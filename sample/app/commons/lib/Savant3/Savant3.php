@@ -988,7 +988,7 @@ class Savant3 {
 		
 		// did we get a path?
 		if (! $result || $this->isError($result)) {
-		
+
 			// no. return the error result.
 			return $result;
 			
