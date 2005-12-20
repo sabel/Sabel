@@ -378,7 +378,10 @@ function js_include($file)
   echo '<script type="text/javascript" src="'.$path.'"></script>'."\n";
 }
 
-//--------------
+
+/**
+ * below utility classes.
+ */
 
 function p($str)
 {
