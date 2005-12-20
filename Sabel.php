@@ -1,9 +1,5 @@
 <?php
 
-function __autoload($class)
-{
-}
-
 /**
  * 定数クラス
  *
