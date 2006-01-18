@@ -14,7 +14,7 @@ class RequestPerser
     array_shift($path);
     foreach ($path as $p => $v) {
       if ($v == $path[count($path) - 2]) {
-	$dir = $v;
+        $dir = $v;
       }
     }
 
