@@ -4,7 +4,7 @@ class SabelClassLoader
 {
   private $request;
 
-  public function __construct($request)
+  private function __construct($request)
   {
     $this->request = $request;
   }
@@ -40,14 +40,15 @@ class SabelClassLoader
 
   public function load()
   {
-    $path = $this->makeControllerPath();
-
     if ($this->isValid()) {
+      $path = $this->makeControllerPath();
       require_once($path);
       $class = $this->getControllerClassName();
       return new $class();
     } else {
-      return false;
+      $path = 'app/modules/Defaults/controllers/Default.php';
+      require_once($cpath);
+      return new Defaults_Default();
     }
   }
 
