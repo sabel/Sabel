@@ -4,6 +4,7 @@ require_once('core/SabelConst.php');
 require_once('core/SabelContext.php');
 require_once('core/SabelClassLoader.php');
 require_once('core/Request.php');
+require_once('core/SessionManager.php');
 
 require_once('core/SabelPageController.php');
 require_once('core/RequestPerser.php');
@@ -49,74 +50,44 @@ class SabelPageWebController extends SabelWebController
 
   public function dispatch()
   {
-    if ($this->loader->isValid()) {
-      $this->process();
-    } else {
-      $this->processDefault();
-    }
+    $this->process();
   }
 
   protected function process()
   {
-    $aModule     = $this->request->getModule();
-    $aController = $this->request->getController();
-    $aMethod     = $this->request->getAction();
+    $this->makeController();
+    $this->processView();
+  }
 
-    UTIL::$module     = $aModule;
-    UTIL::$controller = $aController;
-    UTIL::$method     = $aMethod;
+  protected function makeController()
+  {
+    $aMethod = $this->request->getAction();
 
     $this->controller = $this->loader->load();
-
     $this->controller->init();
-    $this->controller->param = $this->request->getParameter();
-
-    $this->controller->te = new TemplateEngine();
+    $this->controller->param   = $this->request->getParameter();
+    $this->controller->session = SessionManager::makeInstance();
+    $this->controller->te      = new TemplateEngine();
     
     if ($this->controller->hasMethod($aMethod)) {
       $this->controller->execute($aMethod);
     } else if ($this->controller->hasMethod('defaults')) {
       $this->controller->execute('defaults');
     } else {
-      // exception ?
+      // todo exception ?
     }
-
-    $this->processView();
-  }
-
-  protected function processDefault()
-  {
-    $cpath = 'app/modules/Defaults/controllers/Default.php';
-    require_once($cpath);
-    $aModule = 'Defaults';
-    $aMethod = 'top';
-    $this->controller = new Defaults_Default();
-
-    $this->controller->init();
-    $this->controller->param = $request->getParameter();
-
-    $this->controller->te = new TemplateEngine();
-
-    if ($this->controller->hasMethod($aMethod)) {
-      $this->controller->execute($aMethod);
-    } else if ($this->controller->hasMethod('defaults')) {
-      $this->controller->execute('defaults');
-    } else {
-      // exception ?
-    }
-
-    $this->processView();
   }
 
   protected function processView()
   {
     $controller = $this->controller;
 
-    $aModule = $this->request->getModule();
-    $aMethod = $this->request->getAction();
+    $aModule     = $this->request->getModule();
+    $aController = $this->request->getController();
+    $aMethod     = $this->request->getAction();
 
     $tplpath  = SabelConst::MODULES_DIR . $aModule . '/';
-    $tplpath .= SabelConst::VIEWS_DIR;
+    $tplpath .= SabelConst::VIEWS_DIR . $aController . '/';
 
     $tplname = $aMethod . SabelConst::TEMPLATE_POSTFIX;
 
