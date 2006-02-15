@@ -18,10 +18,9 @@ abstract class SabelController
   abstract public function dispatch();
 }
 
-abstract class SabelWebController extends SabelController
-{
-}
-
+/**
+ * Controller for Command line interface.
+ */
 class SabelCLIController extends SabelController
 {
   public function dispatch()
@@ -35,7 +34,7 @@ class SabelCLIController extends SabelController
  * 
  * @author Mori Reo <mori.reo@servise.jp>
  */
-class SabelPageWebController extends SabelWebController
+class SabelPageWebController extends SabelController
 {
   protected $request;
   protected $loader;
@@ -50,16 +49,11 @@ class SabelPageWebController extends SabelWebController
 
   public function dispatch()
   {
-    $this->process();
-  }
-
-  protected function process()
-  {
-    $this->makeController();
+    $this->processController();
     $this->processTemplate();
   }
 
-  protected function makeController()
+  protected function processController()
   {
     $aMethod = $this->request->getAction();
 
@@ -77,6 +71,9 @@ class SabelPageWebController extends SabelWebController
     }
   }
 
+  /**
+   * process template then rendering it.
+   */
   protected function processTemplate()
   {
     $d = TemplateDirectorFactory::create($this->request);
