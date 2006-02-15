@@ -25,6 +25,8 @@ class RequestParser
     $matched = true;
     foreach ($sp as $p => $v) {
       if ($matched)   $request[] = $v;
+
+      // neccesary for when application is not root.
       // if ($v == $dir) $matched = true;
     }
 

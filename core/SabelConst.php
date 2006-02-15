@@ -37,6 +37,16 @@ class SabelConst
   const TEMPLATE_NAME_SEPARATOR = '.';
 
   /**
+   * デフォルトのモジュール名称
+   */
+  const DEFAULT_MODULE = 'Defaults';
+
+  /**
+   * デフォルトのコントローラ名称
+   */
+  const DEFAULT_CONTROLLER = 'Default';
+
+  /**
    * コントローラが実装するデフォルトのメソッド名称と
    * メソッド指定が省略されている場合でのメソッド
    */
