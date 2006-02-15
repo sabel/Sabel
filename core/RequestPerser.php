@@ -1,10 +1,10 @@
 <?php
 
-require_once('PersedRequest.php');
+require_once('ParsedRequest.php');
 
-class RequestPerser
+class RequestParser
 {
-  public function perse()
+  public function parse()
   {
     global $sabelfilepath;
 
@@ -28,7 +28,7 @@ class RequestPerser
       // if ($v == $dir) $matched = true;
     }
 
-    return new PersedRequest($request);
+    return new ParsedRequest($request);
   }
 }
 
