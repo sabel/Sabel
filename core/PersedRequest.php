@@ -1,6 +1,6 @@
 <?php
 
-class PersedRequest
+class ParsedRequest
 {
   private $request;
 
