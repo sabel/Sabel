@@ -31,10 +31,14 @@ class SabelConst
    */
   const TEMPLATE_POSTFIX   = '.tpl';
 
+  /**
+   * テンプレートファイル名の区切り文字列
+   */
   const TEMPLATE_NAME_SEPARATOR = '.';
 
   /**
-   * コントローラが実装するデフォルトのメソッド名称
+   * コントローラが実装するデフォルトのメソッド名称と
+   * メソッド指定が省略されている場合でのメソッド
    */
   const DEFAULT_METHOD     = 'defaults';
 }

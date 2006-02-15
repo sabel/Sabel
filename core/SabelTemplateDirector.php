@@ -6,6 +6,24 @@ interface SabelTemplateDirector
   public function decideName();
 }
 
+class TemplateDirectorFactory
+{
+  public static function create($request)
+  {
+    $classPath  = SabelConst::MODULES_DIR . $request->getModule();
+    $classPath .= '/extentions/CustomTemplateDirector.php';
+
+    if (is_file($classPath)) {
+      require_once($classPath);
+      $instance = new CustomTemplateDirector($request);
+    } else {
+      $instance = new DefaultTemplateDirector($request);
+    }
+
+    return $instance;
+  }
+}
+
 class DefaultTemplateDirector implements SabelTemplateDirector
 {
   protected $request;
@@ -15,7 +33,7 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     $this->request = $request;
   }
 
-  public function decidePath()
+  protected function getPath()
   {
     $tplpath  = SabelConst::MODULES_DIR;
     $tplpath .= $this->request->getModule() . '/';
@@ -24,7 +42,12 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     return $tplpath;
   }
 
-  public function decideName()
+  public function decidePath()
+  {
+    return $this->getPath();
+  }
+
+  protected function getName()
   {
     // makeing template name string such as "controller.method.tpl"
     $tplname  = $this->request->getController();
@@ -35,9 +58,14 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     return $tplname;
   }
 
+  public function decideName()
+  {
+    return $this->getName();
+  }
+
   public function getFullPath()
   {
-    return $this->decidePath() . $this->decideName();
+    return $this->getPath() . $this->getName();
   }
 }
 

@@ -13,7 +13,6 @@ require_once('core/TemplateEngine.php');
 
 require_once('view/Helper.php');
 
-
 abstract class SabelController
 {
   abstract public function dispatch();
@@ -73,14 +72,14 @@ class SabelPageWebController extends SabelWebController
     
     if ($this->controller->hasMethod($aMethod)) {
       $this->controller->execute($aMethod);
-    } else if ($this->controller->hasMethod(SabelConst::DEFAULT_METHOD)) {
+    } else {
       $this->controller->execute(SabelConst::DEFAULT_METHOD);
     }
   }
 
   protected function processTemplate()
   {
-    $d = new DefaultTemplateDirector($this->request);
+    $d = TemplateDirectorFactory::create($this->request);
     $this->controller->te->selectPath($d->decidePath());
     $this->controller->te->selectName($d->decideName());
     $this->controller->te->rendering();

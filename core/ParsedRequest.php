@@ -32,7 +32,7 @@ class ParsedRequest
     if (isset($this->request[2]) && $this->request[2] != "") {
       return $this->request[2];
     } else {
-      return 'top';
+      return SabelConst::DEFAULT_METHOD;
     }
   }
 
