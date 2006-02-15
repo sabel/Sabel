@@ -7,7 +7,8 @@ require_once('core/Request.php');
 require_once('core/SessionManager.php');
 
 require_once('core/SabelPageController.php');
-require_once('core/RequestPerser.php');
+require_once('core/RequestParser.php');
+require_once('core/SabelTemplateDirector.php');
 require_once('core/TemplateEngine.php');
 
 require_once('view/Helper.php');
@@ -43,8 +44,8 @@ class SabelPageWebController extends SabelWebController
 
   public function __construct()
   {
-    $p = new RequestPerser();
-    $this->request = $p->perse();
+    $p = new RequestParser();
+    $this->request = $p->parse();
     $this->loader = SabelClassLoader::create($this->request);
   }
 
@@ -56,7 +57,7 @@ class SabelPageWebController extends SabelWebController
   protected function process()
   {
     $this->makeController();
-    $this->processView();
+    $this->processTemplate();
   }
 
   protected function makeController()
@@ -64,37 +65,25 @@ class SabelPageWebController extends SabelWebController
     $aMethod = $this->request->getAction();
 
     $this->controller = $this->loader->load();
-    $this->controller->init();
+    $this->controller->setup();
     $this->controller->param   = $this->request->getParameter();
     $this->controller->session = SessionManager::makeInstance();
     $this->controller->te      = new TemplateEngine();
+    $this->controller->initialize();
     
     if ($this->controller->hasMethod($aMethod)) {
       $this->controller->execute($aMethod);
-    } else if ($this->controller->hasMethod('defaults')) {
-      $this->controller->execute('defaults');
-    } else {
-      // todo exception ?
+    } else if ($this->controller->hasMethod(SabelConst::DEFAULT_METHOD)) {
+      $this->controller->execute(SabelConst::DEFAULT_METHOD);
     }
   }
 
-  protected function processView()
+  protected function processTemplate()
   {
-    $controller = $this->controller;
-
-    $aModule     = $this->request->getModule();
-    $aController = $this->request->getController();
-    $aMethod     = $this->request->getAction();
-
-    $tplpath  = SabelConst::MODULES_DIR . $aModule . '/';
-    $tplpath .= SabelConst::VIEWS_DIR . $aController . '/';
-
-    $tplname = $aMethod . SabelConst::TEMPLATE_POSTFIX;
-
-    $controller->te->selectPath($tplpath);
-    $controller->te->selectName($tplname);
-
-    $controller->te->rendering();
+    $d = new DefaultTemplateDirector($this->request);
+    $this->controller->te->selectPath($d->decidePath());
+    $this->controller->te->selectName($d->decideName());
+    $this->controller->te->rendering();
   }
 
   protected function debugInformation()

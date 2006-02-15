@@ -11,7 +11,14 @@ abstract class SabelPageController
   protected $parameters;
   protected $request;
 
-  public function init()
+  /**
+   * ·Ñ¾µÀè¥¯¥é¥¹¤Ç¼ÂÁõ
+   *
+   */
+  abstract function initialize();
+  abstract function defaults();
+
+  public function setup()
   {
     $this->request = new PostRequest();
   }
@@ -72,7 +79,7 @@ abstract class SabelPageController
    */
   public function forward($to)
   {
-    
+    // @todo implement
   }
 
   public function hasMethod($name)
