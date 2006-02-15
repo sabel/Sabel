@@ -11,7 +11,7 @@ class PersedRequest
 
   public function getModule()
   {
-    if (!empty($this->request[0])) {
+    if (!empty($this->request[0]) && $this->request[0] != "") {
       return $this->request[0];
     } else {
       return 'Defaults';
@@ -20,7 +20,7 @@ class PersedRequest
 
   public function getController()
   {
-    if (isset($this->request[1])) {
+    if (isset($this->request[1]) && $this->request[1] != "") {
       return $this->request[1];
     } else {
       return 'Default';
@@ -29,7 +29,7 @@ class PersedRequest
 
   public function getAction()
   {
-    if (isset($this->request[2])) {
+    if (isset($this->request[2]) && $this->request[2] != "") {
       return $this->request[2];
     } else {
       return 'top';
