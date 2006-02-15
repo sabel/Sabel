@@ -47,7 +47,7 @@ class SabelClassLoader
       return new $class();
     } else {
       $path = 'app/modules/Defaults/controllers/Default.php';
-      require_once($cpath);
+      require_once($path);
       return new Defaults_Default();
     }
   }
