@@ -10,6 +10,8 @@ abstract class SabelPageController
 {
   protected $parameters;
   protected $request;
+  public $rawRequest;
+  public $template;
 
   /**
    * ·Ñ¾µÀè¥¯¥é¥¹¤Ç¼ÂÁõ
@@ -94,6 +96,24 @@ abstract class SabelPageController
   public function execute($methodName)
   {
     $this->$methodName();
+    $this->showTemplate();
+  }
+
+  /**
+   * process template then rendering it.
+   *
+   */
+  protected function showTemplate()
+  {
+    $d = TemplateDirectorFactory::create($this->rawRequest);
+    $this->template->selectPath($d->decidePath());
+    $this->template->selectName($d->decideName());
+
+    try {
+      $this->template->rendering();
+    } catch(SabelException $e) {
+      $e->printStackTrace();
+    }
   }
 }
 

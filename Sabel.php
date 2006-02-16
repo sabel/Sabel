@@ -5,6 +5,7 @@ require_once('core/SabelContext.php');
 require_once('core/SabelClassLoader.php');
 require_once('core/Request.php');
 require_once('core/SessionManager.php');
+require_once('core/SabelException.php');
 
 require_once('core/SabelPageController.php');
 require_once('core/RequestParser.php');
@@ -12,6 +13,9 @@ require_once('core/SabelTemplateDirector.php');
 require_once('core/TemplateEngine.php');
 
 require_once('view/Helper.php');
+
+require_once('core/spyc.php');
+require_once('third/Smarty/Smarty.class.php');
 
 abstract class SabelController
 {
@@ -49,19 +53,14 @@ class SabelPageWebController extends SabelController
 
   public function dispatch()
   {
-    $this->processController();
-    $this->processTemplate();
-  }
-
-  protected function processController()
-  {
     $aMethod = $this->request->getAction();
 
     $this->controller = $this->loader->load();
     $this->controller->setup();
-    $this->controller->param   = $this->request->getParameter();
-    $this->controller->session = SessionManager::makeInstance();
-    $this->controller->te      = new TemplateEngine();
+    $this->controller->rawRequest = $this->request;
+    $this->controller->param    = $this->request->getParameter();
+    $this->controller->session  = SessionManager::makeInstance();
+    $this->controller->template = new HtmlTemplate();
     $this->controller->initialize();
     
     if ($this->controller->hasMethod($aMethod)) {
@@ -69,17 +68,6 @@ class SabelPageWebController extends SabelController
     } else {
       $this->controller->execute(SabelConst::DEFAULT_METHOD);
     }
-  }
-
-  /**
-   * process template then rendering it.
-   */
-  protected function processTemplate()
-  {
-    $d = TemplateDirectorFactory::create($this->request);
-    $this->controller->te->selectPath($d->decidePath());
-    $this->controller->te->selectName($d->decideName());
-    $this->controller->te->rendering();
   }
 
   protected function debugInformation()

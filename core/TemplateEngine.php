@@ -9,14 +9,19 @@ interface HtmlTemplateService
   public function rendering();
 }
 
-class TemplateEngine implements HtmlTemplateService
+class HtmlTemplate implements HtmlTemplateService
 {
   private $impl;
 
   public function __construct()
   {
-    $this->impl = new SavantEngineImpl();
+    $this->impl = new SmartyEngineImpl();
     $this->impl->configuration();
+  }
+
+  public function changeEngine($inc)
+  {
+    $this->impl = $inc;
   }
 
   public function assign($key ,$value)
@@ -45,9 +50,6 @@ class TemplateEngine implements HtmlTemplateService
   }
 }
 
-
-
-
 interface TemplateEngineImpl
 {
   public function assign($key, $value);
@@ -58,12 +60,31 @@ interface TemplateEngineImpl
   public function display();
 }
 
-class SavantEngineImpl
+abstract class BaseEngineImpl 
+{
+  protected
+    $tplpath = null,
+    $tplname = null;
+
+  public function setTemplateName($name)
+  {
+    $this->tplname = $name;
+  }
+
+  public function setTemplatePath($path)
+  {
+    $this->tplpath = $path;
+  }
+
+  protected function getTemplateFullPath()
+  {
+    return $this->tplpath . $this->tplname;
+  }
+}
+
+class SavantEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 {
   private $savant  = null;
-  
-  private $tplpath = null;
-  private $tplname = null;
 
   public function __construct()
   {
@@ -87,31 +108,50 @@ class SavantEngineImpl
     }
   }
 
-  public function setTemplateName($name)
-  {
-    $this->tplname = $name;
-  }
-
-  public function setTemplatePath($path)
-  {
-    $this->tplpath = $path;
-  }
-
   public function configuration()
   {
-    // ignore
   }
 
   public function display()
   {
-    $this->savant->display($this->getTemplateFullPath());
+    $path = $this->getTemplateFullPath();
+    if (!is_file($path))
+      throw new SabelException("template isn't found: " . "'".$path."'");
+
+    $this->savant->display($path);
+  }
+}
+
+class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
+{
+  private $smarty  = null;
+
+  public function __construct()
+  {
+    $this->smarty = new Smarty();
   }
 
-  protected function getTemplateFullPath()
+  public function assign($key, $value)
   {
-    return $this->tplpath . $this->tplname;
+    $this->smarty->assign($key, $value);
   }
-  
+
+  public function retrieve()
+  {
+    $this->smarty->template_dir = $this->tplpath;
+    return $this->smarty->fetch($this->tplname);
+  }
+
+  public function configuration()
+  {
+    $this->smarty->compile_dir = 'compile';
+  }
+
+  public function display()
+  {
+    $this->smarty->template_dir = $this->tplpath;
+    $this->smarty->display($this->tplname);
+  }
 }
 
 ?>
