@@ -22,6 +22,11 @@ class SabelConst
   const MODULES_DIR        = 'app/modules/';
 
   /**
+   * プロジェクト共通のファイルディレクトリ
+   */
+  const COMMONS_DIR = 'app/commons/';
+
+  /**
    * テンプレートを配置するディレクトリ
    */
   const TEMPLATE_DIR          = 'templates/';

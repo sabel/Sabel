@@ -13,9 +13,14 @@ class HtmlTemplate implements HtmlTemplateService
 {
   private $impl;
 
-  public function __construct()
+  public function __construct($ins = null)
   {
-    $this->impl = new SmartyEngineImpl();
+    if ($ins instanceOf BaseEngineImpl) {
+      $this->impl = $ins;
+    } else {
+      // 標準実装？
+      $this->impl = new SmartyEngineImpl();
+    }
     $this->impl->configuration();
   }
 

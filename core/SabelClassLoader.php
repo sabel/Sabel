@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * クラスをロードする
+ *
+ */
 class SabelClassLoader
 {
   private $request;
@@ -31,6 +35,7 @@ class SabelClassLoader
   public function isValid()
   {
     $path = $this->makeControllerPath();
+
     if (is_file($path)) {
       return true;
     } else {

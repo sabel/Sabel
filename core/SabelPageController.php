@@ -105,6 +105,9 @@ abstract class SabelPageController
     // @todo implement
   }
 
+  /**
+   * テンプレートを初期化
+   */
   protected function initTemplate()
   {
     $d = TemplateDirectorFactory::create($this->parsedRequest);

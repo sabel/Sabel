@@ -11,9 +11,15 @@ class TemplateDirectorFactory
   public static function create($request)
   {
     $classPath  = SabelConst::MODULES_DIR . $request->getModule();
-    $classPath .= '/extentions/CustomTemplateDirector.php';
+    $classPath .= '/extensions/CustomTemplateDirector.php';
 
-    if (is_file($classPath)) {
+    $commonsPath  = SabelConst::COMMONS_DIR;
+    $commonsPath .= '/extensions/CustomTemplateDirector.php';
+      
+    if (is_file($commonsPath)) {
+      require_once($commonsPath);
+      $instance = new CustomTemplateDirector($request);
+    } else if (is_file($classPath)) {
       require_once($classPath);
       $instance = new CustomTemplateDirector($request);
     } else {
