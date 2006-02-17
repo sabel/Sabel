@@ -4,7 +4,7 @@ require_once('ParsedRequest.php');
 
 class RequestParser
 {
-  public function parse()
+  public static function parse()
   {
     global $sabelfilepath;
 

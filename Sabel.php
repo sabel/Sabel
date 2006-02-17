@@ -23,50 +23,27 @@ abstract class SabelController
 }
 
 /**
- * Controller for Command line interface.
- */
-class SabelCLIController extends SabelController
-{
-  public function dispatch()
-  {
-    // @todo implement
-  }
-}
-
-/**
  * SabelPageWebController
  * 
  * @author Mori Reo <mori.reo@servise.jp>
  */
 class SabelPageWebController extends SabelController
 {
-  protected $request;
-  protected $loader;
-  protected $controller;
-
-  public function __construct()
-  {
-    $p = new RequestParser();
-    $this->request = $p->parse();
-    $this->loader = SabelClassLoader::create($this->request);
-  }
-
   public function dispatch()
   {
-    $aMethod = $this->request->getAction();
+    $parsedRequest = RequestParser::parse();
+    $loader = SabelClassLoader::create($parsedRequest);
 
-    $this->controller = $this->loader->load();
-    $this->controller->setup();
-    $this->controller->rawRequest = $this->request;
-    $this->controller->param    = $this->request->getParameter();
-    $this->controller->session  = SessionManager::makeInstance();
-    $this->controller->template = new HtmlTemplate();
-    $this->controller->initialize();
-    
-    if ($this->controller->hasMethod($aMethod)) {
-      $this->controller->execute($aMethod);
+    $controller = $loader->load();
+    $controller->setup($parsedRequest);
+    $controller->initialize();
+
+    $aMethod = $parsedRequest->getMethod();
+
+    if ($controller->hasMethod($aMethod)) {
+      $controller->execute($aMethod);
     } else {
-      $this->controller->execute(SabelConst::DEFAULT_METHOD);
+      $controller->execute(SabelConst::DEFAULT_METHOD);
     }
   }
 

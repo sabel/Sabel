@@ -8,10 +8,14 @@
  */
 abstract class SabelPageController
 {
-  protected $parameters;
-  protected $request;
-  public $rawRequest;
-  public $template;
+  public
+    $parsedRequest;
+
+  protected
+    $parameters,
+    $postRequest,
+    $template,
+    $session;
 
   /**
    * 継承先クラスで実装
@@ -20,22 +24,41 @@ abstract class SabelPageController
   abstract function initialize();
   abstract function defaults();
 
-  public function setup()
+  public function setup($parsedRequest)
   {
-    $this->request = new PostRequest();
+    $this->setParsedRequest($parsedRequest);
+    $this->postRequest = new PostRequest();
+    $this->setTemplate(new HtmlTemplate());
+    $this->session = SessionManager::makeInstance();
   }
 
-  public function __set($name, $value)
+  public function execute($methodName)
   {
-    $this->parameters[$name] = $value;
+    $this->$methodName();
+    $this->initTemplate();
+    $this->showTemplate();
   }
 
-  public function __get($name)
+  public function hasMethod($name)
   {
-    return $this->parameters[$name];
+    if (method_exists($this, $name)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  public function showActionMethods()
+  protected function setTemplate($template)
+  {
+    $this->template = $template;
+  }
+
+  protected function setParsedRequest($request)
+  {
+    $this->parsedRequest = $request;
+  }
+
+  protected function showActionMethods()
   {
     print "<pre>";
 
@@ -47,7 +70,7 @@ abstract class SabelPageController
     print "</pre>";
   }
 
-  public function checkReferer($validURIs)
+  protected function checkReferer($validURIs)
   {
     $ref = $_SERVER['HTTP_REFERER'];
     $absolute = 'http://'.$_SERVER['HTTP_HOST'] . $validURIs[0];
@@ -64,39 +87,29 @@ abstract class SabelPageController
    *
    * @param string $to /Module/Controller/Method
    */
-  public function redirect($to)
+  protected function redirect($to)
   {
     $absolute  = 'http://' . $_SERVER['HTTP_HOST'];
-    $absolute .= $to;
-    $redirect = 'Location: ' . $absolute;
+    $redirect  = 'Location: ' . $absolute . $to;
     header($redirect);
 
-    // HTTPヘッダ(30x)を送信した後は処理を継続しない
-    exit;
+    exit; // HTTPヘッダ(30x)を送信した後は処理を継続しない
   }
 
   /**
-   * forwaring anothor controller or method of same controller
+   * forwaring anothor controller or method of same controller.
    *
    */
-  public function forward($to)
+  protected function forward($to)
   {
     // @todo implement
   }
 
-  public function hasMethod($name)
+  protected function initTemplate()
   {
-    if (method_exists($this, $name)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  public function execute($methodName)
-  {
-    $this->$methodName();
-    $this->showTemplate();
+    $d = TemplateDirectorFactory::create($this->parsedRequest);
+    $this->template->selectPath($d->decidePath());
+    $this->template->selectName($d->decideName());
   }
 
   /**
@@ -105,10 +118,6 @@ abstract class SabelPageController
    */
   protected function showTemplate()
   {
-    $d = TemplateDirectorFactory::create($this->rawRequest);
-    $this->template->selectPath($d->decidePath());
-    $this->template->selectName($d->decideName());
-
     try {
       $this->template->rendering();
     } catch(SabelException $e) {

@@ -34,7 +34,7 @@ class ParsedRequest
     }
   }
 
-  public function getAction()
+  public function getMethod()
   {
     if (!empty($this->request[2])) {
       return $this->request[2];

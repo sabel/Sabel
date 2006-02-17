@@ -52,7 +52,7 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     // makeing template name string such as "controller.method.tpl"
     $tplname  = $this->request->getController();
     $tplname .= SabelConst::TEMPLATE_NAME_SEPARATOR;
-    $tplname .= $this->request->getAction();
+    $tplname .= $this->request->getMethod();
     $tplname .= SabelConst::TEMPLATE_POSTFIX;
 
     return $tplname;
