@@ -58,25 +58,20 @@ abstract class SabelPageController
 
   protected function showActionMethods()
   {
-    print "<pre>";
-
     $methods = get_class_methods($this);
+
     foreach ($methods as $key => $val) {
       if ($val[0] != '_') print $val . "<br/>\n";
     }
-
-    print "</pre>";
   }
 
   protected function checkReferer($validURIs)
   {
     $ref = $_SERVER['HTTP_REFERER'];
-    $absolute = 'http://'.$_SERVER['HTTP_HOST'] . $validURIs[0];
-    if ($ref == $absolute) {
-      return true;
-    } else {
-      return false;
-    }
+    $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
+    $patternAbsoluteURI = '/http:\/\/' . $_SERVER['HTTP_HOST'] . $replaced . '/';
+    preg_match($patternAbsoluteURI, $ref, $matchs);
+    return (isset($matchs[0])) ? true : false;
   }
 
   /**
