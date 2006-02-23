@@ -51,9 +51,13 @@ class SabelClassLoader
       $class = $this->getControllerClassName();
       return new $class();
     } else {
-      $path = 'app/modules/Defaults/controllers/Default.php';
-      require_once($path);
-      return new Defaults_Default();
+      $path = 'app/modules/defaults/controllers/default.php';
+      if (is_file($path)) {
+	require_once($path);
+	return new Defaults_Default();
+      } else {
+	throw new SabelException($path . ' is not a valid file');
+      }
     }
   }
 

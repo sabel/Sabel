@@ -14,8 +14,7 @@ abstract class SabelPageController
   protected
     $parameters,
     $postRequest,
-    $template,
-    $session;
+    $template;
 
   /**
    * ·Ñ¾µÀè¥¯¥é¥¹¤Ç¼ÂÁõ
@@ -29,7 +28,6 @@ abstract class SabelPageController
     $this->setParsedRequest($parsedRequest);
     $this->postRequest = new PostRequest();
     $this->setTemplate(new HtmlTemplate());
-    $this->session = SessionManager::makeInstance();
   }
 
   public function execute($methodName)
