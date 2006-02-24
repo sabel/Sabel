@@ -18,6 +18,7 @@ require_once('view/Helper.php');
 
 require_once('core/spyc.php');
 require_once('third/Smarty/Smarty.class.php');
+require_once('third/Crypt_Blowfish/Blowfish.php');
 
 abstract class SabelController
 {
