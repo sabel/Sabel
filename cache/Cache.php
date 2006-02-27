@@ -15,8 +15,8 @@ class MemCacheImpl extends Cache
   public function __construct()
   {
     $this->memcache = new Memcache();
-    $this->memcache->addServer('192.168.0.197', 11211, true, 1);
-    $this->memcache->addServer('192.168.0.191', 11211, true, 3);
+    $this->memcache->addServer('192.168.0.197', 11211, true);
+    $this->memcache->addServer('192.168.0.191', 11211, true);
 
     $this->memcache->addServer('127.0.0.1', 11211, true, 1);
   }
