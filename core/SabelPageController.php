@@ -33,7 +33,7 @@ abstract class SabelPageController
 
   protected function setupConfig()
   {
-    $this->config = new ConfigImpl();
+    $this->config = new CachedConfig(new ConfigImpl());
   }
 
   public function execute($methodName)
