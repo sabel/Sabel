@@ -28,6 +28,12 @@ abstract class SabelPageController
     $this->setParsedRequest($parsedRequest);
     $this->postRequest = new PostRequest();
     $this->setTemplate(new HtmlTemplate());
+    $this->setupConfig();
+  }
+
+  protected function setupConfig()
+  {
+    $this->config = new ConfigImpl();
   }
 
   public function execute($methodName)

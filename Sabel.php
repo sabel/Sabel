@@ -12,6 +12,7 @@ require_once('core/SabelTemplateDirector.php');
 require_once('core/TemplateEngine.php');
 
 require_once('user/User.php');
+require_once('config/Config.php');
 require_once('storage/Storage.php');
 
 require_once('view/Helper.php');
