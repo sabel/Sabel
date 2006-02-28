@@ -36,11 +36,27 @@ abstract class SabelPageController
     $this->config = new CachedConfig(new ConfigImpl());
   }
 
-  public function execute($methodName)
+  public function execute($method)
   {
-    $this->$methodName();
+    $this->checkValidateMethodAndExecute($method);
+    $this->$method();
     $this->initTemplate();
     $this->showTemplate();
+  }
+
+  protected function checkValidateMethodAndExecute($method)
+  {
+    if ($this->hasValidateMethod($method)) {
+      return $this->executeValidateMethod($method);
+    } else {
+      return true;
+    }
+  }
+
+  protected function executeValidateMethod($method)
+  {
+    $validateMethod = 'validate' . ucfirst($method);
+    return $this->$validateMethod();
   }
 
   public function hasMethod($name)
@@ -62,13 +78,28 @@ abstract class SabelPageController
     $this->parsedRequest = $request;
   }
 
-  protected function showActionMethods()
+  protected function getActionMethods()
   {
     $methods = get_class_methods($this);
 
+    $ar = array();
     foreach ($methods as $key => $val) {
-      if ($val[0] != '_') print $val . "<br/>\n";
+      if ($val[0] != '_') {
+	$ar[$key] = $val;
+      }
     }
+    return $ar;
+  }
+
+  protected function hasValidateMethod($methodName)
+  {
+    $methods = $this->getActionMethods();
+    $vMethodName =(string) 'validate'. ucfirst($methodName);
+
+    $found = false;
+    foreach ($methods as $k => $method) if ($method === $vMethodName) $found = true;
+
+    return $found;
   }
 
   protected function checkReferer($validURIs)
