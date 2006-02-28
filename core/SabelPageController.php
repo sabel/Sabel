@@ -14,7 +14,8 @@ abstract class SabelPageController
   protected
     $parameters,
     $postRequest,
-    $template;
+    $template,
+    $cache;
 
   /**
    * ·Ñ¾µÀè¥¯¥é¥¹¤Ç¼ÂÁõ
@@ -29,11 +30,17 @@ abstract class SabelPageController
     $this->postRequest = new PostRequest();
     $this->setTemplate(new HtmlTemplate());
     $this->setupConfig();
+    $this->setupCache();
   }
 
   protected function setupConfig()
   {
     $this->config = new CachedConfig(new ConfigImpl());
+  }
+
+  protected function setupCache()
+  {
+    $this->cache = new MemCacheImpl();
   }
 
   public function execute($method)
