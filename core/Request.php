@@ -17,6 +17,15 @@ class PostRequest extends Request
     }
   }
 
+  public function getRequests()
+  {
+    $array = array();
+    foreach ($_POST as $key => $value) {
+      $array[$key] = $value;
+    }
+    return $array;
+  }
+
   public function set($key, $value)
   {
     $_POST[$key] = $value;

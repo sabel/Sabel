@@ -97,7 +97,9 @@ abstract class SabelPageController
     $vMethodName =(string) 'validate'. ucfirst($methodName);
 
     $found = false;
-    foreach ($methods as $k => $method) if ($method === $vMethodName) $found = true;
+    foreach ($methods as $k => $method) {
+      if ($method === $vMethodName) $found = true;
+    }
 
     return $found;
   }
