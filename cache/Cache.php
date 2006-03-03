@@ -16,9 +16,8 @@ class MemCacheImpl extends Cache
   {
     $this->memcache = new Memcache();
     $this->memcache->addServer('192.168.0.197', 11211, true);
-    $this->memcache->addServer('192.168.0.191', 11211, true);
-
-    $this->memcache->addServer('127.0.0.1', 11211, true, 1);
+    //$this->memcache->addServer('192.168.0.191', 11211, true);
+    //    $this->memcache->addServer('127.0.0.1', 11211, true, 1);
   }
 
   public static function create()
@@ -36,12 +35,20 @@ class MemCacheImpl extends Cache
 
   public function get($key)
   {
-    return $this->memcache->get($key);
+    try {
+      return $this->memcache->get($key);
+    } catch (Exception $e) {
+      throw new Exception("can't get object key: {$key}");
+    }
   }
 
-  public function add($key, $value)
+  public function add($key, $value, $timeout = 600, $comp = false)
   {
-    $this->memcache->add($key, $value);
+    try {
+      $this->memcache->add($key, $value, $comp, $timeout);
+    } catch (Exception $e) {
+      throw $e;
+    }
   }
 
   public function delete($key)
