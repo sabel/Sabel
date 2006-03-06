@@ -1,5 +1,41 @@
 <?php
 
+class Parameters
+{
+  protected $parameter;
+  protected $parameters;
+  protected $parsedParameters;
+
+  public function __construct($parameters)
+  {
+    $this->parameters = $parameters;
+    $this->parse();
+  }
+
+  public function parse()
+  {
+    $parameters = split("\?", $this->parameters);
+    $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
+    $separate = split("&", $parameters[1]);
+    $sets = array();
+    foreach ($separate as $key => $val) {
+      $tmp = split("=", $val);
+      $sets[$tmp[0]] = $tmp[1];
+    }
+    $this->parsedParameters =& $sets;
+  }
+
+  public function getParameter()
+  {
+    return $this->parameter;
+  }
+
+  public function get($key)
+  {
+    return $this->parsedParameters[$key];
+  }
+}
+
 /**
  * ページコントローラの基底クラス
  *
@@ -31,6 +67,7 @@ abstract class SabelPageController
     $this->setTemplate(new HtmlTemplate());
     $this->setupConfig();
     $this->setupCache();
+    $this->setupParameters();
   }
 
   protected function setupConfig()
@@ -41,6 +78,11 @@ abstract class SabelPageController
   protected function setupCache()
   {
     $this->cache = new MemCacheImpl();
+  }
+
+  protected function setupParameters()
+  {
+    $this->parameters = new Parameters($this->parsedRequest->getParameter());
   }
 
   public function execute($method)

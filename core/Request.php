@@ -13,7 +13,7 @@ class PostRequest extends Request
     if (isset($_POST[$key])) {
       return $_POST[$key];
     } else {
-      return false;
+      return null;
     }
   }
 
