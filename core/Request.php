@@ -21,7 +21,7 @@ class PostRequest extends Request
   {
     $array = array();
     foreach ($_POST as $key => $value) {
-      $array[$key] = (empty($value) ? null : $value;
+      $array[$key] = (empty($value)) ? null : $value;
     }
     return $array;
   }
