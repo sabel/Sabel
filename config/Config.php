@@ -23,12 +23,13 @@ class ConfigImpl extends Config
 
 class CachedConfigImpl extends Config
 {
+  const CACHE_FILE = 'serverconf.txt';
   protected static $config;
 
   public static function create()
   {
-    if(is_file('serverconf.txt')) {
-      $fp = fopen('serverconf.txt', 'r');
+    if(is_file(self::CACHE_FILE)) {
+      $fp = fopen(self::CACHE_FILE, 'r');
       $server = fgets($fp);
       fclose($fp);
       $cache = MemCacheImpl::create($server);
@@ -36,7 +37,9 @@ class CachedConfigImpl extends Config
     } else {
       $config = new ConfigImpl();
       $conf = $config->get('Memcache');
-      $fp = fopen('serverconf.txt', 'a+');
+      if (!$fp = @fopen(self::CACHE_FILE, 'a+')) {
+	throw new Exception(self::CACHE_FILE . " has't permission.");
+      }
       fwrite($fp, $conf['server']);
       fclose($fp);
       $cache = MemCacheImpl::create($conf['server']);
