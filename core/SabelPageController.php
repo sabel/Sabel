@@ -72,7 +72,7 @@ abstract class SabelPageController
 
   protected function setupConfig()
   {
-    $this->config = new ConfigImpl();
+    $this->config = CachedConfigImpl::create();
   }
 
   protected function setupCache()
