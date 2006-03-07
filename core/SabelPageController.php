@@ -135,7 +135,7 @@ abstract class SabelPageController
     $ar = array();
     foreach ($methods as $key => $val) {
       if ($val[0] != '_') {
-	$ar[$key] = $val;
+        $ar[$key] = $val;
       }
     }
     return $ar;
