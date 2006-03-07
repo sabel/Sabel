@@ -12,24 +12,20 @@ class MemCacheImpl extends Cache
   private $memcache;
   private static $instance;
 
-  protected function __construct()
+  protected function __construct($server = null)
   {
     $this->memcache = new Memcache();
-    $this->memcache->addServer('127.0.0.1', 11211, true);
-    //$this->memcache->addServer('192.168.0.191', 11211, true);
+    $this->memcache->addServer($server, 11211, true);
   }
 
-  public static function create()
+  public static function create($server = null)
   {
     if (!isset(self::$instance)) {
-      self::$instance = new self();
+      if (is_null($server)) throw new Exception("server is null.");
+      self::$instance = new self($server);
     }
-    return self::$instance;
-  }
 
-  public function __destruct()
-  {
-    //$this->memcache->close();
+    return self::$instance;
   }
 
   public function get($key)
@@ -37,7 +33,7 @@ class MemCacheImpl extends Cache
     try {
       return $this->memcache->get($key);
     } catch (Exception $e) {
-      throw new Exception("can't get object key: {$key}");
+      return null;
     }
   }
 
@@ -46,7 +42,7 @@ class MemCacheImpl extends Cache
     try {
       $this->memcache->add($key, $value, $comp, $timeout);
     } catch (Exception $e) {
-      throw $e;
+
     }
   }
 
