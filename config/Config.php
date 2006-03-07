@@ -11,7 +11,8 @@ class ConfigImpl extends Config
 
   public function __construct()
   {
-    $this->data = Spyc::YAMLLoad('app/configs/config.yml');
+    $parser = new Spyc();
+    $this->data = $parser->load('app/configs/config.yml');
   }
 
   public function get($key)
