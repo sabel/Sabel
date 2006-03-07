@@ -33,21 +33,31 @@ class CachedConfigImpl extends Config
       $server = fgets($fp);
       fclose($fp);
       $cache = MemCacheImpl::create($server);
-      self::$config = $cache->get('config');
-    } else {
-      $config = new ConfigImpl();
-      $conf = $config->get('Memcache');
-      if (!$fp = @fopen(self::CACHE_FILE, 'a+')) {
-	throw new Exception(self::CACHE_FILE . " has't permission.");
+      $config = $cache->get('config');
+      if (is_object($config)) {
+	self::$config = $config;
+      } else {
+	self::initializeConfig();
       }
-      fwrite($fp, $conf['server']);
-      fclose($fp);
-      $cache = MemCacheImpl::create($conf['server']);
-      $cache->add('config', $config);
-      self::$config = $config;
+    } else {
+      self::initializeConfig();
     }
 
     return new self();
+  }
+
+  protected static function initializeConfig()
+  {
+    $config = new ConfigImpl();
+    $conf = $config->get('Memcache');
+    if (!$fp = @fopen(self::CACHE_FILE, 'a+')) {
+      throw new Exception(self::CACHE_FILE . " has't permission.");
+    }
+    fwrite($fp, $conf['server']);
+    fclose($fp);
+    $cache = MemCacheImpl::create($conf['server']);
+    $cache->add('config', $config);
+    self::$config = $config;
   }
 
   public function get($key)
