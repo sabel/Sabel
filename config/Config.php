@@ -33,7 +33,7 @@ class CachedConfigImpl extends Config
       $server = fgets($fp);
       fclose($fp);
       $cache = MemCacheImpl::create($server);
-      $config = $cache->get('config');
+      $config = $cache->get('sabel_config_cache');
       if (is_object($config)) {
 	self::$config = $config;
       } else {
@@ -50,13 +50,13 @@ class CachedConfigImpl extends Config
   {
     $config = new ConfigImpl();
     $conf = $config->get('Memcache');
-    if (!$fp = @fopen(self::CACHE_FILE, 'a+')) {
+    if (!$fp = @fopen(self::CACHE_FILE, 'w')) {
       throw new Exception(self::CACHE_FILE . " has't permission.");
     }
     fwrite($fp, $conf['server']);
     fclose($fp);
     $cache = MemCacheImpl::create($conf['server']);
-    $cache->add('config', $config);
+    $cache->add('sabel_config_cache', $config);
     self::$config = $config;
   }
 
