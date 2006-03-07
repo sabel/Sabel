@@ -12,7 +12,7 @@ class MemCacheImpl extends Cache
   private $memcache;
   private static $instance;
 
-  public function __construct()
+  protected function __construct()
   {
     $this->memcache = new Memcache();
     $this->memcache->addServer('127.0.0.1', 11211, true);

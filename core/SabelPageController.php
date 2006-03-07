@@ -77,7 +77,7 @@ abstract class SabelPageController
 
   protected function setupCache()
   {
-    $this->cache = new MemCacheImpl();
+    $this->cache = MemCacheImpl::create();
   }
 
   protected function setupParameters()
@@ -183,7 +183,7 @@ abstract class SabelPageController
    */
   protected function forward($to)
   {
-    // @todo implement
+    // @todo implemen
   }
 
   /**
