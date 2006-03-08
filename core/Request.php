@@ -11,9 +11,13 @@ class PostRequest extends Request
   public function get($key)
   {
     if (isset($_POST[$key])) {
-      return $_POST[$key];
+      if (get_magic_quotes_gpc()) {
+        return stripslashes($_POST[$key]);
+      } else {
+        return $_POST[$key];
+      }
     } else {
-      return null;
+      return false;
     }
   }
 
