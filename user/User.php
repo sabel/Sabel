@@ -3,14 +3,14 @@
 class User
 {
   protected $attributes = array();
+  protected $uniqueKey  = null;
 
   public function __construct($uniqueKey = null)
   {
+    $this->uniqueKey = $uniqueKey;
+
     $storage = Storage::create('SessionStorage');
     $this->attributes = $storage->read('Community.UserAttributes' . $uniqueKey);
-    if ($this->attributes == null) {
-      $this->attributes = null;
-    }
   }
 
   public function __destruct()
@@ -40,15 +40,13 @@ class SecurityUser extends User
   private static $instance;
 
   protected $credentials = array();
-  protected $authorized = false;
-  protected $uniqueKey = null;
+  protected $authorized  = false;
 
   const AUTHORIZE_NAMESPACE = 'Community.AuthorizeFlag';
 
   public function __construct($uniqueKey)
   {
-    $this->uniqueKey = $uniqueKey;
-    parent::__construct($this->uniqueKey);
+    parent::__construct($uniqueKey);
 
     $storage = Storage::create('SessionStorage');
     $this->authorized = $storage->read(self::AUTHORIZE_NAMESPACE . $uniqueKey);
@@ -67,9 +65,8 @@ class SecurityUser extends User
 
   public static function create($uniqueKey = null)
   {
-
     if (!isset(self::$instance)) {
-      self::$instance = new self(($uniqueKey != null) ? $uniqueKey : null);
+      self::$instance = new self($uniqueKey);
     }
     return self::$instance;
   }

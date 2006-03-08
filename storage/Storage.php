@@ -37,10 +37,10 @@ class SessionStorage extends Storage
     $deleted = array();
     foreach ($_SESSION as $key => $sesval) {
       if ($key == SecurityUser::AUTHORIZE_NAMESPACE) {
-	SecurityUser::create()->unAuthorize();
+        SecurityUser::create()->unAuthorize();
       } else {
-	$deleted = $sesval;
-	unset($_SESSION[$key]);
+        $deleted[] = $sesval;
+        unset($_SESSION[$key]);
       }
     }
     return $deleted;
@@ -58,8 +58,8 @@ class SessionStorage extends Storage
   public function write($key, $value, $timeout = 60)
   {
     $_SESSION[$key] = array('value'   => $value, 
-			    'timeout' => $timeout,
-			    'count'   => 0);
+                            'timeout' => $timeout,
+                            'count'   => 0);
   }
 
   public function delete($key)
@@ -76,7 +76,7 @@ class SessionStorage extends Storage
   {
     foreach ($_SESSION as $key => $value) {
       if ($value['count'] > $value['timeout']) {
-	unset($_SESSION[$key]);
+        unset($_SESSION[$key]);
       }
     }
   }

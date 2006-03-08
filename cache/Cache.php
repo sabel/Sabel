@@ -1,13 +1,13 @@
 <?php
 
-abstract class Cache
+interface Cache
 {
-  abstract public function get($key);
-  abstract public function add($key, $value);
-  abstract public function delete($key);
+  public function get($key);
+  public function add($key, $value);
+  public function delete($key);
 }
 
-class MemCacheImpl extends Cache
+class MemCacheImpl implements Cache
 {
   private $memcache;
   private static $instance;
@@ -42,7 +42,7 @@ class MemCacheImpl extends Cache
     try {
       $this->memcache->add($key, $value, $comp, $timeout);
     } catch (Exception $e) {
-
+      // @todo Ç«Ç§Ç∑ÇÈÇÃÇ©ÇµÇÁÅ`ÅH
     }
   }
 

@@ -1,11 +1,11 @@
 <?php
 
-abstract class Config
+interface Config
 {
-  abstract public function get($key);
+  public function get($key);
 }
 
-class ConfigImpl extends Config
+class ConfigImpl implements Config
 {
   private $data;
 
@@ -21,7 +21,7 @@ class ConfigImpl extends Config
   }
 }
 
-class CachedConfigImpl extends Config
+class CachedConfigImpl implements Config
 {
   const CACHE_FILE = 'serverconf.txt';
   protected static $config;
@@ -35,9 +35,9 @@ class CachedConfigImpl extends Config
       $cache = MemCacheImpl::create($server);
       $config = $cache->get('sabel_config_cache');
       if (is_object($config)) {
-	self::$config = $config;
+        self::$config = $config;
       } else {
-	self::initializeConfig();
+        self::initializeConfig();
       }
     } else {
       self::initializeConfig();
