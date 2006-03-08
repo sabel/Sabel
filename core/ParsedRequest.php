@@ -8,12 +8,48 @@ class ParsedRequest
 {
   private $request;
 
-  public function __construct($request)
-  {
-    if (!is_array($request))
-      throw new Exception("request is not array");
+  private static $instance = null;
 
-    $this->request = $request;
+  public static function create()
+  {
+    if (!self::$instance) {
+      self::$instance = new self();
+    }
+    return self::$instance;
+  }
+
+  protected function __construct()
+  {
+    $this->request = $this->parse();
+  }
+
+  protected function parse()
+  {
+    global $sabelfilepath;
+
+    $uri = $_SERVER['REQUEST_URI'];
+
+    $path = split('/', $sabelfilepath);
+    array_shift($path);
+    foreach ($path as $p => $v) {
+      if ($v == $path[count($path) - 2]) {
+        $dir = $v;
+      }
+    }
+
+    $sp = split('/', $uri);
+    array_shift($sp);
+
+    $request = array();
+    $matched = true;
+    foreach ($sp as $p => $v) {
+      if ($matched) $request[] = $v;
+
+      // neccesary for when application is not root.
+      // if ($v == $dir) $matched = true;
+    }
+
+    return $request;
   }
 
   public function getModule()
@@ -45,7 +81,11 @@ class ParsedRequest
 
   public function getParameter()
   {
-    return $this->request[3];
+    if (!empty($this->request[3])) {
+      return $this->request[3];
+    } else {
+      return null;
+    }
   }
 }
 

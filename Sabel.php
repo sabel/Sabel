@@ -3,11 +3,12 @@
 require_once('core/SabelConst.php');
 require_once('core/SabelContext.php');
 require_once('core/SabelClassLoader.php');
+require_once('core/SabelUtility.php');
 require_once('core/Request.php');
+require_once('core/ParsedRequest.php');
 require_once('core/SabelException.php');
 
 require_once('core/SabelPageController.php');
-require_once('core/RequestParser.php');
 require_once('core/SabelTemplateDirector.php');
 require_once('core/TemplateEngine.php');
 
@@ -22,25 +23,32 @@ require_once('core/spyc.php');
 require_once('third/Smarty/Smarty.class.php');
 require_once('third/Crypt_Blowfish/Blowfish.php');
 
-abstract class SabelController
+interface SabelController
 {
-  abstract public function dispatch();
+  public function dispatch();
+}
+
+class SabelCLIController implements SabelController
+{
+  public function dispatch()
+  {
+  }
 }
 
 /**
  * SabelPageWebController
- * 
+ *
  * @author Mori Reo <mori.reo@servise.jp>
  */
-class SabelPageWebController extends SabelController
+class SabelPageWebController implements SabelController
 {
   public function dispatch()
   {
-    $parsedRequest = RequestParser::parse();
+    $parsedRequest = ParsedRequest::create();
     $loader = SabelClassLoader::create($parsedRequest);
 
     $controller = $loader->load();
-    $controller->setup($parsedRequest);
+    $controller->setup(new WebRequest());
     $controller->initialize();
 
     $aMethod = $parsedRequest->getMethod();

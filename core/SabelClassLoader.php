@@ -18,12 +18,12 @@ class SabelClassLoader
     return new self($request);
   }
 
-  public function getControllerClassName()
+  private function getControllerClassName()
   {
     return $this->request->getModule() . '_' . $this->request->getController();
   }
 
-  public function makeControllerPath()
+  private function makeControllerPath()
   {
     $path  = 'app/modules/'  . $this->request->getModule();
     $path .= '/controllers/' . $this->request->getController();
@@ -32,7 +32,7 @@ class SabelClassLoader
     return $path;
   }
 
-  public function isValid()
+  private function isValid()
   {
     $path = $this->makeControllerPath();
 
@@ -53,10 +53,10 @@ class SabelClassLoader
     } else {
       $path = 'app/modules/defaults/controllers/default.php';
       if (is_file($path)) {
-	require_once($path);
-	return new Defaults_Default();
+        require_once($path);
+        return new Defaults_Default();
       } else {
-	throw new SabelException($path . ' is not a valid file');
+        throw new SabelException($path . ' is not a valid file');
       }
     }
   }

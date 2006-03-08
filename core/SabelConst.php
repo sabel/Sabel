@@ -56,6 +56,12 @@ class SabelConst
    * メソッド指定が省略されている場合でのメソッド
    */
   const DEFAULT_METHOD     = 'defaults';
+
+  /**
+   * SabelExceptionのログファイルの名前
+   *
+   */
+  const EXCEPTION_LOG_FILE_NAME = 'sabelException.log';
 }
 
 ?>

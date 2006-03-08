@@ -8,14 +8,16 @@ interface SabelTemplateDirector
 
 class TemplateDirectorFactory
 {
-  public static function create($request)
+  public static function create()
   {
+    $request = ParsedRequest::create();
+
     $classPath  = SabelConst::MODULES_DIR . $request->getModule();
     $classPath .= '/extensions/CustomTemplateDirector.php';
 
     $commonsPath  = SabelConst::COMMONS_DIR;
     $commonsPath .= '/extensions/CustomTemplateDirector.php';
-      
+
     if (is_file($classPath)) {
       require_once($classPath);
       $instance = new CustomTemplateDirector($request);
@@ -34,9 +36,9 @@ class DefaultTemplateDirector implements SabelTemplateDirector
 {
   protected $request;
 
-  public function __construct(ParsedRequest $request)
+  public function __construct()
   {
-    $this->request = $request;
+    $this->request = ParsedRequest::create();
   }
 
   protected function getPath()
@@ -44,7 +46,7 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     $tplpath  = SabelConst::MODULES_DIR;
     $tplpath .= $this->request->getModule() . '/';
     $tplpath .= SabelConst::TEMPLATE_DIR;
-    
+
     return $tplpath;
   }
 

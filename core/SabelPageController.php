@@ -12,7 +12,13 @@ class Parameters
     $this->parse();
   }
 
-  public function parse()
+  /**
+   * URIリクエストをパースする
+   *
+   * @param void
+   * @return void
+   */
+  protected function parse()
   {
     $parameters = split("\?", $this->parameters);
     $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
@@ -36,6 +42,30 @@ class Parameters
   }
 }
 
+interface Response
+{
+}
+
+class WebResponse implements Response
+{
+  protected $responses = array();
+
+  public function __set($name, $value)
+  {
+    $this->responses[$name] = $value;
+  }
+
+  public function __get($name)
+  {
+    return $this->responses[$name];
+  }
+
+  public function responses()
+  {
+    return $this->responses;
+  }
+}
+
 /**
  * ページコントローラの基底クラス
  *
@@ -44,14 +74,7 @@ class Parameters
  */
 abstract class SabelPageController
 {
-  public
-    $parsedRequest;
-
-  protected
-    $parameters,
-    $postRequest,
-    $template,
-    $cache;
+  protected $request, $template, $cache;
 
   /**
    * 継承先クラスで実装
@@ -60,14 +83,29 @@ abstract class SabelPageController
   abstract function initialize();
   abstract function defaults();
 
-  public function setup($parsedRequest)
+  /**
+   * リクエストを取得するための省略メソッド
+   *
+   * @param string input name
+   * @return mixed
+   */
+  public function __get($name)
   {
-    $this->setParsedRequest($parsedRequest);
-    $this->postRequest = new PostRequest();
+    return $this->request->$name;
+  }
+
+  public function setup($request)
+  {
+    $this->request = $request;
+    $this->setupResponse();
     $this->setTemplate(new HtmlTemplate());
     $this->setupConfig();
     $this->setupCache();
-    $this->setupParameters();
+  }
+
+  protected function setupResponse()
+  {
+    $this->response = new WebResponse();
   }
 
   protected function setupConfig()
@@ -81,17 +119,18 @@ abstract class SabelPageController
     $this->cache = MemCacheImpl::create($conf['server']);
   }
 
-  protected function setupParameters()
-  {
-    $this->parameters = new Parameters($this->parsedRequest->getParameter());
-  }
-
   public function execute($method)
   {
     $this->checkValidateMethodAndExecute($method);
     $this->$method();
     $this->initTemplate();
     $this->showTemplate();
+  }
+
+  protected function assignTemplates()
+  {
+    foreach ($this->response->responses() as $key => $val)
+      $this->template->assign($key, $val);
   }
 
   protected function checkValidateMethodAndExecute($method)
@@ -121,11 +160,6 @@ abstract class SabelPageController
   protected function setTemplate($template)
   {
     $this->template = $template;
-  }
-
-  protected function setParsedRequest($request)
-  {
-    $this->parsedRequest = $request;
   }
 
   protected function getActionMethods()
@@ -192,7 +226,7 @@ abstract class SabelPageController
    */
   protected function initTemplate()
   {
-    $d = TemplateDirectorFactory::create($this->parsedRequest);
+    $d = TemplateDirectorFactory::create();
     $this->template->selectPath($d->decidePath());
     $this->template->selectName($d->decideName());
   }

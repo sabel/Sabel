@@ -1,21 +1,40 @@
 <?php
 
-abstract class Request
+interface Request
 {
-  abstract public function get($key);
-  abstract public function set($key, $value);
+  public function get($key);
+  public function set($key, $value);
+  public function getRequests();
 }
 
-class PostRequest extends Request
+class WebRequest implements Request
 {
+  protected $parsedRequest;
+  protected $parameters;
+
+  public function __construct()
+  {
+    $this->parsedRequest = ParsedRequest::create();
+    $this->parameters = new Parameters($this->parsedRequest->getParameter());
+  }
+
+  public function __get($name)
+  {
+    if ($name == 'requests'){
+      return $this->getRequests();
+    } else if ($name == 'parameter') {
+      $this->getParameter();
+    } else if ($name == 'parameters') {
+      $this->getParameters();
+    } else {
+      return $this->get($name);
+    }
+  }
+
   public function get($key)
   {
     if (isset($_POST[$key])) {
-      if (get_magic_quotes_gpc()) {
-        return stripslashes($_POST[$key]);
-      } else {
-        return $_POST[$key];
-      }
+      return Sanitize::normalize($_POST[$key]);
     } else {
       return false;
     }
@@ -25,7 +44,7 @@ class PostRequest extends Request
   {
     $array = array();
     foreach ($_POST as $key => $value) {
-      $array[$key] = (isset($value)) ? $value : null;
+      $array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
     }
     return $array;
   }
@@ -33,6 +52,16 @@ class PostRequest extends Request
   public function set($key, $value)
   {
     $_POST[$key] = $value;
+  }
+
+  public function getParameter()
+  {
+    return $this->parsedRequest->getParameter();
+  }
+
+  public function getParameters()
+  {
+    $this->parameters = new Parameters($this->parameter);
   }
 }
 
