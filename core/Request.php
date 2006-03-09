@@ -23,9 +23,9 @@ class WebRequest implements Request
     if ($name == 'requests'){
       return $this->getRequests();
     } else if ($name == 'parameter') {
-      $this->getParameter();
+      return $this->getParameter();
     } else if ($name == 'parameters') {
-      $this->getParameters();
+      return $this->parameters;
     } else {
       return $this->get($name);
     }
@@ -57,11 +57,6 @@ class WebRequest implements Request
   public function getParameter()
   {
     return $this->parsedRequest->getParameter();
-  }
-
-  public function getParameters()
-  {
-    $this->parameters = new Parameters($this->parameter);
   }
 }
 
