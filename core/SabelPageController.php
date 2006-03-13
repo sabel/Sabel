@@ -91,6 +91,13 @@ abstract class SabelPageController
    */
   public function __get($name)
   {
+    $safe = substr($name, 0, 4);
+
+    if ($safe == 'safe') {
+      $lower = strtolower(substr($name, 4, (strlen($name) - 4)));
+      return addslashes($this->request->$lower);
+    }
+
     return $this->request->$name;
   }
 
