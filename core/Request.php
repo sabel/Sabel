@@ -1,13 +1,13 @@
 <?php
 
-interface Request
+interface Reques
 {
   public function get($key);
   public function set($key, $value);
   public function getRequests();
 }
 
-class WebRequest implements Request
+class WebRequest implements Reques
 {
   protected $parsedRequest;
   protected $parameters;
@@ -20,7 +20,7 @@ class WebRequest implements Request
 
   public function __get($name)
   {
-    if ($name == 'requests'){
+    if ($name == 'requests') {
       return $this->getRequests();
     } else if ($name == 'parameter') {
       return $this->getParameter();

@@ -36,8 +36,15 @@ class Sanitize
   public static function normalize($target)
   {
     if (get_magic_quotes_gpc()) {
-      $target = stripslashes($target);
+      if (is_array($target)) {
+	foreach ($target as $k => $v) {
+	  $target[$k] = stripslashes($v);
+	}
+      } else {
+	$target = stripslashes($target);
+      }
     }
+
     return $target;
   }
 }
