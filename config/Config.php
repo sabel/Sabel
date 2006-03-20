@@ -1,11 +1,6 @@
 <?php
 
-interface Config
-{
-  public function get($key);
-}
-
-class ConfigImpl implements Config
+class ConfigImpl
 {
   private $data;
 
