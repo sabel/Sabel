@@ -16,7 +16,7 @@ class ConfigImpl
   }
 }
 
-class CachedConfigImpl implements Config
+class CachedConfigImpl
 {
   const CACHE_FILE = 'serverconf.txt';
   protected static $config;
