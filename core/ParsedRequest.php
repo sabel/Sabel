@@ -10,24 +10,30 @@ class ParsedRequest
 
   private static $instance = null;
 
-  public static function create()
+  public static function create($request = null)
   {
     if (!self::$instance) {
       self::$instance = new self();
+    } else if (isset($request)) {
+      return new self($request);
     }
     return self::$instance;
   }
 
-  protected function __construct()
+  protected function __construct($request = null)
   {
-    $this->request = $this->parse();
+    $this->request = $this->parse($request);
   }
 
-  protected function parse()
+  protected function parse($request)
   {
     global $sabelfilepath;
 
-    $uri = $_SERVER['REQUEST_URI'];
+    if (empty($request)) {
+      $uri = $_SERVER['REQUEST_URI'];
+    } else {
+      $uri = $request;
+    }
 
     $path = split('/', $sabelfilepath);
     array_shift($path);
@@ -48,7 +54,6 @@ class ParsedRequest
       // neccesary for when application is not root.
       // if ($v == $dir) $matched = true;
     }
-
     return $request;
   }
 
