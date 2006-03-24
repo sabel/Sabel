@@ -10,7 +10,11 @@ class SabelClassLoader
 
   private function __construct($request)
   {
-    $this->request = $request;
+    if ($request instanceof ParsedRequest) {
+      $this->request = $request;
+    } else {
+      throw new SabelException('request is not ParsedRequest');
+    }
   }
 
   public static function create($request)
@@ -23,6 +27,12 @@ class SabelClassLoader
     return $this->request->getModule() . '_' . $this->request->getController();
   }
 
+  protected function makeModulePath()
+  {
+    $path = 'app/modules/' . $this->request->getModule();
+    return $path;
+  }
+
   private function makeControllerPath()
   {
     $path  = 'app/modules/'  . $this->request->getModule();
@@ -32,7 +42,16 @@ class SabelClassLoader
     return $path;
   }
 
-  private function isValid()
+  protected function isValidModule()
+  {
+    if (is_dir($this->makeModulePath())) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  protected function isValidController()
   {
     $path = $this->makeControllerPath();
 
@@ -45,16 +64,24 @@ class SabelClassLoader
 
   public function load()
   {
-    if ($this->isValid()) {
+    $request = new WebRequest();
+
+    if ($this->isValidController()) {
       $path = $this->makeControllerPath();
       require_once($path);
       $class = $this->getControllerClassName();
       return new $class();
+    } else if ($this->isValidModule()) {
+      $path = 'app/modules/' . $this->request->getModule() . '/controllers/index.php';
+      $moduleClassName = $this->request->getModule() . '_Index';
+      $request->set('value', $this->request->getController());
+      return new $moduleClassName();
     } else {
-      $path = 'app/modules/defaults/controllers/default.php';
+      $request->set('value', $this->request->getModule());
+      $path = 'app/modules/index/controllers/index.php';
       if (is_file($path)) {
         require_once($path);
-        return new Defaults_Default();
+        return new Index_Index();
       } else {
         throw new SabelException($path . ' is not a valid file');
       }

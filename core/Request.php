@@ -1,13 +1,13 @@
 <?php
 
-interface Reques
+interface Request
 {
   public function get($key);
   public function set($key, $value);
   public function getRequests();
 }
 
-class WebRequest implements Reques
+class WebRequest implements Request
 {
   protected $parsedRequest;
   protected $parameters;

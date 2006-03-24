@@ -44,18 +44,18 @@ class SabelConst
   /**
    * デフォルトのモジュール名称
    */
-  const DEFAULT_MODULE = 'Defaults';
+  const DEFAULT_MODULE = 'Index';
 
   /**
    * デフォルトのコントローラ名称
    */
-  const DEFAULT_CONTROLLER = 'Default';
+  const DEFAULT_CONTROLLER = 'index';
 
   /**
    * コントローラが実装するデフォルトのメソッド名称と
    * メソッド指定が省略されている場合でのメソッド
    */
-  const DEFAULT_METHOD     = 'defaults';
+  const DEFAULT_METHOD     = 'index';
 
   /**
    * SabelExceptionのログファイルの名前

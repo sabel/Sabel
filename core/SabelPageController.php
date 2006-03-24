@@ -81,7 +81,7 @@ abstract class SabelPageController
    *
    */
   abstract function initialize();
-  abstract function defaults();
+  abstract function index();
 
   /**
    * リクエストを取得するための省略メソッド
