@@ -1,5 +1,48 @@
 <?php
 
+interface DirectoryList
+{
+  public function listing($path);
+}
+
+class DirectoryListImpl implements DirectoryList
+{
+  public function listing($path)
+  {
+    $result = array();
+    foreach (new DirectoryIterator($path) as $k => $v) {
+      if (!$v->isDot() && $v->isFile()) {
+        $result[] = $v->getFilename();
+      }
+    }
+    
+    return $result;
+  }
+}
+
+class ClassNameList implements DirectoryList
+{
+  protected $list = null;
+  
+  public function __construct(DirectoryList $list)
+  {
+    $this->list = $list;
+  }
+  
+  public function listing($path)
+  {
+    $result = array();
+    $l = $this->list->listing($path);
+    foreach ($l as $k => $file) {
+      $classname = explode('.', $file);
+      if ($classname[0]) {
+        $result[] = $classname[0];
+      }
+    }
+    return $result;
+  }
+}
+
 class Parameters
 {
   protected $parameter;
@@ -13,7 +56,7 @@ class Parameters
   }
 
   /**
-   * URIリクエストをパースする
+   * Parsing URL request
    *
    * @param void
    * @return void
@@ -67,7 +110,7 @@ class WebResponse implements Response
 }
 
 /**
- * ページコントローラの基底クラス
+ * page controller base class.
  *
  * @author Mori Reo <mori.reo@servise.jp>
  * @package sabel.controller
@@ -77,14 +120,14 @@ abstract class SabelPageController
   protected $request, $template, $cache;
 
   /**
-   * 継承先クラスで実装
+   * implement for inherit class.
    *
    */
   abstract function initialize();
   abstract function index();
 
   /**
-   * リクエストを取得するための省略メソッド
+   * get request parameter
    *
    * @param string input name
    * @return mixed
@@ -129,9 +172,35 @@ abstract class SabelPageController
   public function execute($method)
   {
     $this->checkValidateMethodAndExecute($method);
-    $this->$method();
+    $this->methodExecute($method);
     $this->initTemplate();
     $this->showTemplate();
+  }
+  
+  protected function methodExecute($methodName)
+  {
+    $r = ParsedRequest::create();
+    $class = $r->getModule() . '_' . $r->getController();
+    $refMethod = new ReflectionMethod($class, $methodName);
+    
+    
+    foreach ($refMethod->getParameters() as $k => $param) {
+      try {
+        $classname = $param->getClass()->getName();
+      } catch (Exception $e) {
+        $msgs = explode(' ', $e->getMessage());
+        $classname = $msgs[1];
+        $classpath = 'app/commons/models/' . $classname . '.php';
+        require_once($classpath);
+      }
+    }
+    
+    if ($classname) {
+      $requiredClass = new $classname();
+      $this->$methodName($requiredClass);
+    } else {
+      $this->$methodName();
+    }
   }
 
   protected function assignTemplates()
@@ -216,7 +285,7 @@ abstract class SabelPageController
     $redirect  = 'Location: ' . $absolute . $to;
     header($redirect);
 
-    exit; // HTTPヘッダ(30x)を送信した後は処理を継続しない
+    exit; // exit after HTTP Header(30x)
   }
 
   /**
@@ -229,7 +298,7 @@ abstract class SabelPageController
   }
 
   /**
-   * テンプレートを初期化
+   * initialize template
    */
   protected function initTemplate()
   {
