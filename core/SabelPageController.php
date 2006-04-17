@@ -1,113 +1,8 @@
 <?php
 
-interface DirectoryList
-{
-  public function listing($path);
-}
-
-class DirectoryListImpl implements DirectoryList
-{
-  public function listing($path)
-  {
-    $result = array();
-    foreach (new DirectoryIterator($path) as $k => $v) {
-      if (!$v->isDot() && $v->isFile()) {
-        $result[] = $v->getFilename();
-      }
-    }
-    
-    return $result;
-  }
-}
-
-class ClassNameList implements DirectoryList
-{
-  protected $list = null;
-  
-  public function __construct(DirectoryList $list)
-  {
-    $this->list = $list;
-  }
-  
-  public function listing($path)
-  {
-    $result = array();
-    $l = $this->list->listing($path);
-    foreach ($l as $k => $file) {
-      $classname = explode('.', $file);
-      if ($classname[0]) {
-        $result[] = $classname[0];
-      }
-    }
-    return $result;
-  }
-}
-
-class Parameters
-{
-  protected $parameter;
-  protected $parameters;
-  protected $parsedParameters;
-
-  public function __construct($parameters)
-  {
-    $this->parameters = $parameters;
-    $this->parse();
-  }
-
-  /**
-   * Parsing URL request
-   *
-   * @param void
-   * @return void
-   */
-  protected function parse()
-  {
-    $parameters = split("\?", $this->parameters);
-    $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
-    $separate = split("&", $parameters[1]);
-    $sets = array();
-    foreach ($separate as $key => $val) {
-      $tmp = split("=", $val);
-      $sets[$tmp[0]] = $tmp[1];
-    }
-    $this->parsedParameters =& $sets;
-  }
-
-  public function getParameter()
-  {
-    return $this->parameter;
-  }
-
-  public function get($key)
-  {
-    return $this->parsedParameters[$key];
-  }
-}
-
-interface Response
-{
-}
-
-class WebResponse implements Response
-{
-  protected $responses = array();
-
-  public function __set($name, $value)
-  {
-    $this->responses[$name] = $value;
-  }
-
-  public function __get($name)
-  {
-    return $this->responses[$name];
-  }
-
-  public function responses()
-  {
-    return $this->responses;
-  }
-}
+require_once('Parameters.php');
+require_once('Response.php');
+require_once('DirectoryList.php');
 
 /**
  * page controller base class.
@@ -180,29 +75,58 @@ abstract class SabelPageController
   protected function methodExecute($methodName)
   {
     $r = ParsedRequest::create();
-    $class = $r->getModule() . '_' . $r->getController();
-    $refMethod = new ReflectionMethod($class, $methodName);
+    $controllerClass = $r->getModule() . '_' . $r->getController();
+    $refMethod = new ReflectionMethod($controllerClass, $methodName);
     
-    
-    foreach ($refMethod->getParameters() as $k => $param) {
-      try {
-        $classname = $param->getClass()->getName();
-      } catch (Exception $e) {
-        $msgs = explode(' ', $e->getMessage());
-        $classname = $msgs[1];
-        $classpath = 'app/commons/models/' . $classname . '.php';
-        require_once($classpath);
+    $hasParameter = false;
+    foreach ($refMethod->getParameters() as $paramidx => $parameter) {
+      $hasParameter = true;
+      $hasDependClass = ($refClass = $parameter->getClass()) ? true : false;
+      if ($hasDependClass) {
+        $structure = array();
+        
+        SabelDIContainer::parseClassDependencyStructure($refClass->getName(), $structure);
+        
+        $typeIsInterface = ($structure[$refClass->getName()]['type'] == 'interface') ? true : false;
+        if ($typeIsInterface) {
+          $diconf = $this->loadDIConfig($refClass->getName());
+          $implClassName = $diconf[$controllerClass][$methodName][$refClass->getName()];
+          //var_dump($diconf);exit;
+          SabelDIContainer::parseClassDependencyStructure($implClassName, $structure);
+          
+          foreach ($structure[$implClassName]['__construct'] as $implparamidx => $implParameter) {
+            if ($implParameter['define']['type'] == 'interface') {
+              $dependClassPath = $diconf[$controllerClass][$methodName][$implClassName]['constructer'];
+              $dependClassName = uses($dependClassPath);
+              $dependClass = new $dependClassName();
+            }
+          }
+        } // else if (has't depend class.) {}
       }
     }
     
-    if ($classname) {
-      $requiredClass = new $classname();
-      $this->$methodName($requiredClass);
+    if ($hasParameter) {
+      $this->$methodName(new $implClassName($dependClass));
     } else {
       $this->$methodName();
     }
+    
   }
+  
+  protected function loadDIConfig()
+  {
+    $r = ParsedRequest::create();
+    $controller = strtolower($r->getController());
+    $paths = array('app/modules/staff/controllers/', 'app/modules/staff/controllers/');
+    $spyc = new Spyc();
+    foreach ($paths as $pathidx => $path) {      
+      $fullpath = $path . $controller. '.yml';
+      if (is_file($fullpath)) break;
+    }
 
+    return $spyc->load($fullpath);
+  }
+  
   protected function assignTemplates()
   {
     foreach ($this->response->responses() as $key => $val)

@@ -1,5 +1,7 @@
 <?php
 
+require_once('core/functions.php');
+
 require_once('core/SabelConst.php');
 require_once('core/SabelContext.php');
 require_once('core/SabelClassLoader.php');
@@ -11,6 +13,8 @@ require_once('core/SabelException.php');
 require_once('core/SabelPageController.php');
 require_once('core/SabelTemplateDirector.php');
 require_once('core/TemplateEngine.php');
+
+require_once('core/SabelDIContainer.php');
 
 require_once('user/User.php');
 require_once('config/Config.php');
@@ -54,11 +58,7 @@ class SabelPageWebController implements SabelController
     $aMethod = $parsedRequest->getMethod();
 
     if ($controller->hasMethod($aMethod)) {
-      $st = split(' ', microtime());
       $controller->execute($aMethod);
-      $en = split(' ', microtime());
-      print $en[0] - $st[0];
-      print "<br/>\n" . $en[1] . "/" . $st[1] . "<br/>\n";
     } else {
       $controller->execute(SabelConst::DEFAULT_METHOD);
     }

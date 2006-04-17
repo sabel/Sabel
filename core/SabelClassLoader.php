@@ -1,7 +1,7 @@
 <?php
 
 /**
- * クラスをロードする
+ * Loading controller class.
  *
  */
 class SabelClassLoader
@@ -87,7 +87,6 @@ class SabelClassLoader
       }
     }
   }
-
 }
 
 ?>
