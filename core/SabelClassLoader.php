@@ -78,7 +78,7 @@ class SabelClassLoader
       return new $moduleClassName();
     } else {
       $request->set('value', $this->request->getModule());
-      $path = 'app/modules/index/controllers/index.php';
+      $path = 'app/modules/Index/controllers/index.php';
       if (is_file($path)) {
         require_once($path);
         return new Index_Index();
