@@ -37,11 +37,11 @@ class Sanitize
   {
     if (get_magic_quotes_gpc()) {
       if (is_array($target)) {
-	foreach ($target as $k => $v) {
-	  $target[$k] = stripslashes($v);
-	}
+        foreach ($target as $k => $v) {
+          $target[$k] = stripslashes($v);
+        }
       } else {
-	$target = stripslashes($target);
+        $target = stripslashes($target);
       }
     }
 
