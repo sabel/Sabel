@@ -144,6 +144,7 @@ class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function retrieve()
   {
     $this->smarty->template_dir = $this->tplpath;
+    $this->smarty->compile_id   = $this->tplpath;
     return $this->smarty->fetch($this->tplname);
   }
 
@@ -155,6 +156,7 @@ class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function display()
   {
     $this->smarty->template_dir = $this->tplpath;
+    $this->smarty->compile_id   = $this->tplpath;
     $this->smarty->display($this->tplname);
   }
 }
