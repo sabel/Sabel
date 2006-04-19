@@ -34,7 +34,10 @@ class WebRequest implements Request
   public function get($key)
   {
     if (isset($_POST[$key])) {
-      return Sanitize::normalize($_POST[$key]);
+      //return Sanitize::normalize($_POST[$key]);
+
+      $ret = Sanitize::normalize($_POST[$key]);
+      return $this->convertToEUC($ret);
     } else {
       return false;
     }
@@ -44,7 +47,10 @@ class WebRequest implements Request
   {
     $array = array();
     foreach ($_POST as $key => $value) {
-      $array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
+      //$array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
+
+      $val = (isset($value)) ? Sanitize::normalize($value) : null;
+      $array[$key] = $this->convertToEUC($val);
     }
     return $array;
   }
@@ -57,6 +63,21 @@ class WebRequest implements Request
   public function getParameter()
   {
     return $this->parsedRequest->getParameter();
+  }
+
+  protected function convertToEUC($value)
+  {
+    if (is_array($value)) {
+      foreach($value as $k => $v) {
+        $enc = mb_detect_encoding($v, 'EUC_JP, SJIS');
+        $value[$k] = mb_convert_encoding($v, 'EUC_JP', $enc);
+      }
+    } else {
+      $enc = mb_detect_encoding($value, 'EUC_JP, SJIS');
+      $value= mb_convert_encoding($value, 'EUC_JP', $enc);
+    }
+
+    return $value;
   }
 }
 

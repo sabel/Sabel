@@ -33,7 +33,7 @@ abstract class SabelPageController
 
     if ($safe == 'safe') {
       $lower = strtolower(substr($name, 4, (strlen($name) - 4)));
-      return addslashes($this->request->$lower);
+      return Sanitize::sqlSafe($this->request->$lower);
     }
 
     return $this->request->$name;

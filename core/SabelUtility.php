@@ -15,7 +15,7 @@ class Sanitize
 
     if(is_array($target)) {
       foreach ($target as $key => $clean) {
-	$cleaned[$key] = preg_replace( "/[^${$expected}a-zA-Z0-9]/", '', $clean);
+        $cleaned[$key] = preg_replace( "/[^${$expected}a-zA-Z0-9]/", '', $clean);
       }
     } else {
       $cleaned = preg_replace( "/[^${$expected}a-zA-Z0-9]/", "", $target);
