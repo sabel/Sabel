@@ -4,7 +4,7 @@
  * some class uses some class.
  * Convinience function for class loading.
  *
- * @param String $name e.g. user.authenticate.test
+ * @param String $uses e.g. "user.authenticate.Test"
  */
 function uses($uses)
 {
@@ -30,18 +30,5 @@ function uses($uses)
   
   if (!$loaded) throw new Exception('class can\'t find: ' . $fullpath);
 }
-
-/*
-function uses($className)
-{
-  $paths = array('app/commons/models/', 'app/modules/staff/models/');
-  
-  foreach ($paths as $pathidx => $path) {
-    require_once('app/commons/models/mail/operation/Generic.php');
-    require_once($path . $className . '.php');
-    break;
-  }
-}
-*/
 
 ?>

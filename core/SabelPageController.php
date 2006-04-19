@@ -77,40 +77,23 @@ abstract class SabelPageController
     $r = ParsedRequest::create();
     $controllerClass = $r->getModule() . '_' . $r->getController();
     $refMethod = new ReflectionMethod($controllerClass, $methodName);
-    
-    $hasParameter = false;
+
+    $hasClass = false;
     foreach ($refMethod->getParameters() as $paramidx => $parameter) {
-      $hasParameter = true;
-      $hasDependClass = ($refClass = $parameter->getClass()) ? true : false;
-      if ($hasDependClass) {
-        $structure = array();
-        
-        SabelDIContainer::parseClassDependencyStructure($refClass->getName(), $structure);
-        
-        $typeIsInterface = ($structure[$refClass->getName()]['type'] == 'interface') ? true : false;
-        if ($typeIsInterface) {
-          $diconf = $this->loadDIConfig($refClass->getName());
-          $implClassName = $diconf[$controllerClass][$methodName][$refClass->getName()];
-          //var_dump($diconf);exit;
-          SabelDIContainer::parseClassDependencyStructure($implClassName, $structure);
-          
-          foreach ($structure[$implClassName]['__construct'] as $implparamidx => $implParameter) {
-            if ($implParameter['define']['type'] == 'interface') {
-              $dependClassPath = $diconf[$controllerClass][$methodName][$implClassName]['constructer'];
-              $dependClassName = uses($dependClassPath);
-              $dependClass = new $dependClassName();
-            }
-          }
-        } // else if (has't depend class.) {}
+      $requireParameterClass = ($reflectionClass = $parameter->getClass()) ? true : false;
+      if ($requireParameterClass) {
+        $hasClass = true;
+        $dicon = new SabelDIContainer();
+        $dicon->loadParameterClass($reflectionClass->getName());
+        $object = $dicon->loading();
       }
     }
     
-    if ($hasParameter) {
-      $this->$methodName(new $implClassName($dependClass));
+    if ($hasClass) {
+      $this->$methodName($object);
     } else {
       $this->$methodName();
     }
-    
   }
   
   protected function loadDIConfig()
@@ -118,6 +101,7 @@ abstract class SabelPageController
     $r = ParsedRequest::create();
     $controller = strtolower($r->getController());
     $paths = array('app/modules/staff/controllers/', 'app/modules/staff/controllers/');
+    
     $spyc = new Spyc();
     foreach ($paths as $pathidx => $path) {      
       $fullpath = $path . $controller. '.yml';
