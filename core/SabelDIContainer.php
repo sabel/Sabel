@@ -55,6 +55,9 @@ class ReflectionClassExt
     $pathElements = explode('_', $interfaceFullName);
     $interfaceName = array_pop($pathElements);
     
+    $r = ParsedRequest::create();
+    $module = $r->getModule();
+    
     foreach ($pathElements as $pathelmidx => $pathElement) {
       $pathElements[$pathelmidx] = strtolower($pathElement);
     }
@@ -62,7 +65,16 @@ class ReflectionClassExt
     $configFilePath = implode('/', $pathElements) . '.yml';
     $config = $this->loadConfig($configFilePath);
 
-    $implementClassName = $config['implementation'];
+    if (array_key_exists('module', $config) && array_key_exists($module, $config['module'])) {
+      $implementClassName = $config['module'][$module];
+    } else {
+      if (array_key_exists('implementation', $config)) {
+        $implementClassName = $config['implementation'];
+      } else {
+        throw 
+          new SabelException('DI config file is invalid can\' find implementation: ' . $configFilePath);
+      }
+    }
     
     return $implementClassName;
   }
