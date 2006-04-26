@@ -151,6 +151,7 @@ class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function configuration()
   {
     $this->smarty->compile_dir = 'compile';
+    $this->smarty->load_filter('output','trimwhitespace');
   }
 
   public function display()
