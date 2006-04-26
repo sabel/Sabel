@@ -58,6 +58,10 @@ function smarty_outputfilter_trimwhitespace($source, &$smarty)
     // replace textarea blocks
     smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:TEXTAREA@@@",$_textarea_blocks, $source);
 
+    $source = str_replace("\n", "", $source);
+    $source = str_replace("\r\n", "", $source);
+    $source = str_replace("\r", "", $source);
+    
     return $source;
 }
 
