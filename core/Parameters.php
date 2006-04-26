@@ -35,6 +35,11 @@ class Parameters
   {
     return $this->parameter;
   }
+  
+  public function __get($key)
+  {
+    return $this->parsedParameters[$key];
+  }
 
   public function get($key)
   {

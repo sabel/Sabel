@@ -36,7 +36,12 @@ abstract class SabelPageController
       return Sanitize::sqlSafe($this->request->$lower);
     }
 
-    return $this->request->$name;
+    if ($this->request->$name) {
+      return $this->request->$name;
+    } else {
+      return $this->parameters->$name;
+    }
+    
   }
 
   public function setup($request)

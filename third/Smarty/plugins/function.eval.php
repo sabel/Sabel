@@ -40,7 +40,7 @@ function smarty_function_eval($params, &$smarty)
     if (!empty($params['assign'])) {
         $smarty->assign($params['assign'], $_contents);
     } else {
-        return $_contents;
+        return preg_replace('!\s+!', '', $_contents);
     }
 }
 
