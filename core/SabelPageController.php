@@ -79,6 +79,8 @@ abstract class SabelPageController
   
   protected function methodExecute($methodName)
   {
+    $this->container = new SabelDIContainer();
+    
     $r = ParsedRequest::create();
     $controllerClass = $r->getModule() . '_' . $r->getController();
     $refMethod = new ReflectionMethod($controllerClass, $methodName);
@@ -88,9 +90,9 @@ abstract class SabelPageController
       $requireParameterClass = ($reflectionClass = $parameter->getClass()) ? true : false;
       if ($requireParameterClass) {
         $hasClass = true;
-        $dicon = new SabelDIContainer();
-        $dicon->loadParameterClass($reflectionClass->getName());
-        $object = $dicon->loading();
+        $this->container = new SabelDIContainer();
+        $this->container->loadParameterClass($reflectionClass->getName());
+        $object = $this->container->loading();
       }
     }
     

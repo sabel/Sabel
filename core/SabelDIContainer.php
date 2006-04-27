@@ -108,6 +108,17 @@ class SabelDIContainer
 {
   public $classStack;
   
+  /**
+   * load instance of $className;
+   *
+   * @return Object instance
+   */
+  public function load($className)
+  {
+    $this->loadParameterClass($className);
+    return $this->loading();
+  }
+  
   public function loadParameterClass($class, $method = '__construct')
   {
     // push to Stack class name
