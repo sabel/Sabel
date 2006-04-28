@@ -48,20 +48,17 @@ function smarty_outputfilter_trimwhitespace($source, &$smarty)
     // remove all leading spaces, tabs and carriage returns NOT
     // preceeded by a php close tag.
     $source = trim(preg_replace('/((?<!\?>)\n)[\s]+/m', '', $source));
-
-    // replace script blocks
-    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:SCRIPT@@@",$_script_blocks, $source);
-
-    // replace pre blocks
-    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:PRE@@@",$_pre_blocks, $source);
-
-    // replace textarea blocks
-    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:TEXTAREA@@@",$_textarea_blocks, $source);
-
     $source = str_replace("\n", "", $source);
     $source = str_replace("\r\n", "", $source);
     $source = str_replace("\r", "", $source);
-    
+
+    // replace script blocks
+    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:SCRIPT@@@",$_script_blocks, $source);
+    // replace pre blocks
+    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:PRE@@@",$_pre_blocks, $source);
+    // replace textarea blocks
+    smarty_outputfilter_trimwhitespace_replace("@@@SMARTY:TRIM:TEXTAREA@@@",$_textarea_blocks, $source);
+
     return $source;
 }
 
