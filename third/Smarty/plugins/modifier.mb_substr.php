@@ -21,8 +21,8 @@ function smarty_modifier_mb_substr($string, $length = 80, $postfix = '...')
   if ($length == 0)
     return '';
 
-  if (strlen($string) > $length) {
-				return mb_substr($string, 0, $length, 'EUC-JP').$postfix;
+  if (mb_strlen($string, 'EUC-JP') > $length) {
+    return mb_substr($string, 0, $length, 'EUC-JP').$postfix;
   } else {
     return $string;
   }
