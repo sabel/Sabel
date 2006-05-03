@@ -65,14 +65,16 @@ class ReflectionClassExt
     $configFilePath = implode('/', $pathElements) . '.yml';
     $config = $this->loadConfig($configFilePath);
 
-    if (array_key_exists('module', $config) && array_key_exists($module, $config['module'])) {
+    if (array_key_exists('module', $config) && 
+        array_key_exists($module, $config['module'])) {
       $implementClassName = $config['module'][$module];
     } else {
       if (array_key_exists('implementation', $config)) {
         $implementClassName = $config['implementation'];
       } else {
-        throw 
-          new SabelException('DI config file is invalid can\' find implementation: ' . $configFilePath);
+        $msg  = 'DI config file is invalid can\' find implementation: ';
+        $msg .= $configFilePath;
+        throw new SabelException($msg);
       }
     }
     
@@ -93,7 +95,9 @@ class ReflectionClassExt
   protected function loadConfig($filepath)
   {
     $spyc = new Spyc();
-    $paths = array('app/commons/models/', 'app/modules/staff/models/', 'app/modules/user/models/');
+    $paths = array('app/commons/models/',
+                   'app/modules/staff/models/',
+                   'app/modules/user/models/');
     
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;
@@ -126,7 +130,9 @@ class SabelDIContainer
     $reflectionClassExt = new ReflectionClassExt($reflectionClass);
     
     if ($reflectionClassExt->isInterface()) {
-      $reflectionClass = new ReflectionClass($reflectionClassExt->getImplementClass());
+      $reflectionClass = 
+        new ReflectionClass($reflectionClassExt->getImplementClass());
+        
       $this->classStack[] = new ReflectionClassExt($reflectionClass);
       $class = $reflectionClass->getName();
     } else {
@@ -137,17 +143,18 @@ class SabelDIContainer
     
     // parameter loop
     $refMethod = new ReflectionMethod($class, $method);
-    foreach ($refMethod->getParameters() as $paramidx => $parameter) {
+    foreach ($refMethod->getParameters() as $paramidx => $param) {
       // check parameter required class
-      $hasClass = ($dependClass = $parameter->getClass()) ? true : false;
+      $hasClass = ($dependClass = $param->getClass()) ? true : false;
       
       // if parameter required class depend another class
       if ($hasClass) {
         // if it class also depend another class then recursive call
-        if ($this->hasParameterDependOnClass($dependClass->getName(), '__construct')) {
-          $this->loadParameterClass($dependClass->getName()); // -> call myself
+        $depend = $dependClass->getName();
+        if ($this->hasParameterDependOnClass($depend, '__construct')) {
+          $this->loadParameterClass($dependClass->getName()); // call myself
         } else {          
-          $this->classStack[] = new ReflectionClassExt($parameter->getClass());
+          $this->classStack[] = new ReflectionClassExt($param->getClass());
         }
       }
     }
@@ -195,11 +202,14 @@ class SabelDIContainer
     }
   }
   
-  public static function parseClassDependencyStructure($className, &$structure)
+  public static function parseClassDependencyStruct($className, &$structure)
   {
     if (is_null($className)) throw new Exception("class name is null");
     
-    $paths = array('app/commons/models/', 'app/modules/staff/models/', 'app/modules/user/models/');
+    // @todo this array will configurable.
+    $paths = array('app/commons/models/',
+                   'app/modules/staff/models/', 
+                   'app/modules/user/models/');
     
     $hasClassPath = (strpos($className, '_') === false) ? true : false;
     
@@ -234,7 +244,9 @@ class SabelDIContainer
     
     $refClass = new ReflectionClass($className);
     
-    $structure[$className]['type'] = SabelDIContainer::getClassType($refClass);
+    $structure[$className]['type'] =
+      SabelDIContainer::getClassType($refClass);
+      
     $refMethods = $refClass->getMethods();
     
     foreach ($refMethods as $refMethodsIdx => $refMethod) {
@@ -245,7 +257,7 @@ class SabelDIContainer
           
           // call self recursive process.
           if (!is_null($paramClassName)) {
-            self::parseClassDependencyStructure($paramClassName, $structure);
+            self::parseClassDependencyStruct($paramClassName, $structure);
           }
           
           $type = SabelDIContainer::getClassType($paramClassRef);
@@ -255,8 +267,8 @@ class SabelDIContainer
                   'name'   => $paramClassRef->getName(),
                   'define' => $structure[$paramClassName]);
         } else {
-          $structure[$className][$refMethod->getName()][$parameter->getName()] = 
-            array('type' => 'parameter', 'name' => $parameter->getName());
+          $structure[$className][$refMethod->getName()][$parameter->getName()]
+            = array('type' => 'parameter', 'name' => $parameter->getName());
         }
       }
     }

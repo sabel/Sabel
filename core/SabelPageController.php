@@ -88,7 +88,8 @@ abstract class SabelPageController
 
     $hasClass = false;
     foreach ($refMethod->getParameters() as $paramidx => $parameter) {
-      $requireParameterClass = ($reflectionClass = $parameter->getClass()) ? true : false;
+      $requireParameterClass = 
+                  ($reflectionClass = $parameter->getClass()) ? true : false;
       if ($requireParameterClass) {
         $hasClass = true;
         $this->container = new SabelDIContainer();
@@ -108,7 +109,8 @@ abstract class SabelPageController
   {
     $r = ParsedRequest::create();
     $controller = strtolower($r->getController());
-    $paths = array('app/modules/staff/controllers/', 'app/modules/staff/controllers/');
+    $paths = array('app/modules/staff/controllers/',
+                   'app/modules/staff/controllers/');
     
     $spyc = new Spyc();
     foreach ($paths as $pathidx => $path) {      
@@ -184,7 +186,7 @@ abstract class SabelPageController
   {
     $ref = $_SERVER['HTTP_REFERER'];
     $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
-    $patternAbsoluteURI = '/http:\/\/' . $_SERVER['HTTP_HOST'] . $replaced . '/';
+    $patternAbsoluteURI = '/http:\/\/' . $_SERVER['HTTP_HOST'].$replaced.'/';
     preg_match($patternAbsoluteURI, $ref, $matchs);
     return (isset($matchs[0])) ? true : false;
   }

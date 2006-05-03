@@ -50,13 +50,13 @@ class SabelPageWebController implements SabelController
   {
     $parsedRequest = ParsedRequest::create();
     $loader = SabelClassLoader::create($parsedRequest);
-
+    
     $controller = $loader->load();
     $controller->setup(new WebRequest());
     $controller->initialize();
-
+    
     $aMethod = $parsedRequest->getMethod();
-
+    
     if ($controller->hasMethod($aMethod)) {
       $controller->execute($aMethod);
     } else {
