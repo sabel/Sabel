@@ -13,6 +13,11 @@ class Test_SabelTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals('test2', $parameters->value2);
   }
   
+  public function testNonParameters()
+  {
+    $parameters = new Parameters("");
+  }
+  
   public function testParametersError()
   {
     try {
