@@ -27,7 +27,7 @@ class Parameters
     $sets = array();
     foreach ($separate as $key => $val) {
       $tmp = split("=", $val);
-      if (empty($tmp[1])) throw new Exception('value is empty');
+      if (empty($tmp[1])) $tmp[1] = '';
       $sets[$tmp[0]] = $tmp[1];
     }
     

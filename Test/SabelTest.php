@@ -22,14 +22,8 @@ class Test_SabelTest extends PHPUnit2_Framework_TestCase
   
   public function testInvalidParameters()
   {
-    try {
-     $parameters = new Parameters('?test=');
-     $excepted = false;
-   } catch (Exception $e) {
-     $excepted = true;
-   }
-   
-   if (!$excepted) $this->fail();
+    $parameters = new Parameters('?test=');
+    $this->assertEquals('', $parameters->test);
   }
   
   public function testNonParameters()
