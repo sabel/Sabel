@@ -1,9 +1,5 @@
 <?php
 
-/**
- * 解析後のリクエスト
- *
- */
 class ParsedRequest
 {
   private $request;

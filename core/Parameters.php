@@ -21,6 +21,8 @@ class Parameters
   protected function parse()
   {
     $parameters = split("\?", $this->parameters);
+    if (count($parameters) == 1)
+      throw new Exception('paraeter value is invalid');
     $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
     $separate = split("&", $parameters[1]);
     $sets = array();

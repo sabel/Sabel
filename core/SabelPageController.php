@@ -30,21 +30,20 @@ abstract class SabelPageController
   public function __get($name)
   {
     $safe = substr($name, 0, 4);
-
+    
     if ($safe == 'safe') {
       $lower = strtolower(substr($name, 4, (strlen($name) - 4)));
       return Sanitize::sqlSafe($this->request->$lower);
     }
-
-    $request = $this->request->$name;
-    if (isset($request)) {
+    
+    if ($request = $this->request->$name) {
       return $request;
     } else {
       return $this->parameters->$name;
     }
     
   }
-
+  
   public function setup($request)
   {
     $this->request = $request;
