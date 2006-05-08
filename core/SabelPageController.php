@@ -12,7 +12,7 @@ require_once('DirectoryList.php');
  */
 abstract class SabelPageController
 {
-  protected $request, $template, $cache;
+  protected $request, $response, $template, $cache;
 
   /**
    * implement for inherit class.
@@ -41,7 +41,6 @@ abstract class SabelPageController
     } else {
       return $this->parameters->$name;
     }
-    
   }
   
   public function setup($request)
