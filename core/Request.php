@@ -46,7 +46,9 @@ class WebRequest implements Request
     $array = array();
     foreach ($_POST as $key => $value) {
       $val = (isset($value)) ? Sanitize::normalize($value) : null;
-      $array[$key] = $this->convertToEUC($val);
+      if ($key != '_') {
+        $array[$key] = $this->convertToEUC($val);
+      }
     }
     return $array;
   }
