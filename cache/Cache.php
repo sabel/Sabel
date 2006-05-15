@@ -31,7 +31,7 @@ class MemCacheImpl implements Cache
   public function get($key)
   {
     try {
-      return $this->memcache->get($key);
+      return @$this->memcache->get($key);
     } catch (Exception $e) {
       return null;
     }

@@ -9,6 +9,7 @@ require_once('core/SabelUtility.php');
 require_once('core/Request.php');
 require_once('core/ParsedRequest.php');
 require_once('core/SabelException.php');
+require_once('core/Logger.php');
 
 require_once('core/SabelPageController.php');
 require_once('core/SabelTemplateDirector.php');
