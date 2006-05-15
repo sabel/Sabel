@@ -37,7 +37,7 @@ class WebRequest implements Request
       $ret = Sanitize::normalize($_POST[$key]);
       return $this->convertToEUC($ret);
     } else {
-      return false;
+      return null;
     }
   }
 
