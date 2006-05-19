@@ -28,7 +28,8 @@ class Parameters
     foreach ($separate as $key => $val) {
       $tmp = split("=", $val);
       if (empty($tmp[1])) $tmp[1] = '';
-      $sets[$tmp[0]] = $tmp[1];
+      $enc   = mb_detect_encoding($tmp[1], 'UTF-8, EUC_JP, SJIS');
+      $sets[$tmp[0]] = mb_convert_encoding(urldecode($tmp[1]), 'EUC-JP', $enc);
     }
     
     $this->parsedParameters =& $sets;
