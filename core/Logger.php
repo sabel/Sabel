@@ -7,7 +7,7 @@ interface Logger
 
 class FileLogger implements Logger
 {
-  const LOG_FILE = 'sabel.log';
+  const LOG_FILE = 'logs/sabel.log';
   
   private $fp = null;
   

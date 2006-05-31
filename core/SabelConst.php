@@ -61,7 +61,7 @@ class SabelConst
    * SabelExceptionのログファイルの名前
    *
    */
-  const EXCEPTION_LOG_FILE_NAME = 'sabelException.log';
+  const EXCEPTION_LOG_FILE_NAME = 'logs/sabelException.log';
 }
 
 ?>
