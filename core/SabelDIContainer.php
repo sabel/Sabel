@@ -4,9 +4,11 @@ class ReflectionClassExt
 {
   protected $reflectionClass;
   protected $implementClassName;
+  protected $dependBy;
   
-  public function __construct(ReflectionClass $ref)
+  public function __construct(ReflectionClass $ref, $dependBy = null)
   {
+    if (is_object($dependBy)) $this->dependBy = $dependBy;
     $this->reflectionClass = $ref;
     
     if ($ref->isInterface()) {
@@ -64,18 +66,26 @@ class ReflectionClassExt
     array_push($pathElements, $interfaceName);
     $configFilePath = implode('/', $pathElements) . '.yml';
     $config = $this->loadConfig($configFilePath);
-
-    if (array_key_exists('module', $config) && 
-        array_key_exists($module, $config['module'])) {
+    
+    if (array_key_exists('class', $config) &&
+        array_key_exists($this->dependBy->getName(), $config['class'])) {
+      $implementClassName = $config['class'][$this->dependBy->getName()];
+    } else if (array_key_exists('module', $config) && 
+               array_key_exists($module, $config['module'])) {
       $implementClassName = $config['module'][$module];
+    } else if (array_key_exists('implementation', $config)) {
+      $implementClassName = $config['implementation'];
     } else {
-      if (array_key_exists('implementation', $config)) {
-        $implementClassName = $config['implementation'];
-      } else {
         $msg  = 'DI config file is invalid can\' find implementation: ';
         $msg .= $configFilePath;
         throw new SabelException($msg);
-      }
+    }
+    
+    if (!is_string($implementClassName)) {
+      $information['implementClassName'] = $implementClassName;
+      $information['config'] = $config;
+      $information['dependBy'] = $this->dependBy;
+      throw new SabelException("<pre>implement class name is invalid: " . var_export($information, 1));
     }
     
     return $implementClassName;
@@ -127,7 +137,7 @@ class SabelDIContainer
   {
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
-    $reflectionClassExt = new ReflectionClassExt($reflectionClass);
+    $reflectionClassExt = new ReflectionClassExt($reflectionClass, $reflectionClass);
     
     if ($reflectionClassExt->isInterface()) {
       $reflectionClass = 
@@ -154,7 +164,7 @@ class SabelDIContainer
         if ($this->hasParameterDependOnClass($depend, '__construct')) {
           $this->loadParameterClass($dependClass->getName()); // call myself
         } else {          
-          $this->classStack[] = new ReflectionClassExt($param->getClass());
+          $this->classStack[] = new ReflectionClassExt($param->getClass(), $reflectionClass);
         }
       }
     }
