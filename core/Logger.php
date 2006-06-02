@@ -18,7 +18,8 @@ class FileLogger implements Logger
   
   public function log($text)
   {
-    fwrite($this->fp, $text);
+    $message = date(DATE_ATOM) . "\t" .$text . "\n";
+    fwrite($this->fp, $message);
   }
   
   public function __destruct()
