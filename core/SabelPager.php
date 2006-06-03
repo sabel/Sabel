@@ -39,11 +39,13 @@ class SabelPager
     }
     
     $this->numberOfItems = $numberOfItems;
+    $this->setNumberOfPages();
   }
   
   public function setPageItem($numberOfPageItems)
   {
     $this->pageItem = $numberOfPageItems;
+    $this->setNumberOfPages();
   }
   
   public function getPageItem()
@@ -63,10 +65,6 @@ class SabelPager
   
   public function getNumberOfPage()
   {
-    if (is_int($this->pageItem)) {
-      $this->numberOfPages =(int) ceil($this->numberOfItems / $this->pageItem);
-    }
-    
     return $this->numberOfPages;
   }
   
@@ -110,6 +108,13 @@ class SabelPager
     }
     
     return $offset;
+  }
+
+  protected function setNumberOfPages()
+  {
+    if (isset($this->numberOfItems) && isset($this->pageItem)) {
+      $this->numberOfPages =(int) ceil($this->numberOfItems / $this->pageItem);
+    }
   }
 }
 
