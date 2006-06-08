@@ -50,22 +50,22 @@ class SabelClassLoader
       return false;
     }
   }
-
+  
   protected function isValidController()
   {
     $path = $this->makeControllerPath();
-
+    
     if (is_file($path)) {
       return true;
     } else {
       return false;
     }
   }
-
+  
   public function load()
   {
     $request = new WebRequest();
-
+    
     if ($this->isValidController()) {
       $path = $this->makeControllerPath();
       require_once($path);
@@ -73,9 +73,14 @@ class SabelClassLoader
       return new $class();
     } else if ($this->isValidModule()) {
       $path = 'app/modules/' . $this->request->getModule() . '/controllers/index.php';
+      require_once($path);
       $moduleClassName = $this->request->getModule() . '_Index';
       $request->set('value', $this->request->getController());
-      return new $moduleClassName();
+      if (class_exists($moduleClassName)) {
+        return new $moduleClassName();
+      } else {
+        throw new SabelException("can't found out controller class: " . $moduleClassName);
+      }
     } else {
       $request->set('value', $this->request->getModule());
       $path = 'app/modules/Index/controllers/index.php';
