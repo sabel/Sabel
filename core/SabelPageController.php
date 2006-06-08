@@ -84,34 +84,30 @@ abstract class SabelPageController
   
   protected function methodExecute($methodName)
   {
-    try {
-      $this->container = new SabelDIContainer();
-      
-      $r = ParsedRequest::create();
-      $controllerClass = $r->getModule() . '_' . $r->getController();
-      $refMethod = new ReflectionMethod($controllerClass, $methodName);
-      
-      $hasClass = false;
-      foreach ($refMethod->getParameters() as $paramidx => $parameter) {
-        $requireParameterClass = 
-                    ($reflectionClass = $parameter->getClass()) ? true : false;
-        if ($requireParameterClass) {
-          $hasClass = true;
-          $this->container = new SabelDIContainer();
-          $this->container->loadParameterClass($reflectionClass->getName());
-          $object = $this->container->loading();
-        }
+    $this->container = new SabelDIContainer();
+    
+    $r = ParsedRequest::create();
+    $controllerClass = $r->getModule() . '_' . $r->getController();
+    $refMethod = new ReflectionMethod($controllerClass, $methodName);
+    
+    $hasClass = false;
+    foreach ($refMethod->getParameters() as $paramidx => $parameter) {
+      $requireParameterClass = 
+                  ($reflectionClass = $parameter->getClass()) ? true : false;
+      if ($requireParameterClass) {
+        $hasClass = true;
+        $this->container = new SabelDIContainer();
+        $this->container->loadParameterClass($reflectionClass->getName());
+        $object = $this->container->loading();
       }
-      
-      if ($hasClass) {
-        $this->$methodName($object);
-      } else {
-        $this->$methodName();
-      }
-    } catch (Exception $e) {
-      print $e->getMessage();
-      exit;
     }
+    
+    if ($hasClass) {
+      $this->$methodName($object);
+    } else {
+      $this->$methodName();
+    }
+    
   }
   
   protected function loadDIConfig()

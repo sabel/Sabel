@@ -50,19 +50,24 @@ class SabelPageWebController implements SabelController
 {
   public function dispatch()
   {
-    $parsedRequest = ParsedRequest::create();
-    $loader = SabelClassLoader::create($parsedRequest);
-    
-    $controller = $loader->load();
-    $controller->setup(new WebRequest());
-    $controller->initialize();
-    
-    $aMethod = $parsedRequest->getMethod();
-    
-    if ($controller->hasMethod($aMethod)) {
-      $controller->execute($aMethod);
-    } else {
-      $controller->execute(SabelConst::DEFAULT_METHOD);
+    try {
+      $parsedRequest = ParsedRequest::create();
+      $loader = SabelClassLoader::create($parsedRequest);
+      
+      $controller = $loader->load();
+      $controller->setup(new WebRequest());
+      $controller->initialize();
+      
+      $aMethod = $parsedRequest->getMethod();
+      
+      if ($controller->hasMethod($aMethod)) {
+        $controller->execute($aMethod);
+      } else {
+        $controller->execute(SabelConst::DEFAULT_METHOD);
+      }
+    } catch (Exception $e) {
+      $logger = new FileLogger();
+      $logger->log($e->getMessage());
     }
   }
 

@@ -3,9 +3,9 @@
 class ParsedRequest
 {
   private $request;
-
+  
   private static $instance = null;
-
+  
   public static function create($request = null)
   {
     if (!self::$instance) {
@@ -15,22 +15,22 @@ class ParsedRequest
     }
     return self::$instance;
   }
-
+  
   protected function __construct($request = null)
   {
     $this->request = $this->parse($request);
   }
-
+  
   protected function parse($request)
   {
     global $sabelfilepath;
-
+    
     if (empty($request)) {
       $uri = $_SERVER['REQUEST_URI'];
     } else {
       $uri = $request;
     }
-
+    
     $path = split('/', $sabelfilepath);
     array_shift($path);
     foreach ($path as $p => $v) {
@@ -38,21 +38,28 @@ class ParsedRequest
         $dir = $v;
       }
     }
-
+    
     $sp = split('/', $uri);
     array_shift($sp);
-
+    
     $request = array();
     $matched = true;
     foreach ($sp as $p => $v) {
-      if ($matched) $request[] = $v;
-
+      if ($matched) {
+        if (substr($v, 0, 1) == '?') {
+          $request[3] = $v;
+        } else {
+          $request[] = $v;
+        }
+      }
+      
       // neccesary for when application is not root.
       // if ($v == $dir) $matched = true;
     }
+    
     return $request;
   }
-
+  
   public function getModule()
   {
     if (!empty($this->request[0])) {
@@ -61,7 +68,7 @@ class ParsedRequest
       return SabelConst::DEFAULT_MODULE;
     }
   }
-
+  
   public function getController()
   {
     if (!empty($this->request[1])) {
@@ -70,7 +77,7 @@ class ParsedRequest
       return SabelConst::DEFAULT_CONTROLLER;
     }
   }
-
+  
   public function getMethod()
   {
     if (!empty($this->request[2])) {
@@ -79,7 +86,7 @@ class ParsedRequest
       return SabelConst::DEFAULT_METHOD;
     }
   }
-
+  
   public function getParameter()
   {
     if (!empty($this->request[3])) {
