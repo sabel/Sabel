@@ -23,38 +23,22 @@ class ParsedRequest
   
   protected function parse($request)
   {
-    global $sabelfilepath;
-    
     if (empty($request)) {
       $uri = $_SERVER['REQUEST_URI'];
     } else {
       $uri = $request;
     }
     
-    $path = split('/', $sabelfilepath);
-    array_shift($path);
-    foreach ($path as $p => $v) {
-      if ($v == $path[count($path) - 2]) {
-        $dir = $v;
-      }
-    }
-    
     $sp = split('/', $uri);
     array_shift($sp);
     
     $request = array();
-    $matched = true;
     foreach ($sp as $p => $v) {
-      if ($matched) {
-        if (substr($v, 0, 1) == '?') {
-          $request[3] = $v;
-        } else {
-          $request[] = $v;
-        }
+      if (substr($v, 0, 1) == '?') {
+        $request[3] = $v;
+      } else {
+        $request[] = $v;
       }
-      
-      // neccesary for when application is not root.
-      // if ($v == $dir) $matched = true;
     }
     
     return $request;
