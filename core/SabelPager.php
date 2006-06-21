@@ -25,7 +25,7 @@ class SabelPager
    * @param int $numberOfItems number of items per page.
    * @param int $numberOfPageItems
    */
-  public function initialize($numberOfItems = null, $numberOfPageItems)
+  public function initialize($numberOfItems, $numberOfPageItems = 25)
   {
     $this->setNumberOfItems($numberOfItems);
     $this->setPageItem($numberOfPageItems);
@@ -34,7 +34,7 @@ class SabelPager
   
   public function setNumberOfItems($numberOfItems)
   {
-    if ($numberOfItems <= 0 || $numberOfItems == null) {
+    if ($numberOfItems < 0 || $numberOfItems == null) {
       throw new Exception("invalid number of items: " . $numberOfItems);
     }
     
