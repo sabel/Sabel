@@ -34,7 +34,7 @@ class SabelPager
   
   public function setNumberOfItems($numberOfItems)
   {
-    if ($numberOfItems < 0 || $numberOfItems == null) {
+    if ($numberOfItems < 0 || is_null($numberOfItems)) {
       throw new Exception("invalid number of items: " . $numberOfItems);
     }
     
