@@ -29,6 +29,11 @@ class SabelContext
   {
     return $_REQUEST['action'];
   }
+
+  public static function getLogger()
+  {
+    return FileLogger::singleton();
+  }
 }
 
 ?>

@@ -55,7 +55,7 @@ abstract class SabelPageController
   
   protected function setupLogger()
   {
-    $this->logger = new FileLogger();
+    $this->logger = FileLogger::singleton();
   }
 
   protected function setupResponse()
