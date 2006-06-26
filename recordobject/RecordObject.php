@@ -13,25 +13,28 @@ abstract class RecordObject
   protected
     $edo,
     $table,
-    $defColumn;
+    $data;
 
-  public function makePDO($site)
+  protected $defColumn = 'id';
+
+  public function makeEDO($site)
   {
     $this->edo = new PdoEDO($site);
   }
 
-  public function __construct($defColumn = null, $_table = null)
+  public function __construct($_table = null)
   {
-    if (!is_null($defColumn)) {
-      $this->defColumn = $defColumn;
-		}
-		
     $this->table = (is_null($_table)) ? strtolower(get_class($this)) : $_table;
   }
 
   public function __set($key, $val)
   {
-    $this->$key = $val;
+    $this->data[$key] = $val;
+  }
+
+  public function setColumn($column)
+  {
+    $this->defColumn = $column;
   }
   
   public function setPropertys($array)
@@ -61,25 +64,37 @@ abstract class RecordObject
       }
     }
   }
-  
-  public function setCondition($param1, $param2 = null)
+
+  public function setCondition($param1, $param2 = null, $param3 = null)
   {
-    if (is_array($param1)) {
-      foreach ($param1 as $key => $val) {
-        if (strtolower($val) == 'null') $val = null;
-        $this->conditions["{$key}"] = $val;
+    if (!is_null($param3)) {
+      if (is_array($param1)) {
+        echo 'Error: ActiveRecord::setCondition() Invalid parameter!!';
+        exit;
+      } else {
+        $values[] = $param2;
+        $values[] = $param3;
+        $this->conditions["{$param1}"] = $values;
+        unset($values);
       }
     } else {
-      if (!is_null($param1)) {
-        if (strtolower($param2) == 'null') $param2 = null;
-     	  $this->conditions["{$param1}"] = $param2;
+      if (is_array($param1)) {
+        foreach ($param1 as $key => $val) {
+          $this->conditions["{$key}"] = $val;
+        }
+      } else {
+        if (!is_null($param1)) {
+   	      $this->conditions["{$param1}"] = $param2;
+        }
       }
     }
   }
-  
-  public function getCount($conditions = null)
+
+
+  public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
-    $this->addConditions($conditions);
+    if (!is_null($param1))
+      $this->addConditions($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT COUNT(*) AS count FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -106,13 +121,15 @@ abstract class RecordObject
     }
   }
 
-  public function selectOne($conditions = null)
+  public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
     if (is_null($conditions) && is_null($this->conditions)) {
       echo "Error: selectOne() [WHERE] must be set condition";
       exit;
     }
-    $this->addConditions($conditions);
+
+    if (!is_null($param1))
+      $this->addConditions($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -128,9 +145,10 @@ abstract class RecordObject
     }
   }
 
-  public function select($conditions = null)
+  public function select($param1 = null, $param2 = null, $param3 = null)
   {
-    $this->addConditions($conditions);
+    if (!is_null($param1))
+      $this->addConditions($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -151,15 +169,29 @@ abstract class RecordObject
     }
   }
 
-  protected function addConditions($conditions = null)
+  protected function addConditions($param1, $param2 = null, $param3 = null)
   {
-    if (is_array($conditions)) {
-        $this->setCondition($conditions);
-    } else {
-      if (!is_null($conditions)) {
-        $this->setCondition($this->defColumn, $conditions);
+    if (!is_null($param3)) {
+      if (is_array($param1)) {
+        echo 'Error: ActiveRecord::conditions invalid parameter.';
+        exit;
+      } else {
+        if (is_null($param2) && is_null($param3)) {
+          $this->setCondition($this->defColumn, $param1, null);
+        } else {
+          if (is_array($param1)) {
+            $this->setCondition($param1, null, null);
+          } else {
+            $this->setCondition($param1, $param2, $param3);
+          }
+        }
       }
     }
+  }
+
+  protected function dataMerge($data)
+  {
+    //todo
   }
 
   public function insert($data)
@@ -189,14 +221,16 @@ abstract class RecordObject
     //todo
   }
 
-  public function delete($conditions = null)
+  public function delete($param1 = null, $param2 = null, $param3 = null)
   {
     if (is_null($conditions) && is_null($this->conditions)) {
       $className = get_class($this);
       echo "Error: {$className}::delete() [WHERE] must be set condition";
       exit;
     }
-    $this->addConditions($conditions);
+
+    if (!is_null($param1))
+      $this->addConditions($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("DELETE FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);

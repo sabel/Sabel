@@ -82,15 +82,25 @@ class PdoEDO implements EDO
     if (!empty($conditions)) {
 
       foreach ($conditions as $key => $val) {
+        $sign = substr($key, 0, 2);
+
         if ($val[0] == '>' || $val[0] == '<') {
-          $this->sqlObj->makeLess_GreaterSQL($key, $val, EDO::EITHER_SEP);
-        } elseif (strpos($val, EDO::BETWEEN_SEP)) {
-          $this->sqlObj->makeBetweenSQL($key, $val, EDO::BETWEEN_SEP);
-        } elseif (strpos($val, EDO::EITHER_SEP)) {
-          $this->sqlObj->makeEitherSQL($key, $val, EDO::EITHER_SEP);
-        } elseif (is_null($val)) {
+          $this->sqlObj->makeLess_GreaterSQL($key, $val);
+        } elseif ($sign == EDO::IN) {
+          $key = str_replace($sign, '', $key);
+          $this->sqlObj->makeWhereInSQL(trim($key), $val);
+        } elseif ($sign == EDO::BET) {
+          $key = str_replace($sign, '', $key);
+          $this->sqlObj->makeBetweenSQL(trim($key), $val);
+        } elseif ($sign == EDO::EITHER) {
+          $key = str_replace($sign, '', $key);
+          $this->sqlObj->makeEitherSQL(trim($key), $val);
+        } elseif ($sign == EDO::LIKE) {
+          $key = str_replace($sign, '', $key);
+          $this->sqlObj->makeLikeSQL(trim($key), $val);
+        } elseif (strtolower($val) == 'null') {
           $this->sqlObj->makeIsNullSQL($key);
-        } elseif (strtolower($val) == 'not null' || $val == '!') {
+        } elseif (strtolower($val) == 'not null') {
           $this->sqlObj->makeIsNotNullSQL($key);
         } else {
           $this->sqlObj->makeNormalConditionSQL($key, $val);
@@ -120,8 +130,11 @@ class PdoEDO implements EDO
     }
 
     $this->stmt = $this->pdo->prepare($sql);
+    //echo $sql.'<br>';
     $this->makeBindParam();
-
+    //var_dump($this->param);
+    //exit;
+    
     if (empty($this->param)) {
       return $this->stmt->execute();
     } else {
@@ -160,6 +173,7 @@ class PdoEDO implements EDO
     }
 
     unset($this->sqlObj->param);
+    unset($this->sqlObj->keyArray);
   }
 }
 

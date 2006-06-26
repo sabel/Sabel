@@ -5,6 +5,8 @@ require_once('SQL.php');
 class PdoSQL 
 {
   private $sql, $set;
+
+  public $keyArray = array();
   public $param = array();
 
   public function getSQL()
@@ -17,17 +19,30 @@ class PdoSQL
     $this->sql = $sql;
   }
 
+  protected function checkKeyExists($key)
+  {
+    if (!array_key_exists($key, $this->keyArray)) {
+      $this->keyArray[$key]['count'] = 2;
+      return $key.'2';
+    } else {
+      $count = $this->keyArray[$key]['count'];
+      $count = $count + 1;
+      $this->keyArray[$key]['count'] = $count;
+      return $key.$count;
+    }
+  }
+
   public function makeNormalConditionSQL($key, $val)
   {
+    $bindKey = $this->checkKeyExists($key);
+
     if (!$this->set) {
-      $this->sql .= " WHERE {$key}=:{$key}2";
+      $this->sql .= " WHERE {$key}=:{$bindKey}";
     } else {
-      $this->sql .= " AND {$key}=:{$key}2";
+      $this->sql .= " AND {$key}=:{$bindKey}";
     }
     $this->set = true;
-
-    $this->param["{$key}2"] = $val;
-    unset($this->param[$key]);
+    $this->param["{$bindKey}"] = $val;
   }
 
   public function makeIsNullSQL($key)
@@ -50,7 +65,31 @@ class PdoSQL
     $this->set = true;
   }
 
-  public function makeBetweenSQL($key, $val, $sep)
+  public function makeWhereInSQL($key, $val)
+  {
+    if (!$this->set) {
+      $this->sql .= " WHERE {$key} IN (". implode(',', $val) .")";
+    } else {
+      $this->sql .= " AND {$key} IN (". implode(',', $val) .")";
+    }
+    $this->set = true;
+  }
+
+  public function makeLikeSQL($key, $val)
+  {
+    $bindKey = $this->checkKeyExists($key);
+
+    if (!$this->set) {
+      $this->sql .= " WHERE {$key} LIKE :{$bindKey}";
+    } else {
+      $this->sql .= " AND {$key} LIKE :{$bindKey}";
+    }
+    $this->set = true;
+
+    $this->param["{$bindKey}"] = $val;
+  }
+
+  public function makeBetweenSQL($key, $val)
   {
     if (!$this->set) {
       $this->sql .= " WHERE {$key} BETWEEN :from AND :to";
@@ -59,56 +98,57 @@ class PdoSQL
     }
     $this->set = true;
 
-    $between = explode($sep, $val);
-    $this->param["from"] = trim($between[0]);
-    $this->param["to"]   = trim($between[1]);
-
-    unset($this->param[$key]);
+    $this->param["from"] = $val[0];
+    $this->param["to"]   = $val[1];
   }
-        
-  public function &makeEitherSQL($key, $val, $sep)
+
+  public function makeEitherSQL($key, $val)
   {
+    $bindKey  = $this->checkKeyExists($key);
+    $bindKey2 = $this->checkKeyExists($key);
+
+    $val1 = $val[0];
+    $val2 = $val[1];
+
     if (!$this->set) {
-      $this->sql .= " WHERE ({$key}=:{$key}2 OR {$key}=:{$key}3)";
+      $str = " WHERE";
     } else {
-      $this->sql .= " AND ({$key}=:{$key}2 OR {$key}=:{$key}3)";
+      $str = " AND";
     }
+
+    if ($val1[0] == '<' || $val1[0] == '>') {
+      $this->sql .= $str." ({$key} {$val1[0]} :{$bindKey} OR";
+      $val1 = trim(str_replace($val1[0], '', $val1));
+    } else {
+      $this->sql .= $str." ({$key}=:{$bindKey} OR";
+    }
+    if ($val2[0] == '<' || $val2[0] == '>') {
+      $this->sql .= " {$key} {$val2[0]} :{$bindKey2})";
+      $val2 = trim(str_replace($val2[0], '', $val2));
+    } else {
+      $this->sql .= " {$key}=:{$bindKey2})";
+    }
+
     $this->set = true;
 
-    $values = explode($sep, $val);
-    $this->param["{$key}2"] = trim($values[0]);
-    $this->param["{$key}3"] = trim($values[1]);
-
-    unset($this->param[$key]);
+    $this->param["{$bindKey}"]  = $val1;
+    $this->param["{$bindKey2}"] = $val2;
   }
 
-  public function makeLess_GreaterSQL($key, $val, $sep)
+  public function makeLess_GreaterSQL($key, $val)
   {
-    if (strpos($val, $sep)) {
-      $array = explode($sep, $val);
-      $val1  = trim($array[0]);
-      $val2  = trim($array[1]);
-      if (!$this->set) {
-        $this->sql .= " WHERE ({$key} {$val1[0]} :{$key}2 OR {$key} {$val2[0]} :{$key}3)";
-      } else {
-        $this->sql .= " AND ({$key} {$val1[0]} :{$key}2 OR {$key} {$val2[0]} :{$key}3)";
-      }
-      $val1  = str_replace($val1[0], '', $val1);
-      $val2  = str_replace($val2[0], '', $val2);
-      $this->param["{$key}2"] = trim($val1);
-      $this->param["{$key}3"] = trim($val2);
-    } else {
-      if (!$this->set) {
-        $this->sql .= " WHERE {$key} {$val[0]} :{$key}2";
-      } else {
-        $this->sql .= " AND {$key} {$val[0]} :{$key}2";
-      }
-      $val = str_replace($val[0], '', $val);
-      $this->param["{$key}2"] = trim($val);
-    }
-    $this->set = true;
+    $bindKey  = $this->checkKeyExists($key);
 
-    unset($this->param[$key]);
+    if (!$this->set) {
+      $this->sql .= " WHERE {$key} {$val[0]} :{$bindKey}";
+    } else {
+      $this->sql .= " AND {$key} {$val[0]} :{$bindKey}";
+    }
+
+    $val = str_replace($val[0], '', $val);
+    $this->param["{$bindKey}"] = trim($val);
+
+    $this->set = true;
   }
 
   public function makeConstraintsSQL($constraints)
