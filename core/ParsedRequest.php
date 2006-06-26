@@ -36,6 +36,7 @@ class ParsedRequest
     foreach ($sp as $p => $v) {
       if (strpos($v, '?')) {
         $splited = split('\?', $v);
+        $request[2] = $splited[0];
         $request[3] = '?'.$splited[1];
       } else  if (substr($v, 0, 1) == '?') {
         $request[3] = $v;
