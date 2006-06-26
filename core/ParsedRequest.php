@@ -34,7 +34,10 @@ class ParsedRequest
     
     $request = array();
     foreach ($sp as $p => $v) {
-      if (substr($v, 0, 1) == '?') {
+      if (strpos($v, '?')) {
+        $splited = split('\?', $v);
+        $request[3] = '?'.$splited[1];
+      } else  if (substr($v, 0, 1) == '?') {
         $request[3] = $v;
       } else {
         $request[] = $v;
