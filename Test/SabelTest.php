@@ -2,6 +2,8 @@
 
 require_once('PHPUnit2/Framework/TestCase.php');
 require_once('core/Parameters.php');
+require_once('core/ParsedRequest.php');
+require_once('core/SabelConst.php');
 
 class Test_SabelTest extends PHPUnit2_Framework_TestCase
 {
@@ -46,5 +48,25 @@ class Test_SabelTest extends PHPUnit2_Framework_TestCase
     } catch(Exception $e) {
       
     }
+  }
+  
+  public function testParsedRequest()
+  {
+    $pp = ParsedRequest::create('/test/test/tset');
+    $this->assertEquals('Index', $pp->getModule());
+  }
+
+  public function testParsedRequestExp()
+  {
+    $uri = '/module/ctrl/action?key=value&keyTwo=valueTwo';
+    $pp = ParsedRequest::create($uri);
+    
+    $this->assertEquals('action', $pp->getMethod());
+    $this->assertEquals('ctrl', $pp->getController());
+    $this->assertEquals('module', $pp->getModule());
+    
+    $parameters = new Parameters($pp->getParameter());
+    $this->assertEquals('value', $parameters->key);
+    $this->assertEquals('valueTwo', $parameters->keyTwo);
   }
 }

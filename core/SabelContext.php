@@ -34,6 +34,17 @@ class SabelContext
   {
     return FileLogger::singleton();
   }
+  
+  public static function getContainer()
+  {
+    return new SabelDIContainer();
+  }
+  
+  public static function getCache()
+  {
+    $config = CachedConfigImpl::create()->get('Memcache');
+    return MemCacheImpl::create($config['server']);
+  }
 }
 
 ?>

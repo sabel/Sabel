@@ -76,7 +76,7 @@ class ReflectionClassExt
     } else if (array_key_exists('implementation', $config)) {
       $implementClassName = $config['implementation'];
     } else {
-        $msg  = 'DI config file is invalid can\' find implementation: ';
+        $msg  = 'DI config file is invalid can\'t find implementation: ';
         $msg .= $configFilePath;
         throw new SabelException($msg);
     }
