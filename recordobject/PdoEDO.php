@@ -1,6 +1,7 @@
 <?php
 
 require_once('EDO.php');
+require_once('SQLObject.php');
 
 class PdoEDO implements EDO
 {
@@ -10,13 +11,9 @@ class PdoEDO implements EDO
   private $param = array();
   private $data  = array();
 
-  public function __construct($site)
+  public function __construct($pdo)
   {
-    $dsn  = 'pgsql:host='.$site['database'].';dbname='.$site['db_name'];
-    $user = $site['auth_user'];
-    $pass = $site['auth_pass'];
-    
-    $this->pdo = new PDO($dsn, $user, $pass);
+    $this->pdo    = $pdo;
     $this->sqlObj = new PdoSQL();
   }
 
@@ -78,7 +75,7 @@ class PdoEDO implements EDO
   }
 
   public function makeQuery(&$conditions = null, &$constraints = null)
-  { 
+  {
     if (!empty($conditions)) {
 
       foreach ($conditions as $key => $val) {
@@ -106,12 +103,12 @@ class PdoEDO implements EDO
           $this->sqlObj->makeNormalConditionSQL($key, $val);
         }
       }
-      unset($conditions);
+      $conditions = array();
     }
 
     if (!empty($constraints)) {
       $this->sqlObj->makeConstraintsSQL($constraints);
-      unset($constraints);
+      $constraints = array();
     }
   }
 
@@ -172,8 +169,7 @@ class PdoEDO implements EDO
       }
     }
 
-    unset($this->sqlObj->param);
-    unset($this->sqlObj->keyArray);
+    $this->sqlObj->unsetProparties();
   }
 }
 

@@ -7,7 +7,7 @@ class PdoSQL
   private $sql, $set;
 
   public $keyArray = array();
-  public $param = array();
+  public $param    = array();
 
   public function getSQL()
   {
@@ -161,6 +161,13 @@ class PdoSQL
 
     if (!is_null($constraints['offset']))
       $this->sql .= " OFFSET {$constraints['offset']}";
+  }
+
+  public function unsetProparties()
+  {
+    $this->param    = array();
+    $this->keyArray = array();
+    $this->set      = false;
   }
 }
 
