@@ -80,6 +80,11 @@ abstract class RecordObject
       }
     }
   }
+  
+  public function __call($method, $parameters)
+  {
+    $this->setCondition($method, $parameters[0]);
+  }
 
   public function __set($key, $val)
   {
