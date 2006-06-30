@@ -540,6 +540,11 @@ abstract class RecordObject
       }
     }
   }
+  
+  public function toArray()
+  {
+    return $this->data;
+  }
 }
 
 class Child_Record extends RecordObject
