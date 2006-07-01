@@ -11,10 +11,10 @@ interface EDO
   public function execute($sql = null);
   public function fetch($style = null, $cursor = null, $offset = null);
 
-  const EITHER = '%O';
-  const BET    = '%B';
-  const IN     = '%I';
-  const LIKE   = '%L';
+  const EITHER = 'OR_';
+  const BET    = 'BET_';
+  const IN     = 'IN_';
+  const LIKE   = 'LIKE_';
 
   const FETCH_ASSOC = 1;
 }

@@ -6,8 +6,8 @@ class PdoSQL
 {
   private $sql, $set;
 
-  public $keyArray = array();
-  public $param    = array();
+  private $keyArray = array();
+  private $param    = array();
 
   public function getSQL()
   {
@@ -86,6 +86,8 @@ class PdoSQL
     }
     $this->set = true;
 
+    $val = str_replace('_', '\_', $val);
+
     $this->param["{$bindKey}"] = $val;
   }
 
@@ -161,6 +163,11 @@ class PdoSQL
 
     if (!is_null($constraints['offset']))
       $this->sql .= " OFFSET {$constraints['offset']}";
+  }
+
+  public function getParam()
+  {
+    return $this->param;
   }
 
   public function unsetProparties()

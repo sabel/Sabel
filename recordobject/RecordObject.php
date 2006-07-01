@@ -2,6 +2,7 @@
 
 require_once('EDO.php');
 require_once('PdoEDO.php');
+require_once('RecordClasses.php');
 
 abstract class RecordObject
 {
@@ -23,7 +24,6 @@ abstract class RecordObject
     $selected = false;
 
   protected static $conList = array();
-  protected $row = array();
 
   protected $selectType = self::SELECT_DEFAULT;
 
@@ -59,8 +59,6 @@ abstract class RecordObject
       $this->edo = new PGEDO(self::$conList['pgsql']);
     } elseif ($type == 'mysql') {
       $this->edo = new MYEDO(self::$conList['mysql']);
-    } elseif ($type == 'mock') {
-      $this->edo = new MockEDO(self::$conList['pdo']);
     } else {
       //todo
     }
@@ -80,17 +78,12 @@ abstract class RecordObject
       }
     }
   }
-  
-  public function __call($method, $parameters)
-  {
-    $this->setCondition($method, $parameters[0]);
-  }
 
   public function __set($key, $val)
   {
-    if (!$this->selected) {
-      $this->data[$key] = $val;
-    } else {
+    $this->data[$key] = $val;
+
+    if ($this->selected) {
       $this->newData[$key] = $val;
     }
   }
@@ -98,6 +91,16 @@ abstract class RecordObject
   public function __get($key)
   {
     return $this->data[$key];
+  }
+
+  public function find()
+  {
+    return $this->selected;
+  }
+
+  public function toArray()
+  {
+    return $this->data;
   }
 
   public function setColumn($column)
@@ -122,21 +125,28 @@ abstract class RecordObject
     }    
   }
 
+  public function __call($method, $parameters)
+  {
+    if (!empty($parameters[1])) {
+      $this->setCondition($method, $parameters[0], $parameters[1]);
+    } else {
+      $this->setCondition($method, $parameters[0]);
+    }
+  }
+  
   public function setConstraint($param1, $param2 = null)
   {
     if (is_array($param1)) {
-      foreach ($param1 as $key => $val) {
+      foreach ($param1 as $key => $vphal) {
         if (is_null($val)) {
-          //echo 'Error: constraint value is null';
-          throw new Exception('EDO Error');
+          throw new Exception('Error: setConstraint() constraint value is null');
         } else {
           $this->constraints["{$key}"] = $val;
         }
       }
     } else {
       if (is_null($param2)) {
-        //echo 'Error: constraint value is null';
-        throw new Exception('EDO Error');
+        throw new Exception('Error: setConstraint() constraint value is null');
       } else {
         $this->constraints["{$param1}"] = $param2;
       }
@@ -148,16 +158,14 @@ abstract class RecordObject
     if (is_array($param1)) {
       foreach ($param1 as $key => $val) {
         if (is_null($val)) {
-          //echo 'Error: constraint value is null';
-          throw new Exception('EDO Error');
+          throw new Exception('Error: setChildConstraint() constraint value is null');
         } else {
           $this->childConstraints["{$key}"] = $val;
         }
       }
     } else {
       if (is_null($param2)) {
-        //echo 'Error: constraint value is null';
-        throw new Exception('EDO Error');
+        throw new Exception('Error: setChildConstraint() constraint value is null');
       } else {
         $this->childConstraints["{$param1}"] = $param2;
       }
@@ -166,9 +174,10 @@ abstract class RecordObject
 
   public function setCondition($param1, $param2 = null, $param3 = null)
   {
+    if (empty($param1)) return;
+
     if (!is_null($param3)) {
       if (is_array($param1)) {
-        //echo 'Error: ActiveRecord::setCondition() Invalid parameter!!';
         throw new Exception('EDO Error');
       } else {
         $values = array();
@@ -193,15 +202,14 @@ abstract class RecordObject
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
-    if (!is_null($param1))
-      $this->addCondition($param1, $param2, $param3);
+    $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT COUNT(*) AS count FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
     if ($this->edo->execute()) {
       $row = $this->edo->fetch();
-      return $row[0];
+      return (int)$row[0];
     }
   }
   
@@ -221,13 +229,13 @@ abstract class RecordObject
     }
   }
 
-  public function selectOne($id = null)
+  public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($this->conditions)) {
-      //echo "Error: selectOne() [WHERE] must be set condition";
-      throw new Exception('EDO Error');
+    if (is_null($param1) &&is_null($this->conditions)) {
+      throw new Exception('Error: selectOne() [WHERE] must be set condition');
     }
 
+    $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
@@ -236,19 +244,17 @@ abstract class RecordObject
     if ($this->edo->execute()) {
       $row = $this->edo->fetch(EDO::FETCH_ASSOC);
       if ($row) {
-        if ($this->selectType == self::SELECT_DEFAULT) {
-          // none
-        } elseif ($this->selectType == self::SELECT_VIEW) {
+        if ($this->selectType == self::SELECT_VIEW) {
           foreach ($row as $key => $val) {
             if (strpos($key, '_id')) {
               $table = str_replace('_id', '', $key);
 
-              $row["{$this->table}.{$key}"] = $val;
+              $row["{$this->table}_{$key}"] = $val;
               unset($row[$key]);
 
               $this->join($table, $val, $row);
             } else {
-              $row["{$this->table}.{$key}"] = $val;
+              $row["{$this->table}_{$key}"] = $val;
               unset($row[$key]);
             }
           }
@@ -260,21 +266,23 @@ abstract class RecordObject
             }
           }
         } else {
-          //echo 'invalid RecordObject::SELECT_TYPE';
-          throw new Exception('EDO Error');
+          // none
         }
-        $this->row = $row;
         $this->setProperties($row);
         $this->selected = true;
         return $this;
       } else {
-        return false;
+        $this->data = $this->selectCondition;
+        return $this;
       }
     }
   }
 
-  public function select()
+  public function select($param1 = null, $param2 = null, $param3 = null)
   {
+    if (!empty($param1))
+      $this->setCondition($param1, $param2, $param3);
+
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
@@ -288,12 +296,10 @@ abstract class RecordObject
       } elseif ($this->selectType == self::SELECT_CHILD) {
         return $this->selectChild($class);
       } else {
-        //echo 'invalid RecordObject::SELECT_TYPE';
-        throw new Exception('EDO Error');
+        throw new Exception('invalid RecordObject::SELECT_TYPE');
       }
     } else {
-      //echo 'Error: select()';
-      throw new Exception('EDO Error');
+      throw new Exception('Error: select()');
     }
   }
 
@@ -320,12 +326,12 @@ abstract class RecordObject
         if (strpos($key, '_id')) {
           $table = str_replace('_id', '', $key);
 
-          $row["{$this->table}.{$key}"] = $val;
+          $row["{$this->table}_{$key}"] = $val;
           unset($row[$key]);
 
           $this->join($table, $val, $row);
         } else {
-          $row["{$this->table}.{$key}"] = $val;
+          $row["{$this->table}_{$key}"] = $val;
           unset($row[$key]);
         }
       }
@@ -351,10 +357,10 @@ abstract class RecordObject
         foreach ($crow as $key => $val) {
           if (strpos($key, '_id')) {
             $ctable = str_replace('_id', '', $key);
-            $row["{$table}.{$key}"] = $val;
+            $row["{$table}_{$key}"] = $val;
             $this->join($ctable, $val, $row);
           } else {
-            $row["{$table}.{$key}"] = $val;
+            $row["{$table}_{$key}"] = $val;
           }
         }
         $obj->setProperties($row);
@@ -362,8 +368,7 @@ abstract class RecordObject
       }
       return $children;
     } else {
-      //echo 'Error: join()';
-      throw new Exception('EDO Error');
+      throw new Exception('Error: join()');
     }
   }
 
@@ -411,8 +416,7 @@ abstract class RecordObject
       }
       return $children;
     } else {
-      //echo 'Error: getChild()';
-      throw new Exception('EDO Error');
+      throw new Exception('Error: getChild()');
     }
   }
 
@@ -433,11 +437,11 @@ abstract class RecordObject
     $this->edo->makeQuery($this->selectCondition);
 
     if (!$this->edo->execute()) {
-      //echo 'Error: update() ';
+      throw new Exception('Error: update()');
     } 
   }
 
-  public function allUpdate($data)
+  public function allUpdate($data = null)
   {
     $this->dataMerge($data);
 
@@ -445,18 +449,25 @@ abstract class RecordObject
     $this->edo->makeQuery($this->conditions);
 
     if (!$this->edo->execute()) {
-      //echo 'Error: allUpdate() ';
+      throw new Exception('Error: allUpdate()');
     }
   }
 
   public function insert()
   {
-    $this->edo->setInsertSQL($this->table, $this->data);
-    $this->edo->makeQuery();
+    if (!$this->edo->executeInsert($this->table, $this->data)) {
+      throw new Exception('Error: insert()');
+    }
+  }
 
-    if (!$this->edo->execute()) {
-      //echo 'Error: insert()';
-    } 
+  public function multipleInsert($data)
+  {
+    if (!is_array($data))
+      throw new Exception('Error: data is not array.');
+
+    if (!$this->edo->executeInsert($this->table, $data)) {
+      throw new Exception('Error: multipleInsert()');
+    }
   }
 
   protected function dataMerge($data)
@@ -465,29 +476,22 @@ abstract class RecordObject
 
     foreach ($data as $key => $val) {
       if (array_key_exists($key, $this->data)) {
-        //echo 'Error: [{$key}] is already set!';
-        throw new Exception('EDO Error');
+        throw new Exception("Error: [{$key}] is already set!");
       } else {
         $this->data[$key] = $val;
       }
     }
   }
 
-  protected function executePreparedSQL($data, $conditions = null)
-  {
-    //todo
-  }
-
   public function delete($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($conditions) && is_null($this->conditions)) {
+    if (is_null($param1) && is_null($this->conditions)) {
       $className = get_class($this);
-      //echo "Error: {$className}::delete() [WHERE] must be set condition";
-      throw new Exception('EDO Error');
+      throw new Exception("Error: {$className}::delete() [WHERE] must be set condition");
     }
 
     if (!is_null($param1))
-      $this->addCondition($param1, $param2, $param3);
+      $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("DELETE FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -513,50 +517,10 @@ abstract class RecordObject
       return false;
     }
   }
-
-  protected function addCondition($param1, $param2 = null, $param3 = null)
-  {
-    if (!is_null($param3)) {
-      if (is_array($param1)) {
-        //echo 'Error: ActiveRecord::addCondition() Invalid parameter!!';
-        throw new Exception('EDO Error');
-      } else {
-        $values = array();
-        $values[] = $param2;
-        $values[] = $param3;
-        $this->setCondition($param1, $values, null);
-      }
-    } else {
-      if (is_array($param1)) {
-        foreach ($param1 as $key => $val) {
-          $this->setCondition($key, $val, null);
-        }
-      } else {
-        if (is_null($param2)) {
-          $this->setCondition($this->defColumn, $param1, null);
-        } else {
-   	      $this->setCondition($param1, $param2, null);
-        }
-      }
-    }
-  }
-  
-  public function toArray()
-  {
-    return $this->data;
-  }
 }
 
 class Child_Record extends RecordObject
 {
-  /*
-  public function setProperties($array)
-  {
-    foreach ($array as $key => $val) {
-      $this->$key = $val;
-    }    
-  }
-  */
 }
 
 ?>
