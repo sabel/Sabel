@@ -1,9 +1,6 @@
 <?php
 
-interface Core_Logger_Interface
-{
-  public function log($text);
-}
+uses('core.logger.Interface');
 
 class Core_Logger_File implements Core_Logger_Interface
 {

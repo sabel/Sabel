@@ -117,12 +117,6 @@ class SabelReflectionClass
   protected function loadConfig($filepath)
   {
     $spyc = new Spyc();
-    /*
-    $paths = array('Sabel/core/', 'core/',
-                   'app/commons/models/',
-                   'app/modules/staff/models/',
-                   'app/modules/user/models/');
-                   */
                    
     $paths = SabelContext::getIncludePath();
     

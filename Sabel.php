@@ -9,7 +9,6 @@ require_once('core/SabelUtility.php');
 require_once('core/Request.php');
 require_once('core/ParsedRequest.php');
 require_once('core/SabelException.php');
-require_once('core/Logger.php');
 
 require_once('core/SabelPageController.php');
 require_once('core/SabelTemplateDirector.php');
@@ -53,8 +52,10 @@ class SabelPageWebController implements SabelController
   public function dispatch()
   {
     try {
-      SabelContext::addIncludePath('Sabel/core/');
+      SabelContext::addIncludePath('Sabel/');
       SabelContext::addIncludePath('app/commons/models/');
+      
+      uses('core.logger.File');
       
       $parsedRequest = ParsedRequest::create();
       $loader = SabelClassLoader::create($parsedRequest);
