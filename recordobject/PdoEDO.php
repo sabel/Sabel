@@ -137,10 +137,8 @@ class PdoEDO implements EDO
     }
   }
 
-  public function execute($_sql = null)
+  public function execute($sql = null)
   {
-    $sql = $_sql;
-
     if (is_null($sql)) {
       $sql = $this->sqlObj->getSQL();
       if (is_null($sql)) {

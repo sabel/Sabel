@@ -244,29 +244,14 @@ abstract class RecordObject
     if ($this->edo->execute()) {
       $row = $this->edo->fetch(EDO::FETCH_ASSOC);
       if ($row) {
-        if ($this->selectType == self::SELECT_VIEW) {
-          foreach ($row as $key => $val) {
-            if (strpos($key, '_id')) {
-              $table = str_replace('_id', '', $key);
+        if ($this->selectType == self::SELECT_DEFAULT) {
 
-              $row["{$this->table}_{$key}"] = $val;
-              unset($row[$key]);
-
-              $this->join($table, $val, $row);
-            } else {
-              $row["{$this->table}_{$key}"] = $val;
-              unset($row[$key]);
-            }
-          }
+        } elseif ($this->selectType == self::SELECT_VIEW) {
+          $this->selectView($row);
         } elseif ($this->selectType == self::SELECT_CHILD) {
-          foreach ($row as $key => $val) {
-            if (strpos($key, '_id')) {
-              $key = str_replace('_id', '', $key);
-              $row[$key] = $this->getChild($key, $val);
-            }
-          }
+          $this->selectChild($row);
         } else {
-          // none
+          throw new Exception('invalid RecordObject::SELECT_TYPE');
         }
         $this->setProperties($row);
         $this->selected = true;
@@ -286,62 +271,50 @@ abstract class RecordObject
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
-    $class = get_class($this);
+    $recordObj = array();
+    $class     = get_class($this);
 
     if ($this->edo->execute()) {
-      if ($this->selectType == self::SELECT_DEFAULT) {
-        return $this->selectDefault($class);
-      } elseif ($this->selectType == self::SELECT_VIEW) {
-        return $this->selectView($class);
-      } elseif ($this->selectType == self::SELECT_CHILD) {
-        return $this->selectChild($class);
-      } else {
-        throw new Exception('invalid RecordObject::SELECT_TYPE');
+      while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
+        $obj = new $class();
+
+        if ($this->selectType == self::SELECT_DEFAULT) {
+          
+        } elseif ($this->selectType == self::SELECT_VIEW) {
+          $this->selectView($row); 
+        } elseif ($this->selectType == self::SELECT_CHILD) {
+          $this->selectChild($row);
+        } else {
+          throw new Exception('invalid RecordObject::SELECT_TYPE');
+        }
+
+        $obj->setProperties($row);
+        $recordObj[] = $obj;
       }
+      return $recordObj;
     } else {
       throw new Exception('Error: select()');
     }
   }
 
-  protected function selectDefault($class)
+  private function selectView(&$row)
   {
-    $recordObj = array();
+    foreach ($row as $key => $val) {
+      if (strpos($key, '_id')) {
+        $table = str_replace('_id', '', $key);
 
-    while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-      $obj = new $class();
-      $obj->setProperties($row);
-      $recordObj[] = $obj;
-    }
-    return $recordObj;
-  }
+        $row["{$this->table}_{$key}"] = $val;
+        unset($row[$key]);
 
-  protected function selectView($class)
-  {
-    $recordObj = array();
-
-    while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-      $obj = new $class();
-
-      foreach ($row as $key => $val) {
-        if (strpos($key, '_id')) {
-          $table = str_replace('_id', '', $key);
-
-          $row["{$this->table}_{$key}"] = $val;
-          unset($row[$key]);
-
-          $this->join($table, $val, $row);
-        } else {
-          $row["{$this->table}_{$key}"] = $val;
-          unset($row[$key]);
-        }
+        $this->join($table, $val, $row);
+      } else {
+        $row["{$this->table}_{$key}"] = $val;
+        unset($row[$key]);
       }
-      $obj->setProperties($row);
-      $recordObj[] = $obj;
     }
-    return $recordObj;
   }
 
-  protected function join($table, $id, &$row)
+  private function join($table, $id, &$row)
   {
     $condition  = array($this->defColumn => $id);
     
@@ -372,25 +345,17 @@ abstract class RecordObject
     }
   }
 
-  protected function selectChild($class)
+  private function selectChild(&$row)
   {
-    $recordObj = array();
-
-    while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-      $obj = new $class();
-      foreach ($row as $key => $val) {
-        if (strpos($key, '_id')) {
-          $key = str_replace('_id', '', $key);
-          $row[$key] = $this->getChild($key, $val);
-        }
+    foreach ($row as $key => $val) {
+      if (strpos($key, '_id')) {
+        $key = str_replace('_id', '', $key);
+        $row[$key] = $this->getChild($key, $val);
       }
-      $obj->setProperties($row);
-      $recordObj[] = $obj;
     }
-    return $recordObj;
   }
 
-  protected function getChild($table, $id)
+  private function getChild($table, $id)
   {
     $condition  = array($this->defColumn => $id);
     $constraint = $this->childConstraints;
@@ -517,10 +482,6 @@ abstract class RecordObject
       return false;
     }
   }
-}
-
-class Child_Record extends RecordObject
-{
 }
 
 ?>

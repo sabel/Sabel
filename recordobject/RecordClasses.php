@@ -2,6 +2,11 @@
 
 require_once('RecordObject.php');
 
+class Child_Record extends RecordObject
+{
+
+}
+
 class Test extends RecordObject
 {
   public function getCondition()

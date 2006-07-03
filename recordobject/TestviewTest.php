@@ -79,18 +79,12 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   public function testMultipleInsert()
   {
     $insertData = array();
-    $rowData = array('id' => 1, 'name' => 'tanaka', 'blood' => 'A', 'test2_id' => 1);
-    $insertData[] = $rowData;
-    $rowData = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B', 'test2_id' => 2);
-    $insertData[] = $rowData;
-    $rowData = array('id' => 3, 'name' => 'uchida', 'blood' => 'AB', 'test2_id' => 1);
-    $insertData[] = $rowData;
-    $rowData = array('id' => 4, 'name' => 'ueda', 'blood' => 'A', 'test2_id' => 3);
-    $insertData[] = $rowData;
-    $rowData = array('id' => 5, 'name' => 'seki', 'blood' => 'O', 'test2_id' => 2);
-    $insertData[] = $rowData;
-    $rowData = array('id' => 6, 'name' => 'uchida', 'blood' => 'A', 'test2_id' => 1);
-    $insertData[] = $rowData;
+    $insertData[] = array('id' => 1, 'name' => 'tanaka',   'blood' => 'A',  'test2_id' => 1);
+    $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
+    $insertData[] = array('id' => 3, 'name' => 'uchida',   'blood' => 'AB', 'test2_id' => 1);
+    $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
+    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 2);
+    $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
 
     foreach ($insertData as $data) {
       $this->test->multipleInsert($data);
