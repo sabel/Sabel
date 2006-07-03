@@ -1,11 +1,11 @@
 <?php
 
-interface Logger
+interface Core_Logger_Interface
 {
   public function log($text);
 }
 
-class FileLogger implements Logger
+class Core_Logger_File implements Core_Logger_Interface
 {
   const LOG_FILE = 'logs/sabel.log';
   
