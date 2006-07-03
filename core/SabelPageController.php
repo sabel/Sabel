@@ -45,6 +45,8 @@ abstract class SabelPageController
   
   public function setup($request)
   {
+    $this->container = new SabelDIContainer();
+    
     $this->request = $request;
     $this->setupLogger();
     $this->setupResponse();
@@ -55,25 +57,25 @@ abstract class SabelPageController
   
   protected function setupLogger()
   {
-    $this->logger = Core_Logger_File::singleton();
+    $this->logger = $this->container->load('Core_Logger_File');
   }
-
+  
   protected function setupResponse()
   {
     $this->response = new WebResponse();
   }
-
+  
   protected function setupConfig()
   {
     $this->config = CachedConfigImpl::create();
   }
-
+  
   protected function setupCache()
   {
     $conf = $this->config->get('Memcache');
     $this->cache = MemCacheImpl::create($conf['server']);
   }
-
+  
   public function execute($method)
   {
     $this->checkValidateMethodAndExecute($method);
@@ -84,8 +86,6 @@ abstract class SabelPageController
   
   protected function methodExecute($methodName)
   {
-    $this->container = new SabelDIContainer();
-    
     $r = ParsedRequest::create();
     $controllerClass = $r->getModule() . '_' . $r->getController();
     $refMethod = new ReflectionMethod($controllerClass, $methodName);

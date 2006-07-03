@@ -11,6 +11,31 @@ require_once('core/SabelException.php');
 // Test Class
 require_once('core/SabelContext.php');
 
+
+class RecordRunningTimeInjection implements InjectionCall
+{
+  private $start;
+  private $end;
+  
+  public function executeBefore($method, $arg)
+  {
+    $this->start = microtime();
+  }
+  
+  public function executeAfter($method, $result)
+  {
+    $this->end = microtime();
+  }
+  
+  public function calcurate()
+  {
+    $startParts = split(' ', $this->start);
+    $endParts   = split(' ', $this->end);
+    
+    return ($this->end - $this->start);
+  }
+}
+
 /**
  * test case for SabelPager
  *
@@ -28,9 +53,24 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $object  = $c->load('SabelContext');
     $o2 = $c->load('Ditest_Module');
     
-    $this->assertEquals('test', $o2->test());
+    $this->assertEquals('ModuleImpl result.', $o2->test('a'));
     
     $this->assertTrue(is_object($object));
+  }
+  
+  public function testContainerInjection()
+  {
+    $c = new SabelDIContainer();
+    $module = $c->loadInjected('Ditest_Module');
+    
+    $i = new InjectionCalls();
+    
+    $runningTime = new RecordRunningTimeInjection();
+    $i->addBoth($runningTime);
+    
+    $module->test('a');
+    
+    print "\nRunningTime: " . $runningTime->calcurate() . "\n";
   }
   
   public function testConvertClassName()

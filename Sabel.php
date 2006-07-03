@@ -1,9 +1,15 @@
 <?php
 
+require_once('core/SabelContext.php');
 require_once('core/functions.php');
 
+SabelContext::addIncludePath('Sabel/');
+SabelContext::addIncludePath('app/commons/models/');
+
+uses('core.logger.File');
+
 require_once('core/SabelConst.php');
-require_once('core/SabelContext.php');
+
 require_once('core/SabelClassLoader.php');
 require_once('core/SabelUtility.php');
 require_once('core/Request.php');
@@ -52,11 +58,6 @@ class SabelPageWebController implements SabelController
   public function dispatch()
   {
     try {
-      SabelContext::addIncludePath('Sabel/');
-      SabelContext::addIncludePath('app/commons/models/');
-      
-      uses('core.logger.File');
-      
       $parsedRequest = ParsedRequest::create();
       $loader = SabelClassLoader::create($parsedRequest);
       
