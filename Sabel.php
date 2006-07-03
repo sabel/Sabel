@@ -53,6 +53,9 @@ class SabelPageWebController implements SabelController
   public function dispatch()
   {
     try {
+      SabelContext::addIncludePath('Sabel/core/');
+      SabelContext::addIncludePath('app/commons/models/');
+      
       $parsedRequest = ParsedRequest::create();
       $loader = SabelClassLoader::create($parsedRequest);
       

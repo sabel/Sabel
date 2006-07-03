@@ -1,6 +1,18 @@
 <?php
 
-class ReflectionClassExt
+class SabelDIHelper
+{
+  public static function getModuleName()
+  {
+    if (class_exists('ParsedRequest')) {
+      return ParsedRequest::create()->getModule();
+    } else {
+      return 'module';
+    }
+  }
+}
+
+class SabelReflectionClass
 {
   protected $reflectionClass;
   protected $implementClassName;
@@ -57,8 +69,7 @@ class ReflectionClassExt
     $pathElements = explode('_', $interfaceFullName);
     $interfaceName = array_pop($pathElements);
     
-    $r = ParsedRequest::create();
-    $module = $r->getModule();
+    $module = SabelDIHelper::getModuleName();
     
     foreach ($pathElements as $pathelmidx => $pathElement) {
       $pathElements[$pathelmidx] = strtolower($pathElement);
@@ -88,6 +99,7 @@ class ReflectionClassExt
       throw new SabelException("<pre>implement class name is invalid: " . var_export($information, 1));
     }
     
+    if (!class_exists($implementClassName)) uses(convertClassPath($implementClassName));
     return $implementClassName;
   }
   
@@ -105,9 +117,14 @@ class ReflectionClassExt
   protected function loadConfig($filepath)
   {
     $spyc = new Spyc();
-    $paths = array('app/commons/models/',
+    /*
+    $paths = array('Sabel/core/', 'core/',
+                   'app/commons/models/',
                    'app/modules/staff/models/',
                    'app/modules/user/models/');
+                   */
+                   
+    $paths = SabelContext::getIncludePath();
     
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;
@@ -118,6 +135,11 @@ class ReflectionClassExt
   }
 }
 
+/**
+ * Sabel DI Container
+ *
+ * @author Mori Reo <mori.reo@servise.jp
+ */
 class SabelDIContainer
 {
   public $classStack;
@@ -127,23 +149,25 @@ class SabelDIContainer
    *
    * @return Object instance
    */
-  public function load($className)
+  public function load($className, $method = '__construct')
   {
-    $this->loadParameterClass($className);
-    return $this->loading();
+    $this->loadClass($className, $method);
+    return $this->makeInstance();
   }
   
-  public function loadParameterClass($class, $method = '__construct')
+  public function loadClass($class, $method)
   {
+    if (!class_exists($class)) uses(convertClassPath($class));
+    
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
-    $reflectionClassExt = new ReflectionClassExt($reflectionClass, $reflectionClass);
+    $reflectionClassExt = new SabelReflectionClass($reflectionClass, $reflectionClass);
     
     if ($reflectionClassExt->isInterface()) {
       $reflectionClass = 
         new ReflectionClass($reflectionClassExt->getImplementClass());
         
-      $this->classStack[] = new ReflectionClassExt($reflectionClass);
+      $this->classStack[] = new SabelReflectionClass($reflectionClass);
       $class = $reflectionClass->getName();
     } else {
       $this->classStack[] = $reflectionClassExt;
@@ -151,7 +175,7 @@ class SabelDIContainer
     
     if (!$reflectionClass->hasMethod($method)) return false;
     
-    // parameter loop
+    // parameters loop
     $refMethod = new ReflectionMethod($class, $method);
     foreach ($refMethod->getParameters() as $paramidx => $param) {
       // check parameter required class
@@ -162,33 +186,37 @@ class SabelDIContainer
         // if it class also depend another class then recursive call
         $depend = $dependClass->getName();
         if ($this->hasParameterDependOnClass($depend, '__construct')) {
-          $this->loadParameterClass($dependClass->getName()); // call myself
+          $this->loadClass($dependClass->getName()); // call myself
         } else {          
-          $this->classStack[] = new ReflectionClassExt($param->getClass(), $reflectionClass);
+          $this->classStack[] = new SabelReflectionClass($param->getClass(), $reflectionClass);
         }
       }
     }
+    
+    return $this;
   }
   
-  public function loading()
+  public function makeInstance()
   {
     $stackCount =(int) count($this->classStack);
     
-    for ($i = 0; $i < $stackCount; $i++) {
-      if ($i == 0) {
-        $class = array_pop($this->classStack);
-        if ($class->isInterface()) {
-          $instance = $class->newInstanceForImplementation();
-        } else {
-          $instance = $class->newInstance();
-        }
+    if ($stackCount < 0) {
+      throw new SabelException('invalid stack count:' . var_export($this->classStack, 1));
+    }
+    
+    $class = array_pop($this->classStack);
+    if ($class->isInterface()) {
+      $instance = $class->newInstanceForImplementation();
+    } else {
+      $instance = $class->newInstance();
+    }
+    
+    for ($i = 1; $i < $stackCount; $i++) {
+      $class = array_pop($this->classStack);
+      if ($class->isInterface()) {
+        $instance = $class->newInstanceForImplementation($instance);
       } else {
-        $class = array_pop($this->classStack);
-        if ($class->isInterface()) {
-          $instance = $class->newInstanceForImplementation($instance);
-        } else {
-          $instance = $class->newInstance($instance);
-        }
+        $instance = $class->newInstance($instance);
       }
     }
     

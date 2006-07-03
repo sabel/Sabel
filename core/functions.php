@@ -8,7 +8,7 @@
  */
 function uses($uses)
 {
-  $paths = array('app/commons/models/', 'app/modules/staff/models/', 'Sabel/core/');
+  $paths = SabelContext::getIncludePath();
   $usesArray = explode('.', $uses);
   foreach ($usesArray as $idx => $name) {
     $classNames[] = ucfirst($name);
@@ -27,8 +27,29 @@ function uses($uses)
   }
   
   return $className;
+}
+
+function convertClassPath($className)
+{
+  $parts = explode('_', $className);
   
-  if (!$loaded) throw new Exception('class can\'t find: ' . $fullpath);
+  if (count($parts) == 1) return $className;
+  
+  $classPath = '';
+  for ($i = 0; $i < count($parts); $i++) {
+    $first = ($i == 0);
+    $last  = ($i == count($parts)-1);
+    
+    if ($last) {
+      $classPath .= '.'. $parts[$i];
+    } else if ($first) {
+      $classPath .= strtolower($parts[$i]);
+    } else {
+      $classPath .= '.'.strtolower($parts[$i]);
+    }
+  }
+  
+  return $classPath;
 }
 
 ?>

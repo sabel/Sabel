@@ -94,11 +94,11 @@ abstract class SabelPageController
     foreach ($refMethod->getParameters() as $paramidx => $parameter) {
       $requireParameterClass = 
                   ($reflectionClass = $parameter->getClass()) ? true : false;
+                  
       if ($requireParameterClass) {
         $hasClass = true;
         $this->container = new SabelDIContainer();
-        $this->container->loadParameterClass($reflectionClass->getName());
-        $object = $this->container->loading();
+        $object = $this->container->load($reflectionClass->getName());
       }
     }
     
@@ -108,22 +108,6 @@ abstract class SabelPageController
       $this->$methodName();
     }
     
-  }
-  
-  protected function loadDIConfig()
-  {
-    $r = ParsedRequest::create();
-    $controller = strtolower($r->getController());
-    $paths = array('app/modules/staff/controllers/',
-                   'app/modules/staff/controllers/');
-    
-    $spyc = new Spyc();
-    foreach ($paths as $pathidx => $path) {      
-      $fullpath = $path . $controller. '.yml';
-      if (is_file($fullpath)) break;
-    }
-
-    return $spyc->load($fullpath);
   }
   
   protected function assignTemplates()

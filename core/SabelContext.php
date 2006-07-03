@@ -3,6 +3,8 @@
 class SabelContext
 {
   private static $parameters = array();
+  
+  private static $includePath = array();
 
   public static function getController()
   {
@@ -44,6 +46,16 @@ class SabelContext
   {
     $config = CachedConfigImpl::create()->get('Memcache');
     return MemCacheImpl::create($config['server']);
+  }
+  
+  public static function addIncludePath($path)
+  {
+    self::$includePath[] = $path;
+  }
+  
+  public static function getIncludePath()
+  {
+    return self::$includePath;
   }
 }
 
