@@ -171,35 +171,44 @@ abstract class RecordObject
       }
     }
   }
-
+  
+  protected function isSpecial($param3, $param1)
+  {
+    return (!is_null($param3) && !is_array($param1));
+  }
+  
+  protected function isDefaultColumnValue($param2)
+  {
+    return is_null($param2);
+  }
+  
+  /**
+   * setting condition
+   * 
+   * @param mixed string or int this value use tow means for
+   *          default column value or a condition column name.
+   * @param mixed string or int or NULL 
+   *          this value use three means for
+   *          default column value or when has param3 value of special condition
+   *          or when has no param3 param2 is value
+   * @param mixed string or int or NULL
+   *          this value use for value of special condition.
+   * @return void
+   */
   public function setCondition($param1, $param2 = null, $param3 = null)
   {
-    if (empty($param1)) return;
-
-    if (!is_null($param3)) {
-      if (is_array($param1)) {
-        throw new Exception('EDO Error');
-      } else {
-        $values = array();
-        $values[] = $param2;
-        $values[] = $param3;
-        $this->conditions["{$param1}"] = $values;
-      }
+    if ($this->isSpecial($param3, $param1)) {
+      $values = array();
+      $values[] = $param2;
+      $values[] = $param3;
+      $this->conditions[$param1] = $values;
+    } else if ($this->isDefaultColumnValue($param2)) {
+      $this->conditions[$this->defColumn] = $param1;
     } else {
-      if (is_array($param1)) {
-        foreach ($param1 as $key => $val) { 
-          $this->conditions["{$key}"] = $val;
-        }
-      } else {
-        if (is_null($param2)) {
-          $this->conditions["{$this->defColumn}"] = $param1;
-        } else {
-   	      $this->conditions["{$param1}"] = $param2;
-        }
-      }
+      $this->conditions[$param1] = $param2;
     }
   }
-
+  
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
