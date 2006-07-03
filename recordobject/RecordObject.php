@@ -14,9 +14,12 @@ abstract class RecordObject
     
   protected
     $edo,
-    $type = 'pdo',
     $table,
     $defColumn = 'id';
+
+  protected
+    $use    = 'user',
+    $useEdo = 'pdo';
 
   protected 
     $data     = array(),
@@ -31,34 +34,35 @@ abstract class RecordObject
   const SELECT_VIEW    = 5;
   const SELECT_CHILD   = 10;
 
-  public static function addCon($type, $con)
+  public static function addCon($use, $useEdo, $con)
   {
-    self::$conList[$type] = $con;
+    self::$conList[$use][$useEdo] = $con;
   }
 
-  public function getEDO()
+  private function getEDO()
   {
-    if ($this->type == 'pdo') {
-      return new PdoEDO(self::$conList['pdo']);
-    } elseif ($this->type == 'pgsql') {
-      return new PGEDO(self::$conList['pgsql']);
-    } elseif ($this->type == 'mysql') {
-      return new MYEDO(self::$conList['mysql']);
+    if ($this->useEdo == 'pdo') {
+      return new PdoEDO(self::$conList[$this->use]['pdo']);
+    } elseif ($this->useEdo == 'pgsql') {
+      return new PGEDO(self::$conList[$this->use]['pgsql']);
+    } elseif ($this->useEdo == 'mysql') {
+      return new MYEDO(self::$conList[$this->use]['mysql']);
     } else {
       //todo
     }
   }
 
-  public function setEDO($type)
+  public function setEDO($use, $useEdo)
   {
-    $this->type = $type;
+    $this->use    = $use;
+    $this->useEdo = $useEdo;
 
-    if ($type == 'pdo') {
-      $this->edo = new PdoEDO(self::$conList['pdo']);
-    } elseif ($type == 'pgsql') {
-      $this->edo = new PGEDO(self::$conList['pgsql']);
-    } elseif ($type == 'mysql') {
-      $this->edo = new MYEDO(self::$conList['mysql']);
+    if ($useEdo== 'pdo') {
+      $this->edo = new PdoEDO(self::$conList[$use]['pdo']);
+    } elseif ($useEdo == 'pgsql') {
+      $this->edo = new PGEDO(self::$conList[$use]['pgsql']);
+    } elseif ($useEdo == 'mysql') {
+      $this->edo = new MYEDO(self::$conList[$use]['mysql']);
     } else {
       //todo
     }
@@ -67,7 +71,7 @@ abstract class RecordObject
   public function __construct($param1 = null, $param2 = null)
   {
     $this->table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', get_class($this)));
-    $this->setEDO($this->type);
+    $this->setEDO($this->use, $this->useEdo);
 
     if (!is_null($param1)) {
       if (!is_null($param2)) {
@@ -123,11 +127,6 @@ abstract class RecordObject
     foreach ($array as $key => $val) {
       $this->$key = $val;
     }    
-  }
-
-  public function getCondition()
-  {
-    return $this->conditions;
   }
 
   public function __call($method, $parameters)
@@ -265,7 +264,7 @@ abstract class RecordObject
         } elseif ($this->selectType == self::SELECT_VIEW) {
           $row = $this->selectView($row);
         } elseif ($this->selectType == self::SELECT_CHILD) {
-          $this->selectChild($row);
+          $row = $this->selectChild($row);
         } else {
           throw new Exception('invalid RecordObject::SELECT_TYPE');
         }
@@ -298,9 +297,9 @@ abstract class RecordObject
         if ($this->selectType == self::SELECT_DEFAULT) {
           
         } elseif ($this->selectType == self::SELECT_VIEW) {
-          $this->selectView($row); 
+          $row = $this->selectView($row); 
         } elseif ($this->selectType == self::SELECT_CHILD) {
-          $this->selectChild($row);
+          $row = $this->selectChild($row);
         } else {
           throw new Exception('invalid RecordObject::SELECT_TYPE');
         }
@@ -363,7 +362,7 @@ abstract class RecordObject
     }
   }
 
-  private function selectChild(&$row)
+  private function selectChild($row)
   {
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
@@ -371,6 +370,7 @@ abstract class RecordObject
         $row[$key] = $this->getChild($key, $val);
       }
     }
+    return $row;
   }
 
   private function getChild($table, $id)

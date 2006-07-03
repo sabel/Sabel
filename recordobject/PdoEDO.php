@@ -149,6 +149,9 @@ class PdoEDO implements EDO
     $this->stmt = $this->pdo->prepare($sql);
     $this->makeBindParam();
 
+    //var_dump($sql);
+    //var_dump($this->param);
+
     if (empty($this->param)) {
       return $this->stmt->execute();
     } else {

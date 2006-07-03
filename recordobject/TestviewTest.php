@@ -43,7 +43,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   protected function setUp()
   {
     $pdo = new PDO('pgsql:host=192.168.0.222;dbname=2525e', 'pgsql', 'pgsql');
-    RecordObject::addCon('pdo', $pdo);
+    RecordObject::addCon('user', 'pdo', $pdo);
 
     $obj = new Common_Record();
 
