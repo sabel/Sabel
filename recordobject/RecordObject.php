@@ -93,7 +93,7 @@ abstract class RecordObject
     return $this->data[$key];
   }
 
-  public function find()
+  public function is_selected()
   {
     return $this->selected;
   }
