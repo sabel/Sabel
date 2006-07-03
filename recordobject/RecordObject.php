@@ -125,6 +125,11 @@ abstract class RecordObject
     }    
   }
 
+  public function getCondition()
+  {
+    return $this->conditions;
+  }
+
   public function __call($method, $parameters)
   {
     if (!empty($parameters[1])) {
@@ -197,12 +202,14 @@ abstract class RecordObject
    */
   public function setCondition($param1, $param2 = null, $param3 = null)
   {
+    if (empty($param1)) return;
+
     if ($this->isSpecial($param3, $param1)) {
       $values = array();
       $values[] = $param2;
       $values[] = $param3;
       $this->conditions[$param1] = $values;
-    } else if ($this->isDefaultColumnValue($param2)) {
+    } elseif ($this->isDefaultColumnValue($param2)) {
       $this->conditions[$this->defColumn] = $param1;
     } else {
       $this->conditions[$param1] = $param2;
@@ -240,7 +247,7 @@ abstract class RecordObject
 
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) &&is_null($this->conditions)) {
+    if (is_null($param1) && is_null($this->conditions)) {
       throw new Exception('Error: selectOne() [WHERE] must be set condition');
     }
 
@@ -256,7 +263,7 @@ abstract class RecordObject
         if ($this->selectType == self::SELECT_DEFAULT) {
 
         } elseif ($this->selectType == self::SELECT_VIEW) {
-          $this->selectView($row);
+          $row = $this->selectView($row);
         } elseif ($this->selectType == self::SELECT_CHILD) {
           $this->selectChild($row);
         } else {
@@ -266,6 +273,7 @@ abstract class RecordObject
         $this->selected = true;
         return $this;
       } else {
+        //echo 'false'; exit;
         $this->data = $this->selectCondition;
         return $this;
       }
@@ -306,7 +314,7 @@ abstract class RecordObject
     }
   }
 
-  private function selectView(&$row)
+  private function selectView($row)
   {
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
@@ -321,6 +329,7 @@ abstract class RecordObject
         unset($row[$key]);
       }
     }
+    return $row;
   }
 
   private function join($table, $id, &$row)

@@ -32,7 +32,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
 
-  protected $test, $test4;
+  protected $test;
 
   /**
    * Sets up the fixture, for example, open a network connection.
@@ -134,7 +134,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $ro = $this->test3->select();
     $this->assertEquals(count($ro), 2);
 
-    $this->test3->name('test31'); // setCondition() == __call()
+    $this->test3->name('test31');
     $obj = $this->test3->selectOne();
     $this->assertEquals($obj->id, 1);
   }
@@ -160,7 +160,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'B');
 
-    if ($test->find()) {
+    if ($test->is_selected()) {
       $test->blood = 'AB';
       $test->save();  // update <= execute
     } else {
