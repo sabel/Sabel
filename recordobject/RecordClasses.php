@@ -1,5 +1,5 @@
 <?php
-
+/*
 require_once('RecordObject.php');
 
 abstract class BaseUserRecordObject extends RecordObject
@@ -55,5 +55,5 @@ class Common_Record extends RecordObject
     if (!is_null($table)) $this->table = $table;
   }
 }
-
+*/
 ?>
