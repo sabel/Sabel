@@ -15,7 +15,7 @@ class SabelDIHelper
 interface InjectionCall
 {
   public function executeBefore($method, $arg);
-  public function executeAfter($method, $result);
+  public function executeAfter($method, &$result);
 }
 
 class InjectionCalls
@@ -46,7 +46,7 @@ class InjectionCalls
     }
   }
   
-  public function doAfter($method, $result)
+  public function doAfter($method, &$result)
   {
     foreach (self::$after as $ai => $object) {
       $object->executeAfter($method, $result);
@@ -64,6 +64,12 @@ class InjectionCalls
   }
 }
 
+/**
+ * class injection wrapper.
+ *
+ * @package org.sabel.aop
+ * @author Mori Reo <mori.reo@servise.jp>
+ */
 class Injector
 {
   private $target;
@@ -75,7 +81,6 @@ class Injector
   
   public function __call($method, $arg)
   {
-    
     $i = new InjectionCalls();
     $i->doBefore($method, $arg);
     
@@ -87,6 +92,12 @@ class Injector
   }
 }
 
+/**
+ * customized reflection class. optimized for sabel
+ *
+ * @package org.sabel.di
+ * @author Mori Reo <mori.reo@servise.jp>
+ */
 class SabelReflectionClass
 {
   protected $reflectionClass;
@@ -141,8 +152,8 @@ class SabelReflectionClass
   public function getImplementClass()
   {
     $interfaceFullName = $this->reflectionClass->getName();
-    $pathElements = explode('_', $interfaceFullName);
-    $interfaceName = array_pop($pathElements);
+    $pathElements      = explode('_', $interfaceFullName);
+    $interfaceName     = array_pop($pathElements);
     
     $module = SabelDIHelper::getModuleName();
     
@@ -319,10 +330,7 @@ class SabelDIContainer
   {
     if (is_null($className)) throw new Exception("class name is null");
     
-    // @todo this array will configurable.
-    $paths = array('app/commons/models/',
-                   'app/modules/staff/models/', 
-                   'app/modules/user/models/');
+    $paths = SabelContext::getIncludePath();
     
     $hasClassPath = (strpos($className, '_') === false) ? true : false;
     
