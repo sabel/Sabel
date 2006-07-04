@@ -2,7 +2,7 @@
 
 require_once('RecordObject.php');
 
-abstract class BaseUserActiveRecord extends RecordObject
+abstract class BaseUserRecordObject extends RecordObject
 {
   public function __construct($param1 = null, $param2 = null)
   {
@@ -11,13 +11,13 @@ abstract class BaseUserActiveRecord extends RecordObject
   }
 }
 
-abstract class BaseMailActiveRecord extends RecordObject
+abstract class BaseMailRecordObject extends RecordObject
 {
 
 }
 
 // for unit-test
-class Test extends BaseUserActiveRecord
+class Test extends BaseUserRecordObject
 {
   public function getCondition()
   {
@@ -35,7 +35,7 @@ class Test extends BaseUserActiveRecord
   }
 }
 
-class Child_Record extends BaseUserActiveRecord
+class Child_Record extends BaseUserRecordObject
 {
   public function __construct($table = null)
   {
