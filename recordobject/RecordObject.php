@@ -1,5 +1,7 @@
 <?php
 
+require_once('DBConnection.php');
+
 require_once('EDO.php');
 require_once('PdoEDO.php');
 require_once('RecordClasses.php');
@@ -18,15 +20,13 @@ abstract class RecordObject
     $defColumn = 'id';
 
   protected
-    $use    = 'user',
-    $useEdo = 'pdo';
+    $owner,
+    $useEdo;
 
   protected 
     $data     = array(),
     $newData  = array(),
     $selected = false;
-
-  protected static $conList = array();
 
   protected $selectType = self::SELECT_DEFAULT;
 
@@ -34,35 +34,34 @@ abstract class RecordObject
   const SELECT_VIEW    = 5;
   const SELECT_CHILD   = 10;
 
-  public static function addCon($use, $useEdo, $con)
-  {
-    self::$conList[$use][$useEdo] = $con;
-  }
-
   private function getEDO()
   {
+    $conn = DBConnection::getConnection($this->owner, $this->useEdo);
+    
     if ($this->useEdo == 'pdo') {
-      return new PdoEDO(self::$conList[$this->use]['pdo']);
+      return new PdoEDO($conn);
     } elseif ($this->useEdo == 'pgsql') {
-      return new PGEDO(self::$conList[$this->use]['pgsql']);
+      return new PGEDO($conn);
     } elseif ($this->useEdo == 'mysql') {
-      return new MYEDO(self::$conList[$this->use]['mysql']);
+      return new MYEDO($conn);
     } else {
       //todo
     }
   }
 
-  public function setEDO($use, $useEdo)
+  public function setEDO($owner, $useEdo)
   {
-    $this->use    = $use;
+    $this->owner  = $owner;
     $this->useEdo = $useEdo;
 
+    $conn = DBConnection::getConnection($owner, $useEdo);
+
     if ($useEdo== 'pdo') {
-      $this->edo = new PdoEDO(self::$conList[$use]['pdo']);
+      $this->edo = new PdoEDO($conn);
     } elseif ($useEdo == 'pgsql') {
-      $this->edo = new PGEDO(self::$conList[$use]['pgsql']);
+      $this->edo = new PGEDO($conn);
     } elseif ($useEdo == 'mysql') {
-      $this->edo = new MYEDO(self::$conList[$use]['mysql']);
+      $this->edo = new MYEDO($conn);
     } else {
       //todo
     }
@@ -71,7 +70,6 @@ abstract class RecordObject
   public function __construct($param1 = null, $param2 = null)
   {
     $this->table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', get_class($this)));
-    $this->setEDO($this->use, $this->useEdo);
 
     if (!is_null($param1)) {
       if (!is_null($param2)) {
@@ -145,14 +143,14 @@ abstract class RecordObject
         if (is_null($val)) {
           throw new Exception('Error: setConstraint() constraint value is null');
         } else {
-          $this->constraints["{$key}"] = $val;
+          $this->constraints[$key] = $val;
         }
       }
     } else {
       if (is_null($param2)) {
         throw new Exception('Error: setConstraint() constraint value is null');
       } else {
-        $this->constraints["{$param1}"] = $param2;
+        $this->constraints[$param1] = $param2;
       }
     }
   }
@@ -164,26 +162,16 @@ abstract class RecordObject
         if (is_null($val)) {
           throw new Exception('Error: setChildConstraint() constraint value is null');
         } else {
-          $this->childConstraints["{$key}"] = $val;
+          $this->childConstraints[$key] = $val;
         }
       }
     } else {
       if (is_null($param2)) {
         throw new Exception('Error: setChildConstraint() constraint value is null');
       } else {
-        $this->childConstraints["{$param1}"] = $param2;
+        $this->childConstraints[$param1] = $param2;
       }
     }
-  }
-  
-  protected function isSpecial($param3, $param1)
-  {
-    return (!is_null($param3) && !is_array($param1));
-  }
-  
-  protected function isDefaultColumnValue($param2)
-  {
-    return is_null($param2);
   }
   
   /**
@@ -203,7 +191,7 @@ abstract class RecordObject
   {
     if (empty($param1)) return;
 
-    if ($this->isSpecial($param3, $param1)) {
+    if ($this->isSpecialParam($param3, $param1)) {
       $values = array();
       $values[] = $param2;
       $values[] = $param3;
@@ -213,6 +201,16 @@ abstract class RecordObject
     } else {
       $this->conditions[$param1] = $param2;
     }
+  }
+  
+  protected function isSpecialParam($param3, $param1)
+  {
+    return (!is_null($param3) && !is_array($param1));
+  }
+  
+  protected function isDefaultColumnValue($param2)
+  {
+    return is_null($param2);
   }
   
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -249,7 +247,6 @@ abstract class RecordObject
     if (is_null($param1) && is_null($this->conditions)) {
       throw new Exception('Error: selectOne() [WHERE] must be set condition');
     }
-
     $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
@@ -272,7 +269,6 @@ abstract class RecordObject
         $this->selected = true;
         return $this;
       } else {
-        //echo 'false'; exit;
         $this->data = $this->selectCondition;
         return $this;
       }
@@ -364,6 +360,9 @@ abstract class RecordObject
 
   private function selectChild($row)
   {
+    if (empty($this->childConstraints))
+      throw new Exception('Error: getChild() must be set constraints for child-object');
+      
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $key = str_replace('_id', '', $key);
@@ -384,10 +383,20 @@ abstract class RecordObject
     $edo->makeQuery($condition, $constraint);
 
     $children = array();
-
     if ($edo->execute()) {
-      while ($row = $edo->fetch(EDO::FETCH_ASSOC)) {
-        $obj = new Child_Record();
+      $rows = $edo->fetchAll(EDO::FETCH_ASSOC);
+
+      if (!$rows) {
+        $children[] = new Child_Record($table);
+        return $children;
+      }
+
+      foreach ($rows as $row) {
+        $obj = new Child_Record($table);
+        $obj->childConstraints = $this->childConstraints;
+        $obj->selectCondition[$this->defColumn] = $id;
+        $obj->selected = true;
+
         foreach ($row as $key => $val) {
           if (strpos($key, '_id')) {
             $key = str_replace('_id', '', $key);
@@ -395,6 +404,7 @@ abstract class RecordObject
           }
         }
         $obj->setProperties($row);
+        $obj->newData = array();
         $children[] = $obj;
       }
       return $children;

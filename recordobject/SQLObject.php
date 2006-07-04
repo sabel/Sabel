@@ -42,7 +42,7 @@ class PdoSQL
       $this->sql .= " AND {$key}=:{$bindKey}";
     }
     $this->set = true;
-    $this->param["{$bindKey}"] = $val;
+    $this->param[$bindKey] = $val;
   }
 
   public function makeIsNullSQL($key)
@@ -88,7 +88,7 @@ class PdoSQL
 
     $val = str_replace('_', '\_', $val);
 
-    $this->param["{$bindKey}"] = $val;
+    $this->param[$bindKey] = $val;
   }
 
   public function makeBetweenSQL($key, $val)
@@ -133,8 +133,8 @@ class PdoSQL
 
     $this->set = true;
 
-    $this->param["{$bindKey}"]  = $val1;
-    $this->param["{$bindKey2}"] = $val2;
+    $this->param[$bindKey]  = $val1;
+    $this->param[$bindKey2] = $val2;
   }
 
   public function makeLess_GreaterSQL($key, $val)
@@ -148,7 +148,7 @@ class PdoSQL
     }
 
     $val = str_replace($val[0], '', $val);
-    $this->param["{$bindKey}"] = trim($val);
+    $this->param[$bindKey] = trim($val);
 
     $this->set = true;
   }

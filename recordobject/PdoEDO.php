@@ -1,22 +1,21 @@
 <?php
 
 require_once('EDO.php');
+require_once('DBConnection.php');
 require_once('SQLObject.php');
 
 class PdoEDO implements EDO
 {
-  private $pdo, $stmt, $sqlObj;
-
-  private $preparedInsertSQL;
-  private $preparedUpdateSQL;
+  private $pdo, $stmt, $sqlObj, $myDb;
 
   private $param = array();
   private $data  = array();
   private $keys  = array();
 
-  public function __construct($pdo)
+  public function __construct($conn)
   {
-    $this->pdo    = $pdo;
+    $this->pdo    = $conn['conn'];
+    $this->myDb   = $conn['db'];
     $this->sqlObj = new PdoSQL();
   }
 
@@ -149,9 +148,6 @@ class PdoEDO implements EDO
     $this->stmt = $this->pdo->prepare($sql);
     $this->makeBindParam();
 
-    //var_dump($sql);
-    //var_dump($this->param);
-
     if (empty($this->param)) {
       return $this->stmt->execute();
     } else {
@@ -161,12 +157,21 @@ class PdoEDO implements EDO
     }
   }
 
-  public function fetch($style = null, $cursor = null, $offset = null)
+  public function fetch($style = null)
   {
     if ($style == EDO::FETCH_ASSOC) {
       return $this->stmt->fetch(PDO::FETCH_ASSOC, $cursor, $offset);
     } else {
       return $this->stmt->fetch(PDO::FETCH_BOTH, $cursor, $offset);
+    }
+  }
+
+  public function fetchAll($style = null)
+  {
+    if ($style == EDO::FETCH_ASSOC) {
+      return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+      return $this->stmt->fetchAll(PDO::FETCH_BOTH);
     }
   }
 

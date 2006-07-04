@@ -9,7 +9,8 @@ interface EDO
   public function makeQuery(&$conditions = null, &$constraints = null);
 
   public function execute($sql = null);
-  public function fetch($style = null, $cursor = null, $offset = null);
+  public function fetch($style = null);
+  public function fetchAll($style = null);
 
   const EITHER = 'OR_';
   const BET    = 'BET_';

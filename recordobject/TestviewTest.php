@@ -12,6 +12,7 @@ require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
 require_once "RecordObject.php";
 require_once "RecordClasses.php";
+require_once "DBConnection.php";
 
 /**
  * Test class for Person.
@@ -42,8 +43,14 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function setUp()
   {
-    $pdo = new PDO('pgsql:host=192.168.0.222;dbname=2525e', 'pgsql', 'pgsql');
-    RecordObject::addCon('user', 'pdo', $pdo);
+    //$pdo = new PDO('pgsql:host=192.168.0.222;dbname=2525e', 'pgsql', 'pgsql');
+
+    $dbCon = array();
+    $dbCon['dsn'] = 'pgsql:host=192.168.0.222;dbname=2525e';
+    $dbCon['user'] = 'pgsql';
+    $dbCon['pass'] = 'pgsql';
+
+    DBConnection::addConnection('user', 'pdo', $dbCon);
 
     $obj = new Common_Record();
 
@@ -145,7 +152,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($test->name, null);
     $this->assertEquals($test->blood, null);
 
-    if ($test->find()) {
+    if ($test->is_selected()) {
       $test->blood = 'AB';
       $test->save();  // (update)
     } else {
@@ -247,6 +254,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   public function testSelectChildResult()
   {
     $this->test->setSelectType(RecordObject::SELECT_CHILD);
+    $this->test->setChildConstraint('limit', 10);
     $obj = $this->test->selectOne(1);
 
     $this->assertEquals($obj->id, 1);

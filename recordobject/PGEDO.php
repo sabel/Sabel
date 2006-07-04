@@ -34,9 +34,14 @@ class PGEDO implements EDO
   
   }
 
-  public function fetch($style = null, $cursor = null, $offset = null)
+  public function fetch($style = null)
   {
   
+  }
+
+  public function fetchAll($style = null)
+  {
+
   }
 }
 
