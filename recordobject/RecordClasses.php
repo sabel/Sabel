@@ -16,6 +16,7 @@ abstract class BaseMailActiveRecord extends RecordObject
 
 }
 
+// for unit-test
 class Test extends BaseUserActiveRecord
 {
   public function getCondition()

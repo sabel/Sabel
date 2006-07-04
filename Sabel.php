@@ -35,6 +35,7 @@ require_once('third/Smarty/Smarty.class.php');
 require_once('third/Crypt_Blowfish/Blowfish.php');
 
 require_once('recordobject/RecordObject.php');
+require_once('recordobject/DBConnection.php');
 
 interface SabelController
 {

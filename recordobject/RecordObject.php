@@ -366,7 +366,12 @@ abstract class RecordObject
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $key = str_replace('_id', '', $key);
-        $row[$key] = $this->getChild($key, $val);
+
+        if (empty($this->childConstraints)) {
+          throw new Exception('Error: getChild() must be set constraints for child-object');
+        } else {
+          $row[$key] = $this->getChild($key, $val);
+        }
       }
     }
     return $row;

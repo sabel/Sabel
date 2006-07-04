@@ -11,6 +11,7 @@ interface EDO
   public function execute($sql = null);
   public function fetch($style = null);
   public function fetchAll($style = null);
+  public function fetchAll($style = null);
 
   const EITHER = 'OR_';
   const BET    = 'BET_';
