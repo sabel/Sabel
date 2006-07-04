@@ -74,7 +74,7 @@ class SabelPageWebController implements SabelController
         $controller->execute(SabelConst::DEFAULT_METHOD);
       }
     } catch (Exception $e) {
-      $logger = new FileLogger();
+      $logger = new Core_Logger_File();
       $logger->log($e->getMessage());
     }
   }
