@@ -30,16 +30,17 @@ abstract class RecordObject
 
   protected $selectType = self::SELECT_DEFAULT;
 
-  const SELECT_DEFAULT = 0;
-  const SELECT_VIEW    = 5;
-  const SELECT_CHILD   = 10;
+  const SELECT_DEFAULT     = 0;
+  const WITH_PARENT_VIEW   = 5;
+  const WITH_PARENT_OBJECT = 10;
 
   private function getEDO()
   {
     $conn = DBConnection::getConnection($this->owner, $this->useEdo);
     
     if ($this->useEdo == 'pdo') {
-      return new PdoEDO($conn);
+      $pdoDb = DBConnection::getPdoDB($this->owner);
+      return new PdoEDO($conn, $pdoDb);
     } elseif ($this->useEdo == 'pgsql') {
       return new PGEDO($conn);
     } elseif ($this->useEdo == 'mysql') {
@@ -57,7 +58,8 @@ abstract class RecordObject
     $conn = DBConnection::getConnection($owner, $useEdo);
 
     if ($useEdo== 'pdo') {
-      $this->edo = new PdoEDO($conn);
+      $pdoDb = DBConnection::getPdoDB($owner);
+      $this->edo = new PdoEDO($conn, $pdoDb);
     } elseif ($useEdo == 'pgsql') {
       $this->edo = new PGEDO($conn);
     } elseif ($useEdo == 'mysql') {
@@ -258,10 +260,10 @@ abstract class RecordObject
       if ($row) {
         if ($this->selectType == self::SELECT_DEFAULT) {
 
-        } elseif ($this->selectType == self::SELECT_VIEW) {
-          $row = $this->selectView($row);
-        } elseif ($this->selectType == self::SELECT_CHILD) {
-          $row = $this->selectChild($row);
+        } elseif ($this->selectType == self::WITH_PARENT_VIEW) {
+          $row = $this->selectWithParentView($row);
+        } elseif ($this->selectType == self::WITH_PARENT_OBJECT) {
+          $row = $this->selectWithParentObject($row);
         } else {
           throw new Exception('invalid RecordObject::SELECT_TYPE');
         }
@@ -281,26 +283,45 @@ abstract class RecordObject
       $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT * FROM {$this->table}");
-    $this->edo->makeQuery($this->conditions, $this->constraints);
+    return $this->getRecords($this->conditions, $this->constraints);
+  }
+
+  public function getChildren($child_table, $column = null)
+  {
+    if (!isset($this->childConstraints['limit']))
+      throw new Exception('Error: getChildren() [LIMIT] must be set constraints');
+
+    $fkey = (is_null($column)) ? $this->table.'_id' : $column; 
+    $condition = array($fkey => $this->data[$this->defColumn]);
+
+    $this->edo->setBasicSQL("SELECT * FROM {$child_table}");
+    $this->data[$child_table] = $this->getRecords($condition, $this->childConstraints, $child_table);
+  }
+
+  private function getRecords(&$conditions, &$constraints = null, $child_table = null)
+  {
+    $this->edo->makeQuery($conditions, $constraints);
 
     $recordObj = array();
     $class     = get_class($this);
 
     if ($this->edo->execute()) {
       while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-        $obj = new $class();
+
+        $obj = (is_null($child_table)) ? new $class : new Child_Record($child_table);
 
         if ($this->selectType == self::SELECT_DEFAULT) {
           
-        } elseif ($this->selectType == self::SELECT_VIEW) {
-          $row = $this->selectView($row); 
-        } elseif ($this->selectType == self::SELECT_CHILD) {
-          $row = $this->selectChild($row);
+        } elseif ($this->selectType == self::WITH_PARENT_VIEW) {
+          $row = $this->selectWithParentView($row); 
+        } elseif ($this->selectType == self::WITH_PARENT_OBJECT) {
+          $row = $this->selectWithParentObject($row);
         } else {
           throw new Exception('invalid RecordObject::SELECT_TYPE');
         }
-
+        
         $obj->setProperties($row);
+        $obj->selected = true;
         $recordObj[] = $obj;
       }
       return $recordObj;
@@ -309,25 +330,29 @@ abstract class RecordObject
     }
   }
 
-  private function selectView($row)
+  private function selectWithParentView($row)
   {
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $table = str_replace('_id', '', $key);
-
-        $row["{$this->table}_{$key}"] = $val;
-        unset($row[$key]);
-
-        $this->join($table, $val, $row);
-      } else {
-        $row["{$this->table}_{$key}"] = $val;
-        unset($row[$key]);
+        $this->addParentProperties($table, $val, $row);
       }
     }
     return $row;
   }
 
-  private function join($table, $id, &$row)
+  private function selectWithParentObject($row)
+  {
+    foreach ($row as $key => $val) {
+      if (strpos($key, '_id')) {
+        $key = str_replace('_id', '', $key);
+        $row[$key] = $this->addParentObject($key, $val);
+      }
+    }
+    return $row;
+  }
+
+  private function addParentProperties($table, $id, &$row)
   {
     $condition  = array($this->defColumn => $id);
     
@@ -335,81 +360,53 @@ abstract class RecordObject
     $edo->setBasicSQL("SELECT * FROM {$table}");
     $edo->makeQuery($condition);
 
-    $children = array();
-
     if ($edo->execute()) {
-      while ($crow = $edo->fetch(EDO::FETCH_ASSOC)) {
-        $obj = new Child_Record();
-        foreach ($crow as $key => $val) {
-          if (strpos($key, '_id')) {
-            $ctable = str_replace('_id', '', $key);
-            $row["{$table}_{$key}"] = $val;
-            $this->join($ctable, $val, $row);
-          } else {
-            $row["{$table}_{$key}"] = $val;
-          }
+      $prow = $edo->fetch(EDO::FETCH_ASSOC);
+
+      if (!$prow) return;
+
+      foreach ($prow as $key => $val) {
+        if (strpos($key, '_id')) {
+          $ctable = str_replace('_id', '', $key);
+          $row["{$table}_{$key}"] = $val;
+          $this->addParentProperties($ctable, $val, $row);
+        } else {
+          $row["{$table}_{$key}"] = $val;
         }
-        $obj->setProperties($row);
-        $children[] = $obj;
       }
-      return $children;
     } else {
-      throw new Exception('Error: join()');
+      throw new Exception('Error: addParentProperties()');
     }
   }
 
-  private function selectChild($row)
-  {
-    if (empty($this->childConstraints))
-      throw new Exception('Error: getChild() must be set constraints for child-object');
-      
-    foreach ($row as $key => $val) {
-      if (strpos($key, '_id')) {
-        $key = str_replace('_id', '', $key);
-        $row[$key] = $this->getChild($key, $val);
-      }
-    }
-    return $row;
-  }
-
-  private function getChild($table, $id)
+  private function addParentObject($table, $id)
   {
     $condition  = array($this->defColumn => $id);
-    $constraint = $this->childConstraints;
 
     $edo = $this->getEDO();
-
     $edo->setBasicSQL("SELECT * FROM {$table}");
-    $edo->makeQuery($condition, $constraint);
+    $edo->makeQuery($condition);
 
-    $children = array();
     if ($edo->execute()) {
-      $rows = $edo->fetchAll(EDO::FETCH_ASSOC);
+      $row = $edo->fetch(EDO::FETCH_ASSOC);
+      $obj = new Common_Record($table);
 
-      if (!$rows) {
-        $children[] = new Child_Record($table);
-        return $children;
-      }
+      if (!$row) return $obj;
 
-      foreach ($rows as $row) {
-        $obj = new Child_Record($table);
-        $obj->childConstraints = $this->childConstraints;
-        $obj->selectCondition[$this->defColumn] = $id;
-        $obj->selected = true;
+      $obj->selectCondition[$this->defColumn] = $id;
+      $obj->selected = true;
 
-        foreach ($row as $key => $val) {
-          if (strpos($key, '_id')) {
-            $key = str_replace('_id', '', $key);
-            $row[$key] = $this->getChild($key, $val);
-          }
+      foreach ($row as $key => $val) {
+        if (strpos($key, '_id')) {
+          $key = str_replace('_id', '', $key);
+          $row[$key] = $this->addParentObject($key, $val);
         }
-        $obj->setProperties($row);
-        $obj->newData = array();
-        $children[] = $obj;
       }
-      return $children;
+      $obj->setProperties($row);
+      $obj->newData = array();
+      return $obj;
     } else {
-      throw new Exception('Error: getChild()');
+      throw new Exception('Error: addParentObject()');
     }
   }
 
@@ -424,16 +421,6 @@ abstract class RecordObject
     }
   }
 
-  public function update()
-  {
-    $this->edo->setUpdateSQL($this->table, $this->newData);
-    $this->edo->makeQuery($this->selectCondition);
-
-    if (!$this->edo->execute()) {
-      throw new Exception('Error: update()');
-    } 
-  }
-
   public function allUpdate($data = null)
   {
     $this->dataMerge($data);
@@ -446,7 +433,17 @@ abstract class RecordObject
     }
   }
 
-  public function insert()
+  protected function update()
+  {
+    $this->edo->setUpdateSQL($this->table, $this->newData);
+    $this->edo->makeQuery($this->selectCondition);
+
+    if (!$this->edo->execute()) {
+      throw new Exception('Error: update()');
+    } 
+  }
+
+  protected function insert()
   {
     if (!$this->edo->executeInsert($this->table, $this->data)) {
       throw new Exception('Error: insert()');
@@ -463,7 +460,7 @@ abstract class RecordObject
     }
   }
 
-  protected function dataMerge($data)
+  private function dataMerge($data)
   { 
     if (empty($data)) return;
 

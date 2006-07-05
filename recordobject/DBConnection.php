@@ -19,8 +19,8 @@ class DBConnection
         $splited = split(':', $dsn);
 
         $conn = new PDO($dsn, $user, $pass);
-        self::$connList[$owner]['pdo']['conn'] = $conn;
-        self::$connList[$owner]['pdo']['db']   = $splited[0];
+        self::$connList[$owner]['pdo'] = $conn;
+        self::$connList[$owner]['db']  = $splited[0];
       }
     } else {
       if(is_array($connection)) {

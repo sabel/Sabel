@@ -71,6 +71,24 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $obj->execute($sql);
 
     $this->test3 = new Common_Record('test3');
+
+    $sql  = "CREATE TABLE customer (id int2 NOT NULL,name varchar NOT NULL,";
+    $sql .= " CONSTRAINT customer_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+
+    $this->customer = new Common_Record('customer');
+
+    $sql  = "CREATE TABLE customer_order (id int2 NOT NULL,customer_id int2 NOT NULL,";
+    $sql .= " CONSTRAINT customer_order_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+
+    $this->order = new Common_Record('customer_order');
+
+    $sql  = "CREATE TABLE order_line (id int2 NOT NULL,customer_order_id int2 NOT NULL,item_id int2 NOT NULL,";
+    $sql .= " CONSTRAINT order_line_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+
+    $this->orderLine = new Common_Record('order_line');
   }
 
   /**
@@ -105,6 +123,46 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     $obj = $this->test->selectOne('name', 'seki');
     $this->assertEquals($obj->id, 5);
+
+    $insertData = array();
+    $insertData[] = array('id' => 1, 'name' => 'tanaka');
+    $insertData[] = array('id' => 2, 'name' => 'ueda');
+
+    foreach ($insertData as $data) {
+      $this->customer->multipleInsert($data);
+    }
+    $this->assertEquals($this->customer->getCount(), 2);
+
+    $insertData = array();
+    $insertData[] = array('id' => 1, 'customer_id' => 1);
+    $insertData[] = array('id' => 2, 'customer_id' => 1);
+    $insertData[] = array('id' => 3, 'customer_id' => 2);
+    $insertData[] = array('id' => 4, 'customer_id' => 2);
+    $insertData[] = array('id' => 5, 'customer_id' => 1);
+    $insertData[] = array('id' => 6, 'customer_id' => 1);
+
+    foreach ($insertData as $data) {
+      $this->order->multipleInsert($data);
+    }
+    $this->assertEquals($this->order->getCount(), 6);
+
+    $insertData = array();
+    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'item_id' => 2);
+    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'item_id' => 1);
+    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'item_id' => 3);
+    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'item_id' => 1);
+    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'item_id' => 3);
+    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'item_id' => 2);
+    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'item_id' => 3);
+    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'item_id' => 1);
+    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'item_id' => 1);
+    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'item_id' => 2);
+    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'item_id' => 3);
+
+    foreach ($insertData as $data) {
+      $this->orderLine->multipleInsert($data);
+    }
+    $this->assertEquals($this->orderLine->getCount(), 11);
   }
     
   public function testInsert()
@@ -251,10 +309,9 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj[2]->name, null);
   }
 
-  public function testSelectChildResult()
+  public function testSelectParentObject()
   {
-    $this->test->setSelectType(RecordObject::SELECT_CHILD);
-    $this->test->setChildConstraint('limit', 10);
+    $this->test->setSelectType(RecordObject::WITH_PARENT_OBJECT);
     $obj = $this->test->selectOne(1);
 
     $this->assertEquals($obj->id, 1);
@@ -262,30 +319,61 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj->blood, 'A');
     $this->assertEquals($obj->test2_id, 1);
 
-    $child = $obj->test2[0];
+    $child = $obj->test2;
     $this->assertEquals($child->id, 1);
     $this->assertEquals($child->name, 'test21');
     $this->assertEquals($child->test3_id, 2);
 
-    $child2 = $child->test3[0];
+    $child2 = $child->test3;
     $this->assertEquals($child2->id, 2);
     $this->assertEquals($child2->name, 'test32');
   }
 
-  public function testSelectViewResult()
+  public function testSelectParentView()
   {
-    $this->test->setSelectType(RecordObject::SELECT_VIEW);
+    $this->test->setSelectType(RecordObject::WITH_PARENT_VIEW);
     $obj = $this->test->selectOne(1);
       
-    $this->assertEquals($obj->test_id, 1);
-    $this->assertEquals($obj->test_name, 'tanaka');
-    $this->assertEquals($obj->test_blood, 'A');
-    $this->assertEquals($obj->test_test2_id, 1);
+    $this->assertEquals($obj->id, 1);
+    $this->assertEquals($obj->name, 'tanaka');
+    $this->assertEquals($obj->blood, 'A');
     $this->assertEquals($obj->test2_id, 1);
     $this->assertEquals($obj->test2_name, 'test21');
     $this->assertEquals($obj->test2_test3_id, 2);
     $this->assertEquals($obj->test3_id, 2);
     $this->assertEquals($obj->test3_name, 'test32');
+  }
+
+  public function testGetChild()
+  {
+    $cu = $this->customer->selectOne(1);
+    $this->assertEquals($cu->name, 'tanaka');
+    
+    $cu->setChildConstraint('limit', 10);
+    $cu->getChildren('customer_order');
+
+    $orders = $cu->customer_order;
+    $this->assertEquals(count($orders), 4);
+
+    $this->assertEquals($orders[0]->id, 1);
+    $this->assertEquals($orders[1]->id, 2);
+    $this->assertEquals($orders[2]->id, 5);
+    $this->assertEquals($orders[3]->id, 6);
+
+    //------------------------------------------------------
+
+    $cu->setChildConstraint(array('limit' => 10,
+                                  'order' => 'id desc'));
+
+    $cu->getChildren('customer_order');
+
+    $orders = $cu->customer_order;
+    $this->assertEquals(count($orders), 4);
+
+    $this->assertEquals($orders[0]->id, 6);
+    $this->assertEquals($orders[1]->id, 5);
+    $this->assertEquals($orders[2]->id, 2);
+    $this->assertEquals($orders[3]->id, 1);
   }
 
   public function testGetCount()

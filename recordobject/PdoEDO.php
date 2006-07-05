@@ -12,10 +12,10 @@ class PdoEDO implements EDO
   private $data  = array();
   private $keys  = array();
 
-  public function __construct($conn)
+  public function __construct($conn, $myDb)
   {
-    $this->pdo    = $conn['conn'];
-    $this->myDb   = $conn['db'];
+    $this->pdo    = $conn;
+    $this->myDb   = $myDb;
     $this->sqlObj = new PdoSQL();
   }
 
