@@ -152,7 +152,7 @@ abstract class RecordObject
   public function setConstraint($param1, $param2 = null)
   {
     if (is_array($param1)) {
-      foreach ($param1 as $key => $vphal) {
+      foreach ($param1 as $key => $val) {
         if (is_null($val)) {
           throw new Exception('Error: setConstraint() constraint value is null');
         } else {
@@ -248,10 +248,12 @@ abstract class RecordObject
       $row = $this->edo->fetch();
     
       if (is_null($row[0])) {
-  			return 1;
-  		} else {    
+        return 1;
+      } else {    
         return $row[0] + 1;
       }
+    } else {
+      return false;
     }
   }
 
@@ -309,7 +311,7 @@ abstract class RecordObject
 
     if ($this->edo->execute()) {
       while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-        $obj = (is_null($child_table)) ? new $class : new Child_Record($child_table);
+        $obj = (is_null($child_table)) ? new $class() : new Child_Record($child_table);
         $row = $this->selectWithParent($this->selectType, $row);
         $obj->setProperties($row);
         $obj->selected = true;
