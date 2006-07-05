@@ -274,6 +274,26 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     }
   }
 
+  public function testProjection()
+  {
+    $obj = $this->test->selectOne(2);
+    $this->assertEquals($obj->id, 2);
+    $this->assertEquals($obj->name, 'yo_shida');
+    $this->assertEquals($obj->blood, 'B');
+    $this->assertEquals($obj->test2_id, 2);
+
+    //--------------------------------------------------
+
+    $test = new Test();
+    $test->setProjection(array(id,blood));
+
+    $obj2 = $test->selectOne(2);
+    $this->assertEquals($obj2->id, 2);
+    $this->assertNotEquals($obj2->name, 'yo_shida');
+    $this->assertEquals($obj2->blood, 'B');
+    $this->assertNotEquals($obj2->test2_id, 2);
+  }
+
   public function testSelectDefaultResult()
   {
     $obj = $this->test->selectOne(1);
@@ -332,8 +352,12 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $in2->save();
 
     $in1->setSelectType(RecordObject::WITH_PARENT_OBJECT);
-    $obj = $in1->select();
-    var_dump($obj);
+    $objs = $in1->select();
+    $obj = $objs[0];
+
+    $this->assertEquals($obj->infinite2_id, $obj->infinite2->id);
+    $this->assertEquals($obj->infinite2->infinite1_id, 1);
+    $this->assertEquals($obj->infinite2->infinite1, null);
   }
 
   public function testSelectParentObject()
@@ -401,6 +425,21 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($orders[1]->id, 5);
     $this->assertEquals($orders[2]->id, 2);
     $this->assertEquals($orders[3]->id, 1);
+
+    //------------------------------------------------------
+
+    $cu->setChildConstraint(array('limit'  => 2,
+                                  'offset' => 2,
+                                  'order'  => 'id desc'));
+
+    $cu->getChildren('customer_order');
+
+    $orders = $cu->customer_order;
+    $this->assertEquals(count($orders), 2);
+
+    $this->assertEquals($orders[0]->id, 2);
+    $this->assertEquals($orders[1]->id, 1);
+    $this->assertEquals($orders[2]->id, null);
   }
 
   public function testGetCount()
