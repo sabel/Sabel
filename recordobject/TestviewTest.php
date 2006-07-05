@@ -309,6 +309,33 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj[2]->name, null);
   }
 
+  public function testInfiniteLoop()
+  {
+    $obj  = new Common_Record();
+
+    $sql  = "CREATE TABLE infinite1 (id int2 NOT NULL,infinite2_id int2 NOT NULL,";
+    $sql .= " CONSTRAINT infinite1_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+    
+    $sql  = "CREATE TABLE infinite2 (id int2 NOT NULL,infinite1_id int2 NOT NULL,";
+    $sql .= " CONSTRAINT infinite2_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+
+    $in1 = new Common_Record('infinite1');
+    $in1->id           = 1;
+    $in1->infinite2_id = 2;
+    $in1->save();
+
+    $in2 = new Common_Record('infinite2');
+    $in2->id           = 2;
+    $in2->infinite1_id = 1;
+    $in2->save();
+
+    $in1->setSelectType(RecordObject::WITH_PARENT_OBJECT);
+    $obj = $in1->select();
+    var_dump($obj);
+  }
+
   public function testSelectParentObject()
   {
     $this->test->setSelectType(RecordObject::WITH_PARENT_OBJECT);

@@ -24,9 +24,10 @@ abstract class RecordObject
     $useEdo;
 
   protected 
-    $data     = array(),
-    $newData  = array(),
-    $selected = false;
+    $data         = array(),
+    $newData      = array(),
+    $parentTables = array(),
+    $selected     = false;
 
   protected $selectType = self::SELECT_DEFAULT;
 
@@ -258,15 +259,7 @@ abstract class RecordObject
     if ($this->edo->execute()) {
       $row = $this->edo->fetch(EDO::FETCH_ASSOC);
       if ($row) {
-        if ($this->selectType == self::SELECT_DEFAULT) {
-
-        } elseif ($this->selectType == self::WITH_PARENT_VIEW) {
-          $row = $this->selectWithParentView($row);
-        } elseif ($this->selectType == self::WITH_PARENT_OBJECT) {
-          $row = $this->selectWithParentObject($row);
-        } else {
-          throw new Exception('invalid RecordObject::SELECT_TYPE');
-        }
+        $row = $this->selectWithParent($this->selectType, $row);
         $this->setProperties($row);
         $this->selected = true;
         return $this;
@@ -307,46 +300,33 @@ abstract class RecordObject
 
     if ($this->edo->execute()) {
       while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-
         $obj = (is_null($child_table)) ? new $class : new Child_Record($child_table);
-
-        if ($this->selectType == self::SELECT_DEFAULT) {
-          
-        } elseif ($this->selectType == self::WITH_PARENT_VIEW) {
-          $row = $this->selectWithParentView($row); 
-        } elseif ($this->selectType == self::WITH_PARENT_OBJECT) {
-          $row = $this->selectWithParentObject($row);
-        } else {
-          throw new Exception('invalid RecordObject::SELECT_TYPE');
-        }
-        
+        $row = $this->selectWithParent($this->selectType, $row);
         $obj->setProperties($row);
         $obj->selected = true;
         $recordObj[] = $obj;
       }
       return $recordObj;
     } else {
-      throw new Exception('Error: select()');
+      throw new Exception('Error: getRecords()');
     }
   }
 
-  private function selectWithParentView($row)
+  private function selectWithParent($type, $row)
   {
+    $this->parentTables[] = $this->table;
+
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $table = str_replace('_id', '', $key);
-        $this->addParentProperties($table, $val, $row);
-      }
-    }
-    return $row;
-  }
 
-  private function selectWithParentObject($row)
-  {
-    foreach ($row as $key => $val) {
-      if (strpos($key, '_id')) {
-        $key = str_replace('_id', '', $key);
-        $row[$key] = $this->addParentObject($key, $val);
+        if ($type == self::WITH_PARENT_VIEW) {
+          $this->addParentProperties($table, $val, $row);
+        } elseif ($type == self::WITH_PARENT_OBJECT) {
+          $row[$table] = $this->addParentObject($table, $val);
+        } else {
+          // ignore 
+        }
       }
     }
     return $row;
@@ -354,7 +334,11 @@ abstract class RecordObject
 
   private function addParentProperties($table, $id, &$row)
   {
-    $condition  = array($this->defColumn => $id);
+    for ($i = 0; $i < count($this->parentTables); $i++) {
+      if ($this->parentTables[$i] == $table) return;
+    }
+    $this->parentTables[] = $table;
+    $condition = array($this->defColumn => $id);
     
     $edo = $this->getEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -367,9 +351,9 @@ abstract class RecordObject
 
       foreach ($prow as $key => $val) {
         if (strpos($key, '_id')) {
-          $ctable = str_replace('_id', '', $key);
+          $ptable = str_replace('_id', '', $key);
           $row["{$table}_{$key}"] = $val;
-          $this->addParentProperties($ctable, $val, $row);
+          $this->addParentProperties($ptable, $val, $row);
         } else {
           $row["{$table}_{$key}"] = $val;
         }
@@ -381,6 +365,10 @@ abstract class RecordObject
 
   private function addParentObject($table, $id)
   {
+    for ($i = 0; $i < count($this->parentTables); $i++) {
+      if ($this->parentTables[$i] == $table) return;
+    }
+    $this->parentTables[] = $table;
     $condition  = array($this->defColumn => $id);
 
     $edo = $this->getEDO();
@@ -400,6 +388,8 @@ abstract class RecordObject
         if (strpos($key, '_id')) {
           $key = str_replace('_id', '', $key);
           $row[$key] = $this->addParentObject($key, $val);
+        } else {
+          $row[$key] = $val;
         }
       }
       $obj->setProperties($row);
