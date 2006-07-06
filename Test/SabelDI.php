@@ -9,6 +9,11 @@ require_once('sabel/core/Context.php');
 require_once('sabel/container/DI.php');
 require_once('sabel/core/spyc.php');
 
+Sabel_Core_Context::addIncludePath('');
+uses('sabel.container.ReflectionClass');
+uses('sabel.injection.Calls');
+uses('sabel.core.Exception');
+
 class RecordRunningTimeInjection
 {
   private $start;
@@ -51,16 +56,10 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
 {
   public function setUp()
   {
-    uses('sabel.injection.Calls');
-    
-    uses('sabel.core.Exception');
   }
   
   public function testLoad()
   {
-    Sabel_Core_Context::addIncludePath('');
-    Sabel_Core_Context::addIncludePath('core/');
-    
     $c = new Sabel_Container_DI();
     $this->assertTrue(is_object($c));
     
