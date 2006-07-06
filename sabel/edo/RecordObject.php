@@ -3,7 +3,7 @@
 uses('sabel.edo.DBConnection');
 uses('sabel.edo.drvier.Interface');
 uses('sabel.edo.driver.Pdo');
-uses('sabel.edo.RecordClasses')
+uses('sabel.edo.RecordClasses');
 
 abstract class Sabel_EDO_RecordObject
 {

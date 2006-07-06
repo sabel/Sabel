@@ -1,41 +1,42 @@
 <?php
 
-require_once('core/SabelContext.php');
-require_once('core/functions.php');
+require_once('sabel/core/Context.php');
+require_once('sabel/Functions.php');
 
-SabelContext::addIncludePath('Sabel/');
-SabelContext::addIncludePath('app/commons/models/');
+Sabel_Core_Context::addIncludePath('Sabel/');
+Sabel_Core_Context::addIncludePath('app/commons/models/');
 
 uses('core.logger.File');
 
-require_once('core/SabelConst.php');
+require_once('sabel/core/Const.php');
 
-require_once('core/SabelClassLoader.php');
-require_once('core/SabelUtility.php');
-require_once('core/Request.php');
-require_once('core/ParsedRequest.php');
-require_once('core/SabelException.php');
+require_once('sabel/core/ClassLoader.php');
+require_once('sabel/core/Utility.php');
+require_once('sabel/request/Parameters.php');
+require_once('sabel/request/Request.php');
+require_once('sabel/request/ParsedRequest.php');
+require_once('sabel/core/Exception.php');
 
-require_once('core/SabelPageController.php');
-require_once('core/SabelTemplateDirector.php');
-require_once('core/TemplateEngine.php');
+require_once('sabel/controller/Page.php');
+require_once('sabel/template/Director.php');
+require_once('sabel/template/Engine.php');
 
-require_once('core/SabelDIContainer.php');
+require_once('sabel/container/DI.php');
 
-require_once('user/User.php');
-require_once('config/Config.php');
-require_once('storage/Storage.php');
-require_once('cache/Cache.php');
+require_once('sabel/user/User.php');
+//require_once('sabel/config/Config.php');
+require_once('sabel/storage/Storage.php');
+require_once('sabel/cache/Cache.php');
 
-require_once('view/Helper.php');
+require_once('sabel/view/Helper.php');
 
-require_once('core/SabelPager.php');
-require_once('core/spyc.php');
+require_once('sabel/core/Pager.php');
+require_once('sabel/core/spyc.php');
 require_once('third/Smarty/Smarty.class.php');
 require_once('third/Crypt_Blowfish/Blowfish.php');
 
-require_once('recordobject/RecordObject.php');
-require_once('recordobject/DBConnection.php');
+require_once('sabel/edo/RecordObject.php');
+require_once('sabel/edo/DBConnection.php');
 
 interface SabelController
 {

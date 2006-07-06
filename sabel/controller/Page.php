@@ -1,8 +1,8 @@
 <?php
 
-require_once('Parameters.php');
-require_once('Response.php');
-require_once('DirectoryList.php');
+//require_once('Parameters.php');
+//require_once('Response.php');
+//require_once('DirectoryList.php');
 
 /**
  * page controller base class.
