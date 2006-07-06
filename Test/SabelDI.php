@@ -58,7 +58,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   {
   }
   
-  public function testLoad()
+  public function estLoad()
   {
     $c = new Sabel_Container_DI();
     $this->assertTrue(is_object($c));
@@ -71,7 +71,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_object($object));
   }
   
-  public function testContainerInjection()
+  public function estContainerInjection()
   {
     $c = new Sabel_Container_DI();
     $module = $c->loadInjected('Data_Ditest_Module');
@@ -89,7 +89,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_float($runningTime->calcurate()));
   }
   
-  public function testMockedInjection()
+  public function estMockedInjection()
   {
     $c = new Sabel_Container_DI();
     $module = $c->loadInjected('Data_Ditest_Module');
@@ -100,13 +100,13 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertEquals('mocked!', $array[0]);
   }
   
-  public function testConvertClassName()
+  public function estConvertClassName()
   {
     $this->assertEquals(convertClassPath('Ditest'), 'Ditest');
     $this->assertEquals(convertClassPath('Data_Ditest_Module_Test'), 'data.ditest.module.Test');
   }
   
-  public function testAnnotation()
+  public function estAnnotation()
   {
     $c = new Sabel_Container_DI();
     $ar     = $c->load('Sabel_Annotation_Reader');
@@ -124,9 +124,56 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     
     $this->assertEquals('mocked!', $module->test('abc'));
   }
+  
+  /**
+   * @todo think assertion of aspect
+   *
+   */
+  public function testAspectOriented()
+  {
+    $order = Sabel_Container_DI::create()->loadInjected('Order');
+    $order->registOrder();
+  }
 }
 
+class AspectOrderRegistration
+{
+  public function when($method)
+  {
+    return ($method == 'registOrder');
+  }
+  
+  public function throws()
+  {
+  }
+  
+  public function before($method, $arg)
+  {
+    $customer = new Customer();
+    $customer->incrementQuantityOfOrder();
+  }
+  
+  public function after($method, $result)
+  {
+  }
+}
 
+class Customer
+{
+  public function cancelOrder()
+  {
+  }
+  
+  public function incrementQuantityOfOrder()
+  {
+    return "do increment";
+  }
+}
 
-
-
+class Order
+{
+  public function registOrder()
+  {
+    return "do regist order";
+  }
+}

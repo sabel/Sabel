@@ -28,6 +28,7 @@ class Sabel_Injection_Injector
   public function __call($method, $arg)
   {
     $i = new Sabel_Injection_Calls();
+    
     $i->doBefore($method, $arg);
     
     $result = $this->target->$method($arg);

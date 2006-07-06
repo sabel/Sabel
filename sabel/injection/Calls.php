@@ -27,14 +27,16 @@ class Sabel_Injection_Calls
   public function doBefore($method, $arg)
   {
     foreach (self::$before as $bi => $object) {
-      $object->before($method, $arg);
+      if ($object->when($method))
+        $object->before($method, $arg);
     }
   }
   
   public function doAfter($method, &$result)
   {
     foreach (self::$after as $ai => $object) {
-      $object->after($method, $result);
+      if ($object->when($method))
+        $object->after($method, $result);
     }
   }
   
