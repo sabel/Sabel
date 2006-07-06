@@ -22,7 +22,6 @@ function uses($uses)
   $loaded = false;
   foreach ($paths as $pathidx => $path) {
     $fullpath = $path.$classpath.'.php';
-    var_dump($fullpath);
     if (is_file($fullpath)) {
       require_once($fullpath);
       $loaded = true;

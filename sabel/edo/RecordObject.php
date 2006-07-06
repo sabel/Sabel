@@ -6,12 +6,6 @@ uses('sabel.edo.RecordClasses');
 uses('sabel.edo.driver.Pdo');
 uses('sabel.edo.driver.Mysql');
 uses('sabel.edo.driver.Pgsql');
-/*
-$parent = new Parent();
-$child = $parent->newChild();
-$child->name = 'tanaka';
-$child->save();
-*/
 
 abstract class Sabel_Edo_RecordObject
 {
