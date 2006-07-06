@@ -6,6 +6,8 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
+require_once('sabel/container/DI.php');
+
 class RecordRunningTimeInjection
 {
   private $start;
@@ -49,19 +51,18 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function setUp()
   {
     uses('sabel.injection.Calls');
-    uses('sabel.core.Context');
-    uses('sabel.container.DI');
+    uses('sabel.core.Context');    
     uses('sabel.core.Spyc');
     uses('sabel.core.Exception');
   }
   
   public function testLoad()
   {
-    
     Sabel_Core_Context::addIncludePath('');
     Sabel_Core_Context::addIncludePath('core/');
     
     $c = new Sabel_Container_DI();
+    //$c = new Sabel_Container_DI();
     $this->assertTrue(is_object($c));
     
     $object  = $c->load('SabelContext');
@@ -74,7 +75,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   
   public function testContainerInjection()
   {
-    $c = new SabelDIContainer();
+    $c = new Sabel_Container_DI();
     $module = $c->loadInjected('Ditest_Module');
     
     $ic = new Sabel_Injection_Calls();
@@ -92,7 +93,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   
   public function testMockedInjection()
   {
-    $c = new SabelDIContainer();
+    $c = new Sabel_Container_DI();
     $module = $c->loadInjected('Ditest_Module');
     $ic = new Sabel_Injection_Calls();
     $ic->addAfter(new MockInjection());
@@ -109,7 +110,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   
   public function testAnnotation()
   {
-    $c = new SabelDIContainer();
+    $c = new Sabel_Container_DI();
     $ar     = $c->load('Sabel_Annotation_Reader');
     $ic     = $c->load('Sabel_Injection_Calls');
     $module = $c->loadInjected('Ditest_Module');

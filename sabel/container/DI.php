@@ -12,7 +12,7 @@ class SabelDIHelper
   }
 }
 
-uses('sabel.container.ReflectionClass');
+require_once('sabel/container/ReflectionClass.php');
 
 /**
  * Sabel DI Container

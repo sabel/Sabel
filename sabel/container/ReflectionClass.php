@@ -6,7 +6,7 @@
  * @package org.sabel.di
  * @author Mori Reo <mori.reo@servise.jp>
  */
-class Sabel_ReflectionClass
+class Sabel_Container_ReflectionClass
 {
   protected $reflectionClass;
   protected $implementClassName;
