@@ -64,7 +64,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_object($c));
     
     $object  = $c->load('Sabel_Core_Context');
-    $o2 = $c->load('Sabel_Ditest_Module');
+    $o2 = $c->load('Data_Ditest_Module');
     
     $this->assertEquals('ModuleImpl result.', $o2->test('a'));
     
@@ -74,7 +74,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testContainerInjection()
   {
     $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Sabel_Ditest_Module');
+    $module = $c->loadInjected('Data_Ditest_Module');
     
     $ic = new Sabel_Injection_Calls();
     
@@ -92,7 +92,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testMockedInjection()
   {
     $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Sabel_Ditest_Module');
+    $module = $c->loadInjected('Data_Ditest_Module');
     $ic = new Sabel_Injection_Calls();
     $ic->addAfter(new MockInjection());
     $this->assertEquals('mocked!', $module->test('a'));
@@ -103,7 +103,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testConvertClassName()
   {
     $this->assertEquals(convertClassPath('Ditest'), 'Ditest');
-    $this->assertEquals(convertClassPath('Sabel_Ditest_Module_Test'), 'sabel.ditest.module.Test');
+    $this->assertEquals(convertClassPath('Data_Ditest_Module_Test'), 'data.ditest.module.Test');
   }
   
   public function testAnnotation()
@@ -111,9 +111,9 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $c = new Sabel_Container_DI();
     $ar     = $c->load('Sabel_Annotation_Reader');
     $ic     = $c->load('Sabel_Injection_Calls');
-    $module = $c->loadInjected('Sabel_Ditest_Module');
+    $module = $c->loadInjected('Data_Ditest_Module');
     
-    $list = $ar->annotation('Sabel_Ditest_Module');
+    $list = $ar->annotation('Data_Ditest_Module');
     
     $it = $list->iterator();
     
