@@ -1,10 +1,8 @@
 <?php
 
-interface Response
-{
-}
+uses('sabel.response.Interface');
 
-class WebResponse implements Response
+class Sabel_Response_Web implements Sabel_Response_Interface
 {
   protected $responses = array();
 

@@ -1,8 +1,8 @@
 <?php
 
-uses('core.logger.Interface');
+uses('sabel.logger.Interface');
 
-class Core_Logger_File implements Core_Logger_Interface
+class Sabel_Logger_File implements Sabel_Logger_Interface
 {
   const LOG_FILE = 'logs/sabel.log';
   

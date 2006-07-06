@@ -24,22 +24,24 @@ class ParsedRequest
   protected function parse($request)
   {
     if (empty($request)) {
-      $uri = $_SERVER['REQUEST_URI'];
+      //$uri = $_SERVER['REQUEST_URI'];
+      $uri = explode('url=', $_SERVER['QUERY_STRING']);
+      $uri = $uri[1];
     } else {
       $uri = $request;
     }
     
     $sp = split('/', $uri);
-    array_shift($sp);
+    //array_shift($sp);
     
     $request = array();
     foreach ($sp as $p => $v) {
-      if (strpos($v, '?')) {
-        $splited = split('\?', $v);
+      if (strpos($v, '&')) {
+        $splited = split('&', $v);
         $request[2] = $splited[0];
         $request[3] = '?'.$splited[1];
-      } else if (substr($v, 0, 1) == '?') {
-        $request[3] = $v;
+      } else if (substr($v, 0, 1) == '&') {
+        $request[3] = '?'.substr($v, 1);
       } else {
         $request[] = $v;
       }

@@ -3,6 +3,9 @@
 //require_once('Parameters.php');
 //require_once('Response.php');
 //require_once('DirectoryList.php');
+uses('sabel.cache.Memcache');
+uses('sabel.response.Web');
+uses('sabel.config.Cached');
 
 /**
  * page controller base class.
@@ -45,7 +48,7 @@ abstract class SabelPageController
   
   public function setup($request)
   {
-    $this->container = new SabelDIContainer();
+    $this->container = new Sabel_Container_DI();
     
     $this->request = $request;
     $this->setupLogger();
@@ -57,23 +60,23 @@ abstract class SabelPageController
   
   protected function setupLogger()
   {
-    $this->logger = $this->container->load('Core_Logger_File');
+    $this->logger = $this->container->load('Sabel_Logger_File');
   }
   
   protected function setupResponse()
   {
-    $this->response = new WebResponse();
+    $this->response = new Sabel_Response_Web();
   }
   
   protected function setupConfig()
   {
-    $this->config = CachedConfigImpl::create();
+    $this->config = Sabel_Config_Cached::create();
   }
   
   protected function setupCache()
   {
     $conf = $this->config->get('Memcache');
-    $this->cache = MemCacheImpl::create($conf['server']);
+    $this->cache = Sabel_Cache_Memcache::create($conf['server']);
   }
   
   public function execute($method)

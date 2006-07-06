@@ -17,6 +17,8 @@ require_once('sabel/request/Request.php');
 require_once('sabel/request/ParsedRequest.php');
 require_once('sabel/core/Exception.php');
 
+require_once('sabel/logger/File.php');
+
 require_once('sabel/controller/Page.php');
 require_once('sabel/template/Director.php');
 require_once('sabel/template/Engine.php');
@@ -75,7 +77,8 @@ class SabelPageWebController implements SabelController
         $controller->execute(SabelConst::DEFAULT_METHOD);
       }
     } catch (Exception $e) {
-      $logger = new Core_Logger_File();
+      $logger = new Sabel_Logger_File();
+var_dump($e);exit;
       $logger->log($e->getMessage());
     }
   }
