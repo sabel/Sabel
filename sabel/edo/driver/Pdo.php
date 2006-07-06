@@ -1,10 +1,10 @@
 <?php
 
-require_once('EDO.php');
-require_once('DBConnection.php');
-require_once('SQLObject.php');
+uses('sabel.edo.driver.Interface');
+uses('sabel.edo.DBConnection');
+uses('sabel.edo.SQLObject');
 
-class PdoEDO implements EDO
+class Sabel_EDO_Driver_Pdo implements Sabel_EDO_Driver_Interface
 {
   private $pdo, $stmt, $sqlObj, $myDb;
 

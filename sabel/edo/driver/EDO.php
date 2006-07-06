@@ -1,6 +1,6 @@
 <?php
 
-interface EDO
+interface Sabel_EDO_Driver_Interface
 {
   public function setBasicSQL($sql);
   public function setUpdateSQL($table, $data);

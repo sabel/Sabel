@@ -1,8 +1,8 @@
 <?php
 
-require_once('RecordObject.php');
+uses('sabel.EDO.RecordObject');
 
-class DBConnection
+class Sabel_EDO_DBConnection
 {
   private static $connList = array();
 

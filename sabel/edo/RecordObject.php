@@ -1,12 +1,11 @@
 <?php
 
-require_once('DBConnection.php');
+uses('sabel.edo.DBConnection');
+uses('sabel.edo.drvier.Interface');
+uses('sabel.edo.driver.Pdo');
+uses('sabel.edo.RecordClasses')
 
-require_once('EDO.php');
-require_once('PdoEDO.php');
-require_once('RecordClasses.php');
-
-abstract class RecordObject
+abstract class Sabel_EDO_RecordObject
 {
   protected
     $constraints      = array(),
