@@ -112,7 +112,7 @@ class Sabel_Container_ReflectionClass
   {
     $spyc = new Spyc();
                    
-    $paths = SabelContext::getIncludePath();
+    $paths = Sabel_Core_Context::getIncludePath();
     
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;

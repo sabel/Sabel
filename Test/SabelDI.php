@@ -7,6 +7,7 @@ require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
 require_once('sabel/container/DI.php');
+require_once('sabel/core/spyc.php');
 
 class RecordRunningTimeInjection
 {
@@ -51,8 +52,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function setUp()
   {
     uses('sabel.injection.Calls');
-    uses('sabel.core.Context');    
-    uses('sabel.core.Spyc');
+    
     uses('sabel.core.Exception');
   }
   
@@ -62,11 +62,10 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     Sabel_Core_Context::addIncludePath('core/');
     
     $c = new Sabel_Container_DI();
-    //$c = new Sabel_Container_DI();
     $this->assertTrue(is_object($c));
     
-    $object  = $c->load('SabelContext');
-    $o2 = $c->load('Ditest_Module');
+    $object  = $c->load('Sabel_Core_Context');
+    $o2 = $c->load('Sabel_Ditest_Module');
     
     $this->assertEquals('ModuleImpl result.', $o2->test('a'));
     
@@ -76,7 +75,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testContainerInjection()
   {
     $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Ditest_Module');
+    $module = $c->loadInjected('Sabel_Ditest_Module');
     
     $ic = new Sabel_Injection_Calls();
     
@@ -94,7 +93,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testMockedInjection()
   {
     $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Ditest_Module');
+    $module = $c->loadInjected('Sabel_Ditest_Module');
     $ic = new Sabel_Injection_Calls();
     $ic->addAfter(new MockInjection());
     $this->assertEquals('mocked!', $module->test('a'));
@@ -105,7 +104,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testConvertClassName()
   {
     $this->assertEquals(convertClassPath('Ditest'), 'Ditest');
-    $this->assertEquals(convertClassPath('Ditest_Module_Test'), 'ditest.module.Test');
+    $this->assertEquals(convertClassPath('Sabel_Ditest_Module_Test'), 'sabel.ditest.module.Test');
   }
   
   public function testAnnotation()
@@ -113,9 +112,9 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $c = new Sabel_Container_DI();
     $ar     = $c->load('Sabel_Annotation_Reader');
     $ic     = $c->load('Sabel_Injection_Calls');
-    $module = $c->loadInjected('Ditest_Module');
+    $module = $c->loadInjected('Sabel_Ditest_Module');
     
-    $list = $ar->annotation('Ditest_ModuleImpl');
+    $list = $ar->annotation('Sabel_Ditest_Module');
     
     $it = $list->iterator();
     
