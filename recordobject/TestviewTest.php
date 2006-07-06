@@ -76,7 +76,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $sql .= " CONSTRAINT customer_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
 
-    $this->customer = new Common_Record('customer');
+    $this->customer = new Customer();
 
     $sql  = "CREATE TABLE customer_order (id int2 NOT NULL,customer_id int2 NOT NULL,";
     $sql .= " CONSTRAINT customer_order_pkey PRIMARY KEY (id) );";
@@ -362,7 +362,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testSelectParentObject()
   {
-    $this->test->setSelectType(RecordObject::WITH_PARENT_OBJECT);
+    //$this->test->setSelectType(RecordObject::WITH_PARENT_OBJECT);
     $obj = $this->test->selectOne(1);
 
     $this->assertEquals($obj->id, 1);
@@ -400,9 +400,6 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $cu = $this->customer->selectOne(1);
     $this->assertEquals($cu->name, 'tanaka');
     
-    $cu->setChildConstraint('limit', 10);
-    $cu->getChildren('customer_order');
-
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 4);
 
@@ -416,7 +413,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $cu->setChildConstraint(array('limit' => 10,
                                   'order' => 'id desc'));
 
-    $cu->getChildren('customer_order');
+    $cu->getChild('customer_order', $cu);
 
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 4);
@@ -432,7 +429,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
                                   'offset' => 2,
                                   'order'  => 'id desc'));
 
-    $cu->getChildren('customer_order');
+    $cu->getChild('customer_order', $cu);
 
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 2);
@@ -440,6 +437,71 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($orders[0]->id, 2);
     $this->assertEquals($orders[1]->id, 1);
     $this->assertEquals($orders[2]->id, null);
+  }
+
+  public function testSelectAll_AutoGetChild()
+  {
+    $cu   = new Customer();
+    $objs = $cu->select();
+
+    $this->assertEquals(count($objs), 2);
+    $this->assertNotEquals($objs[0]->customer_order, null);
+    $this->assertNotEquals($objs[1]->customer_order, null);
+
+    $this->assertEquals(count($objs[0]->customer_order), 4);
+    $this->assertEquals(count($objs[1]->customer_order), 2);
+
+    $this->assertEquals($objs[0]->customer_order[0]->id, 1);
+    $this->assertEquals($objs[0]->customer_order[1]->id, 2);
+    $this->assertEquals($objs[1]->customer_order[0]->id, 3);
+    $this->assertEquals($objs[1]->customer_order[1]->id, 4);
+    $this->assertEquals($objs[0]->customer_order[2]->id, 5);
+    $this->assertEquals($objs[0]->customer_order[3]->id, 6);
+
+    //-------------------------------------------------------
+
+    $cu   = new Customer();
+    $cu->setChildConstraint(array('limit' => 10,
+                                  'order' => 'id desc'));
+    $objs = $cu->select();
+
+    $this->assertEquals($objs[0]->customer_order[0]->id, 6);
+    $this->assertEquals($objs[0]->customer_order[1]->id, 5);
+    $this->assertEquals($objs[1]->customer_order[0]->id, 4);
+    $this->assertEquals($objs[1]->customer_order[1]->id, 3);
+    $this->assertEquals($objs[0]->customer_order[2]->id, 2);
+    $this->assertEquals($objs[0]->customer_order[3]->id, 1);
+
+    //-------------------------------------------------------
+
+    $cu   = new Customer();
+    $objs = $cu->select();
+    $this->assertNotEquals($objs[0]->customer_order[0]->order_line, null);
+    $this->assertNotEquals($objs[1]->customer_order[0]->order_line, null);
+
+    $this->assertEquals($objs[0]->customer_order[0]->order_line[0]->id, 2);
+    $this->assertEquals($objs[0]->customer_order[0]->order_line[1]->id, 8);
+    $this->assertEquals($objs[0]->customer_order[0]->order_line[2]->id, 11);
+    $this->assertEquals($objs[0]->customer_order[0]->order_line[3]->id, null);  // hasn't
+
+    $this->assertEquals($objs[0]->customer_order[1]->order_line[0]->id, 3);
+    $this->assertEquals($objs[0]->customer_order[1]->order_line[0]->item_id, 3);
+    $this->assertEquals($objs[0]->customer_order[1]->order_line[1]->id, 4);
+    $this->assertEquals($objs[0]->customer_order[1]->order_line[1]->item_id, 1);
+    $this->assertEquals($objs[0]->customer_order[1]->order_line[2]->id, null);  // hasn't
+
+    $this->assertEquals($objs[0]->customer_order[2]->order_line[0]->id, 1);
+    $this->assertEquals($objs[0]->customer_order[2]->order_line[0]->item_id, 2);
+    $this->assertEquals($objs[0]->customer_order[2]->order_line[1]->id, 7);
+    $this->assertEquals($objs[0]->customer_order[2]->order_line[1]->item_id, 3);
+    $this->assertEquals($objs[0]->customer_order[2]->order_line[2]->id, null);  // hasn't
+
+    $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->id, 6);
+    $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->item_id, 2);
+    $this->assertEquals($objs[1]->customer_order[0]->order_line[1]->id, null);
+    $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->id, 5);
+    $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->item_id, 3);
+    $this->assertEquals($objs[1]->customer_order[1]->order_line[1]->id, null);
   }
 
   public function testGetCount()

@@ -170,6 +170,8 @@ abstract class RecordObject
 
   public function setChildConstraint($param1, $param2 = null)
   {
+    $this->childConstraints = array();
+
     if (is_array($param1)) {
       foreach ($param1 as $key => $val) {
         if (is_null($val)) {
@@ -274,6 +276,9 @@ abstract class RecordObject
         $row = $this->selectWithParent($this->selectType, $row);
         $this->setProperties($row);
         $this->selected = true;
+
+        $myChild = $this->getMyChildren();
+        if (!is_null($myChild)) $this->getChild($myChild, $this);
         return $this;
       } else {
         $this->data = $this->selectCondition;
@@ -288,21 +293,21 @@ abstract class RecordObject
       $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
-    return $this->getRecords($this->conditions, $this->constraints);
+    return $this->getRecords($this->conditions, $this->constraints, $this->childConstraints);
   }
 
-  public function getChildren($child_table)
+  public function getChild($child_table, $obj)
   {
-    if (!isset($this->childConstraints['limit']))
+    if (!isset($obj->childConstraints['limit']))
       throw new Exception('Error: getChildren() [LIMIT] must be set constraints');
 
-    $condition = array("{$this->table}_id" => $this->data[$this->defColumn]);
+    $condition = array("{$obj->table}_id" => $obj->data[$obj->defColumn]);
 
-    $this->edo->setBasicSQL("SELECT * FROM {$child_table}");
-    $this->data[$child_table] = $this->getRecords($condition, $this->childConstraints, $child_table);
+    $obj->edo->setBasicSQL("SELECT * FROM {$child_table}");
+    $obj->data[$child_table] = $obj->getRecords($condition, $obj->childConstraints, $child_table);
   }
 
-  protected function getRecords(&$conditions, &$constraints = null, $child_table = null)
+  protected function getRecords(&$conditions, &$constraints = null, $param = null)
   {
     $this->edo->makeQuery($conditions, $constraints);
 
@@ -311,10 +316,22 @@ abstract class RecordObject
 
     if ($this->edo->execute()) {
       while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
-        $obj = (is_null($child_table)) ? new $class() : new Child_Record($child_table);
+        if (is_array($param)) {
+          $obj = new $class();
+          $obj->setChildConstraint($param);
+        } else {
+          if (class_exists($param)) {
+            $obj = new $param();
+          } else {
+            $obj = new Child_Record($param);
+          }
+        }
         $row = $this->selectWithParent($this->selectType, $row);
         $obj->setProperties($row);
         $obj->selected = true;
+
+        $myChild = $obj->getMyChildren();
+        if (!is_null($myChild)) $obj->getChild($myChild, $obj);
         $recordObj[] = $obj;
       }
       return $recordObj;
@@ -345,7 +362,7 @@ abstract class RecordObject
 
   protected function addParentProperties($table, $id, &$row)
   {
-    if (!$this->checkTableReference($table)) return null;
+    if ($this->hasAlreadyAcquiredParent($table)) return null;
 
     $edo = $this->makeBasicQueryForChild($table, $id);
     if ($edo->execute()) {
@@ -369,7 +386,7 @@ abstract class RecordObject
 
   protected function addParentObject($table, $id)
   {
-    if (!$this->checkTableReference($table)) return null;
+    if ($this->hasAlreadyAcquiredParent($table)) return null;
 
     $edo = $this->makeBasicQueryForChild($table, $id);
     if ($edo->execute()) {
@@ -407,13 +424,13 @@ abstract class RecordObject
     return $edo;
   }
 
-  protected function checkTableReference($table)
+  protected function hasAlreadyAcquiredParent($table)
   {
     for ($i = 0; $i < count($this->parentTables); $i++) {
-      if ($this->parentTables[$i] == $table) return false;
+      if ($this->parentTables[$i] == $table) return true;
     }
     $this->parentTables[] = $table;
-    return true;
+    return false;
   }
 
   public function save($data = null)
