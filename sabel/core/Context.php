@@ -1,6 +1,6 @@
 <?php
 
-class SabelContext
+class Sabel_Core_Context
 {
   private static $parameters = array();
   

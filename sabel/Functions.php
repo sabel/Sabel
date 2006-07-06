@@ -8,7 +8,7 @@
  */
 function uses($uses)
 {
-  $paths = SabelContext::getIncludePath();
+  $paths = Sabel_Core_Context::getIncludePath();
   
   $usesArray = explode('.', $uses);
   foreach ($usesArray as $idx => $name) {

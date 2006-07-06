@@ -3,11 +3,8 @@
 require_once('PHPUnit2/Framework/TestCase.php');
 
 // must need by DI
-require_once('core/functions.php');
-require_once('core/SabelContext.php');
-require_once('core/SabelDIContainer.php');
-require_once('core/spyc.php');
-require_once('core/SabelException.php');
+require_once('sabel/Functions.php');
+require_once('sabel/core/Context.php');
 
 class RecordRunningTimeInjection
 {
@@ -52,15 +49,19 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function setUp()
   {
     uses('sabel.injection.Calls');
+    uses('sabel.core.Context');
+    uses('sabel.container.DI');
+    uses('sabel.core.Spyc');
+    uses('sabel.core.Exception');
   }
   
   public function testLoad()
   {
     
-    SabelContext::addIncludePath('');
-    SabelContext::addIncludePath('core/');
+    Sabel_Core_Context::addIncludePath('');
+    Sabel_Core_Context::addIncludePath('core/');
     
-    $c = new SabelDIContainer();
+    $c = new Sabel_Container_DI();
     $this->assertTrue(is_object($c));
     
     $object  = $c->load('SabelContext');
