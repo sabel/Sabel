@@ -12,6 +12,8 @@ class SabelDIHelper
   }
 }
 
+uses('sabel.container.ReflectionClass');
+
 /**
  * Sabel DI Container
  *
@@ -45,13 +47,13 @@ class Sabel_Container_DI
     
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
-    $reflectionClassExt = new SabelReflectionClass($reflectionClass, $reflectionClass);
+    $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass, $reflectionClass);
     
     if ($reflectionClassExt->isInterface()) {
       $reflectionClass = 
         new ReflectionClass($reflectionClassExt->getImplementClass());
         
-      $this->classStack[] = new SabelReflectionClass($reflectionClass);
+      $this->classStack[] = new Sabel_Container_ReflectionClass($reflectionClass);
       $class = $reflectionClass->getName();
     } else {
       $this->classStack[] = $reflectionClassExt;
@@ -72,7 +74,7 @@ class Sabel_Container_DI
         if ($this->hasParameterDependOnClass($depend, '__construct')) {
           $this->loadClass($dependClass->getName()); // call myself
         } else {          
-          $this->classStack[] = new SabelReflectionClass($param->getClass(), $reflectionClass);
+          $this->classStack[] = new Sabel_Container_ReflectionClass($param->getClass(), $reflectionClass);
         }
       }
     }
