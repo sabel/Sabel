@@ -228,11 +228,13 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT COUNT(*) AS count FROM {$this->table}");
-    $this->edo->makeQuery($this->conditions, $this->constraints);
+    $this->edo->makeQuery($this->conditions, array('limit' => 1));
 
     if ($this->edo->execute()) {
       $row = $this->edo->fetch();
       return (int)$row[0];
+    } else {
+      throw new Exception('Error: getCount()');
     }
   }
   
@@ -250,15 +252,15 @@ abstract class Sabel_Edo_RecordObject
         return $row[0] + 1;
       }
     } else {
-      return false;
+      throw new Exception('Error: getNextNumber()');
     }
   }
 
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) && is_null($this->conditions)) {
+    if (is_null($param1) && is_null($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition');
-    }
+
     $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
@@ -273,12 +275,13 @@ abstract class Sabel_Edo_RecordObject
         $this->selected = true;
 
         $myChild = $this->getMyChildren();
-        if (!is_null($myChild)) $this->getChild($myChild, $this);
-        return $this;
+        if (!is_null($myChild)) $this->getDefaultChild($myChild, $this);
       } else {
         $this->data = $this->selectCondition;
-        return $this;
       }
+      $this->constraints = array();
+      $this->conditions  = array();
+      return $this;
     }
   }
 
@@ -302,7 +305,7 @@ abstract class Sabel_Edo_RecordObject
     $obj->data[$child_table] = $obj->getRecords($condition, $obj->childConstraints, $child_table);
   }
 
-  protected function getRecords(&$conditions, &$constraints = null, $param = null)
+  protected function getRecords(&$conditions, $constraints = null, $param = null)
   {
     $this->edo->makeQuery($conditions, $constraints);
 
@@ -326,12 +329,25 @@ abstract class Sabel_Edo_RecordObject
         $obj->selected = true;
 
         $myChild = $obj->getMyChildren();
-        if (!is_null($myChild)) $obj->getChild($myChild, $obj);
+        if (!is_null($myChild)) $this->getDefaultChild($myChild, $obj);
         $recordObj[] = $obj;
       }
+      $this->constraints = array();
+      $this->conditions  = array();
       return $recordObj;
     } else {
       throw new Exception('Error: getRecords()');
+    }
+  }
+
+  protected function getDefaultChild($children, $obj)
+  {
+    if (is_array($children)) {
+      foreach ($children as $val) {
+        $obj->getChild($val, $obj);
+      }
+    } else {
+      $obj->getChild($children, $obj);
     }
   }
 
@@ -468,7 +484,9 @@ abstract class Sabel_Edo_RecordObject
     $this->edo->setUpdateSQL($this->table, $this->data);
     $this->edo->makeQuery($this->conditions);
 
-    if (!$this->edo->execute()) {
+    if ($this->edo->execute()) {
+      $this->conditions = array();
+    } else {
       throw new Exception('Error: allUpdate()');
     }
   }
@@ -478,9 +496,11 @@ abstract class Sabel_Edo_RecordObject
     $this->edo->setUpdateSQL($this->table, $this->newData);
     $this->edo->makeQuery($this->selectCondition);
 
-    if (!$this->edo->execute()) {
+    if ($this->edo->execute()) {
+      $this->selectCondition = array();
+    } else {
       throw new Exception('Error: update()');
-    } 
+    }
   }
 
   protected function insert()
@@ -526,9 +546,12 @@ abstract class Sabel_Edo_RecordObject
     $this->edo->setBasicSQL("DELETE FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
-    if (!$this->edo->execute()) {
+    if ($this->edo->execute()) {
+      $this->conditions  = array();
+      $this->constraints = array();
+    } else {
       throw new Exception('Error: delete()');
-    } 
+    }
   }
 
   public function execute($sql)

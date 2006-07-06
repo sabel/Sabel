@@ -98,41 +98,35 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     return $this->execute();
   }
 
-  public function makeQuery(&$conditions = null, &$constraints = null)
+  public function makeQuery($conditions, $constraints = null)
   {
-    if (!empty($conditions)) {
+    foreach ($conditions as $key => $val) {
 
-      foreach ($conditions as $key => $val) {
-
-        if ($val[0] == '>' || $val[0] == '<') {
-          $this->sqlObj->makeLess_GreaterSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
-          $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
-          $this->sqlObj->makeWhereInSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
-          $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
-          $this->sqlObj->makeBetweenSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
-          $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
-          $this->sqlObj->makeEitherSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
-          $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
-          $this->sqlObj->makeLikeSQL($key, $val);
-        } elseif (strtolower($val) == 'null') {
-          $this->sqlObj->makeIsNullSQL($key);
-        } elseif (strtolower($val) == 'not null') {
-          $this->sqlObj->makeIsNotNullSQL($key);
-        } else {
-          $this->sqlObj->makeNormalConditionSQL($key, $val);
-        }
+      if ($val[0] == '>' || $val[0] == '<') {
+        $this->sqlObj->makeLess_GreaterSQL($key, $val);
+      } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
+        $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
+        $this->sqlObj->makeWhereInSQL($key, $val);
+      } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
+        $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
+        $this->sqlObj->makeBetweenSQL($key, $val);
+      } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
+        $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
+        $this->sqlObj->makeEitherSQL($key, $val);
+      } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
+        $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
+        $this->sqlObj->makeLikeSQL($key, $val);
+      } elseif (strtolower($val) == 'null') {
+        $this->sqlObj->makeIsNullSQL($key);
+      } elseif (strtolower($val) == 'not null') {
+        $this->sqlObj->makeIsNotNullSQL($key);
+      } else {
+        $this->sqlObj->makeNormalConditionSQL($key, $val);
       }
-      $conditions = array();
     }
 
-    if (!empty($constraints)) {
+    if (!empty($constraints))
       $this->sqlObj->makeConstraintsSQL($constraints);
-      $constraints = array();
-    }
   }
 
   public function execute($sql = null)

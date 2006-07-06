@@ -96,6 +96,12 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $obj->execute($sql);
 
     $this->orderLine = new Common_Record('order_line');
+
+    $sql  = "CREATE TABLE customer_telephone (id int2 NOT NULL,customer_id int2 NOT NULL,telephone varchar,";
+    $sql .= " CONSTRAINT customer_telephon_pkey PRIMARY KEY (id) );";
+    $obj->execute($sql);
+
+    $this->telephone = new Common_Record('customer_telephone');
   }
 
   /**
@@ -170,6 +176,18 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
       $this->orderLine->multipleInsert($data);
     }
     $this->assertEquals($this->orderLine->getCount(), 11);
+
+    $insertData = array();
+    $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
+    $insertData[] = array('id' => 2,  'customer_id' => 2, 'telephone' => '09022221111');
+    $insertData[] = array('id' => 3,  'customer_id' => 1, 'telephone' => '09011112222');
+    $insertData[] = array('id' => 4,  'customer_id' => 2, 'telephone' => '09022222222');
+
+    foreach ($insertData as $data) {
+      $this->telephone->multipleInsert($data);
+    }
+    $this->assertEquals($this->orderLine->getCount(), 11);
+
   }
     
   public function testInsert()
@@ -529,10 +547,20 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->id, 6);
     $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->item_id, 2);
-    $this->assertEquals($objs[1]->customer_order[0]->order_line[1]->id, null);
+    $this->assertEquals($objs[1]->customer_order[0]->order_line[1]->id, null);  // hasn't
     $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->id, 5);
     $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->item_id, 3);
-    $this->assertEquals($objs[1]->customer_order[1]->order_line[1]->id, null);
+    $this->assertEquals($objs[1]->customer_order[1]->order_line[1]->id, null);  // hasn't
+
+    $this->assertEquals($objs[0]->customer_telephone[0]->id, 1);
+    $this->assertEquals($objs[0]->customer_telephone[1]->id, 3);
+    $this->assertEquals($objs[1]->customer_telephone[0]->id, 2);
+    $this->assertEquals($objs[1]->customer_telephone[1]->id, 4);
+
+    $this->assertEquals($objs[0]->customer_telephone[0]->telephone, '09011111111');
+    $this->assertEquals($objs[0]->customer_telephone[1]->telephone, '09011112222');
+    $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
   }
 
   public function testGetCount()

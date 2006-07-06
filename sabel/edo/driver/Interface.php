@@ -6,7 +6,7 @@ interface Sabel_Edo_Driver_Interface
   public function setUpdateSQL($table, $data);
   public function setInsertSQL($table, $data);
 
-  public function makeQuery(&$conditions = null, &$constraints = null);
+  public function makeQuery($conditions, $constraints = null);
 
   public function execute($sql = null);
   public function fetch($style = null);

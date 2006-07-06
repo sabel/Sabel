@@ -46,7 +46,7 @@ class Test extends BaseUserRecordObject
 
 class Customer extends BaseUserRecordObject
 {
-  protected $myChildren = 'customer_order';
+  protected $myChildren = array('customer_order','customer_telephone');
   protected $childConstraints = array('limit' => 10);
 }
 
