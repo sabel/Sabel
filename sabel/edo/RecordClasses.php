@@ -1,8 +1,8 @@
 <?php
 /*
-require_once('RecordObject.php');
+uses('sabel.edo.RecordObject');
 
-abstract class BaseUserRecordObject extends RecordObject
+abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 {
   protected $myChildren = null;
 
@@ -18,7 +18,7 @@ abstract class BaseUserRecordObject extends RecordObject
   }
 }
 
-abstract class BaseMailRecordObject extends RecordObject
+abstract class BaseMailRecordObject extends Sabel_Edo_RecordObject
 {
 
 }
@@ -26,11 +26,7 @@ abstract class BaseMailRecordObject extends RecordObject
 // for unit-test
 class Test extends BaseUserRecordObject
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->selectType = RecordObject::WITH_PARENT_OBJECT;
-    parent::__construct($param1, $param2);
-  }
+  protected $selectType = Sabel_Edo_RecordObject::WITH_PARENT_OBJECT;
 
   public function getCondition()
   {
@@ -70,7 +66,7 @@ class Child_Record extends BaseUserRecordObject
   }
 }
 
-class Common_Record extends RecordObject
+class Common_Record extends Sabel_Edo_RecordObject
 {
   public function __construct($table = null)
   {

@@ -1,11 +1,19 @@
 <?php
 
 uses('sabel.edo.DBConnection');
-uses('sabel.edo.drvier.Interface');
-uses('sabel.edo.driver.Pdo');
 uses('sabel.edo.RecordClasses');
 
-abstract class Sabel_EDO_RecordObject
+uses('sabel.edo.driver.Pdo');
+uses('sabel.edo.driver.Mysql');
+uses('sabel.edo.driver.Pgsql');
+/*
+$parent = new Parent();
+$child = $parent->newChild();
+$child->name = 'tanaka';
+$child->save();
+*/
+
+abstract class Sabel_Edo_RecordObject
 {
   protected
     $constraints      = array(),
@@ -37,15 +45,15 @@ abstract class Sabel_EDO_RecordObject
 
   protected function getMyEDO()
   {
-    $conn = DBConnection::getConnection($this->owner, $this->useEdo);
+    $conn = Sabel_Edo_DBConnection::getConnection($this->owner, $this->useEdo);
     
     if ($this->useEdo == 'pdo') {
-      $pdoDb = DBConnection::getPdoDB($this->owner);
-      return new PdoEDO($conn, $pdoDb);
+      $pdoDb = Sabel_Edo_DBConnection::getPdoDB($this->owner);
+      return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($this->useEdo == 'pgsql') {
-      return new PGEDO($conn);
+      return new Sabel_Edo_Driver_Pgsql($conn);
     } elseif ($this->useEdo == 'mysql') {
-      return new MYEDO($conn);
+      return new Sabel_Edo_Driver_Mysql($conn);
     } else {
       //todo
     }
@@ -56,15 +64,15 @@ abstract class Sabel_EDO_RecordObject
     $this->owner  = $owner;
     $this->useEdo = $useEdo;
 
-    $conn = DBConnection::getConnection($owner, $useEdo);
+    $conn = Sabel_Edo_DBConnection::getConnection($owner, $useEdo);
 
     if ($useEdo== 'pdo') {
-      $pdoDb = DBConnection::getPdoDB($owner);
-      $this->edo = new PdoEDO($conn, $pdoDb);
+      $pdoDb = Sabel_Edo_DBConnection::getPdoDB($owner);
+      $this->edo = new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($useEdo == 'pgsql') {
-      $this->edo = new PGEDO($conn);
+      $this->edo = new Sabel_Edo_Driver_Pgsql($conn);
     } elseif ($useEdo == 'mysql') {
-      $this->edo = new MYEDO($conn);
+      $this->edo = new Sabel_Edo_Driver_Mysql($conn);
     } else {
       //todo
     }
@@ -74,14 +82,8 @@ abstract class Sabel_EDO_RecordObject
   {
     $this->table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', get_class($this)));
 
-    if (!is_null($param1)) {
-      if (!is_null($param2)) {
-        $this->setColumn($param1);
-        $this->selectOne($param2);
-      } else {
-        $this->selectOne($param1);
-      }
-    }
+    if (!is_null($param1))
+      $this->selectOne($param1, $param2);
   }
 
   public function __set($key, $val)
@@ -270,7 +272,7 @@ abstract class Sabel_EDO_RecordObject
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
     if ($this->edo->execute()) {
-      $row = $this->edo->fetch(EDO::FETCH_ASSOC);
+      $row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       if ($row) {
         $row = $this->selectWithParent($this->selectType, $row);
         $this->setProperties($row);
@@ -314,7 +316,7 @@ abstract class Sabel_EDO_RecordObject
     $class     = get_class($this);
 
     if ($this->edo->execute()) {
-      while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
+      while ($row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
         if (is_array($param)) {
           $obj = new $class();
           $obj->setChildConstraint($param);
@@ -365,7 +367,7 @@ abstract class Sabel_EDO_RecordObject
 
     $edo = $this->makeBasicQueryForChild($table, $id);
     if ($edo->execute()) {
-      $prow = $edo->fetch(EDO::FETCH_ASSOC);
+      $prow = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
 
       if (!$prow) return;
 
@@ -389,8 +391,12 @@ abstract class Sabel_EDO_RecordObject
 
     $edo = $this->makeBasicQueryForChild($table, $id);
     if ($edo->execute()) {
-      $row = $edo->fetch(EDO::FETCH_ASSOC);
-      $obj = new Common_Record($table);
+      $row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      if (class_exists($table)) {
+        $obj = new $table();
+      } else {
+        $obj = new Common_Record($table);
+      }
 
       if (!$row) return $obj;
 
@@ -430,6 +436,24 @@ abstract class Sabel_EDO_RecordObject
     }
     $this->parentTables[] = $table;
     return false;
+  }
+
+  public function newChild($child = null)
+  {
+    $id = $this->data[$this->defColumn];
+    if (empty($id))
+      throw new Exception('Error: who is a parent? hasn\'t id value.');
+
+    $parent = strtolower(get_class($this));
+    $table = (is_null($child)) ? $parant : $child;
+
+    if (class_exists($table)) {
+      $obj = new $table();
+    } else {
+      $obj = new Common_Record($table);
+    }
+    $obj->__set("{$parent}_id", $id);
+    return $obj;
   }
 
   public function save($data = null)
@@ -519,7 +543,7 @@ abstract class Sabel_EDO_RecordObject
     $class = get_class($this);
 
     if ($this->edo->execute($sql)) {
-      while ($row = $this->edo->fetch(EDO::FETCH_ASSOC)) {
+      while ($row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
         $obj = new $class();
         $obj->setProperties($row);
         $recordObj[] = $obj;

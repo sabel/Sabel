@@ -10,9 +10,16 @@ require_once "PHPUnit2/Framework/TestSuite.php";
 // You may remove the following line when all tests have been implemented.
 require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
+require_once "../Functions.php";
 require_once "RecordObject.php";
 require_once "RecordClasses.php";
 require_once "DBConnection.php";
+
+require_once "driver/Interface.php";
+require_once "driver/Pdo.php";
+
+require_once "SQL.php";
+require_once "SQLObject.php";
 
 /**
  * Test class for Person.
@@ -50,7 +57,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
 
-    DBConnection::addConnection('user', 'pdo', $dbCon);
+    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
 
     $obj = new Common_Record();
 
@@ -294,6 +301,16 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertNotEquals($obj2->test2_id, 2);
   }
 
+  public function testSelect()
+  {
+    /*
+    $c = new Customer();
+    for ($i = 0; $i < 1000; $i++) {
+      $c->select();
+    }
+    */
+  }
+
   public function testSelectDefaultResult()
   {
     $obj = $this->test->selectOne(1);
@@ -351,7 +368,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $in2->infinite1_id = 1;
     $in2->save();
 
-    $in1->setSelectType(RecordObject::WITH_PARENT_OBJECT);
+    $in1->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
     $objs = $in1->select();
     $obj = $objs[0];
 
@@ -362,7 +379,6 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testSelectParentObject()
   {
-    //$this->test->setSelectType(RecordObject::WITH_PARENT_OBJECT);
     $obj = $this->test->selectOne(1);
 
     $this->assertEquals($obj->id, 1);
@@ -382,7 +398,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testSelectParentView()
   {
-    $this->test->setSelectType(RecordObject::WITH_PARENT_VIEW);
+    $this->test->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_VIEW);
     $obj = $this->test->selectOne(1);
       
     $this->assertEquals($obj->id, 1);
@@ -439,6 +455,19 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($orders[2]->id, null);
   }
 
+  public function testNewChild()
+  {
+    $cu = new Customer(1);
+    $ch = $cu->newChild('customer_order');
+
+    $number = $ch->getNextNumber();
+    $ch->id = $number;
+    $ch->save();  // auto insert parent_id
+
+    $order = new Customer_Order($number);
+    $this->assertEquals($order->customer_id, 1);  // parent_id
+  }
+
   public function testSelectAll_AutoGetChild()
   {
     $cu   = new Customer();
@@ -448,7 +477,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertNotEquals($objs[0]->customer_order, null);
     $this->assertNotEquals($objs[1]->customer_order, null);
 
-    $this->assertEquals(count($objs[0]->customer_order), 4);
+    $this->assertEquals(count($objs[0]->customer_order), 5);
     $this->assertEquals(count($objs[1]->customer_order), 2);
 
     $this->assertEquals($objs[0]->customer_order[0]->id, 1);
@@ -457,6 +486,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($objs[1]->customer_order[1]->id, 4);
     $this->assertEquals($objs[0]->customer_order[2]->id, 5);
     $this->assertEquals($objs[0]->customer_order[3]->id, 6);
+    $this->assertEquals($objs[0]->customer_order[4]->id, 7);
 
     //-------------------------------------------------------
 
@@ -465,12 +495,13 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
                                   'order' => 'id desc'));
     $objs = $cu->select();
 
-    $this->assertEquals($objs[0]->customer_order[0]->id, 6);
-    $this->assertEquals($objs[0]->customer_order[1]->id, 5);
+    $this->assertEquals($objs[0]->customer_order[0]->id, 7);
+    $this->assertEquals($objs[0]->customer_order[1]->id, 6);
+    $this->assertEquals($objs[0]->customer_order[2]->id, 5);
     $this->assertEquals($objs[1]->customer_order[0]->id, 4);
     $this->assertEquals($objs[1]->customer_order[1]->id, 3);
-    $this->assertEquals($objs[0]->customer_order[2]->id, 2);
-    $this->assertEquals($objs[0]->customer_order[3]->id, 1);
+    $this->assertEquals($objs[0]->customer_order[3]->id, 2);
+    $this->assertEquals($objs[0]->customer_order[4]->id, 1);
 
     //-------------------------------------------------------
 

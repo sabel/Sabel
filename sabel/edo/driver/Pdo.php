@@ -1,10 +1,9 @@
 <?php
 
 uses('sabel.edo.driver.Interface');
-uses('sabel.edo.DBConnection');
 uses('sabel.edo.SQLObject');
 
-class Sabel_EDO_Driver_Pdo implements Sabel_EDO_Driver_Interface
+class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 {
   private $pdo, $stmt, $sqlObj, $myDb;
 
@@ -107,17 +106,17 @@ class Sabel_EDO_Driver_Pdo implements Sabel_EDO_Driver_Interface
 
         if ($val[0] == '>' || $val[0] == '<') {
           $this->sqlObj->makeLess_GreaterSQL($key, $val);
-        } elseif (strstr($key, EDO::IN)) {
-          $key = str_replace(EDO::IN, '', $key);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
           $this->sqlObj->makeWhereInSQL($key, $val);
-        } elseif (strstr($key, EDO::BET)) {
-          $key = str_replace(EDO::BET, '', $key);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
           $this->sqlObj->makeBetweenSQL($key, $val);
-        } elseif (strstr($key, EDO::EITHER)) {
-          $key = str_replace(EDO::EITHER, '', $key);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
           $this->sqlObj->makeEitherSQL($key, $val);
-        } elseif (strstr($key, EDO::LIKE)) {
-          $key = str_replace(EDO::LIKE, '', $key);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
           $this->sqlObj->makeLikeSQL($key, $val);
         } elseif (strtolower($val) == 'null') {
           $this->sqlObj->makeIsNullSQL($key);
@@ -159,7 +158,7 @@ class Sabel_EDO_Driver_Pdo implements Sabel_EDO_Driver_Interface
 
   public function fetch($style = null)
   {
-    if ($style == EDO::FETCH_ASSOC) {
+    if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
       return $this->stmt->fetch(PDO::FETCH_ASSOC, $cursor, $offset);
     } else {
       return $this->stmt->fetch(PDO::FETCH_BOTH, $cursor, $offset);
@@ -168,7 +167,7 @@ class Sabel_EDO_Driver_Pdo implements Sabel_EDO_Driver_Interface
 
   public function fetchAll($style = null)
   {
-    if ($style == EDO::FETCH_ASSOC) {
+    if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
       return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
       return $this->stmt->fetchAll(PDO::FETCH_BOTH);
