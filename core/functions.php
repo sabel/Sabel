@@ -9,13 +9,14 @@
 function uses($uses)
 {
   $paths = SabelContext::getIncludePath();
+  
   $usesArray = explode('.', $uses);
   foreach ($usesArray as $idx => $name) {
     $classNames[] = ucfirst($name);
   }
   $className = implode('_', $classNames);
   $classpath = implode('/', $usesArray);
-  
+    
   $loaded = false;
   foreach ($paths as $pathidx => $path) {
     $fullpath = $path.$classpath.'.php';

@@ -12,86 +12,6 @@ class SabelDIHelper
   }
 }
 
-interface InjectionCall
-{
-  public function executeBefore($method, $arg);
-  public function executeAfter($method, &$result);
-}
-
-class InjectionCalls
-{
-  private static $before = array();
-  private static $after  = array();
-  
-  /**
-   * add both before and after injection.
-   *
-   * @param InjectionCall object
-   * @return void
-   */
-  public function addBoth($injection)
-  {
-    if ($injection instanceOf InjectionCall) {
-      $this->addBefore($injection);
-      $this->addAfter($injection);
-    } else {
-      throw new SabelException(var_export($injection, 1) . ' is not InjectionCall object');
-    }
-  }
-  
-  public function doBefore($method, $arg)
-  {
-    foreach (self::$before as $bi => $object) {
-      $object->executeBefore($method, $arg);
-    }
-  }
-  
-  public function doAfter($method, &$result)
-  {
-    foreach (self::$after as $ai => $object) {
-      $object->executeAfter($method, $result);
-    }
-  }
-  
-  public function addBefore($injection)
-  {
-    self::$before[] = $injection;
-  }
-  
-  public function addAfter($injection)
-  {
-    self::$after[] = $injection;
-  }
-}
-
-/**
- * class injection wrapper.
- *
- * @package org.sabel.aop
- * @author Mori Reo <mori.reo@servise.jp>
- */
-class Injector
-{
-  private $target;
-  
-  public function __construct($target)
-  {
-    $this->target = $target;
-  }
-  
-  public function __call($method, $arg)
-  {
-    $i = new InjectionCalls();
-    $i->doBefore($method, $arg);
-    
-    $result = $this->target->$method($arg);
-    
-    $i->doAfter($method, $result);
-    
-    return $result;
-  }
-}
-
 /**
  * customized reflection class. optimized for sabel
  *
@@ -237,8 +157,9 @@ class SabelDIContainer
   
   public function loadInjected($className, $method = '__construct')
   {
+    uses('sabel.injection.Injector');
     $this->loadClass($className, $method);
-    return new Injector($this->makeInstance());
+    return new Sabel_Injection_Injector($this->makeInstance());
   }
   
   public function loadClass($class, $method)
