@@ -83,7 +83,7 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
   public function testInjectedLoad()
   {
     $obj = $this->c->loadInjected('Data_Ditest_Module');
-    $this->assertEquals('mocked!', $obj->test('a'));
+    $this->assertEquals('ModuleImpl result.', $obj->test('a'));
   }
   
   public function testContainerInjection()

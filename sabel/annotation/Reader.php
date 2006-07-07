@@ -43,9 +43,16 @@ class Sabel_Annotation_Reader
   
   protected function processAnnotation($line)
   {
-    $annotation = split(' ', $this->removeComment($line));
+    $annotation = preg_split('/ +/', $this->removeComment($line));
+    
     if ($annotation[0]{0} == '@') {
-      $this->list->push(new Sabel_Annotation_Context(ltrim($annotation[0], '@ '), $annotation[1]));
+      if (count($annotation) > 2) {
+        $name = array_shift($annotation);
+        $this->list->push(new Sabel_Annotation_Context(ltrim($name, '@ '), $annotation));
+      } else {
+        $name = array_shift($annotation);
+        $this->list->push(new Sabel_Annotation_Context(ltrim($name, '@ '), $annotation[0]));
+      }
     }
   }
   
