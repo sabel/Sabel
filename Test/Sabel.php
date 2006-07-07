@@ -68,7 +68,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
 
   public function testParsedRequestExp()
   {
-    $uri = '/module/ctrl/action?key=value&keyTwo=valueTwo';
+    $uri = 'module/ctrl/action?key=value&keyTwo=valueTwo';
     $pp = ParsedRequest::create($uri);
     
     $this->assertEquals('action', $pp->getMethod());
