@@ -46,7 +46,7 @@ class ParsedRequest
     if (!empty($this->request[0])) {
       return $this->request[0];
     } else {
-      return SabelConst::DEFAULT_MODULE;
+      return Sabel_Core_Const::DEFAULT_MODULE;
     }
   }
   

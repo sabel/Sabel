@@ -1,67 +1,60 @@
 <?php
 
 /**
- * 定数クラス
+ * Sabel constant values
  *
  */
-class SabelConst
+class Sabel_Core_Const
 {
   /**
-   * コントローラを配置するディレクトリ名称
+   * controllers directory.
    */
   const CONTROLLER_DIR     = 'controllers/';
 
   /**
-   * コントローラの拡張子
+   * postfix extention of controller class.
    */
   const CONTROLLER_POSTFIX = '.php';
 
   /**
-   * モジュールを配置するディレクトリ
+   * modules directory
    */
   const MODULES_DIR        = 'app/modules/';
 
   /**
-   * プロジェクト共通のファイルディレクトリ
+   * common files of project
    */
   const COMMONS_DIR = 'app/commons/';
 
   /**
-   * テンプレートを配置するディレクトリ
+   * templates dirctory
    */
   const TEMPLATE_DIR          = 'templates/';
 
   /**
-   * テンプレートファイルの拡張子
+   * postfix extention for template
    */
   const TEMPLATE_POSTFIX   = '.tpl';
 
   /**
-   * テンプレートファイル名の区切り文字列
+   * separater of template
    */
   const TEMPLATE_NAME_SEPARATOR = '.';
 
   /**
-   * デフォルトのモジュール名称
+   * modules default name
    */
   const DEFAULT_MODULE = 'Index';
 
   /**
-   * デフォルトのコントローラ名称
+   * controllers default name
    */
   const DEFAULT_CONTROLLER = 'index';
 
   /**
-   * コントローラが実装するデフォルトのメソッド名称と
-   * メソッド指定が省略されている場合でのメソッド
+   * default action method
    */
   const DEFAULT_METHOD     = 'index';
-
-  /**
-   * SabelExceptionのログファイルの名前
-   *
-   */
-  const EXCEPTION_LOG_FILE_NAME = 'logs/sabelException.log';
 }
 
 ?>

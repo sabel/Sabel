@@ -1,15 +1,25 @@
 <?php
 
 require_once('PHPUnit2/Framework/TestCase.php');
-require_once('core/Parameters.php');
-require_once('core/ParsedRequest.php');
-require_once('core/SabelConst.php');
+
+// must need by DI
+require_once('sabel/Functions.php');
+require_once('sabel/core/Context.php');
+
+Sabel_Core_Context::addIncludePath('');
+uses('sabel.container.DI');
+uses('sabel.injection.Calls');
+uses('sabel.core.Exception');
+uses('sabel.core.Const');
+uses('sabel.request.Parameters');
+uses('sabel.request.ParsedRequest');
 
 class Test_Sabel extends PHPUnit2_Framework_TestCase
 {
   public function testParameters()
   {
-    $parameters = new Parameters('value?value=test&value2=test2');
+    $parameters = new Parameters('&value?value=test&value2=test2');
+    var_dump($parameters);
     $this->assertTrue(is_object($parameters));
     $this->assertEquals('test', $parameters->value);
     $this->assertEquals('test2', $parameters->value2);
