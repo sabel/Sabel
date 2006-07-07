@@ -20,9 +20,9 @@ class Parameters
    */
   protected function parse()
   {
-    $parameters = explode("\?", $this->parameters);
+    $parameters = explode("?", $this->parameters);
     
-    $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
+    $this->parameter = (empty($parameters[0])) ? null : substr($parameters[0], 1);
     $separate = explode("&", $parameters[1]);
     $sets = array();
     foreach ($separate as $key => $val) {

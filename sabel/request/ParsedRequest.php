@@ -29,9 +29,9 @@ class ParsedRequest
     } else {
       $uri = $request;
     }
-    
+
     if (!empty($uri)) {
-      $pattern = '/^([\w]+)?(?:\/([\w]+))?(?:\/([\w]+))?(?:\/?&([\w]+))?/';
+      $pattern = '/^([\w]+)?(?:\/([\w]+))?(?:\/([\w]+))?(?:\/?&(.+))?/';
       preg_match($pattern, $uri, $matches);
 
       array_shift($matches);
