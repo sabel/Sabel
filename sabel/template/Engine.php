@@ -26,7 +26,9 @@ class HtmlTemplate implements HtmlTemplateService
 
   public function changeEngine($inc)
   {
-    $this->impl = $inc;
+    if ($ins instanceof BaseEngineImpl) {
+      $this->impl = $inc;
+    }
   }
 
   public function assign($key ,$value)

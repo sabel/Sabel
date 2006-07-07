@@ -20,13 +20,13 @@ class Parameters
    */
   protected function parse()
   {
-    $parameters = split("\?", $this->parameters);
+    $parameters = explode("\?", $this->parameters);
     
     $this->parameter = (empty($parameters[0])) ? null : $parameters[0];
-    $separate = split("&", $parameters[1]);
+    $separate = explode("&", $parameters[1]);
     $sets = array();
     foreach ($separate as $key => $val) {
-      $tmp = split("=", $val);
+      $tmp = explode("=", $val);
       if (empty($tmp[1])) $tmp[1] = '';
       $enc   = mb_detect_encoding($tmp[1], 'UTF-8, EUC_JP, SJIS');
       $sets[$tmp[0]] = mb_convert_encoding(urldecode($tmp[1]), 'EUC-JP', $enc);
