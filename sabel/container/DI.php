@@ -12,7 +12,9 @@ class SabelDIHelper
   }
 }
 
+uses('sabel.injection.Injector');
 uses('sabel.container.ReflectionClass');
+uses('sabel.core.Spyc');
 
 /**
  * Sabel DI Container
@@ -41,11 +43,8 @@ class Sabel_Container_DI
   
   public function loadInjected($className, $method = '__construct')
   {
-    uses('sabel.injection.Injector');
-    
-    
-    $ic = $this->load('Sabel_Injection_Calls');
-    $ic->add(new AspectOrderRegistration());
+    //$ic = $this->load('Sabel_Injection_Calls');
+    //$ic->add(new AspectOrderRegistration());
     
     $this->loadClass($className, $method);
     return new Sabel_Injection_Injector($this->makeInstance());

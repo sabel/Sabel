@@ -6,11 +6,8 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
-require_once('sabel/container/DI.php');
-require_once('sabel/core/spyc.php');
-
 Sabel_Core_Context::addIncludePath('');
-uses('sabel.container.ReflectionClass');
+uses('sabel.container.DI');
 uses('sabel.injection.Calls');
 uses('sabel.core.Exception');
 
@@ -18,6 +15,11 @@ class RecordRunningTimeInjection
 {
   private $start;
   private $end;
+  
+  public function when($method)
+  {
+    return true;
+  }
   
   public function before($method, $arg)
   {
@@ -37,6 +39,11 @@ class RecordRunningTimeInjection
 
 class MockInjection
 {
+  public function when($method)
+  {
+    return true;
+  }
+  
   public function after($method, &$result)
   {
     if ($method == 'test') {
@@ -54,27 +61,34 @@ class MockInjection
  */
 class Test_SabelDI extends PHPUnit2_Framework_TestCase
 {
+  protected $c = null;
+  
   public function setUp()
   {
+    $this->c = new Sabel_Container_DI();
   }
   
-  public function estLoad()
+  public function tearDown()
   {
-    $c = new Sabel_Container_DI();
-    $this->assertTrue(is_object($c));
-    
-    $object  = $c->load('Sabel_Core_Context');
-    $o2 = $c->load('Data_Ditest_Module');
+    unset($this->c);
+  }
+  
+  public function testNotInjectedLoad()
+  {
+    $o2 = $this->c->load('Data_Ditest_Module');
     
     $this->assertEquals('ModuleImpl result.', $o2->test('a'));
-    
-    $this->assertTrue(is_object($object));
   }
   
-  public function estContainerInjection()
+  public function testInjectedLoad()
   {
-    $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Data_Ditest_Module');
+    $obj = $this->c->loadInjected('Data_Ditest_Module');
+    $this->assertEquals('mocked!', $obj->test('a'));
+  }
+  
+  public function testContainerInjection()
+  {
+    $module = $this->c->loadInjected('Data_Ditest_Module');
     
     $ic = new Sabel_Injection_Calls();
     
@@ -89,10 +103,9 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_float($runningTime->calcurate()));
   }
   
-  public function estMockedInjection()
+  public function testMockedInjection()
   {
-    $c = new Sabel_Container_DI();
-    $module = $c->loadInjected('Data_Ditest_Module');
+    $module = $this->c->loadInjected('Data_Ditest_Module');
     $ic = new Sabel_Injection_Calls();
     $ic->addAfter(new MockInjection());
     $this->assertEquals('mocked!', $module->test('a'));
@@ -100,18 +113,17 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     $this->assertEquals('mocked!', $array[0]);
   }
   
-  public function estConvertClassName()
+  public function testConvertClassName()
   {
     $this->assertEquals(convertClassPath('Ditest'), 'Ditest');
     $this->assertEquals(convertClassPath('Data_Ditest_Module_Test'), 'data.ditest.module.Test');
   }
   
-  public function estAnnotation()
+  public function testAnnotation()
   {
-    $c = new Sabel_Container_DI();
-    $ar     = $c->load('Sabel_Annotation_Reader');
-    $ic     = $c->load('Sabel_Injection_Calls');
-    $module = $c->loadInjected('Data_Ditest_Module');
+    $ar     = $this->c->load('Sabel_Annotation_Reader');
+    $ic     = $this->c->load('Sabel_Injection_Calls');
+    $module = $this->c->loadInjected('Data_Ditest_Module');
     
     $list = $ar->annotation('Data_Ditest_Module');
     
@@ -123,57 +135,5 @@ class Test_SabelDI extends PHPUnit2_Framework_TestCase
     }
     
     $this->assertEquals('mocked!', $module->test('abc'));
-  }
-  
-  /**
-   * @todo think assertion of aspect
-   *
-   */
-  public function testAspectOriented()
-  {
-    $order = Sabel_Container_DI::create()->loadInjected('Order');
-    $order->registOrder();
-  }
-}
-
-class AspectOrderRegistration
-{
-  public function when($method)
-  {
-    return ($method == 'registOrder');
-  }
-  
-  public function throws()
-  {
-  }
-  
-  public function before($method, $arg)
-  {
-    $customer = new Customer();
-    $customer->incrementQuantityOfOrder();
-  }
-  
-  public function after($method, $result)
-  {
-  }
-}
-
-class Customer
-{
-  public function cancelOrder()
-  {
-  }
-  
-  public function incrementQuantityOfOrder()
-  {
-    return "do increment";
-  }
-}
-
-class Order
-{
-  public function registOrder()
-  {
-    return "do regist order";
   }
 }
