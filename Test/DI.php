@@ -59,7 +59,7 @@ class MockInjection
  *
  * @author Mori Reo <mori.reo@servise.jp>
  */
-class Test_SabelDI extends PHPUnit2_Framework_TestCase
+class Test_DI extends PHPUnit2_Framework_TestCase
 {
   protected $c = null;
   
