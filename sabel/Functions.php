@@ -19,12 +19,10 @@ function uses($uses)
   $className = implode('_', $classNames);
   $classpath = implode('/', $usesArray);
     
-  $loaded = false;
   foreach ($paths as $pathidx => $path) {
     $fullpath = $path.$classpath.'.php';
     if (is_file($fullpath)) {
       require_once($fullpath);
-      $loaded = true;
       break;
     }
   }
@@ -40,16 +38,8 @@ function convertClassPath($className)
   
   $classPath = '';
   for ($i = 0; $i < count($parts); $i++) {
-    $first = ($i == 0);
-    $last  = ($i == count($parts)-1);
-    
-    if ($last) {
-      $classPath .= '.'. $parts[$i];
-    } else if ($first) {
-      $classPath .= strtolower($parts[$i]);
-    } else {
-      $classPath .= '.'.strtolower($parts[$i]);
-    }
+    $last = ($i == count($parts)-1);
+    $classPath .= ($last) ? $parts[$i] : strtolower($parts[$i]).'.';
   }
   
   return $classPath;

@@ -2,43 +2,42 @@
 
 require_once('sabel/core/Context.php');
 require_once('sabel/Functions.php');
+require_once('third/Smarty/Smarty.class.php');
 
 Sabel_Core_Context::addIncludePath('Sabel/');
 Sabel_Core_Context::addIncludePath('app/commons/models/');
 
-uses('core.logger.File');
+uses('sabel.logger.File');
 
-require_once('sabel/core/Const.php');
+uses('sabel.core.Const');
 
-require_once('sabel/core/ClassLoader.php');
-require_once('sabel/core/Utility.php');
-require_once('sabel/request/Parameters.php');
-require_once('sabel/request/Request.php');
-require_once('sabel/request/ParsedRequest.php');
-require_once('sabel/core/Exception.php');
+uses('sabel.core.ClassLoader');
+uses('sabel.core.Utility');
+uses('sabel.request.Parameters');
+uses('sabel.request.Request');
+uses('sabel.request.ParsedRequest');
+uses('sabel.core.Exception');
 
-require_once('sabel/logger/File.php');
+uses('sabel.logger.File');
 
-require_once('sabel/controller/Page.php');
-require_once('sabel/template/Director.php');
-require_once('sabel/template/Engine.php');
+uses('sabel.controller.Page');
+uses('sabel.template.Director');
+uses('sabel.template.Engine');
 
-require_once('sabel/container/DI.php');
+uses('sabel.container.DI');
 
-require_once('sabel/user/User.php');
-//require_once('sabel/config/Config.php');
-require_once('sabel/storage/Storage.php');
-require_once('sabel/cache/Cache.php');
+uses('sabel.user.User');
+uses('sabel.storage.Storage');
+uses('sabel.cache.Cache');
 
-require_once('sabel/view/Helper.php');
+uses('sabel.view.Helper');
 
-require_once('sabel/core/Pager.php');
-require_once('sabel/core/spyc.php');
-require_once('third/Smarty/Smarty.class.php');
-require_once('third/Crypt_Blowfish/Blowfish.php');
+uses('sabel.core.Pager');
+uses('sabel.core.Spyc');
+uses('third.Crypt_Blowfish.Blowfish');
 
-require_once('sabel/edo/RecordObject.php');
-require_once('sabel/edo/DBConnection.php');
+uses('sabel.edo.RecordObject');
+uses('sabel.edo.DBConnection');
 
 interface SabelController
 {
@@ -78,7 +77,6 @@ class SabelPageWebController implements SabelController
       }
     } catch (Exception $e) {
       $logger = new Sabel_Logger_File();
-var_dump($e);exit;
       $logger->log($e->getMessage());
     }
   }
