@@ -4,7 +4,7 @@
  * 
  *
  */
-class ParsedRequest
+class Sabel_Request_Parser_Web
 {
   private static $instance = null;
   
