@@ -19,7 +19,6 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   public function testParameters()
   {
     $parameters = new Parameters('&value?value=test&value2=test2');
-    var_dump($parameters);
     $this->assertTrue(is_object($parameters));
     $this->assertEquals('test', $parameters->value);
     $this->assertEquals('test2', $parameters->value2);
@@ -68,7 +67,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
 
   public function testParsedRequestExp()
   {
-    $uri = 'module/ctrl/action?key=value&keyTwo=valueTwo';
+    $uri = 'module/ctrl/action&key=value&keyTwo=valueTwo';
     $pp = ParsedRequest::create($uri);
     
     $this->assertEquals('action', $pp->getMethod());
