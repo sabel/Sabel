@@ -58,24 +58,4 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
       
     }
   }
-  
-  public function testParsedRequest()
-  {
-    $pp = ParsedRequest::create('/test/test/tset');
-    $this->assertEquals('Index', $pp->getModule());
-  }
-
-  public function testParsedRequestExp()
-  {
-    $uri = 'module/ctrl/action&key=value&keyTwo=valueTwo';
-    $pp = ParsedRequest::create($uri);
-    
-    $this->assertEquals('action', $pp->getMethod());
-    $this->assertEquals('ctrl', $pp->getController());
-    $this->assertEquals('module', $pp->getModule());
-    
-    $parameters = new Parameters($pp->getParameter());
-    $this->assertEquals('value', $parameters->key);
-    $this->assertEquals('valueTwo', $parameters->keyTwo);
-  }
 }

@@ -1,80 +1,90 @@
 <?php
 
+/**
+ * 
+ *
+ */
 class ParsedRequest
 {
-  private $request;
-  
   private static $instance = null;
   
-  public static function create($request = null)
+  private $request;
+  private $attributes;
+  private $parameters;
+  
+  public static function create()
   {
     if (!self::$instance) {
       self::$instance = new self();
-    } else if (isset($request)) {
-      return new self($request);
     }
     return self::$instance;
   }
   
-  protected function __construct($request = null)
+  public function destruct()
   {
-    $this->request = $this->parse($request);
+    self::$instance = null;
   }
   
-  protected function parse($request)
+  public function parse($request = null, $pair = null, $pat = null)
   {
-    if (empty($request)) {
-      $uri = explode('url=', $_SERVER['QUERY_STRING']);
-      $uri = $uri[1];
+    if (is_not_null($pat) && is_null($pair))
+      throw new Sabel_Exception_Runtime('pair is null.');
+      
+    if (empty($request)) return null;
+    
+    if (is_not_null($pat) && count($pat) > 0) {
+      $this->parseWithPattern($request, $pair, $pat);
+    } else if (is_null($pair)) {
+      $this->parseDefault($request);
     } else {
-      $uri = $request;
+      $this->parseDefault($request, $pair);
     }
-
-    if (!empty($uri)) {
-      $pattern = '/^([\w]+)?(?:\/([\w]+))?(?:\/([\w]+))?(?:\/?&(.+))?/';
-      preg_match($pattern, $uri, $matches);
-
-      array_shift($matches);
-      return $matches;
-    } else {
-      return null;
-    }
+    
+    return $this;
   }
   
-  public function getModule()
+  protected function parseDefault($request, $pair = null)
   {
-    if (!empty($this->request[0])) {
-      return $this->request[0];
-    } else {
-      return Sabel_Core_Const::DEFAULT_MODULE;
-    }
-  }
-  
-  public function getController()
-  {
-    if (!empty($this->request[1])) {
-      return $this->request[1];
-    } else {
-      return SabelConst::DEFAULT_CONTROLLER;
+    $pair = (is_null($pair)) ? 'module/controller/action' : $pair;
+    
+    $request  = explode('?', $request);
+    $this->parameters = $request[1];
+    $requests = explode('/', $request[0]);
+    $pairs    = explode('/', $pair);
+    
+    for ($i = 0; $i < count($pairs); $i++) {
+      $this->attributes[$pairs[$i]] = $requests[$i];
     }
   }
   
-  public function getMethod()
+  protected function parseWithPattern($request, $pair, $pat)
   {
-    if (!empty($this->request[2])) {
-      return $this->request[2];
-    } else {
-      return SabelConst::DEFAULT_METHOD;
+    $request  = explode('?', $request);
+    $this->parameters = $request[1];
+    $requests = explode('/', $request[0]);
+    $pairs    = explode('/', $pair);
+    
+    for ($i = 0; $i < count($pat); $i++) {
+      $p = '%^'.$pat[$i].'$%';
+      if (preg_match($p, $requests[$i], $match)) {
+        $this->attributes[$pairs[$i]] = $match[1];
+      } else {
+        $this->attributes[$pairs[$i]] = null;
+      }
     }
+    
+    return true;
   }
   
-  public function getParameter()
+  public function __set($key, $val)
   {
-    if (!empty($this->request[3])) {
-      return $this->request[3];
-    } else {
-      return null;
-    }
+    $this->attributes[$key] = $val;
+  }
+  
+  public function __get($key)
+  {
+    if ($key == 'parameters') return $this->parameters;
+    return $this->attributes[$key];
   }
 }
 

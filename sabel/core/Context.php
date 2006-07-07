@@ -59,4 +59,6 @@ class Sabel_Core_Context
   }
 }
 
+Sabel_Core_Context::addIncludePath('');
+
 ?>
