@@ -13,15 +13,15 @@ uses('sabel.injection.Calls');
 uses('sabel.core.Exception');
 uses('sabel.core.Const');
 uses('sabel.request.Parameters');
-uses('sabel.request.ParsedRequest');
+uses('sabel.request.parser.Web');
 
-class Test_ParsedRequest extends PHPUnit2_Framework_TestCase
+class Test_ParserWeb extends PHPUnit2_Framework_TestCase
 {
   public $pr = null;
   
   protected function setUp()
   {
-    $this->pr = ParsedRequest::create();
+    $this->pr = Sabel_Request_Parser_Web::create();
   }
   
   protected function tearDown()

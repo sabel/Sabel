@@ -1,28 +1,19 @@
 <?php
 
+uses('sabel.request.parser.Common');
+
 /**
  * 
  *
  */
-class Sabel_Request_Parser_Web
+class Sabel_Request_Parser_Web extends Sabel_Request_Parser_Common
 {
-  private static $instance = null;
-  
-  private $request;
-  private $attributes;
-  private $parameters;
-  
   public static function create()
   {
     if (!self::$instance) {
       self::$instance = new self();
     }
     return self::$instance;
-  }
-  
-  public function destruct()
-  {
-    self::$instance = null;
   }
   
   public function parse($request = null, $pair = null, $pat = null)
@@ -74,17 +65,6 @@ class Sabel_Request_Parser_Web
     }
     
     return true;
-  }
-  
-  public function __set($key, $val)
-  {
-    $this->attributes[$key] = $val;
-  }
-  
-  public function __get($key)
-  {
-    if ($key == 'parameters') return $this->parameters;
-    return $this->attributes[$key];
   }
 }
 

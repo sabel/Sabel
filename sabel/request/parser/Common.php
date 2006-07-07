@@ -2,10 +2,12 @@
 
 abstract class Sabel_Request_Parser_Common
 {
-  protected final $attributes = null;
-  protected final $parameters = null;
+  protected $attributes = null;
+  protected $parameters = null;
   
-  abstract function parse($request, $pair, $pat);
+  protected static $instance = null;
+  
+  abstract function parse($request = null, $pair = null, $pat = null);
   
   public function __set($key, $value)
   {
