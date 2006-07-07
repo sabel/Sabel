@@ -5,7 +5,7 @@ require_once('core/Parameters.php');
 require_once('core/ParsedRequest.php');
 require_once('core/SabelConst.php');
 
-class Test_SabelTest extends PHPUnit2_Framework_TestCase
+class Test_Sabel extends PHPUnit2_Framework_TestCase
 {
   public function testParameters()
   {

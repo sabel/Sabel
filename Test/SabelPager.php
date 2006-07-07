@@ -56,7 +56,7 @@ class DummyBBS
  *
  * @author Mori Reo <mori.reo@servise.jp>
  */
-class Test_SabelPager extends PHPUnit2_Framework_TestCase
+class Test_Pager extends PHPUnit2_Framework_TestCase
 {
   public function testStandardPagerUse()
   {
