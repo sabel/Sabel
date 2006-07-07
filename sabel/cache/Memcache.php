@@ -7,7 +7,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
   private $memcache;
   private static $instance;
 
-  protected function __construct($server = null)
+  protected function __construct($server)
   {
     $this->memcache = new Memcache();
     $this->memcache->addServer($server, 11211, true);
@@ -37,7 +37,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
     try {
       $this->memcache->add($key, $value, $comp, $timeout);
     } catch (Exception $e) {
-      // @todo ц┤б╚ц┤б╖ц┤Б┬▒ц┤ц┬ц┤ц┐ц┤б╘ц┤б╣ц┤ц│ц┘`ц┘H
+      // @todo ╦╣╓нй╦╬о╓╛фи╓А╓ч╓╩╓С╓г╓╥╓©║ё
     }
   }
 

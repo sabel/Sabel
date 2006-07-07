@@ -1,8 +1,5 @@
 <?php
 
-//require_once('Parameters.php');
-//require_once('Response.php');
-//require_once('DirectoryList.php');
 uses('sabel.cache.Memcache');
 uses('sabel.response.Web');
 uses('sabel.config.Cached');

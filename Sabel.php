@@ -28,7 +28,6 @@ uses('sabel.container.DI');
 
 uses('sabel.user.User');
 uses('sabel.storage.Storage');
-uses('sabel.cache.Cache');
 
 uses('sabel.view.Helper');
 

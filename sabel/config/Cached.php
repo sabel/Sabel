@@ -33,7 +33,7 @@ class Sabel_Config_Cached implements Sabel_Config_Interface
     $config = new Sabel_Config_Impl();
     $conf = $config->get('Memcache');
     if (!$fp = @fopen(self::CACHE_FILE, 'w')) {
-      throw new Exception(self::CACHE_FILE . " has't permission.");
+      throw new Exception(self::CACHE_FILE . " hasn't permission.");
     }
     fwrite($fp, $conf['server']);
     fclose($fp);
