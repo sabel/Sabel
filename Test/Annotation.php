@@ -40,7 +40,6 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
           $this->assertEquals('test3', $annotation->getContents());
         break;
         case 'annot4':
-          var_dump($annotation->getContents());
           $this->assertTrue(is_array($annotation->getContents()));
         break;
       }
