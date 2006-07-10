@@ -1,7 +1,10 @@
 <?php
 
 uses('sabel.edo.driver.Interface');
+uses('sabel.edo.driver.Statement');
 uses('sabel.edo.SQLObject');
+
+require_once('Statement.php');
 
 class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 {
@@ -10,6 +13,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   private $param = array();
   private $data  = array();
   private $keys  = array();
+
+  private $childTable = '';
+  private $childCondition = array();
+
 
   public function __construct($conn, $myDb)
   {
@@ -27,19 +34,19 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   {
     $this->data = $data;
 
-    $sql = "UPDATE {$table} SET";
+    $sql = array("UPDATE {$table} SET");
     $set = false;
 
     foreach ($data as $key => $val) {
       if (!$set) {
-        $sql .= " {$key}=:{$key}";
+        array_push($sql, " {$key}=:{$key}");
       } else {
-        $sql .= ",{$key}=:{$key}";
+        array_push($sql, ",{$key}=:{$key}");
       }
       $set = true;
     }
 
-    $this->sqlObj->setBasicSQL($sql);
+    $this->sqlObj->setBasicSQL(implode('', $sql));
   }
 
   public function setInsertSQL($table, $data)
@@ -51,77 +58,70 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   {
     $this->data = $data;
 
-    if (count($this->keys) == count($data)) {
-      $check = true;
-      $count = 0;
-      foreach ($data as $key => $val) {
-        if ($this->keys[$count] != $key) {
-          $check = false;
-          break;
-        }
-        $count++;
-      }
-      if ($check)
-        return $this->execute();
-    }
-
-    $sql = "INSERT INTO {$table}(";
- 
-    $set = false;
-    $this->keys = array();
-
-    foreach ($data as $key => $val) {
-      if (!$set) {
-        $sql .= "{$key}";
-      } else {
-        $sql .= ",{$key}";
-      }
-      $this->keys[] = $key;
-      $set = true;
-    }
-
-    $sql .= ") VALUES(";
+    $sql = array("INSERT INTO {$table}(");
     $set = false;
 
     foreach ($data as $key => $val) {
       if (!$set) {
-        $sql .= ":{$key}";
+        array_push($sql, "{$key}");
       } else {
-        $sql .= ",:{$key}";
+        array_push($sql, ",{$key}");
       }
       $set = true;
     }
 
-    $sql .= ');';
+    array_push($sql, ") VALUES(");
+    $set = false;
 
-    $this->sqlObj->setBasicSQL($sql);
-    return $this->execute();
+    foreach ($data as $key => $val) {
+      if (!$set) {
+        array_push($sql, ":{$key}");
+      } else {
+        array_push($sql, ",:{$key}");
+      }
+      $set = true;
+    }
+
+    array_push($sql, ');');
+
+    $this->stmtFlag = Sabel_Edo_Driver_Statement::statement_exists(implode('', $sql), $data);
+
+    if ($this->stmtFlag) {
+      return $this->execute();
+    } else {
+      $this->sqlObj->setBasicSQL(implode('', $sql));
+      return $this->execute();
+    }
   }
 
   public function makeQuery($conditions, $constraints = null)
   {
-    foreach ($conditions as $key => $val) {
+    $this->stmtFlag = Sabel_Edo_Driver_Statement::statement_exists($this->sqlObj->getSQL(), $conditions, $constraints);
 
-      if ($val[0] == '>' || $val[0] == '<') {
-        $this->sqlObj->makeLess_GreaterSQL($key, $val);
-      } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
-        $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
-        $this->sqlObj->makeWhereInSQL($key, $val);
-      } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
-        $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
-        $this->sqlObj->makeBetweenSQL($key, $val);
-      } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
-        $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
-        $this->sqlObj->makeEitherSQL($key, $val);
-      } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
-        $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
-        $this->sqlObj->makeLikeSQL($key, $val);
-      } elseif (strtolower($val) == 'null') {
-        $this->sqlObj->makeIsNullSQL($key);
-      } elseif (strtolower($val) == 'not null') {
-        $this->sqlObj->makeIsNotNullSQL($key);
-      } else {
-        $this->sqlObj->makeNormalConditionSQL($key, $val);
+    if (!empty($conditions)) {
+      foreach ($conditions as $key => $val) {
+
+        if ($val[0] == '>' || $val[0] == '<') {
+          $this->sqlObj->makeLess_GreaterSQL($key, $val);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
+          $this->sqlObj->makeWhereInSQL($key, $val);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
+          $this->sqlObj->makeBetweenSQL($key, $val);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
+          $this->sqlObj->makeEitherSQL($key, $val);
+        } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
+          $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
+          $this->sqlObj->makeLikeSQL($key, $val);
+        } elseif (strtolower($val) == 'null') {
+          $this->sqlObj->makeIsNullSQL($key);
+        } elseif (strtolower($val) == 'not null') {
+          $this->sqlObj->makeIsNotNullSQL($key);
+        } else {
+          $this->sqlObj->makeNormalConditionSQL($key, $val);
+        }
       }
     }
 
@@ -131,14 +131,22 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function execute($sql = null)
   {
-    if (is_null($sql)) {
-      $sql = $this->sqlObj->getSQL();
+    if ($this->stmtFlag) {
+      $this->stmt = Sabel_Edo_Driver_Statement::getStatement();
+    } else {
       if (is_null($sql)) {
-        throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
+        $sql = $this->sqlObj->getSQL();
+        if (is_null($sql)) {
+          throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
+        } else {
+          $this->stmt = $this->pdo->prepare($sql);
+          Sabel_Edo_Driver_Statement::addStatement($this->stmt);
+        }
+      } else {
+        $this->stmt = $this->pdo->prepare($sql);
       }
     }
 
-    $this->stmt = $this->pdo->prepare($sql);
     $this->makeBindParam();
 
     if (empty($this->param)) {

@@ -11,12 +11,12 @@ class PdoSQL
 
   public function getSQL()
   {
-    return $this->sql;
+    return implode('', $this->sql);
   }
 
   public function setBasicSQL($sql)
   {
-    $this->sql = $sql;
+    $this->sql = array($sql);
   }
 
   protected function checkKeyExists($key)
@@ -37,9 +37,9 @@ class PdoSQL
     $bindKey = $this->checkKeyExists($key);
 
     if (!$this->set) {
-      $this->sql .= " WHERE {$key}=:{$bindKey}";
+      array_push($this->sql, " WHERE {$key}=:{$bindKey}");
     } else {
-      $this->sql .= " AND {$key}=:{$bindKey}";
+      array_push($this->sql, " AND {$key}=:{$bindKey}");
     }
     $this->set = true;
     $this->param[$bindKey] = $val;
@@ -48,9 +48,9 @@ class PdoSQL
   public function makeIsNullSQL($key)
   {
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} IS NULL";
+      array_push($this->sql, " WHERE {$key} IS NULL");
     } else {
-      $this->sql .= " AND {$key} IS NULL";
+      array_push($this->sql, " AND {$key} IS NULL");
     }
     $this->set = true;
   }
@@ -58,9 +58,9 @@ class PdoSQL
   public function makeIsNotNullSQL($key)
   {
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} IS NOT NULL";
+      array_push($this->sql, " WHERE {$key} IS NOT NULL");
     } else {
-      $this->sql .= " AND {$key} IS NOT NULL";
+      array_push($this->sql, " AND {$key} IS NOT NULL");
     }
     $this->set = true;
   }
@@ -68,9 +68,9 @@ class PdoSQL
   public function makeWhereInSQL($key, $val)
   {
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} IN (". implode(',', $val) .")";
+      array_push($this->sql, " WHERE {$key} IN (". implode(',', $val) .")");
     } else {
-      $this->sql .= " AND {$key} IN (". implode(',', $val) .")";
+      array_push($this->sql, " AND {$key} IN (". implode(',', $val) .")");
     }
     $this->set = true;
   }
@@ -80,9 +80,9 @@ class PdoSQL
     $bindKey = $this->checkKeyExists($key);
 
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} LIKE :{$bindKey}";
+      array_push($this->sql, " WHERE {$key} LIKE :{$bindKey}");
     } else {
-      $this->sql .= " AND {$key} LIKE :{$bindKey}";
+      array_push($this->sql, " AND {$key} LIKE :{$bindKey}");
     }
     $this->set = true;
 
@@ -94,9 +94,9 @@ class PdoSQL
   public function makeBetweenSQL($key, $val)
   {
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} BETWEEN :from AND :to";
+      array_push($this->sql, " WHERE {$key} BETWEEN :from AND :to");
     } else {
-      $this->sql .= " AND {$key} BETWEEN :from AND :to";
+      array_push($this->sql, " AND {$key} BETWEEN :from AND :to");
     }
     $this->set = true;
 
@@ -119,16 +119,16 @@ class PdoSQL
     }
 
     if ($val1[0] == '<' || $val1[0] == '>') {
-      $this->sql .= $str." ({$key} {$val1[0]} :{$bindKey} OR";
+      array_push($this->sql, $str." ({$key} {$val1[0]} :{$bindKey} OR");
       $val1 = trim(str_replace($val1[0], '', $val1));
     } else {
-      $this->sql .= $str." ({$key}=:{$bindKey} OR";
+      array_push($this->sql, $str." ({$key}=:{$bindKey} OR");
     }
     if ($val2[0] == '<' || $val2[0] == '>') {
-      $this->sql .= " {$key} {$val2[0]} :{$bindKey2})";
+      array_push($this->sql, " {$key} {$val2[0]} :{$bindKey2})");
       $val2 = trim(str_replace($val2[0], '', $val2));
     } else {
-      $this->sql .= " {$key}=:{$bindKey2})";
+      array_push($this->sql, " {$key}=:{$bindKey2})");
     }
 
     $this->set = true;
@@ -142,9 +142,9 @@ class PdoSQL
     $bindKey  = $this->checkKeyExists($key);
 
     if (!$this->set) {
-      $this->sql .= " WHERE {$key} {$val[0]} :{$bindKey}";
+      array_push($this->sql, " WHERE {$key} {$val[0]} :{$bindKey}");
     } else {
-      $this->sql .= " AND {$key} {$val[0]} :{$bindKey}";
+      array_push($this->sql, " AND {$key} {$val[0]} :{$bindKey}");
     }
 
     $val = str_replace($val[0], '', $val);
@@ -156,13 +156,13 @@ class PdoSQL
   public function makeConstraintsSQL($constraints)
   {
     if (!is_null($constraints['order']))
-      $this->sql .= " ORDER BY {$constraints['order']}";
+      array_push($this->sql, " ORDER BY {$constraints['order']}");
 
     if (!is_null($constraints['limit']))
-      $this->sql .= " LIMIT {$constraints['limit']}";
+      array_push($this->sql, " LIMIT {$constraints['limit']}");
 
     if (!is_null($constraints['offset']))
-      $this->sql .= " OFFSET {$constraints['offset']}";
+      array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
 
   public function getParam()

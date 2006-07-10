@@ -33,6 +33,10 @@ abstract class Sabel_Edo_RecordObject
 
   protected $selectType = self::SELECT_DEFAULT;
 
+  private
+    $checkChildTable  = '',
+    $checkChildColumn = '';
+
   const SELECT_DEFAULT     = 0;
   const WITH_PARENT_VIEW   = 5;
   const WITH_PARENT_OBJECT = 10;
@@ -282,6 +286,8 @@ abstract class Sabel_Edo_RecordObject
       $this->constraints = array();
       $this->conditions  = array();
       return $this;
+    } else {
+      throw new Exception('Error: selectOne()');
     }
   }
 
@@ -375,7 +381,10 @@ abstract class Sabel_Edo_RecordObject
   {
     if ($this->hasAlreadyAcquiredParent($table)) return null;
 
-    $edo = $this->makeBasicQueryForChild($table, $id);
+    $edo = $this->getMyEDO();
+    $edo->setBasicSQL("SELECT * FROM {$table}");
+    $edo->makeQuery(array($this->defColumn => $id));
+
     if ($edo->execute()) {
       $prow = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
 
@@ -399,7 +408,10 @@ abstract class Sabel_Edo_RecordObject
   {
     if ($this->hasAlreadyAcquiredParent($table)) return null;
 
-    $edo = $this->makeBasicQueryForChild($table, $id);
+    $edo = $this->getMyEDO();
+    $edo->setBasicSQL("SELECT * FROM {$table}");
+    $edo->makeQuery(array($this->defColumn => $id));
+
     if ($edo->execute()) {
       $row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       if (class_exists($table)) {
@@ -427,16 +439,6 @@ abstract class Sabel_Edo_RecordObject
     } else {
       throw new Exception('Error: addParentObject()');
     }
-  }
-
-  protected function makeBasicQueryForChild($table, $id)
-  {
-    $condition  = array($this->defColumn => $id);
-
-    $edo = $this->getMyEDO();
-    $edo->setBasicSQL("SELECT * FROM {$table}");
-    $edo->makeQuery($condition);
-    return $edo;
   }
 
   protected function hasAlreadyAcquiredParent($table)

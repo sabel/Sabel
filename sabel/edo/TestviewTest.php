@@ -50,10 +50,8 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function setUp()
   {
-    //$pdo = new PDO('pgsql:host=192.168.0.222;dbname=2525e', 'pgsql', 'pgsql');
-
     $dbCon = array();
-    $dbCon['dsn'] = 'pgsql:host=192.168.0.222;dbname=2525e';
+    $dbCon['dsn'] = 'pgsql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
 
@@ -232,6 +230,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   public function testUpdateOrInsert()
   {
     $test = new Test(7); // not found 
+    
     $this->assertEquals($test->name, null);
     $this->assertEquals($test->blood, null);
 
@@ -243,9 +242,9 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
       $test->blood = 'B';
       $test->save();  // insert <= execute
     }
-
+    
     //--------------------------------------------------------
-
+    
     $test = new Test(7); // found 
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'B');
@@ -321,12 +320,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testSelect()
   {
-    /*
     $c = new Customer();
     for ($i = 0; $i < 1000; $i++) {
       $c->select();
     }
-    */
   }
 
   public function testSelectDefaultResult()
