@@ -81,7 +81,7 @@ abstract class Sabel_Edo_RecordObject
     $this->table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', get_class($this)));
 
     if (!is_null($param1))
-      $this->selectOne($param1, $param2);
+      $this->defaultSelectOne($param1, $param2);
   }
 
   public function __set($key, $val)
@@ -169,23 +169,24 @@ abstract class Sabel_Edo_RecordObject
 
   public function setChildConstraint($param1, $param2 = null)
   {
-    $this->childConstraints = array();
-
-    if (is_array($param1)) {
-      foreach ($param1 as $key => $val) {
-        if (is_null($val)) {
-          throw new Exception('Error: setChildConstraint() constraint value is null');
-        } else {
-          $this->childConstraints[$key] = $val;
-        }
+    if (is_null($param2)) {
+      if (!is_array($param1)) {
+        throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
+      } else {
+        $this->childConstraints['whole'] = $param1;
       }
     } else {
-      if (is_null($param2)) {
-        throw new Exception('Error: setChildConstraint() constraint value is null');
+      if (!is_array($param2)) {
+        throw new Exception('Error: setChildConstraint() Argument 2 must be an Array');
       } else {
         $this->childConstraints[$param1] = $param2;
       }
     }
+  }
+
+  protected function receiveChildConstraint(array $constraints)
+  {
+    $this->childConstraints = $constraints;
   }
   
   /**
@@ -260,6 +261,14 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
+  public function defaultSelectOne($param1, $param2 = null)
+  {
+    $this->setCondition($param1, $param2);
+    $this->selectCondition = $this->conditions;
+
+    $this->makeFindObject($this);
+  }
+
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
     if (is_null($param1) && is_null($this->conditions))
@@ -268,6 +277,11 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
+    return $this->makeFindObject(clone($this));
+  }
+
+  protected function makeFindObject($obj)
+  {
     $this->edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
 
@@ -275,19 +289,19 @@ abstract class Sabel_Edo_RecordObject
       $row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       if ($row) {
         $row = $this->selectWithParent($this->selectType, $row);
-        $this->setProperties($row);
-        $this->selected = true;
+        $obj->setProperties($row);
+        $obj->selected = true;
 
         $myChild = $this->getMyChildren();
-        if (!is_null($myChild)) $this->getDefaultChild($myChild, $this);
+        if (!is_null($myChild)) $this->getDefaultChild($myChild, $obj);
       } else {
-        $this->data = $this->selectCondition;
+        $obj->data = $this->selectCondition;
       }
       $this->constraints = array();
       $this->conditions  = array();
-      return $this;
+      return $obj;
     } else {
-      throw new Exception('Error: selectOne()');
+      throw new Exception('Error: makeFindObject()');
     }
   }
 
@@ -297,21 +311,24 @@ abstract class Sabel_Edo_RecordObject
       $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
-    return $this->getRecords($this->conditions, $this->constraints, $this->childConstraints);
+    return $this->getRecords($this->conditions, $this->constraints);
   }
 
-  public function getChild($child_table, $obj)
+  public function getChild($child, $obj = null)
   {
-    if (!isset($obj->childConstraints['limit']))
-      throw new Exception('Error: getChildren() [LIMIT] must be set constraints');
+    if (is_null($obj)) $obj = $this;
+
+    $obj->chooseMyChildConstraint($child, $obj);
+    if (!isset($obj->childConstraints[$child]['limit']))
+      throw new Exception('Error: getChildren() must be set limit constraints');
 
     $condition = array("{$obj->table}_id" => $obj->data[$obj->defColumn]);
 
-    $obj->edo->setBasicSQL("SELECT * FROM {$child_table}");
-    $obj->data[$child_table] = $obj->getRecords($condition, $obj->childConstraints, $child_table);
+    $obj->edo->setBasicSQL("SELECT * FROM {$child}");
+    $obj->data[$child] = $obj->getRecords($condition, $obj->childConstraints[$child], $child);
   }
 
-  protected function getRecords(&$conditions, $constraints = null, $param = null)
+  protected function getRecords($conditions, $constraints = null, $child_table = null)
   {
     $this->edo->makeQuery($conditions, $constraints);
 
@@ -320,14 +337,13 @@ abstract class Sabel_Edo_RecordObject
 
     if ($this->edo->execute()) {
       while ($row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
-        if (is_array($param)) {
+        if (is_null($child_table)) {
           $obj = new $class();
-          $obj->setChildConstraint($param);
         } else {
-          if (class_exists($param)) {
-            $obj = new $param();
+          if (class_exists($child_table)) {
+            $obj = new $child_table();
           } else {
-            $obj = new Child_Record($param);
+            $obj = new Child_Record($child_table);
           }
         }
         $row = $this->selectWithParent($this->selectType, $row);
@@ -335,7 +351,14 @@ abstract class Sabel_Edo_RecordObject
         $obj->selected = true;
 
         $myChild = $obj->getMyChildren();
-        if (!is_null($myChild)) $this->getDefaultChild($myChild, $obj);
+        if (!is_null($myChild)) {
+          if (is_null($child_table)) {
+            $obj->receiveChildConstraint($this->childConstraints);
+          } else {
+            $this->chooseMyChildConstraint($myChild, $obj);
+          }
+          $this->getDefaultChild($myChild, $obj);
+        }
         $recordObj[] = $obj;
       }
       $this->constraints = array();
@@ -350,10 +373,30 @@ abstract class Sabel_Edo_RecordObject
   {
     if (is_array($children)) {
       foreach ($children as $val) {
+        $this->chooseMyChildConstraint($val, $obj);
         $obj->getChild($val, $obj);
       }
     } else {
+      $this->chooseMyChildConstraint($children, $obj);
       $obj->getChild($children, $obj);
+    }
+  }
+
+  protected function chooseMyChildConstraint($child, $obj)
+  {
+    if (array_key_exists($child, $this->childConstraints)) {
+      $obj->setChildConstraint($child, $this->childConstraints[$child]);
+    } else {
+      $childConstraints = $obj->getMyChildConstraint();
+      if (array_key_exists($child, $childConstraints)) {
+        $obj->setChildConstraint($child, $childConstraints[$child]);
+      } else {
+        if (is_null($this->childConstraints['whole'])) {
+          throw new Exception('Error: constraint of child object, not found.');
+        } else {  
+          $obj->setChildConstraint($child, $this->childConstraints['whole']);
+        }
+      }
     }
   }
 

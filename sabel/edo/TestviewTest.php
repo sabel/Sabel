@@ -320,10 +320,26 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testSelect()
   {
+    /*
     $c = new Customer();
+    $c->setChildConstraint(array('limit' => 10));
     for ($i = 0; $i < 1000; $i++) {
       $c->select();
     }
+    */
+  }
+
+  public function testMultipleSelect()
+  {
+    $obj = new Test();
+    $user1 = $obj->selectOne(1);
+    $user2 = $obj->selectOne(2);
+
+    $this->assertEquals($user1->id, 1);
+    $this->assertEquals($user1->name, 'tanaka');
+    
+    $this->assertEquals($user2->id, 2);
+    $this->assertEquals($user2->name, 'yo_shida');
   }
 
   public function testSelectDefaultResult()
@@ -354,7 +370,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $obj = $this->test->select();
     $this->assertEquals(count($obj), 1); // yo_shida
 
-    $this->test->OR_id('3', '4');
+    $this->test->OR_id(3, 4);
     $obj = $this->test->select();
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
@@ -428,6 +444,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testGetChild()
   {
+    $this->customer->setChildConstraint(array('limit' => 10));
     $cu = $this->customer->selectOne(1);
     $this->assertEquals($cu->name, 'tanaka');
     
@@ -441,10 +458,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     //------------------------------------------------------
 
-    $cu->setChildConstraint(array('limit' => 10,
-                                  'order' => 'id desc'));
+    $cu->setChildConstraint('customer_order',
+                            array('limit' => 10, 'order' => 'id desc'));
 
-    $cu->getChild('customer_order', $cu);
+    $cu->getChild('customer_order');
 
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 4);
@@ -456,11 +473,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     //------------------------------------------------------
 
-    $cu->setChildConstraint(array('limit'  => 2,
-                                  'offset' => 2,
-                                  'order'  => 'id desc'));
+    $cu->setChildConstraint('customer_order',
+                            array('limit'  => 2, 'offset' => 2, 'order'  => 'id desc'));
 
-    $cu->getChild('customer_order', $cu);
+    $cu->getChild('customer_order');
 
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 2);
@@ -472,20 +488,25 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testNewChild()
   {
-    $cu = new Customer(1);
-    $ch = $cu->newChild('customer_order');
+    $cu = new Customer();
+    $cu->setChildConstraint(array('limit' => 10));
+    $c  = $cu->selectOne(1);
+    $ch = $c->newChild('customer_order');
 
     $number = $ch->getNextNumber();
     $ch->id = $number;
     $ch->save();  // auto insert parent_id
 
-    $order = new Customer_Order($number);
+    $co = new Customer_Order();
+    $co->setChildConstraint(array('limit' => 10));
+    $order = $co->selectOne($number);
     $this->assertEquals($order->customer_id, 1);  // parent_id
   }
 
   public function testSelectAll_AutoGetChild()
   {
     $cu   = new Customer();
+    $cu->setChildConstraint(array('limit' => 10));
     $objs = $cu->select();
 
     $this->assertEquals(count($objs), 2);
@@ -518,9 +539,18 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($objs[0]->customer_order[3]->id, 2);
     $this->assertEquals($objs[0]->customer_order[4]->id, 1);
 
+    $this->assertEquals($objs[0]->customer_order[4]->order_line[0]->id, 11);
+    $this->assertEquals($objs[0]->customer_order[4]->order_line[1]->id, 8);
+    $this->assertEquals($objs[0]->customer_order[4]->order_line[2]->id, 2);
+
+    //$this->assertEquals($objs[0]->customer_order[4]->order_line[0]->id, 2);
+    //$this->assertEquals($objs[0]->customer_order[4]->order_line[1]->id, 8);
+    //$this->assertEquals($objs[0]->customer_order[4]->order_line[2]->id, 11);
+
     //-------------------------------------------------------
 
     $cu   = new Customer();
+    $cu->setChildConstraint(array('limit' => 10));
     $objs = $cu->select();
     $this->assertNotEquals($objs[0]->customer_order[0]->order_line, null);
     $this->assertNotEquals($objs[1]->customer_order[0]->order_line, null);
@@ -588,7 +618,6 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   }
 }
 
-// Call PersonTest::main() if this source file is executed directly.
 if (PHPUnit2_MAIN_METHOD == "TestviewTest::main") {
     TestviewTest::main();
 }

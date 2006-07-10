@@ -4,7 +4,8 @@ uses('sabel.edo.RecordObject');
 
 abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 {
-  protected $myChildren = null;
+  protected $myChildren         = null;
+  protected $myChildConstraints = array();
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -15,6 +16,11 @@ abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
   public function getMyChildren()
   {
     return $this->myChildren;
+  }
+
+  public function getMyChildConstraint()
+  {
+    return $this->myChildConstraints;
   }
 }
 
@@ -47,13 +53,30 @@ class Test extends BaseUserRecordObject
 class Customer extends BaseUserRecordObject
 {
   protected $myChildren = array('customer_order','customer_telephone');
-  protected $childConstraints = array('limit' => 10);
+  protected $myChildConstraints = array('limit' => 10);
+  /*
+  public function __construct($param1 = null, $param2 = null)
+  {
+    //$this->myChildConstraints['customer_order']     = array('limit' => 10);
+    //$this->myChildConstraints['customer_telephone'] = array('limit' => 10);
+    $this->myChildConstraints = array('limit' => 10);
+    parent::__construct($param1, $param2);
+  }
+  */
 }
 
 class Customer_Order extends BaseUserRecordObject
 {
   protected $myChildren = 'order_line';
-  protected $childConstraints = array('limit' => 10);
+  protected $myChildConstraints = array('limit' => 10);
+  /*
+  public function __construct($param1 = null, $param2 = null)
+  {
+    //$this->myChildConstraints['order_line'] = array('limit' => 10);
+    $this->myChildConstraints = array('limit' => 10);
+    parent::__construct($param1, $param2);
+  }
+  */
 }
 
 class Child_Record extends BaseUserRecordObject
