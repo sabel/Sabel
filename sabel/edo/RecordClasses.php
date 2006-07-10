@@ -1,5 +1,5 @@
 <?php
-
+/*
 uses('sabel.edo.RecordObject');
 
 abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
@@ -76,5 +76,5 @@ class Common_Record extends Sabel_Edo_RecordObject
     if (!is_null($table)) $this->table = $table;
   }
 }
-
+*/
 ?>
