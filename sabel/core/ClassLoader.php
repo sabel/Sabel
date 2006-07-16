@@ -4,39 +4,34 @@
  * Loading controller class.
  *
  */
-class SabelClassLoader
+class Sabel_Core_ClassLoader
 {
-  private $request;
+  private $destination;
 
-  private function __construct($request)
+  private function __construct($destination)
   {
-    if ($request instanceof ParsedRequest) {
-      $this->request = $request;
-    } else {
-      throw new SabelException('request is not ParsedRequest');
-    }
+    $this->destination = $destination;
   }
 
-  public static function create($request)
+  public static function create($d)
   {
-    return new self($request);
+    return new self($d);
   }
 
   private function getControllerClassName()
   {
-    return $this->request->getModule() . '_' . $this->request->getController();
+    return $this->destination[0] . '_' . $this->destination[1];
   }
 
   protected function makeModulePath()
   {
-    $path = 'app/modules/' . $this->request->getModule();
-    return $path;
+    return RUN_BASE . '/app/modules/' . $this->destination[0];
   }
 
   private function makeControllerPath()
   {
-    $path  = 'app/modules/'  . $this->request->getModule();
-    $path .= '/controllers/' . $this->request->getController();
+    $path  = RUN_BASE.'/app/modules/'  . $this->destination[0];
+    $path .= '/controllers/' . $this->destination[1];
     $path .= '.php';
 
     return $path;
@@ -64,31 +59,27 @@ class SabelClassLoader
   
   public function load()
   {
-    $request = new WebRequest();
-    
     if ($this->isValidController()) {
       $path = $this->makeControllerPath();
       require_once($path);
       $class = $this->getControllerClassName();
       return new $class();
     } else if ($this->isValidModule()) {
-      $path = 'app/modules/' . $this->request->getModule() . '/controllers/index.php';
+      $path = RUN_BASE.'/app/modules/' . $this->destination[0] . '/controllers/index.php';
       require_once($path);
-      $moduleClassName = $this->request->getModule() . '_Index';
-      $request->set('value', $this->request->getController());
+      $moduleClassName = $this->destination[0] . '_Index';
       if (class_exists($moduleClassName)) {
         return new $moduleClassName();
       } else {
-        throw new SabelException("can't found out controller class: " . $moduleClassName);
+        throw new Sabel_Exception_Runtime('can\'t found out controller class: ' . $moduleClassName);
       }
     } else {
-      $request->set('value', $this->request->getModule());
-      $path = 'app/modules/Index/controllers/index.php';
+      $path = RUN_BASE.'/app/modules/Index/controllers/index.php';
       if (is_file($path)) {
         require_once($path);
         return new Index_Index();
       } else {
-        throw new SabelException($path . ' is not a valid file');
+        throw new Sabel_Exception_Runtime($path . ' is not a valid file');
       }
     }
   }
