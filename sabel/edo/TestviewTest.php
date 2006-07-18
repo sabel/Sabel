@@ -50,14 +50,22 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function setUp()
   {
+    ///* postgres
     $dbCon = array();
-    $dbCon['dsn'] = 'pgsql:host=192.168.0.120;dbname=2525e';
+    $dbCon['dsn']  = 'pgsql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
 
+    /* mysql
+    $dbCon = array();
+    $dbCon['dsn']  = 'mysql:host=192.168.0.120;dbname=2525e';
+    $dbCon['user'] = 'develop';
+    $dbCon['pass'] = 'develop';
+    */
+
     Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
 
-    $obj = new Common_Record();
+    /*
 
     $sql  = "CREATE TABLE test (id int2 NOT NULL,name varchar NOT NULL, blood varchar, test2_id int2,";
     $sql .= " CONSTRAINT test_pkey PRIMARY KEY (id) );";
@@ -89,7 +97,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     $this->order = new Common_Record('customer_order');
 
-    $sql  = "CREATE TABLE order_line (id int2 NOT NULL,customer_order_id int2 NOT NULL,item_id int2 NOT NULL,";
+    $sql  = "CREATE TABLE order_line (id int2 NOT NULL,customer_order_id int2 NOT NULL,amount int4 NOT NULL, item_id int2 NOT NULL,";
     $sql .= " CONSTRAINT order_line_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
 
@@ -99,6 +107,15 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $sql .= " CONSTRAINT customer_telephon_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
 
+    $this->telephone = new Common_Record('customer_telephone');
+    */
+
+    $this->test      = new Test();
+    $this->test2     = new Common_Record('test2');
+    $this->test3     = new Common_Record('test3');
+    $this->customer  = new Customer();
+    $this->order     = new Common_Record('customer_order');
+    $this->orderLine = new Common_Record('order_line');
     $this->telephone = new Common_Record('customer_telephone');
   }
 
@@ -110,6 +127,69 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function tearDown() {
     unset($this->test);
+  }
+
+  public function testConstraint()
+  {
+    $insertData = array();
+    $insertData[] = array('id' => 1, 'name' => 'tanaka');
+    $insertData[] = array('id' => 2, 'name' => 'ueda');
+
+    foreach ($insertData as $data) {
+      $this->customer->multipleInsert($data);
+    }
+    $this->assertEquals($this->customer->getCount(), 2);
+
+    $insertData = array();
+    $insertData[] = array('id' => 1, 'customer_id' => 1);
+    $insertData[] = array('id' => 2, 'customer_id' => 1);
+    $insertData[] = array('id' => 3, 'customer_id' => 2);
+    $insertData[] = array('id' => 4, 'customer_id' => 2);
+    $insertData[] = array('id' => 5, 'customer_id' => 1);
+    $insertData[] = array('id' => 6, 'customer_id' => 1);
+
+    foreach ($insertData as $data) {
+      $this->order->multipleInsert($data);
+    }
+
+    $this->assertEquals($this->order->getCount(), 6);
+
+    $cu  = new Customer();
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);  
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);  
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);  
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);  
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 5);  
+    $this->assertEquals((int)$cus[0]->customer_order[3]->id, 6);
+
+    $cu = new Customer();
+    $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 6);  
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);  
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);  
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 3);  
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 2);  
+    $this->assertEquals((int)$cus[0]->customer_order[3]->id, 1);
+
+    $cu  = new Customer();
+    $cu->setChildConstraint('customer_order', array('offset' => 1));
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 2);  
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);  
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);  
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 6);  
+
+    $cu  = new Customer();
+    $cu->setChildConstraint('customer_order', array('limit' => 2));
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);  
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);  
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);  
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);  
+    $this->assertEquals($cus[0]->customer_order[2]->id, null);  
+    $this->assertEquals($cus[0]->customer_order[3]->id, null);  
   }
 
   public function testMultipleInsert()
@@ -133,42 +213,20 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj->name, 'seki');
 
     $obj = $this->test->selectOne('name', 'seki');
-    $this->assertEquals($obj->id, 5);
+    $this->assertEquals((int)$obj->id, 5);
 
     $insertData = array();
-    $insertData[] = array('id' => 1, 'name' => 'tanaka');
-    $insertData[] = array('id' => 2, 'name' => 'ueda');
-
-    foreach ($insertData as $data) {
-      $this->customer->multipleInsert($data);
-    }
-    $this->assertEquals($this->customer->getCount(), 2);
-
-    $insertData = array();
-    $insertData[] = array('id' => 1, 'customer_id' => 1);
-    $insertData[] = array('id' => 2, 'customer_id' => 1);
-    $insertData[] = array('id' => 3, 'customer_id' => 2);
-    $insertData[] = array('id' => 4, 'customer_id' => 2);
-    $insertData[] = array('id' => 5, 'customer_id' => 1);
-    $insertData[] = array('id' => 6, 'customer_id' => 1);
-
-    foreach ($insertData as $data) {
-      $this->order->multipleInsert($data);
-    }
-    $this->assertEquals($this->order->getCount(), 6);
-
-    $insertData = array();
-    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'item_id' => 2);
-    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'item_id' => 1);
-    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'item_id' => 3);
-    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'item_id' => 1);
-    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'item_id' => 3);
-    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'item_id' => 2);
-    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'item_id' => 3);
-    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'item_id' => 1);
-    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'item_id' => 1);
-    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'item_id' => 2);
-    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'item_id' => 3);
+    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
+    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
+    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
+    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
+    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
+    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
+    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
+    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
+    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
 
     foreach ($insertData as $data) {
       $this->orderLine->multipleInsert($data);
@@ -185,25 +243,27 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
       $this->telephone->multipleInsert($data);
     }
     $this->assertEquals($this->orderLine->getCount(), 11);
-
   }
-    
+
   public function testInsert()
   {
-    $this->test2->id = 1;
-    $this->test2->name = 'test21';
-    $this->test2->test3_id = '2';
-    $this->test2->save();
+    $test2 = new Common_Record('test2');
+    $test2->id = 1;
+    $test2->name = 'test21';
+    $test2->test3_id = '2';
+    $test2->save();
 
-    $this->test2->id = 2;
-    $this->test2->name = 'test22';
-    $this->test2->test3_id = '1';
-    $this->test2->save();
+    $test2 = new Common_Record('test2');
+    $test2->id = 2;
+    $test2->name = 'test22';
+    $test2->test3_id = '1';
+    $test2->save();
 
-    $this->test2->id = 3;
-    $this->test2->name = 'test23';
-    $this->test2->test3_id = '3';
-    $this->test2->save();
+    $test2 = new Common_Record('test2');
+    $test2->id = 3;
+    $test2->name = 'test23';
+    $test2->test3_id = '3';
+    $test2->save();
 
     $ro = $this->test2->select();
     $this->assertEquals(count($ro), 3);
@@ -224,7 +284,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
     $this->test3->name('test31');
     $obj = $this->test3->selectOne();
-    $this->assertEquals($obj->id, 1);
+    $this->assertEquals((int)$obj->id, 1);
   }
 
   public function testUpdateOrInsert()
@@ -263,12 +323,12 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($test->blood, 'AB');
   }
 
-  public function testDelete()
+  public function testRemove()
   {
     $obj = $this->test->selectOne(7);
     $this->assertEquals($obj->blood, 'AB');
 
-    $this->test->delete(7);
+    $this->test->remove(7);
 
     $obj = $this->test->selectOne(7);
     $this->assertNotEquals($obj->blood, 'AB');
@@ -301,10 +361,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   public function testProjection()
   {
     $obj = $this->test->selectOne(2);
-    $this->assertEquals($obj->id, 2);
+    $this->assertEquals((int)$obj->id, 2);
     $this->assertEquals($obj->name, 'yo_shida');
     $this->assertEquals($obj->blood, 'B');
-    $this->assertEquals($obj->test2_id, 2);
+    $this->assertEquals((int)$obj->test2_id, 2);
 
     //--------------------------------------------------
 
@@ -312,18 +372,17 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $test->setProjection(array(id,blood));
 
     $obj2 = $test->selectOne(2);
-    $this->assertEquals($obj2->id, 2);
+    $this->assertEquals((int)$obj2->id, 2);
     $this->assertNotEquals($obj2->name, 'yo_shida');
     $this->assertEquals($obj2->blood, 'B');
-    $this->assertNotEquals($obj2->test2_id, 2);
+    $this->assertNotEquals((int)$obj2->test2_id, 2);
   }
 
   public function testSelect()
   {
     /*
     $c = new Customer();
-    $c->setChildConstraint(array('limit' => 10));
-    for ($i = 0; $i < 1000; $i++) {
+    for ($i = 0; $i < 100; $i++) {
       $c->select();
     }
     */
@@ -335,10 +394,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $user1 = $obj->selectOne(1);
     $user2 = $obj->selectOne(2);
 
-    $this->assertEquals($user1->id, 1);
+    $this->assertEquals((int)$user1->id, 1);
     $this->assertEquals($user1->name, 'tanaka');
     
-    $this->assertEquals($user2->id, 2);
+    $this->assertEquals((int)$user2->id, 2);
     $this->assertEquals($user2->name, 'yo_shida');
   }
 
@@ -346,19 +405,19 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   {
     $obj = $this->test->selectOne(1);
 
-    $this->assertEquals($obj->id, 1);
+    $this->assertEquals((int)$obj->id, 1);
     $this->assertEquals($obj->name, 'tanaka');
     $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals($obj->test2_id, 1);
+    $this->assertEquals((int)$obj->test2_id, 1);
 
     //----------------------------------------------
 
     $obj = new Test(1);
 
-    $this->assertEquals($obj->id, 1);
+    $this->assertEquals((int)$obj->id, 1);
     $this->assertEquals($obj->name, 'tanaka');
     $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals($obj->test2_id, 1);
+    $this->assertEquals((int)$obj->test2_id, 1);
 
     //----------------------------------------------
 
@@ -379,8 +438,8 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
 
   public function testInfiniteLoop()
   {
+    /*
     $obj  = new Common_Record();
-
     $sql  = "CREATE TABLE infinite1 (id int2 NOT NULL,infinite2_id int2 NOT NULL,";
     $sql .= " CONSTRAINT infinite1_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
@@ -388,6 +447,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $sql  = "CREATE TABLE infinite2 (id int2 NOT NULL,infinite1_id int2 NOT NULL,";
     $sql .= " CONSTRAINT infinite2_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
+    */
 
     $in1 = new Common_Record('infinite1');
     $in1->id           = 1;
@@ -404,7 +464,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $obj = $objs[0];
 
     $this->assertEquals($obj->infinite2_id, $obj->infinite2->id);
-    $this->assertEquals($obj->infinite2->infinite1_id, 1);
+    $this->assertEquals((int)$obj->infinite2->infinite1_id, 1);
     $this->assertEquals($obj->infinite2->infinite1, null);
   }
 
@@ -412,18 +472,18 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
   {
     $obj = $this->test->selectOne(1);
 
-    $this->assertEquals($obj->id, 1);
+    $this->assertEquals((int)$obj->id, 1);
     $this->assertEquals($obj->name, 'tanaka');
     $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals($obj->test2_id, 1);
+    $this->assertEquals((int)$obj->test2_id, 1);
 
     $child = $obj->test2;
-    $this->assertEquals($child->id, 1);
+    $this->assertEquals((int)$child->id, 1);
     $this->assertEquals($child->name, 'test21');
-    $this->assertEquals($child->test3_id, 2);
+    $this->assertEquals((int)$child->test3_id, 2);
 
     $child2 = $child->test3;
-    $this->assertEquals($child2->id, 2);
+    $this->assertEquals((int)$child2->id, 2);
     $this->assertEquals($child2->name, 'test32');
   }
 
@@ -432,13 +492,13 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->test->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_VIEW);
     $obj = $this->test->selectOne(1);
       
-    $this->assertEquals($obj->id, 1);
+    $this->assertEquals((int)$obj->id, 1);
     $this->assertEquals($obj->name, 'tanaka');
     $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals($obj->test2_id, 1);
+    $this->assertEquals((int)$obj->test2_id, 1);
     $this->assertEquals($obj->test2_name, 'test21');
-    $this->assertEquals($obj->test2_test3_id, 2);
-    $this->assertEquals($obj->test3_id, 2);
+    $this->assertEquals((int)$obj->test2_test3_id, 2);
+    $this->assertEquals((int)$obj->test3_id, 2);
     $this->assertEquals($obj->test3_name, 'test32');
   }
 
@@ -451,10 +511,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 4);
 
-    $this->assertEquals($orders[0]->id, 1);
-    $this->assertEquals($orders[1]->id, 2);
-    $this->assertEquals($orders[2]->id, 5);
-    $this->assertEquals($orders[3]->id, 6);
+    $this->assertEquals((int)$orders[0]->id, 1);
+    $this->assertEquals((int)$orders[1]->id, 2);
+    $this->assertEquals((int)$orders[2]->id, 5);
+    $this->assertEquals((int)$orders[3]->id, 6);
 
     //------------------------------------------------------
 
@@ -466,10 +526,10 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 4);
 
-    $this->assertEquals($orders[0]->id, 6);
-    $this->assertEquals($orders[1]->id, 5);
-    $this->assertEquals($orders[2]->id, 2);
-    $this->assertEquals($orders[3]->id, 1);
+    $this->assertEquals((int)$orders[0]->id, 6);
+    $this->assertEquals((int)$orders[1]->id, 5);
+    $this->assertEquals((int)$orders[2]->id, 2);
+    $this->assertEquals((int)$orders[3]->id, 1);
 
     //------------------------------------------------------
 
@@ -481,8 +541,8 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $orders = $cu->customer_order;
     $this->assertEquals(count($orders), 2);
 
-    $this->assertEquals($orders[0]->id, 2);
-    $this->assertEquals($orders[1]->id, 1);
+    $this->assertEquals((int)$orders[0]->id, 2);
+    $this->assertEquals((int)$orders[1]->id, 1);
     $this->assertEquals($orders[2]->id, null);
   }
 
@@ -493,14 +553,13 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $c  = $cu->selectOne(1);
     $ch = $c->newChild('customer_order');
 
-    $number = $ch->getNextNumber();
-    $ch->id = $number;
+    $ch->id = 7;
     $ch->save();  // auto insert parent_id
 
     $co = new Customer_Order();
     $co->setChildConstraint(array('limit' => 10));
     $order = $co->selectOne($number);
-    $this->assertEquals($order->customer_id, 1);  // parent_id
+    $this->assertEquals((int)$order->customer_id, 1);  // parent_id
   }
 
   public function testSelectAll_AutoGetChild()
@@ -516,13 +575,13 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals(count($objs[0]->customer_order), 5);
     $this->assertEquals(count($objs[1]->customer_order), 2);
 
-    $this->assertEquals($objs[0]->customer_order[0]->id, 1);
-    $this->assertEquals($objs[0]->customer_order[1]->id, 2);
-    $this->assertEquals($objs[1]->customer_order[0]->id, 3);
-    $this->assertEquals($objs[1]->customer_order[1]->id, 4);
-    $this->assertEquals($objs[0]->customer_order[2]->id, 5);
-    $this->assertEquals($objs[0]->customer_order[3]->id, 6);
-    $this->assertEquals($objs[0]->customer_order[4]->id, 7);
+    $this->assertEquals((int)$objs[0]->customer_order[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->id, 2);
+    $this->assertEquals((int)$objs[1]->customer_order[0]->id, 3);
+    $this->assertEquals((int)$objs[1]->customer_order[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->id, 5);
+    $this->assertEquals((int)$objs[0]->customer_order[3]->id, 6);
+    $this->assertEquals((int)$objs[0]->customer_order[4]->id, 7);
 
     //-------------------------------------------------------
 
@@ -531,61 +590,74 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
                                   'order' => 'id desc'));
     $objs = $cu->select();
 
-    $this->assertEquals($objs[0]->customer_order[0]->id, 7);
-    $this->assertEquals($objs[0]->customer_order[1]->id, 6);
-    $this->assertEquals($objs[0]->customer_order[2]->id, 5);
-    $this->assertEquals($objs[1]->customer_order[0]->id, 4);
-    $this->assertEquals($objs[1]->customer_order[1]->id, 3);
-    $this->assertEquals($objs[0]->customer_order[3]->id, 2);
-    $this->assertEquals($objs[0]->customer_order[4]->id, 1);
+    $this->assertEquals((int)$objs[0]->customer_order[0]->id, 7);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->id, 6);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->id, 5);
+    $this->assertEquals((int)$objs[1]->customer_order[0]->id, 4);
+    $this->assertEquals((int)$objs[1]->customer_order[1]->id, 3);
+    $this->assertEquals((int)$objs[0]->customer_order[3]->id, 2);
+    $this->assertEquals((int)$objs[0]->customer_order[4]->id, 1);
 
-    $this->assertEquals($objs[0]->customer_order[4]->order_line[0]->id, 11);
-    $this->assertEquals($objs[0]->customer_order[4]->order_line[1]->id, 8);
-    $this->assertEquals($objs[0]->customer_order[4]->order_line[2]->id, 2);
+    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[0]->id, 11);
+    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[2]->id, 2);
 
-    //$this->assertEquals($objs[0]->customer_order[4]->order_line[0]->id, 2);
-    //$this->assertEquals($objs[0]->customer_order[4]->order_line[1]->id, 8);
-    //$this->assertEquals($objs[0]->customer_order[4]->order_line[2]->id, 11);
+    //$this->assertEquals((int)$objs[0]->customer_order[4]->order_line[0]->id, 2);
+    //$this->assertEquals((int)$objs[0]->customer_order[4]->order_line[1]->id, 8);
+    //$this->assertEquals((int)$objs[0]->customer_order[4]->order_line[2]->id, 11);
 
     //-------------------------------------------------------
 
     $cu   = new Customer();
     $cu->setChildConstraint(array('limit' => 10));
     $objs = $cu->select();
-    $this->assertNotEquals($objs[0]->customer_order[0]->order_line, null);
-    $this->assertNotEquals($objs[1]->customer_order[0]->order_line, null);
+    $this->assertNotEquals((int)$objs[0]->customer_order[0]->order_line, null);
+    $this->assertNotEquals((int)$objs[1]->customer_order[0]->order_line, null);
 
-    $this->assertEquals($objs[0]->customer_order[0]->order_line[0]->id, 2);
-    $this->assertEquals($objs[0]->customer_order[0]->order_line[1]->id, 8);
-    $this->assertEquals($objs[0]->customer_order[0]->order_line[2]->id, 11);
+    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[0]->id, 2);
+    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[2]->id, 11);
     $this->assertEquals($objs[0]->customer_order[0]->order_line[3]->id, null);  // hasn't
 
-    $this->assertEquals($objs[0]->customer_order[1]->order_line[0]->id, 3);
-    $this->assertEquals($objs[0]->customer_order[1]->order_line[0]->item_id, 3);
-    $this->assertEquals($objs[0]->customer_order[1]->order_line[1]->id, 4);
-    $this->assertEquals($objs[0]->customer_order[1]->order_line[1]->item_id, 1);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->id, 3);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->item_id, 3);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->item_id, 1);
     $this->assertEquals($objs[0]->customer_order[1]->order_line[2]->id, null);  // hasn't
 
-    $this->assertEquals($objs[0]->customer_order[2]->order_line[0]->id, 1);
-    $this->assertEquals($objs[0]->customer_order[2]->order_line[0]->item_id, 2);
-    $this->assertEquals($objs[0]->customer_order[2]->order_line[1]->id, 7);
-    $this->assertEquals($objs[0]->customer_order[2]->order_line[1]->item_id, 3);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->item_id, 2);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->id, 7);
+    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->item_id, 3);
     $this->assertEquals($objs[0]->customer_order[2]->order_line[2]->id, null);  // hasn't
 
-    $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->id, 6);
-    $this->assertEquals($objs[1]->customer_order[0]->order_line[0]->item_id, 2);
+    $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->id, 6);
+    $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->item_id, 2);
     $this->assertEquals($objs[1]->customer_order[0]->order_line[1]->id, null);  // hasn't
-    $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->id, 5);
-    $this->assertEquals($objs[1]->customer_order[1]->order_line[0]->item_id, 3);
+    $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->id, 5);
+    $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->item_id, 3);
     $this->assertEquals($objs[1]->customer_order[1]->order_line[1]->id, null);  // hasn't
 
-    $this->assertEquals($objs[0]->customer_telephone[0]->id, 1);
-    $this->assertEquals($objs[0]->customer_telephone[1]->id, 3);
-    $this->assertEquals($objs[1]->customer_telephone[0]->id, 2);
-    $this->assertEquals($objs[1]->customer_telephone[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->customer_telephone[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->customer_telephone[1]->id, 3);
+    $this->assertEquals((int)$objs[1]->customer_telephone[0]->id, 2);
+    $this->assertEquals((int)$objs[1]->customer_telephone[1]->id, 4);
 
     $this->assertEquals($objs[0]->customer_telephone[0]->telephone, '09011111111');
     $this->assertEquals($objs[0]->customer_telephone[1]->telephone, '09011112222');
+    $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
+
+    //--------------------------------------------------------------------
+
+    $objs[0]->killAll('customer_telephone');
+
+    $cu   = new Customer();
+    $cu->setChildConstraint(array('limit' => 10));
+    $objs = $cu->select();
+
+    $this->assertEquals($objs[0]->customer_telephone[0]->telephone, null);
+    $this->assertEquals($objs[0]->customer_telephone[1]->telephone, null);
     $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
     $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
   }
@@ -608,13 +680,35 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $this->assertEquals($count, 2);
   }
 
-  public function testGetNextNumber()
+  public function testAggregate()
   {
-    $next = $this->test->getNextNumber();
-    $this->assertEquals($next, 7);
+    $order = new Customer_Order();
+    $order->setConstraint('order', 'sum_amount desc');
 
-    $next = $this->test->getNextNumber('id');
-    $this->assertEquals($next, 7);
+    $function = array('sum'   => 'amount',
+                      'avg'   => 'amount',
+                      'count' => 'amount');
+
+    $result = $order->aggregate($function, 'order_line');
+
+    $this->assertEquals((int)$result[0]->sum_amount, 60000);
+    $this->assertEquals((int)$result[1]->sum_amount, 13000);
+    $this->assertEquals((int)$result[2]->sum_amount, 9000);
+    $this->assertEquals((int)$result[3]->sum_amount, 6500);
+    $this->assertEquals((int)$result[4]->sum_amount, 3500);
+    $this->assertEquals((int)$result[5]->sum_amount, 1500);
+
+    $this->assertEquals((int)$result[0]->count_amount, 2);
+    $this->assertEquals((int)$result[0]->avg_amount,   30000);
+  }
+
+  public function testSeq()
+  {
+    $seq = new Common_Record('seq');
+
+    $seq->text = 'test';
+    $id = $seq->save();
+    var_dump($id);
   }
 }
 

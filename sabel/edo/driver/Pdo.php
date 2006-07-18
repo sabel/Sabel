@@ -1,10 +1,7 @@
 <?php
 
 uses('sabel.edo.driver.Interface');
-uses('sabel.edo.driver.Statement');
 uses('sabel.edo.SQLObject');
-
-require_once('Statement.php');
 
 class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 {
@@ -54,9 +51,25 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   
   }
 
-  public function executeInsert($table, $data)
+  public function setAggregateSQL($table, $idColumn, $functions)
   {
+    $sql = array("SELECT {$idColumn}");
+
+    foreach ($functions as $key => $val)
+      array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
+
+    array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
+    $this->sqlObj->setBasicSQL(implode('', $sql));
+  }
+
+  public function executeInsert($table, $data, $id_exists = null)
+  {
+    if (!$id_exists && $this->myDb == 'pgsql')
+      $data['id'] = $this->getNextNumber($table);
+
     $this->data = $data;
+
+    if ($table == 'order_line') $this->disp = true;
 
     $sql = array("INSERT INTO {$table}(");
     $set = false;
@@ -86,11 +99,37 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     $this->stmtFlag = Sabel_Edo_Driver_Statement::statement_exists(implode('', $sql), $data);
 
-    if ($this->stmtFlag) {
-      return $this->execute();
-    } else {
+    if (!$this->stmtFlag)
       $this->sqlObj->setBasicSQL(implode('', $sql));
-      return $this->execute();
+
+    return $this->execute();
+  }
+
+  public function getLastInsertId()
+  {
+    if ($this->myDb == 'pgsql') {
+      return $this->lastInsertId;
+    } elseif ($this->myDb == 'mysql') {
+      $this->execute('SELECT last_insert_id()');
+      $row = $this->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      return $row['last_insert_id()'];
+    } else {
+      return 'todo else';
+    }
+  }
+
+  private function getNextNumber($table)
+  {
+    if ($this->myDb == 'pgsql') {
+      $this->execute('SELECT nextval(\''.$table.'_id_seq\');');
+      $row = $this->fetch();
+      if (($this->lastInsertId = (int)$row[0]) == 0) {
+        throw new Exception($table.'_id_seq is not found.');
+      } else {
+        return $this->lastInsertId;
+      }
+    } else {
+      return 'todo else';
     }
   }
 
@@ -100,7 +139,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     if (!empty($conditions)) {
       foreach ($conditions as $key => $val) {
-
+        $check = false;
         if ($val[0] == '>' || $val[0] == '<') {
           $this->sqlObj->makeLess_GreaterSQL($key, $val);
         } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
@@ -121,50 +160,75 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
           $this->sqlObj->makeIsNotNullSQL($key);
         } else {
           $this->sqlObj->makeNormalConditionSQL($key, $val);
+          $check = true;
         }
+        if (!$check) $this->stmtFlag = false;
       }
     }
 
-    if (!empty($constraints))
+    if (!empty($constraints) && !($this->stmtFrag))
       $this->sqlObj->makeConstraintsSQL($constraints);
   }
 
   public function execute($sql = null)
   {
-    if ($this->stmtFlag) {
-      $this->stmt = Sabel_Edo_Driver_Statement::getStatement();
-    } else {
-      if (is_null($sql)) {
-        $sql = $this->sqlObj->getSQL();
-        if (is_null($sql)) {
-          throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
-        } else {
-          $this->stmt = $this->pdo->prepare($sql);
-          Sabel_Edo_Driver_Statement::addStatement($this->stmt);
-        }
-      } else {
+    try {
+      if (!is_null($sql)) {
         $this->stmt = $this->pdo->prepare($sql);
+      } elseif ($this->stmtFlag) {
+        $this->stmt = Sabel_Edo_Driver_Statement::getStatement();
+      } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
+        throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
+      } else {
+        $sql = $this->sqlObj->getSQL();
+        if ($this->stmt = $this->pdo->prepare($sql)) {
+          Sabel_Edo_Driver_Statement::addStatement($this->stmt);
+        } else {
+          throw new PDOException('Error: PDOStatement is null.');
+        }
       }
+    } catch (Exception $e) {
+      print_r($e->getMessage()."\n");
+      print_r($e->getTrace());
+    } catch (PDOException $pe) {
+      print_r($pe->getMessage()."\n");
+      print_r($sql);
+      print_r($this->pdo->errorInfo());
     }
 
     $this->makeBindParam();
 
-    if (empty($this->param)) {
-      return $this->stmt->execute();
-    } else {
-      $result = $this->stmt->execute($this->param);
-      $this->param = array();
+    try {
+      if (empty($this->param)) {
+        $result = $this->stmt->execute();
+      } else {
+        $result = $this->stmt->execute($this->param);
+        $tmp = $this->param;
+        $this->param = array();
+      }
+
+      if (!$result)
+        throw new PDOException('Error: PDOStatement::execute()');
+
       return $result;
+    } catch (PDOException $pe) {
+      print_r($pe->getMessage()."\n");
+      print_r($this->stmt);
+      print_r($tmp);
+      print_r($this->stmt->errorInfo());
     }
   }
 
   public function fetch($style = null)
   {
     if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
-      return $this->stmt->fetch(PDO::FETCH_ASSOC, $cursor, $offset);
+      $result = $this->stmt->fetch(PDO::FETCH_ASSOC, $cursor, $offset);
     } else {
-      return $this->stmt->fetch(PDO::FETCH_BOTH, $cursor, $offset);
+      $result = $this->stmt->fetch(PDO::FETCH_BOTH, $cursor, $offset);
     }
+
+    $this->stmt->closeCursor();
+    return $result;
   }
 
   public function fetchAll($style = null)
@@ -180,16 +244,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   {
     $this->param = $this->sqlObj->getParam();
 
-    if (!empty($this->param)) {
-      if (!empty($this->data)) {
-        $this->param = array_merge($this->param, $this->data);
-        $this->data  = array();
-      }
+    if (!empty($this->param) && !empty($this->data)) {
+      $this->param = array_merge($this->param, $this->data);
     } else {
-      if (!empty($this->data)) {
-        $this->param = $this->data;
-        $this->data  = array();
-      }
+      if (!empty($this->data)) $this->param = $this->data;
     }
 
     if (!empty($this->param)) {
@@ -201,7 +259,45 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       }
     }
 
+    $this->data  = array();
     $this->sqlObj->unsetProparties();
+  }
+}
+
+class Sabel_Edo_Driver_Statement
+{
+  private static $stmt;
+  private static $sql;
+  private static $keys = array();
+  private static $constraints = array();
+
+  public static function statement_exists($sql, $conditions, $constraints = null)
+  {
+    $result = true;
+    if (!empty($conditions))
+      $keys = array_keys($conditions);
+    
+    if (self::$sql         != $sql  || 
+        self::$keys        != $keys || 
+        self::$constraints != $constraints) { 
+
+      self::$sql         = $sql;
+      self::$keys        = $keys;
+      self::$constraints = $constraints;
+      $result = false;
+    }        
+
+    return $result;
+  }
+
+  public static function addStatement($stmt)
+  {
+    self::$stmt = $stmt;
+  }
+
+  public static function getStatement()
+  {
+    return self::$stmt;
   }
 }
 

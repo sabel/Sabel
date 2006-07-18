@@ -10,10 +10,13 @@ uses('sabel.edo.driver.Pgsql');
 abstract class Sabel_Edo_RecordObject
 {
   protected
-    $constraints      = array(),
-    $childConstraints = array(),
     $conditions       = array(),
     $selectCondition  = array();
+
+  protected
+    $constraints             = array(),
+    $childConstraints        = array(),
+    $defaultChildConstraints = array();
     
   protected
     $edo,
@@ -173,7 +176,7 @@ abstract class Sabel_Edo_RecordObject
       if (!is_array($param1)) {
         throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
       } else {
-        $this->childConstraints['whole'] = $param1;
+        $this->defaultChildConstraints = $param1;
       }
     } else {
       if (!is_array($param2)) {
@@ -207,7 +210,7 @@ abstract class Sabel_Edo_RecordObject
     if (empty($param1)) return;
 
     if ($this->isSpecialParam($param3, $param1)) {
-      $values = array();
+      $values   = array();
       $values[] = $param2;
       $values[] = $param3;
       $this->conditions[$param1] = $values;
@@ -232,7 +235,7 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->setCondition($param1, $param2, $param3);
 
-    $this->edo->setBasicSQL("SELECT COUNT(*) AS count FROM {$this->table}");
+    $this->edo->setBasicSQL("SELECT COUNT(*) FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, array('limit' => 1));
 
     if ($this->edo->execute()) {
@@ -243,21 +246,31 @@ abstract class Sabel_Edo_RecordObject
     }
   }
   
-  public function getNextNumber($column = null)
+  public function getNextNumber()
   {
-    $col = (is_null($column)) ? $this->defColumn : $column;
-    $sql = "SELECT {$col} FROM {$this->table} ORDER BY {$col} desc";
-    
-    if ($this->edo->execute($sql)) {
-      $row = $this->edo->fetch();
-    
-      if (is_null($row[0])) {
-        return 1;
-      } else {    
-        return $row[0] + 1;
-      }
+    return $this->edo->getNextNumber($this->table);
+  }
+
+  public function aggregate($functions, $child = null)
+  {
+    if (is_null($child)) {
+      $table    = $this->table;
+      $idColumn = 'id';
     } else {
-      throw new Exception('Error: getNextNumber()');
+      $table    = $child;
+      $idColumn = $this->table.'_id';
+    }
+
+    $this->edo->setAggregateSQL($table, $idColumn, $functions);
+    $this->edo->makeQuery(null, $this->constraints);
+
+    $recordObj = array();
+
+    if ($this->edo->execute($sql)) {
+      $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      return $this->toObject($rows);
+    } else {
+      return false;
     }
   }
 
@@ -266,7 +279,7 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2);
     $this->selectCondition = $this->conditions;
 
-    $this->makeFindObject($this);
+    $this->find($this);
   }
 
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
@@ -277,10 +290,10 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
-    return $this->makeFindObject(clone($this));
+    return $this->find(clone($this));
   }
 
-  protected function makeFindObject($obj)
+  protected function find($obj)
   {
     $this->edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -319,6 +332,7 @@ abstract class Sabel_Edo_RecordObject
     if (is_null($obj)) $obj = $this;
 
     $obj->chooseMyChildConstraint($child, $obj);
+
     if (!isset($obj->childConstraints[$child]['limit']))
       throw new Exception('Error: getChildren() must be set limit constraints');
 
@@ -336,9 +350,11 @@ abstract class Sabel_Edo_RecordObject
     $class     = get_class($this);
 
     if ($this->edo->execute()) {
-      while ($row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
+      $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      foreach ($rows as $row) {
         if (is_null($child_table)) {
           $obj = new $class();
+          $obj->receiveChildConstraint($this->childConstraints);
         } else {
           if (class_exists($child_table)) {
             $obj = new $child_table();
@@ -352,11 +368,7 @@ abstract class Sabel_Edo_RecordObject
 
         $myChild = $obj->getMyChildren();
         if (!is_null($myChild)) {
-          if (is_null($child_table)) {
-            $obj->receiveChildConstraint($this->childConstraints);
-          } else {
-            $this->chooseMyChildConstraint($myChild, $obj);
-          }
+          if (!is_null($child_table)) $this->chooseMyChildConstraint($myChild, $obj);
           $this->getDefaultChild($myChild, $obj);
         }
         $recordObj[] = $obj;
@@ -382,21 +394,54 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  protected function chooseMyChildConstraint($child, $obj)
+  private function chooseMyChildConstraint($child, $obj)
   {
     if (array_key_exists($child, $this->childConstraints)) {
-      $obj->setChildConstraint($child, $this->childConstraints[$child]);
+      $constraints = $this->constraintMerge($child, $this->childConstraints[$child]);
+      $obj->setChildConstraint($child, $constraints);
+    } elseif (!empty($this->defaultChildConstraints)) {
+      $obj->setChildConstraint($child, $this->defaultChildConstraints);
+    } elseif ($constraints = $this->hasMyChildConstraint($child, $obj)) {
+      $obj->setChildConstraint($child, $constraints);
     } else {
-      $childConstraints = $obj->getMyChildConstraint();
-      if (array_key_exists($child, $childConstraints)) {
-        $obj->setChildConstraint($child, $childConstraints[$child]);
-      } else {
-        if (is_null($this->childConstraints['whole'])) {
-          throw new Exception('Error: constraint of child object, not found.');
-        } else {  
-          $obj->setChildConstraint($child, $this->childConstraints['whole']);
-        }
+      $constraints = $this->hasDefaultChildConstraint($obj);
+      $obj->setChildConstraint($child, $constraints);
+    }
+    $obj->defaultChildConstraints = $this->defaultChildConstraints;
+  }
+
+  public function test()
+  {
+    $this->edo->test();
+  }
+
+  private function constraintMerge($child, $constraints)
+  {
+    if ($result = $this->hasMyChildConstraint($child, $this)) {
+      foreach ($result as $key => $val) {
+        if (!array_key_exists($key, $constraints)) $constraints[$key] = $val;
       }
+    }
+    return $constraints;
+  }
+
+  private function hasMyChildConstraint($child, $obj)
+  {
+    $childConstraints = $obj->getMyChildConstraint();
+    if (array_key_exists($child, $childConstraints)) {
+      return $childConstraints[$child];
+    } else {
+      return false;
+    }
+  }
+
+  private function hasDefaultChildConstraint($obj)
+  {
+    if (!empty($obj->defaultChildConstraints)) {
+      return $obj->defaultChildConstraints;
+    } else { 
+      throw new Exception('Error: constraint of child object, not found.');
+      return false;
     }
   }
 
@@ -422,7 +467,7 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentProperties($table, $id, &$row)
   {
-    if ($this->hasAlreadyAcquiredParent($table)) return null;
+    if ($this->isAcquiredObject($table)) return null;
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -449,7 +494,7 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentObject($table, $id)
   {
-    if ($this->hasAlreadyAcquiredParent($table)) return null;
+    if ($this->isAcquiredObject($table)) return null;
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -484,7 +529,7 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  protected function hasAlreadyAcquiredParent($table)
+  protected function isAcquiredObject($table)
   {
     for ($i = 0; $i < count($this->parentTables); $i++) {
       if ($this->parentTables[$i] == $table) return true;
@@ -507,8 +552,22 @@ abstract class Sabel_Edo_RecordObject
     } else {
       $obj = new Common_Record($table);
     }
-    $obj->__set("{$parent}_id", $id);
+    $column = $parent.'_id';
+    $obj->$column = $id;
     return $obj;
+  }
+
+  public function killAll($child)
+  {
+    $id = $this->data[$this->defColumn];
+    if (empty($id))
+      throw new Exception('Error: who is a parent? hasn\'t id value.');
+
+    $parent = strtolower(get_class($this));
+    $this->table = $child;
+    $this->remove("{$parent}_id", $id);
+  
+    $this->table = $parant; 
   }
 
   public function save($data = null)
@@ -518,7 +577,7 @@ abstract class Sabel_Edo_RecordObject
     if ($this->selected) {
       $this->update();
     } else {
-      $this->insert();
+      return $this->insert();
     }
   }
 
@@ -550,7 +609,9 @@ abstract class Sabel_Edo_RecordObject
 
   protected function insert()
   {
-    if (!$this->edo->executeInsert($this->table, $this->data)) {
+    if ($this->edo->executeInsert($this->table, $this->data, isset($this->data['id']))) {
+      return $this->edo->getLastInsertId();
+    } else {
       throw new Exception('Error: insert()');
     }
   }
@@ -560,7 +621,7 @@ abstract class Sabel_Edo_RecordObject
     if (!is_array($data))
       throw new Exception('Error: data is not array.');
 
-    if (!$this->edo->executeInsert($this->table, $data)) {
+    if (!$this->edo->executeInsert($this->table, $data, true)) {
       throw new Exception('Error: multipleInsert()');
     }
   }
@@ -571,19 +632,17 @@ abstract class Sabel_Edo_RecordObject
 
     foreach ($data as $key => $val) {
       if (array_key_exists($key, $this->data)) {
-        throw new Exception("Error: [{$key}] is already set!");
+        throw new Exception("Error: [\'{$key}\'] is already set!");
       } else {
         $this->data[$key] = $val;
       }
     }
   }
 
-  public function delete($param1 = null, $param2 = null, $param3 = null)
+  public function remove($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) && is_null($this->conditions)) {
-      $className = get_class($this);
-      throw new Exception("Error: {$className}::delete() [WHERE] must be set condition");
-    }
+    if (is_null($param1) && is_null($this->conditions))
+      throw new Exception("Error: remove() [WHERE] must be set condition");
 
     if (!is_null($param1))
       $this->setCondition($param1, $param2, $param3);
@@ -595,25 +654,35 @@ abstract class Sabel_Edo_RecordObject
       $this->conditions  = array();
       $this->constraints = array();
     } else {
-      throw new Exception('Error: delete()');
+      throw new Exception('Error: remove()');
     }
   }
 
   public function execute($sql)
   {
-    $recordObj = array();
-    $class = get_class($this);
-
     if ($this->edo->execute($sql)) {
-      while ($row = $this->edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
-        $obj = new $class();
-        $obj->setProperties($row);
-        $recordObj[] = $obj;
-      }
-      return $recordObj;
+      $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      return $this->toObject($rows);
     } else {
       return false;
     }
+  }
+
+  protected function toObject($array)
+  {
+    $recordObj = array();
+    $class = get_class($this);
+
+    foreach ($array as $row) {
+      if (class_exists($class)) {
+        $obj = new $class();
+      } else {
+        $obj = new Common_Record($class);
+      }
+      $obj->setProperties($row);
+      $recordObj[] = $obj;
+    }
+    return $recordObj;
   }
 }
 

@@ -11,7 +11,8 @@ class PdoSQL
 
   public function getSQL()
   {
-    return implode('', $this->sql);
+    if (is_array($this->sql))
+      return implode('', $this->sql);
   }
 
   public function setBasicSQL($sql)
@@ -19,7 +20,7 @@ class PdoSQL
     $this->sql = array($sql);
   }
 
-  protected function checkKeyExists($key)
+  protected function bindKey_exists($key)
   {
     if (!array_key_exists($key, $this->keyArray)) {
       $this->keyArray[$key]['count'] = 2;
@@ -34,7 +35,7 @@ class PdoSQL
 
   public function makeNormalConditionSQL($key, $val)
   {
-    $bindKey = $this->checkKeyExists($key);
+    $bindKey = $this->bindKey_exists($key);
 
     if (!$this->set) {
       array_push($this->sql, " WHERE {$key}=:{$bindKey}");
@@ -77,7 +78,7 @@ class PdoSQL
 
   public function makeLikeSQL($key, $val)
   {
-    $bindKey = $this->checkKeyExists($key);
+    $bindKey = $this->bindKey_exists($key);
 
     if (!$this->set) {
       array_push($this->sql, " WHERE {$key} LIKE :{$bindKey}");
@@ -106,8 +107,8 @@ class PdoSQL
 
   public function makeEitherSQL($key, $val)
   {
-    $bindKey  = $this->checkKeyExists($key);
-    $bindKey2 = $this->checkKeyExists($key);
+    $bindKey  = $this->bindKey_exists($key);
+    $bindKey2 = $this->bindKey_exists($key);
 
     $val1 = $val[0];
     $val2 = $val[1];
@@ -120,13 +121,18 @@ class PdoSQL
 
     if ($val1[0] == '<' || $val1[0] == '>') {
       array_push($this->sql, $str." ({$key} {$val1[0]} :{$bindKey} OR");
-      $val1 = trim(str_replace($val1[0], '', $val1));
+      $val1 = trim(substr_replace($val1, '', 0, 1));
+    } elseif ($val1 == 'null') {
+      array_push($this->sql, $str." ({$key} IS NULL OR");
     } else {
       array_push($this->sql, $str." ({$key}=:{$bindKey} OR");
     }
+
     if ($val2[0] == '<' || $val2[0] == '>') {
       array_push($this->sql, " {$key} {$val2[0]} :{$bindKey2})");
-      $val2 = trim(str_replace($val2[0], '', $val2));
+      $val2 = trim(substr_replace($val2, '', 0, 1));
+    } elseif ($val2 == 'null') {
+      array_push($this->sql, $str." {$key} IS NULL)");
     } else {
       array_push($this->sql, " {$key}=:{$bindKey2})");
     }
@@ -139,7 +145,7 @@ class PdoSQL
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $bindKey  = $this->checkKeyExists($key);
+    $bindKey  = $this->bindKey_exists($key);
 
     if (!$this->set) {
       array_push($this->sql, " WHERE {$key} {$val[0]} :{$bindKey}");
@@ -147,7 +153,7 @@ class PdoSQL
       array_push($this->sql, " AND {$key} {$val[0]} :{$bindKey}");
     }
 
-    $val = str_replace($val[0], '', $val);
+    $val = substr_replace($val, '', 0, 1);
     $this->param[$bindKey] = trim($val);
 
     $this->set = true;
