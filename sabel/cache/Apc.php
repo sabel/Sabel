@@ -27,7 +27,7 @@ class Sabel_Cache_Apc
   
   public function delete($key)
   {
-    acp_delete($key);
+    apc_delete($key);
   }
 }
 

@@ -8,32 +8,35 @@
  */
 class Sabel_Core_Resolver
 {
-  protected $classpath;
-  public function __construct($classpath)
+  public static function resolvClassName($classpath)
   {
-    $this->classpath = $classpath;
-  }
-  
-  public function resolvClassName()
-  {
-    $parts = explode('.', $this->classpath);
+    $parts = explode('.', $classpath);
     foreach ($parts as $pos => $name) {
       $classNames[] = ucfirst($name);
     }
     
-    $className = implode('_', $classNames);
-    
-    
-    return $className;
+    return implode('_', $classNames);
   }
   
-  public function resolvRealPath()
+  public static function resolvPath($classpath)
   {
-    $parts = explode('.', $this->classpath);
-    foreach ($parts as $pos => $name) {
-      $classNames[] = ucfirst($name);
+    return str_replace('.', '/', $classpath);
+  }
+  
+  public static function resolvClassPathByClassName($name)
+  {
+    $parts = explode('_', $name);
+    
+    if (count($parts) === 1) return $name;
+    
+    $classPath = '';
+    for ($i = 0; $i < count($parts); $i++) {
+      $last = ($i === (count($parts) - 1));
+      $classPath .= ($last) ? $parts[$i] : strtolower($parts[$i]) . '.';
     }
-    $classpath = implode('/', $parts);
+    
+    return $classPath;
   }
 }
+
 ?>
