@@ -1,0 +1,10 @@
+RewriteEngine on
+
+#RewriteBase /hamanaka_sandbox/user
+
+# skip .some files
+RewriteCond %{REQUEST_URI} \..+$
+RewriteRule .* - [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]

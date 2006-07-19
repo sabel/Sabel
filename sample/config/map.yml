@@ -1,0 +1,35 @@
+# route settings
+
+show:
+  uri:        ":id"
+  destination:
+    module: "blog"
+    controller: "common"
+    action: "entry"
+
+blog:
+  uri:    ":year/:month/:day"
+  option: ":day"
+  destination:
+    module:     "blog"
+    controller: "common"
+    action:     "showByDate"
+  requirements:
+    year:  "([1-2][0-9]{3})"
+    month: "([0-1]?[0-9])"
+    day:   "([0-3]?[0-9])"
+
+test:
+  uri: ":test/:test2"
+  destination:
+    module: "blog"
+    controller: "common"
+    action: "entry"
+    
+rmt:
+  uri: ":game/:controller/:action/:test"
+  default:
+    controller: "index"
+    action:     "index"
+
+default: ":module/:controller/:action"
