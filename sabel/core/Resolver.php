@@ -29,13 +29,13 @@ class Sabel_Core_Resolver
     
     if (count($parts) === 1) return $name;
     
-    $classPath = '';
+    $classpath = '';
     for ($i = 0; $i < count($parts); $i++) {
       $last = ($i === (count($parts) - 1));
-      $classPath .= ($last) ? $parts[$i] : strtolower($parts[$i]) . '.';
+      $classpath .= ($last) ? $parts[$i] : strtolower($parts[$i]) . '.';
     }
     
-    return $classPath;
+    return $classpath;
   }
 }
 
