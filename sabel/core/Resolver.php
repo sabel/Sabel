@@ -11,7 +11,7 @@ class Sabel_Core_Resolver
   public static function resolvClassName($classpath)
   {
     $parts = explode('.', $classpath);
-    foreach ($parts as $pos => $name) {
+    foreach ($parts as $name) {
       $classNames[] = ucfirst($name);
     }
     
@@ -29,6 +29,7 @@ class Sabel_Core_Resolver
     
     if (count($parts) === 1) return $name;
     
+    // @todo use iterator.
     $classpath = '';
     for ($i = 0; $i < count($parts); $i++) {
       $last = ($i === (count($parts) - 1));
