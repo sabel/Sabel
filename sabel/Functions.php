@@ -20,7 +20,7 @@ function uses($uses)
   $className = Sabel_Core_Resolver::resolvClassName($uses);
   $classpath = Sabel_Core_Resolver::resolvPath($uses);
   
-  foreach ($paths as $pathidx => $path) {
+  foreach ($paths as $path) {
     $fullpath = $path.$classpath.'.php';
     if (defined('SABEL_USE_INCLUDE_PATH')) {
       require_once($fullpath);
