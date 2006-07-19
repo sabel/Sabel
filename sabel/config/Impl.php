@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Config_Impl
+class Sabel_Config_Yaml
 {
   private $data;
 
@@ -10,7 +10,7 @@ class Sabel_Config_Impl
     $this->data = $parser->load('app/configs/config.yml');
   }
 
-  public function get($key)
+  public function read($key)
   {
     return $this->data[$key];
   }
