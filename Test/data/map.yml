@@ -1,0 +1,20 @@
+# route settings
+
+show: ":action/:id"
+  controller: "blog"
+  
+blog: ":year/:month/:day"
+  controller: "blog"
+  action:     "showByDate"
+  requirements: 
+    year:  "([1-2][0-9]{3})"
+    month: "([0-1]?[0-9])"
+    day:   "([0-3]?[0-9])"
+      option: "true"
+      
+rmt: ":game/:controller/:action"
+  default:
+    controller: "index"
+    action:     "index"
+
+default: ":controller/:action/:id"
