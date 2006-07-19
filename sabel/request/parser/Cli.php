@@ -4,33 +4,43 @@ uses('sabel.request.parser.Common');
 
 class Sabel_Request_Parser_Cli extends Sabel_Request_Parser_Common
 {
-  private static $instance = null;
-  
-  private $attributes = null;
-  private $parameters = null;
-  
   public static function create()
   {
-  
-  }
-  
-  public function __set($key, $value)
-  {
-    $this->attributes[$key] = $value;
-  }
-  
-  public function __get($key)
-  {
-    if ($key == 'parameters') return $this->parameters;
-    return $this->attributes[$key];
+    if (!self::$instance) {
+      self::$instance = new self();
+    }
+    return self::$instance;
   }
   
   public function parse($request = null, $pair = null, $pat = null)
   {
+    $this->parseWithPattern($request, $pair, $pat);
+    
+    
+    return $this;
+  }
+  
+  public function parseDefault($request, $pair = null)
+  {
     
   }
   
-  public function destruct(){}
+  public function parseWithPattern($request, $pair, $pat)
+  {
+    $this->parameters = $request[count($pat)];
+    $pairs = explode('/', $pair);
+    
+    for ($i = 0; $i < count($pat); $i++) {
+      $p = '%^'.$pat[$i].'$%';
+      if (preg_match($p, $request[$i], $match)) {
+        $this->attributes[$pairs[$i]] = $match[1];
+      } else {
+        $this->attributes[$pairs[$i]] = null;
+      }
+    }
+
+    return true;
+  }
 }
 
 ?>

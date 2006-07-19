@@ -4,7 +4,7 @@
  * Loading controller class.
  *
  */
-class Sabel_Core_ClassLoader
+class Sabel_Controller_Loader
 {
   private $destination;
 
@@ -65,7 +65,7 @@ class Sabel_Core_ClassLoader
       $class = $this->getControllerClassName();
       return new $class();
     } else if ($this->isValidModule()) {
-      $path = RUN_BASE.'/app/modules/' . $this->destination[0] . '/controllers/index.php';
+      $path = RUN_BASE.'/app/modules/' . $this->destination[0] . 'controllers/index.php';
       require_once($path);
       $moduleClassName = $this->destination[0] . '_Index';
       if (class_exists($moduleClassName)) {

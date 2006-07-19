@@ -1,10 +1,8 @@
 <?php
 
-uses('sabel.logger.Interface');
-
-class Sabel_Logger_File implements Sabel_Logger_Interface
+class Sabel_Logger_File
 {
-  const LOG_FILE = 'logs/sabel.log';
+  const LOG_FILE = '/logs/sabel.log';
   
   private $fp = null;
   private static $instance = null;
@@ -19,7 +17,7 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   public function __construct()
   {
-    $this->fp = fopen(self::LOG_FILE, 'a+');
+    $this->fp = fopen(RUN_BASE . self::LOG_FILE, 'a+');
   }
   
   public function log($text)

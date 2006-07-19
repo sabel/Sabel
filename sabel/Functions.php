@@ -1,6 +1,31 @@
 <?php
 
-require_once('core/Context.php');
+static $included = array();
+
+/*
+require_once('Sabel/sabel/cache/Apc.php');
+$c = new Sabel_Cache_Apc();
+
+$usesCache = array();
+
+$rstart = microtime();
+if ($c->read('uses')) {
+  uses('');
+} else {
+  uses('sabel.cache.Apc');
+  uses('sabel.controller.Front');
+  uses('sabel.core.Router');
+  uses('sabel.core.Dispatcher');
+  uses('sabel.controller.Loader');
+  uses('sabel.exception.Runtime');
+  $c->write('uses', $usesCache);
+}
+*/
+
+function __autoload($class)
+{
+  uses(convertClassPath($class));
+}
 
 /**
  * some class uses some class.
@@ -10,6 +35,13 @@ require_once('core/Context.php');
  */
 function uses($uses)
 {
+  if (is_array($cache) && 0 < count($cache)) {
+    foreach ($cache as $cpos => $path) {
+      require_once($path);
+    }
+    return true;
+  }
+  
   $paths = Sabel_Core_Context::getIncludePath();
   
   $usesArray = explode('.', $uses);
@@ -18,12 +50,19 @@ function uses($uses)
   }
   $className = implode('_', $classNames);
   $classpath = implode('/', $usesArray);
-    
-  foreach ($paths as $pathidx => $path) {
-    $fullpath = $path.$classpath.'.php';
-    if (is_file($fullpath)) {
-      require_once($fullpath);
-      break;
+  
+  if (defined('SABEL_USE_INCLUDE_PATH')) {
+    foreach ($paths as $pathidx => $path) {
+      $fullpath = $path.$classpath.'.php';
+      require_once($path.$classpath.'.php');
+    }
+  } else {
+    foreach ($paths as $pathidx => $path) {
+      $fullpath = $path.$classpath.'.php';
+      if (is_readable($fullpath)) {
+        require_once($fullpath);
+        break;
+      }
     }
   }
   

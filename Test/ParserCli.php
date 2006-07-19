@@ -13,15 +13,15 @@ uses('sabel.injection.Calls');
 uses('sabel.core.Exception');
 uses('sabel.core.Const');
 uses('sabel.request.Parameters');
-uses('sabel.request.parser.Web');
+uses('sabel.request.parser.Cli');
 
-class Test_ParserWeb extends PHPUnit2_Framework_TestCase
+class Test_ParserCli extends PHPUnit2_Framework_TestCase
 {
   public $pr = null;
   
   protected function setUp()
   {
-    $this->pr = Sabel_Request_Parser_Web::create();
+    $this->pr = Sabel_Request_Parser_Cli::create();
   }
   
   protected function tearDown()
@@ -31,7 +31,7 @@ class Test_ParserWeb extends PHPUnit2_Framework_TestCase
   
   public function testFlexibleURI()
   {
-    $uri  = '2006/07/05';
+    $uri  = array('2006', '07', '05');
     $pair = 'year/month/day';
     $pat  = array('([1-2][0-9]{3})', '([0-1]?[0-9])', '([0-3]?[0-9])');
     
@@ -44,7 +44,7 @@ class Test_ParserWeb extends PHPUnit2_Framework_TestCase
   
   public function testFlexibleURI_with_param()
   {
-    $uri = '2006/07/05?parameter&key=value';
+    $uri  = array('2006', '07', '05', 'parameter&key=value');
     $pair = 'year/month/day';
     $pat  = array('([1-2][0-9]{3})', '([0-1]?[0-9])', '([0-3]?[0-9])');
     

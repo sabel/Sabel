@@ -56,7 +56,7 @@ class Sabel_Request_Parser_Web extends Sabel_Request_Parser_Common
     $pairs    = explode('/', $pair);
     
     for ($i = 0; $i < count($pat); $i++) {
-      $p = '%^'.$pat[$i].'$%';
+      $p = '/^'.$pat[$i].'$/';
       if (preg_match($p, $requests[$i], $match)) {
         $this->attributes[$pairs[$i]] = $match[1];
       } else {

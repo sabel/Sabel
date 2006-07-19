@@ -2,6 +2,7 @@
 
 class Sabel_Core_Context
 {
+  private static $logger;
   private static $parameters = array();
   
   private static $includePath = array();
@@ -21,25 +22,26 @@ class Sabel_Core_Context
   {
     return self::$parameters[$name];
   }
-
-  public static function getRequestModule()
+  
+  public static function initLogger()
   {
-    return $_REQUEST['module'];
+    self::$logger = Sabel_Logger_File::singleton();
   }
-
-  public static function getRequestAction()
+  
+  public static function log($log)
   {
-    return $_REQUEST['action'];
+    if (!is_object(self::$logger)) self::initLogger();
+    self::$logger->log($log);
   }
-
+  
   public static function getLogger()
   {
-    return FileLogger::singleton();
+    return Sabel_Logger_File::singleton();
   }
   
   public static function getContainer()
   {
-    return new SabelDIContainer();
+    return new Sabel_Container_DI();
   }
   
   public static function getCache()
@@ -58,7 +60,5 @@ class Sabel_Core_Context
     return self::$includePath;
   }
 }
-
-Sabel_Core_Context::addIncludePath('');
 
 ?>

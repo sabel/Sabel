@@ -10,7 +10,7 @@ uses('sabel.config.Cached');
  * @author Mori Reo <mori.reo@servise.jp>
  * @package sabel.controller
  */
-abstract class SabelPageController
+abstract class Sabel_Controller_Page
 {
   protected $request, $response, $template, $cache, $logger;
 
