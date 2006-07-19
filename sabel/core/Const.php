@@ -9,7 +9,7 @@ class Sabel_Core_Const
   /**
    * controllers directory.
    */
-  const CONTROLLER_DIR     = 'controllers/';
+  const CONTROLLER_DIR     = '/controllers/';
 
   /**
    * postfix extention of controller class.
@@ -19,7 +19,7 @@ class Sabel_Core_Const
   /**
    * modules directory
    */
-  const MODULES_DIR        = 'app/modules/';
+  const MODULES_DIR        = '/app/modules/';
 
   /**
    * common files of project
