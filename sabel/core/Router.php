@@ -14,21 +14,6 @@ class Sabel_Core_Router
 {
   public function routing($request_uri)
   {
-    $map = new Sabel_Core_Map();
-    return $map->connect($request_uri);
-  }
-}
-
-/**
- * Sabel_Core_Map
- * 
- * @package org.sabel
- * @author Mori Reo <mori.reo@gmail.com>
- */
-class Sabel_Core_Map 
-{
-  public function connect($request_uri)
-  {
     uses('sabel.config.Spyc');
     $c = new Sabel_Config_Yaml(RUN_BASE.'/config/map.yml');
     
