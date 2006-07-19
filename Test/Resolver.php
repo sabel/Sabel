@@ -17,8 +17,14 @@ class Test_Resolver extends PHPUnit2_Framework_TestCase
 {
   public function testResolver()
   {
-    $r = new Sabel_Core_Resolver('root.dir.dir.Class');
-    $path = $r->resolvClassName();
-    print_r($path);
+    $classpath = 'root.dir.dir2.Class';
+    
+    $className = Sabel_Core_Resolver::resolvClassName($classpath);
+    $path      = Sabel_Core_Resolver::resolvPath($classpath);
+    $classpath = Sabel_Core_Resolver::resolvClassPathByClassName('Root_Dir_Dir2_Class');
+    
+    $this->assertEquals('Root_Dir_Dir2_Class', $className);
+    $this->assertEquals('root/dir/dir2/Class', $path);
+    $this->assertEquals('root.dir.dir2.Class', $classpath);
   }
 }

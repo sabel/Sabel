@@ -7,6 +7,9 @@ require_once('sabel/core/Context.php');
 
 uses('sabel.exception.Runtime');
 uses('sabel.core.Router');
+require_once('sabel/core/Router.php');
+require_once('sabel/config/Spyc.php');
+require_once('sabel/config/Yaml.php');
 
 /**
  * Test_Router
@@ -24,9 +27,9 @@ class Test_Router extends PHPUnit2_Framework_TestCase
   
   public function testUri()
   {
-    $uri = 'blog/2006/06/04';
-    $map = ':controller/:year/:day/:month';
-    $pat = '%([a-z].*)/(19|20\d\d)/([01]?\d)/([0-3]?\d)%';
+    $uri = '2006/06/04';
+    $map = ':year/:day/:month';
+    $pat = '%(19|20\d\d)/([01]?\d)/([0-3]?\d)%';
     preg_match($pat, $uri, $matchs);
     array_shift($matchs);
     

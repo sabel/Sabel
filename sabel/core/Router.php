@@ -27,23 +27,19 @@ class Sabel_Core_Router
  */
 class Sabel_Core_Map 
 {
-  protected $map;
-  
-  public function __construct()
-  {
-    $tmpMap = array();
-    $tmpMap['pattern'] = array('([1-2][0-9]{3})', '([0-1]?[0-9])', '([0-3]?[0-9])');
-    $tmpMap['destination'] = array('blog', 'common', 'show');
-    $this->map[] = $tmpMap;
-  }
-  
   public function connect($request_uri)
   {
-    $pattern = $this->map[0]['pattern'];
-    $pattern = join('/', $pattern);
-    $pattern = '%'.$pattern.'%';
-    if (preg_match($pattern, $request_uri, $matchs)) {
-      return $this->map[0]['destination'];
+    uses('sabel.config.Spyc');
+    $c = new Sabel_Config_Yaml(RUN_BASE.'/config/map.yml');
+    
+    $rcount = count(explode('/', $request_uri));
+    
+    $map = $c->toArray();
+    foreach ($map as $entry => $config) {
+      $ccount = count(explode('/', $config['uri']));
+      if ($ccount === $rcount) {
+        return $map[$entry]['destination'];
+      }
     }
   }
 }
