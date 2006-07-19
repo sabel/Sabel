@@ -38,7 +38,6 @@ class Test_Router extends PHPUnit2_Framework_TestCase
     foreach ($maps as $pos => $mapPart) {
       $data[ltrim($mapPart, ':')] = $matchs[$pos];
     }
-    print_r($data);
   }
 }
 

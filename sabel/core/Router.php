@@ -20,10 +20,10 @@ class Sabel_Core_Router
     $rcount = count(explode('/', $request_uri));
     
     $map = $c->toArray();
-    foreach ($map as $entry => $config) {
+    foreach ($map as $config) {
       $ccount = count(explode('/', $config['uri']));
       if ($ccount === $rcount) {
-        return $map[$entry]['destination'];
+        return $config['destination'];
       }
     }
   }

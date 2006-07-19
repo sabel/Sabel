@@ -24,7 +24,7 @@ class Sabel_Annotation_Reader
       return self::$annotation[$className];
     } else {
       $ref = new ReflectionClass($className);
-      foreach ($ref->getMethods() as $midx => $method) {
+      foreach ($ref->getMethods() as $method) {
         $this->processMethod($method->getDocComment());
       }
       self::$annotation[$className] = $this->list;
