@@ -1,11 +1,9 @@
-# route settings
-
 show:
-  uri:        ":id"
+  uri: ":id"
   destination:
-    module: "blog"
+    module:     "blog"
     controller: "common"
-    action: "entry"
+    action:     "entry"
 
 blog:
   uri:    ":year/:month/:day"
@@ -19,12 +17,19 @@ blog:
     month: "([0-1]?[0-9])"
     day:   "([0-3]?[0-9])"
 
-test:
+newstest:
   uri: ":test/:test2"
   destination:
-    module: "blog"
-    controller: "common"
-    action: "entry"
+    module:     "test"
+    controller: "test"
+    action:     "test"
+    
+news:
+  uri: "news/:article_id"
+  destination:
+    module:     "news"
+    controller: "viewer"
+    action:     "show"
     
 rmt:
   uri: ":game/:controller/:action/:test"

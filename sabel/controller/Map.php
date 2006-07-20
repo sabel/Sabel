@@ -53,4 +53,35 @@ class Sabel_Controller_Map
     }
     return $entries;
   }
+  
+  public function getEntriesByCount($number)
+  {
+    $number = (int) $number;
+    
+    $entries = array();
+    foreach ($this->map as $entry) {
+      $entry = new Sabel_Controller_Map_Entry($entry);
+      if ($entry->getUri()->count() === $number) $entries[] = $entry;
+    }
+    return $entries;
+  }
+  
+  public function hasSameUriCountOfEntries($number)
+  {
+    $number =(int) $number;
+    $entries = $this->getEntriesByCount($number);
+    return (count($entries) >= 2) ? count($entries) : false;
+  }
+  
+  public function getEntryByHasConstantUriElement($number)
+  {
+    $entries = $this->getEntriesByCount($number);
+    foreach ($entries as $entry) {
+      if ($entry->getUri()->getElement(0)->isConstant()) {
+        $hasConstant = $entry;
+      }
+    }
+    
+    return (is_object($hasConstant)) ? $hasConstant : false;
+  }
 }

@@ -55,6 +55,25 @@ class Sabel_Controller_Map_Element
     $this->element = $element;
   }
   
+  public function isConstant()
+  {
+    return (strpos($this->element, ':') === false);
+  }
+  
+  public function getConstant()
+  {
+    return ($this->isConstant()) ? $this->element : false;
+  }
+  
+  public function isReservedWord()
+  {
+    if ($this->isModule() || $this->isController() || $this->isAction()) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
   public function isModule()
   {
     return ($this->element === ':module');

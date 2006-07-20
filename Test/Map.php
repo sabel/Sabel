@@ -47,9 +47,23 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   public function testMapElement()
   {
     $entry = $this->map->getEntry('rmt');
-    $this->assertTrue($entry->getUri()->getElement(1)->isController());
-    $this->assertTrue($entry->getUri()->getElement(2)->isAction());
+    $this->assertFalse($entry->getUri()->getElement(0)->isModule());
     $this->assertFalse($entry->getUri()->getElement(0)->isController());
+    $this->assertFalse($entry->getUri()->getElement(0)->isAction());
+    
+    $this->assertTrue( $entry->getUri()->getElement(1)->isController());
+    $this->assertTrue( $entry->getUri()->getElement(2)->isAction());
+    
+    $this->assertFalse($entry->getUri()->getElement(0)->isReservedWord());
+    $this->assertTrue( $entry->getUri()->getElement(1)->isReservedWord());
+    $this->assertTrue( $entry->getUri()->getElement(2)->isReservedWord());
+  }
+  
+  public function testMapElementConst()
+  {
+    $entry = $this->map->getEntry('news');
+    $this->assertTrue($entry->getUri()->getElement(0)->isConstant());
+    $this->assertFalse($entry->getUri()->getElement(1)->isConstant());
   }
   
   public function testMapEntry()
@@ -57,6 +71,24 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $entry = $this->map->getEntry('blog');
     $this->assertTrue(is_object($entry->getUri()));
     $this->assertEquals(':year/:month/:day', $entry->getUri()->getString());
+  }
+  
+  public function testSameNumberOfParts()
+  {
+    $entries = $this->map->getEntriesByCount(2);
+    $this->assertEquals(':test/:test2',     $entries[0]->getUri()->getString());
+    $this->assertEquals('news/:article_id', $entries[1]->getUri()->getString());
+  }
+  
+  public function testHasSameNumberOfUriParts()
+  {
+    $this->assertTrue(!$this->map->hasSameUriCountOfEntries(2) === false);
+  }
+  
+  public function testGetHasConstantUriElement()
+  {
+    $entry = $this->map->getEntryByHasConstantUriElement(2);
+    $this->assertEquals('news', $entry->getUri()->getElement(0)->getConstant());
   }
   
   public function testMapEntries()

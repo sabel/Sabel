@@ -8,16 +8,29 @@
  */
 class Sabel_Core_Router
 {
+  protected $map;
+  
+  public function __construct($map = null)
+  {
+    $this->map = ($map) ? $map : new Sabel_Controller_Map();
+    $this->map->load();
+  }
+  
   public function routing($request_uri)
   {
-    $rcount = count(explode('/', $request_uri));
+    $uriParts = explode('/', $request_uri);
+    $rcount   = count($uriParts);
     
-    $map = new Sabel_Controller_Map();
-    $map->load();
-    foreach ($map->getEntries() as $entry) {
+    $entry = $this->map->getEntryByHasConstantUriElement(2);
+    if ($entry->getUri()->getElement(0)->getConstant() == $uriParts[0]) {
+      return $entry->getDestination();
+    }
+    
+    foreach ($this->map->getEntries() as $entry) {
       if ($entry->getUri()->count() === $rcount) {
         return $entry->getDestination();
       }
     }
+    
   }
 }
