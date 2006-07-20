@@ -14,16 +14,13 @@ class Sabel_Core_Router
 {
   public function routing($request_uri)
   {
-    uses('sabel.config.Spyc');
-    $c = new Sabel_Config_Yaml(RUN_BASE.'/config/map.yml');
-    
     $rcount = count(explode('/', $request_uri));
     
-    $map = $c->toArray();
-    foreach ($map as $config) {
-      $ccount = count(explode('/', $config['uri']));
-      if ($ccount === $rcount) {
-        return $config['destination'];
+    $map = new Sabel_Controller_Map();
+    $map->load();
+    foreach ($map->getEntries() as $entry) {
+      if ($entry->countUri() === $rcount) {
+        return $entry->getDestination();
       }
     }
   }
