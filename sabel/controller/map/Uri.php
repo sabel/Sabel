@@ -27,7 +27,7 @@ class Sabel_Controller_Map_Uri
   public function getElement($position)
   {
     $elements = $this->getElements();
-    if ($position < count($elements)) {
+    if (0 <= $position && $position < count($elements)) {
       return $elements[$position];
     } else {
       return false;
@@ -37,6 +37,42 @@ class Sabel_Controller_Map_Uri
   public function getElements()
   {
     return $elements = explode('/', $this->uri);
+  }
+}
+
+/**
+ * ClassName
+ * 
+ * @package org.sabel
+ * @author Mori Reo <mori.reo@gmail.com>
+ */
+class Sabel_Controller_Map_Element
+{
+  protected $element;
+  
+  public function __construct($element)
+  {
+    $this->element = $element;
+  }
+  
+  public function isModule()
+  {
+    
+  }
+  
+  public function isController()
+  {
+    
+  }
+  
+  public function isAction()
+  {
+    
+  }
+  
+  public function getKey()
+  {
+    
   }
 }
 

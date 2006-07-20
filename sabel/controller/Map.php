@@ -36,7 +36,7 @@ class Sabel_Controller_Map
       $c = new Sabel_Config_Yaml($this->getPath());
       $this->map = $c->toArray();
     } else {
-      throw new Exception("map not found.");
+      throw new Exception("map configure not found on " . $this->getPath());
     }
   }
   

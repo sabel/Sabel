@@ -1,14 +1,10 @@
 <?php
 
 /**
+ * Routing request to controller.
  * 
- * note------------------
- * requested /2006/05/05.
- * is it match which controller?
- * how can i decide route it?
- * first, we create simple map object. then compare it and map.
- * map structure look like "match pattern" -> "module controller action"
- * now we can decide where route it if match pattern found.
+ * @package org.sabel.core
+ * @author Mori Reo <mori.reo@gmail.com
  */
 class Sabel_Core_Router
 {

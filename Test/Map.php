@@ -33,6 +33,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   {
     $entry = $this->map->getEntry('blog');
     $mapUri = $entry->getUri();
+    $this->assertFalse($mapUri->getElement(-1));
     $this->assertEquals(':year',  $mapUri->getElement(0));
     $this->assertEquals(':month', $mapUri->getElement(1));
     $this->assertEquals(':day',   $mapUri->getElement(2));
