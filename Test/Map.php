@@ -34,14 +34,22 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $entry = $this->map->getEntry('blog');
     $mapUri = $entry->getUri();
     $this->assertFalse($mapUri->getElement(-1));
-    $this->assertEquals(':year',  $mapUri->getElement(0));
-    $this->assertEquals(':month', $mapUri->getElement(1));
-    $this->assertEquals(':day',   $mapUri->getElement(2));
+    $this->assertEquals(':year',  $mapUri->getElement(0)->toString());
+    $this->assertEquals(':month', $mapUri->getElement(1)->toString());
+    $this->assertEquals(':day',   $mapUri->getElement(2)->toString());
     $this->assertFalse($mapUri->getElement(3));
     
     foreach ($mapUri->getElements() as $element) {
       $this->assertTrue(is_string($element));
     }
+  }
+  
+  public function testMapElement()
+  {
+    $entry = $this->map->getEntry('rmt');
+    $this->assertTrue($entry->getUri()->getElement(1)->isController());
+    $this->assertTrue($entry->getUri()->getElement(2)->isAction());
+    $this->assertFalse($entry->getUri()->getElement(0)->isController());
   }
   
   public function testMapEntry()
@@ -77,5 +85,3 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $this->assertEquals('showByDate', $dest->getAction());
   }
 }
-
-?>

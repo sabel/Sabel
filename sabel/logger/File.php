@@ -31,5 +31,3 @@ class Sabel_Logger_File
     fclose($this->fp);
   }
 }
-
-?>

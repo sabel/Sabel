@@ -19,5 +19,3 @@ require_once('lib/setup.php');
 Sabel::main();
 $e = microtime();
 Sabel_Core_Context::log('total execution: '.($e - $s));
-
-?>

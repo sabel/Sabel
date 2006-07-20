@@ -76,5 +76,3 @@ class DefaultTemplateDirector implements SabelTemplateDirector
     return $this->getPath() . $this->getName();
   }
 }
-
-?>

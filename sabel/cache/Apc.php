@@ -30,5 +30,3 @@ class Sabel_Cache_Apc
     apc_delete($key);
   }
 }
-
-?>

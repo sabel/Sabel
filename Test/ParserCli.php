@@ -135,5 +135,3 @@ class Test_ParserCli extends PHPUnit2_Framework_TestCase
     $this->assertEquals(null,       $pr->day);
   }
 }
-
-?>

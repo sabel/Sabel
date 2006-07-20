@@ -40,5 +40,3 @@ class Test_Router extends PHPUnit2_Framework_TestCase
     }
   }
 }
-
-?>

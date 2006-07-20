@@ -14,5 +14,3 @@ class Sabel
     $frontController->ignition();
   }
 }
-
-?>

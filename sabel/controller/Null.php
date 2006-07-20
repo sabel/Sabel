@@ -22,5 +22,3 @@ class Sabel_Controller_Null
     
   }
 }
-
-?>

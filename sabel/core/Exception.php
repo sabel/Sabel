@@ -80,5 +80,3 @@ class SabelException extends Exception
     print $errorMsg;
   }
 }
-
-?>

@@ -24,6 +24,11 @@ test:
     controller: "common"
     action: "entry"
     
+news:
+  uri: "news/:article_id"
+  destination:
+    
+    
 rmt:
   uri: ":game/:controller/:action/:test"
   default:
@@ -31,3 +36,5 @@ rmt:
     action:     "index"
 
 default: ":module/:controller/:action"
+
+http://domain.com/2005/9/05

@@ -21,5 +21,3 @@ class Sabel_Core_Router
     }
   }
 }
-
-?>

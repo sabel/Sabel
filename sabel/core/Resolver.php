@@ -39,5 +39,3 @@ class Sabel_Core_Resolver
     return $classpath;
   }
 }
-
-?>

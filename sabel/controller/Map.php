@@ -54,5 +54,3 @@ class Sabel_Controller_Map
     return $entries;
   }
 }
-
-?>

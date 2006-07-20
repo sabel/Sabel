@@ -38,5 +38,3 @@ class Sabel_Injection_Injector
     return $result;
   }
 }
-
-?>

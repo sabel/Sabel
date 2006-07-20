@@ -56,5 +56,3 @@ class Sabel_Core_Const
    */
   const DEFAULT_METHOD = 'index';
 }
-
-?>

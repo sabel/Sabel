@@ -55,5 +55,3 @@ class Sabel_Core_Context
     return self::$includePath;
   }
 }
-
-?>

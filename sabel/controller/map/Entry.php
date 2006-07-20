@@ -61,5 +61,3 @@ class Sabel_Controller_Map_Entry
     }
   }
 }
-
-?>

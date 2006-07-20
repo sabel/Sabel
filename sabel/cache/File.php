@@ -10,5 +10,3 @@ class Sabel_Cache_File
 {
   
 }
-
-?>

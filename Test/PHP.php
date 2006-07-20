@@ -28,5 +28,3 @@ class Test_PHP extends PHPUnit2_Framework_TestCase
     $a['test'] = 'test';
   }
 }
-
-?>

@@ -14,5 +14,3 @@ class Sabel_Core_Dispatcher
     return new Sabel_Controller_Null();
   }
 }
-
-?>

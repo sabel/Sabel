@@ -34,5 +34,3 @@ class Sabel_Library_Iterator
     return $this->array;
   }
 }
-
-?>

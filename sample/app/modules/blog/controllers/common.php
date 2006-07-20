@@ -18,5 +18,3 @@ class Blog_Common
     print "show by entry \n";
   }
 }
-
-?>

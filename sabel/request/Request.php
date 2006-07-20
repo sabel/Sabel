@@ -88,5 +88,3 @@ class Sabel_Request implements Request
     return $value;
   }
 }
-
-?>

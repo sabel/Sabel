@@ -12,5 +12,3 @@ if(defined('SABEL_USE_INCLUDE_PATH')) {
   Sabel_Core_Context::addIncludePath(RUN_BASE . '/Sabel/');
   require_once(RUN_BASE . '/Sabel/Sabel.php');
 }
-
-?>

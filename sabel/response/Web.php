@@ -21,6 +21,3 @@ class Sabel_Response_Web implements Sabel_Response_Interface
     return $this->responses;
   }
 }
-
-
-?>

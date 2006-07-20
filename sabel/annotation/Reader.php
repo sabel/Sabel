@@ -63,5 +63,3 @@ class Sabel_Annotation_Reader
     return trim(preg_replace('/^\/\*\*/', '',      $line));
   }
 }
-
-?>

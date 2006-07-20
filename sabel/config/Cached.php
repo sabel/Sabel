@@ -47,5 +47,3 @@ class Sabel_Config_Cached implements Sabel_Config_Interface
     return self::$config->get($key);
   }
 }
-
-?>

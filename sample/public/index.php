@@ -27,5 +27,3 @@ $end   = microtime();
 Sabel_Core_Context::log('total execution: '.($end - $start));
 
 ob_flush();
-
-?>

@@ -50,5 +50,3 @@ class Parameters
     return $this->parsedParameters[$key];
   }
 }
-
-?>

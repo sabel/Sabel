@@ -122,5 +122,3 @@ class Sabel_Container_ReflectionClass
     return $spyc->load($fullpath);
   }
 }
-
-?>

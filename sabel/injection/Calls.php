@@ -50,5 +50,3 @@ class Sabel_Injection_Calls
     self::$after[] = $injection;
   }
 }
-
-?>

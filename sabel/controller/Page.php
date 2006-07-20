@@ -227,5 +227,3 @@ abstract class Sabel_Controller_Page
     }
   }
 }
-
-?>

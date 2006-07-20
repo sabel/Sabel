@@ -163,5 +163,3 @@ class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
     $this->smarty->display($this->tplname);
   }
 }
-
-?>

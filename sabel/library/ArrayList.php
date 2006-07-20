@@ -39,5 +39,3 @@ class Sabel_Library_ArrayList
     return $this->array;
   }
 }
-
-?>

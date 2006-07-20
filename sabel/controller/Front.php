@@ -17,5 +17,3 @@ class Sabel_Controller_Front
     $class->$action();
   }
 }
-
-?>

@@ -74,5 +74,3 @@ class Sabel_Controller_Loader
     }
   }
 }
-
-?>

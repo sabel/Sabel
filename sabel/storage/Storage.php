@@ -98,5 +98,3 @@ class SessionStorage extends Storage
     print "</pre>";
   }
 }
-
-?>

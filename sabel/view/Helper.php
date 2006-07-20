@@ -83,5 +83,3 @@ function ep($str)
 {
   echo htmlspeicalchars($str);
 }
-
-?>

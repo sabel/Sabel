@@ -28,7 +28,7 @@ class Sabel_Controller_Map_Uri
   {
     $elements = $this->getElements();
     if (0 <= $position && $position < count($elements)) {
-      return $elements[$position];
+      return new Sabel_Controller_Map_Element($elements[$position]);
     } else {
       return false;
     }
@@ -57,23 +57,21 @@ class Sabel_Controller_Map_Element
   
   public function isModule()
   {
-    
+    return ($this->element === ':module');
   }
   
   public function isController()
   {
-    
+    return ($this->element === ':controller');
   }
   
   public function isAction()
   {
-    
+    return ($this->element === ':action');
   }
   
-  public function getKey()
+  public function toString()
   {
-    
+    return $this->element;
   }
 }
-
-?>

@@ -62,5 +62,3 @@ class Sabel_Controller_Map_Destination
     return $this->destination;
   }
 }
-
-?>

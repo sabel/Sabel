@@ -219,5 +219,3 @@ class Sabel_Container_DI
     return $type;
   }
 }
-
-?>

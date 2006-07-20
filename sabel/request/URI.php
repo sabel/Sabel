@@ -26,4 +26,3 @@ class Sabel_Request_URI
     return $request_uri;
   }
 }
-?>

@@ -86,5 +86,3 @@ class SecurityUser extends User
     return $this->authorized;
   }
 }
-
-?>

@@ -40,5 +40,3 @@ class Sabel_Annotation_Context
     }
   }
 }
-
-?>

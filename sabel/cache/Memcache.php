@@ -46,5 +46,3 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
     $this->memcache->delete($key);
   }
 }
-
-?>

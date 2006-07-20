@@ -20,5 +20,3 @@ class Sabel_Config_Yaml
     return $this->data;
   }
 }
-
-?>
