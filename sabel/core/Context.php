@@ -23,15 +23,9 @@ class Sabel_Core_Context
     return self::$parameters[$name];
   }
   
-  public static function initLogger()
-  {
-    self::$logger = Sabel_Logger_File::singleton();
-  }
-  
   public static function log($log)
   {
-    if (!is_object(self::$logger)) self::initLogger();
-    self::$logger->log($log);
+    Sabel_Logger_File::singleton()->log($log);
   }
   
   public static function getLogger()
@@ -41,6 +35,7 @@ class Sabel_Core_Context
   
   public static function getContainer()
   {
+    // @TODO alter container make.
     return new Sabel_Container_DI();
   }
   
@@ -52,7 +47,9 @@ class Sabel_Core_Context
   
   public static function addIncludePath($path)
   {
-    self::$includePath[] = $path;
+    if (!in_array($path, self::$includePath)) {
+      self::$includePath[] = $path;
+    }
   }
   
   public static function getIncludePath()
