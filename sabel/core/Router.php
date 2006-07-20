@@ -19,7 +19,7 @@ class Sabel_Core_Router
     $map = new Sabel_Controller_Map();
     $map->load();
     foreach ($map->getEntries() as $entry) {
-      if ($entry->countUri() === $rcount) {
+      if ($entry->getUri()->count() === $rcount) {
         return $entry->getDestination();
       }
     }

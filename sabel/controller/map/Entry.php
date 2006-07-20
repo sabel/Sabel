@@ -17,12 +17,7 @@ class Sabel_Controller_Map_Entry
   
   public function getUri()
   {
-    return $this->entry['uri'];
-  }
-  
-  public function countUri()
-  {
-    return count(explode('/', $this->getUri()));
+    return new Sabel_Controller_Map_Uri($this->entry['uri']);
   }
   
   public function getDestination()

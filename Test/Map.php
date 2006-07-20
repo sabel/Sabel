@@ -10,6 +10,7 @@ require_once('sabel/core/Context.php');
 
 require_once('sabel/controller/Map.php');
 require_once('sabel/controller/map/Entry.php');
+require_once('sabel/controller/map/Uri.php');
 require_once('sabel/config/Spyc.php');
 require_once('sabel/config/Yaml.php');
 
@@ -27,17 +28,23 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $this->map->load();
   }
   
+  public function testMapUri()
+  {
+    $entry = $this->map->getEntry('blog');
+    $mapUri = $entry->getUri();
+  }
+  
   public function testMapEntry()
   {
     $entry = $this->map->getEntry('blog');
-    $this->assertTrue(is_string($entry->getUri()));
-    $this->assertEquals(':year/:month/:day', $entry->getUri());
+    $this->assertTrue(is_object($entry->getUri()));
+    $this->assertEquals(':year/:month/:day', $entry->getUri()->getString());
   }
   
   public function testMapEntries()
   {
     foreach ($this->map->getEntries() as $entry) {
-      $this->assertTrue(is_string($entry->getUri()));
+      $this->assertTrue(is_object($entry->getUri()));
     }
   }
 }
