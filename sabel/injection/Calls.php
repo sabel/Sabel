@@ -13,12 +13,12 @@ class Sabel_Injection_Calls
    */
   public function add($injection)
   {
-    if (!$injection) return false;  
+    if (!$injection) return false;
     $reflection = new ReflectionClass($injection);
     foreach ($reflection->getMethods() as $method) {
-      if ($method->getName() == 'before') {
+      if ($method->getName() === 'before') {
         $this->addBefore($injection);
-      } else if ($method->getName() == 'after') {
+      } else if ($method->getName() === 'after') {
         $this->addAfter($injection);
       }
     }
@@ -26,7 +26,7 @@ class Sabel_Injection_Calls
   
   public function doBefore($method, $arg)
   {
-    foreach (self::$before as $bi => $object) {
+    foreach (self::$before as $object) {
       if ($object->when($method))
         $object->before($method, $arg);
     }
@@ -34,7 +34,7 @@ class Sabel_Injection_Calls
   
   public function doAfter($method, &$result)
   {
-    foreach (self::$after as $ai => $object) {
+    foreach (self::$after as $object) {
       if ($object->when($method))
         $object->after($method, $result);
     }
