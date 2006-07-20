@@ -39,22 +39,12 @@ class Sabel_Controller_Loader
 
   protected function isValidModule()
   {
-    if (is_dir($this->makeModulePath())) {
-      return true;
-    } else {
-      return false;
-    }
+    return (is_dir($this->makeModulePath()));
   }
   
   protected function isValidController()
   {
-    $path = $this->makeControllerPath();
-    
-    if (is_file($path)) {
-      return true;
-    } else {
-      return false;
-    }
+    return (is_file($this->makeControllerPath()));
   }
   
   public function load()
