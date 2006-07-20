@@ -2,7 +2,6 @@
 
 class Sabel_Core_Context
 {
-  private static $logger;
   private static $parameters = array();
   
   private static $includePath = array();
