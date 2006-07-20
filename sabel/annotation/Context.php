@@ -27,9 +27,9 @@ class Sabel_Annotation_Context
     return $this->contents;
   }
   
-  public function isInjection()
+  protected function isInjection()
   {
-    return ($this->getName() == 'injection');
+    return ($this->getName() === 'injection');
   }
   
   public function createInjection()

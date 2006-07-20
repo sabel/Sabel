@@ -2,8 +2,7 @@
 
 class Sabel_Core_Context
 {
-  private static $parameters = array();
-  
+  private static $parameters  = array();
   private static $includePath = array();
 
   public static function getController()
