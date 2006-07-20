@@ -25,7 +25,7 @@ class Sabel_Edo_DBConnection
         throw new Exception('DBConnection::addConnection() invalid Parameter. 3rd Argument must be string.');
       } else {
         if ($useEdo == 'pgsql') {
-          $conn = pg_connect($connection);
+          $conn = $connection;
           self::$connList[$owner]['pgsql'] = $conn;
         } elseif ($useEdo == 'mysql') {
           $conn = mysql_connect($connection);

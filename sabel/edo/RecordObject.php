@@ -81,7 +81,7 @@ abstract class Sabel_Edo_RecordObject
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->table = strtolower(preg_replace('/([a-z])([A-Z])/', '$1_$2', get_class($this)));
+    $this->table = strtolower(get_class($this));
 
     if (!is_null($param1))
       $this->defaultSelectOne($param1, $param2);
@@ -279,7 +279,7 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2);
     $this->selectCondition = $this->conditions;
 
-    $this->find($this);
+    $this->makeFindObject($this);
   }
 
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
@@ -290,10 +290,10 @@ abstract class Sabel_Edo_RecordObject
     $this->setCondition($param1, $param2, $param3);
     $this->selectCondition = $this->conditions;
 
-    return $this->find(clone($this));
+    return $this->makeFindObject(clone($this));
   }
 
-  protected function find($obj)
+  protected function makeFindObject($obj)
   {
     $this->edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -351,6 +351,8 @@ abstract class Sabel_Edo_RecordObject
 
     if ($this->edo->execute()) {
       $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      if (!$rows) return null;
+
       foreach ($rows as $row) {
         if (is_null($child_table)) {
           $obj = new $class();
@@ -428,6 +430,8 @@ abstract class Sabel_Edo_RecordObject
   private function hasMyChildConstraint($child, $obj)
   {
     $childConstraints = $obj->getMyChildConstraint();
+    if (!is_array($childConstraints)) return false;
+
     if (array_key_exists($child, $childConstraints)) {
       return $childConstraints[$child];
     } else {
@@ -441,7 +445,6 @@ abstract class Sabel_Edo_RecordObject
       return $obj->defaultChildConstraints;
     } else { 
       throw new Exception('Error: constraint of child object, not found.');
-      return false;
     }
   }
 
@@ -467,7 +470,9 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentProperties($table, $id, &$row)
   {
-    if ($this->isAcquiredObject($table)) return null;
+    if ($this->getStructure() != 'tree') {
+      if ($this->isAcquiredObject($table)) return null;
+    }
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -494,7 +499,9 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentObject($table, $id)
   {
-    if ($this->isAcquiredObject($table)) return null;
+    if ($this->getStructure() != 'tree') {
+      if ($this->isAcquiredObject($table)) return null;
+    }
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");

@@ -17,9 +17,9 @@ require_once "DBConnection.php";
 
 require_once "driver/Interface.php";
 require_once "driver/Pdo.php";
+require_once "driver/Pgsql.php";
 
-require_once "SQL.php";
-require_once "SQLObject.php";
+require_once "Query.php";
 
 /**
  * Test class for Person.
@@ -50,23 +50,26 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function setUp()
   {
-    ///* postgres
+    ///* pdo postgres
     $dbCon = array();
     $dbCon['dsn']  = 'pgsql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
+    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    //*/
 
-    /* mysql
+    /* pdo mysql
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'develop';
     $dbCon['pass'] = 'develop';
     */
 
-    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
-
+    //native postgres
+    //$dbCon = pg_connect('host=192.168.0.120 dbname=2525e user=pgsql password=pgsql');
+    //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
+    
     /*
-
     $sql  = "CREATE TABLE test (id int2 NOT NULL,name varchar NOT NULL, blood varchar, test2_id int2,";
     $sql .= " CONSTRAINT test_pkey PRIMARY KEY (id) );";
     $obj->execute($sql);
@@ -709,6 +712,53 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $seq->text = 'test';
     $id = $seq->save();
     var_dump($id);
+  }
+
+  public function testTree()
+  {
+    $tree  = new Tree();
+    $trees = $tree->select();
+    $this->assertEquals((int)$trees[0]->id, 1);
+    $this->assertEquals($trees[0]->tree_id, null);
+    $this->assertEquals($trees[0]->name, 'A');
+
+    $t = $tree->selectOne(1);
+    $this->assertEquals((int)$t->id, 1);
+    $this->assertEquals($t->tree_id, null);
+    $this->assertEquals($t->name, 'A');
+
+    $t->setChildConstraint(array('limit' => 100));
+    $t->getChild('tree');
+
+    $this->assertEquals(count($t->tree), 2);
+    $this->assertEquals((int)$t->tree[0]->id, 3);
+    $this->assertEquals((int)$t->tree[1]->id, 5);
+    $this->assertEquals((int)$t->tree[0]->tree_id, 1);
+    $this->assertEquals((int)$t->tree[1]->tree_id, 1);
+    $this->assertEquals($t->tree[0]->name, 'A3');
+    $this->assertEquals($t->tree[1]->name, 'A5');
+
+    $tree = new Tree();
+    $tree->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
+    
+    $t = $tree->selectOne(3);
+
+    $this->assertEquals((int)$t->id, 3);
+    $this->assertEquals((int)$t->tree_id, 1);
+    $this->assertEquals($t->name, 'A3');
+
+    $this->assertEquals((int)$t->tree->id, 1);
+    $this->assertEquals((int)$t->tree->tree_id, 0);
+    $this->assertEquals($t->tree->name, 'A');
+
+    $t = $tree->selectOne(5);
+    $this->assertEquals((int)$t->id, 5);
+    $this->assertEquals((int)$t->tree_id, 1);
+    $this->assertEquals($t->name, 'A5');
+
+    $this->assertEquals((int)$t->tree->id, 1);
+    $this->assertEquals((int)$t->tree->tree_id, 0);
+    $this->assertEquals($t->tree->name, 'A');
   }
 }
 

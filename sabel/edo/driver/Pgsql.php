@@ -3,18 +3,17 @@
 uses('sabel.edo.driver.Interface');
 uses('sabel.edo.query.php');
 
-class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
+class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
 {
-  private $pdo, $stmt, $sqlObj, $myDb;
+  private $conn, $stmt, $sqlObj;
 
   private $param = array();
   private $data  = array();
 
-  public function __construct($conn, $myDb)
+  public function __construct($conn)
   {
-    $this->pdo    = $conn;
-    $this->myDb   = $myDb;
-    $this->sqlObj = new PdoQuery();
+    $this->conn   = $conn;
+    $this->sqlObj = new PgsqlQuery();
   }
 
   public function setBasicSQL($sql)
@@ -28,17 +27,20 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     $sql = array("UPDATE {$table} SET");
     $set = false;
+    $count = 1;
 
     foreach ($data as $key => $val) {
       if (!$set) {
-        array_push($sql, " {$key}=:{$key}");
+        array_push($sql, " {$key}=\${$count}");
       } else {
-        array_push($sql, ",{$key}=:{$key}");
+        array_push($sql, ",{$key}=\${$count}");
       }
       $set = true;
+      $count++;
     }
 
     $this->sqlObj->setBasicSQL(implode('', $sql));
+    $this->sqlObj->setCount($count);
   }
 
   public function setInsertSQL($table, $data)
@@ -59,15 +61,13 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function executeInsert($table, $data, $id_exists = null)
   {
-    if (!$id_exists && $this->myDb == 'pgsql')
+    if (!$id_exists)
       $data['id'] = $this->getNextNumber($table);
 
     $this->data = $data;
 
-    if ($table == 'order_line') $this->disp = true;
-
-    $sql = array("INSERT INTO {$table}(");
-    $set = false;
+    $sql   = array("INSERT INTO {$table}(");
+    $set   = false;
 
     foreach ($data as $key => $val) {
       if (!$set) {
@@ -80,19 +80,20 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     array_push($sql, ") VALUES(");
     $set = false;
+    $count = 1;
 
     foreach ($data as $key => $val) {
       if (!$set) {
-        array_push($sql, ":{$key}");
+        array_push($sql, "\${$count}");
       } else {
-        array_push($sql, ",:{$key}");
+        array_push($sql, ",\${$count}");
       }
       $set = true;
+      $count++;
     }
-
     array_push($sql, ');');
 
-    $this->stmtFlag = Sabel_Edo_Driver_PdoStatement::statement_exists(implode('', $sql), $data);
+    $this->stmtFlag = Sabel_Edo_Driver_PgsqlStatement::statement_exists(implode('', $sql), $data);
 
     if (!$this->stmtFlag)
       $this->sqlObj->setBasicSQL(implode('', $sql));
@@ -102,35 +103,23 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function getLastInsertId()
   {
-    if ($this->myDb == 'pgsql') {
-      return $this->lastInsertId;
-    } elseif ($this->myDb == 'mysql') {
-      $this->execute('SELECT last_insert_id()');
-      $row = $this->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      return $row['last_insert_id()'];
-    } else {
-      return 'todo else';
-    }
+    return $this->lastInsertId;
   }
 
   private function getNextNumber($table)
   {
-    if ($this->myDb == 'pgsql') {
-      $this->execute('SELECT nextval(\''.$table.'_id_seq\');');
-      $row = $this->fetch();
-      if (($this->lastInsertId = (int)$row[0]) == 0) {
-        throw new Exception($table.'_id_seq is not found.');
-      } else {
-        return $this->lastInsertId;
-      }
+    $this->execute('SELECT nextval(\''.$table.'_id_seq\');');
+    $row = $this->fetch();
+    if (($this->lastInsertId = (int)$row[0]) == 0) {
+      //throw new Exception($table.'_id_seq is not found.');
     } else {
-      return 'todo else';
+      return $this->lastInsertId;
     }
   }
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $this->stmtFlag = Sabel_Edo_Driver_PdoStatement::statement_exists($this->sqlObj->getSQL(), $conditions, $constraints);
+    $this->stmtFlag = Sabel_Edo_Driver_PgsqlStatement::statement_exists($this->sqlObj->getSQL(), $conditions, $constraints);
 
     if (!empty($conditions)) {
       foreach ($conditions as $key => $val) {
@@ -169,70 +158,61 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   {
     try {
       if (!is_null($sql)) {
-        $this->stmt = $this->pdo->prepare($sql);
+        if (!($this->result = pg_query($this->conn, $sql))) {
+          throw new Exception('Error: Edo_Driver_Pgsql::pg_query()');
+        } else {
+          return true;
+        }
       } elseif ($this->stmtFlag) {
-        $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
+        $this->stmt = Sabel_Edo_Driver_PgsqlStatement::getStatement();
       } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
         throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
       } else {
         $sql = $this->sqlObj->getSQL();
-        if ($this->stmt = $this->pdo->prepare($sql)) {
-          Sabel_Edo_Driver_PdoStatement::addStatement($this->stmt);
+        if ($this->stmt = pg_prepare($this->conn, "", $sql)) {
+          Sabel_Edo_Driver_PgsqlStatement::addStatement($this->stmt);
         } else {
-          throw new PDOException('Error: PDOStatement is null.');
+          throw new Exception('Error: PgsqlStatement is null.');
         }
       }
     } catch (Exception $e) {
       print_r($e->getMessage()."\n");
-      print_r($e->getTrace());
-    } catch (PDOException $pe) {
-      print_r($pe->getMessage()."\n");
       print_r($sql);
-      print_r($this->pdo->errorInfo());
+      print_r($e->getTrace());
     }
 
     $this->makeBindParam();
 
     try {
-      if (empty($this->param)) {
-        $result = $this->stmt->execute();
+      if (!($this->result = pg_execute($this->conn, "", $this->param))) {
+        throw new Exception('Error: Edo_Driver_Pgsql::execute()');
+        return false;
       } else {
-        $result = $this->stmt->execute($this->param);
         $tmp = $this->param;
         $this->param = array();
+        return true;
       }
-
-      if (!$result)
-        throw new PDOException('Error: PDOStatement::execute()');
-
-      return $result;
-    } catch (PDOException $pe) {
-      print_r($pe->getMessage()."\n");
-      print_r($this->stmt);
+    } catch (Exception $e) {
+      print_r($e->getMessage()."\n");
       print_r($tmp);
-      print_r($this->stmt->errorInfo());
+      print_r($e->getTrace());
     }
   }
 
   public function fetch($style = null)
   {
     if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
-      $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
+      $result = pg_fetch_assoc($this->result);
     } else {
-      $result = $this->stmt->fetch(PDO::FETCH_BOTH);
+      $result = pg_fetch_array($this->result);
     }
-
-    $this->stmt->closeCursor();
     return $result;
   }
 
   public function fetchAll($style = null)
   {
-    if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
-      return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-      return $this->stmt->fetchAll(PDO::FETCH_BOTH);
-    }
+    $result = pg_fetch_all($this->result);
+    return $result;
   }
 
   private function makeBindParam()
@@ -240,18 +220,9 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     $this->param = $this->sqlObj->getParam();
 
     if (!empty($this->param) && !empty($this->data)) {
-      $this->param = array_merge($this->param, $this->data);
+      $this->param = $this->data + $this->param;
     } else {
       if (!empty($this->data)) $this->param = $this->data;
-    }
-
-    if (!empty($this->param)) {
-      foreach ($this->param as $key => $val) {
-        if (is_null($val)) continue;
-        
-        $this->param[":{$key}"] = $val;
-        unset($this->param["{$key}"]);
-      }
     }
 
     $this->data  = array();
@@ -259,12 +230,16 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   }
 }
 
-class PdoQuery 
+class PgsqlQuery 
 {
   private $sql, $set;
+  private $param = array();
+  private $count = 1;
 
-  private $keyArray = array();
-  private $param    = array();
+  public function setCount($count)
+  {
+    $this->count = $count;
+  }
 
   public function getSQL()
   {
@@ -277,30 +252,16 @@ class PdoQuery
     $this->sql = array($sql);
   }
 
-  protected function bindKey_exists($key)
-  {
-    if (!array_key_exists($key, $this->keyArray)) {
-      $this->keyArray[$key]['count'] = 2;
-      return $key.'2';
-    } else {
-      $count = $this->keyArray[$key]['count'];
-      $count = $count + 1;
-      $this->keyArray[$key]['count'] = $count;
-      return $key.$count;
-    }
-  }
-
   public function makeNormalConditionSQL($key, $val)
   {
-    $bindKey = $this->bindKey_exists($key);
-
     if (!$this->set) {
-      array_push($this->sql, " WHERE {$key}=:{$bindKey}");
+      array_push($this->sql, " WHERE {$key}=\${$this->count}");
     } else {
-      array_push($this->sql, " AND {$key}=:{$bindKey}");
+      array_push($this->sql, " AND {$key}=\${$this->count}");
     }
     $this->set = true;
-    $this->param[$bindKey] = $val;
+    $this->count++;
+    $this->param[] = $val;
   }
 
   public function makeIsNullSQL($key)
@@ -335,38 +296,36 @@ class PdoQuery
 
   public function makeLikeSQL($key, $val)
   {
-    $bindKey = $this->bindKey_exists($key);
-
     if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} LIKE :{$bindKey}");
+      array_push($this->sql, " WHERE {$key} LIKE \${$this->count}");
     } else {
-      array_push($this->sql, " AND {$key} LIKE :{$bindKey}");
+      array_push($this->sql, " AND {$key} LIKE \${$this->count}");
     }
     $this->set = true;
+    $this->count++;
 
     $val = str_replace('_', '\_', $val);
-
-    $this->param[$bindKey] = $val;
+    $this->param[] = $val;
   }
 
   public function makeBetweenSQL($key, $val)
   {
+    $to = $this->count + 1;
+
     if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} BETWEEN :from AND :to");
+      array_push($this->sql, " WHERE {$key} BETWEEN \${$this->count} AND \${$to}");
     } else {
-      array_push($this->sql, " AND {$key} BETWEEN :from AND :to");
+      array_push($this->sql, " AND {$key} BETWEEN \${$this->count} AND \${$to}");
     }
     $this->set = true;
+    $this->count += 2;
 
-    $this->param["from"] = $val[0];
-    $this->param["to"]   = $val[1];
+    $this->param[] = $val[0];
+    $this->param[] = $val[1];
   }
 
   public function makeEitherSQL($key, $val)
   {
-    $bindKey  = $this->bindKey_exists($key);
-    $bindKey2 = $this->bindKey_exists($key);
-
     $val1 = $val[0];
     $val2 = $val[1];
 
@@ -377,43 +336,42 @@ class PdoQuery
     }
 
     if ($val1[0] == '<' || $val1[0] == '>') {
-      array_push($this->sql, $str." ({$key} {$val1[0]} :{$bindKey} OR");
+      array_push($this->sql, $str." ({$key} {$val1[0]} \${$this->count} OR");
       $val1 = trim(substr_replace($val1, '', 0, 1));
     } elseif ($val1 == 'null') {
       array_push($this->sql, $str." ({$key} IS NULL OR");
     } else {
-      array_push($this->sql, $str." ({$key}=:{$bindKey} OR");
+      array_push($this->sql, $str." ({$key}=\${$this->count} OR");
     }
 
+    $c2 = $this->count + 1;
     if ($val2[0] == '<' || $val2[0] == '>') {
-      array_push($this->sql, " {$key} {$val2[0]} :{$bindKey2})");
+      array_push($this->sql, " {$key} {$val2[0]} \${$c2})");
       $val2 = trim(substr_replace($val2, '', 0, 1));
     } elseif ($val2 == 'null') {
       array_push($this->sql, $str." {$key} IS NULL)");
     } else {
-      array_push($this->sql, " {$key}=:{$bindKey2})");
+      array_push($this->sql, " {$key}=\${$c2})");
     }
-
     $this->set = true;
+    $this->count += 2;
 
-    $this->param[$bindKey]  = $val1;
-    $this->param[$bindKey2] = $val2;
+    $this->param[] = $val1;
+    $this->param[] = $val2;
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $bindKey  = $this->bindKey_exists($key);
-
     if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} {$val[0]} :{$bindKey}");
+      array_push($this->sql, " WHERE {$key} {$val[0]} \${$this->count}");
     } else {
-      array_push($this->sql, " AND {$key} {$val[0]} :{$bindKey}");
+      array_push($this->sql, " AND {$key} {$val[0]} \${$this->count}");
     }
+    $this->set = true;
+    $this->count++;
 
     $val = substr_replace($val, '', 0, 1);
-    $this->param[$bindKey] = trim($val);
-
-    $this->set = true;
+    $this->param[] = trim($val);
   }
 
   public function makeConstraintsSQL($constraints)
@@ -435,13 +393,13 @@ class PdoQuery
 
   public function unsetProparties()
   {
-    $this->param    = array();
-    $this->keyArray = array();
-    $this->set      = false;
+    $this->param = array();
+    $this->set   = false;
+    $this->count = 1;
   }
 }
 
-class Sabel_Edo_Driver_PdoStatement
+class Sabel_Edo_Driver_PgsqlStatement
 {
   private static $stmt;
   private static $sql;
@@ -454,13 +412,14 @@ class Sabel_Edo_Driver_PdoStatement
     if (!empty($conditions))
       $keys = array_keys($conditions);
     
-    if (self::$sql         != $sql  || 
-        self::$keys        != $keys || 
-        self::$constraints != $constraints) { 
+    if (self::$sql         !=  $sql  || 
+        self::$keys        !== $keys || 
+        self::$constraints !=  $constraints) { 
 
       self::$sql         = $sql;
       self::$keys        = $keys;
       self::$constraints = $constraints;
+      
       $result = false;
     }        
 

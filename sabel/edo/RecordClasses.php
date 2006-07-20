@@ -24,6 +24,27 @@ abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
   }
 }
 
+abstract class BaseTreeRecord extends Sabel_Edo_RecordObject
+{
+  protected $structure = 'tree';
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setEDO('user', 'pdo');
+    parent::__construct($param1, $param2);
+  }
+
+  public function getStructure()
+  {
+    return $this->structure;
+  }
+
+  protected function getRoot()
+  {
+    return $this->select("{$this->table}_id", 'null');
+  }
+}
+
 abstract class BaseMailRecordObject extends Sabel_Edo_RecordObject
 {
 
@@ -65,11 +86,9 @@ class Customer extends BaseUserRecordObject
 class Customer_Order extends BaseUserRecordObject
 {
   protected $myChildren = 'order_line';
-  //protected $defaultChildConstraints = array('limit' => 10);
-  //protected $myChildConstraints = array('limit' => 10);
+
   public function __construct($param1 = null, $param2 = null)
   {
-    //$this->myChildConstraints['order_line'] = array('limit' => 10);
     $this->myChildConstraints['order_line'] = array('limit' => 10);
     parent::__construct($param1, $param2);
   }
@@ -83,6 +102,11 @@ class Child_Record extends BaseUserRecordObject
 
     if (!is_null($table)) $this->table = $table;
   }
+}
+
+class Tree extends BaseTreeRecord
+{
+
 }
 
 class Common_Record extends Sabel_Edo_RecordObject
