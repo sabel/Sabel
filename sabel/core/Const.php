@@ -9,7 +9,7 @@ class Sabel_Core_Const
   /**
    * controllers directory.
    */
-  const CONTROLLER_DIR     = '/controllers/';
+  const CONTROLLER_DIR = '/controllers/';
 
   /**
    * postfix extention of controller class.
@@ -19,7 +19,7 @@ class Sabel_Core_Const
   /**
    * modules directory
    */
-  const MODULES_DIR        = '/app/modules/';
+  const MODULES_DIR = '/app/modules/';
 
   /**
    * common files of project
@@ -29,12 +29,12 @@ class Sabel_Core_Const
   /**
    * templates dirctory
    */
-  const TEMPLATE_DIR          = 'templates/';
+  const TEMPLATE_DIR = 'templates/';
 
   /**
    * postfix extention for template
    */
-  const TEMPLATE_POSTFIX   = '.tpl';
+  const TEMPLATE_POSTFIX = '.tpl';
 
   /**
    * separater of template
@@ -54,7 +54,7 @@ class Sabel_Core_Const
   /**
    * default action method
    */
-  const DEFAULT_METHOD     = 'index';
+  const DEFAULT_METHOD = 'index';
 }
 
 ?>
