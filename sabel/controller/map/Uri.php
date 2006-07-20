@@ -23,6 +23,21 @@ class Sabel_Controller_Map_Uri
   {
     return count(explode('/', $this->uri));
   }
+  
+  public function getElement($position)
+  {
+    $elements = $this->getElements();
+    if ($position < count($elements)) {
+      return $elements[$position];
+    } else {
+      return false;
+    }
+  }
+  
+  public function getElements()
+  {
+    return $elements = explode('/', $this->uri);
+  }
 }
 
 ?>

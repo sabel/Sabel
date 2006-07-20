@@ -20,18 +20,18 @@ class Sabel_Controller_Loader
 
   private function getControllerClassName()
   {
-    return $this->destination['module'] . '_' . $this->destination['controller'];
+    return $this->destination->module . '_' . $this->destination->controller;
   }
 
   protected function makeModulePath()
   {
-    return RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination['module'];
+    return RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination->module;
   }
 
   private function makeControllerPath()
   {
-    $path  = RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination['module'];
-    $path .= Sabel_Core_Const::CONTROLLER_DIR . $this->destination['controller'];
+    $path  = RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination->module;
+    $path .= Sabel_Core_Const::CONTROLLER_DIR . $this->destination->controller;
     $path .= '.php';
 
     return $path;
@@ -55,9 +55,9 @@ class Sabel_Controller_Loader
       $class = $this->getControllerClassName();
       return new $class();
     } else if ($this->isValidModule()) {
-      $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination['controller'] . 'controllers/index.php';
+      $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . 'controllers/index.php';
       require_once($path);
-      $moduleClassName = $this->destination['module'] . '_Index';
+      $moduleClassName = $this->destination->module . '_Index';
       if (class_exists($moduleClassName)) {
         return new $moduleClassName();
       } else {

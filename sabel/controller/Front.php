@@ -15,7 +15,7 @@ class Sabel_Controller_Front
     $destination = $r->routing(Sabel_Request_URI::getUri());
     
     $class = Sabel_Controller_Loader::create($destination)->load();
-    $action = $destination['action'];
+    $action = $destination->action;
     
     $class->$action();
   }

@@ -23,7 +23,7 @@ class Sabel_Controller_Map_Entry
   public function getDestination()
   {
     if (isset($this->entry['destination'])) {
-      return $this->entry['destination'];
+      return new Sabel_Controller_Map_Destination($this->entry['destination']);
     } else {
       return null;
     }
@@ -40,7 +40,7 @@ class Sabel_Controller_Map_Entry
   
   public function validate()
   {
-    
+    // @todo implement
   }
   
   public function hasRequirements()

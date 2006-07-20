@@ -11,6 +11,7 @@ require_once('sabel/core/Context.php');
 require_once('sabel/controller/Map.php');
 require_once('sabel/controller/map/Entry.php');
 require_once('sabel/controller/map/Uri.php');
+require_once('sabel/controller/map/Destination.php');
 require_once('sabel/config/Spyc.php');
 require_once('sabel/config/Yaml.php');
 
@@ -32,6 +33,14 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   {
     $entry = $this->map->getEntry('blog');
     $mapUri = $entry->getUri();
+    $this->assertEquals(':year',  $mapUri->getElement(0));
+    $this->assertEquals(':month', $mapUri->getElement(1));
+    $this->assertEquals(':day',   $mapUri->getElement(2));
+    $this->assertFalse($mapUri->getElement(3));
+    
+    foreach ($mapUri->getElements() as $element) {
+      $this->assertTrue(is_string($element));
+    }
   }
   
   public function testMapEntry()
@@ -45,7 +54,26 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   {
     foreach ($this->map->getEntries() as $entry) {
       $this->assertTrue(is_object($entry->getUri()));
+      $uri = $entry->getUri();
+      $this->assertTrue(is_string($uri->getString()));
+      foreach ($uri->getElements() as $element) {
+        $this->assertTrue(is_string($element));
+      }
     }
+  }
+  
+  public function testMapDestination()
+  {
+    $entry = $this->map->getEntry('blog');
+    $dest = $entry->getDestination();
+    $this->assertTrue($dest->hasModule());
+    $this->assertEquals('blog', $dest->getModule());
+    
+    $this->assertTrue($dest->hasController());
+    $this->assertEquals('common', $dest->getController());
+    
+    $this->assertTrue($dest->hasAction());
+    $this->assertEquals('showByDate', $dest->getAction());
   }
 }
 
