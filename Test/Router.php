@@ -13,6 +13,8 @@ require_once('sabel/controller/map/Entry.php');
 require_once('sabel/controller/map/Uri.php');
 require_once('sabel/controller/map/Destination.php');
 
+require_once('sabel/request/URI.php');
+
 require_once('sabel/core/Router.php');
 
 require_once('sabel/config/Spyc.php');
@@ -55,20 +57,20 @@ class Test_Router extends PHPUnit2_Framework_TestCase
   
   public function testRouter()
   {
-    $dest = $this->r->routing('2005/06/06');
+    $dest = $this->r->routing(new Sabel_Request_Uri('2005/06/06'));
     $this->assertEquals('blog', $dest->getModule());
     $this->assertEquals('common', $dest->getController());
   }
   
   public function testSingleEntry()
   {
-    $dest = $this->r->routing('10');
+    $dest = $this->r->routing(new Sabel_Request_Uri('10'));
     $this->assertEquals('entry', $dest->getAction());
   }
   
   public function testSameUriCountEntry()
   {
-    $dest = $this->r->routing('news/1');
+    $dest = $this->r->routing(new Sabel_Request_Uri('news/1'));
     $this->assertEquals('news',   $dest->getModule());
     $this->assertEquals('viewer', $dest->getController());
     $this->assertEquals('viewer', $dest->getController());

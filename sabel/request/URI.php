@@ -8,9 +8,39 @@
  */
 class Sabel_Request_URI
 {
-  public function __construct()
+  protected $request;
+  
+  /**
+   * @var array parts of uri. separate by slash (/)
+   */
+  protected $parts;
+  
+  protected $parameters = null;
+  
+  public function __construct($requestUri = null)
   {
-    
+    $this->request = ($requestUri) ? $requestUri : self::getUri();
+    if ($this->hasUriParameters()) {
+      $uriAndParameters = explode('?', $this->request);
+      $this->parts = explode('/', $uriAndParameters[0]);
+      $this->parameters = new Sabel_Request_Parameters($uriAndParameters[1]);
+    } else {
+      $this->parts = explode('/', $this->request);
+    }
+  }
+  
+  protected function hasUriParameters()
+  {
+    if (strpos($this->request, '?')) {
+      $uriAndParameters = explode('?', $this->request);
+      if (!empty($uriAndParameters[1])) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
   }
   
   public static function getUri()
@@ -24,5 +54,25 @@ class Sabel_Request_URI
     }
     
     return $request_uri;
+  }
+  
+  public function count()
+  {
+    return count($this->parts);
+  }
+  
+  public function get($pos)
+  {
+    return $this->parts[$pos];
+  }
+  
+  public function hasParameters()
+  {
+    return (!is_null($this->parameters));
+  }
+  
+  public function getParameters()
+  {
+    return $this->parameters;
   }
 }

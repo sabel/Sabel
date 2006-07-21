@@ -16,18 +16,15 @@ class Sabel_Core_Router
     $this->map->load();
   }
   
-  public function routing($request_uri)
+  public function routing($uri)
   {
-    $uriParts = explode('/', $request_uri);
-    $rcount   = count($uriParts);
-    
     $entry = $this->map->getEntryByHasConstantUriElement(2);
-    if ($entry->getUri()->getElement(0)->getConstant() == $uriParts[0]) {
+    if ($entry->getUri()->getElement(0)->getConstant() == $uri->get(0)) {
       return $entry->getDestination();
     }
     
     foreach ($this->map->getEntries() as $entry) {
-      if ($entry->getUri()->count() === $rcount) {
+      if ($entry->getUri()->count() === $uri->count()) {
         return $entry->getDestination();
       }
     }

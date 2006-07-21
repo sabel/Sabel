@@ -1,8 +1,11 @@
 <?php
 
-class Parameters
+/**
+ * 
+ *
+ */
+class Sabel_Request_Parameters
 {
-  protected $parameter;
   protected $parameters;
   protected $parsedParameters;
   
@@ -20,10 +23,7 @@ class Parameters
    */
   protected function parse()
   {
-    $parameters = explode("?", $this->parameters);
-    
-    $this->parameter = (empty($parameters[0])) ? null : substr($parameters[0], 1);
-    $separate = explode("&", $parameters[1]);
+    $separate = explode("&", $this->parameters);
     $sets = array();
     foreach ($separate as $key => $val) {
       $tmp = explode("=", $val);
@@ -33,11 +33,6 @@ class Parameters
     }
     
     $this->parsedParameters =& $sets;
-  }
-  
-  public function getParameter()
-  {
-    return $this->parameter;
   }
   
   public function __get($key)
