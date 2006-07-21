@@ -28,6 +28,5 @@ class Sabel_Core_Router
         return $entry->getDestination();
       }
     }
-    
   }
 }

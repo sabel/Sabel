@@ -18,11 +18,7 @@ class Sabel_Controller_Map
   
   public function __construct($path = null)
   {
-    if ($path) {
-      $this->path = RUN_BASE . $path;
-    } else {
-      $this->path = RUN_BASE . self::DEFAULT_PATH;
-    }
+    $this->path = RUN_BASE . (($path) ? $path : self::DEFAULT_PATH);
   }
   
   public function getPath()
@@ -68,7 +64,7 @@ class Sabel_Controller_Map
   
   public function hasSameUriCountOfEntries($number)
   {
-    $number =(int) $number;
+    $number  = (int) $number;
     $entries = $this->getEntriesByCount($number);
     return (count($entries) >= 2) ? count($entries) : false;
   }
