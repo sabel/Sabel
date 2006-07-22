@@ -52,7 +52,11 @@ class Sabel_Container_DI
   
   public function loadClass($class, $method)
   {
-    if (!class_exists($class)) uses(convertClassPath($class));
+    if (!class_exists($class)) {
+      $path = Sabel_Core_Resolver::resolvClassPathByClassName($class);
+      uses($path);
+    }
+    
     
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);

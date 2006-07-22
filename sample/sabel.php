@@ -1,4 +1,4 @@
-#!/usr/local/bin/php
+#!/opt/local/php/bin/php
 <?php
 $s = microtime();
 

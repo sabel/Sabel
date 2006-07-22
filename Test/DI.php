@@ -7,9 +7,10 @@ require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
 Sabel_Core_Context::addIncludePath('');
-uses('sabel.container.DI');
-uses('sabel.injection.Calls');
-uses('sabel.core.Exception');
+require_once('sabel/config/Spyc.php');
+require_once('sabel/container/DI.php');
+require_once('sabel/exception/Runtime.php');
+require_once('sabel/injection/Calls.php');
 
 class RecordRunningTimeInjection
 {
@@ -111,12 +112,6 @@ class Test_DI extends PHPUnit2_Framework_TestCase
     $this->assertEquals('mocked!', $module->test('a'));
     $array = $module->returnArray();
     $this->assertEquals('mocked!', $array[0]);
-  }
-  
-  public function testConvertClassName()
-  {
-    $this->assertEquals(convertClassPath('Ditest'), 'Ditest');
-    $this->assertEquals(convertClassPath('Data_Ditest_Module_Test'), 'data.ditest.module.Test');
   }
   
   public function testAnnotation()
