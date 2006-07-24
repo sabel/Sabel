@@ -17,7 +17,7 @@ class Sabel_Controller_Map_Destination
   
   public function __get($key)
   {
-    $methodName = 'get'.ucfirst($key);
+    $methodName = 'get' . ucfirst($key);
     return $this->$methodName();
   }
   

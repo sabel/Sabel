@@ -45,19 +45,11 @@ class Sabel_Controller_Map_Entry
   
   public function hasRequirements()
   {
-    if (isset($this->entry['requirements'])) {
-      return true;
-    } else {
-      return false;
-    }
+    return (isset($this->entry['requirements']));
   }
   
   public function hasOptions()
   {
-    if (isset($this->entry['option'])) {
-      return true;
-    } else {
-      return false;
-    }
+    return (isset($this->entry['option']));
   }
 }
