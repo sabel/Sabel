@@ -36,7 +36,7 @@ class Sabel_Controller_Map_Uri
   
   public function getElements()
   {
-    return $elements = explode('/', $this->uri);
+    return explode('/', $this->uri);
   }
 }
 
@@ -57,7 +57,7 @@ class Sabel_Controller_Map_Element
   
   public function isConstant()
   {
-    return (strpos($this->element, ':') === false);
+    return (!strpos($this->element, ':'));
   }
   
   public function getConstant()
