@@ -45,7 +45,7 @@ class Sabel_Request_URI
   
   public static function getUri()
   {
-    if ($_SERVER['argv']{0} === './sabel.php' || $_SERVER['argv']{0} === 'sabel.php') {
+    if (strpos($_SERVER['argv']{0}, 'sabel') !== false) {
       $args = $_SERVER['argv'];
       array_shift($args);
       $request_uri = join('/', $args);
