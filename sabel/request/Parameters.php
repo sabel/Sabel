@@ -25,11 +25,11 @@ class Sabel_Request_Parameters
   {
     $separate = explode("&", $this->parameters);
     $sets = array();
-    foreach ($separate as $key => $val) {
+    foreach ($separate as $val) {
       $tmp = explode("=", $val);
-      if (empty($tmp[1])) $tmp[1] = '';
-      $enc   = mb_detect_encoding($tmp[1], 'UTF-8, EUC_JP, SJIS');
-      $sets[$tmp[0]] = mb_convert_encoding(urldecode($tmp[1]), 'EUC-JP', $enc);
+      if (is_null($tmp[1])) $tmp[1] = '';
+      $enc = mb_detect_encoding($tmp[1], 'UTF-8, EUC_JP, SJIS');
+      $sets[$tmp[0]] = mb_convert_encoding(urldecode($tmp[1]), 'EUC_JP', $enc);
     }
     
     $this->parsedParameters =& $sets;

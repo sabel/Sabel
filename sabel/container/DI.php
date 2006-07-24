@@ -19,7 +19,7 @@ uses('sabel.core.Spyc');
 /**
  * Sabel DI Container
  *
- * @author Mori Reo <mori.reo@servise.jp
+ * @author Mori Reo <mori.reo@servise.jp>
  */
 class Sabel_Container_DI
 {
@@ -56,7 +56,6 @@ class Sabel_Container_DI
       $path = Sabel_Core_Resolver::resolvClassPathByClassName($class);
       uses($path);
     }
-    
     
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
@@ -97,7 +96,7 @@ class Sabel_Container_DI
   
   public function makeInstance()
   {
-    $stackCount =(int) count($this->classStack);
+    $stackCount = (int) count($this->classStack);
     
     if ($stackCount < 0) {
       throw new SabelException('invalid stack count:' . var_export($this->classStack, 1));

@@ -21,7 +21,7 @@ function uses($uses)
   $classpath = Sabel_Core_Resolver::resolvPath($uses);
   
   foreach ($paths as $path) {
-    $fullpath = $path.$classpath.'.php';
+    $fullpath = $path . $classpath . '.php';
     if (defined('SABEL_USE_INCLUDE_PATH')) {
       require_once($fullpath);
     } else {
