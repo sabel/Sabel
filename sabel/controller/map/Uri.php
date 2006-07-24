@@ -57,7 +57,7 @@ class Sabel_Controller_Map_Element
   
   public function isConstant()
   {
-    return (!strpos($this->element, ':'));
+    return (strpos($this->element, ':') === false);
   }
   
   public function getConstant()
