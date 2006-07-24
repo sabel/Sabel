@@ -13,7 +13,7 @@ class Sabel_Request_URI
   /**
    * @var array parts of uri. separate by slash (/)
    */
-  protected $parts;
+  protected $parts = array();
   
   protected $parameters = null;
   
@@ -25,7 +25,11 @@ class Sabel_Request_URI
       $this->parts = explode('/', $uriAndParameters[0]);
       $this->parameters = new Sabel_Request_Parameters($uriAndParameters[1]);
     } else {
-      $this->parts = explode('/', $this->request);
+      $parts = explode('/', $this->request);
+      
+      foreach ($parts as $part) {
+        if (!empty($part)) $this->parts[] = $part;
+      }
     }
   }
   

@@ -62,6 +62,13 @@ class Test_Router extends PHPUnit2_Framework_TestCase
     $this->assertEquals('common', $dest->getController());
   }
   
+  public function testEmptyEndOfUri()
+  {
+    $dest = $this->r->routing(new Sabel_Request_Uri('2005/'));
+    $this->assertEquals('blog', $dest->getModule());
+    $this->assertEquals('common', $dest->getController());
+  }
+  
   public function testSingleEntry()
   {
     $dest = $this->r->routing(new Sabel_Request_Uri('10'));
