@@ -49,6 +49,7 @@ class Sabel_Controller_Loader
   
   public function load()
   {
+    // @todo refactoring.
     if ($this->isValidController()) {
       $path = $this->makeControllerPath();
       require_once($path);

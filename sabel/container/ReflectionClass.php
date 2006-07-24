@@ -65,8 +65,8 @@ class Sabel_Container_ReflectionClass
     
     $module = SabelDIHelper::getModuleName();
     
-    foreach ($pathElements as $pathelmidx => $pathElement) {
-      $pathElements[$pathelmidx] = strtolower($pathElement);
+    foreach ($pathElements as &$pathElement) {
+      $pathElement = strtolower($pathElement);
     }
     array_push($pathElements, $interfaceName);
     $configFilePath = implode('/', $pathElements) . '.yml';
@@ -93,7 +93,9 @@ class Sabel_Container_ReflectionClass
       throw new SabelException("<pre>implement class name is invalid: " . var_export($information, 1));
     }
     
-    if (!class_exists($implementClassName)) uses(convertClassPath($implementClassName));
+    if (!class_exists($implementClassName)) {
+      uses(Sabel_Core_Resolver::resolvClassPathByClassName($implementClassName));
+    }
     return $implementClassName;
   }
   
@@ -114,6 +116,7 @@ class Sabel_Container_ReflectionClass
                    
     $paths = Sabel_Core_Context::getIncludePath();
     
+    // @todo おかしくね？
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;
       if (is_file($fullpath)) break;

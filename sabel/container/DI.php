@@ -43,18 +43,13 @@ class Sabel_Container_DI
   
   public function loadInjected($className, $method = '__construct')
   {
-    //$ic = $this->load('Sabel_Injection_Calls');
-    //$ic->add(new AspectOrderRegistration());
-    
-    $this->loadClass($className, $method);
-    return new Sabel_Injection_Injector($this->makeInstance());
+    return new Sabel_Injection_Injector($this->load($className, $method));
   }
   
   public function loadClass($class, $method)
   {
     if (!class_exists($class)) {
-      $path = Sabel_Core_Resolver::resolvClassPathByClassName($class);
-      uses($path);
+      uses(Sabel_Core_Resolver::resolvClassPathByClassName($class));
     }
     
     // push to Stack class name
