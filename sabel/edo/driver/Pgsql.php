@@ -78,7 +78,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
       $set = true;
     }
 
-    array_push($sql, ") VALUES(");
+    array_push($sql, ') VALUES(');
     $set = false;
     $count = 1;
 
@@ -338,26 +338,27 @@ class PgsqlQuery
     if ($val1[0] == '<' || $val1[0] == '>') {
       array_push($this->sql, $str." ({$key} {$val1[0]} \${$this->count} OR");
       $val1 = trim(substr_replace($val1, '', 0, 1));
+      $this->param[] = $val1;
     } elseif ($val1 == 'null') {
       array_push($this->sql, $str." ({$key} IS NULL OR");
     } else {
       array_push($this->sql, $str." ({$key}=\${$this->count} OR");
+      $this->param[] = $val1;
     }
 
     $c2 = $this->count + 1;
     if ($val2[0] == '<' || $val2[0] == '>') {
       array_push($this->sql, " {$key} {$val2[0]} \${$c2})");
       $val2 = trim(substr_replace($val2, '', 0, 1));
+      $this->param[] = $val2;
     } elseif ($val2 == 'null') {
       array_push($this->sql, $str." {$key} IS NULL)");
     } else {
       array_push($this->sql, " {$key}=\${$c2})");
+      $this->param[] = $val2;
     }
     $this->set = true;
     $this->count += 2;
-
-    $this->param[] = $val1;
-    $this->param[] = $val2;
   }
 
   public function makeLess_GreaterSQL($key, $val)

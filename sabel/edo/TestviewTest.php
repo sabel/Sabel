@@ -18,6 +18,7 @@ require_once "DBConnection.php";
 require_once "driver/Interface.php";
 require_once "driver/Pdo.php";
 require_once "driver/Pgsql.php";
+require_once "driver/Mysqli.php";
 
 require_once "Query.php";
 
@@ -50,7 +51,7 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
    */
   protected function setUp()
   {
-    ///* pdo postgres
+    /* pdo postgres
     $dbCon = array();
     $dbCon['dsn']  = 'pgsql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'pgsql';
@@ -63,12 +64,17 @@ class TestviewTest extends PHPUnit2_Framework_TestCase
     $dbCon['dsn']  = 'mysql:host=192.168.0.120;dbname=2525e';
     $dbCon['user'] = 'develop';
     $dbCon['pass'] = 'develop';
-    */
+    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    //*/
 
     //native postgres
     //$dbCon = pg_connect('host=192.168.0.120 dbname=2525e user=pgsql password=pgsql');
     //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
     
+    //native mysql 
+    $dbCon = mysqli_connect('192.168.0.120', 'develop', 'develop', '2525e');
+    Sabel_Edo_DBConnection::addConnection('user', 'mysql', $dbCon);
+
     /*
     $sql  = "CREATE TABLE test (id int2 NOT NULL,name varchar NOT NULL, blood varchar, test2_id int2,";
     $sql .= " CONSTRAINT test_pkey PRIMARY KEY (id) );";
