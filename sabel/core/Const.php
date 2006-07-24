@@ -19,7 +19,7 @@ class Sabel_Core_Const
   /**
    * modules directory
    */
-  const MODULES_DIR = '/app/modules/';
+  const MODULES_DIR = '/app/';
 
   /**
    * common files of project

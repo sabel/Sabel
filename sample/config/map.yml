@@ -37,4 +37,13 @@ rmt:
     controller: "index"
     action:     "index"
 
-default: ":module/:controller/:action"
+# draft
+production:
+  default: ":controller/:action/"
+  module: ":module.:user.:domain"
+  
+# draft
+develoment:
+  default: ":module/:user/:controller/:action"
+  module: ":module.:user.:domain"
+
