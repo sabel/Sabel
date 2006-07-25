@@ -12,6 +12,7 @@ require_once('sabel/controller/Map.php');
 require_once('sabel/controller/map/Entry.php');
 require_once('sabel/controller/map/Uri.php');
 require_once('sabel/controller/map/Destination.php');
+require_once('sabel/controller/map/Requirements.php');
 require_once('sabel/config/Spyc.php');
 require_once('sabel/config/Yaml.php');
 
@@ -76,8 +77,14 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   public function testSameNumberOfParts()
   {
     $entries = $this->map->getEntriesByCount(2);
-    $this->assertEquals(':test/:test2',     $entries[0]->getUri()->getString());
+    $this->assertEquals('news/:author',     $entries[0]->getUri()->getString());
     $this->assertEquals('news/:article_id', $entries[1]->getUri()->getString());
+    
+    $requirements = $entries[0]->getRequirements();
+    $this->assertTrue($requirements[0]->isMatch('tester'));
+    
+    $requirements = $entries[1]->getRequirements();
+    $this->assertTrue($requirements[0]->isMatch(12345670));
   }
   
   public function testHasSameNumberOfUriParts()

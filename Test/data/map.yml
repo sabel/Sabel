@@ -17,12 +17,14 @@ blog:
     month: ([0-1]?[0-9])
     day:   ([0-3]?[0-9])
 
-newstest:
-  uri: :test/:test2
+newsAuthor:
+  uri: news/:author
   destination:
-    module:     test
-    controller: test
-    action:     test
+    module: news
+    controller: viewer
+    action: showByAuthor
+  requirements:
+    author: ([a-zA-Z])
     
 news:
   uri: news/:article_id
@@ -30,6 +32,8 @@ news:
     module:     news
     controller: viewer
     action:     show
+  requirements:
+    article_id: ([0-9]{8})
     
 rmt:
   uri: :game/:controller/:action/:test

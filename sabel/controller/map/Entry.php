@@ -32,7 +32,8 @@ class Sabel_Controller_Map_Entry
   public function getRequirements()
   {
     if ($this->hasRequirements()) {
-      return $this->entry['requirements'];
+      $r = new Sabel_Map_Requirements($this->entry['requirements']);
+      return $r->getRequirements();
     } else {
       return null;
     }
