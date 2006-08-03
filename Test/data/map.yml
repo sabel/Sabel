@@ -34,11 +34,10 @@ news:
     action:     show
   requirements:
     article_id: ([0-9]{8})
-    
-rmt:
-  uri: :game/:controller/:action/:test
-  default:
-    controller: index
-    action:     index
 
-default: :module/:controller/:action
+default:
+  uri: :module/:controller/:action
+
+module:     index
+controller: index
+action:     index

@@ -15,6 +15,7 @@ class Sabel_Controller_Map
   
   protected $path;
   protected $map;
+  protected $requestUri = null;
   
   public function __construct($path = null)
   {
@@ -36,16 +37,39 @@ class Sabel_Controller_Map
     }
   }
   
+  public function setRequestUri($uri)
+  {
+    $this->requestUri = $uri;
+  }
+  
+  public function find()
+  {
+    $entries = $this->getEntries();
+    foreach ($entries as $entry) {
+      if ($entry->getUri()->count() == $this->requestUri->count()) {
+        $matched = $entry;
+      }
+    }
+    
+    if (is_object($matched)) {
+      return $matched;
+    } else {
+      return $this->getEntry('default');
+    }
+  }
+  
   public function getEntry($name)
   {
-    return new Sabel_Controller_Map_Entry($this->map[$name]);
+    return new Sabel_Controller_Map_Entry($this->map[$name], $this->requestUri);
   }
   
   public function getEntries()
   {
     $entries = array();
-    foreach ($this->map as $entry) {
-      $entries[] = new Sabel_Controller_Map_Entry($entry);
+    foreach ($this->map as $name => $entry) {
+      if ($name != 'module' && $name != 'controller' && $name != 'action') {
+        $entries[] = new Sabel_Controller_Map_Entry($entry, $this->requestUri);
+      }
     }
     return $entries;
   }
@@ -56,7 +80,7 @@ class Sabel_Controller_Map
     
     $entries = array();
     foreach ($this->map as $entry) {
-      $entry = new Sabel_Controller_Map_Entry($entry);
+      $entry = new Sabel_Controller_Map_Entry($entry, $this->requestUri);
       if ($entry->getUri()->count() === $number) $entries[] = $entry;
     }
     return $entries;

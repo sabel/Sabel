@@ -18,15 +18,7 @@ class Sabel_Core_Router
   
   public function routing($uri)
   {
-    $entry = $this->map->getEntryByHasConstantUriElement(2);
-    if ($entry->getUri()->getElement(0)->getConstant() === $uri->get(0)) {
-      return $entry->getDestination();
-    }
-    
-    foreach ($this->map->getEntries() as $entry) {
-      if ($entry->getUri()->count() === $uri->count()) {
-        return $entry->getDestination();
-      }
-    }
+    $this->map->setRequestUri($uri);
+    return $this->map->find()->getDestination();
   }
 }

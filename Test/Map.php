@@ -32,7 +32,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function testMapUri()
   {
-    $entry = $this->map->getEntry('blog');
+    $entry  = $this->map->getEntry('blog');
     $mapUri = $entry->getUri();
     $this->assertFalse($mapUri->getElement(-1));
     $this->assertEquals(':year',  $mapUri->getElement(0)->toString());
@@ -41,23 +41,20 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $this->assertFalse($mapUri->getElement(3));
     
     foreach ($mapUri->getElements() as $element) {
-      $this->assertTrue(is_string($element));
+      $this->assertTrue(is_object($element));
     }
   }
   
   public function testMapElement()
   {
-    $entry = $this->map->getEntry('rmt');
-    $this->assertFalse($entry->getUri()->getElement(0)->isModule());
-    $this->assertFalse($entry->getUri()->getElement(0)->isController());
-    $this->assertFalse($entry->getUri()->getElement(0)->isAction());
+    $entry = $this->map->getEntry('default');
+    $this->assertTrue($entry->getUri()->getElement(0)->isModule());
+    $this->assertTrue($entry->getUri()->getElement(1)->isController());
+    $this->assertTrue($entry->getUri()->getElement(2)->isAction());
     
-    $this->assertTrue( $entry->getUri()->getElement(1)->isController());
-    $this->assertTrue( $entry->getUri()->getElement(2)->isAction());
-    
-    $this->assertFalse($entry->getUri()->getElement(0)->isReservedWord());
-    $this->assertTrue( $entry->getUri()->getElement(1)->isReservedWord());
-    $this->assertTrue( $entry->getUri()->getElement(2)->isReservedWord());
+    $this->assertTrue($entry->getUri()->getElement(0)->isReservedWord());
+    $this->assertTrue($entry->getUri()->getElement(1)->isReservedWord());
+    $this->assertTrue($entry->getUri()->getElement(2)->isReservedWord());
   }
   
   public function testMapElementConst()
@@ -105,7 +102,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
       $uri = $entry->getUri();
       $this->assertTrue(is_string($uri->getString()));
       foreach ($uri->getElements() as $element) {
-        $this->assertTrue(is_string($element));
+        $this->assertTrue(is_object($element));
       }
     }
   }

@@ -9,10 +9,12 @@
 class Sabel_Controller_Map_Entry
 {
   protected $entry;
+  protected $requestUri;
   
-  public function __construct($entry)
+  public function __construct($entry, $requestUri)
   {
     $this->entry = $entry;
+    $this->requestUri = $requestUri;
   }
   
   public function getUri()
@@ -25,7 +27,23 @@ class Sabel_Controller_Map_Entry
     if (isset($this->entry['destination'])) {
       return new Sabel_Controller_Map_Destination($this->entry['destination']);
     } else {
-      return null;
+      $uri = new Sabel_Controller_Map_Uri($this->entry['uri']);
+      $destination = array();
+      foreach ($uri->getElements() as $element) {
+        switch ($element->isReservedWord()) {
+          case ($element->isModule()):
+            $destination['module'] = $this->requestUri->get(0);
+            break;
+          case ($element->isController()):
+            $destination['controller'] = $this->requestUri->get(1);
+            break;
+          case ($element->isAction()):
+            $destination['action'] = $this->requestUri->get(2);
+            break;
+        }
+      }
+      
+      return new Sabel_Controller_Map_Destination($destination);
     }
   }
   

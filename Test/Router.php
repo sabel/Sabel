@@ -54,7 +54,8 @@ class Test_Router extends PHPUnit2_Framework_TestCase
   {
     unset($this->r);
   }
-  
+
+  /*
   public function testRouter()
   {
     $dest = $this->r->routing(new Sabel_Request_Uri('2005/06/06'));
@@ -68,13 +69,16 @@ class Test_Router extends PHPUnit2_Framework_TestCase
     $this->assertEquals('blog', $dest->getModule());
     $this->assertEquals('common', $dest->getController());
   }
+  */
   
   public function testSingleEntry()
   {
     $dest = $this->r->routing(new Sabel_Request_Uri('10'));
+    $this->assertEquals('blog', $dest->getModule());
     $this->assertEquals('entry', $dest->getAction());
   }
   
+  /*
   public function testSameUriCountEntry()
   {
     $dest = $this->r->routing(new Sabel_Request_Uri('news/1'));
@@ -82,4 +86,5 @@ class Test_Router extends PHPUnit2_Framework_TestCase
     $this->assertEquals('viewer', $dest->getController());
     $this->assertEquals('viewer', $dest->getController());
   }
+  */
 }

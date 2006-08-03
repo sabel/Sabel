@@ -33,7 +33,6 @@ class Sabel_Controller_Loader
     $path  = RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination->module;
     $path .= Sabel_Core_Const::CONTROLLER_DIR . $this->destination->controller;
     $path .= '.php';
-
     return $path;
   }
 

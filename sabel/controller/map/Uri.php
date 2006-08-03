@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sabel_Controller_Map_Uri
  * 
@@ -26,7 +27,7 @@ class Sabel_Controller_Map_Uri
   
   public function getElement($position)
   {
-    $elements = $this->getElements();
+    $elements = explode('/', $this->uri);
     if (0 <= $position && $position < count($elements)) {
       return new Sabel_Controller_Map_Element($elements[$position]);
     } else {
@@ -36,7 +37,12 @@ class Sabel_Controller_Map_Uri
   
   public function getElements()
   {
-    return explode('/', $this->uri);
+    $elements = explode('/', $this->uri);
+    $objElements = array();
+    foreach ($elements as $element) {
+      $objElements[] = new Sabel_Controller_Map_Element($element);
+    }
+    return $objElements;
   }
 }
 
@@ -53,6 +59,11 @@ class Sabel_Controller_Map_Element
   public function __construct($element)
   {
     $this->element = $element;
+  }
+  
+  public function get()
+  {
+    $this->element;
   }
   
   public function isConstant()
