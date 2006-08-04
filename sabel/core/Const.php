@@ -29,7 +29,7 @@ class Sabel_Core_Const
   /**
    * templates dirctory
    */
-  const TEMPLATE_DIR = 'templates/';
+  const TEMPLATE_DIR = 'views/';
 
   /**
    * postfix extention for template

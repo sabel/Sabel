@@ -1,8 +1,7 @@
 <?php
 
-uses('sabel.cache.Memcache');
-uses('sabel.response.Web');
-uses('sabel.config.Cached');
+uses('sabel.template.Director');
+uses('sabel.template.Engine');
 
 /**
  * page controller base class.
@@ -13,14 +12,8 @@ uses('sabel.config.Cached');
 abstract class Sabel_Controller_Page
 {
   protected $request, $response, $template, $cache, $logger;
-
-  /**
-   * implement for inherit class.
-   *
-   */
-  abstract function initialize();
-  abstract function index();
-
+  protected $destination;
+  
   /**
    * get request parameter
    *
@@ -43,16 +36,19 @@ abstract class Sabel_Controller_Page
     }
   }
   
-  public function setup($request)
+  public function setup($request, $destination)
   {
     $this->container = new Sabel_Container_DI();
     
     $this->request = $request;
+    $this->destination = $destination;
+    
     $this->setupLogger();
     $this->setupResponse();
     $this->setTemplate(new HtmlTemplate());
-    $this->setupConfig();
-    $this->setupCache();
+    
+    //$this->setupConfig();
+    //$this->setupCache();
   }
   
   protected function setupLogger()
@@ -67,28 +63,28 @@ abstract class Sabel_Controller_Page
   
   protected function setupConfig()
   {
-    $this->config = Sabel_Config_Cached::create();
+    //$this->config = Sabel_Config_Cached::create();
   }
   
   protected function setupCache()
   {
-    $conf = $this->config->get('Memcache');
-    $this->cache = Sabel_Cache_Memcache::create($conf['server']);
+    //$conf = $this->config->get('Memcache');
+    //$this->cache = Sabel_Cache_Memcache::create($conf['server']);
   }
   
-  public function execute($method)
+  public function execute()
   {
-    $this->checkValidateMethodAndExecute($method);
-    $this->methodExecute($method);
+    $actionName = $this->destination->action;
+    $this->checkValidateMethodAndExecute($actionName);
+    $this->methodExecute($actionName);
     $this->initTemplate();
     $this->showTemplate();
   }
   
-  protected function methodExecute($methodName)
+  protected function methodExecute($action)
   {
-    $r = ParsedRequest::create();
-    $controllerClass = $r->getModule() . '_' . $r->getController();
-    $refMethod = new ReflectionMethod($controllerClass, $methodName);
+    $controllerClass = $this->destination->module.'_'.$this->destination->controller;
+    $refMethod = new ReflectionMethod($controllerClass, $action);
     
     $hasClass = false;
     foreach ($refMethod->getParameters() as $paramidx => $parameter) {
@@ -103,9 +99,9 @@ abstract class Sabel_Controller_Page
     }
     
     if ($hasClass) {
-      $this->$methodName($object);
+      $this->$action($object);
     } else {
-      $this->$methodName();
+      $this->$action();
     }
     
   }
@@ -209,7 +205,7 @@ abstract class Sabel_Controller_Page
    */
   protected function initTemplate()
   {
-    $d = TemplateDirectorFactory::create();
+    $d = TemplateDirectorFactory::create(null, $this->destination);
     $this->template->selectPath($d->decidePath());
     $this->template->selectName($d->decideName());
   }

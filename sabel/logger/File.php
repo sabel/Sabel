@@ -15,7 +15,7 @@ class Sabel_Logger_File
     return self::$instance;
   }
   
-  private function __construct()
+  public function __construct()
   {
     $this->fp = fopen(RUN_BASE . self::LOG_FILE, 'a+');
   }

@@ -8,69 +8,64 @@ interface SabelTemplateDirector
 
 class TemplateDirectorFactory
 {
-  public static function create($request = null)
+  public static function create($request = null, $destination)
   {
-    $prequest = ParsedRequest::create($request);
-
-    $classPath  = SabelConst::MODULES_DIR . $prequest->getModule();
+    $classPath  = Sabel_Core_Const::MODULES_DIR . $destination->module;
     $classPath .= '/extensions/CustomTemplateDirector.php';
-
-    $commonsPath  = SabelConst::COMMONS_DIR;
+    
+    $commonsPath  = Sabel_Core_Const::COMMONS_DIR;
     $commonsPath .= '/extensions/CustomTemplateDirector.php';
-
+    
     if (is_file($classPath)) {
       require_once($classPath);
-      $instance = new CustomTemplateDirector($prequest);
+      return new CustomTemplateDirector($destination);
     } else if (is_file($commonsPath)) {
       require_once($commonsPath);
-      $instance = new CustomTemplateDirector($prequest);
+      return new CustomTemplateDirector($destination);
     } else {
-      $instance = new DefaultTemplateDirector($prequest);
+      return new DefaultTemplateDirector($destination);
     }
-
-    return $instance;
   }
 }
 
 class DefaultTemplateDirector implements SabelTemplateDirector
 {
-  protected $request;
-
-  public function __construct($request)
+  protected $destination;
+  
+  public function __construct($destination)
   {
-    $this->request = $request;
+    $this->destination = $destination;
   }
-
+  
   protected function getPath()
   {
-    $tplpath  = SabelConst::MODULES_DIR;
-    $tplpath .= $this->request->getModule() . '/';
-    $tplpath .= SabelConst::TEMPLATE_DIR;
-
+    $tplpath  = RUN_BASE;
+    $tplpath .= Sabel_Core_Const::MODULES_DIR;
+    $tplpath .= $this->destination->module . '/';
+    $tplpath .= Sabel_Core_Const::TEMPLATE_DIR;
     return $tplpath;
   }
-
+  
   public function decidePath()
   {
     return $this->getPath();
   }
-
+  
   protected function getName()
   {
     // makeing template name string such as "controller.method.tpl"
-    $tplname  = $this->request->getController();
-    $tplname .= SabelConst::TEMPLATE_NAME_SEPARATOR;
-    $tplname .= $this->request->getMethod();
-    $tplname .= SabelConst::TEMPLATE_POSTFIX;
-
+    $tplname  = $this->destination->controller;
+    $tplname .= Sabel_Core_Const::TEMPLATE_NAME_SEPARATOR;
+    $tplname .= $this->destination->action;
+    $tplname .= Sabel_Core_Const::TEMPLATE_POSTFIX;
     return $tplname;
   }
-
+  
   public function decideName()
   {
     return $this->getName();
   }
-
+  
   public function getFullPath()
   {
     return $this->getPath() . $this->getName();

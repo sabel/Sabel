@@ -5,7 +5,8 @@ class SabelDIHelper
   public static function getModuleName()
   {
     if (class_exists('ParsedRequest')) {
-      return ParsedRequest::create()->getModule();
+      // @todo remove ParsedRequest
+      //return ParsedRequest::create()->getModule();
     } else {
       return 'module';
     }
@@ -14,7 +15,7 @@ class SabelDIHelper
 
 uses('sabel.injection.Injector');
 uses('sabel.container.ReflectionClass');
-uses('sabel.core.Spyc');
+uses('sabel.config.Spyc');
 
 /**
  * Sabel DI Container
