@@ -10,6 +10,6 @@ class Index_Index
 {
   public function index()
   {
-    print 'index may be conflict.';
+    print 'index may be conflict';
   }
 }
