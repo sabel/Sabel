@@ -55,8 +55,14 @@ class Sabel_Controller_Loader
       $class = $this->getControllerClassName();
       return new $class();
     } else if ($this->isValidModule()) {
-      $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . 'controllers/index.php';
-      require_once($path);
+      $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . '/controllers/index.php';
+      
+      if (is_readable($path)) {
+        require_once($path);
+      } else {
+        throw new Sabel_Exception_Runtime("Index not found: " . $path);
+      }
+      
       $moduleClassName = $this->destination->module . '_Index';
       if (class_exists($moduleClassName)) {
         return new $moduleClassName();

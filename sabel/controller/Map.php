@@ -14,12 +14,27 @@ class Sabel_Controller_Map
   const DEFAULT_PATH = '/config/map.yml';
   
   protected $path;
-  protected $map;
+  protected static $map;
   protected $requestUri = null;
   
   public function __construct($path = null)
   {
     $this->path = RUN_BASE . (($path) ? $path : self::DEFAULT_PATH);
+  }
+  
+  public static function getDefaultModule()
+  {
+    return self::$map['module'];
+  }
+  
+  public static function getDefaultController()
+  {
+    return self::$map['module'];
+  }
+  
+  public static function getDefaultAction()
+  {
+    return self::$map['module'];
   }
   
   public function getPath()
@@ -31,7 +46,7 @@ class Sabel_Controller_Map
   {
     if (is_file($this->getPath())) {
       $c = new Sabel_Config_Yaml($this->getPath());
-      $this->map = $c->toArray();
+      self::$map = $c->toArray();
     } else {
       throw new Exception("map configure not found on " . $this->getPath());
     }
@@ -60,13 +75,13 @@ class Sabel_Controller_Map
   
   public function getEntry($name)
   {
-    return new Sabel_Controller_Map_Entry($this->map[$name], $this->requestUri);
+    return new Sabel_Controller_Map_Entry(self::$map[$name], $this->requestUri);
   }
   
   public function getEntries()
   {
     $entries = array();
-    foreach ($this->map as $name => $entry) {
+    foreach (self::$map as $name => $entry) {
       if ($name != 'module' && $name != 'controller' && $name != 'action') {
         $entries[] = new Sabel_Controller_Map_Entry($entry, $this->requestUri);
       }
@@ -79,7 +94,7 @@ class Sabel_Controller_Map
     $number = (int) $number;
     
     $entries = array();
-    foreach ($this->map as $entry) {
+    foreach (self::$map as $entry) {
       $entry = new Sabel_Controller_Map_Entry($entry, $this->requestUri);
       if ($entry->getUri()->count() === $number) $entries[] = $entry;
     }

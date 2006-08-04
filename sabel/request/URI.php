@@ -70,6 +70,11 @@ class Sabel_Request_URI
     return $this->parts[$pos];
   }
   
+  public function has($pos)
+  {
+    return isset($this->parts[$pos]);
+  }
+  
   public function hasParameters()
   {
     return (!is_null($this->parameters));

@@ -28,17 +28,24 @@ class Sabel_Controller_Map_Entry
       return new Sabel_Controller_Map_Destination($this->entry['destination']);
     } else {
       $uri = new Sabel_Controller_Map_Uri($this->entry['uri']);
+      $ruri = $this->requestUri;
       $destination = array();
       foreach ($uri->getElements() as $element) {
         switch ($element->isReservedWord()) {
           case ($element->isModule()):
-            $destination['module'] = $this->requestUri->get(0);
+            $destination['module'] = ($ruri->has(0))
+                                     ? $ruri->get(0)
+                                     : Sabel_Controller_Map::getDefaultModule();
             break;
           case ($element->isController()):
-            $destination['controller'] = $this->requestUri->get(1);
+            $destination['controller'] = ($ruri->has(1))
+                                         ? $ruri->get(1)
+                                         : Sabel_Controller_Map::getDefaultController();
             break;
           case ($element->isAction()):
-            $destination['action'] = $this->requestUri->get(2);
+            $destination['action'] = ($ruri->has(2))
+                                     ? $ruri->get(2)
+                                     : Sabel_Controller_Map::getDefaultAction();
             break;
         }
       }
