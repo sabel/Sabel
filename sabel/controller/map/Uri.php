@@ -25,6 +25,18 @@ class Sabel_Controller_Map_Uri
     return count(explode('/', $this->uri));
   }
   
+  public function calcElementPositionByName($name)
+  {
+    $position = 0;
+    $elements = explode('/', $this->uri);
+    
+    foreach ($elements as $element) {
+      $oElement = new Sabel_Controller_Map_Element($element);
+      if ($oElement->getName() == $name) return $position;
+      $position++;
+    }
+  }
+  
   public function getElement($position)
   {
     $elements = explode('/', $this->uri);
@@ -64,6 +76,12 @@ class Sabel_Controller_Map_Element
   public function get()
   {
     $this->element;
+  }
+  
+  public function getName()
+  {
+    $parts = explode(':', $this->element);
+    return $parts[1];
   }
   
   public function isConstant()

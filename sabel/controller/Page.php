@@ -78,6 +78,7 @@ abstract class Sabel_Controller_Page
     $this->checkValidateMethodAndExecute($actionName);
     $this->methodExecute($actionName);
     $this->initTemplate();
+    $this->assignTemplates();
     $this->showTemplate();
   }
   
@@ -178,7 +179,7 @@ abstract class Sabel_Controller_Page
 
   /**
    * HTTP Redirect to another location.
-   * this method will be avoid "back button" problem.
+   * this method will avoid "back button" problem.
    *
    * @param string $to /Module/Controller/Method
    */

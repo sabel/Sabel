@@ -25,7 +25,8 @@ class Sabel_Controller_Map_Entry
   public function getDestination()
   {
     if (isset($this->entry['destination'])) {
-      return new Sabel_Controller_Map_Destination($this->entry['destination']);
+      // @todo implements when specified reserved word.
+      return new Sabel_Controller_Map_Destination($this, $this->entry['destination']);
     } else {
       $uri = new Sabel_Controller_Map_Uri($this->entry['uri']);
       $ruri = $this->requestUri;
@@ -33,24 +34,24 @@ class Sabel_Controller_Map_Entry
       foreach ($uri->getElements() as $element) {
         switch ($element->isReservedWord()) {
           case ($element->isModule()):
-            $destination['module'] = ($ruri->has(0))
+            $destination['module'] =  ($ruri->has(0))
                                      ? $ruri->get(0)
                                      : Sabel_Controller_Map::getDefaultModule();
             break;
           case ($element->isController()):
-            $destination['controller'] = ($ruri->has(1))
+            $destination['controller'] =  ($ruri->has(1))
                                          ? $ruri->get(1)
                                          : Sabel_Controller_Map::getDefaultController();
             break;
           case ($element->isAction()):
-            $destination['action'] = ($ruri->has(2))
+            $destination['action'] =  ($ruri->has(2))
                                      ? $ruri->get(2)
                                      : Sabel_Controller_Map::getDefaultAction();
             break;
         }
       }
       
-      return new Sabel_Controller_Map_Destination($destination);
+      return new Sabel_Controller_Map_Destination($this, $destination);
     }
   }
   

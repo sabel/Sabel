@@ -12,35 +12,34 @@ interface HtmlTemplateService
 class HtmlTemplate implements HtmlTemplateService
 {
   private $impl;
-
+  
   public function __construct($ins = null)
   {
     if ($ins instanceOf BaseEngineImpl) {
       $this->impl = $ins;
     } else {
-      // 標準実装？
-      $this->impl = new SmartyEngineImpl();
+      $this->impl = new PhpEngineImpl();
     }
     $this->impl->configuration();
   }
-
+  
   public function changeEngine($inc)
   {
     if ($ins instanceof BaseEngineImpl) {
       $this->impl = $inc;
     }
   }
-
+  
   public function assign($key ,$value)
   {
     $this->impl->assign($key, $value);
   }
-
+  
   public function retrieve()
   {
     return $this->impl->retrieve();
   }
-
+  
   public function selectName($name)
   {
     $this->impl->setTemplateName($name);
@@ -50,7 +49,7 @@ class HtmlTemplate implements HtmlTemplateService
   {
     $this->impl->setTemplatePath($path);
   }
-
+  
   public function rendering()
   {
     $this->impl->display();
@@ -72,59 +71,116 @@ abstract class BaseEngineImpl
   protected
     $tplpath = null,
     $tplname = null;
-
+    
   public function setTemplateName($name)
   {
     $this->tplname = $name;
   }
-
+  
   public function setTemplatePath($path)
   {
     $this->tplpath = $path;
   }
-
+  
   protected function getTemplateFullPath()
   {
     return $this->tplpath . $this->tplname;
   }
 }
 
+class putter
+{
+  protected $attributes;
+  
+  public function __construct($atr)
+  {
+    $this->attributes = $atr;
+  }
+  
+  public function __get($key)
+  {
+    echo $this->attributes[$key];
+  }
+}
+
+class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
+{
+  protected $attributes;
+  protected $p;
+  
+  public function assign($key, $value)
+  {
+    $this->attributes[$key] = $value;
+  }
+  
+  public function put($key)
+  {
+    echo $this->attributes[$key];
+  }
+  
+  public function __get($key)
+  {
+    return $this->attributes[$key];
+  }
+  
+  public function retrieve()
+  {
+    $this->p = new Putter($this->attributes);
+    $path = $this->getTemplateFullPath();
+    
+    ob_start();
+    @include($path);
+    $content = ob_get_clean();
+    ob_flush();
+    return $content;
+  }
+  
+  public function configuration()
+  {
+  }
+  
+  public function display()
+  {
+    echo $this->retrieve();
+  }
+}
+
 class SavantEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 {
   private $savant  = null;
-
+  
   public function __construct()
   {
     require_once('Savant3/Savant3.php');
     $this->savant = new Savant3();
   }
-
+  
   public function assign($key, $value)
   {
     $this->savant->assign($key, $value);
   }
-
+  
   public function retrieve()
   {
     $fullpath = $this->getTemplateFullPath();
-
+    
     if (file_exists($fullpath)) {
       return $this->savant->fetch($fullpath);
     } else {
       // @todo Exception handling.
     }
   }
-
+  
   public function configuration()
   {
   }
-
+  
   public function display()
   {
     $path = $this->getTemplateFullPath();
     if (!is_file($path))
       throw new SabelException("template isn't found: " . "'".$path."'");
-
+      
     $this->savant->display($path);
   }
 }
@@ -132,30 +188,30 @@ class SavantEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 class SmartyEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 {
   private $smarty  = null;
-
+  
   public function __construct()
   {
     $this->smarty = new Smarty();
   }
-
+  
   public function assign($key, $value)
   {
     $this->smarty->assign($key, $value);
   }
-
+  
   public function retrieve()
   {
     $this->smarty->template_dir = $this->tplpath;
     $this->smarty->compile_id   = $this->tplpath;
     return $this->smarty->fetch($this->tplname);
   }
-
+  
   public function configuration()
   {
     $this->smarty->compile_dir = RUN_BASE . '/compile';
     $this->smarty->load_filter('output','trimwhitespace');
   }
-
+  
   public function display()
   {
     $this->smarty->template_dir = $this->tplpath;

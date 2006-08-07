@@ -17,8 +17,12 @@ class Sabel_Request_URI
   
   protected $parameters = null;
   
-  public function __construct($requestUri = null)
+  protected $entry = null;
+  
+  public function __construct($requestUri = null, $entry = null)
   {
+    $this->entry = $entry;
+    
     $this->request = ($requestUri) ? $requestUri : self::getUri();
     if ($this->hasUriParameters()) {
       $uriAndParameters = explode('?', $this->request);
@@ -68,6 +72,12 @@ class Sabel_Request_URI
   public function get($pos)
   {
     return $this->parts[$pos];
+  }
+  
+  public function getByName($name)
+  {
+    $position = $this->entry->getUri()->calcElementPositionByName($name);
+    return $this->get($position);
   }
   
   public function has($pos)

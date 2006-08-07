@@ -8,10 +8,12 @@
  */
 class Sabel_Controller_Map_Destination
 {
+  protected $parentEntry = null;
   protected $destination = null;
   
-  public function __construct($destination)
+  public function __construct($entry, $destination)
   {
+    $this->parentEntry = $entry;
     $this->destination = $destination;
   }
   
@@ -25,6 +27,11 @@ class Sabel_Controller_Map_Destination
   {
     $methodName = 'get' . ucfirst($method);
     return $this->$methodName();
+  }
+  
+  public function getEntry()
+  {
+    return $this->parentEntry;
   }
   
   public function hasModule()

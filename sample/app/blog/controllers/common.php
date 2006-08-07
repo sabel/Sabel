@@ -1,6 +1,6 @@
 <?php
 
-class Blog_Common
+class Blog_Common extends Sabel_Controller_Page
 {
   public function show()
   {
@@ -15,6 +15,6 @@ class Blog_Common
   
   public function entry()
   {
-    print "show by entry \n";
+    $this->response->id = $this->request->getByName('id');
   }
 }
