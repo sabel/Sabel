@@ -26,10 +26,13 @@ class Sabel_Edo_DBConnection
       } else {
         if ($useEdo == 'pgsql') {
           $conn = $connection;
-          self::$connList[$owner]['pgsql'] = $conn;
+          self::$connList[$owner]['pgsql']  = $conn;
+        } elseif ($useEdo == 'mysqli') {
+          $conn = $connection;
+          self::$connList[$owner]['mysqli'] = $conn;
         } elseif ($useEdo == 'mysql') {
           $conn = mysql_connect($connection);
-          self::$connList[$owner]['mysql'] = $conn;
+          self::$connList[$owner]['mysql']  = $conn;
         } else {
           throw new Exception('DBConnection::addConnection() invalid Parameter. EDO hasn\'t '.$useEdo);
         }

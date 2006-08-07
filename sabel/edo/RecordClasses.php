@@ -1,6 +1,6 @@
 <?php
 
-uses('sabel.edo.RecordObject');
+//uses('sabel.edo.RecordObject');
 
 abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 {
@@ -9,7 +9,7 @@ abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setEDO('user', 'mysql');
+    $this->setEDO('user', 'pdo');
     parent::__construct($param1, $param2);
   }
 
@@ -30,7 +30,7 @@ abstract class BaseTreeRecord extends Sabel_Edo_RecordObject
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setEDO('user', 'mysql');
+    $this->setEDO('user', 'pdo');
     parent::__construct($param1, $param2);
   }
 
@@ -113,7 +113,7 @@ class Common_Record extends Sabel_Edo_RecordObject
 {
   public function __construct($table = null)
   {
-    $this->setEDO('user', 'mysql');
+    $this->setEDO('user', 'pdo');
     parent::__construct();
 
     if (!is_null($table)) $this->table = $table;

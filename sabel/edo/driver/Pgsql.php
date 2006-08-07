@@ -1,7 +1,7 @@
 <?php
 
-uses('sabel.edo.driver.Interface');
-uses('sabel.edo.query.php');
+//uses('sabel.edo.driver.Interface');
+//uses('sabel.edo.query.php');
 
 class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
 {
@@ -178,7 +178,6 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     } catch (Exception $e) {
       print_r($e->getMessage()."\n");
       print_r($sql);
-      print_r($e->getTrace());
     }
 
     $this->makeBindParam();
@@ -195,24 +194,22 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     } catch (Exception $e) {
       print_r($e->getMessage()."\n");
       print_r($tmp);
-      print_r($e->getTrace());
+      //print_r($e->getTrace());
     }
   }
 
   public function fetch($style = null)
   {
     if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
-      $result = pg_fetch_assoc($this->result);
+      return pg_fetch_assoc($this->result);
     } else {
-      $result = pg_fetch_array($this->result);
+      return pg_fetch_array($this->result);
     }
-    return $result;
   }
 
   public function fetchAll($style = null)
   {
-    $result = pg_fetch_all($this->result);
-    return $result;
+    return pg_fetch_all($this->result);
   }
 
   private function makeBindParam()

@@ -1,7 +1,7 @@
 <?php
 
-uses('sabel.edo.driver.Interface');
-uses('sabel.edo.query.php');
+//uses('sabel.edo.driver.Interface');
+//uses('sabel.edo.query.php');
 
 class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 {
@@ -167,50 +167,39 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function execute($sql = null)
   {
-    try {
-      if (!is_null($sql)) {
-        $this->stmt = $this->pdo->prepare($sql);
-      } elseif ($this->stmtFlag) {
-        $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
-      } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
-        throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
+    if (!is_null($sql)) {
+      $this->stmt = $this->pdo->prepare($sql);
+    } elseif ($this->stmtFlag) {
+      $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
+    } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
+      print_r('Error: query not exist. execute EDO::makeQuery() beforehand');
+    } else {
+      $sql = $this->sqlObj->getSQL();
+      if ($this->stmt = $this->pdo->prepare($sql)) {
+        Sabel_Edo_Driver_PdoStatement::addStatement($this->stmt);
       } else {
-        $sql = $this->sqlObj->getSQL();
-        if ($this->stmt = $this->pdo->prepare($sql)) {
-          Sabel_Edo_Driver_PdoStatement::addStatement($this->stmt);
-        } else {
-          throw new PDOException('Error: PDOStatement is null.');
-        }
+        print_r('Error: PDOStatement is null.');
+        print_r($sql."\n");
+        print_r($this->pdo->errorInfo());
       }
-    } catch (Exception $e) {
-      print_r($e->getMessage()."\n");
-      print_r($e->getTrace());
-    } catch (PDOException $pe) {
-      print_r($pe->getMessage()."\n");
-      print_r($sql);
-      print_r($this->pdo->errorInfo());
     }
 
     $this->makeBindParam();
 
-    try {
-      if (empty($this->param)) {
-        $result = $this->stmt->execute();
-      } else {
-        $result = $this->stmt->execute($this->param);
-        $tmp = $this->param;
-        $this->param = array();
-      }
+    if (empty($this->param)) {
+      $result = $this->stmt->execute();
+    } else {
+      $result = $this->stmt->execute($this->param);
+      $this->param = array();
+    }
 
-      if (!$result)
-        throw new PDOException('Error: PDOStatement::execute()');
-
-      return $result;
-    } catch (PDOException $pe) {
-      print_r($pe->getMessage()."\n");
+    if (!$result) {
+      print_r('Error: PDOStatement::execute()');
       print_r($this->stmt);
-      print_r($tmp);
+      print_r($this->param);
       print_r($this->stmt->errorInfo());
+    } else {
+      return true;
     }
   }
 
@@ -221,7 +210,6 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     } else {
       $result = $this->stmt->fetch(PDO::FETCH_BOTH);
     }
-
     $this->stmt->closeCursor();
     return $result;
   }
@@ -345,7 +333,6 @@ class PdoQuery
     $this->set = true;
 
     $val = str_replace('_', '\_', $val);
-
     $this->param[$bindKey] = $val;
   }
 

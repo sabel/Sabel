@@ -1,11 +1,11 @@
 <?php
 
-uses('sabel.edo.DBConnection');
-uses('sabel.edo.RecordClasses');
+//uses('sabel.edo.DBConnection');
+//uses('sabel.edo.RecordClasses');
 
-uses('sabel.edo.driver.Pdo');
-uses('sabel.edo.driver.Mysql');
-uses('sabel.edo.driver.Pgsql');
+//uses('sabel.edo.driver.Pdo');
+//uses('sabel.edo.driver.Mysql');
+//uses('sabel.edo.driver.Pgsql');
 
 abstract class Sabel_Edo_RecordObject
 {
@@ -36,10 +36,6 @@ abstract class Sabel_Edo_RecordObject
 
   protected $selectType = self::SELECT_DEFAULT;
 
-  private
-    $checkChildTable  = '',
-    $checkChildColumn = '';
-
   const SELECT_DEFAULT     = 0;
   const WITH_PARENT_VIEW   = 5;
   const WITH_PARENT_OBJECT = 10;
@@ -53,8 +49,8 @@ abstract class Sabel_Edo_RecordObject
       return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($this->useEdo == 'pgsql') {
       return new Sabel_Edo_Driver_Pgsql($conn);
-    } elseif ($this->useEdo == 'mysql') {
-      return new Sabel_Edo_Driver_Mysql($conn);
+    } elseif ($this->useEdo == 'mysqli') {
+      return new Sabel_Edo_Driver_Mysqli($conn);
     } else {
       //todo
     }
@@ -72,8 +68,8 @@ abstract class Sabel_Edo_RecordObject
       $this->edo = new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($useEdo == 'pgsql') {
       $this->edo = new Sabel_Edo_Driver_Pgsql($conn);
-    } elseif ($useEdo == 'mysql') {
-      $this->edo = new Sabel_Edo_Driver_Mysql($conn);
+    } elseif ($useEdo == 'mysqli') {
+      $this->edo = new Sabel_Edo_Driver_Mysqli($conn);
     } else {
       //todo
     }
