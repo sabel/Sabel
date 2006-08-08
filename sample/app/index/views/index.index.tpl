@@ -1,7 +1,7 @@
 <html>
 <head>
   <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-  <title>インデックス - <? $this->p->title ?></title>
+  <Title>インデックス - <? $this->p->title ?></title>
 </head>
 
 <body>
