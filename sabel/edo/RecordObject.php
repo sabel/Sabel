@@ -522,7 +522,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function newClass($name)
   {
-    if (class_exists($name) && $name != 'Sabel_Edo_CommonRecord') {
+    $classes = get_declared_classes();
+    if (isset($classes[$name]) && $name != 'Sabel_Edo_CommonRecord') {
       return new $name();
     } else {
       return new Sabel_Edo_CommonRecord($name);

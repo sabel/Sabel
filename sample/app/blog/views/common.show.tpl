@@ -1,12 +1,7 @@
 <? foreach ($articles as $article) : ?>
-  <h2><? echo $article->title ?></h2>
+<div style="border: 1px dotted; margin: 10px;">
+  <h4><? echo $article->title ?></h4>
   <p><? echo $article->body ?></p>
-  <p>著者: <? echo $article->author->name ?> </p>
-
-<!--
-<pre>
-<? var_dump($article) ?>
-</pre>
--->
-
+  <p>著者: <? echo $article->author->name ?>(<? echo $article->author->age ?>) </p>
+</div>
 <? endforeach; ?>

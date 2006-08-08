@@ -1,6 +1,6 @@
 <?php
 
-require_once('sabel/core/Resolver.php');
+require_once('Sabel/sabel/core/Resolver.php');
 
 function __autoload($class)
 {
