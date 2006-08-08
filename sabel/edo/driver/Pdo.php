@@ -182,9 +182,6 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
         print_r($sql."\n");
         print_r($this->pdo->errorInfo());
       }
-    } catch (Exception $e) {
-      print_r($e->getMessage()."\n");
-      print_r($e->getTrace());
     }
 
     $this->makeBindParam();
