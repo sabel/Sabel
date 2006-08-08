@@ -42,36 +42,31 @@ abstract class Sabel_Edo_RecordObject
 
   protected function getMyEDO()
   {
-    $conn = Sabel_Edo_DBConnection::getConnection($this->owner, $this->useEdo);
-    
-    if ($this->useEdo == 'pdo') {
-      $pdoDb = Sabel_Edo_DBConnection::getDB($this->owner);
-      return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
-    } else if ($this->useEdo == 'pgsql') {
-      return new Sabel_Edo_Driver_Pgsql($conn);
-    } else if ($this->useEdo == 'mysqli') {
-      return new Sabel_Edo_Driver_Mysqli($conn);
-    } else {
-      // @todo
-    }
+    return $this->makeEdoDriver();
   }
 
   public function setEDO($owner, $useEdo)
   {
     $this->owner  = $owner;
     $this->useEdo = $useEdo;
+    $this->edo    = $this->makeEdoDriver();
+  }
 
-    $conn = Sabel_Edo_DBConnection::getConnection($owner, $useEdo);
+  protected function makeEdoDriver()
+  {
+    $conn = Sabel_Edo_DBConnection::getConnection($this->owner, $this->useEdo);
 
-    if ($useEdo == 'pdo') {
-      $pdoDb = Sabel_Edo_DBConnection::getDB($owner);
-      $this->edo = new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
-    } else if ($useEdo == 'pgsql') {
-      $this->edo = new Sabel_Edo_Driver_Pgsql($conn);
-    } else if ($useEdo == 'mysqli') {
-      $this->edo = new Sabel_Edo_Driver_Mysqli($conn);
-    } else {
-      // @todo
+    switch ($this->useEdo) {
+      case 'pdo':
+        $pdoDb = Sabel_Edo_DBConnection::getDB($this->owner);
+        return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
+        break;
+      case 'pgsql':
+        return new Sabel_Edo_Driver_Pgsql($conn);
+        break;
+      case 'mysqli':
+        return new Sabel_Edo_Driver_Mysqli($conn);
+        break;
     }
   }
 
@@ -106,13 +101,9 @@ abstract class Sabel_Edo_RecordObject
     return $this->data;
   }
 
-  public function setProjection($projection)
+  public function setProjection($p)
   {
-    if (is_array($projection)) {
-      $this->projection = implode(',', $projection);
-    } else {
-      $this->projection = $projection;
-    }
+    $this->projection = (is_array($p)) ? implode(',', $p) : $p;
   }
 
   public function setDefaultColumn($column)
@@ -129,55 +120,44 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->selectType = $type;
   }
-  
+
   public function setProperties($array)
   {
-    foreach ($array as $key => $val) {
+    foreach ($array as $key => $val)
       $this->$key = $val;
-    }    
   }
 
   public function __call($method, $parameters)
   {
-    if (empty($parameters[1])) {
-      $this->setCondition($method, $parameters[0]);
-    } else {
-      $this->setCondition($method, $parameters[0], $parameters[1]);
-    }
+    $this->setCondition($method, $parameters[0], $parameters[1]);
   }
-  
+
   public function setConstraint($param1, $param2 = null)
   {
-    if (is_array($param1)) {
-      foreach ($param1 as $key => $val) {
-        if (is_null($val)) {
-          throw new Exception('Error: setConstraint() constraint value is null');
-        } else {
-          $this->constraints[$key] = $val;
-        }
-      }
-    } else {
-      if (is_null($param2)) {
-        throw new Exception('Error: setConstraint() constraint value is null');
+    if (!is_array($param1)) $param1 = array($param1 => $param2);
+
+    foreach ($param1 as $key => $val) {
+      if (isset($val)) {
+        $this->constraints[$key] = $val;
       } else {
-        $this->constraints[$param1] = $param2;
+        throw new Exception('Error: setConstraint() constraint value is null.');
       }
     }
   }
 
   public function setChildConstraint($param1, $param2 = null)
   {
-    if (is_null($param2)) {
-      if (is_array($param1)) {
-        $this->defaultChildConstraints = $param1;
-      } else {
-        throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
-      }
-    } else {
+    if (isset($param2)) {
       if (is_array($param2)) {
         $this->childConstraints[$param1] = $param2;
       } else {
         throw new Exception('Error: setChildConstraint() Argument 2 must be an Array');
+      }
+    } else {
+      if (is_array($param1)) {
+        $this->defaultChildConstraints = $param1;
+      } else {
+        throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
       }
     }
   }
@@ -186,10 +166,10 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->childConstraints = $constraints;
   }
-  
+
   /**
    * setting condition
-   * 
+   *
    * @param mixed string or int this value use tow means for
    *          default column value or a condition column name.
    * @param mixed string or int or NULL 
@@ -213,12 +193,12 @@ abstract class Sabel_Edo_RecordObject
       $this->conditions[$param1] = $param2;
     }
   }
-  
+
   protected function isSpecialParam($param3, $param1)
   {
     return (!is_null($param3) && !is_array($param1));
   }
-  
+
   protected function isDefaultColumnValue($param2)
   {
     return is_null($param2);
@@ -252,16 +232,15 @@ abstract class Sabel_Edo_RecordObject
       $idColumn = 'id';
     } else {
       $table    = $child;
-      $idColumn = $this->table.'_id';
+      $idColumn = $this->table . '_id';
     }
 
-    $this->edo->setAggregateSQL($table, $idColumn, $functions);
-    $this->edo->makeQuery(null, $this->constraints);
+    $edo = $this->edo;
+    $edo->setAggregateSQL($table, $idColumn, $functions);
+    $edo->makeQuery(null, $this->constraints);
 
-    $recordObj = array();
-
-    if ($this->edo->execute($sql)) {
-      $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+    if ($edo->execute($sql)) {
+      $rows = $edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       return $this->toObject($rows);
     } else {
       return false;
@@ -301,7 +280,7 @@ abstract class Sabel_Edo_RecordObject
         $obj->selected = true;
 
         $myChild = $this->getMyChildren();
-        if (!is_null($myChild)) $this->getDefaultChild($myChild, $obj);
+        if (isset($myChild)) $this->getDefaultChild($myChild, $obj);
       } else {
         $obj->data = $this->selectCondition;
       }
@@ -327,7 +306,7 @@ abstract class Sabel_Edo_RecordObject
 
     $obj->chooseMyChildConstraint($child, $obj);
 
-    if (!isset($obj->childConstraints[$child]['limit']))
+    if (is_null($obj->childConstraints[$child]['limit']))
       throw new Exception('Error: getChildren() must be set limit constraints');
 
     $condition = array("{$obj->table}_id" => $obj->data[$obj->defColumn]);
@@ -340,12 +319,12 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->edo->makeQuery($conditions, $constraints);
 
-    $recordObj = array();
-    $class     = get_class($this);
-
     if ($this->edo->execute()) {
       $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       if (!$rows) return null;
+
+      $recordObj = array();
+      $class     = get_class($this);
 
       foreach ($rows as $row) {
         if (is_null($child_table)) {
@@ -397,16 +376,14 @@ abstract class Sabel_Edo_RecordObject
       $constraints = $this->constraintMerge($child, $this->childConstraints[$child]);
     } else if (!empty($this->defaultChildConstraints)) {
       $constraints = $this->defaultChildConstraints;
-    } else if ($constraints = $this->hasMyChildConstraint($child, $obj)) {
-      // @todo どーする？
-    } else {
+    } else if (!($constraints = $this->hasMyChildConstraint($child, $obj))) {
       $constraints = $this->hasDefaultChildConstraint($obj);
     }
-    
+
     $obj->setChildConstraint($child, $constraints);
     $obj->defaultChildConstraints = $this->defaultChildConstraints;
   }
-  
+
   private function constraintMerge($child, $constraints)
   {
     if ($results = $this->hasMyChildConstraint($child, $this)) {
