@@ -407,12 +407,7 @@ abstract class Sabel_Edo_RecordObject
     }
     $obj->defaultChildConstraints = $this->defaultChildConstraints;
   }
-
-  public function test()
-  {
-    $this->edo->test();
-  }
-
+  
   private function constraintMerge($child, $constraints)
   {
     if ($result = $this->hasMyChildConstraint($child, $this)) {
@@ -508,7 +503,7 @@ abstract class Sabel_Edo_RecordObject
       if (class_exists($table)) {
         $obj = new $table();
       } else {
-        $obj = new Common_Record($table);
+        $obj = new Sabel_Edo_CommonRecord($table);
       }
 
       if (!$row) return $obj;
@@ -689,4 +684,13 @@ abstract class Sabel_Edo_RecordObject
   }
 }
 
-?>
+class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
+{
+  public function __construct($table = null)
+  {
+    $this->setEDO('user', 'pdo');
+    parent::__construct();
+    
+    if (!is_null($table)) $this->table = $table;
+  }
+}

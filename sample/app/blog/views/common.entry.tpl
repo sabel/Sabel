@@ -1,10 +1,10 @@
-<html>
-<head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-  <title>Blog - entry</title>
-</head>
+<div style="border: 1px dotted; background-color: #EFE;">
+  <h3>記事番号<? echo $id ?>番</h3>
+    タイトル: <? echo $title ?> <br />
+    本文: <? echo $body ?>
 
-<body>
-  記事番号<? $this->p->id ?>番の記事を表示
-</body>
-</html>
+    <? if ($id == 15) : ?>
+      <p style="color: red;">あたり</p>
+    <? endif; ?>
+</div>
+

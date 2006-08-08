@@ -19,5 +19,3 @@ interface Sabel_Edo_Driver_Interface
 
   const FETCH_ASSOC = 1;
 }
-
-?>

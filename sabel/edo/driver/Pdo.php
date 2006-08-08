@@ -467,5 +467,3 @@ class Sabel_Edo_Driver_PdoStatement
     return self::$stmt;
   }
 }
-
-?>

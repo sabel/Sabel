@@ -434,5 +434,3 @@ class Sabel_Edo_Driver_PgsqlStatement
     return self::$stmt;
   }
 }
-
-?>

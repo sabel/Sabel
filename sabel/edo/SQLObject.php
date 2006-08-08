@@ -183,5 +183,3 @@ class PdoSQL
     $this->set      = false;
   }
 }
-
-?>

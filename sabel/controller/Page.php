@@ -38,6 +38,12 @@ abstract class Sabel_Controller_Page
   
   public function setup($request, $destination)
   {
+    $dbCon = array();
+    $dbCon['dsn']  = 'mysql:host=127.0.0.1;dbname=blog';
+    $dbCon['user'] = 'root';
+    $dbCon['pass'] = '';
+    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    
     $this->container = new Sabel_Container_DI();
     
     $this->request = $request;

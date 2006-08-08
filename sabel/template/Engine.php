@@ -88,25 +88,9 @@ abstract class BaseEngineImpl
   }
 }
 
-class putter
-{
-  protected $attributes;
-  
-  public function __construct($atr)
-  {
-    $this->attributes = $atr;
-  }
-  
-  public function __get($key)
-  {
-    echo $this->attributes[$key];
-  }
-}
-
 class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 {
   protected $attributes;
-  protected $p;
   
   public function assign($key, $value)
   {
@@ -125,8 +109,12 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function retrieve()
   {
-    $this->p = new Putter($this->attributes);
     $path = $this->getTemplateFullPath();
+    
+    $attributes = $this->attributes;
+    if (count($attributes) != 0) {
+      foreach ($attributes as $name => $value) $$name = $value;
+    }
     
     ob_start();
     @include($path);
@@ -135,13 +123,25 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
     return $content;
   }
   
+  public function load_template($name)
+  {
+    $t = clone $this;
+    $t->setTemplateName($name.'.tpl');
+    echo $t->retrieve();
+  }
+  
   public function configuration()
   {
   }
   
   public function display()
   {
-    echo $this->retrieve();
+    $this->content_for_layout = $this->retrieve();
+    
+    $this->setTemplateName('layout.phtml');
+    $layout = $this->retrieve();
+    
+    echo $layout;
   }
 }
 

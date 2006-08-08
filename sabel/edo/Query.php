@@ -16,5 +16,3 @@ interface Query
 
   public function makeConstraintSQL($constraints);
 }
-
-?>

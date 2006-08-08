@@ -15,7 +15,7 @@ class Sabel_Edo_DBConnection
         $pass = $connection['pass'];
         
         $splited = split(':', $dsn);
-
+        
         $conn = new PDO($dsn, $user, $pass);
         self::$connList[$owner]['pdo'] = $conn;
         self::$connList[$owner]['db']  = $splited[0];
@@ -39,16 +39,14 @@ class Sabel_Edo_DBConnection
       }
     }
   }
-
+  
   public static function getConnection($owner, $useEdo)
   {
     return self::$connList[$owner][$useEdo];
   }
-
+  
   public static function getPdoDB($owner)
   {
     return self::$connList[$owner]['db'];
   }
 }
-
-?>

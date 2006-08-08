@@ -59,12 +59,12 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   protected function setUp()
   {
     $this->test      = new Test();
-    $this->test2     = new Common_Record('test2');
-    $this->test3     = new Common_Record('test3');
+    $this->test2     = new Sabel_Edo_CommonRecord('test2');
+    $this->test3     = new Sabel_Edo_CommonRecord('test3');
     $this->customer  = new Customer();
-    $this->order     = new Common_Record('customer_order');
-    $this->orderLine = new Common_Record('order_line');
-    $this->telephone = new Common_Record('customer_telephone');
+    $this->order     = new Sabel_Edo_CommonRecord('customer_order');
+    $this->orderLine = new Sabel_Edo_CommonRecord('order_line');
+    $this->telephone = new Sabel_Edo_CommonRecord('customer_telephone');
   }
   
   /**
@@ -192,7 +192,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     }
     $this->assertEquals($this->orderLine->getCount(), 11);
     
-    $tree = new Common_Record('tree');
+    $tree = new Sabel_Edo_CommonRecord('tree');
     $insertData   = array();
     $insertData[] = array('id' => 1,  'name' => 'A');
     $insertData[] = array('id' => 2,  'name' => 'B');
@@ -213,19 +213,19 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   
   public function testInsert()
   {
-    $test2 = new Common_Record('test2');
+    $test2 = new Sabel_Edo_CommonRecord('test2');
     $test2->id = 1;
     $test2->name = 'test21';
     $test2->test3_id = '2';
     $test2->save();
     
-    $test2 = new Common_Record('test2');
+    $test2 = new Sabel_Edo_CommonRecord('test2');
     $test2->id = 2;
     $test2->name = 'test22';
     $test2->test3_id = '1';
     $test2->save();
     
-    $test2 = new Common_Record('test2');
+    $test2 = new Sabel_Edo_CommonRecord('test2');
     $test2->id = 3;
     $test2->name = 'test23';
     $test2->test3_id = '3';
@@ -402,12 +402,12 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   
   public function testInfiniteLoop()
   {
-    $in1 = new Common_Record('infinite1');
+    $in1 = new Sabel_Edo_CommonRecord('infinite1');
     $in1->id           = 1;
     $in1->infinite2_id = 2;
     $in1->save();
     
-    $in2 = new Common_Record('infinite2');
+    $in2 = new Sabel_Edo_CommonRecord('infinite2');
     $in2->id           = 2;
     $in2->infinite1_id = 1;
     $in2->save();
@@ -653,7 +653,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   
   public function testSeq()
   {
-    $seq = new Common_Record('seq');
+    $seq = new Sabel_Edo_CommonRecord('seq');
     
     $seq->text = 'test';
     $id = $seq->save();
@@ -783,7 +783,7 @@ class MysqlHelper
   
   public function createTables()
   {
-    $obj = new Common_Record();
+    $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->sqls as $sql) {
       $obj->execute($sql);
@@ -792,7 +792,7 @@ class MysqlHelper
   
   public function dropTables()
   {
-    $obj = new Common_Record();
+    $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->tables as $table) {
       $obj->execute("DROP TABLE ${table}");
@@ -874,7 +874,7 @@ class PgsqlHelper
   
   public function createTables()
   {
-    $obj = new Common_Record();
+    $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->sqls as $sql) {
       $obj->execute($sql);
@@ -883,7 +883,7 @@ class PgsqlHelper
   
   public function dropTables()
   {
-    $obj = new Common_Record();
+    $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->tables as $table) {
       $obj->execute("DROP TABLE ${table}");
@@ -996,17 +996,6 @@ class Child_Record extends BaseUserRecordObject
 class Tree extends BaseTreeRecord
 {
 
-}
-
-class Common_Record extends Sabel_Edo_RecordObject
-{
-  public function __construct($table = null)
-  {
-    $this->setEDO('user', 'pdo');
-    parent::__construct();
-
-    if (!is_null($table)) $this->table = $table;
-  }
 }
 
 if (PHPUnit2_MAIN_METHOD == "Test_Edo::main") {
