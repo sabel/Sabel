@@ -343,8 +343,8 @@ abstract class Sabel_Edo_RecordObject
         $obj->selected = true;
 
         $myChild = $obj->getMyChildren();
-        if (!is_null($myChild)) {
-          if (!is_null($child_table)) $this->chooseMyChildConstraint($myChild, $obj);
+        if (isset($myChild)) {
+          if (isset($child_table)) $this->chooseMyChildConstraint($myChild, $obj);
           $this->getDefaultChild($myChild, $obj);
         }
         $recordObj[] = $obj;
@@ -359,14 +359,11 @@ abstract class Sabel_Edo_RecordObject
 
   protected function getDefaultChild($children, $obj)
   {
-    if (is_array($children)) {
-      foreach ($children as $val) {
-        $this->chooseMyChildConstraint($val, $obj);
-        $obj->getChild($val, $obj);
-      }
-    } else {
-      $this->chooseMyChildConstraint($children, $obj);
-      $obj->getChild($children, $obj);
+    if (!is_array($children)) $children = array($children);
+    
+    foreach ($children as $val) {
+      $this->chooseMyChildConstraint($val, $obj);
+      $obj->getChild($val, $obj);
     }
   }
 
@@ -422,9 +419,9 @@ abstract class Sabel_Edo_RecordObject
         $table = str_replace('_id', '', $key);
 
         $this->parentTables = array($this->table);
-        if ($type == self::WITH_PARENT_VIEW) {
+        if ($type === self::WITH_PARENT_VIEW) {
           $this->addParentProperties($table, $val, $row);
-        } else if ($type == self::WITH_PARENT_OBJECT) {
+        } else if ($type === self::WITH_PARENT_OBJECT) {
           $row[$table] = $this->addParentObject($table, $val);
         }
       }
@@ -497,7 +494,7 @@ abstract class Sabel_Edo_RecordObject
   {
     $pt = $this->parentTables;
     foreach ($pt as $val) {
-      if ($val == $table) return true;
+      if ($val === $table) return true;
     }
     $pt[] = $table;
     $this->parentTables = $pt;
@@ -523,7 +520,7 @@ abstract class Sabel_Edo_RecordObject
   protected function newClass($name)
   {
     $classes = get_declared_classes();
-    if (isset($classes[$name]) && $name != 'Sabel_Edo_CommonRecord') {
+    if (isset($classes[$name]) && $name !== 'Sabel_Edo_CommonRecord') {
       return new $name();
     } else {
       return new Sabel_Edo_CommonRecord($name);
@@ -546,12 +543,7 @@ abstract class Sabel_Edo_RecordObject
   public function save($data = null)
   {
     $this->dataMerge($data);
-
-    if ($this->selected) {
-      $this->update();
-    } else {
-      return $this->insert();
-    }
+    return ($this->is_selected()) ? $this->update() : $this->insert();
   }
 
   public function allUpdate($data = null)
@@ -604,10 +596,10 @@ abstract class Sabel_Edo_RecordObject
     if (empty($data)) return null;
 
     foreach ($data as $key => $val) {
-      if (array_key_exists($key, $this->data)) {
-        throw new Exception("Error: [\'{$key}\'] is already set!");
-      } else {
+      if (!array_key_exists($key, $this->data)) {
         $this->data[$key] = $val;
+      } else {
+        throw new Exception("Error: [\'{$key}\'] is already set!");
       }
     }
   }
@@ -617,7 +609,7 @@ abstract class Sabel_Edo_RecordObject
     if (is_null($param1) && is_null($this->conditions))
       throw new Exception("Error: remove() [WHERE] must be set condition");
 
-    if (!is_null($param1))
+    if (isset($param1))
       $this->setCondition($param1, $param2, $param3);
 
     $this->edo->setBasicSQL("DELETE FROM {$this->table}");
@@ -662,6 +654,6 @@ class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
     $this->setEDO('user', 'pdo');
     parent::__construct();
 
-    if (!is_null($table)) $this->table = $table;
+    if (isset($table)) $this->table = $table;
   }
 }
