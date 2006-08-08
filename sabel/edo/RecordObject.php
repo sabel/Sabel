@@ -45,7 +45,7 @@ abstract class Sabel_Edo_RecordObject
     $conn = Sabel_Edo_DBConnection::getConnection($this->owner, $this->useEdo);
     
     if ($this->useEdo == 'pdo') {
-      $pdoDb = Sabel_Edo_DBConnection::getPdoDB($this->owner);
+      $pdoDb = Sabel_Edo_DBConnection::getDB($this->owner);
       return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($this->useEdo == 'pgsql') {
       return new Sabel_Edo_Driver_Pgsql($conn);
@@ -64,7 +64,7 @@ abstract class Sabel_Edo_RecordObject
     $conn = Sabel_Edo_DBConnection::getConnection($owner, $useEdo);
 
     if ($useEdo== 'pdo') {
-      $pdoDb = Sabel_Edo_DBConnection::getPdoDB($owner);
+      $pdoDb = Sabel_Edo_DBConnection::getDB($owner);
       $this->edo = new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
     } elseif ($useEdo == 'pgsql') {
       $this->edo = new Sabel_Edo_Driver_Pgsql($conn);
@@ -506,11 +506,7 @@ abstract class Sabel_Edo_RecordObject
 
     if ($edo->execute()) {
       $row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      if (class_exists($table)) {
-        $obj = new $table();
-      } else {
-        $obj = new Sabel_Edo_CommonRecord($table);
-      }
+      $obj = $this->newClass($table);
 
       if (!$row) return $obj;
 
@@ -551,14 +547,20 @@ abstract class Sabel_Edo_RecordObject
     $parent = strtolower(get_class($this));
     $table = (is_null($child)) ? $parant : $child;
 
-    if (class_exists($table)) {
-      $obj = new $table();
-    } else {
-      $obj = new Common_Record($table);
-    }
+    $obj = $this->newClass($table);
+
     $column = $parent.'_id';
     $obj->$column = $id;
     return $obj;
+  }
+
+  protected function newClass($name)
+  {
+    if (class_exists($name) && $name != 'Sabel_Edo_CommonRecord') {
+      return new $table();
+    } else {
+      return new Sabel_Edo_CommonRecord($name);
+    }
   }
 
   public function killAll($child)
@@ -678,11 +680,7 @@ abstract class Sabel_Edo_RecordObject
     $class = get_class($this);
 
     foreach ($array as $row) {
-      if (class_exists($class)) {
-        $obj = new $class();
-      } else {
-        $obj = new Common_Record($class);
-      }
+      $obj = $this->newClass($class);
       $obj->setProperties($row);
       $recordObj[] = $obj;
     }
@@ -696,7 +694,7 @@ class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
   {
     $this->setEDO('user', 'pdo');
     parent::__construct();
-    
+
     if (!is_null($table)) $this->table = $table;
   }
 }
