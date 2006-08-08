@@ -105,40 +105,40 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     $cu  = new Customer();
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);  
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);  
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);  
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);  
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 5);  
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 5);
     $this->assertEquals((int)$cus[0]->customer_order[3]->id, 6);
     
     $cu = new Customer();
     $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 6);  
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);  
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);  
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 3);  
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 2);  
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 6);
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 3);
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 2);
     $this->assertEquals((int)$cus[0]->customer_order[3]->id, 1);
     
     $cu  = new Customer();
     $cu->setChildConstraint('customer_order', array('offset' => 1));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 2);  
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);  
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);  
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 6);  
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 2);
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);
+    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 6);
     
     $cu  = new Customer();
     $cu->setChildConstraint('customer_order', array('limit' => 2));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);  
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);  
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);  
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);  
-    $this->assertEquals($cus[0]->customer_order[2]->id, null);  
-    $this->assertEquals($cus[0]->customer_order[3]->id, null);  
+    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
+    $this->assertEquals($cus[0]->customer_order[2]->id, null);
+    $this->assertEquals($cus[0]->customer_order[3]->id, null);
   }
   
   public function testMultipleInsert()
@@ -182,7 +182,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     }
     $this->assertEquals($this->orderLine->getCount(), 11);
     
-    $insertData = array();
+    $insertData   = array();
     $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
     $insertData[] = array('id' => 2,  'customer_id' => 2, 'telephone' => '09022221111');
     $insertData[] = array('id' => 3,  'customer_id' => 1, 'telephone' => '09011112222');
@@ -194,7 +194,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($this->orderLine->getCount(), 11);
     
     $tree = new Common_Record('tree');
-    $insertData = array();
+    $insertData   = array();
     $insertData[] = array('id' => 1,  'name' => 'A');
     $insertData[] = array('id' => 2,  'name' => 'B');
     $insertData[] = array('id' => 3,  'tree_id' => 1, 'name' => 'A3');
@@ -667,15 +667,15 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$trees[0]->id, 1);
     $this->assertEquals($trees[0]->tree_id, null);
     $this->assertEquals($trees[0]->name, 'A');
-
+    
     $t = $tree->selectOne(1);
     $this->assertEquals((int)$t->id, 1);
     $this->assertEquals($t->tree_id, null);
     $this->assertEquals($t->name, 'A');
-
+    
     $t->setChildConstraint(array('limit' => 100));
     $t->getChild('tree');
-
+    
     $this->assertEquals(count($t->tree), 2);
     $this->assertEquals((int)$t->tree[0]->id, 3);
     $this->assertEquals((int)$t->tree[1]->id, 5);
@@ -683,25 +683,25 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$t->tree[1]->tree_id, 1);
     $this->assertEquals($t->tree[0]->name, 'A3');
     $this->assertEquals($t->tree[1]->name, 'A5');
-
+    
     $tree = new Tree();
     $tree->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
     
     $t = $tree->selectOne(3);
-
+    
     $this->assertEquals((int)$t->id, 3);
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A3');
-
+    
     $this->assertEquals((int)$t->tree->id, 1);
     $this->assertEquals((int)$t->tree->tree_id, 0);
     $this->assertEquals($t->tree->name, 'A');
-
+    
     $t = $tree->selectOne(5);
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A5');
-
+    
     $this->assertEquals((int)$t->tree->id, 1);
     $this->assertEquals((int)$t->tree->tree_id, 0);
     $this->assertEquals($t->tree->name, 'A');
