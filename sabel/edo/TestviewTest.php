@@ -10,7 +10,6 @@ require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
 //require_once "../Functions.php";
 require_once "RecordObject.php";
-require_once "RecordClasses.php";
 require_once "DBConnection.php";
 
 require_once "driver/Interface.php";
@@ -129,6 +128,9 @@ class TestviewTest extends PHPUnit2_Framework_TestCase {
     foreach ($insertData as $data) {
       $this->order->multipleInsert($data);
     }
+
+    $o = new Common_Record('customer_order');
+    $o->setSelectType(Sabel_Edo_RecordObject::SE);
 
     $this->assertEquals($this->order->getCount(), 6);
 

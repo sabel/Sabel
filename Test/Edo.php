@@ -100,6 +100,12 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
       $this->order->multipleInsert($data);
     }
     
+    $o = new Sabel_Edo_CommonRecord('customer_order');
+    $o->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
+    $res = $o->select();
+    $this->assertEquals((int)$res[0]->customer->id, 1);
+    $this->assertEquals((int)$res[2]->customer->id, 2);
+
     $this->assertEquals($this->order->getCount(), 6);
     
     $cu  = new Customer();
@@ -399,7 +405,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj[1]->name, 'ueda');
     $this->assertEquals($obj[2]->name, null);
   }
-  
+
   public function testInfiniteLoop()
   {
     $in1 = new Sabel_Edo_CommonRecord('infinite1');
@@ -658,6 +664,11 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $seq->text = 'test';
     $id = $seq->save();
   }
+
+  public function testTest()
+  {
+    class_exists('TestTestTes');
+  }
   
   public function testTree()
   {
@@ -719,7 +730,7 @@ class MysqlHelper
   public function __construct()
   {
     $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=127.0.0.1;dbname=edo';
+    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     

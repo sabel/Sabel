@@ -338,7 +338,7 @@ abstract class Sabel_Edo_RecordObject
           }
         }
         $row = $this->selectWithParent($this->selectType, $row);
-        
+
         $obj->setProperties($row);
         $obj->selected = true;
 
@@ -410,7 +410,7 @@ abstract class Sabel_Edo_RecordObject
   {
     if (!empty($obj->defaultChildConstraints)) {
       return $obj->defaultChildConstrts;
-    } else { 
+    } else {
       throw new Exception('Error: constraint of child object, not found.');
     }
   }
@@ -421,7 +421,7 @@ abstract class Sabel_Edo_RecordObject
       if (strpos($key, '_id')) {
         $table = str_replace('_id', '', $key);
 
-        $this->parentTables[] = $this->table;
+        $this->parentTables = array($this->table);
         if ($type == self::WITH_PARENT_VIEW) {
           $this->addParentProperties($table, $val, $row);
         } else if ($type == self::WITH_PARENT_OBJECT) {
@@ -429,6 +429,7 @@ abstract class Sabel_Edo_RecordObject
         }
       }
     }
+    $this->parentTables = array($this->table);
     return $row;
   }
 
@@ -461,14 +462,7 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentObject($table, $id)
   {
-    /*
-    // @todo fix me please (?????ｷｬｰ�?
-    if ($this->getStructure() != 'tree') {
-      if ($this->isAcquiredObject($table)) {
-        return null;
-      }
-    }
-    */
+    if ($this->getStructure() !== 'tree' && $this->isAcquiredObject($table)) return null;
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -501,10 +495,12 @@ abstract class Sabel_Edo_RecordObject
 
   protected function isAcquiredObject($table)
   {
-    for ($i = 0; $i < count($this->parentTables); $i++) {
-      if ($this->parentTables[$i] == $table) return true;
+    $pt = $this->parentTables;
+    foreach ($pt as $val) {
+      if ($val == $table) return true;
     }
-    $this->parentTables[] = $table;
+    $pt[] = $table;
+    $this->parentTables = $pt;
     return false;
   }
 
