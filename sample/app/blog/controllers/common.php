@@ -2,17 +2,6 @@
 
 uses('sabel.edo.RecordObject');
 
-/*
-class Author extends Sabel_Edo_RecordObject
-{
-  public function __construct($table = null)
-  {
-    $this->setEDO('user', 'pdo');
-    parent::__construct();
-  }
-}
-*/
-
 class Blog_Common extends Sabel_Controller_Page
 {
   public function show()

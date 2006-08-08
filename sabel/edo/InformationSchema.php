@@ -2,8 +2,33 @@
 
 require_once "RecordObject.php";
 
+class Edo_InformationSchema_Table
+{
+  protected $tableName = null;
+  protected $columns = null;
+  
+  public function __construct($name, $columns)
+  {
+    $this->tableName = $name;
+    $this->columns   = $columns;
+  }
+  
+  public function getColumns()
+  {
+    return $this->columns;
+  }
+  
+  public function getColumnByName($name)
+  {
+    return $this->columns[$name];
+  }
+}
+
 class Edo_InformationSchema extends Sabel_Edo_RecordObject
 {
+  const INT    = 0;
+  const STRING = 10;
+  
   protected $edo, $is, $database;
 
   public function __construct($database = null)
@@ -20,31 +45,39 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
     $this->setEDO($dbuser, $useEdo);
   }
 
-  public function getTableList()
+  public function getTables()
   {
     $sql = "select * from information_schema.tables where table_schema = '{$this->database}'";
-    $res = $this->execute($sql);
-    $res = array_change_key_case($res);
-
-    foreach ($res as $val) $tableList[] = $val->table_name;
-    return $tableList;
+    
+    foreach ($this->execute($sql) as $val) {
+      $data = array_change_key_case($val->toArray());
+      $tableName = $data['table_name'];
+      $tables[] = new Edo_InformationSchema_Table($tableName, $this->createColumns($tableName));
+    }
+    
+    return $tables;
   }
-
-  public function getColumnsInfo($table)
+  
+  public function getTable($name)
+  {
+    return new Edo_InformationSchema_Table($name, $this->createColumns($name));
+  }
+  
+  protected function createColumns($table)
   {
     $sql = "select * from information_schema.columns where table_name = '{$table}'";
     $res = $this->execute($sql);
 
     foreach ($res as $val) {
       $data = array_change_key_case($val->toArray()); 
-      $columns[] = $this->getColumnInfo($table, $data['column_name']);
+      $columns[$data['column_name']] = $this->createColumn($table, $data['column_name']);
     }
     return $columns;
   }
 
-  public function getColumnInfo($table, $column = null)
+  protected function createColumn($table, $column = null)
   {
-    if (is_null($column)) return $this->getColumnsInfo($table);
+    if (is_null($column)) return $this->createColumns($table);
 
     $sql  = "select * from information_schema.columns ";
     $sql .= "where table_name = '{$table}' and column_name = '{$column}'";
@@ -58,13 +91,13 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
     $co = new ColumnObject();
     $co->name    = $columnRecord['column_name'];
     $co->default = $columnRecord['column_default'];
-    $co->notNull = ($columnRecord['is_nullable'] == 'NO') ? true : false;
+    $co->notNull = ($columnRecord['is_nullable'] == 'NO');
 
     $this->is->addIncrementInfo($co, $columnRecord);
 
     foreach ($this->is->getNumericTypes() as $val) {
       if ($val == $columnRecord['data_type']) {
-        $co->type = 'int';
+        $co->type = Edo_InformationSchema::INT;
         $co->convertToEdoInteger($columnRecord['data_type']);
         break;
       }
@@ -72,7 +105,7 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
 
     foreach ($this->is->getStringTypes() as $val) {
       if ($val == $columnRecord['data_type']) {
-        $co->type = 'string';
+        $co->type = Edo_InformationSchema::STRING;
         $this->is->addStringLength($co, $columnRecord);
         break;
       }
@@ -182,5 +215,3 @@ class ColumnObject
 
   }
 }
-
-?>
