@@ -361,6 +361,7 @@ abstract class Sabel_Edo_RecordObject
           }
         }
         $row = $this->selectWithParent($this->selectType, $row);
+        
         $obj->setProperties($row);
         $obj->selected = true;
 
@@ -490,9 +491,14 @@ abstract class Sabel_Edo_RecordObject
 
   protected function addParentObject($table, $id)
   {
+    /*
+    // @todo fix me please (〃▽〃)ｷｬｰ♪
     if ($this->getStructure() != 'tree') {
-      if ($this->isAcquiredObject($table)) return null;
+      if ($this->isAcquiredObject($table)) {
+        return null;
+      }
     }
+    */
 
     $edo = $this->getMyEDO();
     $edo->setBasicSQL("SELECT * FROM {$table}");
