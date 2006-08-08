@@ -33,7 +33,7 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
 
   public function __construct($schema = null)
   {
-    $this->schema = $database;
+    $this->schema = $schema;
   }
 
   public function dbinit($dbuser, $useEdo)
