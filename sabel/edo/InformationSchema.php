@@ -5,7 +5,7 @@ require_once "RecordObject.php";
 class Edo_InformationSchema_Table
 {
   protected $tableName = null;
-  protected $columns = null;
+  protected $columns   = null;
   
   public function __construct($name, $columns)
   {
@@ -29,11 +29,11 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
   const INT    = 0;
   const STRING = 10;
   
-  protected $edo, $is, $database;
+  protected $edo, $is, $schema;
 
-  public function __construct($database = null)
+  public function __construct($schema = null)
   {
-    $this->database = $database;
+    $this->schema = $database;
   }
 
   public function dbinit($dbuser, $useEdo)
@@ -47,7 +47,7 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
 
   public function getTables()
   {
-    $sql = "select * from information_schema.tables where table_schema = '{$this->database}'";
+    $sql = "select * from information_schema.tables where table_schema = '{$this->schema}'";
     
     foreach ($this->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
@@ -93,7 +93,11 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
     $co->default = $columnRecord['column_default'];
     $co->notNull = ($columnRecord['is_nullable'] == 'NO');
 
-    $this->is->addIncrementInfo($co, $columnRecord);
+    if (!($this->is->addIncrementInfo($co, $columnRecord))) {
+      $sql  = "select * from pg_statio_user_sequences ";
+      $sql .= "where relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
+      $co->increment = (count($this->execute($sql)) > 0);
+    }
 
     foreach ($this->is->getNumericTypes() as $val) {
       if ($val == $columnRecord['data_type']) {
@@ -133,7 +137,8 @@ class Edo_Mysql_InformationSchema extends Edo_InformationSchema
 
   public function addIncrementInfo($co, $columnRecord)
   {
-    $co->increment = ($columnRecord->extra == 'auto_increment') ? true : false;
+    $co->increment = ($columnRecord->extra == 'auto_increment');
+    return true;
   }
 
   public function addStringLength($co, $columnRecord)
@@ -161,9 +166,7 @@ class Edo_Pgsql_InformationSchema extends Edo_InformationSchema
 
   public function addIncrementInfo($co, $columnRecord)
   {
-    //$sql = "select * from seq_id_seq limit 1";
-    //$res = $this->execute($sql);
-    //$co->increment = ($columnRecord->EXTRA == 'auto_increment') ? true : false;
+    return false;
   }
 
   public function addStringLength($co, $columnRecord)
@@ -208,10 +211,5 @@ class ColumnObject
       $this->data['maxValue'] =  9223372036854775807;
       $this->data['minValue'] = -9223372036854775808;
     }
-  }
-
-  public function convertToEdoString($type)
-  {
-
   }
 }
