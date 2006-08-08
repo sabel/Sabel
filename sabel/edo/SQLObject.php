@@ -27,7 +27,7 @@ class PdoSQL
       return $key.'2';
     } else {
       $count = $this->keyArray[$key]['count'];
-      $count = $count + 1;
+      $count++;
       $this->keyArray[$key]['count'] = $count;
       return $key.$count;
     }
