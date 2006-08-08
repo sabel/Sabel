@@ -59,12 +59,12 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function executeInsert($table, $data, $id_exists = null)
   {
-    if (!$id_exists && $this->myDb == 'pgsql')
+    if (!$id_exists && $this->myDb === 'pgsql')
       $data['id'] = $this->getNextNumber($table);
 
     $this->data = $data;
 
-    if ($table == 'order_line') $this->disp = true;
+    if ($table === 'order_line') $this->disp = true;
 
     $sql = array("INSERT INTO {$table}(");
     $set = false;
@@ -102,9 +102,9 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function getLastInsertId()
   {
-    if ($this->myDb == 'pgsql') {
+    if ($this->myDb === 'pgsql') {
       return $this->lastInsertId;
-    } elseif ($this->myDb == 'mysql') {
+    } elseif ($this->myDb === 'mysql') {
       $this->execute('SELECT last_insert_id()');
       $row = $this->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
       return $row['last_insert_id()'];
@@ -115,10 +115,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   private function getNextNumber($table)
   {
-    if ($this->myDb == 'pgsql') {
-      $this->execute('SELECT nextval(\''.$table.'_id_seq\');');
+    if ($this->myDb === 'pgsql') {
+      $this->execute('SELECT nextval(\'' . $table . '_id_seq\');');
       $row = $this->fetch();
-      if (($this->lastInsertId = (int)$row[0]) == 0) {
+      if (($this->lastInsertId =(int) $row[0]) === 0) {
         throw new Exception($table.'_id_seq is not found.');
       } else {
         return $this->lastInsertId;
@@ -167,7 +167,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function execute($sql = null)
   {
-    if (!is_null($sql)) {
+    if (isset($sql)) {
       $this->stmt = $this->pdo->prepare($sql);
     } elseif ($this->stmtFlag) {
       $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
@@ -389,7 +389,7 @@ class PdoQuery
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $bindKey  = $this->bindKey_exists($key);
+    $bindKey = $this->bindKey_exists($key);
 
     if (!$this->set) {
       array_push($this->sql, " WHERE {$key} {$val[0]} :{$bindKey}");
@@ -405,13 +405,13 @@ class PdoQuery
 
   public function makeConstraintsSQL($constraints)
   {
-    if (!is_null($constraints['order']))
+    if (isset($constraints['order']))
       array_push($this->sql, " ORDER BY {$constraints['order']}");
 
-    if (!is_null($constraints['limit']))
+    if (isset($constraints['limit']))
       array_push($this->sql, " LIMIT {$constraints['limit']}");
 
-    if (!is_null($constraints['offset']))
+    if (isset($constraints['offset']))
       array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
 
