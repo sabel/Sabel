@@ -398,12 +398,17 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->test->LIKE_name('%_%');
     $obj = $this->test->select();
     $this->assertEquals(count($obj), 1); // yo_shida
-    
-    $this->test->OR_id(3, 4);
+
+    $this->test->OR_id('3', '4');
     $obj = $this->test->select();
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     $this->assertEquals($obj[2]->name, null);
+    
+    $this->test->OR_id('<2', '>5');
+    $obj = $this->test->select();
+    $this->assertEquals((int) $obj[0]->id, 1);
+    $this->assertEquals((int) $obj[1]->id, 6);
   }
 
   public function testInfiniteLoop()

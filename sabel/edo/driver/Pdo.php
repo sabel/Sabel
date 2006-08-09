@@ -272,7 +272,7 @@ class PdoQuery
       return $key.'2';
     } else {
       $count = $this->keyArray[$key]['count'];
-      $count = $count + 1;
+      $count++;
       $this->keyArray[$key]['count'] = $count;
       return $key.$count;
     }
@@ -281,70 +281,35 @@ class PdoQuery
   public function makeNormalConditionSQL($key, $val)
   {
     $bindKey = $this->bindKey_exists($key);
-
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key}=:{$bindKey}");
-    } else {
-      array_push($this->sql, " AND {$key}=:{$bindKey}");
-    }
-    $this->set = true;
+    $this->setWhereQuery("{$key}=:{$bindKey}");
     $this->param[$bindKey] = $val;
   }
 
   public function makeIsNullSQL($key)
   {
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} IS NULL");
-    } else {
-      array_push($this->sql, " AND {$key} IS NULL");
-    }
-    $this->set = true;
+    $this->setWhereQuery($key . ' IS NULL');
   }
 
   public function makeIsNotNullSQL($key)
   {
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} IS NOT NULL");
-    } else {
-      array_push($this->sql, " AND {$key} IS NOT NULL");
-    }
-    $this->set = true;
+    $this->setWhereQuery($key . ' IS NOT NULL');
   }
 
   public function makeWhereInSQL($key, $val)
   {
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} IN (". implode(',', $val) .")");
-    } else {
-      array_push($this->sql, " AND {$key} IN (". implode(',', $val) .")");
-    }
-    $this->set = true;
+    $this->setWhereQuery($key . ' IN (' . implode(',', $val) . ')');
   }
 
   public function makeLikeSQL($key, $val)
   {
     $bindKey = $this->bindKey_exists($key);
-
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} LIKE :{$bindKey}");
-    } else {
-      array_push($this->sql, " AND {$key} LIKE :{$bindKey}");
-    }
-    $this->set = true;
-
-    $val = str_replace('_', '\_', $val);
-    $this->param[$bindKey] = $val;
+    $this->setWhereQuery("{$key} LIKE :{$bindKey}");
+    $this->param[$bindKey] = str_replace('_', '\_', $val); 
   }
 
   public function makeBetweenSQL($key, $val)
   {
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} BETWEEN :from AND :to");
-    } else {
-      array_push($this->sql, " AND {$key} BETWEEN :from AND :to");
-    }
-    $this->set = true;
-
+    $this->setWhereQuery("{$key} BETWEEN :from AND :to");
     $this->param["from"] = $val[0];
     $this->param["to"]   = $val[1];
   }
@@ -357,50 +322,38 @@ class PdoQuery
     $val1 = $val[0];
     $val2 = $val[1];
 
-    if (!$this->set) {
-      $str = " WHERE";
+    $query = '(';
+    if ($val1[0] === '<' || $val1[0] === '>') {
+      $query .= "{$key} ${val1[0]} :{$bindKey}";
+      $this->param[$bindKey]  = trim(substr($val1, 1));
+    } else if ($val1 === 'null') {
+      $query .= "{$key} IS NULL";
     } else {
-      $str = " AND";
+      $query .= "{$key}=:{$bindKey}";
+      $this->param[$bindKey]  = $val1;
     }
+    
+    $query .= ' OR ';
 
-    if ($val1[0] == '<' || $val1[0] == '>') {
-      array_push($this->sql, $str." ({$key} {$val1[0]} :{$bindKey} OR");
-      $val1 = trim(substr_replace($val1, '', 0, 1));
-    } elseif ($val1 == 'null') {
-      array_push($this->sql, $str." ({$key} IS NULL OR");
+    if ($val2[0] === '<' || $val2[0] === '>') {
+      $query .= "{$key} {$val2[0]} :{$bindKey2}";
+      $this->param[$bindKey2] = trim(substr($val2, 1));
+    } else if ($val2 === 'null') {
+      $query .= "{$key} IS NULL";
     } else {
-      array_push($this->sql, $str." ({$key}=:{$bindKey} OR");
+      $query .= "{$key}=:{$bindKey2}";
+      $this->param[$bindKey2] = $val2;
     }
-
-    if ($val2[0] == '<' || $val2[0] == '>') {
-      array_push($this->sql, " {$key} {$val2[0]} :{$bindKey2})");
-      $val2 = trim(substr_replace($val2, '', 0, 1));
-    } elseif ($val2 == 'null') {
-      array_push($this->sql, $str." {$key} IS NULL)");
-    } else {
-      array_push($this->sql, " {$key}=:{$bindKey2})");
-    }
-
-    $this->set = true;
-
-    $this->param[$bindKey]  = $val1;
-    $this->param[$bindKey2] = $val2;
+    $query .= ')';
+    
+    $this->setWhereQuery($query);
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
     $bindKey = $this->bindKey_exists($key);
-
-    if (!$this->set) {
-      array_push($this->sql, " WHERE {$key} {$val[0]} :{$bindKey}");
-    } else {
-      array_push($this->sql, " AND {$key} {$val[0]} :{$bindKey}");
-    }
-
-    $val = substr_replace($val, '', 0, 1);
-    $this->param[$bindKey] = trim($val);
-
-    $this->set = true;
+    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}"); 
+    $this->param[$bindKey] = trim(substr($val, 1));
   }
 
   public function makeConstraintsSQL($constraints)
@@ -425,6 +378,16 @@ class PdoQuery
     $this->param    = array();
     $this->keyArray = array();
     $this->set      = false;
+  }
+  
+  protected function setWhereQuery($query)
+  {
+    if ($this->set) {
+      array_push($this->sql, ' AND ' . $query);
+    } else {
+      array_push($this->sql, ' WHERE ' . $query);
+      $this->set = true;
+    }
   }
 }
 
