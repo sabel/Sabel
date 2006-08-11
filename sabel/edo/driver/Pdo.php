@@ -32,10 +32,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     foreach ($data as $key => $val) {
       if (!$set) {
         array_push($sql, " {$key}=:{$key}");
+        $set = true;
       } else {
         array_push($sql, ",{$key}=:{$key}");
       }
-      $set = true;
     }
 
     $this->sqlObj->setBasicSQL(implode('', $sql));
@@ -72,10 +72,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     foreach ($data as $key => $val) {
       if (!$set) {
         array_push($sql, "{$key}");
+        $set = true;
       } else {
         array_push($sql, ",{$key}");
       }
-      $set = true;
     }
 
     array_push($sql, ") VALUES(");
@@ -267,15 +267,10 @@ class PdoQuery
 
   protected function bindKey_exists($key)
   {
-    if (!array_key_exists($key, $this->keyArray)) {
-      $this->keyArray[$key]['count'] = 2;
-      return $key.'2';
-    } else {
-      $count = $this->keyArray[$key]['count'];
-      $count++;
-      $this->keyArray[$key]['count'] = $count;
-      return $key.$count;
-    }
+    $count =& $this->keyArray[$key]['count'];
+    $count = (array_key_exists($key, $this->keyArray)) ? $count + 1 : 2;
+
+    return $key . $count;
   }
 
   public function makeNormalConditionSQL($key, $val)
