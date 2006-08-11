@@ -13,13 +13,13 @@ class Sabel_Controller_Map
 {
   const DEFAULT_PATH = '/config/map.yml';
   
-  protected $path;
-  protected static $map;
+  protected $path = '';
+  protected static $map = array();
   protected $requestUri = null;
   
-  public function __construct($path = null)
+  public function __construct($path = self::DEFAULT_PATH)
   {
-    $this->path = RUN_BASE . (($path) ? $path : self::DEFAULT_PATH);
+    $this->path = RUN_BASE . $path;
   }
   
   public static function getDefaultModule()
@@ -29,12 +29,12 @@ class Sabel_Controller_Map
   
   public static function getDefaultController()
   {
-    return self::$map['module'];
+    return self::$map['controller'];
   }
   
   public static function getDefaultAction()
   {
-    return self::$map['module'];
+    return self::$map['action'];
   }
   
   public function getPath()
@@ -59,18 +59,13 @@ class Sabel_Controller_Map
   
   public function find()
   {
-    $entries = $this->getEntries();
-    foreach ($entries as $entry) {
-      if ($entry->getUri()->count() == $this->requestUri->count()) {
+    foreach ($this->getEntries() as $entry) {
+      if ($entry->getUri()->count() === $this->requestUri->count()) {
         $matched = $entry;
       }
     }
     
-    if (is_object($matched)) {
-      return $matched;
-    } else {
-      return $this->getEntry('default');
-    }
+    return (is_object($matched)) ? $matched : $this->getEntry('default');
   }
   
   public function getEntry($name)
@@ -82,7 +77,7 @@ class Sabel_Controller_Map
   {
     $entries = array();
     foreach (self::$map as $name => $entry) {
-      if ($name != 'module' && $name != 'controller' && $name != 'action') {
+      if ($name !== 'module' && $name !== 'controller' && $name !== 'action') {
         $entries[] = new Sabel_Controller_Map_Entry($entry, $this->requestUri);
       }
     }
@@ -91,7 +86,7 @@ class Sabel_Controller_Map
   
   public function getEntriesByCount($number)
   {
-    $number = (int) $number;
+    $number =(int) $number;
     
     $entries = array();
     foreach (self::$map as $entry) {
@@ -103,7 +98,6 @@ class Sabel_Controller_Map
   
   public function hasSameUriCountOfEntries($number)
   {
-    $number  = (int) $number;
     $entries = $this->getEntriesByCount($number);
     return (count($entries) >= 2) ? count($entries) : false;
   }
@@ -114,6 +108,8 @@ class Sabel_Controller_Map
     foreach ($entries as $entry) {
       if ($entry->getUri()->getElement(0)->isConstant()) {
         $hasConstant = $entry;
+        break;
+        // @todo 仕様決めませう
       }
     }
     

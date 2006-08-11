@@ -9,7 +9,7 @@
 class Sabel_Controller_Map_Destination
 {
   protected $parentEntry = null;
-  protected $destination = null;
+  protected $destination = array();
   
   public function __construct($entry, $destination)
   {

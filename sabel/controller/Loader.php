@@ -6,7 +6,7 @@
  */
 class Sabel_Controller_Loader
 {
-  private $destination;
+  private $destination = null;
 
   private function __construct($destination)
   {
@@ -30,7 +30,7 @@ class Sabel_Controller_Loader
 
   private function makeControllerPath()
   {
-    $path  = RUN_BASE . Sabel_Core_Const::MODULES_DIR . $this->destination->module;
+    $path  = $this->makeModulePath();
     $path .= Sabel_Core_Const::CONTROLLER_DIR . $this->destination->controller;
     $path .= '.php';
     return $path;

@@ -8,8 +8,8 @@
  */
 class Sabel_Controller_Map_Entry
 {
-  protected $entry;
-  protected $requestUri;
+  protected $entry = array();
+  protected $requestUri = null;
   
   public function __construct($entry, $requestUri)
   {
