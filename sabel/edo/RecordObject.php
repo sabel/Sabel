@@ -71,16 +71,14 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->table = strtolower(get_class($this));
 
-    if (isset($param1))
-      $this->defaultSelectOne($param1, $param2);
+    if (isset($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
 
-    if ($this->is_selected())
-      $this->newData[$key] = $val;
+    if ($this->is_selected()) $this->newData[$key] = $val;
   }
 
   public function __get($key)
@@ -161,7 +159,7 @@ abstract class Sabel_Edo_RecordObject
 
   protected function receiveChildConstraint($constraints)
   {
-    if (!is_array($constrains)) throw new Exception('constrains is not array.');
+    if (!is_array($constraints)) throw new Exception('constrains is not array.');
     
     $this->childConstraints = $constraints;
   }

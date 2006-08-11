@@ -1,6 +1,6 @@
 <?php
 
-require_once "RecordObject.php";
+require_once('RecordObject.php');
 
 class Edo_Type
 {
