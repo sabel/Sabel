@@ -33,7 +33,6 @@ class Test_InformationSchema extends PHPUnit2_Framework_TestCase
     $this->assertEquals(Edo_Type::INT, $tableOfAuthor->getColumnByName('id')->type);
 
     $tables = $is->getTables();
-    var_dump($tables);
     foreach ($tables as $table) {
       $this->assertEquals(Edo_Type::INT, $table->getColumnByName('id')->type);
 

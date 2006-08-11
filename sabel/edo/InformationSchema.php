@@ -39,7 +39,7 @@ class Edo_InformationSchema
 
   public function __construct($connectName, $schema)
   {
-    $className = 'Edo_'. Sabel_Edo_DBConnection::getDB($connectName) .'_InformationSchema';
+    $className = 'Edo_' . Sabel_Edo_DBConnection::getDB($connectName) . '_InformationSchema';
     $this->is  = new $className($connectName, $schema);
   }
 
@@ -81,9 +81,9 @@ class Edo_MysqlPgsql_InformationSchema
     $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
 
     foreach ($this->recordObj->execute($sql) as $val) {
-      $data = array_change_key_case($val->toArray());
+      $data      = array_change_key_case($val->toArray());
       $tableName = $data['table_name'];
-      $tables[] = new Edo_InformationSchema_Table($tableName, $this->createColumns($tableName));
+      $tables[]  = new Edo_InformationSchema_Table($tableName, $this->createColumns($tableName));
     }
 
     return $tables;
@@ -129,21 +129,18 @@ class Edo_MysqlPgsql_InformationSchema
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
-    foreach ($this->getNumericTypes() as $val) {
-      if ($val === $columnRecord['data_type']) {
-        $co->type = Edo_Type::INT;
-        $co->convertToEdoInteger($columnRecord['data_type']);
-        break;
-      }
+    $type = $columnRecord['data_type'];
+
+    if (in_array($type, $this->getNumericTypes())) {
+      $co->type = Edo_Type::INT;
+      $co->convertToEdoInteger($columnRecord['data_type']);
     }
 
-    foreach ($this->getStringTypes() as $val) {
-      if ($val === $columnRecord['data_type']) {
-        $co->type = Edo_Type::STRING;
-        $this->addStringLength($co, $columnRecord);
-        break;
-      }
+    if (in_array($type, $this->getStringTypes())) {
+      $co->type = Edo_Type::STRING;
+      $this->addStringLength($co, $columnRecord);
     }
+
     return $co;
   }
 }

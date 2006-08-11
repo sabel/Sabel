@@ -6,7 +6,7 @@ class Sabel_Edo_DBConnection
 
   public static function addConnection($connectName ,$useEdoDriver, $connection)
   {
-    if ($useEdoDriver == 'pdo') {
+    if ($useEdoDriver === 'pdo') {
       if(!is_array($connection)) {
         throw new Exception('DBConnection::addConnection() invalid Parameter. when use pdo, 3rd Argument must be array.');
       } else {
