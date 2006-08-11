@@ -534,7 +534,7 @@ abstract class Sabel_Edo_RecordObject
     $parent = strtolower(get_class($this));
     $this->table = $child;
     $this->remove("{$parent}_id", $id);
-  
+
     $this->table = $parant; 
   }
 
@@ -590,7 +590,7 @@ abstract class Sabel_Edo_RecordObject
   }
 
   protected function dataMerge($data)
-  { 
+  {
     if (empty($data)) return null;
 
     foreach ($data as $key => $val) {
