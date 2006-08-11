@@ -71,7 +71,7 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->table = strtolower(get_class($this));
 
-    if (!is_null($param1))
+    if (isset($param1))
       $this->defaultSelectOne($param1, $param2);
   }
 
@@ -159,8 +159,10 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  protected function receiveChildConstraint(array $constraints)
+  protected function receiveChildConstraint($constraints)
   {
+    if (!is_array($constrains)) throw new Exception('constrains is not array.');
+    
     $this->childConstraints = $constraints;
   }
 
@@ -193,7 +195,7 @@ abstract class Sabel_Edo_RecordObject
 
   protected function isSpecialParam($param3, $param1)
   {
-    return (!is_null($param3) && !is_array($param1));
+    return (isset($param3) && !is_array($param1));
   }
 
   protected function isDefaultColumnValue($param2)

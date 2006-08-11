@@ -13,8 +13,8 @@ class Edo_Type
 
 class Edo_InformationSchema_Table
 {
-  protected $tableName = null;
-  protected $columns   = null;
+  protected $tableName = '';
+  protected $columns   = array();
 
   public function __construct($name, $columns)
   {
@@ -35,9 +35,9 @@ class Edo_InformationSchema_Table
 
 class Edo_InformationSchema
 {
-  protected $is;
+  protected $is = null;
 
-  public function __construct($connectName, $schema = null)
+  public function __construct($connectName, $schema)
   {
     $className = 'Edo_'. Sabel_Edo_DBConnection::getDB($connectName) .'_InformationSchema';
     $this->is  = new $className($connectName, $schema);
@@ -66,7 +66,8 @@ class Edo_InformationSchema
 
 class Edo_MysqlPgsql_InformationSchema
 {
-  protected $recordObj, $schema;
+  protected $recordObj = null;
+  protected $schema    = '';
 
   public function __construct($connectName, $schema)
   {
@@ -77,7 +78,7 @@ class Edo_MysqlPgsql_InformationSchema
 
   public function getTables()
   {
-    $sql = "select * from information_schema.tables where table_schema = '{$this->schema}'";
+    $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
 
     foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
@@ -95,10 +96,9 @@ class Edo_MysqlPgsql_InformationSchema
 
   protected function createColumns($table)
   {
-    $sql = "select * from information_schema.columns where table_name = '{$table}'";
-    $res = $this->recordObj->execute($sql);
+    $sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$table}'";
 
-    foreach ($res as $val) {
+    foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray()); 
       $columns[$data['column_name']] = $this->createColumn($table, $data['column_name']);
     }
@@ -109,8 +109,8 @@ class Edo_MysqlPgsql_InformationSchema
   {
     if (is_null($column)) return $this->createColumns($table);
 
-    $sql  = "select * from information_schema.columns ";
-    $sql .= "where table_name = '{$table}' and column_name = '{$column}'";
+    $sql  = "SELECT * FROM information_schema.columns ";
+    $sql .= "WHERE table_name = '{$table}' AND column_name = '{$column}'";
 
     $res = $this->recordObj->execute($sql);
     return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
@@ -121,16 +121,16 @@ class Edo_MysqlPgsql_InformationSchema
     $co = new ColumnObject();
     $co->name    = $columnRecord['column_name'];
     $co->default = $columnRecord['column_default'];
-    $co->notNull = ($columnRecord['is_nullable'] == 'NO');
+    $co->notNull = ($columnRecord['is_nullable'] === 'NO');
 
     if (!($this->addIncrementInfo($co, $columnRecord))) {
-      $sql  = "select * from pg_statio_user_sequences ";
-      $sql .= "where relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
+      $sql  = "SELECT * FROM pg_statio_user_sequences ";
+      $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
     foreach ($this->getNumericTypes() as $val) {
-      if ($val == $columnRecord['data_type']) {
+      if ($val === $columnRecord['data_type']) {
         $co->type = Edo_Type::INT;
         $co->convertToEdoInteger($columnRecord['data_type']);
         break;
@@ -138,7 +138,7 @@ class Edo_MysqlPgsql_InformationSchema
     }
 
     foreach ($this->getStringTypes() as $val) {
-      if ($val == $columnRecord['data_type']) {
+      if ($val === $columnRecord['data_type']) {
         $co->type = Edo_Type::STRING;
         $this->addStringLength($co, $columnRecord);
         break;
@@ -167,7 +167,7 @@ class Edo_Mysql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 
   public function addIncrementInfo($co, $columnRecord)
   {
-    $co->increment = ($columnRecord->extra == 'auto_increment');
+    $co->increment = ($columnRecord->extra === 'auto_increment');
     return true;
   }
 
@@ -201,11 +201,8 @@ class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 
   public function addStringLength($co, $columnRecord)
   {
-    if (is_null($columnRecord['character_maximum_length'])) {
-      $co->maxLength = 65535;
-    } else {
-      $co->maxLength = $columnRecord['character_maximum_length'];
-    }
+    $maxlen        = $columnRecord['character_maximum_length'];
+    $co->maxLength = (isset($maxlen)) ? $maxlen : 65535;
   }
 }
 
@@ -225,19 +222,19 @@ class ColumnObject
 
   public function convertToEdoInteger($type)
   {
-    if ($type == 'tinyint') {
+    if ($type === 'tinyint') {
       $this->data['maxValue'] =  127;
       $this->data['minValue'] = -128;
-    } elseif ($type == 'smallint') {
+    } else if ($type === 'smallint') {
       $this->data['maxValue'] =  32767;
       $this->data['minValue'] = -32768;
-    } elseif ($type == 'mediumint') {
+    } else if ($type === 'mediumint') {
       $this->data['maxValue'] =  8388607;
       $this->data['minValue'] = -8388608;
-    } elseif ($type == 'int' || $type == 'integer') {
+    } else if ($type === 'int' || $type === 'integer') {
       $this->data['maxValue'] =  2147483647;
       $this->data['minValue'] = -2147483648;
-    } elseif ($type == 'bigint') {
+    } else if ($type === 'bigint') {
       $this->data['maxValue'] =  9223372036854775807;
       $this->data['minValue'] = -9223372036854775808;
     }
