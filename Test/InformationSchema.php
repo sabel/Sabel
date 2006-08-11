@@ -21,31 +21,31 @@ class Test_InformationSchema extends PHPUnit2_Framework_TestCase
   public function testUse()
   {
     $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
+    $dbCon['dsn']  = 'mysql:host=localhost;dbname=blog';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    
+
     Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
-    
-    $is = new Edo_InformationSchema('blog');
-    $is->dbinit('user', 'pdo');
-    
+
+    $is = new Edo_InformationSchema('user', 'blog');
+
     $tableOfAuthor = $is->getTable('author');
-    $this->assertEquals(Edo_InformationSchema::INT, $tableOfAuthor->getColumnByName('id')->type);
-    
+    $this->assertEquals(Edo_Type::INT, $tableOfAuthor->getColumnByName('id')->type);
+
     $tables = $is->getTables();
+    var_dump($tables);
     foreach ($tables as $table) {
-      $this->assertEquals(Edo_InformationSchema::INT, $table->getColumnByName('id')->type);
-      
+      $this->assertEquals(Edo_Type::INT, $table->getColumnByName('id')->type);
+
       foreach ($table->getColumns() as $column) {
         $this->assertTrue(is_object($column));
         if ($column->name == 'name') {
-          $this->assertEquals(Edo_InformationSchema::STRING, $column->type);
+          $this->assertEquals(Edo_Type::STRING, $column->type);
         }
       }
     }
   }
-  
+  /*
   public function prototype()
   {
     $is = new Edo_InformationSchema();
@@ -81,4 +81,5 @@ class Test_InformationSchema extends PHPUnit2_Framework_TestCase
       }
     }
   }
+  */
 }

@@ -9,6 +9,10 @@
 
 abstract class Sabel_Edo_RecordObject
 {
+  const SELECT_DEFAULT     = 0;
+  const WITH_PARENT_VIEW   = 5;
+  const WITH_PARENT_OBJECT = 10;
+
   protected
     $conditions       = array(),
     $selectCondition  = array();
@@ -17,18 +21,19 @@ abstract class Sabel_Edo_RecordObject
     $constraints             = array(),
     $childConstraints        = array(),
     $defaultChildConstraints = array();
-    
+
   protected
     $edo,
+    $connectName,
+    $cacheClasses,
     $table,
     $projection = '*',
     $defColumn  = 'id';
 
   protected
-    $owner,
     $useEdo;
 
-  protected 
+  protected
     $data         = array(),
     $newData      = array(),
     $parentTables = array(),
@@ -36,36 +41,28 @@ abstract class Sabel_Edo_RecordObject
 
   protected $selectType = self::SELECT_DEFAULT;
 
-  const SELECT_DEFAULT     = 0;
-  const WITH_PARENT_VIEW   = 5;
-  const WITH_PARENT_OBJECT = 10;
-
   protected function getMyEDO()
   {
     return $this->makeEdoDriver();
   }
 
-  public function setEDO($owner, $useEdo)
+  public function setEDO($connectName)
   {
-    $this->owner  = $owner;
-    $this->useEdo = $useEdo;
-    $this->edo    = $this->makeEdoDriver();
+    $this->connectName = $connectName;
+    $this->edo = $this->makeEdoDriver();
   }
 
   protected function makeEdoDriver()
   {
-    $conn = Sabel_Edo_DBConnection::getConnection($this->owner, $this->useEdo);
+    $conn = Sabel_Edo_DBConnection::getConnection($this->connectName);
 
-    switch ($this->useEdo) {
+    switch (Sabel_Edo_DBConnection::getEdoDriver($this->connectName)) {
       case 'pdo':
-        $pdoDb = Sabel_Edo_DBConnection::getDB($this->owner);
+        $pdoDb = Sabel_Edo_DBConnection::getDB($this->connectName);
         return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
         break;
       case 'pgsql':
         return new Sabel_Edo_Driver_Pgsql($conn);
-        break;
-      case 'mysqli':
-        return new Sabel_Edo_Driver_Mysqli($conn);
         break;
     }
   }
@@ -172,7 +169,7 @@ abstract class Sabel_Edo_RecordObject
    *
    * @param mixed string or int this value use tow means for
    *          default column value or a condition column name.
-   * @param mixed string or int or NULL 
+   * @param mixed string or int or NULL
    *          this value use three means for
    *          default column value or when has param3 value of special condition
    *          or when has no param3 param2 is value
@@ -203,7 +200,7 @@ abstract class Sabel_Edo_RecordObject
   {
     return is_null($param2);
   }
-  
+
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
@@ -219,7 +216,7 @@ abstract class Sabel_Edo_RecordObject
       throw new Exception('Error: getCount() execute failed.');
     }
   }
-  
+
   public function getNextNumber()
   {
     return $this->edo->getNextNumber($this->table);
@@ -519,7 +516,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function newClass($name)
   {
-    $classes = get_declared_classes();
+    $classes = (is_null($this->cacheClasses)) ? get_declared_classes() : $this->cacheClasses;
+
     if (isset($classes[$name]) && $name !== 'Sabel_Edo_CommonRecord') {
       return new $name();
     } else {
@@ -651,7 +649,7 @@ class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
 {
   public function __construct($table = null)
   {
-    $this->setEDO('user', 'pdo');
+    $this->setEDO('user');
     parent::__construct();
 
     if (isset($table)) $this->table = $table;

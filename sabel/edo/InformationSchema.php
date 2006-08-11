@@ -2,71 +2,101 @@
 
 require_once "RecordObject.php";
 
+class Edo_Type
+{
+  const INT       =  0;
+  const STRING    =  5;
+  const BLOB      = 10;
+  const DATE      = 15;
+  const TIMESTAMP = 20;  // pgsql timestamp || (mysql timestamp || datetime)
+}
+
 class Edo_InformationSchema_Table
 {
   protected $tableName = null;
   protected $columns   = null;
-  
+
   public function __construct($name, $columns)
   {
     $this->tableName = $name;
     $this->columns   = $columns;
   }
-  
+
   public function getColumns()
   {
     return $this->columns;
   }
-  
+
   public function getColumnByName($name)
   {
     return $this->columns[$name];
   }
 }
 
-class Edo_InformationSchema extends Sabel_Edo_RecordObject
+class Edo_InformationSchema
 {
-  const INT    = 0;
-  const STRING = 10;
-  
-  protected $edo, $is, $schema;
+  protected $is;
 
-  public function __construct($schema = null)
+  public function __construct($connectName, $schema = null)
   {
-    $this->schema = $schema;
+    $className = 'Edo_'. Sabel_Edo_DBConnection::getDB($connectName) .'_InformationSchema';
+    $this->is  = new $className($connectName, $schema);
   }
 
-  public function dbinit($dbuser, $useEdo)
+  public function getTables()
   {
-    $db = Sabel_Edo_DBConnection::getDB($dbuser);
-    $className = 'Edo_'. $db .'_informationSchema';
+    return $this->is->getTables();
+  }
 
-    $this->is  = new $className();
-    $this->setEDO($dbuser, $useEdo);
+  public function getTable($name)
+  {
+    return $this->is->getTable($name);
+  }
+
+  protected function createColumns($table)
+  {
+    return $this->is->createColumns($table);
+  }
+
+  protected function createColumn($table, $column = null)
+  {
+    return $this->is->createColumn($table, $column);
+  }
+}
+
+class Edo_MysqlPgsql_InformationSchema
+{
+  protected $recordObj, $schema;
+
+  public function __construct($connectName, $schema)
+  {
+    $this->schema    = $schema;
+    $this->recordObj = new Sabel_Edo_CommonRecord();
+    $this->recordObj->setEDO($connectName);
   }
 
   public function getTables()
   {
     $sql = "select * from information_schema.tables where table_schema = '{$this->schema}'";
-    
-    foreach ($this->execute($sql) as $val) {
+
+    foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
       $tableName = $data['table_name'];
       $tables[] = new Edo_InformationSchema_Table($tableName, $this->createColumns($tableName));
     }
-    
+
     return $tables;
   }
-  
+
   public function getTable($name)
   {
     return new Edo_InformationSchema_Table($name, $this->createColumns($name));
   }
-  
+
   protected function createColumns($table)
   {
     $sql = "select * from information_schema.columns where table_name = '{$table}'";
-    $res = $this->execute($sql);
+    $res = $this->recordObj->execute($sql);
 
     foreach ($res as $val) {
       $data = array_change_key_case($val->toArray()); 
@@ -82,7 +112,7 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
     $sql  = "select * from information_schema.columns ";
     $sql .= "where table_name = '{$table}' and column_name = '{$column}'";
 
-    $res = $this->execute($sql);
+    $res = $this->recordObj->execute($sql);
     return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
   }
 
@@ -93,24 +123,24 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
     $co->default = $columnRecord['column_default'];
     $co->notNull = ($columnRecord['is_nullable'] == 'NO');
 
-    if (!($this->is->addIncrementInfo($co, $columnRecord))) {
+    if (!($this->addIncrementInfo($co, $columnRecord))) {
       $sql  = "select * from pg_statio_user_sequences ";
       $sql .= "where relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
-      $co->increment = (count($this->execute($sql)) > 0);
+      $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
-    foreach ($this->is->getNumericTypes() as $val) {
+    foreach ($this->getNumericTypes() as $val) {
       if ($val == $columnRecord['data_type']) {
-        $co->type = Edo_InformationSchema::INT;
+        $co->type = Edo_Type::INT;
         $co->convertToEdoInteger($columnRecord['data_type']);
         break;
       }
     }
 
-    foreach ($this->is->getStringTypes() as $val) {
+    foreach ($this->getStringTypes() as $val) {
       if ($val == $columnRecord['data_type']) {
-        $co->type = Edo_InformationSchema::STRING;
-        $this->is->addStringLength($co, $columnRecord);
+        $co->type = Edo_Type::STRING;
+        $this->addStringLength($co, $columnRecord);
         break;
       }
     }
@@ -118,13 +148,8 @@ class Edo_InformationSchema extends Sabel_Edo_RecordObject
   }
 }
 
-class Edo_Mysql_InformationSchema extends Edo_InformationSchema
+class Edo_Mysql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 {
-  public function __construct()
-  {
-
-  }
-
   public function getNumericTypes()
   {
     return array('tinyint', 'smallint', 'mediumint', 'int', 'bigint');
@@ -132,7 +157,12 @@ class Edo_Mysql_InformationSchema extends Edo_InformationSchema
 
   public function getStringTypes()
   {
-    return array('text', 'mediumtext', 'varchar', 'char', 'blob', 'mediumblob', 'longblob');
+    return array('text', 'mediumtext', 'varchar', 'char');
+  }
+
+  public function getBinaryTypes()
+  {
+    return array('blob', 'mediumblob', 'longblob');
   }
 
   public function addIncrementInfo($co, $columnRecord)
@@ -147,13 +177,8 @@ class Edo_Mysql_InformationSchema extends Edo_InformationSchema
   }
 }
 
-class Edo_Pgsql_InformationSchema extends Edo_InformationSchema
+class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 {
-  public function __construct()
-  {
-
-  }
-
   public function getNumericTypes()
   {
     return array('smallint', 'integer', 'bigint');
@@ -162,6 +187,11 @@ class Edo_Pgsql_InformationSchema extends Edo_InformationSchema
   public function getStringTypes()
   {
     return array('text', 'character varying', 'varchar', 'character', 'char');
+  }
+
+  public function getBinaryTypes()
+  {
+    return array('bytea');
   }
 
   public function addIncrementInfo($co, $columnRecord)
