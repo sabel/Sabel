@@ -123,9 +123,7 @@ class Edo_MysqlPgsql_InformationSchema
     $co->default = $columnRecord['column_default'];
     $co->notNull = ($columnRecord['is_nullable'] === 'NO');
 
-    if (!($this->addIncrementInfo($co, $columnRecord))) {
-      $sql  = "SELECT * FROM pg_statio_user_sequences ";
-      $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
+    if (is_string($sql = $this->addIncrementInfo($co, $columnRecord))) {
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
@@ -165,7 +163,6 @@ class Edo_Mysql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
   public function addIncrementInfo($co, $columnRecord)
   {
     $co->increment = ($columnRecord->extra === 'auto_increment');
-    return true;
   }
 
   public function addStringLength($co, $columnRecord)
@@ -193,12 +190,15 @@ class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 
   public function addIncrementInfo($co, $columnRecord)
   {
-    return false;
+		$sql  = "SELECT * FROM pg_statio_user_sequences ";
+    $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
+    
+    return $sql;
   }
 
   public function addStringLength($co, $columnRecord)
   {
-    $maxlen        = $columnRecord['character_maximum_length'];
+    $maxlen = $columnRecord['character_maximum_length'];
     $co->maxLength = (isset($maxlen)) ? $maxlen : 65535;
   }
 }

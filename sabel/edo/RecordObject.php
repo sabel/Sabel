@@ -516,7 +516,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function newClass($name)
   {
-    $classes = (is_null($this->cacheClasses)) ? get_declared_classes() : $this->cacheClasses;
+    $classes = (empty($this->cacheClasses)) ? get_declared_classes() : $this->cacheClasses;
+    $this->cacheClasses = $classes;
 
     if (isset($classes[$name]) && $name !== 'Sabel_Edo_CommonRecord') {
       return new $name();
