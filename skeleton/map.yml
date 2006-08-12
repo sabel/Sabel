@@ -1,0 +1,6 @@
+default:
+  uri: :module/:controller/:action
+
+module:     index
+controller: index
+action:     index

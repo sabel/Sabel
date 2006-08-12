@@ -1,0 +1,17 @@
+production:
+  host: localhost
+  database: 
+  user: root
+  password:
+  
+development:
+  host: localhost
+  database: test
+  user: root
+  password:
+  
+test:
+  host: localhost
+  database: test
+  user: root
+  password:
