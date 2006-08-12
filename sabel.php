@@ -1,83 +1,48 @@
 <?php
 
-define('ABSOLUTE_PATH', dirname(realpath(__FILE__)));
+define('SKELETON_DIR', dirname(realpath(__FILE__)) . '/skeleton');
 
-class DirectoryCreator
+class DirectoryTraverser
 {
-  public function create($name)
-  {
-    
-    if (is_dir($name)) {
-      echo "$name already exists.\n";
-    } else {
-      echo "create $name\n";
-      mkdir($name);
-    }
-  }
-}
-
-$directries = array('app',
-                    'app/index', 'app/index/controllers', 'app/index/models', 'app/index/views',
-                    'config', 'data', 'lib', 'logs',
-                    'public', 'public/images', 'public/js', 'public/css',
-                    'scripts', 'skeleton', 'test');
-
-class FileCreator
-{
-  protected $targetFiles = array();
-  protected $sourceFiles = array();
+  protected $directories = null;
   
   public function __construct()
   {
-    $this->targetFiles = array('public/index.php',
-                               'public/.htaccess',
-                               'lib/setup.php',
-                               'config/map.yml',
-                               'config/database.yml',
-                               'app/index/controllers/index.php',
-                               'sabel.php');
-                               
-    $this->sourceFiles = array('/skeleton/index.php',
-                               '/skeleton/htaccess',
-                               '/skeleton/setup.php',
-                               '/skeleton/map.yml',
-                               '/skeleton/database.yml',
-                               '/skeleton/controller_index.php',
-                               '/skeleton/sabel.php');
+    $this->directories = new DirectoryIterator(SKELETON_DIR);
   }
-  
-  public function create()
+
+  public function traverse($fromElement = null)
   {
-    $fp = fopen('logs/sabel.log', 'w');
-    chown('logs/sabel.log', 'www');
-    chmod('logs/sabel.log', 0777);
-    fclose($fp);
+    $element = (is_null($fromElement)) ? $this->directories : $fromElement;
     
-    $targetFiles = $this->targetFiles;
-    $sourceFiles = $this->sourceFiles;
-    foreach ($targetFiles as $pos => $file) {
-      if (is_file($file)) {
-        echo "${file} already exists.\n";
-      } else {
-        echo "create ${file}\n";
-        fwrite(fopen($file, 'w'), file_get_contents(ABSOLUTE_PATH . $sourceFiles[$pos]));
+    foreach ($element as $e) {
+      if (!$e->isDot() && $e->isDir()) {
+        $child = $e->getPath() .'/'. $e->getFileName();
+        $dir = ltrim(str_replace(SKELETON_DIR, '', $child), '/');
+        if (is_dir($dir)) {
+          echo "${dir} already exists.\n";
+        } else {
+          echo "create ${dir}\n";
+          mkdir($dir);
+        }
+        $this->traverse(new DirectoryIterator($child));
+      } else if (!$e->isDot()) {
+        $child = $e->getPath() .'/'. $e->getFileName();
+        $file = ltrim(str_replace(SKELETON_DIR, '', $child), '/');
+        if (is_file($file)) {
+          echo "${file} already exists.\n";
+        } else {
+          echo "create ${file}\n";
+          fwrite(fopen($file, 'w'), file_get_contents($child));
+          if ($file == 'logs/sabel.log') {
+            chown('logs/sabel.log', 'www');
+            chmod('logs/sabel.log', 0777);
+          }
+        }
       }
     }
   }
 }
 
-$d = new DirectoryCreator();
-foreach ($directries as $directory) {
-  $d->create($directory);
-}
-
-$fc = new FileCreator();
-$fc->create();
-
-start.
-read skeleton directory structure.
-read system information.
-fill skeleton.
-write directory structure.
-write filled sekeleton files.
-end.
+$dt = new DirectoryTraverser();
+$dt->traverse();
