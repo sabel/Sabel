@@ -14,8 +14,8 @@ abstract class Sabel_Edo_RecordObject
   const WITH_PARENT_OBJECT = 10;
 
   protected
-    $conditions       = array(),
-    $selectCondition  = array();
+    $conditions      = array(),
+    $selectCondition = array();
 
   protected
     $constraints             = array(),
@@ -23,15 +23,13 @@ abstract class Sabel_Edo_RecordObject
     $defaultChildConstraints = array();
 
   protected
-    $edo,
-    $connectName,
-    $cacheClasses,
-    $table,
-    $projection = '*',
-    $defColumn  = 'id';
-
-  protected
-    $useEdo;
+    $edo          = null,
+    $connectName  = '',
+    $cacheClasses = array(),
+    $table        = null,
+    $structure    = 'normal',
+    $projection   = '*',
+    $defColumn    = 'id';
 
   protected
     $data         = array(),
@@ -122,6 +120,11 @@ abstract class Sabel_Edo_RecordObject
       $this->$key = $val;
   }
 
+  public function getStructure()
+  {
+    return $this->structure;
+  }
+
   public function __call($method, $parameters)
   {
     $this->setCondition($method, $parameters[0], $parameters[1]);
@@ -199,6 +202,16 @@ abstract class Sabel_Edo_RecordObject
   protected function isDefaultColumnValue($param2)
   {
     return is_null($param2);
+  }
+
+  public function begin()
+  {
+    $this->edo->begin();
+  }
+
+  public function commit()
+  {
+    $this->edo->commit();
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -331,7 +344,7 @@ abstract class Sabel_Edo_RecordObject
           if (class_exists($child_table)) {
             $obj = new $child_table();
           } else {
-            $obj = new Child_Record($child_table);
+            $obj = new Sabel_Edo_CommonRecord($child_table);
           }
         }
         $row = $this->selectWithParent($this->selectType, $row);
@@ -654,5 +667,58 @@ class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
     parent::__construct();
 
     if (isset($table)) $this->table = $table;
+  }
+}
+
+abstract class BaseBridgeRecord extends Sabel_Edo_RecordObject
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->structure = 'tree';
+    $this->setEDO('user');
+    parent::__construct($param1, $param2);
+  }
+
+  // method overwrite
+  public function getChild($child, $obj = null)
+  {
+    parent::getChild($child, $obj);
+    //@todo
+  }
+
+  // method overwrite
+  public function save($data = null)
+  {
+    parent::save($data);
+    //@todo
+  }
+}
+
+abstract class BaseTreeRecord extends Sabel_Edo_RecordObject
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->structure = 'tree';
+    $this->setEDO('user');
+    parent::__construct($param1, $param2);
+  }
+
+  protected function addLeaf($obj = null)
+  {
+    if (is_null($obj)) $obj = $this;
+
+    $obj->leaf = true;
+    //@todo
+  }
+
+  protected function getLeaf()
+  {
+    $this->leaf(true);
+    //@todo
+  }
+
+  protected function getRoot()
+  {
+    return $this->select("{$this->table}_id", 'null');
   }
 }

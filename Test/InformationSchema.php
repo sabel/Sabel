@@ -24,12 +24,16 @@ class Test_InformationSchema extends PHPUnit2_Framework_TestCase
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=blog';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
+    //$dbCon['dsn']  = 'pgsql:host=localhost;dbname=blog';
+    //$dbCon['user'] = 'pgsql';
+    //$dbCon['pass'] = 'pgsql';
 
     Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
 
     $is = new Edo_InformationSchema('user', 'blog');
 
     $tableOfAuthor = $is->getTable('author');
+    var_dump($tableOfAuthor->getColumnByName('age')->comment);
     $this->assertEquals(Edo_Type::INT, $tableOfAuthor->getColumnByName('id')->type);
 
     $tables = $is->getTables();

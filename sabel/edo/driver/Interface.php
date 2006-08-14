@@ -4,7 +4,7 @@ interface Sabel_Edo_Driver_Interface
 {
   public function setBasicSQL($sql);
   public function setUpdateSQL($table, $data);
-  public function setInsertSQL($table, $data);
+  public function executeInsert($table, $data, $id_exist = null);
 
   public function makeQuery($conditions, $constraints = null);
 

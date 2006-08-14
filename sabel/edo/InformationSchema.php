@@ -130,6 +130,14 @@ class Edo_MysqlPgsql_InformationSchema
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
+    if (is_array($sqls = $this->addCommentInfo($co, $columnRecord))) {
+      $oid = $this->recordObj->execute($sqls[0]);
+      $pos = $this->recordObj->execute($sqls[1]);
+
+      $comment = $this->recordObj->execute(sprintf($sqls[2], $oid[0]->relfilenode, $pos[0]->ordinal_position));
+      $co->comment = $comment[0]->col_description;
+    }
+
     $type = $columnRecord['data_type'];
 
     if (in_array($type, $this->getNumericTypes())) {
@@ -163,9 +171,14 @@ class Edo_Mysql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
     return array('blob', 'mediumblob', 'longblob');
   }
 
+  public function addCommentInfo($co, $columnRecord)
+  {
+    $co->comment = $columnRecord['column_comment'];
+  }
+
   public function addIncrementInfo($co, $columnRecord)
   {
-    $co->increment = ($columnRecord->extra === 'auto_increment');
+    $co->increment = ($columnRecord['extra'] === 'auto_increment');
   }
 
   public function addStringLength($co, $columnRecord)
@@ -191,11 +204,25 @@ class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
     return array('bytea');
   }
 
+  public function addCommentInfo($co, $columnRecord)
+  {
+    $sqls   = array();
+    $sqls[] = "SELECT relfilenode FROM pg_class WHERE relname = '{$columnRecord['table_name']}'";
+
+    $sql  = "SELECT ordinal_position FROM information_schema.columns ";
+    $sql .= "WHERE table_name = '{$columnRecord['table_name']}' AND column_name = '{$co->name}'";
+    $sqls[] = $sql;
+
+    $sqls[] = "SELECT col_description FROM col_description(%s, %s)";
+
+    return $sqls;
+  }
+
   public function addIncrementInfo($co, $columnRecord)
   {
-		$sql  = "SELECT * FROM pg_statio_user_sequences ";
+    $sql  = "SELECT * FROM pg_statio_user_sequences ";
     $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
-    
+
     return $sql;
   }
 

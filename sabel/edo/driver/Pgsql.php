@@ -43,11 +43,6 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setCount($count);
   }
 
-  public function setInsertSQL($table, $data)
-  {
-  
-  }
-
   public function setAggregateSQL($table, $idColumn, $functions)
   {
     $sql = array("SELECT {$idColumn}");
@@ -59,9 +54,9 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setBasicSQL(implode('', $sql));
   }
 
-  public function executeInsert($table, $data, $id_exists = null)
+  public function executeInsert($table, $data, $id_exist = null)
   {
-    if (!$id_exists)
+    if (!$id_exist)
       $data['id'] = $this->getNextNumber($table);
 
     $this->data = $data;

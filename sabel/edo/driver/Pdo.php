@@ -17,6 +17,16 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     $this->sqlObj = new PdoQuery();
   }
 
+  public function begin()
+  {
+    //@todo
+  }
+
+  public function commit()
+  {
+    //@todo
+  }
+
   public function setBasicSQL($sql)
   {
     $this->sqlObj->setBasicSQL($sql);
@@ -41,11 +51,6 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setBasicSQL(implode('', $sql));
   }
 
-  public function setInsertSQL($table, $data)
-  {
-  
-  }
-
   public function setAggregateSQL($table, $idColumn, $functions)
   {
     $sql = array("SELECT {$idColumn}");
@@ -57,9 +62,9 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setBasicSQL(implode('', $sql));
   }
 
-  public function executeInsert($table, $data, $id_exists = null)
+  public function executeInsert($table, $data, $id_exist = null)
   {
-    if (!$id_exists && $this->myDb === 'pgsql')
+    if (!$id_exist && $this->myDb === 'pgsql')
       $data['id'] = $this->getNextNumber($table);
 
     $this->data = $data;
