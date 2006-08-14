@@ -176,6 +176,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       $this->stmt = $this->pdo->prepare($sql);
     } elseif ($this->stmtFlag) {
       $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
+      Sabel_Edo_Driver_PdoStatement::$count++;
     } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
       print_r('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
@@ -190,6 +191,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     }
 
     $this->makeBindParam();
+    //echo "{$this->stmt->queryString}\n";
 
     if (empty($this->param)) {
       $result = $this->stmt->execute();
@@ -197,6 +199,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       $result = $this->stmt->execute($this->param);
       $this->param = array();
     }
+    Sabel_Edo_Driver_PdoStatement::$count1++;
 
     if (!$result) {
       print_r('Error: PDOStatement::execute()');
@@ -397,6 +400,8 @@ class Sabel_Edo_Driver_PdoStatement
   private static $sql;
   private static $keys = array();
   private static $constraints = array();
+  public static $count = 0;
+  public static $count1 = 0;
 
   public static function statement_exists($sql, $conditions, $constraints = null)
   {

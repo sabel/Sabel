@@ -23,13 +23,14 @@ abstract class Sabel_Edo_RecordObject
     $defaultChildConstraints = array();
 
   protected
-    $edo          = null,
-    $connectName  = '',
-    $cacheClasses = array(),
-    $table        = null,
-    $structure    = 'normal',
-    $projection   = '*',
-    $defColumn    = 'id';
+    $edo           = null,
+    $connectName   = '',
+    $cachedClasses = array(),
+    $cachedParent  = array(),
+    $table         = null,
+    $structure     = 'normal',
+    $projection    = '*',
+    $defColumn     = 'id';
 
   protected
     $data         = array(),
@@ -444,60 +445,61 @@ abstract class Sabel_Edo_RecordObject
   {
     if ($this->getStructure() !== 'tree' && $this->isAcquiredObject($table)) return null;
 
-    $edo = $this->getMyEDO();
-    $edo->setBasicSQL("SELECT * FROM {$table}");
-    $edo->makeQuery(array($this->defColumn => $id));
+    $prow = $this->getCachedParentRow($table, $id);
+    if (!$prow) return null;
 
-    if ($edo->execute()) {
-      $prow = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-
-      if (!$prow) return null;
-
-      foreach ($prow as $key => $val) {
-        if (strpos($key, '_id')) {
-          $ptable = str_replace('_id', '', $key);
-          $row["{$table}_{$key}"] = $val;
-          $this->addParentProperties($ptable, $val, $row);
-        } else {
-          $row["{$table}_{$key}"] = $val;
-        }
+    foreach ($prow as $key => $val) {
+      if (strpos($key, '_id')) {
+        $ptable = str_replace('_id', '', $key);
+        $row["{$table}_{$key}"] = $val;
+        $this->addParentProperties($ptable, $val, $row);
+      } else {
+        $row["{$table}_{$key}"] = $val;
       }
-    } else {
-      throw new Exception('Error: addParentProperties() execute failed.');
     }
+  }
+
+  protected function getCachedParentRow($table, $id)
+  {
+    if (is_array($cache = Sabel_Edo_SimpleCache::get($table.$id))) {
+      $result = $cache;
+    } else {
+      $edo = $this->getMyEDO();
+      $edo->setBasicSQL("SELECT * FROM {$table}");
+      $edo->makeQuery(array($this->defColumn => $id));
+
+      if ($edo->execute()) {
+        $result = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+        Sabel_Edo_SimpleCache::add($table.$id, $result);
+      } else {
+        throw new Exception('Error: addParentObject() execute failed.');
+      }
+    }
+    return $result;
   }
 
   protected function addParentObject($table, $id)
   {
     if ($this->getStructure() !== 'tree' && $this->isAcquiredObject($table)) return null;
 
-    $edo = $this->getMyEDO();
-    $edo->setBasicSQL("SELECT * FROM {$table}");
-    $edo->makeQuery(array($this->defColumn => $id));
+    $row = $this->getCachedParentRow($table, $id);
+    $obj = $this->newClass($table);
+    if (!$row) return $obj;
 
-    if ($edo->execute()) {
-      $row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      $obj = $this->newClass($table);
+    $obj->selectCondition[$this->defColumn] = $id;
+    $obj->selected = true;
 
-      if (!$row) return $obj;
-
-      $obj->selectCondition[$this->defColumn] = $id;
-      $obj->selected = true;
-
-      foreach ($row as $key => $val) {
-        if (strpos($key, '_id')) {
-          $key = str_replace('_id', '', $key);
-          $row[$key] = $this->addParentObject($key, $val);
-        } else {
-          $row[$key] = $val;
-        }
+    foreach ($row as $key => $val) {
+      if (strpos($key, '_id')) {
+        $key = str_replace('_id', '', $key);
+        $row[$key] = $this->addParentObject($key, $val);
+      } else {
+        $row[$key] = $val;
       }
-      $obj->setProperties($row);
-      $obj->newData = array();
-      return $obj;
-    } else {
-      throw new Exception('Error: addParentObject() execute failed.');
     }
+    $obj->setProperties($row);
+    $obj->newData = array();
+    return $obj;
   }
 
   protected function isAcquiredObject($table)
@@ -529,8 +531,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function newClass($name)
   {
-    $classes = (empty($this->cacheClasses)) ? get_declared_classes() : $this->cacheClasses;
-    $this->cacheClasses = $classes;
+    $classes = (empty($this->cachedClasses)) ? get_declared_classes() : $this->cachedClasses;
+    $this->cachedClasses = $classes;
 
     if (isset($classes[$name]) && $name !== 'Sabel_Edo_CommonRecord') {
       return new $name();
@@ -659,6 +661,21 @@ abstract class Sabel_Edo_RecordObject
   }
 }
 
+class Sabel_Edo_SimpleCache
+{
+  private static $cache = array();
+
+  public static function add($key, $val)
+  {
+    self::$cache[$key] = $val;
+  }
+
+  public static function get($key)
+  {
+    return self::$cache[$key];
+  }
+}
+
 class Sabel_Edo_CommonRecord extends Sabel_Edo_RecordObject
 {
   public function __construct($table = null)
@@ -679,18 +696,19 @@ abstract class BaseBridgeRecord extends Sabel_Edo_RecordObject
     parent::__construct($param1, $param2);
   }
 
-  // method overwrite
-  public function getChild($child, $obj = null)
+  public function getChild($child, $bridge = null)
   {
-    parent::getChild($child, $obj);
-    //@todo
-  }
+    if (is_null($bridge))
+      throw new Exception('BaseBridgeRecord::getChild() need a name of a bridge table.');
 
-  // method overwrite
-  public function save($data = null)
-  {
-    parent::save($data);
-    //@todo
+    $this->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
+    parent::getChild($bridge);
+
+    $children = array();
+    foreach ($this->$bridge as $bridge) {
+      $children[] = $bridge->$child;
+    }
+    $this->$child = $children;
   }
 }
 
@@ -703,10 +721,8 @@ abstract class BaseTreeRecord extends Sabel_Edo_RecordObject
     parent::__construct($param1, $param2);
   }
 
-  protected function addLeaf($obj = null)
+  protected function addLeaf()
   {
-    if (is_null($obj)) $obj = $this;
-
     $obj->leaf = true;
     //@todo
   }

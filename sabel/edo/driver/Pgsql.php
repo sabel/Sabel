@@ -16,6 +16,16 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->sqlObj = new PgsqlQuery();
   }
 
+  public function begin()
+  {
+    //@todo
+  }
+
+  public function commit()
+  {
+    //@todo
+  }
+
   public function setBasicSQL($sql)
   {
     $this->sqlObj->setBasicSQL($sql);

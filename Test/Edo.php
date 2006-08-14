@@ -189,12 +189,65 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 9,  'tree_id' => 2, 'name' => 'B9');
     $insertData[] = array('id' => 10, 'tree_id' => 6, 'name' => 'B6-10');
     $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
-    
+
     foreach ($insertData as $data) {
       $tree->multipleInsert($data);
     }
+
+    $student = new Sabel_Edo_CommonRecord('student');
+    $insertData   = array();
+    $insertData[] = array('name' => 'tom',   'birth' => '1983/08/17');
+    $insertData[] = array('name' => 'john',  'birth' => '1983/08/18');
+    $insertData[] = array('name' => 'bob',   'birth' => '1983/08/19');
+    $insertData[] = array('name' => 'marcy', 'birth' => '1983/08/20');
+    $insertData[] = array('name' => 'ameri', 'birth' => '1983/08/21');
+
+    foreach ($insertData as $data) {
+      $student->multipleInsert($data);
+    }
+
+    $course = new Sabel_Edo_CommonRecord('course');
+    $insertData   = array();
+    $insertData[] = array('name' => 'Mathematics');
+    $insertData[] = array('name' => 'Physics');
+    $insertData[] = array('name' => 'Science');
+    $insertData[] = array('name' => 'Economic');
+    $insertData[] = array('name' => 'Psychology');
+
+    foreach ($insertData as $data) {
+      $course->multipleInsert($data);
+    }
+
+    $sc = new Sabel_Edo_CommonRecord('student_course');
+    $insertData   = array();
+    $insertData[] = array('student_id' => 1, 'course_id' => 1);
+    $insertData[] = array('student_id' => 1, 'course_id' => 2);
+    $insertData[] = array('student_id' => 1, 'course_id' => 3);
+
+    $insertData[] = array('student_id' => 2, 'course_id' => 2);
+    $insertData[] = array('student_id' => 2, 'course_id' => 3);
+    $insertData[] = array('student_id' => 2, 'course_id' => 4);
+    $insertData[] = array('student_id' => 2, 'course_id' => 5);
+
+    $insertData[] = array('student_id' => 3, 'course_id' => 1);
+    $insertData[] = array('student_id' => 3, 'course_id' => 2);
+    $insertData[] = array('student_id' => 3, 'course_id' => 4);
+    $insertData[] = array('student_id' => 3, 'course_id' => 5);
+
+    $insertData[] = array('student_id' => 4, 'course_id' => 3);
+    $insertData[] = array('student_id' => 4, 'course_id' => 4);
+
+    $insertData[] = array('student_id' => 5, 'course_id' => 1);
+    $insertData[] = array('student_id' => 5, 'course_id' => 2);
+    $insertData[] = array('student_id' => 5, 'course_id' => 3);
+    $insertData[] = array('student_id' => 5, 'course_id' => 4);
+    $insertData[] = array('student_id' => 5, 'course_id' => 5);
+
+    foreach ($insertData as $data) {
+      $sc->multipleInsert($data);
+    }
   }
-  
+
   public function testInsert()
   {
     $test2 = new Sabel_Edo_CommonRecord('test2');
@@ -202,7 +255,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $test2->name = 'test21';
     $test2->test3_id = '2';
     $test2->save();
-    
+
     $test2 = new Sabel_Edo_CommonRecord('test2');
     $test2->id = 2;
     $test2->name = 'test22';
@@ -419,14 +472,14 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj->blood, 'A');
     $this->assertEquals((int)$obj->test2_id, 1);
     
-    $child = $obj->test2;
-    $this->assertEquals((int)$child->id, 1);
-    $this->assertEquals($child->name, 'test21');
-    $this->assertEquals((int)$child->test3_id, 2);
+    $parent = $obj->test2;
+    $this->assertEquals((int)$parent->id, 1);
+    $this->assertEquals($parent->name, 'test21');
+    $this->assertEquals((int)$parent->test3_id, 2);
     
-    $child2 = $child->test3;
-    $this->assertEquals((int)$child2->id, 2);
-    $this->assertEquals($child2->name, 'test32');
+    $parent2 = $parent->test3;
+    $this->assertEquals((int)$parent2->id, 2);
+    $this->assertEquals($parent2->name, 'test32');
   }
   
   public function testSelectParentView()
@@ -694,10 +747,92 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A5');
-    
+
     $this->assertEquals((int)$t->tree->id, 1);
     $this->assertEquals((int)$t->tree->tree_id, 0);
     $this->assertEquals($t->tree->name, 'A');
+  }
+
+  public function testBridge()
+  {
+    $stu = new Student(1);
+    $this->assertEquals($stu->name, 'tom');
+    $this->assertEquals($stu->student_course, null);
+
+    $constraint = array('limit' => 100, 'order' => 'course_id');
+    $stu->setChildConstraint('student_course', $constraint);
+
+    $stu->getChild('course', 'student_course');
+
+    $this->assertEquals((int)$stu->student_course[0]->course_id, 1);
+    $this->assertEquals((int)$stu->student_course[1]->course_id, 2);
+    $this->assertEquals((int)$stu->student_course[2]->course_id, 3);
+
+    $this->assertEquals((int)$stu->course[0]->id, 1);
+    $this->assertEquals((int)$stu->course[1]->id, 2);
+    $this->assertEquals((int)$stu->course[2]->id, 3);
+
+    $this->assertEquals($stu->course[0]->name, 'Mathematics');
+    $this->assertEquals($stu->course[1]->name, 'Physics');
+    $this->assertEquals($stu->course[2]->name, 'Science');
+
+    $stu = new Student();
+    $stu->setConstraint('order', 'id desc');
+
+    $students = $stu->select();
+    $this->assertEquals((int)$students[0]->id, 5);
+    $this->assertEquals((int)$students[1]->id, 4);
+
+    $constraint = array('limit' => 100, 'order' => 'course_id desc');
+
+    foreach ($students as $student) {
+      $student->setChildConstraint($constraint);
+      $student->getChild('course', 'student_course');
+    }
+
+    $this->assertEquals((int)$students[2]->student_course[0]->course_id, 5);
+    $this->assertEquals((int)$students[2]->student_course[1]->course_id, 4);
+    $this->assertEquals((int)$students[2]->student_course[2]->course_id, 2);
+    $this->assertEquals((int)$students[2]->student_course[3]->course_id, 1);
+
+    $this->assertEquals((int)$students[3]->course[0]->id, 5);
+    $this->assertEquals((int)$students[3]->course[1]->id, 4);
+    $this->assertEquals((int)$students[3]->course[2]->id, 3);
+    $this->assertEquals((int)$students[3]->course[3]->id, 2);
+
+    $this->assertEquals($students[3]->course[0]->name, 'Psychology');
+    $this->assertEquals($students[3]->course[1]->name, 'Economic');
+    $this->assertEquals($students[3]->course[2]->name, 'Science');
+    $this->assertEquals($students[3]->course[3]->name, 'Physics');
+
+    //-----------------------------------------------------------------
+
+    $course = new Course();
+    $course->setConstraint('order', 'id');
+
+    $cs = $course->select();
+
+    $constraint = array('limit' => 100, 'order' => 'student_id');
+
+    foreach ($cs as $c) {
+      $c->setChildConstraint($constraint);
+      $c->getChild('student', 'student_course');
+    }
+
+    $this->assertEquals($cs[0]->student[0]->name, 'tom');
+    $this->assertEquals($cs[0]->student[1]->name, 'bob');
+    $this->assertEquals($cs[0]->student[2]->name, 'ameri');
+
+    $this->assertEquals($cs[2]->student[0]->name, 'tom');
+    $this->assertEquals($cs[2]->student[1]->name, 'john');
+    $this->assertEquals($cs[2]->student[2]->name, 'marcy');
+    $this->assertEquals($cs[2]->student[3]->name, 'ameri');
+  }
+
+  public function testStatementCount()
+  {
+    var_dump(Sabel_Edo_Driver_PdoStatement::$count);
+    var_dump(Sabel_Edo_Driver_PdoStatement::$count1);
   }
 }
 
@@ -707,8 +842,8 @@ class MysqlHelper
   
   protected $tables = array('test', 'test2', 'test3',
                             'customer', 'customer_order', 'order_line',
-                            'customer_telephone',
-                            'infinite1', 'infinite2', 'seq', 'tree');
+                            'customer_telephone', 'infinite1', 'infinite2',
+                            'seq', 'tree', 'student', 'student_course', 'course');
   
   public function __construct()
   {
@@ -771,6 +906,20 @@ class MysqlHelper
                  id INT2 PRIMARY KEY,
                  tree_id INT2,
                  name varchar(12) )';
+
+    $SQLs[] = 'CREATE TABLE student (
+                 id INT4 PRIMARY KEY AUTO_INCREMENT,
+                 name VARCHAR(24) NOT NULL,
+                 birth DATE)';
+    
+    $SQLs[] = 'CREATE TABLE student_course (
+                 student_id INT4 NOT NULL,
+                 course_id INT4 NOT NULL,
+                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+
+    $SQLs[] = 'CREATE TABLE course (
+                 id INT4 PRIMARY KEY AUTO_INCREMENT,
+                 name varchar(24) )';
                 
     $this->sqls = $SQLs;
   }
@@ -957,6 +1106,16 @@ class Customer_Order extends BaseUserRecordObject
 }
 
 class Tree extends BaseTreeRecord
+{
+
+}
+
+class Student extends BaseBridgeRecord
+{
+
+}
+
+class Course extends BaseBridgeRecord
 {
 
 }
