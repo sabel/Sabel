@@ -80,6 +80,7 @@ class Edo_MysqlPgsql_InformationSchema
   {
     $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
 
+    $tables = array();
     foreach ($this->recordObj->execute($sql) as $val) {
       $data      = array_change_key_case($val->toArray());
       $tableName = $data['table_name'];
@@ -98,9 +99,11 @@ class Edo_MysqlPgsql_InformationSchema
   {
     $sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$table}'";
 
+    $columns = array();
     foreach ($this->recordObj->execute($sql) as $val) {
-      $data = array_change_key_case($val->toArray()); 
-      $columns[$data['column_name']] = $this->createColumn($table, $data['column_name']);
+      $data = array_change_key_case($val->toArray());
+      $columnName = $data['column_name']; 
+      $columns[$columnName] = $this->createColumn($table, $columnName);
     }
     return $columns;
   }
@@ -219,21 +222,30 @@ class ColumnObject
 
   public function convertToEdoInteger($type)
   {
-    if ($type === 'tinyint') {
-      $this->data['maxValue'] =  127;
-      $this->data['minValue'] = -128;
-    } else if ($type === 'smallint') {
-      $this->data['maxValue'] =  32767;
-      $this->data['minValue'] = -32768;
-    } else if ($type === 'mediumint') {
-      $this->data['maxValue'] =  8388607;
-      $this->data['minValue'] = -8388608;
-    } else if ($type === 'int' || $type === 'integer') {
-      $this->data['maxValue'] =  2147483647;
-      $this->data['minValue'] = -2147483648;
-    } else if ($type === 'bigint') {
-      $this->data['maxValue'] =  9223372036854775807;
-      $this->data['minValue'] = -9223372036854775808;
+    $data =& $this->data;
+
+    switch($type) {
+      case 'tinyint':
+        $data['maxValue'] =  127;
+        $data['minValue'] = -128;
+        break;
+      case 'smallint':
+        $data['maxValue'] =  32767;
+        $data['minValue'] = -32768;
+        break;
+      case 'mediumint':
+        $data['maxValue'] =  8388607;
+        $data['minValue'] = -8388608;
+        break;
+      case 'int':
+      case 'integer':
+        $data['maxValue'] =  2147483647;
+        $data['minValue'] = -2147483648;
+        break;
+      case 'bigint':
+        $data['maxValue'] =  9223372036854775807;
+        $data['minValue'] = -9223372036854775808;
+        break;
     }
   }
 }
