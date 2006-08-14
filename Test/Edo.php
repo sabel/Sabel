@@ -828,12 +828,6 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
-
-  public function testStatementCount()
-  {
-    var_dump(Sabel_Edo_Driver_PdoStatement::$count);
-    var_dump(Sabel_Edo_Driver_PdoStatement::$count1);
-  }
 }
 
 class MysqlHelper
