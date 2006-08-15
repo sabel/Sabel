@@ -18,7 +18,8 @@ class Edo_InformationSchema_Table
 
   public function __construct($name, $columns)
   {
-    $this->tableName = $name;
+    // @todo これ使ってるん？
+    //$this->tableName = $name;
     $this->columns   = $columns;
   }
 
@@ -75,7 +76,7 @@ class Edo_MysqlPgsql_InformationSchema
     $this->recordObj = new Sabel_Edo_CommonRecord();
     $this->recordObj->setEDO($connectName);
   }
-
+  
   public function getTables()
   {
     $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
