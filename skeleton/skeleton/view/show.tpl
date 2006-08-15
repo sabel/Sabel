@@ -1,1 +1,1 @@
-show
+show <? echo $name ?> <# echo $id #>

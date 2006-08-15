@@ -69,6 +69,8 @@ class ViewGenerator
     ob_start();
     @include($skeleton);
     $contents = ob_get_contents();
+    $contents = str_replace('<#', '<?', $contents);
+    $contents = str_replace('#>', '?>', $contents);
     ob_end_clean();
     fwrite($fp, $contents);
     fclose($fp);

@@ -15,7 +15,7 @@ class HtmlTemplate implements HtmlTemplateService
   
   public function __construct($ins = null)
   {
-    if ($ins instanceOf BaseEngineImpl) {
+    if ($ins instanceof BaseEngineImpl) {
       $this->impl = $ins;
     } else {
       $this->impl = new PhpEngineImpl();
@@ -88,6 +88,20 @@ abstract class BaseEngineImpl
   }
 }
 
+class Re
+{
+  protected static $responses = array();
+  
+  public static function set($name, $value)
+  {
+    self::$responses[$name] = $value;
+  }
+  public static function get()
+  {
+    return self::$responses;
+  }
+}
+
 class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
 {
   protected $attributes;
@@ -110,6 +124,7 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function retrieve()
   {
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
+    extract(Re::get(), EXTR_SKIP);
     ob_start();
     include($this->getTemplateFullPath());
     $content = ob_get_clean();

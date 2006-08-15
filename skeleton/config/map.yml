@@ -1,5 +1,5 @@
 default:
-  uri: :module/:controller/:action
+  uri: :module/:controller/:action/:id
 
 module:     index
 controller: index

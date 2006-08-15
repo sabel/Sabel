@@ -35,7 +35,7 @@ class DirectoryTraverser
           echo "create ${file}\n";
           fwrite(fopen($file, 'w'), file_get_contents($child));
           if ($file == 'logs/sabel.log') {
-            chown('logs/sabel.log', 'www');
+            @chown('logs/sabel.log', 'www');
             chmod('logs/sabel.log', 0777);
           }
         }

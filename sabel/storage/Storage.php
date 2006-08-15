@@ -9,7 +9,7 @@ abstract class Storage
   {
     // @todo ちゃんとやれ
     $instance = new $className();
-    if ($instance instanceOf Storage) {
+    if ($instance instanceof Storage) {
       return $instance;
     } else {
       throw new SabelException($className . " not found");

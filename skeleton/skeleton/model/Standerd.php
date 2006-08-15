@@ -1,13 +1,12 @@
 <#php
 
-class <?php echo $className ?> extends Edo_RecordObject
-
+class <?php echo $className ?> extends Sabel_Edo_RecordObject
 {
   public function show()
   {
   }
   
-  public function list()
+  public function lists()
   {
   }
   
