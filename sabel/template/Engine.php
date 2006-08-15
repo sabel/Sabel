@@ -109,15 +109,9 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function retrieve()
   {
-    $path = $this->getTemplateFullPath();
-    
-    $attributes = $this->attributes;
-    if (count($attributes) != 0) {
-      foreach ($attributes as $name => $value) $$name = $value;
-    }
-    
+    if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
     ob_start();
-    @include($path);
+    include($this->getTemplateFullPath());
     $content = ob_get_clean();
     ob_flush();
     return $content;
@@ -136,12 +130,11 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function display()
   {
-    $this->content_for_layout = $this->retrieve();
-    
-    $this->setTemplateName('layout.phtml');
-    $layout = $this->retrieve();
-    
-    echo $layout;
+    if (is_file($this->tplpath.'layout.tpl')) {
+      $this->content_for_layout = $this->retrieve();
+      $this->setTemplateName('layout.tpl');
+    }
+    echo $this->retrieve();
   }
 }
 
