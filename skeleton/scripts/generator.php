@@ -108,6 +108,7 @@ class Generator
       case 'model':
         print "generate model ${name}\n";
         ModelGenerator::generate($name);
+        FixtureGenerator::generate($name);
         break;
       case 'controller':
         print "generate controller ${name}\n";
