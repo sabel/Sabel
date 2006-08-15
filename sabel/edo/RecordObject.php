@@ -38,7 +38,8 @@ abstract class Sabel_Edo_RecordObject
     $parentTables = array(),
     $selected     = false;
 
-  protected $selectType = self::SELECT_DEFAULT;
+  protected
+    $selectType = self::SELECT_DEFAULT;
 
   protected function getMyEDO()
   {
@@ -59,10 +60,8 @@ abstract class Sabel_Edo_RecordObject
       case 'pdo':
         $pdoDb = Sabel_Edo_DBConnection::getDB($this->connectName);
         return new Sabel_Edo_Driver_Pdo($conn, $pdoDb);
-        break;
       case 'pgsql':
         return new Sabel_Edo_Driver_Pgsql($conn);
-        break;
     }
   }
 
@@ -117,8 +116,7 @@ abstract class Sabel_Edo_RecordObject
 
   public function setProperties($array)
   {
-    foreach ($array as $key => $val)
-      $this->$key = $val;
+    foreach ($array as $key => $val) $this->$key = $val;
   }
 
   public function getStructure()
@@ -164,7 +162,7 @@ abstract class Sabel_Edo_RecordObject
   protected function receiveChildConstraint($constraints)
   {
     if (!is_array($constraints)) throw new Exception('constrains is not array.');
-    
+
     $this->childConstraints = $constraints;
   }
 
@@ -258,7 +256,7 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  public function defaultSelectOne($param1, $param2 = null)
+  protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
     $this->selectCondition = $this->conditions;
@@ -284,8 +282,7 @@ abstract class Sabel_Edo_RecordObject
     $edo->makeQuery($this->conditions, $this->constraints);
 
     if ($edo->execute()) {
-      $row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      if ($row) {
+      if ($row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
         $row = $this->selectWithParent($this->selectType, $row);
         $obj->setProperties($row);
         $obj->selected = true;
@@ -371,7 +368,7 @@ abstract class Sabel_Edo_RecordObject
   protected function getDefaultChild($children, $obj)
   {
     if (!is_array($children)) $children = array($children);
-    
+
     foreach ($children as $val) {
       $this->chooseMyChildConstraint($val, $obj);
       $obj->getChild($val, $obj);
@@ -444,47 +441,21 @@ abstract class Sabel_Edo_RecordObject
   protected function addParentProperties($table, $id, &$row)
   {
     if ($this->getStructure() !== 'tree' && $this->isAcquiredObject($table)) return null;
-
-    $prow = $this->getCachedParentRow($table, $id);
-    if (!$prow) return null;
+    if (!($prow = $this->getCachedParentRow($table, $id))) return null;
 
     foreach ($prow as $key => $val) {
-      if (strpos($key, '_id')) {
-        $ptable = str_replace('_id', '', $key);
-        $row["{$table}_{$key}"] = $val;
-        $this->addParentProperties($ptable, $val, $row);
-      } else {
-        $row["{$table}_{$key}"] = $val;
-      }
+      $row["{$table}_{$key}"] = $val;
+      if (strpos($key, '_id'))
+        $this->addParentProperties(str_replace('_id', '', $key), $val, $row);
     }
-  }
-
-  protected function getCachedParentRow($table, $id)
-  {
-    if (is_array($cache = Sabel_Edo_SimpleCache::get($table.$id))) {
-      $result = $cache;
-    } else {
-      $edo = $this->getMyEDO();
-      $edo->setBasicSQL("SELECT * FROM {$table}");
-      $edo->makeQuery(array($this->defColumn => $id));
-
-      if ($edo->execute()) {
-        $result = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-        Sabel_Edo_SimpleCache::add($table.$id, $result);
-      } else {
-        throw new Exception('Error: addParentObject() execute failed.');
-      }
-    }
-    return $result;
   }
 
   protected function addParentObject($table, $id)
   {
     if ($this->getStructure() !== 'tree' && $this->isAcquiredObject($table)) return null;
 
-    $row = $this->getCachedParentRow($table, $id);
     $obj = $this->newClass($table);
-    if (!$row) return $obj;
+    if (!($row = $this->getCachedParentRow($table, $id))) return $obj;
 
     $obj->selectCondition[$this->defColumn] = $id;
     $obj->selected = true;
@@ -505,12 +476,28 @@ abstract class Sabel_Edo_RecordObject
   protected function isAcquiredObject($table)
   {
     $pt = $this->parentTables;
-    foreach ($pt as $val) {
-      if ($val === $table) return true;
-    }
+    if (in_array($table, $pt)) return true;
+
     $pt[] = $table;
     $this->parentTables = $pt;
     return false;
+  }
+
+  protected function getCachedParentRow($table, $id)
+  {
+    if (!is_array($result = Sabel_Edo_SimpleCache::get($table . $id))) {
+      $edo = $this->getMyEDO();
+      $edo->setBasicSQL("SELECT * FROM {$table}");
+      $edo->makeQuery(array($this->defColumn => $id));
+
+      if ($edo->execute()) {
+        $result = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+        Sabel_Edo_SimpleCache::add($table . $id, $result);
+      } else {
+        throw new Exception('Error: addParentObject() execute failed.');
+      }
+    }
+    return $result;
   }
 
   public function newChild($child = null)
@@ -520,11 +507,10 @@ abstract class Sabel_Edo_RecordObject
       throw new Exception('Error: who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
-    $table = (is_null($child)) ? $parant : $child;
+    $table  = (is_null($child)) ? $parant : $child;
+    $obj    = $this->newClass($table);
 
-    $obj = $this->newClass($table);
-
-    $column = $parent.'_id';
+    $column = $parent . '_id';
     $obj->$column = $id;
     return $obj;
   }
@@ -600,9 +586,8 @@ abstract class Sabel_Edo_RecordObject
     if (!is_array($data))
       throw new Exception('Error: data is not array.');
 
-    if (!$this->edo->executeInsert($this->table, $data, true)) {
+    if (!$this->edo->executeInsert($this->table, $data, true))
       throw new Exception('Error: multipleInsert() execute failed.');
-    }
   }
 
   protected function dataMerge($data)
