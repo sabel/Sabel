@@ -4,11 +4,11 @@ require_once('RecordObject.php');
 
 class Edo_Type
 {
-  const INT       =  0;
-  const STRING    =  5;
-  const BLOB      = 10;
-  const DATE      = 15;
-  const TIMESTAMP = 20;  // pgsql timestamp || (mysql timestamp || datetime)
+  const INT       = 'INT';
+  const STRING    = 'STRING';
+  const BLOB      = 'BLOB';
+  const DATE      = 'DATE';
+  const TIMESTAMP = 'TIMESTAMP';  // pgsql timestamp || (mysql timestamp || datetime)
 }
 
 class Edo_InformationSchema_Table
@@ -18,9 +18,13 @@ class Edo_InformationSchema_Table
 
   public function __construct($name, $columns)
   {
-    // @todo これ使ってるん？
-    //$this->tableName = $name;
+    $this->tableName = $name;
     $this->columns   = $columns;
+  }
+
+  public function getTableName()
+  {
+    return $this->tableName;
   }
 
   public function getColumns()

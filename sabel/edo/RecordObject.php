@@ -27,7 +27,7 @@ abstract class Sabel_Edo_RecordObject
     $connectName   = '',
     $cachedClasses = array(),
     $cachedParent  = array(),
-    $table         = null,
+    $table         = '',
     $structure     = 'normal',
     $projection    = '*',
     $defColumn     = 'id';
@@ -67,7 +67,8 @@ abstract class Sabel_Edo_RecordObject
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->table = strtolower(get_class($this));
+    if ($this->table === '')
+      $this->table = strtolower(get_class($this));
 
     if (isset($param1)) $this->defaultSelectOne($param1, $param2);
   }
@@ -185,7 +186,7 @@ abstract class Sabel_Edo_RecordObject
 
     if ($this->isSpecialParam($param3, $param1)) {
       if (is_null($param2)) throw new Exception('Error: setCondition() Argument 2 is null.');
-      $this->conditions[$param1] = array($param2, $param3); 
+      $this->conditions[$param1] = array($param2, $param3);
     } else if ($this->isDefaultColumnValue($param2)) {
       $this->conditions[$this->defColumn] = $param1;
     } else {
@@ -229,16 +230,11 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  public function getNextNumber()
-  {
-    return $this->edo->getNextNumber($this->table);
-  }
-
   public function aggregate($functions, $child = null)
   {
     if (is_null($child)) {
       $table    = $this->table;
-      $idColumn = 'id';
+      $idColumn = $this->defColumn;
     } else {
       $table    = $child;
       $idColumn = $this->table . '_id';
@@ -457,7 +453,7 @@ abstract class Sabel_Edo_RecordObject
     $obj = $this->newClass($table);
     if (!($row = $this->getCachedParentRow($table, $id))) return $obj;
 
-    $obj->selectCondition[$this->defColumn] = $id;
+    $obj->selectCondition[$obj->defColumn] = $id;
     $obj->selected = true;
 
     foreach ($row as $key => $val) {
@@ -485,6 +481,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function getCachedParentRow($table, $id)
   {
+    if (is_null($id)) return false;
+
     if (!is_array($result = Sabel_Edo_SimpleCache::get($table . $id))) {
       $edo = $this->getMyEDO();
       $edo->setBasicSQL("SELECT * FROM {$table}");
@@ -527,7 +525,7 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  public function killAll($child)
+  public function clearChild($child)
   {
     $id = $this->data[$this->defColumn];
     if (empty($id))
@@ -574,7 +572,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function insert()
   {
-    if ($this->edo->executeInsert($this->table, $this->data, isset($this->data['id']))) {
+    $idValue = $this->data[$this->defColumn];
+    if ($this->edo->executeInsert($this->table, $this->data, isset($idValue))) {
       return $this->edo->getLastInsertId();
     } else {
       throw new Exception('Error: insert() execute failed.');
@@ -622,6 +621,14 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
+  public function inherit($parent, $schema)
+  {
+    $info  = new Edo_InformationSchema($this->connectName, $schema);
+    $table = $info->getTable($parent);
+
+    foreach ($table->getColumns() as $column) $cols[] = $column->name;
+  }
+
   public function execute($sql)
   {
     if ($this->edo->execute($sql)) {
@@ -634,6 +641,8 @@ abstract class Sabel_Edo_RecordObject
 
   protected function toObject($array)
   {
+    if (empty($array)) return null;
+
     $recordObj = array();
     $class = get_class($this);
 

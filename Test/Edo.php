@@ -15,6 +15,7 @@ require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
 require_once "sabel/edo/RecordObject.php";
+require_once "sabel/edo/InformationSchema.php";
 require_once "sabel/edo/DBConnection.php";
 
 require_once "sabel/edo/Query.php";
@@ -34,8 +35,9 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function __construct()
   {
-    //$helper = new PgsqlHelper();
-    $helper = new MysqlHelper();
+    $helper = new PgsqlHelper();
+    //$helper = new MysqlHelper();
+
     $helper->dropTables();
     $helper->createTables();
   }
@@ -64,6 +66,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     foreach ($insertData as $data) {
       $this->customer->multipleInsert($data);
     }
+
     $this->assertEquals($this->customer->getCount(), 2);
     
     $insertData   = array();
@@ -73,11 +76,11 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 4, 'customer_id' => 2);
     $insertData[] = array('id' => 5, 'customer_id' => 1);
     $insertData[] = array('id' => 6, 'customer_id' => 1);
-    
+
     foreach ($insertData as $data) {
       $this->order->multipleInsert($data);
     }
-    
+
     $o = new Sabel_Edo_CommonRecord('customer_order');
     $o->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
     $res = $o->select();
@@ -146,7 +149,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     $obj = $this->test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
-    
+
     $insertData = array();
     $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
     $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
@@ -174,6 +177,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     foreach ($insertData as $data) {
       $this->telephone->multipleInsert($data);
     }
+
     $this->assertEquals($this->orderLine->getCount(), 11);
     
     $tree = new Sabel_Edo_CommonRecord('tree');
@@ -245,6 +249,15 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
     foreach ($insertData as $data) {
       $sc->multipleInsert($data);
+    }
+
+    $users = new Users();
+    $insertData   = array();
+    $insertData[] = array('name' => 'Tarou'  , 'age' => 20, 'location' => 'TOKYO');
+    $insertData[] = array('name' => 'Hanako' , 'age' => 22, 'location' => 'CHIBA');
+
+    foreach ($insertData as $data) {
+      $users->multipleInsert($data);
     }
   }
 
@@ -380,15 +393,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($obj2->blood, 'B');
     $this->assertNotEquals((int)$obj2->test2_id, 2);
   }
-  
-  public function testSelect()
-  {
-    $c = new Customer();
-    for ($i = 0; $i < 10; $i++) {
-      $customer = $c->select();
-    }
-  }
-  
+
   public function testMultipleSelect()
   {
     $obj = new Test();
@@ -641,7 +646,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     //--------------------------------------------------------------------
     
-    $objs[0]->killAll('customer_telephone');
+    $objs[0]->clearChild('customer_telephone');
     
     $cu   = new Customer();
     $cu->setChildConstraint(array('limit' => 10));
@@ -732,7 +737,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     $tree = new Tree();
     $tree->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
-    
+
     $t = $tree->selectOne(3);
     
     $this->assertEquals((int)$t->id, 3);
@@ -742,7 +747,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$t->tree->id, 1);
     $this->assertEquals((int)$t->tree->tree_id, 0);
     $this->assertEquals($t->tree->name, 'A');
-    
+
     $t = $tree->selectOne(5);
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
@@ -828,6 +833,26 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
+
+  public function testInherit()
+  {
+    $u1 = new TestUser1();
+    $u2 = new TestUser2();
+
+    $this->assertEquals($u1->testGetTableName(), $u2->testGetTableName());
+    $this->assertEquals($u1->testGetTableName(), 'users');
+
+    $this->assertNotEquals($u1->getMyClassName(), $u2->getMyClassName());
+    $this->assertEquals($u1->getMyClassName(), 'TestUser1');
+    $this->assertEquals($u2->getMyClassName(), 'TestUser2');
+
+    $users1 = $u1->select();
+    $users2 = $u2->select();
+    $this->assertEquals($users1[0]->name, 'Tarou');
+    $this->assertEquals($users1[1]->name, 'Hanako');
+    $this->assertEquals($users2[0]->name, 'Tarou');
+    $this->assertEquals($users2[1]->name, 'Hanako');
+  }
 }
 
 class MysqlHelper
@@ -837,7 +862,8 @@ class MysqlHelper
   protected $tables = array('test', 'test2', 'test3',
                             'customer', 'customer_order', 'order_line',
                             'customer_telephone', 'infinite1', 'infinite2',
-                            'seq', 'tree', 'student', 'student_course', 'course');
+                            'seq', 'tree', 'student', 'student_course',
+                            'course', 'users');
   
   public function __construct()
   {
@@ -899,7 +925,7 @@ class MysqlHelper
     $SQLs[] = 'CREATE TABLE tree (
                  id INT2 PRIMARY KEY,
                  tree_id INT2,
-                 name varchar(12) )';
+                 name VARCHAR(12) )';
 
     $SQLs[] = 'CREATE TABLE student (
                  id INT4 PRIMARY KEY AUTO_INCREMENT,
@@ -913,8 +939,14 @@ class MysqlHelper
 
     $SQLs[] = 'CREATE TABLE course (
                  id INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name varchar(24) )';
+                 name VARCHAR(24) )';
                 
+    $SQLs[] = 'CREATE TABLE users (
+                 id INT4 PRIMARY KEY AUTO_INCREMENT,
+                 name VARCHAR(24) NOT NULL,
+                 age INT2 NOT NULL,
+                 location VARCHAR(24) )';
+
     $this->sqls = $SQLs;
   }
   
@@ -940,18 +972,23 @@ class MysqlHelper
 class PgsqlHelper
 {
   protected $sqls = null;
+
   protected $tables = array('test', 'test2', 'test3',
                             'customer', 'customer_order', 'order_line',
-                            'customer_telephone',
-                            'infinite1', 'infinite2', 'seq', 'tree');
+                            'customer_telephone', 'infinite1', 'infinite2',
+                            'seq', 'tree', 'student', 'student_course',
+                            'course', 'users');
                             
   public function __construct()
   {
     $dbCon = array();
-    $dbCon['dsn']  = 'pgsql:host=127.0.0.1;dbname=edo';
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
     Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+
+    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
+    //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
     
     $SQLs = array();
     
@@ -962,50 +999,70 @@ class PgsqlHelper
                  test2_id INT2)';
     
     $SQLs[] = 'CREATE TABLE test2 (
-                 id SERIAL PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL,
-                 test3_id int2)';
+                 id       SERIAL PRIMARY KEY,
+                 name     VARCHAR(32) NOT NULL,
+                 test3_id INT2)';
                  
     $SQLs[] = 'CREATE TABLE test3 (
-                id SERIAL PRIMARY KEY,
+                id   SERIAL PRIMARY KEY,
                 name VARCHAR(32) NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer (
-                id SERIAL PRIMARY KEY,
+                id   SERIAL PRIMARY KEY,
                 name VARCHAR(32) NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_order (
-                id SERIAL PRIMARY KEY,
+                id          SERIAL PRIMARY KEY,
                 customer_id INT2 NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE order_line (
-                id SERIAL PRIMARY KEY,
+                id                SERIAL PRIMARY KEY,
                 customer_order_id INT2 NOT NULL,
-                amount INT4 NOT NULL,
-                item_id INT2 NOT NULL)';
+                amount            INT4 NOT NULL,
+                item_id           INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_telephone (
-                id SERIAL PRIMARY KEY,
+                id SERIAL   PRIMARY KEY,
                 customer_id INT2 NOT NULL,
-                telephone VARCHAR(32))';
+                telephone   VARCHAR(32))';
                 
     $SQLs[] = 'CREATE TABLE infinite1 (
-                id SERIAL PRIMARY KEY,
+                id           SERIAL PRIMARY KEY,
                 infinite2_id INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE infinite2 (
-                id SERIAL PRIMARY KEY,
+                id           SERIAL PRIMARY KEY,
                 infinite1_id int2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE seq (
-                 id SERIAL PRIMARY KEY,
+                 id   SERIAL PRIMARY KEY,
                  text VARCHAR(65536) NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE tree (
-                 id SERIAL PRIMARY KEY,
+                 id      SERIAL PRIMARY KEY,
                  tree_id INT2,
-                 name varchar(12) )';
+                 name    VARCHAR(12) )';
                 
+    $SQLs[] = 'CREATE TABLE student (
+                 id    SERIAL PRIMARY KEY,
+                 name  VARCHAR(24) NOT NULL,
+                 birth DATE)';
+    
+    $SQLs[] = 'CREATE TABLE student_course (
+                 student_id INT4 NOT NULL,
+                 course_id  INT4 NOT NULL,
+                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+
+    $SQLs[] = 'CREATE TABLE course (
+                 id   SERIAL PRIMARY KEY,
+                 name VARCHAR(24) )';
+                
+    $SQLs[] = 'CREATE TABLE users (
+                 id       SERIAL PRIMARY KEY,
+                 name     VARCHAR(24) NOT NULL,
+                 age      INT2 NOT NULL,
+                 location VARCHAR(24) )';
+
     $this->sqls = $SQLs;
   }
   
@@ -1027,6 +1084,8 @@ class PgsqlHelper
     }
   }
 }
+
+//-----------------------------------------------------------------
 
 abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 {
@@ -1050,12 +1109,6 @@ abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
   }
 }
 
-abstract class BaseMailRecordObject extends Sabel_Edo_RecordObject
-{
-
-}
-
-// for unit-test
 class Test extends BaseUserRecordObject
 {
   protected $selectType = Sabel_Edo_RecordObject::WITH_PARENT_OBJECT;
@@ -1112,6 +1165,51 @@ class Student extends BaseBridgeRecord
 class Course extends BaseBridgeRecord
 {
 
+}
+
+class Users extends BaseUserRecordObject
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->table = 'users';
+    parent::__construct($param1, $param2);
+  }
+}
+
+class TestUser1 extends Users
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    parent::__construct($param1, $param2);
+  }
+
+  public function getMyClassName()
+  {
+    return get_class($this);
+  }
+
+  public function testGetTableName()
+  {
+    return $this->table;
+  }
+}
+
+class TestUser2 extends Users
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    parent::__construct($param1, $param2);
+  }
+
+  public function getMyClassName()
+  {
+    return get_class($this);
+  }
+
+  public function testGetTableName()
+  {
+    return $this->table;
+  }
 }
 
 if (PHPUnit2_MAIN_METHOD == "Test_Edo::main") {

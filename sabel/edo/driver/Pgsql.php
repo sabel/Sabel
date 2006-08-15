@@ -174,7 +174,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
         throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
       } else {
         $sql = $this->sqlObj->getSQL();
-        if ($this->stmt = pg_prepare($this->conn, "", $sql)) {
+        if ($this->stmt = pg_prepare($this->conn, '', $sql)) {
           Sabel_Edo_Driver_PgsqlStatement::addStatement($this->stmt);
         } else {
           throw new Exception('Error: PgsqlStatement is null.');
@@ -188,7 +188,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->makeBindParam();
 
     try {
-      if (!($this->result = pg_execute($this->conn, "", $this->param))) {
+      if (!($this->result = pg_execute($this->conn, '', $this->param))) {
         throw new Exception('Error: Edo_Driver_Pgsql::execute()');
         return false;
       } else {
@@ -198,7 +198,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
       }
     } catch (Exception $e) {
       print_r($e->getMessage()."\n");
-      print_r($tmp);
+      print_r($this->param);
       //print_r($e->getTrace());
     }
   }
