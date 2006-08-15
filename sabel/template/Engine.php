@@ -117,6 +117,10 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function retrieve()
   {
+    uses('sabel.edo.InformationSchema');
+    $is = new Edo_InformationSchema('default', 'default');
+    $table = $is->getTable('blog');
+    
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
     extract(Re::get(), EXTR_SKIP);
     ob_start();

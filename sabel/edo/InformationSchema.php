@@ -6,6 +6,7 @@ class Edo_Type
 {
   const INT       = 'INT';
   const STRING    = 'STRING';
+  const TEXT      = 'TEXT';
   const BLOB      = 'BLOB';
   const DATE      = 'DATE';
   const TIMESTAMP = 'TIMESTAMP';  // pgsql timestamp || (mysql timestamp || datetime)
@@ -148,14 +149,19 @@ class Edo_MysqlPgsql_InformationSchema
     if (in_array($type, $this->getNumericTypes())) {
       $co->type = Edo_Type::INT;
       $co->convertToEdoInteger($columnRecord['data_type']);
+      return $co;
     }
 
     if (in_array($type, $this->getStringTypes())) {
       $co->type = Edo_Type::STRING;
       $this->addStringLength($co, $columnRecord);
+      return $co;
     }
-
-    return $co;
+    
+    if (in_array($type, $this->getTextTypes())) {
+      $co->type = Edo_Type::TEXT;
+      return $co;
+    }
   }
 }
 
@@ -168,7 +174,12 @@ class Edo_Mysql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 
   public function getStringTypes()
   {
-    return array('text', 'mediumtext', 'varchar', 'char');
+    return array('varchar', 'char');
+  }
+  
+  public function getTextTypes()
+  {
+    return array('text', 'mediumtext', 'tinytext');
   }
 
   public function getBinaryTypes()
@@ -201,7 +212,12 @@ class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
 
   public function getStringTypes()
   {
-    return array('text', 'character varying', 'varchar', 'character', 'char');
+    return array('character varying', 'varchar', 'character', 'char');
+  }
+  
+  public function getTextTypes()
+  {
+    return array('text');
   }
 
   public function getBinaryTypes()
