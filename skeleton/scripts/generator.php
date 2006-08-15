@@ -41,6 +41,26 @@ class ControllerGenerator
   }
 }
 
+class FixtureGenerator
+{
+  public static function generate($name)
+  {
+    $name = strtolower($name);
+    $target = "fixtures/${name}.php";
+    echo "generate $target \n";
+    $fp = fopen($target, 'w');
+    $name = $name;
+    
+    ob_start();
+    @include("skeleton/fixture/Standerd.php");
+    $contents = ob_get_contents();
+    ob_end_clean();
+    $contents = str_replace('#php', '?php', $contents);
+    fwrite($fp, $contents);
+    fclose($fp);
+  }
+}
+
 class ViewGenerator
 {
   public static function generate($type, $name)
@@ -106,6 +126,7 @@ class Generator
         ViewGenerator::generate('show',   $name);
         ViewGenerator::generate('edit',   $name);
         ViewGenerator::generate('delete', $name);
+        FixtureGenerator::generate($name);
         break;
       default:
         break;

@@ -3,6 +3,16 @@
 uses('sabel.template.Director');
 uses('sabel.template.Engine');
 
+$conf = new Sabel_Config_Yaml(RUN_BASE.'/config/database.yml');
+$dev = $conf->read('development');
+$fm = '%s:host=%s;dbname=%s';
+$con['dsn'] = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
+$con['user'] = $dev['user'];
+$con['pass'] = $dev['password'];
+
+Sabel_Edo_DBConnection::addConnection('default', 'pdo', $con);
+uses('sabel.edo.RecordObject');
+
 /**
  * page controller base class.
  *

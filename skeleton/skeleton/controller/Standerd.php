@@ -16,10 +16,8 @@ class Index_<? echo $controllerName ?> extends Sabel_Controller_Page
   
   public function show()
   {
-    $id = $this->request->getByName('id');
-    $person = new Person();
+    $person = new <? echo ucfirst($controllerName) ?>($this->request->getByName('id'));
     Re::set('<? echo $controllerName ?>', $<? echo $controllerName ?>);
-    Re::set('id', $id);
   }
   
   public function edit()

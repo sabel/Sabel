@@ -26,10 +26,31 @@ class Fixture
     $con['pass'] = $dev['password'];
 
     Sabel_Edo_DBConnection::addConnection('default', 'pdo', $con);
+    uses('sabel.edo.RecordObject');
   }
   
   public function command()
   {
+    $target = $_SERVER['argv'][1];
+    echo "\n";
+    require_once("fixtures/{$target}.php");
+    $fixtureClass = 'Fixture_'.$target;
+    $fixture = new $fixtureClass();
+    
+    try {
+      $fixture->drop();
+      echo "DROP TABLE $target.\n";
+    } catch (Exception $e) {
+      echo "drop failed because $target table does not exists.\n";
+    }
+    
+    try {
+      $fixture->create();
+      echo "CREATE TABLE $target.\n";
+    } catch (Exception $e) {
+      echo "cant't create table $target.\n";
+    }
+    
     
   }
 }
