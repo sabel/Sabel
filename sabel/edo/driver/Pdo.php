@@ -34,21 +34,11 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function setUpdateSQL($table, $data)
   {
+    $sql = array();
     $this->data = $data;
 
-    $sql = array("UPDATE {$table} SET");
-    $set = false;
-
-    foreach ($data as $key => $val) {
-      if (!$set) {
-        array_push($sql, " {$key}=:{$key}");
-        $set = true;
-      } else {
-        array_push($sql, ",{$key}=:{$key}");
-      }
-    }
-
-    $this->sqlObj->setBasicSQL(implode('', $sql));
+    foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
+    $this->sqlObj->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
   }
 
   public function setAggregateSQL($table, $idColumn, $functions)
@@ -59,7 +49,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
 
     array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
-    $this->sqlObj->setBasicSQL(implode('', $sql));
+    $this->sqlObj->setBasicSQL(join('', $sql));
   }
 
   public function executeInsert($table, $data, $id_exist = null)
@@ -71,50 +61,36 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     if ($table === 'order_line') $this->disp = true;
 
+    $columns = array();
+    foreach ($data as $key => $val) array_push($columns, $key);
+
+    $values = array();
+    foreach ($data as $key => $val) array_push($values, ":{$key}");
+
     $sql = array("INSERT INTO {$table}(");
-    $set = false;
-
-    foreach ($data as $key => $val) {
-      if (!$set) {
-        array_push($sql, "{$key}");
-        $set = true;
-      } else {
-        array_push($sql, ",{$key}");
-      }
-    }
-
+    array_push($sql, join(',', $columns));
     array_push($sql, ") VALUES(");
-    $set = false;
-
-    foreach ($data as $key => $val) {
-      if (!$set) {
-        array_push($sql, ":{$key}");
-      } else {
-        array_push($sql, ",:{$key}");
-      }
-      $set = true;
-    }
-
+    array_push($sql, join(',', $values));
     array_push($sql, ');');
 
-    $this->stmtFlag = Sabel_Edo_Driver_PdoStatement::statement_exists(implode('', $sql), $data);
+    $this->stmtFlag = Sabel_Edo_Driver_PdoStatement::statement_exists(join('', $sql), $data);
 
-    if (!$this->stmtFlag)
-      $this->sqlObj->setBasicSQL(implode('', $sql));
+    if (!$this->stmtFlag) $this->sqlObj->setBasicSQL(join('', $sql));
 
     return $this->execute();
   }
 
   public function getLastInsertId()
   {
-    if ($this->myDb === 'pgsql') {
-      return $this->lastInsertId;
-    } elseif ($this->myDb === 'mysql') {
-      $this->execute('SELECT last_insert_id()');
-      $row = $this->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      return $row['last_insert_id()'];
-    } else {
-      return 'todo else';
+    switch ($this->myDb) {
+      case 'pgsql':
+        return $this->lastInsertId;
+      case 'mysql':
+        $this->execute('SELECT last_insert_id()');
+        $row = $this->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+        return $row['last_insert_id()'];
+      default:
+        return 'todo else';
     }
   }
 
@@ -142,21 +118,21 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
         $check = false;
         if ($val[0] == '>' || $val[0] == '<') {
           $this->sqlObj->makeLess_GreaterSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
+        } else if (strstr($key, Sabel_Edo_Driver_Interface::IN)) {
           $key = str_replace(Sabel_Edo_Driver_Interface::IN, '', $key);
           $this->sqlObj->makeWhereInSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
+        } else if (strstr($key, Sabel_Edo_Driver_Interface::BET)) {
           $key = str_replace(Sabel_Edo_Driver_Interface::BET, '', $key);
           $this->sqlObj->makeBetweenSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
+        } else if (strstr($key, Sabel_Edo_Driver_Interface::EITHER)) {
           $key = str_replace(Sabel_Edo_Driver_Interface::EITHER, '', $key);
           $this->sqlObj->makeEitherSQL($key, $val);
-        } elseif (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
+        } else if (strstr($key, Sabel_Edo_Driver_Interface::LIKE)) {
           $key = str_replace(Sabel_Edo_Driver_Interface::LIKE, '', $key);
           $this->sqlObj->makeLikeSQL($key, $val);
-        } elseif (strtolower($val) == 'null') {
+        } else if (strtolower($val) === 'null') {
           $this->sqlObj->makeIsNullSQL($key);
-        } elseif (strtolower($val) == 'not null') {
+        } else if (strtolower($val) === 'not null') {
           $this->sqlObj->makeIsNotNullSQL($key);
         } else {
           $this->sqlObj->makeNormalConditionSQL($key, $val);
@@ -174,18 +150,18 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   {
     if (isset($sql)) {
       $this->stmt = $this->pdo->prepare($sql);
-    } elseif ($this->stmtFlag) {
+    } else if ($this->stmtFlag) {
       $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
-    } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
-      print_r('Error: query not exist. execute EDO::makeQuery() beforehand');
+    } else if (is_null($this->sqlObj->getSQL())) {
+      // @todo test case make.
+      throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
       $sql = $this->sqlObj->getSQL();
       if ($this->stmt = $this->pdo->prepare($sql)) {
         Sabel_Edo_Driver_PdoStatement::addStatement($this->stmt);
       } else {
-        print_r('Error: PDOStatement is null.');
-        print_r($sql."\n");
-        print_r($this->pdo->errorInfo());
+        // @todo test case make.
+        throw new Exception('PDOStatement is null. sql : ' . $sql);
       }
     }
 
@@ -198,19 +174,16 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       $this->param = array();
     }
 
-    if (!$result) {
-      print_r('Error: PDOStatement::execute()');
-      print_r($this->stmt);
-      print_r($this->param);
-      print_r($this->stmt->errorInfo());
-    } else {
+    if ($result) {
       return true;
+    } else {
+      throw new Exception('Error: PDOStatement::execute()');
     }
   }
 
   public function fetch($style = null)
   {
-    if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
       $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
     } else {
       $result = $this->stmt->fetch(PDO::FETCH_BOTH);
@@ -221,7 +194,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   public function fetchAll($style = null)
   {
-    if ($style == Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_Edo_Driver_Interface::FETCH_ASSOC) {
       return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
       return $this->stmt->fetchAll(PDO::FETCH_BOTH);
@@ -230,39 +203,38 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
   private function makeBindParam()
   {
-    $this->param = $this->sqlObj->getParam();
+    $param = $this->sqlObj->getParam();
+    $data  = $this->data;
 
-    if (!empty($this->param) && !empty($this->data)) {
-      $this->param = array_merge($this->param, $this->data);
-    } else {
-      if (!empty($this->data)) $this->param = $this->data;
-    }
+    if (!empty($data))
+      $param = (empty($param)) ? $data : array_merge($param, $data);
 
-    if (!empty($this->param)) {
-      foreach ($this->param as $key => $val) {
+    if (!empty($param)) {
+      foreach ($param as $key => $val) {
         if (is_null($val)) continue;
-        
-        $this->param[":{$key}"] = $val;
-        unset($this->param["{$key}"]);
+
+        $param[":{$key}"] = $val;
+        unset($param[$key]);
       }
     }
 
+    $this->param = $param;
     $this->data  = array();
     $this->sqlObj->unsetProparties();
   }
 }
 
-class PdoQuery 
+class PdoQuery
 {
-  private $sql, $set;
+  private $sql = array();
+  private $set = null;
 
   private $keyArray = array();
   private $param    = array();
 
   public function getSQL()
   {
-    if (is_array($this->sql))
-      return implode('', $this->sql);
+    if (is_array($this->sql)) return join('', $this->sql);
   }
 
   public function setBasicSQL($sql)
@@ -297,14 +269,14 @@ class PdoQuery
 
   public function makeWhereInSQL($key, $val)
   {
-    $this->setWhereQuery($key . ' IN (' . implode(',', $val) . ')');
+    $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
   public function makeLikeSQL($key, $val)
   {
     $bindKey = $this->bindKey_exists($key);
     $this->setWhereQuery("{$key} LIKE :{$bindKey}");
-    $this->param[$bindKey] = str_replace('_', '\_', $val); 
+    $this->param[$bindKey] = str_replace('_', '\_', $val);
   }
 
   public function makeBetweenSQL($key, $val)
@@ -332,7 +304,7 @@ class PdoQuery
       $query .= "{$key}=:{$bindKey}";
       $this->param[$bindKey]  = $val1;
     }
-    
+
     $query .= ' OR ';
 
     if ($val2[0] === '<' || $val2[0] === '>') {
@@ -345,14 +317,14 @@ class PdoQuery
       $this->param[$bindKey2] = $val2;
     }
     $query .= ')';
-    
+
     $this->setWhereQuery($query);
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
     $bindKey = $this->bindKey_exists($key);
-    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}"); 
+    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}");
     $this->param[$bindKey] = trim(substr($val, 1));
   }
 
@@ -379,7 +351,7 @@ class PdoQuery
     $this->keyArray = array();
     $this->set      = false;
   }
-  
+
   protected function setWhereQuery($query)
   {
     if ($this->set) {
@@ -401,18 +373,17 @@ class Sabel_Edo_Driver_PdoStatement
   public static function statement_exists($sql, $conditions, $constraints = null)
   {
     $result = true;
-    if (!empty($conditions))
-      $keys = array_keys($conditions);
-    
-    if (self::$sql         != $sql  || 
-        self::$keys        != $keys || 
-        self::$constraints != $constraints) { 
+    if (!empty($conditions)) $keys = array_keys($conditions);
+
+    if (self::$sql         != $sql  ||
+        self::$keys        != $keys ||
+        self::$constraints != $constraints) {
 
       self::$sql         = $sql;
       self::$keys        = $keys;
       self::$constraints = $constraints;
       $result = false;
-    }        
+    }
 
     return $result;
   }
