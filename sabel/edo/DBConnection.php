@@ -7,23 +7,24 @@ class Sabel_Edo_DBConnection
   public static function addConnection($connectName ,$useEdoDriver, $connection)
   {
     if ($useEdoDriver === 'pdo') {
-      if(!is_array($connection)) {
-        throw new Exception('DBConnection::addConnection() invalid Parameter. when use pdo, 3rd Argument must be array.');
+      if(is_array($connection)) {
+        $dsn = $connection['dsn'];
+        
+        $list['conn']   = new PDO($dsn, $connection['user'], $connection['pass']);
+        $list['driver'] = $useEdoDriver;
+        $list['db']     = substr($dsn, 0, strpos($dsn, ':'));
+        self::$connList[$connectName] = $list;
       } else {
-        $splited = split(':', $connection['dsn']);
-
-        $conn = new PDO($connection['dsn'], $connection['user'], $connection['pass']);
-        self::$connList[$connectName]['conn']   = $conn;
-        self::$connList[$connectName]['driver'] = $useEdoDriver;
-        self::$connList[$connectName]['db']     = $splited[0];
+        throw new Exception('DBConnection::addConnection() invalid Parameter. when use pdo, 3rd Argument must be array.');
       }
     } else {
-      if(is_array($connection)) {
-        throw new Exception('DBConnection::addConnection() invalid Parameter. 3rd Argument must be string.');
+      if(!is_array($connection)) {
+        $list['conn']   = $connection;
+        $list['driver'] = $useEdoDriver;
+        $list['db']     = $useEdoDriver;
+        self::$connList[$connectName] = $list; 
       } else {
-        self::$connList[$connectName]['conn']   = $connection;
-        self::$connList[$connectName]['driver'] = $useEdoDriver;
-        self::$connList[$connectName]['db']     = $useEdoDriver;
+        throw new Exception('DBConnection::addConnection() invalid Parameter. 3rd Argument must be string.');
       }
     }
   }
