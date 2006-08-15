@@ -15,19 +15,13 @@ class HtmlTemplate implements HtmlTemplateService
   
   public function __construct($ins = null)
   {
-    if ($ins instanceof BaseEngineImpl) {
-      $this->impl = $ins;
-    } else {
-      $this->impl = new PhpEngineImpl();
-    }
+    $this->impl = ($ins instanceof BaseEngineImpl) ? $ins : new PhpEngineImpl();
     $this->impl->configuration();
   }
   
   public function changeEngine($inc)
   {
-    if ($ins instanceof BaseEngineImpl) {
-      $this->impl = $inc;
-    }
+    if ($ins instanceof BaseEngineImpl) $this->impl = $inc;
   }
   
   public function assign($key ,$value)
@@ -135,7 +129,7 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function load_template($name)
   {
     $t = clone $this;
-    $t->setTemplateName($name.'.tpl');
+    $t->setTemplateName($name . '.tpl');
     echo $t->retrieve();
   }
   
@@ -145,7 +139,7 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function display()
   {
-    if (is_file($this->tplpath.'layout.tpl')) {
+    if (is_file($this->tplpath . 'layout.tpl')) {
       $this->content_for_layout = $this->retrieve();
       $this->setTemplateName('layout.tpl');
     }
