@@ -1,29 +1,29 @@
 <?php
 
 /**
- * Sabel_Request_URI
+ * Sabel_Request_Uri
  * 
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Request_URI
+class Sabel_Request_Uri
 {
-  protected $request;
+  protected $request = '';
   
   /**
    * @var array parts of uri. separate by slash (/)
    */
   protected $parts = array();
+  protected $entry = null;
   
   protected $parameters = null;
   
-  protected $entry = null;
   
   public function __construct($requestUri = null, $entry = null)
   {
-    $this->entry = $entry;
-    
+    $this->entry   = $entry; 
     $this->request = ($requestUri) ? $requestUri : self::getUri();
+    
     if ($this->hasUriParameters()) {
       $uriAndParameters = explode('?', $this->request);
       $this->parts = explode('/', $uriAndParameters[0]);
@@ -41,11 +41,7 @@ class Sabel_Request_URI
   {
     if (strpos($this->request, '?')) {
       $uriAndParameters = explode('?', $this->request);
-      if (!empty($uriAndParameters[1])) {
-        return true;
-      } else {
-        return false;
-      }
+      return (empty($uriAndParameters[1])) ? false : true;
     } else {
       return false;
     }
@@ -87,7 +83,7 @@ class Sabel_Request_URI
   
   public function hasParameters()
   {
-    return (!is_null($this->parameters));
+    return (isset($this->parameters));
   }
   
   public function getParameters()

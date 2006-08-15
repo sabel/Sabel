@@ -1,4 +1,4 @@
-    <?php
+<?php
 
 /**
  * undecumented class
@@ -10,8 +10,6 @@ class Sabel
 {
   public static function main()
   {
-      
-
     $frontController = new Sabel_Controller_Front();
     $frontController->ignition();
   }
