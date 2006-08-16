@@ -84,6 +84,9 @@ class ViewGenerator
       case 'delete':
         $skeleton = 'skeleton/view/delete.tpl';
         break;
+      case 'create':
+        $skeleton = 'skeleton/view/create.tpl';
+        break;
     }
     
     ob_start();
@@ -127,6 +130,7 @@ class Generator
         ViewGenerator::generate('show',   $name);
         ViewGenerator::generate('edit',   $name);
         ViewGenerator::generate('delete', $name);
+        ViewGenerator::generate('create', $name);
         FixtureGenerator::generate($name);
         break;
       default:

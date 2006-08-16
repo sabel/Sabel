@@ -1,20 +1,20 @@
 production:
-  driver: pgsql
+  driver: mysql
   host: localhost
   database: default
   user: root
-  password: root
+  password: 
   
 development:
-  driver: pgsql
+  driver: mysql
   host: localhost
   database: default
   user: root
-  password: root
+  password:
   
 test:
-  driver: pgsql
+  driver: mysql
   host: localhost
   database: default
   user: root
-  password: root
+  password: 
