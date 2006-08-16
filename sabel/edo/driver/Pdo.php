@@ -153,14 +153,12 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_Edo_Driver_PdoStatement::getStatement();
     } else if (is_null($this->sqlObj->getSQL())) {
-      // @todo test case make.
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
       $sql = $this->sqlObj->getSQL();
       if ($this->stmt = $this->pdo->prepare($sql)) {
         Sabel_Edo_Driver_PdoStatement::addStatement($this->stmt);
       } else {
-        // @todo test case make.
         throw new Exception('PDOStatement is null. sql : ' . $sql);
       }
     }

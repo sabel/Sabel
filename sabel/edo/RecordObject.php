@@ -25,7 +25,6 @@ abstract class Sabel_Edo_RecordObject
   protected
     $edo           = null,
     $connectName   = '',
-    $cachedClasses = array(),
     $cachedParent  = array(),
     $table         = '',
     $structure     = 'normal',
@@ -194,12 +193,12 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
-  protected function isSpecialParam($param3, $param1)
+  private function isSpecialParam($param3, $param1)
   {
     return (isset($param3) && !is_array($param1));
   }
 
-  protected function isDefaultColumnValue($param2)
+  private function isDefaultColumnValue($param2)
   {
     return is_null($param2);
   }
@@ -280,13 +279,12 @@ abstract class Sabel_Edo_RecordObject
     if ($edo->execute()) {
       if ($row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
         $row = $this->selectWithParent($this->selectType, $row);
-        $obj->setProperties($row);
-        $obj->selected = true;
+        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
 
         $myChild = $this->getMyChildren();
         if (isset($myChild)) $this->getDefaultChild($myChild, $obj);
       } else {
-        $obj->data = $this->selectCondition;
+        $obj->data = $this->conditions;
       }
       $this->constraints = array();
       $this->conditions  = array();
@@ -328,23 +326,16 @@ abstract class Sabel_Edo_RecordObject
       if (!$rows) return null;
 
       $recordObj = array();
-      $class     = get_class($this);
 
       foreach ($rows as $row) {
         if (is_null($child_table)) {
-          $obj = new $class();
+          $obj = $this->newClass(get_class($this));
           $obj->receiveChildConstraint($this->childConstraints);
         } else {
-          if (class_exists($child_table)) {
-            $obj = new $child_table();
-          } else {
-            $obj = new Sabel_Edo_CommonRecord($child_table);
-          }
+          $obj = $this->newClass($child_table);
         }
         $row = $this->selectWithParent($this->selectType, $row);
-
-        $obj->setProperties($row);
-        $obj->selected = true;
+        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
 
         $myChild = $obj->getMyChildren();
         if (isset($myChild)) {
@@ -453,9 +444,6 @@ abstract class Sabel_Edo_RecordObject
     $obj = $this->newClass($table);
     if (!($row = $this->getCachedParentRow($table, $id))) return $obj;
 
-    $obj->selectCondition[$obj->defColumn] = $id;
-    $obj->selected = true;
-
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $key = str_replace('_id', '', $key);
@@ -464,12 +452,19 @@ abstract class Sabel_Edo_RecordObject
         $row[$key] = $val;
       }
     }
-    $obj->setProperties($row);
+    $this->setSelectedProperty($obj, $id, $row);
     $obj->newData = array();
     return $obj;
   }
 
-  protected function isAcquiredObject($table)
+  private function setSelectedProperty($obj, $id, $row)
+  {
+    $obj->selectCondition[$obj->defColumn] = $id;
+    $obj->setProperties($row);
+    $obj->selected = true;
+  }
+
+  private function isAcquiredObject($table)
   {
     $pt = $this->parentTables;
     if (in_array($table, $pt)) return true;
@@ -515,13 +510,10 @@ abstract class Sabel_Edo_RecordObject
 
   protected function newClass($name)
   {
-    $classes = (empty($this->cachedClasses)) ? get_declared_classes() : $this->cachedClasses;
-    $this->cachedClasses = $classes;
-
-    if (isset($classes[$name]) && $name !== 'Sabel_Edo_CommonRecord') {
+    if (class_exists($name, false) && strtolower($name) !== 'sabel_edo_commonrecord') {
       return new $name();
     } else {
-      return new Sabel_Edo_CommonRecord($name);
+      return new Sabel_Edo_CommonRecord($this->table);
     }
   }
 
@@ -604,11 +596,16 @@ abstract class Sabel_Edo_RecordObject
 
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) && is_null($this->conditions))
+    $idValue = $this->selectCondition[$this->defColumn];
+
+    if (is_null($param1) && empty($this->conditions) && is_null($idValue))
       throw new Exception("Error: remove() [WHERE] must be set condition");
 
-    if (isset($param1))
+    if (isset($param1)) {
       $this->setCondition($param1, $param2, $param3);
+    } else {
+      $this->setCondition($this->defColumn, $idValue);
+    }
 
     $this->edo->setBasicSQL("DELETE FROM {$this->table}");
     $this->edo->makeQuery($this->conditions, $this->constraints);
@@ -619,14 +616,6 @@ abstract class Sabel_Edo_RecordObject
     } else {
       throw new Exception('Error: remove() execute failed.');
     }
-  }
-
-  public function inherit($parent, $schema)
-  {
-    $info  = new Edo_InformationSchema($this->connectName, $schema);
-    $table = $info->getTable($parent);
-
-    foreach ($table->getColumns() as $column) $cols[] = $column->name;
   }
 
   public function execute($sql)

@@ -1,14 +1,11 @@
 <?php
 
-// Call PersonTest::main() if this source file is executed directly.
 if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
 }
 
 require_once "PHPUnit2/Framework/TestCase.php";
 require_once "PHPUnit2/Framework/TestSuite.php";
-
-// You may remove the following line when all tests have been implemented.
 require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
 require_once('sabel/Functions.php');
@@ -35,8 +32,8 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function __construct()
   {
-    $helper = new PgsqlHelper();
-    //$helper = new MysqlHelper();
+    //$helper = new PgsqlHelper();
+    $helper = new MysqlHelper();
 
     $helper->dropTables();
     $helper->createTables();
@@ -349,6 +346,17 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $obj = $this->test->selectOne(7);
     $this->assertNotEquals($obj->blood, 'AB');
     $this->assertEquals($obj->blood, null);
+
+    $t = new Test(99);
+    $this->assertEquals($t->is_selected(), false);
+    $t->name     = 'test99';
+    $t->blood    = 'C';
+    $t->test2_id = '3';
+    $t->save();
+
+    $t = new Test(99);
+    $this->assertEquals($t->is_selected(), true);
+    $t->remove();
   }
   
   public function testCondition()
@@ -706,11 +714,6 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $id = $seq->save();
   }
 
-  public function testTest()
-  {
-    class_exists('TestTestTes');
-  }
-  
   public function testTree()
   {
     $tree  = new Tree();
@@ -981,14 +984,14 @@ class PgsqlHelper
                             
   public function __construct()
   {
-    $dbCon = array();
-    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
-    $dbCon['user'] = 'pgsql';
-    $dbCon['pass'] = 'pgsql';
-    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    //$dbCon = array();
+    //$dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
+    //$dbCon['user'] = 'pgsql';
+    //$dbCon['pass'] = 'pgsql';
+    //Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
 
-    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
-    //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
+    $dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
+    Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
     
     $SQLs = array();
     
