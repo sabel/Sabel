@@ -26,7 +26,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   public static function main() {
     require_once "PHPUnit2/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit2_Framework_TestSuite("PersonTest");
+    $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
 
@@ -250,11 +250,59 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
     $users = new Users();
     $insertData   = array();
-    $insertData[] = array('name' => 'Tarou'  , 'age' => 20, 'location' => 'TOKYO');
-    $insertData[] = array('name' => 'Hanako' , 'age' => 22, 'location' => 'CHIBA');
+    $insertData[] = array('name' => 'Tarou'  , 'status_id' => 1);
+    $insertData[] = array('name' => 'Hanako' , 'status_id' => 2);
+    $insertData[] = array('name' => 'Maruo'  , 'status_id' => 1);
+    $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
 
     foreach ($insertData as $data) {
       $users->multipleInsert($data);
+    }
+
+    $s = new Sabel_Edo_CommonRecord('status');
+    $s->state = 'normal';
+    $s->save();
+    $s->state = 'invalid';
+    $s->save();
+
+    $s  = new Sabel_Edo_CommonRecord('status');
+    $ss = $s->select();
+
+    $this->assertEquals((int)$ss[0]->id, 1);
+    $this->assertEquals($ss[0]->state, 'normal');
+
+    $this->assertEquals((int)$ss[1]->id, 2);
+    $this->assertEquals($ss[1]->state, 'invalid');
+
+    $bbs = new Sabel_Edo_CommonRecord('bbs');
+
+    $insertData   = array();
+    $insertData[] = array('users_id' => 1 , 'title' => 'title11', 'body' => 'body11');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title12', 'body' => 'body12');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title13', 'body' => 'body13');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title14', 'body' => 'body14');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title15', 'body' => 'body15');
+
+    $insertData[] = array('users_id' => 2 , 'title' => 'title21', 'body' => 'body21');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title22', 'body' => 'body22');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title23', 'body' => 'body23');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title24', 'body' => 'body24');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title25', 'body' => 'body25');
+
+    $insertData[] = array('users_id' => 3 , 'title' => 'title31', 'body' => 'body31');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title32', 'body' => 'body32');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title33', 'body' => 'body33');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title34', 'body' => 'body34');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title35', 'body' => 'body35');
+
+    $insertData[] = array('users_id' => 4 , 'title' => 'title41', 'body' => 'body41');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title42', 'body' => 'body42');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title43', 'body' => 'body43');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title44', 'body' => 'body44');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title45', 'body' => 'body45');
+
+    foreach ($insertData as $data) {
+      $bbs->multipleInsert($data);
     }
   }
 
@@ -836,25 +884,42 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
-
-  public function testInherit()
+ 
+  public function testJoinSelect()
   {
-    $u1 = new TestUser1();
-    $u2 = new TestUser2();
+    $users = new Users();
+    $relList = array('child' => 'bbs', 'parent' => 'status');
+    $users->setConstraint('order', 'users.id, bbs.title');
+    $res = $users->selectJoin($relList);
 
-    $this->assertEquals($u1->testGetTableName(), $u2->testGetTableName());
-    $this->assertEquals($u1->testGetTableName(), 'users');
+    $this->assertEquals($res[0]->name, 'Tarou');
+    $this->assertEquals($res[5]->name, 'Hanako');
+    $this->assertEquals($res[10]->name, 'Maruo');
+    $this->assertEquals($res[15]->name, 'Atsuko');
 
-    $this->assertNotEquals($u1->getMyClassName(), $u2->getMyClassName());
-    $this->assertEquals($u1->getMyClassName(), 'TestUser1');
-    $this->assertEquals($u2->getMyClassName(), 'TestUser2');
+    $this->assertEquals($res[0]->status_id, $res[0]->status->id);
+    $this->assertEquals($res[5]->status_id, $res[5]->status->id);
+    $this->assertEquals($res[10]->status_id, $res[10]->status->id);
+    $this->assertEquals($res[15]->status_id, $res[15]->status->id);
 
-    $users1 = $u1->select();
-    $users2 = $u2->select();
-    $this->assertEquals($users1[0]->name, 'Tarou');
-    $this->assertEquals($users1[1]->name, 'Hanako');
-    $this->assertEquals($users2[0]->name, 'Tarou');
-    $this->assertEquals($users2[1]->name, 'Hanako');
+    $this->assertEquals($res[0]->bbs->title, 'title11');
+    $this->assertEquals($res[1]->bbs->title, 'title12');
+    $this->assertEquals($res[2]->bbs->title, 'title13');
+
+    $users = new Users();
+    $users->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
+    $users->setConstraint('order', 'id');
+    $res = $users->select();
+
+    foreach ($res as $user) {
+      $user->setChildConstraint(array('limit' => 10, 'order', 'title'));
+      $user->getChild('bbs');
+    }
+    $this->assertEquals($res[0]->status_id, $res[0]->status->id);
+    $this->assertEquals($res[0]->bbs[0]->title, 'title11');
+    $this->assertEquals($res[0]->bbs[1]->title, 'title12');
+    $this->assertEquals($res[1]->bbs[0]->title, 'title21');
+    $this->assertEquals($res[1]->bbs[1]->title, 'title22');
   }
 }
 
@@ -866,7 +931,7 @@ class MysqlHelper
                             'customer', 'customer_order', 'order_line',
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
-                            'course', 'users');
+                            'course', 'users', 'status', 'bbs');
   
   public function __construct()
   {
@@ -926,29 +991,38 @@ class MysqlHelper
                  text VARCHAR(65536) NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE tree (
-                 id INT2 PRIMARY KEY,
+                 id      INT2 PRIMARY KEY,
                  tree_id INT2,
-                 name VARCHAR(12) )';
+                 name    VARCHAR(12) )';
 
     $SQLs[] = 'CREATE TABLE student (
-                 id INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name VARCHAR(24) NOT NULL,
+                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
+                 name  VARCHAR(24) NOT NULL,
                  birth DATE)';
     
     $SQLs[] = 'CREATE TABLE student_course (
                  student_id INT4 NOT NULL,
-                 course_id INT4 NOT NULL,
+                 course_id  INT4 NOT NULL,
                  CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
 
     $SQLs[] = 'CREATE TABLE course (
-                 id INT4 PRIMARY KEY AUTO_INCREMENT,
+                 id   INT4 PRIMARY KEY AUTO_INCREMENT,
                  name VARCHAR(24) )';
                 
     $SQLs[] = 'CREATE TABLE users (
-                 id INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name VARCHAR(24) NOT NULL,
-                 age INT2 NOT NULL,
-                 location VARCHAR(24) )';
+                 id        INT4 PRIMARY KEY AUTO_INCREMENT,
+                 name      VARCHAR(24) NOT NULL,
+                 status_id INT2 )';
+
+    $SQLs[] = 'CREATE TABLE status (
+                 id    INT2 PRIMARY KEY AUTO_INCREMENT,
+                 state VARCHAR(24) )';
+
+    $SQLs[] = 'CREATE TABLE bbs (
+                 id       INT4 PRIMARY KEY AUTO_INCREMENT,
+                 users_id INT4 NOT NULL,
+                 title    VARCHAR(24),
+                 body     VARCHAR(24))';
 
     $this->sqls = $SQLs;
   }
@@ -1060,12 +1134,6 @@ class PgsqlHelper
                  id   SERIAL PRIMARY KEY,
                  name VARCHAR(24) )';
                 
-    $SQLs[] = 'CREATE TABLE users (
-                 id       SERIAL PRIMARY KEY,
-                 name     VARCHAR(24) NOT NULL,
-                 age      INT2 NOT NULL,
-                 location VARCHAR(24) )';
-
     $this->sqls = $SQLs;
   }
   

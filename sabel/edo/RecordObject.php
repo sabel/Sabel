@@ -273,7 +273,7 @@ abstract class Sabel_Edo_RecordObject
   protected function makeFindObject($obj)
   {
     $edo = $this->edo;
-    $edo->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
+    $edo->setBasicSQL("SELECT {$obj->projection} FROM {$this->table}");
     $edo->makeQuery($this->conditions, $this->constraints);
 
     if ($edo->execute()) {
@@ -302,6 +302,109 @@ abstract class Sabel_Edo_RecordObject
     return $this->getRecords($this->conditions, $this->constraints);
   }
 
+  public function selectJoin($relTableList)
+  {
+    $child  = false;
+    $parent = false;
+
+    if (isset($relTableList['child'])) {
+      if (!is_array($relTableList['child']))
+        $relTableList['child']  = array($relTableList['child']);
+
+      $child = true;
+    }
+    if (isset($relTableList['parent'])) {
+      if (!is_array($relTableList['parent']))
+        $relTableList['parent'] = array($relTableList['parent']);
+
+      $parent = true;
+    }
+
+    if (!$child && !$parent)
+      throw new Exception('Error: joinSelect() invalid parameter.');
+
+    $sql   = array("SELECT ");
+    $table = $this->table;
+
+    $schema = 'edo'; //tmp
+    $is = new Edo_InformationSchema($this->connectName, $schema);
+
+    array_push($sql, $this->getJoinColumnPhrase($is, $sql, $table));
+
+    if ($child)
+      array_push($sql, $this->getJoinColumnPhrase($is, $sql, $relTableList['child']));
+
+    if ($parent)
+      array_push($sql, $this->getJoinColumnPhrase($is, $sql, $relTableList['parent']));
+
+    $sql = join('', $sql);
+    $sql = array(substr_replace($sql, '', strlen($sql) - 2));
+    array_push($sql, " FROM {$table}");
+
+    if ($child)
+      array_push($sql, $this->getLeftJoinPhrase($relTableList['child'], $table, 'child'));
+
+    if ($parent)
+      array_push($sql, $this->getLeftJoinPhrase($relTableList['parent'], $table, 'parent'));
+
+    $edo = $this->edo;
+    $edo->setBasicSQL(join('', $sql));
+    $edo->makeQuery(null, $this->constraints);
+    if ($edo->execute()) {
+      $rows = $edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+      $relTables = array_merge($relTableList['child'], $relTableList['parent']);
+
+      $recordObj = array();
+      foreach ($rows as $row) {
+        foreach ($relTables as $table) {
+          foreach ($row as $key => $val) {
+            if (strpos($key, "prefix_{$table}_") === 0) {
+              $k = str_replace("prefix_{$table}_", '', $key);
+              $row[$table][$k] = $val;
+              unset($row[$key]);
+            }
+          }
+          $obj = $this->newClass($table);
+          $this->setSelectedProperty($obj, $row[$table][$obj->defColumn], $row[$table]);
+          $obj->setTable($table);
+          $row[$table] = $obj;
+        }
+        $obj = $this->newClass($this->table);
+        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
+        $recordObj[] = $obj;
+      }
+      return $recordObj;
+    } else {
+      throw new Exception('Error: selectJoin() failed');
+    }
+  }
+
+  private function getJoinColumnPhrase($is, &$sql, $table)
+  {
+    if (is_array($table)) {
+      foreach ($table as $t) {
+        foreach ($is->getTable($t)->getColumns() as $c) {
+         array_push($sql, "{$t}.{$c->name} AS prefix_{$t}_{$c->name}, ");
+        }
+      }
+    } else {
+      foreach ($is->getTable($table)->getColumns() as $c) {
+        array_push($sql, "{$table}.{$c->name}, ");
+      }
+    }
+  }
+
+  private function getLeftJoinPhrase($rel, $table, $type)
+  {
+    foreach ($rel as $val) {
+      if ($type === 'child') {
+        return " LEFT JOIN {$val} ON {$table}.id = {$val}.{$table}_id";
+      } else {
+        return " LEFT JOIN {$val} ON {$table}.{$val}_id = {$val}.id ";
+      }
+    }
+  }
+
   public function getChild($child, $obj = null)
   {
     if (is_null($obj)) $obj = $this;
@@ -313,7 +416,7 @@ abstract class Sabel_Edo_RecordObject
 
     $condition = array("{$obj->table}_id" => $obj->data[$obj->defColumn]);
 
-    $obj->edo->setBasicSQL("SELECT * FROM {$child}");
+    $obj->edo->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
     $obj->data[$child] = $obj->getRecords($condition, $obj->childConstraints[$child], $child);
   }
 
@@ -329,7 +432,7 @@ abstract class Sabel_Edo_RecordObject
 
       foreach ($rows as $row) {
         if (is_null($child_table)) {
-          $obj = $this->newClass(get_class($this));
+          $obj = $this->newClass($this->table);
           $obj->receiveChildConstraint($this->childConstraints);
         } else {
           $obj = $this->newClass($child_table);
@@ -480,7 +583,7 @@ abstract class Sabel_Edo_RecordObject
 
     if (!is_array($result = Sabel_Edo_SimpleCache::get($table . $id))) {
       $edo = $this->getMyEDO();
-      $edo->setBasicSQL("SELECT * FROM {$table}");
+      $edo->setBasicSQL("SELECT {$this->projection} FROM {$table}");
       $edo->makeQuery(array($this->defColumn => $id));
 
       if ($edo->execute()) {
@@ -633,10 +736,8 @@ abstract class Sabel_Edo_RecordObject
     if (empty($array)) return null;
 
     $recordObj = array();
-    $class = get_class($this);
-
     foreach ($array as $row) {
-      $obj = $this->newClass($class);
+      $obj = $this->newClass($this->table);
       $obj->setProperties($row);
       $recordObj[] = $obj;
     }

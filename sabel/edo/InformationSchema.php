@@ -103,7 +103,8 @@ class Edo_MysqlPgsql_InformationSchema
 
   protected function createColumns($table)
   {
-    $sql = "SELECT * FROM information_schema.columns WHERE table_name = '{$table}'";
+    $sql  = "SELECT * FROM information_schema.columns ";
+    $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$table}'";
 
     $columns = array();
     foreach ($this->recordObj->execute($sql) as $val) {
@@ -119,7 +120,7 @@ class Edo_MysqlPgsql_InformationSchema
     if (is_null($column)) return $this->createColumns($table);
 
     $sql  = "SELECT * FROM information_schema.columns ";
-    $sql .= "WHERE table_name = '{$table}' AND column_name = '{$column}'";
+    $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$table}' AND column_name = '{$column}'";
 
     $res = $this->recordObj->execute($sql);
     return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
