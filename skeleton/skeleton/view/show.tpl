@@ -1,6 +1,6 @@
 <h1>show <? echo $name ?></h1>
 
-<# foreach ($blog->toArray() as $name => $val) : #>
+<# foreach ($<? echo $name ?>->toArray() as $name => $val) : #>
   <# echo $name #>:&nbsp;
   <# echo nl2br($<? echo $name ?>->$name) #>
   <br />
