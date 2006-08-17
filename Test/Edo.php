@@ -1107,7 +1107,7 @@ class PgsqlHelper
     $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->sqls as $sql) {
-      $obj->execute($sql);
+      @$obj->execute($sql);
     }
   }
   
@@ -1116,7 +1116,7 @@ class PgsqlHelper
     $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->tables as $table) {
-      $obj->execute("DROP TABLE ${table}");
+      @$obj->execute("DROP TABLE ${table}");
     }
   }
 }

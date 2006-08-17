@@ -312,24 +312,14 @@ abstract class Sabel_Edo_RecordObject
 
   public function selectJoin($relTableList)
   {
-    $child  = false;
-    $parent = false;
-
-    if (isset($relTableList['child'])) {
-      if (!is_array($relTableList['child']))
-        $relTableList['child']  = array($relTableList['child']);
-
-      $child = true;
-    }
-    if (isset($relTableList['parent'])) {
-      if (!is_array($relTableList['parent']))
-        $relTableList['parent'] = array($relTableList['parent']);
-
-      $parent = true;
-    }
+    $child  = $relTableList['child'];
+    $parent = $relTableList['parent'];
 
     if (!$child && !$parent)
       throw new Exception('Error: joinSelect() invalid parameter.');
+
+    if (isset($child)  && !is_array($child))  $child  = array($child);
+    if (isset($parent) && !is_array($parent)) $parent = array($parent);
 
     $sql   = array("SELECT ");
     $table = $this->table;
@@ -338,28 +328,22 @@ abstract class Sabel_Edo_RecordObject
     $is = new Edo_InformationSchema($this->connectName, $schema);
     $this->addJoinColumnPhrase($is, $sql, $table);
 
-    if ($child)
-      $this->addJoinColumnPhrase($is, $sql, $relTableList['child']);
-
-    if ($parent)
-      $this->addJoinColumnPhrase($is, $sql, $relTableList['parent']);
+    if ($child)  $this->addJoinColumnPhrase($is, $sql, $child);
+    if ($parent) $this->addJoinColumnPhrase($is, $sql, $parent);
 
     $sql = join('', $sql);
     $sql = array(substr_replace($sql, '', strlen($sql) - 2));
     array_push($sql, " FROM {$table}");
 
-    if ($child)
-      array_push($sql, $this->getLeftJoinPhrase($relTableList['child'], $table, 'child'));
-
-    if ($parent)
-      array_push($sql, $this->getLeftJoinPhrase($relTableList['parent'], $table, 'parent'));
+    if ($child) array_push($sql, $this->getLeftJoinPhrase($child, $table, 'child'));
+    if ($parent) array_push($sql, $this->getLeftJoinPhrase($parent, $table, 'parent'));
 
     $edo = $this->edo;
     $edo->setBasicSQL(join('', $sql));
     $edo->makeQuery($this->condition, $this->constraints);
     if ($edo->execute()) {
       $rows = $edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      $relTables = array_merge($relTableList['child'], $relTableList['parent']);
+      $relTables = array_merge($child, $parent);
 
       $recordObj = array();
       foreach ($rows as $row) {
@@ -387,11 +371,12 @@ abstract class Sabel_Edo_RecordObject
   {
     if (is_array($table)) {
       foreach ($table as $t) {
-        $this->joinColCache[$t] = array();
+        $joinCol = array();
         foreach ($is->getTable($t)->getColumns() as $c) {
-          $this->joinColCache[$t][] = $c->name;
+          $joinCol[] = $c->name;
           array_push($sql, "{$t}.{$c->name} AS prefix_{$t}_{$c->name}, ");
         }
+        $this->joinColCache[$t] = $joinCol;
       }
     } else {
       foreach ($is->getTable($table)->getColumns() as $c) {
@@ -642,7 +627,7 @@ abstract class Sabel_Edo_RecordObject
   protected function update()
   {
     $this->edo->setUpdateSQL($this->table, $this->newData);
-    $this->edo->makeQuery($this->selectCondition);
+    $this->edo->makeQuery($this->seleCondition);
 
     if ($this->edo->execute()) {
       $this->selectCondition = array();
