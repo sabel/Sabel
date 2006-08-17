@@ -337,7 +337,7 @@ abstract class Sabel_Edo_RecordObject
     if (isset($child)  && !is_array($child))  $child  = array($child);
     if (isset($parent) && !is_array($parent)) $parent = array($parent);
 
-    $sql   = array("SELECT ");
+    $sql   = array('SELECT ');
     $table = $this->table;
 
     $schema = 'edo'; //tmp
@@ -348,10 +348,10 @@ abstract class Sabel_Edo_RecordObject
     if ($parent) $this->addJoinColumnPhrase($is, $sql, $parent);
 
     $sql = join('', $sql);
-    $sql = array(substr_replace($sql, '', strlen($sql) - 2));
+    $sql = array(substr($sql, 0, strlen($sql) - 2));
     array_push($sql, " FROM {$table}");
 
-    if ($child) array_push($sql, $this->getLeftJoinPhrase($child, $table, 'child'));
+    if ($child)  array_push($sql, $this->getLeftJoinPhrase($child,  $table, 'child'));
     if ($parent) array_push($sql, $this->getLeftJoinPhrase($parent, $table, 'parent'));
 
     $edo = $this->edo;
@@ -445,8 +445,7 @@ abstract class Sabel_Edo_RecordObject
           $obj = $this->newClass($child_table);
         }
 
-        if ($this->withParent)
-          $row = $this->selectWithParent($row);
+        if ($this->withParent) $row = $this->selectWithParent($row);
 
         $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
 
@@ -643,7 +642,7 @@ abstract class Sabel_Edo_RecordObject
   protected function update()
   {
     $this->edo->setUpdateSQL($this->table, $this->newData);
-    $this->edo->makeQuery($this->seleCondition);
+    $this->edo->makeQuery($this->selectCondition);
 
     if ($this->edo->execute()) {
       $this->selectCondition = array();

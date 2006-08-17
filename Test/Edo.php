@@ -1031,7 +1031,7 @@ class MysqlHelper
     $obj = new Sabel_Edo_CommonRecord();
     
     foreach ($this->sqls as $sql) {
-      $obj->execute($sql);
+      @$obj->execute($sql);
     }
   }
   
@@ -1039,8 +1039,11 @@ class MysqlHelper
   {
     $obj = new Sabel_Edo_CommonRecord();
     
-    foreach ($this->tables as $table) {
-      $obj->execute("DROP TABLE ${table}");
+    try {
+      foreach ($this->tables as $table) {
+        @$obj->execute("DROP TABLE ${table}");
+      }
+    } catch (Exception $e) {
     }
   }
 }
