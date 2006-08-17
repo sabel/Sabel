@@ -32,8 +32,8 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function __construct()
   {
-    $helper = new PgsqlHelper();
-    //$helper = new MysqlHelper();
+    //$helper = new PgsqlHelper();
+    $helper = new MysqlHelper();
 
     $helper->dropTables();
     $helper->createTables();
@@ -138,17 +138,17 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$obj->id, 5);
 
     $insertData = array();
-    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
-    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
-    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
-    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
-    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
-    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
-    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
-    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
-    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
+    $insertData[] = array('customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
+    $insertData[] = array('customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
+    $insertData[] = array('customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
+    $insertData[] = array('customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
+    $insertData[] = array('customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
+    $insertData[] = array('customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
+    $insertData[] = array('customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
+    $insertData[] = array('customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
+    $insertData[] = array('customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
     $this->orderLine->multipleInsert($insertData);
     $this->assertEquals($this->orderLine->getCount(), 11);
     
@@ -707,9 +707,10 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   public function testSeq()
   {
     $seq = new Sabel_Edo_CommonRecord('seq');
-    
+
     $seq->text = 'test';
     $id = $seq->save();
+    //$this->assertNotEquals($id, null);
   }
 
   public function testTree()
@@ -869,6 +870,56 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($res[1]->bbs[0]->title, 'title21');
     $this->assertEquals($res[1]->bbs[1]->title, 'title22');
   }
+
+  public function testOrder()
+  {
+    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol->customer_order_id = 13;
+    $ol->item_id = 5;
+    $ol->save();
+
+    $ol->customer_order_id = 18;
+    $ol->item_id = 8;
+    $ol->save();
+
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 50000);
+
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 500);
+
+    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol->item_id(3);
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 9000);
+
+    $ol->item_id(3);
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 500);
+
+    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol->customer_order_id = 1;
+    $ol->amount  = 100000;
+    $ol->item_id = 1;
+    $ol->save();
+
+    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $this->assertEquals($ol->getCount(), 3);
+
+    $ol = new Sabel_Edo_CommonRecord('order_line');
+
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 100000);
+
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 3000);
+  }
 }
 
 class MysqlHelper
@@ -916,9 +967,9 @@ class MysqlHelper
                 customer_id INT2 NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE order_line (
-                id INT2 PRIMARY KEY,
+                id INT2 PRIMARY KEY AUTO_INCREMENT,
                 customer_order_id INT2 NOT NULL,
-                amount INT4 NOT NULL,
+                amount INT4,
                 item_id INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_telephone (
@@ -949,7 +1000,6 @@ class MysqlHelper
                  birth DATE)';
     
     $SQLs[] = 'CREATE TABLE student_course (
-                 id         INT4 AUTO_INCREMENT,
                  student_id INT4 NOT NULL,
                  course_id  INT4 NOT NULL,
                  CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
@@ -1007,17 +1057,18 @@ class PgsqlHelper
                             
   public function __construct()
   {
-    //$dbCon = array();
-    //$dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
-    //$dbCon['user'] = 'pgsql';
-    //$dbCon['pass'] = 'pgsql';
-    //Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    $dbCon = array();
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
+    $dbCon['user'] = 'pgsql';
+    $dbCon['pass'] = 'pgsql';
+    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
 
-    $dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
-    Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
-    
+    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
+    //pg_trace('/tmp/pg_trace.log', 'w', $dbCon);
+    //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
+
     $SQLs = array();
-    
+
     $SQLs[] = 'CREATE TABLE test (
                  id       SERIAL PRIMARY KEY,
                  name     VARCHAR(32) NOT NULL,
@@ -1044,11 +1095,11 @@ class PgsqlHelper
     $SQLs[] = 'CREATE TABLE order_line (
                 id                SERIAL PRIMARY KEY,
                 customer_order_id INT2 NOT NULL,
-                amount            INT4 NOT NULL,
+                amount            INT4,
                 item_id           INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_telephone (
-                id SERIAL   PRIMARY KEY,
+                id          SERIAL PRIMARY KEY,
                 customer_id INT2 NOT NULL,
                 telephone   VARCHAR(32))';
                 

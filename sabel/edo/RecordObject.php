@@ -226,6 +226,23 @@ abstract class Sabel_Edo_RecordObject
     }
   }
 
+  public function getFirst($orderColumn)
+  {
+    return $this->getMost('asc', $orderColumn);
+  }
+
+  public function getLast($orderColumn)
+  {
+    return $this->getMost('desc', $orderColumn);
+  }
+
+  protected function getMost($type, $orderColumn)
+  {
+    $this->setCondition($orderColumn, 'not null');
+    $this->setConstraint(array('limit' => 1, 'order' => "{$orderColumn} {$type}"));
+    return $this->selectOne();
+  }
+
   public function aggregate($functions, $child = null)
   {
     if (is_null($child)) {
@@ -278,7 +295,6 @@ abstract class Sabel_Edo_RecordObject
         if ($this->withParent) {
           $row = $this->selectWithParent($row);
         }
-
         $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
 
         $myChild = $this->getMyChildren();
@@ -324,7 +340,7 @@ abstract class Sabel_Edo_RecordObject
     $sql   = array("SELECT ");
     $table = $this->table;
 
-    $schema = 'public'; //tmp
+    $schema = 'edo'; //tmp
     $is = new Edo_InformationSchema($this->connectName, $schema);
     $this->addJoinColumnPhrase($is, $sql, $table);
 

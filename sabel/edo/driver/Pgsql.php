@@ -66,8 +66,10 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
 
   public function executeInsert($table, $data, $defColumn)
   {
-    //if (is_null($data[$defColumn]))
+    //if ($defColumn !== false)
     //  $data[$defColumn] = $this->getNextNumber($table);
+    if (is_null($data[$defColumn]))
+    $data[$defColumn] = $this->getNextNumber($table);
 
     $this->data = $data;
 
@@ -96,7 +98,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
       $set = true;
       $count++;
     }
-    array_push($sql, ');');
+    array_push($sql, ')');
 
     $this->stmtFlag = Sabel_Edo_Driver_PgsqlStatement::statement_exists(implode('', $sql), $data);
 
@@ -162,21 +164,20 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
   public function execute($sql = null, $param = null)
   {
     try {
-      if (!is_null($sql)) {
+      if (isset($sql)) {
         if (!($this->result = pg_query($this->conn, $sql))) {
-          throw new Exception('Error: Edo_Driver_Pgsql::pg_query()');
+          throw new Exception('Error: Sabel_Edo_Driver_Pgsql::pg_query()');
         } else {
           return true;
         }
       } elseif ($this->stmtFlag) {
-        $this->stmt = Sabel_Edo_Driver_PgsqlStatement::getStatement();
+        $stmtName = Sabel_Edo_Driver_PgsqlStatement::getStmtName();
       } elseif (is_null($sql) && is_null($this->sqlObj->getSQL())) {
         throw new Exception('Error: None SQL-Query!! execute EDO::makeQuery() beforehand');
       } else {
         $sql = $this->sqlObj->getSQL();
-        if ($this->stmt = pg_prepare($this->conn, '', $sql)) {
-          Sabel_Edo_Driver_PgsqlStatement::addStatement($this->stmt);
-        } else {
+        $stmtName = Sabel_Edo_Driver_PgsqlStatement::incStmtName();
+        if (!(pg_prepare($this->conn, $stmtName, $sql))) {
           throw new Exception('Error: PgsqlStatement is null.');
         }
       }
@@ -188,7 +189,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->makeBindParam();
 
     try {
-      if (!($this->result = pg_execute($this->conn, '', $this->param))) {
+      if (!($this->result = pg_execute($this->conn, $stmtName, $this->param))) {
         throw new Exception('Error: Sabel_Edo_Driver_Pgsql::execute()');
         return false;
       } else {
@@ -408,6 +409,7 @@ class Sabel_Edo_Driver_PgsqlStatement
   private static $sql;
   private static $keys = array();
   private static $constraints = array();
+  private static $count = 0;
 
   public static function statement_exists($sql, $conditions, $constraints = null)
   {
@@ -428,7 +430,7 @@ class Sabel_Edo_Driver_PgsqlStatement
 
     return $result;
   }
-
+  /*
   public static function addStatement($stmt)
   {
     self::$stmt = $stmt;
@@ -437,5 +439,16 @@ class Sabel_Edo_Driver_PgsqlStatement
   public static function getStatement()
   {
     return self::$stmt;
+  }
+  */
+
+  public static function incStmtName()
+  {
+    return 'stmt' . self::$count++;
+  }
+
+  public static function getStmtName()
+  {
+    return 'stmt' . self::$count;
   }
 }
