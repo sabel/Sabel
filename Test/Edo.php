@@ -32,8 +32,8 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function __construct()
   {
-    //$helper = new PgsqlHelper();
-    $helper = new MysqlHelper();
+    $helper = new PgsqlHelper();
+    //$helper = new MysqlHelper();
 
     $helper->dropTables();
     $helper->createTables();
@@ -59,10 +59,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'tanaka');
     $insertData[] = array('id' => 2, 'name' => 'ueda');
-    
-    foreach ($insertData as $data) {
-      $this->customer->multipleInsert($data);
-    }
+    $this->customer->multipleInsert($insertData);
 
     $this->assertEquals($this->customer->getCount(), 2);
     
@@ -73,14 +70,10 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 4, 'customer_id' => 2);
     $insertData[] = array('id' => 5, 'customer_id' => 1);
     $insertData[] = array('id' => 6, 'customer_id' => 1);
-
-    foreach ($insertData as $data) {
-      $this->order->multipleInsert($data);
-    }
+    $this->order->multipleInsert($insertData);
 
     $o = new Sabel_Edo_CommonRecord('customer_order');
-    $o->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
-    $res = $o->select();
+    $res = $o->select(Sabel_Edo_RecordObject::WITH_PARENT);
     $this->assertEquals((int)$res[0]->customer->id, 1);
     $this->assertEquals((int)$res[2]->customer->id, 2);
 
@@ -133,10 +126,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
     $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 2);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
-    
-    foreach ($insertData as $data) {
-      $this->test->multipleInsert($data);
-    }
+    $this->test->multipleInsert($insertData);
     
     $ro = $this->test->select();
     $this->assertEquals(count($ro), 6);
@@ -159,10 +149,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
     $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
     $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
-    
-    foreach ($insertData as $data) {
-      $this->orderLine->multipleInsert($data);
-    }
+    $this->orderLine->multipleInsert($insertData);
     $this->assertEquals($this->orderLine->getCount(), 11);
     
     $insertData   = array();
@@ -170,10 +157,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 2,  'customer_id' => 2, 'telephone' => '09022221111');
     $insertData[] = array('id' => 3,  'customer_id' => 1, 'telephone' => '09011112222');
     $insertData[] = array('id' => 4,  'customer_id' => 2, 'telephone' => '09022222222');
-    
-    foreach ($insertData as $data) {
-      $this->telephone->multipleInsert($data);
-    }
+    $this->telephone->multipleInsert($insertData);
 
     $this->assertEquals($this->orderLine->getCount(), 11);
     
@@ -190,10 +174,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 9,  'tree_id' => 2, 'name' => 'B9');
     $insertData[] = array('id' => 10, 'tree_id' => 6, 'name' => 'B6-10');
     $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
-
-    foreach ($insertData as $data) {
-      $tree->multipleInsert($data);
-    }
+    $tree->multipleInsert($insertData);
 
     $student = new Sabel_Edo_CommonRecord('student');
     $insertData   = array();
@@ -202,10 +183,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'bob',   'birth' => '1983/08/19');
     $insertData[] = array('name' => 'marcy', 'birth' => '1983/08/20');
     $insertData[] = array('name' => 'ameri', 'birth' => '1983/08/21');
-
-    foreach ($insertData as $data) {
-      $student->multipleInsert($data);
-    }
+    $student->multipleInsert($insertData);
 
     $course = new Sabel_Edo_CommonRecord('course');
     $insertData   = array();
@@ -214,10 +192,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'Science');
     $insertData[] = array('name' => 'Economic');
     $insertData[] = array('name' => 'Psychology');
-
-    foreach ($insertData as $data) {
-      $course->multipleInsert($data);
-    }
+    $course->multipleInsert($insertData);
 
     $sc = new Sabel_Edo_CommonRecord('student_course');
     $insertData   = array();
@@ -243,10 +218,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('student_id' => 5, 'course_id' => 3);
     $insertData[] = array('student_id' => 5, 'course_id' => 4);
     $insertData[] = array('student_id' => 5, 'course_id' => 5);
-
-    foreach ($insertData as $data) {
-      $sc->multipleInsert($data);
-    }
+    $sc->multipleInsert($insertData);
 
     $users = new Users();
     $insertData   = array();
@@ -254,10 +226,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'Hanako' , 'status_id' => 2);
     $insertData[] = array('name' => 'Maruo'  , 'status_id' => 1);
     $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
-
-    foreach ($insertData as $data) {
-      $users->multipleInsert($data);
-    }
+    $users->multipleInsert($insertData);
 
     $s = new Sabel_Edo_CommonRecord('status');
     $s->state = 'normal';
@@ -300,10 +269,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('users_id' => 4 , 'title' => 'title43', 'body' => 'body43');
     $insertData[] = array('users_id' => 4 , 'title' => 'title44', 'body' => 'body44');
     $insertData[] = array('users_id' => 4 , 'title' => 'title45', 'body' => 'body45');
-
-    foreach ($insertData as $data) {
-      $bbs->multipleInsert($data);
-    }
+    $bbs->multipleInsert($insertData);
   }
 
   public function testInsert()
@@ -515,8 +481,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $in2->infinite1_id = 1;
     $in2->save();
     
-    $in1->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
-    $objs = $in1->select();
+    $objs = $in1->select(Sabel_Edo_RecordObject::WITH_PARENT);
     $obj = $objs[0];
     
     $this->assertEquals($obj->infinite2_id, $obj->infinite2->id);
@@ -543,24 +508,9 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($parent2->name, 'test32');
   }
   
-  public function testSelectParentView()
-  {
-    $this->test->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_VIEW);
-    $obj = $this->test->selectOne(1);
-    
-    $this->assertEquals((int)$obj->id, 1);
-    $this->assertEquals($obj->name, 'tanaka');
-    $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals((int)$obj->test2_id, 1);
-    $this->assertEquals($obj->test2_name, 'test21');
-    $this->assertEquals((int)$obj->test2_test3_id, 2);
-    $this->assertEquals((int)$obj->test3_id, 2);
-    $this->assertEquals($obj->test3_name, 'test32');
-  }
-  
   public function testGetChild()
   {
-    $this->customer->setChildConstraint(array('limit' => 10));
+    $this->customer->setChildConstraint('limit', 10);
     $cu = $this->customer->selectOne(1);
     $this->assertEquals($cu->name, 'tanaka');
     
@@ -605,7 +555,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   public function testNewChild()
   {
     $cu = new Customer();
-    $cu->setChildConstraint(array('limit' => 10));
+    $cu->setChildConstraint('limit', 10);
     $c  = $cu->selectOne(1);
     $ch = $c->newChild('customer_order');
     
@@ -613,7 +563,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $ch->save();  // auto insert parent_id
     
     $co = new Customer_Order();
-    $co->setChildConstraint(array('limit' => 10));
+    $co->setChildConstraint('limit', 10);
     $order = $co->selectOne($number);
     $this->assertEquals((int)$order->customer_id, 1);  // parent_id
   }
@@ -621,7 +571,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   public function testSelectAll_AutoGetChild()
   {
     $cu   = new Customer();
-    $cu->setChildConstraint(array('limit' => 10));
+    $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
     
     $this->assertEquals(count($objs), 2);
@@ -661,7 +611,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     //-------------------------------------------------------
     
     $cu   = new Customer();
-    $cu->setChildConstraint(array('limit' => 10));
+    $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
     $this->assertNotEquals((int)$objs[0]->customer_order[0]->order_line, null);
     $this->assertNotEquals((int)$objs[1]->customer_order[0]->order_line, null);
@@ -705,7 +655,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $objs[0]->clearChild('customer_telephone');
     
     $cu   = new Customer();
-    $cu->setChildConstraint(array('limit' => 10));
+    $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
     
     $this->assertEquals($objs[0]->customer_telephone[0]->telephone, null);
@@ -775,7 +725,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($t->tree_id, null);
     $this->assertEquals($t->name, 'A');
     
-    $t->setChildConstraint(array('limit' => 100));
+    $t->setChildConstraint('limit', 100);
     $t->getChild('tree');
     
     $this->assertEquals(count($t->tree), 2);
@@ -787,8 +737,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($t->tree[1]->name, 'A5');
     
     $tree = new Tree();
-    $tree->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
-
+    $tree->setWithParent(true);
     $t = $tree->selectOne(3);
     
     $this->assertEquals((int)$t->id, 3);
@@ -907,12 +856,11 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($res[2]->bbs->title, 'title13');
 
     $users = new Users();
-    $users->setSelectType(Sabel_Edo_RecordObject::WITH_PARENT_OBJECT);
     $users->setConstraint('order', 'id');
-    $res = $users->select();
+    $res = $users->select(Sabel_Edo_RecordObject::WITH_PARENT);
 
     foreach ($res as $user) {
-      $user->setChildConstraint(array('limit' => 10, 'order', 'title'));
+      $user->setChildConstraint('limit', 10);
       $user->getChild('bbs');
     }
     $this->assertEquals($res[0]->status_id, $res[0]->status->id);
@@ -1001,6 +949,7 @@ class MysqlHelper
                  birth DATE)';
     
     $SQLs[] = 'CREATE TABLE student_course (
+                 id         INT4 AUTO_INCREMENT,
                  student_id INT4 NOT NULL,
                  course_id  INT4 NOT NULL,
                  CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
@@ -1054,7 +1003,7 @@ class PgsqlHelper
                             'customer', 'customer_order', 'order_line',
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
-                            'course', 'users');
+                            'course', 'users', 'bbs', 'status');
                             
   public function __construct()
   {
@@ -1126,6 +1075,7 @@ class PgsqlHelper
                  birth DATE)';
     
     $SQLs[] = 'CREATE TABLE student_course (
+                 id         SERIAL,
                  student_id INT4 NOT NULL,
                  course_id  INT4 NOT NULL,
                  CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
@@ -1134,6 +1084,21 @@ class PgsqlHelper
                  id   SERIAL PRIMARY KEY,
                  name VARCHAR(24) )';
                 
+    $SQLs[] = 'CREATE TABLE users (
+                 id        SERIAL PRIMARY KEY,
+                 name      VARCHAR(24) NOT NULL,
+                 status_id INT2 )';
+
+    $SQLs[] = 'CREATE TABLE status (
+                 id    SERIAL PRIMARY KEY,
+                 state VARCHAR(24) )';
+
+    $SQLs[] = 'CREATE TABLE bbs (
+                 id       SERIAL PRIMARY KEY,
+                 users_id INT4 NOT NULL,
+                 title    VARCHAR(24),
+                 body     VARCHAR(24))';
+
     $this->sqls = $SQLs;
   }
   
@@ -1182,7 +1147,7 @@ abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
 
 class Test extends BaseUserRecordObject
 {
-  protected $selectType = Sabel_Edo_RecordObject::WITH_PARENT_OBJECT;
+  protected $withParent = true;
 
   public function getCondition()
   {
@@ -1203,7 +1168,7 @@ class Test extends BaseUserRecordObject
 class Customer extends BaseUserRecordObject
 {
   protected $myChildren = array('customer_order','customer_telephone');
-  protected $defaultChildConstraints = array('limit' => 10); // (for telephone)
+  protected $defChildConstraints = array('limit' => 10); // (for telephone)
 
   public function __construct($param1 = null, $param2 = null)
   {

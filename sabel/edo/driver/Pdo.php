@@ -52,10 +52,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setBasicSQL(join('', $sql));
   }
 
-  public function executeInsert($table, $data, $id_exist = null)
+  public function executeInsert($table, $data, $defColumn)
   {
-    if (!$id_exist && $this->myDb === 'pgsql')
-      $data['id'] = $this->getNextNumber($table);
+    if (is_null($data[$defColumn]) && $this->myDb === 'pgsql')
+      $data[$defColumn] = $this->getNextNumber($table);
 
     $this->data = $data;
 
@@ -146,7 +146,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
       $this->sqlObj->makeConstraintsSQL($constraints);
   }
 
-  public function execute($sql = null)
+  public function execute($sql = null, $param = null)
   {
     if (isset($sql)) {
       $this->stmt = $this->pdo->prepare($sql);
@@ -175,6 +175,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     if ($result) {
       return true;
     } else {
+      var_dump($this->pdo->errorInfo());
       throw new Exception('Error: PDOStatement::execute()');
     }
   }

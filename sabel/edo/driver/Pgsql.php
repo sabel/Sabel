@@ -64,10 +64,10 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
     $this->sqlObj->setBasicSQL(implode('', $sql));
   }
 
-  public function executeInsert($table, $data, $id_exist = null)
+  public function executeInsert($table, $data, $defColumn)
   {
-    if (!$id_exist)
-      $data['id'] = $this->getNextNumber($table);
+    //if (is_null($data[$defColumn]))
+    //  $data[$defColumn] = $this->getNextNumber($table);
 
     $this->data = $data;
 
@@ -115,7 +115,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
   {
     $this->execute('SELECT nextval(\''.$table.'_id_seq\');');
     $row = $this->fetch();
-    if (($this->lastInsertId = (int)$row[0]) == 0) {
+    if (($this->lastInsertId =(int) $row[0]) === 0) {
       //throw new Exception($table.'_id_seq is not found.');
     } else {
       return $this->lastInsertId;
@@ -159,7 +159,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
       $this->sqlObj->makeConstraintsSQL($constraints);
   }
 
-  public function execute($sql = null)
+  public function execute($sql = null, $param = null)
   {
     try {
       if (!is_null($sql)) {
@@ -189,7 +189,7 @@ class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
 
     try {
       if (!($this->result = pg_execute($this->conn, '', $this->param))) {
-        throw new Exception('Error: Edo_Driver_Pgsql::execute()');
+        throw new Exception('Error: Sabel_Edo_Driver_Pgsql::execute()');
         return false;
       } else {
         $tmp = $this->param;

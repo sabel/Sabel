@@ -34,7 +34,7 @@ class Sabel_Edo_DBConnection
     return self::$connList[$connectName]['conn'];
   }
 
-  public static function getEdoDriver($connectName)
+  public static function getDriver($connectName)
   {
     return self::$connList[$connectName]['driver'];
   }
