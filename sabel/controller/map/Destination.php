@@ -8,31 +8,41 @@
  */
 class Sabel_Controller_Map_Destination
 {
+  const MODULE     = 'module';
+  const CONTROLLER = 'controller';
+  const ACTION     = 'action';
+  
   protected $parentEntry = null;
   protected $destination = array();
   
-  public function __construct($entry, $destination)
+  public function __construct($entry, $dest)
   {
     $this->parentEntry = $entry;
     
-    $uri  = $entry->getUri();
-    $ruri = $entry->getRequestUri();
+    $mapUri     = $entry->getUri();
+    $requestUri = $entry->getRequestUri();
     
-    for ($pos = 0; $pos < $uri->count(); $pos++) {
-      $element = $uri->getElement($pos);
-      if ($element->isModule()) {
-        $destElement = new Sabel_Controller_Map_Element($destination['module']);
-        if ($destElement->isModule()) $destination['module'] = $ruri->get($pos);
-      } else if ($element->isController()) {
-        $destElement = new Sabel_Controller_Map_Element($destination['controller']);
-        if ($destElement->isController()) $destination['controller'] = $ruri->get($pos);
-      } else if ($element->isAction()) {
-        $destElement = new Sabel_Controller_Map_Element($destination['action']);
-        if ($destElement->isAction()) $destination['action'] = $ruri->get($pos);
+    $elems = array(new Sabel_Controller_Map_Element($dest[self::MODULE]),
+                   new Sabel_Controller_Map_Element($dest[self::CONTROLLER]),
+                   new Sabel_Controller_Map_Element($dest[self::ACTION]));
+    
+    for ($pos = 0; $pos < $mapUri->count(); $pos++) {
+      $element = $mapUri->getElement($pos);
+      
+      switch (true) {
+        case ($element->isModule() && $elems[0]->isModule()):
+          $dest[self::MODULE] = $requestUri->get($pos);
+          break;
+        case ($element->isController() && $elems[1]->isController()):
+          $dest[self::CONTROLLER] = $requestUri->get($pos);
+          break;
+        case ($element->isAction() && $elems[2]->isAction()):
+          $dest[self::ACTION] = $requestUri->get($pos);
+          break;
       }
     }
     
-    $this->destination = $destination;
+    $this->destination = $dest;
   }
   
   public function __get($key)

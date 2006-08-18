@@ -31,36 +31,7 @@ class Sabel_Controller_Map_Entry
   
   public function getDestination()
   {
-    if (isset($this->entry['destination'])) {
-      // @todo implements when specified reserved word.
-      return new Sabel_Controller_Map_Destination($this, $this->entry['destination']);
-    } else {
-      $statuses = array('module'=>false, 'controller'=>false, 'action'=>false);
-      
-      $uri = new Sabel_Controller_Map_Uri($this->entry['uri']);
-      $ruri = $this->requestUri;
-      $destination = array();
-      foreach ($uri->getElements() as $element) {
-        if ($element->isModule()) {
-          $statuses['module'] = true;
-          $destination['module'] =  ($ruri->has(0))
-                                   ? $ruri->get(0)
-                                   : Sabel_Controller_Map::getDefaultModule();
-        } else if ($element->isController()) {
-          $statuses['controller'] = true;
-          $destination['controller'] =  ($ruri->has(1))
-                                       ? $ruri->get(1)
-                                       : Sabel_Controller_Map::getDefaultController();
-        } else if ($element->isAction()) {
-          $statuses['action'] = true;
-          $destination['action'] =  ($ruri->has(2))
-                                   ? $ruri->get(2)
-                                   : Sabel_Controller_Map::getDefaultAction();
-        }
-      }
-      
-      return new Sabel_Controller_Map_Destination($this, $destination);
-    }
+    return new Sabel_Controller_Map_Destination($this, $this->entry['destination']);
   }
   
   public function getRequirements()
