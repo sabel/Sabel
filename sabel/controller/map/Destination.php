@@ -18,7 +18,7 @@ class Sabel_Controller_Map_Destination
   public function __construct($entry, $dest)
   {
     $this->parentEntry = $entry;
-    
+   
     $mapUri     = $entry->getUri();
     $requestUri = $entry->getRequestUri();
     

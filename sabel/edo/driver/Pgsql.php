@@ -5,7 +5,7 @@
 
 class Sabel_Edo_Driver_Pgsql implements Sabel_Edo_Driver_Interface
 {
-  private $conn, $stmt, $sqlObj;
+  private $conn,$stmt, $sqlObj;
 
   private $param = array();
   private $data  = array();

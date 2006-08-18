@@ -65,7 +65,7 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
     foreach ($data as $key => $val) array_push($columns, $key);
 
     $values = array();
-    foreach ($data as $key => $val) array_push($values, ":{$key}");
+    foreach ($data as $key => $val) array_push($values, ':' . $key);
 
     $sql = array("INSERT INTO {$table}(");
     array_push($sql, join(',', $columns));
@@ -97,10 +97,10 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
   private function getNextNumber($table)
   {
     if ($this->myDb === 'pgsql') {
-      $this->execute('SELECT nextval(\'' . $table . '_id_seq\');');
+      $this->execute("SELECT nextval('{$table}_id_seq');");
       $row = $this->fetch();
       if (($this->lastInsertId =(int) $row[0]) === 0) {
-        throw new Exception($table.'_id_seq is not found.');
+        throw new Exception($table . '_id_seq is not found.');
       } else {
         return $this->lastInsertId;
       }
@@ -165,17 +165,13 @@ class Sabel_Edo_Driver_Pdo implements Sabel_Edo_Driver_Interface
 
     $this->makeBindParam();
 
-    if (empty($this->param)) {
-      $result = $this->stmt->execute();
-    } else {
-      $result = $this->stmt->execute($this->param);
+    if ($this->stmt->execute($this->param)) {
       $this->param = array();
-    }
-
-    if ($result) {
       return true;
     } else {
-      var_dump($this->pdo->errorInfo());
+      // @todo
+      // var_dump($this->param);
+      // var_dump($this->stmt->queryString);
       throw new Exception('Error: PDOStatement::execute()');
     }
   }

@@ -8,14 +8,16 @@
  */
 class Sabel_Controller_Map_Uri implements Iterator
 {
-  protected $uri;
+  protected $uri = '';
+  protected $elements = array();
   private $position = 0;
   private $limit = 0;
   
   public function __construct($uri)
   {
-    $this->uri = $uri;
-    $this->limit = $this->count();
+    $this->uri      = $uri;
+    $this->elements = explode('/', $uri);
+    $this->limit    = $this->count();
   }
   
   public function getString()
@@ -25,26 +27,25 @@ class Sabel_Controller_Map_Uri implements Iterator
   
   public function count()
   {
-    return count(explode('/', $this->uri));
+    return count($this->elements);
   }
   
   public function calcElementPositionByName($name)
   {
     $position = 0;
-    $elements = explode('/', $this->uri);
-    
-    foreach ($elements as $element) {
+    foreach ($this->elements as $element) {
       $oElement = new Sabel_Controller_Map_Element($element);
-      if ($oElement->getName() == $name) return $position;
+      if ($oElement->getName() === $name) return $position;
       $position++;
     }
   }
   
   public function getElement($position)
   {
-    $elements = explode('/', $this->uri);
-    if (0 <= $position && $position < count($elements)) {
-      return new Sabel_Controller_Map_Element($elements[$position]);
+    $position =(int) $position;
+
+    if (0 <= $position && $position < $this->limit) {
+      return new Sabel_Controller_Map_Element($this->elements[$position]);
     } else {
       return false;
     }
@@ -52,9 +53,8 @@ class Sabel_Controller_Map_Uri implements Iterator
   
   public function getElements()
   {
-    $elements = explode('/', $this->uri);
     $objElements = array();
-    foreach ($elements as $element) {
+    foreach ($this->elements as $element) {
       $objElements[] = new Sabel_Controller_Map_Element($element);
     }
     return $objElements;

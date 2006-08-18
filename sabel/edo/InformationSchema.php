@@ -217,7 +217,7 @@ class Edo_Pgsql_InformationSchema extends Edo_MysqlPgsql_InformationSchema
   {
     return array('character varying', 'varchar', 'character', 'char');
   }
-  
+
   public function getTextTypes()
   {
     return array('text');
