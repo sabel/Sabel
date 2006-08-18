@@ -24,7 +24,7 @@ require_once('sabel/config/Yaml.php');
  */
 class Test_Map extends PHPUnit2_Framework_TestCase
 {
-  public function setUp()
+  public function __construct()
   {
     $this->map = new Sabel_Controller_Map('/data/map.yml');
     $this->map->load();
@@ -97,7 +97,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function testMapEntries()
   {
-    foreach ($this->map->getEntries() as $entry) {
+    foreach ($this->map as $entry) {
       $this->assertTrue(is_object($entry->getUri()));
       $uri = $entry->getUri();
       $this->assertTrue(is_string($uri->getString()));

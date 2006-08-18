@@ -8,13 +8,20 @@
  */
 class Sabel_Controller_Map_Entry
 {
-  protected $entry = array();
+  protected $name       = '';
+  protected $entry      = array();
   protected $requestUri = null;
   
-  public function __construct($entry, $requestUri)
+  public function __construct($name, $entry, $requestUri)
   {
-    $this->entry = $entry;
+    $this->name       = $name;
+    $this->entry      = $entry;
     $this->requestUri = $requestUri;
+  }
+  
+  public function getName()
+  {
+    return $this->name;
   }
   
   public function getUri()

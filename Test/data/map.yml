@@ -36,8 +36,8 @@ news:
     article_id: ([0-9]{8})
 
 default:
-  uri: :module/:controller/:action
-
-module:     index
-controller: index
-action:     index
+  uri: :module/:controller/:action/:id
+  destination:
+    module:     :module
+    controller: :controller
+    action:     :action
