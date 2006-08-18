@@ -78,7 +78,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$res[2]->customer->id, 2);
 
     $this->assertEquals($this->order->getCount(), 6);
-    
+
     $cu  = new Customer();
     $cus = $cu->select();
     $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);
@@ -87,7 +87,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
     $this->assertEquals((int)$cus[0]->customer_order[2]->id, 5);
     $this->assertEquals((int)$cus[0]->customer_order[3]->id, 6);
-    
+
     $cu = new Customer();
     $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
     $cus = $cu->select();
@@ -116,7 +116,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($cus[0]->customer_order[2]->id, null);
     $this->assertEquals($cus[0]->customer_order[3]->id, null);
   }
-  
+
   public function testMultipleInsert()
   {
     $insertData = array();
@@ -567,7 +567,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $order = $co->selectOne($number);
     $this->assertEquals((int)$order->customer_id, 1);  // parent_id
   }
-  
+
   public function testSelectAll_AutoGetChild()
   {
     $cu   = new Customer();
@@ -593,7 +593,9 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     $cu   = new Customer();
     $cu->setChildConstraint(array('limit' => 10,
-                                  'order' => 'id desc'));
+                                  'order' => 'id desc')); // default: for telephone & order_line
+
+    $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
     $objs = $cu->select();
     
     $this->assertEquals((int)$objs[0]->customer_order[0]->id, 7);
@@ -663,7 +665,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
     $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
   }
-  
+
   public function testGetCount()
   {
     // all count ---------------------------------
@@ -1177,29 +1179,16 @@ class PgsqlHelper
 
 //-----------------------------------------------------------------
 
-abstract class BaseUserRecordObject extends Sabel_Edo_RecordObject
+abstract class BaseRecordObject extends Sabel_Edo_RecordObject
 {
-  protected $myChildren         = null;
-  protected $myChildConstraints = array();
-
   public function __construct($param1 = null, $param2 = null)
   {
     $this->setEDO('user');
     parent::__construct($param1, $param2);
   }
-
-  public function getMyChildren()
-  {
-    return $this->myChildren;
-  }
-
-  public function getMyChildConstraint()
-  {
-    return $this->myChildConstraints;
-  }
 }
 
-class Test extends BaseUserRecordObject
+class Test extends BaseRecordObject
 {
   protected $withParent = true;
 
@@ -1219,26 +1208,26 @@ class Test extends BaseUserRecordObject
   }
 }
 
-class Customer extends BaseUserRecordObject
+class Customer extends BaseRecordObject
 {
   protected $myChildren = array('customer_order','customer_telephone');
-  protected $defChildConstraints = array('limit' => 10); // (for telephone)
+  protected $defChildConstraints = array('limit' => 10);
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->myChildConstraints['customer_order'] = array('limit' => 10);
     parent::__construct($param1, $param2);
+    $this->setChildConstraint('customer_order', array('limit' => 10));
   }
 }
 
-class Customer_Order extends BaseUserRecordObject
+class Customer_Order extends BaseRecordObject
 {
   protected $myChildren = 'order_line';
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->myChildConstraints['order_line'] = array('limit' => 10);
     parent::__construct($param1, $param2);
+    $this->setChildConstraint('order_line', array('limit' => 10));
   }
 }
 
@@ -1257,7 +1246,7 @@ class Course extends BaseBridgeRecord
 
 }
 
-class Users extends BaseUserRecordObject
+class Users extends BaseRecordObject
 {
   public function __construct($param1 = null, $param2 = null)
   {

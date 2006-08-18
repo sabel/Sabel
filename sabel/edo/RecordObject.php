@@ -21,7 +21,9 @@ abstract class Sabel_Edo_RecordObject
   protected
     $constraints         = array(),
     $childConstraints    = array(),
-    $defChildConstraints = array();
+    $defChildConstraints = array(),
+    $myChildren          = null;
+
 
   protected
     $edo           = null,
@@ -122,6 +124,16 @@ abstract class Sabel_Edo_RecordObject
     return $this->structure;
   }
 
+  public function getMyChildren()
+  {
+    return $this->myChildren;
+  }
+
+  public function getMyChildConstraint()
+  {
+    return $this->childConstraints;
+  }
+
   public function __call($method, $parameters)
   {
     $this->setCondition($method, $parameters[0], $parameters[1]);
@@ -142,25 +154,24 @@ abstract class Sabel_Edo_RecordObject
 
   public function setChildConstraint($param1, $param2 = null)
   {
-    if (isset($param2)) {
-      if (is_array($param2)) {
-        $this->childConstraints[$param1] = $param2;
-      } else {
-        $this->defChildConstraints = array($param1 => $param2);
-      }
+    if (isset($param2) && is_array($param2)) {
+      foreach ($param2 as $key => $val)
+        $this->childConstraints[$param1][$key] = $val;
+    } else if (isset($param2)) {
+      $this->defChildConstraints = array($param1 => $param2);
+    } else if (is_array($param1)) {
+      $this->defChildConstraints = $param1;
     } else {
-      if (is_array($param1)) {
-        $this->defChildConstraints = $param1;
-      } else {
-        throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
-      }
+      throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
     }
   }
 
   protected function receiveChildConstraint($constraints)
   {
     if (!is_array($constraints)) throw new Exception('constrains is not array.');
-    $this->childConstraints = $constraints;
+
+    if (!empty($constraints))
+      $this->childConstraints = $constraints;
   }
 
   /**
@@ -236,10 +247,10 @@ abstract class Sabel_Edo_RecordObject
     return $this->getMost('DESC', $orderColumn);
   }
 
-  protected function getMost($type, $orderColumn)
+  protected function getMost($order, $orderColumn)
   {
     $this->setCondition($orderColumn, 'NOT NULL');
-    $this->setConstraint(array('limit' => 1, 'order' => "{$orderColumn} {$type}"));
+    $this->setConstraint(array('limit' => 1, 'order' => "{$orderColumn} {$order}"));
     return $this->selectOne();
   }
 
@@ -428,7 +439,7 @@ abstract class Sabel_Edo_RecordObject
 
     if ($this->edo->execute()) {
       $rows = $this->edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      if (!$rows) return null;
+      if (!$rows) return false;
 
       $recordObj = array();
 
@@ -440,7 +451,8 @@ abstract class Sabel_Edo_RecordObject
           $obj = $this->newClass($child_table);
         }
 
-        if ($this->withParent) $row = $this->selectWithParent($row);
+        if ($this->withParent)
+          $row = $this->selectWithParent($row);
 
         $this->setSelectedProperty($obj, $row);
 
@@ -472,31 +484,15 @@ abstract class Sabel_Edo_RecordObject
   private function chooseMyChildConstraint($child, $obj)
   {
     if (array_key_exists($child, $this->childConstraints)) {
-      $constraints = $this->constraintMerge($child, $this->childConstraints[$child]);
+      $constraints = $this->childConstraints[$child];
     } else if (!empty($this->defChildConstraints)) {
       $constraints = $this->defChildConstraints;
-    } else if (!($constraints = $this->hasMyChildConstraint($child, $obj))) {
+    } else if (!($constraints = $obj->childConstraints[$child])) {
       $constraints = $this->hasDefaultChildConstraint($obj);
     }
 
     $obj->setChildConstraint($child, $constraints);
     $obj->defChildConstraints = $this->defChildConstraints;
-  }
-
-  private function constraintMerge($child, $constraints)
-  {
-    if ($results = $this->hasMyChildConstraint($child, $this)) {
-      foreach ($results as $key => $val) {
-        if (!array_key_exists($key, $constraints)) $constraints[$key] = $val;
-      }
-    }
-    return $constraints;
-  }
-
-  private function hasMyChildConstraint($child, $obj)
-  {
-    $childConstraints =(array) $obj->getMyChildConstraint();
-    return ($c = $childConstraints[$child]) ? $c : false;
   }
 
   private function hasDefaultChildConstraint($obj)
@@ -593,7 +589,7 @@ abstract class Sabel_Edo_RecordObject
     if (class_exists($name, false) && strtolower($name) !== 'sabel_edo_commonrecord') {
       return new $name();
     } else {
-      return new Sabel_Edo_CommonRecord($this->table);
+      return new Sabel_Edo_CommonRecord($name);
     }
   }
 
@@ -739,7 +735,7 @@ abstract class BaseBridgeRecord extends Sabel_Edo_RecordObject
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->structure = 'tree';
+    $this->structure = 'bridge';
     $this->setEDO('user');
     parent::__construct($param1, $param2);
   }
