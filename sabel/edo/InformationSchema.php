@@ -84,7 +84,7 @@ class Edo_MysqlPgsql_InformationSchema
     $this->recordObj   = new Sabel_Edo_CommonRecord();
     $this->recordObj->setEDO($connectName);
   }
-  
+
   public function getTables()
   {
     $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
@@ -95,7 +95,6 @@ class Edo_MysqlPgsql_InformationSchema
       $tableName = $data['table_name'];
       $tables[]  = new Edo_InformationSchema_Table($tableName, $this->createColumns($tableName));
     }
-
     return $tables;
   }
 
@@ -106,11 +105,10 @@ class Edo_MysqlPgsql_InformationSchema
 
   protected function createColumns($table)
   {
-    $columns = array();
-
     $sql  = "SELECT * FROM information_schema.columns ";
     $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$table}'";
 
+    $columns = array();
     foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
       $columnName = $data['column_name'];
