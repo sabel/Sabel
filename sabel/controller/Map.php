@@ -32,12 +32,7 @@ class Sabel_Controller_Map implements Iterator
       $c = new Sabel_Config_Yaml($this->getPath());
       self::$map = $c->toArray();
       
-      $entries = array();
-      foreach (self::$map as $name => $entry) {
-        $entries[] = new Sabel_Controller_Map_Entry($name, $entry, $this->requestUri);
-      }
-      
-      $this->entries = $entries;
+      $this->entries = $this->getEntries();
     } else {
       throw new Exception("map configure not found on " . $this->getPath());
     }
@@ -55,16 +50,9 @@ class Sabel_Controller_Map implements Iterator
   
   public function find()
   {
-    $requestUri = $this->requestUri;
+    $matched = $this->getEntriesByCount($this->requestUri->count());
     
-    foreach ($this->getEntries() as $entry) {
-      if ($entry->getUri()->count() === $requestUri->count()) {
-        $matched = $entry;
-        break;
-      }
-    }
-    
-    return (is_object($matched)) ? $matched : $this->getEntry('default');
+    return (is_object($matched[0])) ? $matched[0] : $this->getEntry('default');
   }
   
   public function getEntry($name)
@@ -75,9 +63,7 @@ class Sabel_Controller_Map implements Iterator
   public function getEntries()
   {
     $entries = array();
-    foreach (self::$map as $name => $entry) {
-      $entries[] = new Sabel_Controller_Map_Entry($name, $entry, $this->requestUri);
-    }
+    foreach (array_keys(self::$map) as $name) $entries[] = $this->getEntry($name);
     return $entries;
   }
   
@@ -86,8 +72,8 @@ class Sabel_Controller_Map implements Iterator
     $number =(int) $number;
     
     $entries = array();
-    foreach (self::$map as $name => $entry) {
-      $entry = new Sabel_Controller_Map_Entry($name, $entry, $this->requestUri);
+    foreach (array_keys(self::$map) as $name) {
+      $entry = $this->getEntry($name);
       if ($entry->getUri()->count() === $number) $entries[] = $entry;
     }
     return $entries;
