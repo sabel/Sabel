@@ -9,7 +9,10 @@
 
 abstract class Sabel_Edo_RecordObject
 {
-  const WITH_PARENT  = 1;
+  const WITH_PARENT = 1;
+
+  const TYPE_CHILD  = 0;
+  const TYPE_PARENT = 1;
 
   protected
     $conditions      = array(),
@@ -63,16 +66,13 @@ abstract class Sabel_Edo_RecordObject
 
   public function __construct($param1 = null, $param2 = null)
   {
-    if ($this->table === '')
-      $this->table = strtolower(get_class($this));
-
+    if ($this->table === '') $this->table = strtolower(get_class($this));
     if (isset($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
-
     if ($this->is_selected()) $this->newData[$key] = $val;
   }
 
@@ -113,6 +113,7 @@ abstract class Sabel_Edo_RecordObject
 
   public function setProperties($array)
   {
+    if (!is_array($array)) throw new Exception('properties argument is not array.');
     foreach ($array as $key => $val) $this->$key = $val;
   }
 
@@ -159,7 +160,6 @@ abstract class Sabel_Edo_RecordObject
   protected function receiveChildConstraint($constraints)
   {
     if (!is_array($constraints)) throw new Exception('constrains is not array.');
-
     $this->childConstraints = $constraints;
   }
 
@@ -228,17 +228,17 @@ abstract class Sabel_Edo_RecordObject
 
   public function getFirst($orderColumn)
   {
-    return $this->getMost('asc', $orderColumn);
+    return $this->getMost('ASC', $orderColumn);
   }
 
   public function getLast($orderColumn)
   {
-    return $this->getMost('desc', $orderColumn);
+    return $this->getMost('DESC', $orderColumn);
   }
 
   protected function getMost($type, $orderColumn)
   {
-    $this->setCondition($orderColumn, 'not null');
+    $this->setCondition($orderColumn, 'NOT NULL');
     $this->setConstraint(array('limit' => 1, 'order' => "{$orderColumn} {$type}"));
     return $this->selectOne();
   }
@@ -269,7 +269,6 @@ abstract class Sabel_Edo_RecordObject
   {
     $this->setCondition($param1, $param2);
     $this->selectCondition = $this->conditions;
-
     $this->makeFindObject($this);
   }
 
@@ -292,10 +291,8 @@ abstract class Sabel_Edo_RecordObject
 
     if ($edo->execute()) {
       if ($row = $edo->fetch(Sabel_Edo_Driver_Interface::FETCH_ASSOC)) {
-        if ($this->withParent) {
-          $row = $this->selectWithParent($row);
-        }
-        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
+        if ($this->withParent) $row = $this->selectWithParent($row);
+        $this->setSelectedProperty($obj, $row);
 
         $myChild = $this->getMyChildren();
         if (isset($myChild)) $this->getDefaultChild($myChild, $obj);
@@ -351,36 +348,34 @@ abstract class Sabel_Edo_RecordObject
     $sql = array(substr($sql, 0, strlen($sql) - 2));
     array_push($sql, " FROM {$table}");
 
-    if ($child)  array_push($sql, $this->getLeftJoinPhrase($child,  $table, 'child'));
-    if ($parent) array_push($sql, $this->getLeftJoinPhrase($parent, $table, 'parent'));
+    if ($child)  array_push($sql, $this->getLeftJoinPhrase($child,  $table, self::TYPE_CHILD));
+    if ($parent) array_push($sql, $this->getLeftJoinPhrase($parent, $table, self::TYPE_PARENT));
 
     $edo = $this->edo;
     $edo->setBasicSQL(join('', $sql));
     $edo->makeQuery($this->condition, $this->constraints);
-    if ($edo->execute()) {
-      $rows = $edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
-      $relTables = array_merge($child, $parent);
+    if (!$edo->execute()) throw new Exception('Error: selectJoin() failed');
 
-      $recordObj = array();
-      foreach ($rows as $row) {
-        foreach ($relTables as $table) {
-          foreach ($this->joinColCache[$table] as $column) {
-            $row[$table][$column] = $row["prefix_{$table}_{$column}"];
-            unset($row["prefix_{$table}_{$column}"]);
-          }
-          $obj = $this->newClass($table);
-          $this->setSelectedProperty($obj, $row[$table][$obj->defColumn], $row[$table]);
-          $obj->setTable($table);
-          $row[$table] = $obj;
+    $rows = $edo->fetchAll(Sabel_Edo_Driver_Interface::FETCH_ASSOC);
+    $relTables = array_merge($child, $parent);
+
+    $recordObj = array();
+    foreach ($rows as $row) {
+      foreach ($relTables as $table) {
+        foreach ($this->joinColCache[$table] as $column) {
+          $row[$table][$column] = $row["prefix_{$table}_{$column}"];
+          unset($row["prefix_{$table}_{$column}"]);
         }
-        $obj = $this->newClass($this->table);
-        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
-        $recordObj[] = $obj;
+        $obj = $this->newClass($table);
+        $this->setSelectedProperty($obj, $row[$table]);
+        $obj->setTable($table);
+        $row[$table] = $obj;
       }
-      return $recordObj;
-    } else {
-      throw new Exception('Error: selectJoin() failed');
+      $obj = $this->newClass($this->table);
+      $this->setSelectedProperty($obj, $row);
+      $recordObj[] = $obj;
     }
+    return $recordObj;
   }
 
   private function addJoinColumnPhrase($is, &$sql, $table)
@@ -404,7 +399,7 @@ abstract class Sabel_Edo_RecordObject
   private function getLeftJoinPhrase($rel, $table, $type)
   {
     foreach ($rel as $val) {
-      if ($type === 'child') {
+      if ($type === self::TYPE_CHILD) {
         return " LEFT JOIN {$val} ON {$table}.id = {$val}.{$table}_id";
       } else {
         return " LEFT JOIN {$val} ON {$table}.{$val}_id = {$val}.id ";
@@ -447,7 +442,7 @@ abstract class Sabel_Edo_RecordObject
 
         if ($this->withParent) $row = $this->selectWithParent($row);
 
-        $this->setSelectedProperty($obj, $row[$obj->defColumn], $row);
+        $this->setSelectedProperty($obj, $row);
 
         $myChild = $obj->getMyChildren();
         if (isset($myChild)) {
@@ -500,14 +495,8 @@ abstract class Sabel_Edo_RecordObject
 
   private function hasMyChildConstraint($child, $obj)
   {
-    $childConstraints = $obj->getMyChildConstraint();
-    if (!is_array($childConstraints)) return false;
-
-    if (array_key_exists($child, $childConstraints)) {
-      return $childConstraints[$child];
-    } else {
-      return false;
-    }
+    $childConstraints =(array) $obj->getMyChildConstraint();
+    return ($c = $childConstraints[$child]) ? $c : false;
   }
 
   private function hasDefaultChildConstraint($obj)
@@ -562,14 +551,14 @@ abstract class Sabel_Edo_RecordObject
         $row[$key] = $val;
       }
     }
-    $this->setSelectedProperty($obj, $id, $row);
+    $this->setSelectedProperty($obj, $row);
     $obj->newData = array();
     return $obj;
   }
 
-  private function setSelectedProperty($obj, $id, $row)
+  private function setSelectedProperty($obj, $row)
   {
-    $obj->selectCondition[$obj->defColumn] = $id;
+    $obj->selectCondition[$obj->defColumn] = $row[$obj->defColumn];
     $obj->setProperties($row);
     $obj->selected = true;
   }

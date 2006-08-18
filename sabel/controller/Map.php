@@ -1,3 +1,4 @@
+
 <?php
 
 uses('sabel.config.Spyc');
