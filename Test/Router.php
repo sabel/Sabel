@@ -13,7 +13,7 @@ require_once('sabel/controller/map/Entry.php');
 require_once('sabel/controller/map/Uri.php');
 require_once('sabel/controller/map/Destination.php');
 
-require_once('sabel/request/URI.php');
+require_once('sabel/request/Uri.php');
 
 require_once('sabel/core/Router.php');
 

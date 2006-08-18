@@ -14,6 +14,24 @@ class Sabel_Controller_Map_Destination
   public function __construct($entry, $destination)
   {
     $this->parentEntry = $entry;
+    
+    $uri  = $entry->getUri();
+    $ruri = $entry->getRequestUri();
+    
+    for ($pos = 0; $pos < $uri->count(); $pos++) {
+      $element = $uri->getElement($pos);
+      if ($element->isModule()) {
+        $destElement = new Sabel_Controller_Map_Element($destination['module']);
+        if ($destElement->isModule()) $destination['module'] = $ruri->get($pos);
+      } else if ($element->isController()) {
+        $destElement = new Sabel_Controller_Map_Element($destination['controller']);
+        if ($destElement->isController()) $destination['controller'] = $ruri->get($pos);
+      } else if ($element->isAction()) {
+        $destElement = new Sabel_Controller_Map_Element($destination['action']);
+        if ($destElement->isAction()) $destination['action'] = $ruri->get($pos);
+      }
+    }
+    
     $this->destination = $destination;
   }
   

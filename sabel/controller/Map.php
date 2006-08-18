@@ -59,9 +59,12 @@ class Sabel_Controller_Map
   
   public function find()
   {
+    $requestUri = $this->requestUri;
+    
     foreach ($this->getEntries() as $entry) {
-      if ($entry->getUri()->count() === $this->requestUri->count()) {
+      if ($entry->getUri()->count() === $requestUri->count()) {
         $matched = $entry;
+        break;
       }
     }
     

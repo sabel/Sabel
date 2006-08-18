@@ -70,7 +70,7 @@ class Sabel_Controller_Loader
         throw new Sabel_Exception_Runtime('can\'t found out controller class: ' . $moduleClassName);
       }
     } else {
-      $path = RUN_BASE.'/app/modules/Index/controllers/index.php';
+      $path = RUN_BASE.'/app/index/controllers/index.php';
       if (is_file($path)) {
         require_once($path);
         return new Index_Index();
