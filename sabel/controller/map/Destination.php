@@ -25,10 +25,9 @@ class Sabel_Controller_Map_Destination
     $elems = array(new Sabel_Controller_Map_Element($dest[self::MODULE]),
                    new Sabel_Controller_Map_Element($dest[self::CONTROLLER]),
                    new Sabel_Controller_Map_Element($dest[self::ACTION]));
-    
-    for ($pos = 0; $pos < $mapUri->count(); $pos++) {
-      $element = $mapUri->getElement($pos);
       
+    $pos = 0;
+    foreach ($mapUri as $element) {
       switch (true) {
         case ($element->isModule() && $elems[0]->isModule()):
           $dest[self::MODULE] = $requestUri->get($pos);
@@ -40,6 +39,8 @@ class Sabel_Controller_Map_Destination
           $dest[self::ACTION] = $requestUri->get($pos);
           break;
       }
+      
+      $pos++;
     }
     
     $this->destination = $dest;
