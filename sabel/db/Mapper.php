@@ -168,7 +168,8 @@ abstract class Sabel_DB_Mapper
   public function setChildCondition($child, $conditions)
   {
     if (!is_array($conditions))
-      throw new Exception('Error: setChildCondition() Argment 2 must be an Array');
+      throw new Exception('Error: setChildCondition() Argument 2 must be an Array');
+
     $this->childConditions[$child] = $conditions;
   } 
 
@@ -532,7 +533,7 @@ abstract class Sabel_DB_Mapper
     $obj = $this->newClass($table);
     if (is_null($id)) return $obj;
 
-    if (!is_array($row = Sabel_Edo_SimpleCache::get($table . $id))) {
+    if (!is_array($row = Sabel_DB_ParentCache::get($table . $id))) {
       $driver = $this->getDriver();
       $driver->setBasicSQL("SELECT {$obj->projection} FROM {$table}");
       $driver->makeQuery(array($obj->defColumn => $id));
@@ -544,7 +545,7 @@ abstract class Sabel_DB_Mapper
           $obj->id = $id;
           return $obj;
         }
-        Sabel_Edo_SimpleCache::add($table . $id, $row);
+        Sabel_DB_ParentCache::add($table . $id, $row);
       } else {
         throw new Exception('Error: addParentObject() execute failed.');
       }
@@ -619,8 +620,16 @@ abstract class Sabel_DB_Mapper
 
   public function save($data = null)
   {
-    if ($data) $this->data = $data;
-    return ($this->is_selected()) ? $this->update() : $this->insert();
+    if ($data && !is_array($data))
+      throw new Exception('Error: Argument must be an Array');
+
+    if ($this->selected) {
+      if ($data) $this->newData = $data;
+      return $this->update();
+    } else {
+      if ($data) $this->data = $data;
+      return $this->insert();
+    }
   }
 
   public function allUpdate($data)
@@ -716,7 +725,7 @@ abstract class Sabel_DB_Mapper
   }
 }
 
-class Sabel_Edo_SimpleCache
+class Sabel_DB_ParentCache
 {
   private static $cache = array();
 
