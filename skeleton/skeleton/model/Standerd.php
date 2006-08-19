@@ -4,7 +4,7 @@ class <?php echo $className ?> extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setEdo('default');
+    $this->setDriver('default');
     parent::__construct($param1, $param2);
   }
   

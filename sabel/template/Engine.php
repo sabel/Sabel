@@ -106,7 +106,7 @@ class Form
   public static function create($table, $obj, $action, $method)
   {
     uses('sabel.db.InformationSchema');
-    $is = new Edo_InformationSchema('default', 'default');
+    $is = new Sabel_DB_Schema('default', 'default');
     
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action, $method);
@@ -134,7 +134,7 @@ class Form
   public static function edit($table, $obj, $action, $method)
   {
     uses('sabel.db.InformationSchema');
-    $is = new Edo_InformationSchema('default', 'default');
+    $is = new Sabel_DB_Schema('default', 'default');
     
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action.$obj->id, $method);
@@ -182,7 +182,7 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   public function retrieve()
   {
     uses('sabel.db.InformationSchema');
-    $is = new Edo_InformationSchema('default', 'default');
+    $is = new Sabel_DB_Schema('default', 'default');
     $table = $is->getTable('blog');
     
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
