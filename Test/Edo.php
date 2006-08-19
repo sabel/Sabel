@@ -8,18 +8,18 @@ require_once "PHPUnit2/Framework/TestCase.php";
 require_once "PHPUnit2/Framework/TestSuite.php";
 require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
+require_once "sabel/Functions.php";
+require_once "sabel/core/Context.php";
 
-require_once "sabel/edo/RecordObject.php";
-require_once "sabel/edo/InformationSchema.php";
-require_once "sabel/edo/DBConnection.php";
+require_once "sabel/db/Mapper.php";
+require_once "sabel/db/InformationSchema.php";
+require_once "sabel/db/Connection.php";
 
-require_once "sabel/edo/Query.php";
+require_once "sabel/db/Query.php";
 
-require_once "sabel/edo/driver/Interface.php";
-require_once "sabel/edo/driver/Pdo.php";
-require_once "sabel/edo/driver/Pgsql.php";
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/driver/Pdo.php";
+require_once "sabel/db/driver/Pgsql.php";
 
 class Test_Edo extends PHPUnit2_Framework_TestCase
 {
@@ -42,12 +42,12 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   protected function setUp()
   {
     $this->test      = new Test();
-    $this->test2     = new Sabel_Edo_CommonRecord('test2');
-    $this->test3     = new Sabel_Edo_CommonRecord('test3');
+    $this->test2     = new Sabel_DB_Basic('test2');
+    $this->test3     = new Sabel_DB_Basic('test3');
     $this->customer  = new Customer();
-    $this->order     = new Sabel_Edo_CommonRecord('customer_order');
-    $this->orderLine = new Sabel_Edo_CommonRecord('order_line');
-    $this->telephone = new Sabel_Edo_CommonRecord('customer_telephone');
+    $this->order     = new Sabel_DB_Basic('customer_order');
+    $this->orderLine = new Sabel_DB_Basic('order_line');
+    $this->telephone = new Sabel_DB_Basic('customer_telephone');
   }
 
   protected function tearDown()
@@ -72,8 +72,8 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 6, 'customer_id' => 1);
     $this->order->multipleInsert($insertData);
 
-    $o = new Sabel_Edo_CommonRecord('customer_order');
-    $res = $o->select(Sabel_Edo_RecordObject::WITH_PARENT);
+    $o = new Sabel_DB_Basic('customer_order');
+    $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
     $this->assertEquals((int)$res[0]->customer->id, 1);
     $this->assertEquals((int)$res[2]->customer->id, 2);
 
@@ -124,15 +124,17 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
     $insertData[] = array('id' => 3, 'name' => 'uchida',   'blood' => 'AB', 'test2_id' => 1);
     $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
-    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 2);
+    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
     $this->test->multipleInsert($insertData);
     
     $ro = $this->test->select();
     $this->assertEquals(count($ro), 6);
     
+    $this->test->setWithParent(true);
     $obj = $this->test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
+    $this->assertEquals((int)$obj->test2->id, 4);
     
     $obj = $this->test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
@@ -161,7 +163,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
     $this->assertEquals($this->orderLine->getCount(), 11);
     
-    $tree = new Sabel_Edo_CommonRecord('tree');
+    $tree = new Sabel_DB_Basic('tree');
     $insertData   = array();
     $insertData[] = array('id' => 1,  'name' => 'A');
     $insertData[] = array('id' => 2,  'name' => 'B');
@@ -176,7 +178,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
     $tree->multipleInsert($insertData);
 
-    $student = new Sabel_Edo_CommonRecord('student');
+    $student = new Sabel_DB_Basic('student');
     $insertData   = array();
     $insertData[] = array('name' => 'tom',   'birth' => '1983/08/17');
     $insertData[] = array('name' => 'john',  'birth' => '1983/08/18');
@@ -185,7 +187,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'ameri', 'birth' => '1983/08/21');
     $student->multipleInsert($insertData);
 
-    $course = new Sabel_Edo_CommonRecord('course');
+    $course = new Sabel_DB_Basic('course');
     $insertData   = array();
     $insertData[] = array('name' => 'Mathematics');
     $insertData[] = array('name' => 'Physics');
@@ -194,7 +196,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'Psychology');
     $course->multipleInsert($insertData);
 
-    $sc = new Sabel_Edo_CommonRecord('student_course');
+    $sc = new Sabel_DB_Basic('student_course');
     $insertData   = array();
     $insertData[] = array('student_id' => 1, 'course_id' => 1);
     $insertData[] = array('student_id' => 1, 'course_id' => 2);
@@ -228,13 +230,13 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
     $users->multipleInsert($insertData);
 
-    $s = new Sabel_Edo_CommonRecord('status');
+    $s = new Sabel_DB_Basic('status');
     $s->state = 'normal';
     $s->save();
     $s->state = 'invalid';
     $s->save();
 
-    $s  = new Sabel_Edo_CommonRecord('status');
+    $s  = new Sabel_DB_Basic('status');
     $ss = $s->select();
 
     $this->assertEquals((int)$ss[0]->id, 1);
@@ -243,7 +245,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$ss[1]->id, 2);
     $this->assertEquals($ss[1]->state, 'invalid');
 
-    $bbs = new Sabel_Edo_CommonRecord('bbs');
+    $bbs = new Sabel_DB_Basic('bbs');
 
     $insertData   = array();
     $insertData[] = array('users_id' => 1 , 'title' => 'title11', 'body' => 'body11');
@@ -274,19 +276,19 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function testInsert()
   {
-    $test2 = new Sabel_Edo_CommonRecord('test2');
+    $test2 = new Sabel_DB_Basic('test2');
     $test2->id = 1;
     $test2->name = 'test21';
     $test2->test3_id = '2';
     $test2->save();
 
-    $test2 = new Sabel_Edo_CommonRecord('test2');
+    $test2 = new Sabel_DB_Basic('test2');
     $test2->id = 2;
     $test2->name = 'test22';
     $test2->test3_id = '1';
     $test2->save();
     
-    $test2 = new Sabel_Edo_CommonRecord('test2');
+    $test2 = new Sabel_DB_Basic('test2');
     $test2->id = 3;
     $test2->name = 'test23';
     $test2->test3_id = '3';
@@ -471,17 +473,17 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function testInfiniteLoop()
   {
-    $in1 = new Sabel_Edo_CommonRecord('infinite1');
+    $in1 = new Sabel_DB_Basic('infinite1');
     $in1->id           = 1;
     $in1->infinite2_id = 2;
     $in1->save();
     
-    $in2 = new Sabel_Edo_CommonRecord('infinite2');
+    $in2 = new Sabel_DB_Basic('infinite2');
     $in2->id           = 2;
     $in2->infinite1_id = 1;
     $in2->save();
     
-    $objs = $in1->select(Sabel_Edo_RecordObject::WITH_PARENT);
+    $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
     $obj = $objs[0];
     
     $this->assertEquals($obj->infinite2_id, $obj->infinite2->id);
@@ -564,7 +566,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     
     $co = new Customer_Order();
     $co->setChildConstraint('limit', 10);
-    $order = $co->selectOne($number);
+    $order = $co->selectOne(7);
     $this->assertEquals((int)$order->customer_id, 1);  // parent_id
   }
 
@@ -708,11 +710,12 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   
   public function testSeq()
   {
-    $seq = new Sabel_Edo_CommonRecord('seq');
+    $seq = new Sabel_DB_Basic('seq');
 
     $seq->text = 'test';
     $id = $seq->save();
-    //$this->assertNotEquals($id, null);
+
+    $this->assertNotEquals($id, null);
   }
 
   public function testTree()
@@ -759,6 +762,24 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals((int)$t->tree->id, 1);
     $this->assertEquals((int)$t->tree->tree_id, 0);
     $this->assertEquals($t->tree->name, 'A');
+ 
+    $t = new Tree();
+    $root = $t->getRoot();
+    $this->assertEquals((int)$root[0]->id, 1);
+    $this->assertEquals((int)$root[1]->id, 2);
+    $this->assertEquals((int)$root[2]->id, 4);
+    $this->assertEquals($root[3], null);
+
+    $root[0]->setChildConstraint(array('limit' => 10));
+    $root[0]->getChild('tree');
+    $this->assertEquals((int)$root[0]->tree[0]->id, 3);
+    $this->assertEquals((int)$root[0]->tree[1]->id, 5);
+
+    $children = $root[0]->tree;
+    $this->assertEquals((int)$children[0]->id, 3);
+    $this->assertEquals($children[0]->name, 'A3');
+    $this->assertEquals((int)$children[1]->id, 5);
+    $this->assertEquals($children[1]->name, 'A5');
   }
 
   public function testBridge()
@@ -860,7 +881,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
     $users = new Users();
     $users->setConstraint('order', 'id');
-    $res = $users->select(Sabel_Edo_RecordObject::WITH_PARENT);
+    $res = $users->select(Sabel_DB_Mapper::WITH_PARENT);
 
     foreach ($res as $user) {
       $user->setChildConstraint('limit', 10);
@@ -875,7 +896,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
 
   public function testOrder()
   {
-    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol = new Sabel_DB_Basic('order_line');
     $ol->customer_order_id = 13;
     $ol->item_id = 5;
     $ol->save();
@@ -890,7 +911,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol = new Sabel_DB_Basic('order_line');
     $ol->item_id(3);
     $last = $ol->getLast('amount');
     $this->assertEquals((int)$last->amount, 9000);
@@ -899,18 +920,18 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol = new Sabel_DB_Basic('order_line');
     $ol->customer_order_id = 1;
     $ol->amount  = 100000;
     $ol->item_id = 1;
     $ol->save();
 
-    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol = new Sabel_DB_Basic('order_line');
     $ol->item_id(1);
     $ol->customer_order_id(1);
     $this->assertEquals($ol->getCount(), 3);
 
-    $ol = new Sabel_Edo_CommonRecord('order_line');
+    $ol = new Sabel_DB_Basic('order_line');
 
     $ol->item_id(1);
     $ol->customer_order_id(1);
@@ -921,6 +942,35 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $ol->customer_order_id(1);
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 3000);
+  }
+
+  public function testChildCondition()
+  {
+    $user = new Users(1);
+    $user->setChildConstraint('limit', 100);
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 5);
+
+    $user = new Users(1);
+    $user->setChildConstraint('limit', 100);
+    $user->setChildCondition('bbs', array('body' => 'body13'));
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 1);
+
+    $user = new Users(2);
+    $user->setChildConstraint('limit', 100);
+    $user->setChildCondition('bbs', array('OR_body' => array('body21', 'body23')));
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 2);
+
+    $bbs = new Sabel_DB_Basic('bbs');
+    $bbs->save(array('users_id' => 4));
+
+    $user = new Users(4);
+    $user->setChildConstraint('limit', 100);
+    $user->setChildCondition('bbs', array('OR_title' => array('title41', 'null')));
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 2);
   }
 }
 
@@ -941,7 +991,7 @@ class MysqlHelper
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     
-    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
     
     $SQLs = array();
     
@@ -1030,7 +1080,7 @@ class MysqlHelper
   
   public function createTables()
   {
-    $obj = new Sabel_Edo_CommonRecord();
+    $obj = new Sabel_DB_Basic();
     
     foreach ($this->sqls as $sql) {
       @$obj->execute($sql);
@@ -1039,7 +1089,7 @@ class MysqlHelper
   
   public function dropTables()
   {
-    $obj = new Sabel_Edo_CommonRecord();
+    $obj = new Sabel_DB_Basic();
     
     try {
       foreach ($this->tables as $table) {
@@ -1066,11 +1116,11 @@ class PgsqlHelper
     $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
-    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
 
     //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
     //pg_trace('/tmp/pg_trace.log', 'w', $dbCon);
-    //Sabel_Edo_DBConnection::addConnection('user', 'pgsql', $dbCon);
+    //Sabel_DB_Connection::addConnection('user', 'pgsql', $dbCon);
 
     $SQLs = array();
 
@@ -1160,7 +1210,7 @@ class PgsqlHelper
   
   public function createTables()
   {
-    $obj = new Sabel_Edo_CommonRecord();
+    $obj = new Sabel_DB_Basic();
     
     foreach ($this->sqls as $sql) {
       @$obj->execute($sql);
@@ -1169,7 +1219,7 @@ class PgsqlHelper
   
   public function dropTables()
   {
-    $obj = new Sabel_Edo_CommonRecord();
+    $obj = new Sabel_DB_Basic();
     
     foreach ($this->tables as $table) {
       @$obj->execute("DROP TABLE ${table}");
@@ -1179,16 +1229,16 @@ class PgsqlHelper
 
 //-----------------------------------------------------------------
 
-abstract class BaseRecordObject extends Sabel_Edo_RecordObject
+abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setEDO('user');
+    $this->setDriver('user');
     parent::__construct($param1, $param2);
   }
 }
 
-class Test extends BaseRecordObject
+class Test extends Mapper_Default
 {
   protected $withParent = true;
 
@@ -1208,7 +1258,7 @@ class Test extends BaseRecordObject
   }
 }
 
-class Customer extends BaseRecordObject
+class Customer extends Mapper_Default
 {
   protected $myChildren = array('customer_order','customer_telephone');
   protected $defChildConstraints = array('limit' => 10);
@@ -1220,7 +1270,7 @@ class Customer extends BaseRecordObject
   }
 }
 
-class Customer_Order extends BaseRecordObject
+class Customer_Order extends Mapper_Default
 {
   protected $myChildren = 'order_line';
 
@@ -1231,22 +1281,22 @@ class Customer_Order extends BaseRecordObject
   }
 }
 
-class Tree extends BaseTreeRecord
+class Tree extends Sabel_DB_Tree
 {
 
 }
 
-class Student extends BaseBridgeRecord
+class Student extends Sabel_DB_Bridge
 {
 
 }
 
-class Course extends BaseBridgeRecord
+class Course extends Sabel_DB_Bridge
 {
 
 }
 
-class Users extends BaseRecordObject
+class Users extends Mapper_Default
 {
   public function __construct($param1 = null, $param2 = null)
   {
