@@ -5,16 +5,16 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
-require_once('sabel/edo/DBConnection.php');
-require_once('sabel/edo/InformationSchema.php');
+require_once('sabel/db/DBConnection.php');
+require_once('sabel/db/InformationSchema.php');
 
-require_once "sabel/edo/RecordObject.php";
+require_once "sabel/db/Mapller.php";
 
-require_once "sabel/edo/Query.php";
+require_once "sabel/db/Query.php";
 
-require_once "sabel/edo/driver/Interface.php";
-require_once "sabel/edo/driver/Pdo.php";
-require_once "sabel/edo/driver/Pgsql.php";
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/driver/Pdo.php";
+require_once "sabel/db/driver/Pgsql.php";
 
 class Test_InformationSchema extends PHPUnit2_Framework_TestCase
 {

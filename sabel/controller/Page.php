@@ -10,8 +10,8 @@ $con['dsn'] = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
 $con['user'] = $dev['user'];
 $con['pass'] = $dev['password'];
 
-Sabel_Edo_DBConnection::addConnection('default', 'pdo', $con);
-uses('sabel.edo.RecordObject');
+Sabel_DB_Connection::addConnection('default', 'pdo', $con);
+uses('sabel.db.Mapper');
 
 /**
  * page controller base class.
@@ -52,7 +52,7 @@ abstract class Sabel_Controller_Page
     $dbCon['dsn']  = 'mysql:host=127.0.0.1;dbname=blog';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    Sabel_Edo_DBConnection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
     
     $this->container = new Sabel_Container_DI();
     

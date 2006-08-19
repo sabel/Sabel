@@ -598,7 +598,7 @@ abstract class Sabel_DB_Mapper
 
   protected function newClass($name)
   {
-    if (class_exists($name, false) && strtolower($name) !== 'sabel_edo_commonrecord') {
+    if (class_exists($name, false) && strtolower($name) !== 'sabel_db_commonrecord') {
       return new $name();
     } else {
       return new Sabel_DB_Basic($name);

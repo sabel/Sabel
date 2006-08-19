@@ -5,7 +5,7 @@ class Fixture_<? echo ucfirst($name) ?>
 {
   public function drop()
   {
-    $db = new Sabel_Edo_CommonRecord();
+    $db = new Sabel_DB_CommonRecord();
     $db->setEdo('default');
     $sql = "DROP TABLE <? echo $name ?>";
     $db->execute($sql);
@@ -13,7 +13,7 @@ class Fixture_<? echo ucfirst($name) ?>
   
   public function create()
   {
-    $db = new Sabel_Edo_CommonRecord();
+    $db = new Sabel_DB_CommonRecord();
     $db->setEdo('default');
     $sql = "
            CREATE TABLE <? echo $name ?> (

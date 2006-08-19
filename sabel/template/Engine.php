@@ -105,7 +105,7 @@ class Form
   
   public static function create($table, $obj, $action, $method)
   {
-    uses('sabel.edo.InformationSchema');
+    uses('sabel.db.InformationSchema');
     $is = new Edo_InformationSchema('default', 'default');
     
     $buf = array();
@@ -133,7 +133,7 @@ class Form
   
   public static function edit($table, $obj, $action, $method)
   {
-    uses('sabel.edo.InformationSchema');
+    uses('sabel.db.InformationSchema');
     $is = new Edo_InformationSchema('default', 'default');
     
     $buf = array();
@@ -181,7 +181,7 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function retrieve()
   {
-    uses('sabel.edo.InformationSchema');
+    uses('sabel.db.InformationSchema');
     $is = new Edo_InformationSchema('default', 'default');
     $table = $is->getTable('blog');
     

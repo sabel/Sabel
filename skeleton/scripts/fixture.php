@@ -25,8 +25,8 @@ class Fixture
     $con['user'] = $dev['user'];
     $con['pass'] = $dev['password'];
 
-    Sabel_Edo_DBConnection::addConnection('default', 'pdo', $con);
-    uses('sabel.edo.RecordObject');
+    Sabel_DB_Connection::addConnection('default', 'pdo', $con);
+    uses('sabel.db.Mapper');
   }
   
   public function command()
