@@ -1,20 +1,23 @@
 <?php
 
 //uses('sabel.db.driver.Interface');
-//uses('sabel.db.query.php');
+//uses('sabel.db.query.Bind');
+
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/query/Bind.php";
 
 class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 {
-  private $pdo, $stmt, $sqlObj, $myDb;
+  private $pdo, $stmt, $queryObj, $myDb;
 
   private $param = array();
   private $data  = array();
 
   public function __construct($conn, $myDb)
   {
-    $this->pdo    = $conn;
-    $this->myDb   = $myDb;
-    $this->sqlObj = new Sabel_DB_Driver_PdoQuery();
+    $this->pdo      = $conn;
+    $this->myDb     = $myDb;
+    $this->queryObj = new Sabel_DB_Query_Bind();
   }
 
   public function begin()
@@ -29,7 +32,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
   public function setBasicSQL($sql)
   {
-    $this->sqlObj->setBasicSQL($sql);
+    $this->queryObj->setBasicSQL($sql);
   }
 
   public function setUpdateSQL($table, $data)
@@ -38,7 +41,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     $this->data = $data;
 
     foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
-    $this->sqlObj->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
+    $this->queryObj->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
   }
 
   public function setAggregateSQL($table, $idColumn, $functions)
@@ -49,17 +52,15 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
       array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
 
     array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
-    $this->sqlObj->setBasicSQL(join('', $sql));
+    $this->queryObj->setBasicSQL(join('', $sql));
   }
 
   public function executeInsert($table, $data, $defColumn)
   {
     if (is_null($data[$defColumn]) && $this->myDb === 'pgsql')
-      $data[$defColumn] = $this->getNextNumber($table);
+      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
     $this->data = $data;
-
-    if ($table === 'order_line') $this->disp = true;
 
     $columns = array();
     foreach ($data as $key => $val) array_push($columns, $key);
@@ -75,7 +76,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
     $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists(join('', $sql), $data);
 
-    if (!$this->stmtFlag) $this->sqlObj->setBasicSQL(join('', $sql));
+    if (!$this->stmtFlag) $this->queryObj->setBasicSQL(join('', $sql));
 
     return $this->execute();
   }
@@ -94,56 +95,28 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     }
   }
 
-  private function getNextNumber($table)
+  private function getNextNumber($table, $defColumn = null)
   {
-    if ($this->myDb === 'pgsql') {
-      $this->execute("SELECT nextval('{$table}_id_seq');");
-      $row = $this->fetch();
-      if (($this->lastInsertId =(int) $row[0]) === 0) {
-        throw new Exception($table . '_id_seq is not found.');
-      } else {
-        return $this->lastInsertId;
-      }
+    $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
+    $row = $this->fetch();
+    if (($this->lastInsertId = (int)$row[0]) === 0) {
+      throw new Exception($table . '_id_seq is not found.');
     } else {
-      return 'todo else';
+      return $this->lastInsertId;
     }
   }
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($this->sqlObj->getSQL(), $conditions, $constraints);
+    $exist = Sabel_DB_Driver_PdoStatement::exists($this->queryObj->getSQL(), $conditions, $constraints);
 
-    if ($conditions) {
-      foreach ($conditions as $key => $val) {
-        $check = false;
-        if ($val[0] == '>' || $val[0] == '<') {
-          $this->sqlObj->makeLess_GreaterSQL($key, $val);
-        } else if (strstr($key, Sabel_DB_Driver_Interface::IN)) {
-          $key = str_replace(Sabel_DB_Driver_Interface::IN, '', $key);
-          $this->sqlObj->makeWhereInSQL($key, $val);
-        } else if (strstr($key, Sabel_DB_Driver_Interface::BET)) {
-          $key = str_replace(Sabel_DB_Driver_Interface::BET, '', $key);
-          $this->sqlObj->makeBetweenSQL($key, $val);
-        } else if (strstr($key, Sabel_DB_Driver_Interface::EITHER)) {
-          $key = str_replace(Sabel_DB_Driver_Interface::EITHER, '', $key);
-          $this->sqlObj->makeEitherSQL($key, $val);
-        } else if (strstr($key, Sabel_DB_Driver_Interface::LIKE)) {
-          $key = str_replace(Sabel_DB_Driver_Interface::LIKE, '', $key);
-          $this->sqlObj->makeLikeSQL($key, $val);
-        } else if (strtolower($val) === 'null') {
-          $this->sqlObj->makeIsNullSQL($key);
-        } else if (strtolower($val) === 'not null') {
-          $this->sqlObj->makeIsNotNullSQL($key);
-        } else {
-          $this->sqlObj->makeNormalConditionSQL($key, $val);
-          $check = true;
-        }
-        if (!$check) $this->stmtFlag = false;
-      }
-    }
+    $result = $this->queryObj->makeConditionQuery($conditions);
+    if (!$result) $exist = false;
 
-    if ($constraints && !($this->stmtFrag))
-      $this->sqlObj->makeConstraintSQL($constraints);
+    if ($constraints && !$exsist)
+      $this->queryObj->makeConstraintQuery($constraints);
+
+    $this->stmtFlag = $exist;
   }
 
   public function execute($sql = null, $param = null)
@@ -152,10 +125,10 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
       $this->stmt = $this->pdo->prepare($sql);
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_DB_Driver_PdoStatement::get();
-    } else if (is_null($this->sqlObj->getSQL())) {
+    } else if (is_null($this->queryObj->getSQL())) {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
-      $sql = $this->sqlObj->getSQL();
+      $sql = $this->queryObj->getSQL();
       if ($this->stmt = $this->pdo->prepare($sql)) {
         Sabel_DB_Driver_PdoStatement::add($this->stmt);
       } else {
@@ -170,8 +143,8 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
       return true;
     } else {
       // @todo
-      var_dump($this->param);
       var_dump($this->stmt->queryString);
+      var_dump($this->param);
       throw new Exception('Error: PDOStatement::execute()');
     }
   }
@@ -198,7 +171,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
   private function makeBindParam()
   {
-    $param = $this->sqlObj->getParam();
+    $param = $this->queryObj->getParam();
     $data  = $this->data;
 
     if ($data)
@@ -215,138 +188,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
     $this->param = $param;
     $this->data  = array();
-    $this->sqlObj->unsetProparties();
-  }
-}
-
-class Sabel_DB_Driver_PdoQuery implements Sabel_DB_Query
-{
-  private $sql = array();
-  private $set = null;
-
-  private $count = 0;
-  private $param = array();
-
-  public function getSQL()
-  {
-    if (is_array($this->sql)) return join('', $this->sql);
-  }
-
-  public function setBasicSQL($sql)
-  {
-    $this->sql = array($sql);
-  }
-
-  public function makeNormalConditionSQL($key, $val)
-  {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key}=:{$bindKey}");
-    $this->param[$bindKey] = $val;
-  }
-
-  public function makeIsNullSQL($key)
-  {
-    $this->setWhereQuery($key . ' IS NULL');
-  }
-
-  public function makeIsNotNullSQL($key)
-  {
-    $this->setWhereQuery($key . ' IS NOT NULL');
-  }
-
-  public function makeWhereInSQL($key, $val)
-  {
-    $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
-  }
-
-  public function makeLikeSQL($key, $val)
-  {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key} LIKE :{$bindKey}");
-    $this->param[$bindKey] = str_replace('_', '\_', $val);
-  }
-
-  public function makeBetweenSQL($key, $val)
-  {
-    $this->setWhereQuery("{$key} BETWEEN :from AND :to");
-    $this->param["from"] = $val[0];
-    $this->param["to"]   = $val[1];
-  }
-
-  public function makeEitherSQL($key, $val)
-  {
-    $bindKey  = $key . $this->count++;
-    $bindKey2 = $key . $this->count++;
-
-    $val1 = $val[0];
-    $val2 = $val[1];
-
-    $query = '(';
-    if ($val1[0] === '<' || $val1[0] === '>') {
-      $query .= "{$key} ${val1[0]} :{$bindKey}";
-      $this->param[$bindKey] = trim(substr($val1, 1));
-    } else if ($val1 === 'null') {
-      $query .= "{$key} IS NULL";
-    } else {
-      $query .= "{$key}=:{$bindKey}";
-      $this->param[$bindKey] = $val1;
-    }
-
-    $query .= ' OR ';
-
-    if ($val2[0] === '<' || $val2[0] === '>') {
-      $query .= "{$key} {$val2[0]} :{$bindKey2}";
-      $this->param[$bindKey2] = trim(substr($val2, 1));
-    } else if ($val2 === 'null') {
-      $query .= "{$key} IS NULL";
-    } else {
-      $query .= "{$key}=:{$bindKey2}";
-      $this->param[$bindKey2] = $val2;
-    }
-    $query .= ')';
-
-    $this->setWhereQuery($query);
-  }
-
-  public function makeLess_GreaterSQL($key, $val)
-  {
-    $bindKey  = $key . $this->count++;
-    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}");
-    $this->param[$bindKey] = trim(substr($val, 1));
-  }
-
-  public function makeConstraintSQL($constraints)
-  {
-    if (isset($constraints['order']))
-      array_push($this->sql, " ORDER BY {$constraints['order']}");
-
-    if (isset($constraints['limit']))
-      array_push($this->sql, " LIMIT {$constraints['limit']}");
-
-    if (isset($constraints['offset']))
-      array_push($this->sql, " OFFSET {$constraints['offset']}");
-  }
-
-  public function getParam()
-  {
-    return $this->param;
-  }
-
-  public function unsetProparties()
-  {
-    $this->param    = array();
-    $this->count    = 0;
-    $this->set      = false;
-  }
-
-  protected function setWhereQuery($query)
-  {
-    if ($this->set) {
-      array_push($this->sql, ' AND ' . $query);
-    } else {
-      array_push($this->sql, ' WHERE ' . $query);
-      $this->set = true;
-    }
+    $this->queryObj->unsetProparties();
   }
 }
 

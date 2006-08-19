@@ -1,8 +1,15 @@
 <?php
 
 //uses('sabel.db.driver.Interface');
-//uses('sabel.db.query.php');
+//uses('sabel.db.query.Bind');
 
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/query/Bind.php";
+
+/**
+ *  This Program is broken.
+ *
+ */
 class Sabel_DB_Driver_Pgsql implements Sabel_DB_Driver_Interface
 {
   private $conn,$stmt, $sqlObj;

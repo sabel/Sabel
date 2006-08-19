@@ -1,6 +1,6 @@
 <?php
 
-interface Sabel_DB_Query
+interface Sabel_DB_Query_Interface
 {
   public function getSQL();
   public function setBasicSQL($sql);

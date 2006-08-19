@@ -1,8 +1,6 @@
 <?php
 
-//uses('sabel.db.Connection');
 //uses('sabel.db.driver.Pdo');
-//uses('sabel.db.driver.Mysql');
 //uses('sabel.db.driver.Pgsql');
 
 abstract class Sabel_DB_Mapper
@@ -107,9 +105,9 @@ abstract class Sabel_DB_Mapper
     $this->table = $table;
   }
 
-  public function setWithParent($bool)
+  public function enableParent()
   {
-    $this->withParent = $bool;
+    $this->withParent = true;
   }
 
   public function setProperties($array)
@@ -337,7 +335,7 @@ abstract class Sabel_DB_Mapper
   private function setSelectCondition($param1, $param2, $param3)
   {
     if ($param1 === self::WITH_PARENT) {
-      $this->setWithParent(true);
+      $this->withParent = true;
     } else {
       $this->setCondition($param1, $param2, $param3);
     }
@@ -765,7 +763,7 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
     if (is_null($bridge))
       throw new Exception('BaseBridgeRecord::getChild() need a name of a bridge table.');
 
-    $this->setWithParent(true);
+    $this->withParent = true;
     parent::getChild($bridge);
 
     $children = array();

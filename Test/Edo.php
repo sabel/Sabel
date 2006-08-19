@@ -15,9 +15,6 @@ require_once "sabel/db/Mapper.php";
 require_once "sabel/db/InformationSchema.php";
 require_once "sabel/db/Connection.php";
 
-require_once "sabel/db/Query.php";
-
-require_once "sabel/db/driver/Interface.php";
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
 
@@ -131,7 +128,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $ro = $this->test->select();
     $this->assertEquals(count($ro), 6);
     
-    $this->test->setWithParent(true);
+    $this->test->enableParent();
     $obj = $this->test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
     $this->assertEquals((int)$obj->test2->id, 4);
@@ -172,7 +169,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $insertData[] = array('id' => 5,  'tree_id' => 1, 'name' => 'A5');
     $insertData[] = array('id' => 6,  'tree_id' => 2, 'name' => 'B6');
     $insertData[] = array('id' => 7,  'tree_id' => 3, 'name' => 'A3-7');
-    $insertData[] = array('id' => 8,  'tree_id' => 4, 'name' => 'C8');
+    $insertData[] = array('id' => 8,  'tree_id' => 4);
     $insertData[] = array('id' => 9,  'tree_id' => 2, 'name' => 'B9');
     $insertData[] = array('id' => 10, 'tree_id' => 6, 'name' => 'B6-10');
     $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
@@ -277,19 +274,19 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
   public function testInsert()
   {
     $test2 = new Sabel_DB_Basic('test2');
-    $test2->id = 1;
+    $test2->id   = 1;
     $test2->name = 'test21';
     $test2->test3_id = '2';
     $test2->save();
 
     $test2 = new Sabel_DB_Basic('test2');
-    $test2->id = 2;
+    $test2->id   = 2;
     $test2->name = 'test22';
     $test2->test3_id = '1';
     $test2->save();
     
     $test2 = new Sabel_DB_Basic('test2');
-    $test2->id = 3;
+    $test2->id   = 3;
     $test2->name = 'test23';
     $test2->test3_id = '3';
     $test2->save();
@@ -743,7 +740,7 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $this->assertEquals($t->tree[1]->name, 'A5');
     
     $tree = new Tree();
-    $tree->setWithParent(true);
+    $tree->enableParent();
     $t = $tree->selectOne(3);
     
     $this->assertEquals((int)$t->id, 3);
@@ -971,6 +968,20 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $user->setChildCondition('bbs', array('OR_title' => array('title41', 'null')));
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
+  }
+
+  public function testStatementCheck()
+  {
+    $tree = new Tree();
+    $tree->name('C11');
+    $tree->tree_id(4);
+    $t = $tree->selectOne();
+    $this->assertEquals((int)$t->id, 11);
+    
+    $tree->name('null');
+    $tree->tree_id(4);
+    $t = $tree->selectOne();
+    $this->assertEquals((int)$t->id, 8);
   }
 }
 
