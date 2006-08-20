@@ -113,7 +113,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     $result = $this->queryObj->makeConditionQuery($conditions);
     if (!$result) $exist = false;
 
-    if ($constraints && !$exsist)
+    if ($constraints && !$exist)
       $this->queryObj->makeConstraintQuery($constraints);
 
     $this->stmtFlag = $exist;
