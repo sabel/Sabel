@@ -233,7 +233,7 @@ abstract class Sabel_DB_Mapper
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
-
+    
     $driver = $this->driver;
     $driver->setBasicSQL("SELECT count(*) FROM {$this->table}");
     $driver->makeQuery($this->conditions, array('limit' => 1));
@@ -339,7 +339,7 @@ abstract class Sabel_DB_Mapper
   private function setSelectCondition($param1, $param2, $param3)
   {
     if ($param1 === self::WITH_PARENT) {
-      $this->withParent = true;
+      $this->enableParent();
     } else {
       $this->setCondition($param1, $param2, $param3);
     }
@@ -625,7 +625,7 @@ abstract class Sabel_DB_Mapper
     if ($data && !is_array($data))
       throw new Exception('Error: Argument must be an Array');
 
-    if ($this->selected) {
+    if ($this->is_selected()) {
       if ($data) $this->newData = $data;
       return $this->update();
     } else {
@@ -767,7 +767,7 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
     if (is_null($bridge))
       throw new Exception('BaseBridgeRecord::getChild() need a name of a bridge table.');
 
-    $this->withParent = true;
+    $this->enableParent();
     parent::getChild($bridge);
 
     $children = array();
