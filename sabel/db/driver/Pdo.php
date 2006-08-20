@@ -202,6 +202,7 @@ class Sabel_DB_Driver_PdoStatement
   public static function exists($sql, $conditions, $constraints = null)
   {
     $result = true;
+    $keys = array();
     if ($conditions) $keys = array_keys($conditions);
 
     if (self::$sql         != $sql  ||

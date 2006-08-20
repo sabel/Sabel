@@ -49,7 +49,7 @@ class Sabel_Request_Uri
   
   public static function getUri()
   {
-    if (strpos($_SERVER['argv']{0}, 'sabel') !== false) {
+    if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
       $args = $_SERVER['argv'];
       array_shift($args);
       $request_uri = join('/', $args);
