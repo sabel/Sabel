@@ -1,11 +1,11 @@
 <?php
 
-//uses('sabel.db.driver.Interface');
-//uses('sabel.db.query.Bind');
-
-require_once "sabel/db/driver/Interface.php";
-require_once "sabel/db/query/Bind.php";
-
+/**
+ * db driver for PDO
+ *
+ * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @package org.sabel.db
+ */
 class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 {
   private $pdo, $stmt, $queryObj, $myDb;

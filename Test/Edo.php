@@ -11,6 +11,10 @@ require_once "PHPUnit2/Framework/IncompleteTestError.php";
 require_once "sabel/Functions.php";
 require_once "sabel/core/Context.php";
 
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/query/Interface.php";
+require_once "sabel/db/query/Factory.php";
+
 require_once "sabel/db/Mapper.php";
 require_once "sabel/db/InformationSchema.php";
 require_once "sabel/db/Connection.php";
@@ -18,6 +22,11 @@ require_once "sabel/db/Connection.php";
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
 
+/**
+ * test for Sabel_DB
+ *
+ * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Edo extends PHPUnit2_Framework_TestCase
 {
   public static function main() {

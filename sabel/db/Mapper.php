@@ -1,8 +1,12 @@
 <?php
 
-//uses('sabel.db.driver.Pdo');
-//uses('sabel.db.driver.Pgsql');
-
+/**
+ * important class of sabel_db package.
+ * inherit this class to use a orm solution.
+ *
+ * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @package org.sabel.db
+ */
 abstract class Sabel_DB_Mapper
 {
   const WITH_PARENT = 1;

@@ -190,7 +190,6 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
     ob_start();
     include($this->getTemplateFullPath());
     $content = ob_get_clean();
-    ob_flush();
     return $content;
   }
   

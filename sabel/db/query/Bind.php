@@ -1,14 +1,13 @@
 <?php
 
-//uses('sabel.db.query.Interface');
-//uses('sabel.db.query.Factory');
-
-require_once "sabel/db/query/Interface.php";
-require_once "sabel/db/query/Factory.php";
-
-class Sabel_DB_Query_Bind 
-extends    Sabel_DB_Query_Factory 
-implements Sabel_DB_Query_Interface
+/**
+ * db driver for PDO
+ *
+ * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @package org.sabel.db
+ */
+class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
+                          implements Sabel_DB_Query_Interface
 {
   private $sql = array();
   private $set = null;
