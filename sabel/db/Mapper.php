@@ -25,7 +25,6 @@ abstract class Sabel_DB_Mapper
     $defChildConstraints = array(),
     $myChildren          = null;
 
-
   protected
     $driver       = null,
     $connectName  = '',
@@ -45,7 +44,7 @@ abstract class Sabel_DB_Mapper
 
   protected function getDriver()
   {
-    return $this->makeEdoDriver();
+    return $this->driver;
   }
 
   public function setDriver($connectName)
@@ -54,13 +53,15 @@ abstract class Sabel_DB_Mapper
     $this->driver = $this->makeEdoDriver();
   }
 
+  // @faq makeEdoDriver args is $connectName??
   protected function makeEdoDriver()
   {
-    $conn = Sabel_DB_Connection::getConnection($this->connectName);
+    $connectName = $this->connectName;
+    $conn = Sabel_DB_Connection::getConnection($connectName);
 
-    switch (Sabel_DB_Connection::getDriver($this->connectName)) {
+    switch (Sabel_DB_Connection::getDriver($connectName)) {
       case 'pdo':
-        $pdoDb = Sabel_DB_Connection::getDB($this->connectName);
+        $pdoDb = Sabel_DB_Connection::getDB($connectName);
         return new Sabel_DB_Driver_Pdo($conn, $pdoDb);
       case 'pgsql':
         return new Sabel_DB_Driver_Pgsql($conn);
@@ -173,14 +174,12 @@ abstract class Sabel_DB_Mapper
       throw new Exception('Error: setChildCondition() Argument 2 must be an Array');
 
     $this->childConditions[$child] = $conditions;
-  } 
+  }
 
   protected function receiveChildConstraint($constraints)
   {
     if (!is_array($constraints)) throw new Exception('constrains is not array.');
-
-    if ($constraints)
-      $this->childConstraints = $constraints;
+    if ($constraints) $this->childConstraints = $constraints;
   }
 
   /**
@@ -233,11 +232,12 @@ abstract class Sabel_DB_Mapper
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
-    
-    $driver = $this->driver;
+
+    $driver = $this->getDriver();
     $driver->setBasicSQL("SELECT count(*) FROM {$this->table}");
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
+    // @faq error check move first??
     if ($driver->execute()) {
       $row = $driver->fetch();
       return (int) $row[0];
@@ -273,7 +273,7 @@ abstract class Sabel_DB_Mapper
       $idColumn = $this->table . '_id';
     }
 
-    $driver = $this->driver;
+    $driver = $this->getDriver();
     $driver->setAggregateSQL($table, $idColumn, $functions);
     $driver->makeQuery(null, $this->constraints);
 
@@ -288,7 +288,6 @@ abstract class Sabel_DB_Mapper
   protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
-    $this->selectCondition = $this->conditions;
     $this->makeFindObject($this);
   }
 
@@ -298,8 +297,6 @@ abstract class Sabel_DB_Mapper
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setSelectCondition($param1, $param2, $param3);
-    $this->selectCondition = $this->conditions;
-
     return $this->makeFindObject(clone($this));
   }
 
@@ -309,24 +306,23 @@ abstract class Sabel_DB_Mapper
     $driver->setBasicSQL("SELECT {$obj->projection} FROM {$this->table}");
     $driver->makeQuery($this->conditions, $this->constraints);
 
-    if ($driver->execute()) {
-      if ($row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC)) {
-        if ($this->withParent)
-          $row = $this->selectWithParent($row);
+    $this->selectCondition = $this->conditions;
 
-        $this->setSelectedProperty($obj, $row);
+    if (!$driver->execute()) throw new Exception('Error: makeFindObject() execute failed.');
+    if ($row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC)) {
+      if ($this->withParent) $row = $this->selectWithParent($row);
 
-        if (!is_null($myChild = $this->getMyChildren()))
-          $this->getDefaultChild($myChild, $obj);
-      } else {
-        $obj->data = $this->conditions;
-      }
-      $this->constraints = array();
-      $this->conditions  = array();
-      return $obj;
+      $this->setSelectedProperty($obj, $row);
+
+      if (!is_null($myChild = $this->getMyChildren()))
+        $this->getDefaultChild($myChild, $obj);
     } else {
-      throw new Exception('Error: makeFindObject() execute failed.');
+      $obj->data = $this->conditions;
     }
+
+    $this->constraints = array();
+    $this->conditions  = array();
+    return $obj;
   }
 
   public function select($param1 = null, $param2 = null, $param3 = null)
@@ -446,39 +442,36 @@ abstract class Sabel_DB_Mapper
 
   protected function getRecords($conditions, $constraints = null, $child = null)
   {
-    $this->driver->makeQuery($conditions, $constraints);
+    $driver = $this->getDriver();
+    $driver->makeQuery($conditions, $constraints);
 
-    if ($this->driver->execute()) {
-      $rows = $this->driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-      if (!$rows) return false;
+    if (!$driver->execute()) throw new Exception('Error: getRecords() execute failed.');
 
-      $recordObj = array();
+    $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    if (!$rows) return false;
 
-      foreach ($rows as $row) {
-        if (is_null($child)) {
-          $obj = $this->newClass($this->table);
-          $obj->receiveChildConstraint($this->childConstraints);
-        } else {
-          $obj = $this->newClass($child);
-        }
-
-        if ($this->withParent)
-          $row = $this->selectWithParent($row);
-
-        $this->setSelectedProperty($obj, $row);
-
-        if (!is_null($myChild = $obj->getMyChildren())) {
-          if (isset($child)) $this->chooseMyChildConstraint($myChild, $obj);
-          $this->getDefaultChild($myChild, $obj);
-        }
-        $recordObj[] = $obj;
+    $recordObj = array();
+    foreach ($rows as $row) {
+      if (is_null($child)) {
+        $obj = $this->newClass($this->table);
+        $obj->receiveChildConstraint($this->childConstraints);
+      } else {
+        $obj = $this->newClass($child);
       }
-      $this->constraints = array();
-      $this->conditions  = array();
-      return $recordObj;
-    } else {
-      throw new Exception('Error: getRecords() execute failed.');
+
+      if ($this->withParent) $row = $this->selectWithParent($row);
+
+      $this->setSelectedProperty($obj, $row);
+
+      if (!is_null($myChild = $obj->getMyChildren())) {
+        if (isset($child)) $this->chooseMyChildConstraint($myChild, $obj);
+        $this->getDefaultChild($myChild, $obj);
+      }
+      $recordObj[] = $obj;
     }
+    $this->constraints = array();
+    $this->conditions  = array();
+    return $recordObj;
   }
 
   protected function getDefaultChild($children, $obj)
@@ -516,15 +509,13 @@ abstract class Sabel_DB_Mapper
 
   protected function selectWithParent($row)
   {
+    $this->parentTables = array($this->table);
     foreach ($row as $key => $val) {
       if (strpos($key, '_id')) {
         $table = str_replace('_id', '', $key);
-
-        $this->parentTables = array($this->table);
         $row[$table] = $this->addParentObject($table, $val);
       }
     }
-    $this->parentTables = array($this->table);
     return $row;
   }
 
@@ -575,19 +566,15 @@ abstract class Sabel_DB_Mapper
 
   private function isAcquired($table)
   {
-    $pt = $this->parentTables;
-    if (in_array($table, $pt)) return true;
-
-    $pt[] = $table;
-    $this->parentTables = $pt;
+    if (in_array($table, $this->parentTables)) return true;
+    $this->parentTables[] = $table;
     return false;
   }
 
   public function newChild($child = null)
   {
     $id = $this->data[$this->defColumn];
-    if (empty($id))
-      throw new Exception('Error: who is a parent? hasn\'t id value.');
+    if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
     $table  = (is_null($child)) ? $parant : $child;
@@ -610,20 +597,18 @@ abstract class Sabel_DB_Mapper
   public function clearChild($child)
   {
     $id = $this->data[$this->defColumn];
-    if (empty($id))
-      throw new Exception('Error: who is a parent? hasn\'t id value.');
+    if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
     $this->table = $child;
     $this->remove("{$parent}_id", $id);
 
-    $this->table = $parant; 
+    $this->table = $parant;
   }
 
   public function save($data = null)
   {
-    if ($data && !is_array($data))
-      throw new Exception('Error: Argument must be an Array');
+    if ($data && !is_array($data)) throw new Exception('Error: Argument must be an Array');
 
     if ($this->is_selected()) {
       if ($data) $this->newData = $data;
@@ -648,10 +633,11 @@ abstract class Sabel_DB_Mapper
 
   protected function update()
   {
-    $this->driver->setUpdateSQL($this->table, $this->newData);
-    $this->driver->makeQuery($this->selectCondition);
+    $driver = $this->getDriver();
+    $driver->setUpdateSQL($this->table, $this->newData);
+    $driver->makeQuery($this->selectCondition);
 
-    if ($this->driver->execute()) {
+    if ($driver->execute()) {
       $this->selectCondition = array();
     } else {
       throw new Exception('Error: update() execute failed.');
