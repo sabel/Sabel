@@ -12,7 +12,7 @@ class Sabel_Controller_Map_Entry
   protected $entry      = array();
   protected $requestUri = null;
   
-  public function __construct($name, $entry, $requestUri)
+  public function __construct($name, $entry, $requestUri = null)
   {
     $this->name       = $name;
     $this->entry      = $entry;
@@ -57,6 +57,11 @@ class Sabel_Controller_Map_Entry
   public function hasOptions()
   {
     return (isset($this->entry['option']));
+  }
+  
+  public function setRequestUri($uri)
+  {
+    $this->requestUri = $uri;
   }
   
   public function getRequestUri()

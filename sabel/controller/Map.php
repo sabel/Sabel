@@ -49,8 +49,7 @@ class Sabel_Controller_Map implements Iterator
   
   public function find()
   {
-    $matched = $this->getEntriesByCount($this->requestUri->count());
-    
+    // @todo implement rules of found out correct map entry.
     return (is_object($matched[0])) ? $matched[0] : $this->getEntry('default');
   }
   

@@ -30,13 +30,13 @@ class Sabel_Controller_Map_Destination
     foreach ($mapUri as $element) {
       switch (true) {
         case ($element->isModule() && $elems[0]->isModule()):
-          $dest[self::MODULE] = $requestUri->get($pos);
+          $dest[self::MODULE] = $requestUri->getUri()->get($pos);
           break;
         case ($element->isController() && $elems[1]->isController()):
-          $dest[self::CONTROLLER] = $requestUri->get($pos);
+          $dest[self::CONTROLLER] = $requestUri->getUri()->get($pos);
           break;
         case ($element->isAction() && $elems[2]->isAction()):
-          $dest[self::ACTION] = $requestUri->get($pos);
+          $dest[self::ACTION] = $requestUri->getUri()->get($pos);
           break;
       }
       

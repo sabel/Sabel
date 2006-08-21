@@ -27,7 +27,7 @@ require_once('sabel/config/Yaml.php');
 */
 
 /**
- * Test_Router
+ * Test_RequestUri
  * 
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
@@ -59,5 +59,12 @@ class Test_RequestUri extends PHPUnit2_Framework_TestCase
   public function testUseParameter()
   {
     $ru = new Sabel_Request_Uri('/blog/archive/view/?id=10');
+  }
+  
+  public function testInvalidUri()
+  {
+    $ru = new Sabel_Request_Uri('/blog/archive/view/');
+    var_dump($ru);
+    $this->assertFalse($ru->hasP);
   }
 }

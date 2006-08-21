@@ -16,10 +16,10 @@ class Sabel_Core_Router
     $this->map->load();
   }
   
-  public function routing($uri)
+  public function routing()
   {
-    $this->map->setRequestUri($uri);
     $entry = $this->map->find();
+    $entry->setRequestUri(new Sabel_Request_Request($entry));
     return $entry->getDestination();
   }
 }

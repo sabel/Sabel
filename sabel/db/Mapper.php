@@ -741,13 +741,13 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
     parent::__construct($param1, $param2);
   }
 
-  public function getChild($child, $bridge)
+  public function getChild($child, $obj = null)
   {
     $this->enableParent();
-    parent::getChild($bridge);
+    parent::getChild($obj);
 
     $children = array();
-    foreach ($this->$bridge as $bridge) $children[] = $bridge->$child;
+    foreach ($this->$obj as $bridge) $children[] = $bridge->$child;
     $this->$child = $children;
   }
 }

@@ -10,54 +10,16 @@ uses('sabel.core.Utility');
  */
 class Sabel_Request_Uri
 {
-  protected static $server = null;
-  protected $request = '';
-  
   /**
    * @var array parts of uri. separate by slash (/)
    */
   protected $parts = array();
   protected $entry = null;
   
-  protected $parameters = null;
-  
-  public function __construct($requestUri = null, $entry = null)
+  public function __construct($requestUri, $entry)
   {
-    $this->entry   = $entry;
-    $this->request = ($requestUri) ? $requestUri : self::getUri();
-    
-    if (($uriAndParameters = $this->getUriParameters())) {
-      //$uriAndParameters = explode('?', $this->request);
-      $parts = explode('/', $uriAndParameters[0]);
-      $this->parameters = new Sabel_Request_Parameters($uriAndParameters[1]);
-    } else {
-      $parts = explode('/', $this->request);
-    }
-    foreach ($parts as $part) if ($part) $this->parts[] = $part;
-    if (!self::$server) self::$server = new Sabel_Env_Server();
-  }
-  
-  protected function getUriParameters()
-  {
-    if (strpos($this->request, '?')) {
-      $uriAndParameters = explode('?', $this->request);
-      return ($uriAndParameters[1]) ? $uriAndParameters : false;
-    } else {
-      return false;
-    }
-  }
-  
-  public static function getUri()
-  {
-    if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
-      $args = $_SERVER['argv'];
-      array_shift($args);
-      $request_uri = join('/', $args);
-    } else {
-      $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
-    }
-    
-    return $request_uri;
+    $this->parts = explode('/', $requestUri);
+    $this->entry = $entry;
   }
   
   public function count()
@@ -70,6 +32,21 @@ class Sabel_Request_Uri
     return (isset($this->parts[$pos])) ? $this->parts[$pos] : null;
   }
   
+  public function getModule()
+  {
+    return $this->get($this->entry->getUri()->calcElementPositionByName('module'));
+  }
+  
+  public function getController()
+  {
+    return $this->get($this->entry->getUri()->calcElementPositionByName('controller'));
+  }
+  
+  public function getAction()
+  {
+    return $this->get($this->entry->getUri()->calcElementPositionByName('action'));
+  }
+  
   public function getByName($name)
   {
     if (is_null($this->entry)) throw new Exception('entry is null.');
@@ -80,44 +57,5 @@ class Sabel_Request_Uri
   public function has($pos)
   {
     return isset($this->parts[$pos]);
-  }
-  
-  public function hasParameters()
-  {
-    return (isset($this->parameters));
-  }
-  
-  public function getParameters()
-  {
-    return $this->parameters;
-  }
-  
-  public function isPost()
-  {
-    return (self::$server->request_method === 'POST' && count($_POST) !== 0) ? true : false;
-  }
-  
-  public function isGet()
-  {
-    return (self::$server->request_method === 'GET' && count($_GET) !== 0) ? true : false;
-  }
-  
-  public function isPut()
-  {
-    return (self::$server->request_method === 'PUT') ? true : false;
-  }
-  
-  public function isDelete()
-  {
-    return (self::$server->request_method === 'DELETE') ? true : false;
-  }
-  
-  public function requests()
-  {
-    $array = array();
-    foreach ($_POST as $key => $value) {
-      $array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
-    }
-    return $array;
   }
 }

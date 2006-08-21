@@ -1,82 +1,93 @@
 <?php
 
-interface Request
+/**
+ * Sabel_Request_Request
+ * 
+ * @package org.sabel.request
+ * @author Mori Reo <mori.reo@gmail.com>
+ */
+class Sabel_Request_Request
 {
-  public function get($key);
-  public function set($key, $value);
-  public function getRequests();
-}
-
-class Sabel_Request implements Request
-{
-  protected $parsedRequest;
-  protected $parameters;
-
-  public function __construct()
+  protected static $server = null;
+  
+  // such as /module/controller/action/something?param=val
+  protected $requestUri = '';
+  
+  // such as param=val
+  protected $requestParameters = '';
+  
+  protected
+    $uri        = null,
+    $parameters = null;
+  
+  public function __construct($entry, $requestUri = null)
   {
-    $this->parsedRequest = ParsedRequest::create();
-    $this->parameters = new Parameters($this->parsedRequest->getParameter());
+    if (!self::$server) self::$server = new Sabel_Env_Server();
+    
+    $this->initializeRequestUriAndParameters($requestUri);
+    $this->uri        = new Sabel_Request_Uri($this->requestUri, $entry);
+    $this->parameters = new Sabel_Request_Parameters($this->requestParameters);
   }
-
-  public function __get($name)
+  
+  private function initializeRequestUriAndParameters($requestUri)
   {
-    if ($name == 'requests') {
-      return $this->getRequests();
-    } else if ($name == 'parameter') {
-      return $this->getParameter();
-    } else if ($name == 'parameters') {
-      return $this->parameters;
+    if ($requestUri) {
+      $request_uri = ltrim($requestUri, '/');
     } else {
-      return $this->get($name);
+      if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
+        $args = $_SERVER['argv'];
+        array_shift($args);
+        $request_uri = join('/', $args);
+      } else {
+        $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
+      }
     }
+    
+    // @todo test this.
+    @list($this->requestUri, $this->requestParameters) = explode('?', $request_uri);
   }
-
-  public function get($key)
+  
+  public function getUri()
   {
-    if (isset($_POST[$key])) {
-      $ret = Sanitize::normalize($_POST[$key]);
-      return $this->convertToEUC($ret);
-    } else {
-      return null;
-    }
+    return $this->uri;
   }
-
-  public function getRequests()
+  
+  public function hasParameters()
+  {
+    return (isset($this->parameters));
+  }
+  
+  public function getParameters()
+  {
+    return $this->parameters;
+  }
+  
+  public function isPost()
+  {
+    return (self::$server->request_method === 'POST' && count($_POST) !== 0) ? true : false;
+  }
+  
+  public function isGet()
+  {
+    return (self::$server->request_method === 'GET' && count($_GET) !== 0) ? true : false;
+  }
+  
+  public function isPut()
+  {
+    return (self::$server->request_method === 'PUT') ? true : false;
+  }
+  
+  public function isDelete()
+  {
+    return (self::$server->request_method === 'DELETE') ? true : false;
+  }
+  
+  public function requests()
   {
     $array = array();
     foreach ($_POST as $key => $value) {
-      $val = (isset($value)) ? Sanitize::normalize($value) : null;
-      if ($key != '_') {
-        $array[$key] = $this->convertToEUC($val);
-      }
+      $array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
     }
     return $array;
-  }
-
-  public function set($key, $value)
-  {
-    $_POST[$key] = $value;
-  }
-
-  public function getParameter()
-  {
-    return $this->parsedRequest->getParameter();
-  }
-
-  protected function convertToEUC($value)
-  {
-    if (is_array($value)) {
-      foreach($value as $k => $v) {
-        $enc       = mb_detect_encoding($v, 'UTF-8, EUC_JP, SJIS');
-        $v         = mb_convert_kana($v, 'KV', $enc);
-        $value[$k] = mb_convert_encoding($v, 'EUC_JP', $enc);
-      }
-    } else {
-      $enc   = mb_detect_encoding($value, 'UTF-8, EUC_JP, SJIS');
-      $value = mb_convert_kana($value, 'KV', $enc);
-      $value = mb_convert_encoding($value, 'EUC_JP', $enc);
-    }
-
-    return $value;
   }
 }
