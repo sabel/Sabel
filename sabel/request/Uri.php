@@ -21,32 +21,27 @@ class Sabel_Request_Uri
   
   protected $parameters = null;
   
-  
   public function __construct($requestUri = null, $entry = null)
   {
-    $this->entry   = $entry; 
+    $this->entry   = $entry;
     $this->request = ($requestUri) ? $requestUri : self::getUri();
     
-    if ($this->hasUriParameters()) {
-      $uriAndParameters = explode('?', $this->request);
-      $this->parts = explode('/', $uriAndParameters[0]);
+    if (($uriAndParameters = $this->getUriParameters())) {
+      //$uriAndParameters = explode('?', $this->request);
+      $parts = explode('/', $uriAndParameters[0]);
       $this->parameters = new Sabel_Request_Parameters($uriAndParameters[1]);
     } else {
       $parts = explode('/', $this->request);
-      
-      foreach ($parts as $part) {
-        if (!empty($part)) $this->parts[] = $part;
-      }
     }
-    
+    foreach ($parts as $part) if ($part) $this->parts[] = $part;
     if (!self::$server) self::$server = new Sabel_Env_Server();
   }
   
-  protected function hasUriParameters()
+  protected function getUriParameters()
   {
     if (strpos($this->request, '?')) {
       $uriAndParameters = explode('?', $this->request);
-      return (empty($uriAndParameters[1])) ? false : true;
+      return ($uriAndParameters[1]) ? $uriAndParameters : false;
     } else {
       return false;
     }
@@ -77,6 +72,7 @@ class Sabel_Request_Uri
   
   public function getByName($name)
   {
+    if (is_null($this->entry)) throw new Exception('entry is null.');
     $position = $this->entry->getUri()->calcElementPositionByName($name);
     return $this->get($position);
   }
