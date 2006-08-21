@@ -81,6 +81,7 @@ abstract class Sabel_DB_Mapper
 
   public function __get($key)
   {
+    if (!$this->data[$key]) $this->getChild($key);
     return $this->data[$key];
   }
 
