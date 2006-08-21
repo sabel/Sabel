@@ -15,6 +15,11 @@ require_once('sabel/core/Resolver.php');
  */
 class Test_Resolver extends PHPUnit2_Framework_TestCase
 {
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Resolver");
+  }
+  
   public function testResolver()
   {
     $classpath = 'root.dir.dir2.Class';

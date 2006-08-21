@@ -35,6 +35,11 @@ class Test_Edo extends PHPUnit2_Framework_TestCase
     $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
+  
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Edo");
+  }
 
   public function __construct()
   {

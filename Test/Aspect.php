@@ -11,49 +11,6 @@ uses('sabel.container.DI');
 uses('sabel.injection.Calls');
 uses('sabel.core.Exception');
 
-class RecordRunningTimeInjection
-{
-  private $start;
-  private $end;
-  
-  public function when($method)
-  {
-    return true;
-  }
-  
-  public function before($method, $arg)
-  {
-    $this->start = microtime();
-  }
-  
-  public function after($method, &$result)
-  {
-    $this->end = microtime();
-  }
-  
-  public function calcurate()
-  {
-    return ($this->end - $this->start);
-  }
-}
-
-class MockInjection
-{
-  public function when($method)
-  {
-    return true;
-  }
-  
-  public function after($method, &$result)
-  {
-    if ($method == 'test') {
-      $result = 'mocked!';
-    } else if ($method == 'returnArray') {
-      $result = array(0 => 'mocked!');
-    }
-  }
-}
-
 class AspectOrderRegistration
 {
   public function when($method)
@@ -67,7 +24,7 @@ class AspectOrderRegistration
   
   public function before($method, $arg)
   {
-    $customer = new Customer();
+    $customer = new Customers();
     $customer->incrementQuantityOfOrder();
   }
   
@@ -76,7 +33,7 @@ class AspectOrderRegistration
   }
 }
 
-class Customer
+class Customers
 {
   public function cancelOrder()
   {
@@ -88,7 +45,7 @@ class Customer
   }
 }
 
-class Order
+class Orders
 {
   public function registOrder()
   {
@@ -103,13 +60,18 @@ class Order
  */
 class Test_Aspect extends PHPUnit2_Framework_TestCase
 {
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Aspect");
+  }
+  
   /**
    * @todo think assertion of aspect
    *
    */
   public function testAspectOriented()
   {
-    $order = Sabel_Container_DI::create()->loadInjected('Order');
+    $order = Sabel_Container_DI::create()->loadInjected('Orders');
     $order->registOrder();
   }
 }

@@ -15,6 +15,11 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
 {
   protected $c;
   
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Annotation");
+  }
+  
   public function __construct()
   {
     $this->c = new Sabel_Container_DI();

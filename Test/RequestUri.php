@@ -34,6 +34,11 @@ require_once('sabel/config/Yaml.php');
  */
 class Test_RequestUri extends PHPUnit2_Framework_TestCase
 {
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_RequestUri");
+  }
+  
   public function setUp()
   {
   }
@@ -44,27 +49,16 @@ class Test_RequestUri extends PHPUnit2_Framework_TestCase
 
   public function testNoParameter()
   {
-    $ru = new Sabel_Request_Uri(10);
-    $this->assertTrue($ru->has(0));
-    $this->assertEquals('10', $ru->get(0));
-    $this->assertFalse($ru->has(1));
-    $this->assertNull($ru->get(1));
-
-    $this->assertEquals(1, $ru->count());
-
-    $this->assertFalse($ru->hasParameters());
-    $this->assertNull($ru->getParameters());
+    
   }
 
   public function testUseParameter()
   {
-    $ru = new Sabel_Request_Uri('/blog/archive/view/?id=10');
+    
   }
   
   public function testInvalidUri()
   {
-    $ru = new Sabel_Request_Uri('/blog/archive/view/');
-    var_dump($ru);
-    $this->assertFalse($ru->hasP);
+    
   }
 }

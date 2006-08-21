@@ -24,6 +24,11 @@ require_once('sabel/config/Yaml.php');
  */
 class Test_Map extends PHPUnit2_Framework_TestCase
 {
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Map");
+  }
+  
   public function __construct()
   {
     $this->map = new Sabel_Controller_Map('/data/map.yml');

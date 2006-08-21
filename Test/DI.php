@@ -64,6 +64,11 @@ class Test_DI extends PHPUnit2_Framework_TestCase
 {
   protected $c = null;
   
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_DI");
+  }
+  
   public function setUp()
   {
     $this->c = new Sabel_Container_DI();

@@ -26,6 +26,11 @@ class Test_Request extends PHPUnit2_Framework_TestCase
 {
   protected $map = array();
   
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Request");
+  }
+  
   public function __construct()
   {
     $this->map = array('uri'=>':module/:controller/:action:/:id',

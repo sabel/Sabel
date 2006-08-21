@@ -63,6 +63,11 @@ class DummyBBS
  */
 class Test_Pager extends PHPUnit2_Framework_TestCase
 {
+  public static function suite()
+  {
+    return new PHPUnit2_Framework_TestSuite("Test_Pager");
+  }
+  
   public function testStandardPagerUse()
   {
     $numberOfItems = 300;
