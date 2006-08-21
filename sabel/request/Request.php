@@ -7,14 +7,6 @@ interface Request
   public function getRequests();
 }
 
-class Sabel_Request_Request
-{
-  public function test()
-  {
-    
-  }
-}
-
 class Sabel_Request implements Request
 {
   protected $parsedRequest;

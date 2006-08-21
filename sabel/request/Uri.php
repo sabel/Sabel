@@ -1,5 +1,7 @@
 <?php
 
+uses('sabel.core.Utility');
+
 /**
  * Sabel_Request_Uri
  * 
@@ -112,5 +114,14 @@ class Sabel_Request_Uri
   public function isDelete()
   {
     return (self::$server->request_method === 'DELETE') ? true : false;
+  }
+  
+  public function requests()
+  {
+    $array = array();
+    foreach ($_POST as $key => $value) {
+      $array[$key] = (isset($value)) ? Sanitize::normalize($value) : null;
+    }
+    return $array;
   }
 }

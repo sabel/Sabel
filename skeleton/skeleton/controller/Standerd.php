@@ -25,9 +25,11 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function create()
   {
-    if (isset($_POST['id'])) {
+    if ($this->request->isPost()) {
       $model = new <? echo $controllerName ?>($this->request->getByName('id'));
-      foreach ($_POST as $name => $value) $model->$name = $value;
+      foreach ($this->request->requests() as $name => $value) {
+        $model->$name = $value;
+      }
       $model->save();
       $this->redirect('/index/<? echo $controllerName ?>/lists');
     }
@@ -37,8 +39,10 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   {
     $model = new <? echo ucfirst($controllerName) ?>($this->request->getByName('id'));
     
-    if (isset($_POST['id'])) {
-      foreach ($_POST as $name => $value) $model->$name = $value;
+    if ($this->request->isPost()) {
+      foreach ($this->request->requests() as $name => $value) {
+        $model->$name = $value;
+      }
       $model->save();
       $this->redirect('/index/<? echo $controllerName ?>/lists');
     }
