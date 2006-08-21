@@ -57,16 +57,17 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if (is_null($data[$defColumn]) && $this->myDb === 'pgsql')
+    if (isset($data[$defColumn]) && is_null($data[$defColumn]) && $this->myDb === 'pgsql')
       $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
     $this->data = $data;
 
     $columns = array();
-    foreach ($data as $key => $val) array_push($columns, $key);
-
-    $values = array();
-    foreach ($data as $key => $val) array_push($values, ':' . $key);
+    $values  = array();
+    foreach ($data as $key => $val) {
+      array_push($columns, $key);
+      array_push($values, ':' . $key);
+    }
 
     $sql = array("INSERT INTO {$table}(");
     array_push($sql, join(',', $columns));
