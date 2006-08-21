@@ -26,7 +26,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   public function create()
   {
     if ($this->request->isPost()) {
-      $model = new <? echo $controllerName ?>($this->request->getByName('id'));
+      $model = new <? echo $controllerName ?>($this->request->getUri()->getByName('id'));
       foreach ($this->request->requests() as $name => $value) {
         $model->$name = $value;
       }
@@ -37,7 +37,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function edit()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->request->getByName('id'));
+    $model = new <? echo ucfirst($controllerName) ?>($this->request->getUri()->getByName('id'));
     
     if ($this->request->isPost()) {
       foreach ($this->request->requests() as $name => $value) {
@@ -52,7 +52,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function delete()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->request->getByName('id'));
+    $model = new <? echo ucfirst($controllerName) ?>($this->request->getUri()->getByName('id'));
     $model->remove();
     $this->redirect('/index/<? echo $controllerName ?>/lists');
   }
