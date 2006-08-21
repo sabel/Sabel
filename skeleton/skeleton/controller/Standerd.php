@@ -19,7 +19,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function show()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->request->getByName('id'));
+    $model = new <? echo ucfirst($controllerName) ?>($this->request->getUri()->getByName('id'));
     Re::set('<? echo $controllerName ?>', $model);
   }
   
