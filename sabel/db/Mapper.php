@@ -1,3 +1,4 @@
+
 <?php
 
 /**
@@ -599,7 +600,7 @@ abstract class Sabel_DB_Mapper
 
   public function save($data = null)
   {
-    if ($data && !is_array($data)) throw new Exception('Error: Argument must be an Array');
+    if (isset($data) && !is_array($data)) throw new Exception('Error: Argument must be an Array');
 
     if ($this->is_selected()) {
       if ($data) $this->newData = $data;
