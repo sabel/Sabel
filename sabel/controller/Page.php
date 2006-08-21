@@ -16,7 +16,7 @@ uses('sabel.db.Mapper');
 /**
  * page controller base class.
  *
- * @author Mori Reo <mori.reo@servise.com>
+ * @author Mori Reo <mori.reo@gmail.com>
  * @package sabel.controller
  */
 abstract class Sabel_Controller_Page

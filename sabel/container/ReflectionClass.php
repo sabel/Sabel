@@ -4,7 +4,7 @@
  * customized reflection class. optimized for sabel
  *
  * @package org.sabel.di
- * @author Mori Reo <mori.reo@servise.com>
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Container_ReflectionClass
 {

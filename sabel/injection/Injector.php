@@ -4,7 +4,7 @@
  * class injection wrapper.
  *
  * @package org.sabel.aop
- * @author Mori Reo <mori.reo@servise.com>
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Injection_Injector
 {

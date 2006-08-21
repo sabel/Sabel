@@ -58,7 +58,7 @@ class MockInjection
 /**
  * test case for Sabel LW DI Container
  *
- * @author Mori Reo <mori.reo@servise.com>
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Test_DI extends PHPUnit2_Framework_TestCase
 {
