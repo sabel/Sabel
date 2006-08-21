@@ -17,7 +17,7 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function getSQL()
   {
-    if (is_array($this->sql)) return join('', $this->sql);
+    return join('', $this->sql);
   }
 
   public function setBasicSQL($sql)
