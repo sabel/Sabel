@@ -3,7 +3,7 @@
 /**
  * this class has information of page
  *
- * @author Mori Reo <mori.reo@servise.jp>
+ * @author Mori Reo <mori.reo@servise.com>
  */
 class SabelPager
 {

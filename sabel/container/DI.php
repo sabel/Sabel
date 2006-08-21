@@ -20,7 +20,7 @@ uses('sabel.config.Spyc');
 /**
  * Sabel DI Container
  *
- * @author Mori Reo <mori.reo@servise.jp>
+ * @author Mori Reo <mori.reo@servise.com>
  */
 class Sabel_Container_DI
 {

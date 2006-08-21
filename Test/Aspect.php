@@ -99,7 +99,7 @@ class Order
 /**
  * test case for Sabel LW DI Container
  *
- * @author Mori Reo <mori.reo@servise.jp>
+ * @author Mori Reo <mori.reo@servise.com>
  */
 class Test_Aspect extends PHPUnit2_Framework_TestCase
 {

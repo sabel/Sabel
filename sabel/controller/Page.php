@@ -16,13 +16,19 @@ uses('sabel.db.Mapper');
 /**
  * page controller base class.
  *
- * @author Mori Reo <mori.reo@servise.jp>
+ * @author Mori Reo <mori.reo@servise.com>
  * @package sabel.controller
  */
 abstract class Sabel_Controller_Page
 {
-  protected $request, $response, $template, $cache, $logger;
-  protected $destination;
+  protected
+    $request     = null,
+    $response    = null,
+    $template    = null,
+    $cache       = null,
+    $logger      = null,
+    $destination = null,
+    $container   = null;
   
   /**
    * get request parameter
@@ -56,7 +62,7 @@ abstract class Sabel_Controller_Page
     
     $this->container = new Sabel_Container_DI();
     
-    $this->request = $request;
+    $this->request     = $request;
     $this->destination = $destination;
     
     $this->setupLogger();

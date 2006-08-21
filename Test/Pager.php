@@ -59,7 +59,7 @@ class DummyBBS
 /**
  * test case for SabelPager
  *
- * @author Mori Reo <mori.reo@servise.jp>
+ * @author Mori Reo <mori.reo@servise.com>
  */
 class Test_Pager extends PHPUnit2_Framework_TestCase
 {

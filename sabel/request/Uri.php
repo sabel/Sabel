@@ -67,7 +67,7 @@ class Sabel_Request_Uri
   
   public function get($pos)
   {
-    return $this->parts[$pos];
+    return (isset($this->parts[$pos])) ? $this->parts[$pos] : null;
   }
   
   public function getByName($name)
