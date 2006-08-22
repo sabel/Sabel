@@ -101,7 +101,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
     $row = $this->fetch();
     if (($this->lastInsertId =(int) $row[0]) === 0) {
-      throw new Exception($table . '_id_seq is not found.');
+      throw new Exception($table . '_{$defColumn}_seq is not found.');
     } else {
       return $this->lastInsertId;
     }
