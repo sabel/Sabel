@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Sabel_Request_Parameters
- * 
+ * Sabel_Request_Parameters class
  * @package org.sabel.request
  * @author Mori Reo <mori.reo@gmail.com>
  * @package org.sabel.request
