@@ -76,10 +76,10 @@ class MysqlHelper
     $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("時をかける少女", 2, 1)';
     $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("涼宮ハルヒの憂鬱", 1, 1)';
     $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("涼宮ハルヒの憂鬱", 2, 1)';
-    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 1, 1)';
-    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 2, 1)';
-    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 3, 1)';
-    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 4, 1)';
+    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 1, 2)';
+    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 2, 2)';
+    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 3, 2)';
+    $sqls[] = 'INSERT INTO book(name, volume, writer_id) VALUES("よつばと！", 4, 2)';
 
     $obj = new Sabel_DB_Basic();
     foreach ($sqls as $sql) {
