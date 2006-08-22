@@ -149,8 +149,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
       $this->param = array();
       return true;
     } else {
-      $msg  = var_export($this->stmt->queryString, 1);
-      $msg .= var_export($this->param, 1);
+      $msg = var_export($this->param, 1);
       throw new Exception("Error: PDOStatement::execute(): {$msg}");
     }
   }

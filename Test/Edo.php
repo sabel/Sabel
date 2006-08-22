@@ -117,8 +117,8 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);
     $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);
     $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
-    $this->assertEquals($cus[0]->customer_order[2]->id, null);
-    $this->assertEquals($cus[0]->customer_order[3]->id, null);
+    @$this->assertNull($cus[0]->customer_order[2]->id);
+    @$this->assertNull($cus[0]->customer_order[3]->id);
   }
 
   public function testMultipleInsert()
@@ -413,7 +413,7 @@ class Test_Edo extends SabelTestCase
     //--------------------------------------------------
     
     $test = new Test();
-    $test->setProjection(array(id,blood));
+    $test->setProjection(array('id', 'blood'));
     
     $obj2 = $test->selectOne(2);
     $this->assertEquals((int)$obj2->id, 2);
@@ -467,7 +467,7 @@ class Test_Edo extends SabelTestCase
     $obj = $this->test->select();
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
-    $this->assertEquals($obj[2]->name, null);
+    @$this->assertNull($obj[2]->name);
     
     $this->test->OR_id('<2', '>5');
     $obj = $this->test->select();
@@ -555,7 +555,7 @@ class Test_Edo extends SabelTestCase
     
     $this->assertEquals((int)$orders[0]->id, 2);
     $this->assertEquals((int)$orders[1]->id, 1);
-    $this->assertEquals($orders[2]->id, null);
+    @$this->assertNull($orders[2]->id);
   }
   
   public function testNewChild()
@@ -627,26 +627,26 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[0]->id, 2);
     $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[1]->id, 8);
     $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[2]->id, 11);
-    $this->assertEquals($objs[0]->customer_order[0]->order_line[3]->id, null);  // hasn't
+    @$this->assertNull($objs[0]->customer_order[0]->order_line[3]->id);  // hasn't
     
     $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->id, 3);
     $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->item_id, 3);
     $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->id, 4);
     $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->item_id, 1);
-    $this->assertEquals($objs[0]->customer_order[1]->order_line[2]->id, null);  // hasn't
+    @$this->assertNull($objs[0]->customer_order[1]->order_line[2]->id);  // hasn't
     
     $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->id, 1);
     $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->item_id, 2);
     $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->id, 7);
     $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->item_id, 3);
-    $this->assertEquals($objs[0]->customer_order[2]->order_line[2]->id, null);  // hasn't
+    @$this->assertNull($objs[0]->customer_order[2]->order_line[2]->id);  // hasn't
     
     $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->id, 6);
     $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->item_id, 2);
-    $this->assertEquals($objs[1]->customer_order[0]->order_line[1]->id, null);  // hasn't
+    @$this->assertNull($objs[1]->customer_order[0]->order_line[1]->id);  // hasn't
     $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->id, 5);
     $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->item_id, 3);
-    $this->assertEquals($objs[1]->customer_order[1]->order_line[1]->id, null);  // hasn't
+    @$this->assertNull($objs[1]->customer_order[1]->order_line[1]->id);  // hasn't
     
     $this->assertEquals((int)$objs[0]->customer_telephone[0]->id, 1);
     $this->assertEquals((int)$objs[0]->customer_telephone[1]->id, 3);
@@ -666,8 +666,8 @@ class Test_Edo extends SabelTestCase
     $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
     
-    $this->assertEquals($objs[0]->customer_telephone[0]->telephone, null);
-    $this->assertEquals($objs[0]->customer_telephone[1]->telephone, null);
+    @$this->assertNull($objs[0]->customer_telephone[0]->telephone);
+    @$this->assertNull($objs[0]->customer_telephone[1]->telephone);
     $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
     $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
   }
@@ -772,7 +772,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals((int)$root[0]->id, 1);
     $this->assertEquals((int)$root[1]->id, 2);
     $this->assertEquals((int)$root[2]->id, 4);
-    $this->assertEquals($root[3], null);
+    @$this->assertNull($root[3]);
 
     $root[0]->setChildConstraint(array('limit' => 10));
     $root[0]->getChild('tree');

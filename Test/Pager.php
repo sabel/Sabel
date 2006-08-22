@@ -17,7 +17,7 @@ class ExtendedSabelPager extends SabelPager
     $this->initialize();
   }
   
-  public function initialize() {
+  public function initialize($numberOfItems = null, $numberOfPageItems = null) {
     $this->setPageItem(30);
   }
 }

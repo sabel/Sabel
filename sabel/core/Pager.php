@@ -25,7 +25,7 @@ class SabelPager
    * @param int $numberOfItems number of items per page.
    * @param int $numberOfPageItems
    */
-  public function initialize($numberOfItems, $numberOfPageItems)
+  public function initialize($numberOfItems = null, $numberOfPageItems = null)
   {
     $this->setNumberOfItems($numberOfItems);
     $this->setPageItem($numberOfPageItems);

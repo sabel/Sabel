@@ -80,7 +80,7 @@ abstract class Sabel_DB_Mapper
 
   public function __get($key)
   {
-    return $this->data[$key];
+    return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
   public function is_selected()
@@ -136,7 +136,8 @@ abstract class Sabel_DB_Mapper
 
   public function __call($method, $parameters)
   {
-    $this->setCondition($method, $parameters[0], $parameters[1]);
+    @list($paramOne, $paramTwo) = $parameters;
+    $this->setCondition($method, $paramOne, $paramTwo);
   }
 
   public function setConstraint($param1, $param2 = null)
@@ -259,6 +260,8 @@ abstract class Sabel_DB_Mapper
 
   public function aggregate($functions, $child = null)
   {
+    $sql = null;
+    
     if (is_null($child)) {
       $table    = $this->table;
       $idColumn = $this->defColumn;
@@ -550,7 +553,8 @@ abstract class Sabel_DB_Mapper
 
   private function setSelectedProperty($obj, $row)
   {
-    $obj->selectCondition[$obj->defColumn] = $row[$obj->defColumn];
+    $value = (isset($row[$obj->defColumn])) ? $row[$obj->defColumn] : null;
+    $obj->selectCondition[$obj->defColumn] = $value;
     $obj->setProperties($row);
     $obj->selected = true;
   }
@@ -587,6 +591,8 @@ abstract class Sabel_DB_Mapper
 
   public function clearChild($child)
   {
+    $parent = '';
+    
     $id = $this->data[$this->defColumn];
     if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
 
@@ -594,7 +600,7 @@ abstract class Sabel_DB_Mapper
     $this->table = $child;
     $this->remove("{$parent}_id", $id);
 
-    $this->table = $parant;
+    $this->table = $parent;
   }
 
   public function save($data = null)
@@ -717,7 +723,7 @@ class Sabel_DB_ParentCache
 
   public static function get($key)
   {
-    return self::$cache[$key];
+    return (isset(self::$cache[$key])) ? self::$cache[$key] : null;
   }
 }
 
