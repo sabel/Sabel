@@ -17,4 +17,9 @@ class Sabel_Env_Server
       return null;
     }
   }
+  
+  public function isMethod($expected)
+  {
+    return ($expected === $this->request_method);
+  }
 }

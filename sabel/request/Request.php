@@ -67,22 +67,22 @@ class Sabel_Request_Request
   
   public function isPost()
   {
-    return (self::$server->request_method === 'POST' && count($_POST) !== 0) ? true : false;
+    return (self::$server->isMethod('POST')) ? true : false;
   }
   
   public function isGet()
   {
-    return (self::$server->request_method === 'GET' && count($_GET) !== 0) ? true : false;
+    return (self::$server->isMethod('GET')) ? true : false;
   }
   
   public function isPut()
   {
-    return (self::$server->request_method === 'PUT') ? true : false;
+    return (self::$server->isMethod('PUT')) ? true : false;
   }
   
   public function isDelete()
   {
-    return (self::$server->request_method === 'DELETE') ? true : false;
+    return (self::$server->isMethod('DELETE')) ? true : false;
   }
   
   public function requests()
