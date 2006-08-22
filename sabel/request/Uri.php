@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.core.Utility');
-
 /**
  * Sabel_Request_Uri
  * 

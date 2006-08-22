@@ -8,6 +8,8 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('sabel/Functions.php');
 require_once('sabel/core/Context.php');
 
+require_once('sabel/core/Utility.php');
+
 require_once('sabel/env/Server.php');
 require_once('sabel/request/Request.php');
 require_once('sabel/request/Uri.php');

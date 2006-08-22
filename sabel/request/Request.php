@@ -1,5 +1,7 @@
 <?php
 
+uses('sabel.core.Utility');
+
 /**
  * Sabel_Request_Request
  * 
@@ -51,7 +53,8 @@ class Sabel_Request_Request
   {
     return $this->uri;
   }
-  
+
+  // @todo remove this??
   public function hasParameters()
   {
     return (isset($this->parameters));
