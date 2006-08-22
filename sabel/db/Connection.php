@@ -27,16 +27,22 @@ class Sabel_DB_Connection
 
   public static function getConnection($connectName)
   {
-    return self::$connList[$connectName]['conn'];
+    if (isset(self::$connList[$connectName])) {
+      return self::$connList[$connectName]['conn'];
+    }
   }
 
   public static function getDriver($connectName)
   {
-    return self::$connList[$connectName]['driver'];
+    if (isset(self::$connList[$connectName])) {
+      return self::$connList[$connectName]['driver'];
+    }
   }
 
   public static function getDB($connectName)
   {
-    return self::$connList[$connectName]['db'];
+    if (isset(self::$connList[$connectName])) {
+      return self::$connList[$connectName]['db'];
+    }
   }
 }

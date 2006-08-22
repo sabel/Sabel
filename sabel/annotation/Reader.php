@@ -45,7 +45,7 @@ class Sabel_Annotation_Reader
   {
     $annotation = preg_split('/ +/', $this->removeComment($line));
     
-    if ($annotation[0]{0} === '@') {
+    if (isset($annotation[0][0]) && $annotation[0]{0} === '@') {
       $name       = array_shift($annotation);
       $annotation = (count($annotation) > 2) ? $annotation : $annotation[0];
       
