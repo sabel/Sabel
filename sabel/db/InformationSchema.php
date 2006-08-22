@@ -113,7 +113,7 @@ class Sabel_DB_MyPgSchema
     foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
       $columnName = $data['column_name'];
-      $columns[$columnName] = $this->createColumn($table, $columnName);
+      $columns[$columnName] = $this->makeColumnValueObject($data);
     }
     return $columns;
   }
@@ -161,7 +161,7 @@ class Sabel_DB_MyPgSchema
       $this->addStringLength($co, $columnRecord);
       return $co;
     }
-    
+
     if (in_array($type, $this->getTextTypes())) {
       $co->type = Edo_Type::TEXT;
       return $co;
@@ -180,7 +180,7 @@ class Sabel_DB_MysqlSchema extends Sabel_DB_MyPgSchema
   {
     return array('varchar', 'char');
   }
-  
+
   public function getTextTypes()
   {
     return array('text', 'mediumtext', 'tinytext');
