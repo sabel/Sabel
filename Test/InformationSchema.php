@@ -1,10 +1,5 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
 require_once('sabel/db/Connection.php');
 require_once('sabel/db/InformationSchema.php');
 
@@ -17,7 +12,7 @@ require_once "sabel/db/driver/Interface.php";
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
 
-class Test_InformationSchema extends PHPUnit2_Framework_TestCase
+class Test_InformationSchema extends SabelTestCase
 {
   public static function suite()
   {
@@ -34,9 +29,9 @@ class Test_InformationSchema extends PHPUnit2_Framework_TestCase
     //$dbCon['user'] = 'pgsql';
     //$dbCon['pass'] = 'pgsql';
 
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('blog', 'pdo', $dbCon);
 
-    $is = new Sabel_DB_Schema('user', 'blog');
+    $is = new Sabel_DB_Schema('blog', 'blog');
 
     $tableOfAuthor = $is->getTable('author');
     $this->assertEquals(Edo_Type::INT, $tableOfAuthor->getColumnByName('id')->type);

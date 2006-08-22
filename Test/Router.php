@@ -3,11 +3,6 @@
 $absolute_path = dirname(realpath(__FILE__));
 define('RUN_BASE', $absolute_path);
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
 require_once('sabel/controller/Map.php');
 require_once('sabel/controller/map/Entry.php');
 require_once('sabel/controller/map/Uri.php');
@@ -26,21 +21,11 @@ require_once('sabel/config/Yaml.php');
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Router extends PHPUnit2_Framework_TestCase
+class Test_Router extends SabelTestCase
 {
-  public function testUri()
+  public static function suite()
   {
-    $uri = '2006/06/04';
-    $map = ':year/:day/:month';
-    $pat = '%(19|20\d\d)/([01]?\d)/([0-3]?\d)%';
-    preg_match($pat, $uri, $matchs);
-    array_shift($matchs);
-    
-    $data = array();
-    $maps = split('/', $map);
-    foreach ($maps as $pos => $mapPart) {
-      $data[ltrim($mapPart, ':')] = $matchs[$pos];
-    }
+   return new PHPUnit2_Framework_TestSuite("Test_Router");
   }
   
   protected $r;
@@ -73,9 +58,6 @@ class Test_Router extends PHPUnit2_Framework_TestCase
   
   public function testSingleEntry()
   {
-    $dest = $this->r->routing(new Sabel_Request_Uri('10'));
-    $this->assertEquals('blog', $dest->getModule());
-    $this->assertEquals('entry', $dest->getAction());
   }
   
   /*

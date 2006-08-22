@@ -42,7 +42,7 @@ abstract class Sabel_DB_Mapper
     $selected     = false,
     $withParent   = false;
 
-  protected function getDriver()
+  public function getDriver()
   {
     return $this->driver;
   }
@@ -80,7 +80,6 @@ abstract class Sabel_DB_Mapper
 
   public function __get($key)
   {
-    if (!$this->data[$key]) $this->getChild($key);
     return $this->data[$key];
   }
 

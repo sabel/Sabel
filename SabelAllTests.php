@@ -9,6 +9,9 @@ require_once('PHPUnit2/Framework/Warning.php');
 require_once('PHPUnit2/TextUI/TestRunner.php');
 require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
+require_once "PHPUnit2/Framework/IncompleteTestError.php";
+
+require_once('Test/SabelTestCase.php');
 
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
@@ -21,7 +24,7 @@ require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
 require_once('Test/Resolver.php');
 require_once('Test/Edo.php');
-
+require_once('Test/Router.php');
 
 class SabelAllTests
 {
@@ -44,11 +47,12 @@ class SabelAllTests
     $suite->addTest(Test_RequestUri::suite());
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Edo::suite());
+    $suite->addTest(Test_Router::suite());
     
     return $suite;
   }
 }
- 
+
 if (PHPUnit2_MAIN_METHOD == 'SabelAllTests::main') {
   SabelAllTests::main();
 }

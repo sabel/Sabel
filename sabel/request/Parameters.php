@@ -5,6 +5,8 @@
  * 
  * @package org.sabel.request
  * @author Mori Reo <mori.reo@gmail.com>
+ * @package org.sabel.request
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Request_Parameters
 {
@@ -13,7 +15,7 @@ class Sabel_Request_Parameters
   
   public function __construct($parameters)
   {
-    $this->parameters = $parameters;
+    $this->parameters = str_replace('?', '', $parameters);
     if (!empty($parameters)) $this->parse();
   }
   
@@ -25,16 +27,14 @@ class Sabel_Request_Parameters
    */
   protected function parse()
   {
-    $separate = explode("&", $this->parameters);
+    $parameters = explode("&", $this->parameters);
     $sets = array();
-    foreach ($separate as $val) {
-      $tmp = explode("=", $val);
-      if (is_null($tmp[1])) $tmp[1] = '';
-      $enc = mb_detect_encoding($tmp[1], 'UTF-8, EUC_JP, SJIS');
-      $sets[$tmp[0]] = mb_convert_encoding(urldecode($tmp[1]), 'EUC_JP', $enc);
+    foreach ($parameters as $piar) {
+      @list($key, $val) = explode('=', $piar);
+      $sets[$key] = $val;
     }
     
-    $this->parsedParameters =& $sets;
+    $this->parsedParameters = $sets;
   }
   
   public function __get($key)

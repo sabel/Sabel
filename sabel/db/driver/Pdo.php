@@ -19,6 +19,11 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     $this->myDb     = $myDb;
     $this->queryObj = new Sabel_DB_Query_Bind();
   }
+  
+  public function getConnection()
+  {
+    return $this->pdo;
+  }
 
   public function begin()
   {
@@ -133,20 +138,20 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
       if ($this->stmt = $this->pdo->prepare($sql)) {
         Sabel_DB_Driver_PdoStatement::add($this->stmt);
       } else {
-        throw new Exception('PDOStatement is null. sql : ' . $sql);
+        $error = $this->pdo->errorInfo();
+        throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
       }
     }
 
     $this->makeBindParam();
 
-    if ($this->stmt->execute($this->param)) {
+    if ($this->stmt && $this->stmt->execute($this->param)) {
       $this->param = array();
       return true;
     } else {
-      // @todo
-      var_dump($this->stmt->queryString);
-      var_dump($this->param);
-      throw new Exception('Error: PDOStatement::execute()');
+      $msg  = var_export($this->stmt->queryString, 1);
+      $msg .= var_export($this->param, 1);
+      throw new Exception("Error: PDOStatement::execute(): {$msg}");
     }
   }
 

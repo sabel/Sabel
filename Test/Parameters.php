@@ -1,51 +1,43 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-// must need by DI
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
 Sabel_Core_Context::addIncludePath('');
-uses('sabel.container.DI');
-uses('sabel.injection.Calls');
 uses('sabel.core.Exception');
 uses('sabel.core.Const');
 uses('sabel.request.Sabel_Request_Parameters');
 
-class Test_Parameters extends PHPUnit2_Framework_TestCase
+class Test_Parameters extends SabelTestCase
 {
   public static function suite()
   {
     return new PHPUnit2_Framework_TestSuite("Test_Parameters");
   }
   
-  public function testSabel_Request_Parameters()
+  public function testParameters()
   {
-    $Sabel_Request_Parameters = new Sabel_Request_Parameters('&value?value=test&value2=test2');
-    $this->assertTrue(is_object($Sabel_Request_Parameters));
-    $this->assertEquals('test', $Sabel_Request_Parameters->value);
-    $this->assertEquals('test2', $Sabel_Request_Parameters->value2);
+    $p = new Sabel_Request_Parameters('?value=test&value2=test2');
+    $this->assertTrue(is_object($p));
+    $this->assertEquals('test',  $p->value);
+    $this->assertEquals('test2', $p->value2);
   }
   
-  public function testSabel_Request_ParametersReal()
+  public function testReal()
   {
-    $Sabel_Request_Parameters = new Sabel_Request_Parameters('?sender=48840&recipient=52971');
-    $this->assertEquals('48840', $Sabel_Request_Parameters->sender);
-    $this->assertEquals('52971', $Sabel_Request_Parameters->recipient);
+    $p = new Sabel_Request_Parameters('?sender=48840&recipient=52971');
+    $this->assertEquals('48840', $p->sender);
+    $this->assertEquals('52971', $p->recipient);
   }
   
-  public function testInvalidSabel_Request_Parameters()
+  public function testInvalidParameters()
   {
-    $Sabel_Request_Parameters = new Sabel_Request_Parameters('?test=');
-    $this->assertEquals('', $Sabel_Request_Parameters->test);
+    $p = new Sabel_Request_Parameters('?test=');
+    $this->assertEquals('', $p->test);
   }
   
-  public function testNonSabel_Request_Parameters()
+  public function testNonParameters()
   {
     try {
-      $Sabel_Request_Parameters = new Sabel_Request_Parameters('');
-      $this->assertTrue(is_object($Sabel_Request_Parameters));
+      $p = new Sabel_Request_Parameters('');
+      $this->assertTrue(is_object($p));
       $excepted = true;
     } catch (Exception $e) {
       $excepted = false;
@@ -54,10 +46,10 @@ class Test_Parameters extends PHPUnit2_Framework_TestCase
     if (!$excepted) $this->fail();
   }
   
-  public function testSabel_Request_ParametersError()
+  public function testError()
   {
     try {
-      $Sabel_Request_Parameters = new Sabel_Request_Parameters('/testvalue&=value');
+      $p = new Sabel_Request_Parameters('/testvalue&=value');
     } catch(Exception $e) {
       
     }

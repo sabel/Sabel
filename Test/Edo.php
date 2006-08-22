@@ -4,13 +4,6 @@ if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
 }
 
-require_once "PHPUnit2/Framework/TestCase.php";
-require_once "PHPUnit2/Framework/TestSuite.php";
-require_once "PHPUnit2/Framework/IncompleteTestError.php";
-
-require_once "sabel/Functions.php";
-require_once "sabel/core/Context.php";
-
 require_once "sabel/db/driver/Interface.php";
 require_once "sabel/db/query/Interface.php";
 require_once "sabel/db/query/Factory.php";
@@ -27,7 +20,7 @@ require_once "sabel/db/driver/Pgsql.php";
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  */
-class Test_Edo extends PHPUnit2_Framework_TestCase
+class Test_Edo extends SabelTestCase
 {
   public static function main() {
     require_once "PHPUnit2/TextUI/TestRunner.php";
@@ -1106,19 +1099,21 @@ class MysqlHelper
   public function createTables()
   {
     $obj = new Sabel_DB_Basic();
+    $pdo = $obj->getDriver()->getConnection();
     
     foreach ($this->sqls as $sql) {
-      @$obj->execute($sql);
+      $pdo->exec($sql);
     }
   }
   
   public function dropTables()
   {
     $obj = new Sabel_DB_Basic();
+    $pdo = $obj->getDriver()->getConnection();
     
     try {
       foreach ($this->tables as $table) {
-        @$obj->execute("DROP TABLE ${table}");
+        $pdo->exec("DROP TABLE ${table}");
       }
     } catch (Exception $e) {
     }
@@ -1285,7 +1280,7 @@ class Test extends Mapper_Default
 
 class Customer extends Mapper_Default
 {
-  protected $myChildren = array('customer_order','customer_telephone');
+  protected $myChildren = array('customer_order', 'customer_telephone');
   protected $defChildConstraints = array('limit' => 10);
 
   public function __construct($param1 = null, $param2 = null)

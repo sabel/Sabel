@@ -4,10 +4,6 @@ if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
 }
 
-require_once "PHPUnit2/Framework/TestCase.php";
-require_once "PHPUnit2/Framework/TestSuite.php";
-require_once "PHPUnit2/Framework/IncompleteTestError.php";
-
 require_once "sabel/Functions.php";
 require_once "sabel/core/Context.php";
 
@@ -27,11 +23,9 @@ require_once "sabel/db/driver/Pgsql.php";
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  */
-class Test_DB extends PHPUnit2_Framework_TestCase
+class Test_DB extends SabelTestCase
 {
   public static function main() {
-    require_once "PHPUnit2/TextUI/TestRunner.php";
-
     $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
