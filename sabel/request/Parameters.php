@@ -1,13 +1,15 @@
 <?php
 
 /**
+ * Sabel_Request_Parameters
  * 
- *
+ * @package org.sabel.request
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Request_Parameters
 {
-  protected $parameters;
-  protected $parsedParameters;
+  protected $parameters = '';
+  protected $parsedParameters = array();
   
   public function __construct($parameters)
   {
@@ -37,11 +39,12 @@ class Sabel_Request_Parameters
   
   public function __get($key)
   {
-    return $this->parsedParameters[$key];
+    return $this->get($key);
   }
   
   public function get($key)
   {
-    return $this->parsedParameters[$key];
+    $pp = $this->parsedParameters;
+    return (isset($pp[$key])) ? $pp[$key] : null;
   }
 }

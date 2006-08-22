@@ -60,6 +60,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
     $this->assertEquals('1',       $r->getUri()->getByName('id'));
     
     $this->assertNull($r->getParameters()->get('id'));
+    $this->assertNull($r->getParameters()->id);
   }
   
   public function testInvalidUri()
@@ -72,6 +73,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
     $this->assertNull($r->getUri()->getAction());
     $this->assertNull($r->getUri()->getByName('id'));
     $this->assertEquals('1', $r->getParameters()->get('id'));
+    $this->assertEquals('1', $r->getParameters()->id);
   }
   
   public function testInvalidModule()

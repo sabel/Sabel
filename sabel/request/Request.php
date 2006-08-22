@@ -41,7 +41,7 @@ class Sabel_Request_Request
         array_shift($args);
         $request_uri = join('/', $args);
       } else {
-        $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
+        $request_uri = (isset($_SERVER['REQUEST_URI'])) ? ltrim($_SERVER['REQUEST_URI'], '/') : null;
       }
     }
     

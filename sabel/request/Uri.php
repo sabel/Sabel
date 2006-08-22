@@ -27,22 +27,22 @@ class Sabel_Request_Uri
   
   public function get($pos)
   {
-    return (isset($this->parts[$pos])) ? $this->parts[$pos] : null;
+    return ($this->has($pos)) ? $this->parts[$pos] : null;
   }
   
   public function getModule()
   {
-    return $this->get($this->entry->getUri()->calcElementPositionByName('module'));
+    return $this->getByName('module');
   }
   
   public function getController()
   {
-    return $this->get($this->entry->getUri()->calcElementPositionByName('controller'));
+    return $this->getByName('controller');
   }
   
   public function getAction()
   {
-    return $this->get($this->entry->getUri()->calcElementPositionByName('action'));
+    return $this->getByName('action');
   }
   
   public function getByName($name)
