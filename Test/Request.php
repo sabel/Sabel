@@ -1,7 +1,9 @@
 <?php
 
 $absolute_path = dirname(realpath(__FILE__));
-define('RUN_BASE', $absolute_path);
+if (!defined('RUN_BASE')) {
+  define('RUN_BASE', $absolute_path);
+}
 
 require_once('PHPUnit2/Framework/TestCase.php');
 
