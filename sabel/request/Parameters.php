@@ -9,6 +9,8 @@
  * @author Mori Reo <mori.reo@gmail.com>
  * @package org.sabel.request
  * @author Mori Reo <mori.reo@gmail.com>
+ * @package org.sabel.request
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Request_Parameters
 {
