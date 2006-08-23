@@ -12,6 +12,7 @@ $con['pass'] = $dev['password'];
 
 Sabel_DB_Connection::addConnection('default', 'pdo', $con);
 uses('sabel.db.Mapper');
+uses('sabel.db.BaseClasses');
 
 /**
  * page controller base class.

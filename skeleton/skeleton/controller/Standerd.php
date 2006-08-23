@@ -26,7 +26,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   public function create()
   {
     if ($this->request->isPost()) {
-      $model = new <? echo $controllerName ?>($this->request->id);
+      $model = new <? echo $controllerName ?>();
       foreach ($this->request->requests() as $name => $value) {
         $model->$name = $value;
       }

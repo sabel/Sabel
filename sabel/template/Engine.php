@@ -96,6 +96,8 @@ class Re
   }
 }
 
+uses('sabel.db.schema.Type');
+
 class Form
 {
   const FORM_START = '<form action="%s" method="%s">';
@@ -105,8 +107,8 @@ class Form
   
   public static function create($table, $obj, $action, $method)
   {
-    uses('sabel.db.InformationSchema');
-    $is = new Sabel_DB_Schema('default', 'default');
+    uses('sabel.db.schema.Accessor');
+    $is = new Sabel_DB_Schema_Accessor('default', 'default');
     
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action, $method);
@@ -124,17 +126,17 @@ class Form
   
   public static function newInput($name, $column, $class = null)
   {
-    if ($column->type == Edo_Type::INT || $column->type == Edo_Type::STRING) {
+    if ($column->type == Sabel_DB_Schema_Type::INT || $column->type == Sabel_DB_Schema_Type::STRING) {
       return sprintf(self::INPUT_TEXT, $name, '');
-    } elseif ($column->type == Edo_Type::TEXT) {
+    } elseif ($column->type == Sabel_DB_Schema_Type::TEXT) {
       return sprintf(self::INPUT_AREA, $name, '');
     }
   }
   
   public static function edit($table, $obj, $action, $method)
   {
-    uses('sabel.db.InformationSchema');
-    $is = new Sabel_DB_Schema('default', 'default');
+    uses('sabel.db.schema.Accessor');
+    $is = new Sabel_DB_Schema_Accessor('default', 'default');
     
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action.$obj->id, $method);
@@ -152,9 +154,9 @@ class Form
   
   public static function input($obj, $name, $column, $class = null)
   {
-    if ($column->type == Edo_Type::INT || $column->type == Edo_Type::STRING) {
+    if ($column->type == Sabel_DB_Schema_Type::INT || $column->type == Sabel_DB_Schema_Type::STRING) {
       return sprintf(self::INPUT_TEXT, $name, $obj->$name);
-    } elseif ($column->type == Edo_Type::TEXT) {
+    } elseif ($column->type == Sabel_DB_Schema_Type::TEXT) {
       return sprintf(self::INPUT_AREA, $name, $obj->$name);
     }
   }
@@ -181,8 +183,8 @@ class PhpEngineImpl extends BaseEngineImpl implements TemplateEngineImpl
   
   public function retrieve()
   {
-    uses('sabel.db.InformationSchema');
-    $is = new Sabel_DB_Schema('default', 'default');
+    uses('sabel.db.schema.Accessor');
+    $is = new Sabel_DB_Schema_Accessor('default', 'default');
     $table = $is->getTable('blog');
     
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
