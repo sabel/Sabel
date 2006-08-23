@@ -20,6 +20,7 @@ class Sabel_Injection_Calls
   public function add($injection)
   {
     if (!$injection) return false;
+    
     $reflection = new ReflectionClass($injection);
     foreach ($reflection->getMethods() as $method) {
       if ($method->getName() === 'before') {
@@ -33,16 +34,14 @@ class Sabel_Injection_Calls
   public function doBefore($method, $arg)
   {
     foreach (self::$before as $object) {
-      if ($object->when($method))
-        $object->before($method, $arg);
+      if ($object->when($method)) $object->before($method, $arg);
     }
   }
   
   public function doAfter($method, &$result)
   {
     foreach (self::$after as $object) {
-      if ($object->when($method))
-        $object->after($method, $result);
+      if ($object->when($method)) $object->after($method, $result);
     }
   }
   
