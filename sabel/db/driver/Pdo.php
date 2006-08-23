@@ -13,6 +13,8 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
   private $param = array();
   private $data  = array();
 
+  private $lastinsertId = null;
+
   public function __construct($conn, $myDb)
   {
     $this->pdo      = $conn;
@@ -25,9 +27,9 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
     return $this->pdo;
   }
 
-  public function begin()
+  public function begin($pdo)
   {
-    $this->pdo->beginTransaction();
+    $pdo->beginTransaction();
   }
 
   public function commit($pdo)
@@ -37,7 +39,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
   public function rollback($pdo)
   {
-    $pdo->rollback();
+    $pdo->rollBack();
   }
 
   public function setBasicSQL($sql)
@@ -67,7 +69,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if (isset($data[$defColumn]) && is_null($data[$defColumn]) && $this->myDb === 'pgsql')
+    if (!isset($data[$defColumn]) && $this->myDb === 'pgsql')
       $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
     $this->data = $data;
@@ -96,7 +98,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
   {
     switch ($this->myDb) {
       case 'pgsql':
-        return $this->lastInsertId;
+        return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->execute('SELECT last_insert_id()');
         $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);

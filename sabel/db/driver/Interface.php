@@ -2,7 +2,7 @@
 
 interface Sabel_DB_Driver_Interface
 {
-  public function begin();
+  public function begin($connection);
   public function commit($connection);
   public function rollback($connection);
 

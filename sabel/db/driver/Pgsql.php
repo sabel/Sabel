@@ -23,7 +23,7 @@ class Sabel_DB_Driver_Pgsql implements Sabel_DB_Driver_Interface
     $this->sqlObj = new PgsqlQuery();
   }
 
-  public function begin()
+  public function begin($connection)
   {
     //@todo
   }

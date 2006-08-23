@@ -69,7 +69,7 @@ class Test_Edo extends SabelTestCase
     $this->customer->multipleInsert($insertData);
 
     $this->assertEquals($this->customer->getCount(), 2);
-    
+
     $insertData   = array();
     $insertData[] = array('id' => 1, 'customer_id' => 1);
     $insertData[] = array('id' => 2, 'customer_id' => 1);
@@ -987,23 +987,105 @@ class Test_Edo extends SabelTestCase
     $tree->tree_id(4);
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 11);
-    
+
     $tree->name('null');
     $tree->tree_id(4);
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 8);
+  }
+
+  public function testTransaction()
+  {
+    $trans1 = new Trans1();
+    $data = array();
+    $data[] = array('text' => 'trans1');
+    $data[] = array('text' => 'trans2');
+    $data[] = array('text' => 'trans3');
+
+    $trans1->multipleInsert($data);
+
+    $trans2 = new Trans2();
+    $data = array();
+    $data[] = array('trans1_id' => 3, 'text' => 'trans21');
+    $data[] = array('trans1_id' => 3, 'text' => 'trans22');
+    $data[] = array('trans1_id' => 2, 'text' => 'trans23');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans24');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans25');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans26');
+
+    $trans2->multipleInsert($data);
+
+    $trans1 = new Trans1(1);
+    $trans1->setChildConstraint('limit', 10);
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 3);
+
+    $trans1 = new Trans1(1);
+    $trans1->setChildConstraint('limit', 10);
+    $trans1->setChildCondition('trans2', array('text' => 'trans24'));
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 1);
+
+    $trans1 = new Trans1(3);
+    $trans1->setChildConstraint('limit', 10);
+    $trans1->setChildCondition('trans2', array('text' => 'trans24'));
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 0);
+
+    $trans1 = new Trans1(2);
+    $trans1->setChildConstraint('limit', 10);
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 1);
+
+    $trans1->execute("DELETE FROM trans1");
+    $trans2->execute("DELETE FROM trans2");
+
+    //-------------------------------------------------------------------
+
+    $trans1 = new Trans1(); // connection1
+    $trans1->begin();
+
+    $data = array();
+    $data[] = array('text' => 'trans1');
+    $data[] = array('text' => 'trans2');
+    $data[] = array('text' => 'trans3');
+
+    $trans1->multipleInsert($data);
+
+    $trans2 = new Trans2(); // connection2
+    $data = array();
+    $data[] = array('trans1_id' => 3, 'text' => 'trans21');
+    $data[] = array('trans1_id' => 3, 'text' => 'trans22');
+    $data[] = array('trans1_id' => 2, 'text' => 'trans23');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans24');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans25');
+    $data[] = array('trans1_id' => 1, 'texx' => 'trans26');  // <- Error && rollback()
+
+    try {
+      $trans2->multipleInsert($data);
+      $trans2->commit(); // not execute commit()
+    } catch (Exception $e) {
+    }
+
+    $trans2 = new Trans2();
+    $t = $trans2->select();
+    $this->assertEquals($t, false); // not found
+
+    $trans1 = new Trans1();
+    $t = $trans1->select();
+    $this->assertEquals($t, false); // not found
   }
 }
 
 class MysqlHelper
 {
   protected $sqls = null;
-  
+
   protected $tables = array('test', 'test2', 'test3',
                             'customer', 'customer_order', 'order_line',
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
-                            'course', 'users', 'status', 'bbs');
+                            'course', 'users', 'status', 'bbs', 'trans1');
   
   public function __construct()
   {
@@ -1012,8 +1094,15 @@ class MysqlHelper
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
     
+    $dbCon = array();
+    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';
+    $dbCon['user'] = 'root';
+    $dbCon['pass'] = '';
+    
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
+ 
     $SQLs = array();
     
     $SQLs[] = 'CREATE TABLE test (
@@ -1096,30 +1185,43 @@ class MysqlHelper
                  title    VARCHAR(24),
                  body     VARCHAR(24))';
 
+    $SQLs[] = 'CREATE TABLE trans1 (
+                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
+                 text  VARCHAR(24)) TYPE=InnoDB';
+
     $this->sqls = $SQLs;
   }
-  
+
   public function createTables()
   {
     $obj = new Sabel_DB_Basic();
     $pdo = $obj->getDriver()->getConnection();
-    
+
     foreach ($this->sqls as $sql) {
       $pdo->exec($sql);
     }
+
+    $sql  = "CREATE TABLE trans2 (id INT4 PRIMARY KEY AUTO_INCREMENT, trans1_id INT4 NOT NULL,";
+    $sql .= "text VARCHAR(24) ) TYPE=InnoDB";
+
+    $trans2 = new Trans2();
+    $trans2->execute($sql);
   }
-  
+
   public function dropTables()
   {
     $obj = new Sabel_DB_Basic();
     $pdo = $obj->getDriver()->getConnection();
-    
+
     try {
       foreach ($this->tables as $table) {
         $pdo->exec("DROP TABLE ${table}");
       }
     } catch (Exception $e) {
     }
+
+    $trans2 = new Trans2();
+    $trans2->execute("DROP TABLE trans2");
   }
 }
 
@@ -1132,14 +1234,14 @@ class PgsqlHelper
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
                             'course', 'users', 'bbs', 'status');
-                            
+
   public function __construct()
   {
     $dbCon = array();
     $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
 
     //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
     //pg_trace('/tmp/pg_trace.log', 'w', $dbCon);
@@ -1239,11 +1341,11 @@ class PgsqlHelper
       @$obj->execute($sql);
     }
   }
-  
+
   public function dropTables()
   {
     $obj = new Sabel_DB_Basic();
-    
+
     foreach ($this->tables as $table) {
       @$obj->execute("DROP TABLE ${table}");
     }
@@ -1256,7 +1358,25 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('user');
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Trans1 extends Sabel_DB_Mapper
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Trans2 extends Sabel_DB_Mapper
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default2');
     parent::__construct($param1, $param2);
   }
 }

@@ -500,7 +500,9 @@ abstract class Sabel_DB_Mapper
       $constraints = $this->childConstraints[$child];
     } else if ($this->defChildConstraints) {
       $constraints = $this->defChildConstraints;
-    } else if (!($constraints = $obj->childConstraints[$child])) {
+    } else if (isset($obj->childConstraints[$child])) {
+      $constraints = $obj->childConstraints[$child];
+    } else {
       $constraints = $this->hasDefaultChildConstraint($obj);
     }
 
@@ -671,12 +673,12 @@ abstract class Sabel_DB_Mapper
   {
     if (!is_array($data)) throw new Exception('Error: data is not array.');
 
-    $this->begin();
+    $result = $this->begin();
     try {
       foreach ($data as $val)
         $this->driver->executeInsert($this->table, $val, $this->defColumn);
 
-      Sabel_DB_Transaction::commit();
+      if ($result) Sabel_DB_Transaction::commit();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }

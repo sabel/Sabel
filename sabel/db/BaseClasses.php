@@ -4,7 +4,7 @@ class Sabel_DB_Basic extends Sabel_DB_Mapper
 {
   public function __construct($table = null)
   {
-    $this->setDriver('user');
+    $this->setDriver('default');
     parent::__construct();
 
     if (isset($table)) $this->table = $table;
@@ -17,7 +17,7 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('user');
+    $this->setDriver('default');
     parent::__construct($param1, $param2);
   }
 
@@ -38,7 +38,7 @@ abstract class Sabel_DB_Tree extends Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('user');
+    $this->setDriver('default');
     parent::__construct($param1, $param2);
   }
 
