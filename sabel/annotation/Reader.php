@@ -20,32 +20,27 @@ class Sabel_Annotation_Reader
   
   public function annotation($className)
   {
-    if (array_key_exists($className, self::$annotation)) {
-      return self::$annotation[$className];
-    } else {
+    if (!array_key_exists($className, self::$annotation)) {
       $ref = new ReflectionClass($className);
       foreach ($ref->getMethods() as $method) {
         $this->processMethod($method->getDocComment());
       }
       self::$annotation[$className] = $this->list;
-      
-      return $this->list;
     }
+    return self::$annotation[$className];
   }
   
   protected function processMethod($comment)
   {
     $comments = preg_split("/[\n\r]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
-    foreach ($comments as $line) {
-      $this->processAnnotation($line);
-    }
+    foreach ($comments as $line) $this->processAnnotation($line);
   }
   
   protected function processAnnotation($line)
   {
     $annotation = preg_split('/ +/', $this->removeComment($line));
     
-    if (isset($annotation[0][0]) && $annotation[0]{0} === '@') {
+    if (strpos($annotation[0], '@') === 0) {
       $name       = array_shift($annotation);
       $annotation = (count($annotation) > 2) ? $annotation : $annotation[0];
       
