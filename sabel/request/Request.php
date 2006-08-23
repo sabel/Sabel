@@ -12,7 +12,7 @@ class Sabel_Request_Request
 {
   protected static $server = null;
   
-  // such as /module/controller/action/something?param=val
+  // such as /module/controller/action/something
   protected $requestUri = '';
   
   // such as param=val
@@ -54,10 +54,9 @@ class Sabel_Request_Request
     return $this->uri;
   }
 
-  // @todo remove this??
   public function hasParameters()
   {
-    return (isset($this->parameters));
+    return (!empty($this->requestParameters));
   }
   
   public function getParameters()

@@ -60,6 +60,8 @@ class Test_Request extends PHPUnit2_Framework_TestCase
     $this->assertEquals('archive', $r->getUri()->getController());
     $this->assertEquals('view',    $r->getUri()->getAction());
     $this->assertEquals('1',       $r->getUri()->getByName('id'));
+
+    $this->assertFalse($r->hasParameters());
     
     $this->assertNull($r->getParameters()->get('id'));
     $this->assertNull($r->getParameters()->id);
@@ -74,6 +76,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
     $this->assertNull($r->getUri()->getController());
     $this->assertNull($r->getUri()->getAction());
     $this->assertNull($r->getUri()->getByName('id'));
+    $this->assertTrue($r->hasParameters());
     $this->assertEquals('1', $r->getParameters()->get('id'));
     $this->assertEquals('1', $r->getParameters()->id);
   }

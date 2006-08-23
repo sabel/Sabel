@@ -70,11 +70,7 @@ class SabelPager
   
   public function check()
   {
-    if ($this->numberOfPages) {
-      return true;
-    } else {
-      return false;
-    }
+    return ($this->numberOfPages) ? true : false;
   }
   
   /**
@@ -103,7 +99,7 @@ class SabelPager
     $offset = $this->getNumberOfPages() * $this->pageItem;
     
     // fixing when page is last page
-    if ($offset == $this->numberOfItems) {
+    if ($offset === $this->numberOfItems) {
       $offset -= $this->pageOffset;
     }
     
