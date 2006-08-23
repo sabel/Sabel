@@ -11,10 +11,7 @@ class Sabel_Core_Resolver
   public static function resolvClassName($classpath)
   {
     $parts = explode('.', $classpath);
-    foreach ($parts as $name) {
-      $classNames[] = ucfirst($name);
-    }
-    
+    $classNames = array_map('ucfirst', $parts);
     return implode('_', $classNames);
   }
   
