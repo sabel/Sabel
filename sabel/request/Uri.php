@@ -20,6 +20,16 @@ class Sabel_Request_Uri
     $this->entry = $entry;
   }
   
+  public function __get($key)
+  {
+    $value = $this->getByName($key);
+    if (is_numeric($value)) {
+      return (int) $value;
+    } else {
+      return (string) $value;
+    }
+  }
+  
   public function count()
   {
     return count($this->parts);
