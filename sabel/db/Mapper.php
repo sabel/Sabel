@@ -232,6 +232,11 @@ abstract class Sabel_DB_Mapper
   {
     Sabel_DB_Transaction::commit();
   }
+  
+  public function rollback()
+  {
+    Sabel_DB_Transaction::rollback();
+  }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
