@@ -1,9 +1,9 @@
 <?php
 
 /**
- * class injection wrapper.
- *
- * @package org.sabel.aop
+ * Sabel_Injection_Injector
+ * 
+ * @package org.sabel.injection
  * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Injection_Injector
@@ -22,19 +22,17 @@ class Sabel_Injection_Injector
   
   public function __get($key)
   {
-    return $this->target->$key;
+    return (isset($this->target->$key)) ? $this->target->$key : null;
   }
   
   public function __call($method, $arg)
   {
     $i = new Sabel_Injection_Calls();
-    
     $i->doBefore($method, $arg);
     
     $result = $this->target->$method($arg);
     
     $i->doAfter($method, $result);
-    
     return $result;
   }
 }

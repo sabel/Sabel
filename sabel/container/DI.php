@@ -24,7 +24,7 @@ uses('sabel.config.Spyc');
  */
 class Sabel_Container_DI
 {
-  public $classStack;
+  public $classStack = array();
   
   public static function create()
   {
@@ -58,7 +58,7 @@ class Sabel_Container_DI
     $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass, $reflectionClass);
     
     if ($reflectionClassExt->isInterface()) {
-      $reflectionClass = 
+      $reflectionClass =
         new ReflectionClass($reflectionClassExt->getImplementClass());
         
       $this->classStack[] = new Sabel_Container_ReflectionClass($reflectionClass);
@@ -81,7 +81,7 @@ class Sabel_Container_DI
         $depend = $dependClass->getName();
         if ($this->hasParameterDependOnClass($depend, '__construct')) {
           $this->loadClass($dependClass->getName()); // call myself
-        } else {          
+        } else {
           $this->classStack[] = new Sabel_Container_ReflectionClass($param->getClass(), $reflectionClass);
         }
       }
@@ -191,7 +191,7 @@ class Sabel_Container_DI
           
           $type = SabelDIContainer::getClassType($paramClassRef);
             
-          $structure[$className][$refMethod->getName()][$paramClassName] = 
+          $structure[$className][$refMethod->getName()][$paramClassName] =
             array('type'   => $type,
                   'name'   => $paramClassRef->getName(),
                   'define' => $structure[$paramClassName]);

@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Sabel_Injection_Calls
+ * 
+ * @package org.sabel.injection
+ * @author Mori Reo <mori.reo@gmail.com>
+ */
 class Sabel_Injection_Calls
 {
   private static $before = array();

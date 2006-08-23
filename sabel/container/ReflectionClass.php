@@ -8,9 +8,9 @@
  */
 class Sabel_Container_ReflectionClass
 {
-  protected $reflectionClass;
-  protected $implementClassName;
-  protected $dependBy;
+  protected $reflectionClass = null;
+  protected $implementClassName = '';
+  protected $dependBy = null;
   
   public function __construct(ReflectionClass $ref, $dependBy = null)
   {
@@ -75,7 +75,7 @@ class Sabel_Container_ReflectionClass
     if (array_key_exists('class', $config) &&
         array_key_exists($this->dependBy->getName(), $config['class'])) {
       $implementClassName = $config['class'][$this->dependBy->getName()];
-    } else if (array_key_exists('module', $config) && 
+    } else if (array_key_exists('module', $config) &&
                array_key_exists($module, $config['module'])) {
       $implementClassName = $config['module'][$module];
     } else if (array_key_exists('implementation', $config)) {
@@ -103,7 +103,7 @@ class Sabel_Container_ReflectionClass
   {
     $implementClassName = $this->getImplementClass();
 
-    if ($dependInstance) {      
+    if ($dependInstance) {
       return new $implementClassName($dependInstance);
     } else {
       return new $implementClassName();
@@ -113,7 +113,7 @@ class Sabel_Container_ReflectionClass
   protected function loadConfig($filepath)
   {
     $spyc = new Spyc();
-                   
+    
     $paths = Sabel_Core_Context::getIncludePath();
     
     // @todo おかしくね？
