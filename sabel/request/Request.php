@@ -49,6 +49,11 @@ class Sabel_Request_Request
     @list($this->requestUri, $this->requestParameters) = explode('?', $request_uri);
   }
   
+  public function __get($name)
+  {
+    return $this->uri->$name;
+  }
+  
   public function getUri()
   {
     return $this->uri;
