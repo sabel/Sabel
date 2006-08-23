@@ -1,13 +1,12 @@
 <?php
 
-require_once('sabel/db/Connection.php');
-require_once('sabel/db/InformationSchema.php');
-
+require_once "sabel/db/Connection.php";
 require_once "sabel/db/Mapper.php";
+
+require_once "sabel/db/schema/Accessor.php";
 
 require_once "sabel/db/query/Interface.php";
 require_once "sabel/db/query/Factory.php";
-require_once "sabel/db/driver/Interface.php";
 
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
@@ -31,19 +30,19 @@ class Test_InformationSchema extends SabelTestCase
 
     Sabel_DB_Connection::addConnection('blog', 'pdo', $dbCon);
 
-    $is = new Sabel_DB_Schema('blog', 'blog');
+    $is = new Sabel_DB_Schema_Accessor('blog', 'blog');
 
     $tableOfAuthor = $is->getTable('author');
-    $this->assertEquals(Edo_Type::INT, $tableOfAuthor->getColumnByName('id')->type);
+    $this->assertEquals(Sabel_DB_Schema_Type::INT, $tableOfAuthor->getColumnByName('id')->type);
 
     $tables = $is->getTables();
     foreach ($tables as $table) {
-      $this->assertEquals(Edo_Type::INT, $table->getColumnByName('id')->type);
+      $this->assertEquals(Sabel_DB_Schema_Type::INT, $table->getColumnByName('id')->type);
 
       foreach ($table->getColumns() as $column) {
         $this->assertTrue(is_object($column));
         if ($column->name == 'name') {
-          $this->assertEquals(Edo_Type::STRING, $column->type);
+          $this->assertEquals(Sabel_DB_Schema_Type::STRING, $column->type);
         }
       }
     }

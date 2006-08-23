@@ -28,7 +28,12 @@ class Sabel_DB_Driver_Pgsql implements Sabel_DB_Driver_Interface
     //@todo
   }
 
-  public function commit()
+  public function commit($connection)
+  {
+    //@todo
+  }
+
+  public function rollback($connection)
   {
     //@todo
   }

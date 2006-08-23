@@ -68,6 +68,8 @@ abstract class Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
+    if (Sabel_DB_Transaction::isActive()) $this->begin();
+
     if ($this->table === '') $this->table = strtolower(get_class($this));
     if (isset($param1)) $this->defaultSelectOne($param1, $param2);
   }
@@ -115,7 +117,7 @@ abstract class Sabel_DB_Mapper
 
   public function setProperties($array)
   {
-    if (!is_array($array)) throw new Exception('properties argument is not array.');
+    if (!is_array($array)) throw new Exception('properties Argument is not array.');
     foreach ($array as $key => $val) $this->$key = $val;
   }
 
@@ -220,12 +222,15 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $this->driver->begin();
+    $driver = $this->getDriver();
+
+    Sabel_DB_Transaction::begin($this->connectName, $driver->getConnection(), $driver);
+    Sabel_DB_Transaction::enableTransaction();
   }
 
   public function commit()
   {
-    $this->driver->commit();
+    Sabel_DB_Transaction::commit();
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -236,7 +241,7 @@ abstract class Sabel_DB_Mapper
     $driver->setBasicSQL("SELECT count(*) FROM {$this->table}");
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
-    if (!$driver->execute()) throw new Exception('Error: getCount() execute failed.');
+    $this->tryExecute($driver);
     $row = $driver->fetch();
     return (int) $row[0];
   }
@@ -260,8 +265,6 @@ abstract class Sabel_DB_Mapper
 
   public function aggregate($functions, $child = null)
   {
-    $sql = null;
-    
     if (is_null($child)) {
       $table    = $this->table;
       $idColumn = $this->defColumn;
@@ -274,12 +277,9 @@ abstract class Sabel_DB_Mapper
     $driver->setAggregateSQL($table, $idColumn, $functions);
     $driver->makeQuery(null, $this->constraints);
 
-    if ($driver->execute($sql)) {
-      $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-      return $this->toObject($rows);
-    } else {
-      return false;
-    }
+    $this->tryExecute($driver);
+    $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    return $this->toObject($rows);
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -293,28 +293,28 @@ abstract class Sabel_DB_Mapper
     if (is_null($param1) && is_null($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
-    $this->setSelectCondition($param1, $param2, $param3);
+    $this->addSelectCondition($param1, $param2, $param3);
     return $this->makeFindObject(clone($this));
   }
 
   protected function makeFindObject($obj)
   {
-    $driver = $this->getDriver();
-    $driver->setBasicSQL("SELECT {$obj->projection} FROM {$this->table}");
-    $driver->makeQuery($this->conditions, $this->constraints);
+    $driver = $obj->getDriver();
+    $driver->setBasicSQL("SELECT {$obj->projection} FROM {$obj->table}");
+    $driver->makeQuery($obj->conditions, $obj->constraints);
 
-    $this->selectCondition = $this->conditions;
+    $obj->selectCondition = $obj->conditions;
 
-    if (!$driver->execute()) throw new Exception('Error: makeFindObject() execute failed.');
+    $this->tryExecute($driver);
     if ($row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC)) {
-      if ($this->withParent) $row = $this->selectWithParent($row);
+      if ($obj->withParent) $row = $obj->selectWithParent($row);
 
-      $this->setSelectedProperty($obj, $row);
+      $obj->setSelectedProperty($obj, $row);
 
-      if (!is_null($myChild = $this->getMyChildren()))
-        $this->getDefaultChild($myChild, $obj);
+      if (!is_null($myChild = $obj->getMyChildren()))
+        $obj->getDefaultChild($myChild, $obj);
     } else {
-      $obj->data = $this->conditions;
+      $obj->data = $obj->conditions;
     }
 
     $this->constraints = array();
@@ -322,14 +322,7 @@ abstract class Sabel_DB_Mapper
     return $obj;
   }
 
-  public function select($param1 = null, $param2 = null, $param3 = null)
-  {
-    $this->setSelectCondition($param1, $param2, $param3);
-    $this->driver->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
-    return $this->getRecords($this->conditions, $this->constraints);
-  }
-
-  private function setSelectCondition($param1, $param2, $param3)
+  private function addSelectCondition($param1, $param2, $param3)
   {
     if ($param1 === self::WITH_PARENT) {
       $this->enableParent();
@@ -353,7 +346,7 @@ abstract class Sabel_DB_Mapper
     $table = $this->table;
 
     $schema = 'edo'; //tmp
-    $is = new Sabel_DB_Schema($this->connectName, $schema);
+    $is = new Sabel_DB_Schema_Accessor($this->connectName, $schema);
     $this->addJoinColumnPhrase($is, $sql, $table);
 
     if ($child)  $this->addJoinColumnPhrase($is, $sql, $child);
@@ -369,8 +362,8 @@ abstract class Sabel_DB_Mapper
     $driver = $this->getDriver();
     $driver->setBasicSQL(join('', $sql));
     $driver->makeQuery($this->condition, $this->constraints);
-    if (!$driver->execute()) throw new Exception('Error: selectJoin() failed');
 
+    $this->tryExecute($driver);
     $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
     $relTables = array_merge($child, $parent);
 
@@ -422,27 +415,42 @@ abstract class Sabel_DB_Mapper
     }
   }
 
+  public function select($param1 = null, $param2 = null, $param3 = null)
+  {
+    $driver = $this->getDriver();
+    $this->addSelectCondition($param1, $param2, $param3);
+    $driver->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
+    return $this->getRecords($driver, $this->conditions, $this->constraints);
+  }
+
   public function getChild($child, $obj = null)
   {
     if (is_null($obj)) $obj = $this;
 
-    $obj->chooseMyChildConstraint($child, $obj);
+    $this->chooseMyChildConstraint($child, $obj);
 
     if (is_null($obj->childConstraints[$child]['limit']))
       throw new Exception('Error: getChildren() must be set limit constraints');
 
     $obj->childConditions[$child]["{$obj->table}_id"] = $obj->data[$obj->defColumn];
 
-    $obj->driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
-    $obj->data[$child] = $obj->getRecords($obj->childConditions[$child], $obj->childConstraints[$child], $child);
+    $driver = $this->newClass($child)->getDriver();
+    $driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
+    $conditions  = $obj->childConditions[$child];
+    $constraints = $obj->childConstraints[$child];
+
+    if ($children = $obj->getRecords($driver, $conditions, $constraints, $child)) {
+      $obj->data[$child] = $children;
+      return $children;
+    } else {
+      return false;
+    }
   }
 
-  protected function getRecords($conditions, $constraints = null, $child = null)
+  protected function getRecords($driver, $conditions, $constraints, $child = null)
   {
-    $driver = $this->getDriver();
     $driver->makeQuery($conditions, $constraints);
-
-    if (!$driver->execute()) throw new Exception('Error: getRecords() execute failed.');
+    $this->tryExecute($driver);
 
     $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
     if (!$rows) return false;
@@ -524,11 +532,11 @@ abstract class Sabel_DB_Mapper
     if (is_null($id)) return $obj;
 
     if (!is_array($row = Sabel_DB_ParentCache::get($table . $id))) {
-      $driver = $this->getDriver();
+      $driver = $obj->getDriver();
       $driver->setBasicSQL("SELECT {$obj->projection} FROM {$table}");
       $driver->makeQuery(array($obj->defColumn => $id));
 
-      if (!$driver->execute()) throw new Exception('Error: addParentObject() execute failed.');
+      $this->tryExecute($driver);
       $row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
       if (!$row) {
         $obj->selected = true;
@@ -582,17 +590,22 @@ abstract class Sabel_DB_Mapper
 
   protected function newClass($name)
   {
-    if (class_exists($name, false) && strtolower($name) !== 'sabel_db_commonrecord') {
+    if ($this->mapper_class_exists($name)) {
       return new $name();
     } else {
       return new Sabel_DB_Basic($name);
     }
   }
 
+  private function mapper_class_exists($className)
+  {
+    return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
+  }
+
   public function clearChild($child)
   {
     $parent = '';
-    
+
     $id = $this->data[$this->defColumn];
     if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
 
@@ -635,19 +648,17 @@ abstract class Sabel_DB_Mapper
     $driver->setUpdateSQL($this->table, $this->newData);
     $driver->makeQuery($this->selectCondition);
 
-    if ($driver->execute()) {
-      $this->selectCondition = array();
-    } else {
-      throw new Exception('Error: update() execute failed.');
-    }
+    $this->tryExecute($driver);
+    $this->selectCondition = array();
   }
 
   protected function insert()
   {
-    if ($this->driver->executeInsert($this->table, $this->data, $this->defColumn)) {
+    try {
+      $this->driver->executeInsert($this->table, $this->data, $this->defColumn);
       return $this->driver->getLastInsertId();
-    } else {
-      throw new Exception('Error: insert() execute failed.');
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage());
     }
   }
 
@@ -655,16 +666,23 @@ abstract class Sabel_DB_Mapper
   {
     if (!is_array($data)) throw new Exception('Error: data is not array.');
 
-    foreach ($data as $val) {
-      if (!$this->driver->executeInsert($this->table, $val, $this->defColumn)) {
-        throw new Exception('Error: multipleInsert() execute failed.');
-      }
+    $this->begin();
+    try {
+      foreach ($data as $val)
+        $this->driver->executeInsert($this->table, $val, $this->defColumn);
+
+      Sabel_DB_Transaction::commit();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage());
     }
   }
 
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
-    $idValue = $this->selectCondition[$this->defColumn];
+    $idValue = null;
+
+    if (isset($this->selectCondition[$this->defColumn]))
+      $idValue = $this->selectCondition[$this->defColumn];
 
     if (is_null($param1) && empty($this->conditions) && is_null($idValue))
       throw new Exception("Error: remove() [WHERE] must be set condition");
@@ -679,22 +697,16 @@ abstract class Sabel_DB_Mapper
     $driver->setBasicSQL("DELETE FROM {$this->table}");
     $driver->makeQuery($this->conditions, $this->constraints);
 
-    if ($driver->execute()) {
-      $this->conditions  = array();
-      $this->constraints = array();
-    } else {
-      throw new Exception('Error: remove() execute failed.');
-    }
+    $this->tryExecute($driver);
+    $this->conditions  = array();
+    $this->constraints = array();
   }
 
   public function execute($sql)
   {
-    if ($this->driver->execute($sql)) {
-      $rows = $this->driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-      return $this->toObject($rows);
-    } else {
-      return false;
-    }
+    $this->tryExecute($this->driver, $sql);
+    $rows = $this->driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    return $this->toObject($rows);
   }
 
   protected function toObject($rows)
@@ -710,6 +722,21 @@ abstract class Sabel_DB_Mapper
     }
     return $recordObj;
   }
+
+  protected function tryExecute($driver, $sql = null)
+  {
+    try {
+      $driver->execute($sql);
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage());
+    }
+  }
+
+  protected function executeError($errorMsg)
+  {
+    if (Sabel_DB_Transaction::isActive()) Sabel_DB_Transaction::rollback();
+    throw new Exception($errorMsg);
+  }
 }
 
 class Sabel_DB_ParentCache
@@ -724,63 +751,5 @@ class Sabel_DB_ParentCache
   public static function get($key)
   {
     return (isset(self::$cache[$key])) ? self::$cache[$key] : null;
-  }
-}
-
-class Sabel_DB_Basic extends Sabel_DB_Mapper
-{
-  public function __construct($table = null)
-  {
-    $this->setDriver('user');
-    parent::__construct();
-
-    if (isset($table)) $this->table = $table;
-  }
-}
-
-abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
-{
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->structure = 'bridge';
-    $this->setDriver('user');
-    parent::__construct($param1, $param2);
-  }
-
-  public function getChild($child, $obj = null)
-  {
-    $this->enableParent();
-    parent::getChild($obj);
-
-    $children = array();
-    foreach ($this->$obj as $bridge) $children[] = $bridge->$child;
-    $this->$child = $children;
-  }
-}
-
-abstract class Sabel_DB_Tree extends Sabel_DB_Mapper
-{
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->structure = 'tree';
-    $this->setDriver('user');
-    parent::__construct($param1, $param2);
-  }
-
-  protected function addLeaf()
-  {
-    $obj->leaf = true;
-    // @todo ???
-  }
-
-  protected function getLeaf()
-  {
-    $this->leaf(true);
-    // @todo ???
-  }
-
-  public function getRoot()
-  {
-    return $this->select("{$this->table}_id", 'null');
   }
 }

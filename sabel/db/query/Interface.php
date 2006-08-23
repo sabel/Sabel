@@ -14,5 +14,6 @@ interface Sabel_DB_Query_Interface
   public function makeEitherSQL($key, $val);
   public function makeLess_GreaterSQL($key, $val);
 
-  public function makeConstraintSQL($constraints);
+  public function makeConditionQuery($conditions);
+  public function makeConstraintQuery($constraints);
 }

@@ -42,6 +42,16 @@ class Sabel_DB_Query_Factory
 
   public function makeConstraintQuery($constraints)
   {
-    $this->makeConstraintSQL($constraints);
+    if (isset($constraints['group']))
+      array_push($this->sql, " GROUP BY {$constraints['group']}");
+
+    if (isset($constraints['order']))
+      array_push($this->sql, " ORDER BY {$constraints['order']}");
+
+    if (isset($constraints['limit']))
+      array_push($this->sql, " LIMIT {$constraints['limit']}");
+
+    if (isset($constraints['offset']))
+      array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
 }

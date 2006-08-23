@@ -3,7 +3,8 @@
 interface Sabel_DB_Driver_Interface
 {
   public function begin();
-  public function commit();
+  public function commit($connection);
+  public function rollback($connection);
 
   public function setBasicSQL($sql);
   public function setUpdateSQL($table, $data);

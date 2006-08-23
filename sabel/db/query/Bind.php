@@ -9,9 +9,9 @@
 class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
                           implements Sabel_DB_Query_Interface
 {
-  private $sql = array();
-  private $set = null;
+  protected $sql = array();
 
+  private $set = null;
   private $count = 1;
   private $param = array();
 
@@ -101,18 +101,6 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
     $bindKey  = $key . $this->count++;
     $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}");
     $this->param[$bindKey] = trim(substr($val, 1));
-  }
-
-  public function makeConstraintSQL($constraints)
-  {
-    if (isset($constraints['order']))
-      array_push($this->sql, " ORDER BY {$constraints['order']}");
-
-    if (isset($constraints['limit']))
-      array_push($this->sql, " LIMIT {$constraints['limit']}");
-
-    if (isset($constraints['offset']))
-      array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
 
   public function getParam()

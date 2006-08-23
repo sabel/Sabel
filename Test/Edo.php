@@ -9,7 +9,10 @@ require_once "sabel/db/query/Interface.php";
 require_once "sabel/db/query/Factory.php";
 
 require_once "sabel/db/Mapper.php";
-require_once "sabel/db/InformationSchema.php";
+require_once "sabel/db/BaseClasses.php";
+
+require_once "sabel/db/Transaction.php";
+require_once "sabel/db/schema/Accessor.php";
 require_once "sabel/db/Connection.php";
 
 require_once "sabel/db/driver/Pdo.php";
