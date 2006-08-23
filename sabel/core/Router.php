@@ -4,7 +4,7 @@
  * Routing request to controller.
  * 
  * @package org.sabel.core
- * @author Mori Reo <mori.reo@gmail.com
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_Core_Router
 {
