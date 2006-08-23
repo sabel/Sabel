@@ -1096,12 +1096,12 @@ class MysqlHelper
     
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
     
-    $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';
-    $dbCon['user'] = 'root';
-    $dbCon['pass'] = '';
+    $dbCon2 = array();
+    $dbCon2['dsn']  = 'mysql:host=localhost;dbname=edo2';
+    $dbCon2['user'] = 'root';
+    $dbCon2['pass'] = '';
     
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
  
     $SQLs = array();
     

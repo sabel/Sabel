@@ -152,7 +152,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
 
     $this->makeBindParam();
 
-    if ($this->stmt && $this->stmt->execute($this->param)) {
+    if ($this->stmt->execute($this->param)) {
       $this->param = array();
       return true;
     } else {
