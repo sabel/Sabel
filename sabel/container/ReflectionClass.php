@@ -61,15 +61,13 @@ class Sabel_Container_ReflectionClass
   {
     $interfaceFullName = $this->reflectionClass->getName();
     $pathElements      = explode('_', $interfaceFullName);
-    $interfaceName     = array_pop($pathElements);
+    $interfaceName     = array_pop($pathElements) . '.yml';
     
     $module = SabelDIHelper::getModuleName();
     
-    foreach ($pathElements as &$pathElement) {
-      $pathElement = strtolower($pathElement);
-    }
+    $pathElements = array_map('strtolower', $pathElements);
     array_push($pathElements, $interfaceName);
-    $configFilePath = implode('/', $pathElements) . '.yml';
+    $configFilePath = implode('/', $pathElements);
     $config = $this->loadConfig($configFilePath);
     
     if (array_key_exists('class', $config) &&
@@ -119,9 +117,8 @@ class Sabel_Container_ReflectionClass
     // @todo おかしくね？
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;
-      if (is_file($fullpath)) break;
+      if (is_file($fullpath)) return $spyc->load($fullpath);
     }
-
-    return $spyc->load($fullpath);
+    return null;
   }
 }

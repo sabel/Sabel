@@ -127,11 +127,7 @@ class Sabel_Container_DI
       $refMethod = new ReflectionMethod($class, $method);
     }
     
-    if (count($refMethod->getParameters()) !== 0) {
-      return true;
-    } else {
-      return false;
-    }
+    return (count($refMethod->getParamegers() !== 0));
   }
   
   public static function parseClassDependencyStruct($className, &$structure)
@@ -145,11 +141,8 @@ class Sabel_Container_DI
     if ($hasClassPath) {
       $pathElements = explode('_', $className);
       $classFileName = array_pop($pathElements) . '.php';
-      $realPathElements = array();
-      
-      foreach ($pathElements as $peidx => $pathElement) {
-        $realPathElements[] = strtolower($pathElement);
-      }
+
+      $realPathElements = array_map('strtolower', $pathElement);
       $realPathElements[] = $classFileName;
       
       $realPath = implode('/', $realPathElements);
