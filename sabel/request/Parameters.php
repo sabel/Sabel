@@ -8,13 +8,12 @@
  */
 class Sabel_Request_Parameters
 {
-  protected $parameters = '';
   protected $parsedParameters = array();
   
   public function __construct($parameters)
   {
-    $this->parameters = str_replace('?', '', $parameters);
-    if (!empty($parameters)) $this->parse();
+    $parameters = str_replace('?', '', $parameters);
+    if (!empty($parameters)) $this->parse($parameters);
   }
   
   /**
@@ -23,15 +22,14 @@ class Sabel_Request_Parameters
    * @param void
    * @return void
    */
-  protected function parse()
+  protected function parse($parameters)
   {
-    $parameters = explode("&", $this->parameters);
+    $parameters = explode("&", $parameters);
     $sets = array();
     foreach ($parameters as $piar) {
       @list($key, $val) = explode('=', $piar);
       $sets[$key] = $val;
     }
-    
     $this->parsedParameters = $sets;
   }
   
