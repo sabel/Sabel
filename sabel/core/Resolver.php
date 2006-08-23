@@ -19,20 +19,22 @@ class Sabel_Core_Resolver
   {
     return str_replace('.', '/', $classpath);
   }
-  
+ 
+  /**
+   * return e.g. sabel.core.Example from Sabel_Core_Example
+   *
+   * @param string $name class name (Sabel_Core_Example)
+   * @return string classpath (sabel.core.Example)
+   */
   public static function resolvClassPathByClassName($name)
   {
     $parts = explode('_', $name);
     
     if (count($parts) === 1) return $name;
     
-    // @todo use iterator.
-    $classpath = '';
-    for ($i = 0; $i < count($parts); $i++) {
-      $last = ($i === (count($parts) - 1));
-      $classpath .= ($last) ? $parts[$i] : strtolower($parts[$i]) . '.';
-    }
-    
-    return $classpath;
+    $className = array_pop($parts);
+    $parts = array_map('strtolower', $parts);
+    array_push($parts, $className);
+    return implode('.', $parts);
   }
 }
