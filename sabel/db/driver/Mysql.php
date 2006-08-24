@@ -8,7 +8,7 @@
  */
 class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 {
-  private $pdo, $stmt, $queryObj, $myDb;
+  private $conn, $queryObj, $myDb;
 
   private $param = array();
   private $data  = array();
