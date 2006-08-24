@@ -24,7 +24,7 @@ class Sabel_Core_Router
   public function routing()
   {
     $entry = $this->map->find();
-    $entry->setRequestUri(new Sabel_Request_Request($entry));
+    //$entry->setRequestUri(new Sabel_Request_Request($entry));
     return $entry;
   }
 }

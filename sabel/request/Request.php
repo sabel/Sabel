@@ -33,15 +33,18 @@ class Sabel_Request_Request
   
   private function initializeRequestUriAndParameters($requestUri)
   {
+    $svr = Sabel_Env_Server::create();
+    
     if ($requestUri) {
       $request_uri = ltrim($requestUri, '/');
     } else {
-      if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
-        $args = $_SERVER['argv'];
+      $argv = $svr->argv;
+      if (isset($argv[0]) && strpos($argv[0], 'sabel') !== false) {
+        $args = $argv;
         array_shift($args);
         $request_uri = join('/', $args);
       } else {
-        $request_uri = (isset($_SERVER['REQUEST_URI'])) ? ltrim($_SERVER['REQUEST_URI'], '/') : null;
+        $request_uri = ($svr->request_uri) ? ltrim($svr->request_uri, '/') : null;
       }
     }
     

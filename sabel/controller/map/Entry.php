@@ -10,13 +10,18 @@ class Sabel_Controller_Map_Entry
 {
   protected $name       = '';
   protected $entry      = array();
-  protected $requestUri = null;
+  protected $request = null;
   
-  public function __construct($name, $entry, $requestUri = null)
+  public function __construct($name, $entry, $request = null)
   {
     $this->name       = $name;
     $this->entry      = $entry;
-    $this->requestUri = $requestUri;
+    
+    if ($request) {
+      $this->request = $request;
+    } else {
+      $this->request = new Sabel_Request_Request($this);
+    }
   }
   
   public function getName()
@@ -59,13 +64,13 @@ class Sabel_Controller_Map_Entry
     return (isset($this->entry['option']));
   }
   
-  public function setRequestUri($uri)
+  public function setRequest($request)
   {
-    $this->requestUri = $uri;
+    $this->request = $request;
   }
   
-  public function getRequestUri()
+  public function getRequest()
   {
-    return $this->requestUri;
+    return $this->request;
   }
 }

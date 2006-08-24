@@ -140,8 +140,6 @@ abstract class Sabel_Controller_Page
   protected function checkReferer($validURIs)
   {
     $ref  = Sabel_Env_Server::create()->http_referer;
-    
-    
     $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
     $patternAbsoluteURI = '/http:\/\/' . $host . $replaced . '/';
     preg_match($patternAbsoluteURI, $ref, $matchs);

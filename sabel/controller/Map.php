@@ -55,7 +55,7 @@ class Sabel_Controller_Map implements Iterator
   public function find()
   {
     // @todo implement rules of found out correct map entry.
-    return (is_object($matched[0])) ? $matched[0] : $this->getEntry('default');
+    return $this->getEntry('default');
   }
   
   public function getEntry($name)

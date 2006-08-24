@@ -20,7 +20,7 @@ class Sabel_Controller_Map_Destination
     $this->parentEntry = $entry;
    
     $mapUri     = $entry->getUri();
-    $requestUri = $entry->getRequestUri();
+    $requestUri = $entry->getRequest();
     
     $elems = array(new Sabel_Controller_Map_Element($dest[self::MODULE]),
                    new Sabel_Controller_Map_Element($dest[self::CONTROLLER]),
