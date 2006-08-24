@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Template_Class
+class Sabel_Template_Engine_Class
 {
   const COMPILE_DIR = 'data/compiled/';
 
