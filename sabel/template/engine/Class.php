@@ -25,9 +25,10 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
       $contents = file_get_contents($filepath);
       $contents = str_replace('<?',     '<?php',       $contents);
       $contents = str_replace('<?php=', '<?php echo',  $contents);
-      $repl = '[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*';
-      $contents = preg_replace('/<\?phph'.$repl.'\?>/', '<?php echo htmlspecialchars($1); $2 ?>', $contents);
-      $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php echo nl2br($1); $2 ?>', $contents);
+
+      $repl = '([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*';
+      $contents = preg_replace('/<\?php(n)?h'.$repl.'\?>/', '<?php$1$2= htmlspecialchars($3); $4 ?>', $contents);
+      $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php echo nl2br($2); $3 ?>', $contents);
 
       $this->saveCompileFile($contents);
     }
