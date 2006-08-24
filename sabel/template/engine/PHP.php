@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Template_Engine_PHP extends BaseEngineImpl implements TemplateEngineImpl
+class Sabel_Template_Engine_PHP extends Sabel_Template_Engine
 {
   protected $attributes;
   
