@@ -1,18 +1,8 @@
 <?php
 
+uses('sabel.db.BaseClasses');
 uses('sabel.template.Director');
 uses('sabel.template.Engine');
-
-$conf = new Sabel_Config_Yaml(RUN_BASE.'/config/database.yml');
-$dev = $conf->read('development');
-$fm = '%s:host=%s;dbname=%s';
-$con['dsn'] = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
-$con['user'] = $dev['user'];
-$con['pass'] = $dev['password'];
-
-Sabel_DB_Connection::addConnection('default', 'pdo', $con);
-uses('sabel.db.Mapper');
-uses('sabel.db.BaseClasses');
 
 /**
  * page controller base class.
@@ -38,28 +28,6 @@ abstract class Sabel_Controller_Page
     $this->setup();
   }
   
-  /**
-   * get request parameter
-   *
-   * @param string input name
-   * @return mixed
-   */
-  public function __get($name)
-  {
-    $safe = substr($name, 0, 4);
-    
-    if ($safe == 'safe') {
-      $lower = strtolower(substr($name, 4, (strlen($name) - 4)));
-      return Sanitize::sqlSafe($this->request->$lower);
-    }
-    
-    if (!is_null($request = $this->request->$name)) {
-      return $request;
-    } else {
-      return $this->parameters->$name;
-    }
-  }
-  
   protected function setup()
   {
     $this->container   = new Sabel_Container_DI();
@@ -71,6 +39,45 @@ abstract class Sabel_Controller_Page
     $this->setTemplate(new HtmlTemplate());
   }
   
+  public function execute()
+  {
+    $actionName = $this->destination->action;
+    $this->methodExecute($actionName);
+    $this->initTemplate();
+    $this->assignTemplates();
+    $this->showTemplate();
+  }
+  
+  protected function __get($name)
+  {
+    return $this->request->$name;
+  }
+  
+  protected function requests()
+  {
+    return $this->request->requests();
+  }
+  
+  protected function isPost()
+  {
+    return $this->request->isPost();
+  }
+  
+  protected function isGet()
+  {
+    return $this->request->isGet();
+  }
+  
+  protected function isPut()
+  {
+    return $this->request->isPut();
+  }
+  
+  protected function isDelete()
+  {
+    return $this->request->isDelete();
+  }
+  
   protected function setupLogger()
   {
     $this->logger = $this->container->load('Sabel_Logger_File');
@@ -79,27 +86,6 @@ abstract class Sabel_Controller_Page
   protected function setupResponse()
   {
     $this->response = new Sabel_Response_Web();
-  }
-  
-  protected function setupConfig()
-  {
-    //$this->config = Sabel_Config_Cached::create();
-  }
-  
-  protected function setupCache()
-  {
-    //$conf = $this->config->get('Memcache');
-    //$this->cache = Sabel_Cache_Memcache::create($conf['server']);
-  }
-  
-  public function execute()
-  {
-    $actionName = $this->destination->action;
-    $this->checkValidateMethodAndExecute($actionName);
-    $this->methodExecute($actionName);
-    $this->initTemplate();
-    $this->assignTemplates();
-    $this->showTemplate();
   }
   
   protected function methodExecute($action)
@@ -133,22 +119,7 @@ abstract class Sabel_Controller_Page
       $this->template->assign($key, $val);
   }
 
-  protected function checkValidateMethodAndExecute($method)
-  {
-    if ($this->hasValidateMethod($method)) {
-      return $this->executeValidateMethod($method);
-    } else {
-      return true;
-    }
-  }
-
-  protected function executeValidateMethod($method)
-  {
-    $validateMethod = 'validate' . ucfirst($method);
-    return $this->$validateMethod();
-  }
-
-  public function hasMethod($name)
+  protected function hasMethod($name)
   {
     if (method_exists($this, $name)) {
       return true;
@@ -173,19 +144,6 @@ abstract class Sabel_Controller_Page
       }
     }
     return $ar;
-  }
-
-  protected function hasValidateMethod($methodName)
-  {
-    $methods = $this->getActionMethods();
-    $vMethodName =(string) 'validate'. ucfirst($methodName);
-
-    $found = false;
-    foreach ($methods as $k => $method) {
-      if ($method === $vMethodName) $found = true;
-    }
-
-    return $found;
   }
 
   protected function checkReferer($validURIs)
