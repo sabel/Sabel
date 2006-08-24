@@ -39,8 +39,8 @@ class Test_Edo extends SabelTestCase
 
   public function __construct()
   {
-    //$helper = new PgsqlHelper();
-    $helper = new MysqlHelper();
+    $helper = new PgsqlHelper();
+    //$helper = new MysqlHelper();
 
     $helper->dropTables();
     $helper->createTables();
@@ -1349,8 +1349,11 @@ class PgsqlHelper
     }
 
     $sql  = "CREATE TABLE trans2 (id SERIAL PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
-    $trans2 = new Trans2();
-    $trans2->execute($sql);
+    try {
+      $trans2 = new Trans2();
+      $trans2->execute($sql);
+    } catch (Exception $e) {
+    }
   }
 
   public function dropTables()
@@ -1361,8 +1364,11 @@ class PgsqlHelper
       @$obj->execute("DROP TABLE ${table}");
     }
 
-    $trans2 = new Trans2();
-    $trans2->execute("DROP TABLE trans2");
+    try {
+      $trans2 = new Trans2();
+      $trans2->execute("DROP TABLE trans2");
+    } catch (Exception $e) {
+    }
   }
 }
 
