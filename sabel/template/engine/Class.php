@@ -16,6 +16,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
   public function retrieve()
   {
     $contents = '';
+    $pageCache = false;
 
     $filepath = $this->getTemplateFullPath();
     $cpath    = $this->getCompileFilePath();
