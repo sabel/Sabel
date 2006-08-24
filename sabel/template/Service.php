@@ -12,10 +12,14 @@ interface Sabel_Template_ServiceInterface
 class Sabel_Template_Service implements Sabel_Template_ServiceInterface
 {
   private $impl;
+  private $path;
+  private $name;
+  private $contentForLayout;
   
   public function __construct($ins = null)
   {
-    $this->impl = ($ins instanceof BaseEngineImpl) ? $ins : new Sabel_Template_Engine_PHP();
+    $this->contentForLayout = '';
+    $this->impl = ($ins instanceof Sabel_Template_Engine) ? $ins : new Sabel_Template_Engine_Class();
     $this->impl->configuration();
   }
   
@@ -42,16 +46,22 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   
   public function selectName($name)
   {
+    $this->name = $name;
     $this->impl->setTemplateName($name);
   }
   
   public function selectPath($path)
   {
+    $this->path = $path;
     $this->impl->setTemplatePath($path);
   }
   
   public function rendering()
   {
-    $this->impl->display();
+    if (is_file($this->path . 'layout.tpl')) {
+      $this->contentForLayout = $this->impl->load('layout.tpl');
+    }
+    
+    echo $this->impl->retrieve();
   }
 }

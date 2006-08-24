@@ -2,8 +2,10 @@
 
 class Sabel_Template_Director_Factory
 {
-  public static function create($request = null, $destination)
+  public static function create($entry)
   {
+    $destination = $entry->getDestination();
+    
     $classPath  = Sabel_Core_Const::MODULES_DIR . $destination->module;
     $classPath .= '/extensions/CustomTemplateDirector.php';
     

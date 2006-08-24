@@ -1,53 +1,38 @@
 <?php
 
-class Sabel_Template_Engine_Class
+class Sabel_Template_Engine_Class extends Sabel_Template_Engine
 {
-  const COMPILE_DIR = 'data/compiled/';
-
-  protected $vars = array();
-  protected $path = '';
-  protected $name = '';
-
-  public function __construct($path = '', $name = '')
+  const COMPILE_DIR = '/data/compiled/';
+  
+  public function configuration()
   {
-    $this->path = $path;
-    $this->name = $name;
   }
 
   public function assign($key, $val)
   {
-    $this->params[$key] = $val;
+    $this->attributes[$key] = $val;
   }
 
-  public function setPath($path)
-  {
-    $this->path = $path;
-  }
-
-  public function setName($name)
-  {
-    $this->name = $name;
-  }
-
-  public function retrieve($pageCache = false)
+  public function retrieve()
   {
     $contents = '';
 
-    $filepath = $this->getTemplateFilePath();
+    $filepath = $this->getTemplateFullPath();
     $cpath    = $this->getCompileFilePath();
 
     if (is_file($filepath) && (!is_readable($cpath) || filemtime($filepath) > filemtime($cpath))) {
       $contents = file_get_contents($filepath);
-      $contents = str_replace('<?',  '<?php',      $contents);
-      $contents = str_replace('<?php= ', '<?php echo', $contents);
-      $contents = str_replace('{',    '<?php echo ', $contents);
-      $contents = str_replace('}',    ' ?>',         $contents);
+      $contents = str_replace('<?',     '<?php',       $contents);
+      $contents = str_replace('<?php=', '<?php echo',  $contents);
+      $contents = str_replace('{',      '<?php echo ', $contents);
+      $contents = str_replace('}',      ' ?>',         $contents);
       $contents = preg_replace('/<\?phph (\$[\w]+) \?>/', '<?php echo htmlspecialchars($1) ?>', $contents);
 
       $this->saveCompileFile($contents);
     }
 
-    extract($this->params);
+    if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
+    extract(Re::get(), EXTR_SKIP);
     ob_start();
     include($cpath);
     $contents = ob_get_clean();
@@ -64,18 +49,8 @@ class Sabel_Template_Engine_Class
     fclose($fp);
   }
 
-  private function getTemplateFilePath()
-  {
-    return $this->path . $this->name;
-  }
-
   private function getCompileFilePath()
   {
-    return RUN_BASE . self::COMPILE_DIR . md5($this->path) . $this->name;
-  }
-
-  public function display($pageCache = false)
-  {
-    echo $this->retrieve($pageCache);
+    return RUN_BASE . self::COMPILE_DIR . md5($this->tplpath) . $this->tplname;
   }
 }
