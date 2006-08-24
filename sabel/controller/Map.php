@@ -1,8 +1,5 @@
 <?php
 
-uses('sabel.config.Spyc');
-uses('sabel.controller.map.Entry');
-
 /**
  * Sabel_Controrller_Map
  *
@@ -27,14 +24,22 @@ class Sabel_Controller_Map implements Iterator
   
   public function load()
   {
-    if (is_file($this->getPath())) {
-      $c = new Sabel_Config_Yaml($this->getPath());
-      self::$map = $c->toArray();
-      
-      $this->entries = $this->getEntries();
+    $cache = new Sabel_Cache_Apc();
+    
+    if ($mapArray = $cache->read('map')) {
+      self::$map = $mapArray;
     } else {
-      throw new Exception("map configure not found on " . $this->getPath());
+      if (is_file($this->getPath())) {
+        $c = new Sabel_Config_Yaml($this->getPath());
+        self::$map = $c->toArray();
+        $cache->write('map', self::$map);
+        
+        $this->entries = $this->getEntries();
+      } else {
+        throw new Exception("map configure not found on " . $this->getPath());
+      }
     }
+    
   }
   
   public function getPath()

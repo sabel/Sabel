@@ -34,22 +34,18 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    //$helper = new MysqlHelper();
+    $helper = new MysqlHelper();
     //$helper = new PgsqlHelper();
-    $helper = new SQLiteHelper();
+    //$helper = new SQLiteHelper();
 
     try {
-      print "do drop\n";
       $helper->dropTables();
-      print "end drop\n";
     } catch (Exception $e) {
       print_r($e);
     }
 
-    print "do create tables\n";
     $helper->createTables();
-    print "end create tables\n";
-    
+
     return new PHPUnit2_Framework_TestSuite("Test_Edo");
   }
 

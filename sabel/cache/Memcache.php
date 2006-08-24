@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.cache.Cache');
-
 class Sabel_Cache_Memcache implements Sabel_Cache_Cache
 {
   private $memcache;

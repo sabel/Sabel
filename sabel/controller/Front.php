@@ -10,10 +10,15 @@ class Sabel_Controller_Front
 {
   public function __construct()
   {
-    $conf = new Sabel_Config_Yaml(RUN_BASE.'/config/database.yml');
+    $cache = new Sabel_Cache_Apc();
+    if (! ($conf = $cache->read('dbconf'))) {
+      $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
+      $cache->write('dbconf', $conf);
+    }
+    
     $dev = $conf->read('development');
     $fm = '%s:host=%s;dbname=%s';
-    $con['dsn'] = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
+    $con['dsn']  = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
     $con['user'] = $dev['user'];
     $con['pass'] = $dev['password'];
     

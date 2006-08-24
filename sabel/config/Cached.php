@@ -1,8 +1,5 @@
 <?php
 
-uses('sabel.config.Interface');
-uses('sabel.config.Impl');
-
 class Sabel_Config_Cached implements Sabel_Config_Interface
 {
   const CACHE_FILE = 'serverconf.txt';

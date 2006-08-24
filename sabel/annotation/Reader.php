@@ -1,8 +1,5 @@
 <?php
 
-uses('sabel.annotation.Context');
-uses('sabel.library.ArrayList');
-
 class Sabel_Annotation_Reader
 {
   protected $list = null;

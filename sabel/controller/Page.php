@@ -1,8 +1,8 @@
 <?php
 
 uses('sabel.db.BaseClasses');
-uses('sabel.template.Director');
-uses('sabel.template.Engine');
+uses('sabel.template.Re');
+uses('sabel.template.Form');
 
 /**
  * page controller base class.
@@ -36,7 +36,7 @@ abstract class Sabel_Controller_Page
     
     $this->setupLogger();
     $this->setupResponse();
-    $this->setTemplate(new HtmlTemplate());
+    $this->template = Sabel_Template_Service::create();
   }
   
   public function execute()
@@ -123,12 +123,7 @@ abstract class Sabel_Controller_Page
   {
     return (method_exists($this, $name));
   }
-
-  protected function setTemplate($template)
-  {
-    $this->template = $template;
-  }
-
+  
   protected function getActionMethods()
   {
     $methods = get_class_methods($this);
@@ -145,7 +140,7 @@ abstract class Sabel_Controller_Page
   protected function checkReferer($validURIs)
   {
     $ref  = Sabel_Env_Server::create()->http_referer;
-    $host = Sabel_Env_Server::create()->http_host;
+    
     
     $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
     $patternAbsoluteURI = '/http:\/\/' . $host . $replaced . '/';
@@ -161,8 +156,9 @@ abstract class Sabel_Controller_Page
    */
   protected function redirect($to)
   {
-    $absolute  = 'http://' . $_SERVER['HTTP_HOST'];
-    $redirect  = 'Location: ' . $absolute . $to;
+    $host = Sabel_Env_Server::create()->http_host;
+    $absolute = 'http://' . $host;
+    $redirect = 'Location: ' . $absolute . $to;
     header($redirect);
 
     exit; // exit after HTTP Header(30x)
@@ -182,7 +178,7 @@ abstract class Sabel_Controller_Page
    */
   protected function initTemplate()
   {
-    $d = TemplateDirectorFactory::create(null, $this->destination);
+    $d = Sabel_Template_Director_Factory::create($this->entry);
     $this->template->selectPath($d->decidePath());
     $this->template->selectName($d->decideName());
   }
