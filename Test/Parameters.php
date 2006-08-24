@@ -45,7 +45,7 @@ class Test_Parameters extends SabelTestCase
     
     if (!$excepted) $this->fail();
   }
-  
+
   public function testError()
   {
     try {

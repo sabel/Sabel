@@ -1204,8 +1204,11 @@ class MysqlHelper
     $sql  = "CREATE TABLE trans2 (id INT4 PRIMARY KEY AUTO_INCREMENT, trans1_id INT4 NOT NULL,";
     $sql .= "text VARCHAR(24) ) TYPE=InnoDB";
 
-    $trans2 = new Trans2();
-    $trans2->execute($sql);
+    try {
+      $trans2 = new Trans2();
+      $trans2->execute($sql);
+    } catch (Exception $e) {
+    }
   }
 
   public function dropTables()
@@ -1220,8 +1223,11 @@ class MysqlHelper
     } catch (Exception $e) {
     }
 
-    $trans2 = new Trans2();
-    $trans2->execute("DROP TABLE trans2");
+    try {
+      $trans2 = new Trans2();
+      $trans2->execute("DROP TABLE trans2");
+    } catch (Exception $e) {
+    }
   }
 }
 
