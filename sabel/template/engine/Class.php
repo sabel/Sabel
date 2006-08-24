@@ -24,9 +24,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
       $contents = file_get_contents($filepath);
       $contents = str_replace('<?',     '<?php',       $contents);
       $contents = str_replace('<?php=', '<?php echo',  $contents);
-      $contents = str_replace('{',      '<?php echo ', $contents);
-      $contents = str_replace('}',      ' ?>',         $contents);
-      $contents = preg_replace('/<\?phph (\$[\w]+) \?>/', '<?php echo htmlspecialchars($1) ?>', $contents);
+      $contents = preg_replace('/<\?phph[[:blank:]]*([^? ]+)[[:blank:]]*\?>/', '<?php echo htmlspecialchars($1) ?>', $contents);
 
       $this->saveCompileFile($contents);
     }
