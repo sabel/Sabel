@@ -42,7 +42,12 @@ class Test_Edo extends SabelTestCase
     $helper = new PgsqlHelper();
     //$helper = new MysqlHelper();
 
-    $helper->dropTables();
+    try {
+      $helper->dropTables();
+    } catch (Exception $e) {
+      
+    }
+    
     $helper->createTables();
   }
 

@@ -6,16 +6,18 @@
  */
 class Sabel_Controller_Loader
 {
+  private $entry = null;
   private $destination = null;
 
-  private function __construct($destination)
+  private function __construct($entry)
   {
-    $this->destination = $destination;
+    $this->entry = $entry;
+    $this->destination = $entry->getDestination();
   }
 
-  public static function create($d)
+  public static function create($entry)
   {
-    return new self($d);
+    return new self($entry);
   }
 
   private function getControllerClassName()
@@ -53,7 +55,7 @@ class Sabel_Controller_Loader
       $path = $this->makeControllerPath();
       require_once($path);
       $class = $this->getControllerClassName();
-      return new $class();
+      return new $class($this->entry);
     } else if ($this->isValidModule()) {
       $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . '/controllers/index.php';
       
@@ -65,7 +67,7 @@ class Sabel_Controller_Loader
       
       $moduleClassName = $this->destination->module . '_Index';
       if (class_exists($moduleClassName)) {
-        return new $moduleClassName();
+        return new $moduleClassName($this->entry);
       } else {
         throw new Sabel_Exception_Runtime('can\'t found out controller class: ' . $moduleClassName);
       }
@@ -73,7 +75,7 @@ class Sabel_Controller_Loader
       $path = RUN_BASE.'/app/index/controllers/index.php';
       if (is_file($path)) {
         require_once($path);
-        return new Index_Index();
+        return new Index_Index($this->entry);
       } else {
         throw new Sabel_Exception_Runtime($path . ' is not a valid file');
       }

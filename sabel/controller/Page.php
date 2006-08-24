@@ -23,13 +23,20 @@ uses('sabel.db.BaseClasses');
 abstract class Sabel_Controller_Page
 {
   protected
+    $entry       = null,
+    $cache       = null,
+    $logger      = null,
     $request     = null,
     $response    = null,
     $template    = null,
-    $cache       = null,
-    $logger      = null,
-    $destination = null,
-    $container   = null;
+    $container   = null,
+    $destination = null;
+  
+  public function __construct($entry)
+  {
+    $this->entry = $entry;
+    $this->setup();
+  }
   
   /**
    * get request parameter
@@ -53,25 +60,15 @@ abstract class Sabel_Controller_Page
     }
   }
   
-  public function setup($request, $destination)
+  protected function setup()
   {
-    $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=127.0.0.1;dbname=blog';
-    $dbCon['user'] = 'root';
-    $dbCon['pass'] = '';
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
-    
-    $this->container = new Sabel_Container_DI();
-    
-    $this->request     = $request;
-    $this->destination = $destination;
+    $this->container   = new Sabel_Container_DI();
+    $this->request     = new Sabel_Request_Request($this->entry);
+    $this->destination = $this->entry->getDestination();
     
     $this->setupLogger();
     $this->setupResponse();
     $this->setTemplate(new HtmlTemplate());
-    
-    //$this->setupConfig();
-    //$this->setupCache();
   }
   
   protected function setupLogger()

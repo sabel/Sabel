@@ -24,7 +24,11 @@ class Sabel_Request_Uri
   {
     $value = $this->getByName($key);
     if (is_numeric($value)) {
-      return (int) $value;
+      if (is_float($value)) {
+        return (float) $vlaue;
+      } else {
+        return (int) $value;
+      }
     } else {
       return (string) $value;
     }
