@@ -11,9 +11,16 @@ class Sabel_DB_Connection
         throw new Exception('invalid Parameter. when use pdo, 3rd Argument must be array.');
 
       $dsn = $connection['dsn'];
-      $list['conn']   = new PDO($dsn, $connection['user'], $connection['pass']);
+      $db  = substr($dsn, 0, strpos($dsn, ':'));
+
+      if ($db === 'sqlite') {
+        $list['conn'] = new PDO($dsn);
+      } else {
+        $list['conn'] = new PDO($dsn, $connection['user'], $connection['pass']);
+      }
+
       $list['driver'] = $driver;
-      $list['db']     = substr($dsn, 0, strpos($dsn, ':'));
+      $list['db']     = $db;
     } else {
       if(is_array($connection))
         throw new Exception('invalid Parameter. 3rd Argument must be string.');

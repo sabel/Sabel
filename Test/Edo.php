@@ -31,7 +31,7 @@ class Test_Edo extends SabelTestCase
     $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
-  
+
   public static function suite()
   {
     return new PHPUnit2_Framework_TestSuite("Test_Edo");
@@ -39,15 +39,15 @@ class Test_Edo extends SabelTestCase
 
   public function __construct()
   {
-    $helper = new PgsqlHelper();
-    //$helper = new MysqlHelper();
+    //$helper = new PgsqlHelper();
+    //$helper = new SQLiteHelper();
+    $helper = new MysqlHelper();
 
     try {
       $helper->dropTables();
     } catch (Exception $e) {
-      
     }
-    
+
     $helper->createTables();
   }
 
@@ -473,10 +473,11 @@ class Test_Edo extends SabelTestCase
 
     $this->test->OR_id('3', '4');
     $obj = $this->test->select();
+
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
-    
+
     $this->test->OR_id('<2', '>5');
     $obj = $this->test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
@@ -869,7 +870,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
- 
+  /*
   public function testJoinSelect()
   {
     $users = new Users();
@@ -905,6 +906,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($res[1]->bbs[0]->title, 'title21');
     $this->assertEquals($res[1]->bbs[1]->title, 'title22');
   }
+  */
 
   public function testOrder()
   {
@@ -1094,18 +1096,17 @@ class MysqlHelper
   
   public function __construct()
   {
-    /*
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
-    */
-
+    /*
     $dbCon = mysql_connect('localhost', 'root', '');
     mysql_select_db('edo', $dbCon);
     Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon);
+    */
     
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';
@@ -1377,6 +1378,141 @@ class PgsqlHelper
   }
 }
 
+class SQLiteHelper
+{
+  protected $sqls = null;
+
+  protected $tables = array('test', 'test2', 'test3',
+                            'customer', 'customer_order', 'order_line',
+                            'customer_telephone', 'infinite1', 'infinite2',
+                            'seq', 'tree', 'student', 'student_course',
+                            'course', 'users', 'bbs', 'status', 'trans1');
+
+  public function __construct()
+  {
+    $dbCon = array();
+    $dbCon['dsn']  = 'sqlite:log1.sq3';
+
+    $dbCon2 = array();
+    $dbCon2['dsn']  = 'sqlite:log2.sq3';
+
+    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
+
+    $SQLs = array();
+
+    $SQLs[] = 'CREATE TABLE test (
+                 id       INTEGER PRIMARY KEY,
+                 name     VARCHAR(32) NOT NULL,
+                 blood    VARCHAR(32),
+                 test2_id INT2)';
+    
+    $SQLs[] = 'CREATE TABLE test2 (
+                 id       INTEGER PRIMARY KEY,
+                 name     VARCHAR(32) NOT NULL,
+                 test3_id INT2)';
+                 
+    $SQLs[] = 'CREATE TABLE test3 (
+                id   INTEGER PRIMARY KEY,
+                name VARCHAR(32) NOT NULL)';
+                
+    $SQLs[] = 'CREATE TABLE customer (
+                id   INTEGER PRIMARY KEY,
+                name VARCHAR(32) NOT NULL)';
+                
+    $SQLs[] = 'CREATE TABLE customer_order (
+                id          INTEGER PRIMARY KEY,
+                customer_id INT2 NOT NULL)';
+    
+    $SQLs[] = 'CREATE TABLE order_line (
+                id                INTEGER PRIMARY KEY,
+                customer_order_id INT2 NOT NULL,
+                amount            INT4,
+                item_id           INT2 NOT NULL)';
+                
+    $SQLs[] = 'CREATE TABLE customer_telephone (
+                id          INTEGER PRIMARY KEY,
+                customer_id INT2 NOT NULL,
+                telephone   VARCHAR(32))';
+                
+    $SQLs[] = 'CREATE TABLE infinite1 (
+                id           INTEGER PRIMARY KEY,
+                infinite2_id INT2 NOT NULL)';
+                
+    $SQLs[] = 'CREATE TABLE infinite2 (
+                id           INTEGER PRIMARY KEY,
+                infinite1_id int2 NOT NULL)';
+                
+    $SQLs[] = 'CREATE TABLE seq (
+                 id   INTEGER PRIMARY KEY,
+                 text VARCHAR(65536) NOT NULL)';
+    
+    $SQLs[] = 'CREATE TABLE tree (
+                 id      INTEGER PRIMARY KEY,
+                 tree_id INT2,
+                 name    VARCHAR(12) )';
+                
+    $SQLs[] = 'CREATE TABLE student (
+                 id    INTEGER PRIMARY KEY,
+                 name  VARCHAR(24) NOT NULL,
+                 birth DATE)';
+    
+    $SQLs[] = 'CREATE TABLE student_course (
+                 student_id INT4 NOT NULL,
+                 course_id  INT4 NOT NULL,
+                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+
+    $SQLs[] = 'CREATE TABLE course (
+                 id   INTEGER PRIMARY KEY,
+                 name VARCHAR(24) )';
+                
+    $SQLs[] = 'CREATE TABLE users (
+                 id        INTEGER PRIMARY KEY,
+                 name      VARCHAR(24) NOT NULL,
+                 status_id INT2 )';
+
+    $SQLs[] = 'CREATE TABLE status (
+                 id    INTEGER PRIMARY KEY,
+                 state VARCHAR(24) )';
+
+    $SQLs[] = 'CREATE TABLE bbs (
+                 id       INTEGER PRIMARY KEY,
+                 users_id INT4 NOT NULL,
+                 title    VARCHAR(24),
+                 body     VARCHAR(24))';
+
+    $SQLs[] = 'CREATE TABLE trans1 (
+                 id    INTEGER PRIMARY KEY,
+                 text  VARCHAR(24) )';
+
+    $this->sqls = $SQLs;
+  }
+  
+  public function createTables()
+  {
+    $obj = new Sabel_DB_Basic();
+    
+    foreach ($this->sqls as $sql) {
+      @$obj->execute($sql);
+    }
+
+    $sql  = "CREATE TABLE trans2 (id INTEGER PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
+    $trans2 = new Trans2();
+    $trans2->execute($sql);
+  }
+
+  public function dropTables()
+  {
+    $obj = new Sabel_DB_Basic();
+
+    foreach ($this->tables as $table) {
+      @$obj->execute("DROP TABLE ${table}");
+    }
+
+    $trans2 = new Trans2();
+    $trans2->execute("DROP TABLE trans2");
+  }
+}
 //-----------------------------------------------------------------
 
 abstract class Mapper_Default extends Sabel_DB_Mapper

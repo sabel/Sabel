@@ -9,6 +9,8 @@
 class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
                           implements Sabel_DB_Query_Interface
 {
+  const SEARCH_STRING = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+
   protected $sql = array();
 
   private $set = null;
@@ -49,9 +51,23 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeLikeSQL($key, $val)
   {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key} LIKE :{$bindKey}");
-    $this->param[$bindKey] = str_replace('_', '\_', $val);
+    $bindKey    = $key . $this->count++;
+    $search_str = ';:ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+
+    if (strpbrk($val, '_') !== false) {
+      for ($i = 0; $i < 30; $i++) {
+        $c = $search_str[$i];
+        if (strpbrk($val, $c) === false) {
+          $val = str_replace('_', "{$c}_", $val);
+          $this->setWhereQuery("{$key} LIKE :{$bindKey} escape '{$c}'");
+          $this->param[$bindKey] = $val;
+          break;
+        }
+      }
+    } else {
+      $this->setWhereQuery("{$key} LIKE :{$bindKey}");
+      $this->param[$bindKey] = $val;
+    }
   }
 
   public function makeBetweenSQL($key, $val)
@@ -91,8 +107,8 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
       $query .= "{$key}=:{$bindKey2}";
       $this->param[$bindKey2] = $val2;
     }
-    $query .= ')';
 
+    $query .= ')';
     $this->setWhereQuery($query);
   }
 

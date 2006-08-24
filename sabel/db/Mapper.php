@@ -352,7 +352,7 @@ abstract class Sabel_DB_Mapper
     $sql   = array('SELECT ');
     $table = $this->table;
 
-    $schema = 'edo'; //tmp
+    $schema = 'public'; //tmp
     $is = new Sabel_DB_Schema_Accessor($this->connectName, $schema);
     $this->addJoinColumnPhrase($is, $sql, $table);
 
@@ -454,7 +454,7 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  protected function getRecords($driver, $conditions, $constraints, $child = null)
+  protected function getRecords($driver, &$conditions, &$constraints, $child = null)
   {
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
@@ -481,8 +481,8 @@ abstract class Sabel_DB_Mapper
       }
       $recordObj[] = $obj;
     }
-    $this->constraints = array();
-    $this->conditions  = array();
+    $constraints = array();
+    $conditions  = array();
     return $recordObj;
   }
 
