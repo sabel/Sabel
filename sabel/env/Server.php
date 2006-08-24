@@ -8,6 +8,14 @@
  */
 class Sabel_Env_Server
 {
+  private static $instance;
+  
+  public function create()
+  {
+    if (is_not_object(self::$instance)) self::$instance = new self();
+    return self::$instance;
+  }
+  
   public function __get($key)
   {
     $key = strtoupper($key);

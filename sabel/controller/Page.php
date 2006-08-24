@@ -121,11 +121,7 @@ abstract class Sabel_Controller_Page
 
   protected function hasMethod($name)
   {
-    if (method_exists($this, $name)) {
-      return true;
-    } else {
-      return false;
-    }
+    return (method_exists($this, $name));
   }
 
   protected function setTemplate($template)
@@ -148,9 +144,11 @@ abstract class Sabel_Controller_Page
 
   protected function checkReferer($validURIs)
   {
-    $ref = $_SERVER['HTTP_REFERER'];
+    $ref  = Sabel_Env_Server::create()->http_referer;
+    $host = Sabel_Env_Server::create()->http_host;
+    
     $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
-    $patternAbsoluteURI = '/http:\/\/' . $_SERVER['HTTP_HOST'].$replaced.'/';
+    $patternAbsoluteURI = '/http:\/\/' . $host . $replaced . '/';
     preg_match($patternAbsoluteURI, $ref, $matchs);
     return (isset($matchs[0])) ? true : false;
   }

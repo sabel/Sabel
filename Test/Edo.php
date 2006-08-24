@@ -34,21 +34,28 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
+    //$helper = new MysqlHelper();
+    //$helper = new PgsqlHelper();
+    $helper = new SQLiteHelper();
+
+    try {
+      print "do drop\n";
+      $helper->dropTables();
+      print "end drop\n";
+    } catch (Exception $e) {
+      print_r($e);
+    }
+
+    print "do create tables\n";
+    $helper->createTables();
+    print "end create tables\n";
+    
     return new PHPUnit2_Framework_TestSuite("Test_Edo");
   }
 
   public function __construct()
   {
-    //$helper = new PgsqlHelper();
-    //$helper = new SQLiteHelper();
-    $helper = new MysqlHelper();
 
-    try {
-      $helper->dropTables();
-    } catch (Exception $e) {
-    }
-
-    $helper->createTables();
   }
 
   protected function setUp()
@@ -1391,10 +1398,10 @@ class SQLiteHelper
   public function __construct()
   {
     $dbCon = array();
-    $dbCon['dsn']  = 'sqlite:log1.sq3';
+    $dbCon['dsn']  = 'sqlite:Test/data/log1.sq3';
 
     $dbCon2 = array();
-    $dbCon2['dsn']  = 'sqlite:log2.sq3';
+    $dbCon2['dsn']  = 'sqlite:Test/data/log2.sq3';
 
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
     Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
@@ -1490,15 +1497,19 @@ class SQLiteHelper
   
   public function createTables()
   {
+    try {
     $obj = new Sabel_DB_Basic();
     
     foreach ($this->sqls as $sql) {
-      @$obj->execute($sql);
+      $obj->execute($sql);
     }
 
     $sql  = "CREATE TABLE trans2 (id INTEGER PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
     $trans2 = new Trans2();
     $trans2->execute($sql);
+    } catch (Exception $e) {
+      print_r($e);
+    }
   }
 
   public function dropTables()
@@ -1506,7 +1517,7 @@ class SQLiteHelper
     $obj = new Sabel_DB_Basic();
 
     foreach ($this->tables as $table) {
-      @$obj->execute("DROP TABLE ${table}");
+      $obj->execute("DROP TABLE ${table}");
     }
 
     $trans2 = new Trans2();
