@@ -9,7 +9,7 @@
  */
 abstract class Sabel_DB_Mapper
 {
-  const WITH_PARENT = 1;
+  const WITH_PARENT = 'WITH_PARENT';
 
   const TYPE_CHILD  = 0;
   const TYPE_PARENT = 1;
@@ -63,6 +63,8 @@ abstract class Sabel_DB_Mapper
         return new Sabel_DB_Driver_Pdo($conn, $pdoDb);
       case 'pgsql':
         return new Sabel_DB_Driver_Pgsql($conn);
+      case 'mysql':
+        return new Sabel_DB_Driver_Mysql($conn);
     }
   }
 

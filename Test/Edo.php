@@ -1089,12 +1089,18 @@ class MysqlHelper
   
   public function __construct()
   {
+    /*
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
+    */
+
+    $dbCon = mysql_connect('localhost', 'root', '');
+    mysql_select_db('edo', $dbCon);
+    Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon);
     
     $dbCon2 = array();
     $dbCon2['dsn']  = 'mysql:host=localhost;dbname=edo2';
@@ -1195,10 +1201,9 @@ class MysqlHelper
   public function createTables()
   {
     $obj = new Sabel_DB_Basic();
-    $pdo = $obj->getDriver()->getConnection();
 
     foreach ($this->sqls as $sql) {
-      $pdo->exec($sql);
+      $obj->execute($sql);
     }
 
     $sql  = "CREATE TABLE trans2 (id INT4 PRIMARY KEY AUTO_INCREMENT, trans1_id INT4 NOT NULL,";
@@ -1214,11 +1219,10 @@ class MysqlHelper
   public function dropTables()
   {
     $obj = new Sabel_DB_Basic();
-    $pdo = $obj->getDriver()->getConnection();
 
     try {
       foreach ($this->tables as $table) {
-        $pdo->exec("DROP TABLE ${table}");
+        $obj->execute("DROP TABLE ${table}");
       }
     } catch (Exception $e) {
     }

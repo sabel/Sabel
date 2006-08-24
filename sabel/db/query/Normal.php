@@ -1,19 +1,23 @@
 <?php
 
 /**
- * Query Maker for Prepared
+ * Query Maker for Native
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
-                          implements Sabel_DB_Query_Interface
+class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
+                            implements Sabel_DB_Query_Interface
 {
   protected $sql = array();
 
-  private $set = null;
-  private $count = 1;
-  private $param = array();
+  private $set   = null;
+  private $driver = null;
+
+  public function __construct($driver)
+  {
+    $this->driver = $driver;
+  }
 
   public function getSQL()
   {
@@ -27,9 +31,7 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeNormalConditionSQL($key, $val)
   {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key}=:{$bindKey}");
-    $this->param[$bindKey] = $val;
+    $this->setWhereQuery("{$key}='". $this->escape($val) ."'");
   }
 
   public function makeIsNullSQL($key)
@@ -44,75 +46,62 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeWhereInSQL($key, $val)
   {
+    foreach ($val as $v) $this->escape($v);
     $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
   public function makeLikeSQL($key, $val)
   {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key} LIKE :{$bindKey}");
-    $this->param[$bindKey] = str_replace('_', '\_', $val);
+    $val = str_replace('_', '\_', $this->escape($val));
+    $this->setWhereQuery("{$key} LIKE '{$val}'");
   }
 
   public function makeBetweenSQL($key, $val)
   {
-    $this->setWhereQuery("{$key} BETWEEN :from AND :to");
-    $this->param["from"] = $val[0];
-    $this->param["to"]   = $val[1];
+    $val1 = $this->escape($val[0]);
+    $val2 = $this->escape($val[1]);
+    $this->setWhereQuery("{$key} BETWEEN '{$val1}' AND '{$val2}'");
   }
 
   public function makeEitherSQL($key, $val)
   {
-    $bindKey  = $key . $this->count++;
-    $bindKey2 = $key . $this->count++;
-
     $val1 = $val[0];
     $val2 = $val[1];
 
     $query = '(';
     if ($val1[0] === '<' || $val1[0] === '>') {
-      $query .= "{$key} ${val1[0]} :{$bindKey}";
-      $this->param[$bindKey] = trim(substr($val1, 1));
+      $val    = $this->escape(trim(substr($val1, 1)));
+      $query .= "{$key} {$val1[0]} '{$val}'";
     } else if (strtolower($val1) === 'null') {
       $query .= "{$key} IS NULL";
     } else {
-      $query .= "{$key}=:{$bindKey}";
-      $this->param[$bindKey] = $val1;
+      $query .= "{$key}='". $this->escape($val1) ."'";
     }
 
     $query .= ' OR ';
 
     if ($val2[0] === '<' || $val2[0] === '>') {
-      $query .= "{$key} {$val2[0]} :{$bindKey2}";
-      $this->param[$bindKey2] = trim(substr($val2, 1));
+      $val    = $this->escape(trim(substr($val2, 1)));
+      $query .= "{$key} {$val2[0]} '{$val}'";
     } else if ($val2 === 'null') {
       $query .= "{$key} IS NULL";
     } else {
-      $query .= "{$key}=:{$bindKey2}";
-      $this->param[$bindKey2] = $val2;
+      $query .= "{$key}='". $this->escape($val2) ."'";
     }
-    $query .= ')';
 
+    $query .= ')';
     $this->setWhereQuery($query);
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $bindKey  = $key . $this->count++;
-    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}");
-    $this->param[$bindKey] = trim(substr($val, 1));
-  }
-
-  public function getParam()
-  {
-    return $this->param;
+    $val1 = $this->escape(trim(substr($val, 1)));
+    $this->setWhereQuery("{$key} {$val[0]} '{$val1}'");
   }
 
   public function unsetProparties()
   {
-    $this->param = array();
-    $this->count = 1;
-    $this->set   = false;
+    $this->set = false;
   }
 
   protected function setWhereQuery($query)
@@ -123,5 +112,10 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
       array_push($this->sql, ' WHERE ' . $query);
       $this->set = true;
     }
+  }
+
+  protected function escape($val)
+  {
+    return $this->driver->escape($val);
   }
 }
