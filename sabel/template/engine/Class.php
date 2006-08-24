@@ -21,12 +21,12 @@ class Sabel_Template_Engine_Class
 
   public function setPath($path)
   {
-    $this->templatePath = $path;
+    $this->path = $path;
   }
 
   public function setName($name)
   {
-    $this->templateName = $name;
+    $this->name = $name;
   }
 
   public function retrieve($pageCache = false)
@@ -66,12 +66,12 @@ class Sabel_Template_Engine_Class
 
   private function getTemplateFilePath()
   {
-    return $this->templatePath . $this->templateName;
+    return $this->path . $this->name;
   }
 
   private function getCompileFilePath()
   {
-    return RUN_BASE . self::COMPILE_DIR . $this->templateName;
+    return RUN_BASE . self::COMPILE_DIR . md5($this->path) . $this->name;
   }
 
   public function display($pageCache = false)
