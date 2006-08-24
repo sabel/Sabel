@@ -1102,12 +1102,12 @@ class MysqlHelper
     mysql_select_db('edo', $dbCon);
     Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon);
     
-    $dbCon2 = array();
-    $dbCon2['dsn']  = 'mysql:host=localhost;dbname=edo2';
-    $dbCon2['user'] = 'root';
-    $dbCon2['pass'] = '';
+    $dbCon = array();
+    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';
+    $dbCon['user'] = 'root';
+    $dbCon['pass'] = '';
     
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
  
     $SQLs = array();
     
@@ -1209,11 +1209,8 @@ class MysqlHelper
     $sql  = "CREATE TABLE trans2 (id INT4 PRIMARY KEY AUTO_INCREMENT, trans1_id INT4 NOT NULL,";
     $sql .= "text VARCHAR(24) ) TYPE=InnoDB";
 
-    try {
-      $trans2 = new Trans2();
-      $trans2->execute($sql);
-    } catch (Exception $e) {
-    }
+    $trans2 = new Trans2();
+    $trans2->execute($sql);
   }
 
   public function dropTables()
@@ -1227,11 +1224,8 @@ class MysqlHelper
     } catch (Exception $e) {
     }
 
-    try {
-      $trans2 = new Trans2();
-      $trans2->execute("DROP TABLE trans2");
-    } catch (Exception $e) {
-    }
+    $trans2 = new Trans2();
+    $trans2->execute("DROP TABLE trans2");
   }
 }
 
@@ -1243,19 +1237,18 @@ class PgsqlHelper
                             'customer', 'customer_order', 'order_line',
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
-                            'course', 'users', 'bbs', 'status');
+                            'course', 'users', 'bbs', 'status', 'trans1');
 
   public function __construct()
   {
+    $dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
+    Sabel_DB_Connection::addConnection('default', 'pgsql', $dbCon);
+
     $dbCon = array();
-    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo2';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
-
-    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
-    //pg_trace('/tmp/pg_trace.log', 'w', $dbCon);
-    //Sabel_DB_Connection::addConnection('user', 'pgsql', $dbCon);
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
 
     $SQLs = array();
 
@@ -1340,6 +1333,10 @@ class PgsqlHelper
                  title    VARCHAR(24),
                  body     VARCHAR(24))';
 
+    $SQLs[] = 'CREATE TABLE trans1 (
+                 id    SERIAL PRIMARY KEY,
+                 text  VARCHAR(24) )';
+
     $this->sqls = $SQLs;
   }
   
@@ -1350,6 +1347,10 @@ class PgsqlHelper
     foreach ($this->sqls as $sql) {
       @$obj->execute($sql);
     }
+
+    $sql  = "CREATE TABLE trans2 (id SERIAL PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
+    $trans2 = new Trans2();
+    $trans2->execute($sql);
   }
 
   public function dropTables()
@@ -1359,6 +1360,9 @@ class PgsqlHelper
     foreach ($this->tables as $table) {
       @$obj->execute("DROP TABLE ${table}");
     }
+
+    $trans2 = new Trans2();
+    $trans2->execute("DROP TABLE trans2");
   }
 }
 

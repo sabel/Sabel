@@ -11,8 +11,9 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 {
   protected $sql = array();
 
-  private $set   = null;
-  private $driver = null;
+  private
+    $set    = null,
+    $driver = null;
 
   public function __construct($driver)
   {
@@ -52,7 +53,7 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 
   public function makeLikeSQL($key, $val)
   {
-    $val = str_replace('_', '\_', $this->escape($val));
+    $val = $this->escape(str_replace('_', '\_', $val));
     $this->setWhereQuery("{$key} LIKE '{$val}'");
   }
 

@@ -1,19 +1,20 @@
 <?php
 
 /**
- * db driver for Mysql
+ * db driver for Pgsql
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Pgsql implements Sabel_DB_Driver_Interface
 {
   private $conn, $queryObj, $myDb;
+  private $lastinsertId = null;
 
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->myDb     = 'mysql';
+    $this->myDb     = 'pgsql';
     $this->queryObj = new Sabel_DB_Query_Normal($this);
   }
 
@@ -24,17 +25,17 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function begin($conn)
   {
-    mysql_query('BEGIN', $conn);
+    pg_query($conn, 'BEGIN');
   }
 
   public function commit($conn)
   {
-    mysql_query('COMMIT', $conn);
+    pg_query($conn, 'COMMIT');
   }
 
   public function rollback($conn)
   {
-    mysql_query('ROLLBACK', $conn);
+    pg_query($conn, 'ROLLBACK');
   }
 
   public function setBasicSQL($sql)
@@ -66,6 +67,9 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function executeInsert($table, $data, $defColumn)
   {
+    if (!isset($data[$defColumn]))
+      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
+
     $columns = array();
     $values  = array();
     foreach ($data as $key => $val) {
@@ -86,9 +90,18 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function getLastInsertId()
   {
-    $this->execute('SELECT last_insert_id()');
-    $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-    return $row['last_insert_id()'];
+    return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
+  }
+
+  private function getNextNumber($table, $defColumn = null)
+  {
+    $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
+    $row = $this->fetch();
+    if (($this->lastInsertId =(int) $row[0]) === 0) {
+      throw new Exception($table . '_{$defColumn}_seq is not found.');
+    } else {
+      return $this->lastInsertId;
+    }
   }
 
   public function makeQuery($conditions, $constraints = null)
@@ -102,13 +115,13 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
   public function execute($sql = null, $param = null)
   {
     if (isset($sql)) {
-      $this->result = mysql_query($sql, $this->conn);
+      $this->result = pg_query($this->conn, $sql);
     } else if (is_null($this->queryObj->getSQL())) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $sql = $this->queryObj->getSQL();
-      if (!($this->result = mysql_query($sql, $this->conn))) {
-        throw new Exception('mysql_query execute failed: ' . $sql);
+      if (!($this->result = pg_query($this->conn, $sql))) {
+        throw new Exception('pg_query execute failed: ' . $sql);
       }
     }
 
@@ -119,25 +132,19 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
   public function fetch($style = null)
   {
     if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
-      return mysql_fetch_assoc($this->result);
+      return pg_fetch_assoc($this->result);
     } else {
-      return mysql_fetch_array($this->result);
+      return pg_fetch_array($this->result);
     }
   }
 
   public function fetchAll($style = null)
   {
-    $rows   = array();
-    $result = $this->result;
-
-    if ($result !== true) {
-      while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
-    }
-    return $rows;
+    return pg_fetch_all($this->result);
   }
 
   public function escape($value)
   {
-     return mysql_real_escape_string($value, $this->conn);
+     return pg_escape_string($value);
   }
 }
