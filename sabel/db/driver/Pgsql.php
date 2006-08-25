@@ -35,33 +35,6 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
     pg_query($conn, 'ROLLBACK');
   }
 
-  public function executeInsert($table, $data, $defColumn)
-  {
-    $data = $this->setIdNumber($table, $data, $defColumn);
-
-    $columns = array();
-    $values  = array();
-    foreach ($data as $key => $val) {
-      array_push($columns, $key);
-      $val = $this->escape($val);
-      array_push($values, "'{$val}'");
-    }
-
-    $sql = array("INSERT INTO {$table}(");
-    array_push($sql, join(',', $columns));
-    array_push($sql, ") VALUES(");
-    array_push($sql, join(',', $values));
-    array_push($sql, ');');
-
-    $this->queryObj->setBasicSQL(join('', $sql));
-    return $this->execute();
-  }
-
-  public function getLastInsertId()
-  {
-    return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
-  }
-
   private function setIdNumber($table, $data, $defColumn)
   {
     if (!isset($data[$defColumn])) {

@@ -33,26 +33,6 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
     mysql_query('ROLLBACK', $conn);
   }
 
-  public function executeInsert($table, $data, $defColumn)
-  {
-    $columns = array();
-    $values  = array();
-    foreach ($data as $key => $val) {
-      array_push($columns, $key);
-      $val = $this->escape($val);
-      array_push($values, "'{$val}'");
-    }
-
-    $sql = array("INSERT INTO {$table}(");
-    array_push($sql, join(',', $columns));
-    array_push($sql, ") VALUES(");
-    array_push($sql, join(',', $values));
-    array_push($sql, ');');
-
-    $this->queryObj->setBasicSQL(join('', $sql));
-    return $this->execute();
-  }
-
   private function setIdNumber($table, $data, $defColumn)
   {
     //ignore
