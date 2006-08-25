@@ -1,20 +1,23 @@
 <?php
 
 /**
- * db driver for Mysql
+ * db driver for Firebird
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Firebird implements Sabel_DB_Driver_Interface
 {
   private $conn, $queryObj, $myDb;
+  private $lastinsertId = null;
 
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->myDb     = 'mysql';
+    $this->myDb     = 'firebird';
     $this->queryObj = new Sabel_DB_Query_Normal($this);
+
+    ibase_query($this->conn, 'COMMIT');
   }
 
   public function getConnection()
@@ -29,17 +32,17 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function begin($conn)
   {
-    mysql_query('BEGIN', $conn);
+    ibase_query($conn, 'SET TRANSACTION');
   }
 
   public function commit($conn)
   {
-    mysql_query('COMMIT', $conn);
+    pg_query($conn, 'COMMIT');
   }
 
   public function rollback($conn)
   {
-    mysql_query('ROLLBACK', $conn);
+    pg_query($conn, 'ROLLBACK');
   }
 
   public function setBasicSQL($sql)
@@ -71,6 +74,9 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function executeInsert($table, $data, $defColumn)
   {
+    if (!isset($data[$defColumn]))
+      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
+
     $columns = array();
     $values  = array();
     foreach ($data as $key => $val) {
@@ -91,9 +97,16 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
 
   public function getLastInsertId()
   {
-    $this->execute('SELECT last_insert_id()');
-    $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-    return $row['last_insert_id()'];
+    return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
+  }
+
+  private function getNextNumber($table, $defColumn = null)
+  {
+    if (!($this->lastInsertId = ibase_gen_id("{$table}_{$defColumn}_seq", 1))) {
+      throw new Exception("{$table}_{$defColumn}_seq is not found.");
+    } else {
+      return $this->lastInsertId;
+    }
   }
 
   public function makeQuery($conditions, $constraints = null)
@@ -107,13 +120,13 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
   public function execute($sql = null, $param = null)
   {
     if (isset($sql)) {
-      $this->result = mysql_query($sql, $this->conn);
+      $this->result = ibase_query($this->conn, $sql);
     } else if (is_null($this->queryObj->getSQL())) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $sql = $this->queryObj->getSQL();
-      if (!($this->result = mysql_query($sql, $this->conn))) {
-        throw new Exception('mysql_query execute failed: ' . $sql);
+      if (!($this->result = ibase_query($this->conn, $sql))) {
+        throw new Exception('ibase_query execute failed: ' . $sql);
       }
     }
 
@@ -124,9 +137,9 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
   public function fetch($style = null)
   {
     if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
-      return mysql_fetch_assoc($this->result);
+      return ibase_fetch_assoc($this->result);
     } else {
-      return mysql_fetch_array($this->result);
+      return ibase_fetch_row($this->result);
     }
   }
 
@@ -135,14 +148,22 @@ class Sabel_DB_Driver_Mysql implements Sabel_DB_Driver_Interface
     $rows   = array();
     $result = $this->result;
 
-    if ($result !== true)
-      while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
-
+    while ($row = ibase_fetch_assoc($result)) $row[] = $row;
     return $rows;
   }
 
   public function escape($value)
   {
-     return mysql_real_escape_string($value, $this->conn);
+     if (!get_magic_quotes_gpc()) $value = addslashes($value);
+     return $value;
+  }
+  
+  public function getFirstSkipQuery($constraints, $sql)
+  {
+    $tmp    = substr($sql, 6);
+    $query  = "FIRST {$constraints['limit']} ";
+    $query .= (isset($constraints['offset']) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
+
+    return 'SELECT ' . $query . $tmp;
   }
 }

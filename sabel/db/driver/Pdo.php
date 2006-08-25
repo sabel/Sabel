@@ -19,12 +19,17 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
   {
     $this->pdo      = $conn;
     $this->myDb     = $myDb;
-    $this->queryObj = new Sabel_DB_Query_Bind();
+    $this->queryObj = new Sabel_DB_Query_Bind($this);
   }
 
   public function getConnection()
   {
     return $this->pdo;
+  }
+
+  public function getDBName()
+  {
+    return $this->myDb;
   }
 
   public function begin($pdo)

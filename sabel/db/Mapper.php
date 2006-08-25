@@ -65,6 +65,8 @@ abstract class Sabel_DB_Mapper
         return new Sabel_DB_Driver_Pgsql($conn);
       case 'mysql':
         return new Sabel_DB_Driver_Mysql($conn);
+      case 'firebird':
+        return new Sabel_DB_Driver_Firebird($conn);
     }
   }
 

@@ -48,11 +48,19 @@ class Sabel_DB_Query_Factory
     if (isset($constraints['order']))
       array_push($this->sql, " ORDER BY {$constraints['order']}");
 
-    if (isset($constraints['limit']))
-      array_push($this->sql, " LIMIT {$constraints['limit']}");
+    if (isset($constraints['limit'])) {
+      if ($this->driver->getDBName() === 'firebird') {
+        $this->sql = array($this->driver->getFirstSkipQuery($constraints, join('', $this->sql)));
+        return false;
+      } else {
+        array_push($this->sql, " LIMIT {$constraints['limit']}");
+      }
+    }
 
     if (isset($constraints['offset']))
       array_push($this->sql, " OFFSET {$constraints['offset']}");
+
+    return true;
   }
 
   public function getSQL()
@@ -87,7 +95,7 @@ class Sabel_DB_Query_Factory
 
   protected function prepareLikeSQL($key, $val)
   {
-    $search_str = ';:ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+    $search_str = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
 
     if (strpbrk($val, '_') !== false) {
       for ($i = 0; $i < 30; $i++) {

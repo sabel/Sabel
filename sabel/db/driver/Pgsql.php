@@ -23,6 +23,11 @@ class Sabel_DB_Driver_Pgsql implements Sabel_DB_Driver_Interface
     return $this->conn;
   }
 
+  public function getDBName()
+  {
+    return $this->myDb;
+  }
+
   public function begin($conn)
   {
     pg_query($conn, 'BEGIN');
