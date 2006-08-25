@@ -1136,17 +1136,17 @@ class MysqlHelper
   
   public function __construct()
   {
+    /*
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
-    /*
+    */
+ 
     $dbCon = mysql_connect('localhost', 'root', '');
     mysql_select_db('edo', $dbCon);
     Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon);
-    */
     
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';

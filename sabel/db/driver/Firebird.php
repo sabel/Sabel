@@ -44,9 +44,9 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {
         $data[$defColumn] = return $this->lastInsertId;
-        return $data;
       }
     }
+    return $data;
   }
 
   public function execute($sql = null, $param = null)

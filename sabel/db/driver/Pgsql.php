@@ -35,7 +35,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
     pg_query($conn, 'ROLLBACK');
   }
 
-  private function setIdNumber($table, $data, $defColumn)
+  protected function setIdNumber($table, $data, $defColumn)
   {
     if (!isset($data[$defColumn])) {
       $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
@@ -44,9 +44,9 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
         throw new Exception($table . '_{$defColumn}_seq is not found.');
       } else {
         $data[$defColumn] = $this->lastInsertId;
-        return $data;
       }
     }
+    return $data;
   }
 
   public function execute($sql = null, $param = null)

@@ -33,9 +33,9 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
     mysql_query('ROLLBACK', $conn);
   }
 
-  private function setIdNumber($table, $data, $defColumn)
+  protected function setIdNumber($table, $data, $defColumn)
   {
-    //ignore
+    return $data;
   }
 
   public function getLastInsertId()
