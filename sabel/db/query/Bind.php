@@ -16,31 +16,9 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
   private $count = 1;
   private $param = array();
 
-  public function getSQL()
+  public function makeNormalSQL($key, $val)
   {
-    return join('', $this->sql);
-  }
-
-  public function setBasicSQL($sql)
-  {
-    $this->sql = array($sql);
-  }
-
-  public function makeNormalConditionSQL($key, $val)
-  {
-    $bindKey = $key . $this->count++;
-    $this->setWhereQuery("{$key}=:{$bindKey}");
-    $this->param[$bindKey] = $val;
-  }
-
-  public function makeIsNullSQL($key)
-  {
-    $this->setWhereQuery($key . ' IS NULL');
-  }
-
-  public function makeIsNotNullSQL($key)
-  {
-    $this->setWhereQuery($key . ' IS NOT NULL');
+    $this->setWhereQuery($this->_getNormalSQL($key, $val, $key.$this->count++));
   }
 
   public function makeWhereInSQL($key, $val)
@@ -48,25 +26,14 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
     $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
-  public function makeLikeSQL($key, $val)
+  public function makeLikeSQL($key, $val, $esc = null)
   {
-    $bindKey    = $key . $this->count++;
-    $search_str = ';:ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+    $bindKey = $key . $this->count++;
+    $query   = "{$key} LIKE :{$bindKey}";
+    if (isset($esc)) $query .= " escape '{$esc}'";
 
-    if (strpbrk($val, '_') !== false) {
-      for ($i = 0; $i < 30; $i++) {
-        $c = $search_str[$i];
-        if (strpbrk($val, $c) === false) {
-          $val = str_replace('_', "{$c}_", $val);
-          $this->setWhereQuery("{$key} LIKE :{$bindKey} escape '{$c}'");
-          $this->param[$bindKey] = $val;
-          break;
-        }
-      }
-    } else {
-      $this->setWhereQuery("{$key} LIKE :{$bindKey}");
-      $this->param[$bindKey] = $val;
-    }
+    $this->setWhereQuery($query);
+    $this->param[$bindKey] = $val;
   }
 
   public function makeBetweenSQL($key, $val)
@@ -78,41 +45,37 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeEitherSQL($key, $val)
   {
-    if ($key !== '')
-      $val = $this->toArrayEitherCondition($key, $val);
-
-    $c = count($val[0]);
-    if ($c !== count($val[1]))
-      throw new Exception('Query_Bind::makeEitherSQL() make column same as number of values.');
-
-    $query  = '(';
-    for ($i = 0; $i < $c; $i++) {
-      $key = $val[0][$i];
-      $this->_makeEitherSQL($key, $val[1][$i], $query, $key.$this->count++);
-      if (($i + 1) !== $c) $query .= ' OR ';
-    }
-    $query .= ')';
-    $this->setWhereQuery($query);
+    return $this->_makeEitherSQL($key, $val, $key.$this->count++);
   }
 
-  protected function _makeEitherSQL($key, $val, &$query, $bindKey)
+  protected function _makeEitherSQL($key, $val, $bindKey)
   {
     if ($val[0] === '<' || $val[0] === '>') {
-      $query .= "{$key} {$val[0]} :{$bindKey}";
-      $this->param[$bindKey] = trim(substr($val, 1));
+      return $this->_getLess_GreaterSQL($key, $val, $bindKey);
     } else if (strtolower($val) === 'null') {
-      $query .= "{$key} IS NULL";
+      return "{$key} IS NULL";
     } else {
-      $query .= "{$key}=:{$bindKey}";
-      $this->param[$bindKey] = $val;
+      return $this->_getNormalSQL($key, $val, $bindKey);
     }
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $bindKey  = $key . $this->count++;
-    $this->setWhereQuery("{$key} {$val[0]} :{$bindKey}");
+    $this->setWhereQuery($this->_getLess_GreaterSQL($key, $val, $key.$this->count++));
+  }
+
+  protected function _getLess_GreaterSQL($key, $val, $bindKey)
+  {
+    $query = "{$key} {$val[0]} :{$bindKey}";
     $this->param[$bindKey] = trim(substr($val, 1));
+    return $query;
+  }
+
+  protected function _getNormalSQL($key, $val, $bindKey)
+  {
+    $query = "{$key}=:{$bindKey}";
+    $this->param[$bindKey] = $val;
+    return $query;
   }
 
   public function getParam()

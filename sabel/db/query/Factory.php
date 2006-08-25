@@ -21,11 +21,11 @@ class Sabel_DB_Query_Factory
         $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::EITHER)) {
         $key = str_replace(Sabel_DB_Driver_Interface::EITHER, '', $key);
-        $this->makeEitherSQL($key, $val);
+        $this->prepareEitherSQL($key, $val);
         $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::LIKE)) {
         $key = str_replace(Sabel_DB_Driver_Interface::LIKE, '', $key);
-        $this->makeLikeSQL($key, $val);
+        $this->prepareLikeSQL($key, $val);
         $check = false;
       } else if (strtolower($val) === 'null') {
         $this->makeIsNullSQL($key);
@@ -34,7 +34,7 @@ class Sabel_DB_Query_Factory
         $this->makeIsNotNullSQL($key);
         $check = false;
       } else {
-        $this->makeNormalConditionSQL($key, $val);
+        $this->makeNormalSQL($key, $val);
       }
     }
     return $check;
@@ -55,7 +55,27 @@ class Sabel_DB_Query_Factory
       array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
 
-  protected function setWhereQuery($query)
+  public function getSQL()
+  {
+    return join('', $this->sql);
+  }
+
+  public function setBasicSQL($sql)
+  {
+    $this->sql = array($sql);
+  }
+
+  public function makeIsNullSQL($key)
+  {
+    $this->setWhereQuery($key . ' IS NULL');
+  }
+
+  public function makeIsNotNullSQL($key)
+  {
+    $this->setWhereQuery($key . ' IS NOT NULL');
+  }
+
+  public function setWhereQuery($query)
   {
     if ($this->set) {
       array_push($this->sql, ' AND ' . $query);
@@ -65,13 +85,50 @@ class Sabel_DB_Query_Factory
     }
   }
 
-  protected function toArrayEitherCondition($key, $val)
+  protected function prepareLikeSQL($key, $val)
   {
-    $keys = array();
-    for ($i = 0; $i < count($val); $i++) $keys[] = $key;
+    $search_str = ';:ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+
+    if (strpbrk($val, '_') !== false) {
+      for ($i = 0; $i < 30; $i++) {
+        $esc = $search_str[$i];
+        if (strpbrk($val, $esc) === false) {
+          $val = str_replace('_', "{$esc}_", $val);
+          $this->makeLikeSQL($key, $val, $esc);
+          break;
+        }
+      }
+    } else {
+      $this->makeLikeSQL($key, $val);
+    }
+  }
+
+  protected function prepareEitherSQL($key, $val)
+  {
     $condition = array();
-    $condition[] = $keys;
-    $condition[] = $val;
-    return $condition;
+    if ($key === '') {
+      $condition[] = $val[0];
+      $condition[] = $val[1];
+    } else {
+      $keys = array();
+      for ($i = 0; $i < count($val); $i++) $keys[] = $key;
+      $condition[] = $keys;
+      $condition[] = $val;
+    }
+
+    $count = count($condition[0]);
+    if ($count !== count($condition[1]))
+      throw new Exception('Query_Factory::prepareEitherSQL() make column same as number of values.');
+
+    $query  = '(';
+
+    for ($i = 0; $i < $count; $i++) {
+      $key    = $condition[0][$i];
+      $query .= $this->makeEitherSQL($key, $condition[1][$i]);
+      if (($i + 1) !== $count) $query .= ' OR ';
+    }
+
+    $query .= ')';
+    $this->setWhereQuery($query);
   }
 }
