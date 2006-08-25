@@ -53,6 +53,11 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
     return $this->execute();
   }
 
+  private function setIdNumber($table, $data, $defColumn)
+  {
+    //ignore
+  }
+
   public function getLastInsertId()
   {
     $this->execute('SELECT last_insert_id()');

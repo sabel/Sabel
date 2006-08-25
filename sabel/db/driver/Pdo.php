@@ -6,45 +6,36 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
+                          implements Sabel_DB_Driver_Interface
 {
-  private $pdo, $stmt, $queryObj, $myDb;
-
-  private $param = array();
-  private $data  = array();
+  private
+    $stmt  = null,
+    $data  = array(),
+    $param = array();
 
   private $lastinsertId = null;
 
   public function __construct($conn, $myDb)
   {
-    $this->pdo      = $conn;
+    $this->conn     = $conn;
     $this->myDb     = $myDb;
     $this->queryObj = new Sabel_DB_Query_Bind($this);
   }
 
-  public function getDBName()
+  public function begin($conn)
   {
-    return $this->myDb;
+    $conn->beginTransaction();
   }
 
-  public function begin($pdo)
+  public function commit($conn)
   {
-    $pdo->beginTransaction();
+    $conn->commit();
   }
 
-  public function commit($pdo)
+  public function rollback($conn)
   {
-    $pdo->commit();
-  }
-
-  public function rollback($pdo)
-  {
-    $pdo->rollBack();
-  }
-
-  public function setBasicSQL($sql)
-  {
-    $this->queryObj->setBasicSQL($sql);
+    $conn->rollBack();
   }
 
   public function setUpdateSQL($table, $data)
@@ -104,7 +95,7 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
         $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
         return $row['last_insert_id()'];
       case 'sqlite':
-        return $this->pdo->lastInsertId();
+        return $this->conn->lastInsertId();
       default:
         return 'todo else';
     }
@@ -137,17 +128,17 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
   public function execute($sql = null, $param = null)
   {
     if (isset($sql)) {
-      $this->stmt = $this->pdo->prepare($sql);
+      $this->stmt = $this->conn->prepare($sql);
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_DB_Driver_PdoStatement::get();
     } else if (is_null($this->queryObj->getSQL())) {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
       $sql = $this->queryObj->getSQL();
-      if ($this->stmt = $this->pdo->prepare($sql)) {
+      if ($this->stmt = $this->conn->prepare($sql)) {
         Sabel_DB_Driver_PdoStatement::add($this->stmt);
       } else {
-        $error = $this->pdo->errorInfo();
+        $error = $this->conn->errorInfo();
         throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
       }
     }

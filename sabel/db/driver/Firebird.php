@@ -39,8 +39,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if (!isset($data[$defColumn]))
-      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
+    $data = $this->setIdNumber($table, $data, $defColumn);
 
     $columns = array();
     $values  = array();
@@ -65,12 +64,15 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
   }
 
-  private function getNextNumber($table, $defColumn = null)
+  private function setIdNumber($table, $data, $defColumn)
   {
-    if (!($this->lastInsertId = ibase_gen_id("{$table}_{$defColumn}_seq", 1))) {
-      throw new Exception("{$table}_{$defColumn}_seq is not found.");
-    } else {
-      return $this->lastInsertId;
+    if (!isset($data[$defColumn])) {
+      if (!($this->lastInsertId = ibase_gen_id("{$table}_{$defColumn}_seq", 1))) {
+        throw new Exception("{$table}_{$defColumn}_seq is not found.");
+      } else {
+        $data[$defColumn] = return $this->lastInsertId;
+        return $data;
+      }
     }
   }
 

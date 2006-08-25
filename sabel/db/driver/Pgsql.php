@@ -37,8 +37,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if (!isset($data[$defColumn]))
-      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
+    $data = $this->setIdNumber($table, $data, $defColumn);
 
     $columns = array();
     $values  = array();
@@ -63,14 +62,17 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
     return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
   }
 
-  private function getNextNumber($table, $defColumn = null)
+  private function setIdNumber($table, $data, $defColumn)
   {
-    $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
-    $row = $this->fetch();
-    if (($this->lastInsertId =(int) $row[0]) === 0) {
-      throw new Exception($table . '_{$defColumn}_seq is not found.');
-    } else {
-      return $this->lastInsertId;
+    if (!isset($data[$defColumn])) {
+      $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
+      $row = $this->fetch();
+      if (($this->lastInsertId =(int) $row[0]) === 0) {
+        throw new Exception($table . '_{$defColumn}_seq is not found.');
+      } else {
+        $data[$defColumn] = $this->lastInsertId;
+        return $data;
+      }
     }
   }
 
