@@ -14,12 +14,16 @@ class Form
     uses('sabel.db.schema.Accessor');
     $is = new Sabel_DB_Schema_Accessor('default', 'default');
     
+    $localizeConfig = new Sabel_Config_Yaml(RUN_BASE . '/config/localize.yml');
+    $localize = $localizeConfig->read($table);
+    
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action, $method);
     
     foreach ($is->getTable($table)->getColumns() as $column) {
       $name  = $column->name;
-      $buf[] = "{$name} <br />";
+      $lname  = (isset($localize[$column->name])) ? $localize[$column->name] : $column->name;
+      $buf[] = "{$lname} <br />";
       $buf[] = self::newInput($name, $column);
     }
     
@@ -42,12 +46,16 @@ class Form
     uses('sabel.db.schema.Accessor');
     $is = new Sabel_DB_Schema_Accessor('default', 'default');
     
+    $localizeConfig = new Sabel_Config_Yaml(RUN_BASE . '/config/localize.yml');
+    $localize = $localizeConfig->read($table);
+    
     $buf = array();
     $buf[] = sprintf(self::FORM_START, $action.$obj->id, $method);
     
     foreach ($is->getTable($table)->getColumns() as $column) {
       $name  = $column->name;
-      $buf[] = "{$name} <br />";
+      $lname  = (isset($localize[$column->name])) ? $localize[$column->name] : $column->name;
+      $buf[] = "{$lname} <br />";
       $buf[] = self::input($obj, $name, $column);
     }
     
