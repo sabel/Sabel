@@ -9,10 +9,9 @@
 class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
                             implements Sabel_DB_Query_Interface
 {
-  protected $sql = array();
-
-  private
-    $set    = null,
+  protected
+    $sql    = array(),
+    $set    = false,
     $driver = null;
 
   public function __construct($driver)
@@ -66,32 +65,33 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 
   public function makeEitherSQL($key, $val)
   {
-    $val1 = $val[0];
-    $val2 = $val[1];
+    if ($key !== '')
+      $val = $this->toArrayEitherCondition($key, $val);
 
-    $query = '(';
-    if ($val1[0] === '<' || $val1[0] === '>') {
-      $val    = $this->escape(trim(substr($val1, 1)));
-      $query .= "{$key} {$val1[0]} '{$val}'";
-    } else if (strtolower($val1) === 'null') {
-      $query .= "{$key} IS NULL";
-    } else {
-      $query .= "{$key}='". $this->escape($val1) ."'";
+    $c = count($val[0]);
+    if ($c !== count($val[1]))
+      throw new Exception('Query_Normal::makeEitherSQL() make column same as number of values.');
+
+    $query  = '(';
+    for ($i = 0; $i < $c; $i++) {
+      $key = $val[0][$i];
+      $this->_makeEitherSQL($key, $val[1][$i], $query);
+      if (($i + 1) !== $c) $query .= ' OR ';
     }
-
-    $query .= ' OR ';
-
-    if ($val2[0] === '<' || $val2[0] === '>') {
-      $val    = $this->escape(trim(substr($val2, 1)));
-      $query .= "{$key} {$val2[0]} '{$val}'";
-    } else if ($val2 === 'null') {
-      $query .= "{$key} IS NULL";
-    } else {
-      $query .= "{$key}='". $this->escape($val2) ."'";
-    }
-
     $query .= ')';
     $this->setWhereQuery($query);
+  }
+
+  protected function _makeEitherSQL($key, $val, &$query)
+  {
+    if ($val[0] === '<' || $val[0] === '>') {
+      $value    = $this->escape(trim(substr($val, 1)));
+      $query .= "{$key} {$val[0]} '{$value}'";
+    } else if (strtolower($val) === 'null') {
+      $query .= "{$key} IS NULL";
+    } else {
+      $query .= "{$key}='". $this->escape($val) ."'";
+    }
   }
 
   public function makeLess_GreaterSQL($key, $val)
@@ -103,16 +103,6 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
   public function unsetProparties()
   {
     $this->set = false;
-  }
-
-  protected function setWhereQuery($query)
-  {
-    if ($this->set) {
-      array_push($this->sql, ' AND ' . $query);
-    } else {
-      array_push($this->sql, ' WHERE ' . $query);
-      $this->set = true;
-    }
   }
 
   protected function escape($val)

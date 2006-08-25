@@ -36,8 +36,8 @@ class Test_Edo extends SabelTestCase
   public static function suite()
   {
     //$helper = new MysqlHelper();
-    $helper = new PgsqlHelper();
-    //$helper = new SQLiteHelper();
+    //$helper = new PgsqlHelper();
+    $helper = new SQLiteHelper();
 
     try {
       $helper->dropTables();
@@ -1001,6 +1001,22 @@ class Test_Edo extends SabelTestCase
     $tree->tree_id(4);
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 8);
+  }
+
+  public function testORCondition()
+  {
+    $ol = new Sabel_DB_Basic('order_line');
+    $ol->setConstraint('order', 'id');
+    $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
+
+    $ols = $ol->select();
+    $this->assertEquals((int)$ols[0]->id, 1);
+    $this->assertEquals((int)$ols[1]->id, 6);
+    $this->assertEquals((int)$ols[2]->id, 9);
+    $this->assertEquals((int)$ols[3]->id, 10);
+
+    $this->assertEquals((int)$ols[2]->amount, 10000);
+    $this->assertEquals((int)$ols[3]->amount, 50000);
   }
 
   public function testTransaction()

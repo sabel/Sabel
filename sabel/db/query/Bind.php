@@ -9,11 +9,10 @@
 class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
                           implements Sabel_DB_Query_Interface
 {
-  const SEARCH_STRING = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  protected
+    $sql = array(),
+    $set = null;
 
-  protected $sql = array();
-
-  private $set = null;
   private $count = 1;
   private $param = array();
 
@@ -79,37 +78,34 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeEitherSQL($key, $val)
   {
-    $bindKey  = $key . $this->count++;
-    $bindKey2 = $key . $this->count++;
+    if ($key !== '')
+      $val = $this->toArrayEitherCondition($key, $val);
 
-    $val1 = $val[0];
-    $val2 = $val[1];
+    $c = count($val[0]);
+    if ($c !== count($val[1]))
+      throw new Exception('Query_Bind::makeEitherSQL() make column same as number of values.');
 
-    $query = '(';
-    if ($val1[0] === '<' || $val1[0] === '>') {
-      $query .= "{$key} ${val1[0]} :{$bindKey}";
-      $this->param[$bindKey] = trim(substr($val1, 1));
-    } else if (strtolower($val1) === 'null') {
+    $query  = '(';
+    for ($i = 0; $i < $c; $i++) {
+      $key = $val[0][$i];
+      $this->_makeEitherSQL($key, $val[1][$i], $query, $key.$this->count++);
+      if (($i + 1) !== $c) $query .= ' OR ';
+    }
+    $query .= ')';
+    $this->setWhereQuery($query);
+  }
+
+  protected function _makeEitherSQL($key, $val, &$query, $bindKey)
+  {
+    if ($val[0] === '<' || $val[0] === '>') {
+      $query .= "{$key} {$val[0]} :{$bindKey}";
+      $this->param[$bindKey] = trim(substr($val, 1));
+    } else if (strtolower($val) === 'null') {
       $query .= "{$key} IS NULL";
     } else {
       $query .= "{$key}=:{$bindKey}";
-      $this->param[$bindKey] = $val1;
+      $this->param[$bindKey] = $val;
     }
-
-    $query .= ' OR ';
-
-    if ($val2[0] === '<' || $val2[0] === '>') {
-      $query .= "{$key} {$val2[0]} :{$bindKey2}";
-      $this->param[$bindKey2] = trim(substr($val2, 1));
-    } else if ($val2 === 'null') {
-      $query .= "{$key} IS NULL";
-    } else {
-      $query .= "{$key}=:{$bindKey2}";
-      $this->param[$bindKey2] = $val2;
-    }
-
-    $query .= ')';
-    $this->setWhereQuery($query);
   }
 
   public function makeLess_GreaterSQL($key, $val)
@@ -129,15 +125,5 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
     $this->param = array();
     $this->count = 1;
     $this->set   = false;
-  }
-
-  protected function setWhereQuery($query)
-  {
-    if ($this->set) {
-      array_push($this->sql, ' AND ' . $query);
-    } else {
-      array_push($this->sql, ' WHERE ' . $query);
-      $this->set = true;
-    }
   }
 }

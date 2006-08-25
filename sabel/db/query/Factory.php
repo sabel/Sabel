@@ -54,4 +54,24 @@ class Sabel_DB_Query_Factory
     if (isset($constraints['offset']))
       array_push($this->sql, " OFFSET {$constraints['offset']}");
   }
+
+  protected function setWhereQuery($query)
+  {
+    if ($this->set) {
+      array_push($this->sql, ' AND ' . $query);
+    } else {
+      array_push($this->sql, ' WHERE ' . $query);
+      $this->set = true;
+    }
+  }
+
+  protected function toArrayEitherCondition($key, $val)
+  {
+    $keys = array();
+    for ($i = 0; $i < count($val); $i++) $keys[] = $key;
+    $condition = array();
+    $condition[] = $keys;
+    $condition[] = $val;
+    return $condition;
+  }
 }
