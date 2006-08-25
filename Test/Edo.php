@@ -17,6 +17,7 @@ require_once "sabel/db/Connection.php";
 
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
+require_once "sabel/db/driver/Mysql.php";
 
 /**
  * test for Sabel_DB
@@ -34,8 +35,8 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    $helper = new MysqlHelper();
-    //$helper = new PgsqlHelper();
+    //$helper = new MysqlHelper();
+    $helper = new PgsqlHelper();
     //$helper = new SQLiteHelper();
 
     try {
@@ -45,7 +46,6 @@ class Test_Edo extends SabelTestCase
     }
 
     $helper->createTables();
-
     return new PHPUnit2_Framework_TestSuite("Test_Edo");
   }
 
@@ -873,7 +873,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
-  /*
+
   public function testJoinSelect()
   {
     $users = new Users();
@@ -909,7 +909,6 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($res[1]->bbs[0]->title, 'title21');
     $this->assertEquals($res[1]->bbs[1]->title, 'title22');
   }
-  */
 
   public function testOrder()
   {
@@ -1084,6 +1083,27 @@ class Test_Edo extends SabelTestCase
     $trans1 = new Trans1();
     $t = $trans1->select();
     $this->assertEquals($t, false); // not found
+  }
+
+  public function testGetColumnsName()
+  {
+    $test = new Test();
+    $test->save(array('name' => 'a' ,'blood' => 'b', 'test2_id' => 3));
+    $colsName = $test->getColumnsName();
+
+    $this->assertEquals($colsName[0], 'id');
+    $this->assertEquals($colsName[1], 'name');
+    $this->assertEquals($colsName[2], 'blood');
+    $this->assertEquals($colsName[3], 'test2_id');
+
+    $test = new Sabel_DB_Basic('seq');
+    $test->save(array('text' => 'a'));
+
+    $test = new Test();
+    $colsName = $test->getColumnsName('seq');
+
+    $this->assertEquals($colsName[0], 'id');
+    $this->assertEquals($colsName[1], 'text');
   }
 }
 

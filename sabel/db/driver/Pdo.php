@@ -103,6 +103,8 @@ class Sabel_DB_Driver_Pdo implements Sabel_DB_Driver_Interface
         $this->execute('SELECT last_insert_id()');
         $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
         return $row['last_insert_id()'];
+      case 'sqlite':
+        return $this->pdo->lastInsertId();
       default:
         return 'todo else';
     }

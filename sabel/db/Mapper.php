@@ -117,6 +117,11 @@ abstract class Sabel_DB_Mapper
     $this->withParent = true;
   }
 
+  public function disableParent()
+  {
+    $this->withParent = false;
+  }
+
   public function setProperties($array)
   {
     if (!is_array($array)) throw new Exception('properties Argument is not array.');
@@ -253,6 +258,20 @@ abstract class Sabel_DB_Mapper
     return (int) $row[0];
   }
 
+  public function getColumnsName($table = null)
+  {
+    $table = (isset($table)) ? $table : $this->table;
+
+    $this->disableParent();
+    $conditions  = array();
+    $constraints = array('limit' => 1);
+
+    $this->driver->setBasicSQL("SELECT * FROM {$table}");
+    $res = $this->getRecords($this->driver, $conditions, $constraints);
+
+    return array_keys($res[0]->toArray());
+  }
+
   public function getFirst($orderColumn)
   {
     return $this->getMost('ASC', $orderColumn);
@@ -352,12 +371,10 @@ abstract class Sabel_DB_Mapper
     $sql   = array('SELECT ');
     $table = $this->table;
 
-    $schema = 'public'; //tmp
-    $is = new Sabel_DB_Schema_Accessor($this->connectName, $schema);
-    $this->addJoinColumnPhrase($is, $sql, $table);
+    $this->addJoinColumnPhrase($sql, $table);
 
-    if ($child)  $this->addJoinColumnPhrase($is, $sql, $child);
-    if ($parent) $this->addJoinColumnPhrase($is, $sql, $parent);
+    if ($child)  $this->addJoinColumnPhrase($sql, $child);
+    if ($parent) $this->addJoinColumnPhrase($sql, $parent);
 
     $sql = join('', $sql);
     $sql = array(substr($sql, 0, strlen($sql) - 2));
@@ -368,7 +385,7 @@ abstract class Sabel_DB_Mapper
 
     $driver = $this->getDriver();
     $driver->setBasicSQL(join('', $sql));
-    $driver->makeQuery($this->condition, $this->constraints);
+    $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
     $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
@@ -393,21 +410,19 @@ abstract class Sabel_DB_Mapper
     return $recordObj;
   }
 
-  private function addJoinColumnPhrase($is, &$sql, $table)
+  private function addJoinColumnPhrase(&$sql, $table)
   {
+    $joinCol = array();
     if (is_array($table)) {
       foreach ($table as $t) {
-        $joinCol = array();
-        foreach ($is->getTable($t)->getColumns() as $c) {
-          $joinCol[] = $c->name;
-          array_push($sql, "{$t}.{$c->name} AS prefix_{$t}_{$c->name}, ");
+        foreach ($this->getColumnsName($t) as $c) {
+          $joinCol[] = $c;
+          array_push($sql, "{$t}.{$c} AS prefix_{$t}_{$c}, ");
         }
         $this->joinColCache[$t] = $joinCol;
       }
     } else {
-      foreach ($is->getTable($table)->getColumns() as $c) {
-        array_push($sql, "{$table}.{$c->name}, ");
-      }
+      foreach ($this->getColumnsName($table) as $c) array_push($sql, "{$table}.{$c}, ");
     }
   }
 
@@ -454,7 +469,7 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  protected function getRecords($driver, &$conditions, &$constraints, $child = null)
+  protected function getRecords($driver, &$conditions, &$constraints = null, $child = null)
   {
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);

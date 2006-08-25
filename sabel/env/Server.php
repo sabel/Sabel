@@ -10,7 +10,7 @@ class Sabel_Env_Server
 {
   private static $instance;
   
-  public function create()
+  public static function create()
   {
     if (is_not_object(self::$instance)) self::$instance = new self();
     return self::$instance;
