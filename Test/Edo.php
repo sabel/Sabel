@@ -5,6 +5,7 @@ if (!defined("PHPUnit2_MAIN_METHOD")) {
 }
 
 require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/driver/General.php";
 require_once "sabel/db/query/Interface.php";
 require_once "sabel/db/query/Factory.php";
 

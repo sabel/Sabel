@@ -5,13 +5,14 @@ class Sabel_DB_Transaction
   private static $list   = array();
   private static $active = false;
 
-  public static function begin($connectName, $connection, $driver)
+  public static function begin($connectName, $driver)
   {
     if (!array_key_exists($connectName, self::$list)) {
-      self::$list[$connectName]['conn']   = $connection;
+      $conn = Sabel_DB_Connection::getConnection($connectName);
+      self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;
 
-      $driver->begin($connection);
+      $driver->begin($conn);
       return true;
     } else {
       return false;

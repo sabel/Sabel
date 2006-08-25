@@ -42,11 +42,6 @@ abstract class Sabel_DB_Mapper
     $selected     = false,
     $withParent   = false;
 
-  public function getDriver()
-  {
-    return $this->driver;
-  }
-
   public function setDriver($connectName)
   {
     $this->driver = $this->makeEdoDriver($connectName);
@@ -68,6 +63,11 @@ abstract class Sabel_DB_Mapper
       case 'firebird':
         return new Sabel_DB_Driver_Firebird($conn);
     }
+  }
+
+  protected function getDriver()
+  {
+    return $this->driver;
   }
 
   public function __construct($param1 = null, $param2 = null)
@@ -233,7 +233,7 @@ abstract class Sabel_DB_Mapper
   {
     $driver = $this->getDriver();
 
-    Sabel_DB_Transaction::begin($this->connectName, $driver->getConnection(), $driver);
+    Sabel_DB_Transaction::begin($this->connectName, $driver);
     Sabel_DB_Transaction::enableTransaction();
   }
 

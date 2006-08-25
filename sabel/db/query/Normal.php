@@ -9,15 +9,7 @@
 class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
                             implements Sabel_DB_Query_Interface
 {
-  protected
-    $sql    = array(),
-    $set    = false,
-    $driver = null;
-
-  public function __construct($driver)
-  {
-    $this->driver = $driver;
-  }
+  protected $sql = array();
 
   public function makeNormalSQL($key, $val)
   {

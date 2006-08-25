@@ -14,7 +14,6 @@ require_once('PHPUnit2/Framework/TestSuite.php');
 require_once "PHPUnit2/Framework/IncompleteTestError.php";
 
 require_once('Test/SabelTestCase.php');
-
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
 require_once('Test/DI.php');
@@ -38,6 +37,7 @@ class SabelAllTests
   public static function suite()
   {
     $suite = new PHPUnit2_Framework_TestSuite('sabel all tests');
+
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_DI::suite());
     $suite->addTest(Test_Aspect::suite());

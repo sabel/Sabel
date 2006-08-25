@@ -2,6 +2,15 @@
 
 class Sabel_DB_Query_Factory
 {
+  protected
+    $driver = null,
+    $set    = false;
+
+  public function __construct($driver)
+  {
+    $this->driver = $driver;
+  }
+
   public function makeConditionQuery($conditions)
   {
     if (!$conditions) return true;

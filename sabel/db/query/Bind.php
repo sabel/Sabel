@@ -9,18 +9,10 @@
 class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
                           implements Sabel_DB_Query_Interface
 {
-  protected
-    $sql    = array(),
-    $set    = false,
-    $driver = null;
+  protected $sql = array();
 
   private $count = 1;
   private $param = array();
-
-  public function __construct($driver)
-  {
-    $this->driver = $driver;
-  }
 
   public function makeNormalSQL($key, $val)
   {
