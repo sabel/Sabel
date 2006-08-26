@@ -64,16 +64,14 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   protected function _getLess_GreaterSQL($key, $val, $bindKey)
   {
-    $query = "{$key} {$val[0]} :{$bindKey}";
     $this->param[$bindKey] = trim(substr($val, 1));
-    return $query;
+    return "{$key} {$val[0]} :{$bindKey}";
   }
 
   protected function _getNormalSQL($key, $val, $bindKey)
   {
-    $query = "{$key}=:{$bindKey}";
     $this->param[$bindKey] = $val;
-    return $query;
+    return "{$key}=:{$bindKey}";
   }
 
   public function getParam()

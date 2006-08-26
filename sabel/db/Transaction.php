@@ -13,15 +13,12 @@ class Sabel_DB_Transaction
       self::$list[$connectName]['driver'] = $driver;
 
       $driver->begin($conn);
+      self::$active = true;
+
       return true;
     } else {
       return false;
     }
-  }
-
-  public static function enableTransaction()
-  {
-    self::$active = true;
   }
 
   public static function isActive()

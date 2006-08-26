@@ -232,9 +232,7 @@ abstract class Sabel_DB_Mapper
   public function begin()
   {
     $driver = $this->getDriver();
-
-    Sabel_DB_Transaction::begin($this->connectName, $driver);
-    Sabel_DB_Transaction::enableTransaction();
+    return Sabel_DB_Transaction::begin($this->connectName, $driver);
   }
 
   public function commit()

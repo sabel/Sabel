@@ -18,23 +18,21 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     $this->conn     = $conn;
     $this->myDb     = 'firebird';
     $this->queryObj = new Sabel_DB_Query_Normal($this);
-
-    ibase_query($this->conn, 'COMMIT');
   }
 
   public function begin($conn)
   {
-    ibase_query($conn, 'SET TRANSACTION');
+    ibase_trans($conn);
   }
 
   public function commit($conn)
   {
-    pg_query($conn, 'COMMIT');
+    ibase_commit($conn);
   }
 
   public function rollback($conn)
   {
-    pg_query($conn, 'ROLLBACK');
+    ibase_rollback($conn);
   }
 
   private function setIdNumber($table, $data, $defColumn)
@@ -69,10 +67,11 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
   public function fetch($style = null)
   {
     if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
-      return ibase_fetch_assoc($this->result);
+      $row = ibase_fetch_assoc($this->result);
     } else {
-      return ibase_fetch_row($this->result);
+      $row = ibase_fetch_row($this->result);
     }
+    return array_change_key_case($row);
   }
 
   public function fetchAll($style = null)
@@ -80,7 +79,9 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    while ($row = ibase_fetch_assoc($result)) $row[] = $row;
+    if ($result !== true)
+      while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);        
+
     return $rows;
   }
 
@@ -94,7 +95,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
   {
     $tmp    = substr($sql, 6);
     $query  = "FIRST {$constraints['limit']} ";
-    $query .= (isset($constraints['offset']) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
+    $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
 
     return 'SELECT ' . $query . $tmp;
   }
