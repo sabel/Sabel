@@ -36,8 +36,8 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    $helper = new MysqlHelper();
-    //$helper = new PgsqlHelper();
+    //$helper = new MysqlHelper();
+    $helper = new PgsqlHelper();
     //$helper = new SQLiteHelper();
 
     try {
@@ -1105,16 +1105,12 @@ class Test_Edo extends SabelTestCase
   public function testGetColumnsName()
   {
     $test = new Test();
-    $test->save(array('name' => 'a' ,'blood' => 'b', 'test2_id' => 3));
     $colsName = $test->getColumnsName();
 
     $this->assertEquals($colsName[0], 'id');
     $this->assertEquals($colsName[1], 'name');
     $this->assertEquals($colsName[2], 'blood');
     $this->assertEquals($colsName[3], 'test2_id');
-
-    $test = new Sabel_DB_Basic('seq');
-    $test->save(array('text' => 'a'));
 
     $test = new Test();
     $colsName = $test->getColumnsName('seq');

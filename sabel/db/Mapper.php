@@ -234,10 +234,6 @@ abstract class Sabel_DB_Mapper
     $this->conditions = array();
   }
 
-  protected function getDriver()
-  {
-    return $this->driver;
-  }
   public function begin()
   {
     $driver = $this->getDriver();
