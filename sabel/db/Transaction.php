@@ -12,9 +12,10 @@ class Sabel_DB_Transaction
       self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;
 
-      $driver->begin($conn);
-      self::$active = true;
+      if (!is_null($result = $driver->begin($conn)))
+        self::$list[$connectName]['conn'] = $result;
 
+      self::$active = true;
       return true;
     } else {
       return false;

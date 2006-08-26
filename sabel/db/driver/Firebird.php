@@ -11,6 +11,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 {
   private
     $conn         = null,
+    $trans        = null,
     $lastinsertId = null;
 
   public function __construct($conn)
@@ -22,40 +23,49 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 
   public function begin($conn)
   {
-    ibase_trans($conn);
+    $resource    = ibase_trans(IBASE_WRITE, $conn);
+    $this->trans = $resource;
+    return $resource;
   }
 
   public function commit($conn)
   {
     ibase_commit($conn);
+    unset($this->trans);
   }
 
   public function rollback($conn)
   {
     ibase_rollback($conn);
+    unset($this->trans);
   }
 
-  private function setIdNumber($table, $data, $defColumn)
+  protected function setIdNumber($table, $data, $defColumn)
   {
+    $seqName = strtoupper("{$table}_{$defColumn}_gen");
+
     if (!isset($data[$defColumn])) {
-      if (!($this->lastInsertId = ibase_gen_id("{$table}_{$defColumn}_seq", 1))) {
-        throw new Exception("{$table}_{$defColumn}_seq is not found.");
-      } else {
-        $data[$defColumn] = return $this->lastInsertId;
-      }
+      if (!$result = $this->execute("SELECT GEN_ID({$seqName}, 1) FROM sequence"))
+        throw new Exception('Error: get generator number failed. ' . $seqName);
+
+      $genNum = $this->fetch();
+      $this->lastInsertId = $genNum[0];
+      $data[$defColumn] = $genNum[0];
     }
     return $data;
   }
 
   public function execute($sql = null, $param = null)
   {
+    $conn = (isset($this->trans)) ? $this->trans : $this->conn;
+
     if (isset($sql)) {
-      $this->result = ibase_query($this->conn, $sql);
+      $this->result = ibase_query($conn, $sql);
     } else if (is_null($this->queryObj->getSQL())) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $sql = $this->queryObj->getSQL();
-      if (!($this->result = ibase_query($this->conn, $sql))) {
+      if (!($this->result = @ibase_query($conn, $sql))) {
         throw new Exception('ibase_query execute failed: ' . $sql);
       }
     }
@@ -71,7 +81,9 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     } else {
       $row = ibase_fetch_row($this->result);
     }
-    return array_change_key_case($row);
+
+    if (is_array($row)) $row = array_change_key_case($row);
+    return $row;
   }
 
   public function fetchAll($style = null)
@@ -79,7 +91,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if ($result !== true)
+    if (!is_bool($result) && !is_numeric($result) && !is_string($result))
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);        
 
     return $rows;
