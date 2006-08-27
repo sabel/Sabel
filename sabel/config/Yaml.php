@@ -11,6 +11,11 @@ class Sabel_Config_Yaml
     $parser = new Spyc();
     $this->data = $parser->load($file);
   }
+  
+  public function isValid()
+  {
+    return (count($this->data) === 0) ? false : true;
+  }
 
   public function read($key)
   {
