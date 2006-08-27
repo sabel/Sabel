@@ -50,7 +50,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 
       $genNum = $this->fetch();
       $this->lastInsertId = $genNum[0];
-      $data[$defColumn] = $genNum[0];
+      $data[$defColumn]   = $genNum[0];
     }
     return $data;
   }
@@ -97,18 +97,14 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
     return $rows;
   }
 
+  /**
+   * should change the setting of php.ini
+   * 'magic_quotes_sybase = On'
+   *
+   */
   public function escape($value)
   {
-     if (!get_magic_quotes_gpc()) $value = addslashes($value);
-     return $value;
-  }
-  
-  public function getFirstSkipQuery($constraints, $sql)
-  {
-    $tmp    = substr($sql, 6);
-    $query  = "FIRST {$constraints['limit']} ";
-    $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
-
-    return 'SELECT ' . $query . $tmp;
+    if (get_magic_quotes_gpc()) $value = stripslashes($value);
+    return $value;
   }
 }

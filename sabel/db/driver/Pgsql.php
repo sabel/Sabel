@@ -82,6 +82,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
 
   public function escape($value)
   {
-     return pg_escape_string($value);
+    if (get_magic_quotes_gpc()) $value = stripslashes($value);
+    return pg_escape_string($value);
   }
 }

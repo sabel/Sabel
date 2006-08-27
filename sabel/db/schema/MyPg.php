@@ -81,7 +81,7 @@ class Sabel_DB_Schema_MyPg
 
     if (in_array($type, $this->getNumericTypes())) {
       $co->type = Sabel_DB_Schema_Type::INT;
-      $co->convertToEdoInteger($columnRecord['data_type']);
+      $co->setNumericRange($columnRecord['data_type']);
       return $co;
     }
 

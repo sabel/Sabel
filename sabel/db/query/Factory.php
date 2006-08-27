@@ -59,7 +59,11 @@ class Sabel_DB_Query_Factory
 
     if (isset($constraints['limit'])) {
       if ($this->driver->getDBName() === 'firebird') {
-        $this->sql = array($this->driver->getFirstSkipQuery($constraints, join('', $this->sql)));
+        $tmp    = substr(join('', $this->sql), 6);
+        $query  = "FIRST {$constraints['limit']} ";
+        $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
+
+        $this->sql = array('SELECT ' . $query . $tmp);
         return false;
       } else {
         array_push($this->sql, " LIMIT {$constraints['limit']}");

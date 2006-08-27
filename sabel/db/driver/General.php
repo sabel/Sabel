@@ -1,7 +1,7 @@
 <?php
 
 /**
- * general class for db drivers.
+ * general class for Sabel_DB_Driver pkg.
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db

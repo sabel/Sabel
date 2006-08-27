@@ -84,6 +84,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
 
   public function escape($value)
   {
-     return mysql_real_escape_string($value, $this->conn);
+    if (get_magic_quotes_gpc()) $value = stripslashes($value);
+    return mysql_real_escape_string($value, $this->conn);
   }
 }
