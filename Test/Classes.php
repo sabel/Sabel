@@ -24,6 +24,10 @@ class Test_Classes extends PHPUnit2_Framework_TestCase
     $this->assertEquals("test", String::create("test ")->rtrim());
     $this->assertEquals("test", String::create(" test")->ltrim());
     $this->assertEquals("test", String::create(" test ")->trim());
+    
+    $string = String::create(" test test ");
+    $string->trim();
+    $this->assertEquals("test test", $string->value);
   }
   
   public function testStringReplace()
@@ -49,6 +53,21 @@ class Test_Classes extends PHPUnit2_Framework_TestCase
   {
     $this->assertEquals(sha1("test"), String::create("test")->sha1());
     $this->assertEquals(md5("test"), String::create("test")->md5());
+  }
+  
+  public function testStringSucc()
+  {
+    $str = String::create("A");
+    $this->assertEquals("B", $str->succ());
+    $this->assertEquals("C", $str->succ());
+    
+    unset($str);
+    $str = String::create("ABC001");
+    $this->assertEquals("ABC002", $str->succ());
+    $this->assertEquals("ABC003", $str->succ());
+    
+    // @todo test for boundary value.
+    // $this->assertEquals("B000", String::create("A999"));
   }
   
   public function testIterator()

@@ -12,6 +12,11 @@ class String implements Iterator
     $this->length = strlen($string);
   }
   
+  public function __get($name)
+  {
+    return $this->string;
+  }
+  
   public static function create($string = null)
   {
     return new self($string);
@@ -40,43 +45,43 @@ class String implements Iterator
   public function rtrim($charlist = null)
   {
     if ($charlist) {
-      return rtrim($this->string, $charlist);
+      return $this->string = rtrim($this->string, $charlist);
     } else {
-      return rtrim($this->string);
+      return $this->string = rtrim($this->string);
     }
   }
   
   public function ltrim($charlist = null)
   {
     if ($charlist) {
-      return ltrim($this->string, $charlist);
+      return $this->string = ltrim($this->string, $charlist);
     } else {
-      return ltrim($this->string);
+      return $this->string = ltrim($this->string);
     }
   }
   
   public function trim($charlist = null)
   {
     if ($charlist) {
-      return trim($this->string, $charlist);
+      return $this->string = trim($this->string, $charlist);
     } else {
-      return trim($this->string);
+      return $this->string = trim($this->string);
     }
   }
   
   public function toUpper()
   {
-    return strtoupper($this->string);
+    return $this->string = strtoupper($this->string);
   }
   
   public function toLower()
   {
-    return strtolower($this->string);
+    return $this->string = strtolower($this->string);
   }
   
   public function toUpperFirst()
   {
-    return ucfirst($this->string);
+    return $this->string = ucfirst($this->string);
   }
   
   public function explode($separator, $limit = null)
@@ -96,7 +101,28 @@ class String implements Iterator
   
   public function replace($search, $replace)
   {
-    return str_replace($search, $replace, $this->string);
+    return $this->string = str_replace($search, $replace, $this->string);
+  }
+  
+  /**
+   * @todo implement boundary value
+   */
+  public function succ()
+  {
+    $current = ord($this->last());
+    $next = ++$current;
+    $this->string{$this->length-1} = chr($next);
+    return $this->string;
+  }
+  
+  public function last()
+  {
+    return $this->string{$this->length()-1};
+  }
+  
+  public function cloning()
+  {
+    return clone $this;
   }
   
   public function count()
