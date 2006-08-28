@@ -2,8 +2,6 @@
 
 interface Sabel_DB_Driver_Interface
 {
-  public function getDBName();
-
   public function begin($connection);
   public function commit($connection);
   public function rollback($connection);

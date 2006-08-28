@@ -20,7 +20,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
   {
     $this->conn     = $conn;
     $this->myDb     = $myDb;
-    $this->queryObj = new Sabel_DB_Query_Bind($this);
+    $this->queryObj = new Sabel_DB_Query_Bind($myDb);
   }
 
   public function begin($conn)
@@ -76,10 +76,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
     array_push($sql, join(',', $columns));
     array_push($sql, ") VALUES(");
     array_push($sql, join(',', $values));
-    array_push($sql, ');');
+    array_push($sql, ')');
 
     $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists(join('', $sql), $data);
-
     if (!$this->stmtFlag) $this->queryObj->setBasicSQL(join('', $sql));
 
     return $this->execute();
@@ -168,10 +167,12 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
   public function fetchAll($style = null)
   {
     if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
-      return $this->stmt->fetchAll(PDO::FETCH_ASSOC);
+      $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
-      return $this->stmt->fetchAll(PDO::FETCH_BOTH);
+      $result = $this->stmt->fetchAll(PDO::FETCH_BOTH);
     }
+    $this->stmt->closeCursor();
+    return $result;
   }
 
   private function makeBindParam()

@@ -1,10 +1,5 @@
 <?php
 
-require_once "Mysql.php";
-require_once "Pgsql.php";
-require_once "Table.php";
-require_once "Column.php";
-
 class Sabel_DB_Schema_Accessor
 {
   protected $is = null;

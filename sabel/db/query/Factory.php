@@ -4,10 +4,12 @@ class Sabel_DB_Query_Factory
 {
   protected
     $driver = null,
+    $dbName = '',
     $set    = false;
 
-  public function __construct($driver)
+  public function __construct($dbName, $driver = null)
   {
+    $this->dbName = $dbName;
     $this->driver = $driver;
   }
 
@@ -58,7 +60,7 @@ class Sabel_DB_Query_Factory
       array_push($this->sql, " ORDER BY {$constraints['order']}");
 
     if (isset($constraints['limit'])) {
-      if ($this->driver->getDBName() === 'firebird') {
+      if ($this->dbName === 'firebird') {
         $tmp    = substr(join('', $this->sql), 6);
         $query  = "FIRST {$constraints['limit']} ";
         $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';

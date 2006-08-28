@@ -10,15 +10,13 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
                                implements Sabel_DB_Driver_Interface
 {
   private
-    $conn         = null,
     $trans        = null,
     $lastinsertId = null;
 
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->myDb     = 'firebird';
-    $this->queryObj = new Sabel_DB_Query_Normal($this);
+    $this->queryObj = new Sabel_DB_Query_Normal('firebird', $this);
   }
 
   public function begin($conn)

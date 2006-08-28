@@ -9,15 +9,12 @@
 class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
                             implements Sabel_DB_Driver_Interface
 {
-  private
-    $conn         = null,
-    $lastinsertId = null;
+  private $lastinsertId = null;
 
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->myDb     = 'pgsql';
-    $this->queryObj = new Sabel_DB_Query_Normal($this);
+    $this->queryObj = new Sabel_DB_Query_Normal('pgsql', $this);
   }
 
   public function begin($conn)

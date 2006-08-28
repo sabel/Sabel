@@ -9,13 +9,8 @@
 class Sabel_DB_Driver_General
 {
   protected
-    $myDb     = null,
+    $conn     = null,
     $queryObj = null;
-
-  public function getDBName()
-  {
-    return $this->myDb;
-  }
 
   public function setBasicSQL($sql)
   {
@@ -51,7 +46,7 @@ class Sabel_DB_Driver_General
     if ($constraints)
       $this->queryObj->makeConstraintQuery($constraints);
   }
-  
+
   public function executeInsert($table, $data, $defColumn)
   {
     $data = $this->setIdNumber($table, $data, $defColumn);

@@ -4,22 +4,31 @@ if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
 }
 
-require_once "sabel/db/driver/Interface.php";
-require_once "sabel/db/driver/General.php";
-require_once "sabel/db/query/Interface.php";
-require_once "sabel/db/query/Factory.php";
-
+require_once "sabel/db/Connection.php";
+require_once "sabel/db/Transaction.php";
 require_once "sabel/db/Mapper.php";
 require_once "sabel/db/BaseClasses.php";
 
-require_once "sabel/db/Transaction.php";
-require_once "sabel/db/schema/Accessor.php";
-require_once "sabel/db/Connection.php";
-
+require_once "sabel/db/driver/Interface.php";
+require_once "sabel/db/driver/General.php";
 require_once "sabel/db/driver/Pdo.php";
 require_once "sabel/db/driver/Pgsql.php";
 require_once "sabel/db/driver/Mysql.php";
 
+require_once "sabel/db/query/Interface.php";
+require_once "sabel/db/query/Factory.php";
+require_once "sabel/db/query/Bind.php";
+require_once "sabel/db/query/Normal.php";
+
+require_once "sabel/db/schema/Type.php";
+require_once "sabel/db/schema/Table.php";
+require_once "sabel/db/schema/Column.php";
+require_once "sabel/db/schema/MyPg.php";
+require_once "sabel/db/schema/Mysql.php";
+require_once "sabel/db/schema/Pgsql.php";
+require_once "sabel/db/schema/Accessor.php";
+
+require_once "SabelTestCase.php";
 /**
  * test for Sabel_DB
  *
@@ -57,18 +66,29 @@ class Test_Edo extends SabelTestCase
 
   protected function setUp()
   {
-    $this->test      = new Test();
-    $this->test2     = new Sabel_DB_Basic('test2');
-    $this->test3     = new Sabel_DB_Basic('test3');
-    $this->customer  = new Customer();
-    $this->order     = new Sabel_DB_Basic('customer_order');
-    $this->orderLine = new Sabel_DB_Basic('order_line');
-    $this->telephone = new Sabel_DB_Basic('customer_telephone');
+     $this->test      = new Test();
+     $this->test2     = new Sabel_DB_Basic('test2');
+     $this->test3     = new Sabel_DB_Basic('test3');
+     $this->customer  = new Customer();
+     $this->order     = new Sabel_DB_Basic('customer_order');
+     $this->orderLine = new Sabel_DB_Basic('order_line');
+     $this->telephone = new Sabel_DB_Basic('customer_telephone');
   }
 
   protected function tearDown()
   {
   }
+  /*
+  public function testDataInsert()
+  {
+    $customer = Sabel_DB_Basic('customer');
+    $insertData   = array();
+    $insertData[] = array('id' => 1, 'name' => 'tanaka');
+    $insertData[] = array('id' => 2, 'name' => 'ueda');
+    $this->customer->multipleInsert($insertData);
+
+  }
+   */
 
   public function testConstraint()
   {
@@ -1129,7 +1149,7 @@ class MysqlHelper
                             'customer_telephone', 'infinite1', 'infinite2',
                             'seq', 'tree', 'student', 'student_course',
                             'course', 'users', 'status', 'bbs', 'trans1');
-  
+
   public function __construct()
   {
     /*
@@ -1139,26 +1159,28 @@ class MysqlHelper
     $dbCon['pass'] = '';
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
     */
- 
     $dbCon = mysql_connect('localhost', 'root', '');
     mysql_select_db('edo', $dbCon);
     Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon);
-    
-    $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo2';
-    $dbCon['user'] = 'root';
-    $dbCon['pass'] = '';
-    
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
- 
+
+    $dbCon2 = array();
+    $dbCon2['dsn']  = 'mysql:host=192.168.0.222;dbname=edo2';
+    $dbCon2['user'] = 'develop';
+    $dbCon2['pass'] = 'develop';
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
+
+    //$dbCon2 = mysql_connect('192.168.0.222', 'develop', 'develop');
+    //mysql_select_db('edo2', $dbCon2);
+    //Sabel_DB_Connection::addConnection('default2', 'mysql', $dbCon2);
+
     $SQLs = array();
-    
+
     $SQLs[] = 'CREATE TABLE test (
                  id       INT2 PRIMARY KEY,
                  name     VARCHAR(32) NOT NULL,
                  blood    VARCHAR(32),
                  test2_id INT2)';
-    
+
     $SQLs[] = 'CREATE TABLE test2 (
                  id int2 PRIMARY KEY,
                  name VARCHAR(32) NOT NULL,
@@ -1283,14 +1305,20 @@ class PgsqlHelper
 
   public function __construct()
   {
-    $dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
-    Sabel_DB_Connection::addConnection('default', 'pgsql', $dbCon);
-
     $dbCon = array();
-    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo2';
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
+
+    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
+    //Sabel_DB_Connection::addConnection('default', 'pgsql', $dbCon);
+
+    $dbCon2 = array();
+    $dbCon2['dsn']  = 'pgsql:host=localhost;dbname=edo2';
+    $dbCon2['user'] = 'pgsql';
+    $dbCon2['pass'] = 'pgsql';
+    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
 
     $SQLs = array();
 

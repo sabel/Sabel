@@ -9,13 +9,10 @@
 class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
                             implements Sabel_DB_Driver_Interface
 {
-  private $conn = null;
-
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->myDb     = 'mysql';
-    $this->queryObj = new Sabel_DB_Query_Normal($this);
+    $this->queryObj = new Sabel_DB_Query_Normal('mysql', $this);
   }
 
   public function begin($conn)
@@ -42,7 +39,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
   {
     $this->execute('SELECT last_insert_id()');
     $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-    return $row['last_insert_id()'];
+    return (int)$row['last_insert_id()'];
   }
 
   public function execute($sql = null, $param = null)
@@ -76,7 +73,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if ($result !== true)
+    if (!is_bool($result))
       while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
 
     return $rows;

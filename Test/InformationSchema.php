@@ -1,16 +1,5 @@
 <?php
 
-require_once "sabel/db/Connection.php";
-require_once "sabel/db/Mapper.php";
-
-require_once "sabel/db/schema/Accessor.php";
-
-require_once "sabel/db/query/Interface.php";
-require_once "sabel/db/query/Factory.php";
-
-require_once "sabel/db/driver/Pdo.php";
-require_once "sabel/db/driver/Pgsql.php";
-
 class Test_InformationSchema extends SabelTestCase
 {
   public static function suite()
