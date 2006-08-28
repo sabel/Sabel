@@ -29,7 +29,7 @@ class String implements Iterator
   
   public function isNotEmpty()
   {
-    return (!(empty($this->string)));
+    return (!$this->isEmpty());
   }
   
   public function isntEmpty()
@@ -39,7 +39,7 @@ class String implements Iterator
   
   public function position($needle, $offset = 0)
   {
-    return strpos($this->string, $needle);
+    return strpos($this->string, $needle, $offset);
   }
   
   public function rtrim($charlist = null)

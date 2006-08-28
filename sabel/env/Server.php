@@ -19,11 +19,7 @@ class Sabel_Env_Server
   public function __get($key)
   {
     $key = strtoupper($key);
-    if (isset($_SERVER[$key])) {
-      return $_SERVER[$key];
-    } else {
-      return null;
-    }
+    return (isset($_SERVER[$key])) ? $_SERVER[$key] : null;
   }
   
   public function isMethod($expected)
