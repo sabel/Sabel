@@ -11,6 +11,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 {
   private
     $stmt  = null,
+    $myDb  = '',
     $data  = array(),
     $param = array();
 

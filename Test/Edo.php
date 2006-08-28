@@ -78,17 +78,6 @@ class Test_Edo extends SabelTestCase
   protected function tearDown()
   {
   }
-  /*
-  public function testDataInsert()
-  {
-    $customer = Sabel_DB_Basic('customer');
-    $insertData   = array();
-    $insertData[] = array('id' => 1, 'name' => 'tanaka');
-    $insertData[] = array('id' => 2, 'name' => 'ueda');
-    $this->customer->multipleInsert($insertData);
-
-  }
-   */
 
   public function testConstraint()
   {
