@@ -17,13 +17,14 @@ class Sabel_DB_Schema_MyPg
 
   public function getTables()
   {
-    $sql = "SELECT * FROM information_schema.tables WHERE table_schema = '{$this->schema}'";
+    $sql  = "SELECT table_name FROM information_schema.tables ";
+    $sql .= "WHERE table_schema = '{$this->schema}'";
 
     $tables = array();
     foreach ($this->recordObj->execute($sql) as $val) {
-      $data      = array_change_key_case($val->toArray());
-      $tableName = $data['table_name'];
-      $tables[]  = new Sabel_DB_Schema_Table($tableName, $this->createColumns($tableName));
+      $data  = array_change_key_case($val->toArray());
+      $table = $data['table_name'];
+      $tables[$table]  = new Sabel_DB_Schema_Table($table, $this->createColumns($table));
     }
     return $tables;
   }
@@ -47,12 +48,11 @@ class Sabel_DB_Schema_MyPg
     return $columns;
   }
 
-  protected function createColumn($table, $column = null)
+  protected function createColumn($table, $column)
   {
-    if (is_null($column)) return $this->createColumns($table);
-
     $sql  = "SELECT * FROM information_schema.columns ";
-    $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$table}' AND column_name = '{$column}'";
+    $sql .= "WHERE table_schema = '{$this->schema}' AND ";
+    $sql .= "table_name = '{$table}' AND column_name = '{$column}'";
 
     $res = $this->recordObj->execute($sql);
     return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
@@ -69,11 +69,15 @@ class Sabel_DB_Schema_MyPg
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
+    if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord))) {
+      $co->pkey = (count($this->recordObj->execute($sql)) > 0);
+    }
+
     if (is_array($sqls = $this->addCommentInfo($co, $columnRecord))) {
       $oid = $this->recordObj->execute($sqls[0]);
-      $pos = $this->recordObj->execute($sqls[1]);
+      $pos = $columnRecord['ordinal_position'];
 
-      $comment = $this->recordObj->execute(sprintf($sqls[2], $oid[0]->relfilenode, $pos[0]->ordinal_position));
+      $comment = $this->recordObj->execute(sprintf($sqls[2], $oid[0]->relfilenode, $pos));
       $co->comment = $comment[0]->col_description;
     }
 

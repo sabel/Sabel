@@ -22,14 +22,19 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
     return array('blob', 'mediumblob', 'longblob');
   }
 
-  public function addCommentInfo($co, $columnRecord)
-  {
-    $co->comment = $columnRecord['column_comment'];
-  }
-
   public function addIncrementInfo($co, $columnRecord)
   {
     $co->increment = ($columnRecord['extra'] === 'auto_increment');
+  }
+
+  public function addPrimaryKeyInfo($co, $columnRecord)
+  {
+    $co->pkey = ($columnRecord['column_key'] === 'PRI');
+  }
+
+  public function addCommentInfo($co, $columnRecord)
+  {
+    $co->comment = $columnRecord['column_comment'];
   }
 
   public function addStringLength($co, $columnRecord)

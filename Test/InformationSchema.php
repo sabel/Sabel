@@ -13,10 +13,12 @@ class Test_InformationSchema extends SabelTestCase
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=blog';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    //$dbCon['dsn']  = 'pgsql:host=localhost;dbname=blog';
-    //$dbCon['user'] = 'pgsql';
-    //$dbCon['pass'] = 'pgsql';
 
+    /*
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=blog';
+    $dbCon['user'] = 'pgsql';
+    $dbCon['pass'] = 'pgsql';
+    */
     Sabel_DB_Connection::addConnection('blog', 'pdo', $dbCon);
 
     $is = new Sabel_DB_Schema_Accessor('blog', 'blog');

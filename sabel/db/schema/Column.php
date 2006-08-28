@@ -23,6 +23,7 @@ class Sabel_DB_Schema_Column
         $data['maxValue'] =  127;
         $data['minValue'] = -128;
         break;
+      case 'int2':
       case 'smallint':
         $data['maxValue'] =  32767;
         $data['minValue'] = -32768;
@@ -32,10 +33,12 @@ class Sabel_DB_Schema_Column
         $data['minValue'] = -8388608;
         break;
       case 'int':
+      case 'int4':
       case 'integer':
         $data['maxValue'] =  2147483647;
         $data['minValue'] = -2147483648;
         break;
+      case 'int8':
       case 'bigint':
         $data['maxValue'] =  9223372036854775807;
         $data['minValue'] = -9223372036854775808;
