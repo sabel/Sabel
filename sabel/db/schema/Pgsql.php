@@ -57,6 +57,11 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     return $sqls;
   }
 
+  public function isBoolean($type, $columnRecord)
+  {
+    return ($type === 'boolean');
+  }
+
   public function addStringLength($co, $columnRecord)
   {
     $maxlen  = $columnRecord['character_maximum_length'];

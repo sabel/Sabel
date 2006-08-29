@@ -47,6 +47,11 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
     $co->comment = $columnRecord['column_comment'];
   }
 
+  public function isBoolean($type, $columnRecord)
+  {
+    return ($type === 'tinyint' && $columnRecord['column_comment'] === 'boolean');
+  }
+
   public function addStringLength($co, $columnRecord)
   {
     $co->max = $columnRecord['character_maximum_length'];

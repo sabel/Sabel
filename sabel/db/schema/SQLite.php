@@ -27,6 +27,15 @@ class Sabel_DB_Schema_SQLite
     return new Sabel_DB_Schema_Table($name, $this->createColumns($name));
   }
 
+  public function createColumn($table, $column)
+  {
+    $lines = $this->getColumnsLine($table);
+    foreach ($lines as $line) {
+      $name = $this->getName($line);
+      if ($name === $column) return $this->makeColumnValueObject($line);
+    }
+  }
+
   protected function createColumns($table)
   {
     $columns = array();
@@ -38,17 +47,17 @@ class Sabel_DB_Schema_SQLite
     return $columns;
   }
 
-  protected function createColumn($table, $column)
+  protected function getName($line)
   {
-    //@todo
+    return substr($line, 0, strpos($line, ' '));
   }
 
   protected function makeColumnValueObject($line)
   {
     $co = new Sabel_DB_Schema_Column();
-    $co->name = substr($line, 0, strpos($line, ' '));
-
+    $co->name = $this->getName($line);
     $rem = trim(str_replace($co->name, '', $line));
+
     $this->setColumnType($co, $rem);
     $this->setNotNull($co);
     $this->setPrimaryKey($co);

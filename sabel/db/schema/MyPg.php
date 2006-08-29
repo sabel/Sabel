@@ -34,6 +34,16 @@ class Sabel_DB_Schema_MyPg
     return new Sabel_DB_Schema_Table($name, $this->createColumns($name));
   }
 
+  public function createColumn($table, $column)
+  {
+    $sql  = "SELECT * FROM information_schema.columns ";
+    $sql .= "WHERE table_schema = '{$this->schema}' AND ";
+    $sql .= "table_name = '{$table}' AND column_name = '{$column}'";
+
+    $res = $this->recordObj->execute($sql);
+    return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
+  }
+
   protected function createColumns($table)
   {
     $sql  = "SELECT * FROM information_schema.columns ";
@@ -46,16 +56,6 @@ class Sabel_DB_Schema_MyPg
       $columns[$columnName] = $this->makeColumnValueObject($data);
     }
     return $columns;
-  }
-
-  protected function createColumn($table, $column)
-  {
-    $sql  = "SELECT * FROM information_schema.columns ";
-    $sql .= "WHERE table_schema = '{$this->schema}' AND ";
-    $sql .= "table_name = '{$table}' AND column_name = '{$column}'";
-
-    $res = $this->recordObj->execute($sql);
-    return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
   }
 
   protected function makeColumnValueObject($columnRecord)
@@ -89,7 +89,7 @@ class Sabel_DB_Schema_MyPg
   {
     $type = $columnRecord['data_type'];
 
-    if ($type === 'tinyint' && $co->comment === 'boolean') {
+    if ($this->isBoolean($type, $columnRecord)) {
       $co->type = Sabel_DB_Schema_Type::BOOL;
       return $co;
     }

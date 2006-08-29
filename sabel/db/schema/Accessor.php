@@ -21,15 +21,8 @@ class Sabel_DB_Schema_Accessor
     return $this->is->getTable($name);
   }
 
-  protected function createColumns($table)
+  public function getColumn($table, $column)
   {
-    return $this->is->createColumns($table);
-  }
-
-  protected function createColumn($table, $column = null)
-  {
-    if (is_null($column)) return $this->is->createColumns($table);
-
     return $this->is->createColumn($table, $column);
   }
 }

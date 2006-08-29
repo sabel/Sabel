@@ -19,8 +19,8 @@ class Test_InformationSchema extends SabelTestCase
   {
     $dropTables = array('stest', 'stest2');
 
-    //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
     $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
+    //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
 
     $stest  = $sa->getTable('stest');
 
