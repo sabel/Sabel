@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>alphatmp</name>
+ <channel>pear.sabel.jp</channel>
+ <summary>web application development framework.</summary>
+ <description>web application development framework.</description>
+ <lead>
+  <name>Mori Reo</name>
+  <user>morireo</user>
+  <email>mori.reo@sabel.jp</email>
+  <active>yes</active>
+ </lead>
+ <developer>
+  <name>Hamanaka Kazuhiro</name>
+  <user>hamanaka</user>
+  <email>hamanaka.kazuhiro@sabel.jp</email>
+  <active>yes</active>
+ </developer>
+ <developer>
+  <name>Ebine Yutaka</name>
+  <user>ebine</user>
+  <email>ebine.yutaka@sabel.jp</email>
+  <active>yes</active>
+ </developer>
+ <date>2006-08-29</date>
+ <time>17:42:57</time>
+ <version>
+  <release>0.1.2</release>
+  <api>0.1.0</api>
+ </version>
+ <stability>
+  <release>alpha</release>
+  <api>alpha</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+ <notes>Initial release</notes>
+ <contents>
+  <dir baseinstalldir="/" name="/">
+   <dir name="bin">
+    <file baseinstalldir="/" name="sabel" role="data">
+     <tasks:replace from="@PHP-BIN@" to="php_bin" type="pear-config" />
+    </file>
+   </dir> <!-- /bin -->
+   <dir name="generator">
+    <file baseinstalldir="/" name="template.php" role="php" />
+    <file baseinstalldir="/" name="thrust.sh" role="data" />
+    <file baseinstalldir="/" name="Thruster.php" role="php" />
+   </dir> <!-- /generator -->
+   <dir name="sabel">
+    <dir name="annotation">
+     <file baseinstalldir="/" name="Context.php" role="php" />
+     <file baseinstalldir="/" name="Reader.php" role="php" />
+    </dir> <!-- /sabel/annotation -->
+    <dir name="cache">
+     <file baseinstalldir="/" name="Apc.php" role="php" />
+     <file baseinstalldir="/" name="Cache.php" role="php" />
+     <file baseinstalldir="/" name="File.php" role="php" />
+     <file baseinstalldir="/" name="Memcache.php" role="php" />
+    </dir> <!-- /sabel/cache -->
+    <dir name="config">
+     <file baseinstalldir="/" name="Cached.php" role="php" />
+     <file baseinstalldir="/" name="Config.php" role="php" />
+     <file baseinstalldir="/" name="Interface.php" role="php" />
+     <file baseinstalldir="/" name="Spyc.php" role="php" />
+     <file baseinstalldir="/" name="Yaml.php" role="php" />
+    </dir> <!-- /sabel/config -->
+    <dir name="container">
+     <file baseinstalldir="/" name="DI.php" role="php" />
+     <file baseinstalldir="/" name="ReflectionClass.php" role="php" />
+    </dir> <!-- /sabel/container -->
+    <dir name="controller">
+     <dir name="map">
+      <file baseinstalldir="/" name="Destination.php" role="php" />
+      <file baseinstalldir="/" name="Entry.php" role="php" />
+      <file baseinstalldir="/" name="Requirements.php" role="php" />
+      <file baseinstalldir="/" name="Uri.php" role="php" />
+     </dir> <!-- /sabel/controller/map -->
+     <file baseinstalldir="/" name="Front.php" role="php" />
+     <file baseinstalldir="/" name="Loader.php" role="php" />
+     <file baseinstalldir="/" name="Map.php" role="php" />
+     <file baseinstalldir="/" name="Null.php" role="php" />
+     <file baseinstalldir="/" name="Page.php" role="php" />
+    </dir> <!-- /sabel/controller -->
+    <dir name="core">
+     <file baseinstalldir="/" name="Const.php" role="php" />
+     <file baseinstalldir="/" name="Context.php" role="php" />
+     <file baseinstalldir="/" name="Dispatcher.php" role="php" />
+     <file baseinstalldir="/" name="Exception.php" role="php" />
+     <file baseinstalldir="/" name="Pager.php" role="php" />
+     <file baseinstalldir="/" name="Resolver.php" role="php" />
+     <file baseinstalldir="/" name="Router.php" role="php" />
+     <file baseinstalldir="/" name="Utility.php" role="php" />
+    </dir> <!-- /sabel/core -->
+    <dir name="db">
+     <dir name="driver">
+      <file baseinstalldir="/" name="Firebird.php" role="php" />
+      <file baseinstalldir="/" name="General.php" role="php" />
+      <file baseinstalldir="/" name="Interface.php" role="php" />
+      <file baseinstalldir="/" name="Mysql.php" role="php" />
+      <file baseinstalldir="/" name="Pdo.php" role="php" />
+      <file baseinstalldir="/" name="Pgsql.php" role="php" />
+     </dir> <!-- /sabel/db/driver -->
+     <dir name="query">
+      <file baseinstalldir="/" name="Bind.php" role="php" />
+      <file baseinstalldir="/" name="Factory.php" role="php" />
+      <file baseinstalldir="/" name="Interface.php" role="php" />
+      <file baseinstalldir="/" name="Normal.php" role="php" />
+     </dir> <!-- /sabel/db/query -->
+     <dir name="schema">
+      <file baseinstalldir="/" name="Accessor.php" role="php" />
+      <file baseinstalldir="/" name="Column.php" role="php" />
+      <file baseinstalldir="/" name="MyPg.php" role="php" />
+      <file baseinstalldir="/" name="Mysql.php" role="php" />
+      <file baseinstalldir="/" name="Pgsql.php" role="php" />
+      <file baseinstalldir="/" name="SQLite.php" role="php" />
+      <file baseinstalldir="/" name="Table.php" role="php" />
+      <file baseinstalldir="/" name="Type.php" role="php" />
+     </dir> <!-- /sabel/db/schema -->
+     <file baseinstalldir="/" name="BaseClasses.php" role="php" />
+     <file baseinstalldir="/" name="Column.php" role="php" />
+     <file baseinstalldir="/" name="Columns.php" role="php" />
+     <file baseinstalldir="/" name="Connection.php" role="php" />
+     <file baseinstalldir="/" name="Mapper.php" role="php" />
+     <file baseinstalldir="/" name="Transaction.php" role="php" />
+    </dir> <!-- /sabel/db -->
+    <dir name="env">
+     <file baseinstalldir="/" name="Post.php" role="php" />
+     <file baseinstalldir="/" name="Server.php" role="php" />
+    </dir> <!-- /sabel/env -->
+    <dir name="exception">
+     <file baseinstalldir="/" name="Runtime.php" role="php" />
+    </dir> <!-- /sabel/exception -->
+    <dir name="i18n">
+     <file baseinstalldir="/" name="Gettext.php" role="php" />
+    </dir> <!-- /sabel/i18n -->
+    <dir name="injection">
+     <file baseinstalldir="/" name="Calls.php" role="php" />
+     <file baseinstalldir="/" name="Injector.php" role="php" />
+    </dir> <!-- /sabel/injection -->
+    <dir name="library">
+     <file baseinstalldir="/" name="ArrayList.php" role="php" />
+     <file baseinstalldir="/" name="Iterator.php" role="php" />
+    </dir> <!-- /sabel/library -->
+    <dir name="logger">
+     <file baseinstalldir="/" name="File.php" role="php" />
+     <file baseinstalldir="/" name="Interface.php" role="php" />
+    </dir> <!-- /sabel/logger -->
+    <dir name="request">
+     <dir name="parser">
+      <file baseinstalldir="/" name="Cli.php" role="php" />
+      <file baseinstalldir="/" name="Common.php" role="php" />
+      <file baseinstalldir="/" name="Web.php" role="php" />
+     </dir> <!-- /sabel/request/parser -->
+     <file baseinstalldir="/" name="Parameters.php" role="php" />
+     <file baseinstalldir="/" name="Request.php" role="php" />
+     <file baseinstalldir="/" name="Uri.php" role="php" />
+    </dir> <!-- /sabel/request -->
+    <dir name="response">
+     <file baseinstalldir="/" name="Interface.php" role="php" />
+     <file baseinstalldir="/" name="Web.php" role="php" />
+    </dir> <!-- /sabel/response -->
+    <dir name="storage">
+     <file baseinstalldir="/" name="Storage.php" role="php" />
+    </dir> <!-- /sabel/storage -->
+    <dir name="template">
+     <dir name="director">
+      <file baseinstalldir="/" name="Default.php" role="php" />
+      <file baseinstalldir="/" name="Factory.php" role="php" />
+      <file baseinstalldir="/" name="Interface.php" role="php" />
+     </dir> <!-- /sabel/template/director -->
+     <dir name="engine">
+      <file baseinstalldir="/" name="Class.php" role="php" />
+      <file baseinstalldir="/" name="PHP.php" role="php" />
+      <file baseinstalldir="/" name="Savant.php" role="php" />
+      <file baseinstalldir="/" name="Smarty.php" role="php" />
+     </dir> <!-- /sabel/template/engine -->
+     <file baseinstalldir="/" name="Engine.php" role="php" />
+     <file baseinstalldir="/" name="Form.php" role="php" />
+     <file baseinstalldir="/" name="Layout.php" role="php" />
+     <file baseinstalldir="/" name="Re.php" role="php" />
+     <file baseinstalldir="/" name="Service.php" role="php" />
+    </dir> <!-- /sabel/template -->
+    <dir name="user">
+     <file baseinstalldir="/" name="User.php" role="php" />
+    </dir> <!-- /sabel/user -->
+    <dir name="view">
+     <file baseinstalldir="/" name="Helper.php" role="php" />
+    </dir> <!-- /sabel/view -->
+    <file baseinstalldir="/" name="Classes.php" role="php" />
+    <file baseinstalldir="/" name="Functions.php" role="php" />
+   </dir> <!-- /sabel -->
+   <dir name="skeleton">
+    <dir name="app">
+     <dir name="index">
+      <dir name="controllers">
+       <file baseinstalldir="/" name="index.php" role="php" />
+      </dir> <!-- /skeleton/app/index/controllers -->
+     </dir> <!-- /skeleton/app/index -->
+    </dir> <!-- /skeleton/app -->
+    <dir name="config">
+     <file baseinstalldir="/" name="database.yml" role="data" />
+     <file baseinstalldir="/" name="map.yml" role="data" />
+    </dir> <!-- /skeleton/config -->
+    <dir name="controller">
+     <file baseinstalldir="/" name="Standerd.php" role="php" />
+    </dir> <!-- /skeleton/controller -->
+    <dir name="fixture">
+     <file baseinstalldir="/" name="Standerd.php" role="php" />
+    </dir> <!-- /skeleton/fixture -->
+    <dir name="lib">
+     <file baseinstalldir="/" name="setup.php" role="php" />
+    </dir> <!-- /skeleton/lib -->
+    <dir name="logs">
+     <file baseinstalldir="/" name="sabel.log" role="data" />
+    </dir> <!-- /skeleton/logs -->
+    <dir name="model">
+     <file baseinstalldir="/" name="Standerd.php" role="php" />
+    </dir> <!-- /skeleton/model -->
+    <dir name="public">
+     <file baseinstalldir="/" name="index.php" role="php" />
+    </dir> <!-- /skeleton/public -->
+    <dir name="scripts">
+     <file baseinstalldir="/" name="fixture.php" role="php" />
+     <file baseinstalldir="/" name="generator.php" role="php" />
+    </dir> <!-- /skeleton/scripts -->
+    <dir name="skeleton">
+     <dir name="controller">
+      <file baseinstalldir="/" name="Standerd.php" role="php" />
+     </dir> <!-- /skeleton/skeleton/controller -->
+     <dir name="fixture">
+      <file baseinstalldir="/" name="Standerd.php" role="php" />
+     </dir> <!-- /skeleton/skeleton/fixture -->
+     <dir name="model">
+      <file baseinstalldir="/" name="Standerd.php" role="php" />
+     </dir> <!-- /skeleton/skeleton/model -->
+     <dir name="view">
+      <file baseinstalldir="/" name="create.tpl" role="data" />
+      <file baseinstalldir="/" name="delete.tpl" role="data" />
+      <file baseinstalldir="/" name="edit.tpl" role="data" />
+      <file baseinstalldir="/" name="lists.tpl" role="data" />
+      <file baseinstalldir="/" name="show.tpl" role="data" />
+     </dir> <!-- /skeleton/skeleton/view -->
+    </dir> <!-- /skeleton/skeleton -->
+    <file baseinstalldir="/" name="sabel.php" role="php" />
+   </dir> <!-- /skeleton -->
+   <dir name="Test">
+    <dir name="data">
+     <file baseinstalldir="/" name="log1.sq3" role="data" />
+     <file baseinstalldir="/" name="log2.sq3" role="data" />
+     <file baseinstalldir="/" name="map.yml" role="data" />
+    </dir> <!-- /Test/data -->
+    <file baseinstalldir="/" name="Annotation.php" role="php" />
+    <file baseinstalldir="/" name="Aspect.php" role="php" />
+    <file baseinstalldir="/" name="Classes.php" role="php" />
+    <file baseinstalldir="/" name="Config.php" role="php" />
+    <file baseinstalldir="/" name="DB.php" role="php" />
+    <file baseinstalldir="/" name="DI.php" role="php" />
+    <file baseinstalldir="/" name="Edo.php" role="php" />
+    <file baseinstalldir="/" name="InformationSchema.php" role="php" />
+    <file baseinstalldir="/" name="Map.php" role="php" />
+    <file baseinstalldir="/" name="MyTest.php" role="php" />
+    <file baseinstalldir="/" name="Pager.php" role="php" />
+    <file baseinstalldir="/" name="Parameters.php" role="php" />
+    <file baseinstalldir="/" name="PHP.php" role="php" />
+    <file baseinstalldir="/" name="Request.php" role="php" />
+    <file baseinstalldir="/" name="RequestUri.php" role="php" />
+    <file baseinstalldir="/" name="Resolver.php" role="php" />
+    <file baseinstalldir="/" name="Router.php" role="php" />
+    <file baseinstalldir="/" name="Sabel.php" role="php" />
+    <file baseinstalldir="/" name="SabelTestCase.php" role="php" />
+   </dir> <!-- /Test -->
+   <dir name="third">
+    <dir name="Crypt_Blowfish">
+     <dir name="Blowfish">
+      <file baseinstalldir="/" name="DefaultKey.php" role="php" />
+     </dir> <!-- /third/Crypt_Blowfish/Blowfish -->
+     <dir name="tests">
+      <file baseinstalldir="/" name="blowfish.phpt" role="data" />
+      <file baseinstalldir="/" name="vectors.txt" role="data" />
+     </dir> <!-- /third/Crypt_Blowfish/tests -->
+     <file baseinstalldir="/" name="Blowfish.php" role="php" />
+    </dir> <!-- /third/Crypt_Blowfish -->
+    <dir name="Smarty">
+     <dir name="internals">
+      <file baseinstalldir="/" name="core.assemble_plugin_filepath.php" role="php" />
+      <file baseinstalldir="/" name="core.assign_smarty_interface.php" role="php" />
+      <file baseinstalldir="/" name="core.create_dir_structure.php" role="php" />
+      <file baseinstalldir="/" name="core.display_debug_console.php" role="php" />
+      <file baseinstalldir="/" name="core.get_include_path.php" role="php" />
+      <file baseinstalldir="/" name="core.get_microtime.php" role="php" />
+      <file baseinstalldir="/" name="core.get_php_resource.php" role="php" />
+      <file baseinstalldir="/" name="core.is_secure.php" role="php" />
+      <file baseinstalldir="/" name="core.is_trusted.php" role="php" />
+      <file baseinstalldir="/" name="core.load_plugins.php" role="php" />
+      <file baseinstalldir="/" name="core.load_resource_plugin.php" role="php" />
+      <file baseinstalldir="/" name="core.process_cached_inserts.php" role="php" />
+      <file baseinstalldir="/" name="core.process_compiled_include.php" role="php" />
+      <file baseinstalldir="/" name="core.read_cache_file.php" role="php" />
+      <file baseinstalldir="/" name="core.rmdir.php" role="php" />
+      <file baseinstalldir="/" name="core.rm_auto.php" role="php" />
+      <file baseinstalldir="/" name="core.run_insert_handler.php" role="php" />
+      <file baseinstalldir="/" name="core.smarty_include_php.php" role="php" />
+      <file baseinstalldir="/" name="core.write_cache_file.php" role="php" />
+      <file baseinstalldir="/" name="core.write_compiled_include.php" role="php" />
+      <file baseinstalldir="/" name="core.write_compiled_resource.php" role="php" />
+      <file baseinstalldir="/" name="core.write_file.php" role="php" />
+     </dir> <!-- /third/Smarty/internals -->
+     <dir name="plugins">
+      <file baseinstalldir="/" name="block.textformat.php" role="php" />
+      <file baseinstalldir="/" name="compiler.assign.php" role="php" />
+      <file baseinstalldir="/" name="function.assign_debug_info.php" role="php" />
+      <file baseinstalldir="/" name="function.config_load.php" role="php" />
+      <file baseinstalldir="/" name="function.counter.php" role="php" />
+      <file baseinstalldir="/" name="function.cycle.php" role="php" />
+      <file baseinstalldir="/" name="function.debug.php" role="php" />
+      <file baseinstalldir="/" name="function.eval.php" role="php" />
+      <file baseinstalldir="/" name="function.fetch.php" role="php" />
+      <file baseinstalldir="/" name="function.html_checkboxes.php" role="php" />
+      <file baseinstalldir="/" name="function.html_image.php" role="php" />
+      <file baseinstalldir="/" name="function.html_options.php" role="php" />
+      <file baseinstalldir="/" name="function.html_radios.php" role="php" />
+      <file baseinstalldir="/" name="function.html_select_date.php" role="php" />
+      <file baseinstalldir="/" name="function.html_select_time.php" role="php" />
+      <file baseinstalldir="/" name="function.html_table.php" role="php" />
+      <file baseinstalldir="/" name="function.mailto.php" role="php" />
+      <file baseinstalldir="/" name="function.math.php" role="php" />
+      <file baseinstalldir="/" name="function.popup.php" role="php" />
+      <file baseinstalldir="/" name="function.popup_init.php" role="php" />
+      <file baseinstalldir="/" name="modifier.base64encode.php" role="php" />
+      <file baseinstalldir="/" name="modifier.capitalize.php" role="php" />
+      <file baseinstalldir="/" name="modifier.cat.php" role="php" />
+      <file baseinstalldir="/" name="modifier.count_characters.php" role="php" />
+      <file baseinstalldir="/" name="modifier.count_paragraphs.php" role="php" />
+      <file baseinstalldir="/" name="modifier.count_sentences.php" role="php" />
+      <file baseinstalldir="/" name="modifier.count_words.php" role="php" />
+      <file baseinstalldir="/" name="modifier.crypt.php" role="php" />
+      <file baseinstalldir="/" name="modifier.date_format.php" role="php" />
+      <file baseinstalldir="/" name="modifier.debug_print_var.php" role="php" />
+      <file baseinstalldir="/" name="modifier.default.php" role="php" />
+      <file baseinstalldir="/" name="modifier.escape.php" role="php" />
+      <file baseinstalldir="/" name="modifier.indent.php" role="php" />
+      <file baseinstalldir="/" name="modifier.lower.php" role="php" />
+      <file baseinstalldir="/" name="modifier.mb_count_characters.php" role="php" />
+      <file baseinstalldir="/" name="modifier.mb_substr.php" role="php" />
+      <file baseinstalldir="/" name="modifier.nl2br.php" role="php" />
+      <file baseinstalldir="/" name="modifier.regex_replace.php" role="php" />
+      <file baseinstalldir="/" name="modifier.replace.php" role="php" />
+      <file baseinstalldir="/" name="modifier.spacify.php" role="php" />
+      <file baseinstalldir="/" name="modifier.string_format.php" role="php" />
+      <file baseinstalldir="/" name="modifier.strip.php" role="php" />
+      <file baseinstalldir="/" name="modifier.strip_tags.php" role="php" />
+      <file baseinstalldir="/" name="modifier.truncate.php" role="php" />
+      <file baseinstalldir="/" name="modifier.upper.php" role="php" />
+      <file baseinstalldir="/" name="modifier.wordwrap.php" role="php" />
+      <file baseinstalldir="/" name="outputfilter.trimwhitespace.php" role="php" />
+      <file baseinstalldir="/" name="shared.escape_special_chars.php" role="php" />
+      <file baseinstalldir="/" name="shared.make_timestamp.php" role="php" />
+     </dir> <!-- /third/Smarty/plugins -->
+     <file baseinstalldir="/" name="Config_File.class.php" role="php" />
+     <file baseinstalldir="/" name="debug.tpl" role="data" />
+     <file baseinstalldir="/" name="Smarty.class.php" role="php" />
+     <file baseinstalldir="/" name="Smarty_Compiler.class.php" role="php" />
+    </dir> <!-- /third/Smarty -->
+   </dir> <!-- /third -->
+   <file baseinstalldir="/" name="packageXml.php" role="php" />
+   <file baseinstalldir="/" name="sabel.php" role="php" />
+   <file baseinstalldir="/" name="Sabel.php" role="php" />
+   <file baseinstalldir="/" name="SabelAllTests.php" role="php" />
+  </dir> <!-- / -->
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.1.0</min>
+   </php>
+   <pearinstaller>
+    <min>1.4.0</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <phprelease>
+  <filelist>
+   <install as="/usr/local/bin/sabel" name="bin/sabel" />
+  </filelist>
+ </phprelease>
+ <changelog>
+  <release>
+   <version>
+    <release>0.1.1</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2006-08-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>Initial release</notes>
+  </release>
+  <release>
+   <version>
+    <release>0.1.2</release>
+    <api>0.1.0</api>
+   </version>
+   <stability>
+    <release>alpha</release>
+    <api>alpha</api>
+   </stability>
+   <date>2006-08-29</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>Initial release</notes>
+  </release>
+ </changelog>
+</package>

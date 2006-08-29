@@ -1,30 +1,5 @@
 <?php
 
-/**
- * 汎用的なストレージを提供
- */
-abstract class Storage
-{
-  public static function create($className)
-  {
-    // @todo ちゃんとやれ
-    $instance = new $className();
-    if ($instance instanceof Storage) {
-      return $instance;
-    } else {
-      throw new SabelException($className . " not found");
-    }
-  }
-
-  abstract function read($key);
-  abstract function write($key, $value);
-  abstract function delete($key);
-  abstract function dump();
-}
-
-/**
- * セッションを用いたストレージ実装
- */
 class SessionStorage extends Storage
 {
   public function __construct()
