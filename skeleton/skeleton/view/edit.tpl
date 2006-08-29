@@ -1,6 +1,16 @@
-<h2>edit <? echo $name ?> No.<# echo $<? echo $name ?>->id #></h2>
+<h2>edit <? echo $name ?> No.<#= $<? echo $name ?>->id #></h2>
 
-<# echo Form::edit('<? echo $name ?>', $<? echo $name ?>, '/index/<? echo $name ?>/edit/', 'post') #>
+<div>
+<form method="post" action="<#= urlFor('default', 'edit', $<? echo $name ?>) #>">
+<# foreach ($<? echo $name ?>->columns() as $column) : #>
+  <#= $column->name #>:
+  <input type="text" name="<#= $column->name #>" value="<#hn $column->data #>" />
+  <br />
+<# endforeach #>
+<input type="submit" value="edit" />
+</form>
+</div>
 
-<a href="/index/<? echo $name ?>/lists">lists</a>
-<a href="/index/<? echo $name ?>/create">new</a>
+<a href="<#= urlFor('default', 'edit', $<? echo $name ?>) #>"><#= _('edit') #></a>
+<a href="<#= urlFor('default', 'create') #>"><#= _('create') #></a>
+<a href="<#= urlFor('default', 'lists') #>"><#= _('list') #></a>

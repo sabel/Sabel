@@ -1,5 +1,14 @@
 <h2>create <? echo $name ?></h2>
 
-<# echo Form::create('<? echo $name ?>', $<? echo $name ?>, '/index/<? echo $name ?>/create', 'post') #>
+<div>
+<form method="post" action="<#= urlFor('default', 'create') #>">
+<# foreach ($<? echo $name ?>->columns() as $column) : #>
+  <#= $column->name #>:
+  <input type="text" name="<#= $column->name #>" value="" />
+  <br />
+<# endforeach #>
+<input type="submit" value="create" />
+</form>
+</div>
 
-<a href="/index/<? echo $name ?>/lists">lists</a>
+<a href="<#= urlFor('default', 'lists') #>"><#= _('list') #></a>

@@ -6,7 +6,7 @@ class Sabel_DB_Schema_Accessor
 
   public function __construct($connectName, $schema)
   {
-    $dbName    = Sabel_DB_Connection::getDB($connectName);
+    $dbName    = ucfirst(Sabel_DB_Connection::getDB($connectName));
     $className = "Sabel_DB_Schema_{$dbName}";
     $this->is  = new $className($connectName, $schema);
   }

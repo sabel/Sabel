@@ -94,6 +94,11 @@ abstract class Sabel_DB_Mapper
     return $this->selected;
   }
 
+  public function columns()
+  {
+    return new Sabel_DB_Columns($this->data, $this->connectName, $this->table);
+  }
+
   public function toArray()
   {
     return $this->data;

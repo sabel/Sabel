@@ -26,6 +26,12 @@ abstract class Sabel_Controller_Page
   {
     $this->entry = $entry;
     $this->setup();
+    $this->initialize();
+  }
+  
+  protected function initialize()
+  {
+    // none.
   }
   
   protected function setup()
