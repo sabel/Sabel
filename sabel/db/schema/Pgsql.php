@@ -2,31 +2,6 @@
 
 class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
 {
-  public function getNumericTypes()
-  {
-    return array('integer', 'bigint', 'smallint');
-  }
-
-  public function getStringTypes()
-  {
-    return array('character varying', 'varchar', 'character', 'char');
-  }
-
-  public function getTextTypes()
-  {
-    return array('text');
-  }
-
-  public function getBinaryTypes()
-  {
-    return array('bytea');
-  }
-
-  public function getTimeStampTypes()
-  {
-    return array('timestamp without time zone', 'timestamp with time zone');
-  }
-
   public function addDefaultInfo($co, $default)
   {
     $default = str_replace(substr(strpbrk($default, '::'), 0), '', $default);

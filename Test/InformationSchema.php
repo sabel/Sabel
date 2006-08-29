@@ -4,9 +4,9 @@ class Test_InformationSchema extends SabelTestCase
 {
   public static function suite()
   {
-    $hel = new MySchemaHelper();
+    //$hel = new MySchemaHelper();
     //$hel = new PgSchemaHelper();
-    //$hel = new SQSchemaHelper();
+    $hel = new SQSchemaHelper();
 
     $obj = new Schema_Accessor();
     $sqls = $hel->getCreateSQL();
@@ -19,8 +19,8 @@ class Test_InformationSchema extends SabelTestCase
   {
     $dropTables = array('stest', 'stest2');
 
-    $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
-    //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
+    //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
+    $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
 
     $stest  = $sa->getTable('stest');
 

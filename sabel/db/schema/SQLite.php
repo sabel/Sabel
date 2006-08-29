@@ -2,6 +2,9 @@
 
 class Sabel_DB_Schema_SQLite
 {
+  const TABLE_LIST    = "SELECT name FROM sqlite_master WHERE type = 'table'";
+  const TABLE_COLUMNS = "SELECT * FROM sqlite_master WHERE name = '%s'";
+
   protected $constraint = '';
 
   public function __construct($connectName, $schema = null)
@@ -13,10 +16,8 @@ class Sabel_DB_Schema_SQLite
 
   public function getTables()
   {
-    $sql = "SELECT name FROM sqlite_master WHERE type = 'table'";
-
     $tables = array();
-    foreach ($this->recordObj->execute($sql) as $val) {
+    foreach ($this->recordObj->execute(self::TABLE_LIST) as $val) {
       $tables[$val->name] = new Sabel_DB_Schema_Table($val->name, $this->createColumns($val->name));
     }
     return $tables;
@@ -29,7 +30,7 @@ class Sabel_DB_Schema_SQLite
 
   public function createColumn($table, $column)
   {
-    $lines = $this->getColumnsLine($table);
+    $lines = $this->getCreatesqlLines($table);
     foreach ($lines as $line) {
       $name = $this->getName($line);
       if ($name === $column) return $this->makeColumnValueObject($line);
@@ -39,17 +40,12 @@ class Sabel_DB_Schema_SQLite
   protected function createColumns($table)
   {
     $columns = array();
-    $lines = $this->getColumnsLine($table);
+    $lines = $this->getCreatesqlLines($table);
     foreach ($lines as $line) {
       $co = $this->makeColumnValueObject($line);
       $columns[$co->name] = $co;
     }
     return $columns;
-  }
-
-  protected function getName($line)
-  {
-    return substr($line, 0, strpos($line, ' '));
   }
 
   protected function makeColumnValueObject($line)
@@ -58,49 +54,34 @@ class Sabel_DB_Schema_SQLite
     $co->name = $this->getName($line);
     $rem = trim(str_replace($co->name, '', $line));
 
-    $this->setColumnType($co, $rem);
-    $this->setNotNull($co);
-    $this->setPrimaryKey($co);
-    $this->setDefault($co);
+    $this->setDataType($co, $rem);
 
+    $this->setNotNull($co);
+    $this->setPrimary($co);
+    $this->setDefault($co);
     return $co;
   }
 
-  protected function getColumnsLine($table)
+  protected function getCreatesqlLines($table)
   {
-    $sql = "SELECT * FROM sqlite_master WHERE name = '{$table}'";
-    $res = $this->recordObj->execute($sql);
+    $res  = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
 
-    $createSQL = substr(strpbrk($res[0]->sql, '('), 0);
-    $createSQL = explode(',', substr($createSQL, 1, strlen($createSQL) - 2));
-
-    return array_map('trim', $createSQL);
+    $sql  = substr(strpbrk($res[0]->sql, '('), 0);
+    $sqls = explode(',', substr($sql, 1, strlen($sql) - 2));
+    return array_map('trim', $sqls);
   }
 
-  protected function setColumnType($co, $rem)
+  protected function setDataType($co, $rem)
   {
-    $tmp = substr($rem, 0, strpos($rem, ' '));
-    $type = ($tmp === '') ? $rem : $tmp;
-    $this->constraint = trim(str_replace($type, '', $rem));
-
-    $co->increment = (stripos($rem, 'INTEGER PRIMARY KEY') !== false);
+    $type = $this->getType($co, $rem);
 
     if (stripos($type, 'INT') !== false) {
       $co->type = Sabel_DB_Schema_Type::INT;
       $co->setNumericRange(strtolower($type));
-    } else {
-      if ($text = strpbrk($type, '(')) {
-        $co->type = Sabel_DB_Schema_Type::STRING;
-        $co->max = substr($text, 1, strlen($text) - 2);
-      } else {
-        $this->setOtherTypes($co, $type);
-      }
-    }
-  }
-
-  protected function setOtherTypes($co, $type)
-  {
-    if (stripos($type, 'TEXT') !== false) {
+    } else if ($text = strpbrk($type, '(')) {
+      $co->type = Sabel_DB_Schema_Type::STRING;
+      $co->max = substr($text, 1, strlen($text) - 2);
+    } else if (stripos($type, 'TEXT') !== false) {
       $co->type = Sabel_DB_Schema_Type::TEXT;
       $co->max = 65535;
     } else if (stripos($type, 'BOOLEAN') !== false) {
@@ -110,6 +91,21 @@ class Sabel_DB_Schema_SQLite
     } else if (stripos($type, 'DATE') !== false) {
       $co->type = Sabel_DB_Schema_Type::DATE;
     }
+  }
+
+  protected function getName($line)
+  {
+    return substr($line, 0, strpos($line, ' '));
+  }
+
+  protected function getType($co, $rem)
+  {
+    $tmp = substr($rem, 0, strpos($rem, ' '));
+    $type = ($tmp === '') ? $rem : $tmp;
+    $this->constraint = trim(str_replace($type, '', $rem));
+
+    $co->increment = (stripos($rem, 'INTEGER PRIMARY KEY') !== false);
+    return $type;
   }
 
   protected function setNotNull($co)
@@ -122,7 +118,7 @@ class Sabel_DB_Schema_SQLite
     }
   }
 
-  protected function setPrimaryKey($co)
+  protected function setPrimary($co)
   {
     if ($this->constraint === '') {
       $co->primary = false;

@@ -2,6 +2,10 @@
 
 class Sabel_DB_Schema_MyPg
 {
+  const TABLE_LIST    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'";
+  const TABLE_COLUMNS = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
+  const COLUMN        = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s' AND column_name = '%s'";
+
   protected
     $recordObj   = null,
     $connectName = '',
@@ -17,10 +21,9 @@ class Sabel_DB_Schema_MyPg
 
   public function getTables()
   {
-    $sql  = "SELECT table_name FROM information_schema.tables ";
-    $sql .= "WHERE table_schema = '{$this->schema}'";
-
     $tables = array();
+    $sql    = sprintf(self::TABLE_LIST, $this->schema);
+
     foreach ($this->recordObj->execute($sql) as $val) {
       $data  = array_change_key_case($val->toArray());
       $table = $data['table_name'];
@@ -36,20 +39,16 @@ class Sabel_DB_Schema_MyPg
 
   public function createColumn($table, $column)
   {
-    $sql  = "SELECT * FROM information_schema.columns ";
-    $sql .= "WHERE table_schema = '{$this->schema}' AND ";
-    $sql .= "table_name = '{$table}' AND column_name = '{$column}'";
-
+    $sql = sprintf(self::COLUMN, $this->schema, $table, $column);
     $res = $this->recordObj->execute($sql);
     return $this->makeColumnValueObject(array_change_key_case($res[0]->toArray()));
   }
 
   protected function createColumns($table)
   {
-    $sql  = "SELECT * FROM information_schema.columns ";
-    $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$table}'";
-
     $columns = array();
+    $sql     = sprintf(self::TABLE_COLUMNS, $this->schema, $table);
+
     foreach ($this->recordObj->execute($sql) as $val) {
       $data = array_change_key_case($val->toArray());
       $columnName = $data['column_name'];
@@ -94,29 +93,24 @@ class Sabel_DB_Schema_MyPg
       return $co;
     }
 
-    if ($type === 'boolean') {
-      $co->type = Sabel_DB_Schema_Type::BOOL;
-      return $co;
-    }
-
-    if (in_array($type, $this->getNumericTypes())) {
+    if (in_array($type, Sabel_DB_Schema_Type::$INTS)) {
       $co->type = Sabel_DB_Schema_Type::INT;
       $co->setNumericRange($columnRecord['data_type']);
       return $co;
     }
 
-    if (in_array($type, $this->getStringTypes())) {
+    if (in_array($type, Sabel_DB_Schema_Type::$STRS)) {
       $co->type = Sabel_DB_Schema_Type::STRING;
       $this->addStringLength($co, $columnRecord);
       return $co;
     }
 
-    if (in_array($type, $this->getTextTypes())) {
+    if (in_array($type, Sabel_DB_Schema_Type::$TEXTS)) {
       $co->type = Sabel_DB_Schema_Type::TEXT;
       return $co;
     }
 
-    if (in_array($type, $this->getTimestampTypes())) {
+    if (in_array($type, Sabel_DB_Schema_Type::$TIMES)) {
       $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
       return $co;
     }

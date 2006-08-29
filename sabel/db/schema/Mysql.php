@@ -2,31 +2,6 @@
 
 class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 {
-  public function getNumericTypes()
-  {
-    return array('int', 'bigint', 'smallint', 'tinyint', 'mediumint');
-  }
-
-  public function getStringTypes()
-  {
-    return array('varchar', 'char');
-  }
-
-  public function getTextTypes()
-  {
-    return array('text', 'mediumtext', 'tinytext');
-  }
-
-  public function getBinaryTypes()
-  {
-    return array('blob', 'mediumblob', 'longblob');
-  }
-
-  public function getTimestampTypes()
-  {
-    return array('timestamp', 'datetime');
-  }
-
   public function addDefaultInfo($co, $default)
   {
     $co->default = $default;
