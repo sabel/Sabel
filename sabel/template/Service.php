@@ -29,12 +29,17 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
     return $instance;
   }
   
-  public function changeEngine($inc)
+  public function changeEngine($ins)
   {
-    if ($ins instanceof Sabel_Template_Engine) $this->impl = $inc;
+    if ($ins instanceof Sabel_Template_Engine) {
+      $this->impl = $ins;
+      $this->impl->configuration();
+    } else {
+    	return false;
+    }
   }
   
-  public function assign($key ,$value)
+  public function assign($key, $value)
   {
     $this->impl->assign($key, $value);
   }

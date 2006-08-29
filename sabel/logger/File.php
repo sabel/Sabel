@@ -9,9 +9,7 @@ class Sabel_Logger_File
 
   public static function singleton()
   {
-    if (is_null(self::$instance)) {
-      self::$instance = new self();
-    }
+    if (is_null(self::$instance)) self::$instance = new self();
     return self::$instance;
   }
   

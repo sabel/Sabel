@@ -13,7 +13,7 @@ class Sabel_I18n_Gettext
     if (!function_exists('gettext')) return false;
     
     $language = 'en';
-    if (stripos($_SERVER['HTTP_ACCEPT_LANGUAGE'], 'ja') !== false) {
+   	if (is_int(stripos($_SERVER['HTTP_ACCEPT_LANGUAGE'], 'ja'))) {
       $language = 'ja_JP';
     }
     

@@ -8,7 +8,7 @@
  */
 class Sabel_Env_Server
 {
-  private static $instance;
+  private static $instance = null;
   
   public static function create()
   {
