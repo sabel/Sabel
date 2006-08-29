@@ -62,26 +62,42 @@ class Sabel_DB_Schema_MyPg
   {
     $co = new Sabel_DB_Schema_Column();
     $co->name    = $columnRecord['column_name'];
-    $co->default = $columnRecord['column_default'];
     $co->notNull = ($columnRecord['is_nullable'] === 'NO');
+
+    $this->addDefaultInfo($co, $columnRecord['column_default']);
 
     if (is_string($sql = $this->addIncrementInfo($co, $columnRecord))) {
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
     }
 
     if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord))) {
-      $co->pkey = (count($this->recordObj->execute($sql)) > 0);
+      $co->primary = (count($this->recordObj->execute($sql)) > 0);
     }
 
     if (is_array($sqls = $this->addCommentInfo($co, $columnRecord))) {
       $oid = $this->recordObj->execute($sqls[0]);
       $pos = $columnRecord['ordinal_position'];
 
-      $comment = $this->recordObj->execute(sprintf($sqls[2], $oid[0]->relfilenode, $pos));
-      $co->comment = $comment[0]->col_description;
+      $comment = $this->recordObj->execute(sprintf($sqls[1], $oid[0]->relfilenode, $pos));
+      if (isset($comment)) $co->comment = $comment[0]->col_description;
     }
 
+    return $this->setColumnType($co, $columnRecord);
+  }
+
+  protected function setColumnType($co, $columnRecord)
+  {
     $type = $columnRecord['data_type'];
+
+    if ($type === 'tinyint' && $co->comment === 'boolean') {
+      $co->type = Sabel_DB_Schema_Type::BOOL;
+      return $co;
+    }
+
+    if ($type === 'boolean') {
+      $co->type = Sabel_DB_Schema_Type::BOOL;
+      return $co;
+    }
 
     if (in_array($type, $this->getNumericTypes())) {
       $co->type = Sabel_DB_Schema_Type::INT;
@@ -97,6 +113,16 @@ class Sabel_DB_Schema_MyPg
 
     if (in_array($type, $this->getTextTypes())) {
       $co->type = Sabel_DB_Schema_Type::TEXT;
+      return $co;
+    }
+
+    if (in_array($type, $this->getTimestampTypes())) {
+      $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
+      return $co;
+    }
+
+    if ($type === 'date') {
+      $co->type = Sabel_DB_Schema_Type::DATE;
       return $co;
     }
   }

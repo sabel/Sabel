@@ -4,7 +4,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 {
   public function getNumericTypes()
   {
-    return array('tinyint', 'smallint', 'mediumint', 'int', 'bigint');
+    return array('int', 'bigint', 'smallint', 'tinyint', 'mediumint');
   }
 
   public function getStringTypes()
@@ -22,6 +22,16 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
     return array('blob', 'mediumblob', 'longblob');
   }
 
+  public function getTimestampTypes()
+  {
+    return array('timestamp', 'datetime');
+  }
+
+  public function addDefaultInfo($co, $default)
+  {
+    $co->default = $default;
+  }
+
   public function addIncrementInfo($co, $columnRecord)
   {
     $co->increment = ($columnRecord['extra'] === 'auto_increment');
@@ -29,7 +39,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 
   public function addPrimaryKeyInfo($co, $columnRecord)
   {
-    $co->pkey = ($columnRecord['column_key'] === 'PRI');
+    $co->primary = ($columnRecord['column_key'] === 'PRI');
   }
 
   public function addCommentInfo($co, $columnRecord)
@@ -39,6 +49,6 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 
   public function addStringLength($co, $columnRecord)
   {
-    $co->maxLength = $columnRecord['character_maximum_length'];
+    $co->max = $columnRecord['character_maximum_length'];
   }
 }

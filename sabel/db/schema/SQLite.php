@@ -24,8 +24,7 @@ class Sabel_DB_Schema_SQLite
 
   public function getTable($name)
   {
-    //@todo
-    //return new Sabel_DB_Schema_Table($name, $this->createColumns($name));
+    return new Sabel_DB_Schema_Table($name, $this->createColumns($name));
   }
 
   protected function createColumns($table)
@@ -71,8 +70,6 @@ class Sabel_DB_Schema_SQLite
 
   protected function setColumnType($co, $rem)
   {
-    $this->constraint = '';
-
     $tmp = substr($rem, 0, strpos($rem, ' '));
     $type = ($tmp === '') ? $rem : $tmp;
     $this->constraint = trim(str_replace($type, '', $rem));
@@ -85,7 +82,7 @@ class Sabel_DB_Schema_SQLite
     } else {
       if ($text = strpbrk($type, '(')) {
         $co->type = Sabel_DB_Schema_Type::STRING;
-        $co->maxLength = substr($text, 1, strlen($text) - 2);
+        $co->max = substr($text, 1, strlen($text) - 2);
       } else {
         $this->setOtherTypes($co, $type);
       }
@@ -95,8 +92,8 @@ class Sabel_DB_Schema_SQLite
   protected function setOtherTypes($co, $type)
   {
     if (stripos($type, 'TEXT') !== false) {
-      $co->type = Sabel_DB_Schema_Type::STRING;
-      $co->maxLength = 65535;
+      $co->type = Sabel_DB_Schema_Type::TEXT;
+      $co->max = 65535;
     } else if (stripos($type, 'BOOLEAN') !== false) {
       $co->type = Sabel_DB_Schema_Type::BOOL;
     } else if (stripos($type, 'TIMESTAMP') !== false) {
@@ -119,9 +116,9 @@ class Sabel_DB_Schema_SQLite
   protected function setPrimaryKey($co)
   {
     if ($this->constraint === '') {
-      $co->pkey = false;
+      $co->primary = false;
     } else {
-      $co->pkey = (stripos($this->constraint, 'PRIMARY KEY') !== false);
+      $co->primary = (stripos($this->constraint, 'PRIMARY KEY') !== false);
       $this->constraint = str_ireplace('PRIMARY KEY', '', $this->constraint);
     }
   }
@@ -132,7 +129,7 @@ class Sabel_DB_Schema_SQLite
       $co->default = null;
     } else {
       if (stripos($this->constraint, 'DEFAULT') !== false) {
-        $default = substr($this->constraint, 8);
+        $default = trim(substr($this->constraint, 8));
         $co->default = (ctype_digit($default)) ? $default : substr($default, 1, strlen($default) - 2);
       } else {
         $co->default = null;

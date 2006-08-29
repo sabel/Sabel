@@ -26,9 +26,9 @@ require_once "sabel/db/schema/Column.php";
 require_once "sabel/db/schema/MyPg.php";
 require_once "sabel/db/schema/Mysql.php";
 require_once "sabel/db/schema/Pgsql.php";
+require_once "sabel/db/schema/SQLite.php";
 require_once "sabel/db/schema/Accessor.php";
 
-require_once "SabelTestCase.php";
 /**
  * test for Sabel_DB
  *

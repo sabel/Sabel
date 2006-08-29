@@ -4,7 +4,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
 {
   public function getNumericTypes()
   {
-    return array('smallint', 'integer', 'bigint');
+    return array('integer', 'bigint', 'smallint');
   }
 
   public function getStringTypes()
@@ -22,6 +22,17 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     return array('bytea');
   }
 
+  public function getTimeStampTypes()
+  {
+    return array('timestamp without time zone', 'timestamp with time zone');
+  }
+
+  public function addDefaultInfo($co, $default)
+  {
+    $default = str_replace(substr(strpbrk($default, '::'), 0), '', $default);
+    $co->default = substr($default, 1, strlen($default) - 2);
+  }
+
   public function addIncrementInfo($co, $columnRecord)
   {
     $sql  = "SELECT * FROM pg_statio_user_sequences ";
@@ -32,8 +43,8 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
   public function addPrimaryKeyInfo($co, $columnRecord)
   {
     $sql  = "SELECT * FROM information_schema.key_column_usage ";
-    $sql .= "WHERE table_schema = '{$this->schema}' AND ";
-    $sql .= "table_name = '{$columnRecord['table_name']}' AND column_name = '{$co->name}'";
+    $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$columnRecord['table_name']}' ";
+    $sql .= "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
 
     return $sql;
   }
@@ -42,18 +53,13 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
   {
     $sqls   = array();
     $sqls[] = "SELECT relfilenode FROM pg_class WHERE relname = '{$columnRecord['table_name']}'";
-
-    $sql  = "SELECT ordinal_position FROM information_schema.columns ";
-    $sql .= "WHERE table_name = '{$columnRecord['table_name']}' AND column_name = '{$co->name}'";
-
-    $sqls[] = $sql;
     $sqls[] = "SELECT col_description FROM col_description(%s, %s)";
     return $sqls;
   }
 
   public function addStringLength($co, $columnRecord)
   {
-    $maxlen = $columnRecord['character_maximum_length'];
-    $co->maxLength = (isset($maxlen)) ? $maxlen : 65535;
+    $maxlen  = $columnRecord['character_maximum_length'];
+    $co->max = (isset($maxlen)) ? $maxlen : 65535;
   }
 }
