@@ -1,6 +1,5 @@
 <#php
 
-error_reporting(0);
 require_once(RUN_BASE.'/app/index/models/<? echo ucfirst($controllerName) ?>.php');
 
 class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page

@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL|E_STRICT);
+
 $absolute_path = dirname(realpath(__FILE__));
 $tmp_path = explode('/', $absolute_path);
 array_pop($tmp_path);
