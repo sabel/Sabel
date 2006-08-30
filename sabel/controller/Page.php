@@ -72,35 +72,15 @@ abstract class Sabel_Controller_Page
     $controllerClass = $this->destination->module.'_'.$this->destination->controller;
     $refClass = new ReflectionClass($controllerClass);
     
-    if ($this->isPost() && $refClass->hasMethod('post'.ucfirst($action))) {
-      $action = 'post'.ucfirst($action);
-    } else if ($this->isGet() && $refClass->hasMethod('get'.ucfirst($action))) {
-      $action = 'get'.ucfirst($action);
-    } else if ($this->isPut() && $refClass->hasMethod('put'.ucfirst($action))) {
-      $action = 'put'.ucfirst($action);
-    } else if ($this->isDelete() && $refClass->hasMethod('delete'.ucfirst($action))) {
-      $action = 'delete'.ucfirst($action);
-    }
-    
-    $refMethod = new ReflectionMethod($controllerClass, $action);
-    
-    $hasClass = false;
-    foreach ($refMethod->getParameters() as $paramidx => $parameter) {
-      $requireParameterClass = 
-                  ($reflectionClass = $parameter->getClass()) ? true : false;
-                  
-      if ($requireParameterClass) {
-        $hasClass = true;
-        $this->container = new SabelDIContainer();
-        $object = $this->container->load($reflectionClass->getName());
+    $httpMethods = array('get', 'post', 'put', 'delete');
+    foreach ($httpMethods as $method) {
+      $checkMethod = 'is'.ucfirst($method);
+      $actionName = $method.ucfirst($action);
+      if ($this->$checkMethod && $refClass->hasMethod($actionName)) {
+        $action = $actionName;
       }
     }
-    
-    if ($hasClass) {
-      $this->$action($object);
-    } else {
-      $this->$action();
-    }
+    $this->$action();
   }
   
   protected function hasMethod($name)
@@ -108,19 +88,6 @@ abstract class Sabel_Controller_Page
     return (method_exists($this, $name));
   }
   
-  protected function getActionMethods()
-  {
-    $methods = get_class_methods($this);
-
-    $ar = array();
-    foreach ($methods as $key => $val) {
-      if ($val[0] != '_') {
-        $ar[$key] = $val;
-      }
-    }
-    return $ar;
-  }
-
   protected function checkReferer($validURIs)
   {
     $ref  = Sabel_Env_Server::create()->http_referer;
@@ -129,7 +96,7 @@ abstract class Sabel_Controller_Page
     preg_match($patternAbsoluteURI, $ref, $matchs);
     return (isset($matchs[0])) ? true : false;
   }
-
+  
   /**
    * HTTP Redirect to another location.
    * this method will avoid "back button" problem.
@@ -142,10 +109,10 @@ abstract class Sabel_Controller_Page
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
     header($redirect);
-
+    
     exit; // exit after HTTP Header(30x)
   }
-
+  
   /**
    * forwaring anothor controller or method of same controller.
    *
