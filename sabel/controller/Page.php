@@ -101,11 +101,11 @@ abstract class Sabel_Controller_Page
     
     if ($this->isPost() && $refClass->hasMethod('post'.ucfirst($action))) {
       $action = 'post'.ucfirst($action);
-    } else if ($this->isGet() && $refClass->hasMethod('get'.ucfirst($action)){
+    } else if ($this->isGet() && $refClass->hasMethod('get'.ucfirst($action))) {
       $action = 'get'.ucfirst($action);
-    } else if ($this->isPut() && $refClass->hasMethod('put'.ucfirst($action)) {
+    } else if ($this->isPut() && $refClass->hasMethod('put'.ucfirst($action))) {
       $action = 'put'.ucfirst($action);
-    } else if ($this->isDelete() && $refClass->hasMethod('delete'.ucfirst($action)) {
+    } else if ($this->isDelete() && $refClass->hasMethod('delete'.ucfirst($action))) {
       $action = 'delete'.ucfirst($action);
     }
     
