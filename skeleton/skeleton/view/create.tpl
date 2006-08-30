@@ -2,7 +2,7 @@
 
 <div>
 <form method="post" action="<#= urlFor('default', 'create') #>">
-<# foreach ($<? echo $name ?>->columns() as $column) : #>
+<# foreach ($<? echo $name ?> as $column) : #>
   <#= $column->name #>:
   <input type="text" name="<#= $column->name #>" value="" />
   <br />

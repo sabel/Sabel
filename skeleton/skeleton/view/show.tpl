@@ -1,8 +1,8 @@
 <h1>show <? echo $name ?></h1>
 
-<# foreach ($<? echo $name ?>->toArray() as $name => $val) : #>
-  <# echo $name #>:&nbsp;
-  <# echo nl2br($<? echo $name ?>->$name) #>
+<# foreach ($<? echo $name ?> as $column) : #>
+  <# echo $column->name #>:&nbsp;
+  <# echo nl2br($column->value) #>
   <br />
 <# endforeach #>
 

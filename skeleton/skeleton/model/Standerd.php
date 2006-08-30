@@ -1,6 +1,6 @@
 <#php
 
-class <?php echo $className ?> extends Sabel_DB_Mapper
+class <?php echo $className ?> extends Sabel_Core_DBProxy
 {
   public function __construct($param1 = null, $param2 = null)
   {

@@ -8,16 +8,16 @@
  */
 class Sabel_DB_Column
 {
+  protected $table     = '';
   protected $name      = '';
   protected $localName = '';
-  protected $data      = '';
-  protected $table     = '';
+  protected $value     = '';
 
   public function __construct($values, $table)
   {
     $this->name      = $values['name'];
     $this->localName = _("{$table}.{$this->name}");
-    $this->data      = $values['data'];
+    $this->value     = $values['data'];
     $this->table     = $table;
   }
 

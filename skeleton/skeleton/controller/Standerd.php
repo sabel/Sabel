@@ -28,12 +28,9 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
     $model = new <? echo ucfirst($controllerName) ?>();
     Re::set('<? echo $controllerName ?>', $model);
     
-    if ($this->request->isPost()) {
+    if ($this->isPost()) {
       $model = new <? echo $controllerName ?>();
-      foreach ($this->request->requests() as $name => $value) {
-        $model->$name = $value;
-      }
-      $model->save();
+      $model->save($this->request->requests());
       $this->redirect('/index/<? echo $controllerName ?>/lists');
     }
   }
@@ -42,11 +39,8 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   {
     $model = new <? echo ucfirst($controllerName) ?>($this->request->id);
     
-    if ($this->request->isPost()) {
-      foreach ($this->request->requests() as $name => $value) {
-        $model->$name = $value;
-      }
-      $model->save();
+    if ($this->isPost()) {
+      $model->save($this->request->requests());
       $this->redirect('/index/<? echo $controllerName ?>/lists');
     }
     

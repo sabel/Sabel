@@ -44,7 +44,7 @@ function urlFor()
 {
   $map = new Sabel_Controller_Map();
   $map->load();
-  $entry = $map->getEntry(func_get_arg(0));
+  $entry   = $map->getEntry(func_get_arg(0));
   $request = $entry->getRequest();
   
   $model = null;
@@ -64,7 +64,7 @@ function urlFor()
         $buf .= '/' . func_get_arg(1);
         break;
       case 'id':
-        $buf .= (is_object($model)) ? '/'.$model->$name : '';
+        $buf .= (is_object($model)) ? '/'.$model->$name->value : '';
         break;
     }
   }

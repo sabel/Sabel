@@ -16,7 +16,9 @@ class Sabel_Controller_Front
       $cache->write('dbconf', $conf);
     }
     
-    $dev = $conf->read('development');
+    $envConf = new Sabel_Config_Yaml(RUN_BASE . '/config/environment.yml');
+    $env = $envConf->read('environment');
+    $dev = $conf->read($env);
     $fm = '%s:host=%s;dbname=%s';
     $con['dsn']  = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
     $con['user'] = $dev['user'];

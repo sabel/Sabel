@@ -3,14 +3,14 @@
 <div>
 <# foreach ($<? echo $name ?>s as $<? echo $name ?>) : #>
   <div>
-  <# foreach ($<? echo $name ?>->columns() as $column) : #>
+  <# foreach ($<? echo $name ?> as $column) : #>
     <#= $column->name #>: &nbsp;
-    <#hn $column->data #>
+    <#hn $column->value #>
     <br />
   <# endforeach #>
   </div>
   
-  <a href="<#= urlFor('default', 'show',   $<? echo $name ?>) ?>"><#= _('list') #></a>
+  <a href="<#= urlFor('default', 'show',   $<? echo $name ?>) ?>"><#= _('show') #></a>
   <a href="<#= urlFor('default', 'edit',   $<? echo $name ?>) ?>"><#= _('edit') #></a>
   <a href="<#= urlFor('default', 'delete', $<? echo $name ?>) ?>"><#= _('delete') #></a>
   

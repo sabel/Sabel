@@ -2,9 +2,9 @@
 
 <div>
 <form method="post" action="<#= urlFor('default', 'edit', $<? echo $name ?>) #>">
-<# foreach ($<? echo $name ?>->columns() as $column) : #>
+<# foreach ($<? echo $name ?> as $column) : #>
   <#= $column->name #>:
-  <input type="text" name="<#= $column->name #>" value="<#hn $column->data #>" />
+  <input type="text" name="<#= $column->name #>" value="<#hn $column->value #>" />
   <br />
 <# endforeach #>
 <input type="submit" value="edit" />
