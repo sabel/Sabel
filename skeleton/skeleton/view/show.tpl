@@ -6,6 +6,6 @@
   <br />
 <# endforeach #>
 
-<a href="/index/<? echo $name ?>/edit/<# echo $<? echo $name ?>->id #>">edit</a>
-<a href="/index/<? echo $name ?>/create">new</a>
-<a href="/index/<? echo $name ?>/lists">lists</a>
+<a href="<#= urlFor('default', 'edit',   $<? echo $name ?>) #>"><#= _('show') #></a>
+<a href="<#= urlFor('default', 'edit',   $<? echo $name ?>) #>"><#= _('edit') #></a>
+<a href="<#= urlFor('default', 'delete', $<? echo $name ?>) #>"><#= _('delete') #></a>

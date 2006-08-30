@@ -1,4 +1,4 @@
-<h2>edit <? echo $name ?> No.<#= $<? echo $name ?>->id #></h2>
+<h2>edit <? echo $name ?> No.<#= $<? echo $name ?>->id->value #></h2>
 
 <div>
 <form method="post" action="<#= urlFor('default', 'edit', $<? echo $name ?>) #>">
