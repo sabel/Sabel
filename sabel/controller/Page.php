@@ -97,6 +97,18 @@ abstract class Sabel_Controller_Page
   protected function methodExecute($action)
   {
     $controllerClass = $this->destination->module.'_'.$this->destination->controller;
+    $refClass = new ReflectionClass($controllerClass);
+    
+    if ($this->isPost() && $refClass->hasMethod('post'.ucfirst($action))) {
+      $action = 'post'.ucfirst($action);
+    } else if ($this->isGet() && $refClass->hasMethod('get'.ucfirst($action)){
+      $action = 'get'.ucfirst($action);
+    } else if ($this->isPut() && $refClass->hasMethod('put'.ucfirst($action)) {
+      $action = 'put'.ucfirst($action);
+    } else if ($this->isDelete() && $refClass->hasMethod('delete'.ucfirst($action)) {
+      $action = 'delete'.ucfirst($action);
+    }
+    
     $refMethod = new ReflectionMethod($controllerClass, $action);
     
     $hasClass = false;
