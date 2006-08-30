@@ -65,13 +65,11 @@ class Sabel_DB_Schema_MyPg
 
     $this->addDefaultInfo($co, $columnRecord['column_default']);
 
-    if (is_string($sql = $this->addIncrementInfo($co, $columnRecord))) {
+    if (is_string($sql = $this->addIncrementInfo($co, $columnRecord)))
       $co->increment = (count($this->recordObj->execute($sql)) > 0);
-    }
 
-    if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord))) {
+    if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord)))
       $co->primary = (count($this->recordObj->execute($sql)) > 0);
-    }
 
     if (is_array($sqls = $this->addCommentInfo($co, $columnRecord))) {
       $oid = $this->recordObj->execute($sqls[0]);
@@ -90,34 +88,20 @@ class Sabel_DB_Schema_MyPg
 
     if ($this->isBoolean($type, $columnRecord)) {
       $co->type = Sabel_DB_Schema_Type::BOOL;
-      return $co;
-    }
-
-    if (in_array($type, Sabel_DB_Schema_Type::$INTS)) {
+    } else if (in_array($type, Sabel_DB_Schema_Type::$INTS)) {
       $co->type = Sabel_DB_Schema_Type::INT;
-      $co->setNumericRange($columnRecord['data_type']);
-      return $co;
-    }
-
-    if (in_array($type, Sabel_DB_Schema_Type::$STRS)) {
+      Sabel_DB_Schema_Type::setRange($co, $type);
+    } else if (in_array($type, Sabel_DB_Schema_Type::$STRS)) {
       $co->type = Sabel_DB_Schema_Type::STRING;
       $this->addStringLength($co, $columnRecord);
-      return $co;
-    }
-
-    if (in_array($type, Sabel_DB_Schema_Type::$TEXTS)) {
+    } else if (in_array($type, Sabel_DB_Schema_Type::$TEXTS)) {
       $co->type = Sabel_DB_Schema_Type::TEXT;
-      return $co;
-    }
-
-    if (in_array($type, Sabel_DB_Schema_Type::$TIMES)) {
+    } else if (in_array($type, Sabel_DB_Schema_Type::$TIMES)) {
       $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
-      return $co;
+    } else if ($type === 'date') {
+      $co->type = Sabel_DB_Schema_Type::DATE;
     }
 
-    if ($type === 'date') {
-      $co->type = Sabel_DB_Schema_Type::DATE;
-      return $co;
-    }
+    return $co;
   }
 }

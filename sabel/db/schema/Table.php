@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Sabel_DB_Schema_Table
+ *
+ * @package org.sabel.db.schema
+ * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Sabel_DB_Schema_Table
 {
   protected $tableName = '';

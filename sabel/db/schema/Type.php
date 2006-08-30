@@ -43,4 +43,34 @@ class Sabel_DB_Schema_Type
                                'timestamp without time zone',
                                'timestamp with time zone',
                                'datetime');
+
+  public static function setRange($columnObj, $intType)
+  {
+    switch($intType) {
+      case 'tinyint':
+        $columnObj->max =  127;
+        $columnObj->min = -128;
+        break;
+      case 'int2':
+      case 'smallint':
+        $columnObj->max =  32767;
+        $columnObj->min = -32768;
+        break;
+      case 'mediumint':
+        $columnObj->max =  8388607;
+        $columnObj->min = -8388608;
+        break;
+      case 'int':
+      case 'int4':
+      case 'integer':
+        $columnObj->max =  2147483647;
+        $columnObj->min = -2147483648;
+        break;
+      case 'int8':
+      case 'bigint':
+        $columnObj->max =  9223372036854775807;
+        $columnObj->min = -9223372036854775808;
+        break;
+    }
+  }
 }

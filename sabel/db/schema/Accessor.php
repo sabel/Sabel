@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Sabel_DB_Schema_Accessor
+ *
+ * @package org.sabel.db.schema
+ * @author Ebine Yutaka <ebine.yutaka@gamil.com>
+ */
 class Sabel_DB_Schema_Accessor
 {
   protected $is = null;
