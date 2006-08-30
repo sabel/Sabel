@@ -12,7 +12,7 @@ class Sabel_DB_Column
   protected $localName = '';
   protected $data      = '';
   protected $table     = '';
-  
+
   public function __construct($values, $table)
   {
     $this->name      = $values['name'];
@@ -20,7 +20,7 @@ class Sabel_DB_Column
     $this->data      = $values['data'];
     $this->table     = $table;
   }
-  
+
   public function __get($key)
   {
     return $this->$key;

@@ -888,7 +888,7 @@ class Test_Edo extends SabelTestCase
   {
     $users = new Users();
     $relList = array('child' => 'bbs', 'parent' => 'status');
-    $users->setConstraint('order', 'users.id, bbs.title');
+    $users->sconst('order', 'users.id, bbs.title');
     $res = $users->selectJoin($relList);
 
     $this->assertEquals($res[0]->name, 'Tarou');
@@ -906,7 +906,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($res[2]->bbs->title, 'title13');
 
     $users = new Users();
-    $users->setConstraint('order', 'id');
+    $users->sconst('order', 'id');
     $res = $users->select(Sabel_DB_Mapper::WITH_PARENT);
 
     foreach ($res as $user) {
@@ -973,19 +973,19 @@ class Test_Edo extends SabelTestCase
   public function testChildCondition()
   {
     $user = new Users(1);
-    $user->setChildConstraint('limit', 100);
+    $user->cconst('limit', 100);
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 5);
 
     $user = new Users(1);
-    $user->setChildConstraint('limit', 100);
-    $user->setChildCondition('bbs', array('body' => 'body13'));
+    $user->cconst('limit', 100);
+    $user->ccond('body', 'body13');
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 1);
 
     $user = new Users(2);
-    $user->setChildConstraint('limit', 100);
-    $user->setChildCondition('bbs', array('OR_body' => array('body21', 'body23')));
+    $user->cconst('limit', 100);
+    $user->ccond('OR_body', array('body21', 'body23'));
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
 
@@ -993,8 +993,8 @@ class Test_Edo extends SabelTestCase
     $bbs->save(array('users_id' => 4));
 
     $user = new Users(4);
-    $user->setChildConstraint('limit', 100);
-    $user->setChildCondition('bbs', array('OR_title' => array('title41', 'null')));
+    $user->cconst('limit', 100);
+    $user->ccond('OR_title', array('title41', 'null'));
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
   }
@@ -1016,7 +1016,7 @@ class Test_Edo extends SabelTestCase
   public function testORCondition()
   {
     $ol = new Sabel_DB_Basic('order_line');
-    $ol->setConstraint('order', 'id');
+    $ol->sconst('order', 'id');
     $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
 
     $ols = $ol->select();
@@ -1049,26 +1049,25 @@ class Test_Edo extends SabelTestCase
     $data[] = array('trans1_id' => 1, 'text' => 'trans26');
 
     $trans2->multipleInsert($data);
-
     $trans1 = new Trans1(1);
-    $trans1->setChildConstraint('limit', 10);
+    $trans1->cconst('limit', 10);
     $trans1->getChild('trans2');
     $this->assertEquals(count($trans1->trans2) , 3);
 
     $trans1 = new Trans1(1);
-    $trans1->setChildConstraint('limit', 10);
-    $trans1->setChildCondition('trans2', array('text' => 'trans24'));
+    $trans1->cconst('limit', 10);
+    $trans1->ccond('text', 'trans24');
     $trans1->getChild('trans2');
     $this->assertEquals(count($trans1->trans2) , 1);
 
     $trans1 = new Trans1(3);
-    $trans1->setChildConstraint('limit', 10);
-    $trans1->setChildCondition('trans2', array('text' => 'trans24'));
+    $trans1->cconst('limit', 10);
+    $trans1->ccond('text', 'trans24');
     $trans1->getChild('trans2');
     $this->assertEquals(count($trans1->trans2) , 0);
 
     $trans1 = new Trans1(2);
-    $trans1->setChildConstraint('limit', 10);
+    $trans1->cconst('limit', 10);
     $trans1->getChild('trans2');
     $this->assertEquals(count($trans1->trans2) , 1);
 
@@ -1114,7 +1113,7 @@ class Test_Edo extends SabelTestCase
   public function testGetColumnsName()
   {
     $test = new Test();
-    $colsName = $test->getColumnsName();
+    $colsName = $test->getColumnNames();
 
     $this->assertEquals($colsName[0], 'id');
     $this->assertEquals($colsName[1], 'name');
@@ -1122,7 +1121,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($colsName[3], 'test2_id');
 
     $test = new Test();
-    $colsName = $test->getColumnsName('seq');
+    $colsName = $test->getColumnNames('seq');
 
     $this->assertEquals($colsName[0], 'id');
     $this->assertEquals($colsName[1], 'text');

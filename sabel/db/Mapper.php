@@ -70,6 +70,11 @@ abstract class Sabel_DB_Mapper
     }
   }
 
+  public function getConnectName()
+  {
+    return $this->connectName;
+  }
+
   public function __construct($param1 = null, $param2 = null)
   {
     if (Sabel_DB_Transaction::isActive()) $this->begin();
@@ -109,9 +114,14 @@ abstract class Sabel_DB_Mapper
     $this->defColumn = $column;
   }
 
-  public function setTable($table)
+  public function setTableName($table)
   {
     $this->table = $table;
+  }
+
+  public function getTableName()
+  {
+    return $this->table;
   }
 
   public function enableParent()
@@ -178,18 +188,9 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function setChildCondition($child, $conditions)
+  public function setChildCondition($key, $val)
   {
-    if (!is_array($conditions))
-      throw new Exception('Error: setChildCondition() Argument 2 must be an Array');
-
-    $this->childConditions[$child] = $conditions;
-  }
-
-  protected function receiveChildConstraint($constraints)
-  {
-    if (!is_array($constraints)) throw new Exception('constrains is not array.');
-    if ($constraints) $this->childConstraints = $constraints;
+    $this->childConditions[$key] = $val;
   }
 
   /**
@@ -263,7 +264,7 @@ abstract class Sabel_DB_Mapper
     return (int) $row[0];
   }
 
-  public function getColumnsName($table = null)
+  public function getColumnNames($table = null)
   {
     $table = (isset($table)) ? $table : $this->table;
 
@@ -405,7 +406,7 @@ abstract class Sabel_DB_Mapper
         }
         $obj = $this->newClass($table);
         $this->setSelectedProperty($obj, $row[$table]);
-        $obj->setTable($table);
+        $obj->setTableName($table);
         $row[$table] = $obj;
       }
       $obj = $this->newClass($this->table);
@@ -420,14 +421,14 @@ abstract class Sabel_DB_Mapper
     $joinCol = array();
     if (is_array($table)) {
       foreach ($table as $t) {
-        foreach ($this->getColumnsName($t) as $c) {
+        foreach ($this->getColumnNames($t) as $c) {
           $joinCol[] = $c;
           array_push($sql, "{$t}.{$c} AS prefix_{$t}_{$c}, ");
         }
         $this->joinColCache[$t] = $joinCol;
       }
     } else {
-      foreach ($this->getColumnsName($table) as $c) array_push($sql, "{$table}.{$c}, ");
+      foreach ($this->getColumnNames($table) as $c) array_push($sql, "{$table}.{$c}, ");
     }
   }
 
@@ -459,11 +460,11 @@ abstract class Sabel_DB_Mapper
     if (is_null($obj->childConstraints[$child]['limit']))
       throw new Exception('Error: getChildren() must be set limit constraints');
 
-    $obj->childConditions[$child]["{$obj->table}_id"] = $obj->data[$obj->defColumn];
+    $obj->childConditions["{$obj->table}_id"] = $obj->data[$obj->defColumn];
 
     $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
-    $conditions  = $obj->childConditions[$child];
+    $conditions  = $obj->childConditions;
     $constraints = $obj->childConstraints[$child];
 
     if ($children = $obj->getRecords($driver, $conditions, $constraints, $child)) {
@@ -486,7 +487,7 @@ abstract class Sabel_DB_Mapper
     foreach ($rows as $row) {
       if (is_null($child)) {
         $obj = $this->newClass($this->table);
-        $obj->receiveChildConstraint($this->childConstraints);
+        if ($this->childConstraints) $obj->childConstraints = $this->childConstraints;
       } else {
         $obj = $this->newClass($child);
       }
@@ -647,7 +648,8 @@ abstract class Sabel_DB_Mapper
 
   public function save($data = null)
   {
-    if (isset($data) && !is_array($data)) throw new Exception('Error: Argument must be an Array');
+    if (isset($data) && !is_array($data))
+      throw new Exception('Error: Argument must be an Array');
 
     if ($this->is_selected()) {
       if ($data) $this->newData = $data;
@@ -765,6 +767,33 @@ abstract class Sabel_DB_Mapper
   {
     if (Sabel_DB_Transaction::isActive()) Sabel_DB_Transaction::rollback();
     throw new Exception($errorMsg);
+  }
+
+  /**
+   * Alias of setConstraint()
+   *
+   */
+  public function sconst($param1, $param2 = null)
+  {
+    $this->setConstraint($param1, $param2);
+  }
+
+  /**
+   * Alias of setChildConstraint()
+   *
+   */
+  public function cconst($param1, $param2 = null)
+  {
+    $this->setChildConstraint($param1, $param2);
+  }
+
+  /**
+   * Alias of setChildCondition()
+   *
+   */
+  public function ccond($key, $val)
+  {
+    $this->setChildCondition($key, $val);
   }
 }
 

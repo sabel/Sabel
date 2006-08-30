@@ -17,8 +17,6 @@ class Test_InformationSchema extends SabelTestCase
 
   public function testUse()
   {
-    $dropTables = array('stest', 'stest2');
-
     $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
     //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
 
@@ -67,9 +65,8 @@ class Test_InformationSchema extends SabelTestCase
     $this->assertFalse($birth->primary);
 
     $this->assertEquals($time->type, Sabel_DB_Schema_Type::TIMESTAMP);
-    $this->assertEquals($comment->type, Sabel_DB_Schema_Type::TEXT);
 
-
+    $dropTables = array('stest', 'stest2');
     $obj = new Schema_Accessor();
     foreach ($dropTables as $table) $obj->execute("DROP TABLE {$table}");
   }
