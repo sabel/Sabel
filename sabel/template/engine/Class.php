@@ -36,6 +36,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
     extract(Re::get(), EXTR_SKIP);
     ob_start();
+    include(RUN_BASE . '/app/index/helpers/blog.php');
     include($cpath);
     $contents = ob_get_clean();
     if ($pageCache) $this->saveCompileFile($contents);
