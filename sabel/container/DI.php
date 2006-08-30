@@ -13,10 +13,6 @@ class SabelDIHelper
   }
 }
 
-uses('sabel.injection.Injector');
-uses('sabel.container.ReflectionClass');
-uses('sabel.config.Spyc');
-
 /**
  * Sabel DI Container
  *

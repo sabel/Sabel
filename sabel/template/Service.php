@@ -16,17 +16,24 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   private $name;
   private $contentForLayout;
   
-  public function __construct($ins = null)
+  protected function __construct($entry, $templateEngine)
   {
     $this->contentForLayout = '';
-    $this->impl = ($ins instanceof Sabel_Template_Engine) ? $ins : new Sabel_Template_Engine_Class();
+    
+    $this->impl = ($templateEngine instanceof Sabel_Template_Engine)
+                  ? $templateEngine
+                  : new Sabel_Template_Engine_Class();
+                  
     $this->impl->configuration();
+    
+    $d = Sabel_Template_Director_Factory::create($entry);
+    $this->selectPath($d->decidePath());
+    $this->selectName($d->decideName());
   }
   
-  public static function create()
+  public static function create($entry, $templateEngine = null)
   {
-    $instance = new self();
-    return $instance;
+    return new self($entry, $templateEngine);
   }
   
   public function changeEngine($ins)
@@ -42,6 +49,11 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   public function assign($key, $value)
   {
     $this->impl->assign($key, $value);
+  }
+  
+  public function assignByArray($array)
+  {
+    $this->impl->assignByArray($array);
   }
   
   public function retrieve()

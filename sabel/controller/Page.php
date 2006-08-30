@@ -36,62 +36,35 @@ abstract class Sabel_Controller_Page
   
   protected function setup()
   {
-    $this->container   = new Sabel_Container_DI();
-    $this->request     = new Sabel_Request_Request($this->entry);
+    $this->container = Sabel_Container_DI::create();
+    $this->request   = new Sabel_Request_Request($this->entry);
+    $this->response  = new Sabel_Response_Web();
     $this->destination = $this->entry->getDestination();
-    
-    $this->setupLogger();
-    $this->setupResponse();
-    $this->template = Sabel_Template_Service::create();
+    $this->logger = $this->container->load('Sabel_Logger_File');
   }
   
   public function execute()
   {
     $actionName = $this->destination->action;
     $this->methodExecute($actionName);
-    $this->initTemplate();
-    $this->assignTemplates();
-    $this->showTemplate();
+    
+    $template = Sabel_Template_Service::create($this->entry);
+    $template->assignByArray($this->response->responses());
+    $template->rendering();
   }
   
   protected function __get($name)
   {
-    return $this->request->$name;
+    if ($this->request->hasUriValue($name)) {
+      return $this->request->$name;
+    }
   }
   
-  protected function requests()
+  protected function __call($method, $args)
   {
-    return $this->request->requests();
-  }
-  
-  protected function isPost()
-  {
-    return $this->request->isPost();
-  }
-  
-  protected function isGet()
-  {
-    return $this->request->isGet();
-  }
-  
-  protected function isPut()
-  {
-    return $this->request->isPut();
-  }
-  
-  protected function isDelete()
-  {
-    return $this->request->isDelete();
-  }
-  
-  protected function setupLogger()
-  {
-    $this->logger = $this->container->load('Sabel_Logger_File');
-  }
-  
-  protected function setupResponse()
-  {
-    $this->response = new Sabel_Response_Web();
+    if ($this->request->hasMethod($method)) {
+      return $this->request->$method($args);
+    }
   }
   
   protected function methodExecute($action)
@@ -128,15 +101,8 @@ abstract class Sabel_Controller_Page
     } else {
       $this->$action();
     }
-    
   }
   
-  protected function assignTemplates()
-  {
-    foreach ($this->response->responses() as $key => $val)
-      $this->template->assign($key, $val);
-  }
-
   protected function hasMethod($name)
   {
     return (method_exists($this, $name));
@@ -187,28 +153,5 @@ abstract class Sabel_Controller_Page
   protected function forward($to)
   {
     // @todo implemen
-  }
-
-  /**
-   * initialize template
-   */
-  protected function initTemplate()
-  {
-    $d = Sabel_Template_Director_Factory::create($this->entry);
-    $this->template->selectPath($d->decidePath());
-    $this->template->selectName($d->decideName());
-  }
-
-  /**
-   * process template then rendering it.
-   *
-   */
-  protected function showTemplate()
-  {
-    try {
-      $this->template->rendering();
-    } catch(SabelException $e) {
-      $e->printStackTrace();
-    }
   }
 }

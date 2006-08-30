@@ -57,6 +57,18 @@ class Sabel_Request_Request
     return $this->uri->$name;
   }
   
+  public function hasUriValue($name)
+  {
+    $value = $this->uri->$name;
+    return (is_not_null($value)) ? $value : false;
+  }
+  
+  public function hasMethod($name)
+  {
+    $ref = new ReflectionClass($this);
+    return $ref->hasMethod($name);
+  }
+  
   public function getUri()
   {
     return $this->uri;

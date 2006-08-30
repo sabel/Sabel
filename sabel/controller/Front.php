@@ -30,6 +30,8 @@ class Sabel_Controller_Front
   public function ignition()
   {
     $entry = Sabel_Core_Router::create()->routing();
+    
+    // @todo performance tuning here. taken 40ms
     $class = Sabel_Controller_Loader::create($entry)->load();
     $class->execute();
   }

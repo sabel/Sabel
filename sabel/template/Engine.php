@@ -32,6 +32,11 @@ abstract class Sabel_Template_Engine implements Sabel_Template_EngineInterface
     return $this->tplpath . $this->tplname;
   }
   
+  protected function getHelperPath()
+  {
+    
+  }
+  
   public function load($name)
   {
     $t = clone $this;
