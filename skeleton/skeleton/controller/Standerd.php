@@ -30,7 +30,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
     if ($this->isPost()) {
       $model = new <? echo $controllerName ?>();
       $model->save($this->request->requests());
-      $this->redirect('/index/<? echo $controllerName ?>/lists');
+      $this->redirect(urlFor('default', 'lists'));
     }
   }
   
@@ -40,7 +40,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
     
     if ($this->isPost()) {
       $model->save($this->request->requests());
-      $this->redirect('/index/<? echo $controllerName ?>/lists');
+      $this->redirect(urlFor('default', 'lists'));
     }
     
     Re::set('<? echo $controllerName ?>', $model);
@@ -50,6 +50,6 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   {
     $model = new <? echo ucfirst($controllerName) ?>($this->request->id);
     $model->remove();
-    $this->redirect('/index/<? echo $controllerName ?>/lists');
+    $this->redirect(urlFor('default', 'lists'));
   }
 }
