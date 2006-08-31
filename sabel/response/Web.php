@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.response.Interface');
-
 class Sabel_Response_Web implements Sabel_Response_Interface
 {
   protected $responses = array();

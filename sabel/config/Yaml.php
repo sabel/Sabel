@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.config.Spyc');
-
 class Sabel_Config_Yaml
 {
   private $data;

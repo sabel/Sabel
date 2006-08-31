@@ -2,12 +2,6 @@
 
 require_once('PHPUnit2/Framework/TestCase.php');
 
-// must need by DI
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
-require_once('sabel/core/Resolver.php');
-
 /**
  * test case for SabelPager
  *

@@ -1,20 +1,6 @@
 <?php
 
-$absolute_path = dirname(realpath(__FILE__));
-define('RUN_BASE', $absolute_path);
-
 require_once('PHPUnit2/Framework/TestCase.php');
-
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
-require_once('sabel/controller/Map.php');
-require_once('sabel/controller/map/Entry.php');
-require_once('sabel/controller/map/Uri.php');
-require_once('sabel/controller/map/Destination.php');
-require_once('sabel/controller/map/Requirements.php');
-require_once('sabel/config/Spyc.php');
-require_once('sabel/config/Yaml.php');
 
 /**
  * Test_Map
@@ -31,7 +17,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function __construct()
   {
-    $this->map = new Sabel_Controller_Map('/data/map.yml');
+    $this->map = new Sabel_Controller_Map('/Test/data/map.yml');
     $this->map->load();
   }
   

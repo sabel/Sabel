@@ -80,7 +80,7 @@ abstract class Sabel_DB_Mapper
     if (Sabel_DB_Transaction::isActive()) $this->begin();
 
     if ($this->table === '') $this->table = strtolower(get_class($this));
-    if (isset($param1)) $this->defaultSelectOne($param1, $param2);
+    if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
   public function __set($key, $val)

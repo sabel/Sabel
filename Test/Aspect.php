@@ -2,15 +2,6 @@
 
 require_once('PHPUnit2/Framework/TestCase.php');
 
-// must need by DI
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
-Sabel_Core_Context::addIncludePath('');
-uses('sabel.container.DI');
-uses('sabel.injection.Calls');
-uses('sabel.core.Exception');
-
 class AspectOrderRegistration
 {
   public function when($method)

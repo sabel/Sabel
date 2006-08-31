@@ -1,10 +1,5 @@
 <?php
 
-Sabel_Core_Context::addIncludePath('');
-uses('sabel.core.Exception');
-uses('sabel.core.Const');
-uses('sabel.request.Sabel_Request_Parameters');
-
 class Test_Parameters extends SabelTestCase
 {
   public static function suite()

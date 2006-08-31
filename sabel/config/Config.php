@@ -14,6 +14,4 @@ class Sabel_Config_Config
   {
     
   }
-  
-  function
 }

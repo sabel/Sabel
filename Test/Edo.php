@@ -4,31 +4,6 @@ if (!defined("PHPUnit2_MAIN_METHOD")) {
     define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
 }
 
-require_once "sabel/db/Connection.php";
-require_once "sabel/db/Transaction.php";
-require_once "sabel/db/Mapper.php";
-require_once "sabel/db/BaseClasses.php";
-
-require_once "sabel/db/driver/Interface.php";
-require_once "sabel/db/driver/General.php";
-require_once "sabel/db/driver/Pdo.php";
-require_once "sabel/db/driver/Pgsql.php";
-require_once "sabel/db/driver/Mysql.php";
-
-require_once "sabel/db/query/Interface.php";
-require_once "sabel/db/query/Factory.php";
-require_once "sabel/db/query/Bind.php";
-require_once "sabel/db/query/Normal.php";
-
-require_once "sabel/db/schema/Type.php";
-require_once "sabel/db/schema/Table.php";
-require_once "sabel/db/schema/Column.php";
-require_once "sabel/db/schema/MyPg.php";
-require_once "sabel/db/schema/Mysql.php";
-require_once "sabel/db/schema/Pgsql.php";
-require_once "sabel/db/schema/SQLite.php";
-require_once "sabel/db/schema/Accessor.php";
-
 /**
  * test for Sabel_DB
  *

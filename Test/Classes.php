@@ -1,7 +1,6 @@
 <?php
 
 require_once('PHPUnit2/Framework/TestCase.php');
-require_once('sabel/Classes.php');
 
 class Test_Classes extends PHPUnit2_Framework_TestCase
 {

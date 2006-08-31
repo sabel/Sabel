@@ -1,7 +1,5 @@
 <?php
 
-//uses('sabel.controller.Null');
-
 class Sabel_Core_Dispatcher
 {
   public function __construct()

@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Template_Engine_Savant extends BaseEngineImpl implements TemplateEngineImpl
+class Sabel_Template_Engine_Savant
 {
   private $savant  = null;
   

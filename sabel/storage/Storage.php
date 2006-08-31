@@ -1,6 +1,6 @@
 <?php
 
-class SessionStorage extends Storage
+class SessionStorage
 {
   public function __construct()
   {

@@ -6,8 +6,7 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
-                          implements Sabel_DB_Query_Interface
+class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory implements Sabel_DB_Query_Interface
 {
   protected $sql = array();
 

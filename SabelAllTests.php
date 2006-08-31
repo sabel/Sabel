@@ -1,5 +1,7 @@
 <?php
 
+define('RUN_BASE', dirname(realpath(__FILE__)));
+
 error_reporting(E_ALL|E_STRICT);
 
 if (!defined('PHPUnit2_MAIN_METHOD')) {
@@ -11,7 +13,9 @@ require_once('PHPUnit2/Framework/Warning.php');
 require_once('PHPUnit2/TextUI/TestRunner.php');
 require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
-require_once "PHPUnit2/Framework/IncompleteTestError.php";
+require_once('PHPUnit2/Framework/IncompleteTestError.php');
+
+require_once('allclasses.php');
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/Annotation.php');
@@ -24,7 +28,7 @@ require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
 require_once('Test/Resolver.php');
 require_once('Test/Edo.php');
-require_once('Test/InformationSchema.php');
+//require_once('Test/InformationSchema.php');
 require_once('Test/Router.php');
 require_once('Test/Classes.php');
 
@@ -38,7 +42,12 @@ class SabelAllTests
   public static function suite()
   {
     $suite = new PHPUnit2_Framework_TestSuite('sabel all tests');
-
+    
+    $c  = new Container();
+    $dt = new DirectoryTraverser();
+    $dt->visit(new ClassRegister($c));
+    $dt->traverse();
+    
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_DI::suite());
     $suite->addTest(Test_Aspect::suite());
@@ -49,10 +58,10 @@ class SabelAllTests
     $suite->addTest(Test_RequestUri::suite());
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Edo::suite());
-    $suite->addTest(Test_InformationSchema::suite());
+    //$suite->addTest(Test_InformationSchema::suite());
     $suite->addTest(Test_Router::suite());
     $suite->addTest(Test_Classes::suite());
-
+    
     return $suite;
   }
 }

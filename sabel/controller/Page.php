@@ -1,9 +1,5 @@
 <?php
 
-uses('sabel.db.BaseClasses');
-uses('sabel.template.Re');
-uses('sabel.template.Form');
-
 /**
  * page controller base class.
  *

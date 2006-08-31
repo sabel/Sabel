@@ -1,5 +1,7 @@
 <?php
 
+/*
+
 require_once('Sabel/sabel/core/Resolver.php');
 
 function __autoload($class)
@@ -12,7 +14,7 @@ function __autoload($class)
  * Convinience function for class loading.
  *
  * @param String $uses e.g. "user.authenticate.Test"
- */
+
 function uses($uses)
 {
   $paths = Sabel_Core_Context::getIncludePath();
@@ -29,6 +31,7 @@ function uses($uses)
     }
   }
 }
+
 
 function is_not_null($value)
 {
@@ -71,3 +74,5 @@ function urlFor()
   
   return $buf;
 }
+
+ */

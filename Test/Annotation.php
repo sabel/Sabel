@@ -2,15 +2,6 @@
 
 require_once('PHPUnit2/Framework/TestCase.php');
 
-// must need by DI
-require_once('sabel/Functions.php');
-require_once('sabel/core/Context.php');
-
-Sabel_Core_Context::addIncludePath('');
-uses('sabel.container.DI');
-uses('sabel.injection.Calls');
-uses('sabel.core.Exception');
-
 class Test_Annotation extends PHPUnit2_Framework_TestCase
 {
   protected $c;
@@ -22,12 +13,12 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
   
   public function __construct()
   {
-    $this->c = new Sabel_Container_DI();
+    $this->c = new Container();
   }
   
   public function testAnnotation()
   {
-    $ar   = $this->c->load('Sabel_Annotation_Reader');
+    $ar   = $this->c->load('sabel.annotation.Reader');
     $list = $ar->annotation('AnnotatedTestClass');
     
     $it = $list->iterator();

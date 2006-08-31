@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.db.schema.Type');
-
 class Form
 {
   const FORM_START = '<form action="%s" method="%s">';

@@ -1,7 +1,5 @@
 <?php
 
-uses('sabel.library.Iterator');
-
 class Sabel_Library_ArrayList
 {
   private $array;

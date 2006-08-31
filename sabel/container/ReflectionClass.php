@@ -111,10 +111,8 @@ class Sabel_Container_ReflectionClass
   protected function loadConfig($filepath)
   {
     $spyc = new Spyc();
-    
     $paths = Sabel_Core_Context::getIncludePath();
     
-    // @todo おかしくね？
     foreach ($paths as $pathidx => $path) {
       $fullpath = $path . $filepath;
       if (is_file($fullpath)) return $spyc->load($fullpath);

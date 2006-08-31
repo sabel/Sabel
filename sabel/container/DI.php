@@ -1,18 +1,5 @@
 <?php
 
-class SabelDIHelper
-{
-  public static function getModuleName()
-  {
-    if (class_exists('ParsedRequest')) {
-      // @todo remove ParsedRequest
-      //return ParsedRequest::create()->getModule();
-    } else {
-      return 'module';
-    }
-  }
-}
-
 /**
  * Sabel DI Container
  *
