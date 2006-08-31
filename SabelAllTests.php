@@ -15,6 +15,12 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
 require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
+require_once('Container.php');
+$c  = new Container();
+$dt = new DirectoryTraverser();
+$dt->visit(new ClassCombinator());
+$dt->visit(new ClassRegister($c));
+$dt->traverse();
 require_once('allclasses.php');
 
 require_once('Test/SabelTestCase.php');
@@ -42,11 +48,6 @@ class SabelAllTests
   public static function suite()
   {
     $suite = new PHPUnit2_Framework_TestSuite('sabel all tests');
-    
-    $c  = new Container();
-    $dt = new DirectoryTraverser();
-    $dt->visit(new ClassRegister($c));
-    $dt->traverse();
     
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_DI::suite());
