@@ -109,7 +109,7 @@ abstract class Sabel_DB_Mapper
     $this->projection = (is_array($p)) ? implode(',', $p) : $p;
   }
 
-  public function setDefaultColumn($column)
+  public function setDefColumn($column)
   {
     $this->defColumn = $column;
   }

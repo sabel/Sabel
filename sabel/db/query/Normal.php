@@ -45,8 +45,9 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
   protected function _makeEitherSQL($key, $val)
   {
     if ($val[0] === '<' || $val[0] === '>') {
-      $value  = $this->escape(trim(substr($val, 1)));
-      return "{$key} {$val[0]} '{$value}'";
+      $lg = substr($val, 0, strpos($val, ' '));
+      $value  = $this->escape(trim(substr($val, strlen($lg))));
+      return "{$key} {$lg} '{$value}'";
     } else if (strtolower($val) === 'null') {
       return "{$key} IS NULL";
     } else {
@@ -56,8 +57,9 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $val1 = $this->escape(trim(substr($val, 1)));
-    $this->setWhereQuery("{$key} {$val[0]} '{$val1}'");
+    $lg = substr($val, 0, strpos($val, ' '));
+    $val1 = $this->escape(trim(substr($val, strlen($lg))));
+    $this->setWhereQuery("{$key} {$lg} '{$val1}'");
   }
 
   public function unsetProparties()

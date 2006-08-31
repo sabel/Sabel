@@ -112,7 +112,14 @@ class Sabel_DB_Query_Factory
   {
     $search_str = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
 
-    if (strpbrk($val, '_') !== false) {
+    if (is_array($val)) {
+      $escape = $val[1];
+      $val    = $val[0];
+    } else {
+      $escape = true;
+    }
+
+    if (strpbrk($val, '_') !== false && $escape) {
       for ($i = 0; $i < 30; $i++) {
         $esc = $search_str[$i];
         if (strpbrk($val, $esc) === false) {

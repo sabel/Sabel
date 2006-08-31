@@ -45,9 +45,9 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    $helper = new MysqlHelper();
+    //$helper = new MysqlHelper();
     //$helper = new PgsqlHelper();
-    //$helper = new SQLiteHelper();
+    $helper = new SQLiteHelper();
 
     try {
       $helper->dropTables();
@@ -421,8 +421,15 @@ class Test_Edo extends SabelTestCase
       $this->assertEquals($val[0], 23);
       $this->assertEquals($val[1], 50);
     }
+
+    $tree = new Tree();
+    $tree->id('>= 10');
+    $trees = $tree->select();
+
+    $this->assertEquals($trees[0]->name, 'B6-10');
+    $this->assertEquals($trees[1]->name, 'C11');
   }
-  
+
   public function testProjection()
   {
     $obj = $this->test->selectOne(2);
@@ -484,6 +491,10 @@ class Test_Edo extends SabelTestCase
     $obj = $this->test->select();
     $this->assertEquals(count($obj), 1); // yo_shida
 
+    $this->test->LIKE_name('%i_a', false);
+    $obj = $this->test->select();
+    $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
+
     $this->test->OR_id('3', '4');
     $obj = $this->test->select();
 
@@ -491,7 +502,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
-    $this->test->OR_id('<2', '>5');
+    $this->test->OR_id('< 2', '> 5');
     $obj = $this->test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
