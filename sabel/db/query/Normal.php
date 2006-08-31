@@ -13,7 +13,7 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 
   public function makeNormalSQL($key, $val)
   {
-    $this->setWhereQuery("{$key}='". $this->escape($val) ."'");
+    $this->setWhereQuery($this->_getNormalSQL($key, $val));
   }
 
   public function makeWhereInSQL($key, $val)
@@ -39,27 +39,30 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 
   public function makeEitherSQL($key, $val)
   {
-    return $this->_makeEitherSQL($key, $val);
-  }
-
-  protected function _makeEitherSQL($key, $val)
-  {
     if ($val[0] === '<' || $val[0] === '>') {
-      $lg = substr($val, 0, strpos($val, ' '));
-      $value  = $this->escape(trim(substr($val, strlen($lg))));
-      return "{$key} {$lg} '{$value}'";
+      return $this->_makeLess_GreaterSQL($key, $val);
     } else if (strtolower($val) === 'null') {
       return "{$key} IS NULL";
     } else {
-      return "{$key}='". $this->escape($val) ."'";
+      return $this->_getNormalSQL($key, $val);
     }
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $lg = substr($val, 0, strpos($val, ' '));
+    $this->setWhereQuery($this->_makeLess_GreaterSQL($key, $val));
+  }
+
+  protected function _makeLess_GreaterSQL($key, $val)
+  {
+    $lg   = substr($val, 0, strpos($val, ' '));
     $val1 = $this->escape(trim(substr($val, strlen($lg))));
-    $this->setWhereQuery("{$key} {$lg} '{$val1}'");
+    return "{$key} {$lg} '{$val1}'";
+  }
+
+  protected function _getNormalSQL($key, $val)
+  {
+    return "{$key}='{$this->escape($val)}'";
   }
 
   public function unsetProparties()

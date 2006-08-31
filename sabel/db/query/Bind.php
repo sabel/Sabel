@@ -43,26 +43,21 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   public function makeEitherSQL($key, $val)
   {
-    return $this->_makeEitherSQL($key, $val, $key.$this->count++);
-  }
-
-  protected function _makeEitherSQL($key, $val, $bindKey)
-  {
     if ($val[0] === '<' || $val[0] === '>') {
-      return $this->_getLess_GreaterSQL($key, $val, $bindKey);
+      return $this->_makeLess_GreaterSQL($key, $val, $key.$this->count++);
     } else if (strtolower($val) === 'null') {
       return "{$key} IS NULL";
     } else {
-      return $this->_getNormalSQL($key, $val, $bindKey);
+      return $this->_getNormalSQL($key, $val, $key.$this->count++);
     }
   }
 
   public function makeLess_GreaterSQL($key, $val)
   {
-    $this->setWhereQuery($this->_getLess_GreaterSQL($key, $val, $key.$this->count++));
+    $this->setWhereQuery($this->_makeLess_GreaterSQL($key, $val, $key.$this->count++));
   }
 
-  protected function _getLess_GreaterSQL($key, $val, $bindKey)
+  protected function _makeLess_GreaterSQL($key, $val, $bindKey)
   {
     $lg = substr($val, 0, strpos($val, ' '));
     $this->param[$bindKey] = trim(substr($val, strlen($lg)));

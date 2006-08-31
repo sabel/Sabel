@@ -46,8 +46,8 @@ class Test_Edo extends SabelTestCase
   public static function suite()
   {
     //$helper = new MysqlHelper();
-    //$helper = new PgsqlHelper();
-    $helper = new SQLiteHelper();
+    $helper = new PgsqlHelper();
+    //$helper = new SQLiteHelper();
 
     try {
       $helper->dropTables();
