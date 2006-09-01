@@ -115,19 +115,22 @@ class DirectoryPathToClassNameResolver implements ClassNameMappingResolver
 class ClassRegister
 {
   protected $container;
+  protected $strictDirectory;
   
-  public function __construct($container)
+  public function __construct($container, $strictDirectory = 'sabel')
   {
     $this->container = $container;
+    $this->strictDirectory = $strictDirectory;
   }
   
   public function accept($value)
   {
+    
     $d2c = new DirectoryPathToClassNameResolver();
     $resolver = new DirectoryPathToNameSpaceResolver();
     $parts = explode('/', $value);
     
-    if ($parts[0] === 'sabel') {
+    if ($parts[0] === $this->strictDirectory) {
       $this->container->regist($resolver->resolv($value), $d2c->resolv($value));
     }
   }
