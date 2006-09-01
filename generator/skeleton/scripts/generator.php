@@ -136,6 +136,9 @@ class Generator
         FixtureGenerator::generate($name);
         break;
       default:
+        print "there is no kind of command: {$type}.\n";
+        print "you can use 'model' or 'controller' or 'view' or 'scaffold' in arg one.\n";
+        print "e.g. php scripts/generator.php scaffold Foo\n\n";
         break;
     }
   }
