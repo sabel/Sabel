@@ -15,5 +15,14 @@ foreach ($paths as $path) {
   if (is_dir($path . '/Sabel')) define('SABEL_USE_INCLUDE_PATH', true);
 }
 
-include_once('../lib/setup.php');
-Sabel::main();
+require_once('Sabel/Container.php');
+require_once('Sabel/allclasses.php');
+
+// @todo use cache here.
+$c  = new Container();
+$dt = new DirectoryTraverser();
+$dt->visit(new ClassRegister($c));
+$dt->traverse();
+
+$frontController = $c->load('sabel.controller.Front');
+$frontController->ignition();
