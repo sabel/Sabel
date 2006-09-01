@@ -26,8 +26,10 @@ class Test_DI extends PHPUnit2_Framework_TestCase
     
     require('Test/data/testClassDirStructure/root/core/Controller.php');
     $obj = $c->load('root.core.Controller', 'singleton');
-    $ref = new ReflectionClass($obj);
-    $this->assertEquals('Root_Core_Controller', $ref->getName());
+    $this->assertEquals('Root_Core_Controller', $obj->getClassName());
+    
+    $obj = $c->load('root.core.Controller');
+    $this->assertEquals('Root_Core_Controller', $obj->getClassName());
   }
   
   public function testDirectoryPathToClassNameResolver()

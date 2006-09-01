@@ -8,55 +8,35 @@
  */
 class Container
 {
-  protected static $classes   = array();
-  protected static $instances = array();
+  const SINGLETON = 'singleton';
+  const NORMAL    = 'normal';
   
-  protected $namespace = array();
+  protected static $classes   = array();
   
   public function regist($name, $path)
   {
     $d2c = new DirectoryPathToClassNameResolver();
-    
-    /* @todo implement namespace
-    $namespaces = explode('.', $name);
-    $last = count($namespaces) - 1;
-
-    $name = $d2c->resolv($path);
-    $swap = array();
-    for ($i = $last; $i >= 0; --$i) {
-      $swap[$namespaces[$i]] = $name;
-      $name = $swap;
-      unset($swap);
-    }
-    
-    $this->namespace = array_merge_recursive($this->namespace, $name);
-    */
-    
     self::$classes[$name] = $d2c->resolv($path);
   }
   
-  public function load($name, $mode = 'normal')
+  public function load($name, $mode = self::NORMAL)
   {
     static $instances;
     
-    if ($mode === 'singleton') {
+    if ($mode === self::SINGLETON) {
       if (isset($instances[$name])) {
-        return $instances[$name];
+        return new Sabel_Injection_Injector($instances[$name]);
       } else {
         $className = self::$classes[$name];
         $instances[$name] = $instance = new $className();
-        return $instance;
+        return new Sabel_Injection_Injector($instance);
       }
     } else {
       $class = self::$classes[$name];
       if (!$class) throw new Exception('');
-      return new $class();
+      $ins = new $class();
+      return new Sabel_Injection_Injector($ins);
     }
-  }
-  
-  public function switchNameSpace($namespace)
-  {
-    $this->namespace = $namespace .'.';
   }
 }
 
@@ -138,11 +118,13 @@ class ClassRegister
 class ClassCombinator
 {
   protected $allclasses = null;
+  protected $lineTrim   = null;
   
-  public function __construct()
+  public function __construct($lineTrim = true)
   {
     $this->allclasses = fopen('allclasses.php', 'w');
     fwrite($this->allclasses, '<?php ');
+    $this->lineTrim = $lineTrim;
   }
   
   public function accept($value, $type)
@@ -154,7 +136,11 @@ class ClassCombinator
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
         while (!feof($fp)) {
           $line = trim(fgets($fp));
-          if ($this->isLineValid($line)) fputs($this->allclasses, $line);
+          if ($this->lineTrim) {
+            if ($this->isLineValid($line)) fputs($this->allclasses, $line);
+          } else {
+            if ($this->isLineValid($line)) fputs($this->allclasses, $line . "\n");
+          }
         }
       }
     }

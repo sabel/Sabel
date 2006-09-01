@@ -30,9 +30,25 @@ class Sabel_Injection_Injector
     $i = new Sabel_Injection_Calls();
     $i->doBefore($method, $arg);
     
-    $result = $this->target->$method($arg);
+    $argc = count($arg);
+    
+    if ($argc === 0) {
+      $result = $this->target->$method();
+    } else if ($argc === 1) {
+      $result = $this->target->$method($arg[0]);
+    } else if ($argc === 2) {
+      $result = $this->target->$method($arg[0], $arg[1]);
+    } else if ($argc === 3) {
+      $result = $this->target->$method($arg[0], $arg[1], $arg[2]);
+    }
     
     $i->doAfter($method, $result);
     return $result;
+  }
+  
+  public function getClassName()
+  {
+    $ref = new ReflectionClass($this->target);
+    return $ref->getName();
   }
 }
