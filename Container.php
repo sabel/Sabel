@@ -149,11 +149,13 @@ class ClassCombinator
   {
     $parts = explode('/', $value);
     
-    if ($parts[0] === 'sabel') {
-      $fp = fopen ($value, 'r');
-      while (!feof($fp)) {
-        $line = trim(fgets($fp));
-        if ($this->isLineValid($line)) fputs($this->allclasses, $line);
+    if ($type === 'file') {
+      if ($parts[0] === 'sabel') {
+        if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
+        while (!feof($fp)) {
+          $line = trim(fgets($fp));
+          if ($this->isLineValid($line)) fputs($this->allclasses, $line);
+        }
       }
     }
   }
@@ -196,7 +198,7 @@ class DirectoryTraverser
       if (!$e->isDot() && $e->isDir()) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
-      } else if (!$e->isDot()) {
+      } else if (!$e->isDot() && ! preg_match('%\/\..*%', $entry)) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
       }
     }
