@@ -38,7 +38,7 @@ class MysqlHelper
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
 
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon, 'edo');
   }
 
   public function initialize()

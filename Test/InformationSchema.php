@@ -20,6 +20,10 @@ class Test_InformationSchema extends SabelTestCase
     $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
     //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
 
+    $stest  = new Schema_Accessor();
+    $stest->setTableName('stest');
+    $schema = schema($stest);
+
     $stest  = $sa->getTable('stest');
 
     $id      = $stest->getColumnByName('id');
@@ -80,7 +84,7 @@ class MySchemaHelper
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon, 'edo');
   }
 
   public function getCreateSQL()
@@ -111,7 +115,7 @@ class PgSchemaHelper
     $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
     $dbCon['pass'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon);
+    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon, 'public');
   }
 
   public function getCreateSQL()

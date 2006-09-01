@@ -75,6 +75,11 @@ abstract class Sabel_DB_Mapper
     return $this->connectName;
   }
 
+  public function getSchemaName()
+  {
+    return Sabel_DB_Connection::getSchema($this->connectName);
+  }
+
   public function __construct($param1 = null, $param2 = null)
   {
     if (Sabel_DB_Transaction::isActive()) $this->begin();
@@ -462,9 +467,7 @@ abstract class Sabel_DB_Mapper
 
     $obj->childConditions["{$obj->table}_id"] = $obj->data[$obj->defColumn];
 
-    $childObj = $this->newClass($child);
-    $driver   = $childObj->getDriver();
-
+    $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
     $conditions  = $obj->childConditions;
     $constraints = $obj->childConstraints[$child];
