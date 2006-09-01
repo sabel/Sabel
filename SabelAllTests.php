@@ -18,7 +18,7 @@ require_once('PHPUnit2/Framework/IncompleteTestError.php');
 require_once('Container.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
-$dt->visit(new ClassCombinator(false));
+$dt->visit(new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false));
 $dt->visit(new ClassRegister($c));
 $dt->traverse();
 require_once('allclasses.php');

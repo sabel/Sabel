@@ -1,5 +1,7 @@
 <?php
 
+define('SABEL', true);
+
 /**
  * class Container has all of Sabel classes and Sabel Application.
  * 
@@ -126,31 +128,40 @@ class ClassRegister
 
 class ClassCombinator
 {
-  protected $allclasses = null;
+  protected $file = null;
   protected $lineTrim   = null;
+  protected $base = '';
+  protected $strict = '';
   
-  public function __construct($lineTrim = true)
+  public function __construct($path, $base = null, $lineTrim = true, $strict = 'sabel')
   {
-    $file = dirname(__FILE__) . '/allclasses.php';
-    $this->allclasses = fopen($file, 'w');
-    fwrite($this->allclasses, '<?php ');
+    $this->strict = $strict;
+    
+    if (is_null($base)) {
+      $this->base = dirname(__FILE__) . '/';
+    } else {
+      $this->base = $base . '/';
+    }
+    
+    $this->file = fopen($path, 'w');
+    fwrite($this->file, '<?php ');
     $this->lineTrim = $lineTrim;
   }
   
   public function accept($value, $type)
   {
     $parts = explode('/', $value);
-    $value = dirname(__FILE__) .'/'. $value;
-    
-    if ($type === 'file') {
-      if ($parts[0] === 'sabel') {
+    $value = $this->base . $value;
+
+    if ($type === 'file' && preg_match('%.*\.php%', $value)) {
+      if ($parts[0] === $this->strict) {
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
         while (!feof($fp)) {
           $line = trim(fgets($fp));
           if ($this->lineTrim) {
-            if ($this->isLineValid($line)) fputs($this->allclasses, $line);
+            if ($this->isLineValid($line)) fputs($this->file, $line);
           } else {
-            if ($this->isLineValid($line)) fputs($this->allclasses, $line . "\n");
+            if ($this->isLineValid($line)) fputs($this->file, $line . "\n");
           }
         }
       }
@@ -172,7 +183,7 @@ class DirectoryTraverser
   public function __construct($dir = null)
   {
     if ($dir) {
-      $this->dir = dirname(realpath(__FILE__)) . '/' .$dir;
+      $this->dir = $dir;
     } else {
       $this->dir = dirname(realpath(__FILE__));
     }
@@ -195,7 +206,7 @@ class DirectoryTraverser
       if (!$e->isDot() && $e->isDir()) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
-      } else if (!$e->isDot() && ! preg_match('%\/\..*%', $entry)) {
+      } else if (!$e->isDot() && !preg_match('%\/\..*%', $entry)) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
       }
     }

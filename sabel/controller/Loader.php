@@ -53,14 +53,14 @@ class Sabel_Controller_Loader
     // @todo refactoring.
     if ($this->isValidController()) {
       $path = $this->makeControllerPath();
-      require_once($path);
+      //require_once($path);
       $class = $this->getControllerClassName();
       return new $class($this->entry);
     } else if ($this->isValidModule()) {
       $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . '/controllers/index.php';
       
       if (is_readable($path)) {
-        require_once($path);
+        //require_once($path);
       } else {
         throw new Sabel_Exception_Runtime("Index not found: " . $path);
       }
@@ -74,7 +74,7 @@ class Sabel_Controller_Loader
     } else {
       $path = RUN_BASE.'/app/index/controllers/index.php';
       if (is_file($path)) {
-        require_once($path);
+        //require_once($path);
         return new Index_Index($this->entry);
       } else {
         throw new Sabel_Exception_Runtime($path . ' is not a valid file');
