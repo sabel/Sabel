@@ -21,21 +21,13 @@ class Test_DI extends PHPUnit2_Framework_TestCase
   {
     $c  = new Container();
     $dt = new DirectoryTraverser('Test/data/testClassDirStructure');
-    // $dt->visit(new ClassCombinator());
-    $dt->visit(new ClassRegister($c));
+    $dt->visit(new ClassRegister($c, 'root'));
     $dt->traverse();
     
     require('Test/data/testClassDirStructure/root/core/Controller.php');
     $obj = $c->load('root.core.Controller', 'singleton');
     $ref = new ReflectionClass($obj);
     $this->assertEquals('Root_Core_Controller', $ref->getName());
-    
-    //$c->switchNameSpace('root.core');
-    //$obj = $c->load('Controller', 'singleton');
-    //$ref = new ReflectionClass($obj);
-    //$this->assertEquals('Root_Core_Controller', $ref->getName());
-    
-    $this->assertTrue(is_readable('allclasses.php'));
   }
   
   public function testDirectoryPathToClassNameResolver()

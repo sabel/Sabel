@@ -123,9 +123,8 @@ class ClassRegister
     $this->strictDirectory = $strictDirectory;
   }
   
-  public function accept($value)
+  public function accept($value, $type)
   {
-    
     $d2c = new DirectoryPathToClassNameResolver();
     $resolver = new DirectoryPathToNameSpaceResolver();
     $parts = explode('/', $value);
@@ -146,7 +145,7 @@ class ClassCombinator
     fwrite($this->allclasses, '<?php ');
   }
   
-  public function accept($value)
+  public function accept($value, $type)
   {
     $parts = explode('/', $value);
     
@@ -195,9 +194,10 @@ class DirectoryTraverser
       $entry = ltrim(str_replace($this->dir, '', $child), '/');
       
       if (!$e->isDot() && $e->isDir()) {
+        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
       } else if (!$e->isDot()) {
-        foreach ($this->visitors as $visitor) $visitor->accept($entry);
+        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
       }
     }
   }
