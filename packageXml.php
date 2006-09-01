@@ -8,13 +8,13 @@ $packagexml = new PEAR_PackageFileManager2();
 $packagexml->setOptions(
   array('filelistgenerator' => 'file',
         'packagedirectory'  => dirname(__FILE__),
-        'baseinstalldir'    => '/',
+        'baseinstalldir'    => '/Sabel',
         'simpleoutput'      => true));
 $packagexml->setPackageType('php');
 $packagexml->addRelease();
-$packagexml->setPackage('alphatmp');
+$packagexml->setPackage('alpha');
 $packagexml->setChannel('pear.sabel.jp');
-$packagexml->setReleaseVersion('0.1.2');
+$packagexml->setReleaseVersion('0.1.0');
 $packagexml->setAPIVersion('0.1.0');
 $packagexml->setReleaseStability('alpha');
 $packagexml->setAPIStability('alpha');
