@@ -127,9 +127,9 @@ class ClassRegister
     $resolver = new DirectoryPathToNameSpaceResolver();
     $parts = explode('/', $value);
     
-    //if ($parts[0] === 'sabel') {
+    if ($parts[0] === 'sabel') {
       $this->container->regist($resolver->resolv($value), $d2c->resolv($value));
-    //}
+    }
   }
 }
 
