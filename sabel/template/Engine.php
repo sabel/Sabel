@@ -1,16 +1,6 @@
 <?php
 
-interface Sabel_Template_EngineInterface
-{
-  public function setTemplateName($name);
-  public function setTemplatePath($path);
-  public function configuration();
-  public function assign($key, $value);
-  public function retrieve();
-  public function load($name);
-}
-
-abstract class Sabel_Template_Engine implements Sabel_Template_EngineInterface
+abstract class Sabel_Template_Engine
 {
   protected
     $tplpath = null,

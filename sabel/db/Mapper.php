@@ -462,7 +462,9 @@ abstract class Sabel_DB_Mapper
 
     $obj->childConditions["{$obj->table}_id"] = $obj->data[$obj->defColumn];
 
-    $driver = $this->newClass($child)->getDriver();
+    $childObj = $this->newClass($child);
+    $driver   = $childObj->getDriver();
+
     $driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
     $conditions  = $obj->childConditions;
     $constraints = $obj->childConstraints[$child];
@@ -487,12 +489,15 @@ abstract class Sabel_DB_Mapper
     foreach ($rows as $row) {
       if (is_null($child)) {
         $obj = $this->newClass($this->table);
+        $withParent = $this->withParent;
         if ($this->childConstraints) $obj->childConstraints = $this->childConstraints;
       } else {
         $obj = $this->newClass($child);
+        $withParent = ($this->withParent) ? true : $obj->withParent;
       }
 
-      if ($this->withParent) $row = $this->selectWithParent($row);
+      if ($withParent)
+        $row = $this->selectWithParent($row);
 
       $this->setSelectedProperty($obj, $row);
 
@@ -502,8 +507,12 @@ abstract class Sabel_DB_Mapper
       }
       $recordObj[] = $obj;
     }
+
     $constraints = array();
     $conditions  = array();
+    $this->childConditions  = array();
+    $this->childConstraints = array();
+
     return $recordObj;
   }
 
