@@ -29,7 +29,9 @@ class Sabel_Controller_Front
   
   public function ignition()
   {
-    $entry = Sabel_Core_Router::create()->routing();
+    $map = Container::create()->load('sabel.controller.Map');
+    $map->load();
+    $entry = $map->find();
     
     // @todo performance tuning here. taken 40ms
     $class = Sabel_Controller_Loader::create($entry)->load();

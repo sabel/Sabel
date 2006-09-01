@@ -8,10 +8,19 @@
  */
 class Container
 {
-  const SINGLETON = 'singleton';
   const NORMAL    = 'normal';
+  const SINGLETON = 'singleton';
   
-  protected static $classes   = array();
+  protected static $instance = null;
+  protected static $classes  = array();
+  
+  public static function create()
+  {
+    if (is_null(self::$instance)) {
+      self::$instance = new self();
+    }
+    return self::$instance;
+  }
   
   public function regist($name, $path)
   {
@@ -122,7 +131,8 @@ class ClassCombinator
   
   public function __construct($lineTrim = true)
   {
-    $this->allclasses = fopen('allclasses.php', 'w');
+    $file = dirname(__FILE__) . '/allclasses.php';
+    $this->allclasses = fopen($file, 'w');
     fwrite($this->allclasses, '<?php ');
     $this->lineTrim = $lineTrim;
   }
@@ -130,6 +140,7 @@ class ClassCombinator
   public function accept($value, $type)
   {
     $parts = explode('/', $value);
+    $value = dirname(__FILE__) .'/'. $value;
     
     if ($type === 'file') {
       if ($parts[0] === 'sabel') {
