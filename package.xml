@@ -26,7 +26,7 @@
   <active>yes</active>
  </developer>
  <date>2006-09-01</date>
- <time>14:46:33</time>
+ <time>15:41:57</time>
  <version>
   <release>0.1.0</release>
   <api>0.1.0</api>
@@ -41,7 +41,7 @@
   <dir baseinstalldir="/Sabel" name="/">
    <dir name="bin">
     <file baseinstalldir="/Sabel" name="sabel" role="data">
-     <tasks:replace from="@PHP-BIN@" to="php_bin" type="pear-config" />
+     <tasks:replace from="@PEAR-DIR@" to="php_dir" type="pear-config" />
     </file>
    </dir> <!-- /bin -->
    <dir name="generator">
@@ -51,20 +51,58 @@
        <dir name="controllers">
         <file baseinstalldir="/Sabel" name="index.php" role="php" />
        </dir> <!-- /generator/skeleton/app/index/controllers -->
+       <dir name="models">
+        <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+       </dir> <!-- /generator/skeleton/app/index/models -->
+       <dir name="views">
+        <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+       </dir> <!-- /generator/skeleton/app/index/views -->
       </dir> <!-- /generator/skeleton/app/index -->
      </dir> <!-- /generator/skeleton/app -->
+     <dir name="cache">
+      <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+     </dir> <!-- /generator/skeleton/cache -->
      <dir name="config">
-      <file baseinstalldir="/Sabel" name="database.yml" role="data" />
-      <file baseinstalldir="/Sabel" name="environment.yml" role="data" />
-      <file baseinstalldir="/Sabel" name="map.yml" role="data" />
+      <file baseinstalldir="/Sabel" name="database.yml" role="php" />
+      <file baseinstalldir="/Sabel" name="environment.yml" role="php" />
+      <file baseinstalldir="/Sabel" name="map.yml" role="php" />
      </dir> <!-- /generator/skeleton/config -->
+     <dir name="data">
+      <dir name="compiled">
+       <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+      </dir> <!-- /generator/skeleton/data/compiled -->
+     </dir> <!-- /generator/skeleton/data -->
+     <dir name="fixtures">
+      <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+     </dir> <!-- /generator/skeleton/fixtures -->
      <dir name="lib">
       <file baseinstalldir="/Sabel" name="setup.php" role="php" />
      </dir> <!-- /generator/skeleton/lib -->
+     <dir name="locale">
+      <dir name="en">
+       <dir name="LC_MESSAGES">
+        <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+       </dir> <!-- /generator/skeleton/locale/en/LC_MESSAGES -->
+      </dir> <!-- /generator/skeleton/locale/en -->
+      <dir name="ja_JP">
+       <dir name="LC_MESSAGES">
+        <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+       </dir> <!-- /generator/skeleton/locale/ja_JP/LC_MESSAGES -->
+      </dir> <!-- /generator/skeleton/locale/ja_JP -->
+     </dir> <!-- /generator/skeleton/locale -->
      <dir name="logs">
-      <file baseinstalldir="/Sabel" name="sabel.log" role="data" />
+      <file baseinstalldir="/Sabel" name="sabel.log" role="php" />
      </dir> <!-- /generator/skeleton/logs -->
      <dir name="public">
+      <dir name="css">
+       <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+      </dir> <!-- /generator/skeleton/public/css -->
+      <dir name="images">
+       <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+      </dir> <!-- /generator/skeleton/public/images -->
+      <dir name="js">
+       <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+      </dir> <!-- /generator/skeleton/public/js -->
       <file baseinstalldir="/Sabel" name="index.php" role="php" />
      </dir> <!-- /generator/skeleton/public -->
      <dir name="scripts">
@@ -82,13 +120,16 @@
        <file baseinstalldir="/Sabel" name="Standerd.php" role="php" />
       </dir> <!-- /generator/skeleton/skeleton/model -->
       <dir name="view">
-       <file baseinstalldir="/Sabel" name="create.tpl" role="data" />
-       <file baseinstalldir="/Sabel" name="delete.tpl" role="data" />
-       <file baseinstalldir="/Sabel" name="edit.tpl" role="data" />
-       <file baseinstalldir="/Sabel" name="lists.tpl" role="data" />
-       <file baseinstalldir="/Sabel" name="show.tpl" role="data" />
+       <file baseinstalldir="/Sabel" name="create.tpl" role="php" />
+       <file baseinstalldir="/Sabel" name="delete.tpl" role="php" />
+       <file baseinstalldir="/Sabel" name="edit.tpl" role="php" />
+       <file baseinstalldir="/Sabel" name="lists.tpl" role="php" />
+       <file baseinstalldir="/Sabel" name="show.tpl" role="php" />
       </dir> <!-- /generator/skeleton/skeleton/view -->
      </dir> <!-- /generator/skeleton/skeleton -->
+     <dir name="tests">
+      <file baseinstalldir="/Sabel" name="desc.txt" role="php" />
+     </dir> <!-- /generator/skeleton/tests -->
      <file baseinstalldir="/Sabel" name="sabel.php" role="php" />
     </dir> <!-- /generator/skeleton -->
     <file baseinstalldir="/Sabel" name="generator.php" role="php" />
@@ -241,7 +282,7 @@
        </dir> <!-- /Test/data/testClassDirStructure/root/core -->
       </dir> <!-- /Test/data/testClassDirStructure/root -->
      </dir> <!-- /Test/data/testClassDirStructure -->
-     <file baseinstalldir="/Sabel" name="map.yml" role="data" />
+     <file baseinstalldir="/Sabel" name="map.yml" role="php" />
     </dir> <!-- /Test/data -->
     <file baseinstalldir="/Sabel" name="Annotation.php" role="php" />
     <file baseinstalldir="/Sabel" name="Aspect.php" role="php" />
@@ -281,7 +322,7 @@
  </dependencies>
  <phprelease>
   <filelist>
-   <install as="/usr/local/bin/sabel" name="bin/sabel" />
+   <install as="sabel" name="bin/sabel" />
   </filelist>
  </phprelease>
  <changelog>
