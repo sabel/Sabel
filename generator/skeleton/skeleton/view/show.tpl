@@ -6,6 +6,7 @@
   <br />
 <# endforeach #>
 
-<a href="<#= urlFor('default', 'edit',   $<? echo $name ?>) #>"><#= _('show') #></a>
+<a href="<#= urlFor('default', 'show',   $<? echo $name ?>) #>"><#= _('show') #></a>
 <a href="<#= urlFor('default', 'edit',   $<? echo $name ?>) #>"><#= _('edit') #></a>
 <a href="<#= urlFor('default', 'delete', $<? echo $name ?>) #>"><#= _('delete') #></a>
+<a href="<#= urlFor('default', 'lists') #>"><#= _('list') #></a>
