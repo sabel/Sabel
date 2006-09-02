@@ -31,6 +31,6 @@ abstract class Sabel_Template_Engine
   {
     $t = clone $this;
     $t->setTemplateName($name . '.tpl');
-    echo $t->retrieve();
+    return $t->retrieve();
   }
 }

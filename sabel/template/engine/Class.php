@@ -43,6 +43,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
     
     ob_start();
     include($cpath);
+    
     $this->getHelperPath();
     $contents = ob_get_clean();
     if ($pageCache) $this->saveCompileFile($contents);

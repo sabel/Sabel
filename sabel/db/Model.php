@@ -24,8 +24,7 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   {
     // @todo performance bottle neck. this method taken 30-40ms.
     if ($this->loaded === false) {
-      $ischema = new Sabel_DB_Schema_Accessor($this->connectName, 'default');
-      $this->columns = $columns = $ischema->getTable($this->table)->getColumns();
+      $this->columns = $columns = $this->getTableSchema()->getColumns();
       $this->size = count($columns);
       
       $schema = array();

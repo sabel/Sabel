@@ -30,7 +30,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
     Re::set('<? echo $controllerName ?>', $model);
     
     if ($this->isPost()) {
-      $model = new <? echo $controllerName ?>();
+      $model = new <? echo ucfirst($controllerName) ?>();
       $model->save($this->request->requests());
       $this->redirect(urlFor('default', 'lists'));
     }

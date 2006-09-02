@@ -76,9 +76,10 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   public function rendering()
   {
     if (is_file($this->path . 'layout.tpl')) {
-      $this->contentForLayout = $this->impl->load('layout.tpl');
+      $this->impl->assign('contentForLayout', $this->impl->retrieve());
+      echo $this->impl->load('layout');
+    } else {
+      echo $this->impl->retrieve();
     }
-    
-    echo $this->impl->retrieve();
   }
 }

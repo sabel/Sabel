@@ -1,5 +1,6 @@
 production:
   driver: mysql
+  schema: default
   host: localhost
   database: default
   user: root
@@ -7,6 +8,7 @@ production:
 
 test:
   driver: mysql
+  schema: default
   host: localhost
   database: default
   user: root
@@ -14,6 +16,7 @@ test:
 
 development:
   driver: mysql
+  schema: default
   host: localhost
   database: default
   user: root
