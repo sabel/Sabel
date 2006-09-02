@@ -141,7 +141,7 @@ abstract class Sabel_DB_Mapper
     return $sa->getTables();
   }
 
-  public function getSchemaAccessor($connectName, $schemaName)
+  public static function getSchemaAccessor($connectName, $schemaName)
   {
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }

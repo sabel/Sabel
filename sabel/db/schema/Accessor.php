@@ -33,10 +33,16 @@ class Sabel_DB_Schema_Accessor
   }
 }
 
+/**
+ * public function. shcema()
+ *
+ * this method will be used from the view mainly.
+ * add schema information to a value of a model and return it.
+ */
 function schema($model)
 {
   if ($model instanceof Sabel_DB_Mapper) {
-    $sa = new Sabel_DB_Schema_Accessor($model->getConnectName(), $model->getSchema());
+    $sa = new Sabel_DB_Schema_Accessor($model->getConnectName(), $model->getSchemaName());
     $columns = $sa->getTable($model->getTableName())->getColumns();
 
     $data = $model->toArray();
@@ -45,6 +51,6 @@ function schema($model)
 
     return $columns;
   } else {
-    throw new Exception('invalid instance. schema() need instanceof Sabel_DB_Mapper.');
+    throw new Exception('invalid instance. schema() need instance of Sabel_DB_Mapper.');
   }
 }
