@@ -4,6 +4,13 @@ require_once(RUN_BASE.'/app/index/models/<? echo ucfirst($controllerName) ?>.php
 
 class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
 {
+  protected $<? echo $controllerName ?> = null;
+  
+  public function initialize()
+  {
+    $this-><? echo $controllerName ?> = new <? echo ucfirst($controllerName) ?>();
+  }
+  
   public function index()
   {
     echo "welcome to <? echo ucfirst($controllerName) ?> controller. \n";
@@ -11,15 +18,12 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function lists()
   {
-    $model = new <? echo ucfirst($controllerName) ?>();
-    $model->setConstraint('order', 'id asc');
-    Re::set('<? echo $controllerName ?>s', $model->select());
+    Re::set('<? echo $controllerName ?>s', $this-><? echo ucfirst($controllerName) ?>->lists());
   }
   
   public function show()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->request->id);
-    Re::set('<? echo $controllerName ?>', $model);
+    Re::set('<? echo $controllerName ?>', $this-><? echo $controllerName ?>->show($this->id));
   }
   
   public function create()
