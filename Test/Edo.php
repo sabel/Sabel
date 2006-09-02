@@ -20,9 +20,9 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    //$helper = new MysqlHelper();
+    $helper = new MysqlHelper();
     //$helper = new PgsqlHelper();
-    $helper = new SQLiteHelper();
+    //$helper = new SQLiteHelper();
 
     try {
       $helper->dropTables();
@@ -1132,16 +1132,23 @@ class MysqlHelper
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon, 'edo');
-    */
-    $dbCon = mysql_connect('localhost', 'root', '');
-    mysql_select_db('edo', $dbCon);
-    Sabel_DB_Connection::addConnection('default', 'mysql', $dbCon, 'edo');
+     */
 
-    $dbCon2 = array();
-    $dbCon2['dsn']  = 'mysql:host=192.168.0.222;dbname=edo2';
-    $dbCon2['user'] = 'develop';
-    $dbCon2['pass'] = 'develop';
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2, 'edo2');
+    $con = array();
+    $con['driver'] = 'mysql';
+    $con['host'] = 'localhost';
+    $con['user'] = 'root';
+    $con['pass'] = '';
+    $con['database'] = 'edo';
+    Sabel_DB_Connection::addConnection('default', $con);
+
+    $con = array();
+    $con['driver'] = 'pdo-mysql';
+    $con['host'] = 'localhost';
+    $con['user'] = 'root';
+    $con['pass'] = '';
+    $con['database'] = 'edo2';
+    Sabel_DB_Connection::addConnection('default2', $con);
 
     //$dbCon2 = mysql_connect('192.168.0.222', 'develop', 'develop');
     //mysql_select_db('edo2', $dbCon2);

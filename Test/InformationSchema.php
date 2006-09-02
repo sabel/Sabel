@@ -77,10 +77,12 @@ class MySchemaHelper
   public function __construct()
   {
     $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
+    $dbCon['driver'] = 'pdo-mysql';
+    $dbCon['host'] = 'localhost';
     $dbCon['user'] = 'root';
     $dbCon['pass'] = '';
-    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon, 'edo');
+    $dbCon['database'] = 'edo';
+    Sabel_DB_Connection::addConnection('schemaAccess', $dbCon);
   }
 
   public function getCreateSQL()

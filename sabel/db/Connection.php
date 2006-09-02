@@ -4,33 +4,43 @@ class Sabel_DB_Connection
 {
   private static $connList = array();
 
-  public static function addConnection($connectName ,$driver, $connection, $schema = null)
+  public static function addConnection($connectName, $params)
   {
-    if ($driver === 'pdo') {
-      if(!is_array($connection))
-        throw new Exception('invalid Parameter. when use pdo, 3rd Argument must be array.');
+    $driver = $params['driver'];
 
-      $dsn = $connection['dsn'];
-      $db  = substr($dsn, 0, strpos($dsn, ':'));
+    if (!is_array($params))
+      throw new Exception('invalid Parameter. 2rd Argument must be array.');
+
+    if (stripos($driver, 'pdo-') !== false) {
+      $db  = str_replace('pdo-', '', $driver);
+      $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
 
       if ($db === 'sqlite') {
         $list['conn'] = new PDO($dsn);
       } else {
-        $list['conn'] = new PDO($dsn, $connection['user'], $connection['pass']);
+        $list['conn'] = new PDO($dsn, $params['user'], $params['pass']);
+      }
+
+      $list['driver'] = 'pdo';
+      $list['db']     = $db;
+    } else {
+      if ($driver === 'mysql') {
+        $host = (isset($params['port'])) ? $params['host'] . ':' . $params['port'] : $params['host'];
+        $list['conn'] = mysql_connect($host, $params['user'], $params['pass']);
+        mysql_select_db($params['database'], $list['conn']);
+      } else if ($driver === 'pgsql') {
+        $host = (isset($params['port'])) ? $params['host'] . ' port=' . $params['port'] : $params['host'];
+        $list['conn'] = pg_connect("host={$host} dbname={$params['database']} user={$params['user']} password={$params['pass']}");
+      } else if ($driver === 'firebird') {
+        $host = $params['host'] . ':' . $params['database'];
+        $list['conn'] = ibase_connect($host, $params['user'], $params['pass']);
       }
 
       $list['driver'] = $driver;
-      $list['db']     = $db;
-      $list['schema'] = $schema;
-    } else {
-      if(is_array($connection))
-        throw new Exception('invalid Parameter. 3rd Argument must be string.');
-
-      $list['conn']   = $connection;
-      $list['driver'] = $driver;
       $list['db']     = $driver;
-      $list['schema'] = $schema;
     }
+
+    $list['schema'] = (isset($params['schema'])) ? $params['schema'] : null;
     self::$connList[$connectName] = $list;
   }
 
