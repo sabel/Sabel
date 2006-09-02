@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Core_DBProxy extends Sabel_DB_Mapper implements Iterator
+class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
 {
   protected $schema   = array();
   protected $columns  = array();

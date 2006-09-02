@@ -1,7 +1,5 @@
 <#php
 
-require_once(RUN_BASE.'/app/index/models/<? echo ucfirst($controllerName) ?>.php');
-
 class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
 {
   protected $<? echo $controllerName ?> = null;
@@ -18,7 +16,7 @@ class Index_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
   
   public function lists()
   {
-    Re::set('<? echo $controllerName ?>s', $this-><? echo ucfirst($controllerName) ?>->lists());
+    Re::set('<? echo $controllerName ?>s', $this-><? echo $controllerName ?>->lists());
   }
   
   public function show()
