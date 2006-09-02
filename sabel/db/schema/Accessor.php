@@ -36,7 +36,7 @@ class Sabel_DB_Schema_Accessor
 function schema($model)
 {
   if ($model instanceof Sabel_DB_Mapper) {
-    $sa = new Sabel_DB_Schema_Accessor($model->getConnectName(), 'edo');
+    $sa = new Sabel_DB_Schema_Accessor($model->getConnectName(), $model->getSchema());
     $columns = $sa->getTable($model->getTableName())->getColumns();
 
     $data = $model->toArray();

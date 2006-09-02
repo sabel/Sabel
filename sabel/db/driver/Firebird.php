@@ -15,7 +15,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->queryObj = new Sabel_DB_Query_Normal('firebird', $this);
+    $this->queryObj = new Sabel_DB_Query_Normal('firebird');
   }
 
   public function begin($conn)
@@ -92,16 +92,5 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);        
 
     return $rows;
-  }
-
-  /**
-   * should change the setting of php.ini
-   * 'magic_quotes_sybase = On'
-   *
-   */
-  public function escape($value)
-  {
-    if (get_magic_quotes_gpc()) $value = stripslashes($value);
-    return $value;
   }
 }

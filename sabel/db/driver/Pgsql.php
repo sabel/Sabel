@@ -13,7 +13,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General implements Sabel_DB_
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->queryObj = new Sabel_DB_Query_Normal('pgsql', $this);
+    $this->queryObj = new Sabel_DB_Query_Normal('pgsql', 'pg_escape_string');
   }
 
   public function begin($conn)
@@ -74,11 +74,5 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General implements Sabel_DB_
   public function fetchAll($style = null)
   {
     return pg_fetch_all($this->result);
-  }
-
-  public function escape($value)
-  {
-    if (get_magic_quotes_gpc()) $value = stripslashes($value);
-    return pg_escape_string($value);
   }
 }

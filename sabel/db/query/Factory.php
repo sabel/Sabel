@@ -3,52 +3,48 @@
 class Sabel_DB_Query_Factory
 {
   protected
-    $driver = null,
-    $dbName = '',
-    $set    = false;
+    $escMethod = '',
+    $dbName    = '',
+    $stripFlag = false,
+    $set       = false;
 
-  public function __construct($dbName, $driver = null)
+  public function __construct($dbName, $methodName = null)
   {
-    $this->dbName = $dbName;
-    $this->driver = $driver;
+    $this->dbName    = $dbName;
+    $this->escMethod = $methodName;
+    $this->stripFlag = (defined('SABEL')) ? false : get_magic_quotes_gpc();
   }
 
   public function makeConditionQuery($conditions)
   {
     if (!$conditions) return true;
 
-    $check = true;
+    $nmlCount = 0;
     foreach ($conditions as $key => $val) {
       if ($val[0] == '>' || $val[0] == '<') {
         $this->makeLess_GreaterSQL($key, $val);
-        $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::IN)) {
         $key = str_replace(Sabel_DB_Driver_Interface::IN, '', $key);
         $this->makeWhereInSQL($key, $val);
-        $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::BET)) {
         $key = str_replace(Sabel_DB_Driver_Interface::BET, '', $key);
         $this->makeBetweenSQL($key, $val);
-        $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::EITHER)) {
         $key = str_replace(Sabel_DB_Driver_Interface::EITHER, '', $key);
         $this->prepareEitherSQL($key, $val);
-        $check = false;
       } else if (strstr($key, Sabel_DB_Driver_Interface::LIKE)) {
         $key = str_replace(Sabel_DB_Driver_Interface::LIKE, '', $key);
         $this->prepareLikeSQL($key, $val);
-        $check = false;
       } else if (strtolower($val) === 'null') {
         $this->makeIsNullSQL($key);
-        $check = false;
       } else if (strtolower($val) === 'not null') {
         $this->makeIsNotNullSQL($key);
-        $check = false;
       } else {
         $this->makeNormalSQL($key, $val);
+        $nmlCount++;
       }
     }
-    return $check;
+    return (count($conditions) === $nmlCount);
   }
 
   public function makeConstraintQuery($constraints)
@@ -66,7 +62,6 @@ class Sabel_DB_Query_Factory
         $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
 
         $this->sql = array('SELECT ' . $query . $tmp);
-        return false;
       } else {
         array_push($this->sql, " LIMIT {$constraints['limit']}");
       }
@@ -74,8 +69,6 @@ class Sabel_DB_Query_Factory
 
     if (isset($constraints['offset']))
       array_push($this->sql, " OFFSET {$constraints['offset']}");
-
-    return true;
   }
 
   public function getSQL()

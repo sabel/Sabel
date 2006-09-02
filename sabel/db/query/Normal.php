@@ -10,6 +10,36 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory implements Sabel_DB_Q
 {
   protected $sql = array();
 
+  public function setUpdateSQL($table, $data)
+  {
+    $sql = array();
+    foreach ($data as $key => $val) {
+      $val = $this->escape($val);
+      array_push($sql, "{$key}='{$val}'");
+    }
+    $this->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
+  }
+
+  public function setInsertSQL($table, $data)
+  {
+    $columns = array();
+    $values  = array();
+
+    foreach ($data as $key => $val) {
+      array_push($columns, $key);
+      $val = $this->escape($val);
+      array_push($values, "'{$val}'");
+    }
+
+    $sql = array("INSERT INTO {$table}(");
+    array_push($sql, join(',', $columns));
+    array_push($sql, ") VALUES(");
+    array_push($sql, join(',', $values));
+    array_push($sql, ');');
+
+    $this->setBasicSQL(join('', $sql));
+  }
+
   public function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val));
@@ -71,6 +101,9 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory implements Sabel_DB_Q
 
   protected function escape($val)
   {
-    return $this->driver->escape($val);
+    $escMethod = $this->escMethod;
+
+    if ($this->stripFlag) $val = stripslashes($val);
+    return (is_null($escMethod)) ? $val : $escMethod($val);
   }
 }

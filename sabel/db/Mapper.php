@@ -129,6 +129,23 @@ abstract class Sabel_DB_Mapper
     return $this->table;
   }
 
+  public function getTableSchema()
+  {
+    $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
+    return $sa->getTable($this->table);
+  }
+
+  public function getAllSchema()
+  {
+    $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
+    return $sa->getTables();
+  }
+
+  public function getSchemaAccessor($connectName, $schemaName)
+  {
+    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
+  }
+
   public function enableParent()
   {
     $this->withParent = true;

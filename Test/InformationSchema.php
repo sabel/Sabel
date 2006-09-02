@@ -20,10 +20,6 @@ class Test_InformationSchema extends SabelTestCase
     $sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'edo');
     //$sa = new Sabel_DB_Schema_Accessor('schemaAccess', 'public');
 
-    $stest  = new Schema_Accessor();
-    $stest->setTableName('stest');
-    $schema = schema($stest);
-
     $stest  = $sa->getTable('stest');
 
     $id      = $stest->getColumnByName('id');

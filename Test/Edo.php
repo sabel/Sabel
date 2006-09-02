@@ -20,9 +20,9 @@ class Test_Edo extends SabelTestCase
 
   public static function suite()
   {
-    $helper = new MysqlHelper();
+    //$helper = new MysqlHelper();
     //$helper = new PgsqlHelper();
-    //$helper = new SQLiteHelper();
+    $helper = new SQLiteHelper();
 
     try {
       $helper->dropTables();
@@ -97,7 +97,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals((int)$cus[1]->customer_order[1]->id, 3);
     $this->assertEquals((int)$cus[0]->customer_order[2]->id, 2);
     $this->assertEquals((int)$cus[0]->customer_order[3]->id, 1);
-    
+
     $cu  = new Customer();
     $cu->setChildConstraint('customer_order', array('offset' => 1));
     $cus = $cu->select();

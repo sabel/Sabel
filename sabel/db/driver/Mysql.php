@@ -11,7 +11,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General implements Sabel_DB_
   public function __construct($conn)
   {
     $this->conn     = $conn;
-    $this->queryObj = new Sabel_DB_Query_Normal('mysql', $this);
+    $this->queryObj = new Sabel_DB_Query_Normal('mysql', 'mysql_real_escape_string');
   }
 
   public function begin($conn)
@@ -76,11 +76,5 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General implements Sabel_DB_
       while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
 
     return $rows;
-  }
-
-  public function escape($value)
-  {
-    if (get_magic_quotes_gpc()) $value = stripslashes($value);
-    return mysql_real_escape_string($value, $this->conn);
   }
 }
