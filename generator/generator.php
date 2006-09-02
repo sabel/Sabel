@@ -28,6 +28,6 @@ class SabelDirectoryAndFileCreator
   }
 }
 
-$dt = new DirectoryTraverser('generator/skeleton');
+$dt = new DirectoryTraverser(dirname(__FILE__) . '/skeleton');
 $dt->visit(new SabelDirectoryAndFileCreator());
 $dt->traverse();
