@@ -694,12 +694,9 @@ abstract class Sabel_DB_Mapper
     $driver = $this->getDriver();
     $driver->setUpdateSQL($this->table, $data);
     $driver->makeQuery($this->conditions);
-
-    if ($driver->execute()) {
-      $this->conditions = array();
-    } else {
-      throw new Exception('Error: allUpdate() execute failed.');
-    }
+    
+    $this->tryExecute($driver);
+    $this->conditions = array();
   }
 
   protected function update()

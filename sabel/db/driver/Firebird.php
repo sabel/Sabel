@@ -8,9 +8,8 @@
  */
 class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_DB_Driver_Interface
 {
-  private
-    $trans        = null,
-    $lastinsertId = null;
+  private   $trans        = null;
+  protected $lastinsertId = null;
 
   public function __construct($conn)
   {
@@ -39,11 +38,11 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_
 
   protected function setIdNumber($table, $data, $defColumn)
   {
-    $seqName = strtoupper("{$table}_{$defColumn}_gen");
+    $genName = strtoupper("{$table}_{$defColumn}_gen");
 
     if (!isset($data[$defColumn])) {
-      if (!$result = $this->execute("SELECT GEN_ID({$seqName}, 1) FROM sequence"))
-        throw new Exception('Error: get generator number failed. ' . $seqName);
+      if (!$result = $this->execute("SELECT GEN_ID({$genName}, 1) FROM sequence"))
+        throw new Exception('Error: get generator number failed. ' . $genName);
 
       $genNum = $this->fetch();
       $this->lastInsertId = $genNum[0];

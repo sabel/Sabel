@@ -11,7 +11,7 @@ class Sabel_DB_Connection
     if (!is_array($params))
       throw new Exception('invalid Parameter. 2rd Argument must be array.');
 
-    if (stripos($driver, 'pdo-') !== false) {
+    if (strpos($driver, 'pdo-') !== false) {
       $db  = str_replace('pdo-', '', $driver);
       $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
 

@@ -34,9 +34,8 @@ class Sabel_DB_Schema_Accessor
 }
 
 /**
- * public function. shcema()
+ * public function. schema()
  *
- * this method will be used from the view mainly.
  * add schema information to a value of a model and return it.
  */
 function schema($model)
