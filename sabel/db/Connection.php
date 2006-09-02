@@ -18,7 +18,7 @@ class Sabel_DB_Connection
       if ($db === 'sqlite') {
         $list['conn'] = new PDO($dsn);
       } else {
-        $list['conn'] = new PDO($dsn, $params['user'], $params['pass']);
+        $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
       }
 
       $list['driver'] = 'pdo';
@@ -26,14 +26,14 @@ class Sabel_DB_Connection
     } else {
       if ($driver === 'mysql') {
         $host = (isset($params['port'])) ? $params['host'] . ':' . $params['port'] : $params['host'];
-        $list['conn'] = mysql_connect($host, $params['user'], $params['pass']);
+        $list['conn'] = mysql_connect($host, $params['user'], $params['password']);
         mysql_select_db($params['database'], $list['conn']);
       } else if ($driver === 'pgsql') {
         $host = (isset($params['port'])) ? $params['host'] . ' port=' . $params['port'] : $params['host'];
-        $list['conn'] = pg_connect("host={$host} dbname={$params['database']} user={$params['user']} password={$params['pass']}");
+        $list['conn'] = pg_connect("host={$host} dbname={$params['database']} user={$params['user']} password={$params['password']}");
       } else if ($driver === 'firebird') {
         $host = $params['host'] . ':' . $params['database'];
-        $list['conn'] = ibase_connect($host, $params['user'], $params['pass']);
+        $list['conn'] = ibase_connect($host, $params['user'], $params['password']);
       }
 
       $list['driver'] = $driver;

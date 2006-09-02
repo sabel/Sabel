@@ -10,21 +10,25 @@ class Sabel_Controller_Front
 {
   public function __construct()
   {
-    $cache = new Sabel_Cache_Apc();
-    if (! ($conf = $cache->read('dbconf'))) {
+    if (ENVIRONMENT === 'development') {
       $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
-      $cache->write('dbconf', $conf);
+      $dbc = $conf->read(ENVIRONMENT);
+    } else {
+      $cache = new Sabel_Cache_Apc();
+      if (!($conf = $cache->read('dbconf'))) {
+        $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
+        $cache->write('dbconf', $conf);
+      }
     }
     
-    $envConf = new Sabel_Config_Yaml(RUN_BASE . '/config/environment.yml');
-    $env = $envConf->read('environment');
-    $dev = $conf->read($env);
-    $fm = '%s:host=%s;dbname=%s';
-    $con['dsn']  = sprintf($fm, $dev['driver'], $dev['host'], $dev['database']);
-    $con['user'] = $dev['user'];
-    $con['pass'] = $dev['password'];
-    
-    Sabel_DB_Connection::addConnection('default', 'pdo', $con);
+    $dbc = $conf->read(ENVIRONMENT);
+    if (isset($dbc['driver'])) {
+      Sabel_DB_Connection::addConnection('default', $dbc);
+    } else {
+      foreach ($dbc as $connectionName => $connection) {
+        Sabel_DB_Connection::addConnection($connectionName, $connection);
+      }
+    }
   }
   
   public function ignition()
