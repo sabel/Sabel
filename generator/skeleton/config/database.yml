@@ -4,17 +4,17 @@ production:
   database: default
   user: root
   password: 
-  
+
+test:
+  driver: mysql
+  host: localhost
+  database: default
+  user: root
+  password:
+
 development:
   driver: mysql
   host: localhost
   database: default
   user: root
   password:
-  
-test:
-  driver: mysql
-  host: localhost
-  database: default
-  user: root
-  password: 

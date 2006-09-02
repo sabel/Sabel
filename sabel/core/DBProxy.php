@@ -30,8 +30,9 @@ class Sabel_Core_DBProxy extends Sabel_DB_Mapper implements Iterator
       
       $schema = array();
       foreach ($columns as $column) {
+        $data = (isset($this->data[$column->name])) ? $this->data[$column->name] : null;
         $values = array('name' => $column->name,
-                        'data' => $this->data[$column->name]);
+                        'data' => $data);
         
         $schema[] = $values;
         $schema[$column->name] = $values;

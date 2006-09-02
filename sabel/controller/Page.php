@@ -72,7 +72,7 @@ abstract class Sabel_Controller_Page
     foreach ($httpMethods as $method) {
       $checkMethod = 'is'.ucfirst($method);
       $actionName = $method.ucfirst($action);
-      if ($this->$checkMethod && $refClass->hasMethod($actionName)) {
+      if ($this->$checkMethod() && $refClass->hasMethod($actionName)) {
         $action = $actionName;
       }
     }
