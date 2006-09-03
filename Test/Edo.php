@@ -869,7 +869,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
-
+  /*
   public function testJoinSelect()
   {
     $users = new Users();
@@ -905,7 +905,7 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($res[1]->bbs[0]->title, 'title21');
     $this->assertEquals($res[1]->bbs[1]->title, 'title22');
   }
-
+  */
   public function testOrder()
   {
     $ol = new Sabel_DB_Basic('order_line');
