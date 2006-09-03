@@ -70,12 +70,13 @@ class Sabel_DB_Schema_TypeStr implements Sabel_DB_Schema_TypeSender
   public function send($co, $type)
   {
     $tArray = array('varchar', 'char', 'character varying' , 'character');
+    $text   = strpbrk($type, '(');
 
-    if (in_array($type, $tArray)) {
+    if (in_array($type, $tArray) || $text !== false) {
       foreach ($tArray as $val) {
         if (stripos($type, $val) !== false) {
           $co->type = Sabel_DB_Schema_Type::STRING;
-          $co->max  = ($text = strpbrk($type, '(')) ? substr($text, 1, strlen($text) - 2) : 256;
+          $co->max  = ($text !== false) ? substr($text, 1, strlen($text) - 2) : 256;
           break;
         }
       }
@@ -165,9 +166,25 @@ class Sabel_DB_Schema_TypeOther implements Sabel_DB_Schema_TypeSender
   }
 }
 
+class ColumnValueObject
+{
+  private $data = array();
+
+  public function __set($key, $val)
+  {
+    $this->data[$key] = $val;
+  }
+
+  public function __get($key)
+  {
+    return $this->data[$key];
+  }
+  
+}
+
 class CreateSchemaColumn
 {
-  protected $constraint = '';
+  protected $colInfo = '';
 
   public function __construct($createSQL)
   {
@@ -177,10 +194,17 @@ class CreateSchemaColumn
 
     $columns = array();
     foreach ($lines as $line) {
-      $co = new Sabel_DB_Schema_Column();
+      //$co = new Sabel_DB_Schema_Column();
+      $co = new ColumnValueObject();
 
       $split = explode(' ', $line);
       $name  = $split[0];
+
+      if ($name === 'constraint') {
+        $constraint = true;
+        $constLine  = $line;
+        continue;        
+      }
 
       $line = strtolower($line);
 
@@ -193,8 +217,9 @@ class CreateSchemaColumn
       $this->setPrimary($co);
       $this->setDefault($co);
       
-      $columns[] = $co;
+      $columns[$name] = $co;
     }
+    if ($constraint) $this->setConstraint($columns, $constLine);
     $this->columns = $columns;
   }
 
@@ -208,7 +233,7 @@ class CreateSchemaColumn
     $type = $this->getType($co, $rem);
     $ts = new Sabel_DB_Schema_TypeSet($co, $type);
 
-    if (!isset($ts->increment)) {
+    if (!isset($co->increment)) {
       $co->increment = (strpos($rem, 'auto_increment') || strpos($rem, 'integer primary key'));
     }
   }
@@ -217,38 +242,38 @@ class CreateSchemaColumn
   {
     $tmp = substr($rem, 0, strpos($rem, ' '));
     $type = ($tmp === '') ? $rem : $tmp;
-    $this->constraint = trim(str_replace($type, '', $rem));
+    $this->colInfo = trim(str_replace($type, '', $rem));
 
     return $type;
   }
 
   protected function setNotNull($co)
   {
-    if ($this->constraint === '') {
+    if ($this->colInfo === '') {
       $co->notNull = false;
     } else {
-      $co->notNull = (strpos($this->constraint, 'not null') !== false);
-      $this->constraint = str_replace('not null', '', $this->constraint);
+      $co->notNull = (strpos($this->colInfo, 'not null') !== false);
+      $this->colInfo = str_replace('not null', '', $this->colInfo);
     }
   }
 
   protected function setPrimary($co)
   {
-    if ($this->constraint === '') {
+    if ($this->colInfo === '') {
       $co->primary = false;
     } else {
-      $co->primary = (strpos($this->constraint, 'primary key') !== false);
-      $this->constraint = str_replace('primary key', '', $this->constraint);
+      $co->primary = (strpos($this->colInfo, 'primary key') !== false);
+      $this->colInfo = str_replace('primary key', '', $this->colInfo);
     }
   }
 
   protected function setDefault($co)
   {
-    if ($this->constraint === '') {
+    if ($this->colInfo === '') {
       $co->default = null;
     } else {
-      if (strpos($this->constraint, 'default') !== false) {
-        $default = trim(substr($this->constraint, 8));
+      if (strpos($this->colInfo, 'default') !== false) {
+        $default = trim(substr($this->colInfo, 8));
         if (ctype_digit($default) || $default === 'false' || $default === 'true') {
           $co->default = $default;
         } else {
@@ -257,6 +282,15 @@ class CreateSchemaColumn
       } else {
         $co->default = null;
       }
+    }
+  }
+
+  protected function setConstraint($columns, $line)
+  {
+    if (strpos($line, 'primary key') !== false) {
+      $line    = strpbrk($line, '(');
+      $colName = substr($line, 1, strlen($line) - 2);
+      $columns[$colName]->primary = true;
     }
   }
 }
