@@ -11,9 +11,6 @@ abstract class Sabel_DB_Mapper
 {
   const WITH_PARENT = 'WITH_PARENT';
 
-  const TYPE_CHILD  = 0;
-  const TYPE_PARENT = 1;
-
   protected
     $conditions      = array(),
     $selectCondition = array();
@@ -385,31 +382,33 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function selectJoin($relTableList)
+  public function selectJoin($relTableList, $columnList = null)
   {
-    $child  = $relTableList['child'];
-    $parent = $relTableList['parent'];
+    if (!is_array($relTableList))
+      throw new Exception('Error: joinSelect() argument must be an array.');
 
-    if (!$child && !$parent)
-      throw new Exception('Error: joinSelect() invalid parameter.');
+    $thisTable     = $this->table;
+    $relTableArray = $this->toArrayJoinTables($relTableList);
 
-    if (isset($child)  && !is_array($child))  $child  = array($child);
-    if (isset($parent) && !is_array($parent)) $parent = array($parent);
+    $sql = array('SELECT ');
+    $columns = (isset($columnList[$thisTable])) ? $columnList[$thisTable] : $this->getColumnNames($thisTable);
+    foreach ($columns as $c) array_push($sql, "{$thisTable}.{$c}, ");
 
-    $sql   = array('SELECT ');
-    $table = $this->table;
-
-    $this->addJoinColumnPhrase($sql, $table);
-
-    if ($child)  $this->addJoinColumnPhrase($sql, $child);
-    if ($parent) $this->addJoinColumnPhrase($sql, $parent);
+    $joinTables = array();
+    foreach ($relTableArray as $tables) {
+      foreach ($tables as $tbl) {
+        if ($tbl !== $thisTable && !isset($this->joinColCache[$tbl])) {
+          $joinTables[] = $tbl;
+          $this->addJoinColumns($sql, $tbl, $columnList);
+        }
+      }
+    }
 
     $sql = join('', $sql);
     $sql = array(substr($sql, 0, strlen($sql) - 2));
-    array_push($sql, " FROM {$table}");
+    array_push($sql, " FROM {$thisTable}");
 
-    if ($child)  array_push($sql, $this->getLeftJoinPhrase($child,  $table, self::TYPE_CHILD));
-    if ($parent) array_push($sql, $this->getLeftJoinPhrase($parent, $table, self::TYPE_PARENT));
+    foreach ($relTableArray as $tables) array_push($sql, $this->getLeftJoin($tables));
 
     $driver = $this->getDriver();
     $driver->setBasicSQL(join('', $sql));
@@ -417,52 +416,84 @@ abstract class Sabel_DB_Mapper
 
     $this->tryExecute($driver);
     $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
-    $relTables = array_merge($child, $parent);
 
     $recordObj = array();
     foreach ($rows as $row) {
-      foreach ($relTables as $table) {
-        foreach ($this->joinColCache[$table] as $column) {
-          $row[$table][$column] = $row["prefix_{$table}_{$column}"];
-          unset($row["prefix_{$table}_{$column}"]);
+      $models    = array();
+      $acquire   = array();
+
+      foreach ($relTableArray as $tables) {
+        foreach ($tables as $t) {
+          if ($t !== $thisTable && !isset($acquire[$t])) {
+            foreach ($this->joinColCache[$t] as $column) {
+              $acquire[$t][$column] = $row["pre_{$t}_{$column}"];
+              unset($row["pre_{$t}_{$column}"]);
+            }
+            $obj = $this->newClass($t);
+            $this->setSelectedProperty($obj, $acquire[$t]);
+            $models[$t] = $obj;
+          }
         }
-        $obj = $this->newClass($table);
-        $this->setSelectedProperty($obj, $row[$table]);
-        $obj->setTableName($table);
-        $row[$table] = $obj;
       }
-      $obj = $this->newClass($this->table);
+
+      $obj = $this->newClass($thisTable);
       $this->setSelectedProperty($obj, $row);
+      $models[$thisTable] = $obj;
+
+      foreach ($joinTables as $model) {
+        foreach ($relTableArray as $tables) {
+          if ($model === $tables['child'] && $thisTable !== $tables['child']) {
+            $parent = $tables['parent'];
+            $models[$model]->$parent = $models[$parent];
+            $models[$model]->newData = array();
+          }
+        }
+      }
+
+      foreach ($relTableArray as $tables) {
+        if ($tables['child'] === $thisTable) {
+          $parent = $tables['parent'];
+          $obj->$parent = $models[$parent];
+          $obj->newData = array();
+        }
+      }
       $recordObj[] = $obj;
     }
     return $recordObj;
   }
 
-  private function addJoinColumnPhrase(&$sql, $table)
+  private function toArrayJoinTables($relTableList)
   {
-    $joinCol = array();
-    if (is_array($table)) {
-      foreach ($table as $t) {
-        foreach ($this->getColumnNames($t) as $c) {
-          $joinCol[] = $c;
-          array_push($sql, "{$t}.{$c} AS prefix_{$t}_{$c}, ");
-        }
-        $this->joinColCache[$t] = $joinCol;
-      }
-    } else {
-      foreach ($this->getColumnNames($table) as $c) array_push($sql, "{$table}.{$c}, ");
+    $relTableArray = array();
+
+    foreach ($relTableList as $tables) {
+      $split = explode(':', $tables);
+
+      $rel = array();
+      $rel['child']    = $split[0];
+      $rel['parent']   = $split[1];
+      $relTableArray[] = $rel;
     }
+    return $relTableArray;
   }
 
-  private function getLeftJoinPhrase($rel, $table, $type)
+  private function addJoinColumns(&$sql, $table, $columnList = null)
   {
-    foreach ($rel as $val) {
-      if ($type === self::TYPE_CHILD) {
-        return " LEFT JOIN {$val} ON {$table}.id = {$val}.{$table}_id";
-      } else {
-        return " LEFT JOIN {$val} ON {$table}.{$val}_id = {$val}.id ";
-      }
+    $joinCol = array();
+    $columns = (isset($columnList[$table])) ? $columnList[$table] : $this->getColumnNames($table);
+    foreach ($columns as $c) {
+      $joinCol[] = $c;
+      array_push($sql, "{$table}.{$c} AS pre_{$table}_{$c}, ");
     }
+    $this->joinColCache[$table] = $joinCol;
+  }
+
+  private function getLeftJoin($tables)
+  {
+    $c = $tables['child'];
+    $p = $tables['parent'];
+
+    return " LEFT JOIN {$p} ON {$c}.{$p}_id = {$p}.id ";
   }
 
   public function select($param1 = null, $param2 = null, $param3 = null)
