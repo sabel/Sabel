@@ -6,34 +6,38 @@ class Sabel_DB_Connection
 
   public static function addConnection($connectName, $params)
   {
-    $driver = $params['driver'];
+    $driver   = $params['driver'];
+    $host     = $params['host'];
+    $user     = $params['user'];
+    $pass     = $params['password'];
+    $database = $params['database'];
 
     if (!is_array($params))
       throw new Exception('invalid Parameter. 2rd Argument must be array.');
 
     if (strpos($driver, 'pdo-') !== false) {
       $db  = str_replace('pdo-', '', $driver);
-      $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
 
       if ($db === 'sqlite') {
-        $list['conn'] = new PDO($dsn);
+        $list['conn'] = new PDO("sqlite:{$database}");
       } else {
-        $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
+        $dsn = "{$db}:host={$host};dbname={$database}";
+        $list['conn'] = new PDO($dsn, $user, $pass);
       }
 
       $list['driver'] = 'pdo';
       $list['db']     = $db;
     } else {
       if ($driver === 'mysql') {
-        $host = (isset($params['port'])) ? $params['host'] . ':' . $params['port'] : $params['host'];
-        $list['conn'] = mysql_connect($host, $params['user'], $params['password']);
-        mysql_select_db($params['database'], $list['conn']);
+        $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
+        $list['conn'] = mysql_connect($host, $user, $pass);
+        mysql_select_db($database, $list['conn']);
       } else if ($driver === 'pgsql') {
-        $host = (isset($params['port'])) ? $params['host'] . ' port=' . $params['port'] : $params['host'];
-        $list['conn'] = pg_connect("host={$host} dbname={$params['database']} user={$params['user']} password={$params['password']}");
+        $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
+        $list['conn'] = pg_connect("host={$host} dbname={$database} user={$user} password={$pass}");
       } else if ($driver === 'firebird') {
-        $host = $params['host'] . ':' . $params['database'];
-        $list['conn'] = ibase_connect($host, $params['user'], $params['password']);
+        $host = $host . ':' . $database;
+        $list['conn'] = ibase_connect($host, $user, $pass);
       }
 
       $list['driver'] = $driver;

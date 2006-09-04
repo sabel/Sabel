@@ -4,7 +4,7 @@
  * Sabel_DB_Schema_Column
  *
  * @package org.sabel.db.schema
- * @author Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author Mori Reo <mori.reo@gmail.com>
  */
 class Sabel_DB_Schema_Column
 {

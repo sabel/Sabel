@@ -4,11 +4,13 @@ class Parser
 {
   public static function create($schema)
   {
-    $columns   = array();
-    $dataArray = $schema->getCreateSQL();
+    $columns = array();
 
-    foreach ($dataArray as $name => $info) {
-      $co = new Column();
+    if (is_object($schema))
+      $schema = $schema->getCreateSQL();
+
+    foreach ($schema as $name => $info) {
+      $co = new ValueObject();
 
       $split = explode(',', $info);
       $type  = $split[0];
