@@ -59,7 +59,7 @@ class Sabel_DB_Schema_MyPg
 
   protected function makeColumnValueObject($columnRecord)
   {
-    $co = new Sabel_DB_Schema_Column();
+    $co = new ValueObject();
     $co->name    = $columnRecord['column_name'];
     $co->notNull = ($columnRecord['is_nullable'] === 'NO');
 

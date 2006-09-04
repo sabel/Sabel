@@ -6,20 +6,20 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   protected $columns  = array();
   protected $size     = 0;
   protected $position = 0;
-  
+
   protected $loaded   = false;
-  
+
   public function __construct($param1 = null, $param2 = null)
   {
     parent::__construct($param1, $param2);
   }
-  
+
   public function __get($key)
   {
     $this->loadSchema();
     return new Sabel_DB_Column($this->schema[$key], $this->table);
   }
-  
+
   protected function loadSchema()
   {
     // @todo performance bottle neck. this method taken 30-40ms.

@@ -131,9 +131,13 @@ class TemporaryValueObject
 
   public function __set($key, $val)
   {
-    if ($val === false) $val = 'false';
-    if ($val === true)  $val = 'true';
-    if (is_null($val))  $val = 'null';
+    if ($val === false) {
+      $val = 'false';
+    } else if (is_null($val)) {
+      $val = 'null';
+    } else if ($val === true) {
+      $val = 'true';
+    }
 
     $this->data[$key] = $val;
   }
