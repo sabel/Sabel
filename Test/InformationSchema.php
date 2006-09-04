@@ -21,40 +21,40 @@ class Test_InformationSchema extends SabelTestCase
     $time    = $colObj['time'];
     $com     = $colObj['com'];
 
-    $this->assertEquals($id->type, Type::INT);
+    $this->assertEquals($id->type, Sabel_DB_Schema_Type::INT);
     $this->assertEquals((int)$id->max, 222);
     $this->assertEquals((int)$id->min, -222);
     $this->assertFalse($id->primary);
 
-    $this->assertEquals($name->type, Type::STRING);
+    $this->assertEquals($name->type, Sabel_DB_Schema_Type::STRING);
     $this->assertEquals((int)$name->max, 128);
     $this->assertTrue($name->notNull);
     $this->assertFalse($name->primary);
 
-    $this->assertEquals($status->type, Type::BOOL);
+    $this->assertEquals($status->type, Sabel_DB_Schema_Type::BOOL);
     $this->assertTrue($status->notNull);
     $this->assertFalse($status->primary);
 
-    $this->assertEquals($comment->type, Type::STRING);
+    $this->assertEquals($comment->type, Sabel_DB_Schema_Type::STRING);
     $this->assertEquals((int)$comment->max, 64);
     $this->assertEquals($comment->default, 'varchar default');
     $this->assertFalse($comment->notNull);
     $this->assertFalse($comment->primary);
 
-    $this->assertEquals($pare_id->type, Type::INT);
+    $this->assertEquals($pare_id->type, Sabel_DB_Schema_Type::INT);
     $this->assertEquals((int)$pare_id->max, 444);
     $this->assertEquals((int)$pare_id->min, -444);
     $this->assertTrue($pare_id->increment);
     $this->assertTrue($pare_id->primary);
 
-    $this->assertEquals($birth->type, Type::DATE);
+    $this->assertEquals($birth->type, Sabel_DB_Schema_Type::DATE);
     $this->assertEquals($birth->default, '3000-01-01');
     $this->assertTrue($birth->notNull);
     $this->assertFalse($birth->increment);
     $this->assertFalse($birth->primary);
 
-    $this->assertEquals($time->type, Type::TIMESTAMP);
-    $this->assertEquals($com->type, Type::TEXT);
+    $this->assertEquals($time->type, Sabel_DB_Schema_Type::TIMESTAMP);
+    $this->assertEquals($com->type, Sabel_DB_Schema_Type::TEXT);
   }
 }
 

@@ -4,8 +4,16 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
 {
   public function addDefaultInfo($co, $default)
   {
-    $default = str_replace(substr(strpbrk($default, '::'), 0), '', $default);
-    $co->default = substr($default, 1, strlen($default) - 2);
+    if ((strpos($default, 'nextval') === false)) {
+      if (ctype_digit($default)) {
+        $co->default = (int)$default;
+      } else {
+        $default     = substr($default, 1);
+        $co->default = substr($default, 0, strpos($default, "'"));
+      }
+    } else {
+      $co->default = null;
+    }
   }
 
   public function addIncrementInfo($co, $columnRecord)
@@ -24,14 +32,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     return $sql;
   }
 
-  public function addCommentInfo($co, $columnRecord)
-  {
-    $sqls   = array();
-    $sqls[] = "SELECT relfilenode FROM pg_class WHERE relname = '{$columnRecord['table_name']}'";
-    $sqls[] = "SELECT col_description FROM col_description(%s, %s)";
-    return $sqls;
-  }
-
   public function isBoolean($type, $columnRecord)
   {
     return ($type === 'boolean');
@@ -40,6 +40,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
   public function addStringLength($co, $columnRecord)
   {
     $maxlen  = $columnRecord['character_maximum_length'];
-    $co->max = (isset($maxlen)) ? $maxlen : 65535;
+    $co->max = (isset($maxlen)) ? $maxlen : 256;
   }
 }

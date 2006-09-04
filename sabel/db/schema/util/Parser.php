@@ -19,12 +19,12 @@ class Parser
       $co->type = $type;
       unset($split[0]);
 
-      if ($type === Type::INT) {
+      if ($type === Sabel_DB_Schema_Type::INT) {
         $co->max = (float)$split[1];
         $co->min = (float)$split[2];
         unset($split[1]);
         unset($split[2]);
-      } else if ($type === Type::STRING) {
+      } else if ($type === Sabel_DB_Schema_Type::STRING) {
         $co->max       = (int)$split[1];
         unset($split[1]);
       }

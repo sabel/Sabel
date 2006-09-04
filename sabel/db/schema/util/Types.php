@@ -17,12 +17,12 @@ class TypeInt implements Sender
 
   public function send($co, $type)
   {
-    $tArray = array('integer', 'bigint', 'serial' , 'bigserial', 'int4',
+    $tArray = array('integer', 'int', 'bigint', 'serial' , 'bigserial', 'int4',
                     'int8', 'smallint', 'tinyint', 'int3', 'int2', 'mediumint');
 
     if (in_array($type, $tArray)) {
-      $co->type = Type::INT;
-      Type::setRange($co, $type);
+      $co->type = Sabel_DB_Schema_Type::INT;
+      Sabel_DB_Schema_Type::setRange($co, $type);
     } else {
       $this->next->send($co, $type);
     }
@@ -46,7 +46,7 @@ class TypeStr implements Sender
     if (in_array($type, $tArray) || $text !== false) {
       foreach ($tArray as $val) {
         if (stripos($type, $val) !== false) {
-          $co->type = Type::STRING;
+          $co->type = Sabel_DB_Schema_Type::STRING;
           $co->max  = ($text !== false) ? substr($text, 1, strlen($text) - 2) : 256;
           break;
         }
@@ -71,7 +71,7 @@ class TypeText implements Sender
     $tArray = array('text', 'mediumtext', 'tinytext');
 
     if (in_array($type, $tArray)) {
-      $co->type = Type::TEXT;
+      $co->type = Sabel_DB_Schema_Type::TEXT;
     } else {
       $this->next->send($co, $type);
     }
@@ -93,7 +93,7 @@ class TypeTime implements Sender
                     'datetime' , 'timestamp with time zone');
 
     if (in_array($type, $tArray)) {
-      $co->type = Type::TIMESTAMP;
+      $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
     } else {
       $this->next->send($co, $type);
     }
@@ -114,7 +114,7 @@ class TypeByte implements Sender
     $tArray = array('blob', 'bytea', 'longblob', 'mediumblob');
 
     if (in_array($type, $tArray)) {
-      $co->type = Type::BLOB;
+      $co->type = Sabel_DB_Schema_Type::BLOB;
     } else {
       $this->next->send($co, $type);
     }

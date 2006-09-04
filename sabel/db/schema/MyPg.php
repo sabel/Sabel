@@ -27,7 +27,7 @@ class Sabel_DB_Schema_MyPg
     foreach ($this->recordObj->execute($sql) as $val) {
       $data  = array_change_key_case($val->toArray());
       $table = $data['table_name'];
-      $tables[$table]  = new Sabel_DB_Schema_Table($table, $this->createColumns($table));
+      $tables[$table] = new Sabel_DB_Schema_Table($table, $this->createColumns($table));
     }
     return $tables;
   }
@@ -54,6 +54,7 @@ class Sabel_DB_Schema_MyPg
       $columnName = $data['column_name'];
       $columns[$columnName] = $this->makeColumnValueObject($data);
     }
+
     return $columns;
   }
 
@@ -71,36 +72,10 @@ class Sabel_DB_Schema_MyPg
     if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord)))
       $co->primary = (count($this->recordObj->execute($sql)) > 0);
 
-    if (is_array($sqls = $this->addCommentInfo($co, $columnRecord))) {
-      $oid = $this->recordObj->execute($sqls[0]);
-      $pos = $columnRecord['ordinal_position'];
+    $setter = new Setter($co, $columnRecord['data_type']);
 
-      $comment = $this->recordObj->execute(sprintf($sqls[1], $oid[0]->relfilenode, $pos));
-      if (isset($comment)) $co->comment = $comment[0]->col_description;
-    }
-
-    return $this->setColumnType($co, $columnRecord);
-  }
-
-  protected function setColumnType($co, $columnRecord)
-  {
-    $type = $columnRecord['data_type'];
-
-    if ($this->isBoolean($type, $columnRecord)) {
-      $co->type = Sabel_DB_Schema_Type::BOOL;
-    } else if (in_array($type, Sabel_DB_Schema_Type::$INTS)) {
-      $co->type = Sabel_DB_Schema_Type::INT;
-      Sabel_DB_Schema_Type::setRange($co, $type);
-    } else if (in_array($type, Sabel_DB_Schema_Type::$STRS)) {
-      $co->type = Sabel_DB_Schema_Type::STRING;
+    if ($co->type === Sabel_DB_Schema_Type::STRING)
       $this->addStringLength($co, $columnRecord);
-    } else if (in_array($type, Sabel_DB_Schema_Type::$TEXTS)) {
-      $co->type = Sabel_DB_Schema_Type::TEXT;
-    } else if (in_array($type, Sabel_DB_Schema_Type::$TIMES)) {
-      $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
-    } else if ($type === 'date') {
-      $co->type = Sabel_DB_Schema_Type::DATE;
-    }
 
     return $co;
   }

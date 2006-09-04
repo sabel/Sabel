@@ -18,32 +18,6 @@ class Sabel_DB_Schema_Type
   const TIME      = 'TIME';
   const TIMESTAMP = 'TIMESTAMP';
 
-  public static $INTS  = array('integer',
-                               'int',
-                               'bigint',
-                               'smallint',
-                               'tinyint',
-                               'mediumint');
-
-  public static $STRS  = array('varchar',
-                               'char',
-                               'character varying',
-                               'character');
-
-  public static $TEXTS = array('text',
-                               'mediumtext',
-                               'tinytext');
-
-  public static $BLOBS = array('blob',
-                               'bytea',
-                               'longblog',
-                               'mediumblob');
-
-  public static $TIMES = array('timestamp',
-                               'timestamp without time zone',
-                               'timestamp with time zone',
-                               'datetime');
-
   public static function setRange($columnObj, $intType)
   {
     switch($intType) {
@@ -64,11 +38,13 @@ class Sabel_DB_Schema_Type
       case 'int':
       case 'int4':
       case 'integer':
+      case 'serial':
         $columnObj->max =  2147483647;
         $columnObj->min = -2147483648;
         break;
       case 'int8':
       case 'bigint':
+      case 'bigserial':
         $columnObj->max =  9223372036854775807;
         $columnObj->min = -9223372036854775808;
         break;

@@ -17,11 +17,6 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
     $co->primary = ($columnRecord['column_key'] === 'PRI');
   }
 
-  public function addCommentInfo($co, $columnRecord)
-  {
-    $co->comment = $columnRecord['column_comment'];
-  }
-
   public function isBoolean($type, $columnRecord)
   {
     return ($type === 'tinyint' && $columnRecord['column_comment'] === 'boolean');
