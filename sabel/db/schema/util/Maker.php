@@ -22,7 +22,7 @@ class Maker
 
     $columns = array();
     foreach ($lines as $line) {
-      $co = new TemporaryValueObject();
+      $co = new ColumnLine();
 
       $line  = strtolower($line);
       $split = explode(' ', $line);
@@ -37,11 +37,15 @@ class Maker
 
       $this->setDataType($co, $rem);
 
-      if (!$this->setNotNull($co)) {
-        if (!$this->setPrimary($co)) {
-          $this->setDefault($co);
-        }
+      if ($this->colInfo === '') {
+        $co->notNull = false;
+        $co->primary = false;
+        $co->default = null;
+      } else {
+        $this->setNotNull($co);
+        if (!$this->setPrimary($co)) $this->setDefault($co);
       }
+
       $columns[$name] = $co->get();
     }
 
@@ -53,53 +57,45 @@ class Maker
 
   protected function setDataType($co, $rem)
   {
-    $type = $this->getType($co, $rem);
-    $ts = new Setter($co, $type);
+    $tmp = substr($rem, 0, strpos($rem, ' '));
+    $type = ($tmp === '') ? $rem : $tmp;
+    $this->colInfo = trim(substr($rem, strlen($type)));
+
+    Setter::set($co, $type);
 
     $co->increment = (strpos($rem, 'auto_increment') || strpos($rem, 'serial') ||
                       strpos($rem, 'bigserial') || strpos($rem, 'integer primary key'));
   }
 
-  protected function getType($co, $rem)
-  {
-    $tmp = substr($rem, 0, strpos($rem, ' '));
-    $type = ($tmp === '') ? $rem : $tmp;
-    $this->colInfo = trim(substr($rem, strlen($type)));
-
-    return $type;
-  }
-
   protected function setNotNull($co)
   {
-    if ($this->colInfo === '') {
-      $co->notNull = false;
-      $co->primary = false;
-      $co->default = null;
-      return true;
-    } else {
-      $co->notNull = (strpos($this->colInfo, 'not null') !== false);
-      $this->colInfo = str_replace('not null', '', $this->colInfo);
-      return false;
-    }
+    $colInfo = $this->colInfo;
+
+    $co->notNull   = (strpos($colInfo, 'not null') !== false);
+    $this->colInfo = str_replace('not null', '', $colInfo);
   }
 
   protected function setPrimary($co)
   {
-    if ($this->colInfo === '') {
+    $colInfo = $this->colInfo;
+
+    if ($colInfo === '') {
       $co->primary = false;
       $co->default = null;
       return true;
     } else {
-      $co->primary = (strpos($this->colInfo, 'primary key') !== false);
-      $this->colInfo = str_replace('primary key', '', $this->colInfo);
+      $co->primary   = (strpos($colInfo, 'primary key') !== false);
+      $this->colInfo = str_replace('primary key', '', $colInfo);
       return false;
     }
   }
 
   protected function setDefault($co)
   {
-    if (strpos($this->colInfo, 'default') !== false) {
-      $default = trim(substr($this->colInfo, 8));
+    $colInfo = $this->colInfo;
+
+    if (strpos($colInfo, 'default') !== false) {
+      $default = trim(substr($colInfo, 8));
       if (ctype_digit($default) || $default === 'false' || $default === 'true') {
         $co->default = $default;
       } else {
@@ -125,7 +121,7 @@ class Maker
   }
 }
 
-class TemporaryValueObject
+class ColumnLine
 {
   protected $data = array();
 

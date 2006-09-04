@@ -2,21 +2,21 @@
 
 class Setter
 {
-  public function __construct($co, $type)
+  public static function set($co, $type)
   {
     if ($type === 'boolean' || $type === 'bool') {
-      $co->type = Type::BOOL;
+      $co->type = Sabel_DB_Schema_Type::BOOL;
     } else if ($type === 'date') {
-      $co->type = Type::DATE;
+      $co->type = Sabel_DB_Schema_Type::DATE;
     } else if ($type === 'time') {
-      $co->type = Type::TIME;
+      $co->type = Sabel_DB_Schema_Type::TIME;
     } else {
-      $tInt   = new TypeInt();
-      $tStr   = new TypeStr();
-      $tText  = new TypeText();
-      $tTime  = new TypeTime();
-      $tByte  = new TypeByte();
-      $tOther = new TypeOther();
+      $tInt   = new Sabel_DB_Schema_TypeInt();
+      $tStr   = new Sabel_DB_Schema_TypeStr();
+      $tText  = new Sabel_DB_Schema_TypeText();
+      $tTime  = new Sabel_DB_Schema_TypeTime();
+      $tByte  = new Sabel_DB_Schema_TypeByte();
+      $tOther = new Sabel_DB_Schema_TypeOther();
 
       $tInt->add($tStr);
       $tStr->add($tText);

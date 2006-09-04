@@ -1,12 +1,12 @@
 <?php
 
-interface Sender
+interface Sabel_DB_Schema_TypeSender
 {
   public function add($chainObj);
   public function send($columnObj, $type);
 }
 
-class TypeInt implements Sender
+class Sabel_DB_Schema_TypeInt implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 
@@ -29,7 +29,7 @@ class TypeInt implements Sender
   }
 }
 
-class TypeStr implements Sender
+class Sabel_DB_Schema_TypeStr implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 
@@ -57,7 +57,7 @@ class TypeStr implements Sender
   }
 }
 
-class TypeText implements Sender
+class Sabel_DB_Schema_TypeText implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 
@@ -78,7 +78,7 @@ class TypeText implements Sender
   }
 }
 
-class TypeTime implements Sender
+class Sabel_DB_Schema_TypeTime implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 
@@ -100,7 +100,7 @@ class TypeTime implements Sender
   }
 }
 
-class TypeByte implements Sender
+class Sabel_DB_Schema_TypeByte implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 
@@ -121,7 +121,7 @@ class TypeByte implements Sender
   }
 }
 
-class TypeOther implements Sender
+class Sabel_DB_Schema_TypeOther implements Sabel_DB_Schema_TypeSender
 {
   private $next = null;
 

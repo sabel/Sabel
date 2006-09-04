@@ -60,7 +60,7 @@ class Test_InformationSchema extends SabelTestCase
 
 class Default_Stest
 {
-  public function getCreateSQL()
+  public function getParsedSQL()
   {
     $sql = array();
 

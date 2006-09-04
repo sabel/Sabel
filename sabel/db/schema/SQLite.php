@@ -18,8 +18,7 @@ class Sabel_DB_Schema_SQLite
   {
     $tables = array();
     foreach ($this->recordObj->execute(self::TABLE_LIST) as $val) {
-      $columns = $this->createColumns($val->name);
-      $tables[$val->name] = new Sabel_DB_Schema_Table($val->name, $columns);
+      $tables[$val->name] = $this->getTable($val->name, $columns);
     }
     return $tables;
   }

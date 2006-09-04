@@ -7,7 +7,7 @@ class Parser
     $columns = array();
 
     if (is_object($schema))
-      $schema = $schema->getCreateSQL();
+      $schema = $schema->getParsedSQL();
 
     foreach ($schema as $name => $info) {
       $co = new ValueObject();
