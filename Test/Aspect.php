@@ -58,11 +58,11 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
   
   /**
    * @todo think assertion of aspect
-   *
+   * @todo implementation.
    */
   public function testAspectOriented()
   {
-    $order = Sabel_Container_DI::create()->loadInjected('Orders');
-    $order->registOrder();
+    // $order = Sabel_Container_DI::create()->loadInjected('Orders');
+    // $order->registOrder();
   }
 }

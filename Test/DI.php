@@ -17,7 +17,7 @@ class Test_DI extends PHPUnit2_Framework_TestCase
     return new PHPUnit2_Framework_TestSuite("Test_DI");
   }
   
-  public function testTraverse()
+  public function estTraverse()
   {
     $c  = new Container();
     $dt = new DirectoryTraverser('Test/data/testClassDirStructure');
@@ -32,10 +32,53 @@ class Test_DI extends PHPUnit2_Framework_TestCase
     $this->assertEquals('Root_Core_Controller', $obj->getClassName());
   }
   
+  // test case for class A depend class B.
+  public function testDependencyResolve()
+  {
+    $c = new Container();
+    $c->regist('test.Age', 'Age');
+    $c->regist('test.Person', 'Person');
+    
+    $person = $c->load('test.Person');
+  }
+  
   public function testDirectoryPathToClassNameResolver()
   {
     $r = new DirectoryPathToClassNameResolver();
     $this->assertEquals('Sabel_Core_Router', $r->resolv('sabel/core/Router.php'));
     $this->assertEquals('Core_Router', $r->resolv('core/Router.php'));
+  }
+}
+
+class Person
+{
+  protected $age = null;
+  
+  /**
+   *
+   * @depend test.Age
+   */
+  public function __construct(Age $age)
+  {
+    $this->age = $age;
+  }
+}
+
+class Age
+{
+  protected $age = 0;
+  
+  public function __construct()
+  {
+  }
+  
+  public function getAge()
+  {
+    return $this->age;
+  }
+  
+  public function setAge($age = 0)
+  {
+    $this->age = $age;
   }
 }

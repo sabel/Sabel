@@ -30,15 +30,13 @@ class Sabel_Container_DI
     return new Sabel_Injection_Injector($this->load($className, $method));
   }
   
-  public function loadClass($class, $method)
+  public function loadClass($class, $method = '__construct')
   {
-    if (!class_exists($class)) {
-      uses(Sabel_Core_Resolver::resolvClassPathByClassName($class));
-    }
-    
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
     $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass, $reflectionClass);
+    
+    if (!$reflectionClass->hasMethod($method)) return false;
     
     if ($reflectionClassExt->isInterface()) {
       $reflectionClass =
@@ -50,20 +48,18 @@ class Sabel_Container_DI
       $this->classStack[] = $reflectionClassExt;
     }
     
-    if (!$reflectionClass->hasMethod($method)) return false;
-    
     // parameters loop
-    $refMethod = new ReflectionMethod($class, $method);
-    foreach ($refMethod->getParameters() as $paramidx => $param) {
+    $refMethod = $reflectionClass->getMethod($method);
+    foreach ($refMethod->getParameters() as $param) {
       // check parameter required class
       $hasClass = ($dependClass = $param->getClass()) ? true : false;
       
-      // if parameter required class depend another class
+      // if parameter required class depend another class.
       if ($hasClass) {
-        // if it class also depend another class then recursive call
+        // if it class also depend another class then recursive call.
         $depend = $dependClass->getName();
         if ($this->hasParameterDependOnClass($depend, '__construct')) {
-          $this->loadClass($dependClass->getName()); // call myself
+          $this->loadClass($depend);
         } else {
           $this->classStack[] = new Sabel_Container_ReflectionClass($param->getClass(), $reflectionClass);
         }
@@ -82,6 +78,8 @@ class Sabel_Container_DI
     }
     
     $class = array_pop($this->classStack);
+    if (is_null($class)) throw new Sabel_Exception_Runtime("class is null.");
+    
     if ($class->isInterface()) {
       $instance = $class->newInstanceForImplementation();
     } else {
@@ -110,7 +108,7 @@ class Sabel_Container_DI
       $refMethod = new ReflectionMethod($class, $method);
     }
     
-    return (count($refMethod->getParamegers() !== 0));
+    return (count($refMethod->getParameters() !== 0));
   }
   
   public static function parseClassDependencyStruct($className, &$structure)

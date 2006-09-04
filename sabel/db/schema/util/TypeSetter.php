@@ -1,7 +1,5 @@
 <?php
 
-require_once 'Types.php';
-
 class TypeSetter
 {
   public function __construct($co, $type)

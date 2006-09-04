@@ -24,13 +24,33 @@ class Container
     return self::$instance;
   }
   
-  public function regist($name, $path)
+  public function regist($key, $name, $path = null)
   {
-    $d2c = new DirectoryPathToClassNameResolver();
-    self::$classes[$name] = $d2c->resolv($path);
+    if (!is_null($path)) {
+      $d2c = new DirectoryPathToClassNameResolver();
+      self::$classes[$key] = $d2c->resolv($path);
+    }
+    
+    self::$classes[$key] = $name;
   }
   
-  public function load($name, $mode = self::NORMAL)
+  public function load($name, $mode = null)
+  {
+    static $instances;
+    $className = self::$classes[$name];
+    
+    $rc = new ReflectionClass($className);
+    $di = Sabel_Container_DI::create();
+    
+    if ($rc->hasMethod('__construct')) {
+      $ins = $di->load($className, '__construct');
+      return $ins;
+    } else {
+      return new $className;
+    }
+  }
+  
+  public function oad($name, $mode = self::NORMAL)
   {
     static $instances;
     

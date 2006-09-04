@@ -1130,7 +1130,7 @@ class MysqlHelper
     $dbCon = array();
     $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
     $dbCon['user'] = 'root';
-    $dbCon['pass'] = '';
+    $dbCon['password'] = '';
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon, 'edo');
      */
 
@@ -1138,7 +1138,7 @@ class MysqlHelper
     $con['driver'] = 'mysql';
     $con['host'] = 'localhost';
     $con['user'] = 'root';
-    $con['pass'] = '';
+    $con['password'] = '';
     $con['database'] = 'edo';
     Sabel_DB_Connection::addConnection('default', $con);
 
@@ -1146,7 +1146,7 @@ class MysqlHelper
     $con['driver'] = 'pdo-mysql';
     $con['host'] = 'localhost';
     $con['user'] = 'root';
-    $con['pass'] = '';
+    $con['password'] = '';
     $con['database'] = 'edo2';
     Sabel_DB_Connection::addConnection('default2', $con);
 
@@ -1289,7 +1289,7 @@ class PgsqlHelper
     $dbCon = array();
     $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
     $dbCon['user'] = 'pgsql';
-    $dbCon['pass'] = 'pgsql';
+    $dbCon['password'] = 'pgsql';
     Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon, 'public');
 
     //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
@@ -1298,7 +1298,7 @@ class PgsqlHelper
     $dbCon2 = array();
     $dbCon2['dsn']  = 'pgsql:host=localhost;dbname=edo2';
     $dbCon2['user'] = 'pgsql';
-    $dbCon2['pass'] = 'pgsql';
+    $dbCon2['password'] = 'pgsql';
     Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2, 'public');
 
     $SQLs = array();
