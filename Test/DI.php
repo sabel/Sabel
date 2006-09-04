@@ -33,13 +33,34 @@ class Test_DI extends PHPUnit2_Framework_TestCase
   }
   
   // test case for class A depend class B.
-  public function testDependencyResolve()
+  public function testSimpleDependencyResolve()
   {
     $c = new Container();
     $c->regist('test.Age', 'Age');
     $c->regist('test.Person', 'Person');
     
     $person = $c->load('test.Person');
+    $this->assertEquals(15, $person->howOldAreYou('who', 'are you'));
+  }
+  
+  public function testSetterInjection()
+  {
+    return false;
+  }
+  
+  public function testGetterInjection()
+  {
+    $c = new Container();
+    $c->regist('test.Person', 'Person');
+    $person = $c->load('test.Person');
+    
+    $f = $person->getFrastration(new FrastrationCalculator());
+    $this->assertEquals('max', $f);
+  }
+  
+  public function testComplexDependencyResolv()
+  {
+    return false;
   }
   
   public function testDirectoryPathToClassNameResolver()
@@ -50,7 +71,22 @@ class Test_DI extends PHPUnit2_Framework_TestCase
   }
 }
 
-class Person
+interface TPerson
+{
+  function isMale();
+}
+
+abstract class Mammalia
+{
+  abstract function birth();
+}
+
+interface TManager extends TPerson
+{
+  function isManager();
+}
+
+class Person extends Mammalia implements TManager
 {
   protected $age = null;
   
@@ -62,11 +98,44 @@ class Person
   {
     $this->age = $age;
   }
+  
+  public function birth()
+  {
+    print "ogya-!";
+  }
+  
+  public function howOldAreYou($arg, $arg2)
+  {
+    return $this->age->getAge();
+  }
+  
+  public function getFrastration(FrastrationCalculator $c)
+  {
+    return $c->calc($this);
+  }
+  
+  function isMale()
+  {
+    return true;
+  }
+  
+  function isManager()
+  {
+    return true;
+  }
+}
+
+class FrastrationCalculator
+{
+  public function calc($obj)
+  {
+    return 'max';
+  }
 }
 
 class Age
 {
-  protected $age = 0;
+  protected $age = 15;
   
   public function __construct()
   {

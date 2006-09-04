@@ -60,6 +60,17 @@ class Test_InformationSchema extends SabelTestCase
 
 class Default_Stest
 {
+  public function __construct()
+  {
+    $dbCon = array();
+    $dbCon['driver'] = 'pdo-mysql';
+    $dbCon['host'] = 'localhost';
+    $dbCon['user'] = 'root';
+    $dbCon['password'] = '';
+    $dbCon['database'] = 'edo';
+    Sabel_DB_Connection::addConnection('schemaAccess', $dbCon);
+  }
+
   public function getCreateSQL()
   {
     $sql = array();
@@ -74,5 +85,74 @@ class Default_Stest
     $sql['com'] = 'TEXT,false,false,false,null';
 
     return $sql;
+  }
+}
+
+class PgSchemaHelper
+{
+  public function __construct()
+  {
+    $dbCon = array();
+    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
+    $dbCon['user'] = 'pgsql';
+    $dbCon['password'] = 'pgsql';
+    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon, 'public');
+  }
+
+  public function getCreateSQL()
+  {
+    $sqls = array();
+
+    $sqls[] = 'CREATE TABLE stest (
+                 id   SMALLINT PRIMARY KEY,
+                 name VARCHAR(128) NOT NULL,
+                 status BOOLEAN NOT NULL,
+                 comment VARCHAR(64) DEFAULT \'varchar default\' )';
+
+    $sqls[] = 'CREATE TABLE stest2 (
+                 id   SERIAL PRIMARY KEY,
+                 birth DATE NOT NULL DEFAULT \'3000-01-01\',
+                 time TIMESTAMP,
+                 comment TEXT )';
+
+    return $sqls;
+  }
+}
+
+class SQSchemaHelper
+{
+  public function __construct()
+  {
+    $dbCon = array();
+    $dbCon['dsn']  = 'sqlite:Test/data/schema.sq3';
+    Sabel_DB_Connection::addConnection('schemaAccess', 'pdo', $dbCon);
+  }
+
+  public function getCreateSQL()
+  {
+    $sqls = array();
+
+    $sqls[] = 'CREATE TABLE stest (
+                 id   INT2 PRIMARY KEY,
+                 name VARCHAR(128) NOT NULL,
+                 status BOOLEAN NOT NULL,
+                 comment VARCHAR(64) DEFAULT \'varchar default\' )';
+
+    $sqls[] = 'CREATE TABLE stest2 (
+                 id   INTEGER PRIMARY KEY,
+                 birth DATE NOT NULL DEFAULT \'3000-01-01\',
+                 time TIMESTAMP,
+                 comment TEXT )';
+
+    return $sqls;
+  }
+}
+
+class Schema_Accessor extends Sabel_DB_Mapper
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('schemaAccess');
+    parent::__construct($param1, $param2);
   }
 }
