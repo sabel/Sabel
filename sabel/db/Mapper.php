@@ -696,8 +696,11 @@ abstract class Sabel_DB_Mapper
   {
     $parent = '';
 
-    $id = $this->data[$this->defColumn];
-    if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
+    $defColumn = $this->defColumn;
+    $id = (isset($this->data[$defColumn])) ? $this->data[$defColumn] : null;
+
+    if (is_null($id))
+      throw new Exception('Error: who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
     $this->table = $child;
@@ -725,7 +728,7 @@ abstract class Sabel_DB_Mapper
     $driver = $this->getDriver();
     $driver->setUpdateSQL($this->table, $data);
     $driver->makeQuery($this->conditions);
-    
+
     $this->tryExecute($driver);
     $this->conditions = array();
   }

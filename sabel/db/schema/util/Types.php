@@ -1,12 +1,12 @@
 <?php
 
-interface TypeSender
+interface Sender
 {
   public function add($chainObj);
   public function send($columnObj, $type);
 }
 
-class TypeInt implements TypeSender
+class TypeInt implements Sender
 {
   private $next = null;
 
@@ -21,15 +21,15 @@ class TypeInt implements TypeSender
                     'int8', 'smallint', 'tinyint', 'int3', 'int2', 'mediumint');
 
     if (in_array($type, $tArray)) {
-      $co->type = Sabel_DB_Schema_Type::INT;
-      Sabel_DB_Schema_Type::setRange($co, $type);
+      $co->type = Type::INT;
+      Type::setRange($co, $type);
     } else {
       $this->next->send($co, $type);
     }
   }
 }
 
-class TypeStr implements TypeSender
+class TypeStr implements Sender
 {
   private $next = null;
 
@@ -46,7 +46,7 @@ class TypeStr implements TypeSender
     if (in_array($type, $tArray) || $text !== false) {
       foreach ($tArray as $val) {
         if (stripos($type, $val) !== false) {
-          $co->type = Sabel_DB_Schema_Type::STRING;
+          $co->type = Type::STRING;
           $co->max  = ($text !== false) ? substr($text, 1, strlen($text) - 2) : 256;
           break;
         }
@@ -57,7 +57,7 @@ class TypeStr implements TypeSender
   }
 }
 
-class TypeText implements TypeSender
+class TypeText implements Sender
 {
   private $next = null;
 
@@ -71,15 +71,14 @@ class TypeText implements TypeSender
     $tArray = array('text', 'mediumtext', 'tinytext');
 
     if (in_array($type, $tArray)) {
-      $co->type = Sabel_DB_Schema_Type::TEXT;
-      $co->max  = 65536;
+      $co->type = Type::TEXT;
     } else {
       $this->next->send($co, $type);
     }
   }
 }
 
-class TypeTime implements TypeSender
+class TypeTime implements Sender
 {
   private $next = null;
 
@@ -94,14 +93,14 @@ class TypeTime implements TypeSender
                     'datetime' , 'timestamp with time zone');
 
     if (in_array($type, $tArray)) {
-      $co->type = Sabel_DB_Schema_Type::TIMESTAMP;
+      $co->type = Type::TIMESTAMP;
     } else {
       $this->next->send($co, $type);
     }
   }
 }
 
-class TypeByte implements TypeSender
+class TypeByte implements Sender
 {
   private $next = null;
 
@@ -115,14 +114,14 @@ class TypeByte implements TypeSender
     $tArray = array('blob', 'bytea', 'longblob', 'mediumblob');
 
     if (in_array($type, $tArray)) {
-      $co->type = Sabel_DB_Schema_Type::BLOB;
+      $co->type = Type::BLOB;
     } else {
       $this->next->send($co, $type);
     }
   }
 }
 
-class TypeOther implements TypeSender
+class TypeOther implements Sender
 {
   private $next = null;
 

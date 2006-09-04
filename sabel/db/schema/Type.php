@@ -61,6 +61,7 @@ class Sabel_DB_Schema_Type
         $columnObj->max =  8388607;
         $columnObj->min = -8388608;
         break;
+      case 'int':
       case 'int4':
       case 'integer':
         $columnObj->max =  2147483647;

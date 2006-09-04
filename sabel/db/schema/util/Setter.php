@@ -1,15 +1,15 @@
 <?php
 
-class TypeSetter
+class Setter
 {
   public function __construct($co, $type)
   {
     if ($type === 'boolean' || $type === 'bool') {
-      $co->type = Sabel_DB_Schema_Type::BOOL;
+      $co->type = Type::BOOL;
     } else if ($type === 'date') {
-      $co->type = Sabel_DB_Schema_Type::DATE;
+      $co->type = Type::DATE;
     } else if ($type === 'time') {
-      $co->type = Sabel_DB_Schema_Type::TIME;
+      $co->type = Type::TIME;
     } else {
       $tInt   = new TypeInt();
       $tStr   = new TypeStr();

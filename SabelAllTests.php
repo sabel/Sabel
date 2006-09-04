@@ -34,7 +34,7 @@ require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
 require_once('Test/Resolver.php');
 require_once('Test/Edo.php');
-//require_once('Test/InformationSchema.php');
+require_once('Test/InformationSchema.php');
 require_once('Test/Router.php');
 require_once('Test/Classes.php');
 
@@ -59,7 +59,7 @@ class SabelAllTests
     $suite->addTest(Test_RequestUri::suite());
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Edo::suite());
-    //$suite->addTest(Test_InformationSchema::suite());
+    $suite->addTest(Test_InformationSchema::suite());
     $suite->addTest(Test_Router::suite());
     $suite->addTest(Test_Classes::suite());
     
