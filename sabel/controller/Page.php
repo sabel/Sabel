@@ -18,25 +18,23 @@ abstract class Sabel_Controller_Page
     $container   = null,
     $destination = null;
   
-  public function __construct($entry)
+  public function setEntry($entry)
   {
     $this->entry = $entry;
-    $this->setup();
-    $this->initialize();
   }
   
-  protected function initialize()
+  public function initialize()
   {
     // none.
   }
   
-  protected function setup()
+  public function setup()
   {
-    $this->container = Sabel_Container_DI::create();
-    $this->request   = new Sabel_Request_Request($this->entry);
-    $this->response  = new Sabel_Response_Web();
+    $this->container   = Sabel_Container_DI::create();
+    $this->request     = new Sabel_Request_Request($this->entry);
+    $this->response    = new Sabel_Response_Web();
     $this->destination = $this->entry->getDestination();
-    $this->logger = $this->container->load('Sabel_Logger_File');
+    $this->logger      = $this->container->load('Sabel_Logger_File');
   }
   
   public function execute()

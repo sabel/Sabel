@@ -53,7 +53,8 @@ class ParsedSQL_Writer
     foreach ($schema as $cName => $line) {
       fwrite($fp, '    $sql[' . "'{$cName}'] = '{$line}';\n");
     }
-
+    
+    fwrite($fp, '    return $sql;');
     fwrite($fp, "  }\n");
     fwrite($fp, "}\n");
 
@@ -121,9 +122,11 @@ class Schema_Generator
   }
 }
 
+/*
 if (!isset($_SERVER['argv'][1])) {
   echo "usage: Generator.php [environment] [connectname] ([dirpath])\n\n";
   exit;
 }
+*/
 
 //Schema_Generator::main();

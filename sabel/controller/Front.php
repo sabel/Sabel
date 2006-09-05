@@ -39,6 +39,9 @@ class Sabel_Controller_Front
     
     // @todo performance tuning here. taken 40ms
     $class = Sabel_Controller_Loader::create($entry)->load();
+    $class->setEntry($entry);
+    $class->setup();
+    $class->initialize();
     $class->execute();
   }
 }

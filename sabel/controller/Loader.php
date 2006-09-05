@@ -50,24 +50,15 @@ class Sabel_Controller_Loader
   
   public function load()
   {
-    // @todo refactoring.
+    $c = Container::create();
     if ($this->isValidController()) {
-      $path = $this->makeControllerPath();
-      //require_once($path);
       $class = $this->getControllerClassName();
-      return new $class($this->entry);
+      return $c->load($class);
     } else if ($this->isValidModule()) {
       $path = RUN_BASE.Sabel_Core_Const::MODULES_DIR . $this->destination->controller . '/controllers/index.php';
-      
-      if (is_readable($path)) {
-        //require_once($path);
-      } else {
-        throw new Sabel_Exception_Runtime("Index not found: " . $path);
-      }
-      
       $moduleClassName = $this->destination->module . '_Index';
       if (class_exists($moduleClassName)) {
-        return new $moduleClassName($this->entry);
+        return new $moduleClassName();
       } else {
         throw new Sabel_Exception_Runtime('can\'t found out controller class: ' . $moduleClassName);
       }
@@ -75,7 +66,7 @@ class Sabel_Controller_Loader
       $path = RUN_BASE.'/app/index/controllers/index.php';
       if (is_file($path)) {
         //require_once($path);
-        return new Index_Index($this->entry);
+        return new Index_Index();
       } else {
         throw new Sabel_Exception_Runtime($path . ' is not a valid file');
       }

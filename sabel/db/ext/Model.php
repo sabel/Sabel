@@ -19,27 +19,28 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
     $this->loadSchema();
     return new Sabel_DB_Column($this->schema[$key], $this->table);
   }
-
+  
   protected function loadSchema()
   {
-    // @todo performance bottle neck. this method taken 30-40ms.
-    if ($this->loaded === false) {
+    $schemaClassName = $this->connectName . '_' . $this->table;
+    if (class_exists($schemaClassName, false)) {
+      $this->columns = $columns = Schema_Creator::create(new $schemaClassName())->getColumns();
+    } else {
       $this->columns = $columns = $this->getTableSchema()->getColumns();
-      $this->size = count($columns);
-      
-      $schema = array();
-      foreach ($columns as $column) {
-        $data = (isset($this->data[$column->name])) ? $this->data[$column->name] : null;
-        $values = array('name' => $column->name,
-                        'data' => $data);
-        
-        $schema[] = $values;
-        $schema[$column->name] = $values;
-      }
-      
-      $this->schema = $schema;
-      $this->loaded = true;
     }
+    $this->size = count($columns);
+    
+    $schema = array();
+    foreach ($columns as $column) {
+      $data = (isset($this->data[$column->name])) ? $this->data[$column->name] : null;
+      $values = array('name' => $column->name,
+                      'data' => $data);
+                      
+      $schema[] = $values;
+      $schema[$column->name] = $values;
+    }
+    $this->schema = $schema;
+    $this->loaded = true;
   }
   
   /**

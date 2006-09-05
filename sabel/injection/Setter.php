@@ -15,21 +15,24 @@ class Sabel_Injection_Setter
     
     $annotations = array();
     foreach ($reflection->getProperties() as $property) {
-      $annotations = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
+      $annotations[] = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
     }
     
     if (count($annotations) === 0) return;
     
-    foreach ($annotations as $annotation) {
-      if (isset($annotation['implementation'])) {
-        $className = $annotation['implementation']->getContents();
-        $ins = new $className();
-        $setter = 'set'. ucfirst($className);
-        if (isset($annotation['setter'])) {
-          $setter = $annotation['setter']->getContents();
-          $target->$setter($ins);
-        } else if ($refleciton->hasMethod($setter)) {
-          $target->$setter($ins);
+    foreach ($annotations as $entries) {
+      if (count($entries) === 0) continue;
+      foreach ($entries as $annotation) {
+        if (isset($annotation['implementation'])) {
+          $className = $annotation['implementation']->getContents();
+          $ins = new $className();
+          $setter = 'set'. ucfirst($className);
+          if (isset($annotation['setter'])) {
+            $setter = $annotation['setter']->getContents();
+            $target->$setter($ins);
+          } else if ($refleciton->hasMethod($setter)) {
+            $target->$setter($ins);
+          }
         }
       }
     }

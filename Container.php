@@ -48,7 +48,9 @@ class Container
       $injection->observe(new Sabel_Injection_Setter());
       return $injection;
     } else {
-      return new $className;
+      $injection = new Sabel_Injection_Injector($this, new $className());
+      $injection->observe(new Sabel_Injection_Setter());
+      return $injection;
     }
   }
   
