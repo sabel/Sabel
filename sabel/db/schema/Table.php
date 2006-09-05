@@ -17,6 +17,11 @@ class Sabel_DB_Schema_Table
     $this->columns   = $columns;
   }
 
+  public function __get($key)
+  {
+    return (isset($this->columns[$key])) ? $this->columns[$key] : null;
+  }
+
   public function getTableName()
   {
     return $this->tableName;

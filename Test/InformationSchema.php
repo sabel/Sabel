@@ -10,16 +10,16 @@ class Test_InformationSchema extends SabelTestCase
   public function testUse()
   {
     $schemaName = 'Default_Stest';
-    $colObj = Schema_Column::create(new $schemaName());
+    $table = Schema_Creator::create(new $schemaName());
 
-    $id      = $colObj['id'];
-    $name    = $colObj['name'];
-    $status  = $colObj['status'];
-    $comment = $colObj['comment'];
-    $pare_id = $colObj['pare_id'];
-    $birth   = $colObj['birth'];
-    $time    = $colObj['time'];
-    $com     = $colObj['com'];
+    $id      = $table->id;
+    $name    = $table->name;
+    $status  = $table->status;
+    $comment = $table->comment;
+    $pare_id = $table->pare_id;
+    $birth   = $table->birth;
+    $time    = $table->time;
+    $com     = $table->com;
 
     $this->assertEquals($id->type, Sabel_DB_Schema_Type::INT);
     $this->assertEquals((int)$id->max, 222);

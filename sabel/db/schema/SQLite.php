@@ -49,7 +49,7 @@ class Sabel_DB_Schema_SQLite
     $res   = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
     $maker = new Schema_Parser($res[0]->sql);
 
-    $columns = Schema_Column::create($maker->getColumns());
+    $columns = Schema_Creator::create($maker->getColumns());
     return $columns;
   }
 }
