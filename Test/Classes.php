@@ -86,9 +86,10 @@ class Test_Classes extends PHPUnit2_Framework_TestCase
     $str = String::create("aZ9$");
     $this->assertEquals("aZ9$", $str->succ());
     
+    // test for advance a place.
     unset($str);
     $str = String::create("0");
-    for ($i = 1; $i < 10000; $i++) {
+    for ($i = 1; $i < 100; ++$i) {
       $this->assertEquals((string) $i, $str->succ());
     }
   }
