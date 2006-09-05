@@ -110,6 +110,7 @@ class String implements Iterator
   public function succ()
   {
     $string = $this->string;
+
     for ($i = $this->length; $i > 0; $i--) {
       $p = $i-1;
       if ($string[$p] == 9) {
@@ -121,12 +122,20 @@ class String implements Iterator
       } else if ($string[$p] === 'Z') {
         $string[$p] = 'A';
         $str        = 'A';
+      } else if (preg_match('/[^a-zA-Z0-9]/', $string[$p])) {
+        break;
       } else {
         $string[$p] = chr(ord($string[$p])+1);
         break;
       }
-      if ($p === 0) $string = $str . $string;
+      if ($p === 0) {
+        $string = $str . $string;
+      } else if (preg_match('/[^a-zA-Z0-9]/', $string[$p-1])) {
+        $string = substr($string, 0, $p) . $str . substr($string, $p);
+        break;
+      }
     }
+    $this->length = strlen($string);
     return $this->string = $string;
   }
   

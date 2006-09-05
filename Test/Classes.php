@@ -65,14 +65,32 @@ class Test_Classes extends PHPUnit2_Framework_TestCase
     $this->assertEquals("ABC002", $str->succ());
     $this->assertEquals("ABC003", $str->succ());
     
-    // @todo test for boundary value.
     unset($str);
     $str = String::create("A999");
     $this->assertEquals("B000", $str->succ());
-
+    
     unset($str);
     $str = String::create("Z999");
     $this->assertEquals("AA000", $str->succ());
+    $this->assertEquals("AA001", $str->succ());
+    
+    unset($str);
+    $str = String::create("z9Z9");
+    $this->assertEquals("aa0A0", $str->succ());
+    
+    unset($str);
+    $str = String::create("-99");
+    $this->assertEquals("-100", $str->succ());
+    
+    unset($str);
+    $str = String::create("aZ9$");
+    $this->assertEquals("aZ9$", $str->succ());
+    
+    unset($str);
+    $str = String::create("0");
+    for ($i = 1; $i < 10000; $i++) {
+      $this->assertEquals((string) $i, $str->succ());
+    }
   }
   
   public function testIterator()
