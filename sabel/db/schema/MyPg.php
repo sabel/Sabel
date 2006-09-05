@@ -72,7 +72,7 @@ class Sabel_DB_Schema_MyPg
     if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord)))
       $co->primary = (count($this->recordObj->execute($sql)) > 0);
 
-    Setter::set($co, $columnRecord['data_type']);
+    Sabel_DB_Schema_TypeSetter::set($co, $columnRecord['data_type']);
 
     if ($co->type === Sabel_DB_Schema_Type::STRING)
       $this->addStringLength($co, $columnRecord);

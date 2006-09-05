@@ -10,7 +10,7 @@ class Test_InformationSchema extends SabelTestCase
   public function testUse()
   {
     $schemaName = 'Default_Stest';
-    $colObj = Parser::create(new $schemaName());
+    $colObj = Schema_Column::create(new $schemaName());
 
     $id      = $colObj['id'];
     $name    = $colObj['name'];

@@ -18,7 +18,7 @@ class Sabel_DB_Schema_SQLite
   {
     $tables = array();
     foreach ($this->recordObj->execute(self::TABLE_LIST) as $val) {
-      $tables[$val->name] = $this->getTable($val->name, $columns);
+      $tables[$val->name] = $this->getTable($val->name);
     }
     return $tables;
   }
@@ -47,9 +47,9 @@ class Sabel_DB_Schema_SQLite
   protected function getSchemaColumn($table)
   {
     $res   = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
-    $maker = new Maker($res[0]->sql);
+    $maker = new Schema_Parser($res[0]->sql);
 
-    $columns = Parser::create($maker->getColumns());
+    $columns = Schema_Column::create($maker->getColumns());
     return $columns;
   }
 }
