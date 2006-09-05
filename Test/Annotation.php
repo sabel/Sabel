@@ -22,9 +22,9 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
     $list = $ar->annotation('AnnotatedTestClass');
     
     $it = $list->iterator();
-    
     while ($it->hasNext()) {
       $annotation = $it->next();
+      if (is_null($annotation)) continue;
       switch ($annotation->getName()) {
         case 'annot':
           $this->assertEquals('test1', $annotation->getContents());

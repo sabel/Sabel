@@ -27,6 +27,14 @@ class Sabel_Annotation_Reader
     return self::$annotation[$className];
   }
   
+  protected function processMethod($comment)
+  {
+    $comments = preg_split("/[\n\r]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($comments as $line) {
+      $this->list->push(Sabel_Annotation_Utility::processAnnotation($line));
+    }
+  }
+  
   public static function getAnnotations($comment)
   {
     $annotations = array();
@@ -49,13 +57,5 @@ class Sabel_Annotation_Reader
       }
     }
     return $annotations;
-  }
-  
-  protected function processMethod($comment)
-  {
-    $comments = preg_split("/[\n\r]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
-    foreach ($comments as $line) {
-      $this->list->push(Sabel_Annotation_Utility::processAnnotation($line));
-    }
   }
 }
