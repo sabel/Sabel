@@ -121,4 +121,9 @@ class Schema_Generator
   }
 }
 
-Schema_Generator::main();
+if (!isset($_SERVER['argv'][1])) {
+  echo "usage: Generator.php [environment] [connectname] ([dirpath])\n\n";
+  exit;
+}
+
+//Schema_Generator::main();
