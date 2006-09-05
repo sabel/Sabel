@@ -46,10 +46,10 @@ class Sabel_DB_Schema_SQLite
 
   protected function getSchemaColumn($table)
   {
-    $res   = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
-    $maker = new Schema_Parser($res[0]->sql);
+    $res    = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
+    $parser = new Schema_Parser();
 
-    $columns = Schema_Creator::create($maker->getColumns());
+    $columns = Schema_Creator::create($parser->parse($res[0]->sql));
     return $columns;
   }
 }

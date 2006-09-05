@@ -4,15 +4,13 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
 {
   public function addDefaultInfo($co, $default)
   {
-    if ((strpos($default, 'nextval') === false)) {
-      if (ctype_digit($default)) {
-        $co->default = (int)$default;
-      } else {
-        $default     = substr($default, 1);
-        $co->default = substr($default, 0, strpos($default, "'"));
-      }
-    } else {
+    if (is_null($default) || strpos($default, 'nextval') !== false) {
       $co->default = null;
+    } else if (ctype_digit($default)) {
+      $co->default = (int)$default;
+    } else {
+      $default     = substr($default, 1);
+      $co->default = substr($default, 0, strpos($default, "'"));
     }
   }
 
