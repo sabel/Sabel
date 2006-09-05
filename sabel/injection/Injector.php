@@ -1,5 +1,16 @@
 <?php
 
+class Injection_Manager
+{
+  protected $reflectionClass = null;
+  
+  public function __construct($className)
+  {
+    $this->reflectionClass = $reflectionClass = new ReflectionClass($className);
+    
+  }
+}
+
 /**
  * Sabel_Injection_Injector
  * 
@@ -30,10 +41,29 @@ class Sabel_Injection_Injector
     $i = new Sabel_Injection_Calls();
     $i->doBefore($method, $arg);
     
+    $annotations = array();
     $ref = new ReflectionClass($this->target);
+    foreach ($ref->getProperties() as $property) {
+      $annotations = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
+    }
+    
+    if (count($annotations) !== 0) {
+      foreach ($annotations as $annotation) {
+        if (isset($annotation['implementation'])) {
+          $className = $annotation['implementation']->getContents();
+          $class = new $className();
+          $setter = 'set'. ucfirst($className);
+          if (isset($annotation['setter'])) {
+            $setter = $annotation['setter']->getContents();
+            $this->target->$setter($class);
+          } else if ($ref->hasMethod($setter)) {
+            $this->target->$setter($class);
+          }
+        }
+      }
+    }
+    
     $method = $ref->getMethod($method);
-    
-    
     $result = $method->invokeArgs($this->target, $arg);
     
     $i->doAfter($method, $result);

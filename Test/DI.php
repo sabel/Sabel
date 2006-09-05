@@ -45,17 +45,10 @@ class Test_DI extends PHPUnit2_Framework_TestCase
   
   public function testSetterInjection()
   {
-    return false;
-  }
-  
-  public function testGetterInjection()
-  {
     $c = new Container();
     $c->regist('test.Person', 'Person');
     $person = $c->load('test.Person');
-    
-    $f = $person->getFrastration(new FrastrationCalculator());
-    $this->assertEquals('max', $f);
+    $this->assertEquals('max', $person->getFrastration());
   }
   
   public function testComplexDependencyResolv()
@@ -86,9 +79,32 @@ interface TManager extends TPerson
   function isManager();
 }
 
+class SomeClass
+{
+  /**
+   * @implementation @ENVIRONMENT@_Exporter // -> ???_Exporter
+   * @injection setter
+   * @implementation @request:id@Calculator
+   * @implementation @module@_Calculator
+   * @injection setter setImplementation
+   */
+  protected $exporter = null;
+
+  public function setExporter($exporter)
+  {
+    $this->exporter = $exporter;
+  }
+}
+
 class Person extends Mammalia implements TManager
 {
   protected $age = null;
+  
+  /**
+   * @implementation FrastrationCalculator
+   * @setter setFrastration
+   */
+  protected $frastration = null;
   
   /**
    *
@@ -109,9 +125,14 @@ class Person extends Mammalia implements TManager
     return $this->age->getAge();
   }
   
-  public function getFrastration(FrastrationCalculator $c)
+  public function getFrastration()
   {
-    return $c->calc($this);
+    return $this->frastration->calc($this);
+  }
+  
+  public function setFrastration($f)
+  {
+    $this->frastration = $f;
   }
   
   function isMale()

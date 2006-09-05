@@ -2,7 +2,7 @@
 
 class Sabel_Annotation_Context
 {
-  protected $name = '';
+  protected $name     = '';
   protected $contents = '';
   
   public function __construct($name, $contents)

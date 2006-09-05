@@ -27,28 +27,35 @@ class Sabel_Annotation_Reader
     return self::$annotation[$className];
   }
   
+  public static function getAnnotations($comment)
+  {
+    $annotations = array();
+    $comments = preg_split("/[\n\r]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($comments as $line) {
+      $annotations[] = Sabel_Annotation_Utility::processAnnotation($line);
+    }
+    return $annotations;
+  }
+  
+  public static function getAnnotationsByProperty($property)
+  {
+    $annotations = array();
+    $rawComment = $property->getDocComment();
+    $comments = preg_split("/[\n\r]/", $rawComment, -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($comments as $line) {
+      $annotation = Sabel_Annotation_Utility::processAnnotation($line);
+      if (is_object($annotation)) {
+        $annotations[$property->getName()][$annotation->getName()] = $annotation;
+      }
+    }
+    return $annotations;
+  }
+  
   protected function processMethod($comment)
   {
     $comments = preg_split("/[\n\r]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
-    foreach ($comments as $line) $this->processAnnotation($line);
-  }
-  
-  protected function processAnnotation($line)
-  {
-    $annotation = preg_split('/ +/', $this->removeComment($line));
-    
-    if (strpos($annotation[0], '@') === 0) {
-      $name       = array_shift($annotation);
-      $annotation = (count($annotation) > 2) ? $annotation : $annotation[0];
-      
-      $this->list->push(new Sabel_Annotation_Context(ltrim($name, '@ '), $annotation));
+    foreach ($comments as $line) {
+      $this->list->push(Sabel_Annotation_Utility::processAnnotation($line));
     }
-  }
-  
-  protected function removeComment($line)
-  {
-    $line =     preg_replace('/^\*/',     '', trim($line));
-    $line =     preg_replace('/\*\/$/',   '',      $line);
-    return trim(preg_replace('/^\/\*\*/', '',      $line));
   }
 }
