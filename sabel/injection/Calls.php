@@ -17,40 +17,40 @@ class Sabel_Injection_Calls
    * @param InjectionCall object
    * @return void
    */
-  public function add($injection)
+  public static function add($injection)
   {
     if (!$injection) return false;
     
     $reflection = new ReflectionClass($injection);
     foreach ($reflection->getMethods() as $method) {
       if ($method->getName() === 'before') {
-        $this->addBefore($injection);
+        self::addBefore($injection);
       } else if ($method->getName() === 'after') {
-        $this->addAfter($injection);
+        self::addAfter($injection);
       }
     }
   }
   
-  public function doBefore($method, $arg)
+  public static function doBefore($method, $arg)
   {
     foreach (self::$before as $object) {
       if ($object->when($method)) $object->before($method, $arg);
     }
   }
   
-  public function doAfter($method, &$result)
+  public static function doAfter($method, &$result)
   {
     foreach (self::$after as $object) {
       if ($object->when($method)) $object->after($method, $result);
     }
   }
   
-  public function addBefore($injection)
+  public static function addBefore($injection)
   {
     self::$before[] = $injection;
   }
   
-  public function addAfter($injection)
+  public static function addAfter($injection)
   {
     self::$after[] = $injection;
   }

@@ -44,7 +44,9 @@ class Container
     
     if ($rc->hasMethod('__construct')) {
       $ins = $di->load($className, '__construct');
-      return new Sabel_Injection_Injector($ins);
+      $injection = new Sabel_Injection_Injector($this, $ins);
+      $injection->observe(new SetterInjection());
+      return $injection;
     } else {
       return new $className;
     }

@@ -1,16 +1,5 @@
 <?php
 
-class Injection_Manager
-{
-  protected $reflectionClass = null;
-  
-  public function __construct($className)
-  {
-    $this->reflectionClass = $reflectionClass = new ReflectionClass($className);
-    
-  }
-}
-
 /**
  * Sabel_Injection_Injector
  * 
@@ -19,11 +8,19 @@ class Injection_Manager
  */
 class Sabel_Injection_Injector
 {
-  private $target;
+  private $container  = null;
+  private $target     = null;
+  private $reflection = null;
+  private $observers  = array();
   
-  public function __construct($target)
+  public function __construct($container, $target)
   {
-    $this->target = $target;
+    if (!is_object($target))
+      throw new Sabel_Exception_Runtime("target is not object.");
+      
+    $this->container  = $container;
+    $this->target     = $target;
+    $this->reflection = new ReflectionClass($target);
   }
   
   public function __set($key, $value)
@@ -38,41 +35,64 @@ class Sabel_Injection_Injector
   
   public function __call($method, $arg)
   {
-    $i = new Sabel_Injection_Calls();
-    $i->doBefore($method, $arg);
+    Sabel_Injection_Calls::doBefore($method, $arg);
+    $method = $this->reflection->getMethod($method);
     
-    $annotations = array();
-    $ref = new ReflectionClass($this->target);
-    foreach ($ref->getProperties() as $property) {
-      $annotations = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
-    }
+    $this->notice($method);
     
-    if (count($annotations) !== 0) {
-      foreach ($annotations as $annotation) {
-        if (isset($annotation['implementation'])) {
-          $className = $annotation['implementation']->getContents();
-          $class = new $className();
-          $setter = 'set'. ucfirst($className);
-          if (isset($annotation['setter'])) {
-            $setter = $annotation['setter']->getContents();
-            $this->target->$setter($class);
-          } else if ($ref->hasMethod($setter)) {
-            $this->target->$setter($class);
-          }
-        }
-      }
-    }
-    
-    $method = $ref->getMethod($method);
     $result = $method->invokeArgs($this->target, $arg);
-    
-    $i->doAfter($method, $result);
+    Sabel_Injection_Calls::doAfter($method, $result);
     return $result;
   }
   
-  public function getClassName()
+  public function getTarget()
   {
-    $ref = new ReflectionClass($this->target);
-    return $ref->getName();
+    return $this->target;
+  }
+  
+  public function getReflection()
+  {
+    return $this->reflection;
+  }
+  
+  public function observe($observer)
+  {
+    $this->observers[] = $observer;
+  }
+  
+  protected function notice($method)
+  {
+    $observers = $this->observers;
+    foreach ($observers as $observer) $observer->notice($this, $method);
+  }
+}
+
+class SetterInjection
+{
+  public function notice($injection, $method)
+  {
+    $reflection = $injection->getReflection();
+    $target     = $injection->getTarget();
+    
+    $annotations = array();
+    foreach ($reflection->getProperties() as $property) {
+      $annotations = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
+    }
+    
+    if (count($annotations) === 0) return;
+    
+    foreach ($annotations as $annotation) {
+      if (isset($annotation['implementation'])) {
+        $className = $annotation['implementation']->getContents();
+        $ins = new $className();
+        $setter = 'set'. ucfirst($className);
+        if (isset($annotation['setter'])) {
+          $setter = $annotation['setter']->getContents();
+          $target->$setter($ins);
+        } else if ($refleciton->hasMethod($setter)) {
+          $target->$setter($ins);
+        }
+      }
+    }
   }
 }

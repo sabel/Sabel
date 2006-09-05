@@ -49,13 +49,14 @@ class Sabel_Annotation_Reader
   {
     $annotations = array();
     $rawComment = $property->getDocComment();
-    $comments = preg_split("/[\n\r]/", $rawComment, -1, PREG_SPLIT_NO_EMPTY);
-    foreach ($comments as $line) {
-      $annotation = Sabel_Annotation_Utility::processAnnotation($line);
+    
+    $as = self::getAnnotations($rawComment);
+    foreach ($as as $annotation) {
       if (is_object($annotation)) {
         $annotations[$property->getName()][$annotation->getName()] = $annotation;
       }
     }
+    
     return $annotations;
   }
 }
