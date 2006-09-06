@@ -39,6 +39,15 @@ class Container
     static $instances;
     $className = self::$classes[$name];
     
+    if (!class_exists($className)) {
+      $classNameParts = explode('_', $className);
+      while(true) {
+        array_shift($classNameParts);
+        $className = implode('_', $classNameParts);
+        if (class_exists($className)) break;
+      }
+    }
+    
     $rc = new ReflectionClass($className);
     $di = Sabel_Container_DI::create();
     
@@ -52,6 +61,11 @@ class Container
       $injection->observe(new Sabel_Injection_Setter());
       return $injection;
     }
+  }
+  
+  public function isRegistered($classpath)
+  {
+    return (isset(self::$classes[$classpath]));
   }
   
   public function getRegisteredClasses()
