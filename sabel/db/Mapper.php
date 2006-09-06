@@ -41,7 +41,7 @@ abstract class Sabel_DB_Mapper
 
   public function setDriver($connectName)
   {
-    $this->driver = $this->makeEdoDriver($connectName);
+    $this->driver = $this->makeDriver($connectName);
   }
 
   protected function getDriver()
@@ -49,7 +49,7 @@ abstract class Sabel_DB_Mapper
     return $this->driver;
   }
 
-  protected function makeEdoDriver($connectName)
+  protected function makeDriver($connectName)
   {
     $this->connectName = $connectName;
     $conn = Sabel_DB_Connection::getConnection($connectName);

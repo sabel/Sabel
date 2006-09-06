@@ -1,67 +1,31 @@
 <?php
 
-if (!defined("PHPUnit2_MAIN_METHOD")) {
-    define("PHPUnit2_MAIN_METHOD", "Test_Edo::main");
-}
-
-/**
- * test for Sabel_DB
- *
- * @author Ebine Yutaka <ebine.yutaka@gmail.com>
- */
-class Test_Edo extends SabelTestCase
+class Test_Edo_Test extends SabelTestCase
 {
-  public static function main() {
-    require_once "PHPUnit2/TextUI/TestRunner.php";
+  private static $count  = 0;
+  private static $dbList = array('mysql', 'pgsql', 'sqlite');
 
-    $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo");
-    $result = PHPUnit2_TextUI_TestRunner::run($suite);
-  }
-
-  public static function suite()
-  {
-    $helper = new MysqlHelper();
-    //$helper = new PgsqlHelper();
-    //$helper = new SQLiteHelper();
-
-    try {
-      $helper->dropTables();
-    } catch (Exception $e) {
-      print_r($e);
-    }
-
-    $helper->createTables();
-    return new PHPUnit2_Framework_TestSuite("Test_Edo");
-  }
-
-  public function __construct()
-  {
-
-  }
-
-  protected function setUp()
-  {
-     $this->test      = new Test();
-     $this->test2     = new Sabel_DB_Basic('test2');
-     $this->test3     = new Sabel_DB_Basic('test3');
-     $this->customer  = new Customer();
-     $this->order     = new Sabel_DB_Basic('customer_order');
-     $this->orderLine = new Sabel_DB_Basic('order_line');
-     $this->telephone = new Sabel_DB_Basic('customer_telephone');
-  }
-
-  protected function tearDown()
-  {
-  }
+  public static $TABLES = array('test', 'test2', 'test3',
+                                'customer', 'customer_order', 'order_line',
+                                'customer_telephone', 'infinite1', 'infinite2',
+                                'seq', 'tree', 'student', 'student_course',
+                                'course', 'users', 'status', 'bbs', 'trans1');
 
   public function testConstraint()
   {
+    $customer = new Customer();
+
+    $dbname = Sabel_DB_Connection::getDB($customer->getConnectName());
+    $this->assertEquals($dbname, self::$dbList[self::$count++]);
+
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'tanaka');
     $insertData[] = array('id' => 2, 'name' => 'ueda');
-    $this->customer->multipleInsert($insertData);
+    $customer->multipleInsert($insertData);
 
-    $this->assertEquals($this->customer->getCount(), 2);
+    $this->assertEquals($customer->getCount(), 2);
+
+    $order = new Sabel_DB_Basic('customer_order');
 
     $insertData   = array();
     $insertData[] = array('id' => 1, 'customer_id' => 1);
@@ -70,14 +34,14 @@ class Test_Edo extends SabelTestCase
     $insertData[] = array('id' => 4, 'customer_id' => 2);
     $insertData[] = array('id' => 5, 'customer_id' => 1);
     $insertData[] = array('id' => 6, 'customer_id' => 1);
-    $this->order->multipleInsert($insertData);
+    $order->multipleInsert($insertData);
 
     $o = new Sabel_DB_Basic('customer_order');
     $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
     $this->assertEquals((int)$res[0]->customer->id, 1);
     $this->assertEquals((int)$res[2]->customer->id, 2);
 
-    $this->assertEquals($this->order->getCount(), 6);
+    $this->assertEquals($order->getCount(), 6);
 
     $cu  = new Customer();
     $cus = $cu->select();
@@ -119,6 +83,8 @@ class Test_Edo extends SabelTestCase
 
   public function testMultipleInsert()
   {
+    $test = new Test();
+
     $insertData = array();
     $insertData[] = array('id' => 1, 'name' => 'tanaka',   'blood' => 'A',  'test2_id' => 1);
     $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
@@ -126,42 +92,46 @@ class Test_Edo extends SabelTestCase
     $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
     $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
-    $this->test->multipleInsert($insertData);
+    $test->multipleInsert($insertData);
     
-    $ro = $this->test->select();
+    $ro = $test->select();
     $this->assertEquals(count($ro), 6);
     
-    $this->test->enableParent();
-    $obj = $this->test->selectOne(5);
+    $test->enableParent();
+    $obj = $test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
     $this->assertEquals((int)$obj->test2->id, 4);
     
-    $obj = $this->test->selectOne('name', 'seki');
+    $obj = $test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
 
+    $orderLine = new Sabel_DB_Basic('order_line');
+
     $insertData = array();
-    $insertData[] = array('customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
-    $insertData[] = array('customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
-    $insertData[] = array('customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
-    $insertData[] = array('customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
-    $insertData[] = array('customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
-    $insertData[] = array('customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
-    $insertData[] = array('customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
-    $insertData[] = array('customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
-    $insertData[] = array('customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
-    $this->orderLine->multipleInsert($insertData);
-    $this->assertEquals($this->orderLine->getCount(), 11);
+    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
+    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
+    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
+    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
+    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
+    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
+    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
+    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
+    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
+    $orderLine->multipleInsert($insertData);
+    $this->assertEquals($orderLine->getCount(), 11);
     
+    $telephone = new Sabel_DB_Basic('customer_telephone');
+
     $insertData   = array();
     $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
     $insertData[] = array('id' => 2,  'customer_id' => 2, 'telephone' => '09022221111');
     $insertData[] = array('id' => 3,  'customer_id' => 1, 'telephone' => '09011112222');
     $insertData[] = array('id' => 4,  'customer_id' => 2, 'telephone' => '09022222222');
-    $this->telephone->multipleInsert($insertData);
+    $telephone->multipleInsert($insertData);
 
-    $this->assertEquals($this->orderLine->getCount(), 11);
+    $this->assertEquals($orderLine->getCount(), 11);
     
     $tree = new Sabel_DB_Basic('tree');
     $insertData   = array();
@@ -180,20 +150,20 @@ class Test_Edo extends SabelTestCase
 
     $student = new Sabel_DB_Basic('student');
     $insertData   = array();
-    $insertData[] = array('name' => 'tom',   'birth' => '1983/08/17');
-    $insertData[] = array('name' => 'john',  'birth' => '1983/08/18');
-    $insertData[] = array('name' => 'bob',   'birth' => '1983/08/19');
-    $insertData[] = array('name' => 'marcy', 'birth' => '1983/08/20');
-    $insertData[] = array('name' => 'ameri', 'birth' => '1983/08/21');
+    $insertData[] = array('id' => 1, 'name' => 'tom',   'birth' => '1983/08/17');
+    $insertData[] = array('id' => 2, 'name' => 'john',  'birth' => '1983/08/18');
+    $insertData[] = array('id' => 3, 'name' => 'bob',   'birth' => '1983/08/19');
+    $insertData[] = array('id' => 4, 'name' => 'marcy', 'birth' => '1983/08/20');
+    $insertData[] = array('id' => 5, 'name' => 'ameri', 'birth' => '1983/08/21');
     $student->multipleInsert($insertData);
 
     $course = new Sabel_DB_Basic('course');
     $insertData   = array();
-    $insertData[] = array('name' => 'Mathematics');
-    $insertData[] = array('name' => 'Physics');
-    $insertData[] = array('name' => 'Science');
-    $insertData[] = array('name' => 'Economic');
-    $insertData[] = array('name' => 'Psychology');
+    $insertData[] = array('id' => 1, 'name' => 'Mathematics');
+    $insertData[] = array('id' => 2, 'name' => 'Physics');
+    $insertData[] = array('id' => 3, 'name' => 'Science');
+    $insertData[] = array('id' => 4, 'name' => 'Economic');
+    $insertData[] = array('id' => 5, 'name' => 'Psychology');
     $course->multipleInsert($insertData);
 
     $sc = new Sabel_DB_Basic('student_course');
@@ -239,10 +209,7 @@ class Test_Edo extends SabelTestCase
     $s  = new Sabel_DB_Basic('status');
     $ss = $s->select();
 
-    $this->assertEquals((int)$ss[0]->id, 1);
     $this->assertEquals($ss[0]->state, 'normal');
-
-    $this->assertEquals((int)$ss[1]->id, 2);
     $this->assertEquals($ss[1]->state, 'invalid');
 
     $bbs = new Sabel_DB_Basic('bbs');
@@ -293,26 +260,22 @@ class Test_Edo extends SabelTestCase
     $test2->name = 'test23';
     $test2->test3_id = '3';
     $test2->save();
-    
-    $ro = $this->test2->select();
-    $this->assertEquals(count($ro), 3);
-    
-    $obj = $this->test2->selectOne(3);
+
+    $test2 = new Sabel_DB_Basic('test2');
+    $obj   = $test2->selectOne(3);
     $this->assertEquals($obj->name, 'test23');
     
-    $this->test3->id = 1;
-    $this->test3->name = 'test31';
-    $this->test3->save();
+    $test3 = new Sabel_DB_Basic('test3');
+    $test3->id = 1;
+    $test3->name = 'test31';
+    $test3->save();
     
-    $this->test3->id = 2;
-    $this->test3->name = 'test32';
-    $this->test3->save();
+    $test3->id = 2;
+    $test3->name = 'test32';
+    $test3->save();
     
-    $ro = $this->test3->select();
-    $this->assertEquals(count($ro), 2);
-    
-    $this->test3->name('test31');
-    $obj = $this->test3->selectOne();
+    $test3->name('test31');
+    $obj = $test3->selectOne();
     $this->assertEquals((int)$obj->id, 1);
   }
   
@@ -354,12 +317,14 @@ class Test_Edo extends SabelTestCase
   
   public function testRemove()
   {
-    $obj = $this->test->selectOne(7);
+    $test = new Test();
+
+    $obj = $test->selectOne(7);
     $this->assertEquals($obj->blood, 'AB');
     
-    $this->test->remove(7);
+    $test->remove(7);
     
-    $obj = $this->test->selectOne(7);
+    $obj = $test->selectOne(7);
     $this->assertNotEquals($obj->blood, 'AB');
     $this->assertEquals($obj->blood, null);
 
@@ -374,40 +339,11 @@ class Test_Edo extends SabelTestCase
     $this->assertEquals($t->is_selected(), true);
     $t->remove();
   }
-  
-  public function testCondition()
-  {
-    $this->test->setCondition('location_id', 2);
-    $this->test->setCondition('LIKE_name', '%aki%');
-    $con = $this->test->getCondition();
-    
-    $this->assertEquals($con['location_id'], 2);
-    $this->assertEquals($con['LIKE_name'], '%aki%');
-    
-    $this->test->unsetCondition();
-    
-    //--------------------------------------------------
-    
-    $this->test->BET_location_id(23, 50);
-    $con = $this->test->getCondition();
-    
-    foreach ($con as $key => $val) {
-      $this->assertEquals($key, 'BET_location_id');
-      $this->assertEquals($val[0], 23);
-      $this->assertEquals($val[1], 50);
-    }
-
-    $tree = new Tree();
-    $tree->id('>= 10');
-    $trees = $tree->select();
-
-    $this->assertEquals($trees[0]->name, 'B6-10');
-    $this->assertEquals($trees[1]->name, 'C11');
-  }
 
   public function testProjection()
   {
-    $obj = $this->test->selectOne(2);
+    $test = new Test();
+    $obj = $test->selectOne(2);
     $this->assertEquals((int)$obj->id, 2);
     $this->assertEquals($obj->name, 'yo_shida');
     $this->assertEquals($obj->blood, 'B');
@@ -425,60 +361,41 @@ class Test_Edo extends SabelTestCase
     $this->assertNotEquals((int)$obj2->test2_id, 2);
   }
 
-  public function testMultipleSelect()
-  {
-    $obj = new Test();
-    $user1 = $obj->selectOne(1);
-    $user2 = $obj->selectOne(2);
-    
-    $this->assertEquals((int)$user1->id, 1);
-    $this->assertEquals($user1->name, 'tanaka');
-    
-    $this->assertEquals((int)$user2->id, 2);
-    $this->assertEquals($user2->name, 'yo_shida');
-  }
-  
   public function testSelectDefaultResult()
   {
-    $obj = $this->test->selectOne(1);
+    $test = new Test();
+    $obj  = $test->selectOne(1);
+
+    $obj2 = new Test(1);
     
-    $this->assertEquals((int)$obj->id, 1);
-    $this->assertEquals($obj->name, 'tanaka');
-    $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals((int)$obj->test2_id, 1);
-    
-    //----------------------------------------------
-    
-    $obj = new Test(1);
-    
-    $this->assertEquals((int)$obj->id, 1);
-    $this->assertEquals($obj->name, 'tanaka');
-    $this->assertEquals($obj->blood, 'A');
-    $this->assertEquals((int)$obj->test2_id, 1);
+    $this->assertEquals((int)$obj->id, (int)$obj2->id);
+    $this->assertEquals($obj->name, $obj2->name);
+    $this->assertEquals($obj->blood, $obj2->blood);
+    $this->assertEquals((int)$obj->test2_id, (int)$obj->test2_id);
     
     //----------------------------------------------
     
-    $this->test->LIKE_name('%da%');
-    $obj = $this->test->select();
+    $test->LIKE_name('%da%');
+    $obj = $test->select();
     $this->assertEquals(count($obj), 4); // yo_shida, uchida, ueda, uchida
     
-    $this->test->LIKE_name('%_%');
-    $obj = $this->test->select();
+    $test->LIKE_name('%_%');
+    $obj = $test->select();
     $this->assertEquals(count($obj), 1); // yo_shida
 
-    $this->test->LIKE_name('%i_a', false);
-    $obj = $this->test->select();
+    $test->LIKE_name('%i_a', false);
+    $obj = $test->select();
     $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
 
-    $this->test->OR_id('3', '4');
-    $obj = $this->test->select();
+    $test->OR_id('3', '4');
+    $obj = $test->select();
 
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
-    $this->test->OR_id('< 2', '> 5');
-    $obj = $this->test->select();
+    $test->OR_id('< 2', '> 5');
+    $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
   }
@@ -498,14 +415,14 @@ class Test_Edo extends SabelTestCase
     $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
     $obj = $objs[0];
     
-    $this->assertEquals($obj->infinite2_id, $obj->infinite2->id);
+    $this->assertEquals((int)$obj->infinite2_id, (int)$obj->infinite2->id);
     $this->assertEquals((int)$obj->infinite2->infinite1_id, 1);
     $this->assertEquals($obj->infinite2->infinite1, null);
   }
   
   public function testSelectParentObject()
   {
-    $obj = $this->test->selectOne(1);
+    $obj = new Test(1);
     
     $this->assertEquals((int)$obj->id, 1);
     $this->assertEquals($obj->name, 'tanaka');
@@ -524,8 +441,10 @@ class Test_Edo extends SabelTestCase
   
   public function testGetChild()
   {
-    $this->customer->setChildConstraint('limit', 10);
-    $cu = $this->customer->selectOne(1);
+    $customer = new Customer();
+
+    $customer->setChildConstraint('limit', 10);
+    $cu = $customer->selectOne(1);
     $this->assertEquals($cu->name, 'tanaka');
     
     $orders = $cu->customer_order;
@@ -682,19 +601,20 @@ class Test_Edo extends SabelTestCase
 
   public function testGetCount()
   {
+    $test = new Test();
     // all count ---------------------------------
-    $count = $this->test->getCount();
+    $count = $test->getCount();
     $this->assertEquals($count, 6);
     
     //--------------------------------------------
-    $count = $this->test->getCount('< 5');
+    $count = $test->getCount('< 5');
     $this->assertEquals($count, 4);
     
-    $count = $this->test->getCount('id', '< 4');
+    $count = $test->getCount('id', '< 4');
     $this->assertEquals($count, 3);
     
-    $this->test->id('< 3');
-    $count = $this->test->getCount();
+    $test->id('< 3');
+    $count = $test->getCount();
     $this->assertEquals($count, 2);
   }
   
@@ -1082,7 +1002,7 @@ class Test_Edo extends SabelTestCase
     $data[] = array('trans1_id' => 1, 'texx' => 'trans26');  // <- Error && rollback()
 
     try {
-      $trans2->multipleInsert($data);
+      @$trans2->multipleInsert($data);
       $trans2->commit(); // not execute commit()
     } catch (Exception $e) {
     }
@@ -1114,456 +1034,6 @@ class Test_Edo extends SabelTestCase
   }
 }
 
-class MysqlHelper
-{
-  protected $sqls = null;
-
-  protected $tables = array('test', 'test2', 'test3',
-                            'customer', 'customer_order', 'order_line',
-                            'customer_telephone', 'infinite1', 'infinite2',
-                            'seq', 'tree', 'student', 'student_course',
-                            'course', 'users', 'status', 'bbs', 'trans1');
-
-  public function __construct()
-  {
-    /*
-    $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
-    $dbCon['user'] = 'root';
-    $dbCon['password'] = '';
-    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon, 'edo');
-     */
-
-    $con = array();
-    $con['driver'] = 'mysql';
-    $con['host'] = 'localhost';
-    $con['user'] = 'root';
-    $con['password'] = '';
-    $con['database'] = 'edo';
-    Sabel_DB_Connection::addConnection('default', $con);
-
-    $con = array();
-    $con['driver'] = 'pdo-mysql';
-    $con['host'] = 'localhost';
-    $con['user'] = 'root';
-    $con['password'] = '';
-    $con['database'] = 'edo2';
-    Sabel_DB_Connection::addConnection('default2', $con);
-
-    //$dbCon2 = mysql_connect('192.168.0.222', 'develop', 'develop');
-    //mysql_select_db('edo2', $dbCon2);
-    //Sabel_DB_Connection::addConnection('default2', 'mysql', $dbCon2, 'edo2');
-
-    $SQLs = array();
-
-    $SQLs[] = 'CREATE TABLE test (
-                 id       INT2 PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INT2)';
-
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id int2 PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL,
-                 test3_id int2)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                id INT2 PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                id INT2 PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                id INT2 PRIMARY KEY,
-                customer_id INT2 NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                id INT2 PRIMARY KEY AUTO_INCREMENT,
-                customer_order_id INT2 NOT NULL,
-                amount INT4,
-                item_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                id INT2 PRIMARY KEY,
-                customer_id INT2 NOT NULL,
-                telephone VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                id INT2 PRIMARY KEY,
-                infinite2_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                id INT2 PRIMARY KEY,
-                infinite1_id int2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE seq (
-                 id INT2 PRIMARY KEY AUTO_INCREMENT,
-                 text VARCHAR(65536) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      INT2 PRIMARY KEY,
-                 tree_id INT2,
-                 name    VARCHAR(12) )';
-
-    $SQLs[] = 'CREATE TABLE student (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 student_id INT4 NOT NULL,
-                 course_id  INT4 NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
-
-    $SQLs[] = 'CREATE TABLE course (
-                 id   INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INT2 )';
-
-    $SQLs[] = 'CREATE TABLE status (
-                 id    INT2 PRIMARY KEY AUTO_INCREMENT,
-                 state VARCHAR(24) )';
-
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       INT4 PRIMARY KEY AUTO_INCREMENT,
-                 users_id INT4 NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
-
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
-                 text  VARCHAR(24)) TYPE=InnoDB';
-
-    $this->sqls = $SQLs;
-  }
-
-  public function createTables()
-  {
-    $obj = new Sabel_DB_Basic();
-
-    foreach ($this->sqls as $sql) {
-      $obj->execute($sql);
-    }
-
-    $sql  = "CREATE TABLE trans2 (id INT4 PRIMARY KEY AUTO_INCREMENT, trans1_id INT4 NOT NULL,";
-    $sql .= "text VARCHAR(24) ) TYPE=InnoDB";
-
-    $trans2 = new Trans2();
-    $trans2->execute($sql);
-  }
-
-  public function dropTables()
-  {
-    $obj = new Sabel_DB_Basic();
-
-    try {
-      foreach ($this->tables as $table) {
-        $obj->execute("DROP TABLE ${table}");
-      }
-    } catch (Exception $e) {
-    }
-
-    $trans2 = new Trans2();
-    $trans2->execute("DROP TABLE trans2");
-  }
-}
-
-class PgsqlHelper
-{
-  protected $sqls = null;
-
-  protected $tables = array('test', 'test2', 'test3',
-                            'customer', 'customer_order', 'order_line',
-                            'customer_telephone', 'infinite1', 'infinite2',
-                            'seq', 'tree', 'student', 'student_course',
-                            'course', 'users', 'bbs', 'status', 'trans1');
-
-  public function __construct()
-  {
-    $dbCon = array();
-    $dbCon['dsn']  = 'pgsql:host=localhost;dbname=edo';
-    $dbCon['user'] = 'pgsql';
-    $dbCon['password'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon, 'public');
-
-    //$dbCon = pg_connect("host=localhost dbname=edo user=pgsql password=pgsql");
-    //Sabel_DB_Connection::addConnection('default', 'pgsql', $dbCon, 'public');
-
-    $dbCon2 = array();
-    $dbCon2['dsn']  = 'pgsql:host=localhost;dbname=edo2';
-    $dbCon2['user'] = 'pgsql';
-    $dbCon2['password'] = 'pgsql';
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2, 'public');
-
-    $SQLs = array();
-
-    $SQLs[] = 'CREATE TABLE test (
-                 id       SERIAL PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INT2)';
-    
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id       SERIAL PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 test3_id INT2)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                id   SERIAL PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                id   SERIAL PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                id          SERIAL PRIMARY KEY,
-                customer_id INT2 NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                id                SERIAL PRIMARY KEY,
-                customer_order_id INT2 NOT NULL,
-                amount            INT4,
-                item_id           INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                id          SERIAL PRIMARY KEY,
-                customer_id INT2 NOT NULL,
-                telephone   VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                id           SERIAL PRIMARY KEY,
-                infinite2_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                id           SERIAL PRIMARY KEY,
-                infinite1_id int2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE seq (
-                 id   SERIAL PRIMARY KEY,
-                 text VARCHAR(65536) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      SERIAL PRIMARY KEY,
-                 tree_id INT2,
-                 name    VARCHAR(12) )';
-                
-    $SQLs[] = 'CREATE TABLE student (
-                 id    SERIAL PRIMARY KEY,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 id         SERIAL,
-                 student_id INT4 NOT NULL,
-                 course_id  INT4 NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
-
-    $SQLs[] = 'CREATE TABLE course (
-                 id   SERIAL PRIMARY KEY,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        SERIAL PRIMARY KEY,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INT2 )';
-
-    $SQLs[] = 'CREATE TABLE status (
-                 id    SERIAL PRIMARY KEY,
-                 state VARCHAR(24) )';
-
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       SERIAL PRIMARY KEY,
-                 users_id INT4 NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
-
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    SERIAL PRIMARY KEY,
-                 text  VARCHAR(24) )';
-
-    $this->sqls = $SQLs;
-  }
-  
-  public function createTables()
-  {
-    $obj = new Sabel_DB_Basic();
-    
-    foreach ($this->sqls as $sql) {
-      @$obj->execute($sql);
-    }
-
-    $sql  = "CREATE TABLE trans2 (id SERIAL PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
-    try {
-      $trans2 = new Trans2();
-      $trans2->execute($sql);
-    } catch (Exception $e) {
-    }
-  }
-
-  public function dropTables()
-  {
-    $obj = new Sabel_DB_Basic();
-
-    foreach ($this->tables as $table) {
-      @$obj->execute("DROP TABLE ${table}");
-    }
-
-    try {
-      $trans2 = new Trans2();
-      $trans2->execute("DROP TABLE trans2");
-    } catch (Exception $e) {
-    }
-  }
-}
-
-class SQLiteHelper
-{
-  protected $sqls = null;
-
-  protected $tables = array('test', 'test2', 'test3',
-                            'customer', 'customer_order', 'order_line',
-                            'customer_telephone', 'infinite1', 'infinite2',
-                            'seq', 'tree', 'student', 'student_course',
-                            'course', 'users', 'bbs', 'status', 'trans1');
-
-  public function __construct()
-  {
-    $dbCon = array();
-    $dbCon['dsn']  = 'sqlite:Test/data/log1.sq3';
-
-    $dbCon2 = array();
-    $dbCon2['dsn']  = 'sqlite:Test/data/log2.sq3';
-
-    Sabel_DB_Connection::addConnection('default', 'pdo', $dbCon);
-    Sabel_DB_Connection::addConnection('default2', 'pdo', $dbCon2);
-
-    $SQLs = array();
-
-    $SQLs[] = 'CREATE TABLE test (
-                 id       INTEGER PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INT2)';
-    
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id       INTEGER PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 test3_id INT2)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                id   INTEGER PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                id   INTEGER PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                id          INTEGER PRIMARY KEY,
-                customer_id INT2 NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                id                INTEGER PRIMARY KEY,
-                customer_order_id INT2 NOT NULL,
-                amount            INT4,
-                item_id           INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                id          INTEGER PRIMARY KEY,
-                customer_id INT2 NOT NULL,
-                telephone   VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                id           INTEGER PRIMARY KEY,
-                infinite2_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                id           INTEGER PRIMARY KEY,
-                infinite1_id int2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE seq (
-                 id   INTEGER PRIMARY KEY,
-                 text VARCHAR(65536) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      INTEGER PRIMARY KEY,
-                 tree_id INT2,
-                 name    VARCHAR(12) )';
-                
-    $SQLs[] = 'CREATE TABLE student (
-                 id    INTEGER PRIMARY KEY,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 student_id INT4 NOT NULL,
-                 course_id  INT4 NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
-
-    $SQLs[] = 'CREATE TABLE course (
-                 id   INTEGER PRIMARY KEY,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        INTEGER PRIMARY KEY,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INT2 )';
-
-    $SQLs[] = 'CREATE TABLE status (
-                 id    INTEGER PRIMARY KEY,
-                 state VARCHAR(24) )';
-
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       INTEGER PRIMARY KEY,
-                 users_id INT4 NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
-
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INTEGER PRIMARY KEY,
-                 text  VARCHAR(24) )';
-
-    $this->sqls = $SQLs;
-  }
-  
-  public function createTables()
-  {
-    try {
-    $obj = new Sabel_DB_Basic();
-    
-    foreach ($this->sqls as $sql) {
-      $obj->execute($sql);
-    }
-
-    $sql  = "CREATE TABLE trans2 (id INTEGER PRIMARY KEY, trans1_id INT4 NOT NULL, text VARCHAR(24) )";
-    $trans2 = new Trans2();
-    $trans2->execute($sql);
-    } catch (Exception $e) {
-      print_r($e);
-    }
-  }
-
-  public function dropTables()
-  {
-    $obj = new Sabel_DB_Basic();
-
-    foreach ($this->tables as $table) {
-      $obj->execute("DROP TABLE ${table}");
-    }
-
-    $trans2 = new Trans2();
-    $trans2->execute("DROP TABLE trans2");
-  }
-}
-//-----------------------------------------------------------------
-
 abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
@@ -1571,6 +1041,49 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
     $this->setDriver('default');
     parent::__construct($param1, $param2);
   }
+}
+
+class Test extends Mapper_Default
+{
+  protected $withParent = true;
+}
+
+class Customer extends Mapper_Default
+{
+  protected $myChildren = array('customer_order', 'customer_telephone');
+  protected $defChildConstraints = array('limit' => 10);
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setChildConstraint('customer_order', array('limit' => 10));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Customer_Order extends Mapper_Default
+{
+  protected $myChildren = 'order_line';
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setChildConstraint('order_line', array('limit' => 10));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Tree extends Sabel_DB_Tree
+{
+
+}
+
+class Student extends Sabel_DB_Bridge
+{
+
+}
+
+class Course extends Sabel_DB_Bridge
+{
+
 }
 
 class Trans1 extends Sabel_DB_Mapper
@@ -1591,64 +1104,6 @@ class Trans2 extends Sabel_DB_Mapper
   }
 }
 
-class Test extends Mapper_Default
-{
-  protected $withParent = true;
-
-  public function getCondition()
-  {
-    return $this->conditions;
-  }
-
-  public function unsetCondition()
-  {
-    $this->conditions = array();
-  }
-
-  public function getData()
-  {
-    return $this->data;
-  }
-}
-
-class Customer extends Mapper_Default
-{
-  protected $myChildren = array('customer_order', 'customer_telephone');
-  protected $defChildConstraints = array('limit' => 10);
-
-  public function __construct($param1 = null, $param2 = null)
-  {
-    parent::__construct($param1, $param2);
-    $this->setChildConstraint('customer_order', array('limit' => 10));
-  }
-}
-
-class Customer_Order extends Mapper_Default
-{
-  protected $myChildren = 'order_line';
-
-  public function __construct($param1 = null, $param2 = null)
-  {
-    parent::__construct($param1, $param2);
-    $this->setChildConstraint('order_line', array('limit' => 10));
-  }
-}
-
-class Tree extends Sabel_DB_Tree
-{
-
-}
-
-class Student extends Sabel_DB_Bridge
-{
-
-}
-
-class Course extends Sabel_DB_Bridge
-{
-
-}
-
 class Users extends Mapper_Default
 {
   public function __construct($param1 = null, $param2 = null)
@@ -1656,44 +1111,4 @@ class Users extends Mapper_Default
     $this->table = 'users';
     parent::__construct($param1, $param2);
   }
-}
-
-class TestUser1 extends Users
-{
-  public function __construct($param1 = null, $param2 = null)
-  {
-    parent::__construct($param1, $param2);
-  }
-
-  public function getMyClassName()
-  {
-    return get_class($this);
-  }
-
-  public function testGetTableName()
-  {
-    return $this->table;
-  }
-}
-
-class TestUser2 extends Users
-{
-  public function __construct($param1 = null, $param2 = null)
-  {
-    parent::__construct($param1, $param2);
-  }
-
-  public function getMyClassName()
-  {
-    return get_class($this);
-  }
-
-  public function testGetTableName()
-  {
-    return $this->table;
-  }
-}
-
-if (PHPUnit2_MAIN_METHOD == "Test_Edo::main") {
-    Test_Edo::main();
 }

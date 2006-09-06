@@ -6,11 +6,7 @@ class Sabel_DB_Connection
 
   public static function addConnection($connectName, $params)
   {
-    $driver   = $params['driver'];
-    $host     = $params['host'];
-    $user     = $params['user'];
-    $pass     = $params['password'];
-    $database = $params['database'];
+    $driver = $params['driver'];
 
     if (!is_array($params))
       throw new Exception('invalid Parameter. 2rd Argument must be array.');
@@ -19,15 +15,20 @@ class Sabel_DB_Connection
       $db  = str_replace('pdo-', '', $driver);
 
       if ($db === 'sqlite') {
-        $list['conn'] = new PDO("sqlite:{$database}");
+        $list['conn'] = new PDO("sqlite:{$params['database']}");
       } else {
-        $dsn = "{$db}:host={$host};dbname={$database}";
-        $list['conn'] = new PDO($dsn, $user, $pass);
+        $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
+        $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
       }
 
       $list['driver'] = 'pdo';
       $list['db']     = $db;
     } else {
+      $host     = $params['host'];
+      $user     = $params['user'];
+      $pass     = $params['password'];
+      $database = $params['database'];
+
       if ($driver === 'mysql') {
         $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
         $list['conn'] = mysql_connect($host, $user, $pass);

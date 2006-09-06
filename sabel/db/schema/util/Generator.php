@@ -39,25 +39,16 @@ class ParsedSQL_Writer
   public static function write($connectName, $tName, $schema, $dirPath)
   {
     $className = $connectName . '_' . $tName;
-    $fp = fopen("{$dirPath}{$className}.php", 'w');
+    $target = "{$dirPath}{$className}.php";
+    echo "generate {$target} \n";
+    $fp = fopen($target, 'w');
 
-    fwrite($fp, "<?php\n");
-    fwrite($fp, "\n");
-    fwrite($fp, "class {$className}\n");
-    fwrite($fp, "{\n");
-    fwrite($fp, "  public function getParsedSQL()\n");
-    fwrite($fp, "  {\n");
-    fwrite($fp, '    $sql' . " = array();\n");
-    fwrite($fp, "\n");
-
-    foreach ($schema as $cName => $line) {
-      fwrite($fp, '    $sql[' . "'{$cName}'] = '{$line}';\n");
-    }
-    
-    fwrite($fp, '    return $sql;');
-    fwrite($fp, "  }\n");
-    fwrite($fp, "}\n");
-
+    ob_start();
+    @include("Schema_Templete.php");
+    $contents = ob_get_contents();
+    ob_end_clean();
+    $contents = str_replace('#php', '?php', $contents);
+    fwrite($fp, $contents);
     fclose($fp);
   }
 }
@@ -103,16 +94,40 @@ class Schema_Generator
   {
     $sArray = array();
 
+    /**
+     * on sabel (use config file. yaml etc.)
+     *
     $environment = $_SERVER['argv'][1];
     $connectName = $_SERVER['argv'][2];
-    $dirPath     = $_SERVER['argv'][3];
+    $dirPath     = $_SERVER['argv'][3] . '/';
 
-    $conf  = new Sabel_Config_Yaml('database.yml');
+    $conf  = new Sabel_Config_Yaml('config/database.yml');
     $dbc   = $conf->read($environment);
     $dbCon = $dbc[$connectName];
+     */
 
-    Sabel_DB_Connection::addConnection($connectName, $dbc[$connectName]);
+    /**
+     * use only sabel_db pakage.
+     *
+     */
+    $dbCon = array();
+    $connectName       = $_SERVER['argv'][1];
+    $dbCon['driver']   = $_SERVER['argv'][2];
+    $dbCon['host']     = $_SERVER['argv'][3];
+    $dbCon['database'] = $_SERVER['argv'][4];
+    $dbCon['user']     = $_SERVER['argv'][5];
 
+    if (count($_SERVER['argv']) === 9) {
+      $dbCon['password'] = $_SERVER['argv'][6];
+      $dbCon['schema']   = $_SERVER['argv'][7];
+      $dirPath = $_SERVER['argv'][8] . '/';
+    } else {
+      $dbCon['password'] = '';
+      $dbCon['schema']   = $_SERVER['argv'][6];
+      $dirPath = $_SERVER['argv'][7] . '/';
+    }
+
+    Sabel_DB_Connection::addConnection($connectName, $dbCon);
     $schemas = Sabel_DB_Mapper::getSchemaAccessor($connectName, $dbCon['schema'])->getTables();
 
     foreach ($schemas as $schema) {
@@ -122,11 +137,26 @@ class Schema_Generator
   }
 }
 
-/*
-if (!isset($_SERVER['argv'][1])) {
-  echo "usage: Generator.php [environment] [connectname] ([dirpath])\n\n";
+/**
+ * on sabel
+ *
+if (!isset($_SERVER['argv'][1]) || !isset($_SERVER['argv'][2]) || !isset($_SERVER['argv'][3])) {
+  echo "usage: php Generator.php [environment] [connectname] [dirpath]\n\n";
   exit;
 }
 */
+
+/**
+ * use only sabel_db pakage.
+ *
+ *
+if (count($_SERVER['argv']) < 8) {
+  echo "usage mysql|postgres|firebird:\n";
+  echo "  php Generator.php [connectname] [driver] [host] [dbname] [dbuser] ([password]) [schema] [dirpath]\n\n";
+  echo "usage sqlite:\n";
+  echo "  php Generator.php [connectname] [driver] [dbname] [dirpath]\n\n";
+  exit;
+}
+ */
 
 //Schema_Generator::main();

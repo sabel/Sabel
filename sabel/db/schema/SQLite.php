@@ -30,26 +30,21 @@ class Sabel_DB_Schema_SQLite
 
   public function createColumn($table, $column)
   {
-    $columns = $this->getSchemaColumn($table);
+    $columns = $this->getSchema($table)->getColumns();
     return (array_key_exists($column, $columns)) ? $columns[$column] : null;
   }
 
   protected function createColumns($table)
   {
-    $columns = array();
-    $columns = $this->getSchemaColumn($table);
-    foreach ($columns as $column) {
-      $columns[$column->name] = $column;
-    }
-    return $columns;
+    return $this->getSchema($table)->getColumns();
   }
 
-  protected function getSchemaColumn($table)
+  protected function getSchema($table)
   {
     $res    = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
     $parser = new Schema_Parser();
 
-    $columns = Schema_Creator::create($parser->parse($res[0]->sql));
-    return $columns;
+    $tableObj = Schema_Creator::create($parser->parse($res[0]->sql));
+    return $tableObj;
   }
 }
