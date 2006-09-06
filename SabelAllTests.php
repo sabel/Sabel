@@ -19,7 +19,7 @@ require_once('Container.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
 $dt->visit(new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false));
-$dt->visit(new ClassRegister($c));
+$dt->visit(new SabelClassRegister($c));
 $dt->traverse();
 require_once('allclasses.php');
 

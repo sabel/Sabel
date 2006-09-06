@@ -63,8 +63,7 @@ abstract class Sabel_Controller_Page
   
   protected function methodExecute($action)
   {
-    $controllerClass = $this->destination->module.'_'.$this->destination->controller;
-    $refClass = new ReflectionClass($controllerClass);
+    $refClass = new ReflectionClass($this);
     
     $httpMethods = array('get', 'post', 'put', 'delete');
     foreach ($httpMethods as $method) {

@@ -54,6 +54,11 @@ class Container
     }
   }
   
+  public function getRegisteredClasses()
+  {
+    return array_keys(self::$classes);
+  }
+  
   public function oad($name, $mode = self::NORMAL)
   {
     static $instances;
@@ -127,7 +132,50 @@ class DirectoryPathToClassNameResolver implements ClassNameMappingResolver
   }
 }
 
-class ClassRegister
+
+class AppClassRegister
+{
+  protected $container;
+  
+  public function __construct($container)
+  {
+    $this->container = $container;
+  }
+  public function accept($value, $type, $child = null)
+  {
+    if ($type === 'dir') return;
+    
+    $classpath = $this->makeClassPath($value);
+    $className = $this->makeClassName($classpath);
+    
+    if (!is_null($classpath))
+      $this->container->regist($classpath, $className);
+  }
+  
+  protected function makeClassPath($value)
+  {
+    $parts = explode('/', $value);
+    $fileName = $parts[count($parts)-1];
+    list($file, $extention) = explode('.', $fileName);
+    
+    if ($extention == 'php') {
+      if ($parts[0] === 'app') {
+        array_shift($parts);
+        $parts[count($parts) - 1] = ucfirst($file);
+        return implode('.', $parts);
+      }
+    }
+  }
+  
+  protected function makeClassName($classPath)
+  {
+    $parts = explode('.', $classPath);
+    $parts = array_map('ucfirst', $parts);
+    return implode('_', $parts);
+  }
+}
+
+class SabelClassRegister
 {
   protected $container;
   protected $strictDirectory;
@@ -138,7 +186,7 @@ class ClassRegister
     $this->strictDirectory = $strictDirectory;
   }
   
-  public function accept($value, $type)
+  public function accept($value, $type, $child = null)
   {
     $d2c = new DirectoryPathToClassNameResolver();
     $resolver = new DirectoryPathToNameSpaceResolver();
@@ -172,7 +220,7 @@ class ClassCombinator
     $this->lineTrim = $lineTrim;
   }
   
-  public function accept($value, $type)
+  public function accept($value, $type, $child = null)
   {
     $parts = explode('/', $value);
     $value = $this->base . $value;
