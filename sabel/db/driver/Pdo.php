@@ -6,15 +6,13 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 {
   private
     $stmt  = null,
     $myDb  = '',
     $data  = array(),
     $param = array();
-
-  private $lastinsertId = null;
 
   public function __construct($conn, $myDb)
   {
@@ -91,7 +89,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General implements Sabel_DB_Dr
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->execute('SELECT last_insert_id()');
-        $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+        $row = $this->fetch(Sabel_DB_Driver_Const::ASSOC);
         return $row['last_insert_id()'];
       case 'sqlite':
         return $this->conn->lastInsertId();
@@ -155,7 +153,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General implements Sabel_DB_Dr
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_DB_Driver_Const::ASSOC) {
       $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
     } else {
       $result = $this->stmt->fetch(PDO::FETCH_BOTH);
@@ -166,7 +164,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General implements Sabel_DB_Dr
 
   public function fetchAll($style = null)
   {
-    if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_DB_Driver_Const::ASSOC) {
       $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
       $result = $this->stmt->fetchAll(PDO::FETCH_BOTH);

@@ -50,6 +50,10 @@ class Test_Edo_SQLite extends Test_Edo_Test
   }
 }
 
+/**
+ * create query for sqlite unit test.
+ *
+ *
 class SQLiteHelper
 {
   protected $sqls = null;
@@ -154,6 +158,7 @@ class SQLiteHelper
     }
   }
 }
+*/
 
 if (!defined("PHPUnit2_MAIN_METHOD")) {
   define("PHPUnit2_MAIN_METHOD", "Test_Edo_SQLite::main");

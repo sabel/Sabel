@@ -6,10 +6,9 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 {
   private   $trans        = null;
-  protected $lastinsertId = null;
 
   public function __construct($conn)
   {
@@ -72,7 +71,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_DB_Driver_Const::ASSOC) {
       $row = ibase_fetch_assoc($this->result);
     } else {
       $row = ibase_fetch_row($this->result);
@@ -88,7 +87,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General implements Sabel_
     $result = $this->result;
 
     if (!is_bool($result) && !is_numeric($result) && !is_string($result))
-      while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);        
+      while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
 
     return $rows;
   }

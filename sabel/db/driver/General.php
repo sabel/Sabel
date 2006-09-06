@@ -6,11 +6,22 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_General
+abstract class Sabel_DB_Driver_General
 {
   protected
     $conn     = null,
-    $queryObj = null;
+    $queryObj = null,
+    $insertId = null;
+
+  public abstract function begin($conn);
+  public abstract function commit($conn);
+  public abstract function rollback($conn);
+
+  public abstract function execute($sql = null, $param = null);
+
+  public abstract function fetch($style = null);
+  public abstract function fetchAll($style = null);
+
 
   public function setBasicSQL($sql)
   {

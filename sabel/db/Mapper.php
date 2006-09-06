@@ -329,7 +329,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery(null, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
     return $this->toObject($rows);
   }
 
@@ -357,7 +357,7 @@ abstract class Sabel_DB_Mapper
     $obj->selectCondition = $obj->conditions;
 
     $this->tryExecute($driver);
-    if ($row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC)) {
+    if ($row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC)) {
       if ($obj->withParent) $row = $obj->selectWithParent($row);
 
       $obj->setSelectedProperty($obj, $row);
@@ -415,7 +415,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
 
     $recordObj = array();
     foreach ($rows as $row) {
@@ -533,7 +533,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
 
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
     if (!$rows) return false;
 
     $recordObj = array();
@@ -627,7 +627,7 @@ abstract class Sabel_DB_Mapper
       $driver->makeQuery(array($obj->defColumn => $id));
 
       $this->tryExecute($driver);
-      $row = $driver->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+      $row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC);
       if (!$row) {
         $obj->selected = true;
         $obj->id = $id;
@@ -796,7 +796,7 @@ abstract class Sabel_DB_Mapper
   public function execute($sql)
   {
     $this->tryExecute($this->driver, $sql);
-    $rows = $this->driver->fetchAll(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    $rows = $this->driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
     return $this->toObject($rows);
   }
 

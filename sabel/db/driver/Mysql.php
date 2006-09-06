@@ -6,7 +6,7 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
 {
   public function __construct($conn)
   {
@@ -37,7 +37,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General implements Sabel_DB_
   public function getLastInsertId()
   {
     $this->execute('SELECT last_insert_id()');
-    $row = $this->fetch(Sabel_DB_Driver_Interface::FETCH_ASSOC);
+    $row = $this->fetch(Sabel_DB_Driver_Const::ASSOC);
     return (int)$row['last_insert_id()'];
   }
 
@@ -60,7 +60,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General implements Sabel_DB_
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_DB_Driver_Const::ASSOC) {
       return mysql_fetch_assoc($this->result);
     } else {
       return mysql_fetch_array($this->result);

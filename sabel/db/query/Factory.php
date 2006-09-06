@@ -1,12 +1,19 @@
 <?php
 
-class Sabel_DB_Query_Factory
+abstract class Sabel_DB_Query_Factory
 {
   protected
     $escMethod = '',
     $dbName    = '',
     $stripFlag = false,
     $set       = false;
+
+  protected abstract function makeNormalSQL($key, $val);
+  protected abstract function makeWhereInSQL($key, $val);
+  protected abstract function makeLikeSQL($key, $val, $esc = null);
+  protected abstract function makeBetweenSQL($key, $val);
+  protected abstract function makeEitherSQL($key, $val);
+  protected abstract function makeLess_GreaterSQL($key, $val);
 
   public function __construct($dbName, $methodName = null)
   {
@@ -23,17 +30,17 @@ class Sabel_DB_Query_Factory
     foreach ($conditions as $key => $val) {
       if ($val[0] == '>' || $val[0] == '<') {
         $this->makeLess_GreaterSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Interface::IN)) {
-        $key = str_replace(Sabel_DB_Driver_Interface::IN, '', $key);
+      } else if (strstr($key, Sabel_DB_Driver_Const::IN)) {
+        $key = str_replace(Sabel_DB_Driver_Const::IN, '', $key);
         $this->makeWhereInSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Interface::BET)) {
-        $key = str_replace(Sabel_DB_Driver_Interface::BET, '', $key);
+      } else if (strstr($key, Sabel_DB_Driver_Const::BET)) {
+        $key = str_replace(Sabel_DB_Driver_Const::BET, '', $key);
         $this->makeBetweenSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Interface::EITHER)) {
-        $key = str_replace(Sabel_DB_Driver_Interface::EITHER, '', $key);
+      } else if (strstr($key, Sabel_DB_Driver_Const::EITHER)) {
+        $key = str_replace(Sabel_DB_Driver_Const::EITHER, '', $key);
         $this->prepareEitherSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Interface::LIKE)) {
-        $key = str_replace(Sabel_DB_Driver_Interface::LIKE, '', $key);
+      } else if (strstr($key, Sabel_DB_Driver_Const::LIKE)) {
+        $key = str_replace(Sabel_DB_Driver_Const::LIKE, '', $key);
         $this->prepareLikeSQL($key, $val);
       } else if (strtolower($val) === 'null') {
         $this->makeIsNullSQL($key);
@@ -81,17 +88,17 @@ class Sabel_DB_Query_Factory
     $this->sql = array($sql);
   }
 
-  public function makeIsNullSQL($key)
+  protected function makeIsNullSQL($key)
   {
     $this->setWhereQuery($key . ' IS NULL');
   }
 
-  public function makeIsNotNullSQL($key)
+  protected function makeIsNotNullSQL($key)
   {
     $this->setWhereQuery($key . ' IS NOT NULL');
   }
 
-  public function setWhereQuery($query)
+  protected function setWhereQuery($query)
   {
     if ($this->set) {
       array_push($this->sql, ' AND ' . $query);

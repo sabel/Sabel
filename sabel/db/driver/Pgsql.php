@@ -6,10 +6,8 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General implements Sabel_DB_Driver_Interface
+class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
 {
-  protected $lastinsertId = null;
-
   public function __construct($conn)
   {
     $this->conn     = $conn;
@@ -64,7 +62,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General implements Sabel_DB_
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Interface::FETCH_ASSOC) {
+    if ($style === Sabel_DB_Driver_Const::ASSOC) {
       return pg_fetch_assoc($this->result);
     } else {
       return pg_fetch_array($this->result);
