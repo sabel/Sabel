@@ -38,22 +38,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 
   public function setUpdateSQL($table, $data)
   {
-    $sql = array();
     $this->data = $data;
-
-    foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
-    $this->queryObj->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
-  }
-
-  public function setAggregateSQL($table, $idColumn, $functions)
-  {
-    $sql = array("SELECT {$idColumn}");
-
-    foreach ($functions as $key => $val)
-      array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
-
-    array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
-    $this->queryObj->setBasicSQL(join('', $sql));
+    $sql = $this->queryObj->makeUpdateSQL($table, $data);
+    $this->queryObj->setBasicSQL($sql);
   }
 
   public function executeInsert($table, $data, $defColumn)
@@ -62,22 +49,10 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
       $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
     $this->data = $data;
+    $sql = $this->queryObj->makeInsertSQL($table, $data);
 
-    $columns = array();
-    $values  = array();
-    foreach ($data as $key => $val) {
-      array_push($columns, $key);
-      array_push($values, ':' . $key);
-    }
-
-    $sql = array("INSERT INTO {$table}(");
-    array_push($sql, join(',', $columns));
-    array_push($sql, ") VALUES(");
-    array_push($sql, join(',', $values));
-    array_push($sql, ')');
-
-    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists(join('', $sql), $data);
-    if (!$this->stmtFlag) $this->queryObj->setBasicSQL(join('', $sql));
+    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $data);
+    if (!$this->stmtFlag) $this->queryObj->setBasicSQL($sql);
 
     return $this->execute();
   }

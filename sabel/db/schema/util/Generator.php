@@ -128,7 +128,8 @@ class Schema_Generator
     }
 
     Sabel_DB_Connection::addConnection($connectName, $dbCon);
-    $schemas = Sabel_DB_Mapper::getSchemaAccessor($connectName, $dbCon['schema'])->getTables();
+    $sa = new Sabe_DB_Schema_Accessor($connectName, $dbCon['schema']);
+    $schemas = $sa->getTables();
 
     foreach ($schemas as $schema) {
       $tName = $schema->getTableName();

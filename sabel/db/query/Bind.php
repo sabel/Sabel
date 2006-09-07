@@ -13,17 +13,43 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
   private $count = 1;
   private $param = array();
 
-  public function makeNormalSQL($key, $val)
+  public function makeUpdateSQL($table, $data)
+  {
+    $sql = array();
+    foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
+    return "UPDATE {$table} SET " . join(',', $sql);
+  }
+
+  public function makeInsertSQL($table, $data)
+  {
+    $columns = array();
+    $values  = array();
+
+    foreach ($data as $key => $val) {
+      array_push($columns, $key);
+      array_push($values, ':' . $key);
+    }
+
+    $sql = array("INSERT INTO {$table}(");
+    array_push($sql, join(',', $columns));
+    array_push($sql, ") VALUES(");
+    array_push($sql, join(',', $values));
+    array_push($sql, ')');
+
+    return join('', $sql);
+  }
+
+  protected function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val, $key.$this->count++));
   }
 
-  public function makeWhereInSQL($key, $val)
+  protected function makeWhereInSQL($key, $val)
   {
     $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
-  public function makeLikeSQL($key, $val, $esc = null)
+  protected function makeLikeSQL($key, $val, $esc = null)
   {
     $bindKey = $key . $this->count++;
     $query   = "{$key} LIKE :{$bindKey}";
@@ -33,14 +59,14 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
     $this->param[$bindKey] = $val;
   }
 
-  public function makeBetweenSQL($key, $val)
+  protected function makeBetweenSQL($key, $val)
   {
     $this->setWhereQuery("{$key} BETWEEN :from AND :to");
     $this->param["from"] = $val[0];
     $this->param["to"]   = $val[1];
   }
 
-  public function makeEitherSQL($key, $val)
+  protected function makeEitherSQL($key, $val)
   {
     if ($val[0] === '<' || $val[0] === '>') {
       return $this->_makeLess_GreaterSQL($key, $val, $key.$this->count++);
@@ -51,7 +77,7 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
     }
   }
 
-  public function makeLess_GreaterSQL($key, $val)
+  protected function makeLess_GreaterSQL($key, $val)
   {
     $this->setWhereQuery($this->_makeLess_GreaterSQL($key, $val, $key.$this->count++));
   }

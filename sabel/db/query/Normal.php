@@ -10,17 +10,18 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
 {
   protected $sql = array();
 
-  public function setUpdateSQL($table, $data)
+  public function makeUpdateSQL($table, $data)
   {
     $sql = array();
+
     foreach ($data as $key => $val) {
       $val = $this->escape($val);
       array_push($sql, "{$key}='{$val}'");
     }
-    $this->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
+    return "UPDATE {$table} SET " . join(',', $sql);
   }
 
-  public function setInsertSQL($table, $data)
+  public function makeInsertSQL($table, $data)
   {
     $columns = array();
     $values  = array();
@@ -37,7 +38,7 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
     array_push($sql, join(',', $values));
     array_push($sql, ');');
 
-    $this->setBasicSQL(join('', $sql));
+    return join('', $sql);
   }
 
   public function makeNormalSQL($key, $val)
@@ -92,6 +93,11 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
   protected function _getNormalSQL($key, $val)
   {
     return "{$key}='{$this->escape($val)}'";
+  }
+
+  public function getParam()
+  {
+
   }
 
   public function unsetProparties()

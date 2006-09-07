@@ -8,12 +8,18 @@ abstract class Sabel_DB_Query_Factory
     $stripFlag = false,
     $set       = false;
 
+  protected abstract function makeUpdateSQL($table, $data);
+  protected abstract function makeInsertSQL($table, $data);
+
   protected abstract function makeNormalSQL($key, $val);
   protected abstract function makeWhereInSQL($key, $val);
   protected abstract function makeLikeSQL($key, $val, $esc = null);
   protected abstract function makeBetweenSQL($key, $val);
   protected abstract function makeEitherSQL($key, $val);
   protected abstract function makeLess_GreaterSQL($key, $val);
+
+  public abstract function getParam();
+  public abstract function unsetProparties();
 
   public function __construct($dbName, $methodName = null)
   {
@@ -28,18 +34,18 @@ abstract class Sabel_DB_Query_Factory
 
     $nmlCount = 0;
     foreach ($conditions as $key => $val) {
-      if ($val[0] == '>' || $val[0] == '<') {
+      if ($val[0] === '>' || $val[0] === '<') {
         $this->makeLess_GreaterSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Const::IN)) {
+      } else if (strpos($key, Sabel_DB_Driver_Const::IN) !== false) {
         $key = str_replace(Sabel_DB_Driver_Const::IN, '', $key);
         $this->makeWhereInSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Const::BET)) {
+      } else if (strpos($key, Sabel_DB_Driver_Const::BET) !== false) {
         $key = str_replace(Sabel_DB_Driver_Const::BET, '', $key);
         $this->makeBetweenSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Const::EITHER)) {
+      } else if (strpos($key, Sabel_DB_Driver_Const::EITHER) !== false) {
         $key = str_replace(Sabel_DB_Driver_Const::EITHER, '', $key);
         $this->prepareEitherSQL($key, $val);
-      } else if (strstr($key, Sabel_DB_Driver_Const::LIKE)) {
+      } else if (strpos($key, Sabel_DB_Driver_Const::LIKE) !== false) {
         $key = str_replace(Sabel_DB_Driver_Const::LIKE, '', $key);
         $this->prepareLikeSQL($key, $val);
       } else if (strtolower($val) === 'null') {
