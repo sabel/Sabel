@@ -33,7 +33,7 @@ class Sabel_Controller_Front
   
   public function ignition()
   {
-    $map = Container::create()->load('sabel.controller.Map');
+    $map = create('sabel.controller.Map');
     $map->load();
     $entry = $map->find();
     

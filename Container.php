@@ -173,7 +173,7 @@ class AppClassRegister
     list($file, $extention) = explode('.', $fileName);
     
     if ($extention == 'php') {
-      if ($parts[0] === 'app') {
+      if ($parts[0] === 'app' || $parts[0] === 'lib') {
         array_shift($parts);
         $parts[count($parts) - 1] = ucfirst($file);
         return implode('.', $parts);
@@ -238,7 +238,7 @@ class ClassCombinator
   {
     $parts = explode('/', $value);
     $value = $this->base . $value;
-
+    
     if ($type === 'file' && preg_match('%.*\.php%', $value)) {
       if ($parts[0] === $this->strict) {
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
@@ -296,5 +296,17 @@ class DirectoryTraverser
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
       }
     }
+  }
+}
+
+if (function_exists('create')) {
+  function __create($classpath)
+  {
+    return Container::create()->load($classpath);
+  }
+} else {
+  function create($classpath)
+  {
+    return Container::create()->load($classpath);
   }
 }

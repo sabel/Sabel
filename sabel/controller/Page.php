@@ -30,11 +30,10 @@ abstract class Sabel_Controller_Page
   
   public function setup()
   {
-    $this->container   = Sabel_Container_DI::create();
+    $this->container   = Container::create();
     $this->request     = new Sabel_Request_Request($this->entry);
     $this->response    = new Sabel_Response_Web();
     $this->destination = $this->entry->getDestination();
-    $this->logger      = $this->container->load('Sabel_Logger_File');
   }
   
   public function execute()
