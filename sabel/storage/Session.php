@@ -1,6 +1,6 @@
 <?php
 
-class SessionStorage
+class Sabel_Session_Storage
 {
   public function __construct()
   {
