@@ -19,6 +19,12 @@ class Sabel_DB_Connection
       } else {
         $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
         $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
+
+        if (isset($params['encoding']) && $db === 'mysql') {
+          $list['conn']->exec("SET NAMES {$params['encoding']}");
+        } else if (isset($params['encoding']) && $db === 'pgsql') {
+          $list['conn']->exec("SET CLIENT_ENCODING TO {$params['encoding']}");
+        }
       }
 
       $list['driver'] = 'pdo';
@@ -29,16 +35,24 @@ class Sabel_DB_Connection
       $pass     = $params['password'];
       $database = $params['database'];
 
+      $encsql   = '';
+
       if ($driver === 'mysql') {
-        $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
+        $host   = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
         $list['conn'] = mysql_connect($host, $user, $pass);
         mysql_select_db($database, $list['conn']);
       } else if ($driver === 'pgsql') {
-        $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
+        $host   = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
         $list['conn'] = pg_connect("host={$host} dbname={$database} user={$user} password={$pass}");
       } else if ($driver === 'firebird') {
         $host = $host . ':' . $database;
         $list['conn'] = ibase_connect($host, $user, $pass);
+      }
+
+      if (isset($params['encoding']) && $driver === 'mysql') {
+        $list['conn']->exec("SET NAMES {$params['encoding']}");
+      } else if (isset($params['encoding']) && $driver === 'pgsql') {
+        $list['conn']->exec("SET CLIENT_ENCODING TO {$params['encoding']}");
       }
 
       $list['driver'] = $driver;
