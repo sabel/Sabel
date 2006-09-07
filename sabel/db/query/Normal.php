@@ -36,7 +36,7 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
     array_push($sql, join(',', $columns));
     array_push($sql, ") VALUES(");
     array_push($sql, join(',', $values));
-    array_push($sql, ');');
+    array_push($sql, ')');
 
     return join('', $sql);
   }

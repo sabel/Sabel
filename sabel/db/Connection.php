@@ -2,10 +2,14 @@
 
 class Sabel_DB_Connection
 {
+  const MYSQL_SET_ENCODING = 'SET NAMES %s';
+  const PGSQL_SET_ENCODING = 'SET CLIENT_ENCODING TO %s';
+
   private static $connList = array();
 
   public static function addConnection($connectName, $params)
   {
+
     $driver = $params['driver'];
 
     if (!is_array($params))
@@ -19,12 +23,6 @@ class Sabel_DB_Connection
       } else {
         $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
         $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
-
-        if (isset($params['encoding']) && $db === 'mysql') {
-          $list['conn']->exec("SET NAMES {$params['encoding']}");
-        } else if (isset($params['encoding']) && $db === 'pgsql') {
-          $list['conn']->exec("SET CLIENT_ENCODING TO {$params['encoding']}");
-        }
       }
 
       $list['driver'] = 'pdo';
@@ -49,14 +47,22 @@ class Sabel_DB_Connection
         $list['conn'] = ibase_connect($host, $user, $pass);
       }
 
-      if (isset($params['encoding']) && $driver === 'mysql') {
-        $list['conn']->exec("SET NAMES {$params['encoding']}");
-      } else if (isset($params['encoding']) && $driver === 'pgsql') {
-        $list['conn']->exec("SET CLIENT_ENCODING TO {$params['encoding']}");
-      }
-
       $list['driver'] = $driver;
       $list['db']     = $driver;
+    }
+
+    if (isset($params['encoding'])) {
+      $enc = $params['encoding'];
+
+      if ($list['driver'] === 'pdo' && $list['db'] === 'mysql') {
+        $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
+      } else if ($list['driver'] === 'pdo' && $list['db'] === 'pgsql') {
+        $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
+      } else if ($list['db'] === 'mysql') {
+        mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
+      } else if ($list['db'] === 'pgsql') {
+        pg_query($list['conn'], sprintf(self::PGSQL_SET_ENCODING, $enc));
+      }
     }
 
     $list['schema'] = (isset($params['schema'])) ? $params['schema'] : null;
