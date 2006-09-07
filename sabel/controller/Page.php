@@ -13,6 +13,7 @@ abstract class Sabel_Controller_Page
     $cache       = null,
     $logger      = null,
     $request     = null,
+    $storage     = null,
     $response    = null,
     $template    = null,
     $container   = null,
@@ -33,6 +34,7 @@ abstract class Sabel_Controller_Page
     $this->container   = Container::create();
     $this->request     = new Sabel_Request_Request($this->entry);
     $this->response    = new Sabel_Response_Web();
+    $this->storage     = $this->container->load('sabel.storage.Session');
     $this->destination = $this->entry->getDestination();
   }
   
