@@ -17,7 +17,7 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   public function __get($key)
   {
     $this->loadSchema();
-    return new Sabel_DB_Column($this->schema[$key], $this->table);
+    return new Sabel_DB_Column($this->schema[$key], $this->columns, $this->table);
   }
   
   protected function loadSchema()
@@ -48,7 +48,7 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
    *
    */
   public function current() {
-    return new Sabel_DB_Column($this->schema[$this->position], $this->table);
+    return new Sabel_DB_Column($this->schema[$this->position], $this->columns, $this->table);
   }
   
   /**

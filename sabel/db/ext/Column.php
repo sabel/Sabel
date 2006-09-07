@@ -13,16 +13,22 @@ class Sabel_DB_Column
   protected $localName = '';
   protected $value     = '';
 
-  public function __construct($values, $table)
+  public function __construct($values, $columns, $table)
   {
     $this->name      = $values['name'];
     $this->localName = _("{$table}.{$this->name}");
     $this->value     = $values['data'];
     $this->table     = $table;
+    $this->columns   = $columns[$values['name']];
   }
 
   public function __get($key)
   {
     return $this->$key;
+  }
+  
+  public function getType()
+  {
+    return $this->columns->type;
   }
 }

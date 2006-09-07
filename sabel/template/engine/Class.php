@@ -33,6 +33,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
 
       $repl = '([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*';
       $contents = preg_replace('/<\?php(n)?h'.$repl.'\?>/', '<?php$1$2= htmlspecialchars($3); $4 ?>', $contents);
+      $contents = preg_replace('/<\?php(n)?v'.$repl.'\?>/', '<?php$1$2 var_dump($3); $4 ?>', $contents);
       $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php echo nl2br($2); $3 ?>', $contents);
 
       $this->saveCompileFile($contents);
