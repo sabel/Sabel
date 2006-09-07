@@ -25,7 +25,7 @@ class Sabel_Injection_Setter
       foreach ($entries as $annotation) {
         if (isset($annotation['implementation'])) {
           $className = $annotation['implementation']->getContents();
-          $ins = new $className();
+          $ins = new Sabel_Injection_Injector(new $className());
           $setter = 'set'. ucfirst($className);
           if (isset($annotation['setter'])) {
             $setter = $annotation['setter']->getContents();

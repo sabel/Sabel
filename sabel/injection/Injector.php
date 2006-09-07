@@ -13,12 +13,12 @@ class Sabel_Injection_Injector
   private $reflection = null;
   private $observers  = array();
   
-  public function __construct($container, $target)
+  public function __construct($target)
   {
     if (!is_object($target))
       throw new Sabel_Exception_Runtime("target is not object.");
       
-    $this->container  = $container;
+    $this->container  = Container::create();
     $this->target     = $target;
     $this->reflection = new ReflectionClass($target);
   }
@@ -35,13 +35,13 @@ class Sabel_Injection_Injector
   
   public function __call($method, $arg)
   {
-    Sabel_Injection_Calls::doBefore($method, $arg);
+    Sabel_Injection_Calls::doBefore($method, $arg, $this->reflection);
     $method = $this->reflection->getMethod($method);
     
     $this->notice($method);
     
     $result = $method->invokeArgs($this->target, $arg);
-    Sabel_Injection_Calls::doAfter($method, $result);
+    Sabel_Injection_Calls::doAfter($method, $result, $this->reflection);
     return $result;
   }
   

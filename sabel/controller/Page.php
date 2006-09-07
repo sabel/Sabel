@@ -55,6 +55,11 @@ abstract class Sabel_Controller_Page
     }
   }
   
+  protected function __set($name, $value)
+  {
+    Re::set($name, $value);
+  }
+  
   protected function __call($method, $args)
   {
     if ($this->request->hasMethod($method)) {

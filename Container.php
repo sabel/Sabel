@@ -41,7 +41,7 @@ class Container
     
     if (!class_exists($className)) {
       $classNameParts = explode('_', $className);
-      while(true) {
+      for ($count = 0; $count < 10; ++$count) {
         array_shift($classNameParts);
         $className = implode('_', $classNameParts);
         if (class_exists($className)) break;
@@ -53,11 +53,11 @@ class Container
     
     if ($rc->hasMethod('__construct')) {
       $ins = $di->load($className, '__construct');
-      $injection = new Sabel_Injection_Injector($this, $ins);
+      $injection = new Sabel_Injection_Injector($ins);
       $injection->observe(new Sabel_Injection_Setter());
       return $injection;
     } else {
-      $injection = new Sabel_Injection_Injector($this, new $className());
+      $injection = new Sabel_Injection_Injector(new $className());
       $injection->observe(new Sabel_Injection_Setter());
       return $injection;
     }
@@ -308,5 +308,17 @@ if (function_exists('create')) {
   function create($classpath)
   {
     return Container::create()->load($classpath);
+  }
+}
+
+if (function_exists('singleton')) {
+  function __singleton($classpath)
+  {
+    return Container::create()->load($classpath, 'singleton');
+  }
+} else {
+  function singleton($classpath)
+  {
+    return Container::create()->load($classpath, 'singleton');
   }
 }

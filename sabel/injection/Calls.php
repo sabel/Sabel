@@ -31,17 +31,17 @@ class Sabel_Injection_Calls
     }
   }
   
-  public static function doBefore($method, $arg)
+  public static function doBefore($method, $arg, $reflection)
   {
     foreach (self::$before as $object) {
-      if ($object->when($method)) $object->before($method, $arg);
+      if ($object->when($method)) $object->before($method, $arg, $reflection);
     }
   }
   
-  public static function doAfter($method, &$result)
+  public static function doAfter($method, &$result, $reflection)
   {
     foreach (self::$after as $object) {
-      if ($object->when($method)) $object->after($method, $result);
+      if ($object->when($method)) $object->after($method, $result, $reflection);
     }
   }
   
