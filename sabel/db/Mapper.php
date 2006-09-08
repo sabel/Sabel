@@ -57,13 +57,13 @@ abstract class Sabel_DB_Mapper
     switch (Sabel_DB_Connection::getDriver($connectName)) {
       case 'pdo':
         $pdoDb = Sabel_DB_Connection::getDB($connectName);
-        return new Sabel_DB_Driver_Pdo($conn, $pdoDb);
+        return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
       case 'pgsql':
-        return new Sabel_DB_Driver_Pgsql($conn);
+        return new Sabel_DB_Driver_Native_Pgsql($conn);
       case 'mysql':
-        return new Sabel_DB_Driver_Mysql($conn);
+        return new Sabel_DB_Driver_Native_Mysql($conn);
       case 'firebird':
-        return new Sabel_DB_Driver_Firebird($conn);
+        return new Sabel_DB_Driver_Native_Firebird($conn);
     }
   }
 

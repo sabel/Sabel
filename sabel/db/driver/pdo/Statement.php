@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_DB_Driver_PdoStatement
+class Sabel_DB_Driver_Pdo_Statement
 {
   private static $stmt  = null;
   private static $sql   = '';

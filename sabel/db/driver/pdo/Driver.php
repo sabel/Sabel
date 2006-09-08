@@ -6,14 +6,13 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
+class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 {
   private
     $stmt  = null,
     $myDb  = '',
     $data  = array(),
-    $param = array(),
-    $conditions = array();
+    $param = array();
 
   public function __construct($conn, $myDb)
   {
@@ -52,7 +51,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
     $this->data = $data;
     $sql = $this->query->makeInsertSQL($table, $data);
 
-    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $data);
+    $this->stmtFlag = Sabel_DB_Driver_Pdo_Statement::exists($sql, $data);
     if (!$this->stmtFlag) $this->query->setBasicSQL($sql);
 
     return $this->execute();
@@ -86,7 +85,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
   public function makeQuery($conditions, $constraints = null)
   {
     $sql = $this->query->getSQL();
-    $exist = Sabel_DB_Driver_PdoStatement::exists($sql, $conditions, $constraints);
+    $exist = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
 
     $result = $this->query->makeConditionQuery($conditions);
     if (!$result) $exist = false;
@@ -102,13 +101,13 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
     if (isset($sql)) {
       $this->stmt = $this->conn->prepare($sql);
     } else if ($this->stmtFlag) {
-      $this->stmt = Sabel_DB_Driver_PdoStatement::get();
+      $this->stmt = Sabel_DB_Driver_Pdo_Statement::get();
     } else if (is_null($this->query->getSQL())) {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
       $sql = $this->query->getSQL();
       if ($this->stmt = $this->conn->prepare($sql)) {
-        Sabel_DB_Driver_PdoStatement::add($this->stmt);
+        Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
       } else {
         $error = $this->conn->errorInfo();
         throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");

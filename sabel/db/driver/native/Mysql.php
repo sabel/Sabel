@@ -6,7 +6,7 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_General
+class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 {
   public function __construct($conn)
   {
