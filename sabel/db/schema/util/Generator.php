@@ -26,14 +26,12 @@ require_once 'Sabel/sabel/db/schema/Pgsql.php';
 require_once 'Sabel/sabel/db/schema/SQLite.php';
 require_once 'Sabel/sabel/db/schema/Accessor.php';
 
-require_once 'Sabel/sabel/db/schema/util/Parser.php';
 require_once 'Sabel/sabel/db/schema/util/Creator.php';
 
 require_once 'Sabel/sabel/config/Spyc.php';
 require_once 'Sabel/sabel/config/Yaml.php';
 require_once 'Sabel/sabel/Classes.php';
 */
-
 class ParsedSQL_Writer
 {
   public static function write($connectName, $tName, $schema, $dirPath)
@@ -63,27 +61,32 @@ class ParsedSQL_Maker
     foreach ($columns as $column) {
       $info = array();
       array_push($info, '$sql[' . "'{$column->name}'] = array(");
-      array_push($info, "'{$column->type}', ");
+      array_push($info, "'type' => '{$column->type}', ");
 
       if ($column->type === Sabel_DB_Schema_Type::INT) {
-        array_push($info, "{$column->max}, ");
-        array_push($info, "{$column->min}, ");
+        array_push($info, "'max' => {$column->max}, ");
+        array_push($info, "'min' => {$column->min}, ");
       } else if ($column->type === Sabel_DB_Schema_Type::STRING) {
-        array_push($info, "{$column->max}, ");
+        array_push($info, "'max' => {$column->max}, ");
       }
 
       $increment = ($column->increment) ? 'true' : 'false';
       $notNull   = ($column->notNull) ? 'true' : 'false';
       $primary   = ($column->primary) ? 'true' : 'false';
 
-      array_push($info, "{$increment}, ");
-      array_push($info, "{$notNull}, ");
-      array_push($info, "{$primary}, ");
+      array_push($info, "'increment' => {$increment}, ");
+      array_push($info, "'notNull' => {$notNull}, ");
+      array_push($info, "'primary' => {$primary}, ");
 
       if (is_null($column->default)) {
-        array_push($info, 'null');
+        array_push($info, "'default' => null");
       } else {
-        array_push($info, "'{$column->default}'");
+        $def = $column->default;
+        if (is_int($def) || is_string($def) && ctype_digit($def)) {
+          array_push($info, "'default' => {$def}");
+        } else {
+          array_push($info, "'default' => '{$def}'");
+        }
       }
 
       array_push($info, ");\n");

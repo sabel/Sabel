@@ -66,14 +66,22 @@ class Default_Stest
   {
     $sql = array();
 
-    $sql['id']      = array('INT',222,-222,true,true,false,22);
-    $sql['name']    = array('STRING',128,false,true,false,null);
-    $sql['status']  = array('BOOL',false,true,false,null);
-    $sql['comment'] = array('STRING',64,false,false,false,'varchar default');
-    $sql['pare_id'] = array('INT',444,-444,true,false,true,null);
-    $sql['birth']   = array('DATE',false,true,false,'3000-01-01');
-    $sql['time']    = array('TIMESTAMP',false,false,false,null);
-    $sql['com']     = array('TEXT',false,false,false,null);
+    $sql['id']      = array('type' => 'INT', 'max' => 222, 'min' => -222, 'increment' => true,
+                            'notNull' => true, 'primary' => false, 'default' => 22);
+    $sql['name']    = array('type' => 'STRING', 'max' => 128, 'increment' => false,
+                            'notNull' => true, 'primary' => false, 'default' => null);
+    $sql['status']  = array('type' => 'BOOL', 'increment' => false, 'notNull' => true,
+                            'primary' => false, 'default' => null);
+    $sql['comment'] = array('type' => 'STRING', 'max' => 64, 'increment' => false,
+                            'notNull' => false, 'primary' => false, 'default' => 'varchar default');
+    $sql['pare_id'] = array('type' => 'INT', 'max' => 444, 'min' => -444, 'increment' => true,
+                            'notNull' => false, 'primary' => true, 'default' => null);
+    $sql['birth']   = array('type' => 'DATE', 'increment' => false, 'notNull' => true,
+                            'primary' => false, 'default' => '3000-01-01');
+    $sql['time']    = array('type' => 'TIMESTAMP', 'increment' => false, 'notNull' => false,
+                            'primary' => false, 'default' => null);
+    $sql['com']     = array('type' => 'TEXT', 'increment' => false, 'notNull' => false,
+                            'primary' => false, 'default' => null);
 
     return $sql;
   }

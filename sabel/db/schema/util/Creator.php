@@ -19,6 +19,8 @@ class Schema_Util_Creator
       $name  = $split[0];
       $rem   = trim(substr($line, strlen($name)));
 
+      $vo->name = $name;
+
       if ($name === 'constraint') {
         $constLine = $line;
         continue;
@@ -44,57 +46,58 @@ class Schema_Util_Creator
     return new Sabel_DB_Schema_Table($table, $columns);
   }
 
-  protected function setDataType($co, $rem)
+  protected function setDataType($vo, $rem)
   {
     $tmp = substr($rem, 0, strpos($rem, ' '));
     $type = ($tmp === '') ? $rem : $tmp;
     $this->colInfo = trim(substr($rem, strlen($type)));
 
-    Sabel_DB_Schema_TypeSetter::send($co, $type);
+    Sabel_DB_Schema_TypeSetter::send($vo, $type);
 
-    $auto   = (strpos($rem, 'auto_increment') !== false);
-    $seq    = (strpos($rem, 'serial') !== false);
-    $intpri = (strpos($rem, 'integer primary key') !== false);
+    $auto    = (strpos($rem, 'auto_increment') !== false);
+    $seq     = (strpos($rem, 'serial') !== false);
+    $intpri  = (strpos($rem, 'integer primary key') !== false);
+    $intpri2 = (strpos($rem, 'integer not null primary key') !== false);
 
-    $co->increment = ($auto || $seq || $intpri);
+    $vo->increment = ($auto || $seq || $intpri || $intpri2);
   }
 
-  protected function setNotNull($co)
+  protected function setNotNull($vo)
   {
     $colInfo = $this->colInfo;
 
-    $co->notNull   = (strpos($colInfo, 'not null') !== false);
+    $vo->notNull   = (strpos($colInfo, 'not null') !== false);
     $this->colInfo = str_replace('not null', '', $colInfo);
   }
 
-  protected function setPrimary($co)
+  protected function setPrimary($vo)
   {
     $colInfo = $this->colInfo;
 
     if ($colInfo === '') {
-      $co->primary = false;
-      $co->default = null;
+      $vo->primary = false;
+      $vo->default = null;
       return true;
     } else {
-      $co->primary   = (strpos($colInfo, 'primary key') !== false);
+      $vo->primary   = (strpos($colInfo, 'primary key') !== false);
       $this->colInfo = str_replace('primary key', '', $colInfo);
       return false;
     }
   }
 
-  protected function setDefault($co)
+  protected function setDefault($vo)
   {
     $colInfo = $this->colInfo;
 
     if (strpos($colInfo, 'default') !== false) {
       $default = trim(substr($colInfo, 8));
       if (ctype_digit($default) || $default === 'false' || $default === 'true') {
-        $co->default = $default;
+        $vo->default = $default;
       } else {
-        $co->default = substr($default, 1, strlen($default) - 2);
+        $vo->default = substr($default, 1, strlen($default) - 2);
       }
     } else {
-      $co->default = null;
+      $vo->default = null;
     }
   }
 

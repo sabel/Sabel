@@ -48,24 +48,19 @@ class Sabel_DB_Schema_Table
       $vo = new ValueObject();
 
       $vo->name = $cName;
-      $vo->type = $values[0];
+      $vo->type = $values['type'];
 
       if ($vo->type === Sabel_DB_Schema_Type::INT) {
-        $vo->max = $values[1];
-        $vo->min = $values[2];
+        $vo->max = $values['max'];
+        $vo->min = $values['min'];
       } else if ($vo->type === Sabel_DB_Schema_Type::STRING) {
-        $vo->max = (int)$values[1];
+        $vo->max = $values['max'];
       }
 
-      $c = count($values) - 4;
-      for ($i = 0; $i < $c; $i++) unset($values[$i]);
-
-      $values = array_values($values);
-
-      $vo->increment = $values[0];
-      $vo->notNull   = $values[1];
-      $vo->primary   = $values[2];
-      $vo->default   = $values[3];
+      $vo->increment = $values['increment'];
+      $vo->notNull   = $values['notNull'];
+      $vo->primary   = $values['primary'];
+      $vo->default   = $values['default'];
 
       $array[$vo->name] = $vo;
     }
