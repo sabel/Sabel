@@ -24,6 +24,6 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 
   public function addStringLength($co, $columnRecord)
   {
-    $co->max = (int)$columnRecord['character_maximum_length'];
+    $co->max =(int) $columnRecord['character_octet_length'];
   }
 }
