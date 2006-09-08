@@ -6,12 +6,14 @@ class Test_Edo_Pgsql extends Test_Edo_Test
                                   'host'     => 'localhost',
                                   'user'     => 'pgsql',
                                   'password' => 'pgsql',
+                                  'schema'   => 'public',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'pgsql',
                                   'host'     => 'localhost',
                                   'user'     => 'pgsql',
                                   'password' => 'pgsql',
+                                  'schema'   => 'public',
                                   'database' => 'edo2');
 
   public static function main() {

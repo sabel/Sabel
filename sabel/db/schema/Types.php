@@ -47,7 +47,7 @@ class Sabel_DB_Schema_TypeStr implements Sabel_DB_Schema_TypeSender
       foreach ($tArray as $val) {
         if (stripos($type, $val) !== false) {
           $co->type = Sabel_DB_Schema_Type::STRING;
-          $co->max  = ($text !== false) ? substr($text, 1, strlen($text) - 2) : 256;
+          $co->max  = ($text !== false) ? (int)substr($text, 1, strlen($text) - 2) : 256;
           break;
         }
       }

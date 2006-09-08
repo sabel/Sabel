@@ -1032,6 +1032,52 @@ class Test_Edo_Test extends SabelTestCase
     $this->assertEquals($colsName[0], 'id');
     $this->assertEquals($colsName[1], 'text');
   }
+
+  private static $tableSchema = array();
+
+  public function testInformationSchema()
+  {
+    $sb = new Sabel_DB_Basic('bbs');
+
+    if (Sabel_DB_Connection::getDB('default') !== 'sqlite') {
+      self::$tableSchema[] = $sb->getTableSchema();
+    } else {
+      $sq = $sb->getTableSchema();
+      $my = self::$tableSchema[0];
+
+      $sqc = $sq->getColumns();
+      $myc = $my->getColumns();
+
+      $this->assertEquals(count($sqc), count($myc));
+      $this->assertEquals($sq->id->type, $my->id->type);
+      $this->assertEquals($sq->id->max, $my->id->max);
+      $this->assertEquals($sq->id->min, $my->id->min);
+      $this->assertEquals($sq->id->increment, $my->id->increment);
+      $this->assertEquals($sq->id->primary, $my->id->primary);
+
+      $this->assertEquals($sq->title->type, $my->title->type);
+      $this->assertEquals($sq->title->max,  $my->title->max);
+
+      $this->assertEquals($sq->body->type, $my->body->type);
+      $this->assertEquals($sq->body->max,  $my->body->max);
+
+      $pg = self::$tableSchema[1];
+      $pgc = $my->getColumns();
+
+      $this->assertEquals(count($sqc), count($pgc));
+      $this->assertEquals($sq->id->type, $pg->id->type);
+      $this->assertEquals($sq->id->max, $pg->id->max);
+      $this->assertEquals($sq->id->min, $pg->id->min);
+      $this->assertEquals($sq->id->increment, $pg->id->increment);
+      $this->assertEquals($sq->id->primary, $pg->id->primary);
+
+      $this->assertEquals($sq->title->type, $pg->title->type);
+      $this->assertEquals($sq->title->max,  $pg->title->max);
+
+      $this->assertEquals($sq->body->type, $pg->body->type);
+      $this->assertEquals($sq->body->max,  $pg->body->max);
+    }
+  }
 }
 
 abstract class Mapper_Default extends Sabel_DB_Mapper

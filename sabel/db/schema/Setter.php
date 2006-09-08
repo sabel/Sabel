@@ -2,7 +2,7 @@
 
 class Sabel_DB_Schema_TypeSetter
 {
-  public static function set($co, $type)
+  public static function send($co, $type)
   {
     if ($type === 'boolean' || $type === 'bool') {
       $co->type = Sabel_DB_Schema_Type::BOOL;

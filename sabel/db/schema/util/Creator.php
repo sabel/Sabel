@@ -1,41 +1,111 @@
 <?php
 
-class Schema_Creator
+class Schema_Util_Creator
 {
-  public static function create($schema)
+  protected $colInfo = '';
+
+  public function create($table, $createSQL)
   {
+    $sql   = substr(strpbrk($createSQL, '('), 0);
+    $lines = explode(',', substr($sql, 1, strlen($sql) - 2));
+    $lines = array_map('strtolower', array_map('trim', $lines));
+
+    $constLine = '';
+
     $columns = array();
-
-    if (is_object($schema))
-      $schema = $schema->getParsedSQL();
-
-    foreach ($schema as $name => $info) {
+    foreach ($lines as $line) {
       $vo    = new ValueObject();
-      $split = explode(',', $info);
+      $split = explode(' ', $line);
+      $name  = $split[0];
+      $rem   = trim(substr($line, strlen($name)));
 
-      $vo->name = $name;
-      $vo->type = $split[0];
-
-      if ($vo->type === Sabel_DB_Schema_Type::INT) {
-        $vo->max = (float)$split[1];
-        $vo->min = (float)$split[2];
-      } else if ($vo->type === Sabel_DB_Schema_Type::STRING) {
-        $vo->max = (int)$split[1];
+      if ($name === 'constraint') {
+        $constLine = $line;
+        continue;
       }
 
-      $c = count($split) - 4;
-      for ($i = 0; $i < $c; $i++) unset($split[$i]);
+      $this->setDataType($vo, $rem);
 
-      $split = array_values($split);
-
-      $vo->increment = ($split[0] === 'true');
-      $vo->notNull   = ($split[1] === 'true');
-      $vo->primary   = ($split[2] === 'true');
-      $vo->default   = $split[3];
+      if ($this->colInfo === '') {
+        $vo->notNull = false;
+        $vo->primary = false;
+        $vo->default = null;
+      } else {
+        $this->setNotNull($vo);
+        if (!$this->setPrimary($vo)) $this->setDefault($vo);
+      }
 
       $columns[$name] = $vo;
     }
 
-    return new Sabel_DB_Schema_Table('table_name', $columns);
+    if ($constLine !== '')
+      $columns = $this->setConstraint($columns, $constLine);
+
+    return new Sabel_DB_Schema_Table($table, $columns);
+  }
+
+  protected function setDataType($co, $rem)
+  {
+    $tmp = substr($rem, 0, strpos($rem, ' '));
+    $type = ($tmp === '') ? $rem : $tmp;
+    $this->colInfo = trim(substr($rem, strlen($type)));
+
+    Sabel_DB_Schema_TypeSetter::send($co, $type);
+
+    $auto   = (strpos($rem, 'auto_increment') !== false);
+    $seq    = (strpos($rem, 'serial') !== false);
+    $intpri = (strpos($rem, 'integer primary key') !== false);
+
+    $co->increment = ($auto || $seq || $intpri);
+  }
+
+  protected function setNotNull($co)
+  {
+    $colInfo = $this->colInfo;
+
+    $co->notNull   = (strpos($colInfo, 'not null') !== false);
+    $this->colInfo = str_replace('not null', '', $colInfo);
+  }
+
+  protected function setPrimary($co)
+  {
+    $colInfo = $this->colInfo;
+
+    if ($colInfo === '') {
+      $co->primary = false;
+      $co->default = null;
+      return true;
+    } else {
+      $co->primary   = (strpos($colInfo, 'primary key') !== false);
+      $this->colInfo = str_replace('primary key', '', $colInfo);
+      return false;
+    }
+  }
+
+  protected function setDefault($co)
+  {
+    $colInfo = $this->colInfo;
+
+    if (strpos($colInfo, 'default') !== false) {
+      $default = trim(substr($colInfo, 8));
+      if (ctype_digit($default) || $default === 'false' || $default === 'true') {
+        $co->default = $default;
+      } else {
+        $co->default = substr($default, 1, strlen($default) - 2);
+      }
+    } else {
+      $co->default = null;
+    }
+  }
+
+  protected function setConstraint($columns, $line)
+  {
+    if (strpos($line, 'primary key') !== false) {
+      $line   = strpbrk($line, '(');
+      $priCol = substr($line, 1, strlen($line) - 2);
+
+      $columns[$priCol]->primary = true;
+      return $columns;
+    }
   }
 }

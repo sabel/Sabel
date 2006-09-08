@@ -9,8 +9,8 @@ class Test_InformationSchema extends SabelTestCase
 
   public function testUse()
   {
-    $schemaName = 'Default_Stest';
-    $table = Schema_Creator::create(new $schemaName());
+    $sb = new Sabel_DB_Basic('stest');
+    $table = $sb->getTableSchema();
 
     $id      = $table->id;
     $name    = $table->name;
@@ -24,6 +24,8 @@ class Test_InformationSchema extends SabelTestCase
     $this->assertEquals($id->type, Sabel_DB_Schema_Type::INT);
     $this->assertEquals((int)$id->max, 222);
     $this->assertEquals((int)$id->min, -222);
+    $this->assertTrue($id->notNull);
+    $this->assertTrue($id->increment);
     $this->assertFalse($id->primary);
 
     $this->assertEquals($name->type, Sabel_DB_Schema_Type::STRING);
@@ -60,18 +62,18 @@ class Test_InformationSchema extends SabelTestCase
 
 class Default_Stest
 {
-  public function getParsedSQL()
+  public function get()
   {
     $sql = array();
 
-    $sql['id']      = 'INT,222,-222,false,false,false,null';
-    $sql['name']    = 'STRING,128,false,true,false,null';
-    $sql['status']  = 'BOOL,false,true,false,null';
-    $sql['comment'] = 'STRING,64,false,false,false,varchar default';
-    $sql['pare_id'] = 'INT,444,-444,true,false,true,null';
-    $sql['birth']   = 'DATE,false,true,false,3000-01-01';
-    $sql['time']    = 'TIMESTAMP,false,false,false,null';
-    $sql['com']     = 'TEXT,false,false,false,null';
+    $sql['id']      = array('INT',222,-222,true,true,false,22);
+    $sql['name']    = array('STRING',128,false,true,false,null);
+    $sql['status']  = array('BOOL',false,true,false,null);
+    $sql['comment'] = array('STRING',64,false,false,false,'varchar default');
+    $sql['pare_id'] = array('INT',444,-444,true,false,true,null);
+    $sql['birth']   = array('DATE',false,true,false,'3000-01-01');
+    $sql['time']    = array('TIMESTAMP',false,false,false,null);
+    $sql['com']     = array('TEXT',false,false,false,null);
 
     return $sql;
   }

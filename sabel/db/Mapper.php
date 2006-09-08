@@ -128,8 +128,16 @@ abstract class Sabel_DB_Mapper
 
   public function getTableSchema()
   {
-    $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
-    return $sa->getTable($this->table);
+    $schemaClass = $this->connectName . '_' . $this->table;
+    if (class_exists($schemaClass, false)) {
+      $sc = new $schemaClass();
+      $tSchema = new Sabel_DB_Schema_Table($this->table);
+      $tSchema->setColumns($sc->get());
+      return $tSchema;
+    } else {
+      $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
+      return $sa->getTable($this->table);
+    }
   }
 
   public function getAllSchema()
@@ -138,7 +146,7 @@ abstract class Sabel_DB_Mapper
     return $sa->getTables();
   }
 
-  public static function getSchemaAccessor($connectName, $schemaName)
+  public static function getSchemaAccessor($connectName, $schemaName = null)
   {
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }

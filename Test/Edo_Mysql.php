@@ -6,12 +6,14 @@ class Test_Edo_Mysql extends Test_Edo_Test
                                   'host'     => 'localhost',
                                   'user'     => 'root',
                                   'password' => '',
+                                  'schema'   => 'edo',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'pdo-mysql',
                                   'host'     => 'localhost',
                                   'user'     => 'root',
                                   'password' => '',
+                                  'schema'   => 'edo2',
                                   'database' => 'edo2');
 
   public static function main() {

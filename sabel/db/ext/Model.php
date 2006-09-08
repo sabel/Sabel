@@ -22,13 +22,8 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   
   protected function loadSchema()
   {
-    $schemaClassName = $this->connectName . '_' . $this->table;
-    if (class_exists($schemaClassName, false)) {
-      $this->columns = $columns = Schema_Creator::create(new $schemaClassName())->getColumns();
-    } else {
-      $this->columns = $columns = $this->getTableSchema()->getColumns();
-    }
-    $this->size = count($columns);
+    $this->columns = $columns = $this->getTableSchema()->getColumns();
+    $this->size    = count($columns);
     
     $schema = array();
     foreach ($columns as $column) {
