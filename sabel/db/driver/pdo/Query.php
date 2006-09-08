@@ -6,10 +6,8 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
+class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
 {
-  protected $sql = array();
-
   private $count = 1;
   private $param = array();
 
@@ -61,9 +59,12 @@ class Sabel_DB_Query_Bind extends Sabel_DB_Query_Factory
 
   protected function makeBetweenSQL($key, $val)
   {
-    $this->setWhereQuery("{$key} BETWEEN :from AND :to");
-    $this->param["from"] = $val[0];
-    $this->param["to"]   = $val[1];
+    $f = $this->count++;
+    $t = $this->count++;
+
+    $this->setWhereQuery("{$key} BETWEEN :from{$f} AND :to{$t}");
+    $this->param["from{$f}"] = $val[0];
+    $this->param["to{$t}"]   = $val[1];
   }
 
   protected function makeEitherSQL($key, $val)

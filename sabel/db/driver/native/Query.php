@@ -6,10 +6,8 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
+class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
 {
-  protected $sql = array();
-
   public function makeUpdateSQL($table, $data)
   {
     $sql = array();
@@ -93,11 +91,6 @@ class Sabel_DB_Query_Normal extends Sabel_DB_Query_Factory
   protected function _getNormalSQL($key, $val)
   {
     return "{$key}='{$this->escape($val)}'";
-  }
-
-  public function getParam()
-  {
-
   }
 
   public function unsetProparties()

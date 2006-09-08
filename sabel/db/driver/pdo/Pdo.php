@@ -12,13 +12,14 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
     $stmt  = null,
     $myDb  = '',
     $data  = array(),
-    $param = array();
+    $param = array(),
+    $conditions = array();
 
   public function __construct($conn, $myDb)
   {
-    $this->conn     = $conn;
-    $this->myDb     = $myDb;
-    $this->queryObj = new Sabel_DB_Query_Bind($myDb);
+    $this->conn  = $conn;
+    $this->myDb  = $myDb;
+    $this->query = new Sabel_DB_Driver_Pdo_Query($myDb);
   }
 
   public function begin($conn)
@@ -39,8 +40,8 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
   public function setUpdateSQL($table, $data)
   {
     $this->data = $data;
-    $sql = $this->queryObj->makeUpdateSQL($table, $data);
-    $this->queryObj->setBasicSQL($sql);
+    $sql = $this->query->makeUpdateSQL($table, $data);
+    $this->query->setBasicSQL($sql);
   }
 
   public function executeInsert($table, $data, $defColumn)
@@ -49,10 +50,10 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
       $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
     $this->data = $data;
-    $sql = $this->queryObj->makeInsertSQL($table, $data);
+    $sql = $this->query->makeInsertSQL($table, $data);
 
     $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $data);
-    if (!$this->stmtFlag) $this->queryObj->setBasicSQL($sql);
+    if (!$this->stmtFlag) $this->query->setBasicSQL($sql);
 
     return $this->execute();
   }
@@ -68,8 +69,6 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
         return $row['last_insert_id()'];
       case 'sqlite':
         return $this->conn->lastInsertId();
-      default:
-        return 'todo else';
     }
   }
 
@@ -86,13 +85,14 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $exist = Sabel_DB_Driver_PdoStatement::exists($this->queryObj->getSQL(), $conditions, $constraints);
+    $sql = $this->query->getSQL();
+    $exist = Sabel_DB_Driver_PdoStatement::exists($sql, $conditions, $constraints);
 
-    $result = $this->queryObj->makeConditionQuery($conditions);
+    $result = $this->query->makeConditionQuery($conditions);
     if (!$result) $exist = false;
 
     if ($constraints && !$exist)
-      $this->queryObj->makeConstraintQuery($constraints);
+      $this->query->makeConstraintQuery($constraints);
 
     $this->stmtFlag = $exist;
   }
@@ -103,10 +103,10 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
       $this->stmt = $this->conn->prepare($sql);
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_DB_Driver_PdoStatement::get();
-    } else if (is_null($this->queryObj->getSQL())) {
+    } else if (is_null($this->query->getSQL())) {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
-      $sql = $this->queryObj->getSQL();
+      $sql = $this->query->getSQL();
       if ($this->stmt = $this->conn->prepare($sql)) {
         Sabel_DB_Driver_PdoStatement::add($this->stmt);
       } else {
@@ -150,7 +150,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 
   private function makeBindParam()
   {
-    $param = $this->queryObj->getParam();
+    $param = $this->query->getParam();
     $data  = $this->data;
 
     if ($data)
@@ -167,43 +167,6 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_General
 
     $this->param = $param;
     $this->data  = array();
-    $this->queryObj->unsetProparties();
-  }
-}
-
-class Sabel_DB_Driver_PdoStatement
-{
-  private static $stmt;
-  private static $sql;
-  private static $keys = array();
-  private static $constraints = array();
-
-  public static function exists($sql, $conditions, $constraints = null)
-  {
-    $result = true;
-    $keys = array();
-    if ($conditions) $keys = array_keys($conditions);
-
-    if (self::$sql         != $sql  ||
-        self::$keys        != $keys ||
-        self::$constraints != $constraints) {
-
-      self::$sql         = $sql;
-      self::$keys        = $keys;
-      self::$constraints = $constraints;
-      $result = false;
-    }
-
-    return $result;
-  }
-
-  public static function add($stmt)
-  {
-    self::$stmt = $stmt;
-  }
-
-  public static function get()
-  {
-    return self::$stmt;
+    $this->query->unsetProparties();
   }
 }

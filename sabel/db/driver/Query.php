@@ -1,16 +1,16 @@
 <?php
 
-abstract class Sabel_DB_Query_Factory
+abstract class Sabel_DB_Driver_Query
 {
   protected
     $escMethod = '',
     $dbName    = '',
+    $sql       = array(),
     $stripFlag = false,
     $set       = false;
 
   protected abstract function makeUpdateSQL($table, $data);
   protected abstract function makeInsertSQL($table, $data);
-
   protected abstract function makeNormalSQL($key, $val);
   protected abstract function makeWhereInSQL($key, $val);
   protected abstract function makeLikeSQL($key, $val, $esc = null);
@@ -18,7 +18,6 @@ abstract class Sabel_DB_Query_Factory
   protected abstract function makeEitherSQL($key, $val);
   protected abstract function makeLess_GreaterSQL($key, $val);
 
-  public abstract function getParam();
   public abstract function unsetProparties();
 
   public function __construct($dbName, $methodName = null)
@@ -154,7 +153,7 @@ abstract class Sabel_DB_Query_Factory
 
     $count = count($condition[0]);
     if ($count !== count($condition[1]))
-      throw new Exception('Query_Factory::prepareEitherSQL() make column same as number of values.');
+      throw new Exception('Error: make column same as number of values.');
 
     $query  = '(';
 
@@ -166,5 +165,10 @@ abstract class Sabel_DB_Query_Factory
 
     $query .= ')';
     $this->setWhereQuery($query);
+  }
+
+  public function getParam()
+  {
+    return $this->param;
   }
 }

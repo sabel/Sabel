@@ -10,8 +10,8 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
 {
   public function __construct($conn)
   {
-    $this->conn     = $conn;
-    $this->queryObj = new Sabel_DB_Query_Normal('pgsql', 'pg_escape_string');
+    $this->conn  = $conn;
+    $this->query = new Sabel_DB_Driver_Native_Query('pgsql', 'pg_escape_string');
   }
 
   public function begin($conn)
@@ -47,16 +47,16 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_General
   {
     if (isset($sql)) {
       $this->result = pg_query($this->conn, $sql);
-    } else if (is_null($this->queryObj->getSQL())) {
+    } else if (is_null($this->query->getSQL())) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $this->queryObj->getSQL();
+      $sql = $this->query->getSQL();
       if (!($this->result = pg_query($this->conn, $sql))) {
         throw new Exception('pg_query execute failed: ' . $sql);
       }
     }
 
-    $this->queryObj->unsetProparties();
+    $this->query->unsetProparties();
     return true;
   }
 

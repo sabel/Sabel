@@ -8,12 +8,12 @@
  */
 class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 {
-  private   $trans        = null;
+  private $trans = null;
 
   public function __construct($conn)
   {
-    $this->conn     = $conn;
-    $this->queryObj = new Sabel_DB_Query_Normal('firebird');
+    $this->conn  = $conn;
+    $this->query = new Sabel_DB_Driver_Native_Query('firebird');
   }
 
   public function begin($conn)
@@ -56,16 +56,16 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver_General
 
     if (isset($sql)) {
       $this->result = ibase_query($conn, $sql);
-    } else if (is_null($this->queryObj->getSQL())) {
+    } else if (is_null($this->query->getSQL())) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $this->queryObj->getSQL();
+      $sql = $this->query->getSQL();
       if (!($this->result = @ibase_query($conn, $sql))) {
         throw new Exception('ibase_query execute failed: ' . $sql);
       }
     }
 
-    $this->queryObj->unsetProparties();
+    $this->query->unsetProparties();
     return true;
   }
 

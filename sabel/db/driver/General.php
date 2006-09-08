@@ -10,7 +10,7 @@ abstract class Sabel_DB_Driver_General
 {
   protected
     $conn     = null,
-    $queryObj = null,
+    $query    = null,
     $insertId = null;
 
   public abstract function begin($conn);
@@ -25,20 +25,20 @@ abstract class Sabel_DB_Driver_General
 
   public function setBasicSQL($sql)
   {
-    $this->queryObj->setBasicSQL($sql);
+    $this->query->setBasicSQL($sql);
   }
 
   public function setUpdateSQL($table, $data)
   {
-    $sql = $this->queryObj->makeUpdateSQL($table, $data);
-    $this->queryObj->setBasicSQL($sql);
+    $sql = $this->query->makeUpdateSQL($table, $data);
+    $this->query->setBasicSQL($sql);
   }
 
   public function executeInsert($table, $data, $defColumn)
   {
     $data = $this->setIdNumber($table, $data, $defColumn);
-    $sql  = $this->queryObj->makeInsertSQL($table, $data);
-    $this->queryObj->setBasicSQL($sql);
+    $sql  = $this->query->makeInsertSQL($table, $data);
+    $this->query->setBasicSQL($sql);
 
     return $this->execute();
   }
@@ -51,15 +51,15 @@ abstract class Sabel_DB_Driver_General
       array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
 
     array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
-    $this->queryObj->setBasicSQL(join('', $sql));
+    $this->query->setBasicSQL(join('', $sql));
   }
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $this->queryObj->makeConditionQuery($conditions);
+    $this->query->makeConditionQuery($conditions);
 
     if ($constraints)
-      $this->queryObj->makeConstraintQuery($constraints);
+      $this->query->makeConstraintQuery($constraints);
   }
 
   public function getLastInsertId()
