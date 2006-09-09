@@ -44,9 +44,14 @@ abstract class Sabel_DB_Mapper
     $this->driver = $this->makeDriver($connectName);
   }
 
-  protected function getDriver()
+  protected function getDriver($partKey = null, $value = null)
   {
-    return $this->driver;
+    if (isset($partKey)) {
+      $ref = new ReflectionClass(get_class($this));
+      return ($ref->hasMethod('selectDriver')) ? $this->selectDriver($partKey, $value) : $this->driver;
+    } else {
+      return $this->driver;
+    }
   }
 
   protected function makeDriver($connectName)
@@ -54,7 +59,7 @@ abstract class Sabel_DB_Mapper
     $this->connectName = $connectName;
     $conn = Sabel_DB_Connection::getConnection($connectName);
 
-    switch (Sabel_DB_Connection::getDriver($connectName)) {
+    switch (Sabel_DB_Connection::getDriverName($connectName)) {
       case 'pdo':
         $pdoDb = Sabel_DB_Connection::getDB($connectName);
         return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
@@ -129,6 +134,7 @@ abstract class Sabel_DB_Mapper
   public function getTableSchema()
   {
     $schemaClass = $this->connectName . '_' . $this->table;
+
     if (class_exists($schemaClass, false)) {
       $sc = new $schemaClass();
       $tSchema = new Sabel_DB_Schema_Table($this->table);
@@ -264,15 +270,14 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $driver = $this->getDriver();
-    return Sabel_DB_Transaction::begin($this->connectName, $driver);
+    return Sabel_DB_Transaction::begin($this->connectName, $this->driver);
   }
 
   public function commit()
   {
     Sabel_DB_Transaction::commit();
   }
-  
+
   public function rollback()
   {
     Sabel_DB_Transaction::rollback();
@@ -282,7 +287,7 @@ abstract class Sabel_DB_Mapper
   {
     $this->setCondition($param1, $param2, $param3);
 
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setBasicSQL("SELECT count(*) FROM {$this->table}");
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
@@ -332,7 +337,7 @@ abstract class Sabel_DB_Mapper
       $idColumn = $this->table . '_id';
     }
 
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setAggregateSQL($table, $idColumn, $functions);
     $driver->makeQuery(null, $this->constraints);
 
@@ -356,29 +361,30 @@ abstract class Sabel_DB_Mapper
     return $this->makeFindObject(clone($this));
   }
 
-  protected function makeFindObject($obj)
+  protected function makeFindObject($model)
   {
-    $driver = $obj->getDriver();
-    $driver->setBasicSQL("SELECT {$obj->projection} FROM {$obj->table}");
-    $driver->makeQuery($obj->conditions, $obj->constraints);
+    $driver = $model->driver;
+    $driver->setBasicSQL("SELECT {$model->projection} FROM {$model->table}");
+    $driver->makeQuery($model->conditions, $model->constraints);
 
-    $obj->selectCondition = $obj->conditions;
+    $model->selectCondition = $model->conditions;
 
     $this->tryExecute($driver);
     if ($row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC)) {
-      if ($obj->withParent) $row = $obj->selectWithParent($row);
+      if ($model->withParent) $row = $model->selectWithParent($row);
 
-      $obj->setSelectedProperty($obj, $row);
+      $model->setSelectedProperty($model, $row);
 
-      if (!is_null($myChild = $obj->getMyChildren()))
-        $obj->getDefaultChild($myChild, $obj);
+      if (!is_null($myChild = $model->getMyChildren())) {
+        $model->getDefaultChild($myChild, $model);
+      }
     } else {
-      $obj->data = $obj->conditions;
+      $model->data = $model->conditions;
     }
 
     $this->constraints = array();
     $this->conditions  = array();
-    return $obj;
+    return $model;
   }
 
   private function addSelectCondition($param1, $param2, $param3)
@@ -418,7 +424,7 @@ abstract class Sabel_DB_Mapper
 
     foreach ($relTableArray as $tables) array_push($sql, $this->getLeftJoin($tables));
 
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setBasicSQL(join('', $sql));
     $driver->makeQuery($this->conditions, $this->constraints);
 
@@ -506,30 +512,32 @@ abstract class Sabel_DB_Mapper
 
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
-    $driver = $this->getDriver();
     $this->addSelectCondition($param1, $param2, $param3);
+
+    $driver = $this->driver;
     $driver->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     return $this->getRecords($driver, $this->conditions, $this->constraints);
   }
 
-  public function getChild($child, $obj = null)
+  public function getChild($child, $model = null)
   {
-    if (is_null($obj)) $obj = $this;
+    if (is_null($model)) $model = $this;
 
-    $this->chooseMyChildConstraint($child, $obj);
+    $this->chooseMyChildConstraint($child, $model);
 
-    if (is_null($obj->childConstraints[$child]['limit']))
+    if (is_null($model->childConstraints[$child]['limit']))
       throw new Exception('Error: getChildren() must be set limit constraints');
 
-    $obj->childConditions["{$obj->table}_id"] = $obj->data[$obj->defColumn];
+    $model->childConditions["{$model->table}_id"] = $model->data[$model->defColumn];
 
-    $driver = $this->newClass($child)->getDriver();
-    $driver->setBasicSQL("SELECT {$obj->projection} FROM {$child}");
-    $conditions  = $obj->childConditions;
-    $constraints = $obj->childConstraints[$child];
+    $driver = $this->newClass($child)->getDriver($model->table, $model->data[$model->defColumn]);
+    $driver->setBasicSQL("SELECT {$model->projection} FROM {$child}");
 
-    if ($children = $obj->getRecords($driver, $conditions, $constraints, $child)) {
-      $obj->data[$child] = $children;
+    $conditions  = $model->childConditions;
+    $constraints = $model->childConstraints[$child];
+
+    if ($children = $model->getRecords($driver, $conditions, $constraints, $child)) {
+      $model->data[$child] = $children;
       return $children;
     } else {
       return false;
@@ -547,24 +555,24 @@ abstract class Sabel_DB_Mapper
     $recordObj = array();
     foreach ($rows as $row) {
       if (is_null($child)) {
-        $obj = $this->newClass($this->table);
+        $model = $this->newClass($this->table);
         $withParent = $this->withParent;
-        if ($this->childConstraints) $obj->childConstraints = $this->childConstraints;
+        if ($this->childConstraints) $model->childConstraints = $this->childConstraints;
       } else {
-        $obj = $this->newClass($child);
-        $withParent = ($this->withParent) ? true : $obj->withParent;
+        $model = $this->newClass($child);
+        $withParent = ($this->withParent) ? true : $model->withParent;
       }
 
       if ($withParent)
         $row = $this->selectWithParent($row);
 
-      $this->setSelectedProperty($obj, $row);
+      $this->setSelectedProperty($model, $row);
 
-      if (!is_null($myChild = $obj->getMyChildren())) {
-        if (isset($child)) $this->chooseMyChildConstraint($myChild, $obj);
-        $this->getDefaultChild($myChild, $obj);
+      if (!is_null($myChild = $model->getMyChildren())) {
+        if (isset($child)) $this->chooseMyChildConstraint($myChild, $model);
+        $this->getDefaultChild($myChild, $model);
       }
-      $recordObj[] = $obj;
+      $recordObj[] = $model;
     }
 
     $constraints = array();
@@ -575,38 +583,38 @@ abstract class Sabel_DB_Mapper
     return $recordObj;
   }
 
-  protected function getDefaultChild($children, $obj)
+  protected function getDefaultChild($children, $model)
   {
     if (!is_array($children)) $children = array($children);
 
     foreach ($children as $val) {
-      $this->chooseMyChildConstraint($val, $obj);
-      $obj->getChild($val, $obj);
+      $this->chooseMyChildConstraint($val, $model);
+      $model->getChild($val, $model);
     }
   }
 
-  private function chooseMyChildConstraint($child, $obj)
+  private function chooseMyChildConstraint($child, $model)
   {
     if (array_key_exists($child, $this->childConstraints)) {
       $constraints = $this->childConstraints[$child];
     } else if ($this->defChildConstraints) {
       $constraints = $this->defChildConstraints;
-    } else if (isset($obj->childConstraints[$child])) {
-      $constraints = $obj->childConstraints[$child];
+    } else if (isset($model->childConstraints[$child])) {
+      $constraints = $model->childConstraints[$child];
     } else {
-      $constraints = $this->hasDefaultChildConstraint($obj);
+      $constraints = $this->hasDefaultChildConstraint($model);
     }
 
-    $obj->setChildConstraint($child, $constraints);
-    $obj->defChildConstraints = $this->defChildConstraints;
+    $model->setChildConstraint($child, $constraints);
+    $model->defChildConstraints = $this->defChildConstraints;
   }
 
-  private function hasDefaultChildConstraint($obj)
+  private function hasDefaultChildConstraint($model)
   {
-    if ($obj->defChildConstraints) {
-      return $obj->defChildConstraints;
+    if ($model->defChildConstraints) {
+      return $model->defChildConstraints;
     } else {
-      throw new Exception('Error: constraint of child object, not found.');
+      throw new Exception('Error: limit constraint of child object, not found.');
     }
   }
 
@@ -626,20 +634,20 @@ abstract class Sabel_DB_Mapper
   {
     if ($this->getStructure() !== 'tree' && $this->isAcquired($table)) return null;
 
-    $obj = $this->newClass($table);
-    if (is_null($id)) return $obj;
+    $model = $this->newClass($table);
+    if (is_null($id)) return $model;
 
     if (!is_array($row = Sabel_DB_ParentCache::get($table . $id))) {
-      $driver = $obj->getDriver();
-      $driver->setBasicSQL("SELECT {$obj->projection} FROM {$table}");
-      $driver->makeQuery(array($obj->defColumn => $id));
+      $driver = $model->getDriver();
+      $driver->setBasicSQL("SELECT {$model->projection} FROM {$table}");
+      $driver->makeQuery(array($model->defColumn => $id));
 
       $this->tryExecute($driver);
       $row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC);
       if (!$row) {
-        $obj->selected = true;
-        $obj->id = $id;
-        return $obj;
+        $model->selected = true;
+        $model->id = $id;
+        return $model;
       }
       Sabel_DB_ParentCache::add($table . $id, $row);
     }
@@ -652,17 +660,17 @@ abstract class Sabel_DB_Mapper
         $row[$key] = $val;
       }
     }
-    $this->setSelectedProperty($obj, $row);
-    $obj->newData = array();
-    return $obj;
+    $this->setSelectedProperty($model, $row);
+    $model->newData = array();
+    return $model;
   }
 
-  private function setSelectedProperty($obj, $row)
+  private function setSelectedProperty($model, $row)
   {
-    $value = (isset($row[$obj->defColumn])) ? $row[$obj->defColumn] : null;
-    $obj->selectCondition[$obj->defColumn] = $value;
-    $obj->setProperties($row);
-    $obj->selected = true;
+    $value = (isset($row[$model->defColumn])) ? $row[$model->defColumn] : null;
+    $model->selectCondition[$model->defColumn] = $value;
+    $model->setProperties($row);
+    $model->selected = true;
   }
 
   private function isAcquired($table)
@@ -679,11 +687,11 @@ abstract class Sabel_DB_Mapper
 
     $parent = strtolower(get_class($this));
     $table  = (is_null($child)) ? $parant : $child;
-    $obj    = $this->newClass($table);
+    $model  = $this->newClass($table);
 
     $column = $parent . '_id';
-    $obj->$column = $id;
-    return $obj;
+    $model->$column = $id;
+    return $model;
   }
 
   protected function newClass($name)
@@ -733,7 +741,7 @@ abstract class Sabel_DB_Mapper
 
   public function allUpdate($data)
   {
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setUpdateSQL($this->table, $data);
     $driver->makeQuery($this->conditions);
 
@@ -743,7 +751,7 @@ abstract class Sabel_DB_Mapper
 
   protected function update()
   {
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setUpdateSQL($this->table, $this->newData);
     $driver->makeQuery($this->selectCondition);
 
@@ -792,7 +800,7 @@ abstract class Sabel_DB_Mapper
       $this->setCondition($this->defColumn, $idValue);
     }
 
-    $driver = $this->getDriver();
+    $driver = $this->driver;
     $driver->setBasicSQL("DELETE FROM {$this->table}");
     $driver->makeQuery($this->conditions, $this->constraints);
 
@@ -813,9 +821,9 @@ abstract class Sabel_DB_Mapper
     if (empty($rows)) return null;
 
     $recordObj = array();
-    $obj = $this->newClass($this->table);
+    $model = $this->newClass($this->table);
     foreach ($rows as $row) {
-      $cloned = clone($obj);
+      $cloned = clone($model);
       $cloned->setProperties($row);
       $recordObj[] = $cloned;
     }

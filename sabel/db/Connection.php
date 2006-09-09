@@ -74,7 +74,7 @@ class Sabel_DB_Connection
     return self::getValue($connectName, 'conn');
   }
 
-  public static function getDriver($connectName)
+  public static function getDriverName($connectName)
   {
     return self::getValue($connectName, 'driver');
   }
