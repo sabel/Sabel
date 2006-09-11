@@ -96,6 +96,11 @@ abstract class Sabel_Controller_Page
     return (isset($matchs[0])) ? true : false;
   }
   
+  protected function layout($layout)
+  {
+    Sabel_Template_Service::setLayout($layout);
+  }
+  
   /**
    * HTTP Redirect to another location.
    * this method will avoid "back button" problem.

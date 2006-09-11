@@ -10,9 +10,6 @@ define('SABEL', true);
  */
 class Container
 {
-  const NORMAL    = 'normal';
-  const SINGLETON = 'singleton';
-  
   protected static $instance = null;
   protected static $classes  = array();
   
@@ -37,29 +34,50 @@ class Container
   public function load($name, $mode = null)
   {
     static $instances;
-    $className = self::$classes[$name];
     
-    if (!class_exists($className)) {
-      $classNameParts = explode('_', $className);
-      for ($count = 0; $count < 10; ++$count) {
-        array_shift($classNameParts);
-        $className = implode('_', $classNameParts);
-        if (class_exists($className)) break;
-      }
-    }
+    $className = $this->resolvShortClassName(self::$classes[$name]);
     
     $rc = new ReflectionClass($className);
     $di = Sabel_Container_DI::create();
     
     if ($rc->hasMethod('__construct')) {
       $ins = $di->load($className, '__construct');
-      $injection = new Sabel_Injection_Injector($ins);
-      $injection->observe(new Sabel_Injection_Setter());
-      return $injection;
+      $instance = new Sabel_Injection_Injector($ins);
     } else {
-      $injection = new Sabel_Injection_Injector(new $className());
-      $injection->observe(new Sabel_Injection_Setter());
-      return $injection;
+      $instance = new Sabel_Injection_Injector(new $className());
+    }
+    
+    $this->setter($instance);
+    return $instance;
+  }
+  
+  protected function setter($injection)
+  {
+    $reflection = $injection->getReflection();
+    $target     = $injection->getTarget();
+    
+    $annotations = array();
+    foreach ($reflection->getProperties() as $property) {
+      $annotations[] = Sabel_Annotation_Reader::getAnnotationsByProperty($property);
+    }
+    
+    if (count($annotations) === 0) return;
+    
+    foreach ($annotations as $entries) {
+      if (count($entries) === 0) continue;
+      foreach ($entries as $annotation) {
+        if (isset($annotation['implementation'])) {
+          $className = $annotation['implementation']->getContents();
+          $ins = new Sabel_Injection_Injector(new $className());
+          $setter = 'set'. ucfirst($className);
+          if (isset($annotation['setter'])) {
+            $setter = $annotation['setter']->getContents();
+            $target->$setter($ins);
+          } else if ($reflection->hasMethod($setter)) {
+            $target->$setter($ins);
+          }
+        }
+      }
     }
   }
   
@@ -73,24 +91,18 @@ class Container
     return array_keys(self::$classes);
   }
   
-  public function oad($name, $mode = self::NORMAL)
+  protected function resolvShortClassName($className)
   {
-    static $instances;
-    
-    if ($mode === self::SINGLETON) {
-      if (isset($instances[$name])) {
-        return new Sabel_Injection_Injector($instances[$name]);
-      } else {
-        $className = self::$classes[$name];
-        $instances[$name] = $instance = new $className();
-        return new Sabel_Injection_Injector($instance);
+    if (!class_exists($className)) {
+      $classNameParts = explode('_', $className);
+      for ($count = 0; $count < count($classNameParts); ++$count) {
+        array_shift($classNameParts);
+        $className = implode('_', $classNameParts);
+        if (class_exists($className)) break;
       }
-    } else {
-      $class = self::$classes[$name];
-      if (!$class) throw new Exception('');
-      $ins = new $class();
-      return new Sabel_Injection_Injector($ins);
     }
+    
+    return $className;
   }
 }
 

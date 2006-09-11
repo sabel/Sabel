@@ -11,10 +11,11 @@ interface Sabel_Template_ServiceInterface
 
 class Sabel_Template_Service implements Sabel_Template_ServiceInterface
 {
-  private $impl;
-  private $path;
-  private $name;
-  private $contentForLayout;
+  private $impl = null;
+  private $path = '';
+  private $name = '';
+  static $layout;
+  private $contentForLayout = '';
   
   protected function __construct($entry, $templateEngine)
   {
@@ -34,6 +35,11 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   public static function create($entry, $templateEngine = null)
   {
     return new self($entry, $templateEngine);
+  }
+  
+  public static function setLayout($layout)
+  {
+    self::$layout = $layout;
   }
   
   public function changeEngine($ins)
@@ -75,11 +81,19 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   
   public function rendering()
   {
+    if (is_file($this->path . self::$layout . '.tpl')) {
+      $this->impl->assign('contentForLayout', $this->impl->retrieve());
+      echo $this->impl->load(self::$layout);
+      return true;
+    }
+    
     if (is_file($this->path . 'layout.tpl')) {
       $this->impl->assign('contentForLayout', $this->impl->retrieve());
       echo $this->impl->load('layout');
-    } else {
-      echo $this->impl->retrieve();
+      return true;
     }
+    
+    echo $this->impl->retrieve();
+    return true;
   }
 }

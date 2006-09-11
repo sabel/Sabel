@@ -13,11 +13,20 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   {
     parent::__construct($param1, $param2);
   }
+  
+  public function get($name)
+  {
+    return $this->data[$name];
+  }
 
   public function __get($key)
   {
     $this->loadSchema();
-    return new Sabel_DB_Column($this->schema[$key], $this->columns, $this->table);
+    if (is_object($this->data[$key])) {
+      return $this->data[$key];
+    } else {
+      return new Sabel_DB_Column($this->schema[$key], $this->columns, $this->table);
+    }
   }
   
   protected function loadSchema()

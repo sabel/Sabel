@@ -23,16 +23,19 @@ class ModelGenerator
 
 class ControllerGenerator
 {
-  public static function generate($name)
+  public static function generate($name, $type)
   {
     $name = strtolower($name);
     $target = "app/index/controllers/${name}.php";
     echo "generate $target \n";
     $fp = fopen($target, 'w');
     $controllerName = $name;
-    
     ob_start();
-    @include("skeleton/controller/Standerd.php");
+    if ($type === 'scaffold') {
+      @include("skeleton/controller/Scaffold.php");
+    } else {
+      @include("skeleton/controller/Standerd.php");
+    }
     $contents = ob_get_contents();
     ob_end_clean();
     $contents = str_replace('#php', '?php', $contents);
@@ -117,17 +120,18 @@ class Generator
         break;
       case 'controller':
         print "generate controller ${name}\n";
-        ControllerGenerator::generate($name);
+        ControllerGenerator::generate($name, 'standerd');
         break;
       case 'view':
         ViewGenerator::generate('lists',  $name);
         ViewGenerator::generate('show',   $name);
         ViewGenerator::generate('edit',   $name);
         ViewGenerator::generate('delete', $name);
+        ViewGenerator::generate('create', $name);
         break;
       case 'scaffold':
         ModelGenerator::generate($name);
-        ControllerGenerator::generate($name);
+        ControllerGenerator::generate($name, 'scaffold');
         ViewGenerator::generate('lists',  $name);
         ViewGenerator::generate('show',   $name);
         ViewGenerator::generate('edit',   $name);

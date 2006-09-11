@@ -31,4 +31,9 @@ class Sabel_DB_Column
   {
     return $this->columns->type;
   }
+  
+  public function __toString()
+  {
+    return $this->value;
+  }
 }
