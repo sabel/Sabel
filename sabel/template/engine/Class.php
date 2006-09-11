@@ -43,7 +43,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
     extract(Re::get(), EXTR_SKIP);
     
     ob_start();
-    include($cpath);
+    if (is_file($cpath)) include($cpath);
     
     $this->getHelperPath();
     $contents = ob_get_clean();
