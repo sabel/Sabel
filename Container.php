@@ -51,6 +51,12 @@ class Container
     return $instance;
   }
   
+  public function instanciate($name)
+  {
+    $className = $this->resolvShortClassName(self::$classes[$name]);
+    return new $className();
+  }
+  
   protected function setter($injection)
   {
     $reflection = $injection->getReflection();

@@ -13,7 +13,17 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
   
   public function __construct()
   {
-    $this->c = new Container();
+    
+  }
+  
+  public function setUp()
+  {
+    $this->c = Container::create();
+  }
+  
+  public function tearDown()
+  {
+    
   }
   
   public function testAnnotation()
@@ -21,24 +31,29 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
     $ar   = $this->c->load('sabel.annotation.Reader');
     $list = $ar->annotation('AnnotatedTestClass');
     
-    $it = $list->iterator();
-    while ($it->hasNext()) {
-      $annotation = $it->next();
-      if (is_null($annotation)) continue;
+    foreach ($list as $annotation) {
       switch ($annotation->getName()) {
+        case 'annotclass':
+          $this->assertEquals('annotclass', $annotation->getContents());
+          break;
         case 'annot':
           $this->assertEquals('test1', $annotation->getContents());
-        break;
+          break;
         case 'annot2':
           $this->assertEquals('test2', $annotation->getContents());
-        break;
+          break;
         case 'annot3':
           $this->assertEquals('test3', $annotation->getContents());
-        break;
+          break;
         case 'annot4':
           $this->assertTrue(is_array($annotation->getContents()));
-        break;
+          break;
       }
+    }
+    
+    $sameName = $ar->getAnnotationsByName('AnnotatedTestClass', 'same');
+    foreach ($sameName as $entry) {
+      $this->assertEquals('value', $entry->getContents());
     }
   }
 }
@@ -46,7 +61,7 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
 /**
  * class annotation
  *
- * @annotation class
+ * @annotclass annotclass
  */
 class AnnotatedTestClass
 {
@@ -57,6 +72,8 @@ class AnnotatedTestClass
    * @annot2   test2
    * @annot3    test3
    * @annot4      test4 elem1 elem2 elem3
+   * @same value
+   * @same value
    */
   public function testMethod()
   {

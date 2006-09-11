@@ -1,6 +1,6 @@
 <?php
 
-class Injection_Assign
+class Injections_Assign
 {
   public function when()
   {
@@ -9,9 +9,17 @@ class Injection_Assign
   
   public function after($method, $result, $reflection)
   {
-    $assignName = $reflection->getName() . '_' . $method->getName();
-    Re::set($assignName, $result);
+    $anonr = Container::create()->instanciate('sabel.annotation.Reader');
+    $anonr->annotation($reflection->getName());
+    $assigns = $anonr->getAnnotationsByName($reflection->getName(), 'assign');
+    
+    foreach ($assigns as $annot) {
+      $assign = $annot->getContents();
+      if ($method->getName() === $assign[0]) {
+        Re::set($assign[2], $result);
+      }
+    }
   }
 }
 
-Sabel_Injection_Calls::add(new Injection_Assign());
+Sabel_Injection_Calls::add(new Injections_Assign());
