@@ -242,6 +242,7 @@ class ClassCombinator
     }
     
     $this->file = fopen($path, 'w');
+    if (!$this->file) throw new Exception("{$path} can't open.");
     fwrite($this->file, '<?php ');
     $this->lineTrim = $lineTrim;
   }
