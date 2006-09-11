@@ -26,7 +26,7 @@ class ControllerGenerator
   public static function generate($name, $type)
   {
     $name = strtolower($name);
-    $target = "app/index/controllers/${name}.php";
+    $target = 'app/index/controllers/' . ucfirst($name) . '.php';
     echo "generate $target \n";
     $fp = fopen($target, 'w');
     $controllerName = $name;
