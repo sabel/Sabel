@@ -301,8 +301,7 @@ class DirectoryTraverser
     foreach ($element as $e) {
       $child = $e->getPath() .'/'. $e->getFileName();
       $entry = ltrim(str_replace($this->dir, '', $child), '/');
-      
-      if (!$e->isDot() && !preg_match('%\/\..*%', $entry) && $e->isDir()) {
+      if (!$e->isDot() && !preg_match('/^\..*/', $e->getFileName()) && $e->isDir()) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
       } else if (!$e->isDot() && !preg_match('%\/\..*%', $entry)) {
