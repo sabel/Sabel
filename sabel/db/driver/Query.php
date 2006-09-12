@@ -12,13 +12,12 @@ abstract class Sabel_DB_Driver_Query
   protected abstract function makeUpdateSQL($table, $data);
   protected abstract function makeInsertSQL($table, $data);
   protected abstract function makeNormalSQL($key, $val);
-  protected abstract function makeWhereInSQL($key, $val);
   protected abstract function makeLikeSQL($key, $val, $esc = null);
   protected abstract function makeBetweenSQL($key, $val);
   protected abstract function makeEitherSQL($key, $val);
   protected abstract function makeLess_GreaterSQL($key, $val);
+  public    abstract function unsetProparties();
 
-  public abstract function unsetProparties();
 
   public function __construct($dbName, $methodName = null)
   {
@@ -103,6 +102,13 @@ abstract class Sabel_DB_Driver_Query
     $this->setWhereQuery($key . ' IS NOT NULL');
   }
 
+  protected function makeWhereInSQL($key, $val)
+  {
+    $values = array();
+    foreach ($val as $v) $values[] = $this->escape($v);
+    $this->setWhereQuery($key . ' IN (' . join(',', $values) . ')');
+  }
+
   protected function setWhereQuery($query)
   {
     if ($this->set) {
@@ -170,5 +176,13 @@ abstract class Sabel_DB_Driver_Query
   public function getParam()
   {
     return $this->param;
+  }
+
+  protected function escape($val)
+  {
+    $escMethod = $this->escMethod;
+
+    if ($this->stripFlag) $val = stripslashes($val);
+    return (is_null($escMethod)) ? $val : $escMethod($val);
   }
 }

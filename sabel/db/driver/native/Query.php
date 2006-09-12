@@ -11,12 +11,11 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
   public function makeUpdateSQL($table, $data)
   {
     $sql = array();
-
     foreach ($data as $key => $val) {
       $val = $this->escape($val);
       array_push($sql, "{$key}='{$val}'");
     }
-    return "UPDATE {$table} SET " . join(',', $sql);
+    $this->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
   }
 
   public function makeInsertSQL($table, $data)
@@ -42,12 +41,6 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
   public function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val));
-  }
-
-  public function makeWhereInSQL($key, $val)
-  {
-    foreach ($val as $v) $this->escape($v);
-    $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
   public function makeLikeSQL($key, $val, $esc = null)
@@ -96,13 +89,5 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
   public function unsetProparties()
   {
     $this->set = false;
-  }
-
-  protected function escape($val)
-  {
-    $escMethod = $this->escMethod;
-
-    if ($this->stripFlag) $val = stripslashes($val);
-    return (is_null($escMethod)) ? $val : $escMethod($val);
   }
 }

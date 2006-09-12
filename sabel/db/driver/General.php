@@ -30,8 +30,7 @@ abstract class Sabel_DB_Driver_General
 
   public function setUpdateSQL($table, $data)
   {
-    $sql = $this->query->makeUpdateSQL($table, $data);
-    $this->query->setBasicSQL($sql);
+    $this->query->makeUpdateSQL($table, $data);
   }
 
   public function executeInsert($table, $data, $defColumn)

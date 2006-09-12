@@ -38,9 +38,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function setUpdateSQL($table, $data)
   {
-    $this->data = $data;
-    $sql = $this->query->makeUpdateSQL($table, $data);
-    $this->query->setBasicSQL($sql);
+    $this->data = $this->query->makeUpdateSQL($table, $data);
   }
 
   public function executeInsert($table, $data, $defColumn)
@@ -48,10 +46,11 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if (!isset($data[$defColumn]) && $this->myDb === 'pgsql')
       $data[$defColumn] = $this->getNextNumber($table, $defColumn);
 
-    $this->data = $data;
-    $sql = $this->query->makeInsertSQL($table, $data);
+    $results    = $this->query->makeInsertSQL($table, $data);
+    $sql        = $results[0];
+    $this->data = $results[1];
 
-    $this->stmtFlag = Sabel_DB_Driver_Pdo_Statement::exists($sql, $data);
+    $this->stmtFlag = Sabel_DB_Driver_Pdo_Statement::exists($sql, $this->data);
     if (!$this->stmtFlag) $this->query->setBasicSQL($sql);
 
     return $this->execute();

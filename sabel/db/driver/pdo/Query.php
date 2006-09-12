@@ -16,7 +16,10 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
   {
     $sql = array();
     foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
-    return "UPDATE {$table} SET " . join(',', $sql);
+    $this->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
+
+    foreach ($data as $key => $d) $data[$key] = $this->escape($d);
+    return $data;
   }
 
   public function makeInsertSQL($table, $data)
@@ -35,17 +38,13 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     array_push($sql, join(',', $values));
     array_push($sql, ')');
 
-    return join('', $sql);
+    foreach ($data as $key => $d) $data[$key] = $this->escape($d);
+    return array(join('', $sql), $data);
   }
 
   protected function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val, $key.$this->count++));
-  }
-
-  protected function makeWhereInSQL($key, $val)
-  {
-    $this->setWhereQuery($key . ' IN (' . join(',', $val) . ')');
   }
 
   protected function makeLikeSQL($key, $val, $esc = null)
@@ -55,7 +54,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     if (isset($esc)) $query .= " escape '{$esc}'";
 
     $this->setWhereQuery($query);
-    $this->param[$bindKey] = $val;
+    $this->param[$bindKey] = $this->escape($val);
   }
 
   protected function makeBetweenSQL($key, $val)
@@ -93,7 +92,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
 
   protected function _getNormalSQL($key, $val, $bindKey)
   {
-    $this->param[$bindKey] = $val;
+    $this->param[$bindKey] = $this->escape($val);
     return "{$key}=:{$bindKey}";
   }
 
