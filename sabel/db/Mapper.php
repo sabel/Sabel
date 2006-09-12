@@ -36,6 +36,7 @@ abstract class Sabel_DB_Mapper
     $newData      = array(),
     $parentTables = array(),
     $joinColCache = array(),
+    $cascadeStack = array(),
     $selected     = false,
     $withParent   = false;
 
@@ -44,14 +45,9 @@ abstract class Sabel_DB_Mapper
     $this->driver = $this->makeDriver($connectName);
   }
 
-  protected function getDriver($partKey = null, $value = null)
+  protected function getDriver()
   {
-    if (isset($partKey)) {
-      $ref = new ReflectionClass(get_class($this));
-      return ($ref->hasMethod('selectDriver')) ? $this->selectDriver($partKey, $value) : $this->driver;
-    } else {
-      return $this->driver;
-    }
+    return $this->driver;
   }
 
   protected function makeDriver($connectName)
@@ -116,7 +112,7 @@ abstract class Sabel_DB_Mapper
     $this->projection = (is_array($p)) ? implode(',', $p) : $p;
   }
 
-  public function setDefColumn($column)
+  public function setDefaultColumn($column)
   {
     $this->defColumn = $column;
   }
@@ -530,7 +526,7 @@ abstract class Sabel_DB_Mapper
 
     $model->childConditions["{$model->table}_id"] = $model->data[$model->defColumn];
 
-    $driver = $this->newClass($child)->getDriver($model->table, $model->data[$model->defColumn]);
+    $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("SELECT {$model->projection} FROM {$child}");
 
     $conditions  = $model->childConditions;
@@ -622,7 +618,7 @@ abstract class Sabel_DB_Mapper
   {
     $this->parentTables = array($this->table);
     foreach ($row as $key => $val) {
-      if (strpos($key, '_id')) {
+      if (strpos($key, '_id') !== false) {
         $table = str_replace('_id', '', $key);
         $row[$table] = $this->addParentObject($table, $val);
       }
@@ -653,7 +649,7 @@ abstract class Sabel_DB_Mapper
     }
 
     foreach ($row as $key => $val) {
-      if (strpos($key, '_id')) {
+      if (strpos($key, '_id') !== false) {
         $key = str_replace('_id', '', $key);
         $row[$key] = $this->addParentObject($key, $val);
       } else {
@@ -708,21 +704,28 @@ abstract class Sabel_DB_Mapper
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
   }
 
-  public function clearChild($child)
+  public function clearChild($child, $connectName = null)
   {
-    $parent = '';
-
     $defColumn = $this->defColumn;
     $id = (isset($this->data[$defColumn])) ? $this->data[$defColumn] : null;
 
     if (is_null($id))
       throw new Exception('Error: who is a parent? hasn\'t id value.');
 
-    $parent = strtolower(get_class($this));
-    $this->table = $child;
-    $this->remove("{$parent}_id", $id);
+    if (isset($connectName)) {
+      $model = $this->newClass($child);
+      $model->setDriver($connectName);
+      $driver = $model->getDriver();
+    } else {
+      $driver = $this->newClass($child)->getDriver();
+    }
 
-    $this->table = $parent;
+    $driver->setBasicSQL("DELETE FROM {$child}");
+    $driver->makeQuery(array("{$this->table}_id" => $id));
+
+    $this->tryExecute($driver);
+    $this->conditions  = array();
+    $this->constraints = array();
   }
 
   public function save($data = null)
@@ -778,7 +781,7 @@ abstract class Sabel_DB_Mapper
       foreach ($data as $val)
         $this->driver->executeInsert($this->table, $val, $this->defColumn);
 
-      if ($result) Sabel_DB_Transaction::commit();
+      if ($result) $this->commit();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -802,11 +805,74 @@ abstract class Sabel_DB_Mapper
 
     $driver = $this->driver;
     $driver->setBasicSQL("DELETE FROM {$this->table}");
-    $driver->makeQuery($this->conditions, $this->constraints);
+    $driver->makeQuery($this->conditions);
 
     $this->tryExecute($driver);
     $this->conditions  = array();
     $this->constraints = array();
+  }
+
+  public function cascadeDelete($id = null)
+  {
+    if (is_null($id) && !$this->is_selected())
+      throw new Exception('Error: need the value of id. or, select the object beforehand.');
+
+    $id = (isset($id)) ? $id : $this->data[$defColumn];
+
+    $chain = Cascade_Chain::get();
+    $myKey = $this->connectName . ':' . $this->table;
+
+    if (!array_key_exists($myKey, $chain)) {
+      throw new Exception('cascade chain is not found. try remove()');
+    } else {
+      $result = $this->begin();
+
+      $models = array();
+      foreach ($chain[$myKey] as $chainModel) {
+        $models[] = $this->selectChainModel($chainModel, "{$this->table}_id", $id);
+      }
+
+      foreach ($models as $children) $this->_cascade($children, $chain);
+
+      if ($result) $this->commit();
+      var_dump($this->cascadeStack);
+    }
+  }
+
+  protected function _cascade($children, &$chain)
+  {
+    $table    = $children[0]->getTableName();
+    $chainKey = $children[0]->getConnectName() . ':' . $table;
+
+    if (array_key_exists($chainKey, $chain)) {
+      $references = array();
+      foreach ($chain[$chainKey] as $chainModel) {
+        $models = array();
+        foreach ($children as $child) {
+          $models[] = $this->selectChainModel($chainModel, "{$table}_id", $child->id);
+        }
+        $references[] = $models;
+      }
+      unset($chain[$chainKey]);
+
+      foreach ($references as $models) {
+        foreach ($models as $children) {
+          $this->_cascade($children, $chain);
+        }
+      }
+    }
+  }
+
+  private function selectChainModel($chainValue, $foreign, $id)
+  {
+    $param  = explode(':', $chainValue);
+    $cName  = $param[0];
+    $tName  = $param[1];
+    $model  = $this->newClass($tName);
+    $model->setDriver($param[0]);
+
+    $this->cascadeStack[$cName.':'.$tName.':'.$id] = array($foreign => $id);
+    return $model->select($foreign, $id);
   }
 
   public function execute($sql)
