@@ -704,7 +704,7 @@ abstract class Sabel_DB_Mapper
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
   }
 
-  public function clearChild($child, $connectName = null)
+  public function clearChild($child)
   {
     $defColumn = $this->defColumn;
     $id = (isset($this->data[$defColumn])) ? $this->data[$defColumn] : null;
@@ -712,14 +712,7 @@ abstract class Sabel_DB_Mapper
     if (is_null($id))
       throw new Exception('Error: who is a parent? hasn\'t id value.');
 
-    if (isset($connectName)) {
-      $model = $this->newClass($child);
-      $model->setDriver($connectName);
-      $driver = $model->getDriver();
-    } else {
-      $driver = $this->newClass($child)->getDriver();
-    }
-
+    $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("DELETE FROM {$child}");
     $driver->makeQuery(array("{$this->table}_id" => $id));
 
@@ -829,7 +822,7 @@ abstract class Sabel_DB_Mapper
 
       $models = array();
       foreach ($chain[$myKey] as $chainModel) {
-        $models[] = $this->selectChainModel($chainModel, "{$this->table}_id", $id);
+        if ($model = $this->getChainModel($chainModel, "{$this->table}_id", $id)) $models[] = $model;
       }
 
       foreach ($models as $children) $this->_cascade($children, $chain);
@@ -849,7 +842,7 @@ abstract class Sabel_DB_Mapper
       foreach ($chain[$chainKey] as $chainModel) {
         $models = array();
         foreach ($children as $child) {
-          $models[] = $this->selectChainModel($chainModel, "{$table}_id", $child->id);
+          if ($model = $this->getChainModel($chainModel, "{$this->table}_id", $id)) $models[] = $model;
         }
         $references[] = $models;
       }
@@ -863,16 +856,19 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  private function selectChainModel($chainValue, $foreign, $id)
+  private function getChainModel($chainValue, $foreign, $id)
   {
     $param  = explode(':', $chainValue);
     $cName  = $param[0];
     $tName  = $param[1];
     $model  = $this->newClass($tName);
     $model->setDriver($param[0]);
+    $result = $model->select($foreign, $id);
 
-    $this->cascadeStack[$cName.':'.$tName.':'.$id] = array($foreign => $id);
-    return $model->select($foreign, $id);
+    if ($result)
+      $this->cascadeStack[$cName.':'.$tName.':'.$id] = array($foreign => $id);
+
+    return $result;
   }
 
   public function execute($sql)
