@@ -10,15 +10,14 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 {
   private
     $stmt  = null,
-    $myDb  = '',
     $data  = array(),
     $param = array();
 
-  public function __construct($conn, $myDb)
+  public function __construct($conn, $dbType)
   {
-    $this->conn  = $conn;
-    $this->myDb  = $myDb;
-    $this->query = new Sabel_DB_Driver_Pdo_Query($myDb);
+    $this->conn   = $conn;
+    $this->dbType = $dbType;
+    $this->query  = new Sabel_DB_Driver_Pdo_Query($dbType);
   }
 
   public function begin($conn)
@@ -43,8 +42,8 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if (!isset($data[$defColumn]) && $this->myDb === 'pgsql')
-      $data[$defColumn] = $this->getNextNumber($table, $defColumn);
+    if ($defColumn && $this->dbType === 'pgsql')
+      $data = $this->setIdNumber($table, $data, $defColumn);
 
     $results    = $this->query->makeInsertSQL($table, $data);
     $sql        = $results[0];
@@ -58,7 +57,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function getLastInsertId()
   {
-    switch ($this->myDb) {
+    switch ($this->dbType) {
       case 'pgsql':
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
@@ -67,17 +66,6 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         return $row['last_insert_id()'];
       case 'sqlite':
         return $this->conn->lastInsertId();
-    }
-  }
-
-  private function getNextNumber($table, $defColumn = null)
-  {
-    $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
-    $row = $this->fetch();
-    if (($this->lastInsertId =(int) $row[0]) === 0) {
-      throw new Exception($table . '_{$defColumn}_seq is not found.');
-    } else {
-      return $this->lastInsertId;
     }
   }
 

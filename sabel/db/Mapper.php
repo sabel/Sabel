@@ -34,11 +34,13 @@ abstract class Sabel_DB_Mapper
   protected
     $data         = array(),
     $newData      = array(),
+    $jointKey     = array(),
     $parentTables = array(),
     $joinColCache = array(),
     $cascadeStack = array(),
     $selected     = false,
-    $withParent   = false;
+    $withParent   = false,
+    $autoNumber   = true;
 
   public function setDriver($connectName)
   {
@@ -117,6 +119,11 @@ abstract class Sabel_DB_Mapper
     $this->defColumn = $column;
   }
 
+  public function setJointKey($keys)
+  {
+    $this->jointKey = (is_array($keys)) ? $keys : array($keys);
+  }
+
   public function setTableName($table)
   {
     $this->table = $table;
@@ -161,6 +168,11 @@ abstract class Sabel_DB_Mapper
   public function disableParent()
   {
     $this->withParent = false;
+  }
+
+  public function disableAutoNumber()
+  {
+    $this->autoNumber = false;
   }
 
   public function setProperties($array)
@@ -663,8 +675,13 @@ abstract class Sabel_DB_Mapper
 
   private function setSelectedProperty($model, $row)
   {
-    $value = (isset($row[$model->defColumn])) ? $row[$model->defColumn] : null;
-    $model->selectCondition[$model->defColumn] = $value;
+    if (empty($model->jointKey)) {
+      $value = (isset($row[$model->defColumn])) ? $row[$model->defColumn] : null;
+      $model->selectCondition[$model->defColumn] = $value;
+    } else {
+      foreach ($this->jointKey as $key) $model->selectCondition[$key] = $row[$key];
+    }
+
     $model->setProperties($row);
     $model->selected = true;
   }
@@ -706,11 +723,11 @@ abstract class Sabel_DB_Mapper
 
   public function clearChild($child)
   {
-    $defColumn = $this->defColumn;
-    $id = (isset($this->data[$defColumn])) ? $this->data[$defColumn] : null;
-
-    if (is_null($id))
+    if (isset($this->data[$this->defColumn])) {
+      $id = $this->data[$this->defColumn];
+    } else {
       throw new Exception('Error: who is a parent? hasn\'t id value.');
+    }
 
     $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("DELETE FROM {$child}");
@@ -758,7 +775,8 @@ abstract class Sabel_DB_Mapper
   protected function insert()
   {
     try {
-      $this->driver->executeInsert($this->table, $this->data, $this->defColumn);
+      $idColumn = ($this->autoNumber) ? $this->defColumn : false;
+      $this->driver->executeInsert($this->table, $this->data, $idColumn);
       return $this->driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());

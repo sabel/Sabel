@@ -33,12 +33,7 @@ class MysqlHelper
 {
   public function __construct()
   {
-    $dbCon = array();
-    $dbCon['dsn']  = 'mysql:host=localhost;dbname=edo';
-    $dbCon['user'] = 'root';
-    $dbCon['pass'] = '';
 
-    Sabel_DB_Connection::addConnection('user', 'pdo', $dbCon, 'edo');
   }
 
   public function initialize()
@@ -75,7 +70,7 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('user');
+    $this->set('user');
     parent::__construct($param1, $param2);
   }
 }

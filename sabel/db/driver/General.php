@@ -11,6 +11,7 @@ abstract class Sabel_DB_Driver_General
   protected
     $conn     = null,
     $query    = null,
+    $dbType   = '',
     $insertId = null;
 
   public abstract function begin($conn);
@@ -35,11 +36,27 @@ abstract class Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    $data = $this->setIdNumber($table, $data, $defColumn);
+    if ($defColumn && $this->dbType === 'pgsql' || $this->dbType === 'firebird')
+      $data = $this->setIdNumber($table, $data, $defColumn);
+
     $sql  = $this->query->makeInsertSQL($table, $data);
     $this->query->setBasicSQL($sql);
 
     return $this->execute();
+  }
+
+  protected function setIdNumber($table, $data, $defColumn)
+  {
+    if (!isset($data[$defColumn])) {
+      $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
+      $row = $this->fetch();
+      if (($this->lastInsertId =(int) $row[0]) === 0) {
+        throw new Exception("{$table}_{$defColumn}_seq is not found.");
+      } else {
+        $data[$defColumn] = $this->lastInsertId;
+      }
+    }
+    return $data;
   }
 
   public function setAggregateSQL($table, $idColumn, $functions)
@@ -56,9 +73,7 @@ abstract class Sabel_DB_Driver_General
   public function makeQuery($conditions, $constraints = null)
   {
     $this->query->makeConditionQuery($conditions);
-
-    if ($constraints)
-      $this->query->makeConstraintQuery($constraints);
+    if ($constraints) $this->query->makeConstraintQuery($constraints);
   }
 
   public function getLastInsertId()

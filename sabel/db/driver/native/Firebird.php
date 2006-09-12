@@ -12,8 +12,9 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function __construct($conn)
   {
-    $this->conn  = $conn;
-    $this->query = new Sabel_DB_Driver_Native_Query('firebird');
+    $this->conn   = $conn;
+    $this->dbType = 'firebird';
+    $this->query  = new Sabel_DB_Driver_Native_Query('firebird');
   }
 
   public function begin($conn)

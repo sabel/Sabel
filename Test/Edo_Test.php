@@ -949,6 +949,7 @@ class Test_Edo_Test extends SabelTestCase
     $data[] = array('trans1_id' => 1, 'text' => 'trans26');
 
     $trans2->multipleInsert($data);
+
     $trans1 = new Trans1(1);
     $trans1->cconst('limit', 10);
     $trans1->getChild('trans2');
@@ -1113,7 +1114,11 @@ class Customer_Order extends Mapper_Default
 
 class Tree extends Sabel_DB_Tree
 {
-
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
 }
 
 class Bridge_Base extends Sabel_DB_Bridge

@@ -27,20 +27,16 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Mapper
     parent::getChild($table);
 
     $children = array();
-    foreach ($this->$table as $bridge) $children[] = $bridge->$child;
-    $this->$child = $children;
+    if ($this->$table) {
+      foreach ($this->$table as $bridge) $children[] = $bridge->$child;
+      $this->$child = $children;
+    }
   }
 }
 
 abstract class Sabel_DB_Tree extends Sabel_DB_Mapper
 {
   protected $structure = 'tree';
-
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    parent::__construct($param1, $param2);
-  }
 
   public function getRoot()
   {

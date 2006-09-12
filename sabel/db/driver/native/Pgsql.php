@@ -10,8 +10,9 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 {
   public function __construct($conn)
   {
-    $this->conn  = $conn;
-    $this->query = new Sabel_DB_Driver_Native_Query('pgsql', 'pg_escape_string');
+    $this->conn   = $conn;
+    $this->dbType = 'pgsql';
+    $this->query  = new Sabel_DB_Driver_Native_Query('pgsql', 'pg_escape_string');
   }
 
   public function begin($conn)
@@ -27,20 +28,6 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
   public function rollback($conn)
   {
     pg_query($conn, 'ROLLBACK');
-  }
-
-  protected function setIdNumber($table, $data, $defColumn)
-  {
-    if (!isset($data[$defColumn])) {
-      $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
-      $row = $this->fetch();
-      if (($this->lastInsertId =(int) $row[0]) === 0) {
-        throw new Exception($table . '_{$defColumn}_seq is not found.');
-      } else {
-        $data[$defColumn] = $this->lastInsertId;
-      }
-    }
-    return $data;
   }
 
   public function execute($sql = null, $param = null)
