@@ -718,12 +718,6 @@ class Test_Edo_Test extends SabelTestCase
   {
     $stu = new Student(1);
     $this->assertEquals($stu->name, 'tom');
-    $this->assertEquals($stu->student_course, null);
-
-    $constraint = array('limit' => 100, 'order' => 'course_id');
-    $stu->setChildConstraint('student_course', $constraint);
-
-    $stu->getChild('course', 'student_course');
 
     $this->assertEquals((int)$stu->student_course[0]->course_id, 1);
     $this->assertEquals((int)$stu->student_course[1]->course_id, 2);
@@ -748,7 +742,7 @@ class Test_Edo_Test extends SabelTestCase
 
     foreach ($students as $student) {
       $student->setChildConstraint($constraint);
-      $student->getChild('course', 'student_course');
+      $student->getChild('course');
     }
 
     $this->assertEquals((int)$students[2]->student_course[0]->course_id, 5);
@@ -1122,12 +1116,28 @@ class Tree extends Sabel_DB_Tree
 
 }
 
-class Student extends Sabel_DB_Bridge
+class Bridge_Base extends Sabel_DB_Bridge
 {
+  protected $bridgeTable = 'student_course';
 
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
 }
 
-class Course extends Sabel_DB_Bridge
+class Student extends Bridge_Base
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->myChildren = 'course';
+    $this->cconst(array('limit' => 100, 'order' => 'course_id'));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Course extends Bridge_Base
 {
 
 }
