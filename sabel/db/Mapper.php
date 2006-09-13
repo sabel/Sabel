@@ -103,7 +103,7 @@ abstract class Sabel_DB_Mapper
   {
     return $this->selected;
   }
-  
+
   public function toArray()
   {
     return $this->data;
@@ -121,7 +121,10 @@ abstract class Sabel_DB_Mapper
 
   public function setJointKey($keys)
   {
-    $this->jointKey = (is_array($keys)) ? $keys : array($keys);
+    if (!is_array($keys))
+      throw new Exception('joint keys are not array.');
+
+    $this->jointKey = $keys;
   }
 
   public function setTableName($table)
@@ -177,7 +180,9 @@ abstract class Sabel_DB_Mapper
 
   public function setProperties($array)
   {
-    if (!is_array($array)) throw new Exception('properties Argument is not array.');
+    if (!is_array($array))
+      throw new Exception('properties Argument is not array.');
+
     foreach ($array as $key => $val) $this->$key = $val;
   }
 

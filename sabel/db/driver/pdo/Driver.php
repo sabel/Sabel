@@ -85,20 +85,22 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function execute($sql = null, $param = null)
   {
+    $getSQL = $this->query->getSQL();
+
     if (isset($sql)) {
       $this->stmt = $this->conn->prepare($sql);
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_DB_Driver_Pdo_Statement::get();
-    } else if (is_null($this->query->getSQL())) {
+    } else if (is_null($getSQL)) {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
-      $sql = $this->query->getSQL();
-      if ($this->stmt = $this->conn->prepare($sql)) {
-        Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
-      } else {
-        $error = $this->conn->errorInfo();
-        throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
-      }
+      $sql = $getSQL;
+      if ($this->stmt = $this->conn->prepare($sql)) Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
+    }
+
+    if (!$this->stmt) {
+      $error = $this->conn->errorInfo();
+      throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
     }
 
     $this->makeBindParam();
@@ -109,7 +111,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     } else {
       $param = var_export($this->param, 1);
       $error = $this->conn->errorInfo();
-      throw new Exception("Error: PDOStatement::execute(): {$sql}  [params]: {$param} {$error[2]}");
+      throw new Exception("pdo execute failed:{$sql} PARAMETERS:{$param} ERROR:{$error[2]}");
     }
   }
 

@@ -30,11 +30,6 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     mysql_query('ROLLBACK', $conn);
   }
 
-  protected function setIdNumber($table, $data, $defColumn)
-  {
-    return $data;
-  }
-
   public function getLastInsertId()
   {
     $this->execute('SELECT last_insert_id()');
@@ -44,15 +39,20 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 
   public function execute($sql = null, $param = null)
   {
+    $getSQL = $this->query->getSQL();
+
     if (isset($sql)) {
       $this->result = mysql_query($sql, $this->conn);
-    } else if (is_null($this->query->getSQL())) {
+    } else if (is_null($getSQL)) {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $this->query->getSQL();
-      if (!($this->result = mysql_query($sql, $this->conn))) {
-        throw new Exception('mysql_query execute failed: ' . $sql);
-      }
+      $sql = $getSQL;
+      $this->result = mysql_query($sql, $this->conn);
+    }
+
+    if (!$this->result) {
+      $error = mysql_error($this->conn);
+      throw new Exception("mysql_query execute failed:{$sql} ERROR:{$error}");
     }
 
     $this->query->unsetProparties();
