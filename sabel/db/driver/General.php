@@ -36,7 +36,7 @@ abstract class Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if ($defColumn && $this->dbType === 'pgsql' || $this->dbType === 'firebird')
+    if ($defColumn && ($this->dbType === 'pgsql' || $this->dbType === 'firebird'))
       $data = $this->setIdNumber($table, $data, $defColumn);
 
     $sql  = $this->query->makeInsertSQL($table, $data);

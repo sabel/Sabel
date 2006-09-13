@@ -107,8 +107,9 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
       $this->param = array();
       return true;
     } else {
-      $msg = var_export($this->param, 1);
-      throw new Exception("Error: PDOStatement::execute(): {$msg}");
+      $param = var_export($this->param, 1);
+      $error = $this->conn->errorInfo();
+      throw new Exception("Error: PDOStatement::execute(): {$sql}  [params]: {$param} {$error[2]}");
     }
   }
 

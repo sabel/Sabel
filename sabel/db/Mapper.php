@@ -679,7 +679,7 @@ abstract class Sabel_DB_Mapper
       $value = (isset($row[$model->defColumn])) ? $row[$model->defColumn] : null;
       $model->selectCondition[$model->defColumn] = $value;
     } else {
-      foreach ($this->jointKey as $key) $model->selectCondition[$key] = $row[$key];
+      foreach ($model->jointKey as $key) $model->selectCondition[$key] = $row[$key];
     }
 
     $model->setProperties($row);
