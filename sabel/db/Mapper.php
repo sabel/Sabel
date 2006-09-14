@@ -899,11 +899,9 @@ abstract class Sabel_DB_Mapper
   private function clearCascadeStack($stack)
   {
     foreach ($stack as $param => $foreign) {
-      $splited = explode(':', $param);
-      $cName   = $splited[0];
-      $tName   = $splited[1];
-      $model   = $this->newClass($tName);
-      $model->setDriver($cName);
+      $params = explode(':', $param);
+      $model  = $this->newClass($params[0]);
+      $model->setDriver($params[1]);
       $model->remove($foreign, $splited[2]);
     }
   }

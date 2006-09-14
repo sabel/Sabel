@@ -12,7 +12,6 @@ class Sabel_Controller_Front
   {
     if (ENVIRONMENT === 'development') {
       $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
-      $dbc = $conf->read(ENVIRONMENT);
     } else {
       $cache = new Sabel_Cache_Apc();
       if (!($conf = $cache->read('dbconf'))) {
@@ -37,7 +36,6 @@ class Sabel_Controller_Front
     $map->load();
     $entry = $map->find();
     
-    // @todo performance tuning here. taken 40ms
     $class = Sabel_Controller_Loader::create($entry)->load();
     $class->setEntry($entry);
     $class->setup();
