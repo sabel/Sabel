@@ -835,7 +835,7 @@ abstract class Sabel_DB_Mapper
     if (is_null($id) && !$this->is_selected())
       throw new Exception('Error: need the value of id. or, select the object beforehand.');
 
-    $id = (isset($id)) ? $id : $this->data[$defColumn];
+    $id = (isset($id)) ? $id : $this->data[$this->defColumn];
 
     $chain = Cascade_Chain::get();
     $myKey = $this->connectName . ':' . $this->table;
@@ -843,8 +843,7 @@ abstract class Sabel_DB_Mapper
     if (!array_key_exists($myKey, $chain)) {
       throw new Exception('cascade chain is not found. try remove()');
     } else {
-      $result = $this->begin();
-
+      $begin  = $this->begin();
       $models = array();
       foreach ($chain[$myKey] as $chainModel) {
         if ($model = $this->getChainModel($chainModel, "{$this->table}_id", $id)) $models[] = $model;
@@ -852,8 +851,9 @@ abstract class Sabel_DB_Mapper
 
       foreach ($models as $children) $this->_cascade($children, $chain);
 
-      if ($result) $this->commit();
-      var_dump($this->cascadeStack);
+      $this->clearCascadeStack(array_reverse($this->cascadeStack));
+      $this->remove($this->defColumn, $id);
+      if ($begin) $this->commit();
     }
   }
 
@@ -867,7 +867,7 @@ abstract class Sabel_DB_Mapper
       foreach ($chain[$chainKey] as $chainModel) {
         $models = array();
         foreach ($children as $child) {
-          if ($model = $this->getChainModel($chainModel, "{$this->table}_id", $id)) $models[] = $model;
+          if ($model = $this->getChainModel($chainModel, "{$table}_id", $child->id)) $models[] = $model;
         }
         $references[] = $models;
       }
@@ -887,13 +887,25 @@ abstract class Sabel_DB_Mapper
     $cName  = $param[0];
     $tName  = $param[1];
     $model  = $this->newClass($tName);
-    $model->setDriver($param[0]);
-    $result = $model->select($foreign, $id);
+    $model->setDriver($cName);
+    $models = $model->select($foreign, $id);
 
-    if ($result)
-      $this->cascadeStack[$cName.':'.$tName.':'.$id] = array($foreign => $id);
+    if ($models)
+      $this->cascadeStack[$cName.':'.$tName.':'.$id] = $foreign;
 
-    return $result;
+    return $models;
+  }
+
+  private function clearCascadeStack($stack)
+  {
+    foreach ($stack as $param => $foreign) {
+      $splited = explode(':', $param);
+      $cName   = $splited[0];
+      $tName   = $splited[1];
+      $model   = $this->newClass($tName);
+      $model->setDriver($cName);
+      $model->remove($foreign, $splited[2]);
+    }
   }
 
   public function execute($sql)
