@@ -142,9 +142,12 @@ abstract class Sabel_DB_Mapper
     $schemaClass = $this->connectName . '_' . $this->table;
 
     if (class_exists($schemaClass, false)) {
-      $sc = new $schemaClass();
-      $tSchema = new Sabel_DB_Schema_Table($this->table);
-      $tSchema->setColumns($sc->get());
+      if (!is_object($tSchema = Sabel_DB_SimpleCache::get($schemaClass))) {
+        $sc = new $schemaClass();
+        $tSchema = new Sabel_DB_Schema_Table($this->table);
+        $tSchema->setColumns($sc->get());
+        Sabel_DB_SimpleCache::add($schemaClass, $tSchema);
+      }
       return $tSchema;
     } else {
       $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
@@ -650,7 +653,7 @@ abstract class Sabel_DB_Mapper
     $model = $this->newClass($table);
     if (is_null($id)) return $model;
 
-    if (!is_array($row = Sabel_DB_ParentCache::get($table . $id))) {
+    if (!is_array($row = Sabel_DB_SimpleCache::get($table . $id))) {
       $driver = $model->getDriver();
       $driver->setBasicSQL("SELECT {$model->projection} FROM {$table}");
       $driver->makeQuery(array($model->defColumn => $id));
@@ -662,7 +665,7 @@ abstract class Sabel_DB_Mapper
         $model->id = $id;
         return $model;
       }
-      Sabel_DB_ParentCache::add($table . $id, $row);
+      Sabel_DB_SimpleCache::add($table . $id, $row);
     }
 
     foreach ($row as $key => $val) {
@@ -686,7 +689,6 @@ abstract class Sabel_DB_Mapper
     } else {
       foreach ($model->jointKey as $key) $model->selectCondition[$key] = $row[$key];
     }
-
     $model->setProperties($row);
     $model->selected = true;
   }
@@ -958,7 +960,7 @@ abstract class Sabel_DB_Mapper
   }
 }
 
-class Sabel_DB_ParentCache
+class Sabel_DB_SimpleCache
 {
   private static $cache = array();
 
