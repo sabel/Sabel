@@ -27,15 +27,23 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
     $cpath    = $this->getCompileFilePath();
 
     if (is_file($filepath) && (!is_readable($cpath) || filemtime($filepath) > filemtime($cpath))) {
+      /*
+      $fp = fopen($filepath, 'r');
+      $contents = array();
+      while (!feof($fp)) $contents[] = trim(fgets($fp, 8192));
+      fclose($fp);
+      $contents = implode('', $contents);
+      */
       $contents = file_get_contents($filepath);
+
       $contents = str_replace('<?',     '<?php',       $contents);
-      $contents = str_replace('<?php=', '<?php echo',  $contents);
 
       $repl = '([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*';
       $contents = preg_replace('/<\?php(n)?h'.$repl.'\?>/', '<?php$1$2= htmlspecialchars($3); $4 ?>', $contents);
       $contents = preg_replace('/<\?php(n)?v'.$repl.'\?>/', '<?php$1$2 var_dump($3); $4 ?>', $contents);
-      $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php echo nl2br($2); $3 ?>', $contents);
+      $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php= nl2br($2); $3 ?>', $contents);
 
+      $contents = str_replace('<?php=', '<?php echo',  $contents);
       $this->saveCompileFile($contents);
     }
 
