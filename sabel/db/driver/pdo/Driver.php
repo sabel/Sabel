@@ -145,16 +145,19 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if ($data)
       $param = (empty($param)) ? $data : array_merge($param, $data);
 
+    $bindParam = array();
     if ($param) {
       foreach ($param as $key => $val) {
         if (is_null($val)) continue;
 
-        $param[":{$key}"] = $val;
-        unset($param[$key]);
+        if (is_bool($val))
+          $bindParam[":{$key}"] = ($val) ? 'true' : 'false';
+
+        $bindParam[":{$key}"] = $val;
       }
     }
 
-    $this->param = $param;
+    $this->param = $bindParam;
     $this->data  = array();
     $this->query->unsetProparties();
   }

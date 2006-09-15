@@ -182,7 +182,7 @@ abstract class Sabel_DB_Driver_Query
   {
     $escMethod = $this->escMethod;
 
-    if ($this->stripFlag) $val = stripslashes($val);
+    if ($this->stripFlag && is_string($val)) $val = stripslashes($val);
     return (is_null($escMethod)) ? $val : $escMethod($val);
   }
 }
