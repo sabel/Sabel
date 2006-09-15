@@ -54,7 +54,7 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Const::ASSOC) {
+    if ($style === Sabel_DB_Const::ASSOC) {
       return pg_fetch_assoc($this->result);
     } else {
       return pg_fetch_array($this->result);

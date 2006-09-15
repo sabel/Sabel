@@ -62,7 +62,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->execute('SELECT last_insert_id()');
-        $row = $this->fetch(Sabel_DB_Driver_Const::ASSOC);
+        $row = $this->fetch(Sabel_DB_Const::ASSOC);
         return $row['last_insert_id()'];
       case 'sqlite':
         return $this->conn->lastInsertId();
@@ -117,7 +117,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Const::ASSOC) {
+    if ($style === Sabel_DB_Const::ASSOC) {
       $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
     } else {
       $result = $this->stmt->fetch(PDO::FETCH_BOTH);
@@ -128,7 +128,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function fetchAll($style = null)
   {
-    if ($style === Sabel_DB_Driver_Const::ASSOC) {
+    if ($style === Sabel_DB_Const::ASSOC) {
       $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
       $result = $this->stmt->fetchAll(PDO::FETCH_BOTH);

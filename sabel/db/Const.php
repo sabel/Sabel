@@ -1,6 +1,6 @@
 <?php
 
-interface Sabel_DB_Driver_Const
+interface Sabel_DB_Const
 {
   const EITHER = 'OR_';
   const BET    = 'BET_';

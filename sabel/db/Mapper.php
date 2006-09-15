@@ -358,7 +358,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery(null, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
     return $this->toObject($rows);
   }
 
@@ -386,7 +386,7 @@ abstract class Sabel_DB_Mapper
     $model->selectCondition = $model->conditions;
 
     $this->tryExecute($driver);
-    if ($row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC)) {
+    if ($row = $driver->fetch(Sabel_DB_Const::ASSOC)) {
       if ($model->withParent) $row = $model->selectWithParent($row);
 
       $model->setSelectedProperty($model, $row);
@@ -445,7 +445,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
 
     $recordObj = array();
     foreach ($rows as $row) {
@@ -565,7 +565,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
 
-    $rows = $driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
+    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
     if (!$rows) return false;
 
     $recordObj = array();
@@ -659,7 +659,7 @@ abstract class Sabel_DB_Mapper
       $driver->makeQuery(array($model->defColumn => $id));
 
       $this->tryExecute($driver);
-      $row = $driver->fetch(Sabel_DB_Driver_Const::ASSOC);
+      $row = $driver->fetch(Sabel_DB_Const::ASSOC);
       if (!$row) {
         $model->selected = true;
         $model->id = $id;
@@ -909,7 +909,7 @@ abstract class Sabel_DB_Mapper
   public function execute($sql)
   {
     $this->tryExecute($this->driver, $sql);
-    $rows = $this->driver->fetchAll(Sabel_DB_Driver_Const::ASSOC);
+    $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
     return $this->toObject($rows);
   }
 

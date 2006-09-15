@@ -34,17 +34,17 @@ abstract class Sabel_DB_Driver_Query
     foreach ($conditions as $key => $val) {
       if ($val[0] === '>' || $val[0] === '<') {
         $this->makeLess_GreaterSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Driver_Const::IN) !== false) {
-        $key = str_replace(Sabel_DB_Driver_Const::IN, '', $key);
+      } else if (strpos($key, Sabel_DB_Const::IN) !== false) {
+        $key = str_replace(Sabel_DB_Const::IN, '', $key);
         $this->makeWhereInSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Driver_Const::BET) !== false) {
-        $key = str_replace(Sabel_DB_Driver_Const::BET, '', $key);
+      } else if (strpos($key, Sabel_DB_Const::BET) !== false) {
+        $key = str_replace(Sabel_DB_Const::BET, '', $key);
         $this->makeBetweenSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Driver_Const::EITHER) !== false) {
-        $key = str_replace(Sabel_DB_Driver_Const::EITHER, '', $key);
+      } else if (strpos($key, Sabel_DB_Const::EITHER) !== false) {
+        $key = str_replace(Sabel_DB_Const::EITHER, '', $key);
         $this->prepareEitherSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Driver_Const::LIKE) !== false) {
-        $key = str_replace(Sabel_DB_Driver_Const::LIKE, '', $key);
+      } else if (strpos($key, Sabel_DB_Const::LIKE) !== false) {
+        $key = str_replace(Sabel_DB_Const::LIKE, '', $key);
         $this->prepareLikeSQL($key, $val);
       } else if (strtolower($val) === 'null') {
         $this->makeIsNullSQL($key);

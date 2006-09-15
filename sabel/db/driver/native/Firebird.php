@@ -76,7 +76,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Driver_Const::ASSOC) {
+    if ($style === Sabel_DB_Const::ASSOC) {
       $row = ibase_fetch_assoc($this->result);
     } else {
       $row = ibase_fetch_row($this->result);
