@@ -552,12 +552,12 @@ abstract class Sabel_DB_Mapper
     $conditions  = $model->childConditions;
     $constraints = $model->childConstraints[$child];
 
-    if ($children = $model->getRecords($driver, $conditions, $constraints, $child)) {
-      $model->data[$child] = $children;
-      return $children;
-    } else {
-      return false;
-    }
+    $children = $model->getRecords($driver, $conditions, $constraints, $child);
+    if ($children) $model->data[$child] = $children;
+
+    $this->childConditions  = array();
+    $this->childConstraints = array();
+    return $children;
   }
 
   protected function getRecords($driver, &$conditions, &$constraints = null, $child = null)
@@ -593,9 +593,6 @@ abstract class Sabel_DB_Mapper
 
     $constraints = array();
     $conditions  = array();
-    $this->childConditions  = array();
-    $this->childConstraints = array();
-
     return $recordObj;
   }
 
