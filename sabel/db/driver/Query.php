@@ -180,6 +180,8 @@ abstract class Sabel_DB_Driver_Query
 
   protected function escape($val)
   {
+    $escMethod = $this->escMethod;
+
     if (is_string($val)) {
       $val = ($this->stripFlag) ? stripslashes($val) : $val;
       $val = (is_null($escMethod)) ? $val : $escMethod($val);
