@@ -6,7 +6,7 @@ class <?php echo $className ?>
   {
     $sql = array();
 
-<?php foreach ($schema as $line) : ?>
+<?php foreach ($colArray as $line) : ?>
     <?php echo $line ?>
 <?php endforeach ?>
 

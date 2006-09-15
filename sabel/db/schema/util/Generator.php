@@ -207,15 +207,16 @@ class ParsedSQL_Maker
       array_push($info, "'notNull' => {$notNull}, ");
       array_push($info, "'primary' => {$primary}, ");
 
-      if (is_null($column->default)) {
+      $def = $column->default;
+      if (is_null($def)) {
         array_push($info, "'default' => null");
+      } else if (is_numeric($def)) {
+        array_push($info, "'default' => {$def}");
+      } else if (is_bool($def)) {
+        $def = ($def) ? 'true' : 'false';
+        array_push($info, "'default' => {$def}");
       } else {
-        $def = $column->default;
-        if (is_int($def) || is_string($def) && ctype_digit($def)) {
-          array_push($info, "'default' => {$def}");
-        } else {
-          array_push($info, "'default' => '{$def}'");
-        }
+        array_push($info, "'default' => '{$def}'");
       }
 
       array_push($info, ");\n");
