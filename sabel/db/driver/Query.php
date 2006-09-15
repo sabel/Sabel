@@ -180,9 +180,17 @@ abstract class Sabel_DB_Driver_Query
 
   protected function escape($val)
   {
-    $escMethod = $this->escMethod;
-
-    if ($this->stripFlag && is_string($val)) $val = stripslashes($val);
-    return (is_null($escMethod)) ? $val : $escMethod($val);
+    if (is_string($val)) {
+      $val = ($this->stripFlag) ? stripslashes($val) : $val;
+      $val = (is_null($escMethod)) ? $val : $escMethod($val);
+    } else if (is_bool($val)) {
+      $db = $this->dbName;
+      if ($db === 'pgsql' || $db === 'sqlite') {
+        $val = ($val) ? 'true' : 'false';
+      } else if ($db === 'mysql') {
+        $val = ($val) ? 1 : 0;
+      }
+    }
+    return $val;
   }
 }
