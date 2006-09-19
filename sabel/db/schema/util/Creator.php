@@ -54,12 +54,10 @@ class Schema_Util_Creator
 
     Sabel_DB_Schema_TypeSetter::send($vo, $type);
 
-    $auto    = (strpos($rem, 'auto_increment') !== false);
-    $seq     = (strpos($rem, 'serial') !== false);
-    $intpri  = (strpos($rem, 'integer primary key') !== false);
-    $intpri2 = (strpos($rem, 'integer not null primary key') !== false);
+    $pri  = (strpos($rem, 'integer primary key') !== false);
+    $pri2 = (strpos($rem, 'integer not null primary key') !== false);
 
-    $vo->increment = ($auto || $seq || $intpri || $intpri2);
+    $vo->increment = ($pri || $pri2);
   }
 
   protected function setNotNull($vo)

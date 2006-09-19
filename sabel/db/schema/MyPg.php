@@ -74,7 +74,7 @@ class Sabel_DB_Schema_MyPg
 
     Sabel_DB_Schema_TypeSetter::send($co, $columnRecord['data_type']);
 
-    if ($co->type === Sabel_DB_Schema_Type::STRING)
+    if ($co->type === Sabel_DB_Const::STRING)
       $this->addStringLength($co, $columnRecord);
 
     return $co;

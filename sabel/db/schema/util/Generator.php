@@ -192,10 +192,10 @@ class ParsedSQL_Maker
       array_push($info, '$sql[' . "'{$column->name}'] = array(");
       array_push($info, "'type' => '{$column->type}', ");
 
-      if ($column->type === Sabel_DB_Schema_Type::INT) {
+      if ($column->type === Sabel_DB_Const::INT) {
         array_push($info, "'max' => {$column->max}, ");
         array_push($info, "'min' => {$column->min}, ");
-      } else if ($column->type === Sabel_DB_Schema_Type::STRING) {
+      } else if ($column->type === Sabel_DB_Const::STRING) {
         array_push($info, "'max' => {$column->max}, ");
       }
 

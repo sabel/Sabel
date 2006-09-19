@@ -50,10 +50,10 @@ class Sabel_DB_Schema_Table
       $vo->name = $cName;
       $vo->type = $values['type'];
 
-      if ($vo->type === Sabel_DB_Schema_Type::INT) {
+      if ($vo->type === Sabel_DB_Const::INT) {
         $vo->max = $values['max'];
         $vo->min = $values['min'];
-      } else if ($vo->type === Sabel_DB_Schema_Type::STRING) {
+      } else if ($vo->type === Sabel_DB_Const::STRING) {
         $vo->max = $values['max'];
       }
 

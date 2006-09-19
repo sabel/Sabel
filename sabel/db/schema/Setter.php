@@ -5,11 +5,11 @@ class Sabel_DB_Schema_TypeSetter
   public static function send($co, $type)
   {
     if ($type === 'boolean' || $type === 'bool') {
-      $co->type = Sabel_DB_Schema_Type::BOOL;
+      $co->type = Sabel_DB_Const::BOOL;
     } else if ($type === 'date') {
-      $co->type = Sabel_DB_Schema_Type::DATE;
+      $co->type = Sabel_DB_Const::DATE;
     } else if ($type === 'time') {
-      $co->type = Sabel_DB_Schema_Type::TIME;
+      $co->type = Sabel_DB_Const::TIME;
     } else {
       $tInt   = new Sabel_DB_Schema_TypeInt();
       $tStr   = new Sabel_DB_Schema_TypeStr();
