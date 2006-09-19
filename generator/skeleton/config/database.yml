@@ -1,23 +1,26 @@
 production:
-  driver: mysql
-  schema: default
-  host: localhost
-  database: default
-  user: root
-  password: 
+  default:
+    driver: mysql
+    schema: default
+    host: localhost
+    database: default
+    user: root
+    password:
 
 test:
-  driver: mysql
-  schema: default
-  host: localhost
-  database: default
-  user: root
-  password:
+  default:
+    driver: mysql
+    schema: default
+    host: localhost
+    database: default
+    user: root
+    password:
 
 development:
-  driver: mysql
-  schema: default
-  host: localhost
-  database: default
-  user: root
-  password:
+  default:
+    driver: mysql
+    schema: default
+    host: localhost
+    database: default
+    user: root
+    password:

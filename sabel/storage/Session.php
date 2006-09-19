@@ -1,10 +1,18 @@
 <?php
 
-class Sabel_Storage_Session
+class Sabel_Storage_Sessionold
 {
+  private static $instance = null;
+  
   public function __construct()
   {
     session_start();
+  }
+  
+  public static function create()
+  {
+    if (!self::$instance) self::$instance = new self();
+    return self::$instance;
   }
 
   public function clear()
@@ -19,6 +27,11 @@ class Sabel_Storage_Session
       }
     }
     return $deleted;
+  }
+  
+  public function has($key)
+  {
+    return isset($_SESSION[$key]);
   }
 
   public function read($key)
