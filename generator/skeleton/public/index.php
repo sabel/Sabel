@@ -20,46 +20,11 @@ if (!defined('ENVIRONMENT')) {
   exit;
 }
 
-require_once('Sabel/Container.php');
-$c = Container::create();
-
-$dt = new DirectoryTraverser();
 define('SABEL_CLASSES', RUN_BASE . '/cache/sabel_classes.php');
-if (ENVIRONMENT !== 'development' && is_readable(SABEL_CLASSES)) {
-  require_once(SABEL_CLASSES);
-  $dt->visit(new SabelClassRegister($c));
-  $dt->traverse();
-} else {
-  $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
-  $dt->visit(new SabelClassRegister($c));
-  $dt->traverse();
-  require_once(SABEL_CLASSES);
-}
-unset($dt);
+define('APP_CACHE',     RUN_BASE . '/cache/app.php');
+define('LIB_CACHE',     RUN_BASE . '/cache/lib.php');
+define('SCM_CACHE',     RUN_BASE . '/cache/schema.php');
+define('INJ_CACHE',     RUN_BASE . '/cache/injection.php');
 
-$dt = new DirectoryTraverser(RUN_BASE);
-define('APP_CACHE', RUN_BASE . '/cache/app.php');
-define('LIB_CACHE', RUN_BASE . '/cache/lib.php');
-define('SCM_CACHE', RUN_BASE . '/cache/schema.php');
-define('INJ_CACHE', RUN_BASE . '/cache/injection.php');
-if (ENVIRONMENT !== 'development' && is_readable(APP_CACHE)) {
-  require_once(APP_CACHE);
-  require_once(LIB_CACHE);
-  require_once(SCM_CACHE);
-  require_once(INJ_CACHE);
-  $dt->visit(new AppClassRegister($c));
-  $dt->traverse();
-} else {
-  $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
-  $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
-  $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
-  $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
-  $dt->visit(new AppClassRegister($c));
-  $dt->traverse();
-  require_once(APP_CACHE);
-  require_once(LIB_CACHE);
-  require_once(SCM_CACHE);
-  require_once(INJ_CACHE);
-}
-
-create('sabel.controller.Front')->ignition();
+require_once('Sabel/Container.php');
+Container::initializeApplication()->load('sabel.controller.Front')->ignition();

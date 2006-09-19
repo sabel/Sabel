@@ -119,6 +119,64 @@ class Container
   public function setClasses($classes){
     self::$classes = $classes;
   }
+  
+  public static function initializeApplication()
+  {
+    $s = Sabel_Storage_Session::create();
+    if (ENVIRONMENT === 'development') {
+      $c = Container::create();
+      $dt = new DirectoryTraverser();
+      $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+      $dt->visit(new SabelClassRegister($c));
+      $dt->traverse();
+      unset($dt);
+      $dt = new DirectoryTraverser(RUN_BASE);
+      $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
+      $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
+      $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+      $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+      $dt->visit(new AppClassRegister($c));
+      $dt->traverse();
+      require_once(SABEL_CLASSES);
+      require_once(APP_CACHE);
+      require_once(LIB_CACHE);
+      require_once(SCM_CACHE);
+      require_once(INJ_CACHE);
+      $s->write('container', $c->getClasses());
+    } else {
+      if ($s->has('container')) {
+        $c = Container::create();
+        $c->setClasses($s->read('container'));
+        require_once(SABEL_CLASSES);
+        require_once(APP_CACHE);
+        require_once(LIB_CACHE);
+        require_once(SCM_CACHE);
+        require_once(INJ_CACHE);
+      } else {
+        $c = Container::create();
+        $dt = new DirectoryTraverser();
+        $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+        $dt->visit(new SabelClassRegister($c));
+        $dt->traverse();
+        unset($dt);
+        $dt = new DirectoryTraverser(RUN_BASE);
+        $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
+        $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
+        $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+        $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+        $dt->visit(new AppClassRegister($c));
+        $dt->traverse();
+        require_once(SABEL_CLASSES);
+        require_once(APP_CACHE);
+        require_once(LIB_CACHE);
+        require_once(SCM_CACHE);
+        require_once(INJ_CACHE);
+        $s->write('container', $c->getClasses());
+      }
+    }
+    
+    return $c;
+  }
 }
 
 interface ClassNameMappingResolver
