@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Storage_Sessionold
+class Sabel_Storage_Session
 {
   private static $instance = null;
   
