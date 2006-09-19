@@ -25,7 +25,7 @@ class Container
   {
     if (!is_null($path)) {
       $d2c = new DirectoryPathToClassNameResolver();
-      self::$classes[$key] = $d2c->resolv($path);
+      self::$classes[$key] = NameResolver::resolvDirectoryPathToClassName($path);
     }
     
     self::$classes[$key] = $name;
@@ -122,7 +122,6 @@ class Container
   
   public static function initializeApplication()
   {
-    $s = Sabel_Storage_Session::create();
     if (ENVIRONMENT === 'development') {
       $c = Container::create();
       $dt = new DirectoryTraverser();
@@ -142,11 +141,15 @@ class Container
       require_once(LIB_CACHE);
       require_once(SCM_CACHE);
       require_once(INJ_CACHE);
-      $s->write('container', $c->getClasses());
+      
+      $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
+      fputs($file, serialize($c->getClasses()));
+      fclose($file);
     } else {
-      if ($s->has('container')) {
+      $file = fopen(RUN_BASE . '/cache/container.cache', 'r');
+      if ($file) {
         $c = Container::create();
-        $c->setClasses($s->read('container'));
+        $c->setClasses(unserialize(fgets($file)));
         require_once(SABEL_CLASSES);
         require_once(APP_CACHE);
         require_once(LIB_CACHE);
@@ -171,7 +174,8 @@ class Container
         require_once(LIB_CACHE);
         require_once(SCM_CACHE);
         require_once(INJ_CACHE);
-        $s->write('container', $c->getClasses());
+        
+        fputs($file, serialize($c->getClasses()));
       }
     }
     
@@ -179,14 +183,9 @@ class Container
   }
 }
 
-interface ClassNameMappingResolver
+class NameResolver
 {
-  public function resolv($target);
-}
-
-class ClassNameToNameSpaceResolver implements ClassNameMappingResolver
-{
-  public function resolv($target)
+  public static function resolvClassNameToNameSpace($target)
   {
     $parts = explode('_', $target);
     
@@ -197,21 +196,8 @@ class ClassNameToNameSpaceResolver implements ClassNameMappingResolver
     array_push($parts, $className);
     return implode('.', $parts);
   }
-}
-
-class DirectoryPathToNameSpaceResolver implements ClassNameMappingResolver
-{
-  public function resolv($target)
-  {
-    $d2c = new DirectoryPathToClassNameResolver();
-    $c2n = new ClassNameToNameSpaceResolver();
-    return $c2n->resolv($d2c->resolv($target));
-  }
-}
-
-class DirectoryPathToClassNameResolver implements ClassNameMappingResolver
-{
-  public function resolv($target)
+  
+  public static function resolvDirectoryPathToClassName($target)
   {
     $parts = explode('/', $target);
     $buf = '';
@@ -229,9 +215,18 @@ class DirectoryPathToClassNameResolver implements ClassNameMappingResolver
     
     return $buf;
   }
+  
+  public static function resolvDirectoryPathToNameSpace($target)
+  {
+    $className = self::resolvDirectoryPathToClassName($target);
+    return self::resolvClassNameToNameSpace($className);
+  }
 }
 
-
+/**
+ * Register application classes from application directories.
+ *
+ */
 class AppClassRegister
 {
   protected $container;
@@ -274,6 +269,10 @@ class AppClassRegister
   }
 }
 
+/**
+ * Register sabel specific classes from sabel directories.
+ *
+ */
 class SabelClassRegister
 {
   protected $container;
@@ -287,12 +286,12 @@ class SabelClassRegister
   
   public function accept($value, $type, $child = null)
   {
-    $d2c = new DirectoryPathToClassNameResolver();
-    $resolver = new DirectoryPathToNameSpaceResolver();
     $parts = explode('/', $value);
     
     if ($parts[0] === $this->strictDirectory) {
-      $this->container->regist($resolver->resolv($value), $d2c->resolv($value));
+      $className = NameResolver::resolvDirectoryPathToClassName($value);
+      $namespaceName = NameResolver::resolvDirectoryPathToNameSpace($value);
+      $this->container->regist($namespaceName, $className);
     }
   }
 }
@@ -407,8 +406,6 @@ if (function_exists('singleton')) {
     return Container::create()->load($classpath, 'singleton');
   }
 }
-
-// <?php
 
 class Sabel_Storage_Session
 {
