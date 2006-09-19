@@ -146,7 +146,7 @@ class Container
       fputs($file, serialize($c->getClasses()));
       fclose($file);
     } else {
-      $file = fopen(RUN_BASE . '/cache/container.cache', 'r');
+      $file = @fopen(RUN_BASE . '/cache/container.cache', 'r');
       if ($file) {
         $c = Container::create();
         $c->setClasses(unserialize(fgets($file)));
@@ -156,6 +156,7 @@ class Container
         require_once(SCM_CACHE);
         require_once(INJ_CACHE);
       } else {
+        $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
         $c = Container::create();
         $dt = new DirectoryTraverser();
         $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
