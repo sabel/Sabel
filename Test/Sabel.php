@@ -1,11 +1,24 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
 class Test_Sabel extends PHPUnit2_Framework_TestCase
 {
-  public function testSabelWeb()
+  public static function suite()
   {
-    $fc = new Sabel_Controller_Front();
+    return new PHPUnit2_Framework_TestSuite("Test_Sabel");
+  }
+  
+  public function setUp()
+  {
+    
+  }
+  
+  public function tearDown()
+  {
+    
+  }
+  
+  public function testSabel()
+  {
+    $c = Container::create();
   }
 }

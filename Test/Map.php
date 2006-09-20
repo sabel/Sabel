@@ -17,7 +17,8 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function __construct()
   {
-    $this->map = new Sabel_Controller_Map('/Test/data/map.yml');
+    $this->map = new Sabel_Controller_Map();
+    $this->map->setConfigPath('Test/data/map.yml');
     $this->map->load();
   }
   

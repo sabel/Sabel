@@ -22,6 +22,11 @@ class Sabel_Controller_Map implements Iterator
     $this->path = RUN_BASE . $path;
   }
   
+  public function setConfigPath($path)
+  {
+    $this->path = $path;
+  }
+  
   public function load()
   {
     $cache = new Sabel_Cache_Apc();

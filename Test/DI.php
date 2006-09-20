@@ -58,9 +58,10 @@ class Test_DI extends PHPUnit2_Framework_TestCase
   
   public function testDirectoryPathToClassNameResolver()
   {
-    $r = new DirectoryPathToClassNameResolver();
-    $this->assertEquals('Sabel_Core_Router', $r->resolv('sabel/core/Router.php'));
-    $this->assertEquals('Core_Router', $r->resolv('core/Router.php'));
+    $this->assertEquals('Sabel_Core_Router',
+                        NameResolver::resolvDirectoryPathToClassName('sabel/core/Router.php'));
+    $this->assertEquals('Core_Router',
+                        NameResolver::resolvDirectoryPathToClassName('core/Router.php'));
   }
 }
 
