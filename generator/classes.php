@@ -17,11 +17,13 @@ class SabelDirectoryAndFileCreator
       if (is_file($element)) {
         $this->printMessage("${element} already exists.");
       } else {
-        $this->printMessage("create ${element}");
-        fwrite(fopen($element, 'w'), file_get_contents($child));
-        if ($element == 'logs/sabel.log') {
-          @chown('logs/sabel.log', 'www');
-          chmod('logs/sabel.log', 0777);
+        if (!preg_match('%\/\..*%', $element)) {
+          $this->printMessage("create ${element}");
+          fwrite(fopen($element, 'w'), file_get_contents($child));
+          if ($element == 'logs/sabel.log') {
+            @chown('logs/sabel.log', 'www');
+            chmod('logs/sabel.log', 0777);
+          }
         }
       }
     }
