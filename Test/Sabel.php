@@ -32,6 +32,8 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function testSabel()
   {
-    Container::initializeApplication();
+    $c = Container::initializeApplication();
+    $fcontroller = $c->load('sabel.controller.Front');
+    $this->assertTrue(is_object($fcontroller));
   }
 }
