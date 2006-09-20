@@ -785,43 +785,63 @@ class Test_Edo_Test extends SabelTestCase
     $this->assertEquals($cs[2]->student[2]->name, 'marcy');
     $this->assertEquals($cs[2]->student[3]->name, 'ameri');
   }
-  /*
+
   public function testJoinSelect()
   {
-    $users = new Users();
-    $relList = array('child' => 'bbs', 'parent' => 'status');
-    $users->sconst('order', 'users.id, bbs.title');
-    $res = $users->selectJoin($relList);
+    $cols = array();
+    $cols['test']  = array('id', 'name', 'blood', 'test2_id');
+    $cols['test2'] = array('id', 'name', 'test3_id');
+    $cols['test3'] = array('id', 'name');
 
-    $this->assertEquals($res[0]->name, 'Tarou');
-    $this->assertEquals($res[5]->name, 'Hanako');
-    $this->assertEquals($res[10]->name, 'Maruo');
-    $this->assertEquals($res[15]->name, 'Atsuko');
+    $pair = array('test:test2', 'test2:test3');
 
-    $this->assertEquals($res[0]->status_id, $res[0]->status->id);
-    $this->assertEquals($res[5]->status_id, $res[5]->status->id);
-    $this->assertEquals($res[10]->status_id, $res[10]->status->id);
-    $this->assertEquals($res[15]->status_id, $res[15]->status->id);
+    $test = new Test();
+    $test->sconst('order', 'test.id');
+    $res  = $test->selectJoin($pair, $cols);
 
-    $this->assertEquals($res[0]->bbs->title, 'title11');
-    $this->assertEquals($res[1]->bbs->title, 'title12');
-    $this->assertEquals($res[2]->bbs->title, 'title13');
+    $test1 = $res[0];
+    $test2 = $res[1];
+    $test3 = $res[2];
+    $test4 = $res[3];
+    $test5 = $res[4];
+    $test6 = $res[5];
 
-    $users = new Users();
-    $users->sconst('order', 'id');
-    $res = $users->select(Sabel_DB_Mapper::WITH_PARENT);
+    $this->assertEquals((int)$test1->id, 1);
+    $this->assertEquals((int)$test2->id, 2);
+    $this->assertEquals((int)$test3->id, 3);
+    $this->assertEquals((int)$test4->id, 4);
+    $this->assertEquals((int)$test5->id, 5);
+    $this->assertEquals((int)$test6->id, 6);
 
-    foreach ($res as $user) {
-      $user->setChildConstraint('limit', 10);
-      $user->getChild('bbs');
-    }
-    $this->assertEquals($res[0]->status_id, $res[0]->status->id);
-    $this->assertEquals($res[0]->bbs[0]->title, 'title11');
-    $this->assertEquals($res[0]->bbs[1]->title, 'title12');
-    $this->assertEquals($res[1]->bbs[0]->title, 'title21');
-    $this->assertEquals($res[1]->bbs[1]->title, 'title22');
+    $this->assertEquals($test1->name, 'tanaka');
+    $this->assertEquals($test2->name, 'yo_shida');
+    $this->assertEquals($test3->name, 'uchida');
+    $this->assertEquals($test4->name, 'ueda');
+    $this->assertEquals($test5->name, 'seki');
+    $this->assertEquals($test6->name, 'uchida');
+
+    $this->assertEquals((int)$test1->test2->id, 1);
+    $this->assertEquals((int)$test2->test2->id, 2);
+    $this->assertEquals((int)$test3->test2->id, 1);
+    $this->assertEquals((int)$test4->test2->id, 3);
+    $this->assertNull($test5->test2->id);
+    $this->assertEquals((int)$test6->test2->id, 1);
+
+    $this->assertEquals((int)$test1->test2->test3->id, 2);
+    $this->assertEquals((int)$test2->test2->test3->id, 1);
+    $this->assertEquals((int)$test3->test2->test3->id, 2);
+    $this->assertNull($test4->test2->test3->id, 3);
+    $this->assertNull($test5->test2->test3->id, 3);
+    $this->assertEquals((int)$test6->test2->test3->id, 2);
+
+    $this->assertEquals($test1->test2->test3->name, 'test32');
+    $this->assertEquals($test2->test2->test3->name, 'test31');
+    $this->assertEquals($test3->test2->test3->name, 'test32');
+    $this->assertNull($test4->test2->test3->name);
+    $this->assertNull($test5->test2->test3->name);
+    $this->assertEquals($test6->test2->test3->name, 'test32');
   }
-  */
+
   public function testOrder()
   {
     $ol = new Order_Line();
