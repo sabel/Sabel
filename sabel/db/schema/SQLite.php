@@ -5,8 +5,6 @@ class Sabel_DB_Schema_SQLite
   const TABLE_LIST    = "SELECT name FROM sqlite_master WHERE type = 'table'";
   const TABLE_COLUMNS = "SELECT * FROM sqlite_master WHERE name = '%s'";
 
-  protected $constraint = '';
-
   public function __construct($connectName, $schema = null)
   {
     $this->connectName = $connectName;

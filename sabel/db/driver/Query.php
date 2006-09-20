@@ -173,11 +173,6 @@ abstract class Sabel_DB_Driver_Query
     $this->setWhereQuery($query);
   }
 
-  public function getParam()
-  {
-    return $this->param;
-  }
-
   protected function escape($val)
   {
     $escMethod = $this->escMethod;
@@ -189,7 +184,7 @@ abstract class Sabel_DB_Driver_Query
       $db = $this->dbName;
       if ($db === 'pgsql' || $db === 'sqlite') {
         $val = ($val) ? 'true' : 'false';
-      } else if ($db === 'mysql') {
+      } else if ($db === 'mysql' || $db === 'firebird') {
         $val = ($val) ? 1 : 0;
       }
     }

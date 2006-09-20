@@ -16,7 +16,6 @@ require_once 'Sabel/sabel/db/Transaction.php';
 require_once 'Sabel/sabel/db/Mapper.php';
 require_once 'Sabel/sabel/db/BaseClasses.php';
 
-require_once 'Sabel/sabel/db/schema/Type.php';
 require_once 'Sabel/sabel/db/schema/Types.php';
 require_once 'Sabel/sabel/db/schema/Setter.php';
 require_once 'Sabel/sabel/db/schema/Table.php';
@@ -33,6 +32,69 @@ require_once 'Sabel/sabel/config/Yaml.php';
 require_once 'Sabel/sabel/cache/Apc.php';
 require_once 'Sabel/sabel/Classes.php';
 */
+class ModelClass_Writer
+{
+  private static $models     = array();
+  private static $tIncrement = array();
+  private static $tPrimary   = array();
+
+  public static function add($connectName, $tName)
+  {
+    self::$models[$connectName][] = $tName;
+  }
+
+  public static function addInc($connectName, $tName, $increment)
+  {
+    self::$tIncrement[$connectName][$tName] = $increment;
+  }
+
+  public static function addPri($connectName, $tName, $primary)
+  {
+    self::$tPrimary[$connectName][$tName] = $primary;
+  }
+
+  public static function show()
+  {
+    $dirPath = Schema_Generator::$modelsDir;
+    if (is_null($dirPath)) return null;
+
+    foreach (self::$models as $connectName => $tArray) {
+      $tables = array_values($tArray);
+
+      foreach ($tables as $table) {
+        $class  = ucfirst($table);
+        $target = "{$dirPath}/{$class}.php";
+
+        echo "generate Model {$target}\n";
+
+        $fp = fopen($target, 'w');
+        fwrite($fp, "<?php\n\n");
+        fwrite($fp, "class {$class} extends Sabel_DB_Mapper\n{\n");
+
+        if (!self::$tIncrement[$connectName][$table]) {
+          fwrite($fp, '  protected $autoNumber = false;' . "\n");
+        }
+
+        $primary = self::$tPrimary[$connectName];
+        if (is_array($primary) && array_key_exists($table, $primary)) {
+          $pri = $primary[$table];
+          fwrite($fp, '  protected $jointKey = array(' . "'{$pri[0]}'");
+          for ($i = 1; $i < count($pri); $i++) fwrite($fp, ", '{$pri[$i]}'");
+          fwrite($fp, ");\n");
+        }
+
+        fwrite($fp, "\n");
+        fwrite($fp, '  public function __construct($param1 = null, $param2 = null)');
+        fwrite($fp, "\n  {\n");
+        fwrite($fp, '    $this->setDriver(' . "'{$connectName}');\n");
+        fwrite($fp, '    parent::__construct($param1, $param2);' . "\n");
+        fwrite($fp, "  }\n}");
+        fclose($fp);
+      }
+    }
+  }
+}
+
 class Cascade_Writer
 {
   private static $references  = array();
@@ -43,7 +105,7 @@ class Cascade_Writer
     self::$foreignKeys[$connectName][$table][] = $key;
   }
 
-  public static function write($dirPath)
+  public static function write()
   {
     foreach (self::$foreignKeys as $connectName => $tables) {
       foreach ($tables as $tName => $foreignKeys) {
@@ -66,15 +128,14 @@ class Cascade_Writer
       }
     }
 
-    $target = "{$dirPath}/Cascade_Chain.php";
+    $dirPath = Schema_Generator::$schemaDir;
+    $target  = "{$dirPath}/Cascade_Chain.php";
     echo "generate Cascade Chain\n\n";
     $fp = fopen($target, 'w');
 
     fwrite($fp, "<?php\n\n");
-    fwrite($fp, "class Cascade_Chain\n");
-    fwrite($fp, "{\n");
-    fwrite($fp, "  public function get()\n");
-    fwrite($fp, "  {\n");
+    fwrite($fp, "class Cascade_Chain\n{\n");
+    fwrite($fp, "  public function get()\n  {\n");
     fwrite($fp, '    $chains = array();' . "\n\n");
 
     foreach ($chain as $parent => $children) {
@@ -92,9 +153,7 @@ class Cascade_Writer
     }
 
     fwrite($fp, "\n");
-    fwrite($fp, '    return $chains;' . "\n");
-    fwrite($fp, "  }\n");
-    fwrite($fp, "}");
+    fwrite($fp, '    return $chains;' . "\n  }\n}");
     fclose($fp);
   }
 
@@ -126,18 +185,17 @@ class TableList_Writer
     return self::$tableList[$connectName];
   }
 
-  public static function write($connectName, $dirPath)
+  public static function write($connectName)
   {
+    $dirPath   = Schema_Generator::$schemaDir;
     $className = ucfirst($connectName) . '_TableList';
     $target = "{$dirPath}/{$className}.php";
-    echo "generate Table List: {$connectName} \n";
+    echo "generate Table List: {$connectName}\n\n";
     $fp = fopen($target, 'w');
 
     fwrite($fp, "<?php\n\n");
-    fwrite($fp, "class {$className}\n");
-    fwrite($fp, "{\n");
-    fwrite($fp, "  public function get()\n");
-    fwrite($fp, "  {\n");
+    fwrite($fp, "class {$className}\n{\n");
+    fwrite($fp, "  public function get()\n  {\n");
     fwrite($fp, '    $list = array(');
 
     $tableList = self::$tableList[$connectName];
@@ -145,22 +203,21 @@ class TableList_Writer
     fwrite($fp, "'$table'");
 
     for ($i = 1; $i < count($tableList); $i++) {
-      $table = self::$tableList[$i];
+      $table = $tableList[$i];
       fwrite($fp, ",'{$table}'");
     }
 
     fwrite($fp, ");\n\n");
-    fwrite($fp, '    return $list;' . "\n");
-    fwrite($fp, "  }\n");
-    fwrite($fp, "}");
+    fwrite($fp, '    return $list;' . "\n  }\n}");
     fclose($fp);
   }
 }
 
-class ParsedSQL_Writer
+class Schema_Writer
 {
-  public static function write($connectName, $tName, $colArray, $dirPath)
+  public static function write($connectName, $tName, $colArray)
   {
+    $dirPath   = Schema_Generator::$schemaDir;
     $className = ucfirst($connectName) . '_' . ucfirst($tName);
     $target = "{$dirPath}/{$className}.php";
     echo "generate {$target} \n";
@@ -176,16 +233,21 @@ class ParsedSQL_Writer
   }
 }
 
-class ParsedSQL_Maker
+class Schema_Maker
 {
   public static function make($connectName, $schema)
   {
     $parsed  = array();
+    $tName   = $schema->getTableName();
     $columns = $schema->getColumns();
+
+    ModelClass_Writer::add($connectName, $tName);
+    $tIncrement = false;
+    $tPrimary   = array();
 
     foreach ($columns as $column) {
       if (strpos($column->name, '_id') !== false) {
-        Cascade_Writer::addForeignKey($connectName, $schema->getTableName(), $column->name);
+        Cascade_Writer::addForeignKey($connectName, $tName, $column->name);
       }
 
       $info = array();
@@ -207,6 +269,9 @@ class ParsedSQL_Maker
       array_push($info, "'notNull' => {$notNull}, ");
       array_push($info, "'primary' => {$primary}, ");
 
+      if (!$tIncrement && $column->increment) $tIncrement = true;
+      if ($column->primary) $tPrimary[] = $column->name;
+
       $def = $column->default;
       if (is_null($def)) {
         array_push($info, "'default' => null");
@@ -222,6 +287,11 @@ class ParsedSQL_Maker
       array_push($info, ");\n");
       $parsed[$column->name] = join('', $info);
     }
+
+    ModelClass_Writer::addInc($connectName, $tName, $tIncrement);
+    if (count($tPrimary) > 1) {
+      ModelClass_Writer::addPri($connectName, $tName, $tPrimary);
+    }
     return $parsed;
   }
 }
@@ -230,8 +300,14 @@ class Schema_Generator
 {
   public static $connectNameList = array();
 
+  public static $schemaDir = null;
+  public static $modelsDir = null;
+
   public static function main()
   {
+    self::$schemaDir = $_SERVER['argv'][2];
+    self::$modelsDir = $_SERVER['argv'][3];
+
     $yml  = new Sabel_Config_Yaml('database.yml');
     $data = $yml->read($_SERVER['argv'][1]);
 
@@ -244,21 +320,22 @@ class Schema_Generator
 
       foreach ($schemas as $schema) {
         $tName    = $schema->getTableName();
-        $colArray = ParsedSQL_Maker::make($connectName, $schema);
-        ParsedSQL_Writer::write($connectName, $tName, $colArray, $_SERVER['argv'][2]);
+        $colArray = Schema_Maker::make($connectName, $schema);
+        Schema_Writer::write($connectName, $tName, $colArray);
         TableList_Writer::add($connectName, $tName);
       }
-      TableList_Writer::write($connectName, $_SERVER['argv'][2]);
+      TableList_Writer::write($connectName);
     }
 
-    Cascade_Writer::write($_SERVER['argv'][2]);
+    Cascade_Writer::write();
+    ModelClass_Writer::show();
   }
 }
 /*
 if (count($_SERVER['argv']) === 1) {
-  echo "usage: php Generator.php [environment] [dirpath]\n\n";
+  echo "usage: php Generator.php [environment] [schema-dir] ([model-dir])\n\n";
   exit;
 }
-*/
 
-//Schema_Generator::main();
+Schema_Generator::main();
+*/

@@ -8,9 +8,8 @@
  */
 class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
 {
-  protected
-    $count = 1,
-    $param = array();
+  private $count = 1;
+  private $param = array();
 
   public function makeUpdateSQL($table, $data)
   {
@@ -94,6 +93,11 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
   {
     $this->param[$bindKey] = $this->escape($val);
     return "{$key}=:{$bindKey}";
+  }
+
+  public function getParam()
+  {
+    return $this->param;
   }
 
   public function unsetProparties()

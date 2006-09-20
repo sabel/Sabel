@@ -9,7 +9,6 @@ class Sabel_DB_Connection
 
   public static function addConnection($connectName, $params)
   {
-
     $driver = $params['driver'];
 
     if (!is_array($params))
@@ -32,8 +31,6 @@ class Sabel_DB_Connection
       $user     = $params['user'];
       $pass     = $params['password'];
       $database = $params['database'];
-
-      $encsql   = '';
 
       if ($driver === 'mysql') {
         $host   = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
@@ -91,8 +88,12 @@ class Sabel_DB_Connection
 
   protected static function getValue($connectName, $key)
   {
-    if (isset(self::$connList[$connectName])) {
+    if (isset(self::$connList[$connectName][$key])) {
       return self::$connList[$connectName][$key];
+    } else {
+      $db = self::$connList[$connectName]['db'];
+      if ($db === 'mysql' || $db === 'pgsql')
+        throw new Exception("value is not set:{$connectName} => {$key}");
     }
   }
 }
