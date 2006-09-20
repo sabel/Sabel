@@ -38,15 +38,13 @@ class Sabel_Controller_Map implements Iterator
       $this->entries = $this->getEntries();
     } else {
       $cache = new Sabel_Cache_Apc();
-      if ($mapArray = $cache->read('map')) {
-        $this->map = $mapArray;
-      } else {
+      if (!($this->map = $cache->read('map'))) {
         if (!is_file($this->getPath()))
           throw new Exception("map configure not found on " . $this->getPath());
           
         $c = new Sabel_Config_Yaml($this->getPath());
         $this->map = $c->toArray();
-        $cache->write('map', $this->$map);
+        $cache->write('map', $this->map);
         
         $this->entries = $this->getEntries();
       }
