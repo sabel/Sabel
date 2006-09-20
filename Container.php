@@ -136,7 +136,7 @@ class Container
       $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
       $dt->visit(new AppClassRegister($c));
       $dt->traverse();
-      require_once(SABEL_CLASSES);
+      if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       require_once(APP_CACHE);
       require_once(LIB_CACHE);
       require_once(SCM_CACHE);

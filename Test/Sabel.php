@@ -1,5 +1,11 @@
 <?php
 
+define('SABEL_CLASSES', RUN_BASE . '/cache/sabel_classes.php');
+define('APP_CACHE',     RUN_BASE . '/cache/app.php');
+define('LIB_CACHE',     RUN_BASE . '/cache/lib.php');
+define('SCM_CACHE',     RUN_BASE . '/cache/schema.php');
+define('INJ_CACHE',     RUN_BASE . '/cache/injection.php');
+
 class Test_Sabel extends PHPUnit2_Framework_TestCase
 {
   public static function suite()
@@ -17,11 +23,15 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function tearDown()
   {
-    
+    $dt = new DirectoryTraverser(RUN_BASE);
+    $remover = new SabelDirectoryAndFileRemover();
+    $dt->visit($remover);
+    $dt->traverse();
+    $remover->removeEmptyDirectories();
   }
   
   public function testSabel()
   {
-    $c = Container::create();
+    Container::initializeApplication();
   }
 }
