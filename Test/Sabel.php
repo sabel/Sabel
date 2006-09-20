@@ -35,5 +35,10 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $c = Container::initializeApplication();
     $fcontroller = $c->load('sabel.controller.Front');
     $this->assertTrue(is_object($fcontroller));
+    
+    ob_start();
+    $fcontroller->ignition();
+    $contents = rtrim(ob_get_clean());
+    $this->assertEquals('welcome.', $contents);
   }
 }

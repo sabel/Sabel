@@ -11,7 +11,7 @@ class Sabel_Controller_Map implements Iterator
   const DEFAULT_PATH = '/config/map.yml';
   
   protected $path       = '';
-  protected static $map = array();
+  protected $map = array();
   protected $requestUri = null;
   
   protected $position = 0;
@@ -29,19 +29,27 @@ class Sabel_Controller_Map implements Iterator
   
   public function load()
   {
-    $cache = new Sabel_Cache_Apc();
-    
-    if ($mapArray = $cache->read('map')) {
-      self::$map = $mapArray;
-    } else {
+    if (ENVIRONMENT === 'development') {
       if (!is_file($this->getPath()))
         throw new Exception("map configure not found on " . $this->getPath());
       
       $c = new Sabel_Config_Yaml($this->getPath());
-      self::$map = $c->toArray();
-      $cache->write('map', self::$map);
-        
+      $this->map = $c->toArray();
       $this->entries = $this->getEntries();
+    } else {
+      $cache = new Sabel_Cache_Apc();
+      if ($mapArray = $cache->read('map')) {
+        $this->map = $mapArray;
+      } else {
+        if (!is_file($this->getPath()))
+          throw new Exception("map configure not found on " . $this->getPath());
+          
+        $c = new Sabel_Config_Yaml($this->getPath());
+        $this->map = $c->toArray();
+        $cache->write('map', $this->$map);
+        
+        $this->entries = $this->getEntries();
+      }
     }
   }
   
@@ -63,13 +71,13 @@ class Sabel_Controller_Map implements Iterator
   
   public function getEntry($name)
   {
-    return new Sabel_Controller_Map_Entry($name, self::$map[$name], $this->requestUri);
+    return new Sabel_Controller_Map_Entry($name, $this->map[$name], $this->requestUri);
   }
   
   public function getEntries()
   {
     $entries = array();
-    foreach (array_keys(self::$map) as $name) $entries[] = $this->getEntry($name);
+    foreach (array_keys($this->map) as $name) $entries[] = $this->getEntry($name);
     return $entries;
   }
   
@@ -78,7 +86,7 @@ class Sabel_Controller_Map implements Iterator
     $number =(int) $number;
     
     $entries = array();
-    foreach (array_keys(self::$map) as $name) {
+    foreach (array_keys($this->map) as $name) {
       $entry = $this->getEntry($name);
       if ($entry->getUri()->count() === $number) $entries[] = $entry;
     }
