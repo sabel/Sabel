@@ -14,7 +14,7 @@ class Schema_Util_Creator
 
     $columns = array();
     foreach ($lines as $line) {
-      $vo    = new ValueObject();
+      $vo    = new Sabel_DB_Schema_Column();
       $split = explode(' ', $line);
       $name  = $split[0];
       $rem   = trim(substr($line, strlen($name)));

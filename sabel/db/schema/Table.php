@@ -36,34 +36,4 @@ class Sabel_DB_Schema_Table
   {
     return $this->columns[$name];
   }
-
-  public function setColumns($columns)
-  {
-    if (!is_array($columns))
-      throw new Exception('Error: Schema_Table::setColumns() argument must be an array.');
-
-    $array = array();
-
-    foreach ($columns as $cName => $values) {
-      $vo = new ValueObject();
-
-      $vo->name = $cName;
-      $vo->type = $values['type'];
-
-      if ($vo->type === Sabel_DB_Const::INT) {
-        $vo->max = $values['max'];
-        $vo->min = $values['min'];
-      } else if ($vo->type === Sabel_DB_Const::STRING) {
-        $vo->max = $values['max'];
-      }
-
-      $vo->increment = $values['increment'];
-      $vo->notNull   = $values['notNull'];
-      $vo->primary   = $values['primary'];
-      $vo->default   = $values['default'];
-
-      $array[$vo->name] = $vo;
-    }
-    $this->columns = $array;
-  }
 }

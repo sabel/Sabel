@@ -26,11 +26,6 @@ class Sabel_DB_Schema_Accessor
   {
     return $this->is->getTable($name);
   }
-
-  public function getColumn($table, $column)
-  {
-    return $this->is->createColumn($table, $column);
-  }
 }
 
 /**
@@ -54,30 +49,3 @@ function schema($model)
     throw new Exception('invalid instance. schema() need instance of Sabel_DB_Mapper.');
   }
 }
-
-/*
-class ValueObject
-{
-  protected $values = array();
-
-  public function __construct($values = null)
-  {
-    $this->values = (!is_null($values)) ? $values : null;
-  }
-
-  public static function create()
-  {
-    return new self();
-  }
-
-  public function __get($key)
-  {
-    return (isset($this->values[$key])) ? $this->values[$key] : null;
-  }
-
-  public function __set($key, $value)
-  {
-    $this->values[$key] = $value;
-  }
-}
-*/

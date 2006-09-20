@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_DB_Schema_SQLite
+class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_General
 {
   const TABLE_LIST    = "SELECT name FROM sqlite_master WHERE type = 'table'";
   const TABLE_COLUMNS = "SELECT * FROM sqlite_master WHERE name = '%s'";
@@ -21,17 +21,6 @@ class Sabel_DB_Schema_SQLite
     return $tables;
   }
 
-  public function getTable($name)
-  {
-    return new Sabel_DB_Schema_Table($name, $this->createColumns($name));
-  }
-
-  public function createColumn($table, $column)
-  {
-    $columns = $this->getSchema($table)->getColumns();
-    return (array_key_exists($column, $columns)) ? $columns[$column] : null;
-  }
-
   protected function createColumns($table)
   {
     return $this->getSchema($table)->getColumns();
@@ -39,10 +28,9 @@ class Sabel_DB_Schema_SQLite
 
   protected function getSchema($table)
   {
-    $res     = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
-    $creator = new Schema_Util_Creator();
-
-    $tableObj = $creator->create($table, $res[0]->sql);
+    $result   = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
+    $creator  = new Schema_Util_Creator();
+    $tableObj = $creator->create($table, $result[0]->sql);
     return $tableObj;
   }
 }

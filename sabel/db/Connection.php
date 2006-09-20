@@ -68,32 +68,46 @@ class Sabel_DB_Connection
 
   public static function getConnection($connectName)
   {
-    return self::getValue($connectName, 'conn');
+    $param = self::getConnectionParam($connectName);
+    return self::getValue($connectName, $param, 'conn');
   }
 
   public static function getDriverName($connectName)
   {
-    return self::getValue($connectName, 'driver');
+    $param = self::getConnectionParam($connectName);
+    return self::getValue($connectName, $param, 'driver');
   }
 
   public static function getDB($connectName)
   {
-    return self::getValue($connectName, 'db');
+    $param = self::getConnectionParam($connectName);
+    return self::getValue($connectName, $param, 'db');
   }
 
   public static function getSchema($connectName)
   {
-    return self::getValue($connectName, 'schema');
+    $param = self::getConnectionParam($connectName);
+
+    if ($param['db'] === 'mysql' || $param['db'] === 'pgsql') {
+      return self::getValue($connectName, $param, 'schema');
+    }
   }
 
-  protected static function getValue($connectName, $key)
+  protected static function getConnectionParam($connectName)
   {
-    if (isset(self::$connList[$connectName][$key])) {
-      return self::$connList[$connectName][$key];
+    if (isset(self::$connList[$connectName])) {
+      return self::$connList[$connectName];
     } else {
-      $db = self::$connList[$connectName]['db'];
-      if ($db === 'mysql' || $db === 'pgsql')
-        throw new Exception("value is not set:{$connectName} => {$key}");
+      throw new Exception('connection name is not found: ' . $connectName);
+    }
+  }
+
+  protected static function getValue($connectName, $param, $key)
+  {
+    if (isset($param[$key])) {
+      return $param[$key];
+    } else {
+      throw new Exception("value is not set:{$connectName} => {$key}");
     }
   }
 }

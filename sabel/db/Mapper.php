@@ -139,20 +139,8 @@ abstract class Sabel_DB_Mapper
 
   public function getTableSchema()
   {
-    $schemaClass = $this->connectName . '_' . $this->table;
-
-    if (class_exists($schemaClass, false)) {
-      if (!is_object($tSchema = Sabel_DB_SimpleCache::get($schemaClass))) {
-        $sc = new $schemaClass();
-        $tSchema = new Sabel_DB_Schema_Table($this->table);
-        $tSchema->setColumns($sc->get());
-        Sabel_DB_SimpleCache::add($schemaClass, $tSchema);
-      }
-      return $tSchema;
-    } else {
-      $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
-      return $sa->getTable($this->table);
-    }
+    $sa = new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
+    return $sa->getTable($this->table);
   }
 
   public function getAllSchema()
@@ -908,7 +896,7 @@ abstract class Sabel_DB_Mapper
 
   protected function toObject($rows)
   {
-    if (empty($rows)) return null;
+    if (!is_array($rows) || empty($rows)) return null;
 
     $recordObj = array();
     $model = $this->newClass($this->table);
@@ -960,20 +948,5 @@ abstract class Sabel_DB_Mapper
   public function ccond($key, $val)
   {
     $this->setChildCondition($key, $val);
-  }
-}
-
-class Sabel_DB_SimpleCache
-{
-  private static $cache = array();
-
-  public static function add($key, $val)
-  {
-    self::$cache[$key] = $val;
-  }
-
-  public static function get($key)
-  {
-    return (isset(self::$cache[$key])) ? self::$cache[$key] : null;
   }
 }

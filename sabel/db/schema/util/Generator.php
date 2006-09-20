@@ -77,10 +77,10 @@ class ModelClass_Writer
 
         $primary = self::$tPrimary[$connectName];
         if (is_array($primary) && array_key_exists($table, $primary)) {
-          $pri = $primary[$table];
-          fwrite($fp, '  protected $jointKey = array(' . "'{$pri[0]}'");
-          for ($i = 1; $i < count($pri); $i++) fwrite($fp, ", '{$pri[$i]}'");
-          fwrite($fp, ");\n");
+          $pri  = $primary[$table];
+          $line = 'protected $jointKey = array(' . "'{$pri[0]}'";
+          for ($i = 1; $i < count($pri); $i++) $line .= ", '{$pri[$i]}'";
+          fwrite($fp, $line . ");\n");
         }
 
         fwrite($fp, "\n");
