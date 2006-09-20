@@ -9,7 +9,10 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function setUp()
   {
-    
+    require_once('generator/generator.php');
+    $dt = new DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
+    $dt->visit(new SabelDirectoryAndFileCreator());
+    $dt->traverse();
   }
   
   public function tearDown()
