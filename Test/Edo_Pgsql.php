@@ -42,11 +42,12 @@ class Test_Edo_Pgsql extends Test_Edo_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default', self::$params1);
-    Sabel_DB_Connection::addConnection('default2', self::$params2);
+    Test_Edo_Test::$connectName = 'pg';
+    Sabel_DB_Connection::addConnection('pg', self::$params1);
+    Sabel_DB_Connection::addConnection('pg2', self::$params2);
 
     $tables = Test_Edo_Test::$TABLES;
-    $obj = new Sabel_DB_Basic();
+    $obj = new Test3();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");

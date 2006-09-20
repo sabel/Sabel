@@ -68,7 +68,7 @@ class SabelAllTests
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Edo_Mysql::suite());
     $suite->addTest(Test_Edo_Pgsql::suite());
-    // $suite->addTest(Test_Edo_SQLite::suite());
+    $suite->addTest(Test_Edo_SQLite::suite());
     $suite->addTest(Test_InformationSchema::suite());
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Classes::suite());

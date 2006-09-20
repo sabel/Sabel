@@ -4,10 +4,8 @@ class Sabel_DB_Basic extends Sabel_DB_Mapper
 {
   public function __construct($table = null)
   {
-    $this->setDriver('default');
-    parent::__construct();
-
     if (isset($table)) $this->table = $table;
+    parent::__construct();
   }
 }
 

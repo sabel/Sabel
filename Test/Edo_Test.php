@@ -5,6 +5,8 @@ class Test_Edo_Test extends SabelTestCase
   private static $count  = 0;
   private static $dbList = array('mysql', 'pgsql', 'sqlite');
 
+  public static $connectName = '';
+
   public static $TABLES = array('test', 'test2', 'test3',
                                 'customer', 'customer_order', 'order_line',
                                 'customer_telephone', 'infinite1', 'infinite2',
@@ -25,7 +27,7 @@ class Test_Edo_Test extends SabelTestCase
 
     $this->assertEquals($customer->getCount(), 2);
 
-    $order = new Sabel_DB_Basic('customer_order');
+    $order = new Customer_Order();
 
     $insertData   = array();
     $insertData[] = array('id' => 1, 'customer_id' => 1);
@@ -36,7 +38,7 @@ class Test_Edo_Test extends SabelTestCase
     $insertData[] = array('id' => 6, 'customer_id' => 1);
     $order->multipleInsert($insertData);
 
-    $o = new Sabel_DB_Basic('customer_order');
+    $o = new Customer_order();
     $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
     $this->assertEquals((int)$res[0]->customer->id, 1);
     $this->assertEquals((int)$res[2]->customer->id, 2);
@@ -105,7 +107,7 @@ class Test_Edo_Test extends SabelTestCase
     $obj = $test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
 
-    $orderLine = new Sabel_DB_Basic('order_line');
+    $orderLine = new Order_Line();
 
     $insertData = array();
     $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
@@ -122,7 +124,7 @@ class Test_Edo_Test extends SabelTestCase
     $orderLine->multipleInsert($insertData);
     $this->assertEquals($orderLine->getCount(), 11);
     
-    $telephone = new Sabel_DB_Basic('customer_telephone');
+    $telephone = new Customer_Telephone();
 
     $insertData   = array();
     $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
@@ -133,7 +135,7 @@ class Test_Edo_Test extends SabelTestCase
 
     $this->assertEquals($orderLine->getCount(), 11);
     
-    $tree = new Sabel_DB_Basic('tree');
+    $tree = new Tree();
     $insertData   = array();
     $insertData[] = array('id' => 1,  'name' => 'A');
     $insertData[] = array('id' => 2,  'name' => 'B');
@@ -148,7 +150,7 @@ class Test_Edo_Test extends SabelTestCase
     $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
     $tree->multipleInsert($insertData);
 
-    $student = new Sabel_DB_Basic('student');
+    $student = new Student();
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'tom',   'birth' => '1983/08/17');
     $insertData[] = array('id' => 2, 'name' => 'john',  'birth' => '1983/08/18');
@@ -157,7 +159,7 @@ class Test_Edo_Test extends SabelTestCase
     $insertData[] = array('id' => 5, 'name' => 'ameri', 'birth' => '1983/08/21');
     $student->multipleInsert($insertData);
 
-    $course = new Sabel_DB_Basic('course');
+    $course = new Course();
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'Mathematics');
     $insertData[] = array('id' => 2, 'name' => 'Physics');
@@ -166,7 +168,7 @@ class Test_Edo_Test extends SabelTestCase
     $insertData[] = array('id' => 5, 'name' => 'Psychology');
     $course->multipleInsert($insertData);
 
-    $sc = new Sabel_DB_Basic('student_course');
+    $sc = new Student_Course();
     $insertData   = array();
     $insertData[] = array('student_id' => 1, 'course_id' => 1);
     $insertData[] = array('student_id' => 1, 'course_id' => 2);
@@ -200,19 +202,19 @@ class Test_Edo_Test extends SabelTestCase
     $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
     $users->multipleInsert($insertData);
 
-    $s = new Sabel_DB_Basic('status');
+    $s = new Status();
     $s->state = 'normal';
     $s->save();
     $s->state = 'invalid';
     $s->save();
 
-    $s  = new Sabel_DB_Basic('status');
+    $s  = new Status();
     $ss = $s->select();
 
     $this->assertEquals($ss[0]->state, 'normal');
     $this->assertEquals($ss[1]->state, 'invalid');
 
-    $bbs = new Sabel_DB_Basic('bbs');
+    $bbs = new Bbs();
 
     $insertData   = array();
     $insertData[] = array('users_id' => 1 , 'title' => 'title11', 'body' => 'body11');
@@ -243,29 +245,29 @@ class Test_Edo_Test extends SabelTestCase
 
   public function testInsert()
   {
-    $test2 = new Sabel_DB_Basic('test2');
+    $test2 = new Test2();
     $test2->id   = 1;
     $test2->name = 'test21';
     $test2->test3_id = '2';
     $test2->save();
 
-    $test2 = new Sabel_DB_Basic('test2');
+    $test2 = new Test2();
     $test2->id   = 2;
     $test2->name = 'test22';
     $test2->test3_id = '1';
     $test2->save();
     
-    $test2 = new Sabel_DB_Basic('test2');
+    $test2 = new Test2();
     $test2->id   = 3;
     $test2->name = 'test23';
     $test2->test3_id = '3';
     $test2->save();
 
-    $test2 = new Sabel_DB_Basic('test2');
+    $test2 = new Test2();
     $obj   = $test2->selectOne(3);
     $this->assertEquals($obj->name, 'test23');
     
-    $test3 = new Sabel_DB_Basic('test3');
+    $test3 = new Test3();
     $test3->id = 1;
     $test3->name = 'test31';
     $test3->save();
@@ -402,12 +404,12 @@ class Test_Edo_Test extends SabelTestCase
 
   public function testInfiniteLoop()
   {
-    $in1 = new Sabel_DB_Basic('infinite1');
+    $in1 = new Infinite1();
     $in1->id           = 1;
     $in1->infinite2_id = 2;
     $in1->save();
     
-    $in2 = new Sabel_DB_Basic('infinite2');
+    $in2 = new Infinite2();
     $in2->id           = 2;
     $in2->infinite1_id = 1;
     $in2->save();
@@ -642,7 +644,7 @@ class Test_Edo_Test extends SabelTestCase
   
   public function testSeq()
   {
-    $seq = new Sabel_DB_Basic('seq');
+    $seq = new Seq();
 
     $seq->text = 'test';
     $id = $seq->save();
@@ -822,7 +824,7 @@ class Test_Edo_Test extends SabelTestCase
   */
   public function testOrder()
   {
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_Line();
     $ol->customer_order_id = 13;
     $ol->item_id = 5;
     $ol->save();
@@ -837,7 +839,7 @@ class Test_Edo_Test extends SabelTestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_line();
     $ol->item_id(3);
     $last = $ol->getLast('amount');
     $this->assertEquals((int)$last->amount, 9000);
@@ -846,18 +848,18 @@ class Test_Edo_Test extends SabelTestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_Line();
     $ol->customer_order_id = 1;
     $ol->amount  = 100000;
     $ol->item_id = 1;
     $ol->save();
 
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_Line();
     $ol->item_id(1);
     $ol->customer_order_id(1);
     $this->assertEquals($ol->getCount(), 3);
 
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_Line();
 
     $ol->item_id(1);
     $ol->customer_order_id(1);
@@ -889,7 +891,7 @@ class Test_Edo_Test extends SabelTestCase
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
 
-    $bbs = new Sabel_DB_Basic('bbs');
+    $bbs = new Bbs();
     $bbs->save(array('users_id' => 4));
 
     $user = new Users(4);
@@ -915,7 +917,7 @@ class Test_Edo_Test extends SabelTestCase
 
   public function testORCondition()
   {
-    $ol = new Sabel_DB_Basic('order_line');
+    $ol = new Order_Line();
     $ol->sconst('order', 'id');
     $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
 
@@ -1032,9 +1034,9 @@ class Test_Edo_Test extends SabelTestCase
 
   public function testInformationSchema()
   {
-    $sb = new Sabel_DB_Basic('bbs');
+    $sb = new Bbs();
 
-    if (Sabel_DB_Connection::getDB('default') !== 'sqlite') {
+    if (Sabel_DB_Connection::getDB(self::$connectName) !== 'sqlite') {
       self::$tableSchema[] = $sb->getTableSchema();
     } else {
       $sq = $sb->getTableSchema();
@@ -1079,7 +1081,7 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('default');
+    $this->setDriver(Test_Edo_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1087,6 +1089,31 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
 class Test extends Mapper_Default
 {
   protected $withParent = true;
+}
+
+class Test2 extends Mapper_Default
+{
+
+}
+
+class Test3 extends Mapper_Default
+{
+
+}
+
+class Infinite1 extends Mapper_Default
+{
+
+}
+
+class Infinite2 extends Mapper_Default
+{
+
+}
+
+class Seq extends Mapper_Default
+{
+
 }
 
 class Customer extends Mapper_Default
@@ -1112,11 +1139,21 @@ class Customer_Order extends Mapper_Default
   }
 }
 
+class Order_Line extends Mapper_Default
+{
+
+}
+
+class Customer_Telephone extends Mapper_Default
+{
+
+}
+
 class Tree extends Sabel_DB_Tree
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('default');
+    $this->setDriver(Test_Edo_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1127,7 +1164,7 @@ class Bridge_Base extends Sabel_DB_Bridge
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('default');
+    $this->setDriver(Test_Edo_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1147,29 +1184,36 @@ class Course extends Bridge_Base
 
 }
 
-class Trans1 extends Sabel_DB_Mapper
+class Student_Course extends Mapper_Default
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    parent::__construct($param1, $param2);
-  }
+
+}
+
+class Trans1 extends Mapper_Default
+{
+
 }
 
 class Trans2 extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver('default2');
+    $this->setDriver(Test_Edo_Test::$connectName . '2');
     parent::__construct($param1, $param2);
   }
 }
 
 class Users extends Mapper_Default
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->table = 'users';
-    parent::__construct($param1, $param2);
-  }
+
+}
+
+class Bbs extends Mapper_Default
+{
+
+}
+
+class Status extends Mapper_Default
+{
+
 }

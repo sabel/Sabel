@@ -9,7 +9,17 @@ class Test_InformationSchema extends SabelTestCase
 
   public function testUse()
   {
+    $param   = array();
+    $param['driver']   = 'mysql';
+    $param['host']     = 'localhost';
+    $param['database'] = 'edo';
+    $param['schema']   = 'edo';
+    $param['user']     = 'root';
+    $param['password'] = '';
+    Sabel_DB_Connection::addConnection('default', $param);
+
     $sb = new Sabel_DB_Basic('stest');
+    $sb->setDriver('default');
     $table = $sb->getTableSchema();
 
     $id      = $table->id;

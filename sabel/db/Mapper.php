@@ -221,7 +221,9 @@ abstract class Sabel_DB_Mapper
     } else if (is_array($param1)) {
       $this->defChildConstraints = $param1;
     } else {
-      throw new Exception('Error: setChildConstraint() when Argument 2 is null, Argument 1 must be an Array');
+      $error  = 'Error: setChildConstraint() ';
+      $error .= 'when second argument is null, first argument must be an array.';
+      throw new Exception($error);
     }
   }
 
@@ -437,6 +439,7 @@ abstract class Sabel_DB_Mapper
     $recordObj = array();
     foreach ($rows as $row) {
       $models = $this->makeEachModelObject($row, $relTableArray);
+      $obj    = $models[$myTable];
 
       foreach ($joinTables as $model) {
         foreach ($relTableArray as $pair) {
@@ -515,7 +518,7 @@ abstract class Sabel_DB_Mapper
     $models[$this->table] = $model;
     return $models;
   }
-  
+
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->addSelectCondition($param1, $param2, $param3);
