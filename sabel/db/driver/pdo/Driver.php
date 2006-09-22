@@ -83,16 +83,13 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function driverExecute($sql = null)
   {
-    $getSQL = $this->query->getSQL();
-
     if (isset($sql)) {
       $this->stmt = $this->conn->prepare($sql);
     } else if ($this->stmtFlag) {
       $this->stmt = Sabel_DB_Driver_Pdo_Statement::get();
-    } else if (is_null($getSQL)) {
+    } else if (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
-      $sql = $getSQL;
       if ($this->stmt = $this->conn->prepare($sql)) Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
     }
 

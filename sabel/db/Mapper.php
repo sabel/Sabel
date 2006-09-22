@@ -532,13 +532,10 @@ abstract class Sabel_DB_Mapper
   {
     if (is_null($model)) $model = $this;
 
-    $this->chooseMyChildConstraint($child, $model);
-    if (is_null($model->childConstraints[$child]['limit']))
-      throw new Exception('Error: getChildren() must be set limit constraints');
-
     $driver = $this->newClass($child)->getDriver();
     $driver->setBasicSQL("SELECT {$model->projection} FROM {$child}");
 
+    $this->chooseMyChildConstraint($child, $model);
     $model->childConditions["{$model->table}_id"] = $model->data[$model->defColumn];
     $conditions  = $model->childConditions;
     $constraints = $model->childConstraints[$child];
