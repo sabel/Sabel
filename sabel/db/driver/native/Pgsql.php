@@ -32,14 +32,11 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 
   public function driverExecute($sql = null)
   {
-    $getSQL = $this->query->getSQL();
-
     if (isset($sql)) {
       $this->result = pg_query($this->conn, $sql);
-    } else if (is_null($getSQL)) {
+    } elseif (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $getSQL;
       $this->result = pg_query($this->conn, $sql);
     }
 

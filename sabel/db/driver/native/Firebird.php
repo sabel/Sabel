@@ -53,15 +53,13 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function driverExecute($sql = null)
   {
-    $conn   = (isset($this->trans)) ? $this->trans : $this->conn;
-    $getSQL = $this->query->getSQL();
+    $conn = (isset($this->trans)) ? $this->trans : $this->conn;
 
     if (isset($sql)) {
       $this->result = ibase_query($conn, $sql);
-    } else if (is_null($getSQL)) {
+    } elseif (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $getSQL;
       $this->result = ibase_query($conn, $sql);
     }
 

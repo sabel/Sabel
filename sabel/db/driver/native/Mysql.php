@@ -39,14 +39,11 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 
   public function driverExecute($sql = null)
   {
-    $getSQL = $this->query->getSQL();
-
     if (isset($sql)) {
       $this->result = mysql_query($sql, $this->conn);
-    } else if (is_null($getSQL)) {
+    } elseif (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $sql = $getSQL;
       $this->result = mysql_query($sql, $this->conn);
     }
 
