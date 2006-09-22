@@ -37,26 +37,12 @@ class Sabel_Controller_Map implements Iterator
   
   public function load()
   {
-    if (ENVIRONMENT === 'development') {
-      if (!is_file($this->getPath()))
-        throw new Exception("map configure not found on " . $this->getPath());
-      
-      $c = new Sabel_Config_Yaml($this->getPath());
-      $this->map = $c->toArray();
-      $this->entries = $this->getEntries();
-    } else {
-      $cache = new Sabel_Cache_Apc();
-      if (!($this->map = $cache->read('map'))) {
-        if (!is_file($this->getPath()))
-          throw new Exception("map configure not found on " . $this->getPath());
-          
-        $c = new Sabel_Config_Yaml($this->getPath());
-        $this->map = $c->toArray();
-        $cache->write('map', $this->map);
-        
-        $this->entries = $this->getEntries();
-      }
-    }
+    if (!is_file($this->getPath()))
+      throw new Exception("map configure not found on " . $this->getPath());
+    
+    $c = new Sabel_Config_Yaml($this->getPath());
+    $this->map = $c->toArray();
+    $this->entries = $this->getEntries();
   }
   
   public function getPath()
@@ -64,14 +50,20 @@ class Sabel_Controller_Map implements Iterator
     return $this->path;
   }
   
-  public function setRequestUri($uri)
+  public function setRequestUri($request)
   {
-    $this->requestUri = $uri;
+    $this->requestUri = $request;
+    $this->requestUri->initializeRequestUriAndParameters();
   }
   
   public function find()
   {
     // @todo implement rules of found out correct map entry.
+    // return $this->getEntry('default');
+    foreach ($this->getEntries() as $entry) {
+      $entry->isMatch();
+    }
+    
     return $this->getEntry('default');
   }
   
@@ -80,7 +72,6 @@ class Sabel_Controller_Map implements Iterator
     if (!is_object($this->requestUri)) throw new Sabel_Exception_Runtime("");
     
     $entry = new Sabel_Controller_Map_Entry($name, $this->map[$name]);
-    $this->requestUri->initializeRequestUriAndParameters();
     $this->requestUri->initialize($entry);
     $entry->setRequest($this->requestUri);
     return $entry;

@@ -67,4 +67,8 @@ class Sabel_Controller_Map_Entry
   {
     return $this->request;
   }
+  
+  public function isMatch()
+  {
+  }
 }

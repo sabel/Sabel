@@ -49,6 +49,11 @@ class Sabel_Request_Uri
     return ($this->has($pos)) ? $this->parts[$pos] : null;
   }
   
+  public function has($pos)
+  {
+    return isset($this->parts[$pos]);
+  }
+  
   public function getModule()
   {
     return $this->getByName('module');
@@ -69,10 +74,5 @@ class Sabel_Request_Uri
     if (is_null($this->entry)) throw new Exception('entry is null.');
     $position = $this->entry->getUri()->calcElementPositionByName($name);
     return $this->get($position);
-  }
-  
-  public function has($pos)
-  {
-    return isset($this->parts[$pos]);
   }
 }

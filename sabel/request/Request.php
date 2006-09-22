@@ -30,15 +30,17 @@ class Sabel_Request_Request
   
   public function initialize($entry)
   {
-    $uri = new Sabel_Request_Uri($this->requestUri);
-    $uri->setEntry($entry);
-    $this->uri = $uri;
-    
-    $this->parameters = new Sabel_Request_Parameters($this->requestParameters);
+    if (is_object($this->uri)) {
+      $this->uri->setEntry($entry);
+    } else {
+      throw new Sabel_Exception_Runtime('uri property must be object.');
+    }
   }
   
   public function initializeRequestUriAndParameters($requestUri = null)
   {
+    if (is_object($this->uri)) return null;
+    
     if ($requestUri) {
       $request_uri = ltrim($requestUri, '/');
     } else {
@@ -54,6 +56,9 @@ class Sabel_Request_Request
     
     // @todo test this.
     @list($this->requestUri, $this->requestParameters) = explode('?', $request_uri);
+    
+    $this->uri = new Sabel_Request_Uri($this->requestUri);
+    $this->parameters = new Sabel_Request_Parameters($this->requestParameters);
   }
   
   public function __get($name)

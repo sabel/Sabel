@@ -70,11 +70,11 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   
   public function testRequestWithParameters()
   {
-    $r = new Sabel_Request_Request('/blog/archive/view/?id=10');
+    $r = new Sabel_Request_Request(null, '/blog/archive/view/?id=10');
   }
   
   public function testRequestInvalid()
   {
-    $r = new Sabel_Request_Request('/blog/archi?ve/view/?id=10');
+    $r = new Sabel_Request_Request(null, '/blog/archi?ve/view/?id=10');
   }
 }

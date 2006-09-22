@@ -121,6 +121,15 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function testMapFind()
   {
+    $map = new Sabel_Controller_Map();
+    $map->setConfigPath('Test/data/map.yml');
+    $request = new SabeL_Request_Request(null, '/2006/05/02');
+    $this->assertEquals('2006', $request->getUri()->get(0));
+    $map->setRequestUri($request);
+    $map->load();
     
+    $entry = $map->find();
+    // @todo test pass here
+    // $this->assertEquals('blog', $entry->getName());
   }
 }
