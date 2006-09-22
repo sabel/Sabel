@@ -8,20 +8,14 @@
  */
 class Sabel_Controller_Map_Entry
 {
-  protected $name    = '';
-  protected $entry   = array();
-  protected $request = null;
+  protected $name     = '';
+  protected $rawEntry = array();
+  protected $request  = null;
   
-  public function __construct($name, $entry, $request = null)
+  public function __construct($name, $rawEntry)
   {
-    $this->name  = $name;
-    $this->entry = $entry;
-    
-    if ($request) {
-      $this->request = $request;
-    } else {
-      $this->request = new Sabel_Request_Request($this);
-    }
+    $this->name     = $name;
+    $this->rawEntry = $rawEntry;
   }
   
   public function getName()
@@ -31,18 +25,18 @@ class Sabel_Controller_Map_Entry
   
   public function getUri()
   {
-    return new Sabel_Controller_Map_Uri($this->entry['uri']);
+    return new Sabel_Controller_Map_Uri($this->rawEntry['uri']);
   }
   
   public function getDestination()
   {
-    return new Sabel_Controller_Map_Destination($this, $this->entry['destination']);
+    return new Sabel_Controller_Map_Destination($this, $this->rawEntry['destination']);
   }
   
   public function getRequirements()
   {
     if ($this->hasRequirements()) {
-      $r = new Sabel_Map_Requirements($this->entry['requirements']);
+      $r = new Sabel_Map_Requirements($this->rawEntry['requirements']);
       return $r->getRequirements();
     } else {
       return null;
@@ -56,12 +50,12 @@ class Sabel_Controller_Map_Entry
   
   public function hasRequirements()
   {
-    return (isset($this->entry['requirements']));
+    return (isset($this->rawEntry['requirements']));
   }
   
   public function hasOptions()
   {
-    return (isset($this->entry['option']));
+    return (isset($this->rawEntry['option']));
   }
   
   public function setRequest($request)

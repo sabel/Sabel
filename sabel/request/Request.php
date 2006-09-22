@@ -20,16 +20,24 @@ class Sabel_Request_Request
     $uri        = null,
     $parameters = null;
   
-  public function __construct($entry, $requestUri = null)
+  public function __construct($entry = null, $requestUri = null)
   {
     if (!self::$server) self::$server = new Sabel_Env_Server();
     
-    $this->initializeRequestUriAndParameters($requestUri);
-    $this->uri        = new Sabel_Request_Uri($this->requestUri, $entry);
+    if (!is_null($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
+    if (!is_null($entry)) $this->initialize($entry);
+  }
+  
+  public function initialize($entry)
+  {
+    $uri = new Sabel_Request_Uri($this->requestUri);
+    $uri->setEntry($entry);
+    $this->uri = $uri;
+    
     $this->parameters = new Sabel_Request_Parameters($this->requestParameters);
   }
   
-  private function initializeRequestUriAndParameters($requestUri)
+  public function initializeRequestUriAndParameters($requestUri = null)
   {
     if ($requestUri) {
       $request_uri = ltrim($requestUri, '/');

@@ -27,7 +27,9 @@ class Test_RequestUri extends SabelTestCase
   
   public function setUp()
   {
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $request = new Sabel_Request_Request(null, '/blog/archive/view/1');
+    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map);
+    $entry->setRequest($request);
     $this->uri = new Sabel_Request_Uri('blog/archive/view/1', $entry);
   }
   

@@ -12,8 +12,7 @@ function is_not_object($object)
 
 function urlFor()
 {
-  $map = new Sabel_Controller_Map();
-  $map->load();
+  $map = Sabel_Controller_Map::create();
   $entry   = $map->getEntry(func_get_arg(0));
   $request = $entry->getRequest();
   

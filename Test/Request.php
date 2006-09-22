@@ -35,7 +35,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   {
     $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
     $r = new Sabel_Request_Request($entry, '/blog/archive/view/1');
-    
+        
     $this->assertEquals('blog',    $r->getUri()->getModule());
     $this->assertEquals('archive', $r->getUri()->getController());
     $this->assertEquals('view',    $r->getUri()->getAction());

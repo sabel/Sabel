@@ -32,7 +32,7 @@ abstract class Sabel_Controller_Page
   public function setup()
   {
     $this->container   = Container::create();
-    $this->request     = new Sabel_Request_Request($this->entry);
+    $this->request     = $this->entry->getRequest();
     $this->response    = new Sabel_Response_Web();
     $this->storage     = Sabel_Storage_Session::create();
     $this->destination = $this->entry->getDestination();

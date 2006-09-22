@@ -1,7 +1,5 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
 /**
  * Test_Map
  * 
@@ -15,11 +13,19 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     return new PHPUnit2_Framework_TestSuite("Test_Map");
   }
   
-  public function __construct()
+  private $map;
+  
+  public function setUp()
   {
     $this->map = new Sabel_Controller_Map();
     $this->map->setConfigPath('Test/data/map.yml');
+    $this->map->setRequestUri(new SabeL_Request_Request());
     $this->map->load();
+  }
+  
+  public function tearDown()
+  {
+    unset($this->map);
   }
   
   public function testMapUri()

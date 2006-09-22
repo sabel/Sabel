@@ -14,9 +14,14 @@ class Sabel_Request_Uri
   protected $parts = array();
   protected $entry = null;
   
-  public function __construct($requestUri, $entry)
+  public function __construct($requestUri, $entry = null)
   {
     $this->parts = explode('/', $requestUri);
+    (!is_null($entry)) ? $this->setEntry($entry) : '';
+  }
+  
+  public function setEntry($entry)
+  {
     $this->entry = $entry;
   }
   

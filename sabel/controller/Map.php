@@ -10,16 +10,24 @@ class Sabel_Controller_Map implements Iterator
 {
   const DEFAULT_PATH = '/config/map.yml';
   
-  protected $path       = '';
-  protected $map = array();
+  protected $path = '';
+  protected $map  = array();
   protected $requestUri = null;
   
   protected $position = 0;
   protected $entries  = array();
   
+  static protected $instance = null;
+  
   public function __construct($path = self::DEFAULT_PATH)
   {
     $this->path = RUN_BASE . $path;
+  }
+  
+  public static function create()
+  {
+    if (is_null(self::$instance)) self::$instance = new self();
+    return self::$instance;
   }
   
   public function setConfigPath($path)
@@ -69,7 +77,13 @@ class Sabel_Controller_Map implements Iterator
   
   public function getEntry($name)
   {
-    return new Sabel_Controller_Map_Entry($name, $this->map[$name], $this->requestUri);
+    if (!is_object($this->requestUri)) throw new Sabel_Exception_Runtime("");
+    
+    $entry = new Sabel_Controller_Map_Entry($name, $this->map[$name]);
+    $this->requestUri->initializeRequestUriAndParameters();
+    $this->requestUri->initialize($entry);
+    $entry->setRequest($this->requestUri);
+    return $entry;
   }
   
   public function getEntries()

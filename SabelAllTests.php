@@ -44,6 +44,7 @@ require_once('Test/Edo_SQLite.php');
 require_once('Test/InformationSchema.php');
 require_once('Test/Container.php');
 require_once('Test/Classes.php');
+require_once('Test/Cache.php');
 
 class SabelAllTests
 {
@@ -72,6 +73,7 @@ class SabelAllTests
     $suite->addTest(Test_InformationSchema::suite());
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Classes::suite());
+    $suite->addTest(Test_Cache::suite());
     
     return $suite;
   }

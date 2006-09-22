@@ -32,12 +32,15 @@ class Sabel_Controller_Front
   
   public function ignition()
   {
-    $map = create('sabel.controller.Map');
-    $map->load();
-    $entry = $map->find();
+    $request = new Sabel_Request_Request();
     
-    $class = Sabel_Controller_Loader::create($entry)->load();
-    $class->setEntry($entry);
+    $map = Sabel_Controller_Map::create();
+    $map->setRequestUri($request);
+    $map->load();
+    $mapEntry = $map->find();
+    
+    $class = Sabel_Controller_Loader::create($mapEntry)->load();
+    $class->setEntry($mapEntry);
     $class->setup();
     $class->initialize();
     $class->execute();
