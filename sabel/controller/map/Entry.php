@@ -8,14 +8,14 @@
  */
 class Sabel_Controller_Map_Entry
 {
-  protected $name       = '';
-  protected $entry      = array();
+  protected $name    = '';
+  protected $entry   = array();
   protected $request = null;
   
   public function __construct($name, $entry, $request = null)
   {
-    $this->name       = $name;
-    $this->entry      = $entry;
+    $this->name  = $name;
+    $this->entry = $entry;
     
     if ($request) {
       $this->request = $request;

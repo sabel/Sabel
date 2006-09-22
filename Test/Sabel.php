@@ -15,6 +15,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function setUp()
   {
+    mkdir(RUN_BASE);
     require_once('generator/generator.php');
     $dt = new DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
     $dt->visit(new SabelDirectoryAndFileCreator());
@@ -28,6 +29,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $dt->visit($remover);
     $dt->traverse();
     $remover->removeEmptyDirectories();
+    rmdir(RUN_BASE);
   }
   
   public function testSabel()

@@ -112,4 +112,9 @@ class Test_Map extends PHPUnit2_Framework_TestCase
     $this->assertTrue($dest->hasAction());
     $this->assertEquals('showByDate', $dest->getAction());
   }
+  
+  public function testMapFind()
+  {
+    
+  }
 }

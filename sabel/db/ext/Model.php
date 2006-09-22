@@ -21,7 +21,7 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
 
   public function __get($key)
   {
-    $this->loadSchema();
+    if (!$this->loaded) $this->loadSchema();
     if (is_object($this->data[$key])) {
       return $this->data[$key];
     } else {
