@@ -5,21 +5,22 @@ class Sabel_DB_Schema_General
   protected $connectName = '';
   protected $recordObj   = null;
 
-  public function getTable($tName)
+  public function getTable($tblName)
   {
-    $schemaClass = $this->connectName . '_' . $tName;
+    $schemaClass = $this->connectName . '_' . $tblName;
     if (is_null($schema = Sabel_DB_SimpleCache::get($schemaClass))) {
       if (class_exists($schemaClass, false)) {
         $sc   = new $schemaClass();
         $cols = array();
-        foreach ($sc->get() as $cName => $params) {
+        foreach ($sc->get() as $colName => $params) {
           $co = new Sabel_DB_Schema_Column();
-          $cols[$cName] = $co->make($params);
+          $co->name = $colName;
+          $cols[$colName] = $co->make($params);
         }
       } else {
-        $cols = $this->createColumns($tName);
+        $cols = $this->createColumns($tblName);
       }
-      $schema = new Sabel_DB_Schema_Table($tName, $cols);
+      $schema = new Sabel_DB_Schema_Table($tblName, $cols);
       Sabel_DB_SimpleCache::add($schemaClass, $schema);
     }
     return $schema;

@@ -33,7 +33,7 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
   {
     $this->columns = $columns = $this->getTableSchema()->getColumns();
     $this->size    = count($columns);
-    
+        
     $schema = array();
     foreach ($columns as $column) {
       $data = (isset($this->data[$column->name])) ? $this->data[$column->name] : null;
