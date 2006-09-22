@@ -100,7 +100,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     return $this->param;
   }
 
-  public function unsetProparties()
+  public function unsetProperties()
   {
     $this->param = array();
     $this->count = 1;

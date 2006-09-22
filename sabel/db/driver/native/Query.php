@@ -86,7 +86,7 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
     return "{$key}='{$this->escape($val)}'";
   }
 
-  public function unsetProparties()
+  public function unsetProperties()
   {
     $this->set = false;
   }

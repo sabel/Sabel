@@ -30,7 +30,7 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
     pg_query($conn, 'ROLLBACK');
   }
 
-  public function execute($sql = null, $param = null)
+  public function driverExecute($sql = null)
   {
     $getSQL = $this->query->getSQL();
 
@@ -47,9 +47,6 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
       $error = pg_result_error($this->conn);
       throw new Exception("pgsql_query execute failed:{$sql} ERROR:{$error}");
     }
-
-    $this->query->unsetProparties();
-    return true;
   }
 
   public function fetch($style = null)

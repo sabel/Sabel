@@ -51,7 +51,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     return $data;
   }
 
-  public function execute($sql = null, $param = null)
+  public function driverExecute($sql = null)
   {
     $conn   = (isset($this->trans)) ? $this->trans : $this->conn;
     $getSQL = $this->query->getSQL();
@@ -69,9 +69,6 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
       $error = ibase_errmsg();
       throw new Exception("ibase_query execute failed:{$sql} ERROR:{$error}");
     }
-
-    $this->query->unsetProparties();
-    return true;
   }
 
   public function fetch($style = null)

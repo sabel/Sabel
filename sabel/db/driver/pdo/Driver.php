@@ -77,13 +77,11 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $result = $this->query->makeConditionQuery($conditions);
     if (!$result) $exist = false;
 
-    if ($constraints && !$exist)
-      $this->query->makeConstraintQuery($constraints);
-
+    if ($constraints && !$exist) $this->query->makeConstraintQuery($constraints);
     $this->stmtFlag = $exist;
   }
 
-  public function execute($sql = null, $param = null)
+  public function driverExecute($sql = null)
   {
     $getSQL = $this->query->getSQL();
 
@@ -107,7 +105,6 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
     if ($this->stmt->execute($this->param)) {
       $this->param = array();
-      return true;
     } else {
       $param = var_export($this->param, 1);
       $error = $this->conn->errorInfo();
@@ -142,23 +139,17 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $param = $this->query->getParam();
     $data  = $this->data;
 
-    if ($data)
-      $param = (empty($param)) ? $data : array_merge($param, $data);
+    if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);
 
     $bindParam = array();
     if ($param) {
       foreach ($param as $key => $val) {
         if (is_null($val)) continue;
-
-        if (is_bool($val))
-          $bindParam[":{$key}"] = ($val) ? 'true' : 'false';
-
         $bindParam[":{$key}"] = $val;
       }
     }
 
     $this->param = $bindParam;
     $this->data  = array();
-    $this->query->unsetProparties();
   }
 }

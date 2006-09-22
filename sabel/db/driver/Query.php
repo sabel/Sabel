@@ -16,7 +16,7 @@ abstract class Sabel_DB_Driver_Query
   protected abstract function makeBetweenSQL($key, $val);
   protected abstract function makeEitherSQL($key, $val);
   protected abstract function makeLess_GreaterSQL($key, $val);
-  public    abstract function unsetProparties();
+  public    abstract function unsetProperties();
 
 
   public function __construct($dbName, $methodName = null)
@@ -173,7 +173,7 @@ abstract class Sabel_DB_Driver_Query
     $this->setWhereQuery($query);
   }
 
-  protected function escape($val)
+  public function escape($val)
   {
     $escMethod = $this->escMethod;
 

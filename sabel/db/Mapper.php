@@ -890,9 +890,9 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function execute($sql)
+  public function execute($sql, $param = null)
   {
-    $this->tryExecute($this->driver, $sql);
+    $this->tryExecute($this->driver, $sql, $param);
     $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
     return $this->toObject($rows);
   }
@@ -911,10 +911,10 @@ abstract class Sabel_DB_Mapper
     return $recordObj;
   }
 
-  protected function tryExecute($driver, $sql = null)
+  protected function tryExecute($driver, $sql = null, $param = null)
   {
     try {
-      $driver->execute($sql);
+      $driver->execute($sql, $param);
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }

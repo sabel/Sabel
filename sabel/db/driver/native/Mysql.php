@@ -37,7 +37,7 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     return (int)$row['last_insert_id()'];
   }
 
-  public function execute($sql = null, $param = null)
+  public function driverExecute($sql = null)
   {
     $getSQL = $this->query->getSQL();
 
@@ -54,9 +54,6 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
       $error = mysql_error($this->conn);
       throw new Exception("mysql_query execute failed:{$sql} ERROR:{$error}");
     }
-
-    $this->query->unsetProparties();
-    return true;
   }
 
   public function fetch($style = null)

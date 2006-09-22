@@ -17,12 +17,10 @@ abstract class Sabel_DB_Driver_General
   public abstract function begin($conn);
   public abstract function commit($conn);
   public abstract function rollback($conn);
-
-  public abstract function execute($sql = null, $param = null);
-
   public abstract function fetch($style = null);
   public abstract function fetchAll($style = null);
 
+  protected abstract function driverExecute($sql = null);
 
   public function setBasicSQL($sql)
   {
@@ -79,5 +77,17 @@ abstract class Sabel_DB_Driver_General
   public function getLastInsertId()
   {
     return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
+  }
+
+  public function execute($sql = null, $param = null)
+  {
+    if (isset($sql)) {
+      if ($param) {
+        foreach ($param as $key => $val) $param[$key] = $this->query->escape($val);
+        $sql = vsprintf($sql, $param);
+      }
+    }
+    $this->driverExecute($sql);
+    $this->query->unsetProperties();
   }
 }
