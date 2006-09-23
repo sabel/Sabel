@@ -81,11 +81,9 @@ abstract class Sabel_DB_Driver_General
 
   public function execute($sql = null, $param = null)
   {
-    if (isset($sql)) {
-      if ($param) {
-        foreach ($param as $key => $val) $param[$key] = $this->query->escape($val);
-        $sql = vsprintf($sql, $param);
-      }
+    if ($param) {
+      foreach ($param as $key => $val) $param[$key] = $this->query->escape($val);
+      $sql = vsprintf($sql, $param);
     }
     $this->driverExecute($sql);
     $this->query->unsetProperties();

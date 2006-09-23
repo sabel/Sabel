@@ -12,7 +12,7 @@ class Sabel_DB_Connection
     $driver = $params['driver'];
 
     if (!is_array($params))
-      throw new Exception('invalid Parameter. 2rd Argument must be array.');
+      throw new Exception('invalid Parameter. second argument must be an array.');
 
     if (strpos($driver, 'pdo-') !== false) {
       $db  = str_replace('pdo-', '', $driver);
@@ -98,7 +98,7 @@ class Sabel_DB_Connection
     if (isset(self::$connList[$connectName])) {
       return self::$connList[$connectName];
     } else {
-      throw new Exception('connection name is not found: ' . $connectName);
+      throw new Exception('Error: connection name is not found: ' . $connectName);
     }
   }
 
@@ -107,7 +107,7 @@ class Sabel_DB_Connection
     if (isset($param[$key])) {
       return $param[$key];
     } else {
-      throw new Exception("value is not set:{$connectName} => {$key}");
+      throw new Exception("Error: value is not set:{$connectName} => {$key}");
     }
   }
 }

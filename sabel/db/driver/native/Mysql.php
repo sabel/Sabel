@@ -55,11 +55,7 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Const::ASSOC) {
-      return mysql_fetch_assoc($this->result);
-    } else {
-      return mysql_fetch_array($this->result);
-    }
+    return ($style === Sabel_DB_Const::ASSOC) ? mysql_fetch_assoc($this->result) : mysql_fetch_array($this->result);
   }
 
   public function fetchAll($style = null)
@@ -67,9 +63,7 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if (!is_bool($result))
-      while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
-
+    if (!is_bool($result)) while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
     return $rows;
   }
 }

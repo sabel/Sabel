@@ -679,7 +679,7 @@ abstract class Sabel_DB_Mapper
   public function newChild($child = null)
   {
     $id = $this->data[$this->defColumn];
-    if (empty($id)) throw new Exception('Error: who is a parent? hasn\'t id value.');
+    if (empty($id)) throw new Exception('Error: newChild() who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
     $table  = (is_null($child)) ? $parant : $child;
@@ -709,7 +709,7 @@ abstract class Sabel_DB_Mapper
     if (isset($this->data[$this->defColumn])) {
       $id = $this->data[$this->defColumn];
     } else {
-      throw new Exception('Error: who is a parent? hasn\'t id value.');
+      throw new Exception('Error: clearChild() who is a parent? hasn\'t id value.');
     }
 
     $driver = $this->newClass($child)->getDriver();
@@ -724,11 +724,11 @@ abstract class Sabel_DB_Mapper
   public function save($data = null)
   {
     if (isset($data) && !is_array($data))
-      throw new Exception('Error: Argument must be an Array');
+      throw new Exception('Error: save() argument must be an array');
 
     if ($this->is_selected()) {
       if ($data) $this->newData = $data;
-      return $this->update();
+      $this->update();
     } else {
       if ($data) $this->data = $data;
       return $this->insert();
@@ -768,7 +768,7 @@ abstract class Sabel_DB_Mapper
 
   public function multipleInsert($data)
   {
-    if (!is_array($data)) throw new Exception('Error: data is not array.');
+    if (!is_array($data)) throw new Exception('Error: multipleInsert() data is not array.');
 
     $begin = $this->begin();
     try {
@@ -810,7 +810,7 @@ abstract class Sabel_DB_Mapper
   public function cascadeDelete($id = null)
   {
     if (is_null($id) && !$this->is_selected())
-      throw new Exception('Error: need the value of id. or, select the object beforehand.');
+      throw new Exception('Error: need the value of id or select the object beforehand.');
 
     $id = (isset($id)) ? $id : $this->data[$this->defColumn];
 
@@ -880,6 +880,9 @@ abstract class Sabel_DB_Mapper
 
   public function execute($sql, $param = null)
   {
+    if (isset($param) && !is_array($param))
+      throw new Exception('Error: execute() second argument must be an array');
+
     $this->tryExecute($this->driver, $sql, $param);
     $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
     return $this->toObject($rows);
