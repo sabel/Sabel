@@ -8,10 +8,8 @@
  */
 class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 {
-  private
-    $stmt  = null,
-    $data  = array(),
-    $param = array();
+  private $stmt = null;
+  private $data = array();
 
   public function __construct($conn, $dbType)
   {
@@ -98,12 +96,9 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
       throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
     }
 
-    $this->makeBindParam();
-
-    if ($this->stmt->execute($this->param)) {
-      $this->param = array();
-    } else {
-      $param = var_export($this->param, 1);
+    $param = $this->makeBindParam();
+    if (!$this->stmt->execute($param)) {
+      $param = var_export($param, 1);
       $error = $this->conn->errorInfo();
       throw new Exception("pdo execute failed:{$sql} PARAMETERS:{$param} ERROR:{$error[2]}");
     }
@@ -137,6 +132,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $data  = $this->data;
 
     if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);
+    $this->data  = array();
 
     $bindParam = array();
     if ($param) {
@@ -145,8 +141,6 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         $bindParam[":{$key}"] = $val;
       }
     }
-
-    $this->param = $bindParam;
-    $this->data  = array();
+    return $bindParam;
   }
 }

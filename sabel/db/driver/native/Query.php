@@ -53,9 +53,7 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
 
   public function makeBetweenSQL($key, $val)
   {
-    $val1 = $this->escape($val[0]);
-    $val2 = $this->escape($val[1]);
-    $this->setWhereQuery("{$key} BETWEEN '{$val1}' AND '{$val2}'");
+    $this->setWhereQuery("{$key} BETWEEN '{$val[0]}' AND '{$val[1]}'");
   }
 
   public function makeEitherSQL($key, $val)

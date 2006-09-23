@@ -1,36 +1,33 @@
 <?php
 /*
-require_once 'Sabel/sabel/db/Connection.php';
+require_once 'db/Connection.php';
 
-require_once 'Sabel/sabel/db/driver/Query.php';
-require_once 'Sabel/sabel/db/driver/native/Query.php';
-require_once 'Sabel/sabel/db/driver/pdo/Query.php';
+require_once 'db/driver/Query.php';
+require_once 'db/driver/native/Query.php';
+require_once 'db/driver/pdo/Query.php';
 
-require_once 'Sabel/sabel/db/driver/General.php';
-require_once 'Sabel/sabel/db/driver/native/Mysql.php';
-require_once 'Sabel/sabel/db/driver/native/Pgsql.php';
-require_once 'Sabel/sabel/db/driver/pdo/Driver.php';
+require_once 'db/driver/General.php';
+require_once 'db/driver/native/Mysql.php';
+require_once 'db/driver/native/Pgsql.php';
+require_once 'db/driver/pdo/Driver.php';
 
-require_once 'Sabel/sabel/db/Const.php';
-require_once 'Sabel/sabel/db/Transaction.php';
-require_once 'Sabel/sabel/db/Mapper.php';
-require_once 'Sabel/sabel/db/BaseClasses.php';
+require_once 'db/Const.php';
+require_once 'db/Transaction.php';
+require_once 'db/SimpleCache.php';
+require_once 'db/Mapper.php';
+require_once 'db/BaseClasses.php';
 
-require_once 'Sabel/sabel/db/schema/Types.php';
-require_once 'Sabel/sabel/db/schema/Setter.php';
-require_once 'Sabel/sabel/db/schema/Table.php';
-require_once 'Sabel/sabel/db/schema/MyPg.php';
-require_once 'Sabel/sabel/db/schema/Mysql.php';
-require_once 'Sabel/sabel/db/schema/Pgsql.php';
-require_once 'Sabel/sabel/db/schema/SQLite.php';
-require_once 'Sabel/sabel/db/schema/Accessor.php';
+require_once 'db/schema/Types.php';
+require_once 'db/schema/Setter.php';
+require_once 'db/schema/Column.php';
+require_once 'db/schema/Table.php';
+require_once 'db/schema/General.php';
+require_once 'db/schema/MyPg.php';
+require_once 'db/schema/Mysql.php';
+require_once 'db/schema/Accessor.php';
 
-require_once 'Sabel/sabel/db/schema/util/Creator.php';
-
-require_once 'Sabel/sabel/config/Spyc.php';
-require_once 'Sabel/sabel/config/Yaml.php';
-require_once 'Sabel/sabel/cache/Apc.php';
-require_once 'Sabel/sabel/Classes.php';
+require_once 'db/config/Spyc.php';
+require_once 'db/config/Yaml.php';
 */
 class ModelClass_Writer
 {
@@ -71,8 +68,10 @@ class ModelClass_Writer
         fwrite($fp, "<?php\n\n");
         fwrite($fp, "class {$class} extends Sabel_DB_Mapper\n{\n");
 
+        $flag = false;
         if (!self::$tIncrement[$connectName][$table]) {
           fwrite($fp, '  protected $autoNumber = false;' . "\n");
+          $flag = true;
         }
 
         $primary = self::$tPrimary[$connectName];
@@ -81,9 +80,10 @@ class ModelClass_Writer
           $line = 'protected $jointKey = array(' . "'{$pri[0]}'";
           for ($i = 1; $i < count($pri); $i++) $line .= ", '{$pri[$i]}'";
           fwrite($fp, $line . ");\n");
+          $flag = true;
         }
 
-        fwrite($fp, "\n");
+        if ($flag) fwrite($fp, "\n");
         fwrite($fp, '  public function __construct($param1 = null, $param2 = null)');
         fwrite($fp, "\n  {\n");
         fwrite($fp, '    $this->setDriver(' . "'{$connectName}');\n");
@@ -220,7 +220,7 @@ class Schema_Writer
     $dirPath   = Schema_Generator::$schemaDir;
     $className = ucfirst($connectName) . '_' . ucfirst($tName);
     $target = "{$dirPath}/{$className}.php";
-    echo "generate {$target} \n";
+    echo "generate Schema {$target} \n";
     $fp = fopen($target, 'w');
 
     ob_start();
@@ -308,7 +308,7 @@ class Schema_Generator
     self::$schemaDir = $_SERVER['argv'][2];
     self::$modelsDir = $_SERVER['argv'][3];
 
-    $yml  = new Sabel_Config_Yaml('database.yml');
+    $yml  = new Sabel_Config_Yaml('/usr/local/www/data/devel/config/database.yml');
     $data = $yml->read($_SERVER['argv'][1]);
 
     foreach ($data as $connectName => $params) {

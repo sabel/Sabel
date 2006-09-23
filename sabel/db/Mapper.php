@@ -603,20 +603,11 @@ abstract class Sabel_DB_Mapper
     } else if (isset($model->childConstraints[$child])) {
       $constraints = $model->childConstraints[$child];
     } else {
-      $constraints = $this->hasDefaultChildConstraint($model);
+      $constraints = $model->defChildConstraints;
     }
 
-    $model->setChildConstraint($child, $constraints);
+    if ($constraints) $model->setChildConstraint($child, $constraints);
     $model->defChildConstraints = $this->defChildConstraints;
-  }
-
-  private function hasDefaultChildConstraint($model)
-  {
-    if ($model->defChildConstraints) {
-      return $model->defChildConstraints;
-    } else {
-      throw new Exception('Error: limit constraint of child object, not found.');
-    }
   }
 
   protected function selectWithParent($row)
