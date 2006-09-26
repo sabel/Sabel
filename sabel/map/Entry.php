@@ -12,15 +12,19 @@ class Sabel_Map_Entry
   protected $rawEntry = array();
   protected $request  = null;
   
+  protected $uri = null;
   protected $destination = null;
+  protected $requirements = null;
   
   public function __construct($name, $rawEntry = null)
   {
-    $this->name     = $name;
+    $this->name = $name;
     
     if (!is_null($rawEntry)) {
       $this->rawEntry = $rawEntry;
     }
+    
+    $this->requirements = new Sabel_Map_Requirements();
   }
   
   public function getName()
@@ -28,9 +32,20 @@ class Sabel_Map_Entry
     return $this->name;
   }
   
+  public function setUri($uri)
+  {
+    $this->uri = $uri;
+  }
+  
   public function getUri()
   {
-    return new Sabel_Map_Uri($this->rawEntry['uri']);
+    if (is_object($this->uri)) {
+      return $this->uri;
+    } else if (is_string($this->uri)) {
+      return new Sabel_Map_Uri($this->uri);
+    } else {
+      return new Sabel_Map_Uri($this->rawEntry['uri']);
+    }
   }
   
   public function setDestination($destination)
@@ -54,24 +69,14 @@ class Sabel_Map_Entry
     return $dest;
   }
   
+  public function setRequirement($name, $rule)
+  {
+    $this->requirements->setRequirement($name, $rule);
+  }
+  
   public function getRequirements()
   {
-    if ($this->hasRequirements()) {
-      $r = new Sabel_Map_Requirements($this->rawEntry['requirements']);
-      return $r->getRequirements();
-    } else {
-      return null;
-    }
-  }
-  
-  public function validate()
-  {
-    // @todo implement
-  }
-  
-  public function hasRequirements()
-  {
-    return (isset($this->rawEntry['requirements']));
+    return $this->requirements;
   }
   
   public function hasOptions()

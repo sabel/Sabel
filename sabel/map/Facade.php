@@ -40,16 +40,37 @@ class Sabel_Map_Facade implements Iterator
     // @todo implement rules of found out correct map entry.
     // return $this->getEntry('default');
     foreach ($this->entries as $entry) {
-      $entry->isMatch();
+      if (is_object($entry)) $entry->isMatch();
     }
     
-    return $this->getEntry('default');
+    return $this->createEntry('default');
+  }
+  
+  public function setEntry($name, $entry)
+  {
+    $this->map[$name] = $entry;
   }
   
   public function getEntry($name)
   {
+    $entry = $this->map[$name];
+    
+    if (is_object($entry)) {
+      $this->requestUri->initialize($entry);
+      $entry->setRequest($this->requestUri);
+      return $entry;
+    } else {
+      return $this->createEntry($name);
+    }
+  }
+  
+  public function createEntry($name)
+  {
     if (!is_object($this->requestUri))
       throw new Sabel_Exception_Runtime("RequestUri object not found.");
+    
+    if (!isset($this->map[$name]))
+      throw new Sabel_Exception_Runtime("config not found.");
     
     $entry = new Sabel_Map_Entry($name, $this->map[$name]);
     $this->requestUri->initialize($entry);
@@ -61,7 +82,7 @@ class Sabel_Map_Facade implements Iterator
   {
     $entries = array();
     foreach (array_keys($this->map) as $name) {
-      $entries[] = $this->getEntry($name);
+      $entries[] = $this->createEntry($name);
     }
     return $entries;
   }

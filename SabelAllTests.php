@@ -32,7 +32,6 @@ require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
 require_once('Test/DI.php');
 require_once('Test/Pager.php');
-require_once('Test/Map.php');
 require_once('Test/Parameters.php');
 require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
@@ -60,16 +59,17 @@ class SabelAllTests
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_DI::suite());
     $suite->addTest(Test_Aspect::suite());
-    $suite->addTest(Test_Pager::suite());
-    $suite->addTest(Test_Map::suite());
-    $suite->addTest(Test_Parameters::suite());
-    $suite->addTest(Test_Request::suite());
-    $suite->addTest(Test_RequestUri::suite());
-    $suite->addTest(Test_Resolver::suite());
     
+    $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Classes::suite());
     $suite->addTest(Test_Cache::suite());
+    
+    $suite->addTest(Test_Pager::suite());
+    
+    $suite->addTest(Test_Request::suite());
+    $suite->addTest(Test_Parameters::suite());
+    $suite->addTest(Test_RequestUri::suite());
     
     $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
