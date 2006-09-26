@@ -16,10 +16,10 @@ class Sabel_Map_Facade implements Iterator
   
   static protected $instance = null;
   
-  public static function create($map)
+  public static function create($map = null)
   {
     if (is_null(self::$instance)) self::$instance = new self();
-    self::$instance->setMap($map);
+    if (!is_null($map)) self::$instance->setMap($map);
     return self::$instance;
   }
   
