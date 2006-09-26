@@ -2,6 +2,7 @@
 
 require_once('Test/Map/Entry.php');
 require_once('Test/Map/Destination.php');
+require_once('Test/Map/Uri.php');
 
 class Test_Map_Tests
 {
@@ -16,6 +17,7 @@ class Test_Map_Tests
     
     $suite->addTest(Test_Map_Entry::suite());
     $suite->addTest(Test_Map_Destination::suite());
+    $suite->addTest(Test_Map_Uri::suite());
     
     return $suite;
   }
