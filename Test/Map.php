@@ -19,7 +19,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   {
     $conf = new Sabel_Config_Yaml('Test/data/map.yml');
     
-    $this->map = Sabel_Controller_Map::create($conf->toArray());
+    $this->map = Sabel_Map_Facade::create($conf->toArray());
     $this->map->setRequestUri(new SabeL_Request_Request());
   }
   
@@ -123,7 +123,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   {
     $conf = new Sabel_Config_Yaml('Test/data/map.yml');
     
-    $map = Sabel_Controller_Map::create($conf->toArray());
+    $map = Sabel_Map_Facade::create($conf->toArray());
     $request = new SabeL_Request_Request(null, '/2006/05/02');
     
     $this->assertEquals('2006', $request->getUri()->get(0));
@@ -136,7 +136,7 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function testControllerMapDestination()
   {
-    $dest = new Sabel_Controller_Map_Destination();
+    $dest = new Sabel_Map_Destination();
     
     $dest->setModule('news');
     $dest->setController('viewer');

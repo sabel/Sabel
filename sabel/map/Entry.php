@@ -6,7 +6,7 @@
  * @package org.sabel.map
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Controller_Map_Entry
+class Sabel_Map_Entry
 {
   protected $name     = '';
   protected $rawEntry = array();
@@ -25,12 +25,12 @@ class Sabel_Controller_Map_Entry
   
   public function getUri()
   {
-    return new Sabel_Controller_Map_Uri($this->rawEntry['uri']);
+    return new Sabel_Map_Uri($this->rawEntry['uri']);
   }
   
   public function getDestination()
   {
-    $dest = new Sabel_Controller_Map_Destination();
+    $dest = new Sabel_Map_Destination();
     
     $destCfg = $this->rawEntry['destination'];
     $dest->setModule($destCfg['module']);

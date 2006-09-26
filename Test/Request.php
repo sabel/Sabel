@@ -33,7 +33,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
 
   public function testRequestBasicUse()
   {
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
     $r = new Sabel_Request_Request($entry, '/blog/archive/view/1');
         
     $this->assertEquals('blog',    $r->getUri()->getModule());
@@ -49,7 +49,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   
   public function testInvalidUri()
   {
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
     $r = new Sabel_Request_Request($entry, '?id=1');
     
     $this->assertEquals('', $r->getUri()->getModule(), 'module is not null');
@@ -63,7 +63,7 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   
   public function testInvalidModule()
   {
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
     $r = new Sabel_Request_Request($entry, 'id=1/id=1/id=1/1');
     $this->assertEquals('id=1', $r->getUri()->getModule());
   }

@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Sabel_Controller_Map_Destination
+ * Sabel_Map_Destination
  * 
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Controller_Map_Destination
+class Sabel_Map_Destination
 {
   const MODULE     = 'module';
   const CONTROLLER = 'controller';
@@ -31,9 +31,9 @@ class Sabel_Controller_Map_Destination
     
     $dest = $this->destination;
     
-    $elems = array(new Sabel_Controller_Map_Element($dest[self::MODULE]),
-                   new Sabel_Controller_Map_Element($dest[self::CONTROLLER]),
-                   new Sabel_Controller_Map_Element($dest[self::ACTION]));
+    $elems = array(new Sabel_Map_Element($dest[self::MODULE]),
+                   new Sabel_Map_Element($dest[self::CONTROLLER]),
+                   new Sabel_Map_Element($dest[self::ACTION]));
                    
     $pos = 0;
     foreach ($mapUri as $element) {

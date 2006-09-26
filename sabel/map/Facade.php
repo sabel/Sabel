@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Sabel_Controrller_Map
+ * Sabel_Facade
  *
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Controller_Map implements Iterator
+class Sabel_Map_Facade implements Iterator
 {
   protected $map = array();
   protected $requestUri = null;
@@ -51,7 +51,7 @@ class Sabel_Controller_Map implements Iterator
     if (!is_object($this->requestUri))
       throw new Sabel_Exception_Runtime("RequestUri object not found.");
     
-    $entry = new Sabel_Controller_Map_Entry($name, $this->map[$name]);
+    $entry = new Sabel_Map_Entry($name, $this->map[$name]);
     $this->requestUri->initialize($entry);
     $entry->setRequest($this->requestUri);
     return $entry;

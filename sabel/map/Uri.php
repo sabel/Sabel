@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Sabel_Controller_Map_Uri
+ * Sabel_Map_Uri
  * 
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Controller_Map_Uri implements Iterator
+class Sabel_Map_Uri implements Iterator
 {
   protected $uri = '';
   protected $elements = array();
@@ -34,7 +34,7 @@ class Sabel_Controller_Map_Uri implements Iterator
   {
     $position = 0;
     foreach ($this->elements as $element) {
-      $oElement = new Sabel_Controller_Map_Element($element);
+      $oElement = new Sabel_Map_Element($element);
       if ($oElement->getName() === $name) return $position;
       $position++;
     }
@@ -45,7 +45,7 @@ class Sabel_Controller_Map_Uri implements Iterator
     $position =(int) $position;
 
     if (0 <= $position && $position < $this->limit) {
-      return new Sabel_Controller_Map_Element($this->elements[$position]);
+      return new Sabel_Map_Element($this->elements[$position]);
     } else {
       return false;
     }
@@ -55,7 +55,7 @@ class Sabel_Controller_Map_Uri implements Iterator
   {
     $objElements = array();
     foreach ($this->elements as $element) {
-      $objElements[] = new Sabel_Controller_Map_Element($element);
+      $objElements[] = new Sabel_Map_Element($element);
     }
     return $objElements;
   }
@@ -111,7 +111,7 @@ class Sabel_Controller_Map_Uri implements Iterator
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_Controller_Map_Element
+class Sabel_Map_Element
 {
   protected $element;
   

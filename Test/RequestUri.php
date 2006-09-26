@@ -28,7 +28,7 @@ class Test_RequestUri extends SabelTestCase
   public function setUp()
   {
     $request = new Sabel_Request_Request(null, '/blog/archive/view/1');
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map);
+    $entry = new Sabel_Map_Entry('dummy', $this->map);
     $entry->setRequest($request);
     $this->uri = new Sabel_Request_Uri('blog/archive/view/1', $entry);
   }
@@ -49,7 +49,7 @@ class Test_RequestUri extends SabelTestCase
   
   public function testOverrideGetString()
   {
-    $entry = new Sabel_Controller_Map_Entry('dummy', $this->map, '/blog/archive/view/test');
+    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/test');
     $this->uri = new Sabel_Request_Uri('blog/archive/view/test', $entry);
     $this->assertEquals('test', $this->uri->id);
   }
