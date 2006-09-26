@@ -1,10 +1,10 @@
 <?php
 
-class Test_InformationSchema extends SabelTestCase
+class Test_DB_InformationSchema extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_InformationSchema");
+    return new PHPUnit2_Framework_TestSuite("Test_DB_InformationSchema");
   }
 
   public function testUse()

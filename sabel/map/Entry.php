@@ -12,10 +12,15 @@ class Sabel_Map_Entry
   protected $rawEntry = array();
   protected $request  = null;
   
-  public function __construct($name, $rawEntry)
+  protected $destination = null;
+  
+  public function __construct($name, $rawEntry = null)
   {
     $this->name     = $name;
-    $this->rawEntry = $rawEntry;
+    
+    if (!is_null($rawEntry)) {
+      $this->rawEntry = $rawEntry;
+    }
   }
   
   public function getName()
@@ -26,6 +31,11 @@ class Sabel_Map_Entry
   public function getUri()
   {
     return new Sabel_Map_Uri($this->rawEntry['uri']);
+  }
+  
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
   }
   
   public function getDestination()

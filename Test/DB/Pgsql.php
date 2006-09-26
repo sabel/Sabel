@@ -1,31 +1,31 @@
 <?php
 
-class Test_Edo_Mysql extends Test_Edo_Test
+class Test_DB_Pgsql extends Test_DB_Test
 {
-  private static $params1 = array('driver'   => 'mysql',
+  private static $params1 = array('driver'   => 'pdo-pgsql',
                                   'host'     => 'localhost',
-                                  'user'     => 'root',
-                                  'password' => '',
-                                  'schema'   => 'edo',
+                                  'user'     => 'pgsql',
+                                  'password' => 'pgsql',
+                                  'schema'   => 'public',
                                   'database' => 'edo');
 
-  private static $params2 = array('driver'   => 'pdo-mysql',
+  private static $params2 = array('driver'   => 'pgsql',
                                   'host'     => 'localhost',
-                                  'user'     => 'root',
-                                  'password' => '',
-                                  'schema'   => 'edo2',
+                                  'user'     => 'pgsql',
+                                  'password' => 'pgsql',
+                                  'schema'   => 'public',
                                   'database' => 'edo2');
 
   public static function main() {
     require_once "PHPUnit2/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo_Mysql");
+    $suite  = new PHPUnit2_Framework_TestSuite("Test_DB_Pgsql");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
 
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Edo_Mysql");
+    return new PHPUnit2_Framework_TestSuite("Test_DB_Pgsql");
   }
 
   public function __construct()
@@ -42,11 +42,11 @@ class Test_Edo_Mysql extends Test_Edo_Test
 
   public function testInit()
   {
-    Test_Edo_Test::$connectName = 'my';
-    Sabel_DB_Connection::addConnection('my', self::$params1);
-    Sabel_DB_Connection::addConnection('my2', self::$params2);
+    Test_DB_Test::$connectName = 'pg';
+    Sabel_DB_Connection::addConnection('pg', self::$params1);
+    Sabel_DB_Connection::addConnection('pg2', self::$params2);
 
-    $tables = Test_Edo_Test::$TABLES;
+    $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
 
     try {
@@ -60,10 +60,10 @@ class Test_Edo_Mysql extends Test_Edo_Test
 }
 
 /**
- * create query for mysql unit test.
+ * create query for postgres unit test.
  *
  *
-class MysqlHelper
+class PgsqlHelper
 {
   protected $sqls = null;
 
@@ -72,88 +72,89 @@ class MysqlHelper
     $SQLs = array();
 
     $SQLs[] = 'CREATE TABLE test (
-                 id       INT2 PRIMARY KEY,
+                 id       SERIAL PRIMARY KEY,
                  name     VARCHAR(32) NOT NULL,
                  blood    VARCHAR(32),
                  test2_id INT2)';
-
+    
     $SQLs[] = 'CREATE TABLE test2 (
-                 id int2 PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL,
-                 test3_id int2)';
+                 id       SERIAL PRIMARY KEY,
+                 name     VARCHAR(32) NOT NULL,
+                 test3_id INT2)';
                  
     $SQLs[] = 'CREATE TABLE test3 (
-                id INT2 PRIMARY KEY,
+                id   SERIAL PRIMARY KEY,
                 name VARCHAR(32) NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer (
-                id INT2 PRIMARY KEY,
+                id   SERIAL PRIMARY KEY,
                 name VARCHAR(32) NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_order (
-                id INT2 PRIMARY KEY,
+                id          SERIAL PRIMARY KEY,
                 customer_id INT2 NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE order_line (
-                id INT2 PRIMARY KEY AUTO_INCREMENT,
+                id                SERIAL PRIMARY KEY,
                 customer_order_id INT2 NOT NULL,
-                amount INT4,
-                item_id INT2 NOT NULL)';
+                amount            INT4,
+                item_id           INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_telephone (
-                id INT2 PRIMARY KEY,
+                id          SERIAL PRIMARY KEY,
                 customer_id INT2 NOT NULL,
-                telephone VARCHAR(32))';
+                telephone   VARCHAR(32))';
                 
     $SQLs[] = 'CREATE TABLE infinite1 (
-                id INT2 PRIMARY KEY,
+                id           SERIAL PRIMARY KEY,
                 infinite2_id INT2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE infinite2 (
-                id INT2 PRIMARY KEY,
+                id           SERIAL PRIMARY KEY,
                 infinite1_id int2 NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE seq (
-                 id INT2 PRIMARY KEY AUTO_INCREMENT,
+                 id   SERIAL PRIMARY KEY,
                  text VARCHAR(65536) NOT NULL)';
     
     $SQLs[] = 'CREATE TABLE tree (
-                 id      INT2 PRIMARY KEY,
+                 id      SERIAL PRIMARY KEY,
                  tree_id INT2,
                  name    VARCHAR(12) )';
-
+                
     $SQLs[] = 'CREATE TABLE student (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
+                 id    SERIAL PRIMARY KEY,
                  name  VARCHAR(24) NOT NULL,
                  birth DATE)';
     
     $SQLs[] = 'CREATE TABLE student_course (
+                 id         SERIAL,
                  student_id INT4 NOT NULL,
                  course_id  INT4 NOT NULL,
                  CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
 
     $SQLs[] = 'CREATE TABLE course (
-                 id   INT4 PRIMARY KEY AUTO_INCREMENT,
+                 id   SERIAL PRIMARY KEY,
                  name VARCHAR(24) )';
                 
     $SQLs[] = 'CREATE TABLE users (
-                 id        INT4 PRIMARY KEY AUTO_INCREMENT,
+                 id        SERIAL PRIMARY KEY,
                  name      VARCHAR(24) NOT NULL,
                  status_id INT2 )';
 
     $SQLs[] = 'CREATE TABLE status (
-                 id    INT2 PRIMARY KEY AUTO_INCREMENT,
+                 id    SERIAL PRIMARY KEY,
                  state VARCHAR(24) )';
 
     $SQLs[] = 'CREATE TABLE bbs (
-                 id       INT4 PRIMARY KEY AUTO_INCREMENT,
+                 id       SERIAL PRIMARY KEY,
                  users_id INT4 NOT NULL,
                  title    VARCHAR(24),
                  body     VARCHAR(24))';
 
     $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
-                 text  VARCHAR(24)) TYPE=InnoDB';
+                 id    SERIAL PRIMARY KEY,
+                 text  VARCHAR(24) )';
 
     $this->sqls = $SQLs;
   }
@@ -161,5 +162,5 @@ class MysqlHelper
 */
 
 if (!defined("PHPUnit2_MAIN_METHOD")) {
-  define("PHPUnit2_MAIN_METHOD", "Test_Edo_Mysql::main");
+  define("PHPUnit2_MAIN_METHOD", "Test_Edo_Pgsql::main");
 }

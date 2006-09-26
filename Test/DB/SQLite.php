@@ -1,6 +1,6 @@
 <?php
 
-class Test_Edo_SQLite extends Test_Edo_Test
+class Test_DB_SQLite extends Test_DB_Test
 {
   private static $params1 = array('driver'   => 'pdo-sqlite',
                                   'database' => 'Test/data/log1.sq3');
@@ -11,13 +11,13 @@ class Test_Edo_SQLite extends Test_Edo_Test
   public static function main() {
     require_once "PHPUnit2/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit2_Framework_TestSuite("Test_Edo_SQLite");
+    $suite  = new PHPUnit2_Framework_TestSuite("Test_DB_SQLite");
     $result = PHPUnit2_TextUI_TestRunner::run($suite);
   }
 
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Edo_SQLite");
+    return new PHPUnit2_Framework_TestSuite("Test_DB_SQLite");
   }
 
   public function __construct()
@@ -34,7 +34,7 @@ class Test_Edo_SQLite extends Test_Edo_Test
 
   public function testInit()
   {
-    Test_Edo_Test::$connectName = 'sq';
+    Test_DB_Test::$connectName = 'sq';
     Sabel_DB_Connection::addConnection('sq', self::$params1);
     Sabel_DB_Connection::addConnection('sq2', self::$params2);
 

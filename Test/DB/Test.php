@@ -1,12 +1,12 @@
 <?php
 
-class Test_Edo_Test extends SabelTestCase
+class Test_DB_Test extends SabelTestCase
 {
   private static $count  = 0;
   private static $dbList = array('mysql', 'pgsql', 'sqlite');
 
   public static $connectName = '';
-
+  
   public static $TABLES = array('test', 'test2', 'test3',
                                 'customer', 'customer_order', 'order_line',
                                 'customer_telephone', 'infinite1', 'infinite2',
@@ -1101,7 +1101,7 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver(Test_Edo_Test::$connectName);
+    $this->setDriver(Test_DB_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1173,7 +1173,7 @@ class Tree extends Sabel_DB_Tree
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver(Test_Edo_Test::$connectName);
+    $this->setDriver(Test_DB_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1184,7 +1184,7 @@ class Bridge_Base extends Sabel_DB_Bridge
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver(Test_Edo_Test::$connectName);
+    $this->setDriver(Test_DB_Test::$connectName);
     parent::__construct($param1, $param2);
   }
 }
@@ -1218,7 +1218,7 @@ class Trans2 extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver(Test_Edo_Test::$connectName . '2');
+    $this->setDriver(Test_DB_Test::$connectName . '2');
     parent::__construct($param1, $param2);
   }
 }
