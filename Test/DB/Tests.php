@@ -5,6 +5,8 @@ require_once('Test/DB/Mysql.php');
 require_once('Test/DB/Pgsql.php');
 require_once('Test/DB/SQLite.php');
 
+require_once('Test/DB/InformationSchema.php');
+
 class Test_DB_Tests
 {
   public static function main()

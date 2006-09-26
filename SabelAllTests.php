@@ -37,14 +37,13 @@ require_once('Test/Parameters.php');
 require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
 require_once('Test/Resolver.php');
-require_once('Test/Edo_Test.php');
-require_once('Test/Edo_Mysql.php');
-require_once('Test/Edo_Pgsql.php');
-require_once('Test/Edo_SQLite.php');
-require_once('Test/InformationSchema.php');
+
 require_once('Test/Container.php');
 require_once('Test/Classes.php');
 require_once('Test/Cache.php');
+
+require_once('Test/DB/Tests.php');
+require_once('Test/Map/Tests.php');
 
 class SabelAllTests
 {
@@ -67,13 +66,13 @@ class SabelAllTests
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_RequestUri::suite());
     $suite->addTest(Test_Resolver::suite());
-    $suite->addTest(Test_Edo_Mysql::suite());
-    $suite->addTest(Test_Edo_Pgsql::suite());
-    $suite->addTest(Test_Edo_SQLite::suite());
-    $suite->addTest(Test_InformationSchema::suite());
+    
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Classes::suite());
     $suite->addTest(Test_Cache::suite());
+    
+    $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_Map_Tests::suite());
     
     return $suite;
   }
