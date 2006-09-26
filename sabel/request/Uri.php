@@ -9,7 +9,7 @@
 class Sabel_Request_Uri
 {
   /**
-   * @var array parts of uri. separate by slash (/)
+   * @var Array parts of uri. separate by slash (/)
    */
   protected $parts = array();
   protected $entry = null;

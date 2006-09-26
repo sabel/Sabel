@@ -12,20 +12,29 @@ class Sabel_Controller_Map_Destination
   const CONTROLLER = 'controller';
   const ACTION     = 'action';
   
-  protected $parentEntry = null;
   protected $destination = array();
   
-  public function __construct($entry, $dest)
+  public function __construct($dest = null)
   {
-    $this->parentEntry = $entry;
-   
-    $mapUri     = $entry->getUri();
-    $requestUri = $entry->getRequest();
+    $this->destination = (!is_null($dest)) ? $dest : null;
+  }
+  
+  public function mappingByRequest($mapUri, $requestUri)
+  {
+    if (!is_object($mapUri)) {
+      throw new Sabel_Exception_Runtime('MapUri is not object.');
+    }
+    
+    if (!is_object($requestUri)) {
+      throw new Sabel_Exception_Runtime('requestUri is not object.');
+    }
+    
+    $dest = $this->destination;
     
     $elems = array(new Sabel_Controller_Map_Element($dest[self::MODULE]),
                    new Sabel_Controller_Map_Element($dest[self::CONTROLLER]),
                    new Sabel_Controller_Map_Element($dest[self::ACTION]));
-      
+                   
     $pos = 0;
     foreach ($mapUri as $element) {
       switch (true) {
@@ -39,11 +48,30 @@ class Sabel_Controller_Map_Destination
           $dest[self::ACTION] = $requestUri->getUri()->get($pos);
           break;
       }
-      
       $pos++;
     }
     
     $this->destination = $dest;
+  }
+  
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
+  }
+  
+  public function setModule($name)
+  {
+    $this->destination[self::MODULE] = $name;
+  }
+  
+  public function setController($name)
+  {
+    $this->destination[self::CONTROLLER] = $name;
+  }
+  
+  public function setAction($name)
+  {
+    $this->destination[self::ACTION] = $name;
   }
   
   public function __get($key)

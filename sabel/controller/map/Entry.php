@@ -30,7 +30,18 @@ class Sabel_Controller_Map_Entry
   
   public function getDestination()
   {
-    return new Sabel_Controller_Map_Destination($this, $this->rawEntry['destination']);
+    $dest = new Sabel_Controller_Map_Destination();
+    
+    $destCfg = $this->rawEntry['destination'];
+    $dest->setModule($destCfg['module']);
+    $dest->setController($destCfg['controller']);
+    $dest->setAction($destCfg['action']);
+    unset($destCfg);
+    
+    // @todo rename.
+    $dest->mappingByRequest($this->getUri(), $this->getRequest());
+    
+    return $dest;
   }
   
   public function getRequirements()

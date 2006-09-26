@@ -8,10 +8,7 @@
  */
 class Sabel_Controller_Map implements Iterator
 {
-  const DEFAULT_PATH = '/config/map.yml';
-  
-  protected $path = '';
-  protected $map  = array();
+  protected $map = array();
   protected $requestUri = null;
   
   protected $position = 0;
@@ -19,48 +16,30 @@ class Sabel_Controller_Map implements Iterator
   
   static protected $instance = null;
   
-  public function __construct($path = self::DEFAULT_PATH)
-  {
-    $this->path = RUN_BASE . $path;
-  }
-  
-  public static function create()
+  public static function create($map)
   {
     if (is_null(self::$instance)) self::$instance = new self();
+    self::$instance->setMap($map);
     return self::$instance;
   }
   
-  public function setConfigPath($path)
+  public function setMap($map)
   {
-    $this->path = $path;
-  }
-  
-  public function load()
-  {
-    if (!is_file($this->getPath()))
-      throw new Exception("map configure not found on " . $this->getPath());
-    
-    $c = new Sabel_Config_Yaml($this->getPath());
-    $this->map = $c->toArray();
-    $this->entries = $this->getEntries();
-  }
-  
-  public function getPath()
-  {
-    return $this->path;
+    $this->map = $map;
   }
   
   public function setRequestUri($request)
   {
     $this->requestUri = $request;
     $this->requestUri->initializeRequestUriAndParameters();
+    $this->entries = $this->getEntries();
   }
   
   public function find()
   {
     // @todo implement rules of found out correct map entry.
     // return $this->getEntry('default');
-    foreach ($this->getEntries() as $entry) {
+    foreach ($this->entries as $entry) {
       $entry->isMatch();
     }
     
@@ -69,7 +48,8 @@ class Sabel_Controller_Map implements Iterator
   
   public function getEntry($name)
   {
-    if (!is_object($this->requestUri)) throw new Sabel_Exception_Runtime("");
+    if (!is_object($this->requestUri))
+      throw new Sabel_Exception_Runtime("RequestUri object not found.");
     
     $entry = new Sabel_Controller_Map_Entry($name, $this->map[$name]);
     $this->requestUri->initialize($entry);
@@ -80,7 +60,9 @@ class Sabel_Controller_Map implements Iterator
   public function getEntries()
   {
     $entries = array();
-    foreach (array_keys($this->map) as $name) $entries[] = $this->getEntry($name);
+    foreach (array_keys($this->map) as $name) {
+      $entries[] = $this->getEntry($name);
+    }
     return $entries;
   }
   

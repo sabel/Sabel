@@ -34,9 +34,9 @@ class Sabel_Controller_Front
   {
     $request = new Sabel_Request_Request();
     
-    $map = Sabel_Controller_Map::create();
+    $conf = new Sabel_Config_Yaml(RUN_BASE.'/config/map.yml');
+    $map = Sabel_Controller_Map::create($conf->toArray());
     $map->setRequestUri($request);
-    $map->load();
     $mapEntry = $map->find();
     
     $class = Sabel_Controller_Loader::create($mapEntry)->load();

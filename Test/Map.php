@@ -17,10 +17,10 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function setUp()
   {
-    $this->map = new Sabel_Controller_Map();
-    $this->map->setConfigPath('Test/data/map.yml');
+    $conf = new Sabel_Config_Yaml('Test/data/map.yml');
+    
+    $this->map = Sabel_Controller_Map::create($conf->toArray());
     $this->map->setRequestUri(new SabeL_Request_Request());
-    $this->map->load();
   }
   
   public function tearDown()
@@ -121,15 +121,31 @@ class Test_Map extends PHPUnit2_Framework_TestCase
   
   public function testMapFind()
   {
-    $map = new Sabel_Controller_Map();
-    $map->setConfigPath('Test/data/map.yml');
+    $conf = new Sabel_Config_Yaml('Test/data/map.yml');
+    
+    $map = Sabel_Controller_Map::create($conf->toArray());
     $request = new SabeL_Request_Request(null, '/2006/05/02');
+    
     $this->assertEquals('2006', $request->getUri()->get(0));
     $map->setRequestUri($request);
-    $map->load();
     
     $entry = $map->find();
     // @todo test pass here
     // $this->assertEquals('blog', $entry->getName());
+  }
+  
+  public function testControllerMapDestination()
+  {
+    $dest = new Sabel_Controller_Map_Destination();
+    
+    $dest->setModule('news');
+    $dest->setController('viewer');
+    $dest->setAction('showByDate');
+    
+    $except = array('module'     => 'news',
+                    'controller' => 'viewer',
+                    'action'     => 'showByDate');
+                    
+    $this->assertEquals($except, $dest->toArray());
   }
 }
