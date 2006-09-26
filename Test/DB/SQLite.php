@@ -38,7 +38,7 @@ class Test_DB_SQLite extends Test_DB_Test
     Sabel_DB_Connection::addConnection('sq', self::$params1);
     Sabel_DB_Connection::addConnection('sq2', self::$params2);
 
-    $tables = Test_Edo_Test::$TABLES;
+    $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
 
     try {
@@ -162,5 +162,5 @@ class SQLiteHelper
 */
 
 if (!defined("PHPUnit2_MAIN_METHOD")) {
-  define("PHPUnit2_MAIN_METHOD", "Test_Edo_SQLite::main");
+  define("PHPUnit2_MAIN_METHOD", "Test_DB_SQLite::main");
 }
