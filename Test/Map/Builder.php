@@ -26,6 +26,7 @@ class Test_Map_Builder extends PHPUnit2_Framework_TestCase
     $this->assertEquals('blog', $facade->getEntry('blog')->getName());
     $this->assertEquals('news', $news->getName());
     
-    $this->assertTrue($news->getRequirements()->getByName('article_id')->isMatch(12345678));
+    $reqs = $news->getRequirements();
+    $this->assertTrue($reqs->getByName('article_id')->isMatch(12345678));
   }
 }

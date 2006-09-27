@@ -80,17 +80,25 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   
   public function testMapFind()
   {
-    $conf = new Sabel_Config_Yaml('Test/data/map.yml');
-    
-    $map = new Sabel_Map_Facade($conf->toArray());
+    $b = new Sabel_Map_Builder();
+    $facade = $b->build('Test/data/map.yml');
     $request = new SabeL_Request_Request(null, '/2006/05/02');
     
     $this->assertEquals('2006', $request->getUri()->get(0));
-    $map->setRequestUri($request);
+    $facade->setRequestUri($request);
     
-    // $entry = $map->find();
-    // @todo test pass here
-    // $this->assertEquals('blog', $entry->getName());
+    $entry = $facade->find();
+    $this->assertEquals('blog', $entry->getName());
+  }
+  
+  public function testMapFindNotFound()
+  {
+    $b = new Sabel_Map_Builder();
+    $facade = $b->build('Test/data/map.yml');
+    $request = new SabeL_Request_Request(null, '/index/blog/top/14');
+    
+    $entry = $facade->find();
+    $this->assertEquals('default', $entry->getName());
   }
   
   protected function createFacade()

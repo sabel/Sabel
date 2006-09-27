@@ -61,11 +61,6 @@ class Sabel_Map_Entry
     return $this->requirements;
   }
   
-  public function hasOptions()
-  {
-    return (isset($this->rawEntry['option']));
-  }
-  
   public function setRequest($request)
   {
     $this->request = $request;
@@ -78,5 +73,21 @@ class Sabel_Map_Entry
   
   public function isMatch()
   {
+    $mapUri     = $this->getUri();
+    $requestUri = $this->request->getUri();
+    
+    $reqs = $this->requirements;
+    
+    if ($reqs->hasRequirements()) {
+      $match = true;
+      for ($i = 0; $i < $requestUri->count(); $i++) {
+        $requirement = $reqs->get($i);
+        if (!is_object($requirement)) break;
+        $match = $requirement->isMatch($requestUri->get($i));
+      }
+      if ($match) return true;
+    }
+    
+    return false;
   }
 }
