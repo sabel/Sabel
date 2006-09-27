@@ -102,11 +102,14 @@ class Sabel_Map_Entry
       
       if ($element->isConstant() && $request === $element->toString()) {
         $match = true;
+        continue;
       } else if ($reqs->hasRequirementByName($element->getName())) {
         $req = $reqs->getByName($element->getName());
         $match = $req->isMatch($request);
+        continue;
       } else {
         $match = false;
+        break;
       }
     }
     
