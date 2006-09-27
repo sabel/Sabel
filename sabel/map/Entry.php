@@ -71,6 +71,22 @@ class Sabel_Map_Entry
     return $this->request;
   }
   
+  public function uri($params)
+  {
+    $mapUri = $this->getUri();
+    
+    $buf = array();
+    foreach ($mapUri as $name => $uri) {
+      $name = $uri->getName();
+      if (isset($params[$name])) {
+        $buf[] = $params[$name];
+      }
+    }
+    
+    $uri = join('/', $buf);
+    return $uri;
+  }
+  
   public function isMatch()
   {
     $mapUri     = $this->getUri();
@@ -78,16 +94,22 @@ class Sabel_Map_Entry
     
     $reqs = $this->requirements;
     
-    if ($reqs->hasRequirements()) {
-      $match = true;
-      for ($i = 0; $i < $requestUri->count(); $i++) {
-        $requirement = $reqs->get($i);
-        if (!is_object($requirement)) break;
-        $match = $requirement->isMatch($requestUri->get($i));
+    $match = true;
+    for ($i = 0; $requestUri->count(); $i++) {
+      $element = $mapUri->getElement($i);
+      if (!is_object($element)) break;
+      $request = $requestUri->get($i);
+      
+      if ($element->isConstant() && $request === $element->toString()) {
+        $match = true;
+      } else if ($reqs->hasRequirementByName($element->getName())) {
+        $req = $reqs->getByName($element->getName());
+        $match = $req->isMatch($request);
+      } else {
+        $match = false;
       }
-      if ($match) return true;
     }
     
-    return false;
+    return $match;
   }
 }

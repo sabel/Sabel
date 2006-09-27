@@ -27,15 +27,6 @@ class Sabel_Map_Facade implements Iterator
     $this->requestUri->initializeRequestUriAndParameters();
   }
   
-  /*
-  public function find()
-  {
-    $entry = $this->getEntry('default');
-    $this->requestUri->initialize($entry);
-    return $entry;
-  }
-  */
-  
   public function find()
   {
     $matched = false;

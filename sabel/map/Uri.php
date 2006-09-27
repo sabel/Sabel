@@ -17,7 +17,7 @@ class Sabel_Map_Uri implements Iterator
   {
     $this->uri      = $uri;
     $this->elements = explode('/', $uri);
-    $this->limit    = $this->count();
+    $this->limit    = count($this->elements);
   }
   
   public function getString()

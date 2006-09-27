@@ -40,6 +40,11 @@ class Sabel_Map_Requirements implements Iterator
     return $this->requirements[$name];
   }
   
+  public function hasRequirementByName($name)
+  {
+    return (isset($this->requirements[$name]));
+  }
+  
   /**
    * implements for Iterator interface
    *
