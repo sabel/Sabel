@@ -8,11 +8,10 @@
  */
 class Sabel_Map_Entry
 {
-  protected $name     = '';
-  protected $rawEntry = array();
-  protected $request  = null;
+  protected $name    = '';
+  protected $request = null;
   
-  protected $uri = null;
+  protected $uri          = null;
   protected $destination  = null;
   protected $requirements = null;
   

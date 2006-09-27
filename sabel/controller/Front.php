@@ -34,7 +34,7 @@ class Sabel_Controller_Front
   {
     $builder = new Sabel_Map_Builder();
     
-    $map = new Sabel_Map_Facade();
+    $map = Sabel_Map_Facade::create();
     $request = new Sabel_Request_Request();
     $map->setRequestUri($request);
     $builder->build(RUN_BASE.'/config/map.yml', $map);
