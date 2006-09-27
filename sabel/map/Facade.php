@@ -8,7 +8,6 @@
  */
 class Sabel_Map_Facade implements Iterator
 {
-  protected $map = array();
   protected $requestUri = null;
   
   protected $position = 0;
@@ -16,75 +15,33 @@ class Sabel_Map_Facade implements Iterator
   
   static protected $instance = null;
   
-  public static function create($map = null)
+  public static function create()
   {
     if (is_null(self::$instance)) self::$instance = new self();
-    if (!is_null($map)) self::$instance->setMap($map);
     return self::$instance;
-  }
-  
-  public function setMap($map)
-  {
-    $this->map = $map;
   }
   
   public function setRequestUri($request)
   {
     $this->requestUri = $request;
     $this->requestUri->initializeRequestUriAndParameters();
-    $this->entries = $this->getEntries();
   }
   
   public function find()
   {
-    // @todo implement rules of found out correct map entry.
-    // return $this->getEntry('default');
-    foreach ($this->entries as $entry) {
-      if (is_object($entry)) $entry->isMatch();
-    }
-    
-    return $this->createEntry('default');
+    return $this->getEntry('default');
   }
   
   public function setEntry($name, $entry)
   {
-    $this->map[$name] = $entry;
+    $this->entries[$name] = $entry;
   }
   
   public function getEntry($name)
   {
-    $entry = $this->map[$name];
-    
-    if (is_object($entry)) {
-      $this->requestUri->initialize($entry);
-      $entry->setRequest($this->requestUri);
-      return $entry;
-    } else {
-      return $this->createEntry($name);
-    }
-  }
-  
-  public function createEntry($name)
-  {
-    if (!is_object($this->requestUri))
-      throw new Sabel_Exception_Runtime("RequestUri object not found.");
-    
-    if (!isset($this->map[$name]))
-      throw new Sabel_Exception_Runtime("config not found.");
-    
-    $entry = new Sabel_Map_Entry($name, $this->map[$name]);
-    $this->requestUri->initialize($entry);
+    $entry = $this->entries[$name];
     $entry->setRequest($this->requestUri);
     return $entry;
-  }
-  
-  public function getEntries()
-  {
-    $entries = array();
-    foreach (array_keys($this->map) as $name) {
-      $entries[] = $this->createEntry($name);
-    }
-    return $entries;
   }
   
   public function getEntriesByCount($number)
@@ -92,7 +49,7 @@ class Sabel_Map_Facade implements Iterator
     $number =(int) $number;
     
     $entries = array();
-    foreach (array_keys($this->map) as $name) {
+    foreach (array_keys($this->entries) as $name) {
       $entry = $this->getEntry($name);
       if ($entry->getUri()->count() === $number) $entries[] = $entry;
     }
@@ -124,7 +81,8 @@ class Sabel_Map_Facade implements Iterator
    *
    */
   public function current() {
-    return $this->entries[$this->position];
+    $entries = array_values($this->entries);
+    return $entries[$this->position];
   }
   
   /**

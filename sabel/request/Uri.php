@@ -71,8 +71,13 @@ class Sabel_Request_Uri
   
   public function getByName($name)
   {
-    if (is_null($this->entry)) throw new Exception('entry is null.');
-    $position = $this->entry->getUri()->calcElementPositionByName($name);
+    $entry = $this->entry;
+    if (is_null($entry)) throw new Sabel_Exception_Runtime('entry is null.');
+    
+    $uri = $entry->getUri();
+    if (!is_object($uri)) throw new Sabel_Exception_Runtime("Map_Uri is not object.");
+    
+    $position = $uri->calcElementPositionByName($name);
     return $this->get($position);
   }
 }

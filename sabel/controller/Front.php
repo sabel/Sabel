@@ -32,14 +32,17 @@ class Sabel_Controller_Front
   
   public function ignition()
   {
-    $request = new Sabel_Request_Request();
+    $builder = new Sabel_Map_Builder();
     
-    $conf = new Sabel_Config_Yaml(RUN_BASE.'/config/map.yml');
-    $map = Sabel_Map_Facade::create($conf->toArray());
+    $map = new Sabel_Map_Facade();
+    $request = new Sabel_Request_Request();
     $map->setRequestUri($request);
+    $builder->build(RUN_BASE.'/config/map.yml', $map);
+    
     $mapEntry = $map->find();
     
     $class = Sabel_Controller_Loader::create($mapEntry)->load();
+    
     $class->setEntry($mapEntry);
     $class->setup();
     $class->initialize();

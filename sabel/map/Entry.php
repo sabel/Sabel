@@ -13,17 +13,12 @@ class Sabel_Map_Entry
   protected $request  = null;
   
   protected $uri = null;
-  protected $destination = null;
+  protected $destination  = null;
   protected $requirements = null;
   
-  public function __construct($name, $rawEntry = null)
+  public function __construct($name)
   {
     $this->name = $name;
-    
-    if (!is_null($rawEntry)) {
-      $this->rawEntry = $rawEntry;
-    }
-    
     $this->requirements = new Sabel_Map_Requirements();
   }
   
@@ -43,8 +38,6 @@ class Sabel_Map_Entry
       return $this->uri;
     } else if (is_string($this->uri)) {
       return new Sabel_Map_Uri($this->uri);
-    } else {
-      return new Sabel_Map_Uri($this->rawEntry['uri']);
     }
   }
   
@@ -55,18 +48,8 @@ class Sabel_Map_Entry
   
   public function getDestination()
   {
-    $dest = new Sabel_Map_Destination();
-    
-    $destCfg = $this->rawEntry['destination'];
-    $dest->setModule($destCfg['module']);
-    $dest->setController($destCfg['controller']);
-    $dest->setAction($destCfg['action']);
-    unset($destCfg);
-    
-    // @todo rename.
-    $dest->mappingByRequest($this->getUri(), $this->getRequest());
-    
-    return $dest;
+    $this->destination->mappingByRequest($this->getUri(), $this->getRequest());
+    return $this->destination;
   }
   
   public function setRequirement($name, $rule)

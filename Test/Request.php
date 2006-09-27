@@ -8,19 +8,9 @@
  */
 class Test_Request extends PHPUnit2_Framework_TestCase
 {
-  protected $map = array();
-  
   public static function suite()
   {
     return new PHPUnit2_Framework_TestSuite("Test_Request");
-  }
-  
-  public function __construct()
-  {
-    $this->map = array('uri'=>':module/:controller/:action:/:id',
-                       'destination'=>array('module'    => 'test',
-                                            'controller'=> 'test',
-                                            'action'    => 'test'));
   }
   
   public function setUp()
@@ -33,9 +23,10 @@ class Test_Request extends PHPUnit2_Framework_TestCase
 
   public function testRequestBasicUse()
   {
-    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy');
+    $entry->setUri(':module/:controller/:action:/:id');
     $r = new Sabel_Request_Request($entry, '/blog/archive/view/1');
-        
+    
     $this->assertEquals('blog',    $r->getUri()->getModule());
     $this->assertEquals('archive', $r->getUri()->getController());
     $this->assertEquals('view',    $r->getUri()->getAction());
@@ -49,7 +40,8 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   
   public function testInvalidUri()
   {
-    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy');
+    $entry->setUri(':module/:controller/:action:/:id');
     $r = new Sabel_Request_Request($entry, '?id=1');
     
     $this->assertEquals('', $r->getUri()->getModule(), 'module is not null');
@@ -63,7 +55,8 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   
   public function testInvalidModule()
   {
-    $entry = new Sabel_Map_Entry('dummy', $this->map, '/blog/archive/view/1');
+    $entry = new Sabel_Map_Entry('dummy');
+    $entry->setUri(':module/:controller/:action:/:id');
     $r = new Sabel_Request_Request($entry, 'id=1/id=1/id=1/1');
     $this->assertEquals('id=1', $r->getUri()->getModule());
   }

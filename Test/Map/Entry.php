@@ -107,6 +107,18 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $newsEntry->setRequirement('article_id', '([0-9]{8})');
     $newsAuthorEntry->setRequirement('author', '([a-zA-Z])');
     
+    $destNews = new Sabel_Map_Destination();
+    $destNews->setModule('news');
+    $destNews->setController('viewer');
+    $destNews->setAction('show');
+    $newsEntry->setDestination($destNews);
+    
+    $destAuthor = new Sabel_Map_Destination();
+    $destAuthor->setModule('news');
+    $destAuthor->setController('viewer');
+    $destAuthor->setAction('showByAuthor');
+    $newsAuthorEntry->setDestination($destAuthor);
+    
     $facade->setEntry('news', $newsEntry);
     $facade->setEntry('newsAuthor', $newsAuthorEntry);
     

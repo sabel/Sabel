@@ -43,7 +43,7 @@ class Sabel_Map_Uri implements Iterator
   public function getElement($position)
   {
     $position =(int) $position;
-
+    
     if (0 <= $position && $position < $this->limit) {
       return new Sabel_Map_Element($this->elements[$position]);
     } else {
