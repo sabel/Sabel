@@ -92,15 +92,27 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $this->assertEquals('default', $entry->getName());
   }
   
-  public function testUri()
+  public function testUriBlog()
   {
-    $facade  = $this->createFacadeFromConfig();
-    $facade->setRequestUri(new SabeL_Request_Request(null, '/2006/05/02'));
-    
-    $entry  = $facade->find();
-    $result = $entry->uri(array('year'=>'2005', 'month'=>'08'));
-    
+    $uriParam = array('year'=>'2005', 'month'=>'08');
+    $facade = $this->createFacadeFromConfig();
+    $result = $facade->getEntry('blog')->uri($uriParam);
     $this->assertEquals('2005/08', $result);
+  }
+  
+  public function testUriBlogFill()
+  {
+    $uriParam = array('year'=>'2005', 'month'=>'08', 'day'=>'12');
+    $facade = $this->createFacadeFromConfig();
+    $result = $facade->getEntry('blog')->uri($uriParam);
+    $this->assertEquals('2005/08/12', $result);
+  }
+  
+  public function testUriWithConstant()
+  {
+    $facade = $this->createFacadeFromConfig();
+    $result = $facade->getEntry('news')->uri(array('article_id'=>'12341235'));
+    $this->assertEquals('news/12341235', $result);
   }
   
   protected function createFacadeFromConfig()

@@ -23,7 +23,7 @@ class Sabel_Map_Element
   public function getName()
   {
     $parts = explode(':', $this->element);
-    return (isset($parts[1])) ? $parts[1] : false;
+    return (isset($parts[1])) ? $parts[1] : $parts[0];
   }
   
   public function isConstant()
