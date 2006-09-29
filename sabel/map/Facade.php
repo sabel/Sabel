@@ -23,6 +23,9 @@ class Sabel_Map_Facade implements Iterator
   
   public function setRequestUri($request)
   {
+    if (!$request instanceof Sabel_Request_Request)
+      throw new Sabel_Exception_Runtime("request is not instance of Sabel_Request_Request");
+      
     $this->requestUri = $request;
     $this->requestUri->initializeRequestUriAndParameters();
   }

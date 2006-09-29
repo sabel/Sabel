@@ -122,7 +122,21 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   
   public function testUriWithController()
   {
-    
+    $facade = $this->createFacadeFromConfig();
+    $result = $facade->getEntry('testController')->uri(array('controller'=>'test',
+                                                             'id'=>'0123456789'));
+                                                             
+    $this->assertEquals('test/0123456789', $result);
+  }
+  
+  public function testUriWithControllerUsingRequestValue()
+  {
+    $facade = $this->createFacadeFromConfig();
+    $facade->setRequestUri(new Sabel_Request_Request(null, 'test/0123456789'));
+    $entry  = $facade->getEntry('testController');
+    $result = $entry->uri(array('id'=>'0123456789'));
+                                                    
+    $this->assertEquals('test/0123456789', $result);
   }
   
   protected function createFacadeFromConfig()

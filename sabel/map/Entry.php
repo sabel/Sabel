@@ -74,6 +74,7 @@ class Sabel_Map_Entry
   public function uri($params)
   {
     $mapUri = $this->getUri();
+    $requestUri = $this->request->getUri();
     
     $cnt = 0;
     $uriBuf = array();
@@ -84,6 +85,8 @@ class Sabel_Map_Entry
         $uriBuf[] = $params[$name];
       } else if ($uri->isConstant()) {
         $uriBuf[] = $name;
+      } else if ($requestUri->has($cnt)){
+        $uriBuf[] = $requestUri->get($cnt);
       }
       
       ++$cnt;

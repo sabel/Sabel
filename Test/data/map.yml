@@ -34,6 +34,15 @@ news:
     action:     show
   requirements:
     article_id: ([0-9]{8})
+    
+testController:
+  uri: :controller/:id
+  destination:
+    module: test
+    controller: test
+    action: test
+  requirements:
+    id: ([0-9]{10})
 
 default:
   uri: :module/:controller/:action/:id
