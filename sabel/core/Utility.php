@@ -45,6 +45,8 @@ class Sanitize
       } else {
         $cleaned = stripslashes($target);
       }
+    } else {
+      $cleaned = $target;
     }
 
     return $cleaned;
