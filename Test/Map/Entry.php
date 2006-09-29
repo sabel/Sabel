@@ -120,6 +120,15 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $this->assertEquals('news/12341235', $result);
   }
   
+  public function testUriWithConstantAndRequest()
+  {
+    $facade = $this->createFacadeFromConfig();
+    $facade->setRequestUri(new Sabel_Request_Request(null, 'news/123412345'));
+    $result = $facade->getEntry('news')->uri(array('article_id'=>'12341235'));
+    $this->assertEquals('news/12341235', $result);
+  }
+  
+  
   public function testUriWithController()
   {
     $facade = $this->createFacadeFromConfig();

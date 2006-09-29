@@ -15,6 +15,8 @@ class Sabel_Map_Facade implements Iterator
   
   static protected $instance = null;
   
+  protected $entry = null;
+  
   public static function create()
   {
     if (is_null(self::$instance)) self::$instance = new self();
@@ -43,13 +45,21 @@ class Sabel_Map_Facade implements Iterator
       }
     }
     
-    if ($matched) {
-      return $entry;
-    } else {
+    if (!$matched) {
       $entry = $this->getEntry('default');
       $this->requestUri->initialize($entry);
-      return $entry;
     }
+    
+    $this->entry = $entry;
+    return $entry;
+  }
+  
+  public function getCurrentEntry()
+  {
+    if (!$this->entry instanceof Sabel_Map_Entry)
+      throw new Sabel_Exception_Runtime("entry is not instance of valid Class");
+      
+    return $this->entry;
   }
   
   public function setEntry($name, $entry)
@@ -61,6 +71,7 @@ class Sabel_Map_Facade implements Iterator
   {
     $entry = $this->entries[$name];
     $entry->setRequest($this->requestUri);
+    $this->entry = $entry;
     return $entry;
   }
   
