@@ -82,7 +82,8 @@ class Sabel_Map_Entry
       $name = $uri->getName();
       
       if (isset($params[$name])) {
-        $uriBuf[] = $params[$name];
+        $value = $params[$name];
+        $uriBuf[] = (is_object($value)) ? $value->__toString() : $value;
       } else if ($uri->isConstant()) {
         $uriBuf[] = $name;
       } else if ($requestUri->has($cnt)){
