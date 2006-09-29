@@ -8,21 +8,22 @@
  */
 class Sabel_Map_Builder
 {
-  public function __construct()
+  protected static $maps = null;
+  
+  public function __construct($path, $reset = false)
   {
-    
+    if ($reset) self::$maps = null;
+    if (is_null(self::$maps)) self::$maps = new Sabel_Config_Yaml($path);
   }
   
-  public function build($path, $facade = null)
+  public function build($facade = null)
   {
-    $maps = new Sabel_Config_Yaml($path);
-    
     if (is_null($facade)) {
       $facade = new Sabel_Map_Facade();
       $facade->setRequestUri(new SabeL_Request_Request());
     }
     
-    foreach ($maps->toArray() as $name => $map) {
+    foreach (self::$maps->toArray() as $name => $map) {
       $entry = new Sabel_Map_Entry($name);
       $entry->setUri(new Sabel_Map_Uri($map['uri']));
       

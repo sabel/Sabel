@@ -108,6 +108,11 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $this->assertEquals('2005/08/12', $result);
   }
   
+  public function testUriDefault()
+  {
+    $uriParam = array('module'=>'index', 'controller'=>'shop', 'action'=>'test');
+  }
+  
   public function testUriWithConstant()
   {
     $facade = $this->createFacadeFromConfig();
@@ -115,10 +120,16 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $this->assertEquals('news/12341235', $result);
   }
   
+  public function testUriWithController()
+  {
+    
+  }
+  
   protected function createFacadeFromConfig()
   {
-    $b = new Sabel_Map_Builder();
-    return $b->build('Test/data/map.yml');
+    $b = new Sabel_Map_Builder('Test/data/map.yml', true);
+    $facade = $b->build();
+    return $facade;
   }
   
   protected function createFacade()

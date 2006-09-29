@@ -75,21 +75,21 @@ class Sabel_Map_Entry
   {
     $mapUri = $this->getUri();
     
-    $buf = array();
     $cnt = 0;
+    $uriBuf = array();
     foreach ($mapUri as $name => $uri) {
       $name = $uri->getName();
+      
       if (isset($params[$name])) {
-        $buf[] = $params[$name];
+        $uriBuf[] = $params[$name];
       } else if ($uri->isConstant()) {
-        $buf[] = $uri->getName();
+        $uriBuf[] = $name;
       }
       
       ++$cnt;
     }
     
-    $uri = join('/', $buf);
-    return $uri;
+    return join('/', $uriBuf);
   }
   
   public function isMatch()

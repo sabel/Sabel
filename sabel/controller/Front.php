@@ -32,12 +32,12 @@ class Sabel_Controller_Front
   
   public function ignition()
   {
-    $builder = new Sabel_Map_Builder();
+    $builder = new Sabel_Map_Builder(RUN_BASE.'/config/map.yml');
     
     $map = Sabel_Map_Facade::create();
     $request = new Sabel_Request_Request();
     $map->setRequestUri($request);
-    $builder->build(RUN_BASE.'/config/map.yml', $map);
+    $builder->build($map);
     
     $mapEntry = $map->find();
     

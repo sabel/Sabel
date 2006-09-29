@@ -19,8 +19,8 @@ class Test_Map_Builder extends PHPUnit2_Framework_TestCase
   
   public function testBuild()
   {
-    $b = new Sabel_Map_Builder();
-    $facade = $b->build('Test/data/map.yml');
+    $b = new Sabel_Map_Builder('Test/data/map.yml');
+    $facade = $b->build();
     
     $news = $facade->getEntry('news');
     $this->assertEquals('blog', $facade->getEntry('blog')->getName());
