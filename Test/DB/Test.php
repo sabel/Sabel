@@ -6,7 +6,7 @@ class Test_DB_Test extends SabelTestCase
   private static $dbList = array('mysql', 'pgsql', 'sqlite');
 
   public static $connectName = '';
-  
+
   public static $TABLES = array('test', 'test2', 'test3',
                                 'customer', 'customer_order', 'order_line',
                                 'customer_telephone', 'infinite1', 'infinite2',
@@ -27,7 +27,7 @@ class Test_DB_Test extends SabelTestCase
 
     $this->assertEquals($customer->getCount(), 2);
 
-    $order = new Customer_Order();
+    $order = new CustomerOrder();
 
     $insertData   = array();
     $insertData[] = array('id' => 1, 'customer_id' => 1);
@@ -38,49 +38,49 @@ class Test_DB_Test extends SabelTestCase
     $insertData[] = array('id' => 6, 'customer_id' => 1);
     $order->multipleInsert($insertData);
 
-    $o = new Customer_order();
+    $o = new CustomerOrder();
     $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
-    $this->assertEquals((int)$res[0]->customer->id, 1);
-    $this->assertEquals((int)$res[2]->customer->id, 2);
+    $this->assertEquals((int)$res[0]->Customer->id, 1);
+    $this->assertEquals((int)$res[2]->Customer->id, 2);
 
     $this->assertEquals($order->getCount(), 6);
 
     $cu  = new Customer();
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 5);
-    $this->assertEquals((int)$cus[0]->customer_order[3]->id, 6);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 4);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[3]->id, 6);
 
     $cu = new Customer();
-    $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
+    $cu->setChildConstraint('CustomerOrder', array('order' => 'id desc'));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 6);
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 3);
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 2);
-    $this->assertEquals((int)$cus[0]->customer_order[3]->id, 1);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 6);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 5);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 3);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 2);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[3]->id, 1);
 
     $cu  = new Customer();
-    $cu->setChildConstraint('customer_order', array('offset' => 1));
+    $cu->setChildConstraint('CustomerOrder', array('offset' => 1));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 2);
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 4);
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 5);
-    $this->assertEquals((int)$cus[0]->customer_order[2]->id, 6);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 5);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 6);
     
     $cu  = new Customer();
-    $cu->setChildConstraint('customer_order', array('limit' => 2));
+    $cu->setChildConstraint('CustomerOrder', array('limit' => 2));
     $cus = $cu->select();
-    $this->assertEquals((int)$cus[0]->customer_order[0]->id, 1);
-    $this->assertEquals((int)$cus[0]->customer_order[1]->id, 2);
-    $this->assertEquals((int)$cus[1]->customer_order[0]->id, 3);
-    $this->assertEquals((int)$cus[1]->customer_order[1]->id, 4);
-    @$this->assertNull($cus[0]->customer_order[2]->id);
-    @$this->assertNull($cus[0]->customer_order[3]->id);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 4);
+    @$this->assertNull($cus[0]->CustomerOrder[2]->id);
+    @$this->assertNull($cus[0]->CustomerOrder[3]->id);
   }
 
   public function testMultipleInsert()
@@ -102,12 +102,12 @@ class Test_DB_Test extends SabelTestCase
     $test->enableParent();
     $obj = $test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
-    $this->assertEquals((int)$obj->test2->id, 4);
+    $this->assertEquals((int)$obj->Test2->id, 4);
     
     $obj = $test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
 
-    $orderLine = new Order_Line();
+    $orderLine = new OrderLine();
 
     $insertData = array();
     $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
@@ -124,7 +124,7 @@ class Test_DB_Test extends SabelTestCase
     $orderLine->multipleInsert($insertData);
     $this->assertEquals($orderLine->getCount(), 11);
     
-    $telephone = new Customer_Telephone();
+    $telephone = new CustomerTelephone();
 
     $insertData   = array();
     $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
@@ -168,7 +168,7 @@ class Test_DB_Test extends SabelTestCase
     $insertData[] = array('id' => 5, 'name' => 'Psychology');
     $course->multipleInsert($insertData);
 
-    $sc = new Student_Course();
+    $sc = new StudentCourse();
     $insertData   = array();
     $insertData[] = array('student_id' => 1, 'course_id' => 1);
     $insertData[] = array('student_id' => 1, 'course_id' => 2);
@@ -417,9 +417,9 @@ class Test_DB_Test extends SabelTestCase
     $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
     $obj = $objs[0];
     
-    $this->assertEquals((int)$obj->infinite2_id, (int)$obj->infinite2->id);
-    $this->assertEquals((int)$obj->infinite2->infinite1_id, 1);
-    $this->assertEquals($obj->infinite2->infinite1, null);
+    $this->assertEquals((int)$obj->infinite2_id, (int)$obj->Infinite2->id);
+    $this->assertEquals((int)$obj->Infinite2->infinite1_id, 1);
+    $this->assertEquals($obj->Infinite2->Infinite1, null);
   }
   
   public function testSelectParentObject()
@@ -431,12 +431,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($obj->blood, 'A');
     $this->assertEquals((int)$obj->test2_id, 1);
     
-    $parent = $obj->test2;
+    $parent = $obj->Test2;
     $this->assertEquals((int)$parent->id, 1);
     $this->assertEquals($parent->name, 'test21');
     $this->assertEquals((int)$parent->test3_id, 2);
     
-    $parent2 = $parent->test3;
+    $parent2 = $parent->Test3;
     $this->assertEquals((int)$parent2->id, 2);
     $this->assertEquals($parent2->name, 'test32');
   }
@@ -449,7 +449,7 @@ class Test_DB_Test extends SabelTestCase
     $cu = $customer->selectOne(1);
     $this->assertEquals($cu->name, 'tanaka');
     
-    $orders = $cu->customer_order;
+    $orders = $cu->CustomerOrder;
     $this->assertEquals(count($orders), 4);
     
     $this->assertEquals((int)$orders[0]->id, 1);
@@ -459,12 +459,12 @@ class Test_DB_Test extends SabelTestCase
     
     //------------------------------------------------------
     
-    $cu->setChildConstraint('customer_order',
+    $cu->setChildConstraint('CustomerOrder',
                             array('limit' => 10, 'order' => 'id desc'));
                             
-    $cu->getChild('customer_order');
+    $cu->getChild('CustomerOrder');
     
-    $orders = $cu->customer_order;
+    $orders = $cu->CustomerOrder;
     $this->assertEquals(count($orders), 4);
     
     $this->assertEquals((int)$orders[0]->id, 6);
@@ -474,12 +474,12 @@ class Test_DB_Test extends SabelTestCase
     
     //------------------------------------------------------
     
-    $cu->setChildConstraint('customer_order',
+    $cu->setChildConstraint('CustomerOrder',
                             array('limit'  => 2, 'offset' => 2, 'order'  => 'id desc'));
                             
-    $cu->getChild('customer_order');
+    $cu->getChild('CustomerOrder');
     
-    $orders = $cu->customer_order;
+    $orders = $cu->CustomerOrder;
     $this->assertEquals(count($orders), 2);
     
     $this->assertEquals((int)$orders[0]->id, 2);
@@ -492,12 +492,12 @@ class Test_DB_Test extends SabelTestCase
     $cu = new Customer();
     $cu->setChildConstraint('limit', 10);
     $c  = $cu->selectOne(1);
-    $ch = $c->newChild('customer_order');
+    $ch = $c->newChild('CustomerOrder');
     
     $ch->id = 7;
     $ch->save();  // auto insert parent_id
     
-    $co = new Customer_Order();
+    $co = new CustomerOrder();
     $co->setChildConstraint('limit', 10);
     $order = $co->selectOne(7);
     $this->assertEquals((int)$order->customer_id, 1);  // parent_id
@@ -510,19 +510,19 @@ class Test_DB_Test extends SabelTestCase
     $objs = $cu->select();
     
     $this->assertEquals(count($objs), 2);
-    $this->assertNotEquals($objs[0]->customer_order, null);
-    $this->assertNotEquals($objs[1]->customer_order, null);
+    $this->assertNotEquals($objs[0]->CustomerOrder, null);
+    $this->assertNotEquals($objs[1]->CustomerOrder, null);
     
-    $this->assertEquals(count($objs[0]->customer_order), 5);
-    $this->assertEquals(count($objs[1]->customer_order), 2);
+    $this->assertEquals(count($objs[0]->CustomerOrder), 5);
+    $this->assertEquals(count($objs[1]->CustomerOrder), 2);
     
-    $this->assertEquals((int)$objs[0]->customer_order[0]->id, 1);
-    $this->assertEquals((int)$objs[0]->customer_order[1]->id, 2);
-    $this->assertEquals((int)$objs[1]->customer_order[0]->id, 3);
-    $this->assertEquals((int)$objs[1]->customer_order[1]->id, 4);
-    $this->assertEquals((int)$objs[0]->customer_order[2]->id, 5);
-    $this->assertEquals((int)$objs[0]->customer_order[3]->id, 6);
-    $this->assertEquals((int)$objs[0]->customer_order[4]->id, 7);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[3]->id, 6);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->id, 7);
     
     //-------------------------------------------------------
     
@@ -530,62 +530,62 @@ class Test_DB_Test extends SabelTestCase
     $cu->setChildConstraint(array('limit' => 10,
                                   'order' => 'id desc')); // default: for telephone & order_line
 
-    $cu->setChildConstraint('customer_order', array('order' => 'id desc'));
+    $cu->setChildConstraint('CustomerOrder', array('order' => 'id desc'));
     $objs = $cu->select();
     
-    $this->assertEquals((int)$objs[0]->customer_order[0]->id, 7);
-    $this->assertEquals((int)$objs[0]->customer_order[1]->id, 6);
-    $this->assertEquals((int)$objs[0]->customer_order[2]->id, 5);
-    $this->assertEquals((int)$objs[1]->customer_order[0]->id, 4);
-    $this->assertEquals((int)$objs[1]->customer_order[1]->id, 3);
-    $this->assertEquals((int)$objs[0]->customer_order[3]->id, 2);
-    $this->assertEquals((int)$objs[0]->customer_order[4]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->id, 7);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->id, 6);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[3]->id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->id, 1);
     
-    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[0]->id, 11);
-    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[1]->id, 8);
-    $this->assertEquals((int)$objs[0]->customer_order[4]->order_line[2]->id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[0]->id, 11);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[2]->id, 2);
     
     //-------------------------------------------------------
     
     $cu   = new Customer();
     $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
-    $this->assertNotEquals((int)$objs[0]->customer_order[0]->order_line, null);
-    $this->assertNotEquals((int)$objs[1]->customer_order[0]->order_line, null);
+    $this->assertNotEquals((int)$objs[0]->CustomerOrder[0]->order_line, null);
+    $this->assertNotEquals((int)$objs[1]->CustomerOrder[0]->order_line, null);
     
-    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[0]->id, 2);
-    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[1]->id, 8);
-    $this->assertEquals((int)$objs[0]->customer_order[0]->order_line[2]->id, 11);
-    @$this->assertNull($objs[0]->customer_order[0]->order_line[3]->id);  // hasn't
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[0]->id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[2]->id, 11);
+    @$this->assertNull($objs[0]->CustomerOrder[0]->OrderLine[3]->id);  // hasn't
     
-    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->id, 3);
-    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[0]->item_id, 3);
-    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->id, 4);
-    $this->assertEquals((int)$objs[0]->customer_order[1]->order_line[1]->item_id, 1);
-    @$this->assertNull($objs[0]->customer_order[1]->order_line[2]->id);  // hasn't
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[0]->id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[0]->item_id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[1]->item_id, 1);
+    @$this->assertNull($objs[0]->CustomerOrder[1]->OrderLine[2]->id);  // hasn't
     
-    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->id, 1);
-    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[0]->item_id, 2);
-    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->id, 7);
-    $this->assertEquals((int)$objs[0]->customer_order[2]->order_line[1]->item_id, 3);
-    @$this->assertNull($objs[0]->customer_order[2]->order_line[2]->id);  // hasn't
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[0]->item_id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[1]->id, 7);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[1]->item_id, 3);
+    @$this->assertNull($objs[0]->CustomerOrder[2]->OrderLine[2]->id);  // hasn't
     
-    $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->id, 6);
-    $this->assertEquals((int)$objs[1]->customer_order[0]->order_line[0]->item_id, 2);
-    @$this->assertNull($objs[1]->customer_order[0]->order_line[1]->id);  // hasn't
-    $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->id, 5);
-    $this->assertEquals((int)$objs[1]->customer_order[1]->order_line[0]->item_id, 3);
-    @$this->assertNull($objs[1]->customer_order[1]->order_line[1]->id);  // hasn't
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->OrderLine[0]->id, 6);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->OrderLine[0]->item_id, 2);
+    @$this->assertNull($objs[1]->CustomerOrder[0]->OrderLine[1]->id);  // hasn't
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->OrderLine[0]->id, 5);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->OrderLine[0]->item_id, 3);
+    @$this->assertNull($objs[1]->CustomerOrder[1]->OrderLine[1]->id);  // hasn't
     
-    $this->assertEquals((int)$objs[0]->customer_telephone[0]->id, 1);
-    $this->assertEquals((int)$objs[0]->customer_telephone[1]->id, 3);
-    $this->assertEquals((int)$objs[1]->customer_telephone[0]->id, 2);
-    $this->assertEquals((int)$objs[1]->customer_telephone[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->CustomerTelephone[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerTelephone[1]->id, 3);
+    $this->assertEquals((int)$objs[1]->CustomerTelephone[0]->id, 2);
+    $this->assertEquals((int)$objs[1]->CustomerTelephone[1]->id, 4);
     
-    $this->assertEquals($objs[0]->customer_telephone[0]->telephone, '09011111111');
-    $this->assertEquals($objs[0]->customer_telephone[1]->telephone, '09011112222');
-    $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
-    $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
+    $this->assertEquals($objs[0]->CustomerTelephone[0]->telephone, '09011111111');
+    $this->assertEquals($objs[0]->CustomerTelephone[1]->telephone, '09011112222');
+    $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->CustomerTelephone[1]->telephone, '09022222222');
     
     //--------------------------------------------------------------------
     
@@ -595,10 +595,10 @@ class Test_DB_Test extends SabelTestCase
     $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
     
-    @$this->assertNull($objs[0]->customer_telephone[0]->telephone);
-    @$this->assertNull($objs[0]->customer_telephone[1]->telephone);
-    $this->assertEquals($objs[1]->customer_telephone[0]->telephone, '09022221111');
-    $this->assertEquals($objs[1]->customer_telephone[1]->telephone, '09022222222');
+    @$this->assertNull($objs[0]->CustomerTelephone[0]->telephone);
+    @$this->assertNull($objs[0]->CustomerTelephone[1]->telephone);
+    $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->CustomerTelephone[1]->telephone, '09022222222');
   }
 
   public function testGetCount()
@@ -622,7 +622,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testAggregate()
   {
-    $order = new Customer_Order();
+    $order = new CustomerOrder();
     $order->setConstraint('order', 'sum_amount desc');
     
     $function = array('sum'   => 'amount',
@@ -684,18 +684,18 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A3');
     
-    $this->assertEquals((int)$t->tree->id, 1);
-    $this->assertEquals((int)$t->tree->tree_id, 0);
-    $this->assertEquals($t->tree->name, 'A');
+    $this->assertEquals((int)$t->Tree->id, 1);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    $this->assertEquals($t->Tree->name, 'A');
 
     $t = $tree->selectOne(5);
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A5');
 
-    $this->assertEquals((int)$t->tree->id, 1);
-    $this->assertEquals((int)$t->tree->tree_id, 0);
-    $this->assertEquals($t->tree->name, 'A');
+    $this->assertEquals((int)$t->Tree->id, 1);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    $this->assertEquals($t->Tree->name, 'A');
  
     $t = new Tree();
     $root = $t->getRoot();
@@ -705,11 +705,11 @@ class Test_DB_Test extends SabelTestCase
     @$this->assertNull($root[3]);
 
     $root[0]->setChildConstraint(array('limit' => 10));
-    $root[0]->getChild('tree');
-    $this->assertEquals((int)$root[0]->tree[0]->id, 3);
-    $this->assertEquals((int)$root[0]->tree[1]->id, 5);
+    $root[0]->getChild('Tree');
+    $this->assertEquals((int)$root[0]->Tree[0]->id, 3);
+    $this->assertEquals((int)$root[0]->Tree[1]->id, 5);
 
-    $children = $root[0]->tree;
+    $children = $root[0]->Tree;
     $this->assertEquals((int)$children[0]->id, 3);
     $this->assertEquals($children[0]->name, 'A3');
     $this->assertEquals((int)$children[1]->id, 5);
@@ -721,17 +721,17 @@ class Test_DB_Test extends SabelTestCase
     $stu = new Student(1);
     $this->assertEquals($stu->name, 'tom');
 
-    $this->assertEquals((int)$stu->student_course[0]->course_id, 1);
-    $this->assertEquals((int)$stu->student_course[1]->course_id, 2);
-    $this->assertEquals((int)$stu->student_course[2]->course_id, 3);
+    $this->assertEquals((int)$stu->StudentCourse[0]->course_id, 1);
+    $this->assertEquals((int)$stu->StudentCourse[1]->course_id, 2);
+    $this->assertEquals((int)$stu->StudentCourse[2]->course_id, 3);
 
-    $this->assertEquals((int)$stu->course[0]->id, 1);
-    $this->assertEquals((int)$stu->course[1]->id, 2);
-    $this->assertEquals((int)$stu->course[2]->id, 3);
+    $this->assertEquals((int)$stu->Course[0]->id, 1);
+    $this->assertEquals((int)$stu->Course[1]->id, 2);
+    $this->assertEquals((int)$stu->Course[2]->id, 3);
 
-    $this->assertEquals($stu->course[0]->name, 'Mathematics');
-    $this->assertEquals($stu->course[1]->name, 'Physics');
-    $this->assertEquals($stu->course[2]->name, 'Science');
+    $this->assertEquals($stu->Course[0]->name, 'Mathematics');
+    $this->assertEquals($stu->Course[1]->name, 'Physics');
+    $this->assertEquals($stu->Course[2]->name, 'Science');
 
     $stu = new Student();
     $stu->setConstraint('order', 'id desc');
@@ -744,23 +744,23 @@ class Test_DB_Test extends SabelTestCase
 
     foreach ($students as $student) {
       $student->setChildConstraint($constraint);
-      $student->getChild('course');
+      $student->getChild('Course');
     }
 
-    $this->assertEquals((int)$students[2]->student_course[0]->course_id, 5);
-    $this->assertEquals((int)$students[2]->student_course[1]->course_id, 4);
-    $this->assertEquals((int)$students[2]->student_course[2]->course_id, 2);
-    $this->assertEquals((int)$students[2]->student_course[3]->course_id, 1);
+    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 5);
+    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 4);
+    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 2);
+    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 1);
 
-    $this->assertEquals((int)$students[3]->course[0]->id, 5);
-    $this->assertEquals((int)$students[3]->course[1]->id, 4);
-    $this->assertEquals((int)$students[3]->course[2]->id, 3);
-    $this->assertEquals((int)$students[3]->course[3]->id, 2);
+    $this->assertEquals((int)$students[3]->Course[0]->id, 5);
+    $this->assertEquals((int)$students[3]->Course[1]->id, 4);
+    $this->assertEquals((int)$students[3]->Course[2]->id, 3);
+    $this->assertEquals((int)$students[3]->Course[3]->id, 2);
 
-    $this->assertEquals($students[3]->course[0]->name, 'Psychology');
-    $this->assertEquals($students[3]->course[1]->name, 'Economic');
-    $this->assertEquals($students[3]->course[2]->name, 'Science');
-    $this->assertEquals($students[3]->course[3]->name, 'Physics');
+    $this->assertEquals($students[3]->Course[0]->name, 'Psychology');
+    $this->assertEquals($students[3]->Course[1]->name, 'Economic');
+    $this->assertEquals($students[3]->Course[2]->name, 'Science');
+    $this->assertEquals($students[3]->Course[3]->name, 'Physics');
 
     //-----------------------------------------------------------------
 
@@ -773,17 +773,17 @@ class Test_DB_Test extends SabelTestCase
 
     foreach ($cs as $c) {
       $c->setChildConstraint($constraint);
-      $c->getChild('student', 'student_course');
+      $c->getChild('Student', 'StudentCourse');
     }
 
-    $this->assertEquals($cs[0]->student[0]->name, 'tom');
-    $this->assertEquals($cs[0]->student[1]->name, 'bob');
-    $this->assertEquals($cs[0]->student[2]->name, 'ameri');
+    $this->assertEquals($cs[0]->Student[0]->name, 'tom');
+    $this->assertEquals($cs[0]->Student[1]->name, 'bob');
+    $this->assertEquals($cs[0]->Student[2]->name, 'ameri');
 
-    $this->assertEquals($cs[2]->student[0]->name, 'tom');
-    $this->assertEquals($cs[2]->student[1]->name, 'john');
-    $this->assertEquals($cs[2]->student[2]->name, 'marcy');
-    $this->assertEquals($cs[2]->student[3]->name, 'ameri');
+    $this->assertEquals($cs[2]->Student[0]->name, 'tom');
+    $this->assertEquals($cs[2]->Student[1]->name, 'john');
+    $this->assertEquals($cs[2]->Student[2]->name, 'marcy');
+    $this->assertEquals($cs[2]->Student[3]->name, 'ameri');
   }
 
   public function testJoinSelect()
@@ -844,7 +844,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testOrder()
   {
-    $ol = new Order_Line();
+    $ol = new OrderLine();
     $ol->customer_order_id = 13;
     $ol->item_id = 5;
     $ol->save();
@@ -859,7 +859,7 @@ class Test_DB_Test extends SabelTestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Order_line();
+    $ol = new OrderLine();
     $ol->item_id(3);
     $last = $ol->getLast('amount');
     $this->assertEquals((int)$last->amount, 9000);
@@ -868,18 +868,18 @@ class Test_DB_Test extends SabelTestCase
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
-    $ol = new Order_Line();
+    $ol = new OrderLine();
     $ol->customer_order_id = 1;
     $ol->amount  = 100000;
     $ol->item_id = 1;
     $ol->save();
 
-    $ol = new Order_Line();
+    $ol = new OrderLine();
     $ol->item_id(1);
     $ol->customer_order_id(1);
     $this->assertEquals($ol->getCount(), 3);
 
-    $ol = new Order_Line();
+    $ol = new OrderLine();
 
     $ol->item_id(1);
     $ol->customer_order_id(1);
@@ -937,7 +937,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testORCondition()
   {
-    $ol = new Order_Line();
+    $ol = new OrderLine();
     $ol->sconst('order', 'id');
     $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
 
@@ -1138,35 +1138,36 @@ class Seq extends Mapper_Default
 
 class Customer extends Mapper_Default
 {
-  protected $myChildren = array('customer_order', 'customer_telephone');
+  protected $myChildren = array('CustomerOrder', 'CustomerTelephone');
   protected $defChildConstraints = array('limit' => 10);
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setChildConstraint('customer_order', array('limit' => 10));
+    $this->setChildConstraint('CustomerOrder', array('limit' => 10));
     parent::__construct($param1, $param2);
   }
 }
 
-class Customer_Order extends Mapper_Default
+class CustomerOrder extends Mapper_Default
 {
-  protected $myChildren = 'order_line';
+  protected $table      = 'customer_order';
+  protected $myChildren = 'OrderLine';
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setChildConstraint('order_line', array('limit' => 10));
+    $this->setChildConstraint('OrderLine', array('limit' => 10));
     parent::__construct($param1, $param2);
   }
 }
 
-class Order_Line extends Mapper_Default
+class OrderLine extends Mapper_Default
 {
-
+  protected $table = 'order_line';
 }
 
-class Customer_Telephone extends Mapper_Default
+class CustomerTelephone extends Mapper_Default
 {
-
+  protected $table = 'customer_telephone';
 }
 
 class Tree extends Sabel_DB_Tree
@@ -1180,7 +1181,7 @@ class Tree extends Sabel_DB_Tree
 
 class Bridge_Base extends Sabel_DB_Bridge
 {
-  protected $bridgeTable = 'student_course';
+  protected $bridgeTable = 'StudentCourse';
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -1191,9 +1192,10 @@ class Bridge_Base extends Sabel_DB_Bridge
 
 class Student extends Bridge_Base
 {
+  protected $myChildren = 'Course';
+
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->myChildren = 'course';
     $this->cconst(array('limit' => 100, 'order' => 'course_id'));
     parent::__construct($param1, $param2);
   }
@@ -1204,9 +1206,9 @@ class Course extends Bridge_Base
 
 }
 
-class Student_Course extends Mapper_Default
+class StudentCourse extends Mapper_Default
 {
-
+  protected $table = 'student_course';
 }
 
 class Trans1 extends Mapper_Default

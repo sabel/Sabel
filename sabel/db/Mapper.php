@@ -532,8 +532,9 @@ abstract class Sabel_DB_Mapper
   {
     if (is_null($model)) $model = $this;
 
-    $driver = $this->newClass($child)->getDriver();
-    $driver->setBasicSQL("SELECT {$model->projection} FROM {$child}");
+    $class  = $this->newClass($child);
+    $driver = $class->getDriver();
+    $driver->setBasicSQL("SELECT {$model->projection} FROM {$class->table}");
 
     $this->chooseMyChildConstraint($child, $model);
     $model->childConditions["{$model->table}_id"] = $model->data[$model->defColumn];
@@ -586,9 +587,7 @@ abstract class Sabel_DB_Mapper
 
   protected function getDefaultChild($children, $model)
   {
-    if (!is_array($children)) $children = array($children);
-
-    foreach ($children as $val) {
+    foreach (is_string($children) ? array($children) : $children as $val) {
       $this->chooseMyChildConstraint($val, $model);
       $model->getChild($val, $model);
     }
@@ -616,7 +615,7 @@ abstract class Sabel_DB_Mapper
     foreach ($row as $key => $val) {
       if (strpos($key, '_id') !== false) {
         $table = str_replace('_id', '', $key);
-        $row[$table] = $this->addParentObject($table, $val);
+        $row[ucfirst($table)] = $this->addParentObject($table, $val);
       }
     }
     return $row;
@@ -624,6 +623,7 @@ abstract class Sabel_DB_Mapper
 
   protected function addParentObject($table, $id)
   {
+    $table = strtolower($table);
     if ($this->getStructure() !== 'tree' && $this->isAcquired($table)) return null;
 
     $model = $this->newClass($table);
@@ -647,7 +647,7 @@ abstract class Sabel_DB_Mapper
     foreach ($row as $key => $val) {
       if (strpos($key, '_id') !== false) {
         $key = str_replace('_id', '', $key);
-        $row[$key] = $this->addParentObject($key, $val);
+        $row[ucfirst($key)] = $this->addParentObject($key, $val);
       } else {
         $row[$key] = $val;
       }
@@ -692,10 +692,12 @@ abstract class Sabel_DB_Mapper
 
   protected function newClass($name)
   {
-    if ($this->mapper_class_exists($name)) {
-      return new $name();
+    $model = str_replace('_', '', $name);
+
+    if ($this->mapper_class_exists($model)) {
+      return new $model();
     } else {
-      return new Sabel_DB_Basic($name);
+      return new Sabel_DB_Basic($model);
     }
   }
 
