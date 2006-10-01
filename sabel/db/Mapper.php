@@ -615,7 +615,8 @@ abstract class Sabel_DB_Mapper
     foreach ($row as $key => $val) {
       if (strpos($key, '_id') !== false) {
         $table = str_replace('_id', '', $key);
-        $row[ucfirst($table)] = $this->addParentObject($table, $val);
+        $modelName = array_map('ucfirst', explode('_', $table));
+        $row[join('', $modelName)] = $this->addParentObject($table, $val);
       }
     }
     return $row;
@@ -647,7 +648,8 @@ abstract class Sabel_DB_Mapper
     foreach ($row as $key => $val) {
       if (strpos($key, '_id') !== false) {
         $key = str_replace('_id', '', $key);
-        $row[ucfirst($key)] = $this->addParentObject($key, $val);
+        $modelName = array_map('ucfirst', explode('_', $key));
+        $row[join('', $modelName)] = $this->addParentObject($key, $val);
       } else {
         $row[$key] = $val;
       }
