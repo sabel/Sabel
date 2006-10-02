@@ -798,7 +798,7 @@ abstract class Sabel_DB_Mapper
 
     if (isset($param1)) {
       $this->setCondition($param1, $param2, $param3);
-    } else {
+    } else if (!is_null($idValue)) {
       $this->setCondition($this->defColumn, $idValue);
     }
 
