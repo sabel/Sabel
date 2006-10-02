@@ -5,10 +5,19 @@ class Sabel_DB_Connection
   const MYSQL_SET_ENCODING = 'SET NAMES %s';
   const PGSQL_SET_ENCODING = 'SET CLIENT_ENCODING TO %s';
 
-  private static $connList = array();
+  protected static $parameters = array();
+  protected static $connList   = array();
 
   public static function addConnection($connectName, $params)
   {
+    self::$parameters[$connectName] = $params;
+  }
+
+  protected static function makeDatabaseLink($connectName)
+  {
+    if (is_null(self::$parameters[$connectName])) return false;
+
+    $params = self::$parameters[$connectName];
     $driver = $params['driver'];
 
     if (!is_array($params))
@@ -64,48 +73,44 @@ class Sabel_DB_Connection
 
     $list['schema'] = (isset($params['schema'])) ? $params['schema'] : null;
     self::$connList[$connectName] = $list;
+    return $list['conn'];
   }
 
   public static function getConnection($connectName)
   {
-    $param = self::getConnectionParam($connectName);
-    return self::getValue($connectName, $param, 'conn');
+    if (isset(self::$connList[$connectName]['conn'])) {
+      return self::$connList[$connectName]['conn'];
+    } else {
+      $result = self::makeDatabaseLink($connectName);
+
+      if (!$result) {
+        throw new Exception('Error: database parameters are not found: ' . $connectName);
+      } else {
+        return $result;
+      }
+    }
   }
 
   public static function getDriverName($connectName)
   {
-    $param = self::getConnectionParam($connectName);
-    return self::getValue($connectName, $param, 'driver');
+    return self::getValue($connectName, 'driver');
   }
 
   public static function getDB($connectName)
   {
-    $param = self::getConnectionParam($connectName);
-    return self::getValue($connectName, $param, 'db');
+    return self::getValue($connectName, 'db');
   }
 
   public static function getSchema($connectName)
   {
-    $param = self::getConnectionParam($connectName);
-
-    if ($param['db'] === 'mysql' || $param['db'] === 'pgsql') {
-      return self::getValue($connectName, $param, 'schema');
-    }
+    $db = self::$connList[$connectName]['db'];
+    if ($db === 'mysql' || $db === 'pgsql') return self::getValue($connectName, 'schema');
   }
 
-  protected static function getConnectionParam($connectName)
+  protected static function getValue($connectName, $key)
   {
-    if (isset(self::$connList[$connectName])) {
-      return self::$connList[$connectName];
-    } else {
-      throw new Exception('Error: connection name is not found: ' . $connectName);
-    }
-  }
-
-  protected static function getValue($connectName, $param, $key)
-  {
-    if (isset($param[$key])) {
-      return $param[$key];
+    if (isset(self::$connList[$connectName][$key])) {
+      return self::$connList[$connectName][$key];
     } else {
       throw new Exception("Error: value is not set:{$connectName} => {$key}");
     }
