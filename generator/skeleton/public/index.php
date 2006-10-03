@@ -27,4 +27,4 @@ define('SCM_CACHE',     RUN_BASE . '/cache/schema.php');
 define('INJ_CACHE',     RUN_BASE . '/cache/injection.php');
 
 require_once('Sabel/Container.php');
-Container::initializeApplication()->load('sabel.controller.Front')->ignition();
+echo Container::initializeApplication()->load('sabel.controller.Front')->ignition();
