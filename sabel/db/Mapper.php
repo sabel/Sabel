@@ -274,15 +274,12 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $connectName = $this->connectName;
+    $engine = true;
 
-    if (Sabel_DB_Connection::getDB($connectName) === 'mysql') {
-      $result = $this->execute("SHOW TABLE STATUS WHERE Name='{$this->table}'", null, Sabel_DB_Const::ASSOC);
-      if ($result[0]['Engine'] !== 'InnoDB' && $result[0]['Engine'] !== 'NDB') {
-        trigger_error('The Engine of the table is MyISAM though the transaction was tried.', E_USER_NOTICE);
-      }
-    }
-    return Sabel_DB_Transaction::begin($connectName, $this->driver);
+    if (Sabel_DB_Connection::getDB($this->connectName) === 'mysql')
+      $engine = $this->driver->checkTableEngine($this->table);
+
+    return ($engine) ? Sabel_DB_Transaction::begin($this->connectName, $this->driver) : false;
   }
 
   public function commit()
@@ -734,7 +731,7 @@ abstract class Sabel_DB_Mapper
 
   public function save($data = null)
   {
-    if (isset($data) && !is_array($data))
+    if (!empty($data) && !is_array($data))
       throw new Exception('Error: save() argument must be an array');
 
     if ($this->is_selected()) {
@@ -889,15 +886,14 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function execute($sql, $param = null, $style = null)
+  public function execute($sql, $param = null)
   {
     if (!empty($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
     $this->tryExecute($this->driver, $sql, $param);
     $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
-
-    return ($style === Sabel_DB_Const::ASSOC) ? $rows : $this->toObject($rows);
+    return $this->toObject($rows);
   }
 
   protected function toObject($rows)
