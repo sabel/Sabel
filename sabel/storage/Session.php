@@ -7,7 +7,7 @@ class Sabel_Storage_Session
   public function __construct()
   {
     // @todo fix me
-    if (!defined('TEST_CASE')) session_start();
+    if (!defined('TEST_CASE')) @session_start();
   }
   
   public static function create()

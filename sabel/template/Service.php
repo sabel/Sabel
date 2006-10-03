@@ -83,17 +83,14 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
   {
     if (is_file($this->path . self::$layout . '.tpl')) {
       $this->impl->assign('contentForLayout', $this->impl->retrieve());
-      echo $this->impl->load(self::$layout);
-      return true;
+      return $this->impl->load(self::$layout);
     }
     
     if (is_file($this->path . 'layout.tpl')) {
       $this->impl->assign('contentForLayout', $this->impl->retrieve());
-      echo $this->impl->load('layout');
-      return true;
+      return $this->impl->load('layout');
     }
     
-    echo $this->impl->retrieve();
-    return true;
+    return $this->impl->retrieve();
   }
 }

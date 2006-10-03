@@ -30,12 +30,20 @@ class Sabel_Controller_Front
     }
   }
   
-  public function ignition()
+  public function ignition($request = null)
   {
     $builder = new Sabel_Map_Builder(RUN_BASE.'/config/map.yml');
     
     $map = Sabel_Map_Facade::create();
-    $request = new Sabel_Request_Request();
+    
+    if (is_object($request)) {
+      $request = $request;
+    } else if (is_string($request)) {
+      $request = new Sabel_Request_Request(null, $request);
+    } else {
+      $request = new Sabel_Request_Request();
+    }
+    
     $map->setRequestUri($request);
     $builder->build($map);
     
@@ -46,6 +54,7 @@ class Sabel_Controller_Front
     $class->setEntry($mapEntry);
     $class->setup();
     $class->initialize();
-    $class->execute();
+    
+    return $class->execute();
   }
 }

@@ -8,6 +8,11 @@ class Sabel_DB_SimpleCache
   {
     self::$cache[$key] = $val;
   }
+  
+  public static function remove($key)
+  {
+    unset(self::$cache[$key]);
+  }
 
   public static function get($key)
   {

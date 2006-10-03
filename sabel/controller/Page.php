@@ -45,7 +45,8 @@ abstract class Sabel_Controller_Page
     
     $template = Sabel_Template_Service::create($this->entry);
     $template->assignByArray($this->response->responses());
-    $template->rendering();
+    
+    return $template->rendering();
   }
   
   protected function __get($name)
