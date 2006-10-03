@@ -42,11 +42,7 @@ abstract class Sabel_Controller_Page
   {
     $actionName = $this->destination->action;
     $this->methodExecute($actionName);
-    
-    $template = Sabel_Template_Service::create($this->entry);
-    $template->assignByArray($this->response->responses());
-    
-    return $template->rendering();
+    return Re::get();
   }
   
   protected function __get($name)

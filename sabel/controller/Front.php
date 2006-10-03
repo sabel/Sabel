@@ -55,6 +55,11 @@ class Sabel_Controller_Front
     $class->setup();
     $class->initialize();
     
-    return $class->execute();
+    $responses = $class->execute();
+    
+    $template = Sabel_Template_Service::create($mapEntry);
+    $template->assignByArray($responses);
+    
+    return array('html' => $template->rendering(), 'responses' => $responses);
   }
 }
