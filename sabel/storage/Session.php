@@ -15,12 +15,12 @@ class Sabel_Storage_Session
     if (!self::$instance) self::$instance = new self();
     return self::$instance;
   }
-
+  
   public function clear()
   {
     $deleted = array();
     foreach ($_SESSION as $key => $sesval) {
-      if ($key == SecurityUser::AUTHORIZE_NAMESPACE) {
+      if ($key === SecurityUser::AUTHORIZE_NAMESPACE) {
         SecurityUser::create()->unAuthorize();
       } else {
         $deleted[] = $sesval;
@@ -30,11 +30,18 @@ class Sabel_Storage_Session
     return $deleted;
   }
   
+  public function destroy()
+  {
+    $deleted = $_SESSION;
+    session_destroy();
+    return $deleted;
+  }
+  
   public function has($key)
   {
     return isset($_SESSION[$key]);
   }
-
+  
   public function read($key)
   {
     $ret = null;
@@ -43,14 +50,14 @@ class Sabel_Storage_Session
     }
     return $ret;
   }
-
+  
   public function write($key, $value, $timeout = 60)
   {
     $_SESSION[$key] = array('value'   => $value, 
                             'timeout' => $timeout,
                             'count'   => 0);
   }
-
+  
   public function delete($key)
   {
     $ret = null;
@@ -60,7 +67,7 @@ class Sabel_Storage_Session
     }
     return $ret;
   }
-
+  
   public function timeout()
   {
     foreach ($_SESSION as $key => $value) {
@@ -69,14 +76,14 @@ class Sabel_Storage_Session
       }
     }
   }
-
+  
   public function countUp()
   {
     foreach ($_SESSION as $key => $value) {
       $_SESSION[$key]['count'] += 1;
     }
   }
-
+  
   public function dump()
   {
     print "<pre>";
