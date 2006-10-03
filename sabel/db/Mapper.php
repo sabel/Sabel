@@ -82,9 +82,8 @@ abstract class Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
-    if (Sabel_DB_Transaction::isActive()) $this->begin();
-
     if ($this->table === '') $this->table = strtolower(get_class($this));
+    if (Sabel_DB_Transaction::isActive()) $this->begin();
     if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
@@ -275,7 +274,15 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    return Sabel_DB_Transaction::begin($this->connectName, $this->driver);
+    $connectName = $this->connectName;
+
+    if (Sabel_DB_Connection::getDB($connectName) === 'mysql') {
+      $result = $this->execute("SHOW TABLE STATUS WHERE Name='{$this->table}'", null, Sabel_DB_Const::ASSOC);
+      if ($result[0]['Engine'] === 'MyISAM') {
+        trigger_error('The Engine of the table is MyISAM though the transaction was tried.', E_USER_NOTICE);
+      }
+    }
+    return Sabel_DB_Transaction::begin($connectName, $this->driver);
   }
 
   public function commit()
@@ -798,7 +805,7 @@ abstract class Sabel_DB_Mapper
 
     if (isset($param1)) {
       $this->setCondition($param1, $param2, $param3);
-    } else if (!is_null($idValue)) {
+    } else if (isset($idValue)) {
       $this->setCondition($this->defColumn, $idValue);
     }
 
@@ -882,14 +889,15 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function execute($sql, $param = null)
+  public function execute($sql, $param = null, $style = null)
   {
-    if (isset($param) && !is_array($param))
+    if (!empty($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
     $this->tryExecute($this->driver, $sql, $param);
     $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
-    return $this->toObject($rows);
+
+    return ($style === Sabel_DB_Const::ASSOC) ? $rows : $this->toObject($rows);
   }
 
   protected function toObject($rows)

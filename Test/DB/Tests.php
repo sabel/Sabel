@@ -20,7 +20,7 @@ class Test_DB_Tests
     
     $suite->addTest(Test_DB_Mysql::suite());
     $suite->addTest(Test_DB_Pgsql::suite());
-    // $suite->addTest(Test_DB_SQLite::suite());
+    //$suite->addTest(Test_DB_SQLite::suite());
     $suite->addTest(Test_DB_InformationSchema::suite());
     
     return $suite;
