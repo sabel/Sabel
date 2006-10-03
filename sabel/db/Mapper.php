@@ -278,7 +278,7 @@ abstract class Sabel_DB_Mapper
 
     if (Sabel_DB_Connection::getDB($connectName) === 'mysql') {
       $result = $this->execute("SHOW TABLE STATUS WHERE Name='{$this->table}'", null, Sabel_DB_Const::ASSOC);
-      if ($result[0]['Engine'] === 'MyISAM') {
+      if ($result[0]['Engine'] !== 'InnoDB' && $result[0]['Engine'] !== 'NDB') {
         trigger_error('The Engine of the table is MyISAM though the transaction was tried.', E_USER_NOTICE);
       }
     }
