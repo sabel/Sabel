@@ -18,7 +18,7 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
 require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
-require_once('Container.php');
+require_once('Sabel.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
 $dt->visit(new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false));

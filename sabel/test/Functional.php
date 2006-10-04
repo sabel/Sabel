@@ -17,8 +17,8 @@ if (!defined('PHPUnit2_MAIN_METHOD'))
  */
 class Sabel_Test_Functional extends PHPUnit2_Framework_TestCase
 {
+  protected $front     = null;
   protected $container = null;
-  protected $front = null;
   
   public function __construct()
   {

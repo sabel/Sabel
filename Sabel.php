@@ -2,6 +2,70 @@
 
 define('SABEL', true);
 
+class Sabel
+{
+  public static function initializeApplication()
+  {
+    if (ENVIRONMENT === 'development') {
+      $c = Container::create();
+      $dt = new DirectoryTraverser();
+      $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+      $dt->visit(new SabelClassRegister($c));
+      $dt->traverse();
+      unset($dt);
+      $dt = new DirectoryTraverser(RUN_BASE);
+      $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
+      $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
+      $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+      $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+      $dt->visit(new AppClassRegister($c));
+      $dt->traverse();
+      if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
+      require_once(APP_CACHE);
+      require_once(LIB_CACHE);
+      require_once(SCM_CACHE);
+      require_once(INJ_CACHE);
+      
+      $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
+      fputs($file, serialize($c->getClasses()));
+      fclose($file);
+    } else {
+      $file = @fopen(RUN_BASE . '/cache/container.cache', 'r');
+      if ($file) {
+        $c = Container::create();
+        $c->setClasses(unserialize(fgets($file)));
+        require_once(SABEL_CLASSES);
+        require_once(APP_CACHE);
+        require_once(LIB_CACHE);
+        require_once(SCM_CACHE);
+        require_once(INJ_CACHE);
+      } else {
+        $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
+        $c = Container::create();
+        $dt = new DirectoryTraverser();
+        $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+        $dt->visit(new SabelClassRegister($c));
+        $dt->traverse();
+        unset($dt);
+        $dt = new DirectoryTraverser(RUN_BASE);
+        $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
+        $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
+        $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+        $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+        $dt->visit(new AppClassRegister($c));
+        $dt->traverse();
+        require_once(SABEL_CLASSES);
+        require_once(APP_CACHE);
+        require_once(LIB_CACHE);
+        require_once(SCM_CACHE);
+        require_once(INJ_CACHE);
+        
+        fputs($file, serialize($c->getClasses()));
+      }
+    }
+  }
+}
+
 /**
  * class Container has all of Sabel classes and Sabel Application.
  * 
@@ -118,69 +182,6 @@ class Container
   
   public function setClasses($classes){
     self::$classes = $classes;
-  }
-  
-  public static function initializeApplication()
-  {
-    if (ENVIRONMENT === 'development') {
-      $c = Container::create();
-      $dt = new DirectoryTraverser();
-      $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
-      $dt->visit(new SabelClassRegister($c));
-      $dt->traverse();
-      unset($dt);
-      $dt = new DirectoryTraverser(RUN_BASE);
-      $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
-      $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
-      $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
-      $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
-      $dt->visit(new AppClassRegister($c));
-      $dt->traverse();
-      if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
-      require_once(APP_CACHE);
-      require_once(LIB_CACHE);
-      require_once(SCM_CACHE);
-      require_once(INJ_CACHE);
-      
-      $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
-      fputs($file, serialize($c->getClasses()));
-      fclose($file);
-    } else {
-      $file = @fopen(RUN_BASE . '/cache/container.cache', 'r');
-      if ($file) {
-        $c = Container::create();
-        $c->setClasses(unserialize(fgets($file)));
-        require_once(SABEL_CLASSES);
-        require_once(APP_CACHE);
-        require_once(LIB_CACHE);
-        require_once(SCM_CACHE);
-        require_once(INJ_CACHE);
-      } else {
-        $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
-        $c = Container::create();
-        $dt = new DirectoryTraverser();
-        $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
-        $dt->visit(new SabelClassRegister($c));
-        $dt->traverse();
-        unset($dt);
-        $dt = new DirectoryTraverser(RUN_BASE);
-        $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
-        $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
-        $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
-        $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
-        $dt->visit(new AppClassRegister($c));
-        $dt->traverse();
-        require_once(SABEL_CLASSES);
-        require_once(APP_CACHE);
-        require_once(LIB_CACHE);
-        require_once(SCM_CACHE);
-        require_once(INJ_CACHE);
-        
-        fputs($file, serialize($c->getClasses()));
-      }
-    }
-    
-    return $c;
   }
 }
 
