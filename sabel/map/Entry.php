@@ -73,6 +73,23 @@ class Sabel_Map_Entry
   
   public function uri($params)
   {
+    foreach ($params as $key => $param) {
+      switch ($key) {
+        case 'm':
+          $params['module'] = $param;
+          unset($params[$key]);
+          break;
+        case 'c':
+          $params['controller'] = $param;
+          unset($params[$key]);
+          break;
+        case 'a':
+          $params['action'] = $param;
+          unset($params[$key]);
+          break;
+      }
+    }
+    
     $mapUri = $this->getUri();
     $requestUri = $this->request->getUri();
     

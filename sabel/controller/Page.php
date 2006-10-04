@@ -114,6 +114,22 @@ abstract class Sabel_Controller_Page
     exit; // exit after HTTP Header(30x)
   }
   
+  protected function redirectTo($params)
+  {
+    $entry = null;
+
+    $map = Sabel_Map_Facade::create();
+    if (isset($params['entry'])) {
+      $entry = $map->getEntry($params['entry']);
+      unset($params['entry']);
+      // @todo if $entry is not object.
+    } else {
+      $entry = $map->getCurrentEntry();
+    }
+
+    $this->redirect('/'.$entry->uri($params));
+  }
+  
   /**
    * forwaring anothor controller or method of same controller.
    *

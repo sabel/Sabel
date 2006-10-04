@@ -27,6 +27,11 @@ abstract class Sabel_Template_Engine
     
   }
   
+  public function partial($tplName)
+  {
+    return $this->load($tplName);
+  }
+  
   public function load($name)
   {
     $t = clone $this;
