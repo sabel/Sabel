@@ -1,33 +1,38 @@
 <?php
 /*
-require_once 'db/Connection.php';
+define(SABEL_DB,   '/usr/local/www/data/trunk/Sabel/sabel/db/');
+define(MODELS_DIR, '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/models/');
+define(SCHEMA_DIR, '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/schema/');
 
-require_once 'db/driver/Query.php';
-require_once 'db/driver/native/Query.php';
-require_once 'db/driver/pdo/Query.php';
+require_once SABEL_DB . 'Connection.php';
 
-require_once 'db/driver/General.php';
-require_once 'db/driver/native/Mysql.php';
-require_once 'db/driver/native/Pgsql.php';
-require_once 'db/driver/pdo/Driver.php';
+require_once SABEL_DB . 'driver/Query.php';
+require_once SABEL_DB . 'driver/native/Query.php';
+require_once SABEL_DB . 'driver/pdo/Query.php';
 
-require_once 'db/Const.php';
-require_once 'db/Transaction.php';
-require_once 'db/SimpleCache.php';
-require_once 'db/Mapper.php';
-require_once 'db/BaseClasses.php';
+require_once SABEL_DB . 'driver/General.php';
+require_once SABEL_DB . 'driver/native/Mysql.php';
+require_once SABEL_DB . 'driver/native/Pgsql.php';
+require_once SABEL_DB . 'driver/pdo/Driver.php';
 
-require_once 'db/schema/Types.php';
-require_once 'db/schema/Setter.php';
-require_once 'db/schema/Column.php';
-require_once 'db/schema/Table.php';
-require_once 'db/schema/General.php';
-require_once 'db/schema/MyPg.php';
-require_once 'db/schema/Mysql.php';
-require_once 'db/schema/Accessor.php';
+require_once SABEL_DB . 'Const.php';
+require_once SABEL_DB . 'Transaction.php';
+require_once SABEL_DB . 'SimpleCache.php';
+require_once SABEL_DB . 'Mapper.php';
+require_once SABEL_DB . 'BaseClasses.php';
 
-require_once 'db/config/Spyc.php';
-require_once 'db/config/Yaml.php';
+require_once SABEL_DB . 'schema/Types.php';
+require_once SABEL_DB . 'schema/Setter.php';
+require_once SABEL_DB . 'schema/Column.php';
+require_once SABEL_DB . 'schema/Table.php';
+require_once SABEL_DB . 'schema/General.php';
+require_once SABEL_DB . 'schema/MyPg.php';
+require_once SABEL_DB . 'schema/Mysql.php';
+require_once SABEL_DB . 'schema/Pgsql.php';
+require_once SABEL_DB . 'schema/Accessor.php';
+
+require_once SABEL_DB . 'config/Spyc.php';
+require_once SABEL_DB . 'config/Yaml.php';
 */
 
 class ModelClass_Writer
@@ -51,17 +56,18 @@ class ModelClass_Writer
     self::$tPrimary[$connectName][$tName] = $primary;
   }
 
-  public static function show()
+  public static function write($inputTables = null)
   {
-    $dirPath = Schema_Generator::$modelsDir;
-    if (is_null($dirPath)) return null;
-
     foreach (self::$models as $connectName => $tArray) {
-      $tables = array_values($tArray);
+      foreach (array_values($tArray) as $table) {
+        if (!empty($inputTables)) {
+          if (count($inputTables) !== 1 || $inputTables[0] !== 'all') {
+            if (!in_array($table, $inputTables)) continue;
+          }
+        }
 
-      foreach ($tables as $table) {
         $class  = ucfirst($table);
-        $target = "{$dirPath}/{$class}.php";
+        $target = MODELS_DIR . "{$class}.php";
 
         echo "generate Model {$target}\n";
 
@@ -78,13 +84,18 @@ class ModelClass_Writer
         $primary = self::$tPrimary[$connectName];
         if (is_array($primary) && array_key_exists($table, $primary)) {
           $pri  = $primary[$table];
-          $line = 'protected $jointKey = array(' . "'{$pri[0]}'";
-          for ($i = 1; $i < count($pri); $i++) $line .= ", '{$pri[$i]}'";
+          $line = '  protected $jointKey = array(' . "'{$pri[0]}'";
+
+          for ($i = 1; $i < count($pri); $i++) {
+            $line .= ", '{$pri[$i]}'";
+          }
+
           fwrite($fp, $line . ");\n");
           $flag = true;
         }
 
         if ($flag) fwrite($fp, "\n");
+
         fwrite($fp, '  public function __construct($param1 = null, $param2 = null)');
         fwrite($fp, "\n  {\n");
         fwrite($fp, '    $this->setDriver(' . "'{$connectName}');\n");
@@ -121,16 +132,15 @@ class Cascade_Writer
 
     foreach (self::$references as $connectName => $table) {
       foreach ($table as $tName => $children) {
-        $tName = self::selectConnectName($tName, $connectName);
+        $tName = self::selectConnectName($tName);
         foreach ($children as $child) {
-          $child = self::selectConnectName($child, $connectName);
+          $child = self::selectConnectName($child);
           $chain[$tName][] = $child;
         }
       }
     }
 
-    $dirPath = Schema_Generator::$schemaDir;
-    $target  = "{$dirPath}/Cascade_Chain.php";
+    $target = SCHEMA_DIR . 'Cascade_Chain.php';
     echo "generate Cascade Chain\n\n";
     $fp = fopen($target, 'w');
 
@@ -158,16 +168,10 @@ class Cascade_Writer
     fclose($fp);
   }
 
-  private static function selectConnectName($tName, $connectName)
+  private static function selectConnectName($tName)
   {
-    if (in_array($tName, TableList_Writer::get($connectName))) {
-      return $connectName . ':' . $tName;
-    } else {
-      foreach (Schema_Generator::$connectNameList as $connectName) {
-        if (in_array($tName, TableList_Writer::get($connectName))) {
-          return $connectName . ':' . $tName;
-        }
-      }
+    foreach (Schema_Util_Generator::$connectNameList as $connectName) {
+      if (in_array($tName, TableList_Writer::get($connectName))) return $connectName . ':' . $tName;
     }
   }
 }
@@ -188,9 +192,8 @@ class TableList_Writer
 
   public static function write($connectName)
   {
-    $dirPath   = Schema_Generator::$schemaDir;
     $className = ucfirst($connectName) . '_TableList';
-    $target = "{$dirPath}/{$className}.php";
+    $target = SCHEMA_DIR . "{$className}.php";
     echo "generate Table List: {$connectName}\n\n";
     $fp = fopen($target, 'w');
 
@@ -216,11 +219,10 @@ class TableList_Writer
 
 class Schema_Writer
 {
-  public static function write($connectName, $tName, $colArray)
+  public static function write($tName, $colArray)
   {
-    $dirPath   = Schema_Generator::$schemaDir;
-    $className = ucfirst($connectName) . '_' . ucfirst($tName);
-    $target = "{$dirPath}/{$className}.php";
+    $className = ucfirst($tName);
+    $target = SCHEMA_DIR . "{$className}.php";
     echo "generate Schema {$target} \n";
     $fp = fopen($target, 'w');
 
@@ -297,20 +299,47 @@ class Schema_Maker
   }
 }
 
-class Schema_Generator
+class Schema_Util_Generator
 {
   public static $connectNameList = array();
 
-  public static $schemaDir = null;
-  public static $modelsDir = null;
-
   public static function main()
   {
-    self::$schemaDir = $_SERVER['argv'][2];
-    self::$modelsDir = $_SERVER['argv'][3];
+    $input = $_SERVER['argv'];
 
-    $yml  = new Sabel_Config_Yaml('/usr/local/www/data/devel/config/database.yml');
-    $data = $yml->read($_SERVER['argv'][1]);
+    $yml   = new Sabel_Config_Yaml('database.yml');
+    $data  = $yml->read($input[1]);
+
+    $schemaWrite  = false;
+    $schemaAll    = false;
+    $inputSchemas = array();
+
+    if (in_array('-s', $input)) {
+      $schemaWrite = true;
+      $key = array_search('-s', $input) + 1;
+      for ($i = $key; $i < count($input); $i++) {
+        $val = $input[$i];
+        if ($val === '-m' || $val === '-l' || $input[$i] === '-c') break;
+        $inputSchemas[] = $val;
+      }
+
+      if (count($inputSchemas) === 1 && $inputSchemas[0] === 'all') {
+        $schemaAll = true;
+      }
+    }
+
+    $modelWrite  = false;
+    $inputModels = array();
+
+    if (in_array('-m', $input)) {
+      $modelWrite = true;
+      $key = array_search('-m', $input) + 1;
+      for ($i = $key; $i < count($input); $i++) {
+        $val = $input[$i];
+        if ($val === '-s' || $val === '-l' || $input[$i] === '-c') break;
+        $inputModels[] = $val;
+      }
+    }
 
     foreach ($data as $connectName => $params) {
       self::$connectNameList[] = $connectName;
@@ -322,21 +351,29 @@ class Schema_Generator
       foreach ($schemas as $schema) {
         $tName    = $schema->getTableName();
         $colArray = Schema_Maker::make($connectName, $schema);
-        Schema_Writer::write($connectName, $tName, $colArray);
+        if ($schemaAll || $schemaWrite && in_array($tName, $inputSchemas)) {
+          Schema_Writer::write($tName, $colArray);
+        }
         TableList_Writer::add($connectName, $tName);
       }
-      TableList_Writer::write($connectName);
+
+      if (in_array('-l', $input)) TableList_Writer::write($connectName);
     }
 
-    Cascade_Writer::write();
-    ModelClass_Writer::show();
+    if (in_array('-c', $input)) Cascade_Writer::write();
+    if ($modelWrite) ModelClass_Writer::write($inputModels);
   }
 }
+
 /*
 if (count($_SERVER['argv']) === 1) {
-  echo "usage: php Generator.php [environment] [schema-dir] ([model-dir])\n\n";
+  echo "usage: php Generator.php environment\n";
+  echo "       [-c] make cascade chain\n";
+  echo "       [-l] make table list\n";
+  echo "       [-s] make schema : table name1, name2... , or all\n";
+  echo "       [-m] make models : table name1, name2... , or all\n";
   exit;
 }
 
-Schema_Generator::main();
+Schema_Util_Generator::main();
 */

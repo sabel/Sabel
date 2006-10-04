@@ -15,7 +15,8 @@ class Sabel_DB_Connection
 
   protected static function makeDatabaseLink($connectName)
   {
-    if (is_null(self::$parameters[$connectName])) return false;
+    if (is_null(self::$parameters[$connectName]))
+      throw new Exception('Error: database parameters are not found: ' . $connectName);
 
     $params = self::$parameters[$connectName];
     $driver = $params['driver'];
@@ -78,26 +79,19 @@ class Sabel_DB_Connection
 
   public static function getConnection($connectName)
   {
-    if (isset(self::$connList[$connectName]['conn'])) {
-      return self::$connList[$connectName]['conn'];
-    } else {
-      $result = self::makeDatabaseLink($connectName);
-
-      if (!$result) {
-        throw new Exception('Error: database parameters are not found: ' . $connectName);
-      } else {
-        return $result;
-      }
-    }
+    self::issetList($connectName, 'conn');
+    return self::getValue($connectName, 'conn');
   }
 
   public static function getDriverName($connectName)
   {
+    self::issetList($connectName, 'conn');
     return self::getValue($connectName, 'driver');
   }
 
   public static function getDB($connectName)
   {
+    self::issetList($connectName, 'conn');
     return self::getValue($connectName, 'db');
   }
 
@@ -105,6 +99,11 @@ class Sabel_DB_Connection
   {
     $db = self::$connList[$connectName]['db'];
     if ($db === 'mysql' || $db === 'pgsql') return self::getValue($connectName, 'schema');
+  }
+
+  protected static function issetList($connectName, $key)
+  {
+    if (!isset(self::$connList[$connectName][$key])) self::makeDatabaseLink($connectName);
   }
 
   protected static function getValue($connectName, $key)
