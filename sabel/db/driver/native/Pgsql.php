@@ -30,18 +30,20 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
     pg_query($conn, 'ROLLBACK');
   }
 
-  public function driverExecute($sql = null)
+  public function driverExecute($sql = null, $conn = null)
   {
+    $conn = (is_null($conn)) ? $this->conn : $conn;
+
     if (isset($sql)) {
-      $this->result = pg_query($this->conn, $sql);
+      $this->result = pg_query($conn, $sql);
     } elseif (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $this->result = pg_query($this->conn, $sql);
+      $this->result = pg_query($conn, $sql);
     }
 
     if (!$this->result) {
-      $error = pg_result_error($this->conn);
+      $error = pg_result_error($this->result);
       throw new Exception("pgsql_query execute failed:{$sql} ERROR:{$error}");
     }
   }

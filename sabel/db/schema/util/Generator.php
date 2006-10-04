@@ -1,5 +1,5 @@
 <?php
-/*
+
 require_once 'db/Connection.php';
 
 require_once 'db/driver/Query.php';
@@ -28,7 +28,7 @@ require_once 'db/schema/Accessor.php';
 
 require_once 'db/config/Spyc.php';
 require_once 'db/config/Yaml.php';
-*/
+
 class ModelClass_Writer
 {
   private static $models     = array();
@@ -331,11 +331,10 @@ class Schema_Generator
     ModelClass_Writer::show();
   }
 }
-/*
+
 if (count($_SERVER['argv']) === 1) {
   echo "usage: php Generator.php [environment] [schema-dir] ([model-dir])\n\n";
   exit;
 }
 
 Schema_Generator::main();
-*/

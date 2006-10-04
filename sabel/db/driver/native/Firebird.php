@@ -19,14 +19,17 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function begin($conn)
   {
-    $resource    = ibase_trans(IBASE_WRITE, $conn);
+    $resource = ibase_trans(IBASE_WRITE, $conn);
     $this->trans = $resource;
     return $resource;
   }
 
   public function commit($conn)
   {
-    ibase_commit($conn);
+    if (!ibase_commit($conn)) {
+      $error = ibase_errmsg();
+      throw new Exception ("Error: transaction commit failed. {$error}");
+    }
     unset($this->trans);
   }
 
@@ -86,7 +89,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if (!is_bool($result) && !is_numeric($result) && !is_string($result))
+    if (is_resource($result))
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
 
     return $rows;

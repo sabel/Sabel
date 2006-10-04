@@ -25,7 +25,10 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function commit($conn)
   {
-    $conn->commit();
+    if (!$conn->commit()) {
+      $error = $this->conn->errorInfo();
+      throw new Exception('Error: transaction commit failed. ' . $error[2]);
+    }
   }
 
   public function rollback($conn)
