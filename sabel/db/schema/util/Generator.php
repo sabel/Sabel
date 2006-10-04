@@ -1,8 +1,7 @@
 <?php
-/*
-define(SABEL_DB,   '/usr/local/www/data/trunk/Sabel/sabel/db/');
-define(MODELS_DIR, '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/models/');
-define(SCHEMA_DIR, '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/schema/');
+define('SABEL_DB',   '/usr/local/www/data/Sabel/sabel/db/');
+define('MODELS_DIR', '/usr/local/www/data/Sabel/sabel/db/schema/util/models/');
+define('SCHEMA_DIR', '/usr/local/www/data/Sabel/sabel/db/schema/util/schema/');
 
 require_once SABEL_DB . 'Connection.php';
 
@@ -31,9 +30,8 @@ require_once SABEL_DB . 'schema/Mysql.php';
 require_once SABEL_DB . 'schema/Pgsql.php';
 require_once SABEL_DB . 'schema/Accessor.php';
 
-require_once SABEL_DB . 'config/Spyc.php';
-require_once SABEL_DB . 'config/Yaml.php';
-*/
+require_once '/usr/local/www/data/Sabel/sabel/config/Spyc.php';
+require_once '/usr/local/www/data/Sabel/sabel/config/Yaml.php';
 
 class ModelClass_Writer
 {
@@ -81,7 +79,8 @@ class ModelClass_Writer
           $flag = true;
         }
 
-        $primary = self::$tPrimary[$connectName];
+        $primary = (isset(self::$tPrimary[$connectName])) ? self::$tPrimary[$connectName] : null;
+
         if (is_array($primary) && array_key_exists($table, $primary)) {
           $pri  = $primary[$table];
           $line = '  protected $jointKey = array(' . "'{$pri[0]}'";
@@ -307,7 +306,7 @@ class Schema_Util_Generator
   {
     $input = $_SERVER['argv'];
 
-    $yml   = new Sabel_Config_Yaml('database.yml');
+    $yml   = new Sabel_Config_Yaml('/usr/local/www/data/adstaff/config/database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;
@@ -365,7 +364,6 @@ class Schema_Util_Generator
   }
 }
 
-/*
 if (count($_SERVER['argv']) === 1) {
   echo "usage: php Generator.php environment\n";
   echo "       [-c] make cascade chain\n";
@@ -376,4 +374,3 @@ if (count($_SERVER['argv']) === 1) {
 }
 
 Schema_Util_Generator::main();
-*/
