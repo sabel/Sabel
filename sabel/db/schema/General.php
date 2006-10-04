@@ -7,7 +7,7 @@ class Sabel_DB_Schema_General
 
   public function getTable($tblName)
   {
-    $schemaClass = $this->connectName . '_' . $tblName;
+    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
     if (is_null($schema = Sabel_DB_SimpleCache::get($schemaClass))) {
       if (class_exists($schemaClass, false)) {
         $sc   = new $schemaClass();

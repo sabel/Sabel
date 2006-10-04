@@ -1,7 +1,8 @@
 <?php
-define('SABEL_DB',   '/usr/local/www/data/Sabel/sabel/db/');
-define('MODELS_DIR', '/usr/local/www/data/Sabel/sabel/db/schema/util/models/');
-define('SCHEMA_DIR', '/usr/local/www/data/Sabel/sabel/db/schema/util/schema/');
+/*
+define('SABEL_DB',   '/usr/local/www/data/trunk/Sabel/sabel/db/');
+define('MODELS_DIR', '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/models/');
+define('SCHEMA_DIR', '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/schema/');
 
 require_once SABEL_DB . 'Connection.php';
 
@@ -30,8 +31,9 @@ require_once SABEL_DB . 'schema/Mysql.php';
 require_once SABEL_DB . 'schema/Pgsql.php';
 require_once SABEL_DB . 'schema/Accessor.php';
 
-require_once '/usr/local/www/data/Sabel/sabel/config/Spyc.php';
-require_once '/usr/local/www/data/Sabel/sabel/config/Yaml.php';
+require_once '/usr/local/www/data/trunk/Sabel/sabel/config/Spyc.php';
+require_once '/usr/local/www/data/trunk/Sabel/sabel/config/Yaml.php';
+*/
 
 class ModelClass_Writer
 {
@@ -58,13 +60,18 @@ class ModelClass_Writer
   {
     foreach (self::$models as $connectName => $tArray) {
       foreach (array_values($tArray) as $table) {
-        if (!empty($inputTables)) {
-          if (count($inputTables) !== 1 || $inputTables[0] !== 'all') {
-            if (!in_array($table, $inputTables)) continue;
-          }
+        if (!empty($inputTables) && (count($inputTables) !== 1 || $inputTables[0] !== 'all')) {
+          if (!in_array($table, $inputTables)) continue;
         }
 
-        $class  = ucfirst($table);
+        $underBar = false;
+        if (strpos($table, '_') !== false) {
+          $underBar  = true;
+          $class = join('', array_map('ucfirst', explode('_', $table)));
+        } else {
+          $class = ucfirst($table);
+        }
+
         $target = MODELS_DIR . "{$class}.php";
 
         echo "generate Model {$target}\n";
@@ -74,6 +81,12 @@ class ModelClass_Writer
         fwrite($fp, "class {$class} extends Sabel_DB_Mapper\n{\n");
 
         $flag = false;
+
+        if ($underBar) {
+          fwrite($fp, '  protected $table = ' . "'{$table}';\n");
+          $flag = true;
+        }
+
         if (!self::$tIncrement[$connectName][$table]) {
           fwrite($fp, '  protected $autoNumber = false;' . "\n");
           $flag = true;
@@ -220,7 +233,8 @@ class Schema_Writer
 {
   public static function write($tName, $colArray)
   {
-    $className = ucfirst($tName);
+    $className = 'Schema_' . join('', array_map('ucfirst', explode('_', $tName)));
+
     $target = SCHEMA_DIR . "{$className}.php";
     echo "generate Schema {$target} \n";
     $fp = fopen($target, 'w');
@@ -306,7 +320,7 @@ class Schema_Util_Generator
   {
     $input = $_SERVER['argv'];
 
-    $yml   = new Sabel_Config_Yaml('/usr/local/www/data/adstaff/config/database.yml');
+    $yml   = new Sabel_Config_Yaml('database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;
@@ -364,6 +378,7 @@ class Schema_Util_Generator
   }
 }
 
+/*
 if (count($_SERVER['argv']) === 1) {
   echo "usage: php Generator.php environment\n";
   echo "       [-c] make cascade chain\n";
@@ -374,3 +389,4 @@ if (count($_SERVER['argv']) === 1) {
 }
 
 Schema_Util_Generator::main();
+*/

@@ -70,7 +70,7 @@ class Test_DB_InformationSchema extends SabelTestCase
   }
 }
 
-class Default_Stest
+class Schema_Stest
 {
   public function get()
   {
