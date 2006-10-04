@@ -49,9 +49,6 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
       $this->result = mysql_query($sql, $conn);
     }
 
-    $logger = Logger::getInstance();
-    $logger->log($sql);
-
     if (!$this->result) {
       $error = mysql_error($conn);
       throw new Exception("mysql_query execute failed:{$sql} ERROR:{$error}");
