@@ -51,7 +51,9 @@ class Sabel_DB_Connection
         $list['conn'] = pg_connect("host={$host} dbname={$database} user={$user} password={$pass}");
       } else if ($driver === 'firebird') {
         $host = $host . ':' . $database;
-        $list['conn'] = ibase_connect($host, $user, $pass);
+        $list['conn'] = (isset($params['encoding']))
+                          ? ibase_connect($host, $user, $pass, $params['encoding'])
+                          : ibase_connect($host, $user, $pass);
       }
 
       $list['driver'] = $driver;

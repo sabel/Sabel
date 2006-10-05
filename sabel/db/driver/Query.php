@@ -73,6 +73,7 @@ abstract class Sabel_DB_Driver_Query
         $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
 
         $this->sql = array('SELECT ' . $query . $tmp);
+        return null;
       } else {
         array_push($this->sql, " LIMIT {$constraints['limit']}");
       }

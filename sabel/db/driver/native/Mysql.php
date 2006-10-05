@@ -32,7 +32,7 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 
   public function getLastInsertId()
   {
-    $this->execute('SELECT last_insert_id()');
+    $this->driverExecute('SELECT last_insert_id()');
     $row = $this->fetch(Sabel_DB_Const::ASSOC);
     return (int)$row['last_insert_id()'];
   }

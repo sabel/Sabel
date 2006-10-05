@@ -17,17 +17,17 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 
   public function begin($conn)
   {
-    pg_query($conn, 'BEGIN');
+    $this->driverExecute('BEGIN', $conn);
   }
 
   public function commit($conn)
   {
-    pg_query($conn, 'COMMIT');
+    $this->driverExecute('COMMIT', $conn);
   }
 
   public function rollback($conn)
   {
-    pg_query($conn, 'ROLLBACK');
+    $this->driverExecute('ROLLBACK', $conn);
   }
 
   public function driverExecute($sql = null, $conn = null)

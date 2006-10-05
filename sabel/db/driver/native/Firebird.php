@@ -44,9 +44,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     $genName = strtoupper("{$table}_{$defColumn}_gen");
 
     if (!isset($data[$defColumn])) {
-      if (!$result = $this->execute("SELECT GEN_ID({$genName}, 1) FROM sequence"))
-        throw new Exception('Error: get generator number failed. ' . $genName);
-
+      $this->driverExecute("SELECT GEN_ID({$genName}, 1) FROM sequence");
       $genNum = $this->fetch();
       $this->lastInsertId = $genNum[0];
       $data[$defColumn]   = $genNum[0];
