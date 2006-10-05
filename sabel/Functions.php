@@ -12,52 +12,93 @@ function is_not_object($object)
 
 function uri($params)
 {
-  $entry = null;
-  
-  $map = Sabel_Map_Facade::create();
-  if (isset($params['entry'])) {
-    $entry = $map->getEntry($params['entry']);
-    unset($params['entry']);
-    // @todo if $entry is not object.
-  } else {
-    $entry = $map->getCurrentEntry();
-  }
-  
-  return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $entry->uri($params);
+  $aCreator = new UriCreator();
+  return $aCreator->uri($params);
 }
 
 function hyperlink($params, $anchor = null, $id = null, $class = null)
 {
-  $entry = null;
-  
-  $map = Sabel_Map_Facade::create();
-  if (isset($params['entry'])) {
-    $entry = $map->getEntry($params['entry']);
-    unset($params['entry']);
-    // @todo if $entry is not object.
-  } else {
-    $entry = $map->getCurrentEntry();
-  }
-  $uriPrefix = "http://{$_SERVER['HTTP_HOST']}";
-  
-  if (is_object($anchor)) {
-    $anchor = $anchor->__toString();
-  }
-  
-  $fmtUri = '<a id="%s" class="%s" href="%s/%s">%s</a>';
-  return sprintf($fmtUri, $id, $class, $uriPrefix, $entry->uri($params), $anchor);
+  $aCreator = new UriCreator();
+  return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
-function a($param, $anchor)
+function a($param, $anchor, $id = null, $class = null)
 {
-  $buf = array();
-  foreach (explode(',', $param) as $key => $part) {
-    $line = array_map('trim', explode(':', $part));
-    if ($line[0] === 'e') {
-      $buf['entry'] = $line[1];
-    } else {
-      $buf[$line[0]] = $line[1];
-    }
+  $aCreator = new UriCreator();
+  return $aCreator->aTag($param, $anchor, $id, $class);
+}
+
+/**
+ * 
+ *
+ * @category   
+ * @package    org.sabel.
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class UriCreator
+{
+  protected $map = null;
+  
+  public function __construct()
+  {
+    $this->map = Sabel_Map_Facade::create();
   }
-  return hyperlink($buf, $anchor);
+  
+  public function hyperlink($params, $anchor = null, $id = null, $class = null)
+  {
+    $entry = null;
+    
+    if (isset($params['entry'])) {
+      $entry = $this->map->getEntry($params['entry']);
+      unset($params['entry']);
+      // @todo if $entry is not object.
+    } else {
+      $entry = $this->map->getCurrentEntry();
+    }
+    $uriPrefix = "http://{$_SERVER['HTTP_HOST']}";
+    
+    if (is_object($anchor)) {
+      $anchor = $anchor->__toString();
+    }
+    
+    $fmtUri = '<a id="%s" class="%s" href="%s/%s">%s</a>';
+    return sprintf($fmtUri, $id, $class, $uriPrefix, $entry->uri($params), $anchor);
+  }
+  
+  public function aTag($param, $anchor)
+  {
+    return $this->hyperlink($this->convert($param), $anchor);
+  }
+  
+  public function uri($params)
+  {
+    $entry = null;
+    
+    if (isset($params['entry'])) {
+      $entry = $this->map->getEntry($params['entry']);
+      unset($params['entry']);
+      // @todo if $entry is not object.
+    } else {
+      $entry = $this->map->getCurrentEntry();
+    }
+    
+    return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $entry->uri($params);
+  }
+  
+  protected function convert($param)
+  {
+    $buf = array();
+    foreach (explode(',', $param) as $key => $part) {
+      $line = array_map('trim', explode(':', $part));
+      if ($line[0] === 'e') {
+        $buf['entry'] = $line[1];
+      } else {
+        $buf[$line[0]] = $line[1];
+      }
+    }
+    
+    return $buf;
+  }
 }
