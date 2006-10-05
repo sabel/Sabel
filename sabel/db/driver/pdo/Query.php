@@ -49,7 +49,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     if (isset($constraints['order']))
       array_push($this->sql, " ORDER BY {$constraints['order']}");
 
-    if (isset($constraints['limit'])) {
+    if (isset($constraints['limit']))
       array_push($this->sql, " LIMIT {$constraints['limit']}");
 
     if (isset($constraints['offset']))
