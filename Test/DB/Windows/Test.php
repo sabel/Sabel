@@ -1,0 +1,1257 @@
+<?php
+
+class WindowsUnitTest
+{
+  protected function assertEquals($p1, $p2)
+  {
+    echo ($p1 === $p2) ? '.' : 'F';
+  }
+
+  protected function assertNotEquals($p1, $p2)
+  {
+    echo ($p1 !== $p2) ? '.' : 'F';
+  }
+
+  protected function assertNull($p)
+  {
+    echo (is_null($p)) ? '.' : 'F';
+  }
+}
+
+class Test_DB_Windows_Test extends WindowsUnitTest
+{
+  public static $TABLES = array('test', 'test2', 'test3',
+                                'customer', 'customer_order', 'order_line',
+                                'customer_telephone', 'infinite1', 'infinite2',
+                                'seq', 'tree', 'student', 'student_course',
+                                'course', 'users', 'status', 'bbs', 'trans1');
+
+  public function testConstraint()
+  {
+    $customer = new Customer();
+
+    $insertData   = array();
+    $insertData[] = array('id' => 1, 'name' => 'tanaka');
+    $insertData[] = array('id' => 2, 'name' => 'ueda');
+    $customer->multipleInsert($insertData);
+
+    $this->assertEquals($customer->getCount(), 2);
+
+    $order = new CustomerOrder();
+
+    $insertData   = array();
+    $insertData[] = array('id' => 1, 'customer_id' => 1);
+    $insertData[] = array('id' => 2, 'customer_id' => 1);
+    $insertData[] = array('id' => 3, 'customer_id' => 2);
+    $insertData[] = array('id' => 4, 'customer_id' => 2);
+    $insertData[] = array('id' => 5, 'customer_id' => 1);
+    $insertData[] = array('id' => 6, 'customer_id' => 1);
+    $order->multipleInsert($insertData);
+
+    $o = new CustomerOrder();
+    $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
+    $this->assertEquals((int)$res[0]->Customer->id, 1);
+    $this->assertEquals((int)$res[2]->Customer->id, 2);
+
+    $this->assertEquals($order->getCount(), 6);
+
+    $cu  = new Customer();
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 4);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[3]->id, 6);
+
+    $cu = new Customer();
+    $cu->setChildConstraint('CustomerOrder', array('order' => 'id desc'));
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 6);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 5);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 3);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 2);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[3]->id, 1);
+
+    $cu  = new Customer();
+    $cu->setChildConstraint('CustomerOrder', array('offset' => 1));
+    $cus = $cu->select();
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 5);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 6);
+ 
+    $cu  = new Customer();
+    $cu->setChildConstraint('CustomerOrder', array('limit' => 2));
+    $cus = $cu->select();
+
+    $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 4);
+    @$this->assertNull($cus[0]->CustomerOrder[2]->id);
+    @$this->assertNull($cus[0]->CustomerOrder[3]->id);
+  }
+
+  public function testMultipleInsert()
+  {
+    $test = new Test();
+
+    $insertData = array();
+    $insertData[] = array('id' => 1, 'name' => 'tanaka',   'blood' => 'A',  'test2_id' => 1);
+    $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
+    $insertData[] = array('id' => 3, 'name' => 'uchida',   'blood' => 'AB', 'test2_id' => 1);
+    $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
+    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
+    $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
+    $test->multipleInsert($insertData);
+    
+    $ro = $test->select();
+    $this->assertEquals(count($ro), 6);
+    
+    $test->enableParent();
+    $obj = $test->selectOne(5);
+    $this->assertEquals($obj->name, 'seki');
+    $this->assertEquals((int)$obj->Test2->id, 4);
+    
+    $obj = $test->selectOne('name', 'seki');
+    $this->assertEquals((int)$obj->id, 5);
+
+    $orderLine = new OrderLine();
+
+    $insertData = array();
+    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
+    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
+    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
+    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
+    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
+    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
+    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
+    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
+    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
+    $orderLine->multipleInsert($insertData);
+    $this->assertEquals($orderLine->getCount(), 11);
+    
+    $telephone = new CustomerTelephone();
+
+    $insertData   = array();
+    $insertData[] = array('id' => 1,  'customer_id' => 1, 'telephone' => '09011111111');
+    $insertData[] = array('id' => 2,  'customer_id' => 2, 'telephone' => '09022221111');
+    $insertData[] = array('id' => 3,  'customer_id' => 1, 'telephone' => '09011112222');
+    $insertData[] = array('id' => 4,  'customer_id' => 2, 'telephone' => '09022222222');
+    $telephone->multipleInsert($insertData);
+
+    $this->assertEquals($orderLine->getCount(), 11);
+    
+    $tree = new Tree();
+    $insertData   = array();
+    $insertData[] = array('id' => 1,  'name' => 'A');
+    $insertData[] = array('id' => 2,  'name' => 'B');
+    $insertData[] = array('id' => 3,  'tree_id' => 1, 'name' => 'A3');
+    $insertData[] = array('id' => 4,  'name' => 'C');
+    $insertData[] = array('id' => 5,  'tree_id' => 1, 'name' => 'A5');
+    $insertData[] = array('id' => 6,  'tree_id' => 2, 'name' => 'B6');
+    $insertData[] = array('id' => 7,  'tree_id' => 3, 'name' => 'A3-7');
+    $insertData[] = array('id' => 8,  'tree_id' => 4);
+    $insertData[] = array('id' => 9,  'tree_id' => 2, 'name' => 'B9');
+    $insertData[] = array('id' => 10, 'tree_id' => 6, 'name' => 'B6-10');
+    $insertData[] = array('id' => 11, 'tree_id' => 4, 'name' => 'C11');
+    $tree->multipleInsert($insertData);
+
+    $student = new Student();
+    $insertData   = array();
+    $insertData[] = array('id' => 1, 'name' => 'tom',   'birth' => '1983/08/17');
+    $insertData[] = array('id' => 2, 'name' => 'john',  'birth' => '1983/08/18');
+    $insertData[] = array('id' => 3, 'name' => 'bob',   'birth' => '1983/08/19');
+    $insertData[] = array('id' => 4, 'name' => 'marcy', 'birth' => '1983/08/20');
+    $insertData[] = array('id' => 5, 'name' => 'ameri', 'birth' => '1983/08/21');
+    $student->multipleInsert($insertData);
+
+    $course = new Course();
+    $insertData   = array();
+    $insertData[] = array('id' => 1, 'name' => 'Mathematics');
+    $insertData[] = array('id' => 2, 'name' => 'Physics');
+    $insertData[] = array('id' => 3, 'name' => 'Science');
+    $insertData[] = array('id' => 4, 'name' => 'Economic');
+    $insertData[] = array('id' => 5, 'name' => 'Psychology');
+    $course->multipleInsert($insertData);
+
+    $sc = new StudentCourse();
+    $insertData   = array();
+    $insertData[] = array('student_id' => 1, 'course_id' => 1);
+    $insertData[] = array('student_id' => 1, 'course_id' => 2);
+    $insertData[] = array('student_id' => 1, 'course_id' => 3);
+
+    $insertData[] = array('student_id' => 2, 'course_id' => 2);
+    $insertData[] = array('student_id' => 2, 'course_id' => 3);
+    $insertData[] = array('student_id' => 2, 'course_id' => 4);
+    $insertData[] = array('student_id' => 2, 'course_id' => 5);
+
+    $insertData[] = array('student_id' => 3, 'course_id' => 1);
+    $insertData[] = array('student_id' => 3, 'course_id' => 2);
+    $insertData[] = array('student_id' => 3, 'course_id' => 4);
+    $insertData[] = array('student_id' => 3, 'course_id' => 5);
+
+    $insertData[] = array('student_id' => 4, 'course_id' => 3);
+    $insertData[] = array('student_id' => 4, 'course_id' => 4);
+
+    $insertData[] = array('student_id' => 5, 'course_id' => 1);
+    $insertData[] = array('student_id' => 5, 'course_id' => 2);
+    $insertData[] = array('student_id' => 5, 'course_id' => 3);
+    $insertData[] = array('student_id' => 5, 'course_id' => 4);
+    $insertData[] = array('student_id' => 5, 'course_id' => 5);
+    $sc->multipleInsert($insertData);
+
+    $users = new Users();
+    $insertData   = array();
+    $insertData[] = array('name' => 'Tarou'  , 'status_id' => 1);
+    $insertData[] = array('name' => 'Hanako' , 'status_id' => 2);
+    $insertData[] = array('name' => 'Maruo'  , 'status_id' => 1);
+    $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
+    $users->multipleInsert($insertData);
+
+    $s = new Status();
+    $s->state = 'normal';
+    $s->save();
+    $s->state = 'invalid';
+    $s->save();
+
+    $s  = new Status();
+    $ss = $s->select();
+
+    $this->assertEquals($ss[0]->state, 'normal');
+    $this->assertEquals($ss[1]->state, 'invalid');
+
+    $bbs = new Bbs();
+
+    $insertData   = array();
+    $insertData[] = array('users_id' => 1 , 'title' => 'title11', 'body' => 'body11');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title12', 'body' => 'body12');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title13', 'body' => 'body13');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title14', 'body' => 'body14');
+    $insertData[] = array('users_id' => 1 , 'title' => 'title15', 'body' => 'body15');
+
+    $insertData[] = array('users_id' => 2 , 'title' => 'title21', 'body' => 'body21');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title22', 'body' => 'body22');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title23', 'body' => 'body23');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title24', 'body' => 'body24');
+    $insertData[] = array('users_id' => 2 , 'title' => 'title25', 'body' => 'body25');
+
+    $insertData[] = array('users_id' => 3 , 'title' => 'title31', 'body' => 'body31');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title32', 'body' => 'body32');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title33', 'body' => 'body33');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title34', 'body' => 'body34');
+    $insertData[] = array('users_id' => 3 , 'title' => 'title35', 'body' => 'body35');
+
+    $insertData[] = array('users_id' => 4 , 'title' => 'title41', 'body' => 'body41');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title42', 'body' => 'body42');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title43', 'body' => 'body43');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title44', 'body' => 'body44');
+    $insertData[] = array('users_id' => 4 , 'title' => 'title45', 'body' => 'body45');
+    $bbs->multipleInsert($insertData);
+  }
+
+  public function testInsert()
+  {
+    $test2 = new Test2();
+    $test2->id   = 1;
+    $test2->name = 'test21';
+    $test2->test3_id = '2';
+    $test2->save();
+
+    $test2 = new Test2();
+    $test2->id   = 2;
+    $test2->name = 'test22';
+    $test2->test3_id = '1';
+    $test2->save();
+    
+    $test2 = new Test2();
+    $test2->id   = 3;
+    $test2->name = 'test23';
+    $test2->test3_id = '3';
+    $test2->save();
+
+    $test2 = new Test2();
+    $obj   = $test2->selectOne(3);
+    $this->assertEquals($obj->name, 'test23');
+    
+    $test3 = new Test3();
+    $test3->id = 1;
+    $test3->name = 'test31';
+    $test3->save();
+    
+    $test3->id = 2;
+    $test3->name = 'test32';
+    $test3->save();
+    
+    $test3->name('test31');
+    $obj = $test3->selectOne();
+    $this->assertEquals((int)$obj->id, 1);
+  }
+  
+  public function testUpdateOrInsert()
+  {
+    $test = new Test(7); // not found 
+    
+    $this->assertEquals($test->name, null);
+    $this->assertEquals($test->blood, null);
+    
+    if ($test->is_selected()) {
+      $test->blood = 'AB';
+      $test->save();  // (update)
+    } else {
+      $test->name  = 'tanaka';
+      $test->blood = 'B';
+      $test->save();  // insert <= execute
+    }
+    
+    //--------------------------------------------------------
+    
+    $test = new Test(7); // found 
+    $this->assertEquals($test->name, 'tanaka');
+    $this->assertEquals($test->blood, 'B');
+    
+    if ($test->is_selected()) {
+      $test->blood = 'AB';
+      $test->save();  // update <= execute
+    } else {
+      $test->name  = 'tanaka';
+      $test->blood = 'B';
+      $test->save();  // (insert)
+    }
+    
+    $test = new Test(7);
+    $this->assertEquals($test->name, 'tanaka');
+    $this->assertEquals($test->blood, 'AB');
+  }
+  
+  public function testRemove()
+  {
+    $test = new Test();
+
+    $obj = $test->selectOne(7);
+    $this->assertEquals($obj->blood, 'AB');
+    
+    $test->remove(7);
+    
+    $obj = $test->selectOne(7);
+    $this->assertNotEquals($obj->blood, 'AB');
+    $this->assertEquals($obj->blood, null);
+
+    $t = new Test(99);
+    $this->assertEquals($t->is_selected(), false);
+    $t->name     = 'test99';
+    $t->blood    = 'C';
+    $t->test2_id = '3';
+    $t->save();
+
+    $t = new Test(99);
+    $this->assertEquals($t->is_selected(), true);
+    $t->remove();
+  }
+
+  public function testProjection()
+  {
+    $test = new Test();
+    $obj = $test->selectOne(2);
+    $this->assertEquals((int)$obj->id, 2);
+    $this->assertEquals($obj->name, 'yo_shida');
+    $this->assertEquals($obj->blood, 'B');
+    $this->assertEquals((int)$obj->test2_id, 2);
+    
+    //--------------------------------------------------
+    
+    $test = new Test();
+    $test->setProjection(array('id', 'blood'));
+    
+    $obj2 = $test->selectOne(2);
+    $this->assertEquals((int)$obj2->id, 2);
+    $this->assertNotEquals($obj2->name, 'yo_shida');
+    $this->assertEquals($obj2->blood, 'B');
+    $this->assertNotEquals((int)$obj2->test2_id, 2);
+  }
+
+  public function testSelectDefaultResult()
+  {
+    $test = new Test();
+    $obj  = $test->selectOne(1);
+
+    $obj2 = new Test(1);
+    
+    $this->assertEquals((int)$obj->id, (int)$obj2->id);
+    $this->assertEquals($obj->name, $obj2->name);
+    $this->assertEquals($obj->blood, $obj2->blood);
+    $this->assertEquals((int)$obj->test2_id, (int)$obj->test2_id);
+    
+    //----------------------------------------------
+    
+    $test->LIKE_name('%da%');
+    $obj = $test->select();
+    $this->assertEquals(count($obj), 4); // yo_shida, uchida, ueda, uchida
+    
+    $test->LIKE_name('%_%');
+    $obj = $test->select();
+    $this->assertEquals(count($obj), 1); // yo_shida
+
+    $test->LIKE_name('%i_a', false);
+    $obj = $test->select();
+    $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
+
+    $test->OR_id('3', '4');
+    $obj = $test->select();
+
+    $this->assertEquals($obj[0]->name, 'uchida');
+    $this->assertEquals($obj[1]->name, 'ueda');
+    @$this->assertNull($obj[2]->name);
+
+    $test->OR_id('< 2', '> 5');
+    $obj = $test->select();
+    $this->assertEquals((int) $obj[0]->id, 1);
+    $this->assertEquals((int) $obj[1]->id, 6);
+  }
+
+  public function testInfiniteLoop()
+  {
+    $in1 = new Infinite1();
+    $in1->id           = 1;
+    $in1->infinite2_id = 2;
+    $in1->save();
+    
+    $in2 = new Infinite2();
+    $in2->id           = 2;
+    $in2->infinite1_id = 1;
+    $in2->save();
+    
+    $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
+    $obj = $objs[0];
+    
+    $this->assertEquals((int)$obj->infinite2_id, (int)$obj->Infinite2->id);
+    $this->assertEquals((int)$obj->Infinite2->infinite1_id, 1);
+    $this->assertEquals($obj->Infinite2->Infinite1, null);
+  }
+  
+  public function testSelectParentObject()
+  {
+    $obj = new Test(1);
+    
+    $this->assertEquals((int)$obj->id, 1);
+    $this->assertEquals($obj->name, 'tanaka');
+    $this->assertEquals($obj->blood, 'A');
+    $this->assertEquals((int)$obj->test2_id, 1);
+    
+    $parent = $obj->Test2;
+    $this->assertEquals((int)$parent->id, 1);
+    $this->assertEquals($parent->name, 'test21');
+    $this->assertEquals((int)$parent->test3_id, 2);
+    
+    $parent2 = $parent->Test3;
+    $this->assertEquals((int)$parent2->id, 2);
+    $this->assertEquals($parent2->name, 'test32');
+  }
+  
+  public function testGetChild()
+  {
+    $customer = new Customer();
+
+    $customer->setChildConstraint('limit', 10);
+    $cu = $customer->selectOne(1);
+    $this->assertEquals($cu->name, 'tanaka');
+    
+    $orders = $cu->CustomerOrder;
+    $this->assertEquals(count($orders), 4);
+    
+    $this->assertEquals((int)$orders[0]->id, 1);
+    $this->assertEquals((int)$orders[1]->id, 2);
+    $this->assertEquals((int)$orders[2]->id, 5);
+    $this->assertEquals((int)$orders[3]->id, 6);
+    
+    //------------------------------------------------------
+    
+    $cu->setChildConstraint('CustomerOrder',
+                            array('limit' => 10, 'order' => 'id desc'));
+                            
+    $cu->getChild('CustomerOrder');
+    
+    $orders = $cu->CustomerOrder;
+    $this->assertEquals(count($orders), 4);
+    
+    $this->assertEquals((int)$orders[0]->id, 6);
+    $this->assertEquals((int)$orders[1]->id, 5);
+    $this->assertEquals((int)$orders[2]->id, 2);
+    $this->assertEquals((int)$orders[3]->id, 1);
+    
+    //------------------------------------------------------
+    
+    $cu->setChildConstraint('CustomerOrder',
+                            array('limit'  => 2, 'offset' => 2, 'order'  => 'id desc'));
+                            
+    $cu->getChild('CustomerOrder');
+    
+    $orders = $cu->CustomerOrder;
+    $this->assertEquals(count($orders), 2);
+    
+    $this->assertEquals((int)$orders[0]->id, 2);
+    $this->assertEquals((int)$orders[1]->id, 1);
+    @$this->assertNull($orders[2]->id);
+  }
+  
+  public function testNewChild()
+  {
+    $cu = new Customer();
+    $cu->setChildConstraint('limit', 10);
+    $c  = $cu->selectOne(1);
+    $ch = $c->newChild('CustomerOrder');
+    
+    $ch->id = 7;
+    $ch->save();  // auto insert parent_id
+    
+    $co = new CustomerOrder();
+    $co->setChildConstraint('limit', 10);
+    $order = $co->selectOne(7);
+    $this->assertEquals((int)$order->customer_id, 1);  // parent_id
+  }
+
+  public function testSelectAll_AutoGetChild()
+  {
+    $cu   = new Customer();
+    $cu->setChildConstraint('limit', 10);
+    $objs = $cu->select();
+    
+    $this->assertEquals(count($objs), 2);
+    $this->assertNotEquals($objs[0]->CustomerOrder, null);
+    $this->assertNotEquals($objs[1]->CustomerOrder, null);
+    
+    $this->assertEquals(count($objs[0]->CustomerOrder), 5);
+    $this->assertEquals(count($objs[1]->CustomerOrder), 2);
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->id, 2);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->id, 3);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[3]->id, 6);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->id, 7);
+    
+    //-------------------------------------------------------
+    
+    $cu   = new Customer();
+    $cu->setChildConstraint(array('limit' => 10,
+                                  'order' => 'id desc')); // default: for telephone & order_line
+
+    $cu->setChildConstraint('CustomerOrder', array('order' => 'id desc'));
+    $objs = $cu->select();
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->id, 7);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->id, 6);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->id, 5);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->id, 4);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[3]->id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->id, 1);
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[0]->id, 11);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[4]->OrderLine[2]->id, 2);
+    
+    //-------------------------------------------------------
+    
+    $cu   = new Customer();
+    $cu->setChildConstraint('limit', 10);
+    $objs = $cu->select();
+    $this->assertNotEquals((int)$objs[0]->CustomerOrder[0]->order_line, null);
+    $this->assertNotEquals((int)$objs[1]->CustomerOrder[0]->order_line, null);
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[0]->id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[1]->id, 8);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[0]->OrderLine[2]->id, 11);
+    @$this->assertNull($objs[0]->CustomerOrder[0]->OrderLine[3]->id);  // hasn't
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[0]->id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[0]->item_id, 3);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[1]->id, 4);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[1]->OrderLine[1]->item_id, 1);
+    @$this->assertNull($objs[0]->CustomerOrder[1]->OrderLine[2]->id);  // hasn't
+    
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[0]->item_id, 2);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[1]->id, 7);
+    $this->assertEquals((int)$objs[0]->CustomerOrder[2]->OrderLine[1]->item_id, 3);
+    @$this->assertNull($objs[0]->CustomerOrder[2]->OrderLine[2]->id);  // hasn't
+    
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->OrderLine[0]->id, 6);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[0]->OrderLine[0]->item_id, 2);
+    @$this->assertNull($objs[1]->CustomerOrder[0]->OrderLine[1]->id);  // hasn't
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->OrderLine[0]->id, 5);
+    $this->assertEquals((int)$objs[1]->CustomerOrder[1]->OrderLine[0]->item_id, 3);
+    @$this->assertNull($objs[1]->CustomerOrder[1]->OrderLine[1]->id);  // hasn't
+    
+    $this->assertEquals((int)$objs[0]->CustomerTelephone[0]->id, 1);
+    $this->assertEquals((int)$objs[0]->CustomerTelephone[1]->id, 3);
+    $this->assertEquals((int)$objs[1]->CustomerTelephone[0]->id, 2);
+    $this->assertEquals((int)$objs[1]->CustomerTelephone[1]->id, 4);
+    
+    $this->assertEquals($objs[0]->CustomerTelephone[0]->telephone, '09011111111');
+    $this->assertEquals($objs[0]->CustomerTelephone[1]->telephone, '09011112222');
+    $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->CustomerTelephone[1]->telephone, '09022222222');
+    
+    //--------------------------------------------------------------------
+    
+    $objs[0]->clearChild('customer_telephone');
+    
+    $cu   = new Customer();
+    $cu->setChildConstraint('limit', 10);
+    $objs = $cu->select();
+    
+    @$this->assertNull($objs[0]->CustomerTelephone[0]->telephone);
+    @$this->assertNull($objs[0]->CustomerTelephone[1]->telephone);
+    $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
+    $this->assertEquals($objs[1]->CustomerTelephone[1]->telephone, '09022222222');
+  }
+
+  public function testGetCount()
+  {
+    $test = new Test();
+    // all count ---------------------------------
+    $count = $test->getCount();
+    $this->assertEquals($count, 6);
+    
+    //--------------------------------------------
+    $count = $test->getCount('< 5');
+    $this->assertEquals($count, 4);
+    
+    $count = $test->getCount('id', '< 4');
+    $this->assertEquals($count, 3);
+    
+    $test->id('< 3');
+    $count = $test->getCount();
+    $this->assertEquals($count, 2);
+  }
+  
+  public function testAggregate()
+  {
+    $order = new CustomerOrder();
+    $order->setConstraint('order', 'sum_amount desc');
+    
+    $function = array('sum'   => 'amount',
+                      'avg'   => 'amount',
+                      'count' => 'amount');
+                      
+    $result = $order->aggregate($function, 'order_line');
+    
+    $this->assertEquals((int)$result[0]->sum_amount, 60000);
+    $this->assertEquals((int)$result[1]->sum_amount, 13000);
+    $this->assertEquals((int)$result[2]->sum_amount, 9000);
+    $this->assertEquals((int)$result[3]->sum_amount, 6500);
+    $this->assertEquals((int)$result[4]->sum_amount, 3500);
+    $this->assertEquals((int)$result[5]->sum_amount, 1500);
+    
+    $this->assertEquals((int)$result[0]->count_amount, 2);
+    $this->assertEquals((int)$result[0]->avg_amount,   30000);
+  }
+  
+  public function testSeq()
+  {
+    $seq = new Seq();
+
+    $seq->text = 'test';
+    $id = $seq->save();
+
+    $this->assertNotEquals($id, null);
+  }
+
+  public function testTree()
+  {
+    $tree  = new Tree();
+    $trees = $tree->select();
+    $this->assertEquals((int)$trees[0]->id, 1);
+    $this->assertEquals($trees[0]->tree_id, null);
+    $this->assertEquals($trees[0]->name, 'A');
+    
+    $t = $tree->selectOne(1);
+    $this->assertEquals((int)$t->id, 1);
+    $this->assertEquals($t->tree_id, null);
+    $this->assertEquals($t->name, 'A');
+    
+    $t->setChildConstraint('limit', 100);
+    $t->getChild('tree');
+    
+    $this->assertEquals(count($t->tree), 2);
+    $this->assertEquals((int)$t->tree[0]->id, 3);
+    $this->assertEquals((int)$t->tree[1]->id, 5);
+    $this->assertEquals((int)$t->tree[0]->tree_id, 1);
+    $this->assertEquals((int)$t->tree[1]->tree_id, 1);
+    $this->assertEquals($t->tree[0]->name, 'A3');
+    $this->assertEquals($t->tree[1]->name, 'A5');
+    
+    $tree = new Tree();
+    $tree->enableParent();
+    $t = $tree->selectOne(3);
+    
+    $this->assertEquals((int)$t->id, 3);
+    $this->assertEquals((int)$t->tree_id, 1);
+    $this->assertEquals($t->name, 'A3');
+    
+    $this->assertEquals((int)$t->Tree->id, 1);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    $this->assertEquals($t->Tree->name, 'A');
+
+    $t = $tree->selectOne(5);
+    $this->assertEquals((int)$t->id, 5);
+    $this->assertEquals((int)$t->tree_id, 1);
+    $this->assertEquals($t->name, 'A5');
+
+    $this->assertEquals((int)$t->Tree->id, 1);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    $this->assertEquals($t->Tree->name, 'A');
+ 
+    $t = new Tree();
+    $root = $t->getRoot();
+    $this->assertEquals((int)$root[0]->id, 1);
+    $this->assertEquals((int)$root[1]->id, 2);
+    $this->assertEquals((int)$root[2]->id, 4);
+    @$this->assertNull($root[3]);
+
+    $root[0]->setChildConstraint(array('limit' => 10));
+    $root[0]->getChild('Tree');
+    $this->assertEquals((int)$root[0]->Tree[0]->id, 3);
+    $this->assertEquals((int)$root[0]->Tree[1]->id, 5);
+
+    $children = $root[0]->Tree;
+    $this->assertEquals((int)$children[0]->id, 3);
+    $this->assertEquals($children[0]->name, 'A3');
+    $this->assertEquals((int)$children[1]->id, 5);
+    $this->assertEquals($children[1]->name, 'A5');
+  }
+
+  public function testBridge()
+  {
+    $stu = new Student(1);
+    $this->assertEquals($stu->name, 'tom');
+
+    $this->assertEquals((int)$stu->StudentCourse[0]->course_id, 1);
+    $this->assertEquals((int)$stu->StudentCourse[1]->course_id, 2);
+    $this->assertEquals((int)$stu->StudentCourse[2]->course_id, 3);
+
+    $this->assertEquals((int)$stu->Course[0]->id, 1);
+    $this->assertEquals((int)$stu->Course[1]->id, 2);
+    $this->assertEquals((int)$stu->Course[2]->id, 3);
+
+    $this->assertEquals($stu->Course[0]->name, 'Mathematics');
+    $this->assertEquals($stu->Course[1]->name, 'Physics');
+    $this->assertEquals($stu->Course[2]->name, 'Science');
+
+    $stu = new Student();
+    $stu->setConstraint('order', 'id desc');
+
+    $students = $stu->select();
+    $this->assertEquals((int)$students[0]->id, 5);
+    $this->assertEquals((int)$students[1]->id, 4);
+
+    $constraint = array('limit' => 100, 'order' => 'course_id desc');
+
+    foreach ($students as $student) {
+      $student->setChildConstraint($constraint);
+      $student->getChild('Course');
+    }
+
+    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 5);
+    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 4);
+    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 2);
+    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 1);
+
+    $this->assertEquals((int)$students[3]->Course[0]->id, 5);
+    $this->assertEquals((int)$students[3]->Course[1]->id, 4);
+    $this->assertEquals((int)$students[3]->Course[2]->id, 3);
+    $this->assertEquals((int)$students[3]->Course[3]->id, 2);
+
+    $this->assertEquals($students[3]->Course[0]->name, 'Psychology');
+    $this->assertEquals($students[3]->Course[1]->name, 'Economic');
+    $this->assertEquals($students[3]->Course[2]->name, 'Science');
+    $this->assertEquals($students[3]->Course[3]->name, 'Physics');
+
+    //-----------------------------------------------------------------
+
+    $course = new Course();
+    $course->setConstraint('order', 'id');
+
+    $cs = $course->select();
+
+    $constraint = array('limit' => 100, 'order' => 'student_id');
+
+    foreach ($cs as $c) {
+      $c->setChildConstraint($constraint);
+      $c->getChild('Student', 'StudentCourse');
+    }
+
+    $this->assertEquals($cs[0]->Student[0]->name, 'tom');
+    $this->assertEquals($cs[0]->Student[1]->name, 'bob');
+    $this->assertEquals($cs[0]->Student[2]->name, 'ameri');
+
+    $this->assertEquals($cs[2]->Student[0]->name, 'tom');
+    $this->assertEquals($cs[2]->Student[1]->name, 'john');
+    $this->assertEquals($cs[2]->Student[2]->name, 'marcy');
+    $this->assertEquals($cs[2]->Student[3]->name, 'ameri');
+  }
+
+  public function testJoinSelect()
+  {
+    $cols = array();
+    $cols['test']  = array('id', 'name', 'blood', 'test2_id');
+    $cols['test2'] = array('id', 'name', 'test3_id');
+    $cols['test3'] = array('id', 'name');
+
+    $pair = array('test:test2', 'test2:test3');
+
+    $test = new Test();
+    $test->sconst('order', 'test.id');
+    $res  = $test->selectJoin($pair, $cols);
+
+    $test1 = $res[0];
+    $test2 = $res[1];
+    $test3 = $res[2];
+    $test4 = $res[3];
+    $test5 = $res[4];
+    $test6 = $res[5];
+
+    $this->assertEquals((int)$test1->id, 1);
+    $this->assertEquals((int)$test2->id, 2);
+    $this->assertEquals((int)$test3->id, 3);
+    $this->assertEquals((int)$test4->id, 4);
+    $this->assertEquals((int)$test5->id, 5);
+    $this->assertEquals((int)$test6->id, 6);
+
+    $this->assertEquals($test1->name, 'tanaka');
+    $this->assertEquals($test2->name, 'yo_shida');
+    $this->assertEquals($test3->name, 'uchida');
+    $this->assertEquals($test4->name, 'ueda');
+    $this->assertEquals($test5->name, 'seki');
+    $this->assertEquals($test6->name, 'uchida');
+
+    $this->assertEquals((int)$test1->test2->id, 1);
+    $this->assertEquals((int)$test2->test2->id, 2);
+    $this->assertEquals((int)$test3->test2->id, 1);
+    $this->assertEquals((int)$test4->test2->id, 3);
+    $this->assertNull($test5->test2->id);
+    $this->assertEquals((int)$test6->test2->id, 1);
+
+    $this->assertEquals((int)$test1->test2->test3->id, 2);
+    $this->assertEquals((int)$test2->test2->test3->id, 1);
+    $this->assertEquals((int)$test3->test2->test3->id, 2);
+    $this->assertNull($test4->test2->test3->id, 3);
+    $this->assertNull($test5->test2->test3->id, 3);
+    $this->assertEquals((int)$test6->test2->test3->id, 2);
+
+    $this->assertEquals($test1->test2->test3->name, 'test32');
+    $this->assertEquals($test2->test2->test3->name, 'test31');
+    $this->assertEquals($test3->test2->test3->name, 'test32');
+    $this->assertNull($test4->test2->test3->name);
+    $this->assertNull($test5->test2->test3->name);
+    $this->assertEquals($test6->test2->test3->name, 'test32');
+  }
+
+  public function testOrder()
+  {
+    $ol = new OrderLine();
+    $ol->id = 12;
+    $ol->customer_order_id = 13;
+    $ol->item_id = 5;
+    $ol->save();
+
+    $ol->id = 13;
+    $ol->customer_order_id = 18;
+    $ol->item_id = 8;
+    $ol->save();
+
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 50000);
+
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 500);
+
+    $ol = new OrderLine();
+    $ol->item_id(3);
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 9000);
+
+    $ol->item_id(3);
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 500);
+
+    $ol = new OrderLine();
+    $ol->id = 14;
+    $ol->customer_order_id = 1;
+    $ol->amount  = 100000;
+    $ol->item_id = 1;
+    $ol->save();
+
+    $ol = new OrderLine();
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $this->assertEquals($ol->getCount(), 3);
+
+    $ol = new OrderLine();
+
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $last = $ol->getLast('amount');
+    $this->assertEquals((int)$last->amount, 100000);
+
+    $ol->item_id(1);
+    $ol->customer_order_id(1);
+    $first = $ol->getFirst('amount');
+    $this->assertEquals((int)$first->amount, 3000);
+  }
+
+  public function testChildCondition()
+  {
+    $user = new Users(1);
+    $user->cconst('limit', 100);
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 5);
+
+    $user = new Users(1);
+    $user->cconst('limit', 100);
+    $user->ccond('body', 'body13');
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 1);
+
+    $user = new Users(2);
+    $user->cconst('limit', 100);
+    $user->ccond('OR_body', array('body21', 'body23'));
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 2);
+
+    $bbs = new Bbs();
+    $bbs->save(array('users_id' => 4));
+
+    $user = new Users(4);
+    $user->cconst('limit', 100);
+    $user->ccond('OR_title', array('title41', 'null'));
+    $user->getChild('bbs');
+    $this->assertEquals(count($user->bbs), 2);
+  }
+
+  public function testStatementCheck()
+  {
+    $tree = new Tree();
+    $tree->name('C11');
+    $tree->tree_id(4);
+    $t = $tree->selectOne();
+    $this->assertEquals((int)$t->id, 11);
+
+    $tree->name('null');
+    $tree->tree_id(4);
+    $t = $tree->selectOne();
+    $this->assertEquals((int)$t->id, 8);
+  }
+
+  public function testORCondition()
+  {
+    $ol = new OrderLine();
+    $ol->sconst('order', 'id');
+    $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
+
+    $ols = $ol->select();
+    $this->assertEquals((int)$ols[0]->id, 1);
+    $this->assertEquals((int)$ols[1]->id, 6);
+    $this->assertEquals((int)$ols[2]->id, 9);
+    $this->assertEquals((int)$ols[3]->id, 10);
+
+    $this->assertEquals((int)$ols[2]->amount, 10000);
+    $this->assertEquals((int)$ols[3]->amount, 50000);
+  }
+
+  public function testTransaction()
+  {
+    $trans1 = new Trans1();
+    $data = array();
+    $data[] = array('text' => 'trans1');
+    $data[] = array('text' => 'trans2');
+    $data[] = array('text' => 'trans3');
+
+    $trans1->multipleInsert($data);
+
+    $trans2 = new Trans2();
+    $data = array();
+    $data[] = array('trans1_id' => 3, 'text' => 'trans21');
+    $data[] = array('trans1_id' => 3, 'text' => 'trans22');
+    $data[] = array('trans1_id' => 2, 'text' => 'trans23');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans24');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans25');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans26');
+
+    $trans2->multipleInsert($data);
+
+    $trans1 = new Trans1(1);
+    $trans1->cconst('limit', 10);
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 3);
+
+    $trans1 = new Trans1(1);
+    $trans1->cconst('limit', 10);
+    $trans1->ccond('text', 'trans24');
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 1);
+
+    $trans1 = new Trans1(3);
+    $trans1->cconst('limit', 10);
+    $trans1->ccond('text', 'trans24');
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 0);
+
+    $trans1 = new Trans1(2);
+    $trans1->cconst('limit', 10);
+    $trans1->getChild('trans2');
+    $this->assertEquals(count($trans1->trans2) , 1);
+
+    $trans1->execute("DELETE FROM trans1");
+    $trans2->execute("DELETE FROM trans2");
+
+    //-------------------------------------------------------------------
+
+    $trans1 = new Trans1(); // connection1
+    $trans1->begin();
+
+    $data = array();
+    $data[] = array('text' => 'trans1');
+    $data[] = array('text' => 'trans2');
+    $data[] = array('text' => 'trans3');
+
+    $trans1->multipleInsert($data);
+
+    $trans2 = new Trans2(); // connection2
+    $data = array();
+    $data[] = array('trans1_id' => 3, 'text' => 'trans21');
+    $data[] = array('trans1_id' => 3, 'text' => 'trans22');
+    $data[] = array('trans1_id' => 2, 'text' => 'trans23');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans24');
+    $data[] = array('trans1_id' => 1, 'text' => 'trans25');
+    $data[] = array('trans1_id' => 1, 'texx' => 'trans26');  // <- Error && rollback()
+
+    try {
+      @$trans2->multipleInsert($data);
+      $trans2->commit(); // not execute commit()
+    } catch (Exception $e) {
+    }
+
+    $trans2 = new Trans2();
+    $t = $trans2->select();
+    $this->assertEquals($t, false); // not found
+
+    $trans1 = new Trans1();
+    $t = $trans1->select();
+    $this->assertEquals($t, false); // not found
+  }
+
+  public function testGetColumnsName()
+  {
+    $test = new Test();
+    $colsName = $test->getColumnNames();
+
+    $this->assertEquals($colsName[0], 'id');
+    $this->assertEquals($colsName[1], 'name');
+    $this->assertEquals($colsName[2], 'blood');
+    $this->assertEquals($colsName[3], 'test2_id');
+
+    $test = new Test();
+    $colsName = $test->getColumnNames('seq');
+
+    $this->assertEquals($colsName[0], 'id');
+    $this->assertEquals($colsName[1], 'text');
+  }
+
+  private static $tableSchema = array();
+
+  public function estInformationSchema()
+  {
+    $sb = new Bbs();
+
+    if (Sabel_DB_Connection::getDB(self::$connectName) !== 'sqlite') {
+      self::$tableSchema[] = $sb->getTableSchema();
+    } else {
+      $sq = $sb->getTableSchema();
+      $my = self::$tableSchema[0];
+
+      $sqc = $sq->getColumns();
+      $myc = $my->getColumns();
+
+      $this->assertEquals(count($sqc), count($myc));
+      $this->assertEquals($sq->id->type, $my->id->type);
+      $this->assertEquals($sq->id->max, $my->id->max);
+      $this->assertEquals($sq->id->min, $my->id->min);
+      $this->assertEquals($sq->id->increment, $my->id->increment);
+      $this->assertEquals($sq->id->primary, $my->id->primary);
+
+      $this->assertEquals($sq->title->type, $my->title->type);
+      $this->assertEquals($sq->title->max,  $my->title->max);
+
+      $this->assertEquals($sq->body->type, $my->body->type);
+      $this->assertEquals($sq->body->max,  $my->body->max);
+
+      $pg = self::$tableSchema[1];
+      $pgc = $my->getColumns();
+
+      $this->assertEquals(count($sqc), count($pgc));
+      $this->assertEquals($sq->id->type, $pg->id->type);
+      $this->assertEquals($sq->id->max, $pg->id->max);
+      $this->assertEquals($sq->id->min, $pg->id->min);
+      $this->assertEquals($sq->id->increment, $pg->id->increment);
+      $this->assertEquals($sq->id->primary, $pg->id->primary);
+
+      $this->assertEquals($sq->title->type, $pg->title->type);
+      $this->assertEquals($sq->title->max,  $pg->title->max);
+
+      $this->assertEquals($sq->body->type, $pg->body->type);
+      $this->assertEquals($sq->body->max,  $pg->body->max);
+    }
+  }
+}
+
+abstract class Mapper_Default extends Sabel_DB_Mapper
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Test extends Mapper_Default
+{
+  protected $withParent = true;
+}
+
+class Test2 extends Mapper_Default
+{
+
+}
+
+class Test3 extends Mapper_Default
+{
+
+}
+
+class Infinite1 extends Mapper_Default
+{
+
+}
+
+class Infinite2 extends Mapper_Default
+{
+
+}
+
+class Seq extends Mapper_Default
+{
+
+}
+
+class Customer extends Mapper_Default
+{
+  protected $myChildren = array('CustomerOrder', 'CustomerTelephone');
+  protected $defChildConstraints = array('limit' => 10);
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setChildConstraint('CustomerOrder', array('limit' => 10));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class CustomerOrder extends Mapper_Default
+{
+  protected $table      = 'customer_order';
+  protected $myChildren = 'OrderLine';
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setChildConstraint('OrderLine', array('limit' => 10));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class OrderLine extends Mapper_Default
+{
+  protected $table = 'order_line';
+}
+
+class CustomerTelephone extends Mapper_Default
+{
+  protected $table = 'customer_telephone';
+}
+
+class Tree extends Sabel_DB_Tree
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Bridge_Base extends Sabel_DB_Bridge
+{
+  protected $bridgeTable = 'StudentCourse';
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Student extends Bridge_Base
+{
+  protected $myChildren = 'Course';
+
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->cconst(array('limit' => 100, 'order' => 'course_id'));
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Course extends Bridge_Base
+{
+
+}
+
+class StudentCourse extends Mapper_Default
+{
+  protected $table      = 'student_course';
+  protected $jointKey   = array('student_id', 'course_id');
+  protected $autoNumber = false;
+}
+
+class Trans1 extends Mapper_Default
+{
+
+}
+
+class Trans2 extends Sabel_DB_Mapper
+{
+  public function __construct($param1 = null, $param2 = null)
+  {
+    $this->setDriver('default2');
+    parent::__construct($param1, $param2);
+  }
+}
+
+class Users extends Mapper_Default
+{
+
+}
+
+class Bbs extends Mapper_Default
+{
+
+}
+
+class Status extends Mapper_Default
+{
+
+}
