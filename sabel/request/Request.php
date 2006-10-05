@@ -121,4 +121,9 @@ class Sabel_Request_Request
     }
     return $array;
   }
+  
+  public function __toString()
+  {
+    return $this->requestUri;
+  }
 }

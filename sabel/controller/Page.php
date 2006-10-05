@@ -1,10 +1,13 @@
 <?php
 
 /**
- * page controller base class.
+ * the Base of Page Controller.
  *
- * @author Mori Reo <mori.reo@gmail.com>
- * @package sabel.controller
+ * @category   Controller
+ * @package    org.sabel.controller
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_Controller_Page
 {
@@ -77,6 +80,7 @@ abstract class Sabel_Controller_Page
       }
     }
     $this->$action();
+    $this->storage->write('previous', $this->request->__toString());
   }
   
   protected function hasMethod($name)
@@ -128,6 +132,16 @@ abstract class Sabel_Controller_Page
     }
 
     $this->redirect('/'.$entry->uri($params));
+  }
+  
+  protected function previous()
+  {
+    return $this->storage->read('previous');
+  }
+  
+  protected function redirectToPrevious()
+  {
+    $this->redirect('/' . $this->previous());
   }
   
   /**

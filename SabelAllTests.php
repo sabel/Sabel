@@ -44,6 +44,8 @@ require_once('Test/Cache.php');
 require_once('Test/DB/Tests.php');
 require_once('Test/Map/Tests.php');
 
+require_once('Test/Validate.php');
+
 class SabelAllTests
 {
   public static function main()
@@ -73,6 +75,8 @@ class SabelAllTests
     
     $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
+    
+    $suite->addTest(Test_Validate::suite());
     
     return $suite;
   }

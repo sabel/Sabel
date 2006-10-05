@@ -19,11 +19,13 @@ class Sabel_Validate_Error
   protected $name;
   protected $msg;
   protected $type;
+  protected $value;
   
-  public function __construct($name, $msg, $type)
+  public function __construct($name, $msg, $value, $type)
   {
     $this->name = $name;
     $this->msg  = $msg;
+    $this->value = $value;
     $this->type = $type;
   }
   
@@ -40,5 +42,10 @@ class Sabel_Validate_Error
   public function getType()
   {
     return $this->type;
+  }
+  
+  public function getValue()
+  {
+    return $this->value;
   }
 }

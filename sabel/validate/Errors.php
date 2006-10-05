@@ -13,9 +13,9 @@ class Sabel_Validate_Errors
 {
   protected $errors = array();
   
-  public function add($name, $msg, $type = null)
+  public function add($name, $msg, $value, $type = null)
   {
-    $this->errors[$name] = new Sabel_Validate_Error($name, $msg, $type);
+    $this->errors[$name] = new Sabel_Validate_Error($name, $msg, $value, $type);
   }
   
   public function get($name)
@@ -31,5 +31,10 @@ class Sabel_Validate_Errors
   public function hasError()
   {
     return (count($this->errors) > 0);
+  }
+  
+  public function errored($name)
+  {
+    return (isset($this->errors[$name]));
   }
 }
