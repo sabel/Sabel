@@ -121,8 +121,6 @@ abstract class Sabel_DB_Driver_Query
 
   protected function prepareLikeSQL($key, $val)
   {
-    $search_str = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
-
     if (is_array($val)) {
       $escape = $val[1];
       $val    = $val[0];
@@ -131,12 +129,19 @@ abstract class Sabel_DB_Driver_Query
     }
 
     if (strpbrk($val, '_') !== false && $escape) {
-      for ($i = 0; $i < 30; $i++) {
-        $esc = $search_str[$i];
-        if (strpbrk($val, $esc) === false) {
-          $val = str_replace('_', "{$esc}_", $val);
-          $this->makeLikeSQL($key, $val, $esc);
-          break;
+      if ($this->dbName === 'mssql') {
+        $val = str_replace('%', "[%]", str_replace('_', "[_]", $val));
+        $this->makeLikeSQL($key, $val);
+      } else {
+        $escapeString = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+
+        for ($i = 0; $i < 30; $i++) {
+          $esc = $escapeString[$i];
+          if (strpbrk($val, $esc) === false) {
+            $val = str_replace('%', "{$esc}%", str_replace('_', "{$esc}_", $val));
+            $this->makeLikeSQL($key, $val, $esc);
+            break;
+          }
         }
       }
     } else {
