@@ -8,31 +8,48 @@
  */
 class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
 {
-  public function __construct($conn)
+  private $defColumn = '';
+
+  public function __construct($conn, $defColumn)
   {
-    $this->conn   = $conn;
-    $this->dbType = 'mssql';
-    $this->query  = new Sabel_DB_Driver_Native_Query('mysql', 'mssql_escape_string');
+    $this->conn      = $conn;
+    $this->dbType    = 'mssql';
+    $this->defColumn = $defColumn;
+    $this->query     = new Sabel_DB_Driver_Native_Query('mssql', 'mssql_escape_string');
   }
 
   public function begin($conn)
   {
-    $this->driverExecute('BEGIN', $conn);
+    $this->driverExecute('BEGIN TRANSACTION', $conn);
   }
 
   public function commit($conn)
   {
-    $this->driverExecute('COMMIT', $conn);
+    $this->driverExecute('COMMIT TRANSACTION', $conn);
   }
 
   public function rollback($conn)
   {
-    $this->driverExecute('ROLLBACK', $conn);
+    $this->driverExecute('ROLLBACK TRANSACTION', $conn);
   }
 
-  public function getLastInsertId()
+  public function makeQuery($conditions, $constraints = null)
   {
+    $this->query->makeConditionQuery($conditions);
+    if ($constraints) {
+      $constraints['defColumn'] = $this->defColumn;
+      $this->query->makeConstraintQuery($constraints);
+    }
+  }
 
+  protected function setIdNumber($table, $data, $defColumn)
+  {
+    if (!isset($data[$defColumn])) {
+      $this->driverExecute("SELECT IDENT_CURRENT('{$table}')");
+      $result = $this->fetch();
+      $this->lastInsertId = (int)$result[0];
+    }
+    return $data;
   }
 
   public function driverExecute($sql = null, $conn = null)

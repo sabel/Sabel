@@ -74,6 +74,36 @@ abstract class Sabel_DB_Driver_Query
 
         $this->sql = array('SELECT ' . $query . $tmp);
         return null;
+      } else if ($this->dbName === 'mssql') {
+        $tmp    = substr(join('', $this->sql), 6);
+        $query  = "TOP {$constraints['limit']} ";
+
+        if (isset($constraints['offset'])) {
+          if (isset($constraints['order'])) {
+            $sp = explode(' ', $constraints['order']);
+            $orderColumn = $sp[0];
+            $orderStr = strstr($tmp, 'ORDER BY');
+            $tmp = str_replace($orderStr, '', $tmp);
+          } else {
+            $orderColumn = $constraints['defColumn'];
+            $orderStr = 'ORDER BY ' .  $orderColumn;
+          }
+          $condition = strstr($tmp, 'WHERE');
+          if ($condition) $tmp = str_replace($condition, '', $tmp);
+
+          $sp = explode(' ', strstr($tmp, 'FROM'));
+          $subSelect  = "WHERE {$orderColumn} NOT IN ";
+          $subSelect .= "(SELECT TOP {$constraints['offset']} {$orderColumn} FROM {$sp[1]} ";
+          if ($condition) $subSelect .= "{$condition} ";
+
+          $subSelect = $subSelect . $orderStr . ') ';
+          if ($condition) $subSelect = "{$subSelect} AND " . str_replace('WHERE ', '', $condition);
+
+          $this->sql = array('SELECT ' . $query . $tmp . $subSelect . $orderStr);
+        } else {
+          $this->sql = array('SELECT ' . $query . $tmp);
+        }
+        return null;
       } else {
         array_push($this->sql, " LIMIT {$constraints['limit']}");
       }

@@ -43,17 +43,21 @@ class Sabel_DB_Connection
       $database = $params['database'];
 
       if ($driver === 'mysql') {
-        $host   = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
+        $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
         $list['conn'] = mysql_connect($host, $user, $pass);
         mysql_select_db($database, $list['conn']);
       } else if ($driver === 'pgsql') {
-        $host   = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
+        $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
         $list['conn'] = pg_connect("host={$host} dbname={$database} user={$user} password={$pass}");
       } else if ($driver === 'firebird') {
         $host = $host . ':' . $database;
         $list['conn'] = (isset($params['encoding']))
                           ? ibase_connect($host, $user, $pass, $params['encoding'])
                           : ibase_connect($host, $user, $pass);
+      } else if ($driver === 'mssql') {
+        $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
+        $list['conn'] = mssql_connect($host, $user, $pass);
+        mssql_select_db($database, $list['conn']);
       }
 
       $list['driver'] = $driver;

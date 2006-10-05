@@ -14,6 +14,9 @@ abstract class Sabel_DB_Driver_General
     $dbType   = '',
     $insertId = null;
 
+  protected
+    $setIdNumberDBs = array('pgsql', 'firebird', 'mssql');
+
   public abstract function begin($conn);
   public abstract function commit($conn);
   public abstract function rollback($conn);
@@ -34,7 +37,7 @@ abstract class Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if ($defColumn && ($this->dbType === 'pgsql' || $this->dbType === 'firebird'))
+    if ($defColumn && in_array($this->dbType, $this->setIdNumberDBs))
       $data = $this->setIdNumber($table, $data, $defColumn);
 
     $sql  = $this->query->makeInsertSQL($table, $data);
@@ -48,7 +51,7 @@ abstract class Sabel_DB_Driver_General
     if (!isset($data[$defColumn])) {
       $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
       $row = $this->fetch();
-      if (($this->lastInsertId =(int) $row[0]) === 0) {
+      if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {
         $data[$defColumn] = $this->lastInsertId;
