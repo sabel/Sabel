@@ -41,6 +41,21 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     return array(join('', $sql), $data);
   }
 
+  public function makeConstraintQuery($constraints)
+  {
+    if (isset($constraints['group']))
+      array_push($this->sql, " GROUP BY {$constraints['group']}");
+
+    if (isset($constraints['order']))
+      array_push($this->sql, " ORDER BY {$constraints['order']}");
+
+    if (isset($constraints['limit'])) {
+      array_push($this->sql, " LIMIT {$constraints['limit']}");
+
+    if (isset($constraints['offset']))
+      array_push($this->sql, " OFFSET {$constraints['offset']}");
+  }
+
   protected function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val, $key.$this->count++));

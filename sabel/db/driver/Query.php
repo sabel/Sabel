@@ -58,61 +58,6 @@ abstract class Sabel_DB_Driver_Query
     return (count($conditions) === $nmlCount);
   }
 
-  public function makeConstraintQuery($constraints)
-  {
-    if (isset($constraints['group']))
-      array_push($this->sql, " GROUP BY {$constraints['group']}");
-
-    if (isset($constraints['order']))
-      array_push($this->sql, " ORDER BY {$constraints['order']}");
-
-    if (isset($constraints['limit'])) {
-      if ($this->dbName === 'firebird') {
-        $tmp    = substr(join('', $this->sql), 6);
-        $query  = "FIRST {$constraints['limit']} ";
-        $query .= (isset($constraints['offset'])) ? "SKIP {$constraints['offset']}" : 'SKIP 0';
-
-        $this->sql = array('SELECT ' . $query . $tmp);
-        return null;
-      } else if ($this->dbName === 'mssql') {
-        $tmp    = substr(join('', $this->sql), 6);
-        $query  = "TOP {$constraints['limit']} ";
-
-        if (isset($constraints['offset'])) {
-          if (isset($constraints['order'])) {
-            $sp = explode(' ', $constraints['order']);
-            $orderColumn = $sp[0];
-            $orderStr = strstr($tmp, 'ORDER BY');
-            $tmp = str_replace($orderStr, '', $tmp);
-          } else {
-            $orderColumn = $constraints['defColumn'];
-            $orderStr = 'ORDER BY ' .  $orderColumn;
-          }
-          $condition = strstr($tmp, 'WHERE');
-          if ($condition) $tmp = str_replace($condition, '', $tmp);
-
-          $sp = explode(' ', strstr($tmp, 'FROM'));
-          $subSelect  = "WHERE {$orderColumn} NOT IN ";
-          $subSelect .= "(SELECT TOP {$constraints['offset']} {$orderColumn} FROM {$sp[1]} ";
-          if ($condition) $subSelect .= "{$condition} ";
-
-          $subSelect = $subSelect . $orderStr . ') ';
-          if ($condition) $subSelect = "{$subSelect} AND " . str_replace('WHERE ', '', $condition);
-
-          $this->sql = array('SELECT ' . $query . $tmp . $subSelect . $orderStr);
-        } else {
-          $this->sql = array('SELECT ' . $query . $tmp);
-        }
-        return null;
-      } else {
-        array_push($this->sql, " LIMIT {$constraints['limit']}");
-      }
-    }
-
-    if (isset($constraints['offset']))
-      array_push($this->sql, " OFFSET {$constraints['offset']}");
-  }
-
   public function getSQL()
   {
     return join('', $this->sql);
@@ -218,7 +163,7 @@ abstract class Sabel_DB_Driver_Query
       $val = (is_null($escMethod)) ? $val : $escMethod($val);
     } else if (is_bool($val)) {
       $db = $this->dbName;
-      if ($db === 'pgsql' || $db === 'sqlite') {
+      if ($db === 'pgsql' || $db === 'mssql' || $db === 'sqlite') {
         $val = ($val) ? 'true' : 'false';
       } else if ($db === 'mysql' || $db === 'firebird') {
         $val = ($val) ? 1 : 0;

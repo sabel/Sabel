@@ -38,6 +38,29 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
     return join('', $sql);
   }
 
+  public function makeConstraintQuery($constraints)
+  {
+    if (isset($constraints['group']))
+      array_push($this->sql, " GROUP BY {$constraints['group']}");
+
+    $order = (isset($constraints['order'])) ? $constraints['order'] : null;
+    if ($order) array_push($this->sql, " ORDER BY {$constraints['order']}");
+
+    $limit  = (isset($constraints['limit'])) ? $constraints['limit'] : null;
+    $offset = (isset($constraints['offset'])) ? $constraints['offset'] : null;
+    $column = (isset($constraints['defColumn'])) ? $constraints['defColumn'] : null;
+
+    $paginate = new Sabel_DB_Driver_Native_Paginate($this->sql, $limit, $offset);
+
+    if ($this->dbName === 'firebird') {
+      $this->sql = $paginate->firebirdPaginate();
+    } else if ($this->dbName === 'mssql') {
+      $this->sql = $paginate->mssqlPaginate($column, $order);
+    } else {
+      $this->sql = $paginate->standardPaginate();
+    }
+  }
+
   public function makeNormalSQL($key, $val)
   {
     $this->setWhereQuery($this->_getNormalSQL($key, $val));
