@@ -2,11 +2,14 @@
 
 /**
  * Sabel_Injection_Injector
- * 
- * @package org.sabel.injection
- * @author Mori Reo <mori.reo@gmail.com>
+ *
+ * @category   Injection
+ * @package    org.sabel.injection
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Injection_Injector
+class Sabel_Injection_Injector implements Iterator
 {
   private $container  = null;
   private $target     = null;
@@ -35,14 +38,18 @@ class Sabel_Injection_Injector
   
   public function __call($method, $arg)
   {
-    Sabel_Injection_Calls::doBefore($method, $arg, $this->reflection);
     $method = $this->reflection->getMethod($method);
+    $execute = Sabel_Injection_Calls::doBefore($method, $arg, $this->reflection, $this->target);
     
     $this->notice($method);
     
-    $result = $method->invokeArgs($this->target, $arg);
-    Sabel_Injection_Calls::doAfter($method, $result, $this->reflection);
-    return $result;
+    if ($execute) {
+      $result = $method->invokeArgs($this->target, $arg);
+      Sabel_Injection_Calls::doAfter($method, $result, $this->reflection);
+      return $result;
+    } else {
+      return null;
+    }
   }
   
   public function getTarget()
@@ -64,5 +71,49 @@ class Sabel_Injection_Injector
   {
     $observers = $this->observers;
     foreach ($observers as $observer) $observer->notice($this, $method);
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function current() {
+    return $this->target->current();
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function key()
+  {
+    return $this->target->key();
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function next()
+  {
+    return $this->target->next();
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function rewind()
+  {
+    $this->target->rewind();
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function valid()
+  {
+    return $this->target->valid();
   }
 }

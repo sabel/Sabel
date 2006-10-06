@@ -41,6 +41,11 @@ abstract class Sabel_Controller_Page
     $this->destination = $this->entry->getDestination();
   }
   
+  public function getRequests()
+  {
+    return $this->request->requests();
+  }
+  
   public function execute()
   {
     $actionName = $this->destination->action;
@@ -139,7 +144,7 @@ abstract class Sabel_Controller_Page
     return $this->storage->read('previous');
   }
   
-  protected function redirectToPrevious()
+  public function redirectToPrevious()
   {
     $this->redirect('/' . $this->previous());
   }

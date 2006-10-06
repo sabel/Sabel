@@ -2,9 +2,12 @@
 
 /**
  * Sabel_Injection_Calls
- * 
- * @package org.sabel.injection
- * @author Mori Reo <mori.reo@gmail.com>
+ *
+ * @category   Injection
+ * @package    org.sabel.injection
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Injection_Calls
 {
@@ -31,11 +34,16 @@ class Sabel_Injection_Calls
     }
   }
   
-  public static function doBefore($method, $arg, $reflection)
+  public static function doBefore($method, $arg, $reflection, $target)
   {
+    $execute = true;
     foreach (self::$before as $object) {
-      if ($object->when($method)) $object->before($method, $arg, $reflection);
+      if ($object->when($method)) {
+        $execute = $object->before($method, $arg, $reflection, $target);
+      }
     }
+    if (is_null($execute)) $execute = true;
+    return $execute;
   }
   
   public static function doAfter($method, &$result, $reflection)
