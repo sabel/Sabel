@@ -29,18 +29,22 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     $this->errors = new Sabel_Validate_Errors();
     
     foreach ($schema->get() as $name => $column) {
-      if ($column['notNull'] === true) {
+      if ($column['notNull'] === true && $column['increment'] === true) continue; 
+        
+      if ($column['notNull'] === true && $column['increment'] === false) {
         if (!isset($data[$name])) {
-          $this->errors->add($name, "$name must be not null", null, Sabel_Validate_Error::NOT_NULL);
+          $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
         } else if (empty($data[$name])) {
-          $this->errors->add($name, "$name must be not null", null, Sabel_Validate_Error::NOT_NULL);
+          $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
         }
       }
       
-      if(isset($data[$name]) && (list($msg, $type) = $this->isError($column, $data[$name], $name))) {
-        $this->errors->add($name, $msg, $data[$name], $type);
+      if (isset($data[$name])) {
+        if (list($msg, $type) = $this->isError($column, $data[$name], $name)) {
+          $this->errors->add($name, $msg, $data[$name], $type);
+        }
       }
       
       /* @todo implement custom validator
@@ -74,6 +78,9 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
             break;
           case ($value < $min):
             return array("{$name} must grather then " . $min, Sabel_Validate_Error::GRATHER_THEN);
+            break;
+          case (!is_numeric($value)):
+            return array("{$name} must be numeric", Sabel_Validate_Error::GRATHER_THEN);
             break;
         }
         break;

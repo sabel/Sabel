@@ -1,10 +1,13 @@
 <?php
 
 /**
- * Test_Validate
- * 
- * @package org.sabel.Test
- * @author Mori Reo <mori.reo@gmail.com>
+ * TestCase of Validate
+ *
+ * @category   TestCase
+ * @package    org.sabel.TestCase
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Test_Validate extends PHPUnit2_Framework_TestCase
 {
@@ -22,20 +25,20 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
   
   public function testValidatorLower()
   {
-    $data = array('id' => 9.22337203685E+19);
+    $data = array('shop_id' => 9.22337203685E+19);
     $aValidator = new TestModel_Validator();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
-    $this->assertEquals(Sabel_Validate_Error::LOWER_THEN, $errors->get('id')->getType());
+    $this->assertEquals(Sabel_Validate_Error::LOWER_THEN, $errors->get('shop_id')->getType());
   }
   
   public function testValidatorGrather()
   {
-    $data = array('id' => -9.22337203685E+19);
+    $data = array('shop_id' => -9.22337203685E+19);
     $aValidator = new TestModel_Validator();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
-    $this->assertEquals(Sabel_Validate_Error::GRATHER_THEN, $errors->get('id')->getType());
+    $this->assertEquals(Sabel_Validate_Error::GRATHER_THEN, $errors->get('shop_id')->getType());
   }
   
   public function testValidatorNotNull()
@@ -44,7 +47,6 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
     $aValidator = new TestModel_Validator();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
-    $this->assertEquals(Sabel_Validate_Error::NOT_NULL, $errors->get('id')->getType());
     $this->assertEquals(Sabel_Validate_Error::NOT_NULL, $errors->get('shop_id')->getType());
   }
   
