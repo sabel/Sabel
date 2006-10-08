@@ -4,7 +4,7 @@ class Schema_Util_Creator
 {
   protected $colInfo = '';
 
-  public function create($table, $createSQL)
+  public function create($createSQL)
   {
     $sql   = substr(strpbrk($createSQL, '('), 0);
     $lines = explode(',', substr($sql, 1, strlen($sql) - 2));
@@ -40,10 +40,8 @@ class Schema_Util_Creator
       $columns[$name] = $vo;
     }
 
-    if ($constLine !== '')
-      $columns = $this->setConstraint($columns, $constLine);
-
-    return new Sabel_DB_Schema_Table($table, $columns);
+    if ($constLine !== '') $columns = $this->setConstraint($columns, $constLine);
+    return $columns;
   }
 
   protected function setDataType($vo, $rem)

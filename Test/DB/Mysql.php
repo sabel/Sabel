@@ -159,7 +159,3 @@ class MysqlHelper
   }
 }
 */
-
-if (!defined("PHPUnit2_MAIN_METHOD")) {
-  define("PHPUnit2_MAIN_METHOD", "Test_Edo_Mysql::main");
-}

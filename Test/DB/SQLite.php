@@ -160,7 +160,3 @@ class SQLiteHelper
   }
 }
 */
-
-if (!defined("PHPUnit2_MAIN_METHOD")) {
-  define("PHPUnit2_MAIN_METHOD", "Test_DB_SQLite::main");
-}

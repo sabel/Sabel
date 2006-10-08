@@ -18,7 +18,8 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
   {
     $sql  = "SELECT * FROM pg_statio_user_sequences ";
     $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
-    return $sql;
+
+    $co->increment = (count($this->execute($sql)) > 0);
   }
 
   public function addPrimaryKeyInfo($co, $columnRecord)
@@ -27,17 +28,18 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$columnRecord['table_name']}' ";
     $sql .= "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
 
-    return $sql;
+    $co->primary = (count($this->execute($sql)) > 0);
   }
 
   public function isBoolean($type, $columnRecord)
   {
+    var_dump('test');
     return ($type === 'boolean');
   }
 
   public function addStringLength($co, $columnRecord)
   {
     $maxlen  = $columnRecord['character_maximum_length'];
-    $co->max = (isset($maxlen)) ? $maxlen : 256;
+    $co->max = (isset($maxlen)) ? $maxlen : 255;
   }
 }

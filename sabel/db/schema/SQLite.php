@@ -16,21 +16,16 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_General
   {
     $tables = array();
     foreach ($this->recordObj->execute(self::TABLE_LIST) as $val) {
-      $tables[$val->name] = $this->getTable($val->name);
+      $table = $val->name;
+      $tables[$table] = new Sabel_DB_Schema_Table($table, $this->getTable($table));
     }
     return $tables;
   }
 
   protected function createColumns($table)
   {
-    return $this->getSchema($table)->getColumns();
-  }
-
-  protected function getSchema($table)
-  {
-    $result   = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
-    $creator  = new Schema_Util_Creator();
-    $tableObj = $creator->create($table, $result[0]->sql);
-    return $tableObj;
+    $result  = $this->recordObj->execute(sprintf(self::TABLE_COLUMNS, $table));
+    $creator = new Schema_Util_Creator();
+    return $creator->create($result[0]->sql);
   }
 }

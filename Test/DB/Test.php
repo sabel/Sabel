@@ -1058,6 +1058,7 @@ class Test_DB_Test extends SabelTestCase
 
     if (Sabel_DB_Connection::getDB(self::$connectName) !== 'sqlite') {
       self::$tableSchema[] = $sb->getTableSchema();
+      Sabel_DB_SimpleCache::remove('Schema_Bbs');
     } else {
       $sq = $sb->getTableSchema();
       $my = self::$tableSchema[0];

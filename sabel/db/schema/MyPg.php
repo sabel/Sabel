@@ -23,7 +23,7 @@ class Sabel_DB_Schema_MyPg extends Sabel_DB_Schema_General
     foreach ($this->recordObj->execute($sql) as $val) {
       $data  = array_change_key_case($val->toArray());
       $table = $data['table_name'];
-      $tables[$table] = $this->getTable($table);
+      $tables[$table] = new Sabel_DB_Schema_Table($table, $this->getTable($table));
     }
     return $tables;
   }
@@ -48,18 +48,17 @@ class Sabel_DB_Schema_MyPg extends Sabel_DB_Schema_General
     $co->notNull = ($columnRecord['is_nullable'] === 'NO');
 
     $this->addDefaultInfo($co, $columnRecord['column_default']);
-
-    if (is_string($sql = $this->addIncrementInfo($co, $columnRecord)))
-      $co->increment = (count($this->recordObj->execute($sql)) > 0);
-
-    if (is_string($sql = $this->addPrimaryKeyInfo($co, $columnRecord)))
-      $co->primary = (count($this->recordObj->execute($sql)) > 0);
+    $this->addIncrementInfo($co, $columnRecord);
+    $this->addPrimaryKeyInfo($co, $columnRecord);
 
     Sabel_DB_Schema_TypeSetter::send($co, $columnRecord['data_type']);
 
-    if ($co->type === Sabel_DB_Const::STRING)
-      $this->addStringLength($co, $columnRecord);
-
+    if ($co->type === Sabel_DB_Const::STRING) $this->addStringLength($co, $columnRecord);
     return $co;
+  }
+
+  protected function execute($sql)
+  {
+    return $this->recordObj->execute($sql);
   }
 }
