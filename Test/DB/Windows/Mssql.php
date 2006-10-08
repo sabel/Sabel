@@ -1,31 +1,43 @@
 <?php
 
-require_once '../db/Const.php';
-require_once '../db/Connection.php';
-require_once '../db/Transaction.php';
-require_once '../db/SimpleCache.php';
+require_once 'c:\php\sabel\sabel\db\Const.php';
+require_once 'c:\php\sabel\sabel\db\Connection.php';
+require_once 'c:\php\sabel\sabel\db\Transaction.php';
+require_once 'c:\php\sabel\sabel\db\SimpleCache.php';
 
-require_once '../db/Mapper.php';
-require_once '../db/BaseClasses.php';
-require_once '../db/driver/General.php';
-require_once '../db/driver/Query.php';
-require_once '../db/driver/native/Query.php';
-require_once '../db/driver/native/Mssql.php';
+require_once 'c:\php\sabel\sabel\db\Mapper.php';
+require_once 'c:\php\sabel\sabel\db\BaseClasses.php';
+require_once 'c:\php\sabel\sabel\db\driver\General.php';
+require_once 'c:\php\sabel\sabel\db\driver\Query.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Query.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Mssql.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Paginate.php';
+
+require_once 'c:\php\sabel\sabel\db\schema/Types.php';
+require_once 'c:\php\sabel\sabel\db\schema/Setter.php';
+require_once 'c:\php\sabel\sabel\db\schema/Table.php';
+require_once 'c:\php\sabel\sabel\db\schema/Column.php';
+require_once 'c:\php\sabel\sabel\db\schema/Accessor.php';
+
+require_once 'c:\php\sabel\sabel\db\schema/General.php';
+require_once 'c:\php\sabel\sabel\db\schema/Mssql.php';
 
 require_once 'Test.php';
 
 class MssqlExecute
 {
   private static $params1 = array('driver'   => 'mssql',
-                                  'host'     => 'EBINE\SQLEXPRESS',
+                                  'host'     => 'USER-116CCEF1CD\SQLEXPRESS',
                                   'user'     => 'develop',
                                   'password' => 'test',
+                                  'schema'   => 'edo',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'mssql',
-                                  'host'     => 'EBINE\SQLEXPRESS',
+                                  'host'     => 'USER-116CCEF1CD\SQLEXPRESS',
                                   'user'     => 'develop2',
                                   'password' => 'test',
+                                  'schema'   => 'edo2',
                                   'database' => 'edo2');
 
   public static function main()
@@ -39,11 +51,12 @@ class MssqlExecute
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
     } catch (Exception $e) {
+      print_r($e->getMessage());
     }
 
     $trans2 = new Trans2();
     $trans2->execute("DELETE FROM trans2");
-    
+
     $testMethods = array();
 
     $class = new ReflectionClass('Test_DB_Windows_Test'); 
@@ -99,7 +112,7 @@ class MssqlHelper
                 item_id INTEGER NOT NULL)';
                 
     $SQLs[] = 'CREATE TABLE customer_telephone (
-                id INTEGER NOT NULL PRIMARY,
+                id INTEGER NOT NULL PRIMARY KEY,
                 customer_id INTEGER NOT NULL,
                 telephone VARCHAR(32))';
                 
