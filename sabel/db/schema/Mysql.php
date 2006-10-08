@@ -4,7 +4,11 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 {
   public function addDefaultInfo($co, $default)
   {
-    $co->default = $default;
+    if ($co->type === Sabel_DB_Const::BOOL) {
+      $co->default = ((int)$default === 1);
+    } else {
+      $co->default = (is_numeric($default)) ? (int)$default : $default;
+    }
   }
 
   public function addIncrementInfo($co, $columnRecord)
@@ -24,6 +28,6 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
 
   public function addStringLength($co, $columnRecord)
   {
-    $co->max =(int) $columnRecord['character_octet_length'];
+    $co->max = (int)$columnRecord['character_octet_length'];
   }
 }

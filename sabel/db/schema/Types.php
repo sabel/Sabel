@@ -42,7 +42,7 @@ class Sabel_DB_Schema_TypeInt implements Sabel_DB_Schema_TypeSender
         case 'int4':
         case 'integer':
         case 'serial':
-          $co->max =  2147483;
+          $co->max =  2147483647;
           $co->min = -2147483648;
           break;
         case 'int8':
@@ -123,6 +123,27 @@ class Sabel_DB_Schema_TypeTime implements Sabel_DB_Schema_TypeSender
 
     if (in_array($type, $tArray)) {
       $co->type = Sabel_DB_Const::TIMESTAMP;
+    } else {
+      $this->next->send($co, $type);
+    }
+  }
+}
+
+class Sabel_DB_Schema_TypeFloat implements Sabel_DB_Schema_TypeSender
+{
+  private $next = null;
+
+  public function add($chain)
+  {
+    $this->next = $chain;
+  }
+
+  public function send($co, $type)
+  {
+    $tArray = array('float', 'double', 'double precision', 'real', 'float4', 'float8');
+
+    if (in_array($type, $tArray)) {
+      $co->type = Sabel_DB_Const::FLOAT;
     } else {
       $this->next->send($co, $type);
     }

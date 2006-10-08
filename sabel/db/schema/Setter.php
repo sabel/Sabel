@@ -15,13 +15,15 @@ class Sabel_DB_Schema_TypeSetter
       $tStr   = new Sabel_DB_Schema_TypeStr();
       $tText  = new Sabel_DB_Schema_TypeText();
       $tTime  = new Sabel_DB_Schema_TypeTime();
+      $tFloat = new Sabel_DB_Schema_TypeFloat();
       $tByte  = new Sabel_DB_Schema_TypeByte();
       $tOther = new Sabel_DB_Schema_TypeOther();
 
       $tInt->add($tStr);
       $tStr->add($tText);
       $tText->add($tTime);
-      $tTime->add($tByte);
+      $tTime->add($tFloat);
+      $tFloat->add($tByte);
       $tByte->add($tOther);
 
       $tInt->send($co, $type);

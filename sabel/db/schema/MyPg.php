@@ -47,11 +47,17 @@ class Sabel_DB_Schema_MyPg extends Sabel_DB_Schema_General
     $co->name    = $columnRecord['column_name'];
     $co->notNull = ($columnRecord['is_nullable'] === 'NO');
 
+    $type = $columnRecord['data_type'];
+
+    if ($this->isBoolean($type, $columnRecord)) {
+      $co->type = Sabel_DB_Const::BOOL;
+    } else {
+      Sabel_DB_Schema_TypeSetter::send($co, $type);
+    }
+
     $this->addDefaultInfo($co, $columnRecord['column_default']);
     $this->addIncrementInfo($co, $columnRecord);
     $this->addPrimaryKeyInfo($co, $columnRecord);
-
-    Sabel_DB_Schema_TypeSetter::send($co, $columnRecord['data_type']);
 
     if ($co->type === Sabel_DB_Const::STRING) $this->addStringLength($co, $columnRecord);
     return $co;

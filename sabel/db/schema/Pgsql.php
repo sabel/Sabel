@@ -6,8 +6,10 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
   {
     if (is_null($default) || strpos($default, 'nextval') !== false) {
       $co->default = null;
-    } else if (ctype_digit($default)) {
+    } else if (is_numeric($default)) {
       $co->default = (int)$default;
+    } else if ($default === 'false' || $default === 'true') {
+      $co->default = ($default === 'true');
     } else {
       $default     = substr($default, 1);
       $co->default = substr($default, 0, strpos($default, "'"));
@@ -33,7 +35,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
 
   public function isBoolean($type, $columnRecord)
   {
-    var_dump('test');
     return ($type === 'boolean');
   }
 

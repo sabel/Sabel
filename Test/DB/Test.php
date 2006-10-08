@@ -17,8 +17,8 @@ class Test_DB_Test extends SabelTestCase
   {
     $customer = new Customer();
 
-    $dbname = Sabel_DB_Connection::getDB($customer->getConnectName());
-    $this->assertEquals($dbname, self::$dbList[self::$count++]);
+    //$dbname = Sabel_DB_Connection::getDB($customer->getConnectName());
+    //$this->assertEquals($dbname, self::$dbList[self::$count++]);
 
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'tanaka');
@@ -1054,47 +1054,126 @@ class Test_DB_Test extends SabelTestCase
 
   public function testInformationSchema()
   {
-    $sb = new Bbs();
+    $bbs = new Bbs();
+    $schema = $bbs->getTableSchema();
 
-    if (Sabel_DB_Connection::getDB(self::$connectName) !== 'sqlite') {
-      self::$tableSchema[] = $sb->getTableSchema();
-      Sabel_DB_SimpleCache::remove('Schema_Bbs');
-    } else {
-      $sq = $sb->getTableSchema();
-      $my = self::$tableSchema[0];
+    $id       = $schema->id;
+    $users_id = $schema->users_id;
+    $title    = $schema->title;
+    $body     = $schema->body;
 
-      $sqc = $sq->getColumns();
-      $myc = $my->getColumns();
+    $this->assertEquals($id->type, Sabel_DB_Const::INT);
+    $this->assertEquals($id->max,  2147483647);
+    $this->assertEquals($id->min, -2147483648);
+    $this->assertTrue($id->notNull);
+    $this->assertTrue($id->primary);
+    $this->assertTrue($id->increment);
 
-      $this->assertEquals(count($sqc), count($myc));
-      $this->assertEquals($sq->id->type, $my->id->type);
-      $this->assertEquals($sq->id->max, $my->id->max);
-      $this->assertEquals($sq->id->min, $my->id->min);
-      $this->assertEquals($sq->id->increment, $my->id->increment);
-      $this->assertEquals($sq->id->primary, $my->id->primary);
+    $this->assertEquals($users_id->type, Sabel_DB_Const::INT);
+    $this->assertEquals($users_id->max,  2147483647);
+    $this->assertEquals($users_id->min, -2147483648);
+    $this->assertTrue($users_id->notNull);
+    $this->assertFalse($users_id->primary);
+    $this->assertFalse($users_id->increment);
 
-      $this->assertEquals($sq->title->type, $my->title->type);
-      $this->assertEquals($sq->title->max,  $my->title->max);
+    $this->assertEquals($title->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($title->max, 24);
+    $this->assertFalse($title->notNull);
+    $this->assertFalse($title->primary);
+    $this->assertFalse($title->increment);
 
-      $this->assertEquals($sq->body->type, $my->body->type);
-      $this->assertEquals($sq->body->max,  $my->body->max);
+    $this->assertEquals($body->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($body->max, 24);
+    $this->assertFalse($body->notNull);
+    $this->assertFalse($body->primary);
+    $this->assertFalse($body->increment);
 
-      $pg = self::$tableSchema[1];
-      $pgc = $my->getColumns();
+    Sabel_DB_SimpleCache::remove('Schema_Bbs');
+  }
 
-      $this->assertEquals(count($sqc), count($pgc));
-      $this->assertEquals($sq->id->type, $pg->id->type);
-      $this->assertEquals($sq->id->max, $pg->id->max);
-      $this->assertEquals($sq->id->min, $pg->id->min);
-      $this->assertEquals($sq->id->increment, $pg->id->increment);
-      $this->assertEquals($sq->id->primary, $pg->id->primary);
+  public function testSchema()
+  {
+    $st = new SchemaTest();
+    $schema = $st->getTableSchema();
 
-      $this->assertEquals($sq->title->type, $pg->title->type);
-      $this->assertEquals($sq->title->max,  $pg->title->max);
+    $id1  = $schema->id1;
+    $id2  = $schema->id2;
+    $num  = $schema->num;
+    $fnum = $schema->fnum;
+    $dnum = $schema->dnum;
+    $str  = $schema->str;
+    $text = $schema->text;
+    $bl   = $schema->bl;
+    $date = $schema->date;
+    $dt   = $schema->dt;
 
-      $this->assertEquals($sq->body->type, $pg->body->type);
-      $this->assertEquals($sq->body->max,  $pg->body->max);
-    }
+    $dbname = Sabel_DB_Connection::getDB($st->getConnectName());
+
+    $this->assertEquals($id1->type, Sabel_DB_Const::INT);
+    $this->assertTrue($id1->primary);
+    if ($dbname !== 'sqlite') $this->assertTrue($id1->increment);
+    $this->assertEquals($id1->max,  9223372036854775807);
+    $this->assertEquals($id1->min, -9223372036854775808);
+    @$this->assertEquals($id1->default, null);
+
+    $this->assertEquals($id2->type, Sabel_DB_Const::INT);
+    $this->assertTrue($id2->primary);
+    $this->assertFalse($id2->increment);
+    $this->assertEquals($id2->max,  2147483647);
+    $this->assertEquals($id2->min, -2147483648);
+    @$this->assertEquals($id2->default, null);
+
+    $this->assertEquals($num->type, Sabel_DB_Const::INT);
+    $this->assertFalse($num->primary);
+    $this->assertFalse($num->increment);
+    $this->assertEquals($num->max,  2147483647);
+    $this->assertEquals($num->min, -2147483648);
+    $this->assertEquals($num->default, 10);
+
+    $this->assertEquals($fnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertFalse($fnum->primary);
+    $this->assertFalse($fnum->notNull);
+    $this->assertFalse($fnum->increment);
+    @$this->assertEquals($fnum->default, null);
+
+    $this->assertEquals($dnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertFalse($dnum->primary);
+    $this->assertFalse($dnum->notNull);
+    $this->assertFalse($dnum->increment);
+    @$this->assertEquals($dnum->default, null);
+
+    $this->assertEquals($str->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($str->max, 64);
+    $this->assertFalse($str->primary);
+    $this->assertFalse($str->notNull);
+    $this->assertFalse($str->increment);
+    $this->assertEquals($str->default, 'test');
+
+    $this->assertEquals($text->type, Sabel_DB_Const::TEXT);
+    $this->assertFalse($text->primary);
+    $this->assertFalse($text->notNull);
+    $this->assertFalse($text->increment);
+    @$this->assertEquals($text->default, null);
+
+    $this->assertEquals($bl->type, Sabel_DB_Const::BOOL);
+    $this->assertFalse($bl->primary);
+    $this->assertFalse($bl->notNull);
+    $this->assertFalse($bl->increment);
+    $this->assertTrue($bl->default);
+
+    $this->assertEquals($date->type, Sabel_DB_Const::DATE);
+    $this->assertFalse($date->primary);
+    $this->assertFalse($date->increment);
+    $this->assertFalse($date->notNull);
+    @$this->assertEquals($date->default, null);
+
+    $this->assertEquals($dt->type, Sabel_DB_Const::TIMESTAMP);
+    $this->assertFalse($dt->primary);
+    $this->assertFalse($dt->increment);
+    $this->assertTrue($dt->notNull);
+    @$this->assertEquals($dt->default, null);
+
+    Sabel_DB_SimpleCache::remove('Schema_SchemaTest');
   }
 }
 
@@ -1239,4 +1318,9 @@ class Bbs extends Mapper_Default
 class Status extends Mapper_Default
 {
 
+}
+
+class SchemaTest extends Mapper_Default
+{
+  protected $table = 'schema_test';
 }

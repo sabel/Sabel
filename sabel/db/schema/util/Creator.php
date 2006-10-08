@@ -13,98 +13,103 @@ class Schema_Util_Creator
     $constLine = '';
 
     $columns = array();
-    foreach ($lines as $line) {
-      $vo    = new Sabel_DB_Schema_Column();
+    foreach ($lines as $key => $line) {
+      $co    = new Sabel_DB_Schema_Column();
       $split = explode(' ', $line);
       $name  = $split[0];
       $rem   = trim(substr($line, strlen($name)));
 
-      $vo->name = $name;
+      $co->name = $name;
 
-      if ($name === 'constraint') {
-        $constLine = $line;
+      if (strpos($line, 'primary key') !== false && strpbrk($line, '(') !== false) {
+        $constLine = $line . ',' . $lines[$key + 1];
         continue;
       }
 
-      $this->setDataType($vo, $rem);
+      $this->setDataType($co, $rem);
 
       if ($this->colInfo === '') {
-        $vo->notNull = false;
-        $vo->primary = false;
-        $vo->default = null;
+        $co->notNull = false;
+        $co->primary = false;
+        $co->default = null;
       } else {
-        $this->setNotNull($vo);
-        if (!$this->setPrimary($vo)) $this->setDefault($vo);
+        $this->setNotNull($co);
+        if (!$this->setPrimary($co)) $this->setDefault($co);
       }
 
-      $columns[$name] = $vo;
+      $columns[$name] = $co;
     }
 
     if ($constLine !== '') $columns = $this->setConstraint($columns, $constLine);
     return $columns;
   }
 
-  protected function setDataType($vo, $rem)
+  protected function setDataType($co, $rem)
   {
     $tmp = substr($rem, 0, strpos($rem, ' '));
     $type = ($tmp === '') ? $rem : $tmp;
     $this->colInfo = trim(substr($rem, strlen($type)));
 
-    Sabel_DB_Schema_TypeSetter::send($vo, $type);
+    Sabel_DB_Schema_TypeSetter::send($co, $type);
 
     $pri  = (strpos($rem, 'integer primary key') !== false);
     $pri2 = (strpos($rem, 'integer not null primary key') !== false);
 
-    $vo->increment = ($pri || $pri2);
+    $co->increment = ($pri || $pri2);
   }
 
-  protected function setNotNull($vo)
+  protected function setNotNull($co)
   {
     $colInfo = $this->colInfo;
 
-    $vo->notNull   = (strpos($colInfo, 'not null') !== false);
+    $co->notNull   = (strpos($colInfo, 'not null') !== false);
     $this->colInfo = str_replace('not null', '', $colInfo);
   }
 
-  protected function setPrimary($vo)
+  protected function setPrimary($co)
   {
     $colInfo = $this->colInfo;
 
     if ($colInfo === '') {
-      $vo->primary = false;
-      $vo->default = null;
+      $co->primary = false;
+      $co->default = null;
       return true;
     } else {
-      $vo->primary   = (strpos($colInfo, 'primary key') !== false);
+      $co->primary   = (strpos($colInfo, 'primary key') !== false);
       $this->colInfo = str_replace('primary key', '', $colInfo);
       return false;
     }
   }
 
-  protected function setDefault($vo)
+  protected function setDefault($co)
   {
     $colInfo = $this->colInfo;
 
     if (strpos($colInfo, 'default') !== false) {
       $default = trim(substr($colInfo, 8));
-      if (ctype_digit($default) || $default === 'false' || $default === 'true') {
-        $vo->default = $default;
+      if (is_numeric($default)) {
+        $co->default = (int)$default;
+      } else if ($default === 'false' || $default === 'true') {
+        $co->default = ($default === 'true');
       } else {
-        $vo->default = substr($default, 1, strlen($default) - 2);
+        $co->default = substr($default, 1, strlen($default) - 2);
       }
     } else {
-      $vo->default = null;
+      $co->default = null;
     }
   }
 
   protected function setConstraint($columns, $line)
   {
-    if (strpos($line, 'primary key') !== false) {
-      $line   = strpbrk($line, '(');
+    $line = strpbrk($line, '(');
+    if (strpbrk($line, ',') !== false) {
+      $parts = explode(',', $line);
+      foreach ($parts as $key => $part) $parts[$key] = str_replace(array('(', ')'), '', $part);
+      foreach ($parts as $key) $columns[$key]->primary = true;
+    } else {
       $priCol = substr($line, 1, strlen($line) - 2);
-
       $columns[$priCol]->primary = true;
-      return $columns;
     }
+    return $columns;
   }
 }
