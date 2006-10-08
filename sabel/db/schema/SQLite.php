@@ -17,7 +17,7 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_General
     $tables = array();
     foreach ($this->recordObj->execute(self::TABLE_LIST) as $val) {
       $table = $val->name;
-      $tables[$table] = new Sabel_DB_Schema_Table($table, $this->getTable($table));
+      $tables[$table] = $this->getTable($table);
     }
     return $tables;
   }

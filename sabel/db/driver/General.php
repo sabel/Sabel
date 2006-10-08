@@ -37,7 +37,7 @@ abstract class Sabel_DB_Driver_General
 
   public function executeInsert($table, $data, $defColumn)
   {
-    if ($defColumn && in_array($this->dbType, $this->setIdNumberDBs))
+    if ($defColumn && ($this->dbType === 'pgsql' || $this->dbType === 'firebird'))
       $data = $this->setIdNumber($table, $data, $defColumn);
 
     $sql  = $this->query->makeInsertSQL($table, $data);
@@ -49,7 +49,7 @@ abstract class Sabel_DB_Driver_General
   protected function setIdNumber($table, $data, $defColumn)
   {
     if (!isset($data[$defColumn])) {
-      $this->execute("SELECT nextval('{$table}_{$defColumn}_seq');");
+      $this->execute("SELECT nextval('{$table}_{$defColumn}_seq')");
       $row = $this->fetch();
       if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");

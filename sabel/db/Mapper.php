@@ -900,7 +900,7 @@ abstract class Sabel_DB_Mapper
 
   protected function toObject($rows)
   {
-    if (!is_array($rows) || empty($rows)) return null;
+    if (!is_array($rows) || empty($rows)) return false;
 
     $recordObj = array();
     $model = $this->newClass($this->table);

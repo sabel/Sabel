@@ -23,7 +23,7 @@ class Sabel_DB_Schema_MyPg extends Sabel_DB_Schema_General
     foreach ($this->recordObj->execute($sql) as $val) {
       $data  = array_change_key_case($val->toArray());
       $table = $data['table_name'];
-      $tables[$table] = new Sabel_DB_Schema_Table($table, $this->getTable($table));
+      $tables[$table] = $this->getTable($table);
     }
     return $tables;
   }

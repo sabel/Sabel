@@ -42,14 +42,11 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     }
   }
 
-  protected function setIdNumber($table, $data, $defColumn)
+  public function getLastInsertId()
   {
-    if (!isset($data[$defColumn])) {
-      $this->driverExecute("SELECT IDENT_CURRENT('{$table}')");
-      $result = $this->fetch();
-      $this->lastInsertId = (int)$result[0];
-    }
-    return $data;
+    $this->driverExecute('SELECT SCOPE_IDENTITY()');
+    $result = $this->fetch();
+    return (int)$result[0];
   }
 
   public function driverExecute($sql = null, $conn = null)
