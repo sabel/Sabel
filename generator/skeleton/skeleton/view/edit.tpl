@@ -1,16 +1,15 @@
-<h2>edit <? echo $name ?> No.<#= $<? echo $name ?>->id->value #></h2>
+<h2>edit bbs No.<#= $<? echo $name ?>->id ?></h2>
+
+<?= $this->partial('error') ?>
 
 <div>
-<form method="post" action="<#= urlFor('default', 'edit', $<? echo $name ?>) #>">
-<# foreach ($<? echo $name ?> as $column) : #>
-  <#= $column->name #>:
-  <input type="text" name="<#= $column->name #>" value="<#hn $column->value #>" />
-  <br />
-<# endforeach #>
-<input type="submit" value="edit" />
-</form>
+  <form method="post" action="<#= uri(array('action'=>'edit', 'id'=>$<? echo $name ?>->id)) ?>">
+    <# $this->assign($model, $<? echo $name ?>) ?>
+    <#= $this->partial('form') ?>
+    <input type="submit" value="edit" />
+  </form>
 </div>
 
-<a href="<#= urlFor('default', 'edit', $<? echo $name ?>) #>"><#= _('edit') #></a>
-<a href="<#= urlFor('default', 'create') #>"><#= _('create') #></a>
-<a href="<#= urlFor('default', 'lists') #>"><#= _('list') #></a>
+<#= a("a: edit, id: {$<? echo $name ?>->id->value}", _('edit')) ?> 
+<#= a('action: create', _('create')) ?> 
+<#= a('action: lists', _('list')) ?>

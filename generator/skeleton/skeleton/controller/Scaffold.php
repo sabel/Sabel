@@ -1,60 +1,53 @@
+<?php $ucControllerName = ucfirst($controllerName) ?>
+
 <#php
 
-class Controllers_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
+class Controllers_<? echo $ucControllerName ?> extends Sabel_Controller_Page
 {
   /**
-   * @implementation <? echo $controllerName ?>
+   * @implementation <? echo $ucControllerName ?>
+   * @setter set<? echo $ucControllerName ?>
    */
-  protected $<? echo $controllerName ?> = null;
+  protected $<? echo $ucControllerName ?> = null;
   
-  public function initialize()
+  public function set<? echo $ucControllerName ?>($<? echo $ontrollerName ?>)
   {
-    $this-><? echo $controllerName ?> = new <? echo ucfirst($controllerName) ?>();
-  }
-  
-  public function index()
-  {
-    echo "welcome to <? echo ucfirst($controllerName) ?> controller. \n";
+    $this-><? echo $controllerName ?> = $<? echo $controllerName ?>;
   }
   
   public function lists()
   {
-    Re::set('<? echo $controllerName ?>s', $this-><? echo $controllerName ?>->lists());
+    $this-><? echo $controllerName ?>->select();
   }
   
   public function show()
   {
-    Re::set('<? echo $controllerName ?>', $this-><? echo $controllerName ?>->show($this->id));
+    $this-><? echo $controllerName ?>->choice($this->id);
   }
   
   public function create()
   {
-    $model = new <? echo ucfirst($controllerName) ?>();
-    Re::set('<? echo $controllerName ?>', $model);
-    
-    if ($this->isPost()) {
-      $model = new <? echo ucfirst($controllerName) ?>();
-      $model->save($this->requests());
-      $this->redirect(urlFor('default', 'lists'));
-    }
+    $this-><? echo $controllerName ?>->assign();
+  }
+  
+  public function postCreate()
+  {
+    $this-><? echo $controllerName ?>->save($this->requests);
   }
   
   public function edit()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->id);
-    
-    if ($this->isPost()) {
-      $model->save($this->requests());
-      $this->redirect(urlFor('default', 'lists'));
-    }
-    
-    Re::set('<? echo $controllerName ?>', $model);
+    $this-><? echo $controllerName ?>->choice($this->id);
+  }
+  
+  public function postEdit()
+  {
+    $this-><? echo $controllerName ?>->choice($this->id)->save($this->requests);
   }
   
   public function delete()
   {
-    $model = new <? echo ucfirst($controllerName) ?>($this->id);
-    $model->remove();
-    $this->redirect(urlFor('default', 'lists'));
+    $this-><? echo $controllerName ?>->choice($this->id)->remove();
+    $this->redirectToPrevious();
   }
 }

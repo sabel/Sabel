@@ -27,6 +27,11 @@ abstract class Sabel_Template_Engine
     
   }
   
+  public function assgin($key, $value)
+  {
+    $this->attributes[$key] = $value;
+  }
+  
   public function partial($tplName)
   {
     return $this->load($tplName);

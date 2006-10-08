@@ -33,7 +33,7 @@ class Sabel_Injection_Injector implements Iterator
   
   public function __get($key)
   {
-    return (isset($this->target->$key)) ? $this->target->$key : null;
+    return $this->target->$key;
   }
   
   public function __call($method, $arg)

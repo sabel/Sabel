@@ -1,14 +1,13 @@
 <h2>create <? echo $name ?></h2>
 
+<?= $this->partial('error') ?>
+
 <div>
-<form method="post" action="<#= urlFor('default', 'create') #>">
-<# foreach ($<? echo $name ?> as $column) : #>
-  <#= $column->name #>:
-  <input type="text" name="<#= $column->name #>" value="" />
-  <br />
-<# endforeach #>
-<input type="submit" value="create" />
-</form>
+  <form method="post" action="<#= uri(array('action'=>'create')) ?>">
+    <# $this->assign($model, <? echo $name ?>) ?>
+    <#= $this->partial('form') ?>
+    <input type="submit" value="create" />
+  </form>
 </div>
 
-<a href="<#= urlFor('default', 'lists') #>"><#= _('list') #></a>
+<#= a("a:lists", _('list')) ?>

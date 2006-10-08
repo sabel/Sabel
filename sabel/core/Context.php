@@ -1,21 +1,36 @@
 <?php
 
+/**
+ * Sabel Context
+ *
+ * @category   Core
+ * @package    org.sabel.core
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Core_Context
 {
   private static $parameters  = array();
   private static $includePath = array();
-
-  public static function getController()
+  
+  private static $pageController = null;
+  
+  public static function setPageController($controller)
   {
-    // @TODO configuration.
-    return new SabelPageWebController();
+    self::$pageController = $controller;
   }
-
+  
+  public static function getPageController()
+  {
+    return self::$pageController;
+  }
+  
   public static function setParameter($name, $value)
   {
     self::$parameters[$name] = $value;
   }
-
+  
   public static function getParameter($name)
   {
     return self::$parameters[$name];
