@@ -26,3 +26,18 @@ class Test_DB_Tests
     return $suite;
   }
 }
+
+abstract class BaseHelper
+{
+  public function create()
+  {
+    foreach ($this->sqls as $sql) {
+      $obj = new Test3();
+      try {
+        $obj->execute($sql);
+      } catch(Exception $e) {
+        // ignore any errors.
+      }
+    }
+  }
+}

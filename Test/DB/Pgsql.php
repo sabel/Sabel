@@ -48,6 +48,9 @@ class Test_DB_Pgsql extends Test_DB_Test
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
+    
+    $helper = new PgsqlHelper();
+    $helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
@@ -63,7 +66,8 @@ class Test_DB_Pgsql extends Test_DB_Test
  * create query for postgres unit test.
  *
  *
-class PgsqlHelper
+ */
+class PgsqlHelper extends BaseHelper
 {
   protected $sqls = null;
 
@@ -156,7 +160,30 @@ class PgsqlHelper
                  id    SERIAL PRIMARY KEY,
                  text  VARCHAR(24) )';
 
+    $SQLs[] = "CREATE TABLE schema_test (
+                 id1 bigserial not null,
+                 id2 integer not null,
+                 num integer default 10,
+                 fnum float4,
+                 dnum float8,
+                 str varchar(64) default 'test',
+                 text text,
+                 bl boolean default true,
+                 date date,
+                 dt timestamp not null,
+                 primary key (id1, id2));";
     $this->sqls = $SQLs;
   }
+  
+  public function create()
+  {
+    foreach ($this->sqls as $sql) {
+      $obj = new Test3();
+      try {
+        $obj->execute($sql);
+      } catch(Exception $e) {
+        // ignore any errors.
+      }
+    }
+  }
 }
-*/

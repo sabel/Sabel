@@ -48,6 +48,9 @@ class Test_DB_Mysql extends Test_DB_Test
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
+    
+    $helper = new MysqlHelper();
+    $helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
@@ -62,11 +65,11 @@ class Test_DB_Mysql extends Test_DB_Test
 /**
  * create query for mysql unit test.
  *
- *
-class MysqlHelper
+ */
+class MysqlHelper extends BaseHelper
 {
   protected $sqls = null;
-
+  
   public function __construct()
   {
     $SQLs = array();
@@ -154,8 +157,20 @@ class MysqlHelper
     $SQLs[] = 'CREATE TABLE trans1 (
                  id    INT4 PRIMARY KEY AUTO_INCREMENT,
                  text  VARCHAR(24)) TYPE=InnoDB';
+    
+    $SQLs[] = "CREATE TABLE schema_test (
+                 id1 bigint auto_increment,
+                 id2 integer not null,
+                 num integer default 10,
+                 fnum float4,
+                 dnum double,
+                 str varchar(64) default 'test',
+                 text text,
+                 bl boolean default true comment 'boolean',
+                 date date,
+                 dt datetime not null,
+                 primary key (id1, id2)) TYPE=InnoDB";
 
     $this->sqls = $SQLs;
   }
 }
-*/

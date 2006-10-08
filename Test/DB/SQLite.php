@@ -40,6 +40,9 @@ class Test_DB_SQLite extends Test_DB_Test
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
+    
+    $helper = new SQLiteHelper();
+    $helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
@@ -55,7 +58,8 @@ class Test_DB_SQLite extends Test_DB_Test
  * create query for sqlite unit test.
  *
  *
-class SQLiteHelper
+ */
+class SQLiteHelper extends BaseHelper
 {
   protected $sqls = null;
 
@@ -147,16 +151,31 @@ class SQLiteHelper
                  id    INTEGER PRIMARY KEY,
                  text  VARCHAR(24) )';
 
+    $SQLs[] = "CREATE TABLE schema_test (
+                 id1 int8 not null,
+                 id2 int4 not null,
+                 num integer default 10,
+                 fnum float4,
+                 dnum float8,
+                 str varchar(64) default 'test',
+                 text text,
+                 bl boolean default true,
+                 date date,
+                 dt timestamp not null,
+                 primary key (id1, id2));";
+                 
     $this->sqls = $SQLs;
   }
 
   public function create()
   {
-    $obj = new Sabel_DB_Basic();
     foreach ($this->sqls as $sql) {
-      var_dump($sql);
-      $obj->execute($sql);
+      $obj = new Test3();
+      try {
+        $obj->execute($sql);
+      } catch(Exception $e) {
+        // ignore any errors.
+      }
     }
   }
 }
-*/
