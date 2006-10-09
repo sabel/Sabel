@@ -8,6 +8,6 @@
 
 <#= a('action:create', _('create')) #> 
 <#= a('action:lists', _('list')) #> 
-<#= a("a:show,   id:{$<? echo $name ?>->id->value}", _('show')) #>
-<#= a("a:edit,   id:{$<? echo $name ?>->id->value}", _('edit')) #>
+<#= a("a:show,   id:{$<? echo $name ?>->id->value}", _('show')) #> 
+<#= a("a:edit,   id:{$<? echo $name ?>->id->value}", _('edit')) #> 
 <#= a("a:delete, id:{$<? echo $name ?>->id->value}", _('delete')) #>
