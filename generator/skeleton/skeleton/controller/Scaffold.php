@@ -1,16 +1,14 @@
-<?php $ucControllerName = ucfirst($controllerName) ?>
-
 <#php
-
+<?php $ucControllerName = ucfirst($controllerName) ?>
 class Controllers_<? echo $ucControllerName ?> extends Sabel_Controller_Page
 {
   /**
-   * @implementation <? echo $ucControllerName ?>
-   * @setter set<? echo $ucControllerName ?>
+   * @implementation <? echo $ucControllerName ."\n" ?>
+   * @setter set<? echo $ucControllerName . "\n" ?>
    */
-  protected $<? echo $ucControllerName ?> = null;
+  protected $<? echo $controllerName ?> = null;
   
-  public function set<? echo $ucControllerName ?>($<? echo $ontrollerName ?>)
+  public function set<? echo $ucControllerName ?>($<? echo $controllerName ?>)
   {
     $this-><? echo $controllerName ?> = $<? echo $controllerName ?>;
   }

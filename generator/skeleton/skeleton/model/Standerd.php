@@ -1,10 +1,9 @@
 <#php
-
 <?php $lwClassName = strtolower($className) ?>
 
 /**
- * @assign choice to <? echo $lwClassName ?>
- * @assign assign to <? echo $lwClassName ?>
+ * @assign choice to <? echo $lwClassName ."\n" ?>
+ * @assign assign to <? echo $lwClassName ."\n" ?>
  * @assign select to <? echo $lwClassName ?>s
  */
 class <?php echo $className ?> extends Sabel_DB_Model

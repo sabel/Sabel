@@ -1,7 +1,7 @@
 <h2>lists</h2>
 
 <div>
-<# foreach ($<? echo $name ?>s as $bbs) : #>
+<# foreach ($<? echo $name ?>s as $<? echo $name ?>) : #>
 
   <div>
   <# foreach ($<? echo $name ?> as $column) : #>

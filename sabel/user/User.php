@@ -9,7 +9,7 @@ class User
   {
     $this->uniqueKey = $uniqueKey;
 
-    $storage = Storage::create('SessionStorage');
+    $storage = Sabel_Storage_Session::create();
     $this->attributes = $storage->read('Community.UserAttributes' . $uniqueKey);
   }
 
