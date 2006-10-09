@@ -52,6 +52,11 @@ class Sabel_DB_Model extends Sabel_DB_Mapper implements Iterator
     return new Sabel_Injection_Injector($this->selectOne($param1, $param2, $param3));
   }
   
+  public function assign()
+  {
+    return $this;
+  }
+  
   /**
    * implements for Iterator interface
    *
