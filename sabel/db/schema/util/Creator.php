@@ -7,7 +7,7 @@ class Schema_Util_Creator
   public function create($createSQL)
   {
     $sql   = substr(strpbrk($createSQL, '('), 0);
-    $lines = explode(',', substr($sql, 1, strlen($sql) - 2));
+    $lines = explode(',', substr($sql, 1, -1));
     $lines = array_map('strtolower', array_map('trim', $lines));
 
     $constLine = '';
@@ -92,7 +92,7 @@ class Schema_Util_Creator
       } else if ($default === 'false' || $default === 'true') {
         $co->default = ($default === 'true');
       } else {
-        $co->default = substr($default, 1, strlen($default) - 2);
+        $co->default = substr($default, 1, -1);
       }
     } else {
       $co->default = null;
@@ -107,7 +107,7 @@ class Schema_Util_Creator
       foreach ($parts as $key => $part) $parts[$key] = str_replace(array('(', ')'), '', $part);
       foreach ($parts as $key) $columns[$key]->primary = true;
     } else {
-      $priCol = substr($line, 1, strlen($line) - 2);
+      $priCol = substr($line, 1, -1);
       $columns[$priCol]->primary = true;
     }
     return $columns;

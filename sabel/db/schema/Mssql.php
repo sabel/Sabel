@@ -73,7 +73,7 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
     if (is_null($default)) {
       $co->default = null;
     } else {
-      $default = substr($default, 2, strlen($default) - 4);
+      $default = substr($default, 2, -2);
       if ($co->type === Sabel_DB_Const::BOOL) {
         $co->default = ($default === 'true');
       } else {
@@ -88,7 +88,7 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
     $sql .= "WHERE obj.name = '{$columnRecord['table_name']}' AND ident.name = '{$co->name}' AND ";
     $sql .= "obj.object_id = ident.object_id";
 
-    $co->increment = ($this->recordObj->execute($sql) > 0);
+    $co->increment = ($this->recordObj->execute($sql) !== false);
   }
 
   protected function addPrimaryKeyInfo($co, $columnRecord)

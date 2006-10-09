@@ -21,7 +21,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     $sql  = "SELECT * FROM pg_statio_user_sequences ";
     $sql .= "WHERE relname = '{$columnRecord['table_name']}_{$co->name}_seq'";
 
-    $co->increment = (count($this->execute($sql)) > 0);
+    $co->increment = ($this->execute($sql) !== false);
   }
 
   public function addPrimaryKeyInfo($co, $columnRecord)
@@ -30,7 +30,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_MyPg
     $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$columnRecord['table_name']}' ";
     $sql .= "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
 
-    $co->primary = (count($this->execute($sql)) > 0);
+    $co->primary = ($this->execute($sql) !== false);
   }
 
   public function isBoolean($type, $columnRecord)
