@@ -1131,12 +1131,16 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($num->default, 10);
 
     $this->assertEquals($fnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertEquals($fnum->max,  3.4028235E38);
+    $this->assertEquals($fnum->min, -3.4028235E38);
     $this->assertFalse($fnum->primary);
     $this->assertFalse($fnum->notNull);
     $this->assertFalse($fnum->increment);
     @$this->assertEquals($fnum->default, null);
 
-    $this->assertEquals($dnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertEquals($dnum->type, Sabel_DB_Const::DOUBLE);
+    $this->assertEquals($dnum->max,  1.79769E308);
+    $this->assertEquals($dnum->min, -1.79769E308);
     $this->assertFalse($dnum->primary);
     $this->assertFalse($dnum->notNull);
     $this->assertFalse($dnum->increment);

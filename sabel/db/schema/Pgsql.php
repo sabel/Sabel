@@ -11,6 +11,16 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_General
     return ($type === 'boolean');
   }
 
+  public function isFloat($type)
+  {
+    return ($type === 'real' || $type === 'double precision');
+  }
+
+  public function getFloatType($type)
+  {
+    return ($type === 'real') ? 'float' : 'double';
+  }
+
   public function setDefault($co, $row)
   {
     $default = $row['column_default'];

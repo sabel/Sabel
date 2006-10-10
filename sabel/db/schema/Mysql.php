@@ -11,6 +11,16 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_General
     return ($type === 'tinyint' && $row['column_comment'] === 'boolean');
   }
 
+  public function isFloat($type)
+  {
+    return ($type === 'float' || $type === 'double');
+  }
+
+  public function getFloatType($type)
+  {
+    return ($type === 'float') ? 'float' : 'double';
+  }
+
   public function setDefault($co, $row)
   {
     $default = $row['column_default'];

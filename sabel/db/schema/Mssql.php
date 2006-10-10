@@ -11,6 +11,16 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
     return ($type === 'bit');
   }
 
+  public function isFloat($type)
+  {
+    return ($type === 'real' || $type === 'float');
+  }
+
+  public function getFloatType($type)
+  {
+    return ($type === 'real') ? 'float' : 'double';
+  }
+
   protected function setDefault($co, $row)
   {
     $default = $row['column_default'];

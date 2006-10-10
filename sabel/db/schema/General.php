@@ -49,6 +49,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     if ($this->isBoolean($type, $row)) {
       $co->type = Sabel_DB_Const::BOOL;
     } else {
+      if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Schema_Type_Setter::send($co, $type);
     }
 

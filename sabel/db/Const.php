@@ -11,6 +11,7 @@ interface Sabel_DB_Const
 
   const INT       = 'INT';
   const FLOAT     = 'FLOAT';
+  const DOUBLE    = 'DOUBLE';
   const STRING    = 'STRING';
   const TEXT      = 'TEXT';
   const BOOL      = 'BOOL';

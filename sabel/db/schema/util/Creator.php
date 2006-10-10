@@ -1,21 +1,24 @@
 <?php
 
-class Schema_Util_Creator
+class Sabel_DB_Schema_Util_Creator
 {
-  protected $colLine = '';
+  private
+    $floatTypes  = array('float', 'float4', 'real'),
+    $doubleTypes = array('float8', 'double');
+
+  private $colLine = '';
 
   public function create($createSQL)
   {
-    $lines = $this->splitCreateSQL($createSQL);
-
     $constLine = '';
 
+    $lines   = $this->splitCreateSQL($createSQL);
     $columns = array();
     foreach ($lines as $key => $line) {
       $co    = new Sabel_DB_Schema_Column();
       $split = explode(' ', $line);
       $name  = $split[0];
-      $rem   = trim(substr($line, strlen($name)));
+      $attr  = trim(substr($line, strlen($name)));
 
       $co->name = $name;
 
@@ -24,17 +27,13 @@ class Schema_Util_Creator
         break;
       }
 
-      $this->setDataType($co, $rem);
+      $this->setIncrement($co, $attr);
 
-      if ($this->colLine === '') {
-        $co->notNull = false;
-        $co->primary = false;
-        $co->default = null;
-      } else {
+      if ($this->setDataType($co, $attr)) {
         $this->setNotNull($co);
-        if (!$this->setPrimary($co)) $this->setDefault($co);
+        $this->setPrimary($co);
+        $this->setDefault($co);
       }
-
       $columns[$name] = $co;
     }
 
@@ -49,18 +48,51 @@ class Schema_Util_Creator
     return array_map('strtolower', array_map('trim', $lines));
   }
 
-  protected function setDataType($co, $attributes)
+  protected function setIncrement($co, $attributes)
   {
-    $tmp  = substr($attributes, 0, strpos($attributes, ' '));
-    $type = ($tmp === '') ? $attributes : $tmp;
-    $this->colLine = substr($attributes, strlen($type));
-
-    if (!$this->isString($co, $type)) Sabel_DB_Schema_Type_Setter::send($co, $type);
-
     $pri  = (strpos($attributes, 'integer primary key') !== false);
     $pri2 = (strpos($attributes, 'integer not null primary key') !== false);
 
     $co->increment = ($pri || $pri2);
+  }
+
+  protected function setDataType($co, $attributes)
+  {
+    $tmp     = substr($attributes, 0, strpos($attributes, ' '));
+    $type    = ($tmp === '') ? $attributes : $tmp;
+    $colLine = substr($attributes, strlen($type));
+
+    if ($this->isBoolean($type)) {
+      $co->type = Sabel_DB_Const::BOOL;
+    } else if (!$this->isString($co, $type)) {
+      if ($this->isFloat($type)) $type = $this->getFloatType($type);
+      Sabel_DB_Schema_Type_Setter::send($co, $type);
+    }
+
+    if ($colLine === '') {
+      $co->notNull = false;
+      $co->primary = false;
+      $co->default = null;
+      return false;
+    } else {
+      $this->colLine = $colLine;
+      return true;
+    }
+  }
+
+  protected function isBoolean($type)
+  {
+    return ($type === 'boolean' || $type === 'bool');
+  }
+
+  protected function isFloat($type)
+  {
+    return (in_array($type, $this->floatTypes) || in_array($type, $this->doubleTypes));
+  }
+
+  protected function getFloatType($type)
+  {
+    return (in_array($type, $this->floatTypes)) ? 'float' : 'double';
   }
 
   protected function isString($co, $type)
@@ -80,39 +112,28 @@ class Schema_Util_Creator
 
   protected function setNotNull($co)
   {
-    $colLine = $this->colLine;
-
-    $co->notNull   = (strpos($colLine, 'not null') !== false);
-    $this->colLine = str_replace('not null', '', $colLine);
+    $co->notNull = (strpos($this->colLine, 'not null') !== false);
+    str_replace('not null', '', $this->colLine);
   }
 
   protected function setPrimary($co)
   {
-    $colLine = $this->colLine;
-
-    if ($colLine === '') {
+    if ($this->colLine === '') {
       $co->primary = false;
-      $co->default = null;
-      return true;
     } else {
-      $co->primary   = (strpos($colLine, 'primary key') !== false);
-      $this->colLine = str_replace('primary key', '', $colLine);
-      return false;
+      $co->primary = (strpos($this->colLine, 'primary key') !== false);
+      str_replace('primary key', '', $this->colLine);
     }
   }
 
   protected function setDefault($co)
   {
-    $colLine = $this->colLine;
-
-    if (strpos($colLine, 'default') !== false) {
-      $default = trim(substr($colLine, 8));
-      if (is_numeric($default)) {
-        $co->default = (int)$default;
-      } else if ($default === 'false' || $default === 'true') {
+    if (strpos($this->colLine, 'default') !== false) {
+      $default = trim(str_replace('default ', '', $this->colLine));
+      if ($co->type === Sabel_DB_Const::BOOL) {
         $co->default = ($default === 'true');
       } else {
-        $co->default = substr($default, 1, -1);
+        $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);
       }
     } else {
       $co->default = null;
