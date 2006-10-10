@@ -55,7 +55,7 @@ class Schema_Util_Creator
     $type = ($tmp === '') ? $attributes : $tmp;
     $this->colLine = substr($attributes, strlen($type));
 
-    if (!$this->isString($co, $type)) Sabel_DB_Schema_TypeSetter::send($co, $type);
+    if (!$this->isString($co, $type)) Sabel_DB_Schema_Type_Setter::send($co, $type);
 
     $pri  = (strpos($attributes, 'integer primary key') !== false);
     $pri2 = (strpos($attributes, 'integer not null primary key') !== false);

@@ -187,6 +187,13 @@ class Container
 
 class NameResolver
 {
+  
+  public static function resolvClassNameToDirectoryPath($target)
+  {
+    $namespace = self::resolvClassNameToNameSpace($target);
+    return str_replace('.', '/', $namespace) . '.php';
+  }
+  
   public static function resolvClassNameToNameSpace($target)
   {
     $parts = explode('_', $target);

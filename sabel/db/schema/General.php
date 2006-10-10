@@ -49,7 +49,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     if ($this->isBoolean($type, $row)) {
       $co->type = Sabel_DB_Const::BOOL;
     } else {
-      Sabel_DB_Schema_TypeSetter::send($co, $type);
+      Sabel_DB_Schema_Type_Setter::send($co, $type);
     }
 
     $this->setDefault($co, $row);

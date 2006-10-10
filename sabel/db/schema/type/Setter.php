@@ -12,7 +12,7 @@ class Sabel_DB_Schema_Type_Setter
       $co->type = Sabel_DB_Const::TIME;
     } else {
       $tInt   = new Sabel_DB_Schema_Type_Int();
-      $tStr   = new Sabel_DB_Schema_Type_Str();
+      $tStr   = new Sabel_DB_Schema_Type_String();
       $tText  = new Sabel_DB_Schema_Type_Text();
       $tTime  = new Sabel_DB_Schema_Type_Time();
       $tFloat = new Sabel_DB_Schema_Type_Float();

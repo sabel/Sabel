@@ -24,10 +24,8 @@ require_once('sabel/db/schema/General.php');
 require_once('Sabel.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
-$dt->visit(new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false));
 $dt->visit(new SabelClassRegister($c));
 $dt->traverse();
-require_once('allclasses.php');
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/Sabel.php');
@@ -49,6 +47,20 @@ require_once('Test/Map/Tests.php');
 
 require_once('Test/Validate.php');
 
+//* there out of naming rules. @todo fix me
+require_once('sabel/config/Spyc.php');
+require_once('sabel/template/Re.php');
+require_once('sabel/Functions.php');
+require_once('sabel/Classes.php');
+
+function __autoload($class)
+{
+  $r = new NameResolver();
+  $file = SABEL_BASE .'/'. $r->resolvClassNameToDirectoryPath($class);
+  if (!is_readable($file)) throw new Exception($file . " not found");
+  require_once($file);
+}
+
 class SabelAllTests
 {
   public static function main()
@@ -58,7 +70,7 @@ class SabelAllTests
 
   public static function suite()
   {
-    $suite = new PHPUnit2_Framework_TestSuite('sabel all tests');
+    $suite = new PHPUnit2_Framework_TestSuite();
     
     $suite->addTest(Test_Sabel::suite());
     $suite->addTest(Test_Annotation::suite());

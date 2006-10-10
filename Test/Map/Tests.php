@@ -15,7 +15,7 @@ class Test_Map_Tests
 
   public static function suite()
   {
-    $suite = new PHPUnit2_Framework_TestSuite('map all tests');
+    $suite = new PHPUnit2_Framework_TestSuite();
     
     $suite->addTest(Test_Map_Entry::suite());
     $suite->addTest(Test_Map_Destination::suite());
