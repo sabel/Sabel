@@ -18,9 +18,6 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
 require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
-require_once('sabel/db/schema/Common.php');
-require_once('sabel/db/schema/General.php');
-
 require_once('Sabel.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
@@ -52,14 +49,6 @@ require_once('sabel/config/Spyc.php');
 require_once('sabel/template/Re.php');
 require_once('sabel/Functions.php');
 require_once('sabel/Classes.php');
-
-function __autoload($class)
-{
-  $r = new NameResolver();
-  $file = SABEL_BASE .'/'. $r->resolvClassNameToDirectoryPath($class);
-  if (!is_readable($file)) throw new Exception($file . " not found");
-  require_once($file);
-}
 
 class SabelAllTests
 {
@@ -99,4 +88,12 @@ class SabelAllTests
 
 if (PHPUnit2_MAIN_METHOD == 'SabelAllTests::main') {
   SabelAllTests::main();
+}
+
+function __autoload($class)
+{
+  $r = new NameResolver();
+  $file = SABEL_BASE .'/'. $r->resolvClassNameToDirectoryPath($class);
+  if (!is_readable($file)) throw new Exception($file . " not found");
+  require_once($file);
 }
