@@ -106,9 +106,9 @@ class Container
     
     if ($rc->hasMethod('__construct')) {
       $ins = $di->load($className, '__construct');
-      $instance = new Sabel_Injection_Injector($ins);
+      $instance = new Sabel_Aspect_DynamicProxy($ins);
     } else {
-      $instance = new Sabel_Injection_Injector(new $className());
+      $instance = new Sabel_Aspect_DynamicProxy(new $className());
     }
     
     $this->setter($instance);
@@ -138,7 +138,7 @@ class Container
       foreach ($entries as $annotation) {
         if (isset($annotation['implementation'])) {
           $className = $annotation['implementation']->getContents();
-          $ins = new Sabel_Injection_Injector(new $className());
+          $ins = new Sabel_Aspect_DynamicProxy(new $className());
           $setter = 'set'. ucfirst($className);
           if (isset($annotation['setter'])) {
             $setter = $annotation['setter']->getContents();

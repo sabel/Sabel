@@ -27,7 +27,7 @@ class Sabel_Container_DI
   
   public function loadInjected($className, $method = '__construct')
   {
-    return new Sabel_Injection_Injector($this->load($className, $method));
+    return new Sabel_Aspect_DynamicProxy($this->load($className, $method));
   }
   
   public function loadClass($class, $method = '__construct')

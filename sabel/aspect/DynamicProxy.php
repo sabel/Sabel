@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_Aspect_Injector
+ * Sabel_Aspect_DynamicProxy
  *
- * @category   Injection
- * @package    org.sabel.injection
+ * @category   Aspect
+ * @package    org.sabel.aspect
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_Injector implements Iterator
+class Sabel_Aspect_DynamicProxy implements Iterator
 {
   private $container  = null;
   private $target     = null;
