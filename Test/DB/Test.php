@@ -623,14 +623,27 @@ class Test_DB_Test extends SabelTestCase
   public function testAggregate()
   {
     $order = new CustomerOrder();
+
+    $func  = 'sum(amount) AS sum_amount,';
+    $func .= 'avg(amount) AS avg_amount, count(amount) AS count_amount';
+
     $order->setConstraint('order', 'sum_amount desc');
+    $result = $order->aggregate($func, 'order_line');
     
-    $function = array('sum'   => 'amount',
-                      'avg'   => 'amount',
-                      'count' => 'amount');
-                      
-    $result = $order->aggregate($function, 'order_line');
+    $this->assertEquals((int)$result[0]->sum_amount, 60000);
+    $this->assertEquals((int)$result[1]->sum_amount, 13000);
+    $this->assertEquals((int)$result[2]->sum_amount, 9000);
+    $this->assertEquals((int)$result[3]->sum_amount, 6500);
+    $this->assertEquals((int)$result[4]->sum_amount, 3500);
+    $this->assertEquals((int)$result[5]->sum_amount, 1500);
     
+    $this->assertEquals((int)$result[0]->count_amount, 2);
+    $this->assertEquals((int)$result[0]->avg_amount,   30000);
+
+    $line = new OrderLine();
+    $line->setConstraint('order', 'sum_amount desc');
+    $result = $line->aggregate($func, null, 'customer_order_id');
+
     $this->assertEquals((int)$result[0]->sum_amount, 60000);
     $this->assertEquals((int)$result[1]->sum_amount, 13000);
     $this->assertEquals((int)$result[2]->sum_amount, 9000);
@@ -1002,12 +1015,9 @@ class Test_DB_Test extends SabelTestCase
     $trans1 = new Trans1(); // connection1
     $trans1->begin();
 
-    $data = array();
-    $data[] = array('text' => 'trans1');
-    $data[] = array('text' => 'trans2');
-    $data[] = array('text' => 'trans3');
-
-    $trans1->multipleInsert($data);
+    $trans1->save(array('text' => 'trans1'));
+    $trans1->save(array('text' => 'trans2'));
+    $trans1->save(array('text' => 'trans3'));
 
     $trans2 = new Trans2(); // connection2
     $data = array();
