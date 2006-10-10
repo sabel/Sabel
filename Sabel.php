@@ -191,7 +191,9 @@ class NameResolver
   public static function resolvClassNameToDirectoryPath($target)
   {
     $namespace = self::resolvClassNameToNameSpace($target);
-    return str_replace('.', '/', $namespace) . '.php';
+    $dir = str_replace('.', '/', $namespace);
+    $parts = explode('/', $dir);
+    return join('/', $parts).'.php';
   }
   
   public static function resolvClassNameToNameSpace($target)
