@@ -379,6 +379,7 @@ class DirectoryTraverser
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
       } else if (!$e->isDot() && !preg_match('%\/\..*%', $entry)) {
+        if ($entry === 'sabel/db/schema/Common.php' || $entry === 'sabel/db/schema/General.php') break;
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
       }
     }

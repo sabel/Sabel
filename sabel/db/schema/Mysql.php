@@ -1,33 +1,41 @@
 <?php
 
-class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_MyPg
+class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_General
 {
-  public function addDefaultInfo($co, $default)
+  protected
+    $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
+    $tableColumns = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
+
+  public function isBoolean($type, $row)
   {
-    if ($co->type === Sabel_DB_Const::BOOL) {
+    return ($type === 'tinyint' && $row['column_comment'] === 'boolean');
+  }
+
+  public function setDefault($co, $row)
+  {
+    $default = $row['column_default'];
+
+    if (is_null($default)) {
+      $co->default = null;
+    } else if ($co->type === Sabel_DB_Const::BOOL) {
       $co->default = ((int)$default === 1);
     } else {
       $co->default = (is_numeric($default)) ? (int)$default : $default;
     }
   }
 
-  public function addIncrementInfo($co, $columnRecord)
+  public function setIncrement($co, $row)
   {
-    $co->increment = ($columnRecord['extra'] === 'auto_increment');
+    $co->increment = ($row['extra'] === 'auto_increment');
   }
 
-  public function addPrimaryKeyInfo($co, $columnRecord)
+  public function setPrimaryKey($co, $row)
   {
-    $co->primary = ($columnRecord['column_key'] === 'PRI');
+    $co->primary = ($row['column_key'] === 'PRI');
   }
 
-  public function isBoolean($type, $columnRecord)
+  public function setLength($co, $row)
   {
-    return ($type === 'tinyint' && $columnRecord['column_comment'] === 'boolean');
-  }
-
-  public function addStringLength($co, $columnRecord)
-  {
-    $co->max = (int)$columnRecord['character_octet_length'];
+    $co->max = (int)$row['character_octet_length'];
   }
 }

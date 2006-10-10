@@ -70,16 +70,9 @@ class Sabel_DB_Schema_TypeStr implements Sabel_DB_Schema_TypeSender
   public function send($co, $type)
   {
     $tArray = array('varchar', 'char', 'character varying' , 'character');
-    $text   = strpbrk($type, '(');
 
-    if (in_array($type, $tArray) || $text !== false) {
-      foreach ($tArray as $val) {
-        if (stripos($type, $val) !== false) {
-          $co->type = Sabel_DB_Const::STRING;
-          $co->max  = ($text !== false) ? (int)substr($text, 1, strlen($text) - 2) : 256;
-          break;
-        }
-      }
+    if (in_array($type, $tArray)) {
+      $co->type = Sabel_DB_Const::STRING;
     } else {
       $this->next->send($co, $type);
     }

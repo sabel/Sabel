@@ -18,6 +18,9 @@ require_once('PHPUnit2/Framework/TestCase.php');
 require_once('PHPUnit2/Framework/TestSuite.php');
 require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
+require_once('sabel/db/schema/Common.php');
+require_once('sabel/db/schema/General.php');
+
 require_once('Sabel.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
