@@ -35,7 +35,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
                                 'customer_telephone', 'infinite1', 'infinite2',
                                 'seq', 'tree', 'student', 'student_course',
                                 'course', 'users', 'status', 'bbs', 'trans1');
-
+ 
   public function testConstraint()
   {
     $customer = new Customer();
@@ -644,14 +644,27 @@ class Test_DB_Windows_Test extends WindowsUnitTest
   public function testAggregate()
   {
     $order = new CustomerOrder();
+
+    $func  = 'sum(amount) AS sum_amount,';
+    $func .= 'avg(amount) AS avg_amount, count(amount) AS count_amount';
+
     $order->setConstraint('order', 'sum_amount desc');
+    $result = $order->aggregate($func, 'order_line');
     
-    $function = array('sum'   => 'amount',
-                      'avg'   => 'amount',
-                      'count' => 'amount');
-                      
-    $result = $order->aggregate($function, 'order_line');
+    $this->assertEquals((int)$result[0]->sum_amount, 60000);
+    $this->assertEquals((int)$result[1]->sum_amount, 13000);
+    $this->assertEquals((int)$result[2]->sum_amount, 9000);
+    $this->assertEquals((int)$result[3]->sum_amount, 6500);
+    $this->assertEquals((int)$result[4]->sum_amount, 3500);
+    $this->assertEquals((int)$result[5]->sum_amount, 1500);
     
+    $this->assertEquals((int)$result[0]->count_amount, 2);
+    $this->assertEquals((int)$result[0]->avg_amount,   30000);
+
+    $line = new OrderLine();
+    $line->setConstraint('order', 'sum_amount desc');
+    $result = $line->aggregate($func, null, 'customer_order_id');
+
     $this->assertEquals((int)$result[0]->sum_amount, 60000);
     $this->assertEquals((int)$result[1]->sum_amount, 13000);
     $this->assertEquals((int)$result[2]->sum_amount, 9000);
@@ -1026,12 +1039,9 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $trans1 = new Trans1(); // connection1
     $trans1->begin();
 
-    $data = array();
-    $data[] = array('text' => 'trans1');
-    $data[] = array('text' => 'trans2');
-    $data[] = array('text' => 'trans3');
-
-    $trans1->multipleInsert($data);
+    $trans1->save(array('text' => 'trans1'));
+    $trans1->save(array('text' => 'trans2'));
+    $trans1->save(array('text' => 'trans3'));
 
     $trans2 = new Trans2(); // connection2
     $data = array();
@@ -1047,7 +1057,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
       $trans2->commit(); // not execute commit()
     } catch (Exception $e) {
     }
-
+ 
     $trans2 = new Trans2();
     $t = $trans2->select();
     $this->assertEquals($t, false); // not found
@@ -1073,6 +1083,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($colsName[0], 'id');
     $this->assertEquals($colsName[1], 'text');
   }
+
   public function testSchema()
   {
     $st = new SchemaTest();
@@ -1086,14 +1097,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $str  = $schema->str;
     $text = $schema->text;
     $bl   = $schema->bl;
-    //$date = $schema->date;
     $dt   = $schema->dt;
-
-    $dbname = Sabel_DB_Connection::getDB($st->getConnectName());
 
     $this->assertEquals($id1->type, Sabel_DB_Const::INT);
     $this->assertTrue($id1->primary);
-    if ($dbname !== 'sqlite') $this->assertTrue($id1->increment);
+    $this->assertTrue($id1->increment);
     $this->assertEquals($id1->max,  9223372036854775807);
     $this->assertEquals($id1->min, -9223372036854775808);
     @$this->assertEquals($id1->default, null);
@@ -1113,12 +1121,16 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($num->default, 10);
 
     $this->assertEquals($fnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertEquals($fnum->max,  3.4028235E38);
+    $this->assertEquals($fnum->min, -3.4028235E38);
     $this->assertFalse($fnum->primary);
     $this->assertFalse($fnum->notNull);
     $this->assertFalse($fnum->increment);
     @$this->assertEquals($fnum->default, null);
 
-    $this->assertEquals($dnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertEquals($dnum->type, Sabel_DB_Const::DOUBLE);
+    $this->assertEquals($dnum->max,  1.79769E308);
+    $this->assertEquals($dnum->min, -1.79769E308);
     $this->assertFalse($dnum->primary);
     $this->assertFalse($dnum->notNull);
     $this->assertFalse($dnum->increment);
@@ -1143,13 +1155,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertFalse($bl->increment);
     $this->assertTrue($bl->default);
 
-    /*
-    $this->assertEquals($date->type, Sabel_DB_Const::DATE);
-    $this->assertFalse($date->primary);
-    $this->assertFalse($date->increment);
-    $this->assertFalse($date->notNull);
-    @$this->assertEquals($date->default, null);
-    */
+    //$this->assertEquals($date->type, Sabel_DB_Const::DATE);
+    //$this->assertFalse($date->primary);
+    //$this->assertFalse($date->increment);
+    //$this->assertFalse($date->notNull);
+    //@$this->assertEquals($date->default, null);
 
     $this->assertEquals($dt->type, Sabel_DB_Const::TIMESTAMP);
     $this->assertFalse($dt->primary);

@@ -1,33 +1,36 @@
 <?php
 
-require_once '../db/Const.php';
-require_once '../db/Connection.php';
-require_once '../db/Transaction.php';
-require_once '../db/SimpleCache.php';
+require_once 'db\Const.php';
+require_once 'db\Connection.php';
+require_once 'db\Transaction.php';
+require_once 'db\SimpleCache.php';
 
-require_once '../db/Mapper.php';
-require_once '../db/BaseClasses.php';
-require_once '../db/driver/General.php';
-require_once '../db/driver/Query.php';
-require_once '../db/driver/native/Query.php';
-require_once '../db/driver/native/Firebird.php';
+require_once 'db\Mapper.php';
+require_once 'db\Basic.php';
+require_once 'db\Bridge.php';
+require_once 'db\Tree.php';
+require_once 'db\driver\General.php';
+require_once 'db\driver\Query.php';
+require_once 'db\driver\native/Query.php';
+require_once 'db\driver\native/Firebird.php';
+require_once 'db\driver\native/Paginate.php';
 
 require_once 'Test.php';
 
-class Execute
+class FirebirdExecute
 {
   private static $params1 = array('driver'   => 'firebird',
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
-                                  'encoding' => 'utf8',
+                                  'encoding' => 'UNICODE_FSS',
                                   'database' => 'C:\Program Files\Apache\Apache2\htdocs\firebird\EDO.FDB');
 
   private static $params2 = array('driver'   => 'firebird',
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
-                                  'encoding' => 'utf8',
+                                  'encoding' => 'UNICODE_FSS',
                                   'database' => 'C:/Program Files/Apache/Apache2/htdocs/firebird/EDO2.FDB');
   public static function main()
   {
@@ -175,4 +178,4 @@ class FirebirdHelper
 }
 */
 
-Execute::main();
+FirebirdExecute::main();
