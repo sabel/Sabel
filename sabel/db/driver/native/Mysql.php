@@ -67,9 +67,9 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if (is_resource($result))
+    if (is_resource($result)) {
       while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
-
+    }
     return $rows;
   }
 }

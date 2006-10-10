@@ -16,9 +16,6 @@ class Sabel_DB_Transaction
         self::$list[$connectName]['conn'] = $result;
 
       self::$active = true;
-      return true;
-    } else {
-      return false;
     }
   }
 
@@ -39,11 +36,12 @@ class Sabel_DB_Transaction
 
   private static function executeMethod($method)
   {
-    foreach (self::$list as $connection) {
-      $connection['driver']->$method($connection['conn']);
+    if (count(self::$list) > 0) {
+      foreach (self::$list as $connection) {
+        $connection['driver']->$method($connection['conn']);
+      }
+      self::$list   = array();
+      self::$active = false;
     }
-
-    self::$list   = array();
-    self::$active = false;
   }
 }

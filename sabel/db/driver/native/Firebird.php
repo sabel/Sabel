@@ -46,8 +46,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT GEN_ID({$genName}, 1) FROM sequence");
       $genNum = $this->fetch();
-      $this->lastInsertId = $genNum[0];
-      $data[$defColumn]   = $genNum[0];
+      $data[$defColumn] = $this->lastInsertId = (int)$genNum[0];
     }
     return $data;
   }
@@ -72,11 +71,9 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Const::ASSOC) {
-      $row = ibase_fetch_assoc($this->result);
-    } else {
-      $row = ibase_fetch_row($this->result);
-    }
+    $row = ($style === Sabel_DB_Const::ASSOC)
+             ? ibase_fetch_assoc($this->result)
+             : ibase_fetch_row($this->result);
 
     if (is_array($row)) $row = array_change_key_case($row);
     return $row;
@@ -87,9 +84,9 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     $rows   = array();
     $result = $this->result;
 
-    if (is_resource($result))
+    if (is_resource($result)) {
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
-
+    }
     return $rows;
   }
 }

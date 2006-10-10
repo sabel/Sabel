@@ -65,10 +65,10 @@ abstract class Sabel_DB_Mapper
         return new Sabel_DB_Driver_Native_Pgsql($conn);
       case 'mysql':
         return new Sabel_DB_Driver_Native_Mysql($conn);
-      case 'mssql':
-        return new Sabel_DB_Driver_Native_Mssql($conn, $this->defColumn);
       case 'firebird':
         return new Sabel_DB_Driver_Native_Firebird($conn);
+      case 'mssql':
+        return new Sabel_DB_Driver_Native_Mssql($conn, $this->defColumn);
     }
   }
 
@@ -276,12 +276,11 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $engine = true;
-
+    $check = true;
     if (Sabel_DB_Connection::getDB($this->connectName) === 'mysql')
-      $engine = $this->driver->checkTableEngine($this->table);
+      $check = $this->driver->checkTableEngine($this->table);
 
-    return ($engine) ? Sabel_DB_Transaction::begin($this->connectName, $this->driver) : false;
+    if ($check) Sabel_DB_Transaction::begin($this->connectName, $this->driver);
   }
 
   public function commit()
@@ -338,23 +337,23 @@ abstract class Sabel_DB_Mapper
     return $this->selectOne();
   }
 
-  public function aggregate($functions, $child = null)
+  public function aggregate($func, $child = null, $group = null)
   {
     if (is_null($child)) {
-      $table    = $this->table;
-      $idColumn = $this->defColumn;
+      $table   = $this->table;
+      $columns = (is_null($group)) ? $this->defColumn : $group;
     } else {
-      $table    = $child;
-      $idColumn = $this->table . '_id';
+      $table   = $child;
+      $columns = (is_null($group)) ? $this->table . '_id' : $group;
     }
+    $this->setConstraint('group', $columns);
 
     $driver = $this->driver;
-    $driver->setAggregateSQL($table, $idColumn, $functions);
-    $driver->makeQuery(null, $this->constraints);
+    $driver->setBasicSQL("SELECT {$columns}, {$func} FROM {$table}");
+    $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
-    return $this->toObject($rows);
+    return ($rows = $driver->fetchAll(Sabel_DB_Const::ASSOC)) ? $this->toObject($rows) : false;
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -400,11 +399,9 @@ abstract class Sabel_DB_Mapper
 
   private function addSelectCondition($param1, $param2, $param3)
   {
-    if ($param1 === self::WITH_PARENT) {
-      $this->enableParent();
-    } else {
-      $this->setCondition($param1, $param2, $param3);
-    }
+    ($param1 === self::WITH_PARENT)
+      ? $this->enableParent()
+      : $this->setCondition($param1, $param2, $param3);
   }
 
   public function selectJoin($relTableList, $columnList = null)
@@ -412,15 +409,15 @@ abstract class Sabel_DB_Mapper
     if (!is_array($relTableList))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
-    $myTable       = $this->table;
-    $relTableArray = $this->toArrayJoinTables($relTableList);
+    $sql        = array('SELECT ');
+    $joinTables = array();
+    $myTable    = $this->table;
+    $relTables  = $this->toArrayJoinTables($relTableList);
 
-    $sql = array('SELECT ');
     $columns = (isset($columnList[$myTable])) ? $columnList[$myTable] : $this->getColumnNames($myTable);
     foreach ($columns as $column) array_push($sql, "{$myTable}.{$column}, ");
 
-    $joinTables = array();
-    foreach ($relTableArray as $pair) {
+    foreach ($relTables as $pair) {
       foreach ($pair as $table) {
         if ($table !== $myTable && !isset($this->joinColCache[$table])) {
           $joinTables[] = $table;
@@ -429,26 +426,25 @@ abstract class Sabel_DB_Mapper
       }
     }
 
-    $sql = join('', $sql);
-    $sql = array(substr($sql, 0, strlen($sql) - 2));
+    $sql = array(substr(join('', $sql), 0, -2));
     array_push($sql, " FROM {$myTable}");
 
-    foreach ($relTableArray as $pair) array_push($sql, $this->getLeftJoin($pair));
+    foreach ($relTables as $pair) array_push($sql, $this->getLeftJoin($pair));
 
     $driver = $this->driver;
     $driver->setBasicSQL(join('', $sql));
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
+    if (!($rows = $driver->fetchAll(Sabel_DB_Const::ASSOC))) return false;
 
     $recordObj = array();
     foreach ($rows as $row) {
-      $models = $this->makeEachModelObject($row, $relTableArray);
+      $models = $this->makeEachModelObject($row, $relTables);
       $obj    = $models[$myTable];
 
       foreach ($joinTables as $model) {
-        foreach ($relTableArray as $pair) {
+        foreach ($relTables as $pair) {
           if ($model === $pair['child'] && $myTable !== $pair['child']) {
             $parent = $pair['parent'];
             $models[$model]->$parent = $models[$parent];
@@ -457,7 +453,7 @@ abstract class Sabel_DB_Mapper
         }
       }
 
-      foreach ($relTableArray as $tables) {
+      foreach ($relTables as $tables) {
         if ($tables['child'] === $myTable) {
           $parent = $tables['parent'];
           $obj->$parent = $models[$parent];
@@ -471,31 +467,26 @@ abstract class Sabel_DB_Mapper
   
   private function toArrayJoinTables($relTableList)
   {
-    $relTableArray = array();
+    $relTables = array();
     foreach ($relTableList as $pair) {
       $split = explode(':', $pair);
-      $relTableArray[] = array('child' => $split[0], 'parent' => $split[1]);
+      $relTables[] = array('child' => $split[0], 'parent' => $split[1]);
     }
-    return $relTableArray;
+    return $relTables;
   }
 
   private function addJoinColumns(&$sql, $table, $columnList = null)
   {
-    $joinCol = array();
     $columns = (isset($columnList[$table])) ? $columnList[$table] : $this->getColumnNames($table);
     foreach ($columns as $column) {
-      $joinCol[] = $column;
+      $this->joinColCache[$table][] = $column;
       array_push($sql, "{$table}.{$column} AS pre_{$table}_{$column}, ");
     }
-    $this->joinColCache[$table] = $joinCol;
   }
 
-  private function getLeftJoin($tables)
+  private function getLeftJoin($tbl)
   {
-    $child  = $tables['child'];
-    $parent = $tables['parent'];
-
-    return " LEFT JOIN {$parent} ON {$child}.{$parent}_id = {$parent}.id ";
+    return " LEFT JOIN {$tbl['parent']} ON {$tbl['child']}.{$tbl['parent']}_id = {$tbl['parent']}.id ";
   }
 
   private function makeEachModelObject($row, $relTableArray)
@@ -780,13 +771,11 @@ abstract class Sabel_DB_Mapper
   {
     if (!is_array($data)) throw new Exception('Error: multipleInsert() data is not array.');
 
-    $begin = $this->begin();
+    $this->begin();
     try {
       $idColumn = ($this->autoNumber) ? $this->defColumn : false;
-      foreach ($data as $val) {
-        $this->driver->executeInsert($this->table, $val, $idColumn);
-      }
-      if ($begin) $this->commit();
+      foreach ($data as $val) $this->driver->executeInsert($this->table, $val, $idColumn);
+      $this->commit();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -820,7 +809,7 @@ abstract class Sabel_DB_Mapper
   public function cascadeDelete($id = null)
   {
     if (is_null($id) && !$this->is_selected())
-      throw new Exception('Error: need the value of id or select the object beforehand.');
+      throw new Exception('Error: give the value of id or select the object beforehand.');
 
     $id = (isset($id)) ? $id : $this->data[$this->defColumn];
 
@@ -830,20 +819,21 @@ abstract class Sabel_DB_Mapper
     if (!array_key_exists($myKey, $chain)) {
       throw new Exception('cascade chain is not found. try remove()');
     } else {
-      $begin  = $this->begin();
+      $this->begin();
       $models = array();
-      foreach ($chain[$myKey] as $chainModel)
-        if ($model = $this->getChainModel($chainModel, "{$this->table}_id", $id)) $models[] = $model;
+      foreach ($chain[$myKey] as $chainModel) {
+        if ($model = $this->pushCascadeStack($chainModel, "{$this->table}_id", $id)) $models[] = $model;
+      }
 
-      foreach ($models as $children) $this->_cascade($children, $chain);
+      foreach ($models as $children) $this->getChainModels($children, $chain);
 
       $this->clearCascadeStack(array_reverse($this->cascadeStack));
       $this->remove($this->defColumn, $id);
-      if ($begin) $this->commit();
+      $this->commit();
     }
   }
 
-  protected function _cascade($children, &$chain)
+  protected function getChainModels($children, &$chain)
   {
     $table    = $children[0]->getTableName();
     $chainKey = $children[0]->getConnectName() . ':' . $table;
@@ -853,19 +843,19 @@ abstract class Sabel_DB_Mapper
       foreach ($chain[$chainKey] as $chainModel) {
         $models = array();
         foreach ($children as $child) {
-          if ($model = $this->getChainModel($chainModel, "{$table}_id", $child->id)) $models[] = $model;
+          if ($model = $this->pushCascadeStack($chainModel, "{$table}_id", $child->id)) $models[] = $model;
         }
         $references[] = $models;
       }
       unset($chain[$chainKey]);
 
       foreach ($references as $models) {
-        foreach ($models as $children) $this->_cascade($children, $chain);
+        foreach ($models as $children) $this->getChainModels($children, $chain);
       }
     }
   }
 
-  private function getChainModel($chainValue, $foreign, $id)
+  private function pushCascadeStack($chainValue, $foreign, $id)
   {
     $param  = explode(':', $chainValue);
     $cName  = $param[0];
@@ -874,7 +864,7 @@ abstract class Sabel_DB_Mapper
     $model->setDriver($cName);
     $models = $model->select($foreign, $id);
 
-    if ($models) $this->cascadeStack[$cName.':'.$tName.':'.$id] = $foreign;
+    if ($models) $this->cascadeStack["{$cName}:{$tName}:{$id}"] = $foreign;
     return $models;
   }
 
@@ -884,7 +874,7 @@ abstract class Sabel_DB_Mapper
       $params = explode(':', $param);
       $model  = $this->newClass($params[0]);
       $model->setDriver($params[1]);
-      $model->remove($foreign, $splited[2]);
+      $model->remove($foreign, $params[2]);
     }
   }
 

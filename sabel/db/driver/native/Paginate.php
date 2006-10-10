@@ -23,24 +23,24 @@ class Sabel_DB_Driver_Native_Paginate
 
   public function firebirdPaginate()
   {
+    $tmp = substr(join('', $this->sql), 6);
+
     if (isset($this->limit)) {
       $query  = "FIRST {$this->limit} ";
       $query .= (isset($this->offset)) ? "SKIP {$this->offset}" : 'SKIP 0';
-      return array('SELECT ' . $query . substr(join('', $this->sql), 6));
+      return array('SELECT ' . $query . $tmp);
     }
     
-    if (isset($this->offset)) {
-      $this->sql = array('SELECT SKIP ' . $this->offset . substr(join('', $this->sql), 6));
-    }
+    if (isset($this->offset)) $this->sql = array('SELECT SKIP ' . $this->offset . $tmp);
     return $this->sql;
   }
 
   public function mssqlPaginate($column, $order)
   {
-    if (isset($this->limit)) {
-      $tmp   = substr(join('', $this->sql), 6);
-      $query = "TOP {$this->limit} ";
+    $tmp = substr(join('', $this->sql), 6);
 
+    if (isset($this->limit)) {
+      $query = "TOP {$this->limit} ";
       if (isset($this->offset)) {
         $values = $this->mssqlOffset($tmp, $column, $order);
         return array('SELECT ' . $query . $tmp . $values[0] . $values[1]);
@@ -50,7 +50,6 @@ class Sabel_DB_Driver_Native_Paginate
     }
 
     if (isset($this->offset)) {
-      $tmp       = substr(join('', $this->sql), 6);
       $values    = $this->mssqlOffset($tmp, $column, $order);
       $this->sql = array('SELECT' . "{$tmp} " . $values[0] . $values[1]);
     }

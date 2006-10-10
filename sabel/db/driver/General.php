@@ -14,9 +14,6 @@ abstract class Sabel_DB_Driver_General
     $dbType   = '',
     $insertId = null;
 
-  protected
-    $setIdNumberDBs = array('pgsql', 'firebird', 'mssql');
-
   public abstract function begin($conn);
   public abstract function commit($conn);
   public abstract function rollback($conn);
@@ -58,17 +55,6 @@ abstract class Sabel_DB_Driver_General
       }
     }
     return $data;
-  }
-
-  public function setAggregateSQL($table, $idColumn, $functions)
-  {
-    $sql = array("SELECT {$idColumn}");
-
-    foreach ($functions as $key => $val)
-      array_push($sql, ", {$key}({$val}) AS {$key}_{$val}");
-
-    array_push($sql, " FROM {$table} GROUP BY {$idColumn}");
-    $this->query->setBasicSQL(join('', $sql));
   }
 
   public function makeQuery($conditions, $constraints = null)
