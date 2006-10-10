@@ -24,6 +24,8 @@ class Sabel_Aspect_DynamicProxy implements Iterator
     $this->container  = Container::create();
     $this->target     = $target;
     $this->reflection = new ReflectionClass($target);
+    
+    $this->target->this = $this;
   }
   
   public function __set($key, $value)

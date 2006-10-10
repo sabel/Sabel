@@ -10,11 +10,12 @@ class Sabeo_Aspect_Injections_Error
   public function before($method, $arg, $reflection, $target)
   {
     if ($method->getName() === 'save') {
+      $className = $reflection->getName();
       $v = new Sabel_Validate_Model();
-      $v->initializeSchema(strtolower($reflection->getName()));
+      $v->initializeSchema(strtolower($className));
       $errors = $v->validate($arg[0]);
       if ($errors->hasError()) {
-        Re::set('bbs', $target);
+        Re::set(strtolower($className), $target);
         Re::set('errors', $errors);
         return false;
       } else {
