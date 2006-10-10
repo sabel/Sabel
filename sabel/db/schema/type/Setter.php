@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_DB_Schema_TypeSetter
+class Sabel_DB_Schema_Type_Setter
 {
   public static function send($co, $type)
   {
@@ -11,13 +11,13 @@ class Sabel_DB_Schema_TypeSetter
     } else if ($type === 'time') {
       $co->type = Sabel_DB_Const::TIME;
     } else {
-      $tInt   = new Sabel_DB_Schema_TypeInt();
-      $tStr   = new Sabel_DB_Schema_TypeStr();
-      $tText  = new Sabel_DB_Schema_TypeText();
-      $tTime  = new Sabel_DB_Schema_TypeTime();
-      $tFloat = new Sabel_DB_Schema_TypeFloat();
-      $tByte  = new Sabel_DB_Schema_TypeByte();
-      $tOther = new Sabel_DB_Schema_TypeOther();
+      $tInt   = new Sabel_DB_Schema_Type_Int();
+      $tStr   = new Sabel_DB_Schema_Type_Str();
+      $tText  = new Sabel_DB_Schema_Type_Text();
+      $tTime  = new Sabel_DB_Schema_Type_Time();
+      $tFloat = new Sabel_DB_Schema_Type_Float();
+      $tByte  = new Sabel_DB_Schema_Type_Byte();
+      $tOther = new Sabel_DB_Schema_Type_Other();
 
       $tInt->add($tStr);
       $tStr->add($tText);
