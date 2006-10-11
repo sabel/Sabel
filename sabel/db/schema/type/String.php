@@ -14,7 +14,7 @@ class Sabel_DB_Schema_Type_String implements Sabel_DB_Schema_Type_Sender
     $types = array('varchar', 'char', 'character varying' , 'character');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Const::STRING;
+      $co->type = Sabel_DB_Schema_Const::STRING;
     } else {
       $this->next->send($co, $type);
     }

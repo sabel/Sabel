@@ -29,7 +29,7 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
       $co->default = null;
     } else {
       $default = substr($default, 2, -2);
-      if ($co->type === Sabel_DB_Const::BOOL) {
+      if ($co->type === Sabel_DB_Schema_Const::BOOL) {
         $co->default = ($default === 'true');
       } else {
         $co->default = (is_numeric($default)) ? (int)$default : $default;

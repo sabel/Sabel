@@ -10,6 +10,7 @@
 abstract class Sabel_DB_Mapper
 {
   const WITH_PARENT = 'WITH_PARENT';
+  const ASSOC       = 'ASSOC';
 
   protected
     $conditions      = array(),
@@ -19,28 +20,22 @@ abstract class Sabel_DB_Mapper
     $constraints         = array(),
     $childConditions     = array(),
     $childConstraints    = array(),
-    $defChildConstraints = array(),
-    $myChildren          = null;
+    $defChildConstraints = array();
 
   protected
     $driver       = null,
     $connectName  = '',
     $cachedParent = array(),
-    $table        = '',
-    $structure    = 'normal',
-    $projection   = '*',
-    $defColumn    = 'id';
+    $projection   = '*';
 
   protected
     $data         = array(),
     $newData      = array(),
-    $jointKey     = array(),
     $parentTables = array(),
     $joinColCache = array(),
     $cascadeStack = array(),
     $selected     = false,
-    $withParent   = false,
-    $autoNumber   = true;
+    $withParent   = false;
 
   public function setDriver($connectName)
   {
@@ -68,7 +63,7 @@ abstract class Sabel_DB_Mapper
       case 'firebird':
         return new Sabel_DB_Driver_Native_Firebird($conn);
       case 'mssql':
-        return new Sabel_DB_Driver_Native_Mssql($conn, $this->defColumn);
+        return new Sabel_DB_Driver_Native_Mssql($conn, $this->incColumn);
     }
   }
 
@@ -91,8 +86,8 @@ abstract class Sabel_DB_Mapper
 
   public function __set($key, $val)
   {
-    $this->data[$key] = $val;
-    if ($this->is_selected()) $this->newData[$key] = $val;
+   $this->data[$key] = $val;
+   if ($this->is_selected()) $this->newData[$key] = $val;
   }
 
   public function __get($key)
@@ -113,29 +108,6 @@ abstract class Sabel_DB_Mapper
   public function setProjection($p)
   {
     $this->projection = (is_array($p)) ? implode(',', $p) : $p;
-  }
-
-  public function setDefaultColumn($column)
-  {
-    $this->defColumn = $column;
-  }
-
-  public function setJointKey($keys)
-  {
-    if (!is_array($keys))
-      throw new Exception('joint keys are not array.');
-
-    $this->jointKey = $keys;
-  }
-
-  public function setTableName($table)
-  {
-    $this->table = $table;
-  }
-
-  public function getTableName()
-  {
-    return $this->table;
   }
 
   public function getTableSchema()
@@ -165,29 +137,6 @@ abstract class Sabel_DB_Mapper
     $this->withParent = false;
   }
 
-  public function disableAutoNumber()
-  {
-    $this->autoNumber = false;
-  }
-
-  public function setProperties($array)
-  {
-    if (!is_array($array))
-      throw new Exception('properties Argument is not array.');
-
-    foreach ($array as $key => $val) $this->$key = $val;
-  }
-
-  public function getStructure()
-  {
-    return $this->structure;
-  }
-
-  public function getMyChildren()
-  {
-    return $this->myChildren;
-  }
-
   public function getMyChildConstraint()
   {
     return $this->childConstraints;
@@ -215,8 +164,7 @@ abstract class Sabel_DB_Mapper
   public function setChildConstraint($param1, $param2 = null)
   {
     if (isset($param2) && is_array($param2)) {
-      foreach ($param2 as $key => $val)
-        $this->childConstraints[$param1][$key] = $val;
+      foreach ($param2 as $key => $val) $this->childConstraints[$param1][$key] = $val;
     } else if (isset($param2)) {
       $this->defChildConstraints = array($param1 => $param2);
     } else if (is_array($param1)) {
@@ -230,43 +178,22 @@ abstract class Sabel_DB_Mapper
 
   public function setChildCondition($key, $val)
   {
-    $this->childConditions[$key] = $val;
+    $condition = new Sabel_DB_Condition($key, $val);
+    $this->childConditions[$condition->key] = $condition;
   }
 
-  /**
-   * setting condition
-   *
-   * @param mixed string or int this value use tow means for
-   *          default column value or a condition column name.
-   * @param mixed string or int or NULL
-   *          this value use three means for
-   *          default column value or when has param3 value of special condition
-   *          or when has no param3 param2 is value
-   * @param mixed string or int or NULL
-   *          this value use for value of special condition.
-   * @return void
-   */
   public function setCondition($param1, $param2 = null, $param3 = null)
   {
     if (empty($param1)) return null;
 
-    if ($this->isSpecialParam($param2, $param3)) {
-      $this->conditions[$param1] = array($param2, $param3);
-    } else if ($this->isDefaultColumnValue($param2)) {
-      $this->conditions[$this->defColumn] = $param1;
-    } else {
-      $this->conditions[$param1] = $param2;
+    if (is_null($param2)) {
+      $param3 = $param2;
+      $param2 = $param1;
+      $param1 = $this->primary;
     }
-  }
 
-  private function isSpecialParam($param2, $param3)
-  {
-    return (isset($param2) && isset($param3));
-  }
-
-  private function isDefaultColumnValue($param2)
-  {
-    return is_null($param2);
+    $condition = new Sabel_DB_Condition($param1, $param2, $param3);
+    $this->conditions[$condition->key] = $condition;
   }
 
   public function unsetCondition()
@@ -298,12 +225,12 @@ abstract class Sabel_DB_Mapper
     $this->setCondition($param1, $param2, $param3);
 
     $driver = $this->driver;
-    $driver->setBasicSQL("SELECT count(*) FROM {$this->table}");
+    $driver->setBasicSQL('SELECT count(*) FROM ' . $this->table);
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
     $this->tryExecute($driver);
     $row = $driver->fetch();
-    return (int) $row[0];
+    return (int)$row[0];
   }
 
   public function getColumnNames($table = null)
@@ -341,7 +268,7 @@ abstract class Sabel_DB_Mapper
   {
     if (is_null($child)) {
       $table   = $this->table;
-      $columns = (is_null($group)) ? $this->defColumn : $group;
+      $columns = (is_null($group)) ? $this->incColumn : $group;
     } else {
       $table   = $child;
       $columns = (is_null($group)) ? $this->table . '_id' : $group;
@@ -353,7 +280,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    return ($rows = $driver->fetchAll(Sabel_DB_Const::ASSOC)) ? $this->toObject($rows) : false;
+    return ($rows = $driver->fetchAll(self::ASSOC)) ? $this->toObject($rows) : false;
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -364,7 +291,7 @@ abstract class Sabel_DB_Mapper
 
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) && is_null($this->conditions))
+    if (is_null($param1) && empty($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->addSelectCondition($param1, $param2, $param3);
@@ -374,13 +301,13 @@ abstract class Sabel_DB_Mapper
   protected function makeFindObject($model)
   {
     $driver = $model->driver;
-    $driver->setBasicSQL("SELECT {$model->projection} FROM {$model->table}");
+    $driver->setBasicSQL("SELECT {$model->projection} FROM " . $model->table);
     $driver->makeQuery($model->conditions, $model->constraints);
 
     $model->selectCondition = $model->conditions;
 
     $this->tryExecute($driver);
-    if ($row = $driver->fetch(Sabel_DB_Const::ASSOC)) {
+    if ($row = $driver->fetch(self::ASSOC)) {
       if ($model->withParent) $row = $model->selectWithParent($row);
 
       $model->setSelectedProperty($model, $row);
@@ -399,9 +326,11 @@ abstract class Sabel_DB_Mapper
 
   private function addSelectCondition($param1, $param2, $param3)
   {
-    ($param1 === self::WITH_PARENT)
-      ? $this->enableParent()
-      : $this->setCondition($param1, $param2, $param3);
+    if ($param1 === self::WITH_PARENT) {
+      $this->enableParent();
+    } else {
+      $this->setCondition($param1, $param2, $param3);
+    }
   }
 
   public function selectJoin($relTableList, $columnList = null)
@@ -436,7 +365,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    if (!($rows = $driver->fetchAll(Sabel_DB_Const::ASSOC))) return false;
+    if (!($rows = $driver->fetchAll(self::ASSOC))) return false;
 
     $recordObj = array();
     foreach ($rows as $row) {
@@ -534,7 +463,7 @@ abstract class Sabel_DB_Mapper
     $driver->setBasicSQL("SELECT {$model->projection} FROM {$class->table}");
 
     $this->chooseMyChildConstraint($child, $model);
-    $model->childConditions["{$model->table}_id"] = $model->data[$model->defColumn];
+    $model->setChildCondition("{$model->table}_id", $model->data[$model->incColumn]);
     $conditions  = $model->childConditions;
     $constraints = $model->childConstraints[$child];
 
@@ -551,7 +480,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
 
-    $rows = $driver->fetchAll(Sabel_DB_Const::ASSOC);
+    $rows = $driver->fetchAll(self::ASSOC);
     if (!$rows) return false;
 
     $recordObj = array();
@@ -630,10 +559,11 @@ abstract class Sabel_DB_Mapper
     if (!is_array($row = Sabel_DB_SimpleCache::get($table . $id))) {
       $driver = $model->getDriver();
       $driver->setBasicSQL("SELECT {$model->projection} FROM {$table}");
-      $driver->makeQuery(array($model->defColumn => $id));
+      $model->setCondition($model->incColumn, $id);
+      $driver->makeQuery($model->conditions);
 
       $this->tryExecute($driver);
-      $row = $driver->fetch(Sabel_DB_Const::ASSOC);
+      $row = $driver->fetch(self::ASSOC);
       if (!$row) {
         $model->selected = true;
         $model->id = $id;
@@ -658,11 +588,18 @@ abstract class Sabel_DB_Mapper
 
   private function setSelectedProperty($model, $row)
   {
+    $primary = $model->primary;
+
     if (empty($model->jointKey)) {
-      $value = (isset($row[$model->defColumn])) ? $row[$model->defColumn] : null;
-      $model->selectCondition[$model->defColumn] = $value;
+      if (isset($row[$primary])) {
+        $condition = new Sabel_DB_Condition($primary, $row[$primary]);
+        $model->selectCondition[$primary] = $condition;
+      }
     } else {
-      foreach ($model->jointKey as $key) $model->selectCondition[$key] = $row[$key];
+      foreach ($model->jointKey as $key) {
+        $condition = new Sabel_DB_Condition($key, $row[$key]);
+        $model->selectCondition[$key] = $condition;
+      }
     }
     $model->setProperties($row);
     $model->selected = true;
@@ -677,7 +614,7 @@ abstract class Sabel_DB_Mapper
 
   public function newChild($child = null)
   {
-    $id = $this->data[$this->defColumn];
+    $id = $this->data[$this->incColumn];
     if (empty($id)) throw new Exception('Error: newChild() who is a parent? hasn\'t id value.');
 
     $parent = strtolower(get_class($this));
@@ -707,15 +644,18 @@ abstract class Sabel_DB_Mapper
 
   public function clearChild($child)
   {
-    if (isset($this->data[$this->defColumn])) {
-      $id = $this->data[$this->defColumn];
+    if (isset($this->data[$this->incColumn])) {
+      $id = $this->data[$this->incColumn];
     } else {
       throw new Exception('Error: clearChild() who is a parent? hasn\'t id value.');
     }
 
-    $driver = $this->newClass($child)->getDriver();
-    $driver->setBasicSQL("DELETE FROM {$child}");
-    $driver->makeQuery(array("{$this->table}_id" => $id));
+    $model  = $this->newClass($child);
+    $driver = $model->getDriver();
+    $driver->setBasicSQL('DELETE FROM ' . $model->table);
+
+    $key = $this->table . '_id';
+    $driver->makeQuery(array($key => new Sabel_DB_Condition($key, $id)));
 
     $this->tryExecute($driver);
     $this->conditions  = array();
@@ -758,8 +698,12 @@ abstract class Sabel_DB_Mapper
 
   protected function insert()
   {
+    foreach ($this->data as $key => $val) {
+      if (is_object($val)) $this->data[$key] = $val->value;
+    }
+
     try {
-      $idColumn = ($this->autoNumber) ? $this->defColumn : false;
+      $idColumn = ($this->autoNumber) ? $this->incColumn : false;
       $this->driver->executeInsert($this->table, $this->data, $idColumn);
       return $this->driver->getLastInsertId();
     } catch (Exception $e) {
@@ -773,7 +717,7 @@ abstract class Sabel_DB_Mapper
 
     $this->begin();
     try {
-      $idColumn = ($this->autoNumber) ? $this->defColumn : false;
+      $idColumn = ($this->autoNumber) ? $this->incColumn : false;
       foreach ($data as $val) $this->driver->executeInsert($this->table, $val, $idColumn);
       $this->commit();
     } catch (Exception $e) {
@@ -785,8 +729,8 @@ abstract class Sabel_DB_Mapper
   {
     $idValue = null;
 
-    if (isset($this->selectCondition[$this->defColumn]))
-      $idValue = $this->selectCondition[$this->defColumn];
+    if (isset($this->selectCondition[$this->incColumn]))
+      $idValue = $this->selectCondition[$this->incColumn]->value;
 
     if (is_null($param1) && empty($this->conditions) && is_null($idValue))
       throw new Exception("Error: remove() [WHERE] must be set condition");
@@ -794,7 +738,7 @@ abstract class Sabel_DB_Mapper
     if (isset($param1)) {
       $this->setCondition($param1, $param2, $param3);
     } else if (isset($idValue)) {
-      $this->setCondition($this->defColumn, $idValue);
+      $this->setCondition($this->incColumn, $idValue);
     }
 
     $driver = $this->driver;
@@ -811,7 +755,7 @@ abstract class Sabel_DB_Mapper
     if (is_null($id) && !$this->is_selected())
       throw new Exception('Error: give the value of id or select the object beforehand.');
 
-    $id = (isset($id)) ? $id : $this->data[$this->defColumn];
+    $id = (isset($id)) ? $id : $this->data[$this->incColumn];
 
     $chain = Cascade_Chain::get();
     $myKey = $this->connectName . ':' . $this->table;
@@ -828,7 +772,7 @@ abstract class Sabel_DB_Mapper
       foreach ($models as $children) $this->getChainModels($children, $chain);
 
       $this->clearCascadeStack(array_reverse($this->cascadeStack));
-      $this->remove($this->defColumn, $id);
+      $this->remove($this->incColumn, $id);
       $this->commit();
     }
   }
@@ -857,9 +801,7 @@ abstract class Sabel_DB_Mapper
 
   private function pushCascadeStack($chainValue, $foreign, $id)
   {
-    $param  = explode(':', $chainValue);
-    $cName  = $param[0];
-    $tName  = $param[1];
+    list($cName, $tName) = explode(':', $chainValue);
     $model  = $this->newClass($tName);
     $model->setDriver($cName);
     $models = $model->select($foreign, $id);
@@ -871,10 +813,10 @@ abstract class Sabel_DB_Mapper
   private function clearCascadeStack($stack)
   {
     foreach ($stack as $param => $foreign) {
-      $params = explode(':', $param);
-      $model  = $this->newClass($params[0]);
-      $model->setDriver($params[1]);
-      $model->remove($foreign, $params[2]);
+      list($cName, $tName, $idValue) = explode(':', $param);
+      $model  = $this->newClass($tName);
+      $model->setDriver($cName);
+      $model->remove($foreign, $idValue);
     }
   }
 
@@ -884,7 +826,7 @@ abstract class Sabel_DB_Mapper
       throw new Exception('Error: execute() second argument must be an array');
 
     $this->tryExecute($this->driver, $sql, $param);
-    $rows = $this->driver->fetchAll(Sabel_DB_Const::ASSOC);
+    $rows = $this->driver->fetchAll(self::ASSOC);
     return $this->toObject($rows);
   }
 
@@ -942,5 +884,96 @@ abstract class Sabel_DB_Mapper
   public function ccond($key, $val)
   {
     $this->setChildCondition($key, $val);
+  }
+
+  public function setProperties($array)
+  {
+    if (!is_array($array)) throw new Exception('properties Argument is not array.');
+    foreach ($array as $key => $val) $this->$key = $val;
+  }
+
+  protected $primary = 'id';
+
+  public function setPrimaryKey($key)
+  {
+    $this->primary = $key;
+  }
+
+  public function getPrimaryKey()
+  {
+    return $this->primary;
+  }
+
+  protected $jointKey = array();
+
+  public function setJointKey($keys)
+  {
+    if (!is_array($keys)) throw new Exception('joint keys are not array.');
+    $this->jointKey = $keys;
+  }
+
+  public function getJointKey()
+  {
+    return $this->jointKey;
+  }
+
+  protected $incColumn = 'id';
+
+  public function setIncColumn($key)
+  {
+    $this->incColumn = $key;
+  }
+
+  public function getIncColumn()
+  {
+    return $this->incColumn;
+  }
+
+  protected $autoNumber = true;
+
+  public function enableAutoNumber()
+  {
+    $this->autoNumber = true;
+  }
+
+  public function disableAutoNumber()
+  {
+    $this->autoNumber = false;
+  }
+
+  protected $table = '';
+
+  public function setTableName($table)
+  {
+    $this->table = $table;
+  }
+
+  public function getTableName()
+  {
+    return $this->table;
+  }
+
+  protected $structure = 'normal';
+
+  public function setStructure($structure)
+  {
+    $this->structure = $structure;
+  }
+
+  public function getStructure()
+  {
+    return $this->structure;
+  }
+
+  protected $myChildren = null;
+
+  public function setMyChildren($children)
+  {
+    $this->myChildren = $children;
+  }
+
+  public function getMyChildren()
+  {
+    return $this->myChildren;
   }
 }

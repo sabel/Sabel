@@ -63,7 +63,7 @@ class Sabel_DB_Schema_Util_Creator
     $colLine = substr($attributes, strlen($type));
 
     if ($this->isBoolean($type)) {
-      $co->type = Sabel_DB_Const::BOOL;
+      $co->type = Sabel_DB_Schema_Const::BOOL;
     } else if (!$this->isString($co, $type)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Schema_Type_Setter::send($co, $type);
@@ -102,7 +102,7 @@ class Sabel_DB_Schema_Util_Creator
     foreach ($types as $sType) {
       if (strpos($type, $sType) !== false) {
         $length   = strpbrk($type, '(');
-        $co->type = Sabel_DB_Const::STRING;
+        $co->type = Sabel_DB_Schema_Const::STRING;
         $co->max  = ($length!== false) ? (int)substr($length, 1, -1) : 255;
         return true;
       }
@@ -130,7 +130,7 @@ class Sabel_DB_Schema_Util_Creator
   {
     if (strpos($this->colLine, 'default') !== false) {
       $default = trim(str_replace('default ', '', $this->colLine));
-      if ($co->type === Sabel_DB_Const::BOOL) {
+      if ($co->type === Sabel_DB_Schema_Const::BOOL) {
         $co->default = ($default === 'true');
       } else {
         $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);

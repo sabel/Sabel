@@ -14,7 +14,7 @@ class Sabel_DB_Schema_Type_Text implements Sabel_DB_Schema_Type_Sender
     $types = array('text', 'mediumtext', 'tinytext');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Const::TEXT;
+      $co->type = Sabel_DB_Schema_Const::TEXT;
     } else {
       $this->next->send($co, $type);
     }

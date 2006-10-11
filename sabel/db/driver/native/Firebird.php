@@ -71,9 +71,8 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    $row = ($style === Sabel_DB_Const::ASSOC)
-             ? ibase_fetch_assoc($this->result)
-             : ibase_fetch_row($this->result);
+    $row = ($style === Sabel_DB_Mapper::ASSOC) ? ibase_fetch_assoc($this->result)
+                                               : ibase_fetch_row($this->result);
 
     if (is_array($row)) $row = array_change_key_case($row);
     return $row;

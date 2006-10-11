@@ -15,7 +15,7 @@ class Sabel_DB_Schema_Type_Time implements Sabel_DB_Schema_Type_Sender
                    'datetime' , 'timestamp with time zone');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Const::TIMESTAMP;
+      $co->type = Sabel_DB_Schema_Const::TIMESTAMP;
     } else {
       $this->next->send($co, $type);
     }

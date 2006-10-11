@@ -81,7 +81,7 @@ abstract class Sabel_DB_Driver_General
   public function checkTableEngine($table)
   {
     $this->driverExecute("SHOW TABLE STATUS WHERE Name='{$table}'", null);
-    $res = $this->fetch(Sabel_DB_Const::ASSOC);
+    $res = $this->fetch(Sabel_DB_Mapper::ASSOC);
     if ($res['Engine'] !== 'InnoDB' && $res['Engine'] !== 'BDB') {
       $msg = "The Engine of '{$table}' is {$res['Engine']} though the transaction was tried.";
       trigger_error($msg, E_USER_NOTICE);

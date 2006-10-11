@@ -5,9 +5,9 @@ class Sabel_DB_Schema_Type_Setter
   public static function send($co, $type)
   {
     if ($type === 'date') {
-      $co->type = Sabel_DB_Const::DATE;
+      $co->type = Sabel_DB_Schema_Const::DATE;
     } else if ($type === 'time') {
-      $co->type = Sabel_DB_Const::TIME;
+      $co->type = Sabel_DB_Schema_Const::TIME;
     } else {
       $int    = new Sabel_DB_Schema_Type_Int();
       $string = new Sabel_DB_Schema_Type_String();

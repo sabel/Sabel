@@ -63,7 +63,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->execute('SELECT last_insert_id()');
-        $row = $this->fetch(Sabel_DB_Const::ASSOC);
+        $row = $this->fetch(Sabel_DB_Mapper::ASSOC);
         return $row['last_insert_id()'];
       case 'sqlite':
         return $this->conn->lastInsertId();
@@ -109,22 +109,18 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    if ($style === Sabel_DB_Const::ASSOC) {
-      $result = $this->stmt->fetch(PDO::FETCH_ASSOC);
-    } else {
-      $result = $this->stmt->fetch(PDO::FETCH_BOTH);
-    }
+    $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetch(PDO::FETCH_ASSOC)
+                                                  : $this->stmt->fetch(PDO::FETCH_BOTH);
+
     $this->stmt->closeCursor();
     return $result;
   }
 
   public function fetchAll($style = null)
   {
-    if ($style === Sabel_DB_Const::ASSOC) {
-      $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-      $result = $this->stmt->fetchAll(PDO::FETCH_BOTH);
-    }
+    $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetchAll(PDO::FETCH_ASSOC)
+                                                  : $this->stmt->fetchAll(PDO::FETCH_BOTH);
+
     $this->stmt->closeCursor();
     return $result;
   }
@@ -135,7 +131,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $data  = $this->data;
 
     if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);
-    $this->data  = array();
+    $this->data = array();
 
     $bindParam = array();
     if ($param) {

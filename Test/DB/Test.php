@@ -95,10 +95,10 @@ class Test_DB_Test extends SabelTestCase
     $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
     $test->multipleInsert($insertData);
-    
+
     $ro = $test->select();
     $this->assertEquals(count($ro), 6);
-    
+
     $test->enableParent();
     $obj = $test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
@@ -196,10 +196,10 @@ class Test_DB_Test extends SabelTestCase
 
     $users = new Users();
     $insertData   = array();
-    $insertData[] = array('name' => 'Tarou'  , 'status_id' => 1);
-    $insertData[] = array('name' => 'Hanako' , 'status_id' => 2);
-    $insertData[] = array('name' => 'Maruo'  , 'status_id' => 1);
-    $insertData[] = array('name' => 'Atsuko' , 'status_id' => 1);
+    $insertData[] = array('id' => 1, 'name' => 'Tarou'  , 'status_id' => 1);
+    $insertData[] = array('id' => 2, 'name' => 'Hanako' , 'status_id' => 2);
+    $insertData[] = array('id' => 3, 'name' => 'Maruo'  , 'status_id' => 1);
+    $insertData[] = array('id' => 4, 'name' => 'Atsuko' , 'status_id' => 1);
     $users->multipleInsert($insertData);
 
     $s = new Status();
@@ -285,8 +285,8 @@ class Test_DB_Test extends SabelTestCase
   {
     $test = new Test(7); // not found 
     
-    $this->assertEquals($test->name, null);
-    $this->assertEquals($test->blood, null);
+    @$this->assertEquals($test->name, null);
+    @$this->assertEquals($test->blood, null);
     
     if ($test->is_selected()) {
       $test->blood = 'AB';
@@ -377,26 +377,27 @@ class Test_DB_Test extends SabelTestCase
     
     //----------------------------------------------
     
-    $test->LIKE_name('%da%');
+    $test->LIKE_name(array('%da%', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 4); // yo_shida, uchida, ueda, uchida
     
-    $test->LIKE_name('%_%');
+    $test->LIKE_name('yo_shida');
     $obj = $test->select();
-    $this->assertEquals(count($obj), 1); // yo_shida
+    $this->assertEquals(count($obj), 1);
+    $this->assertEquals($obj[0]->name, 'yo_shida'); // yo_shida
 
-    $test->LIKE_name('%i_a', false);
+    $test->LIKE_name(array('%i_a', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
 
-    $test->OR_id('3', '4');
+    $test->OR_id(array('3', '4'));
     $obj = $test->select();
 
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
-    $test->OR_id('< 2', '> 5');
+    $test->OR_id(array('< 2', '> 5'));
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
@@ -589,12 +590,12 @@ class Test_DB_Test extends SabelTestCase
     
     //--------------------------------------------------------------------
     
-    $objs[0]->clearChild('customer_telephone');
+    $objs[0]->clearChild('CustomerTelephone');
     
     $cu   = new Customer();
     $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
-    
+
     @$this->assertNull($objs[0]->CustomerTelephone[0]->telephone);
     @$this->assertNull($objs[0]->CustomerTelephone[1]->telephone);
     $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
@@ -709,7 +710,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$t->Tree->id, 1);
     $this->assertEquals((int)$t->Tree->tree_id, 0);
     $this->assertEquals($t->Tree->name, 'A');
- 
+
     $t = new Tree();
     $root = $t->getRoot();
     $this->assertEquals((int)$root[0]->id, 1);
@@ -952,7 +953,10 @@ class Test_DB_Test extends SabelTestCase
   {
     $ol = new OrderLine();
     $ol->sconst('order', 'id');
-    $ol->OR_(array('amount', 'item_id'), array('> 9000', '2'));
+
+    $keys   = array('amount', 'item_id');
+    $values = array('> 9000', '2');
+    $ol->OR_(array($keys, $values));
 
     $ols = $ol->select();
     $this->assertEquals((int)$ols[0]->id, 1);
@@ -968,9 +972,9 @@ class Test_DB_Test extends SabelTestCase
   {
     $trans1 = new Trans1();
     $data = array();
-    $data[] = array('text' => 'trans1');
-    $data[] = array('text' => 'trans2');
-    $data[] = array('text' => 'trans3');
+    $data[] = array('id' => 1, 'text' => 'trans1');
+    $data[] = array('id' => 2, 'text' => 'trans2');
+    $data[] = array('id' => 3, 'text' => 'trans3');
 
     $trans1->multipleInsert($data);
 
@@ -987,25 +991,25 @@ class Test_DB_Test extends SabelTestCase
 
     $trans1 = new Trans1(1);
     $trans1->cconst('limit', 10);
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 3);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 3);
 
     $trans1 = new Trans1(1);
     $trans1->cconst('limit', 10);
     $trans1->ccond('text', 'trans24');
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 1);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 1);
 
     $trans1 = new Trans1(3);
     $trans1->cconst('limit', 10);
     $trans1->ccond('text', 'trans24');
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 0);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 0);
 
     $trans1 = new Trans1(2);
     $trans1->cconst('limit', 10);
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 1);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 1);
 
     $trans1->execute("DELETE FROM trans1");
     $trans2->execute("DELETE FROM trans2");
@@ -1015,9 +1019,9 @@ class Test_DB_Test extends SabelTestCase
     $trans1 = new Trans1(); // connection1
     $trans1->begin();
 
-    $trans1->save(array('text' => 'trans1'));
-    $trans1->save(array('text' => 'trans2'));
-    $trans1->save(array('text' => 'trans3'));
+    $trans1->save(array('id' => 1, 'text' => 'trans1'));
+    $trans1->save(array('id' => 2, 'text' => 'trans2'));
+    $trans1->save(array('id' => 3, 'text' => 'trans3'));
 
     $trans2 = new Trans2(); // connection2
     $data = array();
@@ -1072,27 +1076,27 @@ class Test_DB_Test extends SabelTestCase
     $title    = $schema->title;
     $body     = $schema->body;
 
-    $this->assertEquals($id->type, Sabel_DB_Const::INT);
+    $this->assertEquals($id->type, Sabel_DB_Schema_Const::INT);
     $this->assertEquals($id->max,  2147483647);
     $this->assertEquals($id->min, -2147483648);
     $this->assertTrue($id->notNull);
     $this->assertTrue($id->primary);
     $this->assertTrue($id->increment);
 
-    $this->assertEquals($users_id->type, Sabel_DB_Const::INT);
+    $this->assertEquals($users_id->type, Sabel_DB_Schema_Const::INT);
     $this->assertEquals($users_id->max,  2147483647);
     $this->assertEquals($users_id->min, -2147483648);
     $this->assertTrue($users_id->notNull);
     $this->assertFalse($users_id->primary);
     $this->assertFalse($users_id->increment);
 
-    $this->assertEquals($title->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($title->type, Sabel_DB_Schema_Const::STRING);
     $this->assertEquals($title->max, 24);
     $this->assertFalse($title->notNull);
     $this->assertFalse($title->primary);
     $this->assertFalse($title->increment);
 
-    $this->assertEquals($body->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($body->type, Sabel_DB_Schema_Const::STRING);
     $this->assertEquals($body->max, 24);
     $this->assertFalse($body->notNull);
     $this->assertFalse($body->primary);
@@ -1119,28 +1123,28 @@ class Test_DB_Test extends SabelTestCase
 
     $dbname = Sabel_DB_Connection::getDB($st->getConnectName());
 
-    $this->assertEquals($id1->type, Sabel_DB_Const::INT);
+    $this->assertEquals($id1->type, Sabel_DB_Schema_Const::INT);
     $this->assertTrue($id1->primary);
     if ($dbname !== 'sqlite') $this->assertTrue($id1->increment);
     $this->assertEquals($id1->max,  9223372036854775807);
     $this->assertEquals($id1->min, -9223372036854775808);
     @$this->assertEquals($id1->default, null);
 
-    $this->assertEquals($id2->type, Sabel_DB_Const::INT);
+    $this->assertEquals($id2->type, Sabel_DB_Schema_Const::INT);
     $this->assertTrue($id2->primary);
     $this->assertFalse($id2->increment);
     $this->assertEquals($id2->max,  2147483647);
     $this->assertEquals($id2->min, -2147483648);
     @$this->assertEquals($id2->default, null);
 
-    $this->assertEquals($num->type, Sabel_DB_Const::INT);
+    $this->assertEquals($num->type, Sabel_DB_Schema_Const::INT);
     $this->assertFalse($num->primary);
     $this->assertFalse($num->increment);
     $this->assertEquals($num->max,  2147483647);
     $this->assertEquals($num->min, -2147483648);
     $this->assertEquals($num->default, 10);
 
-    $this->assertEquals($fnum->type, Sabel_DB_Const::FLOAT);
+    $this->assertEquals($fnum->type, Sabel_DB_Schema_Const::FLOAT);
     $this->assertEquals($fnum->max,  3.4028235E38);
     $this->assertEquals($fnum->min, -3.4028235E38);
     $this->assertFalse($fnum->primary);
@@ -1148,7 +1152,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($fnum->increment);
     @$this->assertEquals($fnum->default, null);
 
-    $this->assertEquals($dnum->type, Sabel_DB_Const::DOUBLE);
+    $this->assertEquals($dnum->type, Sabel_DB_Schema_Const::DOUBLE);
     $this->assertEquals($dnum->max,  1.79769E308);
     $this->assertEquals($dnum->min, -1.79769E308);
     $this->assertFalse($dnum->primary);
@@ -1156,32 +1160,32 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($dnum->increment);
     @$this->assertEquals($dnum->default, null);
 
-    $this->assertEquals($str->type, Sabel_DB_Const::STRING);
+    $this->assertEquals($str->type, Sabel_DB_Schema_Const::STRING);
     $this->assertEquals($str->max, 64);
     $this->assertFalse($str->primary);
     $this->assertFalse($str->notNull);
     $this->assertFalse($str->increment);
     $this->assertEquals($str->default, 'test');
 
-    $this->assertEquals($text->type, Sabel_DB_Const::TEXT);
+    $this->assertEquals($text->type, Sabel_DB_Schema_Const::TEXT);
     $this->assertFalse($text->primary);
     $this->assertFalse($text->notNull);
     $this->assertFalse($text->increment);
     @$this->assertEquals($text->default, null);
 
-    $this->assertEquals($bl->type, Sabel_DB_Const::BOOL);
+    $this->assertEquals($bl->type, Sabel_DB_Schema_Const::BOOL);
     $this->assertFalse($bl->primary);
     $this->assertFalse($bl->notNull);
     $this->assertFalse($bl->increment);
     $this->assertTrue($bl->default);
 
-    $this->assertEquals($date->type, Sabel_DB_Const::DATE);
+    $this->assertEquals($date->type, Sabel_DB_Schema_Const::DATE);
     $this->assertFalse($date->primary);
     $this->assertFalse($date->increment);
     $this->assertFalse($date->notNull);
     @$this->assertEquals($date->default, null);
 
-    $this->assertEquals($dt->type, Sabel_DB_Const::TIMESTAMP);
+    $this->assertEquals($dt->type, Sabel_DB_Schema_Const::TIMESTAMP);
     $this->assertFalse($dt->primary);
     $this->assertFalse($dt->increment);
     $this->assertTrue($dt->notNull);

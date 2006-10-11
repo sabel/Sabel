@@ -47,7 +47,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     $type = $row['data_type'];
 
     if ($this->isBoolean($type, $row)) {
-      $co->type = Sabel_DB_Const::BOOL;
+      $co->type = Sabel_DB_Schema_Const::BOOL;
     } else {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Schema_Type_Setter::send($co, $type);
@@ -57,7 +57,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     $this->setIncrement($co, $row);
     $this->setPrimaryKey($co, $row);
 
-    if ($co->type === Sabel_DB_Const::STRING) $this->setLength($co, $row);
+    if ($co->type === Sabel_DB_Schema_Const::STRING) $this->setLength($co, $row);
     return $co;
   }
 

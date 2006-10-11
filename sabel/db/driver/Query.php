@@ -5,6 +5,7 @@ abstract class Sabel_DB_Driver_Query
   protected
     $escMethod = '',
     $dbName    = '',
+    $nmlCount  = 0,
     $sql       = array(),
     $stripFlag = false,
     $set       = false;
@@ -30,32 +31,36 @@ abstract class Sabel_DB_Driver_Query
   {
     if (!$conditions) return true;
 
-    $nmlCount = 0;
-    foreach ($conditions as $key => $val) {
-      if ($val[0] === '>' || $val[0] === '<') {
-        $this->makeLess_GreaterSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Const::IN) !== false) {
-        $key = str_replace(Sabel_DB_Const::IN, '', $key);
-        $this->makeWhereInSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Const::BET) !== false) {
-        $key = str_replace(Sabel_DB_Const::BET, '', $key);
-        $this->makeBetweenSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Const::EITHER) !== false) {
-        $key = str_replace(Sabel_DB_Const::EITHER, '', $key);
-        $this->prepareEitherSQL($key, $val);
-      } else if (strpos($key, Sabel_DB_Const::LIKE) !== false) {
-        $key = str_replace(Sabel_DB_Const::LIKE, '', $key);
-        $this->prepareLikeSQL($key, $val);
-      } else if (strtolower($val) === 'null') {
-        $this->makeIsNullSQL($key);
-      } else if (strtolower($val) === 'not null') {
-        $this->makeIsNotNullSQL($key);
-      } else {
-        $this->makeNormalSQL($key, $val);
-        $nmlCount++;
+    foreach ($conditions as $key => $condition) {
+      if ($condition->type === Sabel_DB_Condition::NORMAL) {
+        $this->makeNormalConditionQuery($key, $condition);
+      } else if ($condition->type === Sabel_DB_Condition::IN) {
+        $this->makeWhereInSQL($key, $condition->value);
+      } else if ($condition->type === Sabel_DB_Condition::BET) {
+        $this->makeBetweenSQL($key, $condition->value);
+      } else if ($condition->type === Sabel_DB_Condition::EITHER) {
+        $this->prepareEitherSQL($key, $condition->value);
+      } else if ($condition->type === Sabel_DB_Condition::LIKE) {
+        $this->prepareLikeSQL($key, $condition->value);
       }
     }
-    return (count($conditions) === $nmlCount);
+    return (count($conditions) === $this->nmlCount);
+  }
+
+  protected function makeNormalConditionQuery($key, $condition)
+  {
+    $value = $condition->value;
+
+    if ($value[0] === '>' || $value[0] === '<') {
+      $this->makeLess_GreaterSQL($key, $value);
+    } else if (strtolower($value) === 'null') {
+      $this->makeIsNullSQL($key);
+    } else if (strtolower($value) === 'not null') {
+      $this->makeIsNotNullSQL($key);
+    } else {
+      $this->makeNormalSQL($key, $value);
+      $this->nmlCount++;
+    }
   }
 
   public function getSQL()
@@ -104,20 +109,18 @@ abstract class Sabel_DB_Driver_Query
       $escape = true;
     }
 
-    if (strpbrk($val, '_') !== false && $escape) {
-      if ($this->dbName === 'mssql') {
-        $val = str_replace('%', "[%]", str_replace('_', "[_]", $val));
-        $this->makeLikeSQL($key, $val);
-      } else {
-        $escapeString = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+    $exist = (strpbrk($val, '_') !== false || strpbrk($val, '%') !== false);
 
-        for ($i = 0; $i < 30; $i++) {
-          $esc = $escapeString[$i];
-          if (strpbrk($val, $esc) === false) {
-            $val = str_replace('%', "{$esc}%", str_replace('_', "{$esc}_", $val));
-            $this->makeLikeSQL($key, $val, $esc);
-            break;
-          }
+    if ($exist && $escape && $this->dbName === 'mssql') {
+      $this->makeLikeSQL($key, str_replace(array('%', '_'), array('[%]', '[_]'), $val));
+    } else if ($exist && $escape) {
+      $escapeString = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+      for ($i = 0; $i < 30; $i++) {
+        $esc = $escapeString[$i];
+        if (strpbrk($val, $esc) === false) {
+          $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
+          $this->makeLikeSQL($key, $val, $esc);
+          break;
         }
       }
     } else {
@@ -129,24 +132,24 @@ abstract class Sabel_DB_Driver_Query
   {
     $condition = array();
     if ($key === '') {
-      $condition[] = $val[0];
-      $condition[] = $val[1];
+      $condition['key'] = $val[0];
+      $condition['val'] = $val[1];
     } else {
       $keys = array();
       for ($i = 0; $i < count($val); $i++) $keys[] = $key;
-      $condition[] = $keys;
-      $condition[] = $val;
+      $condition['key'] = $keys;
+      $condition['val'] = $val;
     }
 
-    $count = count($condition[0]);
-    if ($count !== count($condition[1]))
+    $count = count($condition['key']);
+    if ($count !== count($condition['val']))
       throw new Exception('Error: make column same as number of values.');
 
     $query  = '(';
 
     for ($i = 0; $i < $count; $i++) {
-      $key    = $condition[0][$i];
-      $query .= $this->makeEitherSQL($key, $condition[1][$i]);
+      $key    = $condition['key'][$i];
+      $query .= $this->makeEitherSQL($key, $condition['val'][$i]);
       if (($i + 1) !== $count) $query .= ' OR ';
     }
 

@@ -15,7 +15,7 @@ class Sabel_DB_Schema_Type_Int implements Sabel_DB_Schema_Type_Sender
                    'int8', 'smallint', 'tinyint', 'int3', 'int2', 'mediumint');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Const::INT;
+      $co->type = Sabel_DB_Schema_Const::INT;
 
       switch($type) {
         case 'tinyint':

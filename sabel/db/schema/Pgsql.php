@@ -29,7 +29,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_General
       $co->default = null;
     } else if (is_numeric($default)) {
       $co->default = (int)$default;
-    } else if ($co->type === Sabel_DB_Const::BOOL) {
+    } else if ($co->type === Sabel_DB_Schema_Const::BOOL) {
       $co->default = ($default === 'true');
     } else {
       $default     = substr($default, 1);

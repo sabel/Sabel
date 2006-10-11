@@ -1,14 +1,7 @@
 <?php
 
-interface Sabel_DB_Const
+class Sabel_DB_Schema_Const
 {
-  const EITHER    = 'OR_';
-  const BET       = 'BET_';
-  const IN        = 'IN_';
-  const LIKE      = 'LIKE_';
-
-  const ASSOC     = 1;
-
   const INT       = 'INT';
   const FLOAT     = 'FLOAT';
   const DOUBLE    = 'DOUBLE';

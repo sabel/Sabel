@@ -74,9 +74,8 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    return ($style === Sabel_DB_Const::ASSOC)
-      ? mssql_fetch_assoc($this->result)
-      : mssql_fetch_array($this->result);
+    return ($style === Sabel_DB_Mapper::ASSOC) ? mssql_fetch_assoc($this->result)
+                                               : mssql_fetch_array($this->result);
   }
 
   public function fetchAll($style = null)
