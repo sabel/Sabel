@@ -37,7 +37,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     array_push($sql, join(',', $values));
     array_push($sql, ')');
 
-    foreach ($data as $key => $d) $data[$key] = $this->escape($d);
+    foreach ($data as $key => $val) $data[$key] = $this->escape($val);
     return array(join('', $sql), $data);
   }
 
@@ -58,7 +58,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
 
   protected function makeNormalSQL($key, $val)
   {
-    $this->setWhereQuery($this->_getNormalSQL($key, $val, $key.$this->count++));
+    $this->setWhereQuery($this->getNormalSQL($key, $val, $key.$this->count++));
   }
 
   protected function makeLikeSQL($key, $val, $esc = null)
@@ -84,27 +84,27 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
   protected function makeEitherSQL($key, $val)
   {
     if ($val[0] === '<' || $val[0] === '>') {
-      return $this->_makeLess_GreaterSQL($key, $val, $key.$this->count++);
+      return $this->getLessGreaterSQL($key, $val, $key.$this->count++);
     } else if (strtolower($val) === 'null') {
       return "{$key} IS NULL";
     } else {
-      return $this->_getNormalSQL($key, $val, $key.$this->count++);
+      return $this->getNormalSQL($key, $val, $key.$this->count++);
     }
   }
 
-  protected function makeLess_GreaterSQL($key, $val)
+  protected function makeLessGreaterSQL($key, $val)
   {
-    $this->setWhereQuery($this->_makeLess_GreaterSQL($key, $val, $key.$this->count++));
+    $this->setWhereQuery($this->getLessGreaterSQL($key, $val, $key.$this->count++));
   }
 
-  protected function _makeLess_GreaterSQL($key, $val, $bindKey)
+  protected function getLessGreaterSQL($key, $val, $bindKey)
   {
     $lg = substr($val, 0, strpos($val, ' '));
     $this->param[$bindKey] = trim(substr($val, strlen($lg)));
     return "{$key} {$lg} :{$bindKey}";
   }
 
-  protected function _getNormalSQL($key, $val, $bindKey)
+  protected function getNormalSQL($key, $val, $bindKey)
   {
     $this->param[$bindKey] = $this->escape($val);
     return "{$key}=:{$bindKey}";

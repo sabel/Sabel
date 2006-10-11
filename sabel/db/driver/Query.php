@@ -16,7 +16,7 @@ abstract class Sabel_DB_Driver_Query
   protected abstract function makeLikeSQL($key, $val, $esc = null);
   protected abstract function makeBetweenSQL($key, $val);
   protected abstract function makeEitherSQL($key, $val);
-  protected abstract function makeLess_GreaterSQL($key, $val);
+  protected abstract function makeLessGreaterSQL($key, $val);
   public    abstract function unsetProperties();
 
 
@@ -32,17 +32,29 @@ abstract class Sabel_DB_Driver_Query
     if (!$conditions) return true;
 
     foreach ($conditions as $key => $condition) {
-      if ($condition->type === Sabel_DB_Condition::NORMAL) {
-        $this->makeNormalConditionQuery($key, $condition);
-      } else if ($condition->type === Sabel_DB_Condition::IN) {
-        $this->makeWhereInSQL($key, $condition->value);
-      } else if ($condition->type === Sabel_DB_Condition::BET) {
-        $this->makeBetweenSQL($key, $condition->value);
-      } else if ($condition->type === Sabel_DB_Condition::EITHER) {
-        $this->prepareEitherSQL($key, $condition->value);
-      } else if ($condition->type === Sabel_DB_Condition::LIKE) {
-        $this->prepareLikeSQL($key, $condition->value);
-      }
+      switch ($condition->type) :
+        case Sabel_DB_Condition::NORMAL:
+          $this->makeNormalConditionQuery($key, $condition);
+          continue;
+        case Sabel_DB_Condition::ISNULL:
+          $this->makeIsNullSQL($key);
+          continue;
+        case Sabel_DB_Condition::NOTNULL:
+          $this->makeIsNotNullSQL($key);
+          continue;
+        case Sabel_DB_Condition::LIKE:
+          $this->prepareLikeSQL($key, $condition->value);
+          continue;
+        case Sabel_DB_Condition::IN:
+          $this->makeWhereInSQL($key, $condition->value);
+          continue;
+        case Sabel_DB_Condition::BET:
+          $this->makeBetweenSQL($key, $condition->value);
+          continue;
+        case Sabel_DB_Condition::EITHER:
+          $this->prepareEitherSQL($key, $condition->value);
+          continue;
+      endswitch;
     }
     return (count($conditions) === $this->nmlCount);
   }
@@ -52,11 +64,7 @@ abstract class Sabel_DB_Driver_Query
     $value = $condition->value;
 
     if ($value[0] === '>' || $value[0] === '<') {
-      $this->makeLess_GreaterSQL($key, $value);
-    } else if (strtolower($value) === 'null') {
-      $this->makeIsNullSQL($key);
-    } else if (strtolower($value) === 'not null') {
-      $this->makeIsNotNullSQL($key);
+      $this->makeLessGreaterSQL($key, $value);
     } else {
       $this->makeNormalSQL($key, $value);
       $this->nmlCount++;
@@ -131,22 +139,20 @@ abstract class Sabel_DB_Driver_Query
   protected function prepareEitherSQL($key, $val)
   {
     $condition = array();
+
     if ($key === '') {
-      $condition['key'] = $val[0];
-      $condition['val'] = $val[1];
+      list($keys, $val) = array_values($val);
     } else {
       $keys = array();
       for ($i = 0; $i < count($val); $i++) $keys[] = $key;
-      $condition['key'] = $keys;
-      $condition['val'] = $val;
     }
+    $condition['key'] = $keys;
+    $condition['val'] = $val;
 
-    $count = count($condition['key']);
-    if ($count !== count($condition['val']))
-      throw new Exception('Error: make column same as number of values.');
+    if (($count = count($condition['key'])) !== count($condition['val']))
+      throw new Exception('Error: make keys same as number of values.');
 
     $query  = '(';
-
     for ($i = 0; $i < $count; $i++) {
       $key    = $condition['key'][$i];
       $query .= $this->makeEitherSQL($key, $condition['val'][$i]);

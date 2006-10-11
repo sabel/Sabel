@@ -2,37 +2,35 @@
 
 class Sabel_DB_Condition
 {
-  const NOT    = 'NOT';
-  const NORMAL = 'NORMAL';
+  const NOT     = 'NOT';
 
-  const EITHER = 'OR_';
-  const BET    = 'BET_';
-  const IN     = 'IN_';
-  const LIKE   = 'LIKE_';
+  const NORMAL  = 'NORMAL';
+  const ISNULL  = 'NULL';
+  const NOTNULL = 'NOTNULL';
 
-  protected $data = array();
+  const EITHER  = 'OR_';
+  const BET     = 'BET_';
+  const IN      = 'IN_';
+  const LIKE    = 'LIKE_';
+
+  protected $values = array();
 
   public function __construct($key, $value, $not = null)
   {
-    list($key, $type) = $this->getType($key);
+    list($key, $type) = $this->getType($key, $value);
 
-    $this->key   = $key;
-    $this->type  = $type;
-    $this->value = $value;
-    $this->not   = ($not === self::NOT) ? self::NOT : false;
-  }
-
-  public function __set($key, $val)
-  {
-    $this->data[$key] = $val;
+    $this->values['key']   = $key;
+    $this->values['type']  = $type;
+    $this->values['value'] = $value;
+    $this->values['not']   = ($not === self::NOT) ? self::NOT : false;
   }
 
   public function __get($key)
   {
-    return (isset($this->data[$key])) ? $this->data[$key] : null;
+    return (isset($this->values[$key])) ? $this->values[$key] : null;
   }
 
-  protected function getType($key)
+  protected function getType($key, $val)
   {
     if (strpos($key, self::IN) === 0) {
       $key  = str_replace(self::IN, '', $key);
@@ -47,8 +45,13 @@ class Sabel_DB_Condition
       $key  = str_replace(self::EITHER, '', $key);
       $type = self::EITHER;
     } else {
-      $key  = $key;
-      $type = self::NORMAL;
+      if (strtolower($val) === 'null') {
+        $type = self::ISNULL;
+      } else if (strtolower($val) === 'not null') {
+        $type = self::NOTNULL;
+      } else {
+        $type = self::NORMAL;
+      }
     }
     return array($key, $type);
   }

@@ -103,7 +103,7 @@ class Sabel_DB_Schema_Util_Creator
       if (strpos($type, $sType) !== false) {
         $length   = strpbrk($type, '(');
         $co->type = Sabel_DB_Schema_Const::STRING;
-        $co->max  = ($length!== false) ? (int)substr($length, 1, -1) : 255;
+        $co->max  = ($length === false) ? 255 : (int)substr($length, 1, -1);
         return true;
       }
     }

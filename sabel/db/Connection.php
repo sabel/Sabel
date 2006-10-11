@@ -18,11 +18,10 @@ class Sabel_DB_Connection
     if (is_null(self::$parameters[$connectName]))
       throw new Exception('Error: database parameters are not found: ' . $connectName);
 
-    $params = self::$parameters[$connectName];
-    $driver = $params['driver'];
+    if (!is_array($params = self::$parameters[$connectName]))
+      throw new Exception('invalid Parameter. parameters must be an array.');
 
-    if (!is_array($params))
-      throw new Exception('invalid Parameter. second argument must be an array.');
+    $driver = $params['driver'];
 
     if (strpos($driver, 'pdo-') !== false) {
       $db  = str_replace('pdo-', '', $driver);
@@ -37,27 +36,26 @@ class Sabel_DB_Connection
       $list['driver'] = 'pdo';
       $list['db']     = $db;
     } else {
-      $host     = $params['host'];
-      $user     = $params['user'];
-      $pass     = $params['password'];
-      $database = $params['database'];
+      $host = $params['host'];
+      $user = $params['user'];
+      $pass = $params['password'];
+      $dbs  = $params['database'];
 
       if ($driver === 'mysql') {
         $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
         $list['conn'] = mysql_connect($host, $user, $pass);
-        mysql_select_db($database, $list['conn']);
+        mysql_select_db($dbs, $list['conn']);
       } else if ($driver === 'pgsql') {
         $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
-        $list['conn'] = pg_connect("host={$host} dbname={$database} user={$user} password={$pass}");
+        $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
       } else if ($driver === 'firebird') {
-        $host = $host . ':' . $database;
-        $list['conn'] = (isset($params['encoding']))
-                          ? ibase_connect($host, $user, $pass, $params['encoding'])
-                          : ibase_connect($host, $user, $pass);
+        $host = $host . ':' . $dbs;
+        $list['conn'] = (isset($params['encoding'])) ? ibase_connect($host, $user, $pass, $params['encoding'])
+                                                     : ibase_connect($host, $user, $pass);
       } else if ($driver === 'mssql') {
         $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
         $list['conn'] = mssql_connect($host, $user, $pass);
-        mssql_select_db($database, $list['conn']);
+        mssql_select_db($dbs, $list['conn']);
       }
 
       $list['driver'] = $driver;
@@ -65,15 +63,16 @@ class Sabel_DB_Connection
     }
 
     if (isset($params['encoding'])) {
+      $db  = $list['db'];
       $enc = $params['encoding'];
 
-      if ($list['driver'] === 'pdo' && $list['db'] === 'mysql') {
+      if ($list['driver'] === 'pdo' && $db === 'mysql') {
         $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } else if ($list['driver'] === 'pdo' && $list['db'] === 'pgsql') {
+      } else if ($list['driver'] === 'pdo' && $db === 'pgsql') {
         $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
-      } else if ($list['db'] === 'mysql') {
+      } else if ($db === 'mysql') {
         mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
-      } else if ($list['db'] === 'pgsql') {
+      } else if ($db === 'pgsql') {
         pg_query($list['conn'], sprintf(self::PGSQL_SET_ENCODING, $enc));
       }
     }

@@ -46,14 +46,11 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if ($defColumn && $this->dbType === 'pgsql')
       $data = $this->setIdNumber($table, $data, $defColumn);
 
-    $results    = $this->query->makeInsertSQL($table, $data);
-    $sql        = $results[0];
-    $this->data = $results[1];
-
+    list($sql, $this->data) = $this->query->makeInsertSQL($table, $data);
     $this->stmtFlag = Sabel_DB_Driver_Pdo_Statement::exists($sql, $this->data);
     if (!$this->stmtFlag) $this->query->setBasicSQL($sql);
 
-    return $this->execute();
+    return $this->driverExecute();
   }
 
   public function getLastInsertId()
@@ -62,7 +59,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
       case 'pgsql':
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
-        $this->execute('SELECT last_insert_id()');
+        $this->driverExecute('SELECT last_insert_id()');
         $row = $this->fetch(Sabel_DB_Mapper::ASSOC);
         return $row['last_insert_id()'];
       case 'sqlite':
@@ -72,10 +69,10 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $sql = $this->query->getSQL();
-    $exist = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
-
+    $sql    = $this->query->getSQL();
+    $exist  = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
     $result = $this->query->makeConditionQuery($conditions);
+
     if (!$result) $exist = false;
 
     if ($constraints && !$exist) $this->query->makeConstraintQuery($constraints);

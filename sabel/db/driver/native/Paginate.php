@@ -42,16 +42,16 @@ class Sabel_DB_Driver_Native_Paginate
     if (isset($this->limit)) {
       $query = "TOP {$this->limit} ";
       if (isset($this->offset)) {
-        $values = $this->mssqlOffset($tmp, $column, $order);
-        return array('SELECT ' . $query . $tmp . $values[0] . $values[1]);
+        list($subSelect, $orderStr) = $this->mssqlOffset($tmp, $column, $order);
+        return array('SELECT ' . $query . $tmp . $subSelect . $orderStr);
       } else {
         return array('SELECT ' . $query . $tmp);
       }
     }
 
     if (isset($this->offset)) {
-      $values    = $this->mssqlOffset($tmp, $column, $order);
-      $this->sql = array('SELECT' . "{$tmp} " . $values[0] . $values[1]);
+      list($subSelect, $orderStr) = $this->mssqlOffset($tmp, $column, $order);
+      $this->sql = array('SELECT' . "{$tmp} " . $subSelect . $orderStr);
     }
     return $this->sql;
   }
@@ -59,8 +59,8 @@ class Sabel_DB_Driver_Native_Paginate
   private function mssqlOffset(&$tmp, $column, $order)
   {
     if (isset($order)) {
-      $sp = explode(' ', $order);
-      $orderColumn = $sp[0];
+      list($colName) = explode(' ', $order);
+      $orderColumn = $colName;
       $orderStr = strstr($tmp, 'ORDER BY');
       $tmp = str_replace($orderStr, '', $tmp);
     } else {

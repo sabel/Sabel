@@ -1,52 +1,53 @@
 <?php
 
-require_once 'db\Const.php';
-require_once 'db\Connection.php';
-require_once 'db\Transaction.php';
-require_once 'db\SimpleCache.php';
+require_once 'c:\php\sabel\sabel\db\Connection.php';
+require_once 'c:\php\sabel\sabel\db\Transaction.php';
+require_once 'c:\php\sabel\sabel\db\SimpleCache.php';
 
-require_once 'db\Mapper.php';
-require_once 'db\Basic.php';
-require_once 'db\Bridge.php';
-require_once 'db\Tree.php';
-require_once 'db\driver\General.php';
-require_once 'db\driver\Query.php';
-require_once 'db\driver\native/Query.php';
-require_once 'db\driver\native/Mssql.php';
-require_once 'db\driver\native/Paginate.php';
+require_once 'c:\php\sabel\sabel\db\Condition.php';
+require_once 'c:\php\sabel\sabel\db\Mapper.php';
+require_once 'c:\php\sabel\sabel\db\Basic.php';
+require_once 'c:\php\sabel\sabel\db\Bridge.php';
+require_once 'c:\php\sabel\sabel\db\Tree.php';
+require_once 'c:\php\sabel\sabel\db\driver\General.php';
+require_once 'c:\php\sabel\sabel\db\driver\Query.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Query.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Mssql.php';
+require_once 'c:\php\sabel\sabel\db\driver\native/Paginate.php';
 
-require_once 'db\schema\type\Setter.php';
-require_once 'db\schema\type\Sender.php';
-require_once 'db\schema\type\Int.php';
-require_once 'db\schema\type\String.php';
-require_once 'db\schema\type\Float.php';
-require_once 'db\schema\type\Double.php';
-require_once 'db\schema\type\Text.php';
-require_once 'db\schema\type\Time.php';
-require_once 'db\schema\type\Byte.php';
-require_once 'db\schema\type\Other.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Setter.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Sender.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Int.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\String.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Float.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Double.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Text.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Time.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Byte.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Other.php';
 
-require_once 'db\schema\Table.php';
-require_once 'db\schema\Column.php';
-require_once 'db\schema\Accessor.php';
+require_once 'c:\php\sabel\sabel\db\schema\Const.php';
+require_once 'c:\php\sabel\sabel\db\schema\Table.php';
+require_once 'c:\php\sabel\sabel\db\schema\Column.php';
+require_once 'c:\php\sabel\sabel\db\schema\Accessor.php';
 
-require_once 'db\schema\Common.php';
-require_once 'db\schema\General.php';
-require_once 'db\schema\Mssql.php';
+require_once 'c:\php\sabel\sabel\db\schema\Common.php';
+require_once 'c:\php\sabel\sabel\db\schema\General.php';
+require_once 'c:\php\sabel\sabel\db\schema\Mssql.php';
 
 require_once 'Test.php';
 
 class MssqlExecute
 {
   private static $params1 = array('driver'   => 'mssql',
-                                  'host'     => 'EBINE\SQLEXPRESS',
+                                  'host'     => 'USER-116CCEF1CD\SQLEXPRESS',
                                   'user'     => 'develop',
                                   'password' => 'test',
                                   'schema'   => 'edo',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'mssql',
-                                  'host'     => 'EBINE\SQLEXPRESS',
+                                  'host'     => 'USER-116CCEF1CD\SQLEXPRESS',
                                   'user'     => 'develop2',
                                   'password' => 'test',
                                   'schema'   => 'edo2',

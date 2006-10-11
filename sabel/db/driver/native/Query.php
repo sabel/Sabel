@@ -63,7 +63,7 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
 
   public function makeNormalSQL($key, $val)
   {
-    $this->setWhereQuery($this->_getNormalSQL($key, $val));
+    $this->setWhereQuery($this->getNormalSQL($key, $val));
   }
 
   public function makeLikeSQL($key, $val, $esc = null)
@@ -82,27 +82,27 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
   public function makeEitherSQL($key, $val)
   {
     if ($val[0] === '<' || $val[0] === '>') {
-      return $this->_makeLess_GreaterSQL($key, $val);
+      return $this->getLessGreaterSQL($key, $val);
     } else if (strtolower($val) === 'null') {
       return "{$key} IS NULL";
     } else {
-      return $this->_getNormalSQL($key, $val);
+      return $this->getNormalSQL($key, $val);
     }
   }
 
-  public function makeLess_GreaterSQL($key, $val)
+  public function makeLessGreaterSQL($key, $val)
   {
-    $this->setWhereQuery($this->_makeLess_GreaterSQL($key, $val));
+    $this->setWhereQuery($this->getLessGreaterSQL($key, $val));
   }
 
-  protected function _makeLess_GreaterSQL($key, $val)
+  protected function getLessGreaterSQL($key, $val)
   {
     $lg   = substr($val, 0, strpos($val, ' '));
     $val1 = $this->escape(trim(substr($val, strlen($lg))));
     return "{$key} {$lg} '{$val1}'";
   }
 
-  protected function _getNormalSQL($key, $val)
+  protected function getNormalSQL($key, $val)
   {
     return "{$key}='{$this->escape($val)}'";
   }
