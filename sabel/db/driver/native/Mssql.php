@@ -37,14 +37,9 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
   {
     $this->query->makeConditionQuery($conditions);
     if ($constraints) {
-      $constraints['defColumn'] = $this->defColumn;
+      $constraints['defCol'] = $this->defColumn;
       $this->query->makeConstraintQuery($constraints);
     }
-  }
-
-  public function test()
-  {
-    return $this->query->getSQL();
   }
 
   public function getLastInsertId()

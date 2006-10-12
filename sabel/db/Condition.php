@@ -7,6 +7,7 @@ class Sabel_DB_Condition
   const NORMAL  = 'NORMAL';
   const ISNULL  = 'NULL';
   const NOTNULL = 'NOTNULL';
+  const COMPARE = 'COMPARE';
 
   const EITHER  = 'OR_';
   const BET     = 'BET_';
@@ -15,9 +16,9 @@ class Sabel_DB_Condition
 
   protected $values = array();
 
-  public function __construct($key, $value, $not = null)
+  public function __construct($key, $val, $not = null)
   {
-    list($key, $type) = $this->getType($key, $value);
+    list($key, $type, $value) = $this->getType($key, $val);
 
     $this->values['key']   = $key;
     $this->values['type']  = $type;
@@ -45,7 +46,9 @@ class Sabel_DB_Condition
       $key  = str_replace(self::EITHER, '', $key);
       $type = self::EITHER;
     } else {
-      if (strtolower($val) === 'null') {
+      if ($val[0] === '>' || $val[0] === '<') {
+        $type = self::COMPARE;
+      } else if (strtolower($val) === 'null') {
         $type = self::ISNULL;
       } else if (strtolower($val) === 'not null') {
         $type = self::NOTNULL;
@@ -53,6 +56,6 @@ class Sabel_DB_Condition
         $type = self::NORMAL;
       }
     }
-    return array($key, $type);
+    return array($key, $type, $val);
   }
 }

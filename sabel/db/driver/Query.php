@@ -32,9 +32,12 @@ abstract class Sabel_DB_Driver_Query
     if (!$conditions) return true;
 
     foreach ($conditions as $key => $condition) {
-      switch ($condition->type) :
+      switch ($condition->type) {
         case Sabel_DB_Condition::NORMAL:
           $this->makeNormalConditionQuery($key, $condition);
+          continue;
+        case Sabel_DB_Condition::COMPARE:
+          $this->makeLessGreaterSQL($key, $condition->value);
           continue;
         case Sabel_DB_Condition::ISNULL:
           $this->makeIsNullSQL($key);
@@ -54,21 +57,15 @@ abstract class Sabel_DB_Driver_Query
         case Sabel_DB_Condition::EITHER:
           $this->prepareEitherSQL($key, $condition->value);
           continue;
-      endswitch;
+      }
     }
     return (count($conditions) === $this->nmlCount);
   }
 
   protected function makeNormalConditionQuery($key, $condition)
   {
-    $value = $condition->value;
-
-    if ($value[0] === '>' || $value[0] === '<') {
-      $this->makeLessGreaterSQL($key, $value);
-    } else {
-      $this->makeNormalSQL($key, $value);
-      $this->nmlCount++;
-    }
+    $this->makeNormalSQL($key, $condition->value);
+    $this->nmlCount++;
   }
 
   public function getSQL()

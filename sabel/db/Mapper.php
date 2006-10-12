@@ -127,16 +127,6 @@ abstract class Sabel_DB_Mapper
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }
 
-  public function enableParent()
-  {
-    $this->withParent = true;
-  }
-
-  public function disableParent()
-  {
-    $this->withParent = false;
-  }
-
   public function getMyChildConstraint()
   {
     return $this->childConstraints;
@@ -975,5 +965,15 @@ abstract class Sabel_DB_Mapper
   public function getMyChildren()
   {
     return $this->myChildren;
+  }
+
+  public function enableParent()
+  {
+    $this->withParent = true;
+  }
+
+  public function disableParent()
+  {
+    $this->withParent = false;
   }
 }

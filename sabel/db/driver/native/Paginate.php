@@ -16,8 +16,8 @@ class Sabel_DB_Driver_Native_Paginate
 
   public function standardPaginate()
   {
-    if (isset($this->limit))  array_push($this->sql, " LIMIT {$this->limit}");
-    if (isset($this->offset)) array_push($this->sql, " OFFSET {$this->offset}");
+    if (isset($this->limit))  array_push($this->sql, ' LIMIT '  . $this->limit);
+    if (isset($this->offset)) array_push($this->sql, ' OFFSET ' . $this->offset);
     return $this->sql;
   }
 
@@ -30,7 +30,7 @@ class Sabel_DB_Driver_Native_Paginate
       $query .= (isset($this->offset)) ? "SKIP {$this->offset}" : 'SKIP 0';
       return array('SELECT ' . $query . $tmp);
     }
-    
+
     if (isset($this->offset)) $this->sql = array('SELECT SKIP ' . $this->offset . $tmp);
     return $this->sql;
   }
@@ -71,12 +71,12 @@ class Sabel_DB_Driver_Native_Paginate
     if ($condition) $tmp = str_replace($condition, '', $tmp);
   
     $sp = explode(' ', strstr($tmp, 'FROM'));
-    $subSelect  = "WHERE {$orderColumn} NOT IN ";
-    $subSelect .= "(SELECT TOP {$this->offset} {$orderColumn} FROM {$sp[1]} ";
-    if ($condition) $subSelect .= "{$condition} ";
+    $subSelect  = "WHERE $orderColumn NOT IN ";
+    $subSelect .= "(SELECT TOP {$this->offset} $orderColumn FROM {$sp[1]} ";
+    if ($condition) $subSelect .= "$condition ";
   
     $subSelect = $subSelect . $orderStr . ') ';
-    if ($condition) $subSelect = "{$subSelect} AND " . str_replace('WHERE ', '', $condition);
+    if ($condition) $subSelect = "$subSelect AND " . str_replace('WHERE ', '', $condition);
 
     return array($subSelect, $orderStr);
   }

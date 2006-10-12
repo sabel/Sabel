@@ -15,9 +15,9 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
   {
     $sql = array();
     foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
-    $this->setBasicSQL("UPDATE {$table} SET " . join(',', $sql));
+    $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
 
-    foreach ($data as $key => $d) $data[$key] = $this->escape($d);
+    foreach ($data as $key => $val) $data[$key] = $this->escape($val);
     return $data;
   }
 
@@ -31,7 +31,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
       array_push($values, ':' . $key);
     }
 
-    $sql = array("INSERT INTO {$table}(");
+    $sql = array("INSERT INTO $table (");
     array_push($sql, join(',', $columns));
     array_push($sql, ") VALUES(");
     array_push($sql, join(',', $values));
@@ -41,30 +41,23 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     return array(join('', $sql), $data);
   }
 
-  public function makeConstraintQuery($constraints)
+  public function makeConstraintQuery($const)
   {
-    if (isset($constraints['group']))
-      array_push($this->sql, " GROUP BY {$constraints['group']}");
-
-    if (isset($constraints['order']))
-      array_push($this->sql, " ORDER BY {$constraints['order']}");
-
-    if (isset($constraints['limit']))
-      array_push($this->sql, " LIMIT {$constraints['limit']}");
-
-    if (isset($constraints['offset']))
-      array_push($this->sql, " OFFSET {$constraints['offset']}");
+    if (isset($const['group']))  array_push($this->sql, ' GROUP BY ' . $const['group']);
+    if (isset($const['order']))  array_push($this->sql, ' ORDER BY ' . $const['order']);
+    if (isset($const['limit']))  array_push($this->sql, ' LIMIT '    . $const['limit']);
+    if (isset($const['offset'])) array_push($this->sql, ' OFFSET '   . $const['offset']);
   }
 
   protected function makeNormalSQL($key, $val)
   {
-    $this->setWhereQuery($this->getNormalSQL($key, $val, $key.$this->count++));
+    $this->setWhereQuery($this->getNormalSQL($key, $val, $key . $this->count++));
   }
 
   protected function makeLikeSQL($key, $val, $esc = null)
   {
     $bindKey = $key . $this->count++;
-    $query   = "{$key} LIKE :{$bindKey}";
+    $query   = "$key LIKE :{$bindKey}";
     if (isset($esc)) $query .= " escape '{$esc}'";
 
     $this->setWhereQuery($query);
@@ -76,7 +69,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
     $f = $this->count++;
     $t = $this->count++;
 
-    $this->setWhereQuery("{$key} BETWEEN :from{$f} AND :to{$t}");
+    $this->setWhereQuery("$key BETWEEN :from{$f} AND :to{$t}");
     $this->param["from{$f}"] = $val[0];
     $this->param["to{$t}"]   = $val[1];
   }
@@ -84,11 +77,11 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
   protected function makeEitherSQL($key, $val)
   {
     if ($val[0] === '<' || $val[0] === '>') {
-      return $this->getLessGreaterSQL($key, $val, $key.$this->count++);
+      return $this->getLessGreaterSQL($key, $val, $key . $this->count++);
     } else if (strtolower($val) === 'null') {
-      return "{$key} IS NULL";
+      return "$key IS NULL";
     } else {
-      return $this->getNormalSQL($key, $val, $key.$this->count++);
+      return $this->getNormalSQL($key, $val, $key . $this->count++);
     }
   }
 
@@ -99,9 +92,9 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
 
   protected function getLessGreaterSQL($key, $val, $bindKey)
   {
-    $lg = substr($val, 0, strpos($val, ' '));
-    $this->param[$bindKey] = trim(substr($val, strlen($lg)));
-    return "{$key} {$lg} :{$bindKey}";
+    list($lg, $val) = array_map('trim', explode(' ', $val));
+    $this->param[$bindKey] = $this->escape($val);
+    return "$key $lg :{$bindKey}";
   }
 
   protected function getNormalSQL($key, $val, $bindKey)

@@ -401,6 +401,14 @@ class Test_DB_Test extends SabelTestCase
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
+
+    $test->OR_id(array('<= 2', '>= 5'));
+    $test->sconst('order', 'id');
+    $obj = $test->select();
+    $this->assertEquals((int) $obj[0]->id, 1);
+    $this->assertEquals((int) $obj[1]->id, 2);
+    $this->assertEquals((int) $obj[2]->id, 5);
+    $this->assertEquals((int) $obj[3]->id, 6);
   }
 
   public function testInfiniteLoop()
