@@ -33,8 +33,9 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
   public function getLastInsertId()
   {
     $this->driverExecute('SELECT last_insert_id()');
-    $row = $this->fetch(Sabel_DB_Mapper::ASSOC);
-    return (int)$row['last_insert_id()'];
+    $resultSet = $this->fetch();
+    $row = $resultSet->fetch();
+    return (int)$row[0];
   }
 
   public function driverExecute($sql = null, $conn = null)
@@ -57,8 +58,12 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    return ($style === Sabel_DB_Mapper::ASSOC) ? mysql_fetch_assoc($this->result)
-                                               : mysql_fetch_array($this->result);
+    $result = ($style === Sabel_DB_Mapper::ASSOC) ? mysql_fetch_assoc($this->result)
+                                                  : mysql_fetch_array($this->result);
+
+    $resultSet = new Sabel_DB_ResultSet();
+    $resultSet->add($result);
+    return $resultSet;
   }
 
   public function fetchAll($style = null)
@@ -69,6 +74,6 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     if (is_resource($result)) {
       while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
     }
-    return $rows;
+    return new Sabel_DB_ResultSet($rows);
   }
 }

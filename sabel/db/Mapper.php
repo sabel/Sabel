@@ -205,7 +205,8 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
     $this->tryExecute($driver);
-    $row = $driver->fetch();
+    $resultSet = $driver->fetch();
+    $row = $resultSet->getFirstItem();
     return (int)$row[0];
   }
 
@@ -257,7 +258,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    return ($rows = $driver->fetchAll(self::ASSOC)) ? $this->toObject($rows) : false;
+    return $this->toObject($driver->fetchAll(self::ASSOC));
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -284,7 +285,8 @@ abstract class Sabel_DB_Mapper
     $model->selectCondition = $model->conditions;
 
     $this->tryExecute($driver);
-    if ($row = $driver->fetch(self::ASSOC)) {
+    $resultSet = $driver->fetch(self::ASSOC);
+    if ($row = $resultSet->fetch()) {
       if ($model->withParent) $row = $model->selectWithParent($row);
 
       $model->setSelectedProperty($model, $row);
@@ -342,10 +344,11 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    if (!($rows = $driver->fetchAll(self::ASSOC))) return false;
+    $resultSet = $driver->fetchAll(self::ASSOC);
+    if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
-    foreach ($rows as $row) {
+    foreach ($resultSet as $row) {
       $models = $this->makeEachModelObject($row, $relTables);
       $obj    = $models[$myTable];
 
@@ -457,11 +460,11 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
 
-    $rows = $driver->fetchAll(self::ASSOC);
-    if (!$rows) return false;
+    $resultSet = $driver->fetchAll(self::ASSOC);
+    if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
-    foreach ($rows as $row) {
+    foreach ($resultSet as $row) {
       if (is_null($child)) {
         $model = $this->newClass($this->table);
         $withParent = $this->withParent;
@@ -470,12 +473,9 @@ abstract class Sabel_DB_Mapper
         $model = $this->newClass($child);
         $withParent = ($this->withParent) ? true : $model->withParent;
       }
-
-      if ($withParent)
-        $row = $this->selectWithParent($row);
+      if ($withParent) $row = $this->selectWithParent($row);
 
       $this->setSelectedProperty($model, $row);
-
       if (!is_null($myChild = $model->getMyChildren())) {
         if (isset($child)) $this->chooseMyChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
@@ -540,8 +540,8 @@ abstract class Sabel_DB_Mapper
       $driver->makeQuery($model->conditions);
 
       $this->tryExecute($driver);
-      $row = $driver->fetch(self::ASSOC);
-      if (!$row) {
+      $resultSet = $driver->fetch(self::ASSOC);
+      if (!$row = $resultSet->fetch()) {
         $model->selected = true;
         $model->id = $id;
         return $model;
@@ -806,17 +806,16 @@ abstract class Sabel_DB_Mapper
 
     $driver = Sabel_DB_Executer::getDriver($this);
     $this->tryExecute($driver, $sql, $param);
-    $rows = $driver->fetchAll(self::ASSOC);
-    return $this->toObject($rows);
+    return $this->toObject($driver->fetchAll(self::ASSOC));
   }
 
-  protected function toObject($rows)
+  protected function toObject($resultSet)
   {
-    if (!is_array($rows) || empty($rows)) return false;
+    if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
     $model = $this->newClass($this->table);
-    foreach ($rows as $row) {
+    foreach ($resultSet as $row) {
       $cloned = clone($model);
       $cloned->setProperties($row);
       $recordObj[] = $cloned;

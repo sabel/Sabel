@@ -50,12 +50,16 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 
   public function fetch($style = null)
   {
-    return ($style === Sabel_DB_Mapper::ASSOC) ? pg_fetch_assoc($this->result)
-                                               : pg_fetch_array($this->result);
+    $result = ($style === Sabel_DB_Mapper::ASSOC) ? pg_fetch_assoc($this->result)
+                                                  : pg_fetch_array($this->result);
+
+    $resultSet = new Sabel_DB_ResultSet();
+    $resultSet->add($result);
+    return $resultSet;
   }
 
   public function fetchAll($style = null)
   {
-    return pg_fetch_all($this->result);
+    return new Sabel_DB_ResultSet(pg_fetch_all($this->result));
   }
 }

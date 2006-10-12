@@ -52,7 +52,8 @@ abstract class Sabel_DB_Driver_General
   {
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
-      $row = $this->fetch();
+      $resultSet = $this->fetch();
+      $row = $resultSet->fetch();
       if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {
@@ -86,7 +87,8 @@ abstract class Sabel_DB_Driver_General
   public function checkTableEngine($table)
   {
     $this->driverExecute("SHOW TABLE STATUS WHERE Name='{$table}'", null);
-    $res = $this->fetch(Sabel_DB_Mapper::ASSOC);
+    $resultSet = $this->fetch(Sabel_DB_Mapper::ASSOC);
+    $res = $resultSet->fetch();
     if ($res['Engine'] !== 'InnoDB' && $res['Engine'] !== 'BDB') {
       $msg = "The Engine of '{$table}' is {$res['Engine']} though the transaction was tried.";
       trigger_error($msg, E_USER_NOTICE);

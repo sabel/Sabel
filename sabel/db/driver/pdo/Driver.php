@@ -60,8 +60,9 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->driverExecute('SELECT last_insert_id()');
-        $row = $this->fetch(Sabel_DB_Mapper::ASSOC);
-        return $row['last_insert_id()'];
+        $resultSet = $this->fetch();
+        $row = $resultSet->fetch();
+        return $row[0];
       case 'sqlite':
         return $this->conn->lastInsertId();
     }
@@ -107,19 +108,22 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
   public function fetch($style = null)
   {
     $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetch(PDO::FETCH_ASSOC)
-                                                  : $this->stmt->fetch(PDO::FETCH_BOTH);
+                                                  : $this->stmt->fetch(PDO::FETCH_NUM);
 
     $this->stmt->closeCursor();
-    return $result;
+
+    $resultSet = new Sabel_DB_ResultSet();
+    $resultSet->add($result);
+    return $resultSet;
   }
 
   public function fetchAll($style = null)
   {
     $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetchAll(PDO::FETCH_ASSOC)
-                                                  : $this->stmt->fetchAll(PDO::FETCH_BOTH);
+                                                  : $this->stmt->fetchAll(PDO::FETCH_NUM);
 
     $this->stmt->closeCursor();
-    return $result;
+    return new Sabel_DB_ResultSet($result);
   }
 
   private function makeBindParam()
