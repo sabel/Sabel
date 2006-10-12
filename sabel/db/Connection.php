@@ -15,7 +15,7 @@ class Sabel_DB_Connection
 
   protected static function makeDatabaseLink($connectName)
   {
-    if (is_null(self::$parameters[$connectName]))
+    if (!isset(self::$parameters[$connectName]))
       throw new Exception('Error: database parameters are not found: ' . $connectName);
 
     if (!is_array($params = self::$parameters[$connectName]))
@@ -33,8 +33,8 @@ class Sabel_DB_Connection
         $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
       }
 
-      $list['driver'] = 'pdo';
-      $list['db']     = $db;
+      $list['drvName'] = 'pdo';
+      $list['db']      = $db;
     } else {
       $host = $params['host'];
       $user = $params['user'];
@@ -58,17 +58,17 @@ class Sabel_DB_Connection
         mssql_select_db($dbs, $list['conn']);
       }
 
-      $list['driver'] = $driver;
-      $list['db']     = $driver;
+      $list['drvName'] = $driver;
+      $list['db']      = $driver;
     }
 
     if (isset($params['encoding'])) {
       $db  = $list['db'];
       $enc = $params['encoding'];
 
-      if ($list['driver'] === 'pdo' && $db === 'mysql') {
+      if ($list['drvName'] === 'pdo' && $db === 'mysql') {
         $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } else if ($list['driver'] === 'pdo' && $db === 'pgsql') {
+      } else if ($list['drvName'] === 'pdo' && $db === 'pgsql') {
         $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
       } else if ($db === 'mysql') {
         mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
@@ -82,6 +82,36 @@ class Sabel_DB_Connection
     return $list['conn'];
   }
 
+  public static function createDBDriver($connectName)
+  {
+    $conn = self::getConnection($connectName);
+    switch (self::getDriverName($connectName)) {
+      case 'pdo':
+        $pdoDb = self::getDB($connectName);
+        $driver = new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
+        break;
+      case 'pgsql':
+        $driver = new Sabel_DB_Driver_Native_Pgsql($conn);
+        break;
+      case 'mysql':
+        $driver = new Sabel_DB_Driver_Native_Mysql($conn);
+        break;
+      case 'firebird':
+        $driver = new Sabel_DB_Driver_Native_Firebird($conn);
+        break;
+      case 'mssql':
+        $driver = new Sabel_DB_Driver_Native_($conn);
+        break;
+    }
+    self::$connList[$connectName]['driver'] = $driver;
+    return $driver;
+  }
+
+  public static function getDBDriver($connectName)
+  {
+    return self::getValue($connectName, 'driver');
+  }
+
   public static function getConnection($connectName)
   {
     self::issetList($connectName, 'conn');
@@ -91,7 +121,7 @@ class Sabel_DB_Connection
   public static function getDriverName($connectName)
   {
     self::issetList($connectName, 'conn');
-    return self::getValue($connectName, 'driver');
+    return self::getValue($connectName, 'drvName');
   }
 
   public static function getDB($connectName)

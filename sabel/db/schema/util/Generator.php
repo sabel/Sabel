@@ -204,7 +204,7 @@ class TableList_Writer
 
   public static function write($connectName)
   {
-    $className = ucfirst($connectName) . '_TableList';
+    $className = 'Schema_' . ucfirst($connectName) . 'TableList';
     $target = SCHEMA_DIR . "{$className}.php";
     echo "generate Table List: {$connectName}\n\n";
     $fp = fopen($target, 'w');

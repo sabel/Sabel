@@ -39,32 +39,13 @@ abstract class Sabel_DB_Mapper
 
   public function setDriver($connectName)
   {
-    $this->driver = $this->makeDriver($connectName);
+    $this->connectName = $connectName;
+    $this->driver = Sabel_DB_Connection::createDBDriver($connectName);
   }
 
   protected function getDriver()
   {
     return $this->driver;
-  }
-
-  protected function makeDriver($connectName)
-  {
-    $this->connectName = $connectName;
-    $conn = Sabel_DB_Connection::getConnection($connectName);
-
-    switch (Sabel_DB_Connection::getDriverName($connectName)) {
-      case 'pdo':
-        $pdoDb = Sabel_DB_Connection::getDB($connectName);
-        return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
-      case 'pgsql':
-        return new Sabel_DB_Driver_Native_Pgsql($conn);
-      case 'mysql':
-        return new Sabel_DB_Driver_Native_Mysql($conn);
-      case 'firebird':
-        return new Sabel_DB_Driver_Native_Firebird($conn);
-      case 'mssql':
-        return new Sabel_DB_Driver_Native_Mssql($conn, $this->incColumn);
-    }
   }
 
   public function getConnectName()
@@ -186,6 +167,11 @@ abstract class Sabel_DB_Mapper
     $this->conditions[$condition->key] = $condition;
   }
 
+  public function getCondition()
+  {
+    return $this->conditions;
+  }
+
   public function unsetCondition()
   {
     $this->conditions = array();
@@ -214,7 +200,7 @@ abstract class Sabel_DB_Mapper
   {
     $this->setCondition($param1, $param2, $param3);
 
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setBasicSQL('SELECT count(*) FROM ' . $this->table);
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
@@ -231,8 +217,9 @@ abstract class Sabel_DB_Mapper
     $conditions  = array();
     $constraints = array('limit' => 1);
 
-    $this->driver->setBasicSQL("SELECT * FROM {$table}");
-    $res = $this->getRecords($this->driver, $conditions, $constraints);
+    $driver = Sabel_DB_Executer::getDriver($this);
+    $driver->setBasicSQL("SELECT * FROM {$table}");
+    $res = $this->getRecords($driver, $conditions, $constraints);
 
     return array_keys($res[0]->toArray());
   }
@@ -265,7 +252,7 @@ abstract class Sabel_DB_Mapper
     }
     $this->setConstraint('group', $columns);
 
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setBasicSQL("SELECT {$columns}, {$func} FROM {$table}");
     $driver->makeQuery($this->conditions, $this->constraints);
 
@@ -350,7 +337,7 @@ abstract class Sabel_DB_Mapper
 
     foreach ($relTables as $pair) array_push($sql, $this->getLeftJoin($pair));
 
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setBasicSQL(join('', $sql));
     $driver->makeQuery($this->conditions, $this->constraints);
 
@@ -439,7 +426,7 @@ abstract class Sabel_DB_Mapper
   {
     $this->addSelectCondition($param1, $param2, $param3);
 
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     return $this->getRecords($driver, $this->conditions, $this->constraints);
   }
@@ -668,7 +655,7 @@ abstract class Sabel_DB_Mapper
 
   public function allUpdate($data)
   {
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setUpdateSQL($this->table, $data);
     $driver->makeQuery($this->conditions);
 
@@ -678,7 +665,7 @@ abstract class Sabel_DB_Mapper
 
   protected function update()
   {
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setUpdateSQL($this->table, $this->newData);
     $driver->makeQuery($this->selectCondition);
 
@@ -694,8 +681,9 @@ abstract class Sabel_DB_Mapper
 
     try {
       $idColumn = ($this->autoNumber) ? $this->incColumn : false;
-      $this->driver->executeInsert($this->table, $this->data, $idColumn);
-      return $this->driver->getLastInsertId();
+      $driver   = Sabel_DB_Executer::getDriver($this);
+      $driver->executeInsert($this->table, $this->data, $idColumn);
+      return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -708,7 +696,8 @@ abstract class Sabel_DB_Mapper
     $this->begin();
     try {
       $idColumn = ($this->autoNumber) ? $this->incColumn : false;
-      foreach ($data as $val) $this->driver->executeInsert($this->table, $val, $idColumn);
+      $driver   = Sabel_DB_Executer::getDriver($this);
+      foreach ($data as $val) $driver->executeInsert($this->table, $val, $idColumn);
       $this->commit();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
@@ -731,7 +720,7 @@ abstract class Sabel_DB_Mapper
       $this->setCondition($this->incColumn, $idValue);
     }
 
-    $driver = $this->driver;
+    $driver = Sabel_DB_Executer::getDriver($this);
     $driver->setBasicSQL("DELETE FROM {$this->table}");
     $driver->makeQuery($this->conditions);
 
@@ -815,8 +804,9 @@ abstract class Sabel_DB_Mapper
     if (!empty($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
-    $this->tryExecute($this->driver, $sql, $param);
-    $rows = $this->driver->fetchAll(self::ASSOC);
+    $driver = Sabel_DB_Executer::getDriver($this);
+    $this->tryExecute($driver, $sql, $param);
+    $rows = $driver->fetchAll(self::ASSOC);
     return $this->toObject($rows);
   }
 
@@ -975,5 +965,10 @@ abstract class Sabel_DB_Mapper
   public function disableParent()
   {
     $this->withParent = false;
+  }
+
+  public function getQueryMaker()
+  {
+    return $this->driver->getQueryMaker();
   }
 }

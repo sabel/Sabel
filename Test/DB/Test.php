@@ -1203,7 +1203,7 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-abstract class Mapper_Default extends Sabel_DB_Mapper
+abstract class MapperDefault extends Sabel_DB_Mapper
 {
   public function __construct($param1 = null, $param2 = null)
   {
@@ -1212,37 +1212,37 @@ abstract class Mapper_Default extends Sabel_DB_Mapper
   }
 }
 
-class Test extends Mapper_Default
+class Test extends MapperDefault
 {
   protected $withParent = true;
 }
 
-class Test2 extends Mapper_Default
+class Test2 extends MapperDefault
 {
 
 }
 
-class Test3 extends Mapper_Default
+class Test3 extends MapperDefault
 {
 
 }
 
-class Infinite1 extends Mapper_Default
+class Infinite1 extends MapperDefault
 {
 
 }
 
-class Infinite2 extends Mapper_Default
+class Infinite2 extends MapperDefault
 {
 
 }
 
-class Seq extends Mapper_Default
+class Seq extends MapperDefault
 {
 
 }
 
-class Customer extends Mapper_Default
+class Customer extends MapperDefault
 {
   protected $myChildren = array('CustomerOrder', 'CustomerTelephone');
   protected $defChildConstraints = array('limit' => 10);
@@ -1254,7 +1254,7 @@ class Customer extends Mapper_Default
   }
 }
 
-class CustomerOrder extends Mapper_Default
+class CustomerOrder extends MapperDefault
 {
   protected $table      = 'customer_order';
   protected $myChildren = 'OrderLine';
@@ -1266,12 +1266,12 @@ class CustomerOrder extends Mapper_Default
   }
 }
 
-class OrderLine extends Mapper_Default
+class OrderLine extends MapperDefault
 {
   protected $table = 'order_line';
 }
 
-class CustomerTelephone extends Mapper_Default
+class CustomerTelephone extends MapperDefault
 {
   protected $table = 'customer_telephone';
 }
@@ -1312,12 +1312,12 @@ class Course extends Bridge_Base
 
 }
 
-class StudentCourse extends Mapper_Default
+class StudentCourse extends MapperDefault
 {
   protected $table = 'student_course';
 }
 
-class Trans1 extends Mapper_Default
+class Trans1 extends MapperDefault
 {
 
 }
@@ -1331,22 +1331,94 @@ class Trans2 extends Sabel_DB_Mapper
   }
 }
 
-class Users extends Mapper_Default
+class Users extends MapperDefault
 {
 
 }
 
-class Bbs extends Mapper_Default
+class Bbs extends MapperDefault
 {
 
 }
 
-class Status extends Mapper_Default
+class Status extends MapperDefault
 {
 
 }
 
-class SchemaTest extends Mapper_Default
+class SchemaTest extends MapperDefault
 {
   protected $table = 'schema_test';
+}
+
+class Schema_MyTableList
+{
+  public function get()
+  {
+    $list = array('test', 'test2', 'test3',
+                  'customer', 'customer_order', 'order_line',
+                  'customer_telephone', 'infinite1', 'infinite2',
+                  'seq', 'tree', 'student', 'student_course', 'schema_test',
+                  'course', 'users', 'status', 'bbs', 'trans1');
+
+    return $list;
+  }
+}
+
+class Schema_PgTableList
+{
+  public function get()
+  {
+    $list = array('test', 'test2', 'test3',
+                  'customer', 'customer_order', 'order_line',
+                  'customer_telephone', 'infinite1', 'infinite2',
+                  'seq', 'tree', 'student', 'student_course', 'schema_test',
+                  'course', 'users', 'status', 'bbs', 'trans1');
+
+    return $list;
+  }
+}
+
+class Schema_SqTableList
+{
+  public function get()
+  {
+    $list = array('test', 'test2', 'test3',
+                  'customer', 'customer_order', 'order_line',
+                  'customer_telephone', 'infinite1', 'infinite2',
+                  'seq', 'tree', 'student', 'student_course', 'schema_test',
+                  'course', 'users', 'status', 'bbs', 'trans1');
+
+    return $list;
+  }
+}
+
+class Schema_My2TableList
+{
+  public function get()
+  {
+    $list = array('trans2');
+
+    return $list;
+  }
+}
+
+class Schema_Pg2TableList
+{
+  public function get()
+  {
+    $list = array('trans2');
+
+    return $list;
+  }
+}
+
+class Schema_Sq2TableList
+{
+  public function get()
+  {
+    $list = array('trans2');
+
+    return $list;
+  }
 }

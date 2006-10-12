@@ -8,14 +8,18 @@
  */
 class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
 {
-  private $defColumn = '';
+  private $defCol = '';
 
-  public function __construct($conn, $defColumn)
+  public function __construct($conn)
   {
     $this->conn      = $conn;
     $this->dbType    = 'mssql';
-    $this->defColumn = $defColumn;
     $this->query     = new Sabel_DB_Driver_Native_Query('mssql', 'mssql_escape_string');
+  }
+
+  public function setDefaultOrderKey($pKey)
+  {
+    $this->defCol = $pKey;
   }
 
   public function begin($conn)
@@ -37,7 +41,7 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
   {
     $this->query->makeConditionQuery($conditions);
     if ($constraints) {
-      $constraints['defCol'] = $this->defColumn;
+      $constraints['defCol'] = $this->defCol;
       $this->query->makeConstraintQuery($constraints);
     }
   }
