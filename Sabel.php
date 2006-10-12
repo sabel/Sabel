@@ -6,20 +6,28 @@ class Sabel
 {
   public static function initializeApplication()
   {
+    $conbinators = array(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'),
+                         new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'),
+                         new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'aspects'),
+                         new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+                         
     if (ENVIRONMENT === 'development') {
       $c = Container::create();
+      
       $dt = new DirectoryTraverser();
-      $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+      $cc = new ClassCombinator(SABEL_CLASSES, null, false);
+      $dt->visit($cc);
       $dt->visit(new SabelClassRegister($c));
       $dt->traverse();
+      $cc->write();
       unset($dt);
+      
       $dt = new DirectoryTraverser(RUN_BASE);
-      $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
-      $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
-      $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
-      $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+      foreach ($conbinators as $conbinator) $dt->visit($conbinator);
       $dt->visit(new AppClassRegister($c));
       $dt->traverse();
+      foreach ($conbinators as $conbinator) $conbinator->write();
+      
       if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       require_once(APP_CACHE);
       require_once(LIB_CACHE);
@@ -43,17 +51,19 @@ class Sabel
         $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
         $c = Container::create();
         $dt = new DirectoryTraverser();
-        $dt->visit(new ClassCombinator(SABEL_CLASSES, null, false));
+        $cc = new ClassCombinator(SABEL_CLASSES, null, false);
+        $dt->visit($cc);
         $dt->visit(new SabelClassRegister($c));
         $dt->traverse();
+        $cc->write();
         unset($dt);
+        
         $dt = new DirectoryTraverser(RUN_BASE);
-        $dt->visit(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'));
-        $dt->visit(new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'));
-        $dt->visit(new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
-        $dt->visit(new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'injections'));
+        foreach ($conbinators as $conbinator) $dt->visit($conbinator);
         $dt->visit(new AppClassRegister($c));
         $dt->traverse();
+        foreach ($conbinators as $conbinator) $conbinator->write();
+        
         require_once(SABEL_CLASSES);
         require_once(APP_CACHE);
         require_once(LIB_CACHE);
@@ -309,25 +319,26 @@ class SabelClassRegister
 
 class ClassCombinator
 {
-  protected $file = null;
+  protected $path = '';
   protected $lineTrim   = null;
   protected $base = '';
   protected $strict = '';
   
+  protected $files = array();
+  protected $filesOfHasParent = array();
+  
   public function __construct($path, $base = null, $lineTrim = true, $strict = 'sabel')
   {
+    $this->path = $path;
     $this->strict = $strict;
+    $this->lineTrim = $lineTrim;
+    $this->files = new ClassFiles();
     
     if (is_null($base)) {
       $this->base = dirname(__FILE__) . '/';
     } else {
       $this->base = $base . '/';
     }
-    
-    $this->file = fopen($path, 'w');
-    if (!$this->file) throw new Exception("{$path} can't open.");
-    fwrite($this->file, '<?php ');
-    $this->lineTrim = $lineTrim;
   }
   
   public function accept($value, $type, $child = null)
@@ -338,22 +349,251 @@ class ClassCombinator
     if ($type === 'file' && preg_match('%.*\.php%', $value)) {
       if ($parts[0] === $this->strict) {
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
-        while (!feof($fp)) {
-          $line = trim(fgets($fp));
-          if ($this->lineTrim) {
-            if ($this->isLineValid($line)) fputs($this->file, $line);
-          } else {
-            if ($this->isLineValid($line)) fputs($this->file, $line . "\n");
-          }
+        $classFile = new ClassFile($value);
+        while (!feof($fp)) $classFile->addLine(trim(fgets($fp)));
+        fclose($fp);
+        $this->files->add($classFile);
+      }
+    }
+  }
+  
+  public function write()
+  {
+    $buf = array();
+    $buf[] = "<?php \n";
+    
+    $this->files->findChilds();
+    $files = $this->files->gets();
+    
+    $conflicts = array();
+    
+    foreach ($files as $file) {
+      if ($file->hasChild()) {
+        $conflicts[] = $file->getSelf();
+        foreach ($file->getLines() as $line) {
+          $buf[] = $line;
         }
       }
     }
+    
+    foreach ($files as $file) {
+      if ($file->hasBoth() && !in_array($file->getSelf(), $conflicts)) {
+        $conflicts[] = $file->getSelf();
+        foreach ($file->getLines() as $line) {
+          $buf[] = $line;
+        }
+      }
+    }
+    
+    foreach ($files as $file) {
+      if ($file->hasParent() && !in_array($file->getSelf(), $conflicts)) {
+        $conflicts[] = $file->getSelf();
+        foreach ($file->getLines() as $line) {
+          $buf[]= $line;
+        }
+      }
+    }
+    
+    foreach ($files as $file) {
+      if ($file->hasnt() && !in_array($file->getSelf(), $conflicts)) {
+        foreach ($file->getLines() as $line) {
+          $buf[]= $line;
+        }
+      }
+    }
+    
+    $fp = fopen($this->path, 'w');
+    foreach ($buf as $b) {
+      fputs($fp, $b);
+    }
+    fclose($fp);
+  }
+  
+  protected function isExtends($line)
+  {
+    return preg_match('%^(abstract class|class).*(extends|implements).*%', $line);
   }
   
   protected function isLineValid($line)
   {
     return ($line != '<?php' && $line != '?>' && !preg_match('%\/\/ %', $line));
   }
+}
+
+class ClassFiles
+{
+  protected $classFiles = array();
+  
+  public function add($classFile)
+  {
+    if (!$classFile instanceof ClassFile) throw new Exception("it's not ClassFile");
+    $this->classFiles[] = $classFile;
+  }
+  
+  public function gets()
+  {
+    return $this->classFiles;
+  }
+  
+  public function findChilds()
+  {
+    $files = $this->classFiles;
+    foreach ($files as $parent) {
+      foreach ($files as $child) {
+        if ($child->hasParent() && $child->getParent() === $parent->getSelf()) {
+          $parent->addChild($child->getSelf());
+        }
+      }
+    }
+  }
+}
+
+class ClassFile
+{
+  protected $self = '';
+  protected $parent = '';
+  protected $childs  = array();
+  
+  protected $hasParent = false;
+  protected $hasChild  = false;
+  
+  protected $lineOfClassDefine = '';
+  protected $lines = array();
+  
+  protected $filePath = '';
+  
+  public function __construct($filepath)
+  {
+    $this->setFilePath($filepath);
+  }
+  
+  public function getSelf()
+  {
+    return $this->self;
+  }
+  
+  public function setParent($className)
+  {
+    $this->parent = $className;
+    $this->hasParent = true;
+  }
+  
+  public function getParent()
+  {
+    return $this->parent;
+  }
+  
+  public function addChild($className)
+  {
+    $this->childs[] = $className;
+    $this->hasChild = true;
+  }
+  
+  public function getChilds()
+  {
+    return $this->childs;
+  }
+  
+  public function hasParent()
+  {
+    return $this->hasParent;
+  }
+  
+  public function hasChild()
+  {
+    return $this->hasChild;
+  }
+  
+  public function hasBoth()
+  {
+    return ($this->hasParent() && $this->hasChild());
+  }
+  
+  public function hasnt()
+  {
+    return (!$this->hasParent() && !$this->hasChild());
+  }
+  
+  public function setFilePath($filepath)
+  {
+    $this->filePath = $filepath;
+  }
+  
+  public function getFilePath()
+  {
+    return $this->filePath;
+  }
+  
+  public function addLine($line)
+  {
+    if (!$this->isLineValid($line)) return false;
+    
+    $result = $this->isExtends($line);
+    if ($result[0]) {
+      $this->hasParent = true;
+      $this->lineOfClassDefine = $line;
+      
+      $this->self   = trim($result[1][2]);
+      $this->parent = trim($result[1][4]);
+    } else {
+      $result = $this->isClassDefine($line);
+      if ($result[0]) {
+        $this->self = trim($result[1][2]);
+        $this->lineOfClassDefine = $line;
+      }
+    }
+    
+    $this->lines[] = $line . "\n";
+  }
+  
+  public function getLineOfClassDefine()
+  {
+    return $this->lineOfClassDefine;
+  }
+  
+  public function getLine($index)
+  {
+    return $this->lines[$index];
+  }
+  
+  public function setLines($lines)
+  {
+    $this->lines = $lines;
+  }
+  
+  public function getLines()
+  {
+    return $this->lines;
+  }
+  
+  protected function isExtends($line)
+  {
+    $matches = array();
+    $pat = '%^(abstract class|interface|class)(.*)(extends|implements)(.*)%';
+    $result = preg_match($pat, $line, $matches);
+    return array($result, $matches);
+  }
+  
+  protected function isClassDefine($line)
+  {
+    $matches = array();
+    $pat = '%^(abstract class|interface|class)(.*)%';
+    $result = preg_match($pat, $line, $matches);
+    return array($result, $matches);
+  }
+  
+  protected function isLineValid($line)
+  {
+    if ($line === '') return false;
+    if ($line === '<?php') return false;
+    if ($line === '?>') return false;
+    
+    // @todo this line has problem. such as "if ("//" = ...)"
+    if (preg_match('%\/\/%', $line)) return false;
+    
+    return true;
+  }
+  
 }
 
 class DirectoryTraverser

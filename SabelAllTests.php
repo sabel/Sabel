@@ -21,8 +21,13 @@ require_once('PHPUnit2/Framework/IncompleteTestError.php');
 require_once('Sabel.php');
 $c  = new Container();
 $dt = new DirectoryTraverser();
+$con = new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false);
+$dt->visit($con);
 $dt->visit(new SabelClassRegister($c));
 $dt->traverse();
+$con->write();
+
+require_once('allclasses.php');
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/Sabel.php');
@@ -45,10 +50,12 @@ require_once('Test/Map/Tests.php');
 require_once('Test/Validate.php');
 
 //* there out of naming rules. @todo fix me
+/*
 require_once('sabel/config/Spyc.php');
 require_once('sabel/template/Re.php');
 require_once('sabel/Functions.php');
 require_once('sabel/Classes.php');
+*/
 
 class SabelAllTests
 {
@@ -56,7 +63,7 @@ class SabelAllTests
   {
     PHPUnit2_TextUI_TestRunner::run(self::suite());
   }
-
+  
   public static function suite()
   {
     $suite = new PHPUnit2_Framework_TestSuite();
@@ -90,6 +97,7 @@ if (PHPUnit2_MAIN_METHOD == 'SabelAllTests::main') {
   SabelAllTests::main();
 }
 
+/*
 function __autoload($class)
 {
   $r = new NameResolver();
@@ -97,3 +105,4 @@ function __autoload($class)
   if (!is_readable($file)) throw new Exception($file . " not found");
   require_once($file);
 }
+*/
