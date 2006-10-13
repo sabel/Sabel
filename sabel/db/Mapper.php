@@ -23,27 +23,17 @@ abstract class Sabel_DB_Mapper
     $defChildConstraints = array();
 
   protected
-    $driver       = null,
-    $cachedParent = array();
-
-  protected
     $data         = array(),
     $newData      = array(),
     $parentTables = array(),
     $joinColCache = array(),
+    $cachedParent = array(),
     $cascadeStack = array(),
     $selected     = false,
     $withParent   = false;
 
-  public function getSchemaName()
-  {
-    return Sabel_DB_Connection::getSchema($this->connectName);
-  }
-
   public function __construct($param1 = null, $param2 = null)
   {
-    Sabel_DB_Connection::createDBDriver($this->connectName);
-
     if ($this->table === '') $this->table = strtolower(get_class($this));
     if (Sabel_DB_Transaction::isActive()) $this->begin();
     if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
@@ -74,6 +64,11 @@ abstract class Sabel_DB_Mapper
   public function is_selected()
   {
     return $this->selected;
+  }
+
+  public function getSchemaName()
+  {
+    return Sabel_DB_Connection::getSchema($this->connectName);
   }
 
   public function getTableSchema()
@@ -588,11 +583,10 @@ abstract class Sabel_DB_Mapper
   {
     if (!empty($data) && !is_array($data))
       throw new Exception('Error: save() argument must be an array');
-      
+
     if ($this->is_selected()) {
-      $data = ($data) ? $data : $this->newData;
       $this->conditions = $this->selectCondition;
-      $this->getExecuter()->update($data);
+      $this->getExecuter()->update(($data) ? $data : $this->newData);
     } else {
       $data = ($data) ? $data : $this->data;
       foreach ($data as $key => $val) {

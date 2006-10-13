@@ -8,8 +8,9 @@
  */
 class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 {
-  private $stmt = null;
-  private $data = array();
+  private $stmt     = null;
+  private $data     = array();
+  private $stmtFlag = false;
 
   public function __construct($conn, $dbType)
   {
@@ -98,6 +99,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     }
 
     if (!$this->stmt) {
+      $this->data = array();
       $error = $this->conn->errorInfo();
       throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
     }
@@ -125,6 +127,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
     if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);
     $this->data = array();
+    $data = array();
 
     $bindParam = array();
     if ($param) {

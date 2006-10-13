@@ -5,8 +5,6 @@ require_once('Test/DB/Mysql.php');
 require_once('Test/DB/Pgsql.php');
 require_once('Test/DB/SQLite.php');
 
-require_once('Test/DB/InformationSchema.php');
-
 class Test_DB_Tests
 {
   public static function main()
@@ -21,7 +19,6 @@ class Test_DB_Tests
     if (extension_loaded('mysql'))$suite->addTest(Test_DB_Mysql::suite());
     if (extension_loaded('pgsql'))$suite->addTest(Test_DB_Pgsql::suite());
     if (extension_loaded('pdo_sqlite')) $suite->addTest(Test_DB_SQLite::suite());
-    $suite->addTest(Test_DB_InformationSchema::suite());
     
     return $suite;
   }

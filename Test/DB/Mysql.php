@@ -49,7 +49,7 @@ class Test_DB_Mysql extends Test_DB_Test
     $obj = new Test3();
 
     $helper = new MysqlHelper();
-    $helper->create();
+    //$helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");

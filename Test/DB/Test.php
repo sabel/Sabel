@@ -664,19 +664,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$result[0]->avg_amount,   30000);
   }
 
-  /*
-    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
-    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
-    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
-    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
-    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
-    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
-    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
-    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
-    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
-    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
-  */
   public function testAllUpdate()
   {
     $line = new OrderLine();
@@ -1066,7 +1053,7 @@ class Test_DB_Test extends SabelTestCase
 
     $trans1->execute("DELETE FROM trans1");
     $trans2->execute("DELETE FROM trans2");
-
+ 
     //-------------------------------------------------------------------
 
     $trans1 = new Trans1(); // connection1
