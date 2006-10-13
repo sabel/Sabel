@@ -2,46 +2,61 @@
 
 class Sabel_DB_ResultSet implements Iterator
 {
-  protected $data    = array();
-  protected $pointer = 0;
+  const ASSOC = 0;
+  const NUM   = 1;
+
+  protected $assocRow = array();
+  protected $arrayRow = array();
+  protected $pointer  = 0;
 
   public function __construct($results = null)
   {
     if (!empty($results)) {
-      foreach ($results as $result) $this->data[] = $result;
+      foreach ($results as $result) {
+        $this->assocRow[] = $result;
+        $this->arrayRow[] = array_values($result);
+      }
     }
   }
 
   public function isEmpty()
   {
-    return (empty($this->data));
+    return (empty($this->assocRow));
   }
 
   public function add($result)
   {
-    $this->data[] = $result;
+    if (is_array($result)) {
+      $this->assocRow[] = $result;
+      $this->arrayRow[] = array_values($result);
+    }
   }
 
   public function getFirstItem()
   {
-    return $this->data[0];
+    return $this->assocRow[0];
   }
 
-  public function fetch()
+  public function fetch($style = self::ASSOC)
   {
-    $data = $this->data[$this->pointer];
-    $this->pointer++;
-    return $data;
+    if ($this->valid()) {
+      $data = ($style === self::ASSOC) ? $this->assocRow[$this->pointer]
+                                       : $this->arrayRow[$this->pointer];
+
+      $this->pointer++;
+      return $data;
+    }
   }
 
-  public function fetchAll()
+  public function fetchAll($style = self::ASSOC)
   {
-    return (empty($this->data)) ? false : $this->data;
+    $data = ($style === self::ASSOC) ? $this->assocRow : $this->arrayRow;
+    return (empty($data)) ? false : $data;
   }
 
   public function current()
   {
-    return $this->data[$this->pointer];
+    return $this->assocRow[$this->pointer];
   }
 
   public function key()
@@ -61,6 +76,6 @@ class Sabel_DB_ResultSet implements Iterator
 
   public function valid()
   {
-    return ($this->pointer < sizeof($this->data));
+    return ($this->pointer < sizeof($this->assocRow));
   }
 }

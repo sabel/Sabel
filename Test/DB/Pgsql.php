@@ -16,7 +16,8 @@ class Test_DB_Pgsql extends Test_DB_Test
                                   'schema'   => 'public',
                                   'database' => 'edo2');
 
-  public static function main() {
+  public static function main()
+  {
     require_once "PHPUnit2/TextUI/TestRunner.php";
 
     $suite  = new PHPUnit2_Framework_TestSuite("Test_DB_Pgsql");
@@ -42,9 +43,8 @@ class Test_DB_Pgsql extends Test_DB_Test
 
   public function testInit()
   {
-    Test_DB_Test::$connectName = 'pg';
-    Sabel_DB_Connection::addConnection('pg', self::$params1);
-    Sabel_DB_Connection::addConnection('pg2', self::$params2);
+    Sabel_DB_Connection::addConnection('default', self::$params1);
+    Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();

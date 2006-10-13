@@ -37,6 +37,11 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     $this->driverExecute('ROLLBACK TRANSACTION', $conn);
   }
 
+  public function close($conn)
+  {
+    mssql_close($conn);
+  }
+
   public function makeQuery($conditions, $constraints = null)
   {
     $this->query->makeConditionQuery($conditions);
@@ -71,13 +76,7 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     }
   }
 
-  public function fetch($style = null)
-  {
-    return ($style === Sabel_DB_Mapper::ASSOC) ? mssql_fetch_assoc($this->result)
-                                               : mssql_fetch_array($this->result);
-  }
-
-  public function fetchAll($style = null)
+  public function getResultSet()
   {
     $rows   = array();
     $result = $this->result;

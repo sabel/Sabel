@@ -24,7 +24,7 @@ abstract class Sabel_DB_Mapper
 
   protected
     $driver       = null,
-    $connectName  = '',
+    $connectName  = 'default',
     $cachedParent = array(),
     $projection   = '*';
 
@@ -60,9 +60,16 @@ abstract class Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
+    $this->setDriver($this->connectName);
+
     if ($this->table === '') $this->table = strtolower(get_class($this));
     if (Sabel_DB_Transaction::isActive()) $this->begin();
     if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
+  }
+
+  public function close()
+  {
+    Sabel_DB_Connection::close($this->connectName);
   }
 
   public function __set($key, $val)
@@ -205,8 +212,8 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, array('limit' => 1));
 
     $this->tryExecute($driver);
-    $resultSet = $driver->fetch();
-    $row = $resultSet->getFirstItem();
+    $resultSet = $driver->getResultSet();
+    $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
     return (int)$row[0];
   }
 
@@ -258,7 +265,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    return $this->toObject($driver->fetchAll(self::ASSOC));
+    return $this->toObject($driver->getResultSet(self::ASSOC));
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -285,7 +292,7 @@ abstract class Sabel_DB_Mapper
     $model->selectCondition = $model->conditions;
 
     $this->tryExecute($driver);
-    $resultSet = $driver->fetch(self::ASSOC);
+    $resultSet = $driver->getResultSet();
     if ($row = $resultSet->fetch()) {
       if ($model->withParent) $row = $model->selectWithParent($row);
 
@@ -344,7 +351,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($this->conditions, $this->constraints);
 
     $this->tryExecute($driver);
-    $resultSet = $driver->fetchAll(self::ASSOC);
+    $resultSet = $driver->getResultSet(self::ASSOC);
     if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
@@ -460,7 +467,7 @@ abstract class Sabel_DB_Mapper
     $driver->makeQuery($conditions, $constraints);
     $this->tryExecute($driver);
 
-    $resultSet = $driver->fetchAll(self::ASSOC);
+    $resultSet = $driver->getResultSet(self::ASSOC);
     if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
@@ -540,7 +547,7 @@ abstract class Sabel_DB_Mapper
       $driver->makeQuery($model->conditions);
 
       $this->tryExecute($driver);
-      $resultSet = $driver->fetch(self::ASSOC);
+      $resultSet = $driver->getResultSet();
       if (!$row = $resultSet->fetch()) {
         $model->selected = true;
         $model->id = $id;
@@ -806,7 +813,7 @@ abstract class Sabel_DB_Mapper
 
     $driver = Sabel_DB_Executer::getDriver($this);
     $this->tryExecute($driver, $sql, $param);
-    return $this->toObject($driver->fetchAll(self::ASSOC));
+    return $this->toObject($driver->getResultSet(self::ASSOC));
   }
 
   protected function toObject($resultSet)

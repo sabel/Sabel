@@ -34,13 +34,12 @@ class Test_DB_SQLite extends Test_DB_Test
 
   public function testInit()
   {
-    Test_DB_Test::$connectName = 'sq';
-    Sabel_DB_Connection::addConnection('sq', self::$params1);
-    Sabel_DB_Connection::addConnection('sq2', self::$params2);
+    Sabel_DB_Connection::addConnection('default', self::$params1);
+    Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
-    
+
     $helper = new SQLiteHelper();
     $helper->create();
 

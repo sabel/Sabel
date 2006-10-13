@@ -30,11 +30,16 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     $this->driverExecute('ROLLBACK', $conn);
   }
 
+  public function close($conn)
+  {
+    mysql_close($conn);
+  }
+
   public function getLastInsertId()
   {
     $this->driverExecute('SELECT last_insert_id()');
-    $resultSet = $this->fetch();
-    $row = $resultSet->fetch();
+    $resultSet = $this->getResultSet();
+    $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
     return (int)$row[0];
   }
 
@@ -56,17 +61,7 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     }
   }
 
-  public function fetch($style = null)
-  {
-    $result = ($style === Sabel_DB_Mapper::ASSOC) ? mysql_fetch_assoc($this->result)
-                                                  : mysql_fetch_array($this->result);
-
-    $resultSet = new Sabel_DB_ResultSet();
-    $resultSet->add($result);
-    return $resultSet;
-  }
-
-  public function fetchAll($style = null)
+  public function getResultSet()
   {
     $rows   = array();
     $result = $this->result;

@@ -109,7 +109,9 @@ class Sabel_DB_Connection
 
   public static function getDBDriver($connectName)
   {
-    return self::getValue($connectName, 'driver');
+    return (isset(self::$connList[$connectName]['driver']))
+      ? self::$connList[$connectName]['driver']
+      : self::createDBDriver($connectName);
   }
 
   public static function getConnection($connectName)
@@ -120,13 +122,13 @@ class Sabel_DB_Connection
 
   public static function getDriverName($connectName)
   {
-    self::issetList($connectName, 'conn');
+    self::issetList($connectName, 'drvName');
     return self::getValue($connectName, 'drvName');
   }
 
   public static function getDB($connectName)
   {
-    self::issetList($connectName, 'conn');
+    self::issetList($connectName, 'db');
     return self::getValue($connectName, 'db');
   }
 
@@ -147,6 +149,26 @@ class Sabel_DB_Connection
       return self::$connList[$connectName][$key];
     } else {
       throw new Exception("Error: value is not set:{$connectName} => {$key}");
+    }
+  }
+
+  public static function close($connectName)
+  {
+    /*@todo
+    $driver = self::getDBDriver($connectName);
+    $driver->close();
+
+    unset(self::$connList[$connectName]);
+    */
+  }
+
+  public static function closeAll()
+  {
+    if (is_array(self::$connList)) {
+      foreach (self::$connList as $list) {
+        if (isset($list['driver'])) $list['driver']->close($list['conn']);
+      }
+      self::$connList = array();
     }
   }
 }

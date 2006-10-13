@@ -42,13 +42,12 @@ class Test_DB_Mysql extends Test_DB_Test
 
   public function testInit()
   {
-    Test_DB_Test::$connectName = 'my';
-    Sabel_DB_Connection::addConnection('my', self::$params1);
-    Sabel_DB_Connection::addConnection('my2', self::$params2);
+    Sabel_DB_Connection::addConnection('default', self::$params1);
+    Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
-    
+
     $helper = new MysqlHelper();
     $helper->create();
 

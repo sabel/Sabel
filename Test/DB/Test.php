@@ -1072,47 +1072,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($colsName[1], 'text');
   }
 
-  private static $tableSchema = array();
-
-  public function testInformationSchema()
-  {
-    $bbs = new Bbs();
-    $schema = $bbs->getTableSchema();
-
-    $id       = $schema->id;
-    $users_id = $schema->users_id;
-    $title    = $schema->title;
-    $body     = $schema->body;
-
-    $this->assertEquals($id->type, Sabel_DB_Schema_Const::INT);
-    $this->assertEquals($id->max,  2147483647);
-    $this->assertEquals($id->min, -2147483648);
-    $this->assertTrue($id->notNull);
-    $this->assertTrue($id->primary);
-    $this->assertTrue($id->increment);
-
-    $this->assertEquals($users_id->type, Sabel_DB_Schema_Const::INT);
-    $this->assertEquals($users_id->max,  2147483647);
-    $this->assertEquals($users_id->min, -2147483648);
-    $this->assertTrue($users_id->notNull);
-    $this->assertFalse($users_id->primary);
-    $this->assertFalse($users_id->increment);
-
-    $this->assertEquals($title->type, Sabel_DB_Schema_Const::STRING);
-    $this->assertEquals($title->max, 24);
-    $this->assertFalse($title->notNull);
-    $this->assertFalse($title->primary);
-    $this->assertFalse($title->increment);
-
-    $this->assertEquals($body->type, Sabel_DB_Schema_Const::STRING);
-    $this->assertEquals($body->max, 24);
-    $this->assertFalse($body->notNull);
-    $this->assertFalse($body->primary);
-    $this->assertFalse($body->increment);
-
-    Sabel_DB_SimpleCache::remove('Schema_Bbs');
-  }
-
   public function testSchema()
   {
     $st = new SchemaTest();
@@ -1199,17 +1158,14 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($dt->notNull);
     @$this->assertEquals($dt->default, null);
 
-    Sabel_DB_SimpleCache::remove('Schema_SchemaTest');
+    Sabel_DB_SimpleCache::reset();
+    Sabel_DB_Connection::closeAll();
   }
 }
 
-abstract class MapperDefault extends Sabel_DB_Mapper
+class MapperDefault extends Sabel_DB_Mapper
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver(Test_DB_Test::$connectName);
-    parent::__construct($param1, $param2);
-  }
+  protected $connectName = 'default';
 }
 
 class Test extends MapperDefault
@@ -1278,27 +1234,18 @@ class CustomerTelephone extends MapperDefault
 
 class Tree extends Sabel_DB_Tree
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver(Test_DB_Test::$connectName);
-    parent::__construct($param1, $param2);
-  }
+  protected $connectName = 'default';
 }
 
 class Bridge_Base extends Sabel_DB_Bridge
 {
+  protected $connectName = 'default';
   protected $bridgeTable = 'StudentCourse';
-
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver(Test_DB_Test::$connectName);
-    parent::__construct($param1, $param2);
-  }
 }
 
 class Student extends Bridge_Base
 {
-  protected $myChildren = 'Course';
+  protected $myChildren  = 'Course';
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -1324,11 +1271,7 @@ class Trans1 extends MapperDefault
 
 class Trans2 extends Sabel_DB_Mapper
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver(Test_DB_Test::$connectName . '2');
-    parent::__construct($param1, $param2);
-  }
+  protected $connectName = 'default2';
 }
 
 class Users extends MapperDefault
@@ -1349,76 +1292,4 @@ class Status extends MapperDefault
 class SchemaTest extends MapperDefault
 {
   protected $table = 'schema_test';
-}
-
-class Schema_MyTableList
-{
-  public function get()
-  {
-    $list = array('test', 'test2', 'test3',
-                  'customer', 'customer_order', 'order_line',
-                  'customer_telephone', 'infinite1', 'infinite2',
-                  'seq', 'tree', 'student', 'student_course', 'schema_test',
-                  'course', 'users', 'status', 'bbs', 'trans1');
-
-    return $list;
-  }
-}
-
-class Schema_PgTableList
-{
-  public function get()
-  {
-    $list = array('test', 'test2', 'test3',
-                  'customer', 'customer_order', 'order_line',
-                  'customer_telephone', 'infinite1', 'infinite2',
-                  'seq', 'tree', 'student', 'student_course', 'schema_test',
-                  'course', 'users', 'status', 'bbs', 'trans1');
-
-    return $list;
-  }
-}
-
-class Schema_SqTableList
-{
-  public function get()
-  {
-    $list = array('test', 'test2', 'test3',
-                  'customer', 'customer_order', 'order_line',
-                  'customer_telephone', 'infinite1', 'infinite2',
-                  'seq', 'tree', 'student', 'student_course', 'schema_test',
-                  'course', 'users', 'status', 'bbs', 'trans1');
-
-    return $list;
-  }
-}
-
-class Schema_My2TableList
-{
-  public function get()
-  {
-    $list = array('trans2');
-
-    return $list;
-  }
-}
-
-class Schema_Pg2TableList
-{
-  public function get()
-  {
-    $list = array('trans2');
-
-    return $list;
-  }
-}
-
-class Schema_Sq2TableList
-{
-  public function get()
-  {
-    $list = array('trans2');
-
-    return $list;
-  }
 }

@@ -31,6 +31,11 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     }
   }
 
+  public function close($conn)
+  {
+    $conn = null;
+  }
+
   public function rollback($conn)
   {
     $conn->rollBack();
@@ -105,22 +110,9 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     }
   }
 
-  public function fetch($style = null)
+  public function getResultSet()
   {
-    $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetch(PDO::FETCH_ASSOC)
-                                                  : $this->stmt->fetch(PDO::FETCH_NUM);
-
-    $this->stmt->closeCursor();
-
-    $resultSet = new Sabel_DB_ResultSet();
-    $resultSet->add($result);
-    return $resultSet;
-  }
-
-  public function fetchAll($style = null)
-  {
-    $result = ($style === Sabel_DB_Mapper::ASSOC) ? $this->stmt->fetchAll(PDO::FETCH_ASSOC)
-                                                  : $this->stmt->fetchAll(PDO::FETCH_NUM);
+    $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $this->stmt->closeCursor();
     return new Sabel_DB_ResultSet($result);

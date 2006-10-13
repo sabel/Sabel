@@ -17,8 +17,8 @@ abstract class Sabel_DB_Driver_General
   public abstract function begin($conn);
   public abstract function commit($conn);
   public abstract function rollback($conn);
-  public abstract function fetch($style = null);
-  public abstract function fetchAll($style = null);
+  public abstract function close($conn);
+  public abstract function getResultSet();
 
   protected abstract function driverExecute($sql = null);
 
@@ -52,8 +52,8 @@ abstract class Sabel_DB_Driver_General
   {
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
-      $resultSet = $this->fetch();
-      $row = $resultSet->fetch();
+      $resultSet = $this->getResultSet();
+      $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
       if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {
@@ -87,7 +87,7 @@ abstract class Sabel_DB_Driver_General
   public function checkTableEngine($table)
   {
     $this->driverExecute("SHOW TABLE STATUS WHERE Name='{$table}'", null);
-    $resultSet = $this->fetch(Sabel_DB_Mapper::ASSOC);
+    $resultSet = $this->getResultSet();
     $res = $resultSet->fetch();
     if ($res['Engine'] !== 'InnoDB' && $res['Engine'] !== 'BDB') {
       $msg = "The Engine of '{$table}' is {$res['Engine']} though the transaction was tried.";

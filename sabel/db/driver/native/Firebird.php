@@ -39,6 +39,11 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     unset($this->trans);
   }
 
+  public function close($conn)
+  {
+    ibase_close($conn);
+  }
+
   protected function setIdNumber($table, $data, $defColumn)
   {
     $genName = strtoupper("{$table}_{$defColumn}_gen");
@@ -69,15 +74,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
     }
   }
 
-  public function fetch($style = null)
-  {
-    $row = ($style === Sabel_DB_Mapper::ASSOC) ? ibase_fetch_assoc($this->result)
-                                               : ibase_fetch_row($this->result);
-
-    return (is_array($row)) ? array_change_key_case($row) : $row;
-  }
-
-  public function fetchAll($style = null)
+  public function getResultSet()
   {
     $rows   = array();
     $result = $this->result;
