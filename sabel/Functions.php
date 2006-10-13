@@ -49,6 +49,8 @@ class UriCreator
   public function hyperlink($params, $anchor = null, $id = null, $class = null)
   {
     $entry = null;
+    $uriPrefix  = 'http:/';
+    $uriPrefix .= '/'. $_SERVER['HTTP_HOST'];
     
     if (isset($params['entry'])) {
       $entry = $this->map->getEntry($params['entry']);
@@ -57,12 +59,12 @@ class UriCreator
     } else {
       $entry = $this->map->getCurrentEntry();
     }
-    $uriPrefix = "http://{$_SERVER['HTTP_HOST']}";
     
     if (is_object($anchor)) {
       $anchor = $anchor->__toString();
     }
     
+    // $uriPrefix = '';
     $fmtUri = '<a id="%s" class="%s" href="%s/%s">%s</a>';
     return sprintf($fmtUri, $id, $class, $uriPrefix, $entry->uri($params), $anchor);
   }

@@ -588,11 +588,11 @@ abstract class Sabel_DB_Mapper
   {
     if (!empty($data) && !is_array($data))
       throw new Exception('Error: save() argument must be an array');
-
+      
     if ($this->is_selected()) {
-      if ($data) $this->newData = $data;
+      $data = ($data) ? $data : $this->newData;
       $this->conditions = $this->selectCondition;
-      $this->getExecuter()->update($this->newData);
+      $this->getExecuter()->update($data);
     } else {
       $data = ($data) ? $data : $this->data;
       foreach ($data as $key => $val) {

@@ -462,6 +462,14 @@ class ClassFile
   
   protected $filePath = '';
   
+  /**
+   *  0 no state
+   *  5 single quote start
+   * 10 double quote start
+   * 15 may be start line comment
+   * 20 start line comment
+   * 25 start here doc
+   */
   protected $state = 0;
   protected $here  = null;
   
