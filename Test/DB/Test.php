@@ -663,6 +663,51 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$result[0]->count_amount, 2);
     $this->assertEquals((int)$result[0]->avg_amount,   30000);
   }
+
+  /*
+    $insertData[] = array('id' => 1,  'customer_order_id' => 5, 'amount' => 1000,  'item_id' => 2);
+    $insertData[] = array('id' => 2,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 3,  'customer_order_id' => 2, 'amount' => 5000,  'item_id' => 3);
+    $insertData[] = array('id' => 4,  'customer_order_id' => 2, 'amount' => 8000,  'item_id' => 1);
+    $insertData[] = array('id' => 5,  'customer_order_id' => 4, 'amount' => 9000,  'item_id' => 3);
+    $insertData[] = array('id' => 6,  'customer_order_id' => 3, 'amount' => 1500,  'item_id' => 2);
+    $insertData[] = array('id' => 7,  'customer_order_id' => 5, 'amount' => 2500,  'item_id' => 3);
+    $insertData[] = array('id' => 8,  'customer_order_id' => 1, 'amount' => 3000,  'item_id' => 1);
+    $insertData[] = array('id' => 9,  'customer_order_id' => 6, 'amount' => 10000, 'item_id' => 1);
+    $insertData[] = array('id' => 10, 'customer_order_id' => 6, 'amount' => 50000, 'item_id' => 2);
+    $insertData[] = array('id' => 11, 'customer_order_id' => 1, 'amount' => 500,   'item_id' => 3);
+  */
+  public function testAllUpdate()
+  {
+    $line = new OrderLine();
+    $line->setCondition('customer_order_id', 1);
+    $line->allUpdate(array('amount' => 1000000));
+
+    $line  = new OrderLine();
+    $line->sconst('order', 'id');
+    $lines = $line->select();
+
+    $this->assertEquals((int)$lines[0]->amount, 1000);
+    $this->assertEquals((int)$lines[1]->amount, 1000000);
+    $this->assertEquals((int)$lines[2]->amount, 5000);
+    $this->assertEquals((int)$lines[3]->amount, 8000);
+    $this->assertEquals((int)$lines[4]->amount, 9000);
+    $this->assertEquals((int)$lines[5]->amount, 1500);
+    $this->assertEquals((int)$lines[6]->amount, 2500);
+    $this->assertEquals((int)$lines[7]->amount, 1000000);
+    $this->assertEquals((int)$lines[8]->amount, 10000);
+    $this->assertEquals((int)$lines[9]->amount, 50000);
+    $this->assertEquals((int)$lines[10]->amount, 1000000);
+
+    $line = new OrderLine(2);
+    $line->save(array('amount' => 3000));
+
+    $line = new OrderLine(8);
+    $line->save(array('amount' => 3000));
+
+    $line = new OrderLine(11);
+    $line->save(array('amount' => 500));
+  }
   
   public function testSeq()
   {

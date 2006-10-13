@@ -1,6 +1,6 @@
 <?php
 
-abstract class Sabel_DB_Driver_Query
+abstract class Sabel_DB_Driver_Statement
 {
   protected
     $escMethod = '',

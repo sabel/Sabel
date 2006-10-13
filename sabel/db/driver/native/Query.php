@@ -6,7 +6,7 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Query
+class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
 {
   public function makeUpdateSQL($table, $data)
   {

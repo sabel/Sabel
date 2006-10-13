@@ -22,7 +22,7 @@ abstract class Sabel_DB_Driver_General
 
   protected abstract function driverExecute($sql = null);
 
-  public function getQueryMaker()
+  public function getQueryCreator()
   {
     return $this->query;
   }
@@ -53,7 +53,7 @@ abstract class Sabel_DB_Driver_General
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
       $resultSet = $this->getResultSet();
-      $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
+      $row = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
       if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {

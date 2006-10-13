@@ -6,7 +6,7 @@
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
  */
-class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Query
+class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
 {
   private $count = 1;
   private $param = array();

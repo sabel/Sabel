@@ -24,9 +24,7 @@ abstract class Sabel_DB_Mapper
 
   protected
     $driver       = null,
-    $connectName  = 'default',
-    $cachedParent = array(),
-    $projection   = '*';
+    $cachedParent = array();
 
   protected
     $data         = array(),
@@ -37,22 +35,6 @@ abstract class Sabel_DB_Mapper
     $selected     = false,
     $withParent   = false;
 
-  public function setDriver($connectName)
-  {
-    $this->connectName = $connectName;
-    $this->driver = Sabel_DB_Connection::createDBDriver($connectName);
-  }
-
-  protected function getDriver()
-  {
-    return $this->driver;
-  }
-
-  public function getConnectName()
-  {
-    return $this->connectName;
-  }
-
   public function getSchemaName()
   {
     return Sabel_DB_Connection::getSchema($this->connectName);
@@ -60,16 +42,11 @@ abstract class Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->setDriver($this->connectName);
+    Sabel_DB_Connection::createDBDriver($this->connectName);
 
     if ($this->table === '') $this->table = strtolower(get_class($this));
     if (Sabel_DB_Transaction::isActive()) $this->begin();
     if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
-  }
-
-  public function close()
-  {
-    Sabel_DB_Connection::close($this->connectName);
   }
 
   public function __set($key, $val)
@@ -83,9 +60,10 @@ abstract class Sabel_DB_Mapper
     return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
-  public function is_selected()
+  public function __call($method, $parameters)
   {
-    return $this->selected;
+    @list($paramOne, $paramTwo) = $parameters;
+    $this->setCondition($method, $paramOne, $paramTwo);
   }
 
   public function toArray()
@@ -93,9 +71,9 @@ abstract class Sabel_DB_Mapper
     return $this->data;
   }
 
-  public function setProjection($p)
+  public function is_selected()
   {
-    $this->projection = (is_array($p)) ? implode(',', $p) : $p;
+    return $this->selected;
   }
 
   public function getTableSchema()
@@ -110,22 +88,6 @@ abstract class Sabel_DB_Mapper
     return $sa->getTables();
   }
 
-  public static function getSchemaAccessor($connectName, $schemaName = null)
-  {
-    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
-  }
-
-  public function getMyChildConstraint()
-  {
-    return $this->childConstraints;
-  }
-
-  public function __call($method, $parameters)
-  {
-    @list($paramOne, $paramTwo) = $parameters;
-    $this->setCondition($method, $paramOne, $paramTwo);
-  }
-
   public function setConstraint($param1, $param2 = null)
   {
     if (!is_array($param1)) $param1 = array($param1 => $param2);
@@ -137,6 +99,11 @@ abstract class Sabel_DB_Mapper
         throw new Exception('Error: setConstraint() constraint value is null.');
       }
     }
+  }
+
+  public function getConstraint()
+  {
+    return $this->constraints;
   }
 
   public function setChildConstraint($param1, $param2 = null)
@@ -186,11 +153,14 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $check = true;
-    if (Sabel_DB_Connection::getDB($this->connectName) === 'mysql')
-      $check = $this->driver->checkTableEngine($this->table);
+    $connectName = $this->connectName;
+    $driver = Sabel_DB_Connection::getDBDriver($connectName);
 
-    if ($check) Sabel_DB_Transaction::begin($this->connectName, $this->driver);
+    $check = true;
+    if (Sabel_DB_Connection::getDB($connectName) === 'mysql')
+      $check = $driver->checkTableEngine($this->table);
+
+    if ($check) Sabel_DB_Transaction::begin($connectName, $driver);
   }
 
   public function commit()
@@ -203,18 +173,20 @@ abstract class Sabel_DB_Mapper
     Sabel_DB_Transaction::rollback();
   }
 
+  public function close()
+  {
+    Sabel_DB_Connection::close($this->connectName);
+  }
+
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
+    $this->setConstraint('limit', 1);
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $driver->makeQuery($this->conditions, array('limit' => 1));
-
-    $this->tryExecute($driver);
-    $resultSet = $driver->getResultSet();
-    $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
-    return (int)$row[0];
+    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
+    $resultSet = $this->getExecuter()->execute();
+    $arrayRow  = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    return (int)$arrayRow[0];
   }
 
   public function getColumnNames($table = null)
@@ -222,14 +194,11 @@ abstract class Sabel_DB_Mapper
     $table = (isset($table)) ? $table : $this->table;
 
     $this->disableParent();
-    $conditions  = array();
-    $constraints = array('limit' => 1);
+    $this->setConstraint('limit', 1);
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL("SELECT * FROM {$table}");
-    $res = $this->getRecords($driver, $conditions, $constraints);
-
-    return array_keys($res[0]->toArray());
+    $this->getStatement()->setBasicSQL("SELECT * FROM {$table}");
+    $models = $this->getRecords($this);
+    return array_keys($models[0]->toArray());
   }
 
   public function getFirst($orderColumn)
@@ -245,7 +214,7 @@ abstract class Sabel_DB_Mapper
   protected function getMost($order, $orderColumn)
   {
     $this->setCondition($orderColumn, 'NOT NULL');
-    $this->setConstraint(array('limit' => 1, 'order' => "{$orderColumn} {$order}"));
+    $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     return $this->selectOne();
   }
 
@@ -260,12 +229,8 @@ abstract class Sabel_DB_Mapper
     }
     $this->setConstraint('group', $columns);
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL("SELECT {$columns}, {$func} FROM {$table}");
-    $driver->makeQuery($this->conditions, $this->constraints);
-
-    $this->tryExecute($driver);
-    return $this->toObject($driver->getResultSet(self::ASSOC));
+    $this->getStatement()->setBasicSQL("SELECT $columns , $func FROM $table");
+    return $this->toObject($this->getExecuter()->execute());
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -285,17 +250,13 @@ abstract class Sabel_DB_Mapper
 
   protected function makeFindObject($model)
   {
-    $driver = $model->driver;
-    $driver->setBasicSQL("SELECT {$model->projection} FROM " . $model->table);
-    $driver->makeQuery($model->conditions, $model->constraints);
-
     $model->selectCondition = $model->conditions;
 
-    $this->tryExecute($driver);
-    $resultSet = $driver->getResultSet();
+    $this->getStatement($model)->setBasicSQL("SELECT {$model->projection} FROM " . $model->table);
+    $resultSet = $this->getExecuter($model)->execute();
+
     if ($row = $resultSet->fetch()) {
       if ($model->withParent) $row = $model->selectWithParent($row);
-
       $model->setSelectedProperty($model, $row);
 
       if (!is_null($myChild = $model->getMyChildren())) {
@@ -346,12 +307,8 @@ abstract class Sabel_DB_Mapper
 
     foreach ($relTables as $pair) array_push($sql, $this->getLeftJoin($pair));
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL(join('', $sql));
-    $driver->makeQuery($this->conditions, $this->constraints);
-
-    $this->tryExecute($driver);
-    $resultSet = $driver->getResultSet(self::ASSOC);
+    $this->getStatement()->setBasicSQL(join('', $sql));
+    $resultSet = $this->getExecuter()->execute();
     if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
@@ -435,39 +392,13 @@ abstract class Sabel_DB_Mapper
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->addSelectCondition($param1, $param2, $param3);
-
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
-    return $this->getRecords($driver, $this->conditions, $this->constraints);
+    $this->getStatement()->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
+    return $this->getRecords($this);
   }
 
-  public function getChild($child, $model = null)
+  protected function getRecords($model, $child = null)
   {
-    if (is_null($model)) $model = $this;
-
-    $class  = $this->newClass($child);
-    $driver = $class->getDriver();
-    $driver->setBasicSQL("SELECT {$model->projection} FROM {$class->table}");
-
-    $this->chooseMyChildConstraint($child, $model);
-    $model->setChildCondition("{$model->table}_id", $model->data[$model->incColumn]);
-    $conditions  = $model->childConditions;
-    $constraints = $model->childConstraints[$child];
-
-    $children = $model->getRecords($driver, $conditions, $constraints, $child);
-    if ($children) $model->data[$child] = $children;
-
-    $this->childConditions  = array();
-    $this->childConstraints = array();
-    return $children;
-  }
-
-  protected function getRecords($driver, &$conditions, &$constraints = null, $child = null)
-  {
-    $driver->makeQuery($conditions, $constraints);
-    $this->tryExecute($driver);
-
-    $resultSet = $driver->getResultSet(self::ASSOC);
+    $resultSet = $this->getExecuter($model)->execute();
     if ($resultSet->isEmpty()) return false;
 
     $recordObj = array();
@@ -490,9 +421,30 @@ abstract class Sabel_DB_Mapper
       $recordObj[] = $model;
     }
 
-    $constraints = array();
-    $conditions  = array();
+    $this->constraints = array();
+    $this->conditions  = array();
     return $recordObj;
+  }
+
+  public function getChild($child, $model = null)
+  {
+    if (is_null($model)) $model = $this;
+
+    $class = $this->newClass($child);
+    $this->getStatement($class)->setBasicSQL("SELECT {$class->projection} FROM {$class->table}");
+
+    $this->chooseMyChildConstraint($child, $model);
+    $model->setChildCondition("{$model->table}_id", $model->data[$model->incColumn]);
+
+    $class->conditions  = $model->childConditions;
+    $class->constraints = $model->childConstraints[$child];
+
+    $children = $model->getRecords($class, $child);
+    if ($children) $model->data[$child] = $children;
+
+    $this->childConditions  = array();
+    $this->childConstraints = array();
+    return $children;
   }
 
   protected function getDefaultChild($children, $model)
@@ -541,13 +493,10 @@ abstract class Sabel_DB_Mapper
     if (is_null($id)) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($table . $id))) {
-      $driver = $model->getDriver();
-      $driver->setBasicSQL("SELECT {$model->projection} FROM {$table}");
       $model->setCondition($model->incColumn, $id);
-      $driver->makeQuery($model->conditions);
+      $this->getStatement($model)->setBasicSQL("SELECT {$model->projection} FROM {$table}");
+      $resultSet = $this->getExecuter($model)->execute();
 
-      $this->tryExecute($driver);
-      $resultSet = $driver->getResultSet();
       if (!$row = $resultSet->fetch()) {
         $model->selected = true;
         $model->id = $id;
@@ -613,15 +562,10 @@ abstract class Sabel_DB_Mapper
   protected function newClass($name)
   {
     $model = str_replace('_', '', $name);
-
-    if ($this->mapper_class_exists($model)) {
-      return new $model();
-    } else {
-      return new Sabel_DB_Basic($model);
-    }
+    return ($this->mapperClassExists($model)) ? new $model : new Sabel_DB_Basic($model);
   }
 
-  private function mapper_class_exists($className)
+  private function mapperClassExists($className)
   {
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
   }
@@ -633,17 +577,11 @@ abstract class Sabel_DB_Mapper
     } else {
       throw new Exception('Error: clearChild() who is a parent? hasn\'t id value.');
     }
+    $model = $this->newClass($child);
 
-    $model  = $this->newClass($child);
-    $driver = $model->getDriver();
-    $driver->setBasicSQL('DELETE FROM ' . $model->table);
-
-    $key = $this->table . '_id';
-    $driver->makeQuery(array($key => new Sabel_DB_Condition($key, $id)));
-
-    $this->tryExecute($driver);
-    $this->conditions  = array();
-    $this->constraints = array();
+    $model->setCondition($this->table . '_id', $id);
+    $this->getStatement($model)->setBasicSQL('DELETE FROM ' . $model->table);
+    $this->getExecuter($model)->execute();
   }
 
   public function save($data = null)
@@ -653,47 +591,20 @@ abstract class Sabel_DB_Mapper
 
     if ($this->is_selected()) {
       if ($data) $this->newData = $data;
-      $this->update();
+      $this->conditions = $this->selectCondition;
+      $this->getExecuter()->update($this->newData);
     } else {
-      if ($data) $this->data = $data;
-      return $this->insert();
+      $data = ($data) ? $data : $this->data;
+      foreach ($data as $key => $val) {
+        if (is_object($val)) $data[$key] = $val->value;
+      }
+      return $this->getExecuter()->insert($data, $this->checkIncColumn());
     }
   }
 
   public function allUpdate($data)
   {
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setUpdateSQL($this->table, $data);
-    $driver->makeQuery($this->conditions);
-
-    $this->tryExecute($driver);
-    $this->conditions = array();
-  }
-
-  protected function update()
-  {
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setUpdateSQL($this->table, $this->newData);
-    $driver->makeQuery($this->selectCondition);
-
-    $this->tryExecute($driver);
-    $this->selectCondition = array();
-  }
-
-  protected function insert()
-  {
-    foreach ($this->data as $key => $val) {
-      if (is_object($val)) $this->data[$key] = $val->value;
-    }
-
-    try {
-      $idColumn = ($this->autoNumber) ? $this->incColumn : false;
-      $driver   = Sabel_DB_Executer::getDriver($this);
-      $driver->executeInsert($this->table, $this->data, $idColumn);
-      return $driver->getLastInsertId();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage());
-    }
+    $this->getExecuter()->update($data);
   }
 
   public function multipleInsert($data)
@@ -702,13 +613,17 @@ abstract class Sabel_DB_Mapper
 
     $this->begin();
     try {
-      $idColumn = ($this->autoNumber) ? $this->incColumn : false;
-      $driver   = Sabel_DB_Executer::getDriver($this);
-      foreach ($data as $val) $driver->executeInsert($this->table, $val, $idColumn);
+      $this->getExecuter()->multipleInsert($data, $this->checkIncColumn());
       $this->commit();
     } catch (Exception $e) {
-      $this->executeError($e->getMessage());
+      $this->rollBack();
+      throw new Exception($e->getMessage());
     }
+  }
+
+  protected function checkIncColumn()
+  {
+    return ($this->isAutoNumber()) ? $this->incColumn : false;
   }
 
   public function remove($param1 = null, $param2 = null, $param3 = null)
@@ -727,13 +642,8 @@ abstract class Sabel_DB_Mapper
       $this->setCondition($this->incColumn, $idValue);
     }
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $driver->setBasicSQL("DELETE FROM {$this->table}");
-    $driver->makeQuery($this->conditions);
-
-    $this->tryExecute($driver);
-    $this->conditions  = array();
-    $this->constraints = array();
+    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->table);
+    $this->getExecuter()->execute();
   }
 
   public function cascadeDelete($id = null)
@@ -811,9 +721,7 @@ abstract class Sabel_DB_Mapper
     if (!empty($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
-    $driver = Sabel_DB_Executer::getDriver($this);
-    $this->tryExecute($driver, $sql, $param);
-    return $this->toObject($driver->getResultSet(self::ASSOC));
+    return $this->toObject($this->getExecuter()->executeQuery($sql, $param));
   }
 
   protected function toObject($resultSet)
@@ -830,19 +738,16 @@ abstract class Sabel_DB_Mapper
     return $recordObj;
   }
 
-  protected function tryExecute($driver, $sql = null, $param = null)
+  protected function getExecuter($model = null)
   {
-    try {
-      $driver->execute($sql, $param);
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage());
-    }
+    $model = (is_null($model)) ? $this : $model;
+    return Sabel_DB_Executer::initialize($model);
   }
 
-  protected function executeError($errorMsg)
+  protected function getStatement($model = null)
   {
-    if (Sabel_DB_Transaction::isActive()) $this->rollback();
-    throw new Exception($errorMsg);
+    $model = (is_null($model)) ? $this : $model;
+    return Sabel_DB_Connection::getDBDriver($model->connectName)->getQueryCreator();
   }
 
   /**
@@ -870,6 +775,18 @@ abstract class Sabel_DB_Mapper
   public function ccond($key, $val)
   {
     $this->setChildCondition($key, $val);
+  }
+
+  protected $connectName = 'default';
+
+  public function setConnectName($connectName)
+  {
+    $this->connectName = $connectName;
+  }
+
+  public function getConnectName()
+  {
+    return $this->connectName;
   }
 
   public function setProperties($array)
@@ -927,6 +844,11 @@ abstract class Sabel_DB_Mapper
     $this->autoNumber = false;
   }
 
+  public function isAutoNumber()
+  {
+    return $this->autoNumber;
+  }
+
   protected $table = '';
 
   public function setTableName($table)
@@ -937,6 +859,18 @@ abstract class Sabel_DB_Mapper
   public function getTableName()
   {
     return $this->table;
+  }
+
+  protected $projection = '*';
+
+  public function setProjection($p)
+  {
+    $this->projection = (is_array($p)) ? implode(',', $p) : $p;
+  }
+
+  public function getProjection()
+  {
+    return $this->projection;
   }
 
   protected $structure = 'normal';
@@ -971,10 +905,5 @@ abstract class Sabel_DB_Mapper
   public function disableParent()
   {
     $this->withParent = false;
-  }
-
-  public function getQueryMaker()
-  {
-    return $this->driver->getQueryMaker();
   }
 }

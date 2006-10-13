@@ -115,7 +115,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $result = $this->stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $this->stmt->closeCursor();
-    return new Sabel_DB_ResultSet($result);
+    return new Sabel_DB_Driver_ResultSet($result);
   }
 
   private function makeBindParam()
@@ -128,10 +128,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
     $bindParam = array();
     if ($param) {
-      foreach ($param as $key => $val) {
-        if (is_null($val)) continue;
-        $bindParam[":{$key}"] = $val;
-      }
+      foreach ($param as $key => $val) $bindParam[":{$key}"] = $val;
     }
     return $bindParam;
   }

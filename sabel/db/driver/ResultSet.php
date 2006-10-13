@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_DB_ResultSet implements Iterator
+class Sabel_DB_Driver_ResultSet implements Iterator
 {
   const ASSOC = 0;
   const NUM   = 1;
