@@ -462,6 +462,9 @@ class ClassFile
   
   protected $filePath = '';
   
+  protected $state = 0;
+  protected $here  = null;
+  
   public function __construct($filepath)
   {
     $this->setFilePath($filepath);
@@ -528,6 +531,8 @@ class ClassFile
   {
     if (!$this->isLineValid($line)) return false;
     
+    $this->removeLineComment($line);
+    
     $result = $this->isExtends($line);
     if ($result[0]) {
       $this->hasParent = true;
@@ -542,6 +547,8 @@ class ClassFile
         $this->lineOfClassDefine = $line;
       }
     }
+    
+    $line = $this->removeLineComment($line);
     
     $this->lines[] = $line . "\n";
   }
@@ -588,12 +595,64 @@ class ClassFile
     if ($line === '<?php') return false;
     if ($line === '?>') return false;
     
-    // @todo this line has problem. such as "if ("//" = ...)"
-    if (preg_match('%\/\/%', $line)) return false;
-    
     return true;
   }
   
+  protected function removeLineComment($line)
+  {
+    if ($this->state !== 5 && $this->state !== 10 && $this->state !== 25) $this->state = 0;
+    
+    if (!is_null($this->here) && $line === $this->here.';') {
+      $this->here  = null;
+      $this->state = 0;
+    }
+    
+    if ($this->state === 25) {
+      return $line;
+    }
+    
+    for ($i = 0; $i < strlen($line); $i++) {
+      $c = $line[$i];
+    
+      if ($this->state === 0) {
+        switch ($c) {
+          case "'":
+            $this->state = 5;
+            break;
+          case '"':
+            $this->state = 10;
+            break;
+          case '/':
+            $this->state = 15;
+            break;
+        }
+        
+        if ($c === '<' && $line[$i+1] === '<' && $line[$i+2] === '<') {
+          $this->state = 25;
+          $this->here = substr($line, $i+3);
+        } 
+        continue;
+      }
+      
+      
+      if ($this->state === 5  && $c === "'") {
+        $this->state = 0;
+        continue;
+      }
+      
+      if ($this->state === 10 && $c === '"') {
+        $this->state = 0;
+        continue;
+      }
+      
+      if ($this->state === 15 && $c === '/') {
+        $line = substr($line, 0, $i-1);
+        break;
+      }
+    }
+    
+    return $line;
+  }
 }
 
 class DirectoryTraverser
