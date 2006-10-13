@@ -50,10 +50,13 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
     switch ($this->dbName) {
       case 'firebird':
         $this->sql = $paginate->firebirdPaginate();
+        break;
       case 'mssql':
         $this->sql = $paginate->mssqlPaginate($column, $order);
+        break;
       default:
         $this->sql = $paginate->standardPaginate();
+        break;
     }
   }
 

@@ -719,7 +719,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($t->name, 'A3');
     
     $this->assertEquals((int)$t->Tree->id, 1);
-    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    @$this->assertNull($t->Tree->tree_id);
     $this->assertEquals($t->Tree->name, 'A');
 
     $t = $tree->selectOne(5);
@@ -728,7 +728,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($t->name, 'A5');
 
     $this->assertEquals((int)$t->Tree->id, 1);
-    $this->assertEquals((int)$t->Tree->tree_id, 0);
+    @$this->assertNull($t->Tree->tree_id);
     $this->assertEquals($t->Tree->name, 'A');
  
     $t = new Tree();
@@ -1176,11 +1176,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
 abstract class Mapper_Default extends Sabel_DB_Mapper
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    parent::__construct($param1, $param2);
-  }
+
 }
 
 class Test extends Mapper_Default
@@ -1249,22 +1245,12 @@ class CustomerTelephone extends Mapper_Default
 
 class Tree extends Sabel_DB_Tree
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    parent::__construct($param1, $param2);
-  }
+
 }
 
 class Bridge_Base extends Sabel_DB_Bridge
 {
   protected $bridgeTable = 'StudentCourse';
-
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    parent::__construct($param1, $param2);
-  }
 }
 
 class Student extends Bridge_Base
@@ -1297,11 +1283,7 @@ class Trans1 extends Mapper_Default
 
 class Trans2 extends Sabel_DB_Mapper
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default2');
-    parent::__construct($param1, $param2);
-  }
+  protected $connectName = 'default2';
 }
 
 class Users extends Mapper_Default

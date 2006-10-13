@@ -2,34 +2,36 @@
 
 class Sabel_DB_Executer
 {
-  protected $model = null;
+  protected $model  = null;
+  protected $driver = null;
 
-  public static function initialize($model)
-  {
-    $self = new self();
-    $self->setModel($model);
-    return $self;
-  }
-
-  public function setModel($model)
+  public function __construct($model)
   {
     $this->model = $model;
+    $this->initialize($model);
   }
 
-  public function getDriver($model)
+  public function initialize($model = null)
   {
-    return Sabel_DB_Connection::getDBDriver($model->getConnectName());
+    if (is_null($model)) $model = $this->model;
+
+    $driver = $this->driver = Sabel_DB_Connection::createDBDriver($model->getConnectName());
+    if ($driver instanceof Sabel_DB_Driver_Native_Mssql) {
+      $driver->setDefaultOrderKey($model->getPrimaryKey());
+    }
+  }
+
+  public function getDriver()
+  {
+    return $this->driver;
   }
 
   public function execute()
   {
     $model = $this->model;
 
-    $conditions  = $model->getCondition();
-    $constraints = $model->getConstraint();
-
-    $driver = $this->getDriver($model);
-    $driver->makeQuery($conditions, $constraints);
+    $driver = $this->driver;
+    $driver->makeQuery($model->getCondition(), $model->getConstraint());
     $this->tryExecute($driver);
     return $driver->getResultSet();
   }
@@ -38,7 +40,7 @@ class Sabel_DB_Executer
   {
     $model = $this->model;
 
-    $driver = $this->getDriver($model);
+    $driver = $this->driver;
     $driver->setUpdateSQL($model->getTableName(), $data);
     $driver->makeQuery($model->getCondition());
     $this->tryExecute($driver);
@@ -49,7 +51,7 @@ class Sabel_DB_Executer
     $model = $this->model;
 
     try {
-      $driver = $this->getDriver($model);
+      $driver = $this->driver;
       $driver->executeInsert($model->getTableName(), $data, $idColumn);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
@@ -62,7 +64,7 @@ class Sabel_DB_Executer
     $model = $this->model;
 
     try {
-      $driver = $this->getDriver($model);
+      $driver = $this->driver;
       foreach ($data as $val) $driver->executeInsert($model->getTableName(), $val, $idColumn);
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
@@ -71,9 +73,8 @@ class Sabel_DB_Executer
 
   public function executeQuery($sql, $param)
   {
-    $driver = Sabel_DB_Connection::getDBDriver($this->model->getConnectName());
-    $this->tryExecute($driver, $sql, $param);
-    return $driver->getResultSet();
+    $this->tryExecute($this->driver, $sql, $param);
+    return $this->driver->getResultSet();
   }
 
   public function tryExecute($driver, $sql = null, $param = null)

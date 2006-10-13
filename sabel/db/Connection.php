@@ -88,30 +88,16 @@ class Sabel_DB_Connection
     switch (self::getDriverName($connectName)) {
       case 'pdo':
         $pdoDb = self::getDB($connectName);
-        $driver = new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
-        break;
+        return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
       case 'pgsql':
-        $driver = new Sabel_DB_Driver_Native_Pgsql($conn);
-        break;
+        return new Sabel_DB_Driver_Native_Pgsql($conn);
       case 'mysql':
-        $driver = new Sabel_DB_Driver_Native_Mysql($conn);
-        break;
+        return new Sabel_DB_Driver_Native_Mysql($conn);
       case 'firebird':
-        $driver = new Sabel_DB_Driver_Native_Firebird($conn);
-        break;
+        return new Sabel_DB_Driver_Native_Firebird($conn);
       case 'mssql':
-        $driver = new Sabel_DB_Driver_Native_($conn);
-        break;
+        return new Sabel_DB_Driver_Native_Mssql($conn);
     }
-    self::$connList[$connectName]['driver'] = $driver;
-    return $driver;
-  }
-
-  public static function getDBDriver($connectName)
-  {
-    return (isset(self::$connList[$connectName]['driver']))
-      ? self::$connList[$connectName]['driver']
-      : self::createDBDriver($connectName);
   }
 
   public static function getConnection($connectName)

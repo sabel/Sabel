@@ -54,7 +54,8 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
   public function getLastInsertId()
   {
     $this->driverExecute('SELECT SCOPE_IDENTITY()');
-    $result = $this->fetch();
+    $resultSet = $this->getResultSet();
+    $arrayRow  = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
     return (int)$result[0];
   }
 
@@ -84,7 +85,7 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     if (is_resource($result)) {
       while ($row = mssql_fetch_assoc($result)) $rows[] = $row;
     }
-    return $rows;
+    return new Sabel_DB_Driver_ResultSet($rows);
   }
 }
 

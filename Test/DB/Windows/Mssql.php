@@ -5,15 +5,18 @@ require_once 'c:\php\sabel\sabel\db\Transaction.php';
 require_once 'c:\php\sabel\sabel\db\SimpleCache.php';
 
 require_once 'c:\php\sabel\sabel\db\Condition.php';
+require_once 'c:\php\sabel\sabel\db\Executer.php';
 require_once 'c:\php\sabel\sabel\db\Mapper.php';
+require_once 'c:\php\sabel\sabel\db\Relation.php';
 require_once 'c:\php\sabel\sabel\db\Basic.php';
 require_once 'c:\php\sabel\sabel\db\Bridge.php';
 require_once 'c:\php\sabel\sabel\db\Tree.php';
 require_once 'c:\php\sabel\sabel\db\driver\General.php';
-require_once 'c:\php\sabel\sabel\db\driver\Query.php';
-require_once 'c:\php\sabel\sabel\db\driver\native/Query.php';
-require_once 'c:\php\sabel\sabel\db\driver\native/Mssql.php';
-require_once 'c:\php\sabel\sabel\db\driver\native/Paginate.php';
+require_once 'c:\php\sabel\sabel\db\driver\ResultSet.php';
+require_once 'c:\php\sabel\sabel\db\driver\Statement.php';
+require_once 'c:\php\sabel\sabel\db\driver\native\Query.php';
+require_once 'c:\php\sabel\sabel\db\driver\native\Mssql.php';
+require_once 'c:\php\sabel\sabel\db\driver\native\Paginate.php';
 
 require_once 'c:\php\sabel\sabel\db\schema\type\Setter.php';
 require_once 'c:\php\sabel\sabel\db\schema\type\Sender.php';
@@ -161,7 +164,7 @@ class MssqlHelper
                  name VARCHAR(24) )';
                 
     $SQLs[] = 'CREATE TABLE users (
-                 id        INTEGER NOT NULL PRIMARY KEY IDENTITY(1, 1),
+                 id        INTEGER NOT NULL PRIMARY KEY,
                  name      VARCHAR(24) NOT NULL,
                  status_id INTEGER )';
 

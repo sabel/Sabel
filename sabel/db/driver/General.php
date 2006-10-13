@@ -22,7 +22,7 @@ abstract class Sabel_DB_Driver_General
 
   protected abstract function driverExecute($sql = null);
 
-  public function getQueryCreator()
+  public function getStatement()
   {
     return $this->query;
   }
