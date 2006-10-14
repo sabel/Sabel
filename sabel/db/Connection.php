@@ -82,21 +82,18 @@ class Sabel_DB_Connection
     return $list['conn'];
   }
 
-  public static function createDBDriver($connectName)
+  public static function getDriver($connectName)
   {
-    $conn = self::getConnection($connectName);
-    switch (self::getDriverName($connectName)) {
+    $conn    = self::getConnection($connectName);
+    $drvName = self::getDriverName($connectName);
+
+    switch ($drvName) {
       case 'pdo':
         $pdoDb = self::getDB($connectName);
         return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
-      case 'pgsql':
-        return new Sabel_DB_Driver_Native_Pgsql($conn);
-      case 'mysql':
-        return new Sabel_DB_Driver_Native_Mysql($conn);
-      case 'firebird':
-        return new Sabel_DB_Driver_Native_Firebird($conn);
-      case 'mssql':
-        return new Sabel_DB_Driver_Native_Mssql($conn);
+      default:
+        $driver = 'Sabel_DB_Driver_Native_' . ucfirst($drvName);
+        return new $driver($conn);
     }
   }
 

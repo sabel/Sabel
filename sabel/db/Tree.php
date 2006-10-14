@@ -2,7 +2,7 @@
 
 abstract class Sabel_DB_Tree extends Sabel_DB_Mapper
 {
-  protected $structure = 'tree';
+  public $structure = 'tree';
 
   public function getRoot()
   {

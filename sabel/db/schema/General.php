@@ -7,7 +7,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
   public function __construct($connectName, $schema)
   {
     $this->schema = $schema;
-    $this->driver = Sabel_DB_Connection::createDBDriver($connectName);
+    $this->driver = Sabel_DB_Connection::getDriver($connectName);
   }
 
   public function getTables()

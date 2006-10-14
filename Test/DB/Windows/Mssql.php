@@ -7,7 +7,6 @@ require_once 'c:\php\sabel\sabel\db\SimpleCache.php';
 require_once 'c:\php\sabel\sabel\db\Condition.php';
 require_once 'c:\php\sabel\sabel\db\Executer.php';
 require_once 'c:\php\sabel\sabel\db\Mapper.php';
-require_once 'c:\php\sabel\sabel\db\Relation.php';
 require_once 'c:\php\sabel\sabel\db\Basic.php';
 require_once 'c:\php\sabel\sabel\db\Bridge.php';
 require_once 'c:\php\sabel\sabel\db\Tree.php';

@@ -1223,7 +1223,7 @@ class Customer extends Mapper_Default
 
 class CustomerOrder extends Mapper_Default
 {
-  protected $table      = 'customer_order';
+  public $table = 'customer_order';
   protected $myChildren = 'OrderLine';
 
   public function __construct($param1 = null, $param2 = null)
@@ -1235,12 +1235,12 @@ class CustomerOrder extends Mapper_Default
 
 class OrderLine extends Mapper_Default
 {
-  protected $table = 'order_line';
+  public $table = 'order_line';
 }
 
 class CustomerTelephone extends Mapper_Default
 {
-  protected $table = 'customer_telephone';
+  public $table = 'customer_telephone';
 }
 
 class Tree extends Sabel_DB_Tree
@@ -1271,9 +1271,9 @@ class Course extends Bridge_Base
 
 class StudentCourse extends Mapper_Default
 {
-  protected $table      = 'student_course';
-  protected $jointKey   = array('student_id', 'course_id');
-  protected $autoNumber = false;
+  public $table      = 'student_course';
+  public $jointKey   = array('student_id', 'course_id');
+  public $autoNumber = false;
 }
 
 class Trans1 extends Mapper_Default
@@ -1303,5 +1303,5 @@ class Status extends Mapper_Default
 
 class SchemaTest extends Mapper_Default
 {
-  protected $table = 'schema_test';
+  public $table = 'schema_test';
 }

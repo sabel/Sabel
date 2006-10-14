@@ -8,23 +8,36 @@
  */
 class Sabel_DB_Schema_Accessor
 {
-  protected $is = null;
+  protected $connectName = '';
+  protected $schemaClass = null;
 
   public function __construct($connectName, $schema)
   {
     $dbName    = ucfirst(Sabel_DB_Connection::getDB($connectName));
-    $className = "Sabel_DB_Schema_{$dbName}";
-    $this->is  = new $className($connectName, $schema);
+    $className = 'Sabel_DB_Schema_' . $dbName;
+
+    $this->schemaClass = new $className($connectName, $schema);
+    $this->connectName = $connectName;
   }
 
   public function getTables()
   {
-    return $this->is->getTables();
+    return $this->schemaClass->getTables();
   }
 
-  public function getTable($name)
+  public function getTable($tblName)
   {
-    return $this->is->getTable($name);
+    return $this->schemaClass->getTable($tblName);
+  }
+
+  public function getColumnNames($table)
+  {
+    $executer = new Sabel_DB_Executer($this->connectName);
+    $executer->setConstraint('limit', 1);
+    $executer->getStatement()->setBasicSQL("SELECT * FROM $table");
+
+    $resultSet = $executer->execute();
+    return array_keys($resultSet->fetch());
   }
 }
 
@@ -46,6 +59,6 @@ function schema($model)
   } else if (is_array($model)) {
 
   } else {
-    throw new Exception('invalid instance. schema() need instance of Sabel_DB_Mapper.');
+    throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
   }
 }

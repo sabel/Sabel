@@ -10,15 +10,14 @@ class Sabel_DB_Executer
     $conditions  = array(),
     $constraints = array();
 
-  public function __construct($model = null)
+  public function __construct($param)
   {
-    if (isset($model)) {
-      if (!$model instanceof Sabel_DB_Mapper) {
-        throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
-      }
-      $this->model   = $model;
+    if ($param instanceof Sabel_DB_Mapper) {
+      $this->model   = $param;
       $this->isModel = true;
-      $this->initialize($model);
+      $this->initialize($param);
+    } else {
+      $this->setDriver($param);
     }
   }
 
@@ -26,9 +25,9 @@ class Sabel_DB_Executer
   {
     if (is_null($model)) $model = $this->model;
 
-    $driver = $this->driver = Sabel_DB_Connection::createDBDriver($model->getConnectName());
+    $driver = $this->driver = Sabel_DB_Connection::getDriver($model->getConnectName());
     if ($driver instanceof Sabel_DB_Driver_Native_Mssql) {
-      $driver->setDefaultOrderKey($model->getPrimaryKey());
+      $driver->setDefaultOrderKey($model->primaryKey);
     }
   }
 
@@ -47,7 +46,8 @@ class Sabel_DB_Executer
 
   public function setConstraint($param1, $param2 = null)
   {
-    foreach ((is_array($param1)) ? $param1 : array($param1 => $param2) as $key => $val) {
+    $param = (is_array($param1)) ? $param1 : array($param1 => $param2);
+    foreach ($param as $key => $val) {
       if (isset($val)) $this->constraints[$key] = $val;
     }
   }
@@ -57,9 +57,19 @@ class Sabel_DB_Executer
     return ($this->isModel) ? $this->model->getConstraint() : $this->constraints;
   }
 
+  public function setDriver($connectName)
+  {
+    $this->driver = Sabel_DB_Connection::getDriver($connectName);
+  }
+
   public function getDriver()
   {
     return $this->driver;
+  }
+
+  public function getStatement()
+  {
+    return $this->driver->getStatement();
   }
 
   public function execute()
@@ -80,12 +90,9 @@ class Sabel_DB_Executer
 
   public function insert($table, $data, $idColumn)
   {
-    $model = $this->model;
-
     try {
-      $driver = $this->driver;
-      $driver->executeInsert($table, $data, $idColumn);
-      return $driver->getLastInsertId();
+      $this->driver->executeInsert($table, $data, $idColumn);
+      return $this->driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -93,11 +100,8 @@ class Sabel_DB_Executer
 
   public function multipleInsert($table, $data, $idColumn)
   {
-    $model = $this->model;
-
     try {
-      $driver = $this->driver;
-      foreach ($data as $val) $driver->executeInsert($table, $val, $idColumn);
+      foreach ($data as $val) $this->driver->executeInsert($table, $val, $idColumn);
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
