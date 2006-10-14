@@ -10,7 +10,6 @@
 abstract class Sabel_DB_Mapper
 {
   const WITH_PARENT = 'WITH_PARENT';
-  const ASSOC       = 'ASSOC';
 
   protected $executer = null;
 
@@ -25,12 +24,16 @@ abstract class Sabel_DB_Mapper
     $defChildConstraints = array();
 
   protected
-    $data         = array(),
-    $newData      = array(),
+    $data    = array(),
+    $newData = array();
+
+  protected 
     $joinColCache = array(),
+    $selfParents  = array();
+
+  protected
     $cachedParent = array(),
-    $cascadeStack = array(),
-    $withParent   = false;
+    $cascadeStack = array();
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -85,14 +88,8 @@ abstract class Sabel_DB_Mapper
 
   public function setConstraint($param1, $param2 = null)
   {
-    if (!is_array($param1)) $param1 = array($param1 => $param2);
-
-    foreach ($param1 as $key => $val) {
-      if (isset($val)) {
-        $this->constraints[$key] = $val;
-      } else {
-        throw new Exception('Error: setConstraint() constraint value is null.');
-      }
+    foreach ((is_array($param1)) ? $param1 : array($param1 => $param2) as $key => $val) {
+      if (isset($val)) $this->constraints[$key] = $val;
     }
   }
 
@@ -188,12 +185,10 @@ abstract class Sabel_DB_Mapper
   {
     $table = (isset($table)) ? $table : $this->table;
 
-    $this->disableParent();
     $this->setConstraint('limit', 1);
-
     $this->getStatement()->setBasicSQL("SELECT * FROM {$table}");
-    $models = $this->getRecords($this);
-    return array_keys($models[0]->toArray());
+    $resultSet = $this->getExecuter()->execute();
+    return array_keys($resultSet->fetch());
   }
 
   public function getFirst($orderColumn)
@@ -291,19 +286,18 @@ abstract class Sabel_DB_Mapper
     $columns = (isset($columnList[$myTable])) ? $columnList[$myTable] : $this->getColumnNames($myTable);
     foreach ($columns as $column) array_push($sql, "{$myTable}.{$column}, ");
 
-    foreach ($relTables as $pair) {
-      foreach ($pair as $table) {
-        if ($table !== $myTable && !isset($this->joinColCache[$table])) {
-          $joinTables[] = $table;
-          $this->addJoinColumns($sql, $table, $columnList);
-        }
-      }
-    }
+    foreach ($relTables as $pair) $joinTables = array_merge($joinTables, array_values($pair));
+    $joinTables = array_diff(array_unique($joinTables), (array)$myTable);
+
+    foreach ($joinTables as $table) $this->addJoinColumns($sql, $table, $columnList);
 
     $sql = array(substr(join('', $sql), 0, -2));
     array_push($sql, " FROM {$myTable}");
 
-    foreach ($relTables as $pair) array_push($sql, $this->getLeftJoin($pair));
+    foreach ($relTables as $pair) {
+      list($child, $parent) = array_values($pair);
+      array_push($sql, " LEFT JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ");
+    }
 
     $this->getStatement()->setBasicSQL(join('', $sql));
     $resultSet = $this->getExecuter()->execute();
@@ -311,37 +305,34 @@ abstract class Sabel_DB_Mapper
 
     $recordObj = array();
     foreach ($resultSet as $row) {
-      $models = $this->makeEachModelObject($row, $relTables);
-      $obj    = $models[$myTable];
+      list($self, $models) = $this->makeEachModelObject($row, $relTables);
+      $relational = $this->relational;
 
-      foreach ($joinTables as $model) {
-        foreach ($relTables as $pair) {
-          if ($model === $pair['child'] && $myTable !== $pair['child']) {
-            $parent = $pair['parent'];
-            $models[$model]->$parent = $models[$parent];
-            $models[$model]->newData = array();
-          }
+      foreach ($joinTables as $table) {
+        if (!array_key_exists($table, $relational)) continue;
+        foreach ($relational[$table] as $parent) {
+          $models[$table]->$parent = $models[$parent];
+          $models[$table]->unsetNewData();
         }
       }
 
-      foreach ($relTables as $tables) {
-        if ($tables['child'] === $myTable) {
-          $parent = $tables['parent'];
-          $obj->$parent = $models[$parent];
-          $obj->newData = array();
-        }
-      }
-      $recordObj[] = $obj;
+      foreach ($relational[$myTable] as $parent) $self->$parent = $models[$parent];
+      $self->unsetNewData();
+      $recordObj[] = $self;
     }
     return $recordObj;
   }
-  
+
+  protected $relational = array();
+
   private function toArrayJoinTables($relTableList)
   {
     $relTables = array();
+
     foreach ($relTableList as $pair) {
       list($child, $parent) = explode(':', $pair);
-      $relTables[] = array('child' => $child, 'parent' => $parent);
+      $this->relational[$child][] = $parent;
+      $relTables[] = array($child, $parent);
     }
     return $relTables;
   }
@@ -353,11 +344,6 @@ abstract class Sabel_DB_Mapper
       $this->joinColCache[$table][] = $column;
       array_push($sql, "{$table}.{$column} AS pre_{$table}_{$column}, ");
     }
-  }
-
-  private function getLeftJoin($tbl)
-  {
-    return " LEFT JOIN {$tbl['parent']} ON {$tbl['child']}.{$tbl['parent']}_id = {$tbl['parent']}.id ";
   }
 
   private function makeEachModelObject($row, $relTableArray)
@@ -384,7 +370,7 @@ abstract class Sabel_DB_Mapper
     $model = $this->newClass($this->table);
     $this->setSelectedProperty($model, $row);
     $models[$this->table] = $model;
-    return $models;
+    return array($model, $models);
   }
 
   public function select($param1 = null, $param2 = null, $param3 = null)
@@ -414,8 +400,8 @@ abstract class Sabel_DB_Mapper
         $relation = new Sabel_DB_Relation();
         $row = $relation->addParent($row, $model->table, $model->structure);
       }
-
       $this->setSelectedProperty($model, $row);
+
       if (!is_null($myChild = $model->getMyChildren())) {
         if (isset($child)) $this->chooseMyChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
@@ -538,13 +524,13 @@ abstract class Sabel_DB_Mapper
 
     if ($this->is_selected()) {
       $this->conditions = $this->selectCondition;
-      $this->getExecuter()->update(($data) ? $data : $this->newData);
+      $this->getExecuter()->update($this->table, ($data) ? $data : $this->newData);
     } else {
       $data = ($data) ? $data : $this->data;
       foreach ($data as $key => $val) {
         if (is_object($val)) $data[$key] = $val->value;
       }
-      return $this->getExecuter()->insert($data, $this->checkIncColumn());
+      return $this->getExecuter()->insert($this->table, $data, $this->checkIncColumn());
     }
   }
 
@@ -559,7 +545,7 @@ abstract class Sabel_DB_Mapper
 
     $this->begin();
     try {
-      $this->getExecuter()->multipleInsert($data, $this->checkIncColumn());
+      $this->getExecuter()->multipleInsert($this->table, $data, $this->checkIncColumn());
       $this->commit();
     } catch (Exception $e) {
       $this->rollBack();
@@ -845,6 +831,8 @@ abstract class Sabel_DB_Mapper
   {
     return $this->myChildren;
   }
+
+  protected $withParent = false;
 
   public function enableParent()
   {

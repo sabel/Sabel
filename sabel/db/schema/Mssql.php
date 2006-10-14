@@ -43,7 +43,7 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
     $sql .= "WHERE obj.name = '{$row['table_name']}' AND ident.name = '{$co->name}' AND ";
     $sql .= "obj.object_id = ident.object_id";
 
-    $co->increment = ($this->execute($sql) !== false);
+    $co->increment = (!$this->execute($sql)->isEmpty());
   }
 
   protected function setPrimaryKey($co, $row)
@@ -52,10 +52,12 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
     $sql .= "WHERE col.table_catalog = '{$this->schema}' AND col.table_name = '{$row['table_name']}' AND ";
     $sql .= "col.column_name = '{$co->name}' AND col.constraint_name = const.name";
 
-    if ($result = $this->execute($sql)) {
-      $co->primary = ($result[0]->type === 'PK');
-    } else {
+    $resultSet = $this->execute($sql);
+    if ($resultSet->isEmpty()) {
       $co->primary = false;
+    } else {
+      $row = $resultSet->fetch();
+      $co->primary = ($row['type'] === 'PK');
     }
   }
 

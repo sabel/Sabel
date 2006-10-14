@@ -6,20 +6,20 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
 
   public function __construct($connectName, $schema)
   {
-    $this->schema      = $schema;
-    $this->connectName = $connectName;
-    $this->recordObj   = new Sabel_DB_Basic();
-    $this->recordObj->setDriver($connectName);
+    $this->schema = $schema;
+    $this->driver = Sabel_DB_Connection::createDBDriver($connectName);
   }
 
   public function getTables()
   {
     $tables = array();
-    $sql    = sprintf($this->tableList, $this->schema);
 
-    foreach ($this->recordObj->execute($sql) as $val) {
-      $data  = array_change_key_case($val->toArray());
-      $table = $data['table_name'];
+    $sql = sprintf($this->tableList, $this->schema);
+    $this->driver->execute($sql);
+
+    foreach ($this->driver->getResultSet() as $row) {
+      $row   = array_change_key_case($row);
+      $table = $row['table_name'];
       $tables[$table] = $this->getTable($table);
     }
     return $tables;
@@ -28,10 +28,12 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
   protected function createColumns($table)
   {
     $columns = array();
-    $sql     = sprintf($this->tableColumns, $this->schema, $table);
 
-    foreach ($this->recordObj->execute($sql) as $val) {
-      $row = array_change_key_case($val->toArray());
+    $sql = sprintf($this->tableColumns, $this->schema, $table);
+    $this->driver->execute($sql);
+
+    foreach ($this->driver->getResultSet() as $row) {
+      $row = array_change_key_case($row);
       $colName = $row['column_name'];
       $columns[$colName] = $this->makeColumnValueObject($row);
     }
@@ -63,6 +65,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
 
   protected function execute($sql)
   {
-    return $this->recordObj->execute($sql);
+    $this->driver->execute($sql);
+    return $this->driver->getResultSet();
   }
 }

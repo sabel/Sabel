@@ -2,13 +2,24 @@
 
 class Sabel_DB_Executer
 {
-  protected $model  = null;
-  protected $driver = null;
+  protected $model   = null;
+  protected $isModel = false;
+  protected $driver  = null;
 
-  public function __construct($model)
+  protected
+    $conditions  = array(),
+    $constraints = array();
+
+  public function __construct($model = null)
   {
-    $this->model = $model;
-    $this->initialize($model);
+    if (isset($model)) {
+      if (!$model instanceof Sabel_DB_Mapper) {
+        throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
+      }
+      $this->model   = $model;
+      $this->isModel = true;
+      $this->initialize($model);
+    }
   }
 
   public function initialize($model = null)
@@ -21,6 +32,31 @@ class Sabel_DB_Executer
     }
   }
 
+  public function setCondition($condition)
+  {
+    if (!$condition instanceof Sabel_DB_Condition)
+      throw new Exception('Error: argument should be an instance of Sabel_DB_Condition');
+
+    $this->conditions[$condition->key] = $condition;
+  }
+
+  public function getCondition()
+  {
+    return ($this->isModel) ? $this->model->getCondition() : $this->conditions;
+  }
+
+  public function setConstraint($param1, $param2 = null)
+  {
+    foreach ((is_array($param1)) ? $param1 : array($param1 => $param2) as $key => $val) {
+      if (isset($val)) $this->constraints[$key] = $val;
+    }
+  }
+
+  public function getConstraint()
+  {
+    return ($this->isModel) ? $this->model->getConstraint() : $this->constraints;
+  }
+
   public function getDriver()
   {
     return $this->driver;
@@ -28,44 +64,40 @@ class Sabel_DB_Executer
 
   public function execute()
   {
-    $model = $this->model;
-
     $driver = $this->driver;
-    $driver->makeQuery($model->getCondition(), $model->getConstraint());
+    $driver->makeQuery($this->getCondition(), $this->getConstraint());
     $this->tryExecute($driver);
     return $driver->getResultSet();
   }
 
-  public function update($data)
+  public function update($table, $data)
   {
-    $model = $this->model;
-
     $driver = $this->driver;
-    $driver->setUpdateSQL($model->getTableName(), $data);
-    $driver->makeQuery($model->getCondition());
+    $driver->setUpdateSQL($table, $data);
+    $driver->makeQuery($this->getCondition());
     $this->tryExecute($driver);
   }
 
-  public function insert($data, $idColumn)
+  public function insert($table, $data, $idColumn)
   {
     $model = $this->model;
 
     try {
       $driver = $this->driver;
-      $driver->executeInsert($model->getTableName(), $data, $idColumn);
+      $driver->executeInsert($table, $data, $idColumn);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  public function multipleInsert($data, $idColumn)
+  public function multipleInsert($table, $data, $idColumn)
   {
     $model = $this->model;
 
     try {
       $driver = $this->driver;
-      foreach ($data as $val) $driver->executeInsert($model->getTableName(), $val, $idColumn);
+      foreach ($data as $val) $driver->executeInsert($table, $val, $idColumn);
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }

@@ -42,7 +42,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_General
     $sql  = "SELECT * FROM pg_statio_user_sequences ";
     $sql .= "WHERE relname = '{$row['table_name']}_{$co->name}_seq'";
 
-    $co->increment = ($this->execute($sql) !== false);
+    $co->increment = (!$this->execute($sql)->isEmpty());
   }
 
   public function setPrimaryKey($co, $row)
@@ -51,7 +51,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_General
     $sql .= "WHERE table_schema = '{$this->schema}' AND table_name = '{$row['table_name']}' ";
     $sql .= "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
 
-    $co->primary = ($this->execute($sql) !== false);
+    $co->primary = (!$this->execute($sql)->isEmpty());
   }
 
   public function setLength($co, $row)

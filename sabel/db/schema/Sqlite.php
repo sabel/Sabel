@@ -8,24 +8,26 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
 
   public function __construct($connectName, $schema = null)
   {
-    $this->connectName = $connectName;
-    $this->recordObj   = new Sabel_DB_Basic();
-    $this->recordObj->setDriver($connectName);
+    $this->driver = Sabel_DB_Connection::createDBDriver($connectName);
   }
 
   public function getTables()
   {
     $tables = array();
-    foreach ($this->recordObj->execute($this->tableList) as $val) {
-      $tables[$val->name] = $this->getTable($val->name);
+
+    $this->driver->execute($this->tableList);
+    foreach ($this->driver->getResultSet() as $row) {
+      $tblName = $row['name'];
+      $tables[$tblName] = $this->getTable($tblName);
     }
     return $tables;
   }
 
   protected function createColumns($table)
   {
-    $result  = $this->recordObj->execute(sprintf($this->tableColumns, $table));
+    $this->driver->execute(sprintf($this->tableColumns, $table));
+    $row = $this->driver->getResultSet()->fetch();
     $creator = new Sabel_DB_Schema_Util_Creator();
-    return $creator->create($result[0]->sql);
+    return $creator->create($result['sql']);
   }
 }

@@ -2,8 +2,7 @@
 
 abstract class Sabel_DB_Schema_Common
 {
-  protected $connectName = '';
-  protected $recordObj   = null;
+  protected $recordObj = null;
 
   public function getTable($tblName)
   {
