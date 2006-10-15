@@ -52,9 +52,19 @@ abstract class Sabel_DB_Mapper
 
   public function __construct($param1 = null, $param2 = null)
   {
-    if ($this->table === '') $this->table = strtolower(get_class($this));
+    if ($this->table === '') $this->setTableName();
     if (Sabel_DB_Transaction::isActive()) $this->begin();
     if ($param1 !== '' && !is_null($param1)) $this->defaultSelectOne($param1, $param2);
+  }
+
+  public function setTableName($tblName = null)
+  {
+    if (isset($tblName)) {
+      $this->table = $tblName;
+    } else {
+      //todo convert from model name to table name?
+      $this->table = strtolower(get_class($this));
+    }
   }
 
   public function __set($key, $val)
