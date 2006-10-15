@@ -13,10 +13,12 @@ abstract class Sabel_DB_Mapper
 
   //todo public $table = '';
   protected $table = '';
-  public $structure    = 'normal';
-  public $primaryKey   = 'id';
-  public $incrementKey = 'id';
-  public $jointKey     = array();
+
+  public
+    $structure    = 'normal',
+    $primaryKey   = 'id',
+    $incrementKey = 'id',
+    $jointKey     = array();
 
   private
     $executer = null;
@@ -33,7 +35,7 @@ abstract class Sabel_DB_Mapper
     $newData  = array(),
     $selected = false;
 
-  private 
+  private
     $joinColCache = array(),
     $relational   = array(),
     $cascadeStack = array();
@@ -150,7 +152,7 @@ abstract class Sabel_DB_Mapper
 
   public function getSchemaName()
   {
-    return Sabel_DB_Connection::getSchema($this->connectName);
+    return Sabel_DB_Connection::getSchema($this->getConnectName());
   }
 
   public function getColumnNames($tblName = null)
@@ -171,7 +173,7 @@ abstract class Sabel_DB_Mapper
 
   protected function createSchemaAccessor()
   {
-    return new Sabel_DB_Schema_Accessor($this->connectName, $this->getSchemaName());
+    return new Sabel_DB_Schema_Accessor($this->getConnectName(), $this->getSchemaName());
   }
 
   public function setConstraint($param1, $param2 = null)
@@ -196,8 +198,9 @@ abstract class Sabel_DB_Mapper
     } else if (is_array($param1)) {
       $this->defChildConstraints = $param1;
     } else {
-      $error  = 'Error: setChildConstraint() ';
-      $error .= 'when second argument is null, first argument must be an array.';
+      $error = 'Error: setChildConstraint() '
+             . 'when second argument is null, first argument must be an array.';
+
       throw new Exception($error);
     }
   }
@@ -212,14 +215,17 @@ abstract class Sabel_DB_Mapper
   {
     if (empty($param1)) return null;
 
-    if (is_null($param2)) {
-      $param3 = $param2;
-      $param2 = $param1;
-      $param1 = $this->primaryKey;
+    if ($param1 instanceof Sabel_DB_Condition) {
+      $this->conditions[$param1->key] = $param1;
+    } else {
+      if (is_null($param2)) {
+        $param3 = $param2;
+        $param2 = $param1;
+        $param1 = $this->primaryKey;
+      }
+      $condition = new Sabel_DB_Condition($param1, $param2, $param3);
+      $this->conditions[$condition->key] = $condition;
     }
-
-    $condition = new Sabel_DB_Condition($param1, $param2, $param3);
-    $this->conditions[$condition->key] = $condition;
   }
 
   public function getCondition()
@@ -235,7 +241,7 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $connectName = $this->connectName;
+    $connectName = $this->getConnectName();
     $driver = $this->getExecuter()->getDriver();
 
     $check = true;
@@ -257,7 +263,7 @@ abstract class Sabel_DB_Mapper
 
   public function close()
   {
-    Sabel_DB_Connection::close($this->connectName);
+    Sabel_DB_Connection::close($this->getConnectName());
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -281,7 +287,7 @@ abstract class Sabel_DB_Mapper
     return $this->getMost('DESC', $orderColumn);
   }
 
-  protected function getMost($order, $orderColumn)
+  private function getMost($order, $orderColumn)
   {
     $this->setCondition($orderColumn, 'NOT NULL');
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
@@ -708,10 +714,10 @@ abstract class Sabel_DB_Mapper
     $id = (isset($id)) ? $id : $this->data[$this->primaryKey];
 
     if (!class_exists('Schema_CascadeChain', false))
-      throw new Exception('Error: class Schema_CascadeChain not exist.');
+      throw new Exception('Error: class Schema_CascadeChain does not exist.');
 
     $chain = Schema_CascadeChain::get();
-    $key   = $this->connectName . ':' . $this->table;
+    $key   = $this->getConnectName() . ':' . $this->table;
 
     if (!array_key_exists($key, $chain)) {
       throw new Exception('cascade chain is not found. try remove()');
@@ -719,8 +725,8 @@ abstract class Sabel_DB_Mapper
       $this->begin();
       $models = array();
       foreach ($chain[$key] as $tblName) {
-        $foreign = $this->table . '_id';
-        if ($model = $this->pushStack($tblName, $foreign, $id)) $models[] = $model;
+        $foreignKey = $this->table . '_id';
+        if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
       }
 
       foreach ($models as $children) $this->getChainModels($children, $chain);
@@ -741,8 +747,8 @@ abstract class Sabel_DB_Mapper
       foreach ($chain[$key] as $tblName) {
         $models = array();
         foreach ($children as $child) {
-          $foreign = $this->table . '_id';
-          if ($model = $this->pushStack($tblName, $foreign, $child->id)) $models[] = $model;
+          $foreignKey = $this->table . '_id';
+          if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
         }
         $references[] = $models;
       }
@@ -754,24 +760,24 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  private function pushStack($chainValue, $foreign, $id)
+  private function pushStack($chainValue, $foreignKey, $id)
   {
     list($cName, $tName) = explode(':', $chainValue);
     $model  = $this->newClass($tName);
     $model->setConnectName($cName);
-    $models = $model->select($foreign, $id);
+    $models = $model->select($foreignKey, $id);
 
-    if ($models) $this->cascadeStack["{$cName}:{$tName}:{$id}"] = $foreign;
+    if ($models) $this->cascadeStack["{$cName}:{$tName}:{$id}"] = $foreignKey;
     return $models;
   }
 
   private function clearCascadeStack($stack)
   {
-    foreach ($stack as $param => $foreign) {
+    foreach ($stack as $param => $foreignKey) {
       list($cName, $tName, $idValue) = explode(':', $param);
-      $model  = $this->newClass($tName);
+      $model = $this->newClass($tName);
       $model->setConnectName($cName);
-      $model->remove($foreign, $idValue);
+      $model->remove($foreignKey, $idValue);
     }
   }
 

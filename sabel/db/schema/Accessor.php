@@ -8,8 +8,8 @@
  */
 class Sabel_DB_Schema_Accessor
 {
-  protected $connectName = '';
-  protected $schemaClass = null;
+  private $connectName = '';
+  private $schemaClass = null;
 
   public function __construct($connectName, $schema)
   {
@@ -57,7 +57,7 @@ function schema($model)
 
     return $columns;
   } else if (is_array($model)) {
-
+    //todo
   } else {
     throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
   }

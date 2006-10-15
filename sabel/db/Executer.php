@@ -2,11 +2,12 @@
 
 class Sabel_DB_Executer
 {
-  protected $model   = null;
-  protected $isModel = false;
-  protected $driver  = null;
+  private
+    $model   = null,
+    $driver  = null,
+    $isModel = false;
 
-  protected
+  private
     $conditions  = array(),
     $constraints = array();
 
@@ -17,14 +18,20 @@ class Sabel_DB_Executer
       $this->isModel = true;
       $this->initialize($param);
     } else {
-      $this->setDriver($param);
+      if (is_string($param))  {
+        $this->setDriver($param);
+      } else {
+        $errorMsg = 'Error: Sabel_DB_Executer::__construct() '
+                  . 'invalid parameter. should be a string or an instance of Sabel_DB_Mapper';
+
+        throw new Exception($errorMsg);
+      }
     }
   }
 
-  public function initialize($model = null)
+  //todo
+  public function initialize($model)
   {
-    if (is_null($model)) $model = $this->model;
-
     $driver = $this->driver = Sabel_DB_Connection::getDriver($model->getConnectName());
     if ($driver instanceof Sabel_DB_Driver_Native_Mssql) {
       $driver->setDefaultOrderKey($model->primaryKey);

@@ -39,18 +39,18 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
 
   protected function setIncrement($co, $row)
   {
-    $sql  = "SELECT * from sys.objects obj, sys.identity_columns ident ";
-    $sql .= "WHERE obj.name = '{$row['table_name']}' AND ident.name = '{$co->name}' AND ";
-    $sql .= "obj.object_id = ident.object_id";
+    $sql  = "SELECT * from sys.objects obj, sys.identity_columns ident "
+          . "WHERE obj.name = '{$row['table_name']}' AND ident.name = '{$co->name}' AND "
+          . "obj.object_id = ident.object_id";
 
     $co->increment = (!$this->execute($sql)->isEmpty());
   }
 
   protected function setPrimaryKey($co, $row)
   {
-    $sql  = "SELECT const.type FROM information_schema.constraint_column_usage col, sys.key_constraints const ";
-    $sql .= "WHERE col.table_catalog = '{$this->schema}' AND col.table_name = '{$row['table_name']}' AND ";
-    $sql .= "col.column_name = '{$co->name}' AND col.constraint_name = const.name";
+    $sql  = "SELECT const.type FROM information_schema.constraint_column_usage col, sys.key_constraints const "
+          . "WHERE col.table_catalog = '{$this->schema}' AND col.table_name = '{$row['table_name']}' AND "
+          . "col.column_name = '{$co->name}' AND col.constraint_name = const.name";
 
     $resultSet = $this->execute($sql);
     if ($resultSet->isEmpty()) {
