@@ -9,16 +9,22 @@
  */
 abstract class Sabel_DB_Mapper
 {
+  //todo delete?
   const WITH_PARENT = 'WITH_PARENT';
 
-  //todo public $table = '';
-  protected $table = '';
-
-  public
+  protected
+    $table        = '',
     $structure    = 'normal',
     $primaryKey   = 'id',
     $incrementKey = 'id',
     $jointKey     = array();
+
+  protected
+    $connectName  = 'default',
+    $autoNumber   = true,
+    $withParent   = false,
+    $projection   = '*',
+    $myChildren   = null;
 
   private
     $executer = null;
@@ -42,13 +48,6 @@ abstract class Sabel_DB_Mapper
 
   protected
     $defChildConstraints = array();
-
-  protected
-    $connectName = 'default',
-    $autoNumber  = true,
-    $withParent  = false,
-    $projection  = '*',
-    $myChildren  = null;
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -120,19 +119,9 @@ abstract class Sabel_DB_Mapper
     $this->projection = (is_array($p)) ? implode(',', $p) : $p;
   }
 
-  public function getProjection()
-  {
-    return $this->projection;
-  }
-
   public function setMyChildren($children)
   {
     $this->myChildren = $children;
-  }
-
-  public function getMyChildren()
-  {
-    return $this->myChildren;
   }
 
   public function enableParent()
@@ -160,11 +149,6 @@ abstract class Sabel_DB_Mapper
     return $this->selected;
   }
 
-  public function getSchemaName()
-  {
-    return Sabel_DB_Connection::getSchema($this->getConnectName());
-  }
-
   public function getColumnNames($tblName = null)
   {
     if (is_null($tblName)) $tblName = $this->table;
@@ -183,7 +167,9 @@ abstract class Sabel_DB_Mapper
 
   protected function createSchemaAccessor()
   {
-    return new Sabel_DB_Schema_Accessor($this->getConnectName(), $this->getSchemaName());
+    $connectName = $this->connectName;
+    $schemaName  = Sabel_DB_Connection::getSchema($connectName);
+    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }
 
   public function setConstraint($param1, $param2 = null)
@@ -251,7 +237,7 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $connectName = $this->getConnectName();
+    $connectName = $this->connectName;
     $driver = $this->getExecuter()->getDriver();
 
     $check = true;
@@ -273,7 +259,7 @@ abstract class Sabel_DB_Mapper
 
   public function close()
   {
-    Sabel_DB_Connection::close($this->getConnectName());
+    Sabel_DB_Connection::close($this->connectName);
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -338,13 +324,13 @@ abstract class Sabel_DB_Mapper
   {
     $model->selectCondition = $model->conditions;
 
-    $projection = $model->getProjection();
+    $projection = $model->projection;
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
     $resultSet = $model->getExecuter()->execute();
 
     if ($row = $resultSet->fetch()) {
       $model->mapping($model, ($model->withParent) ? $this->addParent($row) : $row);
-      if (!is_null($myChild = $model->getMyChildren())) $model->getDefaultChild($myChild, $model);
+      if (!is_null($myChild = $model->myChildren)) $model->getDefaultChild($myChild, $model);
     } else {
       $model->data = $model->conditions;
     }
@@ -460,7 +446,7 @@ abstract class Sabel_DB_Mapper
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->addSelectCondition($param1, $param2, $param3);
-    $projection = $this->getProjection();
+    $projection = $this->projection;
     $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
     return $this->getRecords($this);
   }
@@ -482,8 +468,8 @@ abstract class Sabel_DB_Mapper
       }
 
       $this->mapping($model, ($withParent) ? $this->addParent($row) : $row);
-      if (!is_null($myChild = $model->getMyChildren())) {
-        if (isset($child)) $this->chooseMyChildConstraint($myChild, $model);
+      if (!is_null($myChild = $model->myChildren)) {
+        if (isset($child)) $this->chooseChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
       }
       $models[] = $model;
@@ -518,10 +504,11 @@ abstract class Sabel_DB_Mapper
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName. $id))) {
       $model->setCondition($model->primaryKey, $id);
-      $projection = $model->getProjection();
+      $projection = $model->projection;
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
       $resultSet = $model->getExecuter()->execute();
 
+      //todo
       if (!$row = $resultSet->fetch()) {
         $model->selected = true;
         $model->id = $id;
@@ -556,10 +543,10 @@ abstract class Sabel_DB_Mapper
     if (is_null($model)) $model = $this;
 
     $class = $this->newClass($child);
-    $projection = $class->getProjection();
+    $projection = $class->projection;
     $class->getStatement()->setBasicSQL("SELECT $projection FROM {$class->table}");
 
-    $this->chooseMyChildConstraint($child, $model);
+    $this->chooseChildConstraint($child, $model);
     $model->setChildCondition("{$model->table}_id", $model->data[$model->primaryKey]);
 
     $class->conditions  = $model->childConditions;
@@ -575,13 +562,13 @@ abstract class Sabel_DB_Mapper
 
   protected function getDefaultChild($children, $model)
   {
-    foreach (is_string($children) ? array($children) : $children as $val) {
-      $this->chooseMyChildConstraint($val, $model);
+    foreach (is_string($children) ? (array)$children : $children as $val) {
+      $this->chooseChildConstraint($val, $model);
       $model->getChild($val, $model);
     }
   }
 
-  private function chooseMyChildConstraint($child, $model)
+  private function chooseChildConstraint($child, $model)
   {
     if (array_key_exists($child, $this->childConstraints)) {
       $constraints = $this->childConstraints[$child];
@@ -727,7 +714,7 @@ abstract class Sabel_DB_Mapper
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
 
     $chain = Schema_CascadeChain::get();
-    $key   = $this->getConnectName() . ':' . $this->table;
+    $key   = $this->connectName . ':' . $this->table;
 
     if (!array_key_exists($key, $chain)) {
       throw new Exception('cascade chain is not found. try remove()');
@@ -750,7 +737,7 @@ abstract class Sabel_DB_Mapper
   private function getChainModels($children, &$chain)
   {
     $table = $children[0]->table;
-    $key   = $children[0]->getConnectName() . ':' . $table;
+    $key   = $children[0]->connectName . ':' . $table;
 
     if (array_key_exists($key, $chain)) {
       $references = array();

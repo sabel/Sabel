@@ -29,7 +29,7 @@ class Sabel_DB_Executer
     }
   }
 
-  //todo
+  //todo default order column = 'id' ? => setDriver()
   public function initialize($model)
   {
     $driver = $this->driver = Sabel_DB_Connection::getDriver($model->getConnectName());
