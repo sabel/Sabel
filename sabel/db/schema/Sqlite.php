@@ -26,8 +26,8 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
   protected function createColumns($table)
   {
     $this->driver->execute(sprintf($this->tableColumns, $table));
-    $row = $this->driver->getResultSet()->fetch();
-    $creator = new Sabel_DB_Schema_Util_Creator();
-    return $creator->create($result['sql']);
+    $assocRow = $this->driver->getResultSet()->fetch();
+    $creator  = new Sabel_DB_Schema_Util_Creator();
+    return $creator->create($assocRow['sql']);
   }
 }

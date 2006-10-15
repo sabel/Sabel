@@ -658,7 +658,7 @@ abstract class Sabel_DB_Mapper
 
   public function allUpdate($data)
   {
-    $this->getExecuter()->update($data);
+    $this->getExecuter()->update($this->table, $data);
   }
 
   public function multipleInsert($data)
