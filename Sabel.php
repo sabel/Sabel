@@ -539,8 +539,6 @@ class ClassFile
   {
     if (!$this->isLineValid($line)) return false;
     
-    $this->removeLineComment($line);
-    
     $result = $this->isExtends($line);
     if ($result[0]) {
       $this->hasParent = true;
@@ -600,6 +598,7 @@ class ClassFile
   protected function isLineValid($line)
   {
     if ($line === '') return false;
+    if ($line === '<?') return false;
     if ($line === '<?php') return false;
     if ($line === '?>') return false;
     
@@ -608,57 +607,59 @@ class ClassFile
   
   protected function removeLineComment($line)
   {
-    if ($this->state !== 5 && $this->state !== 10 && $this->state !== 25) $this->state = 0;
-    
-    if (!is_null($this->here) && $line === $this->here.';') {
-      $this->here  = null;
-      $this->state = 0;
-    }
-    
-    if ($this->state === 25) {
-      return $line;
-    }
-    
     for ($i = 0; $i < strlen($line); $i++) {
       $c = $line[$i];
-    
-      if ($this->state === 0) {
-        switch ($c) {
-          case "'":
-            $this->state = 5;
-            break;
-          case '"':
-            $this->state = 10;
-            break;
-          case '/':
-            $this->state = 15;
-            break;
-        }
-        
-        if ($c === '<' && $line[$i+1] === '<' && $line[$i+2] === '<') {
-          $this->state = 25;
-          $this->here = substr($line, $i+3);
-        } 
-        continue;
+      switch ($this->state) {
+        case 0: // no state
+          switch ($c) {
+            case "'":
+              $this->state = 5;
+              break;
+            case '"':
+              $this->state = 10;
+              break;
+            case '/':
+              $this->state = 15;
+              break;
+            case '#':
+              $this->state = 30;
+              break;
+            case '<':
+              if ($line[$i+1] === '<' && $line[$i+2] === '<') {
+                $this->here  = substr($line, $i+3);
+                $this->state = 25;
+              }
+              break;
+          }
+          break;
+        case 5: // single quote
+          if ($c === "'"  && $line[$i-1] !== '\\') $this->state = 0;
+          break;
+        case 10: // double quote
+          if ($c === '"' && $line[$i-1] !== '\\') $this->state = 0;
+          break;
+        case 15: // may be comment
+          switch ($c) {
+            case '*':
+              $this->state = 20;
+              break;
+            case '/':
+              $this->state = 30;
+              break;
+          }
+          break;
+        case 20: // multi line comment
+          if ($c === '/' && $line[$i-1] === '*') $this->state = 0;
+          break;
+        case 25: // hereDoc
+          if ($line === $this->here . ';') $this->state = 0;
+          break;
       }
-      
-      
-      if ($this->state === 5  && $c === "'") {
+      if ($this->state === 30) {
         $this->state = 0;
-        continue;
-      }
-      
-      if ($this->state === 10 && $c === '"') {
-        $this->state = 0;
-        continue;
-      }
-      
-      if ($this->state === 15 && $c === '/') {
         $line = substr($line, 0, $i-1);
-        break;
       }
     }
-    
     return $line;
   }
 }
