@@ -350,7 +350,7 @@ class ClassCombinator
       if ($parts[0] === $this->strict) {
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
         $classFile = new ClassFile($value);
-        while (!feof($fp)) $classFile->addLine(trim(fgets($fp)));
+        while (!feof($fp)) $classFile->addLine(rtrim(fgets($fp)));
         fclose($fp);
         $this->files->add($classFile);
       }
