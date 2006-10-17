@@ -6,6 +6,7 @@ define('TEST_CASE', true);
 define('ENVIRONMENT', 'development');
 
 error_reporting(E_ALL|E_STRICT);
+ini_set('memory_limit', '16m');
 
 if (!defined('PHPUnit2_MAIN_METHOD')) {
     define('PHPUnit2_MAIN_METHOD', 'SabelAllTests::main');

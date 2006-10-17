@@ -39,7 +39,8 @@ class Test_DB_Test extends SabelTestCase
     $order->multipleInsert($insertData);
 
     $o = new CustomerOrder();
-    $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
+    $o->enableParent();
+    $res = $o->select();
     $this->assertEquals((int)$res[0]->Customer->id, 1);
     $this->assertEquals((int)$res[2]->Customer->id, 2);
 
@@ -83,6 +84,44 @@ class Test_DB_Test extends SabelTestCase
     @$this->assertNull($cus[0]->CustomerOrder[3]->id);
   }
 
+  public function testInsert()
+  {
+    $test2 = new Test2();
+    $test2->id   = 1;
+    $test2->name = 'test21';
+    $test2->test3_id = '2';
+    $test2->save();
+
+    $test2 = new Test2();
+    $test2->id   = 2;
+    $test2->name = 'test22';
+    $test2->test3_id = '1';
+    $test2->save();
+    
+    $test2 = new Test2();
+    $test2->id   = 3;
+    $test2->name = 'test23';
+    $test2->test3_id = '2';
+    $test2->save();
+
+    $test2 = new Test2();
+    $obj   = $test2->selectOne(3);
+    $this->assertEquals($obj->name, 'test23');
+    
+    $test3 = new Test3();
+    $test3->id = 1;
+    $test3->name = 'test31';
+    $test3->save();
+    
+    $test3->id = 2;
+    $test3->name = 'test32';
+    $test3->save();
+    
+    $test3->name('test31');
+    $obj = $test3->selectOne();
+    $this->assertEquals((int)$obj->id, 1);
+  }
+
   public function testMultipleInsert()
   {
     $test = new Test();
@@ -92,7 +131,7 @@ class Test_DB_Test extends SabelTestCase
     $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
     $insertData[] = array('id' => 3, 'name' => 'uchida',   'blood' => 'AB', 'test2_id' => 1);
     $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
-    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
+    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 3);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
     $test->multipleInsert($insertData);
 
@@ -102,7 +141,7 @@ class Test_DB_Test extends SabelTestCase
     $test->enableParent();
     $obj = $test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
-    $this->assertEquals((int)$obj->Test2->id, 4);
+    $this->assertEquals((int)$obj->Test2->id, 3);
     
     $obj = $test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
@@ -243,44 +282,6 @@ class Test_DB_Test extends SabelTestCase
     $bbs->multipleInsert($insertData);
   }
 
-  public function testInsert()
-  {
-    $test2 = new Test2();
-    $test2->id   = 1;
-    $test2->name = 'test21';
-    $test2->test3_id = '2';
-    $test2->save();
-
-    $test2 = new Test2();
-    $test2->id   = 2;
-    $test2->name = 'test22';
-    $test2->test3_id = '1';
-    $test2->save();
-    
-    $test2 = new Test2();
-    $test2->id   = 3;
-    $test2->name = 'test23';
-    $test2->test3_id = '3';
-    $test2->save();
-
-    $test2 = new Test2();
-    $obj   = $test2->selectOne(3);
-    $this->assertEquals($obj->name, 'test23');
-    
-    $test3 = new Test3();
-    $test3->id = 1;
-    $test3->name = 'test31';
-    $test3->save();
-    
-    $test3->id = 2;
-    $test3->name = 'test32';
-    $test3->save();
-    
-    $test3->name('test31');
-    $obj = $test3->selectOne();
-    $this->assertEquals((int)$obj->id, 1);
-  }
-  
   public function testUpdateOrInsert()
   {
     $test = new Test(7); // not found 
@@ -288,7 +289,7 @@ class Test_DB_Test extends SabelTestCase
     @$this->assertEquals($test->name, null);
     @$this->assertEquals($test->blood, null);
     
-    if ($test->is_selected()) {
+    if ($test->isSelected()) {
       $test->blood = 'AB';
       $test->save();  // (update)
     } else {
@@ -303,7 +304,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'B');
     
-    if ($test->is_selected()) {
+    if ($test->isSelected()) {
       $test->blood = 'AB';
       $test->save();  // update <= execute
     } else {
@@ -331,14 +332,14 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($obj->blood, null);
 
     $t = new Test(99);
-    $this->assertEquals($t->is_selected(), false);
+    $this->assertEquals($t->isSelected(), false);
     $t->name     = 'test99';
     $t->blood    = 'C';
     $t->test2_id = '3';
     $t->save();
 
     $t = new Test(99);
-    $this->assertEquals($t->is_selected(), true);
+    $this->assertEquals($t->isSelected(), true);
     $t->remove();
   }
 
@@ -377,19 +378,23 @@ class Test_DB_Test extends SabelTestCase
     
     //----------------------------------------------
     
+    $test = new Test();
     $test->LIKE_name(array('%da%', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 4); // yo_shida, uchida, ueda, uchida
     
+    $test = new Test();
     $test->LIKE_name('yo_shida');
     $obj = $test->select();
     $this->assertEquals(count($obj), 1);
     $this->assertEquals($obj[0]->name, 'yo_shida'); // yo_shida
 
+    $test = new Test();
     $test->LIKE_name(array('%i_a', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
 
+    $test = new Test();
     $test->OR_id(array('3', '4'));
     $obj = $test->select();
 
@@ -397,11 +402,13 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
+    $test = new Test();
     $test->OR_id(array('< 2', '> 5'));
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
 
+    $test = new Test();
     $test->OR_id(array('<= 2', '>= 5'));
     $test->sconst('order', 'id');
     $obj = $test->select();
@@ -423,8 +430,12 @@ class Test_DB_Test extends SabelTestCase
     $in2->infinite1_id = 1;
     $in2->save();
     
-    $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
+    $in1->enableParent();
+    $objs = $in1->select();
     $obj = $objs[0];
+
+    $data = $obj->Infinite2->toArray();
+    $this->assertFalse(in_array('Infinite1', array_keys($data)));
     
     $this->assertEquals((int)$obj->infinite2_id, (int)$obj->Infinite2->id);
     $this->assertEquals((int)$obj->Infinite2->infinite1_id, 1);
@@ -794,27 +805,20 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$students[0]->id, 5);
     $this->assertEquals((int)$students[1]->id, 4);
 
-    $constraint = array('limit' => 100, 'order' => 'course_id desc');
+    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 5);
+    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 4);
+    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 2);
+    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 1);
 
-    foreach ($students as $student) {
-      $student->setChildConstraint($constraint);
-      $student->getChild('Course');
-    }
+    $this->assertEquals((int)$students[3]->Course[3]->id, 5);
+    $this->assertEquals((int)$students[3]->Course[2]->id, 4);
+    $this->assertEquals((int)$students[3]->Course[1]->id, 3);
+    $this->assertEquals((int)$students[3]->Course[0]->id, 2);
 
-    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 5);
-    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 4);
-    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 2);
-    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 1);
-
-    $this->assertEquals((int)$students[3]->Course[0]->id, 5);
-    $this->assertEquals((int)$students[3]->Course[1]->id, 4);
-    $this->assertEquals((int)$students[3]->Course[2]->id, 3);
-    $this->assertEquals((int)$students[3]->Course[3]->id, 2);
-
-    $this->assertEquals($students[3]->Course[0]->name, 'Psychology');
-    $this->assertEquals($students[3]->Course[1]->name, 'Economic');
-    $this->assertEquals($students[3]->Course[2]->name, 'Science');
-    $this->assertEquals($students[3]->Course[3]->name, 'Physics');
+    $this->assertEquals($students[3]->Course[3]->name, 'Psychology');
+    $this->assertEquals($students[3]->Course[2]->name, 'Economic');
+    $this->assertEquals($students[3]->Course[1]->name, 'Science');
+    $this->assertEquals($students[3]->Course[0]->name, 'Physics');
 
     //-----------------------------------------------------------------
 
@@ -878,21 +882,21 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$test2->test2->id, 2);
     $this->assertEquals((int)$test3->test2->id, 1);
     $this->assertEquals((int)$test4->test2->id, 3);
-    $this->assertNull($test5->test2->id);
+    $this->assertEquals((int)$test5->test2->id, 3);
     $this->assertEquals((int)$test6->test2->id, 1);
 
     $this->assertEquals((int)$test1->test2->test3->id, 2);
     $this->assertEquals((int)$test2->test2->test3->id, 1);
     $this->assertEquals((int)$test3->test2->test3->id, 2);
-    $this->assertNull($test4->test2->test3->id, 3);
-    $this->assertNull($test5->test2->test3->id, 3);
+    $this->assertEquals((int)$test4->test2->test3->id, 2);
+    $this->assertEquals((int)$test5->test2->test3->id, 2);
     $this->assertEquals((int)$test6->test2->test3->id, 2);
 
     $this->assertEquals($test1->test2->test3->name, 'test32');
     $this->assertEquals($test2->test2->test3->name, 'test31');
     $this->assertEquals($test3->test2->test3->name, 'test32');
-    $this->assertNull($test4->test2->test3->name);
-    $this->assertNull($test5->test2->test3->name);
+    $this->assertEquals($test4->test2->test3->name, 'test32');
+    $this->assertEquals($test5->test2->test3->name, 'test32');
     $this->assertEquals($test6->test2->test3->name, 'test32');
   }
 
@@ -1244,7 +1248,6 @@ class Customer extends MapperDefault
 
 class CustomerOrder extends MapperDefault
 {
-  public $table = 'customer_order';
   protected $myChildren = 'OrderLine';
 
   public function __construct($param1 = null, $param2 = null)
@@ -1256,12 +1259,12 @@ class CustomerOrder extends MapperDefault
 
 class OrderLine extends MapperDefault
 {
-  public $table = 'order_line';
+
 }
 
 class CustomerTelephone extends MapperDefault
 {
-  public $table = 'customer_telephone';
+
 }
 
 class Tree extends Sabel_DB_Tree
@@ -1292,7 +1295,7 @@ class Course extends Bridge_Base
 
 class StudentCourse extends MapperDefault
 {
-  public $table = 'student_course';
+
 }
 
 class Trans1 extends MapperDefault
@@ -1322,5 +1325,5 @@ class Status extends MapperDefault
 
 class SchemaTest extends MapperDefault
 {
-  public $table = 'schema_test';
+
 }

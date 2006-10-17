@@ -9,9 +9,6 @@
  */
 abstract class Sabel_DB_Mapper
 {
-  //todo delete?
-  const WITH_PARENT = 'WITH_PARENT';
-
   protected
     $table        = '',
     $structure    = 'normal',
@@ -61,15 +58,15 @@ abstract class Sabel_DB_Mapper
     if (isset($tblName)) {
       $this->table = $tblName;
     } else {
-      //todo convert from model name to table name?
-      $this->table = strtolower(get_class($this));
+      $table = substr(strtolower(preg_replace('/([A-Z])/', '_$1',get_class($this))), 1);
+      $this->table = $table;
     }
   }
 
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
-    if ($this->is_selected()) $this->newData[$key] = $val;
+    if ($this->isSelected()) $this->newData[$key] = $val;
   }
 
   public function __get($key)
@@ -144,24 +141,21 @@ abstract class Sabel_DB_Mapper
     return $this->data;
   }
 
-  public function is_selected()
+  public function isSelected()
   {
     return $this->selected;
   }
-  
+
   public function choice($param1 = null, $param2 = null, $param3 = null)
   {
     return new Sabel_Aspect_DynamicProxy($this->selectOne($param1, $param2, $param3));
   }
-  
+
   public function schema($tblName = null)
   {
-    if (is_null($tblName)) {
-      $tblName = $this->table;
-    }
-    
+    if (is_null($tblName)) $tblName = $this->table;
     $columns = $this->getTableSchema($tblName)->getColumns();
-    
+
     if ($tblName === $this->table) {
       foreach ($this->data as $name => $data) {
         if (!is_object($this->data[$name]) && isset($this->data[$name])) {
@@ -169,10 +163,9 @@ abstract class Sabel_DB_Mapper
         }
       }
     }
-    
     return $columns;
   }
-  
+
   public function getColumnNames($tblName = null)
   {
     if (is_null($tblName)) $tblName = $this->table;
@@ -260,6 +253,12 @@ abstract class Sabel_DB_Mapper
     $this->constraints = array();
   }
 
+  public function unsetChildCondition()
+  {
+    $this->childConditions  = array();
+    $this->childConstraints = array();
+  }
+
   public function begin()
   {
     $connectName = $this->connectName;
@@ -341,16 +340,14 @@ abstract class Sabel_DB_Mapper
     if (is_null($param1) && empty($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
-    $this->addSelectCondition($param1, $param2, $param3);
+    $this->setCondition($param1, $param2, $param3);
     return $this->makeFindObject(clone($this));
   }
 
   protected function makeFindObject($model)
   {
     $model->selectCondition = $model->conditions;
-
-    $projection = $model->projection;
-    $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
+    $model->getStatement()->setBasicSQL("SELECT {$model->projection} FROM " . $model->table);
     $resultSet = $model->getExecuter()->execute();
 
     if ($row = $resultSet->fetch()) {
@@ -359,19 +356,7 @@ abstract class Sabel_DB_Mapper
     } else {
       $model->data = $model->conditions;
     }
-
-    $this->constraints = array();
-    $this->conditions  = array();
     return $model;
-  }
-
-  private function addSelectCondition($param1, $param2, $param3)
-  {
-    if ($param1 === self::WITH_PARENT) {
-      $this->enableParent();
-    } else {
-      $this->setCondition($param1, $param2, $param3);
-    }
   }
 
   public function selectJoin($relTableList, $columnList = null)
@@ -470,9 +455,8 @@ abstract class Sabel_DB_Mapper
 
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
-    $this->addSelectCondition($param1, $param2, $param3);
-    $projection = $this->projection;
-    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
+    $this->setCondition($param1, $param2, $param3);
+    $this->getStatement()->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     return $this->getRecords($this);
   }
 
@@ -499,61 +483,51 @@ abstract class Sabel_DB_Mapper
       }
       $models[] = $model;
     }
-
-    $this->constraints = array();
-    $this->conditions  = array();
     return $models;
   }
 
-  public function addParent($row)
+  protected function addParent($row)
   {
     $this->parentTables = array($this->table);
-
-    foreach ($row as $key => $val) {
-      if (strpos($key, '_id') !== false) {
-        $tblName   = str_replace('_id', '', $key);
-        $modelName = array_map('ucfirst', explode('_', $tblName));
-        $row[join('', $modelName)] = $this->addParentModels($tblName, $val);
-      }
-    }
-    return $row;
+    return $this->checkRelationalColumn($row);
   }
 
   protected function addParentModels($tblName, $id)
   {
     $tblName = strtolower($tblName);
-    if ($this->structure !== 'tree' && $this->isAcquired($tblName)) return null;
+    if ($this->structure !== 'tree' && $this->isAcquired($tblName)) return false;
 
     $model = $this->newClass($tblName);
     if (is_null($id)) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName. $id))) {
       $model->setCondition($model->primaryKey, $id);
-      $projection = $model->projection;
-      $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
+      $model->getStatement()->setBasicSQL("SELECT {$model->projection} FROM $tblName");
       $resultSet = $model->getExecuter()->execute();
 
-      //todo
-      if (!$row = $resultSet->fetch()) {
-        $model->selected = true;
-        $model->id = $id;
-        return $model;
-      }
+      if (!$row = $resultSet->fetch())
+        throw new Execption('Error: relational error. parent does not exists.');
+
       Sabel_DB_SimpleCache::add($tblName. $id, $row);
     }
+    $row = $this->checkRelationalColumn($row);
 
-    foreach ($row as $key => $val) {
-      if (strpos($key, '_id') !== false) {
-        $tblName   = str_replace('_id', '', $key);
-        $modelName = array_map('ucfirst', explode('_', $tblName));
-        $row[join('', $modelName)] = $this->addParentModels($tblName, $val);
-      } else {
-        $row[$key] = $val;
-      }
-    }
     $this->mapping($model, $row);
     $model->unsetNewData();
     return $model;
+  }
+
+  private function checkRelationalColumn($row)
+  {
+    foreach ($row as $key => $val) {
+      if (strpos($key, '_id') !== false) {
+        $tblName = str_replace('_id', '', $key);
+        $mdlName = array_map('ucfirst', explode('_', $tblName));
+        $result  = $this->addParentModels($tblName, $val);
+        if ($result) $row[join('', $mdlName)] = $result;
+      }
+    }
+    return $row;
   }
 
   private function isAcquired($tblName)
@@ -568,8 +542,7 @@ abstract class Sabel_DB_Mapper
     if (is_null($model)) $model = $this;
 
     $class = $this->newClass($child);
-    $projection = $class->projection;
-    $class->getStatement()->setBasicSQL("SELECT $projection FROM {$class->table}");
+    $class->getStatement()->setBasicSQL("SELECT {$class->projection} FROM {$class->table}");
 
     $this->chooseChildConstraint($child, $model);
     $model->setChildCondition("{$model->table}_id", $model->data[$model->primaryKey]);
@@ -578,10 +551,7 @@ abstract class Sabel_DB_Mapper
     $class->constraints = $model->childConstraints[$child];
 
     $children = $model->getRecords($class, $child);
-    if ($children) $model->data[$child] = $children;
-
-    $this->childConditions  = array();
-    $this->childConstraints = array();
+    if ($children) $model->$child = $children;
     return $children;
   }
 
@@ -595,18 +565,19 @@ abstract class Sabel_DB_Mapper
 
   private function chooseChildConstraint($child, $model)
   {
+    $thisDefault = $this->defChildConstraints;
+
     if (array_key_exists($child, $this->childConstraints)) {
       $constraints = $this->childConstraints[$child];
-    } else if ($this->defChildConstraints) {
-      $constraints = $this->defChildConstraints;
+    } else if ($thisDefault) {
+      $constraints = $thisDefault;
     } else if (isset($model->childConstraints[$child])) {
       $constraints = $model->childConstraints[$child];
     } else {
       $constraints = $model->defChildConstraints;
     }
-
     if ($constraints) $model->setChildConstraint($child, $constraints);
-    $model->defChildConstraints = $this->defChildConstraints;
+    if ($thisDefault) $model->defChildConstraints = $thisDefault;
   }
 
   protected function mapping($model, $row)
@@ -672,7 +643,7 @@ abstract class Sabel_DB_Mapper
     if (!empty($data) && !is_array($data))
       throw new Exception('Error: save() argument must be an array');
 
-    if ($this->is_selected()) {
+    if ($this->isSelected()) {
       $this->conditions = $this->selectCondition;
       $this->getExecuter()->update($this->table, ($data) ? $data : $this->newData);
     } else {
@@ -730,7 +701,7 @@ abstract class Sabel_DB_Mapper
 
   public function cascadeDelete($id = null)
   {
-    if (is_null($id) && !$this->is_selected())
+    if (is_null($id) && !$this->isSelected())
       throw new Exception('Error: give the value of id or select the object beforehand.');
 
     $id = (isset($id)) ? $id : $this->data[$this->primaryKey];
