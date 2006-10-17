@@ -16,6 +16,8 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   private $reflection = null;
   private $observers  = array();
   
+  private $parents = array();
+  
   public function __construct($target)
   {
     if (!is_object($target))
@@ -40,6 +42,10 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   
   public function __call($method, $arg)
   {
+    if (($parent = $this->isParentMethod($method))) {
+      return $parent->$method($arg);
+    }
+    
     $method = $this->reflection->getMethod($method);
     $execute = Sabel_Aspect_Calls::doBefore($method, $arg, $this->reflection, $this->target);
     
@@ -52,6 +58,34 @@ class Sabel_Aspect_DynamicProxy implements Iterator
     } else {
       return null;
     }
+  }
+  
+  protected function hasParent()
+  {
+    return (count($this->parents) > 0);
+  }
+  
+  protected function isParentMethod($method)
+  {
+    $result = false;
+    $parents = $this->parents;
+    foreach ($parents as $parent) {
+      if ($parent->hasMethod($method)) {
+        $result = true;
+        break;
+      }
+    }
+    
+    if ($result) {
+      return $parent;
+    } else {
+      return $result;
+    }
+  }
+  
+  public function hasMethod($method)
+  {
+    return $this->reflection->hasMethod($method);
   }
   
   public function getTarget()
@@ -67,6 +101,13 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   public function observe($observer)
   {
     $this->observers[] = $observer;
+  }
+  
+  public function inherit($parent)
+  {
+    $parentInstance = Container::create()->load($parent);
+    $this->parents[] = $parentInstance;
+    return $this;
   }
   
   protected function notice($method)

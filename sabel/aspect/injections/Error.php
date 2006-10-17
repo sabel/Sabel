@@ -19,11 +19,9 @@ class Sabeo_Aspect_Injections_Error
         Re::set('errors', $errors);
         return false;
       } else {
-        // $target->save($arg[0]);
         $method->invokeArgs($target, $arg);
         Sabel_Core_Context::getPageController()->redirectToPrevious();
         return false;
-        // already terminated.
       }
     }
   }

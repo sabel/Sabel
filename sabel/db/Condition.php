@@ -46,6 +46,7 @@ class Sabel_DB_Condition
       $key  = str_replace(self::EITHER, '', $key);
       $type = self::EITHER;
     } else {
+      if (is_object($val)) throw new Exception("Cannot use object of type Sabel_DB_Condition as array");
       if ($val[0] === '>' || $val[0] === '<') {
         $type = self::COMPARE;
       } else if (strtolower($val) === 'null') {

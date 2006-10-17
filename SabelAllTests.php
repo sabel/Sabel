@@ -48,6 +48,7 @@ require_once('Test/DB/Tests.php');
 require_once('Test/Map/Tests.php');
 
 require_once('Test/Validate.php');
+require_once('Test/VirtualInheritance.php');
 
 //* there out of naming rules. @todo fix me
 /*
@@ -88,6 +89,7 @@ class SabelAllTests
     $suite->addTest(Test_Map_Tests::suite());
     
     $suite->addTest(Test_Validate::suite());
+    $suite->addTest(Test_VirtualInheritance::suite());
     
     return $suite;
   }

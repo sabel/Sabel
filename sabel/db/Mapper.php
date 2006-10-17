@@ -148,16 +148,41 @@ abstract class Sabel_DB_Mapper
   {
     return $this->selected;
   }
-
+  
+  public function choice($param1 = null, $param2 = null, $param3 = null)
+  {
+    return new Sabel_Aspect_DynamicProxy($this->selectOne($param1, $param2, $param3));
+  }
+  
+  public function schema($tblName = null)
+  {
+    if (is_null($tblName)) {
+      $tblName = $this->table;
+    }
+    
+    $columns = $this->getTableSchema($tblName)->getColumns();
+    
+    if ($tblName === $this->table) {
+      foreach ($this->data as $name => $data) {
+        if (!is_object($this->data[$name]) && isset($this->data[$name])) {
+          $columns[$name]->value = $data;
+        }
+      }
+    }
+    
+    return $columns;
+  }
+  
   public function getColumnNames($tblName = null)
   {
     if (is_null($tblName)) $tblName = $this->table;
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
-  public function getTableSchema()
+  public function getTableSchema($tblName = null)
   {
-    return $this->createSchemaAccessor()->getTable($this->table);
+    if (is_null($tblName)) $tblName = $this->table;
+    return $this->createSchemaAccessor()->getTable($tblName);
   }
 
   public function getAllSchema()
