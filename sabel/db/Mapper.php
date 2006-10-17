@@ -146,11 +146,6 @@ abstract class Sabel_DB_Mapper
     return $this->selected;
   }
 
-  public function choice($param1 = null, $param2 = null, $param3 = null)
-  {
-    return new Sabel_Aspect_DynamicProxy($this->selectOne($param1, $param2, $param3));
-  }
-
   public function schema($tblName = null)
   {
     if (is_null($tblName)) $tblName = $this->table;
