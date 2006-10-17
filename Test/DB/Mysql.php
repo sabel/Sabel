@@ -47,7 +47,8 @@ class Test_DB_Mysql extends Test_DB_Test
 
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
-    $helper = new MysqlHelper();
+
+    //$helper = new MysqlHelper();
     //$helper->create();
 
     try {

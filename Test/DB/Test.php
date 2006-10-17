@@ -13,6 +13,7 @@ class Test_DB_Test extends SabelTestCase
                                 'seq', 'tree', 'student', 'student_course',
                                 'course', 'users', 'status', 'bbs', 'trans1');
 
+
   public function testConstraint()
   {
     $customer = new Customer();
@@ -317,7 +318,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'AB');
   }
-  
+
   public function testRemove()
   {
     $test = new Test();
@@ -441,7 +442,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$obj->Infinite2->infinite1_id, 1);
     $this->assertEquals($obj->Infinite2->Infinite1, null);
   }
-  
+
   public function testSelectParentObject()
   {
     $obj = new Test(1);
@@ -506,7 +507,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$orders[1]->id, 1);
     @$this->assertNull($orders[2]->id);
   }
-  
+
   public function testNewChild()
   {
     $cu = new Customer();
@@ -706,7 +707,7 @@ class Test_DB_Test extends SabelTestCase
     $line = new OrderLine(11);
     $line->save(array('amount' => 500));
   }
-  
+
   public function testSeq()
   {
     $seq = new Seq();
@@ -1057,7 +1058,7 @@ class Test_DB_Test extends SabelTestCase
 
     $trans1->execute("DELETE FROM trans1");
     $trans2->execute("DELETE FROM trans2");
- 
+
     //-------------------------------------------------------------------
 
     $trans1 = new Trans1(); // connection1
@@ -1193,7 +1194,10 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($dt->increment);
     $this->assertTrue($dt->notNull);
     @$this->assertEquals($dt->default, null);
+  }
 
+  public function testClear()
+  {
     Sabel_DB_SimpleCache::reset();
     Sabel_DB_Connection::closeAll();
   }

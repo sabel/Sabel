@@ -66,11 +66,11 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
         return (isset($this->lastInsertId)) ? $this->lastInsertId : null;
       case 'mysql':
         $this->driverExecute('SELECT last_insert_id()');
-        $resultSet = $this->fetch();
-        $row = $resultSet->fetch();
-        return $row[0];
+        $resultSet = $this->getResultSet();
+        $row = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
+        return (int)$row[0];
       case 'sqlite':
-        return $this->conn->lastInsertId();
+        return (int)$this->conn->lastInsertId();
     }
   }
 

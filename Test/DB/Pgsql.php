@@ -50,7 +50,7 @@ class Test_DB_Pgsql extends Test_DB_Test
     $obj = new Test3();
     
     $helper = new PgsqlHelper();
-    $helper->create();
+    //$helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
@@ -171,7 +171,8 @@ class PgsqlHelper extends BaseHelper
                  bl boolean default true,
                  date date,
                  dt timestamp not null,
-                 primary key (id1, id2));";
+                 primary key (id1, id2))";
+
     $this->sqls = $SQLs;
   }
   

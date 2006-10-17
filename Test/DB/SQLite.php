@@ -40,8 +40,8 @@ class Test_DB_SQLite extends Test_DB_Test
     $tables = Test_DB_Test::$TABLES;
     $obj = new Test3();
 
-    $helper = new SQLiteHelper();
-    $helper->create();
+    //$helper = new SQLiteHelper();
+    //$helper->create();
 
     try {
       foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");

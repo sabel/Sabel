@@ -89,12 +89,19 @@ class Sabel_DB_Connection
 
     switch ($drvName) {
       case 'pdo':
-        $pdoDb = self::getDB($connectName);
-        return new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
+        $pdoDb  = self::getDB($connectName);
+        $driver = new Sabel_DB_Driver_Pdo_Driver($conn, $pdoDb);
+        break;
       default:
-        $driver = 'Sabel_DB_Driver_Native_' . ucfirst($drvName);
-        return new $driver($conn);
+        $cName  = 'Sabel_DB_Driver_Native_' . ucfirst($drvName);
+        $driver = new $cName($conn);
+        break;
     }
+
+    if (!isset(self::$connList[$connectName]['driver']))
+      self::$connList[$connectName]['driver'] = $driver;
+
+    return $driver;
   }
 
   public static function getConnection($connectName)
@@ -137,12 +144,7 @@ class Sabel_DB_Connection
 
   public static function close($connectName)
   {
-    /*@todo
-    $driver = self::getDBDriver($connectName);
-    $driver->close();
-
-    unset(self::$connList[$connectName]);
-    */
+    //todo
   }
 
   public static function closeAll()
