@@ -4,7 +4,7 @@
 
 <div>
   <form method="post" action="<#= uri(array('action'=>'create')) ?>">
-    <# $this->assign('model', $<? echo $name ?>) #>
+    <# $this->assign('schema', $<? echo $name ?>->schema()) #>
     <#= $this->partial('form') #>
     <input type="submit" value="create" />
   </form>

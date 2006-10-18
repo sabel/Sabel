@@ -20,7 +20,7 @@ class Controllers_<? echo $ucControllerName ?> extends Sabel_Controller_Page
   
   public function show()
   {
-    $this-><? echo $controllerName ?>->choice($this->id);
+    $this-><? echo $controllerName ?>->selectOne($this->id);
   }
   
   public function create()
@@ -35,17 +35,18 @@ class Controllers_<? echo $ucControllerName ?> extends Sabel_Controller_Page
   
   public function edit()
   {
-    $this-><? echo $controllerName ?>->choice($this->id);
+    $this-><? echo $controllerName ?>->selectOne($this->id);
   }
   
   public function postEdit()
   {
-    $this-><? echo $controllerName ?>->choice($this->id)->save($this->requests);
+    $<? echo $controllerName ?> = $this-><? echo $controllerName ?>->selectOne($this->id);
+    $<? echo $controllerName ?>->save($this->requests);
   }
   
   public function delete()
   {
-    $this-><? echo $controllerName ?>->choice($this->id)->remove();
+    $this-><? echo $controllerName ?>->selectOne($this->id)->remove();
     $this->redirectToPrevious();
   }
 }

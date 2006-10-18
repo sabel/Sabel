@@ -2,21 +2,13 @@
 <?php $lwClassName = strtolower($className) ?>
 
 /**
- * @assign choice to <? echo $lwClassName ."\n" ?>
- * @assign assign to <? echo $lwClassName ."\n" ?>
+ * there belows are annotation of Templates
+ *
  * @assign select to <? echo $lwClassName ?>s
+ * @assign selectOne to <? echo $lwClassName ?> 
  */
-class <?php echo $className ?> extends Sabel_DB_Model
+class <?php echo $className ?> extends Sabel_DB_Mapper
 {
-  public function __construct($param1 = null, $param2 = null)
-  {
-    $this->setDriver('default');
-    $this->enableParent();
-    parent::__construct($param1, $param2);
-  }
-  
-  public function assign()
-  {
-    return $this;
-  }
+  // do you want to play with parent? ;-) try this.
+  protected $withParent = false;
 }

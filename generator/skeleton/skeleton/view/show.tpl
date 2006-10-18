@@ -1,6 +1,6 @@
 <h1>show <? echo $name ?></h1>
 
-<# foreach ($<? echo $name ?> as $column) : #>
+<# foreach ($<? echo $name ?>->schema() as $column) : #>
   <#= $column->name #>:&nbsp;
   <#= nl2br($column->value) #>
   <br />
@@ -8,6 +8,6 @@
 
 <#= a('action:create', _('create')) #> 
 <#= a('action:lists', _('list')) #> 
-<#= a("a:show,   id:{$<? echo $name ?>->id->value}", _('show')) #> 
-<#= a("a:edit,   id:{$<? echo $name ?>->id->value}", _('edit')) #> 
-<#= a("a:delete, id:{$<? echo $name ?>->id->value}", _('delete')) #>
+<#= a("a:show,   id:{$<? echo $name ?>->id}", _('show')) #>
+<#= a("a:edit,   id:{$<? echo $name ?>->id}", _('edit')) #>
+<#= a("a:delete, id:{$<? echo $name ?>->id}", _('delete')) #>
