@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Aspect_DynamicProxy
+ * Sabel_Aspect_ModelProxy
  *
  * @category   Aspect
  * @package    org.sabel.aspect
@@ -9,14 +9,12 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_DynamicProxy implements Iterator
+class Sabel_Aspect_ModelProxy implements Iterator
 {
   private $container  = null;
   private $target     = null;
   private $reflection = null;
   private $observers  = array();
-  
-  private $parents = array();
   
   public function __construct($target)
   {
@@ -42,78 +40,31 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   
   public function __call($method, $arg)
   {
-    // @todo redesign here.
-    if ($method === 'assign') {
-      Re::set(strtolower($this->reflection->getName()), $this->target);
+    $bbs = new Bbs();
+    
+    if ($method == 'selectOne') {
+      $bbs = $bbs->selectOne($arg[0]);
+      $this->target->id = $bbs->id;
+      $this->target->title = $bbs->title;
+      $this->target->title = $bbs->body;
+      $this->target->users = $bbs->Users;
       return;
     }
     
-    if (($parent = $this->isParentMethod($method))) {
-      return $parent->$method($arg);
-    }
+    // $this->target = $users;
     
-    try {
-      $this->reflection->getMethod('__call');
-      $hasCallMethod = true;
-    } catch (ReflectionException $e) {
-      $hasCallMethod = false;
-    }
-    
-    try {
-      $method = $this->reflection->getMethod($method);
-    } catch (ReflectionException $e) {
-      if ($hasCallMethod) {
-        // @todo multiple arguments.
-        // @todo write testcase of nested __call()
-        return $this->target->$method($arg[0]);
-      }
-    }
-    
+    $method = $this->reflection->getMethod($method);
     $execute = Sabel_Aspect_Calls::doBefore($method, $arg, $this->reflection, $this->target);
     
     $this->notice($method);
     
     if ($execute) {
       $result = $method->invokeArgs($this->target, $arg);
-      $afterResult = Sabel_Aspect_Calls::doAfter($method, $result, $this->reflection);
-      if (!is_null($afterResult) && count($afterResult) === 1) return $afterResult[0];
-      
-      if (count($afterResult) === 0) {
-        return $result;
-      } else {
-        return $afterResult;
-      }
+      Sabel_Aspect_Calls::doAfter($method, $result, $this->reflection);
+      return $result;
     } else {
       return null;
     }
-  }
-  
-  protected function hasParent()
-  {
-    return (count($this->parents) > 0);
-  }
-  
-  protected function isParentMethod($method)
-  {
-    $result = false;
-    $parents = $this->parents;
-    foreach ($parents as $parent) {
-      if ($parent->hasMethod($method)) {
-        $result = true;
-        break;
-      }
-    }
-    
-    if ($result) {
-      return $parent;
-    } else {
-      return $result;
-    }
-  }
-  
-  public function hasMethod($method)
-  {
-    return $this->reflection->hasMethod($method);
   }
   
   public function getTarget()
@@ -129,13 +80,6 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   public function observe($observer)
   {
     $this->observers[] = $observer;
-  }
-  
-  public function inherit($parent)
-  {
-    $parentInstance = Container::create()->load($parent);
-    $this->parents[] = $parentInstance;
-    return $this;
   }
   
   protected function notice($method)
