@@ -43,7 +43,7 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   public function __call($method, $arg)
   {
     if ($method === 'assign') {
-      Re::set($this->reflection->getName(), $this->target);
+      Re::set(strtolower($this->reflection->getName()), $this->target);
       return;
     }
     
