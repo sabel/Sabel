@@ -3,18 +3,20 @@
 abstract class Sabel_DB_Driver_Statement
 {
   protected
+    $dbName   = '',
+    $set      = false,
+    $sql      = array(),
+    $nmlCount = 0;
+
+  private
     $escMethod = '',
-    $dbName    = '',
-    $nmlCount  = 0,
-    $sql       = array(),
-    $stripFlag = false,
-    $set       = false;
+    $stripFlag = false;
 
   protected abstract function makeUpdateSQL($table, $data);
   protected abstract function makeInsertSQL($table, $data);
-  protected abstract function makeNormalSQL($key, $val);
-  protected abstract function makeLikeSQL($key, $val, $esc = null);
-  protected abstract function makeBetweenSQL($key, $val);
+  protected abstract function makeNormalSQL($key, $condition);
+  protected abstract function makeBetweenSQL($key, $condition);
+  protected abstract function makeLikeSQL($val, $condition, $esc = null);
   protected abstract function makeEitherSQL($key, $val);
   protected abstract function makeLessGreaterSQL($key, $val);
   public    abstract function unsetProperties();
@@ -34,7 +36,17 @@ abstract class Sabel_DB_Driver_Statement
     foreach ($conditions as $key => $condition) {
       switch ($condition->type) {
         case Sabel_DB_Condition::NORMAL:
-          $this->makeNormalConditionQuery($key, $condition);
+          $this->makeNormalSQL($key, $condition);
+          $this->nmlCount++;
+          continue;
+        case Sabel_DB_Condition::BET:
+          $this->makeBetweenSQL($key, $condition);
+          continue;
+        case Sabel_DB_Condition::LIKE:
+          $this->prepareLikeSQL($key, $condition);
+          continue;
+        case Sabel_DB_Condition::IN:
+          $this->makeWhereInSQL($key, $condition);
           continue;
         case Sabel_DB_Condition::COMPARE:
           $this->makeLessGreaterSQL($key, $condition->value);
@@ -45,27 +57,12 @@ abstract class Sabel_DB_Driver_Statement
         case Sabel_DB_Condition::NOTNULL:
           $this->makeIsNotNullSQL($key);
           continue;
-        case Sabel_DB_Condition::LIKE:
-          $this->prepareLikeSQL($key, $condition->value);
-          continue;
-        case Sabel_DB_Condition::IN:
-          $this->makeWhereInSQL($key, $condition->value);
-          continue;
-        case Sabel_DB_Condition::BET:
-          $this->makeBetweenSQL($key, $condition->value);
-          continue;
         case Sabel_DB_Condition::EITHER:
           $this->prepareEitherSQL($key, $condition->value);
           continue;
       }
     }
     return (count($conditions) === $this->nmlCount);
-  }
-
-  protected function makeNormalConditionQuery($key, $condition)
-  {
-    $this->makeNormalSQL($key, $condition->value);
-    $this->nmlCount++;
   }
 
   public function getSQL()
@@ -88,48 +85,52 @@ abstract class Sabel_DB_Driver_Statement
     $this->setWhereQuery($key . ' IS NOT NULL');
   }
 
-  protected function makeWhereInSQL($key, $val)
+  protected function makeWhereInSQL($key, $condition)
   {
     $values = array();
-    foreach ($val as $v) $values[] = $this->escape($v);
-    $this->setWhereQuery($key . ' IN (' . join(',', $values) . ')');
+    foreach ($condition->value as $val) $values[] = $this->escape($val);
+    $key = ($condition->not) ? "NOT $key" : $key;
+    $this->setWhereQuery("$key IN (" . join(',', $values) . ')');
   }
 
   protected function setWhereQuery($query)
   {
     if ($this->set) {
-      array_push($this->sql, ' AND ' . $query);
+      array_push($this->sql, " AND $query");
     } else {
-      array_push($this->sql, ' WHERE ' . $query);
+      array_push($this->sql, " WHERE $query");
       $this->set = true;
     }
   }
 
-  protected function prepareLikeSQL($key, $val)
+  protected function prepareLikeSQL($key, $condition)
   {
-    if (is_array($val)) {
-      $escape = $val[1];
-      $val    = $val[0];
+    if (is_array($condition->value)) {
+      $escape = $condition->value[1];
+      $val    = $condition->value[0];
     } else {
       $escape = true;
+      $val    = $condition->value;
     }
 
+    $not   = $condition->not;
     $exist = (strpbrk($val, '_') !== false || strpbrk($val, '%') !== false);
 
     if ($exist && $escape && $this->dbName === 'mssql') {
-      $this->makeLikeSQL($key, str_replace(array('%', '_'), array('[%]', '[_]'), $val));
+      $val = str_replace(array('%', '_'), array('[%]', '[_]'), $val);
+      $this->makeLikeSQL($val, $condition);
     } else if ($exist && $escape) {
       $escapeString = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
       for ($i = 0; $i < 30; $i++) {
         $esc = $escapeString[$i];
         if (strpbrk($val, $esc) === false) {
           $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
-          $this->makeLikeSQL($key, $val, $esc);
+          $this->makeLikeSQL($val, $condition, $esc);
           break;
         }
       }
     } else {
-      $this->makeLikeSQL($key, $val);
+      $this->makeLikeSQL($val, $condition);
     }
   }
 
@@ -158,6 +159,11 @@ abstract class Sabel_DB_Driver_Statement
 
     $query .= ')';
     $this->setWhereQuery($query);
+  }
+
+  protected function getKey($condition)
+  {
+    return ($condition->not) ? 'NOT ' . $condition->key : $condition->key;
   }
 
   public function escape($val)

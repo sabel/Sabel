@@ -501,7 +501,7 @@ abstract class Sabel_DB_Mapper
       $resultSet = $model->getExecuter()->execute();
 
       if (!$row = $resultSet->fetch())
-        throw new Execption('Error: relational error. parent does not exists.');
+        throw new Exception('Error: relational error. parent does not exists.');
 
       Sabel_DB_SimpleCache::add($tblName. $id, $row);
     }

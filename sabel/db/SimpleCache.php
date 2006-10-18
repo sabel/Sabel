@@ -19,7 +19,7 @@ class Sabel_DB_SimpleCache
     unset(self::$cache[$key]);
   }
 
-  public static function reset()
+  public static function clear()
   {
     self::$cache = array();
   }

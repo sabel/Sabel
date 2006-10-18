@@ -36,7 +36,8 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
 
   public function makeConstraintQuery($const)
   {
-    if (isset($const['group'])) array_push($this->sql, ' GROUP BY ' . $const['group']);
+    if (isset($const['group']))  array_push($this->sql, ' GROUP BY ' . $const['group']);
+    if (isset($const['having'])) array_push($this->sql, ' HAVING '   . $const['having']);
 
     $order = (isset($const['order'])) ? $const['order'] : null;
     if ($order) array_push($this->sql, ' ORDER BY ' . $const['order']);
@@ -60,22 +61,23 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
     }
   }
 
-  public function makeNormalSQL($key, $val)
+  public function makeNormalSQL($key, $condition)
   {
-    $this->setWhereQuery($this->getNormalSQL($key, $val));
+    $val = $condition->value;
+    $this->setWhereQuery($this->getNormalSQL($this->getKey($condition), $val));
   }
 
-  public function makeLikeSQL($key, $val, $esc = null)
+  public function makeBetweenSQL($key, $condition)
   {
-    $query = "$key LIKE '{$this->escape($val)}'";
+    $val = $condition->value;
+    $this->setWhereQuery($this->getKey($condition) . " BETWEEN '{$val[0]}' AND '{$val[1]}'");
+  }
+
+  public function makeLikeSQL($val, $condition, $esc = null)
+  {
+    $query = $this->getKey($condition) . " LIKE '{$this->escape($val)}'";
     if (isset($esc)) $query .= " escape '{$esc}'";
-
     $this->setWhereQuery($query);
-  }
-
-  public function makeBetweenSQL($key, $val)
-  {
-    $this->setWhereQuery("$key BETWEEN '{$val[0]}' AND '{$val[1]}'");
   }
 
   public function makeEitherSQL($key, $val)
@@ -84,6 +86,8 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
       return $this->getLessGreaterSQL($key, $val);
     } else if (strtolower($val) === 'null') {
       return "$key IS NULL";
+    } else if (strtolower($val) === 'not null') {
+      return "$key IS NOT NULL";
     } else {
       return $this->getNormalSQL($key, $val);
     }

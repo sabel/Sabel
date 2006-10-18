@@ -1196,9 +1196,70 @@ class Test_DB_Test extends SabelTestCase
     @$this->assertEquals($dt->default, null);
   }
 
+  public function testWhereNot()
+  {
+    $test = new Test();
+    $test->id(1, 'NOT');
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+    $this->assertEquals($tests[3]->name, 'seki');
+    $this->assertEquals($tests[4]->name, 'uchida');
+
+    $test = new Test();
+    $test->IN_id(array(2,3,5));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'seki');
+
+    $test = new Test();
+    $test->IN_id(array(2,3,5), 'NOT');
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+    $this->assertEquals($tests[1]->name, 'ueda');
+    $this->assertEquals($tests[2]->name, 'uchida');
+
+    $test = new Test();
+    $test->BET_id(array(2, 4));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+
+    $test = new Test();
+    $test->BET_id(array(2, 4), 'NOT');
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+    $this->assertEquals($tests[1]->name, 'seki');
+    $this->assertEquals($tests[2]->name, 'uchida');
+
+    $test = new Test();
+    $test->LIKE_name(array('%na%', false));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+
+    $test = new Test();
+    $test->LIKE_name(array('%na%', false), 'NOT');
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+    $this->assertEquals($tests[3]->name, 'seki');
+    $this->assertEquals($tests[4]->name, 'uchida');
+  }
+
   public function testClear()
   {
-    Sabel_DB_SimpleCache::reset();
+    Sabel_DB_SimpleCache::clear();
     Sabel_DB_Connection::closeAll();
   }
 }

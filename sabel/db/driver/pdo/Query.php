@@ -44,32 +44,36 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
   public function makeConstraintQuery($const)
   {
     if (isset($const['group']))  array_push($this->sql, ' GROUP BY ' . $const['group']);
+    if (isset($const['having'])) array_push($this->sql, ' HAVING '   . $const['having']);
     if (isset($const['order']))  array_push($this->sql, ' ORDER BY ' . $const['order']);
     if (isset($const['limit']))  array_push($this->sql, ' LIMIT '    . $const['limit']);
     if (isset($const['offset'])) array_push($this->sql, ' OFFSET '   . $const['offset']);
   }
 
-  protected function makeNormalSQL($key, $val)
+  protected function makeNormalSQL($key, $condition)
   {
-    $this->setWhereQuery($this->getNormalSQL($key, $val, $key . $this->count++));
+    $val   = $condition->value;
+    $query = $this->getNormalSQL($this->getKey($condition), $val, $key . $this->count++);
+    $this->setWhereQuery($query);
   }
 
-  protected function makeLikeSQL($key, $val, $esc = null)
+  protected function makeLikeSQL($val, $condition, $esc = null)
   {
-    $bindKey = $key . $this->count++;
-    $query   = "$key LIKE :{$bindKey}";
+    $bindKey = $condition->key . $this->count++;
+    $query   = $this->getKey($condition) . " LIKE :{$bindKey}";
     if (isset($esc)) $query .= " escape '{$esc}'";
 
     $this->setWhereQuery($query);
     $this->param[$bindKey] = $this->escape($val);
   }
 
-  protected function makeBetweenSQL($key, $val)
+  protected function makeBetweenSQL($key, $condition)
   {
-    $f = $this->count++;
-    $t = $this->count++;
+    $f   = $this->count++;
+    $t   = $this->count++;
+    $val = $condition->value;
 
-    $this->setWhereQuery("$key BETWEEN :from{$f} AND :to{$t}");
+    $this->setWhereQuery($this->getKey($condition) . " BETWEEN :from{$f} AND :to{$t}");
     $this->param["from{$f}"] = $val[0];
     $this->param["to{$t}"]   = $val[1];
   }
@@ -80,6 +84,8 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
       return $this->getLessGreaterSQL($key, $val, $key . $this->count++);
     } else if (strtolower($val) === 'null') {
       return "$key IS NULL";
+    } else if (strtolower($val) === 'not null') {
+      return "$key IS NOT NULL";
     } else {
       return $this->getNormalSQL($key, $val, $key . $this->count++);
     }
@@ -87,7 +93,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
 
   protected function makeLessGreaterSQL($key, $val)
   {
-    $this->setWhereQuery($this->getLessGreaterSQL($key, $val, $key.$this->count++));
+    $this->setWhereQuery($this->getLessGreaterSQL($key, $val, $key . $this->count++));
   }
 
   protected function getLessGreaterSQL($key, $val, $bindKey)
@@ -110,8 +116,9 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
 
   public function unsetProperties()
   {
-    $this->param = array();
-    $this->count = 1;
-    $this->set   = false;
+    $this->param    = array();
+    $this->count    = 1;
+    $this->nmlCount = 0;
+    $this->set      = false;
   }
 }

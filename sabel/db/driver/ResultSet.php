@@ -2,8 +2,10 @@
 
 class Sabel_DB_Driver_ResultSet implements Iterator
 {
-  const ASSOC = 0;
-  const NUM   = 1;
+  const ASSOC  = 0;
+  const NUM    = 5;
+  const OBJECT = 10;
+  const SCHEMA = 15;
 
   protected $assocRow = array();
   protected $arrayRow = array();

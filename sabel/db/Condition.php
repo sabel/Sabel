@@ -23,7 +23,7 @@ class Sabel_DB_Condition
     $this->values['key']   = $key;
     $this->values['type']  = $type;
     $this->values['value'] = $value;
-    $this->values['not']   = ($not === self::NOT) ? self::NOT : false;
+    $this->values['not']   = ($not === self::NOT);
   }
 
   public function __get($key)
