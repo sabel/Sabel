@@ -42,6 +42,11 @@ class Sabel_Aspect_DynamicProxy implements Iterator
   
   public function __call($method, $arg)
   {
+    if ($method === 'assign') {
+      Re::set($this->reflection->getName(), $this->target);
+      return;
+    }
+    
     if (($parent = $this->isParentMethod($method))) {
       return $parent->$method($arg);
     }
@@ -53,8 +58,14 @@ class Sabel_Aspect_DynamicProxy implements Iterator
     
     if ($execute) {
       $result = $method->invokeArgs($this->target, $arg);
-      Sabel_Aspect_Calls::doAfter($method, $result, $this->reflection);
-      return $result;
+      $afterResult = Sabel_Aspect_Calls::doAfter($method, $result, $this->reflection);
+      if (!is_null($afterResult) && count($afterResult) === 1) return $afterResult[0];
+      
+      if (count($afterResult) === 0) {
+        return $result;
+      } else {
+        return $afterResult;
+      }
     } else {
       return null;
     }

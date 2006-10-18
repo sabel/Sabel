@@ -104,3 +104,10 @@ class UriCreator
     return $buf;
   }
 }
+
+function prevd($mixed)
+{
+  echo '<pre>';
+  var_dump($mixed);
+  echo '</pre>';
+}

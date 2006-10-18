@@ -2,7 +2,7 @@
 
 class Sabel_Aspect_Injections_Assign
 {
-  public function when()
+  public function when($method)
   {
     return true;
   }

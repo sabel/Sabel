@@ -48,9 +48,16 @@ class Sabel_Aspect_Calls
   
   public static function doAfter($method, &$result, $reflection)
   {
+    $injectionResult = array();
+    
     foreach (self::$after as $object) {
-      if ($object->when($method)) $object->after($method, $result, $reflection);
+      if ($object->when($method)) {
+        $afterResult = $object->after($method, $result, $reflection);
+        if (!is_null($afterResult)) $injectionResult[] = $afterResult;
+      }
     }
+    
+    return $injectionResult;
   }
   
   public static function addBefore($injection)

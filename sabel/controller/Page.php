@@ -109,6 +109,11 @@ abstract class Sabel_Controller_Page
     Sabel_Template_Service::setLayout($layout);
   }
   
+  protected function proxy($target)
+  {
+    return new Sabel_Aspect_DynamicProxy($target);
+  }
+  
   /**
    * HTTP Redirect to another location.
    * this method will avoid "back button" problem.

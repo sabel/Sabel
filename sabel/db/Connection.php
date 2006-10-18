@@ -124,8 +124,11 @@ class Sabel_DB_Connection
 
   public static function getSchema($connectName)
   {
-    $db = self::$connList[$connectName]['db'];
-    if ($db !== 'sqlite' && $db !== 'firebird') return self::getValue($connectName, 'schema');
+    $db = self::getDB($connectName);
+    if ($db !== 'sqlite' && $db !== 'firebird') {
+      self::issetList($connectName, 'schema');
+      return self::getValue($connectName, 'schema');
+    }
   }
 
   protected static function issetList($connectName, $key)
