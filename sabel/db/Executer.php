@@ -17,15 +17,13 @@ class Sabel_DB_Executer
       $this->model   = $param;
       $this->isModel = true;
       $this->initialize($param);
+    } else if (is_string($param)) {
+      $this->setDriver($param);
     } else {
-      if (is_string($param))  {
-        $this->setDriver($param);
-      } else {
-        $errorMsg = 'Error: Sabel_DB_Executer::__construct() '
-                  . 'invalid parameter. should be a string or an instance of Sabel_DB_Mapper';
+      $errorMsg = 'Error: Sabel_DB_Executer::__construct() '
+                . 'invalid parameter. should be a string or an instance of Sabel_DB_Mapper';
 
-        throw new Exception($errorMsg);
-      }
+      throw new Exception($errorMsg);
     }
   }
 

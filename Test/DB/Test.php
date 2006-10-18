@@ -1257,6 +1257,22 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($tests[4]->name, 'uchida');
   }
 
+  public function testResultSet()
+  {
+    $executer  = new Sabel_DB_Executer('default');
+    $executer->getStatement()->setBasicSQL('SELECT * FROM test');
+    $condition = new Sabel_DB_Condition('LIKE_name', array('%na%', false), 'NOT');
+    $executer->setCondition($condition);
+    $resultSet = $executer->execute();
+    $resultObj = $resultSet->fetchAll(Sabel_DB_Driver_ResultSet::OBJECT);
+
+    $this->assertEquals($resultObj[0]->name, 'yo_shida');
+    $this->assertEquals($resultObj[1]->name, 'uchida');
+    $this->assertEquals($resultObj[2]->name, 'ueda');
+    $this->assertEquals($resultObj[3]->name, 'seki');
+    $this->assertEquals($resultObj[4]->name, 'uchida');
+  }
+
   public function testClear()
   {
     Sabel_DB_SimpleCache::clear();

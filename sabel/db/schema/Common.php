@@ -7,6 +7,7 @@ abstract class Sabel_DB_Schema_Common
   public function getTable($tblName)
   {
     $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
+
     if (is_null($schema = Sabel_DB_SimpleCache::get($schemaClass))) {
       if (class_exists($schemaClass, false)) {
         $sc   = new $schemaClass();

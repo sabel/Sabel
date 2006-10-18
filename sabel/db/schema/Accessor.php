@@ -32,12 +32,20 @@ class Sabel_DB_Schema_Accessor
 
   public function getColumnNames($table)
   {
-    $executer = new Sabel_DB_Executer($this->connectName);
-    $executer->setConstraint('limit', 1);
-    $executer->getStatement()->setBasicSQL("SELECT * FROM $table");
+    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $table)));
 
-    $resultSet = $executer->execute();
-    return array_keys($resultSet->fetch());
+    if (class_exists($schemaClass, false)) {
+      $sc   = new $schemaClass();
+      $cols = $sc->get();
+    } else {
+      $executer = new Sabel_DB_Executer($this->connectName);
+      $executer->setConstraint('limit', 1);
+      $executer->getStatement()->setBasicSQL("SELECT * FROM $table");
+
+      $resultSet = $executer->execute();
+      $cols = $resultSet->fetch();
+    }
+    return array_keys($cols);
   }
 }
 
@@ -56,8 +64,6 @@ function schema($model)
       if (array_key_exists($key, $columns)) $columns[$key]->value = $val;
 
     return $columns;
-  } else if (is_array($model)) {
-    //todo
   } else {
     throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
   }
