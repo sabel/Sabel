@@ -6,12 +6,10 @@ class Sabel_DB_Driver_ResultObject
 
   public function __construct($assocRow)
   {
-    if (!is_array($assocRow)
+    if (!is_array($assocRow))
       throw new Exception('Error: ResultObject::__construct() argument must be an array.');
 
-    foreach ($assocRow as $column => $value) {
-      $this->data[$column] = $value;
-    }
+    foreach ($assocRow as $column => $value) $this->data[$column] = $value;
   }
 
   public function __set($key, $val)
