@@ -1,51 +1,7 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-class AspectOrderRegistration
-{
-  public function when($method)
-  {
-    return ($method == 'registOrder');
-  }
-  
-  public function throws()
-  {
-  }
-  
-  public function before($method, $arg)
-  {
-    $customer = new Customers();
-    $customer->incrementQuantityOfOrder();
-  }
-  
-  public function after($method, $result)
-  {
-  }
-}
-
-class Customers
-{
-  public function cancelOrder()
-  {
-  }
-  
-  public function incrementQuantityOfOrder()
-  {
-    return "do increment";
-  }
-}
-
-class Orders
-{
-  public function registOrder()
-  {
-    return "do regist order";
-  }
-}
-
 /**
- * test case for Sabel LW DI Container
+ * TestCase of sabel.aspect.*
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
@@ -56,13 +12,50 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     return new PHPUnit2_Framework_TestSuite("Test_Aspect");
   }
   
-  /**
-   * @todo think assertion of aspect
-   * @todo implementation.
-   */
-  public function testAspectOriented()
+  public function testDynamicProxy()
   {
-    // $order = Sabel_Container_DI::create()->loadInjected('Orders');
-    // $order->registOrder();
+    $before = create_function('$target, $method', 'return $method->getName();');
+    $after  = create_function('$target, $method, $result', 'return $result;');
+    $both   = create_function('$target, $method, $result', 'return null;');
+    
+    $customer = new Sabel_Aspect_DynamicProxy(new Test_Aspect_Customers());
+    $customer->beforeAspect('before', $before);
+    $customer->afterAspect('after', $after);
+    $customer->bothAspect('both', $both);
+    $customer->getOrder();
+    
+    $this->assertEquals($customer->beforeResult('before'), 'getOrder');
+    $this->assertEquals($customer->afterResult('after'), 'order');
+    $this->assertEquals($customer->bothResult('both'), null);
+  }
+  
+  public function testNestedOverloads()
+  {
+    $arg     = '$target, $method, $result';
+    $routine = 'return $result;';
+    
+    $ol = new Sabel_Aspect_DynamicProxy(new Test_Aspect_Overloads());
+    $ol->afterAspect('after', create_function($arg, $routine));
+    $ol->callOverloads('test');
+    $this->assertEquals('callOverloads', $ol->afterResult('after'));
+    
+    $ol->callOverloadsTwo('test');
+    $this->assertEquals('callOverloadsTwo', $ol->afterResult('after'));
+  }
+}
+
+class Test_Aspect_Customers
+{
+  public function getOrder()
+  {
+    return 'order';
+  }
+}
+
+class Test_Aspect_Overloads
+{
+  public function __call($method, $arg)
+  {
+    return $method;
   }
 }
