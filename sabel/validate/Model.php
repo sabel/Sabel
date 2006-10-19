@@ -32,7 +32,7 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
       if (isset($column['nullable'])  && $column['nullable']  === false &&
           isset($column['increment']) && $column['increment'] === true)
       {
-            continue;
+        continue;
       }
         
       if (isset($column['nullable'])  && $column['nullable']  === false &&
