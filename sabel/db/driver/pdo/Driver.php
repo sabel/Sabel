@@ -76,14 +76,26 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $sql    = $this->query->getSQL();
-    $exist  = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
-    $result = $this->query->makeConditionQuery($conditions);
+    $sql = $this->query->getSQL();
 
-    if (!$result) $exist = false;
+    $exist = false;
+    if ($this->checkConditionTypes($conditions))
+      $exist = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
 
+    $this->query->makeConditionQuery($conditions);
     if ($constraints && !$exist) $this->query->makeConstraintQuery($constraints);
     $this->stmtFlag = $exist;
+  }
+
+  private function checkConditionTypes($conditions)
+  {
+    if (empty($conditions)) return true;
+
+    foreach ($conditions as $condition) {
+      if (is_array($condition)) return false;
+      if ($condition->type !== Sabel_DB_Condition::NORMAL) return false;
+    }
+    return true;
   }
 
   public function driverExecute($sql = null)

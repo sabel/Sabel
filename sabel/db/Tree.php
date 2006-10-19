@@ -6,6 +6,6 @@ abstract class Sabel_DB_Tree extends Sabel_DB_Mapper
 
   public function getRoot()
   {
-    return $this->select("{$this->table}_id", 'null');
+    return $this->select("{$this->table}_id", Sabel_DB_Condition::ISNULL);
   }
 }

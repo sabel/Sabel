@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Query Maker for Prepared
+ * Query Maker for Pdo
  *
  * @author Ebine Yutaka <ebine.yutaka@gmail.com>
  * @package org.sabel.db
@@ -50,11 +50,11 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     if (isset($const['offset'])) array_push($this->sql, ' OFFSET '   . $const['offset']);
   }
 
-  protected function makeNormalSQL($key, $condition)
+  protected function makeNormalSQL($condition)
   {
-    $val   = $condition->value;
-    $query = $this->getNormalSQL($this->getKey($condition), $val, $key . $this->count++);
-    $this->setWhereQuery($query);
+    $bindKey = $condition->key . $this->count++;
+    $this->param[$bindKey] = $this->escape($condition->value);
+    $this->setWhereQuery($this->getKey($condition) . "=:{$bindKey}");
   }
 
   protected function makeLikeSQL($val, $condition, $esc = null)
@@ -67,7 +67,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     $this->param[$bindKey] = $this->escape($val);
   }
 
-  protected function makeBetweenSQL($key, $condition)
+  protected function makeBetweenSQL($condition)
   {
     $f   = $this->count++;
     $t   = $this->count++;
@@ -78,35 +78,13 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     $this->param["to{$t}"]   = $val[1];
   }
 
-  protected function makeEitherSQL($key, $val)
+  protected function makeCompareSQL($condition)
   {
-    if ($val[0] === '<' || $val[0] === '>') {
-      return $this->getLessGreaterSQL($key, $val, $key . $this->count++);
-    } else if (strtolower($val) === 'null') {
-      return "$key IS NULL";
-    } else if (strtolower($val) === 'not null') {
-      return "$key IS NOT NULL";
-    } else {
-      return $this->getNormalSQL($key, $val, $key . $this->count++);
-    }
-  }
+    $bindKey = $condition->key . $this->count++;
 
-  protected function makeLessGreaterSQL($key, $val)
-  {
-    $this->setWhereQuery($this->getLessGreaterSQL($key, $val, $key . $this->count++));
-  }
-
-  protected function getLessGreaterSQL($key, $val, $bindKey)
-  {
-    list($lg, $val) = array_map('trim', explode(' ', $val));
-    $this->param[$bindKey] = $this->escape($val);
-    return "$key $lg :{$bindKey}";
-  }
-
-  protected function getNormalSQL($key, $val, $bindKey)
-  {
-    $this->param[$bindKey] = $this->escape($val);
-    return "{$key}=:{$bindKey}";
+    $lg = $condition->value[0];
+    $this->param[$bindKey] = $this->escape($condition->value[1]);
+    $this->setWhereQuery($condition->key . " $lg :{$bindKey}");
   }
 
   public function getParam()
@@ -116,9 +94,8 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
 
   public function unsetProperties()
   {
-    $this->param    = array();
-    $this->count    = 1;
-    $this->nmlCount = 0;
-    $this->set      = false;
+    $this->param = array();
+    $this->count = 1;
+    $this->set   = false;
   }
 }

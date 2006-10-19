@@ -396,22 +396,30 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
 
     $test = new Test();
-    $test->OR_id(array('3', '4'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('id', 3);
+    $conditions[] = new Sabel_DB_Condition('id', 4);
+    $test->setCondition($conditions);
     $obj = $test->select();
-
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
     $test = new Test();
-    $test->OR_id(array('< 2', '> 5'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('<', 2));
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('>', 5));
+    $test->setCondition($conditions);
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
 
     $test = new Test();
-    $test->OR_id(array('<= 2', '>= 5'));
     $test->sconst('order', 'id');
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('<=', 2));
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('>=', 5));
+    $test->setCondition($conditions);
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 2);
@@ -630,15 +638,29 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($count, 6);
     
     //--------------------------------------------
-    $count = $test->getCount('< 5');
+    $test = new Test();
+    $count = $test->getCount('COMP_id', array('<', 5));
     $this->assertEquals($count, 4);
     
-    $count = $test->getCount('id', '< 4');
+    $test = new Test();
+    $count = $test->getCount('COMP_id', array('<', 4));
     $this->assertEquals($count, 3);
     
-    $test->id('< 3');
+    $test = new Test();
+    $test->COMP_id(array('<', 3));
     $count = $test->getCount();
     $this->assertEquals($count, 2);
+
+    $test = new Test();
+    $test->COMP_id(array('<=', 3));
+    $count = $test->getCount();
+    $this->assertEquals($count, 3);
+
+    $test = new Test();
+    $condition = new Sabel_DB_Condition('COMP_id', array('<=', 3));
+    $test->setCondition($condition);
+    $count = $test->getCount();
+    $this->assertEquals($count, 3);
   }
   
   public function testAggregate()
@@ -754,6 +776,8 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$t->Tree->tree_id, 0);
     $this->assertEquals($t->Tree->name, 'A');
 
+    $tree = new Tree();
+    $tree->enableParent();
     $t = $tree->selectOne(5);
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
@@ -912,9 +936,11 @@ class Test_DB_Test extends SabelTestCase
     $ol->item_id = 8;
     $ol->save();
 
+    $ol = new OrderLine();
     $last = $ol->getLast('amount');
     $this->assertEquals((int)$last->amount, 50000);
 
+    $ol = new OrderLine();
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
@@ -966,7 +992,10 @@ class Test_DB_Test extends SabelTestCase
 
     $user = new Users(2);
     $user->cconst('limit', 100);
-    $user->ccond('OR_body', array('body21', 'body23'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('body', 'body21');
+    $conditions[] = new Sabel_DB_Condition('body', 'body23');
+    $user->ccond($conditions);
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
 
@@ -975,7 +1004,10 @@ class Test_DB_Test extends SabelTestCase
 
     $user = new Users(4);
     $user->cconst('limit', 100);
-    $user->ccond('OR_title', array('title41', 'null'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('title', 'title41');
+    $conditions[] = new Sabel_DB_Condition('title', Sabel_DB_Condition::ISNULL);
+    $user->ccond($conditions);
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
   }
@@ -988,7 +1020,8 @@ class Test_DB_Test extends SabelTestCase
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 11);
 
-    $tree->name('null');
+    $tree = new Tree();
+    $tree->name(Sabel_DB_Condition::ISNULL);
     $tree->tree_id(4);
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 8);
@@ -999,9 +1032,10 @@ class Test_DB_Test extends SabelTestCase
     $ol = new OrderLine();
     $ol->sconst('order', 'id');
 
-    $keys   = array('amount', 'item_id');
-    $values = array('> 9000', '2');
-    $ol->OR_(array($keys, $values));
+    $conditions = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_amount', array('>', 9000));
+    $conditions[] = new Sabel_DB_Condition('item_id', 2);
+    $ol->setCondition($conditions);
 
     $ols = $ol->select();
     $this->assertEquals((int)$ols[0]->id, 1);
@@ -1199,7 +1233,7 @@ class Test_DB_Test extends SabelTestCase
   public function testWhereNot()
   {
     $test = new Test();
-    $test->id(1, 'NOT');
+    $test->id(1, Sabel_DB_Condition::NOT);
     $tests = $test->select();
 
     $this->assertEquals($tests[0]->name, 'yo_shida');
@@ -1217,7 +1251,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($tests[2]->name, 'seki');
 
     $test = new Test();
-    $test->IN_id(array(2,3,5), 'NOT');
+    $test->IN_id(array(2,3,5), Sabel_DB_Condition::NOT);
     $tests = $test->select();
 
     $this->assertEquals($tests[0]->name, 'tanaka');
@@ -1233,7 +1267,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($tests[2]->name, 'ueda');
 
     $test = new Test();
-    $test->BET_id(array(2, 4), 'NOT');
+    $test->BET_id(array(2, 4), Sabel_DB_Condition::NOT);
     $tests = $test->select();
 
     $this->assertEquals($tests[0]->name, 'tanaka');
@@ -1247,7 +1281,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($tests[0]->name, 'tanaka');
 
     $test = new Test();
-    $test->LIKE_name(array('%na%', false), 'NOT');
+    $test->LIKE_name(array('%na%', false), Sabel_DB_Condition::NOT);
     $tests = $test->select();
 
     $this->assertEquals($tests[0]->name, 'yo_shida');
@@ -1261,7 +1295,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $executer  = new Sabel_DB_Executer('default');
     $executer->getStatement()->setBasicSQL('SELECT * FROM test');
-    $condition = new Sabel_DB_Condition('LIKE_name', array('%na%', false), 'NOT');
+    $condition = new Sabel_DB_Condition('LIKE_name', array('%na%', false), Sabel_DB_Condition::NOT);
     $executer->setCondition($condition);
     $resultSet = $executer->execute();
     $resultObj = $resultSet->fetchAll(Sabel_DB_Driver_ResultSet::OBJECT);

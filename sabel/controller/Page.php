@@ -57,9 +57,8 @@ abstract class Sabel_Controller_Page
   
   protected function __get($name)
   {
-    if ($this->request->hasUriValue($name)) {
+    if ($this->request->hasUriValue($name))
       return $this->request->$name;
-    }
   }
   
   protected function __set($name, $value)
@@ -69,9 +68,8 @@ abstract class Sabel_Controller_Page
   
   protected function __call($method, $args)
   {
-    if ($this->request->hasMethod($method)) {
+    if ($this->request->hasMethod($method))
       return $this->request->$method($args);
-    }
   }
   
   protected function methodExecute($action)

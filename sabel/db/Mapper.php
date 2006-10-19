@@ -39,6 +39,7 @@ abstract class Sabel_DB_Mapper
     $selected = false;
 
   private
+    $parentTables = array(),
     $joinColCache = array(),
     $relational   = array(),
     $cascadeStack = array();
@@ -58,9 +59,13 @@ abstract class Sabel_DB_Mapper
     if (isset($tblName)) {
       $this->table = $tblName;
     } else {
-      $table = substr(strtolower(preg_replace('/([A-Z])/', '_$1',get_class($this))), 1);
-      $this->table = $table;
+      $this->table = $this->convertToTableName(get_class($this));
     }
+  }
+
+  private function convertToTableName($mdlName)
+  {
+    return substr(strtolower(preg_replace('/([A-Z])/', '_$1', $mdlName)), 1);
   }
 
   public function __set($key, $val)
@@ -214,26 +219,29 @@ abstract class Sabel_DB_Mapper
     }
   }
 
-  public function setChildCondition($key, $val)
+  public function setChildCondition($key, $val = null, $not = null)
   {
-    $condition = new Sabel_DB_Condition($key, $val);
-    $this->childConditions[$condition->key] = $condition;
+    if ($key instanceof Sabel_DB_Condition || is_array($key)) {
+      $this->childConditions[] = $key;
+    } else {
+      $condition = new Sabel_DB_Condition($key, $val, $not);
+      $this->childConditions[] = $condition;
+    }
   }
 
   public function setCondition($param1, $param2 = null, $param3 = null)
   {
     if (empty($param1)) return null;
 
-    if ($param1 instanceof Sabel_DB_Condition) {
-      $this->conditions[$param1->key] = $param1;
+    if ($param1 instanceof Sabel_DB_Condition || is_array($param1)) {
+      $this->conditions[] = $param1;
     } else {
       if (is_null($param2)) {
-        $param3 = $param2;
+        $param3 = null;
         $param2 = $param1;
         $param1 = $this->primaryKey;
       }
-      $condition = new Sabel_DB_Condition($param1, $param2, $param3);
-      $this->conditions[$condition->key] = $condition;
+      $this->conditions[] = new Sabel_DB_Condition($param1, $param2, $param3);
     }
   }
 
@@ -304,7 +312,7 @@ abstract class Sabel_DB_Mapper
 
   private function getMost($order, $orderColumn)
   {
-    $this->setCondition($orderColumn, 'NOT NULL');
+    $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     return $this->selectOne();
   }
@@ -349,7 +357,7 @@ abstract class Sabel_DB_Mapper
       $model->mapping($model, ($model->withParent) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->myChildren)) $model->getDefaultChild($myChild, $model);
     } else {
-      $model->data = $model->conditions;
+      foreach ($model->conditions as $condition) $model->data[$condition->key] = $condition->value;
     }
     return $model;
   }
@@ -611,7 +619,14 @@ abstract class Sabel_DB_Mapper
   protected function newClass($name)
   {
     $model = str_replace('_', '', $name);
-    return ($this->modelExists($model)) ? new $model : new Sabel_DB_Basic($name);
+
+    if ($this->modelExists($model)) {
+      return new $model();
+    } else {
+      $class = new Sabel_DB_Basic($this->convertToTableName($name));
+      $class->setConnectName($this->connectName);
+      return $class;
+    }
   }
 
   private function modelExists($className)
@@ -823,7 +838,7 @@ abstract class Sabel_DB_Mapper
   /**
    * alias of setChildCondition()
    */
-  public function ccond($key, $val)
+  public function ccond($key, $val = null)
   {
     $this->setChildCondition($key, $val);
   }

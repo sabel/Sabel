@@ -61,13 +61,13 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
     }
   }
 
-  public function makeNormalSQL($key, $condition)
+  public function makeNormalSQL($condition)
   {
     $val = $condition->value;
-    $this->setWhereQuery($this->getNormalSQL($this->getKey($condition), $val));
+    $this->setWhereQuery($this->getKey($condition) . "='{$this->escape($val)}'");
   }
 
-  public function makeBetweenSQL($key, $condition)
+  public function makeBetweenSQL($condition)
   {
     $val = $condition->value;
     $this->setWhereQuery($this->getKey($condition) . " BETWEEN '{$val[0]}' AND '{$val[1]}'");
@@ -80,33 +80,11 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
     $this->setWhereQuery($query);
   }
 
-  public function makeEitherSQL($key, $val)
+  public function makeCompareSQL($condition)
   {
-    if ($val[0] === '<' || $val[0] === '>') {
-      return $this->getLessGreaterSQL($key, $val);
-    } else if (strtolower($val) === 'null') {
-      return "$key IS NULL";
-    } else if (strtolower($val) === 'not null') {
-      return "$key IS NOT NULL";
-    } else {
-      return $this->getNormalSQL($key, $val);
-    }
-  }
-
-  public function makeLessGreaterSQL($key, $val)
-  {
-    $this->setWhereQuery($this->getLessGreaterSQL($key, $val));
-  }
-
-  protected function getLessGreaterSQL($key, $val)
-  {
-    list($lg, $val) = array_map('trim', explode(' ', $val));
-    return "$key $lg '{$this->escape($val)}'";
-  }
-
-  protected function getNormalSQL($key, $val)
-  {
-    return "{$key}='{$this->escape($val)}'";
+    $lg  = $condition->value[0];
+    $val = $this->escape($condition->value[1]);
+    $this->setWhereQuery($condition->key . " $lg $val");
   }
 
   public function unsetProperties()

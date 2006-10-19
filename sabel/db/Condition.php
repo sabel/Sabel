@@ -2,17 +2,15 @@
 
 class Sabel_DB_Condition
 {
-  const NOT     = 'NOT';
+  const NOT     = 'CONDITION_NOT';
+  const NORMAL  = 'CONDITION_NORMAL';
+  const ISNULL  = 'CONDITION_NULL';
+  const NOTNULL = 'CONDITION_NOTNULL';
 
-  const NORMAL  = 'NORMAL';
-  const ISNULL  = 'NULL';
-  const NOTNULL = 'NOTNULL';
-  const COMPARE = 'COMPARE';
-
-  const EITHER  = 'OR_';
-  const BET     = 'BET_';
-  const IN      = 'IN_';
-  const LIKE    = 'LIKE_';
+  const BET    = 'BET_';
+  const IN     = 'IN_';
+  const LIKE   = 'LIKE_';
+  const COMP   = 'COMP_';
 
   protected $values = array();
 
@@ -24,6 +22,12 @@ class Sabel_DB_Condition
     $this->values['type']  = $type;
     $this->values['value'] = $value;
     $this->values['not']   = ($not === self::NOT);
+  }
+
+  public static function add($key, $val, $not = null)
+  {
+    $self = new self($key, $val, $not);
+    return $self;
   }
 
   public function __get($key)
@@ -42,17 +46,19 @@ class Sabel_DB_Condition
     } else if (strpos($key, self::BET) === 0) {
       $key  = str_replace(self::BET, '', $key);
       $type = self::BET;
-    } else if (strpos($key, self::EITHER) === 0) {
-      $key  = str_replace(self::EITHER, '', $key);
-      $type = self::EITHER;
+    } else if (strpos($key, self::COMP) === 0) {
+      $key  = str_replace(self::COMP, '', $key);
+      $type = self::COMP;
+    } else if ($val === self::ISNULL) {
+      $type = self::ISNULL;
+    } else if ($val === self::NOTNULL) {
+      $type = self::NOTNULL;
     } else {
-      if (is_object($val)) throw new Exception("Cannot use object of type Sabel_DB_Condition as array");
-      if ($val[0] === '>' || $val[0] === '<') {
-        $type = self::COMPARE;
-      } else if (strtolower($val) === 'null') {
-        $type = self::ISNULL;
-      } else if (strtolower($val) === 'not null') {
-        $type = self::NOTNULL;
+      if (is_object($val)) {
+        $errorMsg = 'Error: Sabel_DB_Condition::getType() invalid parameter. '
+                  . 'the condition value is should not be an object.';
+
+        throw new Exception($errorMsg);
       } else {
         $type = self::NORMAL;
       }
