@@ -63,9 +63,16 @@ class Sabel_Aspect_DynamicProxy implements Iterator
       $method = $this->reflection->getMethod($method);
     } catch (ReflectionException $e) {
       if ($hasCallMethod) {
-        // @todo multiple arguments.
         // @todo write testcase of nested __call()
-        return $this->target->$method($arg[0]);
+        
+        $argStrBuf = array();
+        for ($i = 0; $i < count($arg); $i++) {
+          $argStrBuf[] = '$arg[' . $i . ']';
+        }
+        
+        $args = join(', ', $argStrBuf);
+        eval('$ret = $this->target->$method(' . $args . ');');
+        return $ret;
       }
     }
     
