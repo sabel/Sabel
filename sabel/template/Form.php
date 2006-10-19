@@ -1,73 +1,144 @@
 <?php
 
-class Form
+/**
+ * form
+ *
+ * Example :
+ *
+ * <? $form = new Sabel_Template_Form($bbs->schema()) ?>
+ * <? $form->hidden(array('shop_id', 'users_id')) ?>
+ * <?= $form->startTag(uri(array('action'=>'edit', 'id'=>$bbs->id), 'POST')) ?>
+ * <? foreach ($form as $f) : ?>
+ *   <? if ($f->isHidden()) : ?>
+ *     <?= $f->write() ?>
+ *   <? else : ?>
+ *     <?= $f->name() ?><?= $f->write() ?> <br />
+ *   <? endif ?>
+ * <? endforeach ?>
+ * <?= $form->endTag() ?>
+ *
+ * @category   Template
+ * @package    org.sabel.template
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Template_Form implements Iterator
 {
-  const FORM_START = '<form action="%s" method="%s">';
-  const FORM_END   = '</form>';
-  const INPUT_TEXT = '<input type="text" name="%s" value="%s" /> <br />';
-  const INPUT_AREA = '<textarea type="text" name="%s" style="width: 30em; height: 30em;">%s</textarea> <br />';
+  protected $position = 0;
+  protected $hidden   = array();
+  protected $columns  = array();
+  protected $size     = 0;
+  protected $currentColumn = null;
   
-  public static function create($table, $obj, $action, $method)
+  public function __construct($columns)
   {
-    uses('sabel.db.schema.Accessor');
-    $is = new Sabel_DB_Schema_Accessor('default', 'default');
-    
-    $localizeConfig = new Sabel_Config_Yaml(RUN_BASE . '/config/localize.yml');
-    $localize = $localizeConfig->read($table);
-    
-    $buf = array();
-    $buf[] = sprintf(self::FORM_START, $action, $method);
-    
-    foreach ($is->getTable($table)->getColumns() as $column) {
-      $name  = $column->name;
-      $lname  = (isset($localize[$column->name])) ? $localize[$column->name] : $column->name;
-      $buf[] = "{$lname} <br />";
-      $buf[] = self::newInput($name, $column);
-    }
-    
-    $buf[] = '<input type="submit" value="create" />';
-    $buf[] = self::FORM_END;
-    return join("\n", $buf);
+    $this->columns = $columns;
+    $this->size    = count($columns);
   }
   
-  public static function newInput($name, $column, $class = null)
+  public function startTag($action, $method = 'GET')
   {
-    if ($column->type == Sabel_DB_Schema_Type::INT || $column->type == Sabel_DB_Schema_Type::STRING) {
-      return sprintf(self::INPUT_TEXT, $name, '');
-    } elseif ($column->type == Sabel_DB_Schema_Type::TEXT) {
-      return sprintf(self::INPUT_AREA, $name, '');
+    return sprintf('<form action="%s" method="%s">', $action, $method);
+  }
+  
+  public function endTag()
+  {
+    return '</form>';
+  }
+  
+  public function isStart()
+  {
+    return ($this->position === 0);
+  }
+  
+  public function isEnd()
+  {
+    return ($this->position === $this->size);
+  }
+  
+  public function hidden($hiddens)
+  {
+    $this->hidden = $hiddens;
+  }
+  
+  public function isHidden()
+  {
+    return in_array($this->currentColumn->name, $this->hidden);
+  }
+  
+  public function name($showHidden = false)
+  {
+    $column = $this->currentColumn;
+    $name   = $column->name;
+    
+    if ($showHidden && $this->isHidden()) {
+      return $name;
+    } else if (!$this->isHidden()) {
+      return $name;
     }
   }
   
-  public static function edit($table, $obj, $action, $method)
+  public function write()
   {
-    uses('sabel.db.schema.Accessor');
-    $is = new Sabel_DB_Schema_Accessor('default', 'default');
-    
-    $localizeConfig = new Sabel_Config_Yaml(RUN_BASE . '/config/localize.yml');
-    $localize = $localizeConfig->read($table);
-    
-    $buf = array();
-    $buf[] = sprintf(self::FORM_START, $action.$obj->id, $method);
-    
-    foreach ($is->getTable($table)->getColumns() as $column) {
-      $name  = $column->name;
-      $lname  = (isset($localize[$column->name])) ? $localize[$column->name] : $column->name;
-      $buf[] = "{$lname} <br />";
-      $buf[] = self::input($obj, $name, $column);
+    $column = $this->currentColumn;
+    if (in_array($column->name, $this->hidden)) {
+      $type = 'hidden';
+    } else {
+      $type = 'text';
     }
     
-    $buf[] = '<input type="submit" value="confirm" />';
-    $buf[] = self::FORM_END;
-    return join("\n", $buf);
+    return sprintf('<input type="%s" name="%s" value="%s">', $type, $column->name, $column->value);
   }
   
-  public static function input($obj, $name, $column, $class = null)
+  public function isError()
   {
-    if ($column->type == Sabel_DB_Schema_Type::INT || $column->type == Sabel_DB_Schema_Type::STRING) {
-      return sprintf(self::INPUT_TEXT, $name, $obj->$name);
-    } elseif ($column->type == Sabel_DB_Schema_Type::TEXT) {
-      return sprintf(self::INPUT_AREA, $name, $obj->$name);
-    }
+    
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function current() {
+    $columns = array_values($this->columns);
+    $this->currentColumn = $columns[$this->position];
+    return $this;
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function key()
+  {
+    return $this->position;
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function next()
+  {
+    return $this->position++;
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function rewind()
+  {
+    $this->position = 0;
+  }
+  
+  /**
+   * implements for Iterator interface
+   *
+   */
+  public function valid()
+  {
+    return ($this->position < $this->size);
   }
 }
