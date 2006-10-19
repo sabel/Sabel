@@ -10,6 +10,6 @@
 <#= $form->submitTag('edit') #>
 <#= $form->endTag() #>
 
-<#= a("a: edit, id: {$<? echo $name ?>->id}", _('edit')) #> 
-<#= a('action: create', _('create')) #> 
+<#= a("a: edit, id: {$<? echo $name ?>->id}", _('edit')) #>&nbsp;
+<#= a('action: create', _('create')) #>&nbsp;
 <#= a('action: lists', _('list')) #>
