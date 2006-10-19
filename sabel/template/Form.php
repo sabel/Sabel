@@ -23,10 +23,14 @@
 class Sabel_Template_Form implements Iterator
 {
   protected $position = 0;
-  protected $hidden   = array();
-  protected $columns  = array();
   protected $size     = 0;
+  
+  protected $hidden   = array();
+  protected $hiddenPattern = '';
+  
+  protected $columns  = array();
   protected $currentColumn = null;
+  
   protected $errors = null;
   
   public function __construct($columns, $errors)
@@ -66,9 +70,20 @@ class Sabel_Template_Form implements Iterator
     $this->hidden = $hiddens;
   }
   
+  public function hiddenPattern($regex)
+  {
+    $this->hiddenPattern = $regex;
+  }
+  
   public function isHidden()
   {
-    return in_array($this->currentColumn->name, $this->hidden);
+    $name = $this->currentColumn->name;
+    if (in_array($name, $this->hidden) ||
+        preg_match('/'.$this->hiddenPattern.'/', $name)) {
+      return true;
+    } else {
+      return false;
+    }
   }
   
   public function name($showHidden = false)
