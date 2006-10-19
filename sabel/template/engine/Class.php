@@ -44,6 +44,9 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
       $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php= nl2br($2); $3 ?>', $contents);
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
+      $contents = explode("\n", $contents);
+      $contents = array_map("trim", $contents);
+      $contents = implode("", $contents);
       $this->saveCompileFile($contents);
     }
 
