@@ -113,14 +113,14 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if (!$this->stmt) {
       $this->data = array();
       $error = $this->conn->errorInfo();
-      throw new Exception('PDOStatement is null. sql : ' . $sql . ": {$error[2]}");
+      throw new Exception('Error: PDOStatement is null. SQL: ' . $sql . " ERROR: {$error[2]}");
     }
 
     $param = $this->makeBindParam();
     if (!$this->stmt->execute($param)) {
       $param = var_export($param, 1);
       $error = $this->conn->errorInfo();
-      throw new Exception("pdo execute failed:{$sql} PARAMETERS:{$param} ERROR:{$error[2]}");
+      throw new Exception("Error: pdo execute failed:{$sql} PARAMETERS:{$param} ERROR:{$error[2]}");
     }
   }
 

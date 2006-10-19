@@ -1442,3 +1442,29 @@ class SchemaTest extends MapperDefault
 {
 
 }
+
+class Schema_Trans2
+{
+  public function get()
+  {
+    $sql = array();
+
+    $sql['id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+                       'increment' => true, 'nullable' => false,
+                       'primary' => true, 'default' => null);
+
+    $sql['trans1_id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+                              'increment' => false, 'nullable' => false,
+                              'primary' => false, 'default' => null);
+
+    $sql['text'] = array('type' => 'STRING', 'max' => 24, 'increment' => false,
+                         'nullable' => true, 'primary' => false, 'default' => null);
+
+    return $sql;
+  }
+
+  public function getEngine()
+  {
+    return 'InnoDB';
+  }
+}

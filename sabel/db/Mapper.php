@@ -164,6 +164,11 @@ abstract class Sabel_DB_Mapper
     }
   }
 
+  public function getTableNames()
+  {
+    return $this->createSchemaAccessor()->getTableNames();
+  }
+
   public function getColumnNames($tblName = null)
   {
     if (is_null($tblName)) $tblName = $this->table;
@@ -262,14 +267,10 @@ abstract class Sabel_DB_Mapper
 
   public function begin()
   {
-    $connectName = $this->connectName;
     $driver = $this->getExecuter()->getDriver();
+    $check  = $this->checkTableEngine($driver);
 
-    $check = true;
-    if (Sabel_DB_Connection::getDB($connectName) === 'mysql')
-      $check = $driver->checkTableEngine($this->table);
-
-    if ($check) Sabel_DB_Transaction::begin($connectName, $driver);
+    if ($check) Sabel_DB_Transaction::begin($this->connectName, $driver);
   }
 
   public function commit()
@@ -285,6 +286,21 @@ abstract class Sabel_DB_Mapper
   public function close()
   {
     Sabel_DB_Connection::close($this->connectName);
+  }
+
+  protected function checkTableEngine($driver)
+  {
+    $db = Sabel_DB_Connection::getDB($this->connectName);
+    if ($db !== 'mysql') return true;
+
+    $engine = $this->createSchemaAccessor()->getTableEngine($this->table, $driver);
+    if ($engine !== 'InnoDB' && $engine !== 'BDB') {
+      $msg = "begin transaction, but a table engine of the '{$this->table}' is $engine";
+      trigger_error($msg, E_USER_NOTICE);
+      return false;
+    } else {
+      return true;
+    }
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
@@ -322,7 +338,7 @@ abstract class Sabel_DB_Mapper
       $columns = (is_null($group)) ? $this->primaryKey : $group;
     } else {
       $table   = $child;
-      $columns = (is_null($group)) ? $this->table . '_id' : $group;
+      $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
     }
     $this->setConstraint('group', $columns);
 
@@ -490,7 +506,7 @@ abstract class Sabel_DB_Mapper
   protected function addParent($row)
   {
     $this->parentTables = array($this->table);
-    return $this->checkRelationalColumn($row);
+    return $this->checkRelationalColumn($row, $this->primaryKey);
   }
 
   protected function addParentModels($tblName, $id)
@@ -511,18 +527,18 @@ abstract class Sabel_DB_Mapper
 
       Sabel_DB_SimpleCache::add($tblName. $id, $row);
     }
-    $row = $this->checkRelationalColumn($row);
+    $row = $this->checkRelationalColumn($row, $model->primaryKey);
 
     $this->setData($model, $row);
     $model->unsetNewData();
     return $model;
   }
 
-  private function checkRelationalColumn($row)
+  private function checkRelationalColumn($row, $pKey)
   {
     foreach ($row as $key => $val) {
-      if (strpos($key, '_id') !== false) {
-        $tblName = str_replace('_id', '', $key);
+      if (strpos($key, "_{$pKey}") !== false) {
+        $tblName = str_replace("_{$pKey}", '', $key);
         $mdlName = array_map('ucfirst', explode('_', $tblName));
         $result  = $this->addParentModels($tblName, $val);
         if ($result) $row[join('', $mdlName)] = $result;
@@ -546,7 +562,8 @@ abstract class Sabel_DB_Mapper
     $class->getStatement()->setBasicSQL("SELECT {$class->projection} FROM {$class->table}");
 
     $this->chooseChildConstraint($child, $model);
-    $model->setChildCondition("{$model->table}_id", $model->data[$model->primaryKey]);
+    $primary = $model->primaryKey;
+    $model->setChildCondition("{$model->table}_{$primary}", $model->data[$primary]);
 
     $class->conditions  = $model->childConditions;
     $class->constraints = $model->childConstraints[$child];
@@ -605,11 +622,11 @@ abstract class Sabel_DB_Mapper
     $id = $this->data[$this->primaryKey];
     if (empty($id)) throw new Exception('Error: newChild() who is a parent? hasn\'t id value.');
 
-    $parent = strtolower(get_class($this));
+    $parent = $this->table;
     $table  = (is_null($child)) ? $parant : $child;
     $model  = $this->newClass($table);
 
-    $column = $parent . '_id';
+    $column = "{$parent}_{$this->primaryKey}";
     $model->$column = $id;
     return $model;
   }
@@ -641,7 +658,7 @@ abstract class Sabel_DB_Mapper
     }
     $model = $this->newClass($child);
 
-    $model->setCondition($this->table . '_id', $id);
+    $model->setCondition("{$this->table}_{$this->primaryKey}", $id);
     $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
     $model->getExecuter()->execute();
   }
@@ -723,7 +740,7 @@ abstract class Sabel_DB_Mapper
       $this->begin();
       $models = array();
       foreach ($chain[$key] as $tblName) {
-        $foreignKey = $this->table . '_id';
+        $foreignKey = "{$this->table}_{$this->primaryKey}";
         if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
       }
 
@@ -737,15 +754,14 @@ abstract class Sabel_DB_Mapper
 
   private function getChainModels($children, &$chain)
   {
-    $table = $children[0]->table;
-    $key   = $children[0]->connectName . ':' . $table;
+    $key = $children[0]->connectName . ':' . $children[0]->table;
 
     if (array_key_exists($key, $chain)) {
       $references = array();
       foreach ($chain[$key] as $tblName) {
         $models = array();
         foreach ($children as $child) {
-          $foreignKey = $this->table . '_id';
+          $foreignKey = "{$child->table}_{$child->primaryKey}";
           if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
         }
         $references[] = $models;

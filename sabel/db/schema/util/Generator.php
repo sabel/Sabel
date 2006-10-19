@@ -55,6 +55,7 @@ require_once SABEL_DB . 'schema/Accessor.php';
 
 require_once SABEL . 'sabel/config/Spyc.php';
 require_once SABEL . 'sabel/config/Yaml.php';
+*/
 
 class Cascade_Writer
 {
@@ -168,7 +169,7 @@ class TableList_Writer
 
 class Schema_Writer
 {
-  public static function write($tName, $colArray)
+  public static function write($tName, $colArray, $sa, $drvName)
   {
     $className = 'Schema_' . join('', array_map('ucfirst', explode('_', $tName)));
 
@@ -184,9 +185,14 @@ class Schema_Writer
 
     foreach ($colArray as $line) fwrite($fp, '    ' . $line);
 
-    fwrite($fp, "\n");
-    fwrite($fp, '    return $sql;' . "\n");
-    fwrite($fp,  "  }\n");
+    fwrite($fp, "\n    return " . '$sql;' . "\n  }\n");
+
+    if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
+      $engine = $sa->getTableEngine($tName);
+      fwrite($fp, "\n  public function getEngine()\n  {\n");
+      fwrite($fp, "    return '{$engine}';\n  }\n");
+    }
+
     fwrite($fp,  "}\n");
     fclose($fp);
   }
@@ -284,7 +290,7 @@ class Schema_Util_Generator
         $tName    = $schema->getTableName();
         $colArray = Schema_Maker::make($connectName, $schema);
         if ($schemaAll || $schemaWrite && in_array($tName, $inputSchemas)) {
-          Schema_Writer::write($tName, $colArray);
+          Schema_Writer::write($tName, $colArray, $sa, $params['driver']);
         }
         TableList_Writer::add($connectName, $tName);
       }
@@ -294,6 +300,7 @@ class Schema_Util_Generator
   }
 }
 
+/*
 if (count($_SERVER['argv']) === 1) {
   echo "usage: php Generator.php environment\n";
   echo "       [-c] make cascade chain\n";
@@ -303,4 +310,4 @@ if (count($_SERVER['argv']) === 1) {
 }
 
 Schema_Util_Generator::main();
- */
+*/

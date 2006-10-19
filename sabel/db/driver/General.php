@@ -83,18 +83,4 @@ abstract class Sabel_DB_Driver_General
     $this->driverExecute($sql);
     $this->query->unsetProperties();
   }
-
-  public function checkTableEngine($table)
-  {
-    $this->driverExecute("SHOW TABLE STATUS WHERE Name='{$table}'", null);
-    $resultSet = $this->getResultSet();
-    $res = $resultSet->fetch();
-    if ($res['Engine'] !== 'InnoDB' && $res['Engine'] !== 'BDB') {
-      $msg = "The Engine of '{$table}' is {$res['Engine']} though the transaction was tried.";
-      trigger_error($msg, E_USER_NOTICE);
-      return false;
-    } else {
-      return true;
-    }
-  }
 }

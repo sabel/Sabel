@@ -42,9 +42,9 @@ class Sabel_DB_Schema_Accessor
     }
   }
 
-  public function getColumnNames($table)
+  public function getColumnNames($tblName)
   {
-    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $table)));
+    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
 
     if (class_exists($schemaClass, false)) {
       $sc   = new $schemaClass();
@@ -52,31 +52,33 @@ class Sabel_DB_Schema_Accessor
     } else {
       $executer = new Sabel_DB_Executer($this->connectName);
       $executer->setConstraint('limit', 1);
-      $executer->getStatement()->setBasicSQL("SELECT * FROM $table");
+      $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
 
       $resultSet = $executer->execute();
       $cols = $resultSet->fetch();
     }
     return array_keys($cols);
   }
-}
 
-/**
- * public function. schema()
- *
- */
-function schema($model)
-{
-  if ($model instanceof Sabel_DB_Mapper) {
-    $sa = new Sabel_DB_Schema_Accessor($model->getConnectName(), $model->getSchemaName());
-    $columns = $sa->getTable($model->getTableName())->getColumns();
+  /**
+   *  for mysql.
+   *
+   */
+  public function getTableEngine($tblName, $driver = null)
+  {
+    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
 
-    $data = $model->toArray();
-    foreach ($data as $key => $val) {
-      if (array_key_exists($key, $columns)) $columns[$key]->value = $val;
+    if (class_exists($schemaClass, false)) {
+      $sc = new $schemaClass();
+      return $sc->getEngine();
     }
-    return $columns;
-  } else {
-    throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
+
+    if (is_null($driver)) {
+      $driver = Sabel_DB_Connection::getDriver($this->connectName);
+    }
+    $driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
+    $resultSet = $driver->getResultSet();
+    $row = $resultSet->fetch();
+    return $row['Engine'];
   }
 }
