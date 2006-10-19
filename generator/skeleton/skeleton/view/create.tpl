@@ -2,12 +2,13 @@
 
 <#= $this->partial('error') #>
 
-<div>
-  <form method="post" action="<#= uri(array('action'=>'create')) ?>">
-    <# $this->assign('schema', $<? echo $name ?>->schema()) #>
-    <#= $this->partial('form') #>
-    <input type="submit" value="create" />
-  </form>
-</div>
+<# $form = new Sabel_Template_Form($<? echo $name ?>->schema(), (isset($errors)) ? $errors : null) #>
+<# $form->hidden(array('id')) #>
+<#= $form->startTag(uri(array('action' => 'edit')), 'POST') #>
+<# foreach ($form as $f) : ?>
+  <#= $f->write("{$f->name()}<br />", "<br /><br />") #>
+<# endforeach #>
+<#= $form->submitTag('edit') #>
+<#= $form->endTag() #>
 
 <#= a("a:lists", _('list')) #>

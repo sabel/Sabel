@@ -25,7 +25,7 @@ class Controllers_<? echo $ucControllerName ?> extends Sabel_Controller_Page
   
   public function create()
   {
-    $this-><? echo $controllerName ?>->assign();
+    $this-><? echo $controllerName ?>->assignToView();
   }
   
   public function postCreate()
