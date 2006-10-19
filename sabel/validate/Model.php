@@ -29,9 +29,15 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     $this->errors = new Sabel_Validate_Errors();
     
     foreach ($schema->get() as $name => $column) {
-      if ($column['nullable'] === false && $column['increment'] === true) continue; 
+      if (isset($column['nullable'])  && $column['nullable']  === false &&
+          isset($column['increment']) && $column['increment'] === true)
+      {
+            continue;
+      }
         
-      if ($column['nullable'] === false && $column['increment'] === false) {
+      if (isset($column['nullable'])  && $column['nullable']  === false &&
+          isset($column['increment']) && $column['increment'] === false)
+      {
         if (!isset($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
