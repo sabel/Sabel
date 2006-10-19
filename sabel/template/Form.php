@@ -79,7 +79,7 @@ class Sabel_Template_Form implements Iterator
   {
     $name = $this->currentColumn->name;
     if (in_array($name, $this->hidden) ||
-        preg_match('/'.$this->hiddenPattern.'/', $name)) {
+        (!empty($this->hiddenPattern) && preg_match('/'.$this->hiddenPattern.'/', $name))) {
       return true;
     } else {
       return false;
