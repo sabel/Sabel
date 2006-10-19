@@ -5,16 +5,13 @@
  *
  * Example :
  *
- * <? $form = new Sabel_Template_Form($bbs->schema()) ?>
+ * <? $form = new Sabel_Template_Form($model->schema(), (isset($errors)) ? $errors : null) ?>
  * <? $form->hidden(array('shop_id', 'users_id')) ?>
- * <?= $form->startTag(uri(array('action'=>'edit', 'id'=>$bbs->id), 'POST')) ?>
+ * <?= $form->startTag(uri(array('action' => 'save', 'id' => $model->id)), 'POST') ?>
  * <? foreach ($form as $f) : ?>
- *   <? if ($f->isHidden()) : ?>
- *     <?= $f->write() ?>
- *   <? else : ?>
- *     <?= $f->name() ?><?= $f->write() ?> <br />
- *   <? endif ?>
+ *   <?= $f->write("{$f->name()}<br />", "<br /><br />") ?>
  * <? endforeach ?>
+ * <?= $form->submitTag('save') ?>
  * <?= $form->endTag() ?>
  *
  * @category   Template
@@ -30,21 +27,28 @@ class Sabel_Template_Form implements Iterator
   protected $columns  = array();
   protected $size     = 0;
   protected $currentColumn = null;
+  protected $errors = null;
   
-  public function __construct($columns)
+  public function __construct($columns, $errors)
   {
     $this->columns = $columns;
     $this->size    = count($columns);
+    $this->errors  = $errors;
   }
   
   public function startTag($action, $method = 'GET')
   {
-    return sprintf('<form action="%s" method="%s">', $action, $method);
+    return sprintf('<form action="%s" method="%s">'."\n", $action, $method);
   }
   
   public function endTag()
   {
-    return '</form>';
+    return "</form>\n";
+  }
+  
+  public function submitTag($value)
+  {
+    return '<input type="submit" value="'.$value.'" />';
   }
   
   public function isStart()
@@ -79,21 +83,34 @@ class Sabel_Template_Form implements Iterator
     }
   }
   
-  public function write()
+  public function write($prefix = null, $postfix = null, $format = null)
   {
     $column = $this->currentColumn;
-    if (in_array($column->name, $this->hidden)) {
-      $type = 'hidden';
-    } else {
-      $type = 'text';
-    }
+    $fmt = (is_null($format)) ? '<input type="%s" name="%s" value="%s" />'."\n" : $format;
     
-    return sprintf('<input type="%s" name="%s" value="%s">', $type, $column->name, $column->value);
+    if ($this->isError()) {
+      $error = $this->errors->get($column->name);
+      if ($this->isHidden()) {
+        return sprintf($fmt, 'hidden', $column->name, $error->getValue());
+      } else {
+        return $prefix . sprintf("\n".$fmt."\n", 'text', $column->name, $error->getValue()) . $postfix;
+      }
+    } else {
+      if ($this->isHidden()) {
+        return sprintf($fmt, 'hidden', $column->name, $column->value);
+      } else {
+        return $prefix . sprintf("\n".$fmt."\n", 'text', $column->name, $column->value) . $postfix;
+      }
+    }
   }
   
   public function isError()
   {
-    
+    if (is_object($this->errors)) {
+      return $this->errors->errored($this->currentColumn->name);
+    } else {
+      return false;
+    }
   }
   
   /**

@@ -5,7 +5,8 @@ abstract class Sabel_Template_Engine
   protected
     $tplpath = null,
     $tplname = null,
-    $attributes = array();
+    $attributes = array(),
+    $trim = true;
     
   public function setTemplateName($name)
   {
