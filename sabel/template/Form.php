@@ -98,6 +98,11 @@ class Sabel_Template_Form implements Iterator
     }
   }
   
+  public function value()
+  {
+    if (!$this->isHidden()) return $this->currentColumn->value;
+  }
+  
   public function write($prefix = null, $postfix = null, $format = null)
   {
     $column = $this->currentColumn;

@@ -3,13 +3,15 @@
 <div>
 <# foreach ($<? echo $name ?>s as $<? echo $name ?>) : #>
 
-  <div>
-  <# foreach ($<? echo $name ?>->schema() as $column) : #>
-    <#= $column->name #>: &nbsp;
-    <#hn $column->value #>
-    <br />
+  <# $form = new Sabel_Template_Form($bbs->schema(), (isset($errors)) ? $errors : null) #>
+  <# $form->hidden(array('id')) #>
+  <# $form->hiddenPattern('.*(_id)') #>
+  <# foreach ($form as $f) : #>
+    <# if (!$f->isHidden()) : #>
+    <#= $f->name() #> <br />
+    <#= $f->value() #> <br /><br />
+    <# endif #>
   <# endforeach #>
-  </div>
   
   <#= a('action:create', _('create')) #> 
   <#= a("a:show,   id:{$<? echo $name ?>->id}", _('show')) #>&nbsp;
@@ -19,3 +21,14 @@
   <hr />
 <# endforeach #>
 </div>
+
+
+<? $form = new Sabel_Template_Form($bbs->schema(), (isset($errors)) ? $errors : null) ?>
+<? $form->hidden(array('id')) ?>
+<? $form->hiddenPattern('.*(_id)') ?>
+<? foreach ($form as $f) : ?>
+  <? if (!$f->isHidden()) : ?>
+  <?= $f->name() ?> <br />
+  <?= $f->value() ?> <br /><br />
+  <? endif ?>
+<? endforeach ?>
