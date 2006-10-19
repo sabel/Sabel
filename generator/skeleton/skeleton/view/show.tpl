@@ -6,8 +6,8 @@
   <br />
 <# endforeach #>
 
-<#= a('action:create', _('create')) #> 
-<#= a('action:lists', _('list')) #> 
+<#= a('action:create', _('create')) #>&nbsp;
+<#= a('action:lists', _('list')) #>&nbsp;
 <#= a("a:show,   id:{$<? echo $name ?>->id}", _('show')) #>&nbsp;
 <#= a("a:edit,   id:{$<? echo $name ?>->id}", _('edit')) #>&nbsp;
 <#= a("a:delete, id:{$<? echo $name ?>->id}", _('delete')) #>
