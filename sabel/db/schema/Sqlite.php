@@ -11,13 +11,19 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
     $this->driver = Sabel_DB_Connection::getDriver($connectName);
   }
 
-  public function getTables()
+  public function getTableNames()
   {
     $tables = array();
 
     $this->driver->execute($this->tableList);
-    foreach ($this->driver->getResultSet() as $row) {
-      $tblName = $row['name'];
+    foreach ($this->driver->getResultSet() as $row) $tables[] = $row['name'];
+    return $tables;
+  }
+
+  public function getTables()
+  {
+    $tables = array();
+    foreach ($this->getTableNames() as $tblName) {
       $tables[$tblName] = $this->getTable($tblName);
     }
     return $tables;

@@ -153,17 +153,15 @@ abstract class Sabel_DB_Mapper
 
   public function schema($tblName = null)
   {
-    if (is_null($tblName)) $tblName = $this->table;
-    $columns = $this->getTableSchema($tblName)->getColumns();
-
-    if ($tblName === $this->table) {
+    if (isset($tblName)) {
+      return $this->getTableSchema($tblName)->getColumns();
+    } else {
+      $columns = $this->getTableSchema()->getColumns();
       foreach ($this->data as $name => $data) {
-        if (!is_object($this->data[$name]) && isset($this->data[$name])) {
-          $columns[$name]->value = $data;
-        }
+        if (!is_object($this->data[$name])) $columns[$name]->value = $data;
       }
+      return $columns;
     }
-    return $columns;
   }
 
   public function getColumnNames($tblName = null)
@@ -354,7 +352,7 @@ abstract class Sabel_DB_Mapper
     $resultSet = $model->getExecuter()->execute();
 
     if ($row = $resultSet->fetch()) {
-      $model->mapping($model, ($model->withParent) ? $this->addParent($row) : $row);
+      $model->setData($model, ($model->withParent) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->myChildren)) $model->getDefaultChild($myChild, $model);
     } else {
       foreach ($model->conditions as $condition) $model->data[$condition->key] = $condition->value;
@@ -446,12 +444,12 @@ abstract class Sabel_DB_Mapper
         unset($row[$preCol]);
       }
       $model = $this->newClass($table);
-      $this->mapping($model, $acquire[$table]);
+      $this->setData($model, $acquire[$table]);
       $models[$table] = $model;
     }
 
     $model = $this->newClass($this->table);
-    $this->mapping($model, $row);
+    $this->setData($model, $row);
     $models[$this->table] = $model;
     return array($model, $models);
   }
@@ -479,7 +477,7 @@ abstract class Sabel_DB_Mapper
         $withParent = ($this->withParent) ? true : $model->withParent;
       }
 
-      $this->mapping($model, ($withParent) ? $this->addParent($row) : $row);
+      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->myChildren)) {
         if (isset($child)) $this->chooseChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
@@ -515,7 +513,7 @@ abstract class Sabel_DB_Mapper
     }
     $row = $this->checkRelationalColumn($row);
 
-    $this->mapping($model, $row);
+    $this->setData($model, $row);
     $model->unsetNewData();
     return $model;
   }
@@ -583,7 +581,7 @@ abstract class Sabel_DB_Mapper
     if ($thisDefault) $model->defChildConstraints = $thisDefault;
   }
 
-  protected function mapping($model, $row)
+  protected function setData($model, $row)
   {
     $primaryKey = $model->primaryKey;
 

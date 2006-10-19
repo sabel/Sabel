@@ -10,7 +10,7 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     $this->driver = Sabel_DB_Connection::getDriver($connectName);
   }
 
-  public function getTables()
+  public function getTableNames()
   {
     $tables = array();
 
@@ -18,9 +18,17 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
     $this->driver->execute($sql);
 
     foreach ($this->driver->getResultSet() as $row) {
-      $row   = array_change_key_case($row);
-      $table = $row['table_name'];
-      $tables[$table] = $this->getTable($table);
+      $row = array_change_key_case($row);
+      $tables[] = $row['table_name'];
+    }
+    return $tables;
+  }
+
+  public function getTables()
+  {
+    $tables = array();
+    foreach ($this->getTableNames() as $tblName) {
+      $tables[$tblName] = $this->getTable($tblName);
     }
     return $tables;
   }
@@ -43,8 +51,8 @@ class Sabel_DB_Schema_General extends Sabel_DB_Schema_Common
   protected function makeColumnValueObject($row)
   {
     $co = new Sabel_DB_Schema_Column();
-    $co->name    = $row['column_name'];
-    $co->notNull = ($row['is_nullable'] === 'NO');
+    $co->name     = $row['column_name'];
+    $co->nullable = ($row['is_nullable'] !== 'NO');
 
     $type = $row['data_type'];
 

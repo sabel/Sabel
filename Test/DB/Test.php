@@ -1186,7 +1186,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($fnum->max,  3.4028235E38);
     $this->assertEquals($fnum->min, -3.4028235E38);
     $this->assertFalse($fnum->primary);
-    $this->assertFalse($fnum->notNull);
+    $this->assertTrue($fnum->nullable);
     $this->assertFalse($fnum->increment);
     @$this->assertEquals($fnum->default, null);
 
@@ -1194,39 +1194,39 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($dnum->max,  1.79769E308);
     $this->assertEquals($dnum->min, -1.79769E308);
     $this->assertFalse($dnum->primary);
-    $this->assertFalse($dnum->notNull);
+    $this->assertTrue($dnum->nullable);
     $this->assertFalse($dnum->increment);
     @$this->assertEquals($dnum->default, null);
 
     $this->assertEquals($str->type, Sabel_DB_Schema_Const::STRING);
     $this->assertEquals($str->max, 64);
     $this->assertFalse($str->primary);
-    $this->assertFalse($str->notNull);
+    $this->assertTrue($str->nullable);
     $this->assertFalse($str->increment);
     $this->assertEquals($str->default, 'test');
 
     $this->assertEquals($text->type, Sabel_DB_Schema_Const::TEXT);
     $this->assertFalse($text->primary);
-    $this->assertFalse($text->notNull);
+    $this->assertTrue($text->nullable);
     $this->assertFalse($text->increment);
     @$this->assertEquals($text->default, null);
 
     $this->assertEquals($bl->type, Sabel_DB_Schema_Const::BOOL);
     $this->assertFalse($bl->primary);
-    $this->assertFalse($bl->notNull);
+    $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertTrue($bl->default);
 
     $this->assertEquals($date->type, Sabel_DB_Schema_Const::DATE);
     $this->assertFalse($date->primary);
     $this->assertFalse($date->increment);
-    $this->assertFalse($date->notNull);
+    $this->assertTrue($date->nullable);
     @$this->assertEquals($date->default, null);
 
     $this->assertEquals($dt->type, Sabel_DB_Schema_Const::TIMESTAMP);
     $this->assertFalse($dt->primary);
     $this->assertFalse($dt->increment);
-    $this->assertTrue($dt->notNull);
+    $this->assertFalse($dt->nullable);
     @$this->assertEquals($dt->default, null);
   }
 

@@ -95,7 +95,7 @@ class Schema_Mock
                              'max'       =>  9.22337203685E+18,
                              'min'       => -9.22337203685E+18,
                              'increment' => true,
-                             'notNull'   => true,
+                             'nullable'  => false,
                              'primary'   => true,
                              'default'   => null);
     
@@ -103,7 +103,7 @@ class Schema_Mock
                              'max'       =>  9.22337203685E+18,
                              'min'       => -9.22337203685E+18,
                              'increment' => false,
-                             'notNull'   => true,
+                             'nullable'  => false,
                              'primary'   => false,
                              'default'   => null);
     
@@ -111,26 +111,26 @@ class Schema_Mock
                              'max'       =>  9.22337203685E+18,
                              'min'       => -9.22337203685E+18,
                              'increment' => false,
-                             'notNull'   => false,
+                             'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
     
     $sql['title']    = array('type'      => 'STRING',
                              'max'       => 32,
                              'increment' => false,
-                             'notNull'   => false,
+                             'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
     
     $sql['body']     = array('type'      => 'TEXT',
                              'increment' => false,
-                             'notNull'   => false,
+                             'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
     
     $sql['date']     = array('type'      => 'TIMESTAMP',
                              'increment' => false,
-                             'notNull'   => false,
+                             'nullable'  => true,
                              'primary'   => false,
                              'default'   => 'CURRENT_TIMESTAMP');
     return $sql;

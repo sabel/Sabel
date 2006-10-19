@@ -70,9 +70,9 @@ class Sabel_DB_Schema_Util_Creator
     }
 
     if ($colLine === '') {
-      $co->notNull = false;
-      $co->primary = false;
-      $co->default = null;
+      $co->nullable = true;
+      $co->primary  = false;
+      $co->default  = null;
       return false;
     } else {
       $this->colLine = $colLine;
@@ -112,7 +112,7 @@ class Sabel_DB_Schema_Util_Creator
 
   protected function setNotNull($co)
   {
-    $co->notNull = (strpos($this->colLine, 'not null') !== false);
+    $co->nullable = (strpos($this->colLine, 'not null') === false);
     str_replace('not null', '', $this->colLine);
   }
 

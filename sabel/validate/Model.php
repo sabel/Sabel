@@ -29,9 +29,9 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     $this->errors = new Sabel_Validate_Errors();
     
     foreach ($schema->get() as $name => $column) {
-      if ($column['notNull'] === true && $column['increment'] === true) continue; 
+      if ($column['nullable'] === false && $column['increment'] === true) continue; 
         
-      if ($column['notNull'] === true && $column['increment'] === false) {
+      if ($column['nullable'] === false && $column['increment'] === false) {
         if (!isset($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
@@ -64,14 +64,14 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     $strlen = (function_exists('mb_strlen')) ? 'mb_strlen' : 'strlen';
     
     switch ($type) {
-      case 'STRING':
+      case Sabel_DB_Schema_Const::STRING:
         switch ($value) {
           case ($strlen($value) > $max):
             return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);
             break;
         }
         break;
-      case 'INT':
+      case Sabel_DB_Schema_Const::INT:
         switch ($value) {
           case ($value > $max):
             return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);

@@ -30,6 +30,18 @@ class Sabel_DB_Schema_Accessor
     return $this->schemaClass->getTable($tblName);
   }
 
+  public function getTableNames()
+  {
+    $schemaClass = 'Schema_' . ucfirst($this->connectName) . 'TableList';
+
+    if (class_exists($schemaClass, false)) {
+      $sc = new $schemaClass();
+      return $sc->get();
+    } else {
+      return $this->schemaClass->getTableNames();
+    }
+  }
+
   public function getColumnNames($table)
   {
     $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $table)));
@@ -60,9 +72,9 @@ function schema($model)
     $columns = $sa->getTable($model->getTableName())->getColumns();
 
     $data = $model->toArray();
-    foreach ($data as $key => $val)
+    foreach ($data as $key => $val) {
       if (array_key_exists($key, $columns)) $columns[$key]->value = $val;
-
+    }
     return $columns;
   } else {
     throw new Exception('Error: argument should be an instance of Sabel_DB_Mapper');
