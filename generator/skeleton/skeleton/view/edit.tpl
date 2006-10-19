@@ -2,13 +2,13 @@
 
 <#= $this->partial('error') #>
 
-<? $form = new Sabel_Template_Form($<? echo $name ?>->schema(), (isset($errors)) ? $errors : null) ?>
-<?= $form->startTag(uri(array('action' => 'edit', 'id' => $<? echo $name ?>->id)), 'POST') ?>
-<? foreach ($form as $f) : ?>
-  <?= $f->write("{$f->name()}<br />", "<br /><br />") ?>
-<? endforeach ?>
-<?= $form->submitTag('edit') ?>
-<?= $form->endTag() ?>
+<# $form = new Sabel_Template_Form($<? echo $name ?>->schema(), (isset($errors)) ? $errors : null) #>
+<#= $form->startTag(uri(array('action' => 'edit', 'id' => $<? echo $name ?>->id)), 'POST') #>
+<# foreach ($form as $f) : ?>
+  <#= $f->write("{$f->name()}<br />", "<br /><br />") #>
+<# endforeach #>
+<#= $form->submitTag('edit') #>
+<#= $form->endTag() #>
 
 <#= a("a: edit, id: {$<? echo $name ?>->id}", _('edit')) #> 
 <#= a('action: create', _('create')) #> 
