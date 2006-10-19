@@ -24,12 +24,6 @@ class Sabel_DB_Condition
     $this->values['not']   = ($not === self::NOT);
   }
 
-  public static function add($key, $val, $not = null)
-  {
-    $self = new self($key, $val, $not);
-    return $self;
-  }
-
   public function __get($key)
   {
     return (isset($this->values[$key])) ? $this->values[$key] : null;

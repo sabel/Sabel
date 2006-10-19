@@ -658,9 +658,6 @@ abstract class Sabel_DB_Mapper
       $this->getExecuter()->update($this->table, ($data) ? $data : $this->newData);
     } else {
       $data = ($data) ? $data : $this->data;
-      foreach ($data as $key => $val) {
-        if (is_object($val)) $data[$key] = $val->value;
-      }
       return $this->getExecuter()->insert($this->table, $data, $this->checkIncColumn());
     }
   }
