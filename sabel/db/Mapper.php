@@ -66,6 +66,11 @@ abstract class Sabel_DB_Mapper
       $this->table = $this->convertToTableName(get_class($this));
     }
   }
+  
+  public function getTableName()
+  {
+    return $this->table;
+  }
 
   private function convertToTableName($mdlName)
   {

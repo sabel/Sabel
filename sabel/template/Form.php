@@ -28,15 +28,17 @@ class Sabel_Template_Form implements Iterator
   protected $hidden   = array();
   protected $hiddenPattern = '';
   
+  protected $model = null;
   protected $columns  = array();
   protected $currentColumn = null;
   
   protected $errors = null;
   
-  public function __construct($columns, $errors)
+  public function __construct($model, $errors)
   {
-    $this->columns = $columns;
-    $this->size    = count($columns);
+    $this->model   = $model;
+    $this->columns = $model->schema();
+    $this->size    = count($this->columns);
     $this->errors  = $errors;
   }
   
@@ -65,14 +67,22 @@ class Sabel_Template_Form implements Iterator
     return ($this->position === $this->size);
   }
   
+  public function setValue($name, $value)
+  {
+    $this->columns[$name]->value = $value;
+    return $this;
+  }
+  
   public function hidden($hiddens)
   {
     $this->hidden = $hiddens;
+    return $this;
   }
   
   public function hiddenPattern($regex)
   {
     $this->hiddenPattern = $regex;
+    return $this;
   }
   
   public function isHidden()
@@ -89,7 +99,7 @@ class Sabel_Template_Form implements Iterator
   public function name($showHidden = false)
   {
     $column = $this->currentColumn;
-    $name   = $column->name;
+    $name   = _($column->name);
     
     if ($showHidden && $this->isHidden()) {
       return $name;
@@ -119,9 +129,38 @@ class Sabel_Template_Form implements Iterator
       if ($this->isHidden()) {
         return sprintf($fmt, 'hidden', $column->name, $column->value);
       } else {
-        return $prefix . sprintf("\n".$fmt."\n", 'text', $column->name, $column->value) . $postfix;
+        if ($this->isText()) {
+          $result = $this->textarea($column->name, $column->value);
+        } else {
+          $result = $this->input('text', $column->name, $column->value);
+        }
+        return $prefix . $result . $postfix;
       }
     }
+  }
+  
+  public function isString()
+  {
+    return ($this->currentColumn->type === 'STRING');
+  }
+  
+  public function input($type, $name, $value, $id = '', $class = '', $style = '')
+  {
+    if (empty($id)) $id = $this->defaultID();
+    $fmt = '<input type="%s" name="%s" value="%s" id="%s" class="%s" style="%s" />';
+    return sprintf($fmt, $type, $name, $value, $id, $class, $style);
+  }
+  
+  public function isText()
+  {
+    return ($this->currentColumn->type === 'TEXT');
+  }
+  
+  public function textarea($name, $value = '', $id = '', $class = '', $style = '')
+  {
+    if (empty($id)) $id = $this->defaultID();
+    $fmt = '<textarea name="%s" id="%s" class="%s" style="%s">%s</textarea>';
+    return sprintf($fmt, $name, $id, $class, $style, $value);
   }
   
   public function isError()
@@ -131,6 +170,11 @@ class Sabel_Template_Form implements Iterator
     } else {
       return false;
     }
+  }
+  
+  protected function defaultID()
+  {
+    return $this->model->getTableName() . '_' . $this->currentColumn->name;
   }
   
   /**

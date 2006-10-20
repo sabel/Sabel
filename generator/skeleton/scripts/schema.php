@@ -200,6 +200,8 @@ class Schema_Writer
       for ($i = 1; $i < sizeof($parents); $i++) array_push($pArray, ",'{$parents[$i]}'");
       fwrite($fp, join('', $pArray));
       fwrite($fp, ");\n  }\n");
+    } else {
+      fwrite($fp, "\n  public function getParents()\n  {\n    retrun null;\n  }\n");
     }
 
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
