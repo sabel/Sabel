@@ -1,10 +1,15 @@
 <?php
 
 /**
- * Query Maker for Native
+ * Sabel_DB_Driver_Native_Query
  *
- * @author Ebine Yutaka <ebine.yutaka@gmail.com>
- * @package org.sabel.db
+ * @category   DB
+ * @package    org.sabel.db
+ * @subpackage driver
+ * @subpackage native
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
 {

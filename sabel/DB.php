@@ -1,6 +1,6 @@
 <?php
 
-abstract class Sabel_DB extends Sabel_DB_Mapper
+abstract class Sabel_DB extends Sabel_DB_Wrapper
 {
-  
+
 }

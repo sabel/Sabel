@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_DB_Executer
+ *
+ * @category   DB
+ * @package    org.sabel.db
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_DB_Executer
 {
   private
@@ -13,7 +22,7 @@ class Sabel_DB_Executer
 
   public function __construct($param)
   {
-    if ($param instanceof Sabel_DB_Mapper) {
+    if ($param instanceof Sabel_DB_Wrapper) {
       $this->model   = $param;
       $this->isModel = true;
       $this->initialize($param);

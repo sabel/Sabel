@@ -1,13 +1,16 @@
 <?php
 
 /**
- * important class of sabel_db package.
- * inherit this class to use a orm solution.
+ * Sabel_DB_Wrapper
  *
- * @author Ebine Yutaka <ebine.yutaka@gmail.com>
- * @package org.sabel.db
+ * @abstract
+ * @category   DB
+ * @package    org.sabel.db
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Mapper
+abstract class Sabel_DB_Wrapper
 {
   protected
     $table        = '',

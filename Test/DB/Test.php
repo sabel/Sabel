@@ -1314,7 +1314,7 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-class MapperDefault extends Sabel_DB_Mapper
+class MapperDefault extends Sabel_DB_Wrapper
 {
 
 }
@@ -1418,7 +1418,7 @@ class Trans1 extends MapperDefault
 
 }
 
-class Trans2 extends Sabel_DB_Mapper
+class Trans2 extends Sabel_DB_Wrapper
 {
   protected $connectName = 'default2';
 }
