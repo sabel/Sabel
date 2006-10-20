@@ -2,7 +2,6 @@
 
 define('SABEL',      '/Users/morireo/MirrorSandbox/sabel/trunk/sabel/');
 define('SABEL_DB',   SABEL . 'db/');
-define('MODELS_DIR', '/usr/local/www/data/trunk/Sabel/sabel/db/schema/util/models/');
 define('SCHEMA_DIR', 'schema/');
 
 require_once SABEL_DB . 'Connection.php';
@@ -16,14 +15,15 @@ require_once SABEL_DB . 'driver/native/Query.php';
 require_once SABEL_DB . 'driver/pdo/Query.php';
 
 require_once SABEL_DB . 'driver/General.php';
-require_once SABEL_DB . 'driver/General.php';
 require_once SABEL_DB . 'driver/native/Mysql.php';
 require_once SABEL_DB . 'driver/native/Pgsql.php';
 require_once SABEL_DB . 'driver/native/Mssql.php';
 require_once SABEL_DB . 'driver/native/Firebird.php';
+require_once SABEL_DB . 'driver/pdo/Statement.php';
 require_once SABEL_DB . 'driver/pdo/Driver.php';
 
 require_once SABEL_DB . 'SimpleCache.php';
+require_once SABEL_DB . 'Transaction.php';
 require_once SABEL_DB . 'Mapper.php';
 require_once SABEL_DB . 'Basic.php';
 require_once SABEL_DB . 'Tree.php';
@@ -56,64 +56,6 @@ require_once SABEL_DB . 'schema/Accessor.php';
 
 require_once SABEL . 'config/Spyc.php';
 require_once SABEL . 'config/Yaml.php';
-
-/*
-define('SABEL',      '/usr/local/www/data/Sabel/');
-define('SABEL_DB',   SABEL . 'sabel/db/');
-define('SCHEMA_DIR', SABEL . 'sabel/db/schema/util/schema/');
-
-require_once SABEL_DB . 'Connection.php';
-
-require_once SABEL_DB . 'driver/ResultSet.php';
-require_once SABEL_DB . 'driver/ResultObject.php';
-
-require_once SABEL_DB . 'driver/Statement.php';
-require_once SABEL_DB . 'driver/native/Paginate.php';
-require_once SABEL_DB . 'driver/native/Query.php';
-require_once SABEL_DB . 'driver/pdo/Query.php';
-
-require_once SABEL_DB . 'driver/General.php';
-require_once SABEL_DB . 'driver/General.php';
-require_once SABEL_DB . 'driver/native/Mysql.php';
-require_once SABEL_DB . 'driver/native/Pgsql.php';
-require_once SABEL_DB . 'driver/native/Mssql.php';
-require_once SABEL_DB . 'driver/native/Firebird.php';
-require_once SABEL_DB . 'driver/pdo/Driver.php';
-
-require_once SABEL_DB . 'SimpleCache.php';
-require_once SABEL_DB . 'Mapper.php';
-require_once SABEL_DB . 'Basic.php';
-require_once SABEL_DB . 'Tree.php';
-require_once SABEL_DB . 'Bridge.php';
-
-require_once SABEL_DB . 'schema/Const.php';
-
-require_once SABEL_DB . 'schema/type/Sender.php';
-require_once SABEL_DB . 'schema/type/Setter.php';
-
-require_once SABEL_DB . 'schema/type/Int.php';
-require_once SABEL_DB . 'schema/type/String.php';
-require_once SABEL_DB . 'schema/type/Byte.php';
-require_once SABEL_DB . 'schema/type/Other.php';
-require_once SABEL_DB . 'schema/type/Text.php';
-require_once SABEL_DB . 'schema/type/Time.php';
-require_once SABEL_DB . 'schema/type/Float.php';
-require_once SABEL_DB . 'schema/type/Double.php';
-
-require_once SABEL_DB . 'schema/Column.php';
-require_once SABEL_DB . 'schema/Table.php';
-
-require_once SABEL_DB . 'schema/Common.php';
-require_once SABEL_DB . 'schema/General.php';
-require_once SABEL_DB . 'schema/Mysql.php';
-require_once SABEL_DB . 'schema/Pgsql.php';
-require_once SABEL_DB . 'schema/Sqlite.php';
-require_once SABEL_DB . 'schema/Mssql.php';
-require_once SABEL_DB . 'schema/Accessor.php';
-
-require_once SABEL . 'sabel/config/Spyc.php';
-require_once SABEL . 'sabel/config/Yaml.php';
-*/
 
 class Cascade_Writer
 {
@@ -227,7 +169,7 @@ class TableList_Writer
 
 class Schema_Writer
 {
-  public static function write($tName, $colArray, $sa, $drvName)
+  public static function write($tName, $colArray, $connectName, $sa, $drvName)
   {
     $className = 'Schema_' . join('', array_map('ucfirst', explode('_', $tName)));
 
@@ -245,6 +187,21 @@ class Schema_Writer
 
     fwrite($fp, "\n    return " . '$sql;' . "\n  }\n");
 
+    fwrite($fp, "\n  public function getConnectName()\n  {\n");
+    fwrite($fp, "    return '{$connectName}';\n  }\n");
+
+    if (array_key_exists($tName, Schema_Maker::$tblParents)) {
+      $parents = Schema_Maker::$tblParents[$tName];
+      fwrite($fp, "\n  public function getParents()\n  {\n");
+      fwrite($fp, '    return array(');
+
+      $pArray = array();
+      array_push($pArray, "'{$parents[0]}'");
+      for ($i = 1; $i < sizeof($parents); $i++) array_push($pArray, ",'{$parents[$i]}'");
+      fwrite($fp, join('', $pArray));
+      fwrite($fp, ");\n  }\n");
+    }
+
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
       $engine = $sa->getTableEngine($tName);
       fwrite($fp, "\n  public function getEngine()\n  {\n");
@@ -258,6 +215,8 @@ class Schema_Writer
 
 class Schema_Maker
 {
+  public static $tblParents = array();
+
   public static function make($connectName, $schema)
   {
     $parsed  = array();
@@ -266,6 +225,7 @@ class Schema_Maker
 
     foreach ($columns as $column) {
       if (strpos($column->name, '_id') !== false) {
+        self::$tblParents[$tName][] = str_replace('_id', '', $column->name);
         Cascade_Writer::addForeignKey($connectName, $tName, $column->name);
       }
 
@@ -331,10 +291,7 @@ class Schema_Util_Generator
         if ($val === '-l' || $input[$i] === '-c') break;
         $inputSchemas[] = $val;
       }
-
-      if (count($inputSchemas) === 1 && $inputSchemas[0] === 'all') {
-        $schemaAll = true;
-      }
+      $schemaAll = (count($inputSchemas) === 1 && $inputSchemas[0] === 'all');
     }
 
     foreach ($data as $connectName => $params) {
@@ -348,7 +305,7 @@ class Schema_Util_Generator
         $tName    = $schema->getTableName();
         $colArray = Schema_Maker::make($connectName, $schema);
         if ($schemaAll || $schemaWrite && in_array($tName, $inputSchemas)) {
-          Schema_Writer::write($tName, $colArray, $sa, $params['driver']);
+          Schema_Writer::write($tName, $colArray, $connectName, $sa, $params['driver']);
         }
         TableList_Writer::add($connectName, $tName);
       }

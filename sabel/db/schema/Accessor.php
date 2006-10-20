@@ -53,9 +53,7 @@ class Sabel_DB_Schema_Accessor
       $executer = new Sabel_DB_Executer($this->connectName);
       $executer->setConstraint('limit', 1);
       $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
-
-      $resultSet = $executer->execute();
-      $cols = $resultSet->fetch();
+      $cols = $executer->execute()->fetch();
     }
     return array_keys($cols);
   }
@@ -77,8 +75,7 @@ class Sabel_DB_Schema_Accessor
       $driver = Sabel_DB_Connection::getDriver($this->connectName);
     }
     $driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
-    $resultSet = $driver->getResultSet();
-    $row = $resultSet->fetch();
+    $row = $driver->getResultSet()->fetch();
     return $row['Engine'];
   }
 }

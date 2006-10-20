@@ -39,8 +39,12 @@ abstract class Sabel_DB_Mapper
     $selected = false;
 
   private
+    $joinPair     = array(),
+    $joinColList  = array(),
+    $joinColCache = array();
+
+  private
     $parentTables = array(),
-    $joinColCache = array(),
     $relational   = array(),
     $cascadeStack = array();
 
@@ -158,7 +162,7 @@ abstract class Sabel_DB_Mapper
     } else {
       $columns = $this->getTableSchema()->getColumns();
       foreach ($this->data as $name => $data) {
-        if (!is_object($this->data[$name])) $columns[$name]->value = $data;
+        if (isset($columns[$name])) $columns[$name]->value = $data;
       }
       return $columns;
     }
@@ -295,7 +299,7 @@ abstract class Sabel_DB_Mapper
 
     $engine = $this->createSchemaAccessor()->getTableEngine($this->table, $driver);
     if ($engine !== 'InnoDB' && $engine !== 'BDB') {
-      $msg = "begin transaction, but a table engine of the '{$this->table}' is $engine";
+      $msg = "begin transaction, but a table engine of the '{$this->table}' is {$engine}.";
       trigger_error($msg, E_USER_NOTICE);
       return false;
     } else {
@@ -309,9 +313,8 @@ abstract class Sabel_DB_Mapper
     $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $resultSet = $this->getExecuter()->execute();
-    $arrayRow  = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
-    return (int)$arrayRow[0];
+    $row = $this->getExecuter()->execute()->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    return (int)$row[0];
   }
 
   public function getFirst($orderColumn)
@@ -365,9 +368,8 @@ abstract class Sabel_DB_Mapper
   {
     $model->selectCondition = $model->conditions;
     $model->getStatement()->setBasicSQL("SELECT {$model->projection} FROM " . $model->table);
-    $resultSet = $model->getExecuter()->execute();
 
-    if ($row = $resultSet->fetch()) {
+    if ($row = $model->getExecuter()->execute()->fetch()) {
       $model->setData($model, ($model->withParent) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->myChildren)) $model->getDefaultChild($myChild, $model);
     } else {
@@ -414,12 +416,16 @@ abstract class Sabel_DB_Mapper
       foreach ($joinTables as $table) {
         if (!array_key_exists($table, $relational)) continue;
         foreach ($relational[$table] as $parent) {
-          $models[$table]->$parent = $models[$parent];
+          $mdlName = join('', array_map('ucfirst', explode('_', $parent)));
+          $models[$table]->$mdlName = $models[$parent];
           $models[$table]->unsetNewData();
         }
       }
 
-      foreach ($relational[$myTable] as $parent) $self->$parent = $models[$parent];
+      foreach ($relational[$myTable] as $parent) {
+        $mdlName = join('', array_map('ucfirst', explode('_', $parent)));
+        $self->$mdlName = $models[$parent];
+      }
       $self->unsetNewData();
       $results[] = $self;
     }
@@ -454,14 +460,23 @@ abstract class Sabel_DB_Mapper
     $colCache = $this->joinColCache;
 
     foreach ($joinTables as $table) {
-      foreach ($colCache[$table] as $column) {
-        $preCol = "pre_{$table}_{$column}";
-        $acquire[$table][$column] = $row[$preCol];
-        unset($row[$preCol]);
+      $model  = $this->newClass($table);
+      $pKey   = $model->primaryKey;
+      $preCol = "pre_{$table}_{$pKey}";
+      $cache  = Sabel_DB_SimpleCache::get($table . $row[$preCol]);
+
+      if (is_object($cache)) {
+        $models[$table] = clone($cache);
+      } else {
+        foreach ($colCache[$table] as $column) {
+          $preCol = "pre_{$table}_{$column}";
+          $acquire[$table][$column] = $row[$preCol];
+          unset($row[$preCol]);
+        }
+        $this->setData($model, $acquire[$table]);
+        $models[$table] = $model;
+        Sabel_DB_SimpleCache::add($table . $model->$pKey, $model);
       }
-      $model = $this->newClass($table);
-      $this->setData($model, $acquire[$table]);
-      $models[$table] = $model;
     }
 
     $model = $this->newClass($this->table);
@@ -470,8 +485,28 @@ abstract class Sabel_DB_Mapper
     return array($model, $models);
   }
 
+  protected function prepareAutoJoin($tblName)
+  {
+    $sClass = $this->schemaClassExists($tblName);
+    if (!$sClass) return false;
+
+    $this->joinColList[$tblName] = array_keys($sClass->get());
+
+    if ($parents = $sClass->getParents()) {
+      foreach ($parents as $parent) {
+        $this->joinPair[] = $tblName . ':' . $parent;
+        return $this->prepareAutoJoin($parent);
+      }
+    }
+    return true;
+  }
+
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
+    if ($this->withParent && $this->prepareAutoJoin($this->table)) {
+      return $this->selectJoin($this->joinPair);
+    }
+
     $this->setCondition($param1, $param2, $param3);
     $this->getStatement()->setBasicSQL("SELECT {$this->projection} FROM {$this->table}");
     return $this->getRecords($this);
@@ -647,6 +682,12 @@ abstract class Sabel_DB_Mapper
   private function modelExists($className)
   {
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
+  }
+
+  protected function schemaClassExists($tblName)
+  {
+    $sClass = 'Schema_' . str_replace('_', '', $tblName);
+    return (class_exists($sClass, false)) ? new $sClass() : false;
   }
 
   public function clearChild($child)

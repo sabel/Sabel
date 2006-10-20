@@ -13,7 +13,8 @@ class Sabel_DB_Driver_Native_Mysql extends Sabel_DB_Driver_General
     $this->conn   = $conn;
     $this->dbType = 'mysql';
     $this->query  = new Sabel_DB_Driver_Native_Query('mysql', 'mysql_real_escape_string');
-  } 
+  }
+
   public function begin($conn)
   {
     $this->driverExecute('BEGIN', $conn);

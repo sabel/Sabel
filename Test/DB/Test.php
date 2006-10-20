@@ -903,26 +903,26 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($test5->name, 'seki');
     $this->assertEquals($test6->name, 'uchida');
 
-    $this->assertEquals((int)$test1->test2->id, 1);
-    $this->assertEquals((int)$test2->test2->id, 2);
-    $this->assertEquals((int)$test3->test2->id, 1);
-    $this->assertEquals((int)$test4->test2->id, 3);
-    $this->assertEquals((int)$test5->test2->id, 3);
-    $this->assertEquals((int)$test6->test2->id, 1);
+    $this->assertEquals((int)$test1->Test2->id, 1);
+    $this->assertEquals((int)$test2->Test2->id, 2);
+    $this->assertEquals((int)$test3->Test2->id, 1);
+    $this->assertEquals((int)$test4->Test2->id, 3);
+    $this->assertEquals((int)$test5->Test2->id, 3);
+    $this->assertEquals((int)$test6->Test2->id, 1);
 
-    $this->assertEquals((int)$test1->test2->test3->id, 2);
-    $this->assertEquals((int)$test2->test2->test3->id, 1);
-    $this->assertEquals((int)$test3->test2->test3->id, 2);
-    $this->assertEquals((int)$test4->test2->test3->id, 2);
-    $this->assertEquals((int)$test5->test2->test3->id, 2);
-    $this->assertEquals((int)$test6->test2->test3->id, 2);
+    $this->assertEquals((int)$test1->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test2->Test2->Test3->id, 1);
+    $this->assertEquals((int)$test3->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test4->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test5->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test6->Test2->Test3->id, 2);
 
-    $this->assertEquals($test1->test2->test3->name, 'test32');
-    $this->assertEquals($test2->test2->test3->name, 'test31');
-    $this->assertEquals($test3->test2->test3->name, 'test32');
-    $this->assertEquals($test4->test2->test3->name, 'test32');
-    $this->assertEquals($test5->test2->test3->name, 'test32');
-    $this->assertEquals($test6->test2->test3->name, 'test32');
+    $this->assertEquals($test1->Test2->Test3->name, 'test32');
+    $this->assertEquals($test2->Test2->Test3->name, 'test31');
+    $this->assertEquals($test3->Test2->Test3->name, 'test32');
+    $this->assertEquals($test4->Test2->Test3->name, 'test32');
+    $this->assertEquals($test5->Test2->Test3->name, 'test32');
+    $this->assertEquals($test6->Test2->Test3->name, 'test32');
   }
 
   public function testOrder()
