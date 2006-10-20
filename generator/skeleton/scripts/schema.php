@@ -190,18 +190,34 @@ class Schema_Writer
     fwrite($fp, "\n  public function getConnectName()\n  {\n");
     fwrite($fp, "    return '{$connectName}';\n  }\n");
 
+    fwrite($fp, "\n  public function getParents()\n  {\n");
     if (array_key_exists($tName, Schema_Maker::$tblParents)) {
       $parents = Schema_Maker::$tblParents[$tName];
-      fwrite($fp, "\n  public function getParents()\n  {\n");
       fwrite($fp, '    return array(');
-
       $pArray = array();
       array_push($pArray, "'{$parents[0]}'");
-      for ($i = 1; $i < sizeof($parents); $i++) array_push($pArray, ",'{$parents[$i]}'");
+      for ($i = 1; $i < sizeof($parents); $i++) array_push($pArray, ", '{$parents[$i]}'");
       fwrite($fp, join('', $pArray));
       fwrite($fp, ");\n  }\n");
     } else {
-      fwrite($fp, "\n  public function getParents()\n  {\n    return null;\n  }\n");
+      fwrite($fp, "    return null;\n  }\n");
+    }
+
+    fwrite($fp, "\n  public function getPrimaryKey()\n  {\n");
+    if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
+      $pArray = Schema_Maker::$tblPrimary[$tName];
+      if (sizeof($pArray) === 1) {
+        fwrite($fp, "    return '{$pArray[0]}';\n  }\n");
+      } else {
+        $keys = array();
+        fwrite($fp, '    return array(');
+        array_push($keys, "'{$pArray[0]}'");
+        for ($i = 1; $i < sizeof($pArray); $i++) array_push($keys, ", '{$pArray[$i]}'");
+        fwrite($fp, join('', $keys));
+        fwrite($fp, ");\n  }\n");
+      }
+    } else {
+      fwrite($fp, "    return null;\n  }\n");
     }
 
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
@@ -218,6 +234,7 @@ class Schema_Writer
 class Schema_Maker
 {
   public static $tblParents = array();
+  public static $tblPrimary = array();
 
   public static function make($connectName, $schema)
   {
@@ -250,6 +267,8 @@ class Schema_Maker
       array_push($info, "'nullable' => {$nullable}, ");
       array_push($info, "'primary' => {$primary}, ");
 
+      if ($column->primary) self::$tblPrimary[$tName][] = $column->name;
+
       $def = $column->default;
       if (is_null($def)) {
         array_push($info, "'default' => null");
@@ -278,7 +297,7 @@ class Schema_Util_Generator
   {
     $input = $_SERVER['argv'];
 
-    $yml   = new Sabel_Config_Yaml('config/database.yml');
+    $yml   = new Sabel_Config_Yaml(SABEL_DB . 'schema/util/database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;

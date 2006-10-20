@@ -66,7 +66,7 @@ abstract class Sabel_DB_Mapper
       $this->table = $this->convertToTableName(get_class($this));
     }
   }
-  
+
   public function getTableName()
   {
     return $this->table;
@@ -509,7 +509,7 @@ abstract class Sabel_DB_Mapper
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     if ($this->withParent && $this->prepareAutoJoin($this->table)) {
-      return $this->selectJoin($this->joinPair);
+      return $this->selectJoin($this->joinPair, $this->joinColList);
     }
 
     $this->setCondition($param1, $param2, $param3);
@@ -546,7 +546,7 @@ abstract class Sabel_DB_Mapper
   protected function addParent($row)
   {
     $this->parentTables = array($this->table);
-    return $this->checkRelationalColumn($row, $this->primaryKey);
+    return $this->checkForeignKey($row, $this->primaryKey);
   }
 
   protected function addParentModels($tblName, $id)
@@ -567,14 +567,14 @@ abstract class Sabel_DB_Mapper
 
       Sabel_DB_SimpleCache::add($tblName. $id, $row);
     }
-    $row = $this->checkRelationalColumn($row, $model->primaryKey);
+    $row = $this->checkForeignKey($row, $model->primaryKey);
 
     $this->setData($model, $row);
     $model->unsetNewData();
     return $model;
   }
 
-  private function checkRelationalColumn($row, $pKey)
+  private function checkForeignKey($row, $pKey)
   {
     foreach ($row as $key => $val) {
       if (strpos($key, "_{$pKey}") !== false) {
@@ -689,7 +689,7 @@ abstract class Sabel_DB_Mapper
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
   }
 
-  protected function schemaClassExists($tblName)
+  private function schemaClassExists($tblName)
   {
     $sClass = 'Schema_' . str_replace('_', '', $tblName);
     return (class_exists($sClass, false)) ? new $sClass() : false;
