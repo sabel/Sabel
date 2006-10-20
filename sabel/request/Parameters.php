@@ -16,10 +16,21 @@ class Sabel_Request_Parameters
     if (!empty($parameters)) $this->parse($parameters);
   }
   
+  public function __get($key)
+  {
+    return $this->get($key);
+  }
+  
+  public function get($key)
+  {
+    $pp = $this->parsedParameters;
+    return (isset($pp[$key])) ? $pp[$key] : null;
+  }
+  
   /**
    * Parsing URL request
    *
-   * @param void
+   * @param array $parameter list of URI parts
    * @return void
    */
   protected function parse($parameters)
@@ -31,16 +42,5 @@ class Sabel_Request_Parameters
       $sets[$key] = $val;
     }
     $this->parsedParameters = $sets;
-  }
-  
-  public function __get($key)
-  {
-    return $this->get($key);
-  }
-  
-  public function get($key)
-  {
-    $pp = $this->parsedParameters;
-    return (isset($pp[$key])) ? $pp[$key] : null;
   }
 }

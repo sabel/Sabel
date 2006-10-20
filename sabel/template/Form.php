@@ -1,18 +1,19 @@
 <?php
 
 /**
- * form
+ * Sabel_Template_Form
  *
  * Example :
- *
- * <? $form = new Sabel_Template_Form($model->schema(), (isset($errors)) ? $errors : null) ?>
- * <? $form->hidden(array('shop_id', 'users_id')) ?>
- * <?= $form->startTag(uri(array('action' => 'save', 'id' => $model->id)), 'POST') ?>
- * <? foreach ($form as $f) : ?>
- *   <?= $f->write("{$f->name()}<br />", "<br /><br />") ?>
- * <? endforeach ?>
- * <?= $form->submitTag('save') ?>
- * <?= $form->endTag() ?>
+ * <code>
+ *   <? $form = new Sabel_Template_Form($model->schema(), (isset($errors)) ? $errors : null) ?>
+ *   <? $form->hidden(array('shop_id', 'users_id')) ?>
+ *   <?= $form->startTag(uri(array('action' => 'save', 'id' => $model->id)), 'POST') ?>
+ *   <? foreach ($form as $f) : ?>
+ *     <?= $f->write("{$f->name()}<br />", "<br /><br />") ?>
+ *   <? endforeach ?>
+ *   <?= $form->submitTag('save') ?>
+ *   <?= $form->endTag() ?>
+ * </code>
  *
  * @category   Template
  * @package    org.sabel.template

@@ -741,12 +741,33 @@ abstract class Sabel_DB_Mapper
       throw new Exception($e->getMessage());
     }
   }
-
-  protected function checkIncColumn()
+  
+  private function checkIncColumn()
   {
     return ($this->isAutoNumber()) ? $this->incrementKey : false;
   }
-
+  
+  /**
+   * remove object
+   *
+   * sample1
+   * <code>
+   * $obj = new Customer();
+   * $obj = $obj->selectOne(1);
+   * $obj->remove();
+   * </code>
+   *
+   * sample2
+   * <code>
+   * $obj = new Customer(1);
+   * $obj->remove();
+   * </code>
+   *
+   * @param mixed $param1 hereisdescription
+   * @param mixed $param2 this is test
+   * @param mixed $param3 this is test
+   * @return void
+   */
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
     $idValue = null;

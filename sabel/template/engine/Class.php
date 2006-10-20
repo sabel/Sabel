@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_Template_Engine_Class
+ *
+ * @category   Template
+ * @package    org.sabel.template.engine
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
+ * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Template_Engine_Class extends Sabel_Template_Engine
 {
   const COMPILE_DIR = '/data/compiled/';

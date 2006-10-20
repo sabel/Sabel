@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_Template_ServiceInterface
+ *
+ * @category   Template
+ * @package    org.sabel.template.service
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 interface Sabel_Template_ServiceInterface
 {
   public function assign($key, $value);
@@ -9,6 +18,15 @@ interface Sabel_Template_ServiceInterface
   public function rendering();
 }
 
+/**
+ * Sabel_Template_Service
+ *
+ * @category   Template
+ * @package    org.sabel.template.service
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Template_Service implements Sabel_Template_ServiceInterface
 {
   private $impl = null;
