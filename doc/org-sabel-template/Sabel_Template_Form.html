@@ -1,0 +1,865 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+   <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Docs For Class Sabel_Template_Form</title>
+  <link rel="stylesheet" href="../media/stylesheet.css" />
+  <script src="../media/lib/classTree.js"></script>
+<link id="webfx-tab-style-sheet" type="text/css" rel="stylesheet" href="../media/lib/tab.webfx.css" />
+<script type="text/javascript" src="../media/lib/tabpane.js"></script>
+  <script language="javascript" type="text/javascript" src="../media/lib/ua.js"></script>
+<script language="javascript" type="text/javascript">
+	var imgPlus = new Image();
+	var imgMinus = new Image();
+	imgPlus.src = "../media/images/plus.gif";
+	imgMinus.src = "../media/images/minus.gif";
+	
+	function showNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgMinus.src;
+		oTable.style.display = "block";
+	}
+	
+	function hideNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgPlus.src;
+		oTable.style.display = "none";
+	}
+	
+	function nodeIsVisible(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+        		break;
+        }
+		return (oTable && oTable.style.display == "block");
+	}
+	
+	function toggleNodeVisibility(Node){
+		if (nodeIsVisible(Node)){
+			hideNode(Node);
+		}else{
+			showNode(Node);
+		}
+	}
+</script>
+<!-- template designed by Julien Damon based on PHPEdit's generated templates, and tweaked by Greg Beaver -->
+<body bgcolor="#ffffff" ><!-- Start of Class Data -->
+<h2>
+	Class Sabel_Template_Form
+</h2> (line <span class="linenumber">24</span>)
+<div class="tab-pane" id="tabPane1">
+<script type="text/javascript">
+tp1 = new WebFXTabPane( document.getElementById( "tabPane1" ));
+</script>
+
+<div class="tab-page" id="Description">
+<h2 class="tab">Description</h2>
+<pre>
+</pre>
+<p>
+	<b><i>Located in File: <a href="_sabel---template---Form.php.html">/sabel/template/Form.php</a></i></b><br>
+</p>
+<!-- ========== Info from phpDoc block ========= -->
+<h5>Sabel_Template_Form</h5>
+<div class="desc"><p>Example :  <div class="src-code"><ol><li><div class="src-line">&nbsp;&nbsp;&nbsp;<strong>&lt;?&nbsp;</strong><strong>$form&nbsp;</strong>=&nbsp;new&nbsp;<a href="../org-sabel-template/Sabel_Template_Form.html">Sabel_Template_Form</a><strong>(</strong><strong>$model</strong><strong>-&gt;</strong>schema<strong>(</strong><strong>)</strong><strong>,&nbsp;</strong><strong>(</strong>isset<strong>(</strong><strong>$errors</strong><strong>))&nbsp;</strong>?&nbsp;<strong>$errors&nbsp;</strong>:&nbsp;null<strong>)&nbsp;</strong><strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;<strong>&lt;?&nbsp;</strong><strong>$form</strong><strong>-&gt;</strong><a href="../org-sabel-template/Sabel_Template_Form.html#methodhidden">hidden</a><strong>(</strong>array<strong>(</strong><font color="#66cccc">'shop_id'</font><strong>,&nbsp;</strong><font color="#66cccc">'users_id'</font><strong>))&nbsp;</strong><strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;&lt;?=&nbsp;<strong>$form</strong><strong>-&gt;</strong><a href="../org-sabel-template/Sabel_Template_Form.html#methodstartTag">startTag</a><strong>(</strong><a href="../org-sabel-/_sabel---Functions.php.html#functionuri">uri</a><strong>(</strong>array<strong>(</strong><font color="#66cccc">'action'&nbsp;</font>=&gt;&nbsp;<font color="#66cccc">'save'</font><strong>,&nbsp;</strong><font color="#66cccc">'id'&nbsp;</font>=&gt;&nbsp;<strong>$model</strong><strong>-&gt;</strong>id<strong>))</strong><strong>,&nbsp;</strong><font color="#66cccc">'POST'</font><strong>)&nbsp;</strong><strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;<strong>&lt;?&nbsp;</strong><font color="blue">foreach&nbsp;</font><strong>(</strong><strong>$form&nbsp;</strong>as&nbsp;<strong>$f</strong><strong>)&nbsp;</strong>:&nbsp;<strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;?=&nbsp;<strong>$f</strong><strong>-&gt;</strong><a href="../org-sabel-template/Sabel_Template_Form.html#methodwrite">write</a><strong>(</strong><font color="#66cccc">&quot;</font>{<strong>$f</strong><strong>-&gt;</strong>name<strong>(</strong><strong>)<font color="#66cccc"></strong><strong>}</strong>&lt;br&nbsp;/&gt;</font><font color="#66cccc">&quot;</font><strong>,&nbsp;</strong><font color="#66cccc">&quot;&lt;br&nbsp;/&gt;&lt;br&nbsp;/&gt;&quot;</font><strong>)&nbsp;</strong><strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;<strong>&lt;?&nbsp;</strong>endforeach&nbsp;<strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;&lt;?=&nbsp;<strong>$form</strong><strong>-&gt;</strong><a href="../org-sabel-template/Sabel_Template_Form.html#methodsubmitTag">submitTag</a><strong>(</strong><font color="#66cccc">'save'</font><strong>)&nbsp;</strong><strong>?&gt;</strong></div></li>
+<li><div class="src-line">&nbsp;&nbsp;&nbsp;&lt;?=&nbsp;<strong>$form</strong><strong>-&gt;</strong><a href="../org-sabel-template/Sabel_Template_Form.html#methodendTag">endTag</a><strong>(</strong><strong>)&nbsp;</strong><strong>?&gt;</strong></div></li>
+</ol></div></p></div>
+<ul>
+		<li><strong>license:</strong> - <a href="http://www.opensource.org/licenses/bsd-license.php">BSD License</a></li>
+		<li><strong>copyright:</strong> - 2002-2006 Mori Reo &lt;mori.reo@gmail.com&gt;</li>
+		<li><strong>author:</strong> - Mori Reo &lt;<a href="mailto:mori.reo@gmail.com">mori.reo@gmail.com</a>&gt;</li>
+	</ul>
+<br /><hr />
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "Description" ) );</script>
+<div class="tab-page" id="tabPage1">
+
+<h2 class="tab">Class Variables</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$columns" title="details" class="property"><strong>$columns</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$currentColumn" title="details" class="property"><strong>$currentColumn</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$errors" title="details" class="property"><strong>$errors</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$hidden" title="details" class="property"><strong>$hidden</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$hiddenPattern" title="details" class="property"><strong>$hiddenPattern</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$model" title="details" class="property"><strong>$model</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$position" title="details" class="property"><strong>$position</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$size" title="details" class="property"><strong>$size</strong></a>
+</div>
+<hr />
+<a name="var$columns" id="var$columns"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$columns = array()</strong> (line <span class="linenumber">33</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$currentColumn" id="var$currentColumn"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$currentColumn =  null</strong> (line <span class="linenumber">34</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$errors" id="var$errors"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$errors =  null</strong> (line <span class="linenumber">36</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$hidden" id="var$hidden"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$hidden = array()</strong> (line <span class="linenumber">29</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$hiddenPattern" id="var$hiddenPattern"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$hiddenPattern =  ''</strong> (line <span class="linenumber">30</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$model" id="var$model"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$model =  null</strong> (line <span class="linenumber">32</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$position" id="var$position"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$position =  0</strong> (line <span class="linenumber">26</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$size" id="var$size"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /> <strong class="property">$size =  0</strong> (line <span class="linenumber">27</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage1" ) );</script>
+</div>
+<div class="tab-page" id="constantsTabpage">
+
+<h2 class="tab">Class Constants</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<hr />
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "constantsTabpage" ) );</script>
+</div>
+<div class="tab-page" id="tabPage2">
+<h2 class="tab">Method Detail</h2>
+<!-- ============ METHOD DETAIL =========== -->
+<strong>Summary:</strong><br />
+<div class="method-summary">
+    <div class="method-definition">
+            <span class="method-result">Sabel_Template_Form</span>
+        <a href="#method__construct" title="details" class="method-name">__construct</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$model</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$errors</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodcurrent" title="details" class="method-name">current</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methoddefaultID" title="details" class="method-name">defaultID</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodendTag" title="details" class="method-name">endTag</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodhidden" title="details" class="method-name">hidden</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$hiddens</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodhiddenPattern" title="details" class="method-name">hiddenPattern</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$regex</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodinput" title="details" class="method-name">input</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$type</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$name</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$value</span>, [<span class="var-type"></span>&nbsp;<span class="var-name">$id</span> = <span class="var-default">''</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$class</span> = <span class="var-default">''</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$style</span> = <span class="var-default">''</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisEnd" title="details" class="method-name">isEnd</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisError" title="details" class="method-name">isError</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisHidden" title="details" class="method-name">isHidden</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisStart" title="details" class="method-name">isStart</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisString" title="details" class="method-name">isString</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodisText" title="details" class="method-name">isText</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodkey" title="details" class="method-name">key</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodname" title="details" class="method-name">name</a>
+        ([<span class="var-type"></span>&nbsp;<span class="var-name">$showHidden</span> = <span class="var-default">false</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodnext" title="details" class="method-name">next</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodrewind" title="details" class="method-name">rewind</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodsetValue" title="details" class="method-name">setValue</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$name</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$value</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodstartTag" title="details" class="method-name">startTag</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$action</span>, [<span class="var-type"></span>&nbsp;<span class="var-name">$method</span> = <span class="var-default">'GET'</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodsubmitTag" title="details" class="method-name">submitTag</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$value</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodtextarea" title="details" class="method-name">textarea</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$name</span>, [<span class="var-type"></span>&nbsp;<span class="var-name">$value</span> = <span class="var-default">''</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$id</span> = <span class="var-default">''</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$class</span> = <span class="var-default">''</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$style</span> = <span class="var-default">''</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodvalid" title="details" class="method-name">valid</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodvalue" title="details" class="method-name">value</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodwrite" title="details" class="method-name">write</a>
+        ([<span class="var-type"></span>&nbsp;<span class="var-name">$prefix</span> = <span class="var-default">null</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$postfix</span> = <span class="var-default">null</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$format</span> = <span class="var-default">null</span>])
+        </div>
+</div>
+<hr />
+<A NAME='method_detail'></A>
+
+
+<a name="method__construct" id="method__construct"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/Constructor.gif" border="0" /> <strong class="method">Constructor __construct</strong> (line <span class="linenumber">38</span>)
+ </h4> 
+<h4><i>Sabel_Template_Form</i> <strong>__construct(
+
+$model, 
+$errors)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $model</strong>: </li>
+			<li><strong> $errors</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodcurrent" id="methodcurrent"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method current</strong> (line <span class="linenumber">185</span>)
+ </h4> 
+<h4><i>void</i> <strong>current(
+)</strong></h4>
+
+			<hr class="separator" />
+		<div class="notes">Implementation of:</div>
+			<dl>
+			<dt>Iterator::current</dt>
+					</dl>
+		<!-- ========== Info from phpDoc block ========= -->
+<h5>implements for Iterator interface</h5>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methoddefaultID" id="methoddefaultID"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method defaultID</strong> (line <span class="linenumber">176</span>)
+ </h4> 
+<h4><i>void</i> <strong>defaultID(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - protected</li>
+		</ul>
+</div>
+<a name="methodendTag" id="methodendTag"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method endTag</strong> (line <span class="linenumber">51</span>)
+ </h4> 
+<h4><i>void</i> <strong>endTag(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodhidden" id="methodhidden"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method hidden</strong> (line <span class="linenumber">77</span>)
+ </h4> 
+<h4><i>void</i> <strong>hidden(
+
+$hiddens)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $hiddens</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodhiddenPattern" id="methodhiddenPattern"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method hiddenPattern</strong> (line <span class="linenumber">83</span>)
+ </h4> 
+<h4><i>void</i> <strong>hiddenPattern(
+
+$regex)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $regex</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodinput" id="methodinput"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method input</strong> (line <span class="linenumber">148</span>)
+ </h4> 
+<h4><i>void</i> <strong>input(
+
+$type, 
+$name, 
+$value, [
+$id = ''], [
+$class = ''], [
+$style = ''])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $type</strong>: </li>
+			<li><strong> $name</strong>: </li>
+			<li><strong> $value</strong>: </li>
+			<li><strong> $id</strong>: </li>
+			<li><strong> $class</strong>: </li>
+			<li><strong> $style</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisEnd" id="methodisEnd"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isEnd</strong> (line <span class="linenumber">66</span>)
+ </h4> 
+<h4><i>void</i> <strong>isEnd(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisError" id="methodisError"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isError</strong> (line <span class="linenumber">167</span>)
+ </h4> 
+<h4><i>void</i> <strong>isError(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisHidden" id="methodisHidden"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isHidden</strong> (line <span class="linenumber">89</span>)
+ </h4> 
+<h4><i>void</i> <strong>isHidden(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisStart" id="methodisStart"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isStart</strong> (line <span class="linenumber">61</span>)
+ </h4> 
+<h4><i>void</i> <strong>isStart(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisString" id="methodisString"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isString</strong> (line <span class="linenumber">143</span>)
+ </h4> 
+<h4><i>void</i> <strong>isString(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodisText" id="methodisText"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method isText</strong> (line <span class="linenumber">155</span>)
+ </h4> 
+<h4><i>void</i> <strong>isText(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodkey" id="methodkey"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method key</strong> (line <span class="linenumber">195</span>)
+ </h4> 
+<h4><i>void</i> <strong>key(
+)</strong></h4>
+
+			<hr class="separator" />
+		<div class="notes">Implementation of:</div>
+			<dl>
+			<dt>Iterator::key</dt>
+					</dl>
+		<!-- ========== Info from phpDoc block ========= -->
+<h5>implements for Iterator interface</h5>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodname" id="methodname"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method name</strong> (line <span class="linenumber">100</span>)
+ </h4> 
+<h4><i>void</i> <strong>name(
+[
+$showHidden = false])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $showHidden</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodnext" id="methodnext"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method next</strong> (line <span class="linenumber">204</span>)
+ </h4> 
+<h4><i>void</i> <strong>next(
+)</strong></h4>
+
+			<hr class="separator" />
+		<div class="notes">Implementation of:</div>
+			<dl>
+			<dt>Iterator::next</dt>
+					</dl>
+		<!-- ========== Info from phpDoc block ========= -->
+<h5>implements for Iterator interface</h5>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodrewind" id="methodrewind"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method rewind</strong> (line <span class="linenumber">213</span>)
+ </h4> 
+<h4><i>void</i> <strong>rewind(
+)</strong></h4>
+
+			<hr class="separator" />
+		<div class="notes">Implementation of:</div>
+			<dl>
+			<dt>Iterator::rewind</dt>
+					</dl>
+		<!-- ========== Info from phpDoc block ========= -->
+<h5>implements for Iterator interface</h5>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodsetValue" id="methodsetValue"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method setValue</strong> (line <span class="linenumber">71</span>)
+ </h4> 
+<h4><i>void</i> <strong>setValue(
+
+$name, 
+$value)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $name</strong>: </li>
+			<li><strong> $value</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodstartTag" id="methodstartTag"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method startTag</strong> (line <span class="linenumber">46</span>)
+ </h4> 
+<h4><i>void</i> <strong>startTag(
+
+$action, [
+$method = 'GET'])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $action</strong>: </li>
+			<li><strong> $method</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodsubmitTag" id="methodsubmitTag"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method submitTag</strong> (line <span class="linenumber">56</span>)
+ </h4> 
+<h4><i>void</i> <strong>submitTag(
+
+$value)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $value</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodtextarea" id="methodtextarea"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method textarea</strong> (line <span class="linenumber">160</span>)
+ </h4> 
+<h4><i>void</i> <strong>textarea(
+
+$name, [
+$value = ''], [
+$id = ''], [
+$class = ''], [
+$style = ''])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $name</strong>: </li>
+			<li><strong> $value</strong>: </li>
+			<li><strong> $id</strong>: </li>
+			<li><strong> $class</strong>: </li>
+			<li><strong> $style</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodvalid" id="methodvalid"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method valid</strong> (line <span class="linenumber">222</span>)
+ </h4> 
+<h4><i>void</i> <strong>valid(
+)</strong></h4>
+
+			<hr class="separator" />
+		<div class="notes">Implementation of:</div>
+			<dl>
+			<dt>Iterator::valid</dt>
+					</dl>
+		<!-- ========== Info from phpDoc block ========= -->
+<h5>implements for Iterator interface</h5>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodvalue" id="methodvalue"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method value</strong> (line <span class="linenumber">112</span>)
+ </h4> 
+<h4><i>void</i> <strong>value(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodwrite" id="methodwrite"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method write</strong> (line <span class="linenumber">117</span>)
+ </h4> 
+<h4><i>void</i> <strong>write(
+[
+$prefix = null], [
+$postfix = null], [
+$format = null])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $prefix</strong>: </li>
+			<li><strong> $postfix</strong>: </li>
+			<li><strong> $format</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage2" ) );</script></div>
+<div class="tab-page" id="iVars">
+<h2 class="tab">Inherited Variables</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iVars" ) );</script>
+<!-- =========== VAR INHERITED SUMMARY =========== -->
+<A NAME='var_inherited_summary'><!-- --></A>
+<h3>Inherited Class Variable Summary</h3>
+
+	</div>
+<div class="tab-page" id="iMethods">
+<h2 class="tab">Inherited Methods</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iMethods" ) );</script>
+<!-- =========== INHERITED METHOD SUMMARY =========== -->
+<A NAME='functions_inherited'><!-- --></A>
+<h3>Inherited Method Summary</h3>
+
+	</div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+
+setupAllTabs();
+
+//]]>
+</script>
+	<div id="credit">
+		<hr />
+		Documentation generated on Fri, 20 Oct 2006 20:36:03 +0900 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.3.0</a>
+	</div>
+</body>
+</html>

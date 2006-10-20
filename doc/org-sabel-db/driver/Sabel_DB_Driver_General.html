@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+   <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Docs For Class Sabel_DB_Driver_General</title>
+  <link rel="stylesheet" href="../../media/stylesheet.css" />
+  <script src="../../media/lib/classTree.js"></script>
+<link id="webfx-tab-style-sheet" type="text/css" rel="stylesheet" href="../../media/lib/tab.webfx.css" />
+<script type="text/javascript" src="../../media/lib/tabpane.js"></script>
+  <script language="javascript" type="text/javascript" src="../../media/lib/ua.js"></script>
+<script language="javascript" type="text/javascript">
+	var imgPlus = new Image();
+	var imgMinus = new Image();
+	imgPlus.src = "../../media/images/plus.gif";
+	imgMinus.src = "../../media/images/minus.gif";
+	
+	function showNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgMinus.src;
+		oTable.style.display = "block";
+	}
+	
+	function hideNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgPlus.src;
+		oTable.style.display = "none";
+	}
+	
+	function nodeIsVisible(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+        		break;
+        }
+		return (oTable && oTable.style.display == "block");
+	}
+	
+	function toggleNodeVisibility(Node){
+		if (nodeIsVisible(Node)){
+			hideNode(Node);
+		}else{
+			showNode(Node);
+		}
+	}
+</script>
+<!-- template designed by Julien Damon based on PHPEdit's generated templates, and tweaked by Greg Beaver -->
+<body bgcolor="#ffffff" ><!-- Start of Class Data -->
+<h2>
+	Class Sabel_DB_Driver_General
+</h2> (line <span class="linenumber">14</span>)
+<div class="tab-pane" id="tabPane1">
+<script type="text/javascript">
+tp1 = new WebFXTabPane( document.getElementById( "tabPane1" ));
+</script>
+
+<div class="tab-page" id="Description">
+<h2 class="tab">Description</h2>
+<pre>
+</pre>
+<p>
+	<b><i>Located in File: <a href="_sabel---db---driver---General.php.html">/sabel/db/driver/General.php</a></i></b><br>
+</p>
+<!-- ========== Info from phpDoc block ========= -->
+<h5>Sabel_DB_Driver_General</h5>
+<ul>
+		<li><strong>abstract:</strong> - </li>
+		<li><strong>license:</strong> - <a href="http://www.opensource.org/licenses/bsd-license.php">BSD License</a></li>
+		<li><strong>copyright:</strong> - 2002-2006 Ebine Yutaka &lt;ebine.yutaka@gmail.com&gt;</li>
+		<li><strong>author:</strong> - Ebine Yutaka &lt;<a href="mailto:ebine.yutaka@gmail.com">ebine.yutaka@gmail.com</a>&gt;</li>
+	</ul>
+<br /><hr />
+<span class="type">Classes extended from Sabel_DB_Driver_General:</span>
+ 		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html">Sabel_DB_Driver_Native_Firebird</a></dt>
+		<dd>Sabel_DB_Driver_Native_Firebird</dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html">Sabel_DB_Driver_Native_Mssql</a></dt>
+		<dd>Sabel_DB_Driver_Native_Mssql</dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html">Sabel_DB_Driver_Native_Mysql</a></dt>
+		<dd>Sabel_DB_Driver_Native_Mysql</dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html">Sabel_DB_Driver_Native_Pgsql</a></dt>
+		<dd>Sabel_DB_Driver_Native_Pgsql</dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html">Sabel_DB_Driver_Pdo_Driver</a></dt>
+		<dd>db driver for PDO</dd>
+	</dl>
+	</p>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "Description" ) );</script>
+<div class="tab-page" id="tabPage1">
+
+<h2 class="tab">Class Variables</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$conn" title="details" class="property"><strong>$conn</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$dbType" title="details" class="property"><strong>$dbType</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$insertId" title="details" class="property"><strong>$insertId</strong></a>
+</div>
+<div class="var-title">
+    <span class="var-type">mixed</span>
+    <a href="#var$query" title="details" class="property"><strong>$query</strong></a>
+</div>
+<hr />
+<a name="var$conn" id="var$conn"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../../media/images/PublicProperty.gif" border="0" /> <strong class="property">$conn =  null</strong> (line <span class="linenumber">17</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$dbType" id="var$dbType"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../../media/images/PublicProperty.gif" border="0" /> <strong class="property">$dbType =  ''</strong> (line <span class="linenumber">19</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$insertId" id="var$insertId"><!-- --></A>
+<div style="background='#eeeeee'">
+<h4>
+<img src="../../media/images/PublicProperty.gif" border="0" /> <strong class="property">$insertId =  null</strong> (line <span class="linenumber">20</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<a name="var$query" id="var$query"><!-- --></A>
+<div style="background='#ffffff'">
+<h4>
+<img src="../../media/images/PublicProperty.gif" border="0" /> <strong class="property">$query =  null</strong> (line <span class="linenumber">18</span>)
+ </h4>
+<h4>Data type : mixed</h4>
+<!-- ========== Info from phpDoc block ========= -->
+<ul>
+		<li><strong>access:</strong> - protected</li>
+	</ul>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage1" ) );</script>
+</div>
+<div class="tab-page" id="constantsTabpage">
+
+<h2 class="tab">Class Constants</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<hr />
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "constantsTabpage" ) );</script>
+</div>
+<div class="tab-page" id="tabPage2">
+<h2 class="tab">Method Detail</h2>
+<!-- ============ METHOD DETAIL =========== -->
+<strong>Summary:</strong><br />
+<div class="method-summary">
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodbegin" title="details" class="method-name">begin</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$conn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodclose" title="details" class="method-name">close</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$conn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodcommit" title="details" class="method-name">commit</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$conn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methoddriverExecute" title="details" class="method-name">driverExecute</a>
+        ([<span class="var-type"></span>&nbsp;<span class="var-name">$sql</span> = <span class="var-default">null</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodexecute" title="details" class="method-name">execute</a>
+        ([<span class="var-type"></span>&nbsp;<span class="var-name">$sql</span> = <span class="var-default">null</span>], [<span class="var-type"></span>&nbsp;<span class="var-name">$param</span> = <span class="var-default">null</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodexecuteInsert" title="details" class="method-name">executeInsert</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$table</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$data</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$defColumn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodgetLastInsertId" title="details" class="method-name">getLastInsertId</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodgetResultSet" title="details" class="method-name">getResultSet</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodgetStatement" title="details" class="method-name">getStatement</a>
+        ()
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodmakeQuery" title="details" class="method-name">makeQuery</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$conditions</span>, [<span class="var-type"></span>&nbsp;<span class="var-name">$constraints</span> = <span class="var-default">null</span>])
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodrollback" title="details" class="method-name">rollback</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$conn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodsetBasicSQL" title="details" class="method-name">setBasicSQL</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$sql</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodsetIdNumber" title="details" class="method-name">setIdNumber</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$table</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$data</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$defColumn</span>)
+        </div>
+    <div class="method-definition">
+            <span class="method-result">void</span>
+        <a href="#methodsetUpdateSQL" title="details" class="method-name">setUpdateSQL</a>
+        (<span class="var-type"></span>&nbsp;<span class="var-name">$table</span>, <span class="var-type"></span>&nbsp;<span class="var-name">$data</span>)
+        </div>
+</div>
+<hr />
+<A NAME='method_detail'></A>
+
+
+<a name="methodbegin" id="methodbegin"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method begin</strong> (line <span class="linenumber">22</span>)
+ </h4> 
+<h4><i>void</i> <strong>begin(
+
+$conn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodbegin">Sabel_DB_Driver_Native_Firebird::begin()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodbegin">Sabel_DB_Driver_Native_Mssql::begin()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodbegin">Sabel_DB_Driver_Native_Mysql::begin()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methodbegin">Sabel_DB_Driver_Native_Pgsql::begin()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodbegin">Sabel_DB_Driver_Pdo_Driver::begin()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $conn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodclose" id="methodclose"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method close</strong> (line <span class="linenumber">25</span>)
+ </h4> 
+<h4><i>void</i> <strong>close(
+
+$conn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodclose">Sabel_DB_Driver_Native_Firebird::close()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodclose">Sabel_DB_Driver_Native_Mssql::close()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodclose">Sabel_DB_Driver_Native_Mysql::close()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methodclose">Sabel_DB_Driver_Native_Pgsql::close()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodclose">Sabel_DB_Driver_Pdo_Driver::close()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $conn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodcommit" id="methodcommit"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method commit</strong> (line <span class="linenumber">23</span>)
+ </h4> 
+<h4><i>void</i> <strong>commit(
+
+$conn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodcommit">Sabel_DB_Driver_Native_Firebird::commit()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodcommit">Sabel_DB_Driver_Native_Mssql::commit()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodcommit">Sabel_DB_Driver_Native_Mysql::commit()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methodcommit">Sabel_DB_Driver_Native_Pgsql::commit()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodcommit">Sabel_DB_Driver_Pdo_Driver::commit()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $conn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methoddriverExecute" id="methoddriverExecute"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method driverExecute</strong> (line <span class="linenumber">28</span>)
+ </h4> 
+<h4><i>void</i> <strong>driverExecute(
+[
+$sql = null])</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methoddriverExecute">Sabel_DB_Driver_Native_Firebird::driverExecute()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methoddriverExecute">Sabel_DB_Driver_Native_Mssql::driverExecute()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methoddriverExecute">Sabel_DB_Driver_Native_Mysql::driverExecute()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methoddriverExecute">Sabel_DB_Driver_Native_Pgsql::driverExecute()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methoddriverExecute">Sabel_DB_Driver_Pdo_Driver::driverExecute()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $sql</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - protected</li>
+		</ul>
+</div>
+<a name="methodexecute" id="methodexecute"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method execute</strong> (line <span class="linenumber">82</span>)
+ </h4> 
+<h4><i>void</i> <strong>execute(
+[
+$sql = null], [
+$param = null])</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $sql</strong>: </li>
+			<li><strong> $param</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodexecuteInsert" id="methodexecuteInsert"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method executeInsert</strong> (line <span class="linenumber">45</span>)
+ </h4> 
+<h4><i>void</i> <strong>executeInsert(
+
+$table, 
+$data, 
+$defColumn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodexecuteInsert">Sabel_DB_Driver_Pdo_Driver::executeInsert()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $table</strong>: </li>
+			<li><strong> $data</strong>: </li>
+			<li><strong> $defColumn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodgetLastInsertId" id="methodgetLastInsertId"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method getLastInsertId</strong> (line <span class="linenumber">77</span>)
+ </h4> 
+<h4><i>void</i> <strong>getLastInsertId(
+)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodgetLastInsertId">Sabel_DB_Driver_Native_Mssql::getLastInsertId()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodgetLastInsertId">Sabel_DB_Driver_Native_Mysql::getLastInsertId()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodgetLastInsertId">Sabel_DB_Driver_Pdo_Driver::getLastInsertId()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodgetResultSet" id="methodgetResultSet"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method getResultSet</strong> (line <span class="linenumber">26</span>)
+ </h4> 
+<h4><i>void</i> <strong>getResultSet(
+)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodgetResultSet">Sabel_DB_Driver_Native_Firebird::getResultSet()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodgetResultSet">Sabel_DB_Driver_Native_Mssql::getResultSet()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodgetResultSet">Sabel_DB_Driver_Native_Mysql::getResultSet()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methodgetResultSet">Sabel_DB_Driver_Native_Pgsql::getResultSet()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodgetResultSet">Sabel_DB_Driver_Pdo_Driver::getResultSet()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodgetStatement" id="methodgetStatement"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method getStatement</strong> (line <span class="linenumber">30</span>)
+ </h4> 
+<h4><i>void</i> <strong>getStatement(
+)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodmakeQuery" id="methodmakeQuery"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method makeQuery</strong> (line <span class="linenumber">71</span>)
+ </h4> 
+<h4><i>void</i> <strong>makeQuery(
+
+$conditions, [
+$constraints = null])</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodmakeQuery">Sabel_DB_Driver_Native_Mssql::makeQuery()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodmakeQuery">Sabel_DB_Driver_Pdo_Driver::makeQuery()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $conditions</strong>: </li>
+			<li><strong> $constraints</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodrollback" id="methodrollback"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method rollback</strong> (line <span class="linenumber">24</span>)
+ </h4> 
+<h4><i>void</i> <strong>rollback(
+
+$conn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodrollback">Sabel_DB_Driver_Native_Firebird::rollback()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mssql.html#methodrollback">Sabel_DB_Driver_Native_Mssql::rollback()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Mysql.html#methodrollback">Sabel_DB_Driver_Native_Mysql::rollback()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Pgsql.html#methodrollback">Sabel_DB_Driver_Native_Pgsql::rollback()</a></dt>
+		<dd></dd>
+	</dl>
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodrollback">Sabel_DB_Driver_Pdo_Driver::rollback()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $conn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>abstract</strong> - </li>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodsetBasicSQL" id="methodsetBasicSQL"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method setBasicSQL</strong> (line <span class="linenumber">35</span>)
+ </h4> 
+<h4><i>void</i> <strong>setBasicSQL(
+
+$sql)</strong></h4>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $sql</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<a name="methodsetIdNumber" id="methodsetIdNumber"><!-- --></a>
+<div style="background='#eeeeee'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method setIdNumber</strong> (line <span class="linenumber">56</span>)
+ </h4> 
+<h4><i>void</i> <strong>setIdNumber(
+
+$table, 
+$data, 
+$defColumn)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Native_Firebird.html#methodsetIdNumber">Sabel_DB_Driver_Native_Firebird::setIdNumber()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $table</strong>: </li>
+			<li><strong> $data</strong>: </li>
+			<li><strong> $defColumn</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - protected</li>
+		</ul>
+</div>
+<a name="methodsetUpdateSQL" id="methodsetUpdateSQL"><!-- --></a>
+<div style="background='#ffffff'"><h4>
+<img src="../../media/images/PublicMethod.gif" border="0" /> <strong class="method">Method setUpdateSQL</strong> (line <span class="linenumber">40</span>)
+ </h4> 
+<h4><i>void</i> <strong>setUpdateSQL(
+
+$table, 
+$data)</strong></h4>
+	<p>Overridden in child classes as:<br />
+		<dl>
+	<dt><a href="../../org-sabel-db/driver/Sabel_DB_Driver_Pdo_Driver.html#methodsetUpdateSQL">Sabel_DB_Driver_Pdo_Driver::setUpdateSQL()</a></dt>
+		<dd></dd>
+	</dl>
+	</p>
+
+	<!-- ========== Info from phpDoc block ========= -->
+		<h4>Parameters</h4>
+	<ul>
+			<li><strong> $table</strong>: </li>
+			<li><strong> $data</strong>: </li>
+		</ul>
+		
+	<h4>Info</h4>
+	<ul>
+			<li><strong>access</strong> - public</li>
+		</ul>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage2" ) );</script></div>
+<div class="tab-page" id="iVars">
+<h2 class="tab">Inherited Variables</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iVars" ) );</script>
+<!-- =========== VAR INHERITED SUMMARY =========== -->
+<A NAME='var_inherited_summary'><!-- --></A>
+<h3>Inherited Class Variable Summary</h3>
+
+	</div>
+<div class="tab-page" id="iMethods">
+<h2 class="tab">Inherited Methods</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iMethods" ) );</script>
+<!-- =========== INHERITED METHOD SUMMARY =========== -->
+<A NAME='functions_inherited'><!-- --></A>
+<h3>Inherited Method Summary</h3>
+
+	</div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+
+setupAllTabs();
+
+//]]>
+</script>
+	<div id="credit">
+		<hr />
+		Documentation generated on Fri, 20 Oct 2006 20:36:03 +0900 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.3.0</a>
+	</div>
+</body>
+</html>

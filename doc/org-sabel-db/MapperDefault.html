@@ -1,0 +1,654 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+   <html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <title>Docs For Class MapperDefault</title>
+  <link rel="stylesheet" href="../media/stylesheet.css" />
+  <script src="../media/lib/classTree.js"></script>
+<link id="webfx-tab-style-sheet" type="text/css" rel="stylesheet" href="../media/lib/tab.webfx.css" />
+<script type="text/javascript" src="../media/lib/tabpane.js"></script>
+  <script language="javascript" type="text/javascript" src="../media/lib/ua.js"></script>
+<script language="javascript" type="text/javascript">
+	var imgPlus = new Image();
+	var imgMinus = new Image();
+	imgPlus.src = "../media/images/plus.gif";
+	imgMinus.src = "../media/images/minus.gif";
+	
+	function showNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgMinus.src;
+		oTable.style.display = "block";
+	}
+	
+	function hideNode(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+				var oImg = document.layers["img" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+				var oImg = document.all["img" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+				var oImg = document.getElementById("img" + Node);
+        		break;
+        }
+		oImg.src = imgPlus.src;
+		oTable.style.display = "none";
+	}
+	
+	function nodeIsVisible(Node){
+        switch(navigator.family){
+        	case 'nn4':
+        		// Nav 4.x code fork...
+				var oTable = document.layers["span" + Node];
+        		break;
+        	case 'ie4':
+        		// IE 4/5 code fork...
+				var oTable = document.all["span" + Node];
+        		break;
+        	case 'gecko':
+        		// Standards Compliant code fork...
+				var oTable = document.getElementById("span" + Node);
+        		break;
+        }
+		return (oTable && oTable.style.display == "block");
+	}
+	
+	function toggleNodeVisibility(Node){
+		if (nodeIsVisible(Node)){
+			hideNode(Node);
+		}else{
+			showNode(Node);
+		}
+	}
+</script>
+<!-- template designed by Julien Damon based on PHPEdit's generated templates, and tweaked by Greg Beaver -->
+<body bgcolor="#ffffff" ><!-- Start of Class Data -->
+<h2>
+	Class MapperDefault
+</h2> (line <span class="linenumber">1317</span>)
+<div class="tab-pane" id="tabPane1">
+<script type="text/javascript">
+tp1 = new WebFXTabPane( document.getElementById( "tabPane1" ));
+</script>
+
+<div class="tab-page" id="Description">
+<h2 class="tab">Description</h2>
+<pre>
+<a href="../org-sabel-db/Sabel_DB_Wrapper.html">Sabel_DB_Wrapper</a>
+   |
+   --MapperDefault</pre>
+<p>
+	<b><i>Located in File: <a href="_Test---DB---Test.php.html">/Test/DB/Test.php</a></i></b><br>
+</p>
+<!-- ========== Info from phpDoc block ========= -->
+<h5>Sabel_DB_Wrapper</h5>
+<ul>
+		<li><strong>copyright:</strong> - 2002-2006 Ebine Yutaka &lt;ebine.yutaka@gmail.com&gt;</li>
+		<li><strong>author:</strong> - Ebine Yutaka &lt;<a href="mailto:ebine.yutaka@gmail.com">ebine.yutaka@gmail.com</a>&gt;</li>
+	</ul>
+<br /><hr />
+<span class="type">Classes extended from MapperDefault:</span>
+ 		<dl>
+	<dt><a href="../org-sabel-db/Test.html">Test</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Test2.html">Test2</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Test3.html">Test3</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Infinite1.html">Infinite1</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Infinite2.html">Infinite2</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Seq.html">Seq</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Customer.html">Customer</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/CustomerOrder.html">CustomerOrder</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/OrderLine.html">OrderLine</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/CustomerTelephone.html">CustomerTelephone</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/StudentCourse.html">StudentCourse</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Trans1.html">Trans1</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Users.html">Users</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Bbs.html">Bbs</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/Status.html">Status</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+		<dl>
+	<dt><a href="../org-sabel-db/SchemaTest.html">SchemaTest</a></dt>
+		<dd>Sabel_DB_Wrapper</dd>
+	</dl>
+	</p>
+</div>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "Description" ) );</script>
+<div class="tab-page" id="tabPage1">
+
+<h2 class="tab">Class Variables</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<hr />
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage1" ) );</script>
+</div>
+<div class="tab-page" id="constantsTabpage">
+
+<h2 class="tab">Class Constants</h2>
+<!-- ============ VARIABLE DETAIL =========== -->
+<strong>Summary:</strong><br />
+<hr />
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "constantsTabpage" ) );</script>
+</div>
+<div class="tab-page" id="tabPage2">
+<h2 class="tab">Method Detail</h2>
+<!-- ============ METHOD DETAIL =========== -->
+<strong>Summary:</strong><br />
+<div class="method-summary">
+</div>
+<hr />
+<A NAME='method_detail'></A>
+
+
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "tabPage2" ) );</script></div>
+<div class="tab-page" id="iVars">
+<h2 class="tab">Inherited Variables</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iVars" ) );</script>
+<!-- =========== VAR INHERITED SUMMARY =========== -->
+<A NAME='var_inherited_summary'><!-- --></A>
+<h3>Inherited Class Variable Summary</h3>
+
+		<!-- =========== Summary =========== -->
+	<h4>Inherited From Class <a href="../org-sabel-db/Sabel_DB_Wrapper.html">Sabel_DB_Wrapper</a></h4>
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$autoNumber">Sabel_DB_Wrapper::$autoNumber</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$cascadeStack">Sabel_DB_Wrapper::$cascadeStack</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$childConditions">Sabel_DB_Wrapper::$childConditions</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$childConstraints">Sabel_DB_Wrapper::$childConstraints</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$conditions">Sabel_DB_Wrapper::$conditions</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$connectName">Sabel_DB_Wrapper::$connectName</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$constraints">Sabel_DB_Wrapper::$constraints</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$data">Sabel_DB_Wrapper::$data</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$defChildConstraints">Sabel_DB_Wrapper::$defChildConstraints</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$executer">Sabel_DB_Wrapper::$executer</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$incrementKey">Sabel_DB_Wrapper::$incrementKey</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$joinColCache">Sabel_DB_Wrapper::$joinColCache</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$joinColList">Sabel_DB_Wrapper::$joinColList</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$joinPair">Sabel_DB_Wrapper::$joinPair</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$jointKey">Sabel_DB_Wrapper::$jointKey</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$myChildren">Sabel_DB_Wrapper::$myChildren</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$newData">Sabel_DB_Wrapper::$newData</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$parentTables">Sabel_DB_Wrapper::$parentTables</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$primaryKey">Sabel_DB_Wrapper::$primaryKey</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$projection">Sabel_DB_Wrapper::$projection</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$relational">Sabel_DB_Wrapper::$relational</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$selectCondition">Sabel_DB_Wrapper::$selectCondition</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$selected">Sabel_DB_Wrapper::$selected</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$structure">Sabel_DB_Wrapper::$structure</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$table">Sabel_DB_Wrapper::$table</a></strong> - 
+	</h4> 
+		<h4>
+<img src="../media/images/PublicProperty.gif" border="0" /><strong class="property"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#var$withParent">Sabel_DB_Wrapper::$withParent</a></strong> - 
+	</h4> 
+		</div>
+<div class="tab-page" id="iMethods">
+<h2 class="tab">Inherited Methods</h2>
+<script type="text/javascript">tp1.addTabPage( document.getElementById( "iMethods" ) );</script>
+<!-- =========== INHERITED METHOD SUMMARY =========== -->
+<A NAME='functions_inherited'><!-- --></A>
+<h3>Inherited Method Summary</h3>
+
+		<!-- =========== Summary =========== -->
+	<h4>Inherited From Class <a href="../org-sabel-db/Sabel_DB_Wrapper.html">Sabel_DB_Wrapper</a></h4>
+				<h4>
+<img src="../media/images/Constructor.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#method__construct">Sabel_DB_Wrapper::__construct()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodaddJoinColumns">Sabel_DB_Wrapper::addJoinColumns()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodaddParent">Sabel_DB_Wrapper::addParent()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodaddParentModels">Sabel_DB_Wrapper::addParentModels()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodaggregate">Sabel_DB_Wrapper::aggregate()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodallUpdate">Sabel_DB_Wrapper::allUpdate()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodbegin">Sabel_DB_Wrapper::begin()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcascadeDelete">Sabel_DB_Wrapper::cascadeDelete()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodccond">Sabel_DB_Wrapper::ccond()</a></strong> - alias of setChildCondition()
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcconst">Sabel_DB_Wrapper::cconst()</a></strong> - alias for setChildConstraint()
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcheckForeignKey">Sabel_DB_Wrapper::checkForeignKey()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcheckIncColumn">Sabel_DB_Wrapper::checkIncColumn()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcheckTableEngine">Sabel_DB_Wrapper::checkTableEngine()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodchooseChildConstraint">Sabel_DB_Wrapper::chooseChildConstraint()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodclearCascadeStack">Sabel_DB_Wrapper::clearCascadeStack()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodclearChild">Sabel_DB_Wrapper::clearChild()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodclose">Sabel_DB_Wrapper::close()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcommit">Sabel_DB_Wrapper::commit()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodconvertToTableName">Sabel_DB_Wrapper::convertToTableName()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodcreateSchemaAccessor">Sabel_DB_Wrapper::createSchemaAccessor()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methoddefaultSelectOne">Sabel_DB_Wrapper::defaultSelectOne()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methoddisableAutoNumber">Sabel_DB_Wrapper::disableAutoNumber()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methoddisableParent">Sabel_DB_Wrapper::disableParent()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodenableAutoNumber">Sabel_DB_Wrapper::enableAutoNumber()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodenableParent">Sabel_DB_Wrapper::enableParent()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodexecute">Sabel_DB_Wrapper::execute()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetAllSchema">Sabel_DB_Wrapper::getAllSchema()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetChainModels">Sabel_DB_Wrapper::getChainModels()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetChild">Sabel_DB_Wrapper::getChild()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetColumnNames">Sabel_DB_Wrapper::getColumnNames()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetCondition">Sabel_DB_Wrapper::getCondition()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetConnectName">Sabel_DB_Wrapper::getConnectName()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetConstraint">Sabel_DB_Wrapper::getConstraint()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetCount">Sabel_DB_Wrapper::getCount()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetDefaultChild">Sabel_DB_Wrapper::getDefaultChild()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetExecuter">Sabel_DB_Wrapper::getExecuter()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetFirst">Sabel_DB_Wrapper::getFirst()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetLast">Sabel_DB_Wrapper::getLast()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetMost">Sabel_DB_Wrapper::getMost()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetRecords">Sabel_DB_Wrapper::getRecords()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetStatement">Sabel_DB_Wrapper::getStatement()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetTableName">Sabel_DB_Wrapper::getTableName()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetTableNames">Sabel_DB_Wrapper::getTableNames()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodgetTableSchema">Sabel_DB_Wrapper::getTableSchema()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodisAcquired">Sabel_DB_Wrapper::isAcquired()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodisAutoNumber">Sabel_DB_Wrapper::isAutoNumber()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodisSelected">Sabel_DB_Wrapper::isSelected()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodmakeEachModels">Sabel_DB_Wrapper::makeEachModels()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodmakeFindObject">Sabel_DB_Wrapper::makeFindObject()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodmodelExists">Sabel_DB_Wrapper::modelExists()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodmultipleInsert">Sabel_DB_Wrapper::multipleInsert()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodnewChild">Sabel_DB_Wrapper::newChild()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodnewClass">Sabel_DB_Wrapper::newClass()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodprepareAutoJoin">Sabel_DB_Wrapper::prepareAutoJoin()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodpushStack">Sabel_DB_Wrapper::pushStack()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodremove">Sabel_DB_Wrapper::remove()</a></strong> - remove object
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodrollback">Sabel_DB_Wrapper::rollback()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsave">Sabel_DB_Wrapper::save()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodschema">Sabel_DB_Wrapper::schema()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodschemaClassExists">Sabel_DB_Wrapper::schemaClassExists()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsconst">Sabel_DB_Wrapper::sconst()</a></strong> - alias for setConstraint()
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodselect">Sabel_DB_Wrapper::select()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodselectJoin">Sabel_DB_Wrapper::selectJoin()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodselectOne">Sabel_DB_Wrapper::selectOne()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetChildCondition">Sabel_DB_Wrapper::setChildCondition()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetChildConstraint">Sabel_DB_Wrapper::setChildConstraint()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetCondition">Sabel_DB_Wrapper::setCondition()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetConnectName">Sabel_DB_Wrapper::setConnectName()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetConstraint">Sabel_DB_Wrapper::setConstraint()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetData">Sabel_DB_Wrapper::setData()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetMyChildren">Sabel_DB_Wrapper::setMyChildren()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetProjection">Sabel_DB_Wrapper::setProjection()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetProperties">Sabel_DB_Wrapper::setProperties()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodsetTableName">Sabel_DB_Wrapper::setTableName()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodtoArray">Sabel_DB_Wrapper::toArray()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodtoObject">Sabel_DB_Wrapper::toObject()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodtoTablePair">Sabel_DB_Wrapper::toTablePair()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodunsetChildCondition">Sabel_DB_Wrapper::unsetChildCondition()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodunsetCondition">Sabel_DB_Wrapper::unsetCondition()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#methodunsetNewData">Sabel_DB_Wrapper::unsetNewData()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#method__call">Sabel_DB_Wrapper::__call()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#method__get">Sabel_DB_Wrapper::__get()</a></strong> - 
+		</h4> 
+
+				<h4>
+<img src="../media/images/PublicMethod.gif" border="0" /><strong class="method"> <a href="../org-sabel-db/Sabel_DB_Wrapper.html#method__set">Sabel_DB_Wrapper::__set()</a></strong> - 
+		</h4> 
+
+				<br />
+	</div>
+</div>
+<script type="text/javascript">
+//<![CDATA[
+
+setupAllTabs();
+
+//]]>
+</script>
+	<div id="credit">
+		<hr />
+		Documentation generated on Fri, 20 Oct 2006 20:36:15 +0900 by <a href="http://www.phpdoc.org" target="_blank">phpDocumentor 1.3.0</a>
+	</div>
+</body>
+</html>
