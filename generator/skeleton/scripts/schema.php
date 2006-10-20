@@ -201,7 +201,7 @@ class Schema_Writer
       fwrite($fp, join('', $pArray));
       fwrite($fp, ");\n  }\n");
     } else {
-      fwrite($fp, "\n  public function getParents()\n  {\n    retrun null;\n  }\n");
+      fwrite($fp, "\n  public function getParents()\n  {\n    return null;\n  }\n");
     }
 
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
