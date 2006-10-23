@@ -22,10 +22,10 @@ function hyperlink($params, $anchor = null, $id = null, $class = null)
   return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
-function a($param, $anchor, $id = null, $class = null)
+function a($param, $anchor)
 {
   $aCreator = new UriCreator();
-  return $aCreator->aTag($param, $anchor, $id, $class);
+  return $aCreator->aTag($param, $anchor);
 }
 
 function request($uri)
@@ -56,23 +56,12 @@ class UriCreator
   
   public function hyperlink($params, $anchor = null, $id = null, $class = null)
   {
-    $entry = null;
-    $uriPrefix  = 'http:/';
-    $uriPrefix .= '/'. $_SERVER['HTTP_HOST'];
+    $uriPrefix = 'http://' . $_SERVER['HTTP_HOST'];
     
-    if (isset($params['entry'])) {
-      $entry = $this->map->getEntry($params['entry']);
-      unset($params['entry']);
-      // @todo if $entry is not object.
-    } else {
-      $entry = $this->map->getCurrentEntry();
-    }
+    $entry = $this->getEntry($params);
     
-    if (is_object($anchor)) {
-      $anchor = $anchor->__toString();
-    }
+    if (is_object($anchor)) $anchor = $anchor->__toString();
     
-    // $uriPrefix = '';
     $fmtUri = '<a id="%s" class="%s" href="%s/%s">%s</a>';
     return sprintf($fmtUri, $id, $class, $uriPrefix, $entry->uri($params), $anchor);
   }
@@ -84,8 +73,23 @@ class UriCreator
   
   public function uri($params, $withDomain)
   {
-    $entry = null;
-    
+    $entry     = $this->getEntry($params);
+    $uriPrefix = ($withDomain) ? 'http://' . $_SERVER['HTTP_HOST'] . '/' : '';
+    return $uriPrefix . $entry->uri($params);
+  }
+  
+  protected function convert($param)
+  {
+    $buf = array();
+    foreach (explode(',', $param) as $part) {
+      $line = array_map('trim', explode(':', $part));
+      $buf[($line[0] === 'e') ? 'entry' : $line[0]] = $line[1];
+    }
+    return $buf;
+  }
+
+  protected function getEntry(&$params)
+  {
     if (isset($params['entry'])) {
       $entry = $this->map->getEntry($params['entry']);
       unset($params['entry']);
@@ -93,27 +97,7 @@ class UriCreator
     } else {
       $entry = $this->map->getCurrentEntry();
     }
-    
-    if ($withDomain) {
-      return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $entry->uri($params);
-    } else {
-      return $entry->uri($params);
-    }
-  }
-  
-  protected function convert($param)
-  {
-    $buf = array();
-    foreach (explode(',', $param) as $key => $part) {
-      $line = array_map('trim', explode(':', $part));
-      if ($line[0] === 'e') {
-        $buf['entry'] = $line[1];
-      } else {
-        $buf[$line[0]] = $line[1];
-      }
-    }
-    
-    return $buf;
+    return $entry;
   }
 }
 
