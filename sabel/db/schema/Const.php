@@ -13,14 +13,14 @@
  */
 abstract class Sabel_DB_Schema_Const
 {
-  const INT       = 1;
-  const FLOAT     = 2;
-  const DOUBLE    = 3;
-  const STRING    = 4;
-  const TEXT      = 5;
-  const BOOL      = 6;
-  const BYTE      = 7;
-  const DATE      = 8;
-  const TIME      = 9;
-  const TIMESTAMP = 10;
+  const INT       = 'INT';
+  const FLOAT     = 'FLOAT';
+  const DOUBLE    = 'DOUBLE';
+  const STRING    = 'STRING';
+  const TEXT      = 'TEXT';
+  const BOOL      = 'BOOL';
+  const BYTE      = 'BYTE';
+  const DATE      = 'DATE';
+  const TIME      = 'TIME';
+  const TIMESTAMP = 'TIMESTAMP';
 }

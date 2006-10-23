@@ -1160,7 +1160,7 @@ class Test_DB_Test extends SabelTestCase
     $date = $schema->date;
     $dt   = $schema->dt;
 
-    $dbname = Sabel_DB_Connection::getDB($st->getConnectName());
+    $dbname = Sabel_DB_Connection::getDB($st->connectName);
 
     $this->assertEquals($id1->type, Sabel_DB_Schema_Const::INT);
     $this->assertTrue($id1->primary);
