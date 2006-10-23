@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Injections_Wrapping
+class Sabel_Aspect_Interceptors_Wrapping
 {
   public function when($method)
   {
@@ -18,4 +18,4 @@ class Sabel_Aspect_Injections_Wrapping
   }
 }
 
-Sabel_Aspect_Calls::add(new Sabel_Aspect_Injections_Wrapping());
+Sabel_Aspect_Calls::add(new Sabel_Aspect_Interceptors_Wrapping());

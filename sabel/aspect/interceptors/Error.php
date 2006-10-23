@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Injections_Error
+class Sabel_Aspect_Interceptors_Error
 {
   public function when($method)
   {
@@ -25,4 +25,4 @@ class Sabel_Aspect_Injections_Error
   }
 }
 
-Sabel_Aspect_Calls::add(new Sabel_Aspect_Injections_Error());
+Sabel_Aspect_Calls::add(new Sabel_Aspect_Interceptors_Error());

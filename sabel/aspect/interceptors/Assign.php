@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Injections_Assign
+class Sabel_Aspect_Interceptors_Assign
 {
   public function when($method)
   {
@@ -26,4 +26,4 @@ class Sabel_Aspect_Injections_Assign
   }
 }
 
-Sabel_Aspect_Calls::add(new Sabel_Aspect_Injections_Assign());
+Sabel_Aspect_Calls::add(new Sabel_Aspect_Interceptors_Assign());
