@@ -12,7 +12,7 @@
  */
 abstract class Sabel_DB_Tree extends Sabel_DB_Wrapper
 {
-  public $structure = 'tree';
+  protected $structure = 'tree';
 
   public function getRoot()
   {

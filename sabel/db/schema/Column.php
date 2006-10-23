@@ -24,14 +24,9 @@ class Sabel_DB_Schema_Column
     return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
-  public function setProperties($array)
+  public function make($colInfo)
   {
-    foreach ($array as $key => $val) $this->$key = $val;
-  }
-
-  public function make($cols)
-  {
-    $this->setProperties($cols);
+    foreach ($colInfo as $key => $val) $this->$key = $val;
     return $this;
   }
 }

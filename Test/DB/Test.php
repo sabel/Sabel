@@ -328,6 +328,7 @@ class Test_DB_Test extends SabelTestCase
     
     $test->remove(7);
     
+    $test = new Test();
     $obj = $test->selectOne(7);
     $this->assertNotEquals($obj->blood, 'AB');
     $this->assertEquals($obj->blood, null);
@@ -1442,7 +1443,6 @@ class SchemaTest extends MapperDefault
 {
 
 }
-
 class Schema_Trans2
 {
   public function get()
@@ -1461,6 +1461,21 @@ class Schema_Trans2
                          'nullable' => true, 'primary' => false, 'default' => null);
 
     return $sql;
+  }
+
+  public function getConnectName()
+  {
+    return 'default2';
+  }
+
+  public function getPrimaryKey()
+  {
+    return 'id';
+  }
+
+  public function getIncrementKey()
+  {
+    return 'id';
   }
 
   public function getEngine()

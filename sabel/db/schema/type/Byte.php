@@ -25,7 +25,7 @@ class Sabel_DB_Schema_Type_Byte implements Sabel_DB_Schema_Type_Sender
     $types = array('blob', 'bytea', 'longblob', 'mediumblob');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Schema_Const::BLOB;
+      $co->type = Sabel_DB_Schema_Const::BYTE;
     } else {
       $this->next->send($co, $type);
     }

@@ -61,7 +61,7 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     $this->driverExecute('SELECT SCOPE_IDENTITY()');
     $resultSet = $this->getResultSet();
     $arrayRow  = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
-    return (int)$result[0];
+    return (int)$arrayRow[0];
   }
 
   public function driverExecute($sql = null, $conn = null)

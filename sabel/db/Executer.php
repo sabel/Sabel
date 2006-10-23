@@ -12,9 +12,9 @@
 class Sabel_DB_Executer
 {
   private
-    $model   = null,
-    $driver  = null,
-    $isModel = false;
+    $property = null,
+    $driver   = null,
+    $isModel  = false;
 
   private
     $conditions  = array(),
@@ -22,26 +22,25 @@ class Sabel_DB_Executer
 
   public function __construct($param)
   {
-    if ($param instanceof Sabel_DB_Wrapper) {
-      $this->model   = $param;
-      $this->isModel = true;
+    if ($param instanceof Sabel_DB_Property) {
+      $this->property = $param;
+      $this->isModel  = true;
       $this->initialize($param);
     } else if (is_string($param)) {
       $this->setDriver($param);
     } else {
       $errorMsg = 'Error: Sabel_DB_Executer::__construct() '
-                . 'invalid parameter. should be a string or an instance of Sabel_DB_Mapper';
+                . 'invalid parameter. should be a string or an instance of Sabel_DB_Wrapper';
 
       throw new Exception($errorMsg);
     }
   }
 
-  //todo default order column = 'id' ? => setDriver()
-  public function initialize($model)
+  public function initialize($property)
   {
-    $driver = $this->driver = Sabel_DB_Connection::getDriver($model->getConnectName());
-    if ($driver instanceof Sabel_DB_Driver_Native_Mssql) {
-      $driver->setDefaultOrderKey($model->primaryKey);
+    $this->driver = Sabel_DB_Connection::getDriver($property->connectName);
+    if ($this->driver instanceof Sabel_DB_Driver_Native_Mssql) {
+      $this->driver->setDefaultOrderKey($property->primaryKey);
     }
   }
 
@@ -55,7 +54,7 @@ class Sabel_DB_Executer
 
   public function getCondition()
   {
-    return ($this->isModel) ? $this->model->getCondition() : $this->conditions;
+    return ($this->isModel) ? $this->property->getCondition() : $this->conditions;
   }
 
   public function setConstraint($param1, $param2 = null)
@@ -68,7 +67,7 @@ class Sabel_DB_Executer
 
   public function getConstraint()
   {
-    return ($this->isModel) ? $this->model->getConstraint() : $this->constraints;
+    return ($this->isModel) ? $this->property->getConstraint() : $this->constraints;
   }
 
   public function setDriver($connectName)

@@ -12,7 +12,7 @@
  */
 abstract class Sabel_DB_Bridge extends Sabel_DB_Wrapper
 {
-  public    $structure   = 'bridge';
+  protected $structure   = 'bridge';
   protected $bridgeTable = '';
 
   public function getChild($child, $table = null)

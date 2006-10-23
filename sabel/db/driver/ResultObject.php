@@ -29,8 +29,7 @@ class Sabel_DB_Driver_ResultObject
 
   public function __get($key)
   {
-    $data = $this->data[$key];
-    return (is_numeric($data)) ? (int)$data : $data;
+    return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
   public function toArray()
@@ -38,4 +37,3 @@ class Sabel_DB_Driver_ResultObject
     return $this->data;
   }
 }
-

@@ -1,5 +1,7 @@
 <?php
 
+error_reporting(E_ALL|E_NOTICE);
+
 class WindowsUnitTest
 {
   protected function assertEquals($p1, $p2)
@@ -35,10 +37,13 @@ class Test_DB_Windows_Test extends WindowsUnitTest
                                 'customer_telephone', 'infinite1', 'infinite2',
                                 'seq', 'tree', 'student', 'student_course',
                                 'course', 'users', 'status', 'bbs', 'trans1');
- 
+
   public function testConstraint()
   {
     $customer = new Customer();
+
+    //$dbname = Sabel_DB_Connection::getDB($customer->getConnectName());
+    //$this->assertEquals($dbname, self::$dbList[self::$count++]);
 
     $insertData   = array();
     $insertData[] = array('id' => 1, 'name' => 'tanaka');
@@ -59,7 +64,8 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $order->multipleInsert($insertData);
 
     $o = new CustomerOrder();
-    $res = $o->select(Sabel_DB_Mapper::WITH_PARENT);
+    $o->enableParent();
+    $res = $o->select();
     $this->assertEquals((int)$res[0]->Customer->id, 1);
     $this->assertEquals((int)$res[2]->Customer->id, 2);
 
@@ -91,17 +97,54 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 4);
     $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 5);
     $this->assertEquals((int)$cus[0]->CustomerOrder[2]->id, 6);
- 
+    
     $cu  = new Customer();
     $cu->setChildConstraint('CustomerOrder', array('limit' => 2));
     $cus = $cu->select();
-
     $this->assertEquals((int)$cus[0]->CustomerOrder[0]->id, 1);
     $this->assertEquals((int)$cus[0]->CustomerOrder[1]->id, 2);
     $this->assertEquals((int)$cus[1]->CustomerOrder[0]->id, 3);
     $this->assertEquals((int)$cus[1]->CustomerOrder[1]->id, 4);
     @$this->assertNull($cus[0]->CustomerOrder[2]->id);
     @$this->assertNull($cus[0]->CustomerOrder[3]->id);
+  }
+
+  public function testInsert()
+  {
+    $test2 = new Test2();
+    $test2->id   = 1;
+    $test2->name = 'test21';
+    $test2->test3_id = '2';
+    $test2->save();
+
+    $test2 = new Test2();
+    $test2->id   = 2;
+    $test2->name = 'test22';
+    $test2->test3_id = '1';
+    $test2->save();
+    
+    $test2 = new Test2();
+    $test2->id   = 3;
+    $test2->name = 'test23';
+    $test2->test3_id = '2';
+    $test2->save();
+
+    $test2 = new Test2();
+    $obj   = $test2->selectOne(3);
+    $this->assertEquals($obj->name, 'test23');
+    
+    $test3 = new Test3();
+    $test3->id = 1;
+    $test3->name = 'test31';
+    $test3->save();
+    
+    $test3->id = 2;
+    $test3->name = 'test32';
+    $test3->save();
+    
+    $test3->name('test31');
+    $obj = $test3->selectOne();
+    $this->assertEquals((int)$obj->id, 1);
   }
 
   public function testMultipleInsert()
@@ -113,17 +156,17 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $insertData[] = array('id' => 2, 'name' => 'yo_shida', 'blood' => 'B',  'test2_id' => 2);
     $insertData[] = array('id' => 3, 'name' => 'uchida',   'blood' => 'AB', 'test2_id' => 1);
     $insertData[] = array('id' => 4, 'name' => 'ueda',     'blood' => 'A',  'test2_id' => 3);
-    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 4);
+    $insertData[] = array('id' => 5, 'name' => 'seki',     'blood' => 'O',  'test2_id' => 3);
     $insertData[] = array('id' => 6, 'name' => 'uchida',   'blood' => 'A',  'test2_id' => 1);
     $test->multipleInsert($insertData);
-    
+
     $ro = $test->select();
     $this->assertEquals(count($ro), 6);
-    
+
     $test->enableParent();
     $obj = $test->selectOne(5);
     $this->assertEquals($obj->name, 'seki');
-    $this->assertEquals((int)$obj->Test2->id, 4);
+    $this->assertEquals((int)$obj->Test2->id, 3);
     
     $obj = $test->selectOne('name', 'seki');
     $this->assertEquals((int)$obj->id, 5);
@@ -264,52 +307,14 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $bbs->multipleInsert($insertData);
   }
 
-  public function testInsert()
-  {
-    $test2 = new Test2();
-    $test2->id   = 1;
-    $test2->name = 'test21';
-    $test2->test3_id = '2';
-    $test2->save();
-
-    $test2 = new Test2();
-    $test2->id   = 2;
-    $test2->name = 'test22';
-    $test2->test3_id = '1';
-    $test2->save();
-    
-    $test2 = new Test2();
-    $test2->id   = 3;
-    $test2->name = 'test23';
-    $test2->test3_id = '3';
-    $test2->save();
-
-    $test2 = new Test2();
-    $obj   = $test2->selectOne(3);
-    $this->assertEquals($obj->name, 'test23');
-    
-    $test3 = new Test3();
-    $test3->id = 1;
-    $test3->name = 'test31';
-    $test3->save();
-    
-    $test3->id = 2;
-    $test3->name = 'test32';
-    $test3->save();
-    
-    $test3->name('test31');
-    $obj = $test3->selectOne();
-    $this->assertEquals((int)$obj->id, 1);
-  }
-  
   public function testUpdateOrInsert()
   {
     $test = new Test(7); // not found 
     
-    $this->assertEquals($test->name, null);
-    $this->assertEquals($test->blood, null);
+    @$this->assertEquals($test->name, null);
+    @$this->assertEquals($test->blood, null);
     
-    if ($test->is_selected()) {
+    if ($test->isSelected()) {
       $test->blood = 'AB';
       $test->save();  // (update)
     } else {
@@ -324,7 +329,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'B');
     
-    if ($test->is_selected()) {
+    if ($test->isSelected()) {
       $test->blood = 'AB';
       $test->save();  // update <= execute
     } else {
@@ -337,7 +342,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($test->name, 'tanaka');
     $this->assertEquals($test->blood, 'AB');
   }
-  
+
   public function testRemove()
   {
     $test = new Test();
@@ -347,19 +352,20 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     
     $test->remove(7);
     
+    $test = new Test();
     $obj = $test->selectOne(7);
     $this->assertNotEquals($obj->blood, 'AB');
     $this->assertEquals($obj->blood, null);
 
     $t = new Test(99);
-    $this->assertEquals($t->is_selected(), false);
+    $this->assertEquals($t->isSelected(), false);
     $t->name     = 'test99';
     $t->blood    = 'C';
     $t->test2_id = '3';
     $t->save();
 
     $t = new Test(99);
-    $this->assertEquals($t->is_selected(), true);
+    $this->assertEquals($t->isSelected(), true);
     $t->remove();
   }
 
@@ -398,29 +404,52 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     
     //----------------------------------------------
     
+    $test = new Test();
     $test->LIKE_name(array('%da%', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 4); // yo_shida, uchida, ueda, uchida
     
+    $test = new Test();
     $test->LIKE_name('yo_shida');
     $obj = $test->select();
+    $this->assertEquals(count($obj), 1);
     $this->assertEquals($obj[0]->name, 'yo_shida'); // yo_shida
 
+    $test = new Test();
     $test->LIKE_name(array('%i_a', false));
     $obj = $test->select();
     $this->assertEquals(count($obj), 3); // yo_shida, uchida, uchida
 
-    $test->OR_id(array('3', '4'));
+    $test = new Test();
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('id', 3);
+    $conditions[] = new Sabel_DB_Condition('id', 4);
+    $test->setCondition($conditions);
     $obj = $test->select();
-
     $this->assertEquals($obj[0]->name, 'uchida');
     $this->assertEquals($obj[1]->name, 'ueda');
     @$this->assertNull($obj[2]->name);
 
-    $test->OR_id(array('< 2', '> 5'));
+    $test = new Test();
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('<', 2));
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('>', 5));
+    $test->setCondition($conditions);
     $obj = $test->select();
     $this->assertEquals((int) $obj[0]->id, 1);
     $this->assertEquals((int) $obj[1]->id, 6);
+
+    $test = new Test();
+    $test->sconst('order', 'id');
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('<=', 2));
+    $conditions[] = new Sabel_DB_Condition('COMP_id', array('>=', 5));
+    $test->setCondition($conditions);
+    $obj = $test->select();
+    $this->assertEquals((int) $obj[0]->id, 1);
+    $this->assertEquals((int) $obj[1]->id, 2);
+    $this->assertEquals((int) $obj[2]->id, 5);
+    $this->assertEquals((int) $obj[3]->id, 6);
   }
 
   public function testInfiniteLoop()
@@ -435,14 +464,18 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $in2->infinite1_id = 1;
     $in2->save();
     
-    $objs = $in1->select(Sabel_DB_Mapper::WITH_PARENT);
+    $in1->enableParent();
+    $objs = $in1->select();
     $obj = $objs[0];
+
+    $data = $obj->Infinite2->toArray();
+    $this->assertFalse(in_array('Infinite1', array_keys($data)));
     
     $this->assertEquals((int)$obj->infinite2_id, (int)$obj->Infinite2->id);
     $this->assertEquals((int)$obj->Infinite2->infinite1_id, 1);
     $this->assertEquals($obj->Infinite2->Infinite1, null);
   }
-  
+
   public function testSelectParentObject()
   {
     $obj = new Test(1);
@@ -507,7 +540,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals((int)$orders[1]->id, 1);
     @$this->assertNull($orders[2]->id);
   }
-  
+
   public function testNewChild()
   {
     $cu = new Customer();
@@ -615,7 +648,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $cu   = new Customer();
     $cu->setChildConstraint('limit', 10);
     $objs = $cu->select();
-    
+
     @$this->assertNull($objs[0]->CustomerTelephone[0]->telephone);
     @$this->assertNull($objs[0]->CustomerTelephone[1]->telephone);
     $this->assertEquals($objs[1]->CustomerTelephone[0]->telephone, '09022221111');
@@ -630,15 +663,29 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($count, 6);
     
     //--------------------------------------------
-    $count = $test->getCount('< 5');
+    $test = new Test();
+    $count = $test->getCount('COMP_id', array('<', 5));
     $this->assertEquals($count, 4);
     
-    $count = $test->getCount('id', '< 4');
+    $test = new Test();
+    $count = $test->getCount('COMP_id', array('<', 4));
     $this->assertEquals($count, 3);
     
-    $test->id('< 3');
+    $test = new Test();
+    $test->COMP_id(array('<', 3));
     $count = $test->getCount();
     $this->assertEquals($count, 2);
+
+    $test = new Test();
+    $test->COMP_id(array('<=', 3));
+    $count = $test->getCount();
+    $this->assertEquals($count, 3);
+
+    $test = new Test();
+    $condition = new Sabel_DB_Condition('COMP_id', array('<=', 3));
+    $test->setCondition($condition);
+    $count = $test->getCount();
+    $this->assertEquals($count, 3);
   }
   
   public function testAggregate()
@@ -675,7 +722,39 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals((int)$result[0]->count_amount, 2);
     $this->assertEquals((int)$result[0]->avg_amount,   30000);
   }
-  
+
+  public function testAllUpdate()
+  {
+    $line = new OrderLine();
+    $line->setCondition('customer_order_id', 1);
+    $line->allUpdate(array('amount' => 1000000));
+
+    $line  = new OrderLine();
+    $line->sconst('order', 'id');
+    $lines = $line->select();
+
+    $this->assertEquals((int)$lines[0]->amount, 1000);
+    $this->assertEquals((int)$lines[1]->amount, 1000000);
+    $this->assertEquals((int)$lines[2]->amount, 5000);
+    $this->assertEquals((int)$lines[3]->amount, 8000);
+    $this->assertEquals((int)$lines[4]->amount, 9000);
+    $this->assertEquals((int)$lines[5]->amount, 1500);
+    $this->assertEquals((int)$lines[6]->amount, 2500);
+    $this->assertEquals((int)$lines[7]->amount, 1000000);
+    $this->assertEquals((int)$lines[8]->amount, 10000);
+    $this->assertEquals((int)$lines[9]->amount, 50000);
+    $this->assertEquals((int)$lines[10]->amount, 1000000);
+
+    $line = new OrderLine(2);
+    $line->save(array('amount' => 3000));
+
+    $line = new OrderLine(8);
+    $line->save(array('amount' => 3000));
+
+    $line = new OrderLine(11);
+    $line->save(array('amount' => 500));
+  }
+
   public function testSeq()
   {
     $seq = new Seq();
@@ -683,7 +762,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $seq->text = 'test';
     $id = $seq->save();
 
-    $this->assertTrue(is_int($id));
+    $this->assertNotEquals($id, null);
   }
 
   public function testTree()
@@ -719,18 +798,20 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($t->name, 'A3');
     
     $this->assertEquals((int)$t->Tree->id, 1);
-    @$this->assertNull($t->Tree->tree_id);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
     $this->assertEquals($t->Tree->name, 'A');
 
+    $tree = new Tree();
+    $tree->enableParent();
     $t = $tree->selectOne(5);
     $this->assertEquals((int)$t->id, 5);
     $this->assertEquals((int)$t->tree_id, 1);
     $this->assertEquals($t->name, 'A5');
 
     $this->assertEquals((int)$t->Tree->id, 1);
-    @$this->assertNull($t->Tree->tree_id);
+    $this->assertEquals((int)$t->Tree->tree_id, 0);
     $this->assertEquals($t->Tree->name, 'A');
- 
+
     $t = new Tree();
     $root = $t->getRoot();
     $this->assertEquals((int)$root[0]->id, 1);
@@ -774,27 +855,20 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals((int)$students[0]->id, 5);
     $this->assertEquals((int)$students[1]->id, 4);
 
-    $constraint = array('limit' => 100, 'order' => 'course_id desc');
+    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 5);
+    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 4);
+    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 2);
+    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 1);
 
-    foreach ($students as $student) {
-      $student->setChildConstraint($constraint);
-      $student->getChild('Course');
-    }
+    $this->assertEquals((int)$students[3]->Course[3]->id, 5);
+    $this->assertEquals((int)$students[3]->Course[2]->id, 4);
+    $this->assertEquals((int)$students[3]->Course[1]->id, 3);
+    $this->assertEquals((int)$students[3]->Course[0]->id, 2);
 
-    $this->assertEquals((int)$students[2]->StudentCourse[0]->course_id, 5);
-    $this->assertEquals((int)$students[2]->StudentCourse[1]->course_id, 4);
-    $this->assertEquals((int)$students[2]->StudentCourse[2]->course_id, 2);
-    $this->assertEquals((int)$students[2]->StudentCourse[3]->course_id, 1);
-
-    $this->assertEquals((int)$students[3]->Course[0]->id, 5);
-    $this->assertEquals((int)$students[3]->Course[1]->id, 4);
-    $this->assertEquals((int)$students[3]->Course[2]->id, 3);
-    $this->assertEquals((int)$students[3]->Course[3]->id, 2);
-
-    $this->assertEquals($students[3]->Course[0]->name, 'Psychology');
-    $this->assertEquals($students[3]->Course[1]->name, 'Economic');
-    $this->assertEquals($students[3]->Course[2]->name, 'Science');
-    $this->assertEquals($students[3]->Course[3]->name, 'Physics');
+    $this->assertEquals($students[3]->Course[3]->name, 'Psychology');
+    $this->assertEquals($students[3]->Course[2]->name, 'Economic');
+    $this->assertEquals($students[3]->Course[1]->name, 'Science');
+    $this->assertEquals($students[3]->Course[0]->name, 'Physics');
 
     //-----------------------------------------------------------------
 
@@ -854,26 +928,26 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($test5->name, 'seki');
     $this->assertEquals($test6->name, 'uchida');
 
-    $this->assertEquals((int)$test1->test2->id, 1);
-    $this->assertEquals((int)$test2->test2->id, 2);
-    $this->assertEquals((int)$test3->test2->id, 1);
-    $this->assertEquals((int)$test4->test2->id, 3);
-    $this->assertNull($test5->test2->id);
-    $this->assertEquals((int)$test6->test2->id, 1);
+    $this->assertEquals((int)$test1->Test2->id, 1);
+    $this->assertEquals((int)$test2->Test2->id, 2);
+    $this->assertEquals((int)$test3->Test2->id, 1);
+    $this->assertEquals((int)$test4->Test2->id, 3);
+    $this->assertEquals((int)$test5->Test2->id, 3);
+    $this->assertEquals((int)$test6->Test2->id, 1);
 
-    $this->assertEquals((int)$test1->test2->test3->id, 2);
-    $this->assertEquals((int)$test2->test2->test3->id, 1);
-    $this->assertEquals((int)$test3->test2->test3->id, 2);
-    $this->assertNull($test4->test2->test3->id, 3);
-    $this->assertNull($test5->test2->test3->id, 3);
-    $this->assertEquals((int)$test6->test2->test3->id, 2);
+    $this->assertEquals((int)$test1->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test2->Test2->Test3->id, 1);
+    $this->assertEquals((int)$test3->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test4->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test5->Test2->Test3->id, 2);
+    $this->assertEquals((int)$test6->Test2->Test3->id, 2);
 
-    $this->assertEquals($test1->test2->test3->name, 'test32');
-    $this->assertEquals($test2->test2->test3->name, 'test31');
-    $this->assertEquals($test3->test2->test3->name, 'test32');
-    $this->assertNull($test4->test2->test3->name);
-    $this->assertNull($test5->test2->test3->name);
-    $this->assertEquals($test6->test2->test3->name, 'test32');
+    $this->assertEquals($test1->Test2->Test3->name, 'test32');
+    $this->assertEquals($test2->Test2->Test3->name, 'test31');
+    $this->assertEquals($test3->Test2->Test3->name, 'test32');
+    $this->assertEquals($test4->Test2->Test3->name, 'test32');
+    $this->assertEquals($test5->Test2->Test3->name, 'test32');
+    $this->assertEquals($test6->Test2->Test3->name, 'test32');
   }
 
   public function testOrder()
@@ -884,14 +958,16 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $ol->item_id = 5;
     $ol->save();
 
-    $ol->id = 13;
     $ol->customer_order_id = 18;
+    $ol->id = 13;
     $ol->item_id = 8;
     $ol->save();
 
+    $ol = new OrderLine();
     $last = $ol->getLast('amount');
     $this->assertEquals((int)$last->amount, 50000);
 
+    $ol = new OrderLine();
     $first = $ol->getFirst('amount');
     $this->assertEquals((int)$first->amount, 500);
 
@@ -944,7 +1020,10 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $user = new Users(2);
     $user->cconst('limit', 100);
-    $user->ccond('OR_body', array('body21', 'body23'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('body', 'body21');
+    $conditions[] = new Sabel_DB_Condition('body', 'body23');
+    $user->ccond($conditions);
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
 
@@ -953,7 +1032,10 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $user = new Users(4);
     $user->cconst('limit', 100);
-    $user->ccond('OR_title', array('title41', 'null'));
+    $conditions   = array();
+    $conditions[] = new Sabel_DB_Condition('title', 'title41');
+    $conditions[] = new Sabel_DB_Condition('title', Sabel_DB_Condition::ISNULL);
+    $user->ccond($conditions);
     $user->getChild('bbs');
     $this->assertEquals(count($user->bbs), 2);
   }
@@ -966,7 +1048,8 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 11);
 
-    $tree->name('null');
+    $tree = new Tree();
+    $tree->name(Sabel_DB_Condition::ISNULL);
     $tree->tree_id(4);
     $t = $tree->selectOne();
     $this->assertEquals((int)$t->id, 8);
@@ -977,9 +1060,10 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $ol = new OrderLine();
     $ol->sconst('order', 'id');
 
-    $key = array('amount', 'item_id');
-    $val = array('> 9000', 2);
-    $ol->OR_(array($key, $val));
+    $conditions = array();
+    $conditions[] = new Sabel_DB_Condition('COMP_amount', array('>', 9000));
+    $conditions[] = new Sabel_DB_Condition('item_id', 2);
+    $ol->setCondition($conditions);
 
     $ols = $ol->select();
     $this->assertEquals((int)$ols[0]->id, 1);
@@ -1014,25 +1098,25 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $trans1 = new Trans1(1);
     $trans1->cconst('limit', 10);
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 3);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 3);
 
     $trans1 = new Trans1(1);
     $trans1->cconst('limit', 10);
     $trans1->ccond('text', 'trans24');
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 1);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 1);
 
     $trans1 = new Trans1(3);
     $trans1->cconst('limit', 10);
     $trans1->ccond('text', 'trans24');
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 0);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 0);
 
     $trans1 = new Trans1(2);
     $trans1->cconst('limit', 10);
-    $trans1->getChild('trans2');
-    $this->assertEquals(count($trans1->trans2) , 1);
+    $trans1->getChild('Trans2');
+    $this->assertEquals(count($trans1->Trans2) , 1);
 
     $trans1->execute("DELETE FROM trans1");
     $trans2->execute("DELETE FROM trans2");
@@ -1060,7 +1144,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
       $trans2->commit(); // not execute commit()
     } catch (Exception $e) {
     }
- 
+
     $trans2 = new Trans2();
     $t = $trans2->select();
     $this->assertEquals($t, false); // not found
@@ -1102,9 +1186,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $bl   = $schema->bl;
     $dt   = $schema->dt;
 
+    $dbname = Sabel_DB_Connection::getDB($st->connectName);
+
     $this->assertEquals($id1->type, Sabel_DB_Schema_Const::INT);
     $this->assertTrue($id1->primary);
-    $this->assertTrue($id1->increment);
+    if ($dbname !== 'sqlite') $this->assertTrue($id1->increment);
     $this->assertEquals($id1->max,  9223372036854775807);
     $this->assertEquals($id1->min, -9223372036854775808);
     @$this->assertEquals($id1->default, null);
@@ -1122,12 +1208,12 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($num->max,  2147483647);
     $this->assertEquals($num->min, -2147483648);
     $this->assertEquals($num->default, 10);
- 
+
     $this->assertEquals($fnum->type, Sabel_DB_Schema_Const::FLOAT);
     $this->assertEquals($fnum->max,  3.4028235E38);
     $this->assertEquals($fnum->min, -3.4028235E38);
     $this->assertFalse($fnum->primary);
-    $this->assertFalse($fnum->notNull);
+    $this->assertTrue($fnum->nullable);
     $this->assertFalse($fnum->increment);
     @$this->assertEquals($fnum->default, null);
 
@@ -1135,81 +1221,156 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($dnum->max,  1.79769E308);
     $this->assertEquals($dnum->min, -1.79769E308);
     $this->assertFalse($dnum->primary);
-    $this->assertFalse($dnum->notNull);
+    $this->assertTrue($dnum->nullable);
     $this->assertFalse($dnum->increment);
     @$this->assertEquals($dnum->default, null);
 
     $this->assertEquals($str->type, Sabel_DB_Schema_Const::STRING);
     $this->assertEquals($str->max, 64);
     $this->assertFalse($str->primary);
-    $this->assertFalse($str->notNull);
+    $this->assertTrue($str->nullable);
     $this->assertFalse($str->increment);
     $this->assertEquals($str->default, 'test');
 
     $this->assertEquals($text->type, Sabel_DB_Schema_Const::TEXT);
     $this->assertFalse($text->primary);
-    $this->assertFalse($text->notNull);
+    $this->assertTrue($text->nullable);
     $this->assertFalse($text->increment);
     @$this->assertEquals($text->default, null);
 
     $this->assertEquals($bl->type, Sabel_DB_Schema_Const::BOOL);
     $this->assertFalse($bl->primary);
-    $this->assertFalse($bl->notNull);
+    $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertTrue($bl->default);
-
-    //$this->assertEquals($date->type, Sabel_DB_Schema_Const::DATE);
-    //$this->assertFalse($date->primary);
-    //$this->assertFalse($date->increment);
-    //$this->assertFalse($date->notNull);
-    //@$this->assertEquals($date->default, null);
 
     $this->assertEquals($dt->type, Sabel_DB_Schema_Const::TIMESTAMP);
     $this->assertFalse($dt->primary);
     $this->assertFalse($dt->increment);
-    $this->assertTrue($dt->notNull);
+    $this->assertFalse($dt->nullable);
     @$this->assertEquals($dt->default, null);
+  }
 
-    Sabel_DB_SimpleCache::remove('Schema_SchemaTest');
+  public function testWhereNot()
+  {
+    $test = new Test();
+    $test->id(1, Sabel_DB_Condition::NOT);
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+    $this->assertEquals($tests[3]->name, 'seki');
+    $this->assertEquals($tests[4]->name, 'uchida');
+
+    $test = new Test();
+    $test->IN_id(array(2,3,5));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'seki');
+
+    $test = new Test();
+    $test->IN_id(array(2,3,5), Sabel_DB_Condition::NOT);
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+    $this->assertEquals($tests[1]->name, 'ueda');
+    $this->assertEquals($tests[2]->name, 'uchida');
+
+    $test = new Test();
+    $test->BET_id(array(2, 4));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+
+    $test = new Test();
+    $test->BET_id(array(2, 4), Sabel_DB_Condition::NOT);
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+    $this->assertEquals($tests[1]->name, 'seki');
+    $this->assertEquals($tests[2]->name, 'uchida');
+
+    $test = new Test();
+    $test->LIKE_name(array('%na%', false));
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'tanaka');
+
+    $test = new Test();
+    $test->LIKE_name(array('%na%', false), Sabel_DB_Condition::NOT);
+    $tests = $test->select();
+
+    $this->assertEquals($tests[0]->name, 'yo_shida');
+    $this->assertEquals($tests[1]->name, 'uchida');
+    $this->assertEquals($tests[2]->name, 'ueda');
+    $this->assertEquals($tests[3]->name, 'seki');
+    $this->assertEquals($tests[4]->name, 'uchida');
+  }
+
+  public function testResultSet()
+  {
+    $executer  = new Sabel_DB_Executer('default');
+    $executer->getStatement()->setBasicSQL('SELECT * FROM test');
+    $condition = new Sabel_DB_Condition('LIKE_name', array('%na%', false), Sabel_DB_Condition::NOT);
+    $executer->setCondition($condition);
+    $resultSet = $executer->execute();
+    $resultObj = $resultSet->fetchAll(Sabel_DB_Driver_ResultSet::OBJECT);
+
+    $this->assertEquals($resultObj[0]->name, 'yo_shida');
+    $this->assertEquals($resultObj[1]->name, 'uchida');
+    $this->assertEquals($resultObj[2]->name, 'ueda');
+    $this->assertEquals($resultObj[3]->name, 'seki');
+    $this->assertEquals($resultObj[4]->name, 'uchida');
+  }
+
+  public function testClear()
+  {
+    Sabel_DB_SimpleCache::clear();
+    Sabel_DB_Connection::closeAll();
   }
 }
 
-abstract class Mapper_Default extends Sabel_DB_Mapper
+class MapperDefault extends Sabel_DB_Wrapper
 {
 
 }
 
-class Test extends Mapper_Default
+class Test extends MapperDefault
 {
   protected $withParent = true;
 }
 
-class Test2 extends Mapper_Default
+class Test2 extends MapperDefault
 {
 
 }
 
-class Test3 extends Mapper_Default
+class Test3 extends MapperDefault
 {
 
 }
 
-class Infinite1 extends Mapper_Default
+class Infinite1 extends MapperDefault
 {
 
 }
 
-class Infinite2 extends Mapper_Default
+class Infinite2 extends MapperDefault
 {
 
 }
 
-class Seq extends Mapper_Default
+class Seq extends MapperDefault
 {
 
 }
 
-class Customer extends Mapper_Default
+class Customer extends MapperDefault
 {
   protected $myChildren = array('CustomerOrder', 'CustomerTelephone');
   protected $defChildConstraints = array('limit' => 10);
@@ -1221,9 +1382,8 @@ class Customer extends Mapper_Default
   }
 }
 
-class CustomerOrder extends Mapper_Default
+class CustomerOrder extends MapperDefault
 {
-  public $table = 'customer_order';
   protected $myChildren = 'OrderLine';
 
   public function __construct($param1 = null, $param2 = null)
@@ -1233,14 +1393,14 @@ class CustomerOrder extends Mapper_Default
   }
 }
 
-class OrderLine extends Mapper_Default
+class OrderLine extends MapperDefault
 {
-  public $table = 'order_line';
+
 }
 
-class CustomerTelephone extends Mapper_Default
+class CustomerTelephone extends MapperDefault
 {
-  public $table = 'customer_telephone';
+
 }
 
 class Tree extends Sabel_DB_Tree
@@ -1269,39 +1429,78 @@ class Course extends Bridge_Base
 
 }
 
-class StudentCourse extends Mapper_Default
-{
-  public $table      = 'student_course';
-  public $jointKey   = array('student_id', 'course_id');
-  public $autoNumber = false;
-}
-
-class Trans1 extends Mapper_Default
+class StudentCourse extends MapperDefault
 {
 
 }
 
-class Trans2 extends Sabel_DB_Mapper
+class Trans1 extends MapperDefault
+{
+
+}
+
+class Trans2 extends Sabel_DB_Wrapper
 {
   protected $connectName = 'default2';
 }
 
-class Users extends Mapper_Default
+class Users extends MapperDefault
 {
 
 }
 
-class Bbs extends Mapper_Default
+class Bbs extends MapperDefault
 {
 
 }
 
-class Status extends Mapper_Default
+class Status extends MapperDefault
 {
 
 }
 
-class SchemaTest extends Mapper_Default
+class SchemaTest extends MapperDefault
 {
-  public $table = 'schema_test';
+
+}
+
+class Schema_Trans2
+{
+  public function get()
+  {
+    $sql = array();
+
+    $sql['id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+                       'increment' => true, 'nullable' => false,
+                       'primary' => true, 'default' => null);
+
+    $sql['trans1_id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+                              'increment' => false, 'nullable' => false,
+                              'primary' => false, 'default' => null);
+
+    $sql['text'] = array('type' => 'STRING', 'max' => 24, 'increment' => false,
+                         'nullable' => true, 'primary' => false, 'default' => null);
+
+    return $sql;
+  }
+
+  public function getConnectName()
+  {
+    return 'default2';
+  }
+
+  public function getPrimaryKey()
+  {
+    return 'id';
+  }
+
+  public function getIncrementKey()
+  {
+    return 'id';
+  }
+
+  public function getEngine()
+  {
+    return 'InnoDB';
+  }
 }

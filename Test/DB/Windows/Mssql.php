@@ -6,12 +6,14 @@ require_once 'c:\php\sabel\sabel\db\SimpleCache.php';
 
 require_once 'c:\php\sabel\sabel\db\Condition.php';
 require_once 'c:\php\sabel\sabel\db\Executer.php';
-require_once 'c:\php\sabel\sabel\db\Mapper.php';
+require_once 'c:\php\sabel\sabel\db\Property.php';
+require_once 'c:\php\sabel\sabel\db\Wrapper.php';
 require_once 'c:\php\sabel\sabel\db\Basic.php';
 require_once 'c:\php\sabel\sabel\db\Bridge.php';
 require_once 'c:\php\sabel\sabel\db\Tree.php';
 require_once 'c:\php\sabel\sabel\db\driver\General.php';
 require_once 'c:\php\sabel\sabel\db\driver\ResultSet.php';
+require_once 'c:\php\sabel\sabel\db\driver\ResultObject.php';
 require_once 'c:\php\sabel\sabel\db\driver\Statement.php';
 require_once 'c:\php\sabel\sabel\db\driver\native\Query.php';
 require_once 'c:\php\sabel\sabel\db\driver\native\Mssql.php';
@@ -19,7 +21,7 @@ require_once 'c:\php\sabel\sabel\db\driver\native\Paginate.php';
 
 require_once 'c:\php\sabel\sabel\db\schema\type\Setter.php';
 require_once 'c:\php\sabel\sabel\db\schema\type\Sender.php';
-require_once 'c:\php\sabel\sabel\db\schema\type\Int.php';
+require_once 'c:\php\sabel\sabel\db\schema\type\Integer.php';
 require_once 'c:\php\sabel\sabel\db\schema\type\String.php';
 require_once 'c:\php\sabel\sabel\db\schema\type\Float.php';
 require_once 'c:\php\sabel\sabel\db\schema\type\Double.php';
