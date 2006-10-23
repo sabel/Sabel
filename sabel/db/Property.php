@@ -159,7 +159,8 @@ class Sabel_DB_Property
         $arg2 = $arg1;
         $arg1 = $this->properties['primaryKey'];
       }
-      $this->conditions[] = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+      $this->conditions[$condition->key] = $condition;
     }
   }
 

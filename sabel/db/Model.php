@@ -4,22 +4,23 @@ class Sabel_DB_Model
 {
   private $models = array();
 
-  public static function load($mdlNames)
+  public static function load($mdlName)
   {
-    if (!is_array($mdlNames)) {
-      return self::getClass($mdlNames);
-    } else {
-      return self::createUnitedModel($mdlNames);
-    }
+    return self::getClass($mdlName);
   }
 
-  private static function createUnitedModel($mdlNames)
+  public static function fusion($mdlNames)
+  {
+    return self::createFusionModel($mdlNames);
+  }
+
+  private static function createFusionModel($mdlNames)
   {
     $models = array();
     foreach ($mdlNames as $name) {
       $models[] = self::getClass($name);
     }
-    return new Sabel_DB_UnitedModel($models, $mdlNames);
+    return new Sabel_DB_FusionModel($models, $mdlNames);
   }
 
   private static function getClass($mdlName)
