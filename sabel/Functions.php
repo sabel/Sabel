@@ -12,19 +12,19 @@ function is_not_object($object)
 
 function uri($params, $withDomain = true)
 {
-  $aCreator = new UriCreator();
+  $aCreator = UriCreator::create();
   return $aCreator->uri($params, $withDomain);
 }
 
 function hyperlink($params, $anchor = null, $id = null, $class = null)
 {
-  $aCreator = new UriCreator();
+  $aCreator = UriCreator::create();
   return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
 function a($param, $anchor)
 {
-  $aCreator = new UriCreator();
+  $aCreator = UriCreator::create();
   return $aCreator->aTag($param, $anchor);
 }
 
@@ -47,18 +47,25 @@ function request($uri)
  */
 class UriCreator
 {
-  protected $map = null;
+  private $map = null;
   
-  public function __construct()
+  private static $instance = null;
+  
+  private function __construct()
   {
     $this->map = Sabel_Map_Facade::create();
+  }
+  
+  public static function create()
+  {
+    if (is_null(self::$instance)) self::$instance = new self();
+    return self::$instance;
   }
   
   public function hyperlink($params, $anchor = null, $id = null, $class = null)
   {
     $uriPrefix = 'http://' . $_SERVER['HTTP_HOST'];
-    
-    $entry = $this->getEntry($params);
+    $entry     = $this->getEntry($params);
     
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
@@ -78,22 +85,23 @@ class UriCreator
     return $uriPrefix . $entry->uri($params);
   }
   
-  protected function convert($param)
+  private function convert($param)
   {
     $buf = array();
     foreach (explode(',', $param) as $part) {
-      $line = array_map('trim', explode(':', $part));
-      $buf[($line[0] === 'e') ? 'entry' : $line[0]] = $line[1];
+      $line     = array_map('trim', explode(':', $part));
+      $reserved = ($line[0] === 'e') ? 'entry' : $line[0];
+      $buf[$reserved] = $line[1];
     }
     return $buf;
   }
 
-  protected function getEntry(&$params)
+  private function getEntry(&$params)
   {
     if (isset($params['entry'])) {
       $entry = $this->map->getEntry($params['entry']);
-      unset($params['entry']);
       if (!is_object($entry)) throw new Sabel_Exception_Runtime("entry is not object");
+      unset($params['entry']);
     } else {
       $entry = $this->map->getCurrentEntry();
     }
