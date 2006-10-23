@@ -2,9 +2,9 @@
 
 <#= $this->partial('error') #>
 
-<# $form = new Sabel_Template_Form($<? echo $name ?>->schema(), (isset($errors)) ? $errors : null) #>
+<# $form = new Sabel_Template_Form($<? echo $name ?>, (isset($errors)) ? $errors : null) #>
 <# $form->hidden(array('id')) #>
-<#= $form->startTag(uri(array('action' => 'edit')), 'POST') #>
+<#= $form->startTag(uri(array('action' => 'create')), 'POST') #>
 <# foreach ($form as $f) : ?>
   <#= $f->write("{$f->name()}<br />", "<br /><br />") #>
 <# endforeach #>

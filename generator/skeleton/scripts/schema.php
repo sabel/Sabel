@@ -24,7 +24,8 @@ require_once SABEL_DB . 'driver/pdo/Driver.php';
 
 require_once SABEL_DB . 'SimpleCache.php';
 require_once SABEL_DB . 'Transaction.php';
-require_once SABEL_DB . 'Mapper.php';
+require_once SABEL_DB . 'Property.php';
+require_once SABEL_DB . 'Wrapper.php';
 require_once SABEL_DB . 'Basic.php';
 require_once SABEL_DB . 'Tree.php';
 require_once SABEL_DB . 'Bridge.php';
@@ -34,7 +35,7 @@ require_once SABEL_DB . 'schema/Const.php';
 require_once SABEL_DB . 'schema/type/Sender.php';
 require_once SABEL_DB . 'schema/type/Setter.php';
 
-require_once SABEL_DB . 'schema/type/Int.php';
+require_once SABEL_DB . 'schema/type/Integer.php';
 require_once SABEL_DB . 'schema/type/String.php';
 require_once SABEL_DB . 'schema/type/Byte.php';
 require_once SABEL_DB . 'schema/type/Other.php';

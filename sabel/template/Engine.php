@@ -38,6 +38,14 @@ abstract class Sabel_Template_Engine
     
   }
   
+  public function inter($uri)
+  {
+    $container = Container::create();
+    $front     = $container->load('sabel.controller.Front');
+    $response  = $front->ignition($uri);
+    return $response['html'];
+  }
+  
   public function assgin($key, $value)
   {
     $this->attributes[$key] = $value;

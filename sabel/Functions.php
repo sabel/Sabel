@@ -10,10 +10,10 @@ function is_not_object($object)
   return (!is_object($object));
 }
 
-function uri($params)
+function uri($params, $withDomain = true)
 {
   $aCreator = new UriCreator();
-  return $aCreator->uri($params);
+  return $aCreator->uri($params, $withDomain);
 }
 
 function hyperlink($params, $anchor = null, $id = null, $class = null)
@@ -26,6 +26,14 @@ function a($param, $anchor, $id = null, $class = null)
 {
   $aCreator = new UriCreator();
   return $aCreator->aTag($param, $anchor, $id, $class);
+}
+
+function request($uri)
+{
+  $container = Container::create();
+  $front     = $container->load('sabel.controller.Front');
+  $response  = $front->ignition($uri);
+  return $response['html'];
 }
 
 /**
@@ -74,19 +82,23 @@ class UriCreator
     return $this->hyperlink($this->convert($param), $anchor);
   }
   
-  public function uri($params)
+  public function uri($params, $withDomain)
   {
     $entry = null;
     
     if (isset($params['entry'])) {
       $entry = $this->map->getEntry($params['entry']);
       unset($params['entry']);
-      // @todo if $entry is not object.
+      if (!is_object($entry)) throw new Sabel_Exception_Runtime("entry is not object");
     } else {
       $entry = $this->map->getCurrentEntry();
     }
     
-    return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $entry->uri($params);
+    if ($withDomain) {
+      return 'http://' . $_SERVER['HTTP_HOST'] . '/' . $entry->uri($params);
+    } else {
+      return $entry->uri($params);
+    }
   }
   
   protected function convert($param)

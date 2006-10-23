@@ -2,7 +2,7 @@
 
 <# foreach ($<? echo $name ?>s as $<? echo $name ?>) : #>
 
-  <# $form = new Sabel_Template_Form($<? echo $name ?>->schema(), (isset($errors)) ? $errors : null) #>
+  <# $form = new Sabel_Template_Form($<? echo $name ?>, (isset($errors)) ? $errors : null) #>
   <# $form->hidden(array('id')) #>
   <# $form->hiddenPattern('.*(_id)') #>
   <# foreach ($form as $f) : #>
