@@ -35,6 +35,6 @@ class Sabel_Validate_Errors
   
   public function errored($name)
   {
-    return (isset($this->errors[$name]));
+    return isset($this->errors[$name]);
   }
 }

@@ -16,22 +16,22 @@ class Sabel_Validate_Error
   const NOT_NULL     = 15;
   const CUSTOM       = 30;
   
-  protected $name;
-  protected $msg;
-  protected $type;
-  protected $value;
+  protected $name  = '';
+  protected $msg   = '';
+  protected $type  = '';
+  protected $value = '';
   
   public function __construct($name, $msg, $value, $type)
   {
-    $this->name = $name;
-    $this->msg  = $msg;
+    $this->name  = $name;
+    $this->msg   = $msg;
     $this->value = $value;
-    $this->type = $type;
+    $this->type  = $type;
   }
   
   public function getName()
   {
-    $this->name;
+    return $this->name;
   }
   
   public function getMessage()

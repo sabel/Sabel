@@ -17,6 +17,7 @@ abstract class Sabel_Validate_Validator
   {
   }
   
+  // @todo value???
   public function custom($name, $value)
   {
     $method = 'validate' . ucfirst($name);
