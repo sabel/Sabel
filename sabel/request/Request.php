@@ -2,9 +2,12 @@
 
 /**
  * Sabel_Request_Request
- * 
- * @package org.sabel.request
- * @author Mori Reo <mori.reo@gmail.com>
+ *
+ * @category   Request
+ * @package    org.sabel.request
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Request_Request
 {
@@ -22,10 +25,10 @@ class Sabel_Request_Request
   
   public function __construct($entry = null, $requestUri = null)
   {
-    if (!self::$server) self::$server = new Sabel_Env_Server();
+    if (is_null(self::$server)) self::$server = new Sabel_Env_Server();
     
-    if (!is_null($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
-    if (!is_null($entry)) $this->initialize($entry);
+    if (isset($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
+    if (isset($entry)) $this->initialize($entry);
   }
   
   public function initialize($entry)
@@ -69,7 +72,7 @@ class Sabel_Request_Request
   public function hasUriValue($name)
   {
     $value = $this->uri->$name;
-    return (is_not_null($value)) ? $value : false;
+    return (isset($value)) ? $value : false;
   }
   
   public function hasMethod($name)

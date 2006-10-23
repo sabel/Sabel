@@ -1,10 +1,13 @@
 <?php
 
 /**
- * Sabel_Request_Parameters class
- * 
- * @package org.sabel.request
- * @author Mori Reo <mori.reo@gmail.com>
+ * Sabel_Request_Parameters
+ *
+ * @category   Request
+ * @package    org.sabel.request
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Request_Parameters
 {
@@ -37,8 +40,8 @@ class Sabel_Request_Parameters
   {
     $parameters = explode("&", $parameters);
     $sets = array();
-    foreach ($parameters as $piar) {
-      @list($key, $val) = explode('=', $piar);
+    foreach ($parameters as $pair) {
+      @list($key, $val) = explode('=', $pair);
       $sets[$key] = $val;
     }
     $this->parsedParameters = $sets;
