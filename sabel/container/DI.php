@@ -21,8 +21,7 @@ class Sabel_Container_DI
    */
   public function load($className, $method = '__construct')
   {
-    $this->loadClass($className, $method);
-    return $this->makeInstance();
+    if ($this->loadClass($className, $method)) return $this->makeInstance();
   }
   
   public function loadInjected($className, $method = '__construct')
@@ -38,30 +37,23 @@ class Sabel_Container_DI
     
     if (!$reflectionClass->hasMethod($method)) return false;
     
-    if ($reflectionClassExt->isInterface()) {
-      $reflectionClass =
-        new ReflectionClass($reflectionClassExt->getImplementClass());
-        
-      $this->classStack[] = new Sabel_Container_ReflectionClass($reflectionClass);
-      $class = $reflectionClass->getName();
-    } else {
-      $this->classStack[] = $reflectionClassExt;
+    if ($reflectionClass->isInterface()) {
+      $reflectionClass    = new ReflectionClass($reflectionClassExt->getImplementClass());
+      $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass);
     }
+    $this->classStack[] = $reflectionClassExt;
     
     // parameters loop
     $refMethod = $reflectionClass->getMethod($method);
     foreach ($refMethod->getParameters() as $param) {
       // check parameter required class
-      $hasClass = ($dependClass = $param->getClass()) ? true : false;
-      
-      // if parameter required class depend another class.
-      if ($hasClass) {
+      if ($dependClass = $param->getClass()) {
         // if it class also depend another class then recursive call.
         $depend = $dependClass->getName();
-        if ($this->hasParameterDependOnClass($depend, '__construct')) {
+        if ($this->hasParameterDependOnClass($depend)) {
           $this->loadClass($depend);
         } else {
-          $this->classStack[] = new Sabel_Container_ReflectionClass($param->getClass(), $reflectionClass);
+          $this->classStack[] = new Sabel_Container_ReflectionClass($dependClass, $reflectionClass);
         }
       }
     }
@@ -71,12 +63,11 @@ class Sabel_Container_DI
   
   public function makeInstance()
   {
-    $stackCount = (int) count($this->classStack);
+    $stackCount =(int) count($this->classStack);
     
-    if ($stackCount < 0) {
+    if ($stackCount < 1)
       throw new SabelException('invalid stack count:' . var_export($this->classStack, 1));
-    }
-    
+      
     $class = array_pop($this->classStack);
     if (is_null($class)) throw new Sabel_Exception_Runtime("class is null.");
     
@@ -98,7 +89,7 @@ class Sabel_Container_DI
     return $instance;
   }
   
-  public function hasParameterDependOnClass($class, $method)
+  public function hasParameterDependOnClass($class, $method = '__construct')
   {
     $refClass  = new ReflectionClass($class);
     
