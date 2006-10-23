@@ -44,9 +44,13 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
           break;
         case 'annot3':
           $this->assertEquals('test3', $annotation->getContents());
+          $this->assertFalse(is_object($annotation->createInjection()));
           break;
         case 'annot4':
           $this->assertTrue(is_array($annotation->getContents()));
+          break;
+        case 'injection':
+          $this->assertTrue(is_object($annotation->createInjection()));
           break;
       }
     }
@@ -72,11 +76,19 @@ class AnnotatedTestClass
    * @annot2   test2
    * @annot3    test3
    * @annot4      test4 elem1 elem2 elem3
+   * @injection  AnnotationsInjectionTestClass
    * @same value
    * @same value
    */
   public function testMethod()
   {
     
+  }
+}
+
+class AnnotationsInjectionTestClass
+{
+  public function testMethod()
+  {
   }
 }

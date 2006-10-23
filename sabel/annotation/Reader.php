@@ -1,8 +1,13 @@
 <?php
 
 /**
- * 
+ * Sabel_Annotation_Reader
  *
+ * @category   Annotation
+ * @package    org.sabel.annotation
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Annotation_Reader
 {
@@ -36,19 +41,9 @@ class Sabel_Annotation_Reader
   {
     $annotations = array();
     foreach (self::$annotation[$className] as $annot) {
-      if ($annot->getName() === $name) {
-        $annotations[] = $annot;
-      }
+      if ($annot->getName() === $name) $annotations[] = $annot;
     }
     return $annotations;
-  }
-  
-  protected function process($comment)
-  {
-    foreach (self::splitComment($comment) as $line) {
-      $annot = Sabel_Annotation_Utility::processAnnotation($line);
-      if ($annot) $this->list->push($annot);
-    }
   }
   
   public static function getAnnotations($comment)
@@ -63,17 +58,20 @@ class Sabel_Annotation_Reader
   
   public static function getAnnotationsByProperty($property)
   {
+    $rawComment  = $property->getDocComment();
     $annotations = array();
-    $rawComment = $property->getDocComment();
-    
-    $as = self::getAnnotations($rawComment);
-    foreach ($as as $annotation) {
-      if (is_object($annotation)) {
-        $annotations[$property->getName()][$annotation->getName()] = $annotation;
-      }
+    foreach (self::getAnnotations($rawComment) as $annotation) {
+      $annotations[$property->getName()][$annotation->getName()] = $annotation;
     }
-    
     return $annotations;
+  }
+  
+  protected function process($comment)
+  {
+    foreach (self::splitComment($comment) as $line) {
+      $annot = Sabel_Annotation_Utility::processAnnotation($line);
+      if ($annot) $this->list->push($annot);
+    }
   }
   
   protected static function splitComment($comment)
