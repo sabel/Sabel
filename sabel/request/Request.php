@@ -25,7 +25,7 @@ class Sabel_Request_Request
   
   public function __construct($entry = null, $requestUri = null)
   {
-    if (is_null(self::$server)) self::$server = new Sabel_Env_Server();
+    if (is_null(self::$server)) self::$server = Sabel_Env_Server::create();
     
     if (isset($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
     if (isset($entry)) $this->initialize($entry);
