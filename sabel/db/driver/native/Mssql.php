@@ -93,8 +93,3 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     return new Sabel_DB_Driver_ResultSet($rows);
   }
 }
-
-function mssql_escape_string($val)
-{
-  return str_replace("'", "''", $val);
-}

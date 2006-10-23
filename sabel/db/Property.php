@@ -64,7 +64,7 @@ class Sabel_DB_Property
 
   private function initTableName($mdlName, &$properties)
   {
-    $properties['table'] = substr(strtolower(preg_replace('/([A-Z])/', '_$1', $mdlName)), 1);
+    $properties['table'] = convert_to_tablename($mdlName);
   }
 
   public function setTableName($tblName)
@@ -258,6 +258,11 @@ class Sabel_DB_Property
   public function receiveSelectCondition($conditions)
   {
     $this->selectConditions = $conditions;
+  }
+
+  public function checkIncColumn()
+  {
+    return ($this->isAutoNumber()) ? $this->properties['incrementKey'] : false;
   }
 
   /**

@@ -48,7 +48,7 @@ class Sabel_DB_Schema_Accessor
 
   public function getColumnNames($tblName)
   {
-    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
+    $schemaClass = 'Schema_' . convert_to_modelname($tblName);
 
     if (class_exists($schemaClass, false)) {
       $sc   = new $schemaClass();

@@ -312,7 +312,7 @@ abstract class Sabel_DB_Wrapper
 
   private function prepareAutoJoin($tblName)
   {
-    $scName = 'Schema_' . str_replace('_', '', $tblName);
+    $scName = 'Schema_' . convert_to_modelname($tblName);
     $sClass = (class_exists($scName, false)) ? new $scName() : false;
     if (!$sClass) return false;
 
@@ -507,15 +507,14 @@ abstract class Sabel_DB_Wrapper
 
   protected function newClass($name)
   {
-    $model = str_replace('_', '', $name);
+    $mdlName = convert_to_modelname($name);
 
-    if ($this->modelExists($model)) {
-      return new $model();
+    if ($this->modelExists($mdlName)) {
+      return new $mdlName();
     } else {
-      $tblName = substr(strtolower(preg_replace('/([A-Z])/', '_$1', $name)), 1);
-      $class = new Sabel_DB_Basic($tblName);
-      $class->setConnectName($this->connectName);
-      return $class;
+      $model = Sabel_DB_Model::load($mdlName);
+      $model->setConnectName($this->connectName);
+      return $model;
     }
   }
 
@@ -572,12 +571,7 @@ abstract class Sabel_DB_Wrapper
       throw new Exception($e->getMessage());
     }
   }
-  
-  private function checkIncColumn()
-  {
-    return ($this->isAutoNumber()) ? $this->incrementKey : false;
-  }
-  
+
   /**
    * remove object
    *
