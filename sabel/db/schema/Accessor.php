@@ -15,7 +15,7 @@ class Sabel_DB_Schema_Accessor
   private $connectName = '';
   private $schemaClass = null;
 
-  public function __construct($connectName, $schema)
+  public function __construct($connectName, $schema = null)
   {
     $dbName    = ucfirst(Sabel_DB_Connection::getDB($connectName));
     $className = 'Sabel_DB_Schema_' . $dbName;
@@ -68,16 +68,7 @@ class Sabel_DB_Schema_Accessor
    */
   public function getTableEngine($tblName, $driver = null)
   {
-    $schemaClass = 'Schema_' . join('', array_map('ucfirst', explode('_', $tblName)));
-
-    if (class_exists($schemaClass, false)) {
-      $sc = new $schemaClass();
-      return $sc->getEngine();
-    }
-
-    if (is_null($driver)) {
-      $driver = Sabel_DB_Connection::getDriver($this->connectName);
-    }
+    if (is_null($driver)) $driver = Sabel_DB_Connection::getDriver($this->connectName);
     $driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
     $row = $driver->getResultSet()->fetch();
     return $row['Engine'];

@@ -54,6 +54,7 @@ require_once SABEL_DB . 'schema/Pgsql.php';
 require_once SABEL_DB . 'schema/Sqlite.php';
 require_once SABEL_DB . 'schema/Mssql.php';
 require_once SABEL_DB . 'schema/Accessor.php';
+require_once SABEL_DB . 'schema/util/Creator.php';
 
 require_once SABEL . 'config/Spyc.php';
 require_once SABEL . 'config/Yaml.php';
@@ -221,10 +222,21 @@ class Schema_Writer
       fwrite($fp, "    return null;\n  }\n");
     }
 
+    fwrite($fp, "\n public function getIncrementKey()\n  {\n");
+    if (array_key_exists($tName, Schema_Maker::$tblIncrement)) {
+      $iKey = Schema_Maker::$tblIncrement[$tName];
+      fwrite($fp, "    return '{$iKey}';\n  }\n");
+    } else {
+      fwrite($fp, "    return null;\n  }\n");
+    }
+
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
       $engine = $sa->getTableEngine($tName);
-      fwrite($fp, "\n  public function getEngine()\n  {\n");
+      fwrite($fp, "\n  public function getTableEngine()\n  {\n");
       fwrite($fp, "    return '{$engine}';\n  }\n");
+    } else {
+      fwrite($fp, "\n  public function getTableEngine()\n  {\n");
+      fwrite($fp, "    return null;\n  }\n");
     }
 
     fwrite($fp,  "}\n");
@@ -234,8 +246,9 @@ class Schema_Writer
 
 class Schema_Maker
 {
-  public static $tblParents = array();
-  public static $tblPrimary = array();
+  public static $tblParents   = array();
+  public static $tblPrimary   = array();
+  public static $tblIncrement = array();
 
   public static function make($connectName, $schema)
   {
@@ -268,7 +281,8 @@ class Schema_Maker
       array_push($info, "'nullable' => {$nullable}, ");
       array_push($info, "'primary' => {$primary}, ");
 
-      if ($column->primary) self::$tblPrimary[$tName][] = $column->name;
+      if ($column->primary)   self::$tblPrimary[$tName][] = $column->name;
+      if ($column->increment) self::$tblIncrement[$tName] = $column->name;
 
       $def = $column->default;
       if (is_null($def)) {
@@ -298,7 +312,7 @@ class Schema_Util_Generator
   {
     $input = $_SERVER['argv'];
 
-    $yml   = new Sabel_Config_Yaml(SABEL_DB . 'schema/util/database.yml');
+    $yml   = new Sabel_Config_Yaml('config/database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;
@@ -320,7 +334,10 @@ class Schema_Util_Generator
       self::$connectNameList[] = $connectName;
       Sabel_DB_Connection::addConnection($connectName, $params);
 
-      $sa = new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
+      $sa = ($params['driver'] === 'pdo-sqlite')
+        ? new Sabel_DB_Schema_Accessor($connectName)
+        : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
+
       $schemas = $sa->getTables();
 
       foreach ($schemas as $schema) {

@@ -1478,7 +1478,7 @@ class Schema_Trans2
     return 'id';
   }
 
-  public function getEngine()
+  public function getTableEngine()
   {
     return 'InnoDB';
   }

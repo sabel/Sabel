@@ -47,12 +47,11 @@ abstract class Sabel_DB_Wrapper
     return $this->property->$key;
   }
 
-  // @todo argument list.
   public function __call($method, $parameters)
   {
-    if (sizeof($parameters) === 1) $parameters = $parameters[0];
     if (is_null($this->property)) $this->createProperty();
-    return $this->property->$method($parameters);
+    @list($arg1, $arg2, $arg3) = $parameters;
+    return $this->property->$method($arg1, $arg2, $arg3);
   }
 
   public function schema($tblName = null)
@@ -97,15 +96,14 @@ abstract class Sabel_DB_Wrapper
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }
 
-  public function setCondition($param1, $param2 = null, $param3 = null)
-  {
-    $this->property->setCondition($param1, $param2, $param3);
-  }
-
   public function begin()
   {
     $driver = $this->getExecuter()->getDriver();
-    $check  = $this->checkTableEngine($driver);
+    $check  = true;
+
+    if (Sabel_DB_Connection::getDB($this->connectName) === 'mysql') {
+      $check = $this->checkTableEngine($driver);
+    }
 
     if ($check) Sabel_DB_Transaction::begin($this->connectName, $driver);
   }
@@ -123,21 +121,6 @@ abstract class Sabel_DB_Wrapper
   public function close()
   {
     Sabel_DB_Connection::close($this->connectName);
-  }
-
-  protected function checkTableEngine($driver)
-  {
-    $db = Sabel_DB_Connection::getDB($this->connectName);
-    if ($db !== 'mysql') return true;
-
-    $engine = $this->createSchemaAccessor()->getTableEngine($this->table, $driver);
-    if ($engine !== 'InnoDB' && $engine !== 'BDB') {
-      $msg = "begin transaction, but a table engine of the '{$this->table}' is {$engine}.";
-      trigger_error($msg, E_USER_NOTICE);
-      return false;
-    } else {
-      return true;
-    }
   }
 
   public function getCount($param1 = null, $param2 = null, $param3 = null)
