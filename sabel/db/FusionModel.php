@@ -3,10 +3,11 @@
 class Sabel_DB_FusionModel
 {
   private
-    $models      = array(),
-    $modelNames  = array(),
-    $makedModels = array(),
-    $modelsData  = array();
+    $models       = array(),
+    $modelNames   = array(),
+    $makedModels  = array(),
+    $modelsData   = array(),
+    $fusionedData = array();
 
   private
     $baseTable  = '',
@@ -41,8 +42,8 @@ class Sabel_DB_FusionModel
   {
     foreach ($this->modelsData as $mdlName => $data) {
       if (array_key_exists($key, $data)) {
-        $this->modelsData[$mdlName][$key] = $val;
         $this->updateModels[] = $mdlName;
+        $this->modelsNewData[$mdlName][$key] = $val;
       }
     }
   }
@@ -54,9 +55,9 @@ class Sabel_DB_FusionModel
     }
   }
 
-  public function __call($method, $parameters)
+  public function toArray()
   {
-    //
+    return $this->fusionedData;
   }
 
   public function setFusionCondition($unitCondition)
@@ -66,9 +67,15 @@ class Sabel_DB_FusionModel
     $modelCondition = array();
     foreach ($unitCondition as $condition) {
       list($p, $c)   = explode(':', $condition);
-      list($pm, $pk) = explode('.', $p);
-      list($cm, $ck) = explode('.', $c);
-
+      if (strpos('.', $p) === false) {
+        $pm = $p;
+        $cm = $c;
+        $pk = 'id';
+        $ck = convert_to_tablename($pm) . '_id';
+      } else {
+        list($pm, $pk) = explode('.', $p);
+        list($cm, $ck) = explode('.', $c);
+      }
       $modelCondition[$pm][$cm] = array($pk, $ck);
     }
     $this->unitCondition = $modelCondition;
@@ -76,10 +83,11 @@ class Sabel_DB_FusionModel
 
   public function selectOne($column, $val)
   {
-    $model = $this->models[$this->baseModel]->selectOne($column, $val);
-    $this->makedModels[] = $model;
-    $this->modelsData[$this->baseModel] = $model->getData();
-    $this->getModel($this->baseModel, $model);
+    $baseModel = $this->baseModel;
+    $model = $this->models[$baseModel]->selectOne($column, $val);
+    $this->makedModels[$baseModel] = $model;
+    $this->modelsData[$baseModel]  = $model->getData();
+    $this->makeModel($baseModel, $model);
 
     $data = array();
     foreach ($this->makedModels as $model) {
@@ -87,19 +95,23 @@ class Sabel_DB_FusionModel
       $data[$mdlName] = $model->getData();
     }
     $this->addPrefixData();
+
+    foreach ($this->modelsData as $data)
+      $this->fusionedData = array_merge($data, $this->fusionedData);
+
     return $this;
   }
 
-  public function getModel($mdlName, $model)
+  public function makeModel($mdlName, $model)
   {
     if (!array_key_exists($mdlName, $this->unitCondition)) return null;
 
     foreach ($this->unitCondition[$mdlName] as $cm => $keys) {
       list($pk, $ck) = $keys;
-      $model   = $this->models[$cm]->selectOne($ck, $model->$pk);
-      $this->makedModels[] = $model;
-      $this->modelsData[$cm] = $model->getData();
-      $this->getModel($cm, $model);
+      $model = $this->models[$cm]->selectOne($ck, $model->$pk);
+      $this->makedModels[$cm] = $model;
+      $this->modelsData[$cm]  = $model->getData();
+      $this->makeModel($cm, $model);
     }
   }
 
@@ -147,8 +159,14 @@ class Sabel_DB_FusionModel
 
   public function save()
   {
-    foreach ($this->updateModels as $model) {
-
+    foreach ($this->updateModels as $mdlName) {
+      $model   = $this->makedModels[$mdlName];
+      $newData = $this->modelsNewData[$mdlName];
+      foreach ($newData as $key => $val) {
+        $key = str_replace("{$mdlName}_", '', $key);
+        $model->$key = $val;
+      }
+      $model->save();
     }
   }
 }

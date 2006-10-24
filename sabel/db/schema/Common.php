@@ -17,23 +17,22 @@ abstract class Sabel_DB_Schema_Common
 
   public function getTable($tblName)
   {
-    $schemaClass = 'Schema_' . convert_to_modelname($tblName);
+    $sClass = get_schema_by_tablename($tblName);
+    $cache  = Sabel_DB_SimpleCache::get('schema_' . $tblName);
+    if ($cache) return $cache;
 
-    if (is_null($schema = Sabel_DB_SimpleCache::get($schemaClass))) {
-      if (class_exists($schemaClass, false)) {
-        $sc   = new $schemaClass();
-        $cols = array();
-        foreach ($sc->get() as $colName => $params) {
-          $co = new Sabel_DB_Schema_Column();
-          $co->name = $colName;
-          $cols[$colName] = $co->make($params);
-        }
-      } else {
-        $cols = $this->createColumns($tblName);
+    if ($sClass) {
+      $cols = array();
+      foreach ($sClass->get() as $colName => $colInfo) {
+        $co = new Sabel_DB_Schema_Column();
+        $co->name = $colName;
+        $cols[$colName] = $co->make($colInfo);
       }
-      $schema = new Sabel_DB_Schema_Table($tblName, $cols);
-      Sabel_DB_SimpleCache::add($schemaClass, $schema);
+    } else {
+      $cols = $this->createColumns($tblName);
     }
+    $schema = new Sabel_DB_Schema_Table($tblName, $cols);
+    Sabel_DB_SimpleCache::add('schema_' . $tblName, $schema);
     return $schema;
   }
 

@@ -36,10 +36,10 @@ class Sabel_DB_Schema_Accessor
 
   public function getTableNames()
   {
-    $schemaClass = 'Schema_' . ucfirst($this->connectName) . 'TableList';
+    $sClass = 'Schema_' . ucfirst($this->connectName) . 'TableList';
 
-    if (class_exists($schemaClass, false)) {
-      $sc = new $schemaClass();
+    if (class_exists($sClass, false)) {
+      $sc = new $sClass();
       return $sc->get();
     } else {
       return $this->schemaClass->getTableNames();
@@ -48,11 +48,10 @@ class Sabel_DB_Schema_Accessor
 
   public function getColumnNames($tblName)
   {
-    $schemaClass = 'Schema_' . convert_to_modelname($tblName);
+    $sClass = get_schema_by_tablename($tblName);
 
-    if (class_exists($schemaClass, false)) {
-      $sc   = new $schemaClass();
-      $cols = $sc->get();
+    if ($sClass) {
+      $cols = $sClass->get();
     } else {
       $executer = new Sabel_DB_Executer($this->connectName);
       $executer->setConstraint('limit', 1);

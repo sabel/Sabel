@@ -22,11 +22,11 @@ require_once SABEL_DB . 'driver/native/Firebird.php';
 require_once SABEL_DB . 'driver/pdo/Statement.php';
 require_once SABEL_DB . 'driver/pdo/Driver.php';
 
+require_once SABEL_DB . 'Functions.php';
 require_once SABEL_DB . 'SimpleCache.php';
 require_once SABEL_DB . 'Transaction.php';
 require_once SABEL_DB . 'Property.php';
-require_once SABEL_DB . 'Wrapper.php';
-require_once SABEL_DB . 'Basic.php';
+require_once SABEL_DB . 'Relation.php';
 require_once SABEL_DB . 'Tree.php';
 require_once SABEL_DB . 'Bridge.php';
 
@@ -182,15 +182,13 @@ class Schema_Writer
     fwrite($fp, "<?php\n\n");
     fwrite($fp, "class {$className}\n{\n");
     fwrite($fp, "  public function get()\n  {\n");
-    fwrite($fp, '    $sql = array();');
+    fwrite($fp, '    $cols = array();');
     fwrite($fp, "\n\n");
 
     foreach ($colArray as $line) fwrite($fp, '    ' . $line);
 
-    fwrite($fp, "\n    return " . '$sql;' . "\n  }\n");
+    fwrite($fp, "\n    return " . '$cols;' . "\n  }\n");
 
-    fwrite($fp, "\n  public function getConnectName()\n  {\n");
-    fwrite($fp, "    return '{$connectName}';\n  }\n");
 
     fwrite($fp, "\n  public function getParents()\n  {\n");
     if (array_key_exists($tName, Schema_Maker::$tblParents)) {
@@ -205,41 +203,44 @@ class Schema_Writer
       fwrite($fp, "    return null;\n  }\n");
     }
 
-    fwrite($fp, "\n  public function getPrimaryKey()\n  {\n");
+    $property = array();
+    array_push($property, '$property = array(' . "'connectName'  => '{$connectName}',\n");
+
+    array_push($property, '                      ');
     if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
       $pArray = Schema_Maker::$tblPrimary[$tName];
       if (sizeof($pArray) === 1) {
-        fwrite($fp, "    return '{$pArray[0]}';\n  }\n");
+        array_push($property, "'primaryKey'   => '{$pArray[0]}',\n");
       } else {
         $keys = array();
-        fwrite($fp, '    return array(');
         array_push($keys, "'{$pArray[0]}'");
         for ($i = 1; $i < sizeof($pArray); $i++) array_push($keys, ", '{$pArray[$i]}'");
-        fwrite($fp, join('', $keys));
-        fwrite($fp, ");\n  }\n");
+        array_push($property, "'primaryKey'   => array(" . join('', $keys) . "),\n");
       }
     } else {
-      fwrite($fp, "    return null;\n  }\n");
+      array_push($property, "'primaryKey'   => null,\n");
     }
 
-    fwrite($fp, "\n public function getIncrementKey()\n  {\n");
+    array_push($property, '                      ');
     if (array_key_exists($tName, Schema_Maker::$tblIncrement)) {
       $iKey = Schema_Maker::$tblIncrement[$tName];
-      fwrite($fp, "    return '{$iKey}';\n  }\n");
+      array_push($property, "'incrementKey' => '{$iKey}',\n");
     } else {
-      fwrite($fp, "    return null;\n  }\n");
+      array_push($property, "'incrementKey' => null,\n");
     }
 
+    array_push($property, '                      ');
     if ($drvName === 'mysql' || $drvName === 'pdo-mysql') {
       $engine = $sa->getTableEngine($tName);
-      fwrite($fp, "\n  public function getTableEngine()\n  {\n");
-      fwrite($fp, "    return '{$engine}';\n  }\n");
+      array_push($property, "'tableEngine'  => '{$engine}');\n\n");
     } else {
-      fwrite($fp, "\n  public function getTableEngine()\n  {\n");
-      fwrite($fp, "    return null;\n  }\n");
+      array_push($property, "'tableEngine'  => null);\n\n");
     }
 
-    fwrite($fp,  "}\n");
+    fwrite($fp, "\n  public function getProperty()\n  {\n");
+    fwrite($fp, '    ' . join('', $property));
+    fwrite($fp, "    " . 'return $property;');
+    fwrite($fp, "\n  }\n}\n");
     fclose($fp);
   }
 }
@@ -263,7 +264,7 @@ class Schema_Maker
       }
 
       $info = array();
-      array_push($info, '$sql[' . "'{$column->name}'] = array(");
+      array_push($info, '$cols[' . "'{$column->name}'] = array(");
       array_push($info, "'type' => '{$column->type}', ");
 
       if ($column->type === Sabel_DB_Schema_Const::INT) {
@@ -311,8 +312,7 @@ class Schema_Util_Generator
   public static function main()
   {
     $input = $_SERVER['argv'];
-
-    $yml   = new Sabel_Config_Yaml('config/database.yml');
+    $yml   = new Sabel_Config_Yaml(SABEL_DB . 'schema/util/database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;

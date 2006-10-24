@@ -873,15 +873,15 @@ class Test_DB_Test extends SabelTestCase
   public function testJoinSelect()
   {
     $cols = array();
-    $cols['test']  = array('id', 'name', 'blood', 'test2_id');
-    $cols['test2'] = array('id', 'name', 'test3_id');
-    $cols['test3'] = array('id', 'name');
+    $cols['Test']  = array('id', 'name', 'blood', 'test2_id');
+    $cols['Test2'] = array('id', 'name', 'test3_id');
+    $cols['Test3'] = array('id', 'name');
 
-    $pair = array('test:test2', 'test2:test3');
+    $pair = array('Test:Test2', 'Test2:Test3');
 
     $test = new Test();
     $test->sconst('order', 'test.id');
-    $res  = $test->selectJoin($pair, $cols);
+    $res  = $test->selectJoin($pair, 'LEFT', $cols);
 
     $test1 = $res[0];
     $test2 = $res[1];
@@ -1315,7 +1315,7 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-class MapperDefault extends Sabel_DB_Wrapper
+class MapperDefault extends Sabel_DB_Relation
 {
 
 }
@@ -1419,7 +1419,7 @@ class Trans1 extends MapperDefault
 
 }
 
-class Trans2 extends Sabel_DB_Wrapper
+class Trans2 extends Sabel_DB_Relation
 {
   protected $connectName = 'default2';
 }
@@ -1463,23 +1463,18 @@ class Schema_Trans2
     return $sql;
   }
 
-  public function getConnectName()
+  public function getParents()
   {
-    return 'default2';
+    return array('trans1');
   }
 
-  public function getPrimaryKey()
+  public function getProperty()
   {
-    return 'id';
-  }
+    $property = array('connectName'  => 'default2',
+                      'primaryKey'   => 'id',
+                      'incrementKey' => 'id',
+                      'tableEngine'  => 'InnoDB');
 
-  public function getIncrementKey()
-  {
-    return 'id';
-  }
-
-  public function getTableEngine()
-  {
-    return 'InnoDB';
+    return $property;
   }
 }

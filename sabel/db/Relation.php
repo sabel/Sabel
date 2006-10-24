@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Wrapper
+ * Sabel_DB_Relation
  *
  * @abstract
  * @category   DB
@@ -18,6 +18,7 @@ abstract class Sabel_DB_Relation
   private
     $joinPair     = array(),
     $joinColList  = array(),
+    $joinConNames = array(),
     $joinColCache = array();
 
   private
@@ -123,6 +124,14 @@ abstract class Sabel_DB_Relation
     Sabel_DB_Connection::close($this->connectName);
   }
 
+  /**
+   * get count by specified (or already set) condition.
+   *
+   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed    $param2 condition value.
+   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return integer rows count
+   */
   public function getCount($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
@@ -154,16 +163,16 @@ abstract class Sabel_DB_Relation
   public function aggregate($func, $child = null, $group = null)
   {
     if (is_null($child)) {
-      $table   = $this->table;
+      $tblName = $this->table;
       $columns = (is_null($group)) ? $this->primaryKey : $group;
     } else {
-      $table   = $child;
+      $tblName = $child;
       $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
     }
     $this->setConstraint('group', $columns);
 
     $executer = $this->getExecuter();
-    $executer->getStatement()->setBasicSQL("SELECT $columns , $func FROM $table");
+    $executer->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
     return $this->toObject($executer->execute());
   }
 
@@ -173,6 +182,14 @@ abstract class Sabel_DB_Relation
     $this->makeFindObject($this);
   }
 
+  /**
+   * retrieve one row from table.
+   *
+   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed    $param2 condition value.
+   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return object
+   */
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
     $conditions = $this->getCondition();
@@ -185,10 +202,10 @@ abstract class Sabel_DB_Relation
 
   private function makeFindObject($model)
   {
-    $model->receiveSelectCondition($model->getCondition());
     $projection = $model->getProjection();
     $executer   = $model->getExecuter();
     $executer->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
+    $model->receiveSelectCondition($model->getCondition());
 
     if ($row = $executer->execute()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
@@ -202,30 +219,39 @@ abstract class Sabel_DB_Relation
     return $model;
   }
 
-  public function selectJoin($relTableList, $columnList = null)
+  /**
+   * retrieve rows from table by join query of some types.
+   *
+   * @param  array  $modelPairs model pairs. (ex. 'Hoge:Huga'
+   * @param  string $joinType   'INNER'( default ) or 'LEFT' or 'RIGHT'
+   * @param  array  $colList    key is model name. and set the columns name in it.
+   * @return array
+   */
+  public function selectJoin($modelPairs, $joinType = 'INNER', $colList = null)
   {
-    if (!is_array($relTableList))
+    if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
     $sql        = array('SELECT ');
     $joinTables = array();
     $myTable    = $this->table;
-    $relTables  = $this->toTablePair($relTableList);
+    $relTables  = $this->toTablePair($modelPairs);
+    $colList    = $this->remakeColList($colList);
 
-    $columns = (isset($columnList[$myTable])) ? $columnList[$myTable] : $this->getColumnNames($myTable);
+    $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames($myTable);
     foreach ($columns as $column) array_push($sql, "{$myTable}.{$column}, ");
 
     foreach ($relTables as $pair) $joinTables = array_merge($joinTables, array_values($pair));
     $joinTables = array_diff(array_unique($joinTables), (array)$myTable);
 
-    foreach ($joinTables as $table) $this->addJoinColumns($sql, $table, $columnList);
+    foreach ($joinTables as $tblName) $this->addJoinColumns($sql, $tblName, $colList);
 
     $sql = array(substr(join('', $sql), 0, -2));
     array_push($sql, " FROM {$myTable}");
 
     foreach ($relTables as $pair) {
       list($child, $parent) = array_values($pair);
-      array_push($sql, " LEFT JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ");
+      array_push($sql, " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ");
     }
 
     $executer = $this->getExecuter();
@@ -238,17 +264,17 @@ abstract class Sabel_DB_Relation
       list($self, $models) = $this->makeEachModels($row, $joinTables);
       $relational = $this->relational;
 
-      foreach ($joinTables as $table) {
-        if (!array_key_exists($table, $relational)) continue;
-        foreach ($relational[$table] as $parent) {
-          $mdlName = join('', array_map('ucfirst', explode('_', $parent)));
-          $models[$table]->$mdlName = $models[$parent];
-          $models[$table]->unsetNewData();
+      foreach ($joinTables as $tblName) {
+        if (!array_key_exists($tblName, $relational)) continue;
+        foreach ($relational[$tblName] as $parent) {
+          $mdlName = convert_to_modelname($parent);
+          $models[$tblName]->$mdlName = $models[$parent];
+          $models[$tblName]->unsetNewData();
         }
       }
 
       foreach ($relational[$myTable] as $parent) {
-        $mdlName = join('', array_map('ucfirst', explode('_', $parent)));
+        $mdlName = convert_to_modelname($parent);
         $self->$mdlName = $models[$parent];
       }
       $self->unsetNewData();
@@ -257,24 +283,36 @@ abstract class Sabel_DB_Relation
     return $results;
   }
 
-  private function toTablePair($relTableList)
+  private function toTablePair($modelPairs)
   {
     $relTables = array();
 
-    foreach ($relTableList as $pair) {
-      list($child, $parent) = explode(':', $pair);
+    foreach ($modelPairs as $pair) {
+      list($child, $parent) = array_map('convert_to_tablename', explode(':', $pair));
       $this->relational[$child][] = $parent;
       $relTables[] = array($child, $parent);
     }
     return $relTables;
   }
 
-  private function addJoinColumns(&$sql, $table, $columnList = null)
+  private function remakeColList($colList)
   {
-    $columns = (isset($columnList[$table])) ? $columnList[$table] : $this->getColumnNames($table);
+    if (empty($colList)) return array();
+
+    foreach ($colList as $key => $colNames) {
+      $newKey = convert_to_tablename($key);
+      $colList[$newKey] = $colNames;
+      unset($colList[$key]);
+    }
+    return $colList;
+  }
+
+  private function addJoinColumns(&$sql, $tblName, $colList = null)
+  {
+    $columns = (isset($colList[$tblName])) ? $colList[$tblName] : $this->getColumnNames($tblName);
     foreach ($columns as $column) {
-      $this->joinColCache[$table][] = $column;
-      array_push($sql, "{$table}.{$column} AS pre_{$table}_{$column}, ");
+      $this->joinColCache[$tblName][] = $column;
+      array_push($sql, "{$tblName}.{$column} AS pre_{$tblName}_{$column}, ");
     }
   }
 
@@ -284,23 +322,23 @@ abstract class Sabel_DB_Relation
     $acquire  = array();
     $colCache = $this->joinColCache;
 
-    foreach ($joinTables as $table) {
-      $model  = $this->newClass($table);
+    foreach ($joinTables as $tblName) {
+      $model  = $this->newClass($tblName);
       $pKey   = $model->primaryKey;
-      $preCol = "pre_{$table}_{$pKey}";
-      $cache  = Sabel_DB_SimpleCache::get($table . $row[$preCol]);
+      $preCol = "pre_{$tblName}_{$pKey}";
+      $cache  = Sabel_DB_SimpleCache::get($tblName . $row[$preCol]);
 
       if (is_object($cache)) {
-        $models[$table] = clone($cache);
+        $models[$tblName] = clone($cache);
       } else {
-        foreach ($colCache[$table] as $column) {
-          $preCol = "pre_{$table}_{$column}";
-          $acquire[$table][$column] = $row[$preCol];
+        foreach ($colCache[$tblName] as $column) {
+          $preCol = "pre_{$tblName}_{$column}";
+          $acquire[$tblName][$column] = $row[$preCol];
           unset($row[$preCol]);
         }
-        $this->setData($model, $acquire[$table]);
-        $models[$table] = $model;
-        Sabel_DB_SimpleCache::add($table . $model->$pKey, $model);
+        $this->setData($model, $acquire[$tblName]);
+        $models[$tblName] = $model;
+        Sabel_DB_SimpleCache::add($tblName . $model->$pKey, $model);
       }
     }
 
@@ -312,12 +350,10 @@ abstract class Sabel_DB_Relation
 
   private function prepareAutoJoin($tblName)
   {
-    $scName = 'Schema_' . convert_to_modelname($tblName);
-    $sClass = (class_exists($scName, false)) ? new $scName() : false;
-    if (!$sClass) return false;
+    if (!$sClass = get_schema_by_tablename($tblName)) return false;
+    if (!$this->isSameConnectName($sClass)) return false;
 
     $this->joinColList[$tblName] = array_keys($sClass->get());
-
     if ($parents = $sClass->getParents()) {
       foreach ($parents as $parent) {
         $this->joinPair[] = $tblName . ':' . $parent;
@@ -327,10 +363,29 @@ abstract class Sabel_DB_Relation
     return true;
   }
 
+  private function isSameConnectName($sClass)
+  {
+    $props = $sClass->getProperty();
+    if (($size = sizeof($this->joinConNames)) === 0) {
+      $this->joinConNames[] = $props['connectName'];
+    } else {
+      if ($this->joinConNames[$size - 1] !== $props['connectName']) return false;
+    }
+    return true;
+  }
+
+  /**
+   * retrieve rows from table.
+   *
+   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed    $param2 condition value.
+   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return array
+   */
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     if ($this->isWithParent() && $this->prepareAutoJoin($this->table)) {
-      return $this->selectJoin($this->joinPair, $this->joinColList);
+      return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
     }
 
     $this->setCondition($param1, $param2, $param3);
@@ -406,9 +461,9 @@ abstract class Sabel_DB_Relation
     foreach ($row as $key => $val) {
       if (strpos($key, "_{$pKey}") !== false) {
         $tblName = str_replace("_{$pKey}", '', $key);
-        $mdlName = array_map('ucfirst', explode('_', $tblName));
         $result  = $this->addParentModels($tblName, $val);
-        if ($result) $row[join('', $mdlName)] = $result;
+        $mdlName = convert_to_modelname($tblName);
+        if ($result) $row[$mdlName] = $result;
       }
     }
     return $row;
@@ -421,6 +476,13 @@ abstract class Sabel_DB_Relation
     return false;
   }
 
+  /**
+   * to fetch children of it model by convention such as *_id ( *_primary key )
+   *
+   * @param  string $child model name.
+   * @param  mixed  $model need not be used. ( used internally )
+   * @return array
+   */
   public function getChild($child, $model = null)
   {
     if (is_null($model)) $model = $this;
@@ -496,9 +558,9 @@ abstract class Sabel_DB_Relation
     $id   = $data[$this->primaryKey];
     if (empty($id)) throw new Exception('Error: newChild() who is a parent? hasn\'t id value.');
 
-    $parent = $this->table;
-    $table  = (is_null($child)) ? $parant : $child;
-    $model  = $this->newClass($table);
+    $parent  = $this->table;
+    $tblName = (is_null($child)) ? $parant : $child;
+    $model   = $this->newClass($tblName);
 
     $column = "{$parent}_{$this->primaryKey}";
     $model->$column = $id;
@@ -520,7 +582,7 @@ abstract class Sabel_DB_Relation
 
   private function modelExists($className)
   {
-    return (class_exists($className, false) && strtolower($className) !== 'sabel_db_basic');
+    return (class_exists($className, false) && strtolower($className) !== 'sabel_db_empty');
   }
 
   public function clearChild($child)
@@ -573,11 +635,11 @@ abstract class Sabel_DB_Relation
   }
 
   /**
-   * remove object
+   * remove row(s) from the table.
    *
-   * @param mixed $param1 hereisdescription
-   * @param mixed $param2 this is test
-   * @param mixed $param3 this is test
+   * @param  mixed     $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed     $param2 condition value.
+   * @param  constrant $param3 denial ( Sabel_DB_Condition::NOT )
    * @return void
    */
   public function remove($param1 = null, $param2 = null, $param3 = null)
@@ -605,10 +667,16 @@ abstract class Sabel_DB_Relation
     $executer->execute();
   }
 
+  /**
+   * cascade delete.
+   *
+   * @param  integer $id value of id ( primary key ).
+   * @return void
+   */
   public function cascadeDelete($id = null)
   {
     if (is_null($id) && !$this->isSelected()) {
-      throw new Exception('Error: give the value of id or select the object beforehand.');
+      throw new Exception('Error: give the value of id or select the model beforehand.');
     }
 
     $data = $this->getData();
@@ -682,6 +750,13 @@ abstract class Sabel_DB_Relation
     }
   }
 
+  /**
+   * execute a query directly.
+   *
+   * @param  string $sql   execute query.
+   * @param  array  $param character strings where it should escape.
+   * @return array
+   */
   public function execute($sql, $param = null)
   {
     if (!empty($param) && !is_array($param))
@@ -695,10 +770,8 @@ abstract class Sabel_DB_Relation
     if ($resultSet->isEmpty()) return false;
 
     $models  = array();
-    $tblName = $this->table;
-
     foreach ($resultSet as $row) {
-      $cloned = $model = $this->newClass($tblName);
+      $cloned = $model = $this->newClass($this->table);
       $cloned->setProperties($row);
       $models[] = $cloned;
     }

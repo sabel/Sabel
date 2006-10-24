@@ -44,10 +44,11 @@ class Sabel_DB_Property
     $sClass = 'Schema_' . $mdlName;
     if (class_exists($sClass, false)) {
       $sc = new $sClass();
-      $properties = array('connectName'  => $sc->getConnectName(),
-                          'primaryKey'   => $sc->getPrimaryKey(),
-                          'incrementKey' => $sc->getIncrementKey(),
-                          'tableEngine'  => $sc->getTableEngine());
+      $ps = $sc->getProperty();
+      $properties = array('connectName'  => $ps['connectName'],
+                          'primaryKey'   => $ps['primaryKey'],
+                          'incrementKey' => $ps['incrementKey'],
+                          'tableEngine'  => $ps['tableEngine']);
     } else {
       $properties = array('connectName'  => 'default',
                           'primaryKey'   => 'id',
@@ -147,6 +148,16 @@ class Sabel_DB_Property
     $this->overrideProps['projection'] = (is_array($p)) ? join(',', $p) : $p;
   }
 
+  /**
+   * setting condition.
+   *
+   * @param mixed    $arg1 column name ( with the condition prefix ),
+   *                       or value of primary key,
+   *                       or object of Sabel_DB_Condition.
+   * @param mixed    $arg2 condition value.
+   * @param constant $arg3 denial ( Sabel_DB_Condition::NOT )
+   * @return void
+   */
   public function setCondition($arg1, $arg2 = null, $arg3 = null)
   {
     if (empty($arg1)) return null;
@@ -210,6 +221,14 @@ class Sabel_DB_Property
     return $this->childConditions;
   }
 
+  /**
+   * setting constraint.
+   * the keys which you can use are 'group', 'having', 'order', 'limit', 'offset'.
+   *
+   * @param mixed $arg1 array constriant(s). or string key.
+   * @param mixed $arg2 value of integer or value of string.
+   * @return void
+   */
   public function setConstraint($arg1, $arg2 = null)
   {
     if (!is_array($arg1)) $arg1 = array($arg1 => $arg2);
@@ -270,14 +289,14 @@ class Sabel_DB_Property
    * this method is for mysql.
    * examine the engine of the table.
    *
+   * @param  object $driver driver an instance of Sabel_DB_Driver_Native_Mysql
+   *                                           or Sabel_DB_Driver_Pdo_Driver
+   * @return string table engine.
    */
   private function getTableEngine($driver = null)
   {
-    $engine = $this->properties['tableEngine'];
-
-    if (is_null($engine)) {
+    if (is_null($this->properties['tableEngine'])) {
       $msg = 'schema class is not found. please generate it by schema.php';
-      // @todo
       //trigger_error($msg, E_USER_NOTICE);
 
       $cn = $this->properties['connectName'];
@@ -286,7 +305,7 @@ class Sabel_DB_Property
 
       return $sa->getTableEngine($this->properties['table'], $driver);
     } else {
-      return $engine;
+      return $this->properties['tableEngine'];
     }
   }
 
