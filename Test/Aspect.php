@@ -67,40 +67,62 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     $this->assertTrue($matches->matched('Test_AspectOne'));
   }
   
-  public function testAspect()
+  public function testAspectsContainer()
   {
     $aspects = Sabel_Aspect_Aspects::singleton();
     $aspects->add(new Test_AspectOne());
     $aspects->add(new Test_AspectTwo());
     $maches = $aspects->findMatch(array('method' => 'doSome'));
     $this->assertTrue($maches->matched('Test_AspectOne'));
-    $target = new Sabel_Aspect_Proxy(new Target());
-    $target->doSomething();
   }
   
-  public function testAspectAfterThrowing()
+  public function testAspect()
   {
-    $aspects = Sabel_Aspect_Aspects::singleton();
-    $aspects->add(new ServerHandler());
+    $aRackClient = new Sabel_Aspect_Proxy(new RackClient());
+    $result = $aRackClient->main();
     
-    $rack = new Sabel_Aspect_Proxy(new Rack());
-    $firstMount  = $rack->mount(new Server('XEON'));
-    $secondMount = $rack->mount(new Server('Opteron'));
-    
-    $this->assertTrue($firstMount);
-    $this->assertEquals('rack space full', $secondMount);
+    $this->assertTrue($result[0]);
+    $this->assertEquals('rack space full', $result[1]);
     $this->assertEquals(1, ServerStock::getNumberOfStock());
     $this->assertEquals('Opteron', ServerStock::pop()->getName());
+    
+    $aNotification = new Notification();
+    $notifications = $aNotification->fetch();
+    $this->assertEquals('added XEON',    $notifications[0]);
+    $this->assertEquals('added Opteron', $notifications[1]);
   }
 }
 
 // test classes for testAspectAfterThrowing
 {
+  class RackClient
+  {
+    public function main()
+    {
+      $rack = $this->getRack();
+      
+      $firstMount  = $rack->mount(new Server('XEON'));
+      $secondMount = $rack->mount(new Server('Opteron'));
+      
+      return array($firstMount, $secondMount);
+    }
+    
+    protected function getRack()
+    {
+      $aspects = Sabel_Aspect_Aspects::singleton();
+      $aspects->add(new RackMountFailMonitor());
+      $aspects->add(new Notifier());
+      
+      return new Sabel_Aspect_Proxy(new Rack());
+    }
+  }
+  
   class NoRackSpaceException extends Exception { }
   
   class Rack
   {
-    protected $space = 41;
+    protected $space   = 41;
+    protected $servers = array();
     
     public function mount($server)
     {
@@ -108,6 +130,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
         throw new NoRackSpaceException('rack space full');
       }
       
+      $this->servers = $server;
       $this->space++;
       return true;
     }
@@ -150,17 +173,56 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     }
   }
   
-  class ServerHandler
+  class Notification
   {
-    public function pointcut()
+    public static $statuses = array();
+    
+    public function add($status)
     {
-      return Sabel_Aspect_Pointcut::create('ServerHandler', $this)->setMethodRegex('mount')
-                                                                  ->asAfter();
+      self::$statuses[] = $status;
     }
     
-    public function afterThrowing(NoRackSpaceException $e, $arg, $target) {
-      ServerStock::add($arg[0]);
-      return $e->getMessage();
+    public function fetch()
+    {
+      return self::$statuses;
+    }
+  }
+  
+  // here is Aspects
+  {
+    class RackmountFailMonitor
+    {
+      public function pointcut()
+      {
+        return Sabel_Aspect_Pointcut::create('RackmountFailMonitor', $this)
+               ->setMethodRegex('mount')->asAfter();
+      }
+      
+      public function throwing($joinpoint) {
+        ServerStock::add($joinpoint->getArgument(0));
+        return $joinpoint->getException()->getMessage();
+      }
+    }
+    
+    class Notifier
+    {
+      public function pointcut()
+      {
+        return Sabel_Aspect_Pointcut::create('Notifier', $this)
+               ->setMethodRegex('.*')->asBefore();
+      }
+      
+      public function around()
+      {
+        return true;
+      }
+      
+      public function before($joinpoint)
+      {
+        $aNotification = new Notification();
+        $server = $joinpoint->getArgument(0);
+        $aNotification->add('added ' . $server->getName());
+      }
     }
   }
 }
