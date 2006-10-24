@@ -28,7 +28,7 @@ class Sabel_DB_Model
     if (class_exists($mdlName)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {
-      eval('class Sabel_DB_Empty extends Sabel_DB_Wrapper{}');
+      eval('class Sabel_DB_Empty extends Sabel_DB_Relation{}');
     }
     $model = new Sabel_DB_Empty();
     $model->setTableName(convert_to_tablename($mdlName));
