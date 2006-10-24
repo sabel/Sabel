@@ -115,3 +115,9 @@ function prevd($mixed)
   var_dump($mixed);
   echo '</pre>';
 }
+
+function array_ndpop(&$array) {
+  $tmp = array_pop($array);
+  array_push($array, $tmp);
+  return $tmp;
+}
