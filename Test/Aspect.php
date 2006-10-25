@@ -110,8 +110,12 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     protected function getRack()
     {
       $aspects = Sabel_Aspect_Aspects::singleton();
-      $aspects->add(new RackMountFailMonitor());
-      $aspects->add(new Notifier());
+      
+      $aspects->addPointcut(Sabel_Aspect_Pointcut::create('RackmountFailMonitor')
+                            ->setMethodRegex('mount'));
+      
+      $aspects->addPointcut(Sabel_Aspect_Pointcut::create('Notifier')
+                            ->setMethodRegex('.*'));
       
       return new Sabel_Aspect_Proxy(new Rack());
     }
@@ -192,12 +196,6 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
   {
     class RackmountFailMonitor
     {
-      public function pointcut()
-      {
-        return Sabel_Aspect_Pointcut::create('RackmountFailMonitor', $this)
-               ->setMethodRegex('mount')->asAfter();
-      }
-      
       public function throwing($joinpoint) {
         ServerStock::add($joinpoint->getArgument(0));
         return $joinpoint->getException()->getMessage();
@@ -206,13 +204,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     
     class Notifier
     {
-      public function pointcut()
-      {
-        return Sabel_Aspect_Pointcut::create('Notifier', $this)
-               ->setMethodRegex('.*')->asBefore();
-      }
-      
-      public function around()
+      public function around($joinpoint)
       {
         return true;
       }

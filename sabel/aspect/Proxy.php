@@ -61,13 +61,25 @@ class Sabel_Aspect_Proxy
     $matches = $aspects->findMatch(array('method' => $method));
     
     $reflection = new ReflectionClass($this->target);
-    $method = $reflection->getMethod($method);
+    
+    $hasMethod = false;
+    try {
+      $method = $reflection->getMethod($method);
+      $hasMethod = true;
+    } catch (Exception $e) {
+      $hasMethod = false;
+    }
     
     try {
+      $result = null;
       $proceed = $this->callAspect($joinpoint, $matches, 'around');
       if ($proceed) {
         $this->callAspect($joinpoint, $matches, 'before');
-        $result = $method->invokeArgs($target, $arg);
+        if ($hasMethod) {
+          $result = $method->invokeArgs($target, $arg); 
+        } else if ($this->hasMethodOverload()) {
+          eval('$result = $target->$method('.$this->makeArgumentsString().')');
+        }
         
         $joinpoint->setResult($result);
         $this->callAspect($joinpoint, $matches, 'after');
@@ -78,6 +90,16 @@ class Sabel_Aspect_Proxy
       $joinpoint->setException($e);
       return $this->callAspect($joinpoint, $matches, 'throwing');
     }
+  }
+  
+  protected function makeArgumentsString($arg)
+  {
+    $argStrBuf = array();
+    for ($i = 0; $i < count($arg); $i++) {
+      $argStrBuf[] = '$arg[' . $i . ']';
+    }
+    
+    return join(', ', $argStrBuf);
   }
   
   private function callAspect($joinpoint, $matches, $type)
@@ -95,5 +117,25 @@ class Sabel_Aspect_Proxy
     }
     
     return ($called) ? $result : true;
+  }
+  
+  /**
+   * check target method has a overload method such as __call
+   * 
+   * @param void
+   * @return boolean
+   */
+  protected function hasMethodOverload()
+  {
+    $has = true;
+    $reflection = new ReflectionClass($this->target);
+    
+    try {
+      $reflection->getMethod('__call');
+    } catch (ReflectionException $e) {
+      $has = false;
+    }
+    
+    return $has;
   }
 }

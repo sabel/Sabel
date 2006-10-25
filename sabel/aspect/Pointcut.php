@@ -34,15 +34,15 @@ class Sabel_Aspect_Pointcut
   protected $hasMethodRegex  = false;
   protected $hasPackageRegex = false;
   
-  public function __construct($name, $aspect)
+  public function __construct($name)
   {
     $this->name   = $name;
-    $this->aspect = $aspect;
+    $this->aspect = new $name();
   }
   
-  public static function create($name, $aspect)
+  public static function create($name)
   {
-    return new self($name, $aspect);
+    return new self($name);
   }
   
   public function getName()

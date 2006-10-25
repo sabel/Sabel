@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_Aspect_Aspects
+ *
+ * @category   Aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Aspect_Aspects
 {
   protected $aspects = array();
@@ -16,6 +25,13 @@ class Sabel_Aspect_Aspects
   {
     if (!self::$instance) self::$instance = new self();
     return self::$instance;
+  }
+  
+  public function addPointcut($pointcut)
+  {
+    self::$matcher->add($pointcut);
+    $className = $pointcut->getName();
+    $this->aspects[] = new $className();
   }
   
   public function add($aspect)
