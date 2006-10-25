@@ -25,7 +25,7 @@ class Sabel_DB_Model
 
   private static function getClass($mdlName)
   {
-    if (class_exists($mdlName)) return new $mdlName();
+    if (class_exists($mdlName, false)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {
       eval('class Sabel_DB_Empty extends Sabel_DB_Relation{}');
