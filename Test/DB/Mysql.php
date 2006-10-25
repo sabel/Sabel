@@ -47,6 +47,9 @@ class Test_DB_Mysql extends Test_DB_Test
 
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
+    //$mh = new MysqlHelper();
+    //foreach ($mh->sqls as $query) @$model->execute($query);
+
 
     try {
       foreach ($tables as $table) $model->execute("DELETE FROM {$table}");
@@ -61,7 +64,7 @@ class Test_DB_Mysql extends Test_DB_Test
  */
 class MysqlHelper extends BaseHelper
 {
-  protected $sqls = null;
+  public $sqls = null;
 
   public function __construct()
   {
