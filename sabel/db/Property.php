@@ -13,6 +13,9 @@
 class Sabel_DB_Property
 {
   private
+    $schema = array();
+
+  private
     $properties    = array(),
     $overrideProps = array();
 
@@ -41,14 +44,9 @@ class Sabel_DB_Property
       if (array_key_exists($key, $props)) $props[$key] = $val;
     }
 
-    $sClass = 'Schema_' . $mdlName;
-    if (class_exists($sClass, false)) {
-      $sc = new $sClass();
-      $ps = $sc->getProperty();
-      $properties = array('connectName'  => $ps['connectName'],
-                          'primaryKey'   => $ps['primaryKey'],
-                          'incrementKey' => $ps['incrementKey'],
-                          'tableEngine'  => $ps['tableEngine']);
+    $clsName = 'Schema_' . $mdlName;
+    if (class_exists($clsName, false)) {
+      $properties = $this->initSchema(new $clsName());
     } else {
       $properties = array('connectName'  => 'default',
                           'primaryKey'   => 'id',
@@ -63,6 +61,18 @@ class Sabel_DB_Property
     $this->properties    = $properties;
   }
 
+  private function initSchema($sClass)
+  {
+    $ps = $sClass->getProperty();
+    $properties = array('connectName'  => $ps['connectName'],
+                        'primaryKey'   => $ps['primaryKey'],
+                        'incrementKey' => $ps['incrementKey'],
+                        'tableEngine'  => $ps['tableEngine']);
+
+    $this->schema = $sClass->get();
+    return $properties;
+  }
+
   private function initTableName($mdlName, &$properties)
   {
     $properties['table'] = convert_to_tablename($mdlName);
@@ -71,6 +81,16 @@ class Sabel_DB_Property
   public function setTableName($tblName)
   {
     $this->properties['table'] = $tblName;
+  }
+
+  public function setSchema($tblName)
+  {
+    $sClass = get_schema_by_tablename($tblName);
+    if ($sClass) {
+      $properties = $this->initSchema($sClass);
+      $this->overrideProps['autoNumber'] = (isset($properties['incrementKey']));
+      $this->properties = array_merge($this->properties, $properties);
+    }
   }
 
   public function __call($column, $args)
@@ -87,10 +107,28 @@ class Sabel_DB_Property
 
   public function __get($key)
   {
-    if (array_key_exists($key, $this->properties)) {
-      return $this->properties[$key];
-    } else {
-      return (isset($this->data[$key])) ? $this->data[$key] : null;
+    if (array_key_exists($key, $this->properties)) return $this->properties[$key];
+    if (!isset($this->data[$key])) return null;
+
+    $data = $this->data[$key];
+    return ($this->schema) ? $this->convertData($key, $data) : $data;
+  }
+
+  private function convertData($key, $data)
+  {
+    $schema = $this->schema;
+    if (!array_key_exists($key, $schema)) return $data;
+
+    switch ($schema[$key]['type']) {
+      case Sabel_DB_Schema_Const::INT:
+        return (int)$data;
+      case SabeL_DB_Schema_Const::BOOL:
+        return (in_array($data, array('1', 't', 'true')));
+      case Sabel_DB_Schema_Const::FLOAT:
+      case Sabel_DB_Schema_Const::DOUBLE:
+        return (float)$data;
+      default:
+        return $data;
     }
   }
 
@@ -101,6 +139,11 @@ class Sabel_DB_Property
       throw new Exception($errorMsg);
     }
     foreach ($row as $key => $val) $this->data[$key] = $val;
+  }
+
+  public function hasSchema()
+  {
+    return (!empty($this->schema));
   }
 
   public function setConnectName($connectName)

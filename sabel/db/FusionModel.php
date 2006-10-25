@@ -66,17 +66,17 @@ class Sabel_DB_FusionModel
 
     $modelCondition = array();
     foreach ($unitCondition as $condition) {
-      list($p, $c)   = explode(':', $condition);
-      if (strpos('.', $p) === false) {
-        $pm = $p;
-        $cm = $c;
-        $pk = 'id';
-        $ck = convert_to_tablename($pm) . '_id';
+      list($child, $parent) = explode(':', $condition);
+      if (strpos($child, '.') === false) {
+        $pModel = $parent;
+        $cModel = $child;
+        $pKey   = 'id';
+        $fKey   = convert_to_tablename($pModel) . '_id';
       } else {
-        list($pm, $pk) = explode('.', $p);
-        list($cm, $ck) = explode('.', $c);
+        list($cModel, $fKey) = explode('.', $child);
+        list($pModel, $pKey) = explode('.', $parent);
       }
-      $modelCondition[$pm][$cm] = array($pk, $ck);
+      $modelCondition[$cModel][$pModel] = array($fKey, $pKey);
     }
     $this->unitCondition = $modelCondition;
   }
@@ -87,7 +87,7 @@ class Sabel_DB_FusionModel
     $model = $this->models[$baseModel]->selectOne($column, $val);
     $this->makedModels[$baseModel] = $model;
     $this->modelsData[$baseModel]  = $model->getData();
-    $this->makeModel($baseModel, $model);
+    $this->createParents($baseModel, $model);
 
     $data = array();
     foreach ($this->makedModels as $model) {
@@ -102,16 +102,29 @@ class Sabel_DB_FusionModel
     return $this;
   }
 
-  public function makeModel($mdlName, $model)
+  public function createParents($mdlName, $model)
   {
     if (!array_key_exists($mdlName, $this->unitCondition)) return null;
+    $this->createModel($this->unitCondition[$mdlName], $model);
+  }
 
-    foreach ($this->unitCondition[$mdlName] as $cm => $keys) {
-      list($pk, $ck) = $keys;
-      $model = $this->models[$cm]->selectOne($ck, $model->$pk);
-      $this->makedModels[$cm] = $model;
-      $this->modelsData[$cm]  = $model->getData();
-      $this->makeModel($cm, $model);
+  private function createModel($parents, $child)
+  {
+    $mdlNames = array();
+    $models   = array();
+
+    foreach ($parents as $parent => $keys) {
+      list($fKey, $pKey) = $keys;
+      $model = $this->models[$parent]->selectOne($pKey, $child->$fKey);
+      $this->modelsData[$parent]  = $model->getData();
+      $this->makedModels[$parent] = $model;
+
+      $mdlNames[] = $parent;
+      $models[]   = $model;
+    }
+
+    for ($i = 0; $i < sizeof($mdlNames); $i++) {
+      $this->createParents($mdlNames[$i], $models[$i]);
     }
   }
 

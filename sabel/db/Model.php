@@ -30,8 +30,10 @@ class Sabel_DB_Model
     if (!class_exists('Sabel_DB_Empty', false)) {
       eval('class Sabel_DB_Empty extends Sabel_DB_Relation{}');
     }
-    $model = new Sabel_DB_Empty();
-    $model->setTableName(convert_to_tablename($mdlName));
+    $model   = new Sabel_DB_Empty();
+    $tblName = convert_to_tablename($mdlName);
+    $model->setTableName($tblName);
+    $model->setSchema($tblName);
     return $model;
   }
 }

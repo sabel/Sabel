@@ -46,18 +46,12 @@ class Test_DB_Mysql extends Test_DB_Test
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
-    $obj = new Test3();
-
-    //$helper = new MysqlHelper();
-    //$helper->create();
+    $model  = Sabel_DB_Model::load('');
 
     try {
-      foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
+      foreach ($tables as $table) $model->execute("DELETE FROM {$table}");
     } catch (Exception $e) {
     }
-
-    $trans2 = new Trans2();
-    $trans2->execute("DELETE FROM trans2");
   }
 }
 
@@ -68,108 +62,64 @@ class Test_DB_Mysql extends Test_DB_Test
 class MysqlHelper extends BaseHelper
 {
   protected $sqls = null;
-  
+
   public function __construct()
   {
-    $SQLs = array();
+    $sqls = array();
 
-    $SQLs[] = 'CREATE TABLE test (
-                 id       INT2 PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INT2)';
+    $sqls[] = 'CREATE TABLE basic (
+                 id integer primary key,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id int2 PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL,
-                 test3_id int2)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                id INT2 PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                id INT2 PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                id INT2 PRIMARY KEY,
-                customer_id INT2 NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                id INT2 PRIMARY KEY AUTO_INCREMENT,
-                customer_order_id INT2 NOT NULL,
-                amount INT4,
-                item_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                id INT2 PRIMARY KEY,
-                customer_id INT2 NOT NULL,
-                telephone VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                id INT2 PRIMARY KEY,
-                infinite2_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                id INT2 PRIMARY KEY,
-                infinite1_id int2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE seq (
-                 id INT2 PRIMARY KEY AUTO_INCREMENT,
-                 text VARCHAR(65536) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      INT2 PRIMARY KEY,
-                 tree_id INT2,
-                 name    VARCHAR(12) )';
+    $sqls[] = 'CREATE TABLE users (
+                 id integer primary key,
+                 name varchar(24),
+                 email varchar(128),
+                 city_id integer not null) type=InnoDB';
 
-    $SQLs[] = 'CREATE TABLE student (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 student_id INT4 NOT NULL,
-                 course_id  INT4 NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+    $sqls[] = 'CREATE TABLE city (
+                 id integer primary key,
+                 name varchar(24),
+                 classification_id integer,
+                 country_id integer not null) type=InnoDB';
 
-    $SQLs[] = 'CREATE TABLE course (
-                 id   INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        INT4 PRIMARY KEY AUTO_INCREMENT,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INT2 )';
+    $sqls[] = 'CREATE TABLE country (
+                 id integer primary key,
+                 name varchar(24)) type=InnoDB';
 
-    $SQLs[] = 'CREATE TABLE status (
-                 id    INT2 PRIMARY KEY AUTO_INCREMENT,
-                 state VARCHAR(24) )';
+    $sqls[] = 'CREATE TABLE classification (
+                 id integer primary key,
+                 class_name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       INT4 PRIMARY KEY AUTO_INCREMENT,
-                 users_id INT4 NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
+    $sqls[] = 'CREATE TABLE test_for_like (
+                 id integer primary key auto_increment,
+                 string varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INT4 PRIMARY KEY AUTO_INCREMENT,
-                 text  VARCHAR(24)) TYPE=InnoDB';
-    
-    $SQLs[] = "CREATE TABLE schema_test (
-                 id1 bigint auto_increment,
-                 id2 integer not null,
-                 num integer default 10,
-                 fnum float4,
-                 dnum double,
-                 str varchar(64) default 'test',
-                 text text,
-                 bl boolean default true comment 'boolean',
-                 date date,
-                 dt datetime not null,
-                 primary key (id1, id2)) TYPE=InnoDB";
+    $sqls[] = "CREATE TABLE test_condition (
+                 id integer primary key auto_increment,
+                 status boolean comment 'boolean',
+                 registed datetime,
+                 point integer)";
 
-    $this->sqls = $SQLs;
+    $sqls[] = "CREATE TABLE blog (
+                 id integer primary key,
+                 title varchar(24),
+                 article text,
+                 write_date datetime,
+                 users_id integer)";
+
+    /* edo2
+    $sqls[] = 'CREATE TABLE customer (
+                 id integer primary key,
+                 name varchar(24))';
+    */
+
+    $sqls[] = "CREATE TABLE customer_order (
+                 id integer primary key auto_increment,
+                 customer_id integer,
+                 buy_date datetime,
+                 amount integer)";
+
+    $this->sqls = $sqls;
   }
 }

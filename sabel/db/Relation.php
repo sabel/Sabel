@@ -165,15 +165,17 @@ abstract class Sabel_DB_Relation
     if (is_null($child)) {
       $tblName = $this->table;
       $columns = (is_null($group)) ? $this->primaryKey : $group;
+      $model   = $this;
     } else {
-      $tblName = $child;
+      $tblName = convert_to_tablename($child);
       $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
+      $model   = $this->newClass($tblName);
     }
-    $this->setConstraint('group', $columns);
+    $model->setConstraint('group', $columns);
 
-    $executer = $this->getExecuter();
+    $executer = $model->getExecuter();
     $executer->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
-    return $this->toObject($executer->execute());
+    return $model->toObject($executer->execute());
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -366,11 +368,10 @@ abstract class Sabel_DB_Relation
   private function isSameConnectName($sClass)
   {
     $props = $sClass->getProperty();
-    if (($size = sizeof($this->joinConNames)) === 0) {
-      $this->joinConNames[] = $props['connectName'];
-    } else {
+    if (($size = sizeof($this->joinConNames)) > 0) {
       if ($this->joinConNames[$size - 1] !== $props['connectName']) return false;
     }
+    $this->joinConNames[] = $props['connectName'];
     return true;
   }
 
@@ -498,10 +499,13 @@ abstract class Sabel_DB_Relation
 
     $class->receiveCondition($model->getChildCondition());
     $cconst = $model->getChildConstraint();
-    $class->receiveConstraint($cconst[$child]);
+    if (isset($cconst[$child])) $class->receiveConstraint($cconst[$child]);
 
     $children = $model->getRecords($executer, $child);
-    if ($children) $model->$child = $children;
+    if ($children) {
+      $model->$child = $children;
+      $model->unsetNewData();
+    }
     return $children;
   }
 
@@ -575,7 +579,9 @@ abstract class Sabel_DB_Relation
       return new $mdlName();
     } else {
       $model = Sabel_DB_Model::load($mdlName);
-      $model->setConnectName($this->connectName);
+      if (!$model->hasSchema()) {
+        $model->setConnectName($this->connectName);
+      }
       return $model;
     }
   }

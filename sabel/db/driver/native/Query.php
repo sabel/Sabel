@@ -89,7 +89,7 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
   {
     $lg  = $condition->value[0];
     $val = $this->escape($condition->value[1]);
-    $this->setWhereQuery($condition->key . " $lg $val");
+    $this->setWhereQuery($condition->key . " $lg '{$val}'");
   }
 
   public function unsetProperties()

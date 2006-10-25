@@ -181,7 +181,7 @@ class Schema_Writer
 
     fwrite($fp, "<?php\n\n");
     fwrite($fp, "class {$className}\n{\n");
-    fwrite($fp, "  public function get()\n  {\n");
+    fwrite($fp, "  public static function get()\n  {\n");
     fwrite($fp, '    $cols = array();');
     fwrite($fp, "\n\n");
 
@@ -312,7 +312,7 @@ class Schema_Util_Generator
   public static function main()
   {
     $input = $_SERVER['argv'];
-    $yml   = new Sabel_Config_Yaml(SABEL_DB . 'schema/util/database.yml');
+    $yml   = new Sabel_Config_Yaml('config/database.yml');
     $data  = $yml->read($input[1]);
 
     $schemaWrite  = false;
