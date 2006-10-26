@@ -15,9 +15,35 @@ abstract class Sabel_Template_Engine
   protected
     $tplpath = null,
     $tplname = null,
-    $attributes = array(),
     $trim = true;
     
+  protected static $attributes = array();
+  
+  public static function setAttribute($key, $value)
+  {
+    self::$attributes[$key] = $value;
+  }
+  
+  public static function getAttirbute($key)
+  {
+    return self::$attributes[$key];
+  }
+  
+  public static function getAttributes()
+  {
+    return self::$attributes;
+  }
+  
+  public function assign($key, $value)
+  {
+    self::setAttribute($key, $value);
+  }
+  
+  public function assignByArray($array)
+  {
+    array_merge(self::$attributes, $array);
+  }
+  
   public function setTemplateName($name)
   {
     $this->tplname = $name;

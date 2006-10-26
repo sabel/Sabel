@@ -1,36 +1,14 @@
 <?php
 
-/*
-
-class Sabel_Aspect_Interceptors_AssignOld
-{
-  public function when($method)
-  {
-    return true;
-  }
-  
-  public function after($method, $result, $reflection)
-  {
-    $anonr = Container::create()->instanciate('sabel.annotation.Reader');
-    $anonr->annotation($reflection->getName());
-    $assigns = $anonr->getAnnotationsByName($reflection->getName(), 'assign');
-    
-    $assignFromAnnotation = false;
-    foreach ($assigns as $annot) {
-      $assign = $annot->getContents();
-      if ($method->getName() === $assign[0]) {
-        $assignFromAnnotation = true;
-        Re::set($assign[2], $result);
-      }
-    }
-    
-    if (!$assignFromAnnotation) Re::set($method->getName(), $result);
-  }
-}
-
-Sabel_Aspect_Calls::add(new Sabel_Aspect_Interceptors_Assign());
-*/
-
+/**
+ * primitive interceptor of SabelAspect
+ *
+ * @category   Aspect
+ * @package    org.sabel.aspect.interceptors
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Aspect_Interceptors_Assign
 {
   public function after($joinpoint)
@@ -44,17 +22,18 @@ class Sabel_Aspect_Interceptors_Assign
     $assignFromAnnotation = false;
     foreach ($assigns as $annot) {
       $assign = $annot->getContents();
-      if ($method->getName() === $assign[0]) {
+      if ($joinpoint->getMethod() === $assign[0]) {
         $assignFromAnnotation = true;
-        Re::set($assign[2], $result);
+        Sabel_Template_Engine::setAttribute($assign[2], $joinpoint->getResult());
       }
     }
     
-    if (!$assignFromAnnotation) Re::set($method->getName(), $result);
+    if (!$assignFromAnnotation) {
+      Sabel_Template_Engine::setAttribute($joinpoint->getMethod(), $joinpoint->getResult());
+    }
   }
 }
 
 Sabel_Aspect_Aspects::singleton()->addPointcut(
-  addPointcut(Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Assign')
-              ->setMethodRegex('.*'));
-);
+  Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Assign')
+  ->setMethodRegex('.*'));

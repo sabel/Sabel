@@ -17,16 +17,6 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
   {
   }
 
-  public function assign($key, $val)
-  {
-    $this->attributes[$key] = $val;
-  }
-  
-  public function assignByArray($array)
-  {
-    array_merge($this->attributes, $array);
-  }
-
   public function retrieve()
   {
     $contents  = '';
@@ -56,8 +46,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
       $this->saveCompileFile($contents);
     }
 
-    if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
-    extract(Re::get(), EXTR_SKIP);
+    if (count(self::$attributes) != 0) extract(self::$attributes, EXTR_SKIP);
     
     ob_start();
     if (is_file($cpath)) include($cpath);

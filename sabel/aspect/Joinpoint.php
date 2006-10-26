@@ -27,7 +27,10 @@ class Sabel_Aspect_Joinpoint
   
   public function getArgument($index)
   {
-    return $this->arguments[$index];
+    $arguments = $this->arguments;
+    if (isset($arguments[$index])) {
+      return $this->arguments[$index];
+    }
   }
   
   public function getMethod()

@@ -40,6 +40,21 @@ class Sabel_Aspect_Proxy
     return $this->target;
   }
   
+  public function getReflection()
+  {
+    return new ReflectionClass($this->target);
+  }
+  
+  public function hasMethod($method)
+  {
+    return $this->getReflection()->hasMethod($method);
+  }
+  
+  public function assignToView()
+  {
+    Sabel_Template_Engine::setAttribute(strtolower($this->getReflection()->getName()), $this->target);
+  }
+  
   public function __set($key, $value)
   {
     $this->target->$key = $value;
@@ -55,6 +70,9 @@ class Sabel_Aspect_Proxy
     $target = $this->target;
     $source = $this->source;
     
+    $bcbResult = $this->beforeCallBefore($method, $arg);
+    if (!is_null($bcbResult)) return $bcbResult;
+    
     $joinpoint = new Sabel_Aspect_Joinpoint($target, $arg, $method);
     
     $aspects = Sabel_Aspect_Aspects::singleton();
@@ -64,21 +82,23 @@ class Sabel_Aspect_Proxy
     
     $hasMethod = false;
     try {
-      $method = $reflection->getMethod($method);
+      $refMethod = $reflection->getMethod($method);
       $hasMethod = true;
     } catch (Exception $e) {
       $hasMethod = false;
     }
     
+    $proceed = true;
     try {
       $result = null;
       $proceed = $this->callAspect($joinpoint, $matches, 'around');
+      
       if ($proceed) {
         $this->callAspect($joinpoint, $matches, 'before');
         if ($hasMethod) {
-          $result = $method->invokeArgs($target, $arg); 
+          $result = $refMethod->invokeArgs($target, $arg);
         } else if ($this->hasMethodOverload()) {
-          eval('$result = $target->$method('.$this->makeArgumentsString().')');
+          eval('$result = $target->$method('.$this->makeArgumentsString($arg).');');
         }
         
         $joinpoint->setResult($result);
@@ -92,17 +112,22 @@ class Sabel_Aspect_Proxy
     }
   }
   
+  protected function beforeCallBefore($method, $arg)
+  {
+  }
+  
   protected function makeArgumentsString($arg)
   {
+    if (count($arg) === 0) return '';
+    
     $argStrBuf = array();
     for ($i = 0; $i < count($arg); $i++) {
       $argStrBuf[] = '$arg[' . $i . ']';
     }
-    
     return join(', ', $argStrBuf);
   }
   
-  private function callAspect($joinpoint, $matches, $type)
+  protected function callAspect($joinpoint, $matches, $type)
   {
     $called = false;
     $result = false;

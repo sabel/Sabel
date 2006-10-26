@@ -63,7 +63,7 @@ abstract class Sabel_Controller_Page
   
   protected function __set($name, $value)
   {
-    Re::set($name, $value);
+    $this->assign($name, $value);
   }
   
   protected function __call($method, $args)
@@ -161,5 +161,10 @@ abstract class Sabel_Controller_Page
   protected function forward($to)
   {
     // @todo implemen
+  }
+  
+  protected function assign($key, $value)
+  {
+    Sabel_Template_Engine::setAttributes($key, $value);
   }
 }
