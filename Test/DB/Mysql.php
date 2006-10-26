@@ -55,7 +55,14 @@ class Test_DB_Mysql extends Test_DB_Test
     }
 
     try {
-      foreach ($tables as $table) $model->execute("DELETE FROM {$table}");
+      foreach ($tables as $table) $model->execute("DELETE FROM $table");
+    } catch (Exception $e) {
+    }
+
+    $model = Sabel_DB_Model::load('');
+
+    try {
+      $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
     } catch (Exception $e) {
     }
   }
@@ -119,12 +126,6 @@ class MysqlHelper extends BaseHelper
                  users_id integer,
                  registed datetime,
                  name varchar(24))";
-
-    /* edo2
-    $sqls[] = 'CREATE TABLE customer (
-                 id integer primary key,
-                 name varchar(24))';
-    */
 
     $sqls[] = "CREATE TABLE customer_order (
                  id integer primary key auto_increment,

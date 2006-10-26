@@ -10,10 +10,8 @@ class Sabel_DB_Fusion
     $fusionedData = array();
 
   private
-    $baseTable  = '',
     $baseModel  = '',
-    $unitedCols = array(),
-    $modelCols  = array();
+    $unitedCols = array();
 
   private
     $unitCondition = array();
@@ -26,7 +24,6 @@ class Sabel_DB_Fusion
   {
     for ($i = 0; $i < sizeof($models); $i++) {
       $tblName = convert_to_tablename($mdlNames[$i]);
-      $this->modelCols[$tblName] = $models[$i]->getColumnNames();
     }
 
     foreach ($models as $model) {
@@ -35,7 +32,6 @@ class Sabel_DB_Fusion
 
     $this->modelNames = $mdlNames;
     $this->baseModel  = $mdlNames[0];
-    $this->baseTable  = convert_to_tablename($mdlNames[0]);
   }
 
   public function __set($key, $val)
@@ -60,12 +56,11 @@ class Sabel_DB_Fusion
     return $this->fusionedData;
   }
 
-  public function setFusionCondition($unitCondition)
+  public function setFusion($fusionCondition)
   {
-    if (!is_array($unitCondition)) $unitCondition = (array)$unitCondition;
+    if (!is_array($fusionCondition)) $fusionCondition = (array)$fusionCondition;
 
-    $modelCondition = array();
-    foreach ($unitCondition as $condition) {
+    foreach ($fusionCondition as $condition) {
       list($child, $parent) = explode(':', $condition);
       if (strpos($child, '.') === false) {
         $pModel = $parent;
@@ -76,9 +71,10 @@ class Sabel_DB_Fusion
         list($cModel, $fKey) = explode('.', $child);
         list($pModel, $pKey) = explode('.', $parent);
       }
-      $modelCondition[$cModel][$pModel] = array($fKey, $pKey);
+      $this->unitCondition[$cModel][$pModel] = array($fKey, $pKey);
+      $this->unitCondition[$pModel][$cModel] = array($pKey, $fKey);
+
     }
-    $this->unitCondition = $modelCondition;
   }
 
   public function selectOne($column, $val)
@@ -105,15 +101,17 @@ class Sabel_DB_Fusion
   public function createParents($mdlName, $model)
   {
     if (!array_key_exists($mdlName, $this->unitCondition)) return null;
-    $this->createModel($this->unitCondition[$mdlName], $model);
+    $this->createModel($this->unitCondition[$mdlName], $model, $mdlName);
   }
 
-  private function createModel($parents, $child)
+  private function createModel($parents, $child, $mdlName)
   {
     $mdlNames = array();
     $models   = array();
 
     foreach ($parents as $parent => $keys) {
+      unset($this->unitCondition[$parent][$mdlName]);
+
       list($fKey, $pKey) = $keys;
       $model = $this->models[$parent]->selectOne($pKey, $child->$fKey);
       $this->modelsData[$parent]  = $model->getData();
@@ -158,8 +156,6 @@ class Sabel_DB_Fusion
 
   private function remakeSchema($schemas)
   {
-    $baseModelName = convert_to_modelname($this->baseTable);
-
     $result = array();
     foreach ($schemas as $mdlName => $data) {
       foreach ($data as $key => $val) {

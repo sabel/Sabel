@@ -34,22 +34,29 @@ class Test_DB_SQLite extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default', self::$params1);
+    Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
-    $obj = new Test3();
-
-    //$helper = new SQLiteHelper();
-    //$helper->create();
+    $model  = Sabel_DB_Model::load('');
 
     try {
-      foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
+      $sh = new SQLiteHelper();
+      foreach ($sh->sqls as $query) $model->execute($query);
     } catch (Exception $e) {
     }
 
-    $trans2 = new Trans2();
-    $trans2->execute("DELETE FROM trans2");
+    try {
+      foreach ($tables as $table) $model->execute("DELETE FROM $table");
+    } catch (Exception $e) {
+    }
+
+    $model = Sabel_DB_Model::load('');
+
+    try {
+      $model->execute('CREATE TABLE customer( id int4 primary key, name varchar(24))');
+    } catch (Exception $e) {
+    }
   }
 }
 
@@ -60,121 +67,65 @@ class Test_DB_SQLite extends Test_DB_Test
  */
 class SQLiteHelper extends BaseHelper
 {
-  protected $sqls = null;
+  public $sqls = null;
 
   public function __construct()
   {
     $SQLs = array();
 
-    $SQLs[] = 'CREATE TABLE test (
-                 id       INTEGER PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INT2)';
-    
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id       INTEGER PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 test3_id INT2)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                 id   INTEGER PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                 id   INTEGER PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                 id          INTEGER PRIMARY KEY,
-                 customer_id INT2 NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                 id                INTEGER PRIMARY KEY,
-                 customer_order_id INT2 NOT NULL,
-                 amount            INT4,
-                 item_id           INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                 id          INTEGER PRIMARY KEY,
-                 customer_id INT2 NOT NULL,
-                 telephone   VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                 id           INTEGER PRIMARY KEY,
-                 infinite2_id INT2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                 id           INTEGER PRIMARY KEY,
-                 infinite1_id int2 NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE seq (
-                 id   INTEGER PRIMARY KEY,
-                 text VARCHAR(65536) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      INTEGER PRIMARY KEY,
-                 tree_id INT2,
-                 name    VARCHAR(12) )';
-                
-    $SQLs[] = 'CREATE TABLE student (
-                 id    INTEGER PRIMARY KEY,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 student_id INT4 NOT NULL,
-                 course_id  INT4 NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+    $sqls[] = 'CREATE TABLE basic (
+                 id int4 primary key,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE course (
-                 id   INTEGER PRIMARY KEY,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        INTEGER PRIMARY KEY,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INT2 )';
+    $sqls[] = 'CREATE TABLE users (
+                 id int4 primary key,
+                 name varchar(24),
+                 email varchar(128),
+                 city_id int4 not null)';
 
-    $SQLs[] = 'CREATE TABLE status (
-                 id    INTEGER PRIMARY KEY,
-                 state VARCHAR(24) )';
+    $sqls[] = 'CREATE TABLE city (
+                 id int4 primary key,
+                 name varchar(24),
+                 classification_id integer,
+                 country_id int4 not null)';
 
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       INTEGER PRIMARY KEY,
-                 users_id INT4 NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
+    $sqls[] = 'CREATE TABLE country (
+                 id int4 primary key,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INTEGER PRIMARY KEY,
-                 text  VARCHAR(24) )';
+    $sqls[] = 'CREATE TABLE classification (
+                 id int4 primary key,
+                 class_name varchar(24))';
 
-    $SQLs[] = "CREATE TABLE schema_test (
-                 id1 int8 not null,
-                 id2 int4 not null,
-                 num integer default 10,
-                 fnum float4,
-                 dnum float8,
-                 str varchar(64) default 'test',
-                 text text,
-                 bl boolean default true,
-                 date date,
-                 dt timestamp not null,
-                 primary key (id1, id2));";
-                 
+    $sqls[] = 'CREATE TABLE test_for_like (
+                 id integer primary key,
+                 string varchar(24))';
+
+    $sqls[] = "CREATE TABLE test_condition (
+                 id integer primary key,
+                 status boolean,
+                 registed datetime,
+                 point int4)";
+
+    $sqls[] = "CREATE TABLE blog (
+                 id int4 primary key,
+                 title varchar(24),
+                 article text,
+                 write_date datetime,
+                 users_id int4)";
+
+    $sqls[] = "CREATE TABLE favorite_item (
+                 id int4 primary key,
+                 users_id int4,
+                 registed datetime,
+                 name varchar(24))";
+
+    $sqls[] = "CREATE TABLE customer_order (
+                 id integer primary key,
+                 customer_id int4,
+                 buy_date datetime,
+                 amount integer)";
+
     $this->sqls = $SQLs;
-  }
-
-  public function create()
-  {
-    foreach ($this->sqls as $sql) {
-      $obj = new Test3();
-      try {
-        $obj->execute($sql);
-      } catch(Exception $e) {
-        // ignore any errors.
-      }
-    }
   }
 }

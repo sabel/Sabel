@@ -352,7 +352,7 @@ abstract class Sabel_DB_Relation
   private function prepareAutoJoin($tblName)
   {
     if (!$sClass = get_schema_by_tablename($tblName)) return false;
-    if (!$this->isSameConnectName($sClass)) return false;
+    if (!$this->isSameConnectName($sClass->getProperty())) return false;
 
     $this->joinColList[$tblName] = array_keys($sClass->get());
     if ($parents = $sClass->getParents()) {
@@ -364,9 +364,8 @@ abstract class Sabel_DB_Relation
     return true;
   }
 
-  private function isSameConnectName($sClass)
+  private function isSameConnectName($props)
   {
-    $props = $sClass->getProperty();
     if (($size = sizeof($this->joinConNames)) > 0) {
       if ($this->joinConNames[$size - 1] !== $props['connectName']) return false;
     }

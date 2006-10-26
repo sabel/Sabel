@@ -599,7 +599,7 @@ class Test_DB_Test extends SabelTestCase
   public function testFusionModel()
   {
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Country'));
-    $model->setFusionCondition(array('Users:City', 'City:Country'));
+    $model->setFusion(array('Users:City', 'City:Country'));
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->id, 4);
@@ -609,13 +609,28 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($fusioned->email, 'user4@example.com');
     $this->assertEquals($fusioned->City_name, 'tokyo');
     $this->assertEquals($fusioned->Country_name, 'japan');
+  }
 
+  public function testFusionCondition()
+  {
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Country'));
-    $model->setFusionCondition(array('City:Country', 'Users:City'));
+    $model->setFusion(array('City:Country', 'Users:City'));
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->id, 4);
     $this->assertEquals((int)$fusioned->city_id, 1);
+    $this->assertEquals((int)$fusioned->City_id, 1);
+    $this->assertEquals((int)$fusioned->Country_id, 1);
+    $this->assertEquals($fusioned->name, 'username4');
+    $this->assertEquals($fusioned->email, 'user4@example.com');
+    $this->assertEquals($fusioned->City_name, 'tokyo');
+    $this->assertEquals($fusioned->Country_name, 'japan');
+
+    $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Country'));
+    $model->setFusion(array('City.id:Users.city_id', 'Country.id:City.country_id'));
+    $fusioned = $model->selectOne('id', 4);
+
+    $this->assertEquals((int)$fusioned->id, 4);
     $this->assertEquals((int)$fusioned->City_id, 1);
     $this->assertEquals((int)$fusioned->Country_id, 1);
     $this->assertEquals($fusioned->name, 'username4');
@@ -627,7 +642,7 @@ class Test_DB_Test extends SabelTestCase
   public function testMoreFusion()
   {
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setFusionCondition(array('Users:City', 'City:Classification', 'City:Country'));
+    $model->setFusion(array('Users:City', 'City:Classification', 'City:Country'));
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->id, 4);
@@ -643,17 +658,36 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($fusioned->class_name, 'classname1');
   }
 
+  public function testMoreFusionConditionTest()
+  {
+    $model = Sabel_DB_Model::fusion(array('City', 'Users', 'Classification', 'Country'));
+    $model->setFusion(array('Users:City', 'City:Classification', 'City:Country'));
+    $fusioned = $model->selectOne('id', 4);
+
+    $this->assertEquals((int)$fusioned->Users_id, 1);
+    $this->assertEquals((int)$fusioned->Users_city_id, 4);
+    $this->assertEquals((int)$fusioned->id, 4);
+    $this->assertEquals((int)$fusioned->Country_id, 3);
+    $this->assertEquals((int)$fusioned->Classification_id, 1);
+    $this->assertEquals($fusioned->Users_name, 'username1');
+    $this->assertEquals($fusioned->email, 'user1@example.com');
+    $this->assertEquals($fusioned->name, 'rondon');
+    $this->assertEquals($fusioned->Country_name, 'england');
+    $this->assertEquals($fusioned->Classification_class_name, 'classname1');
+    $this->assertEquals($fusioned->class_name, 'classname1');
+  }
+
   public function testUpdateFusionModel()
   {
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setFusionCondition(array('Users:City', 'City:Classification', 'City:Country'));
+    $model->setFusion(array('Users:City', 'City:Classification', 'City:Country'));
     $fusioned = $model->selectOne('id', 4);
 
     $fusioned->city_id = 2;
     $fusioned->save();
 
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setFusionCondition(array('Users:City', 'City:Classification', 'City:Country'));
+    $model->setFusion(array('Users:City', 'City:Classification', 'City:Country'));
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->id, 4);
@@ -662,16 +696,16 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($fusioned->City_name, 'osaka');
 
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setFusionCondition(array('Users:City', 'City:Classification', 'City:Country'));
+    $model->setFusion(array('Users:City', 'City:Classification', 'City:Country'));
     $fusioned = $model->selectOne('id', 4);
 
     $fusioned->City_name = 'Osaka';
     $fusioned->save();
 
     $model = Sabel_DB_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setFusionCondition(array('Users.city_id:City.id',
-                                     'City.classification_id:Classification.id',
-                                     'City.country_id:Country.id'));
+    $model->setFusion(array('Users.city_id:City.id',
+                            'City.classification_id:Classification.id',
+                            'City.country_id:Country.id'));
 
     $fusioned = $model->selectOne('id', 4);
 
