@@ -11,16 +11,9 @@ class Sabel_DB_Model
 
   public static function fusion($mdlNames)
   {
-    return self::createFusionModel($mdlNames);
-  }
-
-  private static function createFusionModel($mdlNames)
-  {
     $models = array();
-    foreach ($mdlNames as $name) {
-      $models[] = self::getClass($name);
-    }
-    return new Sabel_DB_FusionModel($models, $mdlNames);
+    foreach ($mdlNames as $name) $models[] = self::getClass($name);
+    return new Sabel_DB_Fusion($models, $mdlNames);
   }
 
   private static function getClass($mdlName)

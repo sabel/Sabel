@@ -116,10 +116,9 @@ class Sabel_DB_Property
 
   private function convertData($key, $data)
   {
-    $schema = $this->schema;
-    if (!array_key_exists($key, $schema)) return $data;
+    if (!array_key_exists($key, $this->schema)) return $data;
 
-    switch ($schema[$key]['type']) {
+    switch ($this->schema[$key]['type']) {
       case Sabel_DB_Schema_Const::INT:
         return (int)$data;
       case SabeL_DB_Schema_Const::BOOL:

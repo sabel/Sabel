@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_DB_FusionModel
+class Sabel_DB_Fusion
 {
   private
     $models       = array(),

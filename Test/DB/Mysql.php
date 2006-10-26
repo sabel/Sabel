@@ -42,14 +42,17 @@ class Test_DB_Mysql extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default', self::$params1);
+    Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
-    //$mh = new MysqlHelper();
-    //foreach ($mh->sqls as $query) @$model->execute($query);
 
+    try {
+      $mh = new MysqlHelper();
+      foreach ($mh->sqls as $query) $model->execute($query);
+    } catch (Exception $e) {
+    }
 
     try {
       foreach ($tables as $table) $model->execute("DELETE FROM {$table}");
