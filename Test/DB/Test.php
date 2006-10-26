@@ -4,7 +4,7 @@ class Test_DB_Test extends SabelTestCase
 {
   public static $TABLES = array('basic', 'users', 'city', 'country',
                                 'test_for_like', 'test_condition', 'blog',
-                                'customer_order', 'classification');
+                                'customer_order', 'classification', 'favorite_item');
 
   public function testBasic()
   {
@@ -364,6 +364,22 @@ class Test_DB_Test extends SabelTestCase
     $blog->save(array('id' => 7,  'title' => 'title7',  'article' => 'article7',
                       'write_date' => '2005-01-01 07:01:01', 'users_id' => 2));
 
+    $favorite = Sabel_DB_Model::load('FavoriteItem');
+    $favorite->save(array('id' => 1, 'name' => 'farorite1',
+                          'registed' => '2005-12-01 01:01:01', 'users_id' => 1));
+    $favorite->save(array('id' => 2, 'name' => 'farorite2',
+                          'registed' => '2005-12-02 01:01:01', 'users_id' => 2));
+    $favorite->save(array('id' => 3, 'name' => 'farorite3',
+                          'registed' => '2005-12-03 01:01:01', 'users_id' => 2));
+    $favorite->save(array('id' => 4, 'name' => 'farorite4',
+                          'registed' => '2005-12-04 01:01:01', 'users_id' => 3));
+    $favorite->save(array('id' => 5, 'name' => 'farorite5',
+                          'registed' => '2005-12-05 01:01:01', 'users_id' => 3));
+    $favorite->save(array('id' => 6, 'name' => 'farorite6',
+                          'registed' => '2005-12-06 01:01:01', 'users_id' => 1));
+    $favorite->save(array('id' => 7, 'name' => 'farorite7',
+                          'registed' => '2005-12-07 01:01:01', 'users_id' => 4));
+
     $user  = new Users(1);
     $blogs = $user->getChild('Blog');
     $this->assertEquals(count($blogs), 4);
@@ -392,6 +408,28 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($blog2->write_date, '2005-01-01 02:01:01');
     $this->assertEquals($blog3->write_date, '2005-01-01 03:01:01');
     $this->assertEquals($blog4->write_date, '2005-01-01 04:01:01');
+
+    $user  = new Users(2);
+    $user->cconst('FavoriteItem', array('registed', 'registed desc'));
+    $blogs = $user->getChild('Blog');
+    $items = $user->getChild('FavoriteItem');
+
+    $this->assertEquals(count($blogs), 3);
+    $this->assertEquals(count($items), 2);
+
+    $blog1 = $blogs[0];
+    $blog2 = $blogs[1];
+    $blog3 = $blogs[2];
+
+    $this->assertEquals($blog1->write_date, '2005-01-01 07:01:01');
+    $this->assertEquals($blog2->write_date, '2005-01-01 06:01:01');
+    $this->assertEquals($blog3->write_date, '2005-01-01 05:01:01');
+
+    $item1 = $items[0];
+    $item2 = $items[1];
+
+    $this->assertEquals($item1->registed, '2005-12-02 01:01:01');
+    $this->assertEquals($item2->registed, '2005-12-03 01:01:01');
   }
 
   public function testChildPaginate()
@@ -525,6 +563,37 @@ class Test_DB_Test extends SabelTestCase
 
     $this->assertEquals($user1->City->Country->name, 'england');
     $this->assertEquals($user2->City->Country->name, 'usa');
+  }
+
+  public function testMoreJoin()
+  {
+    $model = new Users();
+    $model->sconst('order', 'users.id');
+    $modelPairs = array('Users:City', 'City:Country', 'City:Classification');
+    $users = $model->selectJoin($modelPairs);
+
+    $this->assertEquals(count($users), 4);
+
+    $user1 = $users[0];
+    $user2 = $users[1];
+    $user3 = $users[2];
+    $user4 = $users[3];
+
+    $this->assertEquals($user1->name, 'username1');
+    $this->assertEquals($user4->name, 'username4');
+
+    $this->assertEquals($user2->City->name, 'san diego');
+    $this->assertEquals($user3->City->name, 'osaka');
+
+    $this->assertEquals($user1->City->Classification->class_name, 'classname1');
+    $this->assertEquals($user2->City->Classification->class_name, 'classname2');
+    $this->assertEquals($user3->City->Classification->class_name, 'classname2');
+    $this->assertEquals($user4->City->Classification->class_name, 'classname1');
+
+    $this->assertEquals($user1->City->Country->name, 'england');
+    $this->assertEquals($user2->City->Country->name, 'usa');
+    $this->assertEquals($user3->City->Country->name, 'japan');
+    $this->assertEquals($user4->City->Country->name, 'japan');
   }
 
   public function testFusionModel()

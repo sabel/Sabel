@@ -99,14 +99,13 @@ abstract class Sabel_DB_Relation
 
   public function begin()
   {
-    $driver = $this->getExecuter()->getDriver();
-    $check  = true;
+    $driver  = $this->getExecuter()->getDriver();
+    $conName = $this->connectName;
 
-    if (Sabel_DB_Connection::getDB($this->connectName) === 'mysql') {
-      $check = $this->checkTableEngine($driver);
-    }
+    $db    = Sabel_DB_Connection::getDB($conName);
+    $check = ($db === 'mysql') ? $this->checkTableEngine($driver) : true;
 
-    if ($check) Sabel_DB_Transaction::begin($this->connectName, $driver);
+    if ($check) Sabel_DB_Transaction::begin($conName, $driver);
   }
 
   public function commit()

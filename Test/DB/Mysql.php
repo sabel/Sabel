@@ -114,6 +114,12 @@ class MysqlHelper extends BaseHelper
                  write_date datetime,
                  users_id integer)";
 
+    $sqls[] = "CREATE TABLE favorite_item (
+                 id integer primary key,
+                 users_id integer,
+                 registed datetime,
+                 name varchar(24))";
+
     /* edo2
     $sqls[] = 'CREATE TABLE customer (
                  id integer primary key,
