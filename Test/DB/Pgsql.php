@@ -49,24 +49,23 @@ class Test_DB_Pgsql extends Test_DB_Test
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
 
-    try {
-      $ph = new PgsqlHelper();
-      foreach ($ph->sqls as $query) $model->execute($query);
-    } catch (Exception $e) {
+    $ph = new PgsqlHelper();
+    foreach ($ph->sqls as $query) {
+      try { @$model->execute($query); }
+      catch (Exception $e) { }
     }
 
     try {
       foreach ($tables as $table) $model->execute("DELETE FROM $table");
-    } catch (Exception $e) {
-    }
+    } catch (Exception $e) { }
 
     $model = Sabel_DB_Model::load('');
+    $model->setConnectName('default2');
 
     try {
-      $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
+      @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
     } catch (Exception $e) {
     }
-
   }
 }
 
@@ -77,7 +76,7 @@ class Test_DB_Pgsql extends Test_DB_Test
  */
 class PgsqlHelper extends BaseHelper
 {
-  public $sqls = null;
+  public $sqls = array();
 
   public function __construct()
   {
@@ -114,26 +113,26 @@ class PgsqlHelper extends BaseHelper
     $sqls[] = "CREATE TABLE test_condition (
                  id serial primary key,
                  status boolean,
-                 registed datetime,
+                 registed timestamp,
                  point integer)";
 
     $sqls[] = "CREATE TABLE blog (
                  id integer primary key,
                  title varchar(24),
                  article text,
-                 write_date datetime,
+                 write_date timestamp,
                  users_id integer)";
 
     $sqls[] = "CREATE TABLE favorite_item (
                  id integer primary key,
                  users_id integer,
-                 registed datetime,
+                 registed timestamp,
                  name varchar(24))";
 
     $sqls[] = "CREATE TABLE customer_order (
                  id serial primary key,
                  customer_id integer,
-                 buy_date datetime,
+                 buy_date timestamp,
                  amount integer)";
 
     $this->sqls = $sqls;

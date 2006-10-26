@@ -476,6 +476,7 @@ class Test_DB_Test extends SabelTestCase
     $order->save(array('customer_id' => 2, 'buy_date' => '2005-08-01 10:10:10', 'amount' => 8000));
 
     $customer = Sabel_DB_Model::load('Customer')->selectOne(1);
+    $customer->setConstraint('order', 'customer_id');
     $func   = 'sum(amount) as sum, avg(amount) as avg';
     $result = $customer->aggregate($func, 'CustomerOrder', 'customer_id');
     $this->assertEquals(count($result), 2);
@@ -489,6 +490,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$res2->avg, 7000);
 
     $model  = Sabel_DB_Model::load('CustomerOrder');
+    $model->setConstraint('order', 'customer_id');
     $func   = 'sum(amount) as sum, avg(amount) as avg';
     $result = $model->aggregate($func, null, 'customer_id');
     $this->assertEquals(count($result), 2);
@@ -719,10 +721,12 @@ class Test_DB_Test extends SabelTestCase
   {
     $model = Sabel_DB_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 13);
+    $model->unsetCondition();
     $model->remove('point', 1000);
 
     $model = Sabel_DB_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 12);
+    $model->unsetCondition();
 
     $model->point(Sabel_DB_Condition::ISNULL);
     $this->assertEquals($model->getCount(), 2);
@@ -784,6 +788,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($users), 2);
     $this->assertEquals($users[0]->name, 'username1');
     $this->assertEquals($users[1]->name, 'username2');
+  }
+
+  public function testClear()
+  {
+    Sabel_DB_SimpleCache::clear();
+    Sabel_DB_Connection::closeAll();
   }
 }
 

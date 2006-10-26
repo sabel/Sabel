@@ -169,6 +169,7 @@ abstract class Sabel_DB_Relation
       $tblName = convert_to_tablename($child);
       $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
       $model   = $this->newClass($tblName);
+      $model->receiveConstraint($this->getConstraint());
     }
     $model->setConstraint('group', $columns);
 

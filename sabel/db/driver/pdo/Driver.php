@@ -8,9 +8,11 @@
  */
 class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
 {
-  private $stmt     = null;
-  private $data     = array();
-  private $stmtFlag = false;
+  private
+    $stmt     = null,
+    $isAdd    = true,
+    $stmtFlag = false,
+    $data     = array();
 
   public function __construct($conn, $dbType)
   {
@@ -79,7 +81,7 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     $sql = $this->query->getSQL();
 
     $exist = false;
-    if ($this->checkConditionTypes($conditions))
+    if ($this->isAdd = $this->checkConditionTypes($conditions))
       $exist = Sabel_DB_Driver_Pdo_Statement::exists($sql, $conditions, $constraints);
 
     $this->query->makeConditionQuery($conditions);
@@ -92,8 +94,8 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if (empty($conditions)) return true;
 
     foreach ($conditions as $condition) {
-      if (is_array($condition)) return false;
-      if ($condition->type !== Sabel_DB_Condition::NORMAL) return false;
+      if (is_array($condition) || $condition->not ||
+          $condition->type !== Sabel_DB_Condition::NORMAL) return false;
     }
     return true;
   }
@@ -107,7 +109,8 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     } else if (($sql = $this->query->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute EDO::makeQuery() beforehand');
     } else {
-      if ($this->stmt = $this->conn->prepare($sql)) Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
+      $this->stmt = $this->conn->prepare($sql);
+      if ($this->isAdd && $this->stmt) Sabel_DB_Driver_Pdo_Statement::add($this->stmt);
     }
 
     if (!$this->stmt) {
@@ -120,7 +123,8 @@ class Sabel_DB_Driver_Pdo_Driver extends Sabel_DB_Driver_General
     if (!$this->stmt->execute($param)) {
       $param = var_export($param, 1);
       $error = $this->conn->errorInfo();
-      $error = (isset($error[2])) ? $error[2] : $error[0];
+      $error = (isset($error[2])) ? $error[2] : var_export($error, 1);
+      if (is_object($this->stmt)) $sql = $this->stmt->queryString;
       throw new Exception("Error: pdo execute failed: $sql PARAMETERS: $param ERROR: $error");
     }
   }

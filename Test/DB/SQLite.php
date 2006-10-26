@@ -52,6 +52,7 @@ class Test_DB_SQLite extends Test_DB_Test
     }
 
     $model = Sabel_DB_Model::load('');
+    $model->setConnectName('default2');
 
     try {
       $model->execute('CREATE TABLE customer( id int4 primary key, name varchar(24))');
@@ -71,7 +72,7 @@ class SQLiteHelper extends BaseHelper
 
   public function __construct()
   {
-    $SQLs = array();
+    $sqls = array();
 
     $sqls[] = 'CREATE TABLE basic (
                  id int4 primary key,
@@ -126,6 +127,6 @@ class SQLiteHelper extends BaseHelper
                  buy_date datetime,
                  amount integer)";
 
-    $this->sqls = $SQLs;
+    $this->sqls = $sqls;
   }
 }
