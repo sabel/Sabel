@@ -52,7 +52,7 @@ abstract class Sabel_Controller_Page
   {
     $actionName = $this->destination->action;
     $this->methodExecute($actionName);
-    return Re::get();
+    return Sabel_Template_Engine::getAttributes();
   }
   
   protected function __get($name)

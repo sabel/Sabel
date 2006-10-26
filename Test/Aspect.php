@@ -213,7 +213,9 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
       {
         $aNotification = new Notification();
         $server = $joinpoint->getArgument(0);
-        $aNotification->add('added ' . $server->getName());
+        if (is_object($server)) {
+          $aNotification->add('added ' . $server->getName());
+        }
       }
     }
   }
