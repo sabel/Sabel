@@ -27,9 +27,10 @@ class Sabel_DB_Driver_Native_Paginate
 
   public function standardPaginate()
   {
-    if (isset($this->limit))  array_push($this->sql, ' LIMIT '  . $this->limit);
-    if (isset($this->offset)) array_push($this->sql, ' OFFSET ' . $this->offset);
-    return $this->sql;
+    $sql =& $this->sql;
+    if (isset($this->limit))  $sql[] = ' LIMIT '  . $this->limit;
+    if (isset($this->offset)) $sql[] = ' OFFSET ' . $this->offset;
+    return $sql;
   }
 
   public function firebirdPaginate()

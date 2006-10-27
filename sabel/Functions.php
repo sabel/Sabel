@@ -118,6 +118,6 @@ function prevd($mixed)
 
 function array_ndpop(&$array) {
   $tmp = array_pop($array);
-  array_push($array, $tmp);
+  $array[] = $tmp;
   return $tmp;
 }

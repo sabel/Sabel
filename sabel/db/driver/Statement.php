@@ -87,7 +87,7 @@ abstract class Sabel_DB_Driver_Statement
 
     $this->either = true;
     $this->makeConditionQuery($conds);
-    array_push($this->sql, ')');
+    $this->sql[] = ')';
     $this->eCount = 1;
     $this->either = false;
   }
@@ -132,7 +132,7 @@ abstract class Sabel_DB_Driver_Statement
       $this->set = true;
     }
     if ($this->either) $this->eCount++;
-    array_push($this->sql, $prefix . $query);
+    $this->sql[] = $prefix . $query;
   }
 
   protected function prepareLikeSQL($condition)

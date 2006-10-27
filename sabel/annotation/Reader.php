@@ -26,7 +26,7 @@ class Sabel_Annotation_Reader
   
   public function annotation($className)
   {
-    if (!array_key_exists($className, self::$annotation)) {
+    if (!isset(self::$annotation[$className])) {
       $ref = new ReflectionClass($className);
       $this->process($ref->getDocComment());
       foreach ($ref->getMethods() as $method) {

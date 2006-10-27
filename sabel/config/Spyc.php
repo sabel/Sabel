@@ -840,7 +840,7 @@ class Spyc
       // This is the good part!  If a key already exists, but it's part of a
       // sequence (an int), just keep addin numbers until we find a fresh one.
       if (isset($ret[$key]) and is_int($key)) {
-        while (array_key_exists($key, $ret)) {
+        while (isset($ret[$key])) {
           $key++;
         }
       }  

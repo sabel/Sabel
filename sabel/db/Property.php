@@ -107,7 +107,8 @@ class Sabel_DB_Property
 
   public function __get($key)
   {
-    if (array_key_exists($key, $this->properties)) return $this->properties[$key];
+    $properties = $this->properties;
+    if (isset($properties[$key])) return $properties[$key];
     if (!isset($this->data[$key])) return null;
 
     $data = $this->data[$key];
@@ -116,7 +117,7 @@ class Sabel_DB_Property
 
   private function convertData($key, $data)
   {
-    if (!array_key_exists($key, $this->schema)) return $data;
+    if (!isset($this->schema[$key])) return $data;
 
     switch ($this->schema[$key]['type']) {
       case Sabel_DB_Schema_Const::INT:

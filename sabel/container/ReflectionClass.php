@@ -66,17 +66,17 @@ class Sabel_Container_ReflectionClass
     $module = SabelDIHelper::getModuleName();
     
     $pathElements = array_map('strtolower', $pathElements);
-    array_push($pathElements, $interfaceName);
+    $pathElements[] = $interfaceName;
     $configFilePath = implode('/', $pathElements);
     $config = $this->loadConfig($configFilePath);
     
-    if (array_key_exists('class', $config) &&
-        array_key_exists($this->dependBy->getName(), $config['class'])) {
+    if (isset($config['class']) &&
+        isset($config['class'][$this->dependBy->getName()])) {
       $implementClassName = $config['class'][$this->dependBy->getName()];
-    } else if (array_key_exists('module', $config) &&
-               array_key_exists($module, $config['module'])) {
+    } else if (isset($config['module']) &&
+               isset($config['module'][$module])) {
       $implementClassName = $config['module'][$module];
-    } else if (array_key_exists('implementation', $config)) {
+    } else if (isset($config['implementation'])) {
       $implementClassName = $config['implementation'];
     } else {
         $msg  = 'DI config file is invalid can\'t find implementation: ';

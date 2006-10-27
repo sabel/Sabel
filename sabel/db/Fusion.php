@@ -37,7 +37,7 @@ class Sabel_DB_Fusion
   public function __set($key, $val)
   {
     foreach ($this->modelsData as $mdlName => $data) {
-      if (array_key_exists($key, $data)) {
+      if (isset($data[$key])) {
         $this->updateModels[] = $mdlName;
         $this->modelsNewData[$mdlName][$key] = $val;
       }
@@ -100,7 +100,7 @@ class Sabel_DB_Fusion
 
   public function createParents($mdlName, $model)
   {
-    if (!array_key_exists($mdlName, $this->unitCondition)) return null;
+    if (!isset($this->unitCondition[$mdlName])) return null;
     $this->createModel($this->unitCondition[$mdlName], $model, $mdlName);
   }
 
@@ -159,7 +159,7 @@ class Sabel_DB_Fusion
     $result = array();
     foreach ($schemas as $mdlName => $data) {
       foreach ($data as $key => $val) {
-        if (!array_key_exists($key, $result)) $result[$key] = $val;
+        if (!isset($result[$key])) $result[$key] = $val;
         $result["{$mdlName}_$key"] = $val;
       }
     }

@@ -34,7 +34,7 @@ class Sabel_Core_Resolver
     
     $className = array_pop($parts);
     $parts = array_map('strtolower', $parts);
-    array_push($parts, $className);
+    $parts[] = $className;
     return implode('.', $parts);
   }
 }

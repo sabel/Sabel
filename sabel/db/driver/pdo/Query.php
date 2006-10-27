@@ -14,7 +14,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
   public function makeUpdateSQL($table, $data)
   {
     $sql = array();
-    foreach (array_keys($data) as $key) array_push($sql, "{$key}=:{$key}");
+    foreach (array_keys($data) as $key) $sql[] = "{$key}=:{$key}";
     $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
 
     foreach ($data as $key => $val) $data[$key] = $this->escape($val);
@@ -27,15 +27,15 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     $values  = array();
 
     foreach ($data as $key => $val) {
-      array_push($columns, $key);
-      array_push($values, ':' . $key);
+      $columns[] = $key;
+      $values[]  = ':' . $key;
     }
 
     $sql = array("INSERT INTO $table (");
-    array_push($sql, join(',', $columns));
-    array_push($sql, ") VALUES(");
-    array_push($sql, join(',', $values));
-    array_push($sql, ')');
+    $sql[] = join(',', $columns);
+    $sql[] = ") VALUES(";
+    $sql[] = join(',', $values);
+    $sql[] = ')';
 
     foreach ($data as $key => $val) $data[$key] = $this->escape($val);
     return array(join('', $sql), $data);
@@ -43,11 +43,12 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
 
   public function makeConstraintQuery($const)
   {
-    if (isset($const['group']))  array_push($this->sql, ' GROUP BY ' . $const['group']);
-    if (isset($const['having'])) array_push($this->sql, ' HAVING '   . $const['having']);
-    if (isset($const['order']))  array_push($this->sql, ' ORDER BY ' . $const['order']);
-    if (isset($const['limit']))  array_push($this->sql, ' LIMIT '    . $const['limit']);
-    if (isset($const['offset'])) array_push($this->sql, ' OFFSET '   . $const['offset']);
+    $sql =& $this->sql;
+    if (isset($const['group']))  $sql[] = ' GROUP BY ' . $const['group'];
+    if (isset($const['having'])) $sql[] = ' HAVING '   . $const['having'];
+    if (isset($const['order']))  $sql[] = ' ORDER BY ' . $const['order'];
+    if (isset($const['limit']))  $sql[] = ' LIMIT '    . $const['limit'];
+    if (isset($const['offset'])) $sql[] = ' OFFSET '   . $const['offset'];
   }
 
   protected function makeNormalSQL($condition)

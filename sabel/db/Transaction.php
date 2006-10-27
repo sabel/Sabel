@@ -16,7 +16,7 @@ class Sabel_DB_Transaction
 
   public static function begin($connectName, $driver)
   {
-    if (!array_key_exists($connectName, self::$list)) {
+    if (!isset(self::$list[$connectName])) {
       $conn = Sabel_DB_Connection::getConnection($connectName);
       self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;

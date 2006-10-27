@@ -240,7 +240,7 @@ abstract class Sabel_DB_Relation
     $colList    = $this->remakeColList($colList);
 
     $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames($myTable);
-    foreach ($columns as $column) array_push($sql, "{$myTable}.{$column}, ");
+    foreach ($columns as $column) $sql[] = "{$myTable}.{$column}, ";
 
     foreach ($relTables as $pair) $joinTables = array_merge($joinTables, array_values($pair));
     $joinTables = array_diff(array_unique($joinTables), (array)$myTable);
@@ -248,11 +248,11 @@ abstract class Sabel_DB_Relation
     foreach ($joinTables as $tblName) $this->addJoinColumns($sql, $tblName, $colList);
 
     $sql = array(substr(join('', $sql), 0, -2));
-    array_push($sql, " FROM {$myTable}");
+    $sql[] = " FROM {$myTable}";
 
     foreach ($relTables as $pair) {
       list($child, $parent) = array_values($pair);
-      array_push($sql, " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ");
+      $sql[] = " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ";
     }
 
     $executer = $this->getExecuter();
@@ -266,7 +266,7 @@ abstract class Sabel_DB_Relation
       $relational = $this->relational;
 
       foreach ($joinTables as $tblName) {
-        if (!array_key_exists($tblName, $relational)) continue;
+        if (!isset($relational[$tblName])) continue;
         foreach ($relational[$tblName] as $parent) {
           $mdlName = convert_to_modelname($parent);
           $models[$tblName]->$mdlName = $models[$parent];
@@ -313,7 +313,7 @@ abstract class Sabel_DB_Relation
     $columns = (isset($colList[$tblName])) ? $colList[$tblName] : $this->getColumnNames($tblName);
     foreach ($columns as $column) {
       $this->joinColCache[$tblName][] = $column;
-      array_push($sql, "{$tblName}.{$column} AS pre_{$tblName}_{$column}, ");
+      $sql[] = "{$tblName}.{$column} AS pre_{$tblName}_{$column}, ";
     }
   }
 
@@ -692,7 +692,7 @@ abstract class Sabel_DB_Relation
     $chain = Schema_CascadeChain::get();
     $key   = $this->connectName . ':' . $this->table;
 
-    if (!array_key_exists($key, $chain))
+    if (!isset($chain[$key]))
       throw new Exception('cascade chain is not found. try remove()');
 
     $this->begin();
@@ -715,7 +715,7 @@ abstract class Sabel_DB_Relation
   {
     $key = $children[0]->connectName . ':' . $children[0]->table;
 
-    if (array_key_exists($key, $chain)) {
+    if (isset($chain[$key])) {
       $references = array();
       foreach ($chain[$key] as $tblName) {
         $models = array();
