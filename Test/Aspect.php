@@ -12,13 +12,14 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     return new PHPUnit2_Framework_TestSuite("Test_Aspect");
   }
   
+  /*
   public function testDynamicProxy()
   {
     $before = create_function('$target, $method', 'return $method->getName();');
     $after  = create_function('$target, $method, $result', 'return $result;');
     $both   = create_function('$target, $method, $result', 'return null;');
     
-    $customer = new Sabel_Aspect_DynamicProxy(new Test_Aspect_Customers());
+    $customer = new Sabel_Aspect_Proxy(new Test_Aspect_Customers());
     $customer->beforeAspect('before', $before);
     $customer->afterAspect('after', $after);
     $customer->bothAspect('both', $both);
@@ -34,7 +35,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     $arg     = '$target, $method, $result';
     $routine = 'return $result;';
     
-    $ol = new Sabel_Aspect_DynamicProxy(new Test_Aspect_Overloads());
+    $ol = new Sabel_Aspect_Proxy(new Test_Aspect_Overloads());
     $ol->afterAspect('after', create_function($arg, $routine));
     $ol->callOverloads('test');
     $this->assertEquals('callOverloads', $ol->afterResult('after'));
@@ -42,6 +43,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     $ol->callOverloadsTwo('test');
     $this->assertEquals('callOverloadsTwo', $ol->afterResult('after'));
   }
+  */
   
   public function testIntertypeDeclaration()
   {
@@ -148,7 +150,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
     public static function add($server)
     {
       self::$counter++;
-      array_push(self::$stock, $server);
+      self::$stock[] = $server;
     }
     
     public static function getNumberOfStock()
@@ -278,7 +280,7 @@ class Test_AspectTwo
   }
 }
 
-class Test_Aspect_IntertypeDeclarator extends Sabel_Aspect_DynamicProxy
+class Test_Aspect_IntertypeDeclarator extends Sabel_Aspect_Proxy
 {
   public function added()
   {
