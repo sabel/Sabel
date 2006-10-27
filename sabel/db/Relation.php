@@ -50,6 +50,7 @@ abstract class Sabel_DB_Relation
 
   public function __call($method, $parameters)
   {
+    if (is_null($this->property)) $this->createProperty();
     @list($arg1, $arg2, $arg3) = $parameters;
     return $this->property->$method($arg1, $arg2, $arg3);
   }
