@@ -25,7 +25,7 @@ class Test_VirtualInheritance extends SabelTestCase
     $c->regist('test.VirtualParentClass',    'VirtualParentClass');
     $c->regist('test.VirtualParentClassTwo', 'VirtualParentClassTwo');
     
-    $inherited = $c->load('test.InheritedClass');
+    $inherited = new Sabel_Aspect_VirtualInheritProxy(new InheritedClass());
     
     $inherited->inherit('test.VirtualParentClass')
               ->inherit('test.VirtualParentClassTwo');
