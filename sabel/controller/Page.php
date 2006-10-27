@@ -38,7 +38,6 @@ abstract class Sabel_Controller_Page
     $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
-    $this->response    = new Sabel_Response_Web();
     $this->storage     = Sabel_Storage_Session::create();
     $this->destination = $this->entry->getDestination();
   }

@@ -20,6 +20,16 @@ class Sabel_Aspect_Joinpoint
     return $this->target;
   }
   
+  public function getReflection()
+  {
+    return new ReflectionClass($this->target);
+  }
+  
+  public function getMethodReflection()
+  {
+    return $this->getReflection()->getMethod($this->getMethod());
+  }
+  
   public function getArguments()
   {
     return $this->arguments;
