@@ -116,9 +116,9 @@ class Container
     
     if ($rc->hasMethod('__construct')) {
       $ins = $di->load($className, '__construct');
-      $instance = new Sabel_Aspect_DynamicProxy($ins);
+      $instance = $this->proxynize($ins);
     } else {
-      $instance = new Sabel_Aspect_DynamicProxy(new $className());
+      $instance = $this->proxynize(new $className());
     }
     
     $this->setter($instance);
@@ -131,10 +131,10 @@ class Container
     return new $className();
   }
   
-  protected function setter($injection)
+  protected function setter($proxy)
   {
-    $reflection = $injection->getReflection();
-    $target     = $injection->getTarget();
+    $reflection = $proxy->getReflection();
+    $target     = $proxy->getTargetClass();
     
     $annotations = array();
     foreach ($reflection->getProperties() as $property) {
@@ -148,7 +148,7 @@ class Container
       foreach ($entries as $annotation) {
         if (isset($annotation['implementation'])) {
           $className = $annotation['implementation']->getContents();
-          $ins = new Sabel_Aspect_DynamicProxy(new $className());
+          $ins = $this->proxynize(new $className());
           $setter = 'set'. ucfirst($className);
           if (isset($annotation['setter'])) {
             $setter = $annotation['setter']->getContents();
@@ -159,6 +159,11 @@ class Container
         }
       }
     }
+  }
+  
+  protected function proxynize($class)
+  {
+    return new Sabel_Aspect_Proxy($class);
   }
   
   public function isRegistered($classpath)
@@ -214,7 +219,7 @@ class NameResolver
     
     $className = array_pop($parts);
     $parts = array_map('strtolower', $parts);
-    array_push($parts, $className);
+    $parts[] = $className;
     return implode('.', $parts);
   }
   
