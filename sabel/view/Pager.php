@@ -25,7 +25,7 @@ class Sabel_View_Pager
   
   public static function getLimit()
   {
-    return 0;
+    return 100;
   }
   
   public static function setOffset($offset)

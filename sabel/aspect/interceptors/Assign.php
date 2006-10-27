@@ -22,6 +22,7 @@ class Sabel_Aspect_Interceptors_Assign
     $assignFromAnnotation = false;
     foreach ($assigns as $annot) {
       $assign = $annot->getContents();
+      
       if ($joinpoint->getMethod() === $assign[0]) {
         $assignFromAnnotation = true;
         Sabel_Template_Engine::setAttribute($assign[2], $joinpoint->getResult());
