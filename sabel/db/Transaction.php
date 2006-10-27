@@ -45,7 +45,7 @@ class Sabel_DB_Transaction
 
   private static function executeMethod($method)
   {
-    if (count(self::$list) > 0) {
+    if (sizeof(self::$list) > 0) {
       foreach (self::$list as $connection) {
         $connection['driver']->$method($connection['conn']);
       }

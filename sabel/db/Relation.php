@@ -50,7 +50,6 @@ abstract class Sabel_DB_Relation
 
   public function __call($method, $parameters)
   {
-    if (is_null($this->property)) $this->createProperty();
     @list($arg1, $arg2, $arg3) = $parameters;
     return $this->property->$method($arg1, $arg2, $arg3);
   }
@@ -359,7 +358,7 @@ abstract class Sabel_DB_Relation
     if ($parents = $sClass->getParents()) {
       foreach ($parents as $parent) {
         $this->joinPair[] = $tblName . ':' . $parent;
-        return $this->prepareAutoJoin($parent);
+        if (!$this->prepareAutoJoin($parent)) return false;
       }
     }
     return true;
@@ -367,10 +366,11 @@ abstract class Sabel_DB_Relation
 
   private function isSameConnectName($props)
   {
+    $conName = $props['connectName'];
     if (($size = sizeof($this->joinConNames)) > 0) {
-      if ($this->joinConNames[$size - 1] !== $props['connectName']) return false;
+      if ($this->joinConNames[$size - 1] !== $conName) return false;
     }
-    $this->joinConNames[] = $props['connectName'];
+    $this->joinConNames[] = $conName;
     return true;
   }
 
@@ -414,7 +414,7 @@ abstract class Sabel_DB_Relation
       }
 
       $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
-      if (!is_null($myChild = $model->getMyChildren())) {
+      if ($myChild = $model->getMyChildren()) {
         if (isset($child)) $this->chooseChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
       }
@@ -437,17 +437,17 @@ abstract class Sabel_DB_Relation
     $model = $this->newClass($tblName);
     if (is_null($id)) return $model;
 
-    if (!is_array($row = Sabel_DB_SimpleCache::get($tblName. $id))) {
+    if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
       $model->setCondition($model->primaryKey, $id);
       $projection = $model->getProjection();
       $executer   = $model->getExecuter();
       $executer->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
-      $resultSet = $executer->execute();
+      $resultSet  = $executer->execute();
 
       if (!$row = $resultSet->fetch())
         throw new Exception('Error: relational error. parent does not exists.');
 
-      Sabel_DB_SimpleCache::add($tblName. $id, $row);
+      Sabel_DB_SimpleCache::add($tblName . $id, $row);
     }
     $row = $this->checkForeignKey($row, $model->primaryKey);
 
@@ -462,8 +462,10 @@ abstract class Sabel_DB_Relation
       if (strpos($key, "_{$pKey}") !== false) {
         $tblName = str_replace("_{$pKey}", '', $key);
         $result  = $this->addParentModels($tblName, $val);
-        $mdlName = convert_to_modelname($tblName);
-        if ($result) $row[$mdlName] = $result;
+        if ($result) {
+          $mdlName = convert_to_modelname($tblName);
+          $row[$mdlName] = $result;
+        }
       }
     }
     return $row;
@@ -578,9 +580,7 @@ abstract class Sabel_DB_Relation
       return new $mdlName();
     } else {
       $model = Sabel_DB_Model::load($mdlName);
-      if (!$model->hasSchema()) {
-        $model->setConnectName($this->connectName);
-      }
+      if (!$model->hasSchema()) $model->setConnectName($this->connectName);
       return $model;
     }
   }
@@ -592,15 +592,16 @@ abstract class Sabel_DB_Relation
 
   public function clearChild($child)
   {
+    $pkey = $this->primaryKey;
     $data = $this->getData();
-    if (isset($data[$this->primaryKey])) {
-      $id = $data[$this->primaryKey];
+    if (isset($data[$pkey])) {
+      $id = $data[$pkey];
     } else {
       throw new Exception('Error: clearChild() who is a parent? hasn\'t id value.');
     }
     $model = $this->newClass($child);
 
-    $model->setCondition("{$this->table}_{$this->primaryKey}", $id);
+    $model->setCondition("{$this->table}_{$pkey}", $id);
     $executer = $model->getExecuter();
     $executer->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
     $executer->execute();
@@ -680,36 +681,34 @@ abstract class Sabel_DB_Relation
    */
   public function cascadeDelete($id = null)
   {
-    if (is_null($id) && !$this->isSelected()) {
-      throw new Exception('Error: give the value of id or select the model beforehand.');
-    }
-
-    $data = $this->getData();
-    $id   = (isset($id)) ? $id : $data[$this->primaryKey];
-
-    if (!class_exists('Schema_CascadeChain', false)) {
+    if (!class_exists('Schema_CascadeChain', false))
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
-    }
 
+    if (is_null($id) && !$this->isSelected())
+      throw new Exception('Error: give the value of id or select the model beforehand.');
+
+    $data  = $this->getData();
+    $id    = (isset($id)) ? $id : $data[$this->primaryKey];
     $chain = Schema_CascadeChain::get();
     $key   = $this->connectName . ':' . $this->table;
 
-    if (!array_key_exists($key, $chain)) {
+    if (!array_key_exists($key, $chain))
       throw new Exception('cascade chain is not found. try remove()');
-    } else {
-      $this->begin();
-      $models = array();
-      foreach ($chain[$key] as $tblName) {
-        $foreignKey = "{$this->table}_{$this->primaryKey}";
-        if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
-      }
 
-      foreach ($models as $children) $this->getChainModels($children, $chain);
-
-      $this->clearCascadeStack(array_reverse($this->cascadeStack));
-      $this->remove($this->primaryKey, $id);
-      $this->commit();
+    $this->begin();
+    $models = array();
+    $table  = $this->table;
+    $pkey   = $this->primaryKey;
+    foreach ($chain[$key] as $tblName) {
+      $foreignKey = "{$table}_{$pkey}";
+      if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
     }
+
+    foreach ($models as $children) $this->getChainModels($children, $chain);
+
+    $this->clearCascadeStack(array_reverse($this->cascadeStack));
+    $this->remove($this->primaryKey, $id);
+    $this->commit();
   }
 
   private function getChainModels($children, &$chain)
