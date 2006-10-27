@@ -56,7 +56,6 @@ require_once('Test/VirtualInheritance.php');
 require_once('sabel/config/Spyc.php');
 require_once('sabel/Functions.php');
 require_once('sabel/db/Functions.php');
-require_once('sabel/Classes.php');
 
 class SabelAllTests
 {
