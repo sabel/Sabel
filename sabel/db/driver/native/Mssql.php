@@ -22,9 +22,9 @@ class Sabel_DB_Driver_Native_Mssql extends Sabel_DB_Driver_General
     $this->query     = new Sabel_DB_Driver_Native_Query('mssql', 'mssql_escape_string');
   }
 
-  public function setDefaultOrderKey($pKey)
+  public function extension($property)
   {
-    $this->defCol = $pKey;
+    $this->defCol = $property->primaryKey;
   }
 
   public function begin($conn)

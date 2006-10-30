@@ -53,17 +53,21 @@ class Sabel_DB_Schema_Accessor
     if ($sClass) {
       $cols = $sClass->get();
     } else {
-      $executer = new Sabel_DB_Executer($this->connectName);
+      $executer = new Sabel_DB_Executer(array('connectName' => $this->connectName));
       $executer->setConstraint('limit', 1);
       $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
-      $cols = $executer->execute()->fetch();
+      $cols = $executer->execution()->fetch();
     }
     return array_keys($cols);
   }
 
   /**
-   *  for mysql.
+   * this method is for mysql.
+   * examine the engine of the table.
    *
+   * @param  string $tblName table name
+   * @param  object $driver  an instance of Sabel_DB_Driver_Native_Mysql or Sabel_DB_Driver_Pdo_Driver
+   * @return string table engine.
    */
   public function getTableEngine($tblName, $driver = null)
   {

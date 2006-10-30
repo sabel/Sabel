@@ -11,68 +11,87 @@
  */
 class Sabel_DB_Executer
 {
-  private
-    $property = null,
-    $driver   = null,
-    $isModel  = false;
-
-  private
+  protected
+    $property    = null,
+    $driver      = null,
     $conditions  = array(),
     $constraints = array();
 
-  public function __construct($param)
-  {
-    if ($param instanceof Sabel_DB_Property) {
-      $this->property = $param;
-      $this->isModel  = true;
-      $this->initialize($param);
-    } else if (is_string($param)) {
-      $this->setDriver($param);
-    } else {
-      $errorMsg = 'Error: Sabel_DB_Executer::__construct() '
-                . 'invalid parameter. should be a string or an instance of Sabel_DB_Wrapper';
+  private
+    $isModel     = false;
 
+  public function __construct($properties)
+  {
+    if (!is_array($properties)) {
+      $errorMsg = 'Sabel_DB_Executer::__construct() argument must be an array.';
       throw new Exception($errorMsg);
     }
+    $property = new Sabel_DB_Property();
+    $property->set($properties);
+    $this->property = $property;
+    $this->createDriver($property->connectName);
   }
 
-  public function initialize($property)
+  public function setDriver($property)
   {
-    $this->driver = Sabel_DB_Connection::getDriver($property->connectName);
-    if ($this->driver instanceof Sabel_DB_Driver_Native_Mssql) {
-      $this->driver->setDefaultOrderKey($property->primaryKey);
+    $this->isModel = true;
+    $this->createDriver($property->connectName)->extension($property);
+  }
+
+  private function createDriver($connectName)
+  {
+    $this->driver = Sabel_DB_Connection::getDriver($connectName);
+    return $this->driver;
+  }
+
+  /**
+   * setting condition.
+   *
+   * @param mixed    $arg1 column name ( with the condition prefix ),
+   *                       or value of primary key,
+   *                       or instance of Sabel_DB_Condition.
+   * @param mixed    $arg2 condition value.
+   * @param constant $arg3 denial ( Sabel_DB_Condition::NOT )
+   * @return void
+   */
+  public function setCondition($arg1, $arg2 = null, $arg3 = null)
+  {
+    if (empty($arg1)) return null;
+
+    if (is_object($arg1) || is_array($arg1)) {
+      $this->conditions[] = $arg1;
+    } else {
+      if (is_null($arg2)) {
+        $arg3 = null;
+        $arg2 = $arg1;
+        $arg1 = $this->property->primaryKey;
+      }
+      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+      $this->conditions[$condition->key] = $condition;
     }
   }
 
-  public function setCondition($condition)
+  /**
+   * setting constraint.
+   * the keys which you can use are 'group', 'having', 'order', 'limit', 'offset'.
+   *
+   * @param  mixed $arg1 array constraint(s). or string key.
+   * @param  mixed $arg2 value of integer or string.
+   * @return void
+   */
+  public function setConstraint($arg1, $arg2 = null)
   {
-    if (!$condition instanceof Sabel_DB_Condition)
-      throw new Exception('Error: argument should be an instance of Sabel_DB_Condition');
+    if (!is_array($arg1)) $arg1 = array($arg1 => $arg2);
 
-    $this->conditions[$condition->key] = $condition;
-  }
-
-  public function getCondition()
-  {
-    return ($this->isModel) ? $this->property->getCondition() : $this->conditions;
-  }
-
-  public function setConstraint($param1, $param2 = null)
-  {
-    $param = (is_array($param1)) ? $param1 : array($param1 => $param2);
-    foreach ($param as $key => $val) {
+    foreach ($arg1 as $key => $val) {
       if (isset($val)) $this->constraints[$key] = $val;
     }
   }
 
-  public function getConstraint()
+  public function unsetCondition()
   {
-    return ($this->isModel) ? $this->property->getConstraint() : $this->constraints;
-  }
-
-  public function setDriver($connectName)
-  {
-    $this->driver = Sabel_DB_Connection::getDriver($connectName);
+    $this->conditions  = array();
+    $this->constraints = array();
   }
 
   public function getDriver()
@@ -85,10 +104,10 @@ class Sabel_DB_Executer
     return $this->driver->getStatement();
   }
 
-  public function execute()
+  public function execution()
   {
     $driver = $this->driver;
-    $driver->makeQuery($this->getCondition(), $this->getConstraint());
+    $driver->makeQuery($this->conditions, $this->constraints);
     $this->tryExecute($driver);
     return $driver->getResultSet();
   }
@@ -97,7 +116,7 @@ class Sabel_DB_Executer
   {
     $driver = $this->driver;
     $driver->setUpdateSQL($table, $data);
-    $driver->makeQuery($this->getCondition());
+    $driver->makeQuery($this->conditions);
     $this->tryExecute($driver);
   }
 
@@ -111,7 +130,7 @@ class Sabel_DB_Executer
     }
   }
 
-  public function multipleInsert($table, $data, $idColumn)
+  public function execMultipleInsert($table, $data, $idColumn)
   {
     try {
       foreach ($data as $val) $this->driver->executeInsert($table, $val, $idColumn);
@@ -137,6 +156,61 @@ class Sabel_DB_Executer
 
   public function executeError($errorMsg)
   {
+    if (Sabel_DB_Transaction::isActive()) Sabel_DB_Transaction::rollback();
     throw new Exception($errorMsg);
+  }
+
+  public function getTableNames()
+  {
+    return $this->createSchemaAccessor()->getTableNames();
+  }
+
+  public function getColumnNames($tblName = null)
+  {
+    if (is_null($tblName)) $tblName = $this->property->table;
+    return $this->createSchemaAccessor()->getColumnNames($tblName);
+  }
+
+  public function getTableSchema($tblName = null)
+  {
+    if (is_null($tblName)) $tblName = $this->property->table;
+    return $this->createSchemaAccessor()->getTable($tblName);
+  }
+
+  public function getAllTableSchema()
+  {
+    return $this->createSchemaAccessor()->getTables();
+  }
+
+  private function createSchemaAccessor()
+  {
+    $connectName = $this->property->connectName;
+    $schemaName  = Sabel_DB_Connection::getSchema($connectName);
+    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
+  }
+
+  public function close()
+  {
+    Sabel_DB_Connection::close($this->property->connectName);
+  }
+
+  /**
+   * an alias for setCondition.
+   *
+   * @return void
+   */
+  public function scond($arg1, $arg2 = null, $not = null)
+  {
+    $this->setCondition($arg1, $arg2, $not);
+  }
+
+  /**
+   * an alias for setConstraint.
+   *
+   * @return void
+   */
+  public function sconst($arg1, $arg2 = null)
+  {
+    $this->setConstraint($arg1, $arg2);
   }
 }

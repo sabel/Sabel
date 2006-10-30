@@ -14,6 +14,29 @@ class Sabel_DB_Transaction
   private static $list   = array();
   private static $active = false;
 
+  public static function add($model)
+  {
+    $driver  = $model->getDriver();
+    $conName = $model->connectName;
+    $db      = Sabel_DB_Connection::getDB($conName);
+
+    if ($db === 'mysql') {
+      $sName    = Sabel_DB_Connection::getSchema($conName);
+      $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
+      $engine   = $accessor->getTableEngine($model->table, $driver);
+      $check = ($engine === 'InnoDB' || $engine === 'BDB');
+    } else {
+      $check = true;
+    }
+
+    if ($check) {
+      self::begin($conName, $driver);
+    } else {
+      $msg = "begin transaction, but a table engine of the '{$model->table}' is {$engine}.";
+      trigger_error($msg, E_USER_NOTICE);
+    }
+  }
+
   public static function begin($connectName, $driver)
   {
     if (!isset(self::$list[$connectName])) {

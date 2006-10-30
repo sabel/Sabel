@@ -162,7 +162,7 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('string' => 'a%a'));
 
     $model = Sabel_DB_Model::load('TestForLike');
-    $model->LIKE_string('aa_');
+    $model->setCondition('LIKE_string', 'aa_');
     $result = $model->select();
 
     $this->assertTrue(is_array($result));
@@ -170,7 +170,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($result[0]->string, 'aa_');
 
     $model = Sabel_DB_Model::load('TestForLike');
-    $model->LIKE_string(array('aa_', false));
+    $model->setCondition('LIKE_string', array('aa_', false));
     $result = $model->select();
 
     $this->assertEquals(count($result), 2);
@@ -178,14 +178,14 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($result[1]->string, 'aa_');
 
     $model = Sabel_DB_Model::load('TestForLike');
-    $model->LIKE_string('a%a');
+    $model->scond('LIKE_string', 'a%a');
     $result = $model->select();
 
     $this->assertEquals(count($result), 1);
     $this->assertEquals($result[0]->string, 'a%a');
 
     $model = Sabel_DB_Model::load('TestForLike');
-    $model->LIKE_string(array('a%a', false));
+    $model->scond('LIKE_string', array('a%a', false));
     $result = $model->select();
 
     $this->assertEquals(count($result), 3);
@@ -209,7 +209,7 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
 
     $model = Sabel_DB_Model::load('TestCondition');
-    $model->COMP_point(array('>=', 8000));
+    $model->scond('COMP_point', array('>=', 8000));
     $models = $model->select();
     $this->assertEquals(count($models), 3);
 
@@ -252,7 +252,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model6->point, 10000);
 
     $model = Sabel_DB_Model::load('TestCondition');
-    $model->status(false);
+    $model->scond('status', false);
     $models = $model->select();
     $this->assertEquals(count($models), 6);
 
@@ -265,7 +265,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model3->point, 5000);
 
     $model->unsetCondition();
-    $model->status(false, Sabel_DB_Condition::NOT);
+    $model->scond('status', false, Sabel_DB_Condition::NOT);
     $models = $model->select();
     $this->assertEquals(count($models), 4);
 
@@ -280,7 +280,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model4->point, 10000);
 
     $model = Sabel_DB_Model::load('TestCondition');
-    $model->BET_registed(array('2005-01-01 11:11:11', '2005-05-05 11:11:11'));
+    $model->scond('BET_registed', array('2005-01-01 11:11:11', '2005-05-05 11:11:11'));
     $model->sconst('order', 'registed');
     $models = $model->select();
     $this->assertEquals(count($models), 4);
@@ -316,7 +316,7 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
     $model->save(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
 
-    $model->point(Sabel_DB_Condition::ISNULL);
+    $model->scond('point', Sabel_DB_Condition::ISNULL);
     $models = $model->select();
     $this->assertEquals(count($models), 2);
 
@@ -332,8 +332,8 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($models), 11);
 
     $model = Sabel_DB_Model::load('TestCondition');
-    $model->point(Sabel_DB_Condition::NOTNULL);
-    $model->COMP_registed(array('<=', '2005-02-01 10:10:10'));
+    $model->scond('point', Sabel_DB_Condition::NOTNULL);
+    $model->scond('COMP_registed', array('<=', '2005-02-01 10:10:10'));
     $models = $model->select();
     $this->assertEquals(count($models), 3);
 
@@ -728,7 +728,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model->getCount(), 12);
     $model->unsetCondition();
 
-    $model->point(Sabel_DB_Condition::ISNULL);
+    $model->scond('point', Sabel_DB_Condition::ISNULL);
     $this->assertEquals($model->getCount(), 2);
 
     Sabel_DB_Model::load('TestCondition')->remove('point', Sabel_DB_Condition::ISNULL);
@@ -788,6 +788,20 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($users), 2);
     $this->assertEquals($users[0]->name, 'username1');
     $this->assertEquals($users[1]->name, 'username2');
+  }
+
+  public function testTransaction()
+  {
+    Sabel_DB_Model::load('')->execute('DELETE FROM customer_order');
+    $model = Sabel_DB_Model::load('CustomerOrder');
+    $model->setConnectName('default2');
+    $model->execute('DELETE FROM customer');
+
+    $customers = Sabel_DB_Model::load('Customer')->select();
+    $this->assertFalse($customers);
+
+    $orders = Sabel_DB_Model::load('CustomerOrder')->select();
+    $this->assertFalse($orders);
   }
 
   public function testClear()

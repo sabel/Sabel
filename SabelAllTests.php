@@ -1,5 +1,7 @@
 <?php
 
+set_include_path(get_include_path() . ':/usr/local/www/data/ebine_sandbox');
+
 define('SABEL_BASE', dirname(realpath(__FILE__)));
 define('RUN_BASE', SABEL_BASE . '/Test/data/application/');
 define('TEST_CASE', true);

@@ -14,9 +14,9 @@
 abstract class Sabel_DB_Driver_General
 {
   protected
+    $dbType   = '',
     $conn     = null,
     $query    = null,
-    $dbType   = '',
     $insertId = null;
 
   public abstract function begin($conn);
@@ -26,6 +26,8 @@ abstract class Sabel_DB_Driver_General
   public abstract function getResultSet();
 
   protected abstract function driverExecute($sql = null);
+
+  public function extension($property){}
 
   public function getStatement()
   {

@@ -20,10 +20,8 @@ class Sabel_DB_Property
     $overrideProps = array();
 
   private
-    $conditions       = array(),
     $selectConditions = array(),
     $childConditions  = array(),
-    $constraints      = array(),
     $childConstraints = array();
 
   private
@@ -31,8 +29,10 @@ class Sabel_DB_Property
     $newData  = array(),
     $selected = false;
 
-  public function __construct($mdlName, $mdlProps)
+  public function __construct($mdlName = null, $mdlProps = null)
   {
+    if (is_null($mdlName)) return null;
+
     $props = array('table'               => '',
                    'structure'           => 'normal',
                    'withParent'          => false,
@@ -55,10 +55,25 @@ class Sabel_DB_Property
     }
 
     $props['autoNumber'] = (isset($properties['incrementKey']));
-    if ($props['table'] === '') $this->initTableName($mdlName, $properties);
+
+    if ($props['table'] === '') {
+      $this->initTableName($mdlName, $properties);
+    } else {
+      $properties['table'] = $props['table'];
+    }
 
     $this->overrideProps = $props;
     $this->properties    = $properties;
+  }
+
+  public function set($properties)
+  {
+    $this->properties = $properties;
+  }
+
+  private function initTableName($mdlName, &$properties)
+  {
+    $properties['table'] = convert_to_tablename($mdlName);
   }
 
   private function initSchema($sClass)
@@ -73,16 +88,6 @@ class Sabel_DB_Property
     return $properties;
   }
 
-  private function initTableName($mdlName, &$properties)
-  {
-    $properties['table'] = convert_to_tablename($mdlName);
-  }
-
-  public function setTableName($tblName)
-  {
-    $this->properties['table'] = $tblName;
-  }
-
   public function setSchema($tblName)
   {
     $sClass = get_schema_by_tablename($tblName);
@@ -93,22 +98,21 @@ class Sabel_DB_Property
     }
   }
 
-  public function __call($column, $args)
-  {
-    @list($arg1, $arg2) = $args;
-    $this->setCondition($column, $arg1, $arg2);
-  }
-
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
     if ($this->selected) $this->newData[$key] = $val;
   }
 
+  public function dataSet($key, $val)
+  {
+    $this->data[$key] = $val;
+  }
+
   public function __get($key)
   {
     $properties = $this->properties;
-    if (isset($properties[$key])) return $properties[$key];
+    if (isset($properties[$key]))  return $properties[$key];
     if (!isset($this->data[$key])) return null;
 
     $data = $this->data[$key];
@@ -191,41 +195,9 @@ class Sabel_DB_Property
     $this->overrideProps['projection'] = (is_array($p)) ? join(',', $p) : $p;
   }
 
-  /**
-   * setting condition.
-   *
-   * @param mixed    $arg1 column name ( with the condition prefix ),
-   *                       or value of primary key,
-   *                       or object of Sabel_DB_Condition.
-   * @param mixed    $arg2 condition value.
-   * @param constant $arg3 denial ( Sabel_DB_Condition::NOT )
-   * @return void
-   */
-  public function setCondition($arg1, $arg2 = null, $arg3 = null)
+  public function setTableName($tblName)
   {
-    if (empty($arg1)) return null;
-
-    if (is_object($arg1) || is_array($arg1)) {
-      $this->conditions[] = $arg1;
-    } else {
-      if (is_null($arg2)) {
-        $arg3 = null;
-        $arg2 = $arg1;
-        $arg1 = $this->properties['primaryKey'];
-      }
-      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
-      $this->conditions[$condition->key] = $condition;
-    }
-  }
-
-  public function receiveCondition($conditions)
-  {
-    $this->conditions = $conditions;
-  }
-
-  public function getCondition()
-  {
-    return $this->conditions;
+    $this->properties['table'] = $tblName;
   }
 
   public function setChildConstraint($arg1, $arg2 = null)
@@ -264,42 +236,9 @@ class Sabel_DB_Property
     return $this->childConditions;
   }
 
-  /**
-   * setting constraint.
-   * the keys which you can use are 'group', 'having', 'order', 'limit', 'offset'.
-   *
-   * @param mixed $arg1 array constriant(s). or string key.
-   * @param mixed $arg2 value of integer or value of string.
-   * @return void
-   */
-  public function setConstraint($arg1, $arg2 = null)
-  {
-    if (!is_array($arg1)) $arg1 = array($arg1 => $arg2);
-
-    foreach ($arg1 as $key => $val) {
-      if (isset($val)) $this->constraints[$key] = $val;
-    }
-  }
-
-  public function receiveConstraint($constraints)
-  {
-    $this->constraints = $constraints;
-  }
-
-  public function getConstraint()
-  {
-    return $this->constraints;
-  }
-
   public function setDefChildConstraint($constraints)
   {
     $this->overrideProps['defChildConstraints'] = $constraints;
-  }
-
-  public function unsetCondition()
-  {
-    $this->conditions  = array();
-    $this->constraints = array();
   }
 
   public function unsetChildCondition()
@@ -336,76 +275,35 @@ class Sabel_DB_Property
    *                                           or Sabel_DB_Driver_Pdo_Driver
    * @return string table engine.
    */
-  private function getTableEngine($driver = null)
-  {
-    if (is_null($this->properties['tableEngine'])) {
-      $msg = 'schema class is not found. please generate it by schema.php';
-      //trigger_error($msg, E_USER_NOTICE);
-
-      $cn = $this->properties['connectName'];
-      $sc = Sabel_DB_Connection::getSchema($cn);
-      $sa = new Sabel_DB_Schema_Accessor($cn, $sc);
-
-      return $sa->getTableEngine($this->properties['table'], $driver);
-    } else {
-      return $this->properties['tableEngine'];
-    }
-  }
-
-  public function checkTableEngine($driver = null)
-  {
-    $engine = $this->getTableEngine($driver);
-    if ($engine !== 'InnoDB' && $engine !== 'BDB') {
-      $msg = "begin transaction, but a table engine of the '{$this->table}' is {$engine}.";
-      trigger_error($msg, E_USER_NOTICE);
-      return false;
-    } else {
-      return true;
-    }
-  }
 
   public function getStructure()
   {
-    return $this->getPropsValue('structure');
+    return $this->overrideProps['structure'];
   }
 
   public function isAutoNumber()
   {
-    return $this->getPropsValue('autoNumber');
+    return $this->overrideProps['autoNumber'];
   }
 
   public function isWithParent()
   {
-    return $this->getPropsValue('withParent');
+    return $this->overrideProps['withParent'];
   }
 
   public function getMyChildren()
   {
-    return $this->getPropsValue('myChildren');
+    return $this->overrideProps['myChildren'];
   }
 
   public function getProjection()
   {
-    return $this->getPropsValue('projection');
+    return $this->overrideProps['projection'];
   }
 
   public function getDefChildConstraint()
   {
-    return $this->getPropsValue('defChildConstraints');
-  }
-
-  private function getPropsValue($key)
-  {
-    return (isset($this->overrideProps[$key])) ? $this->overrideProps[$key] : null;
-  }
-
-  /**
-   * an alias for setConstraint.
-   *
-   */
-  public function sconst($arg1, $arg2 = null)
-  {
-    $this->setConstraint($arg1, $arg2);
+    return $this->overrideProps['defChildConstraints'];
   }
 
   /**

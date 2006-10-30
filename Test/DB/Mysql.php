@@ -60,6 +60,7 @@ class Test_DB_Mysql extends Test_DB_Test
     }
 
     $model = Sabel_DB_Model::load('');
+    $model->setConnectName('default2');
 
     try {
       $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');

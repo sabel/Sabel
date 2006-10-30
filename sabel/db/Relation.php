@@ -3,18 +3,14 @@
 /**
  * Sabel_DB_Relation
  *
- * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Relation
+class Sabel_DB_Relation extends Sabel_DB_Executer
 {
-  private
-    $property = null;
-
   private
     $joinPair     = array(),
     $joinColList  = array(),
@@ -29,13 +25,14 @@ abstract class Sabel_DB_Relation
   public function __construct($param1 = null, $param2 = null)
   {
     if (is_null($this->property)) $this->createProperty();
-    if (Sabel_DB_Transaction::isActive()) $this->begin();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
   private function createProperty()
   {
-    $this->property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
+    $property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
+    $this->property = $property;
+    $this->setDriver($property);
   }
 
   public function __set($key, $val)
@@ -68,61 +65,6 @@ abstract class Sabel_DB_Relation
     }
   }
 
-  public function getTableNames()
-  {
-    return $this->createSchemaAccessor()->getTableNames();
-  }
-
-  public function getColumnNames($tblName = null)
-  {
-    if (is_null($tblName)) $tblName = $this->table;
-    return $this->createSchemaAccessor()->getColumnNames($tblName);
-  }
-
-  public function getTableSchema($tblName = null)
-  {
-    if (is_null($tblName)) $tblName = $this->table;
-    return $this->createSchemaAccessor()->getTable($tblName);
-  }
-
-  public function getAllSchema()
-  {
-    return $this->createSchemaAccessor()->getTables($this->table);
-  }
-
-  private function createSchemaAccessor()
-  {
-    $connectName = $this->connectName;
-    $schemaName  = Sabel_DB_Connection::getSchema($connectName);
-    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
-  }
-
-  public function begin()
-  {
-    $driver  = $this->getExecuter()->getDriver();
-    $conName = $this->connectName;
-
-    $db    = Sabel_DB_Connection::getDB($conName);
-    $check = ($db === 'mysql') ? $this->checkTableEngine($driver) : true;
-
-    if ($check) Sabel_DB_Transaction::begin($conName, $driver);
-  }
-
-  public function commit()
-  {
-    Sabel_DB_Transaction::commit();
-  }
-
-  public function rollback()
-  {
-    Sabel_DB_Transaction::rollback();
-  }
-
-  public function close()
-  {
-    Sabel_DB_Connection::close($this->connectName);
-  }
-
   /**
    * get count by specified (or already set) condition.
    *
@@ -136,9 +78,8 @@ abstract class Sabel_DB_Relation
     $this->setCondition($param1, $param2, $param3);
     $this->setConstraint('limit', 1);
 
-    $executer = $this->getExecuter();
-    $executer->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $row = $executer->execute()->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
+    $row = $this->execution()->fetch(Sabel_DB_Driver_ResultSet::NUM);
     return (int)$row[0];
   }
 
@@ -169,13 +110,12 @@ abstract class Sabel_DB_Relation
       $tblName = convert_to_tablename($child);
       $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
       $model   = $this->newClass($tblName);
-      $model->receiveConstraint($this->getConstraint());
+      $model->constraints = $this->constraints;
     }
     $model->setConstraint('group', $columns);
 
-    $executer = $model->getExecuter();
-    $executer->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
-    return $model->toObject($executer->execute());
+    $model->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
+    return $model->toObject($model->execution());
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -194,8 +134,7 @@ abstract class Sabel_DB_Relation
    */
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    $conditions = $this->getCondition();
-    if (is_null($param1) && empty($conditions))
+    if (is_null($param1) && empty($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setCondition($param1, $param2, $param3);
@@ -205,17 +144,15 @@ abstract class Sabel_DB_Relation
   private function makeFindObject($model)
   {
     $projection = $model->getProjection();
-    $executer   = $model->getExecuter();
-    $executer->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
-    $model->receiveSelectCondition($model->getCondition());
+    $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
+    $model->receiveSelectCondition($model->conditions);
 
-    if ($row = $executer->execute()->fetch()) {
+    if ($row = $model->execution()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->getMyChildren())) $model->getDefaultChild($myChild, $model);
     } else {
-      foreach ($model->getCondition() as $condition) {
-        $key = $condition->key;
-        $model->$key = $condition->value;
+      foreach ($model->conditions as $condition) {
+        $model->{$condition->key} = $condition->value;
       }
     }
     return $model;
@@ -256,9 +193,8 @@ abstract class Sabel_DB_Relation
       $sql[] = " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ";
     }
 
-    $executer = $this->getExecuter();
-    $executer->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $executer->execute();
+    $this->getStatement()->setBasicSQL(join('', $sql));
+    $resultSet = $this->execution();
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
@@ -391,14 +327,13 @@ abstract class Sabel_DB_Relation
 
     $this->setCondition($param1, $param2, $param3);
     $projection = $this->getProjection();
-    $executer   = $this->getExecuter();
-    $executer->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
-    return $this->getRecords($executer);
+    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
+    return $this->getRecords($this);
   }
 
-  private function getRecords($executer, $child = null)
+  private function getRecords($model, $child = null)
   {
-    $resultSet = $executer->execute();
+    $resultSet = $model->execution();
     if ($resultSet->isEmpty()) return false;
 
     $models = array();
@@ -441,9 +376,8 @@ abstract class Sabel_DB_Relation
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
       $model->setCondition($model->primaryKey, $id);
       $projection = $model->getProjection();
-      $executer   = $model->getExecuter();
-      $executer->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
-      $resultSet  = $executer->execute();
+      $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
+      $resultSet  = $model->execution();
 
       if (!$row = $resultSet->fetch())
         throw new Exception('Error: relational error. parent does not exists.');
@@ -490,24 +424,20 @@ abstract class Sabel_DB_Relation
   {
     if (is_null($model)) $model = $this;
 
-    $class = $this->newClass($child);
-    $projection = $class->getProjection();
-    $executer   = $class->getExecuter();
-    $executer->getStatement()->setBasicSQL("SELECT $projection FROM {$class->table}");
+    $cModel = $this->newClass($child);
+    $projection = $cModel->getProjection();
+    $cModel->getStatement()->setBasicSQL("SELECT $projection FROM {$cModel->table}");
 
     $this->chooseChildConstraint($child, $model);
     $primary = $model->primaryKey;
     $model->setChildCondition("{$model->table}_{$primary}", $model->$primary);
 
-    $class->receiveCondition($model->getChildCondition());
+    $cModel->conditions = $model->getChildCondition();
     $cconst = $model->getChildConstraint();
-    if (isset($cconst[$child])) $class->receiveConstraint($cconst[$child]);
+    if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
-    $children = $model->getRecords($executer, $child);
-    if ($children) {
-      $model->$child = $children;
-      $model->unsetNewData();
-    }
+    $children = $model->getRecords($cModel, $child);
+    if ($children) $model->dataSet($child, $children);
     return $children;
   }
 
@@ -603,9 +533,8 @@ abstract class Sabel_DB_Relation
     $model = $this->newClass($child);
 
     $model->setCondition("{$this->table}_{$pkey}", $id);
-    $executer = $model->getExecuter();
-    $executer->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
-    $executer->execute();
+    $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
+    $model->execution();
   }
 
   public function save($data = null)
@@ -614,29 +543,28 @@ abstract class Sabel_DB_Relation
       throw new Exception('Error: save() argument must be an array');
 
     if ($this->isSelected()) {
-      $this->receiveCondition($this->getSelectCondition());
-      $this->getExecuter()->update($this->table, ($data) ? $data : $this->getNewData());
+      $this->conditions = $this->getSelectCondition();
+      $this->update($this->table, ($data) ? $data : $this->getNewData());
     } else {
       $data = ($data) ? $data : $this->getData();
-      return $this->getExecuter()->insert($this->table, $data, $this->checkIncColumn());
+      return $this->insert($this->table, $data, $this->checkIncColumn());
     }
   }
 
   public function allUpdate($data)
   {
-    $this->getExecuter()->update($this->table, $data);
+    $this->update($this->table, $data);
   }
 
   public function multipleInsert($data)
   {
     if (!is_array($data)) throw new Exception('Error: multipleInsert() data is not array.');
 
-    $this->begin();
+    Sabel_DB_Transaction::add($this);
     try {
-      $this->getExecuter()->multipleInsert($this->table, $data, $this->checkIncColumn());
-      $this->commit();
+      $this->execMultipleInsert($this->table, $data, $this->checkIncColumn());
+      Sabel_DB_Transaction::commit();
     } catch (Exception $e) {
-      $this->rollBack();
       throw new Exception($e->getMessage());
     }
   }
@@ -658,8 +586,7 @@ abstract class Sabel_DB_Relation
       $idValue = $selectConditions[$this->primaryKey]->value;
     }
 
-    $conditions = $this->getCondition();
-    if (is_null($param1) && empty($conditions) && is_null($idValue)) {
+    if (is_null($param1) && empty($this->conditions) && is_null($idValue)) {
       throw new Exception("Error: remove() [WHERE] must be set condition");
     }
 
@@ -669,9 +596,8 @@ abstract class Sabel_DB_Relation
       $this->setCondition($this->primaryKey, $idValue);
     }
 
-    $executer = $this->getExecuter();
-    $executer->getStatement()->setBasicSQL('DELETE FROM ' . $this->table);
-    $executer->execute();
+    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->table);
+    $this->execution();
   }
 
   /**
@@ -696,7 +622,7 @@ abstract class Sabel_DB_Relation
     if (!isset($chain[$key]))
       throw new Exception('cascade chain is not found. try remove()');
 
-    $this->begin();
+    Sabel_DB_Transaction::add($this);
     $models = array();
     $table  = $this->table;
     $pkey   = $this->primaryKey;
@@ -709,7 +635,7 @@ abstract class Sabel_DB_Relation
 
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
     $this->remove($this->primaryKey, $id);
-    $this->commit();
+    Sabel_DB_Transaction::commit();
   }
 
   private function getChainModels($children, &$chain)
@@ -767,7 +693,7 @@ abstract class Sabel_DB_Relation
     if (!empty($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
-    return $this->toObject($this->getExecuter()->executeQuery($sql, $param));
+    return $this->toObject($this->executeQuery($sql, $param));
   }
 
   protected function toObject($resultSet)
@@ -781,10 +707,5 @@ abstract class Sabel_DB_Relation
       $models[] = $cloned;
     }
     return $models;
-  }
-
-  private function getExecuter()
-  {
-    return new Sabel_DB_Executer($this->property);
   }
 }
