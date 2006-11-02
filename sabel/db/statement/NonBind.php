@@ -52,7 +52,7 @@ class Sabel_DB_Statement_NonBind extends Sabel_DB_Statement
     $offset = (isset($const['offset'])) ? $const['offset'] : null;
     $column = (isset($const['defCol'])) ? $const['defCol'] : null;
 
-    $paginate = new Sabel_DB_Driver_Native_Paginate($sql, $limit, $offset);
+    $paginate = new Sabel_DB_Statement_Limitation($sql, $limit, $offset);
 
     switch ($this->db) {
       case 'firebird':
