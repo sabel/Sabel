@@ -64,9 +64,8 @@ class Test_DB_SQLite extends Test_DB_Test
 /**
  * create query for sqlite unit test.
  *
- *
  */
-class SQLiteHelper extends BaseHelper
+class SQLiteHelper
 {
   public $sqls = null;
 

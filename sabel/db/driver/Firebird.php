@@ -1,25 +1,23 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Native_Firebird
+ * Sabel_DB_Driver_Firebird
  *
  * @category   DB
  * @package    org.sabel.db
  * @subpackage driver
- * @subpackage native
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
+class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver
 {
   private $trans = null;
 
   public function __construct($conn)
   {
-    $this->conn   = $conn;
-    $this->dbType = 'firebird';
-    $this->query  = new Sabel_DB_Driver_Native_Query('firebird');
+    $this->conn = $conn;
+    $this->db   = 'firebird';
   }
 
   public function begin($conn)
@@ -68,7 +66,7 @@ class Sabel_DB_Driver_Native_Firebird extends Sabel_DB_Driver_General
 
     if (isset($sql)) {
       $this->result = ibase_query($conn, $sql);
-    } elseif (($sql = $this->query->getSQL()) === '') {
+    } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $this->result = ibase_query($conn, $sql);

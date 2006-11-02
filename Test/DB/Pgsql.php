@@ -46,6 +46,9 @@ class Test_DB_Pgsql extends Test_DB_Test
     Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
+    Test_DB_Test::$db = 'pgsql';
+    define('DB', 'PGSQL');
+
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
 
@@ -72,9 +75,8 @@ class Test_DB_Pgsql extends Test_DB_Test
 /**
  * create query for postgres unit test.
  *
- *
  */
-class PgsqlHelper extends BaseHelper
+class PgsqlHelper
 {
   public $sqls = array();
 

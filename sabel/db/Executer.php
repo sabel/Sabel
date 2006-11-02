@@ -13,12 +13,11 @@ class Sabel_DB_Executer
 {
   protected
     $property    = null,
-    $driver      = null,
     $conditions  = array(),
     $constraints = array();
 
-  private
-    $isModel     = false;
+  protected
+    $driver = null;
 
   public function __construct($properties)
   {
@@ -26,22 +25,10 @@ class Sabel_DB_Executer
       $errorMsg = 'Sabel_DB_Executer::__construct() argument must be an array.';
       throw new Exception($errorMsg);
     }
+
     $property = new Sabel_DB_Property();
     $property->set($properties);
     $this->property = $property;
-    $this->createDriver($property->connectName);
-  }
-
-  public function setDriver($property)
-  {
-    $this->isModel = true;
-    $this->createDriver($property->connectName)->extension($property);
-  }
-
-  private function createDriver($connectName)
-  {
-    $this->driver = Sabel_DB_Connection::getDriver($connectName);
-    return $this->driver;
   }
 
   /**
@@ -96,17 +83,21 @@ class Sabel_DB_Executer
 
   public function getDriver()
   {
+    if (is_null($this->driver)) {
+      $this->driver = Sabel_DB_Connection::getDriver($this->property->connectName);
+    }
     return $this->driver;
   }
 
   public function getStatement()
   {
-    return $this->driver->getStatement();
+    $driver = $this->getDriver();
+    return $driver->loadStatement();
   }
 
-  public function execution()
+  public function exec()
   {
-    $driver = $this->driver;
+    $driver = $this->getDriver();
     $driver->makeQuery($this->conditions, $this->constraints);
     $this->tryExecute($driver);
     return $driver->getResultSet();
@@ -114,17 +105,27 @@ class Sabel_DB_Executer
 
   public function update($table, $data)
   {
-    $driver = $this->driver;
-    $driver->setUpdateSQL($table, $data);
+    $this->getStatement()->makeUpdateSQL($table, $data);
+
+    $driver = $this->getDriver();
     $driver->makeQuery($this->conditions);
-    $this->tryExecute($driver);
+    $driver->update();
   }
 
   public function insert($table, $data, $idColumn)
   {
     try {
-      $this->driver->executeInsert($table, $data, $idColumn);
-      return $this->driver->getLastInsertId();
+      $driver = $this->getDriver();
+
+      $db = Sabel_DB_Connection::getDB($this->property->connectName);
+      if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
+        $data = $driver->setIdNumber($table, $data, $idColumn);
+      }
+
+      $this->getStatement()->makeInsertSQL($table, $data);
+      $driver->insert();
+
+      return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -133,7 +134,18 @@ class Sabel_DB_Executer
   public function execMultipleInsert($table, $data, $idColumn)
   {
     try {
-      foreach ($data as $val) $this->driver->executeInsert($table, $val, $idColumn);
+      $driver = $this->getDriver();
+      $stmt   = $this->getStatement();
+
+      foreach ($data as $val) {
+        $db = Sabel_DB_Connection::getDB($this->property->connectName);
+        if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
+          $data = $driver->setIdNumber($table, $val, $idColumn);
+        }
+
+        $stmt->makeInsertSQL($table, $val);
+        $driver->insert();
+      }
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
@@ -141,8 +153,9 @@ class Sabel_DB_Executer
 
   public function executeQuery($sql, $param)
   {
-    $this->tryExecute($this->driver, $sql, $param);
-    return $this->driver->getResultSet();
+    $driver = Sabel_DB_Connection::getDriver($this->property->connectName);
+    $this->tryExecute($driver, $sql, $param);
+    return $driver->getResultSet();
   }
 
   public function tryExecute($driver, $sql = null, $param = null)

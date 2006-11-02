@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Driver_General
+ * Sabel_DB_Driver
  *
  * @abstract
  * @category   DB
@@ -11,12 +11,12 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Driver_General
+abstract class Sabel_DB_Driver
 {
   protected
-    $dbType   = '',
     $conn     = null,
-    $query    = null,
+    $stmt     = null,
+    $db       = '',
     $insertId = null;
 
   public abstract function begin($conn);
@@ -29,33 +29,23 @@ abstract class Sabel_DB_Driver_General
 
   public function extension($property){}
 
-  public function getStatement()
+  public function loadStatement()
   {
-    return $this->query;
+    $this->stmt = new Sabel_DB_Statement_NonBind($this->db, $this->escMethod);
+    return $this->stmt;
   }
 
-  public function setBasicSQL($sql)
+  public function update()
   {
-    $this->query->setBasicSQL($sql);
+    $this->driverExecute();
   }
 
-  public function setUpdateSQL($table, $data)
+  public function insert()
   {
-    $this->query->makeUpdateSQL($table, $data);
+    $this->driverExecute();
   }
 
-  public function executeInsert($table, $data, $defColumn)
-  {
-    if ($defColumn && ($this->dbType === 'pgsql' || $this->dbType === 'firebird'))
-      $data = $this->setIdNumber($table, $data, $defColumn);
-
-    $sql  = $this->query->makeInsertSQL($table, $data);
-    $this->query->setBasicSQL($sql);
-
-    return $this->driverExecute();
-  }
-
-  protected function setIdNumber($table, $data, $defColumn)
+  public function setIdNumber($table, $data, $defColumn)
   {
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
@@ -72,8 +62,8 @@ abstract class Sabel_DB_Driver_General
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $this->query->makeConditionQuery($conditions);
-    if ($constraints) $this->query->makeConstraintQuery($constraints);
+    $this->stmt->makeConditionQuery($conditions);
+    if ($constraints) $this->stmt->makeConstraintQuery($constraints);
   }
 
   public function getLastInsertId()
@@ -84,10 +74,11 @@ abstract class Sabel_DB_Driver_General
   public function execute($sql = null, $param = null)
   {
     if ($param) {
-      foreach ($param as $key => $val) $param[$key] = $this->query->escape($val);
+      foreach ($param as $key => $val) $param[$key] = $this->stmt->escape($val);
       $sql = vsprintf($sql, $param);
     }
+
     $this->driverExecute($sql);
-    $this->query->unsetProperties();
+    if (isset($this->stmt)) $this->stmt->unsetProperties();
   }
 }

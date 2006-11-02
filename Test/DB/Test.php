@@ -2,9 +2,11 @@
 
 class Test_DB_Test extends SabelTestCase
 {
+  public static $db = '';
   public static $TABLES = array('basic', 'users', 'city', 'country',
                                 'test_for_like', 'test_condition', 'blog',
                                 'customer_order', 'classification', 'favorite_item');
+
 
   public function testBasic()
   {
@@ -802,6 +804,13 @@ class Test_DB_Test extends SabelTestCase
 
     $orders = Sabel_DB_Model::load('CustomerOrder')->select();
     $this->assertFalse($orders);
+
+    $model = Sabel_DB_Model::load('CustomerOrder');
+    Sabel_DB_Transaction::add($model);
+    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    Sabel_DB_Transaction::commit();
   }
 
   public function testClear()
@@ -931,10 +940,10 @@ class Schema_CascadeChain
     $chains = array();
 
     $chains['default:classification'] = array('default:city');
-    $chains['default:city']      = array('default:users');
-    $chains['default:users']     = array('default:blog');
-    $chains['default:country']   = array('default:city');
-    $chains['default2:customer'] = array('default:customer_order');
+    $chains['default:city']           = array('default:users');
+    $chains['default:users']          = array('default:blog');
+    $chains['default:country']        = array('default:city');
+    $chains['default2:customer']      = array('default:customer_order');
 
     return $chains;
   }

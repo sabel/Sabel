@@ -38,6 +38,7 @@ require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
 require_once('Test/DI.php');
 require_once('Test/Pager.php');
+require_once('Test/PageViewer.php');
 require_once('Test/Parameters.php');
 require_once('Test/Request.php');
 require_once('Test/RequestUri.php');
@@ -83,6 +84,7 @@ class SabelAllTests
     $suite->addTest(Test_Cache::suite());
     
     $suite->addTest(Test_Pager::suite());
+    $suite->addTest(Test_PageViewer::suite());
     
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());

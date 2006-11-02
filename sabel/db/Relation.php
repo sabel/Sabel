@@ -30,9 +30,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private function createProperty()
   {
-    $property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
-    $this->property = $property;
-    $this->setDriver($property);
+    $this->property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
   }
 
   public function __set($key, $val)
@@ -56,13 +54,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     if (isset($tblName)) {
       return $this->getTableSchema($tblName)->getColumns();
+    } else if ($this->hasSchema()) {
+      $columns = $this->getSchema();
     } else {
       $columns = $this->getTableSchema()->getColumns();
-      foreach ($this->getData() as $name => $data) {
-        if (isset($columns[$name])) $columns[$name]->value = $data;
-      }
-      return $columns;
     }
+    foreach ($this->getData() as $name => $data) {
+      if (isset($columns[$name])) $columns[$name]->value = $data;
+    }
+    return $columns;
   }
 
   /**
@@ -79,7 +79,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $row = $this->execution()->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    $row = $this->exec()->fetch(Sabel_DB_Driver_ResultSet::NUM);
     return (int)$row[0];
   }
 
@@ -115,7 +115,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $model->setConstraint('group', $columns);
 
     $model->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
-    return $model->toObject($model->execution());
+    return $model->toObject($model->exec());
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -147,7 +147,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
     $model->receiveSelectCondition($model->conditions);
 
-    if ($row = $model->execution()->fetch()) {
+    if ($row = $model->exec()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->getMyChildren())) $model->getDefaultChild($myChild, $model);
     } else {
@@ -194,7 +194,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     $this->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $this->execution();
+    $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
@@ -206,16 +206,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
         if (!isset($relational[$tblName])) continue;
         foreach ($relational[$tblName] as $parent) {
           $mdlName = convert_to_modelname($parent);
-          $models[$tblName]->$mdlName = $models[$parent];
-          $models[$tblName]->unsetNewData();
+          $models[$tblName]->dataSet($mdlName, $models[$parent]);
         }
       }
 
       foreach ($relational[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
+        $self->dataSet($mdlName, $models[$parent]);
         $self->$mdlName = $models[$parent];
       }
-      $self->unsetNewData();
       $results[] = $self;
     }
     return $results;
@@ -333,7 +332,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private function getRecords($model, $child = null)
   {
-    $resultSet = $model->execution();
+    $resultSet = $model->exec();
     if ($resultSet->isEmpty()) return false;
 
     $models = array();
@@ -377,17 +376,17 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       $model->setCondition($model->primaryKey, $id);
       $projection = $model->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
-      $resultSet  = $model->execution();
+      $resultSet  = $model->exec();
 
-      if (!$row = $resultSet->fetch())
+      if (!$row = $resultSet->fetch()) {
         throw new Exception('Error: relational error. parent does not exists.');
+      }
 
       Sabel_DB_SimpleCache::add($tblName . $id, $row);
     }
-    $row = $this->checkForeignKey($row, $model->primaryKey);
 
+    $row = $this->checkForeignKey($row, $model->primaryKey);
     $this->setData($model, $row);
-    $model->unsetNewData();
     return $model;
   }
 
@@ -414,7 +413,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   }
 
   /**
-   * to fetch children of it model by convention such as *_id ( *_primary key )
+   * fetch the children by relating own primary key to foreign key of a given table name.
+   *   strongly recommend 'id' for a primary key.
+   *   strongly recommend parent table name + '_id' for a foreign key.
    *
    * @param  string $child model name.
    * @param  mixed  $model need not be used. ( used internally )
@@ -443,7 +444,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private function getDefaultChild($children, $model)
   {
-    foreach (is_string($children) ? (array)$children : $children as $val) {
+    $children = (is_string($children)) ? (array)$children : $children;
+
+    foreach ($children as $val) {
       $this->chooseChildConstraint($val, $model);
       $model->getChild($val, $model);
     }
@@ -492,13 +495,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     $data = $this->getData();
     $id   = $data[$this->primaryKey];
-    if (empty($id)) throw new Exception('Error: newChild() who is a parent? hasn\'t id value.');
+
+    if (empty($id)) {
+      throw new Exception("Sabel_DB_Relation::newChild() who is a parent? hasn't id value.");
+    }
 
     $parent  = $this->table;
     $tblName = (is_null($child)) ? $parant : $child;
     $model   = $this->newClass($tblName);
-
-    $column = "{$parent}_{$this->primaryKey}";
+    $column  = "{$parent}_{$this->primaryKey}";
     $model->$column = $id;
     return $model;
   }
@@ -525,22 +530,24 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     $pkey = $this->primaryKey;
     $data = $this->getData();
+
     if (isset($data[$pkey])) {
       $id = $data[$pkey];
     } else {
-      throw new Exception('Error: clearChild() who is a parent? hasn\'t id value.');
+      throw new Exception("Sabel_DB_Relation::clearChild() who is a parent? hasn't id value.");
     }
+
     $model = $this->newClass($child);
 
     $model->setCondition("{$this->table}_{$pkey}", $id);
     $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
-    $model->execution();
+    $model->exec();
   }
 
   public function save($data = null)
   {
     if (!empty($data) && !is_array($data))
-      throw new Exception('Error: save() argument must be an array');
+      throw new Exception('Sabel_DB_Relation::save() argument must be an array');
 
     if ($this->isSelected()) {
       $this->conditions = $this->getSelectCondition();
@@ -558,15 +565,19 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function multipleInsert($data)
   {
-    if (!is_array($data)) throw new Exception('Error: multipleInsert() data is not array.');
+    if (!is_array($data)) {
+      throw new Exception('Sabel_DB_Relation::multipleInsert() data is not array.');
+    }
 
     Sabel_DB_Transaction::add($this);
+
     try {
       $this->execMultipleInsert($this->table, $data, $this->checkIncColumn());
-      Sabel_DB_Transaction::commit();
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
+
+    Sabel_DB_Transaction::commit();
   }
 
   /**
@@ -587,7 +598,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     if (is_null($param1) && empty($this->conditions) && is_null($idValue)) {
-      throw new Exception("Error: remove() [WHERE] must be set condition");
+      throw new Exception("Sabel_DB_Relation::remove() must be set condition");
     }
 
     if (isset($param1)) {
@@ -597,7 +608,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->table);
-    $this->execution();
+    $this->exec();
   }
 
   /**
@@ -619,10 +630,12 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $chain = Schema_CascadeChain::get();
     $key   = $this->connectName . ':' . $this->table;
 
-    if (!isset($chain[$key]))
-      throw new Exception('cascade chain is not found. try remove()');
+    if (!isset($chain[$key])) {
+      throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
+    }
 
     Sabel_DB_Transaction::add($this);
+
     $models = array();
     $table  = $this->table;
     $pkey   = $this->primaryKey;
@@ -631,31 +644,27 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
     }
 
-    foreach ($models as $children) $this->getChainModels($children, $chain);
+    foreach ($models as $children) $this->makeChainModels($children, $chain);
 
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
     $this->remove($this->primaryKey, $id);
+
     Sabel_DB_Transaction::commit();
   }
 
-  private function getChainModels($children, &$chain)
+  private function makeChainModels($children, &$chain)
   {
     $key = $children[0]->connectName . ':' . $children[0]->table;
+    if (!isset($chain[$key])) return null;
 
-    if (isset($chain[$key])) {
-      $references = array();
-      foreach ($chain[$key] as $tblName) {
-        $models = array();
-        foreach ($children as $child) {
-          $foreignKey = "{$child->table}_{$child->primaryKey}";
-          if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
-        }
-        $references[] = $models;
+    foreach ($chain[$key] as $tblName) {
+      $models = array();
+      foreach ($children as $child) {
+        $foreignKey = "{$child->table}_{$child->primaryKey}";
+        if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
       }
-      unset($chain[$key]);
-
-      foreach ($references as $models) {
-        foreach ($models as $children) $this->getChainModels($children, $chain);
+      if ($models) {
+        foreach ($models as $children) $this->makeChainModels($children, $chain);
       }
     }
   }

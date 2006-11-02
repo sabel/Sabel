@@ -1,23 +1,24 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Native_Pgsql
+ * Sabel_DB_Driver_Pgsql
  *
  * @category   DB
  * @package    org.sabel.db
  * @subpackage driver
- * @subpackage native
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
+class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver
 {
+  protected
+    $escMethod = 'pg_escape_string';
+
   public function __construct($conn)
   {
-    $this->conn   = $conn;
-    $this->dbType = 'pgsql';
-    $this->query  = new Sabel_DB_Driver_Native_Query('pgsql', 'pg_escape_string');
+    $this->conn = $conn;
+    $this->db   = 'pgsql';
   }
 
   public function begin($conn)
@@ -46,7 +47,7 @@ class Sabel_DB_Driver_Native_Pgsql extends Sabel_DB_Driver_General
 
     if (isset($sql)) {
       $this->result = pg_query($conn, $sql);
-    } elseif (($sql = $this->query->getSQL()) === '') {
+    } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $this->result = pg_query($conn, $sql);

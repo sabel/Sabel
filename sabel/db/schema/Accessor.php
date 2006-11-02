@@ -56,7 +56,7 @@ class Sabel_DB_Schema_Accessor
       $executer = new Sabel_DB_Executer(array('connectName' => $this->connectName));
       $executer->setConstraint('limit', 1);
       $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
-      $cols = $executer->execution()->fetch();
+      $cols = $executer->exec()->fetch();
     }
     return array_keys($cols);
   }

@@ -50,7 +50,7 @@ class Test_DB_Mysql extends Test_DB_Test
 
     try {
       $mh = new MysqlHelper();
-      foreach ($mh->sqls as $query) $model->execute($query);
+      foreach ($mh->sqls as $query) $query; $model->execute($query);
     } catch (Exception $e) {
     }
 
@@ -59,11 +59,10 @@ class Test_DB_Mysql extends Test_DB_Test
     } catch (Exception $e) {
     }
 
-    $model = Sabel_DB_Model::load('');
-    $model->setConnectName('default2');
+    $model = Sabel_DB_Model::load('Customer');
 
     try {
-      $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
+      $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24)) type=InnoDB');
     } catch (Exception $e) {
     }
   }
@@ -73,7 +72,7 @@ class Test_DB_Mysql extends Test_DB_Test
  * create query for mysql unit test.
  *
  */
-class MysqlHelper extends BaseHelper
+class MysqlHelper
 {
   public $sqls = null;
 
@@ -132,7 +131,7 @@ class MysqlHelper extends BaseHelper
                  id integer primary key auto_increment,
                  customer_id integer,
                  buy_date datetime,
-                 amount integer)";
+                 amount integer) type=InnoDB";
 
     $this->sqls = $sqls;
   }

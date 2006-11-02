@@ -24,7 +24,7 @@ class Sabel_DB_Transaction
       $sName    = Sabel_DB_Connection::getSchema($conName);
       $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
       $engine   = $accessor->getTableEngine($model->table, $driver);
-      $check = ($engine === 'InnoDB' || $engine === 'BDB');
+      $check    = ($engine === 'InnoDB' || $engine === 'BDB');
     } else {
       $check = true;
     }

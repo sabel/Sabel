@@ -3,7 +3,6 @@
 /**
  * Sabel_DB_Property
  *
- * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
@@ -91,6 +90,7 @@ class Sabel_DB_Property
   public function setSchema($tblName)
   {
     $sClass = get_schema_by_tablename($tblName);
+
     if ($sClass) {
       $properties = $this->initSchema($sClass);
       $this->overrideProps['autoNumber'] = (isset($properties['incrementKey']));
@@ -139,7 +139,7 @@ class Sabel_DB_Property
   public function setProperties($row)
   {
     if (!is_array($row)) {
-      $errorMsg = 'Error: setProperties(). argument should be an array.';
+      $errorMsg = 'Sabel_DB_Property::setProperties(). argument should be an array.';
       throw new Exception($errorMsg);
     }
     foreach ($row as $key => $val) $this->data[$key] = $val;
@@ -148,6 +148,11 @@ class Sabel_DB_Property
   public function hasSchema()
   {
     return (!empty($this->schema));
+  }
+
+  public function getSchema($key = null)
+  {
+    return (isset($key)) ? $this->schema[$key] : $this->schema;
   }
 
   public function setConnectName($connectName)
@@ -168,11 +173,6 @@ class Sabel_DB_Property
   public function getNewData()
   {
     return $this->newData;
-  }
-
-  public function unsetNewData()
-  {
-    $this->newData = array();
   }
 
   public function isSelected()

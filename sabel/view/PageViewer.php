@@ -13,7 +13,7 @@ class Sabel_View_PageViewer
   public function __construct($pager)
   {
     if (!($pager instanceof Sabel_View_Pager))
-      throw new Sabel_Exception_Runtime('pager is not nstaceof sabel_view_pager.');
+      throw new Sabel_Exception_Runtime('pager is not instaceof sabel_view_pager.');
     $this->pager = $pager;
   }
 }
