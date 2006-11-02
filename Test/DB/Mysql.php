@@ -50,7 +50,7 @@ class Test_DB_Mysql extends Test_DB_Test
 
     try {
       $mh = new MysqlHelper();
-      foreach ($mh->sqls as $query) $query; $model->execute($query);
+      foreach ($mh->sqls as $query) $model->execute($query);
     } catch (Exception $e) {
     }
 
