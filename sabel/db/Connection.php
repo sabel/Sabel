@@ -108,17 +108,17 @@ class Sabel_DB_Connection
 
   public static function getConnection($conName)
   {
-    self::issetList($conName, 'conn');
+    self::createDBLink($conName, 'conn');
     return self::getValue($conName, 'conn');
   }
 
   public static function getDB($conName)
   {
-    self::issetList($conName, 'db');
+    self::createDBLink($conName, 'db');
     return self::getValue($conName, 'db');
   }
 
-  protected static function issetList($conName, $key)
+  protected static function createDBLink($conName, $key)
   {
     if (!isset(self::$connList[$conName][$key])) self::makeDatabaseLink($conName);
   }

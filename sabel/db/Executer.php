@@ -75,12 +75,23 @@ class Sabel_DB_Executer
     }
   }
 
+  /**
+   * unset condition and constraint.
+   *
+   * @return void
+   */
   public function unsetCondition()
   {
     $this->conditions  = array();
     $this->constraints = array();
   }
 
+  /**
+   * create driver instance.
+   * return it if model have already had driver instance.
+   *
+   * @return object
+   */
   public function getDriver()
   {
     if (is_null($this->driver)) {
@@ -89,6 +100,12 @@ class Sabel_DB_Executer
     return $this->driver;
   }
 
+  /**
+   * create statement instance.
+   * load a statement instance from a driver and return it.
+   *
+   * @return object
+   */
   public function getStatement()
   {
     $driver = $this->getDriver();
@@ -116,39 +133,38 @@ class Sabel_DB_Executer
   {
     try {
       $driver = $this->getDriver();
+      $stmt   = $this->getStatement();
 
-      $db = Sabel_DB_Connection::getDB($this->property->connectName);
-      if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
-        $data = $driver->setIdNumber($table, $data, $idColumn);
-      }
-
-      $this->getStatement()->makeInsertSQL($table, $data);
-      $driver->insert();
-
+      $this->execInsert($driver, $stmt, $table, $data, $idColumn);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  public function execMultipleInsert($table, $data, $idColumn)
+  public function ArrayInsert($table, $data, $idColumn)
   {
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
 
       foreach ($data as $val) {
-        $db = Sabel_DB_Connection::getDB($this->property->connectName);
-        if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
-          $data = $driver->setIdNumber($table, $val, $idColumn);
-        }
-
-        $stmt->makeInsertSQL($table, $val);
-        $driver->insert();
+        $this->execInsert($driver, $stmt, $table, $val, $idColumn);
       }
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
+  }
+
+  private function execInsert($driver, $stmt, $table, $data, $idColumn)
+  {
+    $db = Sabel_DB_Connection::getDB($this->property->connectName);
+    if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
+      $data = $driver->setIdNumber($table, $data, $idColumn);
+    }
+
+    $stmt->makeInsertSQL($table, $data);
+    $driver->insert();
   }
 
   public function executeQuery($sql, $param)

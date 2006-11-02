@@ -59,6 +59,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     } else {
       $columns = $this->getTableSchema()->getColumns();
     }
+
     foreach ($this->getData() as $name => $data) {
       if (isset($columns[$name])) $columns[$name]->value = $data;
     }
@@ -66,7 +67,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   }
 
   /**
-   * get count by specified (or already set) condition.
+   * get rows count.
    *
    * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
    * @param  mixed    $param2 condition value.
@@ -572,7 +573,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     Sabel_DB_Transaction::add($this);
 
     try {
-      $this->execMultipleInsert($this->table, $data, $this->checkIncColumn());
+      $this->ArrayInsert($this->table, $data, $this->checkIncColumn());
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
