@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Native_Limitation
+ * Sabel_DB_Statement_Limitation
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
- * @subpackage native
+ * @subpackage statement
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Native_Limitation
+class Sabel_DB_Statement_Limitation
 {
   private
     $sql    = array(),
@@ -81,12 +80,12 @@ class Sabel_DB_Driver_Native_Limitation
     }
     $condition = strstr($tmp, 'WHERE');
     if ($condition) $tmp = str_replace($condition, '', $tmp);
-  
+
     $sp = explode(' ', strstr($tmp, 'FROM'));
     $subSelect  = "WHERE $orderColumn NOT IN ";
     $subSelect .= "(SELECT TOP {$this->offset} $orderColumn FROM {$sp[1]} ";
     if ($condition) $subSelect .= "$condition ";
-  
+
     $subSelect = $subSelect . $orderStr . ') ';
     if ($condition) $subSelect = "$subSelect AND " . str_replace('WHERE ', '', $condition);
 

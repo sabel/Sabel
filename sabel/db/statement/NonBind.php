@@ -1,17 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Native_Query
+ * Sabel_DB_Statement_NonBind
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
- * @subpackage native
+ * @subpackage statement
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
+class Sabel_DB_Statement_NonBind extends Sabel_DB_Statement
 {
   public function makeUpdateSQL($table, $data)
   {
@@ -30,19 +29,19 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
       $values[]  = "'{$this->escape($val)}'";
     }
 
-    $sql = array("INSERT INTO $table (");
+    $sql   = array("INSERT INTO $table (");
     $sql[] = join(',', $columns);
     $sql[] = ') VALUES(';
     $sql[] = join(',', $values);
     $sql[] = ')';
 
-    return join('', $sql);
+    $this->setBasicSQL(join('', $sql));
   }
 
   public function makeConstraintQuery($const)
   {
     $sql =& $this->sql;
-    
+
     if (isset($const['group']))  $sql[] = ' GROUP BY ' . $const['group'];
     if (isset($const['having'])) $sql[] = ' HAVING '   . $const['having'];
 
@@ -55,7 +54,7 @@ class Sabel_DB_Driver_Native_Query extends Sabel_DB_Driver_Statement
 
     $paginate = new Sabel_DB_Driver_Native_Paginate($sql, $limit, $offset);
 
-    switch ($this->dbName) {
+    switch ($this->db) {
       case 'firebird':
         $sql = $paginate->firebirdPaginate();
         break;

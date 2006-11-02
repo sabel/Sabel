@@ -1,15 +1,28 @@
 <?php
 
 /**
- * Query Maker for Pdo
+ * Sabel_DB_Statement_Bind
  *
- * @author Ebine Yutaka <ebine.yutaka@gmail.com>
- * @package org.sabel.db
+ * @category   DB
+ * @package    org.sabel.db
+ * @subpackage statement
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
+class Sabel_DB_Statement_Bind extends Sabel_DB_Statement
 {
-  private $count = 1;
-  private $param = array();
+  private
+    $count = 1;
+
+  private
+    $param    = array(),
+    $bindData = array();
+
+  public function getBindData()
+  {
+    return $this->bindData;
+  }
 
   public function makeUpdateSQL($table, $data)
   {
@@ -18,7 +31,7 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
 
     foreach ($data as $key => $val) $data[$key] = $this->escape($val);
-    return $data;
+    $this->bindData = $data;
   }
 
   public function makeInsertSQL($table, $data)
@@ -36,9 +49,10 @@ class Sabel_DB_Driver_Pdo_Query extends Sabel_DB_Driver_Statement
     $sql[] = ") VALUES(";
     $sql[] = join(',', $values);
     $sql[] = ')';
+    $this->setBasicSQL(join('', $sql));
 
     foreach ($data as $key => $val) $data[$key] = $this->escape($val);
-    return array(join('', $sql), $data);
+    $this->bindData = $data;
   }
 
   public function makeConstraintQuery($const)
