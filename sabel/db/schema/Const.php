@@ -22,5 +22,5 @@ abstract class Sabel_DB_Schema_Const
   const BYTE      = 'BYTE';
   const DATE      = 'DATE';
   const TIME      = 'TIME';
-  const TIMESTAMP = 'TIMESTAMP';
+  const DATETIME  = 'DATETIME';
 }

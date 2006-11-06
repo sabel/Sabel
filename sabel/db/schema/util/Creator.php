@@ -123,8 +123,8 @@ class Sabel_DB_Schema_Util_Creator
 
   protected function setNotNull($co)
   {
-    $co->nullable = (strpos($this->colLine, 'not null') === false);
-    str_replace('not null', '', $this->colLine);
+    $co->nullable  = (strpos($this->colLine, 'not null') === false);
+    $this->colLine = str_replace('not null', '', $this->colLine);
   }
 
   protected function setPrimary($co)
@@ -132,8 +132,8 @@ class Sabel_DB_Schema_Util_Creator
     if ($this->colLine === '') {
       $co->primary = false;
     } else {
-      $co->primary = (strpos($this->colLine, 'primary key') !== false);
-      str_replace('primary key', '', $this->colLine);
+      $co->primary   = (strpos($this->colLine, 'primary key') !== false);
+      $this->colLine = str_replace('primary key', '', $this->colLine);
     }
   }
 

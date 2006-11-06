@@ -40,10 +40,10 @@ class Test_DB_SQLite extends Test_DB_Test
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
 
-    try {
-      $sh = new SQLiteHelper();
-      foreach ($sh->sqls as $query) $model->execute($query);
-    } catch (Exception $e) {
+    $sh = new SQLiteHelper();
+
+    foreach ($sh->sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
 
     try {
@@ -125,6 +125,15 @@ class SQLiteHelper
                  customer_id int4,
                  buy_date datetime,
                  amount integer)";
+
+    $sqls[] = "CREATE TABLE schema_test (
+                 id integer not null primary key,
+                 name varchar(128) not null default 'test',
+                 bl boolean default false,
+                 dt datetime,
+                 ft_val float default 1,
+                 db_val double not null,
+                 tx text)";
 
     $this->sqls = $sqls;
   }

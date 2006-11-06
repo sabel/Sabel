@@ -810,7 +810,123 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+
+    $model = Sabel_DB_Model::load('Customer');
+    Sabel_DB_Transaction::add($model);
+    $model->save(array('id' => 1, 'name' => 'name'));
+    $model->save(array('id' => 2, 'name' => 'name'));
+    try { @$model->save(array('id' => 3, 'nama' => 'name')); } catch (Exception $e) {}
+
     Sabel_DB_Transaction::commit();
+
+    $customers = Sabel_DB_Model::load('Customer')->select();
+    $this->assertFalse($customers);
+
+    $orders = Sabel_DB_Model::load('CustomerOrder')->select();
+    $this->assertFalse($orders);
+  }
+
+  public function testUpdate()
+  {
+    $model = Sabel_DB_Model::load('Customer');
+    $model->save(array('id' => 1, 'name' => 'name1'));
+    $model->save(array('id' => 2, 'name' => 'name2'));
+
+    $customer = Sabel_DB_Model::load('Customer')->selectOne(1);
+    $this->assertEquals($customer->name, 'name1');
+
+    $customer->name = 'new name1';
+    $customer->save();
+
+    $customer = Sabel_DB_Model::load('Customer')->selectOne(1);
+    $this->assertEquals($customer->name, 'new name1');
+
+    $customer = Sabel_DB_Model::load('Customer')->selectOne(100);
+    $this->assertFalse($customer->isSelected());
+
+    $customer->name = 'name100';
+    $customer->save();
+
+    $customer = Sabel_DB_Model::load('Customer')->selectOne(100);
+    $this->assertTrue($customer->isSelected());
+    $this->assertEquals($customer->name, 'name100');
+
+    $model = Sabel_DB_Model::load('CustomerOrder');
+    $model->scond(5);
+    $model->scond('customer_id', 10);
+    $order = $model->selectOne();
+    $this->assertFalse($order->isSelected());
+
+    $model->buy_date    = '1999-01-01 12:34:55';
+    $model->amount      = 9999;
+    $model->save();
+
+    $order = Sabel_DB_Model::load('CustomerOrder')->selectOne(5);
+    $this->assertTrue($order->isSelected());
+
+    $this->assertEquals($order->id, 5);
+    $this->assertEquals($order->customer_id, 10);
+    $this->assertEquals($order->buy_date, '1999-01-01 12:34:55');
+    $this->assertEquals($order->amount, 9999);
+  }
+
+  public function testSchema()
+  {
+    $model  = Sabel_DB_Model::load('SchemaTest');
+    $schema = $model->getTableSchema();
+
+    $id = $schema->id;
+    $nm = $schema->name;
+    $bl = $schema->bl;
+    $dt = $schema->dt;
+    $ft = $schema->ft_val;
+    $db = $schema->db_val;
+    $tx = $schema->tx;
+
+    $this->assertEquals($id->type, Sabel_DB_Schema_Const::INT);
+    $this->assertEquals($id->max,  2147483647);
+    $this->assertEquals($id->min, -2147483648);
+    $this->assertFalse($id->nullable);
+    $this->assertTrue($id->increment);
+    $this->assertTrue($id->primary);
+
+    $this->assertEquals($nm->type, Sabel_DB_Schema_Const::STRING);
+    $this->assertEquals($nm->max, 128);
+    $this->assertFalse($nm->nullable);
+    $this->assertFalse($nm->increment);
+    $this->assertFalse($nm->primary);
+    $this->assertEquals($nm->default, 'test');
+
+    $this->assertEquals($bl->type, Sabel_DB_Schema_Const::BOOL);
+    $this->assertTrue($bl->nullable);
+    $this->assertFalse($bl->increment);
+    $this->assertFalse($bl->primary);
+    $this->assertFalse($bl->default);
+
+    $this->assertEquals($dt->type, Sabel_DB_Schema_Const::DATETIME);
+    $this->assertTrue($dt->nullable);
+    $this->assertFalse($dt->increment);
+    $this->assertFalse($dt->primary);
+
+    $this->assertEquals($ft->type, Sabel_DB_Schema_Const::FLOAT);
+    $this->assertEquals($ft->max,  3.4028235E38);
+    $this->assertEquals($ft->min, -3.4028235E38);
+    $this->assertTrue($ft->nullable);
+    $this->assertFalse($ft->increment);
+    $this->assertFalse($ft->primary);
+    $this->assertEquals($ft->default, 1);
+
+    $this->assertEquals($db->type, Sabel_DB_Schema_Const::DOUBLE);
+    $this->assertEquals($db->max,  1.79769E308);
+    $this->assertEquals($db->min, -1.79769E308);
+    $this->assertFalse($db->nullable);
+    $this->assertFalse($db->increment);
+    $this->assertFalse($db->primary);
+
+    $this->assertEquals($tx->type, Sabel_DB_Schema_Const::TEXT);
+    $this->assertTrue($tx->nullable);
+    $this->assertFalse($tx->increment);
+    $this->assertFalse($tx->primary);
   }
 
   public function testClear()

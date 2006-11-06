@@ -48,10 +48,10 @@ class Test_DB_Mysql extends Test_DB_Test
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
 
-    try {
-      $mh = new MysqlHelper();
-      foreach ($mh->sqls as $query) $model->execute($query);
-    } catch (Exception $e) {
+    $mh = new MysqlHelper();
+
+    foreach ($mh->sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
 
     try {
@@ -132,6 +132,15 @@ class MysqlHelper
                  customer_id integer,
                  buy_date datetime,
                  amount integer) type=InnoDB";
+
+    $sqls[] = "CREATE TABLE schema_test (
+                 id integer primary key auto_increment,
+                 name varchar(128) not null default 'test',
+                 bl boolean default false comment 'boolean',
+                 dt datetime,
+                 ft_val float default 1,
+                 db_val double not null,
+                 tx text)";
 
     $this->sqls = $sqls;
   }

@@ -56,6 +56,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_General
 
   public function setLength($co, $row)
   {
-    $co->max = (int)$row['character_octet_length'];
+    //$co->max = (int)$row['character_octet_length'];
+    $co->max = (int)$row['character_maximum_length'];
   }
 }

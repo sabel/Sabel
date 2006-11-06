@@ -46,16 +46,13 @@ class Test_DB_Pgsql extends Test_DB_Test
     Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
-    Test_DB_Test::$db = 'pgsql';
-    define('DB', 'PGSQL');
-
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('');
 
     $ph = new PgsqlHelper();
+
     foreach ($ph->sqls as $query) {
-      try { @$model->execute($query); }
-      catch (Exception $e) { }
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
 
     try {
@@ -136,6 +133,15 @@ class PgsqlHelper
                  customer_id integer,
                  buy_date timestamp,
                  amount integer)";
+
+    $sqls[] = "CREATE TABLE schema_test (
+                 id serial primary key,
+                 name varchar(128) not null default 'test',
+                 bl boolean default false,
+                 dt timestamp,
+                 ft_val float4 default 1,
+                 db_val double precision not null,
+                 tx text)";
 
     $this->sqls = $sqls;
   }
