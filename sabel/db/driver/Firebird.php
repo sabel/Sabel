@@ -47,7 +47,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver
     ibase_close($conn);
   }
 
-  protected function setIdNumber($table, $data, $defColumn)
+  public function setIdNumber($table, $data, $defColumn)
   {
     $genName = strtoupper("{$table}_{$defColumn}_gen");
 
