@@ -24,7 +24,20 @@ class Test_PageViewer extends PHPUnit2_Framework_TestCase
     $pager->pageNumber = 1;
     $pv = new Sabel_View_PageViewer($pager);
     
-    for ($i = 2; $i < 10; $i++) $this->assertEquals($i, $pv->getNext());
-    for ($i = 8; $i > 1; $i--)  $this->assertEquals($i, $pv->getPrevious());
+    $this->assertTrue($pv->isCurrent());
+    
+    for ($i = 2; $i < 21; $i++) $this->assertEquals($i, $pv->getNext());
+    $this->assertTrue($pv->isLast());
+    $this->assertFalse($pv->isFirst());
+    $this->assertFalse($pv->isCurrent());
+      
+    for ($i = 19; $i > 0; $i--)  $this->assertEquals($i, $pv->getPrevious());
+    $this->assertTrue($pv->isFirst());
+    $this->assertFalse($pv->isLast());
+    $this->assertTrue($pv->isCurrent());
+    
+    $this->assertEquals(20, $pv->getLast());
+    $this->assertEquals(1,  $pv->getFirst());
+    
   }
 }
