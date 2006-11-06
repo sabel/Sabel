@@ -75,7 +75,12 @@ class Sabel_View_Pager
   
   public function getPageNumber()
   {
-    return (int) round(max(min(($this->numberOfItem / $this->pageItem), $this->pageNumber), 1));
+    return (int) max(min($this->getTotalPageNumber(), $this->pageNumber), 1);
+  }
+  
+  public function getTotalPageNumber()
+  {
+    return (int) ceil(max($this->numberOfItem / $this->pageItem, 1));
   }
   
   public function getSqlOffset()

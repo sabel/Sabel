@@ -32,6 +32,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $this->assertEquals(100, $pager->getNumberOfItem());
     $this->assertEquals(10,  $pager->getLimit());
     $this->assertEquals(3,   $pager->getPageNumber());
+    $this->assertEquals(10,  $pager->getTotalPageNumber());
     $this->assertEquals(20,  $pager->getSqlOffset());
   }
   
@@ -46,6 +47,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $this->assertEquals(100, $pager->numberOfItem);
     $this->assertEquals(10,  $pager->limit);
     $this->assertEquals(3,   $pager->pageNumber);
+    $this->assertEquals(10,  $pager->totalPageNumber);
     $this->assertEquals(20,  $pager->sqlOffset);
   }
   
@@ -54,12 +56,13 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $pager = clone $this->pager;
     
     $pager->setNumberOfItem(300);
-    $pager->setLimit(40);
+    $pager->setLimit(70);
     $pager->setPageNumber(100);
     
     $this->assertEquals(300, $pager->getNumberOfItem());
-    $this->assertEquals(40,  $pager->getLimit());
-    $this->assertEquals(8,   $pager->getPageNumber());
+    $this->assertEquals(70,  $pager->getLimit());
+    $this->assertEquals(5,   $pager->getPageNumber());
+    $this->assertEquals(5,   $pager->getTotalPageNumber());
     $this->assertEquals(280, $pager->getSqlOffset());
   }
   
@@ -83,6 +86,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $this->assertEquals(0, $pager->getNumberOfItem());
     $this->assertEquals(1, $pager->getLimit());
     $this->assertEquals(1, $pager->getPageNumber());
+    $this->assertEquals(1, $pager->getTotalPageNumber());
     $this->assertEquals(0, $pager->getSqlOffset());
   }
   
@@ -93,6 +97,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $pager->setPageNumber(10);
     
     $this->assertEquals(1, $pager->getPageNumber());
+    $this->assertEquals(1, $pager->getTotalPageNumber());
     $this->assertEquals(0, $pager->getSqlOffset());
     
     $pager->setNumberOfItem(250);
@@ -101,6 +106,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $this->assertEquals(250, $pager->getNumberOfItem());
     $this->assertEquals(15,  $pager->getLimit());
     $this->assertEquals(10,  $pager->getPageNumber());
+    $this->assertEquals(17,  $pager->getTotalPageNumber());
     $this->assertEquals(135, $pager->getSqlOffset());
   }
   
@@ -113,6 +119,7 @@ class Test_Pager extends PHPUnit2_Framework_TestCase
     $this->assertEquals(200, $pager->getNumberOfItem());
     $this->assertEquals(20,  $pager->getLimit());
     $this->assertEquals(4,   $pager->getPageNumber());
+    $this->assertEquals(10,   $pager->getTotalPageNumber());
     $this->assertEquals(60,  $pager->getSqlOffset());
   }
 }
