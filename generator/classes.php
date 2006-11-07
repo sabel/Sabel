@@ -12,18 +12,18 @@ class SabelDirectoryAndFileCreator
       } else {
         $this->printMessage("create ${element}");
         mkdir($element);
+        if (in_array($element, array('data', 'cache'))) {
+          chmod($element, 0777);
+        }
       }
     } else if ($type === 'file') {
       if (is_file($element)) {
         $this->printMessage("${element} already exists.");
       } else {
-        if (!preg_match('%\/\..*%', $element)) {
-          $this->printMessage("create ${element}");
-          fwrite(fopen($element, 'w'), file_get_contents($child));
-          if ($element == 'logs/sabel.log') {
-            @chown('logs/sabel.log', 'www');
-            chmod('logs/sabel.log', 0777);
-          }
+        $this->printMessage("create ${element}");
+        fwrite(fopen($element, 'w'), file_get_contents($child));
+        if ($element == 'logs/sabel.log') {
+          chmod($element, 0777);
         }
       }
     }

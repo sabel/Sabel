@@ -21,6 +21,7 @@ class Sabel
       $dt->traverse();
       $cc->write();
       unset($dt);
+      if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       
       $dt = new DirectoryTraverser(RUN_BASE);
       foreach ($conbinators as $conbinator) $dt->visit($conbinator);
@@ -28,7 +29,6 @@ class Sabel
       $dt->traverse();
       foreach ($conbinators as $conbinator) $conbinator->write();
       
-      if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       require_once(APP_CACHE);
       require_once(LIB_CACHE);
       require_once(SCM_CACHE);
@@ -203,22 +203,20 @@ class Container
 class NameResolver
 {
   
-  public static function resolvClassNameToDirectoryPath($target)
+  public static function resolvClassNameToDirectoryPath($target, $toLower = true)
   {
-    $namespace = self::resolvClassNameToNameSpace($target);
-    $dir = str_replace('.', '/', $namespace);
-    $parts = explode('/', $dir);
-    return join('/', $parts).'.php';
+    $namespace = self::resolvClassNameToNameSpace($target, $toLower);
+    return str_replace('.', '/', $namespace) . '.php';
   }
   
-  public static function resolvClassNameToNameSpace($target)
+  public static function resolvClassNameToNameSpace($target, $toLower = true)
   {
     $parts = explode('_', $target);
     
     if (count($parts) === 1) return $target;
     
     $className = array_pop($parts);
-    $parts = array_map('strtolower', $parts);
+    if ($toLower) $parts = array_map('strtolower', $parts);
     $parts[] = $className;
     return implode('.', $parts);
   }
@@ -392,9 +390,9 @@ class ClassCombinator
     
     foreach ($files as $file) {
       if ($file->hasParent() && !in_array($file->getSelf(), $conflicts)) {
-        $conflicts[] = $file->getSelf();
-        foreach ($file->getLines() as $line) {
-          $buf[]= $line;
+        if ($this->checkParentExists($file, $conflicts)) {
+          $conflicts[] = $file->getSelf();
+          foreach ($file->getLines() as $line) $buf[]= $line;
         }
       }
     }
@@ -412,6 +410,20 @@ class ClassCombinator
       fputs($fp, $b);
     }
     fclose($fp);
+  }
+  
+  protected function checkParentExists($file, $conflicts)
+  {
+    $parent = $file->getParent();
+    if (in_array($parent, $conflicts)) return true;
+    if (class_exists($parent, false))  return true;
+    if (interface_exists($parent, false)) return true;
+    
+    $filepath = NameResolver::resolvClassNameToDirectoryPath($parent, false);
+    foreach (explode(':', ini_get('include_path')) as $path) {
+      if (file_exists($path . '/' . $filepath)) return true;
+    }
+    return false;
   }
   
   protected function isExtends($line)
@@ -462,7 +474,6 @@ class ClassFile
   protected $hasParent = false;
   protected $hasChild  = false;
   
-  protected $lineOfClassDefine = '';
   protected $lines = array();
   
   protected $filePath = '';
@@ -545,28 +556,27 @@ class ClassFile
     if (!$this->isLineValid($line)) return false;
     
     $result = $this->isExtends($line);
-    if ($result[0]) {
+    if (isset($result)) {
       $this->hasParent = true;
-      $this->lineOfClassDefine = $line;
+      if (empty($this->self) || $this->self != trim($result[4])) {
+        $this->self   = trim($result[2]);
+        $this->parent = trim($result[4]);
+      }
       
-      $this->self   = trim($result[1][2]);
-      $this->parent = trim($result[1][4]);
+      /*
+      $this->self   = trim($result[2]);
+      $this->parent = trim($result[4]);
+       */
     } else {
       $result = $this->isClassDefine($line);
-      if ($result[0]) {
-        $this->self = trim($result[1][2]);
-        $this->lineOfClassDefine = $line;
+      if (isset($result)) {
+        $this->self = trim($result[2]);
       }
     }
     
     $line = $this->removeLineComment($line);
     
     $this->lines[] = $line . "\n";
-  }
-  
-  public function getLineOfClassDefine()
-  {
-    return $this->lineOfClassDefine;
   }
   
   public function getLine($index)
@@ -586,18 +596,14 @@ class ClassFile
   
   protected function isExtends($line)
   {
-    $matches = array();
     $pat = '%^(abstract class|interface|class)(.*)(extends|implements)(.*)%';
-    $result = preg_match($pat, $line, $matches);
-    return array($result, $matches);
+    return (preg_match($pat, $line, $matches)) ? $matches : null;
   }
   
   protected function isClassDefine($line)
   {
-    $matches = array();
-    $pat = '%^(abstract class|interface|class)(.*)%';
-    $result = preg_match($pat, $line, $matches);
-    return array($result, $matches);
+    $pat = '%^(abstract class|interface|class) (.*)%';
+    return (preg_match($pat, $line, $matches)) ? $matches : null;
   }
   
   protected function isLineValid($line)
@@ -612,6 +618,7 @@ class ClassFile
   
   protected function removeLineComment($line)
   {
+    $this->state = 0;
     for ($i = 0; $i < strlen($line); $i++) {
       $c = $line[$i];
       switch ($this->state) {
@@ -677,12 +684,7 @@ class DirectoryTraverser
   
   public function __construct($dir = null)
   {
-    if ($dir) {
-      $this->dir = $dir;
-    } else {
-      $this->dir = dirname(realpath(__FILE__));
-    }
-    
+    $this->dir = ($dir) ? $dir : dirname(realpath(__FILE__));
     $this->directories = new DirectoryIterator($this->dir);
   }
   
@@ -691,17 +693,17 @@ class DirectoryTraverser
     $this->visitors[] = $visitor;
   }
   
-  public function traverse($fromElement = null)
+  public function traverse(DirectoryIterator $fromElement = null)
   {
     $element = (is_null($fromElement)) ? $this->directories : $fromElement;
     foreach ($element as $e) {
-      $child = $e->getPath() .'/'. $e->getFileName();
+      $child = $e->getPathName();
       $entry = ltrim(str_replace($this->dir, '', $child), '/');
-      if (!$e->isDot() && !preg_match('/^\..*/', $e->getFileName()) && $e->isDir()) {
+      if (!$e->isDot() && $e->isDir() && preg_match('/^[^\.]/', $e->getFileName())) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
-      } else if (!$e->isDot() && !preg_match('%\/\..*%', $entry)) {
-        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file',  $child);
+      } else if (!$e->isDot() && $e->isFile()) {
+        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file', $child);
       }
     }
   }
