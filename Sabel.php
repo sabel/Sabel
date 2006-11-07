@@ -414,6 +414,7 @@ class ClassCombinator
   
   protected function checkParentExists($file, $conflicts)
   {
+    return true;
     $parent = $file->getParent();
     if (in_array($parent, $conflicts)) return true;
     if (class_exists($parent, false))  return true;
