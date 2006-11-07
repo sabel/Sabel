@@ -17,8 +17,7 @@ class Sabel_Aspect_Interceptors_Error
     $className = $joinpoint->getReflection()->getName();
     $method    = $joinpoint->getMethodReflection();
     
-    $v = new Sabel_Validate_Model();
-    $v->initializeSchema(strtolower($className));
+    $v = new Sabel_Validate_Model($target);
     $errors = $v->validate($joinpoint->getArgument(0));
     if ($errors->hasError()) {
       Sabel_Template_Engine::setAttribute(strtolower($className), $target);

@@ -26,7 +26,7 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
   public function testValidatorLower()
   {
     $data = array('shop_id' => 9.22337203685E+19);
-    $aValidator = new TestModel_Validator();
+    $aValidator = new Mock();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
     $this->assertEquals(Sabel_Validate_Error::LOWER_THEN, $errors->get('shop_id')->getType());
@@ -35,7 +35,7 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
   public function testValidatorGrather()
   {
     $data = array('shop_id' => -9.22337203685E+19);
-    $aValidator = new TestModel_Validator();
+    $aValidator = new Mock();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
     $this->assertEquals(Sabel_Validate_Error::GRATHER_THEN, $errors->get('shop_id')->getType());
@@ -44,7 +44,7 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
   public function testValidatorNotNull()
   {
     $data = array('id' => null);
-    $aValidator = new TestModel_Validator();
+    $aValidator = new Mock();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
     $this->assertEquals(Sabel_Validate_Error::NOT_NULL, $errors->get('shop_id')->getType());
@@ -53,7 +53,7 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
   public function testValidatorStringLower()
   {
     $data = array('title' => 'abcdeabcdeabcdeabcdeabcdeabcdeabc');
-    $aValidator = new TestModel_Validator();
+    $aValidator = new Mock();
     $errors = $aValidator->validate($data);
     $this->assertTrue($errors->hasError());
     $this->assertEquals(Sabel_Validate_Error::LOWER_THEN, $errors->get('title')->getType());
@@ -79,7 +79,7 @@ class Test_Validate extends PHPUnit2_Framework_TestCase
                                 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
                                 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
                                 
-    $aValidator = new TestModel_Validator();
+    $aValidator = new Mock();
     $errors = $aValidator->validate($data);
     $this->assertFalse($errors->hasError());
     
@@ -137,10 +137,16 @@ class Schema_Mock
   }
 }
 
-class TestModel_Validator extends Sabel_Validate_Model
+//class Mock extends Sabel_Validate_Model
+class Mock extends Sabel_Validate_Model
 {
+  protected $mdlName = 'Mock';
+  protected $conName = '';
+  protected $scmName = '';
+
   public function __construct()
   {
-    $this->schema = new Schema_Mock();
+    //$this->schema = new Schema_Mock();
+    //parent::__construct($this);
   }
 }

@@ -11,32 +11,39 @@
  */
 class Sabel_Validate_Model extends Sabel_Validate_Validator
 {
-  protected $errors = null;
-  protected $schema = null;
-  
-  public function initializeSchema($name)
+  protected $errors  = null;
+  protected $mdlName = '';
+  protected $conName = '';
+  protected $scmName = '';
+
+  public function __construct($model)
   {
-    $className = 'Schema_' . ucfirst($name);
-    $this->schema = new $className();
+    $conName = $model->connectName;
+
+    $this->mdlName = get_class($model);
+    $this->conName = $conName;
+    $this->scmName = Sabel_DB_Connection::getSchema($conName);
   }
   
   public function validate($data)
   {
-    $schema = $this->schema;
-    if (!is_object($schema))
-      throw new Sabel_Exception_Runtime("Schema must be Object");
-      
+    $sClass = 'Schema_' . ucfirst($this->mdlName);
+
+    if (class_exists($sClass, false)) {
+      $schema  = new $sClass();
+      $columns = $schema->get();
+    } else {
+      $tblName = convert_to_tablename($this->mdlName);
+      $sAccess = new Sabel_DB_Schema_Accessor($this->conName, $this->scmName);
+      $columns = $sAccess->getTable($tblName)->getColumns();
+    }
+    
     $this->errors = new Sabel_Validate_Errors();
     
-    foreach ($schema->get() as $name => $column) {
-      if (isset($column['nullable'])  && $column['nullable']  === false &&
-          isset($column['increment']) && $column['increment'] === true)
-      {
-        continue;
-      }
+    foreach ($columns as $name => $column) {
+      if ($column['nullable']  === false && $column['increment'] === true) continue;
         
-      if (isset($column['nullable'])  && $column['nullable']  === false &&
-          isset($column['increment']) && $column['increment'] === false)
+      if ($column['nullable']  === false && $column['increment'] === false)
       {
         if (!isset($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
