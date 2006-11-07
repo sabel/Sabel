@@ -6,14 +6,18 @@ class Sabel
 {
   public static function initializeApplication()
   {
+    $cacheFilepath = RUN_BASE . 'cache/container.cache';
     $conbinators = array(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'),
                          new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'),
                          new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'aspects'),
                          new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
                          
-    if (ENVIRONMENT === 'development') {
-      $c = Container::create();
-      
+    $c = Container::create();
+    if (ENVIRONMENT !== 'development' && is_readable($cacheFilepath)) {
+      $file = fopen($cacheFilepath, 'r');
+      $c->setClasses(unserialize(fgets($file)));
+      require_once(SABEL_CLASSES);
+    } else {
       $dt = new DirectoryTraverser();
       $cc = new ClassCombinator(SABEL_CLASSES, null, false);
       $dt->visit($cc);
@@ -29,50 +33,14 @@ class Sabel
       $dt->traverse();
       foreach ($conbinators as $conbinator) $conbinator->write();
       
-      require_once(APP_CACHE);
-      require_once(LIB_CACHE);
-      require_once(SCM_CACHE);
-      require_once(INJ_CACHE);
-      
       $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
       fputs($file, serialize($c->getClasses()));
       fclose($file);
-    } else {
-      $file = @fopen(RUN_BASE . '/cache/container.cache', 'r');
-      if ($file) {
-        $c = Container::create();
-        $c->setClasses(unserialize(fgets($file)));
-        require_once(SABEL_CLASSES);
-        require_once(APP_CACHE);
-        require_once(LIB_CACHE);
-        require_once(SCM_CACHE);
-        require_once(INJ_CACHE);
-      } else {
-        $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
-        $c = Container::create();
-        $dt = new DirectoryTraverser();
-        $cc = new ClassCombinator(SABEL_CLASSES, null, false);
-        $dt->visit($cc);
-        $dt->visit(new SabelClassRegister($c));
-        $dt->traverse();
-        $cc->write();
-        unset($dt);
-        
-        $dt = new DirectoryTraverser(RUN_BASE);
-        foreach ($conbinators as $conbinator) $dt->visit($conbinator);
-        $dt->visit(new AppClassRegister($c));
-        $dt->traverse();
-        foreach ($conbinators as $conbinator) $conbinator->write();
-        
-        require_once(SABEL_CLASSES);
-        require_once(APP_CACHE);
-        require_once(LIB_CACHE);
-        require_once(SCM_CACHE);
-        require_once(INJ_CACHE);
-        
-        fputs($file, serialize($c->getClasses()));
-      }
     }
+    require_once(APP_CACHE);
+    require_once(LIB_CACHE);
+    require_once(SCM_CACHE);
+    require_once(INJ_CACHE);
   }
 }
 
@@ -414,7 +382,6 @@ class ClassCombinator
   
   protected function checkParentExists($file, $conflicts)
   {
-    return true;
     $parent = $file->getParent();
     if (in_array($parent, $conflicts)) return true;
     if (class_exists($parent, false))  return true;
@@ -423,6 +390,12 @@ class ClassCombinator
     $filepath = NameResolver::resolvClassNameToDirectoryPath($parent, false);
     foreach (explode(':', ini_get('include_path')) as $path) {
       if (file_exists($path . '/' . $filepath)) return true;
+    }
+    if (defined('TEST_CASE')) {
+      $filepath = NameResolver::resolvClassNameToDirectoryPath($parent);
+      foreach (explode(':', ini_get('include_path')) as $path) {
+        if (file_exists($path . '/' . $filepath)) return true;
+      }
     }
     return false;
   }
@@ -563,11 +536,6 @@ class ClassFile
         $this->self   = trim($result[2]);
         $this->parent = trim($result[4]);
       }
-      
-      /*
-      $this->self   = trim($result[2]);
-      $this->parent = trim($result[4]);
-       */
     } else {
       $result = $this->isClassDefine($line);
       if (isset($result)) {
