@@ -78,7 +78,7 @@ class Container
     static $instances;
     
     $className = $this->resolvShortClassName(self::$classes[$name]);
-    
+
     $rc = new ReflectionClass($className);
     $di = Sabel_Container_DI::create();
     
@@ -151,7 +151,7 @@ class Container
       for ($count = 0; $count < count($classNameParts); ++$count) {
         array_shift($classNameParts);
         $className = implode('_', $classNameParts);
-        if (class_exists($className)) break;
+        if (class_exists($className, false)) break;
       }
     }
     

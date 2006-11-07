@@ -90,7 +90,7 @@ class SabelAllTests
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_RequestUri::suite());
     
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     
     $suite->addTest(Test_Validate::suite());
