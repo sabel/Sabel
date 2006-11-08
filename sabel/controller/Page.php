@@ -78,6 +78,10 @@ abstract class Sabel_Controller_Page
   {
     if ($this->request->hasUriValue($name))
       return $this->request->$name;
+    } else {
+      $tmp = $this->requests();
+      return $tmp[$name];
+    }
   }
   
   protected function __set($name, $value)
