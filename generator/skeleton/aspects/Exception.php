@@ -13,11 +13,14 @@ class Aspects_Exception
 {
   public function throwing($joinpoint)
   {
+    prevd($joinpoint);
     echo request(uri(array('controller'=>'index', 'action' => 'notfound'), false));
     exit;
   }
 }
 
-Sabel_Aspect_Aspects::singleton()->addPointcut(
-  Sabel_Aspect_Pointcut::create('Aspects_Exception')
-  ->setMethodRegex('.*'));
+if (!defined('TEST_CASE')) {
+  Sabel_Aspect_Aspects::singleton()->addPointcut(
+    Sabel_Aspect_Pointcut::create('Aspects_Exception')
+    ->setMethodRegex('.*'));
+}
