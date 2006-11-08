@@ -6,7 +6,7 @@ class Sabel
 {
   public static function initializeApplication()
   {
-    $cacheFilepath = RUN_BASE . 'cache/container.cache';
+    $cacheFilepath = RUN_BASE . '/cache/container.cache';
     $conbinators = array(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'),
                          new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'),
                          new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'aspects'),
