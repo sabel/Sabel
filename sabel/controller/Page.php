@@ -108,7 +108,7 @@ abstract class Sabel_Controller_Page
   
   protected function proxy($target)
   {
-    return new Sabel_Aspect_DynamicProxy($target);
+    return new Sabel_Aspect_Proxy($target);
   }
   
   /**
@@ -164,6 +164,6 @@ abstract class Sabel_Controller_Page
   
   protected function assign($key, $value)
   {
-    Sabel_Template_Engine::setAttributes($key, $value);
+    Sabel_Template_Engine::setAttribute($key, $value);
   }
 }
