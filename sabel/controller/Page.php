@@ -22,6 +22,23 @@ abstract class Sabel_Controller_Page
     $template    = null,
     $container   = null,
     $destination = null;
+    
+  /**
+   * reserved name lists of methods(actions)
+   * @var array $reserved
+   */
+  private $reserved = array();
+  
+  public final function initializeReservedNamesOfMethods()
+  {
+    $ref = new ReflectionClass('Sabel_Controller_Page');
+    $methods = $ref->getMethods();
+    $pageMethods = array();
+    foreach ($methods as $method) {
+      $reserved[$method->getName()] = 1;
+    }
+    $this->reserved = $reserved;
+  }
   
   public function setEntry($entry)
   {
@@ -50,6 +67,9 @@ abstract class Sabel_Controller_Page
   public function execute()
   {
     $actionName = $this->destination->action;
+    if (isset($this->reserved[$actionName]))
+      throw new Sabel_Exception_Runtime('use reserved action name');
+      
     $this->methodExecute($actionName);
     return Sabel_Template_Engine::getAttributes();
   }
@@ -162,6 +182,13 @@ abstract class Sabel_Controller_Page
     // @todo implemen
   }
   
+  
+  /**
+   * assign value to template.
+   *
+   * @param mixed $key search key
+   * @param mixed $value value
+   */
   protected function assign($key, $value)
   {
     Sabel_Template_Engine::setAttribute($key, $value);

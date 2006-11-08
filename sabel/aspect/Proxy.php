@@ -14,6 +14,10 @@ class Sabel_Aspect_Proxy
   protected $target = null;
   protected $source = null;
   
+  const TYPE_BEFORE   = 0;
+  const TYPE_AFTER    = 5;
+  const TYPE_THROWING = 10;
+  
   public function __construct($taget, $source = null)
   {
     $this->target = $taget;

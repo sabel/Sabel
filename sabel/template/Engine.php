@@ -41,7 +41,8 @@ abstract class Sabel_Template_Engine
   
   public function assignByArray($array)
   {
-    array_merge(self::$attributes, $array);
+    if (is_array($array))
+      array_merge(self::$attributes, $array);
   }
   
   public function setTemplateName($name)

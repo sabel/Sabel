@@ -56,6 +56,7 @@ class Sabel_Controller_Front
     $class->setEntry($mapEntry);
     $class->setup();
     $class->initialize();
+    $class->initializeReservedNamesOfMethods();
     
     $responses = $class->execute();
     
