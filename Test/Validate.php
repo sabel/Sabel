@@ -9,6 +9,8 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
+
+/*
 class Test_Validate extends PHPUnit2_Framework_TestCase
 {
   public static function suite()
@@ -137,16 +139,10 @@ class Schema_Mock
   }
 }
 
-//class Mock extends Sabel_Validate_Model
 class Mock extends Sabel_Validate_Model
 {
   protected $mdlName = 'Mock';
   protected $conName = '';
   protected $scmName = '';
-
-  public function __construct()
-  {
-    //$this->schema = new Schema_Mock();
-    //parent::__construct($this);
-  }
 }
+*/

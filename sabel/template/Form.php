@@ -175,7 +175,7 @@ class Sabel_Template_Form implements Iterator
   
   protected function defaultID()
   {
-    return $this->model->getTableName() . '_' . $this->currentColumn->name;
+    return $this->model->table . '_' . $this->currentColumn->name;
   }
   
   /**
