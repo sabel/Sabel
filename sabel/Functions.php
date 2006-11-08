@@ -109,7 +109,7 @@ class UriCreator
   }
 }
 
-function prevd($mixed)
+function dump($mixed)
 {
   echo '<pre>';
   var_dump($mixed);
