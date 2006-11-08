@@ -100,13 +100,7 @@ class Sabel_Template_Form implements Iterator
   public function name($showHidden = false)
   {
     $column = $this->currentColumn;
-    $name   = _($column->name);
-    
-    if ($showHidden && $this->isHidden()) {
-      return $name;
-    } else if (!$this->isHidden()) {
-      return $name;
-    }
+    return _($column->name);
   }
   
   public function value()
@@ -132,6 +126,8 @@ class Sabel_Template_Form implements Iterator
       } else {
         if ($this->isText()) {
           $result = $this->textarea($column->name, $column->value);
+        } else if ($this->isBool()) {
+          $result = $this->checkbox($column->name, $column->default);
         } else {
           $result = $this->input('text', $column->name, $column->value);
         }
@@ -142,7 +138,7 @@ class Sabel_Template_Form implements Iterator
   
   public function isString()
   {
-    return ($this->currentColumn->type === 'STRING');
+    return ($this->currentColumn->type === Sabel_DB_Schema_Const::STRING);
   }
   
   public function input($type, $name, $value, $id = '', $class = '', $style = '')
@@ -154,7 +150,7 @@ class Sabel_Template_Form implements Iterator
   
   public function isText()
   {
-    return ($this->currentColumn->type === 'TEXT');
+    return ($this->currentColumn->type === Sabel_DB_Schema_Const::TEXT);
   }
   
   public function textarea($name, $value = '', $id = '', $class = '', $style = '')
@@ -162,6 +158,20 @@ class Sabel_Template_Form implements Iterator
     if (empty($id)) $id = $this->defaultID();
     $fmt = '<textarea name="%s" id="%s" class="%s" style="%s">%s</textarea>';
     return sprintf($fmt, $name, $id, $class, $style, $value);
+  }
+  
+  public function isBool()
+  {
+    return ($this->currentColumn->type === Sabel_DB_Schema_Const::BOOL);
+  }
+  
+  public function checkbox($name, $default, $id = '', $class = '', $style = '')
+  {
+    if (empty($id)) $id = $this->defaultID();
+    $fmt  = '<input type="checkbox" name="%s" id="%s" class="%s" style="%s"';
+    if ($default) $fmt .= ' checked="checked"';
+    $fmt .= ' />';
+    return sprintf($fmt, $name, $id, $class, $style);
   }
   
   public function isError()

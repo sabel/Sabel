@@ -150,9 +150,16 @@ class Sabel_DB_Property
     return (!empty($this->schema));
   }
 
-  public function getSchema($key = null)
+  public function getSchema()
   {
-    return (isset($key)) ? $this->schema[$key] : $this->schema;
+    $cols = array();
+    foreach ($this->schema as $colName => $colInfo) {
+      $co = new Sabel_DB_Schema_Column();
+      $co->name = $colName;
+      $cols[$colName] = $co->make($colInfo);
+    }
+
+    return $cols;
   }
 
   public function setConnectName($connectName)
