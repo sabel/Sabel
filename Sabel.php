@@ -317,7 +317,7 @@ class ClassCombinator
     $parts = explode('/', $value);
     $value = $this->base . $value;
     
-    if ($type === 'file' && preg_match('%.*\.php%', $value)) {
+    if ($type === 'file' && preg_match('%.*\.php[^\.]?$%', $value)) {
       if ($parts[0] === $this->strict) {
         if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
         $classFile = new ClassFile($value);
@@ -671,7 +671,7 @@ class DirectoryTraverser
       if (!$e->isDot() && $e->isDir() && preg_match('/^[^\.]/', $e->getFileName())) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
         $this->traverse(new DirectoryIterator($child));
-      } else if (!$e->isDot() && $e->isFile()) {
+      } else if (!$e->isDot() && $e->isFile() && preg_match('/^([^\.]|\.ht)/', $e->getFileName())) {
         foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file', $child);
       }
     }
