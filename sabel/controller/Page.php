@@ -76,10 +76,10 @@ abstract class Sabel_Controller_Page
   
   protected function __get($name)
   {
-    if ($this->request->hasUriValue($name))
+    if ($this->request->hasUriValue($name)) {
       return $this->request->$name;
     } else {
-      $tmp = $this->requests;
+      $tmp = $this->getRequests();
       return $tmp[$name];
     }
   }
