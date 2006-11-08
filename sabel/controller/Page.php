@@ -79,7 +79,7 @@ abstract class Sabel_Controller_Page
     if ($this->request->hasUriValue($name))
       return $this->request->$name;
     } else {
-      $tmp = $this->requests();
+      $tmp = $this->requests;
       return $tmp[$name];
     }
   }
