@@ -197,4 +197,17 @@ abstract class Sabel_Controller_Page
   {
     Sabel_Template_Engine::setAttribute($key, $value);
   }
+  
+  /**
+   * read annotation
+   * 
+   * @param string $className class name
+   * @param string $annotationName annotation name
+   */
+  protected function readAnnotation($className, $annotationName)
+  {
+    $anonr = Container::create()->instanciate('sabel.annotation.Reader');
+    $anonr->annotation($className);
+    return $anonr->getAnnotationsByName($className, $annotationName);
+  }
 }
