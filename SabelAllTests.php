@@ -1,6 +1,7 @@
 <?php
 
 set_include_path(get_include_path() . ':/usr/local/www/data/ebine_sandbox');
+set_include_path(get_include_path() . ':Test');
 
 define('SABEL_BASE', dirname(realpath(__FILE__)));
 define('RUN_BASE', SABEL_BASE . '/Test/data/application/');
@@ -90,7 +91,7 @@ class SabelAllTests
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_RequestUri::suite());
     
-    // $suite->addTest(Test_DB_Tests::suite());
+    //$suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     
     //$suite->addTest(Test_Validate::suite());
@@ -102,12 +103,4 @@ class SabelAllTests
 
 if (PHPUnit2_MAIN_METHOD == 'SabelAllTests::main') {
   SabelAllTests::main();
-}
-
-function __autoload($class)
-{
-  $r = new NameResolver();
-  $file = SABEL_BASE .'/'. $r->resolvClassNameToDirectoryPath($class);
-  if (!is_readable($file)) throw new Exception($file . " not found");
-  require_once($file);
 }
