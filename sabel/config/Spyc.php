@@ -1,17 +1,17 @@
 <?php
 
 /** 
- * Spyc -- A Simple PHP YAML Class
+ * Sabel_Config_Spyc -- A Simple PHP YAML Class
  * @version 0.2.3 -- 2006-02-04
  * @author Chris Wanstrath <chris@ozmm.org>
  * @link http://spyc.sourceforge.net/
  * @copyright Copyright 2005-2006 Chris Wanstrath
  * @license http://www.opensource.org/licenses/mit-license.php MIT License
- * @package Spyc
+ * @package Sabel_Config_Spyc
  */
 /** 
- * A node, used by Spyc for parsing YAML.
- * @package Spyc
+ * A node, used by Sabel_Config_Spyc for parsing YAML.
+ * @package Sabel_Config_Spyc
  */
 class YAMLNode {
   /**#@+
@@ -56,12 +56,12 @@ class YAMLNode {
  *
  * Usage:
  * <code>
- *   $parser = new Spyc;
+ *   $parser = new Sabel_Config_Spyc;
  *   $array  = $parser->load($file);
  * </code>
- * @package Spyc
+ * @package Sabel_Config_Spyc
  */
-class Spyc
+class Sabel_Config_Spyc
 {
   /**
    * Load YAML into a PHP array statically
@@ -71,7 +71,7 @@ class Spyc
    * simple.
    *  Usage: 
    *  <code>
-   *   $array = Spyc::YAMLLoad('lucky.yml');
+   *   $array = Sabel_Config_Spyc::YAMLLoad('lucky.yml');
    *   print_r($array);
    *  </code>
    * @access public
@@ -79,7 +79,7 @@ class Spyc
    * @param string $input Path of YAML file or string containing YAML
    */
    public function YAMLLoad($input) {
-    $spyc = new Spyc;
+    $spyc = new Sabel_Config_Spyc;
     return $spyc->load($input);
   }
   
@@ -104,7 +104,7 @@ class Spyc
    * @param int $wordwrap Pass in 0 for no wordwrap, false for default (40)
    */
    public function YAMLDump($array,$indent = false,$wordwrap = false) {
-    $spyc = new Spyc;
+    $spyc = new Sabel_Config_Spyc;
     return $spyc->dump($array,$indent,$wordwrap);
   }
 
@@ -115,7 +115,7 @@ class Spyc
    * will do its best to convert the YAML into a PHP array.  Pretty simple.
    *  Usage: 
    *  <code>
-   *   $parser = new Spyc;
+   *   $parser = new Sabel_Config_Spyc;
    *   $array  = $parser->load('lucky.yml');
    *   print_r($array);
    *  </code>
