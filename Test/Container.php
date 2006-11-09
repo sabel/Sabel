@@ -21,6 +21,18 @@ class Test_Container extends SabelTestCase
     $this->c->regist('target.test.Class', 'Target_Test_Class');
   }
   
+  public function testPrototypeClassLoading()
+  {
+    $this->c->regist('target.test.Prototype', 'Target_Test_Prototype');
+    $obj = $this->c->load('target.test.Prototype');
+    $obj->set('first');
+    
+    unset($obj);
+    
+    $obj = $this->c->load('target.test.Prototype');
+    // $this->assertEquals('first', $obj->get());
+  }
+  
   public function testClassLoading()
   {
     $obj = $this->c->load('target.test.Class');
@@ -56,6 +68,21 @@ class Shortcut_Test_Class
   public function whatYourName()
   {
     return 'Foo_Shortcut_Test_Class';
+  }
+}
+
+class Target_Test_Prototype
+{
+  private $test = null;
+  
+  public function set($set)
+  {
+    $this->test = $set;
+  }
+  
+  public function get()
+  {
+    return $this->test;
   }
 }
 

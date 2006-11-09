@@ -82,7 +82,6 @@ class Container
   public function regist($key, $name, $path = null)
   {
     if (!is_null($path)) {
-      $d2c = new DirectoryPathToClassNameResolver();
       self::$classes[$key] = NameResolver::resolvDirectoryPathToClassName($path);
     }
     
