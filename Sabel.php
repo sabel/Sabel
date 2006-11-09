@@ -2,10 +2,26 @@
 
 define('SABEL', true);
 
+if (ENVIRONMENT === 'development') {
+  require_once('sabel/Functions.php');
+  set_include_path(get_include_path().':'.RUN_BASE.'/app');
+  set_include_path(get_include_path().':'.RUN_BASE.'/lib');
+  set_include_path(get_include_path().':'.RUN_BASE.'/aspects');
+  set_include_path(get_include_path().':'.RUN_BASE.'/schema');
+  function __autoload($class)
+  {
+    $filepath = NameResolver::resolvClassNameToDirectoryPath($class);
+    foreach (explode(':', get_include_path()) as $path) {
+      if (file_exists($path.'/'.$filepath)) require_once($filepath);
+    }
+  }
+}
+
 class Sabel
 {
   public static function initializeApplication()
   {
+    if (ENVIRONMENT === 'development') return null;
     $cacheFilepath = RUN_BASE . '/cache/container.cache';
     $conbinators = array(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'),
                          new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'),
@@ -77,8 +93,10 @@ class Container
   {
     static $instances;
     
-    $className = $this->resolvShortClassName(self::$classes[$name]);
-
+    //$className = $this->resolvShortClassName(self::$classes[$name]);
+    $name = NameResolver::resolvNameSpaceToClassName($name);
+    $className = $this->resolvShortClassName($name);
+    
     $rc = new ReflectionClass($className);
     $di = Sabel_Container_DI::create();
     
@@ -170,6 +188,11 @@ class Container
 
 class NameResolver
 {
+  public static function resolvNameSpaceToClassName($target)
+  {
+    $parts = array_map('ucfirst', explode('.', $target));
+    return join('_', $parts);
+  }
   
   public static function resolvClassNameToDirectoryPath($target, $toLower = true)
   {
