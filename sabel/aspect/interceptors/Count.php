@@ -4,10 +4,11 @@ class Sabel_Aspect_Interceptors_Count
 {
   public function before($joinpoint)
   {
-    Sabel_View_Pager::setCount($joinpoint->getTarget()->getCount());
+    $pager = Sabel_View_Pager::create();
+    $pager->setCount($joinpoint->getTarget()->getCount());
     
-    $joinpoint->getTarget()->sconst('limit',  Sabel_View_Pager::getLimit());
-    $joinpoint->getTarget()->sconst('offset', Sabel_view_Pager::getOffset());
+    $joinpoint->getTarget()->sconst('limit',  $pager->getLimit());
+    $joinpoint->getTarget()->sconst('offset', $pager->getOffset());
   }
 }
 

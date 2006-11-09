@@ -39,11 +39,11 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     }
     
     $this->errors = new Sabel_Validate_Errors();
-    
+
     foreach ($columns as $name => $column) {
-      if ($column['nullable']  === false && $column['increment'] === true) continue;
+      if ($column['nullable'] === false && $column['increment'] === true) continue;
         
-      if ($column['nullable']  === false && $column['increment'] === false)
+      if ($column['nullable'] === false && $column['increment'] === false)
       {
         if (!isset($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
@@ -66,7 +66,7 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
       }
       */
     }
-    
+
     return $this->errors;
   }
   

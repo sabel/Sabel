@@ -168,7 +168,7 @@ class Sabel_Template_Form implements Iterator
   public function checkbox($name, $default, $id = '', $class = '', $style = '')
   {
     if (empty($id)) $id = $this->defaultID();
-    $fmt  = '<input type="checkbox" name="%s" id="%s" class="%s" style="%s"';
+    $fmt  = '<input type="checkbox" value="true" name="%s" id="%s" class="%s" style="%s"';
     if ($default) $fmt .= ' checked="checked"';
     $fmt .= ' />';
     return sprintf($fmt, $name, $id, $class, $style);
