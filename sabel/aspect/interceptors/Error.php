@@ -16,7 +16,7 @@ class Sabel_Aspect_Interceptors_Error
     $target    = $joinpoint->getTarget();
     $className = $joinpoint->getReflection()->getName();
     $method    = $joinpoint->getMethodReflection();
-    
+
     $v = new Sabel_Validate_Model($target);
     $errors = $v->validate($joinpoint->getArgument(0));
     if ($errors->hasError()) {
@@ -31,6 +31,6 @@ class Sabel_Aspect_Interceptors_Error
   }
 }
 
-Sabel_Aspect_Aspects::singleton()->addPointcut(
-  Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Error')
-  ->setMethodRegex('save'));
+//Sabel_Aspect_Aspects::singleton()->addPointcut(
+//  Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Error')
+//  ->setMethodRegex('save'));
