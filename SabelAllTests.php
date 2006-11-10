@@ -1,8 +1,5 @@
 <?php
 
-set_include_path(get_include_path() . ':/usr/local/www/data/ebine_sandbox');
-set_include_path(get_include_path() . ':Test');
-
 define('SABEL_BASE', dirname(realpath(__FILE__)));
 define('RUN_BASE', SABEL_BASE . '/Test/data/application/');
 define('TEST_CASE', true);
@@ -23,15 +20,10 @@ require_once('PHPUnit2/Framework/TestSuite.php');
 require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
 require_once('Sabel.php');
-$c  = new Container();
-$dt = new DirectoryTraverser();
-// $con = new ClassCombinator(dirname(__FILE__).'/allclasses.php', null, false);
-// $dt->visit($con);
-$dt->visit(new SabelClassRegister($c));
-$dt->traverse();
-// $con->write();
 
-// require_once('allclasses.php');
+$csr = ClassFileStructureReader::create(null, 'sabel/');
+$csr->read()->write('allclasses.php');
+require_once('allclasses.php');
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/Sabel.php');
@@ -57,12 +49,13 @@ require_once('Test/Validate.php');
 require_once('Test/VirtualInheritance.php');
 
 //* there out of naming rules. @todo fix me
-
+/*
 require_once('sabel/config/Spyc.php');
 require_once('sabel/Functions.php');
 require_once('sabel/db/Functions.php');
 require_once('sabel/String.php');
 require_once('sabel/ValueObject.php');
+*/
 
 class SabelAllTests
 {

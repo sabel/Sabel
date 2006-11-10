@@ -48,7 +48,6 @@ class Sabel_Controller_Front
     $builder->build($map);
     
     $mapEntry = $map->find();
-    
     // first
     $class = Sabel_Controller_Loader::create($mapEntry)->load();
     Sabel_Core_Context::setPageController($class);

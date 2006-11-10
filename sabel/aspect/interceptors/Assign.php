@@ -15,7 +15,7 @@ class Sabel_Aspect_Interceptors_Assign
   {
     $reflection = new ReflectionClass($joinpoint->getTarget());
     
-    $anonr = Container::create()->instanciate('sabel.annotation.Reader');
+    $anonr = new Sabel_Annotation_Reader();
     $anonr->annotation($reflection->getName());
     $assigns = $anonr->getAnnotationsByName($reflection->getName(), 'assign');
     

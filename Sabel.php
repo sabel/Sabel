@@ -2,57 +2,41 @@
 
 define('SABEL', true);
 
-if (ENVIRONMENT === 'development') {
-  require_once('sabel/Functions.php');
-  set_include_path(get_include_path().':'.RUN_BASE.'/app');
-  set_include_path(get_include_path().':'.RUN_BASE.'/lib');
-  set_include_path(get_include_path().':'.RUN_BASE.'/aspects');
-  set_include_path(get_include_path().':'.RUN_BASE.'/schema');
-  function __autoload($class)
-  {
-    $filepath = NameResolver::resolvClassNameToDirectoryPath($class);
-    foreach (explode(':', get_include_path()) as $path) {
-      if (file_exists($path.'/'.$filepath)) require_once($filepath);
-    }
-  }
-}
-
 class Sabel
 {
   public static function initializeApplication()
   {
-    if (ENVIRONMENT === 'development') return null;
     $cacheFilepath = RUN_BASE . '/cache/container.cache';
-    $conbinators = array(new ClassCombinator(APP_CACHE, RUN_BASE, false, 'app'),
-                         new ClassCombinator(LIB_CACHE, RUN_BASE, false, 'lib'),
-                         new ClassCombinator(INJ_CACHE, RUN_BASE, false, 'aspects'),
-                         new ClassCombinator(SCM_CACHE, RUN_BASE, false, 'schema'));
+    $roots = array();
+    $roots[] = array(APP_CACHE, '/app/');
+    $roots[] = array(LIB_CACHE, '/lib/');
+    $roots[] = array(INJ_CACHE, '/aspects/');
+    $roots[] = array(SCM_CACHE, '/schema/');
                          
     $c = Container::create();
+    
     if (ENVIRONMENT !== 'development' && is_readable($cacheFilepath)) {
       $file = fopen($cacheFilepath, 'r');
       $c->setClasses(unserialize(fgets($file)));
       require_once(SABEL_CLASSES);
     } else {
-      $dt = new DirectoryTraverser();
-      $cc = new ClassCombinator(SABEL_CLASSES, null, false);
-      $dt->visit($cc);
-      $dt->visit(new SabelClassRegister($c));
-      $dt->traverse();
-      $cc->write();
-      unset($dt);
+      ClassFileStructureReader::create(null, 'sabel/')
+        ->read()
+        ->write(SABEL_CLASSES);
+        
       if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       
-      $dt = new DirectoryTraverser(RUN_BASE);
-      foreach ($conbinators as $conbinator) $dt->visit($conbinator);
-      $dt->visit(new AppClassRegister($c));
-      $dt->traverse();
-      foreach ($conbinators as $conbinator) $conbinator->write();
+      foreach ($roots as $root) {
+        ClassFileStructureReader::create(RUN_BASE, $root[1])
+          ->read()
+          ->write($root[0]);
+      }
       
       $file = fopen(RUN_BASE . '/cache/container.cache', 'w');
       fputs($file, serialize($c->getClasses()));
       fclose($file);
     }
+    
     require_once(APP_CACHE);
     require_once(LIB_CACHE);
     require_once(SCM_CACHE);
@@ -108,12 +92,6 @@ class Container
     
     $this->setter($instance);
     return $instance;
-  }
-  
-  public function instanciate($name)
-  {
-    $className = $this->resolvShortClassName(self::$classes[$name]);
-    return new $className();
   }
   
   protected function setter($proxy)
@@ -249,6 +227,7 @@ class AppClassRegister
   {
     $this->container = $container;
   }
+  
   public function accept($value, $type, $child = null)
   {
     if ($type === 'dir') return;
@@ -310,129 +289,6 @@ class SabelClassRegister
   }
 }
 
-class ClassCombinator
-{
-  protected $path = '';
-  protected $lineTrim   = null;
-  protected $base = '';
-  protected $strict = '';
-  
-  protected $files = array();
-  protected $filesOfHasParent = array();
-  
-  public function __construct($path, $base = null, $lineTrim = true, $strict = 'sabel')
-  {
-    $this->path = $path;
-    $this->strict = $strict;
-    $this->lineTrim = $lineTrim;
-    $this->files = new ClassFiles();
-    
-    if (is_null($base)) {
-      $this->base = dirname(__FILE__) . '/';
-    } else {
-      $this->base = $base . '/';
-    }
-  }
-  
-  public function accept($value, $type, $child = null)
-  {
-    $parts = explode('/', $value);
-    $value = $this->base . $value;
-    
-    if ($type === 'file' && preg_match('%.*\.php[^\.]?$%', $value)) {
-      if ($parts[0] === $this->strict) {
-        if (!$fp = fopen($value, 'r')) throw new Exception("{$value} can't open.");
-        $classFile = new ClassFile($value);
-        while (!feof($fp)) $classFile->addLine(rtrim(fgets($fp)));
-        fclose($fp);
-        $this->files->add($classFile);
-      }
-    }
-  }
-  
-  public function write()
-  {
-    $buf = array();
-    $buf[] = "<?php \n";
-    
-    $this->files->findChilds();
-    $files = $this->files->gets();
-    
-    $conflicts = array();
-    
-    foreach ($files as $file) {
-      if ($file->hasChild()) {
-        $conflicts[] = $file->getSelf();
-        foreach ($file->getLines() as $line) {
-          $buf[] = $line;
-        }
-      }
-    }
-    
-    foreach ($files as $file) {
-      if ($file->hasBoth() && !in_array($file->getSelf(), $conflicts)) {
-        $conflicts[] = $file->getSelf();
-        foreach ($file->getLines() as $line) {
-          $buf[] = $line;
-        }
-      }
-    }
-    
-    foreach ($files as $file) {
-      if ($file->hasParent() && !in_array($file->getSelf(), $conflicts)) {
-        if ($this->checkParentExists($file, $conflicts)) {
-          $conflicts[] = $file->getSelf();
-          foreach ($file->getLines() as $line) $buf[]= $line;
-        }
-      }
-    }
-    
-    foreach ($files as $file) {
-      if ($file->hasnt() && !in_array($file->getSelf(), $conflicts)) {
-        foreach ($file->getLines() as $line) {
-          $buf[]= $line;
-        }
-      }
-    }
-    
-    $fp = fopen($this->path, 'w');
-    foreach ($buf as $b) {
-      fputs($fp, $b);
-    }
-    fclose($fp);
-  }
-  
-  protected function checkParentExists($file, $conflicts)
-  {
-    $parent = $file->getParent();
-    if (in_array($parent, $conflicts)) return true;
-    if (class_exists($parent, false))  return true;
-    if (interface_exists($parent, false)) return true;
-    
-    $filepath = NameResolver::resolvClassNameToDirectoryPath($parent, false);
-    foreach (explode(':', ini_get('include_path')) as $path) {
-      if (file_exists($path . '/' . $filepath)) return true;
-    }
-    if (defined('TEST_CASE')) {
-      $filepath = NameResolver::resolvClassNameToDirectoryPath($parent);
-      foreach (explode(':', ini_get('include_path')) as $path) {
-        if (file_exists($path . '/' . $filepath)) return true;
-      }
-    }
-    return false;
-  }
-  
-  protected function isExtends($line)
-  {
-    return preg_match('%^(abstract class|class).*(extends|implements).*%', $line);
-  }
-  
-  protected function isLineValid($line)
-  {
-    return ($line != '<?php' && $line != '?>' && !preg_match('%\/\/ %', $line));
-  }
-}
-
 class ClassFiles
 {
   protected $classFiles = array();
@@ -463,9 +319,9 @@ class ClassFiles
 
 class ClassFile
 {
-  protected $self = '';
+  protected $self   = '';
   protected $parent = '';
-  protected $childs  = array();
+  protected $childs = array();
   
   protected $hasParent = false;
   protected $hasChild  = false;
@@ -545,6 +401,11 @@ class ClassFile
   public function getFilePath()
   {
     return $this->filePath;
+  }
+  
+  public function addLines($lines)
+  {
+    foreach ($lines as $line) $this->addLine(rtrim($line));
   }
   
   public function addLine($line)
@@ -664,6 +525,133 @@ class ClassFile
       }
     }
     return $line;
+  }
+}
+
+class ClassFileStructureReader
+{
+  protected $base = '';
+  protected $dir = '';
+  protected $directories = null;
+  
+  protected $files = null;
+  protected $filesOfHasParent = array();
+  
+  private function __construct($base, $dir, $classFiles)
+  {
+    $this->base = (is_null($base)) ? dirname(realpath(__FILE__)).'/' : $base;
+    $this->dir = $this->base . $dir;
+    $this->directories = new DirectoryIterator($this->dir);
+    $this->files = (is_null($classFiles)) ? new ClassFiles() : $classFiles;
+  }
+  
+  public static function create($base = null, $dir = null, $classFiles = null)
+  {
+    return new self($base, $dir, $classFiles);
+  }
+  
+  /**
+   * read directory recursivery
+   *
+   * @param DirectoryIterator $fromElement default null
+   * @return $this
+   */
+  public function read(DirectoryIterator $fromElement = null)
+  {
+    $elements = (is_null($fromElement)) ? $this->directories : $fromElement;
+    
+    foreach ($elements as $element) {
+      $child = $element->getPathName();
+      $entry = ltrim(str_replace($this->dir, '', $child), '/');
+      if ($this->isValidDirectory($element)) {
+        $this->read(new DirectoryIterator($child));
+      } else if ($this->isValidFile($element)) {
+        $this->readClass($entry);
+      }
+    }
+    
+    return $this;
+  }
+  
+  protected function readClass($pathToClassWithoutBaseDir)
+  {
+    // $pathToClassFile has a base directory. such as sabel/core/Context.php
+    //                                                ^^^^^
+    $pathToClassFile = $this->dir . $pathToClassWithoutBaseDir;
+    if (strpos($pathToClassFile, '.php') !== false) {
+      if (!is_readable($pathToClassFile))
+        throw new Exception("$pathToClassFile can't open.");
+        
+      $classFile = new ClassFile($pathToClassFile);
+      $classFile->addLines(explode("\n", file_get_contents($pathToClassFile)));
+      $this->files->add($classFile);
+    }
+  }
+  
+  protected function isValidDirectory($element)
+  {
+    return ($element->isDir() && strpos($element->getFileName(), '.') === false);
+  }
+  
+  protected function isValidFile($element)
+  {
+    return ($element->isFile() && strpos($element->getFileName(), '.') !== 0);
+  }
+  
+  
+  public function write($path)
+  {
+    $cbuf = $bbuf = $pbuf = $nbuf = array();
+    
+    $this->files->findChilds();
+    $files = $this->files->gets();
+    
+    foreach ($files as $file) {
+      if ($file->hasChild()) {
+        $cbuf = array_merge($cbuf, $file->getLines());
+      } else if ($file->hasBoth()) {
+        $bbuf = array_merge($bbuf, $file->getLines());
+      } else if ($file->hasParent()) {
+        $pbuf = array_merge($pbuf, $file->getLines());
+      } else if ($file->hasnt()) {
+        $nbuf = array_merge($nbuf, $file->getLines());
+      }
+    }
+    
+    file_put_contents($path, array_merge(array("<?php\n"), $cbuf, $bbuf, $pbuf, $nbuf));
+  }
+  
+  protected function checkParentExists($file, $conflicts)
+  {
+    $parent = $file->getParent();
+    
+    if (in_array($parent, $conflicts))    return true;
+    if (class_exists($parent, false))     return true;
+    if (interface_exists($parent, false)) return true;
+    
+    $filepath = NameResolver::resolvClassNameToDirectoryPath($parent, false);
+    foreach (explode(':', ini_get('include_path')) as $path) {
+      if (file_exists($path . '/' . $filepath)) return true;
+    }
+    
+    if (defined('TEST_CASE')) {
+      $filepath = NameResolver::resolvClassNameToDirectoryPath($parent);
+      foreach (explode(':', ini_get('include_path')) as $path) {
+        if (file_exists($path . '/' . $filepath)) return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  protected function isExtends($line)
+  {
+    return preg_match('%^(abstract class|class).*(extends|implements).*%', $line);
+  }
+  
+  protected function isLineValid($line)
+  {
+    return ($line != '<?php' && $line != '?>' && !preg_match('%\/\/ %', $line));
   }
 }
 
