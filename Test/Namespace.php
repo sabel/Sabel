@@ -22,36 +22,51 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
     
   }
   
-  public function testNamespace()
+  public function testRealisticNamespaceUseConstructor()
   {
-    $root = new Sabel_Core_Namespace();
-    $core = new Sabel_Core_Namespace('core');
-    $root->addNamespace($core);
-    $core->addClass('Foo');
-    unset($core);
-    $core = $root->getNamespace('core');
-    $this->assertEquals('core', $core->getName());
-    $className = $core->getClassName('Foo');
-    $this->assertEquals('Core_Foo', $className);
-    // $className = $root->getClassName('core.Foo');
-    //$this->assertEquals('Core_Foo', $className);
+    $root  = new Sabel_Core_Namespace();
+    $sabel = new Sabel_Core_Namespace('sabel', $root);
+    $core  = new Sabel_Core_Namespace('core',  $sabel);
+    $view  = new Sabel_Core_Namespace('view',  $sabel);
+    $child = new Sabel_Core_Namespace('child', $core);
+    
+    $child->addClass('Foo');
+    $child->addClass('Bar');
+    $view->addClass('Foo');
+    $view->addClass('Bar');
+    
+    $core = $root->getNamespace('sabel.core');
+    $this->assertEquals('Sabel_Core_Child_Foo', $core->getClassName('child.Foo'));
+    $this->assertEquals('Sabel_Core_Child_Bar', $core->getClassName('child.Bar'));
+    
+    $view = $root->getNamespace('sabel.view');
+    $this->assertEquals('Sabel_View_Foo', $view->getClassName('Foo'));
+    $this->assertEquals('Sabel_View_Bar', $view->getClassName('Bar'));
   }
   
-  public function testRealisticNamespace()
+  public function testRealisticNamespaceUseAddNamespace()
   {
-    $rootroot = new Sabel_Core_Namespace();
-    $root = new Sabel_Core_Namespace('root');
-    $core = new Sabel_Core_Namespace('core');
+    $root  = new Sabel_Core_Namespace();
+    $sabel = new Sabel_Core_Namespace('sabel');
+    $core  = new Sabel_Core_Namespace('core');
+    $view  = new Sabel_Core_Namespace('view');
     $child = new Sabel_Core_Namespace('child');
+    
     $core->addNamespace($child);
+    $sabel->addNamespace($view);
+    $sabel->addNamespace($core);
+    $root->addNamespace($sabel);
+    
+    $core->addClass('Foo');
     $child->addClass('Foo');
-    $root->addNamespace($core);
-    $rootroot->addNamespace($root);
-    unset($core);
-    $core = $rootroot->getNamespace('root.core');
-    $this->assertEquals('core', $core->getName());
-    $className = $core->getClassName('child.Foo');
-    $this->assertEquals('Root_Core_Child_Foo', $className);
+    $child->addClass('Bar');
+    
+    $core = $root->getNamespace('sabel.core');
+    $this->assertEquals('Sabel_Core_Foo',       $core->getClassName('Foo'));
+    $this->assertEquals('Sabel_Core_Child_Foo', $core->getClassName('child.Foo'));
+    $this->assertEquals('Sabel_Core_Child_Bar', $core->getClassName('child.Bar'));
+    
+    $this->assertEquals(array('Foo', 'Bar'), $child->getClasses());
   }
   
   public function testSoMuchNSHierarcy()
@@ -77,9 +92,10 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
     $this->assertEquals($className, $type->getClassName('address.bit.Zero'));
     $this->assertEquals($className, $address->getClassName('bit.Zero'));
     $this->assertEquals($className, $bit->getClassName('Zero'));
-    $this->assertEquals($className, $bit->getClassName('sabel.db.driver.schema.table.column.type.address.bit.Zero'));
+    $this->assertEquals($className, $bit->getClassName(
+      'sabel.db.driver.schema.table.column.type.address.bit.Zero'
+    ));
   }
-    
   
   public function testAutoSoMuchNSHierarcy()
   {
@@ -89,7 +105,7 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
     
     $a = $c;
     $cn = array('A');
-    $hierarcy = 15;
+    $hierarcy = 25;
     for ($i = 0; $i < $hierarcy; $i++) {
       $inc = $str->succ();
       $tns = new Sabel_Core_Namespace($inc);
@@ -104,17 +120,5 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
     $className = $a->getClassName('Alpha');
     $expectedClassName = join('_', array_reverse($cn)).'_Alpha';
     $this->assertEquals($expectedClassName, $className);
-  }
-  
-  public function estAnotherClassName()
-  {
-    $root = new Sabel_Core_Namespace();
-    $core = new Sabel_Core_Namespace('core');
-    $core->addClass('Foo');
-    $root->addNamespace($core);
-    unset($core);
-    $core = $root->getNamespace('core');
-    $className = $root->getClassName('core.Foo');
-    $this->assertEquals('Foo', $className);
   }
 }
