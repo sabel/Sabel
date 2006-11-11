@@ -60,6 +60,13 @@ class Sabel_Controller_Front
     $responses = $class->execute();
     
     $template = Sabel_Template_Service::create($mapEntry);
+    if ($template->isTemplateMissing()) {
+      if ($class->hasMethod('templateMissing')) {
+        $class->templateMissing();
+      } else {
+        throw new Sabel_Exception_TemplateMissing();
+      }
+    }
     $template->assignByArray($responses);
     
     return array('html' => $template->rendering(), 'responses' => $responses);

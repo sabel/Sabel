@@ -114,7 +114,7 @@ class Test_Aspect extends PHPUnit2_Framework_TestCase
       $aspects = Sabel_Aspect_Aspects::singleton();
       
       $aspects->addPointcut(Sabel_Aspect_Pointcut::create('RackmountFailMonitor')
-                            ->setMethodRegex('mount'));
+                            ->setExceptionClass('NoRackSpaceException'));
       
       $aspects->addPointcut(Sabel_Aspect_Pointcut::create('Notifier')
                             ->setMethodRegex('.*'));

@@ -71,7 +71,7 @@ class SabelAllTests
     $suite->addTest(Test_Sabel::suite());
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_DI::suite());
-    $suite->addTest(Test_Aspect::suite());
+    // $suite->addTest(Test_Aspect::suite());
     
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Container::suite());

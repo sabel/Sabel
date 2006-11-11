@@ -73,6 +73,7 @@ class Sabel_Aspect_Proxy
   {
     $target = $this->target;
     $source = $this->source;
+    $reflection = new ReflectionClass($this->target);
     
     $bcbResult = $this->beforeCallBefore($method, $arg);
     if (!is_null($bcbResult)) return $bcbResult;
@@ -80,9 +81,8 @@ class Sabel_Aspect_Proxy
     $joinpoint = new Sabel_Aspect_Joinpoint($target, $arg, $method);
     
     $aspects = Sabel_Aspect_Aspects::singleton();
-    $matches = $aspects->findMatch(array('method' => $method));
-    
-    $reflection = new ReflectionClass($this->target);
+    $matches = $aspects->findMatch(array('method' => $method,
+                                         'class'  => $reflection->getName()));
     
     $hasMethod = false;
     try {
@@ -112,7 +112,14 @@ class Sabel_Aspect_Proxy
       }
     } catch (Exception $e) {
       $joinpoint->setException($e);
-      return $this->callAspect($joinpoint, $matches, 'throwing');
+      $eref = new ReflectionClass($e);
+      $matches = $aspects->findExceptionMatch(array('class' => $eref->getName()));
+      
+      if ($matches->hasMatch()) {
+        $this->callAspect($joinpoint, $matches, 'throwing');
+      } else {
+        throw $e;
+      }
     }
   }
   

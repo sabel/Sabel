@@ -13,6 +13,19 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
 {
   const COMPILE_DIR = '/data/compiled/';
   
+  const H_PAT 
+    = '/<\?php(n)?h([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
+    
+  const DUMP_PAT
+    = '/<\?php(n)?v([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
+    
+  const NL2BR_PAT = 
+    '/<\?phpn([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
+    
+  const H_REPLACE     = '<?php$1$2= htmlspecialchars($3); $4 ?>';
+  const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3); $4 ?></pre>';
+  const NL2BR_REPLACE = '<?php= nl2br($2); $3 ?>';
+  
   public function configuration()
   {
   }
@@ -25,15 +38,15 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
     $filepath = $this->getTemplateFullPath();
     $cpath    = $this->getCompileFilePath();
 
-    if (is_file($filepath) && (!is_readable($cpath) || filemtime($filepath) > filemtime($cpath))) {
+    if (is_file($filepath) && (!is_readable($cpath) 
+        || filemtime($filepath) > filemtime($cpath))) {
       $contents = file_get_contents($filepath);
 
-      $contents = str_replace('<?',     '<?php',       $contents);
-
-      $repl = '([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*';
-      $contents = preg_replace('/<\?php(n)?h'.$repl.'\?>/', '<?php$1$2= htmlspecialchars($3); $4 ?>', $contents);
-      $contents = preg_replace('/<\?php(n)?v'.$repl.'\?>/', '<pre><?php$1$2 var_dump($3); $4 ?></pre>', $contents);
-      $contents = preg_replace('/<\?phpn'.$repl.'\?>/', '<?php= nl2br($2); $3 ?>', $contents);
+      $contents = str_replace('<?', '<?php', $contents);
+      
+      $contents = preg_replace(self::H_PAT,     self::H_REPLACE,     $contents);
+      $contents = preg_replace(self::DUMP_PAT,  self::DUMP_REPLACE,  $contents);
+      $contents = preg_replace(self::NL2BR_PAT, self::NL2BR_REPLACE, $contents);
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
       

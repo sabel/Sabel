@@ -70,6 +70,12 @@ class Sabel_Template_Service implements Sabel_Template_ServiceInterface
     }
   }
   
+  public function isTemplateMissing()
+  {
+    $pathToTpl = $this->impl->getTemplateFullPath();
+    return (!is_readable($pathToTpl));
+  }
+  
   public function assign($key, $value)
   {
     $this->impl->assign($key, $value);

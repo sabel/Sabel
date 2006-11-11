@@ -16,7 +16,7 @@ class Sabel_Aspect_Interceptors_Error
     $target    = $joinpoint->getTarget();
     $className = $joinpoint->getReflection()->getName();
     $method    = $joinpoint->getMethodReflection();
-
+    
     $v = new Sabel_Validate_Model($target);
     $errors = $v->validate($joinpoint->getArgument(0));
     if ($errors->hasError()) {

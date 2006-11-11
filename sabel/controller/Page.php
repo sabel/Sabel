@@ -107,7 +107,13 @@ abstract class Sabel_Controller_Page
         $action = $actionName;
       }
     }
-    $this->$action();
+    
+    if ($this->hasMethod($action)) {
+      $this->$action();
+    } else if ($this->hasMethod('actionMissing')) {
+      $this->actionMissing();
+    }
+    
     $this->storage->write('previous', $this->request->__toString());
   }
   

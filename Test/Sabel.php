@@ -50,6 +50,6 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     ob_start();
     $fcontroller->ignition();
     $contents = rtrim(ob_get_clean());
-    $this->assertEquals('welcome.', $contents);
+    $this->assertEquals("welcome.\ntemplate missing", $contents);
   }
 }

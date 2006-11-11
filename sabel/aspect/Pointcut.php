@@ -20,6 +20,16 @@ class Sabel_Aspect_Pointcut
   protected $name = '';
   protected $aspect = null;
   
+  protected $toAll = false;
+  
+  protected $anyException = false;
+  protected $exception = false;
+  
+  protected $exceptionClass = '';
+  protected $hasExceptionClass = false;
+  protected $exceptionClassRegex = '';
+  protected $hasExceptionClassRegex = false;
+  
   protected $class      = '';
   protected $method     = '';
   protected $package    = '';
@@ -55,6 +65,59 @@ class Sabel_Aspect_Pointcut
     return $this->aspect;
   }
   
+  public function hasException()
+  {
+    return $this->exception;
+  }
+  
+  public function anyException()
+  {
+    $this->exception = true;
+    $this->anyException = true;
+    return $this;
+  }
+  
+  public function hasAnyException()
+  {
+    return $this->anyException;
+  }
+  
+  public function setExceptionClass($class)
+  {
+    $this->exception = true;
+    $this->hasExceptionClass = true;
+    $this->exceptionClass = $class;
+    return $this;
+  }
+  
+  public function hasExceptionClass()
+  {
+    return $this->hasExceptionClass;
+  }
+  
+  public function getExceptionClass()
+  {
+    return $this->exceptionClass;
+  }
+  
+  public function setExceptionClassRegex($class)
+  {
+    $this->exception = true;
+    $this->hasExceptionClassRegex = true;
+    $this->exceptionClassRegex = $class;
+    return $this;
+  }
+  
+  public function getExceptionClassRegex()
+  {
+    return $this->exceptionClassRegex;
+  }
+  
+  public function hasExceptionClassRegex()
+  {
+    return $this->hasExceptionClassRegex;
+  }
+  
   public function setClass($class)
   {
     $this->class = $class;
@@ -67,11 +130,21 @@ class Sabel_Aspect_Pointcut
     return $this->hasClass;
   }
   
+  public function getClass()
+  {
+    return $this->class;
+  }
+  
   public function setClassRegex($rule)
   {
     $this->classRegex = $rule;
     $this->hasClassRegex = true;
     return $this;
+  }
+  
+  public function getClassRegex()
+  {
+    return $this->classRegex;
   }
   
   public function hasClassRegex()
@@ -106,6 +179,17 @@ class Sabel_Aspect_Pointcut
   public function hasMethodRegex()
   {
     return $this->hasMethodRegex;
+  }
+  
+  public function toAll()
+  {
+    $this->toAll = true;
+    return $this;
+  }
+  
+  public function hasToAll()
+  {
+    return $this->toAll;
   }
   
   public function asAround()

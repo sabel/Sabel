@@ -18,6 +18,11 @@ class Sabel_Aspect_Matches implements Iterator
     return (isset($this->matchesList[$name]));
   }
   
+  public function hasMatch()
+  {
+    return (count($this->matches) > 0);
+  }
+  
   public function current()
   {
     $matches = $this->matches;

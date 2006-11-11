@@ -15,7 +15,7 @@ abstract class Sabel_Template_Engine
   protected
     $tplpath = null,
     $tplname = null,
-    $trim = true;
+    $trim    = true;
     
   protected static $attributes = array();
   
@@ -55,7 +55,7 @@ abstract class Sabel_Template_Engine
     $this->tplpath = $path;
   }
   
-  protected function getTemplateFullPath()
+  public function getTemplateFullPath()
   {
     return $this->tplpath . $this->tplname;
   }
