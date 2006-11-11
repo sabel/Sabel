@@ -3,9 +3,9 @@
 /**
  * define sabel environment.
  */
-//define('ENVIRONMENT', 'production');
-//define('ENVIRONMENT', 'test');
-define('ENVIRONMENT', 'development');
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'production');
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'test');
+if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'development');
 
 /**
  * error_reporting settings.

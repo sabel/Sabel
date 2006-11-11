@@ -20,14 +20,14 @@ class Sabel
       $c->setClasses(unserialize(fgets($file)));
       require_once(SABEL_CLASSES);
     } else {
-      ClassFileStructureReader::create(null, 'sabel/')
+      ClassFileStructureReader::create('sabel/')
         ->read()
         ->write(SABEL_CLASSES);
         
       if (!defined('TEST_CASE')) require_once(SABEL_CLASSES);
       
       foreach ($roots as $root) {
-        ClassFileStructureReader::create(RUN_BASE, $root[1])
+        ClassFileStructureReader::create($root[1], RUN_BASE)
           ->read()
           ->write($root[0]);
       }
@@ -537,7 +537,7 @@ class ClassFileStructureReader
   protected $files = null;
   protected $filesOfHasParent = array();
   
-  private function __construct($base, $dir, $classFiles)
+  private function __construct($dir, $base, $classFiles)
   {
     $this->base = (is_null($base)) ? dirname(realpath(__FILE__)).'/' : $base;
     $this->dir = $this->base . $dir;
@@ -545,9 +545,9 @@ class ClassFileStructureReader
     $this->files = (is_null($classFiles)) ? new ClassFiles() : $classFiles;
   }
   
-  public static function create($base = null, $dir = null, $classFiles = null)
+  public static function create($dir = null, $base = null, $classFiles = null)
   {
-    return new self($base, $dir, $classFiles);
+    return new self($dir, $base, $classFiles);
   }
   
   /**
@@ -577,6 +577,7 @@ class ClassFileStructureReader
   {
     // $pathToClassFile has a base directory. such as sabel/core/Context.php
     //                                                ^^^^^
+    
     $pathToClassFile = $this->dir . $pathToClassWithoutBaseDir;
     if (strpos($pathToClassFile, '.php') !== false) {
       if (!is_readable($pathToClassFile))
@@ -597,7 +598,6 @@ class ClassFileStructureReader
   {
     return ($element->isFile() && strpos($element->getFileName(), '.') !== 0);
   }
-  
   
   public function write($path)
   {
@@ -657,8 +657,8 @@ class ClassFileStructureReader
 
 class DirectoryTraverser
 {
-  protected $directories = null;
   protected $dir = '';
+  protected $directories = null;
   protected $visitors = array();
   
   public function __construct($dir = null)
@@ -678,13 +678,27 @@ class DirectoryTraverser
     foreach ($element as $e) {
       $child = $e->getPathName();
       $entry = ltrim(str_replace($this->dir, '', $child), '/');
-      if (!$e->isDot() && $e->isDir() && preg_match('/^[^\.]/', $e->getFileName())) {
-        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'dir');
+      if ($this->isValidDirectory($e)) {
+        foreach ($this->visitors as $visitor) {
+          $visitor->accept($entry, 'dir');
+        }
         $this->traverse(new DirectoryIterator($child));
-      } else if (!$e->isDot() && $e->isFile() && preg_match('/^([^\.]|\.ht)/', $e->getFileName())) {
-        foreach ($this->visitors as $visitor) $visitor->accept($entry, 'file', $child);
+      } else if ($this->isValidFile($e)) {
+        foreach ($this->visitors as $visitor) {
+          $visitor->accept($entry, 'file', $child);
+        }
       }
     }
+  }
+  
+  protected function isValidDirectory($element)
+  {
+    return ($element->isDir() && strpos($element->getFileName(), '.') === false);
+  }
+  
+  protected function isValidFile($element)
+  {
+    return ($element->isFile() && strpos($element->getFileName(), '.') !== 0);
   }
 }
 

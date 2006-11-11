@@ -21,7 +21,7 @@ require_once('PHPUnit2/Framework/IncompleteTestError.php');
 
 require_once('Sabel.php');
 
-$csr = ClassFileStructureReader::create(null, 'sabel/');
+$csr = ClassFileStructureReader::create('sabel/');
 $csr->read()->write('allclasses.php');
 require_once('allclasses.php');
 
