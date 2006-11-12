@@ -159,6 +159,11 @@ class Sabel_Aspect_Pointcut
     return $this;
   }
   
+  public function getMethod()
+  {
+    return $this->method;
+  }
+  
   public function hasMethod()
   {
     return $this->hasMethod;
