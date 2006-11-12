@@ -33,7 +33,8 @@ class Sabel_DB_Connection
     $drvName = $params['driver'];
 
     if (strpos($drvName, 'pdo-') === 0) {
-      $db = str_replace('pdo-', '', $drvName);
+      $type = 'pdo';
+      $db   = str_replace('pdo-', '', $drvName);
 
       if ($db === 'sqlite') {
         $list['conn'] = new PDO("sqlite:{$params['database']}");
@@ -44,6 +45,7 @@ class Sabel_DB_Connection
 
       $list['db'] = $db;
     } else {
+      $type = 'native';
       $host = $params['host'];
       $user = $params['user'];
       $pass = $params['password'];
@@ -73,9 +75,9 @@ class Sabel_DB_Connection
       $db  = $list['db'];
       $enc = $params['encoding'];
 
-      if (isset($list['drvName']) && $list['drvName'] === 'pdo' && $db === 'mysql') {
+      if ($type === 'pdo' && $db === 'mysql') {
         $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } else if (isset($list['drvName']) && $list['drvName'] === 'pdo' && $db === 'pgsql') {
+      } else if ($type === 'pdo' && $db === 'pgsql') {
         $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
       } else if ($db === 'mysql') {
         mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
@@ -84,7 +86,6 @@ class Sabel_DB_Connection
       }
     }
 
-    $list['drvName'] = $drvName;
     $list['schema']  = (isset($params['schema'])) ? $params['schema'] : null;
     self::$connList[$connectName] = $list;
     return $list['conn'];
