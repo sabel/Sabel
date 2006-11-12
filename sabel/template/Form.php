@@ -53,9 +53,9 @@ class Sabel_Template_Form implements Iterator
     return "</form>\n";
   }
   
-  public function submitTag($value)
+  public function submitTag($value, $style = '')
   {
-    return '<input type="submit" value="'.$value.'" />';
+    return '<input type="submit" value="'.$value.'" style="'.$style.'" />';
   }
   
   public function isStart()
@@ -183,7 +183,7 @@ class Sabel_Template_Form implements Iterator
     }
   }
   
-  protected function defaultID()
+  public function defaultID()
   {
     return $this->model->table . '_' . $this->currentColumn->name;
   }

@@ -79,9 +79,9 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
       case Sabel_DB_Schema_Const::STRING:
         $error = false;
         if (function_exists('mb_strlen')) {
-          if (mb_strlen($value, 'UTF-8') > $max) $error = true;
+          $error = (mb_strlen($value, 'UTF-8') > $max);
         } else {
-          if (strlen($value) > $max) $error = true;
+          $error = (strlen($value) > $max);
         }
         
         if ($error) return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);

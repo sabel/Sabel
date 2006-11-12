@@ -40,7 +40,7 @@ class Sanitize
     if (get_magic_quotes_gpc()) {
       if (is_array($target)) {
         foreach ($target as $key => $value) {
-          $cleaned[$k] = stripslashes($value);
+          $cleaned[$key] = stripslashes($value);
         }
       } else {
         $cleaned = stripslashes($target);

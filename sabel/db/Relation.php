@@ -146,12 +146,12 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     $projection = $model->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
-    $model->receiveSelectCondition($model->conditions);
 
     if ($row = $model->exec()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
       if (!is_null($myChild = $model->getMyChildren())) $model->getDefaultChild($myChild, $model);
     } else {
+      $model->receiveSelectCondition($model->conditions);
       foreach ($model->conditions as $condition) {
         $model->{$condition->key} = $condition->value;
       }

@@ -6,7 +6,7 @@ class ValueObject
   
   public function __construct($values = null)
   {
-    $this->values = (!is_null($values)) ? $values : null;
+    if (is_array($values)) $this->values = $values;
   }
   
   public static function create()
