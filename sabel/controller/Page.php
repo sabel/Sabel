@@ -23,6 +23,9 @@ abstract class Sabel_Controller_Page
     $container   = null,
     $destination = null;
     
+  protected
+    $skipDefaultAction = true;
+    
   /**
    * reserved name lists of methods(actions)
    * @var array $reserved
@@ -97,6 +100,7 @@ abstract class Sabel_Controller_Page
   
   protected function methodExecute($action)
   {
+    $specificAction = false;
     $refClass = new ReflectionClass($this);
     
     $httpMethods = array('get', 'post', 'put', 'delete');
@@ -104,14 +108,25 @@ abstract class Sabel_Controller_Page
       $checkMethod = 'is'.ucfirst($method);
       $actionName = $method.ucfirst($action);
       if ($this->$checkMethod() && $refClass->hasMethod($actionName)) {
-        $action = $actionName;
+        $specificAction = $actionName;
       }
     }
     
-    if ($this->hasMethod($action)) {
-      $this->$action();
-    } else if ($this->hasMethod('actionMissing')) {
-      $this->actionMissing();
+    if ($specificAction !== false) {
+      if ($this->hasMethod($specificAction)) {
+        if (!$this->skipDefaultAction) {
+          $this->$action();
+        }
+        $this->$specificAction();
+      } else if ($this->hasMethod('actionMissing')) {
+        $this->actionMissing();
+      }
+    } else {
+      if ($this->hasMethod($action)) {
+        $this->$action();
+      } else if ($this->hasMethod('actionMissing')){
+        $this->actionMissing();
+      }
     }
     
     $this->storage->write('previous', $this->request->__toString());
