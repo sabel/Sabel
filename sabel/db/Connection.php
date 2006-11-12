@@ -73,9 +73,9 @@ class Sabel_DB_Connection
       $db  = $list['db'];
       $enc = $params['encoding'];
 
-      if ($list['drvName'] === 'pdo' && $db === 'mysql') {
+      if (isset($list['drvName']) && $list['drvName'] === 'pdo' && $db === 'mysql') {
         $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } else if ($list['drvName'] === 'pdo' && $db === 'pgsql') {
+      } else if (isset($list['drvName']) && $list['drvName'] === 'pdo' && $db === 'pgsql') {
         $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
       } else if ($db === 'mysql') {
         mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);

@@ -1,26 +1,28 @@
 <?php
 
-define('SABEL',      '/Users/morireo/MirrorSandbox/sabel/trunk/sabel/');
+// define('SABEL',      '/Users/morireo/Repository/sabel/sabel/');
+
+if (!defined('SABEL')) {
+  trigger_error('you must define SABEL directory before run', E_USER_ERROR);
+}
+
 define('SABEL_DB',   SABEL . 'db/');
 define('SCHEMA_DIR', 'schema/');
 
 require_once SABEL_DB . 'Connection.php';
+require_once SABEL_DB . 'Executer.php';
 
 require_once SABEL_DB . 'driver/ResultSet.php';
 require_once SABEL_DB . 'driver/ResultObject.php';
 
-require_once SABEL_DB . 'driver/Statement.php';
-require_once SABEL_DB . 'driver/native/Paginate.php';
-require_once SABEL_DB . 'driver/native/Query.php';
-require_once SABEL_DB . 'driver/pdo/Query.php';
+require_once SABEL_DB . 'statement/Statement.php';
 
-require_once SABEL_DB . 'driver/General.php';
-require_once SABEL_DB . 'driver/native/Mysql.php';
-require_once SABEL_DB . 'driver/native/Pgsql.php';
-require_once SABEL_DB . 'driver/native/Mssql.php';
-require_once SABEL_DB . 'driver/native/Firebird.php';
-require_once SABEL_DB . 'driver/pdo/Statement.php';
-require_once SABEL_DB . 'driver/pdo/Driver.php';
+require_once SABEL_DB . 'driver/Driver.php';
+require_once SABEL_DB . 'driver/Mysql.php';
+require_once SABEL_DB . 'driver/Pgsql.php';
+require_once SABEL_DB . 'driver/Mssql.php';
+require_once SABEL_DB . 'driver/Firebird.php';
+require_once SABEL_DB . 'driver/Pdo.php';
 
 require_once SABEL_DB . 'Functions.php';
 require_once SABEL_DB . 'SimpleCache.php';
