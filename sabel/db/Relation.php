@@ -551,12 +551,22 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       throw new Exception('Sabel_DB_Relation::save() argument must be an array');
 
     if ($this->isSelected()) {
+      $saveData = ($data) ? $data : $this->getNewData();
       $this->conditions = $this->getSelectCondition();
-      $this->update($this->table, ($data) ? $data : $this->getNewData());
+      $this->update($this->table, $saveData);
+      $this->unsetNewData();
     } else {
-      $data = ($data) ? $data : $this->getData();
-      return $this->insert($this->table, $data, $this->checkIncColumn());
+      $saveData = ($data) ? $data : $this->getData();
+      if ($incCol = $this->checkIncColumn()) {
+        $newId = $this->insert($this->table, $saveData, $incCol);
+        $this->dataSet($incCol, $newId);
+      } else {
+        $this->insert($this->table, $saveData, false);
+      }
     }
+
+    foreach ($saveData as $key => $val) $this->dataSet($key, $val);
+    return $this;
   }
 
   public function allUpdate($data)

@@ -138,11 +138,7 @@ class Sabel_DB_Property
 
   public function getValidateData()
   {
-    if ($this->isSelected()) {
-      return $this->newData;
-    } else {
-      return $this->data;
-    }
+    return ($this->isSelected()) ? $this->newData : $this->data;
   }
 
   public function setProperties($row)
@@ -189,6 +185,11 @@ class Sabel_DB_Property
   public function getNewData()
   {
     return $this->newData;
+  }
+
+  public function unsetNewData()
+  {
+    $this->newData = array();
   }
 
   public function isSelected()

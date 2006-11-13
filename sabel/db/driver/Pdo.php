@@ -61,11 +61,11 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver
 
   public function insert()
   {
-    $sql = $this->stmt->getSQL();
-    $dt  = $this->stmt->getBindData();
-    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $dt);
+    $sql  = $this->stmt->getSQL();
+    $data = $this->stmt->getBindData();
+    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $data);
 
-    $this->data = $dt;
+    $this->data = $data;
     return $this->driverExecute();
   }
 

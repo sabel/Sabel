@@ -161,7 +161,9 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('string' => 'aaa'));
     $model->save(array('string' => 'aa_'));
     $model->save(array('string' => 'aba'));
-    $model->save(array('string' => 'a%a'));
+    $newModel = $model->save(array('string' => 'a%a'));
+    $this->assertTrue(is_numeric($newModel->id));
+    $this->assertEquals($newModel->string, 'a%a');
 
     $model = Sabel_DB_Model::load('TestForLike');
     $model->setCondition('LIKE_string', 'aa_');
@@ -836,7 +838,10 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($customer->name, 'name1');
 
     $customer->name = 'new name1';
-    $customer->save();
+    $customer = $customer->save();
+
+    $this->assertEquals((int)$customer->id, 1);
+    $this->assertEquals($customer->name, 'new name1');
 
     $customer = Sabel_DB_Model::load('Customer')->selectOne(1);
     $this->assertEquals($customer->name, 'new name1');
@@ -845,7 +850,9 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($customer->isSelected());
 
     $customer->name = 'name100';
-    $customer->save();
+    $customer = $customer->save();
+    $this->assertEquals((int)$customer->id, 100);
+    $this->assertEquals($customer->name, 'name100');
 
     $customer = Sabel_DB_Model::load('Customer')->selectOne(100);
     $this->assertTrue($customer->isSelected());
@@ -857,8 +864,8 @@ class Test_DB_Test extends SabelTestCase
     $order = $model->selectOne();
     $this->assertFalse($order->isSelected());
 
-    $model->buy_date    = '1999-01-01 12:34:55';
-    $model->amount      = 9999;
+    $model->buy_date = '1999-01-01 12:34:55';
+    $model->amount   = 9999;
     $model->save();
 
     $order = Sabel_DB_Model::load('CustomerOrder')->selectOne(5);

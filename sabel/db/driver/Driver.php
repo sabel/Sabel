@@ -15,8 +15,10 @@ abstract class Sabel_DB_Driver
   protected
     $conn     = null,
     $stmt     = null,
-    $db       = '',
-    $insertId = null;
+    $db       = '';
+
+  protected
+    $lastInsertId = null;
 
   public abstract function begin($conn);
   public abstract function commit($conn);
