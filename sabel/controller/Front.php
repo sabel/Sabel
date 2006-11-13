@@ -61,6 +61,8 @@ class Sabel_Controller_Front
     
     $responses = $controller->execute();
     
+    if ($responses === false) return false;
+    
     $template = Sabel_Template_Service::create($mapEntry);
     if ($template->isTemplateMissing()) {
       if ($controller->hasMethod('templateMissing')) {

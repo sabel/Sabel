@@ -12,6 +12,7 @@
 abstract class Sabel_Controller_Page
 {
   protected
+    $security    = null,
     $entry       = null,
     $cache       = null,
     $logger      = null,
@@ -22,7 +23,10 @@ abstract class Sabel_Controller_Page
     $template    = null,
     $container   = null,
     $destination = null;
-    
+  
+  protected
+    $permission = Sabel_Security_Permission::P_PUBLIC;
+  
   protected
     $action = '',
     $skipDefaultAction = true;
@@ -56,6 +60,7 @@ abstract class Sabel_Controller_Page
   
   public function setup()
   {
+    $this->security    = Sabel_Security_Security::create();
     $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
@@ -79,9 +84,43 @@ abstract class Sabel_Controller_Page
     $actionName = $this->destination->action;
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
-      
-    $this->methodExecute($actionName);
-    return Sabel_Template_Engine::getAttributes();
+    
+    if ($this->isPublicAction($actionName)) {
+      $this->methodExecute($actionName);
+      return Sabel_Template_Engine::getAttributes();
+    }
+    
+    if ($this->permission === Sabel_Security_Permission::P_PRIVATE) {
+      if ($this->isAuthorized()) {
+        $this->methodExecute($actionName);
+        return Sabel_Template_Engine::getAttributes();
+      } else if ($this->hasMethod('authorizeRequired')) {
+        $this->authorizeRequired();
+        return false;
+      } else {
+        throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
+      }
+    }
+  }
+  
+  protected function isPublicAction($actionName)
+  {
+    $ref = new ReflectionClass($this);
+    $annot = $this->readAnnotation($ref->getName(), $actionName);
+    if (isset($annot[0]) && is_object($annot[0])) {
+      $annot = $annot[0];
+      return ($annot->getContents() === 'public');
+    }
+  }
+  
+  protected function isPrivateAction($actionName)
+  {
+    $ref = new ReflectionClass($this);
+    $annot = $this->readAnnotation($ref->getName(), $actionName);
+    if (isset($annot[0]) && is_object($annot[0])) {
+      $annot = $annot[0]; 
+      return ($annot->getContents() === 'private');
+    }
   }
   
   protected function __get($name)
@@ -258,7 +297,7 @@ abstract class Sabel_Controller_Page
    */
   protected function readAnnotation($className, $annotationName)
   {
-    $anonr = Container::create()->instanciate('sabel.annotation.Reader');
+    $anonr = create('sabel.annotation.Reader');
     $anonr->annotation($className);
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
@@ -281,5 +320,25 @@ abstract class Sabel_Controller_Page
   protected function failure($uri)
   {
     Aspects_Validate::redirectWhenFailure($uri);
+  }
+  
+  public function registAuthorizer($authorizer)
+  {
+    $this->security->registAuthorizer($authorizer);
+  }
+  
+  public function authorize($identity, $password)
+  {
+    return $this->security->authorize($identity, $password);
+  }
+  
+  public function unauthorize()
+  {
+    $this->security->unauthorize();
+  }
+  
+  public function isAuthorized()
+  {
+    return $this->security->isAuthorized();
   }
 }
