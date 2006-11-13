@@ -103,6 +103,9 @@ abstract class Sabel_Controller_Page
       } else {
         throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
       }
+    } else {
+      $this->methodExecute($actionName);
+      return Sabel_Template_Engine::getAttributes();
     }
   }
   
@@ -113,6 +116,8 @@ abstract class Sabel_Controller_Page
     if (isset($annot[0]) && is_object($annot[0])) {
       $annot = $annot[0];
       return ($annot->getContents() === 'public');
+    } else {
+      return false;
     }
   }
   
