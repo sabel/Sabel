@@ -12,7 +12,7 @@
 abstract class Sabel_Controller_Page
 {
   protected
-    $security    = null,
+    
     $entry       = null,
     $cache       = null,
     $logger      = null,
@@ -25,6 +25,8 @@ abstract class Sabel_Controller_Page
     $destination = null;
   
   protected
+    $security   = null,
+    $identity   = null,
     $permission = Sabel_Security_Permission::P_PUBLIC;
   
   protected
@@ -61,6 +63,7 @@ abstract class Sabel_Controller_Page
   public function setup()
   {
     $this->security    = Sabel_Security_Security::create();
+    $this->identity    = $this->security->getIdentity();
     $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();

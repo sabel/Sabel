@@ -22,12 +22,21 @@ class Sabel_Security_Security
     $this->authorizer = $authorizer;
   }
   
+  public function getIdentity()
+  {
+    if ($this->isAuthorized()) {
+      return $this->storage->read('SABEL_AUTH_IDENTITY');
+    } else {
+      return false;
+    }
+  }
+  
   public function authorize($identity, $password)
   {
     $result = $this->authorizer->authorize($identity, $password);
     if ($result === true) {
       $this->storage->write('SABEL_AUTHORIZED', 'true');
-      $this->storage->write('SABEL_AUTH_IDENTITY', true);
+      $this->storage->write('SABEL_AUTH_IDENTITY', $identity);
       return true;
     } else {
       return false;
