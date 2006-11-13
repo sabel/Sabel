@@ -64,6 +64,11 @@ abstract class Sabel_Controller_Page
     $this->action      = $this->destination->action;
   }
   
+  public function getAction()
+  {
+    return $this->action;
+  }
+  
   public function getRequests()
   {
     return $this->request->requests();
@@ -134,9 +139,29 @@ abstract class Sabel_Controller_Page
     $this->storage->write('previous', $this->request->__toString());
   }
   
-  protected function hasMethod($name)
+  public function hasMethod($name)
   {
     return (method_exists($this, $name));
+  }
+  
+  public function successMethod()
+  {
+    return 'success'.ucfirst($this->getAction());
+  }
+  
+  public function hasSuccessMethod()
+  {
+    return ($this->hasMethod($this->successMethod()));
+  }
+  
+  public function errorMethod()
+  {
+    return 'error'.ucfirst($this->getAction());
+  }
+  
+  public function hasErrorMethod()
+  {
+    return ($this->hasMethod($this->errorMethod()));
   }
   
   protected function checkReferer($validURIs)
@@ -164,7 +189,7 @@ abstract class Sabel_Controller_Page
    *
    * @param string $to /Module/Controller/Method
    */
-  protected function redirect($to)
+  public function redirect($to)
   {
     $host = Sabel_Env_Server::create()->http_host;
     $absolute = 'http://' . $host;
@@ -174,14 +199,14 @@ abstract class Sabel_Controller_Page
     exit; // exit after HTTP Header(30x)
   }
   
-  protected function redirectTo($params)
+  public function redirectTo($params)
   {
     if (!is_array($params) && is_string($params)) {
       $params = array('action'=>$params);
     }
     
     $entry = null;
-
+    
     $map = Sabel_Map_Facade::create();
     if (isset($params['entry'])) {
       $entry = $map->getEntry($params['entry']);
@@ -190,11 +215,11 @@ abstract class Sabel_Controller_Page
     } else {
       $entry = $map->getCurrentEntry();
     }
-
+    
     $this->redirect('/'.$entry->uri($params));
   }
   
-  protected function previous()
+  public function previous()
   {
     return $this->storage->read('previous');
   }
@@ -246,5 +271,15 @@ abstract class Sabel_Controller_Page
   protected function isGet()
   {
     return $this->request->isGet();
+  }
+  
+  protected function success($uri)
+  {
+    Aspects_Validate::redirectWhenSuccess($uri);
+  }
+  
+  protected function failure($uri)
+  {
+    Aspects_Validate::redirectWhenFailure($uri);
   }
 }

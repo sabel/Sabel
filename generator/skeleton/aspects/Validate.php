@@ -11,25 +11,82 @@
  */
 class Aspects_Validate
 {
-  public function before($joinpoint)
+  protected static $failureCallbacks = null;
+  protected static $successCallbacks = null;
+  
+  protected static $redirectWhenSuccess = '';
+  protected static $redirectWhenFailure = '';
+  
+  public static function addSuccessCallback($function)
+  {
+    self::$successCallbacks[] = $function;
+  }
+  
+  public static function addFailureCallback($function)
+  {
+    self::$failureCallbacks[] = $function;
+  }
+  
+  public static function redirectWhenSuccess($uri)
+  {
+    self::$redirectWhenSuccess = $uri;
+  }
+  
+  public static function redirectWhenFailure($uri)
+  {
+    self::$redirectWhenFailure = $uri;
+  }
+  
+  public function around($joinpoint)
   {
     $target    = $joinpoint->getTarget();
     $className = $joinpoint->getReflection()->getName();
     $method    = $joinpoint->getMethodReflection();
+    $controller = Sabel_Core_Context::getPageController();
     
-    $v = new Sabel_Validate_Model($target);
+    $v = new Sabel_Validate_Model($className);
     $arg = $joinpoint->getArgument(0);
     if (count($arg) === 0) {
       $arg = $target->getValidateData();
     }
+    
     $errors = $v->validate($arg);
+    
     if ($errors->hasError()) {
-      Sabel_Template_Engine::setAttribute(strtolower($className), $target);
-      Sabel_Template_Engine::setAttribute('errors', $errors);
+      if (self::$redirectWhenFailure !== '') {
+        $controller->redirectTo(self::$redirectWhenFailure);
+      }
+      
+      if ($controller->hasErrorMethod()) {
+        $errorMethod = $controller->errorMethod();
+        $controller->$errorMethod($errors);
+      } else {
+        Sabel_Template_Engine::setAttribute(strtolower($className), $target);
+        Sabel_Template_Engine::setAttribute('errors', $errors);
+      }
+      
+      if (count(self::$failureCallbacks) > 0) {
+        foreach (self::$failureCallbacks as $callback) $callback($joinpoint);
+      }
+      
       return false;
     } else {
+      if (count(self::$successCallbacks) > 0) {
+        foreach (self::$successCallbacks as $callback) $callback($joinpoint);
+      }
+      
       $method->invokeArgs($target, $joinpoint->getArguments());
-      Sabel_Core_Context::getPageController()->redirectToPrevious();
+      
+      if ($controller->hasSuccessMethod()) {
+        $successMethod = $controller->successMethod();
+        $controller->$successMethod();
+      }
+      
+      if (self::$redirectWhenSuccess === '') {
+        $controller->redirectToPrevious();
+      } else {
+        $controller->redirectTo(self::$redirectWhenFailure);
+      }
       return false;
     }
   }

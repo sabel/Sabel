@@ -49,20 +49,22 @@ class Sabel_Controller_Front
     
     $mapEntry = $map->find();
     // first
-    $class = Sabel_Controller_Loader::create($mapEntry)->load();
-    Sabel_Core_Context::setPageController($class);
+    $controller = Sabel_Controller_Loader::create($mapEntry)->load();
+    Sabel_Core_Context::setPageController($controller);
     
-    $class->setEntry($mapEntry);
-    $class->setup();
-    $class->initialize();
-    $class->initializeReservedNamesOfMethods();
+    $controller->setEntry($mapEntry);
+    $controller->setup();
+    $controller->initialize();
+    $controller->initializeReservedNamesOfMethods();
     
-    $responses = $class->execute();
+    Sabel_Core_Context::setPageController($controller);
+    
+    $responses = $controller->execute();
     
     $template = Sabel_Template_Service::create($mapEntry);
     if ($template->isTemplateMissing()) {
-      if ($class->hasMethod('templateMissing')) {
-        $class->templateMissing();
+      if ($controller->hasMethod('templateMissing')) {
+        $controller->templateMissing();
       } else {
         throw new Sabel_Exception_TemplateMissing();
       }
