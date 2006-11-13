@@ -50,6 +50,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return $this->property->$method($arg1, $arg2, $arg3);
   }
 
+  // @todo
   public function schema($tblName = null)
   {
     if (isset($tblName)) {
@@ -60,8 +61,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       $columns = $this->getTableSchema()->getColumns();
     }
 
+    // @todo
     foreach ($this->getData() as $name => $data) {
-      if (isset($columns[$name])) $columns[$name]->value = $data;
+      if (isset($columns[$name])) {
+        if ($columns[$name]->type === Sabel_DB_Schema_Const::BOOL) {
+          $columns[$name]->value = in_array($data, array('1', 't', 'true'));
+        } else {
+          $columns[$name]->value = $data;
+        }
+      }
     }
     return $columns;
   }

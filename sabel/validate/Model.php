@@ -88,16 +88,12 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
         if ($error) return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);
         break;
       case Sabel_DB_Schema_Const::INT:
-        switch ($value) {
-          case (!is_numeric($value)):
-            return array("{$name} must be numeric", Sabel_Validate_Error::GRATHER_THEN);
-            break;
-          case ($value > $max):
-            return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);
-            break;
-          case ($value < $min):
-            return array("{$name} must grather then " . $min, Sabel_Validate_Error::GRATHER_THEN);
-            break;
+        if (!is_numeric($value)) {
+          return array("{$name} must be numeric", Sabel_Validate_Error::GRATHER_THEN);
+        } elseif ($value > $max) {
+          return array("{$name} must lower then " . $max, Sabel_Validate_Error::LOWER_THEN);
+        } elseif ($value < $min) {
+          return array("{$name} must grather then " . $min, Sabel_Validate_Error::GRATHER_THEN);
         }
         break;
     }

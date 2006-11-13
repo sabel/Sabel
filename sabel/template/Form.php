@@ -127,7 +127,7 @@ class Sabel_Template_Form implements Iterator
         if ($this->isText()) {
           $result = $this->textarea($column->name, $column->value);
         } elseif ($this->isBool()) {
-          $result = $this->checkbox($column->name, $column->default);
+          $result = $this->checkbox($column->name, $column->value, $column->default);
         } else {
           $result = $this->input('text', $column->name, $column->value);
         }
@@ -165,11 +165,12 @@ class Sabel_Template_Form implements Iterator
     return ($this->currentColumn->type === Sabel_DB_Schema_Const::BOOL);
   }
   
-  public function checkbox($name, $default, $id = '', $class = '', $style = '')
+  public function checkbox($name, $value, $default, $id = '', $class = '', $style = '')
   {
     if (empty($id)) $id = $this->defaultID();
+    $value = (isset($value)) ? $value : $default;
     $fmt  = '<input type="checkbox" value="true" name="%s" id="%s" class="%s" style="%s"';
-    if ($default) $fmt .= ' checked="checked"';
+    if ($value) $fmt .= ' checked="checked"';
     $fmt .= ' />';
     return sprintf($fmt, $name, $id, $class, $style);
   }

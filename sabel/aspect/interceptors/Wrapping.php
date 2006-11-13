@@ -22,4 +22,4 @@ class Sabel_Aspect_Interceptors_Wrapping
 
 Sabel_Aspect_Aspects::singleton()->addPointcut(
   Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Wrapping')
-  ->setMethodRegex('select.*'));
+  ->setMethod('selectOne'));

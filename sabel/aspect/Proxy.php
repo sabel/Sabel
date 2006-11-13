@@ -13,6 +13,8 @@ class Sabel_Aspect_Proxy
 {
   protected $target = null;
   protected $source = null;
+
+  protected $afterResults = array();
   
   const TYPE_BEFORE   = 0;
   const TYPE_AFTER    = 5;
@@ -107,7 +109,7 @@ class Sabel_Aspect_Proxy
         
         $joinpoint->setResult($result);
         $this->callAspect($joinpoint, $matches, 'after');
-        
+
         return $result;
       }
     } catch (Exception $e) {
@@ -142,17 +144,30 @@ class Sabel_Aspect_Proxy
   {
     $called = false;
     $result = false;
+
+    $ref = new ReflectionClass($this->target);
     
     foreach ($matches as $aspect) {
       $aspectReflect = new ReflectionClass($aspect);
       if ($aspectReflect->hasMethod($type)) {
         $called = true;
         $result = $aspect->$type($joinpoint);
+        $this->afterResults[$ref->getName()] = $result;
       }
       unset($aspectReflect);
     }
     
     return ($called) ? $result : true;
+  }
+
+  public function getAfterResults()
+  {
+    return $this->afterResults;
+  }
+
+  public function getAfterResult($name)
+  {
+    return $this->afterResults[$name];
   }
   
   /**

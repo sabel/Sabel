@@ -56,13 +56,14 @@ class Aspects_Validate
       if (self::$redirectWhenFailure !== '') {
         $controller->redirectTo(self::$redirectWhenFailure);
       }
+
+      Sabel_Template_Engine::setAttribute('errors', $errors);
       
       if ($controller->hasErrorMethod()) {
         $errorMethod = $controller->errorMethod();
         $controller->$errorMethod($errors);
       } else {
         Sabel_Template_Engine::setAttribute(strtolower($className), $target);
-        Sabel_Template_Engine::setAttribute('errors', $errors);
       }
       
       if (count(self::$failureCallbacks) > 0) {
@@ -85,7 +86,7 @@ class Aspects_Validate
       if (self::$redirectWhenSuccess === '') {
         $controller->redirectToPrevious();
       } else {
-        $controller->redirectTo(self::$redirectWhenFailure);
+        $controller->redirectTo(self::$redirectWhenSuccess);
       }
       return false;
     }
