@@ -24,6 +24,7 @@ abstract class Sabel_Controller_Page
     $destination = null;
     
   protected
+    $action = '',
     $skipDefaultAction = true;
     
   /**
@@ -60,6 +61,7 @@ abstract class Sabel_Controller_Page
     $this->requests    = $this->request->requests();
     $this->storage     = Sabel_Storage_Session::create();
     $this->destination = $this->entry->getDestination();
+    $this->action      = $this->destination->action;
   }
   
   public function getRequests()
