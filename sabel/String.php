@@ -116,13 +116,13 @@ class String implements Iterator
       if ($string[$p] == 9) {
         $string[$p] = 0;
         $str        = 1;
-      } else if ($string[$p] === 'z') {
+      } elseif ($string[$p] === 'z') {
         $string[$p] = 'a';
         $str        = 'a';
-      } else if ($string[$p] === 'Z') {
+      } elseif ($string[$p] === 'Z') {
         $string[$p] = 'A';
         $str        = 'A';
-      } else if (preg_match('/[^a-zA-Z0-9]/', $string[$p])) {
+      } elseif (preg_match('/[^a-zA-Z0-9]/', $string[$p])) {
         break;
       } else {
         $string[$p] = chr(ord($string[$p])+1);
@@ -130,7 +130,7 @@ class String implements Iterator
       }
       if ($p === 0) {
         $string = $str . $string;
-      } else if (preg_match('/[^a-zA-Z0-9]/', $string[$p-1])) {
+      } elseif (preg_match('/[^a-zA-Z0-9]/', $string[$p-1])) {
         $string = substr($string, 0, $p) . $str . substr($string, $p);
         break;
       }

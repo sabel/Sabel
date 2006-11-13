@@ -112,9 +112,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver
   {
     if (isset($sql)) {
       $pdoStmt = $this->conn->prepare($sql);
-    } else if ($this->stmtFlag) {
+    } elseif ($this->stmtFlag) {
       $pdoStmt = Sabel_DB_Driver_PdoStatement::get();
-    } else if (($sql = $this->stmt->getSQL()) === '') {
+    } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $pdoStmt = $this->conn->prepare($sql);

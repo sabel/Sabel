@@ -116,7 +116,7 @@ class Container
           if (isset($annotation['setter'])) {
             $setter = $annotation['setter']->getContents();
             $target->$setter($ins);
-          } else if ($reflection->hasMethod($setter)) {
+          } elseif ($reflection->hasMethod($setter)) {
             $target->$setter($ins);
           }
         }
@@ -565,7 +565,7 @@ class ClassFileStructureReader
       $entry = ltrim(str_replace($this->dir, '', $child), '/');
       if ($this->isValidDirectory($element)) {
         $this->read(new DirectoryIterator($child));
-      } else if ($this->isValidFile($element)) {
+      } elseif ($this->isValidFile($element)) {
         $this->readClass($entry);
       }
     }
@@ -609,11 +609,11 @@ class ClassFileStructureReader
     foreach ($files as $file) {
       if ($file->hasChild()) {
         $cbuf = array_merge($cbuf, $file->getLines());
-      } else if ($file->hasBoth()) {
+      } elseif ($file->hasBoth()) {
         $bbuf = array_merge($bbuf, $file->getLines());
-      } else if ($file->hasParent()) {
+      } elseif ($file->hasParent()) {
         $pbuf = array_merge($pbuf, $file->getLines());
-      } else if ($file->hasnt()) {
+      } elseif ($file->hasnt()) {
         $nbuf = array_merge($nbuf, $file->getLines());
       }
     }
@@ -683,7 +683,7 @@ class DirectoryTraverser
           $visitor->accept($entry, 'dir');
         }
         $this->traverse(new DirectoryIterator($child));
-      } else if ($this->isValidFile($e)) {
+      } elseif ($this->isValidFile($e)) {
         foreach ($this->visitors as $visitor) {
           $visitor->accept($entry, 'file', $child);
         }

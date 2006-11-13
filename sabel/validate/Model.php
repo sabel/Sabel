@@ -50,7 +50,7 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
         if (!isset($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
-        } else if (empty($data[$name])) {
+        } elseif (empty($data[$name])) {
           $this->errors->add($name, "$name can't be blank", null, Sabel_Validate_Error::NOT_NULL);
           continue;
         }

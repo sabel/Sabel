@@ -54,7 +54,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     if (isset($tblName)) {
       return $this->getTableSchema($tblName)->getColumns();
-    } else if ($this->hasSchema()) {
+    } elseif ($this->hasSchema()) {
       $columns = $this->getSchema();
     } else {
       $columns = $this->getTableSchema()->getColumns();
@@ -461,9 +461,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
     if (isset($thisCConst[$child])) {
       $constraints = $thisCConst[$child];
-    } else if ($thisDefault) {
+    } elseif ($thisDefault) {
       $constraints = $thisDefault;
-    } else if (isset($modelCConst[$child])) {
+    } elseif (isset($modelCConst[$child])) {
       $constraints = $modelCConst[$child];
     } else {
       $constraints = $model->getDefChildConstraint();
@@ -604,7 +604,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
     if (isset($param1)) {
       $this->setCondition($param1, $param2, $param3);
-    } else if (isset($idValue)) {
+    } elseif (isset($idValue)) {
       $this->setCondition($this->primaryKey, $idValue);
     }
 

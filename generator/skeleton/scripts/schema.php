@@ -272,7 +272,7 @@ class Schema_Maker
       if ($column->type === Sabel_DB_Schema_Const::INT) {
         array_push($info, "'max' => {$column->max}, ");
         array_push($info, "'min' => {$column->min}, ");
-      } else if ($column->type === Sabel_DB_Schema_Const::STRING) {
+      } elseif ($column->type === Sabel_DB_Schema_Const::STRING) {
         array_push($info, "'max' => {$column->max}, ");
       }
 
@@ -290,9 +290,9 @@ class Schema_Maker
       $def = $column->default;
       if (is_null($def)) {
         array_push($info, "'default' => null");
-      } else if (is_numeric($def)) {
+      } elseif (is_numeric($def)) {
         array_push($info, "'default' => {$def}");
-      } else if (is_bool($def)) {
+      } elseif (is_bool($def)) {
         $def = ($def) ? 'true' : 'false';
         array_push($info, "'default' => {$def}");
       } else {

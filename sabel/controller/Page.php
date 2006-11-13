@@ -120,13 +120,13 @@ abstract class Sabel_Controller_Page
         if (!$this->skipDefaultAction) {
           $this->$action();
         }
-      } else if ($this->hasMethod('actionMissing')) {
+      } elseif ($this->hasMethod('actionMissing')) {
         $this->actionMissing();
       }
     } else {
       if ($this->hasMethod($action)) {
         $this->$action();
-      } else if ($this->hasMethod('actionMissing')){
+      } elseif ($this->hasMethod('actionMissing')){
         $this->actionMissing();
       }
     }

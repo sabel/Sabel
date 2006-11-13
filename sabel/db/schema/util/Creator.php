@@ -75,7 +75,7 @@ class Sabel_DB_Schema_Util_Creator
 
     if ($this->isBoolean($type)) {
       $co->type = Sabel_DB_Schema_Const::BOOL;
-    } else if (!$this->isString($co, $type)) {
+    } elseif (!$this->isString($co, $type)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Schema_Type_Setter::send($co, $type);
     }

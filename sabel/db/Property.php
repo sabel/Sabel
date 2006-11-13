@@ -220,7 +220,7 @@ class Sabel_DB_Property
   {
     if (isset($arg1) && is_array($arg2)) {
       foreach ($arg2 as $key => $val) $this->childConstraints[$arg1][$key] = $val;
-    } else if (isset($arg2)) {
+    } elseif (isset($arg2)) {
       $this->overrideProps['defChildConstraints'] = array($arg1 => $arg2);
     } else {
       $this->overrideProps['defChildConstraints'] = $arg1;

@@ -43,18 +43,18 @@ class Sabel_DB_Condition
     if (strpos($key, self::IN) === 0) {
       $key  = str_replace(self::IN, '', $key);
       $type = self::IN;
-    } else if (strpos($key, self::LIKE) === 0) {
+    } elseif (strpos($key, self::LIKE) === 0) {
       $key  = str_replace(self::LIKE, '', $key);
       $type = self::LIKE;
-    } else if (strpos($key, self::BET) === 0) {
+    } elseif (strpos($key, self::BET) === 0) {
       $key  = str_replace(self::BET, '', $key);
       $type = self::BET;
-    } else if (strpos($key, self::COMP) === 0) {
+    } elseif (strpos($key, self::COMP) === 0) {
       $key  = str_replace(self::COMP, '', $key);
       $type = self::COMP;
-    } else if ($val === self::ISNULL) {
+    } elseif ($val === self::ISNULL) {
       $type = self::ISNULL;
-    } else if ($val === self::NOTNULL) {
+    } elseif ($val === self::NOTNULL) {
       $type = self::NOTNULL;
     } else {
       if (is_object($val)) {

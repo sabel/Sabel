@@ -38,7 +38,7 @@ class Sabel_Controller_Front
     
     if (is_object($request)) {
       $request = $request;
-    } else if (is_string($request)) {
+    } elseif (is_string($request)) {
       $request = new Sabel_Request_Request(null, $request);
     } else {
       $request = new Sabel_Request_Request();

@@ -126,7 +126,7 @@ class Sabel_Template_Form implements Iterator
       } else {
         if ($this->isText()) {
           $result = $this->textarea($column->name, $column->value);
-        } else if ($this->isBool()) {
+        } elseif ($this->isBool()) {
           $result = $this->checkbox($column->name, $column->default);
         } else {
           $result = $this->input('text', $column->name, $column->value);

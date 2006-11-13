@@ -35,7 +35,7 @@ class Sabel_Map_Entry
   {
     if (is_object($this->uri)) {
       return $this->uri;
-    } else if (is_string($this->uri)) {
+    } elseif (is_string($this->uri)) {
       return new Sabel_Map_Uri($this->uri);
     }
   }
@@ -101,9 +101,9 @@ class Sabel_Map_Entry
       if (isset($params[$name])) {
         $value = $params[$name];
         $uriBuf[] = (is_object($value)) ? $value->__toString() : $value;
-      } else if ($uri->isConstant()) {
+      } elseif ($uri->isConstant()) {
         $uriBuf[] = $name;
-      } else if ($requestUri->has($cnt)){
+      } elseif ($requestUri->has($cnt)){
         $uriBuf[] = $requestUri->get($cnt);
       }
       
@@ -129,7 +129,7 @@ class Sabel_Map_Entry
       if ($element->isConstant() && $request === $element->toString()) {
         $match = true;
         continue;
-      } else if ($reqs->hasRequirementByName($element->getName())) {
+      } elseif ($reqs->hasRequirementByName($element->getName())) {
         $req = $reqs->getByName($element->getName());
         $match = $req->isMatch($request);
         continue;

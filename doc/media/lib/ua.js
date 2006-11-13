@@ -30,9 +30,9 @@ function xbDetectBrowser()
     platform = window.navigator.platform.toLowerCase();
     if (platform.indexOf('win') != -1)
       navigator.OS = 'win';
-    else if (platform.indexOf('mac') != -1)
+    elseif (platform.indexOf('mac') != -1)
       navigator.OS = 'mac';
-    else if (platform.indexOf('unix') != -1 || platform.indexOf('linux') != -1 || platform.indexOf('sun') != -1)
+    elseif (platform.indexOf('unix') != -1 || platform.indexOf('linux') != -1 || platform.indexOf('sun') != -1)
       navigator.OS = 'nix';
   }
 
@@ -45,7 +45,7 @@ function xbDetectBrowser()
     navigator.org    = 'opera';
     navigator.version  = parseFloat('0' + ua.substr(i+6), 10);
   }
-  else if ((i = ua.indexOf('msie')) != -1)
+  elseif ((i = ua.indexOf('msie')) != -1)
   {
     navigator.org    = 'microsoft';
     navigator.version  = parseFloat('0' + ua.substr(i+5), 10);
@@ -55,7 +55,7 @@ function xbDetectBrowser()
     else
       navigator.family = 'ie4'
   }
-  else if (ua.indexOf('gecko') != -1)
+  elseif (ua.indexOf('gecko') != -1)
   {
     navigator.family = 'gecko';
     var rvStart = navigator.userAgent.indexOf('rv:') + 3;
@@ -71,12 +71,12 @@ function xbDetectBrowser()
 
     if (ua.indexOf('netscape') != -1)
       navigator.org = 'netscape';
-    else if (ua.indexOf('compuserve') != -1)
+    elseif (ua.indexOf('compuserve') != -1)
       navigator.org = 'compuserve';
     else
       navigator.org = 'mozilla';
   }
-  else if ((ua.indexOf('mozilla') !=-1) && (ua.indexOf('spoofer')==-1) && (ua.indexOf('compatible') == -1) && (ua.indexOf('opera')==-1)&& (ua.indexOf('webtv')==-1) && (ua.indexOf('hotjava')==-1))
+  elseif ((ua.indexOf('mozilla') !=-1) && (ua.indexOf('spoofer')==-1) && (ua.indexOf('compatible') == -1) && (ua.indexOf('opera')==-1)&& (ua.indexOf('webtv')==-1) && (ua.indexOf('hotjava')==-1))
   {
     var is_major = parseFloat(navigator.appVersion);
     
@@ -90,14 +90,14 @@ function xbDetectBrowser()
     navigator.org = 'netscape';
     navigator.family = 'nn' + parseInt(navigator.appVersion);
   }
-  else if ((i = ua.indexOf('aol')) != -1 )
+  elseif ((i = ua.indexOf('aol')) != -1 )
   {
     // aol
     navigator.family  = 'aol';
     navigator.org    = 'aol';
     navigator.version  = parseFloat('0' + ua.substr(i+4), 10);
   }
-  else if ((i = ua.indexOf('hotjava')) != -1 )
+  elseif ((i = ua.indexOf('hotjava')) != -1 )
   {
     // hotjava
     navigator.family  = 'hotjava';

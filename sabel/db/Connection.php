@@ -55,14 +55,14 @@ class Sabel_DB_Connection
         $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
         $list['conn'] = mysql_connect($host, $user, $pass);
         mysql_select_db($dbs, $list['conn']);
-      } else if ($drvName === 'pgsql') {
+      } elseif ($drvName === 'pgsql') {
         $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
         $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
-      } else if ($drvName === 'firebird') {
+      } elseif ($drvName === 'firebird') {
         $host = $host . ':' . $dbs;
         $list['conn'] = (isset($params['encoding'])) ? ibase_connect($host, $user, $pass, $params['encoding'])
                                                      : ibase_connect($host, $user, $pass);
-      } else if ($drvName === 'mssql') {
+      } elseif ($drvName === 'mssql') {
         $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
         $list['conn'] = mssql_connect($host, $user, $pass);
         mssql_select_db($dbs, $list['conn']);
@@ -77,11 +77,11 @@ class Sabel_DB_Connection
 
       if ($type === 'pdo' && $db === 'mysql') {
         $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } else if ($type === 'pdo' && $db === 'pgsql') {
+      } elseif ($type === 'pdo' && $db === 'pgsql') {
         $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
-      } else if ($db === 'mysql') {
+      } elseif ($db === 'mysql') {
         mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
-      } else if ($db === 'pgsql') {
+      } elseif ($db === 'pgsql') {
         pg_query($list['conn'], sprintf(self::PGSQL_SET_ENCODING, $enc));
       }
     }

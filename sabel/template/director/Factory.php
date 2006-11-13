@@ -24,7 +24,7 @@ class Sabel_Template_Director_Factory
     if (is_file($classPath)) {
       require_once($classPath);
       return new CustomTemplateDirector($destination);
-    } else if (is_file($commonsPath)) {
+    } elseif (is_file($commonsPath)) {
       require_once($commonsPath);
       return new CustomTemplateDirector($destination);
     } else {

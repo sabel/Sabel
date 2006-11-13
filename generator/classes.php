@@ -16,7 +16,7 @@ class SabelDirectoryAndFileCreator
           chmod($element, 0777);
         }
       }
-    } else if ($type === 'file') {
+    } elseif ($type === 'file') {
       if (is_file($element)) {
         $this->printMessage("${element} already exists.");
       } else {
@@ -45,7 +45,7 @@ class SabelDirectoryAndFileRemover
     
     if ($type === 'dir') {
       if (!@rmdir($element)) $this->stack[] = $element;
-    } else if ($type === 'file') {
+    } elseif ($type === 'file') {
       unlink($element);
     }
   }

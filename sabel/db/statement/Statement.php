@@ -177,10 +177,10 @@ abstract class Sabel_DB_Statement
     if (is_string($val)) {
       $val = ($this->stripFlag) ? stripslashes($val) : $val;
       $val = ($escMethod === '') ? $val : $escMethod($val);
-    } else if (is_bool($val)) {
+    } elseif (is_bool($val)) {
       if (in_array($this->db, array('pgsql', 'mssql', 'sqlite'))) {
         $val = ($val) ? 'true' : 'false';
-      } else if (in_array($this->db, array('mysql', 'firebird'))) {
+      } elseif (in_array($this->db, array('mysql', 'firebird'))) {
         $val = ($val) ? 1 : 0;
       }
     }

@@ -277,7 +277,7 @@ function setupAllTabs() {
 			new WebFXTabPane( el );
 	
 		// unitiated tab page wit a valid tab pane parent
-		else if ( tabPageRe.test( cn ) && !el.tabPage &&
+		elseif ( tabPageRe.test( cn ) && !el.tabPage &&
 					tabPaneRe.test( el.parentNode.className ) ) {
 			el.parentNode.tabPane.addTabPage( el );			
 		}
@@ -292,7 +292,7 @@ if ( typeof window.addEventListener != "undefined" )
 	window.addEventListener( "load", setupAllTabs, false );
 
 // IE 
-else if ( typeof window.attachEvent != "undefined" )
+elseif ( typeof window.attachEvent != "undefined" )
 	window.attachEvent( "onload", setupAllTabs );
 
 else {

@@ -31,9 +31,9 @@ class Sabel_Container_ReflectionClass
   {
     if ($this->reflectionClass->isInterface()) {
       $type = 'interface';
-    } else if ($this->reflectionClass->isAbstract()) {
+    } elseif ($this->reflectionClass->isAbstract()) {
       $type = 'abstract';
-    } else if ($this->reflectionClass->isInstantiable()) {
+    } elseif ($this->reflectionClass->isInstantiable()) {
       $type = 'class';
     } else {
       $type = 'unknown';
@@ -73,10 +73,10 @@ class Sabel_Container_ReflectionClass
     if (isset($config['class']) &&
         isset($config['class'][$this->dependBy->getName()])) {
       $implementClassName = $config['class'][$this->dependBy->getName()];
-    } else if (isset($config['module']) &&
+    } elseif (isset($config['module']) &&
                isset($config['module'][$module])) {
       $implementClassName = $config['module'][$module];
-    } else if (isset($config['implementation'])) {
+    } elseif (isset($config['implementation'])) {
       $implementClassName = $config['implementation'];
     } else {
         $msg  = 'DI config file is invalid can\'t find implementation: ';

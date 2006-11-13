@@ -101,7 +101,7 @@ class Sabel_Aspect_Proxy
         $this->callAspect($joinpoint, $matches, 'before');
         if ($hasMethod) {
           $result = $refMethod->invokeArgs($target, $arg);
-        } else if ($this->hasMethodOverload()) {
+        } elseif ($this->hasMethodOverload()) {
           eval('$result = $target->$method('.$this->makeArgumentsString($arg).');');
         }
         

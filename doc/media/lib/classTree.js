@@ -335,7 +335,7 @@ WebFXTreeItem.prototype.remove = function() {
 	if (document.getElementById(prevSibling.id + '-plus')) {
 		if (nextSibling) {
 			if ((parentNode == prevSibling) && (parentNode.getNextSibling))  { document.getElementById(prevSibling.id + '-plus').src = webFXTreeConfig.tIcon; }
-			else if (nextSibling.parentNode != prevSibling) { document.getElementById(prevSibling.id + '-plus').src = webFXTreeConfig.lIcon; }
+			elseif (nextSibling.parentNode != prevSibling) { document.getElementById(prevSibling.id + '-plus').src = webFXTreeConfig.lIcon; }
 		}
 		else { document.getElementById(prevSibling.id + '-plus').src = webFXTreeConfig.lIcon; }
 	}
@@ -404,17 +404,17 @@ WebFXTreeItem.prototype.keydown = function(key) {
 		if (!this.open) { this.expand(); return false; }
 		else { this.getFirst().select(); return false; }
 	}
-	else if (key == 37) {
+	elseif (key == 37) {
 		if (this.open) { this.collapse(); return false; }
 		else { this.parentNode.select(); return false; }
 	}
-	else if (key == 40) {
+	elseif (key == 40) {
 		if (this.open) { this.getFirst().select(); return false; }
 		else {
 			var sib = this.getNextSibling();
 			if (sib) { sib.select(); return false; }
 	} }
-	else if (key == 38) { this.getPreviousSibling().select(); return false; }
+	elseif (key == 38) { this.getPreviousSibling().select(); return false; }
 	return true;
 }
 
@@ -435,7 +435,7 @@ WebFXTreeItem.prototype.toString = function (nItem, nItemCount) {
 		if (!this.icon) { this.icon = webFXTreeConfig.folderIcon; }
 		if (!this.openIcon) { this.openIcon = webFXTreeConfig.openFolderIcon; }
 	}
-	else if (!this.icon) { this.icon = webFXTreeConfig.fileIcon; }
+	elseif (!this.icon) { this.icon = webFXTreeConfig.fileIcon; }
 	var label = this.text;
 	label = label.replace('<', '<');
 	label = label.replace('>', '>');

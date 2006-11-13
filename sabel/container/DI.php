@@ -106,9 +106,9 @@ class Sabel_Container_DI
   {
     if ($reflectionClass->isInterface()) {
       $type = 'interface';
-    } else if ($reflectionClass->isAbstract()) {
+    } elseif ($reflectionClass->isAbstract()) {
       $type = 'abstract';
-    } else if ($reflectionClass->isInstantiable()) {
+    } elseif ($reflectionClass->isInstantiable()) {
       $type = 'class';
     } else {
       $type = 'unknown';

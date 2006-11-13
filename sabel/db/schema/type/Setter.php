@@ -17,7 +17,7 @@ class Sabel_DB_Schema_Type_Setter
   {
     if ($type === 'date') {
       $co->type = Sabel_DB_Schema_Const::DATE;
-    } else if ($type === 'time') {
+    } elseif ($type === 'time') {
       $co->type = Sabel_DB_Schema_Const::TIME;
     } else {
       $int    = new Sabel_DB_Schema_Type_Integer();
