@@ -16,8 +16,14 @@ class Test_DB_Tests
   {
     $suite = new PHPUnit2_Framework_TestSuite();
 
-    if (extension_loaded('mysql')) $suite->addTest(Test_DB_Mysql::suite());
-    if (extension_loaded('pgsql')) $suite->addTest(Test_DB_Pgsql::suite());
+    if (extension_loaded('mysql') && extension_loaded('pdo_mysql')) {
+      $suite->addTest(Test_DB_Mysql::suite());
+    }
+    
+    if (extension_loaded('pgsql') && extension_loaded('pdo_pgsql')) {
+      $suite->addTest(Test_DB_Pgsql::suite());
+    }
+    
     if (extension_loaded('pdo_sqlite')) $suite->addTest(Test_DB_SQLite::suite());
 
     return $suite;
