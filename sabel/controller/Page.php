@@ -176,6 +176,10 @@ abstract class Sabel_Controller_Page
   
   protected function redirectTo($params)
   {
+    if (!is_array($params) && is_string($params)) {
+      $params = array('action'=>$params);
+    }
+    
     $entry = null;
 
     $map = Sabel_Map_Facade::create();

@@ -17,8 +17,9 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
   protected $conName = '';
   protected $scmName = '';
 
-  public function __construct($model)
+  public function __construct($modelName)
   {
+    $model = new $modelName();
     $conName = $model->connectName;
 
     $this->mdlName = get_class($model);
