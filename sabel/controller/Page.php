@@ -116,10 +116,10 @@ abstract class Sabel_Controller_Page
     
     if ($specificAction !== false) {
       if ($this->hasMethod($specificAction)) {
+        $this->$specificAction();
         if (!$this->skipDefaultAction) {
           $this->$action();
         }
-        $this->$specificAction();
       } else if ($this->hasMethod('actionMissing')) {
         $this->actionMissing();
       }
