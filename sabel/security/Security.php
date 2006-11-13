@@ -22,6 +22,11 @@ class Sabel_Security_Security
     $this->authorizer = $authorizer;
   }
   
+  public function getAuthorizer()
+  {
+    return $this->authorizer;
+  }
+  
   public function getIdentity()
   {
     if ($this->isAuthorized()) {
