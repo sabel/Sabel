@@ -237,4 +237,14 @@ abstract class Sabel_Controller_Page
     $anonr->annotation($className);
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
+  
+  protected function isPost()
+  {
+    return $this->request->isPost();
+  }
+  
+  protected function isGet()
+  {
+    return $this->request->isGet();
+  }
 }
