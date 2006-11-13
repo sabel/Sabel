@@ -50,7 +50,7 @@ class Sabel_Template_Engine_Class extends Sabel_Template_Engine
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
       
-      if ($this->trim) {
+      if (ENVIRONMENT !== 'development' && $this->trim) {
         $contents = explode("\n",     $contents);
         $contents = array_map('trim', $contents);
         $contents = implode('',       $contents);
