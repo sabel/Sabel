@@ -31,6 +31,11 @@ class Sabel_Security_Security
     }
   }
   
+  public function overwriteIdentity($identity)
+  {
+    if ($this->isAuthorized()) $this->storage->write('SABEL_AUTH_IDENTITY', $identity);
+  }
+  
   public function authorize($identity, $password)
   {
     $result = $this->authorizer->authorize($identity, $password);
