@@ -136,6 +136,15 @@ class Sabel_DB_Property
     }
   }
 
+  public function getValidateData()
+  {
+    if ($this->isSelected()) {
+      return $this->newData;
+    } else {
+      return $this->data;
+    }
+  }
+
   public function setProperties($row)
   {
     if (!is_array($row)) {

@@ -37,4 +37,4 @@ class Sabel_Aspect_Interceptors_Assign
 
 Sabel_Aspect_Aspects::singleton()->addPointcut(
   Sabel_Aspect_Pointcut::create('Sabel_Aspect_Interceptors_Assign')
-  ->setMethodRegex('.*'));
+  ->toAll());
