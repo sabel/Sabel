@@ -60,7 +60,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     foreach ($this->getData() as $name => $value) {
-      $columns[$name] = $this->convertData($name, $value);
+      $columns[$name]->value = $this->convertData($name, $value);
     }
     return $columns;
   }
