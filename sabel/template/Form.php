@@ -37,6 +37,8 @@ class Sabel_Template_Form implements Iterator
   
   protected $yearRange = array();
   
+  protected $ignore = array();
+  
   public function __construct($model, $errors)
   {
     $this->model   = $model;
@@ -99,6 +101,25 @@ class Sabel_Template_Form implements Iterator
     }
   }
   
+  public function ignore($mixed)
+  {
+    if (is_array($mixed)) {
+      foreach ($mixed as $ignore) {
+        if (isset($this->columns[$ignore])) {
+          unset($this->columns[$column->name]);
+        }
+      }
+      $this->size = count($this->columns);
+      $this->ignore = array_merge($this->ignore, $mixed);
+    } elseif (is_string($mixed)) {
+      if (isset($this->columns[$mixed])) {
+        unset($this->columns[$mixed]);
+      }
+      $this->size = count($this->columns);
+      $this->ignore[] = $mixed;
+    }
+  }
+  
   public function name($showHidden = false)
   {
     $column = $this->currentColumn;
@@ -113,6 +134,7 @@ class Sabel_Template_Form implements Iterator
   public function write($prefix = null, $postfix = null, $format = null)
   {
     $column = $this->currentColumn;
+    
     $fmt = (is_null($format)) ? '<input type="%s" name="%s" value="%s" />'."\n" : $format;
     
     if ($this->isError()) {
