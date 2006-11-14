@@ -141,6 +141,18 @@ abstract class Sabel_Controller_Page
     }
   }
   
+  protected function isNull($name)
+  {
+    if ($this->request->hasUriValue($name)) {
+      $check = $this->request->$name;
+    } else {
+      $tmp = $this->getRequests();
+      $check = tmp[$name];
+    }
+    
+    return (is_null($check));
+  }
+  
   protected function __set($name, $value)
   {
     $this->assign($name, $value);

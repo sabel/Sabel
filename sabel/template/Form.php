@@ -106,7 +106,7 @@ class Sabel_Template_Form implements Iterator
     if (is_array($mixed)) {
       foreach ($mixed as $ignore) {
         if (isset($this->columns[$ignore])) {
-          unset($this->columns[$column->name]);
+          unset($this->columns[$ignore]);
         }
       }
       $this->size = count($this->columns);
