@@ -35,6 +35,8 @@ class Sabel_Template_Form implements Iterator
   
   protected $errors = null;
   
+  protected $yearRange = array();
+  
   public function __construct($model, $errors)
   {
     $this->model   = $model;
@@ -128,6 +130,8 @@ class Sabel_Template_Form implements Iterator
           $result = $this->textarea($column->name, $column->value);
         } elseif ($this->isBool()) {
           $result = $this->checkbox($column->name, $column->value, $column->default);
+        } elseif ($this->isDate()) {
+          $result = $this->date($column->name, $column->value);
         } else {
           $result = $this->input('text', $column->name, $column->value);
         }
@@ -173,6 +177,85 @@ class Sabel_Template_Form implements Iterator
     if ($value) $fmt .= ' checked="checked"';
     $fmt .= ' />';
     return sprintf($fmt, $name, $id, $class, $style);
+  }
+  
+  public function isDate()
+  {
+    return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATE);
+  }
+  
+  public function yearRange($range)
+  {
+    $this->yearRange = $range;
+  }
+  
+  public function date($name, $value, $default = '', $id = '', $class = '', $style = '')
+  {
+    $tsNow    = time();
+    $defYear  = date('Y', $tsNow);
+    $defMonth = date('M', $tsNow);
+    $defDay   = date('d', $tsNow);
+    $defHour  = date('G', $tsNow);
+    $defMin   = date('i', $tsNow);
+    
+    $listYear = (count($this->yearRange) === 0) ? array(2005, 2006, 2007): $listYear = $this->yearRange;;
+    $fmtYear  = '<select name="%s[year]" id="%s" class="%s" style="%s">'."\n";
+    foreach ($listYear as $year) {
+      if ($year == $defYear) {
+        $fmtYear .= "<option value=\"$year\" selected=\"selected\">$year</option>\n";
+      } else {
+        $fmtYear .= "<option value=\"$year\">$year</option>\n";
+      }
+    }
+    $fmtYear .= '</select>'."\n";
+    
+    $fmtMonth  = '<select name="%s[month]" id="%s" class="%s" style="%s">'."\n";
+    for ($m = 1; $m <= 12; $m++) {
+      if ($m == $defMonth) {
+        $fmtMonth .= "<option value=\"$m\" selected=\"selected\">$m</option>\n";
+      } else {
+        $fmtMonth .= "<option value=\"$m\">$m</option>\n";
+      }
+    }
+    $fmtMonth .= '</select>'."\n";
+    
+    $fmtDay  = '<select name="%s[day]" id="%s" class="%s" style="%s">'."\n";
+    for ($d=1;$d<=31;$d++) {
+      if ($d == $defDay) {
+        $fmtDay .= "<option value=\"$d\" selected=\"selected\">$d</option>\n";
+      } else {
+        $fmtDay .= "<option value=\"$d\">$d</option>\n";
+      }
+    }
+    $fmtDay .= '</select> - '."\n";
+    
+    $fmtHour  = '<select name="%s[hour]" id="%s" class="%s" style="%s">'."\n";
+    for ($h=0 ; $h <= 23; $h++) {
+      if ($h == $defHour) {
+        $fmtHour .= "<option value=\"$h\" selected=\"selected\">$h</option>\n";
+      } else {
+        $fmtHour .= "<option value=\"$h\">$h</option>\n";
+      }
+    }
+    $fmtHour .= '</select> : ';
+    
+    $fmtMin  = '<select name="%s[min]" id="%s" class="%s" style="%s">'."\n";
+    for ($min=0;$min<=60;$min++) {
+      if ($min == $defMin) {
+        $fmtMin .= "<option value=\"$min\" selected=\"selected\">$min</option>\n";
+      } else {
+        $fmtMin .= "<option value=\"$min\">$min</option>\n";
+      }
+    }
+    $fmtMin .= '</select>'."\n";
+    
+    $formats = array($fmtYear, $fmtMonth, $fmtDay, $fmtHour, $fmtMin);
+    $results = array();
+    foreach ($formats as $format) {
+      $results[] = sprintf($format, $name, $value, $id, $class, $style);
+    }
+    
+    return join("\n", $results);
   }
   
   public function isError()
