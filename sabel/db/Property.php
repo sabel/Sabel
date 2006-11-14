@@ -60,8 +60,8 @@ class Sabel_DB_Property
     } else {
       $properties['table'] = $props['table'];
     }
-    
-    if (is_null($properties['primaryKey'])) 
+
+    if (is_null($properties['primaryKey']))
       trigger_error('primary key not found in '.$properties['table'], E_USER_NOTICE);
 
     $this->overrideProps = $props;

@@ -14,13 +14,14 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   private
     $joinPair     = array(),
     $joinColList  = array(),
-    $joinConNames = array(),
-    $joinColCache = array();
+    $joinColCache = array(),
+    $joinConNames = array();
 
   private
-    $parentTables = array(),
-    $relational   = array(),
-    $cascadeStack = array();
+    $parentTables    = array(),
+    $relational      = array(),
+    $acquiredParents = array(),
+    $cascadeStack    = array();
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -302,7 +303,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $this->joinColList[$tblName] = array_keys($sClass->get());
     if ($parents = $sClass->getParents()) {
       foreach ($parents as $parent) {
+        if (in_array($parent, $this->acquiredParents)) continue;
         $this->joinPair[] = $tblName . ':' . $parent;
+        $this->acquiredParents[] = $parent;
         if (!$this->prepareAutoJoin($parent)) return false;
       }
     }
@@ -329,11 +332,11 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
    */
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
+    $this->setCondition($param1, $param2, $param3);
     if ($this->isWithParent() && $this->prepareAutoJoin($this->table)) {
       return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
     }
 
-    $this->setCondition($param1, $param2, $param3);
     $projection = $this->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
     return $this->getRecords($this);

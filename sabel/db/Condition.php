@@ -66,6 +66,12 @@ class Sabel_DB_Condition
         $type = self::NORMAL;
       }
     }
+
+    if (strpos($key, '.') !== false) {
+      list($mdlName, $key) = explode('.', $key);
+      $key = convert_to_tablename($mdlName) . '.' . $key;
+    }
+
     return array($key, $type, $val);
   }
 }
