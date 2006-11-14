@@ -147,7 +147,7 @@ abstract class Sabel_Controller_Page
       $check = $this->request->$name;
     } else {
       $tmp = $this->getRequests();
-      $check = tmp[$name];
+      $check = $tmp[$name];
     }
     
     return (is_null($check));
