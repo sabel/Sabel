@@ -326,7 +326,7 @@ class Sabel_Template_Form implements Iterator
     $formats = array($fmtYear, $fmtMonth, $fmtDay, $fmtHour, $fmtMin);
     $results = array();
     foreach ($formats as $format) {
-      $results[] = sprintf($format, $name, $value, $id, $class, $style);
+      $results[] = sprintf($format, $name, $id, $class, $style);
     }
     
     return join("\n", $results);

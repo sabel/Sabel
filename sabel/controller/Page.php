@@ -137,20 +137,13 @@ abstract class Sabel_Controller_Page
       return $this->request->$name;
     } else {
       $tmp = $this->getRequests();
-      return $tmp[$name];
+      return (isset($tmp[$name])) ? $tmp[$name] : null;
     }
   }
   
   protected function isNull($name)
   {
-    if ($this->request->hasUriValue($name)) {
-      $check = $this->request->$name;
-    } else {
-      $tmp = $this->getRequests();
-      $check = $tmp[$name];
-    }
-    
-    return (is_null($check));
+    return (is_null($this->$name));
   }
   
   protected function __set($name, $value)
