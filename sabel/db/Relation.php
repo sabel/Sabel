@@ -53,10 +53,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function schema($tblName = null)
   {
-    if (!isset($tblName)) $this->getTableSchema($tblName)->getColumns();
+    if (isset($tblName)) $this->getTableSchema($tblName)->getColumns();
     
     $columns = $this->getSchema()->getColumns();
-    
     foreach ($this->getData() as $name => $value) {
       if (isset($columns[$name])) $columns[$name]->value = $this->convertData($name, $value);
     }
