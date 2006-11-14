@@ -45,6 +45,8 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
     foreach ($columns as $name => $column) {
       if ($column['nullable'] === false && $column['increment'] === true) continue;
       
+      if ($column['nullable'] === false && isset($column['default'])) continue;
+      
       if ($column['nullable'] === false && $column['increment'] === false)
       {
         if (!isset($data[$name])) {

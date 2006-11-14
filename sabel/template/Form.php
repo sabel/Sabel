@@ -131,7 +131,7 @@ class Sabel_Template_Form implements Iterator
     if (!$this->isHidden()) return $this->currentColumn->value;
   }
   
-  public function write($prefix = null, $postfix = null, $format = null)
+  public function write($prefix = null, $postfix = null, $nessecary = null, $format = null)
   {
     $column = $this->currentColumn;
     
@@ -161,7 +161,13 @@ class Sabel_Template_Form implements Iterator
         } else {
           $result = $this->input('text', $column->name, $column->value);
         }
-        return $prefix . $result . $postfix;
+        
+        if ($this->isNecessary()) {
+          return $nessecary . $result . $postfix;
+        } else {
+          return $prefix . $result . $postfix;
+        }
+        
       }
     }
   }
@@ -199,6 +205,7 @@ class Sabel_Template_Form implements Iterator
   {
     if (empty($id)) $id = $this->defaultID();
     $value = (isset($value)) ? $value : $default;
+    // <input type="hidden" value="false" name="testbool"/>
     $fmt  = '<input type="checkbox" value="true" name="%s" id="%s" class="%s" style="%s"';
     if ($value) $fmt .= ' checked="checked"';
     $fmt .= ' />';
@@ -393,6 +400,11 @@ class Sabel_Template_Form implements Iterator
   public function defaultID()
   {
     return $this->model->table . '_' . $this->currentColumn->name;
+  }
+  
+  public function isNecessary()
+  {
+    return ($this->currentColumn->nullable === false);
   }
   
   /**

@@ -48,6 +48,8 @@ require_once('Test/Namespace.php');
 require_once('Test/Validate.php');
 require_once('Test/VirtualInheritance.php');
 
+require_once('Test/Form.php');
+
 //* there out of naming rules. @todo fix me
 /*
 require_once('sabel/config/Spyc.php');
@@ -92,6 +94,8 @@ class SabelAllTests
     
     //$suite->addTest(Test_Validate::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
+    
+    $suite->addTest(Test_Form::suite());
     
     return $suite;
   }
