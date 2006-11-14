@@ -40,4 +40,23 @@ class Sabel_DB_Schema_Table
   {
     return $this->columns[$name];
   }
+
+  public function getPrimaryKey()
+  {
+    $pKey = array();
+    foreach ($this->columns as $column) {
+      if ($column->primary) $pKey[] = $column->name;
+    }
+
+    if (empty($pKey)) return null;
+    return (sizeof($pKey) === 1) ? $pKey[0] : $pKey;
+  }
+
+  public function getIncrementKey()
+  {
+    foreach ($this->columns as $column) {
+      if ($column->increment) return $column->name;
+    }
+    return null;
+  }
 }

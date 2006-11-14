@@ -30,12 +30,16 @@ class Sabel_DB_Model
     if (class_exists($mdlName, false)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {
-      eval('class Sabel_DB_Empty extends Sabel_DB_Relation{}');
+      eval('class Sabel_DB_Empty extends Sabel_DB_Relation
+            {
+              public function __construct() { }
+            }'
+          );
     }
-    $model   = new Sabel_DB_Empty();
-    $tblName = convert_to_tablename($mdlName);
-    $model->setTableName($tblName);
-    $model->setSchema($tblName);
+
+    $model = new Sabel_DB_Empty();
+    $prop  = new Sabel_DB_Property($mdlName, array());
+    $model->setProperty($prop);
     return $model;
   }
 }

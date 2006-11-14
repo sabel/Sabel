@@ -19,15 +19,18 @@ class Sabel_DB_Executer
   protected
     $driver = null;
 
-  public function __construct($properties)
+  public function __construct($tblName, $conName = 'default')
   {
-    if (!is_array($properties)) {
-      $errorMsg = 'Sabel_DB_Executer::__construct() argument must be an array.';
-      throw new Exception($errorMsg);
-    }
+    $mdlName  = convert_to_modelname($tblName);
+    $props    = array('table' => $tblName, 'connectName' => $conName);
+    $this->setProperty(new Sabel_DB_Property($mdlName, $props));
+  }
 
-    $property = new Sabel_DB_Property();
-    $property->set($properties);
+  public function setProperty($property)
+  {
+    if (!$property instanceof Sabel_DB_Property)
+      throw new Exception('argument should be an instance of Sabel_DB_Property.');
+
     $this->property = $property;
   }
 
@@ -196,14 +199,13 @@ class Sabel_DB_Executer
 
   public function getColumnNames($tblName = null)
   {
-    if (is_null($tblName)) $tblName = $this->property->table;
+    if (is_null($tblName)) return $this->getColumns();
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
   public function getTableSchema($tblName = null)
   {
-    if (is_null($tblName)) $tblName = $this->property->table;
-    return $this->createSchemaAccessor()->getTable($tblName);
+    return $this->property->getSchema();
   }
 
   public function getAllTableSchema()

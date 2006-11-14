@@ -29,9 +29,12 @@ class Sabel_DB_Schema_Accessor
     return $this->schemaClass->getTables();
   }
 
-  public function getTable($tblName)
+  public function getTable($tblName, $scmColumns = null)
   {
-    return $this->schemaClass->getTable($tblName);
+    if (is_null($scmColumns)) return $this->schemaClass->getTable($tblName);
+    if (!is_array($scmColumns)) throw new Exception('second argument must be an array.');
+
+    return new Sabel_DB_Schema_Table($tblName, $scmColumns);
   }
 
   public function getTableNames()
@@ -53,7 +56,7 @@ class Sabel_DB_Schema_Accessor
     if ($sClass) {
       $cols = $sClass->get();
     } else {
-      $executer = new Sabel_DB_Executer(array('connectName' => $this->connectName));
+      $executer = new Sabel_DB_Executer($tblName, $this->connectName);
       $executer->setConstraint('limit', 1);
       $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
       $cols = $executer->exec()->fetch();

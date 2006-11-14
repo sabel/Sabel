@@ -12,7 +12,8 @@
 class Sabel_DB_Property
 {
   private
-    $schema = array();
+    $schema  = array(),
+    $columns = array();
 
   private
     $properties    = array(),
@@ -43,23 +44,11 @@ class Sabel_DB_Property
       if (array_key_exists($key, $props)) $props[$key] = $val;
     }
 
-    $clsName = 'Schema_' . $mdlName;
-    if (class_exists($clsName, false)) {
-      $properties = $this->initSchema(new $clsName());
-    } else {
-      $properties = array('connectName'  => 'default',
-                          'primaryKey'   => 'id',
-                          'incrementKey' => 'id',
-                          'tableEngine'  => null);
-    }
+    $conName = (array_key_exists('connectName', $mdlProps)) ? $mdlProps['connectName']
+                                                            : 'default';
 
+    $properties = $this->initSchema($mdlName, $conName, $props['table']);
     $props['autoNumber'] = (isset($properties['incrementKey']));
-
-    if ($props['table'] === '') {
-      $this->initTableName($mdlName, $properties);
-    } else {
-      $properties['table'] = $props['table'];
-    }
 
     if (is_null($properties['primaryKey']))
       trigger_error('primary key not found in '.$properties['table'], E_USER_NOTICE);
@@ -73,32 +62,64 @@ class Sabel_DB_Property
     $this->properties = $properties;
   }
 
-  private function initTableName($mdlName, &$properties)
+  public function initSchema($mdlName, $conName, $tblName)
   {
-    $properties['table'] = convert_to_tablename($mdlName);
-  }
+    $tblName = ($tblName === '') ? convert_to_tablename($mdlName) : $tblName;
+    $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
 
-  private function initSchema($sClass)
-  {
-    $ps = $sClass->getProperty();
-    $properties = array('connectName'  => $ps['connectName'],
-                        'primaryKey'   => $ps['primaryKey'],
-                        'incrementKey' => $ps['incrementKey'],
-                        'tableEngine'  => $ps['tableEngine']);
-      
-    $this->schema = $sClass->get();
+    if ($cache) {
+      $this->schema  = $cache;
+      $this->columns = Sabel_DB_SimpleCache::get('columns_' . $tblName);
+      return Sabel_DB_SimpleCache::get('props_' . $tblName);
+    }
+
+    $sName    = Sabel_DB_Connection::getSchema($conName);
+    $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
+
+    $clsName = 'Schema_' . $mdlName;
+    if (class_exists($clsName, false)) {
+      $sClass = new $clsName();
+      $props  = $sClass->getProperty();
+      $properties = array('connectName'  => $props['connectName'],
+                          'primaryKey'   => $props['primaryKey'],
+                          'incrementKey' => $props['incrementKey'],
+                          'tableEngine'  => $props['tableEngine'],
+                          'table'        => $tblName);
+
+      $scmColumns = $this->createSchema($sClass->get());
+      $tblSchema  = $accessor->getTable($tblName, $scmColumns);
+    } else {
+      $database  = Sabel_DB_Connection::getDB($conName);
+      $engine    = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
+      $tblSchema = $accessor->getTable($tblName);
+
+      $properties = array('connectName'  => $conName,
+                          'primaryKey'   => $tblSchema->getPrimaryKey(),
+                          'incrementKey' => $tblSchema->getIncrementKey(),
+                          'tableEngine'  => $engine,
+                          'table'        => $tblName);
+    }
+
+    $this->schema  = $tblSchema;
+    $this->columns = array_keys($tblSchema->getColumns());
+
+    Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
+    Sabel_DB_SimpleCache::add('columns_' . $tblName, $this->columns);
+    Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
+
     return $properties;
   }
 
-  public function setSchema($tblName)
+  protected function createSchema($colInfos)
   {
-    $sClass = get_schema_by_tablename($tblName);
-
-    if ($sClass) {
-      $properties = $this->initSchema($sClass);
-      $this->overrideProps['autoNumber'] = (isset($properties['incrementKey']));
-      $this->properties = array_merge($this->properties, $properties);
+    $schema = array();
+    foreach ($colInfos as $colName => $colInfo) {
+      $co = new Sabel_DB_Schema_Column();
+      $co->name = $colName;
+      $schema[$colName] = $co->make($colInfo);
     }
+
+    return $schema;
   }
 
   public function __set($key, $val)
@@ -119,14 +140,15 @@ class Sabel_DB_Property
     if (!isset($this->data[$key])) return null;
 
     $data = $this->data[$key];
-    return ($this->schema) ? $this->convertData($key, $data) : $data;
+    return $this->convertData($key, $data);
   }
 
-  private function convertData($key, $data)
+  public function convertData($key, $data)
   {
-    if (!isset($this->schema[$key])) return $data;
+    $schema = $this->schema->getColumns();
+    if (!isset($schema[$key])) return $data;
 
-    switch ($this->schema[$key]['type']) {
+    switch ($schema[$key]->type) {
       case Sabel_DB_Schema_Const::INT:
         return (int)$data;
       case SabeL_DB_Schema_Const::BOOL:
@@ -153,21 +175,14 @@ class Sabel_DB_Property
     foreach ($row as $key => $val) $this->data[$key] = $val;
   }
 
-  public function hasSchema()
-  {
-    return (!empty($this->schema));
-  }
-
   public function getSchema()
   {
-    $cols = array();
-    foreach ($this->schema as $colName => $colInfo) {
-      $co = new Sabel_DB_Schema_Column();
-      $co->name = $colName;
-      $cols[$colName] = $co->make($colInfo);
-    }
+    return $this->schema;
+  }
 
-    return $cols;
+  public function getColumns()
+  {
+    return $this->columns;
   }
 
   public function setConnectName($connectName)
@@ -295,7 +310,6 @@ class Sabel_DB_Property
    *                                           or Sabel_DB_Driver_Pdo_Driver
    * @return string table engine.
    */
-
   public function getStructure()
   {
     return $this->overrideProps['structure'];

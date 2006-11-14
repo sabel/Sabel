@@ -47,7 +47,7 @@ class Test_DB_Pgsql extends Test_DB_Test
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_DB_Model::load('');
+    $model  = Sabel_DB_Model::load('Basic');
 
     $ph = new PgsqlHelper();
 
@@ -59,8 +59,7 @@ class Test_DB_Pgsql extends Test_DB_Test
       foreach ($tables as $table) $model->execute("DELETE FROM $table");
     } catch (Exception $e) { }
 
-    $model = Sabel_DB_Model::load('');
-    $model->setConnectName('default2');
+    $model = Sabel_DB_Model::load('Customer');
 
     try {
       @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');

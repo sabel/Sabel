@@ -51,26 +51,16 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return $this->property->$method($arg1, $arg2, $arg3);
   }
 
-  // @todo
   public function schema($tblName = null)
   {
     if (isset($tblName)) {
       return $this->getTableSchema($tblName)->getColumns();
-    } elseif ($this->hasSchema()) {
-      $columns = $this->getSchema();
     } else {
-      $columns = $this->getTableSchema()->getColumns();
+      $columns = $this->getSchema()->getColumns();
     }
 
-    // @todo
-    foreach ($this->getData() as $name => $data) {
-      if (isset($columns[$name])) {
-        if ($columns[$name]->type === Sabel_DB_Schema_Const::BOOL) {
-          $columns[$name]->value = in_array($data, array('1', 't', 'true'));
-        } else {
-          $columns[$name]->value = $data;
-        }
-      }
+    foreach ($this->getData() as $name => $value) {
+      $columns[$name] = $this->convertData($name, $value);
     }
     return $columns;
   }
@@ -187,7 +177,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $relTables  = $this->toTablePair($modelPairs);
     $colList    = $this->remakeColList($colList);
 
-    $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames($myTable);
+    $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames();
     foreach ($columns as $column) $sql[] = "{$myTable}.{$column}, ";
 
     foreach ($relTables as $pair) $joinTables = array_merge($joinTables, array_values($pair));
@@ -523,14 +513,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   protected function newClass($name)
   {
     $mdlName = convert_to_modelname($name);
-
-    if ($this->modelExists($mdlName)) {
-      return new $mdlName();
-    } else {
-      $model = Sabel_DB_Model::load($mdlName);
-      if (!$model->hasSchema()) $model->setConnectName($this->connectName);
-      return $model;
-    }
+    return ($this->modelExists($mdlName)) ? new $mdlName : Sabel_DB_Model::load($mdlName);
   }
 
   private function modelExists($className)

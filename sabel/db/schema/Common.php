@@ -17,9 +17,10 @@ abstract class Sabel_DB_Schema_Common
 
   public function getTable($tblName)
   {
-    $sClass = get_schema_by_tablename($tblName);
     $cache  = Sabel_DB_SimpleCache::get('schema_' . $tblName);
     if ($cache) return $cache;
+
+    $sClass = get_schema_by_tablename($tblName);
 
     if ($sClass) {
       $cols = array();

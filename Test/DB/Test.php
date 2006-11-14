@@ -796,7 +796,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testTransaction()
   {
-    Sabel_DB_Model::load('')->execute('DELETE FROM customer_order');
+    Sabel_DB_Model::load('CustomerOrder')->execute('DELETE FROM customer_order');
     $model = Sabel_DB_Model::load('CustomerOrder');
     $model->setConnectName('default2');
     $model->execute('DELETE FROM customer');

@@ -29,4 +29,9 @@ class Sabel_DB_Schema_Column
     foreach ($colInfo as $key => $val) $this->$key = $val;
     return $this;
   }
+
+  public function toArray()
+  {
+    return $this->data;
+  }
 }
