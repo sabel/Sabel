@@ -38,7 +38,7 @@ class Sabel_View_PageViewer implements Iterator
   
   public function getNext()
   {
-    return (int) min($this->getLast(), $this->current + 1);
+    return (int) min($this->pager->getTotalPageNumber(), $this->current + 1);
   }
   
   public function getPrevious()
@@ -121,7 +121,7 @@ class Sabel_View_PageViewer implements Iterator
     $this->end   =(int) $this->start + $this->window;
     if (!$this->igEmpty) {
       if ($this->start < 1) $this->start = 1;
-      if (($start = $this->getLast() - $this->end + 1) < 0) {
+      if (($start = $this->pager->getTotalPageNumber() - $this->end + 1) < 0) {
         $this->start =(int) $this->start + $start;
       }
       $this->end   =(int) $this->start + $this->window;
@@ -131,7 +131,7 @@ class Sabel_View_PageViewer implements Iterator
   
   public function valid()
   {
-    $endPageNum =(int) min($this->getLast() + 1, $this->end);
+    $endPageNum =(int) min($this->pager->getTotalPageNumber() + 1, $this->end);
     return ($this->position->current < $endPageNum);
   }
   

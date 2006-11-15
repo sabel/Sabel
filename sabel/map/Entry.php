@@ -73,6 +73,7 @@ class Sabel_Map_Entry
   
   public function uri($params)
   {
+    if (!is_array($params)) $params = array($params);
     foreach ($params as $key => $param) {
       switch ($key) {
         case 'm':
