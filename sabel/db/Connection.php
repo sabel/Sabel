@@ -11,8 +11,7 @@
  */
 class Sabel_DB_Connection
 {
-  const MYSQL_SET_ENCODING = 'SET NAMES %s';
-  const PGSQL_SET_ENCODING = 'SET CLIENT_ENCODING TO %s';
+  const SET_ENCODING = 'SET NAMES %s';
 
   protected static $parameters = array();
   protected static $connList   = array();
@@ -75,14 +74,12 @@ class Sabel_DB_Connection
       $db  = $list['db'];
       $enc = $params['encoding'];
 
-      if ($type === 'pdo' && $db === 'mysql') {
-        $list['conn']->exec(sprintf(self::MYSQL_SET_ENCODING, $enc));
-      } elseif ($type === 'pdo' && $db === 'pgsql') {
-        $list['conn']->exec(sprintf(self::PGSQL_SET_ENCODING, $enc));
+      if ($type === 'pdo') {
+        $list['conn']->exec(sprintf(self::SET_ENCODING, $enc));
       } elseif ($db === 'mysql') {
-        mysql_query(sprintf(self::MYSQL_SET_ENCODING, $enc), $list['conn']);
+        mysql_query(sprintf(self::SET_ENCODING, $enc), $list['conn']);
       } elseif ($db === 'pgsql') {
-        pg_query($list['conn'], sprintf(self::PGSQL_SET_ENCODING, $enc));
+        pg_query($list['conn'], sprintf(self::SET_ENCODING, $enc));
       }
     }
 
@@ -109,13 +106,11 @@ class Sabel_DB_Connection
 
   public static function getConnection($conName)
   {
-    self::createDBLink($conName, 'conn');
     return self::getValue($conName, 'conn');
   }
 
   public static function getDB($conName)
   {
-    self::createDBLink($conName, 'db');
     return self::getValue($conName, 'db');
   }
 
@@ -126,6 +121,8 @@ class Sabel_DB_Connection
 
   protected static function getValue($conName, $key)
   {
+    self::createDBLink($conName, $key);
+
     if (isset(self::$connList[$conName][$key])) {
       return self::$connList[$conName][$key];
     } else {
