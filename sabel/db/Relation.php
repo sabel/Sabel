@@ -545,15 +545,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     if ($this->isSelected()) {
       $saveData = ($data) ? $data : $this->getNewData();
       $this->conditions = $this->getSelectCondition();
-      $this->update($this->table, $saveData);
+      $this->update($saveData);
       $this->unsetNewData();
     } else {
       $saveData = ($data) ? $data : $this->getData();
       if ($incCol = $this->checkIncColumn()) {
-        $newId = $this->insert($this->table, $saveData, $incCol);
+        $newId = $this->insert($saveData, $incCol);
         $this->dataSet($incCol, $newId);
       } else {
-        $this->insert($this->table, $saveData, false);
+        $this->insert($saveData, false);
       }
     }
 
@@ -575,7 +575,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     Sabel_DB_Transaction::add($this);
 
     try {
-      $this->ArrayInsert($this->table, $data, $this->checkIncColumn());
+      $this->ArrayInsert($data, $this->checkIncColumn());
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }

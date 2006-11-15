@@ -123,8 +123,9 @@ class Sabel_DB_Executer
     return $driver->getResultSet();
   }
 
-  public function update($table, $data)
+  public function update($data)
   {
+    $table = $this->property->table;
     $this->getStatement()->makeUpdateSQL($table, $data);
 
     $driver = $this->getDriver();
@@ -132,36 +133,38 @@ class Sabel_DB_Executer
     $driver->update();
   }
 
-  public function insert($table, $data, $idColumn)
+  public function insert($data, $idColumn)
   {
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
 
-      $this->execInsert($driver, $stmt, $table, $data, $idColumn);
+      $this->execInsert($driver, $stmt, $data, $idColumn);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  public function ArrayInsert($table, $data, $idColumn)
+  public function ArrayInsert($data, $idColumn)
   {
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
 
       foreach ($data as $val) {
-        $this->execInsert($driver, $stmt, $table, $val, $idColumn);
+        $this->execInsert($driver, $stmt, $val, $idColumn);
       }
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  private function execInsert($driver, $stmt, $table, $data, $idColumn)
+  private function execInsert($driver, $stmt, $data, $idColumn)
   {
-    $db = Sabel_DB_Connection::getDB($this->property->connectName);
+    $table = $this->property->table;
+    $db    = Sabel_DB_Connection::getDB($this->property->connectName);
+
     if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
       $data = $driver->setIdNumber($table, $data, $idColumn);
     }
