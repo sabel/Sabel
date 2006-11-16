@@ -133,34 +133,35 @@ class Sabel_DB_Executer
     $driver->update();
   }
 
-  public function insert($data, $idColumn)
+  public function insert($data, $incCol = false)
   {
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
 
-      $this->execInsert($driver, $stmt, $data, $idColumn);
+      $this->execInsert($driver, $stmt, $data, $incCol);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  public function ArrayInsert($data, $idColumn)
+  public function ArrayInsert($data)
   {
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
+      $incCol = $this->checkIncColumn();
 
       foreach ($data as $val) {
-        $this->execInsert($driver, $stmt, $val, $idColumn);
+        $this->execInsert($driver, $stmt, $val, $incCol);
       }
     } catch (Exception $e) {
       $this->executeError($e->getMessage());
     }
   }
 
-  private function execInsert($driver, $stmt, $data, $idColumn)
+  protected function execInsert($driver, $stmt, $data, $idColumn)
   {
     $table = $this->property->table;
     $db    = Sabel_DB_Connection::getDB($this->property->connectName);
@@ -171,6 +172,12 @@ class Sabel_DB_Executer
 
     $stmt->makeInsertSQL($table, $data);
     $driver->insert();
+  }
+
+  protected function checkIncColumn()
+  {
+    $prop = $this->property;
+    return ($prop->isAutoNumber()) ? $prop->incrementKey : false;
   }
 
   public function executeQuery($sql, $param)
@@ -216,7 +223,7 @@ class Sabel_DB_Executer
     return $this->createSchemaAccessor()->getTables();
   }
 
-  private function createSchemaAccessor()
+  protected function createSchemaAccessor()
   {
     $connectName = $this->property->connectName;
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);

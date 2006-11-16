@@ -539,7 +539,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function save($data = null)
   {
-    if (!empty($data) && !is_array($data))
+    if (isset($data) && !is_array($data))
       throw new Exception('Sabel_DB_Relation::save() argument must be an array');
 
     if ($this->isSelected()) {
@@ -553,7 +553,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
         $newId = $this->insert($saveData, $incCol);
         $this->dataSet($incCol, $newId);
       } else {
-        $this->insert($saveData, false);
+        $this->insert($saveData);
       }
     }
 
@@ -563,7 +563,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function allUpdate($data)
   {
-    $this->update($this->table, $data);
+    $this->update($data);
   }
 
   public function multipleInsert($data)
@@ -575,7 +575,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     Sabel_DB_Transaction::add($this);
 
     try {
-      $this->ArrayInsert($data, $this->checkIncColumn());
+      $this->ArrayInsert($data);
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }

@@ -51,7 +51,7 @@ class Sabel_DB_Property
     $props['autoNumber'] = (isset($properties['incrementKey']));
 
     if (is_null($properties['primaryKey']))
-      trigger_error('primary key not found in '.$properties['table'], E_USER_NOTICE);
+      trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
 
     $this->overrideProps = $props;
     $this->properties    = $properties;
@@ -75,11 +75,12 @@ class Sabel_DB_Property
 
     $sName    = Sabel_DB_Connection::getSchema($conName);
     $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
+    $clsName  = 'Schema_' . $mdlName;
 
-    $clsName = 'Schema_' . $mdlName;
     if (class_exists($clsName, false)) {
       $sClass = new $clsName();
       $props  = $sClass->getProperty();
+
       $properties = array('connectName'  => $props['connectName'],
                           'primaryKey'   => $props['primaryKey'],
                           'incrementKey' => $props['incrementKey'],
@@ -89,9 +90,9 @@ class Sabel_DB_Property
       $scmColumns = $this->createSchema($sClass->get());
       $tblSchema  = $accessor->getTable($tblName, $scmColumns);
     } else {
-      $database  = Sabel_DB_Connection::getDB($conName);
-      $engine    = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
-      $tblSchema = $accessor->getTable($tblName);
+      $database   = Sabel_DB_Connection::getDB($conName);
+      $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
+      $tblSchema  = $accessor->getTable($tblName);
 
       $properties = array('connectName'  => $conName,
                           'primaryKey'   => $tblSchema->getPrimaryKey(),
@@ -135,12 +136,12 @@ class Sabel_DB_Property
 
   public function __get($key)
   {
-    $properties = $this->properties;
-    if (isset($properties[$key]))  return $properties[$key];
-    if (!isset($this->data[$key])) return null;
+    if (array_key_exists($key, $this->properties)) {
+      return $this->properties[$key];
+    }
 
-    $data = $this->data[$key];
-    return $this->convertData($key, $data);
+    if (!isset($this->data[$key])) return null;
+    return $this->convertData($key, $this->data[$key]);
   }
 
   public function convertData($key, $data)
@@ -295,11 +296,6 @@ class Sabel_DB_Property
   public function receiveSelectCondition($conditions)
   {
     $this->selectConditions = $conditions;
-  }
-
-  public function checkIncColumn()
-  {
-    return ($this->isAutoNumber()) ? $this->properties['incrementKey'] : false;
   }
 
   /**
