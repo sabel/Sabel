@@ -1,5 +1,7 @@
 <?php
 
+if (defined('TEST_CASE')){
+
 if (!defined('PHPUnit2_MAIN_METHOD'))
   define('PHPUnit2_MAIN_METHOD', 'Tester::main');
 
@@ -30,4 +32,6 @@ class Sabel_Test_Functional extends PHPUnit2_Framework_TestCase
   {
     return $this->front->ignition($uri);
   }
+}
+
 }

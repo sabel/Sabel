@@ -1,5 +1,7 @@
 <?php
 
+if (defined('TEST_CASE')){
+  
 if (!defined('PHPUnit2_MAIN_METHOD'))
   define('PHPUnit2_MAIN_METHOD', 'Tester::main');
 
@@ -42,4 +44,6 @@ class Sabel_Test_Runner extends PHPUnit2_TextUI_TestRunner
       throw new Exception('Could not run test suite:'. $e->getMessage());
     }
   }
+}
+
 }

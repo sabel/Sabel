@@ -14,6 +14,8 @@ class Sabel_Annotation_Reader
   protected $list = null;
   protected static $annotation = array();
   
+  protected $path = '';
+  
   /**
    * default constructer
    *
@@ -21,6 +23,12 @@ class Sabel_Annotation_Reader
    */
   public function __construct()
   {
+    $this->path = $path = RUN_BASE . '/cache/annotation.cache';
+    
+    if (is_readable($path)) {
+      self::$annotation = unserialize(file_get_contents($path));
+    }
+    
     $this->list = new Sabel_Library_ArrayList();
   }
   
@@ -33,6 +41,7 @@ class Sabel_Annotation_Reader
         $this->process($method->getDocComment());
       }
       self::$annotation[$className] = $this->list;
+      file_put_contents($this->path, serialize(self::$annotation));
     }
     return self::$annotation[$className];
   }

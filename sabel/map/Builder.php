@@ -13,7 +13,15 @@ class Sabel_Map_Builder
   public function __construct($path, $reset = false)
   {
     if ($reset) self::$maps = null;
-    if (is_null(self::$maps)) self::$maps = new Sabel_Config_Yaml($path);
+    
+    $bcpath = RUN_BASE . '/cache/map.cache';
+    
+    if (is_readable($bcpath)) {
+      self::$maps = unserialize(file_get_contents($bcpath));
+    } else {
+      if (is_null(self::$maps)) self::$maps = new Sabel_Config_Yaml($path);
+      file_put_contents($bcpath, serialize(self::$maps));
+    }
   }
   
   public function build($facade = null)
