@@ -12,9 +12,10 @@
 class Sabel_Annotation_Reader
 {
   protected $list = null;
-  protected static $annotation = array();
-  
   protected $path = '';
+  
+  protected static $annotation = array();
+  protected static $instance = null;
   
   /**
    * default constructer
@@ -30,6 +31,12 @@ class Sabel_Annotation_Reader
     }
     
     $this->list = new Sabel_Library_ArrayList();
+  }
+  
+  public static function create()
+  {
+    if (is_null(self::$instance)) self::$instance = new self();
+    return self::$instance;
   }
   
   public function annotation($className)
@@ -49,9 +56,12 @@ class Sabel_Annotation_Reader
   public function getAnnotationsByName($className, $name)
   {
     $annotations = array();
-    foreach (self::$annotation[$className] as $annot) {
-      if ($annot->getName() === $name) $annotations[] = $annot;
+    $annos = self::$annotation[$className]->toArray();
+    
+    foreach ($annos as $annot) {
+      if (isset($annos[$name])) $annotations[] = $annot;
     }
+    
     return $annotations;
   }
   
@@ -79,7 +89,10 @@ class Sabel_Annotation_Reader
   {
     foreach (self::splitComment($comment) as $line) {
       $annot = Sabel_Annotation_Utility::processAnnotation($line);
-      if ($annot) $this->list->push($annot);
+      if ($annot) {
+        $this->list->push($annot);
+        $this->list->set($annot->getName(), $annot);
+      }
     }
   }
   

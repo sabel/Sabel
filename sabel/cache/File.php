@@ -8,36 +8,31 @@
  */
 class Sabel_Cache_File
 {
-  private $prefix = '';
+  private $path = '';
   
-  public function __construct($prefix = null)
+  public function __construct($path)
   {
-    $this->prefix = (!is_null($prefix)) ? $prefix : '';
+    $this->path = $path;
   }
   
-  public function read($filePath)
+  public function read($key)
   {
-    $fp = fopen($this->prefix . $filePath, 'r+');
-    if (!$fp) return null;
-    $lines = array();
-    while(!feof($fp)) {
-      $lines[] = fgets($fp);
-    }
-    fclose($fp);
-    return $lines;
+    if ($this->isReadable($key)) return file_get_contents($this->path);
   }
   
-  public function write($filePath, $value)
+  public function write($value)
   {
-    $fp = fopen($this->prefix . $filePath, 'w+');
-    if (!$fp) return null;
-    $this->writeToFile($fp, $value);
-    fclose($fp);
+    file_put_contents($this->path, $value);
   }
   
-  public function append($filePath, $value)
+  public function isReadable($key)
   {
-    $fp = fopen($this->prefix . $filePath, 'a+');
+    return (is_readable($this->path));
+  }
+  
+  public function append($value)
+  {
+    $fp = fopen($path, 'a+');
     if (!$fp) return null;
     $this->writeToFile($fp, $value);
     fclose($fp);

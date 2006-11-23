@@ -22,10 +22,10 @@ class Sabel_Template_Director_Factory
     $commonsPath .= '/extensions/CustomTemplateDirector.php';
     
     if (is_file($classPath)) {
-      require_once($classPath);
+      require ($classPath);
       return new CustomTemplateDirector($destination);
     } elseif (is_file($commonsPath)) {
-      require_once($commonsPath);
+      require ($commonsPath);
       return new CustomTemplateDirector($destination);
     } else {
       return new Sabel_Template_Director_Default($destination);

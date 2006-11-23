@@ -50,6 +50,7 @@ class Sabel_Controller_Front
     $mapEntry = $map->find();
     // first
     $controller = Sabel_Controller_Loader::create($mapEntry)->load();
+    $controller = $controller->getTargetClass();
     Sabel_Core_Context::setPageController($controller);
     
     $controller->setEntry($mapEntry);
@@ -72,6 +73,9 @@ class Sabel_Controller_Front
       }
     }
     $template->assignByArray($responses);
+    
+    $rc = ReflectionCache::create();
+    $rc->destruction();
     
     return array('html' => $template->rendering(), 'responses' => $responses);
   }

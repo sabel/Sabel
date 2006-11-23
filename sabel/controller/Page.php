@@ -85,6 +85,7 @@ abstract class Sabel_Controller_Page
   public function execute()
   {
     $actionName = $this->destination->action;
+    
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
     
@@ -160,30 +161,26 @@ abstract class Sabel_Controller_Page
   protected function methodExecute($action)
   {
     $specificAction = false;
-    $refClass = new ReflectionClass($this);
+    $reqMethod = strtolower($_SERVER['REQUEST_METHOD']);
+    $actionName = $reqMethod.ucfirst($action);
     
-    $httpMethods = array('get', 'post', 'put', 'delete');
-    foreach ($httpMethods as $method) {
-      $checkMethod = 'is'.ucfirst($method);
-      $actionName = $method.ucfirst($action);
-      if ($this->$checkMethod() && $refClass->hasMethod($actionName)) {
-        $specificAction = $actionName;
-      }
+    if ($this->hasMethod($actionName)) {
+      $specificAction = $actionName;
     }
     
     if ($specificAction !== false) {
-      if ($this->hasMethod($specificAction)) {
+      if (method_exists($this, $specificAction)) {
         $this->$specificAction();
         if (!$this->skipDefaultAction) {
           $this->$action();
         }
-      } elseif ($this->hasMethod('actionMissing')) {
+      } elseif (method_exists($this, 'actionMissing')) {
         $this->actionMissing();
       }
     } else {
-      if ($this->hasMethod($action)) {
+      if (method_exists($this, $action)) {
         $this->$action();
-      } elseif ($this->hasMethod('actionMissing')){
+      } elseif (method_exists($this, 'actionMissing')){
         $this->actionMissing();
       }
     }
@@ -310,7 +307,7 @@ abstract class Sabel_Controller_Page
    */
   protected function readAnnotation($className, $annotationName)
   {
-    $anonr = create('sabel.annotation.Reader');
+    $anonr = Sabel_Annotation_Reader::create();
     $anonr->annotation($className);
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
@@ -353,5 +350,48 @@ abstract class Sabel_Controller_Page
   public function isAuthorized()
   {
     return $this->security->isAuthorized();
+  }
+}
+
+class ReflectionCache
+{
+  private static $instance = null;
+  protected $classes = array();
+  protected $loaded = false;
+  
+  protected function __construct()
+  {
+    $path = RUN_BASE . '/cache/controller.cache';
+    if (!$this->loaded && is_readable($path)) {
+      $this->loaded = true;
+      $this->classes = unserialize(file_get_contents($path));
+    }
+  }
+  
+  public static function create()
+  {
+    if (is_null(self::$instance)) self::$instance = new self();
+    return self::$instance;
+  }
+  
+  public function set($key, $val)
+  {
+    $this->classes[$key] = $val;
+  }
+  
+  public function get($key)
+  {
+    return $this->classes[$key];
+  }
+  
+  public function has($key)
+  {
+    return (isset($this->classes[$key]));
+  }
+  
+  public function destruction()
+  {
+    $path = RUN_BASE . '/cache/controller.cache';
+    file_put_contents($path, serialize($this->classes));
   }
 }
