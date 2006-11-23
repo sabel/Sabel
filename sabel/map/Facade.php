@@ -71,7 +71,6 @@ class Sabel_Map_Facade implements Iterator
   {
     $entry = $this->entries[$name];
     $entry->setRequest($this->requestUri);
-    $this->entry = $entry;
     return $entry;
   }
   
