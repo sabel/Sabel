@@ -118,12 +118,14 @@ class Sabel_Map_Entry
   {
     $mapUri     = $this->getUri();
     $requestUri = $this->request->getUri();
-    
-    $reqs = $this->requirements;
+    $reqs       = $this->requirements;
     
     $match = true;
-    for ($i = 0; $requestUri->count(); $i++) {
+    
+    $count = $requestUri->count();
+    for ($i = 0; $count; ++$i) {
       $element = $mapUri->getElement($i);
+      
       if (!is_object($element)) break;
       $request = $requestUri->get($i);
       

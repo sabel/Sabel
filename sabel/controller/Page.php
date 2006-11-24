@@ -179,7 +179,24 @@ abstract class Sabel_Controller_Page
       }
     } else {
       if (method_exists($this, $action)) {
-        $this->$action();
+        $ref = new ReflectionClass($this);
+        $method = $ref->getMethod($action);
+        if ($method->getNumberOfParameters() === 0) {
+          $this->$action();
+        } else {
+          $args = array();
+          $parameters = $method->getParameters();
+          foreach ($parameters as $parameter) {
+            $name = $parameter->getName();
+            if ($parameter->allowsNull() && is_null($this->$name)) {
+              $args[] = null;
+            } else {
+              $args[] = $this->$name;
+            }
+          }
+          $method->invokeArgs($this, $args);
+        }
+        
       } elseif (method_exists($this, 'actionMissing')){
         $this->actionMissing();
       }
