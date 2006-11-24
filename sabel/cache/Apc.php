@@ -9,12 +9,14 @@
 class Sabel_Cache_Apc
 {
   protected static $instance = null;
+  protected $signature = '';
   
   public function __construct()
   {
     if (!extension_loaded('apc')) {
       throw new Sabel_Exception_Runtime('apc extension not loaded');
     }
+    $this->signature = $_SERVER['SERVER_NAME'];
   }
   
   public static function create()
@@ -25,22 +27,22 @@ class Sabel_Cache_Apc
   
   public function read($key)
   {
-    return apc_fetch($key);
+    return apc_fetch($this->signature.$key);
   }
   
   public function write($key, $value)
   {
-    return apc_store($key, $value);
+    return apc_store($this->signature.$key, $value);
   }
   
   public function isReadable($key)
   {
-    $result = $this->read($key);
+    $result = $this->read($this->signature.$key);
     return ($result !== false);
   }
   
   public function delete($key)
   {
-    apc_delete($key);
+    apc_delete($this->signature.$key);
   }
 }
