@@ -2,7 +2,7 @@
 
 class Sabel_Form_Select extends Sabel_Form_HtmlElement
 {
-  const START_TAG_FMT = '<select name="%s">';
+  const START_TAG_FMT = '<select name="%s" id="%s">';
   const END_TAG_FMT   = '</select>';
   
   protected $options = array();
@@ -34,7 +34,7 @@ class Sabel_Form_Select extends Sabel_Form_HtmlElement
   public function toHtml($trim = false)
   {
     $buf = array();
-    $buf[] = sprintf(self::START_TAG_FMT, $this->name);
+    $buf[] = sprintf(self::START_TAG_FMT, $this->name, $this->id);
     if ($this->hasOptions()) {
       $options = $this->options;
       foreach ($options as $option) $buf[] = $option->toHtml($trim);

@@ -217,126 +217,14 @@ class Sabel_Template_Form implements Iterator
     return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATE);
   }
   
-  public function isDatetime()
-  {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATETIME);
-  }
-  
   public function isTime()
   {
     return ($this->currentColumn->type === Sabel_DB_Schema_Const::TIME);
   }
   
-  public function time($name, $value, $default = '', $id = '', $class = '', $style = '')
+  public function isDatetime()
   {
-    $tsNow    = time();
-    $defYear  = date('Y', $tsNow);
-    $defMonth = date('M', $tsNow);
-    $defDay   = date('d', $tsNow);
-    $defHour  = date('G', $tsNow);
-    $defMin   = date('i', $tsNow);
-    
-    $fmtHour  = '<select name="%s[hour]" id="%s" class="%s" style="%s">'."\n";
-    for ($h=0 ; $h <= 23; $h++) {
-      if ($h == $defHour) {
-        $fmtHour .= "<option value=\"$h\" selected=\"selected\">$h</option>\n";
-      } else {
-        $fmtHour .= "<option value=\"$h\">$h</option>\n";
-      }
-    }
-    $fmtHour .= '</select> : ';
-    
-    $fmtMin  = '<select name="%s[min]" id="%s" class="%s" style="%s">'."\n";
-    for ($min=0;$min<=60;$min++) {
-      if ($min == $defMin) {
-        $fmtMin .= "<option value=\"$min\" selected=\"selected\">$min</option>\n";
-      } else {
-        $fmtMin .= "<option value=\"$min\">$min</option>\n";
-      }
-    }
-    $fmtMin .= '</select>'."\n";
-    
-    $formats = array($fmtHour, $fmtMin);
-    $results = array();
-    foreach ($formats as $format) {
-      $results[] = sprintf($format, $name, $value, $id, $class, $style);
-    }
-    
-    return join("\n", $results);
-  }
-  
-  public function yearRange($range)
-  {
-    $this->yearRange = $range;
-  }
-  
-  public function datetime($name, $value, $default = '', $id = '', $class = '', $style = '')
-  {
-    $tsNow    = time();
-    $defYear  = date('Y', $tsNow);
-    $defMonth = date('n', $tsNow);
-    $defDay   = date('d', $tsNow);
-    $defHour  = date('G', $tsNow);
-    $defMin   = date('i', $tsNow);
-    
-    $listYear = (count($this->yearRange) === 0) ? array(2005, 2006, 2007): $listYear = $this->yearRange;;
-    $fmtYear  = '<select name="%s[year]" id="%s" class="%s" style="%s">'."\n";
-    foreach ($listYear as $year) {
-      if ($year == $defYear) {
-        $fmtYear .= "<option value=\"$year\" selected=\"selected\">$year</option>\n";
-      } else {
-        $fmtYear .= "<option value=\"$year\">$year</option>\n";
-      }
-    }
-    $fmtYear .= '</select>'."\n";
-    
-    $fmtMonth  = '<select name="%s[month]" id="%s" class="%s" style="%s">'."\n";
-    for ($m = 1; $m <= 12; $m++) {
-      if ($m == $defMonth) {
-        $fmtMonth .= "<option value=\"$m\" selected=\"selected\">$m</option>\n";
-      } else {
-        $fmtMonth .= "<option value=\"$m\">$m</option>\n";
-      }
-    }
-    $fmtMonth .= '</select>'."\n";
-    
-    $fmtDay  = '<select name="%s[day]" id="%s" class="%s" style="%s">'."\n";
-    for ($d=1;$d<=31;$d++) {
-      if ($d == $defDay) {
-        $fmtDay .= "<option value=\"$d\" selected=\"selected\">$d</option>\n";
-      } else {
-        $fmtDay .= "<option value=\"$d\">$d</option>\n";
-      }
-    }
-    $fmtDay .= '</select> - '."\n";
-    
-    $fmtHour  = '<select name="%s[hour]" id="%s" class="%s" style="%s">'."\n";
-    for ($h=0 ; $h <= 23; $h++) {
-      if ($h == $defHour) {
-        $fmtHour .= "<option value=\"$h\" selected=\"selected\">$h</option>\n";
-      } else {
-        $fmtHour .= "<option value=\"$h\">$h</option>\n";
-      }
-    }
-    $fmtHour .= '</select> : ';
-    
-    $fmtMin  = '<select name="%s[min]" id="%s" class="%s" style="%s">'."\n";
-    for ($min=0;$min<=60;$min++) {
-      if ($min == $defMin) {
-        $fmtMin .= "<option value=\"$min\" selected=\"selected\">$min</option>\n";
-      } else {
-        $fmtMin .= "<option value=\"$min\">$min</option>\n";
-      }
-    }
-    $fmtMin .= '</select>'."\n";
-    
-    $formats = array($fmtYear, $fmtMonth, $fmtDay, $fmtHour, $fmtMin);
-    $results = array();
-    foreach ($formats as $format) {
-      $results[] = sprintf($format, $name, $id, $class, $style);
-    }
-    
-    return join("\n", $results);
+    return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATETIME);
   }
   
   public function date($name, $value, $default = '', $id = '', $class = '', $style = '')
@@ -345,47 +233,51 @@ class Sabel_Template_Form implements Iterator
     $defYear  = date('Y', $tsNow);
     $defMonth = date('n', $tsNow);
     $defDay   = date('d', $tsNow);
+    
+    $sYear  = new Sabel_Form_Select($name . '[year]');
+    $sMonth = new Sabel_Form_Select($name . '[month]');
+    $sDay   = new Sabel_Form_Select($name . '[day]');
+    
+    $listYears = (count($this->yearRange) === 0) ? array(2005, 2006, 2007): $listYears = $this->yearRange;
+    
+    foreach ($listYears as $year)
+      $sYear->addOption(new Sabel_Form_Option($year, $year, ($year == $defYear)));
+    
+    for ($m = 1; $m <= 12; ++$m)
+      $sMonth->addOption(new Sabel_Form_Option($m, $m, ($m == $defMonth)));
+    
+    for ($d = 1; $d <= 31; ++$d)
+      $sDay->addOption(new Sabel_Form_Option($d, $d, ($d == $defDay)));
+    
+    return $sYear->toHtml() . $sMonth->toHtml() . $sDay->toHtml();
+  }
+  
+  public function time($name, $value, $default = '', $id = '', $class = '', $style = '')
+  {
+    $tsNow    = time();
     $defHour  = date('G', $tsNow);
     $defMin   = date('i', $tsNow);
     
-    $listYear = (count($this->yearRange) === 0) ? array(2005, 2006, 2007): $listYear = $this->yearRange;;
-    $fmtYear  = '<select name="%s[year]" id="%s" class="%s" style="%s">'."\n";
-    foreach ($listYear as $year) {
-      if ($year == $defYear) {
-        $fmtYear .= "<option value=\"$year\" selected=\"selected\">$year</option>\n";
-      } else {
-        $fmtYear .= "<option value=\"$year\">$year</option>\n";
-      }
-    }
-    $fmtYear .= '</select>'."\n";
+    $hour = new Sabel_Form_Select($name . '[hour]');
+    $min  = new Sabel_Form_Select($name . '[min]');
     
-    $fmtMonth  = '<select name="%s[month]" id="%s" class="%s" style="%s">'."\n";
-    for ($m = 1; $m <= 12; $m++) {
-      if ($m == $defMonth) {
-        $fmtMonth .= "<option value=\"$m\" selected=\"selected\">$m</option>\n";
-      } else {
-        $fmtMonth .= "<option value=\"$m\">$m</option>\n";
-      }
-    }
-    $fmtMonth .= '</select>'."\n";
+    for ($h = 0; $h <= 23; ++$h)
+      $hour->addOption(new Sabel_Form_Option($h, $h, ($h == $defHour)));
     
-    $fmtDay  = '<select name="%s[day]" id="%s" class="%s" style="%s">'."\n";
-    for ($d=1;$d<=31;$d++) {
-      if ($d == $defDay) {
-        $fmtDay .= "<option value=\"$d\" selected=\"selected\">$d</option>\n";
-      } else {
-        $fmtDay .= "<option value=\"$d\">$d</option>\n";
-      }
-    }
-    $fmtDay .= '</select>'."\n";
+    for ($m = 0; $m <= 60; ++$m)
+      $min->addOption(new Sabel_Form_Option($m, $m, ($m == $defMin)));
     
-    $formats = array($fmtYear, $fmtMonth, $fmtDay);
-    $results = array();
-    foreach ($formats as $format) {
-      $results[] = sprintf($format, $name, $value, $id, $class, $style);
-    }
-    
-    return join("\n", $results);
+    return $hour->toHtml() . ' : ' . $min->toHtml();
+  }
+  
+  public function datetime($name, $value, $default = '', $id = '', $class = '', $style = '')
+  {
+    return $this->date($name, $value, $default, $id, $class, $style) .' - '. $this->time($name, $value);
+  }
+  
+  public function yearRange($range)
+  {
+    $this->yearRange = $range;
   }
   
   public function isError()
