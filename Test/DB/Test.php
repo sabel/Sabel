@@ -1014,7 +1014,7 @@ class Schema_Customer
     $property = array('connectName'  => 'default2',
                       'primaryKey'   => 'id',
                       'incrementKey' => null,
-                      'tableEngine'  => 'MyISAM');
+                      'tableEngine'  => 'InnoDB');
 
     return $property;
   }
@@ -1050,7 +1050,7 @@ class Schema_CustomerOrder
     $property = array('connectName'  => 'default',
                       'primaryKey'   => 'id',
                       'incrementKey' => 'id',
-                      'tableEngine'  => 'MyISAM'); 
+                      'tableEngine'  => 'InnoDB');
 
     return $property;
   }

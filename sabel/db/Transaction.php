@@ -30,14 +30,14 @@ class Sabel_DB_Transaction
     }
 
     if ($check) {
-      self::begin($conName, $driver);
+      self::begin($driver, $conName);
     } else {
       $msg = "begin transaction, but a table engine of the '{$model->table}' is {$engine}.";
       trigger_error($msg, E_USER_NOTICE);
     }
   }
 
-  public static function begin($connectName, $driver)
+  public static function begin($driver, $connectName = 'default')
   {
     if (!isset(self::$list[$connectName])) {
       $conn = Sabel_DB_Connection::getConnection($connectName);

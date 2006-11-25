@@ -44,8 +44,11 @@ class Sabel_DB_Property
       if (array_key_exists($key, $props)) $props[$key] = $val;
     }
 
-    $conName = (array_key_exists('connectName', $mdlProps)) ? $mdlProps['connectName']
-                                                            : 'default';
+    if (array_key_exists('connectName', $mdlProps)) {
+      $conName = $mdlProps['connectName'];
+    } else {
+      $conName = 'default';
+    }
 
     $properties = $this->initSchema($mdlName, $conName, $props['table']);
     $props['autoNumber'] = (isset($properties['incrementKey']));

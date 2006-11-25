@@ -209,12 +209,14 @@ class Sabel_DB_Executer
 
   public function getColumnNames($tblName = null)
   {
+    // @todo
     if (is_null($tblName)) return $this->getColumns();
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
   public function getTableSchema($tblName = null)
   {
+    // @todo
     return $this->property->getSchema();
   }
 
