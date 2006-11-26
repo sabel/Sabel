@@ -32,6 +32,7 @@ abstract class Sabel_DB_Schema_Common
     } else {
       $cols = $this->createColumns($tblName);
     }
+
     $schema = new Sabel_DB_Schema_Table($tblName, $cols);
     Sabel_DB_SimpleCache::add('schema_' . $tblName, $schema);
     return $schema;

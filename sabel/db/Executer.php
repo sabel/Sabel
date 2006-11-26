@@ -17,13 +17,23 @@ class Sabel_DB_Executer
     $constraints = array();
 
   protected
-    $driver = null;
+    $driver  = null,
+    $isModel = false;
 
-  public function __construct($tblName, $conName = 'default')
+  /**
+   * Sabel_DB_Executer constructor.
+   *
+   * @param array $properties
+   *   ['table']          => table name
+   *   ( ['connectName']  => connection name )
+   *   ( ['incrementKey'] => auto increment column )
+   *
+   * @return void
+   */
+  public function __construct($properties)
   {
-    $mdlName  = convert_to_modelname($tblName);
-    $props    = array('table' => $tblName, 'connectName' => $conName);
-    $this->setProperty(new Sabel_DB_Property($mdlName, $props));
+    $this->property = new Sabel_DB_Property();
+    $this->property->set($properties);
   }
 
   public function setProperty($property)
@@ -91,7 +101,6 @@ class Sabel_DB_Executer
 
   /**
    * create driver instance.
-   * return it if model have already had driver instance.
    *
    * @return object
    */
@@ -105,7 +114,6 @@ class Sabel_DB_Executer
 
   /**
    * create statement instance.
-   * load a statement instance from a driver and return it.
    *
    * @return object
    */
@@ -176,8 +184,8 @@ class Sabel_DB_Executer
 
   protected function checkIncColumn()
   {
-    $prop = $this->property;
-    return ($prop->isAutoNumber()) ? $prop->incrementKey : false;
+    $incCol = $this->property->incrementKey;
+    return (isset($incCol)) ? $incCol : false;
   }
 
   public function executeQuery($sql, $param)
@@ -209,15 +217,18 @@ class Sabel_DB_Executer
 
   public function getColumnNames($tblName = null)
   {
-    // @todo
-    if (is_null($tblName)) return $this->getColumns();
+    if (is_null($tblName) && $this->isModel) return $this->property->getColumns();
+
+    $tblName = (is_null($tblName)) ? $this->property->table : $tblName;
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
   public function getTableSchema($tblName = null)
   {
-    // @todo
-    return $this->property->getSchema();
+    if (is_null($tblName) && $this->isModel) return $this->property->getSchema();
+
+    $tblName = (is_null($tblName)) ? $this->property->table : $tblName;
+    return $this->createSchemaAccessor()->getTable($tblName);
   }
 
   public function getAllTableSchema()

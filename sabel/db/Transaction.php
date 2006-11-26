@@ -16,15 +16,16 @@ class Sabel_DB_Transaction
 
   public static function add($model)
   {
+    if (!$model instanceof Sabel_DB_Relation)
+      throw new Exception('argument must be an instance of Sabel_DB_Relation.');
+
     $driver  = $model->getDriver();
     $conName = $model->connectName;
     $db      = Sabel_DB_Connection::getDB($conName);
 
     if ($db === 'mysql') {
-      $sName    = Sabel_DB_Connection::getSchema($conName);
-      $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
-      $engine   = $accessor->getTableEngine($model->table, $driver);
-      $check    = ($engine === 'InnoDB' || $engine === 'BDB');
+      $engine = $model->tableEngine;
+      $check  = ($engine === 'InnoDB' || $engine === 'BDB');
     } else {
       $check = true;
     }

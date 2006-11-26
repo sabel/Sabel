@@ -11,8 +11,6 @@
  */
 class Sabel_DB_Model
 {
-  private $models = array();
-
   public static function load($mdlName)
   {
     return self::getClass($mdlName);
@@ -32,7 +30,7 @@ class Sabel_DB_Model
     if (!class_exists('Sabel_DB_Empty', false)) {
       eval('class Sabel_DB_Empty extends Sabel_DB_Relation
             {
-              public function __construct() { }
+              public function __construct() { $this->isModel = true; }
             }'
           );
     }

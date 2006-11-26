@@ -40,8 +40,8 @@ class Sabel_DB_Property
                    'myChildren'          => null,
                    'defChildConstraints' => array());
 
-    foreach ($mdlProps as $key => $val) {
-      if (array_key_exists($key, $props)) $props[$key] = $val;
+    foreach (array_keys($props) as $key) {
+      if (isset($mdlProps[$key])) $props[$key] = $mdlProps[$key];
     }
 
     if (array_key_exists('connectName', $mdlProps)) {
@@ -51,18 +51,12 @@ class Sabel_DB_Property
     }
 
     $properties = $this->initSchema($mdlName, $conName, $props['table']);
-    $props['autoNumber'] = (isset($properties['incrementKey']));
 
     if (is_null($properties['primaryKey']))
       trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
 
     $this->overrideProps = $props;
     $this->properties    = $properties;
-  }
-
-  public function set($properties)
-  {
-    $this->properties = $properties;
   }
 
   public function initSchema($mdlName, $conName, $tblName)
@@ -81,17 +75,11 @@ class Sabel_DB_Property
     $clsName  = 'Schema_' . $mdlName;
 
     if (class_exists($clsName, false)) {
-      $sClass = new $clsName();
-      $props  = $sClass->getProperty();
+      $sClass     = new $clsName();
+      $properties = $sClass->getProperty();
+      $properties['table'] = $tblName;
 
-      $properties = array('connectName'  => $props['connectName'],
-                          'primaryKey'   => $props['primaryKey'],
-                          'incrementKey' => $props['incrementKey'],
-                          'tableEngine'  => $props['tableEngine'],
-                          'table'        => $tblName);
-
-      $scmColumns = $this->createSchema($sClass->get());
-      $tblSchema  = $accessor->getTable($tblName, $scmColumns);
+      $tblSchema  = $accessor->getTable($tblName);
     } else {
       $database   = Sabel_DB_Connection::getDB($conName);
       $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
@@ -107,23 +95,19 @@ class Sabel_DB_Property
     $this->schema  = $tblSchema;
     $this->columns = array_keys($tblSchema->getColumns());
 
-    Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
     Sabel_DB_SimpleCache::add('columns_' . $tblName, $this->columns);
     Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
     return $properties;
   }
 
-  protected function createSchema($colInfos)
+  public function set($prop)
   {
-    $schema = array();
-    foreach ($colInfos as $colName => $colInfo) {
-      $co = new Sabel_DB_Schema_Column();
-      $co->name = $colName;
-      $schema[$colName] = $co->make($colInfo);
-    }
+    $myProp =& $this->properties;
 
-    return $schema;
+    $myProp['table']        = $prop['table'];
+    $myProp['connectName']  = (isset($prop['connectName']))  ? $prop['connectName']  : 'default';
+    $myProp['incrementKey'] = (isset($prop['incrementKey'])) ? $prop['incrementKey'] : null;
   }
 
   public function __set($key, $val)
@@ -305,18 +289,12 @@ class Sabel_DB_Property
    * this method is for mysql.
    * examine the engine of the table.
    *
-   * @param  object $driver driver an instance of Sabel_DB_Driver_Native_Mysql
-   *                                           or Sabel_DB_Driver_Pdo_Driver
+   * @param  object $driver driver an instance of Driver_Native_Mysql or Driver_Pdo_Driver
    * @return string table engine.
    */
   public function getStructure()
   {
     return $this->overrideProps['structure'];
-  }
-
-  public function isAutoNumber()
-  {
-    return $this->overrideProps['autoNumber'];
   }
 
   public function isWithParent()

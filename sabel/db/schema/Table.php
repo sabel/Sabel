@@ -15,10 +15,10 @@ class Sabel_DB_Schema_Table
   protected $tableName = '';
   protected $columns   = array();
 
-  public function __construct($name, $columns = null)
+  public function __construct($name, $columns)
   {
     $this->tableName = $name;
-    if (isset($columns)) $this->columns = $columns;
+    $this->columns   = $columns;
   }
 
   public function __get($key)

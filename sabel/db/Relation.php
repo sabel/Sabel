@@ -25,6 +25,8 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function __construct($param1 = null, $param2 = null)
   {
+    $this->isModel = true;
+
     if (is_null($this->property)) $this->createProperty();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
@@ -54,12 +56,12 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   public function schema($tblName = null)
   {
     if (isset($tblName)) $this->getTableSchema($tblName)->getColumns();
-    
+
     $columns = $this->getSchema()->getColumns();
     foreach ($this->getData() as $name => $value) {
       if (isset($columns[$name])) $columns[$name]->value = $this->convertData($name, $value);
     }
-    
+
     return $columns;
   }
 
@@ -159,7 +161,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   /**
    * retrieve rows from table by join query of some types.
    *
-   * @param  array  $modelPairs model pairs. (ex. 'Hoge:Huga'
+   * @param  array  $modelPairs model pairs. (ex. 'Hoge:Huga', 'Hoge:Foo', 'Foo:Bar'
    * @param  string $joinType   'INNER'( default ) or 'LEFT' or 'RIGHT'
    * @param  array  $colList    key is model name. and set the columns name in it.
    * @return array
@@ -311,12 +313,12 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   }
 
   /**
-   * retrieve rows from table.
+   * retrieve rows
    *
    * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
    * @param  mixed    $param2 condition value.
    * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
-   * @return array
+   * @return mixed    array or false.
    */
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
@@ -361,10 +363,25 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   protected function addParent($row)
   {
     $this->parentTables = array($this->table);
-    return $this->checkForeignKey($row, $this->primaryKey);
+    return $this->addParentModels($row, $this->primaryKey);
   }
 
-  private function addParentModels($tblName, $id)
+  private function addParentModels($row, $pKey)
+  {
+    foreach ($row as $key => $val) {
+      if (strpos($key, "_{$pKey}") !== false) {
+        $tblName = str_replace("_{$pKey}", '', $key);
+        $result  = $this->createParentModels($tblName, $val);
+        if ($result) {
+          $mdlName = convert_to_modelname($tblName);
+          $row[$mdlName] = $result;
+        }
+      }
+    }
+    return $row;
+  }
+
+  private function createParentModels($tblName, $id)
   {
     $tblName = strtolower($tblName);
     if ($this->getStructure() !== 'tree' && $this->isAcquired($tblName)) return false;
@@ -385,24 +402,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       Sabel_DB_SimpleCache::add($tblName . $id, $row);
     }
 
-    $row = $this->checkForeignKey($row, $model->primaryKey);
+    $row = $this->addParentModels($row, $model->primaryKey);
     $this->setData($model, $row);
     return $model;
-  }
-
-  private function checkForeignKey($row, $pKey)
-  {
-    foreach ($row as $key => $val) {
-      if (strpos($key, "_{$pKey}") !== false) {
-        $tblName = str_replace("_{$pKey}", '', $key);
-        $result  = $this->addParentModels($tblName, $val);
-        if ($result) {
-          $mdlName = convert_to_modelname($tblName);
-          $row[$mdlName] = $result;
-        }
-      }
-    }
-    return $row;
   }
 
   private function isAcquired($tblName)
@@ -414,8 +416,6 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   /**
    * fetch the children by relating own primary key to foreign key of a given table name.
-   *   strongly recommend 'id' for a primary key.
-   *   strongly recommend parent table name + '_id' for a foreign key.
    *
    * @param  string $child model name.
    * @param  mixed  $model need not be used. ( used internally )
@@ -584,7 +584,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   }
 
   /**
-   * remove row(s) from the table.
+   * remove row(s)
    *
    * @param  mixed     $param1 column name ( with the condition prefix ), or value of primary key.
    * @param  mixed     $param2 condition value.
