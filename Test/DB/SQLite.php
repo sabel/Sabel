@@ -80,13 +80,19 @@ class SQLiteHelper
                  id int4 primary key,
                  name varchar(24),
                  email varchar(128),
-                 city_id int4 not null)';
+                 city_id int4 not null,
+                 company_id integer not null)';
 
     $sqls[] = 'CREATE TABLE city (
                  id int4 primary key,
                  name varchar(24),
                  classification_id integer,
                  country_id int4 not null)';
+
+    $sqls[] = 'CREATE TABLE company (
+                 id integer primary key,
+                 city_id integer not null,
+                 name varchar(24))';
 
     $sqls[] = 'CREATE TABLE country (
                  id int4 primary key,

@@ -29,7 +29,8 @@ class Sabel_DB_Fusion
   public function __construct($models, $mdlNames)
   {
     foreach ($models as $model) {
-      $this->models[convert_to_modelname($model->table)] = $model;
+      $mdlName = convert_to_modelname($model->table);
+      $this->models[$mdlName] = $model;
     }
 
     $this->baseModel = $mdlNames[0];
@@ -104,13 +105,13 @@ class Sabel_DB_Fusion
     $this->createModel($this->combCondition[$mdlName], $model, $mdlName);
   }
 
-  private function createModel($parents, $child, $mdlName)
+  protected function createModel($parents, $child, $mdlName)
   {
     $mdlNames = array();
     $models   = array();
 
     foreach ($parents as $parent => $keys) {
-      unset($this->combCondition[$parent][$mdlName]);
+      $this->unsetCombCondition($parent, $mdlName);
 
       list($fKey, $pKey) = $keys;
       $model = $this->models[$parent]->selectOne($pKey, $child->$fKey);
@@ -124,6 +125,13 @@ class Sabel_DB_Fusion
     for ($i = 0; $i < sizeof($mdlNames); $i++) {
       $this->createParents($mdlNames[$i], $models[$i]);
     }
+  }
+
+  protected function unsetCombCondition($key1, $key2)
+  {
+    $cc =& $this->combCondition;
+    unset($cc[$key1][$key2]);
+    if (empty($cc[$key1])) unset($cc[$key1]);
   }
 
   private function addPrefixData()

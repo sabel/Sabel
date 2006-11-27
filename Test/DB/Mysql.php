@@ -88,13 +88,19 @@ class MysqlHelper
                  id integer primary key,
                  name varchar(24),
                  email varchar(128),
-                 city_id integer not null) type=InnoDB';
+                 city_id integer not null,
+                 company_id integer not null) type=InnoDB';
 
     $sqls[] = 'CREATE TABLE city (
                  id integer primary key,
                  name varchar(24),
                  classification_id integer,
                  country_id integer not null) type=InnoDB';
+
+    $sqls[] = 'CREATE TABLE company (
+                 id integer primary key,
+                 city_id integer not null,
+                 name varchar(24))';
 
     $sqls[] = 'CREATE TABLE country (
                  id integer primary key,

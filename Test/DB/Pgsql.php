@@ -88,7 +88,13 @@ class PgsqlHelper
                  id integer primary key,
                  name varchar(24),
                  email varchar(128),
-                 city_id integer not null)';
+                 city_id integer not null,
+                 company_id integer not null)';
+
+    $sqls[] = 'CREATE TABLE company (
+                 id integer primary key,
+                 city_id integer not null,
+                 name varchar(24))';
 
     $sqls[] = 'CREATE TABLE city (
                  id integer primary key,

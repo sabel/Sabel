@@ -3,7 +3,7 @@
 class Test_DB_Test extends SabelTestCase
 {
   public static $db = '';
-  public static $TABLES = array('basic', 'users', 'city', 'country',
+  public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
                                 'test_for_like', 'test_condition', 'blog',
                                 'customer_order', 'classification', 'favorite_item');
 
@@ -29,10 +29,28 @@ class Test_DB_Test extends SabelTestCase
   public function testParent()
   {
     $data = array();
-    $data[] = array('id' => 1, 'name' => 'username1', 'email' => 'user1@example.com', 'city_id' => 4);
-    $data[] = array('id' => 2, 'name' => 'username2', 'email' => 'user2@example.com', 'city_id' => 3);
-    $data[] = array('id' => 3, 'name' => 'username3', 'email' => 'user3@example.com', 'city_id' => 2);
-    $data[] = array('id' => 4, 'name' => 'username4', 'email' => 'user4@example.com', 'city_id' => 1);
+    $data[] = array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1);
+    $data[] = array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1);
+    $data[] = array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2);
+    $data[] = array('id' => 4, 'name' => 'osaka-company2',     'city_id' => 2);
+    $data[] = array('id' => 5, 'name' => 'san diego-company1', 'city_id' => 3);
+    $data[] = array('id' => 6, 'name' => 'san diego-company2', 'city_id' => 3);
+    $data[] = array('id' => 7, 'name' => 'rondon-company1',    'city_id' => 4);
+    $data[] = array('id' => 8, 'name' => 'rondon-company2',    'city_id' => 4);
+
+    $shop = Sabel_DB_Model::load('Company');
+    $shop->multipleInsert($data);
+
+    $data = array();
+    $data[] = array('id' => 1, 'name' => 'username1', 'email' => 'user1@example.com',
+                    'city_id' => 4, 'company_id' => 7);
+    $data[] = array('id' => 2, 'name' => 'username2', 'email' => 'user2@example.com',
+                    'city_id' => 3, 'company_id' => 5);
+    $data[] = array('id' => 3, 'name' => 'username3', 'email' => 'user3@example.com',
+                    'city_id' => 2, 'company_id' => 4);
+    $data[] = array('id' => 4, 'name' => 'username4', 'email' => 'user4@example.com',
+                    'city_id' => 1, 'company_id' => 2);
+
     $users = new Users();
     $users->multipleInsert($data);
 
@@ -575,7 +593,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $model = new Users();
     $model->sconst('order', 'users.id');
-    $modelPairs = array('Users:City', 'City:Country', 'City:Classification');
+    $modelPairs = array('Users:City', 'Users:Company', 'City:Country', 'City:Classification', 'Company:City');
     $users = $model->selectJoin($modelPairs);
 
     $this->assertEquals(count($users), 4);
@@ -600,6 +618,13 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($user2->City->Country->name, 'usa');
     $this->assertEquals($user3->City->Country->name, 'japan');
     $this->assertEquals($user4->City->Country->name, 'japan');
+
+    $this->assertEquals($user4->Company->id, 2);
+    $this->assertEquals($user4->City->id, 1);
+    $this->assertEquals($user4->City->name, 'tokyo');
+    $this->assertEquals($user4->Company->name, 'tokyo-company2');
+    $this->assertEquals($user4->Company->City->id, 1);
+    $this->assertEquals($user4->Company->City->name, 'tokyo');
   }
 
   public function testFusionModel()
@@ -609,6 +634,7 @@ class Test_DB_Test extends SabelTestCase
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->id, 4);
+    $this->assertEquals((int)$fusioned->city_id, 1);
     $this->assertEquals((int)$fusioned->City_id, 1);
     $this->assertEquals((int)$fusioned->Country_id, 1);
     $this->assertEquals($fusioned->name, 'username4');
@@ -666,8 +692,13 @@ class Test_DB_Test extends SabelTestCase
 
   public function testMoreFusionConditionTest()
   {
+    // ok.
+    //$model = Sabel_DB_Model::fusion(array('City', 'Users', 'Classification', 'Country'));
+    //$model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
+
     $model = Sabel_DB_Model::fusion(array('City', 'Users', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
+    $model->setCombination(array('Users:City', 'City:Country', 'City:Classification'));
+
     $fusioned = $model->selectOne('id', 4);
 
     $this->assertEquals((int)$fusioned->Users_id, 1);
@@ -808,17 +839,19 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($orders);
 
     $model = Sabel_DB_Model::load('CustomerOrder');
-    Sabel_DB_Transaction::add($model);
+    Sabel_DB_Transaction::add($model); // db1 start transaction.
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
 
     $model = Sabel_DB_Model::load('Customer');
-    Sabel_DB_Transaction::add($model);
+    Sabel_DB_Transaction::add($model); // db2 start transaction.
     $model->save(array('id' => 1, 'name' => 'name'));
     $model->save(array('id' => 2, 'name' => 'name'));
+    // 'nama' not found -> execute rollback.
     try { @$model->save(array('id' => 3, 'nama' => 'name')); } catch (Exception $e) {}
 
+    // not execute.
     Sabel_DB_Transaction::commit();
 
     $customers = Sabel_DB_Model::load('Customer')->select();

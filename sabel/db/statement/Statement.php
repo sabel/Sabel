@@ -170,7 +170,7 @@ abstract class Sabel_DB_Statement
     }
   }
 
-  public function escape($val)
+  protected function escape($val)
   {
     $escMethod = $this->escMethod;
 

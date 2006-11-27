@@ -1,13 +1,13 @@
 <?php
 
-// define('SABEL',      '/Users/morireo/Repository/sabel/sabel/');
+define('SCHEMA_DIR', 'schema/');
+//define('SABEL', '/usr/local/.../.../');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
 }
 
 define('SABEL_DB',   SABEL . 'db/');
-define('SCHEMA_DIR', 'schema/');
 
 require_once SABEL_DB . 'Connection.php';
 require_once SABEL_DB . 'Executer.php';
@@ -29,8 +29,6 @@ require_once SABEL_DB . 'SimpleCache.php';
 require_once SABEL_DB . 'Transaction.php';
 require_once SABEL_DB . 'Property.php';
 require_once SABEL_DB . 'Relation.php';
-require_once SABEL_DB . 'Tree.php';
-require_once SABEL_DB . 'Bridge.php';
 
 require_once SABEL_DB . 'schema/Const.php';
 
@@ -56,7 +54,6 @@ require_once SABEL_DB . 'schema/Pgsql.php';
 require_once SABEL_DB . 'schema/Sqlite.php';
 require_once SABEL_DB . 'schema/Mssql.php';
 require_once SABEL_DB . 'schema/Accessor.php';
-require_once SABEL_DB . 'schema/util/Creator.php';
 
 require_once SABEL . 'config/Spyc.php';
 require_once SABEL . 'config/Yaml.php';
@@ -307,7 +304,7 @@ class Schema_Maker
   }
 }
 
-class Schema_Util_Generator
+class Schema_Generator
 {
   public static $connectNameList = array();
 
@@ -357,11 +354,11 @@ class Schema_Util_Generator
 }
 
 if (count($_SERVER['argv']) === 1) {
-  echo "usage: php Generator.php environment\n";
-  echo "       [-c] make cascade chain\n";
-  echo "       [-l] make table list\n";
-  echo "       [-s] make schema : table name1, name2... , or all\n";
+  echo "Usage: php schema.php [environment]\n";
+  echo "       -c  make cascade chain\n";
+  echo "       -l  make table list\n";
+  echo "       -s  make schema : table name1, name2... , or all\n";
   exit;
 }
 
-Schema_Util_Generator::main();
+Schema_Generator::main();

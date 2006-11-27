@@ -36,14 +36,6 @@ class Sabel_DB_Executer
     $this->property->set($properties);
   }
 
-  public function setProperty($property)
-  {
-    if (!$property instanceof Sabel_DB_Property)
-      throw new Exception('argument should be an instance of Sabel_DB_Property.');
-
-    $this->property = $property;
-  }
-
   /**
    * setting condition.
    *

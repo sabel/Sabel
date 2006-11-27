@@ -19,7 +19,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private
     $parentTables    = array(),
-    $relational      = array(),
+    $refStructure    = array(),
     $acquiredParents = array(),
     $cascadeStack    = array();
 
@@ -33,7 +33,15 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private function createProperty()
   {
-    $this->property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
+    $this->setProperty(new Sabel_DB_Property(get_class($this), get_object_vars($this)));
+  }
+
+  public function setProperty($property)
+  {
+    if (!$property instanceof Sabel_DB_Property)
+      throw new Exception('argument should be an instance of Sabel_DB_Property.');
+
+    $this->property = $property;
   }
 
   public function __set($key, $val)
@@ -55,7 +63,9 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function schema($tblName = null)
   {
-    if (isset($tblName)) $this->getTableSchema($tblName)->getColumns();
+    if (isset($tblName)) {
+      return $this->getTableSchema($tblName)->getColumns();
+    }
 
     $columns = $this->getSchema()->getColumns();
     foreach ($this->getData() as $name => $value) {
@@ -121,7 +131,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
-    $this->makeFindObject($this);
+    $this->createModel($this);
   }
 
   /**
@@ -138,10 +148,10 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setCondition($param1, $param2, $param3);
-    return $this->makeFindObject(clone($this));
+    return $this->createModel(clone($this));
   }
 
-  private function makeFindObject($model)
+  protected function createModel($model)
   {
     $projection = $model->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
@@ -156,6 +166,59 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       }
     }
     return $model;
+  }
+
+  /**
+   * retrieve rows
+   *
+   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed    $param2 condition value.
+   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return mixed    array or false.
+   */
+  public function select($param1 = null, $param2 = null, $param3 = null)
+  {
+    $this->setCondition($param1, $param2, $param3);
+    if ($this->isWithParent() && $this->prepareAutoJoin($this->table)) {
+      return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
+    }
+
+    $projection = $this->getProjection();
+    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
+    return $this->createModels($this);
+  }
+
+  protected function createModels($model, $child = null)
+  {
+    $resultSet = $model->exec();
+    if ($resultSet->isEmpty()) return false;
+
+    $models = array();
+    foreach ($resultSet as $row) {
+      if (is_null($child)) {
+        $model = $this->newClass($this->table);
+        $withParent = $this->isWithParent();
+
+        $cconst = $this->getChildConstraint();
+        if ($cconst) $model->receiveChildConstraint($cconst);
+      } else {
+        $model = $this->newClass($child);
+        $withParent = ($this->isWithParent()) ? true : $model->isWithParent();
+      }
+
+      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
+      if ($myChild = $model->getMyChildren()) {
+        if (isset($child)) $this->chooseChildConstraint($myChild, $model);
+        $this->getDefaultChild($myChild, $model);
+      }
+      $models[] = $model;
+    }
+    return $models;
+  }
+
+  public function join()
+  {
+    // @todo
   }
 
   /**
@@ -175,7 +238,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $joinTables = array();
     $myTable    = $this->table;
     $relTables  = $this->toTablePair($modelPairs);
-    $colList    = $this->remakeColList($colList);
+    $colList    = $this->convertColListKeys($colList);
 
     $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames();
     foreach ($columns as $column) $sql[] = "{$myTable}.{$column}, ";
@@ -188,9 +251,13 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $sql = array(substr(join('', $sql), 0, -2));
     $sql[] = " FROM {$myTable}";
 
+    $acquired = array();
     foreach ($relTables as $pair) {
       list($child, $parent) = array_values($pair);
-      $sql[] = " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id ";
+      if (!in_array($parent, $acquired)) {
+        $sql[] = " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id";
+        $acquired[] = $parent;
+      }
     }
 
     $this->getStatement()->setBasicSQL(join('', $sql));
@@ -200,17 +267,17 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $results = array();
     foreach ($resultSet as $row) {
       list($self, $models) = $this->makeEachModels($row, $joinTables);
-      $relational = $this->relational;
+      $ref = $this->refStructure;
 
       foreach ($joinTables as $tblName) {
-        if (!isset($relational[$tblName])) continue;
-        foreach ($relational[$tblName] as $parent) {
+        if (!isset($ref[$tblName])) continue;
+        foreach ($ref[$tblName] as $parent) {
           $mdlName = convert_to_modelname($parent);
           $models[$tblName]->dataSet($mdlName, $models[$parent]);
         }
       }
 
-      foreach ($relational[$myTable] as $parent) {
+      foreach ($ref[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
         $self->dataSet($mdlName, $models[$parent]);
         $self->$mdlName = $models[$parent];
@@ -220,19 +287,20 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return $results;
   }
 
-  private function toTablePair($modelPairs)
+  protected function toTablePair($modelPairs)
   {
     $relTables = array();
 
+    $ref =& $this->refStructure;
     foreach ($modelPairs as $pair) {
       list($child, $parent) = array_map('convert_to_tablename', explode(':', $pair));
-      $this->relational[$child][] = $parent;
-      $relTables[] = array($child, $parent);
+      $ref[$child][] = $parent;
+      $relTables[]   = array($child, $parent);
     }
     return $relTables;
   }
 
-  private function remakeColList($colList)
+  protected function convertColListKeys($colList)
   {
     if (empty($colList)) return array();
 
@@ -244,7 +312,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return $colList;
   }
 
-  private function addJoinColumns(&$sql, $tblName, $colList = null)
+  protected function addJoinColumns(&$sql, $tblName, $colList = null)
   {
     $columns = (isset($colList[$tblName])) ? $colList[$tblName] : $this->getColumnNames($tblName);
     foreach ($columns as $column) {
@@ -285,7 +353,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return array($model, $models);
   }
 
-  private function prepareAutoJoin($tblName)
+  protected function prepareAutoJoin($tblName)
   {
     if (!$sClass = get_schema_by_tablename($tblName)) return false;
     if (!$this->isSameConnectName($sClass->getProperty())) return false;
@@ -312,61 +380,13 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return true;
   }
 
-  /**
-   * retrieve rows
-   *
-   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
-   * @param  mixed    $param2 condition value.
-   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
-   * @return mixed    array or false.
-   */
-  public function select($param1 = null, $param2 = null, $param3 = null)
-  {
-    $this->setCondition($param1, $param2, $param3);
-    if ($this->isWithParent() && $this->prepareAutoJoin($this->table)) {
-      return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
-    }
-
-    $projection = $this->getProjection();
-    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
-    return $this->getRecords($this);
-  }
-
-  private function getRecords($model, $child = null)
-  {
-    $resultSet = $model->exec();
-    if ($resultSet->isEmpty()) return false;
-
-    $models = array();
-    foreach ($resultSet as $row) {
-      if (is_null($child)) {
-        $model = $this->newClass($this->table);
-        $withParent = $this->isWithParent();
-
-        $cconst = $this->getChildConstraint();
-        if ($cconst) $model->receiveChildConstraint($cconst);
-      } else {
-        $model = $this->newClass($child);
-        $withParent = ($this->isWithParent()) ? true : $model->isWithParent();
-      }
-
-      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
-      if ($myChild = $model->getMyChildren()) {
-        if (isset($child)) $this->chooseChildConstraint($myChild, $model);
-        $this->getDefaultChild($myChild, $model);
-      }
-      $models[] = $model;
-    }
-    return $models;
-  }
-
   protected function addParent($row)
   {
     $this->parentTables = array($this->table);
     return $this->addParentModels($row, $this->primaryKey);
   }
 
-  private function addParentModels($row, $pKey)
+  protected function addParentModels($row, $pKey)
   {
     foreach ($row as $key => $val) {
       if (strpos($key, "_{$pKey}") !== false) {
@@ -437,12 +457,12 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $cconst = $model->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
-    $children = $model->getRecords($cModel, $child);
+    $children = $model->createModels($cModel, $child);
     if ($children) $model->dataSet($child, $children);
     return $children;
   }
 
-  private function getDefaultChild($children, $model)
+  protected function getDefaultChild($children, $model)
   {
     $children = (is_string($children)) ? (array)$children : $children;
 
@@ -452,7 +472,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
   }
 
-  private function chooseChildConstraint($child, $model)
+  protected function chooseChildConstraint($child, $model)
   {
     $thisDefault = $this->getDefChildConstraint();
     $thisCConst  = $this->getChildConstraint();
@@ -514,7 +534,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     return ($this->modelExists($mdlName)) ? new $mdlName : Sabel_DB_Model::load($mdlName);
   }
 
-  private function modelExists($className)
+  protected function modelExists($className)
   {
     return (class_exists($className, false) && strtolower($className) !== 'sabel_db_empty');
   }
