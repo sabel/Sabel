@@ -2,7 +2,10 @@
 
 class Sabel_Request_Remote
 {
-  public static function remoteRequest($host, $path, $param = '', $method = 'post', $port = 80, $ua = 'sabel')
+  protected $requestHeaders  = array();
+  protected $responseHeaders = array();
+  
+  public function remoteRequest($host, $path, $param = '', $method = 'post', $port = 80, $ua = 'sabel')
   {
     if (is_array($param)) {
       $request = array();
@@ -13,44 +16,55 @@ class Sabel_Request_Remote
     }
     $request_length = strlen($request);
     
+    $headers = array();
+    
     switch (strtolower($method)) {
       case 'post':
-        $header  = "POST $path HTTP/1.0\r\n";
-        $header .= "Host: $host\r\n";
-        if($ua) $header .= "User-Agent: $ua\r\n";
-        $header .= "Content-type:  application/x-www-form-urlencoded\r\n";
-        $header .= "Content-length: $request_length\r\n";
-        $header .= "\r\n";
+        $headers[] = "POST {$path} HTTP/1.0";
+        $headers[] = "Content-length: {$request_length}";
+        $headers[] = "Content-Type: application/x-www-form-urlencoded";
         break;
       case 'get':
-        $header  = "GET $path?$request HTTP/1.1\r\n";
-        $header .= "Host: $host\r\n";
-        if ($ua) $header .= "User-Agent: $ua\r\n";
-        $header .= "Content-type:  application/x-www-form-urlencoded\r\n";
-        $header .= "Content-length: $request_length\r\n";
-        $header .= "\r\n";
+        $headers[] = "GET {$path}?{$request} HTTP/1.0";
+        $headers[] = "Content-length: {$request_length}";
+        break;
+      case 'put':
+        $headers[] = "POST {$path} HTTP/1.0";
+        $headers[] = "Contents-length: {$request_length}";
+        $headers[] = "Content-Type: application/x-www-form-urlencoded";
+        break;
+      case 'delete':
+        $headers[] = "DELETE {$path}?{$request} HTTP/1.0";
+        $headers[] = "Contents-length: {$request_length}";
         break;
       default:
-        $header  = "$method $path HTTP/1.0\r\n";
-        $header .= "Host: $host\r\n";
-        if ($ua) $header .= "User-Agent: $ua\r\n";
+        $headers[] = "{$method} {$path} HTTP/1.0";
         break;
     }
     
+    $headers[] = "Host: $host";
+    $headers[] = "Connection: close";
+    if($ua) $headers[] = "User-Agent: $ua";
+    
     $sock = stream_socket_client("tcp://{$host}:{$port}", $errno, $errstr, 1, STREAM_CLIENT_CONNECT);
+    stream_set_timeout($sock, 15);
     stream_set_blocking($sock, 1);
     
-    if (!$sock) { 
-      throw new Sabel_Exception_Runtime("can't connect to remote server.");
-    }
+    if (!$sock) throw new Sabel_Exception_Runtime("can't connect to remote server.");
     
-    stream_socket_sendto($sock, $header.$request);
+    stream_socket_sendto($sock, join("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n");
+    
+    $this->requestHeaders = $headers;
     $response = '';
     
     $headerFlag = true;
     while (!feof($sock)) {
       $line = stream_get_line($sock, 8192, "\n");
-      if (!$headerFlag) $response = $line;
+      if (!$headerFlag) {
+        $response = $line;
+      } else {
+        $this->responseHeaders[] = $line;
+      }
       
       if ($headerFlag && trim($line) === "") {
         $headerFlag = false;
@@ -60,5 +74,15 @@ class Sabel_Request_Remote
     }
     
     return $response;
+  }
+  
+  public function getRequestHeaders()
+  {
+    return $this->requestHeaders;
+  }
+  
+  public function getResponseHeaders()
+  {
+    return $this->responseHeaders;
   }
 }

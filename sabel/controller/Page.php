@@ -24,6 +24,8 @@ abstract class Sabel_Controller_Page
     $container   = null,
     $destination = null;
   
+  protected $disableSession = false;
+  
   protected
     $security   = null,
     $identity   = null,
@@ -62,12 +64,16 @@ abstract class Sabel_Controller_Page
   
   public function setup()
   {
-    $this->security    = Sabel_Security_Security::create();
-    $this->identity    = $this->security->getIdentity();
     $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
-    $this->storage     = Sabel_Storage_Session::create();
+    
+    if (!$this->disableSession) {
+      $this->storage   = Sabel_Storage_Session::create();
+      $this->security  = Sabel_Security_Security::create();
+      $this->identity  = $this->security->getIdentity();
+    }
+    
     $this->destination = $this->entry->getDestination();
     $this->action      = $this->destination->action;
     
@@ -88,6 +94,8 @@ abstract class Sabel_Controller_Page
   
   public function execute()
   {
+    header('X-Framework: Sabel');
+    header('X-Sabel-Version: alpha2');
     $actionName = $this->destination->action;
     
     if (isset($this->reserved[$actionName]))
@@ -206,7 +214,9 @@ abstract class Sabel_Controller_Page
       }
     }
     
-    $this->storage->write('previous', $this->request->__toString());
+    if (is_object($this->storage)) {
+      $this->storage->write('previous', $this->request->__toString());
+    }
   }
   
   public function hasMethod($name)
