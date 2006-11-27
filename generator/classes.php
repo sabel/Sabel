@@ -4,7 +4,7 @@ class SabelDirectoryAndFileCreator
 {
   public function accept($element, $type, $child = null)
   {
-    if (defined('TEST_CASE')) $element = RUN_BASE . $element;
+    if (defined('TEST_CASE')) $element = RUN_BASE . '/' . $element;
     
     if ($type === 'dir') {
       if (is_dir($element)) {
@@ -41,7 +41,7 @@ class SabelDirectoryAndFileRemover
   
   public function accept($element, $type, $child = null)
   {
-    if (defined('TEST_CASE')) $element = RUN_BASE . $element;
+    if (defined('TEST_CASE')) $element = RUN_BASE  . '/' . $element;
     
     if ($type === 'dir') {
       if (!@rmdir($element)) $this->stack[] = $element;

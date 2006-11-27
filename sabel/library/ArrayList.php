@@ -44,7 +44,8 @@ class Sabel_Library_ArrayList implements Iterator
    *
    */
   public function current() {
-    return $this->array[$this->position];
+    $pos = $this->position;
+    return (isset($this->array[$pos])) ? $this->array[$pos] : null;
   }
   
   /**

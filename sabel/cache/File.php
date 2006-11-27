@@ -32,7 +32,7 @@ class Sabel_Cache_File
   
   public function append($value)
   {
-    $fp = fopen($path, 'a+');
+    $fp = fopen($this->path, 'a+');
     if (!$fp) return null;
     $this->writeToFile($fp, $value);
     fclose($fp);

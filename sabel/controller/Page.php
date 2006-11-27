@@ -12,11 +12,11 @@
 abstract class Sabel_Controller_Page
 {
   protected
-    
     $entry       = null,
     $cache       = null,
     $logger      = null,
     $request     = null,
+    $httpMethod  = 'GET',
     $requests    = array(),
     $storage     = null,
     $response    = null,
@@ -70,6 +70,10 @@ abstract class Sabel_Controller_Page
     $this->storage     = Sabel_Storage_Session::create();
     $this->destination = $this->entry->getDestination();
     $this->action      = $this->destination->action;
+    
+    if (isset($_SERVER['REQUEST_METHOD'])) {
+      $this->httpMethod = $_SERVER['REQUEST_METHOD'];
+    }
   }
   
   public function getAction()
@@ -161,7 +165,7 @@ abstract class Sabel_Controller_Page
   protected function methodExecute($action)
   {
     $specificAction = false;
-    $reqMethod = strtolower($_SERVER['REQUEST_METHOD']);
+    $reqMethod = strtolower($this->httpMethod);
     $actionName = $reqMethod.ucfirst($action);
     
     if ($this->hasMethod($actionName)) {

@@ -1,6 +1,6 @@
 default:
-  uri: :module/:controller/:action/:id
+  uri: :controller/:action/:id
   destination:
     module:     index
-    controller: index
-    action:     index
+    controller: :controller
+    action:     :action

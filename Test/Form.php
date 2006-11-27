@@ -14,7 +14,7 @@ class Test_Form extends PHPUnit2_Framework_TestCase
   
   public function testSelect()
   {
-    $select = new Sabel_Form_Select('name', 'id', 'class', 'style');
+    $select = new Sabel_Form_Select('name');
     $select->addOption(new Sabel_Form_Option('optElem', 'value'));
     $expOne = '<select name="name"><option value="value" >optElem</option></select>';
     $this->assertEquals($expOne, $select->toHtml(true));
@@ -63,7 +63,7 @@ class Test_Form extends PHPUnit2_Framework_TestCase
   
   public function testSelectOptionAndOptionGroup()
   {
-    $select = new Sabel_Form_Select('name', 'id', 'class', 'style');
+    $select = new Sabel_Form_Select('name');
     $select->addOption(new Sabel_Form_Option('outer'));
     
     $og = new Sabel_Form_OptionGroup('label');

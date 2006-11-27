@@ -10,8 +10,10 @@ class Sabel_Map_Builder
 {
   protected static $maps = null;
   
-  public function __construct($path, $reset = false)
+  public function __construct($path = null, $reset = false)
   {
+    if (is_null($path)) return 0;
+    
     if ($reset) self::$maps = null;
     
     $bcpath = RUN_BASE . '/cache/map.cache';
@@ -20,8 +22,21 @@ class Sabel_Map_Builder
       self::$maps = unserialize(file_get_contents($bcpath));
     } else {
       if (is_null(self::$maps)) self::$maps = new Sabel_Config_Yaml($path);
-      file_put_contents($bcpath, serialize(self::$maps));
+      
+      if (is_writable($bcpath)) {
+        file_put_contents($bcpath, serialize(self::$maps));
+      } elseif (($fp = fopen($bcpath, 'w+'))) {
+        fwrite($fp, serialize(self::$maps));
+        fclose($fp);
+      } else {
+        throw new Sabel_Exception_Runtime($bcpath . " can't open.");
+      }
     }
+  }
+  
+  public function load($path)
+  {
+    self::$maps = new Sabel_Config_Yaml($path);
   }
   
   public function build($facade = null)

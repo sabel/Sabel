@@ -1,7 +1,7 @@
 <?php
 
 define('SABEL_BASE', dirname(realpath(__FILE__)));
-define('RUN_BASE', SABEL_BASE . '/Test/data/application/');
+define('RUN_BASE', SABEL_BASE . '/Test/data/application');
 define('TEST_CASE', true);
 define('ENVIRONMENT', 'development');
 
@@ -39,7 +39,7 @@ require_once('Test/Resolver.php');
 
 require_once('Test/Container.php');
 require_once('Test/Classes.php');
-require_once('Test/Cache.php');
+// require_once('Test/Cache.php');
 
 require_once('Test/DB/Tests.php');
 require_once('Test/Map/Tests.php');
@@ -78,7 +78,7 @@ class SabelAllTests
     $suite->addTest(Test_Resolver::suite());
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Classes::suite());
-    $suite->addTest(Test_Cache::suite());
+    // $suite->addTest(Test_Cache::suite());
     
     $suite->addTest(Test_Pager::suite());
     $suite->addTest(Test_PageViewer::suite());

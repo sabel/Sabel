@@ -69,6 +69,9 @@ class Sabel_Map_Facade implements Iterator
   
   public function getEntry($name)
   {
+    if (!isset($this->entries[$name]))
+      throw new Sabel_Exception_Runtime("{$name} entry does't exists in map entries");
+    
     $entry = $this->entries[$name];
     $entry->setRequest($this->requestUri);
     return $entry;

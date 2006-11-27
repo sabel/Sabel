@@ -32,7 +32,7 @@ class Sabel_Controller_Front
   
   public function ignition($request = null)
   {
-    $builder = new Sabel_Map_Builder(RUN_BASE.'/config/map.yml');
+    $builder = new Sabel_Map_Builder(RUN_BASE . '/config/map.yml');
     
     $map = Sabel_Map_Facade::create();
     

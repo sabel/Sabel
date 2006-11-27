@@ -48,7 +48,14 @@ class Sabel_Annotation_Reader
         $this->process($method->getDocComment());
       }
       self::$annotation[$className] = $this->list;
-      file_put_contents($this->path, serialize(self::$annotation));
+      if (is_writable($this->path)) {
+        file_put_contents($this->path, serialize(self::$annotation));
+      } elseif (($fp = fopen($this->path, 'w+'))) {
+        fwrite($fp, serialize(self::$annotation));
+        fclose($fp);
+      } else {
+        throw new Sabel_Exception_Runtime($this->path . "can't open");
+      }
     }
     return self::$annotation[$className];
   }

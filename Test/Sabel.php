@@ -1,5 +1,7 @@
 <?php
 
+require ('generator/generator.php');
+
 /**
  * define for application.
  */
@@ -21,23 +23,23 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     return new PHPUnit2_Framework_TestSuite("Test_Sabel");
   }
   
-  public function setUp()
+  public function __construct()
   {
-    mkdir(RUN_BASE);
-    require_once('generator/generator.php');
-    $dt = new DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
-    $dt->visit(new SabelDirectoryAndFileCreator());
-    $dt->traverse();
-  }
-  
-  public function tearDown()
-  {
-    $dt = new DirectoryTraverser(RUN_BASE);
-    $remover = new SabelDirectoryAndFileRemover();
-    $dt->visit($remover);
-    $dt->traverse();
-    $remover->removeEmptyDirectories();
-    rmdir(RUN_BASE);
+    if (is_dir(RUN_BASE)) {
+      $dt = new DirectoryTraverser(RUN_BASE);
+      $remover = new SabelDirectoryAndFileRemover();
+      $dt->visit($remover);
+      $dt->traverse();
+      $remover->removeEmptyDirectories();
+      rmdir(RUN_BASE);
+    }
+    
+    if (!is_dir(RUN_BASE)) {
+      mkdir(RUN_BASE);
+      $dt = new DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
+      $dt->visit(new SabelDirectoryAndFileCreator());
+      $dt->traverse();
+    }
   }
   
   public function testSabel()
@@ -48,7 +50,8 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_object($fcontroller));
     
     ob_start();
-    $fcontroller->ignition();
+    require (RUN_BASE . '/cache/app.php');
+    $fcontroller->ignition('/index/index');
     $contents = rtrim(ob_get_clean());
     $this->assertEquals("welcome.", $contents);
   }

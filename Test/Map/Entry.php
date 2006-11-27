@@ -143,14 +143,15 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
     $facade = $this->createFacadeFromConfig();
     $facade->setRequestUri(new Sabel_Request_Request(null, 'test/0123456789'));
     $entry  = $facade->getEntry('testController');
-    $result = $entry->uri(array('id'=>'0123456789'));
+    $result = $entry->uri(array('id' => '0123456789'));
                                                     
     $this->assertEquals('test/0123456789', $result);
   }
   
   protected function createFacadeFromConfig()
   {
-    $b = new Sabel_Map_Builder('Test/data/map.yml', true);
+    $b = new Sabel_Map_Builder();
+    $b->load('Test/data/map.yml');
     $facade = $b->build();
     return $facade;
   }
