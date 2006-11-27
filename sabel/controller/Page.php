@@ -96,7 +96,6 @@ abstract class Sabel_Controller_Page
   {
     if (!headers_sent()) {
       header('X-Framework: Sabel');
-      header('X-Sabel-Version: alpha2');
     }
     
     $actionName = $this->destination->action;
