@@ -55,15 +55,17 @@ class Sabel_Request_Remote
     stream_socket_sendto($sock, join("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n");
     
     $this->requestHeaders = $headers;
-    $response = '';
+    
+    $response = new Sabel_Http_Response();
+    $responseHeader = new Sabel_Http_Header();
     
     $headerFlag = true;
     while (!feof($sock)) {
       $line = stream_get_line($sock, 8192, "\n");
       if (!$headerFlag) {
-        $response = $line;
+        $response->setContents($line);
       } else {
-        $this->responseHeaders[] = $line;
+        $responseHeader->add($line);
       }
       
       if ($headerFlag && trim($line) === "") {
@@ -73,6 +75,7 @@ class Sabel_Request_Remote
       }
     }
     
+    $response->setHeader($responseHeader);
     return $response;
   }
   
