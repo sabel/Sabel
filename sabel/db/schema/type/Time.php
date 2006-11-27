@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Type_Time
+ * Sabel_DB_Schema_Type_Datetime
  *
  * @category   DB
  * @package    org.sabel.db
@@ -11,7 +11,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Type_Time implements Sabel_DB_Schema_Type_Sender
+class Sabel_DB_Schema_Type_DateTime implements Sabel_DB_Schema_Type_Sender
 {
   private $next = null;
 

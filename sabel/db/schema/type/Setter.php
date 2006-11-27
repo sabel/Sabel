@@ -23,7 +23,7 @@ class Sabel_DB_Schema_Type_Setter
       $int    = new Sabel_DB_Schema_Type_Integer();
       $string = new Sabel_DB_Schema_Type_String();
       $text   = new Sabel_DB_Schema_Type_Text();
-      $time   = new Sabel_DB_Schema_Type_Time();
+      $time   = new Sabel_DB_Schema_Type_Datetime();
       $double = new Sabel_DB_Schema_Type_Double();
       $float  = new Sabel_DB_Schema_Type_Float();
       $byte   = new Sabel_DB_Schema_Type_Byte();

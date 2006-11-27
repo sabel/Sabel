@@ -22,7 +22,7 @@ class Sabel_DB_Schema_Type_String implements Sabel_DB_Schema_Type_Sender
 
   public function send($co, $type)
   {
-    $types = array('varchar', 'char', 'character varying' , 'character');
+    $types = array('varchar', 'char', 'character varying' , 'character', 'cstring');
 
     if (in_array($type, $types)) {
       $co->type = Sabel_DB_Schema_Const::STRING;

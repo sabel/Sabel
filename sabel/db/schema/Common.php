@@ -13,7 +13,7 @@
  */
 abstract class Sabel_DB_Schema_Common
 {
-  protected $recordObj = null;
+  protected $driver = null;
 
   public function getTable($tblName)
   {
