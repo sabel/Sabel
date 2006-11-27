@@ -94,8 +94,11 @@ abstract class Sabel_Controller_Page
   
   public function execute()
   {
-    header('X-Framework: Sabel');
-    header('X-Sabel-Version: alpha2');
+    if (!headers_sent()) {
+      header('X-Framework: Sabel');
+      header('X-Sabel-Version: alpha2');
+    }
+    
     $actionName = $this->destination->action;
     
     if (isset($this->reserved[$actionName]))

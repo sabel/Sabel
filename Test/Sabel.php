@@ -44,12 +44,12 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function testSabel()
   {
+    ob_start();
     Sabel::initializeApplication();
     $c = Container::create();
     $fcontroller = $c->load('sabel.controller.Front');
     $this->assertTrue(is_object($fcontroller));
     
-    ob_start();
     require (RUN_BASE . '/cache/app.php');
     $fcontroller->ignition('/index/index');
     $contents = rtrim(ob_get_clean());
