@@ -28,18 +28,15 @@ class Test_DB_Test extends SabelTestCase
 
   public function testParent()
   {
-    $data = array();
-    $data[] = array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1);
-    $data[] = array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1);
-    $data[] = array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2);
-    $data[] = array('id' => 4, 'name' => 'osaka-company2',     'city_id' => 2);
-    $data[] = array('id' => 5, 'name' => 'san diego-company1', 'city_id' => 3);
-    $data[] = array('id' => 6, 'name' => 'san diego-company2', 'city_id' => 3);
-    $data[] = array('id' => 7, 'name' => 'rondon-company1',    'city_id' => 4);
-    $data[] = array('id' => 8, 'name' => 'rondon-company2',    'city_id' => 4);
-
     $shop = Sabel_DB_Model::load('Company');
-    $shop->multipleInsert($data);
+    $shop->save(array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1));
+    $shop->save(array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1));
+    $shop->save(array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2));
+    $shop->save(array('id' => 4, 'name' => 'osaka-company2',     'city_id' => 2));
+    $shop->save(array('id' => 5, 'name' => 'san diego-company1', 'city_id' => 3));
+    $shop->save(array('id' => 6, 'name' => 'san diego-company2', 'city_id' => 3));
+    $shop->save(array('id' => 7, 'name' => 'rondon-company1',    'city_id' => 4));
+    $shop->save(array('id' => 8, 'name' => 'rondon-company2',    'city_id' => 4));
 
     $data = array();
     $data[] = array('id' => 1, 'name' => 'username1', 'email' => 'user1@example.com',
