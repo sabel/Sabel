@@ -1,19 +1,45 @@
 <?php
 
-require_once 'db\Const.php';
-require_once 'db\Connection.php';
-require_once 'db\Transaction.php';
-require_once 'db\SimpleCache.php';
+require_once 'C:\php\Sabel\sabel\db\Functions.php';
 
-require_once 'db\Mapper.php';
-require_once 'db\Basic.php';
-require_once 'db\Bridge.php';
-require_once 'db\Tree.php';
-require_once 'db\driver\General.php';
-require_once 'db\driver\Query.php';
-require_once 'db\driver\native/Query.php';
-require_once 'db\driver\native/Firebird.php';
-require_once 'db\driver\native/Paginate.php';
+require_once 'C:\php\Sabel\sabel\db\Connection.php';
+require_once 'C:\php\Sabel\sabel\db\Transaction.php';
+require_once 'C:\php\Sabel\sabel\db\SimpleCache.php';
+require_once 'C:\php\Sabel\sabel\db\Condition.php';
+require_once 'C:\php\Sabel\sabel\db\Property.php';
+require_once 'C:\php\Sabel\sabel\db\Executer.php';
+require_once 'C:\php\Sabel\sabel\db\Relation.php';
+require_once 'C:\php\Sabel\sabel\db\Tree.php';
+require_once 'C:\php\Sabel\sabel\db\Bridge.php';
+require_once 'C:\php\Sabel\sabel\db\Model.php';
+require_once 'C:\php\Sabel\sabel\db\Fusion.php';
+
+require_once 'C:\php\Sabel\sabel\db\driver\Driver.php';
+require_once 'C:\php\Sabel\sabel\db\driver\Firebird.php';
+require_once 'C:\php\Sabel\sabel\db\driver\ResultSet.php';
+require_once 'C:\php\Sabel\sabel\db\driver\ResultObject.php';
+
+require_once 'C:\php\Sabel\sabel\db\statement\Statement.php';
+require_once 'C:\php\Sabel\sabel\db\statement\NonBind.php';
+require_once 'C:\php\Sabel\sabel\db\statement\Limitation.php';
+
+require_once 'C:\php\Sabel\sabel\db\schema\Const.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Accessor.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Column.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Table.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Common.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Firebird.php';
+
+require_once 'C:\php\Sabel\sabel\db\schema\type\Setter.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Sender.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Integer.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\String.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Float.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Double.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Text.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Time.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Byte.php';
+require_once 'C:\php\Sabel\sabel\db\schema\type\Other.php';
 
 require_once 'Test.php';
 
@@ -23,44 +49,50 @@ class FirebirdExecute
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
-                                  'encoding' => 'UNICODE_FSS',
-                                  'database' => 'C:\Program Files\Apache\Apache2\htdocs\firebird\EDO.FDB');
+                                  'encoding' => 'utf8',
+                                  'database' => 'C:\Program Files\Firebird\db\EDO.FDB');
 
   private static $params2 = array('driver'   => 'firebird',
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
-                                  'encoding' => 'UNICODE_FSS',
-                                  'database' => 'C:/Program Files/Apache/Apache2/htdocs/firebird/EDO2.FDB');
+                                  'encoding' => 'utf8',
+                                  'database' => 'C:\Program Files\Firebird\db\EDO2.FDB');
   public static function main()
   {
     Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Windows_Test::$TABLES;
-    $obj = new Test3();
-
-    /*
-    $obj->begin();
-    try {
-      foreach ($tables as $table) $obj->execute("CREATE GENERATOR {$table}_ID_GEN");
-    } catch (Exception $e) {
-      print_r($e->getMessage());
-    }
-    $obj->commit();
-    */
+    $model  = Sabel_DB_Model::load('Basic');
 
     try {
-      foreach ($tables as $table) $obj->execute("DELETE FROM {$table}");
+      @$model->execute('CREATE GENERATOR TEST_FOR_LIKE_ID_GEN');
+      @$model->execute('CREATE GENERATOR TEST_CONDITION_ID_GEN');
+      @$model->execute('CREATE GENERATOR CUSTOMER_ORDER_ID_GEN');
+      @$model->execute('CREATE GENERATOR SCHEMA_TEST_ID_GEN');
     } catch (Exception $e) {
     }
 
-    $trans2 = new Trans2();
-    $trans2->execute("DELETE FROM trans2");
-    
-    $testMethods = array();
+    $mh = new FirebirdHelper();
 
-    $class = new ReflectionClass('Test_DB_Windows_Test'); 
+    foreach ($mh->sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
+    }
+
+    try {
+      foreach ($tables as $table) @$model->execute("DELETE FROM $table");
+    } catch (Exception $e) {
+    }
+
+    $model = Sabel_DB_Model::load('Customer');
+
+    try {
+      @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
+    } catch (Exception $e) {
+    }
+
+    $class = new ReflectionClass('Test_DB_Windows_Test');
     foreach ($class->getMethods() as $methodObj) {
       $methodName = $methodObj->name;
       if (($pre = substr($methodName, 0, 4)) === 'test') {
@@ -75,107 +107,84 @@ class FirebirdExecute
   }
 }
 
-/*
 class FirebirdHelper
 {
-  protected $sqls = null;
+  public $sqls = array();
 
   public function __construct()
   {
-    $SQLs = array();
+    $sqls = array();
 
-    $SQLs[] = 'CREATE TABLE test (
-                 id       INTEGER NOT NULL PRIMARY KEY,
-                 name     VARCHAR(32) NOT NULL,
-                 blood    VARCHAR(32),
-                 test2_id INTEGER)';
+    $sqls[] = 'CREATE TABLE basic (
+                 id integer primary key,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE test2 (
-                 id INTEGER NOT NULL PRIMARY KEY,
-                 name VARCHAR(32) NOT NULL,
-                 test3_id INTEGER)';
-                 
-    $SQLs[] = 'CREATE TABLE test3 (
-                id INTEGER NOT NULL PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer (
-                id INTEGER NOT NULL PRIMARY KEY,
-                name VARCHAR(32) NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_order (
-                id INTEGER NOT NULL PRIMARY KEY,
-                customer_id INTEGER NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE order_line (
-                id INTEGER NOT NULL PRIMARY KEY,
-                customer_order_id INTEGER NOT NULL,
-                amount INTEGER,
-                item_id INTEGER NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE customer_telephone (
-                id INTEGER NOT NULL PRIMARY KEY,
-                customer_id INTEGER NOT NULL,
-                telephone VARCHAR(32))';
-                
-    $SQLs[] = 'CREATE TABLE infinite1 (
-                id INTEGER NOT NULL PRIMARY KEY,
-                infinite2_id INTEGER NOT NULL)';
-                
-    $SQLs[] = 'CREATE TABLE infinite2 (
-                id INTEGER NOT NULL PRIMARY KEY,
-                infinite1_id INTEGER NOT NULL)';
- 
-    $SQLs[] = 'CREATE TABLE seq (
-                 id INTEGER NOT NULL PRIMARY KEY,
-                 text VARCHAR(255) NOT NULL)';
-    
-    $SQLs[] = 'CREATE TABLE tree (
-                 id      INTEGER NOT NULL PRIMARY KEY,
-                 tree_id INTEGER,
-                 name    VARCHAR(12) )';
+    $sqls[] = 'CREATE TABLE users (
+                 id integer primary key,
+                 name varchar(24),
+                 email varchar(128),
+                 city_id integer not null,
+                 company_id integer not null)';
 
-    $SQLs[] = 'CREATE TABLE student (
-                 id    INTEGER NOT NULL PRIMARY KEY,
-                 name  VARCHAR(24) NOT NULL,
-                 birth DATE)';
-    
-    $SQLs[] = 'CREATE TABLE student_course (
-                 student_id INTEGER NOT NULL,
-                 course_id  INTEGER NOT NULL,
-                 CONSTRAINT student_course_pkey PRIMARY KEY (student_id, course_id) )';
+    $sqls[] = 'CREATE TABLE company (
+                 id integer primary key,
+                 city_id integer not null,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE course (
-                 id   INTEGER NOT NULL PRIMARY KEY,
-                 name VARCHAR(24) )';
-                
-    $SQLs[] = 'CREATE TABLE users (
-                 id        INTEGER NOT NULL PRIMARY KEY,
-                 name      VARCHAR(24) NOT NULL,
-                 status_id INTEGER )';
+    $sqls[] = 'CREATE TABLE city (
+                 id integer primary key,
+                 name varchar(24),
+                 classification_id integer,
+                 country_id integer not null)';
 
-    $SQLs[] = 'CREATE TABLE status (
-                 id    INTEGER NOT NULL PRIMARY KEY,
-                 state VARCHAR(24) )';
+    $sqls[] = 'CREATE TABLE country (
+                 id integer primary key,
+                 name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE bbs (
-                 id       INTEGER NOT NULL PRIMARY KEY,
-                 users_id INTEGER NOT NULL,
-                 title    VARCHAR(24),
-                 body     VARCHAR(24))';
+    $sqls[] = 'CREATE TABLE classification (
+                 id integer primary key,
+                 class_name varchar(24))';
 
-    $SQLs[] = 'CREATE TABLE trans1 (
-                 id    INTEGER NOT NULL PRIMARY KEY,
-                 text  VARCHAR(24))';
+    $sqls[] = 'CREATE TABLE test_for_like (
+                 id integer primary key,
+                 string varchar(24))';
 
-    $this->sqls = $SQLs;
-  }
+    $sqls[] = "CREATE TABLE test_condition (
+                 id integer primary key,
+                 status smallint,
+                 registed timestamp,
+                 point integer)";
 
-  public function get()
-  {
-    return $this->sqls;
+    $sqls[] = "CREATE TABLE blog (
+                 id integer primary key,
+                 title varchar(24),
+                 article blob sub_type text,
+                 write_date timestamp,
+                 users_id integer)";
+
+    $sqls[] = "CREATE TABLE favorite_item (
+                 id integer primary key,
+                 users_id integer,
+                 registed timestamp,
+                 name varchar(24))";
+
+    $sqls[] = "CREATE TABLE customer_order (
+                 id integer primary key,
+                 customer_id integer,
+                 buy_date timestamp,
+                 amount integer)";
+
+    $sqls[] = "CREATE TABLE schema_test (
+                 id integer primary key,
+                 name varchar(128) not null,
+                 bl smallint,
+                 dt timestamp,
+                 ft_val float default 1,
+                 db_val double precision not null,
+                 tx blob sub_type text)";
+
+    $this->sqls = $sqls;
   }
 }
-*/
 
 FirebirdExecute::main();
