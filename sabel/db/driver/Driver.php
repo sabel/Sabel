@@ -13,11 +13,12 @@
 abstract class Sabel_DB_Driver
 {
   protected
-    $conn     = null,
-    $stmt     = null,
-    $db       = '';
+    $conn = null,
+    $stmt = null,
+    $db   = '';
 
   protected
+    $escMethod    = '',
     $lastInsertId = null;
 
   public abstract function begin($conn);

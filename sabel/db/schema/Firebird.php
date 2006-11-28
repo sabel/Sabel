@@ -32,7 +32,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
                      ON rel.RDB$INDEX_NAME = seg.RDB$INDEX_NAME WHERE rel.RDB$RELATION_NAME = \'%s\' AND
                      rel.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\'',
     $tableList    = 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$SYSTEM_FLAG = 0',
-    $tableColumns = 'SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_TYPE, rf.RDB$NULL_FLAG,
+    $tableColumns = 'SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_TYPE, f.RDB$FIELD_SUB_TYPE, rf.RDB$NULL_FLAG,
                      f.RDB$CHARACTER_LENGTH FROM RDB$FIELDS f, RDB$RELATION_FIELDS rf
                      WHERE f.RDB$FIELD_NAME = rf.RDB$FIELD_SOURCE AND rf.RDB$RELATION_NAME = \'%s\'
                      ORDER BY rf.RDB$FIELD_POSITION ASC';
@@ -52,7 +52,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
     $this->driver->execute($this->tableList);
     foreach ($this->driver->getResultSet() as $row) {
-      $tables[] = strtolower($row['RDB$RELATION_NAME']);
+      $tables[] = strtolower($row['rdb$relation_name']);
     }
     return $tables;
   }
@@ -73,7 +73,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
     $gens =& $this->generators;
     $this->driver->execute($this->genList);
     foreach ($this->driver->getResultSet() as $row) {
-      $gens[] = $row['RDB$GENERATOR_NAME'];
+      $gens[] = trim($row['rdb$generator_name']);
     }
   }
 
@@ -84,7 +84,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
     $keys =& $this->primaryKeys;
     $this->driver->execute(sprintf($this->priKeys, $tblName));
     foreach ($this->driver->getResultSet() as $row) {
-      $keys[] = $row['RDB$FIELD_NAME'];
+      $keys[] = trim($row['rdb$field_name']);
     }
   }
 
@@ -98,7 +98,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
     $this->driver->execute(sprintf($this->tableColumns, $tblName));
     foreach ($this->driver->getResultSet() as $row) {
-      $colName = $row['RDB$FIELD_NAME'];
+      $colName = strtolower(trim($row['rdb$field_name']));
       $columns[$colName] = $this->makeColumnValueObject($row, $tblName);
     }
     return $columns;
@@ -106,14 +106,18 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
   protected function makeColumnValueObject($row, $tblName)
   {
-    $fieldName = trim($row['RDB$FIELD_NAME']);
+    $fieldName = trim($row['rdb$field_name']);
 
     $co = new Sabel_DB_Schema_Column();
     $co->name     = strtolower($fieldName);
-    $co->nullable = ($row['RDB$NULL_FLAG'] === 1);
+    $co->nullable = (is_null($row['rdb$null_flag']));
 
-    $typeNum = $row['RDB$FIELD_TYPE'];
-    $type    = $this->type[$typeNum];
+    if ($this->isText($row)) {
+      $type = 'text';
+    } else {
+      $typeNum = $row['rdb$field_type'];
+      $type    = $this->types[$typeNum];
+    }
 
     if ($this->isFloat($type)) $type = $this->getFloatType($type);
     Sabel_DB_Schema_TYpe_Setter::send($co, $type);
@@ -123,6 +127,11 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
     if ($co->type === Sabel_DB_Schema_Const::STRING) $this->setLength($co, $row);
     return $co;
+  }
+
+  protected function isText($row)
+  {
+    return ($row['rdb$field_type'] === 261 && $row['rdb$field_sub_type'] === 1);
   }
 
   protected function isFloat($type)
@@ -148,6 +157,6 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
   protected function setLength($co, $row)
   {
-    $co->max = $row['RDB$CHARACTER_LENGTH'];
+    $co->max = $row['rdb$character_length'];
   }
 }

@@ -20,6 +20,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver
     $this->db   = 'firebird';
   }
 
+  // @todo
   public function begin($conn)
   {
     $resource = ibase_trans(IBASE_WRITE, $conn);
@@ -27,15 +28,16 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver
     return $resource;
   }
 
+  // @todo
   public function commit($conn)
   {
     if (!ibase_commit($conn)) {
       $error = ibase_errmsg();
       throw new Exception ("Error: transaction commit failed. {$error}");
     }
-    unset($this->trans);
   }
 
+  // @todo
   public function rollback($conn)
   {
     ibase_rollback($conn);
@@ -52,7 +54,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Driver
     $genName = strtoupper("{$table}_{$defColumn}_gen");
 
     if (!isset($data[$defColumn])) {
-      $this->driverExecute("SELECT GEN_ID({$genName}, 1) FROM sequence");
+      $this->driverExecute('SELECT GEN_ID(' . $genName . ', 1) FROM rdb$database');
       $resultSet = $this->getResultSet();
       $genNum = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
       $data[$defColumn] = $this->lastInsertId = (int)$genNum[0];

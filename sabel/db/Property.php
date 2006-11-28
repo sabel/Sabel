@@ -139,14 +139,17 @@ class Sabel_DB_Property
     switch ($schema[$key]->type) {
       case Sabel_DB_Schema_Const::INT:
         return (int)$data;
-      case SabeL_DB_Schema_Const::BOOL:
-        return (in_array($data, array('1', 't', 'true')));
       case Sabel_DB_Schema_Const::FLOAT:
       case Sabel_DB_Schema_Const::DOUBLE:
         return (float)$data;
-      default:
-        return $data;
+      case SabeL_DB_Schema_Const::BOOL:
+        if (is_int($data)) {
+          $data = ($data === 1);
+        } else {
+          $data = (in_array($data, array('1', 't', 'true')));
+        }
     }
+    return $data;
   }
 
   public function getValidateData()
