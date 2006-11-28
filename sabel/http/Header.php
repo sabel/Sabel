@@ -1,22 +1,31 @@
 <?php
 
+/**
+ * HTTP Header
+ *
+ * @category   Controller
+ * @package    org.sabel.controller
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Http_Header
 {
-  protected $headers     = array();
-  protected $returnCode  = 0;
-  protected $returnHttp = '';
+  protected $headers       = array();
+  protected $returnCode    = 0;
+  protected $returnHttp    = '';
   protected $returnMessage = '';
   
   public function __construct($headers = null)
   {
-    $hashHeaders = array();
-    
     if (is_array($headers)) {
-      foreach ($headers as $header) {
-        $parts = explode(':', $headers);
-        $hashHeaders[$parts[0]] = $parts[1];
-      }
+      foreach ($headers as $header) $this->add($header);
     }
+  }
+  
+  public function __get($name)
+  {
+    return $this->get($name);
   }
   
   public function get($name)
@@ -34,7 +43,7 @@ class Sabel_Http_Header
       if (isset($parts[2])) $this->returnMessage = $parts[2];
     } else {
       $parts = explode(':', $headerLine);
-      $this->headers[$parts[0]] = $parts[1];
+       $this->headers[$parts[0]] = $parts[1];
     }
   }
   
@@ -68,6 +77,11 @@ class Sabel_Http_Header
     return ($this->returnCode === 200);
   }
   
+  /**
+   * The request has been fulfilled and resulted in a new resource being created.
+   *
+   * @see RFC-2616 10.2.2
+   */
   public function isCreated()
   {
     return ($this->returnCode === 201);
