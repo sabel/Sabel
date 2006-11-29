@@ -23,6 +23,11 @@ class Sabel_Request_Parameters
     }
   }
   
+  public function isEmpty()
+  {
+    return ($this->rawParameters === '');
+  }
+  
   public function __get($key)
   {
     return $this->get($key);

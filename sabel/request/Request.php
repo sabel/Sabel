@@ -88,7 +88,7 @@ class Sabel_Request_Request
 
   public function hasParameters()
   {
-    return (!empty($this->requestParameters));
+    return (!$this->parameters->isEmpty());
   }
   
   /**
