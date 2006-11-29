@@ -11,12 +11,16 @@
  */
 class Sabel_Request_Parameters
 {
+  protected $rawParameters = '';
   protected $parsedParameters = array();
   
   public function __construct($parameters)
   {
-    $parameters = str_replace('?', '', $parameters);
-    if (!empty($parameters)) $this->parse($parameters);
+    if (!empty($parameters)) {
+      $this->rawParameters = $parameters;
+      $parameters = str_replace('?', '', $parameters);
+      $this->parse($parameters);
+    }
   }
   
   public function __get($key)
@@ -28,6 +32,11 @@ class Sabel_Request_Parameters
   {
     $pp = $this->parsedParameters;
     return (isset($pp[$key])) ? $pp[$key] : null;
+  }
+  
+  public function __toString()
+  {
+    return $this->rawParameters;
   }
   
   /**

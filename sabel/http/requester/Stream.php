@@ -13,6 +13,7 @@ class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
   protected $protocol     = 'tcp';
   protected $timeout      = 30;
   protected $flag         = STREAM_CLIENT_CONNECT;
+  protected $bytesPerRead = 8192;
   
   public function __construct()
   {
@@ -26,6 +27,12 @@ class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
   public function setTimeout($timeout)
   {
     if ($timeout > 1 && $timeout <= 3600) $this->timeout = $timeout;
+  }
+  
+  
+  public function setBytesPerRead($value)
+  {
+    if ($value > 0) $this->bytesPerRead = $value;
   }
   
   /**
@@ -59,7 +66,7 @@ class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
       
       stream_socket_sendto($socket, $data);
       
-      $bytesPerRead = 8192;
+      $bytesPerRead = $this->bytesPerRead;
       for ($read = 0, $maxBytes = 131072; !feof($socket) && $read <= $maxBytes;
            $read += $bytesPerRead) {
         $result[] = stream_get_line($socket, $bytesPerRead, "\n");

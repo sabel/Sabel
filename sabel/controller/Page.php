@@ -345,6 +345,22 @@ abstract class Sabel_Controller_Page
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
   
+  protected function getType()
+  {
+    return $this->request->getUri()->getType();
+  }
+  
+  /**
+   * get parameter value of URI Query String
+   *
+   * @param string parameters key
+   * @return mixed
+   */
+  protected function getParameter($key)
+  {
+    return $this->request->getParameters()->get($key);
+  }
+  
   protected function isPost()
   {
     return $this->request->isPost();

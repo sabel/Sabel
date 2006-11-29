@@ -13,15 +13,15 @@ class Sabel_Request_Request
 {
   protected static $server = null;
   
-  // such as /module/controller/action/something
-  protected $requestUri = '';
+  /**
+   * @var Sabel_Request_Uri object
+   */
+  protected $uri = null;
   
-  // such as param=val
-  protected $requestParameters = '';
-  
-  protected
-    $uri        = null,
-    $parameters = null;
+  /**
+   * @var Sabel_Request_Parameters object
+   */
+  protected $parameters = null;
   
   public function __construct($entry = null, $requestUri = null)
   {
@@ -58,10 +58,10 @@ class Sabel_Request_Request
     }
     
     // @todo test this.
-    @list($this->requestUri, $this->requestParameters) = explode('?', $request_uri);
+    @list($requestUri, $requestParameters) = explode('?', $request_uri);
     
-    $this->uri = new Sabel_Request_Uri($this->requestUri);
-    $this->parameters = new Sabel_Request_Parameters($this->requestParameters);
+    $this->uri        = new Sabel_Request_Uri($requestUri);
+    $this->parameters = new Sabel_Request_Parameters($requestParameters);
   }
   
   public function __get($name)
@@ -91,6 +91,11 @@ class Sabel_Request_Request
     return (!empty($this->requestParameters));
   }
   
+  /**
+   * get parameters object
+   *
+   * @return Sabel_Request_Parameters
+   */
   public function getParameters()
   {
     return $this->parameters;

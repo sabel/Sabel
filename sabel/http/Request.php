@@ -57,7 +57,7 @@ class Sabel_Http_Request
       case 'put':
         $headers[] = "PUT {$path} HTTP/1.0";
         $headers[] = "Content-length: {$request_length}";
-        // $headers[] = "Content-Type: application/x-www-form-urlencoded";
+        $headers[] = "Content-Type: application/x-www-form-urlencoded";
         break;
       case 'delete':
         $headers[] = "DELETE {$path}?{$request} HTTP/1.0";
@@ -74,9 +74,9 @@ class Sabel_Http_Request
     $headers[] = "X-Path: {$path}";
     if($this->userAgent) $headers[] = "User-Agent: {$this->userAgent}";
     
+    $this->requester->setBytesPerRead(10192);
     $this->requester->connect($host, $port);
     $data = join("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n";
-    dump($data);
     $result = $this->requester->send($data);
     
     $response = new Sabel_Http_Response();

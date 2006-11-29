@@ -12,14 +12,45 @@
 class Sabel_Request_Uri
 {
   /**
+   *
+   * @var string such as /module/controller/action/something
+   */
+  protected $rawUriString = '';
+  
+  /**
    * @var Array parts of uri. separate by slash (/)
    */
   protected $parts = array();
   protected $entry = null;
   
+  /**
+   * @var type of last element e.g. if requested as /test/test.html type is html
+   */
+  protected $type  = '';
+  
+  /**
+   * constructer
+   *
+   * @param string $requestUri this is raw requestUri(query string without query parameter)
+   * @return void
+   */
   public function __construct($requestUri, $entry = null)
   {
-    $this->parts = explode('/', $requestUri);
+    $this->rawUriString = $requestUri;
+    
+    $elements = explode('/', $requestUri);
+    
+    $lastElement = array_pop($elements);
+    
+    if (stripos($lastElement, '.') !== false) {
+      list($tmp, $this->type) = explode('.', $lastElement);
+      array_push($elements, $tmp);
+    } else {
+      array_push($elements, $lastElement);
+    }
+    
+    $this->parts = $elements;
+    
     if (isset($entry)) $this->setEntry($entry);
   }
   
@@ -78,5 +109,15 @@ class Sabel_Request_Uri
     
     $position = $uri->calcElementPositionByName($name);
     return $this->get($position);
+  }
+  
+  public function getType()
+  {
+    return $this->type;
+  }
+  
+  public function __toString()
+  {
+    return $this->rawUriString;
   }
 }
