@@ -13,22 +13,12 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
   const COMPILE_DIR = '/data/compiled/';
   
-  const H_PAT 
-    = '/<\?php(n)?h([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
+  const REPLACE_PAT
+    = '/<\?php([a-z]*)%s([a-z=]*)\s*([^?;]+)([^?]+)\?>/';
     
-  const DUMP_PAT
-    = '/<\?php(n)?v([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
-    
-  const NL2BR_PAT = 
-    '/<\?phpn([a-z=])*[[:blank:]]*([^?; ]+)[; \t]*(.*)?[; \t]*\?>/';
-    
-  const H_REPLACE     = '<?php$1$2= htmlspecialchars($3); $4 ?>';
-  const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3); $4 ?></pre>';
-  const NL2BR_REPLACE = '<?php= nl2br($2); $3 ?>';
-  
-  public function configuration()
-  {
-  }
+  const H_REPLACE     = '<?php$1$2= htmlspecialchars($3)$4 ?>';
+  const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3)$4 ?></pre>';
+  const NL2BR_REPLACE = '<?php= nl2br($3)$4 ?>';
   
   public function rendering($path, $name, $values)
   {
@@ -36,15 +26,15 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     $filepath = $path . $name;
     $cpath    = $this->getCompileFilePath($path, $name);
     
-    if (is_file($filepath) && (!is_readable($cpath) 
+    if (is_readable($filepath) && (!is_readable($cpath) 
         || filemtime($filepath) > filemtime($cpath))) {
       $contents = file_get_contents($filepath);
       
       $contents = str_replace('<?', '<?php', $contents);
       
-      $contents = preg_replace(self::H_PAT,     self::H_REPLACE,     $contents);
-      $contents = preg_replace(self::DUMP_PAT,  self::DUMP_REPLACE,  $contents);
-      $contents = preg_replace(self::NL2BR_PAT, self::NL2BR_REPLACE, $contents);
+      $contents = preg_replace(sprintf(self::REPLACE_PAT, 'h'), self::H_REPLACE,     $contents);
+      $contents = preg_replace(sprintf(self::REPLACE_PAT, 'v'), self::DUMP_REPLACE,  $contents);
+      $contents = preg_replace(sprintf(self::REPLACE_PAT, 'n'), self::NL2BR_REPLACE, $contents);
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
       
@@ -60,7 +50,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     extract($values, EXTR_SKIP);
     
     ob_start();
-    if (is_file($cpath)) include($cpath);
+    if (is_readable($cpath)) include($cpath);
     $contents = ob_get_clean();
     
     return $contents;
