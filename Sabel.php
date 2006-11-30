@@ -506,6 +506,9 @@ class ClassFile
             case '/':
               $this->state = 30;
               break;
+            default:
+              $this->state = 0;
+              break;
           }
           break;
         case 20: // multi line comment
