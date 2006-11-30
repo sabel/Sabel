@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Template_Engine_Smarty
+class Sabel_View_Renderer_Smarty extends Sabel_View_Renderer
 {
   private $smarty  = null;
   
@@ -18,12 +18,7 @@ class Sabel_Template_Engine_Smarty
     $this->smarty = new Smarty();
   }
   
-  public function assign($key, $value)
-  {
-    $this->smarty->assign($key, $value);
-  }
-  
-  public function retrieve()
+  public function rendering($path, $name, $values)
   {
     $this->smarty->template_dir = $this->tplpath;
     $this->smarty->compile_id   = $this->tplpath;
@@ -34,12 +29,5 @@ class Sabel_Template_Engine_Smarty
   {
     $this->smarty->compile_dir = RUN_BASE . '/data/compiled';
     $this->smarty->load_filter('output','trimwhitespace');
-  }
-  
-  public function display()
-  {
-    $this->smarty->template_dir = $this->tplpath;
-    $this->smarty->compile_id   = $this->tplpath;
-    $this->smarty->display($this->tplname);
   }
 }

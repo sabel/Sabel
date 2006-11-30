@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Template_Engine_Savant
+class Sabel_View_Renderer_Savant extends Sabel_View_Renderer
 {
   private $savant  = null;
   
@@ -19,12 +19,7 @@ class Sabel_Template_Engine_Savant
     $this->savant = new Savant3();
   }
   
-  public function assign($key, $value)
-  {
-    $this->savant->assign($key, $value);
-  }
-  
-  public function retrieve()
+  public function rendering($path, $name, $values)
   {
     $fullpath = $this->getTemplateFullPath();
     
@@ -33,18 +28,5 @@ class Sabel_Template_Engine_Savant
     } else {
       // @todo Exception handling.
     }
-  }
-  
-  public function configuration()
-  {
-  }
-  
-  public function display()
-  {
-    $path = $this->getTemplateFullPath();
-    if (!is_file($path))
-      throw new SabelException("template isn't found: " . "'".$path."'");
-      
-    $this->savant->display($path);
   }
 }

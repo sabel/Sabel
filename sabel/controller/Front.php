@@ -48,35 +48,22 @@ class Sabel_Controller_Front
     $builder->build($map);
     
     $mapEntry = $map->find();
-    // first
+    
     $controller = Sabel_Controller_Loader::create($mapEntry)->load();
     $controller = $controller->getTargetClass();
-    Sabel_Core_Context::setPageController($controller);
     
-    $controller->setEntry($mapEntry);
+    Sabel_Context::setCurrentMapEntry($mapEntry);
+    Sabel_Context::setPageController($controller);
+    
     $controller->setup();
     $controller->initialize();
     $controller->initializeReservedNamesOfMethods();
     
-    Sabel_Core_Context::setPageController($controller);
-    
     $responses = $controller->execute();
-    
-    if ($responses === false) return false;
-    
-    $template = Sabel_Template_Service::create($mapEntry);
-    if ($template->isTemplateMissing()) {
-      if ($controller->hasMethod('templateMissing')) {
-        $controller->templateMissing();
-      } else {
-        throw new Sabel_Exception_TemplateMissing();
-      }
-    }
-    $template->assignByArray($responses);
     
     $rc = ReflectionCache::create();
     $rc->destruction();
     
-    return array('html' => $template->rendering(), 'responses' => $responses);
+    return array('html' => $controller->rendering(), 'responses' => $responses);
   }
 }

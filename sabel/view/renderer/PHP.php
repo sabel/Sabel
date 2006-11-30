@@ -9,28 +9,9 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Template_Engine_PHP extends Sabel_Template_Engine
+class Sabel_View_Renderer_PHP extends Sabel_View_Renderer
 {
-  public function assign($key, $value)
-  {
-    $this->attributes[$key] = $value;
-  }
-  
-  public function put($key)
-  {
-    echo $this->attributes[$key];
-  }
-  
-  public function __get($key)
-  {
-    return $this->attributes[$key];
-  }
-  
-  public function configuration()
-  {
-  }
-  
-  public function retrieve()
+  public function rendering($path, $name, $values)
   {
     if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
     extract(Re::get(), EXTR_SKIP);

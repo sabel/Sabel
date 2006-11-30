@@ -12,6 +12,7 @@
 abstract class Sabel_Controller_Page
 {
   protected
+    $view        = null,
     $entry       = null,
     $cache       = null,
     $logger      = null,
@@ -33,6 +34,7 @@ abstract class Sabel_Controller_Page
   
   protected
     $action = '',
+    $rendering = true,
     $skipDefaultAction = true;
     
   /**
@@ -52,11 +54,6 @@ abstract class Sabel_Controller_Page
     $this->reserved = $reserved;
   }
   
-  public function setEntry($entry)
-  {
-    $this->entry = $entry;
-  }
-  
   public function initialize()
   {
     // none.
@@ -64,6 +61,9 @@ abstract class Sabel_Controller_Page
   
   public function setup()
   {
+    $this->view = new Sabel_View();
+    $this->entry = Sabel_Context::getCurrentMapEntry();
+    
     $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
@@ -100,27 +100,103 @@ abstract class Sabel_Controller_Page
     
     $actionName = $this->destination->action;
     
+    // check reserved words
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
     
     if ($this->isPublicAction($actionName)) {
-      $this->methodExecute($actionName);
-      return Sabel_Template_Engine::getAttributes();
+      $result = $this->methodExecute($actionName);
+      if (is_array($result)) {
+        $this->view->assignByArray($result);
+      }
+      return $result;
     }
     
     if ($this->permission === Sabel_Security_Permission::P_PRIVATE) {
       if ($this->isAuthorized()) {
-        $this->methodExecute($actionName);
-        return Sabel_Template_Engine::getAttributes();
+        $result = $this->methodExecute($actionName);
+        if (is_array($result)) {
+          $this->view->assignByArray($result);
+        }
       } else if ($this->hasMethod('authorizeRequired')) {
         $this->authorizeRequired();
-        return false;
       } else {
         throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
       }
     } else {
-      $this->methodExecute($actionName);
-      return Sabel_Template_Engine::getAttributes();
+      $result = $this->methodExecute($actionName);
+      if (is_array($result)) {
+        $this->view->assignByArray($result);
+      }
+    }
+    
+    return $result;
+  }
+  
+  protected function methodExecute($action)
+  {
+    $result = array();
+    $specificAction = false;
+    $reqMethod = strtolower($this->httpMethod);
+    $actionName = $reqMethod.ucfirst($action);
+    
+    if ($this->hasMethod($actionName)) {
+      $specificAction = $actionName;
+    }
+    
+    if ($specificAction !== false) {
+      if (method_exists($this, $specificAction)) {
+        $this->$specificAction();
+        if (!$this->skipDefaultAction) {
+          $result = array_merge($result, $this->$action());
+        }
+      } elseif (method_exists($this, 'actionMissing')) {
+        $this->actionMissing();
+      }
+    } else {
+      if (method_exists($this, $action)) {
+        $ref = new ReflectionClass($this);
+        $method = $ref->getMethod($action);
+        if ($method->getNumberOfParameters() === 0) {
+          $result = array_merge($result, $this->$action());
+        } else {
+          $args = array();
+          $parameters = $method->getParameters();
+          foreach ($parameters as $parameter) {
+            $name = $parameter->getName();
+            if ($parameter->allowsNull() && is_null($this->$name)) {
+              $args[] = null;
+            } else {
+              $args[] = $this->$name;
+            }
+          }
+          $result = array_merge($result, $method->invokeArgs($this, $args));
+        }
+        
+      } elseif (method_exists($this, 'actionMissing')){
+        $this->actionMissing();
+      }
+    }
+    
+    if (is_object($this->storage)) {
+      $this->storage->write('previous', $this->request->__toString());
+    }
+    
+    return $result;
+  }
+  
+  public function rendering()
+  {
+    if ($this->rendering) {
+      if ($this->view->isTemplateMissing()) {
+        if ($this->hasMethod('templateMissing')) {
+          $this->templateMissing();
+        } else {
+          throw new Sabel_Exception_TemplateMissing();
+        }
+      } else {
+        return $this->view->rendering();
+      }
     }
   }
   
@@ -172,55 +248,6 @@ abstract class Sabel_Controller_Page
       return $this->request->$method($args);
   }
   
-  protected function methodExecute($action)
-  {
-    $specificAction = false;
-    $reqMethod = strtolower($this->httpMethod);
-    $actionName = $reqMethod.ucfirst($action);
-    
-    if ($this->hasMethod($actionName)) {
-      $specificAction = $actionName;
-    }
-    
-    if ($specificAction !== false) {
-      if (method_exists($this, $specificAction)) {
-        $this->$specificAction();
-        if (!$this->skipDefaultAction) {
-          $this->$action();
-        }
-      } elseif (method_exists($this, 'actionMissing')) {
-        $this->actionMissing();
-      }
-    } else {
-      if (method_exists($this, $action)) {
-        $ref = new ReflectionClass($this);
-        $method = $ref->getMethod($action);
-        if ($method->getNumberOfParameters() === 0) {
-          $this->$action();
-        } else {
-          $args = array();
-          $parameters = $method->getParameters();
-          foreach ($parameters as $parameter) {
-            $name = $parameter->getName();
-            if ($parameter->allowsNull() && is_null($this->$name)) {
-              $args[] = null;
-            } else {
-              $args[] = $this->$name;
-            }
-          }
-          $method->invokeArgs($this, $args);
-        }
-        
-      } elseif (method_exists($this, 'actionMissing')){
-        $this->actionMissing();
-      }
-    }
-    
-    if (is_object($this->storage)) {
-      $this->storage->write('previous', $this->request->__toString());
-    }
-  }
-  
   public function hasMethod($name)
   {
     return (method_exists($this, $name));
@@ -257,7 +284,7 @@ abstract class Sabel_Controller_Page
   
   protected function layout($layout)
   {
-    Sabel_Template_Service::setLayout($layout);
+    $this->view->setLayout($layout);
   }
   
   protected function proxy($target)
@@ -329,7 +356,7 @@ abstract class Sabel_Controller_Page
    */
   protected function assign($key, $value)
   {
-    Sabel_Template_Engine::setAttribute($key, $value);
+    $this->view->assign($key, $value);
   }
   
   /**

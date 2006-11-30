@@ -42,7 +42,7 @@ class Aspects_Validate
     $target    = $joinpoint->getTarget();
     $className = $joinpoint->getReflection()->getName();
     $method    = $joinpoint->getMethodReflection();
-    $controller = Sabel_Core_Context::getPageController();
+    $controller = Sabel_Context::getPageController();
     
     $v = new Sabel_Validate_Model($className);
     $arg = $joinpoint->getArgument(0);
