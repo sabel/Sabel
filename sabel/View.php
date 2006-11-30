@@ -75,7 +75,7 @@ class Sabel_View
       
       if (is_file($this->templatePath . 'layout.tpl')) {
         $found = true;
-        $name = 'layout.tpl';
+        $name = Sabel_Const::DEFAULT_LAYOUT;
       }
       
       if (is_file($this->templatePath . $this->layout . '.tpl')) {

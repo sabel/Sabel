@@ -10,12 +10,6 @@ class Sabel_Controller_Loader
 {
   public function load()
   {
-    $classpath = $this->makeControllerClassPath();
-    return Container::create()->load($classpath);
-  }
-  
-  private function makeControllerClassPath()
-  {
     $destination = Sabel_Context::getCurrentMapEntry()->getDestination();
     
     $classpath  = $destination->module;
@@ -26,6 +20,6 @@ class Sabel_Controller_Loader
       $classpath .= '.'. ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
-    return $classpath;
+    return Container::create()->load($classpath);
   }
 }

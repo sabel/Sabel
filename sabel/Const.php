@@ -55,4 +55,6 @@ class Sabel_Const
    * default action method
    */
   const DEFAULT_ACTION = 'index';
+  
+  const DEFAULT_LAYOUT = 'layout.tpl';
 }
