@@ -62,6 +62,7 @@ abstract class Sabel_Controller_Page
   public function setup()
   {
     $this->view = new Sabel_View();
+    Sabel_Context::setView($this->view);
     $this->entry = Sabel_Context::getCurrentMapEntry();
     
     $this->container   = Container::create();
@@ -148,7 +149,10 @@ abstract class Sabel_Controller_Page
       if (method_exists($this, $specificAction)) {
         $this->$specificAction();
         if (!$this->skipDefaultAction) {
-          $result = array_merge($result, $this->$action());
+          $actionResult = $this->$action();
+          if (is_array($actionResult)) {
+            $result = array_merge($result, $actionResult);
+          }
         }
       } elseif (method_exists($this, 'actionMissing')) {
         $this->actionMissing();
@@ -158,7 +162,10 @@ abstract class Sabel_Controller_Page
         $ref = new ReflectionClass($this);
         $method = $ref->getMethod($action);
         if ($method->getNumberOfParameters() === 0) {
-          $result = array_merge($result, $this->$action());
+          $actionResult = $this->$action();
+          if (is_array($actionResult)) {
+            $result = array_merge($result, $actionResult);
+          }
         } else {
           $args = array();
           $parameters = $method->getParameters();
@@ -170,7 +177,10 @@ abstract class Sabel_Controller_Page
               $args[] = $this->$name;
             }
           }
-          $result = array_merge($result, $method->invokeArgs($this, $args));
+          $actionResult = $method->invokeArgs($this, $args);
+          if (is_array($actionResult)) {
+            $result = array_merge($result, $actionResult);
+          }
         }
         
       } elseif (method_exists($this, 'actionMissing')){
