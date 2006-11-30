@@ -45,7 +45,7 @@ class Sabel_DB_Transaction
       self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;
 
-      if (!is_null($result = $driver->begin($conn)))
+      if (($result = $driver->begin($conn)) !== null)
         self::$list[$connectName]['conn'] = $result;
 
       self::$active = true;

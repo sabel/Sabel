@@ -53,7 +53,7 @@ class Sabel_DB_Executer
     if (is_object($arg1) || is_array($arg1)) {
       $this->conditions[] = $arg1;
     } else {
-      if (is_null($arg2)) {
+      if ($arg2 === null) {
         $arg3 = null;
         $arg2 = $arg1;
         $arg1 = $this->property->primaryKey;
@@ -98,7 +98,7 @@ class Sabel_DB_Executer
    */
   public function getDriver()
   {
-    if (is_null($this->driver)) {
+    if ($this->driver === null) {
       $this->driver = Sabel_DB_Connection::getDriver($this->property->connectName);
     }
     return $this->driver;
@@ -209,17 +209,17 @@ class Sabel_DB_Executer
 
   public function getColumnNames($tblName = null)
   {
-    if (is_null($tblName) && $this->isModel) return $this->property->getColumns();
+    if ($tblName === null && $this->isModel) return $this->property->getColumns();
 
-    $tblName = (is_null($tblName)) ? $this->property->table : $tblName;
+    $tblName = ($tblName === null) ? $this->property->table : $tblName;
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
   public function getTableSchema($tblName = null)
   {
-    if (is_null($tblName) && $this->isModel) return $this->property->getSchema();
+    if ($tblName === null && $this->isModel) return $this->property->getSchema();
 
-    $tblName = (is_null($tblName)) ? $this->property->table : $tblName;
+    $tblName = ($tblName === null) ? $this->property->table : $tblName;
     return $this->createSchemaAccessor()->getTable($tblName);
   }
 

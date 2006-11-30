@@ -43,7 +43,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    $conn = (is_null($conn)) ? $this->conn : $conn;
+    $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
       $this->result = pg_query($conn, $sql);

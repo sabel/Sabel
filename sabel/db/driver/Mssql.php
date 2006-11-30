@@ -68,7 +68,7 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    $conn = (is_null($conn)) ? $this->conn : $conn;
+    $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
       $this->result = mssql_query($sql, $conn);

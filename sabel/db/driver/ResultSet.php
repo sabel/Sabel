@@ -22,11 +22,11 @@ class Sabel_DB_Driver_ResultSet implements Iterator
 
   public function __construct($results = null)
   {
-    if (!empty($results)) {
-      foreach ($results as $result) {
-        $this->assocRow[] = $result;
-        $this->arrayRow[] = array_values($result);
-      }
+    if (empty($results)) return null;
+
+    foreach ($results as $result) {
+      $this->assocRow[] = $result;
+      $this->arrayRow[] = array_values($result);
     }
   }
 

@@ -51,7 +51,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    $conn = (is_null($conn)) ? $this->conn : $conn;
+    $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
       $this->result = mysql_query($sql, $conn);

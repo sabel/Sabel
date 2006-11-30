@@ -72,7 +72,7 @@ class Sabel_DB_Schema_Accessor
    */
   public function getTableEngine($tblName, $driver = null)
   {
-    if (is_null($driver)) $driver = Sabel_DB_Connection::getDriver($this->connectName);
+    if ($driver === null) $driver = Sabel_DB_Connection::getDriver($this->connectName);
     $driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
     $row = $driver->getResultSet()->fetch();
     return $row['Engine'];

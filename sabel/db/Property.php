@@ -31,7 +31,7 @@ class Sabel_DB_Property
 
   public function __construct($mdlName = null, $mdlProps = null)
   {
-    if (is_null($mdlName)) return null;
+    if ($mdlName === null) return null;
 
     $props = array('table'               => '',
                    'structure'           => 'normal',
@@ -52,7 +52,7 @@ class Sabel_DB_Property
 
     $properties = $this->initSchema($mdlName, $conName, $props['table']);
 
-    if (is_null($properties['primaryKey']))
+    if ($properties['primaryKey'] === null)
       trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
 
     $this->overrideProps = $props;

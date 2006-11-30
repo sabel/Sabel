@@ -110,7 +110,7 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
 
     $co = new Sabel_DB_Schema_Column();
     $co->name     = strtolower($fieldName);
-    $co->nullable = (is_null($row['rdb$null_flag']));
+    $co->nullable = ($row['rdb$null_flag'] === null);
 
     if ($this->isText($row)) {
       $type = 'text';

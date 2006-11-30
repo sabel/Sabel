@@ -35,7 +35,7 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_General
   {
     $default = $row['column_default'];
 
-    if (is_null($default) || strpos($default, 'nextval') !== false) {
+    if ($default === null || strpos($default, 'nextval') !== false) {
       $co->default = null;
     } elseif (is_numeric($default)) {
       $co->default = (int)$default;

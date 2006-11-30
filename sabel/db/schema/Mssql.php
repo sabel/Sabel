@@ -35,7 +35,7 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_General
   {
     $default = $row['column_default'];
 
-    if (is_null($default)) {
+    if ($default === null) {
       $co->default = null;
     } else {
       $default = substr($default, 2, -2);

@@ -149,7 +149,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver
 
   private function makeBindParam()
   {
-    $param = (is_null($this->stmt)) ? array() : $this->stmt->getParam();
+    $param = ($this->stmt === null) ? array() : $this->stmt->getParam();
     $data  = $this->data;
 
     if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);

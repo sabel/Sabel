@@ -27,7 +27,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   {
     $this->isModel = true;
 
-    if (is_null($this->property)) $this->createProperty();
+    if ($this->property === null) $this->createProperty();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
@@ -56,7 +56,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function __call($method, $parameters)
   {
-    if (is_null($this->property)) $this->createProperty();
+    if ($this->property === null) $this->createProperty();
     @list($arg1, $arg2, $arg3) = $parameters;
     return $this->property->$method($arg1, $arg2, $arg3);
   }
@@ -112,13 +112,13 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   public function aggregate($func, $child = null, $group = null)
   {
-    if (is_null($child)) {
+    if ($child === null) {
       $tblName = $this->table;
-      $columns = (is_null($group)) ? $this->primaryKey : $group;
+      $columns = ($group === null) ? $this->primaryKey : $group;
       $model   = $this;
     } else {
       $tblName = convert_to_tablename($child);
-      $columns = (is_null($group)) ? "{$this->table}_{$this->primaryKey}" : $group;
+      $columns = ($group === null) ? "{$this->table}_{$this->primaryKey}" : $group;
       $model   = $this->newClass($tblName);
       $model->constraints = $this->constraints;
     }
@@ -144,7 +144,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
    */
   public function selectOne($param1 = null, $param2 = null, $param3 = null)
   {
-    if (is_null($param1) && empty($this->conditions))
+    if ($param1 === null && empty($this->conditions))
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setCondition($param1, $param2, $param3);
@@ -158,7 +158,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
     if ($row = $model->exec()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
-      if (!is_null($myChild = $model->getMyChildren())) $model->getDefaultChild($myChild, $model);
+      if (($myChild = $model->getMyChildren()) !== null) $model->getDefaultChild($myChild, $model);
     } else {
       $model->receiveSelectCondition($model->conditions);
       foreach ($model->conditions as $condition) {
@@ -195,7 +195,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
     $models = array();
     foreach ($resultSet as $row) {
-      if (is_null($child)) {
+      if ($child === null) {
         $model = $this->newClass($this->table);
         $withParent = $this->isWithParent();
 
@@ -407,7 +407,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     if ($this->getStructure() !== 'tree' && $this->isAcquired($tblName)) return false;
 
     $model = $this->newClass($tblName);
-    if (is_null($id)) return $model;
+    if ($id === null) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
       $model->setCondition($model->primaryKey, $id);
@@ -443,7 +443,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
    */
   public function getChild($child, $model = null)
   {
-    if (is_null($model)) $model = $this;
+    if ($model === null) $model = $this;
 
     $cModel = $this->newClass($child);
     $projection = $cModel->getProjection();
@@ -521,7 +521,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     $parent  = $this->table;
-    $tblName = (is_null($child)) ? $parant : $child;
+    $tblName = ($child === null) ? $parant : $child;
     $model   = $this->newClass($tblName);
     $column  = "{$parent}_{$this->primaryKey}";
     $model->$column = $id;
@@ -620,7 +620,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       $idValue = $selectConditions[$this->primaryKey]->value;
     }
 
-    if (is_null($param1) && empty($this->conditions) && is_null($idValue)) {
+    if ($param1 === null && empty($this->conditions) && $idValue === null) {
       throw new Exception("Sabel_DB_Relation::remove() must be set condition");
     }
 
@@ -645,7 +645,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     if (!class_exists('Schema_CascadeChain', false))
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
 
-    if (is_null($id) && !$this->isSelected())
+    if ($id === null && !$this->isSelected())
       throw new Exception('Error: give the value of id or select the model beforehand.');
 
     $data  = $this->getData();

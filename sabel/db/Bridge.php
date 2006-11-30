@@ -19,10 +19,10 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Relation
   {
     $this->enableParent();
 
-    if (is_null($table) && $this->bridgeTable === '')
+    if ($table === null && $this->bridgeTable === '')
       throw new Exception('need bridge table name.');
 
-    $table = (is_object($table) || is_null($table)) ? $this->bridgeTable : $table;
+    $table = (is_object($table) || $table === null) ? $this->bridgeTable : $table;
     parent::getChild($table);
 
     $children = array();
