@@ -20,7 +20,7 @@ class Sabel_Http_Request
   public function __construct($userAgent = 'sabel', $requester = null)
   {
     $this->userAgent = $userAgent;
-    if (is_null($requester)) {
+    if ($requester === null) {
       $this->requester = new Sabel_Http_Requester_Stream();
     } else if ($requester instanceof Sabel_Http_Requestable){
       $this->requester = $requester;

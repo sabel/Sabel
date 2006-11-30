@@ -135,7 +135,7 @@ class Sabel_Form implements Iterator
   {
     $column = $this->currentColumn;
     
-    $fmt = (is_null($format)) ? '<input type="%s" name="%s" value="%s" />'."\n" : $format;
+    $fmt = ($format === null) ? '<input type="%s" name="%s" value="%s" />'."\n" : $format;
     
     if ($this->isError()) {
       $error = $this->errors->get($column->name);

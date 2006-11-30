@@ -22,7 +22,7 @@ class Sabel_View_Pager
   
   public static function create($count = null, $limit = null)
   {
-    if (is_null(self::$instance) || isset($count, $limit))
+    if (self::$instance === null || isset($count, $limit))
       self::$instance = new self($count, $limit);
     return self::$instance;
   }

@@ -171,7 +171,7 @@ abstract class Sabel_Controller_Page
           $parameters = $method->getParameters();
           foreach ($parameters as $parameter) {
             $name = $parameter->getName();
-            if ($parameter->allowsNull() && is_null($this->$name)) {
+            if ($parameter->allowsNull() && $this->$name === null) {
               $args[] = null;
             } else {
               $args[] = $this->$name;
@@ -244,7 +244,7 @@ abstract class Sabel_Controller_Page
   
   protected function isNull($name)
   {
-    return (is_null($this->$name));
+    return ($this->$name === null);
   }
   
   protected function __set($name, $value)
@@ -456,7 +456,7 @@ class ReflectionCache
   
   public static function create()
   {
-    if (is_null(self::$instance)) self::$instance = new self();
+    if (self::$instance === null) self::$instance = new self();
     return self::$instance;
   }
   

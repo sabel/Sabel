@@ -102,7 +102,7 @@ class Sabel_Core_Namespace
   
   public function addClass($className)
   {
-    if (is_null($this->parent)) throw new Exception("parent can't be null");
+    if ($this->parent === null) throw new Exception("parent can't be null");
     
     $names = array();
     $names[] = $this->name;

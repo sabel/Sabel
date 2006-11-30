@@ -22,7 +22,7 @@ class Sabel_View_Uri
   
   public static function create()
   {
-    if (is_null(self::$instance)) self::$instance = new self();
+    if (self::$instance === null) self::$instance = new self();
     return self::$instance;
   }
   

@@ -49,7 +49,7 @@ class Container
   
   public static function create()
   {
-    if (is_null(self::$instance)) {
+    if (self::$instance === null) {
       self::$instance = new self();
     }
     return self::$instance;
@@ -57,7 +57,7 @@ class Container
   
   public function regist($key, $name, $path = null)
   {
-    if (!is_null($path)) {
+    if ($path !== null) {
       self::$classes[$key] = NameResolver::resolvDirectoryPathToClassName($path);
     }
     
@@ -231,7 +231,7 @@ class AppClassRegister
     $classpath = $this->makeClassPath($value);
     $className = $this->makeClassName($classpath);
     
-    if (!is_null($classpath))
+    if ($classpath !== null)
       $this->container->regist($classpath, $className);
   }
   
@@ -535,10 +535,10 @@ class ClassFileStructureReader
   
   private function __construct($dir, $base, $classFiles)
   {
-    $this->base = (is_null($base)) ? dirname(realpath(__FILE__)).'/' : $base;
+    $this->base = ($base === null) ? dirname(realpath(__FILE__)).'/' : $base;
     $this->dir = $this->base . $dir;
     $this->directories = new DirectoryIterator($this->dir);
-    $this->files = (is_null($classFiles)) ? new ClassFiles() : $classFiles;
+    $this->files = ($classFiles === null) ? new ClassFiles() : $classFiles;
   }
   
   public static function create($dir = null, $base = null, $classFiles = null)
@@ -554,7 +554,7 @@ class ClassFileStructureReader
    */
   public function read(DirectoryIterator $fromElement = null)
   {
-    $elements = (is_null($fromElement)) ? $this->directories : $fromElement;
+    $elements = ($fromElement === null) ? $this->directories : $fromElement;
     
     foreach ($elements as $element) {
       $child = $element->getPathName();
@@ -675,7 +675,7 @@ class DirectoryTraverser
   
   public function traverse(DirectoryIterator $fromElement = null)
   {
-    $element = (is_null($fromElement)) ? $this->directories : $fromElement;
+    $element = ($fromElement === null) ? $this->directories : $fromElement;
     foreach ($element as $e) {
       $child = $e->getPathName();
       $entry = ltrim(str_replace($this->dir, '', $child), '/');

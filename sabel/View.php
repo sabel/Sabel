@@ -15,7 +15,7 @@ class Sabel_View
   
   public function __construct($entry = null)
   {
-    if (is_null($entry)) {
+    if ($entry === null) {
       $entry = Sabel_Context::getCurrentMapEntry();
     }
     

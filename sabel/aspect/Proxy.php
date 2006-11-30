@@ -78,7 +78,7 @@ class Sabel_Aspect_Proxy
     $reflection = new ReflectionClass($this->target);
     
     $bcbResult = $this->beforeCallBefore($method, $arg);
-    if (!is_null($bcbResult)) return $bcbResult;
+    if ($bcbResult !== null) return $bcbResult;
     
     $joinpoint = new Sabel_Aspect_Joinpoint($target, $arg, $method);
     

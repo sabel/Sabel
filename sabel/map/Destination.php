@@ -16,7 +16,7 @@ class Sabel_Map_Destination
   
   public function __construct($dest = null)
   {
-    $this->destination = (!is_null($dest)) ? $dest : null;
+    $this->destination = ($dest !== null) ? $dest : null;
   }
   
   public function mappingByRequest($mapUri, $requestUri)

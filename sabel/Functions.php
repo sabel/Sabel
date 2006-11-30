@@ -2,7 +2,7 @@
 
 function is_not_null($value)
 {
-  return (!is_null($value));
+  return ($value !== null);
 }
 
 function is_not_object($object)

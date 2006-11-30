@@ -55,7 +55,7 @@ class Sabel_Aspect_Joinpoint
   
   public function hasResult()
   {
-    return (is_null($this->result)) ? false : $this->result;
+    return ($this->result === null) ? false : $this->result;
   }
   
   public function getResult()
@@ -70,7 +70,7 @@ class Sabel_Aspect_Joinpoint
   
   public function hasException()
   {
-    return (is_null($this->exception)) ? false : true ;
+    return ($this->exception === null) ? false : true ;
   }
   
   public function getException()

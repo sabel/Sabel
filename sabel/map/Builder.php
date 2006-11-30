@@ -12,7 +12,7 @@ class Sabel_Map_Builder
   
   public function __construct($path = null, $reset = false)
   {
-    if (is_null($path)) return 0;
+    if ($path === null) return 0;
     
     if ($reset) self::$maps = null;
     
@@ -21,7 +21,7 @@ class Sabel_Map_Builder
     if (is_readable($bcpath)) {
       self::$maps = unserialize(file_get_contents($bcpath));
     } else {
-      if (is_null(self::$maps)) self::$maps = new Sabel_Config_Yaml($path);
+      if (self::$maps === null) self::$maps = new Sabel_Config_Yaml($path);
       
       if (is_writable($bcpath)) {
         file_put_contents($bcpath, serialize(self::$maps));
@@ -41,7 +41,7 @@ class Sabel_Map_Builder
   
   public function build($facade = null)
   {
-    if (is_null($facade)) {
+    if ($facade === null) {
       $facade = new Sabel_Map_Facade();
       $facade->setRequestUri(new SabeL_Request_Request());
     }
