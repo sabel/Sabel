@@ -18,7 +18,7 @@ class Sabel_Controller_Loader
     $destination = Sabel_Context::getCurrentMapEntry()->getDestination();
     
     $classpath  = $destination->module;
-    $classpath .= '.' . trim(Sabel_Core_Const::CONTROLLER_DIR, '/');
+    $classpath .= '.' . trim(Sabel_Const::CONTROLLER_DIR, '/');
     if ($destination->hasController()) {
       $classpath .= '.' . ucfirst($destination->controller);
     } else {
