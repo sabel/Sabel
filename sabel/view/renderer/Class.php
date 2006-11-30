@@ -29,19 +29,17 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   public function configuration()
   {
   }
-
+  
   public function rendering($path, $name, $values)
   {
-    $contents  = '';
-    $pageCache = false;
-
+    $contents = '';
     $filepath = $path . $name;
     $cpath    = $this->getCompileFilePath($path, $name);
-
+    
     if (is_file($filepath) && (!is_readable($cpath) 
         || filemtime($filepath) > filemtime($cpath))) {
       $contents = file_get_contents($filepath);
-
+      
       $contents = str_replace('<?', '<?php', $contents);
       
       $contents = preg_replace(self::H_PAT,     self::H_REPLACE,     $contents);
@@ -63,21 +61,17 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     
     ob_start();
     if (is_file($cpath)) include($cpath);
-    
     $contents = ob_get_clean();
-    if ($pageCache) $this->saveCompileFile($path, $name, $contents);
-
+    
     return $contents;
   }
-
+  
   private function saveCompileFile($path, $name, $contents)
   {
     $cpath = $this->getCompileFilePath($path, $name);
-    $fp = fopen($cpath, 'w');
-    fwrite($fp, $contents);
-    fclose($fp);
+    file_put_contents($cpath, $contents);
   }
-
+  
   private function getCompileFilePath($path, $name)
   {
     return RUN_BASE . self::COMPILE_DIR . md5($path) . $name;
