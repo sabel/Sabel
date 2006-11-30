@@ -123,7 +123,7 @@ class Sabel_Map_Destination
     if ($this->hasAction()) {
       return $this->destination['action'];
     } else {
-      return 'index';
+      return Sabel_Const::DEFAULT_ACTION;
     }
   }
   

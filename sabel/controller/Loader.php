@@ -22,7 +22,7 @@ class Sabel_Controller_Loader
     if ($destination->hasController()) {
       $classpath .= '.' . ucfirst($destination->controller);
     } else {
-      $classpath .= '.Index';
+      $classpath .= '.'. ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
     return $classpath;
