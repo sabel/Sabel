@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Template_Engine_Smarty
+ * Sabel_View_Renderer_Smarty
  *
  * @category   Template
  * @package    org.sabel.template.engine

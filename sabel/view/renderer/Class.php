@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Template_Engine_Class
+ * Sabel_View_Renerer_Class
  *
  * @category   Template
  * @package    org.sabel.template.engine

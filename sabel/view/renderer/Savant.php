@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Template_Engine_Savant
+ * Sabel_View_Renderer_Savant
  *
  * @category   Template
  * @package    org.sabel.template.engine

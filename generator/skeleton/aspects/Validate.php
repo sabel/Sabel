@@ -56,14 +56,15 @@ class Aspects_Validate
       if (self::$redirectWhenFailure !== '') {
         $controller->redirectTo(self::$redirectWhenFailure);
       }
-
-      Sabel_Template_Engine::setAttribute('errors', $errors);
+      
+      $view = Sabel_Context::getView();
+      $view->assign('errors', $errors);
       
       if ($controller->hasErrorMethod()) {
         $errorMethod = $controller->errorMethod();
         $controller->$errorMethod($errors);
       } else {
-        Sabel_Template_Engine::setAttribute(strtolower($className), $target);
+        $view->assign(strtolower($className), $target);
       }
       
       if (count(self::$failureCallbacks) > 0) {
