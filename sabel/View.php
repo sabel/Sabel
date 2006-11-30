@@ -101,15 +101,15 @@ class Sabel_View
     $destination = $entry->getDestination();
     
     $tplpath  = RUN_BASE;
-    $tplpath .= Sabel_Core_Const::MODULES_DIR;
+    $tplpath .= Sabel_Const::MODULES_DIR;
     $tplpath .= $destination->module . '/';
-    $tplpath .= Sabel_Core_Const::TEMPLATE_DIR;
+    $tplpath .= Sabel_Const::TEMPLATE_DIR;
     
     // make name string of template such as "controller.method.tpl"
     $tplname  = $destination->controller;
-    $tplname .= Sabel_Core_Const::TEMPLATE_NAME_SEPARATOR;
+    $tplname .= Sabel_Const::TEMPLATE_NAME_SEPARATOR;
     $tplname .= $destination->action;
-    $tplname .= Sabel_Core_Const::TEMPLATE_POSTFIX;
+    $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
     
     $this->setTemplatePath($tplpath);
     $this->setTemplateName($tplname);
