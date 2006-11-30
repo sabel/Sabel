@@ -54,5 +54,5 @@ class Sabel_Const
   /**
    * default action method
    */
-  const DEFAULT_METHOD = 'index';
+  const DEFAULT_ACTION = 'index';
 }
