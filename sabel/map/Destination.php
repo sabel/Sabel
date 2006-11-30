@@ -98,12 +98,14 @@ class Sabel_Map_Destination
   
   public function hasController()
   {
-    return (isset($this->destination['controller']));
+    return (isset($this->destination['controller']) &&
+            $this->destination['controller'] !== '');
   }
   
   public function hasAction()
   {
-    return (isset($this->destination['action']));
+    return (isset($this->destination['action']) &&
+            $this->destination['action'] !== '');
   }
   
   public function getModule()
@@ -118,7 +120,11 @@ class Sabel_Map_Destination
   
   public function getAction()
   {
-    return $this->destination['action'];
+    if ($this->hasAction()) {
+      return $this->destination['action'];
+    } else {
+      return 'index';
+    }
   }
   
   public function toArray()

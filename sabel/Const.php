@@ -4,7 +4,7 @@
  * Sabel constant values
  *
  */
-class Sabel_Core_Const
+class Sabel_Const
 {
   /**
    * controllers directory.

@@ -99,7 +99,7 @@ abstract class Sabel_Controller_Page
       header('X-Framework: Sabel');
     }
     
-    $actionName = $this->destination->action;
+    $actionName = $this->destination->getAction();
     
     // check reserved words
     if (isset($this->reserved[$actionName]))

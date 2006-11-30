@@ -8,18 +8,6 @@
  */
 class Sabel_Controller_Loader
 {
-  private $entry = null;
-
-  private function __construct($entry)
-  {
-    $this->entry = $entry;
-  }
-
-  public static function create($entry)
-  {
-    return new self($entry);
-  }
-  
   public function load()
   {
     return Container::create()->load($this->makeControllerClassPath());
@@ -27,11 +15,15 @@ class Sabel_Controller_Loader
   
   private function makeControllerClassPath()
   {
-    $destination = $this->entry->getDestination();
+    $destination = Sabel_Context::getCurrentMapEntry()->getDestination();
     
     $classpath  = $destination->module;
     $classpath .= '.' . trim(Sabel_Core_Const::CONTROLLER_DIR, '/');
-    $classpath .= '.' . ucfirst($destination->controller);
+    if ($destination->hasController()) {
+      $classpath .= '.' . ucfirst($destination->controller);
+    } else {
+      $classpath .= '.Index';
+    }
     
     return $classpath;
   }

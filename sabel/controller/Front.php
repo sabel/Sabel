@@ -48,11 +48,12 @@ class Sabel_Controller_Front
     $builder->build($map);
     
     $mapEntry = $map->find();
+    Sabel_Context::setCurrentMapEntry($mapEntry);
     
-    $controller = Sabel_Controller_Loader::create($mapEntry)->load();
+    $loader = new Sabel_Controller_Loader();
+    $controller = $loader->load();
     $controller = $controller->getTargetClass();
     
-    Sabel_Context::setCurrentMapEntry($mapEntry);
     Sabel_Context::setPageController($controller);
     
     $controller->setup();
