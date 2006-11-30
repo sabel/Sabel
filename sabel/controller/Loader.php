@@ -10,7 +10,8 @@ class Sabel_Controller_Loader
 {
   public function load()
   {
-    return Container::create()->load($this->makeControllerClassPath());
+    $classpath = $this->makeControllerClassPath();
+    return Container::create()->load($classpath);
   }
   
   private function makeControllerClassPath()

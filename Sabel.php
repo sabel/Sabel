@@ -72,6 +72,10 @@ class Container
     $name = NameResolver::resolvNameSpaceToClassName($name);
     $className = $this->resolvShortClassName($name);
     
+    if (!class_exists($className)) {
+      throw new Sabel_Exception_Runtime($className . " does not exists");
+    }
+    
     $rc = new ReflectionClass($className);
     $di = Sabel_Container_DI::create();
     
@@ -593,6 +597,11 @@ class ClassFileStructureReader
   
   public function write($path)
   {
+    file_put_contents($path, $this->fetch());
+  }
+  
+  public function fetch()
+  {
     $cbuf = $bbuf = $pbuf = $nbuf = array();
     
     $this->files->findChilds();
@@ -610,7 +619,7 @@ class ClassFileStructureReader
       }
     }
     
-    file_put_contents($path, array_merge(array("<?php\n"), $cbuf, $bbuf, $pbuf, $nbuf));
+    return array_merge(array("<?php\n"), $cbuf, $bbuf, $pbuf, $nbuf);
   }
   
   protected function checkParentExists($file, $conflicts)
