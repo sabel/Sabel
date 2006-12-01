@@ -4,6 +4,7 @@ Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
 Sabel::using('Sabel_Annotation_Reader');
+Sabel::fileUsing('sabel/core/Utility.php');
 
 /**
  * the Base of Page Controller.
@@ -68,7 +69,6 @@ abstract class Sabel_Controller_Page
     
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
-    $this->container   = Container::create();
     
     if ($this->enableSession) {
       $this->storage   = Sabel_Storage_Session::create();
@@ -105,8 +105,10 @@ abstract class Sabel_Controller_Page
       throw new Sabel_Exception_Runtime('use reserved action name');
       
     $result = null;
-    if ($this->permission === Sabel_Security_Permission::P_PRIVATE ||
-        $this->isPrivateAction($actionName)) {
+    if ($this->isPublicAction($actionName)) {
+      $result = $this->methodExecute($actionName);
+    } elseif ($this->permission === Sabel_Security_Permission::P_PRIVATE ||
+          $this->isPrivateAction($actionName)) {
       if ($this->isAuthorized()) {
         $result = $this->methodExecute($actionName);
       } elseif ($this->hasMethod('authorizeRequired')) {
