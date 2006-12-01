@@ -9,6 +9,7 @@ Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_Exception_Runtime');
 Sabel::using('Sabel_Config_Yaml');
 Sabel::fileUsing('sabel/Functions.php');
+Sabel::fileUsing('sabel/db/Functions.php');
 
 /**
  * Front Controller Class.
