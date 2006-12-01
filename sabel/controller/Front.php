@@ -73,8 +73,7 @@ class Sabel_Controller_Front
     
     $responses = $controller->execute();
     
-    $rc = ReflectionCache::create();
-    $rc->destruction();
+    ReflectionCache::create()->destruction();
     
     return array('html' => $controller->rendering(), 'responses' => $responses);
   }

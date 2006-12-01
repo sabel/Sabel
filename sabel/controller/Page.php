@@ -106,37 +106,37 @@ abstract class Sabel_Controller_Page
       
     $result = null;
     if ($this->isPublicAction($actionName)) {
-      $result = $this->methodExecute($actionName);
+      $result = $this->methodCheckAndExecute($actionName);
     } elseif ($this->permission === Sabel_Security_Permission::P_PRIVATE ||
           $this->isPrivateAction($actionName)) {
       if ($this->isAuthorized()) {
-        $result = $this->methodExecute($actionName);
+        $result = $this->methodCheckAndExecute($actionName);
       } elseif ($this->hasMethod('authorizeRequired')) {
         $this->authorizeRequired();
       } else {
         throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
       }
     } else {
-      $result = $this->methodExecute($actionName);
+      $result = $this->methodCheckAndExecute($actionName);
     }
     
     if (is_array($result)) $this->view->assignByArray($result);
     return $result;
   }
   
-  protected function methodExecute($action)
+  protected function methodCheckAndExecute($action)
   {
     $reqMethod    = strtolower($this->httpMethod);
     $actionName   = $reqMethod . ucfirst($action);
     $actionResult = array();
     
     if ($this->hasMethod($actionName)) {
-      $actionResult =(array) $this->test($actionName);
+      $actionResult =(array) $this->methodExecute($actionName);
       if (!$this->skipDefaultAction) {
-        $actionResult = array_merge((array) $this->test($action), $actionResult);
+        $actionResult = array_merge((array) $this->methodExecute($action), $actionResult);
       }
     } elseif ($this->hasMethod($action)) {
-      $actionResult = $this->test($action);
+      $actionResult = $this->methodExecute($action);
     } elseif ($this->hasMethod('actionMissing')) {
       $this->actionMissing();
     }
@@ -146,6 +146,24 @@ abstract class Sabel_Controller_Page
       $this->storage->write('previous', $this->request->__toString());
       
     return $result;
+  }
+  
+  protected function methodExecute($action)
+  {
+    $ref = new ReflectionClass($this);
+    $method = $ref->getMethod($action);
+    if ($method->getNumberOfParameters() === 0) {
+      $actionResult = $this->$action();
+    } else {
+      $args = array();
+      $parameters = $method->getParameters();
+      foreach ($parameters as $parameter) {
+        $name = $parameter->getName();
+        $args[] = $this->$name;
+      }
+      $actionResult = $method->invokeArgs($this, $args);
+    }
+    return $actionResult;
   }
   
   public function rendering()
