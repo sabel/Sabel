@@ -1,16 +1,20 @@
 <?php
 
 /**
- * Sabel_DB_Relation
+ * Sabel_DB_Model_Relation
  *
  * @category   DB
  * @package    org.sabel.db
+ * @subpackage model
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Relation extends Sabel_DB_Executer
+class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 {
+  protected
+    $property = null;
+
   private
     $joinPair     = array(),
     $joinColList  = array(),
@@ -31,9 +35,14 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
-  private function createProperty()
+  protected function createProperty($mdlName = null, $mdlProps = null)
   {
-    $this->property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
+    $mdlName  = ($mdlName === null)  ? get_class($this) : $mdlName;
+    $mdlProps = ($mdlProps === null) ? get_object_vars($this) : $mdlProps;
+
+    $this->property  = new Sabel_DB_Model_Property($mdlName, $mdlProps);
+    $tableProperties = $this->property->getTableProperties();
+    $this->tableProp = Sabel::load('Sabel_ValueObject', $tableProperties);
   }
 
   public function __set($key, $val)

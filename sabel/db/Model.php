@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Model_Relation');
+
 /**
  * Sabel_DB_Model
  *
@@ -28,12 +30,12 @@ class Sabel_DB_Model
     if (class_exists($mdlName, false)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {
-      eval('class Sabel_DB_Empty extends Sabel_DB_Relation
+      eval('class Sabel_DB_Empty extends Sabel_DB_Model_Relation
             {
               public function __construct($mdlName)
               {
-                $this->isModel  = true;
-                $this->property = new Sabel_DB_Property($mdlName, array());
+                $this->isModel = true;
+                $this->createProperty($mdlName, array());
               }
             }'
           );

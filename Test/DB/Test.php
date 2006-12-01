@@ -1085,23 +1085,23 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-class Users extends Sabel_DB_Relation
+class Users extends Sabel_DB_Model_Relation
 {
   protected $withParent = true;
   protected $defChildConstraints = array('order' => 'write_date desc');
 }
 
-class Country extends Sabel_DB_Relation
+class Country extends Sabel_DB_Model_Relation
 {
   protected $myChildren = array('City');
 }
 
-class Student extends Sabel_DB_Bridge
+class Student extends Sabel_DB_Model_Bridge
 {
   protected $bridgeTable = 'StudentCourse';
 }
 
-class Course extends Sabel_DB_Bridge
+class Course extends Sabel_DB_Model_Bridge
 {
   protected $bridgeTable = 'StudentCourse';
 }

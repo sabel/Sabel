@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Property
+ * Sabel_DB_Model_Property
  *
  * @category   DB
  * @package    org.sabel.db
+ * @subpackage model
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Property
+class Sabel_DB_Model_Property
 {
   private
     $schema  = array(),
@@ -164,6 +165,11 @@ class Sabel_DB_Property
       throw new Exception($errorMsg);
     }
     foreach ($row as $key => $val) $this->data[$key] = $val;
+  }
+
+  public function getTableProperties()
+  {
+    return $this->properties;
   }
 
   public function getSchema()

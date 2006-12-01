@@ -16,8 +16,8 @@ class Sabel_DB_Transaction
 
   public static function add($model)
   {
-    if (!$model instanceof Sabel_DB_Relation)
-      throw new Exception('argument must be an instance of Sabel_DB_Relation.');
+    if (!$model instanceof Sabel_DB_Model_Relation)
+      throw new Exception('argument must be an instance of Sabel_DB_Model_Relation.');
 
     $driver  = $model->getDriver();
     $conName = $model->connectName;

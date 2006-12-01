@@ -12,7 +12,7 @@
 class Sabel_DB_Executer
 {
   protected
-    $property    = null,
+    $tableProp   = null,
     $conditions  = array(),
     $constraints = array();
 
@@ -26,14 +26,19 @@ class Sabel_DB_Executer
    * @param array $properties
    *   ['table']          => table name
    *   ( ['connectName']  => connection name )
+   *   ( ['primaryKey']   => primary key )
    *   ( ['incrementKey'] => auto increment column )
    *
    * @return void
    */
-  public function __construct($properties)
+  public function __construct($ps)
   {
-    $this->property = new Sabel_DB_Property();
-    $this->property->set($properties);
+    $props['table']        = $ps['table'];
+    $props['connectName']  = (isset($ps['connectName']))  ? $ps['connectName']  : 'default';
+    $props['primaryKey']   = (isset($ps['primaryKey']))   ? $ps['primaryKey']   : 'id';
+    $props['incrementKey'] = (isset($ps['incrementKey'])) ? $ps['incrementKey'] : null;
+
+    $this->tableProp = Sabel::load('Sabel_ValueObject', $props);
   }
 
   /**
@@ -52,15 +57,21 @@ class Sabel_DB_Executer
 
     if (is_object($arg1) || is_array($arg1)) {
       $this->conditions[] = $arg1;
-    } else {
-      if ($arg2 === null) {
-        $arg3 = null;
-        $arg2 = $arg1;
-        $arg1 = $this->property->primaryKey;
-      }
-      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
-      $this->conditions[$condition->key] = $condition;
+      return null;
     }
+
+    if ($arg2 === null) {
+      $pKey = $this->tableProp->primaryKey;
+      if (is_array($pKey)) {
+        throw new Exception('Please specify a primary key for the table.');
+      }
+
+      $arg3 = null;
+      $arg2 = $arg1;
+      $arg1 = $pKey;
+    }
+    $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+    $this->conditions[$condition->key] = $condition;
   }
 
   /**
@@ -99,7 +110,14 @@ class Sabel_DB_Executer
   public function getDriver()
   {
     if ($this->driver === null) {
-      $this->driver = Sabel_DB_Connection::getDriver($this->property->connectName);
+      $a = $this->tableProp->connectName;
+      if ($a === null) {
+        var_dump($this->tableProp);
+        var_dump(get_class($this));
+        exit;
+      }
+
+      $this->driver = Sabel_DB_Connection::getDriver($this->tableProp->connectName);
     }
     return $this->driver;
   }
@@ -125,7 +143,7 @@ class Sabel_DB_Executer
 
   public function update($data)
   {
-    $table = $this->property->table;
+    $table = $this->tableProp->table;
     $this->getStatement()->makeUpdateSQL($table, $data);
 
     $driver = $this->getDriver();
@@ -163,8 +181,8 @@ class Sabel_DB_Executer
 
   protected function execInsert($driver, $stmt, $data, $idColumn)
   {
-    $table = $this->property->table;
-    $db    = Sabel_DB_Connection::getDB($this->property->connectName);
+    $table = $this->tableProp->table;
+    $db    = Sabel_DB_Connection::getDB($this->tableProp->connectName);
 
     if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
       $data = $driver->setIdNumber($table, $data, $idColumn);
@@ -176,7 +194,7 @@ class Sabel_DB_Executer
 
   protected function checkIncColumn()
   {
-    $incCol = $this->property->incrementKey;
+    $incCol = $this->tableProp->incrementKey;
     return (isset($incCol)) ? $incCol : false;
   }
 
@@ -198,7 +216,7 @@ class Sabel_DB_Executer
 
     if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
 
-    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->property->table);
+    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
     $this->exec();
   }
 
@@ -216,7 +234,7 @@ class Sabel_DB_Executer
     $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $row = $this->exec()->fetch(Sabel_DB_ResultSet::NUM);
+    $row = $this->exec()->fetch(Sabel_DB_Result_Row::NUM);
     return (int)$row[0];
   }
 
@@ -238,7 +256,7 @@ class Sabel_DB_Executer
     if ($this->isModel) {
       return $this->selectOne();
     } else {
-      $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->property->table);
+      $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
       return $this->exec();
     }
   }
@@ -274,7 +292,7 @@ class Sabel_DB_Executer
   {
     if ($tblName === null && $this->isModel) return $this->property->getColumns();
 
-    $tblName = ($tblName === null) ? $this->property->table : $tblName;
+    $tblName = ($tblName === null) ? $this->tableProp->table : $tblName;
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
@@ -282,7 +300,7 @@ class Sabel_DB_Executer
   {
     if ($tblName === null && $this->isModel) return $this->property->getSchema();
 
-    $tblName = ($tblName === null) ? $this->property->table : $tblName;
+    $tblName = ($tblName === null) ? $this->tableProp->table : $tblName;
     return $this->createSchemaAccessor()->getTable($tblName);
   }
 
@@ -293,14 +311,14 @@ class Sabel_DB_Executer
 
   protected function createSchemaAccessor()
   {
-    $connectName = $this->property->connectName;
+    $connectName = $this->tableProp->connectName;
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
     return new Sabel_DB_Base_Schema($connectName, $schemaName);
   }
 
   public function close()
   {
-    Sabel_DB_Connection::close($this->property->connectName);
+    Sabel_DB_Connection::close($this->tableProp->connectName);
   }
 
   /**

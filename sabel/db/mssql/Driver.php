@@ -62,7 +62,7 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
   {
     $this->driverExecute('SELECT SCOPE_IDENTITY()');
     $resultSet = $this->getResultSet();
-    $arrayRow  = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
+    $arrayRow  = $resultSet->fetch(Sabel_DB_Result_Row::NUM);
     return (int)$arrayRow[0];
   }
 
@@ -92,6 +92,6 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
     if (is_resource($result)) {
       while ($row = mssql_fetch_assoc($result)) $rows[] = $row;
     }
-    return new Sabel_DB_ResultSet($rows);
+    return new Sabel_DB_Result_Row($rows);
   }
 }

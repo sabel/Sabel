@@ -53,7 +53,7 @@ abstract class Sabel_DB_Base_Driver
     if (!isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
       $resultSet = $this->getResultSet();
-      $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
+      $row = $resultSet->fetch(Sabel_DB_Result_Row::NUM);
       if (($this->lastInsertId = (int)$row[0]) === 0) {
         throw new Exception("{$table}_{$defColumn}_seq is not found.");
       } else {

@@ -77,7 +77,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
       case 'mysql':
         $this->driverExecute('SELECT last_insert_id()');
         $resultSet = $this->getResultSet();
-        $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
+        $row = $resultSet->fetch(Sabel_DB_Result_Row::NUM);
         return (int)$row[0];
       case 'sqlite':
         return (int)$this->conn->lastInsertId();
@@ -144,7 +144,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     $result = $this->pdoStmt->fetchAll(PDO::FETCH_ASSOC);
 
     $this->pdoStmt->closeCursor();
-    return new Sabel_DB_ResultSet($result);
+    return new Sabel_DB_Result_Row($result);
   }
 
   private function makeBindParam()

@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_ResultSet
+ * Sabel_DB_Result_Row
  *
  * @category   DB
  * @package    org.sabel.db
+ * @subpackage result
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_ResultSet implements Iterator
+class Sabel_DB_Result_Row implements Iterator
 {
   const ASSOC  = 0;
   const NUM    = 5;
@@ -54,7 +55,7 @@ class Sabel_DB_ResultSet implements Iterator
         $data = $this->arrayRow[$this->pointer];
         break;
       case self::OBJECT:
-        $data = new Sabel_DB_ResultObject($this->assocRow[$this->pointer]);
+        $data = new Sabel_DB_Result_Object($this->assocRow[$this->pointer]);
         break;
     }
 
@@ -74,7 +75,7 @@ class Sabel_DB_ResultSet implements Iterator
       case self::OBJECT:
         $data = array();
         foreach ($this->assocRow as $row) {
-          $data[] = new Sabel_DB_ResultObject($row);
+          $data[] = new Sabel_DB_Result_Object($row);
         }
         break;
     }
