@@ -1,16 +1,17 @@
 <?php
 
 /**
- * Sabel_DB_Driver
+ * Sabel_DB_Base_Driver
  *
  * @abstract
  * @category   DB
  * @package    org.sabel.db
+ * @subpackage base
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Driver
+abstract class Sabel_DB_Base_Driver
 {
   protected
     $conn = null,

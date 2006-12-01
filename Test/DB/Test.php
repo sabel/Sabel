@@ -5,7 +5,8 @@ class Test_DB_Test extends SabelTestCase
   public static $db = '';
   public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
                                 'test_for_like', 'test_condition', 'blog',
-                                'customer_order', 'classification', 'favorite_item');
+                                'customer_order', 'classification', 'favorite_item',
+                                'student', 'course', 'student_course');
 
 
   public function testBasic()
@@ -1038,6 +1039,45 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($tx->primary);
   }
 
+  public function testBridge()
+  {
+    $model = MODEL('Student');
+    $model->save(array('id' => 1, 'name' => 'suzuki'));
+    $model->save(array('id' => 2, 'name' => 'satou'));
+    $model->save(array('id' => 3, 'name' => 'tanaka'));
+    $model->save(array('id' => 4, 'name' => 'koike'));
+    $model->save(array('id' => 5, 'name' => 'yamada'));
+
+    $model = MODEL('Course');
+    $model->save(array('id' => 1, 'course_name' => 'math'));
+    $model->save(array('id' => 2, 'course_name' => 'physics'));
+    $model->save(array('id' => 3, 'course_name' => 'sience'));
+
+    $model = MODEL('StudentCourse');
+    $model->save(array('student_id' => 1, 'course_id' => 1));
+    $model->save(array('student_id' => 1, 'course_id' => 2));
+    $model->save(array('student_id' => 2, 'course_id' => 2));
+    $model->save(array('student_id' => 3, 'course_id' => 1));
+    $model->save(array('student_id' => 4, 'course_id' => 3));
+    $model->save(array('student_id' => 2, 'course_id' => 3));
+    $model->save(array('student_id' => 3, 'course_id' => 2));
+
+    $suzuki = MODEL('Student')->selectOne(1);
+    $this->assertEquals($suzuki->name, 'suzuki');
+
+    $courses = $suzuki->getChild('Course');
+    $this->assertEquals(count($courses), 2);
+
+    $courses = $suzuki->Course;
+    $this->assertEquals(count($courses), 2);
+
+    $suzuki = MODEL('Student')->selectOne(5);
+    $this->assertEquals($suzuki->name, 'yamada');
+
+    $courses = $suzuki->getChild('Course');
+    $this->assertFalse($courses);
+  }
+
   public function testClear()
   {
     Sabel_DB_SimpleCache::clear();
@@ -1053,17 +1093,17 @@ class Users extends Sabel_DB_Relation
 
 class Country extends Sabel_DB_Relation
 {
-  protected $myChildren = 'City';
+  protected $myChildren = array('City');
 }
 
 class Student extends Sabel_DB_Bridge
 {
-
+  protected $bridgeTable = 'StudentCourse';
 }
 
 class Course extends Sabel_DB_Bridge
 {
-
+  protected $bridgeTable = 'StudentCourse';
 }
 
 class Schema_TestCondition

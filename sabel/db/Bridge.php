@@ -26,9 +26,14 @@ abstract class Sabel_DB_Bridge extends Sabel_DB_Relation
     parent::getChild($table);
 
     $children = array();
-    if ($this->$table) {
-      foreach ($this->$table as $bridge) $children[] = $bridge->$child;
-      $this->$child = $children;
+    $bridges  = $this->$table;
+
+    if ($bridges) {
+      $bridges = $this->$table;
+      foreach ($bridges as $bridge) $children[] = $bridge->$child;
+      return $this->$child = $children;
+    } else {
+      return false;
     }
   }
 }

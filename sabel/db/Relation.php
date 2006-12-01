@@ -403,8 +403,6 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   protected function getDefaultChild($children, $model)
   {
-    $children = (is_string($children)) ? (array)$children : $children;
-
     foreach ($children as $val) {
       $this->chooseChildConstraint($val, $model);
       $model->getChild($val, $model);

@@ -12,12 +12,13 @@ define('SABEL_DB',   SABEL . 'db/');
 require_once SABEL_DB . 'Connection.php';
 require_once SABEL_DB . 'Executer.php';
 
+require_once SABEL_DB . 'base/Driver.php';
+require_once SABEL_DB . 'base/Statement.php';
+require_once SABEL_DB . 'base/Schema.php';
+
 require_once SABEL_DB . 'driver/ResultSet.php';
 require_once SABEL_DB . 'driver/ResultObject.php';
 
-require_once SABEL_DB . 'statement/Statement.php';
-
-require_once SABEL_DB . 'driver/Driver.php';
 require_once SABEL_DB . 'driver/Mysql.php';
 require_once SABEL_DB . 'driver/Pgsql.php';
 require_once SABEL_DB . 'driver/Mssql.php';
@@ -53,7 +54,6 @@ require_once SABEL_DB . 'schema/Mysql.php';
 require_once SABEL_DB . 'schema/Pgsql.php';
 require_once SABEL_DB . 'schema/Sqlite.php';
 require_once SABEL_DB . 'schema/Mssql.php';
-require_once SABEL_DB . 'schema/Accessor.php';
 
 require_once SABEL . 'config/Spyc.php';
 require_once SABEL . 'config/Yaml.php';
@@ -334,8 +334,8 @@ class Schema_Generator
       Sabel_DB_Connection::addConnection($connectName, $params);
 
       $sa = ($params['driver'] === 'pdo-sqlite')
-        ? new Sabel_DB_Schema_Accessor($connectName)
-        : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
+        ? new Sabel_DB_Base_Schema($connectName)
+        : new Sabel_DB_Base_Schema($connectName, $params['schema']);
 
       $schemas = $sa->getTables();
 

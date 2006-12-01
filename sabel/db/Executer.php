@@ -295,7 +295,7 @@ class Sabel_DB_Executer
   {
     $connectName = $this->property->connectName;
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
-    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
+    return new Sabel_DB_Base_Schema($connectName, $schemaName);
   }
 
   public function close()
