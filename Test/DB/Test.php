@@ -993,32 +993,32 @@ class Test_DB_Test extends SabelTestCase
     $db = $schema->db_val;
     $tx = $schema->tx;
 
-    $this->assertEquals($id->type, Sabel_DB_Schema_Const::INT);
+    $this->assertEquals($id->type, Sabel_DB_Type_Const::INT);
     $this->assertEquals($id->max,  2147483647);
     $this->assertEquals($id->min, -2147483648);
     $this->assertFalse($id->nullable);
     $this->assertTrue($id->increment);
     $this->assertTrue($id->primary);
 
-    $this->assertEquals($nm->type, Sabel_DB_Schema_Const::STRING);
+    $this->assertEquals($nm->type, Sabel_DB_Type_Const::STRING);
     $this->assertEquals($nm->max, 128);
     $this->assertFalse($nm->nullable);
     $this->assertFalse($nm->increment);
     $this->assertFalse($nm->primary);
     $this->assertEquals($nm->default, 'test');
 
-    $this->assertEquals($bl->type, Sabel_DB_Schema_Const::BOOL);
+    $this->assertEquals($bl->type, Sabel_DB_Type_Const::BOOL);
     $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertFalse($bl->primary);
     $this->assertFalse($bl->default);
 
-    $this->assertEquals($dt->type, Sabel_DB_Schema_Const::DATETIME);
+    $this->assertEquals($dt->type, Sabel_DB_Type_Const::DATETIME);
     $this->assertTrue($dt->nullable);
     $this->assertFalse($dt->increment);
     $this->assertFalse($dt->primary);
 
-    $this->assertEquals($ft->type, Sabel_DB_Schema_Const::FLOAT);
+    $this->assertEquals($ft->type, Sabel_DB_Type_Const::FLOAT);
     $this->assertEquals($ft->max,  3.4028235E38);
     $this->assertEquals($ft->min, -3.4028235E38);
     $this->assertTrue($ft->nullable);
@@ -1026,14 +1026,14 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($ft->primary);
     $this->assertEquals($ft->default, 1);
 
-    $this->assertEquals($db->type, Sabel_DB_Schema_Const::DOUBLE);
+    $this->assertEquals($db->type, Sabel_DB_Type_Const::DOUBLE);
     $this->assertEquals($db->max,  1.79769E308);
     $this->assertEquals($db->min, -1.79769E308);
     $this->assertFalse($db->nullable);
     $this->assertFalse($db->increment);
     $this->assertFalse($db->primary);
 
-    $this->assertEquals($tx->type, Sabel_DB_Schema_Const::TEXT);
+    $this->assertEquals($tx->type, Sabel_DB_Type_Const::TEXT);
     $this->assertTrue($tx->nullable);
     $this->assertFalse($tx->increment);
     $this->assertFalse($tx->primary);
