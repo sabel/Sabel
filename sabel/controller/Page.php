@@ -148,24 +148,6 @@ abstract class Sabel_Controller_Page
     return $result;
   }
   
-  protected function test($action)
-  {
-    $ref = new ReflectionClass($this);
-    $method = $ref->getMethod($action);
-    if ($method->getNumberOfParameters() === 0) {
-      $actionResult = $this->$action();
-    } else {
-      $args = array();
-      $parameters = $method->getParameters();
-      foreach ($parameters as $parameter) {
-        $name = $parameter->getName();
-        $args[] = $this->$name;
-      }
-      $actionResult = $method->invokeArgs($this, $args);
-    }
-    return $actionResult;
-  }
-  
   public function rendering()
   {
     if (!$this->rendering) return;
@@ -220,7 +202,6 @@ abstract class Sabel_Controller_Page
   
   protected function __call($method, $args)
   {
-    if (!is_object($this->request)) throw new Exception('');
     if ($this->request->hasMethod($method))
       return $this->request->$method($args);
   }
