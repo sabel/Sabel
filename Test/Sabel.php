@@ -1,15 +1,6 @@
 <?php
 
 require ('generator/generator.php');
-
-/**
- * define for application.
-define('SABEL_CLASSES', RUN_BASE . '/cache/sabel_classes.php');
-define('APP_CACHE',     RUN_BASE . '/cache/app.php');
-define('LIB_CACHE',     RUN_BASE . '/cache/lib.php');
-define('SCM_CACHE',     RUN_BASE . '/cache/schema.php');
-define('INJ_CACHE',     RUN_BASE . '/cache/injection.php');
- */
  
 /**
  * TestCase for Sabel Aplication

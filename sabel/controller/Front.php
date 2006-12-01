@@ -5,7 +5,6 @@ Sabel::using('Sabel_Const');
 
 Sabel::using('Sabel_Map_Facade');
 
-Sabel::using('Sabel_Request');
 Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_Exception_Runtime');
 Sabel::using('Sabel_Config_Yaml');
@@ -52,7 +51,7 @@ class Sabel_Controller_Front
     } elseif (is_string($requestUri)) {
       $request = new Sabel_Request(null, $requestUri);
     } else {
-      $request = new Sabel_Request();
+      $request = Sabel::load('Sabel_Request');
     }
     
     $map->setRequestUri($request);
@@ -63,7 +62,6 @@ class Sabel_Controller_Front
     
     $loader = Sabel::load('Sabel_Controller_Loader');
     $controller = $loader->load();
-    // $controller = $controller->getTargetClass();
     
     Sabel_Context::setPageController($controller);
     

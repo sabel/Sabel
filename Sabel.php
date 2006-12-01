@@ -15,7 +15,20 @@ final class Sabel
 {
   private static $required   = array();
   private static $fileUsing  = array();
+  private static $readables  = array();
   private static $singletons = array();
+  
+  public static function loadState()
+  {
+    $apc = self::load('Sabel_Cache_Apc');
+    self::$readables = $apc->read('readables');
+  }
+  
+  public static function saveState()
+  {
+    $apc = self::load('Sabel_Cache_Apc');
+    $apc->write('readables', self::$readables);
+  }
   
   public static function load($className, $constructerArg = null)
   {
@@ -76,12 +89,19 @@ final class Sabel
   
   private static function isReadable($path)
   {
+    if (isset(self::$readables[$path])) return true;
     if (is_readable($path)) return true;
     
     $includePath = get_include_path();
     $paths = explode(':', $includePath);
     
-    foreach ($paths as $p) if (is_readable($p .'/'. $path)) return true;
+    foreach ($paths as $p) {
+      if (is_readable($p .'/'. $path)) {
+        self::$readables[$path] = true;
+        return true;
+      }
+    }
+    
     return false;
   }
 }
