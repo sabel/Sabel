@@ -24,7 +24,7 @@ class Sabel_DB_Statement_Limitation
     $this->offset = $offset;
   }
 
-  public function standardPaginate()
+  public function standardLimitation()
   {
     $sql =& $this->sql;
     if (isset($this->limit))  $sql[] = ' LIMIT '  . $this->limit;
@@ -32,7 +32,7 @@ class Sabel_DB_Statement_Limitation
     return $sql;
   }
 
-  public function firebirdPaginate()
+  public function firebirdLimitation()
   {
     $tmp = substr(join('', $this->sql), 6);
 
@@ -46,7 +46,7 @@ class Sabel_DB_Statement_Limitation
     return $this->sql;
   }
 
-  public function mssqlPaginate($column, $order)
+  public function mssqlLimitation($column, $order)
   {
     $tmp = substr(join('', $this->sql), 6);
 

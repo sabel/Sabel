@@ -216,7 +216,7 @@ class Sabel_DB_Executer
     $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $row = $this->exec()->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    $row = $this->exec()->fetch(Sabel_DB_ResultSet::NUM);
     return (int)$row[0];
   }
 

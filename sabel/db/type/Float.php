@@ -14,6 +14,11 @@ class Sabel_DB_Type_Float implements Sabel_DB_Type_Sender
 {
   private $next = null;
 
+  public function getType()
+  {
+    return Sabel_DB_Type_Const::FLOAT;
+  }
+
   public function add($chain)
   {
     $this->next = $chain;

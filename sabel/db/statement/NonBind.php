@@ -56,13 +56,13 @@ class Sabel_DB_Statement_NonBind extends Sabel_DB_Base_Statement
 
     switch ($this->db) {
       case 'firebird':
-        $sql = $paginate->firebirdPaginate();
+        $sql = $paginate->firebirdLimitation();
         break;
       case 'mssql':
-        $sql = $paginate->mssqlPaginate($column, $order);
+        $sql = $paginate->mssqlLimitation($column, $order);
         break;
       default:
-        $sql = $paginate->standardPaginate();
+        $sql = $paginate->standardLimitation();
         break;
     }
   }

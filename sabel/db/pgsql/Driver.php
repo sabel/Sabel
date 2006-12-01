@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Pgsql
+ * Sabel_DB_Pgsql_Driver
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
+ * @subpackage pgsql
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Pgsql extends Sabel_DB_Base_Driver
+class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 {
   protected
     $escMethod = 'pg_escape_string';
@@ -61,6 +61,6 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Base_Driver
 
   public function getResultSet()
   {
-    return new Sabel_DB_Driver_ResultSet(pg_fetch_all($this->result));
+    return new Sabel_DB_ResultSet(pg_fetch_all($this->result));
   }
 }

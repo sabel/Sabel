@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Firebird
+ * Sabel_DB_Firebird_Driver
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
+ * @subpackage firebird
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Firebird extends Sabel_DB_Base_Driver
+class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 {
   private $trans = null;
 
@@ -56,7 +56,7 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Base_Driver
     if (!isset($data[$defColumn])) {
       $this->driverExecute('SELECT GEN_ID(' . $genName . ', 1) FROM rdb$database');
       $resultSet = $this->getResultSet();
-      $genNum = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
+      $genNum = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
       $data[$defColumn] = $this->lastInsertId = (int)$genNum[0];
     }
     return $data;
@@ -88,6 +88,6 @@ class Sabel_DB_Driver_Firebird extends Sabel_DB_Base_Driver
     if (is_resource($result)) {
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
     }
-    return new Sabel_DB_Driver_ResultSet($rows);
+    return new Sabel_DB_ResultSet($rows);
   }
 }

@@ -18,7 +18,7 @@ class Sabel_DB_Base_Schema
   public function __construct($connectName, $schema = null)
   {
     $dbName    = ucfirst(Sabel_DB_Connection::getDB($connectName));
-    $className = 'Sabel_DB_Schema_' . $dbName;
+    $className = 'Sabel_DB_' . $dbName . '_Schema';
 
     $this->schemaClass = new $className($connectName, $schema);
     $this->connectName = $connectName;

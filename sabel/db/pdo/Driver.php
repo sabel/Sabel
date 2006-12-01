@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Pdo
+ * Sabel_DB_Pdo_Driver
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
+ * @subpackage pdo
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
+class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 {
   private
     $pdoStmt  = null,
@@ -63,7 +63,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
   {
     $sql  = $this->stmt->getSQL();
     $data = $this->stmt->getBindData();
-    $this->stmtFlag = Sabel_DB_Driver_PdoStatement::exists($sql, $data);
+    $this->stmtFlag = Sabel_DB_Pdo_PdoStatement::exists($sql, $data);
 
     $this->data = $data;
     return $this->driverExecute();
@@ -77,7 +77,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
       case 'mysql':
         $this->driverExecute('SELECT last_insert_id()');
         $resultSet = $this->getResultSet();
-        $row = $resultSet->fetch(Sabel_DB_Driver_ResultSet::NUM);
+        $row = $resultSet->fetch(Sabel_DB_ResultSet::NUM);
         return (int)$row[0];
       case 'sqlite':
         return (int)$this->conn->lastInsertId();
@@ -90,7 +90,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
 
     $exist = false;
     if ($this->isAdd = $this->checkConditionTypes($conditions))
-      $exist = Sabel_DB_Driver_PdoStatement::exists($sql, $conditions, $constraints);
+      $exist = Sabel_DB_Pdo_PdoStatement::exists($sql, $conditions, $constraints);
 
     $this->stmt->makeConditionQuery($conditions);
     if ($constraints && !$exist) $this->stmt->makeConstraintQuery($constraints);
@@ -113,12 +113,12 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
     if (isset($sql)) {
       $pdoStmt = $this->conn->prepare($sql);
     } elseif ($this->stmtFlag) {
-      $pdoStmt = Sabel_DB_Driver_PdoStatement::get();
+      $pdoStmt = Sabel_DB_Pdo_PdoStatement::get();
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $pdoStmt = $this->conn->prepare($sql);
-      if ($this->isAdd) Sabel_DB_Driver_PdoStatement::add($pdoStmt);
+      if ($this->isAdd) Sabel_DB_Pdo_PdoStatement::add($pdoStmt);
     }
 
     if (!$pdoStmt) {
@@ -144,7 +144,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Base_Driver
     $result = $this->pdoStmt->fetchAll(PDO::FETCH_ASSOC);
 
     $this->pdoStmt->closeCursor();
-    return new Sabel_DB_Driver_ResultSet($result);
+    return new Sabel_DB_ResultSet($result);
   }
 
   private function makeBindParam()

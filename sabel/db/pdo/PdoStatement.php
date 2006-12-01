@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_PdoStatement
+ * Sabel_DB_Pdo_PdoStatement
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage driver
+ * @subpackage pdo
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_PdoStatement
+class Sabel_DB_Pdo_PdoStatement
 {
   private static $stmt  = null;
   private static $sql   = '';
