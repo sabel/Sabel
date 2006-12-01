@@ -180,9 +180,72 @@ class Sabel_DB_Executer
     return (isset($incCol)) ? $incCol : false;
   }
 
-  public function executeQuery($sql, $param)
+  /**
+   * remove row(s)
+   *
+   * @param  mixed     $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed     $param2 condition value.
+   * @param  constrant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return void
+   */
+  public function delete($arg1 = null, $arg2 = null, $arg3 = null)
   {
-    $driver = Sabel_DB_Connection::getDriver($this->property->connectName);
+    if (empty($this->conditions) && $arg1 === null) {
+      $msg  = 'all remove? must be set condition';
+      $smpl = 'DELETE FROM {table_name}';
+      throw new Exception($msg . "or execute executeQuery('{$smpl}').");
+    }
+
+    if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
+
+    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->property->table);
+    $this->exec();
+  }
+
+  /**
+   * get rows count.
+   *
+   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
+   * @param  mixed    $param2 condition value.
+   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
+   * @return integer rows count
+   */
+  public function getCount($arg1 = null, $arg2 = null, $arg3 = null)
+  {
+    $this->setCondition($arg1, $arg2, $arg3);
+    $this->setConstraint('limit', 1);
+
+    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
+    $row = $this->exec()->fetch(Sabel_DB_Driver_ResultSet::NUM);
+    return (int)$row[0];
+  }
+
+  public function getFirst($orderColumn)
+  {
+    return $this->getEdge('ASC', $orderColumn);
+  }
+
+  public function getLast($orderColumn)
+  {
+    return $this->getEdge('DESC', $orderColumn);
+  }
+
+  protected function getEdge($order, $orderColumn)
+  {
+    $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
+    $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
+
+    if ($this->isModel) {
+      return $this->selectOne();
+    } else {
+      $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->property->table);
+      return $this->exec();
+    }
+  }
+
+  public function executeQuery($sql, $param = null)
+  {
+    $driver = $this->getDriver();
     $this->tryExecute($driver, $sql, $param);
     return $driver->getResultSet();
   }

@@ -13,31 +13,32 @@ class Sabel_DB_Model
 {
   public static function load($mdlName)
   {
-    return self::getClass($mdlName);
+    return self::createModel($mdlName);
   }
 
   public static function fusion($mdlNames)
   {
     $models = array();
-    foreach ($mdlNames as $name) $models[] = self::getClass($name);
+    foreach ($mdlNames as $name) $models[] = self::createModel($name);
     return new Sabel_DB_Fusion($models, $mdlNames);
   }
 
-  private static function getClass($mdlName)
+  protected static function createModel($mdlName)
   {
     if (class_exists($mdlName, false)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {
       eval('class Sabel_DB_Empty extends Sabel_DB_Relation
             {
-              public function __construct() { $this->isModel = true; }
+              public function __construct($mdlName)
+              {
+                $this->isModel  = true;
+                $this->property = new Sabel_DB_Property($mdlName, array());
+              }
             }'
           );
     }
 
-    $model = new Sabel_DB_Empty();
-    $prop  = new Sabel_DB_Property($mdlName, array());
-    $model->setProperty($prop);
-    return $model;
+    return new Sabel_DB_Empty($mdlName);
   }
 }

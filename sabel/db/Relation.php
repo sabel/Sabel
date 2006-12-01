@@ -33,15 +33,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
 
   private function createProperty()
   {
-    $this->setProperty(new Sabel_DB_Property(get_class($this), get_object_vars($this)));
-  }
-
-  public function setProperty($property)
-  {
-    if (!$property instanceof Sabel_DB_Property)
-      throw new Exception('argument should be an instance of Sabel_DB_Property.');
-
-    $this->property = $property;
+    $this->property = new Sabel_DB_Property(get_class($this), get_object_vars($this));
   }
 
   public function __set($key, $val)
@@ -73,59 +65,6 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     }
 
     return $columns;
-  }
-
-  /**
-   * get rows count.
-   *
-   * @param  mixed    $param1 column name ( with the condition prefix ), or value of primary key.
-   * @param  mixed    $param2 condition value.
-   * @param  constant $param3 denial ( Sabel_DB_Condition::NOT )
-   * @return integer rows count
-   */
-  public function getCount($param1 = null, $param2 = null, $param3 = null)
-  {
-    $this->setCondition($param1, $param2, $param3);
-    $this->setConstraint('limit', 1);
-
-    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
-    $row = $this->exec()->fetch(Sabel_DB_Driver_ResultSet::NUM);
-    return (int)$row[0];
-  }
-
-  public function getFirst($orderColumn)
-  {
-    return $this->getMost('ASC', $orderColumn);
-  }
-
-  public function getLast($orderColumn)
-  {
-    return $this->getMost('DESC', $orderColumn);
-  }
-
-  private function getMost($order, $orderColumn)
-  {
-    $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
-    $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
-    return $this->selectOne();
-  }
-
-  public function aggregate($func, $child = null, $group = null)
-  {
-    if ($child === null) {
-      $tblName = $this->table;
-      $columns = ($group === null) ? $this->primaryKey : $group;
-      $model   = $this;
-    } else {
-      $tblName = convert_to_tablename($child);
-      $columns = ($group === null) ? "{$this->table}_{$this->primaryKey}" : $group;
-      $model   = $this->newClass($tblName);
-      $model->constraints = $this->constraints;
-    }
-    $model->setConstraint('group', $columns);
-
-    $model->getStatement()->setBasicSQL("SELECT $columns , $func FROM $tblName");
-    return $model->toObject($model->exec());
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -531,7 +470,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
   protected function newClass($name)
   {
     $mdlName = convert_to_modelname($name);
-    return ($this->modelExists($mdlName)) ? new $mdlName : Sabel_DB_Model::load($mdlName);
+    return ($this->modelExists($mdlName)) ? new $mdlName : MODEL($mdlName);
   }
 
   protected function modelExists($className)
@@ -592,7 +531,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       throw new Exception('Sabel_DB_Relation::multipleInsert() data is not array.');
     }
 
-    Sabel_DB_Transaction::add($this);
+    BEGIN($this);
 
     try {
       $this->ArrayInsert($data);
@@ -600,38 +539,20 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       throw new Exception($e->getMessage());
     }
 
-    Sabel_DB_Transaction::commit();
+    COMMIT();
   }
 
-  /**
-   * remove row(s)
-   *
-   * @param  mixed     $param1 column name ( with the condition prefix ), or value of primary key.
-   * @param  mixed     $param2 condition value.
-   * @param  constrant $param3 denial ( Sabel_DB_Condition::NOT )
-   * @return void
-   */
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
-    $idValue = null;
+    if ($param1 !== null) {
+      $this->delete($param1, $param2, $param3);
+    } else {
+      $pKey    = $this->primaryKey;
+      $scond   = $this->getSelectCondition();
+      $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;
 
-    $selectConditions = $this->getSelectCondition();
-    if (isset($selectConditions[$this->primaryKey])) {
-      $idValue = $selectConditions[$this->primaryKey]->value;
+      $this->delete((isset($idValue)) ? $pKey : null, $idValue);
     }
-
-    if ($param1 === null && empty($this->conditions) && $idValue === null) {
-      throw new Exception("Sabel_DB_Relation::remove() must be set condition");
-    }
-
-    if (isset($param1)) {
-      $this->setCondition($param1, $param2, $param3);
-    } elseif (isset($idValue)) {
-      $this->setCondition($this->primaryKey, $idValue);
-    }
-
-    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->table);
-    $this->exec();
   }
 
   /**
@@ -657,7 +578,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
     }
 
-    Sabel_DB_Transaction::add($this);
+    BEGIN($this);
 
     $models = array();
     $table  = $this->table;
@@ -672,7 +593,7 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
     $this->remove($this->primaryKey, $id);
 
-    Sabel_DB_Transaction::commit();
+    COMMIT();
   }
 
   private function makeChainModels($children, &$chain)
@@ -709,6 +630,8 @@ class Sabel_DB_Relation extends Sabel_DB_Executer
       list($cName, $tName, $idValue) = explode(':', $param);
       $model = $this->newClass($tName);
       $model->setConnectName($cName);
+
+      BEGIN($model);
       $model->remove($foreignKey, $idValue);
     }
   }

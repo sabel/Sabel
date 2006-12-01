@@ -21,3 +21,18 @@ function mssql_escape_string($val)
 {
   return str_replece("'", "''", $val);
 }
+
+function MODEL($mdlName)
+{
+  return Sabel_DB_Model::load($mdlName);
+}
+
+function BEGIN($model)
+{
+  Sabel_DB_Transaction::add($model);
+}
+
+function COMMIT()
+{
+  Sabel_DB_Transaction::commit();
+}

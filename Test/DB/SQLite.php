@@ -37,6 +37,8 @@ class Test_DB_SQLite extends Test_DB_Test
     Sabel_DB_Connection::addConnection('default',  self::$params1);
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
+    Test_DB_Test::$db = 'SQLITE';
+
     $tables = Test_DB_Test::$TABLES;
     $model  = Sabel_DB_Model::load('Basic');
 
@@ -139,6 +141,19 @@ class SQLiteHelper
                  ft_val float default 1,
                  db_val double not null,
                  tx text)";
+
+    $sqls[] = "CREATE TABLE student (
+                 id integer primary key,
+                 name varchar(24))";
+
+    $sqls[] = "CREATE TABLE course (
+                 id integer primary key,
+                 course_name varchar(24))";
+
+    $sqls[] = "CREATE TABLE student_course (
+                 student_id integer not null,
+                 course_id  integer not null,
+                 primary key (student_id, course_id))";
 
     $this->sqls = $sqls;
   }
