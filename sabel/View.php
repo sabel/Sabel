@@ -1,5 +1,8 @@
 <?php
 
+Sabel::using('Sabel_View_Renderer');
+Sabel::using('Sabel_View_Uri');
+
 class Sabel_View
 {
   protected $renderer = null;
@@ -23,7 +26,7 @@ class Sabel_View
       $this->decideTemplatePathAndNameByEntry($entry);
     }
     
-    $this->renderer = new Sabel_View_Renderer_Class();
+    $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
   }
   
   public function __set($key, $value)

@@ -34,7 +34,7 @@ class Sabel_Map_Uri implements Iterator
   {
     $position = 0;
     foreach ($this->elements as $element) {
-      $oElement = new Sabel_Map_Element($element);
+      $oElement = Sabel::load('Sabel_Map_Element', $element);
       if ($oElement->getName() === $name) return $position;
       $position++;
     }
@@ -45,7 +45,7 @@ class Sabel_Map_Uri implements Iterator
     $position =(int) $position;
     
     if (0 <= $position && $position < $this->limit) {
-      return new Sabel_Map_Element($this->elements[$position]);
+      return Sabel::load('Sabel_Map_Element', $this->elements[$position]);
     } else {
       return false;
     }
@@ -55,7 +55,7 @@ class Sabel_Map_Uri implements Iterator
   {
     $objElements = array();
     foreach ($this->elements as $element) {
-      $objElements[] = new Sabel_Map_Element($element);
+      $objElements[] = Sabel::load('Sabel_Map_Element', $element);
     }
     return $objElements;
   }

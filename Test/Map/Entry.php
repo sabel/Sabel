@@ -65,28 +65,28 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   {
     $facade = $this->createFacadeFromConfig();
     
-    $facade->setRequestUri(new SabeL_Request_Request(null, '/2006/05/02'));
+    $facade->setRequestUri(new Sabel_Request(null, '/2006/05/02'));
     $this->assertEquals('blog', $facade->find()->getName());
   }
   
   public function testMapFindWithConstant()
   {
     $facade = $this->createFacadeFromConfig();
-    $facade->setRequestUri(new SabeL_Request_Request(null, '/news/tester'));
+    $facade->setRequestUri(new Sabel_Request(null, '/news/tester'));
     $this->assertEquals('newsAuthor', $facade->find()->getName());
   }
   
   public function testMapFindWithConstantAndRequirement()
   {
     $facade = $this->createFacadeFromConfig();
-    $facade->setRequestUri(new SabeL_Request_Request(null, '/news/12341234'));
+    $facade->setRequestUri(new Sabel_Request(null, '/news/12341234'));
     $this->assertEquals('news', $facade->find()->getName());
   }
   
   public function testMapFindNotFound()
   {
     $facade = $this->createFacadeFromConfig();
-    $request = new SabeL_Request_Request(null, '/index/blog/top/14');
+    $request = new Sabel_Request(null, '/index/blog/top/14');
     
     $entry = $facade->find();
     $this->assertEquals('default', $entry->getName());
@@ -123,7 +123,7 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   public function testUriWithConstantAndRequest()
   {
     $facade = $this->createFacadeFromConfig();
-    $facade->setRequestUri(new Sabel_Request_Request(null, 'news/123412345'));
+    $facade->setRequestUri(new Sabel_Request(null, 'news/123412345'));
     $result = $facade->getEntry('news')->uri(array('article_id'=>'12341235'));
     $this->assertEquals('news/12341235', $result);
   }
@@ -141,7 +141,7 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   public function testUriWithControllerUsingRequestValue()
   {
     $facade = $this->createFacadeFromConfig();
-    $facade->setRequestUri(new Sabel_Request_Request(null, 'test/0123456789'));
+    $facade->setRequestUri(new Sabel_Request(null, 'test/0123456789'));
     $entry  = $facade->getEntry('testController');
     $result = $entry->uri(array('id' => '0123456789'));
                                                     
@@ -159,7 +159,7 @@ class Test_Map_Entry extends PHPUnit2_Framework_TestCase
   protected function createFacade()
   {
     $facade = new Sabel_Map_Facade();
-    $facade->setRequestUri(new SabeL_Request_Request());
+    $facade->setRequestUri(new Sabel_Request());
     
     $newsEntry = new Sabel_Map_Entry('news');
     $newsAuthorEntry = new Sabel_Map_Entry('newsAuthor');

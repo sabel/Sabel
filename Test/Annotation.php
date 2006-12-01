@@ -4,8 +4,6 @@ require_once('PHPUnit2/Framework/TestCase.php');
 
 class Test_Annotation extends PHPUnit2_Framework_TestCase
 {
-  protected $c;
-  
   public static function suite()
   {
     return new PHPUnit2_Framework_TestSuite("Test_Annotation");
@@ -18,7 +16,6 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
   
   public function setUp()
   {
-    $this->c = Container::create();
   }
   
   public function tearDown()
@@ -28,7 +25,7 @@ class Test_Annotation extends PHPUnit2_Framework_TestCase
   
   public function testAnnotation()
   {
-    $ar   = $this->c->load('sabel.annotation.Reader');
+    $ar   = Sabel::load('Sabel_annotation_Reader');
     $list = $ar->annotation('AnnotatedTestClass');
     
     foreach ($list as $annotation) {

@@ -1,5 +1,7 @@
 <?php
 
+Sabel::fileUsing('sabel/String.php');
+
 class Test_Namespace extends PHPUnit2_Framework_TestCase
 {
   public static function suite()
@@ -14,7 +16,6 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
   
   public function setUp()
   {
-    $this->c = Container::create();
   }
   
   public function tearDown()

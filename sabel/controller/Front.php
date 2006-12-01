@@ -1,5 +1,16 @@
 <?php
 
+Sabel::using('Sabel_Context');
+Sabel::using('Sabel_Const');
+
+Sabel::using('Sabel_Map_Facade');
+
+Sabel::using('Sabel_Request');
+Sabel::using('Sabel_DB_Connection');
+Sabel::using('Sabel_Exception_Runtime');
+Sabel::using('Sabel_Config_Yaml');
+Sabel::fileUsing('sabel/Functions.php');
+
 /**
  * Front Controller Class.
  *
@@ -11,11 +22,11 @@ class Sabel_Controller_Front
   public function __construct()
   {
     if (ENVIRONMENT === 'development') {
-      $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
+      $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
     } else {
-      $cache = new Sabel_Cache_Apc();
+      $cache = Sabel::load('Sabel_Cache_Apc');
       if (!($conf = $cache->read('dbconf'))) {
-        $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
+        $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
         $cache->write('dbconf', $conf);
       }
     }
@@ -30,18 +41,18 @@ class Sabel_Controller_Front
     }
   }
   
-  public function ignition($request = null)
+  public function ignition($requestUri = null)
   {
-    $builder = new Sabel_Map_Builder(RUN_BASE . '/config/map.yml');
+    $builder = Sabel::load('Sabel_Map_Builder', RUN_BASE.'/config/map.yml');
     
     $map = Sabel_Map_Facade::create();
     
-    if (is_object($request)) {
-      $request = $request;
-    } elseif (is_string($request)) {
-      $request = new Sabel_Request_Request(null, $request);
+    if (is_object($requestUri)) {
+      $request = $requestUri;
+    } elseif (is_string($requestUri)) {
+      $request = new Sabel_Request(null, $requestUri);
     } else {
-      $request = new Sabel_Request_Request();
+      $request = new Sabel_Request();
     }
     
     $map->setRequestUri($request);
@@ -50,9 +61,9 @@ class Sabel_Controller_Front
     $mapEntry = $map->find();
     Sabel_Context::setCurrentMapEntry($mapEntry);
     
-    $loader = new Sabel_Controller_Loader();
+    $loader = Sabel::load('Sabel_Controller_Loader');
     $controller = $loader->load();
-    $controller = $controller->getTargetClass();
+    // $controller = $controller->getTargetClass();
     
     Sabel_Context::setPageController($controller);
     

@@ -1,5 +1,8 @@
 <?php
 
+Sabel::using('Sabel_Annotation_Context');
+Sabel::using('Sabel_Library_ArrayList');
+
 /**
  * Sabel_Annotation_Reader
  *
@@ -30,7 +33,7 @@ class Sabel_Annotation_Reader
       self::$annotation = unserialize(file_get_contents($path));
     }
     
-    $this->list = new Sabel_Library_ArrayList();
+    $this->list = Sabel::load('Sabel_Library_ArrayList');
   }
   
   public static function create()

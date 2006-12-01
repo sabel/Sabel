@@ -18,7 +18,7 @@ class Sabel_Map_Entry
   public function __construct($name)
   {
     $this->name = $name;
-    $this->requirements = new Sabel_Map_Requirements();
+    $this->requirements = Sabel::load('Sabel_Map_Requirements');
   }
   
   public function getName()
@@ -36,7 +36,7 @@ class Sabel_Map_Entry
     if (is_object($this->uri)) {
       return $this->uri;
     } elseif (is_string($this->uri)) {
-      return new Sabel_Map_Uri($this->uri);
+      return Sabel::load('Sabel_Map_Uri', $this->uri);
     }
   }
   

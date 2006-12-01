@@ -4,13 +4,13 @@ require ('generator/generator.php');
 
 /**
  * define for application.
- */
 define('SABEL_CLASSES', RUN_BASE . '/cache/sabel_classes.php');
 define('APP_CACHE',     RUN_BASE . '/cache/app.php');
 define('LIB_CACHE',     RUN_BASE . '/cache/lib.php');
 define('SCM_CACHE',     RUN_BASE . '/cache/schema.php');
 define('INJ_CACHE',     RUN_BASE . '/cache/injection.php');
-
+ */
+ 
 /**
  * TestCase for Sabel Aplication
  *
@@ -45,12 +45,10 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   public function testSabel()
   {
     ob_start();
-    Sabel::initializeApplication();
-    $c = Container::create();
-    $fcontroller = $c->load('sabel.controller.Front');
+    $fcontroller = Sabel::load('Sabel_Controller_Front');
     $this->assertTrue(is_object($fcontroller));
     
-    require (RUN_BASE . '/cache/app.php');
+    set_include_path(get_include_path().':'.RUN_BASE.'/app/');
     $fcontroller->ignition('/index/index');
     $contents = rtrim(ob_get_clean());
     $this->assertEquals("welcome.", $contents);

@@ -6,7 +6,7 @@ class Sabel_Config_Yaml
 
   public function __construct($file)
   {
-    $parser = new Sabel_Config_Spyc();
+    $parser = Sabel::load('Sabel_Config_Spyc');
     $this->data = $parser->load($file);
   }
   

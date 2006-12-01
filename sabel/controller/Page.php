@@ -1,5 +1,10 @@
 <?php
 
+Sabel::using('Sabel_Security_Security');
+Sabel::using('Sabel_Security_Permission');
+Sabel::using('Sabel_Storage_Session');
+Sabel::using('Sabel_Annotation_Reader');
+
 /**
  * the Base of Page Controller.
  *
@@ -57,7 +62,7 @@ abstract class Sabel_Controller_Page
   
   public function setup()
   {
-    $this->view = new Sabel_View();
+    $this->view = Sabel::load('Sabel_View');
     Sabel_Context::setView($this->view);
     $this->entry       = Sabel_Context::getCurrentMapEntry();
     
@@ -213,6 +218,7 @@ abstract class Sabel_Controller_Page
   
   protected function __call($method, $args)
   {
+    if (!is_object($this->request)) throw new Exception('');
     if ($this->request->hasMethod($method))
       return $this->request->$method($args);
   }
@@ -327,12 +333,6 @@ abstract class Sabel_Controller_Page
     $this->view->assign($key, $value);
   }
   
-  /**
-   * read annotation
-   * 
-   * @param string $className class name
-   * @param string $annotationName annotation name
-   */
   protected function readAnnotation($className, $annotationName)
   {
     $anonr = Sabel_Annotation_Reader::create();

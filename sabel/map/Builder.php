@@ -21,7 +21,7 @@ class Sabel_Map_Builder
     if (is_readable($bcpath)) {
       self::$maps = unserialize(file_get_contents($bcpath));
     } else {
-      if (self::$maps === null) self::$maps = new Sabel_Config_Yaml($path);
+      if (self::$maps === null) self::$maps = Sabel::load('Sabel_Config_Yaml', $path);
       
       if (is_writable($bcpath)) {
         file_put_contents($bcpath, serialize(self::$maps));
@@ -29,26 +29,26 @@ class Sabel_Map_Builder
         fwrite($fp, serialize(self::$maps));
         fclose($fp);
       } else {
-        throw new Sabel_Exception_Runtime($bcpath . " can't open.");
+        throw Sabel::load('Sabel_Exception_Runtime', $bcpath . " can't open.");
       }
     }
   }
   
   public function load($path)
   {
-    self::$maps = new Sabel_Config_Yaml($path);
+    self::$maps = Sabel::load('Sabel_Config_Yaml', $path);
   }
   
   public function build($facade = null)
   {
     if ($facade === null) {
-      $facade = new Sabel_Map_Facade();
-      $facade->setRequestUri(new SabeL_Request_Request());
+      $facade = Sabel::load('Sabel_Map_Facade');
+      $facade->setRequestUri(Sabel::load('Sabel_Request'));
     }
     
     foreach (self::$maps->toArray() as $name => $map) {
-      $entry = new Sabel_Map_Entry($name);
-      $entry->setUri(new Sabel_Map_Uri($map['uri']));
+      $entry = Sabel::load('Sabel_Map_Entry', $name);
+      $entry->setUri(Sabel::load('Sabel_Map_Uri', $map['uri']));
       
       if (isset($map['requirements'])) {
         foreach ($map['requirements'] as $reqname => $requirement) {
@@ -57,7 +57,7 @@ class Sabel_Map_Builder
       }
       
       if (isset($map['destination'])) {
-        $destination = new Sabel_Map_Destination();
+        $destination = Sabel::load('Sabel_Map_Destination');
         $destination->setModule($map['destination']['module']);
         $destination->setController($map['destination']['controller']);
         $destination->setAction($map['destination']['action']);

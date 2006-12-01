@@ -20,6 +20,6 @@ class Sabel_Controller_Loader
       $classpath .= '.'. ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
-    return Container::create()->load($classpath);
+    return Sabel::load(str_replace('.', '_', $classpath));
   }
 }
