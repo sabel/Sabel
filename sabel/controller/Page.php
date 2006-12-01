@@ -24,17 +24,16 @@ abstract class Sabel_Controller_Page
     $template    = null,
     $container   = null,
     $destination = null;
-  
-  protected $disableSession = false;
-  
+    
   protected
     $security   = null,
     $identity   = null,
     $permission = Sabel_Security_Permission::P_PUBLIC;
-  
+    
   protected
     $action = '',
     $rendering = true,
+    $enableSession = true,
     $skipDefaultAction = true;
     
   /**
@@ -47,10 +46,7 @@ abstract class Sabel_Controller_Page
   {
     $ref = new ReflectionClass('Sabel_Controller_Page');
     $methods = $ref->getMethods();
-    $pageMethods = array();
-    foreach ($methods as $method) {
-      $reserved[$method->getName()] = 1;
-    }
+    foreach ($methods as $method) $reserved[$method->getName()] = 1;
     $this->reserved = $reserved;
   }
   
@@ -63,13 +59,13 @@ abstract class Sabel_Controller_Page
   {
     $this->view = new Sabel_View();
     Sabel_Context::setView($this->view);
-    $this->entry = Sabel_Context::getCurrentMapEntry();
+    $this->entry       = Sabel_Context::getCurrentMapEntry();
     
-    $this->container   = Container::create();
     $this->request     = $this->entry->getRequest();
     $this->requests    = $this->request->requests();
+    $this->container   = Container::create();
     
-    if (!$this->disableSession) {
+    if ($this->enableSession) {
       $this->storage   = Sabel_Storage_Session::create();
       $this->security  = Sabel_Security_Security::create();
       $this->identity  = $this->security->getIdentity();
@@ -95,118 +91,86 @@ abstract class Sabel_Controller_Page
   
   public function execute()
   {
-    if (!headers_sent()) {
-      header('X-Framework: Sabel');
-    }
+    if (!headers_sent()) header('X-Framework: Sabel');
     
     $actionName = $this->destination->getAction();
     
     // check reserved words
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
-    
-    if ($this->isPublicAction($actionName)) {
-      $result = $this->methodExecute($actionName);
-      if (is_array($result)) {
-        $this->view->assignByArray($result);
-      }
-      return $result;
-    }
-    
-    if ($this->permission === Sabel_Security_Permission::P_PRIVATE) {
+      
+    $result = null;
+    if ($this->permission === Sabel_Security_Permission::P_PRIVATE ||
+        $this->isPrivateAction($actionName)) {
       if ($this->isAuthorized()) {
         $result = $this->methodExecute($actionName);
-        if (is_array($result)) {
-          $this->view->assignByArray($result);
-        }
-      } else if ($this->hasMethod('authorizeRequired')) {
+      } elseif ($this->hasMethod('authorizeRequired')) {
         $this->authorizeRequired();
       } else {
         throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
       }
     } else {
       $result = $this->methodExecute($actionName);
-      if (is_array($result)) {
-        $this->view->assignByArray($result);
-      }
     }
     
+    if (is_array($result)) $this->view->assignByArray($result);
     return $result;
   }
   
   protected function methodExecute($action)
   {
-    $result = array();
-    $specificAction = false;
-    $reqMethod = strtolower($this->httpMethod);
-    $actionName = $reqMethod.ucfirst($action);
+    $reqMethod    = strtolower($this->httpMethod);
+    $actionName   = $reqMethod . ucfirst($action);
+    $actionResult = array();
     
     if ($this->hasMethod($actionName)) {
-      $specificAction = $actionName;
-    }
-    
-    if ($specificAction !== false) {
-      if (method_exists($this, $specificAction)) {
-        $this->$specificAction();
-        if (!$this->skipDefaultAction) {
-          $actionResult = $this->$action();
-          if (is_array($actionResult)) {
-            $result = array_merge($result, $actionResult);
-          }
-        }
-      } elseif (method_exists($this, 'actionMissing')) {
-        $this->actionMissing();
+      $actionResult =(array) $this->test($actionName);
+      if (!$this->skipDefaultAction) {
+        $actionResult = array_merge((array) $this->test($action), $actionResult);
       }
-    } else {
-      if (method_exists($this, $action)) {
-        $ref = new ReflectionClass($this);
-        $method = $ref->getMethod($action);
-        if ($method->getNumberOfParameters() === 0) {
-          $actionResult = $this->$action();
-          if (is_array($actionResult)) {
-            $result = array_merge($result, $actionResult);
-          }
-        } else {
-          $args = array();
-          $parameters = $method->getParameters();
-          foreach ($parameters as $parameter) {
-            $name = $parameter->getName();
-            if ($parameter->allowsNull() && $this->$name === null) {
-              $args[] = null;
-            } else {
-              $args[] = $this->$name;
-            }
-          }
-          $actionResult = $method->invokeArgs($this, $args);
-          if (is_array($actionResult)) {
-            $result = array_merge($result, $actionResult);
-          }
-        }
-        
-      } elseif (method_exists($this, 'actionMissing')){
-        $this->actionMissing();
-      }
+    } elseif ($this->hasMethod($action)) {
+      $actionResult = $this->test($action);
+    } elseif ($this->hasMethod('actionMissing')) {
+      $this->actionMissing();
     }
+    $result = (is_array($actionResult)) ? $actionResult : array();
     
-    if (is_object($this->storage)) {
+    if (is_object($this->storage))
       $this->storage->write('previous', $this->request->__toString());
-    }
-    
+      
     return $result;
+  }
+  
+  protected function test($action)
+  {
+    $ref = new ReflectionClass($this);
+    $method = $ref->getMethod($action);
+    if ($method->getNumberOfParameters() === 0) {
+      $actionResult = $this->$action();
+    } else {
+      $args = array();
+      $parameters = $method->getParameters();
+      foreach ($parameters as $parameter) {
+        $name = $parameter->getName();
+        $args[] = $this->$name;
+      }
+      $actionResult = $method->invokeArgs($this, $args);
+    }
+    return $actionResult;
   }
   
   public function rendering()
   {
-    if ($this->rendering) {
-      if ($this->view->isTemplateMissing()) {
-        if ($this->hasMethod('templateMissing')) {
-          $this->templateMissing();
-        } else {
-          throw new Sabel_Exception_TemplateMissing();
-        }
+    if (!$this->rendering) return;
+    
+    if ($this->view->isTemplateMissing()) {
+      if ($this->hasMethod('templateMissing')) {
+        $this->templateMissing();
       } else {
-        return $this->view->rendering();
+        throw new Sabel_Exception_TemplateMissing();
       }
+    } else {
+      return $this->view->rendering();
     }
   }
   
@@ -217,9 +181,8 @@ abstract class Sabel_Controller_Page
     if (isset($annot[0]) && is_object($annot[0])) {
       $annot = $annot[0];
       return ($annot->getContents() === 'public');
-    } else {
-      return false;
     }
+    return false;
   }
   
   protected function isPrivateAction($actionName)
@@ -227,9 +190,10 @@ abstract class Sabel_Controller_Page
     $ref = new ReflectionClass($this);
     $annot = $this->readAnnotation($ref->getName(), $actionName);
     if (isset($annot[0]) && is_object($annot[0])) {
-      $annot = $annot[0]; 
+      $annot = $annot[0];
       return ($annot->getContents() === 'private');
     }
+    return false;
   }
   
   protected function __get($name)
@@ -240,11 +204,6 @@ abstract class Sabel_Controller_Page
       $tmp = $this->getRequests();
       return (isset($tmp[$name])) ? $tmp[$name] : null;
     }
-  }
-  
-  protected function isNull($name)
-  {
-    return ($this->$name === null);
   }
   
   protected function __set($name, $value)
@@ -265,7 +224,7 @@ abstract class Sabel_Controller_Page
   
   public function successMethod()
   {
-    return 'success'.ucfirst($this->getAction());
+    return 'success' . ucfirst($this->getAction());
   }
   
   public function hasSuccessMethod()
@@ -275,7 +234,7 @@ abstract class Sabel_Controller_Page
   
   public function errorMethod()
   {
-    return 'error'.ucfirst($this->getAction());
+    return 'error' . ucfirst($this->getAction());
   }
   
   public function hasErrorMethod()
@@ -356,7 +315,6 @@ abstract class Sabel_Controller_Page
   {
     // @todo implemen
   }
-  
   
   /**
    * assign value to template.
