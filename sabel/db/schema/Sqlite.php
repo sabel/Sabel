@@ -108,10 +108,10 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
     $colLine = substr($attributes, strlen($type));
 
     if ($this->isBoolean($type)) {
-      $co->type = Sabel_DB_Schema_Const::BOOL;
+      $co->type = Sabel_DB_Type_Const::BOOL;
     } elseif (!$this->isString($co, $type)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
-      Sabel_DB_Schema_Type_Setter::send($co, $type);
+      Sabel_DB_Type_Setter::send($co, $type);
     }
 
     if ($colLine === '') {
@@ -147,7 +147,7 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
     foreach ($types as $sType) {
       if (strpos($type, $sType) !== false) {
         $length   = strpbrk($type, '(');
-        $co->type = Sabel_DB_Schema_Const::STRING;
+        $co->type = Sabel_DB_Type_Const::STRING;
         $co->max  = ($length === false) ? 255 : (int)substr($length, 1, -1);
         return true;
       }
@@ -175,7 +175,7 @@ class Sabel_DB_Schema_SQLite extends Sabel_DB_Schema_Common
   {
     if (strpos($this->colLine, 'default') !== false) {
       $default = trim(str_replace('default ', '', $this->colLine));
-      if ($co->type === Sabel_DB_Schema_Const::BOOL) {
+      if ($co->type === Sabel_DB_Type_Const::BOOL) {
         $co->default = (strcasecmp($default, 'true') === 0 || $default === '1');
       } else {
         $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);

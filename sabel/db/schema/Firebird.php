@@ -120,12 +120,12 @@ class Sabel_DB_Schema_Firebird extends Sabel_DB_Schema_Common
     }
 
     if ($this->isFloat($type)) $type = $this->getFloatType($type);
-    Sabel_DB_Schema_TYpe_Setter::send($co, $type);
+    Sabel_DB_Type_Setter::send($co, $type);
 
     $this->setIncrement($co, $fieldName, $tblName);
     $this->setPrimaryKey($co, $fieldName);
 
-    if ($co->type === Sabel_DB_Schema_Const::STRING) $this->setLength($co, $row);
+    if ($co->type === Sabel_DB_Type_Const::STRING) $this->setLength($co, $row);
     return $co;
   }
 

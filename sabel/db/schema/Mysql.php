@@ -37,7 +37,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_General
 
     if ($default === null) {
       $co->default = null;
-    } elseif ($co->type === Sabel_DB_Schema_Const::BOOL) {
+    } elseif ($co->type === Sabel_DB_Type_Const::BOOL) {
       $co->default = ((int)$default === 1);
     } else {
       $co->default = (is_numeric($default)) ? (int)$default : $default;

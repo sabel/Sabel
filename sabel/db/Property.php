@@ -137,12 +137,12 @@ class Sabel_DB_Property
     if (!isset($schema[$key])) return $data;
 
     switch ($schema[$key]->type) {
-      case Sabel_DB_Schema_Const::INT:
+      case Sabel_DB_Type_Const::INT:
         return (int)$data;
-      case Sabel_DB_Schema_Const::FLOAT:
-      case Sabel_DB_Schema_Const::DOUBLE:
+      case Sabel_DB_Type_Const::FLOAT:
+      case Sabel_DB_Type_Const::DOUBLE:
         return (float)$data;
-      case SabeL_DB_Schema_Const::BOOL:
+      case SabeL_DB_Type_Const::BOOL:
         if (is_int($data)) {
           $data = ($data === 1);
         } else {
