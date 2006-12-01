@@ -3,8 +3,6 @@
 Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
-Sabel::using('Sabel_Annotation_Reader');
-Sabel::fileUsing('sabel/core/Utility.php');
 
 /**
  * the Base of Page Controller.
@@ -32,6 +30,8 @@ abstract class Sabel_Controller_Page
     $destination = null;
     
   protected
+    $public     = array(),
+    $private    = array(),
     $security   = null,
     $identity   = null,
     $permission = Sabel_Security_Permission::P_PUBLIC;
@@ -165,24 +165,20 @@ abstract class Sabel_Controller_Page
   
   protected function isPublicAction($actionName)
   {
-    $ref = new ReflectionClass($this);
-    $annot = $this->readAnnotation($ref->getName(), $actionName);
-    if (isset($annot[0]) && is_object($annot[0])) {
-      $annot = $annot[0];
-      return ($annot->getContents() === 'public');
+    if (count($this->public) > 0) {
+      return in_array($actionName, $this->public);
+    } else {
+      return false;
     }
-    return false;
   }
   
   protected function isPrivateAction($actionName)
   {
-    $ref = new ReflectionClass($this);
-    $annot = $this->readAnnotation($ref->getName(), $actionName);
-    if (isset($annot[0]) && is_object($annot[0])) {
-      $annot = $annot[0];
-      return ($annot->getContents() === 'private');
+    if (count($this->private) > 0) {
+      return in_array($actionName, $this->private);
+    } else {
+      return false;
     }
-    return false;
   }
   
   protected function __get($name)
@@ -258,7 +254,7 @@ abstract class Sabel_Controller_Page
    */
   public function redirect($to)
   {
-    $host = Sabel_Env_Server::create()->http_host;
+    $host = $_SERVER['HTTP_HOST'];
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
     header($redirect);
@@ -316,12 +312,14 @@ abstract class Sabel_Controller_Page
     $this->view->assign($key, $value);
   }
   
+  /*
   protected function readAnnotation($className, $annotationName)
   {
     $anonr = Sabel_Annotation_Reader::create();
     $anonr->annotation($className);
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
+  */
   
   protected function getType()
   {

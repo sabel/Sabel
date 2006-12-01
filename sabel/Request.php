@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using('Sabel_Env_Server');
-
 /**
  * Sabel_Request
  *
@@ -13,8 +11,6 @@ Sabel::using('Sabel_Env_Server');
  */
 class Sabel_Request
 {
-  protected static $server = null;
-  
   /**
    * @var Sabel_Request_Uri object
    */
@@ -27,8 +23,6 @@ class Sabel_Request
   
   public function __construct($entry = null, $requestUri = null)
   {
-    if (self::$server === null) self::$server = Sabel_Env_Server::create();
-    
     if (isset($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
     if (isset($entry)) $this->initialize($entry);
   }
@@ -111,22 +105,22 @@ class Sabel_Request
   
   public function isPost()
   {
-    return (self::$server->isMethod('POST')) ? true : false;
+    return ($_SERVER['REQUEST_METHOD'] === 'POST');
   }
   
   public function isGet()
   {
-    return (self::$server->isMethod('GET')) ? true : false;
+    return ($_SERVER['REQUEST_METHOD'] === 'GET');
   }
   
   public function isPut()
   {
-    return (self::$server->isMethod('PUT')) ? true : false;
+    return ($_SERVER['REQUEST_METHOD'] === 'PUT');
   }
   
   public function isDelete()
   {
-    return (self::$server->isMethod('DELETE')) ? true : false;
+    return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
   }
   
   public function requests()
