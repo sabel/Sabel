@@ -1,6 +1,6 @@
 <?php
 
-class ValueObject
+class Sabel_ValueObject
 {
   protected $values = array();
   
