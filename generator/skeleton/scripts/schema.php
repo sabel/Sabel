@@ -334,8 +334,8 @@ class Schema_Generator
       Sabel_DB_Connection::addConnection($connectName, $params);
 
       $sa = ($params['driver'] === 'pdo-sqlite')
-        ? new Sabel_DB_Base_Schema($connectName)
-        : new Sabel_DB_Base_Schema($connectName, $params['schema']);
+        ? new Sabel_DB_Schema_Accessor($connectName)
+        : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
 
       $schemas = $sa->getTables();
 

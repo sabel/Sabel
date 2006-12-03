@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Base_Schema
+ * Sabel_DB_Schema_Accessor
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage base
+ * @subpackage schema
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Base_Schema
+class Sabel_DB_Schema_Accessor
 {
   private $connectName = '';
   private $schemaClass = null;

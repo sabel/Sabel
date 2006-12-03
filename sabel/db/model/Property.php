@@ -72,7 +72,7 @@ class Sabel_DB_Model_Property
     }
 
     $sName    = Sabel_DB_Connection::getSchema($conName);
-    $accessor = new Sabel_DB_Base_Schema($conName, $sName);
+    $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
     $clsName  = 'Schema_' . $mdlName;
 
     if (class_exists($clsName, false)) {
