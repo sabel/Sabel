@@ -127,36 +127,27 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
-    if ($this->isWithParent() && $this->prepareAutoJoin($this->table)) {
+    if ($this->isWithParent() && $this->prepareAutoJoin($this->tableProp->table)) {
       return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
     }
 
     $projection = $this->getProjection();
-    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->table}");
-    return $this->createModels($this);
-  }
+    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->tableProp->table}");
 
-  protected function createModels($model, $child = null)
-  {
-    $resultSet = $model->exec();
+    $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
 
     $models = array();
     foreach ($resultSet as $row) {
-      if ($child === null) {
-        $model = $this->newClass($this->table);
-        $withParent = $this->isWithParent();
+      $model = $this->newClass($this->tableProp->table);
 
-        $cconst = $this->getChildConstraint();
-        if ($cconst) $model->receiveChildConstraint($cconst);
-      } else {
-        $model = $this->newClass($child);
-        $withParent = ($this->isWithParent()) ? true : $model->isWithParent();
+      if ($cconst = $this->getChildConstraint()) {
+        $model->receiveChildConstraint($cconst);
       }
 
-      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
+      $this->setData($model, ($this->isWithParent()) ? $this->addParent($row) : $row);
+
       if ($myChild = $model->getMyChildren()) {
-        if (isset($child)) $this->chooseChildConstraint($myChild, $model);
         $this->getDefaultChild($myChild, $model);
       }
       $models[] = $model;
@@ -184,7 +175,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
     $sql        = array('SELECT ');
     $joinTables = array();
-    $myTable    = $this->table;
+    $myTable    = $this->tableProp->table;
     $relTables  = $this->toTablePair($modelPairs);
     $colList    = $this->convertColListKeys($colList);
 
@@ -295,9 +286,9 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
       }
     }
 
-    $model = $this->newClass($this->table);
+    $model = $this->newClass($this->tableProp->table);
     $this->setData($model, $row);
-    $models[$this->table] = $model;
+    $models[$this->tableProp->table] = $model;
     return array($model, $models);
   }
 
@@ -330,8 +321,8 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
   protected function addParent($row)
   {
-    $this->parentTables = array($this->table);
-    return $this->addParentModels($row, $this->primaryKey);
+    $this->parentTables = array($this->tableProp->table);
+    return $this->addParentModels($row, $this->tableProp->primaryKey);
   }
 
   protected function addParentModels($row, $pKey)
@@ -405,9 +396,48 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     $cconst = $model->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
-    $children = $model->createModels($cModel, $child);
-    if ($children) $model->dataSet($child, $children);
+    $resultSet = $cModel->exec();
+
+    if ($resultSet->isEmpty()) {
+      $model->dataSet($child, false);
+      return false;
+    }
+
+    $children = array();
+    foreach ($resultSet as $row) {
+      $childObj   = $this->newClass($child);
+      $withParent = ($this->isWithParent()) ? true : $childObj->isWithParent();
+
+      $this->setData($childObj, ($withParent) ? $this->addParent($row) : $row);
+      if ($myChild = $childObj->getMyChildren()) {
+        $this->chooseChildConstraint($myChild, $childObj);
+        $this->getDefaultChild($myChild, $childObj);
+      }
+      $children[] = $childObj;
+    }
+
+    $model->dataSet($child, $children);
     return $children;
+  }
+
+  protected function createModels($cModel, $child = null)
+  {
+    $resultSet = $cModel->exec();
+    if ($resultSet->isEmpty()) return false;
+
+    $models = array();
+    foreach ($resultSet as $row) {
+      $model = $this->newClass($child);
+      $withParent = ($this->isWithParent()) ? true : $model->isWithParent();
+
+      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
+      if ($myChild = $model->getMyChildren()) {
+        $this->chooseChildConstraint($myChild, $model);
+        $this->getDefaultChild($myChild, $model);
+      }
+      $models[] = $model;
+    }
+    return $models;
   }
 
   protected function getDefaultChild($children, $model)
@@ -460,45 +490,39 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
   public function newChild($child = null)
   {
     $data = $this->getData();
-    $id   = $data[$this->primaryKey];
+    $id   = $data[$this->tableProp->primaryKey];
 
     if (empty($id)) {
-      throw new Exception("Sabel_DB_Relation::newChild() who is a parent? hasn't id value.");
+      throw new Exception("Error:newChild() who is a parent? hasn't id value.");
     }
 
-    $parent  = $this->table;
+    $parent  = $this->tableProp->table;
     $tblName = ($child === null) ? $parant : $child;
     $model   = $this->newClass($tblName);
-    $column  = "{$parent}_{$this->primaryKey}";
+    $column  = "{$parent}_{$this->tableProp->primaryKey}";
     $model->$column = $id;
     return $model;
   }
 
   protected function newClass($name)
   {
-    $mdlName = convert_to_modelname($name);
-    return ($this->modelExists($mdlName)) ? new $mdlName : MODEL($mdlName);
-  }
-
-  protected function modelExists($className)
-  {
-    return (class_exists($className, false) && strtolower($className) !== 'sabel_db_empty');
+    return MODEL(convert_to_modelname($name));
   }
 
   public function clearChild($child)
   {
-    $pkey = $this->primaryKey;
+    $pkey = $this->tableProp->primaryKey;
     $data = $this->getData();
 
     if (isset($data[$pkey])) {
       $id = $data[$pkey];
     } else {
-      throw new Exception("Sabel_DB_Relation::clearChild() who is a parent? hasn't id value.");
+      throw new Exception("Error:clearChild() who is a parent? hasn't id value.");
     }
 
     $model = $this->newClass($child);
 
-    $model->setCondition("{$this->table}_{$pkey}", $id);
+    $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
     $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
     $model->exec();
   }
@@ -506,7 +530,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
   public function save($data = null)
   {
     if (isset($data) && !is_array($data))
-      throw new Exception('Sabel_DB_Relation::save() argument must be an array');
+      throw new Exception('Error:save() argument must be an array');
 
     if ($this->isSelected()) {
       $saveData = ($data) ? $data : $this->getNewData();
@@ -554,7 +578,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     if ($param1 !== null) {
       $this->delete($param1, $param2, $param3);
     } else {
-      $pKey    = $this->primaryKey;
+      $pKey    = $this->tableProp->primaryKey;
       $scond   = $this->getSelectCondition();
       $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;
 
@@ -577,9 +601,9 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
       throw new Exception('Error: give the value of id or select the model beforehand.');
 
     $data  = $this->getData();
-    $id    = (isset($id)) ? $id : $data[$this->primaryKey];
+    $id    = (isset($id)) ? $id : $data[$this->tableProp->primaryKey];
     $chain = Schema_CascadeChain::get();
-    $key   = $this->connectName . ':' . $this->table;
+    $key   = $this->tableProp->connectName . ':' . $this->tableProp->table;
 
     if (!isset($chain[$key])) {
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
@@ -588,17 +612,17 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     BEGIN($this);
 
     $models = array();
-    $table  = $this->table;
-    $pkey   = $this->primaryKey;
+    $table  = $this->tableProp->table;
+    $pKey   = $this->tableProp->primaryKey;
     foreach ($chain[$key] as $tblName) {
-      $foreignKey = "{$table}_{$pkey}";
+      $foreignKey = "{$table}_{$pKey}";
       if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
     }
 
     foreach ($models as $children) $this->makeChainModels($children, $chain);
 
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
-    $this->remove($this->primaryKey, $id);
+    $this->remove($pKey, $id);
 
     COMMIT();
   }
@@ -664,7 +688,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
     $models  = array();
     foreach ($resultSet as $row) {
-      $cloned = $model = $this->newClass($this->table);
+      $cloned = $model = $this->newClass($this->tableProp->table);
       $cloned->setProperties($row);
       $models[] = $cloned;
     }

@@ -26,7 +26,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_Statement_Bind($this->db);
+    $this->stmt = new Sabel_DB_Pdo_Statement($this->db);
     return $this->stmt;
   }
 

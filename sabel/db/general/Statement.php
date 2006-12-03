@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Statement_NonBind
+ * Sabel_DB_General_Statement
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage statement
+ * @subpackage general
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Statement_NonBind extends Sabel_DB_Base_Statement
+class Sabel_DB_General_Statement extends Sabel_DB_Base_Statement
 {
   public function makeUpdateSQL($table, $data)
   {
@@ -45,26 +45,19 @@ class Sabel_DB_Statement_NonBind extends Sabel_DB_Base_Statement
     if (isset($const['group']))  $sql[] = ' GROUP BY ' . $const['group'];
     if (isset($const['having'])) $sql[] = ' HAVING '   . $const['having'];
 
-    $order = (isset($const['order'])) ? $const['order'] : null;
-    if ($order) $sql[] = ' ORDER BY ' . $const['order'];
-
+    $order  = (isset($const['order']))  ? $const['order']  : null;
     $limit  = (isset($const['limit']))  ? $const['limit']  : null;
     $offset = (isset($const['offset'])) ? $const['offset'] : null;
-    $column = (isset($const['defCol'])) ? $const['defCol'] : null;
 
-    $paginate = new Sabel_DB_Statement_Limitation($sql, $limit, $offset);
+    if ($order) $sql[] = ' ORDER BY ' . $const['order'];
 
-    switch ($this->db) {
-      case 'firebird':
-        $sql = $paginate->firebirdLimitation();
-        break;
-      case 'mssql':
-        $sql = $paginate->mssqlLimitation($column, $order);
-        break;
-      default:
-        $sql = $paginate->standardLimitation();
-        break;
-    }
+    $this->makeLimitationSQL($sql, $limit, $offset, $order);
+  }
+
+  protected function makeLimitationSQL(&$sql, $limit, $offset, $order)
+  {
+    if (isset($limit))  $sql[] = ' LIMIT '  . $limit;
+    if (isset($offset)) $sql[] = ' OFFSET ' . $offset;
   }
 
   public function makeNormalSQL($condition)

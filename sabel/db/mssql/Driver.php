@@ -12,9 +12,6 @@
  */
 class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
 {
-  protected
-    $escMethod = 'mssql_escape_string';
-
   private
     $defCol = '';
 
@@ -24,9 +21,16 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
     $this->db   = 'mssql';
   }
 
-  public function extension($property)
+  public function loadStatement()
   {
-    $this->defCol = $property->primaryKey;
+    $this->stmt = new Sabel_DB_Mssql_Statement($this->db, 'mssql_escape_string');
+    $this->stmt->setDefaultOrderColumn($this->defCol);
+    return $this->stmt;
+  }
+
+  public function extension($tableProp)
+  {
+    $this->defCol = $tableProp->primaryKey;
   }
 
   public function begin($conn)

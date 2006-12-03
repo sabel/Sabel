@@ -20,6 +20,12 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     $this->db   = 'firebird';
   }
 
+  public function loadStatement()
+  {
+    $this->stmt = new Sabel_DB_Firebird_Statement($this->db);
+    return $this->stmt;
+  }
+
   // @todo
   public function begin($conn)
   {

@@ -151,22 +151,21 @@ abstract class Sabel_DB_Base_Statement
 
     if (!$escape) {
       $this->makeLikeSQL($val, $condition);
-      return null;
-    }
-
-    if ($this->db === 'mssql') {
-      $val = str_replace(array('%', '_'), array('[%]', '[_]'), $val);
-      $this->makeLikeSQL($val, $condition);
     } else {
-      $escapeChars = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+      list($val, $esc) = $this->escapeLikeSQL($val);
+      $this->makeLikeSQL($val, $condition, $esc);
+    }
+  }
 
-      for ($i = 0; $i < 30; $i++) {
-        $esc = $escapeChars[$i];
-        if (strpbrk($val, $esc) === false) {
-          $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
-          $this->makeLikeSQL($val, $condition, $esc);
-          break;
-        }
+  protected function escapeLikeSQL($val)
+  {
+    $escapeChars = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+
+    for ($i = 0; $i < 30; $i++) {
+      $esc = $escapeChars[$i];
+      if (strpbrk($val, $esc) === false) {
+        $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
+        return array($val, $esc);
       }
     }
   }

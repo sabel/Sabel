@@ -30,11 +30,11 @@ abstract class Sabel_DB_Base_Driver
 
   protected abstract function driverExecute($sql = null);
 
-  public function extension($property){}
+  public function extension($obj) { }
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_Statement_NonBind($this->db, $this->escMethod);
+    $this->stmt = new Sabel_DB_General_Statement($this->db, $this->escMethod);
     return $this->stmt;
   }
 

@@ -110,14 +110,8 @@ class Sabel_DB_Executer
   public function getDriver()
   {
     if ($this->driver === null) {
-      $a = $this->tableProp->connectName;
-      if ($a === null) {
-        var_dump($this->tableProp);
-        var_dump(get_class($this));
-        exit;
-      }
-
       $this->driver = Sabel_DB_Connection::getDriver($this->tableProp->connectName);
+      $this->driver->extension($this->tableProp);
     }
     return $this->driver;
   }
