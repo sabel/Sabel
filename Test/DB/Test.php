@@ -473,7 +473,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($blog4->write_date, '2005-01-01 01:01:01');
 
     $user  = new Users(1);
-    $user->cconst('order', 'write_date');
+    $user->cconst('Blog', array('order' => 'write_date'));
     $blogs = $user->getChild('Blog');
     $this->assertEquals(count($blogs), 4);
 
@@ -489,7 +489,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($blog4->write_date, '2005-01-01 04:01:01');
 
     $user  = new Users(2);
-    $user->cconst('FavoriteItem', array('registed', 'registed desc'));
+    $user->cconst('FavoriteItem', array('order' => 'registed asc'));
     $blogs = $user->getChild('Blog');
     $items = $user->getChild('FavoriteItem');
 
@@ -514,7 +514,7 @@ class Test_DB_Test extends SabelTestCase
   public function testChildPaginate()
   {
     $user  = new Users(1);
-    $user->cconst(array('order' => 'write_date desc', 'limit' => 2));
+    $user->cconst('Blog', array('order' => 'write_date desc', 'limit' => 2));
     $blogs = $user->getChild('Blog');
     $this->assertEquals(count($blogs), 2);
 
@@ -525,7 +525,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($blog2->write_date, '2005-01-01 03:01:01');
 
     $user  = new Users(1);
-    $user->cconst(array('order' => 'write_date desc', 'limit' => 2, 'offset' => 2));
+    $user->cconst('Blog', array('order' => 'write_date desc', 'limit' => 2, 'offset' => 2));
     $blogs = $user->getChild('Blog');
     $this->assertEquals(count($blogs), 2);
 
@@ -1088,7 +1088,7 @@ class Test_DB_Test extends SabelTestCase
 class Users extends Sabel_DB_Model_Relation
 {
   protected $withParent = true;
-  protected $defChildConstraints = array('order' => 'write_date desc');
+  protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
 }
 
 class Country extends Sabel_DB_Model_Relation
