@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_SimpleCache');
+
 /**
  * Sabel_DB_Model_Property
  *

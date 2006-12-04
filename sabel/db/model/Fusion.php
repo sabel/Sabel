@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Fusion
+ * Sabel_DB_Model_Fusion
  *
  * @category   DB
  * @package    org.sabel.db
+ * @subpackage model
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Fusion
+class Sabel_DB_Model_Fusion
 {
   private
     $models        = array(),

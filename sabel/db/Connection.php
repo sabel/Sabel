@@ -94,10 +94,11 @@ class Sabel_DB_Connection
     $drvName = self::getDriverName($conName);
 
     if (strpos($drvName, 'pdo') === 0) {
+      Sabel::using('Sabel_DB_Pro_Driver');
       $driver  = new Sabel_DB_Pdo_Driver($conn, self::getDB($conName));
     } else {
       $clsName = 'Sabel_DB_' . ucfirst($drvName) . '_Driver';
-      $driver  = new $clsName($conn);
+      $driver  = Sabel::load($clsName, $conn);
     }
 
     self::$connList[$conName]['driver'] = $driver;

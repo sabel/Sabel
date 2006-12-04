@@ -22,7 +22,7 @@ class Sabel_DB_Model
   {
     $models = array();
     foreach ($mdlNames as $name) $models[] = self::createModel($name);
-    return new Sabel_DB_Fusion($models, $mdlNames);
+    return new Sabel_DB_Model_Fusion($models, $mdlNames);
   }
 
   protected static function createModel($mdlName)
