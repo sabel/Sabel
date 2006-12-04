@@ -21,37 +21,31 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
     $this->assertEquals('login', $tokens->get(2));
   }
   
-  // UriCandidateと、RequestUriを比較する
-  public function testSelecter()
+  public function testOmittableAccept()
   {
-    $tokens = new Sabel_Map_Tokens("blog/user/const2/foobar");
-    
-    $c = new Sabel_Map_Candidate();
-    $c->setName('default');
-    // uri: blog/:controller/show/:userName/:id/:date
-    
-    $c->addElement('blog', Sabel_Map_Candidate::CONSTANT);
-    
-    $c->addElement('controller', Sabel_Map_Candidate::CONTROLLER);
-    
-    $c->addElement('const2', Sabel_Map_Candidate::CONSTANT);
-    
-    $c->addElement('userName');
-    $c->setRequirement('userName', new Sabel_Map_Requirement_Regex('/([a-zA-Z].*)/'));
-    
-    $c->addElement('id');
-    $c->setOmittable('id');
-    $c->setRequirement('id', new Sabel_Map_Requirement_Regex('/([0-9].*)/'));
-    
-    $c->addElement('date');
-    $c->setOmittable('date');
-
     $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    $c->addElement("test", Sabel_Map_Candidate::VARIABLE);
+    $c->setOmittable("test");
     
-    foreach ($c as $current) {
-      $result = $s->select($tokens->current(), $current);
-      $this->assertTrue($result);
-      $tokens->next();
-    }
+    $result = $s->select(false, $c);
+    
+    $this->assertTrue($result);
+  }
+  
+  public function testOmittableWithRequirementDeny()
+  {
+    $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    
+    $c->addElement("test", Sabel_Map_Candidate::VARIABLE);
+    $c->setOmittable("test");
+    $c->setRequirement("test", new Sabel_Map_Requirement_Regex("/([a-z].*)/"));
+    
+    $result = $s->select(false, $c);
+    $this->assertTrue($result);
+    
+    $result = $s->select("12345", $c);
+    $this->assertFalse($result);
   }
 }

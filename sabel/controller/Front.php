@@ -12,10 +12,13 @@ Sabel::fileUsing('sabel/Functions.php');
 Sabel::fileUsing('sabel/db/Functions.php');
 
 /**
- * Front Controller Class.
+ * Sabel_Controller_Front
  *
- * @package org.sabel
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category   Controller
+ * @package    org.sabel.controller
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Controller_Front
 {
