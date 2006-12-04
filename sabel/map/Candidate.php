@@ -65,6 +65,11 @@ class Sabel_Map_Candidate implements Iterator
   
   public function setRequirement($name, $requirement)
   {
+    if ($this->elements[$name][self::TYPE_KEY] === self::CONSTANT) {
+      $msg = "could't apply requirement to constant elements";
+      throw new Sabel_Map_Candidate_IllegalSetting($msg);
+    }
+    
     if (isset($this->elements[$name])) {
       $this->elements[$name][self::REQUIREMENT_KEY] = $requirement;
     }
@@ -89,6 +94,12 @@ class Sabel_Map_Candidate implements Iterator
     return (isset($element[self::REQUIREMENT_KEY]));
   }
   
+  public function clearRequirement()
+  {
+    $element = $this->getElement();
+    unset($element[self::REQUIREMENT_KEY]);
+  }
+  
   public function setOmittable($name)
   {
     if (isset($this->elements[$name])) {
@@ -110,6 +121,11 @@ class Sabel_Map_Candidate implements Iterator
   
   public function setConstant($name)
   {
+    if ($this->hasRequirement()) {
+      $msg = "could't change to constant elements. it's has a requirement";
+      throw new Sabel_Map_Candidate_IllegalSetting($msg);
+    }
+    
     if (isset($this->elements[$name])) {
       $this->elements[$name][self::TYPE_KEY] = self::CONSTANT;
     }
@@ -147,3 +163,5 @@ class Sabel_Map_Candidate implements Iterator
     $this->size = count($this->elements);
   }
 }
+
+class Sabel_Map_Candidate_IllegalSetting extends Exception {}

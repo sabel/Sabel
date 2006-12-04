@@ -16,8 +16,8 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
   public function testToken()
   {
     $tokens = new Sabel_Map_Tokens("foo/user/login/");
-    $this->assertEquals('foo', $tokens->get(0));
-    $this->assertEquals('user', $tokens->get(1));
+    $this->assertEquals('foo',   $tokens->get(0));
+    $this->assertEquals('user',  $tokens->get(1));
     $this->assertEquals('login', $tokens->get(2));
   }
   
@@ -47,5 +47,49 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
     
     $result = $s->select("12345", $c);
     $this->assertFalse($result);
+  }
+  
+  public function testHasRequirementAccept()
+  {
+    $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    
+    $c->addElement("test", Sabel_Map_Candidate::VARIABLE);
+    $c->setRequirement("test", new Sabel_Map_Requirement_Regex("/([a-z].*)/"));
+    
+    $result = $s->select("abcdefg", $c);
+    $this->assertTrue($result);
+  }
+  
+  public function testConstantWithRequirementException()
+  {
+    $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    
+    $c->addElement("test", Sabel_Map_Candidate::CONSTANT);
+    try {
+      $c->setRequirement("test", new Sabel_Map_Requirement_Regex("/([a-z].*)/"));
+      $this->fail();
+    } catch (Sabel_Map_Candidate_IllegalSetting $e) {
+      if (!$e instanceof Sabel_Map_Candidate_IllegalSetting) $this->fail();
+      $this->assertTrue(true);
+    }
+  }
+  
+  public function testRequirementWithConstantException()
+  {
+    $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    
+    $c->addElement("test", Sabel_Map_Candidate::VARIABLE);
+    $c->setRequirement("test", new Sabel_Map_Requirement_Regex("/([a-z].*)/"));
+    
+    try {
+      $c->setConstant("test");
+      $this->fail();
+    } catch (Sabel_Map_Candidate_IllegalSetting $e) {
+      if (!$e instanceof Sabel_Map_Candidate_IllegalSetting) $this->fail();
+      $this->assertTrue(true);
+    }
   }
 }
