@@ -49,10 +49,12 @@ class Sabel_DB_Schema_Accessor
 
   public function getColumnNames($tblName)
   {
-    $sClass = get_schema_by_tablename($tblName);
+    $sClsName = 'Schema_' . convert_to_modelname($tblName);
+    Sabel::using($sClsName);
 
-    if ($sClass) {
-      $cols = $sClass->get();
+    if (class_exists($sClsName, false)) {
+      $sClass = new $sClsName();
+      $cols   = $sClass->get();
     } else {
       $arg = array('table' => $tblName, 'connectName' => $this->connectName);
       $executer = new Sabel_DB_Executer($arg);

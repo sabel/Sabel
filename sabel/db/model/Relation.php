@@ -297,8 +297,16 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
   protected function prepareAutoJoin($tblName)
   {
-    if (!$sClass = get_schema_by_tablename($tblName)) return false;
-    if (!$this->isSameConnectName($sClass->getProperty())) return false;
+    $sClsName = 'Schema_' . convert_to_modelname($tblName);
+    Sabel::using($sClsName);
+
+    if (class_exists($sClsName, false)) {
+      $sClass = new $sClsName();
+      $props  = $sClass->getProperty();
+      if (!$this->isSameConnectName($props['connectName'])) return false;
+    } else {
+      return false;
+    }
 
     $this->joinColList[$tblName] = array_keys($sClass->get());
     if ($parents = $sClass->getParents()) {
@@ -312,9 +320,8 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     return true;
   }
 
-  private function isSameConnectName($props)
+  private function isSameConnectName($conName)
   {
-    $conName = $props['connectName'];
     if (($size = sizeof($this->joinConNames)) > 0) {
       if ($this->joinConNames[$size - 1] !== $conName) return false;
     }
@@ -453,8 +460,8 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
   protected function chooseChildConstraint($child, $model)
   {
-    $thisDefault = $this->getDefChildConstraint();
     $thisCConst  = $this->getChildConstraint();
+    $thisDefault = $this->getDefChildConstraint();
     $modelCConst = $model->getChildConstraint();
 
     if (isset($thisCConst[$child])) {
