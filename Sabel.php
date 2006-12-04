@@ -1,15 +1,8 @@
 <?php
 
-define('SABEL', true);
+if (!defined('DIR_DIVIDER')) define('DIR_DIVIDER', '/');
 
-/*
-function __autoload($class)
-{
-  echo "oops.. autoload called. <br />\n";
-  var_dump($class);
-  echo "<br/>\n";
-}
-*/
+define('DEFAULT_PHP_POSTFIX', '.php');
 
 final class Sabel
 {
@@ -48,7 +41,7 @@ final class Sabel
     if (isset(self::$singletons[$className])) {
       $instance = self::$singletons[$className];
     } else {
-      self::using($className);
+       self::using($className);
       if ($constructerArg === null) {
         $instance = new $className();
       } else {
@@ -81,8 +74,9 @@ final class Sabel
   
   private static function convertPath($className)
   {
-    $prePath = str_replace('_', '/', $className);
-    $path = strtolower(dirname($prePath)) .'/'. basename($prePath) . '.php';
+    $prePath = str_replace('_', DIR_DIVIDER, $className);
+    $path = strtolower(dirname($prePath)) . DIR_DIVIDER 
+            . basename($prePath) . DEFAULT_PHP_POSTFIX;
     
     return str_replace('./', '', $path);
   }
@@ -106,26 +100,18 @@ final class Sabel
   }
 }
 
+/**
+ * alias of Sabel::load()
+ *
+ */
 if (function_exists('create')) {
-  function __create($classpath)
+  function __create($className)
   {
-    return Container::create()->load($classpath);
+    return Sabel::load($className);
   }
 } else {
-  function create($classpath)
+  function create($className)
   {
-    return Container::create()->load($classpath);
-  }
-}
-
-if (function_exists('singleton')) {
-  function __singleton($classpath)
-  {
-    return Container::create()->load($classpath, 'singleton');
-  }
-} else {
-  function singleton($classpath)
-  {
-    return Container::create()->load($classpath, 'singleton');
+    return Sabel::load($className);
   }
 }
