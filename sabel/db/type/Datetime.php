@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Type_Interface');
+
 /**
  * Sabel_DB_Type_Datetime
  *
@@ -10,9 +12,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Type_DateTime implements Sabel_DB_Type_Sender
+class Sabel_DB_Type_DateTime implements Sabel_DB_Type_Interface
 {
   private $next = null;
+
+  public function getType()
+  {
+    return Sabel_DB_Type_Const::DATETIME;
+  }
 
   public function add($chain)
   {
@@ -25,7 +32,7 @@ class Sabel_DB_Type_DateTime implements Sabel_DB_Type_Sender
                    'datetime' , 'timestamp with time zone');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Type_Const::DATETIME;
+      $co->type = $this->getType();
     } else {
       $this->next->send($co, $type);
     }

@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Type_Interface');
+
 /**
  * Sabel_DB_Type_Double
  *
@@ -10,7 +12,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Type_Double implements Sabel_DB_Type_Sender
+class Sabel_DB_Type_Double implements Sabel_DB_Type_Interface
 {
   private $next = null;
 
@@ -27,7 +29,7 @@ class Sabel_DB_Type_Double implements Sabel_DB_Type_Sender
   public function send($co, $type)
   {
     if ($type === 'double') {
-      $co->type = Sabel_DB_Type_Const::DOUBLE;
+      $co->type = $this->getType();
       $co->max  =  1.79769E308;
       $co->min  = -1.79769E308;
     } else {

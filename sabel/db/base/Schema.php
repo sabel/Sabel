@@ -1,5 +1,6 @@
 <?php
 
+Sabel::using('Sabel_DB_SimpleCache');
 Sabel::using('Sabel_DB_Schema_Table');
 Sabel::using('Sabel_DB_Schema_Column');
 

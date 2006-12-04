@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Type_Interface');
+
 /**
  * Sabel_DB_Type_Date
  *
@@ -10,7 +12,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Type_Date implements Sabel_DB_Type_Sender
+class Sabel_DB_Type_Date implements Sabel_DB_Type_Interface
 {
   private $next = null;
 
@@ -27,7 +29,7 @@ class Sabel_DB_Type_Date implements Sabel_DB_Type_Sender
   public function send($co, $type)
   {
     if ($type === 'date') {
-      $co->type = Sabel_DB_Type_Const::DATE;
+      $co->type = $this->getType();
     } else {
       $this->next->send($co, $type);
     }

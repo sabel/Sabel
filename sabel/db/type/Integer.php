@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Type_Interface');
+
 /**
  * Sabel_DB_Type_Integer
  *
@@ -10,7 +12,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Type_Integer implements Sabel_DB_Type_Sender
+class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
 {
   private $next = null;
 
@@ -30,7 +32,7 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Sender
                    'int8', 'smallint', 'tinyint', 'int3', 'int2', 'mediumint');
 
     if (in_array($type, $types)) {
-      $co->type = Sabel_DB_Type_Const::INT;
+      $co->type = $this->getType();
 
       switch($type) {
         case 'tinyint':

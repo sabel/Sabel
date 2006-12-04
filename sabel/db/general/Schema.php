@@ -48,11 +48,12 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function createColumns($table)
   {
-    $columns = array();
+    Sabel::using('Sabel_DB_Type_Setter');
 
     $sql = sprintf($this->tableColumns, $this->schema, $table);
     $this->driver->execute($sql);
 
+    $columns = array();
     foreach ($this->driver->getResultSet() as $row) {
       $row = array_change_key_case($row);
       $colName = $row['column_name'];

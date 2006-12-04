@@ -1,62 +1,22 @@
 <?php
 
-define('SCHEMA_DIR', 'schema/');
-//define('SABEL', '/usr/local/.../.../');
+define('SCHEMA_DIR', 'lib/schema/');
+//define('SABEL', '/usr/local/~~~/~~~/Sabel/');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
 }
 
-define('SABEL_DB',   SABEL . 'db/');
+require SABEL . 'Sabel.php';
 
-require_once SABEL_DB . 'Connection.php';
-require_once SABEL_DB . 'Executer.php';
+Sabel::fileUsing(SABEL . 'sabel/db/Functions.php');
 
-require_once SABEL_DB . 'base/Driver.php';
-require_once SABEL_DB . 'base/Statement.php';
-require_once SABEL_DB . 'base/Schema.php';
-
-require_once SABEL_DB . 'driver/ResultSet.php';
-require_once SABEL_DB . 'driver/ResultObject.php';
-
-require_once SABEL_DB . 'driver/Mysql.php';
-require_once SABEL_DB . 'driver/Pgsql.php';
-require_once SABEL_DB . 'driver/Mssql.php';
-require_once SABEL_DB . 'driver/Firebird.php';
-require_once SABEL_DB . 'driver/Pdo.php';
-
-require_once SABEL_DB . 'Functions.php';
-require_once SABEL_DB . 'SimpleCache.php';
-require_once SABEL_DB . 'Transaction.php';
-require_once SABEL_DB . 'Property.php';
-require_once SABEL_DB . 'Relation.php';
-
-require_once SABEL_DB . 'schema/Const.php';
-
-require_once SABEL_DB . 'schema/type/Sender.php';
-require_once SABEL_DB . 'schema/type/Setter.php';
-
-require_once SABEL_DB . 'schema/type/Integer.php';
-require_once SABEL_DB . 'schema/type/String.php';
-require_once SABEL_DB . 'schema/type/Byte.php';
-require_once SABEL_DB . 'schema/type/Other.php';
-require_once SABEL_DB . 'schema/type/Text.php';
-require_once SABEL_DB . 'schema/type/Time.php';
-require_once SABEL_DB . 'schema/type/Float.php';
-require_once SABEL_DB . 'schema/type/Double.php';
-
-require_once SABEL_DB . 'schema/Column.php';
-require_once SABEL_DB . 'schema/Table.php';
-
-require_once SABEL_DB . 'schema/Common.php';
-require_once SABEL_DB . 'schema/General.php';
-require_once SABEL_DB . 'schema/Mysql.php';
-require_once SABEL_DB . 'schema/Pgsql.php';
-require_once SABEL_DB . 'schema/Sqlite.php';
-require_once SABEL_DB . 'schema/Mssql.php';
-
-require_once SABEL . 'config/Spyc.php';
-require_once SABEL . 'config/Yaml.php';
+Sabel::using('Sabel_Config_Yaml');
+Sabel::using('Sabel_DB_Connection');
+Sabel::using('Sabel_DB_Executer');
+Sabel::using('Sabel_DB_Schema_Accessor');
+Sabel::using('Sabel_DB_Type_Const');
+Sabel::using('Sabel_DB_Type_Setter');
 
 class Cascade_Writer
 {
