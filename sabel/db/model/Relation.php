@@ -1,5 +1,6 @@
 <?php
 
+Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Model_Property');
 
 /**
@@ -471,17 +472,17 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
   protected function setData($model, $row)
   {
-    $primaryKey = $model->primaryKey;
+    $pKey = $model->primaryKey;
 
-    if (is_array($primaryKey)) {
-      foreach ($primaryKey as $key) {
+    if (is_array($pKey)) {
+      foreach ($pKey as $key) {
         $condition = new Sabel_DB_Condition($key, $row[$key]);
         $model->setSelectCondition($key, $condition);
       }
     } else {
-      if (isset($row[$primaryKey])) {
-        $condition = new Sabel_DB_Condition($primaryKey, $row[$primaryKey]);
-        $model->setSelectCondition($primaryKey, $condition);
+      if (isset($row[$pKey])) {
+        $condition = new Sabel_DB_Condition($pKey, $row[$pKey]);
+        $model->setSelectCondition($pKey, $condition);
       }
     }
 

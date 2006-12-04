@@ -27,6 +27,7 @@ class Sabel_DB_Model
 
   protected static function createModel($mdlName)
   {
+    Sabel::using($mdlName);
     if (class_exists($mdlName, false)) return new $mdlName();
 
     if (!class_exists('Sabel_DB_Empty', false)) {

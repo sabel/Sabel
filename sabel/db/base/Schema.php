@@ -1,5 +1,8 @@
 <?php
 
+Sabel::using('Sabel_DB_Schema_Table');
+Sabel::using('Sabel_DB_Schema_Column');
+
 /**
  * Sabel_DB_Base_Schema
  *
@@ -17,25 +20,19 @@ abstract class Sabel_DB_Base_Schema
 
   public function getTable($tblName)
   {
-    $cache  = Sabel_DB_SimpleCache::get('schema_' . $tblName);
+    $cache = Sabel_DB_SimpleCache::get('schema_' . $tblName);
     if ($cache) return $cache;
 
-    $sClass = get_schema_by_tablename($tblName);
+    $mdlName   = convert_to_modelname($tblName);
+    $tblSchema = create_schema('Schema_' . $mdlName);
 
-    if ($sClass) {
-      $cols = array();
-      foreach ($sClass->get() as $colName => $colInfo) {
-        $co = new Sabel_DB_Schema_Column();
-        $co->name = $colName;
-        $cols[$colName] = $co->make($colInfo);
-      }
-    } else {
-      $cols = $this->createColumns($tblName);
+    if (!$tblSchema) {
+      $columns   = $this->createColumns($tblName);
+      $tblSchema = new Sabel_DB_Schema_Table($tblName, $columns);
     }
 
-    $schema = new Sabel_DB_Schema_Table($tblName, $cols);
-    Sabel_DB_SimpleCache::add('schema_' . $tblName, $schema);
-    return $schema;
+    Sabel_DB_SimpleCache::add('schema_' . $tblName, $tblSchema);
+    return $tblSchema;
   }
 
   protected abstract function getTableNames();

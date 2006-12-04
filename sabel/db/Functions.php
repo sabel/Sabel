@@ -17,6 +17,28 @@ function get_schema_by_tablename($tblName)
   return (class_exists($sClass, false)) ? new $sClass() : false;
 }
 
+function create_schema($sClsName)
+{
+  Sabel::using($sClsName);
+  if (!class_exists($sClsName, false)) return false;
+
+  Sabel::using('Sabel_DB_Schema_Table');
+  Sabel::using('Sabel_DB_Schema_Column');
+
+  $cols = array();
+  $sCls = new $sClsName();
+  foreach ($sCls->get() as $colName => $colInfo) {
+    $co = new Sabel_DB_Schema_Column();
+    $co->name = $colName;
+    $cols[$colName] = $co->make($colInfo);
+  }
+
+  $split   = explode('_', $sClsName);
+  $tblName = convert_to_tablename($split[1]);
+
+  return new Sabel_DB_Schema_Table($tblName, $cols);
+}
+
 function mssql_escape_string($val)
 {
   return str_replece("'", "''", $val);
@@ -24,11 +46,13 @@ function mssql_escape_string($val)
 
 function MODEL($mdlName)
 {
+  Sabel::using('Sabel_DB_Model');
   return Sabel_DB_Model::load($mdlName);
 }
 
 function BEGIN($model)
 {
+  Sabel::using('Sabel_DB_Transaction');
   Sabel_DB_Transaction::add($model);
 }
 

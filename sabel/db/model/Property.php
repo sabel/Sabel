@@ -73,18 +73,19 @@ class Sabel_DB_Model_Property
       return Sabel_DB_SimpleCache::get('props_' . $tblName);
     }
 
-    $sName    = Sabel_DB_Connection::getSchema($conName);
-    $accessor = new Sabel_DB_Schema_Accessor($conName, $sName);
-    $clsName  = 'Schema_' . $mdlName;
+    $sClsName  = 'Schema_' . $mdlName;
+    $tblSchema = create_schema($sClsName);
 
-    if (class_exists($clsName, false)) {
-      $sClass     = new $clsName();
+    if (is_object($tblSchema)) {
+      $sClass     = new $sClsName();
       $properties = $sClass->getProperty();
       $properties['table'] = $tblName;
-
-      $tblSchema  = $accessor->getTable($tblName);
     } else {
+      Sabel::using('Sabel_DB_Schema_Accessor');
+
+      $scmName    = Sabel_DB_Connection::getSchema($conName);
       $database   = Sabel_DB_Connection::getDB($conName);
+      $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
       $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
       $tblSchema  = $accessor->getTable($tblName);
 
@@ -98,6 +99,7 @@ class Sabel_DB_Model_Property
     $this->schema  = $tblSchema;
     $this->columns = array_keys($tblSchema->getColumns());
 
+    Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
     Sabel_DB_SimpleCache::add('columns_' . $tblName, $this->columns);
     Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
@@ -260,6 +262,7 @@ class Sabel_DB_Model_Property
     if (is_object($arg1) || is_array($arg1)) {
       $this->childConditions[] = $arg1;
     } else {
+      Sabel::using('Sabel_DB_Condition');
       $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
       $this->childConditions[] = $condition;
     }

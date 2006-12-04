@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Result_Row');
+
 /**
  * Sabel_DB_Base_Driver
  *

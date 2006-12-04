@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Condition');
+
 /**
  * Sabel_DB_Executer
  *
@@ -65,11 +67,12 @@ class Sabel_DB_Executer
       if (is_array($pKey)) {
         throw new Exception('Please specify a primary key for the table.');
       }
-
       $arg3 = null;
       $arg2 = $arg1;
       $arg1 = $pKey;
     }
+
+    Sabel::using('Sabel_DB_Condition');
     $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
     $this->conditions[$condition->key] = $condition;
   }
