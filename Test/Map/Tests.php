@@ -1,10 +1,11 @@
 <?php
 
-require_once('Test/Map/Entry.php');
-require_once('Test/Map/Destination.php');
-require_once('Test/Map/Uri.php');
-require_once('Test/Map/Requirements.php');
-require_once('Test/Map/Builder.php');
+require_once ('Test/Map/Entry.php');
+require_once ('Test/Map/Destination.php');
+require_once ('Test/Map/Uri.php');
+require_once ('Test/Map/Requirements.php');
+require_once ('Test/Map/Builder.php');
+require_once ('Test/Map/Selecter.php');
 
 class Test_Map_Tests
 {
@@ -22,6 +23,7 @@ class Test_Map_Tests
     $suite->addTest(Test_Map_Uri::suite());
     // $suite->addTest(Test_Map_Requirements::suite());
     $suite->addTest(Test_Map_Builder::suite());
+    $suite->addTest(Test_Map_Selecter::suite());
     
     return $suite;
   }
