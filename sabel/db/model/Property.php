@@ -32,19 +32,22 @@ class Sabel_DB_Model_Property
     $newData  = array(),
     $selected = false;
 
-  public function __construct($mdlName = null, $mdlProps = null)
+  public function __construct($mdlName, $mdlProps)
   {
-    if ($mdlName === null) return null;
-
-    $props = array('table'               => '',
-                   'structure'           => 'normal',
-                   'withParent'          => false,
-                   'projection'          => '*',
-                   'myChildren'          => null,
-                   'defChildConstraints' => array());
+    $props = array('table'      => '',
+                   'structure'  => 'normal',
+                   'withParent' => false,
+                   'projection' => '*',
+                   'myChildren' => null);
 
     foreach (array_keys($props) as $key) {
       if (isset($mdlProps[$key])) $props[$key] = $mdlProps[$key];
+    }
+
+    if (array_key_exists('childConstraints', $mdlProps)) {
+      foreach ($mdlProps['childConstraints'] as $cldName => $param) {
+        $this->cconst($cldName, $param);
+      }
     }
 
     if (array_key_exists('connectName', $mdlProps)) {
@@ -104,15 +107,6 @@ class Sabel_DB_Model_Property
     Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
     return $properties;
-  }
-
-  public function set($prop)
-  {
-    $myProp =& $this->properties;
-
-    $myProp['table']        = $prop['table'];
-    $myProp['connectName']  = (isset($prop['connectName']))  ? $prop['connectName']  : 'default';
-    $myProp['incrementKey'] = (isset($prop['incrementKey'])) ? $prop['incrementKey'] : null;
   }
 
   public function __set($key, $val)
@@ -236,14 +230,14 @@ class Sabel_DB_Model_Property
     $this->properties['table'] = $tblName;
   }
 
-  public function setChildConstraint($arg1, $arg2 = null)
+  public function setChildConstraint($mdlName, $constraints = null)
   {
-    if (isset($arg1) && is_array($arg2)) {
-      foreach ($arg2 as $key => $val) $this->childConstraints[$arg1][$key] = $val;
-    } elseif (isset($arg2)) {
-      $this->overrideProps['defChildConstraints'] = array($arg1 => $arg2);
+    if (!is_array($constraints)) {
+      throw new Exception('Error:setChildConstraint() second argument must be an array.');
     } else {
-      $this->overrideProps['defChildConstraints'] = $arg1;
+      foreach ($constraints as $key => $val) {
+        $this->childConstraints[$mdlName][$key] = $val;
+      }
     }
   }
 
@@ -273,11 +267,6 @@ class Sabel_DB_Model_Property
     return $this->childConditions;
   }
 
-  public function setDefChildConstraint($constraints)
-  {
-    $this->overrideProps['defChildConstraints'] = $constraints;
-  }
-
   public function unsetChildCondition()
   {
     $this->childConditions  = array();
@@ -299,13 +288,6 @@ class Sabel_DB_Model_Property
     $this->selectConditions = $conditions;
   }
 
-  /**
-   * this method is for mysql.
-   * examine the engine of the table.
-   *
-   * @param  object $driver driver an instance of Driver_Native_Mysql or Driver_Pdo_Driver
-   * @return string table engine.
-   */
   public function getStructure()
   {
     return $this->overrideProps['structure'];
@@ -326,18 +308,13 @@ class Sabel_DB_Model_Property
     return $this->overrideProps['projection'];
   }
 
-  public function getDefChildConstraint()
-  {
-    return $this->overrideProps['defChildConstraints'];
-  }
-
   /**
    * an alias for setChildConstraint.
    *
    */
-  public function cconst($arg1, $arg2 = null)
+  public function cconst($mdlName, $constraints = null)
   {
-    $this->setChildConstraint($arg1, $arg2);
+    $this->setChildConstraint($mdlName, $constraints);
   }
 
   /**

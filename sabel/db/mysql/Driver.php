@@ -26,7 +26,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 
   public function begin($conn)
   {
-    $this->driverExecute('BEGIN', $conn);
+    $this->driverExecute('START TRANSACTION', $conn);
   }
 
   public function commit($conn)

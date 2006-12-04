@@ -19,8 +19,7 @@ abstract class Sabel_DB_Base_Statement
     $sql = array();
 
   private
-    $escMethod = '',
-    $stripFlag = false;
+    $escMethod = '';
 
   private
     $either = false,
@@ -39,7 +38,6 @@ abstract class Sabel_DB_Base_Statement
   {
     $this->db        = $db;
     $this->escMethod = $escMethod;
-    $this->stripFlag = (defined('SABEL')) ? false : get_magic_quotes_gpc();
   }
 
   public function makeConditionQuery($conditions)
@@ -175,7 +173,6 @@ abstract class Sabel_DB_Base_Statement
     $escMethod = $this->escMethod;
 
     if (is_string($val)) {
-      $val = ($this->stripFlag) ? stripslashes($val) : $val;
       $val = ($escMethod === '') ? $val : $escMethod($val);
     } elseif (is_bool($val)) {
       if (in_array($this->db, array('pgsql', 'mssql', 'sqlite'))) {

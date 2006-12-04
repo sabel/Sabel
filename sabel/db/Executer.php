@@ -19,8 +19,7 @@ class Sabel_DB_Executer
     $constraints = array();
 
   protected
-    $driver  = null,
-    $isModel = false;
+    $driver  = null;
 
   /**
    * Sabel_DB_Executer constructor.
@@ -270,7 +269,7 @@ class Sabel_DB_Executer
 
   public function executeError($errorMsg)
   {
-    if (Sabel_DB_Transaction::isActive()) Sabel_DB_Transaction::rollback();
+    ROLLBACK();
     throw new Exception($errorMsg);
   }
 

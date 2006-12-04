@@ -32,8 +32,6 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
   public function __construct($param1 = null, $param2 = null)
   {
-    $this->isModel = true;
-
     if ($this->property === null) $this->createProperty();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
@@ -91,6 +89,11 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
                                : parent::getColumnNames($tblName);
   }
 
+  protected function initChildConstraint()
+  {
+    return array();
+  }
+
   protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
@@ -128,7 +131,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
 
     if ($row = $model->exec()->fetch()) {
       $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
-      if (($myChild = $model->getMyChildren()) !== null) $model->getDefaultChild($myChild, $model);
+      $model->getDefaultChild($model);
     } else {
       $model->receiveSelectCondition($model->conditions);
       foreach ($model->conditions as $condition) {
@@ -168,10 +171,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
       }
 
       $this->setData($model, ($this->isWithParent()) ? $this->addParent($row) : $row);
-
-      if ($myChild = $model->getMyChildren()) {
-        $this->getDefaultChild($myChild, $model);
-      }
+      $this->getDefaultChild($model);
       $models[] = $model;
     }
     return $models;
@@ -438,10 +438,7 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
       $withParent = ($this->isWithParent()) ? true : $childObj->isWithParent();
 
       $this->setData($childObj, ($withParent) ? $this->addParent($row) : $row);
-      if ($myChild = $childObj->getMyChildren()) {
-        $this->chooseChildConstraint($myChild, $childObj);
-        $this->getDefaultChild($myChild, $childObj);
-      }
+      $this->getDefaultChild($childObj);
       $children[] = $childObj;
     }
 
@@ -449,51 +446,35 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     return $children;
   }
 
-  protected function createModels($cModel, $child = null)
+  protected function getDefaultChild($model)
   {
-    $resultSet = $cModel->exec();
-    if ($resultSet->isEmpty()) return false;
-
-    $models = array();
-    foreach ($resultSet as $row) {
-      $model = $this->newClass($child);
-      $withParent = ($this->isWithParent()) ? true : $model->isWithParent();
-
-      $this->setData($model, ($withParent) ? $this->addParent($row) : $row);
-      if ($myChild = $model->getMyChildren()) {
-        $this->chooseChildConstraint($myChild, $model);
-        $this->getDefaultChild($myChild, $model);
+    if ($children = $model->getMyChildren()) {
+      foreach ($children as $val) {
+        $this->chooseChildConstraint($val, $model);
+        $model->getChild($val, $model);
       }
-      $models[] = $model;
-    }
-    return $models;
-  }
-
-  protected function getDefaultChild($children, $model)
-  {
-    foreach ($children as $val) {
-      $this->chooseChildConstraint($val, $model);
-      $model->getChild($val, $model);
     }
   }
 
   protected function chooseChildConstraint($child, $model)
   {
     $thisCConst  = $this->getChildConstraint();
-    $thisDefault = $this->getDefChildConstraint();
     $modelCConst = $model->getChildConstraint();
 
+    $constraints = array();
     if (isset($thisCConst[$child])) {
       $constraints = $thisCConst[$child];
-    } elseif ($thisDefault) {
-      $constraints = $thisDefault;
     } elseif (isset($modelCConst[$child])) {
       $constraints = $modelCConst[$child];
-    } else {
-      $constraints = $model->getDefChildConstraint();
     }
+
     if ($constraints) $model->setChildConstraint($child, $constraints);
-    if ($thisDefault) $model->setDefChildConstraint($thisDefault);
+
+    if ($thisCConst)  {
+      foreach ($thisCConst as $cldName => $param) {
+        $model->setChildConstraint($cldName, $param);
+      }
+    }
   }
 
   protected function setData($model, $row)

@@ -35,7 +35,6 @@ class Sabel_DB_Model
             {
               public function __construct($mdlName)
               {
-                $this->isModel = true;
                 $this->createProperty($mdlName, array());
               }
             }'

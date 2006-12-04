@@ -58,5 +58,15 @@ function BEGIN($model)
 
 function COMMIT()
 {
+  Sabel::using('Sabel_DB_Transaction');
   Sabel_DB_Transaction::commit();
+}
+
+function ROLLBACK()
+{
+  Sabel::using('Sabel_DB_Transaction');
+
+  if (Sabel_DB_Transaction::isActive()) {
+    Sabel_DB_Transaction::rollback();
+  }
 }
