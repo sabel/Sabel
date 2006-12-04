@@ -79,10 +79,29 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     return $columns;
   }
 
+  public function getTableSchema($tblName = null)
+  {
+    return ($tblName === null) ? $this->property->getSchema()
+                               : parent::getTableSchema($tblName);
+  }
+
+  public function getColumnNames($tblName = null)
+  {
+    return ($tblName === null) ? $this->property->getColumns()
+                               : parent::getColumnNames($tblName);
+  }
+
   protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
     $this->createModel($this);
+  }
+
+  protected function getEdge($order, $orderColumn)
+  {
+    $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
+    $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
+    return $this->selectOne();
   }
 
   /**

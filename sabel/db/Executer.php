@@ -72,7 +72,6 @@ class Sabel_DB_Executer
       $arg1 = $pKey;
     }
 
-    Sabel::using('Sabel_DB_Condition');
     $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
     $this->conditions[$condition->key] = $condition;
   }
@@ -249,13 +248,8 @@ class Sabel_DB_Executer
   {
     $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
-
-    if ($this->isModel) {
-      return $this->selectOne();
-    } else {
-      $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
-      return $this->exec();
-    }
+    $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
+    return $this->exec();
   }
 
   public function executeQuery($sql, $param = null)
@@ -287,16 +281,12 @@ class Sabel_DB_Executer
 
   public function getColumnNames($tblName = null)
   {
-    if ($tblName === null && $this->isModel) return $this->property->getColumns();
-
     $tblName = ($tblName === null) ? $this->tableProp->table : $tblName;
     return $this->createSchemaAccessor()->getColumnNames($tblName);
   }
 
   public function getTableSchema($tblName = null)
   {
-    if ($tblName === null && $this->isModel) return $this->property->getSchema();
-
     $tblName = ($tblName === null) ? $this->tableProp->table : $tblName;
     return $this->createSchemaAccessor()->getTable($tblName);
   }
