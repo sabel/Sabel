@@ -2,12 +2,11 @@
 
 class Sabel_Form_Select extends Sabel_Form_HtmlElement
 {
-  const START_TAG_FMT = '<select name="%s">';
-  const START_TAG_FMT_WITH_ID = '<select name="%s" id="%s">';
+  const START_TAG_FMT = '<select name="%s"%s%s>';
+  const PARAM_ID_FMT  = ' id="%s"';
   const END_TAG_FMT   = '</select>';
   
   protected $options = array();
-  protected $optionsByName = array();
   protected $optionGroups = array();
   protected $multiple = false;
   
@@ -24,7 +23,6 @@ class Sabel_Form_Select extends Sabel_Form_HtmlElement
   public function addOption($option)
   {
     $this->options[] = $option;
-    $this->optionsByValue[$option->getContents()] = $option;
   }
   
   public function addOptionGroup($og)
@@ -35,15 +33,15 @@ class Sabel_Form_Select extends Sabel_Form_HtmlElement
   public function toHtml($trim = false)
   {
     $buf = array();
-    if ($this->id === "") {
-      $buf[] = sprintf(self::START_TAG_FMT, $this->name);
-    } else {
-      $buf[] = sprintf(self::START_TAG_FMT_WITH_ID, $this->name, $this->id);
-    }
+    
+    $id = ($this->id !== "") ? sprintf(self::PARAM_ID_FMT, $this->id) : "";
+    $multiple = ($this->isMultiple()) ? ' multiple="multiple"' : "";
+    
+    $buf[] = sprintf(self::START_TAG_FMT, $this->name, $id, $multiple);
     
     if ($this->hasOptions()) {
       $options = $this->options;
-      foreach ($options as $option) $buf[] = $option->toHtml($trim);
+      foreach ($options as $option) $buf[] = $option->toHtml();
     }
     
     if ($this->hasOptionGroups()) {

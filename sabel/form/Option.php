@@ -6,16 +6,16 @@ class Sabel_Form_Option extends Sabel_Form_HtmlElement
   protected $label    = '';
   protected $selected = false;
   
-  const START_TAG_OPEN  = '<option ';
+  const START_TAG_OPEN  = '<option';
   const START_TAG_CLOSE = '>';
-  const END_TAG_FMT   = '</option>';
+  const END_TAG_FMT     = '</option>';
   
   public function __construct($contents, $value = '', $selected = false, 
                               $label = '', $id = '', $class = '', $style = '')
   {
     parent::__construct('', $value, $id, $class, $style);
     $this->contents = $contents;
-    $this->label = $label;
+    $this->label    = $label;
     $this->selected = $selected;
   }
   
@@ -39,22 +39,22 @@ class Sabel_Form_Option extends Sabel_Form_HtmlElement
     return $this->contents;
   }
   
-  public function toHtml($trim = false)
+  public function toHtml()
   {
     $buf = array();
     
     $value = ($this->value === '') ? $this->contents : $this->value;
     $buf[] = self::START_TAG_OPEN;
     
-    if ($this->isSelected()) $buf[] =         'selected="selected" ';
-    $buf[] = sprintf('value="%s" ', $value);
-    if ($this->label !== '') $buf[] = sprintf('label="%s"', $this->label);
+    if ($this->isSelected()) $buf[] = ' selected="selected"';
+    $buf[] = sprintf(' value="%s"', $value);
+    if ($this->label !== '') $buf[] = sprintf(' label="%s"', $this->label);
     
     $buf[] = self::START_TAG_CLOSE;
     
     $buf[] = $this->contents;
     
     $buf[] = self::END_TAG_FMT;
-    return ($trim) ? join("", $buf) : join("\n", $buf);
+    return join("", $buf);
   }
 }

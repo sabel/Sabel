@@ -8,10 +8,11 @@ class Sabel_Form_OptionGroup extends Sabel_Form_Select
   public function toHtml($trim = false)
   {
     $buf = array();
+    
     $buf[] = sprintf(self::START_TAG_FMT, $this->name);
     if ($this->hasOptions()) {
       $options = $this->options;
-      foreach ($options as $option) $buf[] = $option->toHtml($trim);
+      foreach ($options as $option) $buf[] = $option->toHtml();
     }
     $buf[] = self::END_TAG_FMT;
     

@@ -16,13 +16,13 @@ class Test_Form extends PHPUnit2_Framework_TestCase
   {
     $select = new Sabel_Form_Select('name');
     $select->addOption(new Sabel_Form_Option('optElem', 'value'));
-    $expOne = '<select name="name"><option value="value" >optElem</option></select>';
+    $expOne = '<select name="name"><option value="value">optElem</option></select>';
     $this->assertEquals($expOne, $select->toHtml(true));
     
     $select->addOption(new Sabel_Form_Option('optElem', 'value'));
     $expTwo  = '<select name="name">';
-    $expTwo .=   '<option value="value" >optElem</option>';
-    $expTwo .=   '<option value="value" >optElem</option>';
+    $expTwo .=   '<option value="value">optElem</option>';
+    $expTwo .=   '<option value="value">optElem</option>';
     $expTwo .= '</select>';
     $this->assertEquals($expTwo, $select->toHtml(true));
   }
@@ -37,27 +37,31 @@ class Test_Form extends PHPUnit2_Framework_TestCase
   
   public function testSelectMultipleOption()
   {
-    
+    $select = new Sabel_Form_Select('name');
+    $select->multiple();
+    $select->addOption(new Sabel_Form_Option('optElem', 'value'));
+    $expOne = '<select name="name" multiple="multiple"><option value="value">optElem</option></select>';
+    $this->assertEquals($expOne, $select->toHtml(true));
   }
   
   public function testOptionContentsMissing()
   {
     $option = new Sabel_Form_Option('optElement');
-    $exp = '<option value="optElement" >optElement</option>';
+    $exp = '<option value="optElement">optElement</option>';
     $this->assertEquals($exp, $option->toHtml(true));
   }
   
   public function testOptionSelected()
   {
     $option = new Sabel_Form_Option('optContents', 'value', true);
-    $exp = '<option selected="selected" value="value" >optContents</option>';
+    $exp = '<option selected="selected" value="value">optContents</option>';
     $this->assertEquals($exp, $option->toHtml(true));
   }
   
   public function testOptionFull()
   {
     $option = new Sabel_Form_Option('optElement', 'value');
-    $exp = '<option value="value" >optElement</option>';
+    $exp = '<option value="value">optElement</option>';
     $this->assertEquals($exp, $option->toHtml(true));
   }
   
@@ -71,9 +75,9 @@ class Test_Form extends PHPUnit2_Framework_TestCase
     $select->addOptionGroup($og);
     
     $exp  = '<select name="name">';
-    $exp .=   '<option value="outer" >outer</option>';
+    $exp .=   '<option value="outer">outer</option>';
     $exp .=   '<optgroup label="label">';
-    $exp .=     '<option value="inner" >inner</option>';
+    $exp .=     '<option value="inner">inner</option>';
     $exp .=   '</optgroup>';
     $exp .= '</select>';
     
