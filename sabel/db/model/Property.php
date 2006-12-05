@@ -56,24 +56,19 @@ class Sabel_DB_Model_Property
       $conName = 'default';
     }
 
-    $properties = $this->initSchema($mdlName, $conName, $props['table']);
-
-    if ($properties['primaryKey'] === null)
-      trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
-
+    $this->initSchema($mdlName, $conName, $props['table']);
     $this->overrideProps = $props;
-    $this->properties    = $properties;
   }
 
-  public function initSchema($mdlName, $conName, $tblName)
+  protected function initSchema($mdlName, $conName, $tblName)
   {
     $tblName = ($tblName === '') ? convert_to_tablename($mdlName) : $tblName;
     $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
 
     if ($cache) {
-      $this->schema  = $cache;
-      $this->columns = Sabel_DB_SimpleCache::get('columns_' . $tblName);
-      return Sabel_DB_SimpleCache::get('props_' . $tblName);
+      $this->schema     = $cache;
+      $this->columns    = Sabel_DB_SimpleCache::get('columns_' . $tblName);
+      $this->properties = Sabel_DB_SimpleCache::get('props_' . $tblName);
     }
 
     $sClsName  = 'Schema_' . $mdlName;
@@ -84,19 +79,7 @@ class Sabel_DB_Model_Property
       $properties = $sClass->getProperty();
       $properties['table'] = $tblName;
     } else {
-      Sabel::using('Sabel_DB_Schema_Accessor');
-
-      $scmName    = Sabel_DB_Connection::getSchema($conName);
-      $database   = Sabel_DB_Connection::getDB($conName);
-      $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
-      $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
-      $tblSchema  = $accessor->getTable($tblName);
-
-      $properties = array('connectName'  => $conName,
-                          'primaryKey'   => $tblSchema->getPrimaryKey(),
-                          'incrementKey' => $tblSchema->getIncrementKey(),
-                          'tableEngine'  => $engine,
-                          'table'        => $tblName);
+      list($tblSchema, $properties) = $this->createSchema($conName, $tblName);
     }
 
     $this->schema  = $tblSchema;
@@ -106,7 +89,29 @@ class Sabel_DB_Model_Property
     Sabel_DB_SimpleCache::add('columns_' . $tblName, $this->columns);
     Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
-    return $properties;
+    if ($properties['primaryKey'] === null)
+      trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+
+    $this->properties = $properties;
+  }
+
+  protected function createSchema($conName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Accessor');
+
+    $scmName    = Sabel_DB_Connection::getSchema($conName);
+    $database   = Sabel_DB_Connection::getDB($conName);
+    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
+    $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
+    $tblSchema  = $accessor->getTable($tblName);
+
+    $properties = array('connectName'  => $conName,
+                        'primaryKey'   => $tblSchema->getPrimaryKey(),
+                        'incrementKey' => $tblSchema->getIncrementKey(),
+                        'tableEngine'  => $engine,
+                        'table'        => $tblName);
+
+    return array($tblSchema, $properties);
   }
 
   public function __set($key, $val)
@@ -230,7 +235,7 @@ class Sabel_DB_Model_Property
     $this->properties['table'] = $tblName;
   }
 
-  public function setChildConstraint($mdlName, $constraints = null)
+  public function setChildConstraint($mdlName, $constraints)
   {
     if (!is_array($constraints)) {
       throw new Exception('Error:setChildConstraint() second argument must be an array.');
@@ -312,7 +317,7 @@ class Sabel_DB_Model_Property
    * an alias for setChildConstraint.
    *
    */
-  public function cconst($mdlName, $constraints = null)
+  public function cconst($mdlName, $constraints)
   {
     $this->setChildConstraint($mdlName, $constraints);
   }

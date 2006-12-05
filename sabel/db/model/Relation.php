@@ -89,11 +89,6 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
                                : parent::getColumnNames($tblName);
   }
 
-  protected function initChildConstraint()
-  {
-    return array();
-  }
-
   protected function defaultSelectOne($param1, $param2 = null)
   {
     $this->setCondition($param1, $param2);
@@ -152,9 +147,14 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
-    if ($this->isWithParent() && $this->prepareAutoJoin($this->tableProp->table)) {
-      return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
+
+    if ($this->isWithParent()) {
+      if ($this->prepareAutoJoin(convert_to_modelname($this->tableProp->table))) {
+        return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
+      }
     }
+    echo '<br />End';
+    exit;
 
     $projection = $this->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->tableProp->table}");
@@ -192,6 +192,11 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
    */
   public function selectJoin($modelPairs, $joinType = 'INNER', $colList = null)
   {
+    dump($modelPairs);
+    dump($colList);
+    dump($this->acquiredParents);
+    exit;
+
     if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
@@ -314,9 +319,9 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
     return array($model, $models);
   }
 
-  protected function prepareAutoJoin($tblName)
+  protected function prepareAutoJoin($mdlName)
   {
-    $sClsName = 'Schema_' . convert_to_modelname($tblName);
+    $sClsName = 'Schema_' . $mdlName;
     Sabel::using($sClsName);
 
     if (class_exists($sClsName, false)) {
@@ -327,16 +332,52 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Executer
       return false;
     }
 
-    $this->joinColList[$tblName] = array_keys($sClass->get());
+    $this->joinColList[$mdlName] = array_keys($sClass->get());
     if ($parents = $sClass->getParents()) {
       foreach ($parents as $parent) {
-        if (in_array($parent, $this->acquiredParents)) continue;
-        $this->joinPair[] = $tblName . ':' . $parent;
-        $this->acquiredParents[] = $parent;
-        if (!$this->prepareAutoJoin($parent)) return false;
+        $this->joinPair[] = $this->createRelationPair($mdlName, $parent);
+        $pModelName = $this->filteringParentModelName($parent);
+
+        if (in_array($pModelName, $this->acquiredParents)) continue;
+
+        $this->acquiredParents[] = $pModelName;
+        if (!$this->prepareAutoJoin($pModelName)) return false;
       }
     }
     return true;
+  }
+
+  protected function createRelationPair($mdlName, $pair)
+  {
+    if (strpos($pair, ':') === false) {
+      $child = $mdlName . '.' . convert_to_tablename($pair) . '_id';
+      $pair = $child. ':' . $pair;
+    }
+
+    list($child, $parent) = explode(':', $pair);
+
+    if (strpos($child, '.') === false) {
+      $child = $mdlName . '.' . $child;
+    }
+
+    if (strpos($parent, '.') === false) {
+      $parent .= '.id';
+    }
+
+    return $child . ':' . $parent;
+  }
+
+  protected function filteringParentModelName($str)
+  {
+    if (strpos($str, ':') !== false) {
+      list($gbg, $str) = explode(':', $str);
+    }
+
+    if (strpos($str, '.') !== false) {
+      list($str) = explode('.', $str);
+    }
+
+    return $str;
   }
 
   private function isSameConnectName($conName)

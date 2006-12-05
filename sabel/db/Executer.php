@@ -58,21 +58,20 @@ class Sabel_DB_Executer
 
     if (is_object($arg1) || is_array($arg1)) {
       $this->conditions[] = $arg1;
-      return null;
-    }
-
-    if ($arg2 === null) {
-      $pKey = $this->tableProp->primaryKey;
-      if (is_array($pKey)) {
-        throw new Exception('Please specify a primary key for the table.');
+    } else {
+      if ($arg2 === null) {
+        $pKey = $this->tableProp->primaryKey;
+        if (is_array($pKey)) {
+          throw new Exception('Error:setCondition() please specify a column for the condition.');
+        }
+        $arg3 = null;
+        $arg2 = $arg1;
+        $arg1 = $pKey;
       }
-      $arg3 = null;
-      $arg2 = $arg1;
-      $arg1 = $pKey;
-    }
 
-    $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
-    $this->conditions[$condition->key] = $condition;
+      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+      $this->conditions[$condition->key] = $condition;
+    }
   }
 
   /**
@@ -297,6 +296,8 @@ class Sabel_DB_Executer
 
   protected function createSchemaAccessor()
   {
+    Sabel::using('Sabel_DB_Schema_Accessor');
+
     $connectName = $this->tableProp->connectName;
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);

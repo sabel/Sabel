@@ -11,12 +11,6 @@ function convert_to_modelname($tblName)
   return join('', array_map('ucfirst', explode('_', $tblName)));
 }
 
-function get_schema_by_tablename($tblName)
-{
-  $sClass = 'Schema_' . convert_to_modelname($tblName);
-  return (class_exists($sClass, false)) ? new $sClass() : false;
-}
-
 function create_schema($sClsName)
 {
   Sabel::using($sClsName);
@@ -46,8 +40,8 @@ function mssql_escape_string($val)
 
 function MODEL($mdlName)
 {
-  Sabel::using('Sabel_DB_Model');
-  return Sabel_DB_Model::load($mdlName);
+  Sabel::using('Sabel_Model');
+  return Sabel_Model::load($mdlName);
 }
 
 function BEGIN($model)
