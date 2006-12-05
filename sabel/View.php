@@ -56,7 +56,7 @@ class Sabel_View
   
   public function isTemplateMissing()
   {
-    return (is_file($this->templatePath.$this->templateName.'.tpl'));
+    return (!is_file($this->templatePath . $this->templateName));
   }
   
   public function setLayout($layout)

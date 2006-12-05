@@ -174,7 +174,7 @@ abstract class Sabel_Controller_Page
       if ($this->hasMethod('templateMissing')) {
         $this->templateMissing();
       } else {
-        throw new Sabel_Exception_TemplateMissing();
+        throw Sabel::load('Sabel_Exception_TemplateMissing', var_export($this->view, 1));
       }
     } else {
       return $this->view->rendering();
@@ -247,11 +247,10 @@ abstract class Sabel_Controller_Page
   
   protected function checkReferer($validURIs)
   {
-    $ref  = Sabel_Env_Server::create()->http_referer;
-    $replaced = preg_replace('/\\//', '\/', $validURIs[0]);
-    $patternAbsoluteURI = '/http:\/\/' . $host . $replaced . '/';
-    preg_match($patternAbsoluteURI, $ref, $matchs);
-    return (isset($matchs[0])) ? true : false;
+    $host = $_SERVER['HTTP_HOST'];
+    $ref  = $_SERVER['HTTP_REFERER'];
+    $patternAbsoluteURI = '%http://' . $host . $validURIs[0]. '%';
+    return (bool) preg_match($patternAbsoluteURI, $ref);
   }
   
   protected function layout($layout)
@@ -297,7 +296,7 @@ abstract class Sabel_Controller_Page
       $entry = $map->getCurrentEntry();
     }
     
-    $this->redirect('/'.$entry->uri($params));
+    $this->redirect('/' . $entry->uri($params));
   }
   
   public function previous()
@@ -338,7 +337,6 @@ abstract class Sabel_Controller_Page
     return $anonr->getAnnotationsByName($className, $annotationName);
   }
   */
-  
   protected function getType()
   {
     return $this->request->getUri()->getType();

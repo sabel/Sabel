@@ -134,7 +134,7 @@ class Sabel_Request
   
   public function __toString()
   {
-    return $this->requestUri;
+    return $this->uri->__toString();
   }
 }
 
