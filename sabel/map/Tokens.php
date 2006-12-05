@@ -23,8 +23,9 @@ class Sabel_Map_Tokens implements Iterator
   
   public function get($position)
   {
-    if (isset($this->tokens[$position]))
+    if (isset($this->tokens[$position])) {
       return $this->tokens[$position];
+    }
   }
   
   public function current()

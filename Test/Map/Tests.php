@@ -27,6 +27,7 @@ class Test_Map_Tests
     // $suite->addTest(Test_Map_Requirements::suite());
     $suite->addTest(Test_Map_Builder::suite());
     
+    $suite->addTest(Test_Map_Usage::suite());
     $suite->addTest(Test_Map_Selecter::suite());
     $suite->addTest(Test_Map_Candidate::suite());
     

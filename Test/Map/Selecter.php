@@ -92,4 +92,15 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
       $this->assertTrue(true);
     }
   }
+  
+  public function testMatchToWildCard()
+  {
+    $s = new Sabel_Map_Selecter_Impl();
+    $c = new Sabel_Map_Candidate();
+    
+    $c->addElement("test");
+    $c->setMatchAll("test", true);
+    
+    $this->assertTrue($s->select("abcd", $c));
+  }
 }

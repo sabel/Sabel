@@ -15,7 +15,9 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
   {
     $result = false;
     
-    if ($candidate->isOmittable() && $candidate->hasRequirement()) {
+    if ($candidate->isMatchAll()) {
+      $result = true;
+    } elseif ($candidate->isOmittable() && $candidate->hasRequirement()) {
       if ($token === false) {
         $result = true;
       } else {
@@ -31,6 +33,19 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
       $result = false;
     } else {
       $result = true;
+    }
+    
+    // token value as a candidate variable
+    if ($result) {
+      if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
+        $candidate->setElementVariable($token);
+      }
     }
     
     return $result;
