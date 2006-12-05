@@ -48,7 +48,7 @@ class Test_DB_Mysql extends Test_DB_Test
     Test_DB_Test::$db = 'MYSQL';
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_DB_Model::load('Basic');
+    $model  = MODEL('Basic');
 
     $mh = new MysqlHelper();
 

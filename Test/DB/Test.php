@@ -1085,13 +1085,13 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-class Users extends Sabel_DB_Model_Relation
+class Users extends Sabel_DB_Model
 {
   protected $withParent = true;
   protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
 }
 
-class Country extends Sabel_DB_Model_Relation
+class Country extends Sabel_DB_Model
 {
   protected $myChildren = array('City');
 }
