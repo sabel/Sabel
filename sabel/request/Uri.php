@@ -38,16 +38,13 @@ class Sabel_Request_Uri
   {
     $this->rawUriString = $requestUri;
     
-    $elements = explode('/', $requestUri);
-    
+    $elements    = explode('/', $requestUri);
     $lastElement = array_pop($elements);
     
-    if (stripos($lastElement, '.') !== false) {
-      list($tmp, $this->type) = explode('.', $lastElement);
-      array_push($elements, $tmp);
-    } else {
-      array_push($elements, $lastElement);
-    }
+    if (strpos($lastElement, '.') !== false)
+      list($lastElement, $this->type) = explode('.', $lastElement);
+      
+    array_push($elements, $lastElement);
     
     $this->parts = $elements;
     
