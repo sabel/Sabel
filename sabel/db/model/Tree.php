@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Model_Relation');
+Sabel::using('Sabel_DB_Model');
 
 /**
  * Sabel_DB_Model_Tree
@@ -13,7 +13,7 @@ Sabel::using('Sabel_DB_Model_Relation');
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Model_Tree extends Sabel_DB_Model_Relation
+abstract class Sabel_DB_Model_Tree extends Sabel_DB_Model
 {
   protected $structure = 'tree';
 
