@@ -15,11 +15,11 @@ class Sabel_Core_Namespace
   
   /**
    * pointer to parent object
-   * 
+   *
    * @var object $parent instance of Sabel_Core_Namespace
    */
-  protected $parent = null;
-  protected $childs = array();
+  protected $parent  = null;
+  protected $childs  = array();
   protected $classes = array();
   
   protected static $namespaces = array();
@@ -50,7 +50,7 @@ class Sabel_Core_Namespace
   public function setParent($parent)
   {
     if (!$parent instanceof Sabel_Core_Namespace)
-      throw new Sabel_Exception_Runtime("$ns isn't Namespace");
+      throw new Sabel_Exception_Runtime("$parent isn't Namespace");
       
     $this->parent = $parent;
   }
@@ -80,23 +80,16 @@ class Sabel_Core_Namespace
   public function getNamespace($entry)
   {
     if (strpos($entry, '.')) {
-      $entries = $entry;
       // absolute path e.g. sabel.core.Foo
-      $nsEntries = explode('.', $entries);
+      $nsEntries = explode('.', $entry);
       $temporaryNS = $this;
       foreach ($nsEntries as $entry) {
-        if (isset($temporaryNS->childs[$entry])) {
-          $temporaryNS = $temporaryNS->childs[$entry];
-        }
+        $temporaryNS = $temporaryNS->getChild($entry);
+        // @todo if child not found.
       }
       return $temporaryNS;
     } else {
-      // find from child
-      if (isset($this->childs[$entry])) {
-        return $this->childs[$entry];
-      } else {
-        return false;
-      }
+      return $this->getChild($entry);
     }
   }
   
@@ -144,5 +137,10 @@ class Sabel_Core_Namespace
   public function getChilds()
   {
     return $this->childs;
+  }
+  
+  protected function getChild($entry)
+  {
+    return (isset($this->childs[$entry])) ? $this->childs[$entry] : false;
   }
 }

@@ -40,7 +40,8 @@ class Test_Namespace extends PHPUnit2_Framework_TestCase
     $this->assertEquals('Sabel_Core_Child_Foo', $core->getClassName('child.Foo'));
     $this->assertEquals('Sabel_Core_Child_Bar', $core->getClassName('child.Bar'));
     
-    $view = $root->getNamespace('sabel.view');
+    $sabel = $root->getNamespace('sabel');
+    $view  = $sabel->getNamespace('view');
     $this->assertEquals('Sabel_View_Foo', $view->getClassName('Foo'));
     $this->assertEquals('Sabel_View_Bar', $view->getClassName('Bar'));
   }
