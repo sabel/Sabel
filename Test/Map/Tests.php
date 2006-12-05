@@ -1,11 +1,5 @@
 <?php
 
-require_once ('Test/Map/Entry.php');
-require_once ('Test/Map/Destination.php');
-require_once ('Test/Map/Uri.php');
-require_once ('Test/Map/Requirements.php');
-require_once ('Test/Map/Builder.php');
-
 require_once ('Test/Map/Usage.php');
 require_once ('Test/Map/Selecter.php');
 require_once ('Test/Map/Candidate.php');

@@ -22,7 +22,7 @@ class Sabel_Map_Candidate implements Iterator
   const REQUIREMENT_KEY = "REQUIREMENT";
   const OMITTABLE_KEY   = "OMITTABLE";
   const MATCH_ALL_KEY   = "MATCH_ALL";
-  const VARIABLE_KEY   = "VARIABLE";
+  const VARIABLE_KEY    = "VARIABLE";
   
   const ELEMENT_NAME = "ELEMENT_NAME";
   
