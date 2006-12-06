@@ -69,6 +69,7 @@ class Sabel_DB_Model_Property
       $this->schema     = $cache;
       $this->columns    = Sabel_DB_SimpleCache::get('columns_' . $tblName);
       $this->properties = Sabel_DB_SimpleCache::get('props_' . $tblName);
+      return null;
     }
 
     $sClsName  = 'Schema_' . $mdlName;

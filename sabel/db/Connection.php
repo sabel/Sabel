@@ -13,25 +13,32 @@ class Sabel_DB_Connection
 {
   const SET_ENCODING = 'SET NAMES %s';
 
+  protected static $isInit     = false;
   protected static $parameters = array();
   protected static $connList   = array();
 
   public static function initialize()
   {
+    if (self::$isInit) return null;
+
+    Sabel::using('Sabel_Config_Yaml');
+
     if (ENVIRONMENT === 'development') {
-      $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
+      $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
     } else {
       $cache = Sabel::load('Sabel_Cache_Apc');
       if (!($conf = $cache->read('dbconf'))) {
-        $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
+        $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
         $cache->write('dbconf', $conf);
       }
     }
 
     $params = $conf->read(ENVIRONMENT);
     foreach ($params as $connectName => $param) {
-      self::$parameters[$connectName] = $param;
+      self::addConnection($connectName, $param);
     }
+
+    self::$isInit = true;
   }
 
   public static function addConnection($connectName, $params)

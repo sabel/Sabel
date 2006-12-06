@@ -40,9 +40,10 @@ function mssql_escape_string($val)
 
 function MODEL($mdlName)
 {
-  Sabel::using('Sabel_Model');
   Sabel::using('Sabel_DB_Connection');
+  Sabel_DB_Connection::initialize();
 
+  Sabel::using('Sabel_Model');
   return Sabel_Model::load($mdlName);
 }
 

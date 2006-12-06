@@ -58,18 +58,14 @@ class Sabel_DB_Model_Relation
     $this->joinColList[$tblName] = array_keys($sClass->get());
     if ($parents = $sClass->getParents()) {
       foreach ($parents as $parent) {
+        $pm = $parent;
+        if (strpos($pm, ':') !== false) list($gbg, $pm) = explode(':', $pm);
+        if (strpos($pm, '.') !== false) list($pm) = explode('.', $pm);
+        if (in_array($pm, $this->acquiredParents)) continue;
+
         $condition = $this->createRelationPair($mdlName, $parent);
-
-        /*
-        $parent    = $this->extractModelName($parent);
-        $pTable = convert_to_tablename($parent);
-        $this->joinConditions[$pTable] = $condition;
-        */
-
-        if (in_array($parent, $this->acquiredParents)) continue;
-
-        $this->acquiredParents[] = $parent;
-        if (!$this->isEnableJoin($parent)) return false;
+        $this->acquiredParents[] = $pm;
+        if (!$this->isEnableJoin($pm)) return false;
       }
     }
     return true;
