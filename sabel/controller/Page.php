@@ -277,24 +277,12 @@ abstract class Sabel_Controller_Page
   
   public function redirectTo($params)
   {
-    /*
     if (!is_array($params) && is_string($params)) {
-      $params = array('action'=>$params);
+      $params = array(':action'=>$params);
     }
     
-    $entry = null;
-    
-    $map = Sabel_Map_Facade::create();
-    if (isset($params['entry'])) {
-      $entry = $map->getEntry($params['entry']);
-      unset($params['entry']);
-      // @todo if $entry is not object.
-    } else {
-      $entry = $map->getCurrentEntry();
-    }
-    
-    $this->redirect('/' . $entry->uri($params));
-    */
+    $candidate = Sabel_Context::getCurrentCandidate();
+    $this->redirect('/'.$candidate->uri($params));
   }
   
   public function previous()
