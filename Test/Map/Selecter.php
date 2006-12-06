@@ -1,10 +1,13 @@
 <?php
 
 /**
- * Test_Map_Element
- * 
- * @package org.sabel
- * @author Mori Reo <mori.reo@gmail.com>
+ * Test of Map_Selecter
+ *
+ * @category   Test
+ * @package    test
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
 {
@@ -69,7 +72,7 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
     $c->addElement("test", Sabel_Map_Candidate::CONSTANT);
     try {
       $c->setRequirement("test", new Sabel_Map_Requirement_Regex("/([a-z].*)/"));
-      $this->fail();
+      $this->fail("does not throw Exception");
     } catch (Sabel_Map_Candidate_IllegalSetting $e) {
       if (!$e instanceof Sabel_Map_Candidate_IllegalSetting) $this->fail();
       $this->assertTrue(true);
@@ -86,7 +89,7 @@ class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
     
     try {
       $c->setConstant("test");
-      $this->fail();
+      $this->fail("does not throw Exception");
     } catch (Sabel_Map_Candidate_IllegalSetting $e) {
       if (!$e instanceof Sabel_Map_Candidate_IllegalSetting) $this->fail();
       $this->assertTrue(true);

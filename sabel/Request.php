@@ -23,7 +23,7 @@ class Sabel_Request
   
   public function __construct($entry = null, $requestUri = null)
   {
-    if (isset($requestUri)) $this->initializeRequestUriAndParameters($requestUri);
+    $this->initializeRequestUriAndParameters($requestUri);
     if (isset($entry)) $this->initialize($entry);
   }
   

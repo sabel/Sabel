@@ -48,36 +48,34 @@ abstract class Sabel_Controller_Page
    */
   private $reserved = array();
   
-  public final function initializeReservedNamesOfMethods()
-  {
-    $ref = new ReflectionClass('Sabel_Controller_Page');
-    $methods = $ref->getMethods();
-    foreach ($methods as $method) $reserved[$method->getName()] = 1;
-    $this->reserved = $reserved;
-  }
-  
   public function initialize()
   {
     // none.
   }
   
-  public function setup()
+  public function setup($request, $view = null)
   {
-    $this->view = Sabel::load('Sabel_View');
-    Sabel_Context::setView($this->view);
-    $this->entry       = Sabel_Context::getCurrentMapEntry();
+    $ref = new ReflectionClass('Sabel_Controller_Page');
+    $methods = $ref->getMethods();
+    foreach ($methods as $method) $reserved[$method->getName()] = 1;
+    $this->reserved = $reserved;
     
-    $this->request     = $this->entry->getRequest();
-    $this->requests    = $this->request->requests();
+    if ($view === null) {
+      $this->view = Sabel::load('Sabel_View');
+    } else {
+      $this->view = $view;
+    }
+    
+    Sabel_Context::setView($this->view);
+    
+    $this->request     = $request;
+    $this->requests    = $this->requests();
     
     if ($this->enableSession) {
       $this->storage   = Sabel_Storage_Session::create();
       $this->security  = Sabel_Security_Security::create();
       $this->identity  = $this->security->getIdentity();
     }
-    
-    $this->destination = $this->entry->getDestination();
-    $this->action      = $this->destination->action;
     
     if (isset($_SERVER['REQUEST_METHOD'])) {
       $this->httpMethod = $_SERVER['REQUEST_METHOD'];
@@ -94,11 +92,9 @@ abstract class Sabel_Controller_Page
     return $this->request->requests();
   }
   
-  public function execute()
+  public function execute($actionName)
   {
     if (!headers_sent()) header('X-Framework: Sabel');
-    
-    $actionName = $this->destination->getAction();
     
     // check reserved words
     if (isset($this->reserved[$actionName]))
@@ -281,6 +277,7 @@ abstract class Sabel_Controller_Page
   
   public function redirectTo($params)
   {
+    /*
     if (!is_array($params) && is_string($params)) {
       $params = array('action'=>$params);
     }
@@ -297,6 +294,7 @@ abstract class Sabel_Controller_Page
     }
     
     $this->redirect('/' . $entry->uri($params));
+    */
   }
   
   public function previous()

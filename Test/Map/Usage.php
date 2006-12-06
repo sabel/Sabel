@@ -35,7 +35,7 @@ class Test_Map_Usage extends PHPUnit2_Framework_TestCase
     $c->addElement('controller', Sabel_Map_Candidate::CONTROLLER);
     $c->addElement('const2',     Sabel_Map_Candidate::CONSTANT);
     
-    $c->addElement('userName');
+    $c->addElement('userName', Sabel_Map_Candidate::ACTION);
     $c->setRequirement('userName', new Sabel_Map_Requirement_Regex('/([a-zA-Z].*)/'));
     
     $c->addElement('id');
@@ -44,6 +44,8 @@ class Test_Map_Usage extends PHPUnit2_Framework_TestCase
     
     $c->addElement('date');
     $c->setOmittable('date');
+    
+    $c->setModule('index');
 
     $s = new Sabel_Map_Selecter_Impl();
     
@@ -52,6 +54,10 @@ class Test_Map_Usage extends PHPUnit2_Framework_TestCase
       $this->assertTrue($result);
       $tokens->next();
     }
+    
+    $this->assertEquals("index",  $c->getModule());
+    $this->assertEquals("user",   $c->getController());
+    $this->assertEquals("foobar", $c->getAction());
     
     $this->assertEquals("user",   $c->getElementVariableByName('controller'));
     $this->assertEquals("foobar", $c->getElementVariableByName('userName'));
@@ -96,8 +102,8 @@ class Test_Map_Usage extends PHPUnit2_Framework_TestCase
         $tokens->next();
       }
       
-      if (!in_array(false, $results)) {
-        // candidate is match we finish compare with uri
+      if (array_pop($results) !== false) {
+        // candidate is match we finished compare with uri
         $matchedCandidate = $candidate;
         break 1;
       } else {

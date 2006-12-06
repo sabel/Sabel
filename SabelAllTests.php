@@ -26,7 +26,6 @@ function __autoload($class)
   Sabel::using($class);
 }
 
-Sabel::fileUsing('sabel/Functions.php');
 Sabel::fileUsing('sabel/db/Functions.php');
 
 require_once('Test/SabelTestCase.php');

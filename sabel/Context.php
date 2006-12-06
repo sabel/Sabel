@@ -15,17 +15,17 @@ class Sabel_Context
   private static $includePath = array();
   
   private static $pageController = null;
-  private static $mapEntry = null;
+  private static $candidate = null;
   private static $view = null;
   
-  public static function setCurrentMapEntry($entry)
+  public static function setCurrentCandidate($candidate)
   {
-    self::$mapEntry = $entry;
+    self::$candidate = $candidate;
   }
   
-  public static function getCurrentMapEntry()
+  public static function getCurrentCandidate()
   {
-    return self::$mapEntry;
+    return self::$candidate;
   }
   
   public static function setView($view)

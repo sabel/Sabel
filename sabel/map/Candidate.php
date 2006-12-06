@@ -11,23 +11,32 @@
  */
 class Sabel_Map_Candidate implements Iterator
 {
-  const VARIABLE   = "VARIABLE";
-  const CONSTANT   = "CONSTANT";
+  const VARIABLE   = 0x01;
+  const CONSTANT   = 0x02;
+  const MODULE     = 0x03;
+  const CONTROLLER = 0x04;
+  const ACTION     = 0x05;
   
-  const MODULE     = "MODULE";
-  const CONTROLLER = "CONTROLLER";
-  const ACTION     = "ACTION";
+  const MODULE_NAME     = 0x40;
+  const CONTROLLER_NAME = 0x41;
+  const ACTION_NAME     = 0x42;
   
-  const TYPE_KEY        = "TYPE";
-  const REQUIREMENT_KEY = "REQUIREMENT";
-  const OMITTABLE_KEY   = "OMITTABLE";
-  const MATCH_ALL_KEY   = "MATCH_ALL";
-  const VARIABLE_KEY    = "VARIABLE";
+  const TYPE_KEY          = 0x50;
+  const REQUIREMENT_KEY   = 0x51;
+  const OMITTABLE_KEY     = 0x52;
+  const MATCH_ALL_KEY     = 0x53;
+  const VARIABLE_KEY      = 0x54;
+  const DEFAULT_VALUE_KEY = 0x55;
   
   const ELEMENT_NAME = "ELEMENT_NAME";
   
-  protected $name = '';
+  protected $name     = '';
   protected $elements = array();
+  
+  protected
+    $module     = '',
+    $controller = '',
+    $action     = '';
   
   protected $size     = 0;
   protected $position = 0;
@@ -165,6 +174,39 @@ class Sabel_Map_Candidate implements Iterator
     return (isset($element[self::OMITTABLE_KEY]));
   }
   
+  public function setDefaultValue($name, $value)
+  {
+    if (isset($this->elements[$name])) {
+      $this->elements[$name][self::DEFAULT_VALUE_KEY] = $value;
+    }
+  }
+  
+  public function getDefaultValue()
+  {
+    $element = $this->getElement();
+    if ($this->hasDefaultValue()) {
+      return $element[self::DEFAULT_VALUE_KEY];
+    }
+  }
+  
+  public function getDefaultValueByName($name)
+  {
+    if (isset($this->elements[$name][self::DEFAULT_VALUE_KEY])) {
+      return $this->elements[$name][self::DEFAULT_VALUE_KEY];
+    }
+  }
+  
+  public function hasDefaultValue()
+  {
+    $element = $this->getElement();
+    return (isset($element[self::DEFAULT_VALUE_KEY]));
+  }
+  
+  public function hasDefaultValueByName($name)
+  {
+    return (isset($this->elements[$name][self::DEFAULT_VALUE_KEY]));
+  }
+  
   public function isConstant()
   {
     $element = $this->getElement();
@@ -207,6 +249,135 @@ class Sabel_Map_Candidate implements Iterator
     $element = $this->getElement();
     return (isset($element[self::MATCH_ALL_KEY]) &&
             $element[self::MATCH_ALL_KEY] === true);
+  }
+  
+  public function setModule($module)
+  {
+    $this->module = $module;
+  }
+  
+  public function getModule()
+  {
+    return $this->module;
+  }
+  
+  public function hasModule()
+  {
+    return ($this->module !== "");
+  }
+  
+  public function setController($controller)
+  {
+    $this->controller = $controller;
+  }
+  
+  public function getController()
+  {
+    return $this->controller;
+  }
+  
+  public function hasController()
+  {
+    return ($this->controller !== "");
+  }
+  
+  public function setAction($action)
+  {
+    $this->action = $action;
+  }
+  
+  public function getAction()
+  {
+    return $this->action;
+  }
+  
+  public function hasAction()
+  {
+    return ($this->action !== "");
+  }
+  
+  public function find($tokens)
+  {
+    $selecter = Sabel::load('Sabel_Map_Selecter_Impl');
+    
+    $results = array();
+    
+    foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
+      foreach ($candidate as $element) {
+        $result = $selecter->select($tokens->current(), $element);
+        
+        // found unmatch. skip compare
+        if ($result === false) {
+          $results[] = false;
+          break 1;
+        }
+        
+        $tokens->next();
+      }
+      
+      if (array_pop($results) !== false) {
+        // candidate is match we finished compare with uri
+        $matchedCandidate = $candidate;
+        break 1;
+      } else {
+        // does't match initialize temporary variables
+        $tokens->rewind();
+        $results = array();
+      }
+    }
+    
+    return $matchedCandidate;
+  }
+  
+  public function uri($parameters = null)
+  {
+    if ($parameters === null) $parameters = array();
+    foreach ($parameters as $key => $param) {
+      switch ($key) {
+        case 'm':
+          $parameters[':module'] = $param;
+          unset($parameters[$key]);
+          break 1;
+        case 'c':
+          $parameters[':controller'] = $param;
+          unset($parameters[$key]);
+          break 1;
+        case 'a':
+          $parameters[':action'] = $param;
+          unset($parameters[$key]);
+          break 1;
+      }
+    }
+    
+    $elements = $this->elements;
+    $buffer = array();
+    
+    foreach ($elements as $element) {
+      if ($element[self::TYPE_KEY] === self::MODULE) {
+        if (isset($parameters[':module'])) {
+          $buffer[] = $parameters[':module'];
+        } else {
+          $buffer[] = $element[self::VARIABLE_KEY];
+        }
+      } elseif ($element[self::TYPE_KEY] === self::CONTROLLER) {
+        if (isset($parameters[':controller'])) {
+          $buffer[] = $parameters[':controller'];
+        } else {
+          $buffer[] = $element[self::VARIABLE_KEY];
+        }
+      } elseif ($element[self::TYPE_KEY] === self::ACTION) {
+        if (isset($parameters[':action'])) {
+          $buffer[] = $parameters[':action'];
+        } else {
+          $buffer[] = $element[self::VARIABLE_KEY];
+        }
+      } elseif (isset($parameters[':'.$element[self::ELEMENT_NAME]])) {
+        $buffer[] = $parameters[':'.$element[self::ELEMENT_NAME]];
+      }
+      
+    }
+    
+    return join('/', $buffer);
   }
   
   public function current()

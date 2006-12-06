@@ -16,16 +16,9 @@ class Sabel_View
   
   protected $layout = '';
   
-  public function __construct($entry = null)
+  public function __construct($module = '', $controller = '', $action = '')
   {
-    if ($entry === null) {
-      $entry = Sabel_Context::getCurrentMapEntry();
-    }
-    
-    if ($entry instanceof Sabel_Map_Entry) {
-      $this->decideTemplatePathAndNameByEntry($entry);
-    }
-    
+    $this->decideTemplatePathAndNameByEntry($module, $controller, $action);
     $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
   }
   
@@ -99,19 +92,17 @@ class Sabel_View
     }
   }
   
-  protected function decideTemplatePathAndNameByEntry($entry)
+  protected function decideTemplatePathAndNameByEntry($module, $controller, $action)
   {
-    $destination = $entry->getDestination();
-    
     $tplpath  = RUN_BASE;
     $tplpath .= Sabel_Const::MODULES_DIR;
-    $tplpath .= $destination->module . '/';
+    $tplpath .= $module . DIR_DIVIDER;
     $tplpath .= Sabel_Const::TEMPLATE_DIR;
     
     // make name string of template such as "controller.method.tpl"
-    $tplname  = $destination->controller;
+    $tplname  = $controller;
     $tplname .= Sabel_Const::TEMPLATE_NAME_SEPARATOR;
-    $tplname .= $destination->action;
+    $tplname .= $action;
     $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
     
     $this->setTemplatePath($tplpath);

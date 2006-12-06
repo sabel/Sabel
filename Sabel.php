@@ -156,3 +156,9 @@ function array_ndpop(&$array) {
   $array[] = $tmp;
   return $tmp;
 }
+
+function candidate($name, $uri, $options = null)
+{
+  Sabel::using('Sabel_Map_Configurator');
+  Sabel_Map_Configurator::addCandidate($name, $uri, $options);
+}

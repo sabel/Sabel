@@ -54,7 +54,9 @@ class Test_DB_Pgsql extends Test_DB_Test
     $ph = new PgsqlHelper();
 
     foreach ($ph->sqls as $query) {
-      try { @$model->execute($query); } catch (Exception $e) {}
+      try {
+        @$model->execute($query);
+      } catch (Exception $e) {}
     }
 
     try {

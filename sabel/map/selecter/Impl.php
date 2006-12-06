@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_Map_Selecter');
+
 /**
  * Selecter implementation
  *
@@ -14,6 +16,10 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
   public function select($token, $candidate)
   {
     $result = false;
+    
+    if ($token === false && $candidate->hasDefaultValue()) {
+      $token = $candidate->getDefaultValue();
+    }
     
     if ($candidate->isMatchAll()) {
       $result = true;
@@ -40,10 +46,13 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
       if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
         $candidate->setElementVariable($token);
       } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
+        $candidate->setModule($token);
         $candidate->setElementVariable($token);
       } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
+        $candidate->setController($token);
         $candidate->setElementVariable($token);
       } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
+        $candidate->setAction($token);
         $candidate->setElementVariable($token);
       }
     }

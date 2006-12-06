@@ -1,13 +1,11 @@
 <?php
 
-Sabel::using('Sabel_Context');
 Sabel::using('Sabel_Const');
+Sabel::using('Sabel_Context');
 
-Sabel::using('Sabel_Map_Facade');
-
-// Sabel::using('Sabel_DB_Connection');
+Sabel::using('Sabel_View');
 Sabel::using('Sabel_Exception_Runtime');
-Sabel::using('Sabel_Config_Yaml');
+
 Sabel::fileUsing('sabel/db/Functions.php');
 
 /**
@@ -21,36 +19,13 @@ Sabel::fileUsing('sabel/db/Functions.php');
  */
 class Sabel_Controller_Front
 {
-  /*
   public function __construct()
   {
-    if (ENVIRONMENT === 'development') {
-      $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
-    } else {
-      $cache = Sabel::load('Sabel_Cache_Apc');
-      if (!($conf = $cache->read('dbconf'))) {
-        $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
-        $cache->write('dbconf', $conf);
-      }
-    }
-    
-    $dbc = $conf->read(ENVIRONMENT);
-    if (isset($dbc['driver'])) {
-      Sabel_DB_Connection::addConnection('default', $dbc);
-    } else {
-      foreach ($dbc as $connectionName => $connection) {
-        Sabel_DB_Connection::addConnection($connectionName, $connection);
-      }
-    }
+    Sabel::fileUsing(RUN_BASE . '/config/map.php');
   }
-  */
   
   public function ignition($requestUri = null)
   {
-    $builder = Sabel::load('Sabel_Map_Builder', RUN_BASE.'/config/map.yml');
-    
-    $map = Sabel_Map_Facade::create();
-    
     if (is_object($requestUri)) {
       $request = $requestUri;
     } elseif (is_string($requestUri)) {
@@ -59,22 +34,27 @@ class Sabel_Controller_Front
       $request = Sabel::load('Sabel_Request');
     }
     
-    $map->setRequestUri($request);
-    $builder->build($map);
+    $candidate = Sabel::load('Sabel_Map_Candidate');
+    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', (string)$request));
+    Sabel_Context::setCurrentCandidate($candidate);
     
-    $mapEntry = $map->find();
-    Sabel_Context::setCurrentMapEntry($mapEntry);
+    $classpath  = $candidate->getModule();
+    $classpath .= '_' . trim(Sabel_Const::CONTROLLER_DIR, '/');
+    if ($candidate->hasController()) {
+      $classpath .= '_' . ucfirst($candidate->getController());
+    } else {
+      $classpath .= '_' . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
+    }
     
-    $loader = Sabel::load('Sabel_Controller_Loader');
-    $controller = $loader->load();
+    $controller = Sabel::load($classpath);
     
     Sabel_Context::setPageController($controller);
     
-    $controller->setup();
+    $view = new Sabel_View('index', $candidate->getController(), $candidate->getAction());
+    $controller->setup($request, $view);
     $controller->initialize();
-    $controller->initializeReservedNamesOfMethods();
     
-    $responses = $controller->execute();
+    $responses = $controller->execute($candidate->getAction());
     
     ReflectionCache::create()->destruction();
     
