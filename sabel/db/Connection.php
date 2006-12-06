@@ -16,6 +16,24 @@ class Sabel_DB_Connection
   protected static $parameters = array();
   protected static $connList   = array();
 
+  public static function initialize()
+  {
+    if (ENVIRONMENT === 'development') {
+      $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
+    } else {
+      $cache = Sabel::load('Sabel_Cache_Apc');
+      if (!($conf = $cache->read('dbconf'))) {
+        $conf = Sabel::load('Sabel_Config_Yaml', RUN_BASE . '/config/database.yml');
+        $cache->write('dbconf', $conf);
+      }
+    }
+
+    $params = $conf->read(ENVIRONMENT);
+    foreach ($params as $connectName => $param) {
+      self::$parameters[$connectName] = $param;
+    }
+  }
+
   public static function addConnection($connectName, $params)
   {
     self::$parameters[$connectName] = $params;

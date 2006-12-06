@@ -20,11 +20,11 @@ class Sabel_DB_Transaction
       throw new Exception('argument must be an instance of Sabel_DB_Model.');
 
     $driver  = $model->getDriver();
-    $conName = $model->connectName;
+    $conName = $model->getConnectName();
     $db      = Sabel_DB_Connection::getDB($conName);
 
     if ($db === 'mysql') {
-      $engine = $model->tableEngine;
+      $engine = $model->getTableEngine();
       $check  = ($engine === 'InnoDB' || $engine === 'BDB');
     } else {
       $check = true;
@@ -33,7 +33,8 @@ class Sabel_DB_Transaction
     if ($check) {
       self::begin($driver, $conName);
     } else {
-      $msg = "begin transaction, but a table engine of the '{$model->table}' is {$engine}.";
+      $tbl = $model->getTableName();
+      $msg = "begin transaction, but a table engine of the '{$tbl}' is {$engine}.";
       trigger_error($msg, E_USER_NOTICE);
     }
   }
@@ -45,6 +46,7 @@ class Sabel_DB_Transaction
       self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;
 
+      // @todo for firebird.
       if (($result = $driver->begin($conn)) !== null)
         self::$list[$connectName]['conn'] = $result;
 

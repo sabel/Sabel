@@ -127,10 +127,6 @@ class Sabel_DB_Model_Property
 
   public function __get($key)
   {
-    if (array_key_exists($key, $this->properties)) {
-      return $this->properties[$key];
-    }
-
     if (!isset($this->data[$key])) return null;
     return $this->convertData($key, $this->data[$key]);
   }

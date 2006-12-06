@@ -30,7 +30,7 @@ class Sabel_DB_Model_Fusion
   public function __construct($models, $mdlNames)
   {
     foreach ($models as $model) {
-      $mdlName = convert_to_modelname($model->table);
+      $mdlName = convert_to_modelname($model->getTableName());
       $this->models[$mdlName] = $model;
     }
 
@@ -89,7 +89,7 @@ class Sabel_DB_Model_Fusion
 
     $data = array();
     foreach ($this->makedModels as $model) {
-      $mdlName = convert_to_modelname($model->table);
+      $mdlName = convert_to_modelname($model->getTableName());
       $data[$mdlName] = $model->getData();
     }
     $this->addPrefixData();
@@ -149,7 +149,7 @@ class Sabel_DB_Model_Fusion
     $schemas = array();
     foreach ($this->models as $model) {
       $columns = $model->schema();
-      $mdlName = convert_to_modelname($model->table);
+      $mdlName = convert_to_modelname($model->getTableName());
       $schemas[$mdlName] = $this->setValueToSchema($mdlName, $columns);
     }
     return $this->mixSchema($schemas);

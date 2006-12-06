@@ -52,6 +52,11 @@ class Sabel_DB_Executer
     return $this->tableProp->primaryKey;
   }
 
+  public function getConnectName()
+  {
+    return $this->tableProp->connectName;
+  }
+
   /**
    * setting condition.
    *
@@ -237,7 +242,7 @@ class Sabel_DB_Executer
     $this->setCondition($arg1, $arg2, $arg3);
     $this->setConstraint('limit', 1);
 
-    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->table);
+    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
     $row = $this->exec()->fetch(Sabel_DB_Result_Row::NUM);
     return (int)$row[0];
   }

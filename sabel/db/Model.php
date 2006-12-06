@@ -69,6 +69,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return $columns;
   }
 
+  public function getTableEngine()
+  {
+    return $this->tableProp->tableEngine;
+  }
+
   public function getTableSchema($tblName = null)
   {
     return ($tblName === null) ? $this->property->getSchema()
