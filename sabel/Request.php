@@ -49,8 +49,7 @@ class Sabel_Request
         $args = $_SERVER['argv'];
         array_shift($args);
         $request_uri = join('/', $args);
-      } else {
-        if (isset($_SERVER['REQUEST_URI']))
+      } elseif (isset($_SERVER['REQUEST_URI'])) {
           $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
       }
     }
@@ -150,18 +149,19 @@ class Sanitize
   public static function removeNonAlphaNumeric(&$target, $expected = '')
   {
     $cleaned = null;
-
+    var_dump($target);
+    
     if(is_array($target)) {
       foreach ($target as $key => $value) {
-        $cleaned[$key] = preg_replace( "/[^${$expected}a-zA-Z0-9]/", '', $value);
+        $cleaned[$key] = preg_replace( "/[^\${$expected}a-zA-Z0-9]/", '', $value);
       }
     } else {
-      $cleaned = preg_replace( "/[^${$expected}a-zA-Z0-9]/", '', $target);
+      $cleaned = preg_replace( "/[^\${$expected}a-zA-Z0-9]/", '', $target);
     }
-
+    
     return $cleaned;
   }
-
+  
   /**
    * target SQL string to make SQL safety
    *
@@ -170,23 +170,16 @@ class Sanitize
   {
     return addslashes($target);
   }
-
-  public static function normalize(&$target)
+  
+  public static function normalize($target)
   {
-    $cleaned = null;
-
-    if (get_magic_quotes_gpc()) {
-      if (is_array($target)) {
-        foreach ($target as $key => $value) {
-          $cleaned[$key] = stripslashes($value);
-        }
-      } else {
-        $cleaned = stripslashes($target);
-      }
+    if (!get_magic_quotes_gpc()) return $target;
+    
+    if (is_array($target)) {
+      foreach ($target as &$value) $value = stripslashes($value);
     } else {
-      $cleaned = $target;
+      $target = stripslashes($target);
     }
-
-    return $cleaned;
+    return $target;
   }
 }
