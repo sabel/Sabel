@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_View_PageViewer');
+
 /**
  * Sabel_View_TagPageViewer
  * 
@@ -51,20 +53,5 @@ class Sabel_View_TagPageViewer extends Sabel_View_PageViewer
   public function getPage($offset)
   {
     return sprintf($this->tag, $offset);
-  }
-  
-  public function isCurrent()
-  {
-    return ($this->current === $this->pager->pageNumber);
-  }
-  
-  public function isFirst()
-  {
-    return ($this->current === 1);
-  }
-  
-  public function isLast()
-  {
-    return ($this->current === $this->pager->getTotalPageNumber());
   }
 }

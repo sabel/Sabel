@@ -61,17 +61,17 @@ class Sabel_View_PageViewer implements Iterator
   
   public function isCurrent()
   {
-    return ($this->getCurrent() === $this->current);
+    return ($this->current === $this->pager->pageNumber);
   }
   
   public function isFirst()
   {
-    return ($this->getCurrent() === 1);
+    return ($this->current === 1);
   }
   
   public function isLast()
   {
-    return ($this->getCurrent() === $this->pager->getTotalPageNumber());
+    return ($this->current === $this->pager->getTotalPageNumber());
   }
   
   public function setWindow($size)
@@ -134,26 +134,4 @@ class Sabel_View_PageViewer implements Iterator
     $endPageNum =(int) min($this->pager->getTotalPageNumber() + 1, $this->end);
     return ($this->position->current < $endPageNum);
   }
-  
-  /*
-  protected function getStartPageNumber()
-  {
-    if ($this->priority === self::PRIORITY_PREVIOUS) {
-      $startPageNum = $this->pager->pageNumber - (($this->window) / 2);
-    } else {
-      $startPageNum = $this->pager->pageNumber - floor((($this->window - 1)) / 2);
-    }
-    return (int) floor($startPageNum);
-  }
-  
-  protected function getEndPageNumber()
-  {
-    if ($this->priority === self::PRIORITY_PREVIOUS) {
-      $endPageNum = $this->pager->pageNumber + floor((($this->window - 1) / 2));
-    } else {
-      $endPageNum = $this->pager->pageNumber + (($this->window) / 2);
-    }
-    return (int) $endPageNum;
-  }
-   */
 }
