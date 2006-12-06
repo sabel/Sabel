@@ -61,7 +61,7 @@ class Test_DB_Mysql extends Test_DB_Test
     } catch (Exception $e) {
     }
 
-    $model = Sabel_DB_Model::load('Customer');
+    $model = MODEL('Customer');
 
     try {
       $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24)) type=InnoDB');

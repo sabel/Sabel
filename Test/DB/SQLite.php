@@ -40,7 +40,7 @@ class Test_DB_SQLite extends Test_DB_Test
     Test_DB_Test::$db = 'SQLITE';
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_DB_Model::load('Basic');
+    $model  = MODEL('Basic');
 
     $sh = new SQLiteHelper();
 
@@ -53,7 +53,7 @@ class Test_DB_SQLite extends Test_DB_Test
     } catch (Exception $e) {
     }
 
-    $model = Sabel_DB_Model::load('Customer');
+    $model = MODEL('Customer');
 
     try {
       $model->execute('CREATE TABLE customer( id int4 primary key, name varchar(24))');

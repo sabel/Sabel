@@ -121,10 +121,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   protected function createModel($model)
   {
     $projection = $model->getProjection();
-    $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->table);
+    $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
 
     if ($row = $model->exec()->fetch()) {
-      $model->setData($model, ($model->isWithParent()) ? $this->addParent($row) : $row);
+      $model->setData(($model->isWithParent()) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
     } else {
       $model->receiveSelectCondition($model->conditions);
@@ -169,7 +169,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         $model->receiveChildConstraint($cconst);
       }
 
-      $this->setData($model, ($this->isWithParent()) ? $this->addParent($row) : $row);
+      $model->setData(($this->isWithParent()) ? $this->addParent($row) : $row);
       $this->getDefaultChild($model);
       $models[] = $model;
     }
@@ -284,7 +284,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     foreach ($joinTables as $tblName) {
       $model  = $this->newClass($tblName);
-      $pKey   = $model->primaryKey;
+      $pKey   = $model->tableProp->primaryKey;
       $preCol = "pre_{$tblName}_{$pKey}";
       $cache  = Sabel_DB_SimpleCache::get($tblName . $row[$preCol]);
 
@@ -296,14 +296,14 @@ class Sabel_DB_Model extends Sabel_DB_Executer
           $acquire[$tblName][$column] = $row[$preCol];
           unset($row[$preCol]);
         }
-        $this->setData($model, $acquire[$tblName]);
+        $model->setData($acquire[$tblName]);
         $models[$tblName] = $model;
         Sabel_DB_SimpleCache::add($tblName . $model->$pKey, $model);
       }
     }
 
     $model = $this->newClass($this->tableProp->table);
-    $this->setData($model, $row);
+    $model->setData($row);
     $models[$this->tableProp->table] = $model;
     return array($model, $models);
   }
@@ -338,7 +338,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($id === null) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
-      $model->setCondition($model->primaryKey, $id);
+      $model->setCondition($model->tableProp->primaryKey, $id);
       $projection = $model->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
       $resultSet  = $model->exec();
@@ -350,8 +350,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       Sabel_DB_SimpleCache::add($tblName . $id, $row);
     }
 
-    $row = $this->addParentModels($row, $model->primaryKey);
-    $this->setData($model, $row);
+    $row = $this->addParentModels($row, $model->tableProp->primaryKey);
+    $model->setData($row);
     return $model;
   }
 
@@ -375,11 +375,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     $cModel = $this->newClass($child);
     $projection = $cModel->getProjection();
-    $cModel->getStatement()->setBasicSQL("SELECT $projection FROM {$cModel->table}");
+    $cModel->getStatement()->setBasicSQL("SELECT $projection FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
-    $primary = $model->primaryKey;
-    $model->setChildCondition("{$model->table}_{$primary}", $model->$primary);
+    $primary = $model->tableProp->primaryKey;
+    $model->setChildCondition("{$model->tableProp->table}_{$primary}", $model->$primary);
 
     $cModel->conditions = $model->getChildCondition();
     $cconst = $model->getChildConstraint();
@@ -397,7 +397,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $childObj   = $this->newClass($child);
       $withParent = ($this->isWithParent()) ? true : $childObj->isWithParent();
 
-      $this->setData($childObj, ($withParent) ? $this->addParent($row) : $row);
+      $childObj->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
     }
@@ -437,24 +437,24 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
   }
 
-  protected function setData($model, $row)
+  public function setData($row)
   {
-    $pKey = $model->primaryKey;
+    $pKey = $this->tableProp->primaryKey;
 
     if (is_array($pKey)) {
       foreach ($pKey as $key) {
         $condition = new Sabel_DB_Condition($key, $row[$key]);
-        $model->setSelectCondition($key, $condition);
+        $this->setSelectCondition($key, $condition);
       }
     } else {
       if (isset($row[$pKey])) {
         $condition = new Sabel_DB_Condition($pKey, $row[$pKey]);
-        $model->setSelectCondition($pKey, $condition);
+        $this->setSelectCondition($pKey, $condition);
       }
     }
 
-    $model->setProperties($row);
-    $model->enableSelected();
+    $this->setProperties($row);
+    $this->enableSelected();
   }
 
   public function newChild($child = null)
@@ -493,7 +493,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $model = $this->newClass($child);
 
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
-    $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->table);
+    $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->tableProp->table);
     $model->exec();
   }
 
@@ -529,7 +529,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function multipleInsert($data)
   {
     if (!is_array($data)) {
-      throw new Exception('Sabel_DB_Relation::multipleInsert() data is not array.');
+      throw new Exception('Error:multipleInsert() data is not array.');
     }
 
     BEGIN($this);
@@ -599,13 +599,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function makeChainModels($children, &$chain)
   {
-    $key = $children[0]->connectName . ':' . $children[0]->table;
+    $conName = $children[0]->tableProp->connectName;
+    $tblName = $children[0]->tableProp->table;
+    $key     = $conName . ':' . $tblName;
+
     if (!isset($chain[$key])) return null;
 
     foreach ($chain[$key] as $tblName) {
       $models = array();
       foreach ($children as $child) {
-        $foreignKey = "{$child->table}_{$child->primaryKey}";
+        $foreignKey = $child->tableProp->table . '_' . $child->tableProp->primaryKey;
         if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
       }
       if ($models) {

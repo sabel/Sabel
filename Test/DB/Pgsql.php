@@ -49,7 +49,7 @@ class Test_DB_Pgsql extends Test_DB_Test
     Test_DB_Test::$db = 'PGSQL';
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_DB_Model::load('Basic');
+    $model  = MODEL('Basic');
 
     $ph = new PgsqlHelper();
 
@@ -61,7 +61,7 @@ class Test_DB_Pgsql extends Test_DB_Test
       foreach ($tables as $table) $model->execute("DELETE FROM $table");
     } catch (Exception $e) { }
 
-    $model = Sabel_DB_Model::load('Customer');
+    $model = MODEL('Customer');
 
     try {
       @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
