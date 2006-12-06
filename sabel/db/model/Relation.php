@@ -30,6 +30,17 @@ class Sabel_DB_Model_Relation
     return $this->isJoin = $result;
   }
 
+  public function setJoinColumns($colList)
+  {
+    if (!is_array($colList)) {
+      throw new Exception('Error:setJoinColumns() argument must be an array.');
+    } else {
+      $this->joinColList = $colList;
+    }
+
+    $this->isJoin = ($this->joinTablePairs && $this->joinConditions && $this->refStructure);
+  }
+
   protected function isEnableJoin($mdlName)
   {
     $sClsName = 'Schema_' . $mdlName;
@@ -49,11 +60,12 @@ class Sabel_DB_Model_Relation
       foreach ($parents as $parent) {
         $condition = $this->createRelationPair($mdlName, $parent);
 
-        if (strpos($parent, ':') !== false) list($gbg, $parent) = explode(':', $parent);
-        if (strpos($parent, '.') !== false) list($parent) = explode('.', $parent);
-
+        /*
+        $parent    = $this->extractModelName($parent);
         $pTable = convert_to_tablename($parent);
         $this->joinConditions[$pTable] = $condition;
+        */
+
         if (in_array($parent, $this->acquiredParents)) continue;
 
         $this->acquiredParents[] = $parent;
@@ -89,7 +101,21 @@ class Sabel_DB_Model_Relation
     $this->joinTablePairs[] = array($cTable, $pTable);
     $this->refStructure[$cTable][] = $pTable;
 
-    return $child . ' = ' . $parent;
+    if (!isset($this->joinConditions[$pTable])) {
+      $this->joinConditions[$pTable] = $child . ' = ' . $parent;
+    }
+  }
+
+  public function extractModelName($str, $pos = 'RIGHT')
+  {
+    if (strpos($str, ':') !== false) {
+      if ($pos === 'LEFT')  list($str, $gbg) = explode(':', $str);
+      if ($pos === 'RIGHT') list($gbg, $str) = explode(':', $str);
+    }
+
+    if (strpos($str, '.') !== false) list($str) = explode('.', $str);
+
+    return $str;
   }
 
   public function createChildKey($child, $parent)
@@ -112,7 +138,16 @@ class Sabel_DB_Model_Relation
     return convert_to_tablename($p) . '.' . $key;
   }
 
-  public function join($self, $joinType = 'INNER')
+  public function getUniqueTables($tablePairs = null)
+  {
+    if ($tablePairs === null) $tablePairs = $this->joinTablePairs;
+
+    $joinTables = array();
+    foreach ($tablePairs as $pair) $joinTables = array_merge($joinTables, array_values($pair));
+    return array_unique($joinTables);
+  }
+
+  public function join($model, $joinType = 'INNER')
   {
     if (!$this->isJoin)
       throw new Exception('Error: join flag is not active. confirm it by initJoin() ?');
@@ -121,12 +156,10 @@ class Sabel_DB_Model_Relation
     $joinTables = array();
     $tablePairs = $this->joinTablePairs;
     $colList    = $this->joinColList;
-    $myTable    = $self->getTableName();
+    $myTable    = $model->getTableName();
 
     foreach ($colList[$myTable] as $column) $sql[] = "{$myTable}.{$column}, ";
-
-    foreach ($tablePairs as $pair) $joinTables = array_merge($joinTables, array_values($pair));
-    $joinTables = array_diff(array_unique($joinTables), (array)$myTable);
+    $joinTables = array_diff($this->getUniqueTables(), (array)$myTable);
 
     foreach ($joinTables as $tblName) {
       foreach ($colList[$tblName] as $column) {
@@ -138,27 +171,17 @@ class Sabel_DB_Model_Relation
     $sql   = array(substr(join('', $sql), 0, -2));
     $sql[] = " FROM {$myTable}";
 
-    $acquired = array();
-    foreach ($tablePairs as $pair) {
-      list($child, $parent) = array_values($pair);
-      if (!in_array($parent, $acquired)) {
-        $cond  = $this->joinConditions[$parent];
-        $sql[] = " $joinType JOIN $parent ON $cond";
-        $acquired[] = $parent;
-      }
+    foreach ($this->joinConditions as $parent => $condition) {
+      $sql[] = " $joinType JOIN $parent ON $condition";
     }
 
-    $self->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $self->exec();
+    $model->getStatement()->setBasicSQL(join('', $sql));
+    $resultSet = $model->exec();
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
     foreach ($resultSet as $row) {
       $models = $this->makeEachModels($row, $joinTables);
-
-      $model = MODEL(convert_to_modelname($myTable));
-      $model->setData($row);
-      $models[$myTable] = $model;
 
       $ref = $this->refStructure;
       foreach ($joinTables as $tblName) {
@@ -169,10 +192,12 @@ class Sabel_DB_Model_Relation
         }
       }
 
+      $self = MODEL(convert_to_modelname($myTable));
+      $self->setData($row);
+
       foreach ($ref[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
         $self->dataSet($mdlName, $models[$parent]);
-        $self->$mdlName = $models[$parent];
       }
       $results[] = $self;
     }

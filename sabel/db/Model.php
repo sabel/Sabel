@@ -18,13 +18,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $property = null;
 
   private
-    $joinPair     = array(),
-    $joinColList  = array(),
-    $joinColCache = array(),
-    $joinConNames = array();
-
-  private
-    $parentTables    = array(),
     $refStructure    = array(),
     $acquiredParents = array(),
     $cascadeStack    = array();
@@ -189,128 +182,34 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
-    $sql        = array('SELECT ');
-    $joinTables = array();
-    $myTable    = $this->tableProp->table;
-    $relTables  = $this->toTablePair($modelPairs);
-    $colList    = $this->convertColListKeys($colList);
+    $myTable  = $this->tableProp->table;
+    $relClass = Sabel::load('Sabel_DB_Model_Relation');
 
-    $columns = (isset($colList[$myTable])) ? $colList[$myTable] : $this->getColumnNames();
-    foreach ($columns as $column) $sql[] = "{$myTable}.{$column}, ";
-
-    foreach ($relTables as $pair) $joinTables = array_merge($joinTables, array_values($pair));
-    $joinTables = array_diff(array_unique($joinTables), (array)$myTable);
-
-    foreach ($joinTables as $tblName) $this->addJoinColumns($sql, $tblName, $colList);
-
-    $sql = array(substr(join('', $sql), 0, -2));
-    $sql[] = " FROM {$myTable}";
-
-    $acquired = array();
-    foreach ($relTables as $pair) {
-      list($child, $parent) = array_values($pair);
-      if (!in_array($parent, $acquired)) {
-        $sql[] = " $joinType JOIN $parent ON {$child}.{$parent}_id = {$parent}.id";
-        $acquired[] = $parent;
-      }
-    }
-
-    $this->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $this->exec();
-    if ($resultSet->isEmpty()) return false;
-
-    $results = array();
-    foreach ($resultSet as $row) {
-      list($self, $models) = $this->makeEachModels($row, $joinTables);
-      $ref = $this->refStructure;
-
-      foreach ($joinTables as $tblName) {
-        if (!isset($ref[$tblName])) continue;
-        foreach ($ref[$tblName] as $parent) {
-          $mdlName = convert_to_modelname($parent);
-          $models[$tblName]->dataSet($mdlName, $models[$parent]);
-        }
-      }
-
-      foreach ($ref[$myTable] as $parent) {
-        $mdlName = convert_to_modelname($parent);
-        $self->dataSet($mdlName, $models[$parent]);
-        $self->$mdlName = $models[$parent];
-      }
-      $results[] = $self;
-    }
-    return $results;
-  }
-
-  protected function toTablePair($modelPairs)
-  {
-    $relTables = array();
-
-    $ref =& $this->refStructure;
     foreach ($modelPairs as $pair) {
-      list($child, $parent) = array_map('convert_to_tablename', explode(':', $pair));
-      $ref[$child][] = $parent;
-      $relTables[]   = array($child, $parent);
+      $relClass->createRelationPair(get_class($this), $pair);
     }
-    return $relTables;
-  }
 
-  protected function convertColListKeys($colList)
-  {
-    if (empty($colList)) return array();
+    $colList = array();
+    $colList[$myTable] = $this->getColumnNames();
 
-    foreach ($colList as $key => $colNames) {
-      $newKey = convert_to_tablename($key);
-      $colList[$newKey] = $colNames;
-      unset($colList[$key]);
-    }
-    return $colList;
-  }
-
-  protected function addJoinColumns(&$sql, $tblName, $colList = null)
-  {
-    $columns = (isset($colList[$tblName])) ? $colList[$tblName] : $this->getColumnNames($tblName);
-    foreach ($columns as $column) {
-      $this->joinColCache[$tblName][] = $column;
-      $sql[] = "{$tblName}.{$column} AS pre_{$tblName}_{$column}, ";
-    }
-  }
-
-  private function makeEachModels($row, $joinTables)
-  {
-    $models   = array();
-    $acquire  = array();
-    $colCache = $this->joinColCache;
+    $joinTables = array_diff($relClass->getUniqueTables(), (array)$myTable);
 
     foreach ($joinTables as $tblName) {
-      $model  = $this->newClass($tblName);
-      $pKey   = $model->tableProp->primaryKey;
-      $preCol = "pre_{$tblName}_{$pKey}";
-      $cache  = Sabel_DB_SimpleCache::get($tblName . $row[$preCol]);
-
-      if (is_object($cache)) {
-        $models[$tblName] = clone($cache);
+      $mdlName = convert_to_modelname($tblName);
+      if (isset($colList[$mdlName])) {
+        $colList[$tblName] = $colList[$mdlName];
       } else {
-        foreach ($colCache[$tblName] as $column) {
-          $preCol = "pre_{$tblName}_{$column}";
-          $acquire[$tblName][$column] = $row[$preCol];
-          unset($row[$preCol]);
-        }
-        $model->setData($acquire[$tblName]);
-        $models[$tblName] = $model;
-        Sabel_DB_SimpleCache::add($tblName . $model->$pKey, $model);
+        $colList[$tblName] = $this->getColumnNames($tblName);
       }
     }
 
-    $model = $this->newClass($this->tableProp->table);
-    $model->setData($row);
-    $models[$this->tableProp->table] = $model;
-    return array($model, $models);
+    $relClass->setJoinColumns($colList);
+    return $relClass->join($this, $joinType);
   }
 
   protected function addParent($row)
   {
-    $this->parentTables = array($this->tableProp->table);
+    $this->acquiredParents = array($this->tableProp->table);
     return $this->addParentModels($row, $this->tableProp->primaryKey);
   }
 
@@ -357,8 +256,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function isAcquired($tblName)
   {
-    if (in_array($tblName, $this->parentTables)) return true;
-    $this->parentTables[] = $tblName;
+    if (in_array($tblName, $this->acquiredParents)) return true;
+    $this->acquiredParents[] = $tblName;
     return false;
   }
 
@@ -519,11 +418,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     foreach ($saveData as $key => $val) $this->dataSet($key, $val);
     return $this;
-  }
-
-  public function allUpdate($data)
-  {
-    $this->update($data);
   }
 
   public function multipleInsert($data)
