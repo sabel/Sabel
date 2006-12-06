@@ -37,7 +37,6 @@ require_once('Test/Pager.php');
 require_once('Test/PageViewer.php');
 require_once('Test/Parameters.php');
 require_once('Test/Request.php');
-require_once('Test/RequestUri.php');
 require_once('Test/Resolver.php');
 
 // require_once('Test/Container.php');
@@ -79,7 +78,6 @@ class SabelAllTests
     
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());
-    $suite->addTest(Test_RequestUri::suite());
     
     $suite->addTest(Test_Namespace::suite());
     
