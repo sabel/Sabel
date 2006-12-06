@@ -148,12 +148,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->setCondition($param1, $param2, $param3);
 
     if ($this->isWithParent()) {
-      if ($this->prepareAutoJoin(convert_to_modelname($this->tableProp->table))) {
-        return $this->selectJoin($this->joinPair, 'LEFT', $this->joinColList);
+      $relClass = Sabel::load('Sabel_DB_Model_Relation');
+      $mdlName  = convert_to_modelname($this->tableProp->table);
+      if ($relClass->initJoin($mdlName)) {
+        return $relClass->join($this, 'INNER');
       }
     }
-    echo '<br />End';
-    exit;
 
     $projection = $this->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->tableProp->table}");
@@ -176,11 +176,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return $models;
   }
 
-  public function join()
-  {
-    // @todo
-  }
-
   /**
    * retrieve rows from table by join query of some types.
    *
@@ -191,11 +186,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
    */
   public function selectJoin($modelPairs, $joinType = 'INNER', $colList = null)
   {
-    dump($modelPairs);
-    dump($colList);
-    dump($this->acquiredParents);
-    exit;
-
     if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
@@ -316,76 +306,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->setData($model, $row);
     $models[$this->tableProp->table] = $model;
     return array($model, $models);
-  }
-
-  protected function prepareAutoJoin($mdlName)
-  {
-    $sClsName = 'Schema_' . $mdlName;
-    Sabel::using($sClsName);
-
-    if (class_exists($sClsName, false)) {
-      $sClass = new $sClsName();
-      $props  = $sClass->getProperty();
-      if (!$this->isSameConnectName($props['connectName'])) return false;
-    } else {
-      return false;
-    }
-
-    $this->joinColList[$mdlName] = array_keys($sClass->get());
-    if ($parents = $sClass->getParents()) {
-      foreach ($parents as $parent) {
-        $this->joinPair[] = $this->createRelationPair($mdlName, $parent);
-        $pModelName = $this->filteringParentModelName($parent);
-
-        if (in_array($pModelName, $this->acquiredParents)) continue;
-
-        $this->acquiredParents[] = $pModelName;
-        if (!$this->prepareAutoJoin($pModelName)) return false;
-      }
-    }
-    return true;
-  }
-
-  protected function createRelationPair($mdlName, $pair)
-  {
-    if (strpos($pair, ':') === false) {
-      $child = $mdlName . '.' . convert_to_tablename($pair) . '_id';
-      $pair = $child. ':' . $pair;
-    }
-
-    list($child, $parent) = explode(':', $pair);
-
-    if (strpos($child, '.') === false) {
-      $child = $mdlName . '.' . $child;
-    }
-
-    if (strpos($parent, '.') === false) {
-      $parent .= '.id';
-    }
-
-    return $child . ':' . $parent;
-  }
-
-  protected function filteringParentModelName($str)
-  {
-    if (strpos($str, ':') !== false) {
-      list($gbg, $str) = explode(':', $str);
-    }
-
-    if (strpos($str, '.') !== false) {
-      list($str) = explode('.', $str);
-    }
-
-    return $str;
-  }
-
-  private function isSameConnectName($conName)
-  {
-    if (($size = sizeof($this->joinConNames)) > 0) {
-      if ($this->joinConNames[$size - 1] !== $conName) return false;
-    }
-    $this->joinConNames[] = $conName;
-    return true;
   }
 
   protected function addParent($row)

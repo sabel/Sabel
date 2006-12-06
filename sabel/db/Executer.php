@@ -42,6 +42,16 @@ class Sabel_DB_Executer
     $this->tableProp = Sabel::load('Sabel_ValueObject', $props);
   }
 
+  public function getTableName()
+  {
+    return $this->tableProp->table;
+  }
+
+  public function getPrimaryKey()
+  {
+    return $this->tableProp->primaryKey;
+  }
+
   /**
    * setting condition.
    *
