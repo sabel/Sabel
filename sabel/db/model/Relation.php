@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Model_Relation extends Sabel_DB_Model
+class Sabel_DB_Model_Relation
 {
   private
     $isJoin = false;
@@ -23,8 +23,6 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Model
     $joinColCache    = array(),
     $joinConNames    = array(),
     $acquiredParents = array();
-
-  public function __construct() {}
 
   public function initJoin($mdlName)
   {
@@ -85,8 +83,8 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Model
     $child  = $this->createChildKey($child, $parent);
     $parent = $this->createParentKey($parent);
 
-    $cTable = $this->getTableNameFromKey($child);
-    $pTable = $this->getTableNameFromKey($parent);
+    list($cTable) = explode('.', $child);
+    list($pTable) = explode('.', $parent);
 
     $this->joinTablePairs[] = array($cTable, $pTable);
     $this->refStructure[$cTable][] = $pTable;
@@ -114,19 +112,16 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Model
     return convert_to_tablename($p) . '.' . $key;
   }
 
-  protected function getTableNameFromKey($key)
-  {
-    list($tblName) = explode('.', $key);
-    return $tblName;
-  }
-
   public function join($self, $joinType = 'INNER')
   {
+    if (!$this->isJoin)
+      throw new Exception('Error: join flag is not active. confirm it by initJoin() ?');
+
     $sql        = array('SELECT ');
     $joinTables = array();
     $tablePairs = $this->joinTablePairs;
     $colList    = $this->joinColList;
-    $myTable    = $self->tableProp->table;
+    $myTable    = $self->getTableName();
 
     foreach ($colList[$myTable] as $column) $sql[] = "{$myTable}.{$column}, ";
 
@@ -161,8 +156,8 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Model
     foreach ($resultSet as $row) {
       $models = $this->makeEachModels($row, $joinTables);
 
-      $model = $this->newClass($myTable);
-      $self->setData($model, $row);
+      $model = MODEL(convert_to_modelname($myTable));
+      $model->setData($row);
       $models[$myTable] = $model;
 
       $ref = $this->refStructure;
@@ -191,24 +186,16 @@ class Sabel_DB_Model_Relation extends Sabel_DB_Model
     $colCache = $this->joinColCache;
 
     foreach ($joinTables as $tblName) {
-      $model  = $this->newClass($tblName);
-      //$pKey   = $model->tableProp->primaryKey;
-      $preCol = "pre_{$tblName}_{$model->tableProp->primaryKey}";
-      //$preCol = "pre_{$tblName}_{$pKey}";
-      //$cache  = Sabel_DB_SimpleCache::get($tblName . $row[$preCol]);
+      $model  = MODEL(convert_to_modelname($tblName));
+      $preCol = "pre_{$tblName}_" . $model->getPrimaryKey();
 
-      //if (is_object($cache)) {
-      //  $models[$tblName] = clone($cache);
-      //} else {
-        foreach ($colCache[$tblName] as $column) {
-          $preCol = "pre_{$tblName}_{$column}";
-          $acquire[$tblName][$column] = $row[$preCol];
-          unset($row[$preCol]);
-        }
-        $this->setData($model, $acquire[$tblName]);
-        $models[$tblName] = $model;
-      //  Sabel_DB_SimpleCache::add($tblName . $model->$pKey, $model);
-      //}
+      foreach ($colCache[$tblName] as $column) {
+        $preCol = "pre_{$tblName}_{$column}";
+        $acquire[$tblName][$column] = $row[$preCol];
+        unset($row[$preCol]);
+      }
+      $model->setData($acquire[$tblName]);
+      $models[$tblName] = $model;
     }
     return $models;
   }
