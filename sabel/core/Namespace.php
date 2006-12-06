@@ -27,7 +27,7 @@ class Sabel_Core_Namespace
   public function __construct($name = '', $parent = null)
   {
     $this->name = $name;
-    if (!is_null($parent)) $parent->addNamespace($this);
+    if ($parent !== null) $parent->addNamespace($this);
   }
   
   public function getName()
@@ -99,8 +99,10 @@ class Sabel_Core_Namespace
     
     $names = array();
     $names[] = $this->name;
+
     $this->getParentName($names);
     $names = array_reverse($names);
+    
     $names[] = $className;
     $this->classes[] = $className;
     self::$namespaces[join('.', $names)] = join('_', array_map('ucfirst', $names));
@@ -114,7 +116,7 @@ class Sabel_Core_Namespace
   public function getClassName($entry)
   {
     if (isset(self::$namespaces[$entry])) return self::$namespaces[$entry];
-      
+    
     $entries = explode('.', $entry);
     $names = array();
     $names[] = $this->name;
@@ -126,12 +128,10 @@ class Sabel_Core_Namespace
   
   public function getParentName(&$stack)
   {
-    if ($this->parent !== null) {
-      if (!$this->parent->isRoot()) {
-        $stack[] = $this->parent->getName();
-      }
-      $this->parent->getParentName($stack);
-    }
+    if (($parent = $this->parent) === null) return;
+    
+    if (!$parent->isRoot()) $stack[] = $parent->getName();
+    $parent->getParentName($stack);
   }
   
   public function getChilds()

@@ -27,7 +27,7 @@ final class Sabel
   {
     self::using($className);
     
-    if (!class_exists($className)) throw new Exception($className ." not found");
+    if (!class_exists($className)) throw new Exception($className . " not found");
     
     if ($constructerArg === null) {
       return new $className();
@@ -36,19 +36,12 @@ final class Sabel
     }
   }
   
-  public static function loadSingleton($className, $constructerArg)
+  public static function loadSingleton($className, $constructerArg = null)
   {
-    if (isset(self::$singletons[$className])) {
-      $instance = self::$singletons[$className];
-    } else {
-       self::using($className);
-      if ($constructerArg === null) {
-        $instance = new $className();
-      } else {
-        $instance = new $className($constructerArg);
-      }
-      self::$singletons[$className] = $instance;
-    }
+    if (!isset(self::$singletons[$className]))
+      self::$singletons[$className] = self::load($className, $constructerArg);
+      
+    $instance = self::$singletons[$className];
     
     return $instance;
   }
@@ -67,8 +60,8 @@ final class Sabel
   public static function fileUsing($path)
   {
     if (!isset(self::$fileUsing[$path])) {
-      self::$fileUsing[$path] = true;
       require ($path);
+      self::$fileUsing[$path] = true;
     }
   }
   

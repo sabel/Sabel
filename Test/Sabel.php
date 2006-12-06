@@ -44,4 +44,17 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $contents = rtrim(ob_get_clean());
     $this->assertEquals("welcome.", $contents);
   }
+  
+  public function testSingleton()
+  {
+    $classA = Sabel::load('Sabel_View_Renderer_Class');
+    $classB = Sabel::load('Sabel_View_Renderer_Class');
+    
+    $this->assertNotSame($classA, $classB);
+    
+    $classA = Sabel::loadSingleton('Sabel_View_Renderer_Class');
+    $classB = Sabel::loadSingleton('Sabel_View_Renderer_Class');
+    
+    $this->assertSame($classA, $classB);
+  }
 }
