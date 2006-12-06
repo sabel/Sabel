@@ -35,7 +35,7 @@ class Sabel_Controller_Front
     }
     
     $candidate = Sabel::load('Sabel_Map_Candidate');
-    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', (string)$request));
+    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
     Sabel_Context::setCurrentCandidate($candidate);
     
     $classpath  = $candidate->getModule();
