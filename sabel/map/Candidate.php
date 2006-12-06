@@ -93,10 +93,8 @@ class Sabel_Map_Candidate implements Iterator
   public function getElementVariableByName($name)
   {
     $result = false;
-    if (isset($this->elements[$name])) {
-      if (isset($this->elements[$name][self::VARIABLE_KEY])) {
-        $result = $this->elements[$name][self::VARIABLE_KEY];
-      }
+    if (isset($this->elements[$name][self::VARIABLE_KEY])) {
+      $result = $this->elements[$name][self::VARIABLE_KEY];
     }
     return $result;
   }
@@ -183,15 +181,15 @@ class Sabel_Map_Candidate implements Iterator
   
   public function getDefaultValue()
   {
-    $element = $this->getElement();
     if ($this->hasDefaultValue()) {
+      $element = $this->getElement();
       return $element[self::DEFAULT_VALUE_KEY];
     }
   }
   
   public function getDefaultValueByName($name)
   {
-    if (isset($this->elements[$name][self::DEFAULT_VALUE_KEY])) {
+    if ($this->hasDefaultValueByName($name)) {
       return $this->elements[$name][self::DEFAULT_VALUE_KEY];
     }
   }
@@ -298,35 +296,27 @@ class Sabel_Map_Candidate implements Iterator
   
   public function find($tokens)
   {
+    foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
+      if ($this->matchToTokens($candidate, $tokens)) return $candidate;
+    }
+    
+    throw new Sabel_Map_Candidate_NotFound("check your config/map.php");
+  }
+  
+  protected function matchToTokens($candidate, $tokens)
+  {
+    $tokens = clone $tokens;
     $selecter = Sabel::load('Sabel_Map_Selecter_Impl');
     
-    $results = array();
-    
-    foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
-      foreach ($candidate as $element) {
-        $result = $selecter->select($tokens->current(), $element);
-        
-        // found unmatch. skip compare
-        if ($result === false) {
-          $results[] = false;
-          break 1;
-        }
-        
+    foreach ($candidate as $element) {
+      if ($selecter->select($tokens->current(), $element)) {
         $tokens->next();
-      }
-      
-      if (array_pop($results) !== false) {
-        // candidate is match we finished compare with uri
-        $matchedCandidate = $candidate;
-        break 1;
       } else {
-        // does't match initialize temporary variables
-        $tokens->rewind();
-        $results = array();
+        return false;
       }
     }
     
-    return $matchedCandidate;
+    return true;
   }
   
   public function uri($parameters = null)
@@ -408,3 +398,4 @@ class Sabel_Map_Candidate implements Iterator
 }
 
 class Sabel_Map_Candidate_IllegalSetting extends Exception {}
+class Sabel_Map_Candidate_NotFound extends Exception {}

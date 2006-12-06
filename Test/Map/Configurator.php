@@ -29,7 +29,7 @@ class Test_Map_Configurator extends PHPUnit2_Framework_TestCase
     Sabel_Map_Configurator::addCandidate("default",
                         ":controller/:action/:id",
                         array('default' => array(':id' => null),
-                              'module'  => 'index')
+                              ':module'  => 'index')
                         );
                         
     $candidate = Sabel_Map_Configurator::getCandidate("default");
@@ -51,7 +51,7 @@ class Test_Map_Configurator extends PHPUnit2_Framework_TestCase
     Sabel_Map_Configurator::addCandidate("default",
                         ":controller/:action/:id",
                         array('default' => array(':id' => 12),
-                              'module'  => 'index')
+                              ':module'  => 'index')
                         );
                         
     $candidate = Sabel_Map_Configurator::getCandidate("default");
@@ -60,8 +60,7 @@ class Test_Map_Configurator extends PHPUnit2_Framework_TestCase
     $s = new Sabel_Map_Selecter_Impl();
     $tokens = new Sabel_Map_Tokens("blog/show");
     $results = array();
-    foreach ($candidate as $current) {
-      $results[] = $s->select($tokens->current(), $current);
+    foreach ($candidate as $current) { $results[] = $s->select($tokens->current(), $current);
       $tokens->next();
     }
     
@@ -69,5 +68,35 @@ class Test_Map_Configurator extends PHPUnit2_Framework_TestCase
     $this->assertEquals('blog', $candidate->getElementVariableByName('controller'));
     $this->assertEquals('show', $candidate->getElementVariableByName('action'));
     $this->assertEquals(12,     $candidate->getElementVariableByName('id'));
+  }
+  
+  public function testCandidateFind()
+  {
+    Sabel_Map_Configurator::addCandidate("default",
+                        ":controller/:action/:id",
+                        array(':module'  => 'index')
+                        );
+    Sabel_Map_Configurator::addCandidate("second",
+                        ":module/:controller/:action/:id"
+                        );
+    Sabel_Map_Configurator::addCandidate("third",
+                        ":action/:id",
+                        array(':module'  => 'index',
+                              ':controller' => 'index')
+                        );
+                        
+    $candidate = Sabel_Map_Configurator::getCandidate("default");
+    try {
+      $candidate->find(Sabel::load('Sabel_Map_Tokens', 'controller'));
+      $this->fail('candidate found');
+    } catch (Sabel_Map_Candidate_NotFound $e) {
+      $this->assertTrue(true);
+    }
+    
+    $matched = $candidate->find(Sabel::load('Sabel_Map_Tokens', 'module/controller/action/id'));
+    $this->assertEquals('default', $matched->getName());
+
+    $matched = $candidate->find(Sabel::load('Sabel_Map_Tokens', 'action/id'));
+    $this->assertEquals('third', $matched->getName());
   }
 }
