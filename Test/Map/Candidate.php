@@ -52,7 +52,7 @@ class Test_Map_Candidate extends PHPUnit2_Framework_TestCase
     $result = $defc->uri(array("a"=>"delete"));
     $this->assertEquals("blog/delete", $result);
     
-    $result = $defc->uri(array(":action"=>"delete", ':id'=>123));
+    $result = $defc->uri(array(":action"=>"delete", 'id'=>123));
     $this->assertEquals("blog/delete/123", $result);
     
     $result = $defc->uri(array(':controller'=>'bbs',':action'=>'delete'));
