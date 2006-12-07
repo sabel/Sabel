@@ -11,9 +11,6 @@
  */
 class Sabel_Request
 {
-  /**
-   * @var Sabel_Request_Uri object
-   */
   protected $uri = null;
   
   /**
@@ -21,57 +18,31 @@ class Sabel_Request
    */
   protected $parameters = null;
   
-  public function __construct($entry = null, $requestUri = null)
+  public function __construct($requestUri = null)
   {
-    $this->initializeRequestUriAndParameters($requestUri);
-    if (isset($entry)) $this->initialize($entry);
-  }
-  
-  public function initialize($entry)
-  {
-    if (is_object($this->uri)) {
-      $this->uri->setEntry($entry);
-    } else {
-      throw new Sabel_Exception_Runtime('uri property must be object.');
-    }
-  }
-  
-  public function initializeRequestUriAndParameters($requestUri = null)
-  {
-    if (is_object($this->uri)) return null;
-    
-    $request_uri = "";
-    
-    if ($requestUri) {
-      $request_uri = ltrim($requestUri, '/');
-    } else {
-      if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
-        $args = $_SERVER['argv'];
-        array_shift($args);
-        $request_uri = join('/', $args);
-      } elseif (isset($_SERVER['REQUEST_URI'])) {
-          $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
-      }
-    }
-    
-    $uriAndParams = explode('?', $request_uri);
-    
+    $uriAndParams = explode('?', $this->createRequestUri($requestUri));
+   
     $this->uri = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
-    
+   
     if (isset($uriAndParams[1])) {
       $this->parameters = Sabel::load('Sabel_Request_Parameters', $uriAndParams[1]);
     }
   }
   
-  public function __get($name)
+  protected function createRequestUri($requestUri)
   {
-    return $this->uri->$name;
-  }
-  
-  public function hasUriValue($name)
-  {
-    $value = $this->uri->$name;
-    return (isset($value)) ? $value : false;
+    if ($requestUri !== null) return ltrim($requestUri, '/');
+
+    $request_uri = "";    
+    if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
+      $args = $_SERVER['argv'];
+      array_shift($args);
+      $request_uri = join('/', $args);
+    } elseif (isset($_SERVER['REQUEST_URI'])) {
+      $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
+    }
+    
+    return $request_uri;
   }
   
   public function hasMethod($name)
@@ -80,11 +51,6 @@ class Sabel_Request
     return $ref->hasMethod($name);
   }
   
-  public function getUri()
-  {
-    return $this->uri;
-  }
-
   public function hasParameters()
   {
     if (!is_object($this->parameters)) return false;
@@ -120,6 +86,15 @@ class Sabel_Request
   public function isDelete()
   {
     return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
+  }
+  
+  public function getRequestValue($name)
+  {
+    if (isset($_POST[$name])) {
+      return $_POST[$name];
+    } else {
+      return null;
+    }
   }
   
   public function requests()

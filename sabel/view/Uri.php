@@ -45,6 +45,7 @@ class Sabel_View_Uri
   {
     $buf = array();
     $params = explode(',', $param);
+    $reserved = ";";
     foreach ($params as $part) {
       $line     = array_map('trim', explode(':', $part));
       $reserved = ($line[0] === 'e') ? 'entry' : $line[0];

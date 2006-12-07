@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_Map_Selecter_Impl');
+
 /**
  * uri candidate
  *
@@ -97,6 +99,11 @@ class Sabel_Map_Candidate implements Iterator
       $result = $this->elements[$name][self::VARIABLE_KEY];
     }
     return $result;
+  }
+  
+  public function hasElementVariableByName($name)
+  {
+    return (isset($this->elements[$name][self::VARIABLE_KEY]));
   }
   
   public function addElement($name, $type = self::VARIABLE)
@@ -306,7 +313,7 @@ class Sabel_Map_Candidate implements Iterator
   protected function matchToTokens($candidate, $tokens)
   {
     $tokens = clone $tokens;
-    $selecter = Sabel::load('Sabel_Map_Selecter_Impl');
+    $selecter = new Sabel_Map_Selecter_Impl();
     
     foreach ($candidate as $element) {
       if ($selecter->select($tokens->current(), $element)) {
@@ -337,6 +344,20 @@ class Sabel_Map_Candidate implements Iterator
           unset($parameters[$key]);
           break 1;
       }
+      switch ($key) {
+        case 'module':
+          $parameters[':module'] = $param;
+          unset($parameters[$key]);
+          break 1;
+        case 'controller':
+          $parameters[':controller'] = $param;
+          unset($parameters[$key]);
+          break 1;
+        case 'action':
+          $parameters[':action'] = $param;
+          unset($parameters[$key]);
+          break 1;
+      }
     }
     
     $elements = $this->elements;
@@ -361,8 +382,8 @@ class Sabel_Map_Candidate implements Iterator
         } else {
           $buffer[] = $element[self::VARIABLE_KEY];
         }
-      } elseif (isset($parameters[':'.$element[self::ELEMENT_NAME]])) {
-        $buffer[] = $parameters[':'.$element[self::ELEMENT_NAME]];
+      } elseif (isset($parameters[$element[self::ELEMENT_NAME]])) {
+        $buffer[] = $parameters[$element[self::ELEMENT_NAME]];
       }
       
     }

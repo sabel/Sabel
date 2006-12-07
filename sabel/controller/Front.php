@@ -29,7 +29,7 @@ class Sabel_Controller_Front
     if (is_object($requestUri)) {
       $request = $requestUri;
     } elseif (is_string($requestUri)) {
-      $request = new Sabel_Request(null, $requestUri);
+      $request = new Sabel_Request($requestUri);
     } else {
       $request = Sabel::load('Sabel_Request');
     }
@@ -46,7 +46,8 @@ class Sabel_Controller_Front
       $classpath .= '_' . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
-    $controller = Sabel::load($classpath);
+    Sabel::using($classpath);
+    $controller = new $classpath();
     
     Sabel_Context::setPageController($controller);
     

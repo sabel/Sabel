@@ -3,7 +3,7 @@
 Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
-
+$a = 'abc';
 /**
  * the Base of Page Controller.
  *
@@ -17,17 +17,11 @@ abstract class Sabel_Controller_Page
 {
   protected
     $view        = null,
-    $entry       = null,
-    $cache       = null,
-    $logger      = null,
     $request     = null,
     $httpMethod  = 'GET',
     $requests    = array(),
     $storage     = null,
-    $response    = null,
-    $template    = null,
-    $container   = null,
-    $destination = null;
+    $response    = null;
     
   protected
     $public     = array(),
@@ -46,7 +40,11 @@ abstract class Sabel_Controller_Page
    * reserved name lists of methods(actions)
    * @var array $reserved
    */
-  private $reserved = array();
+  private $reserved = array('setup',
+                            'getAction',
+                            'getRequests',
+                            'execute',
+                            'initialize');
   
   public function initialize()
   {
@@ -55,11 +53,6 @@ abstract class Sabel_Controller_Page
   
   public function setup($request, $view = null)
   {
-    $ref = new ReflectionClass('Sabel_Controller_Page');
-    $methods = $ref->getMethods();
-    foreach ($methods as $method) $reserved[$method->getName()] = 1;
-    $this->reserved = $reserved;
-    
     if ($view === null) {
       $this->view = Sabel::load('Sabel_View');
     } else {
@@ -68,18 +61,39 @@ abstract class Sabel_Controller_Page
     
     Sabel_Context::setView($this->view);
     
-    $this->request     = $request;
-    $this->requests    = $this->requests();
+    $this->request  = $request;
+    $this->requests = $this->requests();
     
     if ($this->enableSession) {
-      $this->storage   = Sabel_Storage_Session::create();
-      $this->security  = Sabel_Security_Security::create();
-      $this->identity  = $this->security->getIdentity();
+      $this->storage  = Sabel_Storage_Session::create();
+      $this->security = Sabel_Security_Security::create();
+      $this->identity = $this->security->getIdentity();
     }
     
     if (isset($_SERVER['REQUEST_METHOD'])) {
       $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
+  }
+  
+  protected function __get($name)
+  {
+    $candidate = Sabel_Context::getCurrentCandidate();
+    if ($candidate->hasElementVariableByName($name)) {
+      return $candidate->getElementVariableByName($name);
+    } else {
+      return $this->request->getRequestValue($name);
+    }
+  }
+  
+  protected function __set($name, $value)
+  {
+    $this->assign($name, $value);
+  }
+  
+  protected function __call($method, $args)
+  {
+    if ($this->request->hasMethod($method))
+      return $this->request->$method($args);
   }
   
   public function getAction()
@@ -195,27 +209,6 @@ abstract class Sabel_Controller_Page
     }
   }
   
-  protected function __get($name)
-  {
-    if ($this->request->hasUriValue($name)) {
-      return $this->request->$name;
-    } else {
-      $tmp = $this->getRequests();
-      return (isset($tmp[$name])) ? $tmp[$name] : null;
-    }
-  }
-  
-  protected function __set($name, $value)
-  {
-    $this->assign($name, $value);
-  }
-  
-  protected function __call($method, $args)
-  {
-    if ($this->request->hasMethod($method))
-      return $this->request->$method($args);
-  }
-  
   public function hasMethod($name)
   {
     return (method_exists($this, $name));
@@ -278,11 +271,11 @@ abstract class Sabel_Controller_Page
   public function redirectTo($params)
   {
     if (!is_array($params) && is_string($params)) {
-      $params = array(':action'=>$params);
+      $params = array(':action' => $params);
     }
     
     $candidate = Sabel_Context::getCurrentCandidate();
-    $this->redirect('/'.$candidate->uri($params));
+    $this->redirect('/' . $candidate->uri($params));
   }
   
   public function previous()

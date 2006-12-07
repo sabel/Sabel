@@ -2,6 +2,7 @@
 
 Sabel::using('Sabel_View_Renderer');
 Sabel::using('Sabel_View_Uri');
+Sabel::using('Sabel_View_Renderer_Class');
 
 class Sabel_View
 {
@@ -19,7 +20,7 @@ class Sabel_View
   public function __construct($module = '', $controller = '', $action = '')
   {
     $this->decideTemplatePathAndNameByEntry($module, $controller, $action);
-    $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
+    $this->renderer = new Sabel_View_Renderer_Class();
   }
   
   public function __set($key, $value)

@@ -21,7 +21,6 @@ class Sabel_Request_Uri
    * @var Array parts of uri. separate by slash (/)
    */
   protected $parts = array();
-  protected $entry = null;
   
   /**
    * @var type of last element e.g. if requested as /test/test.html type is html
@@ -34,7 +33,7 @@ class Sabel_Request_Uri
    * @param string $requestUri this is raw requestUri(query string without query parameter)
    * @return void
    */
-  public function __construct($requestUri, $entry = null)
+  public function __construct($requestUri)
   {
     $this->rawUriString = $requestUri;
     
@@ -47,23 +46,10 @@ class Sabel_Request_Uri
     array_push($elements, $lastElement);
     
     $this->parts = $elements;
-    
-    if (isset($entry)) $this->setEntry($entry);
-  }
-  
-  public function setEntry($entry)
-  {
-    $this->entry = $entry;
   }
   
   public function __get($key)
   {
-    $value = $this->getByName($key);
-    if (is_numeric($value)) {
-      return (is_float($value)) ? (float) $value : (int) $value;
-    } else {
-      return (string) $value;
-    }
   }
   
   public function count()
@@ -98,14 +84,6 @@ class Sabel_Request_Uri
   
   public function getByName($name)
   {
-    $entry = $this->entry;
-    if ($entry === null) throw new Sabel_Exception_Runtime('entry is null.');
-    
-    $uri = $entry->getUri();
-    if (!is_object($uri)) throw new Sabel_Exception_Runtime("Map_Uri is not object.");
-    
-    $position = $uri->calcElementPositionByName($name);
-    return $this->get($position);
   }
   
   public function getType()
