@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Form_OptionGroup extends Sabel_Form_Select
+class Sabel_Form_OptionGroup extends Sabel_Form_HtmlElement
 {
   const START_TAG_FMT = '<optgroup label="%s">';
   const END_TAG_FMT   = '</optgroup>';

@@ -1,5 +1,10 @@
 <?php
 
+Sabel::using('Sabel_Form_HtmlElement');
+Sabel::using('Sabel_Form_Select');
+Sabel::using('Sabel_Form_Option');
+Sabel::using('Sabel_Form_OptionGroup');
+
 /**
  * Sabel_Template_Form
  *
@@ -174,7 +179,7 @@ class Sabel_Form implements Iterator
   
   public function isString()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::STRING);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::STRING);
   }
   
   public function input($type, $name, $value, $id = '', $class = '', $style = '')
@@ -186,7 +191,7 @@ class Sabel_Form implements Iterator
   
   public function isText()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::TEXT);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::TEXT);
   }
   
   public function textarea($name, $value = '', $id = '', $class = '', $style = '')
@@ -198,7 +203,7 @@ class Sabel_Form implements Iterator
   
   public function isBool()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::BOOL);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::BOOL);
   }
   
   public function checkbox($name, $value, $default, $id = '', $class = '', $style = '')
@@ -214,17 +219,17 @@ class Sabel_Form implements Iterator
   
   public function isDate()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATE);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::DATE);
   }
   
   public function isTime()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::TIME);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::TIME);
   }
   
   public function isDatetime()
   {
-    return ($this->currentColumn->type === Sabel_DB_Schema_Const::DATETIME);
+    return ($this->currentColumn->type === Sabel_DB_Type_Const::DATETIME);
   }
   
   public function date($name, $value, $default = '', $id = '', $class = '', $style = '')

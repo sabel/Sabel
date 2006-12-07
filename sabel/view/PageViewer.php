@@ -27,6 +27,7 @@ class Sabel_View_PageViewer implements Iterator
   {
     if (!$pager instanceof Sabel_View_Pager)
       throw new Sabel_Exception_Runtime('pager is not instaceof sabel_view_pager.');
+      
     $this->pager   = clone $pager;
     $this->current =(int) $pager->pageNumber;
   }

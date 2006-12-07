@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_Form_HtmlElement');
+
 class Sabel_Form_Option extends Sabel_Form_HtmlElement
 {
   protected $contents = '';

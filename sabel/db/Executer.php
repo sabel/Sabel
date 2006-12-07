@@ -105,6 +105,18 @@ class Sabel_DB_Executer
       if (isset($val)) $this->constraints[$key] = $val;
     }
   }
+  
+  /**
+   * reset constraints and conditions.
+   *
+   * @todo review
+   * @param void
+   * @return void
+   */
+  public function resetState()
+  {
+    $this->constraints = $this->conditions = array();
+  }
 
   /**
    * unset condition and constraint.
