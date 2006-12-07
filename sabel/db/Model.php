@@ -48,6 +48,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return $this->property->$key;
   }
 
+  public function __clone()
+  {
+    $this->property = clone $this->property;
+  }
+
   public function __call($method, $parameters)
   {
     if ($this->property === null) $this->createProperty();
@@ -113,7 +118,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setCondition($param1, $param2, $param3);
-    return $this->createModel(clone($this));
+
+    $property = $this->property;
+    $self = clone $this;
+    $self->property = $property;
+
+    return $this->createModel($self);
   }
 
   protected function createModel($model)
@@ -153,7 +163,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $relClass = Sabel::load('Sabel_DB_Model_Relation');
       $mdlName  = convert_to_modelname($tblName);
       if ($relClass->initJoin($mdlName)) {
-        return $relClass->join($this, 'INNER');
+        return $relClass->autoJoin($this, 'INNER');
       }
     }
 
@@ -168,8 +178,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $models = array();
     $rows   = $resultSet->fetchAll();
 
+    $obj = MODEL(convert_to_modelname($tblName));
     foreach ($rows as $row) {
-      $model = MODEL(convert_to_modelname($tblName));
+      $model = clone $obj;
 
       if ($childConstraints) {
         $model->receiveChildConstraint($childConstraints);
@@ -195,29 +206,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
-    $myTable  = $this->tableProp->table;
     $relClass = Sabel::load('Sabel_DB_Model_Relation');
-
-    foreach ($modelPairs as $pair) {
-      $relClass->createRelationPair(get_class($this), $pair);
-    }
-
-    $colList = array();
-    $colList[$myTable] = $this->getColumnNames();
-
-    $joinTables = array_diff($relClass->getUniqueTables(), (array)$myTable);
-
-    foreach ($joinTables as $tblName) {
-      $mdlName = convert_to_modelname($tblName);
-      if (isset($colList[$mdlName])) {
-        $colList[$tblName] = $colList[$mdlName];
-      } else {
-        $colList[$tblName] = $this->getColumnNames($tblName);
-      }
-    }
-
-    $relClass->setJoinColumns($colList);
-    return $relClass->join($this, $joinType);
+    return $relClass->join($this, $modelPairs, $joinType, $colList);
   }
 
   protected function addParent($row)
@@ -246,7 +236,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $tblName = strtolower($tblName);
     if ($this->getStructure() !== 'tree' && $this->isAcquired($tblName)) return false;
 
-    $model = $this->newClass($tblName);
+    $model = MODEL(convert_to_modelname($tblName));
     if ($id === null) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
@@ -308,10 +298,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $withParent = ($withParent) ? true : $cModel->property->isWithParent();
 
     $children = array();
+    $childObj = MODEL($child);
     $rows     = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
-      $childObj = MODEL($child);
+      $childObj = clone $childObj;
       $childObj->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
@@ -387,11 +378,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $column  = "{$parent}_{$this->tableProp->primaryKey}";
     $model->$column = $id;
     return $model;
-  }
-
-  protected function newClass($name)
-  {
-    return MODEL(convert_to_modelname($name));
   }
 
   /**
@@ -577,8 +563,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     $models  = array();
     $tblName = $this->tableProp->table;
+    $obj     = MODEL(convert_to_modelname($tblName));
+
     foreach ($resultSet as $row) {
-      $model = MODEL(convert_to_modelname($tblName));
+      $model = clone $obj;
       $model->setProperties($row);
       $models[] = $model;
     }

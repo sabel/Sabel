@@ -24,21 +24,13 @@ class Sabel_DB_Model_Relation
     $joinConNames    = array(),
     $acquiredParents = array();
 
+  private
+    $objects = array();
+
   public function initJoin($mdlName)
   {
     $result = $this->isEnableJoin($mdlName);
     return $this->isJoin = $result;
-  }
-
-  public function setJoinColumns($colList)
-  {
-    if (!is_array($colList)) {
-      throw new Exception('Error:setJoinColumns() argument must be an array.');
-    } else {
-      $this->joinColList = $colList;
-    }
-
-    $this->isJoin = ($this->joinTablePairs && $this->joinConditions && $this->refStructure);
   }
 
   protected function isEnableJoin($mdlName)
@@ -131,19 +123,54 @@ class Sabel_DB_Model_Relation
     return array_unique($joinTables);
   }
 
-  public function join($model, $joinType = 'INNER')
+  public function join($model, $modelPairs, $joinType, $columns)
   {
+    if (!$model instanceof Sabel_DB_Model)
+      throw new Exception('Error:join() first argument must be an instance of Sabel_DB_Model.');
+
+    foreach ($modelPairs as $pair) {
+      $this->createRelationPair(get_class($model), $pair);
+    }
+
+    $colList = array();
+    $tblName = $model->getTableName();
+    $colList[$tblName] = $model->getColumnNames();
+
+    $joinTables = array_diff($this->getUniqueTables(), array($tblName));
+
+    foreach ($joinTables as $tblName) {
+      $mdlName = convert_to_modelname($tblName);
+      if (isset($columns[$mdlName])) {
+        $colList[$tblName] = $columns[$mdlName];
+      } else {
+        $colList[$tblName] = $model->getColumnNames($tblName);
+      }
+    }
+
+    $this->isJoin      = true;
+    $this->joinColList = $colList;
+
+    return $this->execJoin($model, $joinType, $joinTables);
+  }
+
+  public function execJoin($model, $joinType = 'INNER', $joinTables = null)
+  {
+    if (!$model instanceof Sabel_DB_Model)
+      throw new Exception('Error:execJoin() first argument must be an instance of Sabel_DB_Model.');
+
     if (!$this->isJoin)
       throw new Exception('Error: join flag is not active. confirm it by initJoin() ?');
 
     $sql        = array('SELECT ');
-    $joinTables = array();
     $tablePairs = $this->joinTablePairs;
     $colList    = $this->joinColList;
     $myTable    = $model->getTableName();
 
     foreach ($colList[$myTable] as $column) $sql[] = "{$myTable}.{$column}, ";
-    $joinTables = array_diff($this->getUniqueTables(), (array)$myTable);
+
+    if (!$joinTables) {
+      $joinTables = array_diff($this->getUniqueTables(), (array)$myTable);
+    }
 
     foreach ($joinTables as $tblName) {
       foreach ($colList[$tblName] as $column) {
@@ -164,6 +191,7 @@ class Sabel_DB_Model_Relation
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
+    $obj     = MODEL(convert_to_modelname($myTable));
     $rows    = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
@@ -178,7 +206,7 @@ class Sabel_DB_Model_Relation
         }
       }
 
-      $self = MODEL(convert_to_modelname($myTable));
+      $self = clone $obj;
       $self->setData($row);
 
       foreach ($ref[$myTable] as $parent) {
@@ -195,9 +223,10 @@ class Sabel_DB_Model_Relation
     $models   = array();
     $acquire  = array();
     $colCache = $this->joinColCache;
+    $objects  = $this->createObjects($joinTables);
 
     foreach ($joinTables as $tblName) {
-      $model  = MODEL(convert_to_modelname($tblName));
+      $model  = clone $objects[$tblName];
       $preCol = "pre_{$tblName}_" . $model->getPrimaryKey();
 
       foreach ($colCache[$tblName] as $column) {
@@ -209,5 +238,16 @@ class Sabel_DB_Model_Relation
       $models[$tblName] = $model;
     }
     return $models;
+  }
+
+  protected function createObjects($tblNames)
+  {
+    $objects =& $this->objects;
+    if ($objects) return $objects;
+
+    foreach ($tblNames as $tblName) {
+      $objects[$tblName] = MODEL(convert_to_modelname($tblName));
+    }
+    return $objects;
   }
 }
