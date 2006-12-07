@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using('Sabel_Map_Selecter_Impl');
-
 /**
  * uri candidate
  *
@@ -318,6 +316,7 @@ class Sabel_Map_Candidate implements Iterator
   protected function matchToTokens($candidate, $tokens)
   {
     $tokens = clone $tokens;
+    Sabel::using('Sabel_Map_Selecter_Impl');
     $selecter = new Sabel_Map_Selecter_Impl();
     
     foreach ($candidate as $element) {

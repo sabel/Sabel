@@ -2,6 +2,7 @@
 
 Sabel::using('Sabel_View');
 Sabel::using('Sabel_Context');
+Sabel::using('Sabel_Map_Candidate');
 Sabel::using('Sabel_Exception_Runtime');
 Sabel::fileUsing('sabel/db/Functions.php');
 
@@ -31,8 +32,14 @@ class Sabel_Controller_Front
       $request = Sabel::load('Sabel_Request');
     }
     
-    $candidate = Sabel::load('Sabel_Map_Candidate');
-    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+    $cache = Sabel::load('Sabel_Cache_Apc');
+    if ($candidate = $cache->read($request->__toString())) {
+    } else {
+      $candidate = Sabel::load('Sabel_Map_Candidate');
+      $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+      $cache->write($request->__toString(), $candidate);
+    }
+    
     Sabel_Context::setCurrentCandidate($candidate);
     
     $classpath  = $candidate->getModule();
