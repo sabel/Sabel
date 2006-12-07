@@ -53,9 +53,6 @@ class Sabel_Controller_Front
     $controller->initialize();
     
     $responses = $controller->execute($candidate->getAction());
-    
-    ReflectionCache::create()->destruction();
-    
     return array('html' => $controller->rendering(), 'responses' => $responses);
   }
 }

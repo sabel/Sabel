@@ -118,6 +118,11 @@ class Sabel_Map_Candidate implements Iterator
     return $elements[$this->position];
   }
   
+  public function getElements()
+  {
+    return $this->elements;
+  }
+  
   public function getElementName()
   {
     $element = $this->getElement();
@@ -328,10 +333,16 @@ class Sabel_Map_Candidate implements Iterator
   
   public function uri($parameters = null)
   {
+    $candidate = null;
     if ($parameters === null) $parameters = array();
     
     foreach ($parameters as $key => $param) {
       switch ($key) {
+        
+        case 'name':
+        case 'candidate':
+          $candidate = Sabel_Map_Configurator::getCandidate($param);
+          break;
         case 'module':
         case 'm':
           $parameters[':module'] = $param;
@@ -350,7 +361,12 @@ class Sabel_Map_Candidate implements Iterator
       }
     }
     
-    $elements = $this->elements;
+    if ($candidate !== null) {
+      $elements = $candidate->getElements();
+    } else {
+      $elements = $this->elements;
+    }
+    
     $buffer = array();
     
     foreach ($elements as $element) {

@@ -63,7 +63,6 @@ class SabelAllTests
   {
     $suite = new PHPUnit2_Framework_TestSuite();
     
-    $suite->addTest(Test_Sabel::suite());
     // $suite->addTest(Test_Annotation::suite());
     // $suite->addTest(Test_DI::suite());
     // $suite->addTest(Test_Aspect::suite());
@@ -80,14 +79,15 @@ class SabelAllTests
     $suite->addTest(Test_Parameters::suite());
     
     $suite->addTest(Test_Namespace::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     
-    $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     
     //$suite->addTest(Test_Validate::suite());
     // $suite->addTest(Test_VirtualInheritance::suite());
     
     $suite->addTest(Test_Form::suite());
+    $suite->addTest(Test_Sabel::suite());
     
     return $suite;
   }

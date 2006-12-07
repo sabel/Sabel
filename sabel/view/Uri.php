@@ -44,7 +44,7 @@ class Sabel_View_Uri
     $reserved = ";";
     foreach ($params as $part) {
       $line     = array_map('trim', explode(':', $part));
-      $reserved = ($line[0] === 'e') ? 'entry' : $line[0];
+      $reserved = ($line[0] === 'n') ? 'candidate' : $line[0];
       $buf[$reserved] = $line[1];
     }
     return $buf;
