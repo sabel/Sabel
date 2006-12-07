@@ -30,11 +30,7 @@ class Sabel_Map_Tokens implements Iterator
   
   public function current()
   {
-    if ($this->valid()) {
-      return $this->tokens[$this->position];
-    } else {
-      return false;
-    }
+    return ($this->valid()) ? $this->tokens[$this->position] : false;
   }
   
   public function key()
@@ -55,6 +51,5 @@ class Sabel_Map_Tokens implements Iterator
   public function rewind()
   {
     $this->position = 0;
-    $this->size = count($this->tokens);
   }
 }

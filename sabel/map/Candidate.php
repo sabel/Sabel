@@ -109,7 +109,7 @@ class Sabel_Map_Candidate implements Iterator
   public function addElement($name, $type = self::VARIABLE)
   {
     $this->elements[$name][self::ELEMENT_NAME] = $name;
-    $this->elements[$name][self::TYPE_KEY] = $type;
+    $this->elements[$name][self::TYPE_KEY]     = $type;
   }
   
   public function getElement()
@@ -126,7 +126,7 @@ class Sabel_Map_Candidate implements Iterator
   
   public function getElementByName($name)
   {
-    return $this->elements[$name];
+    return (isset($this->elements[$name])) ?$this->elements[$name] : null;
   }
   
   public function setRequirement($name, $requirement)
@@ -149,7 +149,7 @@ class Sabel_Map_Candidate implements Iterator
   
   public function getRequirementByName($name)
   {
-    if (isset($this->elements[$name])) {
+    if (isset($this->elements[$name][self::REQUIREMENT_KEY])) {
       return $this->elements[$name][self::REQUIREMENT_KEY];
     }
   }
@@ -329,34 +329,24 @@ class Sabel_Map_Candidate implements Iterator
   public function uri($parameters = null)
   {
     if ($parameters === null) $parameters = array();
+    
     foreach ($parameters as $key => $param) {
       switch ($key) {
+        case 'module':
         case 'm':
           $parameters[':module'] = $param;
           unset($parameters[$key]);
-          break 1;
+          break;
+        case 'controller':
         case 'c':
           $parameters[':controller'] = $param;
           unset($parameters[$key]);
-          break 1;
+          break;
+        case 'action':
         case 'a':
           $parameters[':action'] = $param;
           unset($parameters[$key]);
-          break 1;
-      }
-      switch ($key) {
-        case 'module':
-          $parameters[':module'] = $param;
-          unset($parameters[$key]);
-          break 1;
-        case 'controller':
-          $parameters[':controller'] = $param;
-          unset($parameters[$key]);
-          break 1;
-        case 'action':
-          $parameters[':action'] = $param;
-          unset($parameters[$key]);
-          break 1;
+          break;
       }
     }
     
@@ -385,7 +375,6 @@ class Sabel_Map_Candidate implements Iterator
       } elseif (isset($parameters[$element[self::ELEMENT_NAME]])) {
         $buffer[] = $parameters[$element[self::ELEMENT_NAME]];
       }
-      
     }
     
     return join('/', $buffer);

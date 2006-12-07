@@ -24,14 +24,19 @@ class Sabel_Map_Configurator
     foreach ($elements as $element) {
       if (stripos($element, self::VARIABLE_MARK) === 0) {
         $variableName = ltrim($element, self::VARIABLE_MARK);
-        if ($variableName === 'module') {
-          $c->addElement($variableName, Sabel_Map_Candidate::MODULE);
-        } elseif ($variableName === 'controller') {
-          $c->addElement($variableName, Sabel_Map_Candidate::CONTROLLER);
-        } elseif ($variableName === 'action') {
-          $c->addElement($variableName, Sabel_Map_Candidate::ACTION);
-        } else {
-          $c->addElement($variableName);
+        switch ($variableName) {
+          case 'module':
+            $c->addElement($variableName, Sabel_Map_Candidate::MODULE);
+            break;
+          case 'controller':
+            $c->addElement($variableName, Sabel_Map_Candidate::CONTROLLER);
+            break;
+          case 'action':
+            $c->addElement($variableName, Sabel_Map_Candidate::ACTION);
+            break;
+          default:
+            $c->addElement($variableName);
+            break;
         }
       } else {
         $c->addElement($element, Sabel_Map_Candidate::CONSTANT);
@@ -41,26 +46,14 @@ class Sabel_Map_Configurator
     if (isset($options['default'])) {
       foreach ($options['default'] as $key => $default) {
         $key = ltrim($key, ':');
-        if ($default === null) {
-          $c->setOmittable($key);
-        } else {
-          $c->setOmittable($key);
-          $c->setDefaultValue($key, $default);
-        }
+        $c->setOmittable($key);
+        if ($default !== null) $c->setDefaultValue($key, $default);
       }
     }
     
-    if (isset($options['module'])) {
-      $c->setModule($options['module']);
-    }
-    
-    if (isset($options['controller'])) {
-      $c->setController($options['controller']);
-    }
-    
-    if (isset($options['action'])) {
-      $c->setAction($options['action']);
-    }
+    if (isset($options['module']))     $c->setModule($options['module']);
+    if (isset($options['controller'])) $c->setController($options['controller']);
+    if (isset($options['action']))     $c->setAction($options['action']);
   }
   
   public static function getCandidate($name)
