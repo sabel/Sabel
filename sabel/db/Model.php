@@ -163,7 +163,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $relClass = Sabel::load('Sabel_DB_Model_Relation');
       $mdlName  = convert_to_modelname($tblName);
       if ($relClass->initJoin($mdlName)) {
-        return $relClass->autoJoin($this, 'INNER');
+        return $relClass->execJoin($this, 'INNER');
       }
     }
 
@@ -176,9 +176,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $childConstraints = $this->property->getChildConstraint();
 
     $models = array();
+    $obj    = MODEL(convert_to_modelname($tblName));
     $rows   = $resultSet->fetchAll();
 
-    $obj = MODEL(convert_to_modelname($tblName));
     foreach ($rows as $row) {
       $model = clone $obj;
 
