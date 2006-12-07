@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_Const');
+// Sabel::using('Sabel_Const');
 Sabel::using('Sabel_Context');
 
 Sabel::using('Sabel_View');
