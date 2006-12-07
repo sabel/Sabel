@@ -166,11 +166,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $childConstraints = $this->property->getChildConstraint();
 
     $models = array();
-    $model  = MODEL(get_class($this));
     $rows   = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
-      $model = clone($model);
+      $model = MODEL(convert_to_modelname($tblName));
 
       if ($childConstraints) {
         $model->receiveChildConstraint($childConstraints);
@@ -305,14 +304,14 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       return false;
     }
 
-    $childObj   = MODEL($child);
     $withParent = $this->property->isWithParent();
-    $withParent = ($withParent) ? true : $childObj->property->isWithParent();
+    $withParent = ($withParent) ? true : $cModel->property->isWithParent();
 
     $children = array();
     $rows     = $resultSet->fetchAll();
+
     foreach ($rows as $row) {
-      $childObj = clone($childObj);
+      $childObj = MODEL($child);
       $childObj->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
@@ -576,10 +575,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     if ($resultSet->isEmpty()) return false;
 
-    $models = array();
-    $model  = MODEL(get_class($this));
+    $models  = array();
+    $tblName = $this->tableProp->table;
     foreach ($resultSet as $row) {
-      $model = clone($model);
+      $model = MODEL(convert_to_modelname($tblName));
       $model->setProperties($row);
       $models[] = $model;
     }

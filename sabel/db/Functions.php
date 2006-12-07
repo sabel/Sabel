@@ -38,8 +38,6 @@ function mssql_escape_string($val)
   return str_replece("'", "''", $val);
 }
 
-global $s;
-
 function MODEL($mdlName)
 {
   Sabel::using('Sabel_DB_Connection');

@@ -164,7 +164,6 @@ class Sabel_DB_Model_Relation
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
-    $self    = MODEL(convert_to_modelname($myTable));
     $rows    = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
@@ -179,7 +178,7 @@ class Sabel_DB_Model_Relation
         }
       }
 
-      $self = clone($self);
+      $self = MODEL(convert_to_modelname($myTable));
       $self->setData($row);
 
       foreach ($ref[$myTable] as $parent) {
