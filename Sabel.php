@@ -121,25 +121,25 @@ function is_not_object($object)
 
 function uri($params, $withDomain = true)
 {
-  $aCreator = Sabel::load('Sabel_View_Uri');
+  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
   return $aCreator->uri($params, $withDomain);
 }
 
 function hyperlink($params, $anchor = null, $id = null, $class = null)
 {
-  $aCreator = Sabel::load('Sabel_View_Uri');
+  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
   return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
 function a($param, $anchor)
 {
-  $aCreator = Sabel::load('Sabel_View_Uri');
+  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
   return $aCreator->aTag($param, $anchor);
 }
 
 function request($uri)
 {
-  $front     = Sabel::load('sabel.controller.Front');
+  $front     = Sabel::loadSingleton('sabel.controller.Front');
   $response  = $front->ignition($uri);
   return $response['html'];
 }
