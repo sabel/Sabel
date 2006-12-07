@@ -17,13 +17,13 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
   {
     $result = false;
     
-    if ($token === false && $candidate->hasDefaultValue()) {
+    if (($token === false || $token === "") && $candidate->hasDefaultValue()) {
       $token = $candidate->getDefaultValue();
     }
     
     if ($candidate->isMatchAll()) {
       $result = true;
-    } elseif ($token === false && $candidate->isOmittable()) {
+    } elseif (($token === false || $token === "") && $candidate->isOmittable()) {
       $result = true;
     } elseif ($candidate->hasRequirement()) {
       $result = $candidate->compareWithRequirement($token);

@@ -1,10 +1,8 @@
 <?php
 
-Sabel::using('Sabel_Context');
-
 Sabel::using('Sabel_View');
+Sabel::using('Sabel_Context');
 Sabel::using('Sabel_Exception_Runtime');
-
 Sabel::fileUsing('sabel/db/Functions.php');
 
 /**
