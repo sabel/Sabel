@@ -19,13 +19,10 @@ class Sabel_View_Uri
   
   public function hyperlink($params, $anchor = null, $id = null, $class = null)
   {
-    $uriPrefix = 'http://' . $_SERVER['HTTP_HOST'];
-    
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
-    $fmtUri = '<a id="%s" class="%s" href="%s/%s">%s</a>';
-    $uri = Sabel_Context::getCurrentCandidate()->uri($params);
-    return sprintf($fmtUri, $id, $class, $uriPrefix, $uri, $anchor);
+    $fmtUri = '<a id="%s" class="%s" href="%s">%s</a>';
+    return sprintf($fmtUri, $id, $class, $this->uri($params, true), $anchor);
   }
   
   public function aTag($param, $anchor)
@@ -35,7 +32,6 @@ class Sabel_View_Uri
   
   public function uri($params, $withDomain)
   {
-    $entry     = $this->getEntry($params);
     $uriPrefix = ($withDomain) ? 'http://' . $_SERVER['HTTP_HOST'] . '/' : '';
     $uri = Sabel_Context::getCurrentCandidate()->uri($params);
     return $uriPrefix . $uri;
