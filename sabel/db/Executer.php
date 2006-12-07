@@ -215,7 +215,7 @@ class Sabel_DB_Executer
    * @param  constrant $param3 denial ( Sabel_DB_Condition::NOT )
    * @return void
    */
-  public function delete($arg1 = null, $arg2 = null, $arg3 = null)
+  public function remove($arg1 = null, $arg2 = null, $arg3 = null)
   {
     if (empty($this->conditions) && $arg1 === null) {
       $msg  = 'all remove? must be set condition';

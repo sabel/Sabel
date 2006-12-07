@@ -118,11 +118,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function createModel($model)
   {
-    $projection = $model->getProjection();
+    $projection = $model->property->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
 
     if ($row = $model->exec()->fetch()) {
-      $model->setData(($model->isWithParent()) ? $this->addParent($row) : $row);
+      $withParent = $model->property->isWithParent();
+      $model->setData(($withParent) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
     } else {
       $model->receiveSelectCondition($model->conditions);
@@ -145,29 +146,37 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     $this->setCondition($param1, $param2, $param3);
 
-    if ($this->isWithParent()) {
+    $tblName    = $this->tableProp->table;
+    $withParent = $this->property->isWithParent();
+
+    if ($withParent) {
       $relClass = Sabel::load('Sabel_DB_Model_Relation');
-      $mdlName  = convert_to_modelname($this->tableProp->table);
+      $mdlName  = convert_to_modelname($tblName);
       if ($relClass->initJoin($mdlName)) {
         return $relClass->join($this, 'INNER');
       }
     }
 
-    $projection = $this->getProjection();
-    $this->getStatement()->setBasicSQL("SELECT $projection FROM {$this->tableProp->table}");
+    $projection = $this->property->getProjection();
+    $this->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
 
     $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
 
-    $models = array();
-    foreach ($resultSet as $row) {
-      $model = $this->newClass($this->tableProp->table);
+    $childConstraints = $this->property->getChildConstraint();
 
-      if ($cconst = $this->getChildConstraint()) {
-        $model->receiveChildConstraint($cconst);
+    $models = array();
+    $model  = MODEL(get_class($this));
+    $rows   = $resultSet->fetchAll();
+
+    foreach ($rows as $row) {
+      $model = clone($model);
+
+      if ($childConstraints) {
+        $model->receiveChildConstraint($childConstraints);
       }
 
-      $model->setData(($this->isWithParent()) ? $this->addParent($row) : $row);
+      $model->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($model);
       $models[] = $model;
     }
@@ -277,16 +286,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     if ($model === null) $model = $this;
 
-    $cModel = $this->newClass($child);
-    $projection = $cModel->getProjection();
+    $cModel     = MODEL($child);
+    $projection = $cModel->property->getProjection();
     $cModel->getStatement()->setBasicSQL("SELECT $projection FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
     $primary = $model->tableProp->primaryKey;
     $model->setChildCondition("{$model->tableProp->table}_{$primary}", $model->$primary);
 
-    $cModel->conditions = $model->getChildCondition();
-    $cconst = $model->getChildConstraint();
+    $cModel->conditions = $model->property->getChildCondition();
+    $cconst = $model->property->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
     $resultSet = $cModel->exec();
@@ -296,11 +305,14 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       return false;
     }
 
-    $children = array();
-    foreach ($resultSet as $row) {
-      $childObj   = $this->newClass($child);
-      $withParent = ($this->isWithParent()) ? true : $childObj->isWithParent();
+    $childObj   = MODEL($child);
+    $withParent = $this->property->isWithParent();
+    $withParent = ($withParent) ? true : $childObj->property->isWithParent();
 
+    $children = array();
+    $rows     = $resultSet->fetchAll();
+    foreach ($rows as $row) {
+      $childObj = clone($childObj);
       $childObj->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
@@ -372,7 +384,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     $parent  = $this->tableProp->table;
     $tblName = ($child === null) ? $parant : $child;
-    $model   = $this->newClass($tblName);
+    $model   = MODEL(convert_to_modelname($tblName));
     $column  = "{$parent}_{$this->tableProp->primaryKey}";
     $model->$column = $id;
     return $model;
@@ -383,10 +395,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return MODEL(convert_to_modelname($name));
   }
 
+  /**
+   * remove all chilren.
+   *
+   * @param string $child child model name.
+   * @return void
+   */
   public function clearChild($child)
   {
     $pkey = $this->tableProp->primaryKey;
-    $data = $this->getData();
+    $data = $this->property->getData();
 
     if (isset($data[$pkey])) {
       $id = $data[$pkey];
@@ -394,7 +412,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception("Error:clearChild() who is a parent? hasn't id value.");
     }
 
-    $model = $this->newClass($child);
+    $model = MODEL($child);
 
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
     $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->tableProp->table);
@@ -407,15 +425,15 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception('Error:save() argument must be an array');
 
     if ($this->isSelected()) {
-      $saveData = ($data) ? $data : $this->getNewData();
-      $this->conditions = $this->getSelectCondition();
+      $saveData = ($data) ? $data : $this->property->getNewData();
+      $this->conditions = $this->property->getSelectCondition();
       $this->update($saveData);
-      $this->unsetNewData();
+      $this->property->unsetNewData();
     } else {
-      $saveData = ($data) ? $data : $this->getData();
+      $saveData = ($data) ? $data : $this->property->getData();
       if ($incCol = $this->checkIncColumn()) {
         $newId = $this->insert($saveData, $incCol);
-        $this->dataSet($incCol, $newId);
+        $this->property->dataSet($incCol, $newId);
       } else {
         $this->insert($saveData);
       }
@@ -445,13 +463,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
     if ($param1 !== null) {
-      $this->delete($param1, $param2, $param3);
+      parent::remove($param1, $param2, $param3);
     } else {
       $pKey    = $this->tableProp->primaryKey;
       $scond   = $this->getSelectCondition();
       $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;
 
-      $this->delete((isset($idValue)) ? $pKey : null, $idValue);
+      parent::remove((isset($idValue)) ? $pKey : null, $idValue);
     }
   }
 
@@ -519,7 +537,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   private function pushStack($chainValue, $foreignKey, $id)
   {
     list($cName, $tName) = explode(':', $chainValue);
-    $model  = $this->newClass($tName);
+    $model  = MODEL(convert_to_modelname($tName));
     $model->setConnectName($cName);
     $models = $model->select($foreignKey, $id);
 
@@ -531,7 +549,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     foreach ($stack as $param => $foreignKey) {
       list($cName, $tName, $idValue) = explode(':', $param);
-      $model = $this->newClass($tName);
+      $model = MODEL(convert_to_modelname($tName));
       $model->setConnectName($cName);
 
       BEGIN($model);
@@ -558,11 +576,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     if ($resultSet->isEmpty()) return false;
 
-    $models  = array();
+    $models = array();
+    $model  = MODEL(get_class($this));
     foreach ($resultSet as $row) {
-      $cloned = $model = $this->newClass($this->tableProp->table);
-      $cloned->setProperties($row);
-      $models[] = $cloned;
+      $model = clone($model);
+      $model->setProperties($row);
+      $models[] = $model;
     }
     return $models;
   }

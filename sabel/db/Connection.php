@@ -21,22 +21,7 @@ class Sabel_DB_Connection
   {
     if (self::$isInit) return null;
 
-    Sabel::using('Sabel_Config_Yaml');
-
-    if (ENVIRONMENT === 'development') {
-      $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
-    } else {
-      $cache = Sabel::load('Sabel_Cache_Apc');
-      if (!($conf = $cache->read('dbconf'))) {
-        $conf = new Sabel_Config_Yaml(RUN_BASE . '/config/database.yml');
-        $cache->write('dbconf', $conf);
-      }
-    }
-
-    $params = $conf->read(ENVIRONMENT);
-    foreach ($params as $connectName => $param) {
-      self::addConnection($connectName, $param);
-    }
+    Sabel::fileUsing(RUN_BASE . '/config/database.php');
 
     self::$isInit = true;
   }
@@ -77,8 +62,11 @@ class Sabel_DB_Connection
 
       if ($drvName === 'mysql') {
         $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
+        global $ct;
+        $s = microtime();
         $list['conn'] = mysql_connect($host, $user, $pass);
         mysql_select_db($dbs, $list['conn']);
+        $ct = (microtime() - $s);
       } elseif ($drvName === 'pgsql') {
         $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
         $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");

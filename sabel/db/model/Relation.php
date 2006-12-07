@@ -102,18 +102,6 @@ class Sabel_DB_Model_Relation
     }
   }
 
-  public function extractModelName($str, $pos = 'RIGHT')
-  {
-    if (strpos($str, ':') !== false) {
-      if ($pos === 'LEFT')  list($str, $gbg) = explode(':', $str);
-      if ($pos === 'RIGHT') list($gbg, $str) = explode(':', $str);
-    }
-
-    if (strpos($str, '.') !== false) list($str) = explode('.', $str);
-
-    return $str;
-  }
-
   public function createChildKey($child, $parent)
   {
     if (strpos($child, '.') === false) {
@@ -176,7 +164,10 @@ class Sabel_DB_Model_Relation
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
-    foreach ($resultSet as $row) {
+    $self    = MODEL(convert_to_modelname($myTable));
+    $rows    = $resultSet->fetchAll();
+
+    foreach ($rows as $row) {
       $models = $this->makeEachModels($row, $joinTables);
 
       $ref = $this->refStructure;
@@ -188,7 +179,7 @@ class Sabel_DB_Model_Relation
         }
       }
 
-      $self = MODEL(convert_to_modelname($myTable));
+      $self = clone($self);
       $self->setData($row);
 
       foreach ($ref[$myTable] as $parent) {
