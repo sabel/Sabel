@@ -7,14 +7,14 @@ define('DEVELOPMENT', 0x0A);
 /**
  * define sabel environment.
  */
-// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'production');
-// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'test');
-if (!defined('ENVIRONMENT')) define('ENVIRONMENT', 'development');
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT, PRODUCTION);
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT, TEST);
+if (!defined('ENVIRONMENT')) define('ENVIRONMENT', DEVELOPMENT);
 
 /**
  * error_reporting settings.
  */
-if (ENVIRONMENT === 'development') {
+if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(E_ALL|E_STRICT);
 } else {
   error_reporting(0);
