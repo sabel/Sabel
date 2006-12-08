@@ -3,7 +3,10 @@
 define('SABEL_BASE', dirname(realpath(__FILE__)));
 define('RUN_BASE', SABEL_BASE . '/Test/data/application');
 define('TEST_CASE', true);
-define('ENVIRONMENT', 'development');
+define('PRODUCTION',  0x01);
+define('TEST',        0x05);
+define('DEVELOPMENT', 0x0A);
+define('ENVIRONMENT', DEVELOPMENT);
 
 error_reporting(E_ALL|E_STRICT);
 ini_set('memory_limit', '16m');
