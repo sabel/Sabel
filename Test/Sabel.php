@@ -35,14 +35,13 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   
   public function testSabel()
   {
-    ob_start();
     $fcontroller = Sabel::load('Sabel_Controller_Front');
     $this->assertTrue(is_object($fcontroller));
     
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
-    $fcontroller->ignition('/index/index');
-    $contents = rtrim(ob_get_clean());
-    $this->assertEquals("welcome to Sabel have fun!", $contents);
+    $result = $fcontroller->ignition('/index/index');
+
+    $this->assertEquals("welcome to Sabel have fun!\n", $result['html']);
   }
   
   public function testSingleton()

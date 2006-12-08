@@ -54,7 +54,7 @@ class Sabel_Controller_Front
     
     Sabel_Context::setPageController($controller);
     
-    $view = new Sabel_View('index', $candidate->getController(), $candidate->getAction());
+    $view = new Sabel_View($candidate->getModule(), $candidate->getController(), $candidate->getAction());
     $controller->setup($request, $view);
     $controller->initialize();
     
