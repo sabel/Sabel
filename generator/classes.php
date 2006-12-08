@@ -67,8 +67,12 @@ class SabelDirectoryAndFileCreator
       } else {
         $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
         mkdir($element);
-        if (in_array($element, array('data', 'cache'))) {
-          chmod($element, 0777);
+        if (in_array($element, array('data', 'cache', 'data/compiled'))) {
+          if (chmod($element, 0777)) {
+            $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] chmod {$element}");
+          } else {
+            $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] chmod {$element}");
+          }
         }
       }
     } elseif ($type === 'file') {
