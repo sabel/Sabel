@@ -42,7 +42,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
     $fcontroller->ignition('/index/index');
     $contents = rtrim(ob_get_clean());
-    $this->assertEquals("welcome.", $contents);
+    $this->assertEquals("welcome to Sabel have fun!", $contents);
   }
   
   public function testSingleton()

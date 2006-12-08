@@ -52,7 +52,7 @@ class SabelDirectoryAndFileCreator
 {
   protected $overwrite = false;
   
-  public function __construct($overwrite)
+  public function __construct($overwrite = false)
   {
     $this->overwrite = $overwrite;
   }

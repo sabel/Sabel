@@ -38,7 +38,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
       
-      if (ENVIRONMENT !== 'development' && $this->trim) {
+      if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
         $contents = explode("\n",     $contents);
         $contents = array_map('trim', $contents);
         $contents = implode('',       $contents);

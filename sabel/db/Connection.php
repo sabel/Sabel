@@ -21,7 +21,7 @@ class Sabel_DB_Connection
   {
     if (self::$isInit) return null;
 
-    //Sabel::fileUsing(RUN_BASE . '/config/database.php');
+    if (!defined('TEST_CASE')) Sabel::fileUsing(RUN_BASE . '/config/database.php');
     self::$isInit = true;
   }
 
