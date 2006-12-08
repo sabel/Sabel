@@ -63,9 +63,9 @@ class SabelDirectoryAndFileCreator
     
     if ($type === 'dir') {
       if (is_dir($element)) {
-        $this->printMessage("${element} already exists.");
+        $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] ${element} already exists.");
       } else {
-        $this->printMessage("create ${element}");
+        $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
         mkdir($element);
         if (in_array($element, array('data', 'cache'))) {
           chmod($element, 0777);
@@ -73,9 +73,9 @@ class SabelDirectoryAndFileCreator
       }
     } elseif ($type === 'file') {
       if (!$this->overwrite && is_file($element)) {
-        $this->printMessage("${element} already exists.");
+        $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] ${element} already exists.");
       } else {
-        $this->printMessage("create ${element}");
+        $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
         fwrite(fopen($element, 'w'), file_get_contents($child));
         if ($element == 'logs/sabel.log') {
           chmod($element, 0777);
