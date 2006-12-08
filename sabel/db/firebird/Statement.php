@@ -19,9 +19,9 @@ class Sabel_DB_Firebird_Statement extends Sabel_DB_General_Statement
     if (isset($limit)) {
       $query  = "FIRST $limit ";
       $query .= (isset($offset)) ? 'SKIP ' . $offset : 'SKIP 0';
-      return array('SELECT ' . $query . $tmp);
+      $sql    = array('SELECT ' . $query . $tmp);
+    } else {
+      if (isset($offset)) $sql = array('SELECT SKIP ' . $offset . $tmp);
     }
-
-    if (isset($offset)) $sql = array('SELECT SKIP ' . $offset . $tmp);
   }
 }

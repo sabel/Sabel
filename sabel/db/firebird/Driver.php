@@ -32,7 +32,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
   // @todo
   public function begin($conn)
   {
-    $resource = ibase_trans(IBASE_WRITE, $conn);
+    $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
     $this->trans = $resource;
     return $resource;
   }
@@ -63,7 +63,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     $genName = strtoupper("{$table}_{$defColumn}_gen");
 
     if (!isset($data[$defColumn])) {
-      $this->driverExecute('SELECT GEN_ID(' . $genName . ', 1) FROM rdb$database');
+      $this->driverExecute('SELECT GEN_ID(' . $genName . ', 1) FROM RDB$DATABASE');
       $resultSet = $this->getResultSet();
       $genNum = $resultSet->fetch(Sabel_DB_Result_Row::NUM);
       $data[$defColumn] = $this->lastInsertId = (int)$genNum[0];

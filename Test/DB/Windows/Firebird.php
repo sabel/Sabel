@@ -1,45 +1,61 @@
 <?php
 
+class Sabel
+{
+  public static function load($clsName, $arg = null)
+  {
+    return new $clsName($arg);
+  }
+
+  public static function using($arg)
+  {
+    // ignore
+  }
+}
+
 require_once 'C:\php\Sabel\sabel\db\Functions.php';
 
+require_once 'C:\php\Sabel\sabel\Model.php';
+require_once 'C:\php\Sabel\sabel\ValueObject.php';
 require_once 'C:\php\Sabel\sabel\db\Connection.php';
 require_once 'C:\php\Sabel\sabel\db\Transaction.php';
 require_once 'C:\php\Sabel\sabel\db\SimpleCache.php';
 require_once 'C:\php\Sabel\sabel\db\Condition.php';
-require_once 'C:\php\Sabel\sabel\db\Property.php';
+require_once 'C:\php\Sabel\sabel\db\model\Property.php';
 require_once 'C:\php\Sabel\sabel\db\Executer.php';
-require_once 'C:\php\Sabel\sabel\db\Relation.php';
-require_once 'C:\php\Sabel\sabel\db\Tree.php';
-require_once 'C:\php\Sabel\sabel\db\Bridge.php';
 require_once 'C:\php\Sabel\sabel\db\Model.php';
-require_once 'C:\php\Sabel\sabel\db\Fusion.php';
+require_once 'C:\php\Sabel\sabel\db\model\Relation.php';
+require_once 'C:\php\Sabel\sabel\db\model\Tree.php';
+require_once 'C:\php\Sabel\sabel\db\model\Bridge.php';
+require_once 'C:\php\Sabel\sabel\db\model\Fusion.php';
 
-require_once 'C:\php\Sabel\sabel\db\driver\Driver.php';
-require_once 'C:\php\Sabel\sabel\db\driver\Firebird.php';
-require_once 'C:\php\Sabel\sabel\db\driver\ResultSet.php';
-require_once 'C:\php\Sabel\sabel\db\driver\ResultObject.php';
+require_once 'C:\php\Sabel\sabel\db\base\Driver.php';
+require_once 'C:\php\Sabel\sabel\db\base\Statement.php';
+require_once 'C:\php\Sabel\sabel\db\base\Schema.php';
+require_once 'C:\php\Sabel\sabel\db\general\Statement.php';
+require_once 'C:\php\Sabel\sabel\db\result\Row.php';
+require_once 'C:\php\Sabel\sabel\db\result\Object.php';
 
-require_once 'C:\php\Sabel\sabel\db\statement\Statement.php';
-require_once 'C:\php\Sabel\sabel\db\statement\NonBind.php';
-require_once 'C:\php\Sabel\sabel\db\statement\Limitation.php';
+require_once 'C:\php\Sabel\sabel\db\firebird\Driver.php';
+require_once 'C:\php\Sabel\sabel\db\firebird\Schema.php';
+require_once 'C:\php\Sabel\sabel\db\firebird\Statement.php';
 
-require_once 'C:\php\Sabel\sabel\db\schema\Const.php';
+require_once 'C:\php\Sabel\sabel\db\type\Const.php';
+require_once 'C:\php\Sabel\sabel\db\schema\Interface.php';
 require_once 'C:\php\Sabel\sabel\db\schema\Accessor.php';
-require_once 'C:\php\Sabel\sabel\db\schema\Column.php';
 require_once 'C:\php\Sabel\sabel\db\schema\Table.php';
-require_once 'C:\php\Sabel\sabel\db\schema\Common.php';
-require_once 'C:\php\Sabel\sabel\db\schema\Firebird.php';
 
-require_once 'C:\php\Sabel\sabel\db\schema\type\Setter.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Sender.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Integer.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\String.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Float.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Double.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Text.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Time.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Byte.php';
-require_once 'C:\php\Sabel\sabel\db\schema\type\Other.php';
+require_once 'C:\php\Sabel\sabel\db\type\Setter.php';
+require_once 'C:\php\Sabel\sabel\db\type\Interface.php';
+require_once 'C:\php\Sabel\sabel\db\type\Integer.php';
+require_once 'C:\php\Sabel\sabel\db\type\String.php';
+require_once 'C:\php\Sabel\sabel\db\type\Float.php';
+require_once 'C:\php\Sabel\sabel\db\type\Double.php';
+require_once 'C:\php\Sabel\sabel\db\type\Text.php';
+require_once 'C:\php\Sabel\sabel\db\type\Time.php';
+require_once 'C:\php\Sabel\sabel\db\type\Datetime.php';
+require_once 'C:\php\Sabel\sabel\db\type\Byte.php';
+require_once 'C:\php\Sabel\sabel\db\type\Other.php';
 
 require_once 'Test.php';
 
@@ -64,7 +80,7 @@ class FirebirdExecute
     Sabel_DB_Connection::addConnection('default2', self::$params2);
 
     $tables = Test_DB_Windows_Test::$TABLES;
-    $model  = Sabel_DB_Model::load('Basic');
+    $model  = Sabel_Model::load('Basic');
 
     try {
       @$model->execute('CREATE GENERATOR TEST_FOR_LIKE_ID_GEN');
@@ -85,7 +101,7 @@ class FirebirdExecute
     } catch (Exception $e) {
     }
 
-    $model = Sabel_DB_Model::load('Customer');
+    $model = Sabel_Model::load('Customer');
 
     try {
       @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
@@ -182,6 +198,19 @@ class FirebirdHelper
                  ft_val float default 1,
                  db_val double precision not null,
                  tx blob sub_type text)";
+
+    $sqls[] = "CREATE TABLE student (
+                 id integer primary key,
+                 name varchar(24))";
+
+    $sqls[] = "CREATE TABLE course (
+                 id integer primary key,
+                 course_name varchar(24))";
+
+    $sqls[] = "CREATE TABLE student_course (
+                 student_id integer not null,
+                 course_id  integer not null,
+                 primary key (student_id, course_id))";
 
     $this->sqls = $sqls;
   }
