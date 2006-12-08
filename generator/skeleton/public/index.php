@@ -1,23 +1,20 @@
 <?php
 
-if (extension_loaded('gettext')) {
-  function _($val)
-  {
-    return $val;
-  }
+ob_start();
+set_include_path('/usr/local/lib/php/Sabel:/usr/local/lib/php');
+define('RUN_BASE', dirname(realpath('.')));
+
+require ('Sabel.php');
+require (RUN_BASE . '/config/environment.php');
+
+if (!defined('ENVIRONMENT')) {
+  echo "SABEL FATAL ERROR: you must define ENVIRONMENT in config/environment.php";
+  exit;
 }
 
-ob_start();
-
-set_include_path('/usr/local/lib/php/Sabel' . ':' . '/usr/local/lib/php');
-require ('../config/environment.php');
-require ('../setup.php');
-require ('/usr/local/lib/php/Sabel/Sabel.php');
-set_include_path(RUN_BASE . '/app' . ':' . get_include_path());
-set_include_path(RUN_BASE . '/lib' . ':' . get_include_path());
-
+Sabel::loadState();
 $response = Sabel::load('Sabel_Controller_Front')->ignition();
+Sabel::saveState();
 
 echo $response['html'];
-
 ob_flush();

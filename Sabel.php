@@ -23,16 +23,33 @@ final class Sabel
     $apc->write('readables', self::$readables);
   }
   
-  public static function load($className, $constructerArg = null)
+  /**
+   * class instanciate.
+   * if not using class then using
+   *
+   * @param string $className class name to using and instanciate
+   * @param mixed $arg
+   * @param mixed $args
+   * @return object
+   */
+  public static function load($className, $arg = null, $args = null)
   {
     self::using($className);
     
     if (!class_exists($className)) throw new Exception($className . " not found");
     
-    if ($constructerArg === null) {
+    if ($args !== null) {
+      $argStr = join(', ', $args);
+    }
+    
+    if ($arg === null) {
       return new $className();
+    } elseif ($args !== null) {
+      $eval = '$instance =' . " new {$className}({$arg}, {$argStr});";
+      eval($eval);
+      return $instance;
     } else {
-      return new $className($constructerArg);
+      return new $className($arg);
     }
   }
   
@@ -139,8 +156,8 @@ function a($param, $anchor)
 
 function request($uri)
 {
-  $front     = Sabel::loadSingleton('sabel.controller.Front');
-  $response  = $front->ignition($uri);
+  $front    = Sabel::loadSingleton('Sabel_Controller_Front');
+  $response = $front->ignition($uri);
   return $response['html'];
 }
 
@@ -163,6 +180,17 @@ function candidate($name, $uri, $options = null)
   Sabel_Map_Configurator::addCandidate($name, $uri, $options);
 }
 
+function add_include_path($path)
+{
+  set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+}
+
+if (!extension_loaded('gettext')) {
+  function _($val)
+  {
+    return $val;
+  }
+}
 
 /**
  * Sabel constant values

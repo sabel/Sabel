@@ -1,7 +1,7 @@
 <?php
 
 switch (ENVIRONMENT) {
-  case 'production':
+  case PRODUCTION:
     $param = array('default' => array(
                      'driver'   => 'mysql',
                      'host'     => 'localhost',
@@ -12,7 +12,7 @@ switch (ENVIRONMENT) {
                    );
     break;
 
-  case 'test':
+  case TEST:
     $param = array('default' => array(
                      'driver'   => 'mysql',
                      'host'     => 'localhost',
@@ -23,7 +23,7 @@ switch (ENVIRONMENT) {
                    );
     break;
 
-  case 'development':
+  case DEVELOPMENT:
     $param = array('default' => array(
                      'driver'   => 'mysql',
                      'host'     => 'localhost',

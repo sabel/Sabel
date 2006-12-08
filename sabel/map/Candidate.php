@@ -185,6 +185,9 @@ class Sabel_Map_Candidate implements Iterator
   public function setDefaultValue($name, $value)
   {
     if (isset($this->elements[$name])) {
+      if ($name === "action") {
+        $this->setAction($value);
+      }
       $this->elements[$name][self::DEFAULT_VALUE_KEY] = $value;
     }
   }

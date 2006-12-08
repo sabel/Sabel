@@ -27,14 +27,13 @@ class Sabel_Controller_Front
     if (is_object($requestUri)) {
       $request = $requestUri;
     } elseif (is_string($requestUri)) {
-      $request = new Sabel_Request($requestUri);
+      $request = Sabel::load('Sabel_Request', $requestUri);
     } else {
       $request = Sabel::load('Sabel_Request');
     }
     
     $cache = Sabel::load('Sabel_Cache_Apc');
-    if ($candidate = $cache->read($request->__toString())) {
-    } else {
+    if (!($candidate = $cache->read($request->__toString()))) {
       $candidate = Sabel::load('Sabel_Map_Candidate');
       $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
       $cache->write($request->__toString(), $candidate);
