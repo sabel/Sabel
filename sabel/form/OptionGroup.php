@@ -5,6 +5,18 @@ class Sabel_Form_OptionGroup extends Sabel_Form_HtmlElement
   const START_TAG_FMT = '<optgroup label="%s">';
   const END_TAG_FMT   = '</optgroup>';
   
+  protected $options = array();
+  
+  public function addOption($option)
+  {
+    $this->options[] = $option;
+  }
+  
+  protected function hasOptions()
+  {
+    return (count($this->options) > 0);
+  }
+  
   public function toHtml($trim = false)
   {
     $buf = array();
