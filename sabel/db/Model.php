@@ -1,5 +1,6 @@
 <?php
 
+Sabel::using('Sabel_ValueObject');
 Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Model_Property');
 
@@ -35,7 +36,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     $this->property  = new Sabel_DB_Model_Property($mdlName, $mdlProps);
     $tableProperties = $this->property->getTableProperties();
-    $this->tableProp = Sabel::load('Sabel_ValueObject', $tableProperties);
+    $this->tableProp = new Sabel_ValueObject($tableProperties);
   }
 
   public function __set($key, $val)
@@ -67,8 +68,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     $columns = $this->getSchema()->getColumns();
-    foreach ($this->getData() as $name => $value) {
-      if (isset($columns[$name])) $columns[$name]->value = $this->convertData($name, $value);
+    foreach ($this->property->getData() as $name => $value) {
+      if (isset($columns[$name])) {
+        $columns[$name]->value = $this->property->convertData($name, $value);
+      }
     }
 
     return $columns;
@@ -314,7 +317,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function getDefaultChild($model)
   {
-    if ($children = $model->getMyChildren()) {
+    if ($children = $model->property->getMyChildren()) {
       foreach ($children as $val) {
         $this->chooseChildConstraint($val, $model);
         $model->getChild($val, $model);
@@ -324,8 +327,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function chooseChildConstraint($child, $model)
   {
-    $thisCConst  = $this->getChildConstraint();
-    $modelCConst = $model->getChildConstraint();
+    $thisCConst  = $this->property->getChildConstraint();
+    $modelCConst = $model->property->getChildConstraint();
 
     $constraints = array();
     if (isset($thisCConst[$child])) {
@@ -334,11 +337,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $constraints = $modelCConst[$child];
     }
 
-    if ($constraints) $model->setChildConstraint($child, $constraints);
+    if ($constraints) $model->property->setChildConstraint($child, $constraints);
 
     if ($thisCConst)  {
       foreach ($thisCConst as $cldName => $param) {
-        $model->setChildConstraint($cldName, $param);
+        $model->property->setChildConstraint($cldName, $param);
       }
     }
   }

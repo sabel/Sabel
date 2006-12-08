@@ -61,4 +61,16 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_General_Schema
     //$co->max = (int)$row['character_octet_length'];
     $co->max = (int)$row['character_maximum_length'];
   }
+
+  /**
+   * examine the engine of the table.
+   *
+   * @param  string $tblName table name
+   * @return string table engine.
+   */
+  public function getTableEngine($tblName)
+  {
+    $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'")->fetch();
+    return $row['Engine'];
+  }
 }

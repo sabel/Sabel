@@ -64,7 +64,7 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function makeColumnValueObject($row)
   {
-    $co = new Sabel_DB_Schema_Column();
+    $co = new Sabel_ValueObject();
     $co->name     = $row['column_name'];
     $co->nullable = ($row['is_nullable'] !== 'NO');
 

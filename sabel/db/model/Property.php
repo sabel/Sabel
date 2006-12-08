@@ -69,34 +69,32 @@ class Sabel_DB_Model_Property
       $this->schema     = $cache;
       $this->columns    = Sabel_DB_SimpleCache::get('columns_' . $tblName);
       $this->properties = Sabel_DB_SimpleCache::get('props_' . $tblName);
-      return null;
-    }
-
-    $sClsName  = 'Schema_' . $mdlName;
-    $tblSchema = create_schema($sClsName);
-
-    if (is_object($tblSchema)) {
-      $sClass     = new $sClsName();
-      $properties = $sClass->getProperty();
-      $properties['table'] = $tblName;
     } else {
-      list($tblSchema, $properties) = $this->createSchema($conName, $tblName);
+      $sClsName = 'Schema_' . $mdlName;
+      Sabel::using($sClsName);
+
+      if (!class_exists($sClsName, false)) {
+        list($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
+      } else {
+        list($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
+      }
+
+      $columns = array_keys($tblSchema->getColumns());
+
+      Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
+      Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
+      Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
+
+      if ($properties['primaryKey'] === null)
+        trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+
+      $this->schema     = $tblSchema;
+      $this->columns    = $columns;
+      $this->properties = $properties;
     }
-
-    $this->schema  = $tblSchema;
-    $this->columns = array_keys($tblSchema->getColumns());
-
-    Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
-    Sabel_DB_SimpleCache::add('columns_' . $tblName, $this->columns);
-    Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
-
-    if ($properties['primaryKey'] === null)
-      trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
-
-    $this->properties = $properties;
   }
 
-  protected function createSchema($conName, $tblName)
+  protected function getSchemaFromDb($conName, $tblName)
   {
     Sabel::using('Sabel_DB_Schema_Accessor');
 
@@ -111,6 +109,24 @@ class Sabel_DB_Model_Property
                         'incrementKey' => $tblSchema->getIncrementKey(),
                         'tableEngine'  => $engine,
                         'table'        => $tblName);
+
+    return array($tblSchema, $properties);
+  }
+
+  protected function getSchemaFromCls($clsName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Table');
+
+    $cols = array();
+    $sCls = new $clsName();
+    foreach ($sCls->get() as $colName => $colInfo) {
+      $colInfo['name'] = $colName;
+      $cols[$colName]  = new Sabel_ValueObject($colInfo);
+    }
+
+    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
+    $properties = $sCls->getProperty();
+    $properties['table'] = $tblName;
 
     return array($tblSchema, $properties);
   }
@@ -146,7 +162,7 @@ class Sabel_DB_Model_Property
       case SabeL_DB_Type_Const::BOOL:
         if (is_int($data)) {
           $data = ($data === 1);
-        } else {
+        } elseif(is_string($data)) {
           $data = (in_array($data, array('1', 't', 'true')));
         }
     }

@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using('Sabel_DB_Schema_Interface');
+
 /**
  * Sabel_DB_Schema_Accessor
  *
@@ -10,7 +12,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Accessor
+class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
 {
   private $connectName = '';
   private $schemaClass = null;
@@ -65,19 +67,8 @@ class Sabel_DB_Schema_Accessor
     return array_keys($cols);
   }
 
-  /**
-   * this method is for mysql.
-   * examine the engine of the table.
-   *
-   * @param  string $tblName table name
-   * @param  object $driver  an instance of Sabel_DB_Driver_Native_Mysql or Sabel_DB_Driver_Pdo_Driver
-   * @return string table engine.
-   */
-  public function getTableEngine($tblName, $driver = null)
+  public function getTableEngine($tblName)
   {
-    if ($driver === null) $driver = Sabel_DB_Connection::getDriver($this->connectName);
-    $driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
-    $row = $driver->getResultSet()->fetch();
-    return $row['Engine'];
+    return $this->schemaClass->getTableEngine($tblName);
   }
 }

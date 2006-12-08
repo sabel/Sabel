@@ -110,7 +110,7 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
   {
     $fieldName = trim($row['rdb$field_name']);
 
-    $co = new Sabel_DB_Schema_Column();
+    $co = new Sabel_ValueObject();
     $co->name     = strtolower($fieldName);
     $co->nullable = ($row['rdb$null_flag'] === null);
 
