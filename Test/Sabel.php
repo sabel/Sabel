@@ -17,7 +17,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
   public function __construct()
   {
     if (is_dir(RUN_BASE)) {
-      $dt = new DirectoryTraverser(RUN_BASE);
+      $dt = Sabel::load('Sabel_Util_DirectoryTraverser', RUN_BASE);
       $remover = new SabelDirectoryAndFileRemover();
       $dt->visit($remover);
       $dt->traverse();
@@ -27,7 +27,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     
     if (!is_dir(RUN_BASE)) {
       mkdir(RUN_BASE);
-      $dt = new DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
+      $dt = Sabel::load('Sabel_Util_DirectoryTraverser', SABEL_BASE.'/generator/skeleton');
       $dt->visit(new SabelDirectoryAndFileCreator());
       $dt->traverse();
     }

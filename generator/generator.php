@@ -1,12 +1,21 @@
 <?php
 
-require_once('Sabel/Sabel.php');
-require_once('classes.php');
-
-$dt = new DirectoryTraverser(dirname(__FILE__) . '/skeleton');
-$aCreator = new SabelDirectoryAndFileCreator();
+require_once ('Sabel/Sabel.php');
+require_once ('classes.php');
 
 $args = $_SERVER['argv'];
+
+$pathToSabel = dirname(dirname($args[0]));
+$includePath = get_include_path();
+if (!in_array($pathToSabel, explode(':', $includePath))) {
+  set_include_path(get_include_path().':'.$pathToSabel);
+}
+
+Sabel::using('Sabel_Util_DirectoryTraverser');
+
+$dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . '/skeleton');
+$aCreator = new SabelDirectoryAndFileCreator();
+
 for ($i = 0, $count = count($args); $i < $count; ++$i) {
   if ($args[$i] === '--overwrite') {
     $aCreator->setOverwrite(true);

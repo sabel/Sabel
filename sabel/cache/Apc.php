@@ -47,6 +47,6 @@ class Sabel_Cache_Apc
   
   public function delete($key)
   {
-    apc_delete($this->signature.$key);
+    return apc_delete($this->signature.$key);
   }
 }
