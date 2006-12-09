@@ -51,15 +51,30 @@ class DirectoryTraverser
 class SabelDirectoryAndFileCreator
 {
   protected $overwrite = false;
+  protected $ignores = array();
   
-  public function __construct($overwrite = false)
+  public function __construct()
   {
-    $this->overwrite = $overwrite;
+  }
+  
+  public function setOverwrite($condition)
+  {
+    if (is_bool($condition)) $this->overwrite = $condition;
+  }
+  
+  public function addIgnore($ignore)
+  {
+    $this->ignores[] = $ignore;
   }
   
   public function accept($element, $type, $child = null)
   {
     if (defined('TEST_CASE')) $element = RUN_BASE . '/' . $element;
+    
+    if ($this->isIgnore($element)) {
+      $this->printMessage("[\x1b[1;34mIGNORE\x1b[m] ${element} ignore");
+      return;
+    }
     
     if ($type === 'dir') {
       if (is_dir($element)) {
@@ -86,6 +101,11 @@ class SabelDirectoryAndFileCreator
         }
       }
     }
+  }
+  
+  protected function isIgnore($name)
+  {
+    return (in_array($name, $this->ignores));
   }
   
   protected function printMessage($msg)

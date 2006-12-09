@@ -50,7 +50,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     extract($values, EXTR_SKIP);
     
     ob_start();
-    if (is_readable($cpath)) include($cpath);
+    if (is_readable($cpath)) include ($cpath);
     $contents = ob_get_clean();
     
     return $contents;
