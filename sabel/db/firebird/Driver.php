@@ -18,7 +18,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 {
   private
     $conName    = '',
-    $autoCommit = true;
+    $resultSet  = null;
 
   public function __construct($conn)
   {
@@ -73,49 +73,40 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
-    if (Sabel_DB_Firebird_Transaction::isActive()) {
-      $conn = Sabel_DB_Firebird_Transaction::get($this->conName);
-    }
+    $conn = Sabel_DB_Firebird_Transaction::get($this->conName);
 
     if ($conn === null) {
       $conn = $this->conn;
+      $autoCommit = true;
     } else {
-      $this->autoCommit = false;
+      $autoCommit = false;
     }
 
     if (isset($sql)) {
-      $this->result = ibase_query($conn, $sql);
+      $result = ibase_query($conn, $sql);
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $this->result = ibase_query($conn, $sql);
+      $result = ibase_query($conn, $sql);
     }
 
-    // @todo
-    $tmp = substr($sql, 0, 6);
-    if ($tmp !== 'SELECT' && $this->autoCommit) {
-      ibase_commit($conn);
-    }
-
-    if (!$this->result) {
+    if (!$result) {
       $error = ibase_errmsg();
       throw new Exception("ibase_query execute failed:{$sql} ERROR:{$error}");
     }
-  }
 
-  public function getResultSet()
-  {
-    $rows   = array();
-    $result = $this->result;
-
+    $rows = array();
     if (is_resource($result)) {
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
     }
 
-    if ($this->autoCommit) {
-      @ibase_commit($this->conn);
-    }
+    if ($autoCommit) ibase_commit($conn);
 
-    return new Sabel_DB_Result_Row($rows);
+    $this->resultSet = new Sabel_DB_Result_Row($rows);
+  }
+
+  public function getResultSet()
+  {
+    return $this->resultSet;
   }
 }

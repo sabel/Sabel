@@ -157,10 +157,10 @@ abstract class Sabel_DB_Base_Statement
 
   protected function escapeLikeSQL($val)
   {
-    $escapeChars = ':ZQXJKVBWYGFPMUzqxjkvbwygfpmu';
+    $escapeChars = 'ZQXJKVBWYGFPMUCDzqxjkvbwygfpmu';
 
     for ($i = 0; $i < 30; $i++) {
-      $esc = $escapeChars[$i];
+      $esc = $escapeChars{$i};
       if (strpbrk($val, $esc) === false) {
         $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
         return array($val, $esc);

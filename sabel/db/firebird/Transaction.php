@@ -26,11 +26,6 @@ class Sabel_DB_Firebird_Transaction
     return (isset(self::$cons[$conName])) ? self::$cons[$conName] : null;
   }
 
-  public static function isActive()
-  {
-    return self::$active;
-  }
-
   public static function commit()
   {
     self::executeMethod('ibase_commit');

@@ -72,14 +72,14 @@ class FirebirdExecute
                                   'user'     => 'develop',
                                   'password' => 'develop',
                                   'encoding' => 'utf8',
-                                  'database' => 'D:\Apache Group\Apache2\htdocs\EDO.FDB');
+                                  'database' => 'C:\Program Files\Firebird\db\EDO.FDB');
 
   private static $params2 = array('driver'   => 'firebird',
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
                                   'encoding' => 'utf8',
-                                  'database' => 'D:\Apache Group\Apache2\htdocs\EDO2.FDB');
+                                  'database' => 'C:\Program Files\Firebird\db\EDO2.FDB');
 
   public static function main()
   {

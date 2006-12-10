@@ -23,6 +23,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $acquiredParents = array(),
     $cascadeStack    = array();
 
+  private
+    $parentModels = array();
+
   public function __construct($param1 = null, $param2 = null)
   {
     if ($this->property === null) $this->createProperty();
@@ -236,10 +239,17 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function createParentModels($tblName, $id)
   {
-    $tblName = strtolower($tblName);
-    if ($this->getStructure() !== 'tree' && $this->isAcquired($tblName)) return false;
+    $tblName   = strtolower($tblName);
+    $structure = $this->property->getStructure();
+    if ($structure !== 'tree' && $this->isAcquired($tblName)) return false;
 
-    $model = MODEL(convert_to_modelname($tblName));
+    if (isset($this->parentModels[$tblName])) {
+      $model = clone $this->parentModels[$tblName];
+    } else {
+      $model = MODEL(convert_to_modelname($tblName));
+      $this->parentModels[$tblName] = $model;
+    }
+
     if ($id === null) return $model;
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
@@ -556,7 +566,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
    */
   public function execute($sql, $param = null)
   {
-    if (!empty($param) && !is_array($param))
+    if (isset($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
     return $this->toObject($this->executeQuery($sql, $param));

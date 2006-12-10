@@ -28,7 +28,6 @@ abstract class Sabel_DB_Base_Driver
   public abstract function commit($conn);
   public abstract function rollback($conn);
   public abstract function close($conn);
-  public abstract function getResultSet();
 
   protected abstract function driverExecute($sql = null);
 
