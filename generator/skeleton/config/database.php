@@ -7,7 +7,7 @@ switch (ENVIRONMENT) {
                      'host'     => 'localhost',
                      'database' => 'default',
                      'schema'   => 'default',
-                     'user'     => 'roor',
+                     'user'     => 'root',
                      'password' => '')
                    );
     break;

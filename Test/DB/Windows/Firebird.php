@@ -11,6 +11,11 @@ class Sabel
   {
     // ignore
   }
+
+  public static function fileUsing($arg)
+  {
+    // ignore
+  }
 }
 
 require_once 'C:\php\Sabel\sabel\db\Functions.php';

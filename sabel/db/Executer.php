@@ -42,16 +42,31 @@ class Sabel_DB_Executer
     $this->tableProp = Sabel::load('Sabel_ValueObject', $props);
   }
 
+  /**
+   * returns the table name.
+   *
+   * @return string
+   */
   public function getTableName()
   {
     return $this->tableProp->table;
   }
 
+  /**
+   * returns the primary key(s).
+   *
+   * @return mixed string of array
+   */
   public function getPrimaryKey()
   {
     return $this->tableProp->primaryKey;
   }
 
+  /**
+   * returns the connection name.
+   *
+   * @return string
+   */
   public function getConnectName()
   {
     return $this->tableProp->connectName;
@@ -225,20 +240,9 @@ class Sabel_DB_Executer
 
     if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
 
-    //$this->delete($this->tableProp->table);
-
     $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
     $this->getDriver()->makeQuery($this->conditions, $this->constraints);
     $this->tryExecute($this->driver);
-  }
-
-  protected function delete($tblName)
-  {
-    $driver = $this->getDriver();
-    $this->getStatement()->setBasicSQL('DELETE FROM ' . $tblName);
-    $driver->makeQuery($this->conditions, $this->constraints);
-    $this->tryExecute($driver);
-    $driver->commit();
   }
 
   /**
