@@ -37,6 +37,7 @@ require_once 'C:\php\Sabel\sabel\db\result\Row.php';
 require_once 'C:\php\Sabel\sabel\db\result\Object.php';
 
 require_once 'C:\php\Sabel\sabel\db\firebird\Driver.php';
+require_once 'C:\php\Sabel\sabel\db\firebird\Transaction.php';
 require_once 'C:\php\Sabel\sabel\db\firebird\Schema.php';
 require_once 'C:\php\Sabel\sabel\db\firebird\Statement.php';
 
@@ -66,14 +67,15 @@ class FirebirdExecute
                                   'user'     => 'develop',
                                   'password' => 'develop',
                                   'encoding' => 'utf8',
-                                  'database' => 'C:\Program Files\Firebird\db\EDO.FDB');
+                                  'database' => 'D:\Apache Group\Apache2\htdocs\EDO.FDB');
 
   private static $params2 = array('driver'   => 'firebird',
                                   'host'     => 'localhost',
                                   'user'     => 'develop',
                                   'password' => 'develop',
                                   'encoding' => 'utf8',
-                                  'database' => 'C:\Program Files\Firebird\db\EDO2.FDB');
+                                  'database' => 'D:\Apache Group\Apache2\htdocs\EDO2.FDB');
+
   public static function main()
   {
     Sabel_DB_Connection::addConnection('default',  self::$params1);

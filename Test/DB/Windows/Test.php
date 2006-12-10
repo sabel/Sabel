@@ -160,46 +160,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals(count($japan->City), 2);
   }
 
-  public function clearChild()
-  {
-    $model  = new City();
-    $cities = $model->select();
-    $this->assertEquals(count($cities), 4);
-
-    $model = new Country();
-    $japan = $model->selectOne('name', 'japan');
-    $japan->clearChild('City');
-
-    $model  = new City();
-    $cities = $model->select();
-    $this->assertEquals(count($cities), 2);
-  }
-
-  public function newChild()
-  {
-    $model = new Country();
-    $japan = $model->selectOne('name', 'japan');
-    $city  = $japan->newChild('City');
-
-    $city->id   = 1;
-    $city->name = 'nagoya';
-    $city->save();
-
-    $city  = $japan->newChild('City');
-
-    $city->id   = 2;
-    $city->name = 'hiroshima';
-    $city->save();
-
-    $city = new City(1);
-    $this->assertEquals($city->name, 'nagorya');
-    $this->assertEquals((int)$city->country_id, 1);
-
-    $city = new City(2);
-    $this->assertEquals($city->name, 'hiroshima');
-    $this->assertEquals((int)$city->country_id, 1);
-  }
-
   public function testLike()
   {
     $model = Sabel_Model::load('TestForLike');
@@ -893,7 +853,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
   {
     Sabel_Model::load('CustomerOrder')->execute('DELETE FROM customer_order');
 
-    /*
     $customers = Sabel_Model::load('Customer')->select();
     $this->assertFalse($customers);
 
@@ -921,7 +880,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $orders = Sabel_Model::load('CustomerOrder')->select();
     $this->assertFalse($orders);
-    */
   }
 
   public function testDatabasesCasecadeDelete()
@@ -1107,6 +1065,34 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $courses = $suzuki->getChild('Course');
     $this->assertFalse($courses);
+  }
+
+  public function testClearChild()
+  {
+    $blogs = Sabel_Model::load('Blog')->select();
+    $this->assertEquals(count($blogs), 7);
+
+    $user = new Users(2);
+    $user->clearChild('Blog');
+
+    $blogs = Sabel_Model::load('Blog')->select();
+    $this->assertEquals(count($blogs), 4);
+  }
+
+  public function testNewChild()
+  {
+    $user = new Users(2);
+    $blog = $user->newChild('Blog');
+
+    $blog->id         = 8;
+    $blog->title      = 'title8';
+    $blog->article    = 'article8';
+    $blog->write_date = '2005-01-01 08:01:01';
+    $blog->save();
+
+    $blog = Sabel_Model::load('Blog')->selectOne(8);
+    $this->assertEquals($blog->title, 'title8');
+    $this->assertEquals($blog->users_id, 2);
   }
 
   public function testClear()

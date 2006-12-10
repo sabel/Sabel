@@ -19,7 +19,7 @@ class Sabel_DB_Executer
     $constraints = array();
 
   protected
-    $driver  = null;
+    $driver = null;
 
   /**
    * Sabel_DB_Executer constructor.
@@ -107,18 +107,6 @@ class Sabel_DB_Executer
   }
   
   /**
-   * reset constraints and conditions.
-   *
-   * @todo review
-   * @param void
-   * @return void
-   */
-  public function resetState()
-  {
-    $this->constraints = $this->conditions = array();
-  }
-
-  /**
    * unset condition and constraint.
    *
    * @return void
@@ -154,7 +142,7 @@ class Sabel_DB_Executer
     return $driver->loadStatement();
   }
 
-  public function exec()
+  public function find()
   {
     $driver = $this->getDriver();
     $driver->makeQuery($this->conditions, $this->constraints);
@@ -237,8 +225,20 @@ class Sabel_DB_Executer
 
     if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
 
+    //$this->delete($this->tableProp->table);
+
     $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
-    $this->exec();
+    $this->getDriver()->makeQuery($this->conditions, $this->constraints);
+    $this->tryExecute($this->driver);
+  }
+
+  protected function delete($tblName)
+  {
+    $driver = $this->getDriver();
+    $this->getStatement()->setBasicSQL('DELETE FROM ' . $tblName);
+    $driver->makeQuery($this->conditions, $this->constraints);
+    $this->tryExecute($driver);
+    $driver->commit();
   }
 
   /**
@@ -255,7 +255,7 @@ class Sabel_DB_Executer
     $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
-    $row = $this->exec()->fetch(Sabel_DB_Result_Row::NUM);
+    $row = $this->find()->fetch(Sabel_DB_Result_Row::NUM);
     return (int)$row[0];
   }
 
@@ -274,7 +274,7 @@ class Sabel_DB_Executer
     $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
-    return $this->exec();
+    return $this->find();
   }
 
   public function executeQuery($sql, $param = null)

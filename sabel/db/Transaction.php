@@ -46,9 +46,7 @@ class Sabel_DB_Transaction
       self::$list[$connectName]['conn']   = $conn;
       self::$list[$connectName]['driver'] = $driver;
 
-      // @todo for firebird.
-      if (($result = $driver->begin($conn)) !== null)
-        self::$list[$connectName]['conn'] = $result;
+      $driver->begin($conn);
 
       self::$active = true;
     }
@@ -78,5 +76,11 @@ class Sabel_DB_Transaction
       self::$list   = array();
       self::$active = false;
     }
+  }
+
+  // @todo this method is temporary
+  public static function unsetList()
+  {
+    self::$list = array();
   }
 }

@@ -134,7 +134,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $projection = $model->property->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
 
-    if ($row = $model->exec()->fetch()) {
+    if ($row = $model->find()->fetch()) {
       $withParent = $model->property->isWithParent();
       $model->setData(($withParent) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
@@ -173,7 +173,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $projection = $this->property->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
 
-    $resultSet = $this->exec();
+    $resultSet = $this->find();
     if ($resultSet->isEmpty()) return false;
 
     $childConstraints = $this->property->getChildConstraint();
@@ -244,9 +244,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
       $model->setCondition($model->tableProp->primaryKey, $id);
-      $projection = $model->getProjection();
+      $projection = $model->property->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
-      $resultSet  = $model->exec();
+      $resultSet = $model->find();
 
       if (!$row = $resultSet->fetch()) {
         throw new Exception('Error: relational error. parent does not exists.');
@@ -290,7 +290,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $cconst = $model->property->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
-    $resultSet = $cModel->exec();
+    $resultSet = $cModel->find();
 
     if ($resultSet->isEmpty()) {
       $model->dataSet($child, false);
@@ -400,11 +400,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception("Error:clearChild() who is a parent? hasn't id value.");
     }
 
-    $model = MODEL($child);
-
+    $model  = MODEL($child);
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
+
+    // @todo
     $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->tableProp->table);
-    $model->exec();
+    $model->getDriver()->makeQuery($model->conditions, $model->constraints);
+    $model->tryExecute($model->driver);
   }
 
   public function save($data = null)
@@ -484,7 +486,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
     }
 
-    //BEGIN($this);
+    BEGIN($this);
 
     $models = array();
     $table  = $this->tableProp->table;
@@ -499,7 +501,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
     $this->remove($pKey, $id);
 
-    //COMMIT();
+    COMMIT();
   }
 
   private function makeChainModels($children, &$chain)
@@ -540,7 +542,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $model = MODEL(convert_to_modelname($tName));
       $model->setConnectName($cName);
 
-      //BEGIN($model);
+      BEGIN($model);
       $model->remove($foreignKey, $idValue);
     }
   }

@@ -2,6 +2,7 @@
 
 Sabel::using('Sabel_DB_Base_Driver');
 Sabel::using('Sabel_DB_Firebird_Statement');
+Sabel::using('Sabel_DB_Firebird_Transaction');
 
 /**
  * Sabel_DB_Firebird_Driver
@@ -15,12 +16,19 @@ Sabel::using('Sabel_DB_Firebird_Statement');
  */
 class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 {
-  private $trans = null;
+  private
+    $conName    = '',
+    $autoCommit = true;
 
   public function __construct($conn)
   {
     $this->conn = $conn;
     $this->db   = 'firebird';
+  }
+
+  public function extension($tableProp)
+  {
+    $this->conName = $tableProp->connectName;
   }
 
   public function loadStatement()
@@ -29,28 +37,20 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     return $this->stmt;
   }
 
-  // @todo
   public function begin($conn)
   {
-    $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
-    $this->trans = $resource;
-    return $resource;
+    $trans = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
+    Sabel_DB_Firebird_Transaction::add($this->conName, $trans);
   }
 
-  // @todo
   public function commit($conn)
   {
-    if (!ibase_commit($conn)) {
-      $error = ibase_errmsg();
-      throw new Exception ("Error: transaction commit failed. {$error}");
-    }
+    Sabel_DB_Firebird_Transaction::commit();
   }
 
-  // @todo
   public function rollback($conn)
   {
-    ibase_rollback($conn);
-    unset($this->trans);
+    Sabel_DB_Firebird_Transaction::rollback();
   }
 
   public function close($conn)
@@ -73,7 +73,15 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
-    $conn = (isset($this->trans)) ? $this->trans : $this->conn;
+    if (Sabel_DB_Firebird_Transaction::isActive()) {
+      $conn = Sabel_DB_Firebird_Transaction::get($this->conName);
+    }
+
+    if ($conn === null) {
+      $conn = $this->conn;
+    } else {
+      $this->autoCommit = false;
+    }
 
     if (isset($sql)) {
       $this->result = ibase_query($conn, $sql);
@@ -81,6 +89,12 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
       $this->result = ibase_query($conn, $sql);
+    }
+
+    // @todo
+    $tmp = substr($sql, 0, 6);
+    if ($tmp !== 'SELECT' && $this->autoCommit) {
+      ibase_commit($conn);
     }
 
     if (!$this->result) {
@@ -97,6 +111,11 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     if (is_resource($result)) {
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
     }
+
+    if ($this->autoCommit) {
+      @ibase_commit($this->conn);
+    }
+
     return new Sabel_DB_Result_Row($rows);
   }
 }
