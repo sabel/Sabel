@@ -860,20 +860,20 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertFalse($orders);
 
     $model = Sabel_Model::load('CustomerOrder');
-    BEGIN($model); // db1 start transaction.
+    $model->begin(); // db1 start transaction.
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
 
     $model = Sabel_Model::load('Customer');
-    BEGIN($model); // db2 start transaction.
+    $model->begin(); // db2 start transaction.
     $model->save(array('id' => 1, 'name' => 'name'));
     $model->save(array('id' => 2, 'name' => 'name'));
     // 'nama' not found -> execute rollback.
     try { @$model->save(array('id' => 3, 'nama' => 'name')); } catch (Exception $e) {}
 
     // not execute.
-    COMMIT();
+    $model->commit();
 
     $customers = Sabel_Model::load('Customer')->select();
     $this->assertFalse($customers);

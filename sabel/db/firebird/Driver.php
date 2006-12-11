@@ -37,21 +37,23 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     return $this->stmt;
   }
 
-  public function begin($conn)
+  public function loadTransaction()
   {
-    $trans = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
-    Sabel_DB_Firebird_Transaction::add($this->conName, $trans);
+    return Sabel_DB_Firebird_Transaction::getInstance();
   }
 
-  public function commit($conn)
+  public function begin($conName)
   {
-    Sabel_DB_Firebird_Transaction::commit();
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($conName)) {
+      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->conn);
+      $trans->begin($resource, $conName);
+    }
   }
 
-  public function rollback($conn)
-  {
-    Sabel_DB_Firebird_Transaction::rollback();
-  }
+  public function doCommit($conn)   { /* neglect */ }
+  public function doRollback($conn) { /* neglect */ }
 
   public function close($conn)
   {
@@ -73,7 +75,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
-    $conn = Sabel_DB_Firebird_Transaction::get($this->conName);
+    $conn = $this->loadTransaction()->get($this->conName);
 
     if ($conn === null) {
       $conn = $this->conn;

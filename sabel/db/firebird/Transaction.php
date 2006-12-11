@@ -12,41 +12,64 @@
  */
 class Sabel_DB_Firebird_Transaction
 {
-  private static $cons   = array();
-  private static $active = false;
+  private static $ins = null;
 
-  public static function add($conName, $trans)
+  private
+    $active       = false,
+    $transactions = array();
+
+  private function __construct() { }
+
+  public static function getInstance()
   {
-    self::$cons[$conName] = $trans;
-    self::$active = true;
+    if (self::$ins === null) {
+      self::$ins = new self();
+    }
+    return self::$ins;
   }
 
-  public static function get($conName)
+  public function begin($transaction, $conName = 'default')
   {
-    return (isset(self::$cons[$conName])) ? self::$cons[$conName] : null;
+    if (!isset($this->transactions[$conName])) {
+      $this->transactions[$conName] = $transaction;
+      $this->active = true;
+    }
   }
 
-  public static function commit()
+  public function get($conName)
   {
-    self::executeMethod('ibase_commit');
+    $ts = $this->transactions;
+    return (isset($ts[$conName])) ? $ts[$conName] : null;
   }
 
-  public static function rollback()
+  public function isActive($conName = null)
   {
-    self::executeMethod('ibase_rollback');
+    if (isset($conName)) {
+      return (isset($this->transactions[$conName]));
+    } else {
+      return $this->active;
+    }
   }
 
-  private static function executeMethod($method)
+  public function commit()
   {
-    if (sizeof(self::$cons) > 0) {
-      foreach (self::$cons as $trans) {
-        $method($trans);
+    $this->executeMethod('ibase_commit');
+  }
+
+  public function rollback()
+  {
+    $this->executeMethod('ibase_rollback');
+  }
+
+  private function executeMethod($method)
+  {
+    if ($this->isActive()) {
+      foreach ($this->transactions as $transaction) {
+        $method($transaction);
       }
-      self::$cons   = array();
-      self::$active = false;
 
-      // @todo
-      Sabel_DB_Transaction::unsetList();
+      $this->active = false;
+      $this->transactions = array();
     }
   }
 }
