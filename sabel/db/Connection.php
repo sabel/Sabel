@@ -48,6 +48,7 @@ class Sabel_DB_Connection
         $list['conn'] = new PDO("sqlite:{$params['database']}");
       } else {
         $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
+        if (isset($params['port'])) $dsn .= ";port={$params['port']}";
         $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
       }
 
