@@ -29,8 +29,7 @@ class Sabel_DB_Model_Relation
 
   public function initJoin($mdlName)
   {
-    $result = $this->isEnableJoin($mdlName);
-    return $this->isJoin = $result;
+    return $this->isJoin = $this->isEnableJoin($mdlName);
   }
 
   protected function isEnableJoin($mdlName)
@@ -41,7 +40,7 @@ class Sabel_DB_Model_Relation
     if (class_exists($sClsName, false)) {
       $sClass = new $sClsName();
       $props  = $sClass->getProperty();
-      if (!$this->isSameConnectName($props['connectName'])) return false;
+      if ($this->isSameConnectName($props['connectName']) === false) return false;
     } else {
       return false;
     }
@@ -53,10 +52,9 @@ class Sabel_DB_Model_Relation
         $pm = $parent;
         if (strpos($pm, ':') !== false) list($gbg, $pm) = explode(':', $pm);
         if (strpos($pm, '.') !== false) list($pm) = explode('.', $pm);
-        if (in_array($pm, $this->acquiredParents)) continue;
+        if (array_key_exists($pm, $this->acquiredParents)) continue;
 
-        $condition = $this->createRelationPair($mdlName, $parent);
-        $this->acquiredParents[] = $pm;
+        $this->acquiredParents[$pm] = true;
         if (!$this->isEnableJoin($pm)) return false;
       }
     }
@@ -72,13 +70,13 @@ class Sabel_DB_Model_Relation
     return true;
   }
 
-  public function createRelationPair($mdlName, $pair)
+  public function createRelationPair($child, $pair)
   {
     if (strpos($pair, ':') === false) {
-      $pair  = $mdlName . ':' . $pair;
+      $parent = $pair;
+    } else {
+      list($child, $parent) = explode(':', $pair);
     }
-
-    list($child, $parent) = explode(':', $pair);
 
     $child  = $this->createChildKey($child, $parent);
     $parent = $this->createParentKey($parent);
@@ -97,21 +95,21 @@ class Sabel_DB_Model_Relation
   public function createChildKey($child, $parent)
   {
     if (strpos($child, '.') === false) {
-      $child = $child . '.' . convert_to_tablename($parent) . '_id';
+      $key = convert_to_tablename($parent) . '_id';
+    } else {
+      list($child, $key) = explode('.', $child);
     }
-
-    list($c, $key) = explode('.', $child);
-    return convert_to_tablename($c) . '.' . $key;
+    return convert_to_tablename($child) . '.' . $key;
   }
 
   public function createParentKey($parent)
   {
     if (strpos($parent, '.') === false) {
-      $parent = $parent. '.id';
+      $key = 'id';
+    } else {
+      list($parent, $key) = explode('.', $parent);
     }
-
-    list($p, $key) = explode('.', $parent);
-    return convert_to_tablename($p) . '.' . $key;
+    return convert_to_tablename($parent) . '.' . $key;
   }
 
   public function getUniqueTables($tablePairs = null)
@@ -128,9 +126,9 @@ class Sabel_DB_Model_Relation
     if (!$model instanceof Sabel_DB_Model)
       throw new Exception('Error:join() first argument must be an instance of Sabel_DB_Model.');
 
-    foreach ($modelPairs as $pair) {
-      $this->createRelationPair(get_class($model), $pair);
-    }
+    $modelClass = get_class($model);
+    foreach ($modelPairs as $pair)
+      $this->createRelationPair($modelClass, $pair);
 
     $colList = array();
     $tblName = $model->getTableName();
@@ -180,7 +178,7 @@ class Sabel_DB_Model_Relation
     }
 
     $sql   = array(substr(join('', $sql), 0, -2));
-    $sql[] = " FROM {$myTable}";
+    $sql[] = " FROM $myTable";
 
     foreach ($this->joinConditions as $parent => $condition) {
       $sql[] = " $joinType JOIN $parent ON $condition";

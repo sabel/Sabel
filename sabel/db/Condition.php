@@ -25,11 +25,11 @@ class Sabel_DB_Condition
 
   public function __construct($key, $val, $not = null)
   {
-    list($key, $type, $value) = $this->getType($key, $val);
+    list($key, $type) = $this->getType($key, $val);
 
     $this->values['key']   = $key;
     $this->values['type']  = $type;
-    $this->values['value'] = $value;
+    $this->values['value'] = $val;
     $this->values['not']   = ($not === self::NOT);
   }
 
@@ -72,6 +72,6 @@ class Sabel_DB_Condition
       $key = convert_to_tablename($mdlName) . '.' . $key;
     }
 
-    return array($key, $type, $val);
+    return array($key, $type);
   }
 }
