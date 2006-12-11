@@ -22,8 +22,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
     $dbName    = ucfirst(Sabel_DB_Connection::getDB($connectName));
     $className = 'Sabel_DB_' . $dbName . '_Schema';
 
-    Sabel::using($className);
-    $this->schemaClass = new $className($connectName, $schema);
+    $this->schemaClass = Sabel::load($className, $connectName, $schema);
     $this->connectName = $connectName;
   }
 
