@@ -81,13 +81,10 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
   {
     $conn = ($conn === null) ? $this->conn : $conn;
 
-    if (isset($sql)) {
-      $result = mssql_query($sql, $conn);
-    } elseif (($sql = $this->stmt->getSQL()) === '') {
+    if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
-    } else {
-      $result = mssql_query($sql, $conn);
-    }
+
+    $result = mssql_query($sql, $conn);
 
     if (!$result) {
       $error = mssql_get_last_message();

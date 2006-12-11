@@ -1,7 +1,6 @@
 <?php
 
 Sabel::using('Sabel_DB_Base_Driver');
-Sabel::using('Sabel_DB_General_Statement');
 
 /**
  * Sabel_DB_Pgsql_Driver
@@ -53,7 +52,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
   {
     $conn = ($conn === null) ? $this->conn : $conn;
 
-    if (!isset($sql) && ($sql = $this->stmt->getSQL()) === '')
+    if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
 
     $result = pg_query($conn, $sql);

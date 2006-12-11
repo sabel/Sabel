@@ -41,18 +41,16 @@ class Sabel_DB_Connection
     $drvName = $params['driver'];
 
     if (strpos($drvName, 'pdo-') === 0) {
-      $type = 'pdo';
-      $db   = str_replace('pdo-', '', $drvName);
+      $type    = 'pdo';
+      $drvName = str_replace('pdo-', '', $drvName);
 
-      if ($db === 'sqlite') {
+      if ($drvName === 'sqlite') {
         $list['conn'] = new PDO("sqlite:{$params['database']}");
       } else {
-        $dsn = "{$db}:host={$params['host']};dbname={$params['database']}";
+        $dsn = "{$drvName}:host={$params['host']};dbname={$params['database']}";
         if (isset($params['port'])) $dsn .= ";port={$params['port']}";
         $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
       }
-
-      $list['db'] = $db;
     } else {
       $type = 'native';
       $host = $params['host'];
@@ -60,28 +58,31 @@ class Sabel_DB_Connection
       $pass = $params['password'];
       $dbs  = $params['database'];
 
-      if ($drvName === 'mysql') {
-        $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
-        $list['conn'] = mysql_connect($host, $user, $pass);
-        mysql_select_db($dbs, $list['conn']);
-      } elseif ($drvName === 'pgsql') {
-        $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
-        $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
-      } elseif ($drvName === 'firebird') {
-        $host = $host . ':' . $dbs;
-        $list['conn'] = (isset($params['encoding'])) ? ibase_connect($host, $user, $pass, $params['encoding'])
-                                                     : ibase_connect($host, $user, $pass);
-      } elseif ($drvName === 'mssql') {
-        $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
-        $list['conn'] = mssql_connect($host, $user, $pass);
-        mssql_select_db($dbs, $list['conn']);
+      switch ($drvName) {
+        case 'mysql':
+          $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
+          $list['conn'] = mysql_connect($host, $user, $pass);
+          mysql_select_db($dbs, $list['conn']);
+          break;
+        case 'pgsql':
+          $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
+          $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
+          break;
+        case 'firebird':
+          $host = $host . ':' . $dbs;
+          $enc  = (isset($params['encoding'])) ? $params['encoding'] : null;
+          $list['conn'] = ibase_connect($host, $user, $pass, $enc);
+          break;
+        case'mssql':
+          $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
+          $list['conn'] = mssql_connect($host, $user, $pass);
+          mssql_select_db($dbs, $list['conn']);
+          break;
       }
-
-      $list['db'] = $drvName;
     }
 
     if (isset($params['encoding'])) {
-      $db  = $list['db'];
+      $db  = $drvName;
       $enc = $params['encoding'];
 
       if ($type === 'pdo') {
@@ -103,9 +104,8 @@ class Sabel_DB_Connection
     $conn    = self::getConnection($conName);
     $drvName = self::getDriverName($conName);
 
-    if (strpos($drvName, 'pdo') === 0) {
-      Sabel::using('Sabel_DB_Pro_Driver');
-      $driver  = new Sabel_DB_Pdo_Driver($conn, self::getDB($conName));
+    if (strpos($drvName, 'pdo-') === 0) {
+      $driver  = Sabel::load('Sabel_DB_Pdo_Driver', $conn, self::getDB($conName));
     } else {
       $clsName = 'Sabel_DB_' . ucfirst($drvName) . '_Driver';
       $driver  = Sabel::load($clsName, $conn);
@@ -122,7 +122,7 @@ class Sabel_DB_Connection
 
   public static function getDB($conName)
   {
-    return self::getValue($conName, 'db');
+    return str_replace('pdo-', '', self::getDriverName($conName));
   }
 
   protected static function createDBLink($conName, $key)

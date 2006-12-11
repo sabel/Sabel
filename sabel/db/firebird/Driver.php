@@ -82,13 +82,10 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
       $autoCommit = false;
     }
 
-    if (isset($sql)) {
-      $result = ibase_query($conn, $sql);
-    } elseif (($sql = $this->stmt->getSQL()) === '') {
+    if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
-    } else {
-      $result = ibase_query($conn, $sql);
-    }
+
+    $result = ibase_query($conn, $sql);
 
     if (!$result) {
       $error = ibase_errmsg();
