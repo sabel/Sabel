@@ -15,6 +15,9 @@ Sabel::using('Sabel_DB_Model_Property');
  */
 class Sabel_DB_Model extends Sabel_DB_Executer
 {
+  const UPDATE_TIME_COLUMN = 'auto_update';
+  const CREATE_TIME_COLUMN = 'auto_create';
+
   protected
     $property = null;
 
@@ -80,6 +83,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return $columns;
   }
 
+  public function setConnectName($connectName)
+  {
+    $this->tableProp->connectName = $connectName;
+  }
+
   public function getTableEngine()
   {
     return $this->tableProp->tableEngine;
@@ -137,7 +145,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $projection = $model->property->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
 
-    if ($row = $model->find()->fetch()) {
+    if ($row = $model->exec()->fetch()) {
       $withParent = $model->property->isWithParent();
       $model->setData(($withParent) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
@@ -176,7 +184,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $projection = $this->property->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
 
-    $resultSet = $this->find();
+    $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
 
     $childConstraints = $this->property->getChildConstraint();
@@ -256,7 +264,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $model->setCondition($model->tableProp->primaryKey, $id);
       $projection = $model->property->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
-      $resultSet = $model->find();
+      $resultSet = $model->exec();
 
       if (!$row = $resultSet->fetch()) {
         throw new Exception('Error: relational error. parent does not exists.');
@@ -300,10 +308,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $cconst = $model->property->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
-    $resultSet = $cModel->find();
+    $resultSet = $cModel->exec();
 
     if ($resultSet->isEmpty()) {
-      $model->dataSet($child, false);
+      $model->property->set($child, false);
       return false;
     }
 
@@ -321,7 +329,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $children[] = $childObj;
     }
 
-    $model->dataSet($child, $children);
+    $model->property->set($child, $children);
     return $children;
   }
 
@@ -410,37 +418,52 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception("Error:clearChild() who is a parent? hasn't id value.");
     }
 
-    $model  = MODEL($child);
+    $model = MODEL($child);
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
-
-    // @todo
-    $model->getStatement()->setBasicSQL('DELETE FROM ' . $model->tableProp->table);
-    $model->getDriver()->makeQuery($model->conditions, $model->constraints);
-    $model->tryExecute($model->driver);
+    $model->doDelete();
   }
 
   public function save($data = null)
   {
-    if (isset($data) && !is_array($data))
+    if (isset($data) && !is_array($data)) {
       throw new Exception('Error:save() argument must be an array');
+    }
+
+    $tblName  = $this->tableProp->table;
+    $newModel = MODEL(convert_to_tablename($tblName));
 
     if ($this->isSelected()) {
       $saveData = ($data) ? $data : $this->property->getNewData();
+      $this->recordTime($saveData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->conditions = $this->property->getSelectCondition();
       $this->update($saveData);
       $this->property->unsetNewData();
+      $newData = array_merge($this->property->getRealData(), $saveData);
     } else {
-      $saveData = ($data) ? $data : $this->property->getData();
+      $newData = ($data) ? $data : $this->property->getData();
+      $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
       if ($incCol = $this->checkIncColumn()) {
-        $newId = $this->insert($saveData, $incCol);
-        $this->property->dataSet($incCol, $newId);
+        $newId = $this->insert($newData, $incCol);
+        if (!isset($newData[$incCol])) $newData[$incCol] = $newId;
       } else {
-        $this->insert($saveData);
+        $this->insert($newData);
       }
     }
 
-    foreach ($saveData as $key => $val) $this->dataSet($key, $val);
-    return $this;
+    foreach ($newData as $key => $val) {
+      $newModel->property->set($key, $val);
+    }
+
+    $newModel->enableSelected();
+    return $newModel;
+  }
+
+  protected function recordTime(&$data, $tblName, $colName)
+  {
+    $cols = $this->property->getColumns();
+    if (in_array($colName, $cols)) {
+      if (!isset($data[$colName])) $data[$colName] = date('Y-m-d H:i:s');
+    }
   }
 
   public function multipleInsert($data)
@@ -463,13 +486,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
     if ($param1 !== null) {
-      parent::remove($param1, $param2, $param3);
+      $this->delete($param1, $param2, $param3);
     } else {
       $pKey    = $this->tableProp->primaryKey;
       $scond   = $this->getSelectCondition();
       $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;
 
-      parent::remove((isset($idValue)) ? $pKey : null, $idValue);
+      $this->delete((isset($idValue)) ? $pKey : null, $idValue);
     }
   }
 
@@ -490,7 +513,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $data  = $this->getData();
     $id    = (isset($id)) ? $id : $data[$this->tableProp->primaryKey];
     $chain = Schema_CascadeChain::get();
-    $key   = $this->tableProp->connectName . ':' . $this->tableProp->table;
+    $key   = $this->getConnectName() . ':' . $this->tableProp->table;
 
     if (!isset($chain[$key])) {
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
@@ -516,8 +539,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function makeChainModels($children, &$chain)
   {
-    $conName = $children[0]->tableProp->connectName;
-    $tblName = $children[0]->tableProp->table;
+    $conName = $children[0]->getConnectName();
+    $tblName = $children[0]->getTableName();
     $key     = $conName . ':' . $tblName;
 
     if (!isset($chain[$key])) return null;

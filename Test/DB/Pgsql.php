@@ -165,6 +165,11 @@ class PgsqlHelper
                  course_id  integer not null,
                  primary key (student_id, course_id))";
 
+    $sqls[] = "CREATE TABLE timer (
+                 id integer primary key,
+                 auto_update timestamp,
+                 auto_create timestamp)";
+
     $this->sqls = $sqls;
   }
 }

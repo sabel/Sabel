@@ -22,6 +22,7 @@ abstract class Sabel_DB_Base_Driver
 
   protected
     $escMethod    = '',
+    $resultSet    = null,
     $lastInsertId = null;
 
   public abstract function begin($connectName);

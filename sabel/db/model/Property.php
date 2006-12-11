@@ -134,10 +134,13 @@ class Sabel_DB_Model_Property
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
-    if ($this->selected) $this->newData[$key] = $val;
+
+    if ($this->selected && in_array($key, $this->columns)) {
+      $this->newData[$key] = $val;
+    }
   }
 
-  public function dataSet($key, $val)
+  public function set($key, $val)
   {
     $this->data[$key] = $val;
   }
@@ -169,11 +172,6 @@ class Sabel_DB_Model_Property
     return $data;
   }
 
-  public function getValidateData()
-  {
-    return ($this->isSelected()) ? $this->newData : $this->data;
-  }
-
   public function setProperties($row)
   {
     if (!is_array($row)) {
@@ -198,14 +196,28 @@ class Sabel_DB_Model_Property
     return $this->columns;
   }
 
-  public function setConnectName($connectName)
-  {
-    $this->properties['connectName'] = $connectName;
-  }
-
   public function getData()
   {
     return $this->data;
+  }
+
+  public function getRealData()
+  {
+    $cols = $this->columns;
+    $data = $this->data;
+    $real = array();
+
+    foreach ($data as $key => $val) {
+      if (in_array($key, $cols)) {
+        $real[$key] = $this->convertData($key, $val);
+      }
+    }
+    return $real;
+  }
+
+  public function getValidateData()
+  {
+    return ($this->isSelected()) ? $this->newData : $this->data;
   }
 
   public function toArray()

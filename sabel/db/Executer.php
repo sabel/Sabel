@@ -156,7 +156,7 @@ class Sabel_DB_Executer
     return $this->getDriver()->loadStatement();
   }
 
-  public function find()
+  public function exec()
   {
     $driver = $this->getDriver();
     $driver->makeQuery($this->conditions, $this->constraints);
@@ -222,26 +222,32 @@ class Sabel_DB_Executer
   }
 
   /**
-   * remove row(s)
+   * delete row(s)
    *
    * @param  mixed     $param1 column name ( with the condition prefix ), or value of primary key.
    * @param  mixed     $param2 condition value.
    * @param  constrant $param3 denial ( Sabel_DB_Condition::NOT )
    * @return void
    */
-  public function remove($arg1 = null, $arg2 = null, $arg3 = null)
+  public function delete($arg1 = null, $arg2 = null, $arg3 = null)
   {
     if (empty($this->conditions) && $arg1 === null) {
-      $msg  = 'all remove? must be set condition';
+      $msg  = 'Error:delete() all delete? must be set condition';
       $smpl = 'DELETE FROM {table_name}';
-      throw new Exception($msg . "or execute executeQuery('{$smpl}').");
+      throw new Exception($msg . " or execute executeQuery('{$smpl}').");
     }
 
     if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
 
+    $this->doDelete();
+  }
+
+  protected function doDelete()
+  {
+    $driver = $this->getDriver();
     $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
-    $this->getDriver()->makeQuery($this->conditions, $this->constraints);
-    $this->tryExecute($this->driver);
+    $driver->makeQuery($this->conditions, $this->constraints);
+    $this->tryExecute($driver);
   }
 
   /**
@@ -255,10 +261,9 @@ class Sabel_DB_Executer
   public function getCount($arg1 = null, $arg2 = null, $arg3 = null)
   {
     $this->setCondition($arg1, $arg2, $arg3);
-    $this->setConstraint('limit', 1);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
-    $row = $this->find()->fetch(Sabel_DB_Result_Row::NUM);
+    $row = $this->exec()->fetch(Sabel_DB_Result_Row::NUM);
     return (int)$row[0];
   }
 
@@ -277,7 +282,7 @@ class Sabel_DB_Executer
     $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
-    return $this->find();
+    return $this->exec();
   }
 
   public function executeQuery($sql, $param = null)

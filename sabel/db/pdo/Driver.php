@@ -16,7 +16,6 @@ Sabel::using('Sabel_DB_Pdo_Statement');
 class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 {
   private
-    $pdoStmt  = null,
     $data     = array(),
     $isAdd    = true,
     $stmtFlag = false;
@@ -97,8 +96,9 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     $sql = $this->stmt->getSQL();
 
     $exist = false;
-    if ($this->isAdd = $this->checkConditionTypes($conditions))
+    if ($this->isAdd = $this->checkConditionTypes($conditions)) {
       $exist = Sabel_DB_Pdo_PdoStatement::exists($sql, $conditions, $constraints);
+    }
 
     $this->stmt->makeConditionQuery($conditions);
     if ($constraints && !$exist) $this->stmt->makeConstraintQuery($constraints);
@@ -137,22 +137,21 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 
     $param = $this->makeBindParam();
     if ($pdoStmt->execute($param)) {
-      $this->pdoStmt = $pdoStmt;
+      $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
+      $pdoStmt->closeCursor();
+      $this->resultSet = new Sabel_DB_Result_Row($rows);
     } else {
       $param = var_export($param, 1);
       $error = $this->conn->errorInfo();
       $error = (isset($error[2])) ? $error[2] : var_export($error, 1);
-      if (is_object($this->pdoStmt)) $sql = $this->pdoStmt->queryString;
+      if (is_object($pdoStmt)) $sql = $pdoStmt->queryString;
       throw new Exception("Error: pdo execute failed: $sql PARAMETERS: $param ERROR: $error");
     }
   }
 
   public function getResultSet()
   {
-    $result = $this->pdoStmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $this->pdoStmt->closeCursor();
-    return new Sabel_DB_Result_Row($result);
+    return $this->resultSet;
   }
 
   private function makeBindParam()

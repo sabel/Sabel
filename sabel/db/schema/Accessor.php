@@ -62,7 +62,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
       $executer = new Sabel_DB_Executer($arg);
       $executer->setConstraint('limit', 1);
       $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
-      $cols = $executer->find()->fetch();
+      $cols = $executer->exec()->fetch();
     }
     return array_keys($cols);
   }

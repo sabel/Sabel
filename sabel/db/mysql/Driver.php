@@ -15,9 +15,6 @@ Sabel::using('Sabel_DB_General_Statement');
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 {
-  private
-    $resultSet = null;
-
   protected
     $escMethod = 'mysql_real_escape_string';
 

@@ -16,9 +16,7 @@ Sabel::using('Sabel_DB_Firebird_Transaction');
  */
 class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 {
-  private
-    $conName    = '',
-    $resultSet  = null;
+  private $conName = '';
 
   public function __construct($conn)
   {

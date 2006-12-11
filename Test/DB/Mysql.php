@@ -163,6 +163,11 @@ class MysqlHelper
                  course_id  integer not null,
                  primary key (student_id, course_id))";
 
+    $sqls[] = "CREATE TABLE timer (
+                 id integer primary key,
+                 auto_update datetime,
+                 auto_create datetime)";
+
     $this->sqls = $sqls;
   }
 }

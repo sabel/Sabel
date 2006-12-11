@@ -187,7 +187,7 @@ class Sabel_DB_Model_Relation
     }
 
     $model->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $model->find();
+    $resultSet = $model->exec();
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
@@ -202,7 +202,7 @@ class Sabel_DB_Model_Relation
         if (!isset($ref[$tblName])) continue;
         foreach ($ref[$tblName] as $parent) {
           $mdlName = convert_to_modelname($parent);
-          $models[$tblName]->dataSet($mdlName, $models[$parent]);
+          $models[$tblName]->set($mdlName, $models[$parent]);
         }
       }
 
@@ -211,7 +211,7 @@ class Sabel_DB_Model_Relation
 
       foreach ($ref[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
-        $self->dataSet($mdlName, $models[$parent]);
+        $self->set($mdlName, $models[$parent]);
       }
       $results[] = $self;
     }

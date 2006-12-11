@@ -15,9 +15,6 @@ Sabel::using('Sabel_DB_General_Statement');
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 {
-  private
-    $resultSet = null;
-
   protected
     $escMethod = 'pg_escape_string';
 

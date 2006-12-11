@@ -6,7 +6,7 @@ class Test_DB_Test extends SabelTestCase
   public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
                                 'test_for_like', 'test_condition', 'blog',
                                 'customer_order', 'classification', 'favorite_item',
-                                'student', 'course', 'student_course');
+                                'student', 'course', 'student_course', 'timer');
 
 
   public function testBasic()
@@ -139,6 +139,7 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('string' => 'aba'));
     $newModel = $model->save(array('string' => 'a%a'));
     $this->assertTrue(is_numeric($newModel->id));
+    $this->assertTrue(($newModel->id > 0));
     $this->assertEquals($newModel->string, 'a%a');
 
     $model = Sabel_Model::load('TestForLike');
@@ -1064,6 +1065,24 @@ class Test_DB_Test extends SabelTestCase
     $blog = Sabel_Model::load('Blog')->selectOne(8);
     $this->assertEquals($blog->title, 'title8');
     $this->assertEquals($blog->users_id, 2);
+  }
+
+  public function testTimer()
+  {
+    $model = Sabel_Model::load('Timer');
+    $model->save(array('id' => 1));
+
+    $model = Sabel_Model::load('Timer')->selectOne(1);
+    $this->assertEquals($model->id, 1);
+    $this->assertNull($model->auto_update);
+    $this->assertNotNull($model->auto_create);
+
+    $model->save(array('auto_create' => date('Y-m-d H:i:s')));
+
+    $model = Sabel_Model::load('Timer')->selectOne(1);
+    $this->assertEquals($model->id, 1);
+    $this->assertNotNull($model->auto_update);
+    $this->assertNotNull($model->auto_create);
   }
 
   public function testClear()
