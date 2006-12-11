@@ -5,7 +5,6 @@ Sabel::using('Sabel_DB_Model');
 /**
  * Sabel_Model
  *
- * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
