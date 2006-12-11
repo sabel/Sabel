@@ -39,13 +39,14 @@ final class Sabel
     if (!class_exists($className)) throw new Exception($className . " not found");
     
     if ($args !== null) {
+      if (!is_array($args)) $args = array($args);
       $argStr = join(', ', $args);
     }
     
     if ($arg === null) {
       return new $className();
     } elseif ($args !== null) {
-      $eval = '$instance =' . " new {$className}({$arg}, {$argStr});";
+      $eval = '$instance = new $className($arg, $argStr);';
       eval($eval);
       return $instance;
     } else {
