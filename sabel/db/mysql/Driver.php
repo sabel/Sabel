@@ -80,9 +80,4 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
     }
     $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
-
-  public function getResultSet()
-  {
-    return $this->resultSet;
-  }
 }

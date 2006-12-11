@@ -93,10 +93,9 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 
   public function makeQuery($conditions, $constraints = null)
   {
-    $sql = $this->stmt->getSQL();
-
     $exist = false;
     if ($this->isAdd = $this->checkConditionTypes($conditions)) {
+      $sql   = $this->stmt->getSQL();
       $exist = Sabel_DB_Pdo_PdoStatement::exists($sql, $conditions, $constraints);
     }
 
@@ -147,11 +146,6 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
       if (is_object($pdoStmt)) $sql = $pdoStmt->queryString;
       throw new Exception("Error: pdo execute failed: $sql PARAMETERS: $param ERROR: $error");
     }
-  }
-
-  public function getResultSet()
-  {
-    return $this->resultSet;
   }
 
   private function makeBindParam()

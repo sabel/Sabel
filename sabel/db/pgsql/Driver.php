@@ -66,9 +66,4 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
     $rows = pg_fetch_all($result);
     $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
-
-  public function getResultSet()
-  {
-    return $this->resultSet;
-  }
 }

@@ -29,7 +29,6 @@ abstract class Sabel_DB_Base_Driver
   public abstract function doCommit($conn);
   public abstract function doRollback($conn);
   public abstract function close($conn);
-  public abstract function getResultSet();
   public abstract function driverExecute($sql = null);
 
   public function extension($obj) { }
@@ -101,5 +100,10 @@ abstract class Sabel_DB_Base_Driver
 
     $this->driverExecute($sql);
     if (isset($this->stmt)) $this->stmt->unsetProperties();
+  }
+
+  public function getResultSet()
+  {
+    return $this->resultSet;
   }
 }
