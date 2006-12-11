@@ -24,12 +24,12 @@ abstract class Sabel_DB_Base_Driver
     $escMethod    = '',
     $lastInsertId = null;
 
-  public abstract function begin($conn);
-  public abstract function commit($conn);
-  public abstract function rollback($conn);
+  public abstract function begin($connectName);
+  public abstract function doCommit($conn);
+  public abstract function doRollback($conn);
   public abstract function close($conn);
-
-  protected abstract function driverExecute($sql = null);
+  public abstract function getResultSet();
+  public abstract function driverExecute($sql = null);
 
   public function extension($obj) { }
 
@@ -37,6 +37,22 @@ abstract class Sabel_DB_Base_Driver
   {
     $this->stmt = new Sabel_DB_General_Statement($this->db, $this->escMethod);
     return $this->stmt;
+  }
+
+  public function loadTransaction()
+  {
+    Sabel::using('Sabel_DB_General_Transaction');
+    return Sabel_DB_General_Transaction::getInstance();
+  }
+
+  public function commit()
+  {
+    $this->loadTransaction()->commit();
+  }
+
+  public function rollback()
+  {
+    $this->loadTransaction()->rollback();
   }
 
   public function update()

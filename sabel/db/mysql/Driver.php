@@ -15,6 +15,9 @@ Sabel::using('Sabel_DB_General_Statement');
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 {
+  private
+    $resultSet = null;
+
   protected
     $escMethod = 'mysql_real_escape_string';
 
@@ -24,17 +27,22 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
     $this->db   = 'mysql';
   }
 
-  public function begin($conn)
+  public function begin($conName)
   {
-    $this->driverExecute('START TRANSACTION', $conn);
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($conName)) {
+      $this->driverExecute('START TRANSACTION', $this->conn);
+      $trans->begin($this, $conName);
+    }
   }
 
-  public function commit($conn)
+  public function doCommit($conn)
   {
     $this->driverExecute('COMMIT', $conn);
   }
 
-  public function rollback($conn)
+  public function doRollback($conn)
   {
     $this->driverExecute('ROLLBACK', $conn);
   }
@@ -57,27 +65,27 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
     $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
-      $this->result = mysql_query($sql, $conn);
+      $result = mysql_query($sql, $conn);
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $this->result = mysql_query($sql, $conn);
+      $result = mysql_query($sql, $conn);
     }
 
-    if (!$this->result) {
+    if (!$result) {
       $error = mysql_error($conn);
       throw new Exception("mysql_query execute failed:{$sql} ERROR:{$error}");
     }
+
+    $rows = array();
+    if (is_resource($result)) {
+      while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
+    }
+    $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
 
   public function getResultSet()
   {
-    $rows   = array();
-    $result = $this->result;
-
-    if (is_resource($result)) {
-      while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
-    }
-    return new Sabel_DB_Result_Row($rows);
+    return $this->resultSet;
   }
 }

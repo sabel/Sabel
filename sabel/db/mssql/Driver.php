@@ -15,8 +15,7 @@ Sabel::using('Sabel_DB_Mssql_Statement');
  */
 class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
 {
-  private
-    $defCol = '';
+  private $defCol = '';
 
   public function __construct($conn)
   {
@@ -36,17 +35,22 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
     $this->defCol = $tableProp->primaryKey;
   }
 
-  public function begin($conn)
+  public function begin($conName)
   {
-    $this->driverExecute('BEGIN TRANSACTION', $conn);
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($conName)) {
+      $this->driverExecute('BEGIN TRANSACTION', $this->conn);
+      $trans->begin($this, $conName);
+    }
   }
 
-  public function commit($conn)
+  public function doCommit($conn)
   {
     $this->driverExecute('COMMIT TRANSACTION', $conn);
   }
 
-  public function rollback($conn)
+  public function doRollback($conn)
   {
     $this->driverExecute('ROLLBACK TRANSACTION', $conn);
   }
@@ -78,27 +82,27 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
     $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
-      $this->result = mssql_query($sql, $conn);
+      $result = mssql_query($sql, $conn);
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $this->result = mssql_query($sql, $conn);
+      $result = mssql_query($sql, $conn);
     }
 
-    if (!$this->result) {
+    if (!$result) {
       $error = mssql_get_last_message();
       throw new Exception("mssql_query execute failed:{$sql} ERROR:{$error}");
     }
+
+    $rows = array();
+    if (is_resource($result)) {
+      while ($row = mssql_fetch_assoc($result)) $rows[] = $row;
+    }
+    $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
 
   public function getResultSet()
   {
-    $rows   = array();
-    $result = $this->result;
-
-    if (is_resource($result)) {
-      while ($row = mssql_fetch_assoc($result)) $rows[] = $row;
-    }
-    return new Sabel_DB_Result_Row($rows);
+    return $this->resultSet;
   }
 }

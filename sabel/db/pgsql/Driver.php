@@ -15,6 +15,9 @@ Sabel::using('Sabel_DB_General_Statement');
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 {
+  private
+    $resultSet = null;
+
   protected
     $escMethod = 'pg_escape_string';
 
@@ -24,17 +27,22 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
     $this->db   = 'pgsql';
   }
 
-  public function begin($conn)
+  public function begin($conName)
   {
-    $this->driverExecute('BEGIN', $conn);
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($conName)) {
+      $this->driverExecute('START TRANSACTION', $this->conn);
+      $trans->begin($this, $conName);
+    }
   }
 
-  public function commit($conn)
+  public function doCommit($conn)
   {
     $this->driverExecute('COMMIT', $conn);
   }
 
-  public function rollback($conn)
+  public function doRollback($conn)
   {
     $this->driverExecute('ROLLBACK', $conn);
   }
@@ -49,21 +57,24 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
     $conn = ($conn === null) ? $this->conn : $conn;
 
     if (isset($sql)) {
-      $this->result = pg_query($conn, $sql);
+      $result = pg_query($conn, $sql);
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $this->result = pg_query($conn, $sql);
+      $result = pg_query($conn, $sql);
     }
 
-    if (!$this->result) {
-      $error = pg_result_error($this->result);
+    if (!$result) {
+      $error = pg_result_error($result);
       throw new Exception("pgsql_query execute failed:{$sql} ERROR:{$error}");
     }
+
+    $rows = (is_resource($result)) ? pg_fetch_all($result) : array();
+    $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
 
   public function getResultSet()
   {
-    return new Sabel_DB_Result_Row(pg_fetch_all($this->result));
+    return $this->resultSet;
   }
 }

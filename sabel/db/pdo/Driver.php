@@ -33,12 +33,17 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     return $this->stmt;
   }
 
-  public function begin($conn)
+  public function begin($conName)
   {
-    $conn->beginTransaction();
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($conName)) {
+      $this->conn->beginTransaction();
+      $trans->begin($this, $conName);
+    }
   }
 
-  public function commit($conn)
+  public function doCommit($conn)
   {
     if (!$conn->commit()) {
       $error = $this->conn->errorInfo();
@@ -46,14 +51,14 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     }
   }
 
+  public function doRollback($conn)
+  {
+    $conn->rollBack();
+  }
+
   public function close($conn)
   {
     $conn = null;
-  }
-
-  public function rollback($conn)
-  {
-    $conn->rollBack();
   }
 
   public function update()
@@ -153,10 +158,9 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
   private function makeBindParam()
   {
     $param = ($this->stmt === null) ? array() : $this->stmt->getParam();
-    $data  = $this->data;
+    $data  =& $this->data;
 
     if ($data) $param = (empty($param)) ? $data : array_merge($param, $data);
-    $this->data = array();
     $data = array();
 
     $bindParam = array();

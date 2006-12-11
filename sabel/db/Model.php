@@ -449,7 +449,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception('Error:multipleInsert() data is not array.');
     }
 
-    BEGIN($this);
+    $this->begin();
 
     try {
       $this->ArrayInsert($data);
@@ -457,7 +457,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception($e->getMessage());
     }
 
-    COMMIT();
+    $this->commit();
   }
 
   public function remove($param1 = null, $param2 = null, $param3 = null)
@@ -496,7 +496,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
     }
 
-    BEGIN($this);
+    $this->begin();
 
     $models = array();
     $table  = $this->tableProp->table;
@@ -511,7 +511,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->clearCascadeStack(array_reverse($this->cascadeStack));
     $this->remove($pKey, $id);
 
-    COMMIT();
+    $this->commit();
   }
 
   private function makeChainModels($children, &$chain)
@@ -552,7 +552,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $model = MODEL(convert_to_modelname($tName));
       $model->setConnectName($cName);
 
-      BEGIN($model);
+      $model->begin();
       $model->remove($foreignKey, $idValue);
     }
   }

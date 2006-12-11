@@ -140,7 +140,7 @@ class Sabel_DB_Executer
   public function getDriver()
   {
     if ($this->driver === null) {
-      $this->driver = Sabel_DB_Connection::getDriver($this->tableProp->connectName);
+      $this->driver = Sabel_DB_Connection::getDriver($this->getConnectName());
       $this->driver->extension($this->tableProp);
     }
     return $this->driver;
@@ -153,8 +153,7 @@ class Sabel_DB_Executer
    */
   public function getStatement()
   {
-    $driver = $this->getDriver();
-    return $driver->loadStatement();
+    return $this->getDriver()->loadStatement();
   }
 
   public function find()
@@ -184,7 +183,7 @@ class Sabel_DB_Executer
       $this->execInsert($driver, $stmt, $data, $incCol);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
-      $this->executeError($e->getMessage());
+      $this->executeError($e->getMessage(), $driver);
     }
   }
 
@@ -199,14 +198,14 @@ class Sabel_DB_Executer
         $this->execInsert($driver, $stmt, $val, $incCol);
       }
     } catch (Exception $e) {
-      $this->executeError($e->getMessage());
+      $this->executeError($e->getMessage(), $driver);
     }
   }
 
   protected function execInsert($driver, $stmt, $data, $idColumn)
   {
     $table = $this->tableProp->table;
-    $db    = Sabel_DB_Connection::getDB($this->tableProp->connectName);
+    $db    = Sabel_DB_Connection::getDB($this->getConnectName());
 
     if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
       $data = $driver->setIdNumber($table, $data, $idColumn);
@@ -293,13 +292,13 @@ class Sabel_DB_Executer
     try {
       $driver->execute($sql, $param);
     } catch (Exception $e) {
-      $this->executeError($e->getMessage());
+      $this->executeError($e->getMessage(), $driver);
     }
   }
 
-  public function executeError($errorMsg)
+  public function executeError($errorMsg, $driver)
   {
-    ROLLBACK();
+    $driver->rollback();
     throw new Exception($errorMsg);
   }
 
@@ -329,9 +328,24 @@ class Sabel_DB_Executer
   {
     Sabel::using('Sabel_DB_Schema_Accessor');
 
-    $connectName = $this->tableProp->connectName;
+    $connectName = $this->getConnectName();
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
     return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
+  }
+
+  public function begin()
+  {
+    $this->getDriver()->begin($this->getConnectName());
+  }
+
+  public function commit()
+  {
+    $this->getDriver()->commit();
+  }
+
+  public function rollback()
+  {
+    $this->getDriver()->rollback();
   }
 
   public function close()
