@@ -32,11 +32,16 @@ class Sabel_Controller_Front
       $request = Sabel::load('Sabel_Request');
     }
     
-    $cache = Sabel::load('Sabel_Cache_Apc');
-    if (!($candidate = $cache->read($request->__toString()))) {
+    if (ENVIRONMENT !== DEVELOPMENT) {
+      $cache = Sabel::load('Sabel_Cache_Apc');
+      if (!($candidate = $cache->read($request->__toString()))) {
+        $candidate = Sabel::load('Sabel_Map_Candidate');
+        $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+        $cache->write($request->__toString(), $candidate);
+      }
+    } else {
       $candidate = Sabel::load('Sabel_Map_Candidate');
       $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
-      $cache->write($request->__toString(), $candidate);
     }
     
     Sabel_Context::setCurrentCandidate($candidate);

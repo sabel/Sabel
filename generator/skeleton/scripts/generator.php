@@ -23,10 +23,19 @@ class ModelGenerator
 
 class ControllerGenerator
 {
-  public static function generate($name, $type)
+  public static function generate($module, $name, $type)
   {
     $name = strtolower($name);
-    $target = 'app/index/controllers/' . ucfirst($name) . '.php';
+    
+    if (!is_dir('app/' . $module)) {
+      mkdir('app/' . $module);
+      mkdir('app/' . $module . '/controllers');
+      mkdir('app/' . $module . '/views');
+      mkdir('app/' . $module . '/models');
+      mkdir('app/' . $module . '/helpers');
+    }
+    
+    $target = 'app/'.$module.'/controllers/' . ucfirst($name) . '.php';
     echo "generate $target \n";
     $fp = fopen($target, 'w');
     $controllerName = $name;
@@ -109,8 +118,9 @@ class Generator
 {
   public static function main()
   {
-    $type = $_SERVER['argv'][1];
-    $name = $_SERVER['argv'][2];
+    $type   = $_SERVER['argv'][1];
+    $module = $_SERVER['argv'][2];
+    $name   = $_SERVER['argv'][3];
     
     switch ($type) {
       case 'model':
@@ -120,7 +130,7 @@ class Generator
         break;
       case 'controller':
         print "generate controller ${name}\n";
-        ControllerGenerator::generate($name, 'standerd');
+        ControllerGenerator::generate($module, $name, 'standerd');
         break;
       case 'view':
         ViewGenerator::generate('lists',  $name);

@@ -1,8 +1,8 @@
 <?php
 
 candidate("default",
-          ":controller/:action/:id",
-          array("default" => array(":controller" => "index",
+          ":module/:controller/:action/:id",
+          array("default" => array(":module"     => "index",
+                                   ":controller" => "index",
                                    ":action"     => "index",
-                                   ":id"         => null),
-                "module"  => "index"));
+                                   ":id"         => null)));

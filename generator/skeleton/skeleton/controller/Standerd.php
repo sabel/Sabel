@@ -1,14 +1,11 @@
 <#php
 
-class Controllers_<? echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
+Sabel::using('Sabel_Controller_Page');
+
+class <?php echo ucfirst($module) ?>_Controllers_<?php echo ucfirst($controllerName) ?> extends Sabel_Controller_Page
 {
-  public function initialize()
-  {
-    
-  }
-  
   public function index()
   {
-    echo "welcome to <? echo ucfirst($controllerName) ?> controller. \n";
+    echo "welcome to <?php echo ucfirst($controllerName) ?> controller. \n";
   }
 }

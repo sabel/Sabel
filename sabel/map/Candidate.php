@@ -392,6 +392,12 @@ class Sabel_Map_Candidate implements Iterator
         }
       } elseif (isset($parameters[$element[self::ELEMENT_NAME]])) {
         $buffer[] = $parameters[$element[self::ELEMENT_NAME]];
+      } else {
+        if (!isset($parameters[$element[self::ELEMENT_NAME]]) && isset($element[self::OMITTABLE_KEY])) {
+          // ignore
+        } else {
+          $buffer[] = $element[self::ELEMENT_NAME];
+        }
       }
     }
     
