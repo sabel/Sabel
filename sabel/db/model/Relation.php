@@ -52,7 +52,7 @@ class Sabel_DB_Model_Relation
         $pm = $parent;
         if (strpos($pm, ':') !== false) list($gbg, $pm) = explode(':', $pm);
         if (strpos($pm, '.') !== false) list($pm) = explode('.', $pm);
-        if (array_key_exists($pm, $this->acquiredParents)) continue;
+        if (isset($this->acquiredParents[$pm])) continue;
 
         $this->acquiredParents[$pm] = true;
         if (!$this->isEnableJoin($pm)) return false;

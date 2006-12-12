@@ -69,9 +69,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function schema($tblName = null)
   {
-    if (isset($tblName)) {
-      return $this->getTableSchema($tblName)->getColumns();
-    }
+    if (isset($tblName)) return $this->getTableSchema($tblName)->getColumns();
 
     $columns = $this->getSchema()->getColumns();
     foreach ($this->property->getData() as $name => $value) {
@@ -176,9 +174,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($withParent) {
       $relClass = Sabel::load('Sabel_DB_Model_Relation');
       $mdlName  = convert_to_modelname($tblName);
-      if ($relClass->initJoin($mdlName)) {
+      if ($relClass->initJoin($mdlName))
         return $relClass->execJoin($this, 'INNER');
-      }
     }
 
     $projection = $this->property->getProjection();
@@ -196,9 +193,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     foreach ($rows as $row) {
       $model = clone $obj;
 
-      if ($childConstraints) {
-        $model->receiveChildConstraint($childConstraints);
-      }
+      if ($childConstraints) $model->receiveChildConstraint($childConstraints);
 
       $model->setData(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($model);
@@ -260,17 +255,17 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     if ($id === null) return $model;
 
-    if (!is_array($row = Sabel_DB_SimpleCache::get($tblName . $id))) {
+    $cacheName = $tblName . $id;
+    if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
       $model->setCondition($model->tableProp->primaryKey, $id);
       $projection = $model->property->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
       $resultSet = $model->exec();
 
-      if (!$row = $resultSet->fetch()) {
+      if (!$row = $resultSet->fetch())
         throw new Exception('Error: relational error. parent does not exists.');
-      }
 
-      Sabel_DB_SimpleCache::add($tblName . $id, $row);
+      Sabel_DB_SimpleCache::add($cacheName, $row);
     }
 
     $row = $this->addParentModels($row, $model->tableProp->primaryKey);
@@ -315,8 +310,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       return false;
     }
 
-    $withParent = $this->property->isWithParent();
-    $withParent = ($withParent) ? true : $cModel->property->isWithParent();
+    $withParent = ($this->property->isWithParent() || $cModel->property->isWithParent());
 
     $children = array();
     $childObj = MODEL($child);
@@ -450,9 +444,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       }
     }
 
-    foreach ($newData as $key => $val) {
-      $newModel->property->set($key, $val);
-    }
+    foreach ($newData as $key => $val) $newModel->property->set($key, $val);
 
     $newModel->enableSelected();
     return $newModel;
@@ -515,9 +507,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $chain = Schema_CascadeChain::get();
     $key   = $this->getConnectName() . ':' . $this->tableProp->table;
 
-    if (!isset($chain[$key])) {
+    if (!isset($chain[$key]))
       throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
-    }
 
     $this->begin();
 
@@ -545,15 +536,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     if (!isset($chain[$key])) return null;
 
+    $models = array();
     foreach ($chain[$key] as $tblName) {
-      $models = array();
       foreach ($children as $child) {
         $foreignKey = $child->tableProp->table . '_' . $child->tableProp->primaryKey;
         if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
       }
-      if ($models) {
-        foreach ($models as $children) $this->makeChainModels($children, $chain);
-      }
+    }
+
+    if ($models) {
+      foreach ($models as $children) $this->makeChainModels($children, $chain);
     }
   }
 

@@ -22,21 +22,19 @@ class Sabel_DB_General_Transaction
 
   public static function getInstance()
   {
-    if (self::$ins === null) {
-      self::$ins = new self();
-    }
+    if (self::$ins === null) self::$ins = new self();
     return self::$ins;
   }
 
   public function begin($driver, $conName = 'default')
   {
-    if (!isset($this->transactions[$conName])) {
-      $conn = Sabel_DB_Connection::getConnection($conName);
-      $this->transactions[$conName]['conn']   = $conn;
-      $this->transactions[$conName]['driver'] = $driver;
+    if (isset($this->transactions[$conName])) return;
 
-      $this->active = true;
-    }
+    $conn = Sabel_DB_Connection::getConnection($conName);
+    $this->transactions[$conName]['conn']   = $conn;
+    $this->transactions[$conName]['driver'] = $driver;
+
+    $this->active = true;
   }
 
   public function isActive($conName = null)

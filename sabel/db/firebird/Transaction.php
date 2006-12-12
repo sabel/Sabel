@@ -22,9 +22,7 @@ class Sabel_DB_Firebird_Transaction
 
   public static function getInstance()
   {
-    if (self::$ins === null) {
-      self::$ins = new self();
-    }
+    if (self::$ins === null) self::$ins = new self();
     return self::$ins;
   }
 
@@ -64,9 +62,7 @@ class Sabel_DB_Firebird_Transaction
   private function executeMethod($method)
   {
     if ($this->isActive()) {
-      foreach ($this->transactions as $transaction) {
-        $method($transaction);
-      }
+      foreach ($this->transactions as $transaction) $method($transaction);
 
       $this->active = false;
       $this->transactions = array();

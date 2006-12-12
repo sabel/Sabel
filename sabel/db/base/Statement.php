@@ -54,36 +54,33 @@ abstract class Sabel_DB_Base_Statement
       switch ($condition->type) {
         case Sabel_DB_Condition::NORMAL:
           $this->makeNormalSQL($condition);
-          continue;
+          break;
         case Sabel_DB_Condition::BET:
           $this->makeBetweenSQL($condition);
-          continue;
+          break;
         case Sabel_DB_Condition::LIKE:
           $this->prepareLikeSQL($condition);
-          continue;
+          break;
         case Sabel_DB_Condition::IN:
           $this->makeWhereInSQL($condition);
-          continue;
+          break;
         case Sabel_DB_Condition::ISNULL:
           $this->makeIsNullSQL($condition->key);
-          continue;
+          break;
         case Sabel_DB_Condition::NOTNULL:
           $this->makeIsNotNullSQL($condition->key);
-          continue;
+          break;
         case Sabel_DB_Condition::COMP:
           $this->makeCompareSQL($condition);
-          continue;
+          break;
       }
     }
   }
 
   private function makeEitherQuery($condArray)
   {
-    $conds = array();
-    foreach ($condArray as $cond) $conds[] = $cond;
-
     $this->either = true;
-    $this->makeConditionQuery($conds);
+    $this->makeConditionQuery($condArray);
     $this->sql[] = ')';
     $this->eCount = 1;
     $this->either = false;
@@ -113,7 +110,7 @@ abstract class Sabel_DB_Base_Statement
   {
     $values = array();
     foreach ($condition->value as $val) $values[] = $this->escape($val);
-    $this->setWhereQuery($this->getKey($condition) . " IN (" . join(',', $values) . ')');
+    $this->setWhereQuery($this->getKey($condition) . ' IN (' . join(',', $values) . ')');
   }
 
   protected function getKey($condition)
@@ -162,7 +159,7 @@ abstract class Sabel_DB_Base_Statement
     for ($i = 0; $i < 30; $i++) {
       $esc = $escapeChars{$i};
       if (strpbrk($val, $esc) === false) {
-        $val = str_replace(array('%', '_'), array("{$esc}%", "{$esc}_"), $val);
+        $val = preg_replace('/([%_])/', $esc . '$1', $val);
         return array($val, $esc);
       }
     }
@@ -175,10 +172,16 @@ abstract class Sabel_DB_Base_Statement
     if (is_string($val)) {
       $val = ($escMethod === '') ? $val : $escMethod($val);
     } elseif (is_bool($val)) {
-      if (in_array($this->db, array('pgsql', 'mssql', 'sqlite'))) {
-        $val = ($val) ? 'true' : 'false';
-      } elseif (in_array($this->db, array('mysql', 'firebird'))) {
-        $val = ($val) ? 1 : 0;
+      switch ($this->db) {
+        case 'pgsql':
+        case 'mssql':
+        case 'sqlite':
+          $val = ($val) ? 'true' : 'false';
+          break;
+        case 'mysql':
+        case 'firebird':
+          $val = ($val) ? 1 : 0;
+          break;
       }
     }
     return $val;

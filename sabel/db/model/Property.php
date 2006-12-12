@@ -44,17 +44,13 @@ class Sabel_DB_Model_Property
       if (isset($mdlProps[$key])) $props[$key] = $mdlProps[$key];
     }
 
-    if (array_key_exists('childConstraints', $mdlProps)) {
+    if (isset($mdlProps['childConstraints'])) {
       foreach ($mdlProps['childConstraints'] as $cldName => $param) {
         $this->cconst($cldName, $param);
       }
     }
 
-    if (array_key_exists('connectName', $mdlProps)) {
-      $conName = $mdlProps['connectName'];
-    } else {
-      $conName = 'default';
-    }
+    $conName = (isset($mdlProps['connectName'])) ? $mdlProps['connectName'] : 'default';
 
     $this->initSchema($mdlName, $conName, $props['table']);
     $this->overrideProps = $props;
@@ -68,7 +64,7 @@ class Sabel_DB_Model_Property
     if ($cache) {
       $this->schema     = $cache;
       $this->columns    = Sabel_DB_SimpleCache::get('columns_' . $tblName);
-      $this->properties = Sabel_DB_SimpleCache::get('props_' . $tblName);
+      $this->properties = Sabel_DB_SimpleCache::get('props_'   . $tblName);
     } else {
       $sClsName = 'Schema_' . $mdlName;
       Sabel::using($sClsName);
@@ -208,9 +204,7 @@ class Sabel_DB_Model_Property
     $real = array();
 
     foreach ($data as $key => $val) {
-      if (in_array($key, $cols)) {
-        $real[$key] = $this->convertData($key, $val);
-      }
+      if (in_array($key, $cols)) $real[$key] = $this->convertData($key, $val);
     }
     return $real;
   }
@@ -262,12 +256,11 @@ class Sabel_DB_Model_Property
 
   public function setChildConstraint($mdlName, $constraints)
   {
-    if (!is_array($constraints)) {
+    if (!is_array($constraints))
       throw new Exception('Error:setChildConstraint() second argument must be an array.');
-    } else {
-      foreach ($constraints as $key => $val) {
-        $this->childConstraints[$mdlName][$key] = $val;
-      }
+
+    foreach ($constraints as $key => $val) {
+      $this->childConstraints[$mdlName][$key] = $val;
     }
   }
 
