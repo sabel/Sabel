@@ -23,73 +23,73 @@ class Sabel_Date
   const RFC     = 10;
   const W3C     = 11;
 
-  private $forms = array(self::NORMAL  => array(
-                           'full' => 'Y-m-d H:i:s',
-                           'date' => 'Y-m-d',
-                           'time' => 'H:i:s'),
+  private $formats = array(self::NORMAL  => array(
+                             'full' => 'Y-m-d H:i:s',
+                             'date' => 'Y-m-d',
+                             'time' => 'H:i:s'),
 
-                         self::ATOM    => array(
-                           'full' => 'c',
-                           'date' => 'Y-m-d',
-                           'time' => 'H:i:sP'),
+                           self::ATOM    => array(
+                             'full' => 'c',
+                             'date' => 'Y-m-d',
+                             'time' => 'H:i:sP'),
 
-                         self::RSS     => array(
-                           'full' => 'r',
-                           'date' => 'D, d M Y',
-                           'time' => 'H:i:s O'),
+                           self::RSS     => array(
+                             'full' => 'r',
+                             'date' => 'D, d M Y',
+                             'time' => 'H:i:s O'),
 
-                         self::COOKIE  => array(
-                           'full' => 'l, d-M-y H:i:s T',
-                           'date' => 'l, d-M-y',
-                           'time' => 'H:i:s T'),
+                           self::COOKIE  => array(
+                             'full' => 'l, d-M-y H:i:s T',
+                             'date' => 'l, d-M-y',
+                             'time' => 'H:i:s T'),
 
-                         self::ISO     => array(
-                           'full' => 'Y-m-d\TH:i:sO',
-                           'date' => 'Y-m-d',
-                           'time' => 'H:i:sO'),
+                           self::ISO     => array(
+                             'full' => 'Y-m-d\TH:i:sO',
+                             'date' => 'Y-m-d',
+                             'time' => 'H:i:sO'),
 
-                         self::RFC822  => array(
-                           'full' => 'D, d M y H:i:s O',
-                           'date' => 'D, d M y',
-                           'time' => 'H:i:s O'),
+                           self::RFC822  => array(
+                             'full' => 'D, d M y H:i:s O',
+                             'date' => 'D, d M y',
+                             'time' => 'H:i:s O'),
 
-                         self::RFC850  => array(
-                           'full' => 'l, d-M-y H:i:s T',
-                           'date' => 'l, d-M-y',
-                           'time' => 'H:i:s T'),
+                           self::RFC850  => array(
+                             'full' => 'l, d-M-y H:i:s T',
+                             'date' => 'l, d-M-y',
+                             'time' => 'H:i:s T'),
 
-                         self::RFC1036 => array(
-                           'full' => 'D, d M y H:i:s O',
-                           'date' => 'D, d M y',
-                           'time' => 'H:i:s O'),
+                           self::RFC1036 => array(
+                             'full' => 'D, d M y H:i:s O',
+                             'date' => 'D, d M y',
+                             'time' => 'H:i:s O'),
 
-                         self::RFC1123 => array(
-                           'full' => 'r',
-                           'date' => 'D, d M Y',
-                           'time' => 'H:i:s O'),
+                           self::RFC1123 => array(
+                             'full' => 'r',
+                             'date' => 'D, d M Y',
+                             'time' => 'H:i:s O'),
 
-                         self::RFC2822 => array(
-                           'full' => 'r',
-                           'date' => 'D, d M Y',
-                           'time' => 'H:i:s O'),
+                           self::RFC2822 => array(
+                             'full' => 'r',
+                             'date' => 'D, d M Y',
+                             'time' => 'H:i:s O'),
 
-                         self::RFC     => array(
-                           'full' => 'r',
-                           'date' => 'D, d M Y',
-                           'time' => 'H:i:s O'),
+                           self::RFC     => array(
+                             'full' => 'r',
+                             'date' => 'D, d M Y',
+                             'time' => 'H:i:s O'),
 
-                         self::W3C     => array(
-                           'full' => 'c',
-                           'date' => 'Y-m-d',
-                           'time' => 'H:i:sP'));
+                           self::W3C     => array(
+                             'full' => 'c',
+                             'date' => 'Y-m-d',
+                             'time' => 'H:i:sP'));
 
-  private $form = self::NORMAL;
+  private $format = self::NORMAL;
   private $data = array();
   private $timestamp = null;
 
   public function __construct($arg = null)
   {
-    if (isset($form)) $this->form = $form;
+    if (isset($format)) $this->format= $format;
 
     if ($arg === null) {
       $this->timestamp = time();
@@ -108,17 +108,17 @@ class Sabel_Date
       throw new Sabel_Exception_Runtime('Sabel_Date::__construct() invalid parameter.');
     }
 
-    $this->init();
+    $this->reset();
   }
 
-  protected function init()
+  protected function reset()
   {
     $this->data = array('year'    => $this->y(),
                         's_year'  => $this->y(true),
                         'month'   => $this->m(),
                         's_month' => $this->m(true),
-                        'day'     => $this->i(),
-                        's_day'   => $this->i(true),
+                        'day'     => $this->d(),
+                        's_day'   => $this->d(true),
                         'hour'    => $this->h(),
                         's_hour'  => $this->h(true),
                         'minute'  => $this->i(),
@@ -135,27 +135,27 @@ class Sabel_Date
     return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
-  public function setForm($form)
+  public function setFormat($format)
   {
-    $this->form = $form;
+    $this->format = $format;
   }
 
   public function getDateTime()
   {
-    $form = $this->form;
-    return date($this->forms[$form]['full'], $this->timestamp);
+    $format = $this->format;
+    return date($this->formats[$format]['full'], $this->timestamp);
   }
 
   public function getDate()
   {
-    $form = $this->form;
-    return date($this->forms[$form]['date'], $this->timestamp);
+    $format = $this->format;
+    return date($this->formats[$format]['date'], $this->timestamp);
   }
 
   public function getTime()
   {
-    $form = $this->form;
-    return date($this->forms[$form]['date'], $this->timestamp);
+    $format = $this->format;
+    return date($this->formats[$format]['time'], $this->timestamp);
   }
 
   public function getYear($short = false)
@@ -214,6 +214,14 @@ class Sabel_Date
     return date('j', $this->timestamp);
   }
 
+  public function getLastDay($short = false)
+  {
+    $timestamp = mktime($this->h(), $this->i(), $this->s(), $this->m() + 1, 0, $this->y());
+
+    $format = ($short) ? 'j' : 'd';
+    return date($format, $timestamp);
+  }
+
   public function getHour($short = false)
   {
     if ($short) {
@@ -254,8 +262,8 @@ class Sabel_Date
 
   public function getMeridiem($upper = false)
   {
-    $form = ($upper) ? 'A' : 'a';
-    return date($form, $this->timestamp);
+    $format = ($upper) ? 'A' : 'a';
+    return date($format, $this->timestamp);
   }
 
   public function getWeek($short = false)
@@ -321,75 +329,99 @@ class Sabel_Date
   {
     $year = $this->y() + $year;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $this->m(), $this->d(), $year);
-    $this->init();
+    $this->reset();
+
+    return $this->y();
   }
 
   public function incMonth($month = 1)
   {
     $month = $this->m() + $month;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $month, $this->d(), $this->y());
-    $this->init();
+    $this->reset();
+
+    return $this->m();
   }
 
   public function incDay($day = 1)
   {
     $this->timestamp += 86400 * $day;
-    $this->init();
+    $this->reset();
+
+    return $this->d();
   }
 
   public function incHour($hour = 1)
   {
     $this->timestamp += 3600 * $hour;
-    $this->init();
+    $this->reset();
+
+    return $this->h();
   }
 
   public function incMinute($min = 1)
   {
     $this->timestamp += 60 * $min;
-    $this->init();
+    $this->reset();
+
+    return $this->i();
   }
 
   public function incSecond($second = 1)
   {
     $this->timestamp += $second;
-    $this->init();
+    $this->reset();
+
+    return $this->s();
   }
 
   public function decYear($year = 1)
   {
     $year = $this->y() - $year;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $this->m(), $this->d(), $year);
-    $this->init();
+    $this->reset();
+
+    return $this->y();
   }
 
   public function decMonth($month = 1)
   {
     $month = $this->m() - $month;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $month, $this->d(), $this->y());
-    $this->init();
+    $this->reset();
+
+    return $this->m();
   }
 
   public function decDay($day = 1)
   {
     $this->timestamp -= 86400 * $day;
-    $this->init();
+    $this->reset();
+
+    return $this->d();
   }
 
   public function decHour($hour = 1)
   {
     $this->timestamp -= 3600 * $hour;
-    $this->init();
+    $this->reset();
+
+    return $this->h();
   }
 
   public function decMinute($min = 1)
   {
     $this->timestamp -= 60 * $min;
-    $this->init();
+    $this->reset();
+
+    return $this->m();
   }
 
   public function decSecond($second = 1)
   {
     $this->timestamp -= $second;
-    $this->init();
+    $this->reset();
+
+    return $this->s();
   }
 }

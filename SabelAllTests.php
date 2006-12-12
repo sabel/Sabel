@@ -47,6 +47,7 @@ require_once('Test/Resolver.php');
 require_once('Test/Classes.php');
 // require_once('Test/Cache.php');
 
+require_once('Test/Date.php');
 require_once('Test/DB/Tests.php');
 require_once('Test/Map/Tests.php');
 
@@ -84,6 +85,7 @@ class SabelAllTests
     
     $suite->addTest(Test_Namespace::suite());
     $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_Date::suite());
     
     $suite->addTest(Test_Map_Tests::suite());
     
