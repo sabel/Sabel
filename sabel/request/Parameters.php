@@ -39,6 +39,11 @@ class Sabel_Request_Parameters
     return (isset($pp[$key])) ? $pp[$key] : null;
   }
   
+  public function hasA($key)
+  {
+    return (isset($this->parsedParameters[$key]));
+  }
+  
   public function __toString()
   {
     return $this->rawParameters;

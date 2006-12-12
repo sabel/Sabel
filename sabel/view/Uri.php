@@ -17,17 +17,17 @@ class Sabel_View_Uri
   {
   }
   
-  public function hyperlink($params, $anchor = null, $id = null, $class = null)
+  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null)
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
-    $fmtUri = '<a id="%s" class="%s" href="%s">%s</a>';
-    return sprintf($fmtUri, $id, $class, $this->uri($params, true), $anchor);
+    $fmtUri = '<a id="%s" class="%s" href="%s%s">%s</a>';
+    return sprintf($fmtUri, $id, $class, $this->uri($params, true), $uriParameters, $anchor);
   }
   
-  public function aTag($param, $anchor)
+  public function aTag($param, $anchor, $uriParameters = null)
   {
-    return $this->hyperlink($this->convert($param), $anchor);
+    return $this->hyperlink($this->convert($param), $anchor, $uriParameters);
   }
   
   public function uri($params, $withDomain)

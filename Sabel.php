@@ -149,10 +149,11 @@ function hyperlink($params, $anchor = null, $id = null, $class = null)
   return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
-function a($param, $anchor)
+function a($param, $anchor, $uriParameters = null)
 {
   $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
-  return $aCreator->aTag($param, $anchor);
+  $tag = $aCreator->aTag($param, $anchor, $uriParameters);
+  return $tag;
 }
 
 function request($uri)

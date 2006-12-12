@@ -58,6 +58,20 @@ class Sabel_Request
     return true;
   }
   
+  public function hasParameter($name)
+  {
+    return $this->parameters->hasA($name);
+  }
+  
+  public function getParameter($name)
+  {
+    if ($this->hasParameter($name)) {
+      return $this->parameters->get($name);
+    } else {
+      return null;
+    }
+  }
+  
   /**
    * get parameters object
    *
