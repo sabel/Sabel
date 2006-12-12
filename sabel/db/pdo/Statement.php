@@ -27,10 +27,12 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Base_Statement
   public function makeUpdateSQL($table, $data)
   {
     $sql = array();
-    foreach (array_keys($data) as $key) $sql[] = "{$key}=:{$key}";
-    $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
+    foreach ($data as $key => $val) {
+      $sql[]      = "{$key}=:{$key}";
+      $data[$key] = $this->escape($val);
+    }
 
-    foreach ($data as $key => $val) $data[$key] = $this->escape($val);
+    $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
     $this->bindData = $data;
   }
 
@@ -40,8 +42,9 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Base_Statement
     $values  = array();
 
     foreach ($data as $key => $val) {
-      $columns[] = $key;
-      $values[]  = ':' . $key;
+      $columns[]  = $key;
+      $values[]   = ':' . $key;
+      $data[$key] = $this->escape($val);
     }
 
     $sql = array("INSERT INTO $table (");
@@ -51,7 +54,6 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Base_Statement
     $sql[] = ')';
     $this->setBasicSQL(join('', $sql));
 
-    foreach ($data as $key => $val) $data[$key] = $this->escape($val);
     $this->bindData = $data;
   }
 

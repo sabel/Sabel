@@ -22,7 +22,7 @@ class Sabel_DB_Result_Row implements Iterator
 
   public function __construct($results = null)
   {
-    if (empty($results)) return null;
+    if (!is_array($results)) return null;
 
     foreach ($results as $result) {
       $this->assocRow[] = $result;
@@ -33,14 +33,6 @@ class Sabel_DB_Result_Row implements Iterator
   public function isEmpty()
   {
     return (empty($this->assocRow));
-  }
-
-  public function add($result)
-  {
-    if (is_array($result)) {
-      $this->assocRow[] = $result;
-      $this->arrayRow[] = array_values($result);
-    }
   }
 
   public function fetch($style = self::ASSOC)
@@ -55,7 +47,7 @@ class Sabel_DB_Result_Row implements Iterator
         $data = $this->arrayRow[$this->pointer];
         break;
       case self::OBJECT:
-        $data = new Sabel_DB_Result_Object($this->assocRow[$this->pointer]);
+        $data = Sabel::load('Sabel_DB_Result_Object', $this->assocRow[$this->pointer]);
         break;
     }
 
@@ -75,7 +67,7 @@ class Sabel_DB_Result_Row implements Iterator
       case self::OBJECT:
         $data = array();
         foreach ($this->assocRow as $row) {
-          $data[] = new Sabel_DB_Result_Object($row);
+          $data[] = Sabel::load('Sabel_DB_Result_Object', $row);
         }
         break;
     }

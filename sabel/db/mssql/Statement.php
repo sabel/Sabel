@@ -16,7 +16,7 @@ class Sabel_DB_Mssql_Statement extends Sabel_DB_General_Statement
 
   protected function escapeLikeSQL($val)
   {
-    $val = str_replace(array('%', '_'), array('[%]', '[_]'), $val);
+    $val = preg_replace('/([%_])/', '[$1]', $val);
     return array($val, null);
   }
 
@@ -30,27 +30,17 @@ class Sabel_DB_Mssql_Statement extends Sabel_DB_General_Statement
     $column = $this->defOrderCol;
     $tmp    = substr(join('', $sql), 6);
 
-    if (isset($limit)) {
-      $query = "TOP $limit ";
-      if (isset($offset)) {
-        list($subSelect, $orderStr) = $this->mssqlOffset($tmp, $column, $order, $offset);
-        return array('SELECT ' . $query . $tmp . $subSelect . $orderStr);
-      } else {
-        return array('SELECT ' . $query . $tmp);
-      }
-    }
+    $limitQuery  = (isset($limit)) ? "TOP $limit " : '';
+    $offsetQuery = (isset($offset))
+                 ? $this->mssqlOffset($tmp, $column, $order, $offset) : '';
 
-    if (isset($offset)) {
-      list($subSelect, $orderStr) = $this->mssqlOffset($tmp, $column, $order, $offset);
-      $sql = array('SELECT' . $tmp . $subSelect . $orderStr);
-    }
+    return array('SELECT ' . $limitQuery . $tmp . $offsetQuery);
   }
 
   protected function mssqlOffset(&$tmp, $column, $order, $offset)
   {
     if (isset($order)) {
-      list($colName) = explode(' ', $order);
-      $orderColumn = $colName;
+      list($orderColumn) = explode(' ', $order);
       $orderStr = strstr($tmp, 'ORDER BY');
       $tmp = str_replace($orderStr, '', $tmp);
     } else {
@@ -68,6 +58,7 @@ class Sabel_DB_Mssql_Statement extends Sabel_DB_General_Statement
     $subSelect = $subSelect . $orderStr . ') ';
     if ($condition) $subSelect = "$subSelect AND " . str_replace('WHERE ', '', $condition);
 
-    return array($subSelect, $orderStr);
+    return $subSelect . $orderStr;
+//    return array($subSelect, $orderStr);
   }
 }
