@@ -137,7 +137,7 @@ class Schema_Writer
   {
     $className = 'Schema_' . join('', array_map('ucfirst', explode('_', $tName)));
 
-    $target = SCHEMA_DIR . "{$className}.php";
+    $target = SCHEMA_DIR . join('', array_map('ucfirst', explode('_', $tName))).".php";
     echo "generate Schema {$target} \n";
     $fp = fopen($target, 'w');
 

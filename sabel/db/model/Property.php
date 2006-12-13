@@ -69,10 +69,10 @@ class Sabel_DB_Model_Property
       $sClsName = 'Schema_' . $mdlName;
       Sabel::using($sClsName);
 
-      if (!class_exists($sClsName, false)) {
-        list($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
-      } else {
+      if (class_exists($sClsName, false)) {
         list($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
+      } else {
+        list($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
       }
 
       $columns = array_keys($tblSchema->getColumns());
