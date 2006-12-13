@@ -1074,7 +1074,7 @@ class Test_DB_Test extends SabelTestCase
 
     $model = Sabel_Model::load('Timer')->selectOne(1);
     $this->assertEquals($model->id, 1);
-    $this->assertNull($model->auto_update);
+    $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
 
     $model->save(array('auto_create' => date('Y-m-d H:i:s')));

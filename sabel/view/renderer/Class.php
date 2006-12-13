@@ -12,6 +12,7 @@
 class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
   const COMPILE_DIR = '/data/compiled/';
+  const CACHE_DIR   = '/cache/';
   
   const REPLACE_PAT
     = '/<\?php([a-z]*)%s([a-z=]*)\s*([^?;]+)([^?]+)\?>/';
@@ -20,8 +21,22 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3)$4 ?></pre>';
   const NL2BR_REPLACE = '<?php= nl2br($3)$4 ?>';
   
+  private $isCache = false;
+  
+  public function enableCache()
+  {
+    $this->isCache = true;
+  }
+  
   public function rendering($path, $name, $values)
   {
+    if ($this->isCache) {
+      $cachePath = $this->getCacheFilePath($path, $name);
+      if (is_readable($cachePath) && filemtime($cachePath) > time() - 600) {
+        return file_get_contents($cachePath);
+      }
+    }
+    
     $contents = '';
     $filepath = $path . $name;
     $cpath    = $this->getCompileFilePath($path, $name);
@@ -52,14 +67,26 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     ob_start();
     if (is_readable($cpath)) include ($cpath);
     $contents = ob_get_clean();
+    if ($this->isCache) $this->saveCacheFile($path, $name, $contents);
     
     return $contents;
+  }
+  
+  private function saveCacheFile($path, $name, $contents)
+  {
+    $cpath = $this->getCacheFilePath($path, $name);
+    file_put_contents($cpath, $contents);
   }
   
   private function saveCompileFile($path, $name, $contents)
   {
     $cpath = $this->getCompileFilePath($path, $name);
     file_put_contents($cpath, $contents);
+  }
+  
+  private function getCacheFilePath($path, $name)
+  {
+    return RUN_BASE . self::CACHE_DIR . md5($path) . $name;
   }
   
   private function getCompileFilePath($path, $name)

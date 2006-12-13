@@ -435,6 +435,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $newData = array_merge($this->property->getRealData(), $saveData);
     } else {
       $newData = ($data) ? $data : $this->property->getData();
+      $this->recordTime($newData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
       if ($incCol = $this->checkIncColumn()) {
         $newId = $this->insert($newData, $incCol);

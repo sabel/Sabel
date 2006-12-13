@@ -2,7 +2,6 @@
 
 Sabel::using('Sabel_View_Renderer');
 Sabel::using('Sabel_View_Uri');
-Sabel::using('Sabel_View_Renderer_Class');
 
 class Sabel_View
 {
@@ -20,7 +19,7 @@ class Sabel_View
   public function __construct($module = '', $controller = '', $action = '')
   {
     $this->decideTemplatePathAndNameByEntry($module, $controller, $action);
-    $this->renderer = new Sabel_View_Renderer_Class();
+    $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
   }
   
   public function __set($key, $value)
@@ -61,6 +60,11 @@ class Sabel_View
   public function setRenderer($renderer)
   {
     if ($renderer instanceof Sabel_View_Renderer) $this->renderer = $renderer;
+  }
+  
+  public function enableCache()
+  {
+    $this->renderer->enableCache();
   }
   
   public function rendering($withLayout = true)
