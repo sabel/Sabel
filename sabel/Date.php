@@ -22,8 +22,9 @@ class Sabel_Date
   const RFC2822 = 9;
   const RFC     = 10;
   const W3C     = 11;
+  const JP      = 12;
 
-  private $formats = array(self::NORMAL  => array(
+  protected $formats = array(self::NORMAL  => array(
                              'full' => 'Y-m-d H:i:s',
                              'date' => 'Y-m-d',
                              'time' => 'H:i:s'),
@@ -81,11 +82,16 @@ class Sabel_Date
                            self::W3C     => array(
                              'full' => 'c',
                              'date' => 'Y-m-d',
-                             'time' => 'H:i:sP'));
+                             'time' => 'H:i:sP'),
+                             
+                           self::JP      => array(
+                             "full" => "Y年m月d日 H時i分s秒",
+                             "date" => "Y年m月d日",
+                             "time" => "H時i分s秒"));
 
-  private $format = self::NORMAL;
-  private $data = array();
-  private $timestamp = null;
+  protected $format = self::NORMAL;
+  protected $data = array();
+  protected $timestamp = null;
 
   public function __construct($arg = null)
   {
@@ -138,6 +144,7 @@ class Sabel_Date
   public function setFormat($format)
   {
     $this->format = $format;
+    return $this;
   }
 
   public function getDateTime()
