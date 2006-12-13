@@ -1,17 +1,20 @@
 <?php
 
 define('SCHEMA_DIR', 'lib/schema/');
-//define('SABEL', '/usr/local/~~~/~~~/Sabel/');
+// define('SABEL', '/usr/local/lib/php/Sabel/');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
 }
 
+define ('RUN_BASE', getcwd());
 require SABEL . 'Sabel.php';
+require RUN_BASE.'/config/environment.php';
+
+set_include_path(SABEL.":".get_include_path());
 
 Sabel::fileUsing(SABEL . 'sabel/db/Functions.php');
 
-Sabel::using('Sabel_Config_Yaml');
 Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Schema_Accessor');
@@ -226,10 +229,10 @@ class Schema_Maker
       array_push($info, '$cols[' . "'{$column->name}'] = array(");
       array_push($info, "'type' => '{$column->type}', ");
 
-      if ($column->type === Sabel_DB_Schema_Const::INT) {
+      if ($column->type === Sabel_DB_Type_Const::INT) {
         array_push($info, "'max' => {$column->max}, ");
         array_push($info, "'min' => {$column->min}, ");
-      } elseif ($column->type === Sabel_DB_Schema_Const::STRING) {
+      } elseif ($column->type === Sabel_DB_Type_Const::STRING) {
         array_push($info, "'max' => {$column->max}, ");
       }
 
@@ -272,7 +275,21 @@ class Schema_Generator
   {
     $input = $_SERVER['argv'];
     Sabel::fileUsing(getcwd() . '/config/database.php');
-    $data  = get_db_params($input[1]);
+    
+    $environment = $input[1];
+    switch ($environment) {
+      case 'production':
+        $environment = PRODUCTION;
+        break;
+      case 'test':
+        $environment = TEST;
+        break;
+      case 'development':
+        $environment = DEVELOPMENT;
+        break;
+    }
+    
+    $data  = get_db_params($environment);
 
     $schemaWrite  = false;
     $schemaAll    = false;

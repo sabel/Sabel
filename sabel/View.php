@@ -13,7 +13,7 @@ class Sabel_View
   /**
    * @var array values for assignment to template
    */
-  protected $values = array();
+  protected static $values = array();
   
   protected $layout = '';
   
@@ -25,17 +25,17 @@ class Sabel_View
   
   public function __set($key, $value)
   {
-    $this->values[$key] = $value;
+    self::$values[$key] = $value;
   }
   
   public function assign($key, $value)
   {
-    $this->values[$key] = $value;
+    self::$values[$key] = $value;
   }
   
   public function assignByArray($array)
   {
-    $this->values = array_merge($this->values, $array);
+    self::$values = array_merge(self::$values, $array);
   }
   
   public function setTemplatePath($path)
@@ -65,7 +65,7 @@ class Sabel_View
   
   public function rendering($withLayout = true)
   {
-    $contents = $this->renderer->rendering($this->templatePath, $this->templateName, $this->values);
+    $contents = $this->renderer->rendering($this->templatePath, $this->templateName, self::$values);
     
     if ($withLayout) {
       $found = false;

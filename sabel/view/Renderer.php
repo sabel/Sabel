@@ -18,7 +18,7 @@ abstract class Sabel_View_Renderer
   
   public function partial($templateName)
   {
-    $v = new Sabel_View();
+    $v = new Sabel_View('wiki');
     $v->setTemplateName($templateName);
     return $v->rendering(false);
   }

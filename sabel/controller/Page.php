@@ -80,7 +80,7 @@ abstract class Sabel_Controller_Page
     $candidate = Sabel_Context::getCurrentCandidate();
     if ($candidate->hasElementVariableByName($name)) {
       return $candidate->getElementVariableByName($name);
-    } elseif ($this->request->hasParameters() && $this->request->hasParameter($name)) {
+    } elseif (is_object($this->request->getParameters()) && $this->request->hasParameter($name)) {
       return $this->request->getParameter($name);
     } else {
       return $this->request->getRequestValue($name);
