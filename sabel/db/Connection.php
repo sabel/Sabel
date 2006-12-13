@@ -21,7 +21,13 @@ class Sabel_DB_Connection
   {
     if (self::$isInit) return null;
 
-    if (!defined('TEST_CASE')) Sabel::fileUsing(RUN_BASE . '/config/database.php');
+    if (!defined('TEST_CASE')) {
+      Sabel::fileUsing(RUN_BASE . '/config/database.php');
+      foreach (get_db_params() as $connectName => $params) {
+        self::addConnection($connectName, $params);
+      }
+    }
+
     self::$isInit = true;
   }
 

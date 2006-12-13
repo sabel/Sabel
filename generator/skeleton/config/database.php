@@ -1,40 +1,43 @@
 <?php
 
-switch (ENVIRONMENT) {
-  case PRODUCTION:
-    $param = array('default' => array(
-                     'driver'   => 'mysql',
-                     'host'     => 'localhost',
-                     'database' => 'default',
-                     'schema'   => 'default',
-                     'user'     => 'root',
-                     'password' => '')
-                   );
-    break;
+function get_db_params($env = null)
+{
+  $env = ($env === null) ? ENVIRONMENT : $env;
 
-  case TEST:
-    $param = array('default' => array(
-                     'driver'   => 'mysql',
-                     'host'     => 'localhost',
-                     'database' => 'default',
-                     'schema'   => 'default',
-                     'user'     => 'root',
-                     'password' => '')
-                   );
-    break;
+  switch ($env) {
+    case PRODUCTION:
+      $params = array('default' => array(
+                        'driver'   => 'mysql',
+                        'host'     => 'localhost',
+                        'database' => 'default',
+                        'schema'   => 'default',
+                        'user'     => 'root',
+                        'password' => '')
+                     );
+      break;
 
-  case DEVELOPMENT:
-    $param = array('default' => array(
-                     'driver'   => 'mysql',
-                     'host'     => 'localhost',
-                     'database' => 'default',
-                     'schema'   => 'default',
-                     'user'     => 'root',
-                     'password' => '')
-                   );
-    break;
-}
+    case TEST:
+      $params = array('default' => array(
+                        'driver'   => 'mysql',
+                        'host'     => 'localhost',
+                        'database' => 'default',
+                        'schema'   => 'default',
+                        'user'     => 'root',
+                        'password' => '')
+                     );
+      break;
 
-foreach ($param as $connectName => $values) {
-  Sabel_DB_Connection::addConnection($connectName, $values);
+    case DEVELOPMENT:
+      $params = array('default' => array(
+                        'driver'   => 'mysql',
+                        'host'     => 'localhost',
+                        'database' => 'default',
+                        'schema'   => 'default',
+                        'user'     => 'root',
+                        'password' => '')
+                     );
+      break;
+  }
+
+  return $params;
 }

@@ -271,8 +271,8 @@ class Schema_Generator
   public static function main()
   {
     $input = $_SERVER['argv'];
-    $yml   = new Sabel_Config_Yaml('config/database.yml');
-    $data  = $yml->read($input[1]);
+    Sabel::fileUsing(getcwd() . '/config/database.php');
+    $data  = get_db_params($input[1]);
 
     $schemaWrite  = false;
     $schemaAll    = false;
