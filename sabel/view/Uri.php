@@ -27,11 +27,12 @@ class Sabel_View_Uri
   
   public function aTag($param, $anchor, $uriParameters = null)
   {
-    return $this->hyperlink($this->convert($param), $anchor, $uriParameters);
+    return $this->hyperlink($param, $anchor, $uriParameters);
   }
   
-  public function uri($params, $withDomain)
+  public function uri($param, $withDomain = false)
   {
+    $params = $this->convert($param);
     $uriPrefix = ($withDomain) ? 'http://' . $_SERVER['HTTP_HOST'] . '/' : '';
     $uri = Sabel_Context::getCurrentCandidate()->uri($params);
     return $uriPrefix . $uri;

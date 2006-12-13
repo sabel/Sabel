@@ -52,9 +52,9 @@ class Sabel_Form implements Iterator
     $this->errors  = $errors;
   }
   
-  public function startTag($action, $method = 'GET', $class = "form")
+  public function startTag($action, $method = 'GET', $class = "form", $name = "_form")
   {
-    return sprintf('<form action="%s" method="%s" class="%s">'."\n", $action, $method, $class);
+    return sprintf('<form action="%s" method="%s" class="%s" name="%s">'."\n", $action, $method, $class, $name);
   }
   
   public function endTag()
