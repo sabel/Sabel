@@ -16,18 +16,26 @@ class Sabel_View_Renderer_Smarty extends Sabel_View_Renderer
   public function __construct()
   {
     $this->smarty = new Smarty();
+    $this->smarty->compile_dir = RUN_BASE . self::COMPILE_DIR;
+  }
+  
+  public function enableCache()
+  {
+    $smarty = $this->smarty;
+    
+    $smarty->caching = true;
+    $smarty->cache_dir = RUN_BASE . self::CACHE_DIR;
+    $smarty->cache_lifetime = 600;
   }
   
   public function rendering($path, $name, $values)
   {
-    $this->smarty->template_dir = $this->tplpath;
-    $this->smarty->compile_id   = $this->tplpath;
-    return $this->smarty->fetch($this->tplname);
-  }
-  
-  public function configuration()
-  {
-    $this->smarty->compile_dir = RUN_BASE . '/data/compiled';
-    $this->smarty->load_filter('output','trimwhitespace');
+    $smarty = $this->smarty;
+    $smarty->template_dir = $path;
+    
+    if (!$smarty->is_cached($name))
+      foreach ($values as $k => $v) $smarty->assign($k, $v);
+    
+    return $smarty->fetch($name);
   }
 }

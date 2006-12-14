@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_View_Renerer_Class
+ * Sabel_View_Renerer_Simplate
  *
  * @category   Template
  * @package    org.sabel.template.engine
@@ -11,9 +11,6 @@
  */
 class Sabel_View_Renderer_Simplate extends Sabel_View_Renderer
 {
-  const COMPILE_DIR = '/data/compiled/';
-  const CACHE_DIR   = '/cache/';
-  
   private $simplate = null;
   
   public function __construct()

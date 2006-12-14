@@ -11,9 +11,6 @@
  */
 class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
-  const COMPILE_DIR = '/data/compiled/';
-  const CACHE_DIR   = '/cache/';
-  
   const REPLACE_PAT
     = '/<\?php([a-z]*)%s([a-z=]*)\s*([^?;]+)([^?]+)\?>/';
     
@@ -53,10 +50,14 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 
       $contents = str_replace('<?php=', '<?php echo',  $contents);
       
-      if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
-        $contents = explode("\n",     $contents);
-        $contents = array_map('trim', $contents);
-        $contents = implode('',       $contents);
+      if (ENVIRONMENT !== DEVELOPMENT) {
+        $rep = '/a\(\'([^\'?]+)\'(?:[,\s]+([^,?\s]+)[,\s]*([^?\s]+)?)?\) \?>/';
+        $contents = preg_replace_callback($rep, '_repA', $contents);
+        if ($this->trim) {
+          $contents = explode("\n",     $contents);
+          $contents = array_map('trim', $contents);
+          $contents = implode('',       $contents);
+        }
       }
       
       $this->saveCompileFile($path, $name, $contents);
@@ -93,4 +94,13 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   {
     return RUN_BASE . self::COMPILE_DIR . md5($path) . $name;
   }
+}
+
+function _repA($matches)
+{
+  $a = $matches[2];
+  if ($a{0} === '_') {
+    $a = eval('return '.$a.';');
+  }
+  return '"'.a($matches[1], $a).'" ?>';
 }

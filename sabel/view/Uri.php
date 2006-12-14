@@ -21,7 +21,8 @@ class Sabel_View_Uri
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
-    $fmtUri = '<a id="%s" class="%s" href="%s%s">%s</a>';
+//    $fmtUri = '<a id="%s" class="%s" href="%s%s">%s</a>';
+    $fmtUri = "<a id='%s' class='%s' href='%s%s'>%s</a>";
     return sprintf($fmtUri, $id, $class, $this->uri($params, true), $uriParameters, $anchor);
   }
   

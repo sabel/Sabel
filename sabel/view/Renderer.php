@@ -12,6 +12,9 @@
  */
 abstract class Sabel_View_Renderer
 {
+  const COMPILE_DIR = '/data/compiled/';
+  const CACHE_DIR   = '/cache/';
+  
   protected $trim = true;
   
   abstract public function rendering($path, $name, $values);
