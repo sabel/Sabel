@@ -120,6 +120,11 @@ class Sabel_Request
     return $array;
   }
   
+  public function getRequestUri()
+  {
+    return $this->uri;
+  }
+  
   public function __toString()
   {
     return $this->uri->__toString();

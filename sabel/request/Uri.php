@@ -33,11 +33,16 @@ class Sabel_Request_Uri
    * @param string $requestUri this is raw requestUri(query string without query parameter)
    * @return void
    */
-  public function __construct($requestUri)
+  public function __construct($rawRequestUri)
   {
-    $this->rawUriString = $requestUri;
+    $this->reset($rawRequestUri);
+  }
+  
+  public function reset($rawUriString)
+  {
+    $this->rawUriString = $rawUriString;
     
-    $elements    = explode('/', $requestUri);
+    $elements    = explode('/', $rawUriString);
     $lastElement = array_pop($elements);
     
     if (strpos($lastElement, '.') !== false)
@@ -46,10 +51,6 @@ class Sabel_Request_Uri
     array_push($elements, $lastElement);
     
     $this->parts = $elements;
-  }
-  
-  public function __get($key)
-  {
   }
   
   public function count()
@@ -67,28 +68,9 @@ class Sabel_Request_Uri
     return isset($this->parts[$pos]);
   }
   
-  public function getModule()
+  public function set($pos, $value)
   {
-    return $this->getByName('module');
-  }
-  
-  public function getController()
-  {
-    return $this->getByName('controller');
-  }
-  
-  public function getAction()
-  {
-    return $this->getByName('action');
-  }
-  
-  public function getByName($name)
-  {
-  }
-  
-  public function getType()
-  {
-    return $this->type;
+    $this->parts[$pos] = $value;
   }
   
   public function __toString()

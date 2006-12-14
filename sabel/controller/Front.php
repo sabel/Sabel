@@ -24,6 +24,22 @@ class Sabel_Controller_Front
   
   public function ignition($requestUri = null)
   {
+    $request    = $this->processRequest($requestUri);
+    $candidate  = $this->processCandidate($request->__toString());
+    $filters    = $this->processPreFilter($candidate, $request);
+    $controller = $this->processPageController($candidate);
+    
+    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate));
+    $controller->initialize();
+    $responses = $controller->execute($candidate->getAction());
+
+    $this->processPostFilter($filters, $controller, $responses);
+    
+    return array('html' => $controller->rendering(), 'responses' => $responses);
+  }
+  
+  protected function processRequest($requestUri)
+  {
     if (is_object($requestUri)) {
       $request = $requestUri;
     } elseif (is_string($requestUri)) {
@@ -32,20 +48,54 @@ class Sabel_Controller_Front
       $request = Sabel::load('Sabel_Request');
     }
     
+    return $request;
+  }
+  
+  protected function processCandidate($requestString)
+  {
     if (ENVIRONMENT !== DEVELOPMENT) {
       $cache = Sabel::load('Sabel_Cache_Apc');
-      if (!($candidate = $cache->read($request->__toString()))) {
+      if (!($candidate = $cache->read($requestString))) {
         $candidate = Sabel::load('Sabel_Map_Candidate');
-        $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+        $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $requestString));
         $cache->write($request->__toString(), $candidate);
       }
     } else {
       $candidate = Sabel::load('Sabel_Map_Candidate');
-      $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+      $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $requestString));
     }
     
     Sabel_Context::setCurrentCandidate($candidate);
     
+    return $candidate;
+  }
+  
+  protected function processPreFilter($candidate, $request)
+  {
+    $filtersDir = RUN_BASE . "/app/{$candidate->getModule()}/filters";
+    $filters = array();
+    if (is_dir($filtersDir)) {
+      if ($dh = opendir($filtersDir)) {
+        while (($file = readdir($dh)) !== false) {
+          if ($file !== "." && $file !== "..") {
+            $filters[] = join('_', array(ucfirst($candidate->getModule()),
+                                   ucfirst('filters'),
+                                   str_replace(".php", "", $file)));
+          }
+        }
+        closedir($dh);
+      }
+    }
+    
+    foreach ($filters as $filter) {
+      Sabel::load($filter)->setup($request)->execute();
+    }
+    
+    return $filters;
+  }
+  
+  protected function processPageController($candidate)
+  {
     $classpath  = $candidate->getModule();
     $classpath .= '_' . trim(Sabel_Const::CONTROLLER_DIR, '/');
     if ($candidate->hasController()) {
@@ -56,14 +106,15 @@ class Sabel_Controller_Front
     
     Sabel::using($classpath);
     $controller = new $classpath();
-    
     Sabel_Context::setPageController($controller);
     
-    $view = new Sabel_View($candidate->getModule(), $candidate->getController(), $candidate->getAction());
-    $controller->setup($request, $view);
-    $controller->initialize();
-    
-    $responses = $controller->execute($candidate->getAction());
-    return array('html' => $controller->rendering(), 'responses' => $responses);
+    return $controller;
+  }
+  
+  protected function processPostFilter($filters, $controller, $responses)
+  {
+    foreach ($filters as $filter) {
+      Sabel::load($filter)->output($responses);
+    }
   }
 }

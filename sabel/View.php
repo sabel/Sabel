@@ -99,6 +99,14 @@ class Sabel_View
     }
   }
   
+  public function decideTemplatePath($candidate)
+  {
+    $this->decideTemplatePathAndNameByEntry($candidate->getModule(),
+                                            $candidate->getController(),
+                                            $candidate->getAction());
+    return $this;
+  }
+  
   protected function decideTemplatePathAndNameByEntry($module, $controller, $action)
   {
     $tplpath  = RUN_BASE;
