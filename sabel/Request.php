@@ -60,7 +60,7 @@ class Sabel_Request
   
   public function hasParameter($name)
   {
-    return $this->parameters->hasA($name);
+    return (isset($this->parameters)) ? $this->parameters->hasA($name) : null;
   }
   
   public function getParameter($name)

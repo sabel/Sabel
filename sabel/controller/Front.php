@@ -72,15 +72,23 @@ class Sabel_Controller_Front
   
   protected function processPreFilter($candidate, $request)
   {
-    $filtersDir = RUN_BASE . "/app/{$candidate->getModule()}/filters";
+    $sharedFiltersDir = RUN_BASE . "/app/filters";
+    $filtersDir       = RUN_BASE . "/app/{$candidate->getModule()}/filters";
     $filters = array();
-    if (is_dir($filtersDir)) {
-      if ($dh = opendir($filtersDir)) {
+    
+    if (is_dir($sharedFiltersDir)) {
+      if ($dh = opendir($sharedFiltersDir)) {
         while (($file = readdir($dh)) !== false) {
           if ($file{0} !== ".") {
-            $filters[] = join('_', array(ucfirst($candidate->getModule()),
-                                   ucfirst('filters'),
-                                   str_replace(".php", "", $file)));
+            if (is_file($filtersDir . "/{$file}")) {
+              // use derived class
+              $filters[] = join("_", array(ucfirst($candidate->getModule()),
+                                           "Filters",
+                                            str_replace(".php", "", $file)));
+            } elseif (is_file($sharedFiltersDir . "/{$file}")) {
+              $filters[] = join("_", array('Filters', str_replace(".php", "", $file)));
+            } else {
+            }
           }
         }
         closedir($dh);
@@ -88,7 +96,9 @@ class Sabel_Controller_Front
     }
     
     foreach ($filters as $filter) {
-      Sabel::load($filter)->setup($request)->execute();
+      $aFilter = Sabel::load($filter);
+      $aFilter->setup($request)->execute();
+      $aFilter->input();
     }
     
     return $filters;
