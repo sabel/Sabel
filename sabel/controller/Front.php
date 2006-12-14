@@ -77,7 +77,7 @@ class Sabel_Controller_Front
     if (is_dir($filtersDir)) {
       if ($dh = opendir($filtersDir)) {
         while (($file = readdir($dh)) !== false) {
-          if ($file !== "." && $file !== "..") {
+          if ($file{0} !== ".") {
             $filters[] = join('_', array(ucfirst($candidate->getModule()),
                                    ucfirst('filters'),
                                    str_replace(".php", "", $file)));
