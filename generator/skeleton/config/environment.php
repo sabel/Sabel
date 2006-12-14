@@ -7,8 +7,8 @@ define('DEVELOPMENT', 0x0A);
 /**
  * define sabel environment.
  */
-// if (!defined('ENVIRONMENT')) define('ENVIRONMENT, PRODUCTION);
-// if (!defined('ENVIRONMENT')) define('ENVIRONMENT, TEST);
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', PRODUCTION);
+// if (!defined('ENVIRONMENT')) define('ENVIRONMENT', TEST);
 if (!defined('ENVIRONMENT')) define('ENVIRONMENT', DEVELOPMENT);
 
 /**
