@@ -33,6 +33,7 @@ abstract class Sabel_Controller_Page
   protected
     $action = '',
     $rendering = true,
+    $withLayout = true,
     $enableSession = true,
     $skipDefaultAction = true;
     
@@ -189,7 +190,7 @@ abstract class Sabel_Controller_Page
         throw Sabel::load('Sabel_Exception_TemplateMissing', var_export($this->view, 1));
       }
     } else {
-      return $this->view->rendering();
+      return $this->view->rendering($this->withLayout);
     }
   }
   

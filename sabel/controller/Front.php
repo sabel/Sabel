@@ -24,9 +24,11 @@ class Sabel_Controller_Front
   
   public function ignition($requestUri = null)
   {
-    $request    = $this->processRequest($requestUri);
-    $candidate  = $this->processCandidate($request->__toString());
-    $filters    = $this->processPreFilter($candidate, $request);
+    $request   = $this->processRequest($requestUri);
+    $candidate = $this->processCandidate($request->__toString());
+    $filters   = $this->loadFilters($candidate);
+    $this->processHelper($this->desideHelperPath($request, $candidate));
+    $this->processPreFilter($filters, $request);
     $controller = $this->processPageController($candidate);
     
     $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate));
@@ -70,7 +72,7 @@ class Sabel_Controller_Front
     return $candidate;
   }
   
-  protected function processPreFilter($candidate, $request)
+  protected function loadFilters($candidate)
   {
     $sharedFiltersDir = RUN_BASE . "/app/filters";
     $filtersDir       = RUN_BASE . "/app/{$candidate->getModule()}/filters";
@@ -95,6 +97,24 @@ class Sabel_Controller_Front
       }
     }
     
+    return $filters;
+  }
+  
+  protected function processHelper($path)
+  {
+    if (is_file($path)) Sabel::fileUsing($path);
+  }
+  
+  protected function desideHelperPath($request, $candidate)
+  {
+    $module = $candidate->getModule();
+    $cntr   = $candidate->getController();
+    $action = $candidate->getAction();
+    return RUN_BASE . "/app/{$module}/helpers/${cntr}.${action}.php";
+  }
+  
+  protected function processPreFilter($filters, $request)
+  {
     foreach ($filters as $filter) {
       $aFilter = Sabel::load($filter);
       $aFilter->setup($request)->execute();
