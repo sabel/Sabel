@@ -15,18 +15,22 @@ class Sabel_View_Renderer_Savant extends Sabel_View_Renderer
   
   public function __construct()
   {
-    require_once('Savant3/Savant3.php');
     $this->savant = new Savant3();
+  }
+  
+  public function enableCache()
+  {
+    $savant = $this->savant;
   }
   
   public function rendering($path, $name, $values)
   {
-    $fullpath = $this->getTemplateFullPath();
+    $savant = $this->savant;
     
-    if (file_exists($fullpath)) {
-      return $this->savant->fetch($fullpath);
-    } else {
-      // @todo Exception handling.
-    }
+    foreach ($values as $k => $v) $savant->assign($k, $v);
+    
+    dump($path.$name);
+    exit;
+    return $savant->fetch($path.$name);
   }
 }
