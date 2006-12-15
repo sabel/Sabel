@@ -14,7 +14,7 @@ class Sabel_Cache_Apc
   public function __construct()
   {
     if (!extension_loaded('apc')) {
-      throw new Sabel_Exception_Runtime('apc extension not loaded');
+      throw Sabel::load('Sabel_Exception_Runtime', 'apc extension not loaded');
     }
     if (isset($_SERVER['SERVER_NAME'])) {
       $this->signature = $_SERVER['SERVER_NAME'];
