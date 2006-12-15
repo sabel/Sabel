@@ -58,7 +58,7 @@ class Sabel_Controller_Front
       if (!($candidate = $cache->read($requestString))) {
         $candidate = Sabel::load('Sabel_Map_Candidate');
         $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $requestString));
-        $cache->write($request->__toString(), $candidate);
+        $cache->write($requestString, $candidate);
       }
     } else {
       $candidate = Sabel::load('Sabel_Map_Candidate');
