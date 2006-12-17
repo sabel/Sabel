@@ -20,35 +20,6 @@ class Migration extends Sakle
     
     $migrationDir = RUN_BASE . "/migration";
     
-    /*
-    if (is_dir($migrationDir)) {
-      if ($handle = opendir($migrationDir)) {
-        while (($file = readdir($handle)) !== false) {
-          if ($file{0} !== ".") {
-            if (is_file($migrationDir . "/{$file}")) {
-              if ($file === "version.php") continue;
-              $migrationInstance = $this->makeMigration($migrationDir, $file);
-              
-              if ($v->version == $file{0}) {
-                // here is same versions of current between migration.
-                // what do we need?
-              } elseif ($v->version < $to && $v->version < $file{0}) {
-                $this->upgrade($migrationInstance);
-                $v->version = $v->version + 1;
-                $v->save();
-              } elseif ($v->version > $to && $v->version > $file{0}) {
-                $this->downgrace($migrationInstance);
-                $v->version = $v->version - 1;
-                $v->save();
-              }
-            }
-          }
-        }
-        closedir($handle);
-      }
-    }
-    */
-    
     $buffer = array();
     if (is_dir($migrationDir)) {
       if ($handle = opendir($migrationDir)) {
@@ -66,30 +37,33 @@ class Migration extends Sakle
         $nextv = $i + 1;
         $this->printMessage("upgrade from {$i} to {$nextv} of $to");
         if (isset($buffer[$nextv])) {
-          dump($buffer[$nextv]);
-          // $migrationInstance = $this->makeMigration($migrationDir, $buffer[$nextv]);
-          // $this->upgrade($migrationInstance);
-          $v->version += 1;
-          $v->save();
+          $migrationInstance = $this->makeMigration($migrationDir, $buffer[$nextv]);
+          try {
+            $this->upgrade($migrationInstance);
+            $v->save(array("version" => ($v->version += 1)));
+          } catch (Exception $e) {
+            $this->printMessage($e->getMessage(), self::ERR_MSG);
+          }
         }
       }
-      
-      /*
-      foreach ($buffer as $version => $file) {
-        
-        if ($v->version < $to && $version < $to) {
-          $migrationInstance = $this->makeMigration($migrationDir, $file);
-          $this->upgrade($migrationInstance);
-          $v->version = $v->version + 1;
-          $v->save();
-          $this->printMessage("upgrade from {$version} to {$v->version}");
-        }
-      }
-      */
     } elseif ($to < $v->version) {
       // downgrade
       arsort($buffer);
-      echo "down grade \n";
+      
+      for ($i = $v->version; $i > $to; $i--) {
+        $nextv = $i - 1;
+        $this->printMessage("downgrade from {$i} to {$nextv} of $to");
+
+        if (isset($buffer[$i])) {
+          $migrationInstance = $this->makeMigration($migrationDir, $buffer[$i]);
+          try {
+            $this->downgrade($migrationInstance);
+            $v->save(array("version" => ($v->version -= 1)));
+          } catch (Exception $e) {
+            $this->printMessage($e->getMessage(), self::ERR_MSG);
+          }
+        }
+      }
     }
   }
   
@@ -105,13 +79,12 @@ class Migration extends Sakle
         $version->setPrimaryKey('id');
         $version->version = 0;
         $version->save();
-        $model = MODEL('Sversion');
-        $model->setPrimaryKey('id');
-        $aVersion = $model->selectOne(1);
-      } catch (Exception $e) {
-        echo $e->getMessage();
+        $aVersion = $version->selectOne(1);
+      } catch (Exception $e2) {
+        $this->printMessage($e2->getMessage(), self::MSG_ERR);
       }
     }
+    $this->printMessage("current version: ".$aVersion->version);
     return $aVersion;
   }
   
@@ -125,10 +98,22 @@ class Migration extends Sakle
     return new $className();
   }
   
-  protected function upgrade($migration)
+  protected function upgrade(Sabel_DB_Migration $migration)
   {
-    $msg = $migration->upgrade();
-    $this->printMessage($msg);
+    try {
+      $this->printMessage($migration->upgrade());
+    } catch (Exception $e) {
+      $this->printMessage($e->getMessage(), self::MSG_ERR);
+    }
+  }
+  
+  protected function downgrade(Sabel_DB_Migration $migration)
+  {
+    try {
+      $this->printMessage($migration->downgrade());
+    } catch (Exception $e) {
+      $this->printMessage($e->getMessage(), self::MSG_ERR);
+    }
   }
   
   protected function query($sql)

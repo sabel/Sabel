@@ -30,29 +30,18 @@ class Sabel_DB_Migration_Table
     $this->table = $name;
   }
   
+  public function dropTable()
+  {
+    $this->query("DROP TABLE {$this->table}");
+  }
+  
   public function addColumn($name, $abstractType, $options = null)
   {
     $driverSpecificTypeAsSQL = '';
     
     $column = array();
     $column["name"] = $name;
-    
-    switch ($abstractType) {
-      case Sabel_DB_Type_Const::INT:
-        $driverSpecificTypeAsSQL = "INT";
-        break;
-      case Sabel_DB_Type_Const::STRING:
-        $driverSpecificTypeAsSQL = "VARCHAR";
-        break;
-      case Sabel_DB_Type_Const::TEXT:
-        $driverSpecificTypeAsSQL = "TEXT";
-        break;
-      case Sabel_DB_Type_Const::DATETIME:
-        $driverSpecificTypeAsSQL = "DATETIME";
-        break;
-    }
-    
-    $column["type"] = $driverSpecificTypeAsSQL;
+    $column["type"] = $this->transrateType($abstractType);
     
     if (isset($options["length"])) {
       $column["length"] = $options["length"];
@@ -69,9 +58,56 @@ class Sabel_DB_Migration_Table
     $this->columns[] = $column;
   }
   
-  public function dropColumn($name)
+  protected function transrateType($abstractType)
   {
+    switch ($abstractType) {
+      case Sabel_DB_Type_Const::INT:
+        $driverSpecificTypeAsSQL = "INT";
+        break;
+      case Sabel_DB_Type_Const::STRING:
+        $driverSpecificTypeAsSQL = "VARCHAR";
+        break;
+      case Sabel_DB_Type_Const::TEXT:
+        $driverSpecificTypeAsSQL = "TEXT";
+        break;
+      case Sabel_DB_Type_Const::DATETIME:
+        $driverSpecificTypeAsSQL = "DATETIME";
+        break;
+    }
     
+    return $driverSpecificTypeAsSQL;
+  }
+  
+  public function alterDropColumn($name)
+  {
+    $this->query("ALTER TABLE {$this->table} DROP COLUMN {$name}");
+  }
+  
+  public function alterAddColumn($name, $type, $options = null)
+  {
+    $type = $this->transrateType($type);
+    
+    if ($options !== null) {
+      if (isset($options["attributes"])) {
+        $attributes = join(" ", $options["attributes"]);
+      } else {
+        $attributes = "";
+      }
+      
+      if (isset($options["length"])) {
+        $length = $options["length"];
+        $fmt = "ALTER TABLE %s ADD COLUMN %s %s(%s) %s";
+        $sql = sprintf($fmt, $this->table, $name, $type, $length, $attributes);
+      } elseif (isset($options["precision"])) {
+        $fmt = "ALTER TABLE %s ADD COLUMN %s %s(%s, %s) %s";
+        $ps = $options["presicion"];
+        $sql = sprintf($fmt, $this->table, $name, $type, $ps[0], $ps[1], $attributes);
+      }
+    } else {
+      $fmt = "ALTER TABLE %s ADD COLUMN %s %s %s";
+      $sql = sprintf($fmt, $this->table, $name, $type, $attributes);
+    }
+    $this->query($sql);
   }
   
   public function changeColumnName($oldName, $newName)
