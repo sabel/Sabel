@@ -61,6 +61,17 @@ class Sabel_DB_Executer
   {
     return $this->tableProp->primaryKey;
   }
+  
+  /**
+   * set primary key
+   *
+   * @param string $keyName
+   @ @return void
+   */
+  public function setPrimaryKey($keyName)
+  {
+    $this->tableProp->primaryKey = $keyName;
+  }
 
   /**
    * returns the connection name.

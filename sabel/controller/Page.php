@@ -31,9 +31,11 @@ abstract class Sabel_Controller_Page
     $permission = Sabel_Security_Permission::P_PUBLIC;
     
   protected
-    $action = '',
-    $rendering = true,
-    $withLayout = true,
+    $action        = '',
+    $filters       = array(),
+    $rendering     = true,
+    $withLayout    = true,
+    $attributes   = array(),
     $enableSession = true,
     $skipDefaultAction = true;
     
@@ -79,7 +81,9 @@ abstract class Sabel_Controller_Page
   protected function __get($name)
   {
     $candidate = Sabel_Context::getCurrentCandidate();
-    if ($candidate->hasElementVariableByName($name)) {
+    if (isset($this->attributes[$name])) {
+      return $this->attributes[$name];
+    } elseif ($candidate->hasElementVariableByName($name)) {
       return $candidate->getElementVariableByName($name);
     } elseif (is_object($this->request->getParameters()) && $this->request->hasParameter($name)) {
       return $this->request->getParameter($name);
@@ -90,7 +94,7 @@ abstract class Sabel_Controller_Page
   
   protected function __set($name, $value)
   {
-    $this->assign($name, $value);
+    $this->attributes[$name] = $value;
   }
   
   protected function __call($method, $args)
@@ -112,6 +116,8 @@ abstract class Sabel_Controller_Page
   public function execute($actionName)
   {
     if (!headers_sent()) header('X-Framework: Sabel');
+    
+    $this->processFilter($actionName);
     
     // check reserved words
     if (isset($this->reserved[$actionName]))
@@ -135,6 +141,28 @@ abstract class Sabel_Controller_Page
     
     if (is_array($result)) $this->view->assignByArray($result);
     return $result;
+  }
+  
+  protected function processFilter($actionName)
+  {
+    $beforeFilters = (isset($this->filters["before"])) ? $this->filters["before"] : array();
+    if (isset($beforeFilters["exclude"])) {
+      if (in_array($actionName, $beforeFilters["exclude"])) {
+        return false;
+      }
+    }
+    
+    unset($beforeFilters["exclude"]);
+    
+    if (count($beforeFilters) > 0) {
+      foreach ($beforeFilters as $filter) {
+        if ($this->hasMethod($filter)) {
+          if (!$this->$filter()) break;
+        } else {
+          throw new Sabel_Exception_Runtime($filter." is notfound in any action");
+        }
+      }
+    }
   }
   
   protected function methodCheckAndExecute($action)

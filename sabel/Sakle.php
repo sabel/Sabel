@@ -23,6 +23,8 @@ class Sakle
   
   protected $runningDirectory = '';
   
+  protected $arguments = array();
+  
   public static function main($class)
   {
     $instance = new self();
@@ -33,6 +35,9 @@ class Sakle
   {
     // @todo compatibility for Windows
     $this->runningDirectory = getcwd();
+    $args = $_SERVER['argv'];
+    array_shift($args);
+    $this->arguments = $args;
   }
   
   public function run($class)
