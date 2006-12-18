@@ -15,7 +15,15 @@ class Migration extends Sakle
   public function execute()
   {
     $this->setupConnection();
+    
+    if ($this->arguments[2] === "version") {
+      $v = $this->getCurrentVersion();
+      $this->printMessage($v->version);
+      exit;
+    }
+    
     $v  = $this->getCurrentVersion();
+    $this->printMessage("current version: ".$v->version);
     $to = $this->arguments[2];
     
     $migrationDir = RUN_BASE . "/migration";
@@ -84,7 +92,6 @@ class Migration extends Sakle
         $this->printMessage($e2->getMessage(), self::MSG_ERR);
       }
     }
-    $this->printMessage("current version: ".$aVersion->version);
     return $aVersion;
   }
   

@@ -170,6 +170,29 @@ function request($uri)
 function dump($mixed)
 {
   echo '<pre>';
+  if (is_array($mixed)) {
+    foreach ($mixed as $value) {
+      if (is_object($value)) {
+        $ref = new ReflectionClass($value);
+        $methods = $ref->getMethods();
+        echo $ref->getName() . "\n";
+        foreach ($methods as $method) {
+          echo "\t" . $method->getName() . "\n";
+        }
+        var_dump($value);
+      }
+      
+      echo "<hr />\n";
+    }
+  } elseif (is_object($mixed)) {
+    $ref = new ReflectionClass($mixed);
+    $methods = $ref->getMethods();
+    echo $ref->getName() . "\n";
+    foreach ($methods as $method) {
+      echo "\t" . $method->getName() . "\n";
+      echo $method . "\n";
+    }
+  }
   var_dump($mixed);
   echo '</pre>';
 }

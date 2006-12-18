@@ -139,7 +139,14 @@ abstract class Sabel_Controller_Page
       $result = $this->methodCheckAndExecute($actionName);
     }
     
-    if (is_array($result)) $this->view->assignByArray($result);
+    $view = $this->view;
+    $view->assignByArray($this->requests);
+    $view->assign("candidate" , Sabel_Context::getCurrentCandidate());
+    $view->assign("request" ,   $this->request);
+    $view->assign("parameter",  $this->request->getParameters());
+    $view->assignByArray($this->attributes);
+    if (is_array($result)) $view->assignByArray($result);
+    
     return $result;
   }
   

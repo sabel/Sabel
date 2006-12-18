@@ -10,6 +10,7 @@ Sabel::using('Sabel_DB_Model_Property');
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ *               Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -28,7 +29,24 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private
     $parentModels = array();
-
+    
+  /**
+   * @var a schema information of DB usually use for validate.
+   *      this value will instanciate in validate() method.
+   */
+  private $schema = null;
+  
+  /**
+   * @var instance of Sabel_Errors
+   */
+  protected $errors = null;
+  
+  protected $validateOnInsert = false;
+  protected $validateOnUpdate = false;
+  
+  protected $validateMessages = array("invalid_length"      => "invalid length",
+                                      "impossible_to_empty" => "impossible to empty");
+  
   public function __construct($param1 = null, $param2 = null)
   {
     if ($this->property === null) $this->createProperty();
@@ -427,6 +445,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $newModel = MODEL(convert_to_tablename($tblName));
 
     if ($this->isSelected()) {
+      // process update.
+      if ($this->validateOnUpdate) {
+        if (($this->errors = $this->validate())) {
+          return false;
+        }
+      }
       $saveData = ($data) ? $data : $this->property->getNewData();
       $this->recordTime($saveData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->conditions = $this->property->getSelectCondition();
@@ -434,6 +458,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->property->unsetNewData();
       $newData = array_merge($this->property->getRealData(), $saveData);
     } else {
+      // process insert.
+      if ($this->validateOnInsert) {
+        if (($this->errors = $this->validate())) {
+          return false;
+        }
+      }
       $newData = ($data) ? $data : $this->property->getData();
       $this->recordTime($newData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
@@ -450,7 +480,103 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $newModel->enableSelected();
     return $newModel;
   }
-
+  
+  public function hasError()
+  {
+    return ($this->errors !== null);
+  }
+  
+  public function getErrors()
+  {
+    return $this->errors;
+  }
+  
+  /**
+   * validate with schema
+   *
+   */
+  public function validate()
+  {
+    // instanciate schema
+    if ($this->schema === null) $this->schema = $this->schema();
+    
+    $errors = Sabel::load('Sabel_Errors');
+    
+    $dataForValidate = $this->property->getValidateData();
+    
+    $errorOccur = false;
+    foreach ($dataForValidate as $name => $value) {
+      if ($this->validateLength($name, $value)) {
+        if (isset($this->localize[$name])) $name = $this->localize[$name];
+        $errors->add($name, $this->validateMessages["invalid_length"]);
+        $errorOccur = true;
+      } elseif ($this->validateNullable($name, $value)) {
+        if (isset($this->localize[$name])) $name = $this->localize[$name];
+        $errors->add($name, $this->validateMessages["impossible_to_empty"]);
+        $errorOccur = true;
+      }
+    }
+    
+    $nonInputs = $this->validateNonInputs($dataForValidate);
+    if ($nonInputs) {
+      foreach ($nonInputs as $name) {
+        if (isset($this->localize[$name])) $name = $this->localize[$name];
+        $errors->add($name, $this->validateMessages["impossible_to_empty"]);
+        $errorOccur = true;
+      }
+    }
+    
+    if ($errorOccur) {
+      return $errors;
+    } else {
+      return false;
+    }
+  }
+  
+  public function validateOnInsert($bool)
+  {
+    $this->validateOnInsert = $bool;
+  }
+  
+  public function validateOnUpdate($bool)
+  {
+    $this->validateOnUpdate = $bool;
+  }
+  
+  protected function validateLength($name, $value)
+  {
+    return ($this->schema[$name]->max < strlen($value));
+  }
+  
+  protected function validateNullable($name, $value)
+  {
+    $result = false;
+    if ($this->schema[$name]->nullable === false) {
+      if ($value === null || $value === "") {
+        $result = true;
+      }
+    }
+    return $result;
+  }
+  
+  protected function validateNonInputs($dataForValidate)
+  {
+    $impossibleToNulls = array();
+    foreach ($this->schema as $s) {
+      if (!$s->increment && !$s->nullable) {
+        $impossileToNulls[] = $s->name;
+      }
+    }
+    
+    $noninputs = array_diff($impossileToNulls, array_keys($dataForValidate));
+    
+    if (count($noninputs)) {
+      return $noninputs;
+    } else {
+      return false;
+    }
+  }
+  
   protected function recordTime(&$data, $tblName, $colName)
   {
     $cols = $this->property->getColumns();
