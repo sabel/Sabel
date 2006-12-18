@@ -75,10 +75,14 @@ final class Sabel
     }
   }
   
-  public static function fileUsing($path)
+  public static function fileUsing($path, $once = false)
   {
     if (!isset(self::$fileUsing[$path])) {
-      require ($path);
+      if ($once) {
+        require_once ($path);
+      } else {
+        require ($path);
+      }
       self::$fileUsing[$path] = true;
     }
   }
