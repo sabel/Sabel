@@ -20,17 +20,15 @@ class Sabel_View_Renderer_Savant extends Sabel_View_Renderer
   
   public function enableCache()
   {
-    $savant = $this->savant;
   }
   
   public function rendering($path, $name, $values)
   {
     $savant = $this->savant;
+    $savant->setPath('template', $path);
     
     foreach ($values as $k => $v) $savant->assign($k, $v);
     
-    dump($path.$name);
-    exit;
-    return $savant->fetch($path.$name);
+    return $savant->fetch($name);
   }
 }
