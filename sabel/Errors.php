@@ -14,6 +14,11 @@ class Sabel_Errors
     if (isset($this->errors[$name])) return $this->errors[$name];
   }
   
+  public function hasError()
+  {
+    return (count($this->errors) > 0);
+  }
+  
   public function toArray()
   {
     return $this->errors;

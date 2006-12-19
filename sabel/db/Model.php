@@ -485,12 +485,23 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   
   public function hasError()
   {
-    return ($this->errors !== null);
+    return $this->errors->hasError();
   }
   
   public function getErrors()
   {
     return $this->errors;
+  }
+  
+  protected function hasValidateMethod($name)
+  {
+    return (method_exists($this, 'validate'.ucfirst($name)));
+  }
+  
+  protected function executeValidateMethod($name, $value)
+  {
+    $methodName = "validate".ucfirst($name);
+    return $this->$methodName($name, $value);
   }
   
   /**
@@ -504,7 +515,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->schema = $this->property->getSchema()->getColumns();
     }
     
-    $errors = Sabel::load('Sabel_Errors');
+    $this->errors = $errors = Sabel::load('Sabel_Errors');
     
     $dataForValidate = $this->property->getValidateData();
     
@@ -522,6 +533,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         if (isset($this->localize[$name])) $name = $this->localize[$name];
         $errors->add($name, $this->validateMessages["type_mismatch"]);
         $errorOccur = true;
+      } elseif ($this->hasValidateMethod($name)) {
+        $this->executeValidateMethod($name, $value);
       }
     }
     
