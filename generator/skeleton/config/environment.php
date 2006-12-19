@@ -23,3 +23,6 @@ if (ENVIRONMENT === DEVELOPMENT) {
 add_include_path('/app');
 add_include_path('/app/models');
 add_include_path('/lib');
+
+define("__TRUE__",  "_true");
+define("__FALSE__", "_false");
