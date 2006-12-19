@@ -3,7 +3,7 @@
 /**
  * Sabel_DB_Type_Const
  *
- * @abstract
+ * @interface
  * @category   DB
  * @package    org.sabel.db
  * @subpackage type
@@ -11,7 +11,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Type_Const
+interface Sabel_DB_Type_Const
 {
   const INT       = 'INT';
   const FLOAT     = 'FLOAT';

@@ -169,20 +169,20 @@ abstract class Sabel_DB_Base_Statement
   {
     $escMethod = $this->escMethod;
 
-    if (is_string($val)) {
-      $val = ($escMethod === '') ? $val : $escMethod($val);
-    } elseif (is_bool($val)) {
+    if ($val === __TRUE__ || $val === __FALSE__) {
       switch ($this->db) {
         case 'pgsql':
         case 'mssql':
         case 'sqlite':
-          $val = ($val) ? 'true' : 'false';
+          $val = ($val === __TRUE__) ? 'true' : 'false';
           break;
         case 'mysql':
         case 'firebird':
-          $val = ($val) ? 1 : 0;
+          $val = ($val === __TRUE__) ? 1 : 0;
           break;
       }
+    } elseif (is_string($val)) {
+      $val = ($escMethod === '') ? $val : $escMethod($val);
     }
     return $val;
   }

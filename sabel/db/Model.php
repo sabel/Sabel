@@ -45,7 +45,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   protected $validateOnUpdate = false;
   
   protected $validateMessages = array("invalid_length"      => "invalid length",
-                                      "impossible_to_empty" => "impossible to empty");
+                                      "impossible_to_empty" => "impossible to empty",
+                                      "type_mismatch"       => "invalid data type");
+  
+  /**
+   * @var localize column names for errors
+   */
+  protected $localize = array();
   
   public function __construct($param1 = null, $param2 = null)
   {
@@ -498,7 +504,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function validate()
   {
     // instanciate schema
-    if ($this->schema === null) $this->schema = $this->schema();
+    if ($this->schema === null) {
+      $this->schema = $this->property->getSchema()->getColumns();
+    }
     
     $errors = Sabel::load('Sabel_Errors');
     
@@ -513,6 +521,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       } elseif ($this->validateNullable($name, $value)) {
         if (isset($this->localize[$name])) $name = $this->localize[$name];
         $errors->add($name, $this->validateMessages["impossible_to_empty"]);
+        $errorOccur = true;
+      } elseif ($this->validateType($name, $value)) {
+        if (isset($this->localize[$name])) $name = $this->localize[$name];
+        $errors->add($name, $this->validateMessages["type_mismatch"]);
         $errorOccur = true;
       }
     }
@@ -545,7 +557,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   
   protected function validateLength($name, $value)
   {
-    return ($this->schema[$name]->max < strlen($value));
+    $type = $this->schema[$name]->type;
+    if ($type === Sabel_DB_Type_Const::INT || $type === Sabel_DB_Type_Const::STRING) {
+      return ($this->schema[$name]->max < strlen($value));
+    } else {
+      return false;
+    }
   }
   
   protected function validateNullable($name, $value)
@@ -555,6 +572,28 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       if ($value === null || $value === "") {
         $result = true;
       }
+    }
+    return $result;
+  }
+  
+  public function validateType($name, $value)
+  {
+    $result = false;
+    switch ($this->schema[$name]->type) {
+      case Sabel_DB_Type_Const::INT:
+        if (!is_numeric($value))  return true;
+        if (!ctype_digit($value)) return true;
+        break;
+      case Sabel_DB_Type_Const::BOOL:
+        if ($value === __TRUE__ || $value === __FALSE__) {
+          return false;
+        } else {
+          return true;
+        }
+        break;
+      case Sabel_DB_Type_Const::DATETIME:
+        
+        break;
     }
     return $result;
   }
