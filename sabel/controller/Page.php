@@ -3,7 +3,7 @@
 Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
-$a = 'abc';
+
 /**
  * the Base of Page Controller.
  *
@@ -227,6 +227,23 @@ abstract class Sabel_Controller_Page
     } else {
       return $this->view->rendering($this->withLayout);
     }
+  }
+  
+  protected function fill($model, $options = null)
+  {
+    if (!$model instanceof Sabel_DB_Model) {
+      throw new Sabel_Exception_Runtime("model isn't Sabel_DB_Model");
+    }
+    
+    if ($options === null) $options = array("ignores"=>array());
+    
+    foreach ($model->getColumnNames() as $column) {
+      if (!in_array($column, $options["ignores"])) {
+        $model->$column = $this->$column;
+      }
+    }
+    
+    return $model;
   }
   
   protected function isPublicAction($actionName)

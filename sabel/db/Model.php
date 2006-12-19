@@ -495,12 +495,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   
   protected function hasValidateMethod($name)
   {
-    return (method_exists($this, 'validate'.ucfirst($name)));
+    return (method_exists($this, 'validate' . ucfirst($name)));
   }
   
   protected function executeValidateMethod($name, $value)
   {
-    $methodName = "validate".ucfirst($name);
+    $methodName = "validate" . ucfirst($name);
     return $this->$methodName($name, $value);
   }
   
@@ -534,7 +534,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         $errors->add($name, $this->validateMessages["type_mismatch"]);
         $errorOccur = true;
       } elseif ($this->hasValidateMethod($name)) {
+        $ec = $errors->count();
         $this->executeValidateMethod($name, $value);
+        if ($ec !== $errors->count()) {
+          $errorOccur = true;
+        }
       }
     }
     
@@ -552,6 +556,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     } else {
       return false;
     }
+  }
+  
+  protected function getLocalizedName($name)
+  {
+    return (isset($this->localize[$name])) ? $this->localize[$name] : $name;
   }
   
   public function validateOnInsert($bool)

@@ -19,6 +19,11 @@ class Sabel_Errors
     return (count($this->errors) > 0);
   }
   
+  public function count()
+  {
+    return count($this->errors);
+  }
+  
   public function toArray()
   {
     return $this->errors;

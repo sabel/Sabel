@@ -32,8 +32,9 @@ class Sabel_Controller_Front
     
     $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate));
     $controller->initialize();
+    
     $responses = $controller->execute($candidate->getAction());
-
+    
     $this->processPostFilter($filters, $controller, $responses);
     
     return array('html' => $controller->rendering(), 'responses' => $responses);
@@ -134,9 +135,14 @@ class Sabel_Controller_Front
     }
     
     Sabel::using($classpath);
-    $controller = new $classpath();
-    Sabel_Context::setPageController($controller);
+    if (class_exists($classpath)) {
+      $controller = new $classpath();
+    } else {
+      Sabel::using('Index_Controllers_Index');
+      $controller = new Index_Controllers_Index();
+    }
     
+    Sabel_Context::setPageController($controller);
     return $controller;
   }
   

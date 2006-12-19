@@ -44,6 +44,7 @@ class Sabel_Security_Security
   public function authorize($identity, $password)
   {
     $result = $this->authorizer->authorize($identity, $password);
+    dump($result);
     if ($result === true) {
       $this->storage->write('SABEL_AUTHORIZED', 'true');
       $this->storage->write('SABEL_AUTH_IDENTITY', $identity);
