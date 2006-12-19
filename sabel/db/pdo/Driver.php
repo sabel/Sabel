@@ -2,6 +2,7 @@
 
 Sabel::using('Sabel_DB_Base_Driver');
 Sabel::using('Sabel_DB_Pdo_Statement');
+Sabel::using('Sabel_DB_Pdo_PdoStatement');
 
 /**
  * Sabel_DB_Pdo_Driver
@@ -16,6 +17,7 @@ Sabel::using('Sabel_DB_Pdo_Statement');
 class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 {
   private
+    $db       = '',
     $data     = array(),
     $isAdd    = true,
     $stmtFlag = false;
@@ -24,11 +26,11 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
   {
     $this->conn = $conn;
     $this->db   = $db;
+    $this->stmt = new Sabel_DB_Pdo_Statement($db);
   }
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_Pdo_Statement($this->db);
     return $this->stmt;
   }
 

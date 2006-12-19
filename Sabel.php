@@ -222,6 +222,30 @@ if (!extension_loaded('gettext')) {
 }
 
 /**
+ * Sabel DB Functions
+ *
+ */
+function convert_to_tablename($mdlName)
+{
+  if (preg_match('/^[a-z0-9_]+$/', $mdlName)) return $mdlName;
+  return substr(strtolower(preg_replace('/([A-Z])/', '_$1', $mdlName)), 1);
+}
+
+function convert_to_modelname($tblName)
+{
+  return join('', array_map('ucfirst', explode('_', $tblName)));
+}
+
+function MODEL($mdlName)
+{
+  Sabel::using('Sabel_DB_Connection');
+  Sabel_DB_Connection::initialize();
+
+  Sabel::using('Sabel_Model');
+  return Sabel_Model::load($mdlName);
+}
+
+/**
  * Sabel constant values
  *
  */

@@ -14,13 +14,10 @@ Sabel::using('Sabel_DB_Base_Driver');
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 {
-  protected
-    $escMethod = 'pg_escape_string';
-
   public function __construct($conn)
   {
     $this->conn = $conn;
-    $this->db   = 'pgsql';
+    $this->stmt = new Sabel_DB_General_Statement('pgsql', 'pg_escape_string');
   }
 
   public function begin($conName)

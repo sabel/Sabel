@@ -12,6 +12,8 @@
 class Sabel_DB_Condition
 {
   const NOT     = 'CONDITION_NOT';
+  const FORCE   = 'CONDITION_FORCE';
+
   const NORMAL  = 'CONDITION_NORMAL';
   const ISNULL  = 'CONDITION_NULL';
   const NOTNULL = 'CONDITION_NOTNULL';
@@ -23,14 +25,15 @@ class Sabel_DB_Condition
 
   protected $values = array();
 
-  public function __construct($key, $val, $not = null)
+  public function __construct($key, $val, $opt = null)
   {
     list($key, $type) = $this->getType($key, $val);
 
     $this->values['key']   = $key;
     $this->values['type']  = $type;
     $this->values['value'] = $val;
-    $this->values['not']   = ($not === self::NOT);
+    $this->values['not']   = ($opt === self::NOT);
+    $this->values['force'] = ($opt === self::FORCE);
   }
 
   public function __get($key)

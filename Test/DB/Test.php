@@ -178,16 +178,16 @@ class Test_DB_Test extends SabelTestCase
   public function testCondition()
   {
     $model = Sabel_Model::load('TestCondition');
-    $model->save(array('status' => true,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
-    $model->save(array('status' => false, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
-    $model->save(array('status' => false, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
-    $model->save(array('status' => true,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
-    $model->save(array('status' => false, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
-    $model->save(array('status' => false, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
-    $model->save(array('status' => true,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
-    $model->save(array('status' => false, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
-    $model->save(array('status' => false, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
-    $model->save(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
+    $model->save(array('status' => __TRUE__,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
+    $model->save(array('status' => __TRUE__,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
+    $model->save(array('status' => __TRUE__,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
+    $model->save(array('status' => __TRUE__,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
 
     $model = Sabel_Model::load('TestCondition');
     $model->scond('COMP_point', array('>=', 8000));
@@ -233,7 +233,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model6->point, 10000);
 
     $model = Sabel_Model::load('TestCondition');
-    $model->scond('status', false);
+    $model->scond('status', __FALSE__);
     $models = $model->select();
     $this->assertEquals(count($models), 6);
 
@@ -246,7 +246,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model3->point, 5000);
 
     $model->unsetCondition();
-    $model->scond('status', false, Sabel_DB_Condition::NOT);
+    $model->scond('status', __FALSE__, Sabel_DB_Condition::NOT);
     $models = $model->select();
     $this->assertEquals(count($models), 4);
 
@@ -293,9 +293,9 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model2->point, 5000);
 
     $model = Sabel_Model::load('TestCondition');
-    $model->save(array('status' => false, 'registed' => '2004-12-01 10:10:10'));
-    $model->save(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
-    $model->save(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
+    $model->save(array('status' => __FALSE__, 'registed' => '2004-12-01 10:10:10'));
+    $model->save(array('status' => __FALSE__, 'registed' => '2004-11-01 10:10:10'));
+    $model->save(array('status' => __TRUE__,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
 
     $model->scond('point', Sabel_DB_Condition::ISNULL);
     $models = $model->select();
@@ -1083,6 +1083,49 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model->id, 1);
     $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
+  }
+
+  public function testExecuter()
+  {
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+    $driver = $exe->getDriver();
+    $driver->execute("SELECT * FROM favorite_item");
+    $results = $driver->getResultSet()->fetchAll();
+    $this->assertEquals(count($results), 7);
+  }
+
+  public function testExecuterConstraintAndCondition()
+  {
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+
+    $driver = $exe->getDriver();
+    $exe->getStatement()->setBasicSQL("SELECT * FROM favorite_item");
+    $exe->setConstraint(array('order' => 'registed desc'));
+    $results = $exe->exec()->fetchAll();
+
+    $row1 = $results[0];
+    $row2 = $results[1];
+    $row3 = $results[2];
+
+    $this->assertEquals((int)$row1['users_id'], 4);
+    $this->assertEquals((int)$row2['users_id'], 1);
+    $this->assertEquals((int)$row3['users_id'], 3);
+
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+
+    $driver = $exe->getDriver();
+    $exe->getStatement()->setBasicSQL("SELECT * FROM favorite_item");
+    $exe->setCondition(array('users_id' => 4));
+    $results = $exe->exec()->fetchAll();
+
+    $this->assertEquals(count($results), 1);
+
+    $row = $results[0];
+    $this->assertEquals((int)$row['id'], 7);
+    $this->assertEquals((int)$row['users_id'], 4);
   }
 
   public function testClear()

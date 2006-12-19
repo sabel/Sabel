@@ -14,13 +14,10 @@ Sabel::using('Sabel_DB_Base_Driver');
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 {
-  protected
-    $escMethod = 'mysql_real_escape_string';
-
   public function __construct($conn)
   {
     $this->conn = $conn;
-    $this->db   = 'mysql';
+    $this->stmt = new Sabel_DB_General_Statement('mysql', 'mysql_real_escape_string');
   }
 
   public function begin($conName)
@@ -60,13 +57,10 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
   {
     $conn = ($conn === null) ? $this->conn : $conn;
 
-    if (isset($sql)) {
-      $result = mysql_query($sql, $conn);
-    } elseif (($sql = $this->stmt->getSQL()) === '') {
+    if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
-    } else {
-      $result = mysql_query($sql, $conn);
-    }
+
+    $result = mysql_query($sql, $conn);
 
     if (!$result) {
       $error = mysql_error($conn);

@@ -18,11 +18,9 @@ abstract class Sabel_DB_Base_Driver
 {
   protected
     $conn = null,
-    $stmt = null,
-    $db   = '';
+    $stmt = null;
 
   protected
-    $escMethod    = '',
     $resultSet    = null,
     $lastInsertId = null;
 
@@ -36,7 +34,6 @@ abstract class Sabel_DB_Base_Driver
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_General_Statement($this->db, $this->escMethod);
     return $this->stmt;
   }
 

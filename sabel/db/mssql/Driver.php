@@ -20,19 +20,18 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
   public function __construct($conn)
   {
     $this->conn = $conn;
-    $this->db   = 'mssql';
+    $this->stmt = new Sabel_DB_Mssql_Statement('mssql', 'mssql_escape_string');
   }
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_Mssql_Statement($this->db, 'mssql_escape_string');
-    $this->stmt->setDefaultOrderColumn($this->defCol);
     return $this->stmt;
   }
 
   public function extension($tableProp)
   {
     $this->defCol = $tableProp->primaryKey;
+    $this->stmt->setDefaultOrderColumn($this->defCol);
   }
 
   public function begin($conName)
@@ -97,4 +96,9 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
     }
     $this->resultSet = new Sabel_DB_Result_Row($rows);
   }
+}
+
+function mssql_escape_string($val)
+{
+  return str_replace("'", "''", $val);
 }

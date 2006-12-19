@@ -2,6 +2,7 @@
 
 Sabel::using('Sabel_ValueObject');
 Sabel::using('Sabel_DB_Executer');
+Sabel::using('Sabel_DB_Type_Const');
 Sabel::using('Sabel_DB_Model_Property');
 
 /**
@@ -103,11 +104,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     return $columns;
-  }
-
-  public function setConnectName($connectName)
-  {
-    $this->tableProp->connectName = $connectName;
   }
 
   public function getTableEngine()

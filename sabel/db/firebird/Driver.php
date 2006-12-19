@@ -21,7 +21,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
   public function __construct($conn)
   {
     $this->conn = $conn;
-    $this->db   = 'firebird';
+    $this->stmt = new Sabel_DB_Firebird_Statement('firebird');
   }
 
   public function extension($tableProp)
@@ -31,7 +31,6 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
   public function loadStatement()
   {
-    $this->stmt = new Sabel_DB_Firebird_Statement($this->db);
     return $this->stmt;
   }
 

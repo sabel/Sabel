@@ -66,7 +66,7 @@ class Sabel_DB_Executer
    * set primary key
    *
    * @param string $keyName
-   @ @return void
+   * @return void
    */
   public function setPrimaryKey($keyName)
   {
@@ -84,6 +84,16 @@ class Sabel_DB_Executer
   }
 
   /**
+   * set ( choice ) connection name.
+   *
+   * @return void
+   */
+  public function setConnectName($connectName)
+  {
+    $this->tableProp->connectName = $connectName;
+  }
+
+  /**
    * setting condition.
    *
    * @param mixed    $arg1 column name ( with the condition prefix ),
@@ -97,8 +107,21 @@ class Sabel_DB_Executer
   {
     if (empty($arg1)) return null;
 
-    if (is_object($arg1) || is_array($arg1)) {
+    if ($arg1 instanceof Sabel_DB_Condition) {
       $this->conditions[] = $arg1;
+      return null;
+    }
+
+    if (is_array($arg1)) {
+      $tmp = array_values($arg1);
+      if (is_object($tmp[0])) {
+        $this->conditions[] = $arg1;
+      } else {
+        foreach ($arg1 as $key => $val) {
+          $condition = new Sabel_DB_Condition($key, $val);
+          $this->conditions[$condition->key] = $condition;
+        }
+      }
     } else {
       if ($arg2 === null) {
         $pKey = $this->tableProp->primaryKey;

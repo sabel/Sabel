@@ -6,8 +6,10 @@ define('TEST_CASE', true);
 define('PRODUCTION',  0x01);
 define('TEST',        0x05);
 define('DEVELOPMENT', 0x0A);
-define('ENVIRONMENT', DEVELOPMENT
-);
+define('ENVIRONMENT', DEVELOPMENT);
+
+define('__TRUE__', 'true');
+define('__FALSE__', 'false');
 
 error_reporting(E_ALL|E_STRICT);
 ini_set('memory_limit', '16m');
@@ -29,8 +31,6 @@ function __autoload($class)
 {
   Sabel::using($class);
 }
-
-Sabel::fileUsing('sabel/db/Functions.php');
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/Sabel.php');

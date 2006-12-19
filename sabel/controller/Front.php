@@ -4,7 +4,6 @@ Sabel::using('Sabel_View');
 Sabel::using('Sabel_Context');
 Sabel::using('Sabel_Map_Candidate');
 Sabel::using('Sabel_Exception_Runtime');
-Sabel::fileUsing('sabel/db/Functions.php');
 
 /**
  * Sabel_Controller_Front
