@@ -645,6 +645,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     foreach ($dataForValidate as $name => $value) {
       $lname = $this->getLocalizedName($name);
+
       if ($this->validateLength($name, $value)) {
         $errors->add($lname, $this->validateMessages["invalid_length"]);
       } elseif ($this->validateNullable($name, $value)) {
@@ -657,11 +658,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     $nonInputs = $this->validateNonInputs($dataForValidate);
-    if ($nonInputs) {
-      foreach ($nonInputs as $name) {
-        $name = $this->getLocalizedName($name);
-        $errors->add($name, $this->validateMessages["impossible_to_empty"]);
-      }
+    foreach ($nonInputs as $name) {
+      $name = $this->getLocalizedName($name);
+      $errors->add($name, $this->validateMessages["impossible_to_empty"]);
     }
 
     return ($errors->count() !== 0) ? $errors : false;
@@ -703,20 +702,20 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function validateType($name, $value)
   {
-    $result = false;
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
-        if (!is_numeric($value))  return true;
-        if (!ctype_digit($value)) return true;
+        return (!ctype_digit($value));
         break;
       case Sabel_DB_Type_Const::BOOL:
         return ($value !== __TRUE__ && $value !== __FALSE__);
         break;
       case Sabel_DB_Type_Const::DATETIME:
-
+        return (boolean) strtotime($value);
+        break;
+      default:
+        return false;
         break;
     }
-    return $result;
   }
 
   protected function validateNonInputs($dataForValidate)
@@ -724,11 +723,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $impossibleToNulls = array();
 
     foreach ($this->schema as $s) {
-      if (!$s->increment && !$s->nullable) $impossileToNulls[] = $s->name;
+      if (!$s->increment && !$s->nullable) $impossibleToNulls[] = $s->name;
     }
 
-    $noninputs = array_diff($impossibleToNulls, array_keys($dataForValidate));
-    return (count($noninputs)) ? $noninputs : false;
+    return array_diff($impossibleToNulls, array_keys($dataForValidate));
   }
 
   protected function recordTime(&$data, $tblName, $colName)
