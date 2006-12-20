@@ -109,10 +109,7 @@ class Sabel_DB_Executer
 
     if ($arg1 instanceof Sabel_DB_Condition) {
       $this->conditions[] = $arg1;
-      return null;
-    }
-
-    if (is_array($arg1)) {
+    } elseif (is_array($arg1)) {
       $tmp = array_values($arg1);
       if (is_object($tmp[0])) {
         $this->conditions[] = $arg1;
@@ -208,7 +205,7 @@ class Sabel_DB_Executer
     $driver->update();
   }
 
-  public function insert($data, $incCol = false)
+  public function insert($data, $incCol = null)
   {
     try {
       $driver = $this->getDriver();
@@ -226,7 +223,7 @@ class Sabel_DB_Executer
     try {
       $driver = $this->getDriver();
       $stmt   = $this->getStatement();
-      $incCol = $this->checkIncColumn();
+      $incCol = $this->tableProp->incrementKey;
 
       foreach ($data as $val) {
         $this->execInsert($driver, $stmt, $val, $incCol);
@@ -239,11 +236,7 @@ class Sabel_DB_Executer
   protected function execInsert($driver, $stmt, $data, $idColumn)
   {
     $table = $this->tableProp->table;
-    $db    = Sabel_DB_Connection::getDB($this->getConnectName());
-
-    if ($idColumn && ($db === 'pgsql' || $db === 'firebird')) {
-      $data = $driver->setIdNumber($table, $data, $idColumn);
-    }
+    if ($idColumn) $data = $driver->setIdNumber($table, $data, $idColumn);
 
     $stmt->makeInsertSQL($table, $data);
     $driver->insert();

@@ -37,7 +37,7 @@ class Sabel_DB_Result_Row implements Iterator
 
   public function fetch($style = self::ASSOC)
   {
-    if (!$this->valid()) return null;
+    if (!$this->valid()) return false;
 
     switch ($style) {
       case self::ASSOC:

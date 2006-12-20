@@ -1128,6 +1128,58 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$row['users_id'], 4);
   }
 
+  public function testExecuterUpdate()
+  {
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+    $exe->scond(7);
+    $exe->update(array('registed' => '2005-12-08 01:01:01', 'name' => 'favorite8'));
+
+    $exe->unsetCondition();
+
+    $exe->scond(7);
+    $driver = $exe->getDriver();
+    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
+    $row = $exe->exec()->fetch();
+
+    $this->assertEquals((int)$row['id'], 7);
+    $this->assertEquals((int)$row['users_id'], 4);
+    $this->assertEquals($row['registed'], '2005-12-08 01:01:01');
+    $this->assertEquals($row['name'], 'favorite8');
+  }
+
+  public function testExecuterUpdate2()
+  {
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+    $exe->scond('users_id', 3);
+    $exe->update(array('users_id' => 5));
+
+    // $exe->unsetCondition();
+    // $exe->scond('users_id', 3);
+
+    $driver = $exe->getDriver();
+    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
+    $row = $exe->exec()->fetchAll();
+
+    $this->assertFalse($row);
+
+    $exe->unsetCondition();
+    $exe->scond('users_id', 5);
+
+    $driver = $exe->getDriver();
+    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
+    $row = $exe->exec()->fetchAll();
+
+    $this->assertEquals(count($row), 2);
+  }
+
+  public function testExecuterInsert()
+  {
+    $prop   = array('table' => 'favorite_item');
+    $exe    = new Sabel_DB_Executer($prop);
+  }
+
   public function testClear()
   {
     Sabel_DB_SimpleCache::clear();

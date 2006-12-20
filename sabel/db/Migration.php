@@ -1,6 +1,5 @@
 <?php
 
-Sabel::using("Sabel_DB_Type_Const");
 Sabel::using("Sabel_DB_Executer");
 
 /**

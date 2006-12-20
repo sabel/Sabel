@@ -45,6 +45,20 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
     pg_close($conn);
   }
 
+  public function setIdNumber($table, $data, $defColumn)
+  {
+    if (!isset($data[$defColumn])) {
+      $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
+      $row = $this->getResultSet()->fetch(Sabel_DB_Result_Row::NUM);
+      if (($this->lastInsertId = (int)$row[0]) === 0) {
+        throw new Exception("{$table}_{$defColumn}_seq is not found.");
+      } else {
+        $data[$defColumn] = $this->lastInsertId;
+      }
+    }
+    return $data;
+  }
+
   public function driverExecute($sql = null, $conn = null)
   {
     $conn = ($conn === null) ? $this->conn : $conn;
