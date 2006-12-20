@@ -516,46 +516,30 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
     
     $this->errors = $errors = Sabel::load('Sabel_Errors');
-    
     $dataForValidate = $this->property->getValidateData();
     
-    $errorOccur = false;
     foreach ($dataForValidate as $name => $value) {
+      $lname = $this->getLocalizedName($name);
       if ($this->validateLength($name, $value)) {
-        if (isset($this->localize[$name])) $name = $this->localize[$name];
-        $errors->add($name, $this->validateMessages["invalid_length"]);
-        $errorOccur = true;
+        $errors->add($lname, $this->validateMessages["invalid_length"]);
       } elseif ($this->validateNullable($name, $value)) {
-        if (isset($this->localize[$name])) $name = $this->localize[$name];
-        $errors->add($name, $this->validateMessages["impossible_to_empty"]);
-        $errorOccur = true;
+        $errors->add($lname, $this->validateMessages["impossible_to_empty"]);
       } elseif ($this->validateType($name, $value)) {
-        if (isset($this->localize[$name])) $name = $this->localize[$name];
-        $errors->add($name, $this->validateMessages["type_mismatch"]);
-        $errorOccur = true;
+        $errors->add($lname, $this->validateMessages["type_mismatch"]);
       } elseif ($this->hasValidateMethod($name)) {
-        $ec = $errors->count();
         $this->executeValidateMethod($name, $value);
-        if ($ec !== $errors->count()) {
-          $errorOccur = true;
-        }
       }
     }
     
     $nonInputs = $this->validateNonInputs($dataForValidate);
     if ($nonInputs) {
       foreach ($nonInputs as $name) {
-        if (isset($this->localize[$name])) $name = $this->localize[$name];
+        $name = $this->getLocalizedName($name);
         $errors->add($name, $this->validateMessages["impossible_to_empty"]);
-        $errorOccur = true;
       }
     }
     
-    if ($errorOccur) {
-      return $errors;
-    } else {
-      return false;
-    }
+    return ($errors->count() !== 0) ? $errors : false;
   }
   
   protected function getLocalizedName($name)
@@ -625,7 +609,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       }
     }
     
-    $noninputs = array_diff($impossileToNulls, array_keys($dataForValidate));
+    $noninputs = array_diff($impossibleToNulls, array_keys($dataForValidate));
     
     if (count($noninputs)) {
       return $noninputs;
