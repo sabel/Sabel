@@ -25,8 +25,8 @@
   <email>ebine.yutaka@sabel.jp</email>
   <active>yes</active>
  </developer>
- <date>2006-12-20</date>
- <time>23:56:44</time>
+ <date>2006-12-21</date>
+ <time>00:01:02</time>
  <version>
   <release>0.3.0</release>
   <api>0.1.0</api>
@@ -232,7 +232,6 @@
      <dir name="model">
       <file baseinstalldir="/Sabel" name="Bridge.php" role="php" />
       <file baseinstalldir="/Sabel" name="Fusion.php" role="php" />
-      <file baseinstalldir="/Sabel" name="Property.php" role="php" />
       <file baseinstalldir="/Sabel" name="Relation.php" role="php" />
       <file baseinstalldir="/Sabel" name="Tree.php" role="php" />
      </dir> <!-- /sabel/db/model -->
@@ -577,9 +576,11 @@
     <file baseinstalldir="/Sabel" name="Validate.php" role="php" />
     <file baseinstalldir="/Sabel" name="VirtualInheritance.php" role="php" />
    </dir> <!-- /Test -->
+   <file baseinstalldir="/Sabel" name="alpha-0.3.0.tgz" role="data" />
    <file baseinstalldir="/Sabel" name="packageXml.php" role="php" />
    <file baseinstalldir="/Sabel" name="Sabel.php" role="php" />
    <file baseinstalldir="/Sabel" name="SabelAllTests.php" role="php" />
+   <file baseinstalldir="/Sabel" name="svk-commitPpxlm.tmp" role="data" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -607,7 +608,7 @@
     <release>alpha</release>
     <api>alpha</api>
    </stability>
-   <date>2006-12-20</date>
+   <date>2006-12-21</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
    <notes>Initial release</notes>
   </release>

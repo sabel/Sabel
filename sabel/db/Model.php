@@ -686,11 +686,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     $this->sColumns  = $this->schema->getColumns();
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
-    $dataForValidata = ($this->isSelected()) ? $this->newData : $this->data;
-
+    $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
+    
     foreach ($dataForValidate as $name => $value) {
       $lname = $this->getLocalizedName($name);
-
       if ($this->validateLength($name, $value)) {
         $errors->add($lname, $this->validateMessages["invalid_length"]);
       } elseif ($this->validateNullable($name, $value)) {
@@ -707,7 +706,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $name = $this->getLocalizedName($name);
       $errors->add($name, $this->validateMessages["impossible_to_empty"]);
     }
-
+    
     return ($errors->count() !== 0) ? $errors : false;
   }
 
