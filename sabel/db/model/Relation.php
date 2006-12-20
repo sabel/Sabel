@@ -205,7 +205,7 @@ class Sabel_DB_Model_Relation
       }
 
       $self = clone $obj;
-      $self->setData($row);
+      $self->transrate($row);
 
       foreach ($ref[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
@@ -232,7 +232,7 @@ class Sabel_DB_Model_Relation
         $acquire[$tblName][$column] = $row[$preCol];
         unset($row[$preCol]);
       }
-      $model->setData($acquire[$tblName]);
+      $model->transrate($acquire[$tblName]);
       $models[$tblName] = $model;
     }
     return $models;

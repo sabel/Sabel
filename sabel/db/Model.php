@@ -23,6 +23,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $property = null;
 
   private
+    $columns = array();
+    
+  private
     $parentModels    = array(),
     $acquiredParents = array(),
     $cascadeStack    = array();
@@ -40,6 +43,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
    *      this value will instanciate in validate() method.
    */
   private $schema = null;
+  
+  /**
+   * @var columns of Schema
+   *
+   */
+  private $sColumns = array();
 
   /**
    * @var instance of Sabel_Errors
@@ -58,15 +67,89 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($this->property === null) $this->createProperty();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
+  
+  protected function initSchema($mdlName, $conName, $tblName = '')
+  {
+    $tblName = ($tblName === '') ? convert_to_tablename($mdlName) : $tblName;
+    $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
+    
+    if ($cache) {
+      $this->schema  = $cache;
+      $this->columns = Sabel_DB_SimpleCache::get('columns_' . $tblName);
+      $properties    = Sabel_DB_SimpleCache::get('props_'   . $tblName);
+    } else {
+      $sClsName = 'Schema_' . $mdlName;
+      Sabel::using($sClsName);
 
+      if (class_exists($sClsName, false)) {
+        list ($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
+      } else {
+        list ($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
+      }
+
+      $columns = array_keys($tblSchema->getColumns());
+
+      Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
+      Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
+      Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
+
+      if ($properties['primaryKey'] === null)
+        trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+
+      $this->schema  = $tblSchema;
+      $this->columns = $columns;
+    }
+    
+    $this->tableProp = new Sabel_ValueObject($properties);
+  }
+  
+  protected function getSchemaFromDb($conName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Accessor');
+
+    $scmName    = Sabel_DB_Connection::getSchema($conName);
+    $database   = Sabel_DB_Connection::getDB($conName);
+    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
+    $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
+    $tblSchema  = $accessor->getTable($tblName);
+
+    $properties = array('connectName'  => $conName,
+                        'primaryKey'   => $tblSchema->getPrimaryKey(),
+                        'incrementKey' => $tblSchema->getIncrementKey(),
+                        'tableEngine'  => $engine,
+                        'table'        => $tblName);
+
+    return array($tblSchema, $properties);
+  }
+
+  protected function getSchemaFromCls($clsName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Table');
+
+    $cols = array();
+    $sCls = new $clsName();
+    foreach ($sCls->get() as $colName => $colInfo) {
+      $colInfo['name'] = $colName;
+      $cols[$colName]  = new Sabel_ValueObject($colInfo);
+    }
+
+    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
+    $properties = $sCls->getProperty();
+    $properties['table'] = $tblName;
+
+    return array($tblSchema, $properties);
+  }
+  
   protected function createProperty($mdlName = null, $mdlProps = null)
   {
     $mdlName  = ($mdlName === null)  ? get_class($this) : $mdlName;
     $mdlProps = ($mdlProps === null) ? get_object_vars($this) : $mdlProps;
-
+    
+    $conName  = (isset($mdlProps['connectName'])) ? $mdlProps['connectName'] : 'default';
+    $this->initSchema($mdlName, $conName);
+    
     $this->property  = new Sabel_DB_Model_Property($mdlName, $mdlProps);
-    $tableProperties = $this->property->getTableProperties();
-    $this->tableProp = new Sabel_ValueObject($tableProperties);
+    $this->property->setColumns($this->columns);
   }
 
   public function __set($key, $val)
@@ -76,7 +159,41 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function __get($key)
   {
-    return $this->property->$key;
+    $value = $this->property->$key;
+    return ($value === null) ? null : $this->convertData($key, $value);
+  }
+  
+  public function convertData($key, $data)
+  {
+    $schema = $this->schema->getColumns();
+    if (!isset($schema[$key])) return $data;
+
+    switch ($schema[$key]->type) {
+      case Sabel_DB_Type_Const::INT:
+        return (int)$data;
+      case Sabel_DB_Type_Const::FLOAT:
+      case Sabel_DB_Type_Const::DOUBLE:
+        return (float)$data;
+      case SabeL_DB_Type_Const::BOOL:
+        if (is_int($data)) {
+          $data = ($data === 1);
+        } elseif(is_string($data)) {
+          $data = (in_array($data, array('1', 't', 'true')));
+        }
+    }
+    return $data;
+  }
+  
+  public function getRealData()
+  {
+    $cols = $this->columns;
+    $data = $this->property->getData();
+    $real = array();
+
+    foreach ($data as $key => $val) {
+      if (in_array($key, $cols)) $real[$key] = $this->convertData($key, $val);
+    }
+    return $real;
   }
 
   public function __clone()
@@ -87,15 +204,15 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function __call($method, $parameters)
   {
     if ($this->property === null) $this->createProperty();
-    @list($arg1, $arg2, $arg3) = $parameters;
+    @list ($arg1, $arg2, $arg3) = $parameters;
     return $this->property->$method($arg1, $arg2, $arg3);
   }
 
   public function schema($tblName = null)
   {
     if (isset($tblName)) return $this->getTableSchema($tblName)->getColumns();
-
-    $columns = $this->getSchema()->getColumns();
+    
+    $columns = $this->schema->getColumns();
     foreach ($this->property->getData() as $name => $value) {
       if (isset($columns[$name])) {
         $columns[$name]->value = $this->property->convertData($name, $value);
@@ -112,13 +229,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function getTableSchema($tblName = null)
   {
-    return ($tblName === null) ? $this->property->getSchema()
+    return ($tblName === null) ? $this->schema
                                : parent::getTableSchema($tblName);
   }
 
   public function getColumnNames($tblName = null)
   {
-    return ($tblName === null) ? $this->property->getColumns()
+    return ($tblName === null) ? $this->columns
                                : parent::getColumnNames($tblName);
   }
 
@@ -164,7 +281,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     if ($row = $model->exec()->fetch()) {
       $withParent = $model->property->isWithParent();
-      $model->setData(($withParent) ? $this->addParent($row) : $row);
+      $model->transrate(($withParent) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
     } else {
       $model->receiveSelectCondition($model->conditions);
@@ -214,7 +331,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
       if ($childConstraints) $model->receiveChildConstraint($childConstraints);
 
-      $model->setData(($withParent) ? $this->addParent($row) : $row);
+      $model->transrate(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($model);
       $models[] = $model;
     }
@@ -288,7 +405,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     $row = $this->addParentModels($row, $model->tableProp->primaryKey);
-    $model->setData($row);
+    $model->transrate($row);
     return $model;
   }
 
@@ -337,7 +454,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     foreach ($rows as $row) {
       $childObj = clone $childObj;
-      $childObj->setData(($withParent) ? $this->addParent($row) : $row);
+      $childObj->transrate(($withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
     }
@@ -377,7 +494,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
   }
 
-  public function setData($row)
+  /**
+   * transrating row of table to properties of Model
+   *
+   * @param array $row row data
+   */
+  public function transrate($row)
   {
     $pKey = $this->tableProp->primaryKey;
 
@@ -455,7 +577,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->conditions = $this->property->getSelectCondition();
       $this->update($saveData);
       $this->property->unsetNewData();
-      $newData = array_merge($this->property->getRealData(), $saveData);
+      $newData = array_merge($this->getRealData(), $saveData);
     } else {
       if ($this->validateOnInsert) {
         if (($this->errors = $this->validate())) return false;
@@ -516,9 +638,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function validate()
   {
     // instanciate schema
-    if ($this->schema === null) {
-      $this->schema = $this->property->getSchema()->getColumns();
-    }
+    $this->sColumns = $this->schema->getColumns();
 
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
     $dataForValidate = $this->property->getValidateData();
@@ -564,9 +684,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function validateLength($name, $value)
   {
-    $type = $this->schema[$name]->type;
+    $type = $this->sColumns[$name]->type;
     if ($type === Sabel_DB_Type_Const::INT || $type === Sabel_DB_Type_Const::STRING) {
-      return ($this->schema[$name]->max < strlen($value));
+      return ($this->sColumns[$name]->max < strlen($value));
     } else {
       return false;
     }
@@ -575,7 +695,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   protected function validateNullable($name, $value)
   {
     $result = false;
-    if ($this->schema[$name]->nullable === false) {
+    if ($this->sColumns[$name]->nullable === false) {
       if ($value === null || $value === "") $result = true;
     }
     return $result;
@@ -584,7 +704,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function validateType($name, $value)
   {
     $result = false;
-    switch ($this->schema[$name]->type) {
+    switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
         if (!is_numeric($value))  return true;
         if (!ctype_digit($value)) return true;

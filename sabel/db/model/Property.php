@@ -15,7 +15,6 @@ Sabel::using('Sabel_DB_SimpleCache');
 class Sabel_DB_Model_Property
 {
   private
-    $schema  = array(),
     $columns = array();
 
   private
@@ -49,84 +48,10 @@ class Sabel_DB_Model_Property
         $this->cconst($cldName, $param);
       }
     }
-
-    $conName = (isset($mdlProps['connectName'])) ? $mdlProps['connectName'] : 'default';
-
-    $this->initSchema($mdlName, $conName, $props['table']);
+    
     $this->overrideProps = $props;
   }
-
-  protected function initSchema($mdlName, $conName, $tblName)
-  {
-    $tblName = ($tblName === '') ? convert_to_tablename($mdlName) : $tblName;
-    $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
-
-    if ($cache) {
-      $this->schema     = $cache;
-      $this->columns    = Sabel_DB_SimpleCache::get('columns_' . $tblName);
-      $this->properties = Sabel_DB_SimpleCache::get('props_'   . $tblName);
-    } else {
-      $sClsName = 'Schema_' . $mdlName;
-      Sabel::using($sClsName);
-
-      if (class_exists($sClsName, false)) {
-        list($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
-      } else {
-        list($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
-      }
-
-      $columns = array_keys($tblSchema->getColumns());
-
-      Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
-      Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
-      Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
-
-      if ($properties['primaryKey'] === null)
-        trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
-
-      $this->schema     = $tblSchema;
-      $this->columns    = $columns;
-      $this->properties = $properties;
-    }
-  }
-
-  protected function getSchemaFromDb($conName, $tblName)
-  {
-    Sabel::using('Sabel_DB_Schema_Accessor');
-
-    $scmName    = Sabel_DB_Connection::getSchema($conName);
-    $database   = Sabel_DB_Connection::getDB($conName);
-    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
-    $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
-    $tblSchema  = $accessor->getTable($tblName);
-
-    $properties = array('connectName'  => $conName,
-                        'primaryKey'   => $tblSchema->getPrimaryKey(),
-                        'incrementKey' => $tblSchema->getIncrementKey(),
-                        'tableEngine'  => $engine,
-                        'table'        => $tblName);
-
-    return array($tblSchema, $properties);
-  }
-
-  protected function getSchemaFromCls($clsName, $tblName)
-  {
-    Sabel::using('Sabel_DB_Schema_Table');
-
-    $cols = array();
-    $sCls = new $clsName();
-    foreach ($sCls->get() as $colName => $colInfo) {
-      $colInfo['name'] = $colName;
-      $cols[$colName]  = new Sabel_ValueObject($colInfo);
-    }
-
-    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
-    $properties = $sCls->getProperty();
-    $properties['table'] = $tblName;
-
-    return array($tblSchema, $properties);
-  }
-
+  
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
@@ -143,29 +68,7 @@ class Sabel_DB_Model_Property
 
   public function __get($key)
   {
-    if (!isset($this->data[$key])) return null;
-    return $this->convertData($key, $this->data[$key]);
-  }
-
-  public function convertData($key, $data)
-  {
-    $schema = $this->schema->getColumns();
-    if (!isset($schema[$key])) return $data;
-
-    switch ($schema[$key]->type) {
-      case Sabel_DB_Type_Const::INT:
-        return (int)$data;
-      case Sabel_DB_Type_Const::FLOAT:
-      case Sabel_DB_Type_Const::DOUBLE:
-        return (float)$data;
-      case SabeL_DB_Type_Const::BOOL:
-        if (is_int($data)) {
-          $data = ($data === 1);
-        } elseif(is_string($data)) {
-          $data = (in_array($data, array('1', 't', 'true')));
-        }
-    }
-    return $data;
+    return (isset($this->data[$key])) ? $this->data[$key] : null;
   }
 
   public function setProperties($row)
@@ -176,15 +79,10 @@ class Sabel_DB_Model_Property
     }
     foreach ($row as $key => $val) $this->data[$key] = $val;
   }
-
-  public function getTableProperties()
+  
+  public function setColumns($columns)
   {
-    return $this->properties;
-  }
-
-  public function getSchema()
-  {
-    return $this->schema;
+    $this->columns = $columns;
   }
 
   public function getColumns()
@@ -195,18 +93,6 @@ class Sabel_DB_Model_Property
   public function getData()
   {
     return $this->data;
-  }
-
-  public function getRealData()
-  {
-    $cols = $this->columns;
-    $data = $this->data;
-    $real = array();
-
-    foreach ($data as $key => $val) {
-      if (in_array($key, $cols)) $real[$key] = $this->convertData($key, $val);
-    }
-    return $real;
   }
 
   public function getValidateData()
