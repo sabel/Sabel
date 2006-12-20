@@ -39,6 +39,8 @@ abstract class Sabel_Controller_Page
     $enableSession = true,
     $skipDefaultAction = true;
     
+  protected $modesl = null;
+  
   /**
    * reserved name lists of methods(actions)
    * @var array $reserved
@@ -112,7 +114,7 @@ abstract class Sabel_Controller_Page
   public function execute($actionName)
   {
     if (!headers_sent()) header('X-Framework: Sabel');
-    
+    $this->processModels();
     $this->processFilter($actionName, "before");
     
     // check reserved words
@@ -146,6 +148,16 @@ abstract class Sabel_Controller_Page
     $this->processFilter($actionName, "after");
     
     return $result;
+  }
+  
+  protected function processModels()
+  {
+    if ($this->models !== null) {
+      foreach ($this->models as $model) {
+        $modelName = strtolower($model);
+        $this->$modelName = MODEL($model);
+      }
+    }
   }
   
   protected function processFilter($actionName, $when = "around")

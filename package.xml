@@ -26,9 +26,9 @@
   <active>yes</active>
  </developer>
  <date>2006-12-21</date>
- <time>00:01:02</time>
+ <time>01:54:24</time>
  <version>
-  <release>0.3.0</release>
+  <release>0.3.1</release>
   <api>0.1.0</api>
  </version>
  <stability>
@@ -576,11 +576,9 @@
     <file baseinstalldir="/Sabel" name="Validate.php" role="php" />
     <file baseinstalldir="/Sabel" name="VirtualInheritance.php" role="php" />
    </dir> <!-- /Test -->
-   <file baseinstalldir="/Sabel" name="alpha-0.3.0.tgz" role="data" />
    <file baseinstalldir="/Sabel" name="packageXml.php" role="php" />
    <file baseinstalldir="/Sabel" name="Sabel.php" role="php" />
    <file baseinstalldir="/Sabel" name="SabelAllTests.php" role="php" />
-   <file baseinstalldir="/Sabel" name="svk-commitPpxlm.tmp" role="data" />
   </dir> <!-- / -->
  </contents>
  <dependencies>

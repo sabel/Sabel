@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -z "$SABEL_HOME" ] ; then
-  SABEL_HOME="/usr/local/lib/php"
+  SABEL_HOME="@PEAR-DIR@"
 fi
 
 if (test -z "$PHP_COMMAND") ; then
