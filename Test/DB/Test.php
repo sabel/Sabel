@@ -928,9 +928,9 @@ class Test_DB_Test extends SabelTestCase
     $order = $model->selectOne();
     $this->assertFalse($order->isSelected());
 
-    $model->buy_date = '1999-01-01 12:34:55';
-    $model->amount   = 9999;
-    $model->save();
+    $order->buy_date = '1999-01-01 12:34:55';
+    $order->amount   = 9999;
+    $order->save();
 
     $order = Sabel_Model::load('CustomerOrder')->selectOne(5);
     $this->assertTrue($order->isSelected());

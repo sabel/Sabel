@@ -1,9 +1,8 @@
 <?php
 
-Sabel::using('Sabel_ValueObject');
 Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Type_Const');
-Sabel::using('Sabel_DB_Model_Property');
+Sabel::using('Sabel_DB_SimpleCache');
 
 /**
  * Sabel_DB_Model
@@ -19,31 +18,48 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   const UPDATE_TIME_COLUMN = 'auto_update';
   const CREATE_TIME_COLUMN = 'auto_create';
 
-  protected
-    $property = null;
-
   private
     $columns = array();
-    
+
   private
-    $parentModels    = array(),
-    $acquiredParents = array(),
-    $cascadeStack    = array();
+    $data     = array(),
+    $newData  = array(),
+    $selected = false;
+
+  private
+    $parentModels     = array(),
+    $acquiredParents  = array(),
+    $cascadeStack     = array();
+
+  protected
+    $table       = '',
+    $connectName = 'default';
+
+  protected
+    $withParent = false,
+    $projection = '*',
+    $structure  = 'normal',
+    $myChildren = array();
+
+  protected
+    $selectConditions = array(),
+    $childConditions  = array(),
+    $childConstraints = array();
 
   protected
     $validateOnInsert = false,
     $validateOnUpdate = false;
 
-  protected $validateMessages = array("invalid_length"      => "invalid length",
-                                      "impossible_to_empty" => "impossible to empty",
-                                      "type_mismatch"       => "invalid data type");
+  protected $validateMessages = array('invalid_length'      => 'invalid length',
+                                      'impossible_to_empty' => 'impossible to empty',
+                                      'type_mismatch'       => 'invalid data type');
 
   /**
    * @var a schema information of DB usually use for validate.
    *      this value will instanciate in validate() method.
    */
   private $schema = null;
-  
+
   /**
    * @var columns of Schema
    *
@@ -64,15 +80,21 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function __construct($param1 = null, $param2 = null)
   {
-    if ($this->property === null) $this->createProperty();
+    $this->initialize();
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
-  
-  protected function initSchema($mdlName, $conName, $tblName = '')
+
+  public function initialize($mdlName = null, $mdlProps = null)
   {
-    $tblName = ($tblName === '') ? convert_to_tablename($mdlName) : $tblName;
+    $mdlName = ($mdlName === null)  ? get_class($this) : $mdlName;
+    $this->initSchema($mdlName, $this->connectName);
+  }
+
+  protected function initSchema($mdlName, $conName)
+  {
+    $tblName = ($this->table === '') ? convert_to_tablename($mdlName) : $this->table;
     $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
-    
+
     if ($cache) {
       $this->schema  = $cache;
       $this->columns = Sabel_DB_SimpleCache::get('columns_' . $tblName);
@@ -99,71 +121,68 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->schema  = $tblSchema;
       $this->columns = $columns;
     }
-    
+
     $this->tableProp = new Sabel_ValueObject($properties);
   }
-  
-  protected function getSchemaFromDb($conName, $tblName)
+
+  public function __clone()
   {
-    Sabel::using('Sabel_DB_Schema_Accessor');
-
-    $scmName    = Sabel_DB_Connection::getSchema($conName);
-    $database   = Sabel_DB_Connection::getDB($conName);
-    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
-    $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
-    $tblSchema  = $accessor->getTable($tblName);
-
-    $properties = array('connectName'  => $conName,
-                        'primaryKey'   => $tblSchema->getPrimaryKey(),
-                        'incrementKey' => $tblSchema->getIncrementKey(),
-                        'tableEngine'  => $engine,
-                        'table'        => $tblName);
-
-    return array($tblSchema, $properties);
-  }
-
-  protected function getSchemaFromCls($clsName, $tblName)
-  {
-    Sabel::using('Sabel_DB_Schema_Table');
-
-    $cols = array();
-    $sCls = new $clsName();
-    foreach ($sCls->get() as $colName => $colInfo) {
-      $colInfo['name'] = $colName;
-      $cols[$colName]  = new Sabel_ValueObject($colInfo);
+    if ($this->errors !== null) {
+      $this->errors = clone $this->errors;
     }
-
-    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
-    $properties = $sCls->getProperty();
-    $properties['table'] = $tblName;
-
-    return array($tblSchema, $properties);
-  }
-  
-  protected function createProperty($mdlName = null, $mdlProps = null)
-  {
-    $mdlName  = ($mdlName === null)  ? get_class($this) : $mdlName;
-    $mdlProps = ($mdlProps === null) ? get_object_vars($this) : $mdlProps;
-    
-    $conName  = (isset($mdlProps['connectName'])) ? $mdlProps['connectName'] : 'default';
-    $this->initSchema($mdlName, $conName);
-    
-    $this->property  = new Sabel_DB_Model_Property($mdlName, $mdlProps);
-    $this->property->setColumns($this->columns);
   }
 
   public function __set($key, $val)
   {
-    $this->property->$key = $val;
+    $this->data[$key] = $val;
+
+    if ($this->selected && in_array($key, $this->columns)) {
+      $this->newData[$key] = $val;
+    }
+  }
+
+  public function setProjection($p)
+  {
+    $this->projection = (is_array($p)) ? join(',', $p) : $p;
+  }
+
+  public function setProperties($row)
+  {
+    if (!is_array($row)) {
+      $errorMsg = 'Sabel_DB_Property::setProperties(). argument should be an array.';
+      throw new Exception($errorMsg);
+    }
+    foreach ($row as $key => $val) $this->data[$key] = $val;
+  }
+
+  public function setChildCondition($arg1, $arg2 = null, $arg3 = null)
+  {
+    if (is_object($arg1) || is_array($arg1)) {
+      $this->childConditions[] = $arg1;
+    } else {
+      Sabel::using('Sabel_DB_Condition');
+      $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
+      $this->childConditions[] = $condition;
+    }
+  }
+
+  public function setChildConstraint($mdlName, $constraints)
+  {
+    if (!is_array($constraints))
+      throw new Exception('Error:setChildConstraint() second argument must be an array.');
+
+    foreach ($constraints as $key => $val) {
+      $this->childConstraints[$mdlName][$key] = $val;
+    }
   }
 
   public function __get($key)
   {
-    $value = $this->property->$key;
-    return ($value === null) ? null : $this->convertData($key, $value);
+    if (!isset($this->data[$key])) return null;
+    return $this->convertData($key, $this->data[$key]);
   }
-  
-  public function convertData($key, $data)
+
+  protected function convertData($key, $data)
   {
     $schema = $this->schema->getColumns();
     if (!isset($schema[$key])) return $data;
@@ -183,43 +202,105 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
     return $data;
   }
-  
+
   public function getRealData()
   {
-    $cols = $this->columns;
-    $data = $this->property->getData();
     $real = array();
 
-    foreach ($data as $key => $val) {
-      if (in_array($key, $cols)) $real[$key] = $this->convertData($key, $val);
+    foreach ($this->data as $key => $val) {
+      if (in_array($key, $this->columns)) $real[$key] = $this->convertData($key, $val);
     }
     return $real;
   }
 
-  public function __clone()
+  public function toArray()
   {
-    $this->property = clone $this->property;
+    return $this->data;
   }
 
-  public function __call($method, $parameters)
+  public function getData()
   {
-    if ($this->property === null) $this->createProperty();
-    @list ($arg1, $arg2, $arg3) = $parameters;
-    return $this->property->$method($arg1, $arg2, $arg3);
+    return $this->data;
+  }
+
+  public function getLocalizedName($name)
+  {
+    return (isset($this->localize[$name])) ? $this->localize[$name] : $name;
+  }
+
+  public function getStructure()
+  {
+    return $this->structure;
+  }
+
+  public function getMyChildren()
+  {
+    return $this->myChildren;
+  }
+
+  public function getProjection()
+  {
+    return $this->projection;
+  }
+
+  public function isSelected()
+  {
+    return $this->selected;
+  }
+
+  public function getChildConstraint()
+  {
+    return $this->childConstraints;
+  }
+
+  public function getChildCondition()
+  {
+    return $this->childConditions;
+  }
+
+  public function unsetChildCondition()
+  {
+    $this->childConditions  = array();
+    $this->childConstraints = array();
+  }
+
+  public function enableParent()
+  {
+    $this->withParent = true;
+  }
+
+  public function validateOnInsert($bool)
+  {
+    $this->validateOnInsert = $bool;
+  }
+
+  public function validateOnUpdate($bool)
+  {
+    $this->validateOnUpdate = $bool;
   }
 
   public function schema($tblName = null)
   {
     if (isset($tblName)) return $this->getTableSchema($tblName)->getColumns();
-    
+
     $columns = $this->schema->getColumns();
-    foreach ($this->property->getData() as $name => $value) {
+    foreach ($this->data as $name => $value) {
       if (isset($columns[$name])) {
-        $columns[$name]->value = $this->property->convertData($name, $value);
+        $columns[$name]->value = $this->convertData($name, $value);
       }
     }
 
     return $columns;
+  }
+
+  public function hasError()
+  {
+    return $this->errors->hasError();
+  }
+
+  public function getErrors()
+  {
+    return $this->errors;
   }
 
   public function getTableEngine()
@@ -229,14 +310,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function getTableSchema($tblName = null)
   {
-    return ($tblName === null) ? $this->schema
-                               : parent::getTableSchema($tblName);
+    return ($tblName === null) ? $this->schema : parent::getTableSchema($tblName);
   }
 
   public function getColumnNames($tblName = null)
   {
-    return ($tblName === null) ? $this->columns
-                               : parent::getColumnNames($tblName);
+    return ($tblName === null) ? $this->columns : parent::getColumnNames($tblName);
   }
 
   protected function defaultSelectOne($param1, $param2 = null)
@@ -266,25 +345,19 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception('Error: selectOne() [WHERE] must be set condition.');
 
     $this->setCondition($param1, $param2, $param3);
-
-    $property = $this->property;
-    $self = clone $this;
-    $self->property = $property;
-
-    return $this->createModel($self);
+    return $this->createModel(clone $this);
   }
 
   protected function createModel($model)
   {
-    $projection = $model->property->getProjection();
+    $projection = $model->getProjection();
     $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
 
     if ($row = $model->exec()->fetch()) {
-      $withParent = $model->property->isWithParent();
-      $model->transrate(($withParent) ? $this->addParent($row) : $row);
+      $model->transrate(($this->withParent) ? $this->addParent($row) : $row);
       $model->getDefaultChild($model);
     } else {
-      $model->receiveSelectCondition($model->conditions);
+      $model->selectConditions = $model->conditions;
       foreach ($model->conditions as $condition) {
         $model->{$condition->key} = $condition->value;
       }
@@ -303,35 +376,31 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function select($param1 = null, $param2 = null, $param3 = null)
   {
     $this->setCondition($param1, $param2, $param3);
+    $tblName = $this->tableProp->table;
 
-    $tblName    = $this->tableProp->table;
-    $withParent = $this->property->isWithParent();
-
-    if ($withParent) {
+    if ($this->withParent) {
       $relClass = Sabel::load('Sabel_DB_Model_Relation');
       $mdlName  = convert_to_modelname($tblName);
-      if ($relClass->initJoin($mdlName))
-        return $relClass->execJoin($this, 'INNER');
+      if ($relClass->initJoin($mdlName)) return $relClass->execJoin($this, 'INNER');
     }
 
-    $projection = $this->property->getProjection();
+    $projection = $this->getProjection();
     $this->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
 
     $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
 
-    $childConstraints = $this->property->getChildConstraint();
-
     $models = array();
+    $ccond  = $this->getChildConstraint();
     $obj    = MODEL(convert_to_modelname($tblName));
     $rows   = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
       $model = clone $obj;
 
-      if ($childConstraints) $model->receiveChildConstraint($childConstraints);
+      if ($ccond) $model->childConstraints = $ccond;
 
-      $model->transrate(($withParent) ? $this->addParent($row) : $row);
+      $model->transrate(($this->withParent) ? $this->addParent($row) : $row);
       $this->getDefaultChild($model);
       $models[] = $model;
     }
@@ -378,9 +447,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function createParentModels($tblName, $id)
   {
-    $tblName   = strtolower($tblName);
-    $structure = $this->property->getStructure();
-    if ($structure !== 'tree' && $this->isAcquired($tblName)) return false;
+    $tblName = strtolower($tblName);
+    if ($this->structure !== 'tree' && $this->isAcquired($tblName)) return false;
 
     if (isset($this->parentModels[$tblName])) {
       $model = clone $this->parentModels[$tblName];
@@ -394,7 +462,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $cacheName = $tblName . $id;
     if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
       $model->setCondition($model->tableProp->primaryKey, $id);
-      $projection = $model->property->getProjection();
+      $projection = $model->getProjection();
       $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
       $resultSet = $model->exec();
 
@@ -428,25 +496,24 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($model === null) $model = $this;
 
     $cModel     = MODEL($child);
-    $projection = $cModel->property->getProjection();
+    $projection = $cModel->getProjection();
     $cModel->getStatement()->setBasicSQL("SELECT $projection FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
     $primary = $model->tableProp->primaryKey;
     $model->setChildCondition("{$model->tableProp->table}_{$primary}", $model->$primary);
 
-    $cModel->conditions = $model->property->getChildCondition();
-    $cconst = $model->property->getChildConstraint();
+    $cModel->conditions = $model->getChildCondition();
+    $cconst = $model->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
     $resultSet = $cModel->exec();
 
     if ($resultSet->isEmpty()) {
-      $model->property->set($child, false);
-      return false;
+      return $model->$child = false;
     }
 
-    $withParent = ($this->property->isWithParent() || $cModel->property->isWithParent());
+    $withParent = ($this->withParent || $cModel->withParent);
 
     $children = array();
     $childObj = MODEL($child);
@@ -459,37 +526,37 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $children[] = $childObj;
     }
 
-    $model->property->set($child, $children);
+    $model->$child = $children;
     return $children;
   }
 
   protected function getDefaultChild($model)
   {
-    if ($children = $model->property->getMyChildren()) {
-      foreach ($children as $val) {
-        $this->chooseChildConstraint($val, $model);
-        $model->getChild($val, $model);
+    if ($children = $model->getMyChildren()) {
+      foreach ($children as $child) {
+        $this->chooseChildConstraint($child, $model);
+        $model->getChild($child, $model);
       }
     }
   }
 
   protected function chooseChildConstraint($child, $model)
   {
-    $thisCConst  = $this->property->getChildConstraint();
-    $modelCConst = $model->property->getChildConstraint();
-
     $constraints = array();
+    $thisCConst  = $this->getChildConstraint();
+    $modelCConst = $model->getChildConstraint();
+
     if (isset($thisCConst[$child])) {
       $constraints = $thisCConst[$child];
     } elseif (isset($modelCConst[$child])) {
       $constraints = $modelCConst[$child];
     }
 
-    if ($constraints) $model->property->setChildConstraint($child, $constraints);
+    if ($constraints) $model->setChildConstraint($child, $constraints);
 
     if ($thisCConst)  {
       foreach ($thisCConst as $cldName => $param) {
-        $model->property->setChildConstraint($cldName, $param);
+        $model->setChildConstraint($cldName, $param);
       }
     }
   }
@@ -506,23 +573,22 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if (is_array($pKey)) {
       foreach ($pKey as $key) {
         $condition = new Sabel_DB_Condition($key, $row[$key]);
-        $this->setSelectCondition($key, $condition);
+        $this->selectConditions[$key] = $condition;
       }
     } else {
       if (isset($row[$pKey])) {
         $condition = new Sabel_DB_Condition($pKey, $row[$pKey]);
-        $this->setSelectCondition($pKey, $condition);
+        $this->selectConditions[$pKey] = $condition;
       }
     }
 
     $this->setProperties($row);
-    $this->enableSelected();
+    $this->selected = true;
   }
 
   public function newChild($child = null)
   {
-    $data = $this->getData();
-    $id   = $data[$this->tableProp->primaryKey];
+    $id = $this->{$this->tableProp->primaryKey};
 
     if (empty($id)) {
       throw new Exception("Error:newChild() who is a parent? hasn't id value.");
@@ -545,10 +611,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function clearChild($child)
   {
     $pkey = $this->tableProp->primaryKey;
-    $data = $this->property->getData();
 
-    if (isset($data[$pkey])) {
-      $id = $data[$pkey];
+    if (isset($this->data[$pkey])) {
+      $id = $this->data[$pkey];
     } else {
       throw new Exception("Error:clearChild() who is a parent? hasn't id value.");
     }
@@ -572,12 +637,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         if (($this->errors = $this->validate())) return false;
       }
 
-      $saveData = ($data) ? $data : $this->property->getNewData();
+      $saveData = ($data) ? $data : $this->newData;
       $this->recordTime($saveData, $tblName, self::UPDATE_TIME_COLUMN);
-      $this->conditions = $this->property->getSelectCondition();
+      $this->conditions = $this->selectConditions;
       $this->update($saveData);
-      $this->property->unsetNewData();
       $newData = array_merge($this->getRealData(), $saveData);
+      $this->newData = array();
     } else {
       if ($this->validateOnInsert) {
         if (($this->errors = $this->validate())) return false;
@@ -585,7 +650,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
       $driver  = $this->getDriver();
       $stmt    = $this->getStatement();
-      $newData = ($data) ? $data : $this->property->getData();
+      $newData = ($data) ? $data : $this->data;
 
       $this->recordTime($newData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
@@ -604,44 +669,24 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       }
     }
 
-    foreach ($newData as $key => $val) $newModel->property->set($key, $val);
+    foreach ($newData as $key => $val) $newModel->$key = $val;
 
-    $newModel->enableSelected();
+    $newModel->selected = true;
     return $newModel;
   }
 
-  public function hasError()
+  protected function recordTime(&$data, $tblName, $colName)
   {
-    return $this->errors->hasError();
+    if (in_array($colName, $this->columns)) {
+      if (!isset($data[$colName])) $data[$colName] = date('Y-m-d H:i:s');
+    }
   }
 
-  public function getErrors()
-  {
-    return $this->errors;
-  }
-
-  protected function hasValidateMethod($name)
-  {
-    return (method_exists($this, 'validate' . ucfirst($name)));
-  }
-
-  protected function executeValidateMethod($name, $value)
-  {
-    $methodName = "validate" . ucfirst($name);
-    return $this->$methodName($name, $value);
-  }
-
-  /**
-   * validate with schema
-   *
-   */
   public function validate()
   {
-    // instanciate schema
-    $this->sColumns = $this->schema->getColumns();
-
+    $this->sColumns  = $this->schema->getColumns();
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
-    $dataForValidate = $this->property->getValidateData();
+    $dataForValidata = ($this->isSelected()) ? $this->newData : $this->data;
 
     foreach ($dataForValidate as $name => $value) {
       $lname = $this->getLocalizedName($name);
@@ -666,19 +711,15 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return ($errors->count() !== 0) ? $errors : false;
   }
 
-  protected function getLocalizedName($name)
+  protected function hasValidateMethod($name)
   {
-    return (isset($this->localize[$name])) ? $this->localize[$name] : $name;
+    return (method_exists($this, 'validate' . ucfirst($name)));
   }
 
-  public function validateOnInsert($bool)
+  protected function executeValidateMethod($name, $value)
   {
-    $this->validateOnInsert = $bool;
-  }
-
-  public function validateOnUpdate($bool)
-  {
-    $this->validateOnUpdate = $bool;
+    $methodName = 'validate' . ucfirst($name);
+    return $this->$methodName($name, $value);
   }
 
   protected function validateLength($name, $value)
@@ -702,6 +743,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function validateType($name, $value)
   {
+
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
         return (!ctype_digit($value));
@@ -729,14 +771,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return array_diff($impossibleToNulls, array_keys($dataForValidate));
   }
 
-  protected function recordTime(&$data, $tblName, $colName)
-  {
-    $cols = $this->property->getColumns();
-    if (in_array($colName, $cols)) {
-      if (!isset($data[$colName])) $data[$colName] = date('Y-m-d H:i:s');
-    }
-  }
-
   public function multipleInsert($data)
   {
     if (!is_array($data)) {
@@ -760,7 +794,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->delete($param1, $param2, $param3);
     } else {
       $pKey    = $this->tableProp->primaryKey;
-      $scond   = $this->getSelectCondition();
+      $scond   = $this->selectConditions;
       $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;
 
       $this->delete((isset($idValue)) ? $pKey : null, $idValue);
@@ -781,8 +815,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($id === null && !$this->isSelected())
       throw new Exception('Error: give the value of id or select the model beforehand.');
 
-    $data  = $this->getData();
-    $id    = (isset($id)) ? $id : $data[$this->tableProp->primaryKey];
+    $id    = (isset($id)) ? $id : $this->{$this->tableProp->primaryKey};
     $chain = Schema_CascadeChain::get();
     $key   = $this->getConnectName() . ':' . $this->tableProp->table;
 
@@ -880,5 +913,60 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $models[] = $model;
     }
     return $models;
+  }
+
+  protected function getSchemaFromCls($clsName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Table');
+
+    $cols = array();
+    $sCls = new $clsName();
+    foreach ($sCls->get() as $colName => $colInfo) {
+      $colInfo['name'] = $colName;
+      $cols[$colName]  = new Sabel_ValueObject($colInfo);
+    }
+
+    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
+    $properties = $sCls->getProperty();
+    $properties['table'] = $tblName;
+
+    return array($tblSchema, $properties);
+  }
+
+  protected function getSchemaFromDb($conName, $tblName)
+  {
+    Sabel::using('Sabel_DB_Schema_Accessor');
+
+    $scmName    = Sabel_DB_Connection::getSchema($conName);
+    $database   = Sabel_DB_Connection::getDB($conName);
+    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
+    $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
+    $tblSchema  = $accessor->getTable($tblName);
+
+    $properties = array('connectName'  => $conName,
+                        'primaryKey'   => $tblSchema->getPrimaryKey(),
+                        'incrementKey' => $tblSchema->getIncrementKey(),
+                        'tableEngine'  => $engine,
+                        'table'        => $tblName);
+
+    return array($tblSchema, $properties);
+  }
+
+  /**
+   * an alias for setChildConstraint.
+   *
+   */
+  public function cconst($mdlName, $constraints)
+  {
+    $this->setChildConstraint($mdlName, $constraints);
+  }
+
+  /**
+   * an alias for setChildCondition.
+   *
+   */
+  public function ccond($arg1, $arg2 = null)
+  {
+    $this->setChildCondition($arg1, $arg2);
   }
 }

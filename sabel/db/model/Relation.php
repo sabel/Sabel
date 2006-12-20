@@ -200,7 +200,7 @@ class Sabel_DB_Model_Relation
         if (!isset($ref[$tblName])) continue;
         foreach ($ref[$tblName] as $parent) {
           $mdlName = convert_to_modelname($parent);
-          $models[$tblName]->set($mdlName, $models[$parent]);
+          $models[$tblName]->$mdlName = $models[$parent];
         }
       }
 
@@ -209,7 +209,7 @@ class Sabel_DB_Model_Relation
 
       foreach ($ref[$myTable] as $parent) {
         $mdlName = convert_to_modelname($parent);
-        $self->set($mdlName, $models[$parent]);
+        $self->$mdlName = $models[$parent];
       }
       $results[] = $self;
     }

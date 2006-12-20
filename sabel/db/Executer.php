@@ -1,5 +1,6 @@
 <?php
 
+Sabel::using('Sabel_ValueObject');
 Sabel::using('Sabel_DB_Condition');
 
 /**
@@ -7,8 +8,8 @@ Sabel::using('Sabel_DB_Condition');
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Executer
@@ -39,7 +40,18 @@ class Sabel_DB_Executer
     $props['primaryKey']   = (isset($ps['primaryKey']))   ? $ps['primaryKey']   : 'id';
     $props['incrementKey'] = (isset($ps['incrementKey'])) ? $ps['incrementKey'] : null;
 
-    $this->tableProp = Sabel::load('Sabel_ValueObject', $props);
+    $this->tableProp = new Sabel_ValueObject($props);
+  }
+
+  /**
+   * set table name.
+   *
+   * @param string $tblName
+   * @return void
+   */
+  public function setTableName($tblName)
+  {
+    $this->tableProp->table = $tblName;
   }
 
   /**
@@ -55,13 +67,13 @@ class Sabel_DB_Executer
   /**
    * returns the primary key(s).
    *
-   * @return mixed string of array
+   * @return mixed string or array
    */
   public function getPrimaryKey()
   {
     return $this->tableProp->primaryKey;
   }
-  
+
   /**
    * set primary key
    *
@@ -98,6 +110,7 @@ class Sabel_DB_Executer
    *
    * @param mixed    $arg1 column name ( with the condition prefix ),
    *                       or value of primary key,
+   *                       or array condition(s),
    *                       or instance of Sabel_DB_Condition.
    * @param mixed    $arg2 condition value.
    * @param constant $arg3 denial ( Sabel_DB_Condition::NOT )
@@ -151,7 +164,7 @@ class Sabel_DB_Executer
       if (isset($val)) $this->constraints[$key] = $val;
     }
   }
-  
+
   /**
    * unset condition and constraint.
    *
