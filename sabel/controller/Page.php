@@ -117,7 +117,7 @@ abstract class Sabel_Controller_Page
   {
     if (!headers_sent()) header('X-Framework: Sabel');
     
-    $this->processFilter($actionName);
+    $this->processFilter($actionName, "before");
     
     // check reserved words
     if (isset($this->reserved[$actionName]))
@@ -147,26 +147,65 @@ abstract class Sabel_Controller_Page
     $view->assignByArray($this->attributes);
     if (is_array($result)) $view->assignByArray($result);
     
+    $this->processFilter($actionName, "after");
+    
     return $result;
   }
   
-  protected function processFilter($actionName)
+  protected function processFilter($actionName, $when)
   {
-    $beforeFilters = (isset($this->filters["before"])) ? $this->filters["before"] : array();
-    if (isset($beforeFilters["exclude"])) {
-      if (in_array($actionName, $beforeFilters["exclude"])) {
-        return false;
-      }
+    switch ($when) {
+      case "before":
+        if (isset($this->filters["before"])) {
+          $this->doFilters($actionName, $this->filters["before"]);
+        }
+        break;
+      case "after":
+        if (isset($this->filters["after"])) {
+          $this->doFilters($actionName, $this->filters["after"]);
+        }
+        break;
+      default:
+        if (isset($this->filters["around"])) {
+          $this->doFilters($actionName, $this->filters["around"]);
+        }
+        break;
+    }
+  }
+  
+  protected function doFilters($actionName, $filters)
+  {
+    if (isset($filters["exclude"]) && isset($filters["include"])) {
+      throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
     }
     
-    unset($beforeFilters["exclude"]);
-    
-    if (count($beforeFilters) > 0) {
-      foreach ($beforeFilters as $filter) {
+    if (isset($filters["exclude"])) {
+      if (in_array($actionName, $filters["exclude"])) {
+        return false;
+      } else {
+        unset($filters["exclude"]);
+        $this->executeFilters($filters);
+      }
+    } elseif (isset($filters["include"])) {
+      if (in_array($actionName, $filters["include"])) {
+        unset($filters["include"]);
+        $this->executeFilters($filters);
+      }
+    } else {
+      unset($filters["exclude"]);
+      unset($filters["include"]);
+      $this->executeFilters($filters);
+    }
+  }
+  
+  protected function executeFilters($filters)
+  {
+    if (0 < count($filters)) {
+      foreach ($filters as $filter) {
         if ($this->hasMethod($filter)) {
-          if (!$this->$filter()) break;
+          if ($this->$filter() === false) break;
         } else {
-          throw new Sabel_Exception_Runtime($filter." is notfound in any action");
+          throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
         }
       }
     }
@@ -225,7 +264,12 @@ abstract class Sabel_Controller_Page
         throw Sabel::load('Sabel_Exception_TemplateMissing', var_export($this->view, 1));
       }
     } else {
-      return $this->view->rendering($this->withLayout);
+      if ($this->hasMethod("render")) {
+        $rendered = $this->view->rendering($this->withLayout);
+        return $this->render($rendered);
+      } else {
+        return $this->view->rendering($this->withLayout);
+      }
     }
   }
   
