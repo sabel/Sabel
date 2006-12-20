@@ -164,6 +164,21 @@ function request($uri)
   return $response['html'];
 }
 
+function __($arraySource)
+{
+  $distination = array();
+  $arraySource = str_replace(", ", ",", $arraySource);
+  $elements = explode(",", $arraySource);
+  foreach ($elements as $element) {
+    $pairs = explode(" ", $element);
+    if (!isset($pairs[1])) $pairs[1] = "";
+    if ($pairs[1] === "__TRUE__")  $paris[1] = __TRUE__;
+    if ($pairs[1] === "__FALSE__") $paris[1] = __FALSE__;
+    $distination[$pairs[0]] = $pairs[1];
+  }
+  return $distination;
+}
+
 function dump($mixed)
 {
   echo '<pre>';
