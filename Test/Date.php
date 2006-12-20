@@ -215,6 +215,20 @@ class Test_Date extends SabelTestCase
     $this->assertEquals($sd->getDateTime(), '2005-08-18T10:00:00+09:00');
   }
 
+  public function testJP()
+  {
+    $time = '2005-08-15 10:00:27';
+//    $time = '2005年08月15日 10時00分27秒';
+    $sd   = new Sabel_Date($time);
+    $sd->setFormat(Sabel_Date::JP);
+    $this->assertEquals($sd->getDateTime(), '2005年08月15日 10時00分27秒');
+    $this->assertEquals($sd->getDate(), '2005年08月15日');
+    $this->assertEquals($sd->getTime(), '10時00分27秒');
+
+    $sd->incDay();
+    $this->assertEquals($sd->getDateTime(), '2005年08月16日 10時00分27秒');
+  }
+
   public function testConvert()
   {
     $time = '2005-08-15 10:00:00';

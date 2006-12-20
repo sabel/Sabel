@@ -91,12 +91,9 @@ class Sabel_View
         $layout->assign('contentForLayout', $contents);
         
         return $layout->rendering(false);
-      } else {
-        return $contents;
       }
-    } else {
-      return $contents;
     }
+    return $contents;
   }
   
   public function decideTemplatePath($candidate)

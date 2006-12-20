@@ -36,17 +36,14 @@ final class Sabel
   {
     self::using($className);
     
-    if (!class_exists($className)) throw new Exception($className . " not found");
-    
-    if ($args !== null) {
-      if (!is_array($args)) $args = array($args);
-      $argStr = join(', ', $args);
-    }
-    
+    if (!class_exists($className, false))
+      throw new Exception($className . " not found");
+      
     if ($arg === null) {
       return new $className();
     } elseif ($args !== null) {
-      $eval = '$instance = new $className($arg, $argStr);';
+      if (is_array($args)) $args = join(',' , $args);
+      $eval = '$instance = new $className($arg, $args);';
       eval($eval);
       return $instance;
     } else {

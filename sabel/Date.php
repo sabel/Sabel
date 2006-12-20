@@ -95,8 +95,6 @@ class Sabel_Date
 
   public function __construct($arg = null)
   {
-    if (isset($format)) $this->format= $format;
-
     if ($arg === null) {
       $this->timestamp = time();
     } elseif (is_string($arg)) {
@@ -114,21 +112,6 @@ class Sabel_Date
       throw new Sabel_Exception_Runtime('Sabel_Date::__construct() invalid parameter.');
     }
 
-    $this->reset();
-  }
-
-  protected function reset()
-  {
-    $this->data = array('year'    => $this->y(),
-                        's_year'  => $this->y(true),
-                        'month'   => $this->m(),
-                        's_month' => $this->m(true),
-                        'day'     => $this->d(),
-                        's_day'   => $this->d(true),
-                        'hour'    => $this->h(),
-                        's_hour'  => $this->h(true),
-                        'minute'  => $this->i(),
-                        'second'  => $this->s());
   }
 
   public function __toString()
@@ -138,7 +121,13 @@ class Sabel_Date
 
   public function __get($key)
   {
-    return (isset($this->data[$key])) ? $this->data[$key] : null;
+    $bool = false;
+    if (strpos($key, 's_') !== false) {
+      $bool = true;
+      $key  = str_replace('s_', '', $key);
+    }
+    $method = 'get' . ucfirst($key);
+    return $this->$method($bool);
   }
 
   public function setFormat($format)
@@ -167,11 +156,7 @@ class Sabel_Date
 
   public function getYear($short = false)
   {
-    if ($short) {
-      return $this->getShortYear();
-    } else {
-      return date('Y', $this->timestamp);
-    }
+    return ($short) ? $this->getShortYear() : date('Y', $this->timestamp);
   }
 
   public function getShortYear()
@@ -181,11 +166,7 @@ class Sabel_Date
 
   public function getMonth($short = false)
   {
-    if ($short) {
-      return $this->getShortMonth();
-    } else {
-      return date('m', $this->timestamp);
-    }
+    return ($short) ? $this->getShortMonth() : date('m', $this->timestamp);
   }
 
   public function getShortMonth()
@@ -195,11 +176,7 @@ class Sabel_Date
 
   public function getStrMonth($short = false)
   {
-    if ($short) {
-      return $this->getShortStrMonth();
-    } else {
-      return date('F', $this->timestamp);
-    }
+    return ($short) ? $this->getShortStrMonth() : date('F', $this->timestamp);
   }
 
   public function getShortStrMonth()
@@ -209,11 +186,7 @@ class Sabel_Date
 
   public function getDay($short = false)
   {
-    if ($short) {
-      return $this->getShortDay();
-    } else {
-      return date('d', $this->timestamp);
-    }
+    return ($short) ? $this->getShortDay() : date('d', $this->timestamp);
   }
 
   public function getShortDay()
@@ -231,11 +204,7 @@ class Sabel_Date
 
   public function getHour($short = false)
   {
-    if ($short) {
-      return $this->getShortHour();
-    } else {
-      return date('H', $this->timestamp);
-    }
+    return ($short) ? $this->getShortHour() : date('H', $this->timestamp);
   }
 
   public function getShortHour()
@@ -245,11 +214,7 @@ class Sabel_Date
 
   public function getHalfHour($short)
   {
-    if ($short) {
-      return $this->getShortHalfHour();
-    } else {
-      return date('h', $this->timestamp);
-    }
+    return ($short) ? $this->getShortHalfHour() : date('h', $this->timestamp);
   }
 
   public function getShortHalfHour()
@@ -275,11 +240,7 @@ class Sabel_Date
 
   public function getWeek($short = false)
   {
-    if ($short) {
-      return $this->getShortWeek();
-    } else {
-      return date('l', $this->timestamp);
-    }
+    return ($short) ? $this->getShortWeek() : date('l', $this->timestamp);
   }
 
   public function getShortWeek()
@@ -336,24 +297,21 @@ class Sabel_Date
   {
     $year = $this->y() + $year;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $this->m(), $this->d(), $year);
-    $this->reset();
 
-    return $this->y();
+    return $year;
   }
 
   public function incMonth($month = 1)
   {
     $month = $this->m() + $month;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $month, $this->d(), $this->y());
-    $this->reset();
 
-    return $this->m();
+    return $month;
   }
 
   public function incDay($day = 1)
   {
     $this->timestamp += 86400 * $day;
-    $this->reset();
 
     return $this->d();
   }
@@ -361,7 +319,6 @@ class Sabel_Date
   public function incHour($hour = 1)
   {
     $this->timestamp += 3600 * $hour;
-    $this->reset();
 
     return $this->h();
   }
@@ -369,7 +326,6 @@ class Sabel_Date
   public function incMinute($min = 1)
   {
     $this->timestamp += 60 * $min;
-    $this->reset();
 
     return $this->i();
   }
@@ -377,7 +333,6 @@ class Sabel_Date
   public function incSecond($second = 1)
   {
     $this->timestamp += $second;
-    $this->reset();
 
     return $this->s();
   }
@@ -386,24 +341,21 @@ class Sabel_Date
   {
     $year = $this->y() - $year;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $this->m(), $this->d(), $year);
-    $this->reset();
 
-    return $this->y();
+    return $year;
   }
 
   public function decMonth($month = 1)
   {
     $month = $this->m() - $month;
     $this->timestamp = mktime($this->h(), $this->i(), $this->s(), $month, $this->d(), $this->y());
-    $this->reset();
 
-    return $this->m();
+    return $month;
   }
 
   public function decDay($day = 1)
   {
     $this->timestamp -= 86400 * $day;
-    $this->reset();
 
     return $this->d();
   }
@@ -411,7 +363,6 @@ class Sabel_Date
   public function decHour($hour = 1)
   {
     $this->timestamp -= 3600 * $hour;
-    $this->reset();
 
     return $this->h();
   }
@@ -419,7 +370,6 @@ class Sabel_Date
   public function decMinute($min = 1)
   {
     $this->timestamp -= 60 * $min;
-    $this->reset();
 
     return $this->m();
   }
@@ -427,7 +377,6 @@ class Sabel_Date
   public function decSecond($second = 1)
   {
     $this->timestamp -= $second;
-    $this->reset();
 
     return $this->s();
   }

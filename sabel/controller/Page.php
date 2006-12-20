@@ -56,11 +56,7 @@ abstract class Sabel_Controller_Page
   
   public function setup($request, $view = null)
   {
-    if ($view === null) {
-      $this->view = Sabel::load('Sabel_View');
-    } else {
-      $this->view = $view;
-    }
+    $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
     
     Sabel_Context::setView($this->view);
     
@@ -152,25 +148,10 @@ abstract class Sabel_Controller_Page
     return $result;
   }
   
-  protected function processFilter($actionName, $when)
+  protected function processFilter($actionName, $when = "around")
   {
-    switch ($when) {
-      case "before":
-        if (isset($this->filters["before"])) {
-          $this->doFilters($actionName, $this->filters["before"]);
-        }
-        break;
-      case "after":
-        if (isset($this->filters["after"])) {
-          $this->doFilters($actionName, $this->filters["after"]);
-        }
-        break;
-      default:
-        if (isset($this->filters["around"])) {
-          $this->doFilters($actionName, $this->filters["around"]);
-        }
-        break;
-    }
+    if (isset($this->filters[$when]))
+      $this->doFilters($actionName, $this->filters[$when]);
   }
   
   protected function doFilters($actionName, $filters)
@@ -192,21 +173,19 @@ abstract class Sabel_Controller_Page
         $this->executeFilters($filters);
       }
     } else {
-      unset($filters["exclude"]);
-      unset($filters["include"]);
       $this->executeFilters($filters);
     }
   }
   
   protected function executeFilters($filters)
   {
-    if (0 < count($filters)) {
-      foreach ($filters as $filter) {
-        if ($this->hasMethod($filter)) {
-          if ($this->$filter() === false) break;
-        } else {
-          throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
-        }
+    if (0 === count($filters)) return;
+    
+    foreach ($filters as $filter) {
+      if ($this->hasMethod($filter)) {
+        if ($this->$filter() === false) break;
+      } else {
+        throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
       }
     }
   }
