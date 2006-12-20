@@ -44,6 +44,8 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $this->assertEquals("welcome to Sabel have fun!\n", $result['html']);
   }
   
+  /*
+   * @todo make this.
   public function testLoad()
   {
     $classA = Sabel::load('Sabel_View');
@@ -58,6 +60,7 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_object($classD));
     $this->assertTrue(is_object($classE));
   }
+  */
   
   public function testSingleton()
   {
