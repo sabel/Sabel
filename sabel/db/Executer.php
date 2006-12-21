@@ -166,16 +166,27 @@ class Sabel_DB_Executer
   }
 
   /**
-   * unset condition and constraint.
+   * unset condition. or with constraint
+   *
+   * @param boolean $with unset with constraint
+   * @return void
+   */
+  public function unsetCondition($with = false)
+  {
+    $this->conditions = array();
+    if ($with) $this->unsetConstraint();
+  }
+  
+  /**
+   * unset constraint.
    *
    * @return void
    */
-  public function unsetCondition()
+  public function unsetConstraint()
   {
-    $this->conditions  = array();
     $this->constraints = array();
   }
-
+  
   /**
    * create driver instance.
    *

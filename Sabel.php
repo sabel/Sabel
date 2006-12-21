@@ -75,6 +75,7 @@ final class Sabel
   public static function fileUsing($path, $once = false)
   {
     if (!isset(self::$fileUsing[$path])) {
+      if (!is_readable($path)) throw new Exception("file not found");
       if ($once) {
         require_once ($path);
       } else {
