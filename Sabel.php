@@ -167,17 +167,14 @@ function request($uri)
 
 function __($arraySource)
 {
-  $distination = array();
-  $arraySource = str_replace(", ", ",", $arraySource);
-  $elements = explode(",", $arraySource);
-  foreach ($elements as $element) {
-    $pairs = explode(" ", $element);
-    if (!isset($pairs[1])) $pairs[1] = "";
-    if ($pairs[1] === "__TRUE__")  $paris[1] = __TRUE__;
-    if ($pairs[1] === "__FALSE__") $paris[1] = __FALSE__;
-    $distination[$pairs[0]] = $pairs[1];
-  }
-  return $distination;
+  $arraySource = preg_replace('/\s*,\s*/', ',', $arraySource);
+  $arraySource = str_replace(' ', '=>', $arraySource);
+  $arraySource = preg_replace("/([^ ',()=>]+)/", "'$1'", $arraySource);
+  $arraySource = preg_replace("/(?<!')\(/", "array(", $arraySource);
+  $arraySource = preg_replace("/'\('(.+?)'\)'/", "'($1)'", $arraySource);
+  $arraySource = preg_replace("/'__(TRUE|FALSE)__'/", '__$1__', $arraySource);
+  eval('$array = array(' . $arraySource . ');');
+  return $array;
 }
 
 function dump($mixed)
