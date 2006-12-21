@@ -74,14 +74,14 @@ class Sabel_View
     if ($withLayout) {
       $found = false;
       
-      if (is_file($this->templatePath . 'layout.tpl')) {
-        $found = true;
-        $name = Sabel_Const::DEFAULT_LAYOUT;
-      }
+      $usersLayoutName = $this->layout . Sabel_Const::TEMPLATE_POSTFIX;
       
-      if (is_file($this->templatePath . $this->layout . '.tpl')) {
+      if (is_file($this->templatePath . $usersLayoutName)) {
         $found = true;
-        $name = $this->layout . '.tpl';
+        $name  = $usersLayoutName;
+      } elseif (is_file($this->templatePath . Sabel_Const::DEFAULT_LAYOUT)) {
+        $found = true;
+        $name  = Sabel_Const::DEFAULT_LAYOUT;
       }
       
       if ($found) {
@@ -90,7 +90,7 @@ class Sabel_View
         $layout->setTemplateName($name);
         $layout->assign('contentForLayout', $contents);
         
-        return $layout->rendering(false);
+        $contents = $layout->rendering(false);
       }
     }
     return $contents;
