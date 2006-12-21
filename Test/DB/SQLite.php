@@ -55,10 +55,17 @@ class Test_DB_SQLite extends Test_DB_Test
 
     $model = Sabel_Model::load('Customer');
 
-    try {
-      $model->execute('CREATE TABLE customer( id int4 primary key, name varchar(24))');
-    } catch (Exception $e) {
+    $sqls = array('CREATE TABLE customer( id int4 primary key, name varchar(24))',
+                  'CREATE TABLE parents( id int4 primary key, name varchar(24))',
+                  'CREATE TABLE grand_child( id int4 primary key, child_id integer, name varchar(24), age integer)');
+
+    foreach ($sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
+
+    $model->execute('DELETE FROM customer');
+    $model->execute('DELETE FROM parents');
+    $model->execute('DELETE FROM grand_child');
   }
 }
 
@@ -159,6 +166,12 @@ class SQLiteHelper
                  id int4 primary key,
                  auto_update timestamp,
                  auto_create timestamp)";
+
+    $sqls[] = "CREATE TABLE child (
+                 id integer primary key,
+                 parents_id integer not null,
+                 name varchar(24),
+                 height integer)";
 
     $this->sqls = $sqls;
   }

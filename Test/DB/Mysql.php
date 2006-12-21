@@ -63,10 +63,17 @@ class Test_DB_Mysql extends Test_DB_Test
 
     $model = Sabel_Model::load('Customer');
 
-    try {
-      $model->execute('CREATE TABLE customer( id integer primary key, name varchar(24)) type=InnoDB');
-    } catch (Exception $e) {
+    $sqls = array('CREATE TABLE customer( id integer primary key, name varchar(24)) type=InnoDB',
+                  'CREATE TABLE parents( id integer primary key, name varchar(24))',
+                  'CREATE TABLE grand_child( id integer primary key, child_id integer, name varchar(24), age integer)');
+
+    foreach ($sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
+
+    $model->execute('DELETE FROM customer');
+    $model->execute('DELETE FROM parents');
+    $model->execute('DELETE FROM grand_child');
   }
 }
 
@@ -167,6 +174,12 @@ class MysqlHelper
                  id integer primary key,
                  auto_update datetime,
                  auto_create datetime)";
+
+    $sqls[] = "CREATE TABLE child (
+                 id integer primary key,
+                 parents_id integer not null,
+                 name varchar(24),
+                 height integer)";
 
     $this->sqls = $sqls;
   }

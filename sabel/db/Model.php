@@ -33,13 +33,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected
     $table       = '',
-    $connectName = 'default';
-
-  protected
-    $withParent = false,
-    $projection = '*',
-    $structure  = 'normal',
-    $myChildren = array();
+    $connectName = 'default',
+    $structure   = 'normal',
+    $withParent  = false,
+    $myChildren  = array();
 
   protected
     $selectConditions = array(),
@@ -141,11 +138,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
   }
 
-  public function setProjection($p)
-  {
-    $this->projection = (is_array($p)) ? join(',', $p) : $p;
-  }
-
   public function setProperties($row)
   {
     if (!is_array($row)) {
@@ -162,7 +154,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     } else {
       Sabel::using('Sabel_DB_Condition');
       $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
-      $this->childConditions[] = $condition;
+      $this->childConditions[$condition->key] = $condition;
     }
   }
 
@@ -197,7 +189,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         if (is_int($data)) {
           $data = ($data === 1);
         } elseif(is_string($data)) {
-          $data = (in_array($data, array('1', 't', 'true')));
+          $data = ($data === '1' || $data === 'true');
         }
     }
     return $data;
@@ -206,7 +198,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function getRealData()
   {
     $real = array();
-
     foreach ($this->data as $key => $val) {
       if (in_array($key, $this->columns)) $real[$key] = $this->convertData($key, $val);
     }
@@ -236,11 +227,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function getMyChildren()
   {
     return $this->myChildren;
-  }
-
-  public function getProjection()
-  {
-    return $this->projection;
   }
 
   public function isSelected()
@@ -350,8 +336,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function createModel($model)
   {
-    $projection = $model->getProjection();
-    $model->getStatement()->setBasicSQL("SELECT $projection FROM " . $model->tableProp->table);
+    $p = $model->getProjection();
+    $model->getStatement()->setBasicSQL("SELECT $p FROM " . $model->tableProp->table);
 
     if ($row = $model->exec()->fetch()) {
       $model->transrate(($this->withParent) ? $this->addParent($row) : $row);
@@ -384,8 +370,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       if ($relClass->initJoin($mdlName)) return $relClass->execJoin($this, 'INNER');
     }
 
-    $projection = $this->getProjection();
-    $this->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
+    $p = $this->getProjection();
+    $this->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
 
     $resultSet = $this->exec();
     if ($resultSet->isEmpty()) return false;
@@ -462,8 +448,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $cacheName = $tblName . $id;
     if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
       $model->setCondition($model->tableProp->primaryKey, $id);
-      $projection = $model->getProjection();
-      $model->getStatement()->setBasicSQL("SELECT $projection FROM $tblName");
+      $p = $model->getProjection();
+      $model->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
       $resultSet = $model->exec();
 
       if (!$row = $resultSet->fetch())
@@ -495,9 +481,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     if ($model === null) $model = $this;
 
-    $cModel     = MODEL($child);
-    $projection = $cModel->getProjection();
-    $cModel->getStatement()->setBasicSQL("SELECT $projection FROM " . $cModel->tableProp->table);
+    $cModel = MODEL($child);
+    $p = $cModel->getProjection();
+    $cModel->getStatement()->setBasicSQL("SELECT $p FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
     $primary = $model->tableProp->primaryKey;

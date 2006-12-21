@@ -15,12 +15,13 @@ Sabel::using('Sabel_DB_Condition');
 class Sabel_DB_Executer
 {
   protected
-    $tableProp   = null,
-    $conditions  = array(),
-    $constraints = array();
+    $driver    = null,
+    $tableProp = null;
 
   protected
-    $driver = null;
+    $projection  = '*',
+    $conditions  = array(),
+    $constraints = array();
 
   /**
    * Sabel_DB_Executer constructor.
@@ -103,6 +104,16 @@ class Sabel_DB_Executer
   public function setConnectName($connectName)
   {
     $this->tableProp->connectName = $connectName;
+  }
+
+  public function setProjection($p)
+  {
+    $this->projection = (is_array($p)) ? join(',', $p) : $p;
+  }
+
+  public function getProjection()
+  {
+    return $this->projection;
   }
 
   /**
@@ -219,6 +230,13 @@ class Sabel_DB_Executer
     return $driver->getResultSet();
   }
 
+  public function select()
+  {
+    $p = $this->getProjection();
+    $this->getStatement()->setBasicSQL("SELECT $p FROM " . $this->tableProp->table);
+    return $this->exec();
+  }
+
   public function update($data)
   {
     $table = $this->tableProp->table;
@@ -266,12 +284,6 @@ class Sabel_DB_Executer
     $driver->insert();
   }
 
-  protected function checkIncColumn()
-  {
-    $incCol = $this->tableProp->incrementKey;
-    return (isset($incCol)) ? $incCol : false;
-  }
-
   /**
    * delete row(s)
    *
@@ -314,10 +326,12 @@ class Sabel_DB_Executer
     if (array_diff(array_keys($this->constraints), array("limit"))) {
       throw new Exception("can't use ORDER HAVING OFFSET GROUP in count() context.");
     }
-    $this->setCondition($arg1, $arg2, $arg3);
 
+    $this->setCondition($arg1, $arg2, $arg3);
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
+    $this->setConstraint('limit', 1);
     $row = $this->exec()->fetch(Sabel_DB_Result_Row::NUM);
+    unset($this->constraints['limit']);
     return (int)$row[0];
   }
 
@@ -336,7 +350,7 @@ class Sabel_DB_Executer
     $this->setCondition($orderColumn, Sabel_DB_Condition::NOTNULL);
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
-    return $this->exec();
+    return $this->exec()->fetch();
   }
 
   public function executeQuery($sql, $param = null)

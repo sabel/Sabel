@@ -6,7 +6,7 @@ class Test_DB_Test extends SabelTestCase
   public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
                                 'test_for_like', 'test_condition', 'blog',
                                 'customer_order', 'classification', 'favorite_item',
-                                'student', 'course', 'student_course', 'timer');
+                                'student', 'course', 'student_course', 'timer', 'child');
 
 
   public function testBasic()
@@ -336,9 +336,8 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model->registed, '2004-10-01 10:10:10');
     $this->assertEquals($model->point, 13000);
 
-    $executer  = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $resultSet = $executer->getFirst('registed');
-    $row       = $resultSet->fetch();
+    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
+    $row = $executer->getFirst('registed');
 
     switch (self::$db) {
       case 'MYSQL':
@@ -364,9 +363,8 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model->registed, '2005-10-01 10:10:10');
     $this->assertEquals($model->point, 1000);
 
-    $executer  = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $resultSet = $executer->getLast('registed');
-    $row       = $resultSet->fetch();
+    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
+    $row = $executer->getLast('registed');
 
     switch (self::$db) {
       case 'MYSQL':
@@ -1113,13 +1111,10 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$row2['users_id'], 1);
     $this->assertEquals((int)$row3['users_id'], 3);
 
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
-
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL("SELECT * FROM favorite_item");
+    $prop = array('table' => 'favorite_item');
+    $exe  = new Sabel_DB_Executer($prop);
     $exe->setCondition(array('users_id' => 4));
-    $results = $exe->exec()->fetchAll();
+    $results = $exe->select()->fetchAll();
 
     $this->assertEquals(count($results), 1);
 
@@ -1130,17 +1125,15 @@ class Test_DB_Test extends SabelTestCase
 
   public function testExecuterUpdate()
   {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
+    $prop = array('table' => 'favorite_item');
+    $exe  = new Sabel_DB_Executer($prop);
     $exe->scond(7);
     $exe->update(array('registed' => '2005-12-08 01:01:01', 'name' => 'favorite8'));
 
     $exe->unsetCondition();
 
     $exe->scond(7);
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
-    $row = $exe->exec()->fetch();
+    $row = $exe->select()->fetch();
 
     $this->assertEquals((int)$row['id'], 7);
     $this->assertEquals((int)$row['users_id'], 4);
@@ -1150,34 +1143,146 @@ class Test_DB_Test extends SabelTestCase
 
   public function testExecuterUpdate2()
   {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
+    $prop = array('table' => 'favorite_item');
+    $exe  = new Sabel_DB_Executer($prop);
     $exe->scond('users_id', 3);
     $exe->update(array('users_id' => 5));
 
     // $exe->unsetCondition();
     // $exe->scond('users_id', 3);
 
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
-    $row = $exe->exec()->fetchAll();
-
+    $row = $exe->select()->fetchAll();
     $this->assertFalse($row);
 
     $exe->unsetCondition();
     $exe->scond('users_id', 5);
 
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL('SELECT * FROM favorite_item');
-    $row = $exe->exec()->fetchAll();
-
+    $row = $exe->select()->fetchAll();
     $this->assertEquals(count($row), 2);
   }
 
   public function testExecuterInsert()
   {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
+    $prop  = array('table' => 'test_condition');
+    $exe   = new Sabel_DB_Executer($prop);
+    $data  = array('status' => __TRUE__, 'registed' => '2006-01-01 10:10:10', 'point' => 20000);
+    $newId = $exe->insert($data, 'id');
+
+    $this->assertTrue(is_int($newId));
+    $this->assertTrue($newId > 0);
+
+    $exe = new Sabel_DB_Executer($prop);
+    $row = $exe->getLast('id');
+
+    $this->assertEquals((int)$row['id'], $newId);
+
+    switch (self::$db) {
+      case 'MYSQL':
+        $this->assertEquals($row['status'], '1');
+        break;
+      case 'PGSQL':
+        $this->assertTrue($row['status']);
+        break;
+      case 'SQLITE':
+        $this->assertEquals($row['status'], 'true');
+        break;
+    }
+
+    $this->assertEquals($row['registed'], '2006-01-01 10:10:10');
+    $this->assertEquals((int)$row['point'], 20000);
+
+    $model = MODEL('TestCondition');
+    $obj   = $model->getLast('id');
+
+    $this->assertEquals($obj->id, $newId);
+    $this->assertTrue($obj->status);
+    $this->assertEquals($obj->registed, '2006-01-01 10:10:10');
+    $this->assertEquals($obj->point, 20000);
+  }
+
+  public function testChildConstarint2()
+  {
+    $data = array();
+    $data[] = array('id' => 1, 'name' => 'parent1');
+    $data[] = array('id' => 2, 'name' => 'parent2');
+    $data[] = array('id' => 3, 'name' => 'parent3');
+    MODEL('Parents')->multipleInsert($data);
+
+    $data = array();
+    $data[] = array('id' => 1, 'parents_id' => 2, 'name' => 'child1', 'height' => 160);
+    $data[] = array('id' => 2, 'parents_id' => 2, 'name' => 'child2', 'height' => 165);
+    $data[] = array('id' => 3, 'parents_id' => 3, 'name' => 'child3', 'height' => 170);
+    $data[] = array('id' => 4, 'parents_id' => 3, 'name' => 'child4', 'height' => 175);
+    $data[] = array('id' => 5, 'parents_id' => 1, 'name' => 'child5', 'height' => 180);
+    MODEL('Child')->multipleInsert($data);
+
+    $data = array();
+    $data[] = array('id' => 1,  'child_id' => 1, 'name' => 'grand1',  'age' => 9);
+    $data[] = array('id' => 2,  'child_id' => 1, 'name' => 'grand2',  'age' => 8);
+    $data[] = array('id' => 3,  'child_id' => 2, 'name' => 'grand3',  'age' => 3);
+    $data[] = array('id' => 4,  'child_id' => 2, 'name' => 'grand4',  'age' => 2);
+    $data[] = array('id' => 5,  'child_id' => 2, 'name' => 'grand5',  'age' => 6);
+    $data[] = array('id' => 6,  'child_id' => 3, 'name' => 'grand6',  'age' => 4);
+    $data[] = array('id' => 7,  'child_id' => 4, 'name' => 'grand7',  'age' => 2);
+    $data[] = array('id' => 8,  'child_id' => 4, 'name' => 'grand8',  'age' => 10);
+    $data[] = array('id' => 9,  'child_id' => 5, 'name' => 'grand9',  'age' => 1);
+    $data[] = array('id' => 10, 'child_id' => 5, 'name' => 'grand10', 'age' => 5);
+    MODEL('GrandChild')->multipleInsert($data);
+
+    $p = MODEL('Parents')->selectOne(2);
+    $children = $p->getChild('Child');
+
+    $this->assertEquals($p->name, 'parent2');
+    $this->assertEquals(count($children), 2);
+
+    $c1 = $children[0];
+    $c2 = $children[1];
+
+    $this->assertEquals($c1->id, 2);
+    $this->assertEquals($c2->id, 1);
+    $this->assertEquals($c1->height, 165);
+    $this->assertEquals($c2->height, 160);
+
+    $gChildren = $c1->GrandChild;
+    $this->assertEquals(count($gChildren), 3);
+
+    $g1 = $gChildren[0];
+    $g2 = $gChildren[1];
+    $g3 = $gChildren[2];
+
+    $this->assertEquals($g1->id, 4);
+    $this->assertEquals($g2->id, 3);
+    $this->assertEquals($g3->id, 5);
+
+    $this->assertEquals($g1->age, 2);
+    $this->assertEquals($g2->age, 3);
+    $this->assertEquals($g3->age, 6);
+
+    $p = MODEL('Parents')->selectOne(2);
+    $p->cconst('Child', array('order' => 'height'));
+    $p->cconst('GrandChild', array('order' => 'age desc'));
+
+    list ($c1, $c2) = $p->getChild('Child');
+
+    $this->assertEquals($c1->id, 1);
+    $this->assertEquals($c2->id, 2);
+    $this->assertEquals($c1->height, 160);
+    $this->assertEquals($c2->height, 165);
+
+    $gChildren = $c2->GrandChild;
+    $this->assertEquals(count($gChildren), 3);
+
+    $g1 = $gChildren[0];
+    $g2 = $gChildren[1];
+    $g3 = $gChildren[2];
+
+    $this->assertEquals($g1->id, 5);
+    $this->assertEquals($g2->id, 3);
+    $this->assertEquals($g3->id, 4);
+
+    $this->assertEquals($g1->age, 6);
+    $this->assertEquals($g2->age, 3);
+    $this->assertEquals($g3->age, 2);
   }
 
   public function testClear()
@@ -1206,6 +1311,23 @@ class Student extends Sabel_DB_Model_Bridge
 class Course extends Sabel_DB_Model_Bridge
 {
   protected $bridgeTable = 'StudentCourse';
+}
+
+class Parents extends Sabel_DB_Model
+{
+  protected $connectName = 'default2';
+  protected $childConstraints = array('Child' => array('order' => 'height desc'));
+}
+
+class Child extends Sabel_DB_Model
+{
+  protected $myChildren = array('GrandChild');
+  protected $childConstraints = array('GrandChild' => array('order' => 'age'));
+}
+
+class GrandChild extends Sabel_DB_Model
+{
+  protected $connectName = 'default2';
 }
 
 class Schema_TestCondition
@@ -1292,7 +1414,7 @@ class Schema_CustomerOrder
                               'increment' => false, 'nullable' => true, 'primary' => false,
                               'default' => null);
     return $cols;
-  } 
+  }
 
   public function getParents()
   {
