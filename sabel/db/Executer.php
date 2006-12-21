@@ -311,6 +311,9 @@ class Sabel_DB_Executer
    */
   public function getCount($arg1 = null, $arg2 = null, $arg3 = null)
   {
+    if (array_diff(array_keys($this->constraints), array("limit"))) {
+      throw new Exception("can't use ORDER HAVING OFFSET GROUP in count() context.");
+    }
     $this->setCondition($arg1, $arg2, $arg3);
 
     $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
