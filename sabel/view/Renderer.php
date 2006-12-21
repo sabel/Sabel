@@ -21,7 +21,8 @@ abstract class Sabel_View_Renderer
   
   public function partial($templateName)
   {
-    $v = new Sabel_View('wiki');
+    $v = new Sabel_View();
+    $v->decideTemplatePath(Sabel_Context::getCurrentCandidate());
     $v->setTemplateName($templateName);
     return $v->rendering(false);
   }
