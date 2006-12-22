@@ -1,10 +1,9 @@
 <?php
 
 ob_start();
-set_include_path('@PEAR_DIR@/Sabel:/usr/local/lib/php');
 define('RUN_BASE', dirname(realpath('.')));
 
-require ('Sabel.php');
+require ('Sabel/Sabel.php');
 require (RUN_BASE . '/config/environment.php');
 
 if (!defined('ENVIRONMENT')) {
