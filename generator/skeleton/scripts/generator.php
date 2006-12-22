@@ -79,7 +79,8 @@ class MigrationGenerator
 {
   public static function generate($name)
   {
-    self::getNextVersion();
+    $nextVersion = self::getNextVersion();
+    echo $nextVersion;
     
     $name = strtolower($name);
     $target = "migration/${name}.php";
@@ -110,8 +111,14 @@ class MigrationGenerator
         }
       }
     }
+    
     $lastVersion = array_pop($buffer);
-    // echo 
+    $lastVersion = $lastVersion{0};
+    if (is_numeric($lastVersion)) {
+      return $lastVersion + 1;
+    } else {
+      return 1;
+    }
   }
 }
 
