@@ -8,6 +8,6 @@ function get_db_tables($tblName)
   if (isset($tables[$tblName])) {
     return $tables[$tblName];
   } else {
-    throw new Exception("Error: $tblName does not exist.");
+    throw new Exception("Error: connection name for '{$tblName}' does not exist.");
   }
 }

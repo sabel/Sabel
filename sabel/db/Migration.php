@@ -1,183 +1,122 @@
 <?php
 
-Sabel::using("Sabel_DB_Executer");
-
 /**
  * Sabel_DB_Migration
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Migration
 {
-  public function table($name)
-  {
-    return new Sabel_DB_Migration_Table($name);
-  }
-}
+  protected $migration   = null;
+  protected $table       = '';
+  protected $view        = '';
+  protected $column      = '';
+  protected $alterObject = '';
+  protected $connectName = '';
 
-class Sabel_DB_Migration_Table
-{
-  protected $table = '';
-  protected $columns = array();
-  
-  public function __construct($name)
+  public function __construct($env)
   {
-    $this->table = $name;
-  }
-  
-  public function dropTable()
-  {
-    $this->query("DROP TABLE {$this->table}");
-  }
-  
-  public function addColumn($name, $abstractType, $options = null)
-  {
-    $driverSpecificTypeAsSQL = '';
-    
-    $column = array();
-    $column["name"] = $name;
-    $column["type"] = $this->transrateType($abstractType);
-    
-    if (isset($options["length"])) {
-      $column["length"] = $options["length"];
-    } elseif (isset($options["precision"])) {
-      $column["precision"] = $options["precision"];
+    if ($this->table === '')
+      throw new Exception('Error: $table is empty. please set the table name.');
+
+    if ($this->connectName === '')
+      throw new Exception('Error: $connectName is empty.');
+
+    switch ($env) {
+      case 'production':
+        $environment = PRODUCTION;
+        break;
+      case 'test':
+        $environment = TEST;
+        break;
+      case 'development':
+        $environment = DEVELOPMENT;
+        break;
     }
-    
-    if (isset($options["attributes"])) {
-      $column["attributes"] = $options["attributes"];
+
+    $params = get_db_params($environment);
+    Sabel_DB_Connection::addConnection($env, $params);
+
+    switch ($params[$this->connectName]['driver']) {
+      case 'mysql':
+      case 'pdo-mysql':
+        $db = 'Mysql';
+        break;
+      case 'pgsql':
+      case 'pdo-pgsql':
+        $db = 'Pgsql';
+        break;
+      case 'pdo-sqlite':
+        $db = 'Sqlite';
+        break;
+      case 'firebird':
+        $db = 'Firebird';
+        break;
+      case 'mssql':
+        $db = 'Mssql';
+        break;
+    }
+
+    $clsName = 'Sabel_DB_' . $db . '_Migration';
+    $this->migration = Sabel::load($clsName, $this->connectName);
+  }
+
+  public function add($param)
+  {
+    if ($this->column !== '') {
+      $this->migration->addColumn($this->table, $this->column, $param);
+    } elseif ($this->view !== '') {
+
     } else {
-      $column["attributes"] = array();
+      $this->migration->addTable($this->table, $param);
     }
-    
-    $this->columns[] = $column;
   }
-  
-  protected function transrateType($abstractType)
+
+  public function delete($param = null)
   {
-    switch ($abstractType) {
-      case Sabel_DB_Type_Const::INT:
-        $driverSpecificTypeAsSQL = "INT";
-        break;
-      case Sabel_DB_Type_Const::STRING:
-        $driverSpecificTypeAsSQL = "VARCHAR";
-        break;
-      case Sabel_DB_Type_Const::TEXT:
-        $driverSpecificTypeAsSQL = "TEXT";
-        break;
-      case Sabel_DB_Type_Const::DATETIME:
-        $driverSpecificTypeAsSQL = "DATETIME";
-        break;
-    }
-    
-    return $driverSpecificTypeAsSQL;
-  }
-  
-  public function alterDropColumn($name)
-  {
-    $this->query("ALTER TABLE {$this->table} DROP COLUMN {$name}");
-  }
-  
-  public function alterAddColumn($name, $type, $options = null)
-  {
-    $type = $this->transrateType($type);
-    
-    if ($options !== null) {
-      if (isset($options["attributes"])) {
-        $attributes = join(" ", $options["attributes"]);
-      } else {
-        $attributes = "";
-      }
-      
-      if (isset($options["length"])) {
-        $length = $options["length"];
-        $fmt = "ALTER TABLE %s ADD COLUMN %s %s(%s) %s";
-        $sql = sprintf($fmt, $this->table, $name, $type, $length, $attributes);
-      } elseif (isset($options["precision"])) {
-        $fmt = "ALTER TABLE %s ADD COLUMN %s %s(%s, %s) %s";
-        $ps = $options["presicion"];
-        $sql = sprintf($fmt, $this->table, $name, $type, $ps[0], $ps[1], $attributes);
-      }
+    if ($this->column !== '') {
+      $this->migration->deleteColumn($this->table, $this->column);
+    } elseif ($this->view !== '') {
+
     } else {
-      $fmt = "ALTER TABLE %s ADD COLUMN %s %s %s";
-      $sql = sprintf($fmt, $this->table, $name, $type, $attributes);
+      $this->migration->deleteTable($this->table);
     }
-    $this->query($sql);
   }
-  
-  public function changeColumnName($oldName, $newName)
+
+  public function change($param)
   {
-    
-  }
-  
-  public function changeColumnType($name, $newType)
-  {
-    
-  }
-  
-  public function create()
-  {
-    $sql = $this->makeCreateSql();
-    $this->query($sql);
-    return $sql;
-  }
-  
-  public function query($sql)
-  {
-    $executer = new Sabel_DB_Executer(array("table" => $this->table));
-    $executer->executeQuery($sql);
-  }
-  
-  public function applyAlters()
-  {
-    
-  }
-  
-  public function makeCreateSql()
-  {
-    $fmtHeader = "CREATE TABLE %s (";
-    $fmtColumns = array(
-                    "normal"    => "  %s %s %s",         // such as 'id INTEGER auto_increment'
-                    "length"    => "  %s %s(%s) %s",     // such as 'id VARCHAR(64)'
-                    "precision" => "  %s %s(%s,%s) %s"); // such as 'id NUMERIC(0, 12)'
-                    
-    $fmtFooter = ") %s";
-    
-    $sql = array();
-    $sql[] = sprintf($fmtHeader, $this->table);
-    
-    $sqlColumns = array();
-    foreach ($this->columns as $column) {
-      $attributes = join(" ", $column["attributes"]);
-      
-      if (isset($column["length"])) {
-        $sqlColumns[] = sprintf($fmtColumns["length"],
-                                 $column["name"],
-                                 $column["type"],
-                                 $column["length"],
-                                 $attributes);
-      } elseif (isset($column["precision"])) {
-        $sqlColumns[] = sprintf($fmtColumns["precision"],
-                                 $column["name"],
-                                 $column["type"],
-                                 $column["precision"][0],
-                                 $column["precision"][1],
-                                 $attributes);
-      } else {
-        $sqlColumns[] = sprintf($fmtColumns["normal"],
-                                 $column["name"],
-                                 $column["type"],
-                                 $attributes);
-      }
+    if ($this->column !== '') {
+      $this->migration->changeColumn($this->table, $this->column, $param);
+    } elseif ($this->view !== '') {
+
+    } else {
+      $this->migration->changeTable($this->table);
     }
-    
-    $sql[] = join(",\n", $sqlColumns);
-    $sql[] = ")";
-    
-    return join("\n", $sql);
+  }
+
+  public function renameTo($name)
+  {
+    if ($this->column !== '') {
+      $this->migration->renameColumn($this->table, $this->column, $name);
+    } elseif ($this->view !== '') {
+
+    } else {
+      $this->migration->renameTable($this->table, $name);
+    }
+  }
+
+  public function renameFrom($name)
+  {
+    if ($this->column !== '') {
+      $this->migration->renameColumn($this->table, $name, $this->column);
+    } elseif ($this->view !== '') {
+
+    } else {
+      $this->migration->renameTable($name, $this->table);
+    }
   }
 }

@@ -2,27 +2,27 @@
 
 define("RUN_BASE", getcwd());
 
-Sabel::using("Sabel_DB_Migration");
 Sabel::fileUsing("config/environment.php");
 Sabel::fileUsing("config/database.php");
-Sabel::using('Sabel_DB_Connection');
-Sabel::using("Sabel_DB_Model");
-Sabel::using("Sabel_DB_Executer");
+Sabel::fileUsing("config/connection_map.php");
 
+Sabel::using('Sabel_DB_Migration');
+Sabel::using('Sabel_DB_Connection');
+Sabel::using('Sabel_DB_Executer');
+Sabel::using('Sabel_DB_Model');
+
+/**
+ * Migration
+ *
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Migration extends Sakle
 {
   public function execute()
   {
-    $this->setupConnection();
-    
-    if ($this->arguments[2] === "version") {
-      $v = $this->getCurrentVersion();
-      $this->printMessage($v->version);
-      exit;
-    }
-    
     $v  = $this->getCurrentVersion();
-    $this->printMessage("current version: ".$v->version);
     $to = $this->arguments[2];
     
     $migrationDir = RUN_BASE . "/migration";
@@ -31,9 +31,7 @@ class Migration extends Sakle
     if (is_dir($migrationDir)) {
       if ($handle = opendir($migrationDir)) {
         while (($file = readdir($handle)) !== false) {
-          if ($file{0} !== ".") {
-            $buffer[$file{0}] = $file;
-          }
+          if ($file{0} !== ".") $buffer[$file{0}] = $file;
         }
       }
     }
@@ -100,11 +98,16 @@ class Migration extends Sakle
   protected function makeMigration($migrationDir, $file)
   {
     include ($migrationDir . "/$file");
-    $fileParts = explode("_", $file);
-    $versionNumber = array_shift($fileParts);
-    $fileParts = array_map("inner_function_convert_names", $fileParts);
-    $className = join("", $fileParts);
-    return new $className();
+    $fileParts  = explode("_", $file);
+    $versionNum = array_shift($fileParts);
+    $fileParts  = array_map("inner_function_convert_names", $fileParts);
+    $className  = join("", $fileParts) . $versionNum;
+    
+    if (isset($this->arguments[1])) {
+      return new $className($this->arguments[1]);
+    } else {
+      throw new Exception('Error: please specify the environment.');
+    }
   }
   
   protected function upgrade(Sabel_DB_Migration $migration)
@@ -129,28 +132,6 @@ class Migration extends Sakle
   {
     $e = new Sabel_DB_Executer(array('table' => 'dummy'));
     $e->executeQuery($sql);
-  }
-  
-  protected function setupConnection()
-  {
-    if (isset($this->arguments[1])) {
-      $environment = $this->arguments[1];
-    }
-
-    switch ($environment) {
-      case "production":
-        $env = PRODUCTION;
-        break;
-      case "test":
-        $env = TEST;
-        break;
-      case "development":
-        $env = DEVELOPMENT;
-        break;
-    }
-      foreach (get_db_params($env) as $connectName => $params) {
-      Sabel_DB_Connection::addConnection($connectName, $params);
-    }
   }
 }
 
