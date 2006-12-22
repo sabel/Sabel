@@ -80,10 +80,9 @@ class MigrationGenerator
   public static function generate($name)
   {
     $nextVersion = self::getNextVersion();
-    echo $nextVersion;
     
     $name = strtolower($name);
-    $target = "migration/${nextVersion}."_".${name}.php";
+    $target = "migration/${nextVersion}_${name}.php";
     echo "generate $target \n";
     $fp = fopen($target, 'w');
     $name = $name;
