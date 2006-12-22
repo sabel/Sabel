@@ -5,7 +5,6 @@ define("RUN_BASE", getcwd());
 Sabel::using("Sabel_DB_Migration");
 Sabel::fileUsing("config/environment.php");
 Sabel::fileUsing("config/database.php");
-Sabel::fileUsing("Sabel/sabel/db/Functions.php");
 Sabel::using('Sabel_DB_Connection');
 Sabel::using("Sabel_DB_Model");
 Sabel::using("Sabel_DB_Executer");
@@ -78,20 +77,23 @@ class Migration extends Sakle
   protected function getCurrentVersion()
   {
     try {
-      $version = MODEL('Sversion');
+      $version  = MODEL('Sversion');
       $aVersion = $version->selectOne(1);
     } catch (Exception $e) {
       try {
-        $this->query("CREATE TABLE sversion(id INT auto_increment PRIMARY KEY, version INT NOT NULL)");
+        $this->query("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
         $version = MODEL('Sversion');
-        $version->setPrimaryKey('id');
+        $version->id = 1;
         $version->version = 0;
         $version->save();
-        $aVersion = $version->selectOne(1);
+
+        $aVersion = $version->selectOne('id', 1);
       } catch (Exception $e2) {
         $this->printMessage($e2->getMessage(), self::MSG_ERR);
       }
     }
+
+    $this->printMessage("current version: " . $aVersion->version);
     return $aVersion;
   }
   
@@ -125,7 +127,7 @@ class Migration extends Sakle
   
   protected function query($sql)
   {
-    $e = new Sabel_DB_Executer(array('table'=>'dummy'));
+    $e = new Sabel_DB_Executer(array('table' => 'dummy'));
     $e->executeQuery($sql);
   }
   
