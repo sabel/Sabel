@@ -29,3 +29,39 @@ class Test_DB_Tests
     return $suite;
   }
 }
+
+if (!function_exists('get_db_tables')) {
+
+function get_db_tables($tblName)
+{
+  $tables = array();
+  $tables['basic']          = 'default';
+  $tables['users']          = 'default';
+  $tables['city']           = 'default';
+  $tables['country']        = 'default';
+  $tables['company']        = 'default';
+  $tables['test_for_like']  = 'default';
+  $tables['test_condition'] = 'default';
+  $tables['blog']           = 'default';
+  $tables['customer_order'] = 'default';
+  $tables['classification'] = 'default';
+  $tables['favorite_item']  = 'default';
+  $tables['student']        = 'default';
+  $tables['course']         = 'default';
+  $tables['student_course'] = 'default';
+  $tables['schema_test']    = 'default';
+  $tables['timer']          = 'default';
+  $tables['child']          = 'default';
+
+  $tables['customer']       = 'default2';
+  $tables['parents']        = 'default2';
+  $tables['grand_child']    = 'default2';
+
+  if (!isset($tables[$tblName])) {
+    throw new Exception("Error: '{$tblName}' does not exist.");
+  }
+
+  return $tables[$tblName];
+}
+
+}

@@ -4,6 +4,10 @@ Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Type_Const');
 Sabel::using('Sabel_DB_SimpleCache');
 
+if (!defined('TEST_CASE')) {
+  Sabel::fileUsing(RUN_BASE . '/config/connection_map.php', true);
+}
+
 /**
  * Sabel_DB_Model
  *
@@ -33,7 +37,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected
     $table       = '',
-    $connectName = 'default',
+    $connectName = '',
     $structure   = 'normal',
     $withParent  = false,
     $myChildren  = array();
@@ -84,10 +88,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function initialize($mdlName = null, $mdlProps = null)
   {
     $mdlName = ($mdlName === null)  ? get_class($this) : $mdlName;
-    $this->initSchema($mdlName, $this->connectName);
+    $this->initSchema($mdlName);
   }
 
-  protected function initSchema($mdlName, $conName)
+  protected function initSchema($mdlName)
   {
     $tblName = ($this->table === '') ? convert_to_tablename($mdlName) : $this->table;
     $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
@@ -103,7 +107,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       if (class_exists($sClsName, false)) {
         list ($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
       } else {
-        list ($tblSchema, $properties) = $this->getSchemaFromDb($conName, $tblName);
+        list ($tblSchema, $properties) = $this->getSchemaFromDb($tblName);
       }
 
       $columns = array_keys($tblSchema->getColumns());
@@ -914,14 +918,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
     $properties = $sCls->getProperty();
     $properties['table'] = $tblName;
+    $properties['connectName'] = get_db_tables($tblName);
 
     return array($tblSchema, $properties);
   }
 
-  protected function getSchemaFromDb($conName, $tblName)
+  protected function getSchemaFromDb($tblName)
   {
     Sabel::using('Sabel_DB_Schema_Accessor');
 
+    $conName    = get_db_tables($tblName);
     $scmName    = Sabel_DB_Connection::getSchema($conName);
     $database   = Sabel_DB_Connection::getDB($conName);
     $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);

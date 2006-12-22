@@ -8,12 +8,11 @@ if (!defined('SABEL')) {
 }
 
 define ('RUN_BASE', getcwd());
+
 require SABEL . 'Sabel.php';
-require RUN_BASE.'/config/environment.php';
+require RUN_BASE . '/config/environment.php';
 
-set_include_path(SABEL.":".get_include_path());
-
-Sabel::fileUsing(SABEL . 'sabel/db/Functions.php');
+set_include_path(SABEL . ":" . get_include_path());
 
 Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_DB_Executer');
@@ -166,7 +165,6 @@ class Schema_Writer
     }
 
     $property = array();
-    array_push($property, '$property = array(' . "'connectName'  => '{$connectName}',\n");
 
     array_push($property, '                      ');
     if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
@@ -275,7 +273,7 @@ class Schema_Generator
   {
     $input = $_SERVER['argv'];
     Sabel::fileUsing(getcwd() . '/config/database.php');
-    
+
     $environment = $input[1];
     switch ($environment) {
       case 'production':
@@ -288,8 +286,8 @@ class Schema_Generator
         $environment = DEVELOPMENT;
         break;
     }
-    
-    $data  = get_db_params($environment);
+
+    $data = get_db_params($environment);
 
     $schemaWrite  = false;
     $schemaAll    = false;
@@ -311,8 +309,8 @@ class Schema_Generator
       Sabel_DB_Connection::addConnection($connectName, $params);
 
       $sa = ($params['driver'] === 'pdo-sqlite')
-        ? new Sabel_DB_Schema_Accessor($connectName)
-        : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
+          ? new Sabel_DB_Schema_Accessor($connectName)
+          : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
 
       $schemas = $sa->getTables();
 

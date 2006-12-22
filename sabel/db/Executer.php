@@ -78,7 +78,7 @@ class Sabel_DB_Executer
   /**
    * set primary key
    *
-   * @param string $keyName
+   * @param  mixed $keyName string or array ( joint keys ).
    * @return void
    */
   public function setPrimaryKey($keyName)
@@ -99,6 +99,7 @@ class Sabel_DB_Executer
   /**
    * set ( choice ) connection name.
    *
+   * @param  string $connectName
    * @return void
    */
   public function setConnectName($connectName)
@@ -106,11 +107,22 @@ class Sabel_DB_Executer
     $this->tableProp->connectName = $connectName;
   }
 
+  /**
+   * set projection ( columns ) for SELECT.
+   *
+   * @param  mixed $p column names. array('col1, 'col2', ...) or string 'col1, col2, ...'
+   * @return void
+   */
   public function setProjection($p)
   {
     $this->projection = (is_array($p)) ? join(',', $p) : $p;
   }
 
+  /**
+   * get projection ( columns ).
+   *
+   * @return string
+   */
   public function getProjection()
   {
     return $this->projection;
@@ -177,9 +189,9 @@ class Sabel_DB_Executer
   }
 
   /**
-   * unset condition. or with constraint
+   * unset condition. or with constraint.
    *
-   * @param boolean $with unset with constraint
+   * @param  boolean $with unset with constraint
    * @return void
    */
   public function unsetCondition($with = false)
@@ -187,7 +199,7 @@ class Sabel_DB_Executer
     $this->conditions = array();
     if ($with) $this->unsetConstraint();
   }
-  
+
   /**
    * unset constraint.
    *
@@ -197,7 +209,7 @@ class Sabel_DB_Executer
   {
     $this->constraints = array();
   }
-  
+
   /**
    * create driver instance.
    *
@@ -220,14 +232,6 @@ class Sabel_DB_Executer
   public function getStatement()
   {
     return $this->getDriver()->loadStatement();
-  }
-
-  public function exec()
-  {
-    $driver = $this->getDriver();
-    $driver->makeQuery($this->conditions, $this->constraints);
-    $this->tryExecute($driver);
-    return $driver->getResultSet();
   }
 
   public function select()
@@ -351,6 +355,14 @@ class Sabel_DB_Executer
     $this->setConstraint(array('limit' => 1, 'order' => "$orderColumn $order"));
     $this->getStatement()->setBasicSQL('SELECT * FROM ' . $this->tableProp->table);
     return $this->exec()->fetch();
+  }
+
+  public function exec()
+  {
+    $driver = $this->getDriver();
+    $driver->makeQuery($this->conditions, $this->constraints);
+    $this->tryExecute($driver);
+    return $driver->getResultSet();
   }
 
   public function executeQuery($sql, $param = null)
