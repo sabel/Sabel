@@ -74,4 +74,19 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     
     $this->assertSame($classA, $classB);
   }
+  
+  public function testArray()
+  {
+    $array = __("keyA valueA, keyB valueB");
+    $this->assertEquals(array("keyA"=>"valueA","keyB"=>"valueB"), $array);
+    
+    $array = __("keyA (keyB valueA), __TRUE__");
+    $this->assertEquals(array("keyA"=>array("keyB"=>"valueA"),__TRUE__), $array);
+    
+    $array = __("keyA 'valueA', (valueB, __FALSE__)");
+    $this->assertEquals(array("keyA"=>"valueA", array("valueB", __FALSE__)), $array);
+    
+    $array = __("keyA 'value()', keyB ('valueB')");
+    $this->assertEquals(array("keyA"=>"value()","keyB"=>array("valueB")), $array);
+  }
 }

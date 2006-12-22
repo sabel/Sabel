@@ -165,15 +165,29 @@ function request($uri)
   return $response['html'];
 }
 
-function __($arraySource)
+function __($text)
 {
-  $arraySource = preg_replace('/\s*,\s*/', ',', $arraySource);
-  $arraySource = str_replace(' ', '=>', $arraySource);
-  $arraySource = preg_replace("/([^ ',()=>]+)/", "'$1'", $arraySource);
-  $arraySource = preg_replace("/(?<!')\(/", "array(", $arraySource);
-  $arraySource = preg_replace("/'\('(.+?)'\)'/", "'($1)'", $arraySource);
-  $arraySource = preg_replace("/'__(TRUE|FALSE)__'/", '__$1__', $arraySource);
-  eval('$array = array(' . $arraySource . ');');
+  preg_match_all('/
+    [\s]+
+    (?<!array)
+    (\((?:[^(]|array\()+\))
+    /xU', $text, $arraySource, PREG_SET_ORDER);
+  if (count($arraySource) > 0) {
+    foreach ($arraySource as $matches) {
+      $value = preg_replace('/([^(),\s\'"]+)(,|\))/', "'$1'$2", $matches[1]);
+      $text = str_replace($matches[1], 'array'.$value, $text);
+    }
+    $text = __($text);
+    return $text;
+  }
+
+  // @todo refactoring this.
+  $text = preg_replace('/[\s]*,[\s]+/', ',', $text);
+  $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
+  $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
+  $text = preg_replace("/'__(TRUE|FALSE)__'/", '__$1__', $text);
+  $text = str_replace("' ", "'=>", $text);
+  eval('$array = array('.$text.');');
   return $array;
 }
 
