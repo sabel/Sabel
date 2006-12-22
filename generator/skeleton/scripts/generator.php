@@ -83,7 +83,7 @@ class MigrationGenerator
     echo $nextVersion;
     
     $name = strtolower($name);
-    $target = "migration/${name}.php";
+    $target = "migration/${nextVersion}."_".${name}.php";
     echo "generate $target \n";
     $fp = fopen($target, 'w');
     $name = $name;
