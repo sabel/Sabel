@@ -16,6 +16,7 @@ Sabel::using('Sabel_DB_Model');
 abstract class Sabel_DB_Model_Tree extends Sabel_DB_Model
 {
   protected $structure = 'tree';
+  protected $ignoreEmptyParent = true;
 
   public function getRoot()
   {

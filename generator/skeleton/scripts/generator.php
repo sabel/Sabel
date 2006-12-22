@@ -2,6 +2,8 @@
 
 <?php
 
+define('RUN_BASE', getcwd());
+
 class ModelGenerator
 {
   public static function generate($name)
@@ -73,6 +75,46 @@ class FixtureGenerator
   }
 }
 
+class MigrationGenerator
+{
+  public static function generate($name)
+  {
+    self::getNextVersion();
+    
+    $name = strtolower($name);
+    $target = "migration/${name}.php";
+    echo "generate $target \n";
+    $fp = fopen($target, 'w');
+    $name = $name;
+    
+    ob_start();
+    @include("skeleton/migration/Standerd.php");
+    $contents = ob_get_contents();
+    ob_end_clean();
+    $contents = str_replace('#php', '?php', $contents);
+    fwrite($fp, $contents);
+    fclose($fp);
+  }
+  
+  protected static function getNextVersion()
+  {
+    $migrationDir = RUN_BASE . "/migration";
+    
+    $buffer = array();
+    if (is_dir($migrationDir)) {
+      if ($handle = opendir($migrationDir)) {
+        while (($file = readdir($handle)) !== false) {
+          if ($file{0} !== "." && is_numeric($file{0})) {
+            $buffer[$file{0}] = $file;
+          }
+        }
+      }
+    }
+    $lastVersion = array_pop($buffer);
+    // echo 
+  }
+}
+
 class ViewGenerator
 {
   public static function generate($type, $name)
@@ -123,6 +165,10 @@ class Generator
     $name   = $_SERVER['argv'][3];
     
     switch ($type) {
+      case 'migration':
+        print "generate migration {$name}\n";
+        MigrationGenerator::generate($name);
+        break;
       case 'model':
         print "generate model ${name}\n";
         ModelGenerator::generate($name);

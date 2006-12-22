@@ -41,6 +41,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $structure   = 'normal',
     $withParent  = false,
     $myChildren  = array();
+    
+  protected
+    $ignoreEmptyParent = false;
 
   protected
     $selectConditions = array(),
@@ -456,8 +459,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $model->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
       $resultSet = $model->exec();
 
-      if (!$row = $resultSet->fetch())
-        throw new Exception('Error: relational error. parent does not exists.');
+      if (!$row = $resultSet->fetch() && !$this->ignoreEmptyParent) {
+        $msg = 'Error: relational error. parent does not exist. '
+             . 'if you mean it try ignoreEmptyParent.';
+        throw new Exception($msg);
+      }
 
       Sabel_DB_SimpleCache::add($cacheName, $row);
     }
