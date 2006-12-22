@@ -28,11 +28,8 @@ abstract class Sabel_DB_Model_Bridge extends Sabel_DB_Model
     $table = (is_object($table) || $table === null) ? $this->bridgeTable : $table;
     parent::getChild($table);
 
-    $children = array();
-    $bridges  = $this->$table;
-
-    if ($bridges) {
-      $bridges = $this->$table;
+    if ($bridges = $this->$table) {
+      $children = array();
       foreach ($bridges as $bridge) $children[] = $bridge->$child;
       return $this->$child = $children;
     } else {
