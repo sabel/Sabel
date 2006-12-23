@@ -20,11 +20,34 @@ Sabel::using('Sabel_DB_Model');
  */
 class Migration extends Sakle
 {
+  const TABLE  = 'MIG_TABLE';
+  const VIEW   = 'MIG_VIEW';
+  const COLUMN = 'MIG_COLUMN';
+
+  protected $environment = '';
+
   public function execute()
   {
+    if (count($this->arguments) < 2) {
+      $this->printMessage("Error: invalid parameter.", self::MSG_ERR);
+      exit;
+    }
+    
+    $this->initialize();
     $v  = $this->getCurrentVersion();
     $to = $this->arguments[2];
     
+    if ($to === "version" || $to === "-v") {
+      $this->printMessage("current version: " . $v->version);
+      exit;
+    }
+    
+    if (!is_numeric($to)) {
+      $this->printMessage("Error: second argument should be a numeric.", self::MSG_ERR);
+      exit;
+    }
+    
+    $this->printMessage("current version: " . $v->version);
     $migrationDir = RUN_BASE . "/migration";
     
     $files = array();
@@ -45,12 +68,8 @@ class Migration extends Sakle
         $this->printMessage("upgrade from {$i} to {$nextv} of $to");
         if (isset($files[$nextv])) {
           $migrationInstance = $this->makeMigration($migrationDir, $files[$nextv]);
-          try {
-            $this->upgrade($migrationInstance);
-            $v->save(array("version" => ($v->version += 1)));
-          } catch (Exception $e) {
-            $this->printMessage($e->getMessage(), self::ERR_MSG);
-          }
+          $this->upgrade($migrationInstance);
+          $v->save(array("version" => ($v->version += 1)));
         }
       }
     } elseif ($to < $v->version) {
@@ -62,14 +81,36 @@ class Migration extends Sakle
         $this->printMessage("downgrade from {$i} to {$nextv} of $to");
         if (isset($files[$i])) {
           $migrationInstance = $this->makeMigration($migrationDir, $files[$i]);
-          try {
-            $this->downgrade($migrationInstance);
-            $v->save(array("version" => ($v->version -= 1)));
-          } catch (Exception $e) {
-            $this->printMessage($e->getMessage(), self::ERR_MSG);
-          }
+          $this->downgrade($migrationInstance);
+          $v->save(array("version" => ($v->version -= 1)));
         }
       }
+    }
+  }
+  
+  protected function initialize()
+  {
+    $env = '';
+    switch ($this->arguments[1]) {
+      case 'production':
+        $env = $this->environment = PRODUCTION;
+        break;
+      case 'test':
+        $env = $this->environment = TEST;
+        break;
+      case 'development':
+        $env = $this->environment = DEVELOPMENT;
+        break;
+    }
+    
+    if ($env === '') {
+      $msg = "Error: wrong environment. 'production' or 'test' or 'development'.";
+      $this->printMessage($msg, self::MSG_ERR);
+      exit;
+    }
+    
+    foreach (get_db_params($env) as $connectName => $params) {
+      Sabel_DB_Connection::addConnection($connectName, $params);
     }
   }
   
@@ -97,7 +138,6 @@ class Migration extends Sakle
       }
     }
 
-    $this->printMessage("current version: " . $aVersion->version);
     return $aVersion;
   }
   
@@ -109,11 +149,7 @@ class Migration extends Sakle
     $fileParts  = array_map("inner_function_convert_names", $fileParts);
     $className  = join("", $fileParts) . $versionNum;
     
-    if (isset($this->arguments[1])) {
-      return new $className($this->arguments[1]);
-    } else {
-      throw new Exception('Error: please specify the environment.');
-    }
+    return new $className($this->environment);
   }
   
   protected function upgrade(Sabel_DB_Migration $migration)
@@ -122,6 +158,7 @@ class Migration extends Sakle
       $this->printMessage($migration->upgrade());
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
+      exit;
     }
   }
   
@@ -131,6 +168,7 @@ class Migration extends Sakle
       $this->printMessage($migration->downgrade());
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
+      exit;
     }
   }
   
