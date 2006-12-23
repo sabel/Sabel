@@ -11,37 +11,14 @@
  */
 class Sabel_DB_Migration
 {
-  protected $migration   = null;
-  protected $table       = '';
-  protected $view        = '';
-  protected $column      = '';
-  protected $alterObject = '';
-  protected $connectName = '';
+  protected $migration = null;
 
   public function __construct($env)
   {
-    if ($this->table === '')
-      throw new Exception('Error: $table is empty. please set the table name.');
+    $params = get_db_params($env);
+    $params = array_shift($params);
 
-    if ($this->connectName === '')
-      throw new Exception('Error: $connectName is empty.');
-
-    switch ($env) {
-      case 'production':
-        $environment = PRODUCTION;
-        break;
-      case 'test':
-        $environment = TEST;
-        break;
-      case 'development':
-        $environment = DEVELOPMENT;
-        break;
-    }
-
-    $params = get_db_params($environment);
-    Sabel_DB_Connection::addConnection($env, $params);
-
-    switch ($params[$this->connectName]['driver']) {
+    switch ($params['driver']) {
       case 'mysql':
       case 'pdo-mysql':
         $db = 'Mysql';
@@ -62,61 +39,72 @@ class Sabel_DB_Migration
     }
 
     $clsName = 'Sabel_DB_' . $db . '_Migration';
-    $this->migration = Sabel::load($clsName, $this->connectName);
+    $this->migration = Sabel::load($clsName);
   }
 
-  public function add($param)
+  public function add($type, $tblName, $arg2, $arg3 = null)
   {
-    if ($this->column !== '') {
-      $this->migration->addColumn($this->table, $this->column, $param);
-    } elseif ($this->view !== '') {
+    $this->migration->setModel($tblName);
 
-    } else {
-      $this->migration->addTable($this->table, $param);
+    switch ($type) {
+      case Migration::TABLE:
+        $this->migration->addTable($tblName, $arg2);
+        break;
+      case Migration::VIEW:
+
+        break;
+      case Migration::COLUMN:
+        $this->migration->addColumn($tblName, $arg2, $arg3);
+        break;
     }
   }
 
-  public function delete($param = null)
+  public function delete($type, $tblName, $arg2 = null)
   {
-    if ($this->column !== '') {
-      $this->migration->deleteColumn($this->table, $this->column);
-    } elseif ($this->view !== '') {
+    $this->migration->setModel($tblName);
 
-    } else {
-      $this->migration->deleteTable($this->table);
+    switch ($type) {
+      case Migration::TABLE:
+        $this->migration->deleteTable($tblName);
+        break;
+      case Migration::VIEW:
+
+        break;
+      case Migration::COLUMN:
+        $this->migration->deleteColumn($tblName, $arg2);
+        break;
     }
   }
 
-  public function change($param)
+  public function change($type, $tblName, $arg2, $arg3 = null)
   {
-    if ($this->column !== '') {
-      $this->migration->changeColumn($this->table, $this->column, $param);
-    } elseif ($this->view !== '') {
+    $this->migration->setModel($tblName);
 
-    } else {
-      $this->migration->changeTable($this->table);
+    switch ($type) {
+      case Migration::TABLE:
+        break;
+      case Migration::VIEW:
+        break;
+      case Migration::COLUMN:
+        $this->migration->changeColumn($tblName, $arg2, $arg3);
+        break;
     }
   }
 
-  public function renameTo($name)
+  public function rename($type, $tblName, $arg2, $arg3 = null)
   {
-    if ($this->column !== '') {
-      $this->migration->renameColumn($this->table, $this->column, $name);
-    } elseif ($this->view !== '') {
+    $this->migration->setModel($tblName);
 
-    } else {
-      $this->migration->renameTable($this->table, $name);
-    }
-  }
+    switch ($type) {
+      case Migration::TABLE:
+        $this->migration->renameTable($tblName, $arg2);
+        break;
+      case Migration::VIEW:
 
-  public function renameFrom($name)
-  {
-    if ($this->column !== '') {
-      $this->migration->renameColumn($this->table, $name, $this->column);
-    } elseif ($this->view !== '') {
-
-    } else {
-      $this->migration->renameTable($name, $this->table);
+        break;
+      case Migration::COLUMN:
+        $this->migration->renameColumn($tblName, $arg2, $arg3);
+        break;
     }
   }
 }

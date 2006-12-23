@@ -36,13 +36,12 @@ class Sabel_DB_Mysql_Migration
                              'float',
                              'double');
 
-  protected $driver = null;
-  protected $connectName = '';
+  protected $model = null;
 
-  public function __construct($connectName)
+  public function setModel($tblName)
   {
-    $this->driver = Sabel_DB_Connection::getDriver($connectName);
-    $this->connectName = $connectName;
+    $mdlName     = convert_to_modelname($tblName);
+    $this->model = @MODEL($mdlName);
   }
 
   public function addTable($tblName, $cmdQuery)
@@ -55,43 +54,45 @@ class Sabel_DB_Mysql_Migration
       if (strpos($line, 'TYPE::BOOL') === false) {
         $exeQuery[] = $line;
       } else {
-        $specifies  = explode(' ', $line); // $line expect as "colName TYPE::*** attributes"
-        $colName    = strtolower(array_shift($specifies));
-        
-        // $type is unnessesarry this mean's just readability.
-        $type       = array_shift($specifies);
-        $attributes = join(" ", $specifies);
-        
-        $exeQuery[] = "$colName tinyint $attributes comment 'boolean'";
+        list ($colName) = explode(' ', $line);
+        $line = str_replace(array($colName, 'TYPE::BOOL'), '', $line);
+        $exeQuery[] = $colName . ' ' . $this->createBooleanAttr(trim($line));
       }
     }
 
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->driver->driverExecute("CREATE TABLE $tblName ( " . $query . " )");
+    $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
   }
 
   public function deleteTable($tblName)
   {
-    $this->driver->driverExecute("DROP TABLE $tblName");
+    $this->model->execute("DROP TABLE $tblName");
   }
 
   public function renameTable($from, $to)
   {
-    $this->driver->driverExecute("ALTER TABLE $from RENAME TO $to");
+    $this->model->execute("ALTER TABLE $from RENAME TO $to");
   }
 
   public function addColumn($tblName, $colName, $param)
   {
     $sch = $this->search;
     $rep = $this->replace;
-    $this->driver->driverExecute("ALTER TABLE $tblName ADD $colName " . str_replace($sch, $rep, $param));
+
+    if (strpos($param, 'TYPE::BOOL') !== false) {
+      $attr = $this->createBooleanAttr(trim(str_replace('TYPE::BOOL', '', $param)));
+    } else {
+      $attr = str_replace($sch, $rep, $param);
+    }
+
+    $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
   }
 
   public function deleteColumn($tblName, $colName)
   {
-    $this->driver->driverExecute("ALTER TABLE $tblName DROP $colName");
+    $this->model->execute("ALTER TABLE $tblName DROP $colName");
   }
 
   public function changeColumn($tblName, $colName, $param)
@@ -99,18 +100,25 @@ class Sabel_DB_Mysql_Migration
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = "ALTER TABLE $tblName MODIFY $colName " . str_replace($sch, $rep, $param);
-    $this->driver->driverExecute($query);
+    $this->model->execute($query);
   }
 
   public function renameColumn($tblName, $from, $to)
   {
-    $schema = Sabel_DB_Connection::getSchema($this->connectName);
-    $query  = "SELECT column_type FROM information_schema.columns "
-            . "WHERE table_schema = '{$schema}' AND table_name = '{$tblName}'";
+    $conName = $this->model->getConnectName();
+    $driver  = $this->model->getDriver();
+    $schema  = Sabel_DB_Connection::getSchema($conName);
+    $query   = "SELECT column_type FROM information_schema.columns "
+             . "WHERE table_schema = '{$schema}' AND table_name = '{$tblName}'";
 
-    $this->driver->driverExecute($query);
-    $row   = $this->driver->getResultSet()->fetch();
+    $driver->driverExecute($query);
+    $row   = $driver->getResultSet()->fetch();
     $query = "ALTER TABLE $tblName CHANGE $from $to " . $row['column_type'];
-    $this->driver->driverExecute($query);
+    $driver->execute($query);
+  }
+
+  protected function createBooleanAttr($attr)
+  {
+    return "tinyint $attr comment 'boolean'";
   }
 }
