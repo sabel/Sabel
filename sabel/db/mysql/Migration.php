@@ -55,9 +55,14 @@ class Sabel_DB_Mysql_Migration
       if (strpos($line, 'TYPE::BOOL') === false) {
         $exeQuery[] = $line;
       } else {
-        list ($colName) = explode(' ', $line);
-        $attr = str_replace('TYPE::BOOL', 'tinyint', strpbrk($line, 'TYPE::BOOL'));
-        $exeQuery[] = $colName . ' ' . $attr . " comment 'boolean'";
+        $specifies  = explode(' ', $line); // $line expect as "colName TYPE::*** attributes"
+        $colName    = strtolower(array_shift($specifies));
+        
+        // $type is unnessesarry this mean's just readability.
+        $type       = array_shift($specifies);
+        $attributes = join(" ", $specifies);
+        
+        $exeQuery[] = "$colName tinyint $attributes comment 'boolean'";
       }
     }
 
