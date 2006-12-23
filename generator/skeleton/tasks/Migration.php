@@ -27,11 +27,13 @@ class Migration extends Sakle
     
     $migrationDir = RUN_BASE . "/migration";
     
-    $buffer = array();
-    if (is_dir($migrationDir)) {
-      if ($handle = opendir($migrationDir)) {
-        while (($file = readdir($handle)) !== false) {
-          if ($file{0} !== ".") $buffer[$file{0}] = $file;
+    $files = array();
+    if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
+      while (($file = readdir($handle)) !== false) {
+        $fileNames = split("_", $file);
+        $versionNumberOfFile = array_shift($fileNames);
+        if ($file{0} !== "." && is_numeric($versionNumberOfFile)) {
+          $files[$versionNumberOfFile] = $file;
         }
       }
     }
@@ -41,8 +43,8 @@ class Migration extends Sakle
       for ($i = $v->version; $i < $to; $i++) {
         $nextv = $i + 1;
         $this->printMessage("upgrade from {$i} to {$nextv} of $to");
-        if (isset($buffer[$nextv])) {
-          $migrationInstance = $this->makeMigration($migrationDir, $buffer[$nextv]);
+        if (isset($files[$nextv])) {
+          $migrationInstance = $this->makeMigration($migrationDir, $files[$nextv]);
           try {
             $this->upgrade($migrationInstance);
             $v->save(array("version" => ($v->version += 1)));
@@ -53,14 +55,13 @@ class Migration extends Sakle
       }
     } elseif ($to < $v->version) {
       // downgrade
-      arsort($buffer);
+      arsort($files);
       
       for ($i = $v->version; $i > $to; $i--) {
         $nextv = $i - 1;
         $this->printMessage("downgrade from {$i} to {$nextv} of $to");
-
-        if (isset($buffer[$i])) {
-          $migrationInstance = $this->makeMigration($migrationDir, $buffer[$i]);
+        if (isset($files[$i])) {
+          $migrationInstance = $this->makeMigration($migrationDir, $files[$i]);
           try {
             $this->downgrade($migrationInstance);
             $v->save(array("version" => ($v->version -= 1)));
@@ -70,6 +71,11 @@ class Migration extends Sakle
         }
       }
     }
+  }
+  
+  protected function migrateVersion()
+  {
+    
   }
   
   protected function getCurrentVersion()

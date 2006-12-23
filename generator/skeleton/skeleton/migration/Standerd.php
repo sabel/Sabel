@@ -1,22 +1,19 @@
 <#php
 
-class <? echo ucfirst($name) ?> extends Sabel_DB_Migration
+class <?php echo ucfirst($className) ?><?php echo $nextVersion ?> extends Sabel_DB_Migration
 {
+  protected $table       = "<?php echo $table ?>";
+  protected $connectName = "default";
+  
   public function upgrade()
   {
-    $table = $this->table("<? echo ucfirst($name) ?>");
-    $table->addColumn("id", $int, array("attributes" => array("auto_increment",
-                                                              "NOT NULL",
-                                                              "PRIMARY KEY")));
-    $table->create();
-    
-    return "create table <? echo ucfirst($name) ?>";
+    $this->add("id TYPE::BINT(INCREMENT) PRIMARY KEY");
+    return "create table <?php echo $table ?>";
   }
   
   public function downgrade()
   {
-    $table = $this->table("<? echo ucfirst($name) ?>");
-    $table->dropTable();
-    return "drop table <? echo ucfirst($name) ?>";
+    $this->delete();
+    return "drop table <?php echo $table ?>";
   }
 }

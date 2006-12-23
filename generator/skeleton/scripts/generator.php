@@ -77,11 +77,11 @@ class FixtureGenerator
 
 class MigrationGenerator
 {
-  public static function generate($name)
+  public static function generate($name, $table)
   {
     $nextVersion = self::getNextVersion();
-    
     $name = strtolower($name);
+    $className = self::toClassName($name);
     $target = "migration/${nextVersion}_${name}.php";
     echo "generate $target \n";
     $fp = fopen($target, 'w');
@@ -96,23 +96,34 @@ class MigrationGenerator
     fclose($fp);
   }
   
+  protected static function toClassName($name)
+  {
+    $parts = split("_", $name);
+    $classNames = array();
+    foreach ($parts as $part) {
+      $classNames[] = ucfirst($part);
+    }
+    return join("", $classNames);
+  }
+  
   protected static function getNextVersion()
   {
     $migrationDir = RUN_BASE . "/migration";
     
-    $buffer = array();
-    if (is_dir($migrationDir)) {
-      if ($handle = opendir($migrationDir)) {
-        while (($file = readdir($handle)) !== false) {
-          if ($file{0} !== "." && is_numeric($file{0})) {
-            $buffer[$file{0}] = $file;
-          }
+    $files = array();
+    if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
+      while (($file = readdir($handle)) !== false) {
+        $fileNames = split("_", $file);
+        $versionNumberOfFile = array_shift($fileNames);
+        if ($file{0} !== "." && is_numeric($versionNumberOfFile)) {
+          $files[$versionNumberOfFile] = $file;
         }
       }
     }
     
-    $lastVersion = array_pop($buffer);
-    $lastVersion = $lastVersion{0};
+    ksort($files);
+    
+    $lastVersion = array_shift(split("_", array_pop($files)));
     if (is_numeric($lastVersion)) {
       return $lastVersion + 1;
     } else {
@@ -172,8 +183,9 @@ class Generator
     
     switch ($type) {
       case 'migration':
+        $table   = $_SERVER['argv'][4];
         print "generate migration {$name}\n";
-        MigrationGenerator::generate($name);
+        MigrationGenerator::generate($name, $table);
         break;
       case 'model':
         print "generate model ${name}\n";
