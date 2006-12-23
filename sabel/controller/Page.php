@@ -7,13 +7,18 @@ Sabel::using('Sabel_Storage_Session');
 /**
  * the Base of Page Controller.
  *
+ * @todo remove dependency to Security package
+ * @todo 
+ * @todo 
+ * @todo 
+ *
  * @category   Controller
  * @package    org.sabel.controller
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Controller_Page
+abstract class Sabel_Controller_Page extends Sabel_Object
 {
   protected
     $view        = null,
@@ -35,11 +40,11 @@ abstract class Sabel_Controller_Page
     $filters       = array(),
     $rendering     = true,
     $withLayout    = true,
-    $attributes   = array(),
+    $attributes    = array(),
     $enableSession = true,
     $skipDefaultAction = true;
     
-  protected $modesl = null;
+  protected $models = null;
   
   /**
    * reserved name lists of methods(actions)
@@ -51,11 +56,13 @@ abstract class Sabel_Controller_Page
                             'execute',
                             'initialize');
   
-  public function initialize()
-  {
-    // none.
-  }
+  public function initialize() {}
   
+  /**
+   * setup of PageController
+   *
+   * @todo remove depend to view
+   */
   public function setup($request, $view = null)
   {
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
@@ -63,7 +70,7 @@ abstract class Sabel_Controller_Page
     Sabel_Context::setView($this->view);
     
     $this->request  = $request;
-    $this->requests = $this->requests();
+    $this->requests = $request->requests();
     
     if ($this->enableSession) {
       $this->storage  = Sabel_Storage_Session::create();
@@ -95,11 +102,14 @@ abstract class Sabel_Controller_Page
     $this->attributes[$name] = $value;
   }
   
+  /*
   protected function __call($method, $args)
   {
-    if ($this->request->hasMethod($method))
+    if ($this->request->hasMethod($method)) {
       return $this->request->$method($args);
+    }
   }
+  */
   
   public function getAction()
   {
@@ -113,6 +123,10 @@ abstract class Sabel_Controller_Page
   
   public function execute($actionName)
   {
+    if (empty($actionName)) {
+      throw new Sabel_Exception_InvalidActionName("invalid action name");
+    }
+    
     if (!headers_sent()) header('X-Framework: Sabel');
     $this->processModels();
     $this->processFilter($actionName, "before");
@@ -299,11 +313,6 @@ abstract class Sabel_Controller_Page
     }
   }
   
-  public function hasMethod($name)
-  {
-    return (method_exists($this, $name));
-  }
-  
   public function successMethod()
   {
     return 'success' . ucfirst($this->getAction());
@@ -462,3 +471,5 @@ abstract class Sabel_Controller_Page
     return $this->security->isAuthorized();
   }
 }
+
+class Sabel_Exception_InvalidActionName extends Sabel_Exception_Runtime{}

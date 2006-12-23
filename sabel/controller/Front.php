@@ -16,6 +16,8 @@ Sabel::using('Sabel_Exception_Runtime');
  */
 class Sabel_Controller_Front
 {
+  protected $requestClass = "Sabel_Request_Web";
+  
   public function __construct()
   {
     Sabel::fileUsing(RUN_BASE . '/config/map.php');
@@ -45,9 +47,9 @@ class Sabel_Controller_Front
     if (is_object($requestUri)) {
       $request = $requestUri;
     } elseif (is_string($requestUri)) {
-      $request = Sabel::load('Sabel_Request', $requestUri);
+      $request = Sabel::load($this->requestClass, $requestUri);
     } else {
-      $request = Sabel::load('Sabel_Request');
+      $request = Sabel::load($this->requestClass);
     }
     
     return $request;

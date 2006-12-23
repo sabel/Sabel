@@ -49,16 +49,16 @@ class Test_Request extends PHPUnit2_Framework_TestCase
   // 
   public function testInvalidModule()
   {
-    $r = new Sabel_Request(null, 'id=1/id=1/id=1/1');
+    $r = new Sabel_Request_Web(null, 'id=1/id=1/id=1/1');
   }
   
   public function testRequestWithParameters()
   {
-    $r = new Sabel_Request(null, '/blog/archive/view/?id=10');
+    $r = new Sabel_Request_Web(null, '/blog/archive/view/?id=10');
   }
   
   public function testRequestInvalid()
   {
-    $r = new Sabel_Request(null, '/blog/archi?ve/view/?id=10');
+    $r = new Sabel_Request_Web(null, '/blog/archi?ve/view/?id=10');
   }
 }

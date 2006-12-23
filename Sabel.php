@@ -4,6 +4,8 @@ if (!defined('DIR_DIVIDER')) define('DIR_DIVIDER', '/');
 define('DEFAULT_PHP_POSTFIX', '.php');
 set_include_path(dirname(__FILE__).":".get_include_path());
 
+Sabel::using("Sabel_Object");
+
 final class Sabel
 {
   private static $required   = array();

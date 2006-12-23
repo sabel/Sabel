@@ -34,7 +34,10 @@ class Sabel_View
   
   public function assignByArray($array)
   {
-    self::$values = array_merge(self::$values, $array);
+    if (is_array($array)) {
+      self::$values = array_merge(self::$values, $array);
+    }
+    return $this;
   }
   
   public function setTemplatePath($path)
