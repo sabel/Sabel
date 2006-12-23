@@ -31,6 +31,11 @@ class Sabel_DB_Connection
     self::$isInit = true;
   }
 
+  public static function setInit($bool)
+  {
+    self::$isInit = $bool;
+  }
+
   public static function addConnection($connectName, $params)
   {
     self::$parameters[$connectName] = $params;

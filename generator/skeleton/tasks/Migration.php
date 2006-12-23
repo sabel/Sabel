@@ -112,6 +112,7 @@ class Migration extends Sakle
     foreach (get_db_params($env) as $connectName => $params) {
       Sabel_DB_Connection::addConnection($connectName, $params);
     }
+    Sabel_DB_Connection::setInit(true);
   }
   
   protected function migrateVersion()
@@ -121,23 +122,25 @@ class Migration extends Sakle
   
   protected function getCurrentVersion()
   {
+    $model  = MODEL('Sversion');
+    $tables = $model->getTableNames();
+    
     try {
-      $version  = MODEL('Sversion');
-      $aVersion = $version->selectOne(1);
-    } catch (Exception $e) {
-      try {
-        $this->query("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
-        $version = MODEL('Sversion');
-        $version->id = 1;
-        $version->version = 0;
-        $version->save();
-
-        $aVersion = $version->selectOne('id', 1);
-      } catch (Exception $e2) {
-        $this->printMessage($e2->getMessage(), self::MSG_ERR);
+      if (in_array('sversion', $tables)) {
+        $aVersion = $model->selectOne(1);
+      } else {
+        $driver = $model->getDriver();
+        $driver->execute("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
+        $driver->execute("INSERT INTO sversion values(1, 0)");
+        
+        Sabel_DB_SimpleCache::clear();
+        $aVersion = MODEL('Sversion')->selectOne(1);
       }
+    } catch (Exception $e) {
+      $this->printMessage($e->getMessage(), self::MSG_ERR);
+      exit;
     }
-
+    
     return $aVersion;
   }
   

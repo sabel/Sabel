@@ -13,7 +13,6 @@
 class Sabel_DB_Mysql_Migration
 {
   protected $search  = array('TYPE::INT(INCREMENT)',
-                             'TYPE::SINT(INCREMENT)',
                              'TYPE::BINT(INCREMENT)',
                              'TYPE::INT',
                              'TYPE::SINT',
@@ -22,10 +21,11 @@ class Sabel_DB_Mysql_Migration
                              'TYPE::TEXT',
                              'TYPE::DATETIME',
                              'TYPE::FLOAT',
-                             'TYPE::DOUBLE');
+                             'TYPE::DOUBLE',
+                             '__TRUE__',
+                             '__FALSE__');
 
   protected $replace = array('integer auto_increment',
-                             'smallint auto_increment',
                              'bigint auto_increment',
                              'integer',
                              'smallint',
@@ -34,7 +34,9 @@ class Sabel_DB_Mysql_Migration
                              'text',
                              'datetime',
                              'float',
-                             'double');
+                             'double',
+                             '1',
+                             '0');
 
   protected $model = null;
 
@@ -82,11 +84,10 @@ class Sabel_DB_Mysql_Migration
     $rep = $this->replace;
 
     if (strpos($param, 'TYPE::BOOL') !== false) {
-      $attr = $this->createBooleanAttr(trim(str_replace('TYPE::BOOL', '', $param)));
-    } else {
-      $attr = str_replace($sch, $rep, $param);
+      $param = $this->createBooleanAttr(trim(str_replace('TYPE::BOOL', '', $param)));
     }
 
+    $attr = str_replace($sch, $rep, $param);
     $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
   }
 
