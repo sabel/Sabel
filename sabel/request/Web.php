@@ -13,27 +13,36 @@ Sabel::using("Sabel_Request");
  */
 class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
 {
+  /**
+   * @var Sabel_Request_Uri $uri
+   */
   protected $uri = null;
   
   /**
-   * @var Sabel_Request_Parameters object
+   * @var Sabel_Map_Candidate $candidate
+   */
+  protected $candidate = null;
+  
+  /**
+   * @var Sabel_Request_Parameters $parameters
    */
   protected $parameters = null;
   
-  public function __construct($requestUri = null)
+  public function __construct($requestUri = "")
   {
     $uriAndParams = explode('?', $this->createRequestUri($requestUri));
-   
-    $this->uri = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
-   
-    if (isset($uriAndParams[1])) {
-      $this->parameters = Sabel::load('Sabel_Request_Parameters', $uriAndParams[1]);
-    }
+    $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
+    
+    $this->uri        = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
+    $this->parameters = Sabel::load('Sabel_Request_Parameters', $parameters);
+    
+    assert(is_object($this->uri));
+    assert(is_object($this->parameters));
   }
   
   protected function createRequestUri($requestUri)
   {
-    if ($requestUri !== null) return ltrim($requestUri, '/');
+    if ($requestUri !== "") return ltrim($requestUri, '/');
 
     $request_uri = "";    
     if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
@@ -61,11 +70,18 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   
   public function getParameter($name)
   {
-    if ($this->hasParameter($name)) {
+    if ($this->candidate !== null && $this->candidate->hasElementVariableByName($name)) {
+      return $this->candidate->getElementVariableByName($name);
+    } elseif (is_object($this->getParameters()) && $this->hasParameter($name)) {
       return $this->parameters->get($name);
     } else {
-      return null;
+      return $this->getPost($name);
     }
+  }
+  
+  public function getPost($name)
+  {
+    return (isset($_POST[$name])) ? $_POST[$name] : null;
   }
   
   /**
@@ -98,29 +114,20 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
     return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
   }
   
-  /**
-   * get post data
-   *
-   * @param string $name
-   * @return mixed or null
-   */
-  public function getRequestValue($name)
+  public function setCandidate(Sabel_Map_Candidate $candidate)
   {
-    if (isset($_POST[$name])) {
-      return $_POST[$name];
-    } else {
-      return null;
-    }
+    $this->candidate = $candidate;
   }
   
-  public function requests()
+  public function getPostRequests($postValues = null)
   {
-    $array = array();
-    foreach ($_POST as $key => $value) {
-      $value = (get_magic_quotes_gpc()) ? $this->normalize($value) : $value;
-      $array[$key] = $value;
+    if ($postValues === null) $postValues = $_POST;
+    
+    if (get_magic_quotes_gpc()) {
+      array_map("normalize", $postValues);
     }
-    return $array;
+        
+    return $postValues;
   }
   
   public function getRequestUri()
@@ -143,7 +150,6 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   protected function removeNonAlphaNumeric(&$target, $expected = '')
   {
     $cleaned = null;
-    var_dump($target);
     
     if(is_array($target)) {
       foreach ($target as $key => $value) {
@@ -156,13 +162,18 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
     return $cleaned;
   }
   
-  protected static function normalize($target)
+  protected function normalize($target)
   {
-    if (is_array($target)) {
-      foreach ($target as &$value) $value = stripslashes($value);
-    } else {
-      $target = stripslashes($target);
-    }
-    return $target;
+    return normailize($target);
   }
+}
+
+function normalize($target)
+{
+  if (is_array($target)) {
+    foreach ($target as &$value) $value = stripslashes($value);
+  } else {
+    $target = stripslashes($target);
+  }
+  return $target;
 }

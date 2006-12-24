@@ -160,13 +160,20 @@ function a($param, $anchor, $uriParameters = null)
   return $tag;
 }
 
+/**
+ * internal request
+ */
 function request($uri)
 {
   $front    = Sabel::loadSingleton('Sabel_Controller_Front');
-  $response = $front->ignition($uri);
+  $response = $front->ignition(Sabel::load("Sabel_Request_Web", $uri));
   return $response['html'];
 }
 
+/**
+ * array create utility
+ * __(a 10, b 20, c 20) === array("a" => "10", "b" => "20", "c" => "30")
+ */
 function __($text)
 {
   preg_match_all('/

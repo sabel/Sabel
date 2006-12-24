@@ -39,7 +39,8 @@ class Test_Sabel extends PHPUnit2_Framework_TestCase
     $this->assertTrue(is_object($fcontroller));
     
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
-    $result = $fcontroller->ignition('/index/index');
+    $request = Sabel::load("Sabel_Request_Web", "/index/index");
+    $result = $fcontroller->ignition($request);
 
     $this->assertEquals("welcome to Sabel have fun!\n", $result['html']);
   }

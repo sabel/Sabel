@@ -1,22 +1,10 @@
 <?php
 
+Sabel::using("Sabel_Controller_Page_Base");
+
 Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
-
-class Sabel_Controller_VariableHolder extends Sabel_Object
-{
-  protected $variables = array();
-  
-  public function regist($name, $variable) {
-    $this->variables[$name] = $variable;
-  }
-  
-  public function fetch($name)
-  {
-    return (isset($this->variables[$name])) ? $this->variables[$name] : null;
-  }
-}
 
 /**
  * the Base of Page Controller.
@@ -32,13 +20,17 @@ class Sabel_Controller_VariableHolder extends Sabel_Object
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Controller_Page extends Sabel_Object
+abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 {
+  const HTTP_METHOD_GET    = 0x01;
+  const HTTP_METHOD_POST   = 0x05;
+  const HTTP_METHOD_PUT    = 0x10;
+  const HTTP_METHOD_DELETE = 0x15;
+  
   protected
     $view        = null,
     $request     = null,
-    $httpMethod  = 'GET',
-    $requests    = array(),
+    $httpMethod  = self::HTTP_METHOD_GET,
     $storage     = null,
     $response    = null;
     
@@ -69,7 +61,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
                             'getRequests',
                             'execute',
                             'initialize');
-  
+                            
   public function initialize() {}
   
   /**
@@ -77,15 +69,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @todo remove depend to view
    */
-  // public function setup($request, $view = null)
-  public function setup($view = null)
+  public function setup(Sabel_Request $request, $view = null)
   {
+    $this->request = $request;
+    
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
-    
     Sabel_Context::setView($this->view);
-    
-    // $this->request  = $request;
-    // $this->requests = $request->requests();
     
     if ($this->enableSession) {
       $this->storage  = Sabel_Storage_Session::create();
@@ -98,34 +87,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
-  public function setVariableHolder(Sabel_Controller_VariableHolder $vh)
-  {
-    $this->variableHolder = $vh;
-  }
-  
-  /*
-  protected function __get($name)
-  {
-    $candidate = Sabel_Context::getCurrentCandidate();
-    
-    if (isset($this->attributes[$name])) {
-      return $this->attributes[$name];
-    } elseif ($candidate !== null && $candidate->hasElementVariableByName($name)) {
-      return $candidate->getElementVariableByName($name);
-    } elseif (is_object($this->request->getParameters()) && $this->request->hasParameter($name)) {
-      return $this->request->getParameter($name);
-    } else {
-      return $this->request->getRequestValue($name);
-    }
-  }
-  */
-  
   protected function __get($name)
   {
     if (isset($this->attributes[$name])) {
       $result = $this->attributes[$name];
     } else {
-      $result = $this->variableHolder->fetch($name);
+      $result = $this->request->getParameter($name);
     }
     return $result;
   }
@@ -176,10 +143,8 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     $view = $this->view;
-    // $view->assignByArray($this->requests);
-    $view->assign("candidate" , Sabel_Context::getCurrentCandidate());
-    // $view->assign("request" ,   $this->request);
-    // $view->assign("parameter",  $this->request->getParameters());
+    $view->assign("request", $this->request);
+    $view->assignByArray($this->request->getPostRequests());
     $view->assignByArray($this->attributes);
     if (is_array($result)) $view->assignByArray($result);
     
@@ -258,11 +223,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     $result = (is_array($actionResult)) ? $actionResult : array();
     
-    /*
-    if (is_object($this->storage))
-      $this->storage->write('previous', $this->request->__toString());
-      */
-      
     return $result;
   }
   
@@ -339,26 +299,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
-  public function successMethod()
-  {
-    return 'success' . ucfirst($this->getAction());
-  }
-  
-  public function hasSuccessMethod()
-  {
-    return ($this->hasMethod($this->successMethod()));
-  }
-  
-  public function errorMethod()
-  {
-    return 'error' . ucfirst($this->getAction());
-  }
-  
-  public function hasErrorMethod()
-  {
-    return ($this->hasMethod($this->errorMethod()));
-  }
-  
   protected function checkReferer($validURIs)
   {
     $host = $_SERVER['HTTP_HOST'];
@@ -370,11 +310,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function layout($layout)
   {
     $this->view->setLayout($layout);
-  }
-  
-  protected function proxy($target)
-  {
-    return new Sabel_Aspect_Proxy($target);
   }
   
   /**
@@ -401,16 +336,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
     $candidate = Sabel_Context::getCurrentCandidate();
     $this->redirect('/' . $candidate->uri($params));
-  }
-  
-  public function previous()
-  {
-    return $this->storage->read('previous');
-  }
-  
-  public function redirectToPrevious()
-  {
-    $this->redirect('/' . $this->previous());
   }
   
   /**
@@ -451,12 +376,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   protected function isPost()
   {
-    return ($this->httpMethod === "POST");
+    return ($this->httpMethod === self::HTTP_METHOD_POST);
   }
   
   protected function isGet()
   {
-    return ($this->httpMethod === "GET");
+    return ($this->httpMethod === self::HTTP_METHOD_GET);
   }
   
   // remove above lines

@@ -5,7 +5,6 @@ require_once ("PageControllerForTest.php");
 
 /**
  * 
- *
  * @category   
  * @package    org.sabel.
  * @author     Mori Reo <mori.reo@gmail.com>
@@ -25,9 +24,7 @@ class Test_Controller_Page extends PHPUnit2_Framework_TestCase
   {
     $this->c = new PageControllerForTest();
     $this->assertTrue(is_object($this->c));
-    $this->c->setup();
-    $this->c->setVariableHolder(new Sabel_Controller_VariableHolder());
-    // $this->c->setup(new MockRequest());
+    $this->c->setup(new MockRequest());
   }
  
   public function tearDown()
@@ -52,7 +49,8 @@ class Test_Controller_Page extends PHPUnit2_Framework_TestCase
   
   public function testActionWithParameter()
   {
-    $request = new MockRequestWithParameter();
+    $request = new MockRequest();
+    $this->c->setup($request);
     $result = $this->c->execute("testActionWithParameter");
     $this->assertEquals("testParam", $result["test"]);
   }
@@ -60,25 +58,16 @@ class Test_Controller_Page extends PHPUnit2_Framework_TestCase
 
 class MockRequest extends Sabel_Object implements Sabel_Request
 {
-  public function requests()
+  public function getPostRequests()
   {
-    
-  }
-  
-  public function getParameters()
-  {
-    
+    return array();
   }
   
   public function __toString()
   {
     
   }
-}
-
-class MockRequestWithParameter extends MockRequest
-{
-  // the target™
+  
   public function getParameters()
   {
     return new StdClass();

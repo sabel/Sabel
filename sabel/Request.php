@@ -11,4 +11,13 @@
  */
 interface Sabel_Request
 {
+  public function getParameters();
+  
+  public function getPostRequests();
+    
+  public function hasParameter($name);
+  
+  public function getParameter($name);
+  
+  public function __toString();
 }
