@@ -4,6 +4,20 @@ Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
 
+class Sabel_Controller_VariableHolder extends Sabel_Object
+{
+  protected $variables = array();
+  
+  public function regist($name, $variable) {
+    $this->variables[$name] = $variable;
+  }
+  
+  public function fetch($name)
+  {
+    return (isset($this->variables[$name])) ? $this->variables[$name] : null;
+  }
+}
+
 /**
  * the Base of Page Controller.
  *
@@ -63,14 +77,15 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @todo remove depend to view
    */
-  public function setup($request, $view = null)
+  // public function setup($request, $view = null)
+  public function setup($view = null)
   {
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
     
     Sabel_Context::setView($this->view);
     
-    $this->request  = $request;
-    $this->requests = $request->requests();
+    // $this->request  = $request;
+    // $this->requests = $request->requests();
     
     if ($this->enableSession) {
       $this->storage  = Sabel_Storage_Session::create();
@@ -81,6 +96,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if (isset($_SERVER['REQUEST_METHOD'])) {
       $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
+  }
+  
+  public function setVariableHolder(Sabel_VariableHolder $vh)
+  {
+    $this->variableHolder = $vh;
   }
   
   /*
@@ -105,7 +125,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if (isset($this->attributes[$name])) {
       $result = $this->attributes[$name];
     } else {
-      $result = $this->valueHolder()->get($name);
+      $result = $this->variableHolder->get($name);
     }
     return $result;
   }
@@ -114,15 +134,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   {
     $this->attributes[$name] = $value;
   }
-  
-  /*
-  protected function __call($method, $args)
-  {
-    if ($this->request->hasMethod($method)) {
-      return $this->request->$method($args);
-    }
-  }
-  */
   
   public function getAction()
   {
@@ -165,10 +176,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     $view = $this->view;
-    $view->assignByArray($this->requests);
+    // $view->assignByArray($this->requests);
     $view->assign("candidate" , Sabel_Context::getCurrentCandidate());
-    $view->assign("request" ,   $this->request);
-    $view->assign("parameter",  $this->request->getParameters());
+    // $view->assign("request" ,   $this->request);
+    // $view->assign("parameter",  $this->request->getParameters());
     $view->assignByArray($this->attributes);
     if (is_array($result)) $view->assignByArray($result);
     
@@ -247,8 +258,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     $result = (is_array($actionResult)) ? $actionResult : array();
     
+    /*
     if (is_object($this->storage))
       $this->storage->write('previous', $this->request->__toString());
+      */
       
     return $result;
   }
@@ -420,14 +433,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->view->assign($key, $value);
   }
   
-  /*
-  protected function readAnnotation($className, $annotationName)
-  {
-    $anonr = Sabel_Annotation_Reader::create();
-    $anonr->annotation($className);
-    return $anonr->getAnnotationsByName($className, $annotationName);
-  }
-  */
   protected function getType()
   {
     return $this->request->getUri()->getType();
@@ -446,23 +451,15 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   protected function isPost()
   {
-    return $this->request->isPost();
+    return ($this->httpMethod === "POST");
   }
   
   protected function isGet()
   {
-    return $this->request->isGet();
+    return ($this->httpMethod === "GET");
   }
   
-  protected function success($uri)
-  {
-    Aspects_Validate::redirectWhenSuccess($uri);
-  }
-  
-  protected function failure($uri)
-  {
-    Aspects_Validate::redirectWhenFailure($uri);
-  }
+  // remove above lines
   
   public function registAuthorizer($authorizer)
   {
