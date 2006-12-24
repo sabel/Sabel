@@ -83,6 +83,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
+  /*
   protected function __get($name)
   {
     $candidate = Sabel_Context::getCurrentCandidate();
@@ -96,6 +97,17 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     } else {
       return $this->request->getRequestValue($name);
     }
+  }
+  */
+  
+  protected function __get($name)
+  {
+    if (isset($this->attributes[$name])) {
+      $result = $this->attributes[$name];
+    } else {
+      $result = $this->valueHolder()->get($name);
+    }
+    return $result;
   }
   
   protected function __set($name, $value)
