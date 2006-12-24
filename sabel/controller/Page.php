@@ -86,9 +86,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function __get($name)
   {
     $candidate = Sabel_Context::getCurrentCandidate();
+    
     if (isset($this->attributes[$name])) {
       return $this->attributes[$name];
-    } elseif ($candidate->hasElementVariableByName($name)) {
+    } elseif ($candidate !== null && $candidate->hasElementVariableByName($name)) {
       return $candidate->getElementVariableByName($name);
     } elseif (is_object($this->request->getParameters()) && $this->request->hasParameter($name)) {
       return $this->request->getParameter($name);

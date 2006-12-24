@@ -98,6 +98,12 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
     return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
   }
   
+  /**
+   * get post data
+   *
+   * @param string $name
+   * @return mixed or null
+   */
   public function getRequestValue($name)
   {
     if (isset($_POST[$name])) {

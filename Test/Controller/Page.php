@@ -52,8 +52,8 @@ class Test_Controller_Page extends PHPUnit2_Framework_TestCase
   {
     $request = new MockRequestWithParameter();
     $this->c->setup($request);
-    $result = $this->c->execute("testAction");
-    dump($result);
+    $result = $this->c->execute("testActionWithParameter");
+    $this->assertEquals("testParam", $result["test"]);
   }
 }
 
@@ -80,6 +80,16 @@ class MockRequestWithParameter extends MockRequest
   // the target
   public function getParameters()
   {
-    return array("test" => "test");
+    return new StdClass();
+  }
+  
+  public function hasParameter($name)
+  {
+    return true;
+  }
+  
+  public function getParameter($name)
+  {
+    return "testParam";
   }
 }
