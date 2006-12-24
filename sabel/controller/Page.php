@@ -98,7 +98,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
-  public function setVariableHolder(Sabel_VariableHolder $vh)
+  public function setVariableHolder(Sabel_Controller_VariableHolder $vh)
   {
     $this->variableHolder = $vh;
   }
@@ -125,7 +125,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if (isset($this->attributes[$name])) {
       $result = $this->attributes[$name];
     } else {
-      $result = $this->variableHolder->get($name);
+      $result = $this->variableHolder->fetch($name);
     }
     return $result;
   }

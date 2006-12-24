@@ -26,7 +26,7 @@ class Test_Controller_Page extends PHPUnit2_Framework_TestCase
     $this->c = new PageControllerForTest();
     $this->assertTrue(is_object($this->c));
     $this->c->setup();
-    $this->c->setVariableHolder(new Sabel_VariableHolder());
+    $this->c->setVariableHolder(new Sabel_Controller_VariableHolder());
     // $this->c->setup(new MockRequest());
   }
  
