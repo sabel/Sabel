@@ -88,7 +88,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
-  public function initialize($mdlName = null, $mdlProps = null)
+  public function initialize($mdlName = null)
   {
     $mdlName = ($mdlName === null)  ? get_class($this) : $mdlName;
     $this->initSchema($mdlName);
@@ -108,9 +108,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       Sabel::using($sClsName);
 
       if (class_exists($sClsName, false)) {
-        list ($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
+        list($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
       } else {
-        list ($tblSchema, $properties) = $this->getSchemaFromDb($tblName);
+        list($tblSchema, $properties) = $this->getSchemaFromDb($tblName);
       }
 
       $columns = array_keys($tblSchema->getColumns());
@@ -194,12 +194,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         return (float)$data;
       case SabeL_DB_Type_Const::BOOL:
         if (is_int($data)) {
-          $data = ($data === 1);
+          return ($data === 1);
         } elseif(is_string($data)) {
-          $data = ($data === '1' || $data === 'true');
+          return ($data === '1' || $data === 'true');
         }
+      default:
+        return $data;
     }
-    return $data;
   }
 
   public function getRealData()
@@ -932,12 +933,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function getSchemaFromDb($tblName)
   {
-    Sabel::using('Sabel_DB_Schema_Accessor');
-
     $conName    = get_db_tables($tblName);
     $scmName    = Sabel_DB_Connection::getSchema($conName);
     $database   = Sabel_DB_Connection::getDB($conName);
-    $accessor   = new Sabel_DB_Schema_Accessor($conName, $scmName);
+    $accessor   = Sabel::load('Sabel_DB_Schema_Accessor', $conName, $scmName);
     $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
     $tblSchema  = $accessor->getTable($tblName);
 

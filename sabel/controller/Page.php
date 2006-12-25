@@ -6,6 +6,8 @@ Sabel::using('Sabel_Security_Security');
 Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
 
+Sabel::using('Sabel_Exception_Runtime');
+
 /**
  * the Base of Page Controller.
  *

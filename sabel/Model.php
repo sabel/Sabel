@@ -34,7 +34,7 @@ class Sabel_Model
             {
               public function __construct($mdlName)
               {
-                $this->initialize($mdlName, array());
+                $this->initialize($mdlName);
               }
             }'
           );
