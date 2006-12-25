@@ -37,7 +37,7 @@ class Migration extends Sakle
     $v  = $this->getCurrentVersion();
     $to = $this->arguments[2];
     
-    if ($to === "version" || $to === "-v") {
+    if ($to === "version" || $to === "-v" || $v->version === (int)$to) {
       $this->printMessage("current version: " . $v->version);
       exit;
     }
@@ -61,30 +61,42 @@ class Migration extends Sakle
       }
     }
     
+    $doNext = false;
     if ($v->version < $to) {
-      // upgrade
-      for ($i = $v->version; $i < $to; $i++) {
-        $nextv = $i + 1;
-        $this->printMessage("upgrade from {$i} to {$nextv} of $to");
-        if (isset($files[$nextv])) {
-          $migrationInstance = $this->makeMigration($migrationDir, $files[$nextv]);
-          $this->upgrade($migrationInstance);
-          $v->save(array("version" => ($v->version += 1)));
-        }
-      }
+      $next   = $v->version + 1;
+      $ver    = $next;
+      $method = 'upgrade';
+      $doNext = ($next < $to);
     } elseif ($to < $v->version) {
-      // downgrade
-      arsort($files);
-      
-      for ($i = $v->version; $i > $to; $i--) {
-        $nextv = $i - 1;
-        $this->printMessage("downgrade from {$i} to {$nextv} of $to");
-        if (isset($files[$i])) {
-          $migrationInstance = $this->makeMigration($migrationDir, $files[$i]);
-          $this->downgrade($migrationInstance);
-          $v->save(array("version" => ($v->version -= 1)));
-        }
-      }
+      $next   = $v->version - 1;
+      $ver    = $v->version;
+      $method = 'downgrade';
+      $doNext = ($next > $to);
+    }
+    
+    $this->printMessage("$method from {$v->version} to {$next}");
+    
+    if (isset($files[$ver])) {
+      $file = $files[$ver];
+    } else {
+      $this->printMessage("migration file is not found. file version: {$ver}", self::MSG_ERR);
+      exit;
+    }
+    
+    $migrationInstance = $this->makeMigration($migrationDir, $file);
+    $this->$method($migrationInstance);
+    
+    try {
+      $v->execute("UPDATE sversion SET version = $next WHERE id = 1");
+    } catch (Exception $e) {
+      $this->printMessage($e->getMessage(), self::MSG_ERR);
+      exit;
+    }
+    
+    $v->commit();
+    
+    if ($doNext) {
+      system("sakle Migration {$this->arguments[1]} {$to}");
     }
   }
   
@@ -141,6 +153,7 @@ class Migration extends Sakle
       exit;
     }
     
+    $aVersion->begin();
     return $aVersion;
   }
   

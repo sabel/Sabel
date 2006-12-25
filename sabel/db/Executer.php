@@ -248,7 +248,12 @@ class Sabel_DB_Executer
 
     $driver = $this->getDriver();
     $driver->makeQuery($this->conditions);
-    $driver->update();
+
+    try {
+      $driver->update();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $driver);
+    }
   }
 
   public function insert($data, $incCol = null)
