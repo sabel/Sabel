@@ -28,7 +28,7 @@ class Migration extends Sakle
 
   public function execute()
   {
-    if (count($this->arguments) < 2) {
+    if (count($this->arguments) < 3) {
       $this->printMessage("Error: invalid parameter.", self::MSG_ERR);
       exit;
     }
@@ -53,11 +53,9 @@ class Migration extends Sakle
     $files = array();
     if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
       while (($file = readdir($handle)) !== false) {
-        $fileNames = split("_", $file);
-        $versionNumberOfFile = array_shift($fileNames);
-        if ($file{0} !== "." && is_numeric($versionNumberOfFile)) {
+        $versionNumberOfFile = substr($file, 0, strpos($file, '_'));
+        if (is_numeric($versionNumberOfFile))
           $files[$versionNumberOfFile] = $file;
-        }
       }
     }
     
@@ -84,9 +82,9 @@ class Migration extends Sakle
     }
     
     $migrationInstance = $this->makeMigration($migrationDir, $file);
-    $this->$method($migrationInstance);
     
     try {
+      $migrationInstance->$method();
       $v->execute("UPDATE sversion SET version = $next WHERE id = 1");
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
@@ -95,15 +93,13 @@ class Migration extends Sakle
     
     $v->commit();
     
-    if ($doNext) {
-      system("sakle Migration {$this->arguments[1]} {$to}");
-    }
+    if ($doNext) system("sakle Migration {$this->arguments[1]} $to");
   }
   
   protected function initialize()
   {
     $env = '';
-    switch ($this->arguments[1]) {
+    switch (strtolower($this->arguments[1])) {
       case 'production':
         $env = $this->environment = PRODUCTION;
         break;
@@ -127,27 +123,16 @@ class Migration extends Sakle
     Sabel_DB_Connection::setInit(true);
   }
   
-  protected function migrateVersion()
-  {
-    
-  }
-  
   protected function getCurrentVersion()
   {
-    $model  = MODEL('Sversion');
-    $tables = $model->getTableNames();
+    $exec = new Sabel_DB_Executer(array('table' => 'sversion'));
     
     try {
-      if (in_array('sversion', $tables)) {
-        $aVersion = $model->selectOne(1);
-      } else {
-        $driver = $model->getDriver();
-        $driver->execute("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
-        $driver->execute("INSERT INTO sversion values(1, 0)");
-        
-        Sabel_DB_SimpleCache::clear();
-        $aVersion = MODEL('Sversion')->selectOne(1);
+      if (!in_array('sversion', $exec->getTableNames())) {
+        $exec->executeQuery("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
+        $exec->executeQuery("INSERT INTO sversion values(1, 0)");
       }
+      $aVersion = MODEL('Sversion')->selectOne(1);
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
       exit;
@@ -159,39 +144,13 @@ class Migration extends Sakle
   
   protected function makeMigration($migrationDir, $file)
   {
-    include ($migrationDir . "/$file");
+    include_once ($migrationDir . "/" . $file);
     $fileParts  = explode("_", $file);
     $versionNum = array_shift($fileParts);
     $fileParts  = array_map("inner_function_convert_names", $fileParts);
     $className  = join("", $fileParts) . $versionNum;
     
     return new $className($this->environment);
-  }
-  
-  protected function upgrade(Sabel_DB_Migration $migration)
-  {
-    try {
-      $this->printMessage($migration->upgrade());
-    } catch (Exception $e) {
-      $this->printMessage($e->getMessage(), self::MSG_ERR);
-      exit;
-    }
-  }
-  
-  protected function downgrade(Sabel_DB_Migration $migration)
-  {
-    try {
-      $this->printMessage($migration->downgrade());
-    } catch (Exception $e) {
-      $this->printMessage($e->getMessage(), self::MSG_ERR);
-      exit;
-    }
-  }
-  
-  protected function query($sql)
-  {
-    $e = new Sabel_DB_Executer(array('table' => 'dummy'));
-    $e->executeQuery($sql);
   }
 }
 

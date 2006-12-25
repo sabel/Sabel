@@ -48,17 +48,16 @@ class Sabel_DB_Mysql_Migration
 
   public function addTable($tblName, $cmdQuery)
   {
-    $cmdQuery = preg_replace("/[\n\r\f]/", '', $cmdQuery);
+    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
 
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
-      $line = trim($line);
       if (strpos($line, 'TYPE::BOOL') === false) {
         $exeQuery[] = $line;
       } else {
         list ($colName) = explode(' ', $line);
         $line = str_replace(array($colName, 'TYPE::BOOL'), '', $line);
-        $exeQuery[] = $colName . ' ' . $this->createBooleanAttr(trim($line));
+        $exeQuery[] = $colName . ' ' . $this->createBooleanAttr($line);
       }
     }
 
@@ -84,7 +83,7 @@ class Sabel_DB_Mysql_Migration
     $rep = $this->replace;
 
     if (strpos($param, 'TYPE::BOOL') !== false) {
-      $param = $this->createBooleanAttr(trim(str_replace('TYPE::BOOL', '', $param)));
+      $param = $this->createBooleanAttr(str_replace('TYPE::BOOL', '', $param));
     }
 
     $attr = str_replace($sch, $rep, $param);
@@ -120,6 +119,6 @@ class Sabel_DB_Mysql_Migration
 
   protected function createBooleanAttr($attr)
   {
-    return "tinyint $attr comment 'boolean'";
+    return "tinyint " . trim($attr) . " comment 'boolean'";
   }
 }

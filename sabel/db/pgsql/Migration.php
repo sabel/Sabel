@@ -98,9 +98,7 @@ class Sabel_DB_Pgsql_Migration
     }
 
     if (strpos($attr, 'default') !== false) {
-      $default = trim(str_replace('default', '', substr($attr, strpos($attr, 'default'))));
-      if ($default === '__false__') $default = 'false';
-      if ($default === '__true__')  $default = 'true';
+      $default = str_replace('default', '', strstr($attr, 'default'));
       $this->model->execute("ALTER TABLE $tblName ALTER $colName SET DEFAULT $default");
     } else {
       $this->model->execute("ALTER TABLE $tblName ALTER $colName DROP DEFAULT");
