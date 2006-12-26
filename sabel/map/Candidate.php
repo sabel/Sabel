@@ -90,6 +90,18 @@ class Sabel_Map_Candidate implements Iterator
     }
   }
   
+  public function getElementVariables()
+  {
+    $results = array();
+    $elements = $this->elements;
+    foreach ($elements as $name => $variable) {
+      if (isset($variable[self::VARIABLE_KEY])) {
+        $results[$name] = $variable[self::VARIABLE_KEY];
+      }
+    }
+    return $results;
+  }
+  
   public function getElementVariableByName($name)
   {
     $result = false;

@@ -146,6 +146,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $view = $this->view;
     $view->assign("request", $this->request);
+    $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
     $view->assignByArray($this->request->getPostRequests());
     $view->assignByArray($this->attributes);
     if (is_array($result)) $view->assignByArray($result);
