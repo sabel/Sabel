@@ -121,12 +121,15 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
       $type    = $this->types[$typeNum];
     }
 
+    $conName = get_db_tables(strtolower($tblName));
+    $default = $row['rdb$default_source'];
+    $co->default = ($default === null) ? null : $this->getDefaultValue($default, $conName);
+
     if (!$this->isBool($co, $type, $row)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
       $this->setIncrement($co, $fieldName, $tblName);
       $this->setPrimaryKey($co, $fieldName);
-      $this->setDefault($co, $row['rdb$default_source']);
     }
 
     if ($co->type === Sabel_DB_Type_Const::STRING) $this->setLength($co, $row);
@@ -141,10 +144,8 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
   protected function isBool($co, $type, $row)
   {
     if ($type === 'char' && $row['rdb$character_length'] === 1) {
-      $default = $this->getDefault($row['rdb$default_source']);
-      if ($default === 0 || $default === 1) {
-        $co->type    = Sabel_DB_Type_Const::BOOL;
-        $co->default = $default;
+      if ($co->default === 0 || $co->default === 1) {
+        $co->type = Sabel_DB_Type_Const::BOOL;
         return true;
       }
     }
@@ -177,13 +178,14 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
     $co->default = ($default === null) ? null : $this->getDefault($default);
   }
 
-  protected function getDefault($default)
+  protected function getDefaultValue($default, $conName)
   {
-    $info = ibase_blob_info($default);
-    $blob = ibase_blob_open($default);
+    $con  = Sabel_DB_Connection::getConnection($conName);
+    $info = ibase_blob_info($con, $default);
+    $blob = ibase_blob_open($con, $default);
     $val  = substr(ibase_blob_get($blob, $info[0]), 8);
 
-    return (is_numeric($val)) ? (int)$val : $val;
+    return (is_numeric($val)) ? (int)$val : substr($val, 1, -1);
   }
 
   protected function setLength($co, $row)

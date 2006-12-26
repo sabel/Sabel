@@ -1,5 +1,7 @@
 <?php
 
+define('TEST_CASE', true);
+
 class WindowsUnitTest
 {
   protected function assertEquals($p1, $p2)
@@ -15,6 +17,11 @@ class WindowsUnitTest
   protected function assertNull($p)
   {
     echo (is_null($p)) ? '.' : 'F';
+  }
+
+  protected function assertNotNull($p)
+  {
+    echo (!is_null($p)) ? '.' : 'F';
   }
 
   protected function assertTrue($p)
@@ -994,11 +1001,13 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertFalse($nm->primary);
     $this->assertEquals($nm->default, 'test');
 
+    /*
     $this->assertEquals($bl->type, Sabel_DB_Type_Const::BOOL);
     $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertFalse($bl->primary);
     $this->assertFalse($bl->default);
+    */
 
     $this->assertEquals($dt->type, Sabel_DB_Type_Const::DATETIME);
     $this->assertTrue($dt->nullable);
@@ -1474,4 +1483,40 @@ class Schema_CascadeChain
 
     return $chains;
   }
+}
+
+if (!function_exists('get_db_tables')) {
+
+function get_db_tables($tblName)
+{
+  $tables = array();
+  $tables['basic']          = 'default';
+  $tables['users']          = 'default';
+  $tables['city']           = 'default';
+  $tables['country']        = 'default';
+  $tables['company']        = 'default';
+  $tables['test_for_like']  = 'default';
+  $tables['test_condition'] = 'default';
+  $tables['blog']           = 'default';
+  $tables['customer_order'] = 'default';
+  $tables['classification'] = 'default';
+  $tables['favorite_item']  = 'default';
+  $tables['student']        = 'default';
+  $tables['course']         = 'default';
+  $tables['student_course'] = 'default';
+  $tables['schema_test']    = 'default';
+  $tables['timer']          = 'default';
+  $tables['child']          = 'default';
+
+  $tables['customer']       = 'default2';
+  $tables['parents']        = 'default2';
+  $tables['grand_child']    = 'default2';
+
+  if (!isset($tables[$tblName])) {
+    throw new Exception("Error: '{$tblName}' does not exist.");
+  }
+
+  return $tables[$tblName];
+}
+
 }

@@ -18,15 +18,31 @@ class Sabel
   }
 }
 
-require_once 'C:\php\Sabel\sabel\db\Functions.php';
+function convert_to_tablename($mdlName)
+{
+  if (preg_match('/^[a-z0-9_]+$/', $mdlName)) return $mdlName;
+  return substr(strtolower(preg_replace('/([A-Z])/', '_$1', $mdlName)), 1);
+}
+
+function convert_to_modelname($tblName)
+{
+  return join('', array_map('ucfirst', explode('_', $tblName)));
+}
+
+function MODEL($mdlName)
+{
+  Sabel::using('Sabel_DB_Connection');
+  Sabel_DB_Connection::initialize();
+
+  Sabel::using('Sabel_Model');
+  return Sabel_Model::load($mdlName);
+}
 
 require_once 'C:\php\Sabel\sabel\Model.php';
 require_once 'C:\php\Sabel\sabel\ValueObject.php';
 require_once 'C:\php\Sabel\sabel\db\Connection.php';
-require_once 'C:\php\Sabel\sabel\db\Transaction.php';
 require_once 'C:\php\Sabel\sabel\db\SimpleCache.php';
 require_once 'C:\php\Sabel\sabel\db\Condition.php';
-require_once 'C:\php\Sabel\sabel\db\model\Property.php';
 require_once 'C:\php\Sabel\sabel\db\Executer.php';
 require_once 'C:\php\Sabel\sabel\db\Model.php';
 require_once 'C:\php\Sabel\sabel\db\model\Relation.php';
@@ -110,10 +126,17 @@ class FirebirdExecute
 
     $model = Sabel_Model::load('Customer');
 
-    try {
-      @$model->execute('CREATE TABLE customer( id integer primary key, name varchar(24))');
-    } catch (Exception $e) {
+    $sqls = array('CREATE TABLE customer( id integer primary key, name varchar(24)) type=InnoDB',
+                  'CREATE TABLE parents( id integer primary key, name varchar(24))',
+                  'CREATE TABLE grand_child( id integer primary key, child_id integer, name varchar(24), age integer)');
+
+    foreach ($sqls as $query) {
+      try { @$model->execute($query); } catch (Exception $e) {}
     }
+
+    $model->execute('DELETE FROM customer');
+    $model->execute('DELETE FROM parents');
+    $model->execute('DELETE FROM grand_child');
 
     $class = new ReflectionClass('Test_DB_Windows_Test');
     foreach ($class->getMethods() as $methodObj) {
@@ -199,7 +222,7 @@ class FirebirdHelper
 
     $sqls[] = "CREATE TABLE schema_test (
                  id integer primary key,
-                 name varchar(128) not null,
+                 name varchar(128) default 'test' not null,
                  bl smallint,
                  dt timestamp,
                  ft_val float default 1,
