@@ -57,7 +57,8 @@ class Sabel_View_PageViewer implements Iterator
     return $this->pager->getTotalPageNumber();
   }
   
-  public function getPage($offset) { return $offset;
+  public function getPage($offset) {
+    return $offset;
   }
   
   public function isCurrent()
@@ -73,6 +74,16 @@ class Sabel_View_PageViewer implements Iterator
   public function isLast()
   {
     return ($this->current === $this->pager->getTotalPageNumber());
+  }
+  
+  public function hasNext()
+  {
+    return (!$this->isLast());
+  }
+  
+  public function hasPrevious()
+  {
+    return (!$this->isFirst());
   }
   
   public function setWindow($size)
