@@ -167,6 +167,7 @@ class Schema_Writer
     $property = array();
 
     array_push($property, '                      ');
+    array_push($property, 'array(');
     if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
       $pArray = Schema_Maker::$tblPrimary[$tName];
       if (sizeof($pArray) === 1) {
