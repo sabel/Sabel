@@ -336,17 +336,23 @@ class Sabel_Map_Candidate implements Iterator
     Sabel::using('Sabel_Map_Selecter_Impl');
     $selecter = new Sabel_Map_Selecter_Impl();
     
+    $constantEstablished = false;
     foreach ($candidate as $element) {
-      if ($element->isConstant()) {
+      if ($constantEstablished) {
         if ($selecter->select($tokens->current(), $element)) {
-          return true;
+          $tokens->next();
         }
-      }
-      
-      if ($selecter->select($tokens->current(), $element)) {
-        $tokens->next();
       } else {
-        return false;
+        if ($element->isConstant()) {
+          $constantEstablished = true;
+          if ($selecter->select($tokens->current(), $element)) {
+            $tokens->next();
+          }
+        } elseif ($selecter->select($tokens->current(), $element)) {
+          $tokens->next();
+        } else {
+          return false;
+        }
       }
     }
     
