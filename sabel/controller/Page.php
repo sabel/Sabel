@@ -294,6 +294,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $model;
   }
   
+  /**
+   * create volatile memory in storage
+   * this volatile data will be gone next end of action.
+   *
+   * @param string $key
+   * @param mixed $value
+   */
   protected function volatile($key, $value)
   {
     $this->storage->write($key, $value);
