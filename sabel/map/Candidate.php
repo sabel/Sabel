@@ -343,7 +343,7 @@ class Sabel_Map_Candidate implements Iterator
           $tokens->next();
         }
       } else {
-        if ($element->isConstant()) {
+        if ($selecter->isConstant($tokens->current(), $element)) {
           $constantEstablished = true;
           if ($selecter->select($tokens->current(), $element)) {
             $tokens->next();

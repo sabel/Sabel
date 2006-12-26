@@ -33,8 +33,6 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
       $result = $candidate->compareWithRequirement($token);
     } elseif ($candidate->isConstant() && $token !== $candidate->getElementName()) {
       return false;
-    } elseif ($candidate->isConstant() && $token === $candidate->getElementName()) {
-      $result = true;
     } else {
       $result =(boolean) $token;
     }
@@ -56,5 +54,10 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
     }
     
     return $result;
+  }
+  
+  public function isConstant($token, $candidate)
+  {
+    return ($candidate->isConstant() && $token === $candidate->getElementName());
   }
 }
