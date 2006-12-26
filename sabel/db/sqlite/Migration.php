@@ -200,6 +200,7 @@ class Sabel_DB_Sqlite_Migration
   protected function inout($tblName, $createSQL, $selectCols)
   {
     $model = $this->model;
+    $model->begin();
 
     $tmpTable = $tblName . '_alter_tmp';
     $query    = "CREATE TEMPORARY TABLE $tmpTable ( $createSQL )";
@@ -215,5 +216,7 @@ class Sabel_DB_Sqlite_Migration
     $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
     $model->execute($query);
     $model->execute("DROP TABLE $tmpTable");
+
+    $model->commit();
   }
 }

@@ -35,7 +35,7 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
                      rel.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\'',
     $tableList    = 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$SYSTEM_FLAG = 0',
     $tableColumns = 'SELECT rf.RDB$FIELD_NAME, f.RDB$FIELD_TYPE, f.RDB$FIELD_SUB_TYPE, rf.RDB$NULL_FLAG,
-                     f.RDB$CHARACTER_LENGTH FROM RDB$FIELDS f, RDB$RELATION_FIELDS rf
+                     f.RDB$CHARACTER_LENGTH, rf.RDB$DEFAULT_SOURCE FROM RDB$FIELDS f, RDB$RELATION_FIELDS rf
                      WHERE f.RDB$FIELD_NAME = rf.RDB$FIELD_SOURCE AND rf.RDB$RELATION_NAME = \'%s\'
                      ORDER BY rf.RDB$FIELD_POSITION ASC';
 
@@ -121,11 +121,13 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
       $type    = $this->types[$typeNum];
     }
 
-    if ($this->isFloat($type)) $type = $this->getFloatType($type);
-    Sabel_DB_Type_Setter::send($co, $type);
-
-    $this->setIncrement($co, $fieldName, $tblName);
-    $this->setPrimaryKey($co, $fieldName);
+    if (!$this->isBool($co, $type, $row)) {
+      if ($this->isFloat($type)) $type = $this->getFloatType($type);
+      Sabel_DB_Type_Setter::send($co, $type);
+      $this->setIncrement($co, $fieldName, $tblName);
+      $this->setPrimaryKey($co, $fieldName);
+      $this->setDefault($co, $row['rdb$default_source']);
+    }
 
     if ($co->type === Sabel_DB_Type_Const::STRING) $this->setLength($co, $row);
     return $co;
@@ -134,6 +136,19 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
   protected function isText($row)
   {
     return ($row['rdb$field_type'] === 261 && $row['rdb$field_sub_type'] === 1);
+  }
+
+  protected function isBool($co, $type, $row)
+  {
+    if ($type === 'char' && $row['rdb$character_length'] === 1) {
+      $default = $this->getDefault($row['rdb$default_source']);
+      if ($default === 0 || $default === 1) {
+        $co->type    = Sabel_DB_Type_Const::BOOL;
+        $co->default = $default;
+        return true;
+      }
+    }
+    return false;
   }
 
   protected function isFloat($type)
@@ -155,6 +170,20 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
   protected function setPrimaryKey($co, $fieldName)
   {
     $co->primary = (in_array($fieldName, $this->primaryKeys));
+  }
+
+  protected function setDefault($co, $default)
+  {
+    $co->default = ($default === null) ? null : $this->getDefault($default);
+  }
+
+  protected function getDefault($default)
+  {
+    $info = ibase_blob_info($default);
+    $blob = ibase_blob_open($default);
+    $val  = substr(ibase_blob_get($blob, $info[0]), 8);
+
+    return (is_numeric($val)) ? (int)$val : $val;
   }
 
   protected function setLength($co, $row)

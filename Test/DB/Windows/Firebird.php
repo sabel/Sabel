@@ -224,6 +224,12 @@ class FirebirdHelper
                  auto_update timestamp,
                  auto_create timestamp)";
 
+    $sqls[] = "CREATE TABLE child (
+                 id integer primary key,
+                 parents_id integer not null,
+                 name varchar(24),
+                 height integer)";
+
     $this->sqls = $sqls;
   }
 }
