@@ -213,7 +213,7 @@ class Sabel_DB_Sqlite_Migration
     $query = "CREATE TABLE $tblName ( $createSQL )";
     $model->execute($query);
 
-    $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
+    $query = "INSERT INTO $tblName SELECT $selectCols FROM $tmpTable";
     $model->execute($query);
     $model->execute("DROP TABLE $tmpTable");
 

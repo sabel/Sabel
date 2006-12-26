@@ -71,7 +71,9 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
 
       $co->name = $name;
 
-      if (strpos($line, 'primary key') !== false && strpbrk($line, '(') !== false) {
+//      if (strpos($line, 'primary key') !== false && strpbrk($line, '(') !== false) {
+      if (($ppos = strpos($line, 'primary key')) !== false &&
+          strpos($line, '(') > $ppos) {
         $constLine = $line . ',' . $lines[$key + 1];
         break;
       }

@@ -57,6 +57,7 @@ class Sabel_DB_Migration
         $this->migration->addColumn($tblName, $arg2, $arg3);
         break;
     }
+    Sabel_DB_SimpleCache::clear();
   }
 
   public function delete($type, $tblName, $arg2 = null)
@@ -74,6 +75,7 @@ class Sabel_DB_Migration
         $this->migration->deleteColumn($tblName, $arg2);
         break;
     }
+    Sabel_DB_SimpleCache::clear();
   }
 
   public function change($type, $tblName, $arg2, $arg3 = null)
@@ -89,6 +91,7 @@ class Sabel_DB_Migration
         $this->migration->changeColumn($tblName, $arg2, $arg3);
         break;
     }
+    Sabel_DB_SimpleCache::clear();
   }
 
   public function rename($type, $tblName, $arg2, $arg3 = null)
@@ -106,5 +109,6 @@ class Sabel_DB_Migration
         $this->migration->renameColumn($tblName, $arg2, $arg3);
         break;
     }
+    Sabel_DB_SimpleCache::clear();
   }
 }
