@@ -322,7 +322,9 @@ class Sabel_Map_Candidate implements Iterator
   public function find($tokens)
   {
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
-      if ($this->matchToTokens($candidate, $tokens)) return $candidate;
+      if ($this->matchToTokens($candidate, $tokens)) {
+        return $candidate;
+      }
     }
     
     throw new Sabel_Map_Candidate_NotFound("check your config/map.php");
@@ -335,6 +337,12 @@ class Sabel_Map_Candidate implements Iterator
     $selecter = new Sabel_Map_Selecter_Impl();
     
     foreach ($candidate as $element) {
+      if ($element->isConstant()) {
+        if ($selecter->select($tokens->current(), $element)) {
+          return true;
+        }
+      }
+      
       if ($selecter->select($tokens->current(), $element)) {
         $tokens->next();
       } else {

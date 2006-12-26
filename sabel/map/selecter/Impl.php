@@ -13,6 +13,10 @@ Sabel::using('Sabel_Map_Selecter');
  */
 class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
 {
+  /**
+   *
+   * @return result
+   */
   public function select($token, $candidate)
   {
     $result = false;
@@ -28,7 +32,9 @@ class Sabel_Map_Selecter_Impl extends Sabel_Map_Selecter
     } elseif ($candidate->hasRequirement()) {
       $result = $candidate->compareWithRequirement($token);
     } elseif ($candidate->isConstant() && $token !== $candidate->getElementName()) {
-      $result = false;
+      return false;
+    } elseif ($candidate->isConstant() && $token === $candidate->getElementName()) {
+      $result = true;
     } else {
       $result =(boolean) $token;
     }
