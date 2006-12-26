@@ -1,7 +1,7 @@
 <?php
 
 define('SCHEMA_DIR', 'lib/schema/');
-// define('SABEL', '/usr/local/lib/php/Sabel/');
+define('SABEL', '/usr/local/lib/php/Sabel/');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
@@ -167,7 +167,7 @@ class Schema_Writer
     $property = array();
 
     array_push($property, '                      ');
-    array_push($property, 'array(');
+    array_push($property, '$property = array(');
     if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
       $pArray = Schema_Maker::$tblPrimary[$tName];
       if (sizeof($pArray) === 1) {

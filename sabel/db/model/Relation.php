@@ -39,8 +39,8 @@ class Sabel_DB_Model_Relation
 
     if (class_exists($sClsName, false)) {
       $sClass = new $sClsName();
-      $props  = $sClass->getProperty();
-      if ($this->isSameConnectName($props['connectName']) === false) return false;
+      $tableName = convert_to_tablename($mdlName);
+      if ($this->isSameConnectName(get_db_tables($tableName)) === false) return false;
     } else {
       return false;
     }
