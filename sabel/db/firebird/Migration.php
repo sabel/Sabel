@@ -12,9 +12,7 @@
  */
 class Sabel_DB_Firebird_Migration
 {
-  protected $search  = array('TYPE::INT(INCREMENT)',
-                             'TYPE::BINT(INCREMENT)',
-                             'TYPE::INT',
+  protected $search  = array('TYPE::INT',
                              'TYPE::SINT',
                              'TYPE::BINT',
                              'TYPE::STRING',
@@ -26,9 +24,7 @@ class Sabel_DB_Firebird_Migration
                              '__TRUE__',
                              '__FALSE__');
 
-  protected $replace = array('integer primary key',
-                             'integer primary key',
-                             'int',
+  protected $replace = array('integer',
                              'smallint',
                              'bigint',
                              'varchar',
@@ -36,7 +32,7 @@ class Sabel_DB_Firebird_Migration
                              'timestamp',
                              'float',
                              'double',
-                             'boolean',
+                             'char(1)',
                              "1",
                              "0");
 
@@ -45,19 +41,28 @@ class Sabel_DB_Firebird_Migration
   public function setModel($tblName)
   {
     $mdlName     = convert_to_modelname($tblName);
-    $this->model = @MODEL($mdlName);
+    $this->model = MODEL($mdlName);
   }
 
   public function addTable($tblName, $cmdQuery)
   {
-    $cmdQuery = preg_replace("/[\n\r\f]/", '', $cmdQuery);
+    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
 
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
-      $line = trim($line);
       list ($colName) = explode(' ', $line);
-      $attr = str_replace($colName, '', $line);
-      $exeQuery[] = $colName . ' ' . $this->incrementFilter($attr);
+      $attr = trim(str_replace($colName, '', $line));
+
+      if (strpos($attr, 'TYPE::BOOL') !== false) {
+        $attr = $this->createBooleanAttr($attr);
+      }
+
+      $line = $colName . ' ' . $this->checkDefaultPosition($attr);
+      if (strpos($line, '(INCREMENT)') !== false) {
+        $this->createGenerator($tblName, $colName);
+        $line = str_replace('(INCREMENT)', '', $line);
+      }
+      $exeQuery[] = $line;
     }
 
     $sch   = $this->search;
@@ -66,55 +71,108 @@ class Sabel_DB_Firebird_Migration
     $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
   }
 
+  protected function checkDefaultPosition($attr)
+  {
+    list ($type) = explode(' ', $attr);
+    $tmpAttr = trim(str_replace($type, '', $attr));
+    if (strpos($tmpAttr, 'DEFAULT') !== false) {
+      if (substr($tmpAttr, 0, 7) !== 'DEFAULT') {
+        $defValue = trim(str_replace('DEFAULT', '', strstr($tmpAttr, 'DEFAULT')));
+        $tmpAttr  = trim(str_replace(array('DEFAULT', $defValue), '', $tmpAttr));
+        $attr = $type . ' DEFAULT ' . $defValue . ' ' . $tmpAttr;
+      }
+    }
+
+    return $attr;
+  }
+
+  protected function createGenerator($tblName, $colName)
+  {
+    $query = "CREATE GENERATOR " . strtoupper($tblName . '_' . $colName . '_GEN');
+    $this->model->execute($query);
+  }
+
   public function deleteTable($tblName)
   {
-    $this->model->execute("DROP TABLE $tblName");
+    $model = $this->model;
+    $key   = $model->getTableSchema()->getIncrementKey();
+
+    if ($key !== null) {
+      $model->execute("DROP GENERATOR {$tblName}_{$key}_GEN");
+    }
+    $model->execute("DROP TABLE $tblName");
   }
 
   public function renameTable($from, $to)
   {
-    $this->model->execute("ALTER TABLE $from RENAME TO $to");
+    $schema = $this->model->getTableSchema();
+    $cols   = $schema->getColumns();
+    $pKey   = $schema->getPrimaryKey();
+    $query  = array();
+
+    foreach ($cols as $col) {
+      $query[] = $this->createColumnAttribute($col);
+    }
+
+    if ($pKey !== null) {
+      $key = (is_array($pKey)) ? implode(',', $pKey) : $pKey;
+      $query[] = "PRIMARY KEY ( $key )";
+    }
+
+    $model = $this->model;
+    $query = "CREATE TABLE $to ( " . implode(',', $query) . " )";
+    $model->execute($query);
+
+    $query = "INSERT INTO $to SELECT * FROM $from";
+    $model->execute($query);
+
+    $model->execute("DROP TABLE $from");
   }
 
   public function addColumn($tblName, $colName, $param)
   {
+    if (strpos($param, 'TYPE::BOOL') !== false) {
+      $param = $this->createBooleanAttr($param);
+    }
+
     $sch  = $this->search;
     $rep  = $this->replace;
-    $attr = str_replace($sch, $rep, $param);
+    $attr = str_replace($sch, $rep, $this->checkDefaultPosition($param));
 
     $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
   }
 
   public function deleteColumn($tblName, $colName)
   {
-    $cols = $this->model->getTableSchema()->getColumns();
-    unset($cols[$colName]);
-
-    $query = array();
-    foreach ($cols as $col) {
-      $query[] = $this->createColumnAttribute($col);
-    }
-
-    $this->inout($tblName, implode(',', $query), implode(',', array_keys($cols)));
+    $this->model->execute("ALTER TABLE $tblName DROP $colName");
   }
 
   public function changeColumn($tblName, $colName, $param)
   {
-    $attr = $this->incrementFilter($param);
+    if (strpos($param, 'TYPE::BOOL') !== false) {
+      $param = $this->createBooleanAttr($param);
+    }
+
     $sch  = $this->search;
     $rep  = $this->replace;
-    $attr = $colName . ' ' .str_replace($sch, $rep, $param);
+    $attr = str_replace($sch, $rep, $this->checkDefaultPosition($param));
 
-    $cols  = $this->model->getTableSchema()->getColumns();
-    $query = array();
+    $schema = $this->model->getTableSchema();
+    $cols   = $schema->getColumns();
+    $pKey   = $schema->getPrimaryKey();
+    $query  = array();
 
     foreach ($cols as $col) {
       if ($col->name === $colName) {
-        $query[] = $attr;
-        continue;
+        $query[] = $colName . ' ' . $attr;
+      } else {
+        $query[] = $this->createColumnAttribute($col);
       }
+    }
 
-      $query[] = $this->createColumnAttribute($col);
+    if ($pKey !== null) {
+      $key = (is_array($pKey)) ? implode(',', $pKey) : $pKey;
+      $query[] = "PRIMARY KEY ( $key )";
     }
 
     $this->inout($tblName, implode(',', $query), '*');
@@ -122,24 +180,7 @@ class Sabel_DB_Firebird_Migration
 
   public function renameColumn($tblName, $from, $to)
   {
-    $cols  = $this->model->getTableSchema()->getColumns();
-    $query = array();
-
-    foreach ($cols as $col) {
-      if ($col->name === $from) $col->name = $to;
-      $query[] = $this->createColumnAttribute($col);
-    }
-
-    $this->inout($tblName, implode(',', $query), '*');
-  }
-
-  protected function incrementFilter($attr)
-  {
-    if (strpos($attr,  'TYPE::INT(INCREMENT)') !== false ||
-        strpos($attr, 'TYPE::BINT(INCREMENT)') !== false) {
-      $attr = "INTEGER PRIMARY KEY";
-    }
-    return $attr;
+    $this->model->execute("ALTER TABLE $tblName ALTER $from TO $to");
   }
 
   protected function createColumnAttribute($col)
@@ -149,22 +190,22 @@ class Sabel_DB_Firebird_Migration
 
     switch ($col->type) {
       case Sabel_DB_Type_Const::INT:
-        if ($col->increment) {
-          $tmp[] = 'integer primary key';
-        } elseif ($col->max > 9E+18) {
+        if ($col->max > 9E+18) {
           $tmp[] = 'bigint';
         } elseif ($col->max < 32768) {
           $tmp[] = 'smallint';
         } else {
-          $tmp[] = 'int';
+          $tmp[] = 'integer';
         }
         break;
       case Sabel_DB_Type_Const::STRING:
         $tmp[] = "varchar({$col->max})";
         break;
+      case Sabel_DB_Type_Const::BOOL:
+        $tmp[] = "char(1)";
+        break;
       default:
-        $types = array(Sabel_DB_Type_Const::BOOL     => 'boolean',
-                       Sabel_DB_Type_Const::TEXT     => 'text',
+        $types = array(Sabel_DB_Type_Const::TEXT     => 'blob sub_type',
                        Sabel_DB_Type_Const::DATETIME => 'datetime',
                        Sabel_DB_Type_Const::FLOAT    => 'float',
                        Sabel_DB_Type_Const::DOUBLE   => 'double');
@@ -173,7 +214,9 @@ class Sabel_DB_Firebird_Migration
         break;
     }
 
-    if (!$col->nullable) $tmp[] = 'not null';
+    if ($col->type !== Sabel_DB_Type_Const::BOOL && !$col->nullable) {
+      $tmp[] = 'not null';
+    }
 
     if ($col->default !== null) {
       switch ($col->type) {
@@ -188,8 +231,7 @@ class Sabel_DB_Firebird_Migration
           $tmp[] = "default '{$col->default}'";
           break;
         case Sabel_DB_Type_Const::BOOL:
-          $val   = ($col->default) ? 'true' : 'false';
-          $tmp[] = "default '{$val}'";
+          $tmp[] = "default {$col->default}";
           break;
       }
     }
@@ -200,14 +242,36 @@ class Sabel_DB_Firebird_Migration
   protected function inout($tblName, $createSQL, $selectCols)
   {
     $model = $this->model;
-    $model->begin();
+
+    // checking sql for create.
+    $query = "CREATE TABLE sabel_firebird_creatable ( $createSQL )";
+    $model->execute($query);
+    $drop  = "DROP TABLE sabel_firebird_creatable";
+
+    // check whether insert is possible.
+    $query = "INSERT INTO sabel_firebird_creatable SELECT $selectCols FROM {$tblName}";
+    try {
+      $model->execute($query);
+    } catch (Exception $e) {
+      $model->execute($drop);
+      throw $e;
+    }
+
+    $model->execute($drop);
 
     $tmpTable = $tblName . '_alter_tmp';
-    $query    = "CREATE TEMPORARY TABLE $tmpTable ( $createSQL )";
+    $query    = "CREATE TABLE $tmpTable ( $createSQL )";
     $model->execute($query);
 
     $query = "INSERT INTO $tmpTable SELECT $selectCols FROM {$tblName}";
-    $model->execute($query);
+
+    try {
+      $model->execute($query);
+    } catch (Exception $e) {
+      $model->execute("DROP TABLE $tmpTable");
+      throw $e;
+    }
+
     $model->execute("DROP TABLE $tblName");
 
     $query = "CREATE TABLE $tblName ( $createSQL )";
@@ -216,7 +280,14 @@ class Sabel_DB_Firebird_Migration
     $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
     $model->execute($query);
     $model->execute("DROP TABLE $tmpTable");
+  }
 
-    $model->commit();
+  protected function createBooleanAttr($attr)
+  {
+    $attr = str_replace('NOT NULL', '', $attr);
+    if (strpos($attr, 'DEFAULT') === false) {
+      $attr .= ' DEFAULT __FALSE__';
+    }
+    return $attr;
   }
 }
