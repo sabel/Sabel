@@ -112,7 +112,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   public function getRequests()
   {
-    return $this->request->requests();
+    return $this->request->getPostRequests();
   }
   
   public function execute($actionName)
