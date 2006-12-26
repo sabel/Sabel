@@ -69,7 +69,7 @@ class SabelAllTests
   {
     $suite = new PHPUnit2_Framework_TestSuite();
     $suite->addTest(Test_Sabel::suite());
-    // $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Form::suite());

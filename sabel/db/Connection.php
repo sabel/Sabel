@@ -132,28 +132,20 @@ class Sabel_DB_Connection
 
   public static function getConnection($conName)
   {
-    return self::getValue($conName, 'conn');
+    if (!isset(self::$connList[$conName]['conn'])) {
+      self::makeDatabaseLink($conName);
+    }
+
+    if (isset(self::$connList[$conName]['conn'])) {
+      return self::$connList[$conName]['conn'];
+    } else {
+      throw new Exception("Error: failed in connect to the database.");
+    }
   }
 
   public static function getDB($conName)
   {
     return str_replace('pdo-', '', self::getDriverName($conName));
-  }
-
-  protected static function createDBLink($conName, $key)
-  {
-    if (!isset(self::$connList[$conName][$key])) self::makeDatabaseLink($conName);
-  }
-
-  protected static function getValue($conName, $key)
-  {
-    self::createDBLink($conName, $key);
-
-    if (isset(self::$connList[$conName][$key])) {
-      return self::$connList[$conName][$key];
-    } else {
-      throw new Exception("Error: value is not set:{$conName} => {$key}");
-    }
   }
 
   public static function getDriverName($conName)
