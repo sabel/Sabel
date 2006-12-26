@@ -47,6 +47,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $action        = '',
     $filters       = array(),
     $rendering     = true,
+    $volatiles     = array(),
     $withLayout    = true,
     $attributes    = array(),
     $enableSession = true,
@@ -116,6 +117,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   public function execute($actionName)
   {
+    if (is_array($this->storage->read("volatiles"))) {
+      $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
+      foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
+        $this->storage->delete($vname);
+      }
+    }
+    
     if (empty($actionName)) {
       throw new Sabel_Exception_InvalidActionName("invalid action name");
     }
@@ -152,6 +160,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     if (is_array($result)) $view->assignByArray($result);
     
     $this->processFilter($actionName, "after");
+    
+    $this->storage->write("volatiles", $this->volatiles);
     
     return $result;
   }
@@ -282,6 +292,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     return $model;
+  }
+  
+  protected function volatile($key, $value)
+  {
+    $this->storage->write($key, $value);
+    $this->volatiles[$key] = $value;
   }
   
   protected function isPublicAction($actionName)
