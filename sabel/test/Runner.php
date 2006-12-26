@@ -1,12 +1,10 @@
 <?php
 
-if (defined('TEST_CASE')){
-  
 if (!defined('PHPUnit2_MAIN_METHOD'))
   define('PHPUnit2_MAIN_METHOD', 'Tester::main');
 
-@require_once('PHPUnit2/TextUI/TestRunner.php');
-@require_once('PHPUnit2/Framework/TestCase.php');
+require_once('PHPUnit2/TextUI/TestRunner.php');
+require_once('PHPUnit2/Framework/TestCase.php');
 
 /**
  * Sabel specific Test_Runner inherit PHPUnit2_TextUI_TestRunner
@@ -44,6 +42,4 @@ class Sabel_Test_Runner extends PHPUnit2_TextUI_TestRunner
       throw new Exception('Could not run test suite:'. $e->getMessage());
     }
   }
-}
-
 }
