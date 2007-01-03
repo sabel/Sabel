@@ -14,16 +14,16 @@ define('__FALSE__', 'false');
 error_reporting(E_ALL|E_STRICT);
 ini_set('memory_limit', '16m');
 
-if (!defined('PHPUnit2_MAIN_METHOD')) {
-    define('PHPUnit2_MAIN_METHOD', 'SabelAllTests::main');
+if (!defined('PHPUnit_MAIN_METHOD')) {
+    define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
 }
 
-require_once('PHPUnit2/Framework/Test.php');
-require_once('PHPUnit2/Framework/Warning.php');
-require_once('PHPUnit2/TextUI/TestRunner.php');
-require_once('PHPUnit2/Framework/TestCase.php');
-require_once('PHPUnit2/Framework/TestSuite.php');
-require_once('PHPUnit2/Framework/IncompleteTestError.php');
+require_once('PHPUnit/Framework/Test.php');
+require_once('PHPUnit/Framework/Warning.php');
+require_once('PHPUnit/TextUI/TestRunner.php');
+require_once('PHPUnit/Framework/TestCase.php');
+require_once('PHPUnit/Framework/TestSuite.php');
+require_once('PHPUnit/Framework/IncompleteTestError.php');
 
 require_once('Sabel.php');
 
@@ -62,14 +62,14 @@ class SabelAllTests
 {
   public static function main()
   {
-    PHPUnit2_TextUI_TestRunner::run(self::suite());
+    PHPUnit_TextUI_TestRunner::run(self::suite());
   }
   
   public static function suite()
   {
-    $suite = new PHPUnit2_Framework_TestSuite();
+    $suite = new PHPUnit_Framework_TestSuite();
     $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    //$suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Form::suite());
@@ -92,6 +92,6 @@ class SabelAllTests
   }
 }
 
-if (PHPUnit2_MAIN_METHOD == 'SabelAllTests::main') {
-  SabelAllTests::main();
-}
+//if (PHPUnit_MAIN_METHOD == 'SabelAllTests::main') {
+//  SabelAllTests::main();
+//}

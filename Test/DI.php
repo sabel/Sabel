@@ -1,20 +1,17 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-require_once('Container.php');
-
 /**
  * test case for Sabel LW DI Container
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_DI extends PHPUnit2_Framework_TestCase
+class Test_DI extends SabelTestCase
 {
   protected $c = null;
   
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_DI");
+    return new PHPUnit_Framework_TestSuite("Test_DI");
   }
   
   public function estTraverse()

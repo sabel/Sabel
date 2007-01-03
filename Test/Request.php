@@ -8,11 +8,11 @@ Sabel::using('Sabel_Request');
  * @package org.sabel.Test
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Request extends PHPUnit2_Framework_TestCase
+class Test_Request extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Request");
+    return new PHPUnit_Framework_TestSuite("Test_Request");
   }
   
   public function setUp()

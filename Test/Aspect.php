@@ -5,7 +5,7 @@
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Aspect extends PHPUnit2_Framework_TestCase
+class Test_Aspect extends SabelTestCase
 {
   public static function suite()
   {

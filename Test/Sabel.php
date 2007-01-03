@@ -7,11 +7,11 @@ require ('generator/generator.php');
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Sabel extends PHPUnit2_Framework_TestCase
+class Test_Sabel extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Sabel");
+    return new PHPUnit_Framework_TestSuite("Test_Sabel");
   }
   
   public function __construct()

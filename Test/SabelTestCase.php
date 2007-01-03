@@ -1,6 +1,6 @@
 <?php
 
-class SabelTestCase extends PHPUnit2_Framework_TestCase
+class SabelTestCase extends PHPUnit_Framework_TestCase
 {
   /**
    * override parents runBare()

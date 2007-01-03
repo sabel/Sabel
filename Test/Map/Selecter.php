@@ -9,11 +9,11 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Test_Map_Selecter extends PHPUnit2_Framework_TestCase
+class Test_Map_Selecter extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Map_Selecter");
+    return new PHPUnit_Framework_TestSuite("Test_Map_Selecter");
   }
   
   public function testToken()

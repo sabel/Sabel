@@ -2,11 +2,11 @@
 
 Sabel::fileUsing('sabel/String.php');
 
-class Test_Namespace extends PHPUnit2_Framework_TestCase
+class Test_Namespace extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Namespace");
+    return new PHPUnit_Framework_TestSuite("Test_Namespace");
   }
   
   public function __construct()

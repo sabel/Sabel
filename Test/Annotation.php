@@ -1,12 +1,10 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-class Test_Annotation extends PHPUnit2_Framework_TestCase
+class Test_Annotation extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Annotation");
+    return new PHPUnit_Framework_TestSuite("Test_Annotation");
   }
   
   public function __construct()

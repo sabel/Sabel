@@ -9,12 +9,12 @@ class Test_Map_Tests
 {
   public static function main()
   {
-    PHPUnit2_TextUI_TestRunner::run(self::suite());
+    PHPUnit_TextUI_TestRunner::run(self::suite());
   }
 
   public static function suite()
   {
-    $suite = new PHPUnit2_Framework_TestSuite();
+    $suite = new PHPUnit_Framework_TestSuite();
     
     $suite->addTest(Test_Map_Usage::suite());
     $suite->addTest(Test_Map_Selecter::suite());

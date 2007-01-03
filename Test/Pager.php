@@ -1,19 +1,17 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
 /**
  * test case for SabelPager
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Pager extends PHPUnit2_Framework_TestCase
+class Test_Pager extends SabelTestCase
 {
   private $pager = null;
   
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Pager");
+    return new PHPUnit_Framework_TestSuite("Test_Pager");
   }
   
   public function setUp()

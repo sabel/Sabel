@@ -4,7 +4,7 @@ class Test_Parameters extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Parameters");
+    return new PHPUnit_Framework_TestSuite("Test_Parameters");
   }
   
   public function testParameters()

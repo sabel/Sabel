@@ -1,12 +1,10 @@
 <?php
 
-require_once('PHPUnit2/Framework/TestCase.php');
-
-class Test_Classes extends PHPUnit2_Framework_TestCase
+class Test_Classes extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Classes");
+    return new PHPUnit_Framework_TestSuite("Test_Classes");
   }
   
   public function testStringPosition()
