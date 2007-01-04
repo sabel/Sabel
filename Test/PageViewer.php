@@ -9,7 +9,7 @@ class Test_PageViewer extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_PageViewer");
+    return self::createSuite("Test_PageViewer");
   }
   
   public function setUp()

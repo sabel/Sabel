@@ -1,6 +1,24 @@
 <?php
 
-class SabelTestCase extends PHPUnit_Framework_TestCase
+if (PHPUNIT_VERSION === 3) {
+  class SabelTestCaseBase extends PHPUnit_Framework_TestCase
+  {
+    protected static function createSuite($name)
+    {
+      return new PHPUnit_Framework_TestSuite($name);
+    }
+  }
+} elseif (PHPUNIT_VERSION === 2) {
+  class SabelTestCaseBase extends PHPUnit2_Framework_TestCase
+  {
+    protected static function createSuite($name)
+    {
+      return new PHPUnit2_Framework_TestSuite($name);
+    }
+  }
+}
+
+class SabelTestCase extends SabelTestCaseBase
 {
   /**
    * override parents runBare()

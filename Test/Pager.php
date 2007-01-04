@@ -11,7 +11,7 @@ class Test_Pager extends SabelTestCase
   
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Pager");
+    return self::createSuite("Test_Pager");
   }
   
   public function setUp()

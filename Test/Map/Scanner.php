@@ -13,7 +13,7 @@ class Test_Map_Scanner extends PHPUnit2_Framework_TestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Map_Scanner");
+    return self::createSuite("Test_Map_Scanner");
   }
   
   public function setUp()

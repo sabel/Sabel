@@ -6,7 +6,7 @@ class Test_Namespace extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Namespace");
+    return self::createSuite("Test_Namespace");
   }
   
   public function __construct()

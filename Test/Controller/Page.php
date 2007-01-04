@@ -15,7 +15,7 @@ class Test_Controller_Page extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Controller_Page");
+    return self::createSuite("Test_Controller_Page");
   }
   
   private $c = null;

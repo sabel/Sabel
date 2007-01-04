@@ -5,11 +5,11 @@
  *
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Test_Form extends PHPUnit_Framework_TestCase
+class Test_Form extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Form");
+    return self::createSuite("Test_Form");
   }
   
   public function testSelect()

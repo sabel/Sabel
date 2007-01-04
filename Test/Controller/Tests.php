@@ -2,16 +2,11 @@
 
 require_once ('Test/Controller/Page.php');
 
-class Test_Controller_Tests
+class Test_Controller_Tests extends SabelTestSuite
 {
-  public static function main()
-  {
-    PHPUnit_TextUI_TestRunner::run(self::suite());
-  }
-
   public static function suite()
   {
-    $suite = new PHPUnit_Framework_TestSuite();
+    $suite = self::createSuite();
     
     $suite->addTest(Test_Controller_Page::suite());
     

@@ -18,12 +18,26 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
 }
 
-require_once('PHPUnit/Framework/Test.php');
-require_once('PHPUnit/Framework/Warning.php');
-require_once('PHPUnit/TextUI/TestRunner.php');
-require_once('PHPUnit/Framework/TestCase.php');
-require_once('PHPUnit/Framework/TestSuite.php');
-require_once('PHPUnit/Framework/IncompleteTestError.php');
+define ("PHPUNIT_VERSION", 2);
+
+switch (PHPUNIT_VERSION) {
+  case 2:
+    require_once("PHPUnit2/Framework/Test.php");
+    require_once("PHPUnit2/Framework/Warning.php");
+    require_once("PHPUnit2/TextUI/TestRunner.php");
+    require_once("PHPUnit2/Framework/TestCase.php");
+    require_once("PHPUnit2/Framework/TestSuite.php");
+    require_once("PHPUnit2/Framework/IncompleteTestError.php");
+    break;
+  case 3:
+    require_once("PHPUnit/Framework/Test.php");
+    require_once("PHPUnit/Framework/Warning.php");
+    require_once("PHPUnit/TextUI/TestRunner.php");
+    require_once("PHPUnit/Framework/TestCase.php");
+    require_once("PHPUnit/Framework/TestSuite.php");
+    require_once("PHPUnit/Framework/IncompleteTestError.php");
+    break;
+}
 
 require_once('Sabel.php');
 
@@ -33,6 +47,7 @@ function __autoload($class)
 }
 
 require_once('Test/SabelTestCase.php');
+require_once('Test/SabelTestSuite.php');
 require_once('Test/Sabel.php');
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
@@ -67,7 +82,12 @@ class SabelAllTests
   
   public static function suite()
   {
-    $suite = new PHPUnit_Framework_TestSuite();
+    if (PHPUNIT_VERSION === 2) {
+      $suite = new PHPUnit2_Framework_TestSuite();
+    } elseif (PHPUNIT_VERISON === 3) {
+      $suite = new PHPUnit_Framework_TestSuite();
+    }
+    
     $suite->addTest(Test_Sabel::suite());
     //$suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());

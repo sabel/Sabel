@@ -12,7 +12,7 @@ class Test_Request extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Request");
+    return self::createSuite("Test_Request");
   }
   
   public function setUp()

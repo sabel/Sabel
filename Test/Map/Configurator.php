@@ -13,7 +13,7 @@ class Test_Map_Configurator extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Map_Configurator");
+    return self::createSuite("Test_Map_Configurator");
   }
   
   public function setUp()

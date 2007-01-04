@@ -11,7 +11,7 @@ class Test_Sabel extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Sabel");
+    return self::createSuite("Test_Sabel");
   }
   
   public function __construct()

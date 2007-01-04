@@ -6,7 +6,7 @@ class Test_Date extends SabelTestCase
 
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Date");
+    return self::createSuite("Test_Date");
   }
 
   public function __construct()
