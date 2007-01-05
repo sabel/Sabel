@@ -18,7 +18,7 @@ if (!defined('PHPUnit_MAIN_METHOD')) {
     define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
 }
 
-define ("PHPUNIT_VERSION", 2);
+define ("PHPUNIT_VERSION", 3);
 
 switch (PHPUNIT_VERSION) {
   case 2:
@@ -84,7 +84,7 @@ class SabelAllTests
   {
     if (PHPUNIT_VERSION === 2) {
       $suite = new PHPUnit2_Framework_TestSuite();
-    } elseif (PHPUNIT_VERISON === 3) {
+    } elseif (PHPUNIT_VERSION === 3) {
       $suite = new PHPUnit_Framework_TestSuite();
     }
     

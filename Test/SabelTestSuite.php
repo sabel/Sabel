@@ -14,7 +14,7 @@ if (PHPUNIT_VERSION === 2) {
     }
   }
 } elseif (PHPUNIT_VERSION === 3) {
-  class SabelTestSuite extends PHPUnit2_Framework_TestCase
+  class SabelTestSuite extends PHPUnit_Framework_TestCase
   {
     public static function main()
     {
