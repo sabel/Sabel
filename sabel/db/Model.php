@@ -21,6 +21,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 {
   const UPDATE_TIME_COLUMN = 'auto_update';
   const CREATE_TIME_COLUMN = 'auto_create';
+  const DATETIME_FORMAT    = 'Y-m-d H:i:s';
 
   private
     $data     = array(),
@@ -665,7 +666,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   protected function recordTime(&$data, $tblName, $colName)
   {
     if (in_array($colName, $this->columns)) {
-      if (!isset($data[$colName])) $data[$colName] = date('Y-m-d H:i:s');
+      if (!isset($data[$colName])) $data[$colName] = date(self::DATETIME_FORMAT);
     }
   }
 
@@ -674,7 +675,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->sColumns  = $this->schema->getColumns();
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
     $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
-    
+
     foreach ($dataForValidate as $name => $value) {
       $lname = $this->getLocalizedName($name);
       if ($this->validateLength($name, $value)) {
@@ -693,7 +694,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $name = $this->getLocalizedName($name);
       $errors->add($name, $this->validateMessages["impossible_to_empty"]);
     }
-    
+
     return ($errors->count() !== 0) ? $errors : false;
   }
 
@@ -801,21 +802,23 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($id === null && !$this->isSelected())
       throw new Exception('Error: give the value of id or select the model beforehand.');
 
-    $id    = (isset($id)) ? $id : $this->{$this->tableProp->primaryKey};
-    $chain = Schema_CascadeChain::get();
-    $key   = $this->getConnectName() . ':' . $this->tableProp->table;
+    $id      = (isset($id)) ? $id : $this->{$this->tableProp->primaryKey};
+    $chain   = Schema_CascadeChain::get();
+    $tblName = $this->tableProp->table;
 
-    if (!isset($chain[$key]))
-      throw new Exception("Sabel_DB_Relation::cascadeDelete() $key is not found. try remove()");
+    if (isset($chain[$tblName])) {
+      $tables = $chain[$tblName];
+    } else {
+      throw new Exception("Error: cascadeDelete() '{$tblName}' does not exist in the cascade chain.");
+    }
 
     $this->begin();
 
     $models = array();
-    $table  = $this->tableProp->table;
     $pKey   = $this->tableProp->primaryKey;
-    foreach ($chain[$key] as $tblName) {
-      $foreignKey = "{$table}_{$pKey}";
-      if ($model = $this->pushStack($tblName, $foreignKey, $id)) $models[] = $model;
+    foreach ($tables as $table) {
+      $foreignKey = "{$tblName}_{$pKey}";
+      if ($model = $this->pushStack($table, $foreignKey, $id)) $models[] = $model;
     }
 
     foreach ($models as $children) $this->makeChainModels($children, $chain);
@@ -828,17 +831,18 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private function makeChainModels($children, &$chain)
   {
-    $conName = $children[0]->getConnectName();
     $tblName = $children[0]->getTableName();
-    $key     = $conName . ':' . $tblName;
-
-    if (!isset($chain[$key])) return null;
+    if (isset($chain[$tblName])) {
+      $tables = $chain[$tblName];
+    } else {
+      return null;
+    }
 
     $models = array();
-    foreach ($chain[$key] as $tblName) {
+    foreach ($tables as $table) {
       foreach ($children as $child) {
         $foreignKey = $child->tableProp->table . '_' . $child->tableProp->primaryKey;
-        if ($model = $this->pushStack($tblName, $foreignKey, $child->id)) $models[] = $model;
+        if ($model = $this->pushStack($table, $foreignKey, $child->id)) $models[] = $model;
       }
     }
 
@@ -847,23 +851,20 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
   }
 
-  private function pushStack($chainValue, $foreignKey, $id)
+  private function pushStack($tblName, $foreignKey, $id)
   {
-    list($cName, $tName) = explode(':', $chainValue);
-    $model  = MODEL(convert_to_modelname($tName));
-    $model->setConnectName($cName);
+    $model  = MODEL(convert_to_modelname($tblName));
     $models = $model->select($foreignKey, $id);
 
-    if ($models) $this->cascadeStack["{$cName}:{$tName}:{$id}"] = $foreignKey;
+    if ($models) $this->cascadeStack["{$tblName}:{$id}"] = $foreignKey;
     return $models;
   }
 
   private function clearCascadeStack($stack)
   {
     foreach ($stack as $param => $foreignKey) {
-      list($cName, $tName, $idValue) = explode(':', $param);
+      list($tName, $idValue) = explode(':', $param);
       $model = MODEL(convert_to_modelname($tName));
-      $model->setConnectName($cName);
 
       $model->begin();
       $model->remove($foreignKey, $idValue);

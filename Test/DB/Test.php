@@ -1438,11 +1438,17 @@ class Schema_CascadeChain
   {
     $chains = array();
 
-    $chains['default:classification'] = array('default:city');
-    $chains['default:city']           = array('default:users');
-    $chains['default:users']          = array('default:blog');
-    $chains['default:country']        = array('default:city');
-    $chains['default2:customer']      = array('default:customer_order');
+    $chains['users']          = array('blog'); //array('blog','favorite_item');
+    $chains['parents']        = array('child');
+    $chains['classification'] = array('city');
+    $chains['country']        = array('city');
+    $chains['city']           = array('company','users');
+    $chains['customer']       = array('customer_order');
+    $chains['student']        = array('student_course');
+    $chains['course']         = array('student_course');
+    $chains['company']        = array('users');
+    $chains['child']          = array('grand_child');
+    $chains['customer_order'] = array('order_line');
 
     return $chains;
   }

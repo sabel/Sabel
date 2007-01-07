@@ -56,6 +56,7 @@ function get_db_tables($tblName)
   $tables['customer']       = 'default2';
   $tables['parents']        = 'default2';
   $tables['grand_child']    = 'default2';
+  $tables['order_line']     = 'default2';
 
   if (!isset($tables[$tblName])) {
     throw new Exception("Error: '{$tblName}' does not exist.");

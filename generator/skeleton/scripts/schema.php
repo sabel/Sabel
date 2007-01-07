@@ -1,7 +1,7 @@
 <?php
 
 define('SCHEMA_DIR', 'lib/schema/');
-define('SABEL', '/usr/local/lib/php/Sabel/');
+//define('SABEL', '/usr/.../.../Sabel/');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
@@ -22,34 +22,21 @@ Sabel::using('Sabel_DB_Type_Setter');
 
 class Cascade_Writer
 {
-  private static $references  = array();
   private static $foreignKeys = array();
 
   public static function addForeignKey($connectName, $table, $key)
   {
-    self::$foreignKeys[$connectName][$table][] = $key;
+    self::$foreignKeys[$table][] = $key;
   }
 
   public static function write()
   {
-    foreach (self::$foreignKeys as $connectName => $tables) {
-      foreach ($tables as $tName => $foreignKeys) {
-        foreach ($foreignKeys as $key) {
-          $parent = str_replace('_id', '', $key);
-          self::$references[$connectName][$parent][] = $tName;
-        }
-      }
-    }
-
     $chain = array();
 
-    foreach (self::$references as $connectName => $table) {
-      foreach ($table as $tName => $children) {
-        $tName = self::selectConnectName($tName);
-        foreach ($children as $child) {
-          $child = self::selectConnectName($child);
-          $chain[$tName][] = $child;
-        }
+    foreach (self::$foreignKeys as $tblName => $colNames) {
+      foreach ($colNames as $colName) {
+        $parent = str_replace('_id', '', $colName);
+        $chain[$parent][] = $tblName;
       }
     }
 
@@ -79,13 +66,6 @@ class Cascade_Writer
     fwrite($fp, "\n");
     fwrite($fp, '    return $chains;' . "\n  }\n}");
     fclose($fp);
-  }
-
-  private static function selectConnectName($tName)
-  {
-    foreach (Schema_Util_Generator::$connectNameList as $connectName) {
-      if (in_array($tName, TableList_Writer::get($connectName))) return $connectName . ':' . $tName;
-    }
   }
 }
 
@@ -152,8 +132,8 @@ class Schema_Writer
 
 
     fwrite($fp, "\n  public function getParents()\n  {\n");
-    if (array_key_exists($tName, Schema_Maker::$tblParents)) {
-      $parents = Schema_Maker::$tblParents[$tName];
+    if (array_key_exists($tName, Schema_Creator::$tblParents)) {
+      $parents = Schema_Creator::$tblParents[$tName];
       fwrite($fp, '    return array(');
       $pArray = array();
       array_push($pArray, "'{$parents[0]}'");
@@ -166,10 +146,9 @@ class Schema_Writer
 
     $property = array();
 
-    array_push($property, '                      ');
     array_push($property, '$property = array(');
-    if (array_key_exists($tName, Schema_Maker::$tblPrimary)) {
-      $pArray = Schema_Maker::$tblPrimary[$tName];
+    if (array_key_exists($tName, Schema_Creator::$tblPrimary)) {
+      $pArray = Schema_Creator::$tblPrimary[$tName];
       if (sizeof($pArray) === 1) {
         array_push($property, "'primaryKey'   => '{$pArray[0]}',\n");
       } else {
@@ -183,8 +162,8 @@ class Schema_Writer
     }
 
     array_push($property, '                      ');
-    if (array_key_exists($tName, Schema_Maker::$tblIncrement)) {
-      $iKey = Schema_Maker::$tblIncrement[$tName];
+    if (array_key_exists($tName, Schema_Creator::$tblIncrement)) {
+      $iKey = Schema_Creator::$tblIncrement[$tName];
       array_push($property, "'incrementKey' => '{$iKey}',\n");
     } else {
       array_push($property, "'incrementKey' => null,\n");
@@ -206,7 +185,7 @@ class Schema_Writer
   }
 }
 
-class Schema_Maker
+class Schema_Creator
 {
   public static $tblParents   = array();
   public static $tblPrimary   = array();
@@ -268,8 +247,6 @@ class Schema_Maker
 
 class Schema_Generator
 {
-  public static $connectNameList = array();
-
   public static function main()
   {
     $input = $_SERVER['argv'];
@@ -306,7 +283,6 @@ class Schema_Generator
     }
 
     foreach ($data as $connectName => $params) {
-      self::$connectNameList[] = $connectName;
       Sabel_DB_Connection::addConnection($connectName, $params);
 
       $sa = ($params['driver'] === 'pdo-sqlite')
@@ -317,7 +293,7 @@ class Schema_Generator
 
       foreach ($schemas as $schema) {
         $tName    = $schema->getTableName();
-        $colArray = Schema_Maker::make($connectName, $schema);
+        $colArray = Schema_Creator::make($connectName, $schema);
         if ($schemaAll || $schemaWrite && in_array($tName, $inputSchemas)) {
           Schema_Writer::write($tName, $colArray, $connectName, $sa, $params['driver']);
         }
@@ -331,9 +307,9 @@ class Schema_Generator
 
 if (count($_SERVER['argv']) === 1) {
   echo "Usage: php schema.php [environment]\n";
-  echo "       -c  make cascade chain\n";
-  echo "       -l  make table list\n";
-  echo "       -s  make schema : table name1, name2... , or all\n";
+  echo "       -c  create cascade chain\n";
+  echo "       -l  create table list\n";
+  echo "       -s  create schema : table_name1, table_name2... , or all\n";
   exit;
 }
 
