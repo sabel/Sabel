@@ -426,10 +426,10 @@ class Test_DB_Test extends SabelTestCase
     $blog4 = $blogs[3];
 
     // use default child constraint in users model.
-    $this->assertEquals($blog1->write_date, '2005-01-01 04:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 03:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog4->write_date, '2005-01-01 01:01:01');
+    $this->assertEquals($blog1->write_date->getDateTime(), '2005-01-01 04:01:01');
+    $this->assertEquals($blog2->write_date->getDateTime(), '2005-01-01 03:01:01');
+    $this->assertEquals($blog3->write_date->getDateTime(), '2005-01-01 02:01:01');
+    $this->assertEquals($blog4->write_date->getDateTime(), '2005-01-01 01:01:01');
 
     $user  = new Users(1);
     $user->cconst('Blog', array('order' => 'write_date'));
@@ -442,10 +442,10 @@ class Test_DB_Test extends SabelTestCase
     $blog4 = $blogs[3];
 
     // child constraint is overrided.
-    $this->assertEquals($blog1->write_date, '2005-01-01 01:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 03:01:01');
-    $this->assertEquals($blog4->write_date, '2005-01-01 04:01:01');
+    $this->assertEquals($blog1->write_date->getDateTime(), '2005-01-01 01:01:01');
+    $this->assertEquals($blog2->write_date->getDateTime(), '2005-01-01 02:01:01');
+    $this->assertEquals($blog3->write_date->getDateTime(), '2005-01-01 03:01:01');
+    $this->assertEquals($blog4->write_date->getDateTime(), '2005-01-01 04:01:01');
 
     $user  = new Users(2);
     $user->cconst('FavoriteItem', array('order' => 'registed asc'));
@@ -459,15 +459,15 @@ class Test_DB_Test extends SabelTestCase
     $blog2 = $blogs[1];
     $blog3 = $blogs[2];
 
-    $this->assertEquals($blog1->write_date, '2005-01-01 07:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 06:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 05:01:01');
+    $this->assertEquals($blog1->write_date->getDateTime(), '2005-01-01 07:01:01');
+    $this->assertEquals($blog2->write_date->getDateTime(), '2005-01-01 06:01:01');
+    $this->assertEquals($blog3->write_date->getDateTime(), '2005-01-01 05:01:01');
 
     $item1 = $items[0];
     $item2 = $items[1];
 
-    $this->assertEquals($item1->registed, '2005-12-02 01:01:01');
-    $this->assertEquals($item2->registed, '2005-12-03 01:01:01');
+    $this->assertEquals($item1->registed->getDateTime(), '2005-12-02 01:01:01');
+    $this->assertEquals($item2->registed->getDateTime(), '2005-12-03 01:01:01');
   }
 
   public function testChildPaginate()
@@ -480,8 +480,8 @@ class Test_DB_Test extends SabelTestCase
     $blog1 = $blogs[0];
     $blog2 = $blogs[1];
 
-    $this->assertEquals($blog1->write_date, '2005-01-01 04:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 03:01:01');
+    $this->assertEquals($blog1->write_date->getDateTime(), '2005-01-01 04:01:01');
+    $this->assertEquals($blog2->write_date->getDateTime(), '2005-01-01 03:01:01');
 
     $user  = new Users(1);
     $user->cconst('Blog', array('order' => 'write_date desc', 'limit' => 2, 'offset' => 2));
@@ -491,8 +491,8 @@ class Test_DB_Test extends SabelTestCase
     $blog1 = $blogs[0];
     $blog2 = $blogs[1];
 
-    $this->assertEquals($blog1->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 01:01:01');
+    $this->assertEquals($blog1->write_date->getDateTime(), '2005-01-01 02:01:01');
+    $this->assertEquals($blog2->write_date->getDateTime(), '2005-01-01 01:01:01');
   }
 
   public function testTest()

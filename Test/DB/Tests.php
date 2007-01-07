@@ -9,12 +9,12 @@ class Test_DB_Tests
 {
   public static function main()
   {
-    PHPUnit2_TextUI_TestRunner::run(self::suite());
+    PHPUnit_TextUI_TestRunner::run(self::suite());
   }
 
   public static function suite()
   {
-    $suite = new PHPUnit2_Framework_TestSuite();
+    $suite = new PHPUnit_Framework_TestSuite();
 
     if (extension_loaded('mysql') && extension_loaded('pdo_mysql')) {
       $suite->addTest(Test_DB_Mysql::suite());

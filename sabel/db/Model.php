@@ -23,24 +23,21 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   const CREATE_TIME_COLUMN = 'auto_create';
 
   private
-    $columns = array();
-
-  private
     $data     = array(),
+    $columns  = array(),
     $newData  = array(),
     $selected = false;
 
   private
-    $parentModels     = array(),
-    $acquiredParents  = array(),
-    $cascadeStack     = array();
+    $parentModels    = array(),
+    $acquiredParents = array(),
+    $cascadeStack    = array();
 
   protected
-    $table       = '',
-    $connectName = '',
-    $structure   = 'normal',
-    $withParent  = false,
-    $myChildren  = array();
+    $table      = '',
+    $structure  = 'normal',
+    $withParent = false,
+    $myChildren = array();
 
   protected
     $ignoreEmptyParent = false;
@@ -88,14 +85,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if (!empty($param1)) $this->defaultSelectOne($param1, $param2);
   }
 
-  public function initialize($mdlName = null)
+  protected function initialize($mdlName = null)
   {
     $mdlName = ($mdlName === null)  ? get_class($this) : $mdlName;
-    $this->initSchema($mdlName);
-  }
-
-  protected function initSchema($mdlName)
-  {
     $tblName = ($this->table === '') ? convert_to_tablename($mdlName) : $this->table;
     $cache   = Sabel_DB_SimpleCache::get('schema_' . $tblName);
 
@@ -129,13 +121,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->tableProp = new Sabel_ValueObject($properties);
   }
 
-  public function __clone()
-  {
-    if ($this->errors !== null) {
-      $this->errors = clone $this->errors;
-    }
-  }
-
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
@@ -148,7 +133,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function setProperties($row)
   {
     if (!is_array($row)) {
-      $errorMsg = 'Sabel_DB_Property::setProperties(). argument should be an array.';
+      $errorMsg = 'Error:setProperties() argument should be an array.';
       throw new Exception($errorMsg);
     }
     foreach ($row as $key => $val) $this->data[$key] = $val;
@@ -195,9 +180,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       case SabeL_DB_Type_Const::BOOL:
         if (is_int($data)) {
           return ($data === 1);
-        } elseif(is_string($data)) {
-          return ($data === '1' || $data === 'true');
+        } elseif (is_string($data)) {
+          return in_array($data, array('1', 't', 'true'));
+        } elseif (is_bool($data)) {
+          return $data;
         }
+      case Sabel_DB_Type_Const::DATETIME:
+        return Sabel::load('Sabel_Date', $data);
       default:
         return $data;
     }
@@ -289,7 +278,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function hasError()
   {
-    return $this->errors->hasError();
+    return (is_object($this->errors)) ? $this->errors->hasError() : false;
   }
 
   public function getErrors()
@@ -914,8 +903,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function getSchemaFromCls($clsName, $tblName)
   {
-    Sabel::using('Sabel_DB_Schema_Table');
-
     $cols = array();
     $sCls = new $clsName();
     foreach ($sCls->get() as $colName => $colInfo) {
@@ -923,6 +910,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $cols[$colName]  = new Sabel_ValueObject($colInfo);
     }
 
+    // @todo
+    //$tblSchema  = Sabel::load('Sabel_DB_Schema_Table', $tblName, $cols);
+
+    Sabel::using('Sabel_DB_Schema_Table');
     $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
     $properties = $sCls->getProperty();
     $properties['table'] = $tblName;

@@ -17,15 +17,15 @@ class Test_DB_Mysql extends Test_DB_Test
                                   'database' => 'edo2');
 
   public static function main() {
-    require_once "PHPUnit2/TextUI/TestRunner.php";
+    require_once "PHPUnit/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit2_Framework_TestSuite("Test_DB_Mysql");
-    $result = PHPUnit2_TextUI_TestRunner::run($suite);
+    $suite  = new PHPUnit_Framework_TestSuite("Test_DB_Mysql");
+    $result = PHPUnit_TextUI_TestRunner::run($suite);
   }
 
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_DB_Mysql");
+    return new PHPUnit_Framework_TestSuite("Test_DB_Mysql");
   }
 
   public function __construct()

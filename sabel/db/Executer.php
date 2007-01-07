@@ -304,9 +304,9 @@ class Sabel_DB_Executer
   public function delete($arg1 = null, $arg2 = null, $arg3 = null)
   {
     if (empty($this->conditions) && $arg1 === null) {
-      $msg  = 'Error:delete() all delete? must be set condition';
-      $smpl = 'DELETE FROM {table_name}';
-      throw new Exception($msg . " or execute executeQuery('{$smpl}').");
+      $msg  = "Error:delete() all delete? must be set condition.";
+      $smpl = "DELETE FROM 'TABLE_NAME'";
+      throw new Exception($msg . " or execute executeQuery({$smpl}).");
     }
 
     if ($arg1 !== null) $this->setCondition($arg1, $arg2, $arg3);
@@ -416,11 +416,9 @@ class Sabel_DB_Executer
 
   protected function createSchemaAccessor()
   {
-    Sabel::using('Sabel_DB_Schema_Accessor');
-
     $connectName = $this->getConnectName();
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
-    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
+    return Sabel::load('Sabel_DB_Schema_Accessor', $connectName, $schemaName);
   }
 
   public function begin()

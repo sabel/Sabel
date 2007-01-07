@@ -9,15 +9,15 @@ class Test_DB_SQLite extends Test_DB_Test
                                   'database' => 'Test/data/log2.sq3');
 
   public static function main() {
-    require_once "PHPUnit2/TextUI/TestRunner.php";
+    require_once "PHPUnit/TextUI/TestRunner.php";
 
-    $suite  = new PHPUnit2_Framework_TestSuite("Test_DB_SQLite");
-    $result = PHPUnit2_TextUI_TestRunner::run($suite);
+    $suite  = new PHPUnit_Framework_TestSuite("Test_DB_SQLite");
+    $result = PHPUnit_TextUI_TestRunner::run($suite);
   }
 
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_DB_SQLite");
+    return new PHPUnit_Framework_TestSuite("Test_DB_SQLite");
   }
 
   public function __construct()
