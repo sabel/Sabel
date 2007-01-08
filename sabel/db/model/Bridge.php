@@ -16,16 +16,14 @@ Sabel::using('Sabel_DB_Model');
 abstract class Sabel_DB_Model_Bridge extends Sabel_DB_Model
 {
   protected $structure   = 'bridge';
-  protected $bridgeTable = '';
+  protected $bridgeModel = '';
 
   public function getChild($child, $table = null)
   {
-    $this->enableParent();
+    if ($table === null && $this->bridgeModel === '')
+      throw new Exception('Error: specify a name of a bridge model.');
 
-    if ($table === null && $this->bridgeTable === '')
-      throw new Exception('need bridge table name.');
-
-    $table = (is_object($table) || $table === null) ? $this->bridgeTable : $table;
+    $table = (is_object($table) || $table === null) ? $this->bridgeModel : $table;
     parent::getChild($table);
 
     if ($bridges = $this->$table) {

@@ -24,7 +24,7 @@ class Cascade_Writer
 {
   private static $foreignKeys = array();
 
-  public static function addForeignKey($connectName, $table, $key)
+  public static function addForeignKey($table, $key)
   {
     self::$foreignKeys[$table][] = $key;
   }
@@ -112,7 +112,7 @@ class TableList_Writer
 
 class Schema_Writer
 {
-  public static function write($tName, $colArray, $connectName, $sa, $drvName)
+  public static function write($tName, $colArray, $sa, $drvName)
   {
     $className = 'Schema_' . join('', array_map('ucfirst', explode('_', $tName)));
 
@@ -130,22 +130,7 @@ class Schema_Writer
 
     fwrite($fp, "\n    return " . '$cols;' . "\n  }\n");
 
-
-    fwrite($fp, "\n  public function getParents()\n  {\n");
-    if (array_key_exists($tName, Schema_Creator::$tblParents)) {
-      $parents = Schema_Creator::$tblParents[$tName];
-      fwrite($fp, '    return array(');
-      $pArray = array();
-      array_push($pArray, "'{$parents[0]}'");
-      for ($i = 1; $i < sizeof($parents); $i++) array_push($pArray, ", '{$parents[$i]}'");
-      fwrite($fp, join('', $pArray));
-      fwrite($fp, ");\n  }\n");
-    } else {
-      fwrite($fp, "    return null;\n  }\n");
-    }
-
     $property = array();
-
     array_push($property, '$property = array(');
     if (array_key_exists($tName, Schema_Creator::$tblPrimary)) {
       $pArray = Schema_Creator::$tblPrimary[$tName];
@@ -187,11 +172,10 @@ class Schema_Writer
 
 class Schema_Creator
 {
-  public static $tblParents   = array();
   public static $tblPrimary   = array();
   public static $tblIncrement = array();
 
-  public static function make($connectName, $schema)
+  public static function make($schema)
   {
     $parsed  = array();
     $tName   = $schema->getTableName();
@@ -199,8 +183,7 @@ class Schema_Creator
 
     foreach ($columns as $column) {
       if (strpos($column->name, '_id') !== false) {
-        self::$tblParents[$tName][] = str_replace('_id', '', $column->name);
-        Cascade_Writer::addForeignKey($connectName, $tName, $column->name);
+        Cascade_Writer::addForeignKey($tName, $column->name);
       }
 
       $info = array();
@@ -289,13 +272,11 @@ class Schema_Generator
           ? new Sabel_DB_Schema_Accessor($connectName)
           : new Sabel_DB_Schema_Accessor($connectName, $params['schema']);
 
-      $schemas = $sa->getTables();
-
-      foreach ($schemas as $schema) {
+      foreach ($sa->getTables() as $schema) {
         $tName    = $schema->getTableName();
-        $colArray = Schema_Creator::make($connectName, $schema);
+        $colArray = Schema_Creator::make($schema);
         if ($schemaAll || $schemaWrite && in_array($tName, $inputSchemas)) {
-          Schema_Writer::write($tName, $colArray, $connectName, $sa, $params['driver']);
+          Schema_Writer::write($tName, $colArray, $sa, $params['driver']);
         }
         TableList_Writer::add($connectName, $tName);
       }

@@ -74,7 +74,7 @@ class Test_DB_Test extends SabelTestCase
     $country->multipleInsert($data);
 
     $model = new Users();
-    $model->setConstraint('order', 'id');
+    $model->setConstraint('order', 'users.id');
     $users = $model->select();
 
     $user1 = $users[0];
@@ -529,7 +529,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($order3->amount, 8000);
 
     $model = Sabel_Model::load('CustomerOrder');
-    $model->enableParent();
     $model->setConstraint('order', 'buy_date desc');
     $orders = $model->select();
     $this->assertEquals(count($orders), 8);
@@ -812,6 +811,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($cities[1]->name, 'rondon');
 
     $users = new Users();
+    $users->sconst('order', 'users.id');
     $users = $users->select();
 
     $this->assertEquals(count($users), 2);
@@ -1294,23 +1294,32 @@ class Test_DB_Test extends SabelTestCase
 
 class Users extends Sabel_DB_Model
 {
-  protected $withParent = true;
   protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
+  protected $parents = array('City');
+}
+
+class City extends Sabel_DB_Model
+{
+  protected $parents = array('Country');
 }
 
 class Country extends Sabel_DB_Model
 {
-  protected $myChildren = array('City');
+  protected $children = array('City');
 }
 
-class Student extends Sabel_DB_Model_Bridge
+class StudentCourseBridge extends Sabel_DB_Model_Bridge
 {
-  protected $bridgeTable = 'StudentCourse';
+  protected $bridgeModel = 'StudentCourse';
+  protected $parents = array('Student', 'Course');
+}
+
+class Student extends StudentCourseBridge
+{
 }
 
 class Course extends Sabel_DB_Model_Bridge
 {
-  protected $bridgeTable = 'StudentCourse';
 }
 
 class Parents extends Sabel_DB_Model
@@ -1321,13 +1330,8 @@ class Parents extends Sabel_DB_Model
 
 class Child extends Sabel_DB_Model
 {
-  protected $myChildren = array('GrandChild');
+  protected $children = array('GrandChild');
   protected $childConstraints = array('GrandChild' => array('order' => 'age'));
-}
-
-class GrandChild extends Sabel_DB_Model
-{
-  protected $connectName = 'default2';
 }
 
 class Schema_TestCondition
@@ -1356,8 +1360,7 @@ class Schema_TestCondition
 
   public function getProperty()
   {
-    $property = array('connectName'  => 'default',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => 'id',
                       'tableEngine'  => 'MyISAM');
 
@@ -1387,8 +1390,7 @@ class Schema_Customer
 
   public function getProperty()
   {
-    $property = array('connectName'  => 'default2',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => null,
                       'tableEngine'  => 'InnoDB');
 
@@ -1423,8 +1425,7 @@ class Schema_CustomerOrder
 
   public function getProperty()
   {
-    $property = array('connectName'  => 'default',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => 'id',
                       'tableEngine'  => 'InnoDB');
 

@@ -13,66 +13,46 @@
 class Sabel_DB_Model_Relation
 {
   private
-    $isJoin = false;
-
-  private
     $joinTablePairs  = array(),
     $joinColList     = array(),
     $joinConditions  = array(),
     $refStructure    = array(),
     $joinColCache    = array(),
-    $joinConNames    = array(),
-    $acquiredParents = array();
+    $joinModels      = array();
 
-  private
-    $objects = array();
-
-  public function initJoin($mdlName)
+  public function setColumns($tblName, $columns)
   {
-    return $this->isJoin = $this->isEnableJoin($mdlName);
+    $this->joinColList[$tblName] = $columns;
   }
 
-  protected function isEnableJoin($mdlName)
+  public function setCondition($tblName, $condition)
   {
-    $sClsName = 'Schema_' . $mdlName;
-    Sabel::using($sClsName);
-
-    if (class_exists($sClsName, false)) {
-      $sClass = new $sClsName();
-      $tableName = convert_to_tablename($mdlName);
-      if ($this->isSameConnectName(get_db_tables($tableName)) === false) return false;
-    } else {
-      return false;
-    }
-
-    $tblName = convert_to_tablename($mdlName);
-    $this->joinColList[$tblName] = array_keys($sClass->get());
-    if ($parents = $sClass->getParents()) {
-      foreach ($parents as $parent) {
-        $pm = $parent;
-        if (strpos($pm, ':') !== false) list($gbg, $pm) = explode(':', $pm);
-        if (strpos($pm, '.') !== false) list($pm) = explode('.', $pm);
-        if (isset($this->acquiredParents[$pm])) continue;
-
-        $this->acquiredParents[$pm] = true;
-        if (!$this->isEnableJoin($pm)) return false;
-      }
-    }
-    return true;
+    $this->joinConditions[$tblName] = $condition;
   }
 
-  protected function isSameConnectName($conName)
+  public function setParent($ctblName, $ptblName)
   {
-    if (($size = sizeof($this->joinConNames)) > 0) {
-      if ($this->joinConNames[$size - 1] !== $conName) return false;
+    if (!is_array($ptblName)) $ptblName = array($ptblName);
+
+    foreach ($ptblName as $parent) {
+      $this->refStructure[$ctblName][] = $parent;
     }
-    $this->joinConNames[] = $conName;
-    return true;
   }
 
-  public function createRelationPair($child, $pair)
+  public function setTablePair($ctblName, $ptblName)
+  {
+    $this->joinTablePairs[] = array($ctblName, $ptblName);
+  }
+
+  public function setTablePairs($pairs)
+  {
+    $this->joinTablePairs = $pairs;
+  }
+
+  public function toRelationPair($mdlName, $pair)
   {
     if (strpos($pair, ':') === false) {
+      $child  = $mdlName;
       $parent = $pair;
     } else {
       list($child, $parent) = explode(':', $pair);
@@ -81,15 +61,7 @@ class Sabel_DB_Model_Relation
     $child  = $this->createChildKey($child, $parent);
     $parent = $this->createParentKey($parent);
 
-    list($cTable) = explode('.', $child);
-    list($pTable) = explode('.', $parent);
-
-    $this->joinTablePairs[] = array($cTable, $pTable);
-    $this->refStructure[$cTable][] = $pTable;
-
-    if (!isset($this->joinConditions[$pTable])) {
-      $this->joinConditions[$pTable] = $child . ' = ' . $parent;
-    }
+    return array($child, $parent);
   }
 
   public function createChildKey($child, $parent)
@@ -126,11 +98,22 @@ class Sabel_DB_Model_Relation
     if (!$model instanceof Sabel_DB_Model)
       throw new Exception('Error:join() first argument must be an instance of Sabel_DB_Model.');
 
-    $modelClass = get_class($model);
-    foreach ($modelPairs as $pair)
-      $this->createRelationPair($modelClass, $pair);
+    $mdlName = get_class($model);
+    foreach ($modelPairs as $pair) {
+      list ($child, $parent) = $this->toRelationPair($mdlName, $pair);
 
-    $colList = array();
+      list ($cTable) = explode('.', $child);
+      list ($pTable) = explode('.', $parent);
+
+      $this->joinTablePairs[] = array($cTable, $pTable);
+      $this->refStructure[$cTable][] = $pTable;
+
+      if (!isset($this->joinConditions[$pTable])) {
+        $this->joinConditions[$pTable] = "$child = $parent";
+      }
+    }
+
+    $colList =& $this->joinColList;
     $tblName = $model->getTableName();
     $colList[$tblName] = $model->getColumnNames();
 
@@ -145,9 +128,6 @@ class Sabel_DB_Model_Relation
       }
     }
 
-    $this->isJoin      = true;
-    $this->joinColList = $colList;
-
     return $this->execJoin($model, $joinType, $joinTables);
   }
 
@@ -156,13 +136,9 @@ class Sabel_DB_Model_Relation
     if (!$model instanceof Sabel_DB_Model)
       throw new Exception('Error:execJoin() first argument must be an instance of Sabel_DB_Model.');
 
-    if (!$this->isJoin)
-      throw new Exception('Error: join flag is not active. confirm it by initJoin() ?');
-
-    $sql        = array('SELECT ');
-    $tablePairs = $this->joinTablePairs;
-    $colList    = $this->joinColList;
-    $myTable    = $model->getTableName();
+    $sql     = array('SELECT ');
+    $colList = $this->joinColList;
+    $myTable = $model->getTableName();
 
     foreach ($colList[$myTable] as $column) $sql[] = "{$myTable}.{$column}, ";
 
@@ -193,7 +169,7 @@ class Sabel_DB_Model_Relation
     $rows    = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
-      $models = $this->makeEachModels($row, $joinTables);
+      $models = $this->createEachModels($row, $joinTables);
 
       $ref = $this->refStructure;
       foreach ($joinTables as $tblName) {
@@ -216,7 +192,7 @@ class Sabel_DB_Model_Relation
     return $results;
   }
 
-  protected function makeEachModels($row, $joinTables)
+  protected function createEachModels($row, $joinTables)
   {
     $models   = array();
     $acquire  = array();
@@ -232,6 +208,7 @@ class Sabel_DB_Model_Relation
         $acquire[$tblName][$column] = $row[$preCol];
         unset($row[$preCol]);
       }
+
       $model->transrate($acquire[$tblName]);
       $models[$tblName] = $model;
     }
@@ -240,12 +217,12 @@ class Sabel_DB_Model_Relation
 
   protected function createObjects($tblNames)
   {
-    $objects =& $this->objects;
-    if ($objects) return $objects;
+    $models =& $this->joinModels;
+    if ($models) return $models;
 
     foreach ($tblNames as $tblName) {
-      $objects[$tblName] = MODEL(convert_to_modelname($tblName));
+      $models[$tblName] = MODEL(convert_to_modelname($tblName));
     }
-    return $objects;
+    return $models;
   }
 }

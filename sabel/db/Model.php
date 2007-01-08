@@ -30,15 +30,22 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $selected = false;
 
   private
+    $relation = null;
+
+  private
     $parentModels    = array(),
     $acquiredParents = array(),
     $cascadeStack    = array();
 
   protected
-    $table      = '',
-    $structure  = 'normal',
-    $withParent = false,
-    $myChildren = array();
+    $table          = '',
+    $structure      = 'normal',
+    $parents        = array(),
+    $children       = array(),
+    $joinConNames   = array(),
+    $joinPairBuffer = array(),
+    $joinCondBuffer = array();
+
 
   protected
     $ignoreEmptyParent = false;
@@ -222,9 +229,14 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     return $this->structure;
   }
 
+  public function getMyParents()
+  {
+    return $this->parents;
+  }
+
   public function getMyChildren()
   {
-    return $this->myChildren;
+    return $this->children;
   }
 
   public function isSelected()
@@ -246,11 +258,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     $this->childConditions  = array();
     $this->childConstraints = array();
-  }
-
-  public function enableParent()
-  {
-    $this->withParent = true;
   }
 
   public function validateOnInsert($bool)
@@ -338,7 +345,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $model->getStatement()->setBasicSQL("SELECT $p FROM " . $model->tableProp->table);
 
     if ($row = $model->exec()->fetch()) {
-      $model->transrate(($this->withParent) ? $this->addParent($row) : $row);
+      if (!empty($this->parents)) {
+        $row = $this->addParent($row, $model);
+      }
+      $model->transrate($row);
       $model->getDefaultChild($model);
     } else {
       $model->selectConditions = $model->conditions;
@@ -362,10 +372,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->setCondition($param1, $param2, $param3);
     $tblName = $this->tableProp->table;
 
-    if ($this->withParent) {
-      $relClass = Sabel::load('Sabel_DB_Model_Relation');
-      $mdlName  = convert_to_modelname($tblName);
-      if ($relClass->initJoin($mdlName)) return $relClass->execJoin($this, 'INNER');
+    if ($this->parents) {
+      $this->relation = Sabel::load('Sabel_DB_Model_Relation');
+      $this->joinConNames[] = $this->tableProp->connectName;
+      $this->relation->setColumns($tblName, $this->columns);
+
+      if ($this->parents) {
+        if ($this->addRelationalDataToBuffer(get_class($this), $this->parents)) {
+          return $this->automaticJoin();
+        }
+      }
     }
 
     $p = $this->getProjection();
@@ -384,11 +400,136 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
       if ($ccond) $model->childConstraints = $ccond;
 
-      $model->transrate(($this->withParent) ? $this->addParent($row) : $row);
+      if (!empty($this->parents)) {
+        $row = $this->addParent($row, $this);
+      }
+
+      $model->transrate($row);
       $this->getDefaultChild($model);
       $models[] = $model;
     }
     return $models;
+  }
+
+  protected function isSameConnectionNames($tblName)
+  {
+    $conName = get_db_tables($tblName);
+    $size    = count($this->joinConNames);
+    if ($this->joinConNames[$size - 1] !== $conName) return false;
+
+    $model   = MODEL(convert_to_modelname($tblName));
+    $tblName = $model->tableProp->table;
+
+    if ($model->parents) {
+      $result = $this->addRelationalDataToBuffer(get_class($model), $model->parents);
+      if (!$result) return false;
+    }
+
+    $this->joinConNames[] = $conName;
+    $this->relation->setColumns($tblName, $model->columns);
+    return true;
+  }
+
+  private function addRelationalDataToBuffer($mdlName, $parents)
+  {
+    $pairBuf = array();
+    $condBuf = array();
+    $tblName = convert_to_tablename($mdlName);
+
+    foreach ($parents as $parent) {
+      list ($self, $parent)   = $this->relation->toRelationPair($mdlName, $parent);
+      list ($ptblName, $pKey) = explode('.', $parent);
+      if ($this->isSameConnectionNames($ptblName)) {
+        $condBuf[] = array($ptblName, "$self = $parent");
+        $pairBuf[] = array($tblName, $ptblName);
+      } else {
+        return false;
+      }
+    }
+
+    if ($pairBuf) $this->joinPairBuffer[] = $pairBuf;
+    if ($condBuf) $this->joinCondBuffer[] = $condBuf;
+    return true;
+  }
+
+
+  protected function automaticJoin()
+  {
+    foreach (array_reverse($this->joinPairBuffer) as $pair) {
+      foreach ($pair as $p) {
+        $this->relation->setParent($p[0], $p[1]);
+        $this->relation->setTablePair($p[0], $p[1]);
+      }
+    }
+
+    foreach (array_reverse($this->joinCondBuffer) as $cond) {
+      foreach ($cond as $c) $this->relation->setCondition($c[0], $c[1]);
+    }
+
+    return $this->relation->execJoin($this);
+  }
+
+  protected function addParent($row, $model)
+  {
+    $this->acquiredParents = array($this->tableProp->table);
+    if ($this->relation === null) $this->relation = Sabel::load('Sabel_DB_Model_Relation');
+
+    foreach ($model->parents as $parent) {
+      list ($self, $parent)    = $this->relation->toRelationPair(get_class($model), $parent);
+      list ($ctblName, $key)   = explode('.', $self);
+      list ($ptblName, $idCol) = explode('.', $parent);
+      if (isset($row[$key])) {
+        $row[$ptblName] = $this->createParentModel($ptblName, $idCol, $row[$key]);
+      }
+    }
+
+    return $row;
+  }
+
+  private function createParentModel($tblName, $idCol, $id)
+  {
+    if ($this->structure !== 'tree' && $this->isAcquired($tblName)) return false;
+
+    if (isset($this->parentModels[$tblName])) {
+      $model = clone $this->parentModels[$tblName];
+    } else {
+      $model = MODEL(convert_to_modelname($tblName));
+      $this->parentModels[$tblName] = $model;
+    }
+
+    $cacheName = $tblName . $id;
+    if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
+      $model->setCondition($idCol, $id);
+      $p = $model->getProjection();
+      $model->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
+      $resultSet = $model->exec();
+
+      if (!($row = $resultSet->fetch()) && !$this->ignoreEmptyParent) {
+        $msg = "Error: relational error. parent '{$tblName}' does not exist. "
+             . "Prease set ignoreEmpryParent = true, if you want to ignore it.";
+
+        throw new Exception($msg);
+      }
+
+      Sabel_DB_SimpleCache::add($cacheName, $row);
+    }
+
+    if (!empty($model->parents)) {
+      $row = $this->addParent($row, $model);
+    }
+
+    $model->transrate($row);
+    return $model;
+  }
+
+  private function isAcquired($tblName)
+  {
+    if (in_array($tblName, $this->acquiredParents)) {
+      return true;
+    } else {
+      $this->acquiredParents[] = $tblName;
+      return false;
+    }
   }
 
   /**
@@ -406,70 +547,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
     $relClass = Sabel::load('Sabel_DB_Model_Relation');
     return $relClass->join($this, $modelPairs, $joinType, $colList);
-  }
-
-  protected function addParent($row)
-  {
-    $this->acquiredParents = array($this->tableProp->table);
-    return $this->addParentModels($row, $this->tableProp->primaryKey);
-  }
-
-  protected function addParentModels($row, $pKey)
-  {
-    foreach ($row as $key => $val) {
-      if (strpos($key, "_{$pKey}") !== false) {
-        $tblName = str_replace("_{$pKey}", '', $key);
-        $result  = $this->createParentModels($tblName, $val);
-        if ($result) {
-          $mdlName = convert_to_modelname($tblName);
-          $row[$mdlName] = $result;
-        }
-      }
-    }
-    return $row;
-  }
-
-  private function createParentModels($tblName, $id)
-  {
-    $tblName = strtolower($tblName);
-    if ($this->structure !== 'tree' && $this->isAcquired($tblName)) return false;
-
-    if (isset($this->parentModels[$tblName])) {
-      $model = clone $this->parentModels[$tblName];
-    } else {
-      $model = MODEL(convert_to_modelname($tblName));
-      $this->parentModels[$tblName] = $model;
-    }
-
-    if ($id === null) return $model;
-
-    $cacheName = $tblName . $id;
-    if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
-      $model->setCondition($model->tableProp->primaryKey, $id);
-      $p = $model->getProjection();
-      $model->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
-      $resultSet = $model->exec();
-
-      if (!($row = $resultSet->fetch()) && !$this->ignoreEmptyParent) {
-        $msg = 'Error: relational error. parent "' . $tblName . '" does not exist. '
-             . 'if you mean it try ignoreEmptyParent.';
-
-        throw new Exception($msg);
-      }
-
-      Sabel_DB_SimpleCache::add($cacheName, $row);
-    }
-
-    $row = $this->addParentModels($row, $model->tableProp->primaryKey);
-    $model->transrate($row);
-    return $model;
-  }
-
-  private function isAcquired($tblName)
-  {
-    if (in_array($tblName, $this->acquiredParents)) return true;
-    $this->acquiredParents[] = $tblName;
-    return false;
   }
 
   /**
@@ -501,15 +578,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       return $model->$child = false;
     }
 
-    $withParent = ($this->withParent || $cModel->withParent);
-
     $children = array();
     $childObj = MODEL($child);
     $rows     = $resultSet->fetchAll();
 
     foreach ($rows as $row) {
       $childObj = clone $childObj;
-      $childObj->transrate(($withParent) ? $this->addParent($row) : $row);
+      if (!empty($childObj->parents)) {
+        $row = $this->addParent($row, $childObj);
+      }
+      $childObj->transrate($row);
       $this->getDefaultChild($childObj);
       $children[] = $childObj;
     }
