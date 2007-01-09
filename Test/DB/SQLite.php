@@ -17,7 +17,7 @@ class Test_DB_SQLite extends Test_DB_Test
 
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_DB_SQLite");
+    return self::createSuite("Test_DB_SQLite");
   }
 
   public function __construct()

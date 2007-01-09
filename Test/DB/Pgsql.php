@@ -26,7 +26,7 @@ class Test_DB_Pgsql extends Test_DB_Test
 
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_DB_Pgsql");
+    return self::createSuite("Test_DB_Pgsql");
   }
 
   public function __construct()

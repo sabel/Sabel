@@ -1449,7 +1449,6 @@ class Schema_CascadeChain
     $chains['course']         = array('student_course');
     $chains['company']        = array('users');
     $chains['child']          = array('grand_child');
-    $chains['customer_order'] = array('order_line');
 
     return $chains;
   }

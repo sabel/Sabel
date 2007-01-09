@@ -25,7 +25,7 @@ class Test_DB_Mysql extends Test_DB_Test
 
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_DB_Mysql");
+    return self::createSuite("Test_DB_Mysql");
   }
 
   public function __construct()
