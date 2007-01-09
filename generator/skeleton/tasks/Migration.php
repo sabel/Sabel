@@ -29,7 +29,7 @@ class Migration extends Sakle
   public function execute()
   {
     if (count($this->arguments) < 3) {
-      $this->printMessage("Error: invalid parameter.", self::MSG_ERR);
+      $this->printMessage("Error: invalid parameter count.", self::MSG_ERR);
       exit;
     }
     
@@ -91,8 +91,6 @@ class Migration extends Sakle
       exit;
     }
     
-    $v->commit();
-    
     if ($doNext) system("sakle Migration {$this->arguments[1]} $to");
   }
   
@@ -138,7 +136,6 @@ class Migration extends Sakle
       exit;
     }
     
-    $aVersion->begin();
     return $aVersion;
   }
   

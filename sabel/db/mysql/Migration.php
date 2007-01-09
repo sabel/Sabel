@@ -52,7 +52,10 @@ class Sabel_DB_Mysql_Migration
 
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
-      if (strpos($line, 'TYPE::BOOL') === false) {
+      if (substr($line, 0, 4) === 'FKEY') {
+        $line = str_replace('FKEY', 'FOREIGN KEY', $line);
+        $exeQuery[] = preg_replace('/\) /', ') REFERENCES ', $line, 1);
+      } elseif (strpos($line, 'TYPE::BOOL') === false) {
         $exeQuery[] = $line;
       } else {
         list ($colName) = explode(' ', $line);

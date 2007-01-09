@@ -34,23 +34,27 @@ final class Sabel
    * @param mixed $args
    * @return object
    */
-  public static function load($className, $arg = null, $args = null)
+  public static function load($className)
   {
     self::using($className);
     
     if (!class_exists($className, false))
       throw new Exception($className . " not found");
       
-    if ($arg === null) {
-      return new $className();
-    } elseif ($args !== null) {
-      if (is_array($args)) $args = join(',' , $args);
-      $eval = '$instance = new $className($arg, $args);';
-      eval($eval);
-      return $instance;
-    } else {
-      return new $className($arg);
+    $arg_list = '';
+
+    if (($numargs = func_num_args()) > 1) {
+      $args = func_get_args();
+      $arg_list = array();
+      
+      for ($i = 1; $i < $numargs; $i++) {
+        $arg_list[] = '$args[' . $i . ']';
+      }
+      $arg_list = join(', ', $arg_list);
     }
+    
+    eval ('$instance = new ' . $className . '(' . $arg_list . ');');
+    return $instance;
   }
   
   public static function loadSingleton($className, $constructerArg = null)
@@ -255,7 +259,7 @@ if (!extension_loaded('gettext')) {
 }
 
 /**
- * Sabel DB Functions
+ * Sabel db functions
  *
  */
 function convert_to_tablename($mdlName)
