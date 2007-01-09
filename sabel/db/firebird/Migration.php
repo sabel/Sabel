@@ -38,29 +38,35 @@ class Sabel_DB_Firebird_Migration extends Sabel_DB_Base_Migration
 
   public function addTable($tblName, $cmdQuery)
   {
+    $this->model->begin();
     $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
 
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
-      list ($colName) = explode(' ', $line);
-      $attr = trim(str_replace($colName, '', $line));
+      if (substr($line, 0, 4) === 'FKEY') {
+        $exeQuery[] = $this->parseForForeignKey($line);
+      } else {
+        list ($colName) = explode(' ', $line);
+        $attr = trim(str_replace($colName, '', $line));
 
-      if (strpos($attr, 'TYPE::BOOL') !== false) {
-        $attr = $this->createBooleanAttr($attr);
-      }
+        if (strpos($attr, 'TYPE::BOOL') !== false) {
+          $attr = $this->createBooleanAttr($attr);
+        }
 
-      $line = $colName . ' ' . $this->checkDefaultPosition($attr);
-      if (strpos($line, '(INCREMENT)') !== false) {
-        $this->createGenerator($tblName, $colName);
-        $line = str_replace('(INCREMENT)', '', $line);
+        $line = $colName . ' ' . $this->checkDefaultPosition($attr);
+        if (strpos($line, '(INCREMENT)') !== false) {
+          $this->createGenerator($tblName, $colName);
+          $line = str_replace('(INCREMENT)', '', $line);
+        }
+        $exeQuery[] = $line;
       }
-      $exeQuery[] = $line;
     }
 
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
     $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
+    $this->model->commit();
   }
 
   protected function checkDefaultPosition($attr)
@@ -141,33 +147,85 @@ class Sabel_DB_Firebird_Migration extends Sabel_DB_Base_Migration
 
   public function changeColumn($tblName, $colName, $param)
   {
-    if (strpos($param, 'TYPE::BOOL') !== false) {
-      $param = $this->createBooleanAttr($param);
+    $cols = $this->model->getTableSchema()->getColumns();
+
+    if (!isset($cols[$colName])) {
+      throw new Exception("Error: column '$colName' does not found in '$tblName'.");
+    } else {
+      $col = $cols[$colName];
     }
 
-    $sch  = $this->search;
-    $rep  = $this->replace;
-    $attr = str_replace($sch, $rep, $this->checkDefaultPosition($param));
+    $migType = array_shift(explode(' ', $param));
+    $newType = $this->toSabelDataType($migType);
+    $source  = $this->getColumnSource($tblName, $colName);
+    $length  = 0;
 
-    $schema = $this->model->getTableSchema();
-    $cols   = $schema->getColumns();
-    $pKey   = $schema->getPrimaryKey();
-    $query  = array();
+    if ($newType === Sabel_DB_Type_Const::STRING) {
+      preg_match('/\(([0-9]+)\)/', $migType, $matches);
+      $length = (int)$matches[1];
+    }
 
-    foreach ($cols as $col) {
-      if ($col->name === $colName) {
-        $query[] = $colName . ' ' . $attr;
-      } else {
-        $query[] = $this->createColumnAttribute($col);
+    $this->model->begin();
+
+    if ($col->type !== $newType) {
+      if ($newType === Sabel_DB_Type_Const::BOOL) {
+        throw new Exception('Error: cannot change to boolean type.');
+      }
+
+      $fbType = Sabel_DB_Firebird_Schema::convertToFirebirdType($newType);
+      $query  = 'UPDATE RDB$FIELDS SET RDB$FIELD_TYPE = ' . $fbType . ' '
+              . 'WHERE RDB$FIELD_NAME = \'' . $source . '\'';
+
+      $driver->driverExecute($query);
+
+      if ($newType === Sabel_DB_Type_Const::STRING) {
+        $this->setLength($source, $length);
+      }
+    } else {
+      if ($length > 0 && $col->max !== $length) {
+        $this->setLength($source, $length);
       }
     }
 
-    if ($pKey !== null) {
-      $key = (is_array($pKey)) ? implode(',', $pKey) : $pKey;
-      $query[] = "PRIMARY KEY ( $key )";
-    }
+    $v = (strpos(strtolower($param), 'not null') !== false) ? '1' : 'NULL';
+    $t = strtoupper($tblName);
+    $c = strtoupper($colName);
 
-    $this->inout($tblName, implode(',', $query), '*');
+    $query = 'UPDATE RDB$RELATION_FIELDS SET RDB$NULL_FLAG = ' . $v . ' '
+           . 'WHERE RDB$RELATION_NAME = \'' . $t . '\' AND RDB$FIELD_NAME = \'' . $c . '\'';
+
+    $this->model->execute($query);
+    $this->model->commit();
+  }
+
+  protected function getColumnSource($tblName, $colName)
+  {
+    $query = 'SELECT RDB$FIELD_SOURCE FROM RDB$RELATION_FIELDS '
+           . 'WHERE RDB$RELATION_NAME = \'%s\' AND RDB$FIELD_NAME = \'%s\'';
+
+    $driver = $this->model->getDriver();
+    $driver->driverExecute(sprintf($query, strtoupper($tblName), strtoupper($colName)));
+    $row    = $driver->getResultSet()->fetch();
+    return trim($row['rdb$field_source']);
+  }
+
+  protected function setLength($source, $length)
+  {
+    $query  = 'UPDATE RDB$FIELDS SET RDB$CHARACTER_LENGTH = ' . $length . ' '
+              . 'WHERE RDB$FIELD_NAME = \'' . trim($source) . '\'';
+
+    $this->model->execute($query);
+  }
+
+  protected function toSabelDataType($type)
+  {
+    if (preg_match('/TYPE::[S|B]?INT/', $type)) {
+      return Sabel_DB_Type_Const::INT;
+    } elseif (strpos($type, 'TYPE::STRING') !== false) {
+      return Sabel_DB_Type_Const::STRING;
+    } else {
+      return constant('Sabel_DB_Type_Const::' . substr($type, 6));
+    }
   }
 
   public function renameColumn($tblName, $from, $to)
@@ -229,49 +287,6 @@ class Sabel_DB_Firebird_Migration extends Sabel_DB_Base_Migration
     }
 
     return implode(' ', $tmp);
-  }
-
-  protected function inout($tblName, $createSQL, $selectCols)
-  {
-    $model = $this->model;
-
-    // checking sql for create.
-    $query = "CREATE TABLE sabel_firebird_creatable ( $createSQL )";
-    $model->execute($query);
-    $drop  = "DROP TABLE sabel_firebird_creatable";
-
-    // check whether insert is possible.
-    $query = "INSERT INTO sabel_firebird_creatable SELECT $selectCols FROM {$tblName}";
-    try {
-      $model->execute($query);
-    } catch (Exception $e) {
-      $model->execute($drop);
-      throw $e;
-    }
-
-    $model->execute($drop);
-
-    $tmpTable = $tblName . '_alter_tmp';
-    $query    = "CREATE TABLE $tmpTable ( $createSQL )";
-    $model->execute($query);
-
-    $query = "INSERT INTO $tmpTable SELECT $selectCols FROM {$tblName}";
-
-    try {
-      $model->execute($query);
-    } catch (Exception $e) {
-      $model->execute("DROP TABLE $tmpTable");
-      throw $e;
-    }
-
-    $model->execute("DROP TABLE $tblName");
-
-    $query = "CREATE TABLE $tblName ( $createSQL )";
-    $model->execute($query);
-
-    $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
-    $model->execute($query);
-    $model->execute("DROP TABLE $tmpTable");
   }
 
   protected function createBooleanAttr($attr)

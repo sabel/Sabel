@@ -48,6 +48,31 @@ class Sabel_DB_Firebird_Schema extends Sabel_DB_Base_Schema
     $this->driver = Sabel_DB_Connection::getDriver($connectName);
   }
 
+  public static function convertToFirebirdType($schemaType)
+  {
+    switch ($schemaType) {
+      case Sabel_DB_Type_Const::INT:
+        return 8;
+      case Sabel_DB_Type_Const::FLOAT:
+        return 10;
+      case Sabel_DB_Type_Const::DOUBLE:
+        return 27;
+      case Sabel_DB_Type_Const::STRING:
+        return 37;
+      case Sabel_DB_Type_Const::DATETIME:
+        return 35;
+      case Sabel_DB_Type_Const::DATE:
+        return 12;
+      case Sabel_DB_Type_Const::TIME:
+        return 13;
+      case Sabel_DB_Type_Const::BOOL:
+        return 14;
+      case Sabel_DB_Type_Const::TEXT:
+      case Sabel_DB_Type_Const::BYTE:
+        return 261;
+    }
+  }
+
   public function getTableNames()
   {
     $tables = array();
