@@ -11,90 +11,28 @@ class Test_DI extends SabelTestCase
   
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_DI");
-  }
-  
-  public function estTraverse()
-  {
-    $c  = new Container();
-    $dt = new DirectoryTraverser('Test/data/testClassDirStructure');
-    $dt->visit(new ClassRegister($c, 'root'));
-    $dt->traverse();
-    
-    require('Test/data/testClassDirStructure/root/core/Controller.php');
-    $obj = $c->load('root.core.Controller', 'singleton');
-    $this->assertEquals('Root_Core_Controller', $obj->getClassName());
-    
-    $obj = $c->load('root.core.Controller');
-    $this->assertEquals('Root_Core_Controller', $obj->getClassName());
+    return self::createSuite("Test_DI");
   }
   
   // test case for class A depend class B.
-  public function testSimpleDependencyResolve()
+  public function testDependencyResolve()
   {
-    $c = new Container();
-    $c->regist('test.Age', 'Age');
-    $c->regist('test.Person', 'Person');
+    $c = new Sabel_Container_DI();
     
-    $person = $c->load('test.Person');
-    $this->assertEquals(15, $person->howOldAreYou('who', 'are you'));
+    $person = $c->load('Person');
+    $this->assertEquals(15, $person->howOldAreYou());
   }
   
   public function testSetterInjection()
   {
-    $c = new Container();
-    $c->regist('test.Person', 'Person');
-    $person = $c->load('test.Person');
-    $this->assertEquals('max', $person->getFrastration());
-  }
-  
-  public function testComplexDependencyResolv()
-  {
-    return false;
-  }
-  
-  public function testDirectoryPathToClassNameResolver()
-  {
-    $this->assertEquals('Sabel_Core_Router',
-                        NameResolver::resolvDirectoryPathToClassName('sabel/core/Router.php'));
-    $this->assertEquals('Core_Router',
-                        NameResolver::resolvDirectoryPathToClassName('core/Router.php'));
+    $c = new Sabel_Container_DI();
+    $c->depends("Person", "FrastrationCalculator", "Setter");
+    $person = $c->load("Person");
+    $this->assertEquals(10, $person->getFrastration());
   }
 }
 
-interface TPerson
-{
-  function isMale();
-}
-
-abstract class Mammalia
-{
-  abstract function birth();
-}
-
-interface TManager extends TPerson
-{
-  function isManager();
-}
-
-class SomeClass
-{
-  /**
-   * @implementation @ENVIRONMENT@_Exporter // -> ???_Exporter
-   * @injection setter
-   * @implementation @request:id@Calculator
-   * @implementation @module@_Calculator
-   * @injection setter setImplementation
-   */
-  protected $exporter = null;
-
-  public function setExporter($exporter)
-  {
-    $this->exporter = $exporter;
-  }
-}
-
-class Person extends Mammalia implements TManager
+class Person
 {
   protected $age = null;
   
@@ -106,49 +44,58 @@ class Person extends Mammalia implements TManager
   
   /**
    *
-   * @depend test.Age
    */
   public function __construct(Age $age)
   {
     $this->age = $age;
   }
   
-  public function birth()
-  {
-    print "ogya-!";
-  }
-  
-  public function howOldAreYou($arg, $arg2)
+  public function howOldAreYou()
   {
     return $this->age->getAge();
   }
   
   public function getFrastration()
   {
+    if (!is_object($this->frastration)) throw new Exception(var_export($this->frastration, 1));
     return $this->frastration->calc($this);
   }
   
-  public function setFrastration($f)
+  public function setFrastrationCalculator($f)
   {
     $this->frastration = $f;
   }
+}
+
+class Integer
+{
+  private $self = 0;
   
-  function isMale()
+  public function set($num)
   {
-    return true;
+    $this->self = $num;
   }
   
-  function isManager()
+  public function add($num)
   {
-    return true;
+    return $this->self + $num;
   }
 }
 
 class FrastrationCalculator
 {
+  private $int = null;
+  
+  public function __construct(Integer $int)
+  {
+    $this->int = $int;
+  }
+  
   public function calc($obj)
   {
-    return 'max';
+    $this->int->set(5);
+    $this->int->add(5);
+    return 10;
   }
 }
 

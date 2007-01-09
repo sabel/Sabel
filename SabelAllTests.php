@@ -99,10 +99,11 @@ class SabelAllTests
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_Namespace::suite());
     $suite->addTest(Test_Date::suite());
+    $suite->addTest(Test_DI::suite());
     return $suite;
     
     // $suite->addTest(Test_Annotation::suite());
-    // $suite->addTest(Test_DI::suite());
+    
     // $suite->addTest(Test_Aspect::suite());
     // $suite->addTest(Test_Container::suite());
     // $suite->addTest(Test_Classes::suite());
