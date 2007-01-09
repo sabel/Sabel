@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Migration
+class Sabel_DB_Pgsql_Migration extends Sabel_DB_Base_Migration
 {
   protected $search  = array('TYPE::INT(INCREMENT)',
                              'TYPE::BINT(INCREMENT)',
@@ -40,21 +40,22 @@ class Sabel_DB_Pgsql_Migration
                              'true',
                              'false');
 
-  protected $model = null;
-
-  public function setModel($tblName)
-  {
-    $mdlName     = convert_to_modelname($tblName);
-    $this->model = @MODEL($mdlName);
-  }
-
   public function addTable($tblName, $cmdQuery)
   {
-    $cmdQuery = preg_replace("/[\n\r\f]/", '', $cmdQuery);
+    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
+
+    $exeQuery = array();
+    foreach (explode(',', $cmdQuery) as $line) {
+      if (substr($line, 0, 4) === 'FKEY') {
+        $exeQuery[] = $this->parseForForeignKey($line);
+      } else {
+        $exeQuery[] = $line;
+      }
+    }
 
     $sch   = $this->search;
     $rep   = $this->replace;
-    $query = str_replace($sch, $rep, $cmdQuery);
+    $query = str_replace($sch, $rep, implode(',', $exeQuery));
     $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
   }
 

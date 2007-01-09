@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Firebird_Migration
+class Sabel_DB_Firebird_Migration extends Sabel_DB_Base_Migration
 {
   protected $search  = array('TYPE::INT',
                              'TYPE::SINT',
@@ -35,14 +35,6 @@ class Sabel_DB_Firebird_Migration
                              'char(1)',
                              "1",
                              "0");
-
-  protected $model = null;
-
-  public function setModel($tblName)
-  {
-    $mdlName     = convert_to_modelname($tblName);
-    $this->model = MODEL($mdlName);
-  }
 
   public function addTable($tblName, $cmdQuery)
   {

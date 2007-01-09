@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Sqlite_Migration
+class Sabel_DB_Sqlite_Migration extends Sabel_DB_Base_Migration
 {
   protected $search  = array('TYPE::INT(INCREMENT)',
                              'TYPE::BINT(INCREMENT)',
@@ -40,24 +40,19 @@ class Sabel_DB_Sqlite_Migration
                              "'true'",
                              "'false'");
 
-  protected $model = null;
-
-  public function setModel($tblName)
-  {
-    $mdlName     = convert_to_modelname($tblName);
-    $this->model = @MODEL($mdlName);
-  }
-
   public function addTable($tblName, $cmdQuery)
   {
-    $cmdQuery = preg_replace("/[\n\r\f]/", '', $cmdQuery);
+    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
 
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
-      $line = trim($line);
-      list ($colName) = explode(' ', $line);
-      $attr = str_replace($colName, '', $line);
-      $exeQuery[] = $colName . ' ' . $this->incrementFilter($attr);
+      if (substr($line, 0, 4) === 'FKEY') {
+        $exeQuery[] = $this->parseForForeignKey($line);
+      } else {
+        list ($colName) = explode(' ', $line);
+        $attr = str_replace($colName, '', $line);
+        $exeQuery[] = $colName . ' ' . $this->incrementFilter($attr);
+      }
     }
 
     $sch   = $this->search;
@@ -213,7 +208,7 @@ class Sabel_DB_Sqlite_Migration
     $query = "CREATE TABLE $tblName ( $createSQL )";
     $model->execute($query);
 
-    $query = "INSERT INTO $tblName SELECT $selectCols FROM $tmpTable";
+    $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
     $model->execute($query);
     $model->execute("DROP TABLE $tmpTable");
 

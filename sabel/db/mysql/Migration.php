@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysql_Migration
+class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
 {
   protected $search  = array('TYPE::INT(INCREMENT)',
                              'TYPE::BINT(INCREMENT)',
@@ -38,14 +38,6 @@ class Sabel_DB_Mysql_Migration
                              '1',
                              '0');
 
-  protected $model = null;
-
-  public function setModel($tblName)
-  {
-    $mdlName     = convert_to_modelname($tblName);
-    $this->model = @MODEL($mdlName);
-  }
-
   public function addTable($tblName, $cmdQuery)
   {
     $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
@@ -53,8 +45,7 @@ class Sabel_DB_Mysql_Migration
     $exeQuery = array();
     foreach (explode(',', $cmdQuery) as $line) {
       if (substr($line, 0, 4) === 'FKEY') {
-        $line = str_replace('FKEY', 'FOREIGN KEY', $line);
-        $exeQuery[] = preg_replace('/\) /', ') REFERENCES ', $line, 1);
+        $exeQuery[] = $this->parseForForeignKey($line);
       } elseif (strpos($line, 'TYPE::BOOL') === false) {
         $exeQuery[] = $line;
       } else {

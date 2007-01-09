@@ -989,11 +989,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $cols[$colName]  = new Sabel_ValueObject($colInfo);
     }
 
-    // @todo
-    //$tblSchema  = Sabel::load('Sabel_DB_Schema_Table', $tblName, $cols);
-
-    Sabel::using('Sabel_DB_Schema_Table');
-    $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
+    $tblSchema  = Sabel::load('Sabel_DB_Schema_Table', $tblName, $cols);
     $properties = $sCls->getProperty();
     $properties['table'] = $tblName;
     $properties['connectName'] = get_db_tables($tblName);
