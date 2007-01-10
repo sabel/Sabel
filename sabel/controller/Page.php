@@ -346,11 +346,14 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   public function redirect($to)
   {
-    $host = $_SERVER['HTTP_HOST'];
+    if (isset($_SERVER['HTTP_HOST'])) {
+      $host = $_SERVER['HTTP_HOST'];
+    } else {
+      $host = "localhost";
+    }
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
     header($redirect);
-    
     exit; // exit after HTTP Header(30x)
   }
   

@@ -33,7 +33,12 @@ class Sabel_View_Uri
   public function uri($param, $withDomain = false)
   {
     $params = $this->convert($param);
-    $uriPrefix = ($withDomain) ? 'http://' . $_SERVER['HTTP_HOST'] . '/' : '';
+    if (isset($_SERVER["HTTP_HOST"])) {
+      $httphost = $_SERVER["HTTP_HOST"];
+    } else {
+      $httphost = "localhost";
+    }
+    $uriPrefix = ($withDomain) ? 'http://' . $httphost . '/' : '';
     $uri = Sabel_Context::getCurrentCandidate()->uri($params);
     return $uriPrefix . $uri;
   }

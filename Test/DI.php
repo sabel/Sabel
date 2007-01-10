@@ -35,16 +35,8 @@ class Test_DI extends SabelTestCase
 class Person
 {
   protected $age = null;
-  
-  /**
-   * @implementation FrastrationCalculator
-   * @setter setFrastration
-   */
   protected $frastration = null;
   
-  /**
-   *
-   */
   public function __construct(Age $age)
   {
     $this->age = $age;
@@ -55,15 +47,15 @@ class Person
     return $this->age->getAge();
   }
   
+  public function setFrastrationCalculator(FrastrationCalculator $f)
+  {
+    $this->frastration = $f;
+  }
+  
   public function getFrastration()
   {
     if (!is_object($this->frastration)) throw new Exception(var_export($this->frastration, 1));
     return $this->frastration->calc($this);
-  }
-  
-  public function setFrastrationCalculator($f)
-  {
-    $this->frastration = $f;
   }
 }
 

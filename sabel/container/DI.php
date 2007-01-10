@@ -105,7 +105,7 @@ class Sabel_Container_DI
     foreach ($this->depends[$className] as $value) {
       $className = $value[0];
       $type      = $value[1];
-    
+      
       if (class_exists($className)) {
         switch ($type) {
           case "Setter":
