@@ -37,13 +37,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $response    = null;
     
   protected
-    $public     = array(),
-    $private    = array(),
-    $security   = null,
-    $identity   = null,
-    $permission = Sabel_Security_Permission::P_PUBLIC;
-    
-  protected
     $action        = '',
     $filters       = array(),
     $rendering     = true,
@@ -117,6 +110,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   public function execute($actionName)
   {
+    $this->action = $actionName;
+    
     if (is_array($this->storage->read("volatiles"))) {
       $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
       foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
@@ -135,22 +130,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     // check reserved words
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
-      
-    $result = null;
-    if ($this->isPublicAction($actionName)) {
-      $result = $this->methodCheckAndExecute($actionName);
-    } elseif ($this->permission === Sabel_Security_Permission::P_PRIVATE ||
-          $this->isPrivateAction($actionName)) {
-      if ($this->isAuthorized()) {
-        $result = $this->methodCheckAndExecute($actionName);
-      } elseif ($this->hasMethod('authorizeRequired')) {
-        $this->authorizeRequired();
-      } else {
-        throw new Sabel_Exception_Runtime('must implement authorizeRequired() when P_PRIVATE');
-      }
-    } else {
-      $result = $this->methodCheckAndExecute($actionName);
-    }
+    
+    $result = $this->methodCheckAndExecute($actionName);
     
     $view = $this->view;
     $view->assign("request", $this->request);
@@ -307,24 +288,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->volatiles[$key] = $value;
   }
   
-  protected function isPublicAction($actionName)
-  {
-    if (count($this->public) > 0) {
-      return in_array($actionName, $this->public);
-    } else {
-      return false;
-    }
-  }
-  
-  protected function isPrivateAction($actionName)
-  {
-    if (count($this->private) > 0) {
-      return in_array($actionName, $this->private);
-    } else {
-      return false;
-    }
-  }
-  
   protected function checkReferer($validURIs)
   {
     $host = $_SERVER['HTTP_HOST'];
@@ -411,28 +374,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   protected function isGet()
   {
     return ($this->httpMethod === self::HTTP_METHOD_GET);
-  }
-  
-  // remove above lines
-  
-  public function registAuthorizer($authorizer)
-  {
-    $this->security->registAuthorizer($authorizer);
-  }
-  
-  public function authorize($identity, $password)
-  {
-    return $this->security->authorize($identity, $password);
-  }
-  
-  public function unauthorize()
-  {
-    $this->security->unauthorize();
-  }
-  
-  public function isAuthorized()
-  {
-    return $this->security->isAuthorized();
   }
 }
 
