@@ -31,7 +31,7 @@ class Sabel_Controller_Front
     $this->processHelper($this->desideHelperPath($request, $candidate));
     $this->processPreFilter($filters, $request);
     $controller = $this->processPageController($candidate);
-    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate));
+    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate), $candidate->getAction());
     $controller->initialize();
     
     $responses = $controller->execute($candidate->getAction());

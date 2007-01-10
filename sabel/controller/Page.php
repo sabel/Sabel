@@ -65,8 +65,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    *
    * @todo remove depend to view
    */
-  public function setup(Sabel_Request $request, $view = null)
+  public function setup(Sabel_Request $request, $view = null, $action)
   {
+    $this->action = $action;
     $this->request = $request;
     
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
@@ -165,6 +166,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function doFilters($actionName, $filters)
   {
+    
     if (isset($filters["exclude"]) && isset($filters["include"])) {
       throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
     }
