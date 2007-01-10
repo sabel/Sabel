@@ -37,20 +37,8 @@ class Migration extends Sakle
     $v  = $this->getCurrentVersion();
     $to = $this->arguments[2];
     
-    if ($to === "version" || $to === "-v" || $v->version === (int)$to) {
-      $this->printMessage("current version: " . $v->version);
-      exit;
-    }
-    
-    if (!is_numeric($to)) {
-      $this->printMessage("Error: second argument should be a numeric.", self::MSG_ERR);
-      exit;
-    }
-    
-    $this->printMessage("current version: " . $v->version);
     $migrationDir = RUN_BASE . "/migration";
-    
-    $files = array();
+    $files        = array();
     if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
       while (($file = readdir($handle)) !== false) {
         $versionNumberOfFile = substr($file, 0, strpos($file, '_'));
@@ -58,6 +46,22 @@ class Migration extends Sakle
           $files[$versionNumberOfFile] = $file;
       }
     }
+    
+    if (strtolower($to) === 'head') $to = max(array_keys($files));
+    if (strtolower($to) === 'foot') $to = 0;
+    if (strtolower($to) === 'reset') {
+      $to = $v->version;
+      system("sakle Migration {$this->arguments[1]} 0");
+      $v  = $this->getCurrentVersion();
+    }
+    
+    if (!is_numeric($to)) {
+      $this->printMessage("Error: second argument should be a numeric.", self::MSG_ERR);
+      exit;
+    }
+    $this->printMessage("current version: " . $v->version);
+    
+    if ($to === "version" || $to === "-v" || $v->version == $to) exit;
     
     $doNext = false;
     if ($v->version < $to) {
