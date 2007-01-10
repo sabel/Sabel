@@ -74,8 +74,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     if ($this->enableSession) {
       $this->storage  = Sabel_Storage_Session::create();
-      $this->security = Sabel_Security_Security::create();
-      $this->identity = $this->security->getIdentity();
     }
     
     if (isset($_SERVER['REQUEST_METHOD'])) {
@@ -111,7 +109,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function execute($actionName)
   {
     $this->action = $actionName;
-    
+
     if (is_array($this->storage->read("volatiles"))) {
       $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
       foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
@@ -324,6 +322,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
+    $this->storage->write("volatiles", $this->volatiles);
     header($redirect);
     exit; // exit after HTTP Header(30x)
   }
@@ -335,6 +334,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     $candidate = Sabel_Context::getCurrentCandidate();
+    $this->storage->write("volatiles", $this->volatiles);
     $this->redirect('/' . $candidate->uri($params));
   }
   
