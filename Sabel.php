@@ -164,6 +164,11 @@ function a($param, $anchor, $uriParameters = null)
   return $tag;
 }
 
+function ah($param, $anchor, $uriParameters = null)
+{
+  return a($param, htmlspecialchars($anchor), $uriParameters);
+}
+
 /**
  * internal request
  */
