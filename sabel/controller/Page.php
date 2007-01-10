@@ -38,7 +38,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
   protected
     $action        = '',
-    $filters       = array(),
     $rendering     = true,
     $volatiles     = array(),
     $withLayout    = true,
@@ -160,8 +159,10 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function processFilter($actionName, $when = "around")
   {
-    $filters = array_filter(array_keys(get_class_vars(__CLASS__)),
+    $filters = array_filter(array_keys(get_object_vars($this)),
                             create_function('$in', 'return (strstr($in, "filter"));'));
+    
+    asort($filters);
     foreach ($filters as $pos => $filterName) {
       $filter = $this->$filterName;
       if (isset($filter[$when])) {

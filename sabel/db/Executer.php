@@ -318,7 +318,7 @@ class Sabel_DB_Executer
   {
     $driver = $this->getDriver();
     $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
-    $driver->makeQuery($this->conditions, $this->constraints);
+    $driver->makeQuery($this->conditions);
     $this->tryExecute($driver);
   }
 
