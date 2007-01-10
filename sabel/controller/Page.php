@@ -160,13 +160,18 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function processFilter($actionName, $when = "around")
   {
-    if (isset($this->filters[$when]))
-      $this->doFilters($actionName, $this->filters[$when]);
+    $filters = array_filter(array_keys(get_class_vars(__CLASS__)),
+                            create_function('$in', 'return (strstr($in, "filter"));'));
+    foreach ($filters as $pos => $filterName) {
+      $filter = $this->$filterName;
+      if (isset($filter[$when])) {
+        $this->doFilters($actionName, $filter[$when]);
+      }
+    }
   }
   
   protected function doFilters($actionName, $filters)
   {
-    
     if (isset($filters["exclude"]) && isset($filters["include"])) {
       throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
     }
