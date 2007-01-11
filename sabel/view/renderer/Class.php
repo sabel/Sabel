@@ -38,7 +38,9 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     ob_start();
     $buf = file_get_contents($sbl_compile_path);
     if (preg_match_all('/(\$[\w]+)/', $buf, $matches)) {
-      foreach ($matches[1] as $key) eval("$key = null;");
+      foreach ($matches[1] as $key) {
+        if ($key !== '$this') eval("$key = null;");
+      }
     }
     extract($sbl_tpl_values, EXTR_OVERWRITE);
     include ($sbl_compile_path);
