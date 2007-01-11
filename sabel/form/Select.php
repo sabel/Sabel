@@ -45,7 +45,9 @@ class Sabel_Form_Select extends Sabel_Form_HtmlElement
     
     if ($this->hasOptions()) {
       $options = $this->options;
-      foreach ($options as $option) $buf[] = $option->toHtml();
+      foreach ($options as $option) {
+        $buf[] = $option->toHtml();
+      }
     }
     
     if ($this->hasOptionGroups()) {
