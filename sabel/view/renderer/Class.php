@@ -87,7 +87,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
         if (strpos($function, ':') !== false) {
           $params   = explode(':', $function);
           $function = array_shift($params);
-          $params   = array_map(create_function('$val', 'return (is_numeric($val)) ? $val : "\'".$val."\'";'), $params);
+          $params   = array_map(create_function('$val', 'return (is_string($val)) ? "\'".$val."\'" : $val;'), $params);
           $params   = ', ' . implode(', ', $params);
         }
         $value = "$function($value$params)";
