@@ -14,7 +14,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   const REPLACE_PAT
     = '/<\?php([a-z=]*)%s([a-z=]*)\s*([^?;]+)([^?]+)\?>/';
     
-  const ISSET_REPLACE = '<?php $3 = (isset($3)) ? $3 : "" ?><?php$1$2 $3$4 ?>';
+  const ISSET_REPLACE = '<?php $3 = (isset($3)) ? $3 : "" ?><?php=$1$2 $3$4 ?>';
   const H_REPLACE     = '<?php$1$2= htmlspecialchars($3)$4 ?>';
   const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3)$4 ?></pre>';
   const NL2BR_REPLACE = '<?php= nl2br($3)$4 ?>';
