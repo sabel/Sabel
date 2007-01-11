@@ -1,11 +1,8 @@
 <?php
 
 Sabel::using("Sabel_Controller_Page_Base");
-
-Sabel::using('Sabel_Security_Security');
-Sabel::using('Sabel_Security_Permission');
 Sabel::using('Sabel_Storage_Session');
-
+Sabel::using("Sabel_Logger_Factory");
 Sabel::using('Sabel_Exception_Runtime');
 
 /**
@@ -30,11 +27,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   const HTTP_METHOD_DELETE = 0x15;
   
   protected
-    $view        = null,
-    $request     = null,
-    $httpMethod  = self::HTTP_METHOD_GET,
-    $storage     = null,
-    $response    = null;
+    $view       = null,
+    $request    = null,
+    $httpMethod = self::HTTP_METHOD_GET,
+    $storage    = null,
+    $logger     = null,
+    $response   = null;
     
   protected
     $action        = '',
@@ -66,8 +64,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   public function setup(Sabel_Request $request, $view = null, $action)
   {
-    $this->action = $action;
+    $this->action  = $action;
     $this->request = $request;
+    $this->logger  = Sabel_Logger_Factory::create("file");
     
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
     Sabel_Context::setView($this->view);
@@ -129,7 +128,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     if (isset($this->reserved[$actionName]))
       throw new Sabel_Exception_Runtime('use reserved action name');
     
-    $result = $this->methodCheckAndExecute($actionName);
+    $result = $this->executeAction($actionName);
     
     $view = $this->view;
     $view->assign("request", $this->request);
@@ -139,9 +138,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     if (is_array($result)) $view->assignByArray($result);
     
     $this->processFilter($actionName, "after");
-    
     $this->storage->write("volatiles", $this->volatiles);
-    
     return $result;
   }
   
@@ -198,6 +195,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     foreach ($filters as $filter) {
       if ($this->hasMethod($filter)) {
+        $this->logger->log("apply filter " . $filter);
         if ($this->$filter() === false) break;
       } else {
         throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
@@ -205,43 +203,28 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
   }
   
-  protected function methodCheckAndExecute($action)
+  protected function executeAction($action)
   {
     $reqMethod    = strtolower($this->httpMethod);
-    $actionName   = $reqMethod . ucfirst($action);
+    $methodAction = $reqMethod . ucfirst($action);
     $actionResult = array();
     
-    if ($this->hasMethod($actionName)) {
-      $actionResult =(array) $this->methodExecute($actionName);
+    if ($this->hasMethod($methodAction)) {
+      $this->logger->log("execute method action: $methodAction");
+      $actionResult =(array) $this->$methodAction();
       if (!$this->skipDefaultAction) {
-        $actionResult = array_merge((array) $this->methodExecute($action), $actionResult);
+        $this->logger->log("execute action: $action");
+        $actionResult = array_merge((array) $this->$action(), $actionResult);
       }
     } elseif ($this->hasMethod($action)) {
-      $actionResult = $this->methodExecute($action);
+      $this->logger->log("execute action: $action");
+      $actionResult = $this->$action();
     } elseif ($this->hasMethod('actionMissing')) {
       $this->actionMissing();
     }
     $result = (is_array($actionResult)) ? $actionResult : array();
     
     return $result;
-  }
-  
-  protected function methodExecute($action)
-  {
-    $ref = new ReflectionClass($this);
-    $method = $ref->getMethod($action);
-    if ($method->getNumberOfParameters() === 0) {
-      $actionResult = $this->$action();
-    } else {
-      $args = array();
-      $parameters = $method->getParameters();
-      foreach ($parameters as $parameter) {
-        $name = $parameter->getName();
-        $args[] = $this->$name;
-      }
-      $actionResult = $method->invokeArgs($this, $args);
-    }
-    return $actionResult;
   }
   
   public function rendering()
@@ -292,6 +275,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     $this->storage->write($key, $value);
     $this->volatiles[$key] = $value;
+    $this->logger->log("register volatile: $key");
   }
   
   protected function checkReferer($validURIs)
@@ -323,6 +307,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
     $this->storage->write("volatiles", $this->volatiles);
+    $this->logger->log("redirect: $to");
     header($redirect);
     exit; // exit after HTTP Header(30x)
   }
@@ -355,6 +340,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   protected function assign($key, $value)
   {
+    $this->logger->log("assign to view: $key $value");
     $this->view->assign($key, $value);
   }
   

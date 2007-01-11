@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * Sabel_Logger_File
+ *
+ * @package    org.sabel.logger
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Logger_File
 {
-  const LOG_FILE = '/logs/sabel.log';
+  const DEFAULT_LOG_PATH = '/logs';
+  const DEFAULT_LOG_FILE = 'sabel.log';
   
   private $fp = null;
   private static $instance = null;
@@ -13,14 +22,30 @@ class Sabel_Logger_File
     return self::$instance;
   }
   
-  public function __construct()
+  public function __construct($option = null)
   {
-    $this->fp = fopen(RUN_BASE . self::LOG_FILE, 'a+');
+    if ($option === null) {
+      switch (ENVIRONMENT) {
+        case PRODUCTION:
+          $env = 'production';
+          break;
+        case TEST:
+          $env = 'test';
+          break;
+        case DEVELOPMENT:
+          $env = 'development';
+          break;
+      }
+      $option = $env . "." . self::DEFAULT_LOG_FILE;
+    }
+    
+    $path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
+    $this->fp = fopen($path, 'a+');
   }
   
   public function log($text)
   {
-    $message = date(DATE_ATOM) . "\t" .$text . "\n";
+    $message = date(DATE_ATOM) ." ". $text . "\n";
     fwrite($this->fp, $message);
   }
   

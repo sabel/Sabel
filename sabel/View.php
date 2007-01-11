@@ -72,6 +72,7 @@ class Sabel_View
   
   public function rendering($withLayout = true)
   {
+    Sabel_Logger_Factory::create("file")->log("rendering: ".$this->templateName);
     $contents = $this->renderer->rendering($this->templatePath, $this->templateName, self::$values);
     
     if ($withLayout) {
