@@ -340,7 +340,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   protected function assign($key, $value)
   {
-    $this->logger->log("assign to view: $key $value");
+    $this->logger->log("assign to view: $key");
     $this->view->assign($key, $value);
   }
   
