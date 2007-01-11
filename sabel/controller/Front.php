@@ -28,7 +28,7 @@ class Sabel_Controller_Front
     if ($request === null) $request = Sabel::load($this->requestClass);
     $candidate = $this->processCandidate($request);
     $filters   = $this->loadFilters($candidate);
-    $this->processHelper($this->desideHelperPath($request, $candidate));
+    $this->processHelper($request, $candidate);
     $this->processPreFilter($filters, $request);
     $controller = $this->processPageController($candidate);
     $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate), $candidate->getAction());
@@ -89,17 +89,27 @@ class Sabel_Controller_Front
     return $filters;
   }
   
-  protected function processHelper($path)
-  {
-    if (is_file($path)) Sabel::fileUsing($path);
-  }
-  
-  protected function desideHelperPath($request, $candidate)
+  protected function processHelper($request, $candidate)
   {
     $module = $candidate->getModule();
     $cntr   = $candidate->getController();
     $action = $candidate->getAction();
-    return RUN_BASE . "/app/{$module}/helpers/${cntr}.${action}.php";
+    
+    $moduleSpecificHelpersPath     = RUN_BASE . "/app/{$module}/helpers/application.php";
+    $controllerSpecificHelpersPath = RUN_BASE . "/app/{$module}/helpers/${cntr}.php";
+    $actionSpecificHelpersPath     = RUN_BASE . "/app/{$module}/helpers/${cntr}.${action}.php";
+    
+    if (is_file($moduleSpecificHelpersPath)) {
+      Sabel::fileUsing($moduleSpecificHelpersPath);
+    }
+    
+    if (is_file($controllerSpecificHelpersPath)) {
+      Sabel::fileUsing($controllerSpecificHelpersPath);
+    }
+    
+    if (is_file($actionSpecificHelpersPath)) {
+      Sabel::fileUsing($actionSpecificHelpersPath);
+    }
   }
   
   protected function processPreFilter($filters, $request)
