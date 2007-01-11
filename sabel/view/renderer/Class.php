@@ -11,13 +11,9 @@
  */
 class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
-  const REPLACE_PAT
-    = '/<\?php([a-z=]*)%s([a-z=]*)\s*([^?;]+)([^?]+)\?>/';
-    
-  const ISSET_REPLACE = '<?php $3 = (isset($3)) ? $3 : "" ?><?php=$1$2 $3$4 ?>';
-  const H_REPLACE     = '<?php$1$2= htmlspecialchars($3)$4 ?>';
-  const DUMP_REPLACE  = '<pre><?php$1$2 var_dump($3)$4 ?></pre>';
-  const NL2BR_REPLACE = '<?php= nl2br($3)$4 ?>';
+  const ISSET_PAT     = '/<\?i\s*(([^?;|]+)[^?;]*)([^?]+)\?>/';
+  const ISSET_REPLACE = '<? if (isset($2)) echo $1$3 ?>';
+  const PIPE_PAT      = '/<\?(.+echo )([^?;\s]+)([^?]+)\?>/';
   
   private $isCache = false;
   
@@ -35,74 +31,89 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
       }
     }
     
-    $sbl_tpl_contents = '';
-    $sbl_tpl_file_path = $sbl_tpl_path . $sbl_tpl_name;
-    $sbl_cache_path    = $this->getCompileFilePath($sbl_tpl_path, $sbl_tpl_name);
+    $this->makeCompileFile($sbl_tpl_path, $sbl_tpl_name);
     
-    if (is_readable($sbl_tpl_file_path) && (!is_readable($sbl_cache_path) 
-        || filemtime($sbl_tpl_file_path) > filemtime($sbl_cache_path))) {
-      $sbl_tpl_contents = file_get_contents($sbl_tpl_file_path);
-      
-      $sbl_tpl_contents = str_replace('<?', '<?php', $sbl_tpl_contents);
-      
-      $sbl_tpl_contents = preg_replace(sprintf(self::REPLACE_PAT, 'i'), self::ISSET_REPLACE, $sbl_tpl_contents);
-      $sbl_tpl_contents = preg_replace(sprintf(self::REPLACE_PAT, 'h'), self::H_REPLACE,     $sbl_tpl_contents);
-      $sbl_tpl_contents = preg_replace(sprintf(self::REPLACE_PAT, 'v'), self::DUMP_REPLACE,  $sbl_tpl_contents);
-      $sbl_tpl_contents = preg_replace(sprintf(self::REPLACE_PAT, 'n'), self::NL2BR_REPLACE, $sbl_tpl_contents);
-
-      $sbl_tpl_contents = str_replace('<?php=', '<?php echo',  $sbl_tpl_contents);
-      
-      if (ENVIRONMENT !== DEVELOPMENT) {
-        $sbl_replace_pattern = '/a\(\'([^\'?]+)\'(?:[,\s]+([^,?\s]+)[,\s]*([^?\s]+)?)?\) \?>/';
-        $sbl_tpl_contents = preg_replace_callback($sbl_replace_pattern, '_repA', $sbl_tpl_contents);
-        if ($this->trim) {
-          $sbl_tpl_contents = explode("\n",     $sbl_tpl_contents);
-          $sbl_tpl_contents = array_map('trim', $sbl_tpl_contents);
-          $sbl_tpl_contents = implode('',       $sbl_tpl_contents);
-        }
-      }
-      
-      $this->saveCompileFile($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_contents);
-    }
-    
-    extract($sbl_tpl_values, EXTR_SKIP);
+    $sbl_compile_path  = $this->getCompileFilePath($sbl_tpl_path, $sbl_tpl_name);
     
     ob_start();
-    if (is_readable($sbl_cache_path)) include ($sbl_cache_path);
+    $buf = file_get_contents($sbl_compile_path);
+    if (preg_match_all('/(\$[\w]+)/', $buf, $matches)) {
+      foreach ($matches[1] as $key) eval("$key = null;");
+    }
+    extract($sbl_tpl_values, EXTR_OVERWRITE);
+    include ($sbl_compile_path);
     $sbl_tpl_contents = ob_get_clean();
     if ($this->isCache) $this->saveCacheFile($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_contents);
     
     return $sbl_tpl_contents;
   }
   
-  private function saveCacheFile($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_contents)
+  private function makeCompileFile($path, $name)
   {
-    $sbl_cache_path = $this->getCacheFilePath($sbl_tpl_path, $sbl_tpl_name);
-    file_put_contents($sbl_cache_path, $sbl_tpl_contents);
-  }
-  
-  private function saveCompileFile($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_contents)
-  {
-    $sbl_cache_path = $this->getCompileFilePath($sbl_tpl_path, $sbl_tpl_name);
-    file_put_contents($sbl_cache_path, $sbl_tpl_contents);
-  }
-  
-  private function getCacheFilePath($sbl_tpl_path, $sbl_tpl_name)
-  {
-    return RUN_BASE . self::CACHE_DIR . md5($sbl_tpl_path) . $sbl_tpl_name;
-  }
-  
-  private function getCompileFilePath($sbl_tpl_path, $sbl_tpl_name)
-  {
-    return RUN_BASE . self::COMPILE_DIR . md5($sbl_tpl_path) . $sbl_tpl_name;
-  }
-}
+    $filepath    = $path . $name;
+    $compilepath = $this->getCompileFilePath($path, $name);
+    if (is_readable($compilepath) && filemtime($filepath) < filemtime($compilepath)) return;
 
-function _repA($matches)
-{
-  $a = $matches[2];
-  if ($a{0} === '_') {
-    $a = eval('return '.$a.';');
+    $contents = file_get_contents($path . $name);
+    
+    $contents = preg_replace(self::ISSET_PAT, self::ISSET_REPLACE, $contents);
+    $contents = str_replace('<?=', '<? echo', $contents);
+    $contents = preg_replace_callback(self::PIPE_PAT, array(&$this, 'pipeToFunc'), $contents);
+    $contents = str_replace('<?',  '<?php',   $contents);
+    
+    if (ENVIRONMENT !== DEVELOPMENT) {
+      if ($this->trim) {
+        $contents = explode("\n",     $contents);
+        $contents = array_map('trim', $contents);
+        $contents = implode('',       $contents);
+      }
+    }
+    $this->saveCompileFile($path, $name, $contents);
   }
-  return '"'.a($matches[1], $a).'" ?>';
+  
+  private function pipeToFunc($matches)
+  {
+    $pre   = rtrim($matches[1]);
+    $value = $matches[2];
+    $post  = rtrim($matches[3]);
+    
+    if (strpos($value, '|') !== false) {
+      $functions = explode('|', $value);
+      $value = array_shift($functions);
+      foreach ($functions as $function) {
+        $params = '';
+        if (strpos($function, ':') !== false) {
+          $params   = explode(':', $function);
+          $function = array_shift($params);
+          $params   = array_map(create_function('$val', 'return (is_numeric($val)) ? $val : "\'".$val."\'";'), $params);
+          $params   = ', ' . implode(', ', $params);
+        }
+        $value = "$function($value$params)";
+      }
+    }
+    
+    return "<?${pre} ${value}${post} ?>";
+  }
+  
+  private function saveCacheFile($path, $name, $contents)
+  {
+    $sbl_cache_path = $this->getCacheFilePath($path, $name);
+    file_put_contents($sbl_cache_path, $contents);
+  }
+  
+  private function saveCompileFile($path, $name, $contents)
+  {
+    $sbl_cache_path = $this->getCompileFilePath($path, $name);
+    file_put_contents($sbl_cache_path, $contents);
+  }
+  
+  private function getCacheFilePath($path, $name)
+  {
+    return RUN_BASE . self::CACHE_DIR . md5($path) . $name;
+  }
+  
+  private function getCompileFilePath($path, $name)
+  {
+    return RUN_BASE . self::COMPILE_DIR . md5($path) . $name;
+  }
 }

@@ -52,7 +52,7 @@ class Sabel_View
   
   public function isTemplateMissing()
   {
-    return (!is_file($this->templatePath . $this->templateName));
+    return (!is_readable($this->templatePath . $this->templateName));
   }
   
   public function setLayout($layout)
