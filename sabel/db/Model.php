@@ -808,10 +808,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function validateType($name, $value)
   {
-
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
-        return (!ctype_digit($value));
+        return (!ctype_digit($value) && !is_int($value));
         break;
       case Sabel_DB_Type_Const::BOOL:
         return ($value !== __TRUE__ && $value !== __FALSE__);
