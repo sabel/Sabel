@@ -56,6 +56,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $childConstraints = array();
 
   protected
+    $validateIgnores  = array(),
     $validateOnInsert = false,
     $validateOnUpdate = false;
 
@@ -506,7 +507,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
       if (!($row = $resultSet->fetch()) && !$this->ignoreEmptyParent) {
         $msg = "Error: relational error. parent '{$tblName}' does not exist. "
-             . "Prease set ignoreEmpryParent = true, if you want to ignore it.";
+             . "Please set ignoreEmpryParent = true, if you want to ignore it.";
 
         throw new Exception($msg);
       }
@@ -753,8 +754,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->sColumns  = $this->schema->getColumns();
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
     $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
-
+    
     foreach ($dataForValidate as $name => $value) {
+      if (in_array($name, $this->validateIgnores)) continue;
       $lname = $this->getLocalizedName($name);
       if ($this->validateLength($name, $value)) {
         $errors->add($lname, $this->validateMessages["invalid_length"]);
@@ -774,6 +776,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     return ($errors->count() !== 0) ? $errors : false;
+  }
+  
+  public function addValidateIgnore($name)
+  {
+    $this->validateIgnores[] = $name;
+  }
+  
+  public function addValidateIgnores($names)
+  {
+    $this->validateIgnores[] = array_merge($this->validateIgnores, $names);
   }
 
   protected function hasValidateMethod($name)
