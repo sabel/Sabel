@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using("Sabel_Http_Requestable");
+
 class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
 {
   const NO_INIT   = 0;
