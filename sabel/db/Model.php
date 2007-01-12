@@ -60,9 +60,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $validateOnInsert = false,
     $validateOnUpdate = false;
 
-  protected $validateMessages = array('invalid_length'      => 'invalid length',
-                                      'impossible_to_empty' => 'impossible to empty',
-                                      'type_mismatch'       => 'invalid data type');
+  protected $validateMessages = array('length'   => 'invalid length',
+                                      'maximum'  => 'too large',
+                                      'nullable' => 'impossible to empty',
+                                      'type'     => 'invalid data type');
 
   /**
    * @var a schema information of DB usually use for validate.
@@ -192,6 +193,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function convertData($key, $data)
   {
+    if ($data === null) return null;
+
     $schema = $this->schema->getColumns();
     if (!isset($schema[$key])) return $data;
 
@@ -780,11 +783,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       if (in_array($name, $this->validateIgnores)) continue;
       $lname = $this->getLocalizedName($name);
       if ($this->validateLength($name, $value)) {
-        $errors->add($lname, $this->validateMessages["invalid_length"]);
+        $errors->add($lname, $this->validateMessages["length"]);
+      } elseif ($this->validateMaximum($name, $value)) {
+        $errors->add($lname, $this->validateMessages["maximum"]);
       } elseif ($this->validateNullable($name, $value)) {
-        $errors->add($lname, $this->validateMessages["impossible_to_empty"]);
+        $errors->add($lname, $this->validateMessages["nullable"]);
       } elseif ($this->validateType($name, $value)) {
-        $errors->add($lname, $this->validateMessages["type_mismatch"]);
+        $errors->add($lname, $this->validateMessages["type"]);
       } elseif ($this->hasValidateMethod($name)) {
         $this->executeValidateMethod($name, $value);
       }
@@ -793,7 +798,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $nonInputs = $this->validateNonInputs($dataForValidate);
     foreach ($nonInputs as $name) {
       $name = $this->getLocalizedName($name);
-      $errors->add($name, $this->validateMessages["impossible_to_empty"]);
+      $errors->add($name, $this->validateMessages["nullable"]);
     }
 
     return ($errors->count() !== 0) ? $errors : false;
@@ -812,12 +817,19 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   protected function validateLength($name, $value)
   {
-    $type = $this->sColumns[$name]->type;
-    if ($type === Sabel_DB_Type_Const::INT || $type === Sabel_DB_Type_Const::STRING) {
-      return ($this->sColumns[$name]->max < strlen($value));
+    $col = $this->sColumns[$name];
+    if ($col->type === Sabel_DB_Type_Const::STRING) {
+      $method = (extension_loaded('mbstring')) ? 'mb_strlen' : 'strlen';
+      return ($method($value) > $col->max);
     } else {
       return false;
     }
+  }
+
+  protected function validateMaximum($name, $value)
+  {
+    $col = $this->sColumns[$name];
+    return ($col->type === Sabel_DB_Type_Const::INT && $col->max < $value);
   }
 
   protected function validateNullable($name, $value)
@@ -833,6 +845,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
+        if ($value === '' || $value === null) return false;
         return (!ctype_digit($value) && !is_int($value));
         break;
       case Sabel_DB_Type_Const::BOOL:
