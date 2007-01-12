@@ -909,6 +909,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
    */
   public function cascadeDelete($id = null)
   {
+    Sabel::using('Schema_CascadeChain');
     if (!class_exists('Schema_CascadeChain', false))
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
 

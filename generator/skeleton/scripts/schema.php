@@ -40,13 +40,13 @@ class Cascade_Writer
       }
     }
 
-    $target = SCHEMA_DIR . 'Schema_CascadeChain.php';
+    $target = SCHEMA_DIR . 'CascadeChain.php';
     echo "generate Cascade Chain\n\n";
     $fp = fopen($target, 'w');
 
     fwrite($fp, "<?php\n\n");
     fwrite($fp, "class Schema_CascadeChain\n{\n");
-    fwrite($fp, "  public function get()\n  {\n");
+    fwrite($fp, "  public static function get()\n  {\n");
     fwrite($fp, '    $chains = array();' . "\n\n");
 
     foreach ($chain as $parent => $children) {
