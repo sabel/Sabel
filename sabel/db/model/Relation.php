@@ -98,7 +98,7 @@ class Sabel_DB_Model_Relation
     if (!$model instanceof Sabel_DB_Model)
       throw new Exception('Error:join() first argument must be an instance of Sabel_DB_Model.');
 
-    $mdlName = get_class($model);
+    $mdlName = convert_to_modelname($model->getTableName());
     foreach ($modelPairs as $pair) {
       list ($child, $parent) = $this->toRelationPair($mdlName, $pair);
 

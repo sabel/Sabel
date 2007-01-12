@@ -86,6 +86,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $result = $this->attributes[$name];
     } else {
       $result = $this->request->getParameter($name);
+      $result = ($result === false || $result === "") ? null : $result;
     }
     return $result;
   }

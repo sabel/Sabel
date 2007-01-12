@@ -141,11 +141,26 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function setProperties($row)
   {
-    if (!is_array($row)) {
-      $errorMsg = 'Error:setProperties() argument should be an array.';
-      throw new Exception($errorMsg);
-    }
+    if (!is_array($row))
+      throw new Exception('Error: setProperties() argument should be an array.');
+
     foreach ($row as $key => $val) $this->data[$key] = $val;
+  }
+
+  public function setParents($parents)
+  {
+    if (!is_array($parents))
+      throw new Exception('Error: setParents() argument should be an array.');
+
+    $this->parents = $parents;
+  }
+
+  public function setChildren($children)
+  {
+    if (!is_array($children))
+      throw new Exception('Error: setChildren() argument should be an array.');
+
+    $this->children = $children;
   }
 
   public function setChildCondition($arg1, $arg2 = null, $arg3 = null)
@@ -269,6 +284,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function validateOnUpdate($bool)
   {
     $this->validateOnUpdate = $bool;
+  }
+
+  public function addValidateIgnore($cols)
+  {
+    if (is_string($cols)) $cols = (array)$cols;
+    foreach ($cols as $col) $this->validateIgnores[] = $col;
   }
 
   public function schema($tblName = null)
@@ -754,7 +775,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $this->sColumns  = $this->schema->getColumns();
     $this->errors    = $errors = Sabel::load('Sabel_Errors');
     $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
-    
+
     foreach ($dataForValidate as $name => $value) {
       if (in_array($name, $this->validateIgnores)) continue;
       $lname = $this->getLocalizedName($name);
@@ -776,16 +797,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     }
 
     return ($errors->count() !== 0) ? $errors : false;
-  }
-  
-  public function addValidateIgnore($name)
-  {
-    $this->validateIgnores[] = $name;
-  }
-  
-  public function addValidateIgnores($names)
-  {
-    $this->validateIgnores[] = array_merge($this->validateIgnores, $names);
   }
 
   protected function hasValidateMethod($name)
