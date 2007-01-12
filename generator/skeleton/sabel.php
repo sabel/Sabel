@@ -1,7 +1,6 @@
 <?php
 
 ob_start();
-set_include_path('/usr/local/lib/php/Sabel:/usr/local/lib/php');
 define('RUN_BASE', dirname(realpath('public/.')));
 
 require ('Sabel.php');
