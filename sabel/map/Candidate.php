@@ -141,7 +141,8 @@ class Sabel_Map_Candidate implements Iterator
   
   public function getElementByName($name)
   {
-    return (isset($this->elements[$name])) ?$this->elements[$name] : null;
+    $result = (isset($this->elements[$name])) ? $this->elements[$name] : null;
+    return ($result === false) ? null : $result;
   }
   
   public function setRequirement($name, $requirement)
