@@ -121,7 +121,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
       Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
-      if ($properties['primaryKey'] === null)
+      if ($properties['primaryKey'] === null && $this->structure !== 'view')
         trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
 
       $this->schema  = $tblSchema;
@@ -890,6 +890,9 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function remove($param1 = null, $param2 = null, $param3 = null)
   {
+    if ($this->structure === 'view')
+      throw new Exception('Error: delete command cannot be executed to view.');
+
     if ($param1 !== null) {
       $this->delete($param1, $param2, $param3);
     } else {
