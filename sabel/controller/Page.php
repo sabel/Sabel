@@ -109,7 +109,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function execute($actionName)
   {
     $this->action = $actionName;
-
+    
     if (is_array($this->storage->read("volatiles"))) {
       $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
       foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
