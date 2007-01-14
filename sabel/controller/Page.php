@@ -258,7 +258,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     foreach ($model->getColumnNames() as $column) {
       if (!in_array($column, $options["ignores"])) {
-        $model->$column = $this->$column;
+        if ($this->$column !== null) $model->$column = $this->$column;
       }
     }
     
