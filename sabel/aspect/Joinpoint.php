@@ -3,14 +3,16 @@
 class Sabel_Aspect_Joinpoint
 {
   protected $target    = null;
+  protected $source    = null;
   protected $arguments = array();
   protected $method    = '';
   protected $result    = null;
   protected $exception = null;
   
-  public function __construct($target, $arg, $method)
+  public function __construct($target, $source, $arg, $method)
   {
     $this->target    = $target;
+    $this->source    = $source;
     $this->arguments = $arg;
     $this->method    = $method;
   }
@@ -18,6 +20,11 @@ class Sabel_Aspect_Joinpoint
   public function getTarget()
   {
     return $this->target;
+  }
+  
+  public function getSource()
+  {
+    return $this->source;
   }
   
   public function getReflection()

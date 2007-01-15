@@ -215,7 +215,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $actionResult =(array) $this->$methodAction();
       if (!$this->skipDefaultAction) {
         $this->logger->log("execute action: $action");
-        $actionResult = array_merge((array) $this->$action(), $actionResult);
+        if ($this->hasMethod($action)) {
+          $actionResult = array_merge((array) $this->$action(), $actionResult);
+        }
       }
     } elseif ($this->hasMethod($action)) {
       $this->logger->log("execute action: $action");

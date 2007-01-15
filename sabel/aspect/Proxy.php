@@ -1,5 +1,11 @@
 <?php
 
+Sabel::using("Sabel_Aspect_Joinpoint");
+Sabel::using("Sabel_Aspect_Aspects");
+Sabel::using("Sabel_Aspect_Pointcut");
+Sabel::using("Sabel_Aspect_Matcher");
+Sabel::using("Sabel_Aspect_Matches");
+
 /**
  * Sabel_Aspect_Proxy
  *
@@ -20,10 +26,18 @@ class Sabel_Aspect_Proxy
   const TYPE_AFTER    = 5;
   const TYPE_THROWING = 10;
   
-  public function __construct($taget, $source = null)
+  public function __construct($taget)
   {
     $this->target = $taget;
-    $this->source = $source;
+    
+    $trace = debug_backtrace();
+    
+    for ($i = 1; $i < 5; $i++) {
+      if (isset($trace[$i]["object"])) {
+        $this->source = $trace[$i]["object"];
+        break;
+      }
+    }
   }
   
   public function setSourceClass($source)
@@ -80,7 +94,7 @@ class Sabel_Aspect_Proxy
     $bcbResult = $this->beforeCallBefore($method, $arg);
     if ($bcbResult !== null) return $bcbResult;
     
-    $joinpoint = new Sabel_Aspect_Joinpoint($target, $arg, $method);
+    $joinpoint = new Sabel_Aspect_Joinpoint($target, $source, $arg, $method);
     
     $aspects = Sabel_Aspect_Aspects::singleton();
     $matches = $aspects->findMatch(array('method' => $method,
@@ -127,6 +141,7 @@ class Sabel_Aspect_Proxy
   
   protected function beforeCallBefore($method, $arg)
   {
+    
   }
   
   protected function makeArgumentsString($arg)
@@ -144,7 +159,7 @@ class Sabel_Aspect_Proxy
   {
     $called = false;
     $result = false;
-
+    
     $ref = new ReflectionClass($this->target);
     
     foreach ($matches as $aspect) {

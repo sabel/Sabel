@@ -287,6 +287,12 @@ function MODEL($mdlName)
   return Sabel_Model::load($mdlName);
 }
 
+function _A($obj)
+{
+  Sabel::using("Sabel_Aspect_Proxy");
+  return new Sabel_Aspect_Proxy($obj);
+}
+
 /**
  * Sabel constant values
  *
