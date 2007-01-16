@@ -95,20 +95,14 @@ class Sabel_Controller_Front
     $cntr   = $candidate->getController();
     $action = $candidate->getAction();
     
-    $moduleSpecificHelpersPath     = RUN_BASE . "/app/{$module}/helpers/application.php";
-    $controllerSpecificHelpersPath = RUN_BASE . "/app/{$module}/helpers/${cntr}.php";
-    $actionSpecificHelpersPath     = RUN_BASE . "/app/{$module}/helpers/${cntr}.${action}.php";
-    
-    if (is_file($moduleSpecificHelpersPath)) {
-      Sabel::fileUsing($moduleSpecificHelpersPath);
-    }
-    
-    if (is_file($controllerSpecificHelpersPath)) {
-      Sabel::fileUsing($controllerSpecificHelpersPath);
-    }
-    
-    if (is_file($actionSpecificHelpersPath)) {
-      Sabel::fileUsing($actionSpecificHelpersPath);
+    $helpers = array("/app/helpers/application.php",
+                     "/app/{$module}/helpers/application.php",
+                     "/app/{$module}/helpers/${cntr}.php",
+                     "/app/{$module}/helpers/${cntr}.${action}.php");
+                     
+    foreach ($helpers as $helper) {
+      $path = RUN_BASE . $helper;
+      if (is_file($path)) Sabel::fileUsing($path);
     }
   }
   
