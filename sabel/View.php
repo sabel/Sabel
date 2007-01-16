@@ -83,21 +83,29 @@ class Sabel_View
       if (is_file($this->templatePath . $usersLayoutName)) {
         $found = true;
         $name  = $usersLayoutName;
+        $contents = $this->renderLayout($this->templatePath, $name, $contents);
+      } elseif (is_file(RUN_BASE . "/app/views/" . Sabel_Const::DEFAULT_LAYOUT)) {
+        $found = true;
+        $name  = Sabel_Const::DEFAULT_LAYOUT;
+        $contents = $this->renderLayout(RUN_BASE . "/app/views/", $name, $contents);
       } elseif (is_file($this->templatePath . Sabel_Const::DEFAULT_LAYOUT)) {
         $found = true;
         $name  = Sabel_Const::DEFAULT_LAYOUT;
-      }
-      
-      if ($found) {
-        $layout = new self();
-        $layout->setTemplatePath($this->templatePath);
-        $layout->setTemplateName($name);
-        $layout->assign('contentForLayout', $contents);
-        
-        $contents = $layout->rendering(false);
+        $contents = $this->renderLayout($this->templatePath, $name, $contents);
       }
     }
+    
     return $contents;
+  }
+  
+  protected function renderLayout($path, $name, $contents)
+  {
+    $layout = new self();
+    $layout->setTemplatePath($path);
+    $layout->setTemplateName($name);
+    $layout->assign('contentForLayout', $contents);
+    
+    return $layout->rendering(false);
   }
   
   public function decideTemplatePath($candidate)
