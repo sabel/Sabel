@@ -95,10 +95,15 @@ class Sabel_Controller_Front
     $cntr   = $candidate->getController();
     $action = $candidate->getAction();
     
-    $helpers = array("/app/helpers/application.php",
-                     "/app/{$module}/helpers/application.php",
-                     "/app/{$module}/helpers/${cntr}.php",
-                     "/app/{$module}/helpers/${cntr}.${action}.php");
+    $appDir          = "app";
+    $helperDirName   = "helpers";
+    $appSharedHelper = "application";
+    $helperPrefix    = "php";
+    
+    $helpers = array("/{$appDir}/{$helperDirName}/{$appSharedHelper}.{$helperPrefix}",
+                     "/{$appDir}/{$module}/{$helperDirName}/{$appSharedHelper}.{$helperPrefix}",
+                     "/{$appDir}/{$module}/{$helperDirName}/{$cntr}.{$helperPrefix}",
+                     "/{$appDir}/{$module}/{$helperDirName}/{$cntr}.{$action}.{$helperPrefix}");
                      
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;
