@@ -24,6 +24,7 @@ abstract class Sabel_View_Renderer
     $v = new Sabel_View();
     $v->decideTemplatePath(Sabel_Context::getCurrentCandidate());
     $v->setTemplateName($templateName);
+    if ($v->isTemplateMissing()) throw new Exception('Template file is not found');
     return $v->rendering(false);
   }
 }
