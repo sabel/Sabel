@@ -11,9 +11,7 @@
  */
 class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
-  const ISSET_PAT     = '/<\?i\s*(([^?;|]+)[^?;]*)([^?]+)\?>/';
-  const ISSET_REPLACE = '<? if (isset($2)) echo $1$3 ?>';
-  const PIPE_PAT      = '/<\?(.+echo )([^?;\s]+)([^?]+)\?>/';
+  const PIPE_PAT      = '/<\?(=)?\s([^?;\s]+)([^?]+)\?>/';
   
   private $isCache = false;
   
@@ -58,9 +56,8 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 
     $contents = file_get_contents($path . $name);
     
-    $contents = preg_replace(self::ISSET_PAT, self::ISSET_REPLACE, $contents);
-    $contents = str_replace('<?=', '<? echo', $contents);
     $contents = preg_replace_callback(self::PIPE_PAT, array(&$this, 'pipeToFunc'), $contents);
+    $contents = str_replace('<?=', '<? echo', $contents);
     $contents = str_replace('<?',  '<?php',   $contents);
     
     if (ENVIRONMENT !== DEVELOPMENT) {
@@ -75,7 +72,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private function pipeToFunc($matches)
   {
-    $pre   = rtrim($matches[1]);
+    $pre   = trim($matches[1]);
     $value = $matches[2];
     $post  = rtrim($matches[3]);
     
