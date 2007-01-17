@@ -1,17 +1,11 @@
 <?php
 
 Sabel::using("Sabel_Controller_Page_Base");
-Sabel::using('Sabel_Storage_Session');
 Sabel::using("Sabel_Logger_Factory");
 Sabel::using('Sabel_Exception_Runtime');
 
 /**
- * the Base of Page Controller.
- *
- * @todo remove dependency to Security package
- * @todo 
- * @todo 
- * @todo 
+ * Abstract Page Controller
  *
  * @category   Controller
  * @package    org.sabel.controller
@@ -26,6 +20,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   const HTTP_METHOD_PUT    = 0x10;
   const HTTP_METHOD_DELETE = 0x15;
   
+  protected $result = null;
+  
   protected
     $view       = null,
     $request    = null,
@@ -35,12 +31,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $response   = null;
     
   protected
-    $action        = '',
-    $rendering     = true,
-    $volatiles     = array(),
-    $withLayout    = true,
-    $attributes    = array(),
-    $enableSession = true,
+    $action            = '',
+    $rendering         = true,
+    $volatiles         = array(),
+    $withLayout        = true,
+    $attributes        = array(),
+    $enableSession     = true,
     $skipDefaultAction = true;
     
   protected $models = null;
@@ -72,6 +68,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     Sabel_Context::setView($this->view);
     
     if ($this->enableSession) {
+      Sabel::using('Sabel_Storage_Session');
       $this->storage  = Sabel_Storage_Session::create();
     }
     
@@ -109,38 +106,37 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function execute($actionName)
   {
     $this->action = $actionName;
+    if (empty($actionName)) {
+      throw new Sabel_Exception_InvalidActionName("invalid action name");
+    }
     
+    $this->processVolatile();
+    $this->processModels();
+    $this->processFilter("before");
+    $this->processReserved();
+    $this->processAction();
+    $this->processView();
+    $this->processFilter("after");
+    $this->storage->write("volatiles", $this->volatiles);
+    
+    return $this->result;
+  }
+  
+  protected function processVolatile()
+  {
     if (is_array($this->storage->read("volatiles"))) {
       $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
       foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
         $this->storage->delete($vname);
       }
     }
-    
-    if (empty($actionName)) {
-      throw new Sabel_Exception_InvalidActionName("invalid action name");
-    }
-    
-    if (!headers_sent()) header('X-Framework: Sabel');
-    $this->processModels();
-    $this->processFilter($actionName, "before");
-    
-    // check reserved words
-    if (isset($this->reserved[$actionName]))
+  }
+  
+  protected function processReserved()
+  {
+    if (isset($this->reserved[$this->action])) {
       throw new Sabel_Exception_Runtime('use reserved action name');
-    
-    $result = $this->executeAction($actionName);
-    
-    $view = $this->view;
-    $view->assign("request", $this->request);
-    $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
-    $view->assignByArray($this->request->getPostRequests());
-    $view->assignByArray($this->attributes);
-    if (is_array($result)) $view->assignByArray($result);
-    
-    $this->processFilter($actionName, "after");
-    $this->storage->write("volatiles", $this->volatiles);
-    return $result;
+    }
   }
   
   protected function processModels()
@@ -153,7 +149,17 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
   }
   
-  protected function processFilter($actionName, $when = "around")
+  protected function processView()
+  {
+    $view = $this->view;
+    $view->assign("request", $this->request);
+    $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
+    $view->assignByArray($this->request->getPostRequests());
+    $view->assignByArray($this->attributes);
+    if (is_array($this->result)) $view->assignByArray($this->result);
+  }
+  
+  protected function processFilter($when = "around")
   {
     $filters = array_filter(array_keys(get_object_vars($this)),
                             create_function('$in', 'return (strstr($in, "filter"));'));
@@ -162,13 +168,14 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     foreach ($filters as $pos => $filterName) {
       $filter = $this->$filterName;
       if (isset($filter[$when])) {
-        $this->doFilters($actionName, $filter[$when]);
+        $this->doFilters($filter[$when]);
       }
     }
   }
   
-  protected function doFilters($actionName, $filters)
+  protected function doFilters($filters)
   {
+    $actionName = $this->action;
     if (isset($filters["exclude"]) && isset($filters["include"])) {
       throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
     }
@@ -204,8 +211,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
   }
   
-  protected function executeAction($action)
+  protected function processAction()
   {
+    $action       = $this->action;
     $reqMethod    = strtolower($this->httpMethod);
     $methodAction = $reqMethod . ucfirst($action);
     $actionResult = array();
@@ -225,9 +233,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     } elseif ($this->hasMethod('actionMissing')) {
       $this->actionMissing();
     }
-    $result = (is_array($actionResult)) ? $actionResult : array();
     
-    return $result;
+    $this->result = (is_array($actionResult)) ? $actionResult : array();
   }
   
   public function rendering()
