@@ -184,7 +184,14 @@ class Sabel_DB_Executer
     if (!is_array($arg1)) $arg1 = array($arg1 => $arg2);
 
     foreach ($arg1 as $key => $val) {
-      if (isset($val)) $this->constraints[$key] = $val;
+      if (!isset($val)) continue;
+
+      if (strpos($val, '.') !== false) {
+        list($mdlName, $val) = explode('.', $val);
+        $val = convert_to_tablename($mdlName) . '.' . $val;
+      }
+
+      $this->constraints[$key] = $val;
     }
   }
 

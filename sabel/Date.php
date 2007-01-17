@@ -83,15 +83,16 @@ class Sabel_Date
                              'full' => 'c',
                              'date' => 'Y-m-d',
                              'time' => 'H:i:sP'),
-                             
+
                            self::JP      => array(
                              "full" => "Y年m月d日 H時i分s秒",
                              "date" => "Y年m月d日",
                              "time" => "H時i分s秒"));
 
-  protected $format = self::NORMAL;
-  protected $data = array();
-  protected $timestamp = null;
+  protected
+    $timestamp = null,
+    $data      = array(),
+    $format    = self::NORMAL;
 
   public function __construct($arg = null)
   {
@@ -102,7 +103,7 @@ class Sabel_Date
     } elseif (is_array($arg)) {
       $y = (isset($arg['y'])) ? $arg['y'] : date('Y');
       $m = (isset($arg['m'])) ? $arg['m'] : date('m');
-      $d = (isset($arg['d'])) ? $arg['d'] : date('d');
+      $d = (isset($arg['d'])) ? $arg['d'] : 0;
       $h = (isset($arg['h'])) ? $arg['h'] : 0;
       $i = (isset($arg['i'])) ? $arg['i'] : 0;
       $s = (isset($arg['s'])) ? $arg['s'] : 0;

@@ -402,10 +402,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->joinConNames[] = $this->tableProp->connectName;
       $this->relation->setColumns($tblName, $this->columns);
 
-      if ($this->parents) {
-        if ($this->addRelationalDataToBuffer(get_class($this), $this->parents)) {
-          return $this->automaticJoin();
-        }
+      if ($this->addRelationalDataToBuffer(get_class($this), $this->parents)) {
+        return $this->automaticJoin();
       }
     }
 
