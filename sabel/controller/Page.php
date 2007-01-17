@@ -166,6 +166,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       throw new Sabel_Exception_Runtime('use reserved action name');
     }
     
+    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+      $this->withLayout = false;
+      if ($this->view->isTemplateMissing()) {
+        $this->rendering = false;
+      }
+    }
+    
     foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
     $this->processAction();
     foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
