@@ -1,6 +1,7 @@
 <?php
 
 Sabel::using("Sabel_Controller_Page_Base");
+Sabel::using("Sabel_Controller_Page_Plugin");
 Sabel::using("Sabel_Logger_Factory");
 Sabel::using('Sabel_Exception_Runtime');
 
@@ -39,6 +40,10 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $enableSession     = true,
     $skipDefaultAction = true;
     
+  protected
+    $plugins       = array(),
+    $pluginMethods = array();
+    
   protected $models = null;
   
   /**
@@ -58,7 +63,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    *
    * @todo remove depend to view
    */
-  public function setup(Sabel_Request $request, $view = null, $action)
+  public function setup(Sabel_Request $request, $view = null, $action = null)
   {
     $this->action  = $action;
     $this->request = $request;
@@ -69,12 +74,15 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     if ($this->enableSession) {
       Sabel::using('Sabel_Storage_Session');
-      $this->storage  = Sabel_Storage_Session::create();
+      $this->storage = Sabel_Storage_Session::create();
     }
     
     if (isset($_SERVER['REQUEST_METHOD'])) {
       $this->httpMethod = $_SERVER['REQUEST_METHOD'];
     }
+    
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Filter'));
   }
   
   protected function __get($name)
@@ -93,6 +101,23 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->attributes[$name] = $value;
   }
   
+  protected function __call($method, $arguments)
+  {
+    $obj = $this->plugins[$this->pluginMethods[$method]];
+    $ref = new ReflectionClass($obj);
+    $ref->getMethod($method)->invokeArgs($obj, $arguments);
+  }
+  
+  public function getAttributes()
+  {
+    return $this->attributes;
+  }
+  
+  public function setAttributes($attributes)
+  {
+    $this->attributes = $attributes;
+  }
+  
   public function getAction()
   {
     return $this->action;
@@ -103,39 +128,34 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this->request->getPostRequests();
   }
   
-  public function execute($actionName)
+  public function execute($action = null)
   {
-    $this->action = $actionName;
-    if (empty($actionName)) {
+    if ($action !== null) $this->action = $action;
+    
+    if (empty($action)) {
       throw new Sabel_Exception_InvalidActionName("invalid action name");
     }
     
-    $this->processVolatile();
+    if (isset($this->reserved[$this->action])) {
+      throw new Sabel_Exception_Runtime('use reserved action name');
+    }
+    
+    foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
     $this->processModels();
-    $this->processFilter("before");
-    $this->processReserved();
     $this->processAction();
     $this->processView();
-    $this->processFilter("after");
-    $this->storage->write("volatiles", $this->volatiles);
-    
+    foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
     return $this->result;
   }
   
-  protected function processVolatile()
+  public function registPlugin($plug)
   {
-    if (is_array($this->storage->read("volatiles"))) {
-      $this->attributes = array_merge($this->storage->read("volatiles"), $this->attributes);
-      foreach ($this->storage->read("volatiles") as $vname => $vvalue) {
-        $this->storage->delete($vname);
+    $name = get_class($plug);
+    $this->plugins[$name] = $plug;
+    foreach (get_class_methods($plug) as $method) {
+      if ($method !== 'onBeforeAction' && $method !== 'onAfterAction') {
+        $this->pluginMethods[$method] = $name;
       }
-    }
-  }
-  
-  protected function processReserved()
-  {
-    if (isset($this->reserved[$this->action])) {
-      throw new Sabel_Exception_Runtime('use reserved action name');
     }
   }
   
@@ -157,58 +177,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $view->assignByArray($this->request->getPostRequests());
     $view->assignByArray($this->attributes);
     if (is_array($this->result)) $view->assignByArray($this->result);
-  }
-  
-  protected function processFilter($when = "around")
-  {
-    $filters = array_filter(array_keys(get_object_vars($this)),
-                            create_function('$in', 'return (strstr($in, "filter"));'));
-    
-    asort($filters);
-    foreach ($filters as $pos => $filterName) {
-      $filter = $this->$filterName;
-      if (isset($filter[$when])) {
-        $this->doFilters($filter[$when]);
-      }
-    }
-  }
-  
-  protected function doFilters($filters)
-  {
-    $actionName = $this->action;
-    if (isset($filters["exclude"]) && isset($filters["include"])) {
-      throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
-    }
-    
-    if (isset($filters["exclude"])) {
-      if (in_array($actionName, $filters["exclude"])) {
-        return false;
-      } else {
-        unset($filters["exclude"]);
-        $this->executeFilters($filters);
-      }
-    } elseif (isset($filters["include"])) {
-      if (in_array($actionName, $filters["include"])) {
-        unset($filters["include"]);
-        $this->executeFilters($filters);
-      }
-    } else {
-      $this->executeFilters($filters);
-    }
-  }
-  
-  protected function executeFilters($filters)
-  {
-    if (0 === count($filters)) return;
-    
-    foreach ($filters as $filter) {
-      if ($this->hasMethod($filter)) {
-        $this->logger->log("apply filter " . $filter);
-        if ($this->$filter() === false) break;
-      } else {
-        throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
-      }
-    }
   }
   
   protected function processAction()
@@ -272,20 +240,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     return $model;
-  }
-  
-  /**
-   * create volatile memory in storage
-   * this volatile data will be gone next end of action.
-   *
-   * @param string $key
-   * @param mixed $value
-   */
-  protected function volatile($key, $value)
-  {
-    $this->storage->write($key, $value);
-    $this->volatiles[$key] = $value;
-    $this->logger->log("register volatile: $key");
   }
   
   protected function checkReferer($validURIs)
