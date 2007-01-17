@@ -83,6 +83,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Filter'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_View'));
   }
   
   protected function __get($name)
@@ -113,9 +114,34 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this->attributes;
   }
   
+  public function setAttribute($name, $value)
+  {
+    $this->attributes[$name] = $value;
+  }
+  
   public function setAttributes($attributes)
   {
     $this->attributes = $attributes;
+  }
+  
+  public function issetModels()
+  {
+    return ($this->models === null) ? false : true;
+  }
+  
+  public function getModels()
+  {
+    return $this->models;
+  }
+  
+  public function getResult()
+  {
+    return $this->result;
+  }
+  
+  public function getRequest()
+  {
+    return $this->request;
   }
   
   public function getAction()
@@ -141,9 +167,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
-    $this->processModels();
     $this->processAction();
-    $this->processView();
     foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
     return $this->result;
   }
@@ -157,26 +181,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
         $this->pluginMethods[$method] = $name;
       }
     }
-  }
-  
-  protected function processModels()
-  {
-    if ($this->models !== null) {
-      foreach ($this->models as $model) {
-        $modelName = strtolower($model);
-        $this->$modelName = MODEL($model);
-      }
-    }
-  }
-  
-  protected function processView()
-  {
-    $view = $this->view;
-    $view->assign("request", $this->request);
-    $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
-    $view->assignByArray($this->request->getPostRequests());
-    $view->assignByArray($this->attributes);
-    if (is_array($this->result)) $view->assignByArray($this->result);
   }
   
   protected function processAction()
@@ -223,23 +227,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
         return $this->view->rendering($this->withLayout);
       }
     }
-  }
-  
-  protected function fill($model, $options = null)
-  {
-    if (!$model instanceof Sabel_DB_Model) {
-      throw new Sabel_Exception_Runtime("model isn't Sabel_DB_Model");
-    }
-    
-    if ($options === null) $options = array("ignores"=>array());
-    
-    foreach ($model->getColumnNames() as $column) {
-      if (!in_array($column, $options["ignores"])) {
-        if ($this->$column !== null) $model->$column = $this->$column;
-      }
-    }
-    
-    return $model;
   }
   
   protected function checkReferer($validURIs)
