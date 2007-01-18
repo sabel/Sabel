@@ -33,11 +33,11 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
         $storage->delete($vname);
       }
     }
-    
   }
   
   public function onAfterAction($controller)
   {
+    $this->onRedirect($controller);
   }
   
   public function onRedirect($controller)
