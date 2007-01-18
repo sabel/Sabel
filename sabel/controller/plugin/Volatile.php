@@ -38,6 +38,10 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
   
   public function onAfterAction($controller)
   {
+  }
+  
+  public function onRedirect($controller)
+  {
     $storage = Sabel_Storage_Session::create();
     $storage->write("volatiles", $this->volatiles);
   }

@@ -41,4 +41,6 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
     
     return $model;
   }
+  
+  public function onRedirect($controller){}
 }

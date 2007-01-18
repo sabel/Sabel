@@ -43,6 +43,8 @@ class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
     }
   }
   
+  public function onRedirect($controller){}
+  
   protected function doFilters($filters)
   {
     $actionName = $this->controller->getAction();

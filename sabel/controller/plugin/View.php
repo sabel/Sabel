@@ -23,4 +23,6 @@ class Sabel_Controller_Plugin_View implements Sabel_Controller_Page_Plugin
     $result = $controller->getResult();
     if (is_array($result)) $view->assignByArray($result);
   }
+  
+  public function onRedirect($controller){}
 }

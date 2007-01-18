@@ -178,10 +178,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->processAction();
     foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
     
-    if ($this->redirect !== null) {
-      header ($this->redirect);
-    }
-    
     return $this->result;
   }
   
@@ -270,9 +266,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
-    $this->logger->log("redirect: $to");
-    
-    $this->redirect = $redirect;
+    foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
+    header ($redirect);
   }
   
   public function redirectTo($params)
