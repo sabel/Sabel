@@ -590,9 +590,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $pair = $child . ':' . convert_to_modelname($model->tableProp->table);
     }
 
-    @list ($key, $tmp) = explode('.', $child);
-    if ($tmp) $child = $key;
-
+    list ($child)  = explode('.', $child);
     $relation      = Sabel::load('Sabel_DB_Model_Relation');
     list ($c, $s)  = $relation->toRelationPair($child, $pair);
     list (, $cKey) = explode('.', $c);
@@ -932,7 +930,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($id === null && !$this->isSelected())
       throw new Exception('Error: give the value of id or select the model beforehand.');
 
-    $id      = (isset($id)) ? $id : $this->{$this->tableProp->primaryKey};
     $chain   = Schema_CascadeChain::get();
     $tblName = $this->tableProp->table;
 
@@ -947,8 +944,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $models = array();
     $pKey   = $this->tableProp->primaryKey;
     foreach ($tables as $table) {
-      $foreignKey = "{$tblName}_{$pKey}";
-      if ($model = $this->pushStack($table, $foreignKey, $id)) $models[] = $model;
+      list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
+      $idValue = (isset($id)) ? $id : $this->$idCol;
+
+      if ($model = $this->pushStack($table, $foreignKey, $idValue)) $models[] = $model;
     }
 
     foreach ($models as $children) $this->makeChainModels($children, $chain);
@@ -971,8 +970,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $models = array();
     foreach ($tables as $table) {
       foreach ($children as $child) {
-        $foreignKey = $child->tableProp->table . '_' . $child->tableProp->primaryKey;
-        if ($model = $this->pushStack($table, $foreignKey, $child->id)) $models[] = $model;
+        $tblName = $child->tableProp->table;
+        $pKey    = $child->tableProp->primaryKey;
+        list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
+
+        if ($model = $this->pushStack($table, $foreignKey, $child->$idCol)) $models[] = $model;
       }
     }
 
@@ -984,10 +986,29 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   private function pushStack($tblName, $foreignKey, $id)
   {
     $model  = MODEL(convert_to_modelname($tblName));
+    $model->setParents(array());
     $models = $model->select($foreignKey, $id);
 
     if ($models) $this->cascadeStack["{$tblName}:{$id}"] = $foreignKey;
     return $models;
+  }
+
+  private function createCascadeParam($chainValue, $tblName, $primaryKey)
+  {
+    if (strpos($chainValue, ':') === false) {
+      $idCol = $primaryKey;
+    } else {
+      list ($idCol, $chainValue) = explode(':', $chainValue);
+    }
+
+    if (strpos($chainValue, '.') === false) {
+      $foreignKey = "{$tblName}_{$primaryKey}";
+    } else {
+      list ($chainValue, $foreignKey) = explode('.', $chainValue);
+    }
+
+    $table_name = $chainValue;
+    return array($table_name, $foreignKey, $idCol);
   }
 
   private function clearCascadeStack($stack)

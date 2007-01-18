@@ -428,9 +428,42 @@ class Sabel_DB_Executer
     return Sabel::load('Sabel_DB_Schema_Accessor', $connectName, $schemaName);
   }
 
+  /**
+   * start transaction.
+   *
+   * @return void
+   */
   public function begin()
   {
     $this->getDriver()->begin($this->getConnectName());
+  }
+
+  /**
+   * an alias for begin() and addTransaction()
+   *
+   * @return void
+   */
+  public function startTransaction()
+  {
+    $this->begin();
+  }
+
+  /**
+   * an alias for begin() and startTransaction()
+   *
+   * Example :
+   * <code>
+   *   $model1->startTransaction();  // or    $model1->begin();
+   *   $model2->addTransaction();    // equal $model2->begin();
+   *     .
+   *     .
+   *     .
+   *   $model1->commit();
+   * </code>
+   */
+  public function addTransaction()
+  {
+    $this->begin();
   }
 
   public function commit()
@@ -449,7 +482,7 @@ class Sabel_DB_Executer
   }
 
   /**
-   * an alias for setCondition.
+   * an alias for setCondition()
    *
    * @return void
    */
@@ -459,7 +492,7 @@ class Sabel_DB_Executer
   }
 
   /**
-   * an alias for setConstraint.
+   * an alias for setConstraint()
    *
    * @return void
    */

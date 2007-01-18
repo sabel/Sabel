@@ -1459,9 +1459,9 @@ class Schema_CascadeChain
     $chains['users']          = array('blog'); //array('blog','favorite_item');
     $chains['parents']        = array('child');
     $chains['classification'] = array('city');
-    $chains['country']        = array('city');
-    $chains['city']           = array('company','users');
-    $chains['customer']       = array('customer_order');
+    $chains['country']        = array('id:city.country_id');
+    $chains['city']           = array('id:company','users.city_id');
+    $chains['customer']       = array('customer_order.customer_id');
     $chains['student']        = array('student_course');
     $chains['course']         = array('student_course');
     $chains['company']        = array('users');
