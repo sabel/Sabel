@@ -18,10 +18,14 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
     $this->volatiles[$key] = $value;
   }
   
+  public function getVolatiles()
+  {
+    return $this->volatiles;
+  }
+  
   public function onBeforeAction($controller)
   {
     $storage = Sabel_Storage_Session::create();
-    
     if (is_array($storage->read("volatiles"))) {
       $attributes = array_merge($storage->read("volatiles"), $controller->getAttributes());
       $controller->setAttributes($attributes);
@@ -29,6 +33,7 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
         $storage->delete($vname);
       }
     }
+    
   }
   
   public function onAfterAction($controller)

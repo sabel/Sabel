@@ -22,6 +22,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   const HTTP_METHOD_DELETE = 0x15;
   
   protected $result = null;
+  protected $redirect = null;
   
   protected
     $view       = null,
@@ -121,7 +122,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   public function setAttributes($attributes)
   {
-    $this->attributes = $attributes;
+    $this->attributes = array_merge($attributes, $this->attributes);
   }
   
   public function issetModels()
@@ -176,6 +177,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
     $this->processAction();
     foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
+    
+    if ($this->redirect !== null) {
+      header ($this->redirect);
+    }
+    
     return $this->result;
   }
   
@@ -264,10 +270,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
-    $this->storage->write("volatiles", $this->volatiles);
     $this->logger->log("redirect: $to");
-    header($redirect);
-    exit; // exit after HTTP Header(30x)
+    
+    $this->redirect = $redirect;
   }
   
   public function redirectTo($params)
@@ -277,7 +282,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     $candidate = Sabel_Context::getCurrentCandidate();
-    $this->storage->write("volatiles", $this->volatiles);
     $this->redirect('/' . $candidate->uri($params));
   }
   
