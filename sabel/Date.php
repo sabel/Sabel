@@ -103,7 +103,7 @@ class Sabel_Date
     } elseif (is_array($arg)) {
       $y = (isset($arg['y'])) ? $arg['y'] : date('Y');
       $m = (isset($arg['m'])) ? $arg['m'] : date('m');
-      $d = (isset($arg['d'])) ? $arg['d'] : 0;
+      $d = (isset($arg['d'])) ? $arg['d'] : 1;
       $h = (isset($arg['h'])) ? $arg['h'] : 0;
       $i = (isset($arg['i'])) ? $arg['i'] : 0;
       $s = (isset($arg['s'])) ? $arg['s'] : 0;
@@ -112,7 +112,6 @@ class Sabel_Date
     } else {
       throw new Sabel_Exception_Runtime('Sabel_Date::__construct() invalid parameter.');
     }
-
   }
 
   public function __toString()

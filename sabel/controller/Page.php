@@ -107,7 +107,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     $obj = $this->plugins[$this->pluginMethods[$method]];
     $ref = new ReflectionClass($obj);
-    $ref->getMethod($method)->invokeArgs($obj, $arguments);
+    return $ref->getMethod($method)->invokeArgs($obj, $arguments);
   }
   
   public function getAttributes()

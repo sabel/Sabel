@@ -23,17 +23,19 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
   
   public function onAfterAction($controller) {}
   
-  protected function fill($model, $options = null)
+  public function fill($model, $options = null)
   {
     if (!$model instanceof Sabel_DB_Model) {
       throw new Sabel_Exception_Runtime("model isn't Sabel_DB_Model");
     }
     
+    $requests = Sabel_Context::getPageController()->getRequests();
+    
     if ($options === null) $options = array("ignores" => array());
     
     foreach ($model->getColumnNames() as $column) {
       if (!in_array($column, $options["ignores"])) {
-        if ($this->$column !== null) $model->$column = $this->$column;
+        if (isset($requests[$column])) $model->$column = $requests[$column];
       }
     }
     
