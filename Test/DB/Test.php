@@ -552,6 +552,23 @@ class Test_DB_Test extends SabelTestCase
 
     $orders = Sabel_Model::load('Customer')->selectOne(2)->getChild('CustomerOrder');
     $this->assertEquals(count($orders), 4);
+
+    $order = MODEL('CustomerOrder');
+    $order->setParents(array('Customer'));
+    $order->sconst('order', 'CustomerOrder.id');
+    $orders = $order->select();
+
+    $this->assertEquals($orders[0]->customer_id, 1);
+    $this->assertEquals($orders[0]->buy_date, '2005-01-01 10:10:10');
+    $this->assertEquals($orders[0]->amount, 1000);
+
+    $this->assertEquals($orders[1]->customer_id, 1);
+    $this->assertEquals($orders[1]->buy_date, '2005-02-01 10:10:10');
+    $this->assertEquals($orders[1]->amount, 2000);
+
+    $this->assertEquals($orders[5]->customer_id, 2);
+    $this->assertEquals($orders[5]->buy_date, '2005-06-01 10:10:10');
+    $this->assertEquals($orders[5]->amount, 6000);
   }
 
   public function testJoin()

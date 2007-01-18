@@ -583,13 +583,28 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     if ($model === null) $model = $this;
 
+    $pair = $child;
+    if (strpos($child, ':') !== false) {
+      list ($child) = explode(':', $child);
+    } else {
+      $pair = $child . ':' . convert_to_modelname($model->tableProp->table);
+    }
+
+    @list ($key, $tmp) = explode('.', $child);
+    if ($tmp) $child = $key;
+
+    $relation      = Sabel::load('Sabel_DB_Model_Relation');
+    list ($c, $s)  = $relation->toRelationPair($child, $pair);
+    list (, $cKey) = explode('.', $c);
+    list (, $sKey) = explode('.', $s);
+
     $cModel = MODEL($child);
+
     $p = $cModel->getProjection();
     $cModel->getStatement()->setBasicSQL("SELECT $p FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
-    $primary = $model->tableProp->primaryKey;
-    $model->setChildCondition("{$model->tableProp->table}_{$primary}", $model->$primary);
+    $model->setChildCondition($cKey, $model->$sKey);
 
     $cModel->conditions = $model->getChildCondition();
     $cconst = $model->getChildConstraint();
