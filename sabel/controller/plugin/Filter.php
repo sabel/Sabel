@@ -76,7 +76,10 @@ class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
     
     foreach ($filters as $filter) {
       if ($this->controller->hasMethod($filter)) {
-        if ($this->controller->$filter() === false) break;
+        if ($this->controller->$filter() === false) {
+          break;
+        } else {
+        }
       } else {
         throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
       }

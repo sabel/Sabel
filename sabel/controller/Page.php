@@ -22,7 +22,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   const HTTP_METHOD_DELETE = 0x15;
   
   protected $result = null;
-  protected $redirect = null;
   
   protected
     $view       = null,
@@ -173,9 +172,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       }
     }
     
-    foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
+    $this->processBeforeActionPlugins();
     $this->processAction();
-    foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
+    $this->processAfterActionPlugins();
     
     return $this->result;
   }
@@ -189,6 +188,21 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
         $this->pluginMethods[$method] = $name;
       }
     }
+  }
+  
+  protected function processBeforeActionPlugins()
+  {
+    foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
+  }
+  
+  protected function processAfterActionPlugins()
+  {
+    foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
+  }
+  
+  protected function processRedirectPlugins()
+  {
+    foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
   }
   
   protected function processAction()
@@ -265,7 +279,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . $to;
-    foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
+    $this->processRedirectPlugins();
     header ($redirect);
     exit;
   }
