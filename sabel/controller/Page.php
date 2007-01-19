@@ -35,7 +35,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   protected
     $action            = '',
     $rendering         = true,
-    $volatiles         = array(),
     $withLayout        = true,
     $attributes        = array(),
     $enableSession     = true,
@@ -268,6 +267,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $redirect = 'Location: ' . $absolute . $to;
     foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
     header ($redirect);
+    exit;
   }
   
   public function redirectTo($params)
