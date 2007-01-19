@@ -46,7 +46,7 @@ class Sabel_Storage_Session
   {
     $ret = null;
     if (isset($_SESSION[$key])) {
-      $ret =& $_SESSION[$key]['value'];
+      $ret = $_SESSION[$key]['value'];
     }
     return $ret;
   }
@@ -82,15 +82,5 @@ class Sabel_Storage_Session
     foreach ($_SESSION as $key => $value) {
       $_SESSION[$key]['count'] += 1;
     }
-  }
-  
-  public function dump()
-  {
-    print "<pre>";
-    print_r($_SESSION);
-    print "<hr />";
-    var_dump($_SESSION);
-    print "<hr />";
-    print "</pre>";
   }
 }

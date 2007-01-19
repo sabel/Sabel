@@ -13,3 +13,43 @@ function update($anchor, $element, $uri, $method = "get", $parameters = "")
   
   return sprintf($format, $element, uri($uri, false), $method, $parameters, $anchor);
 }
+
+function remote($anchor, $uri, $method = "get", $parameters = "")
+{
+  $format = "
+    <a onClick=\"
+         new Ajax.Request('%s', {
+           method:     '%s',
+           parameters: '%s',
+           onComplete: function(response) {eval(response.responseText)}
+         })
+       \">%s</a>";
+  
+  return sprintf($format, uri($uri, false), $method, $parameters, $anchor);
+}
+
+class Sabel_View_Helper_Prototype_Page
+{
+  protected $jsLines = array();
+  
+  public function source($js)
+  {
+    $this->jsLines[] = $js;
+  }
+  
+  function replace($id, $contents)
+  {
+    $jstemplate = '$("%s").innerHTML = "%s"';
+    $this->jsLines[] = sprintf($jstemplate, $id, $contents);
+  }
+  
+  public function insert()
+  {
+    $this->jsLines[] = "";
+  }
+  
+  public function toJavaScript()
+  {
+    return join("\n", $this->jsLines);
+  }
+}

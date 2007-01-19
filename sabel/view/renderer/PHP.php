@@ -11,13 +11,16 @@
  */
 class Sabel_View_Renderer_PHP extends Sabel_View_Renderer
 {
-  public function rendering($path, $name, $values)
+  public function rendering($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_values)
   {
-    if (count($this->attributes) != 0) extract($this->attributes, EXTR_SKIP);
-    extract(Re::get(), EXTR_SKIP);
-    ob_start();
-    include($this->getTemplateFullPath());
-    $content = ob_get_clean();
+    Sabel::using("Sabel_View_Helper_Prototype");
+    $page = new Sabel_View_Helper_Prototype_Page();
+    
+    extract($sbl_tpl_values, EXTR_OVERWRITE);
+    // ob_start();
+    include($sbl_tpl_path . $sbl_tpl_name);
+    $content = $page->toJavaScript();
+    // $content = ob_get_clean();
     return $content;
   }
 }
