@@ -181,6 +181,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       throw new Exception('Error:setChildConstraint() second argument must be an array.');
 
     foreach ($constraints as $key => $val) {
+      if (strpos($val, '.') !== false) {
+        list($mdlName, $val) = explode('.', $val);
+        $val = convert_to_tablename($mdlName) . '.' . $val;
+      }
       $this->childConstraints[$mdlName][$key] = $val;
     }
   }
@@ -787,7 +791,13 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function validate()
   {
     $this->sColumns  = $this->schema->getColumns();
-    $this->errors    = $errors = Sabel::load('Sabel_Errors');
+
+    if (is_object($this->errors)) {
+      $errors = $this->errors;
+    } else {
+      $this->errors = $errors = Sabel::load('Sabel_Errors');
+    }
+
     $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
 
     foreach ($dataForValidate as $name => $value) {

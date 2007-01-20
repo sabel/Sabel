@@ -109,7 +109,8 @@ abstract class Sabel_DB_Base_Statement
   protected function makeWhereInSQL($condition)
   {
     $values = array();
-    foreach ($condition->value as $val) $values[] = $this->escape($val);
+    $conditionValues = $condition->value;
+    foreach ($conditionValues as $val) $values[] = $this->escape($val);
     $this->setWhereQuery($this->getKey($condition) . ' IN (' . join(',', $values) . ')');
   }
 
