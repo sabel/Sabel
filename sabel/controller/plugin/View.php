@@ -25,4 +25,5 @@ class Sabel_Controller_Plugin_View implements Sabel_Controller_Page_Plugin
   }
   
   public function onRedirect($controller){}
+  public function onException($controller, $exception) {}
 }

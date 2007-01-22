@@ -13,7 +13,7 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
 {
   public function onBeforeAction($controller)
   {
-    if ($controller->issetModel()) {
+    if ($controller->issetModels()) {
       foreach ($controller->getModels() as $model) {
         $modelName = strtolower($model);
         $this->setAttribute($modelName, MODEL($model));
@@ -42,5 +42,6 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
     return $model;
   }
   
-  public function onRedirect($controller){}
+  public function onRedirect($controller) {}
+  public function onException($controller, $exception) {}
 }

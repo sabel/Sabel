@@ -24,7 +24,7 @@ class Test_Controller_Page extends SabelTestCase
   {
     $this->c = new PageControllerForTest();
     $this->assertTrue(is_object($this->c));
-    $this->c->setup(new MockRequest(), null, 'mock');
+    $this->c->setup(new MockRequest());
   }
  
   public function tearDown()
@@ -50,7 +50,7 @@ class Test_Controller_Page extends SabelTestCase
   public function testActionWithParameter()
   {
     $request = new MockRequest();
-    $this->c->setup($request, null, 'mock');
+    $this->c->setup($request);
     $result = $this->c->execute("testActionWithParameter");
     $this->assertEquals("testParam", $result["test"]);
   }

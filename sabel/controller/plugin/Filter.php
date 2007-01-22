@@ -85,4 +85,6 @@ class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
       }
     }
   }
+  
+  public function onException($controller, $exception) {}
 }

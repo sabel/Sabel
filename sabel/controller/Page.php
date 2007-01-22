@@ -82,7 +82,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Filter'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_View'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Model'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'));
   }
   
   protected function __get($name)
@@ -173,7 +174,14 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     $this->processBeforeActionPlugins();
-    $this->processAction();
+    
+    try {
+      $this->processAction();
+      $this->view->assignByArray($this->result);
+    } catch (Exception $exception) {
+      $this->processExceptionPlugins($exception);
+    }
+    
     $this->processAfterActionPlugins();
     
     return $this->result;
@@ -203,6 +211,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   protected function processRedirectPlugins()
   {
     foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
+  }
+  
+  protected function processExceptionPlugins($exception)
+  {
+    foreach ($this->plugins as $plugin) $plugin->onException($this, $exception);
   }
   
   protected function processAction()
