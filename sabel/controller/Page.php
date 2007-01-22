@@ -83,6 +83,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Filter'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Model'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_View'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'));
   }
   
