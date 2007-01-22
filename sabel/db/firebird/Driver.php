@@ -88,6 +88,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
     if (!$result) {
       $error = ibase_errmsg();
+      $sql   = substr($sql, 0, 128) . " ...";
       throw new Exception("ibase_query execute failed:{$sql} ERROR:{$error}");
     }
 

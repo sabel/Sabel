@@ -87,6 +87,7 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Base_Driver
 
     if (!$result) {
       $error = mssql_get_last_message();
+      $sql   = substr($sql, 0, 128) . " ...";
       throw new Exception("mssql_query execute failed:{$sql} ERROR:{$error}");
     }
 

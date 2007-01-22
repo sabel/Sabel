@@ -70,6 +70,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 
     if (!$result) {
       $error = pg_result_error($result);
+      $sql   = substr($sql, 0, 128) . " ...";
       throw new Exception("pgsql_query execute failed:{$sql} ERROR:{$error}");
     }
 
