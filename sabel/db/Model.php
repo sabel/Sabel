@@ -873,7 +873,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         return ($value !== __TRUE__ && $value !== __FALSE__);
         break;
       case Sabel_DB_Type_Const::DATETIME:
-        return (boolean) strtotime($value);
+        return !(boolean)strtotime($value);
         break;
       default:
         return false;
