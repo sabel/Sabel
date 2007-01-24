@@ -16,14 +16,14 @@ Sabel::using('Sabel_Exception_Runtime');
  */
 class Sabel_Controller_Front
 {
-  protected $requestClass = "Sabel_Request_Web";
+  private $requestClass = "Sabel_Request_Web";
   
   public function __construct()
   {
     Sabel::fileUsing(RUN_BASE . '/config/map.php');
   }
   
-  public function ignition(Sabel_Request $request = null)
+  public function ignition(Sabel_Request $request = null, $storage = null)
   {
     if ($request === null) $request = Sabel::load($this->requestClass);
     $candidate = $this->processCandidate($request);
@@ -31,14 +31,18 @@ class Sabel_Controller_Front
     $this->processHelper($request, $candidate);
     $this->processPreFilter($filters, $request);
     $controller = $this->processPageController($candidate);
-    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate));
+    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate), $storage);
     $controller->initialize();
     
     $responses = $controller->execute($candidate->getAction());
     
     $this->processPostFilter($filters, $controller, $responses);
     
-    return array('html' => $controller->rendering(), 'responses' => $responses);
+    if ($responses !== false) {
+      return array('html' => $controller->rendering(), 'responses' => $responses);
+    } else {
+      return false;
+    }
   }
   
   protected function processCandidate(Sabel_Request $request)

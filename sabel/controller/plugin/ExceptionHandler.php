@@ -9,7 +9,11 @@ class Sabel_Controller_Plugin_ExceptionHandler implements Sabel_Controller_Page_
     $c->initialize();
     $ref = new ReflectionClass($exception);
     $className = str_replace("Exception_", "", $ref->getName());
-    $c->$className($exception);
+    if ($ref->hasMethod($className)) {
+      $c->$className($exception);
+    } else {
+      $c->exception($exception);
+    }
   }
   
   public function onBeforeAction($controller) {}

@@ -16,17 +16,13 @@ Sabel::using('Sabel_Exception_Runtime');
  */
 abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 {
-  const HTTP_METHOD_GET    = 0x01;
-  const HTTP_METHOD_POST   = 0x05;
-  const HTTP_METHOD_PUT    = 0x10;
-  const HTTP_METHOD_DELETE = 0x15;
-  
-  protected $result = null;
+  protected
+    $redirected = false,
+    $result     = null;
   
   protected
     $view       = null,
     $request    = null,
-    $httpMethod = self::HTTP_METHOD_GET,
     $storage    = null,
     $logger     = null,
     $response   = null;
@@ -62,9 +58,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    *
    * @todo remove depend to view
    */
-  public function setup(Sabel_Request $request, $view = null, $action = null)
+  public function setup(Sabel_Request $request, $view = null, $storage = null)
   {
-    $this->action  = $action;
     $this->request = $request;
     $this->logger  = Sabel_Logger_Factory::create("file");
     
@@ -72,12 +67,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     Sabel_Context::setView($this->view);
     
     if ($this->enableSession) {
-      Sabel::using('Sabel_Storage_Session');
-      $this->storage = Sabel_Storage_Session::create();
-    }
-    
-    if (isset($_SERVER['REQUEST_METHOD'])) {
-      $this->httpMethod = $_SERVER['REQUEST_METHOD'];
+      if ($storage === null) {
+        Sabel::using('Sabel_Storage_Session');
+        $this->storage = Sabel_Storage_Session::create();
+      } else {
+        $this->storage = $storage;
+      }
     }
     
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
@@ -85,6 +80,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Model'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_View'));
     $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'));
+    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Redirecter'));
   }
   
   protected function __get($name)
@@ -209,9 +205,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
   }
   
-  protected function processRedirectPlugins()
+  protected function processRedirectPlugins($redirect)
   {
-    foreach ($this->plugins as $plugin) $plugin->onRedirect($this);
+    foreach ($this->plugins as $plugin) {
+      $plugin->onRedirect($this, $redirect);
+    }
   }
   
   protected function processExceptionPlugins($exception)
@@ -221,8 +219,10 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function processAction()
   {
+    if ($this->redirected) return false;
+    
     $action       = $this->action;
-    $reqMethod    = strtolower($this->httpMethod);
+    $reqMethod    = strtolower($this->request->getHttpMethod());
     $methodAction = $reqMethod . ucfirst($action);
     $actionResult = array();
     
@@ -286,16 +286,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   public function redirect($to)
   {
-    if (isset($_SERVER['HTTP_HOST'])) {
-      $host = $_SERVER['HTTP_HOST'];
-    } else {
-      $host = "localhost";
-    }
-    $absolute = 'http://' . $host;
-    $redirect = 'Location: ' . $absolute . $to;
-    $this->processRedirectPlugins();
-    header ($redirect);
-    exit;
+    $this->redirected = true;
+    $this->processRedirectPlugins($to);
   }
   
   public function redirectTo($params)
@@ -305,7 +297,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     $candidate = Sabel_Context::getCurrentCandidate();
-    $this->redirect('/' . $candidate->uri($params));
+    $this->redirect($candidate->uri($params));
   }
   
   /**
@@ -347,12 +339,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function isPost()
   {
-    return ($this->httpMethod === self::HTTP_METHOD_POST);
+    return ($this->request->isPost());
   }
   
   protected function isGet()
   {
-    return ($this->httpMethod === self::HTTP_METHOD_GET);
+    return ($this->request->isGet());
   }
 }
 

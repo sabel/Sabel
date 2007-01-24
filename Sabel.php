@@ -256,6 +256,15 @@ function add_include_path($path)
   set_include_path(RUN_BASE . "{$path}:" . get_include_path());
 }
 
+function environment($string)
+{
+  switch ($string) {
+    case 'production':  return PRODUCTION;
+    case 'test':        return TEST;
+    case 'development': return DEVELOPMENT;
+  }
+}
+
 if (!extension_loaded('gettext')) {
   function _($val)
   {

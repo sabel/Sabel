@@ -23,13 +23,27 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
    */
   protected $candidate = null;
   
+  protected $httpMethod = "get";
+  
+  protected $posts = array();
+  
   /**
    * @var Sabel_Request_Parameters $parameters
    */
   protected $parameters = null;
   
-  public function __construct($requestUri = "")
+  public function __construct($requestUri = "", $httpMethod = null)
   {
+    if ($httpMethod === null) {
+      $this->httpMethod = $_SERVER['REQUEST_METHOD'];
+    } else {
+      $this->httpMethod = $httpMethod;
+    }
+    
+    if (isset($_POST)) {
+      $this->posts = $_POST;
+    }
+    
     $uriAndParams = explode('?', $this->createRequestUri($requestUri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
     
@@ -75,13 +89,25 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
     } elseif (is_object($this->getParameters()) && $this->hasParameter($name)) {
       return $this->parameters->get($name);
     } else {
-      return $this->getPost($name);
+      return $this->getPostValue($name);
     }
   }
   
-  public function getPost($name)
+  public function setPostValue($name, $value)
   {
-    return (isset($_POST[$name])) ? $_POST[$name] : null;
+    $this->posts[$name] = $value;
+    return $this;
+  }
+  
+  public function setPostValues($values)
+  {
+    $this->posts = array_merge($values, $this->posts);
+    return $this;
+  }
+  
+  public function getPostValue($name)
+  {
+    return (isset($this->posts[$name])) ? $this->posts[$name] : null;
   }
   
   /**
@@ -96,22 +122,27 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   
   public function isPost()
   {
-    return ($_SERVER['REQUEST_METHOD'] === 'POST');
+    return ($this->httpMethod === 'POST');
   }
   
   public function isGet()
   {
-    return ($_SERVER['REQUEST_METHOD'] === 'GET');
+    return ($this->httpMethod === 'GET');
   }
   
   public function isPut()
   {
-    return ($_SERVER['REQUEST_METHOD'] === 'PUT');
+    return ($this->httpMethod === 'PUT');
   }
   
   public function isDelete()
   {
-    return ($_SERVER['REQUEST_METHOD'] === 'DELETE');
+    return ($this->httpMethod === 'DELETE');
+  }
+  
+  public function getHttpMethod()
+  {
+    return $this->httpMethod;
   }
   
   public function setCandidate(Sabel_Map_Candidate $candidate)

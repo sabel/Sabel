@@ -1,13 +1,10 @@
 <?php
 
-if (!defined('PHPUnit2_MAIN_METHOD'))
-  define('PHPUnit2_MAIN_METHOD', 'Tester::main');
-
-require_once('PHPUnit2/TextUI/TestRunner.php');
-require_once('PHPUnit2/Framework/TestCase.php');
+require_once('PHPUnit/TextUI/TestRunner.php');
+require_once('PHPUnit/Framework/TestCase.php');
 
 /**
- * Sabel specific Test_Runner inherit PHPUnit2_TextUI_TestRunner
+ * Sabel specific Test_Runner inherit PHPUnit_TextUI_TestRunner
  *
  * @category   Test
  * @package    org.sabel.test
@@ -15,7 +12,7 @@ require_once('PHPUnit2/Framework/TestCase.php');
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Test_Runner extends PHPUnit2_TextUI_TestRunner
+class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
 {
   public static function create()
   {

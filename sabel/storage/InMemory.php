@@ -1,14 +1,9 @@
 <?php
 
-class Sabel_Storage_Session
+class Sabel_Storage_InMemory
 {
   private static $instance = null;
-  
-  public function __construct()
-  {
-    // @todo fix me
-    if (!defined('TEST_CASE')) @session_start();
-  }
+  private $attributes = array();
   
   public static function create()
   {
@@ -19,37 +14,36 @@ class Sabel_Storage_Session
   public function clear()
   {
     $deleted = array();
-    foreach ($_SESSION as $key => $sesval) {
+    foreach ($this->attributes as $key => $sesval) {
       $deleted[] = $sesval;
-      unset($_SESSION[$key]);
+      unset($this->attributes[$key]);
     }
     return $deleted;
   }
   
   public function destroy()
   {
-    $deleted = $_SESSION;
-    session_destroy();
-    return $deleted;
+    $this->attributes = array();
+    return $this->attributes;
   }
   
   public function has($key)
   {
-    return isset($_SESSION[$key]);
+    return isset($this->attributes[$key]);
   }
   
   public function read($key)
   {
     $ret = null;
-    if (isset($_SESSION[$key])) {
-      $ret = $_SESSION[$key]['value'];
+    if (isset($this->attributes[$key])) {
+      $ret = $this->attributes[$key]['value'];
     }
     return $ret;
   }
   
   public function write($key, $value, $timeout = 60)
   {
-    $_SESSION[$key] = array('value'   => $value, 
+    $this->attributes[$key] = array('value'   => $value, 
                             'timeout' => $timeout,
                             'count'   => 0);
   }
@@ -57,26 +51,26 @@ class Sabel_Storage_Session
   public function delete($key)
   {
     $ret = null;
-    if (isset($_SESSION[$key])) {
-      $ret =& $_SESSION[$key]['value'];
-      unset($_SESSION[$key]);
+    if (isset($this->attributes[$key])) {
+      $ret =& $this->attributes[$key]['value'];
+      unset($this->attributes[$key]);
     }
     return $ret;
   }
   
   public function timeout()
   {
-    foreach ($_SESSION as $key => $value) {
+    foreach ($this->attributes as $key => $value) {
       if ($value['count'] > $value['timeout']) {
-        unset($_SESSION[$key]);
+        unset($this->attributes[$key]);
       }
     }
   }
   
   public function countUp()
   {
-    foreach ($_SESSION as $key => $value) {
-      $_SESSION[$key]['count'] += 1;
+    foreach ($this->attributes as $key => $value) {
+      $this->attributes[$key]['count'] += 1;
     }
   }
 }
