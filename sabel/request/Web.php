@@ -11,7 +11,7 @@ Sabel::using("Sabel_Request");
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
+class Sabel_Request_Web extends Sabel_Request
 {
   /**
    * @var Sabel_Request_Uri $uri
@@ -27,6 +27,8 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   
   protected $posts = array();
   
+  private $result = null;
+  
   /**
    * @var Sabel_Request_Parameters $parameters
    */
@@ -35,7 +37,9 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   public function __construct($requestUri = "", $httpMethod = null)
   {
     if ($httpMethod === null) {
-      $this->httpMethod = $_SERVER['REQUEST_METHOD'];
+      if (isset($_SERVER["REQUEST_METHOD"])) {
+        $this->httpMethod = $_SERVER["REQUEST_METHOD"];
+      }
     } else {
       $this->httpMethod = $httpMethod;
     }
@@ -52,6 +56,40 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
     
     assert(is_object($this->uri));
     assert(is_object($this->parameters));
+  }
+  
+  public function to($uri)
+  {
+    $uriAndParams = explode('?', $this->createRequestUri($uri));
+    $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
+    $this->uri        = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
+    $this->parameters = Sabel::load('Sabel_Request_Parameters', $parameters);
+    
+    return $this;
+  }
+  
+  public function parameters($params)
+  {
+    $this->parameters = Sabel::load('Sabel_Request_Parameters', $params);
+    return $this;
+  }
+  
+  public function method($httpMethod)
+  {
+    $this->httpMethod = $httpMethod;
+    return $this;
+  }
+  
+  public function value($key, $value)
+  {
+    $this->setPostValue($key, $value);
+    return $this;
+  }
+  
+  public function values($lists)
+  {
+    $this->setPostValues($lists);
+    return $this;
   }
   
   protected function createRequestUri($requestUri)
@@ -164,6 +202,33 @@ class Sabel_Request_Web extends Sabel_Object implements Sabel_Request
   public function getRequestUri()
   {
     return $this->uri;
+  }
+  
+  public function launch($storage = null)
+  {
+    $aFrontController = Sabel::load('Sabel_Controller_Front');
+    
+    $aFrontController->plugin
+                     ->add(Sabel::load('Sabel_Controller_Plugin_Volatile'))
+                     ->add(Sabel::load('Sabel_Controller_Plugin_Filter'))
+                     ->add(Sabel::load('Sabel_Controller_Plugin_Model'))
+                     ->add(Sabel::load('Sabel_Controller_Plugin_View'))
+                     ->add(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'))
+                     ->add(Sabel::load('Sabel_Controller_Plugin_TestRedirecter'));
+                     
+    $this->result = $aFrontController->ignition($this, $storage);
+      
+    return $this;
+  }
+  
+  public function isRedirected()
+  {
+    return $this->result->isRedirected();
+  }
+  
+  public function result()
+  {
+    return $this->result;
   }
   
   public function __toString()

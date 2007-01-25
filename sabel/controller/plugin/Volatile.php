@@ -1,5 +1,7 @@
 <?php
 
+Sabel::using("Sabel_Controller_Page_Plugin");
+
 /**
  * Volatile plugin
  *

@@ -9,15 +9,20 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_Request
+abstract class Sabel_Request extends Sabel_Object
 {
-  public function getParameters();
+  public static function create()
+  {
+    return Sabel::load("Sabel_Request_Web");
+  }
   
-  public function getPostRequests();
+  abstract public function getParameters();
+  
+  abstract public function getPostRequests();
     
-  public function hasParameter($name);
+  abstract public function hasParameter($name);
   
-  public function getParameter($name);
+  abstract public function getParameter($name);
   
-  public function __toString();
+  abstract public function __toString();
 }

@@ -17,6 +17,7 @@ Sabel::using('Sabel_Exception_Runtime');
 abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 {
   protected
+    $redirect   = "",
     $redirected = false,
     $result     = null;
   
@@ -74,13 +75,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
         $this->storage = $storage;
       }
     }
-    
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Volatile'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Filter'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Model'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_View'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'));
-    $this->registPlugin(Sabel::load('Sabel_Controller_Plugin_Redirecter'));
   }
   
   protected function __get($name)
@@ -181,7 +175,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $this->processAfterActionPlugins();
     
-    return $this->result;
+    return $this;
   }
   
   public function registPlugin($plug)
@@ -192,6 +186,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       if ($method !== 'onBeforeAction' && $method !== 'onAfterAction') {
         $this->pluginMethods[$method] = $name;
       }
+    }
+  }
+  
+  public function registPlugins($plugin)
+  {
+    foreach ($plugin->toArray() as $eachPlugin) {
+      $this->registPlugin($eachPlugin);
     }
   }
   
@@ -287,6 +288,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function redirect($to)
   {
     $this->redirected = true;
+    $this->redirect = $to;
     $this->processRedirectPlugins($to);
   }
   
@@ -298,6 +300,16 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $candidate = Sabel_Context::getCurrentCandidate();
     $this->redirect($candidate->uri($params));
+  }
+  
+  public function isRedirected()
+  {
+    return $this->redirected;
+  }
+  
+  public function getRedirect()
+  {
+    return $this->redirect;
   }
   
   /**
