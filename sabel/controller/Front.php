@@ -23,7 +23,7 @@ class Sabel_Controller_Front
     Sabel::fileUsing(RUN_BASE . '/config/map.php');
   }
   
-  public function ignition(Sabel_Request $request = null, $storage = null)
+  public function ignition($request = null, $storage = null)
   {
     if ($request === null) $request = Sabel::load($this->requestClass);
     $candidate = $this->processCandidate($request);
