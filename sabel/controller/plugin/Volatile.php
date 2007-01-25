@@ -113,15 +113,20 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
       foreach ($storage->read("volatiles") as $key => $vvalue) {
         if (isset($this->ignores[$key])) {
           $candidate = Sabel_Context::getCurrentCandidate();
+          $hit = false;
           foreach ($this->ignores[$key] as $ignore) {
             if (!($candidate->getModule()   === $ignore["module"]      &&
                 $candidate->getController() === $ignore["controller"]  &&
                 $candidate->getAction()     === $ignore["action"]))
             {
-              unset($this->ignores[$key]);
-              unset($this->volatiles[$key]);
-              $storage->delete($key);
+              $hit = true;
             }
+          }
+          
+          if (!$hit) {
+            unset($this->ignores[$key]);
+            unset($this->volatiles[$key]);
+            $storage->delete($key);
           }
         } else {
           unset($this->volatiles[$key]);
