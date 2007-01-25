@@ -12,7 +12,7 @@
 class Sabel_Http_Response
 {
   protected $header = null;
-  protected $contents = '';
+  protected $contents = array();
   
   public function __get($name)
   {
@@ -43,12 +43,12 @@ class Sabel_Http_Response
   
   public function setContents($contents)
   {
-    $this->contents = $contents;
+    $this->contents[] = $contents;
   }
   
   public function getContents()
   {
-    return $this->contents;
+    return join('', $this->contents);
   }
   
   public function hasContents()

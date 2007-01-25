@@ -63,13 +63,13 @@ class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
   public function send($data)
   {
     if ($this->state === self::CONNECTED) {
-      $results = array();
+      $result  = array();
       $socket  = $this->socket; // alias for performance
       
       stream_socket_sendto($socket, $data);
       
       $bytesPerRead = $this->bytesPerRead;
-      for ($read = 0, $maxBytes = 131072; !feof($socket) && $read <= $maxBytes;
+      for ($read = 0, $maxBytes = 1310720; !feof($socket) && $read <= $maxBytes;
            $read += $bytesPerRead) {
         $result[] = stream_get_line($socket, $bytesPerRead, "\n");
       }
