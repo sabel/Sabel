@@ -21,6 +21,7 @@ class Sabel_Aspect_Proxy
   protected $source = null;
 
   protected $afterResults = array();
+  protected $beforeResults = array();
   
   const TYPE_BEFORE   = 0;
   const TYPE_AFTER    = 5;
@@ -167,12 +168,30 @@ class Sabel_Aspect_Proxy
       if ($aspectReflect->hasMethod($type)) {
         $called = true;
         $result = $aspect->$type($joinpoint);
-        $this->afterResults[$ref->getName()] = $result;
+        switch ($type) {
+          case "before":
+            $this->beforeResults[$ref->getName()] = $result;
+            break;
+          case "after":
+            $this->afterResults[$ref->getName()] = $result;
+            break;
+        }
+        
       }
       unset($aspectReflect);
     }
     
     return ($called) ? $result : true;
+  }
+  
+  public function getBeforeResults()
+  {
+    return $this->beforeResults;
+  }
+  
+  public function getBeforeResult($name)
+  {
+    return $this->beforeResults[$name];
   }
 
   public function getAfterResults()
