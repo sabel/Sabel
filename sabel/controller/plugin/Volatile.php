@@ -44,6 +44,30 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
     }
     
     if (is_array($options)) {
+      if (isset($options["ignores"])) {
+        foreach ($options["ignores"] as $ignore) {
+          if (isset($ignore["module"])) {
+            $module = $ignore["ignore"]["module"];
+          } else {
+            $module = $candidate->getModule();
+          }
+          
+          if (isset($ignore["controller"])) {
+            $controller = $ignore["controller"];
+          } else {
+            $controller = $candidate->getController();
+          }
+          
+          if (isset($ignore["action"])) {
+            $action = $ignore["action"];
+          } else {
+            $action = $candidate->getAction();
+          }
+          
+          $this->ignores[$key] = array("module" => $module, "controller" => $controller, "action" => $action);
+        }
+      }
+      
       if (isset($options["ignore"])) {
         if (isset($options["ignore"]["module"])) {
           $module = $options["ignore"]["module"];
