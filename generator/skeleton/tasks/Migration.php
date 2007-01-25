@@ -47,10 +47,11 @@ class Migration extends Sakle
       }
     }
     
-    if (strtolower($to) === 'head') $to = max(array_keys($files));
-    if (strtolower($to) === 'foot') $to = 0;
-    if (strtolower($to) === 'reset') {
-      $to = $v->version;
+    $to = strtolower($to);
+    if ($to === 'head') $to = max(array_keys($files));
+    if ($to === 'foot') $to = 0;
+    if ($to === 'reset' || $to === 'rehead') {
+      $to = ($to === 'reset') ? $v->version : max(array_keys($files));
       system("sakle Migration {$this->arguments[1]} 0");
       $v  = $this->getCurrentVersion();
     }
