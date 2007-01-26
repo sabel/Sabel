@@ -125,7 +125,7 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
             }
           }
           
-          if (!$hit) {
+          if ($hit) {
             unset($this->ignores[$key]);
             unset($this->volatiles[$key]);
             $storage->delete($key);
