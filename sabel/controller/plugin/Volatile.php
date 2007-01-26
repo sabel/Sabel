@@ -69,28 +69,6 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
           $this->ignores[$key][] = array("module" => $module, "controller" => $controller, "action" => $action);
         }
       }
-      
-      if (isset($options["ignore"])) {
-        if (isset($options["ignore"]["module"])) {
-          $module = $options["ignore"]["module"];
-        } else {
-          $module = $candidate->getModule();
-        }
-        
-        if (isset($options["ignore"]["controller"])) {
-          $controller = $options["ignore"]["controller"];
-        } else {
-          $controller = $candidate->getController();
-        }
-        
-        if (isset($options["ignore"]["action"])) {
-          $action = $options["ignore"]["action"];
-        } else {
-          $action = $candidate->getAction();
-        }
-        
-        $this->ignores[$key][] = array("module" => $module, "controller" => $controller, "action" => $action);
-      }
     }
     
     $this->volatiles[$key] = $value;
@@ -125,7 +103,7 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
             }
           }
           
-          if ($hit) {
+          if (!$hit) {
             unset($this->ignores[$key]);
             unset($this->volatiles[$key]);
             $storage->delete($key);
