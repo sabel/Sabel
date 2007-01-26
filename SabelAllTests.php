@@ -1,21 +1,21 @@
 <?php
 
-define('SABEL_BASE', dirname(realpath(__FILE__)));
-define('RUN_BASE', SABEL_BASE . '/Test/data/application');
-define('TEST_CASE', true);
+define('SABEL_BASE',  dirname(realpath(__FILE__)));
+define('RUN_BASE',    SABEL_BASE . '/Test/data/application');
+define('TEST_CASE',   true);
 define('PRODUCTION',  0x01);
 define('TEST',        0x05);
 define('DEVELOPMENT', 0x0A);
 define('ENVIRONMENT', DEVELOPMENT);
 
-define('__TRUE__', 'true');
+define('__TRUE__',  'true');
 define('__FALSE__', 'false');
 
 error_reporting(E_ALL|E_STRICT);
 ini_set('memory_limit', '16m');
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
-    define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
+  define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
 }
 
 define ("PHPUNIT_VERSION", 3);
@@ -43,7 +43,7 @@ require_once('Sabel.php');
 
 function __autoload($class)
 {
-  Sabel::using($class);
+  if (!class_exists($class)) Sabel::using($class);
 }
 
 require_once('Test/SabelTestCase.php');
@@ -89,7 +89,7 @@ class SabelAllTests
     }
     
     $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Form::suite());
@@ -112,7 +112,3 @@ class SabelAllTests
     // $suite->addTest(Test_VirtualInheritance::suite());
   }
 }
-
-//if (PHPUnit_MAIN_METHOD == 'SabelAllTests::main') {
-//  SabelAllTests::main();
-//}

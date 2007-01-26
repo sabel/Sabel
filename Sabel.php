@@ -72,7 +72,7 @@ final class Sabel
     if (!isset(self::$required[$className]) && !class_exists($className)) {
       $path = self::convertPath($className);
       if (self::isReadable($path)) {
-        require ($path);
+        require_once ($path);
         self::$required[$className] = true;
       }
     }
