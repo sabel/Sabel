@@ -65,7 +65,6 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
           } else {
             $action = $candidate->getAction();
           }
-          
           $this->ignores[$key][] = array("module" => $module, "controller" => $controller, "action" => $action);
         }
       }
@@ -93,17 +92,17 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
       foreach ($storage->read("volatiles") as $key => $vvalue) {
         if (isset($this->ignores[$key])) {
           $candidate = Sabel_Context::getCurrentCandidate();
-          $hit = false;
+          $hitIgnoresList = false;
           foreach ($this->ignores[$key] as $ignore) {
-            if (!($candidate->getModule()   === $ignore["module"]      &&
-                $candidate->getController() === $ignore["controller"]  &&
-                $candidate->getAction()     === $ignore["action"]))
+            if ($candidate->getModule()     === $ignore["module"]     &&
+                $candidate->getController() === $ignore["controller"] &&
+                $candidate->getAction()     === $ignore["action"])
             {
-              $hit = true;
+              $hitIgnoresList = true;
             }
           }
           
-          if (!$hit) {
+          if (!$hitIgnoresList) {
             unset($this->ignores[$key]);
             unset($this->volatiles[$key]);
             $storage->delete($key);
