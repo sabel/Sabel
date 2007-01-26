@@ -61,7 +61,15 @@ class Sabel_DB_Model_Relation
     $child  = $this->createChildKey($child, $parent);
     $parent = $this->createParentKey($parent);
 
-    return array($child, $parent);
+    list ($ct, $ck) = explode('.', $child);
+    list ($pt, $pk) = explode('.', $parent);
+
+    return array('child'  => $child,
+                 'parent' => $parent,
+                 'ctable' => $ct,
+                 'ptable' => $pt,
+                 'ckey'   => $ck,
+                 'pkey'   => $pk);
   }
 
   public function createChildKey($child, $parent)
@@ -100,16 +108,13 @@ class Sabel_DB_Model_Relation
 
     $mdlName = convert_to_modelname($model->getTableName());
     foreach ($modelPairs as $pair) {
-      list ($child, $parent) = $this->toRelationPair($mdlName, $pair);
+      $res  = $this->toRelationPair($mdlName, $pair);
+      $ptbl = $res['ptable'];
+      $this->joinTablePairs[] = array($res['ctable'], $ptbl);
+      $this->refStructure["{$res['ctable']}"][] = $ptbl;
 
-      list ($cTable) = explode('.', $child);
-      list ($pTable) = explode('.', $parent);
-
-      $this->joinTablePairs[] = array($cTable, $pTable);
-      $this->refStructure[$cTable][] = $pTable;
-
-      if (!isset($this->joinConditions[$pTable])) {
-        $this->joinConditions[$pTable] = "$child = $parent";
+      if (!isset($this->joinConditions[$ptbl])) {
+        $this->joinConditions[$ptbl] = "{$res['child']} = {$res['parent']}";
       }
     }
 

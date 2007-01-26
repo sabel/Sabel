@@ -30,7 +30,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $selected = false;
 
   private
-    $relation = null;
+    $schema   = null,
+    $errors   = null,
+    $relation = null,
+    $sColumns = array();
 
   private
     $parentModels    = array(),
@@ -38,14 +41,16 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $cascadeStack    = array();
 
   protected
-    $table          = '',
-    $structure      = 'normal',
-    $parents        = array(),
-    $children       = array(),
+    $table     = '',
+    $structure = 'normal',
+    $localize  = array(),
+    $parents   = array(),
+    $children  = array();
+
+  private
     $joinConNames   = array(),
     $joinPairBuffer = array(),
     $joinCondBuffer = array();
-
 
   protected
     $ignoreEmptyParent = false;
@@ -64,30 +69,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
                                       'maximum'  => 'too large',
                                       'nullable' => 'impossible to empty',
                                       'type'     => 'invalid data type');
-
-  /**
-   * @var a schema information of DB usually use for validate.
-   *      this value will instanciate in validate() method.
-   */
-  private $schema = null;
-
-  /**
-   * @var columns of Schema
-   *
-   */
-  private $sColumns = array();
-
-  /**
-   * @var instance of Sabel_Errors
-   *
-   */
-  protected $errors = null;
-
-  /**
-   * @var localize column names for errors
-   *
-   */
-  protected $localize = array();
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -406,7 +387,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $this->joinConNames[] = $this->tableProp->connectName;
       $this->relation->setColumns($tblName, $this->columns);
 
-      if ($this->addRelationalDataToBuffer(get_class($this), $this->parents)) {
+      if ($this->addRelationalDataToBuffer($tblName, $this->parents)) {
         return $this->automaticJoin();
       }
     }
@@ -464,11 +445,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $tblName = convert_to_tablename($mdlName);
 
     foreach ($parents as $parent) {
-      list ($self, $parent)   = $this->relation->toRelationPair($mdlName, $parent);
-      list ($ptblName, $pKey) = explode('.', $parent);
-      if ($this->isSameConnectionNames($ptblName)) {
-        $condBuf[] = array($ptblName, "$self = $parent");
-        $pairBuf[] = array($tblName, $ptblName);
+      $res  = $this->relation->toRelationPair($mdlName, $parent);
+      $ptbl = $res['ptable'];
+      if ($this->isSameConnectionNames($ptbl)) {
+        $condBuf[] = array($ptbl, "{$res['child']} = {$res['parent']}");
+        $pairBuf[] = array($tblName, $ptbl);
       } else {
         return false;
       }
@@ -502,11 +483,10 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     if ($this->relation === null) $this->relation = Sabel::load('Sabel_DB_Model_Relation');
 
     foreach ($model->parents as $parent) {
-      list ($self, $parent)    = $this->relation->toRelationPair(get_class($model), $parent);
-      list ($ctblName, $key)   = explode('.', $self);
-      list ($ptblName, $idCol) = explode('.', $parent);
-      if (isset($row[$key])) {
-        $row[$ptblName] = $this->createParentModel($ptblName, $idCol, $row[$key]);
+      $res = $this->relation->toRelationPair($model->tableProp->table, $parent);
+      if (isset($row["{$res['ckey']}"])) {
+        $ptbl = $res['ptable'];
+        $row[$ptbl] = $this->createParentModel($ptbl, $res['pkey'], $row["{$res['ckey']}"]);
       }
     }
 
@@ -580,7 +560,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
    * fetch the children by relating own primary key to foreign key of a given table name.
    *
    * @param  string $child model name.
-   * @param  mixed  $model need not be used. ( used internally )
+   * @param  mixed  $model not used. ( used internally )
    * @return array
    */
   public function getChild($child, $model = null)
@@ -594,29 +574,23 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       $pair = $child . ':' . convert_to_modelname($model->tableProp->table);
     }
 
-    list ($child)  = explode('.', $child);
-    $relation      = Sabel::load('Sabel_DB_Model_Relation');
-    list ($c, $s)  = $relation->toRelationPair($child, $pair);
-    list (, $cKey) = explode('.', $c);
-    list (, $sKey) = explode('.', $s);
+    list ($child) = explode('.', $child);
+    $res  = Sabel::load('Sabel_DB_Model_Relation')->toRelationPair($child, $pair);
+    $pkey = $res['pkey'];
 
     $cModel = MODEL($child);
-
     $p = $cModel->getProjection();
     $cModel->getStatement()->setBasicSQL("SELECT $p FROM " . $cModel->tableProp->table);
 
     $this->chooseChildConstraint($child, $model);
-    $model->setChildCondition($cKey, $model->$sKey);
+    $model->setChildCondition($res['ckey'], $model->$pkey);
 
     $cModel->conditions = $model->getChildCondition();
     $cconst = $model->getChildConstraint();
     if (isset($cconst[$child])) $cModel->constraints = $cconst[$child];
 
     $resultSet = $cModel->exec();
-
-    if ($resultSet->isEmpty()) {
-      return $model->$child = false;
-    }
+    if ($resultSet->isEmpty()) return $model->$child = false;
 
     $children = array();
     $childObj = MODEL($child);
@@ -790,7 +764,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   public function validate()
   {
-    $this->sColumns  = $this->schema->getColumns();
+    $this->sColumns = $this->schema->getColumns();
 
     if (is_object($this->errors)) {
       $errors = $this->errors;
@@ -873,7 +847,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         return ($value !== __TRUE__ && $value !== __FALSE__);
         break;
       case Sabel_DB_Type_Const::DATETIME:
-        return !(boolean)strtotime($value);
+        return !((boolean) strtotime($value));
         break;
       default:
         return false;
@@ -955,8 +929,8 @@ class Sabel_DB_Model extends Sabel_DB_Executer
     $pKey   = $this->tableProp->primaryKey;
     foreach ($tables as $table) {
       list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
-      $idValue = (isset($id)) ? $id : $this->$idCol;
 
+      $idValue = (isset($id)) ? $id : $this->$idCol;
       if ($model = $this->pushStack($table, $foreignKey, $idValue)) $models[] = $model;
     }
 
@@ -983,7 +957,6 @@ class Sabel_DB_Model extends Sabel_DB_Executer
         $tblName = $child->tableProp->table;
         $pKey    = $child->tableProp->primaryKey;
         list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
-
         if ($model = $this->pushStack($table, $foreignKey, $child->$idCol)) $models[] = $model;
       }
     }
@@ -1017,8 +990,7 @@ class Sabel_DB_Model extends Sabel_DB_Executer
       list ($chainValue, $foreignKey) = explode('.', $chainValue);
     }
 
-    $table_name = $chainValue;
-    return array($table_name, $foreignKey, $idCol);
+    return array($chainValue, $foreignKey, $idCol);
   }
 
   private function clearCascadeStack($stack)
