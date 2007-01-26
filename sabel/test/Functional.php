@@ -36,14 +36,7 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
 
 Sabel::using("Sabel_Controller_Page_Plugin");
 class Sabel_Controller_Plugin_TestRedirecter implements Sabel_Controller_Page_Plugin
-{
-  protected static $listener = null;
-  
-  public static function setListener($listener)
-  {
-    self::$listener = $listener;
-  }
-  
+{  
   public function onException($controller, $exception) {}
   public function onBeforeAction($controller) {}
   public function onAfterAction($controller) {}
@@ -55,10 +48,6 @@ class Sabel_Controller_Plugin_TestRedirecter implements Sabel_Controller_Page_Pl
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . '/' . $to;
     
-    if (defined("FUNCTIONAL_TEST")) {
-      self::$listener->notify($to);
-    } else {
-      header ($redirect);
-    }
+    // header ($redirect);
   }
 }

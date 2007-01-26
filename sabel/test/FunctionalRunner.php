@@ -4,21 +4,6 @@ define("FUNCTIONAL_TEST", true);
 Sabel::using('Sabel_Controller_Page_Plugin');
 Sabel::using('Sabel_Controller_Plugin_Redirecter');
 
-class Sabel_Test_Functional_RedirectListener
-{
-  protected $to = null;
-  
-  public function notify($to)
-  {
-    if ($this->to === null) $this->to = $to;
-  }
-  
-  public function getRedirectTo()
-  {
-    return $this->to;
-  }
-}
-
 class Sabel_Test_FunctionalRunner extends PHPUnit_TextUI_TestRunner
 {
   public static function create()

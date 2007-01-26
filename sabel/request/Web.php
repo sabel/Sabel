@@ -226,6 +226,11 @@ class Sabel_Request_Web extends Sabel_Request
     return $this->result->isRedirected();
   }
   
+  public function controller()
+  {
+    return $this->result;
+  }
+  
   public function result()
   {
     return $this->result;
