@@ -46,6 +46,9 @@ class Sabel_DB_Condition
     if (strpos($key, self::IN) === 0) {
       $key  = str_replace(self::IN, '', $key);
       $type = self::IN;
+      if (!is_array($val)) {
+        throw new Exception("Error: parameter of 'IN_' should be an array.");
+      }
     } elseif (strpos($key, self::LIKE) === 0) {
       $key  = str_replace(self::LIKE, '', $key);
       $type = self::LIKE;

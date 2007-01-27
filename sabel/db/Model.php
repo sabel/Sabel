@@ -838,10 +838,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   {
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
-        if ($value === '' || $value === null) return false;
+        if ($value === null || $value === '') return false;
         return (!ctype_digit($value) && !is_int($value));
         break;
       case Sabel_DB_Type_Const::BOOL:
+        if ($value === null || $value === '') return false;
         return ($value !== __TRUE__ && $value !== __FALSE__);
         break;
       case Sabel_DB_Type_Const::DATETIME:
