@@ -31,9 +31,11 @@ class Sabel_DB_Model extends Sabel_DB_Executer
 
   private
     $schema   = null,
-    $errors   = null,
     $relation = null,
     $sColumns = array();
+
+  protected
+    $errors   = null;
 
   private
     $parentModels    = array(),
@@ -649,16 +651,12 @@ class Sabel_DB_Model extends Sabel_DB_Executer
   public function transrate($row)
   {
     $pKey = $this->tableProp->primaryKey;
+    if (!is_array($pKey)) $pKey = (array)$pKey;
 
-    if (is_array($pKey)) {
-      foreach ($pKey as $key) {
+    foreach ($pKey as $key) {
+      if (isset($row[$key])) {
         $condition = new Sabel_DB_Condition($key, $row[$key]);
         $this->selectConditions[$key] = $condition;
-      }
-    } else {
-      if (isset($row[$pKey])) {
-        $condition = new Sabel_DB_Condition($pKey, $row[$pKey]);
-        $this->selectConditions[$pKey] = $condition;
       }
     }
 
