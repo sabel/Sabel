@@ -208,6 +208,8 @@ class Sabel_Request_Web extends Sabel_Request
   {
     $aFrontController = Sabel::load('Sabel_Controller_Front');
     
+    $aFrontController->processCandidate($this);
+    
     $aFrontController->plugin
                      ->add(Sabel::load('Sabel_Controller_Plugin_Volatile'))
                      ->add(Sabel::load('Sabel_Controller_Plugin_Filter'))
@@ -216,7 +218,7 @@ class Sabel_Request_Web extends Sabel_Request
                      ->add(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'))
                      ->add(Sabel::load('Sabel_Controller_Plugin_TestRedirecter'));
                      
-    $this->result = $aFrontController->ignition($this, $storage);
+    $this->result = $aFrontController->ignition($storage);
       
     return $this;
   }

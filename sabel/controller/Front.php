@@ -17,49 +17,43 @@ Sabel::using('Sabel_Exception_Runtime');
 class Sabel_Controller_Front
 {
   private $requestClass = "Sabel_Request_Web";
+  private $candidate = null;
+  private $request = null;
   public $plugin = null;
   
-  public function __construct()
+  public function __construct($request = null)
   {
+    if ($this->request === null) $this->request = Sabel::load($this->requestClass);
     Sabel::fileUsing(RUN_BASE . '/config/map.php');
     $this->plugin = Sabel::load("Sabel_Controller_Plugin");
   }
   
-  public function ignition($request = null, $storage = null)
+  public function ignition($storage = null)
   {
-    if ($request === null) $request = Sabel::load($this->requestClass);
-    $candidate = $this->processCandidate($request);
-    $filters   = $this->loadFilters($candidate);
-    $this->processHelper($request, $candidate);
-    $this->processPreFilter($filters, $request);
-    $controller = $this->processPageController($candidate);
+    $filters = $this->loadFilters($this->candidate);
+    $this->processHelper($this->request, $this->candidate);
+    $this->processPreFilter($filters, $this->request);
+    $controller = $this->processPageController($this->candidate);
     $controller->registPlugins($this->plugin);
-    $controller->setup($request, Sabel::load('Sabel_View')->decideTemplatePath($candidate), $storage);
+    $controller->setup($this->request, Sabel::load('Sabel_View')->decideTemplatePath($this->candidate), $storage);
     $controller->initialize();
     
     $this->processPostFilter($filters, $controller);
     
-    return $controller->execute($candidate->getAction());
+    return $controller->execute($this->candidate->getAction());
   }
   
-  protected function processCandidate(Sabel_Request $request)
+  public function processCandidate()
   {
-    if (ENVIRONMENT !== DEVELOPMENT) {
-      $cache = Sabel::load('Sabel_Cache_Apc');
-      if (!($candidate = $cache->read($request->__toString()))) {
-        $candidate = Sabel::load('Sabel_Map_Candidate');
-        $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
-        $cache->write($request->__toString(), $candidate);
-      }
-    } else {
-      $candidate = Sabel::load('Sabel_Map_Candidate');
-      $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
-    }
+    $candidate = Sabel::load('Sabel_Map_Candidate');
+    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $this->request->__toString()));
     
     Sabel_Context::setCurrentCandidate($candidate);
-    $request->setCandidate($candidate);
+    $this->request->setCandidate($candidate);
     
-    return $candidate;
+    $this->candidate =  $candidate;
+    
+    return $this;
   }
   
   protected function loadFilters($candidate)

@@ -14,6 +14,12 @@ class PageControllerForTest extends Sabel_Controller_Page
   
   public function testVolatile()
   {
-    $this->volatile("test", "test");
+    $opt["ignores"][] = array("action"=>"testVolatileIgnore");
+    $this->volatile("test", "test", $opt);
+  }
+  
+  public function testVolatileIgnore()
+  {
+    
   }
 }

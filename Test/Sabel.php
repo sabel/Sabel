@@ -36,6 +36,7 @@ class Test_Sabel extends SabelTestCase
   public function testSabel()
   {
     $fcontroller = Sabel::load('Sabel_Controller_Front');
+    $fcontroller->processCandidate();
     $this->assertTrue(is_object($fcontroller));
     
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
