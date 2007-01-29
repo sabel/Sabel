@@ -19,7 +19,7 @@ class Test_Controller_Plugins extends SabelTestCase
     $pVolatile = Sabel::load("Sabel_Controller_Plugin_Volatile", $session);
     $aController->registPlugin($pVolatile);
     $aController->execute("testVolatile");
-    print_r($session);
+    // print_r($session);
     $aController->execute("testAction");
     $this->assertTrue(count($session->read("volatiles")) === 0);
   }

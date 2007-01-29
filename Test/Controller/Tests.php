@@ -1,6 +1,7 @@
 <?php
 
 require_once ('Test/Controller/Page.php');
+require_once ('Test/Controller/Plugins.php');
 
 class Test_Controller_Tests extends SabelTestSuite
 {
