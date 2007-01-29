@@ -16,6 +16,17 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
   protected $volatiles = array();
   protected $lists     = array();
   protected $ignores   = array();
+  protected $storage   = null;
+  
+  public function __construct($storage = null)
+  {
+    if ($storage === null) {
+      Sabel::using("Sabel_Storage_Session");
+      $this->storage = Sabel_Storage_Session::create();
+    } else {
+      $this->storage = $storage;
+    }
+  }
   
   public function volatile($key, $value, $options = null)
   {
@@ -80,16 +91,15 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
   
   public function onBeforeAction($controller)
   {
-    $storage = Sabel_Storage_Session::create();
-    $this->volatiles = $storage->read("volatiles");
-    $this->lists     = $storage->read("volatiles_lists");
-    $this->ignores   = $storage->read("volatiles_ignores");
+    $this->volatiles = $this->storage->read("volatiles");
+    $this->lists     = $this->storage->read("volatiles_lists");
+    $this->ignores   = $this->storage->read("volatiles_ignores");
     
     if (is_array($this->volatiles)) {
       $attributes = array_merge($this->volatiles, $controller->getAttributes());
       $controller->setAttributes($attributes);
       
-      foreach ($storage->read("volatiles") as $key => $vvalue) {
+      foreach ($this->storage->read("volatiles") as $key => $vvalue) {
         if (isset($this->ignores[$key])) {
           $candidate = Sabel_Context::getCurrentCandidate();
           $hitIgnoresList = false;
@@ -105,11 +115,11 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
           if (!$hitIgnoresList) {
             unset($this->ignores[$key]);
             unset($this->volatiles[$key]);
-            $storage->delete($key);
+            $this->storage->delete($key);
           }
         } else {
           unset($this->volatiles[$key]);
-          $storage->delete($key);
+          $this->storage->delete($key);
         }
       }
     }
@@ -126,27 +136,25 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
   }
   
   protected function shutdown($controller)
-  {
-    $storage = Sabel_Storage_Session::create();
-    
-    if (is_array($storage->read("volatiles"))) {
-      foreach ($storage->read("volatiles") as $key => $vvalue) {
+  {    
+    if (is_array($this->storage->read("volatiles"))) {
+      foreach ($this->storage->read("volatiles") as $key => $vvalue) {
         if (isset($this->lists[$key])) {
           $candidate = Sabel_Context::getCurrentCandidate();
           if ($candidate->getModule()     === $this->lists[$key]["module"]     &&
               $candidate->getController() === $this->lists[$key]["controller"] &&
               $candidate->getAction()     === $this->lists[$key]["action"])
           {
-            $storage->delete($key);
+            $this->storage->delete($key);
             unset($this->volatiles[$key]);
           }
         }
       }
     }
     
-    $storage->write("volatiles", $this->volatiles);
-    $storage->write("volatiles_lists", $this->lists);
-    $storage->write("volatiles_ignores", $this->ignores);
+    $this->storage->write("volatiles", $this->volatiles);
+    $this->storage->write("volatiles_lists", $this->lists);
+    $this->storage->write("volatiles_ignores", $this->ignores);
   }
   
   public function onException($controller, $exception) {}

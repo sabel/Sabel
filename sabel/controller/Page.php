@@ -181,6 +181,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function registPlugin($plug)
   {
     $name = get_class($plug);
+    
+    if ($name === false) throw new Sabel_Exception_InvalidPlugin("can't locate");
+    
     $this->plugins[$name] = $plug;
     foreach (get_class_methods($plug) as $method) {
       if ($method !== 'onBeforeAction' && $method !== 'onAfterAction') {
@@ -361,3 +364,4 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 }
 
 class Sabel_Exception_InvalidActionName extends Sabel_Exception_Runtime{}
+class Sabel_Exception_InvalidPlugin extends Sabel_Exception_Runtime{}
