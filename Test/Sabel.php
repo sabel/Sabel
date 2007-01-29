@@ -67,9 +67,11 @@ class Test_Sabel extends SabelTestCase
     $array = __("keyA 'valueA', (valueB, __FALSE__)");
     $this->assertEquals(array("keyA"=>"valueA", array("valueB", __FALSE__)), $array);
     
-    $array = __("keyA 'value()', keyB ('valueB')");
-    
     // @todo this assert fail on PHP 5.2.1RC4 of MacOSX
-    // $this->assertEquals(array("keyA"=>"value()","keyB"=>array("valueB")), $array);
+    $array = __("keyA 'value()', keyB ('valueB')");
+    $this->assertEquals(array("keyA"=>"value()","keyB"=>array("valueB")), $array);
+    
+    $array = __("keyA ((keyB valueA))");
+    $this->assertEquals(array("keyA"=>array(array("keyB"=>"valueA"))), $array);
   }
 }

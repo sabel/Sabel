@@ -187,7 +187,7 @@ function __($text)
 {
   // match (--- or array(---
   preg_match_all('/
-    [\s]*
+    (?:[\s]+|\()
     (?<!array)
     (\((?:[^(]|array\()+\))
     /xU', $text, $arraySource, PREG_SET_ORDER);
