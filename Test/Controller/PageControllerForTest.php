@@ -11,4 +11,9 @@ class PageControllerForTest extends Sabel_Controller_Page
   {
     return array("test" => $this->test);
   }
+  
+  public function testVolatile()
+  {
+    $this->volatile("test", "test");
+  }
 }

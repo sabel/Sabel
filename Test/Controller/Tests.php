@@ -9,6 +9,7 @@ class Test_Controller_Tests extends SabelTestSuite
     $suite = self::createSuite();
     
     $suite->addTest(Test_Controller_Page::suite());
+    $suite->addTest(Test_Controller_Plugins::suite());
     
     return $suite;
   }
