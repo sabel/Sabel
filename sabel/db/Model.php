@@ -399,17 +399,17 @@ class Sabel_DB_Model
 
     switch ($schema[$key]->type) {
       case Sabel_DB_Type_Const::INT:
-        return (int)$data;
+        return ($data > 2147483647) ? (float)$data : (int)$data;
       case Sabel_DB_Type_Const::FLOAT:
       case Sabel_DB_Type_Const::DOUBLE:
         return (float)$data;
       case SabeL_DB_Type_Const::BOOL:
-        if (is_int($data)) {
-          return ($data === 1);
-        } elseif (is_string($data)) {
-          return in_array($data, array('1', 't', 'true'));
+        if (is_string($data)) {
+          return in_array($data, array('1', 't', 'true', __TRUE__));
         } elseif (is_bool($data)) {
           return $data;
+        } elseif (is_int($data)) {
+          return ($data === 1);
         }
       case Sabel_DB_Type_Const::DATETIME:
         return Sabel::load('Sabel_Date', $data);
