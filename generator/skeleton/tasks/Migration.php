@@ -123,7 +123,8 @@ class Migration extends Sakle
     foreach (get_db_params($env) as $connectName => $params) {
       Sabel_DB_Connection::addConnection($connectName, $params);
     }
-    Sabel_DB_Connection::setInit(true);
+    
+    Sabel_DB_Connection::setInitFlag(true);
   }
   
   protected function getCurrentVersion()

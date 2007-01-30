@@ -49,8 +49,8 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     }
   }
 
-  public function doCommit($conn)   { /* neglect */ }
-  public function doRollback($conn) { /* neglect */ }
+  public function doCommit($conn)   { /*  ignore  */ }
+  public function doRollback($conn) { /*  ignore  */ }
 
   public function close($conn)
   {

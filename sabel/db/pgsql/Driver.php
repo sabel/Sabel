@@ -47,7 +47,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 
   public function setIdNumber($table, $data, $defColumn)
   {
-    if (!isset($data[$defColumn])) {
+    if ($defColumn !== null && !isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
       $row = $this->getResultSet()->fetch(Sabel_DB_Result_Row::NUM);
       if (($this->lastInsertId = (int)$row[0]) === 0) {

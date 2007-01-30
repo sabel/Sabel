@@ -28,10 +28,10 @@ class Sabel_DB_Connection
       }
     }
 
-    self::setInit(true);
+    self::$isInit = true;
   }
 
-  public static function setInit($bool)
+  public static function setInitFlag($bool)
   {
     if (!is_bool($bool)) {
       throw new Exception('Error:setInit() invalid parameter. argument should be a boolean.');

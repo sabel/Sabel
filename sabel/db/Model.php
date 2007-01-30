@@ -26,61 +26,56 @@ class Sabel_DB_Model
   const CREATE_TIME_COLUMN = 'auto_create';
   const DATETIME_FORMAT    = 'Y-m-d H:i:s';
 
-  protected
-    $projection  = '*',
-    $conditions  = array(),
-    $constraints = array();
-
   private
     $data      = array(),
     $columns   = array(),
     $newData   = array(),
-    $tableProp = null,
     $selected  = false;
 
   private
-    $schema   = null,
-    $relation = null,
-    $sColumns = array();
-
-  protected
-    $driver   = null,
-    $errors   = null;
+    $driver    = null,
+    $schema    = null,
+    $relation  = null,
+    $tableProp = null,
+    $sColumns  = array();
 
   private
     $parentModels    = array(),
     $acquiredParents = array(),
+    $joinConNames    = array(),
+    $joinPairBuffer  = array(),
+    $joinCondBuffer  = array(),
     $cascadeStack    = array();
 
   protected
-    $table     = '',
-    $structure = 'normal',
-    $localize  = array(),
-    $parents   = array(),
-    $children  = array();
-
-  private
-    $joinConNames   = array(),
-    $joinPairBuffer = array(),
-    $joinCondBuffer = array();
+    $errors      = null,
+    $projection  = '*',
+    $conditions  = array(),
+    $constraints = array();
 
   protected
+    $table       = '',
+    $structure   = 'normal',
+    $localize    = array(),
+    $parents     = array(),
+    $children    = array();
+
+  protected
+    $selectConditions  = array(),
+    $childConditions   = array(),
+    $childConstraints  = array();
+
+  protected
+    $validateIgnores   = array(),
+    $validateOnInsert  = false,
+    $validateOnUpdate  = false,
     $ignoreEmptyParent = false;
 
   protected
-    $selectConditions = array(),
-    $childConditions  = array(),
-    $childConstraints = array();
-
-  protected
-    $validateIgnores  = array(),
-    $validateOnInsert = false,
-    $validateOnUpdate = false;
-
-  protected $validateMessages = array('length'   => 'invalid length',
-                                      'maximum'  => 'too large',
-                                      'nullable' => 'impossible to empty',
-                                      'type'     => 'invalid data type');
+    $validateMessages = array('length'   => 'too long',
+                              'maximum'  => 'too large',
+                              'nullable' => 'should not be a blank',
+                              'type'     => 'invalid data type');
 
   public function __construct($param1 = null, $param2 = null)
   {
@@ -205,6 +200,16 @@ class Sabel_DB_Model
   public function setPrimaryKey($keyName)
   {
     $this->tableProp->primaryKey = $keyName;
+  }
+
+  /**
+   * returns the increment key ( sequence column ).
+   *
+   * @return string
+   */
+  public function getIncrementKey()
+  {
+    return $this->tableProp->incrementKey;
   }
 
   /**
@@ -641,9 +646,16 @@ class Sabel_DB_Model
     }
 
     $this->setCondition($arg1, $arg2, $arg3);
-    $this->getStatement()->setBasicSQL('SELECT count(*) FROM ' . $this->tableProp->table);
-    $this->setConstraint('limit', 1);
+
+    $tmpProjection = $this->projection;
+    $tmpConstraint = $this->constraints;
+
+    $this->projection  = 'count(*)';
+    $this->constraints = array('limit' => 1);
+
     $row = $this->doSelect()->fetch(Sabel_DB_Result_Row::NUM);
+
+    $this->projection = $tmpProjection;
     unset($this->constraints['limit']);
     return (int)$row[0];
   }
@@ -679,9 +691,6 @@ class Sabel_DB_Model
 
   protected function createModel($model)
   {
-    $p = $model->getProjection();
-    $model->getStatement()->setBasicSQL("SELECT $p FROM " . $model->tableProp->table);
-
     if ($row = $model->doSelect()->fetch()) {
       if (!empty($this->parents)) {
         $row = $this->addParent($row, $model);
@@ -697,12 +706,21 @@ class Sabel_DB_Model
     return $model;
   }
 
-  public function doSelect()
+  public function doSelect($query = null)
   {
-    $driver = $this->getDriver();
-    $driver->makeQuery($this->conditions, $this->constraints);
-    $this->tryExecute($driver);
-    return $driver->getResultSet();
+    $driver  = $this->getDriver();
+    $tblName = $this->getTableName();
+
+    try {
+      if ($query === null) {
+        $driver->select($tblName, $this->getProjection(), $this->conditions, $this->constraints);
+      } else {
+        $driver->selectQuery($query, $this->conditions, $this->constraints);
+      }
+      return $driver->getResultSet();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $driver);
+    }
   }
 
   /**
@@ -727,9 +745,6 @@ class Sabel_DB_Model
         return $this->automaticJoin();
       }
     }
-
-    $p = $this->getProjection();
-    $this->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
 
     $resultSet = $this->doSelect();
     if ($resultSet->isEmpty()) return false;
@@ -842,13 +857,11 @@ class Sabel_DB_Model
     $cacheName = $tblName . $id;
     if (!is_array($row = Sabel_DB_SimpleCache::get($cacheName))) {
       $model->setCondition($idCol, $id);
-      $p = $model->getProjection();
-      $model->getStatement()->setBasicSQL("SELECT $p FROM $tblName");
       $resultSet = $model->doSelect();
 
       if (!($row = $resultSet->fetch()) && !$this->ignoreEmptyParent) {
         $msg = "Error: relational error. parent '{$tblName}' does not exist. "
-             . "Please set ignoreEmpryParent = true, if you want to ignore it.";
+             . "Please set ignoreEmpryParent = true if you want to ignore it.";
 
         throw new Exception($msg);
       }
@@ -914,9 +927,6 @@ class Sabel_DB_Model
     $pkey = $res['pkey'];
 
     $cModel = MODEL($child);
-    $p = $cModel->getProjection();
-    $cModel->getStatement()->setBasicSQL("SELECT $p FROM " . $cModel->tableProp->table);
-
     $this->chooseChildConstraint($child, $model);
     $model->setChildCondition($res['ckey'], $model->$pkey);
 
@@ -1031,7 +1041,13 @@ class Sabel_DB_Model
 
     $model = MODEL($child);
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
-    $model->doDelete();
+
+    try {
+      $driver = $model->getDriver();
+      $driver->delete($model->getTableName(), $model->conditions);
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $driver);
+    }
   }
 
   public function save($data = null)
@@ -1059,23 +1075,15 @@ class Sabel_DB_Model
         if (($this->errors = $this->validate())) return false;
       }
 
-      $driver  = $this->getDriver();
-      $stmt    = $this->getStatement();
       $newData = ($data) ? $data : $this->data;
 
       $this->recordTime($newData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
 
-      $incCol = $this->tableProp->incrementKey;
-
-      try {
-        $this->execInsert($driver, $stmt, $newData, $incCol);
-      } catch (Exception $e) {
-        $this->executeError($e->getMessage(), $driver);
-      }
+      $incCol = $this->getIncrementKey();
+      $newId  = $this->insert($newData, $incCol);
 
       if ($incCol) {
-        $newId = $driver->getLastInsertId();
         if (!isset($newData[$incCol])) $newData[$incCol] = $newId;
       }
     }
@@ -1088,14 +1096,9 @@ class Sabel_DB_Model
 
   public function update($data)
   {
-    $table = $this->tableProp->table;
-    $this->getStatement()->makeUpdateSQL($table, $data);
-
-    $driver = $this->getDriver();
-    $driver->makeQuery($this->conditions);
-
     try {
-      $driver->update();
+      $driver = $this->getDriver();
+      $driver->update($this->tableProp->table, $data, $this->conditions);
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $driver);
     }
@@ -1105,9 +1108,7 @@ class Sabel_DB_Model
   {
     try {
       $driver = $this->getDriver();
-      $stmt   = $this->getStatement();
-
-      $this->execInsert($driver, $stmt, $data, $incCol);
+      $driver->insert($this->tableProp->table, $data, $incCol);
       return $driver->getLastInsertId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $driver);
@@ -1232,39 +1233,16 @@ class Sabel_DB_Model
       throw new Exception('Error:multipleInsert() data is not array.');
     }
 
-    $this->begin();
-
     try {
-      $this->ArrayInsert($data);
+      $driver = $this->getDriver();
+      $incCol = $this->getIncrementKey();
+
+      $this->begin();
+      $driver->arrayInsert($this->tableProp->table, $data, $incCol);
+      $this->commit();
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
-
-    $this->commit();
-  }
-
-  public function ArrayInsert($data)
-  {
-    try {
-      $driver = $this->getDriver();
-      $stmt   = $this->getStatement();
-      $incCol = $this->tableProp->incrementKey;
-
-      foreach ($data as $val) {
-        $this->execInsert($driver, $stmt, $val, $incCol);
-      }
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $driver);
-    }
-  }
-
-  protected function execInsert($driver, $stmt, $data, $idColumn)
-  {
-    $table = $this->tableProp->table;
-    if ($idColumn) $data = $driver->setIdNumber($table, $data, $idColumn);
-
-    $stmt->makeInsertSQL($table, $data);
-    $driver->insert();
   }
 
   /**
@@ -1295,15 +1273,12 @@ class Sabel_DB_Model
       throw new Exception($msg . " or execute executeQuery({$smpl}).");
     }
 
-    $this->doDelete();
-  }
-
-  protected function doDelete()
-  {
-    $driver = $this->getDriver();
-    $this->getStatement()->setBasicSQL('DELETE FROM ' . $this->tableProp->table);
-    $driver->makeQuery($this->conditions);
-    $this->tryExecute($driver);
+    try {
+      $driver = $this->getDriver();
+      $driver->delete($this->getTableName(), $this->conditions);
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $driver);
+    }
   }
 
   /**
@@ -1423,15 +1398,10 @@ class Sabel_DB_Model
     if (isset($param) && !is_array($param))
       throw new Exception('Error: execute() second argument must be an array');
 
-    $driver = $this->getDriver();
-    $this->tryExecute($driver, $sql, $param);
-    return $this->toObject($driver->getResultSet());
-  }
-
-  protected function tryExecute($driver, $sql = null, $param = null)
-  {
     try {
+      $driver = $this->getDriver();
       $driver->execute($sql, $param);
+      return $this->toObject($driver->getResultSet());
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $driver);
     }

@@ -165,8 +165,7 @@ class Sabel_DB_Model_Relation
       $sql[] = " $joinType JOIN $parent ON $condition";
     }
 
-    $model->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $model->doSelect();
+    $resultSet = $model->doSelect(join('', $sql));
     if ($resultSet->isEmpty()) return false;
 
     $results = array();

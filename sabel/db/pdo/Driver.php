@@ -62,14 +62,17 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     $conn = null;
   }
 
-  public function update()
+  public function update($table, $data, $conditions = null)
   {
+    $this->makeUpdateQuery($table, $data, $conditions);
     $this->data = $this->stmt->getBindData();
     $this->execute();
   }
 
-  public function insert()
+  public function insert($table, $data, $idColumn)
   {
+    $this->makeInsertQuery($table, $data, $idColumn);
+
     $sql  = $this->stmt->getSQL();
     $data = $this->stmt->getBindData();
     $this->stmtFlag = Sabel_DB_Pdo_PdoStatement::exists($sql, $data);
@@ -82,7 +85,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
   {
     if ($this->db !== 'pgsql') return $data;
 
-    if (!isset($data[$defColumn])) {
+    if ($defColumn !== null && !isset($data[$defColumn])) {
       $this->driverExecute("SELECT nextval('{$table}_{$defColumn}_seq')");
       $row = $this->getResultSet()->fetch(Sabel_DB_Result_Row::NUM);
       if (($this->lastInsertId = (int)$row[0]) === 0) {
