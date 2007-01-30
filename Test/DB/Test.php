@@ -335,24 +335,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($model->status);
     $this->assertEquals($model->registed, '2004-10-01 10:10:10');
     $this->assertEquals($model->point, 13000);
-
-    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $row = $executer->getFirst('registed');
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2004-10-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 13000);
   }
 
   public function testLast()
@@ -362,24 +344,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($model->status);
     $this->assertEquals($model->registed, '2005-10-01 10:10:10');
     $this->assertEquals($model->point, 1000);
-
-    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $row = $executer->getLast('registed');
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2005-10-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 1000);
   }
 
   public function testChildConstraint()
@@ -498,7 +462,7 @@ class Test_DB_Test extends SabelTestCase
   public function testTest()
   {
     $model = Sabel_Model::load('Customer');
-    $model->execute('DELETE FROM customer');
+    $model->executeQuery('DELETE FROM customer');
 
     $model->save(array('id' => 1, 'name' => 'name1'));
     $model->save(array('id' => 2, 'name' => 'name2'));
@@ -838,7 +802,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testTransaction()
   {
-    Sabel_Model::load('CustomerOrder')->execute('DELETE FROM customer_order');
+    Sabel_Model::load('CustomerOrder')->executeQuery('DELETE FROM customer_order');
 
     $customers = Sabel_Model::load('Customer')->select();
     $this->assertFalse($customers);
@@ -900,11 +864,8 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model[0]->buy_date, '2000-02-02 02:02:02');
     $this->assertEquals($model[0]->amount, 2000);
 
-    $executer = new Sabel_DB_Executer(array('table' => 'customer', 'connectName' => 'default2'));
-    $executer->executeQuery('DELETE FROM customer');
-
-    $executer = new Sabel_DB_Executer(array('table' => 'customer', 'connectName' => 'default'));
-    $executer->executeQuery('DELETE FROM customer_order');
+    MODEL('Customer')->executeQuery('DELETE FROM customer');
+    MODEL('CustomerOrder')->executeQuery('DELETE FROM customer_order');
   }
 
   public function testUpdate()
@@ -1098,123 +1059,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model->id, 1);
     $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
-  }
-
-  public function testExecuter()
-  {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
-    $driver = $exe->getDriver();
-    $driver->execute("SELECT * FROM favorite_item");
-    $results = $driver->getResultSet()->fetchAll();
-    $this->assertEquals(count($results), 7);
-  }
-
-  public function testExecuterConstraintAndCondition()
-  {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
-
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL("SELECT * FROM favorite_item");
-    $exe->setConstraint(array('order' => 'registed desc'));
-    $results = $exe->exec()->fetchAll();
-
-    $row1 = $results[0];
-    $row2 = $results[1];
-    $row3 = $results[2];
-
-    $this->assertEquals((int)$row1['users_id'], 4);
-    $this->assertEquals((int)$row2['users_id'], 1);
-    $this->assertEquals((int)$row3['users_id'], 3);
-
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->setCondition(array('users_id' => 4));
-    $results = $exe->select()->fetchAll();
-
-    $this->assertEquals(count($results), 1);
-
-    $row = $results[0];
-    $this->assertEquals((int)$row['id'], 7);
-    $this->assertEquals((int)$row['users_id'], 4);
-  }
-
-  public function testExecuterUpdate()
-  {
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->scond(7);
-    $exe->update(array('registed' => '2005-12-08 01:01:01', 'name' => 'favorite8'));
-
-    $exe->unsetCondition();
-
-    $exe->scond(7);
-    $row = $exe->select()->fetch();
-
-    $this->assertEquals((int)$row['id'], 7);
-    $this->assertEquals((int)$row['users_id'], 4);
-    $this->assertEquals($row['registed'], '2005-12-08 01:01:01');
-    $this->assertEquals($row['name'], 'favorite8');
-  }
-
-  public function testExecuterUpdate2()
-  {
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->scond('users_id', 3);
-    $exe->update(array('users_id' => 5));
-
-    // $exe->unsetCondition();
-    // $exe->scond('users_id', 3);
-
-    $row = $exe->select()->fetchAll();
-    $this->assertFalse($row);
-
-    $exe->unsetCondition();
-    $exe->scond('users_id', 5);
-
-    $row = $exe->select()->fetchAll();
-    $this->assertEquals(count($row), 2);
-  }
-
-  public function testExecuterInsert()
-  {
-    $prop  = array('table' => 'test_condition');
-    $exe   = new Sabel_DB_Executer($prop);
-    $data  = array('status' => __TRUE__, 'registed' => '2006-01-01 10:10:10', 'point' => 20000);
-    $newId = $exe->insert($data, 'id');
-
-    $this->assertTrue(is_int($newId));
-    $this->assertTrue($newId > 0);
-
-    $exe = new Sabel_DB_Executer($prop);
-    $row = $exe->getLast('id');
-
-    $this->assertEquals((int)$row['id'], $newId);
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2006-01-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 20000);
-
-    $model = MODEL('TestCondition');
-    $obj   = $model->getLast('id');
-
-    $this->assertEquals($obj->id, $newId);
-    $this->assertTrue($obj->status);
-    $this->assertEquals($obj->registed, '2006-01-01 10:10:10');
-    $this->assertEquals($obj->point, 20000);
   }
 
   public function testChildConstarint2()

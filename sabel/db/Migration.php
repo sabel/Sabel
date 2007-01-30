@@ -50,7 +50,7 @@ class Sabel_DB_Migration
 
     switch ($type) {
       case Migration::TABLE:
-        $this->migration->addTable($tblName, $arg2);
+        $this->migration->addTable($tblName, $arg2, $arg3);
         break;
       case Migration::VIEW:
 

@@ -55,12 +55,12 @@ class Test_DB_Pgsql extends Test_DB_Test
 
     foreach ($ph->sqls as $query) {
       try {
-        @$model->execute($query);
+        @$model->executeQuery($query);
       } catch (Exception $e) {}
     }
 
     try {
-      foreach ($tables as $table) $model->execute("DELETE FROM $table");
+      foreach ($tables as $table) $model->executeQuery("DELETE FROM $table");
     } catch (Exception $e) { }
 
     $model = Sabel_Model::load('Customer');
@@ -70,12 +70,12 @@ class Test_DB_Pgsql extends Test_DB_Test
                   'CREATE TABLE grand_child( id integer primary key, child_id integer, name varchar(24), age integer)');
 
     foreach ($sqls as $query) {
-      try { @$model->execute($query); } catch (Exception $e) {}
+      try { @$model->executeQuery($query); } catch (Exception $e) {}
     }
 
-    $model->execute('DELETE FROM customer');
-    $model->execute('DELETE FROM parents');
-    $model->execute('DELETE FROM grand_child');
+    $model->executeQuery('DELETE FROM customer');
+    $model->executeQuery('DELETE FROM parents');
+    $model->executeQuery('DELETE FROM grand_child');
   }
 }
 

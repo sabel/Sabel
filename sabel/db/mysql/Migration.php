@@ -38,7 +38,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
                              '1',
                              '0');
 
-  public function addTable($tblName, $cmdQuery)
+  public function addTable($tblName, $cmdQuery, $engine = null)
   {
     $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
 
@@ -58,7 +58,9 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
+    $query = "CREATE TABLE $tblName ( $query )";
+    if ($engine !== null) $query .= " ENGINE={$engine}";
+    $this->model->execute($query);
   }
 
   public function deleteTable($tblName)

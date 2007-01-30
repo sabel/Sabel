@@ -57,14 +57,9 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
       $sClass = new $sClsName();
       $cols   = $sClass->get();
     } else {
-      $arg = array('table' => $tblName, 'connectName' => $this->connectName);
-      $executer = new Sabel_DB_Executer($arg);
-      $executer->setConstraint('limit', 1);
-      $executer->getStatement()->setBasicSQL("SELECT * FROM $tblName");
-      $cols = $executer->exec()->fetch();
+      $cols = $this->getTable($tblName)->getColumns();
     }
 
-    if (!$cols) $cols = $this->getTable($tblName)->getColumns();
     return array_keys($cols);
   }
 

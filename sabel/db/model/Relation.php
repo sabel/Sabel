@@ -166,7 +166,7 @@ class Sabel_DB_Model_Relation
     }
 
     $model->getStatement()->setBasicSQL(join('', $sql));
-    $resultSet = $model->exec();
+    $resultSet = $model->doSelect();
     if ($resultSet->isEmpty()) return false;
 
     $results = array();
