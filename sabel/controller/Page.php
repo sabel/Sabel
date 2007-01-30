@@ -52,6 +52,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
                             'execute',
                             'initialize');
                             
+  public function __construct()
+  {
+    $this->logger  = Sabel_Logger_Factory::create("file");
+  }
+  
   public function initialize() {}
   
   /**
@@ -62,10 +67,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function setup(Sabel_Request $request, $view = null, $storage = null)
   {
     $this->request = $request;
-    $this->logger  = Sabel_Logger_Factory::create("file");
-    
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
-    Sabel_Context::setView($this->view);
     
     if ($this->enableSession) {
       if ($storage === null) {
@@ -225,9 +227,14 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     if ($this->redirected) return false;
     
-    $action       = $this->action;
-    $reqMethod    = strtolower($this->request->getHttpMethod());
-    $methodAction = $reqMethod . ucfirst($action);
+    $action = $this->action;
+    $methodAction = "";
+    
+    if (is_object($this->request)) {
+      $reqMethod    = strtolower($this->request->getHttpMethod());
+      $methodAction = $reqMethod . ucfirst($action);
+    }
+    
     $actionResult = array();
     
     if ($this->hasMethod($methodAction)) {

@@ -49,7 +49,13 @@ class Sabel_View
   public function setTemplateName($name)
   {
     $this->templateName = $name;
+    
+    $pathToTemplate = $this->templatePath . $this->templateName;
+    if (is_readable($pathToTemplate)) {
+      $this->templateFound = true;
+    }
   }
+  
   
   public function isTemplateMissing()
   {

@@ -31,11 +31,18 @@ class Sabel_Controller_Front
   public function ignition($storage = null)
   {
     $filters = $this->loadFilters($this->candidate);
+    
     $this->processHelper($this->request, $this->candidate);
     $this->processPreFilter($filters, $this->request);
+    
     $controller = $this->processPageController($this->candidate);
     $controller->registPlugins($this->plugin);
-    $controller->setup($this->request, Sabel::load('Sabel_View')->decideTemplatePath($this->candidate), $storage);
+    
+    $view = Sabel::load('Sabel_View');
+    $view->decideTemplatePath($this->candidate);
+    Sabel_Context::setView($view);
+    
+    $controller->setup($this->request, $view, $storage);
     $controller->initialize();
     
     $this->processPostFilter($filters, $controller);

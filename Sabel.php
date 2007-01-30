@@ -303,6 +303,30 @@ function _A($obj)
   return new Sabel_Aspect_Proxy($obj);
 }
 
+function renderingComponent($componentName, $args)
+{
+  echo renderingComponentAsString($componentName, $args);
+}
+
+function renderingComponentAsString($componentName, $args)
+{
+  $path = RUN_BASE . "/components/".$componentName . "/controllers/". $args["controller"] . ".php";
+  $cClassName = ucfirst($componentName) . "_Controllers_" . ucfirst($args["controller"]);
+  
+  if (is_readable($path)) {
+    $controller = Sabel::load($cClassName);
+    $view = Sabel::load('Sabel_View');
+    $view->setTemplatePath(RUN_BASE . "/components/" . $componentName . "/views/");
+    $view->setTemplateName($args["controller"] . "." . $args["action"] . ".tpl");
+    $controller->setup(Sabel::load("Sabel_Request_Web", ""), $view);
+    $controller->execute($args["action"]);
+    
+    return $view->rendering(false);
+  } else {
+    throw new Sabel_Exception_Runtime($path . " controller notfound");
+  }
+}
+
 /**
  * Sabel constant values
  *
