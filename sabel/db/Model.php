@@ -608,7 +608,7 @@ class Sabel_DB_Model
 
   public function close()
   {
-    Sabel_DB_Connection::close($this->tableProp->connectName);
+    Sabel_DB_Connection::close($this->getConnectName());
   }
 
   public function getFirst($orderColumn)
@@ -1009,16 +1009,17 @@ class Sabel_DB_Model
 
   public function newChild($child = null)
   {
-    $id = $this->{$this->tableProp->primaryKey};
+    $pKey = $this->getPrimaryKey();
+    $id   = $this->$pKey;
 
     if (empty($id)) {
       throw new Exception("Error:newChild() who is a parent? hasn't id value.");
     }
 
-    $parent  = $this->tableProp->table;
+    $parent  = $this->getTableName();
     $tblName = ($child === null) ? $parant : $child;
     $model   = MODEL(convert_to_modelname($tblName));
-    $column  = "{$parent}_{$this->tableProp->primaryKey}";
+    $column  = "{$parent}_{$pKey}";
     $model->$column = $id;
     return $model;
   }
@@ -1031,7 +1032,7 @@ class Sabel_DB_Model
    */
   public function clearChild($child)
   {
-    $pkey = $this->tableProp->primaryKey;
+    $pkey = $this->getPrimaryKey();
 
     if (isset($this->data[$pkey])) {
       $id = $this->data[$pkey];
@@ -1041,13 +1042,7 @@ class Sabel_DB_Model
 
     $model = MODEL($child);
     $model->setCondition("{$this->tableProp->table}_{$pkey}", $id);
-
-    try {
-      $driver = $model->getDriver();
-      $driver->delete($model->getTableName(), $model->conditions);
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $driver);
-    }
+    $model->doDelete();
   }
 
   public function save($data = null)
@@ -1067,7 +1062,7 @@ class Sabel_DB_Model
       $saveData = ($data) ? $data : $this->newData;
       $this->recordTime($saveData, $tblName, self::UPDATE_TIME_COLUMN);
       $this->conditions = $this->selectConditions;
-      $this->update($saveData);
+      $this->doUpdate($saveData);
       $newData = array_merge($this->getRealData(), $saveData);
       $this->newData = array();
     } else {
@@ -1081,7 +1076,7 @@ class Sabel_DB_Model
       $this->recordTime($newData, $tblName, self::CREATE_TIME_COLUMN);
 
       $incCol = $this->getIncrementKey();
-      $newId  = $this->insert($newData, $incCol);
+      $newId  = $this->doInsert($newData, $incCol);
 
       if ($incCol) {
         if (!isset($newData[$incCol])) $newData[$incCol] = $newId;
@@ -1094,7 +1089,7 @@ class Sabel_DB_Model
     return $newModel;
   }
 
-  public function update($data)
+  public function doUpdate($data)
   {
     try {
       $driver = $this->getDriver();
@@ -1104,7 +1099,7 @@ class Sabel_DB_Model
     }
   }
 
-  public function insert($data, $incCol = null)
+  public function doInsert($data, $incCol = null)
   {
     try {
       $driver = $this->getDriver();
@@ -1273,6 +1268,11 @@ class Sabel_DB_Model
       throw new Exception($msg . " or execute executeQuery({$smpl}).");
     }
 
+    $this->doDelete();
+  }
+
+  protected function doDelete()
+  {
     try {
       $driver = $this->getDriver();
       $driver->delete($this->getTableName(), $this->conditions);
