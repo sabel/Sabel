@@ -27,6 +27,7 @@ class Sabel_Map_Candidate implements Iterator
   const MATCH_ALL_KEY     = 0x53;
   const VARIABLE_KEY      = 0x54;
   const DEFAULT_VALUE_KEY = 0x55;
+  const CACHE_KEY         = 0x56;
   
   const ELEMENT_NAME = "ELEMENT_NAME";
   
@@ -195,6 +196,12 @@ class Sabel_Map_Candidate implements Iterator
     return (isset($element[self::OMITTABLE_KEY]));
   }
   
+  public function setCache($key)
+  {
+    $element = $this->getElement();
+    $element[self::CACHE_KEY] = $key;
+  }
+  
   public function setDefaultValue($name, $value)
   {
     if (isset($this->elements[$name])) {
@@ -322,13 +329,70 @@ class Sabel_Map_Candidate implements Iterator
   
   public function find($tokens)
   {
+    if ($candidate = $this->loadFromCache($tokens)) {
+      return $candidate;
+    }
+    
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
       if ($this->matchToTokens($candidate, $tokens)) {
+        $this->saveToCache($candidate, $tokens);
         return $candidate;
       }
     }
     
     throw new Sabel_Map_Candidate_NotFound("check your config/map.php");
+  }
+  
+  protected function loadFromCache($tokens)
+  {
+    if (PRODUCTION !== PRODUCTION) return false;
+    
+    $cache = Sabel::load("Sabel_Cache_Apc");
+    
+    if ($tokens->get(0) === "") {
+      $key = "map_space";
+      return false;
+    } else {
+      $key = $tokens->get(0);
+    }
+    
+    if (($selCandidate = $cache->read($key))) {
+      $cacheCandidate = unserialize($selCandidate);
+        
+      foreach ($cacheCandidate as $candidate) {
+        $token = $tokens->current();
+        if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
+          $candidate->setElementVariable($token);
+        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
+          $candidate->setModule($token);
+          $candidate->setElementVariable($token);
+        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
+          $candidate->setController($token);
+          $candidate->setElementVariable($token);
+        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
+          $candidate->setAction($token);
+          $candidate->setElementVariable($token);
+        }
+        $tokens->next();
+      }
+      return $cacheCandidate;
+    } else {
+      return false;
+    }
+  }
+  
+  protected function saveToCache($candidate, $tokens)
+  {
+    if (PRODUCTION !== PRODUCTION) return false;
+    
+    $cache = Sabel::load("Sabel_Cache_Apc");
+    
+    if ($tokens->get(0) === "") {
+      $key = "map_space";
+    } else {
+      $key = $tokens->get(0);
+    }
+    $cache->write($key, serialize($candidate));
   }
   
   protected function matchToTokens($candidate, $tokens)

@@ -5,6 +5,7 @@ define('DEFAULT_PHP_POSTFIX', '.php');
 set_include_path(dirname(__FILE__).":".get_include_path());
 
 Sabel::using("Sabel_Object");
+Sabel::using('Sabel_Map_Configurator');
 
 final class Sabel
 {
@@ -248,7 +249,6 @@ function array_ndpop(&$array) {
 
 function candidate($name, $uri, $options = null)
 {
-  Sabel::using('Sabel_Map_Configurator');
   Sabel_Map_Configurator::addCandidate($name, $uri, $options);
 }
 

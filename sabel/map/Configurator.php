@@ -61,6 +61,10 @@ class Sabel_Map_Configurator
       }
     }
     
+    if (isset($options["cache"])) {
+      $c->setCache($options["cache"]);
+    }
+    
     if (isset($options['module']))     $c->setModule($options['module']);
     if (isset($options['controller'])) $c->setController($options['controller']);
     if (isset($options['action']))     $c->setAction($options['action']);
@@ -75,5 +79,10 @@ class Sabel_Map_Configurator
   public static function getCandidates()
   {
     return self::$candidates;
+  }
+  
+  public static function setCandidates($candidates)
+  {
+    self::$candidates = $candidates;
   }
 }

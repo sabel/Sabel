@@ -24,7 +24,19 @@ class Sabel_Controller_Front
   public function __construct($request = null)
   {
     if ($this->request === null) $this->request = Sabel::load($this->requestClass);
-    Sabel::fileUsing(RUN_BASE . '/config/map.php');
+    
+    if (ENVIRONMENT === PRODUCTION) {
+      $cache = Sabel::load("Sabel_Cache_Apc");
+      if (!($candidates = $cache->read("map_candidates"))) {
+        Sabel::fileUsing(RUN_BASE . '/config/map.php');
+        $cache->write("map_candidates", serialize(Sabel_Map_Configurator::getCandidates()));
+      } else {
+        Sabel_Map_Configurator::setCandidates(unserialize($candidates));
+      }
+    } else {
+      Sabel::fileUsing(RUN_BASE . '/config/map.php');
+    }
+    
     $this->plugin = Sabel::load("Sabel_Controller_Plugin");
   }
   
