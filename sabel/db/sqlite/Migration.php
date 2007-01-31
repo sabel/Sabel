@@ -58,17 +58,17 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Base_Migration
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
+    $this->model->executeQuery("CREATE TABLE $tblName ( " . $query . " )");
   }
 
   public function deleteTable($tblName)
   {
-    $this->model->execute("DROP TABLE $tblName");
+    $this->model->executeQuery("DROP TABLE $tblName");
   }
 
   public function renameTable($from, $to)
   {
-    $this->model->execute("ALTER TABLE $from RENAME TO $to");
+    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
   }
 
   public function addColumn($tblName, $colName, $param)
@@ -77,7 +77,7 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Base_Migration
     $rep  = $this->replace;
     $attr = str_replace($sch, $rep, $param);
 
-    $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
+    $this->model->executeQuery("ALTER TABLE $tblName ADD $colName $attr");
   }
 
   public function deleteColumn($tblName, $colName)
@@ -199,18 +199,18 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Base_Migration
 
     $tmpTable = $tblName . '_alter_tmp';
     $query    = "CREATE TEMPORARY TABLE $tmpTable ( $createSQL )";
-    $model->execute($query);
+    $model->executeQuery($query);
 
     $query = "INSERT INTO $tmpTable SELECT $selectCols FROM {$tblName}";
-    $model->execute($query);
-    $model->execute("DROP TABLE $tblName");
+    $model->executeQuery($query);
+    $model->executeQuery("DROP TABLE $tblName");
 
     $query = "CREATE TABLE $tblName ( $createSQL )";
-    $model->execute($query);
+    $model->executeQuery($query);
 
     $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
-    $model->execute($query);
-    $model->execute("DROP TABLE $tmpTable");
+    $model->executeQuery($query);
+    $model->executeQuery("DROP TABLE $tmpTable");
 
     $model->commit();
   }

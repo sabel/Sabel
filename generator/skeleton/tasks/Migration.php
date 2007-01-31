@@ -8,7 +8,6 @@ Sabel::fileUsing("config/connection_map.php");
 
 Sabel::using('Sabel_DB_Migration');
 Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Model');
 
 /**

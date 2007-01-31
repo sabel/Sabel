@@ -60,17 +60,17 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
     $query = "CREATE TABLE $tblName ( $query )";
     if ($engine !== null) $query .= " ENGINE={$engine}";
-    $this->model->execute($query);
+    $this->model->executeQuery($query);
   }
 
   public function deleteTable($tblName)
   {
-    $this->model->execute("DROP TABLE $tblName");
+    $this->model->executeQuery("DROP TABLE $tblName");
   }
 
   public function renameTable($from, $to)
   {
-    $this->model->execute("ALTER TABLE $from RENAME TO $to");
+    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
   }
 
   public function addColumn($tblName, $colName, $param)
@@ -83,12 +83,12 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
     }
 
     $attr = str_replace($sch, $rep, $param);
-    $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
+    $this->model->executeQuery("ALTER TABLE $tblName ADD $colName $attr");
   }
 
   public function deleteColumn($tblName, $colName)
   {
-    $this->model->execute("ALTER TABLE $tblName DROP $colName");
+    $this->model->executeQuery("ALTER TABLE $tblName DROP $colName");
   }
 
   public function changeColumn($tblName, $colName, $param)
@@ -96,7 +96,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Base_Migration
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = "ALTER TABLE $tblName MODIFY $colName " . str_replace($sch, $rep, $param);
-    $this->model->execute($query);
+    $this->model->executeQuery($query);
   }
 
   public function renameColumn($tblName, $from, $to)

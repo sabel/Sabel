@@ -56,17 +56,17 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Base_Migration
     $sch   = $this->search;
     $rep   = $this->replace;
     $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->model->execute("CREATE TABLE $tblName ( " . $query . " )");
+    $this->model->executeQuery("CREATE TABLE $tblName ( " . $query . " )");
   }
 
   public function deleteTable($tblName)
   {
-    $this->model->execute("DROP TABLE $tblName");
+    $this->model->executeQuery("DROP TABLE $tblName");
   }
 
   public function renameTable($from, $to)
   {
-    $this->model->execute("ALTER TABLE $from RENAME TO $to");
+    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
   }
 
   public function addColumn($tblName, $colName, $param)
@@ -75,12 +75,12 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Base_Migration
     $rep  = $this->replace;
     $attr = str_replace($sch, $rep, $param);
 
-    $this->model->execute("ALTER TABLE $tblName ADD $colName $attr");
+    $this->model->executeQuery("ALTER TABLE $tblName ADD $colName $attr");
   }
 
   public function deleteColumn($tblName, $colName)
   {
-    $this->model->execute("ALTER TABLE $tblName DROP $colName");
+    $this->model->executeQuery("ALTER TABLE $tblName DROP $colName");
   }
 
   public function changeColumn($tblName, $colName, $param)
@@ -89,25 +89,25 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Base_Migration
     $rep  = $this->replace;
     $attr = trim(str_replace($sch, $rep, $param));
     list ($type) = explode(' ', $attr);
-    $this->model->execute("ALTER TABLE $tblName ALTER $colName TYPE $type");
+    $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
 
     $attr = strtolower($attr);
     if (strpos($attr, 'not null') !== false) {
-      $this->model->execute("ALTER TABLE $tblName ALTER $colName SET NOT NULL");
+      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName SET NOT NULL");
     } else {
-      $this->model->execute("ALTER TABLE $tblName ALTER $colName DROP NOT NULL");
+      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName DROP NOT NULL");
     }
 
     if (strpos($attr, 'default') !== false) {
       $default = str_replace('default', '', strstr($attr, 'default'));
-      $this->model->execute("ALTER TABLE $tblName ALTER $colName SET DEFAULT $default");
+      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName SET DEFAULT $default");
     } else {
-      $this->model->execute("ALTER TABLE $tblName ALTER $colName DROP DEFAULT");
+      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName DROP DEFAULT");
     }
   }
 
   public function renameColumn($tblName, $from, $to)
   {
-    $this->model->execute("ALTER TABLE $tblName RENAME $from TO $to");
+    $this->model->executeQuery("ALTER TABLE $tblName RENAME $from TO $to");
   }
 }
