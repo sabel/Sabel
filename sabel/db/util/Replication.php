@@ -1,7 +1,8 @@
 <?php
 
 /**
- * Sabel_DB_Util_Replication
+ * utility class for Replication.
+ * please copy into the app/models of your application.
  *
  * @abstract
  * @category   DB
@@ -10,7 +11,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Util_Replication extends Sabel_DB_Model
+abstract class Replication extends Sabel_DB_Model
 {
   abstract public function choiceMasterConnectionName();
   abstract public function choiceSlaveConnectionName();

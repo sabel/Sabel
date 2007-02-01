@@ -17,6 +17,7 @@ abstract class Sabel_DB_Base_Migration
 
   public function setModel($tblName)
   {
+    // @todo
     $this->model = @MODEL(convert_to_modelname($tblName));
   }
 
