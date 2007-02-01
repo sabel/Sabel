@@ -33,7 +33,6 @@ class Sabel_DB_Model
     $selected  = false;
 
   private
-    $driver    = null,
     $schema    = null,
     $relation  = null,
     $tableProp = null,
@@ -126,11 +125,10 @@ class Sabel_DB_Model
    */
   public function getDriver()
   {
-    if ($this->driver === null) {
-      $this->driver = Sabel_DB_Connection::getDriver($this->getConnectName());
-      $this->driver->extension($this->tableProp);
-    }
-    return $this->driver;
+    $driver = Sabel_DB_Connection::getDriver($this->getConnectName());
+    $driver->extension($this->tableProp);
+
+    return $driver;
   }
 
   /**

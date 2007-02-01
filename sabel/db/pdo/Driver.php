@@ -17,14 +17,14 @@ Sabel::using('Sabel_DB_Pdo_PdoStatement');
 class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 {
   private
+    $conn     = null,
     $db       = '',
     $data     = array(),
     $isAdd    = true,
     $stmtFlag = false;
 
-  public function __construct($conn, $db)
+  public function __construct($db)
   {
-    $this->conn = $conn;
     $this->db   = $db;
     $this->stmt = new Sabel_DB_Pdo_Statement($db);
   }
@@ -39,7 +39,8 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
     $trans = $this->loadTransaction();
 
     if (!$trans->isActive($conName)) {
-      $this->conn->beginTransaction();
+      $conn = Sabel_DB_Connection::getConnection($conName);
+      $conn->beginTransaction();
       $trans->begin($this, $conName);
     }
   }
@@ -47,7 +48,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
   public function doCommit($conn)
   {
     if (!$conn->commit()) {
-      $error = $this->conn->errorInfo();
+      $error = $conn->errorInfo();
       throw new Exception('Error: transaction commit failed. ' . $error[2]);
     }
   }
@@ -138,20 +139,22 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
+    $conn = Sabel_DB_Connection::getConnection($this->connectName);
+
     if (isset($sql)) {
-      $pdoStmt = $this->conn->prepare($sql);
+      $pdoStmt = $conn->prepare($sql);
     } elseif ($this->stmtFlag) {
       $pdoStmt = Sabel_DB_Pdo_PdoStatement::get();
     } elseif (($sql = $this->stmt->getSQL()) === '') {
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
     } else {
-      $pdoStmt = $this->conn->prepare($sql);
+      $pdoStmt = $conn->prepare($sql);
       if ($this->isAdd) Sabel_DB_Pdo_PdoStatement::add($pdoStmt);
     }
 
     if (!$pdoStmt) {
       $this->data = array();
-      $error = $this->conn->errorInfo();
+      $error = $conn->errorInfo();
       throw new Exception('Error: PDOStatement is null. SQL: ' . $sql . " ERROR: {$error[2]}");
     }
 
@@ -160,9 +163,10 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
       $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
       $pdoStmt->closeCursor();
       $this->resultSet = new Sabel_DB_Result_Row($rows);
+      $this->conn = $conn;
     } else {
       $param = var_export($param, 1);
-      $error = $this->conn->errorInfo();
+      $error = $conn->errorInfo();
       $error = (isset($error[2])) ? $error[2] : var_export($error, 1);
       if (is_object($pdoStmt)) $sql = $pdoStmt->queryString;
       $sql   = substr($sql, 0, 128) . " ...";

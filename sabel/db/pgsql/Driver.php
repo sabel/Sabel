@@ -14,9 +14,8 @@ Sabel::using('Sabel_DB_Base_Driver');
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 {
-  public function __construct($conn)
+  public function __construct()
   {
-    $this->conn = $conn;
     $this->stmt = new Sabel_DB_General_Statement('pgsql', 'pg_escape_string');
   }
 
@@ -25,7 +24,8 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
     $trans = $this->loadTransaction();
 
     if (!$trans->isActive($conName)) {
-      $this->driverExecute('START TRANSACTION', $this->conn);
+      $conn = Sabel_DB_Connection::getConnection($conName);
+      $this->driverExecute('START TRANSACTION', $conn);
       $trans->begin($this, $conName);
     }
   }
@@ -61,7 +61,9 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    $conn = ($conn === null) ? $this->conn : $conn;
+    if ($conn === null) {
+      $conn = Sabel_DB_Connection::getConnection($this->connectName);
+    }
 
     if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');

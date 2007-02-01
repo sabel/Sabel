@@ -116,17 +116,16 @@ class Sabel_DB_Connection
 
   public static function getDriver($conName)
   {
-    $conn    = self::getConnection($conName);
     $drvName = self::getDriverName($conName);
 
     if (strpos($drvName, 'pdo-') === 0) {
-      $driver  = Sabel::load('Sabel_DB_Pdo_Driver', $conn, self::getDB($conName));
+      $driver = Sabel::load('Sabel_DB_Pdo_Driver', self::getDB($conName));
     } else {
-      $clsName = 'Sabel_DB_' . ucfirst($drvName) . '_Driver';
-      $driver  = Sabel::load($clsName, $conn);
+      $driver = Sabel::load('Sabel_DB_' . ucfirst($drvName) . '_Driver');
     }
 
     self::$connList[$conName]['driver'] = $driver;
+    $driver->setConnectionName($conName);
     return $driver;
   }
 

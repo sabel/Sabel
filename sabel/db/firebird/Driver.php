@@ -16,17 +16,9 @@ Sabel::using('Sabel_DB_Firebird_Transaction');
  */
 class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 {
-  private $conName = '';
-
-  public function __construct($conn)
+  public function __construct()
   {
-    $this->conn = $conn;
     $this->stmt = new Sabel_DB_Firebird_Statement('firebird');
-  }
-
-  public function extension($tableProp)
-  {
-    $this->conName = $tableProp->connectName;
   }
 
   public function loadStatement()
@@ -44,7 +36,8 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     $trans = $this->loadTransaction();
 
     if (!$trans->isActive($conName)) {
-      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->conn);
+      $conn = Sabel_DB_Connection::getConnection($conName);
+      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
       $trans->begin($resource, $conName);
     }
   }
@@ -72,10 +65,10 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
-    $conn = $this->loadTransaction()->get($this->conName);
+    $conn = $this->loadTransaction()->get($this->connectName);
 
     if ($conn === null) {
-      $conn = $this->conn;
+      $conn = Sabel_DB_Connection::getConnection($this->connectName);
       $autoCommit = true;
     } else {
       $autoCommit = false;

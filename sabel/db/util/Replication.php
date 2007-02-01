@@ -12,7 +12,7 @@
  */
 abstract class Sabel_DB_Util_Replication extends Sabel_DB_Model
 {
-  abstract public function choiceConnectionNameForMaster();
+  abstract public function choiceMasterConnectionName();
   abstract public function choiceSlaveConnectionName();
 
   protected function createSchemaAccessor()
@@ -30,7 +30,7 @@ abstract class Sabel_DB_Util_Replication extends Sabel_DB_Model
   public function doSelect($query = null)
   {
     $this->choiceSlaveConnectionName();
-    parent::doSelect($query);
+    return parent::doSelect($query);
   }
 
   public function doUpdate($data)
@@ -42,7 +42,7 @@ abstract class Sabel_DB_Util_Replication extends Sabel_DB_Model
   public function doInsert($data, $incCol = null)
   {
     $this->choiceMasterConnectionName();
-    parent::doInsert($data, $incCol);
+    return parent::doInsert($data, $incCol);
   }
 
   protected function doDelete()

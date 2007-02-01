@@ -8,7 +8,6 @@ class Test_DB_Test extends SabelTestCase
                                 'customer_order', 'classification', 'favorite_item',
                                 'student', 'course', 'student_course', 'timer', 'child');
 
-
   public function testBasic()
   {
     $basic = Sabel_Model::load('Basic');

@@ -17,11 +17,9 @@ Sabel::using('Sabel_DB_General_Statement');
 abstract class Sabel_DB_Base_Driver
 {
   protected
-    $conn = null,
-    $stmt = null;
-
-  protected
+    $stmt         = null,
     $resultSet    = null,
+    $connectName  = null,
     $lastInsertId = null;
 
   public abstract function begin($connectName);
@@ -35,6 +33,11 @@ abstract class Sabel_DB_Base_Driver
   public function loadStatement()
   {
     return $this->stmt;
+  }
+
+  public function setConnectionName($connectName)
+  {
+    $this->connectName = $connectName;
   }
 
   public function loadTransaction()
