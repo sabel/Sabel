@@ -67,8 +67,11 @@ class Sabel_DB_Model
   protected
     $validateIgnores   = array(),
     $validateOnInsert  = false,
-    $validateOnUpdate  = false,
-    $ignoreEmptyParent = false;
+    $validateOnUpdate  = false;
+
+  protected
+    $ignoreNothingPrimary = false,
+    $ignoreEmptyParent    = false;
 
   protected
     $validateMessages = array('length'   => 'too long',
@@ -108,8 +111,11 @@ class Sabel_DB_Model
       Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
       Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
 
-      if ($properties['primaryKey'] === null && $this->structure !== 'view')
-        trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+      if ($properties['primaryKey'] === null) {
+        if (!$this->ignoreNothingPrimary && $this->structure !== 'view') {
+          trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+        }
+      }
 
       $this->schema  = $tblSchema;
       $this->columns = $columns;
