@@ -40,6 +40,11 @@ abstract class Sabel_DB_Base_Driver
     $this->connectName = $connectName;
   }
 
+  public function getConnection()
+  {
+    return Sabel_DB_Connection::getConnection($this->connectName);
+  }
+
   public function loadTransaction()
   {
     Sabel::using('Sabel_DB_General_Transaction');

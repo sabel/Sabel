@@ -139,7 +139,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null)
   {
-    $conn = Sabel_DB_Connection::getConnection($this->connectName);
+    $conn = $this->getConnection();
 
     if (isset($sql)) {
       $pdoStmt = $conn->prepare($sql);

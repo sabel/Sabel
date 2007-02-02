@@ -61,9 +61,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    if ($conn === null) {
-      $conn = Sabel_DB_Connection::getConnection($this->connectName);
-    }
+    if ($conn === null) $conn = $this->getConnection();
 
     if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');

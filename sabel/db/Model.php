@@ -476,9 +476,20 @@ class Sabel_DB_Model
     return $this->childConditions;
   }
 
-  public function unsetChildCondition()
+  /**
+   * unset condition for child. or with constraint.
+   *
+   * @param  boolean $with unset with constraint
+   * @return void
+   */
+  public function unsetChildCondition($with)
   {
-    $this->childConditions  = array();
+    $this->childConditions = array();
+    if ($with) $this->unsetChildConstraint();
+  }
+
+  public function unsetChildConstraint()
+  {
     $this->childConstraints = array();
   }
 

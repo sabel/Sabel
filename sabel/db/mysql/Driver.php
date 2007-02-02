@@ -14,9 +14,37 @@ Sabel::using('Sabel_DB_Base_Driver');
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 {
+  private $conn = null;
+
   public function __construct()
   {
     $this->stmt = new Sabel_DB_General_Statement('mysql', 'mysql_real_escape_string');
+  }
+
+  protected function setConnection()
+  {
+    $conn =& $this->conn;
+    if ($conn === null) $conn = $this->getConnection();
+  }
+
+  protected function makeQuery($conditions, $constraints = null)
+  {
+    $this->setConnection();
+    $this->stmt->makeConditionQuery($conditions);
+    if ($constraints) $this->stmt->makeConstraintQuery($constraints);
+  }
+
+  protected function makeUpdateQuery($table, $data, $conditions = null)
+  {
+    $this->setConnection();
+    $this->stmt->makeUpdateSQL($table, $data);
+    if ($conditions) $this->makeQuery($conditions);
+  }
+
+  protected function makeInsertQuery($table, $data, $idColumn)
+  {
+    $this->setConnection();
+    $this->stmt->makeInsertSQL($table, $data);
   }
 
   public function begin($conName)
@@ -56,7 +84,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
   public function driverExecute($sql = null, $conn = null)
   {
     if ($conn === null) {
-      $conn = Sabel_DB_Connection::getConnection($this->connectName);
+      $conn = ($this->conn === null) ? $this->getConnection() : $this->conn;
     }
 
     if ($sql === null && ($sql = $this->stmt->getSQL()) === '')

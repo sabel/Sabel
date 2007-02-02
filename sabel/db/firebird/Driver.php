@@ -54,7 +54,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
   {
     $genName = strtoupper("{$table}_{$defColumn}_gen");
 
-    if (!isset($data[$defColumn])) {
+    if ($defColumn !== null && !isset($data[$defColumn])) {
       $this->driverExecute('SELECT GEN_ID(' . $genName . ', 1) FROM RDB$DATABASE');
       $resultSet = $this->getResultSet();
       $genNum = $resultSet->fetch(Sabel_DB_Result_Row::NUM);
@@ -68,7 +68,7 @@ class Sabel_DB_Firebird_Driver extends Sabel_DB_Base_Driver
     $conn = $this->loadTransaction()->get($this->connectName);
 
     if ($conn === null) {
-      $conn = Sabel_DB_Connection::getConnection($this->connectName);
+      $conn = $this->getConnection();
       $autoCommit = true;
     } else {
       $autoCommit = false;
