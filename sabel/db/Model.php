@@ -416,7 +416,7 @@ class Sabel_DB_Model
           return ($data === 1);
         }
       case Sabel_DB_Type_Const::DATETIME:
-        return Sabel::load('Sabel_Date', $data);
+        return (is_object($data)) ? $data : Sabel::load('Sabel_Date', $data);
       default:
         return $data;
     }
