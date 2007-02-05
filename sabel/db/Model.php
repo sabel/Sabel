@@ -7,10 +7,6 @@ Sabel::using('Sabel_DB_SimpleCache');
 
 Sabel::using('Sabel_DB_Condition');
 
-if (!defined('TEST_CASE')) {
-  Sabel::fileUsing(RUN_BASE . '/config/connection_map.php', true);
-}
-
 /**
  * Sabel_DB_Model
  *
@@ -41,7 +37,7 @@ class Sabel_DB_Model
   private
     $parentModels    = array(),
     $acquiredParents = array(),
-    $joinConNames    = array(),
+    $dbTables        = array(),
     $joinPairBuffer  = array(),
     $joinCondBuffer  = array(),
     $cascadeStack    = array();
@@ -54,28 +50,29 @@ class Sabel_DB_Model
 
   protected
     $table       = '',
+    $connectName = 'default',
     $structure   = 'normal',
     $localize    = array(),
     $parents     = array(),
     $children    = array();
 
   protected
-    $selectConditions  = array(),
-    $childConditions   = array(),
-    $childConstraints  = array();
+    $selectConditions = array(),
+    $childConditions  = array(),
+    $childConstraints = array();
 
   protected
-    $validateIgnores   = array(),
-    $validateOnInsert  = false,
-    $validateOnUpdate  = false;
+    $validateIgnores  = array(),
+    $validateOnInsert = false,
+    $validateOnUpdate = false;
 
   protected
     $ignoreNothingPrimary = false,
     $ignoreEmptyParent    = false;
 
   protected
-    $validateMessages = array('length'   => 'too long',
-                              'maximum'  => 'too large',
+    $validateMessages = array('length'   => 'is too long',
+                              'maximum'  => 'is too large',
                               'nullable' => 'should not be a blank',
                               'type'     => 'invalid data type');
 
@@ -94,26 +91,28 @@ class Sabel_DB_Model
     if ($cache) {
       $this->schema  = $cache;
       $this->columns = Sabel_DB_SimpleCache::get('columns_' . $tblName);
-      $properties    = Sabel_DB_SimpleCache::get('props_'   . $tblName);
+      $props         = Sabel_DB_SimpleCache::get('props_'   . $tblName);
     } else {
       $sClsName = 'Schema_' . $mdlName;
       Sabel::using($sClsName);
 
       if (class_exists($sClsName, false)) {
-        list($tblSchema, $properties) = $this->getSchemaFromCls($sClsName, $tblName);
+        list($tblSchema, $props) = $this->getSchemaFromCls($sClsName, $tblName);
       } else {
-        list($tblSchema, $properties) = $this->getSchemaFromDb($tblName);
+        list($tblSchema, $props) = $this->getSchemaFromDb($tblName);
       }
 
+      $props['table']       = $tblName;
+      $props['connectName'] = $this->connectName;
       $columns = array_keys($tblSchema->getColumns());
 
       Sabel_DB_SimpleCache::add('schema_'  . $tblName, $tblSchema);
       Sabel_DB_SimpleCache::add('columns_' . $tblName, $columns);
-      Sabel_DB_SimpleCache::add('props_'   . $tblName, $properties);
+      Sabel_DB_SimpleCache::add('props_'   . $tblName, $props);
 
-      if ($properties['primaryKey'] === null) {
+      if ($props['primaryKey'] === null) {
         if (!$this->ignoreNothingPrimary && $this->structure !== 'view') {
-          trigger_error('primary key not found in ' . $properties['table'], E_USER_NOTICE);
+          trigger_error('primary key not found in ' . $props['table'], E_USER_NOTICE);
         }
       }
 
@@ -121,7 +120,7 @@ class Sabel_DB_Model
       $this->columns = $columns;
     }
 
-    $this->tableProp = new Sabel_ValueObject($properties);
+    $this->tableProp = new Sabel_ValueObject($props);
   }
 
   /**
@@ -707,7 +706,7 @@ class Sabel_DB_Model
   protected function createModel($model)
   {
     if ($row = $model->doSelect()->fetch()) {
-      if (!empty($this->parents)) {
+      if ($this->parents) {
         $row = $this->addParent($row, $model);
       }
       $model->transrate($row);
@@ -750,13 +749,14 @@ class Sabel_DB_Model
   {
     $this->setCondition($param1, $param2, $param3);
     $tblName = $this->tableProp->table;
+    $parents = $this->parents;
 
-    if ($this->parents) {
+    if ($parents) {
       $this->relation = Sabel::load('Sabel_DB_Model_Relation');
-      $this->joinConNames[] = $this->tableProp->connectName;
+      $this->dbTables = $this->getTableNames();
       $this->relation->setColumns($tblName, $this->columns);
 
-      if ($this->addRelationalDataToBuffer($tblName, $this->parents)) {
+      if ($this->addRelationalDataToBuffer($tblName, $parents)) {
         return $this->automaticJoin();
       }
     }
@@ -772,11 +772,8 @@ class Sabel_DB_Model
     foreach ($rows as $row) {
       $model = clone $obj;
 
-      if ($ccond) $model->childConstraints = $ccond;
-
-      if (!empty($this->parents)) {
-        $row = $this->addParent($row, $this);
-      }
+      if ($ccond)   $model->childConstraints = $ccond;
+      if ($parents) $row = $this->addParent($row, $this);
 
       $model->transrate($row);
       $this->getDefaultChild($model);
@@ -787,10 +784,7 @@ class Sabel_DB_Model
 
   protected function isSameConnectionNames($tblName)
   {
-    $conName = get_db_tables($tblName);
-    $size    = count($this->joinConNames);
-    if ($this->joinConNames[$size - 1] !== $conName) return false;
-
+    if (!in_array($tblName, $this->dbTables)) return false;
     $model = MODEL(convert_to_modelname($tblName));
 
     if ($model->parents) {
@@ -798,7 +792,6 @@ class Sabel_DB_Model
       if (!$result) return false;
     }
 
-    $this->joinConNames[] = $conName;
     $this->relation->setColumns($tblName, $model->columns);
     return true;
   }
@@ -1455,26 +1448,22 @@ class Sabel_DB_Model
 
     $tblSchema  = Sabel::load('Sabel_DB_Schema_Table', $tblName, $cols);
     $properties = $sCls->getProperty();
-    $properties['table'] = $tblName;
-    $properties['connectName'] = get_db_tables($tblName);
 
     return array($tblSchema, $properties);
   }
 
   protected function getSchemaFromDb($tblName)
   {
-    $conName    = get_db_tables($tblName);
+    $conName    = $this->connectName;
     $scmName    = Sabel_DB_Connection::getSchema($conName);
     $database   = Sabel_DB_Connection::getDB($conName);
     $accessor   = Sabel::load('Sabel_DB_Schema_Accessor', $conName, $scmName);
     $engine     = ($database === 'mysql') ? $accessor->getTableEngine($tblName) : null;
     $tblSchema  = $accessor->getTable($tblName);
 
-    $properties = array('connectName'  => $conName,
-                        'primaryKey'   => $tblSchema->getPrimaryKey(),
+    $properties = array('primaryKey'   => $tblSchema->getPrimaryKey(),
                         'incrementKey' => $tblSchema->getIncrementKey(),
-                        'tableEngine'  => $engine,
-                        'table'        => $tblName);
+                        'tableEngine'  => $engine);
 
     return array($tblSchema, $properties);
   }

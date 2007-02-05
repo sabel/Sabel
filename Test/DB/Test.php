@@ -1152,6 +1152,16 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
+class Dummy extends Sabel_DB_Model
+{
+  protected $connectName = 'default';
+
+  public function __construct($mdlName)
+  {
+    $this->initialize($mdlName);
+  }
+}
+
 class Users extends Sabel_DB_Model
 {
   protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
@@ -1178,7 +1188,7 @@ class Student extends StudentCourseBridge
 {
 }
 
-class Course extends Sabel_DB_Model_Bridge
+class Course extends StudentCourseBridge
 {
 }
 
@@ -1192,6 +1202,16 @@ class Child extends Sabel_DB_Model
 {
   protected $children = array('GrandChild');
   protected $childConstraints = array('GrandChild' => array('order' => 'age'));
+}
+
+class Customer extends Sabel_DB_Model
+{
+  protected $connectName = 'default2';
+}
+
+class GrandChild extends Sabel_DB_Model
+{
+  protected $connectName = 'default2';
 }
 
 class Schema_TestCondition

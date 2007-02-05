@@ -21,25 +21,16 @@ class Sabel_Model
   {
     $models = array();
     foreach ($mdlNames as $name) $models[] = self::createModel($name);
-    return new Sabel_DB_Model_Fusion($models, $mdlNames);
+    return Sabel::load('Sabel_DB_Model_Fusion', $models, $mdlNames);
   }
 
   protected static function createModel($mdlName)
   {
     Sabel::using($mdlName);
-    if (class_exists($mdlName, false)) return new $mdlName();
-
-    if (!class_exists('Sabel_DB_Empty', false)) {
-      eval('class Sabel_DB_Empty extends Sabel_DB_Model
-            {
-              public function __construct($mdlName)
-              {
-                $this->initialize($mdlName);
-              }
-            }'
-          );
+    if (class_exists($mdlName, false)) {
+      return new $mdlName();
+    } else {
+      return Sabel::load('Dummy', $mdlName);
     }
-
-    return new Sabel_DB_Empty($mdlName);
   }
 }

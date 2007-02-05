@@ -58,6 +58,9 @@ class Test_DB_Mysql extends Test_DB_Test
 
     try {
       foreach ($tables as $table) $model->executeQuery("DELETE FROM $table");
+      @$model->executeQuery("DROP TABLE parents");
+      @$model->executeQuery("DROP TABLE grand_child");
+      @$model->executeQuery("DROP TABLE customer");
     } catch (Exception $e) {
     }
 
