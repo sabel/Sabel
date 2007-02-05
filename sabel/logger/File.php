@@ -45,7 +45,7 @@ class Sabel_Logger_File
   
   public function log($text)
   {
-    $message = date(DATE_ATOM) ." ". $text . "\n";
+    $message = date("c") ." ". $text . "\n";
     fwrite($this->fp, $message);
   }
   
