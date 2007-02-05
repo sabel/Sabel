@@ -17,7 +17,7 @@ final class Sabel
   public static function loadState()
   {
     $c = self::load('Sabel_Cache_Manager')->create();
-    self::$readables = $apc->read('readables');
+    self::$readables = $c->read('readables');
   }
   
   public static function saveState()
