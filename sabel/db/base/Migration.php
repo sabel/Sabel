@@ -15,10 +15,10 @@ abstract class Sabel_DB_Base_Migration
 {
   protected $model = null;
 
-  public function setModel($tblName)
+  public function setModel($tblName, $connectName)
   {
-    // @todo
     $this->model = @MODEL(convert_to_modelname($tblName));
+    $this->model->setConnectName($connectName);
   }
 
   protected function parseForForeignKey($line)

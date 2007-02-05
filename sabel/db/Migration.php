@@ -13,10 +13,13 @@ Sabel::using('Sabel_DB_Base_Migration');
  */
 class Sabel_DB_Migration
 {
-  protected $migration = null;
+  protected $migration   = null;
+  protected $connectName = '';
 
-  public function __construct($env)
+  public function __construct($env, $connectName)
   {
+    $this->connectName = $connectName;
+
     $params = get_db_params($env);
     $params = array_shift($params);
 
@@ -40,13 +43,12 @@ class Sabel_DB_Migration
         break;
     }
 
-    $clsName = 'Sabel_DB_' . $db . '_Migration';
-    $this->migration = Sabel::load($clsName);
+    $this->migration = Sabel::load('Sabel_DB_' . $db . '_Migration');
   }
 
   public function add($type, $tblName, $arg2, $arg3 = null)
   {
-    $this->migration->setModel($tblName);
+    $this->migration->setModel($tblName, $this->connectName);
 
     switch ($type) {
       case Migration::TABLE:
@@ -64,7 +66,7 @@ class Sabel_DB_Migration
 
   public function delete($type, $tblName, $arg2 = null)
   {
-    $this->migration->setModel($tblName);
+    $this->migration->setModel($tblName, $this->connectName);
 
     switch ($type) {
       case Migration::TABLE:
@@ -82,7 +84,7 @@ class Sabel_DB_Migration
 
   public function change($type, $tblName, $arg2, $arg3 = null)
   {
-    $this->migration->setModel($tblName);
+    $this->migration->setModel($tblName, $this->connectName);
 
     switch ($type) {
       case Migration::TABLE:
@@ -98,7 +100,7 @@ class Sabel_DB_Migration
 
   public function rename($type, $tblName, $arg2, $arg3 = null)
   {
-    $this->migration->setModel($tblName);
+    $this->migration->setModel($tblName, $this->connectName);
 
     switch ($type) {
       case Migration::TABLE:
