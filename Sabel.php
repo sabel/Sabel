@@ -16,14 +16,14 @@ final class Sabel
   
   public static function loadState()
   {
-    $apc = self::load('Sabel_Cache_Apc');
+    $c = self::load('Sabel_Cache_Manager')->create();
     self::$readables = $apc->read('readables');
   }
   
   public static function saveState()
   {
-    $apc = self::load('Sabel_Cache_Apc');
-    $apc->write('readables', self::$readables);
+    $c = self::load('Sabel_Cache_Manager')->create();
+    $c->write('readables', self::$readables);
   }
   
   /**
@@ -54,7 +54,10 @@ final class Sabel
       $arg_list = join(', ', $arg_list);
     }
     
+    escapeshellcmd($className);
+    escapeshellcmd($arg_list);
     eval ('$instance = new ' . $className . '(' . $arg_list . ');');
+    
     return $instance;
   }
   

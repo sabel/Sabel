@@ -33,6 +33,9 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
     
     if ($candidate === null) {
       $candidate = Sabel_Context::getCurrentCandidate();
+      if (!is_object($candidate)) {
+        throw new Sabel_Exception_Runtime("candidate is not object.");
+      }
     } else {
       $candidate = $candidate;
     }

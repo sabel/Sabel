@@ -1,35 +1,47 @@
 <?php
 
 /**
- * Sabel_Cache_File
- * 
- * @package org.sabel
- * @author Mori Reo <mori.reo@gmail.com>
+ * cache to file
+ *
+ * @category   Cache
+ * @package    org.sabel.cache
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Cache_File
 {
-  private $path = '';
+  private $dir = "";
   
-  public function __construct($path)
+  public function __construct($dir = null)
   {
-    $this->path = $path;
+    if ($dir === null) {
+      $this->dir = RUN_BASE . "/cache";
+    } else {
+      $this->dir = $dir;
+    }
   }
   
   public function read($key)
   {
-    if ($this->isReadable($key)) return file_get_contents($this->path);
-  }
-  
-  public function write($value)
-  {
-    file_put_contents($this->path, $value);
+    $path = $this->getPath($key);
+    if ($this->isReadable($path)) {
+      file_get_contents($path);
+    } else {
+      return null;
+    }
   }
   
   public function isReadable($key)
   {
-    return (is_readable($this->path));
+    return is_readable($this->getPath($key));
   }
   
+  public function write($key, $value)
+  {
+    file_put_contents($this->getPath($key), $value);
+  }
+    
   public function append($value)
   {
     $fp = fopen($this->path, 'a+');
@@ -38,12 +50,8 @@ class Sabel_Cache_File
     fclose($fp);
   }
   
-  protected function writeToFile($fp, $value)
+  protected function getPath($key)
   {
-    if (is_array($value)) {
-      foreach ($value as $v) fwrite($fp, $v);
-    } else {
-      fwrite($fp, $value);
-    }
+    return $this->dir . "/" . $key;
   }
 }

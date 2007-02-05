@@ -347,7 +347,7 @@ class Sabel_Map_Candidate implements Iterator
   {
     if (PRODUCTION !== PRODUCTION) return false;
     
-    $cache = Sabel::load("Sabel_Cache_Apc");
+    $cache = Sabel::load("Sabel_Cache_Manager")->create();
     
     if ($tokens->get(0) === "") {
       $key = "map_space";
@@ -385,7 +385,7 @@ class Sabel_Map_Candidate implements Iterator
   {
     if (PRODUCTION !== PRODUCTION) return false;
     
-    $cache = Sabel::load("Sabel_Cache_Apc");
+    $cache = Sabel::load("Sabel_Cache_Manager")->create();
     
     if ($tokens->get(0) === "") {
       $key = "map_space";
