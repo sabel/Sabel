@@ -1,7 +1,7 @@
 <?php
 
  /**
-  * Cache implementation of APC
+  * Cache implementation of Xcache
   *
   * @category   Cache
   * @package    org.sabel.cache
@@ -9,15 +9,15 @@
   * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
   * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
   */
-class Sabel_Cache_Apc
+class Sabel_Cache_Xcache
 {
   private $signature = '';
   private static $instance = null;
   
   public function __construct()
   {
-    if (!extension_loaded('apc')) {
-      throw Sabel::load('Sabel_Exception_Runtime', 'apc extension not loaded');
+    if (!extension_loaded('xcache')) {
+      throw Sabel::load('Sabel_Exception_Runtime', 'xcache extension not loaded');
     }
     if (isset($_SERVER['SERVER_NAME'])) {
       $this->signature = $_SERVER['SERVER_NAME'];
@@ -34,22 +34,21 @@ class Sabel_Cache_Apc
   
   public function read($key)
   {
-    return apc_fetch($this->signature.$key);
+    return xcache_get($this->signature.$key);
   }
   
   public function write($key, $value)
   {
-    return apc_store($this->signature.$key, $value);
+    return xcache_set($this->signature.$key, $value);
   }
   
   public function isReadable($key)
   {
-    $result = $this->read($this->signature.$key);
-    return ($result !== false);
+    return xcache_isset($this->signature.$key);
   }
   
   public function delete($key)
   {
-    return apc_delete($this->signature.$key);
+    return xcache_delete($this->signature.$key);
   }
 }

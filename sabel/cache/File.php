@@ -12,6 +12,7 @@
 class Sabel_Cache_File
 {
   private $dir = "";
+  private static $instance = null;
   
   public function __construct($dir = null)
   {
@@ -20,6 +21,12 @@ class Sabel_Cache_File
     } else {
       $this->dir = $dir;
     }
+  }
+  
+  public static function create()
+  {
+    if (self::$instance === null) self::$instance = new self();
+    return self::$instance;
   }
   
   public function read($key)
