@@ -92,6 +92,9 @@ class Sabel_View
         $found = true;
         $name  = $usersLayoutName;
         $contents = $this->renderLayout($this->templatePath, $name, $contents);
+      } elseif (is_file($this->templatePath . Sabel_Const::DEFAULT_LAYOUT)) {
+        $found = true;
+        $contents = $this->renderLayout($this->templatePath, Sabel_Const::DEFAULT_LAYOUT, $contents);
       } elseif (is_file(RUN_BASE . "/app/views/" . Sabel_Const::DEFAULT_LAYOUT)) {
         $found = true;
         $name  = Sabel_Const::DEFAULT_LAYOUT;
