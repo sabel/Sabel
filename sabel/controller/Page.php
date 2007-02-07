@@ -300,6 +300,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->redirected = true;
     $this->redirect = $to;
     $this->processRedirectPlugins($to);
+    $this->processAfterActionPlugins();
+    exit;
   }
   
   public function redirectTo($params)
