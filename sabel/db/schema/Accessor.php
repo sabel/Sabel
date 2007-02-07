@@ -39,6 +39,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
   public function getTableNames()
   {
     $sClass = 'Schema_' . ucfirst($this->connectName) . 'TableList';
+    Sabel::using($sClass);
 
     if (class_exists($sClass, false)) {
       $sc = new $sClass();

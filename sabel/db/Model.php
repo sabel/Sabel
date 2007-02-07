@@ -1261,7 +1261,7 @@ class Sabel_DB_Model
     if ($this->structure === 'view')
       throw new Exception('Error: delete command cannot be executed to view.');
 
-    if ($param1 === null) {
+    if ($param1 === null && empty($this->conditions)) {
       $pKey    = $this->tableProp->primaryKey;
       $scond   = $this->selectConditions;
       $idValue = (isset($scond[$pKey])) ? $scond[$pKey]->value : null;

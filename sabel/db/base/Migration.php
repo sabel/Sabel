@@ -21,6 +21,11 @@ abstract class Sabel_DB_Base_Migration
     $this->model->setConnectName($connectName);
   }
 
+  public function executeQuery($query)
+  {
+    $this->model->executeQuery($query);
+  }
+
   protected function parseForForeignKey($line)
   {
     $line = str_replace('FKEY', 'FOREIGN KEY', $line);

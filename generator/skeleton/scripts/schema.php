@@ -1,7 +1,7 @@
 <?php
 
 define('SCHEMA_DIR', 'lib/schema/');
-//define('SABEL', '/usr/.../.../Sabel/');
+// define('SABEL', '/usr/local/.../.../Sabel/');
 
 if (!defined('SABEL')) {
   trigger_error('you must define SABEL directory before run', E_USER_ERROR);
@@ -15,7 +15,6 @@ require RUN_BASE . '/config/environment.php';
 set_include_path(SABEL . ":" . get_include_path());
 
 Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Schema_Accessor');
 Sabel::using('Sabel_DB_Type_Const');
 Sabel::using('Sabel_DB_Type_Setter');
@@ -85,8 +84,9 @@ class TableList_Writer
 
   public static function write($connectName)
   {
-    $className = 'Schema_' . ucfirst($connectName) . 'TableList';
-    $target = SCHEMA_DIR . "{$className}.php";
+    $fileName  = ucfirst($connectName) . 'TableList';
+    $target    = SCHEMA_DIR . "{$fileName}.php";
+    $className = 'Schema_' . $fileName;
     echo "generate Table List: {$connectName}\n\n";
     $fp = fopen($target, 'w');
 
@@ -118,6 +118,9 @@ class Schema_Writer
 
     $target = SCHEMA_DIR . join('', array_map('ucfirst', explode('_', $tName))).".php";
     echo "generate Schema {$target} \n";
+
+    if (file_exists($target)) return null;
+
     $fp = fopen($target, 'w');
 
     fwrite($fp, "<?php\n\n");
@@ -232,6 +235,8 @@ class Schema_Generator
 {
   public static function main()
   {
+    clearstatcache();
+
     $input = $_SERVER['argv'];
     Sabel::fileUsing(getcwd() . '/config/database.php');
 

@@ -115,4 +115,10 @@ class Sabel_DB_Migration
     }
     Sabel_DB_SimpleCache::clear();
   }
+
+  public function query($tblName, $query)
+  {
+    $this->migration->setModel($tblName, $this->connectName);
+    $this->migration->executeQuery($query);
+  }
 }
