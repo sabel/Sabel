@@ -19,7 +19,7 @@ class Sabel_Controller_Front
   private $requestClass = "Sabel_Request_Web";
   private $candidate = null;
   private $request = null;
-  public $plugin = null;
+  public  $plugin = null;
   
   public function __construct($request = null)
   {
@@ -62,15 +62,16 @@ class Sabel_Controller_Front
     return $controller->execute($this->candidate->getAction());
   }
   
-  public function processCandidate()
+  public function processCandidate($request)
   {
     $candidate = Sabel::load('Sabel_Map_Candidate');
-    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $this->request->__toString()));
+    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
     
     Sabel_Context::setCurrentCandidate($candidate);
+    $this->request = $request;
     $this->request->setCandidate($candidate);
     
-    $this->candidate =  $candidate;
+    $this->candidate = $candidate;
     
     return $this;
   }
