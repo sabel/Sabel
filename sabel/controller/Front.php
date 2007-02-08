@@ -62,8 +62,12 @@ class Sabel_Controller_Front
     return $controller->execute($this->candidate->getAction());
   }
   
-  public function processCandidate($request)
+  public function processCandidate($request = null)
   {
+    if ($request === null) {
+      $request = Sabel::load("Sabel_Request_Web");
+    }
+    
     $candidate = Sabel::load('Sabel_Map_Candidate');
     $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
     

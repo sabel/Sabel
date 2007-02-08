@@ -217,9 +217,9 @@ class Sabel_Request_Web extends Sabel_Request
                      ->add(Sabel::load('Sabel_Controller_Plugin_View'))
                      ->add(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'))
                      ->add(Sabel::load('Sabel_Controller_Plugin_TestRedirecter'));
-                     
+
     $this->result = $aFrontController->ignition($storage);
-      
+    
     return $this;
   }
   

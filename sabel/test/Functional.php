@@ -47,7 +47,5 @@ class Sabel_Controller_Plugin_TestRedirecter implements Sabel_Controller_Page_Pl
     
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . '/' . $to;
-    
-    // header ($redirect);
   }
 }
