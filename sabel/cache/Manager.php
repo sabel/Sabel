@@ -24,7 +24,7 @@ class Sabel_Cache_Manager
   {
     $instance = null;
     
-    if (ENVIRONMENT === DEVELOPMENT) {
+    if (ENVIRONMENT === DEVELOPMENT || ENVIRONMENT === TEST) {
       Sabel::using("Sabel_Cache_Null");
       $instance = Sabel_Cache_Null::create();
     } elseif (isset($this->support["apc"]) && $this->support["apc"] === true) {

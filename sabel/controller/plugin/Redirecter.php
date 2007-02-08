@@ -18,5 +18,6 @@ class Sabel_Controller_Plugin_Redirecter implements Sabel_Controller_Page_Plugin
     $redirect = 'Location: ' . $absolute . '/' . $to;
     
     header ($redirect);
+    exit;
   }
 }
