@@ -9,7 +9,11 @@ if (!in_array($pathToSabel, explode(':', $includePath))) {
   set_include_path(get_include_path().':'.$pathToSabel);
 }
 
-Sakle::main($args[1]);
+if (isset($args[1])) {
+  Sakle::main($args[1]);
+} else {
+  Sakle::main(null);
+}
 
 class Sakle
 {
@@ -28,7 +32,12 @@ class Sakle
   public static function main($class)
   {
     $instance = new self();
-    $instance->run($class);
+    
+    if ($class === null) {
+      $instance->allTestRun();
+    } else {
+      $instance->run($class);
+    }
   }
   
   public function __construct()
@@ -47,6 +56,52 @@ class Sakle
       require ($pathToClass); 
       $ins = new $class();
       $ins->execute();
+    }
+  }
+  
+  public function allTestRun()
+  {
+    define("RUN_BASE", getcwd());
+    add_include_path("/tests");
+
+    if (!defined('PRODUCTION'))  define('PRODUCTION',  0x01);
+    if (!defined('TEST'))        define('TEST',        0x05);
+    if (!defined('DEVELOPMENT')) define('DEVELOPMENT', 0x0A);
+
+    add_include_path('/app');
+    add_include_path('/app/models');
+    add_include_path('/lib');
+
+    define("__TRUE__",  "true");
+    define("__FALSE__", "false");
+
+    Sabel::fileUsing("config/database.php");
+
+    Sabel::using('Sabel_DB_Connection');
+    Sabel::using('Sabel_DB_Executer');
+    Sabel::using('Sabel_DB_Model');
+
+    Sabel::using("Sabel_Test_Functional");
+    Sabel::using("Sabel_Test_FunctionalRunner");
+    
+    define ("ENVIRONMENT", TEST);
+        
+    $pathToTest = $this->runningDirectory . '/tests/functional';
+    $dir = new DirectoryIterator($pathToTest);
+    
+    $tests = array();
+    foreach ($dir as $element) {
+      if ($element->isFile() && strpos($element->getFileName(), '.') !== 0) {
+        require ($pathToTest . "/" . $element->getFileName());
+        $tests[] = $element->getFileName(). "\n";
+      }
+    }
+    
+    foreach ($tests as $test) {
+      $name = explode(".", $test);
+      $this->printMessage("RUN: " . $name[0]);
+      Sabel_Test_FunctionalRunner::create()->start($name[0]);
+      echo "\n";
     }
   }
   
