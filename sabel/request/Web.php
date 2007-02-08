@@ -68,6 +68,15 @@ class Sabel_Request_Web extends Sabel_Request
     return $this;
   }
   
+  /**
+   * to with uri()
+   *
+   */
+  public function toUri($uri)
+  {
+    return $this->to(uri($uri, false));
+  }
+  
   public function parameters($params)
   {
     $this->parameters = Sabel::load('Sabel_Request_Parameters', $params);
