@@ -64,15 +64,12 @@ class Sabel_Controller_Front
   
   public function processCandidate($request = null)
   {
-    if ($request === null) {
-      $request = Sabel::load("Sabel_Request_Web");
-    }
+    if ($request !== null) $this->request = $request;
     
     $candidate = Sabel::load('Sabel_Map_Candidate');
-    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $request->__toString()));
+    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $this->request->__toString()));
     
     Sabel_Context::setCurrentCandidate($candidate);
-    $this->request = $request;
     $this->request->setCandidate($candidate);
     
     $this->candidate = $candidate;
