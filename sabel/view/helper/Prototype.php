@@ -14,18 +14,18 @@ function update($anchor, $element, $uri, $method = "get", $parameters = "")
   return sprintf($format, $element, uri($uri, false), $method, $parameters, $anchor);
 }
 
-function remote($anchor, $uri, $method = "get", $parameters = "")
+function remote($anchor, $uri, $method = "get", $parameters = "", $comp)
 {
   $format = "
     <a onClick=\"
          new Ajax.Request('%s', {
            method:     '%s',
            parameters: '%s',
-           onComplete: function(response) {eval(response.responseText)}
+           onComplete: %s
          })
        \">%s</a>";
   
-  return sprintf($format, uri($uri, false), $method, $parameters, $anchor);
+  return sprintf($format, uri($uri, false), $method, $parameters, $comp, $anchor);
 }
 
 class Sabel_View_Helper_Prototype_Page
