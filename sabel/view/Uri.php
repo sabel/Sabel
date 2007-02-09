@@ -25,9 +25,9 @@ class Sabel_View_Uri
     return sprintf($fmtUri, $id, $class, $this->uri($params, true), $uriParameters, $anchor);
   }
   
-  public function aTag($param, $anchor, $uriParameters = null)
+  public function aTag($param, $anchor, $uriParameters = null, $id, $class)
   {
-    return $this->hyperlink($param, $anchor, $uriParameters);
+    return $this->hyperlink($param, $anchor, $uriParameters, $id, $class);
   }
   
   public function uri($param, $withDomain = false)
