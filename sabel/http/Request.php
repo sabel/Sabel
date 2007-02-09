@@ -35,7 +35,13 @@ class Sabel_Http_Request
   {
     if (is_array($param)) {
       $request = array();
-      foreach ($param as $key => $val) $request[] = $key . "=" . urlencode($val);
+      foreach ($param as $key => $val) {
+        if (is_array($val)) {
+          foreach ($val as $k => $v) $request[] = "{$key}[{$k}]=" . urlencode($v);
+        } else {
+          $request[] = $key . "=" . urlencode($val);
+        }
+      }
       $request = join('&', $request);
     } else {
       $request = $param;
