@@ -12,9 +12,9 @@ Sabel::using('Sabel_DB_Model');
  */
 class Sabel_Model
 {
-  public static function load($mdlName)
+  public static function load($mdlName, $arg1 = null, $arg2 = null)
   {
-    return self::createModel($mdlName);
+    return self::createModel($mdlName, $arg1, $arg2);
   }
 
   public static function fusion($mdlNames)
@@ -24,13 +24,13 @@ class Sabel_Model
     return Sabel::load('Sabel_DB_Model_Fusion', $models, $mdlNames);
   }
 
-  protected static function createModel($mdlName)
+  protected static function createModel($mdlName, $arg1 = null, $arg2 = null)
   {
     Sabel::using($mdlName);
     if (class_exists($mdlName, false)) {
-      return new $mdlName();
+       return new $mdlName($arg1, $arg2);
     } else {
-      return Sabel::load('Dummy', $mdlName);
+      return Sabel::load('Proxy', $mdlName);
     }
   }
 }

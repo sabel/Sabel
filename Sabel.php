@@ -291,13 +291,13 @@ function convert_to_modelname($tblName)
   return join('', array_map('ucfirst', explode('_', $tblName)));
 }
 
-function MODEL($mdlName)
+function MODEL($mdlName, $arg1 = null, $arg2 = null)
 {
   Sabel::using('Sabel_DB_Connection');
   Sabel_DB_Connection::initialize();
 
   Sabel::using('Sabel_Model');
-  return Sabel_Model::load($mdlName);
+  return Sabel_Model::load($mdlName, $arg1, $arg2);
 }
 
 function _A($obj)

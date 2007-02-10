@@ -1203,8 +1203,9 @@ class Sabel_DB_Model
   {
     switch ($this->sColumns[$name]->type) {
       case Sabel_DB_Type_Const::INT:
-        if ($value === null || $value === '') return false;
-        return (!ctype_digit($value) && !is_int($value));
+        if ($value === null || is_int($value)) return false;
+        if (is_string($value)) return !preg_match('/^[-|+]?[0-9]+$/', $value);
+        return true;
         break;
       case Sabel_DB_Type_Const::BOOL:
         if ($value === null || $value === '') return false;
@@ -1344,8 +1345,8 @@ class Sabel_DB_Model
     $models = array();
     foreach ($tables as $table) {
       foreach ($children as $child) {
-        $tblName = $child->tableProp->table;
-        $pKey    = $child->tableProp->primaryKey;
+        $tblName = $child->getTableName();
+        $pKey    = $child->getPrimaryKey();
         list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
         if ($model = $this->pushStack($table, $foreignKey, $child->$idCol)) $models[] = $model;
       }
