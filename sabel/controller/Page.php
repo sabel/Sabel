@@ -259,7 +259,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   public function rendering()
   {
     if (!$this->rendering) return;
-    
+        
     if ($this->view->isTemplateMissing()) {
       if ($this->hasMethod('templateMissing')) {
         $this->templateMissing();

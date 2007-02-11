@@ -32,6 +32,15 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
                      
     return $aFrontController->ignition($uri, $storage);
   }
+  
+  protected function assertHtmlElementEquals($expect, $id, $html)
+  {
+    $doc = new DomDocument();
+    @$doc->loadHTML($html);
+    $element = $doc->getElementById($id);
+    
+    $this->assertEquals($expect, $element->nodeValue);
+  }
 }
 
 Sabel::using("Sabel_Controller_Page_Plugin");

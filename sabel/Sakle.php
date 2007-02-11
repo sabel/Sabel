@@ -55,68 +55,17 @@ class Sakle
     if (is_readable($pathToClass)) {
       require ($pathToClass); 
       $ins = new $class();
-      $ins->execute();
+      $ins->run($this->arguments);
     }
   }
   
   public function allTestRun()
   {
-    define("RUN_BASE", getcwd());
-    add_include_path("/tests");
-
-    if (!defined('PRODUCTION'))  define('PRODUCTION',  0x01);
-    if (!defined('TEST'))        define('TEST',        0x05);
-    if (!defined('DEVELOPMENT')) define('DEVELOPMENT', 0x0A);
-
-    add_include_path('/app');
-    add_include_path('/app/models');
-    add_include_path('/lib');
-
-    define("__TRUE__",  "true");
-    define("__FALSE__", "false");
-
-    Sabel::fileUsing("config/database.php");
-
-    Sabel::using('Sabel_DB_Connection');
-    Sabel::using('Sabel_DB_Executer');
-    Sabel::using('Sabel_DB_Model');
-
-    Sabel::using("Sabel_Test_Functional");
-    Sabel::using("Sabel_Test_FunctionalRunner");
-    
-    define ("ENVIRONMENT", TEST);
-        
-    $pathToTest = $this->runningDirectory . '/tests/functional';
-    $dir = new DirectoryIterator($pathToTest);
-    
-    $tests = array();
-    foreach ($dir as $element) {
-      if ($element->isFile() && strpos($element->getFileName(), '.') !== 0) {
-        require ($pathToTest . "/" . $element->getFileName());
-        $tests[] = $element->getFileName(). "\n";
-      }
-    }
-    
-    foreach ($tests as $test) {
-      $name = explode(".", $test);
-      $this->printMessage("RUN: " . $name[0]);
-      Sabel_Test_FunctionalRunner::create()->start($name[0]);
-      echo "\n";
-    }
-  }
-  
-  protected function printMessage($msg, $type = self::MSG_INFO)
-  {
-    switch ($type) {
-      case self::MSG_INFO:
-        echo $this->messageHeaders[self::MSG_INFO] .': '. $msg . "\n";
-        break;
-      case self::MSG_WARN:
-        echo $this->messageHeaders[self::MSG_WARN] .': '. $msg . "\n";
-        break;
-      case self::MSG_ERR:
-        echo $this->messageHeaders[self::MSG_ERR]  .': '. $msg . "\n";
-        break;
+    $pathToClass = $this->runningDirectory . '/tasks/TestSuite.php';
+    if (is_readable($pathToClass)) {
+      require ($pathToClass); 
+      $ins = new TestSuite();
+      $ins->run($this->arguments);
     }
   }
   

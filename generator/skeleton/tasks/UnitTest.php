@@ -8,7 +8,6 @@ define('ENVIRONMENT', TEST);
 
 Sabel::fileUsing("config/environment.php");
 Sabel::fileUsing("config/database.php");
-Sabel::fileUsing("config/connection_map.php");
 
 Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_DB_Executer');

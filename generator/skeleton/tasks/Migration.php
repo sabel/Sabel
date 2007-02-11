@@ -4,138 +4,244 @@ define("RUN_BASE", getcwd());
 
 Sabel::fileUsing("config/environment.php");
 Sabel::fileUsing("config/database.php");
-Sabel::fileUsing("config/connection_map.php");
 
+Sabel::using('Sabel_Sakle_Task');
 Sabel::using('Sabel_DB_Migration');
 Sabel::using('Sabel_DB_Connection');
 Sabel::using('Sabel_DB_Model');
 
 /**
- * Migration
+ * task of migration
  *
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Migration extends Sakle
+class Migration extends Sabel_Sakle_Task
 {
   const TABLE  = 'MIG_TABLE';
   const VIEW   = 'MIG_VIEW';
   const COLUMN = 'MIG_COLUMN';
 
-  protected $environment = '';
+  protected $environment = null;
+  protected $constEnvironment = null;
+  
+  protected $migrationDir = '';
+  protected $migrationFiles = null;
+  
+  protected $migrateTo = 0;
+  protected $version   = null;
 
-  public function execute()
+  public function run($arguments)
   {
-    if (count($this->arguments) < 3) {
-      $this->printMessage("Error: invalid parameter count.", self::MSG_ERR);
+    list($environment, $migrateTo, $connectName) = $this->processArguments($arguments);
+    
+    $this->initializeEnvironment($environment);
+    $this->initializeDatabaseConnection();
+    
+    $this->version   = $this->getCurrentVersion($connectName);
+    $this->migrateTo = $migrateTo;
+    
+    $this->showCurrentDatabaseVersion($this->migrateTo);
+    
+    $this->migrationDir   = RUN_BASE . "/migration/" . $connectName;
+    $this->migrationFiles = $this->getMigrationFiles($this->migrationDir);
+    
+    $this->decideMigrate($connectName);
+    
+    $this->checkMigrateTo($this->migrateTo);
+    
+    $hasNextMigration = $this->doCurrentMigration($connectName);
+    
+    if ($hasNextMigration) {
+      $this->doNewMigration($this->environment, $connectName);
+    }
+  }
+  
+  private function processArguments($arguments)
+  {
+    return array($arguments[1],
+                 $arguments[2],
+                 (isset($arguments[3])) ? $arguments[3] : 'default');
+  }
+  
+  private function showCurrentDatabaseVersion($migrateTo)
+  {
+    if ($migrateTo === "version" || $migrateTo === "-v") {
+      $this->printMessage("current version: " . $this->version->version);
       exit;
     }
-    
-    $this->initialize();
-    $v  = $this->getCurrentVersion();
-    $to = $this->arguments[2];
-    
-    $migrationDir = RUN_BASE . "/migration";
-    $files        = array();
-    if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
-      while (($file = readdir($handle)) !== false) {
-        $versionNumberOfFile = substr($file, 0, strpos($file, '_'));
-        if (is_numeric($versionNumberOfFile))
-          $files[$versionNumberOfFile] = $file;
-      }
-    }
-    
-    $to = strtolower($to);
-    if ($to === 'head') $to = max(array_keys($files));
-    if ($to === 'foot') $to = 0;
-    if ($to === 'reset' || $to === 'rehead') {
-      $to = ($to === 'reset') ? $v->version : max(array_keys($files));
-      system("sakle Migration {$this->arguments[1]} 0");
-      $v  = $this->getCurrentVersion();
-    }
-    
-    if (!is_numeric($to)) {
+  }
+  
+  protected function checkMigrateTo($migrateTo)
+  {
+    if (!is_numeric($migrateTo)) {
       $this->printMessage("Error: second argument should be a numeric.", self::MSG_ERR);
       exit;
     }
-    $this->printMessage("current version: " . $v->version);
+  }
+  
+  protected function doCurrentMigration($connectName)
+  {
+    $this->printMessage("current version: " . $this->version->version);
     
-    if ($to === "version" || $to === "-v" || $v->version == $to) exit;
-    
+    $currentVersion = $this->version->version;
     $doNext = false;
-    if ($v->version < $to) {
-      $next   = $v->version + 1;
-      $ver    = $next;
-      $method = 'upgrade';
-      $doNext = ($next < $to);
-    } elseif ($to < $v->version) {
-      $next   = $v->version - 1;
-      $ver    = $v->version;
-      $method = 'downgrade';
-      $doNext = ($next > $to);
+    if ($currentVersion < $this->migrateTo) {
+      $next    = $currentVersion + 1;
+      $version = $next;
+      $method  = 'upgrade';
+      $doNext  = ($next < $this->migrateTo);
+    } elseif ($this->migrateTo < $currentVersion) {
+      $next    = $currentVersion - 1;
+      $version = $currentVersion;
+      $method  = 'downgrade';
+      $doNext  = ($next > $this->migrateTo);
+    } else {
+      return false;
     }
     
-    $this->printMessage("$method from {$v->version} to {$next}");
+    $this->printMessage("$method from {$currentVersion} to {$next}");
     
-    if (isset($files[$ver])) {
-      $file = $files[$ver];
+    if (isset($this->migrationFiles[$version])) {
+      $migration = $this->migrationFiles[$version];
     } else {
-      $this->printMessage("migration file is not found. file version: {$ver}", self::MSG_ERR);
+      $this->printMessage("migration file is not found. file version: {$version}", self::MSG_ERR);
       exit;
     }
     
-    $migrationInstance = $this->makeMigration($migrationDir, $file);
+    $migrationInstance = $this->makeMigration($migration, $connectName);
     
     try {
       $migrationInstance->$method();
-      $v->execute("UPDATE sversion SET version = $next WHERE id = 1");
+      $this->version->executeQuery("UPDATE sversion SET version = $next WHERE id = 1");
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
       exit;
     }
     
-    if ($doNext) system("sakle Migration {$this->arguments[1]} $to");
+    return $doNext;
   }
   
-  protected function initialize()
+  private function doNewMigration($environment, $connectName)
   {
-    $env = '';
-    switch (strtolower($this->arguments[1])) {
+    // @todo check database implements
+    $requiredCompletelyAnotherProcess = false;
+    
+    if ($requiredCompletelyAnotherProcess) {
+      system("sakle Migration $environment {$this->migrateTo} $connectName");
+    } else {
+      $nins = new self();
+      $nins->run(array(null, $environment, $this->migrateTo, $connectName));
+      unset($nins);
+    }
+  }
+  
+  protected function getMigrationFiles($migrationDir)
+  {
+    $files = array();
+    if (is_dir($migrationDir) && ($handle = opendir($migrationDir))) {
+      while (($file = readdir($handle)) !== false) {
+        $versionNumberOfFile = substr($file, 0, strpos($file, '_'));
+        if (is_numeric($versionNumberOfFile)) $files[$versionNumberOfFile] = $file;
+      }
+    }
+    return $files;
+  }
+  
+  protected function decideMigrate($connectName)
+  {
+    switch (strtolower($this->migrateTo)) {
+      case 'head':
+        $this->migrateTo = max(array_keys($this->migrationFiles));
+        break;
+      case 'foot':
+        $this->migrateTo = 0;
+        break;
+      case 'rehead':
+        $this->migrateTo = 0;
+        $this->doNewMigration($this->environment, $connectName);
+        $this->migrateTo = max(array_keys($this->migrationFiles));
+        $this->doNewMigration($this->environment, $connectName);
+        $this->version = $this->getCurrentVersion($connectName);
+        break;
+      case 'reset':
+        $this->migrateTo = 0;
+        $this->doNewMigration($this->environment, $connectName);
+        $this->migrateTo = $this->version->version;
+        $this->doNewMigration($this->environment, $connectName);
+        $this->version = $this->getCurrentVersion($connectName);
+        break;
+    }
+  }
+  
+  private function initializeEnvironment($strEnvironment)
+  {
+    $constEnvironment = $this->getConstantEnvironment($strEnvironment);
+    
+    if ($constEnvironment === null) {
+      $fp = fopen("php://stdin", "r");
+      
+      while (true) {
+        fputs($fp, "specify valid environment ( production | test | development ): ");
+        $tmporaryEnvironment = trim(fgets($fp));
+        $tmporaryConstEnvironment = $this->getConstantEnvironment($tmporaryEnvironment);
+        if ($tmporaryConstEnvironment !== null) {
+          $strEnvironment = $tmporaryConstEnvironment;
+          $constEnvironment = $tmporaryConstEnvironment;
+          break;
+        }
+      }
+      
+      fclose($fp);
+    }
+    
+    $this->environment      = $strEnvironment;
+    $this->constEnvironment = $constEnvironment;
+  }
+  
+  private function getConstantEnvironment($strEnvironment)
+  {
+    $constEnvironment = null;
+    
+    switch (strtolower($strEnvironment)) {
       case 'production':
-        $env = $this->environment = PRODUCTION;
+        $constEnvironment = PRODUCTION;
         break;
       case 'test':
-        $env = $this->environment = TEST;
+        $constEnvironment = TEST;
         break;
       case 'development':
-        $env = $this->environment = DEVELOPMENT;
+        $constEnvironment = DEVELOPMENT;
         break;
     }
     
-    if ($env === '') {
-      $msg = "Error: wrong environment. 'production' or 'test' or 'development'.";
-      $this->printMessage($msg, self::MSG_ERR);
-      exit;
-    }
-    
-    foreach (get_db_params($env) as $connectName => $params) {
+    return $constEnvironment;
+  }
+  
+  private function initializeDatabaseConnection()
+  {
+    foreach (get_db_params($this->constEnvironment) as $connectName => $params) {
       Sabel_DB_Connection::addConnection($connectName, $params);
     }
     
     Sabel_DB_Connection::setInitFlag(true);
   }
   
-  protected function getCurrentVersion()
+  private function getCurrentVersion($connectName)
   {
-    $exec = new Sabel_DB_Executer(array('table' => 'sversion'));
+    $driver  = Sabel_DB_Connection::getDriver($connectName);
+    $scmName = Sabel_DB_Connection::getSchema($connectName);
     
     try {
-      if (!in_array('sversion', $exec->getTableNames())) {
-        $exec->executeQuery("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
-        $exec->executeQuery("INSERT INTO sversion values(1, 0)");
+      $accessor = Sabel::load('Sabel_DB_Schema_Accessor', $connectName, $scmName);
+      if (!in_array('sversion', $accessor->getTableNames())) {
+        $driver->execute("CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)");
+        $driver->execute("INSERT INTO sversion values(1, 0)");
       }
-      $aVersion = MODEL('Sversion')->selectOne(1);
+      $model = MODEL('Sversion');
+      $model->setConnectName($connectName);
+      $aVersion = $model->selectOne(1);
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR);
       exit;
@@ -144,15 +250,15 @@ class Migration extends Sakle
     return $aVersion;
   }
   
-  protected function makeMigration($migrationDir, $file)
+  private function makeMigration($file, $connectName)
   {
-    include_once ($migrationDir . "/" . $file);
+    require_once ($this->migrationDir . "/" . $file);
     $fileParts  = explode("_", $file);
     $versionNum = array_shift($fileParts);
     $fileParts  = array_map("inner_function_convert_names", $fileParts);
     $className  = join("", $fileParts) . $versionNum;
     
-    return new $className($this->environment);
+    return new $className($this->constEnvironment, $connectName);
   }
 }
 
