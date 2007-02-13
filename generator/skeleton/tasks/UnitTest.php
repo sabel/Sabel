@@ -1,12 +1,8 @@
 <?php
 
-define("RUN_BASE", getcwd());
-add_include_path("/tests");
+if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-define('TEST',        0x05);
-define('ENVIRONMENT', TEST);
-
-Sabel::fileUsing("config/environment.php");
+Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
 Sabel::using('Sabel_DB_Connection');
@@ -25,12 +21,12 @@ Sabel::using("Sabel_Test_ModelRunner");
  */
 class UnitTest extends Sakle
 {
-  public function execute()
+  public function run($arguments)
   {
-    if (!isset($this->arguments[1])) {
+    if (!isset($arguments[1])) {
       throw new Exception("model name must be specified");
     }
     
-    Sabel_Test_ModelRunner::create()->start($this->arguments[1]);
+    Sabel_Test_ModelRunner::create()->start($arguments[1]);
   }
 }

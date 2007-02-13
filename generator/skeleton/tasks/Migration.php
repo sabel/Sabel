@@ -1,8 +1,8 @@
 <?php
 
-define("RUN_BASE", getcwd());
+if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("config/environment.php");
+Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
 Sabel::using('Sabel_Sakle_Task');
@@ -253,11 +253,14 @@ class Migration extends Sabel_Sakle_Task
   
   private function makeMigration($file, $connectName)
   {
-    require_once ($this->migrationDir . "/" . $file);
     $fileParts  = explode("_", $file);
     $versionNum = array_shift($fileParts);
     $fileParts  = array_map("inner_function_convert_names", $fileParts);
     $className  = join("", $fileParts) . $versionNum;
+    
+    if (!class_exists($className)) {
+      require_once ($this->migrationDir . "/" . $file);
+    }
     
     return new $className($this->constEnvironment, $connectName);
   }

@@ -1,24 +1,13 @@
 <?php
 
-define("RUN_BASE", getcwd());
-add_include_path("/tests");
+if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-if (!defined('PRODUCTION'))  define('PRODUCTION',  0x01);
-if (!defined('TEST'))        define('TEST',        0x05);
-if (!defined('DEVELOPMENT')) define('DEVELOPMENT', 0x0A);
-
-add_include_path('/app');
-add_include_path('/app/models');
-add_include_path('/lib');
-
-define("__TRUE__",  "true");
-define("__FALSE__", "false");
-
+Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
+Sabel::using('Sabel_Sakle_Task');
 Sabel::using('Sabel_DB_Migration');
 Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Executer');
 Sabel::using('Sabel_DB_Model');
 
 /**
@@ -28,23 +17,26 @@ Sabel::using('Sabel_DB_Model');
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Fixture extends Sakle
+class Fixture extends Sabel_Sakle_Task
 {
-  public function execute()
+  public function run($arguments)
   {
-    if (isset($this->arguments[2])) {
-      define ("ENVIRONMENT", environment($this->arguments[2]));
-    } else {
-      define ("ENVIRONMENT", TEST);
+    if (!defined("ENVIRONMENT")) {
+      if (isset($arguments[2])) {
+        define ("ENVIRONMENT", environment($arguments[2]));
+      } else {
+        define ("ENVIRONMENT", TEST);
+      }
     }
     
-    $fixtureName = "Fixtures_" . $this->arguments[1];
+    $fixtureName = "Fixtures_" . $arguments[1];
     Sabel::using($fixtureName);
     
     try {
+      $this->printMessage("up fixture");
       if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");
     } catch (Exception $e) {
-      echo "fixture throws exception: " . $e->getMessage() . "\n";
+      $this->printMessage($e->getMessage());
     }
   }
 }
