@@ -175,7 +175,10 @@ class Sabel_DB_Connection
     if (!isset(self::$connList[$conName])) return null;
 
     $list = self::$connList[$conName];
-    if (isset($list['driver'])) $list['driver']->close($list['conn']);
+    if (isset($list['driver']) && isset($list['conn'])) {
+      $list['driver']->close($list['conn']);
+    }
+    
     unset(self::$connList[$conName]);
   }
 

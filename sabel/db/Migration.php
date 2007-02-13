@@ -61,6 +61,8 @@ class Sabel_DB_Migration
         $this->migration->addColumn($tblName, $arg2, $arg3);
         break;
     }
+    
+    Sabel_DB_Connection::close($this->connectName);
     Sabel_DB_SimpleCache::clear();
   }
 
@@ -79,6 +81,8 @@ class Sabel_DB_Migration
         $this->migration->deleteColumn($tblName, $arg2);
         break;
     }
+    
+    Sabel_DB_Connection::close($this->connectName);
     Sabel_DB_SimpleCache::clear();
   }
 
@@ -95,6 +99,8 @@ class Sabel_DB_Migration
         $this->migration->changeColumn($tblName, $arg2, $arg3);
         break;
     }
+    
+    Sabel_DB_Connection::close($this->connectName);
     Sabel_DB_SimpleCache::clear();
   }
 
@@ -113,6 +119,8 @@ class Sabel_DB_Migration
         $this->migration->renameColumn($tblName, $arg2, $arg3);
         break;
     }
+    
+    Sabel_DB_Connection::close($this->connectName);
     Sabel_DB_SimpleCache::clear();
   }
 
@@ -120,5 +128,8 @@ class Sabel_DB_Migration
   {
     $this->migration->setModel($tblName, $this->connectName);
     $this->migration->executeQuery($query);
+    
+    Sabel_DB_Connection::close($this->connectName);
+    Sabel_DB_SimpleCache::clear();
   }
 }
