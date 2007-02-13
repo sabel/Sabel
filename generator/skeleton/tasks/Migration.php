@@ -131,6 +131,7 @@ class Migration extends Sabel_Sakle_Task
     if ($requiredCompletelyAnotherProcess) {
       system("sakle Migration $environment {$this->migrateTo} $connectName");
     } else {
+      Sabel_DB_Connection::closeAll();
       $nins = new self();
       $nins->run(array(null, $environment, $this->migrateTo, $connectName));
       unset($nins);
