@@ -18,7 +18,8 @@ class Sabel_DB_Model_Relation
     $joinConditions  = array(),
     $refStructure    = array(),
     $joinColCache    = array(),
-    $joinModels      = array();
+    $joinModels      = array(),
+    $aliases         = array();
 
   public function setColumns($tblName, $columns)
   {
@@ -48,6 +49,11 @@ class Sabel_DB_Model_Relation
   {
     $this->joinTablePairs = $pairs;
   }
+  
+  public function setAlias($aliasName, $tblName)
+  {
+    $this->aliases[$aliasName] = $tblName;
+  }
 
   public function toRelationPair($mdlName, $pair)
   {
@@ -58,8 +64,8 @@ class Sabel_DB_Model_Relation
       list($child, $parent) = explode(':', $pair);
     }
 
-    $child  = $this->createChildKey($child, $parent);
-    $parent = $this->createParentKey($parent);
+    $child = $this->createChildKey($child, $parent);
+    list ($parent, $alias) = $this->createParentKey($parent);
 
     list ($ct, $ck) = explode('.', $child);
     list ($pt, $pk) = explode('.', $parent);
@@ -69,7 +75,8 @@ class Sabel_DB_Model_Relation
                  'ctable' => $ct,
                  'ptable' => $pt,
                  'ckey'   => $ck,
-                 'pkey'   => $pk);
+                 'pkey'   => $pk,
+                 'alias'  => $alias);
   }
 
   public function createChildKey($child, $parent)
@@ -84,12 +91,21 @@ class Sabel_DB_Model_Relation
 
   public function createParentKey($parent)
   {
+    $alias = null;
+    if (strpos($parent, '(') !== false) {
+      preg_match('/\((\w+)\)\./', $parent, $matches);
+      $alias = $matches[1];
+    }
+    
+    $parent = str_replace("({$alias})", '', $parent);
+
     if (strpos($parent, '.') === false) {
       $key = 'id';
     } else {
       list($parent, $key) = explode('.', $parent);
     }
-    return convert_to_tablename($parent) . '.' . $key;
+    
+    return array(convert_to_tablename($parent) . '.' . $key, $alias);
   }
 
   public function getUniqueTables($tablePairs = null)
@@ -107,14 +123,27 @@ class Sabel_DB_Model_Relation
       throw new Exception('Error:join() first argument must be an instance of Sabel_DB_Model.');
 
     $mdlName = convert_to_modelname($model->getTableName());
+    $aliases =& $this->aliases;
+    
     foreach ($modelPairs as $pair) {
-      $res  = $this->toRelationPair($mdlName, $pair);
-      $ptbl = $res['ptable'];
-      $this->joinTablePairs[] = array($res['ctable'], $ptbl);
-      $this->refStructure["{$res['ctable']}"][] = $ptbl;
+      $res   = $this->toRelationPair($mdlName, $pair);
+      $ptbl  = $res['ptable'];
+      $alias = ($res['alias']) ? convert_to_tablename($res['alias']) : null;
+      
+      if ($alias === null) {
+        $key  = $ptbl;
+        $cond = $res['parent'];
+      } else {
+        $key  = $ptbl . ' AS ' . $alias;
+        $cond = $alias . '.' . $res['pkey'];
+        $aliases[$alias] = $ptbl;
+      }
+      
+      $this->joinTablePairs[] = array($res['ctable'], ($alias) ? $alias : $ptbl);
+      $this->refStructure["{$res['ctable']}"][] = ($alias) ? $alias : $ptbl;
 
-      if (!isset($this->joinConditions[$ptbl])) {
-        $this->joinConditions[$ptbl] = "{$res['child']} = {$res['parent']}";
+      if (!isset($this->joinConditions[$key])) {
+        $this->joinConditions[$key] = "{$res['child']} = $cond";
       }
     }
 
@@ -125,14 +154,15 @@ class Sabel_DB_Model_Relation
     $joinTables = array_diff($this->getUniqueTables(), array($tblName));
 
     foreach ($joinTables as $tblName) {
-      $mdlName = convert_to_modelname($tblName);
+      $name    = (isset($aliases[$tblName])) ? $aliases[$tblName] : $tblName;
+      $mdlName = convert_to_modelname($name);
       if (isset($columns[$mdlName])) {
-        $colList[$tblName] = $columns[$mdlName];
+        $colList[$name] = $columns[$mdlName];
       } else {
-        $colList[$tblName] = $model->getColumnNames($tblName);
+        $colList[$tblName] = $model->getColumnNames($name);
       }
     }
-
+    
     return $this->execJoin($model, $joinType, $joinTables);
   }
 
@@ -164,7 +194,7 @@ class Sabel_DB_Model_Relation
     foreach ($this->joinConditions as $parent => $condition) {
       $sql[] = " $joinType JOIN $parent ON $condition";
     }
-
+    
     $resultSet = $model->doSelect(join('', $sql));
     if ($resultSet->isEmpty()) return false;
 
@@ -200,11 +230,13 @@ class Sabel_DB_Model_Relation
   {
     $models   = array();
     $acquire  = array();
+    $aliases  = $this->aliases;
     $colCache = $this->joinColCache;
     $objects  = $this->createObjects($joinTables);
 
     foreach ($joinTables as $tblName) {
-      $model  = clone $objects[$tblName];
+      $name   = (isset($aliases[$tblName])) ? $aliases[$tblName] : $tblName;
+      $model  = clone $objects[$name];
       $preCol = "pre_{$tblName}_" . $model->getPrimaryKey();
 
       foreach ($colCache[$tblName] as $column) {
@@ -221,11 +253,13 @@ class Sabel_DB_Model_Relation
 
   protected function createObjects($tblNames)
   {
-    $models =& $this->joinModels;
+    $aliases =  $this->aliases; 
+    $models  =& $this->joinModels;
     if ($models) return $models;
-
+    
     foreach ($tblNames as $tblName) {
-      $models[$tblName] = MODEL(convert_to_modelname($tblName));
+      $name = (isset($aliases[$tblName])) ? $aliases[$tblName] : $tblName;
+      if (!isset($models[$name])) $models[$name] = MODEL(convert_to_modelname($name));
     }
     return $models;
   }

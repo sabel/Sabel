@@ -136,16 +136,6 @@ class Sabel_DB_Model
     return $driver;
   }
 
-  /**
-   * create statement instance.
-   *
-   * @return object
-   */
-  public function getStatement()
-  {
-    return $this->getDriver()->loadStatement();
-  }
-
   public function __set($key, $val)
   {
     $this->data[$key] = $val;
@@ -782,7 +772,7 @@ class Sabel_DB_Model
     return $models;
   }
 
-  protected function isSameConnectionNames($tblName)
+  protected function isSameConnectionNames($tblName, $alias = null)
   {
     if (!in_array($tblName, $this->dbTables)) return false;
     $model = MODEL(convert_to_modelname($tblName));
@@ -791,7 +781,8 @@ class Sabel_DB_Model
       $result = $this->addRelationalDataToBuffer($tblName, $model->parents);
       if (!$result) return false;
     }
-
+    
+    if ($alias !== null) $tblName = $alias;
     $this->relation->setColumns($tblName, $model->columns);
     return true;
   }
@@ -803,11 +794,21 @@ class Sabel_DB_Model
     $tblName = convert_to_tablename($mdlName);
 
     foreach ($parents as $parent) {
-      $res  = $this->relation->toRelationPair($mdlName, $parent);
-      $ptbl = $res['ptable'];
-      if ($this->isSameConnectionNames($ptbl)) {
-        $condBuf[] = array($ptbl, "{$res['child']} = {$res['parent']}");
-        $pairBuf[] = array($tblName, $ptbl);
+      $res   = $this->relation->toRelationPair($mdlName, $parent);
+      $ptbl  = $res['ptable'];
+      $alias = ($res['alias']) ? convert_to_tablename($res['alias']) : null;
+      if ($this->isSameConnectionNames($ptbl, $alias)) {
+        if ($alias === null) {
+          $key  = $ptbl;
+          $cond = $res['parent'];
+        } else {
+          $key  = $ptbl . ' AS ' . $alias;
+          $cond = $alias . '.' . $res['pkey'];
+          $this->relation->setAlias($alias, $ptbl);
+        }
+        
+        $condBuf[] = array($key, "{$res['child']} = $cond");
+        $pairBuf[] = array($tblName, ($alias) ? $alias : $ptbl);
       } else {
         return false;
       }

@@ -36,6 +36,14 @@ class Migration extends Sabel_Sakle_Task
   {
     list($environment, $migrateTo, $connectName) = $this->processArguments($arguments);
     
+    if (!defined("ENVIRONMENT")) {
+      if (isset($environment)) {
+        define ("ENVIRONMENT", environment($environment));
+      } else {
+        define ("ENVIRONMENT", TEST);
+      }
+    }
+    
     $this->initializeEnvironment($environment);
     $this->initializeDatabaseConnection();
     
@@ -125,17 +133,9 @@ class Migration extends Sabel_Sakle_Task
   
   private function doNewMigration($environment, $connectName)
   {
-    // @todo check database implements
-    $requiredCompletelyAnotherProcess = false;
-    
-    if ($requiredCompletelyAnotherProcess) {
-      system("sakle Migration $environment {$this->migrateTo} $connectName");
-    } else {
-      Sabel_DB_Connection::closeAll();
-      $nins = new self();
-      $nins->run(array(null, $environment, $this->migrateTo, $connectName));
-      unset($nins);
-    }
+    $nins = new self();
+    $nins->run(array(null, $environment, $this->migrateTo, $connectName));
+    unset($nins);
   }
   
   protected function getMigrationFiles($migrationDir)
@@ -257,11 +257,7 @@ class Migration extends Sabel_Sakle_Task
     $versionNum = array_shift($fileParts);
     $fileParts  = array_map("inner_function_convert_names", $fileParts);
     $className  = join("", $fileParts) . $versionNum;
-    
-    if (!class_exists($className)) {
-      require_once ($this->migrationDir . "/" . $file);
-    }
-    
+    if (!class_exists($className)) require_once ($this->migrationDir . "/" . $file);
     return new $className($this->constEnvironment, $connectName);
   }
 }
