@@ -110,11 +110,13 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private function getCacheFilePath($path, $name)
   {
+    $name = str_replace('/', '_', $name);
     return RUN_BASE . self::CACHE_DIR . md5($path) . $name;
   }
   
   private function getCompileFilePath($path, $name)
   {
+    $name = str_replace('/', '_', $name);
     return RUN_BASE . self::COMPILE_DIR . md5($path) . $name;
   }
 }
