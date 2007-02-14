@@ -52,11 +52,13 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private function makeCompileFile($path, $name)
   {
-    $filepath    = $path . $name;
+    $filepath = $path . $name;
+    if (!file_exists($filepath)) $filepath .= '.tpl';
+    
     $compilepath = $this->getCompileFilePath($path, $name);
     if (is_readable($compilepath) && filemtime($filepath) < filemtime($compilepath)) return;
 
-    $contents = file_get_contents($path . $name);
+    $contents = file_get_contents($filepath);
     
     $contents = preg_replace_callback(self::PIPE_PAT, array(&$this, 'pipeToFunc'), $contents);
     $contents = str_replace('<?=', '<? echo', $contents);
