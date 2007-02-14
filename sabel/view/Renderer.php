@@ -19,9 +19,10 @@ abstract class Sabel_View_Renderer
   
   abstract public function rendering($path, $name, $values);
   
-  public function partial($templateName)
+  public function partial($templateName, $values = array())
   {
     $v = new Sabel_View();
+    $v->assignByArray($values);
     $v->decideTemplatePath(Sabel_Context::getCurrentCandidate());
     $v->setTemplateName($templateName);
     if ($v->isTemplateMissing()) throw new Exception('Template file is not found');

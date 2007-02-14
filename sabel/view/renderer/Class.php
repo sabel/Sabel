@@ -56,7 +56,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     if (!file_exists($filepath)) $filepath .= '.tpl';
     
     $compilepath = $this->getCompileFilePath($path, $name);
-    if (is_readable($compilepath) && filemtime($filepath) < filemtime($compilepath)) return;
+//    if (is_readable($compilepath) && filemtime($filepath) < filemtime($compilepath)) return;
 
     $contents = file_get_contents($filepath);
     
@@ -65,13 +65,35 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     $contents = str_replace('<?',  '<?php',   $contents);
     
     if (ENVIRONMENT !== DEVELOPMENT) {
-      if ($this->trim) {
-        $contents = explode("\n",     $contents);
-        $contents = array_map('trim', $contents);
-        $contents = implode('',       $contents);
-      }
+      if ($this->trim) $contents = $this->trimContents($contents);
     }
     $this->saveCompileFile($path, $name, $contents);
+  }
+  
+  private function checkAndTrimContents($contents)
+  {
+    if (strpos($contents, '<script') === false) {
+      $contents = explode("\n",     $contents);
+      $contents = array_map('trim', $contents);
+      $contents = implode('',       $contents);
+    } else {
+      $contents = preg_replace_callback('@(.*)(<script [^>]+>.*</script>)(.*)@si', array($this, 'trimContents'), $contents);
+    }
+    return $contents;
+  }
+  
+  private function trimContents($contents)
+  {
+    if (is_string($contents)) {
+      $contents = $this->checkAndTrimContents($contents);
+    } elseif (is_array($contents)) {
+      $head   = $this->checkAndTrimContents($contents[1]);
+      $script = $contents[2];
+      $foot   = $this->checkAndTrimContents($contents[3]);
+      
+      $contents = $head . "\n" . $script . "\n" . $foot;
+    }
+    return $contents;
   }
   
   private function pipeToFunc($matches)
