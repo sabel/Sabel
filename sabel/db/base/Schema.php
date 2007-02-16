@@ -21,9 +21,6 @@ abstract class Sabel_DB_Base_Schema
 
   public function getTable($tblName)
   {
-    $cache = Sabel_DB_SimpleCache::get('schema_' . $tblName);
-    if ($cache) return $cache;
-
     $mdlName  = convert_to_modelname($tblName);
     $sClsName = 'Schema_' . $mdlName;
 
@@ -39,10 +36,7 @@ abstract class Sabel_DB_Base_Schema
       $cols = $this->createColumns($tblName);
     }
 
-    $tblSchema = new Sabel_DB_Schema_Table($tblName, $cols);
-    Sabel_DB_SimpleCache::add('schema_' . $tblName, $tblSchema);
-
-    return $tblSchema;
+    return new Sabel_DB_Schema_Table($tblName, $cols);
   }
 
   public function getTableEngine($tblName)
