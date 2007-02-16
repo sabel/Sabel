@@ -28,7 +28,7 @@ class Sabel_Model
   {
     Sabel::using($mdlName);
     if (class_exists($mdlName, false)) {
-       return new $mdlName($arg1, $arg2);
+      return new $mdlName($arg1, $arg2);
     } else {
       return Sabel::load('Proxy', $mdlName);
     }

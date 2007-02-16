@@ -17,7 +17,13 @@ class Sabel_DB_General_Statement extends Sabel_DB_Base_Statement
   public function makeUpdateSQL($table, $data)
   {
     $sql = array();
-    foreach ($data as $key => $val) $sql[] = "{$key}='{$this->escape($val)}'";
+    foreach ($data as $key => $val) {
+      if ($val === null) {
+        $sql[] = "{$key} = NULL";        
+      } else {
+        $sql[] = "{$key} = '{$this->escape($val)}'";
+      }
+    }
     $this->setBasicSQL("UPDATE $table SET " . join(',', $sql));
   }
 

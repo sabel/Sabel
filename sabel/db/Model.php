@@ -1273,7 +1273,7 @@ class Sabel_DB_Model
     }
 
     if (empty($this->conditions)) {
-      $msg  = "Error:delete() all delete? must be set condition.";
+      $msg  = "Error:remove() all delete? must be set condition.";
       $smpl = "DELETE FROM 'TABLE_NAME'";
       throw new Exception($msg . " or execute executeQuery({$smpl}).");
     }
