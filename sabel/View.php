@@ -115,41 +115,56 @@ class Sabel_View
     return $layout->rendering(false);
   }
   
-  public function decideTemplatePath($candidate)
+  public function decideTemplatePath($candidate, $partial = false)
   {
     $this->decideTemplatePathAndNameByEntry($candidate->getModule(),
                                             $candidate->getController(),
-                                            $candidate->getAction());
+                                            $candidate->getAction(), $partial);
     return $this;
   }
   
-  protected function decideTemplatePathAndNameByEntry($module, $controller, $action)
+  protected function decideTemplatePathAndNameByEntry($module, $controller, $action, $partial = false)
   {
     $tplpath  = RUN_BASE;
     $tplpath .= Sabel_Const::MODULES_DIR;
     $tplpath .= $module . DIR_DIVIDER;
-    $tplpath .= Sabel_Const::TEMPLATE_DIR;
     
-    $this->setTemplatePath($tplpath);
+    $controllerSpecificTplpath = null;
+    $controllerSpecific = null;
+    
+    if (is_dir($tplpath."views/".$controller)) {
+      $controllerSpecificTplpath = $tplpath."views/".$controller;
+      $controllerSpecific = $controllerSpecificTplpath . "/" . $action . Sabel_Const::TEMPLATE_POSTFIX;      
+    }
+    
+    $tplpath .= Sabel_Const::TEMPLATE_DIR;
     
     // make name string of template such as "controller.method.tpl"
     $tplname  = $controller;
     $tplname .= Sabel_Const::TEMPLATE_NAME_SEPARATOR;
     $tplname .= $action;
-    // $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
     
-    if (is_readable($tplpath . $tplname . ".pjs")) {
+    if (!$partial && is_readable($controllerSpecific)) {
+      $tplname = "/" . $action . Sabel_Const::TEMPLATE_POSTFIX;
+      $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
+      $this->templateFound = true;
+      $this->setTemplatePath($controllerSpecificTplpath);
+    } elseif (is_readable($tplpath . $tplname . ".pjs")) {
       $tplname .= ".pjs";
       $this->renderer = Sabel::load('Sabel_View_Renderer_PHP');
       $this->templateFound = true;
+      $this->setTemplatePath($tplpath);
     } elseif(is_readable($tplpath . $tplname . Sabel_Const::TEMPLATE_POSTFIX)) {
       $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
       $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
       $this->templateFound = true;
+      $this->setTemplatePath($tplpath);
     } else {
       $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
       $this->templateFound = false;
+      $this->setTemplatePath($tplpath);
     }
+    
     $this->setTemplateName($tplname);
   }
 }

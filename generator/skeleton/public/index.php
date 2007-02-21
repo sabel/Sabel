@@ -1,6 +1,5 @@
 <?php
 
-ob_start();
 define('RUN_BASE', dirname(realpath('.')));
 
 require ('Sabel/Sabel.php');
@@ -12,8 +11,17 @@ if (!defined('ENVIRONMENT')) {
 }
 
 Sabel::loadState();
-$response = Sabel::load('Sabel_Controller_Front')->ignition();
+$aFrontController = Sabel::load("Sabel_Controller_Front");
+
+$aFrontController->processCandidate()
+                 ->plugin
+                 ->add(Sabel::load('Sabel_Controller_Plugin_Volatile'))
+                 ->add(Sabel::load('Sabel_Controller_Plugin_Filter'))
+                 ->add(Sabel::load('Sabel_Controller_Plugin_View'))
+                 ->add(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'))
+                 ->add(Sabel::load('Sabel_Controller_Plugin_Redirecter'));
+
+echo $aFrontController->ignition()->rendering();
 Sabel::saveState();
 
-echo $response['html'];
-ob_flush();
+exit;
