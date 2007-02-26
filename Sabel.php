@@ -6,6 +6,8 @@ set_include_path(dirname(__FILE__).":".get_include_path());
 
 Sabel::using("Sabel_Object");
 Sabel::using('Sabel_Map_Configurator');
+Sabel::using('Sabel_DB_Connection');
+Sabel::using('Sabel_Model');
 
 final class Sabel
 {
@@ -293,10 +295,7 @@ function convert_to_modelname($tblName)
 
 function MODEL($mdlName, $arg1 = null, $arg2 = null)
 {
-  Sabel::using('Sabel_DB_Connection');
   Sabel_DB_Connection::initialize();
-
-  Sabel::using('Sabel_Model');
   return Sabel_Model::load($mdlName, $arg1, $arg2);
 }
 
