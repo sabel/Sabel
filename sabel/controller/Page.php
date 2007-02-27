@@ -137,6 +137,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this->request;
   }
   
+  public function setAction($action)
+  {
+    $this->action = $action;
+  }
+  
   public function getAction()
   {
     return $this->action;

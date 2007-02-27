@@ -55,11 +55,14 @@ class Sabel_Controller_Front
     Sabel_Context::setView($view);
     
     $controller->setup($this->request, $view, $storage);
+
+    $actionName = $this->candidate->getAction();
+    $controller->setAction($actionName);
+
     $controller->initialize();
-    
     $this->processPostFilter($filters, $controller);
     
-    return $controller->execute($this->candidate->getAction());
+    return $controller->execute($actionName);
   }
   
   public function processCandidate($request = null)

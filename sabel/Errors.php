@@ -7,6 +7,7 @@ class Sabel_Errors
   public function add($name, $msg)
   {
     $this->errors[$name] = $msg;
+    return $this;
   }
   
   public function get($name)
