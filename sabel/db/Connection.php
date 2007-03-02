@@ -96,6 +96,8 @@ class Sabel_DB_Connection
       }
     }
 
+    if (!$list['conn']) self::error();
+
     if (isset($params['encoding'])) {
       $db  = $drvName;
       $enc = $params['encoding'];
@@ -189,6 +191,14 @@ class Sabel_DB_Connection
         if (isset($list['driver'])) $list['driver']->close($list['conn']);
       }
       self::$connList = array();
+    }
+  }
+
+  public static function error()
+  {
+    Sabel::using('Exception_DatabaseConnection');
+    if (class_exists('Exception_DatabaseConnection', false)) {
+      Exception_DatabaseConnection::error();
     }
   }
 }

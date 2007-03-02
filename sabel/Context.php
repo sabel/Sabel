@@ -79,6 +79,11 @@ class Sabel_Context
     $config = CachedConfigImpl::create()->get('Memcache');
     return MemCacheImpl::create($config['server']);
   }
+
+  public static function getStorage()
+  {
+    return Sabel_Storage_Session::create();
+  }
   
   public static function addIncludePath($path)
   {
