@@ -25,19 +25,14 @@ class Sabel_Cache_Manager
     $instance = null;
     
     if (ENVIRONMENT === DEVELOPMENT || ENVIRONMENT === TEST) {
-      Sabel::using("Sabel_Cache_Null");
       $instance = Sabel_Cache_Null::create();
     } elseif (isset($this->support["apc"]) && $this->support["apc"] === true) {
-      Sabel::using("Sabel_Cache_Apc");
       $instance = Sabel_Cache_Apc::create();
     } elseif (isset($this->support["xcache"]) && $this->support["xcache"] === true) {
-      Sabel::using("Sabel_Cache_Xcache");
       $instance = Sabel_Cache_Xcache::create();
     } elseif (isset($this->support["memcache"]) && $this->support["memcache"] === true) {
-      Sabel::using("Sabel_Cache_Memcache");
       $instance = Sabel_Cache_Memcache::create();
     } else {
-      Sabel::using("Sabel_Cache_File");
       $instance = Sabel_Cache_File::create();
     }
     

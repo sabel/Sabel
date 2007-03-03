@@ -1,7 +1,7 @@
 <?php
 
-Sabel::using('Sabel_View_Renderer');
-Sabel::using('Sabel_View_Uri');
+//Sabel::using('Sabel_View_Renderer');
+//Sabel::using('Sabel_View_Uri');
 
 class Sabel_View
 {

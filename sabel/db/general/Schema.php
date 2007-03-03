@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Base_Schema');
+//Sabel::using('Sabel_DB_Base_Schema');
 
 /**
  * Sabel_DB_General_Schema
@@ -48,7 +48,7 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function createColumns($table)
   {
-    Sabel::using('Sabel_DB_Type_Setter');
+    //Sabel::using('Sabel_DB_Type_Setter');
 
     $sql = sprintf($this->tableColumns, $this->schema, $table);
     $this->driver->execute($sql);

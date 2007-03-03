@@ -4,11 +4,13 @@ if (!defined('DIR_DIVIDER')) define('DIR_DIVIDER', '/');
 define('DEFAULT_PHP_POSTFIX', '.php');
 set_include_path(dirname(__FILE__).":".get_include_path());
 
-Sabel::using("Sabel_Object");
-Sabel::using('Sabel_Map_Configurator');
-Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_Model');
+// regist autoload static method
+spl_autoload_register(array('Sabel', 'using'));
 
+/**
+ * the core of sabel
+ *
+ */
 final class Sabel
 {
   private static $required   = array();
@@ -39,11 +41,6 @@ final class Sabel
    */
   public static function load($className)
   {
-    self::using($className);
-    
-    if (!class_exists($className, false))
-      throw new Exception($className . " not found");
-      
     $arg_list = '';
 
     if (($numargs = func_num_args()) > 1) {
@@ -72,9 +69,9 @@ final class Sabel
     
     return $instance;
   }
-  
+    
   public static function using($className)
-  {    
+  {
     if (!isset(self::$required[$className]) && !class_exists($className, false)) {
       $path = self::convertPath($className);
       if (self::isReadable($path)) {
@@ -82,6 +79,8 @@ final class Sabel
         self::$required[$className] = true;
       }
     }
+    
+    Sabel_Logger_Factory::create("File")->log("using class: " . $className);
   }
   
   public static function fileUsing($path, $once = false)
@@ -163,10 +162,10 @@ function hyperlink($params, $anchor = null, $id = null, $class = null)
   return $aCreator->hyperlink($params, $anchor, $id, $class);
 }
 
-function a($param, $anchor, $uriParameters = null, $id = null, $class = null)
+function a($param, $anchor, $uriParameters = null, $id = null, $class = null, $secure = false)
 {
   $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
-  $tag = $aCreator->aTag($param, $anchor, $uriParameters, $id, $class);
+  $tag = $aCreator->aTag($param, $anchor, $uriParameters, $id, $class, $secure);
   return $tag;
 }
 
@@ -301,7 +300,7 @@ function MODEL($mdlName, $arg1 = null, $arg2 = null)
 
 function _A($obj)
 {
-  Sabel::using("Sabel_Aspect_Proxy");
+  ////Sabel::using("Sabel_Aspect_Proxy");
   return new Sabel_Aspect_Proxy($obj);
 }
 

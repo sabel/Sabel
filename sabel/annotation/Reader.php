@@ -1,8 +1,5 @@
 <?php
 
-Sabel::using('Sabel_Annotation_Context');
-Sabel::using('Sabel_Library_ArrayList');
-
 /**
  * Sabel_Annotation_Reader
  *

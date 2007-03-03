@@ -1,7 +1,7 @@
 <?php
 
-Sabel::using('Sabel_DB_Result_Row');
-Sabel::using('Sabel_DB_General_Statement');
+//Sabel::using('Sabel_DB_Result_Row');
+//Sabel::using('Sabel_DB_General_Statement');
 
 /**
  * Sabel_DB_Base_Driver
@@ -47,7 +47,7 @@ abstract class Sabel_DB_Base_Driver
 
   public function loadTransaction()
   {
-    Sabel::using('Sabel_DB_General_Transaction');
+    //Sabel::using('Sabel_DB_General_Transaction');
     return Sabel_DB_General_Transaction::getInstance();
   }
 

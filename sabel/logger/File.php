@@ -14,6 +14,7 @@ class Sabel_Logger_File
   const DEFAULT_LOG_FILE = 'sabel.log';
   
   private $fp = null;
+  private $messages = array();
   private static $instance = null;
 
   public static function singleton()
@@ -45,12 +46,13 @@ class Sabel_Logger_File
   
   public function log($text)
   {
-    $message = date("c") ." ". $text . "\n";
-    fwrite($this->fp, $message);
+    $this->messages[] = date("c") ." ". $text . "\n";
   }
   
   public function __destruct()
   {
+    $messages = $this->messages;
+    foreach ($messages as $message) fwrite($this->fp, $message);
     fclose($this->fp);
   }
 }

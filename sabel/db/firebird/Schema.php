@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Base_Schema');
+//Sabel::using('Sabel_DB_Base_Schema');
 
 /**
  * Sabel_DB_Firebird_Schema

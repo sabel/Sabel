@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using("Sabel_Controller_Page_Plugin");
-
 /**
  * Volatile plugin
  *
@@ -25,7 +23,6 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
   public function __construct($storage = null, $candidate = null)
   {
     if ($storage === null) {
-      Sabel::using("Sabel_Storage_Session");
       $this->storage = Sabel_Storage_Session::create();
     } else {
       $this->storage = $storage;

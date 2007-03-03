@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Schema_Interface');
+//Sabel::using('Sabel_DB_Schema_Interface');
 
 /**
  * Sabel_DB_Schema_Accessor
@@ -39,7 +39,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
   public function getTableNames()
   {
     $sClass = 'Schema_' . ucfirst($this->connectName) . 'TableList';
-    Sabel::using($sClass);
+    //Sabel::using($sClass);
 
     if (class_exists($sClass, false)) {
       $sc = new $sClass();
@@ -52,7 +52,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
   public function getColumnNames($tblName)
   {
     $sClsName = 'Schema_' . convert_to_modelname($tblName);
-    Sabel::using($sClsName);
+    //Sabel::using($sClsName);
 
     if (class_exists($sClsName, false)) {
       $sClass = new $sClsName();

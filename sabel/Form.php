@@ -1,10 +1,5 @@
 <?php
 
-Sabel::using('Sabel_Form_HtmlElement');
-Sabel::using('Sabel_Form_Select');
-Sabel::using('Sabel_Form_Option');
-Sabel::using('Sabel_Form_OptionGroup');
-
 /**
  * Sabel_Template_Form
  *

@@ -1,8 +1,8 @@
 <?php
 
-Sabel::using('Sabel_DB_Base_Driver');
-Sabel::using('Sabel_DB_Firebird_Statement');
-Sabel::using('Sabel_DB_Firebird_Transaction');
+//Sabel::using('Sabel_DB_Base_Driver');
+//Sabel::using('Sabel_DB_Firebird_Statement');
+//Sabel::using('Sabel_DB_Firebird_Transaction');
 
 /**
  * Sabel_DB_Firebird_Driver

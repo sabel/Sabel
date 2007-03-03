@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Test_ModelRunner extends PHPUnit2_TextUI_TestRunner
+class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
 {
   public static function create()
   {

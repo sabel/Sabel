@@ -1,10 +1,5 @@
 <?php
 
-Sabel::using("Sabel_Controller_Page_Base");
-Sabel::using("Sabel_Controller_Page_Plugin");
-Sabel::using("Sabel_Logger_Factory");
-Sabel::using('Sabel_Exception_Runtime');
-
 /**
  * Abstract Page Controller
  *
@@ -71,11 +66,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     if ($this->enableSession) {
       if ($storage === null) {
-        Sabel::using('Sabel_Storage_Session');
         $this->storage = Sabel_Storage_Session::create();
       } else {
         $this->storage = $storage;
       }
+      
+      Sabel_Context::setStorage($this->storage);
     }
   }
   

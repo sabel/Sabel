@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using('Sabel_View_PageViewer');
-
 /**
  * Sabel_View_TagPageViewer
  * 

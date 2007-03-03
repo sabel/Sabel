@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using("Sabel_Request");
-
 /**
  * Sabel_Request
  *

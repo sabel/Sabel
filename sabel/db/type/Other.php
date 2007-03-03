@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Type_Interface');
+//Sabel::using('Sabel_DB_Type_Interface');
 
 /**
  * Sabel_DB_Type_Other

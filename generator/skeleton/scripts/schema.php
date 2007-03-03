@@ -14,10 +14,10 @@ require RUN_BASE . '/config/environment.php';
 
 set_include_path(SABEL . ":" . get_include_path());
 
-Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Schema_Accessor');
-Sabel::using('Sabel_DB_Type_Const');
-Sabel::using('Sabel_DB_Type_Setter');
+//Sabel::using('Sabel_DB_Connection');
+//Sabel::using('Sabel_DB_Schema_Accessor');
+//Sabel::using('Sabel_DB_Type_Const');
+//Sabel::using('Sabel_DB_Type_Setter');
 
 class Cascade_Writer
 {

@@ -5,12 +5,12 @@ if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
-Sabel::using('Sabel_Sakle_Task');
-Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Model');
+//Sabel::using('Sabel_Sakle_Task');
+//Sabel::using('Sabel_DB_Connection');
+//Sabel::using('Sabel_DB_Model');
 
-Sabel::using("Sabel_Test_Functional");
-Sabel::using("Sabel_Test_FunctionalRunner");
+//Sabel::using("Sabel_Test_Functional");
+//Sabel::using("Sabel_Test_FunctionalRunner");
 
 /**
  * Functional

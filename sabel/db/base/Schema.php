@@ -1,8 +1,8 @@
 <?php
 
-Sabel::using('Sabel_ValueObject');
-Sabel::using('Sabel_DB_SimpleCache');
-Sabel::using('Sabel_DB_Schema_Table');
+//Sabel::using('Sabel_ValueObject');
+//Sabel::using('Sabel_DB_SimpleCache');
+//Sabel::using('Sabel_DB_Schema_Table');
 
 /**
  * Sabel_DB_Base_Schema
@@ -24,7 +24,7 @@ abstract class Sabel_DB_Base_Schema
     $mdlName  = convert_to_modelname($tblName);
     $sClsName = 'Schema_' . $mdlName;
 
-    Sabel::using($sClsName);
+    //Sabel::using($sClsName);
     if (class_exists($sClsName, false)) {
       $cols = array();
       $sCls = new $sClsName();

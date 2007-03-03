@@ -22,7 +22,7 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   public function rendering($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_values)
   {
-    Sabel::using("Sabel_View_Helper_Prototype");
+    //Sabel::using("Sabel_View_Helper_Prototype");
     
     if ($this->isCache) {
       $sbl_tpl_cache_path = $this->getCacheFilePath($sbl_tpl_path, $sbl_tpl_name);

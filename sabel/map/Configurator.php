@@ -1,7 +1,7 @@
 <?php
 
-Sabel::using("Sabel_Map_Requirement_Interface");
-Sabel::using("Sabel_Map_Requirement_Regex");
+//Sabel::using("Sabel_Map_Requirement_Interface");
+//Sabel::using("Sabel_Map_Requirement_Regex");
 
 /**
  * Map Configurator

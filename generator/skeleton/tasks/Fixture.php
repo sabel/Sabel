@@ -5,10 +5,10 @@ if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
-Sabel::using('Sabel_Sakle_Task');
-Sabel::using('Sabel_DB_Migration');
-Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Model');
+//Sabel::using('Sabel_Sakle_Task');
+//Sabel::using('Sabel_DB_Migration');
+//Sabel::using('Sabel_DB_Connection');
+//Sabel::using('Sabel_DB_Model');
 
 /**
  * Fixture
@@ -30,7 +30,7 @@ class Fixture extends Sabel_Sakle_Task
     }
     
     $fixtureName = "Fixtures_" . $arguments[1];
-    Sabel::using($fixtureName);
+    //Sabel::using($fixtureName);
     
     try {
       $this->printMessage("up fixture");

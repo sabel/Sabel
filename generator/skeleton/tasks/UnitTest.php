@@ -5,12 +5,12 @@ if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 Sabel::fileUsing("tasks/environment.php");
 Sabel::fileUsing("config/database.php");
 
-Sabel::using('Sabel_DB_Connection');
-Sabel::using('Sabel_DB_Executer');
-Sabel::using('Sabel_DB_Model');
+//Sabel::using('Sabel_DB_Connection');
+//Sabel::using('Sabel_DB_Executer');
+//Sabel::using('Sabel_DB_Model');
 
-Sabel::using("Sabel_Test_Model");
-Sabel::using("Sabel_Test_ModelRunner");
+//Sabel::using("Sabel_Test_Model");
+//Sabel::using("Sabel_Test_ModelRunner");
 
 /**
  * Migration
@@ -25,6 +25,12 @@ class UnitTest extends Sakle
   {
     if (!isset($arguments[1])) {
       throw new Exception("model name must be specified");
+    }
+    
+    if (isset($arguments[2])) {
+      define ("ENVIRONMENT", environment($arguments[2]));
+    } else {
+      define ("ENVIRONMENT", TEST);
     }
     
     Sabel_Test_ModelRunner::create()->start($arguments[1]);

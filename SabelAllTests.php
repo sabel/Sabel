@@ -40,11 +40,11 @@ switch (PHPUNIT_VERSION) {
 }
 
 require_once('Sabel.php');
-
+/*
 function __autoload($class)
 {
   if (!class_exists($class)) Sabel::using($class);
-}
+}*/
 
 require_once('Test/SabelTestCase.php');
 require_once('Test/SabelTestSuite.php');
@@ -89,7 +89,7 @@ class SabelAllTests
     }
     
     $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Form::suite());

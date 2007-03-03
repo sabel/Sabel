@@ -1,11 +1,11 @@
 <?php
 
-Sabel::using('Sabel_DB_Type_Const');
+//Sabel::using('Sabel_DB_Type_Const');
 
-Sabel::using('Sabel_ValueObject');
-Sabel::using('Sabel_DB_SimpleCache');
+//Sabel::using('Sabel_ValueObject');
+//Sabel::using('Sabel_DB_SimpleCache');
 
-Sabel::using('Sabel_DB_Condition');
+//Sabel::using('Sabel_DB_Condition');
 
 /**
  * Sabel_DB_Model
@@ -323,7 +323,7 @@ class Sabel_DB_Model
     if (is_object($arg1) || is_array($arg1)) {
       $this->childConditions[] = $arg1;
     } else {
-      Sabel::using('Sabel_DB_Condition');
+      //Sabel::using('Sabel_DB_Condition');
       $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
       $this->childConditions[$condition->key] = $condition;
     }
@@ -1299,7 +1299,7 @@ class Sabel_DB_Model
    */
   public function cascadeDelete($id = null)
   {
-    Sabel::using('Schema_CascadeChain');
+    //Sabel::using('Schema_CascadeChain');
     if (!class_exists('Schema_CascadeChain', false))
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
 

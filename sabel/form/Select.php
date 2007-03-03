@@ -1,9 +1,5 @@
 <?php
 
-Sabel::using('Sabel_Form_HtmlElement');
-Sabel::using('Sabel_Form_Option');
-Sabel::using('Sabel_Form_OptionGroup');
-
 class Sabel_Form_Select extends Sabel_Form_HtmlElement
 {
   const START_TAG_FMT = '<select name="%s"%s%s>';

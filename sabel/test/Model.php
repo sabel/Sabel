@@ -1,10 +1,10 @@
 <?php
 
-if (!defined('PHPUnit2_MAIN_METHOD'))
-  define('PHPUnit2_MAIN_METHOD', 'Tester::main');
+if (!defined('PHPUnit_MAIN_METHOD'))
+  define('PHPUnit_MAIN_METHOD', 'Tester::main');
 
-require_once('PHPUnit2/TextUI/TestRunner.php');
-require_once('PHPUnit2/Framework/TestCase.php');
+require_once('PHPUnit/TextUI/TestRunner.php');
+require_once('PHPUnit/Framework/TestCase.php');
 
 /**
  * functional test for Sabel Application
@@ -15,7 +15,7 @@ require_once('PHPUnit2/Framework/TestCase.php');
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Test_Model extends PHPUnit2_Framework_TestCase
+class Sabel_Test_Model extends PHPUnit_Framework_TestCase
 {
   /**
    * override parents runBare()
@@ -28,7 +28,7 @@ class Sabel_Test_Model extends PHPUnit2_Framework_TestCase
     
     $ref = new ReflectionClass($this);
     $fixtureName = "Fixtures_" . array_pop(explode("_", $ref->getName()));
-    Sabel::using($fixtureName);
+    //Sabel::using($fixtureName);
     
     try {
       if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");

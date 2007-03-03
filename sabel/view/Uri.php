@@ -17,20 +17,20 @@ class Sabel_View_Uri
   {
   }
   
-  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null)
+  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null, $secure = false)
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
     $fmtUri = "<a id='%s' class='%s' href='%s%s'>%s</a>";
-    return sprintf($fmtUri, $id, $class, $this->uri($params, true), $uriParameters, $anchor);
+    return sprintf($fmtUri, $id, $class, $this->uri($params, true, $secure), $uriParameters, $anchor);
   }
   
-  public function aTag($param, $anchor, $uriParameters = null, $id, $class)
+  public function aTag($param, $anchor, $uriParameters = null, $id, $class, $secure)
   {
-    return $this->hyperlink($param, $anchor, $uriParameters, $id, $class);
+    return $this->hyperlink($param, $anchor, $uriParameters, $id, $class, $secure);
   }
   
-  public function uri($param, $withDomain = false)
+  public function uri($param, $withDomain = false, $secure = false)
   {
     $params = $this->convert($param);
     if (isset($_SERVER["HTTP_HOST"])) {
@@ -38,7 +38,10 @@ class Sabel_View_Uri
     } else {
       $httphost = "localhost";
     }
-    $uriPrefix = ($withDomain) ? 'http://' . $httphost : '';
+    
+    $protocol = ($secure) ? 'https' : 'http';
+    
+    $uriPrefix = ($withDomain) ? $protocol . '://' . $httphost : '';
     $uri = Sabel_Context::getCurrentCandidate()->uri($params);
     return $uriPrefix . "/" . $uri;
   }

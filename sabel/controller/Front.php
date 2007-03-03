@@ -1,10 +1,5 @@
 <?php
 
-Sabel::using('Sabel_View');
-Sabel::using('Sabel_Context');
-Sabel::using('Sabel_Map_Candidate');
-Sabel::using('Sabel_Exception_Runtime');
-
 /**
  * Sabel_Controller_Front
  *
@@ -42,6 +37,7 @@ class Sabel_Controller_Front
   
   public function ignition($storage = null)
   {
+    Sabel_Logger_Factory::create("File")->log("sabel start");
     $filters = $this->loadFilters($this->candidate);
     
     $this->processHelper($this->request, $this->candidate);
@@ -62,6 +58,7 @@ class Sabel_Controller_Front
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
     
+    Sabel_Logger_Factory::create("File")->log("end of execution\n");
     return $controller->execute($actionName);
   }
   
@@ -151,11 +148,9 @@ class Sabel_Controller_Front
       $classpath .= '_' . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
-    Sabel::using($classpath);
     if (class_exists($classpath)) {
       $controller = new $classpath();
     } else {
-      Sabel::using('Index_Controllers_Index');
       $controller = new Index_Controllers_Index();
     }
     

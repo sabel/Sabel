@@ -1,7 +1,7 @@
 <?php
 
-Sabel::using('Sabel_DB_Base_Driver');
-Sabel::using('Sabel_DB_Mssql_Statement');
+//Sabel::using('Sabel_DB_Base_Driver');
+//Sabel::using('Sabel_DB_Mssql_Statement');
 
 /**
  * Sabel_DB_Mssql_Driver

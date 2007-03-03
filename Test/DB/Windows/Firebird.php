@@ -31,10 +31,10 @@ function convert_to_modelname($tblName)
 
 function MODEL($mdlName)
 {
-  Sabel::using('Sabel_DB_Connection');
+  //Sabel::using('Sabel_DB_Connection');
   Sabel_DB_Connection::initialize();
 
-  Sabel::using('Sabel_Model');
+  //Sabel::using('Sabel_Model');
   return Sabel_Model::load($mdlName);
 }
 

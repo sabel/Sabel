@@ -6,7 +6,7 @@ if (!defined('PHPUnit_MAIN_METHOD'))
 require_once('PHPUnit/TextUI/TestRunner.php');
 require_once('PHPUnit/Framework/TestCase.php');
 
-Sabel::using("Sabel_Request");
+//Sabel::using("Sabel_Request");
 
 /**
  * functional test for Sabel Application
@@ -43,7 +43,7 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
   }
 }
 
-Sabel::using("Sabel_Controller_Page_Plugin");
+//Sabel::using("Sabel_Controller_Page_Plugin");
 class Sabel_Controller_Plugin_TestRedirecter implements Sabel_Controller_Page_Plugin
 {  
   public function onException($controller, $exception) {}

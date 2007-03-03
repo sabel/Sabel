@@ -18,6 +18,18 @@ class Sabel_Context
   private static $candidate = null;
   private static $view = null;
   
+  private static $storage = null;
+  
+  public static function setStorage($storage)
+  {
+    self::$storage = $storage;
+  }
+  
+  public static function getStorage()
+  {
+    return self::$storage;
+  }
+  
   public static function setCurrentCandidate($candidate)
   {
     self::$candidate = $candidate;

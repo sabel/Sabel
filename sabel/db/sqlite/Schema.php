@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_DB_Base_Schema');
+//Sabel::using('Sabel_DB_Base_Schema');
 
 /**
  * Sabel_DB_Sqlite_Schema
@@ -49,7 +49,7 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
 
   protected function createColumns($table)
   {
-    Sabel::using('Sabel_DB_Type_Setter');
+    //Sabel::using('Sabel_DB_Type_Setter');
 
     $this->driver->execute(sprintf($this->tableColumns, $table));
     $assocRow = $this->driver->getResultSet()->fetch();

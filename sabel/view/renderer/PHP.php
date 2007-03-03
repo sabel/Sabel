@@ -13,7 +13,6 @@ class Sabel_View_Renderer_PHP extends Sabel_View_Renderer
 {
   public function rendering($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_values)
   {
-    Sabel::using("Sabel_View_Helper_Prototype");
     $page = new Sabel_View_Helper_Prototype_Page();
     
     extract($sbl_tpl_values, EXTR_OVERWRITE);

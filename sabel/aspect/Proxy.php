@@ -1,11 +1,5 @@
 <?php
 
-Sabel::using("Sabel_Aspect_Joinpoint");
-Sabel::using("Sabel_Aspect_Aspects");
-Sabel::using("Sabel_Aspect_Pointcut");
-Sabel::using("Sabel_Aspect_Matcher");
-Sabel::using("Sabel_Aspect_Matches");
-
 /**
  * Sabel_Aspect_Proxy
  *

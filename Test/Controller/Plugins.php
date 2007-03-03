@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using("Sabel_Request");
+//Sabel::using("Sabel_Request");
 require_once ("MockRequest.php");
 require_once ("PageControllerForTest.php");
 

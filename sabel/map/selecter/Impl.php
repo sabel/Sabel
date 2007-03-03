@@ -1,6 +1,6 @@
 <?php
 
-Sabel::using('Sabel_Map_Selecter');
+//Sabel::using('Sabel_Map_Selecter');
 
 /**
  * Selecter implementation
