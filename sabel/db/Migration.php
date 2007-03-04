@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Base_Migration');
-
 /**
  * Sabel_DB_Migration
  *

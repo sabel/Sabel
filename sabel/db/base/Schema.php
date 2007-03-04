@@ -1,9 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_ValueObject');
-//Sabel::using('Sabel_DB_SimpleCache');
-//Sabel::using('Sabel_DB_Schema_Table');
-
 /**
  * Sabel_DB_Base_Schema
  *

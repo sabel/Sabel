@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_General_Schema');
-
 /**
  * Sabel_DB_Mssql_Schema
  *

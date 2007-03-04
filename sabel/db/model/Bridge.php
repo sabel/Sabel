@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Model');
-
 /**
  * Sabel_DB_Model_Bridge
  *

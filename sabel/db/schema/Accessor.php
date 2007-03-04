@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Schema_Interface');
-
 /**
  * Sabel_DB_Schema_Accessor
  *

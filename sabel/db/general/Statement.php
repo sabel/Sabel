@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Base_Statement');
-
 /**
  * Sabel_DB_General_Statement
  *

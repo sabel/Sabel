@@ -1,12 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Type_Const');
-
-//Sabel::using('Sabel_ValueObject');
-//Sabel::using('Sabel_DB_SimpleCache');
-
-//Sabel::using('Sabel_DB_Condition');
-
 /**
  * Sabel_DB_Model
  *
