@@ -1061,7 +1061,7 @@ class Sabel_DB_Model
     }
 
     $tblName  = $this->tableProp->table;
-    $newModel = MODEL(convert_to_tablename($tblName));
+    $newModel = MODEL(convert_to_modelname($tblName));
 
     if ($this->isSelected()) {
       if ($this->validateOnUpdate) {
