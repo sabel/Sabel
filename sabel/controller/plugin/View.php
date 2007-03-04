@@ -9,10 +9,8 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_View implements Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_View extends Sabel_Controller_Page_Plugin
 {
-  public function onBeforeAction($controller) {}
-  
   public function onAfterAction($controller)
   {
     $view = Sabel_Context::getView();
@@ -23,7 +21,4 @@ class Sabel_Controller_Plugin_View implements Sabel_Controller_Page_Plugin
     $result = $controller->getResult();
     if (is_array($result)) $view->assignByArray($result);
   }
-  
-  public function onRedirect($controller){}
-  public function onException($controller, $exception) {}
 }

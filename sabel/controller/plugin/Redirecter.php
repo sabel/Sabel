@@ -1,11 +1,7 @@
 <?php
 
-class Sabel_Controller_Plugin_Redirecter implements Sabel_Controller_Page_Plugin
-{  
-  public function onException($controller, $exception) {}
-  public function onBeforeAction($controller) {}
-  public function onAfterAction($controller) {}
-  
+class Sabel_Controller_Plugin_Redirecter extends Sabel_Controller_Page_Plugin
+{
   public function onRedirect($controller, $to = null)
   {
     if (!isset($_SERVER["HTTP_HOST"])) {

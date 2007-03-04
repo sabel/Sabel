@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
 {
   protected $controller = null;
   
@@ -42,8 +42,6 @@ class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
       }
     }
   }
-  
-  public function onRedirect($controller){}
   
   protected function doFilters($filters)
   {
@@ -85,6 +83,4 @@ class Sabel_Controller_Plugin_Filter implements Sabel_Controller_Page_Plugin
       }
     }
   }
-  
-  public function onException($controller, $exception) {}
 }

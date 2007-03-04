@@ -79,8 +79,6 @@ final class Sabel
         self::$required[$className] = true;
       }
     }
-    
-    Sabel_Logger_Factory::create("File")->log("using class: " . $className);
   }
   
   public static function fileUsing($path, $once = false)
@@ -300,7 +298,6 @@ function MODEL($mdlName, $arg1 = null, $arg2 = null)
 
 function _A($obj)
 {
-  ////Sabel::using("Sabel_Aspect_Proxy");
   return new Sabel_Aspect_Proxy($obj);
 }
 

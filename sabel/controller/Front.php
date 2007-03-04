@@ -32,19 +32,18 @@ class Sabel_Controller_Front
       Sabel::fileUsing(RUN_BASE . '/config/map.php');
     }
     
-    $this->plugin = Sabel::load("Sabel_Controller_Plugin");
+    $this->plugin = Sabel_Controller_Plugin::create();
   }
   
   public function ignition($storage = null)
   {
-    Sabel_Logger_Factory::create("File")->log("sabel start");
     $filters = $this->loadFilters($this->candidate);
     
     $this->processHelper($this->request, $this->candidate);
     $this->processPreFilter($filters, $this->request);
     
     $controller = $this->processPageController($this->candidate);
-    $controller->registPlugins($this->plugin);
+    $this->plugin->onCreateController($controller, $this->candidate);
     
     $view = Sabel::load('Sabel_View');
     $view->decideTemplatePath($this->candidate);
@@ -58,7 +57,6 @@ class Sabel_Controller_Front
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
     
-    Sabel_Logger_Factory::create("File")->log("end of execution\n");
     return $controller->execute($actionName);
   }
   

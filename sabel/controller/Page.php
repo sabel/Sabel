@@ -30,10 +30,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $attributes        = array(),
     $enableSession     = true,
     $skipDefaultAction = true;
-    
-  protected
-    $plugins       = array(),
-    $pluginMethods = array();
+  
+  protected $plugin = null;
     
   protected $models = null;
   
@@ -49,7 +47,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
                             
   public function __construct()
   {
-    $this->logger  = Sabel_Logger_Factory::create("file");
+    $this->logger = Sabel_Logger_Factory::create("file");
+    $this->plugin = Sabel_Controller_Plugin::create($this);
   }
   
   public function initialize() {}
@@ -93,9 +92,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function __call($method, $arguments)
   {
-    $obj = $this->plugins[$this->pluginMethods[$method]];
-    $ref = new ReflectionClass($obj);
-    return $ref->getMethod($method)->invokeArgs($obj, $arguments);
+    return $this->plugin->call($method, $arguments);
   }
   
   public function getAttributes()
@@ -167,61 +164,18 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       }
     }
     
-    $this->processBeforeActionPlugins();
+    $this->plugin->onBeforeAction();
     
     try {
       $this->processAction();
       $this->view->assignByArray($this->result);
     } catch (Exception $exception) {
-      $this->processExceptionPlugins($exception);
+      $this->plugin->onException($exception);
     }
     
-    $this->processAfterActionPlugins();
+    $this->plugin->onAfterAction();
     
     return $this;
-  }
-  
-  public function registPlugin($plug)
-  {
-    $name = get_class($plug);
-    
-    if ($name === false) throw new Sabel_Exception_InvalidPlugin("can't locate");
-    
-    $this->plugins[$name] = $plug;
-    foreach (get_class_methods($plug) as $method) {
-      if ($method !== 'onBeforeAction' && $method !== 'onAfterAction') {
-        $this->pluginMethods[$method] = $name;
-      }
-    }
-  }
-  
-  public function registPlugins($plugin)
-  {
-    foreach ($plugin->toArray() as $eachPlugin) {
-      $this->registPlugin($eachPlugin);
-    }
-  }
-  
-  protected function processBeforeActionPlugins()
-  {
-    foreach ($this->plugins as $plugin) $plugin->onBeforeAction($this);
-  }
-  
-  protected function processAfterActionPlugins()
-  {
-    foreach ($this->plugins as $plugin) $plugin->onAfterAction($this);
-  }
-  
-  protected function processRedirectPlugins($redirect)
-  {
-    foreach ($this->plugins as $plugin) {
-      $plugin->onRedirect($this, $redirect);
-    }
-  }
-  
-  protected function processExceptionPlugins($exception)
-  {
-    foreach ($this->plugins as $plugin) $plugin->onException($this, $exception);
   }
   
   protected function processAction()
@@ -240,7 +194,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     if ($this->hasMethod($methodAction)) {
       $this->logger->log("execute method action: $methodAction");
-      $actionResult =(array) $this->$methodAction();
+      if ($this->plugin->onExecuteAction($action)) {
+        $actionResult =(array) $this->$methodAction();
+      }
       if (!$this->skipDefaultAction) {
         $this->logger->log("execute action: $action");
         if ($this->hasMethod($action)) {
@@ -249,7 +205,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       }
     } elseif ($this->hasMethod($action)) {
       $this->logger->log("execute action: $action");
-      $actionResult = $this->$action();
+      if ($this->plugin->onExecuteAction($action)) {
+        $actionResult = $this->$action();
+      }
     } elseif ($this->hasMethod('actionMissing')) {
       $this->actionMissing();
     }
@@ -300,8 +258,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     $this->redirected = true;
     $this->redirect = $to;
-    $this->processRedirectPlugins($to);
-    $this->processAfterActionPlugins();
+    $this->plugin->onRedirect($to);
+    $this->plugin->processAfterActionPlugins();
   }
   
   public function redirectTo($params)

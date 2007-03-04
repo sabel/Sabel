@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Controller_Plugin_ExceptionHandler implements Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_ExceptionHandler extends Sabel_Controller_Page_Plugin
 {
   public function onException($controller, $exception)
   {
@@ -15,8 +15,4 @@ class Sabel_Controller_Plugin_ExceptionHandler implements Sabel_Controller_Page_
       $c->exception($exception);
     }
   }
-  
-  public function onBeforeAction($controller) {}
-  public function onAfterAction($controller) {}
-  public function onRedirect($controller) {}
 }

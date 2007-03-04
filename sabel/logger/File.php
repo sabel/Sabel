@@ -8,13 +8,15 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Logger_File
+class Sabel_Logger_File implements Sabel_Logger_Interface
 {
   const DEFAULT_LOG_PATH = '/logs';
   const DEFAULT_LOG_FILE = 'sabel.log';
   
   private $fp = null;
   private $messages = array();
+  private $path = "";
+  
   private static $instance = null;
 
   public static function singleton()
@@ -40,8 +42,7 @@ class Sabel_Logger_File
       $option = $env . "." . self::DEFAULT_LOG_FILE;
     }
     
-    $path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
-    $this->fp = fopen($path, 'a+');
+    $this->path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
   }
   
   public function log($text)
@@ -51,8 +52,6 @@ class Sabel_Logger_File
   
   public function __destruct()
   {
-    $messages = $this->messages;
-    foreach ($messages as $message) fwrite($this->fp, $message);
-    fclose($this->fp);
+    file_put_contents($this->path, $this->messages, LOCK_EX);
   }
 }

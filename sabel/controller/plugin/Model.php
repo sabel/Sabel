@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_Model extends Sabel_Controller_Page_Plugin
 {
   public function onBeforeAction($controller)
   {
@@ -20,8 +20,6 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
       }
     }
   }
-  
-  public function onAfterAction($controller) {}
   
   public function fill($model, $options = null)
   {
@@ -41,7 +39,4 @@ class Sabel_Controller_Plugin_Model implements Sabel_Controller_Page_Plugin
     
     return $model;
   }
-  
-  public function onRedirect($controller) {}
-  public function onException($controller, $exception) {}
 }

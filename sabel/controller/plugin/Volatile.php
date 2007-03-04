@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_Volatile extends Sabel_Controller_Page_Plugin
 {
   private $volatiles = array();
   private $lists     = array();
@@ -181,6 +181,4 @@ class Sabel_Controller_Plugin_Volatile implements Sabel_Controller_Page_Plugin
     $this->storage->write("volatiles_lists", $this->lists);
     $this->storage->write("volatiles_ignores", $this->ignores);
   }
-  
-  public function onException($controller, $exception) {}
 }
