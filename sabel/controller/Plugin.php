@@ -62,46 +62,64 @@ final class Sabel_Controller_Plugin
   
   public function onBeforeAction()
   {
-    foreach ($this->events["onBeforeAction"] as $name) {
-      $this->plugins[$name]->onBeforeAction($this->controller);
-    }    
+    $this->doActionEvent("onBeforeAction");
   }
   
   public function onAfterAction()
   {
-    foreach ($this->events["onAfterAction"] as $name) {
-      $this->plugins[$name]->onAfterAction($this->controller);
+    $this->doActionEvent("onAfterAction");
+  }
+  
+  protected function doActionEvent($event)
+  {
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $this->plugins[$name]->$event($this->controller);
+      }
     }
   }
   
   public function onRedirect($redirect)
   {
-    foreach ($this->events["onRedirect"] as $name) {
-      $this->plugins[$name]->onRedirect($this->controller, $redirect);
+    $event = "onRedirect";
+    
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $this->plugins[$name]->$event($this->controller, $redirect);
+      }
     }
   }
   
   public function onException($exception)
   {
-    foreach ($this->events["onException"] as $name) {
-      $this->plugins[$name]->onException($this->controller, $exception);
+    $event = "onException";
+    
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $this->plugins[$name]->$event($this->controller, $exception);
+      }
     }
   }
   
   public function onCreateController($controller, $candidate)
   {
-    foreach ($this->events["onCreateController"] as $name) {
-      $this->plugins[$name]->onCreateController($controller, $candidate);
+    $event = "onCreateController";
+    
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $this->plugins[$name]->$event($controller, $candidate);
+      }
     }
   }
   
   public function onExecuteAction($method)
   {
-    $result = true;
+    $result = true; 
+    $event = "onExecuteAction";
     
-    if (isset($this->events["onExecuteAction"])) {
-      foreach ($this->events["onExecuteAction"] as $name) {
-        $result = $this->plugins[$name]->onExecuteAction($method);
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $result = $this->plugins[$name]->$event($method);
       }
     }
     

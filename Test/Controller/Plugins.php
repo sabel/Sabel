@@ -21,7 +21,7 @@ class Test_Controller_Plugins extends SabelTestCase
     $pVolatile->setModule("index");
     $pVolatile->setController("index");
     
-    $aController->registPlugin($pVolatile);
+    $aController->plugin->add($pVolatile);
     
     $pVolatile->setAction("testVolatile");
     $aController->execute("testVolatile");

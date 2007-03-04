@@ -31,7 +31,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $enableSession     = true,
     $skipDefaultAction = true;
   
-  protected $plugin = null;
+  public $plugin = null;
     
   protected $models = null;
   

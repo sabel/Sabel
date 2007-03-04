@@ -23,7 +23,9 @@ class Sabel_Container_DI
    */
   public function load($className, $method = '__construct')
   {
-    if ($this->loadClass($className, $method)) return $this->makeInstance();
+    if ($this->loadClass($className, $method)) {
+      return $this->makeInstance();
+    }
   }
   
   public function depends($className, $dependsClassName, $type)
@@ -42,10 +44,11 @@ class Sabel_Container_DI
     $reflectionClass    = new ReflectionClass($class);
     $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass, $reflectionClass);
     
-    if ($reflectionClass->isInterface()) {
+    if ($reflectionClass->isInterface() || $reflectionClass->isAbstract()) {
       $reflectionClass    = new ReflectionClass($reflectionClassExt->getImplementClass());
       $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass);
     }
+    
     $this->classStack[] = $reflectionClassExt;
     
     if ($reflectionClass->hasMethod($method)) {
@@ -79,6 +82,8 @@ class Sabel_Container_DI
     if ($class === null) throw new Sabel_Exception_Runtime("class is null.");
     
     if ($class->isInterface()) {
+      $instance = $class->newInstanceForImplementation();
+    } elseif ($class->isAbstract()) {
       $instance = $class->newInstanceForImplementation();
     } else {
       $instance = $class->newInstance();

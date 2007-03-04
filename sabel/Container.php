@@ -11,31 +11,29 @@
  */
 class Sabel_Container
 {
-  public static function load($className)
+  public static function load($className, $configClass = "Dependency_Config")
   {
-    $refClass = new ReflectionClass($className);
-    if ($refClass->isAbstract() || $refClass->isInterface()) {
-      $self = new self();
-      $conf = $self->loadConfig($className);
-      
-      $confMethod = str_replace("_", "", $className);
+    $di = new Sabel_Container_DI();
+    
+    $self = new self();
+    $conf = $self->loadConfig($className, $configClass);
+    
+    $confMethod = str_replace("_", "", $className);
+    if (in_array($confMethod, get_class_methods($conf))) {
       $config = $conf->$confMethod();
-      $impl = $config->implementation;
-      
-      if (isset($config->aspect)) {
-        if (isset($config->aspect->use) && $config->aspect->use) {
-          return new Sabel_Aspect_Proxy(new $impl());
-        }
-      }
-      
-      return new $impl();
-    } else {
-      return new $className();
     }
+    
+    if (isset($config->aspect)) {
+      if (isset($config->aspect->use) && $config->aspect->use) {
+        return new Sabel_Aspect_Proxy($di->load($className));
+      }
+    }
+    
+    return $di->load($className);    
   }
   
-  public function loadConfig($className)
+  public function loadConfig($className, $configClass)
   {
-    return new Dependency_Config();
+    return new $configClass();
   }
 }

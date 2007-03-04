@@ -47,6 +47,11 @@ class Sabel_Container_ReflectionClass
     return $this->reflectionClass->isInterface();
   }
   
+  public function isAbstract()
+  {
+    return $this->reflectionClass->isAbstract();
+  }
+  
   public function newInstance($depend = null)
   {
     $className = $this->reflectionClass->getName();
@@ -57,43 +62,29 @@ class Sabel_Container_ReflectionClass
     }
   }
   
+  /**
+   * get implementation class name
+   *
+   * @return string $implementClassname
+   */
   public function getImplementClass()
   {
     $interfaceFullName = $this->reflectionClass->getName();
-    $pathElements      = explode('_', $interfaceFullName);
-    $interfaceName     = array_pop($pathElements) . '.yml';
     
-    $module = SabelDIHelper::getModuleName();
+    $configClass = "Dependency_Config";
+    $conf = new $configClass();
+    $confMethod = str_replace("_", "", $interfaceFullName);
+    $result = $conf->$confMethod();
     
-    $pathElements = array_map('strtolower', $pathElements);
-    $pathElements[] = $interfaceName;
-    $configFilePath = implode('/', $pathElements);
-    $config = $this->loadConfig($configFilePath);
-    
-    if (isset($config['class']) &&
-        isset($config['class'][$this->dependBy->getName()])) {
-      $implementClassName = $config['class'][$this->dependBy->getName()];
-    } elseif (isset($config['module']) &&
-               isset($config['module'][$module])) {
-      $implementClassName = $config['module'][$module];
-    } elseif (isset($config['implementation'])) {
-      $implementClassName = $config['implementation'];
-    } else {
-        $msg  = 'DI config file is invalid can\'t find implementation: ';
-        $msg .= $configFilePath;
-        throw new SabelException($msg);
-    }
-    
+    $implementClassName = $result->implementation;
+        
     if (!is_string($implementClassName)) {
-      $information['implementClassName'] = $implementClassName;
-      $information['config'] = $config;
+      $information['config']   = $config;
       $information['dependBy'] = $this->dependBy;
-      throw new SabelException("<pre>implement class name is invalid: " . var_export($information, 1));
+      $information['implementClassName'] = $implementClassName;
+      throw new SabelException("implement class name is invalid: " . var_export($information, 1));
     }
     
-    if (!class_exists($implementClassName)) {
-      uses(Sabel_Core_Resolver::resolvClassPathByClassName($implementClassName));
-    }
     return $implementClassName;
   }
   
