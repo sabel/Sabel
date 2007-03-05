@@ -345,7 +345,7 @@ class Sabel_Map_Candidate implements Iterator
   
   protected function loadFromCache($tokens)
   {
-    if (PRODUCTION !== PRODUCTION) return false;
+    if (ENVIRONMENT !== PRODUCTION) return false;
     
     $cache = Sabel::load("Sabel_Cache_Manager")->create();
     
@@ -383,7 +383,7 @@ class Sabel_Map_Candidate implements Iterator
   
   protected function saveToCache($candidate, $tokens)
   {
-    if (PRODUCTION !== PRODUCTION) return false;
+    if (ENVIRONMENT !== PRODUCTION) return false;
     
     $cache = Sabel::load("Sabel_Cache_Manager")->create();
     
