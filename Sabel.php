@@ -122,6 +122,11 @@ final class Sabel
   }
 }
 
+function load($className)
+{
+  return Sabel_Container::load($className);
+}
+
 /**
  * alias of Sabel::load()
  *

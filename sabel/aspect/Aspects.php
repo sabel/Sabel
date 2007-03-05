@@ -71,7 +71,6 @@ class Sabel_Aspect_Aspects
           break;
         case ($p->hasMethods()):
           foreach ($p->getMethods() as $pcMethod) {
-            
             if ($pcMethod === $method) {
               $matches->add($p->getName(), $p->getAspect());
             }

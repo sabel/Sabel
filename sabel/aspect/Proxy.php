@@ -109,8 +109,10 @@ class Sabel_Aspect_Proxy
       $proceed = $this->callAspect($joinpoint, $matches, 'around');
       
       if ($proceed) {
-        if ($result = $this->callAspect($joinpoint, $matches, 'before')) {
-          return $result;
+        $beforeResult = $this->callBefore($joinpoint, $matches);
+        
+        if ($beforeResult !== false) {
+          return $beforeResult;
         }
         
         if ($hasMethod) {
@@ -121,7 +123,7 @@ class Sabel_Aspect_Proxy
         
         $joinpoint->setResult($result);
         $this->callAspect($joinpoint, $matches, 'after');
-
+        
         return $result;
       }
     } catch (Exception $e) {
@@ -153,13 +155,32 @@ class Sabel_Aspect_Proxy
     return join(', ', $argStrBuf);
   }
   
+  protected function callBefore($joinpoint, $matches)
+  {
+    $result = false;
+    
+    $ref = new ReflectionClass($this->target);
+    foreach ($matches as $aspect) {
+      $aspectReflect = new ReflectionClass($aspect);
+      if ($aspectReflect->hasMethod("before")) {
+        $result = $aspect->before($joinpoint);
+      }
+      unset($aspectReflect);
+    }
+    
+    if ($result !== false) {
+      return $result;
+    } else {
+      return false;      
+    }
+  }
+  
   protected function callAspect($joinpoint, $matches, $type)
   {
     $called = false;
     $result = false;
     
     $ref = new ReflectionClass($this->target);
-    
     foreach ($matches as $aspect) {
       $aspectReflect = new ReflectionClass($aspect);
       if ($aspectReflect->hasMethod($type)) {

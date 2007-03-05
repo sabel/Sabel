@@ -33,9 +33,9 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
   public function get($key)
   {
     try {
-      return @$this->memcache->get($key);
+      return $this->memcache->get($key);
     } catch (Exception $e) {
-      return null;
+      dump("EXCEPTION" . $e->getMessage());
     }
   }
 
@@ -44,6 +44,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
     try {
       $this->memcache->add($key, $value, $comp, $timeout);
     } catch (Exception $e) {
+      dump("EXCEPTION" . $e->getMessage());
     }
   }
 
