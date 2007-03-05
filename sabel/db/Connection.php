@@ -45,6 +45,11 @@ class Sabel_DB_Connection
     self::$parameters[$connectName] = $params;
   }
 
+  public static function getConnectionParameters()
+  {
+    return self::$parameters;
+  }
+
   protected static function makeDatabaseLink($connectName)
   {
     if (!isset(self::$parameters[$connectName]))
@@ -96,7 +101,7 @@ class Sabel_DB_Connection
       }
     }
 
-    if (!$list['conn']) self::error();
+    if (!$list['conn']) self::error($connectName);
 
     if (isset($params['encoding'])) {
       $db  = $drvName;
@@ -194,11 +199,11 @@ class Sabel_DB_Connection
     }
   }
 
-  public static function error()
+  public static function error($connectName)
   {
     Sabel::using('Exception_DatabaseConnection');
     if (class_exists('Exception_DatabaseConnection', true)) {
-      Exception_DatabaseConnection::error();
+      Exception_DatabaseConnection::error($connectName);
     }
   }
 }

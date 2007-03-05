@@ -44,7 +44,6 @@ abstract class Sabel_DB_Base_Driver
 
   public function loadTransaction()
   {
-    //Sabel::using('Sabel_DB_General_Transaction');
     return Sabel_DB_General_Transaction::getInstance();
   }
 
