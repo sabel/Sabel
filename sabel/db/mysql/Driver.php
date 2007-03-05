@@ -81,7 +81,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 
   public function driverExecute($sql = null, $conn = null)
   {
-    Sabel_Context::log($sql);
     if ($conn === null) {
       $conn = ($this->conn === null) ? $this->getConnection() : $this->conn;
     }
