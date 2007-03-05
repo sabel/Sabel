@@ -16,11 +16,13 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
 
   protected function __construct($server)
   {
-    $this->memcache = new Memcache();
-    $this->memcache->addServer($server, 11211, true);
+    if (extension_loaded("memcache")) {
+      $this->memcache = new Memcache();
+      $this->memcache->addServer($server, 11211, true);
+    }
   }
 
-  public static function create($server = null)
+  public static function create($server = "localhost")
   {
     if (!isset(self::$instance)) {
       if (is_null($server)) throw new Exception("server is null.");
