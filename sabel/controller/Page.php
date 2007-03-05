@@ -235,6 +235,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
   }
   
+  public function disableLayout()
+  {
+    $this->withLayout = false;
+    return $this;
+  }
+  
   protected function checkReferer($validURIs)
   {
     $host = $_SERVER['HTTP_HOST'];
