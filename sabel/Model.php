@@ -27,7 +27,7 @@ class Sabel_Model
   protected static function createModel($mdlName, $arg1 = null, $arg2 = null)
   {
     Sabel::using($mdlName);
-    if (class_exists($mdlName, false)) {
+    if (class_exists($mdlName, true)) {
       return new $mdlName($arg1, $arg2);
     } else {
       return Sabel::load('Proxy', $mdlName);

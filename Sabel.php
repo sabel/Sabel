@@ -72,7 +72,7 @@ final class Sabel
     
   public static function using($className)
   {
-    if (!isset(self::$required[$className]) && !class_exists($className, false)) {
+    if (!isset(self::$required[$className]) && !class_exists($className, true)) {
       $path = self::convertPath($className);
       if (self::isReadable($path)) {
         require ($path);

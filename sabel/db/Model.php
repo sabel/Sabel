@@ -89,7 +89,7 @@ class Sabel_DB_Model
       $sClsName = 'Schema_' . $mdlName;
       Sabel::using($sClsName);
 
-      if (class_exists($sClsName, false)) {
+      if (class_exists($sClsName, true)) {
         list($tblSchema, $props) = $this->getSchemaFromCls($sClsName, $tblName);
       } else {
         list($tblSchema, $props) = $this->getSchemaFromDb($tblName);
@@ -1293,7 +1293,7 @@ class Sabel_DB_Model
   public function cascadeDelete($id = null)
   {
     //Sabel::using('Schema_CascadeChain');
-    if (!class_exists('Schema_CascadeChain', false))
+    if (!class_exists('Schema_CascadeChain', true))
       throw new Exception('Error: class Schema_CascadeChain does not exist.');
 
     if ($id === null && !$this->isSelected())

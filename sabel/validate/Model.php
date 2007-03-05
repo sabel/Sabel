@@ -31,7 +31,7 @@ class Sabel_Validate_Model extends Sabel_Validate_Validator
   {
     $sClass = 'Schema_' . ucfirst($this->mdlName);
     
-    if (class_exists($sClass, false)) {
+    if (class_exists($sClass, true)) {
       $schema  = new $sClass();
       $columns = $schema->get();
     } else {

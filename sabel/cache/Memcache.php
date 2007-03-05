@@ -1,7 +1,5 @@
 <?php
 
-Sabel::using("Sabel_Cache_Cache");
-
 /**
  * Cache implementation of Memcache
  *

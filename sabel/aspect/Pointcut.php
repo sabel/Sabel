@@ -32,9 +32,11 @@ class Sabel_Aspect_Pointcut
   
   protected $class      = '';
   protected $method     = '';
+  protected $methods    = array();
   protected $package    = '';
   protected $hasClass   = false;
   protected $hasMethod  = false;
+  protected $hasMethods = false;
   protected $hasPackage = false;
   
   protected $classRegex      = '';
@@ -159,14 +161,38 @@ class Sabel_Aspect_Pointcut
     return $this;
   }
   
+  public function addMethod($method)
+  {
+    $this->methods[] = $method;
+    $this->hasMethods = true;
+    return $this;
+  }
+  
+  public function setMethods($methods)
+  {
+    $this->methods = $methods;
+    $this->hasMethods = true;
+    return $this;
+  }
+  
   public function getMethod()
   {
     return $this->method;
   }
   
+  public function getMethods()
+  {
+    return $this->methods;
+  }
+  
   public function hasMethod()
   {
     return $this->hasMethod;
+  }
+  
+  public function hasMethods()
+  {
+    return $this->hasMethods;
   }
   
   public function setMethodRegex($rule)

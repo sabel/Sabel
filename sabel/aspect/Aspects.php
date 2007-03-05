@@ -69,6 +69,14 @@ class Sabel_Aspect_Aspects
         case ($p->hasMethod() && $p->getMethod() === $method):
           $match = true;
           break;
+        case ($p->hasMethods()):
+          foreach ($p->getMethods() as $pcMethod) {
+            
+            if ($pcMethod === $method) {
+              $matches->add($p->getName(), $p->getAspect());
+            }
+          }
+          break;
         case ($p->hasMethodRegex() && preg_match('/'.$p->getMethodRegex().'/', $method)):
           $match = true;
           break;

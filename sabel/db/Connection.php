@@ -197,7 +197,7 @@ class Sabel_DB_Connection
   public static function error()
   {
     Sabel::using('Exception_DatabaseConnection');
-    if (class_exists('Exception_DatabaseConnection', false)) {
+    if (class_exists('Exception_DatabaseConnection', true)) {
       Exception_DatabaseConnection::error();
     }
   }

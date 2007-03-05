@@ -48,10 +48,11 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   public function log($text)
   {
     $this->messages[] = date("c") ." ". $text . "\n";
+    file_put_contents($this->path, $text . "\n", LOCK_EX);
   }
   
   public function __destruct()
   {
-    file_put_contents($this->path, $this->messages, LOCK_EX);
+    // file_put_contents($this->path, $this->messages, LOCK_EX);
   }
 }

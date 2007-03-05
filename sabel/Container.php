@@ -25,11 +25,22 @@ class Sabel_Container
     
     if (isset($config->aspect)) {
       if (isset($config->aspect->use) && $config->aspect->use) {
+        
+        if (isset($config->aspect->aspects)) {
+          foreach ($config->aspect->aspects as $aspect) {
+            $pc = Sabel_Aspect_Pointcut::create($aspect);
+            foreach ($config->aspect->methods as $method) {
+              $pc->addMethod($method);
+            }
+            Sabel_Aspect_Aspects::singleton()->addPointcut($pc);
+          }
+        }
+        
         return new Sabel_Aspect_Proxy($di->load($className));
       }
     }
     
-    return $di->load($className);    
+    return $di->load($className);
   }
   
   public function loadConfig($className, $configClass)

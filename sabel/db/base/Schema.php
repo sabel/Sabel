@@ -20,8 +20,7 @@ abstract class Sabel_DB_Base_Schema
     $mdlName  = convert_to_modelname($tblName);
     $sClsName = 'Schema_' . $mdlName;
 
-    //Sabel::using($sClsName);
-    if (class_exists($sClsName, false)) {
+    if (class_exists($sClsName, true)) {
       $cols = array();
       $sCls = new $sClsName();
       foreach ($sCls->get() as $colName => $colInfo) {
