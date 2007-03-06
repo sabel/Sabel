@@ -40,7 +40,7 @@ class Sabel_Controller_Plugin_Dependency extends Sabel_Controller_Page_Plugin
   
   public function onExecuteAction($method)
   {
-    $result = true;
+    $result = false;
     if (is_object($this->dependency)) {
       $result = $this->dependency->execute($method);
     }

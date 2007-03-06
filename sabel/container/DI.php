@@ -75,9 +75,10 @@ class Sabel_Container_DI
   {
     $stackCount =(int) count($this->classStack);
     
-    if ($stackCount < 1)
+    if ($stackCount < 1) {
       throw new SabelException('invalid stack count:' . var_export($this->classStack, 1));
-      
+    }
+    
     $class = array_pop($this->classStack);
     if ($class === null) throw new Sabel_Exception_Runtime("class is null.");
     
@@ -91,7 +92,10 @@ class Sabel_Container_DI
     
     for ($i = 1; $i < $stackCount; ++$i) {
       $class = array_pop($this->classStack);
+      
       if ($class->isInterface()) {
+        $instance = $class->newInstanceForImplementation($instance);
+      } elseif ($class->isAbstract()) {
         $instance = $class->newInstanceForImplementation($instance);
       } else {
         $instance = $class->newInstance($instance);

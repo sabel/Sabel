@@ -194,7 +194,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     if ($this->hasMethod($methodAction)) {
       $this->logger->log("execute method action: $methodAction");
-      if ($this->plugin->onExecuteAction($action)) {
+      if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
         $actionResult =(array) $this->$methodAction();
       }
       if (!$this->skipDefaultAction) {
@@ -205,7 +205,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       }
     } elseif ($this->hasMethod($action)) {
       $this->logger->log("execute action: $action");
-      if ($this->plugin->onExecuteAction($action)) {
+      if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
         $actionResult = $this->$action();
       }
     } elseif ($this->hasMethod('actionMissing')) {
