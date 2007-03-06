@@ -114,7 +114,7 @@ final class Sabel_Controller_Plugin
   
   public function onExecuteAction($method)
   {
-    $result = true; 
+    $result = false; 
     $event = "onExecuteAction";
     
     if (isset($this->events[$event])) {

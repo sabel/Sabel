@@ -181,7 +181,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   protected function processAction()
   {
     if ($this->redirected) return false;
-    
+
     $action = $this->action;
     $methodAction = "";
     
@@ -189,7 +189,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $reqMethod    = strtolower($this->request->getHttpMethod());
       $methodAction = $reqMethod . ucfirst($action);
     }
-    
     $actionResult = array();
     
     if ($this->hasMethod($methodAction)) {

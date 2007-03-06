@@ -49,6 +49,8 @@ class Sabel_Form_Option extends Sabel_Form_HtmlElement
     if ($this->isSelected()) $buf[] = ' selected="selected"';
     $buf[] = sprintf(' value="%s"', $value);
     if ($this->label !== '') $buf[] = sprintf(' label="%s"', $this->label);
+    if ($this->id !== '') $buf[] = sprintf(' id="%s"', $this->id);
+    if ($this->class !== '') $buf[] = sprintf(' class="%s"', $this->class);
     
     $buf[] = self::START_TAG_CLOSE;
     
