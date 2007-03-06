@@ -153,10 +153,10 @@ function is_not_object($object)
   return (!is_object($object));
 }
 
-function uri($param, $withDomain = true)
+function uri($param, $withDomain = true, $secure = false)
 {
   $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
-  return $aCreator->uri($param, $withDomain);
+  return $aCreator->uri($param, $withDomain, $secure);
 }
 
 function hyperlink($params, $anchor = null, $id = null, $class = null)
