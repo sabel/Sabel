@@ -329,9 +329,11 @@ class Sabel_Map_Candidate implements Iterator
   
   public function find($tokens)
   {
+    // @todo bug in here.
+    /*
     if ($candidate = $this->loadFromCache($tokens)) {
       return $candidate;
-    }
+    }*/
     
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
       if ($this->matchToTokens($candidate, $tokens)) {
