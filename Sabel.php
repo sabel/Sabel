@@ -122,9 +122,9 @@ final class Sabel
   }
 }
 
-function load($className)
+function load($className, $configClass = "Dependency_Config")
 {
-  return Sabel_Container::load($className);
+  return Sabel_Container::load($className, $configClass);
 }
 
 /**

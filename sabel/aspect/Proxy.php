@@ -168,6 +168,8 @@ class Sabel_Aspect_Proxy
       unset($aspectReflect);
     }
     
+    if ($result === null) return false;
+    
     if ($result !== false) {
       return $result;
     } else {
