@@ -316,7 +316,6 @@ class Sabel_DB_Model
     if (is_object($arg1) || is_array($arg1)) {
       $this->childConditions[] = $arg1;
     } else {
-      //Sabel::using('Sabel_DB_Condition');
       $condition = new Sabel_DB_Condition($arg1, $arg2, $arg3);
       $this->childConditions[$condition->key] = $condition;
     }
@@ -448,14 +447,24 @@ class Sabel_DB_Model
     return $this->selected;
   }
 
-  public function getChildConstraint()
+  public function getCondition()
   {
-    return $this->childConstraints;
+    return $this->conditions;
   }
 
   public function getChildCondition()
   {
     return $this->childConditions;
+  }
+
+  public function getConstraint()
+  {
+    return $this->constraints;
+  }
+
+  public function getChildConstraint()
+  {
+    return $this->childConstraints;
   }
 
   /**

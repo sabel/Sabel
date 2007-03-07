@@ -51,6 +51,11 @@ abstract class Sabel_DB_Base_Statement
         continue;
       }
 
+      if ($condition->force) {
+        $this->makeForceSQL($condition); 
+        continue;
+      }
+
       switch ($condition->type) {
         case Sabel_DB_Condition::NORMAL:
           $this->makeNormalSQL($condition);
@@ -108,10 +113,23 @@ abstract class Sabel_DB_Base_Statement
 
   protected function makeWhereInSQL($condition)
   {
+    $val = $condition->value;
+
     $values = array();
-    $conditionValues = $condition->value;
-    foreach ($conditionValues as $val) $values[] = $this->escape($val);
+    foreach ($val as $v) $values[] = $this->escape($v);
     $this->setWhereQuery($this->getKey($condition) . ' IN (' . join(',', $values) . ')');
+  }
+
+  protected function makeForceSQL($condition)
+  {
+    $val = $condition->value;
+    if (!is_array($val)) $val = (array)$val;
+
+    $values = array();
+    foreach ($val as &$v) $values[] = $this->escape($v);
+
+    $cond = vsprintf($condition->key, $values);
+    $this->setWhereQuery($cond);
   }
 
   protected function getKey($condition)

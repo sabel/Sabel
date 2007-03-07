@@ -116,9 +116,8 @@ class Sabel_DB_Connection
       }
     }
 
-    $list['schema']  = (isset($params['schema'])) ? $params['schema'] : null;
+    $list['schema'] = (isset($params['schema'])) ? $params['schema'] : null;
     self::$connList[$connectName] = $list;
-    return $list['conn'];
   }
 
   public static function getDriver($conName)
@@ -201,7 +200,6 @@ class Sabel_DB_Connection
 
   public static function error($connectName)
   {
-    Sabel::using('Exception_DatabaseConnection');
     if (class_exists('Exception_DatabaseConnection', true)) {
       Exception_DatabaseConnection::error($connectName);
     }
