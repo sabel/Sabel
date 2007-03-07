@@ -43,6 +43,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
                             'getAction',
                             'getRequests',
                             'execute',
+                            'getResult',
+                            'result',
                             'initialize');
                             
   public function __construct()
@@ -191,6 +193,10 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     $actionResult = array();
     
+    if (in_array($methodAction, $this->reserved)) {
+      throw new Sabel_Exception_ReservedActionName($methodAction . " is reserved by sabel");
+    }
+    
     if ($this->hasMethod($methodAction)) {
       $this->logger->log("execute method action: $methodAction");
       if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
@@ -335,5 +341,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   }
 }
 
+class Sabel_Exception_ReservedActionName extends Sabel_Exception_Runtime{}
 class Sabel_Exception_InvalidActionName extends Sabel_Exception_Runtime{}
 class Sabel_Exception_InvalidPlugin extends Sabel_Exception_Runtime{}
