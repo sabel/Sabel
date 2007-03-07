@@ -116,7 +116,7 @@ abstract class Sabel_DB_Base_Statement
     $val = $condition->value;
 
     $values = array();
-    foreach ($val as $v) $values[] = $this->escape($v);
+    foreach ($val as $v) $values[] = "'" . $this->escape($v). "'";
     $this->setWhereQuery($this->getKey($condition) . ' IN (' . join(',', $values) . ')');
   }
 
