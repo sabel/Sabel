@@ -70,9 +70,11 @@ class Sabel_Context
     return self::$parameters[$name];
   }
   
-  public static function log($log)
+  public static function log($message)
   {
-    Sabel_Logger_File::singleton()->log($log);
+    static $log;
+    if (!isset($log)) $log = Sabel_Logger_File::singleton();
+    $log->log($message);
   }
   
   public static function getLogger()

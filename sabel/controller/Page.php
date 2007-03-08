@@ -49,7 +49,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
                             
   public function __construct()
   {
-    $this->logger = Sabel_Logger_Factory::create("file");
+    $this->logger = load("Sabel_Logger_File", array("singleton" => true));
+    Sabel_Context::log("construct " . get_class($this));
     $this->plugin = Sabel_Controller_Plugin::create($this);
   }
   
@@ -62,6 +63,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   public function setup(Sabel_Request $request, $view = null, $storage = null)
   {
+    Sabel_Context::log("setup controller " . get_class($this));
+    
     $this->request = $request;
     $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
     
@@ -94,6 +97,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function __call($method, $arguments)
   {
+    Sabel_Context::log("call plugin " . $method);
     return $this->plugin->call($method, $arguments);
   }
   
@@ -151,6 +155,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     if ($action !== null) $this->action = $action;
     
+    Sabel_Context::log("execute {$this->action}");
+    
     if (empty($action)) {
       throw new Sabel_Exception_InvalidActionName("invalid action name");
     }
@@ -183,7 +189,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   protected function processAction()
   {
     if ($this->redirected) return false;
-
+    
     $action = $this->action;
     $methodAction = "";
     
@@ -198,18 +204,18 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     if ($this->hasMethod($methodAction)) {
-      $this->logger->log("execute method action: $methodAction");
+      Sabel_Context::log("execute method action: $methodAction");
       if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
         $actionResult =(array) $this->$methodAction();
       }
       if (!$this->skipDefaultAction) {
-        $this->logger->log("execute action: $action");
+        Sabel_Context::log("execute action: $action");
         if ($this->hasMethod($action)) {
           $actionResult = array_merge((array) $this->$action(), $actionResult);
         }
       }
     } elseif ($this->hasMethod($action)) {
-      $this->logger->log("execute action: $action");
+      Sabel_Context::log("execute action: $action");
       if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
         $actionResult = $this->$action();
       }

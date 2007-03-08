@@ -37,6 +37,8 @@ class Sabel_Controller_Front
   
   public function ignition($storage = null)
   {
+    Sabel_Context::log("request " . $this->request);
+    
     $filters = $this->loadFilters($this->candidate);
     
     $this->processHelper($this->request, $this->candidate);
@@ -50,15 +52,15 @@ class Sabel_Controller_Front
     Sabel_Context::setView($view);
     
     $controller->setup($this->request, $view, $storage);
-
+    
     $actionName = $this->candidate->getAction();
     $controller->setAction($actionName);
-
+    
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
     
     $result = $controller->execute($actionName);
-    Sabel_Context::log("end of request\n\n");
+    Sabel_Context::log("end of ignition\n");
     return $result;
   }
   

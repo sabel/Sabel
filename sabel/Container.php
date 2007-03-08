@@ -11,16 +11,33 @@
  */
 class Sabel_Container
 {
-  public static function load($className, $configClass = "Dependency_Config")
+  static $instancies = array();
+  
+  // public static function load($className, $configClass = "Dependency_Config", $singleton = false)
+  public static function load($className, $additional = null)
   {
+    if ($additional === null) $additional = array();
+    
+    if (isset($additional["singleton"]) && $additional["singleton"] && isset(self::$instancies[$className])) {
+      return self::$instancies[$className];
+    }
+    
     $di = new Sabel_Container_DI();
     
     $self = new self();
-    $conf = $self->loadConfig($className, $configClass);
+    if (isset($additional["config"])) {
+      $conf = $self->loadConfig($className, $additional["config"]);
+    } else {
+      $conf = $self->loadConfig($className, "Dependency_Config");
+    }
     
-    $confMethod = str_replace("_", "", $className);
-    if (in_array($confMethod, get_class_methods($conf))) {
-      $config = $conf->$confMethod();
+    if ($conf) {
+      $confMethod = str_replace("_", "", $className);
+      if (in_array($confMethod, get_class_methods($conf))) {
+        $config = $conf->$confMethod();
+      }
+    } else {
+      $config = new StdClass();
     }
     
     if (isset($config->implementation)) {
@@ -31,7 +48,6 @@ class Sabel_Container
     
     if (isset($config->aspect)) {
       if (isset($config->aspect->use) && $config->aspect->use) {
-        
         if (isset($config->aspect->aspects)) {
           foreach ($config->aspect->aspects as $aspect) {
             $pc = Sabel_Aspect_Pointcut::create($aspect);
@@ -43,15 +59,32 @@ class Sabel_Container
           }
         }
         
-        return new Sabel_Aspect_Proxy($di->load($className));
+        $instance =  new Sabel_Aspect_Proxy($di->load($className));
+      } else {
+        $instance = $di->load($className);
       }
+    } else {
+      $instance = $di->load($className);
     }
     
-    return $di->load($className);
+    if (isset($additional["singleton"]) && $additional["singleton"] === true) {
+      if (isset(self::$instancies[$className])) {
+        return self::$instancies[$className];
+      } else {
+        self::$instancies[$className] = $instance;
+        return $instance;
+      }
+    } else {
+      return $instance;
+    }
   }
   
   public function loadConfig($className, $configClass)
   {
-    return new $configClass();
+    if (class_exists($configClass)) {
+      return new $configClass();
+    } else {
+      return false;
+    }
   }
 }
