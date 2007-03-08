@@ -57,7 +57,9 @@ class Sabel_Controller_Front
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
     
-    return $controller->execute($actionName);
+    $result = $controller->execute($actionName);
+    Sabel_Context::log("end of request\n\n");
+    return $result;
   }
   
   public function processCandidate($request = null)

@@ -43,12 +43,14 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
     }
     
     $this->path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
+    $this->fp = fopen($this->path, "w+");
   }
   
   public function log($text)
   {
     $this->messages[] = date("c") ." ". $text . "\n";
-    file_put_contents($this->path, $text . "\n", LOCK_EX);
+    fwrite($this->fp, date("c") ." ". $text . "\n");
+    // file_put_contents($this->path, $text . "\n", LOCK_EX);
   }
   
   public function __destruct()

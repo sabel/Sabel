@@ -75,6 +75,7 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
     foreach ($filters as $filter) {
       if ($this->controller->hasMethod($filter)) {
         if ($this->controller->$filter() === false) {
+          Sabel_Context::log("apply filter " . $filter);
           break;
         } else {
         }
