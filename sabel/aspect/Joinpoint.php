@@ -37,6 +37,11 @@ class Sabel_Aspect_Joinpoint
     return $this->getReflection()->getMethod($this->getMethod());
   }
   
+  public function getClassName()
+  {
+    return $this->getReflection()->getName();
+  }
+  
   public function getArguments()
   {
     return $this->arguments;

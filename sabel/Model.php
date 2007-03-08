@@ -30,7 +30,7 @@ class Sabel_Model
     if (class_exists($mdlName, true)) {
       return new $mdlName($arg1, $arg2);
     } else {
-      return Sabel::load('Proxy', $mdlName);
+      return new Proxy($mdlName);
     }
   }
 }
