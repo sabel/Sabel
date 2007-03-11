@@ -15,21 +15,8 @@ final class Sabel
 {
   private static $required   = array();
   private static $fileUsing  = array();
-  private static $readables  = array();
   private static $singletons = array();
-  
-  public static function loadState()
-  {
-    $c = self::load('Sabel_Cache_Manager')->create();
-    self::$readables = $c->read('readables');
-  }
-  
-  public static function saveState()
-  {
-    $c = self::load('Sabel_Cache_Manager')->create();
-    $c->write('readables', self::$readables);
-  }
-  
+    
   /**
    * class instanciate.
    * if not using class then using
@@ -69,7 +56,7 @@ final class Sabel
     
     return $instance;
   }
-    
+  
   public static function using($className)
   {
     if (!isset(self::$required[$className]) && !class_exists($className, true)) {
@@ -105,7 +92,6 @@ final class Sabel
   
   private static function isReadable($path)
   {
-    if (isset(self::$readables[$path])) return true;
     if (is_readable($path)) return true;
     
     $includePath = get_include_path();
@@ -113,7 +99,6 @@ final class Sabel
     
     foreach ($paths as $p) {
       if (is_readable($p .'/'. $path)) {
-        self::$readables[$path] = true;
         return true;
       }
     }
@@ -122,9 +107,9 @@ final class Sabel
   }
 }
 
-function load($className, $configClass = "Dependency_Config")
+function load($class_name, $config_class = null)
 {
-  return Sabel_Container::load($className, $configClass);
+  return Sabel_Container::load($class_name, $config_class);
 }
 
 /**

@@ -54,12 +54,16 @@ class Sabel_Container_ReflectionClass
   
   public function newInstance($depend = null)
   {
-    $className = $this->reflectionClass->getName();
+    $instance   = null;
+    $class_name = $this->reflectionClass->getName();
+    
     if ($depend) {
-      return new $className($depend);
+      $instance = new $class_name($depend);
     } else {
-      return new $className();
+      $instance = new $class_name();
     }
+    
+    return $instance;
   }
   
   /**

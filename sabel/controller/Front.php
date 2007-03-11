@@ -68,8 +68,8 @@ class Sabel_Controller_Front
   {
     if ($request !== null) $this->request = $request;
     
-    $candidate = Sabel::load('Sabel_Map_Candidate');
-    $candidate = $candidate->find(Sabel::load('Sabel_Map_Tokens', $this->request->__toString()));
+    $candidate = new Sabel_Map_Candidate();
+    $candidate = $candidate->find(new Sabel_Map_Tokens($this->request->__toString()));
     
     Sabel_Context::setCurrentCandidate($candidate);
     $this->request->setCandidate($candidate);

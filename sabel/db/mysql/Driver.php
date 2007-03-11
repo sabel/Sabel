@@ -87,7 +87,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Base_Driver
 
     if ($sql === null && ($sql = $this->stmt->getSQL()) === '')
       throw new Exception('Error: query not exist. execute makeQuery() beforehand');
-
+    
     $result = mysql_query($sql, $conn);
 
     if (!$result) {

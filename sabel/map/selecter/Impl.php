@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_Map_Selecter');
-
 /**
  * Selecter implementation
  *

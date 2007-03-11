@@ -23,9 +23,9 @@ class Sabel_Container_DI
    */
   public function load($className, $method = '__construct')
   {
-    if ($this->loadClass($className, $method)) {
-      return $this->makeInstance();
-    }
+    $this->parseDependency($className, $method);
+    $instance = $this->constructInstance();
+    return $instance;
   }
   
   public function depends($className, $dependsClassName, $type)
@@ -38,7 +38,7 @@ class Sabel_Container_DI
     return new Sabel_Aspect_Proxy($this->load($className, $method));
   }
   
-  public function loadClass($class, $method = '__construct')
+  public function parseDependency($class, $method = '__construct')
   {
     // push to Stack class name
     $reflectionClass    = new ReflectionClass($class);
@@ -60,7 +60,7 @@ class Sabel_Container_DI
           // recursive call if class also depend another class.
           $depend = $dependClass->getName();
           if ($this->hasParameterDependOnClass($depend)) {
-            $this->loadClass($depend);
+            $this->parseDependency($depend);
           } else {
             $this->classStack[] = new Sabel_Container_ReflectionClass($dependClass, $reflectionClass);
           }
@@ -71,7 +71,7 @@ class Sabel_Container_DI
     return $this;
   }
   
-  public function makeInstance()
+  public function constructInstance()
   {
     $stackCount =(int) count($this->classStack);
     

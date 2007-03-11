@@ -13,7 +13,6 @@ class Sabel_Container
 {
   static $instancies = array();
   
-  // public static function load($className, $configClass = "Dependency_Config", $singleton = false)
   public static function load($className, $additional = null)
   {
     if ($additional === null) $additional = array();
@@ -59,13 +58,15 @@ class Sabel_Container
           }
         }
         
-        $instance =  new Sabel_Aspect_Proxy($di->load($className));
+        $solved_instance = $di->load($className);
+        $instance = new Sabel_Aspect_Proxy($solved_instance);
       } else {
         $instance = $di->load($className);
       }
     } else {
       $instance = $di->load($className);
     }
+    
     
     if (isset($additional["singleton"]) && $additional["singleton"] === true) {
       if (isset(self::$instancies[$className])) {
