@@ -67,7 +67,6 @@ class Sabel_Container
       $instance = $di->load($className);
     }
     
-    
     if (isset($additional["singleton"]) && $additional["singleton"] === true) {
       if (isset(self::$instancies[$className])) {
         return self::$instancies[$className];

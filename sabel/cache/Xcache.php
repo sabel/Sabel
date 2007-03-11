@@ -17,7 +17,7 @@ class Sabel_Cache_Xcache
   public function __construct()
   {
     if (!extension_loaded('xcache')) {
-      throw Sabel::load('Sabel_Exception_Runtime', 'xcache extension not loaded');
+      throw new Sabel_Exception_Runtime('xcache extension not loaded');
     }
     if (isset($_SERVER['SERVER_NAME'])) {
       $this->signature = $_SERVER['SERVER_NAME'];

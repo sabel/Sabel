@@ -146,21 +146,21 @@ class Sabel_View
     
     if (!$partial && is_readable($controllerSpecific)) {
       $tplname = "/" . $action . Sabel_Const::TEMPLATE_POSTFIX;
-      $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
+      $this->renderer = new Sabel_View_Renderer_Class();
       $this->templateFound = true;
       $this->setTemplatePath($controllerSpecificTplpath);
     } elseif (is_readable($tplpath . $tplname . ".pjs")) {
       $tplname .= ".pjs";
-      $this->renderer = Sabel::load('Sabel_View_Renderer_PHP');
+      $this->renderer = new Sabel_View_Renderer_PHP();
       $this->templateFound = true;
       $this->setTemplatePath($tplpath);
     } elseif(is_readable($tplpath . $tplname . Sabel_Const::TEMPLATE_POSTFIX)) {
       $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
-      $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
+      $this->renderer = new Sabel_View_Renderer_Class();
       $this->templateFound = true;
       $this->setTemplatePath($tplpath);
     } else {
-      $this->renderer = Sabel::load('Sabel_View_Renderer_Class');
+      $this->renderer = new Sabel_View_Renderer_Class();
       $this->templateFound = false;
       $this->setTemplatePath($tplpath);
     }

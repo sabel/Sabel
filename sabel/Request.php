@@ -13,7 +13,7 @@ abstract class Sabel_Request extends Sabel_Object
 {
   public static function create()
   {
-    return Sabel::load("Sabel_Request_Web");
+    return new Sabel_Request_Web();
   }
   
   abstract public function getParameters();

@@ -21,7 +21,7 @@ class Sabel_Controller_Front
     if ($this->request === null) $this->request = Sabel::load($this->requestClass);
     
     if (ENVIRONMENT === PRODUCTION) {
-      $cache = Sabel::load("Sabel_Cache_Manager")->create();
+      $cache = Sabel_Cache_Manager::create();
       if (!($candidates = $cache->read("map_candidates"))) {
         Sabel::fileUsing(RUN_BASE . '/config/map.php');
         $cache->write("map_candidates", serialize(Sabel_Map_Configurator::getCandidates()));
@@ -47,7 +47,7 @@ class Sabel_Controller_Front
     $controller = $this->processPageController($this->candidate);
     $this->plugin->onCreateController($controller, $this->candidate);
     
-    $view = Sabel::load('Sabel_View');
+    $view = new Sabel_View();
     $view->decideTemplatePath($this->candidate);
     Sabel_Context::setView($view);
     
@@ -58,7 +58,7 @@ class Sabel_Controller_Front
     
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
-    
+        
     $result = $controller->execute($actionName);
     Sabel_Context::log("end of ignition\n");
     return $result;

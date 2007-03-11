@@ -21,7 +21,7 @@ class Sabel_Http_Request
   {
     $this->userAgent = $userAgent;
     if ($requester === null) {
-      $this->requester = Sabel::load('Sabel_Http_Requester_Stream');
+      $this->requester = new Sabel_Http_Requester_Stream();
     } else if ($requester instanceof Sabel_Http_Requestable){
       $this->requester = $requester;
     }
@@ -85,8 +85,8 @@ class Sabel_Http_Request
     $data = join("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n";
     $result = $this->requester->send($data);
     
-    $response = Sabel::load('Sabel_Http_Response');
-    $responseHeader = Sabel::load('Sabel_Http_Header');
+    $response = new Sabel_Http_Response();
+    $responseHeader = new Sabel_Http_Header();
     $response->setHeader($responseHeader);
     
     $this->responseHeader = $responseHeader;

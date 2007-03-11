@@ -1,6 +1,5 @@
 <?php
 
-//Sabel::using("Sabel_Request");
 require_once ("MockRequest.php");
 require_once ("PageControllerForTest.php");
 
@@ -16,8 +15,8 @@ class Test_Controller_Plugins extends SabelTestCase
     $aController = new PageControllerForTest();
     $aController->setup(new MockRequest());
     
-    $session   = Sabel::load("Sabel_Storage_InMemory");
-    $pVolatile = Sabel::load("Sabel_Controller_Plugin_Volatile", $session);
+    $session   = new Sabel_Storage_InMemory();
+    $pVolatile = new Sabel_Controller_Plugin_Volatile($session);
     $pVolatile->setModule("index");
     $pVolatile->setController("index");
     

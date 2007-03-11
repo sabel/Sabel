@@ -4,7 +4,7 @@ class Sabel_Controller_Plugin_ExceptionHandler extends Sabel_Controller_Page_Plu
 {
   public function onException($controller, $exception)
   {
-    $c = Sabel::load("Common_ExceptionHandler");
+    $c = new Common_ExceptionHandler();
     $c->setup($controller->getRequest());
     $c->initialize();
     $ref = new ReflectionClass($exception);

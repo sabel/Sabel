@@ -27,7 +27,7 @@ class Test_Sabel extends SabelTestCase
     
     if (!is_dir(RUN_BASE)) {
       mkdir(RUN_BASE);
-      $dt = Sabel::load('Sabel_Util_DirectoryTraverser', SABEL_BASE.'/generator/skeleton');
+      $dt = new Sabel_Util_DirectoryTraverser(SABEL_BASE.'/generator/skeleton');
       $dt->visit(new SabelDirectoryAndFileCreator());
       $dt->traverse();
     }
@@ -35,19 +35,19 @@ class Test_Sabel extends SabelTestCase
   
   public function testSabel()
   {
-    $fcontroller = Sabel::load('Sabel_Controller_Front');
+    $fcontroller = new Sabel_Controller_Front();
     $fcontroller->processCandidate();
     $this->assertTrue(is_object($fcontroller));
     
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
-    $request = Sabel::load("Sabel_Request_Web", "/index/index");
+    $request = new Sabel_Request_Web("/index/index");
     $this->assertTrue(is_object($fcontroller->ignition($request)));
   }
   
   public function testSingleton()
   {
-    $classA = Sabel::load('Sabel_View_Renderer_Class');
-    $classB = Sabel::load('Sabel_View_Renderer_Class');
+    $classA = new Sabel_View_Renderer_Class();
+    $classB = new Sabel_View_Renderer_Class();
     
     $this->assertNotSame($classA, $classB);
     

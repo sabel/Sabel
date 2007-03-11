@@ -41,7 +41,8 @@ class Sabel_DB_Migration
         break;
     }
 
-    $this->migration = Sabel::load('Sabel_DB_' . $db . '_Migration');
+    $migrationClass = 'Sabel_DB_' . $db . '_Migration';
+    $this->migration = new $migrationClass();
   }
 
   public function add($type, $tblName, $arg2, $arg3 = null)

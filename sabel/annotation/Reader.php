@@ -30,7 +30,7 @@ class Sabel_Annotation_Reader
       self::$annotation = unserialize(file_get_contents($path));
     }
     
-    $this->list = Sabel::load('Sabel_Library_ArrayList');
+    $this->list = new Sabel_Library_ArrayList();
   }
   
   public static function create()

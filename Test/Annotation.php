@@ -23,7 +23,7 @@ class Test_Annotation extends SabelTestCase
   
   public function testAnnotation()
   {
-    $ar   = Sabel::load('Sabel_annotation_Reader');
+    $ar   = new Sabel_annotation_Reader();
     $list = $ar->annotation('AnnotatedTestClass');
     
     foreach ($list as $annotation) {

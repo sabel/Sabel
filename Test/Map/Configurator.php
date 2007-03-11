@@ -87,16 +87,16 @@ class Test_Map_Configurator extends SabelTestCase
                         
     $candidate = Sabel_Map_Configurator::getCandidate("default");
     try {
-      $candidate->find(Sabel::load('Sabel_Map_Tokens', 'controller'));
+      $candidate->find(new Sabel_Map_Tokens('controller'));
       $this->fail('candidate found');
     } catch (Sabel_Map_Candidate_NotFound $e) {
       $this->assertTrue(true);
     }
     
-    $matched = $candidate->find(Sabel::load('Sabel_Map_Tokens', 'module/controller/action/id'));
+    $matched = $candidate->find(new Sabel_Map_Tokens('module/controller/action/id'));
     $this->assertEquals('default', $matched->getName());
 
-    $matched = $candidate->find(Sabel::load('Sabel_Map_Tokens', 'action/id'));
+    $matched = $candidate->find(new Sabel_Map_Tokens('action/id'));
     $this->assertEquals('third', $matched->getName());
   }
 }

@@ -11,26 +11,26 @@
  */
 class Sabel_Cache_Manager
 {
-  private $support = array();
+  private static $support = array();
   
-  public function __construct()
+  public static function init()
   {
-    $this->support["apc"]      = extension_loaded("apc");
-    $this->support["xcache"]   = extension_loaded("xcache");
-    $this->support["memcache"] = extension_loaded("memcache");
+    self::$support["apc"]      = extension_loaded("apc");
+    self::$support["xcache"]   = extension_loaded("xcache");
+    self::$support["memcache"] = extension_loaded("memcache");
   }
   
-  public function create($type = "")
+  public static function create($type = "")
   {
     $instance = null;
     
     if (ENVIRONMENT === DEVELOPMENT || ENVIRONMENT === TEST) {
       $instance = Sabel_Cache_Null::create();
-    } elseif (isset($this->support["apc"]) && $this->support["apc"] === true) {
+    } elseif (isset(self::$support["apc"]) && self::$support["apc"] === true) {
       $instance = Sabel_Cache_Apc::create();
-    } elseif (isset($this->support["xcache"]) && $this->support["xcache"] === true) {
+    } elseif (isset(self::$support["xcache"]) && self::$support["xcache"] === true) {
       $instance = Sabel_Cache_Xcache::create();
-    } elseif (isset($this->support["memcache"]) && $this->support["memcache"] === true) {
+    } elseif (isset(self::$support["memcache"]) && self::$support["memcache"] === true) {
       $instance = Sabel_Cache_Memcache::create();
     } else {
       $instance = Sabel_Cache_File::create();

@@ -21,14 +21,14 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
 {
   protected function request($uri, $storage = null)
   {
-    $aFrontController = Sabel::load('Sabel_Controller_Front');
+    $aFrontController = new Sabel_Controller_Front();
     
     $aFrontController->plugin
-                     ->add(Sabel::load('Sabel_Controller_Plugin_Volatile'))
-                     ->add(Sabel::load('Sabel_Controller_Plugin_Filter'))
-                     ->add(Sabel::load('Sabel_Controller_Plugin_View'))
-                     ->add(Sabel::load('Sabel_Controller_Plugin_ExceptionHandler'))
-                     ->add(Sabel::load('Sabel_Controller_Plugin_TestRedirecter'));
+                     ->add(new Sabel_Controller_Plugin_Volatile())
+                     ->add(new Sabel_Controller_Plugin_Filter())
+                     ->add(new Sabel_Controller_Plugin_View())
+                     ->add(new Sabel_Controller_Plugin_ExceptionHandler())
+                     ->add(new Sabel_Controller_Plugin_TestRedirecter());
                      
     return $aFrontController->ignition($uri, $storage);
   }

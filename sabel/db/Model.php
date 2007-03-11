@@ -744,7 +744,7 @@ class Sabel_DB_Model
     $parents = $this->parents;
 
     if ($parents) {
-      $this->relation = Sabel::load('Sabel_DB_Model_Relation');
+      $this->relation = new Sabel_DB_Model_Relation();
       $this->dbTables = $this->getTableNames();
       $this->relation->setColumns($tblName, $this->columns);
 
@@ -841,7 +841,7 @@ class Sabel_DB_Model
   protected function addParent($row, $model)
   {
     $this->acquiredParents = array($this->tableProp->table);
-    if ($this->relation === null) $this->relation = Sabel::load('Sabel_DB_Model_Relation');
+    if ($this->relation === null) $this->relation = new Sabel_DB_Model_Relation();
 
     foreach ($model->parents as $parent) {
       $res = $this->relation->toRelationPair($model->tableProp->table, $parent);
@@ -911,7 +911,7 @@ class Sabel_DB_Model
     if (!is_array($modelPairs))
       throw new Exception('Error: joinSelect() argument must be an array.');
 
-    $relClass = Sabel::load('Sabel_DB_Model_Relation');
+    $relClass = new Sabel_DB_Model_Relation();
     return $relClass->join($this, $modelPairs, $joinType, $colList);
   }
 
@@ -934,7 +934,8 @@ class Sabel_DB_Model
     }
 
     list ($child) = explode('.', $child);
-    $res  = Sabel::load('Sabel_DB_Model_Relation')->toRelationPair($child, $pair);
+    $relation = new Sabel_DB_Model_Relation();
+    $res  = $relation->toRelationPair($child, $pair);
     $pkey = $res['pkey'];
 
     $cModel = MODEL($child);
@@ -1135,7 +1136,7 @@ class Sabel_DB_Model
     if (is_object($this->errors)) {
       $errors = $this->errors;
     } else {
-      $this->errors = $errors = Sabel::load('Sabel_Errors');
+      $this->errors = $errors = new Sabel_Errors();
     }
 
     $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;

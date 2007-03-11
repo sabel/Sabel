@@ -66,7 +66,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     Sabel_Context::log("setup controller " . get_class($this));
     
     $this->request = $request;
-    $this->view = ($view === null) ? Sabel::load('Sabel_View') : $view;
+    $this->view = ($view === null) ? new Sabel_View() : $view;
     
     if ($this->enableSession) {
       if ($storage === null) {

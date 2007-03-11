@@ -9,7 +9,7 @@ class CacheCleaner extends Sakle
       $this->stop();
     }
     
-    $apc = Sabel::load('Sabel_Cache_Apc');
+    $apc = new Sabel_Cache_Apc();
     if ($apc->delete('readables')) {
       $this->printMessage('delete cache');
     } else {

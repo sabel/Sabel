@@ -303,10 +303,10 @@ function renderingComponentAsString($componentName, $args)
   
   if (is_readable($path)) {
     $controller = Sabel::load($cClassName);
-    $view = Sabel::load('Sabel_View');
+    $view = new Sabel_View();
     $view->setTemplatePath(RUN_BASE . "/components/" . $componentName . "/views/");
     $view->setTemplateName($args["controller"] . "." . $args["action"] . ".tpl");
-    $controller->setup(Sabel::load("Sabel_Request_Web", ""), $view);
+    $controller->setup(new Sabel_Request_Web(), $view);
     $controller->execute($args["action"]);
     
     return $view->rendering(false);
