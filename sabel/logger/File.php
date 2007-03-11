@@ -21,6 +21,10 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   public static function singleton($option = null)
   {
+    if (ENVIRONMENT === PRODUCTION) {
+      self::$instance = new Sabel_Logger_Null();
+    }
+    
     if (is_object(self::$instance)) {
       return self::$instance;
     } else {
