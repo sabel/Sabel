@@ -18,7 +18,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
-      $this->memcache->addServer($server, 11211, true);
+      $this->memcache->connect($server, 11211, true);
     }
   }
 
@@ -37,7 +37,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Cache
     try {
       return $this->memcache->get($key);
     } catch (Exception $e) {
-      dump("EXCEPTION" . $e->getMessage());
+      var_dump("EXCEPTION" . $e->getMessage());
     }
   }
 
