@@ -140,6 +140,8 @@ function is_not_object($object)
 
 function uri($param, $withDomain = true, $secure = false)
 {
+  $secure = (defined("USE_SSL") && $secure === true);
+
   $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
   return $aCreator->uri($param, $withDomain, $secure);
 }
