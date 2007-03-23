@@ -51,7 +51,7 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
     }
     
     $this->path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
-    $this->fp = fopen($this->path, "w+");
+    $this->fp = fopen($this->path, "a+");
   }
   
   public function log($text)
