@@ -1181,7 +1181,7 @@ class Sabel_DB_Model
   {
     $col = $this->sColumns[$name];
     if ($col->type === Sabel_DB_Type_Const::STRING) {
-      $method = (extension_loaded('mbstring')) ? 'mb_strlen' : 'strlen';
+      $method = (extension_loaded('mbstring')) ? 'mb_strwidth' : 'strlen';
       return ($method($value) > $col->max);
     } else {
       return false;
