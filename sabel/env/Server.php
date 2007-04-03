@@ -26,6 +26,10 @@ class Sabel_Env_Server
   public function __get($key)
   {
     $key = strtoupper($key);
+    if ($key === "HTTP_HOST" && !isset($_SERVER[$key])) {
+      return "localhost";
+    }
+    
     return (isset($_SERVER[$key])) ? $_SERVER[$key] : null;
   }
   
