@@ -556,12 +556,17 @@ class Sabel_DB_Model
   {
     return $this->tableProp->tableEngine;
   }
+  
+  public function getSchemaAccessor()
+  {
+    return $this->createSchemaAccessor();
+  }
 
   protected function createSchemaAccessor()
   {
     $connectName = $this->getConnectName();
     $schemaName  = Sabel_DB_Connection::getSchema($connectName);
-    return Sabel::load('Sabel_DB_Schema_Accessor', $connectName, $schemaName);
+    return new Sabel_DB_Schema_Accessor($connectName, $schemaName);
   }
 
   /**

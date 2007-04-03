@@ -1,5 +1,7 @@
 <?php
 
+require ("PHPUnit/TextUI/TestRunner.php");
+
 class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
 {
   public static function create()

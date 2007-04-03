@@ -119,7 +119,7 @@ class Sabel_Container_DI
         switch ($type) {
           case "Setter":
             $setter = "set".ucfirst($className);
-            $instance->$setter(self::create()->loadClass($className)->makeInstance());
+            $instance->$setter(self::create()->load($className));
             break;
         }
       }

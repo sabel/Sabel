@@ -17,7 +17,10 @@ class Sabel_Container
   {
     if ($additional === null) $additional = array();
     
-    if (isset($additional["singleton"]) && $additional["singleton"] && isset(self::$instancies[$className])) {
+    if (isset($additional["singleton"])
+        && $additional["singleton"]
+        && isset(self::$instancies[$className]))
+    {
       return self::$instancies[$className];
     }
     

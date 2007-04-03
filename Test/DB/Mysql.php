@@ -3,14 +3,14 @@
 class Test_DB_Mysql extends Test_DB_Test
 {
   private static $params1 = array('driver'   => 'mysql',
-                                  'host'     => 'localhost',
+                                  'host'     => '127.0.0.1',
                                   'user'     => 'root',
                                   'password' => '',
                                   'schema'   => 'edo',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'pdo-mysql',
-                                  'host'     => 'localhost',
+                                  'host'     => '127.0.0.1',
                                   'user'     => 'root',
                                   'password' => '',
                                   'schema'   => 'edo2',
