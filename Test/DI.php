@@ -32,6 +32,8 @@ class Test_DI extends SabelTestCase
   }
 }
 
+/****************************************************************************/
+
 class Person
 {
   protected $age = null;

@@ -29,7 +29,7 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
                      ->add(new Sabel_Controller_Plugin_View())
                      ->add(new Sabel_Controller_Plugin_ExceptionHandler())
                      ->add(new Sabel_Controller_Plugin_TestRedirecter());
-                     
+                   
     return $aFrontController->ignition($uri, $storage);
   }
   
@@ -43,13 +43,8 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
   }
 }
 
-//Sabel::using("Sabel_Controller_Page_Plugin");
-class Sabel_Controller_Plugin_TestRedirecter implements Sabel_Controller_Page_Plugin
-{  
-  public function onException($controller, $exception) {}
-  public function onBeforeAction($controller) {}
-  public function onAfterAction($controller) {}
-  
+class Sabel_Controller_Plugin_TestRedirecter extends Sabel_Controller_Page_Plugin
+{    
   public function onRedirect($controller, $to = null)
   {
     $host = (isset($_SERVER["HTTP_HOST"])) ? $_SERVER["HTTP_HOST"] : "localhost";

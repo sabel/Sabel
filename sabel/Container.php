@@ -43,7 +43,9 @@ class Sabel_Container
     }
     
     if (isset($config->implementation)) {
-      Sabel_Context::log("load from container " . $className . " implement class " . $config->implementation);
+      $fmt = "load from container % implement class %";
+      $msg = sprintf($fmt, $className, $config->implementation);
+      Sabel_Context::log($msg);
     } else {
       Sabel_Context::log("load from container " . $className);
     }
@@ -56,7 +58,8 @@ class Sabel_Container
             foreach ($config->aspect->methods as $method) {
               $pc->addMethod($method);
             }
-            Sabel_Context::log("apply $aspect aspect for class $className on " . join(", ", $config->aspect->methods));
+            $msg = "apply $aspect aspect for class $className on ";
+            Sabel_Context::log($msg . join(", ", $config->aspect->methods));
             Sabel_Aspect_Aspects::singleton()->addPointcut($pc);
           }
         }

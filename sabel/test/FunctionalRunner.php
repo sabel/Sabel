@@ -1,8 +1,9 @@
 <?php
 
 define("FUNCTIONAL_TEST", true);
-//Sabel::using('Sabel_Controller_Page_Plugin');
-//Sabel::using('Sabel_Controller_Plugin_Redirecter');
+
+require_once('PHPUnit/TextUI/TestRunner.php');
+require_once('PHPUnit/Framework/TestCase.php');
 
 class Sabel_Test_FunctionalRunner extends PHPUnit_TextUI_TestRunner
 {

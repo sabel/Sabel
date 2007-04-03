@@ -276,7 +276,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->redirected = true;
     $this->redirect = $to;
     $this->plugin->onRedirect($to);
-    $this->plugin->processAfterActionPlugins();
+    $this->plugin->onAfterAction();
   }
   
   public function redirectTo($params)

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Env_Server
+ * Sabel_Environment
  *
  * @category   Env
  * @package    org.sabel.env
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Env_Server
+class Sabel_Environment
 {
   private static $instance = null;
   
@@ -21,6 +21,11 @@ class Sabel_Env_Server
   {
     if (is_not_object(self::$instance)) self::$instance = new self();
     return self::$instance;
+  }
+  
+  public static function get($key)
+  {
+    return self::create()->$key;
   }
   
   public function __get($key)
