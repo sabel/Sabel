@@ -151,10 +151,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this->request->getPostRequests();
   }
   
-  public function execute($action = null)
-  {
-    if ($action !== null) $this->action = $action;
-    
+  public function execute($action)
+  { 
     Sabel_Context::log("execute {$this->action}");
     
     if (empty($action)) {
@@ -175,8 +173,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->plugin->onBeforeAction();
     
     try {
-      $this->processAction();
-      $this->view->assignByArray($this->result);
+      $result = $this->processAction($action);
+      $this->view->assignByArray($result);
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
     }
@@ -186,11 +184,22 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this;
   }
   
-  protected function processAction()
+  public function partial($action)
+  {
+    if ($action !== null) {
+      $result = $this->$action();
+      $view = new Sabel_View();
+      $view->decideTemplatePath(Sabel_Context::getCurrentCandidate());
+      $view->setTemplateName("/".$action);
+      $view->assignByArray($result);
+      return $view;
+    }
+  }
+  
+  protected function processAction($action)
   {
     if ($this->redirected) return false;
     
-    $action = $this->action;
     $methodAction = "";
     
     if (is_object($this->request)) {
@@ -223,7 +232,9 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $this->actionMissing();
     }
     
-    $this->result = (is_array($actionResult)) ? $actionResult : array();
+    $result = (is_array($actionResult)) ? $actionResult : array();
+    $this->result = $result;
+    return $result;
   }
   
   public function rendering()
