@@ -184,13 +184,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this;
   }
   
-  public function partial($action)
+  public function partial($action, $template)
   {
     if ($action !== null) {
       $result = $this->$action();
       $view = new Sabel_View();
       $view->decideTemplatePath(Sabel_Context::getCurrentCandidate());
-      $view->setTemplateName("/".$action);
+      $view->setTemplateName($template);
       $view->assignByArray($result);
       return $view;
     }

@@ -177,7 +177,6 @@ function convert_to_modelname($tblName)
 
 function MODEL($mdlName, $arg1 = null, $arg2 = null)
 {
-  Sabel_DB_Connection::initialize();
   return Sabel_Model::load($mdlName, $arg1, $arg2);
 }
 
