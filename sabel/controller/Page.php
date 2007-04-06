@@ -178,7 +178,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this;
   }
   
-  public function partial($action, $template)
+  public function partial($action)
   {
     if ($action !== null) {
       $result = $this->$action();
