@@ -13,6 +13,7 @@ class Sabel_Controller_Plugin_View extends Sabel_Controller_Page_Plugin
 {
   public function onAfterAction($controller)
   {
+    /*
     $view = Sabel_Context::getView();
     $view->assign("request", $controller->getRequest());
     $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
@@ -20,5 +21,6 @@ class Sabel_Controller_Plugin_View extends Sabel_Controller_Page_Plugin
     $view->assignByArray($controller->getAttributes());
     $result = $controller->getResult();
     if (is_array($result)) $view->assignByArray($result);
+    */
   }
 }

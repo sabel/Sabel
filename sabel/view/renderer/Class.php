@@ -6,81 +6,72 @@
  * @category   Template
  * @package    org.sabel.template.engine
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
+ *             Mori Reo <mori.reo@gmail.com>
+ *
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Renderer_Class extends Sabel_View_Renderer
+final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
-  const PIPE_PAT      = '/<\?(=)?\s([^?;\s]+)([^?]+)\?>/';
-  
-  private $isCache = false;
-  
-  public function enableCache()
+  public function rendering($sbl_template, &$sbl_tpl_values)
   {
-    $this->isCache = true;
-  }
-  
-  public function rendering($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_values)
-  {
-    if ($this->isCache) {
-      $sbl_tpl_cache_path = $this->getCacheFilePath($sbl_tpl_path, $sbl_tpl_name);
-      if (is_readable($sbl_tpl_cache_path) && filemtime($sbl_tpl_cache_path) > time() - 600) {
-        return file_get_contents($sbl_tpl_cache_path);
-      }
-    }
-    
-    $this->makeCompileFile($sbl_tpl_path, $sbl_tpl_name);
-    
-    $sbl_compile_path  = $this->getCompileFilePath($sbl_tpl_path, $sbl_tpl_name);
-    
-    ob_start();
-    $buf = file_get_contents($sbl_compile_path);
-    if (preg_match_all('/(\$[\w]+)/', $buf, $matches)) {
-      foreach ($matches[1] as $key) {
-        if ($key !== '$this') eval("$key = null;");
-      }
-    }
+    $hash = md5(substr($sbl_template, 0, 256));
+    $this->makeCompileFile($sbl_template, $hash);
+        
+    $this->initNotInitValues($hash, $sbl_tpl_values);
     extract($sbl_tpl_values, EXTR_OVERWRITE);
-    include ($sbl_compile_path);
-    $sbl_tpl_contents = ob_get_clean();
-    if ($this->isCache) $this->saveCacheFile($sbl_tpl_path, $sbl_tpl_name, $sbl_tpl_contents);
-    
-    return $sbl_tpl_contents;
+    ob_start();
+    include ($this->getCompileFilePath($hash));
+    return ob_get_clean();
   }
   
-  private function makeCompileFile($path, $name)
+  private final function initNotInitValues($hash, &$sbl_tpl_values)
   {
-    $filepath = $path . $name;
-    if (!file_exists($filepath)) $filepath .= '.tpl';
-    
-    $compilepath = $this->getCompileFilePath($path, $name);
-//    if (is_readable($compilepath) && filemtime($filepath) < filemtime($compilepath)) return;
-
-    $contents = file_get_contents($filepath);
-    
-    $contents = preg_replace_callback(self::PIPE_PAT, array(&$this, 'pipeToFunc'), $contents);
-    $contents = str_replace('<?=', '<? echo', $contents);
-    $contents = str_replace('<?',  '<?php',   $contents);
-    
-    if (ENVIRONMENT !== DEVELOPMENT) {
-      if ($this->trim) $contents = $this->trimContents($contents);
+    $buf = file_get_contents($this->getCompileFilePath($hash));
+    if (preg_match_all('/\$([\w]+)/', $buf, $matches)) {
+      $buf = array();
+      $filtered = array_filter($matches[1], '_sbl_internal_remove_this');
+      foreach ($filtered as $key => $val) {
+        $buf[$val] = null;
+      }
+      $sbl_tpl_values = array_merge($buf, $sbl_tpl_values);
     }
-    $this->saveCompileFile($path, $name, $contents);
   }
   
-  private function checkAndTrimContents($contents)
+  private final function makeCompileFile($template, $hash)
+  {
+    if (ENVIRONMENT === PRODUCTION) {
+      if (is_readable($this->getCompileFilePath($hash))) return;
+    }
+    
+    $r = '/<\?(=)?\s([^?;\s]+)([^?]+)\?>/';
+    $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
+    $template = str_replace('<?=', '<? echo', $template);
+    $template = str_replace('<?',  '<?php',   $template);
+    
+    if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
+      $template = $this->trimContents($template);
+    }
+    
+    $this->saveCompileFile(RUN_BASE . "/data/compile/", $hash, $template);
+  }
+  
+  private final function checkAndTrimContents($contents)
   {
     if (strpos($contents, '<script') === false) {
       $contents = explode("\n",     $contents);
       $contents = array_map('trim', $contents);
       $contents = implode('',       $contents);
     } else {
-      $contents = preg_replace_callback('@(.*)(<script [^>]+>.*</script>)(.*)@si', array($this, 'trimContents'), $contents);
+      $pat = '@(.*)(<script [^>]+>.*</script>)(.*)@si';
+      $callback = array($this, 'trimContents');
+      $contents = preg_replace_callback($pat, $callback, $contents);
     }
+    
     return $contents;
   }
   
-  private function trimContents($contents)
+  private final function trimContents($contents)
   {
     if (is_string($contents)) {
       $contents = $this->checkAndTrimContents($contents);
@@ -94,51 +85,44 @@ class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     return $contents;
   }
   
-  private function pipeToFunc($matches)
+  private final function saveCompileFile($path, $name, $compiled)
   {
-    $pre   = trim($matches[1]);
-    $value = $matches[2];
-    $post  = rtrim($matches[3]);
-    
-    if (strpos($value, '|') !== false) {
-      $functions = explode('|', $value);
-      $value = array_shift($functions);
-      foreach ($functions as $function) {
-        $params = '';
-        if (strpos($function, ':') !== false) {
-          $params   = explode(':', $function);
-          $function = array_shift($params);
-          $params   = array_map(create_function('$val', 'return (is_string($val)) ? "\'".$val."\'" : $val;'), $params);
-          $params   = ', ' . implode(', ', $params);
-        }
-        $value = "$function($value$params)";
+    file_put_contents(RUN_BASE . self::COMPILE_DIR . $name, $compiled);
+  }
+  
+  private final function getCompileFilePath($name)
+  {
+    return RUN_BASE . self::COMPILE_DIR . $name;
+  }
+}
+
+function _sbl_tpl_pipe_to_func($matches)
+{
+  $pre   = trim($matches[1]);
+  $value = $matches[2];
+  $post  = rtrim($matches[3]);
+  
+  if (strpos($value, '|') !== false) {
+    $functions = explode('|', $value);
+    $value = array_shift($functions);
+    $lamdaBody = 'return (is_string($val)) ? "\'".$val."\'" : $val;';
+    $lamda = create_function('$val', $lamdaBody);
+    foreach ($functions as $function) {
+      $params = '';
+      if (strpos($function, ':') !== false) {
+        $params   = explode(':', $function);
+        $function = array_shift($params);
+        $params   = array_map($lamda, $params);
+        $params   = ', ' . implode(', ', $params);
       }
+      $value = "$function($value$params)";
     }
-    
-    return "<?${pre} ${value}${post} ?>";
   }
   
-  private function saveCacheFile($path, $name, $contents)
-  {
-    $sbl_cache_path = $this->getCacheFilePath($path, $name);
-    file_put_contents($sbl_cache_path, $contents);
-  }
-  
-  private function saveCompileFile($path, $name, $contents)
-  {
-    $sbl_cache_path = $this->getCompileFilePath($path, $name);
-    file_put_contents($sbl_cache_path, $contents);
-  }
-  
-  private function getCacheFilePath($path, $name)
-  {
-    $name = str_replace('/', '_', $name);
-    return RUN_BASE . self::CACHE_DIR . md5($path) . $name;
-  }
-  
-  private function getCompileFilePath($path, $name)
-  {
-    $name = str_replace('/', '_', $name);
-    return RUN_BASE . self::COMPILE_DIR . md5($path) . $name;
-  }
+  return "<?${pre} ${value}${post} ?>";
+}
+
+function _sbl_internal_remove_this($arg)
+{
+  return ($arg !== '$this');
 }

@@ -18,13 +18,16 @@ class Sabel_Controller_Front
   
   public function __construct($request = null)
   {
-    if ($this->request === null) $this->request = Sabel::load($this->requestClass);
+    if ($this->request === null) {
+      $this->request = Sabel::load($this->requestClass);
+    }
     
     if (ENVIRONMENT === PRODUCTION) {
       $cache = Sabel_Cache_Manager::create();
       if (!($candidates = $cache->read("map_candidates"))) {
         Sabel::fileUsing(RUN_BASE . '/config/map.php');
-        $cache->write("map_candidates", serialize(Sabel_Map_Configurator::getCandidates()));
+        $serialized = serialize(Sabel_Map_Configurator::getCandidates());
+        $cache->write("map_candidates", $serialized);
       } else {
         Sabel_Map_Configurator::setCandidates(unserialize($candidates));
       }
@@ -37,7 +40,11 @@ class Sabel_Controller_Front
   
   public function ignition($storage = null)
   {
+    header("Content-Type: text/html; charset=UTF-8");
     Sabel_Context::log("request " . $this->request);
+    
+    $view = new Sabel_View();
+    Sabel_Context::setView($view);
     
     $filters = $this->loadFilters($this->candidate);
     
@@ -46,10 +53,6 @@ class Sabel_Controller_Front
     
     $controller = $this->processPageController($this->candidate);
     $this->plugin->onCreateController($controller, $this->candidate);
-    
-    $view = new Sabel_View();
-    $view->decideTemplatePath($this->candidate);
-    Sabel_Context::setView($view);
     
     $controller->setup($this->request, $view, $storage);
     
@@ -60,16 +63,37 @@ class Sabel_Controller_Front
     $this->processPostFilter($filters, $controller);
         
     $result = $controller->execute($actionName);
-    Sabel_Context::log("end of ignition\n");
-    return $result;
+    
+    $assignments = $controller->getAssignments();
+    $view->assignByArray($assignments);
+    
+    $condition = new Sabel_View_Locator_Condition(true);
+    $condition->setCandidate($this->candidate);
+    
+    $locator   = new Sabel_View_Locator_File();
+    $resources = $locator->locate($condition);
+    
+    $content   = $view->rendering($resources->template);
+    
+    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+      $html = $content;
+    } else {
+      $view->assign("contentForLayout", $content);
+      $html = $view->rendering($resources->layout);
+    }
+    
+    return $html;
   }
   
   public function processCandidate($request = null)
   {
-    if ($request !== null) $this->request = $request;
+    if ($request !== null) {
+      $this->request = $request;
+    }
     
     $candidate = new Sabel_Map_Candidate();
-    $candidate = $candidate->find(new Sabel_Map_Tokens($this->request->__toString()));
+    $tokens    = new Sabel_Map_Tokens($this->request->__toString());
+    $candidate = $candidate->find($tokens);
     
     Sabel_Context::setCurrentCandidate($candidate);
     $this->request->setCandidate($candidate);
@@ -95,8 +119,8 @@ class Sabel_Controller_Front
                                            "Filters",
                                             str_replace(".php", "", $file)));
             } elseif (is_file($sharedFiltersDir . "/{$file}")) {
-              $filters[] = join("_", array('Filters', str_replace(".php", "", $file)));
-            } else {
+              $class = array('Filters', str_replace(".php", "", $file));
+              $filters[] = join("_", $class);
             }
           }
         }

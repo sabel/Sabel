@@ -3,10 +3,8 @@
 if (!defined('PHPUnit_MAIN_METHOD'))
   define('PHPUnit_MAIN_METHOD', 'Tester::main');
 
-require_once('PHPUnit/TextUI/TestRunner.php');
-require_once('PHPUnit/Framework/TestCase.php');
-
-//Sabel::using("Sabel_Request");
+require_once ('PHPUnit/TextUI/TestRunner.php');
+require_once ('PHPUnit/Framework/TestCase.php');
 
 /**
  * functional test for Sabel Application
@@ -47,7 +45,7 @@ class Sabel_Controller_Plugin_TestRedirecter extends Sabel_Controller_Page_Plugi
 {    
   public function onRedirect($controller, $to = null)
   {
-    $host = (isset($_SERVER["HTTP_HOST"])) ? $_SERVER["HTTP_HOST"] : "localhost";
+    $host = Sabel_Environment::get("http_host");
     
     $absolute = 'http://' . $host;
     $redirect = 'Location: ' . $absolute . '/' . $to;

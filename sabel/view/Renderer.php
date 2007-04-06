@@ -13,13 +13,23 @@
 abstract class Sabel_View_Renderer
 {
   const COMPILE_DIR = '/data/compiled/';
-  const CACHE_DIR   = '/cache/';
   
   protected $trim = true;
   
-  abstract public function rendering($path, $name, $values);
+  public function partial($name, $options = array())
+  {
+    $locator = new Sabel_View_Locator_File();
+    $condition = new Sabel_View_Locator_Condition(false);
+    $condition->setCandidate(Sabel_Context::getCurrentCandidate());
+    $condition->setName($name);
+    $resource = $locator->locate($condition);
+    
+    $view = new Sabel_View();
+    $view->assignByArray($options);
+    return $view->rendering($resource);
+  }
   
-  public function partial($template_name, $options = array())
+  public function temp()
   {
     $v = new Sabel_View();
     
@@ -28,13 +38,13 @@ abstract class Sabel_View_Renderer
     }
     
     if (is_readable(RUN_BASE . "/app/views/" . $template_name)) {
-      $v->setTemplatePath(RUN_BASE . "/app/views/");
+      $v->setPath(RUN_BASE . "/app/views/");
     } else {
-      $v->decideTemplatePath(Sabel_Context::getCurrentCandidate(), true);
+      $v->decide(Sabel_Context::getCurrentCandidate(), true);
     }
     
-    $v->setTemplateName($template_name);
-    if ($v->isTemplateMissing()) throw new Exception('Template file is not found');
+    $v->setName($template_name);
+    if ($v->isResourceMissing()) throw new Exception('Template file is not found');
     
     if (isset($options["cache"]) && $options["cache"] === true) {
       $key = "";

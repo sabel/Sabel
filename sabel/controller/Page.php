@@ -12,12 +12,13 @@
 abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 {
   protected
-    $redirect   = "",
-    $redirected = false,
-    $result     = null;
+    $redirect    = "",
+    $redirected  = false,
+    $result      = null,
+    $assignments = array();
   
   protected
-    $view       = null,
+    // $view       = null,
     $request    = null,
     $storage    = null,
     $logger     = null,
@@ -66,7 +67,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     Sabel_Context::log("setup controller " . get_class($this));
     
     $this->request = $request;
-    $this->view = ($view === null) ? new Sabel_View() : $view;
+    // $this->view = ($view === null) ? new Sabel_View() : $view;
     
     if ($this->enableSession) {
       if ($storage === null) {
@@ -163,18 +164,11 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       throw new Sabel_Exception_Runtime('use reserved action name');
     }
     
-    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      $this->withLayout = false;
-      if ($this->view->isTemplateMissing()) {
-        $this->rendering = false;
-      }
-    }
-    
     $this->plugin->onBeforeAction();
     
     try {
       $result = $this->processAction($action);
-      $this->view->assignByArray($result);
+      // $this->view->assignByArray($result);
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
     }
@@ -188,11 +182,20 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   {
     if ($action !== null) {
       $result = $this->$action();
+      
       $view = new Sabel_View();
       $view->decideTemplatePath(Sabel_Context::getCurrentCandidate());
       $view->setTemplateName($template);
       $view->assignByArray($result);
-      return $view;
+      $view->assignByArray($this->assignments);
+      $condition = new Sabel_View_Locator_Condition(false);
+      $condition->setCandidate(Sabel_Context::getCurrentCandidate());
+      $condition->setName($action);
+      $locator  = new Sabel_View_Locator_File();
+      $resource = $locator->locate($condition);
+      
+      $result = $view->rendering($resource);
+      return $result;
     }
   }
   
@@ -237,25 +240,40 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $result;
   }
   
+  /*
   public function rendering()
   {
     if (!$this->rendering) return;
         
-    if ($this->view->isTemplateMissing()) {
+    if ($this->view->isResourceMissing()) {
       if ($this->hasMethod('templateMissing')) {
-        $this->templateMissing();
+        $this->resourceMissing();
       } else {
         throw Sabel::load('Sabel_Exception_TemplateMissing', var_export($this->view, 1));
       }
     } else {
       if ($this->hasMethod("render")) {
-        $rendered = $this->view->rendering($this->withLayout);
+        $rendered = $this->view->rendering();
         return $this->render($rendered);
       } else {
-        return $this->view->rendering($this->withLayout);
+        
+        $content = $this->view->rendering();
+        
+        $view     = new Sabel_View();
+        $resource = new Sabel_View_Resource_Template();
+        $renderer = new Sabel_View_Renderer_Class();
+        
+        $view->assign("contentForLayout", $content);
+        $view->setResource($resource);
+        $resource->setRenderer($renderer);
+        $resource->setPath(RUN_BASE . '/app/views/');
+        $resource->setName('layout.tpl');
+        
+        return $view->rendering();
       }
     }
   }
+  */
   
   public function disableLayout()
   {
@@ -265,16 +283,19 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function checkReferer($validURIs)
   {
-    $host = $_SERVER['HTTP_HOST'];
-    $ref  = $_SERVER['HTTP_REFERER'];
+    $host = Sabel_Environment::get("http_host");
+    $ref  = Sabel_Environment::get("http_referer");
+    
     $patternAbsoluteURI = '%http://' . $host . $validURIs[0]. '%';
     return (bool) preg_match($patternAbsoluteURI, $ref);
   }
   
+  /*
   protected function layout($layout)
   {
     $this->view->setLayout($layout);
   }
+  */
   
   /**
    * HTTP Redirect to another location.
@@ -316,7 +337,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   protected function forward($to)
   {
-    // @todo implemen
+    // @todo implement this
   }
   
   /**
@@ -327,7 +348,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    */
   protected function assign($key, $value)
   {
-    $this->view->assign($key, $value);
+    $this->assignments[$key] = $value;
+    // $this->view->assign($key, $value);
+  }
+  
+  public function getAssignments()
+  {
+    return $this->assignments;
   }
   
   protected function getType()

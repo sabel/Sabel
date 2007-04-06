@@ -55,6 +55,11 @@ final class Sabel_Controller_Plugin
   
   public function call($method, $arguments)
   {
+    if (!isset($this->pluginMethods[$method])) {
+      $msg = "call {$method}() not found in any plugins";
+      throw new Sabel_Exception_NoPluginMethod($msg);
+    }
+    
     $obj = $this->plugins[$this->pluginMethods[$method]];
     $ref = new ReflectionClass($obj);
     return $ref->getMethod($method)->invokeArgs($obj, $arguments);
