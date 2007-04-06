@@ -184,8 +184,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $result = $this->$action();
       
       $view = new Sabel_View();
-      $view->decideTemplatePath(Sabel_Context::getCurrentCandidate());
-      $view->setTemplateName($template);
       $view->assignByArray($result);
       $view->assignByArray($this->assignments);
       $condition = new Sabel_View_Locator_Condition(false);
