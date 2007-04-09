@@ -90,7 +90,7 @@ class Sabel_Http_Request
     $response->setHeader($responseHeader);
     
     $this->responseHeader = $responseHeader;
-    $this->requestHeader  = Sabel::load('Sabel_Http_Header', $headers);
+    $this->requestHeader  = new Sabel_Http_Header($headers);
     
     $headerFlag = true;
     foreach ($result as $line) {

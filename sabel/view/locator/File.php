@@ -10,65 +10,19 @@
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_View_Locator_File implements Sabel_View_Locator
-{  
-  public function locate($condition)
-  {
-    if ($condition->isActionDefault()) {
-      return $this->locateFromActionDefault($condition);
-    } else {
-      return $this->locateFromPathAndName($condition);
-    }
-  }
+{
+  const VIEW_DIR = "views/";
+  const APP_VIEW = "/app/views/";
+  const DEF_LAYOUT = "layout.tpl";
+  const TPL_SUFFIX = ".tpl";
   
-  private final function locateFromActionDefault($condition)
+  public function locate($name = null)
   {
-    $candidate  = $condition->getCandidate();
-    
-    $module     = $candidate->getModule();
-    $controller = $candidate->getController();
-    $action     = $candidate->getAction();
-    
-    $tplpath  = RUN_BASE;
-    $tplpath .= Sabel_Const::MODULES_DIR;
-    $tplpath .= $module . DIR_DIVIDER;
-    
-    $controllerSpecificTplpath = null;
-    $controllerSpecific = null;
-    
-    if (is_dir($tplpath."views/".$controller)) {
-      $controllerSpecificTplpath = $tplpath."views/".$controller;
-      
-      $controllerSpecific = $controllerSpecificTplpath . "/" .
-                            $action . Sabel_Const::TEMPLATE_POSTFIX;
+    if ($name === null) {
+      list($module, $controller, $name) = $this->getContext();
     }
     
-    $location = new stdClass();
-    
-    $tplpath .= Sabel_Const::TEMPLATE_DIR;
-    
-    // make name of template such as "controller.method.tpl"
-    $tplname  = $controller;
-    $tplname .= Sabel_Const::TEMPLATE_NAME_SEPARATOR;
-    $tplname .= $action;
-    
-    if (!$condition->getPartial() && is_readable($controllerSpecific)) {
-      $tplname = "/" . $action . Sabel_Const::TEMPLATE_POSTFIX;
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path     = $controllerSpecificTplpath;
-    } elseif (is_readable($tplpath . $tplname . ".pjs")) {
-      $tplname .= ".pjs";
-      $location->renderer = new Sabel_View_Renderer_PHP();
-      $location->path     = $tplpath;
-    } elseif(is_readable($tplpath . $tplname . Sabel_Const::TEMPLATE_POSTFIX)) {
-      $tplname .= Sabel_Const::TEMPLATE_POSTFIX;
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path = $tplpath;
-    } else {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path = $tplpath;
-    }
-    
-    $location->name = $tplname;
+    $location = $this->getLocation($name);
     
     $resource = new Sabel_View_Resource_Template();
     $resource->setRenderer($location->renderer);
@@ -77,72 +31,14 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     
     $result = new stdClass();
     $result->template = $resource;
-    $result->layout   = $this->locateLayout($location->path, "layout.tpl");
+    $result->layout   = $this->locateLayout($location->path, self::DEF_LAYOUT);
     
     return $result;
   }
   
-  private final function locateFromPathAndName($condition)
-  {
-    $candidate  = $condition->getCandidate();
-    
-    $module     = $candidate->getModule();
-    $controller = $candidate->getController();
-    $action     = $candidate->getAction();
-    
-    $tplpath  = RUN_BASE;
-    $tplpath .= Sabel_Const::MODULES_DIR;
-    $tplpath .= $module . DIR_DIVIDER;
-    
-    $location = new stdClass();
-    
-    $location->name = $name = $condition->getName();
-    
-    $controllerSpecificTplpath = null;
-    $controllerSpecific = null;
-    
-    if (is_dir($tplpath . "views/" . $controller)) {
-      $controllerSpecificTplpath = $tplpath . "views/" . $controller;
-      
-      $controllerSpecific = $controllerSpecificTplpath . "/" .
-                            $name . Sabel_Const::TEMPLATE_POSTFIX;
-    } else {
-      $tplpath .= "views/";
-    }
-        
-    $fullpath = $tplpath . $controller.".".$name .Sabel_Const::TEMPLATE_POSTFIX;
-    
-    if (is_readable(RUN_BASE . "/app/views/" . $name)) {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path = RUN_BASE . "/app/views/";
-    } elseif (is_readable($tplpath . Sabel_Const::TEMPLATE_DIR . $name)) {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path     = $tplpath . Sabel_Const::TEMPLATE_DIR;
-    } elseif (!$condition->getPartial() && is_readable($controllerSpecific)) {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path     = $controllerSpecificTplpath;
-      $location->name     = "/".$name . Sabel_Const::TEMPLATE_POSTFIX;
-    } elseif (is_readable($fullpath)) {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path = $tplpath;
-      $location->name = $controller.".".$name.Sabel_Const::TEMPLATE_POSTFIX;
-    } elseif ($tplpath.$name) {
-      $location->renderer = new Sabel_View_Renderer_Class();
-      $location->path = $tplpath;
-      $location->name = $name;
-    }
-    
-    $resource = new Sabel_View_Resource_Template();
-    $resource->setRenderer($location->renderer);
-    $resource->setPath($location->path);
-    $resource->setName($location->name);
-    
-    return $resource;
-  }
-  
   public function locateLayout($path, $layout)
   {
-    $usersLayoutName = $layout . Sabel_Const::TEMPLATE_POSTFIX;
+    $usersLayoutName = $layout . Sabel_Const::TEMPLATE_SUFFIX;
     
     $result = new stdClass();
     
@@ -153,9 +49,9 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     } elseif (is_file($path . Sabel_Const::DEFAULT_LAYOUT)) {
       $result->path = $path;
       $result->name = Sabel_Const::DEFAULT_LAYOUT;
-    } elseif (is_file(RUN_BASE . "/app/views/" . Sabel_Const::DEFAULT_LAYOUT)) {
+    } elseif (is_file(RUN_BASE . self::APP_VIEW . Sabel_Const::DEFAULT_LAYOUT)) {
       $result->name = Sabel_Const::DEFAULT_LAYOUT;
-      $result->path = RUN_BASE . "/app/views/";
+      $result->path = RUN_BASE . self::APP_VIEW;
     } elseif (is_file($path . Sabel_Const::DEFAULT_LAYOUT)) {
       $result->name  = Sabel_Const::DEFAULT_LAYOUT;
       $result->path = $path;
@@ -169,5 +65,62 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     $resource->setName($result->name);
     
     return $resource;
+  }
+  
+  private final function getLocation($name)
+  {
+    $tpldir = Sabel_Const::TEMPLATE_DIR;
+    
+    list($module, $controller, $action) = $this->getContext();
+    $path = $this->getPath($module);
+    
+    $specificPath  = $path . self::VIEW_DIR;
+    $specificName  = $controller . "." . $name . self::TPL_SUFFIX;
+    $specificName2 = $controller . "/" . $name . self::TPL_SUFFIX;
+    
+    $location = new StdClass();
+    $location->renderer = new Sabel_View_Renderer_Class();
+    
+    if (is_readable(RUN_BASE . self::APP_VIEW . $name)) {
+      $location->path = RUN_BASE . self::APP_VIEW;
+      $location->name = $name;
+    } elseif (is_readable($specificPath . $specificName2)) {
+      $location->path = $specificPath;
+      $location->name = $specificName2;
+    } elseif (is_readable($specificPath . $specificName)) {
+      $location->path = $specificPath;
+      $location->name = $specificName;
+    } elseif (is_readable($path . $tpldir . $name)) {
+      $location->path = $path . $tpldir;
+      $location->name = $name;
+    } elseif (is_readable($path . $name)) {
+      $location->path = $path;
+      $location->name = $name;
+    } elseif (is_readable($path . $name . self::TPL_SUFFIX)) {
+      $location->path = $path;
+      $location->name = $name . self::TPL_SUFFIX;
+    } else {
+      $location->valid = false;
+      return $location;
+    }
+    
+    $location->valid = true;
+    return $location;
+  }
+  
+  private final function getPath($module)
+  {
+    return RUN_BASE . Sabel_Const::MODULES_DIR . $module . DIR_DIVIDER;
+  }
+  
+  private final function getContext()
+  {
+    $candidate  = Sabel_Context::getCurrentCandidate();
+    
+    $module     = $candidate->getModule();
+    $controller = $candidate->getController();
+    $action     = $candidate->getAction();
+    
+    return array($module, $controller, $action);
   }
 }

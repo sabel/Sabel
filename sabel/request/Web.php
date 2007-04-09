@@ -49,8 +49,8 @@ class Sabel_Request_Web extends Sabel_Request
     $uriAndParams = explode('?', $this->createRequestUri($requestUri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
     
-    $this->uri        = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
-    $this->parameters = Sabel::load('Sabel_Request_Parameters', $parameters);
+    $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
+    $this->parameters = new Sabel_Request_Parameters($parameters);
     
     assert(is_object($this->uri));
     assert(is_object($this->parameters));
@@ -60,8 +60,8 @@ class Sabel_Request_Web extends Sabel_Request
   {
     $uriAndParams = explode('?', $this->createRequestUri($uri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
-    $this->uri        = Sabel::load('Sabel_Request_Uri', $uriAndParams[0]);
-    $this->parameters = Sabel::load('Sabel_Request_Parameters', $parameters);
+    $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
+    $this->parameters = new Sabel_Request_Parameters($parameters);
     
     return $this;
   }

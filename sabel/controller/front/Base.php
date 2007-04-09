@@ -21,49 +21,20 @@ abstract class Sabel_Controller_Front_Base
   
   public function ignition($storage = null)
   {
-    header("Content-Type: text/html; charset=UTF-8");
     Sabel_Context::log("request " . $this->request);
-    
-    $view = new Sabel_View();
-    Sabel_Context::setView($view);
-    
+    Sabel_Context::initialize();
     $filters = $this->loadFilters($this->candidate);
-    
     $this->processHelper($this->request, $this->candidate);
     $this->processPreFilter($filters, $this->request);
-    
     $controller = $this->processPageController($this->candidate);
     $this->plugin->onCreateController($controller, $this->candidate);
-    
-    $controller->setup($this->request, $view, $storage);
-    
+    $controller->setup($this->request, $storage);
     $actionName = $this->candidate->getAction();
     $controller->setAction($actionName);
-    
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
-        
     $result = $controller->execute($actionName);
-    
-    $assignments = $controller->getAssignments();
-    $view->assignByArray($assignments);
-    
-    $condition = new Sabel_View_Locator_Condition(true);
-    $condition->setCandidate($this->candidate);
-    
-    $locator   = new Sabel_View_Locator_File();
-    $resources = $locator->locate($condition);
-    
-    $content   = $view->rendering($resources->template);
-    
-    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      $html = $content;
-    } else {
-      $view->assign("contentForLayout", $content);
-      $html = $view->rendering($resources->layout);
-    }
-    
-    return $html;
+    return $this->processView($controller);
   }
  
   abstract public function processCandidate($request = null);
@@ -72,4 +43,5 @@ abstract class Sabel_Controller_Front_Base
   abstract protected function processPreFilter($filters, $request);
   abstract protected function processPageController($candidate);
   abstract protected function processPostFilter($filters, $controller);
+  abstract protected function processView($controller);
 }

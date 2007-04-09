@@ -11,5 +11,5 @@
  */
 interface Sabel_View_Locator
 {  
-  public function locate($condition);
+  public function locate($name = null);
 }

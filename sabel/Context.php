@@ -20,6 +20,11 @@ class Sabel_Context
   
   private static $storage = null;
   
+  public static function initialize()
+  {
+    self::setView(new Sabel_View());
+  }
+  
   public static function setStorage($storage)
   {
     self::$storage = $storage;

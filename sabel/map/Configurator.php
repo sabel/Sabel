@@ -17,7 +17,7 @@ class Sabel_Map_Configurator
   
   public static function addCandidate($name, $uri, $options = null)
   {
-    $c = Sabel::load('Sabel_Map_Candidate', $name);
+    $c = new Sabel_Map_Candidate($name);
     self::$candidates[$name] = $c;
     $elements = explode('/', $uri);
     

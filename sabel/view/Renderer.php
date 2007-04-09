@@ -18,53 +18,12 @@ abstract class Sabel_View_Renderer
   
   public function partial($name, $options = array())
   {
-    $locator = new Sabel_View_Locator_File();
-    $condition = new Sabel_View_Locator_Condition(false);
-    $condition->setCandidate(Sabel_Context::getCurrentCandidate());
-    $condition->setName($name);
-    $resource = $locator->locate($condition);
+    $view    = new Sabel_View();
+    $locator = Sabel_View_Locator_Factory::create()->make();
     
-    $view = new Sabel_View();
+    $resources = $locator->locate($name);
+    
     $view->assignByArray($options);
-    return $view->rendering($resource);
-  }
-  
-  public function temp()
-  {
-    $v = new Sabel_View();
-    
-    if (isset($options["values"])) {
-      $v->assignByArray(array());
-    }
-    
-    if (is_readable(RUN_BASE . "/app/views/" . $template_name)) {
-      $v->setPath(RUN_BASE . "/app/views/");
-    } else {
-      $v->decide(Sabel_Context::getCurrentCandidate(), true);
-    }
-    
-    $v->setName($template_name);
-    if ($v->isResourceMissing()) throw new Exception('Template file is not found');
-    
-    if (isset($options["cache"]) && $options["cache"] === true) {
-      $key = "";
-      
-      if (isset($options["key"])) {
-        $key = $options["key"];
-      }
-      
-      $cpath = RUN_BASE . "/cache/" . $template_name . $key;
-      
-      if (is_readable($cpath)) {
-        $partial_html = file_get_contents($cpath);
-      } else {
-        $partial_html = $v->rendering(false);
-        file_put_contents($cpath, $partial_html);
-      }
-    } else {
-      $partial_html = $v->rendering(false);
-    }
-    
-    return $partial_html;
+    return $view->rendering($resources->template);
   }
 }

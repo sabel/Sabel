@@ -10,8 +10,14 @@ spl_autoload_register(array('Sabel', 'using'));
 require ("sabel/Functions.php");
 
 /**
- * the core of sabel
+ * Sabel
+ * rapid application development framework
  *
+ * @category   Sabel
+ * @package    org.sabel
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 final class Sabel
 {
@@ -123,7 +129,7 @@ class Sabel_Const
   /**
    * postfix extention of controller class.
    */
-  const CONTROLLER_POSTFIX = '.php';
+  const CONTROLLER_SUFFIX = '.php';
 
   /**
    * modules directory
@@ -143,7 +149,7 @@ class Sabel_Const
   /**
    * postfix extention for template
    */
-  const TEMPLATE_POSTFIX = '.tpl';
+  const TEMPLATE_SUFFIX = '.tpl';
 
   /**
    * separater of template

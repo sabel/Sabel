@@ -1,7 +1,7 @@
 <?php
 
 ob_start();
-define('RUN_BASE', dirname(realpath('public/.')));
+define('RUN_BASE', dirname(realpath('.')));
 
 require ('Sabel/Sabel.php');
 require (RUN_BASE . '/config/environment.php');
@@ -11,18 +11,16 @@ if (!defined('ENVIRONMENT')) {
   exit;
 }
 
-Sabel::loadState();
 $aFrontController = new Sabel_Controller_Front();
 
-$aFrontController->processCandidate(Sabel::load('Sabel_Request_Web', $_SERVER["argv"][1]))
+$aFrontController->processCandidate()
                  ->plugin
-                 ->add(new Sabel_Controller_Plugin_Volatile())
+                 ->add(new Common_Volatile())
                  ->add(new Sabel_Controller_Plugin_Filter())
                  ->add(new Sabel_Controller_Plugin_View())
                  ->add(new Sabel_Controller_Plugin_ExceptionHandler())
+                 ->add(new Sabel_Controller_Plugin_Dependency())
                  ->add(new Sabel_Controller_Plugin_Redirecter());
-
-echo $aFrontController->ignition()->rendering();
-Sabel::saveState();
-
+                 
+echo $aFrontController->ignition();
 ob_flush();
