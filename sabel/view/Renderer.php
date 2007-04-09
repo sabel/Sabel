@@ -18,12 +18,6 @@ abstract class Sabel_View_Renderer
   
   public function partial($name, $options = array())
   {
-    $view    = new Sabel_View();
-    $locator = Sabel_View_Locator_Factory::create()->make();
-    
-    $resources = $locator->locate($name);
-    
-    $view->assignByArray($options);
-    return $view->rendering($resources->template);
+    return Sabel_View::render($name, array("assign" => $options));
   }
 }

@@ -11,8 +11,8 @@
  */
 class Sabel_View_Locator_File implements Sabel_View_Locator
 {
-  const VIEW_DIR = "views/";
-  const APP_VIEW = "/app/views/";
+  const VIEW_DIR   = "views/";
+  const APP_VIEW   = "/app/views/";
   const DEF_LAYOUT = "layout.tpl";
   const TPL_SUFFIX = ".tpl";
   
@@ -28,41 +28,6 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     $resource->setRenderer($location->renderer);
     $resource->setPath($location->path);
     $resource->setName($location->name);
-    
-    $result = new stdClass();
-    $result->template = $resource;
-    $result->layout   = $this->locateLayout($location->path, self::DEF_LAYOUT);
-    
-    return $result;
-  }
-  
-  public function locateLayout($path, $layout)
-  {
-    $usersLayoutName = $layout . Sabel_Const::TEMPLATE_SUFFIX;
-    
-    $result = new stdClass();
-    
-    if (is_file($path . $usersLayoutName)) {
-      $name  = $usersLayoutName;
-      $result->path = $path;
-      $result->name = $name;
-    } elseif (is_file($path . Sabel_Const::DEFAULT_LAYOUT)) {
-      $result->path = $path;
-      $result->name = Sabel_Const::DEFAULT_LAYOUT;
-    } elseif (is_file(RUN_BASE . self::APP_VIEW . Sabel_Const::DEFAULT_LAYOUT)) {
-      $result->name = Sabel_Const::DEFAULT_LAYOUT;
-      $result->path = RUN_BASE . self::APP_VIEW;
-    } elseif (is_file($path . Sabel_Const::DEFAULT_LAYOUT)) {
-      $result->name  = Sabel_Const::DEFAULT_LAYOUT;
-      $result->path = $path;
-    }
-    
-    $result->renderer = new Sabel_View_Renderer_Class();
-    
-    $resource = new Sabel_View_Resource_Template();
-    $resource->setRenderer($result->renderer);
-    $resource->setPath($result->path);
-    $resource->setName($result->name);
     
     return $resource;
   }

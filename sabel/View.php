@@ -67,4 +67,16 @@ final class Sabel_View
       throw new Exception("invalid resource");
     }
   }
+  
+  public static function render($name = null, $additional)
+  {
+    if (isset($additional["assign"])) {
+      self::$values = array_merge(self::$values, $additional["assign"]);
+    }
+            
+    return Sabel_View_Locator_Factory::create()
+                                       ->make()
+                                       ->locate($name)
+                                       ->fetch(self::$values);
+  }
 }
