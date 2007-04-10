@@ -45,6 +45,7 @@ class Sabel_DB_Connection
           mysql_select_db($dbs, $conn);
           break;
         case "pgsql":
+        case "pgsql81":
           $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
           $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
           break;
