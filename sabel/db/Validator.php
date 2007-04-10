@@ -17,6 +17,7 @@ class Sabel_DB_Validator
 
   protected
     $messages      = array(),
+    $localizedName = array(),
     $datetimeRegex = array();
 
   protected
@@ -25,10 +26,16 @@ class Sabel_DB_Validator
   public function __construct($model)
   {
     $this->model   = $model;
-    $this->mdlName = convert_to_modelname($model->getTableName());
+    $this->mdlName = $mdlName = convert_to_modelname($model->getTableName());
 
-    $this->messages = Sabel_DB_Validate_Config::getMessages();
-    $this->datetimeRegex = Sabel_DB_Validate_Config::getDatetimeRegex();
+    $configs = Sabel_DB_Validate_Config::getConfigs();
+
+    $this->messages      = $configs["messages"];
+    $this->datetimeRegex = $configs["datetimeRegex"];
+
+    if (isset($configs["localizedName"][$mdlName])) {
+      $this->localizedName = $configs["localizedName"][$mdlName];
+    }
   }
 
   public function getErrors()
@@ -46,21 +53,23 @@ class Sabel_DB_Validator
     $errors   = array();
     $messages = $this->messages;
     $schemas  = $this->model->toSchema();
+    $names    = $this->localizedName;
 
     foreach ($schemas as $name => $schema) {
       if (in_array($name, $ignores)) continue;
+      $msgName = (isset($names[$name])) ? $names[$name] : $name;
 
       if (!$this->nullable($name, $schema)) {
-        $errors[] = sprintf($this->messages["nullable"], $name);
+        $errors[] = sprintf($this->messages["nullable"], $msgName);
         continue;
       }
       if (!$this->type($name, $schema)) {
-        $errors[] = sprintf($this->messages["type"], $name);
+        $errors[] = sprintf($this->messages["type"], $msgName);
         continue;
       }
       if ($schema->type === Sabel_DB_Type::STRING) {
         if (!$this->length($name, $schema)) {
-          $errors[] = sprintf($this->messages["length"], $name);
+          $errors[] = sprintf($this->messages["length"], $msgName);
           continue;
         }
       }
@@ -68,7 +77,7 @@ class Sabel_DB_Validator
           $schema->type === Sabel_DB_Type::FLOAT ||
           $schema->type === Sabel_DB_Type::DOUBLE) {
         if (!$this->maximum($name, $schema)) {
-          $errors[] = sprintf($this->messages["maximum"], $name);
+          $errors[] = sprintf($this->messages["maximum"], $msgName);
           continue;
         }
       }

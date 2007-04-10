@@ -9,19 +9,16 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Command_ArrayInsert
+class Sabel_DB_Command_ArrayInsert extends Sabel_DB_Command_Base
 {
-  const COMMAND = "ARRAY_INSERT";
+  protected $command = Sabel_DB_Command::ARRAY_INSERT;
 
-  public static function build($command)
+  public function run($executer)
   {
-    $result = Sabel_DB_Command_Before::execute(self::COMMAND, $command);
-    if ($result !== Sabel_DB_Command_Before::CONTINUOUS) return;
+    $model  = $executer->getModel();
+    $driver = $executer->getDriver();
+    $query  = $driver->getSqlClass($model)->buildInsertSql($driver);
 
-    $model  = $command->getModel();
-    $driver = $command->getDriver();
     $driver->setSql($driver->getSqlClass($model)->buildInsertSql($driver));
-
-    Sabel_DB_Command_After::execute(self::COMMAND, $command);
   }
 }

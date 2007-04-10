@@ -9,7 +9,7 @@ class Test_DB_Pgsql extends Test_DB_Test
                                   'schema'   => 'public',
                                   'database' => 'edo');
 
-  private static $params2 = array('driver'   => 'pgsql',
+  private static $params2 = array('driver'   => 'pgsql81',
                                   'host'     => 'localhost',
                                   'user'     => 'pgsql',
                                   'password' => 'pgsql',
@@ -43,8 +43,8 @@ class Test_DB_Pgsql extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default',  self::$params1);
-    Sabel_DB_Connection::addConnection('default2', self::$params2);
+    Sabel_DB_Config::regist('default',  self::$params1);
+    Sabel_DB_Config::regist('default2', self::$params2);
 
     Test_DB_Test::$db = 'PGSQL';
 
@@ -185,6 +185,12 @@ class PgsqlHelper
                  parents_id integer not null,
                  name varchar(24),
                  height integer)";
+
+    $sqls[] = "CREATE TABLE mail (
+                 id integer primary key,
+                 sender_id integer not null,
+                 recipient_id integer not null,
+                 subject varchar(255))";
 
     $this->sqls = $sqls;
   }

@@ -30,6 +30,9 @@ class Sabel_DB_Relation_Join_Alias
       }
 
       unset(self::$objects[$source]);
+
+      $resultBuilder = Sabel_DB_Relation_Join_Result::getInstance();
+      $resultBuilder->changeKeyOfStructure($source, $alias);
     }
   }
 

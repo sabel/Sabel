@@ -18,15 +18,6 @@ class Sabel_DB_Sql_Common implements Sabel_DB_Sql_Interface
     $this->model = $model;
   }
 
-  public function buildSelectSql($driver)
-  {
-    $model      = $this->model;
-    $tblName    = $model->getTableName();
-    $projection = $model->getProjection();
-
-    return "SELECT " . $model->getProjection() . " FROM " . $tblName;
-  }
-
   public function buildInsertSql($driver)
   {
     $model   = $this->model;

@@ -233,34 +233,39 @@ class Sabel_DB_Model
   public function __get($key)
   {
     if (!isset($this->values[$key])) return null;
-    return $this->convertData($key, $this->values[$key]);
+    return $this->toRegularValue($key, $this->values[$key]);
   }
 
-  protected function convertData($key, $data)
+  protected function toRegularValue($key, $value)
   {
-    if ($data === null) return null;
+    if ($value === null) return null;
 
-    $schema = $this->schema->getColumns();
-    if (!isset($schema[$key])) return $data;
+    $columns = $this->schema->getColumns();
+    if (!isset($columns[$key])) return $value;
 
-    switch ($schema[$key]->type) {
+    switch ($columns[$key]->type) {
       case Sabel_DB_Type::INT:
-        return ($data > 2147483647) ? (float)$data : (int)$data;
+        return ($value > 2147483647) ? (float)$value : (int)$value;
+
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:
-        return (float)$data;
-      case SabeL_DB_Type::BOOL:
-        if (is_string($data)) {
-          return in_array($data, array('1', 't', 'true', __TRUE__));
-        } elseif (is_bool($data)) {
-          return $data;
-        } elseif (is_int($data)) {
-          return ($data === 1);
+        return (float)$value;
+
+      case Sabel_DB_Type::BOOL:
+        if (is_bool($value)) return $value;
+        if (is_int($value))  return ($value === 1);
+
+        if (is_string($value)) {
+          return in_array($value, array("1", "t", "true"));
+        } else {
+          throw new Exception("invalid boolean type.");
         }
+
       case Sabel_DB_Type::DATETIME:
-        return (is_object($data)) ? $data : Sabel::load('Sabel_Date', $data);
+        return (is_object($value)) ? $value : new Sabel_Date($value);
+
       default:
-        return $data;
+        return $value;
     }
   }
 

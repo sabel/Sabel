@@ -9,19 +9,21 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Command_Query
+class Sabel_DB_Command_Query extends Sabel_DB_Command_Base
 {
-  const COMMAND = "QUERY";
+  protected $command = Sabel_DB_Command::QUERY;
 
-  public static function build($command, $query, $inputs)
+  public function run($executer)
   {
-    $result = Sabel_DB_Command_Before::execute(self::COMMAND, $command);
-    if ($result !== Sabel_DB_Command_Before::CONTINUOUS) return;
+    $args = $executer->getArguments();
+    $driver = $executer->getDriver();
 
-    $driver = $command->getDriver();
-    if ($inputs) $query = vsprintf($sql, $driver->escape($param));
+    if ($args[1]) {
+      $query = vsprintf($args[0], $driver->escape($args[1]));
+    } else {
+      $query = $args[0];
+    }
+
     $driver->setSql($query);
-
-    Sabel_DB_Command_After::execute(self::COMMAND, $command);
   }
 }

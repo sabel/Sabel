@@ -9,17 +9,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Command_Update
+class Sabel_DB_Command_Update extends Sabel_DB_Command_Base
 {
-  const COMMAND = "UPDATE";
+  protected $command = Sabel_DB_Command::UPDATE;
 
-  public static function build($command)
+  public function run($executer)
   {
-    $result = Sabel_DB_Command_Before::execute(self::COMMAND, $command);
-    if ($result !== Sabel_DB_Command_Before::CONTINUOUS) return;
-
-    $model  = $command->getModel();
-    $driver = $command->getDriver();
+    $model  = $executer->getModel();
+    $driver = $executer->getDriver();
 
     $query = $driver->getSqlClass($model)->buildUpdateSql($driver);
     $conds = $model->getConditionManager()->getUniqueConditions();
@@ -30,6 +27,5 @@ class Sabel_DB_Command_Update
     $query .= $manager->build($driver);
 
     $driver->setSql($query);
-    Sabel_DB_Command_After::execute(self::COMMAND, $command);
   }
 }

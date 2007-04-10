@@ -125,7 +125,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     $sql = $this->sql;
 
     // @todo
-    if (defined("QUERY_LOG")) {
+    if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
       var_dump($sql);
     }
 

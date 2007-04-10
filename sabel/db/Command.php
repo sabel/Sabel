@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Sql_Interface
+ * Sabel_DB_Command
  *
  * @interface
  * @category   DB
@@ -10,9 +10,17 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_DB_Sql_Interface
+interface Sabel_DB_Command
 {
-  public function setModel($model);
-  public function buildInsertSql($driver);
-  public function buildUpdateSql($driver);
+  const SELECT = 0x01;
+  const INSERT = 0x02;
+  const UPDATE = 0x04;
+  const DELETE = 0x08;
+  const QUERY  = 0x10;
+
+  const BEGIN    = 0x20;
+  const COMMIT   = 0x40;
+  const ROLLBACK = 0x80;
+
+  const ARRAY_INSERT = 0x100;
 }

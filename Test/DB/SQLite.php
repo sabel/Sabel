@@ -34,8 +34,8 @@ class Test_DB_SQLite extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default',  self::$params1);
-    Sabel_DB_Connection::addConnection('default2', self::$params2);
+    Sabel_DB_Config::regist('default',  self::$params1);
+    Sabel_DB_Config::regist('default2', self::$params2);
 
     Test_DB_Test::$db = 'SQLITE';
 
@@ -175,6 +175,12 @@ class SQLiteHelper
                  parents_id integer not null,
                  name varchar(24),
                  height integer)";
+
+    $sqls[] = "CREATE TABLE mail (
+                 id int4 primary key,
+                 sender_id integer not null,
+                 recipient_id integer not null,
+                 subject varchar(255))";
 
     $this->sqls = $sqls;
   }

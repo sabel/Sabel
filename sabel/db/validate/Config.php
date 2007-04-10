@@ -22,6 +22,13 @@ class Sabel_DB_Validate_Config
   protected static $postProcesses = array();
   protected static $customValidations = array();
 
+  public static function getConfigs()
+  {
+    return array("messages"      => self::$messages,
+                 "localizedName" => self::$localizedName,
+                 "datetimeRegex" => self::$datetimeRegex);
+  }
+
   public static function setMessages($messages)
   {
     self::$messages = $messages;

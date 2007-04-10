@@ -15,8 +15,14 @@ abstract class Sabel_DB_Driver_Base
   protected $connectionName = "";
 
   protected $sql         = "";
+  protected $driverId    = "";
   protected $result      = array();
   protected $incrementId = null;
+
+  public function getDriverId()
+  {
+    return $this->driverId;
+  }
 
   public function setSql($sql)
   {
@@ -29,7 +35,7 @@ abstract class Sabel_DB_Driver_Base
     $sql = $this->sql;
 
     // @todo
-    if (defined("QUERY_LOG")) {
+    if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
       var_dump($sql);
     }
 
@@ -93,6 +99,10 @@ abstract class Sabel_DB_Driver_Base
 
   public function setConnectionName($connectionName)
   {
+    if ($connectionName !== $this->connectionName && isset($this->connection)) {
+      $this->connection = Sabel_DB_Connection::get($connectionName);
+    }
+
     $this->connectionName = $connectionName;
   }
 

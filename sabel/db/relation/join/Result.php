@@ -32,6 +32,15 @@ class Sabel_DB_Relation_Join_Result
     $this->structure[$source][] = $table;
   }
 
+  public function changeKeyOfStructure($key, $newKey)
+  {
+    $structure =& $this->structure;
+    if (isset($structure[$key])) {
+      $structure[$newKey] = $structure[$key];
+      unset($structure[$key]);
+    }
+  }
+
   public function setObject($object)
   {
     $this->objects[$object->getName()] = $object;

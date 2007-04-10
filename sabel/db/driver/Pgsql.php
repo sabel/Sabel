@@ -1,5 +1,7 @@
 <?php
 
+include_once("ArrayInsert.php");
+
 /**
  * Sabel_DB_Driver_Pgsql
  *

@@ -11,9 +11,13 @@
  */
 class Sabel_DB_Command_Executer
 {
+  const SKIP = 0x01;
+
   protected $model  = null;
   protected $driver = null;
   protected $result = null;
+
+  protected $arguments = array();
 
   protected $incrementId   = null;
   protected $beforeMethods = array();
@@ -38,48 +42,39 @@ class Sabel_DB_Command_Executer
     return $this->driver;
   }
 
-  public function __call($callMethod, $args)
+  public function getArguments()
   {
+    return $this->arguments;
+  }
+
+  public function __call($command, $args)
+  {
+    $this->arguments = $args;
+
     $bms = $this->beforeMethods;
     $ams = $this->afterMethods;
 
-    if (isset($bms[$callMethod])) $this->doMethods($bms[$callMethod]);
-
-    switch ($callMethod) {
-      case "select":
-        Sabel_DB_Command_Select::build($this);
-        break;
-
-      case "update":
-        Sabel_DB_Command_Update::build($this);
-        break;
-
-      case "insert":
-        Sabel_DB_Command_Insert::build($this);
-        break;
-
-      case "arrayInsert":
-        Sabel_DB_Command_ArrayInsert::build($this);
-        break;
-
-      case "delete":
-        Sabel_DB_Command_Delete::build($this);
-        break;
-
-      case "query":
-        $inp = (isset($args[1])) ? $args[1] : null;
-        Sabel_DB_Command_Query::build($this, $args[0], $inp);
-        break;
-
-      default:
-        throw new Exception("no such command. '{$callMethod}'");
+    if (isset($bms[$command])) {
+      if ($this->doMethods($bms[$command])) return $this;
     }
 
-    if (isset($bms["execute"])) $this->doMethods($bms["execute"]);
-    $this->result = $this->driver->execute();
-    if (isset($ams["execute"])) $this->doMethods($ams["execute"]);
+    $commander = Sabel_DB_Command_Loader::getClass($command);
+    $result = $commander->execute($this);
+    if ($result === self::SKIP) return $this;
 
-    if (isset($ams[$callMethod])) $this->doMethods($ams[$callMethod]);
+    if (isset($bms["execute"])) {
+      if ($this->doMethods($bms["execute"])) return $this;
+    }
+
+    $this->result = $this->driver->execute();
+
+    if (isset($ams["execute"])) {
+      if ($this->doMethods($ams["execute"])) return $this;
+    }
+
+    if (isset($ams[$command])) {
+      if ($this->doMethods($ams[$command])) return $this;
+    }
 
     return $this;
   }
@@ -104,23 +99,14 @@ class Sabel_DB_Command_Executer
     $this->incrementId = $id;
   }
 
-  public function begin()
-  {
-    $this->driver->begin($this->model->getConnectionName());
-  }
-
-  public function commit()
-  {
-    $this->driver->loadTransaction()->commit();
-  }
-
-  public function rollback()
-  {
-    $this->driver->loadTransaction()->rollback();
-  }
-
   protected function doMethods($methods)
   {
-    foreach ($methods as $method) $this->driver->$method($this);
+    $skip = false;
+    foreach ($methods as $method) {
+      $result = $this->driver->$method($this);
+      if ($result === self::SKIP) $skip = true;
+    }
+
+    return $skip;
   }
 }

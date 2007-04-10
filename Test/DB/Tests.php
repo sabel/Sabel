@@ -24,6 +24,7 @@ class Test_DB_Tests
       $suite->addTest(Test_DB_Mysql::suite());
     }
 
+    //define("QUERY_LOG", true);
     if (extension_loaded('pgsql') && extension_loaded('pdo_pgsql')) {
       $suite->addTest(Test_DB_Pgsql::suite());
     }

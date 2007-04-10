@@ -46,7 +46,7 @@ class Sabel_DB_Command_Before
 
     foreach (self::$before as $className => $params) {
       $commands = $params["commands"];
-      if (is_string($commands)) $commands = (array)$commands;
+      if (!is_array($commands)) $commands = (array)$commands;
       if (!in_array($commandId, $commands)) continue;
 
       if (!self::isPass($params["options"], $driverName, $modelName)) continue;

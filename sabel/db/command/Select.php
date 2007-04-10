@@ -9,18 +9,17 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Command_Select
+class Sabel_DB_Command_Select extends Sabel_DB_Command_Base
 {
-  const COMMAND = "SELECT";
+  protected $command = Sabel_DB_Command::SELECT;
 
-  public static function build($command)
+  public function run($executer)
   {
-    $result = Sabel_DB_Command_Before::execute(self::COMMAND, $command);
-    if ($result !== Sabel_DB_Command_Before::CONTINUOUS) return;
+    $model   = $executer->getModel();
+    $driver  = $executer->getDriver();
 
-    $model   = $command->getModel();
-    $driver  = $command->getDriver();
-    $query   = $driver->getSqlClass($model)->buildSelectSql($driver);
+    $tblName = $model->getTableName();
+    $query   = "SELECT " . $model->getProjection() . " FROM " . $tblName;
     $manager = $model->getConditionManager();
 
     if (is_object($manager)) $query .= $manager->build($driver);
@@ -30,6 +29,5 @@ class Sabel_DB_Command_Select
     }
 
     $driver->setSql($query);
-    Sabel_DB_Command_After::execute(self::COMMAND, $command);
   }
 }

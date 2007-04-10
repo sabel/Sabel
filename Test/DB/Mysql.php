@@ -16,7 +16,8 @@ class Test_DB_Mysql extends Test_DB_Test
                                   'schema'   => 'edo2',
                                   'database' => 'edo2');
 
-  public static function main() {
+  public static function main()
+  {
     require_once "PHPUnit/TextUI/TestRunner.php";
 
     $suite  = new PHPUnit_Framework_TestSuite("Test_DB_Mysql");
@@ -42,8 +43,8 @@ class Test_DB_Mysql extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Connection::addConnection('default',  self::$params1);
-    Sabel_DB_Connection::addConnection('default2', self::$params2);
+    Sabel_DB_Config::regist('default',  self::$params1);
+    Sabel_DB_Config::regist('default2', self::$params2);
 
     Test_DB_Test::$db = 'MYSQL';
 
@@ -53,7 +54,7 @@ class Test_DB_Mysql extends Test_DB_Test
     $mh = new MysqlHelper();
 
     foreach ($mh->sqls as $query) {
-      try { @$model->executeQuery($query); } catch (Exception $e) {}
+      try { $model->executeQuery($query); } catch (Exception $e) {}
     }
 
     try {
@@ -71,7 +72,7 @@ class Test_DB_Mysql extends Test_DB_Test
                   'CREATE TABLE grand_child( id integer primary key, child_id integer, name varchar(24), age integer)');
 
     foreach ($sqls as $query) {
-      try { @$model->executeQuery($query); } catch (Exception $e) {}
+      try { @$model->executeQuery($query); } catch (Exception $e) { }
     }
 
     $model->executeQuery('DELETE FROM customer');
@@ -183,6 +184,18 @@ class MysqlHelper
                  parents_id integer not null,
                  name varchar(24),
                  height integer)";
+
+    $sqls[] = "CREATE TABLE child (
+                 id integer primary key,
+                 parents_id integer not null,
+                 name varchar(24),
+                 height integer)";
+
+    $sqls[] = "CREATE TABLE mail (
+                 id integer primary key,
+                 sender_id integer not null,
+                 recipient_id integer not null,
+                 subject varchar(255))";
 
     $this->sqls = $sqls;
   }
