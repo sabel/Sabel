@@ -11,198 +11,112 @@
  */
 class Sabel_DB_Connection
 {
-  const SET_ENCODING = 'SET NAMES %s';
+  const SET_ENCODING = "SET NAMES %s";
 
-  protected static $isInit     = false;
-  protected static $parameters = array();
-  protected static $connList   = array();
+  protected static $connections = array();
 
-  public static function initialize()
+  protected static function createDatabaseLink($connectionName)
   {
-    if (self::$isInit) return null;
+    $params  = Sabel_DB_Config::get($connectionName);
+    $drvName = $params["driver"];
 
-    if (!defined('TEST_CASE')) {
-      Sabel::fileUsing(RUN_BASE . '/config/database.php', true);
-      foreach (get_db_params() as $connectName => $params) {
-        self::addConnection($connectName, $params);
-      }
-    }
+    if (strpos($drvName, "pdo-") === 0) {
+      $type    = "pdo";
+      $drvName = str_replace("pdo-", "", $drvName);
 
-    self::$isInit = true;
-  }
-
-  public static function setInitFlag($bool)
-  {
-    if (!is_bool($bool)) {
-      throw new Exception('Error:setInit() invalid parameter. argument should be a boolean.');
-    }
-
-    self::$isInit = $bool;
-  }
-
-  public static function addConnection($connectName, $params)
-  {
-    self::$parameters[$connectName] = $params;
-  }
-
-  public static function getConnectionParameters()
-  {
-    return self::$parameters;
-  }
-
-  protected static function makeDatabaseLink($connectName)
-  {
-    if (!isset(self::$parameters[$connectName]))
-      throw new Exception('Error: database parameters are not found: ' . $connectName);
-
-    if (!is_array($params = self::$parameters[$connectName]))
-      throw new Exception('invalid Parameter. parameters must be an array.');
-
-    $drvName = $params['driver'];
-
-    if (strpos($drvName, 'pdo-') === 0) {
-      $type    = 'pdo';
-      $drvName = str_replace('pdo-', '', $drvName);
-
-      if ($drvName === 'sqlite') {
-        $list['conn'] = new PDO("sqlite:{$params['database']}");
+      if ($drvName === "sqlite") {
+        $conn = new PDO("sqlite:" . $params["database"]);
       } else {
-        $dsn = "{$drvName}:host={$params['host']};dbname={$params['database']}";
-        if (isset($params['port'])) $dsn .= ";port={$params['port']}";
-        $list['conn'] = new PDO($dsn, $params['user'], $params['password']);
+        $dsn = "{$drvName}:host={$params["host"]};dbname={$params["database"]}";
+        if (isset($params["port"])) $dsn .= ";port={$params["port"]}";
+        $conn = new PDO($dsn, $params["user"], $params["password"]);
       }
     } else {
-      $type = 'native';
-      $host = $params['host'];
-      $user = $params['user'];
-      $pass = $params['password'];
-      $dbs  = $params['database'];
+      $type = "native";
+      $host = $params["host"];
+      $user = $params["user"];
+      $pass = $params["password"];
+      $dbs  = $params["database"];
 
       switch ($drvName) {
-        case 'mysql':
-          $host = (isset($params['port'])) ? $host . ':' . $params['port'] : $host;
-          $list['conn'] = mysql_connect($host, $user, $pass);
-          mysql_select_db($dbs, $list['conn']);
+        case "mysql":
+          $host = (isset($params["port"])) ? $host . ":" . $params["port"] : $host;
+          $conn = mysql_connect($host, $user, $pass);
+          mysql_select_db($dbs, $conn);
           break;
-        case 'pgsql':
-          $host = (isset($params['port'])) ? $host . ' port=' . $params['port'] : $host;
-          $list['conn'] = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
+        case "pgsql":
+          $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
+          $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
           break;
-        case 'firebird':
-          $host = $host . ':' . $dbs;
-          $enc  = (isset($params['encoding'])) ? $params['encoding'] : null;
-          $list['conn'] = ibase_connect($host, $user, $pass, $enc);
+        case "ibase":
+          $host = $host . ":" . $dbs;
+          $enc  = (isset($params["encoding"])) ? $params["encoding"] : null;
+          $conn = ibase_connect($host, $user, $pass, $enc);
           break;
-        case'mssql':
-          $host = (isset($params['port'])) ? $host . ',' . $params['port'] : $host;
-          $list['conn'] = mssql_connect($host, $user, $pass);
-          mssql_select_db($dbs, $list['conn']);
+        case "mssql":
+          $host = (isset($params["port"])) ? $host . "," . $params["port"] : $host;
+          $conn = mssql_connect($host, $user, $pass);
+          mssql_select_db($dbs, $conn);
           break;
       }
     }
 
-    if (!$list['conn']) self::error($connectName);
+    if (!$conn) self::error($connectionName);
 
-    if (isset($params['encoding'])) {
+    if (isset($params["encoding"])) {
       $db  = $drvName;
-      $enc = $params['encoding'];
+      $enc = $params["encoding"];
 
-      if ($type === 'pdo') {
-        $list['conn']->exec(sprintf(self::SET_ENCODING, $enc));
-      } elseif ($db === 'mysql') {
-        mysql_query(sprintf(self::SET_ENCODING, $enc), $list['conn']);
-      } elseif ($db === 'pgsql') {
-        pg_query($list['conn'], sprintf(self::SET_ENCODING, $enc));
+      if ($type === "pdo") {
+        $conn->exec(sprintf(self::SET_ENCODING, $enc));
+      } elseif ($db === "mysql") {
+        mysql_query(sprintf(self::SET_ENCODING, $enc), $conn);
+      } elseif ($db === "pgsql") {
+        pg_query($conn, sprintf(self::SET_ENCODING, $enc));
       }
     }
 
-    $list['schema'] = (isset($params['schema'])) ? $params['schema'] : null;
-    self::$connList[$connectName] = $list;
+    self::$connections[$connectionName] = $conn;
   }
 
-  public static function getDriver($conName)
+  public static function get($connectionName)
   {
-    $drvName = self::getDriverName($conName);
+    if (!isset(self::$connections[$connectionName])) {
+      self::createDatabaseLink($connectionName);
+    }
 
-    if (strpos($drvName, 'pdo-') === 0) {
-      $driver = new Sabel_DB_Pdo_Driver(self::getDB($conName));
+    if (isset(self::$connections[$connectionName])) {
+      return self::$connections[$connectionName];
     } else {
-      $className = 'Sabel_DB_' . ucfirst($drvName) . '_Driver';
-      $driver = new $className;
-    }
-
-    self::$connList[$conName]['driver'] = $driver;
-    $driver->setConnectionName($conName);
-    return $driver;
-  }
-
-  public static function getConnection($conName)
-  {
-    if (!isset(self::$connList[$conName]['conn'])) {
-      self::makeDatabaseLink($conName);
-    }
-
-    if (isset(self::$connList[$conName]['conn'])) {
-      return self::$connList[$conName]['conn'];
-    } else {
-      throw new Exception("Error: failed in connect to the database.");
+      throw new Exception("database connection refused.");
     }
   }
 
-  public static function getDB($conName)
+  public static function close($connectionName)
   {
-    return str_replace('pdo-', '', self::getDriverName($conName));
-  }
+    if (!isset(self::$connections[$connectionName])) return null;
 
-  public static function getDriverName($conName)
-  {
-    if (isset(self::$parameters[$conName]['driver'])) {
-      return self::$parameters[$conName]['driver'];
-    } else {
-      $msg = "Sabel_DB_Connection::getDriverName() value is not set: $conName";
-      throw new Exception($msg);
-    }
-  }
+    $conn   = self::$connections[$connectionName];
+    $driver = load_driver($connectionName);
+    $driver->close($conn);
 
-  public static function getSchema($conName)
-  {
-    $drvName = self::getDriverName($conName);
-    if (in_array($drvName, array('pdo-sqlite', 'firebird'))) return null;
-
-    if (isset(self::$parameters[$conName]['schema'])) {
-      return self::$parameters[$conName]['schema'];
-    } else {
-      $msg = "Sabel_DB_Connection::getSchema() value is not set: $conName";
-      throw new Exception($msg);
-    }
-  }
-
-  public static function close($conName)
-  {
-    if (!isset(self::$connList[$conName])) return null;
-
-    $list = self::$connList[$conName];
-    if (isset($list['driver']) && isset($list['conn'])) {
-      $list['driver']->close($list['conn']);
-    }
-    
-    unset(self::$connList[$conName]);
+    unset(self::$connections[$connectionName]);
   }
 
   public static function closeAll()
   {
-    if (is_array(self::$connList)) {
-      foreach (self::$connList as $list) {
-        if (isset($list['driver'])) $list['driver']->close($list['conn']);
-      }
-      self::$connList = array();
+    $configs = Sabel_DB_Config::get();
+    foreach ($configs as $connectionName => $config) {
+      self::close($connectionName);
     }
+
+    self::$connections = array();
   }
 
-  public static function error($connectName)
+  public static function error($connectionName)
   {
     if (class_exists('Exception_DatabaseConnection', true)) {
-      Exception_DatabaseConnection::error($connectName);
+      Exception_DatabaseConnection::error($connectionName);
     }
   }
 }

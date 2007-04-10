@@ -17,22 +17,22 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
     $tableColumns = "SELECT * FROM sqlite_master WHERE name = '%s'";
 
   private
-    $floatTypes  = array('float', 'float4', 'real'),
-    $doubleTypes = array('float8', 'double');
+    $floatTypes  = array("float", "float4", "real"),
+    $doubleTypes = array("float8", "double");
 
   private $colLine = '';
 
-  public function __construct($connectName, $schema = null)
+  public function __construct($connectionName)
   {
-    $this->driver = Sabel_DB_Connection::getDriver($connectName);
+    $this->driver = load_driver($connectionName);
   }
 
   public function getTableNames()
   {
     $tables = array();
 
-    $this->driver->execute($this->tableList);
-    foreach ($this->driver->getResultSet() as $row) $tables[] = $row['name'];
+    $this->execute($this->tableList);
+    foreach ($this->driver->getResult() as $row) $tables[] = $row["name"];
     return $tables;
   }
 
@@ -47,17 +47,15 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
 
   protected function createColumns($table)
   {
-    //Sabel::using('Sabel_DB_Type_Setter');
+    $this->execute(sprintf($this->tableColumns, $table));
+    $assocRow = $this->driver->getResult();
 
-    $this->driver->execute(sprintf($this->tableColumns, $table));
-    $assocRow = $this->driver->getResultSet()->fetch();
-
-    return $this->create($assocRow['sql']);
+    return $this->create($assocRow[0]["sql"]);
   }
 
   private function create($createSQL)
   {
-    $constLine = '';
+    $constLine = "";
 
     $lines   = $this->splitCreateSQL($createSQL);
     $columns = array();
@@ -69,10 +67,9 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
 
       $co->name = $name;
 
-//      if (strpos($line, 'primary key') !== false && strpbrk($line, '(') !== false) {
-      if (($ppos = strpos($line, 'primary key')) !== false &&
-          strpos($line, '(') > $ppos) {
-        $constLine = $line . ',' . $lines[$key + 1];
+      $ppos = strpos($line, "primary key");
+      if ($ppos !== false && strpos($line, "(") > $ppos) {
+        $constLine = $line . "," . $lines[$key + 1];
         break;
       }
 
@@ -86,29 +83,29 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
       $columns[$name] = $co;
     }
 
-    if ($constLine !== '') $columns = $this->setConstraint($columns, $constLine);
+    if ($constLine !== "") $columns = $this->setConstraint($columns, $constLine);
     return $columns;
   }
 
   private function splitCreateSQL($sql)
   {
-    $sql   = substr(strpbrk($sql, '('), 0);
-    $lines = explode(',', substr($sql, 1, -1));
-    return array_map('strtolower', array_map('trim', $lines));
+    $sql   = substr(strpbrk($sql, "("), 0);
+    $lines = explode(",", substr($sql, 1, -1));
+    return array_map("strtolower", array_map("trim", $lines));
   }
 
   private function setIncrement($co, $attributes)
   {
-    $pri  = (strpos($attributes, 'integer primary key') !== false);
-    $pri2 = (strpos($attributes, 'integer not null primary key') !== false);
+    $pri  = (strpos($attributes, "integer primary key") !== false);
+    $pri2 = (strpos($attributes, "integer not null primary key") !== false);
 
     $co->increment = ($pri || $pri2);
   }
 
   private function setDataType($co, $attributes)
   {
-    $tmp     = substr($attributes, 0, strpos($attributes, ' '));
-    $type    = ($tmp === '') ? $attributes : $tmp;
+    $tmp     = substr($attributes, 0, strpos($attributes, " "));
+    $type    = ($tmp === "") ? $attributes : $tmp;
     $colLine = substr($attributes, strlen($type));
 
     if ($this->isBoolean($type)) {
@@ -118,7 +115,7 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
       Sabel_DB_Type_Setter::send($co, $type);
     }
 
-    if ($colLine === '') {
+    if ($colLine === "") {
       $co->nullable = true;
       $co->primary  = false;
       $co->default  = null;
@@ -129,77 +126,87 @@ class Sabel_DB_SQLite_Schema extends Sabel_DB_Base_Schema
     }
   }
 
-  private function isBoolean($type)
+  protected function isBoolean($type)
   {
-    return ($type === 'boolean' || $type === 'bool');
+    return ($type === "boolean" || $type === "bool");
   }
 
-  private function isFloat($type)
+  protected function isFloat($type)
   {
     return (in_array($type, $this->floatTypes) || in_array($type, $this->doubleTypes));
   }
 
-  private function getFloatType($type)
+  protected function getFloatType($type)
   {
     return (in_array($type, $this->floatTypes)) ? 'float' : 'double';
   }
 
-  private function isString($co, $type)
+  protected function isString($co, $type)
   {
-    $types = array('varchar', 'char', 'character');
+    $types = array("varchar", "char", "character");
 
     foreach ($types as $sType) {
       if (strpos($type, $sType) !== false) {
-        $length   = strpbrk($type, '(');
+        $length   = strpbrk($type, "(");
         $co->type = Sabel_DB_Type_Const::STRING;
         $co->max  = ($length === false) ? 255 : (int)substr($length, 1, -1);
         return true;
       }
     }
+
     return false;
   }
 
   private function setNotNull($co)
   {
-    $co->nullable  = (strpos($this->colLine, 'not null') === false);
-    $this->colLine = str_replace('not null', '', $this->colLine);
+    $co->nullable  = (strpos($this->colLine, "not null") === false);
+    $this->colLine = str_replace("not null", "", $this->colLine);
   }
 
   private function setPrimary($co)
   {
-    if ($this->colLine === '') {
+    if ($this->colLine === "") {
       $co->primary = false;
     } else {
-      $co->primary   = (strpos($this->colLine, 'primary key') !== false);
-      $this->colLine = str_replace('primary key', '', $this->colLine);
+      $co->primary   = (strpos($this->colLine, "primary key") !== false);
+      $this->colLine = str_replace("primary key", "", $this->colLine);
     }
   }
 
   private function setDefault($co)
   {
-    if (strpos($this->colLine, 'default') !== false) {
-      $default = trim(str_replace('default ', '', $this->colLine));
-      if ($co->type === Sabel_DB_Type_Const::BOOL) {
-        $co->default = (strcasecmp($default, 'true') === 0 || $default === '1');
-      } else {
-        $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);
-      }
-    } else {
+    if (strpos($this->colLine, "default") === false) {
       $co->default = null;
+      return;
+    }
+
+    $default = trim(str_replace("default ", "", $this->colLine));
+    if ($co->type === Sabel_DB_Type_Const::BOOL) {
+      $co->default = (strcasecmp($default, "true") === 0 || $default === "1");
+    } else {
+      $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);
     }
   }
 
   private function setConstraint($columns, $line)
   {
-    $line = strpbrk($line, '(');
-    if (strpbrk($line, ',') !== false) {
-      $parts = explode(',', $line);
-      foreach ($parts as $key => $part) $parts[$key] = str_replace(array('(', ')'), '', $part);
+    $line = strpbrk($line, "(");
+    if (strpbrk($line, ",") !== false) {
+      $parts = explode(",", $line);
+      foreach ($parts as $key => $part) $parts[$key] = str_replace(array("(", ")"), "", $part);
       foreach ($parts as $key) $columns[$key]->primary = true;
     } else {
       $priCol = substr($line, 1, -1);
       $columns[$priCol]->primary = true;
     }
     return $columns;
+  }
+
+  protected function execute($sql)
+  {
+    $driver = $this->driver;
+
+    $driver->setSql($sql)->execute();
+    return $driver->getResult();
   }
 }

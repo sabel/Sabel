@@ -6,31 +6,30 @@
  * @abstract
  * @category   DB
  * @package    org.sabel.db
- * @subpackage general
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 {
-  protected $schema = '';
+  protected $schemaName = '';
 
-  public function __construct($connectName, $schema)
+  public function __construct($connectionName, $schemaName)
   {
-    $this->schema = $schema;
-    $this->driver = Sabel_DB_Connection::getDriver($connectName);
+    $this->driver = load_driver($connectionName);
+    $this->schemaName = $schemaName;
   }
 
   public function getTableNames()
   {
     $tables = array();
 
-    $sql = sprintf($this->tableList, $this->schema);
-    $this->driver->execute($sql);
+    $sql = sprintf($this->tableList, $this->schemaName);
+    $this->execute($sql);
 
-    foreach ($this->driver->getResultSet() as $row) {
+    foreach ($this->driver->getResult() as $row) {
       $row = array_change_key_case($row);
-      $tables[] = $row['table_name'];
+      $tables[] = $row["table_name"];
     }
     return $tables;
   }
@@ -46,15 +45,13 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function createColumns($table)
   {
-    //Sabel::using('Sabel_DB_Type_Setter');
-
-    $sql = sprintf($this->tableColumns, $this->schema, $table);
-    $this->driver->execute($sql);
+    $sql = sprintf($this->tableColumns, $this->schemaName, $table);
+    $this->execute($sql);
 
     $columns = array();
-    foreach ($this->driver->getResultSet() as $row) {
+    foreach ($this->driver->getResult() as $row) {
       $row = array_change_key_case($row);
-      $colName = $row['column_name'];
+      $colName = $row["column_name"];
       $columns[$colName] = $this->makeColumnValueObject($row);
     }
     return $columns;
@@ -62,11 +59,11 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function makeColumnValueObject($row)
   {
-    $co = new Sabel_ValueObject();
-    $co->name     = $row['column_name'];
-    $co->nullable = ($row['is_nullable'] !== 'NO');
+    $co           = new StdClass();
+    $co->name     = $row["column_name"];
+    $co->nullable = ($row["is_nullable"] !== "NO");
 
-    $type = $row['data_type'];
+    $type = $row["data_type"];
 
     if ($this->isBoolean($type, $row)) {
       $co->type = Sabel_DB_Type_Const::BOOL;
@@ -85,7 +82,9 @@ abstract class Sabel_DB_General_Schema extends Sabel_DB_Base_Schema
 
   protected function execute($sql)
   {
-    $this->driver->execute($sql);
-    return $this->driver->getResultSet();
+    $driver = $this->driver;
+
+    $driver->setSql($sql)->execute();
+    return $driver->getResult();
   }
 }

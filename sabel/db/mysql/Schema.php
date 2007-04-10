@@ -18,22 +18,22 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_General_Schema
 
   public function isBoolean($type, $row)
   {
-    return ($type === 'tinyint' && $row['column_comment'] === 'boolean');
+    return ($type === "tinyint" && $row["column_comment"] === "boolean");
   }
 
   public function isFloat($type)
   {
-    return ($type === 'float' || $type === 'double');
+    return ($type === "float" || $type === "double");
   }
 
   public function getFloatType($type)
   {
-    return ($type === 'float') ? 'float' : 'double';
+    return ($type === "float") ? "float" : "double";
   }
 
   public function setDefault($co, $row)
   {
-    $default = $row['column_default'];
+    $default = $row["column_default"];
 
     if ($default === null) {
       $co->default = null;
@@ -46,29 +46,23 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_General_Schema
 
   public function setIncrement($co, $row)
   {
-    $co->increment = ($row['extra'] === 'auto_increment');
+    $co->increment = ($row["extra"] === "auto_increment");
   }
 
   public function setPrimaryKey($co, $row)
   {
-    $co->primary = ($row['column_key'] === 'PRI');
+    $co->primary = ($row["column_key"] === "PRI");
   }
 
   public function setLength($co, $row)
   {
-    //$co->max = (int)$row['character_octet_length'];
-    $co->max = (int)$row['character_maximum_length'];
+    //$co->max = (int)$row["character_octet_length"];
+    $co->max = (int)$row["character_maximum_length"];
   }
 
-  /**
-   * examine the engine of the table.
-   *
-   * @param  string $tblName table name
-   * @return string table engine.
-   */
   public function getTableEngine($tblName)
   {
-    $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'")->fetch();
-    return $row['Engine'];
+    $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
+    return $row[0]["Engine"];
   }
 }

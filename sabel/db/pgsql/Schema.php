@@ -18,29 +18,29 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_General_Schema
 
   public function isBoolean($type, $row)
   {
-    return ($type === 'boolean');
+    return ($type === "boolean");
   }
 
   public function isFloat($type)
   {
-    return ($type === 'real' || $type === 'double precision');
+    return ($type === "real" || $type === "double precision");
   }
 
   public function getFloatType($type)
   {
-    return ($type === 'real') ? 'float' : 'double';
+    return ($type === "real") ? "float" : "double";
   }
 
   public function setDefault($co, $row)
   {
-    $default = $row['column_default'];
+    $default = $row["column_default"];
 
-    if ($default === null || strpos($default, 'nextval') !== false) {
+    if ($default === null || strpos($default, "nextval") !== false) {
       $co->default = null;
     } elseif (is_numeric($default)) {
       $co->default = (int)$default;
     } elseif ($co->type === Sabel_DB_Type_Const::BOOL) {
-      $co->default = ($default === 'true');
+      $co->default = ($default === "true");
     } else {
       $default     = substr($default, 1);
       $co->default = substr($default, 0, strpos($default, "'"));
@@ -50,23 +50,26 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_General_Schema
   public function setIncrement($co, $row)
   {
     $sql  = "SELECT * FROM pg_statio_user_sequences "
-          . "WHERE relname = '{$row['table_name']}_{$co->name}_seq'";
+          . "WHERE relname = '{$row["table_name"]}_{$co->name}_seq'";
 
-    $co->increment = (!$this->execute($sql)->isEmpty());
+    $result = $this->execute($sql);
+    $co->increment = !(empty($result));
   }
 
   public function setPrimaryKey($co, $row)
   {
     $sql  = "SELECT * FROM information_schema.key_column_usage "
-          . "WHERE table_schema = '{$this->schema}' AND table_name = '{$row['table_name']}' "
+          . "WHERE table_schema = '{$this->schemaName}' "
+          . "AND table_name = '{$row["table_name"]}' "
           . "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
 
-    $co->primary = (!$this->execute($sql)->isEmpty());
+    $result = $this->execute($sql);
+    $co->primary = !(empty($result));
   }
 
   public function setLength($co, $row)
   {
-    $maxlen  = $row['character_maximum_length'];
+    $maxlen  = $row["character_maximum_length"];
     $co->max = (isset($maxlen)) ? $maxlen : 255;
   }
 }

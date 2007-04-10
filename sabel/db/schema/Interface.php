@@ -13,9 +13,9 @@
  */
 interface Sabel_DB_Schema_Interface
 {
-  public function getTables();
-  public function getTable($tblName);
-  public function getTableNames();
+  public function getAll();
+  public function get($tblName);
+  public function getTableLists();
   public function getColumnNames($tblName);
   public function getTableEngine($tblName);
 }

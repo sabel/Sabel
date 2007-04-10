@@ -12,8 +12,11 @@
  */
 class Sabel_DB_Schema_Table
 {
-  protected $tableName = '';
-  protected $columns   = array();
+  protected $tableName       = "";
+  protected $columns         = array();
+  protected $primaryKey      = null;
+  protected $incrementColumn = null;
+  protected $tableEngine     = null;
 
   public function __construct($name, $columns)
   {
@@ -41,22 +44,38 @@ class Sabel_DB_Schema_Table
     return $this->columns[$name];
   }
 
-  public function getPrimaryKey()
+  public function getColumnNames()
   {
-    $pKey = array();
-    foreach ($this->columns as $column) {
-      if ($column->primary) $pKey[] = $column->name;
-    }
-
-    if (empty($pKey)) return null;
-    return (sizeof($pKey) === 1) ? $pKey[0] : $pKey;
+    return array_keys($this->columns);
   }
 
-  public function getIncrementKey()
+  public function setPrimaryKey($key)
   {
-    foreach ($this->columns as $column) {
-      if ($column->increment) return $column->name;
-    }
-    return null;
+    $this->primaryKey = $key;
+  }
+
+  public function getPrimaryKey()
+  {
+    return $this->primaryKey;
+  }
+
+  public function setIncrementColumn($colName)
+  {
+    $this->incrementColumn = $colName;
+  }
+
+  public function getIncrementColumn()
+  {
+    return $this->incrementColumn;
+  }
+
+  public function setTableEngine($engine)
+  {
+    $this->tableEngine = $engine;
+  }
+
+  public function getTableEngine()
+  {
+    return $this->tableEngine;
   }
 }
