@@ -17,24 +17,21 @@ class Sabel_DB_Model
     $schema    = null;
 
   protected
+    $selected = false;
+
+  protected
     $values       = array(),
     $updateValues = array(),
     $saveValues   = array();
 
-  private
-    $selected = false;
+  protected
+    $projection  = "*",
+    $structure   = "normal",
+    $constraints = array(),
+    $parents     = array();
 
   private
     $cascadeStack = array();
-
-  protected
-    $projection  = "*",
-    $constraints = array();
-
-  protected
-    $structure   = "normal",
-    $localize    = array(),
-    $parents     = array();
 
   protected
     $ignoreNothingPrimaryKey = false;
@@ -42,14 +39,6 @@ class Sabel_DB_Model
   protected
     $conditionManager = null,
     $connectionName   = "default";
-
-  /*
-  protected
-    $validateMessages = array('length'   => 'is too long',
-                              'maximum'  => 'is too large',
-                              'nullable' => 'should not be a blank',
-                              'type'     => 'invalid data type');
-  */
 
   public function __construct($arg1 = null, $arg2 = null)
   {
@@ -165,6 +154,11 @@ class Sabel_DB_Model
     $this->parents = $parents;
   }
 
+  public function getParents()
+  {
+    return $this->parents;
+  }
+
   public function loadConditionManager()
   {
     if ($this->conditionManager === null) {
@@ -250,12 +244,12 @@ class Sabel_DB_Model
     if (!isset($schema[$key])) return $data;
 
     switch ($schema[$key]->type) {
-      case Sabel_DB_Type_Const::INT:
+      case Sabel_DB_Type::INT:
         return ($data > 2147483647) ? (float)$data : (int)$data;
-      case Sabel_DB_Type_Const::FLOAT:
-      case Sabel_DB_Type_Const::DOUBLE:
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
         return (float)$data;
-      case SabeL_DB_Type_Const::BOOL:
+      case SabeL_DB_Type::BOOL:
         if (is_string($data)) {
           return in_array($data, array('1', 't', 'true', __TRUE__));
         } elseif (is_bool($data)) {
@@ -263,20 +257,11 @@ class Sabel_DB_Model
         } elseif (is_int($data)) {
           return ($data === 1);
         }
-      case Sabel_DB_Type_Const::DATETIME:
+      case Sabel_DB_Type::DATETIME:
         return (is_object($data)) ? $data : Sabel::load('Sabel_Date', $data);
       default:
         return $data;
     }
-  }
-
-  public function getRealData()
-  {
-    $real = array();
-    foreach ($this->values as $key => $val) {
-      if (in_array($key, $this->columns)) $real[$key] = $this->convertData($key, $val);
-    }
-    return $real;
   }
 
   public function toArray()
@@ -284,45 +269,29 @@ class Sabel_DB_Model
     return $this->values;
   }
 
-  public function getLocalizedName($name)
+  public function toSchema()
   {
-    return (isset($this->localize[$name])) ? $this->localize[$name] : $name;
-  }
+    $schemas = array();
+    $values  = $this->values;
+    $columns = $this->schema->getColumns();
 
-  public function getStructure()
-  {
-    return $this->structure;
-  }
+    foreach ($columns as $name => $schema) {
+      $cloned = clone $schema;
+      if (isset($values[$name])) {
+        $cloned->value = $values[$name];
+      } else {
+        $cloned->value = null;
+      }
 
-  public function getParents()
-  {
-    return $this->parents;
+      $schemas[$name] = $cloned;
+    }
+
+    return $schemas;
   }
 
   public function isSelected()
   {
     return $this->selected;
-  }
-
-  /*
-  public function addValidateIgnore($cols)
-  {
-    if (is_string($cols)) $cols = (array)$cols;
-    foreach ($cols as $col) $this->validateIgnores[] = $col;
-  }
-  */
-
-  public function toSchema()
-  {
-    $columns = $this->schema->getColumns();
-
-    foreach ($this->values as $name => $value) {
-      if (isset($columns[$name])) {
-        $columns[$name]->value = $this->convertData($name, $value);
-      }
-    }
-
-    return $columns;
   }
 
   public function begin()
@@ -348,11 +317,6 @@ class Sabel_DB_Model
   public function rollback()
   {
     $this->getCommand()->rollback();
-  }
-
-  public function close()
-  {
-    Sabel_DB_Connection::close($this->getConnectName());
   }
 
   public function getFirst($orderColumn)
@@ -432,16 +396,6 @@ class Sabel_DB_Model
     return $model;
   }
 
-  public function doSelect()
-  {
-    try {
-      $command = $this->getCommand();
-      return $command->select()->getResult();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
-  }
-
   public function select($arg1 = null, $arg2 = null, $arg3 = null)
   {
     $this->setCondition($arg1, $arg2, $arg3);
@@ -470,6 +424,16 @@ class Sabel_DB_Model
     }
 
     return $results;
+  }
+
+  protected function doSelect()
+  {
+    try {
+      $command = $this->getCommand();
+      return $command->select()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
   }
 
   protected function internalJoin()
@@ -527,7 +491,7 @@ class Sabel_DB_Model
   public function save($data = null)
   {
     if (isset($data) && !is_array($data)) {
-      throw new Exception("argument must be an array");
+      throw new Exception("argument must be an array.");
     }
 
     if ($this->isSelected()) {
@@ -577,122 +541,6 @@ class Sabel_DB_Model
   public function getSaveValues()
   {
     return $this->saveValues;
-  }
-
-  public function doUpdate($data)
-  {
-    try {
-      $command = $this->getCommand();
-      $command->update($this);
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
-  }
-
-  public function validate()
-  {
-    $this->sColumns = $this->schema->getColumns();
-
-    if (is_object($this->errors)) {
-      $errors = $this->errors;
-    } else {
-      $this->errors = $errors = new Sabel_Errors();
-    }
-
-    $dataForValidate = ($this->isSelected()) ? $this->newData : $this->values;
-
-    foreach ($dataForValidate as $name => $value) {
-      if (in_array($name, $this->validateIgnores)) continue;
-      $lname = $this->getLocalizedName($name);
-      if ($this->validateLength($name, $value)) {
-        $errors->add($lname, $this->validateMessages["length"]);
-      } elseif ($this->validateMaximum($name, $value)) {
-        $errors->add($lname, $this->validateMessages["maximum"]);
-      } elseif ($this->validateNullable($name, $value)) {
-        $errors->add($lname, $this->validateMessages["nullable"]);
-      } elseif ($this->validateType($name, $value)) {
-        $errors->add($lname, $this->validateMessages["type"]);
-      } elseif ($this->hasValidateMethod($name)) {
-        $this->executeValidateMethod($name, $value);
-      }
-    }
-
-    $nonInputs = $this->validateNonInputs($dataForValidate);
-    foreach ($nonInputs as $name) {
-      $name = $this->getLocalizedName($name);
-      $errors->add($name, $this->validateMessages["nullable"]);
-    }
-
-    return ($errors->count() !== 0) ? $errors : false;
-  }
-
-  protected function hasValidateMethod($name)
-  {
-    return (method_exists($this, 'validate' . ucfirst($name)));
-  }
-
-  protected function executeValidateMethod($name, $value)
-  {
-    $methodName = 'validate' . ucfirst($name);
-    return $this->$methodName($name, $value);
-  }
-
-  protected function validateLength($name, $value)
-  {
-    $col = $this->sColumns[$name];
-    if ($col->type === Sabel_DB_Type_Const::STRING) {
-      $method = (extension_loaded('mbstring')) ? 'mb_strwidth' : 'strlen';
-      return ($method($value) > $col->max);
-    } else {
-      return false;
-    }
-  }
-
-  protected function validateMaximum($name, $value)
-  {
-    $col = $this->sColumns[$name];
-    return ($col->type === Sabel_DB_Type_Const::INT && $col->max < $value);
-  }
-
-  protected function validateNullable($name, $value)
-  {
-    $result = false;
-    if ($this->sColumns[$name]->nullable === false) {
-      if ($value === null || $value === "") $result = true;
-    }
-    return $result;
-  }
-
-  public function validateType($name, $value)
-  {
-    switch ($this->sColumns[$name]->type) {
-      case Sabel_DB_Type_Const::INT:
-        if ($value === null || is_int($value)) return false;
-        if (is_string($value)) return !preg_match('/^[-|+]?[0-9]+$/', $value);
-        return true;
-        break;
-      case Sabel_DB_Type_Const::BOOL:
-        if ($value === null || $value === '') return false;
-        return ($value !== __TRUE__ && $value !== __FALSE__);
-        break;
-      case Sabel_DB_Type_Const::DATETIME:
-        return !((boolean) strtotime($value));
-        break;
-      default:
-        return false;
-        break;
-    }
-  }
-
-  protected function validateNonInputs($dataForValidate)
-  {
-    $impossibleToNulls = array();
-
-    foreach ($this->schema as $s) {
-      if (!$s->increment && !$s->nullable) $impossibleToNulls[] = $s->name;
-    }
-
-    return array_diff($impossibleToNulls, array_keys($dataForValidate));
   }
 
   public function arrayInsert($data)
@@ -878,21 +726,11 @@ class Sabel_DB_Model
     throw new Exception($errorMsg);
   }
 
-  /**
-   * an alias for setCondition()
-   *
-   * @return void
-   */
   public function scond($arg1, $arg2 = null, $not = null)
   {
     $this->setCondition($arg1, $arg2, $not);
   }
 
-  /**
-   * an alias for setConstraint()
-   *
-   * @return void
-   */
   public function sconst($arg1, $arg2 = null)
   {
     $this->setConstraint($arg1, $arg2);

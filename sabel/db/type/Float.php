@@ -16,7 +16,7 @@ class Sabel_DB_Type_Float implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::FLOAT;
+    return Sabel_DB_Type::FLOAT;
   }
 
   public function add($chain)
@@ -26,7 +26,7 @@ class Sabel_DB_Type_Float implements Sabel_DB_Type_Interface
 
   public function send($co, $type)
   {
-    if ($type === 'float') {
+    if ($type === "float") {
       $co->type = $this->getType();
       $co->max  =  3.4028235E38;
       $co->min  = -3.4028235E38;

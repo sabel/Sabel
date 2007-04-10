@@ -16,7 +16,7 @@ class Sabel_DB_Type_Double implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::DOUBLE;
+    return Sabel_DB_Type::DOUBLE;
   }
 
   public function add($chain)
@@ -26,7 +26,7 @@ class Sabel_DB_Type_Double implements Sabel_DB_Type_Interface
 
   public function send($co, $type)
   {
-    if ($type === 'double') {
+    if ($type === "double") {
       $co->type = $this->getType();
       $co->max  =  1.79769E308;
       $co->min  = -1.79769E308;

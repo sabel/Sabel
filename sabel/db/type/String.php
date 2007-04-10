@@ -16,7 +16,7 @@ class Sabel_DB_Type_String implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::STRING;
+    return Sabel_DB_Type::STRING;
   }
 
   public function add($chain)

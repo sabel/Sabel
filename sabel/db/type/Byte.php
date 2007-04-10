@@ -16,7 +16,7 @@ class Sabel_DB_Type_Byte implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::BYTE;
+    return Sabel_DB_Type::BYTE;
   }
 
   public function add($chain)

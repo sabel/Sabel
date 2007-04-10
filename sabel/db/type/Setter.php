@@ -14,10 +14,10 @@ class Sabel_DB_Type_Setter
 {
   public static function send($co, $type)
   {
-    if ($type === 'date') {
-      $co->type = Sabel_DB_Type_Const::DATE;
-    } elseif ($type === 'time') {
-      $co->type = Sabel_DB_Type_Const::TIME;
+    if ($type === "date") {
+      $co->type = Sabel_DB_Type::DATE;
+    } elseif ($type === "time") {
+      $co->type = Sabel_DB_Type::TIME;
     } else {
       $int    = new Sabel_DB_Type_Integer();
       $string = new Sabel_DB_Type_String();

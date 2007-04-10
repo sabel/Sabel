@@ -16,7 +16,7 @@ class Sabel_DB_Type_Text implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::TEXT;
+    return Sabel_DB_Type::TEXT;
   }
 
   public function add($chain)

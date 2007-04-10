@@ -16,7 +16,7 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::INT;
+    return Sabel_DB_Type::INT;
   }
 
   public function add($chain)

@@ -16,7 +16,7 @@ class Sabel_DB_Type_Time implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::TIME;
+    return Sabel_DB_Type::TIME;
   }
 
   public function add($chain)

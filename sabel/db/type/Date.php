@@ -16,7 +16,7 @@ class Sabel_DB_Type_Date implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return Sabel_DB_Type_Const::DATE;
+    return Sabel_DB_Type::DATE;
   }
 
   public function add($chain)
