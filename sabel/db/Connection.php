@@ -44,16 +44,19 @@ class Sabel_DB_Connection
           $conn = mysql_connect($host, $user, $pass);
           mysql_select_db($dbs, $conn);
           break;
+
         case "pgsql":
         case "pgsql81":
           $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
           $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
           break;
+
         case "ibase":
           $host = $host . ":" . $dbs;
           $enc  = (isset($params["encoding"])) ? $params["encoding"] : null;
           $conn = ibase_connect($host, $user, $pass, $enc);
           break;
+
         case "mssql":
           $host = (isset($params["port"])) ? $host . "," . $params["port"] : $host;
           $conn = mssql_connect($host, $user, $pass);

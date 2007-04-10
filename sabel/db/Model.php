@@ -14,15 +14,15 @@ class Sabel_DB_Model
   protected
     $tableName = "",
     $columns   = array(),
-    $schema    = null,
-    $data      = array();
+    $schema    = null;
+
+  protected
+    $values       = array(),
+    $updateValues = array(),
+    $saveValues   = array();
 
   private
     $selected = false;
-
-  protected
-    $updateValues = array(),
-    $saveValues   = array();
 
   private
     $cascadeStack = array();
@@ -96,7 +96,7 @@ class Sabel_DB_Model
 
   public function getCommand()
   {
-    return new Sabel_DB_Command_Facade($this);
+    return new Sabel_DB_Command_Executer($this);
 
     // @todo for mssql
     // $driver->extension($this->tableProp);
@@ -104,7 +104,7 @@ class Sabel_DB_Model
 
   public function __set($key, $val)
   {
-    $this->data[$key] = $val;
+    $this->values[$key] = $val;
 
     if ($this->selected && in_array($key, $this->columns)) {
       $this->updateValues[$key] = $val;
@@ -238,8 +238,8 @@ class Sabel_DB_Model
 
   public function __get($key)
   {
-    if (!isset($this->data[$key])) return null;
-    return $this->convertData($key, $this->data[$key]);
+    if (!isset($this->values[$key])) return null;
+    return $this->convertData($key, $this->values[$key]);
   }
 
   protected function convertData($key, $data)
@@ -273,7 +273,7 @@ class Sabel_DB_Model
   public function getRealData()
   {
     $real = array();
-    foreach ($this->data as $key => $val) {
+    foreach ($this->values as $key => $val) {
       if (in_array($key, $this->columns)) $real[$key] = $this->convertData($key, $val);
     }
     return $real;
@@ -281,7 +281,7 @@ class Sabel_DB_Model
 
   public function toArray()
   {
-    return $this->data;
+    return $this->values;
   }
 
   public function getLocalizedName($name)
@@ -312,12 +312,11 @@ class Sabel_DB_Model
   }
   */
 
-  public function schema($tblName = null)
+  public function toSchema()
   {
-    if (isset($tblName)) return $this->getTableSchema($tblName)->getColumns();
-
     $columns = $this->schema->getColumns();
-    foreach ($this->data as $name => $value) {
+
+    foreach ($this->values as $name => $value) {
       if (isset($columns[$name])) {
         $columns[$name]->value = $this->convertData($name, $value);
       }
@@ -519,7 +518,7 @@ class Sabel_DB_Model
     }
 
     foreach ($row as $key => $val) {
-      $this->data[$key] = $val;
+      $this->values[$key] = $val;
     }
 
     $this->selected = true;
@@ -535,7 +534,7 @@ class Sabel_DB_Model
       $saveValues = ($data) ? $data : $this->updateValues;
       $this->updateValues= array();
     } else {
-      $saveValues = ($data) ? $data : $this->data;
+      $saveValues = ($data) ? $data : $this->values;
     }
 
     $this->saveValues = $saveValues;
@@ -600,7 +599,7 @@ class Sabel_DB_Model
       $this->errors = $errors = new Sabel_Errors();
     }
 
-    $dataForValidate = ($this->isSelected()) ? $this->newData : $this->data;
+    $dataForValidate = ($this->isSelected()) ? $this->newData : $this->values;
 
     foreach ($dataForValidate as $name => $value) {
       if (in_array($name, $this->validateIgnores)) continue;
@@ -861,7 +860,7 @@ class Sabel_DB_Model
       foreach ($resultSet as $row) {
         $model = MODEL($mdlName);
         foreach ($row as $key => $val) {
-          $model->data[$key] = $val;
+          $model->values[$key] = $val;
         }
 
         $models[] = $model;
