@@ -42,7 +42,18 @@ class Sabel_DB_Driver_Sequence
         return (int)$rows[0]["id"];
 
       case "ibase":
+        list ($idColumn, $tblName, $values) = self::getProperties($model);
 
+        if ($idColumn !== null && !isset($values[$idColumn])) {
+          $genName = strtoupper("{$tblName}_{$idColumn}_gen");
+          $sql  = "SELECT GEN_ID({$genName}, 1) AS id " . 'FROM RDB$DATABASE';
+          $rows = $driver->setSql($sql)->execute();
+          $id = (int)$rows[0]["id"];
+          $values[$idColumn] = $id;
+          $model->setSaveValues($values);
+          return $id;
+        }
+        break;
     }
   }
 

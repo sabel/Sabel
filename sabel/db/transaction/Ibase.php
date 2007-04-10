@@ -32,12 +32,12 @@ class Sabel_DB_Transaction_Ibase
 
   public function commit()
   {
-    $this->executeMethod('ibase_commit');
+    $this->executeMethod("ibase_commit");
   }
 
   public function rollback()
   {
-    $this->executeMethod('ibase_rollback');
+    $this->executeMethod("ibase_rollback");
   }
 
   private function executeMethod($method)

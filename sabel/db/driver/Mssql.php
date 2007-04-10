@@ -18,6 +18,7 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Mssql
   protected $commitcommand   = "COMMIT TRANSACTION";
   protected $rollbackCommand = "ROLLBACK TRANSACTION";
 
+  // @todo
   private $defCol = "";
 
   // @todo

@@ -41,7 +41,8 @@ class Sabel_DB_Command_Before
     $result = self::CONTINUOUS;
     if (empty(self::$before)) return $result;
 
-    $modelName  = get_class($commandClass->getModel());
+    $tableName  = $commandClass->getModel()->getTableName();
+    $modelName  = convert_to_modelname($tableName);
     $driverName = get_class($commandClass->getDriver());
 
     foreach (self::$before as $className => $params) {

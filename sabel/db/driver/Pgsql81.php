@@ -55,7 +55,7 @@ class Sabel_DB_Driver_Pgsql81 extends Sabel_DB_Driver_Base
     $this->incrementId = Sabel_DB_Driver_Sequence::getId("pgsql", $command);
   }
 
-  public function getIncrementId($command)
+  public function getIncrementId($command = null)
   {
     if ($command === null) {
       return $this->incrementId;
