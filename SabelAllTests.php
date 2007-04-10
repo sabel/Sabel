@@ -70,7 +70,7 @@ require_once('Test/Namespace.php');
 require_once('Test/Validate.php');
 require_once('Test/VirtualInheritance.php');
 
-require_once('Test/Controller/Tests.php');
+// require_once('Test/Controller/Tests.php');
 require_once('Test/Form.php');
 
 class SabelAllTests
@@ -88,10 +88,10 @@ class SabelAllTests
       $suite = new PHPUnit_Framework_TestSuite();
     }
     
-    $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_Sabel::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Validate::suite());
-    $suite->addTest(Test_Controller_Tests::suite());
+    // $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Form::suite());
     $suite->addTest(Test_Pager::suite());
