@@ -14,10 +14,8 @@ class Sabel_DB_Model
   protected
     $tableName = "",
     $columns   = array(),
-    $schema    = null;
-
-  protected
-    $selected = false;
+    $schema    = null,
+    $selected  = false;
 
   protected
     $values       = array(),
@@ -30,15 +28,12 @@ class Sabel_DB_Model
     $constraints = array(),
     $parents     = array();
 
-  private
-    $cascadeStack = array();
-
-  protected
-    $ignoreNothingPrimaryKey = false;
-
   protected
     $conditionManager = null,
     $connectionName   = "default";
+
+  protected
+    $ignoreNothingPrimaryKey = false;
 
   public function __construct($arg1 = null, $arg2 = null)
   {
@@ -593,104 +588,6 @@ class Sabel_DB_Model
 
     $command = $this->getCommand();
     $command->delete();
-  }
-
-  public function cascadeDelete($id = null)
-  {
-    if (!class_exists('Schema_CascadeChain', true))
-      throw new Exception('Error: class Schema_CascadeChain does not exist.');
-
-    if ($id === null && !$this->isSelected())
-      throw new Exception('Error: give the value of id or select the model beforehand.');
-
-    $chain   = Schema_CascadeChain::get();
-    $tblName = $this->getTableName();
-
-    if (isset($chain[$tblName])) {
-      $tables = $chain[$tblName];
-    } else {
-      throw new Exception("Error: cascadeDelete() '{$tblName}' does not exist in the cascade chain.");
-    }
-
-    $this->begin();
-
-    $models = array();
-    $pKey   = $this->getPrimaryKey();
-    foreach ($tables as $table) {
-      list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
-
-      $idValue = (isset($id)) ? $id : $this->$idCol;
-      if ($model = $this->pushStack($table, $foreignKey, $idValue)) $models[] = $model;
-    }
-
-    foreach ($models as $children) $this->makeChainModels($children, $chain);
-
-    $this->clearCascadeStack(array_reverse($this->cascadeStack));
-    $this->remove($pKey, $id);
-
-    $this->commit();
-  }
-
-  private function makeChainModels($children, &$chain)
-  {
-    $tblName = $children[0]->getTableName();
-    if (isset($chain[$tblName])) {
-      $tables = $chain[$tblName];
-    } else {
-      return null;
-    }
-
-    $models = array();
-    foreach ($tables as $table) {
-      foreach ($children as $child) {
-        $tblName = $child->getTableName();
-        $pKey    = $child->getPrimaryKey();
-        list ($table, $foreignKey, $idCol) = $this->createCascadeParam($table, $tblName, $pKey);
-        if ($model = $this->pushStack($table, $foreignKey, $child->$idCol)) $models[] = $model;
-      }
-    }
-
-    if ($models) {
-      foreach ($models as $children) $this->makeChainModels($children, $chain);
-    }
-  }
-
-  private function pushStack($tblName, $foreignKey, $id)
-  {
-    $model  = MODEL(convert_to_modelname($tblName));
-    $model->setParents(array());
-    $models = $model->select($foreignKey, $id);
-
-    if ($models) $this->cascadeStack["{$tblName}:{$id}"] = $foreignKey;
-    return $models;
-  }
-
-  private function createCascadeParam($chainValue, $tblName, $primaryKey)
-  {
-    if (strpos($chainValue, ':') === false) {
-      $idCol = $primaryKey;
-    } else {
-      list ($idCol, $chainValue) = explode(':', $chainValue);
-    }
-
-    if (strpos($chainValue, '.') === false) {
-      $foreignKey = "{$tblName}_{$primaryKey}";
-    } else {
-      list ($chainValue, $foreignKey) = explode('.', $chainValue);
-    }
-
-    return array($chainValue, $foreignKey, $idCol);
-  }
-
-  private function clearCascadeStack($stack)
-  {
-    foreach ($stack as $param => $foreignKey) {
-      list($tName, $idValue) = explode(':', $param);
-      $model = MODEL(convert_to_modelname($tName));
-
-      $model->begin();
-      $model->remove($foreignKey, $idValue);
-    }
   }
 
   public function executeQuery($sql, $inputs = null)

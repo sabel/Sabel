@@ -25,11 +25,13 @@ class Sabel_DB_Command_Executer
 
   public function __construct($model)
   {
-    $this->model  = $model;
-    $this->driver = $driver = load_driver($model->getConnectionName());
+    $this->model = $model;
+    $driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
 
     $this->beforeMethods = $driver->getBeforeMethods();
     $this->afterMethods  = $driver->getAfterMethods();
+
+    $this->driver = $driver;
   }
 
   public function getModel()

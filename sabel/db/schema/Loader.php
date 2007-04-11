@@ -28,9 +28,7 @@ class Sabel_DB_Schema_Loader
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {
         $info["name"] = $colName;
-        $class = new stdClass();
-        foreach ($info as $key => $val) $class->$key = $val;
-        $cols[$colName] = $class;
+        $cols[$colName] = (object)$info;
       }
 
       $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);

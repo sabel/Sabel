@@ -35,6 +35,20 @@ class Sabel_DB_Config
     }
   }
 
+  public static function loadDriver($connectionName)
+  {
+    $driverName = Sabel_DB_Config::getDriverName($connectionName);
+    if (strpos($driverName, "pdo") === false) {
+      $className = "Sabel_DB_Driver_" . ucfirst($driverName);
+      $driver = new $className();
+    } else {
+      $driver = new Sabel_DB_Driver_Pdo(Sabel_DB_Config::getDB($connectionName));
+    }
+
+    $driver->setConnectionName($connectionName);
+    return $driver;
+  }
+
   public static function getDB($connectionName)
   {
     return str_replace("pdo-", "", self::getDriverName($connectionName));
@@ -75,18 +89,4 @@ class Sabel_DB_Config
       throw new Exception("connection name '{$connectionName}' is not found.");
     }
   }
-}
-
-function load_driver($connectionName)
-{
-  $driverName = Sabel_DB_Config::getDriverName($connectionName);
-  if (strpos($driverName, "pdo") === false) {
-    $className = "Sabel_DB_Driver_" . ucfirst($driverName);
-    $driver = new $className();
-  } else {
-    $driver = new Sabel_DB_Driver_Pdo(Sabel_DB_Config::getDB($connectionName));
-  }
-
-  $driver->setConnectionName($connectionName);
-  return $driver;
 }

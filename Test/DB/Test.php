@@ -577,8 +577,8 @@ class Test_DB_Test extends SabelTestCase
 
   public function testCascadeDelete()
   {
-    $country = new Country();
-    @$country->cascadeDelete(1);
+    $deleter = new Sabel_DB_Model_CascadeDelete("Country", 1);
+    $deleter->execute("CountryCascadeDelete");
 
     $country   = new Country();
     $countries = $country->select();
@@ -649,7 +649,9 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('id' => 2, 'name' => 'name2'));
     $model->save(array('id' => 3, 'name' => 'name3'));
 
-    $model = Sabel_Model::load('Customer')->cascadeDelete(1);
+    $deleter = new Sabel_DB_Model_CascadeDelete("Customer", 1);
+    $deleter->execute("CustomerCascadeDelete");
+
     $this->assertEquals(Sabel_Model::load('Customer')->getCount(), 2);
 
     $model = Sabel_Model::load('Customer')->select();
@@ -805,14 +807,14 @@ class Test_DB_Test extends SabelTestCase
     $suzuki = Sabel_Model::load('Student')->selectOne(1);
     $this->assertEquals($suzuki->name, 'suzuki');
 
-    $bridge = new Sabel_DB_Relation_Bridge($suzuki, "StudentCourse");
+    $bridge = new Sabel_DB_Model_Bridge($suzuki, "StudentCourse");
     $courses = $bridge->getChild('Course');
     $this->assertEquals(count($courses), 2);
 
     $yamada = Sabel_Model::load('Student')->selectOne(5);
     $this->assertEquals($yamada->name, 'yamada');
 
-    $bridge = new Sabel_DB_Relation_Bridge($yamada, "StudentCourse");
+    $bridge = new Sabel_DB_Model_Bridge($yamada, "StudentCourse");
     $courses = $bridge->getChild('Course');
     $this->assertFalse($courses);
   }
@@ -970,24 +972,41 @@ class Schema_CustomerOrder
   }
 }
 
-class Schema_CascadeChain
+class CustomerCascadeDelete
 {
-  public static function get()
+  public function getChain()
+  {
+    return array("Customer" => array("CustomerOrder"));
+  }
+
+  public function getKeys()
+  {
+
+  }
+}
+
+class CountryCascadeDelete
+{
+  public function getChain()
   {
     $chains = array();
 
-    $chains['users']          = array('blog'); //array('blog','favorite_item');
-    $chains['parents']        = array('child');
-    $chains['classification'] = array('city');
-    $chains['country']        = array('id:city.country_id');
-    $chains['city']           = array('id:company','users.city_id');
-    $chains['customer']       = array('customer_order.customer_id');
-    $chains['student']        = array('student_course');
-    $chains['course']         = array('student_course');
-    $chains['company']        = array('users');
-    $chains['child']          = array('grand_child');
+    $chains["Users"]   = array("Blog");
+    $chains["Country"] = array("City");
+    $chains["City"]    = array("Company", "Users");
+    $chains["Company"] = array("Users");
 
     return $chains;
+  }
+
+  public function getKeys()
+  {
+    $keys = array();
+    $keys["Country"]["City"] = array("id" => "id", "fKey" => "country_id");
+    $keys["City"]["Company"] = array("id" => "id", "fKey" => "city_id");
+    $keys["City"]["Users"]   = array("id" => "id", "fKey" => "city_id");
+
+    return $keys;
   }
 }
 

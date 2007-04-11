@@ -101,7 +101,7 @@ class Sabel_DB_Connection
     if (!isset(self::$connections[$connectionName])) return null;
 
     $conn   = self::$connections[$connectionName];
-    $driver = load_driver($connectionName);
+    $driver = Sabel_DB_Config::loadDriver($connectionName);
     $driver->close($conn);
 
     unset(self::$connections[$connectionName]);
