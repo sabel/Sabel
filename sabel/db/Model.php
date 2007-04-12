@@ -356,15 +356,25 @@ class Sabel_DB_Model
     $tmpConstraints = $this->constraints;
     $this->unsetConstraints();
 
-    $this->setProjection("count(*)");
+    $this->setProjection("count(*) AS cnt");
     $this->setConstraint("limit", 1);
 
-    $row = $this->doSelect()->fetch(Sabel_DB_Result_Row::NUM);
+    $command = $this->getCommand();
+
+    try {
+      $rows = $command->select()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
 
     $this->projection  = $tmpProjection;
     $this->constraints = $tmpConstraints;
 
-    return (int)$row[0];
+    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+      return $command->getAfterResult();
+    } else {
+      return (int)$rows[0]["cnt"];
+    }
   }
 
   public function selectOne($arg1 = null, $arg2 = null, $arg3 = null)
@@ -379,8 +389,18 @@ class Sabel_DB_Model
 
   protected function createModel($model)
   {
-    if ($row = $model->doSelect()->fetch()) {
-      $model->setProperties($row);
+    $command = $model->getCommand();
+
+    try {
+      $rows = $command->select()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
+
+    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+      return $command->getAfterResult();
+    } elseif (isset($rows[0])) {
+      $model->setProperties($rows[0]);
       if ($this->parents) $model->addParent($this->parents);
     } else {
       $manager = $model->loadConditionManager();
@@ -408,13 +428,23 @@ class Sabel_DB_Model
       if ($result !== Sabel_DB_Relation_Joiner::CANNOT_JOIN) return $result;
     }
 
-    $resultSet = $this->doSelect();
-    if ($resultSet->isEmpty()) return false;
+    $command = $this->getCommand();
+
+    try {
+      $rows = $command->select()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
+
+    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+      return $command->getAfterResult();
+    } elseif (empty($rows)) {
+      return false;
+    }
 
     $results   = array();
     $modelName = convert_to_modelname($tblName);
 
-    $rows = $resultSet->fetchAll();
     foreach ($rows as $row) {
       $model = MODEL($modelName);
       $model->setProperties($row);
@@ -424,16 +454,6 @@ class Sabel_DB_Model
     }
 
     return $results;
-  }
-
-  protected function doSelect()
-  {
-    try {
-      $command = $this->getCommand();
-      return $command->select()->getResult();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
   }
 
   protected function internalJoin()
@@ -456,16 +476,14 @@ class Sabel_DB_Model
 
   public function getChild($childName, $constraints = null)
   {
-    $keys = Sabel_DB_Relation_Key::create($this, null);
-    $id   = $this->$keys["id"];
-
     $child = MODEL($childName);
+    $keys  = Sabel_DB_Relation_Key::create($this, null);
 
     if ($constraints) {
       $child->setConstraint($constraints);
     }
 
-    return $child->select($keys["fKey"], $id);
+    return $child->select($keys["fKey"], $this->$keys["id"]);
   }
 
   public function setProperties($row)
@@ -496,35 +514,38 @@ class Sabel_DB_Model
 
     if ($this->isSelected()) {
       $saveValues = ($data) ? $data : $this->updateValues;
+      $saveMethod = "update";
       $this->updateValues= array();
     } else {
       $saveValues = ($data) ? $data : $this->values;
+      $saveMethod = "insert";
     }
 
     $this->saveValues = $saveValues;
+    $command = $this->getCommand();
 
-    $command  = $this->getCommand();
-    $tblName  = $this->getTableName();
-    $newModel = MODEL(convert_to_modelname($tblName));
+    try {
+      $result = $command->$saveMethod()->getResult();
+      if ($result === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+        return $command->getAfterResult();
+      }
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
 
     if ($this->isSelected()) {
-      $command->update();
       $saveValues = array_merge($this->toArray(), $saveValues);
     } else {
-      $incCol = $this->getIncrementColumn();
-
-      try {
-        $id = $command->insert()->getIncrementId();
-      } catch (Exception $e) {
-        $this->executeError($e->getMessage(), $command);
-      }
-
       if (($incCol = $this->getIncrementColumn()) !== null) {
+        $id = $command->getIncrementId();
         if (!isset($saveValues[$incCol])) $saveValues[$incCol] = $id;
       }
     }
 
+    $tblName  = $this->getTableName();
+    $newModel = MODEL(convert_to_modelname($tblName));
     $newModel->setProperties($saveValues);
+
     $this->saveValues = array();
     return $newModel;
   }
@@ -593,33 +614,37 @@ class Sabel_DB_Model
   public function executeQuery($sql, $inputs = null)
   {
     if (isset($inputs) && !is_array($inputs)) {
-      throw new Exception("second argument must be an array");
+      throw new Exception("second argument must be an array.");
     }
 
     $command = $this->getCommand();
 
     try {
-      $command->query($sql, $inputs);
-      $resultSet = $command->getResult();
-      if ($resultSet->isEmpty()) return false;
-
-      $models  = array();
-      $tblName = $this->getTableName();
-      $mdlName = convert_to_modelname($tblName);
-
-      foreach ($resultSet as $row) {
-        $model = MODEL($mdlName);
-        foreach ($row as $key => $val) {
-          $model->values[$key] = $val;
-        }
-
-        $models[] = $model;
-      }
-
-      return $models;
+      $rows = $command->query($sql, $inputs)->getResult();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
     }
+
+    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+      return $command->getAfterResult();
+    } elseif (empty($rows)) {
+      return null;
+    }
+
+    $models  = array();
+    $tblName = $this->getTableName();
+    $mdlName = convert_to_modelname($tblName);
+
+    foreach ($rows as $row) {
+      $model = MODEL($mdlName);
+      foreach ($row as $key => $val) {
+        $model->values[$key] = $val;
+      }
+
+      $models[] = $model;
+    }
+
+    return $models;
   }
 
   protected function executeError($errorMsg, $command)

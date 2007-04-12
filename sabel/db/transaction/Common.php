@@ -27,12 +27,12 @@ class Sabel_DB_Transaction_Common extends Sabel_DB_Transaction_Base
 
   public function commit()
   {
-    $this->executeMethod('commit');
+    $this->executeMethod("commit");
   }
 
   public function rollback()
   {
-    $this->executeMethod('rollback');
+    $this->executeMethod("rollback");
   }
 
   private function executeMethod($method)

@@ -19,27 +19,19 @@ class Sabel_DB_Driver_Sequence
     switch ($db) {
       case "mysql":
         $rows = $driver->setSql("SELECT last_insert_id() AS id")->execute();
-        return (int)$rows[0]["id"];
+        return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
 
       case "pgsql":
-        list ($idColumn, $tblName, $values) = self::getProperties($model);
-
-        if ($idColumn !== null && !isset($values[$idColumn])) {
-          $sql  = "SELECT nextval('{$tblName}_{$idColumn}_seq') AS id";
-          $rows = $driver->setSql($sql)->execute();
-          if (($id = (int)$rows[0]["id"]) === 0) {
-            throw new Exception("{$tblName}_{$idColumn}_seq is not found.");
-          } else {
-            $values[$idColumn] = $id;
-            $model->setSaveValues($values);
-            return $id;
-          }
+        if ($model->getIncrementColumn()) {
+          $rows = $driver->setSql("SELECT LASTVAL() AS id")->execute();
+          return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
+        } else {
+          return null;
         }
-        break;
 
       case "mssql":
         $rows = $driver->setSql("SELECT SCOPE_IDENTITY() AS id")->execute();
-        return (int)$rows[0]["id"];
+        return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
 
       case "ibase":
         list ($idColumn, $tblName, $values) = self::getProperties($model);

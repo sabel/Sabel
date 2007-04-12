@@ -12,6 +12,7 @@
 class Sabel_DB_Command_Executer
 {
   const SKIP = 0x01;
+  const USE_AFTER_RESULT = 0x10;
 
   protected $model  = null;
   protected $driver = null;
@@ -22,6 +23,7 @@ class Sabel_DB_Command_Executer
   protected $incrementId   = null;
   protected $beforeMethods = array();
   protected $afterMethods  = array();
+  protected $afterResult   = null;
 
   public function __construct($model)
   {
@@ -61,18 +63,7 @@ class Sabel_DB_Command_Executer
     }
 
     $commander = Sabel_DB_Command_Loader::getClass($command);
-    $result = $commander->execute($this);
-    if ($result === self::SKIP) return $this;
-
-    if (isset($bms["execute"])) {
-      if ($this->doMethods($bms["execute"])) return $this;
-    }
-
-    $this->result = $this->driver->execute();
-
-    if (isset($ams["execute"])) {
-      if ($this->doMethods($ams["execute"])) return $this;
-    }
+    $commander->execute($this);
 
     if (isset($ams[$command])) {
       if ($this->doMethods($ams[$command])) return $this;
@@ -81,14 +72,24 @@ class Sabel_DB_Command_Executer
     return $this;
   }
 
+  public function setResult($result)
+  {
+    $this->result = $result;
+  }
+
   public function getResult()
   {
     return $this->result;
   }
 
-  public function setResult($result)
+  public function setAfterResult($result)
   {
-    $this->result = $result;
+    $this->afterResult = $result;
+  }
+
+  public function getAfterResult()
+  {
+    return $this->afterResult;
   }
 
   public function getIncrementId()

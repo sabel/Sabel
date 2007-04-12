@@ -13,7 +13,7 @@ class Sabel_DB_Command_Delete extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::DELETE;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
@@ -21,6 +21,6 @@ class Sabel_DB_Command_Delete extends Sabel_DB_Command_Base
     $query  = "DELETE FROM " . $model->getTableName();
     $query .= $model->getConditionManager()->build($driver);
 
-    $driver->setSql($query);
+    $executer->setResult($driver->setSql($query)->execute());
   }
 }

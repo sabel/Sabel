@@ -21,27 +21,9 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Mssql
   // @todo
   private $defCol = "";
 
-  // @todo
-  public function extension($ext)
-  {
-    $this->defCol = $ext->primaryKey;
-    $this->stmt->setDefaultOrderColumn($this->defCol);
-  }
-
   public function getAfterMethods()
   {
-    return array("execute" => array("getResultSet"),
-                 "insert"  => array("getIncrementId"));
-  }
-
-  // @todo
-  public function makeQuery($conditions, $constraints = null)
-  {
-    $this->stmt->makeConditionQuery($conditions);
-    if ($constraints) {
-      $constraints['defCol'] = $this->defCol;
-      $this->stmt->makeConstraintQuery($constraints);
-    }
+    return array("insert" => array("getIncrementId"));
   }
 
   public function escape($values)
@@ -62,6 +44,7 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Mssql
     $rows = array();
     if (is_resource($result)) {
       while ($row = mssql_fetch_assoc($result)) $rows[] = $row;
+      mssql_free_result($result);
     }
 
     return $this->result = $rows;

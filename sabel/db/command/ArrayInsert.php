@@ -13,12 +13,12 @@ class Sabel_DB_Command_ArrayInsert extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::ARRAY_INSERT;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
     $query  = $driver->getSqlClass($model)->buildInsertSql($driver);
 
-    $driver->setSql($driver->getSqlClass($model)->buildInsertSql($driver));
+    $executer->setResult($driver->setSql($query)->execute());
   }
 }

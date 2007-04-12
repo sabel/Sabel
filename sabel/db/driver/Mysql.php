@@ -22,8 +22,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Base
 
   public function getAfterMethods()
   {
-    return array("execute" => array("getResultSet"),
-                 "insert"  => array("getIncrementId"));
+    return array("insert" => array("getIncrementId"));
   }
 
   public function escape($values)
@@ -48,6 +47,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Base
     $rows = array();
     if (is_resource($result)) {
       while ($row = mysql_fetch_assoc($result)) $rows[] = $row;
+      mysql_free_result($result);
     }
 
     return $this->result = $rows;

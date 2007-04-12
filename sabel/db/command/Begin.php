@@ -13,7 +13,7 @@ class Sabel_DB_Command_Begin extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::BEGIN;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $model = $executer->getModel();
     $executer->getDriver()->begin($model->getConnectionName());

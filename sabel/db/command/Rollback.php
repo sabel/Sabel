@@ -13,10 +13,9 @@ class Sabel_DB_Command_Rollback extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::ROLLBACK;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $executer->getDriver()->loadTransaction()->rollback();
-
     return Sabel_DB_Command_Executer::SKIP;
   }
 }

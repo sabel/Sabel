@@ -23,8 +23,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Base_Driver
 
   public function getAfterMethods()
   {
-    return array("execute" => array("getResultSet"),
-                 "insert"  => array("getIncrementId"));
+    return array("insert" => array("getIncrementId"));
   }
 
   public function loadTransaction()
@@ -75,6 +74,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Base_Driver
     $rows = array();
     if (is_resource($result)) {
       while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
+      //ibase_free_result($result);
     }
 
     return $this->result = $rows;

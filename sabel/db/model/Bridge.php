@@ -47,8 +47,3 @@ class Sabel_DB_Model_Bridge
     return $children;
   }
 }
-
-class Hoge
-{
-  public static $count = 0;
-}

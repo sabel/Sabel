@@ -13,10 +13,9 @@ class Sabel_DB_Command_Commit extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::COMMIT;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $executer->getDriver()->loadTransaction()->commit();
-
     return Sabel_DB_Command_Executer::SKIP;
   }
 }

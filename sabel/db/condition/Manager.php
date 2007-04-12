@@ -30,7 +30,7 @@ class Sabel_DB_Condition_Manager
 
   public function create($arg1, $arg2, $arg3 = null)
   {
-    if (empty($arg1)) return null;
+    if (empty($arg1)) return;
 
     if (is_array($arg1)) {
       foreach ($arg1 as $key => $val) {

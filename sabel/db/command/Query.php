@@ -13,7 +13,7 @@ class Sabel_DB_Command_Query extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::QUERY;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $args = $executer->getArguments();
     $driver = $executer->getDriver();
@@ -24,6 +24,6 @@ class Sabel_DB_Command_Query extends Sabel_DB_Command_Base
       $query = $args[0];
     }
 
-    $driver->setSql($query);
+    $executer->setResult($driver->setSql($query)->execute());
   }
 }

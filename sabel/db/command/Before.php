@@ -103,4 +103,10 @@ class Sabel_DB_Command_Before
 
     return true;
   }
+
+  public static function clear()
+  {
+    self::$before    = array();
+    self::$instances = array();
+  }
 }

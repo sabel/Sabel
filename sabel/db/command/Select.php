@@ -13,7 +13,7 @@ class Sabel_DB_Command_Select extends Sabel_DB_Command_Base
 {
   protected $command = Sabel_DB_Command::SELECT;
 
-  public function run($executer)
+  protected function run($executer)
   {
     $model   = $executer->getModel();
     $driver  = $executer->getDriver();
@@ -28,6 +28,6 @@ class Sabel_DB_Command_Select extends Sabel_DB_Command_Base
       $query = $driver->getConstraintSqlClass()->build($query, $constraints);
     }
 
-    $driver->setSql($query);
+    $executer->setResult($driver->setSql($query)->execute());
   }
 }

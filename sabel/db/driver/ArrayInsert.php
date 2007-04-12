@@ -2,9 +2,9 @@
 
 class ArrayInsert
 {
-  public function createInsertSql($command)
+  public function run($executer)
   {
-    $model   = $command->getModel();
+    $model   = $executer->getModel();
     $tblName = $model->getTableName();
     $array   = $model->getSaveValues();
 
@@ -12,7 +12,7 @@ class ArrayInsert
          . implode(", ", array_keys($array[0]))
          . ") VALUES ";
 
-    $driver = $command->getDriver();
+    $driver = $executer->getDriver();
     $vals   = array();
 
     foreach ($array as $values) {
@@ -20,14 +20,15 @@ class ArrayInsert
       $vals[] = "(" . implode(", ", $values) . ")";
     }
 
-    $driver->setSql($sql . implode(", ", $vals));
+    $query = $sql . implode(", ", $vals);
+    $executer->setResult($driver->setSql($query)->execute());
   }
 }
 
 Sabel_DB_Command_Before::regist(array("ArrayInsert", true),
                                 Sabel_DB_Command::ARRAY_INSERT,
-                                array("createInsertSql"),
-                                array("driver" =>
-                                  array("include" => array("Sabel_DB_Driver_Mysql"))),
+                                array("run"),
+                                array("driver" => array("include" =>
+                                                  array("Sabel_DB_Driver_Mysql"))),
                                 Sabel_DB_Command_Before::INTERRUPT);
 

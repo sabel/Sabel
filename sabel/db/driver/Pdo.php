@@ -35,19 +35,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return $this->bindValues;
   }
 
-  public function getBeforeMethods()
-  {
-    if ($this->db === "pgsql") {
-      return array("insert" => array("setIncrementId"));
-    } else {
-      return array();
-    }
-  }
-
   public function getAfterMethods()
   {
-    return array("execute" => array("getResultSet"),
-                 "insert"  => array("getIncrementId"));
+    return array("insert" => array("getIncrementId"));
   }
 
   public function getSqlClass($model, $classType = null)
@@ -94,20 +84,17 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return escapeString($this->db, $values);
   }
 
-  public function setIncrementId($command)
-  {
-    $this->incrementId = Sabel_DB_Driver_Sequence::getId("pgsql", $command);
-  }
-
   public function getIncrementId($command = null)
   {
     switch ($this->db) {
       case 'pgsql':
-        $id = $this->incrementId;
+        $id = Sabel_DB_Driver_Sequence::getId("pgsql", $command);
         break;
+
       case 'mysql':
         $id = Sabel_DB_Driver_Sequence::getId("mysql", $command);
         break;
+
       case 'sqlite':
         $id = (int)$this->connection->lastInsertId();
         break;

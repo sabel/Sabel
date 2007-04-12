@@ -74,11 +74,6 @@ class Test_DB_Test extends SabelTestCase
 
     $model = new Users();
     $model->setConstraint('order', 'users.id');
-    if (self::$db === "PGSQL") {
-      define("STOP", true);
-    } elseif (self::$db === "MYSQL") {
-      define("MYSTOP", true);
-    }
     $users = $model->select();
 
     $user1 = $users[0];
@@ -405,7 +400,7 @@ class Test_DB_Test extends SabelTestCase
     $users = new Users();
     $users->sconst("order", "Users.id");
 
-    $joiner = new Sabel_DB_Relation_joiner($users);
+    $joiner = new Sabel_DB_Relation_Joiner($users);
 
     $join = new Sabel_DB_Relation_Join(MODEL("City"));
     $join->add(MODEL("Country"));
@@ -623,8 +618,13 @@ class Test_DB_Test extends SabelTestCase
     $model->begin(); // db2 start transaction.
     $model->save(array('id' => 1, 'name' => 'name'));
     $model->save(array('id' => 2, 'name' => 'name'));
-    // 'nama' not found -> execute rollback.
-    try { @$model->save(array('id' => 3, 'nama' => 'name')); } catch (Exception $e) {}
+
+    try {
+      // 'nama' not found -> execute rollback.
+      @$model->save(array('id' => 3, 'nama' => 'name'));
+    } catch (Exception $e) {
+
+    }
 
     // not execute.
     $model->commit();
@@ -837,6 +837,19 @@ class Test_DB_Test extends SabelTestCase
     $this->assertNotNull($model->auto_create);
   }
 
+  public function testCommandAfter()
+  {
+    Sabel_DB_Command_After::regist("TestAfter",
+                                   Sabel_DB_Command::SELECT,
+                                   array("after"),
+                                   array("model" => array("include" => array("Timer"))));
+
+    $result = Sabel_Model::load('Timer')->selectOne(1);
+    $this->assertEquals($result, "hoge");
+
+    Sabel_DB_Command_After::clear();
+  }
+
   public function testClear()
   {
     Sabel_DB_Schema_Loader::clear();
@@ -879,11 +892,6 @@ class Parents extends Sabel_DB_Model
 }
 
 class Customer extends Sabel_DB_Model
-{
-  protected $connectionName = 'default2';
-}
-
-class GrandChild extends Sabel_DB_Model
 {
   protected $connectionName = 'default2';
 }
@@ -1043,3 +1051,11 @@ Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
                                 array("record"),
                                 array("model" => array("include" => array("Timer"))));
 
+class TestAfter
+{
+  public function after($executer)
+  {
+    $executer->setResult(Sabel_DB_Command_Executer::USE_AFTER_RESULT);
+    $executer->setAfterResult("hoge");
+  }
+}

@@ -9,7 +9,7 @@ class Test_DB_Pgsql extends Test_DB_Test
                                   'schema'   => 'public',
                                   'database' => 'edo');
 
-  private static $params2 = array('driver'   => 'pgsql81',
+  private static $params2 = array('driver'   => 'pgsql',
                                   'host'     => 'localhost',
                                   'user'     => 'pgsql',
                                   'password' => 'pgsql',

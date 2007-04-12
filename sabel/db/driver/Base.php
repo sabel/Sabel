@@ -40,18 +40,14 @@ abstract class Sabel_DB_Driver_Base
     }
 
     if ($conn === null) {
-      if ($this->connection === null) {
-        $conn = Sabel_DB_Connection::get($this->connectionName);
-        $this->connection = $conn;
-      } else {
-        $conn = $this->connection;
-      }
+      $conn = $this->getConnection();
     }
 
     $func = $this->execFunction;
 
     switch ($this->driverId) {
       case "mysql":
+      case "mysqli":
       case "mysql41":
       case "mssql":
         if (is_array($sql)) {
@@ -62,10 +58,9 @@ abstract class Sabel_DB_Driver_Base
         }
 
       case "pgsql":
-      case "pgsql81":
       case "ibase":
         if (is_array($sql)) {
-          foreach ($sql as $s) $func($s, $conn);
+          foreach ($sql as $s) $func($conn, $s);
           break;
         } else {
           return $func($conn, $sql);
@@ -76,15 +71,6 @@ abstract class Sabel_DB_Driver_Base
   public function getResult()
   {
     return $this->result;
-  }
-
-  public function getResultSet($command = null)
-  {
-    if ($command === null) {
-      return new Sabel_DB_Result_Row($this->result);
-    } else {
-      $command->setResult(new Sabel_DB_Result_Row($this->result));
-    }
   }
 
   public function getBeforeMethods()
@@ -109,6 +95,16 @@ abstract class Sabel_DB_Driver_Base
   public function getConnectionName()
   {
     return $this->connectionName;
+  }
+
+  public function getConnection()
+  {
+    if ($this->connection === null) {
+      $conn = Sabel_DB_Connection::get($this->connectionName);
+      return $this->connection = $conn;
+    } else {
+      return $this->connection;
+    }
   }
 
   public function getSqlClass($model, $classType = null)
