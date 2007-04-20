@@ -239,7 +239,7 @@ class Test_Validate extends SabelTestCase
     $custom = array("function"  => "validate_function_custom1",
                     "model"     => "TargetModel1",
                     "column"    => "name",
-                    "arguments" => array("5"));
+                    "arguments" => array(5));
 
     Sabel_DB_Validate_Config::registCustomValidation($custom);
 
@@ -253,6 +253,37 @@ class Test_Validate extends SabelTestCase
     $validator = new Sabel_DB_Validator($model);
     $validator->validate();
     $this->assertFalse($validator->hasError());
+
+    Sabel_DB_Validate_Config::clearCustomValidations();
+  }
+
+  public function testCustom3()
+  {
+    $custom = array("function"  => "validate_function_custom1",
+                    "model"     => array("TargetModel1", "TargetModel2"),
+                    "column"    => "name",
+                    "arguments" => array(5, 2));
+
+    Sabel_DB_Validate_Config::registCustomValidation($custom);
+
+    $model = new TargetModel1();
+    $model->id = 10;
+    $model->name = "hoge";
+    $model->status = false;
+    $model->registed = "2006-01-10 20:11:44";
+    $model->point = 3000;
+
+    $validator = new Sabel_DB_Validator($model);
+    $validator->validate();
+    $this->assertFalse($validator->hasError());
+
+    $model = new TargetModel2();
+    $model->id = 10;
+    $model->name = "hoge";
+
+    $validator = new Sabel_DB_Validator($model);
+    $validator->validate();
+    $this->assertTrue($validator->hasError());
 
     Sabel_DB_Validate_Config::clearCustomValidations();
   }
@@ -303,6 +334,11 @@ class TargetModel1 extends Sabel_DB_Model
 
 }
 
+class TargetModel2 extends Sabel_DB_Model
+{
+
+}
+
 class Schema_TargetModel1
 {
   public function get()
@@ -343,6 +379,40 @@ class Schema_TargetModel1
                            'nullable'  => true,
                            'primary'   => false,
                            'default'   => null);
+
+    return $cols;
+  }
+
+  public function getProperty()
+  {
+    $property = array('primaryKey'   => 'id',
+                      'incrementKey' => 'id',
+                      'tableEngine'  => 'MyISAM');
+
+    return $property;
+  }
+}
+
+class Schema_TargetModel2
+{
+  public function get()
+  {
+    $cols = array();
+
+    $cols['id']     = array('type'      => 'INT',
+                            'max'       => 2147483647,
+                            'min'       => -2147483648,
+                            'increment' => true,
+                            'nullable'  => false,
+                            'primary'   => true,
+                            'default'   => null);
+
+    $cols['name']   = array('type'      => 'STRING',
+                            'increment' => false,
+                            'nullable'  => false,
+                            'primary'   => false,
+                            'max'       => 24,
+                            'default'   => null);
 
     return $cols;
   }

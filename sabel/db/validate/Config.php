@@ -61,7 +61,29 @@ class Sabel_DB_Validate_Config
 
   public static function registCustomValidation($custom)
   {
-    self::$customValidations[] = $custom;
+    $cvs =& self::$customValidations;
+
+    $colName = $custom["column"];
+    $models  = $custom["model"];
+    if (is_string($models)) $models = (array)$models;
+
+    $arguments = null;
+    if (isset($custom["arguments"])) {
+      $arguments = $custom["arguments"];
+      if (!is_array($arguments)) $arguments = (array)$arguments;
+
+      if (count($arguments) !== count($models)) {
+        throw new Exception("invalid parameter count.");
+      }
+    }
+
+    foreach ($models as $i => $mdlName) {
+      if ($arguments) {
+        $cvs[$mdlName][$colName][] = array($custom["function"], $arguments[$i]);
+      } else {
+        $cvs[$mdlName][$colName][] = $custom["function"];
+      }
+    }
   }
 
   public static function getCustomValidations()

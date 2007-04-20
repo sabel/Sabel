@@ -17,7 +17,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   {
     $hash = md5(substr($sbl_template, 0, 256));
     $this->makeCompileFile($sbl_template, $hash);
-        
+    
     $this->initNotInitValues($hash, $sbl_tpl_values);
     extract($sbl_tpl_values, EXTR_OVERWRITE);
     ob_start();

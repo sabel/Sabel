@@ -63,16 +63,19 @@ class Sabel_DB_Validator
         $errors[] = sprintf($this->messages["nullable"], $msgName);
         continue;
       }
+
       if (!$this->type($name, $schema)) {
         $errors[] = sprintf($this->messages["type"], $msgName);
         continue;
       }
+
       if ($schema->type === Sabel_DB_Type::STRING) {
         if (!$this->length($name, $schema)) {
           $errors[] = sprintf($this->messages["length"], $msgName);
           continue;
         }
       }
+
       if ($schema->type === Sabel_DB_Type::INT   ||
           $schema->type === Sabel_DB_Type::FLOAT ||
           $schema->type === Sabel_DB_Type::DOUBLE) {
@@ -84,7 +87,9 @@ class Sabel_DB_Validator
     }
 
     $customs = Sabel_DB_Validate_Config::getCustomValidations();
-    if ($customs) $this->customValidation($customs, $schemas, $errors);
+    if (isset($customs[$this->mdlName])) {
+      $this->customValidation($customs[$this->mdlName], $schemas, $errors);
+    }
 
     $processes = Sabel_DB_Validate_Config::getPostProcesses();
     if ($processes) $this->postProcess($processes, $errors);
@@ -93,27 +98,38 @@ class Sabel_DB_Validator
     return (empty($errors)) ? null : $errors;
   }
 
-  protected function customValidation($customs, $schemas, &$errors)
+  protected function customValidation($validations, $schemas, &$errors)
   {
-    foreach ($customs as $custom) {
-      $func  = $custom["function"];
-      $name  = $custom["column"];
-      $value = $schemas[$name]->value;
-
-      if (isset($custom["arguments"])) {
-        $args = array();
-        for ($i = 0; $i < count($custom["arguments"]); $i++) {
-          $args[] = '$custom["arguments"][' . $i . ']';
-        }
-
-        $args = str_replace(";", "", implode(",", $args));
-        eval ('$result = $func($value, ' . $args . ');');
+    foreach ($validations as $colName => $functions) {
+      if (isset($schemas[$colName])) {
+        $value = $schemas[$colName]->value;
       } else {
-        $result = $func($value);
+        continue;
       }
 
-      if ($result) $errors[] = $result;
+      foreach ($functions as $function) {
+        if (is_array($function)) {
+          list ($function, $args) = $function;
+          if (!is_array($args)) $args = (array)$args;
+
+          $argString = $this->createEvalString($args);
+          eval ('$result = $function($value, ' . $argString . ');');
+        } else {
+          $result = $function($value);
+        }
+
+        if ($result) $errors[] = $result;
+      }
     }
+  }
+
+  protected function createEvalString(&$arguments)
+  {
+    for ($i = 0; $i < count($arguments); $i++) {
+      $args[] = '$args[' . $i . ']';
+    }
+
+    return str_replace(";", "", implode(",", $args));
   }
 
   protected function postProcess($processes, &$errors)
