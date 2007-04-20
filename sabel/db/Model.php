@@ -12,6 +12,9 @@
 class Sabel_DB_Model
 {
   protected
+    $connectionName = "default";
+
+  protected
     $tableName = "",
     $columns   = array(),
     $schema    = null,
@@ -25,12 +28,11 @@ class Sabel_DB_Model
   protected
     $projection  = "*",
     $structure   = "normal",
-    $constraints = array(),
     $parents     = array();
 
   protected
-    $conditionManager = null,
-    $connectionName   = "default";
+    $constraints      = array(),
+    $conditionManager = null;
 
   protected
     $ignoreNothingPrimaryKey = false;
@@ -81,9 +83,6 @@ class Sabel_DB_Model
   public function getCommand()
   {
     return new Sabel_DB_Command_Executer($this);
-
-    // @todo for mssql
-    // $driver->extension($this->tableProp);
   }
 
   public function __set($key, $val)
@@ -178,11 +177,9 @@ class Sabel_DB_Model
       $manager->create($arg1);
     } elseif ($arg1 instanceof Sabel_DB_Condition_Object) {
       $manager->add($arg1);
+    } elseif ($arg2 === null) {
+      $manager->create($this->getPrimaryKey(), $arg1);
     } else {
-      if ($arg2 === null) {
-        $arg2 = $arg1;
-        $arg1 = $this->getPrimaryKey();
-      }
       $manager->create($arg1, $arg2, $arg3);
     }
   }
@@ -360,12 +357,7 @@ class Sabel_DB_Model
     $this->setConstraint("limit", 1);
 
     $command = $this->getCommand();
-
-    try {
-      $rows = $command->select()->getResult();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
+    $rows = $this->execSelect($command);
 
     $this->projection  = $tmpProjection;
     $this->constraints = $tmpConstraints;
@@ -390,12 +382,7 @@ class Sabel_DB_Model
   protected function createModel($model)
   {
     $command = $model->getCommand();
-
-    try {
-      $rows = $command->select()->getResult();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
+    $rows = $this->execSelect($command);
 
     if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
       return $command->getAfterResult();
@@ -429,12 +416,7 @@ class Sabel_DB_Model
     }
 
     $command = $this->getCommand();
-
-    try {
-      $rows = $command->select()->getResult();
-    } catch (Exception $e) {
-      $this->executeError($e->getMessage(), $command);
-    }
+    $rows = $this->execSelect($command);
 
     if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
       return $command->getAfterResult();
@@ -526,11 +508,14 @@ class Sabel_DB_Model
 
     try {
       $result = $command->$saveMethod()->getResult();
-      if ($result === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-        return $command->getAfterResult();
-      }
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
+    }
+
+    $this->saveValues = array();
+
+    if ($result === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
+      return $command->getAfterResult();
     }
 
     if ($this->isSelected()) {
@@ -546,7 +531,6 @@ class Sabel_DB_Model
     $newModel = MODEL(convert_to_modelname($tblName));
     $newModel->setProperties($saveValues);
 
-    $this->saveValues = array();
     return $newModel;
   }
 
@@ -645,6 +629,15 @@ class Sabel_DB_Model
     }
 
     return $models;
+  }
+
+  protected function execSelect($command)
+  {
+    try {
+      return $command->select()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
   }
 
   protected function executeError($errorMsg, $command)
