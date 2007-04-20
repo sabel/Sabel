@@ -26,7 +26,7 @@ class Sabel_DB_Validator
   public function __construct($model)
   {
     $this->model   = $model;
-    $this->mdlName = $mdlName = convert_to_modelname($model->getTableName());
+    $this->mdlName = $mdlName = $model->getModelName();
 
     $configs = Sabel_DB_Validate_Config::getConfigs();
 

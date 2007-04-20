@@ -16,6 +16,7 @@ class Sabel_DB_Model
 
   protected
     $tableName = "",
+    $modelName = "",
     $columns   = array(),
     $schema    = null,
     $selected  = false;
@@ -46,6 +47,7 @@ class Sabel_DB_Model
   protected function initialize($mdlName = null)
   {
     if ($mdlName === null) $mdlName = get_class($this);
+    $this->modelName = $mdlName;
 
     if ($this->tableName === "") {
       $tblName = convert_to_tablename($mdlName);
@@ -102,6 +104,11 @@ class Sabel_DB_Model
   public function getTableName()
   {
     return $this->tableName;
+  }
+
+  public function getModelName()
+  {
+    return $this->modelName;
   }
 
   public function getColumnNames()
@@ -362,11 +369,7 @@ class Sabel_DB_Model
     $this->projection  = $tmpProjection;
     $this->constraints = $tmpConstraints;
 
-    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-      return $command->getAfterResult();
-    } else {
-      return (int)$rows[0]["cnt"];
-    }
+    return (int)$rows[0]["cnt"];
   }
 
   public function selectOne($arg1 = null, $arg2 = null, $arg3 = null)
@@ -384,9 +387,7 @@ class Sabel_DB_Model
     $command = $model->getCommand();
     $rows = $this->execSelect($command);
 
-    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-      return $command->getAfterResult();
-    } elseif (isset($rows[0])) {
+    if (isset($rows[0])) {
       $model->setProperties($rows[0]);
       if ($this->parents) $model->addParent($this->parents);
     } else {
@@ -406,8 +407,6 @@ class Sabel_DB_Model
   public function select($arg1 = null, $arg2 = null, $arg3 = null)
   {
     $this->setCondition($arg1, $arg2, $arg3);
-
-    $tblName = $this->getTableName();
     $parents = $this->parents;
 
     if ($parents) {
@@ -417,15 +416,10 @@ class Sabel_DB_Model
 
     $command = $this->getCommand();
     $rows = $this->execSelect($command);
-
-    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-      return $command->getAfterResult();
-    } elseif (empty($rows)) {
-      return false;
-    }
+    if (empty($rows)) return false;
 
     $results   = array();
-    $modelName = convert_to_modelname($tblName);
+    $modelName = $this->getModelName();
 
     foreach ($rows as $row) {
       $model = MODEL($modelName);
@@ -514,10 +508,6 @@ class Sabel_DB_Model
 
     $this->saveValues = array();
 
-    if ($result === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-      return $command->getAfterResult();
-    }
-
     if ($this->isSelected()) {
       $saveValues = array_merge($this->toArray(), $saveValues);
     } else {
@@ -527,8 +517,7 @@ class Sabel_DB_Model
       }
     }
 
-    $tblName  = $this->getTableName();
-    $newModel = MODEL(convert_to_modelname($tblName));
+    $newModel = MODEL($this->getModelName());
     $newModel->setProperties($saveValues);
 
     return $newModel;
@@ -609,15 +598,10 @@ class Sabel_DB_Model
       $this->executeError($e->getMessage(), $command);
     }
 
-    if ($rows === Sabel_DB_Command_Executer::USE_AFTER_RESULT) {
-      return $command->getAfterResult();
-    } elseif (empty($rows)) {
-      return null;
-    }
+    if (empty($rows)) return null;
 
     $models  = array();
-    $tblName = $this->getTableName();
-    $mdlName = convert_to_modelname($tblName);
+    $mdlName = $this->getModelName();
 
     foreach ($rows as $row) {
       $model = MODEL($mdlName);

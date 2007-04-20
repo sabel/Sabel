@@ -11,9 +11,9 @@
  */
 class Sabel_DB_Command_Before
 {
-  const INTERRUPT_IMMEDIATE = -1;
-  const INTERRUPT           = 0;
-  const CONTINUOUS          = 1;
+  const INTERRUPT_IMMEDIATE = -0x01;
+  const INTERRUPT           = 0x00;
+  const CONTINUOUS          = 0x01;
 
   protected static $before    = array();
   protected static $instances = array();
@@ -41,8 +41,7 @@ class Sabel_DB_Command_Before
     $result = self::CONTINUOUS;
     if (empty(self::$before)) return $result;
 
-    $tableName  = $commandClass->getModel()->getTableName();
-    $modelName  = convert_to_modelname($tableName);
+    $modelName  = $commandClass->getModel()->getModelName();
     $driverName = get_class($commandClass->getDriver());
 
     foreach (self::$before as $className => $params) {

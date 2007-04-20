@@ -12,7 +12,6 @@
 class Sabel_DB_Command_Executer
 {
   const SKIP = 0x01;
-  const USE_AFTER_RESULT = 0x10;
 
   protected $model  = null;
   protected $driver = null;
@@ -80,16 +79,6 @@ class Sabel_DB_Command_Executer
   public function getResult()
   {
     return $this->result;
-  }
-
-  public function setAfterResult($result)
-  {
-    $this->afterResult = $result;
-  }
-
-  public function getAfterResult()
-  {
-    return $this->afterResult;
   }
 
   public function getIncrementId()

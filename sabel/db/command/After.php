@@ -34,8 +34,7 @@ class Sabel_DB_Command_After
   {
     if (empty(self::$after)) return;
 
-    $tableName  = $commandClass->getModel()->getTableName();
-    $modelName  = convert_to_modelname($tableName);
+    $modelName  = $commandClass->getModel()->getModelName();
     $driverName = get_class($commandClass->getDriver());
 
     foreach (self::$after as $className => $params) {
