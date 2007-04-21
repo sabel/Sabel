@@ -52,7 +52,7 @@ abstract class Sabel_DB_Driver_Base
       case "mssql":
         if (is_array($sql)) {
           foreach ($sql as $s) $func($s, $conn);
-          break;
+          return true;
         } else {
           return $func($sql, $conn);
         }
@@ -61,7 +61,7 @@ abstract class Sabel_DB_Driver_Base
       case "ibase":
         if (is_array($sql)) {
           foreach ($sql as $s) $func($conn, $s);
-          break;
+          return true;
         } else {
           return $func($conn, $sql);
         }

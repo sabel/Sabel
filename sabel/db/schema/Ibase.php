@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Ibase
+class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
 {
   protected
     $types = array("7"   => "smallint",
@@ -79,7 +79,7 @@ class Sabel_DB_Schema_Ibase
 
   protected function createGenerators()
   {
-    if (!empty($this->generators)) return null;
+    if (!empty($this->generators)) return;
 
     $gens =& $this->generators;
     $rows = $this->execute($this->genList);
@@ -91,7 +91,7 @@ class Sabel_DB_Schema_Ibase
 
   protected function createPrimaryKeys($tblName)
   {
-    if (!empty($this->primaryKeys)) return null;
+    if (!empty($this->primaryKeys)) return;
 
     $keys =& $this->primaryKeys;
     $rows = $this->execute(sprintf($this->priKeys, $tblName));
@@ -122,7 +122,7 @@ class Sabel_DB_Schema_Ibase
   {
     $fieldName = trim($row['rdb$field_name']);
 
-    $co = new Sabel_ValueObject();
+    $co = new stdClass();
     $co->name     = strtolower($fieldName);
     $co->nullable = ($row['rdb$null_flag'] === null);
 
@@ -133,16 +133,16 @@ class Sabel_DB_Schema_Ibase
       $type    = $this->types[$typeNum];
     }
 
-    $conName = get_db_tables(strtolower($tblName));
     $default = $row['rdb$default_source'];
-    $co->default = ($default === null) ? null : $this->getDefaultValue($default, $conName);
+    $co->default = ($default === null) ? null : $this->getDefaultValue($default);
 
     if (!$this->isBool($co, $type, $row)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
-      $this->setIncrement($co, $fieldName, $tblName);
-      $this->setPrimaryKey($co, $fieldName);
     }
+
+    $this->setIncrement($co, $fieldName, $tblName);
+    $this->setPrimaryKey($co, $fieldName);
 
     if ($co->type === Sabel_DB_Type::STRING) {
       $this->setLength($co, $row);
@@ -159,11 +159,12 @@ class Sabel_DB_Schema_Ibase
   protected function isBool($co, $type, $row)
   {
     if ($type === "char" && $row['rdb$character_length'] === 1) {
-      if ($co->default === 0 || $co->default === 1) {
+      if ($co->default === "0" || $co->default === "1") {
         $co->type = Sabel_DB_Type::BOOL;
         return true;
       }
     }
+
     return false;
   }
 
@@ -193,9 +194,9 @@ class Sabel_DB_Schema_Ibase
     $co->default = ($default === null) ? null : $this->getDefault($default);
   }
 
-  protected function getDefaultValue($default, $conName)
+  protected function getDefaultValue($default)
   {
-    $con  = Sabel_DB_Connection::getConnection($conName);
+    $con  = $this->driver->getConnection();
     $info = ibase_blob_info($con, $default);
     $blob = ibase_blob_open($con, $default);
     $val  = substr(ibase_blob_get($blob, $info[0]), 8);

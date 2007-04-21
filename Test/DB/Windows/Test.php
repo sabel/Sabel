@@ -39,10 +39,9 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 {
   public static $db = '';
   public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
-                                'test_for_like', 'test_condition', 'blog',
+                                'test_for_like', 'test_condition', 'blog', 'mail',
                                 'customer_order', 'classification', 'favorite_item',
                                 'student', 'course', 'student_course', 'timer', 'child');
-
 
   public function testBasic()
   {
@@ -85,7 +84,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
                     'city_id' => 1, 'company_id' => 2);
 
     $users = new Users();
-    $users->multipleInsert($data);
+    $users->arrayInsert($data);
 
     $data = array();
     $data[] = array('id' => 1, 'name' => 'tokyo',     'classification_id' => 1, 'country_id' => 1);
@@ -94,7 +93,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $data[] = array('id' => 4, 'name' => 'rondon',    'classification_id' => 1, 'country_id' => 3);
 
     $city = Sabel_Model::load('City');
-    $city->multipleInsert($data);
+    $city->arrayInsert($data);
 
     $city = Sabel_Model::load('Classification');
     $city->save(array('id' => 1, 'class_name' => 'classname1'));
@@ -106,10 +105,10 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $data[] = array('id' => 3, 'name' => 'england');
 
     $country = new Country();
-    $country->multipleInsert($data);
+    $country->arrayInsert($data);
 
     $model = new Users();
-    $model->setConstraint('order', 'id');
+    $model->setConstraint('order', 'users.id');
     $users = $model->select();
 
     $user1 = $users[0];
@@ -129,41 +128,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals((int)$user4->City->country_id, 1);
     $this->assertEquals($user3->City->Country->name, 'japan');
     $this->assertEquals($user4->City->Country->name, 'japan');
-  }
-
-  public function testChild()
-  {
-    $model = new Country();
-    $model->sconst('order', 'id desc');
-    $countries = $model->select();
-
-    $country3 = $countries[0];
-    $country2 = $countries[1];
-    $country1 = $countries[2];
-
-    $this->assertEquals($country3->name, 'england');
-    $this->assertEquals($country2->name, 'usa');
-
-    $cities = $country1->City;
-    $city1  = $cities[0];
-    $city2  = $cities[1];
-
-    $this->assertEquals($city1->name, 'tokyo');
-    $this->assertEquals($city2->name, 'osaka');
-  }
-
-  public function testChildCondition()
-  {
-    $model = new Country();
-    $model->ccond('name', 'osaka');
-    $japan = $model->selectOne('name', 'japan');
-
-    $this->assertEquals(count($japan->City), 1);
-    $this->assertEquals($japan->City[0]->name, 'osaka');
-
-    $model = new Country();
-    $japan = $model->selectOne('name', 'japan');
-    $this->assertEquals(count($japan->City), 2);
   }
 
   public function testLike()
@@ -213,16 +177,16 @@ class Test_DB_Windows_Test extends WindowsUnitTest
   public function testCondition()
   {
     $model = Sabel_Model::load('TestCondition');
-    $model->save(array('status' => __TRUE__,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
-    $model->save(array('status' => __TRUE__,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
-    $model->save(array('status' => __TRUE__,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
-    $model->save(array('status' => __FALSE__, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
-    $model->save(array('status' => __TRUE__,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
+    $model->save(array('status' => true,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
+    $model->save(array('status' => false, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
+    $model->save(array('status' => false, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
+    $model->save(array('status' => true,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
+    $model->save(array('status' => false, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
+    $model->save(array('status' => false, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
+    $model->save(array('status' => true,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
+    $model->save(array('status' => false, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
+    $model->save(array('status' => false, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
+    $model->save(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
 
     $model = Sabel_Model::load('TestCondition');
     $model->scond('COMP_point', array('>=', 8000));
@@ -236,18 +200,24 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals(count($models), 2);
 
     $model = Sabel_Model::load('TestCondition');
-    $conditions = array();
-    $conditions[] = new Sabel_DB_Condition('COMP_point', array('>=', 8000));
-    $conditions[] = new Sabel_DB_Condition('COMP_point', array('<=', 3000));
-    $model->setCondition($conditions);
+    $manager = $model->loadConditionManager();
+
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('>=', 8000)));
+    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('<=', 3000)));
+    $manager->add($or);
+
     $models = $model->select();
     $this->assertEquals(count($models), 6);
 
     $model = Sabel_Model::load('TestCondition');
-    $conditions = array();
-    $conditions[] = new Sabel_DB_Condition('COMP_point', array('>=', 8000));
-    $conditions[] = new Sabel_DB_Condition('COMP_registed', array('>', '2005-08-01 01:01:01'));
-    $model->setCondition($conditions);
+    $manager = $model->loadConditionManager();
+
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('>=', 8000)));
+    $or->add(new Sabel_DB_Condition_Object('COMP_registed', array('>', '2005-08-01 01:01:01')));
+    $manager->add($or);
+
     $model->sconst('order', 'id');
     $models = $model->select();
     $this->assertEquals(count($models), 6);
@@ -268,7 +238,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model6->point, 10000);
 
     $model = Sabel_Model::load('TestCondition');
-    $model->scond('status', __FALSE__);
+    $model->scond('status', false);
     $models = $model->select();
     $this->assertEquals(count($models), 6);
 
@@ -280,8 +250,8 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model2->point, 3000);
     $this->assertEquals($model3->point, 5000);
 
-    $model->unsetCondition();
-    $model->scond('status', __FALSE__, Sabel_DB_Condition::NOT);
+    $model->unsetConditions();
+    $model->scond('status', false, Sabel_DB_Condition_Object::NOT);
     $models = $model->select();
     $this->assertEquals(count($models), 4);
 
@@ -311,11 +281,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model3->point, 7000);
     $this->assertEquals($model4->point, 6000);
 
-    $model->unsetCondition();
+    $model->unsetConditions();
 
-    $condition = new Sabel_DB_Condition('BET_registed',
+    $condition = new Sabel_DB_Condition_Object('BET_registed',
                                         array('2005-01-01 11:11:11', '2005-05-05 11:11:11'),
-                                        Sabel_DB_Condition::NOT);
+                                        Sabel_DB_Condition_Object::NOT);
     $model->setCondition($condition);
     $model->sconst('order', 'registed');
     $models = $model->select();
@@ -328,11 +298,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model2->point, 5000);
 
     $model = Sabel_Model::load('TestCondition');
-    $model->save(array('status' => __FALSE__, 'registed' => '2004-12-01 10:10:10'));
-    $model->save(array('status' => __FALSE__, 'registed' => '2004-11-01 10:10:10'));
-    $model->save(array('status' => __TRUE__,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
+    $model->save(array('status' => false, 'registed' => '2004-12-01 10:10:10'));
+    $model->save(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
+    $model->save(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
 
-    $model->scond('point', Sabel_DB_Condition::ISNULL);
+    $model->scond('point', Sabel_DB_Condition_Object::ISNULL);
     $models = $model->select();
     $this->assertEquals(count($models), 2);
 
@@ -342,13 +312,13 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model1->registed, '2004-12-01 10:10:10');
     $this->assertEquals($model2->registed, '2004-11-01 10:10:10');
 
-    $model->unsetCondition();
+    $model->unsetConditions();
 
-    $models = $model->select('point', Sabel_DB_Condition::NOTNULL);
+    $models = $model->select('point', Sabel_DB_Condition_Object::NOTNULL);
     $this->assertEquals(count($models), 11);
 
     $model = Sabel_Model::load('TestCondition');
-    $model->scond('point', Sabel_DB_Condition::NOTNULL);
+    $model->scond('point', Sabel_DB_Condition_Object::NOTNULL);
     $model->scond('COMP_registed', array('<=', '2005-02-01 10:10:10'));
     $models = $model->select();
     $this->assertEquals(count($models), 3);
@@ -370,24 +340,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertTrue($model->status);
     $this->assertEquals($model->registed, '2004-10-01 10:10:10');
     $this->assertEquals($model->point, 13000);
-
-    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $row = $executer->getFirst('registed');
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2004-10-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 13000);
   }
 
   public function testLast()
@@ -397,143 +349,12 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertTrue($model->status);
     $this->assertEquals($model->registed, '2005-10-01 10:10:10');
     $this->assertEquals($model->point, 1000);
-
-    $executer = new Sabel_DB_Executer(array('table' => 'test_condition'));
-    $row = $executer->getLast('registed');
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2005-10-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 1000);
-  }
-
-  public function testChildConstraint()
-  {
-    $blog = Sabel_Model::load('Blog');
-    $blog->save(array('id' => 1,  'title' => 'title1',  'article' => 'article1',
-                      'write_date' => '2005-01-01 01:01:01', 'users_id' => 1));
-    $blog->save(array('id' => 2,  'title' => 'title2',  'article' => 'article2',
-                      'write_date' => '2005-01-01 02:01:01', 'users_id' => 1));
-    $blog->save(array('id' => 3,  'title' => 'title3',  'article' => 'article3',
-                      'write_date' => '2005-01-01 03:01:01', 'users_id' => 1));
-    $blog->save(array('id' => 4,  'title' => 'title4',  'article' => 'article4',
-                      'write_date' => '2005-01-01 04:01:01', 'users_id' => 1));
-    $blog->save(array('id' => 5,  'title' => 'title5',  'article' => 'article5',
-                      'write_date' => '2005-01-01 05:01:01', 'users_id' => 2));
-    $blog->save(array('id' => 6,  'title' => 'title6',  'article' => 'article6',
-                      'write_date' => '2005-01-01 06:01:01', 'users_id' => 2));
-    $blog->save(array('id' => 7,  'title' => 'title7',  'article' => 'article7',
-                      'write_date' => '2005-01-01 07:01:01', 'users_id' => 2));
-
-    $favorite = Sabel_Model::load('FavoriteItem');
-    $favorite->save(array('id' => 1, 'name' => 'farorite1',
-                          'registed' => '2005-12-01 01:01:01', 'users_id' => 1));
-    $favorite->save(array('id' => 2, 'name' => 'farorite2',
-                          'registed' => '2005-12-02 01:01:01', 'users_id' => 2));
-    $favorite->save(array('id' => 3, 'name' => 'farorite3',
-                          'registed' => '2005-12-03 01:01:01', 'users_id' => 2));
-    $favorite->save(array('id' => 4, 'name' => 'farorite4',
-                          'registed' => '2005-12-04 01:01:01', 'users_id' => 3));
-    $favorite->save(array('id' => 5, 'name' => 'farorite5',
-                          'registed' => '2005-12-05 01:01:01', 'users_id' => 3));
-    $favorite->save(array('id' => 6, 'name' => 'farorite6',
-                          'registed' => '2005-12-06 01:01:01', 'users_id' => 1));
-    $favorite->save(array('id' => 7, 'name' => 'farorite7',
-                          'registed' => '2005-12-07 01:01:01', 'users_id' => 4));
-
-    $user  = new Users(1);
-    $blogs = $user->getChild('Blog');
-    $this->assertEquals(count($blogs), 4);
-
-    $blog1 = $blogs[0];
-    $blog2 = $blogs[1];
-    $blog3 = $blogs[2];
-    $blog4 = $blogs[3];
-
-    // use default child constraint in users model.
-    $this->assertEquals($blog1->write_date, '2005-01-01 04:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 03:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog4->write_date, '2005-01-01 01:01:01');
-
-    $user  = new Users(1);
-    $user->cconst('Blog', array('order' => 'write_date'));
-    $blogs = $user->getChild('Blog');
-    $this->assertEquals(count($blogs), 4);
-
-    $blog1 = $blogs[0];
-    $blog2 = $blogs[1];
-    $blog3 = $blogs[2];
-    $blog4 = $blogs[3];
-
-    // child constraint is overrided.
-    $this->assertEquals($blog1->write_date, '2005-01-01 01:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 03:01:01');
-    $this->assertEquals($blog4->write_date, '2005-01-01 04:01:01');
-
-    $user  = new Users(2);
-    $user->cconst('FavoriteItem', array('order' => 'registed asc'));
-    $blogs = $user->getChild('Blog');
-    $items = $user->getChild('FavoriteItem');
-
-    $this->assertEquals(count($blogs), 3);
-    $this->assertEquals(count($items), 2);
-
-    $blog1 = $blogs[0];
-    $blog2 = $blogs[1];
-    $blog3 = $blogs[2];
-
-    $this->assertEquals($blog1->write_date, '2005-01-01 07:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 06:01:01');
-    $this->assertEquals($blog3->write_date, '2005-01-01 05:01:01');
-
-    $item1 = $items[0];
-    $item2 = $items[1];
-
-    $this->assertEquals($item1->registed, '2005-12-02 01:01:01');
-    $this->assertEquals($item2->registed, '2005-12-03 01:01:01');
-  }
-
-  public function testChildPaginate()
-  {
-    $user  = new Users(1);
-    $user->cconst('Blog', array('order' => 'write_date desc', 'limit' => 2));
-    $blogs = $user->getChild('Blog');
-    $this->assertEquals(count($blogs), 2);
-
-    $blog1 = $blogs[0];
-    $blog2 = $blogs[1];
-
-    $this->assertEquals($blog1->write_date, '2005-01-01 04:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 03:01:01');
-
-    $user  = new Users(1);
-    $user->cconst('Blog', array('order' => 'write_date desc', 'limit' => 2, 'offset' => 2));
-    $blogs = $user->getChild('Blog');
-    $this->assertEquals(count($blogs), 2);
-
-    $blog1 = $blogs[0];
-    $blog2 = $blogs[1];
-
-    $this->assertEquals($blog1->write_date, '2005-01-01 02:01:01');
-    $this->assertEquals($blog2->write_date, '2005-01-01 01:01:01');
   }
 
   public function testTest()
   {
     $model = Sabel_Model::load('Customer');
-    $model->execute('DELETE FROM customer');
+    $model->executeQuery('DELETE FROM customer');
 
     $model->save(array('id' => 1, 'name' => 'name1'));
     $model->save(array('id' => 2, 'name' => 'name2'));
@@ -564,7 +385,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($order3->amount, 8000);
 
     $model = Sabel_Model::load('CustomerOrder');
-    $model->enableParent();
     $model->setConstraint('order', 'buy_date desc');
     $orders = $model->select();
     $this->assertEquals(count($orders), 8);
@@ -579,24 +399,50 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($order5->buy_date, '2005-05-01 10:10:10');
     $this->assertEquals($order4->buy_date, '2005-04-01 10:10:10');
 
-    $customer = Sabel_Model::load('Customer')->selectOne(2);
-    $order    = $customer->newChild('CustomerOrder');
-
+    $order = Sabel_Model::load('CustomerOrder');
+    $order->customer_id = 2;
     $order->buy_date = '2005-08-01 10:10:10';
     $order->amount   = 9000;
     $order->save();
 
     $orders = Sabel_Model::load('Customer')->selectOne(2)->getChild('CustomerOrder');
     $this->assertEquals(count($orders), 4);
+
+    $order = MODEL('CustomerOrder');
+    $order->setParents(array('Customer'));
+    $order->sconst('order', 'CustomerOrder.id');
+    $orders = $order->select();
+
+    $this->assertEquals($orders[0]->Customer->id, 1);
+
+    $this->assertEquals($orders[0]->customer_id, 1);
+    $this->assertEquals($orders[0]->buy_date, '2005-01-01 10:10:10');
+    $this->assertEquals($orders[0]->amount, 1000);
+
+    $this->assertEquals($orders[1]->customer_id, 1);
+    $this->assertEquals($orders[1]->buy_date, '2005-02-01 10:10:10');
+    $this->assertEquals($orders[1]->amount, 2000);
+
+    $this->assertEquals($orders[5]->customer_id, 2);
+    $this->assertEquals($orders[5]->buy_date, '2005-06-01 10:10:10');
+    $this->assertEquals($orders[5]->amount, 6000);
+
+    $this->assertEquals($orders[5]->Customer->id, 2);
   }
 
   public function testJoin()
   {
-    $model = new Users();
-    $model->sconst('order', 'users.id');
-    $modelPairs = array('Users:City', 'City:Country');
-    $users = $model->selectJoin($modelPairs);
+    $users = new Users();
+    $users->sconst("order", "Users.id");
 
+    $joiner = new Sabel_DB_Relation_Joiner($users);
+
+    $join = new Sabel_DB_Relation_Join(MODEL("City"));
+    $join->add(MODEL("Country"));
+
+    $joiner->add($join);
+
+    $users = $joiner->join();
     $user1 = $users[0];
     $user2 = $users[1];
     $user3 = $users[2];
@@ -614,11 +460,19 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
   public function testMoreJoin()
   {
-    $model = new Users();
-    $model->sconst('order', 'users.id');
-    $modelPairs = array('Users:City', 'Users:Company', 'City:Country', 'City:Classification', 'Company:City');
-    $users = $model->selectJoin($modelPairs);
+    $users = new Users();
+    $users->sconst("order", "users.id");
 
+    $joiner = new Sabel_DB_Relation_joiner($users);
+    $joiner->add(MODEL("Company"));
+
+    $join = new Sabel_DB_Relation_Join(MODEL("City"));
+    $join->add(MODEL("Country"))
+         ->add(MODEL("Classification"));
+
+    $joiner->add($join);
+
+    $users = $joiner->join();
     $this->assertEquals(count($users), 4);
 
     $user1 = $users[0];
@@ -646,164 +500,88 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($user4->City->id, 1);
     $this->assertEquals($user4->City->name, 'tokyo');
     $this->assertEquals($user4->Company->name, 'tokyo-company2');
-    $this->assertEquals($user4->Company->City->id, 1);
-    $this->assertEquals($user4->Company->City->name, 'tokyo');
   }
 
-  public function testFusionModel()
+  public function testJoinAlias()
   {
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Country'));
-    $fusioned = $model->selectOne('id', 4);
+    $data = array();
+    $data[] = array('id' => 1, 'sender_id' => 1, 'recipient_id' => 2, 'subject' => 'subject1');
+    $data[] = array('id' => 2, 'sender_id' => 1, 'recipient_id' => 3, 'subject' => 'subject2');
+    $data[] = array('id' => 3, 'sender_id' => 2, 'recipient_id' => 1, 'subject' => 'subject3');
+    $data[] = array('id' => 4, 'sender_id' => 3, 'recipient_id' => 4, 'subject' => 'subject4');
+    $data[] = array('id' => 5, 'sender_id' => 1, 'recipient_id' => 4, 'subject' => 'subject5');
+    $data[] = array('id' => 6, 'sender_id' => 2, 'recipient_id' => 3, 'subject' => 'subject6');
 
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->city_id, 1);
-    $this->assertEquals((int)$fusioned->City_id, 1);
-    $this->assertEquals((int)$fusioned->Country_id, 1);
-    $this->assertEquals($fusioned->name, 'username4');
-    $this->assertEquals($fusioned->email, 'user4@example.com');
-    $this->assertEquals($fusioned->City_name, 'tokyo');
-    $this->assertEquals($fusioned->Country_name, 'japan');
-  }
+    $mail = MODEL("Mail");
+    $mail->arrayInsert($data);
 
-  public function testFusionCondition()
-  {
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Country'));
-    $model->setCombination(array('City:Country', 'Users:City'));
-    $fusioned = $model->selectOne('id', 4);
+    $mail = MODEL("Mail");
+    $mail->sconst("order", "Mail.id");
+    $joiner = new Sabel_DB_Relation_Joiner($mail);
 
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->city_id, 1);
-    $this->assertEquals((int)$fusioned->City_id, 1);
-    $this->assertEquals((int)$fusioned->Country_id, 1);
-    $this->assertEquals($fusioned->name, 'username4');
-    $this->assertEquals($fusioned->email, 'user4@example.com');
-    $this->assertEquals($fusioned->City_name, 'tokyo');
-    $this->assertEquals($fusioned->Country_name, 'japan');
+    $user = MODEL("Users");
+    $join = new Sabel_DB_Relation_Join($user);
+    $join->add(MODEL("City"));
 
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Country'));
-    $model->setCombination(array('City.id:Users.city_id', 'Country.id:City.country_id'));
-    $fusioned = $model->selectOne('id', 4);
+    $joiner->add($join, array("fKey" => "sender_id"), null, "FromUser");
+    $joiner->add(MODEL("Users"), array("fKey" => "recipient_id"), null, "ToUser");
+    $results = $joiner->join();
 
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->City_id, 1);
-    $this->assertEquals((int)$fusioned->Country_id, 1);
-    $this->assertEquals($fusioned->name, 'username4');
-    $this->assertEquals($fusioned->email, 'user4@example.com');
-    $this->assertEquals($fusioned->City_name, 'tokyo');
-    $this->assertEquals($fusioned->Country_name, 'japan');
-  }
+    $this->assertEquals(count($results), 6);
 
-  public function testMoreFusion()
-  {
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
-    $fusioned = $model->selectOne('id', 4);
+    $mail1 = $results[0];
+    $mail3 = $results[2];
+    $mail5 = $results[4];
 
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->city_id, 1);
-    $this->assertEquals((int)$fusioned->City_id, 1);
-    $this->assertEquals((int)$fusioned->Country_id, 1);
-    $this->assertEquals((int)$fusioned->Classification_id, 1);
-    $this->assertEquals($fusioned->name, 'username4');
-    $this->assertEquals($fusioned->email, 'user4@example.com');
-    $this->assertEquals($fusioned->City_name, 'tokyo');
-    $this->assertEquals($fusioned->Country_name, 'japan');
-    $this->assertEquals($fusioned->Classification_class_name, 'classname1');
-    $this->assertEquals($fusioned->class_name, 'classname1');
-  }
+    $this->assertTrue(is_object($mail1->FromUser));
+    $this->assertTrue(is_object($mail1->FromUser->City));
+    $this->assertTrue(is_object($mail1->ToUser));
+    $this->assertTrue(is_object($mail3->FromUser));
+    $this->assertTrue(is_object($mail3->FromUser->City));
+    $this->assertTrue(is_object($mail5->ToUser));
 
-  public function testMoreFusionConditionTest()
-  {
-    // ok.
-    //$model = Sabel_Model::fusion(array('City', 'Users', 'Classification', 'Country'));
-    //$model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
+    $this->assertEquals($mail1->FromUser->id, 1);
+    $this->assertEquals($mail1->ToUser->id, 2);
+    $this->assertEquals($mail3->FromUser->id, 2);
+    $this->assertEquals($mail3->ToUser->id, 1);
+    $this->assertEquals($mail5->FromUser->id, 1);
+    $this->assertEquals($mail5->ToUser->id, 4);
 
-    $model = Sabel_Model::fusion(array('City', 'Users', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Country', 'City:Classification'));
-
-    $fusioned = $model->selectOne('id', 4);
-
-    $this->assertEquals((int)$fusioned->Users_id, 1);
-    $this->assertEquals((int)$fusioned->Users_city_id, 4);
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->Country_id, 3);
-    $this->assertEquals((int)$fusioned->Classification_id, 1);
-    $this->assertEquals($fusioned->Users_name, 'username1');
-    $this->assertEquals($fusioned->email, 'user1@example.com');
-    $this->assertEquals($fusioned->name, 'rondon');
-    $this->assertEquals($fusioned->Country_name, 'england');
-    $this->assertEquals($fusioned->Classification_class_name, 'classname1');
-    $this->assertEquals($fusioned->class_name, 'classname1');
-  }
-
-  public function testUpdateFusionModel()
-  {
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
-    $fusioned = $model->selectOne('id', 4);
-
-    $fusioned->city_id = 2;
-    $fusioned->save();
-
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
-    $fusioned = $model->selectOne('id', 4);
-
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->city_id, 2);
-    $this->assertEquals((int)$fusioned->City_id, 2);
-    $this->assertEquals($fusioned->City_name, 'osaka');
-
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setCombination(array('Users:City', 'City:Classification', 'City:Country'));
-    $fusioned = $model->selectOne('id', 4);
-
-    $fusioned->City_name = 'Osaka';
-    $fusioned->save();
-
-    $model = Sabel_Model::fusion(array('Users', 'City', 'Classification', 'Country'));
-    $model->setCombination(array('Users.city_id:City.id',
-                                 'City.classification_id:Classification.id',
-                                 'City.country_id:Country.id'));
-
-    $fusioned = $model->selectOne('id', 4);
-
-    $this->assertEquals((int)$fusioned->id, 4);
-    $this->assertEquals((int)$fusioned->city_id, 2);
-    $this->assertEquals((int)$fusioned->City_id, 2);
-    $this->assertEquals($fusioned->City_name, 'Osaka');
+    $this->assertEquals($mail3->FromUser->name, "username2");
+    $this->assertEquals($mail3->ToUser->name, "username1");
   }
 
   public function testRemove()
   {
     $model = Sabel_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 13);
-    $model->unsetCondition();
+
     $model->remove('point', 1000);
 
     $model = Sabel_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 12);
-    $model->unsetCondition();
+    $model->unsetConditions();
 
-    $model->scond('point', Sabel_DB_Condition::ISNULL);
+    $model->scond('point', Sabel_DB_Condition_Object::ISNULL);
     $this->assertEquals($model->getCount(), 2);
 
-    Sabel_Model::load('TestCondition')->remove('point', Sabel_DB_Condition::ISNULL);
+    Sabel_Model::load('TestCondition')->remove('point', Sabel_DB_Condition_Object::ISNULL);
 
     $model = Sabel_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 10);
 
     $model = Sabel_Model::load('TestCondition');
-    $conditions = array();
-    $conditions[] = new Sabel_DB_Condition('point', 10000);
-    $conditions[] = new Sabel_DB_Condition('COMP_point', array('<=', 4000));
-    $model->setCondition($conditions);
+    $manager = $model->loadConditionManager();
+    $manager->clear();
+
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(new Sabel_DB_Condition_Object('point', 10000));
+    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('<=', 4000)));
+    $manager->add($or);
     $model->remove();
 
     $model = Sabel_Model::load('TestCondition');
     $this->assertEquals($model->getCount(), 6);
-    $model->unsetCondition();
 
     $models = $model->select();
     $model1 = $models[0];
@@ -829,8 +607,8 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
   public function testCascadeDelete()
   {
-    $country = new Country();
-    @$country->cascadeDelete(1);
+    $deleter = new Sabel_DB_Model_CascadeDelete("Country", 1);
+    $deleter->execute("CountryCascadeDelete");
 
     $country   = new Country();
     $countries = $country->select();
@@ -847,6 +625,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($cities[1]->name, 'rondon');
 
     $users = new Users();
+    $users->sconst('order', 'users.id');
     $users = $users->select();
 
     $this->assertEquals(count($users), 2);
@@ -856,7 +635,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
   public function testTransaction()
   {
-    Sabel_Model::load('CustomerOrder')->execute('DELETE FROM customer_order');
+    Sabel_Model::load('CustomerOrder')->executeQuery('DELETE FROM customer_order');
 
     $customers = Sabel_Model::load('Customer')->select();
     $this->assertFalse($customers);
@@ -874,8 +653,13 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $model->begin(); // db2 start transaction.
     $model->save(array('id' => 1, 'name' => 'name'));
     $model->save(array('id' => 2, 'name' => 'name'));
-    // 'nama' not found -> execute rollback.
-    try { @$model->save(array('id' => 3, 'nama' => 'name')); } catch (Exception $e) {}
+
+    try {
+      // 'nama' not found -> execute rollback.
+      @$model->save(array('id' => 3, 'nama' => 'name'));
+    } catch (Exception $e) {
+
+    }
 
     // not execute.
     $model->commit();
@@ -900,7 +684,9 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $model->save(array('id' => 2, 'name' => 'name2'));
     $model->save(array('id' => 3, 'name' => 'name3'));
 
-    $model = Sabel_Model::load('Customer')->cascadeDelete(1);
+    $deleter = new Sabel_DB_Model_CascadeDelete("Customer", 1);
+    $deleter->execute("CustomerCascadeDelete");
+
     $this->assertEquals(Sabel_Model::load('Customer')->getCount(), 2);
 
     $model = Sabel_Model::load('Customer')->select();
@@ -918,11 +704,8 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertEquals($model[0]->buy_date, '2000-02-02 02:02:02');
     $this->assertEquals($model[0]->amount, 2000);
 
-    $executer = new Sabel_DB_Executer(array('table' => 'customer', 'connectName' => 'default2'));
-    $executer->executeQuery('DELETE FROM customer');
-
-    $executer = new Sabel_DB_Executer(array('table' => 'customer', 'connectName' => 'default'));
-    $executer->executeQuery('DELETE FROM customer_order');
+    MODEL('Customer')->executeQuery('DELETE FROM customer');
+    MODEL('CustomerOrder')->executeQuery('DELETE FROM customer_order');
   }
 
   public function testUpdate()
@@ -977,7 +760,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
   public function testSchema()
   {
     $model  = Sabel_Model::load('SchemaTest');
-    $schema = $model->getTableSchema();
+    $schema = $model->getSchema();
 
     $id = $schema->id;
     $nm = $schema->name;
@@ -987,34 +770,32 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $db = $schema->db_val;
     $tx = $schema->tx;
 
-    $this->assertEquals($id->type, Sabel_DB_Type_Const::INT);
+    $this->assertEquals($id->type, Sabel_DB_Type::INT);
     $this->assertEquals($id->max,  2147483647);
     $this->assertEquals($id->min, -2147483648);
     $this->assertFalse($id->nullable);
     $this->assertTrue($id->increment);
     $this->assertTrue($id->primary);
 
-    $this->assertEquals($nm->type, Sabel_DB_Type_Const::STRING);
+    $this->assertEquals($nm->type, Sabel_DB_Type::STRING);
     $this->assertEquals($nm->max, 128);
     $this->assertFalse($nm->nullable);
     $this->assertFalse($nm->increment);
     $this->assertFalse($nm->primary);
     $this->assertEquals($nm->default, 'test');
 
-    /*
-    $this->assertEquals($bl->type, Sabel_DB_Type_Const::BOOL);
+    $this->assertEquals($bl->type, Sabel_DB_Type::BOOL);
     $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertFalse($bl->primary);
-    $this->assertFalse($bl->default);
-    */
+    $this->assertEquals($bl->default, "0");
 
-    $this->assertEquals($dt->type, Sabel_DB_Type_Const::DATETIME);
+    $this->assertEquals($dt->type, Sabel_DB_Type::DATETIME);
     $this->assertTrue($dt->nullable);
     $this->assertFalse($dt->increment);
     $this->assertFalse($dt->primary);
 
-    $this->assertEquals($ft->type, Sabel_DB_Type_Const::FLOAT);
+    $this->assertEquals($ft->type, Sabel_DB_Type::FLOAT);
     $this->assertEquals($ft->max,  3.4028235E38);
     $this->assertEquals($ft->min, -3.4028235E38);
     $this->assertTrue($ft->nullable);
@@ -1022,14 +803,14 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertFalse($ft->primary);
     $this->assertEquals($ft->default, 1);
 
-    $this->assertEquals($db->type, Sabel_DB_Type_Const::DOUBLE);
+    $this->assertEquals($db->type, Sabel_DB_Type::DOUBLE);
     $this->assertEquals($db->max,  1.79769E308);
     $this->assertEquals($db->min, -1.79769E308);
     $this->assertFalse($db->nullable);
     $this->assertFalse($db->increment);
     $this->assertFalse($db->primary);
 
-    $this->assertEquals($tx->type, Sabel_DB_Type_Const::TEXT);
+    $this->assertEquals($tx->type, Sabel_DB_Type::TEXT);
     $this->assertTrue($tx->nullable);
     $this->assertFalse($tx->increment);
     $this->assertFalse($tx->primary);
@@ -1061,45 +842,16 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $suzuki = Sabel_Model::load('Student')->selectOne(1);
     $this->assertEquals($suzuki->name, 'suzuki');
 
-    $courses = $suzuki->getChild('Course');
+    $bridge = new Sabel_DB_Model_Bridge($suzuki, "StudentCourse");
+    $courses = $bridge->getChild('Course');
     $this->assertEquals(count($courses), 2);
 
-    $courses = $suzuki->Course;
-    $this->assertEquals(count($courses), 2);
+    $yamada = Sabel_Model::load('Student')->selectOne(5);
+    $this->assertEquals($yamada->name, 'yamada');
 
-    $suzuki = Sabel_Model::load('Student')->selectOne(5);
-    $this->assertEquals($suzuki->name, 'yamada');
-
-    $courses = $suzuki->getChild('Course');
+    $bridge = new Sabel_DB_Model_Bridge($yamada, "StudentCourse");
+    $courses = $bridge->getChild('Course');
     $this->assertFalse($courses);
-  }
-
-  public function testClearChild()
-  {
-    $blogs = Sabel_Model::load('Blog')->select();
-    $this->assertEquals(count($blogs), 7);
-
-    $user = new Users(2);
-    $user->clearChild('Blog');
-
-    $blogs = Sabel_Model::load('Blog')->select();
-    $this->assertEquals(count($blogs), 4);
-  }
-
-  public function testNewChild()
-  {
-    $user = new Users(2);
-    $blog = $user->newChild('Blog');
-
-    $blog->id         = 8;
-    $blog->title      = 'title8';
-    $blog->article    = 'article8';
-    $blog->write_date = '2005-01-01 08:01:01';
-    $blog->save();
-
-    $blog = Sabel_Model::load('Blog')->selectOne(8);
-    $this->assertEquals($blog->title, 'title8');
-    $this->assertEquals($blog->users_id, 2);
   }
 
   public function testTimer()
@@ -1120,251 +872,50 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertNotNull($model->auto_create);
   }
 
-  public function testExecuter()
-  {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
-    $driver = $exe->getDriver();
-    $driver->execute("SELECT * FROM favorite_item");
-    $results = $driver->getResultSet()->fetchAll();
-    $this->assertEquals(count($results), 7);
-  }
-
-  public function testExecuterConstraintAndCondition()
-  {
-    $prop   = array('table' => 'favorite_item');
-    $exe    = new Sabel_DB_Executer($prop);
-
-    $driver = $exe->getDriver();
-    $exe->getStatement()->setBasicSQL("SELECT * FROM favorite_item");
-    $exe->setConstraint(array('order' => 'registed desc'));
-    $results = $exe->exec()->fetchAll();
-
-    $row1 = $results[0];
-    $row2 = $results[1];
-    $row3 = $results[2];
-
-    $this->assertEquals((int)$row1['users_id'], 4);
-    $this->assertEquals((int)$row2['users_id'], 1);
-    $this->assertEquals((int)$row3['users_id'], 3);
-
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->setCondition(array('users_id' => 4));
-    $results = $exe->select()->fetchAll();
-
-    $this->assertEquals(count($results), 1);
-
-    $row = $results[0];
-    $this->assertEquals((int)$row['id'], 7);
-    $this->assertEquals((int)$row['users_id'], 4);
-  }
-
-  public function testExecuterUpdate()
-  {
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->scond(7);
-    $exe->update(array('registed' => '2005-12-08 01:01:01', 'name' => 'favorite8'));
-
-    $exe->unsetCondition();
-
-    $exe->scond(7);
-    $row = $exe->select()->fetch();
-
-    $this->assertEquals((int)$row['id'], 7);
-    $this->assertEquals((int)$row['users_id'], 4);
-    $this->assertEquals($row['registed'], '2005-12-08 01:01:01');
-    $this->assertEquals($row['name'], 'favorite8');
-  }
-
-  public function testExecuterUpdate2()
-  {
-    $prop = array('table' => 'favorite_item');
-    $exe  = new Sabel_DB_Executer($prop);
-    $exe->scond('users_id', 3);
-    $exe->update(array('users_id' => 5));
-
-    // $exe->unsetCondition();
-    // $exe->scond('users_id', 3);
-
-    $row = $exe->select()->fetchAll();
-    $this->assertFalse($row);
-
-    $exe->unsetCondition();
-    $exe->scond('users_id', 5);
-
-    $row = $exe->select()->fetchAll();
-    $this->assertEquals(count($row), 2);
-  }
-
-  public function testExecuterInsert()
-  {
-    $prop  = array('table' => 'test_condition');
-    $exe   = new Sabel_DB_Executer($prop);
-    $data  = array('status' => __TRUE__, 'registed' => '2006-01-01 10:10:10', 'point' => 20000);
-    $newId = $exe->insert($data, 'id');
-
-    $this->assertTrue(is_int($newId));
-    $this->assertTrue($newId > 0);
-
-    $exe = new Sabel_DB_Executer($prop);
-    $row = $exe->getLast('id');
-
-    $this->assertEquals((int)$row['id'], $newId);
-
-    switch (self::$db) {
-      case 'MYSQL':
-        $this->assertEquals($row['status'], '1');
-        break;
-      case 'PGSQL':
-        $this->assertTrue($row['status']);
-        break;
-      case 'SQLITE':
-        $this->assertEquals($row['status'], 'true');
-        break;
-    }
-
-    $this->assertEquals($row['registed'], '2006-01-01 10:10:10');
-    $this->assertEquals((int)$row['point'], 20000);
-
-    $model = MODEL('TestCondition');
-    $obj   = $model->getLast('id');
-
-    $this->assertEquals($obj->id, $newId);
-    $this->assertTrue($obj->status);
-    $this->assertEquals($obj->registed, '2006-01-01 10:10:10');
-    $this->assertEquals($obj->point, 20000);
-  }
-
-  public function testChildConstarint2()
-  {
-    $data = array();
-    $data[] = array('id' => 1, 'name' => 'parent1');
-    $data[] = array('id' => 2, 'name' => 'parent2');
-    $data[] = array('id' => 3, 'name' => 'parent3');
-    MODEL('Parents')->multipleInsert($data);
-
-    $data = array();
-    $data[] = array('id' => 1, 'parents_id' => 2, 'name' => 'child1', 'height' => 160);
-    $data[] = array('id' => 2, 'parents_id' => 2, 'name' => 'child2', 'height' => 165);
-    $data[] = array('id' => 3, 'parents_id' => 3, 'name' => 'child3', 'height' => 170);
-    $data[] = array('id' => 4, 'parents_id' => 3, 'name' => 'child4', 'height' => 175);
-    $data[] = array('id' => 5, 'parents_id' => 1, 'name' => 'child5', 'height' => 180);
-    MODEL('Child')->multipleInsert($data);
-
-    $data = array();
-    $data[] = array('id' => 1,  'child_id' => 1, 'name' => 'grand1',  'age' => 9);
-    $data[] = array('id' => 2,  'child_id' => 1, 'name' => 'grand2',  'age' => 8);
-    $data[] = array('id' => 3,  'child_id' => 2, 'name' => 'grand3',  'age' => 3);
-    $data[] = array('id' => 4,  'child_id' => 2, 'name' => 'grand4',  'age' => 2);
-    $data[] = array('id' => 5,  'child_id' => 2, 'name' => 'grand5',  'age' => 6);
-    $data[] = array('id' => 6,  'child_id' => 3, 'name' => 'grand6',  'age' => 4);
-    $data[] = array('id' => 7,  'child_id' => 4, 'name' => 'grand7',  'age' => 2);
-    $data[] = array('id' => 8,  'child_id' => 4, 'name' => 'grand8',  'age' => 10);
-    $data[] = array('id' => 9,  'child_id' => 5, 'name' => 'grand9',  'age' => 1);
-    $data[] = array('id' => 10, 'child_id' => 5, 'name' => 'grand10', 'age' => 5);
-    MODEL('GrandChild')->multipleInsert($data);
-
-    $p = MODEL('Parents')->selectOne(2);
-    $children = $p->getChild('Child');
-
-    $this->assertEquals($p->name, 'parent2');
-    $this->assertEquals(count($children), 2);
-
-    $c1 = $children[0];
-    $c2 = $children[1];
-
-    $this->assertEquals($c1->id, 2);
-    $this->assertEquals($c2->id, 1);
-    $this->assertEquals($c1->height, 165);
-    $this->assertEquals($c2->height, 160);
-
-    $gChildren = $c1->GrandChild;
-    $this->assertEquals(count($gChildren), 3);
-
-    $g1 = $gChildren[0];
-    $g2 = $gChildren[1];
-    $g3 = $gChildren[2];
-
-    $this->assertEquals($g1->id, 4);
-    $this->assertEquals($g2->id, 3);
-    $this->assertEquals($g3->id, 5);
-
-    $this->assertEquals($g1->age, 2);
-    $this->assertEquals($g2->age, 3);
-    $this->assertEquals($g3->age, 6);
-
-    $p = MODEL('Parents')->selectOne(2);
-    $p->cconst('Child', array('order' => 'height'));
-    $p->cconst('GrandChild', array('order' => 'age desc'));
-
-    list ($c1, $c2) = $p->getChild('Child');
-
-    $this->assertEquals($c1->id, 1);
-    $this->assertEquals($c2->id, 2);
-    $this->assertEquals($c1->height, 160);
-    $this->assertEquals($c2->height, 165);
-
-    $gChildren = $c2->GrandChild;
-    $this->assertEquals(count($gChildren), 3);
-
-    $g1 = $gChildren[0];
-    $g2 = $gChildren[1];
-    $g3 = $gChildren[2];
-
-    $this->assertEquals($g1->id, 5);
-    $this->assertEquals($g2->id, 3);
-    $this->assertEquals($g3->id, 4);
-
-    $this->assertEquals($g1->age, 6);
-    $this->assertEquals($g2->age, 3);
-    $this->assertEquals($g3->age, 2);
-  }
-
   public function testClear()
   {
-    Sabel_DB_SimpleCache::clear();
+    Sabel_DB_Schema_Loader::clear();
     Sabel_DB_Connection::closeAll();
+  }
+}
+
+class Proxy extends Sabel_DB_Model
+{
+  public function __construct($mdlName)
+  {
+    $this->initialize($mdlName);
   }
 }
 
 class Users extends Sabel_DB_Model
 {
-  protected $withParent = true;
   protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
+  protected $parents = array('City');
+}
+
+class City extends Sabel_DB_Model
+{
+  protected $parents = array('Country');
 }
 
 class Country extends Sabel_DB_Model
 {
-  protected $myChildren = array('City');
+  protected $children = array('City');
 }
 
-class Student extends Sabel_DB_Model_Bridge
+class Timer extends Sabel_DB_Model
 {
-  protected $bridgeTable = 'StudentCourse';
-}
 
-class Course extends Sabel_DB_Model_Bridge
-{
-  protected $bridgeTable = 'StudentCourse';
 }
 
 class Parents extends Sabel_DB_Model
 {
-  protected $connectName = 'default2';
-  protected $childConstraints = array('Child' => array('order' => 'height desc'));
+  protected $connectionName = 'default2';
 }
 
-class Child extends Sabel_DB_Model
+class Customer extends Sabel_DB_Model
 {
-  protected $myChildren = array('GrandChild');
-  protected $childConstraints = array('GrandChild' => array('order' => 'age'));
-}
-
-class GrandChild extends Sabel_DB_Model
-{
-  protected $connectName = 'default2';
+  protected $connectionName = 'default2';
 }
 
 class Schema_TestCondition
@@ -1386,15 +937,9 @@ class Schema_TestCondition
     return $cols;
   }
 
-  public function getParents()
-  {
-    return null;
-  }
-
   public function getProperty()
   {
-    $property = array('connectName'  => 'default',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => 'id',
                       'tableEngine'  => 'MyISAM');
 
@@ -1417,15 +962,9 @@ class Schema_Customer
     return $cols;
   }
 
-  public function getParents()
-  {
-    return null;
-  }
-
   public function getProperty()
   {
-    $property = array('connectName'  => 'default2',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => null,
                       'tableEngine'  => 'InnoDB');
 
@@ -1453,15 +992,9 @@ class Schema_CustomerOrder
     return $cols;
   }
 
-  public function getParents()
-  {
-    return array('customer');
-  }
-
   public function getProperty()
   {
-    $property = array('connectName'  => 'default',
-                      'primaryKey'   => 'id',
+    $property = array('primaryKey'   => 'id',
                       'incrementKey' => 'id',
                       'tableEngine'  => 'InnoDB');
 
@@ -1469,54 +1002,73 @@ class Schema_CustomerOrder
   }
 }
 
-class Schema_CascadeChain
+class CustomerCascadeDelete
 {
-  public static function get()
+  public function getChain()
+  {
+    return array("Customer" => array("CustomerOrder"));
+  }
+
+  public function getKeys()
+  {
+
+  }
+}
+
+class CountryCascadeDelete
+{
+  public function getChain()
   {
     $chains = array();
 
-    $chains['default:classification'] = array('default:city');
-    $chains['default:city']           = array('default:users');
-    $chains['default:users']          = array('default:blog');
-    $chains['default:country']        = array('default:city');
-    $chains['default2:customer']      = array('default:customer_order');
+    $chains["Users"]   = array("Blog");
+    $chains["Country"] = array("City");
+    $chains["City"]    = array("Company", "Users");
+    $chains["Company"] = array("Users");
 
     return $chains;
   }
-}
 
-if (!function_exists('get_db_tables')) {
+  public function getKeys()
+  {
+    $keys = array();
+    $keys["Country"]["City"] = array("id" => "id", "fKey" => "country_id");
+    $keys["City"]["Company"] = array("id" => "id", "fKey" => "city_id");
+    $keys["City"]["Users"]   = array("id" => "id", "fKey" => "city_id");
 
-function get_db_tables($tblName)
-{
-  $tables = array();
-  $tables['basic']          = 'default';
-  $tables['users']          = 'default';
-  $tables['city']           = 'default';
-  $tables['country']        = 'default';
-  $tables['company']        = 'default';
-  $tables['test_for_like']  = 'default';
-  $tables['test_condition'] = 'default';
-  $tables['blog']           = 'default';
-  $tables['customer_order'] = 'default';
-  $tables['classification'] = 'default';
-  $tables['favorite_item']  = 'default';
-  $tables['student']        = 'default';
-  $tables['course']         = 'default';
-  $tables['student_course'] = 'default';
-  $tables['schema_test']    = 'default';
-  $tables['timer']          = 'default';
-  $tables['child']          = 'default';
-
-  $tables['customer']       = 'default2';
-  $tables['parents']        = 'default2';
-  $tables['grand_child']    = 'default2';
-
-  if (!isset($tables[$tblName])) {
-    throw new Exception("Error: '{$tblName}' does not exist.");
+    return $keys;
   }
-
-  return $tables[$tblName];
 }
 
+class TimeRecorder
+{
+  const UPDATE_COLUMN = "auto_update";
+  const INSERT_COLUMN = "auto_create";
+
+  public function record($command)
+  {
+    $model   = $command->getModel();
+    $values  = $model->getSaveValues();
+    $columns = $model->getColumnNames();
+
+    if (!$model->isSelected()) {
+      if (in_array(self::INSERT_COLUMN, $columns)) {
+        $val = $model->{self::INSERT_COLUMN};
+        if ($val === null) $values[self::INSERT_COLUMN] = now();
+      }
+    }
+
+    if (in_array(self::UPDATE_COLUMN, $columns)) {
+      $val = $model->{self::UPDATE_COLUMN};
+      if ($val === null) $values[self::UPDATE_COLUMN] = now();
+    }
+
+    $model->setSaveValues($values);
+  }
 }
+
+Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
+                                array(Sabel_DB_Command::UPDATE,
+                                      Sabel_DB_Command::INSERT),
+                                array("record"),
+                                array("model" => array("include" => array("Timer"))));

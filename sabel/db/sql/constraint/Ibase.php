@@ -17,14 +17,15 @@ class Sabel_DB_Sql_Constraint_Ibase implements Sabel_DB_Sql_Constraint_Interface
 
     if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
+    if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
 
-    $tmp   = substr($sql, 6);
+    $tmp = substr($sql, 6);
 
     if (isset($c["limit"])) {
       $query  = "FIRST {$c["limit"]} ";
       $query .= (isset($c["offset"])) ? "SKIP " . $c["offset"] : "SKIP 0";
       $sql    = "SELECT " . $query . $tmp;
-    } else {
+    } elseif (isset($c["offset"])) {
       if (isset($c["offset"])) $sql = "SELECT SKIP " . $c["offset"] . $tmp;
     }
 

@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Transaction_Ibase
+class Sabel_DB_Transaction_Ibase extends Sabel_DB_Transaction_Base
 {
   public static function getInstance()
   {
@@ -19,7 +19,6 @@ class Sabel_DB_Transaction_Ibase
 
   public function start($connection, $connectionName)
   {
-    $connectionName = $driver->getConnectionName();
     $this->transactions[$connectionName] = $connection;
     $this->active = true;
   }

@@ -837,19 +837,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertNotNull($model->auto_create);
   }
 
-  public function testCommandAfter()
-  {
-    Sabel_DB_Command_After::regist("TestAfter",
-                                   Sabel_DB_Command::SELECT,
-                                   array("after"),
-                                   array("model" => array("include" => array("Timer"))));
-
-    $result = Sabel_Model::load('Timer')->selectOne(1);
-    $this->assertEquals($result, "hoge");
-
-    Sabel_DB_Command_After::clear();
-  }
-
   public function testClear()
   {
     Sabel_DB_Schema_Loader::clear();
@@ -1050,12 +1037,3 @@ Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
                                       Sabel_DB_Command::INSERT),
                                 array("record"),
                                 array("model" => array("include" => array("Timer"))));
-
-class TestAfter
-{
-  public function after($executer)
-  {
-    $executer->setResult(Sabel_DB_Command_Executer::USE_AFTER_RESULT);
-    $executer->setAfterResult("hoge");
-  }
-}
