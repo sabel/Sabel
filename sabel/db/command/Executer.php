@@ -54,19 +54,13 @@ class Sabel_DB_Command_Executer
   {
     $this->arguments = $args;
 
-    $bms = $this->beforeMethods;
-    $ams = $this->afterMethods;
-
-    if (isset($bms[$command])) {
-      if ($this->doMethods($bms[$command])) return $this;
-    }
+    $skip = $this->execRegisteredMethods("before", $command);
+    if ($skip) return $this;
 
     $commander = Sabel_DB_Command_Loader::getClass($command);
     $commander->execute($this);
 
-    if (isset($ams[$command])) {
-      if ($this->doMethods($ams[$command])) return $this;
-    }
+    $this->execRegisteredMethods("after", $command);
 
     return $this;
   }
@@ -89,6 +83,23 @@ class Sabel_DB_Command_Executer
   public function setIncrementId($id)
   {
     $this->incrementId = $id;
+  }
+
+  protected function execRegisteredMethods($type, $command)
+  {
+    if ($type === "before") {
+      $methods = $this->beforeMethods;
+    } else {
+      $methods = $this->afterMethods;
+    }
+
+    if (isset($methods[$command])) {
+      return $this->doMethods($methods[$command]);
+    }
+
+    if (isset($methods["all"])) {
+      return $this->doMethods($methods["all"]);
+    }
   }
 
   protected function doMethods($methods)

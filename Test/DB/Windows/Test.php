@@ -38,7 +38,7 @@ class WindowsUnitTest
 class Test_DB_Windows_Test extends WindowsUnitTest
 {
   public static $db = '';
-  public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
+  public static $TABLES = array('basic', 'users', 'city', 'country', 'company', 'schema_test',
                                 'test_for_like', 'test_condition', 'blog', 'mail',
                                 'customer_order', 'classification', 'favorite_item',
                                 'student', 'course', 'student_course', 'timer', 'child');
@@ -762,6 +762,12 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $model  = Sabel_Model::load('SchemaTest');
     $schema = $model->getSchema();
 
+    $model->id = 1;
+    $model->name = 'name';
+    $model->db_val = 1.333;
+    $model->tx = 'text';
+    $model->save();
+
     $id = $schema->id;
     $nm = $schema->name;
     $bl = $schema->bl;
@@ -814,6 +820,12 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertTrue($tx->nullable);
     $this->assertFalse($tx->increment);
     $this->assertFalse($tx->primary);
+
+    $model = MODEL('SchemaTest')->selectOne(1);
+    $this->assertEquals($model->id, 1);
+    $this->assertEquals($model->name, 'name');
+    $this->assertEquals($model->db_val, 1.333);
+    $this->assertEquals($model->tx, 'text');
   }
 
   public function testBridge()
