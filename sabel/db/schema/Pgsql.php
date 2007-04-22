@@ -36,13 +36,13 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
 
     if ($default === null || strpos($default, "nextval") !== false) {
       $co->default = null;
-    } elseif (is_numeric($default)) {
-      $co->default = (int)$default;
-    } elseif ($co->type === Sabel_DB_Type::BOOL) {
-      $co->default = ($default === "true");
     } else {
-      $default     = substr($default, 1);
-      $co->default = substr($default, 0, strpos($default, "'"));
+      if (strpos($default, "'::") !== false) {
+        preg_match("/'(.*)'/", $default, $matches);
+        $default = $matches[1];
+      }
+
+      $this->setDefaultValue($co, $default);
     }
   }
 

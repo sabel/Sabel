@@ -44,4 +44,29 @@ abstract class Sabel_DB_Schema_Base
     $driver->setSql($sql)->execute();
     return $driver->getResult();
   }
+
+  protected function setDefaultValue($co, $default)
+  {
+    if ($default === null) {
+      $co->default = null; return;
+    }
+
+    switch ($co->type) {
+      case Sabel_DB_Type::INT:
+        $co->default = (int)$default;
+        break;
+
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        $co->default = (float)$default;
+        break;
+
+      case Sabel_DB_Type::BOOL:
+        $co->default = (in_array($default, array("true", 1)));
+        break;
+
+      default:
+        $co->default = $default;
+    }
+  }
 }

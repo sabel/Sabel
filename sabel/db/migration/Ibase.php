@@ -172,7 +172,7 @@ class Sabel_DB_Firebird_Migration extends Sabel_DB_Base_Migration
         throw new Exception('Error: cannot change to boolean type.');
       }
 
-      $fbType = Sabel_DB_Firebird_Schema::convertToFirebirdType($newType);
+      $fbType = Sabel_DB_Firebird_Schema::convertToIbaseType($newType);
       $query  = 'UPDATE RDB$FIELDS SET RDB$FIELD_TYPE = ' . $fbType . ' '
               . 'WHERE RDB$FIELD_NAME = \'' . $source . '\'';
 

@@ -95,6 +95,48 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($user4->City->Country->name, 'japan');
   }
 
+  public function testLimitation()
+  {
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $users = $model->select();
+    $this->assertEquals(count($users), 4);
+
+    $this->assertEquals($users[0]->id, 1);
+    $this->assertEquals($users[1]->id, 2);
+    $this->assertEquals($users[2]->id, 3);
+    $this->assertEquals($users[3]->id, 4);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('limit', 2);
+    $users = $model->select();
+    $this->assertEquals(count($users), 2);
+
+    $this->assertEquals($users[0]->id, 1);
+    $this->assertEquals($users[1]->id, 2);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('offset', 1);
+    $users = $model->select();
+    $this->assertEquals(count($users), 3);
+
+    $this->assertEquals($users[0]->id, 2);
+    $this->assertEquals($users[1]->id, 3);
+    $this->assertEquals($users[2]->id, 4);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id DESC');
+    $model->setConstraint('offset', 2);
+    $model->setConstraint('limit',  2);
+    $users = $model->select();
+    $this->assertEquals(count($users), 2);
+
+    $this->assertEquals($users[0]->id, 2);
+    $this->assertEquals($users[1]->id, 1);
+  }
+
   public function testLike()
   {
     $model = Sabel_Model::load('TestForLike');
@@ -766,7 +808,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($ft->nullable);
     $this->assertFalse($ft->increment);
     $this->assertFalse($ft->primary);
-    $this->assertEquals($ft->default, 1);
+    $this->assertEquals($ft->default, (float)1);
 
     $this->assertEquals($db->type, Sabel_DB_Type::DOUBLE);
     $this->assertEquals($db->max,  1.79769E308);

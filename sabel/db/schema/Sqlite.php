@@ -160,14 +160,10 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
   {
     if (strpos($this->colLine, "default") === false) {
       $co->default = null;
-      return;
-    }
-
-    $default = trim(str_replace("default ", "", $this->colLine));
-    if ($co->type === Sabel_DB_Type::BOOL) {
-      $co->default = (strcasecmp($default, "true") === 0 || $default === "1");
     } else {
-      $co->default = (is_numeric($default)) ? (int)$default : substr($default, 1, -1);
+      $default = trim(str_replace("default ", "", $this->colLine));
+      if (!is_numeric($default)) $default = substr($default, 1, -1);
+      $this->setDefaultValue($co, $default);
     }
   }
 

@@ -42,27 +42,6 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_Common
     }
   }
 
-  protected function setDefaultValue($co, $default)
-  {
-    switch ($co->type) {
-      case Sabel_DB_Type::INT:
-        $co->default = (int)$default;
-        break;
-
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        $co->default = (float)$default;
-        break;
-
-      case Sabel_DB_Type::BOOL:
-        $co->default = ($default === "true" || $default === 1);
-        break;
-
-      default:
-        $co->default = $default;
-    }
-  }
-
   protected function setIncrement($co, $row)
   {
     $sql = "SELECT * from sys.objects obj, sys.identity_columns ident "

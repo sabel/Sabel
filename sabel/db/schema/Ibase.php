@@ -40,7 +40,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     $generators  = array(),
     $primaryKeys = array();
 
-  public static function convertToFirebirdType($schemaType)
+  public static function convertToIbaseType($schemaType)
   {
     switch ($schemaType) {
       case Sabel_DB_Type::INT:
@@ -146,7 +146,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
 
     $this->setIncrement($co, $fieldName, $tblName);
     $this->setPrimaryKey($co, $fieldName);
-    $this->setDefault($co, $default);
+    $this->setDefaultValue($co, $default);
 
     if ($co->type === Sabel_DB_Type::STRING) {
       $this->setLength($co, $row);
@@ -191,27 +191,6 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
   protected function setPrimaryKey($co, $fieldName)
   {
     $co->primary = (in_array($fieldName, $this->primaryKeys));
-  }
-
-  protected function setDefault($co, $default)
-  {
-    switch ($co->type) {
-      case Sabel_DB_Type::INT:
-        $co->default = (int)$default;
-        break;
-
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        $co->default = (float)$default;
-        break;
-
-      case Sabel_DB_Type::BOOL:
-        $co->default = ($default === "1");
-        break;
-
-      default:
-        $co->default = $default;
-    }
   }
 
   protected function setLength($co, $row)
