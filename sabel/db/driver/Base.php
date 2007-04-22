@@ -35,7 +35,8 @@ abstract class Sabel_DB_Driver_Base
     $sql = $this->sql;
 
     // @todo
-    if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
+    //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
+    if (defined("QUERY_LOG")) {
       var_dump($sql);
     }
 
@@ -48,7 +49,6 @@ abstract class Sabel_DB_Driver_Base
     switch ($this->driverId) {
       case "mysql":
       case "mysqli":
-      case "mysql41":
       case "mssql":
         if (is_array($sql)) {
           foreach ($sql as $s) $func($s, $conn);
@@ -174,15 +174,18 @@ function escapeString($db, $values, $escMethod = null)
   foreach ($values as &$val) {
     if (is_bool($val)) {
       switch ($db) {
+        case "mysql":
+        case "ibase":
+          $val = ($val) ? 1 : 0;
+          break;
+
         case "pgsql":
-        case "mssql":
         case "sqlite":
           $val = ($val) ? 'true' : 'false';
           break;
 
-        case "mysql":
-        case "ibase":
-          $val = ($val) ? 1 : 0;
+        case "mssql":
+          $val = ($val) ? "'true'" : "'false'";
           break;
       }
     } elseif (is_string($val) && $escMethod !== null) {

@@ -15,11 +15,8 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Base
   protected $execFunction    = "mssql_query";
   protected $closeFunction   = "mssql_close";
   protected $beginCommand    = "BEGIN TRANSACTION";
-  protected $commitcommand   = "COMMIT TRANSACTION";
+  protected $commitCommand   = "COMMIT TRANSACTION";
   protected $rollbackCommand = "ROLLBACK TRANSACTION";
-
-  // @todo
-  private $defCol = "";
 
   public function getAfterMethods()
   {
@@ -31,7 +28,12 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Base
     return escapeString("mssql", $values, "mssql_escape_string");
   }
 
-  public function query($connection = null)
+  public function getConstraintSqlClass($classType = null)
+  {
+    return parent::getConstraintSqlClass(Sabel_DB_Sql_Constraint_Loader::MSSQL);
+  }
+
+  public function execute($connection = null)
   {
     $result = parent::execute($connection);
 

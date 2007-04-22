@@ -133,16 +133,20 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
       $type    = $this->types[$typeNum];
     }
 
-    $default = $row['rdb$default_source'];
-    $co->default = ($default === null) ? null : $this->getDefaultValue($default);
+    if (($default = $row['rdb$default_source']) !== null) {
+      $tmp = substr($default, 8);
+      $default = (is_numeric($tmp)) ? $tmp : substr($tmp, 1, -1);
+    }
 
-    if (!$this->isBool($co, $type, $row)) {
+    if ($this->isBool($co, $type, $row, $default)) {
+    } else {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
     }
 
     $this->setIncrement($co, $fieldName, $tblName);
     $this->setPrimaryKey($co, $fieldName);
+    $this->setDefault($co, $default);
 
     if ($co->type === Sabel_DB_Type::STRING) {
       $this->setLength($co, $row);
@@ -156,10 +160,10 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     return ($row['rdb$field_type'] === 261 && $row['rdb$field_sub_type'] === 1);
   }
 
-  protected function isBool($co, $type, $row)
+  protected function isBool($co, $type, $row, $default)
   {
     if ($type === "char" && $row['rdb$character_length'] === 1) {
-      if ($co->default === "0" || $co->default === "1") {
+      if ($default === "0" || $default === "1") {
         $co->type = Sabel_DB_Type::BOOL;
         return true;
       }
@@ -191,17 +195,23 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
 
   protected function setDefault($co, $default)
   {
-    $co->default = ($default === null) ? null : $this->getDefault($default);
-  }
+    switch ($co->type) {
+      case Sabel_DB_Type::INT:
+        $co->default = (int)$default;
+        break;
 
-  protected function getDefaultValue($default)
-  {
-    $con  = $this->driver->getConnection();
-    $info = ibase_blob_info($con, $default);
-    $blob = ibase_blob_open($con, $default);
-    $val  = substr(ibase_blob_get($blob, $info[0]), 8);
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        $co->default = (float)$default;
+        break;
 
-    return (is_numeric($val)) ? (int)$val : substr($val, 1, -1);
+      case Sabel_DB_Type::BOOL:
+        $co->default = ($default === "1");
+        break;
+
+      default:
+        $co->default = $default;
+    }
   }
 
   protected function setLength($co, $row)

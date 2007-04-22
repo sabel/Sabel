@@ -26,8 +26,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
 
   public function getAfterMethods()
   {
-    return array("insert" => array("getIncrementId"),
-                 "all"    => array("postProcess"));
+    return array("insert" => array("getIncrementId"));
   }
 
   public function loadTransaction()
@@ -79,32 +78,14 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
 
     $rows = array();
     if (is_resource($result)) {
-      while ($row = ibase_fetch_assoc($result)) $rows[] = array_change_key_case($row);
+      while ($row = ibase_fetch_assoc($result, IBASE_TEXT)) {
+        $rows[] = array_change_key_case($row);
+      }
       ibase_free_result($result);
     }
 
     if ($autoCommit) ibase_commit($connection);
     return $this->result = $rows;
-  }
-
-  public function postProcess($command)
-  {
-    $rows = $this->result;
-    if (empty($rows)) return;
-
-    $columns = $command->getModel()->getSchema()->getColumns(); 
-    foreach ($columns as $colName => $schema) {
-      if ($schema->type === Sabel_DB_Type::TEXT && isset($rows[0][$colName])) {
-        $con = $this->getConnection();
-        foreach ($rows as &$row) {
-          $info = ibase_blob_info($con, $row[$colName]);
-          $blob = ibase_blob_open($con, $row[$colName]);
-          $row[$colName] = ibase_blob_get($blob, $info[0]);
-        }
-      }
-    }
-
-    $command->setResult($rows);
   }
 
   public function setIncrementId($command)

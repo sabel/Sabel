@@ -116,18 +116,60 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $user3 = $users[2];
     $user4 = $users[3];
 
-    $this->assertEquals((int)$user1->id, 1);
-    $this->assertEquals((int)$user2->id, 2);
+    $this->assertEquals($user1->id, 1);
+    $this->assertEquals($user2->id, 2);
     $this->assertEquals($user3->email, 'user3@example.com');
     $this->assertEquals($user4->email, 'user4@example.com');
 
     $this->assertEquals($user1->City->name, 'rondon');
     $this->assertEquals($user2->City->name, 'san diego');
 
-    $this->assertEquals((int)$user3->City->country_id, 1);
-    $this->assertEquals((int)$user4->City->country_id, 1);
+    $this->assertEquals($user3->City->country_id, 1);
+    $this->assertEquals($user4->City->country_id, 1);
     $this->assertEquals($user3->City->Country->name, 'japan');
     $this->assertEquals($user4->City->Country->name, 'japan');
+  }
+
+  public function testLimitation()
+  {
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $users = $model->select();
+    $this->assertEquals(count($users), 4);
+
+    $this->assertEquals($users[0]->id, 1);
+    $this->assertEquals($users[1]->id, 2);
+    $this->assertEquals($users[2]->id, 3);
+    $this->assertEquals($users[3]->id, 4);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('limit', 2);
+    $users = $model->select();
+    $this->assertEquals(count($users), 2);
+
+    $this->assertEquals($users[0]->id, 1);
+    $this->assertEquals($users[1]->id, 2);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('offset', 1);
+    $users = $model->select();
+    $this->assertEquals(count($users), 3);
+
+    $this->assertEquals($users[0]->id, 2);
+    $this->assertEquals($users[1]->id, 3);
+    $this->assertEquals($users[2]->id, 4);
+
+    $model = new Users();
+    $model->setConstraint('order', 'users.id DESC');
+    $model->setConstraint('offset', 2);
+    $model->setConstraint('limit',  2);
+    $users = $model->select();
+    $this->assertEquals(count($users), 2);
+
+    $this->assertEquals($users[0]->id, 2);
+    $this->assertEquals($users[1]->id, 1);
   }
 
   public function testLike()
@@ -744,6 +786,9 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $order = $model->selectOne();
     $this->assertFalse($order->isSelected());
 
+    if (self::$db === "MSSQL") {
+      $model->executeQuery("SET IDENTITY_INSERT edo.dbo.customer_order ON");
+    }
     $order->buy_date = '1999-01-01 12:34:55';
     $order->amount   = 9999;
     $order->save();
@@ -762,7 +807,6 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $model  = Sabel_Model::load('SchemaTest');
     $schema = $model->getSchema();
 
-    $model->id = 1;
     $model->name = 'name';
     $model->db_val = 1.333;
     $model->tx = 'text';
@@ -785,7 +829,9 @@ class Test_DB_Windows_Test extends WindowsUnitTest
 
     $this->assertEquals($nm->type, Sabel_DB_Type::STRING);
     $this->assertEquals($nm->max, 128);
-    $this->assertFalse($nm->nullable);
+    if (self::$db !== "MSSQL") {
+      $this->assertFalse($nm->nullable);
+    }
     $this->assertFalse($nm->increment);
     $this->assertFalse($nm->primary);
     $this->assertEquals($nm->default, 'test');
@@ -794,7 +840,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertTrue($bl->nullable);
     $this->assertFalse($bl->increment);
     $this->assertFalse($bl->primary);
-    $this->assertEquals($bl->default, "0");
+    $this->assertEquals($bl->default, false);
 
     $this->assertEquals($dt->type, Sabel_DB_Type::DATETIME);
     $this->assertTrue($dt->nullable);
@@ -807,7 +853,7 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertTrue($ft->nullable);
     $this->assertFalse($ft->increment);
     $this->assertFalse($ft->primary);
-    $this->assertEquals($ft->default, 1);
+    $this->assertEquals($ft->default, (float)1);
 
     $this->assertEquals($db->type, Sabel_DB_Type::DOUBLE);
     $this->assertEquals($db->max,  1.79769E308);
@@ -821,8 +867,11 @@ class Test_DB_Windows_Test extends WindowsUnitTest
     $this->assertFalse($tx->increment);
     $this->assertFalse($tx->primary);
 
-    $model = MODEL('SchemaTest')->selectOne(1);
-    $this->assertEquals($model->id, 1);
+    $model = MODEL('SchemaTest')->select();
+    $this->assertTrue(is_array($model));
+
+    $model = $model[0];
+    $this->assertTrue(is_int($model->id));
     $this->assertEquals($model->name, 'name');
     $this->assertEquals($model->db_val, 1.333);
     $this->assertEquals($model->tx, 'text');

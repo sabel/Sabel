@@ -38,37 +38,54 @@ class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_Common
       $co->default = null;
     } else {
       $default = substr($default, 2, -2);
-      if ($co->type === Sabel_DB_Type::BOOL) {
-        $co->default = ($default === "true");
-      } else {
-        $co->default = (is_numeric($default)) ? (int)$default : $default;
-      }
+      $this->setDefaultValue($co, $default);
+    }
+  }
+
+  protected function setDefaultValue($co, $default)
+  {
+    switch ($co->type) {
+      case Sabel_DB_Type::INT:
+        $co->default = (int)$default;
+        break;
+
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        $co->default = (float)$default;
+        break;
+
+      case Sabel_DB_Type::BOOL:
+        $co->default = ($default === "true" || $default === 1);
+        break;
+
+      default:
+        $co->default = $default;
     }
   }
 
   protected function setIncrement($co, $row)
   {
-    $sql  = "SELECT * from sys.objects obj, sys.identity_columns ident "
-          . "WHERE obj.name = '{$row['table_name']}' AND ident.name = '{$co->name}' AND "
-          . "obj.object_id = ident.object_id";
+    $sql = "SELECT * from sys.objects obj, sys.identity_columns ident "
+         . "WHERE obj.name = '{$row['table_name']}' AND ident.name = '{$co->name}' AND "
+         . "obj.object_id = ident.object_id";
 
-    $co->increment = (!$this->execute($sql)->isEmpty());
+    $rows = $this->execute($sql);
+    $co->increment = !(empty($rows));
   }
 
   protected function setPrimaryKey($co, $row)
   {
-    $sql  = "SELECT const.type FROM information_schema.constraint_column_usage col, "
-          . "sys.key_constraints const WHERE col.table_catalog = '{$this->schema}' "
-          . "AND col.table_name = '{$row['table_name']}' AND "
-          . "col.column_name = '{$co->name}' AND col.constraint_name = const.name";
+    $sql = "SELECT const.type FROM information_schema.constraint_column_usage col, "
+         . "sys.key_constraints const WHERE col.table_catalog = '{$this->schemaName}' "
+         . "AND col.table_name = '{$row['table_name']}' AND "
+         . "col.column_name = '{$co->name}' AND col.constraint_name = const.name";
 
-    $resultSet = $this->execute($sql);
+    $rows = $this->execute($sql);
 
-    if ($resultSet->isEmpty()) {
+    if (empty($rows)) {
       $co->primary = false;
     } else {
-      $row = $resultSet->fetch();
-      $co->primary = ($row["type"] === "PK");
+      $co->primary = ($rows[0]["type"] === "PK");
     }
   }
 
