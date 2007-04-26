@@ -43,7 +43,7 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     $lines   = $this->splitCreateSQL($createSQL);
     $columns = array();
     foreach ($lines as $key => $line) {
-      $co    = new stdClass();
+      $co    = new Sabel_DB_Schema_Column();
       $split = explode(" ", $line);
       $name  = $split[0];
       $attr  = trim(substr($line, strlen($name)));

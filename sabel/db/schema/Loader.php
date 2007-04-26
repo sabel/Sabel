@@ -27,8 +27,10 @@ class Sabel_DB_Schema_Loader
       $cols = array();
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {
-        $info["name"] = $colName;
-        $cols[$colName] = (object)$info;
+        $co = new Sabel_DB_Schema_Column();
+        $co->name = $colName;
+        foreach ($info as $key => $val) $co->$key = $val;
+        $cols[$colName] = $co;
       }
 
       $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
@@ -43,16 +45,9 @@ class Sabel_DB_Schema_Loader
       $accessor  = new Sabel_DB_Schema_Accessor($conName, $scmName);
       $engine    = ($database === "mysql") ? $accessor->getTableEngine($tblName) : null;
       $tblSchema = $accessor->get($tblName);
-
-      $columns   = $tblSchema->getColumns();
-      $primary   = self::getPrimaryKey($columns);
-      $increment = self::getIncrementColumn($columns);
     }
 
-    $tblSchema->setPrimaryKey($primary);
-    $tblSchema->setIncrementColumn($increment);
     $tblSchema->setTableEngine($engine);
-
     return self::$schemas[$tblName] = $tblSchema;
   }
 
@@ -62,25 +57,5 @@ class Sabel_DB_Schema_Loader
     self::$schemas = array();
 
     return $schemas;
-  }
-
-  protected static function getPrimaryKey($columns)
-  {
-    $pKey = array();
-    foreach ($columns as $column) {
-      if ($column->primary) $pKey[] = $column->name;
-    }
-
-    if (empty($pKey)) return null;
-    return (sizeof($pKey) === 1) ? $pKey[0] : $pKey;
-  }
-
-  protected static function getIncrementColumn($columns)
-  {
-    foreach ($columns as $column) {
-      if ($column->increment) return $column->name;
-    }
-
-    return null;
   }
 }

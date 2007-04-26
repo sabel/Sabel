@@ -21,6 +21,9 @@ class Sabel_DB_Schema_Table
   {
     $this->tableName = $name;
     $this->columns   = $columns;
+
+    $this->setPrimaryKey();
+    $this->setIncrementColumn();
   }
 
   public function __get($key)
@@ -48,9 +51,20 @@ class Sabel_DB_Schema_Table
     return array_keys($this->columns);
   }
 
-  public function setPrimaryKey($key)
+  protected function setPrimaryKey()
   {
-    $this->primaryKey = $key;
+    $pKey = array();
+    foreach ($this->columns as $column) {
+      if ($column->primary) $pKey[] = $column->name;
+    }
+
+    if (empty($pKey)) {
+      $this->primaryKey = null;
+    } elseif (count($pKey) === 1) {
+      $this->primaryKey = $pKey[0];
+    } else {
+      $this->primaryKey = $pKey;
+    }
   }
 
   public function getPrimaryKey()
@@ -58,9 +72,18 @@ class Sabel_DB_Schema_Table
     return $this->primaryKey;
   }
 
-  public function setIncrementColumn($colName)
+  protected function setIncrementColumn()
   {
-    $this->incrementColumn = $colName;
+    $incrementColumn = null;
+
+    foreach ($this->columns as $column) {
+      if ($column->increment) {
+        $incrementColumn = $column->name;
+        break;
+      }
+    }
+
+    $this->incrementColumn = $incrementColumn;
   }
 
   public function getIncrementColumn()

@@ -43,7 +43,7 @@ abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
 
   protected function makeColumnValueObject($row)
   {
-    $co           = new stdClass();
+    $co           = new Sabel_DB_Schema_Column();
     $co->name     = $row["column_name"];
     $co->nullable = ($row["is_nullable"] !== "NO");
 
@@ -60,7 +60,7 @@ abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
     $this->setIncrement($co, $row);
     $this->setPrimaryKey($co, $row);
 
-    if ($co->type === Sabel_DB_Type::STRING) $this->setLength($co, $row);
+    if ($co->isString()) $this->setLength($co, $row);
     return $co;
   }
 }

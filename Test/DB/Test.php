@@ -442,9 +442,9 @@ class Test_DB_Test extends SabelTestCase
     $users = new Users();
     $users->sconst("order", "Users.id");
 
-    $joiner = new Sabel_DB_Relation_Joiner($users);
+    $joiner = new Sabel_DB_Join($users);
 
-    $join = new Sabel_DB_Relation_Join(MODEL("City"));
+    $join = new Sabel_DB_Join_Relay(MODEL("City"));
     $join->add(MODEL("Country"));
 
     $joiner->add($join);
@@ -470,10 +470,10 @@ class Test_DB_Test extends SabelTestCase
     $users = new Users();
     $users->sconst("order", "users.id");
 
-    $joiner = new Sabel_DB_Relation_joiner($users);
+    $joiner = new Sabel_DB_Join($users);
     $joiner->add(MODEL("Company"));
 
-    $join = new Sabel_DB_Relation_Join(MODEL("City"));
+    $join = new Sabel_DB_Join_Relay(MODEL("City"));
     $join->add(MODEL("Country"))
          ->add(MODEL("Classification"));
 
@@ -524,10 +524,10 @@ class Test_DB_Test extends SabelTestCase
 
     $mail = MODEL("Mail");
     $mail->sconst("order", "Mail.id");
-    $joiner = new Sabel_DB_Relation_Joiner($mail);
+    $joiner = new Sabel_DB_Join($mail);
 
     $user = MODEL("Users");
-    $join = new Sabel_DB_Relation_Join($user);
+    $join = new Sabel_DB_Join_Relay($user);
     $join->add(MODEL("City"));
 
     $joiner->add($join, array("fKey" => "sender_id"), null, "FromUser");

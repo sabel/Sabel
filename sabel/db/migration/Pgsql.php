@@ -1,113 +1,127 @@
 <?php
 
 /**
- * Sabel_DB_Pgsql_Migration
+ * Sabel_DB_Migration_Pgsql
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage pgsql
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Migration extends Sabel_DB_Base_Migration
+class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 {
-  protected $search  = array('TYPE::INT(INCREMENT)',
-                             'TYPE::BINT(INCREMENT)',
-                             'TYPE::INT',
-                             'TYPE::SINT',
-                             'TYPE::BINT',
-                             'TYPE::STRING',
-                             'TYPE::TEXT',
-                             'TYPE::DATETIME',
-                             'TYPE::FLOAT',
-                             'TYPE::DOUBLE',
-                             'TYPE::BOOL',
-                             '__TRUE__',
-                             '__FALSE__');
+  protected $types = array(Sabel_DB_Type::INT      => "integer",
+                           Sabel_DB_Type::BIGINT   => "bigint",
+                           Sabel_DB_Type::SMALLINT => "smallint",
+                           Sabel_DB_Type::FLOAT    => "real",
+                           Sabel_DB_Type::DOUBLE   => "double precision",
+                           Sabel_DB_Type::BOOL     => "boolean",
+                           Sabel_DB_Type::STRING   => "varchar",
+                           Sabel_DB_Type::TEXT     => "text",
+                           Sabel_DB_Type::DATETIME => "timestamp");
 
-  protected $replace = array('serial',
-                             'bigserial',
-                             'integer',
-                             'smallint',
-                             'bigint',
-                             'varchar',
-                             'text',
-                             'timestamp',
-                             'real',
-                             'double precision',
-                             'boolean',
-                             'true',
-                             'false');
-
-  public function addTable($tblName, $cmdQuery)
+  public function createTable($cols)
   {
-    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
+    $this->executeQuery($this->getCreateSql($cols));
+  }
 
-    $exeQuery = array();
-    foreach (explode(',', $cmdQuery) as $line) {
-      if (substr($line, 0, 4) === 'FKEY') {
-        $exeQuery[] = $this->parseForForeignKey($line);
+  public function drop()
+  {
+    if ($this->type === "upgrade") {
+      $restore = $this->getRestoreFileName();
+      if (!is_file($restore)) {
+        $fp = fopen($restore, "w");
+        $this->writeRestoreFile($fp, true);
+      }
+
+      $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
+    } else {
+      $cols = $this->createColumns($this->getRestoreFileName());
+      $this->createTable($cols);
+    }
+  }
+
+  protected function changeColumnUpgrade($cols, $schema, $tblName)
+  {
+    foreach ($cols as $col) {
+      $current = $schema->getColumnByName($col->name);
+      $this->alterChange($current, $col, $tblName);
+    }
+  }
+
+  protected function changeColumnDowngrade($cols, $schema, $tblName)
+  {
+    foreach ($cols as $col) {
+      $current = $schema->getColumnByName($col->name);
+      $this->alterChange($current, $col, $tblName);
+    }
+  }
+
+  protected function alterChange($current, $col, $tblName)
+  {
+    if ($col->type !== "EMPTY") {
+      if ($current->type !== $col->type) {
+        $type = $this->getDataType($col);
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
       } else {
-        $exeQuery[] = $line;
+        if ($current->isString() && $current->max !== $col->length) {
+          $type = $this->getDataType($col);
+          $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
+        }
       }
     }
 
-    $sch   = $this->search;
-    $rep   = $this->replace;
-    $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->model->executeQuery("CREATE TABLE $tblName ( " . $query . " )");
-  }
-
-  public function deleteTable($tblName)
-  {
-    $this->model->executeQuery("DROP TABLE $tblName");
-  }
-
-  public function renameTable($from, $to)
-  {
-    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
-  }
-
-  public function addColumn($tblName, $colName, $param)
-  {
-    $sch  = $this->search;
-    $rep  = $this->replace;
-    $attr = str_replace($sch, $rep, $param);
-
-    $this->model->executeQuery("ALTER TABLE $tblName ADD $colName $attr");
-  }
-
-  public function deleteColumn($tblName, $colName)
-  {
-    $this->model->executeQuery("ALTER TABLE $tblName DROP $colName");
-  }
-
-  public function changeColumn($tblName, $colName, $param)
-  {
-    $sch  = $this->search;
-    $rep  = $this->replace;
-    $attr = trim(str_replace($sch, $rep, $param));
-    list ($type) = explode(' ', $attr);
-    $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
-
-    $attr = strtolower($attr);
-    if (strpos($attr, 'not null') !== false) {
-      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName SET NOT NULL");
-    } else {
-      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName DROP NOT NULL");
+    if ($current->nullable !== $col->nullable) {
+      if ($col->nullable === true) {
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP NOT NULL");
+      } elseif ($col->nullable === false) {
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET NOT NULL");
+      }
     }
 
-    if (strpos($attr, 'default') !== false) {
-      $default = str_replace('default', '', strstr($attr, 'default'));
-      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName SET DEFAULT $default");
-    } else {
-      $this->model->executeQuery("ALTER TABLE $tblName ALTER $colName DROP DEFAULT");
+    if ($current->default !== $col->default) {
+      if ($col->default === null) {
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP DEFAULT");
+      } elseif ($col->default !== "EMPTY") {
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT {$col->default}");
+      }
     }
   }
 
-  public function renameColumn($tblName, $from, $to)
+  protected function createColumnAttributes($col)
   {
-    $this->model->executeQuery("ALTER TABLE $tblName RENAME $from TO $to");
+    $line   = array();
+    $line[] = $col->name;
+    $line[] = $this->getDataType($col);
+
+    if ($col->nullable !== "EMPTY" && $col->nullable === false) {
+      $line[] = "NOT NULL";
+    }
+
+    if ($col->default !== "EMPTY" && $col->default !== null) {
+      $line[] = "DEFAULT " . $col->default;
+    }
+
+    return implode(" ", $line);
+  }
+
+  protected function getDataType($col)
+  {
+    if ($col->increment) {
+      if ($col->isInt()) {
+        return "serial";
+      } elseif ($col->isBigint()) {
+        return "bigserial";
+      } else {
+        throw new Exception("invalid data type for sequence.");
+      }
+    } else {
+      if ($col->isString()) {
+        return $this->types[$col->type] . "({$col->length})";
+      } else {
+        return $this->types[$col->type];
+      }
+    }
   }
 }

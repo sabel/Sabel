@@ -122,7 +122,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
   {
     $fieldName = trim($row['rdb$field_name']);
 
-    $co = new stdClass();
+    $co = new Sabel_DB_Schema_Column();
     $co->name     = strtolower($fieldName);
     $co->nullable = ($row['rdb$null_flag'] === null);
 
@@ -148,9 +148,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     $this->setPrimaryKey($co, $fieldName);
     $this->setDefaultValue($co, $default);
 
-    if ($co->type === Sabel_DB_Type::STRING) {
-      $this->setLength($co, $row);
-    }
+    if ($co->isString()) $this->setLength($co, $row);
 
     return $co;
   }

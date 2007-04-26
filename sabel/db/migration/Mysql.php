@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
+class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
 {
   protected $types = array(Sabel_DB_Type::INT      => "integer",
                            Sabel_DB_Type::BIGINT   => "bigint",
@@ -21,12 +21,6 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime");
 
-  public function execute()
-  {
-    $command = $this->command;
-    $this->$command();
-  }
-
   public function setOptions($options)
   {
     foreach ($options as $opt) {
@@ -36,106 +30,97 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     }
   }
 
-  public function create()
-  {
-    if ($this->type === "upgrade") {
-      $cols = parent::create();
-      $this->createTable($cols);
-    } else {
-      $query = "DROP TABLE " . convert_to_tablename($this->mdlName);
-      $this->executeQuery($query);
-    }
-  }
-
   public function createTable($cols)
   {
-    $pKey  = array();
-    $query = array();
-
-    foreach ($cols as $col) {
-      if ($col->primary) $pKey[] = $col->name;
-      $query[] = $this->createColumnAttributes($col);
-    }
-
-    if ($pKey) {
-      $query[] = "PRIMARY KEY(" . implode(", ", $pKey) . ")";
-    }
-
-    $query   = implode(", ", $query);
-    $tblName = convert_to_tablename($this->mdlName);
-    $query   = "CREATE TABLE $tblName (" . $query . ")";
+    $query = $this->getCreateSql($cols);
 
     if (isset($this->options["engine"])) {
-      $query .= " ENGINE=InnoDB";
+      $query .= " ENGINE=" . $this->options["engine"];
     }
 
     $this->executeQuery($query);
   }
 
-  public function add()
+  public function drop()
   {
-    $cols = parent::create();
-    $tblName = convert_to_tablename($this->mdlName);
-
     if ($this->type === "upgrade") {
-      foreach ($cols as $col) {
-        $line = $this->createColumnAttributes($col);
-        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
+      $restore = $this->getRestoreFileName();
+      if (!is_file($restore)) {
+        $fp = fopen($restore, "w");
+        $this->writeRestoreFile($fp, false);
+
+        $tblName = convert_to_tablename($this->mdlName);
+        $engine  = $this->accessor->getTableEngine($tblName);
+
+        fwrite($fp, "options:\n");
+        fwrite($fp, "  engine: {$engine}\n");
+        fclose($fp);
       }
+
+      $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     } else {
-      foreach ($cols as $col) {
-        $line = $this->createColumnAttributes($col);
-        $this->executeQuery("ALTER TABLE $tblName DROP " . $col->name);
-      }
+      $cols = $this->createColumns($this->getRestoreFileName());
+      $this->createTable($cols);
     }
   }
 
-  public function renameTable($from, $to)
+  protected function changeColumnUpgrade($cols, $schema, $tblName)
   {
-    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
+    foreach ($cols as $col) {
+      $current = $schema->getColumnByName($col->name);
+      $line = $this->createColumnAttributes($col, $current);
+      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+    }
   }
 
-  public function changeColumn($tblName, $colName, $param)
+  protected function changeColumnDowngrade($cols, $schema, $tblName)
   {
-    $sch   = $this->search;
-    $rep   = $this->replace;
-    $query = "ALTER TABLE $tblName MODIFY $colName " . str_replace($sch, $rep, $param);
-    $this->model->executeQuery($query);
+    foreach ($cols as $col) {
+      $line = $this->createColumnAttributes($col);
+      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+    }
   }
 
-  public function renameColumn($tblName, $from, $to)
-  {
-    $conName = $this->model->getConnectName();
-    $driver  = $this->model->getDriver();
-    $schema  = Sabel_DB_Connection::getSchema($conName);
-    $query   = "SELECT column_type FROM information_schema.columns "
-             . "WHERE table_schema = '{$schema}' AND table_name = '{$tblName}'";
-
-    $driver->driverExecute($query);
-    $row   = $driver->getResultSet()->fetch();
-    $query = "ALTER TABLE $tblName CHANGE $from $to " . $row['column_type'];
-    $driver->execute($query);
-  }
-
-  protected function createColumnAttributes($col)
+  protected function createColumnAttributes($col, $current = null)
   {
     $line   = array();
     $line[] = $col->name;
 
-    if ($col->type === Sabel_DB_Type::STRING) {
-      $line[] = $this->types[$col->type] . "({$col->length})";
+    if (isset($current) && $col->type === "EMPTY") {
+      if ($current->isString()) {
+        $line[] = $this->types[$current->type] . "({$current->max})";
+      } else {
+        $line[] = $this->types[$current->type];
+      }
     } else {
-      $line[] = $this->types[$col->type];
+      if ($col->isString()) {
+        $line[] = $this->types[$col->type] . "({$col->length})";
+      } else {
+        $line[] = $this->types[$col->type];
+      }
     }
 
-    if (!$col->nullable) $line[] = "NOT NULL";
+    if (isset($current) && $col->nullable === "EMPTY") {
+      if (!$current->nullable) $line[] = "NOT NULL";
+    } else {
+      if ($col->nullable === false) $line[] = "NOT NULL";
+    }
 
-    if ($col->default !== null) {
-      if ($col->type === Sabel_DB_Type::BOOL) {
-        $line[] = "DEFAULT " . $this->getBooleanValue($col->default);
-        $line[] = "COMMENT 'boolean'";
+    if (isset($current) && $col->default === "EMPTY" && $current->default !== null) {
+      if ($current->isBool()) {
+        $line[] = $this->getBooleanAttr($current->default);
+      } elseif ($current->isString()) {
+        $line[] = "DEFAULT '{$current->default}'";
       } else {
-        $line[] = "DEFAULT " . $col->default;
+        $line[] = "DEFAULT {$current->default}";
+      }
+    } elseif ($col->default !== "EMPTY") {
+      if ($col->isBool()) {
+        $line[] = $this->getBooleanAttr($current->default);
+      } elseif ($col->isString() && $col->default === "null") {
+        $line[] = "DEFAULT ''";
+      } else {
+        $line[] = "DEFAULT {$col->default}";
       }
     }
 
@@ -144,8 +129,9 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     return implode(" ", $line);
   }
 
-  protected function getBooleanValue($value)
+  protected function getBooleanAttr($value)
   {
-    return (in_array($value, array("true", "TRUE", 1))) ? 1 : 0;
+    $val = (in_array($value, array("true", "TRUE", 1))) ? 1 : 0;
+    return "DEFAULT $val COMMENT 'boolean'";
   }
 }

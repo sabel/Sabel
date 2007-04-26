@@ -14,15 +14,15 @@
 interface Sabel_DB_Type
 {
   const INT       = "INT";
-  const SMALLINT  = "SINT";
-  const BIGINT    = "BINT";
+  const SMALLINT  = "SMALLINT";
+  const BIGINT    = "BIGINT";
   const FLOAT     = "FLOAT";
   const DOUBLE    = "DOUBLE";
   const STRING    = "STRING";
   const TEXT      = "TEXT";
   const BOOL      = "BOOL";
-  const BYTE      = "BYTE";
   const DATETIME  = "DATETIME";
+  const BYTE      = "BYTE";
 
   // might erase...
   const DATE      = "DATE";

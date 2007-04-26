@@ -69,16 +69,14 @@ class Sabel_DB_Validator
         continue;
       }
 
-      if ($schema->type === Sabel_DB_Type::STRING) {
+      if ($schema->isString()) {
         if (!$this->length($name, $schema)) {
           $errors[] = sprintf($this->messages["length"], $msgName);
           continue;
         }
       }
 
-      if ($schema->type === Sabel_DB_Type::INT   ||
-          $schema->type === Sabel_DB_Type::FLOAT ||
-          $schema->type === Sabel_DB_Type::DOUBLE) {
+      if ($schema->isInt() || $schema->isFloat() || $schema->isDouble()) {
         if (!$this->maximum($name, $schema)) {
           $errors[] = sprintf($this->messages["maximum"], $msgName);
           continue;

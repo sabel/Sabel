@@ -181,7 +181,7 @@ function escapeString($db, $values, $escMethod = null)
 
         case "pgsql":
         case "sqlite":
-          $val = ($val) ? 'true' : 'false';
+          $val = ($val) ? "true" : "false";
           break;
 
         case "mssql":
