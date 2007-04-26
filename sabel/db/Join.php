@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Relation_joiner
+ * Sabel_DB_Join
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,43 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Relation_Joiner
+class Sabel_DB_Join extends Sabel_DB_Join_Base
 {
   const CANNOT_JOIN = 0x00;
 
-  protected $objects = array();
-
-  protected $sourceModel = null;
-  protected $tblName     = "";
-
   protected $possibleTables = array();
-  protected $resultBuilder  = null;
-
-  public function __construct($model)
-  {
-    $this->sourceModel   = $model;
-    $this->tblName       = $model->getTableName();
-    $this->resultBuilder = Sabel_DB_Relation_Join_Result::getInstance();
-  }
-
-  public function add($arg, $joinKeys = null, $columns = null, $alias = null)
-  {
-    $object = new Sabel_DB_Relation_Join_Object($arg, $joinKeys, $columns, $alias);
-    $this->objects[] = $object;
-
-    $builder = $this->resultBuilder;
-    $builder->setObject($object);
-    $builder->addStructure($this->tblName, $object->getName());
-
-    Sabel_DB_Relation_Join_Alias::regist($this->tblName, $object);
-
-    if ($alias !== null) {
-      $name = $object->getModel()->getTableName();
-      Sabel_DB_Relation_Join_Alias::change($name, $alias, $object);
-    }
-
-    return $this;
-  }
 
   public function buildParents()
   {
@@ -82,7 +50,7 @@ class Sabel_DB_Relation_Joiner
       }
 
       if ($parents = $model->getParents()) {
-        $more = new Sabel_DB_Relation_Join($model);
+        $more = new Sabel_DB_Join_Relay($model);
         $this->addParentModel($parents, $more);
         $this->add($more);
       }
@@ -158,7 +126,7 @@ class Sabel_DB_Relation_Joiner
   protected function clear()
   {
     $this->objects = array();
-    Sabel_DB_Relation_Join_Result::clear();
-    Sabel_DB_Relation_Join_Alias::clear();
+    Sabel_DB_Join_Result::clear();
+    Sabel_DB_Join_Alias::clear();
   }
 }

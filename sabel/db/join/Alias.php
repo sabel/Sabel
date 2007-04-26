@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Relation_Join_Alias
+ * Sabel_DB_Join_Alias
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Relation_Join_Alias
+class Sabel_DB_Join_Alias
 {
   protected static $objects = array();
 
@@ -31,8 +31,7 @@ class Sabel_DB_Relation_Join_Alias
 
       unset(self::$objects[$source]);
 
-      $resultBuilder = Sabel_DB_Relation_Join_Result::getInstance();
-      $resultBuilder->changeKeyOfStructure($source, $alias);
+      Sabel_DB_Join_Result::getInstance()->changeKeyOfStructure($source, $alias);
     }
   }
 

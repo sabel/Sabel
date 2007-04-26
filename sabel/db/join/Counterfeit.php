@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Relation_Join_Counterfeit
+ * Sabel_DB_Join_Counterfeit
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Relation_Join_Counterfeit
+class Sabel_DB_Join_Counterfeit
 {
   protected $model = null;
 

@@ -33,7 +33,7 @@ class Sabel_DB_Model_Bridge
       $bridge->setConstraint($constraints);
     }
 
-    $joiner  = new Sabel_DB_Relation_Joiner($bridge);
+    $joiner  = new Sabel_DB_Join($bridge);
     $keys    = array("fKey" => $fKey, "id" => $pKey);
     $results = $joiner->add(MODEL($child), $keys)->join();
 

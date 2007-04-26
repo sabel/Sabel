@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Relation_Join_Object
+ * Sabel_DB_Join_Object
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Relation_Join_Object
+class Sabel_DB_Join_Object
 {
   protected $model   = null;
   protected $isModel = false;
@@ -23,7 +23,7 @@ class Sabel_DB_Relation_Join_Object
 
   public function __construct($object, $joinKeys = null, $columns = null, $alias = null)
   {
-    if ($object instanceof Sabel_DB_Relation_Join) {
+    if ($object instanceof Sabel_DB_Join_Relay) {
       $model = $this->model = $object->getSourceModel();
       $this->objects = $object->getObjects();
     } elseif ($object instanceof Sabel_DB_Model) {

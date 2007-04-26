@@ -411,7 +411,7 @@ class Sabel_DB_Model
 
     if ($parents) {
       $result = $this->internalJoin();
-      if ($result !== Sabel_DB_Relation_Joiner::CANNOT_JOIN) return $result;
+      if ($result !== Sabel_DB_Join::CANNOT_JOIN) return $result;
     }
 
     $command = $this->getCommand();
@@ -434,11 +434,11 @@ class Sabel_DB_Model
 
   protected function internalJoin()
   {
-    $joiner = new Sabel_DB_Relation_Joiner($this);
+    $joiner = new Sabel_DB_Join($this);
     $result = $joiner->buildParents();
 
-    if ($result === Sabel_DB_Relation_Joiner::CANNOT_JOIN) {
-      return Sabel_DB_Relation_Joiner::CANNOT_JOIN;
+    if ($result === Sabel_DB_Join::CANNOT_JOIN) {
+      return Sabel_DB_Join::CANNOT_JOIN;
     } else {
       return $joiner->join();
     }
@@ -446,7 +446,7 @@ class Sabel_DB_Model
 
   protected function addParent($parents)
   {
-    $counterfeit = new Sabel_DB_Relation_Join_Counterfeit($this);
+    $counterfeit = new Sabel_DB_Join_Counterfeit($this);
     $counterfeit->setParents($parents);
   }
 
