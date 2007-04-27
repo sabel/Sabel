@@ -195,28 +195,31 @@ abstract class Sabel_DB_Migration_Base
 
       fwrite($fp, "\n");
 
-      if (!$column->nullable) fwrite($fp, "  nullable: false\n");
+      if ($column->nullable) {
+        fwrite($fp, "  nullable: true\n");
+      } else {
+        fwrite($fp, "  nullable: false\n");
+      }
+
       if ($column->primary)   fwrite($fp, "  primary: true\n");
       if ($column->increment) fwrite($fp, "  increment: true\n");
 
-      if ($column->default !== null) {
-        $d = $column->default;
-        if ($column->isBool()) {
-          if ($d) {
-            fwrite($fp, "  default: true");
-          } else {
-            fwrite($fp, "  default: false");
-          }
-        } elseif (is_int($d) || is_float($d)) {
-          fwrite($fp, "  default: $d");
+      $d = $column->default;
+      if ($d === null) {
+        fwrite($fp, "  default: null");
+      } elseif ($column->isBool()) {
+        if ($d) {
+          fwrite($fp, "  default: true");
         } else {
-          fwrite($fp, "  default: '{$d}'");
+          fwrite($fp, "  default: false");
         }
-
-        fwrite($fp, "\n");
+      } elseif (is_int($d) || is_float($d)) {
+        fwrite($fp, "  default: $d");
+      } else {
+        fwrite($fp, "  default: '{$d}'");
       }
 
-      fwrite($fp, "\n");
+      fwrite($fp, "\n\n");
     }
 
     if ($isClose) fclose($fp);

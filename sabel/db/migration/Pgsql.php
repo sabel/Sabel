@@ -68,7 +68,15 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
       if ($col->default === null) {
         $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP DEFAULT");
       } elseif ($col->default !== "EMPTY") {
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT {$col->default}");
+        if ($col->isBool()) {
+          $default = ($col->default) ? "true" : "false";
+        } elseif ($col->isString()) {
+          $default = "'" . $col->default . "'";
+        } else {
+          $default = $col->default;
+        }
+
+        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT $default");
       }
     }
   }
@@ -81,8 +89,16 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 
     if ($col->nullable === false) $line[] = "NOT NULL";
 
-    if ($col->default !== "EMPTY" && $col->default !== null) {
-      $line[] = "DEFAULT " . $col->default;
+    $cd = $col->default;
+
+    if ($cd !== "EMPTY") {
+      if ($cd === null) {
+        $line[] = "DEFAULT NULL";
+      } elseif ($col->isString()) {
+        $line[] = "DEFAULT '{$cd}'";
+      } else {
+        $line[] = "DEFAULT $cd";
+      }
     }
 
     return implode(" ", $line);

@@ -76,6 +76,8 @@ class Sabel_DB_Config
       return $config["database"];
     } elseif (isset($config["schema"])) {
       return $config["schema"];
+    } elseif (($drvName === "pgsql" || $drvName === "pdo-pgsql") && !isset($config["schema"])) {
+      return "public";
     } else {
       throw new Exception("schema name is not found.");
     }

@@ -69,6 +69,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
   public function setLength($co, $row)
   {
     $maxlen  = $row["character_maximum_length"];
-    $co->max = (isset($maxlen)) ? $maxlen : 255;
+    $co->max = (isset($maxlen)) ? (int)$maxlen : 255;
   }
 }

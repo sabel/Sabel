@@ -40,9 +40,8 @@ class Sabel_DB_Schema_Loader
       $engine     = $properties["tableEngine"];
     } else {
       $conName   = $model->getConnectionName();
-      $scmName   = Sabel_DB_Config::getSchemaName($conName);
       $database  = Sabel_DB_Config::getDB($conName);
-      $accessor  = new Sabel_DB_Schema_Accessor($conName, $scmName);
+      $accessor  = new Sabel_DB_Schema_Accessor($conName);
       $engine    = ($database === "mysql") ? $accessor->getTableEngine($tblName) : null;
       $tblSchema = $accessor->get($tblName);
     }

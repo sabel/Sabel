@@ -162,8 +162,12 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
       $co->default = null;
     } else {
       $default = trim(str_replace("default ", "", $this->colLine));
-      if (!is_numeric($default)) $default = substr($default, 1, -1);
-      $this->setDefaultValue($co, $default);
+      if ($default === "null" || $default === "NULL") {
+        $co->default = null;
+      } else {
+        if (!is_numeric($default)) $default = substr($default, 1, -1);
+        $this->setDefaultValue($co, $default);
+      }
     }
   }
 

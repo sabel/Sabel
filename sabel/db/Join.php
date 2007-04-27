@@ -60,8 +60,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
   protected function getPossibleTables()
   {
     $connectionName = $this->sourceModel->getConnectionName();
-    $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
-    $accessor   = new Sabel_DB_Schema_Accessor($connectionName, $schemaName);
+    $accessor = new Sabel_DB_Schema_Accessor($connectionName);
 
     return $this->possibleTables = $accessor->getTableLists();
   }

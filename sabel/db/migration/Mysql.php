@@ -106,7 +106,9 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
       if ($col->nullable === false) $line[] = "NOT NULL";
     }
 
-    if (isset($current) && $col->default === "EMPTY" && $current->default !== null) {
+    $cd = $col->default;
+
+    if (isset($current) && $cd === "EMPTY" && $current->default !== null) {
       if ($current->isBool()) {
         $line[] = $this->getBooleanAttr($current->default);
       } elseif ($current->isString()) {
@@ -114,13 +116,13 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
       } else {
         $line[] = "DEFAULT {$current->default}";
       }
-    } elseif ($col->default !== "EMPTY") {
+    } elseif ($cd !== "EMPTY") {
       if ($col->isBool()) {
-        $line[] = $this->getBooleanAttr($current->default);
-      } elseif ($col->isString() && $col->default === "null") {
-        $line[] = "DEFAULT ''";
-      } else {
-        $line[] = "DEFAULT {$col->default}";
+        $line[] = $this->getBooleanAttr($cd);
+      } elseif ($col->isString()) {
+        $line[] = ($cd === null) ? "DEFAULT ''" : "DEFAULT '{$cd}'";
+      } elseif ($cd !== null) {
+        $line[] = "DEFAULT $cd";
       }
     }
 

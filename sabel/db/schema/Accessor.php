@@ -14,11 +14,12 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
   private $connectionName = "";
   private $schemaClass = null;
 
-  public function __construct($connectionName, $schemaName = null)
+  public function __construct($connectionName)
   {
-    $dbName    = Sabel_DB_Config::getDB($connectionName);
+    $dbName = Sabel_DB_Config::getDB($connectionName);
     $className = "Sabel_DB_Schema_" . ucfirst($dbName);
 
+    $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
     $this->schemaClass = new $className($connectionName, $schemaName);
     $this->connectionName = $connectionName;
   }
