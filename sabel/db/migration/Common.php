@@ -61,48 +61,4 @@ abstract class Sabel_DB_Migration_Common extends Sabel_DB_Migration_Base
       }
     }
   }
-
-  protected function getDropColumns()
-  {
-    $fp   = fopen($this->filePath, "r");
-    $cols = array();
-
-    while (!feof($fp)) {
-      $line = trim(fgets($fp, 256));
-      if ($line === "") continue;
-      $cols[] = $line;
-    }
-
-    fclose($fp);
-    return $cols;
-  }
-
-  public function changeColumn()
-  {
-    $tblName = convert_to_tablename($this->mdlName);
-    $schema  = $this->getTableSchema();
-
-    if ($this->type === "upgrade") {
-      $cols = $this->createColumns();
-      $columnNames = array();
-      foreach ($cols as $col) $columnNames[] = $col->name;
-
-      $restore = $this->getRestoreFileName();
-      if (!is_file($restore)) {
-        $columns = array();
-
-        foreach ($schema->getColumns() as $column) {
-          if (in_array($column->name, $columnNames)) $columns[] = $column;
-        }
-
-        $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true, $columns);
-      }
-
-      $this->changeColumnUpgrade($cols, $schema, $tblName);
-    } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      $this->changeColumnDowngrade($cols, $schema, $tblName);
-    }
-  }
 }

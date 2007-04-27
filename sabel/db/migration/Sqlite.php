@@ -1,217 +1,170 @@
 <?php
 
 /**
- * Sabel_DB_Sqlite_Migration
+ * Sabel_DB_Migration_Sqlite
  *
  * @category   DB
  * @package    org.sabel.db
- * @subpackage sqlite
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Sqlite_Migration extends Sabel_DB_Base_Migration
+class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 {
-  protected $search  = array('TYPE::INT(INCREMENT)',
-                             'TYPE::BINT(INCREMENT)',
-                             'TYPE::INT',
-                             'TYPE::SINT',
-                             'TYPE::BINT',
-                             'TYPE::STRING',
-                             'TYPE::TEXT',
-                             'TYPE::DATETIME',
-                             'TYPE::FLOAT',
-                             'TYPE::DOUBLE',
-                             'TYPE::BOOL',
-                             '__TRUE__',
-                             '__FALSE__');
+  protected $types = array(Sabel_DB_Type::INT      => "int",
+                           Sabel_DB_Type::BIGINT   => "bigint",
+                           Sabel_DB_Type::SMALLINT => "smallint",
+                           Sabel_DB_Type::FLOAT    => "float",
+                           Sabel_DB_Type::DOUBLE   => "double",
+                           Sabel_DB_Type::BOOL     => "boolean",
+                           Sabel_DB_Type::STRING   => "varchar",
+                           Sabel_DB_Type::TEXT     => "text",
+                           Sabel_DB_Type::DATETIME => "datetime");
 
-  protected $replace = array('integer primary key',
-                             'integer primary key',
-                             'int',
-                             'smallint',
-                             'bigint',
-                             'varchar',
-                             'text',
-                             'timestamp',
-                             'float',
-                             'double',
-                             'boolean',
-                             "'true'",
-                             "'false'");
+  protected $autoPrimary = false;
 
-  public function addTable($tblName, $cmdQuery)
+  public function createTable($cols)
   {
-    $cmdQuery = preg_replace("/[\n\r\f][ \t]*/", '', $cmdQuery);
+    $this->executeQuery($this->getCreateSql($cols));
+  }
 
-    $exeQuery = array();
-    foreach (explode(',', $cmdQuery) as $line) {
-      if (substr($line, 0, 4) === 'FKEY') {
-        $exeQuery[] = $this->parseForForeignKey($line);
-      } else {
-        list ($colName) = explode(' ', $line);
-        $attr = str_replace($colName, '', $line);
-        $exeQuery[] = $colName . ' ' . $this->incrementFilter($attr);
+  public function addColumn()
+  {
+    $cols = $this->createColumns();
+    $tblName = convert_to_tablename($this->mdlName);
+
+    if ($this->type === "upgrade") {
+      foreach ($cols as $col) {
+        $line = $this->createColumnAttributes($col);
+        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
       }
-    }
-
-    $sch   = $this->search;
-    $rep   = $this->replace;
-    $query = str_replace($sch, $rep, implode(',', $exeQuery));
-    $this->model->executeQuery("CREATE TABLE $tblName ( " . $query . " )");
-  }
-
-  public function deleteTable($tblName)
-  {
-    $this->model->executeQuery("DROP TABLE $tblName");
-  }
-
-  public function renameTable($from, $to)
-  {
-    $this->model->executeQuery("ALTER TABLE $from RENAME TO $to");
-  }
-
-  public function addColumn($tblName, $colName, $param)
-  {
-    $sch  = $this->search;
-    $rep  = $this->replace;
-    $attr = str_replace($sch, $rep, $param);
-
-    $this->model->executeQuery("ALTER TABLE $tblName ADD $colName $attr");
-  }
-
-  public function deleteColumn($tblName, $colName)
-  {
-    $cols = $this->model->getTableSchema()->getColumns();
-    unset($cols[$colName]);
-
-    $query = array();
-    foreach ($cols as $col) {
-      $query[] = $this->createColumnAttribute($col);
-    }
-
-    $this->inout($tblName, implode(',', $query), implode(',', array_keys($cols)));
-  }
-
-  public function changeColumn($tblName, $colName, $param)
-  {
-    $attr = $this->incrementFilter($param);
-    $sch  = $this->search;
-    $rep  = $this->replace;
-    $attr = $colName . ' ' .str_replace($sch, $rep, $param);
-
-    $cols  = $this->model->getTableSchema()->getColumns();
-    $query = array();
-
-    foreach ($cols as $col) {
-      if ($col->name === $colName) {
-        $query[] = $attr;
-        continue;
+    } else {
+      $columns = $this->getTableSchema()->getColumns();
+      foreach ($cols as $col) {
+        if (isset($columns[$col->name])) unset($columns[$col->name]);
       }
 
-      $query[] = $this->createColumnAttribute($col);
+      $this->dropColumnsAndRemakeTable($columns, $tblName);
     }
-
-    $this->inout($tblName, implode(',', $query), '*');
   }
 
-  public function renameColumn($tblName, $from, $to)
+  public function dropColumn()
   {
-    $cols  = $this->model->getTableSchema()->getColumns();
-    $query = array();
+    $tblName = convert_to_tablename($this->mdlName);
 
-    foreach ($cols as $col) {
-      if ($col->name === $from) $col->name = $to;
-      $query[] = $this->createColumnAttribute($col);
-    }
+    if ($this->type === "upgrade") {
+      $cols    = $this->getDropColumns();
+      $restore = $this->getRestoreFileName();
 
-    $this->inout($tblName, implode(',', $query), '*');
-  }
+      if (!is_file($restore)) {
+        $columns = array();
+        $schema  = $this->getTableSchema();
 
-  protected function incrementFilter($attr)
-  {
-    if (strpos($attr,  'TYPE::INT(INCREMENT)') !== false ||
-        strpos($attr, 'TYPE::BINT(INCREMENT)') !== false) {
-      $attr = "INTEGER PRIMARY KEY";
-    }
-    return $attr;
-  }
-
-  protected function createColumnAttribute($col)
-  {
-    $tmp   = array();
-    $tmp[] = $col->name;
-
-    switch ($col->type) {
-      case Sabel_DB_Type_Const::INT:
-        if ($col->increment) {
-          $tmp[] = 'integer primary key';
-        } elseif ($col->max > 9E+18) {
-          $tmp[] = 'bigint';
-        } elseif ($col->max < 32768) {
-          $tmp[] = 'smallint';
-        } else {
-          $tmp[] = 'int';
+        foreach ($schema->getColumns() as $column) {
+          if (in_array($column->name, $cols)) $columns[] = $column;
         }
-        break;
-      case Sabel_DB_Type_Const::STRING:
-        $tmp[] = "varchar({$col->max})";
-        break;
-      default:
-        $types = array(Sabel_DB_Type_Const::BOOL     => 'boolean',
-                       Sabel_DB_Type_Const::TEXT     => 'text',
-                       Sabel_DB_Type_Const::DATETIME => 'datetime',
-                       Sabel_DB_Type_Const::FLOAT    => 'float',
-                       Sabel_DB_Type_Const::DOUBLE   => 'double');
 
-        $tmp[] = $types[$col->type];
-        break;
+        $fp = fopen($restore, "w");
+        $this->writeRestoreFile($fp, true, $columns);
+      }
+
+      $columns = $this->getTableSchema()->getColumns();
+      foreach ($cols as $col) {
+        if (isset($columns[$col])) unset($columns[$col]);
+      }
+
+      $this->dropColumnsAndRemakeTable($columns, $tblName);
+    } else {
+      $cols = $this->createColumns($this->getRestoreFileName());
+      foreach ($cols as $col) {
+        $line = $this->createColumnAttributes($col);
+        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
+      }
+    }
+  }
+
+  public function dropColumnsAndRemakeTable($columns, $tblName)
+  {
+    $driver = $this->driver;
+    $driver->begin($driver->getConnectionName());
+
+    $query = $this->getCreateSql($columns);
+    $query = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
+    $this->executeQuery($query);
+
+    $projection = array();
+    foreach (array_keys($columns) as $key) $projection[] = $key;
+
+    $projection = implode(", ", $projection);
+    $query = "INSERT INTO stmp_{$tblName} SELECT $projection FROM $tblName";
+    $this->executeQuery($query);
+
+    $this->executeQuery("DROP TABLE $tblName");
+
+    $query = "ALTER TABLE stmp_{$tblName} RENAME TO $tblName";
+    $this->executeQuery($query);
+
+    $driver->loadTransaction()->commit();
+  }
+
+  protected function changeColumnUpgrade($cols, $schema, $tblName)
+  {
+    $this->alterChange($cols, $schema, $tblName);
+  }
+
+  protected function changeColumnDowngrade($cols, $schema, $tblName)
+  {
+    $this->alterChange($cols, $schema, $tblName);
+  }
+
+  protected function alterChange($cols, $schema, $tblName)
+  {
+    $columns = $this->getTableSchema()->getColumns();
+    foreach ($cols as $col) {
+      if (isset($columns[$col->name])) $columns[$col->name] = $col;
     }
 
-    if (!$col->nullable) $tmp[] = 'not null';
+    $this->dropColumnsAndRemakeTable($columns, convert_to_tablename($this->mdlName));
+  }
 
-    if ($col->default !== null) {
-      switch ($col->type) {
-        case Sabel_DB_Type_Const::INT:
-        case Sabel_DB_Type_Const::FLOAT:
-        case Sabel_DB_Type_Const::DOUBLE:
-          $tmp[] = "default {$col->default}";
-          break;
-        case Sabel_DB_Type_Const::STRING:
-        case Sabel_DB_Type_Const::TEXT:
-        case Sabel_DB_Type_Const::DATETIME:
-          $tmp[] = "default '{$col->default}'";
-          break;
-        case Sabel_DB_Type_Const::BOOL:
-          $val   = ($col->default) ? 'true' : 'false';
-          $tmp[] = "default '{$val}'";
-          break;
+  protected function createColumnAttributes($col)
+  {
+    $line   = array();
+    $line[] = $col->name;
+    $line[] = $this->getDataType($col);
+
+    if ($col->nullable === false) $line[] = "NOT NULL";
+
+    if ($col->default !== "EMPTY" && $col->default !== null) {
+      if (is_bool($col->default)) {
+        $value  = ($col->default) ? "true" : "false";
+        $line[] = "DEFAULT " . $value;
+      } elseif ($col->isString()) {
+        $d = $col->default;
+        if ((substr($d, 0, 1) !== "'" || substr($d, -1, 1) !== "'") && $d !== "null") {
+          $line[] = "DEFAULT '{$d}'";
+        } else {
+          $line[] = "DEFAULT $d";
+        }
+      } else {
+        $line[] = "DEFAULT " . $col->default;
       }
     }
 
-    return implode(' ', $tmp);
+    return implode(" ", $line);
   }
 
-  protected function inout($tblName, $createSQL, $selectCols)
+  protected function getDataType($col)
   {
-    $model = $this->model;
-    $model->begin();
-
-    $tmpTable = $tblName . '_alter_tmp';
-    $query    = "CREATE TEMPORARY TABLE $tmpTable ( $createSQL )";
-    $model->executeQuery($query);
-
-    $query = "INSERT INTO $tmpTable SELECT $selectCols FROM {$tblName}";
-    $model->executeQuery($query);
-    $model->executeQuery("DROP TABLE $tblName");
-
-    $query = "CREATE TABLE $tblName ( $createSQL )";
-    $model->executeQuery($query);
-
-    $query = "INSERT INTO $tblName SELECT * FROM $tmpTable";
-    $model->executeQuery($query);
-    $model->executeQuery("DROP TABLE $tmpTable");
-
-    $model->commit();
+    if ($col->increment) {
+      $this->sqlPrimary = true;
+      return "integer PRIMARY KEY";
+    } else {
+      if ($col->isString()) {
+        return $this->types[$col->type] . "({$col->max})";
+      } else {
+        return $this->types[$col->type];
+      }
+    }
   }
 }

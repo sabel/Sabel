@@ -53,9 +53,9 @@ class Sabel_DB_Migration_Parser
   protected function setLength($value)
   {
     if ($value === "") {
-      $this->co->length = 255;
+      $this->co->max = 255;
     } else {
-      $this->co->length = (int)substr($value, 1, -1);
+      $this->co->max = (int)substr($value, 1, -1);
     }
   }
 

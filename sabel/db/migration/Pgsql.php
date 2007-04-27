@@ -26,22 +26,6 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
     $this->executeQuery($this->getCreateSql($cols));
   }
 
-  public function drop()
-  {
-    if ($this->type === "upgrade") {
-      $restore = $this->getRestoreFileName();
-      if (!is_file($restore)) {
-        $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true);
-      }
-
-      $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
-    } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      $this->createTable($cols);
-    }
-  }
-
   protected function changeColumnUpgrade($cols, $schema, $tblName)
   {
     foreach ($cols as $col) {
@@ -95,9 +79,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
     $line[] = $col->name;
     $line[] = $this->getDataType($col);
 
-    if ($col->nullable !== "EMPTY" && $col->nullable === false) {
-      $line[] = "NOT NULL";
-    }
+    if ($col->nullable === false) $line[] = "NOT NULL";
 
     if ($col->default !== "EMPTY" && $col->default !== null) {
       $line[] = "DEFAULT " . $col->default;
@@ -118,7 +100,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
       }
     } else {
       if ($col->isString()) {
-        return $this->types[$col->type] . "({$col->length})";
+        return $this->types[$col->type] . "({$col->max})";
       } else {
         return $this->types[$col->type];
       }

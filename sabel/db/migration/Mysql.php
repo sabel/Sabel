@@ -94,7 +94,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
       }
     } else {
       if ($col->isString()) {
-        $line[] = $this->types[$col->type] . "({$col->length})";
+        $line[] = $this->types[$col->type] . "({$col->max})";
       } else {
         $line[] = $this->types[$col->type];
       }
