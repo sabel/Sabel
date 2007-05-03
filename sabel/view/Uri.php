@@ -17,12 +17,12 @@ class Sabel_View_Uri
   {
   }
   
-  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null, $secure = false)
+  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null, $secure = false, $absolute = false)
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
     $fmtUri = "<a id='%s' class='%s' href='%s%s'>%s</a>";
-    return sprintf($fmtUri, $id, $class, $this->uri($params, true, $secure), $uriParameters, $anchor);
+    return sprintf($fmtUri, $id, $class, $this->uri($params, $absolute, $secure), $uriParameters, $anchor);
   }
   
   public function aTag($param, $anchor, $uriParameters = null, $id, $class, $secure)
@@ -33,8 +33,8 @@ class Sabel_View_Uri
   public function uri($param, $withDomain = false, $secure = false)
   {
     $params = $this->convert($param);
-    if (isset($_SERVER["HTTP_HOST"])) {
-      $httphost = $_SERVER["HTTP_HOST"];
+    if (isset($_SERVER["SERVER_NAME"])) {
+      $httphost = $_SERVER["SERVER_NAME"];
     } else {
       $httphost = "localhost";
     }

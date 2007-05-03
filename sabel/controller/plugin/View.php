@@ -11,16 +11,8 @@
  */
 class Sabel_Controller_Plugin_View extends Sabel_Controller_Page_Plugin
 {
-  public function onAfterAction($controller)
+  public function render($template, $additional)
   {
-    /*
-    $view = Sabel_Context::getView();
-    $view->assign("request", $controller->getRequest());
-    $view->assignByArray(Sabel_Context::getCurrentCandidate()->getElementVariables());
-    $view->assignByArray($controller->getRequests());
-    $view->assignByArray($controller->getAttributes());
-    $result = $controller->getResult();
-    if (is_array($result)) $view->assignByArray($result);
-    */
+    $this->rendered = Sabel_View::Render($template, $additional);
   }
 }

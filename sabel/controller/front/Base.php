@@ -18,11 +18,15 @@ abstract class Sabel_Controller_Front_Base
     $candidate = null,
     $request   = null, 
     $requestClass = "Sabel_Request_Web";
+    
+  protected 
+    $controller = null;
   
   public function ignition($storage = null)
   {
     Sabel_Context::log("request " . $this->request);
     Sabel_Context::initialize();
+    
     $filters = $this->loadFilters($this->candidate);
     $this->processHelper($this->request, $this->candidate);
     $this->processPreFilter($filters, $this->request);
@@ -33,10 +37,20 @@ abstract class Sabel_Controller_Front_Base
     $controller->setAction($actionName);
     $controller->initialize();
     $this->processPostFilter($filters, $controller);
-    $result = $controller->execute($actionName);
-    return $this->processView($controller);
+    $controller->execute($actionName);
+    $this->controller = $controller;
   }
- 
+  
+  public function getController()
+  {
+    return $this->controller;
+  }
+  
+  public function getResult()
+  {
+    return $this->processView($this->controller);
+  }
+  
   abstract public function processCandidate($request = null);
   abstract protected function loadFilters($candidate);
   abstract protected function processHelper($request, $candidate);

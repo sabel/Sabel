@@ -16,6 +16,8 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
   const DEF_LAYOUT = "layout.tpl";
   const TPL_SUFFIX = ".tpl";
   
+  private $locations = array();
+  
   public function locate($name = null)
   {
     if ($name === null) {
@@ -23,6 +25,10 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     }
     
     $location = $this->getLocation($name);
+    
+    if (!$location->valid) {
+      throw new Exception("resource missing");
+    }
     
     $resource = new Sabel_View_Resource_Template();
     $resource->setRenderer($location->renderer);
@@ -32,6 +38,7 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     return $resource;
   }
   
+  /*
   private final function getLocation($name)
   {
     $tpldir = Sabel_Const::TEMPLATE_DIR;
@@ -42,6 +49,7 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     $specificPath  = $path . self::VIEW_DIR;
     $specificName  = $controller . "." . $name . self::TPL_SUFFIX;
     $specificName2 = $controller . "/" . $name . self::TPL_SUFFIX;
+    $specificName3 = $controller . "/" . $name;
     
     $location = new StdClass();
     $location->renderer = new Sabel_View_Renderer_Class();
@@ -55,6 +63,12 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     } elseif (is_readable($specificPath . $specificName)) {
       $location->path = $specificPath;
       $location->name = $specificName;
+    } elseif (is_readable($specificPath . $specificName3)) {
+      $location->path = $specificPath;
+      $location->name = $specificName3;
+    } elseif (is_readable($specificPath . $name)) {
+      $location->path = $specificPath;
+      $location->name = $name;
     } elseif (is_readable($path . $tpldir . $name)) {
       $location->path = $path . $tpldir;
       $location->name = $name;
@@ -71,12 +85,37 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     
     $location->valid = true;
     return $location;
+  }*/
+  
+  private final function getLocation()
+  {
+    $location = new StdClass();
+    foreach ($this->locations as $l) {
+      list($path, $name) = $l;
+      if (is_readable($path.$name)) {
+        $location->path = $path;
+        $location->name = $name;
+        $location->renderer = new Sabel_View_Renderer_Class();
+        $location->valid = true;
+        return $location;
+      }
+    }
+    
+    $location->valid = false;
+    return $location;
   }
   
+  public final function addLocation($path, $name)
+  {
+    $this->locations[] = array($path, $name);
+  }
+  
+  /*
   private final function getPath($module)
   {
     return RUN_BASE . Sabel_Const::MODULES_DIR . $module . DIR_DIVIDER;
   }
+  */
   
   private final function getContext()
   {

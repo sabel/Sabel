@@ -15,8 +15,12 @@ final class Sabel_Controller_Plugin
   private $pluginMethods = array();
   private $controller    = null;
   
-  private $eventMethods = array("onBeforeAction", "onAfterAction", "onRedirect",
-                                "onException", "onCreateController", "onExecuteAction");
+  private $eventMethods = array("onBeforeAction",
+                                "onAfterAction",
+                                "onRedirect",
+                                "onException",
+                                "onCreateController",
+                                "onExecuteAction");
   
   private $events = array();
   
@@ -35,34 +39,52 @@ final class Sabel_Controller_Plugin
     $this->controller = $controller;
   }
   
+  /**
+   * add plugin
+   *
+   * @param Sabel_Controller_Page_Plugin $plugin
+   */
   public function add($plugin)
   {
-    $name = get_class($plugin);
+    if (!$plugin instanceof Sabel_Controller_Page_Plugin) {
+      throw new Sabel_Exception_Unexpected();
+    }
     
-    if ($name === false) throw new Sabel_Exception_InvalidPlugin("can't locate");
+    $name = get_class($plugin);
     
     $this->plugins[$name] = $plugin;
     foreach (get_class_methods($plugin) as $method) {
-      if (!in_array($method, $this->eventMethods)) {
-        $this->pluginMethods[$method] = $name;
-      } else {
+      if ($this->isEventMethod($method)) {
         $this->events[$method][] = $name;
+      } else {
+        $this->pluginMethods[$method] = $name;
       }
     }
     
     return $this;
   }
   
+  /**
+   * execute a method of plugin
+   *
+   * @param string $method
+   * @param array $arguments
+   * @return mixed the result of action execute
+   */
   public function call($method, $arguments)
   {
-    if (!isset($this->pluginMethods[$method])) {
-      $msg = "call {$method}() not found in any plugins";
+    if (!$this->isPluginMethodExists($method)) {
+      $msg = "call {$method}() not found in any plugins and controller";
       throw new Sabel_Exception_NoPluginMethod($msg);
     }
     
-    $obj = $this->plugins[$this->pluginMethods[$method]];
-    $ref = new ReflectionClass($obj);
-    return $ref->getMethod($method)->invokeArgs($obj, $arguments);
+    $plugin = $this->plugins[$this->pluginMethods[$method]];
+    if (!is_object($plugin)) throw new Sabel_Exception_Unexpected();
+      
+    $plugin->setControllerInstance($this->controller);
+    $refPlugin = new ReflectionClass($plugin);
+    
+    return $refPlugin->getMethod($method)->invokeArgs($plugin, $arguments);
   }
   
   public function onBeforeAction()
@@ -73,15 +95,6 @@ final class Sabel_Controller_Plugin
   public function onAfterAction()
   {
     $this->doActionEvent("onAfterAction");
-  }
-  
-  protected function doActionEvent($event)
-  {
-    if (isset($this->events[$event])) {
-      foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($this->controller);
-      }
-    }
   }
   
   public function onRedirect($redirect)
@@ -134,5 +147,24 @@ final class Sabel_Controller_Plugin
   public function toArray()
   {
     return $this->plugins;
+  }
+  
+  private final function doActionEvent($event)
+  {
+    if (isset($this->events[$event])) {
+      foreach ($this->events[$event] as $name) {
+        $this->plugins[$name]->$event($this->controller);
+      }
+    }
+  }
+  
+  private final function isPluginMethodExists($method)
+  {
+    return isset($this->pluginMethods[$method]);
+  }
+  
+  private final function isEventMethod($method)
+  {
+    return in_array($method, $this->eventMethods);
   }
 }

@@ -1,6 +1,5 @@
 <?php
 
-//Sabel::using("Sabel_Request");
 require_once ("MockRequest.php");
 require_once ("PageControllerForTest.php");
 
@@ -20,12 +19,14 @@ class Test_Controller_Page extends SabelTestCase
   }
   
   private $c = null;
+  private $storage = null;
   
   public function setUp()
   {
+    $this->storage = new Sabel_Storage_InMemory();
     $this->c = new PageControllerForTest();
     $this->assertTrue(is_object($this->c));
-    $this->c->setup(new MockRequest());
+    $this->c->setup(new MockRequest(), $this->storage);
   }
  
   public function tearDown()
@@ -34,8 +35,7 @@ class Test_Controller_Page extends SabelTestCase
   
   public function testExecuteSimpleAction()
   {
-    $result = $this->c->execute("testAction");
-    // $this->assertEquals("test", $result["test"]);
+    $this->c->execute("testAction");
   }
   
   public function testInvalidAction()
@@ -52,9 +52,15 @@ class Test_Controller_Page extends SabelTestCase
   {
     $request = new MockRequest();
     $this->c->setup($request);
-    $result = $this->c->execute("testActionWithParameter");
-    // $this->assertEquals("testParam", $result["test"]);
+    $this->c->execute("testActionWithParameter");
   }
 }
 
 
+class EventListener
+{
+  public function notify($controller, $state)
+  {
+    echo $state;
+  }
+}

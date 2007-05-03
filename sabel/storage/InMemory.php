@@ -11,6 +11,11 @@ class Sabel_Storage_InMemory
     return self::$instance;
   }
   
+  public function start()
+  {
+    
+  }
+  
   public function clear()
   {
     $deleted = array();

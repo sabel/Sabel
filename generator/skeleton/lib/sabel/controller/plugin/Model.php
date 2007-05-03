@@ -11,6 +11,16 @@
  */
 class Sabel_Controller_Plugin_Model extends Sabel_Controller_Page_Plugin
 {
+  public function onBeforeAction($controller)
+  {
+    if ($controller->issetModels()) {
+      foreach ($controller->getModels() as $model) {
+        $modelName = strtolower($model);
+        $this->setAttribute($modelName, MODEL($model));
+      }
+    }
+  }
+  
   public function fill($model, $options = null)
   {
     if (!$model instanceof Sabel_DB_Model) {

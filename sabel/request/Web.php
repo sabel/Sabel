@@ -26,6 +26,7 @@ class Sabel_Request_Web extends Sabel_Request
   protected $posts = array();
   
   private $result = null;
+  private $fController = null;
   
   /**
    * @var Sabel_Request_Parameters $parameters
@@ -64,15 +65,6 @@ class Sabel_Request_Web extends Sabel_Request
     $this->parameters = new Sabel_Request_Parameters($parameters);
     
     return $this;
-  }
-  
-  /**
-   * to with uri()
-   *
-   */
-  public function toUri($uri)
-  {
-    return $this->to(uri($uri, false));
   }
   
   public function parameters($params)
@@ -211,6 +203,16 @@ class Sabel_Request_Web extends Sabel_Request
     return $this->uri;
   }
   
+  public function get($uri)
+  {
+    return $this->method("GET")->to($uri);
+  }
+  
+  public function post($uri)
+  {
+    return $this->method("POST")->to($uri);
+  }
+  
   public function launch($storage = null)
   {
     $aFrontController = new Sabel_Controller_Front();
@@ -218,30 +220,31 @@ class Sabel_Request_Web extends Sabel_Request
     $aFrontController->processCandidate($this);
     
     $aFrontController->plugin
-                     ->add(new Sabel_Controller_Plugin_Volatile())
+                     ->add(new Sabel_Controller_Plugin_Volatile($storage))
                      ->add(new Sabel_Controller_Plugin_Filter())
                      ->add(new Sabel_Controller_Plugin_Model())
                      ->add(new Sabel_Controller_Plugin_View())
                      ->add(new Sabel_Controller_Plugin_ExceptionHandler());
 
-    $this->result = $aFrontController->ignition($storage);
-    
+    $aFrontController->ignition($storage);
+    $this->fController = $aFrontController;
+    $this->fController->getResult();
     return $this;
   }
   
   public function isRedirected()
   {
-    return $this->result->isRedirected();
+    return $this->fController->getController()->isRedirected();
   }
   
   public function controller()
   {
-    return $this->result;
+    return $this->fController->getController();
   }
   
   public function result()
   {
-    return $this->result;
+    return $this->fController->getController();
   }
   
   public function __toString()

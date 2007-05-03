@@ -11,15 +11,30 @@
  */
 class Sabel_View_Resource_String implements Sabel_View_Resource
 {
-  protected final $string = "";
+  private $string = "";
+  private $renderer = null;
   
   public function set($string)
   {
     $this->string = $string;
   }
   
+  public final function setRenderer($renderer)
+  {
+    if ($renderer instanceof Sabel_View_Renderer) {
+      $this->renderer = $renderer;
+    } else {
+      throw new Exception("pass invalid renderer");
+    }
+  }
+  
   public function isResourceMissing()
   {
     return ($this->string === "");
+  }
+  
+  public function fetch($values)
+  {
+    return $this->renderer->rendering($this->string, $values);
   }
 }

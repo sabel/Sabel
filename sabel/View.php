@@ -12,46 +12,56 @@
 final class Sabel_View
 {
   private static $values = array();
-  
+
   private $resource = null;
-  
+
   public function __set($key, $value)
   {
     self::$values[$key] = $value;
   }
-  
+
   public final function assign($key, $value)
   {
     self::$values[$key] = $value;
     return $this;
   }
   
+  public static function getAssigns()
+  {
+    return self::$values;
+  }
+  
+  public static function clearAssigns()
+  {
+    self::$values = array();
+  }
+
   public final function assignByArray($assignments)
   {
     if (is_array($assignments)) {
       self::$values = array_merge(self::$values, $assignments);
     }
-    
+
     return $this;
   }
-    
+
   public final function enableCache()
   {
     $this->renderer->enableCache();
     return $this;
   }
-  
+
   public final function setResource($resource)
   {
     $this->resource = $resource;
     return $this;
   }
-  
+
   public final function isResourceMissing()
   {
     return $this->resource->isResourceMissing();
   }
-  
+
   /**
    * rendering template resource
    *
@@ -67,16 +77,25 @@ final class Sabel_View
       throw new Exception("invalid resource");
     }
   }
-  
+
   public static function render($name = null, $additional)
   {
     if (isset($additional["assign"])) {
       self::$values = array_merge(self::$values, $additional["assign"]);
     }
-            
-    return Sabel_View_Locator_Factory::create()
-                                       ->make()
-                                       ->locate($name)
-                                       ->fetch(self::$values);
+    
+    if (isset($additional["resource"])) {
+      if ($additional["resource"] === "string") {
+        $resource = new Sabel_View_Resource_String();
+        $resource->set($name);
+        $resource->setRenderer(new Sabel_View_Renderer_Class());
+        return $resource->fetch(self::$values);
+      }
+    } else {
+      return Sabel_View_Locator_Factory::create()
+                                         ->make($name)
+                                         ->locate($name)
+                                         ->fetch(self::$values);
+    }
   }
 }

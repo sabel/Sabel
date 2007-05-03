@@ -3,17 +3,20 @@
 class Sabel_Storage_Session
 {
   private static $instance = null;
-  
-  public function __construct()
-  {
-    // @todo fix me
-    if (!defined('TEST_CASE')) @session_start();
-  }
+  private static $started = false;
   
   public static function create()
   {
     if (!self::$instance) self::$instance = new self();
     return self::$instance;
+  }
+  
+  public function start()
+  {
+    if (self::$started === false) {
+      session_start();
+      self::$started = true;
+    }
   }
   
   public function clear()
@@ -49,6 +52,8 @@ class Sabel_Storage_Session
   
   public function write($key, $value, $timeout = 60)
   {
+    if (self::$started === false) $this->start();
+    
     $_SESSION[$key] = array('value'   => $value, 
                             'timeout' => $timeout,
                             'count'   => 0);

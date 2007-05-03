@@ -27,7 +27,7 @@ class Test_Sabel extends SabelTestCase
     
     if (!is_dir(RUN_BASE)) {
       mkdir(RUN_BASE);
-      $dt = new Sabel_Util_DirectoryTraverser(SABEL_BASE.'/generator/skeleton');
+      $dt = new Sabel_Util_DirectoryTraverser(SABEL_BASE . '/generator/skeleton');
       $dt->visit(new SabelDirectoryAndFileCreator());
       $dt->traverse();
     }
@@ -40,8 +40,7 @@ class Test_Sabel extends SabelTestCase
     $this->assertTrue(is_object($fcontroller));
     
     set_include_path(get_include_path().':'.RUN_BASE.'/app/');
-    $request = new Sabel_Request_Web("/index/index");
-    $this->assertTrue(is_object($fcontroller->ignition($request)));
+    $request = new Sabel_Request_Web("index/index");
   }
   
   public function testSingleton()
