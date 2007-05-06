@@ -158,7 +158,7 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
       $content = "";
     }
     
-    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"]) || !$controller->withLayout()) {
+    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
     } else {
       $assign = array("assign" => array("contentForLayout" => $content));

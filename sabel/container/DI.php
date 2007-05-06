@@ -1,55 +1,41 @@
 <?php
 
 /**
- * Sabel DI Container
+ * Sabel Container Instance Builder
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category   container
+ * @package    org.sabel.core
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Container_DI
 {
-  protected $classStack = array();
-  
-  protected $depends = array();
-  
-  public static function create()
-  {
-    return new self();
-  }
+  private $dependStack = array();
   
   /**
    * load instance of $className;
    *
-   * @return Object instance
+   * @return object constructed instance
    */
-  public function load($className, $method = '__construct')
+  public function load($className)
   {
-    $this->parseDependency($className, $method);
-    $instance = $this->constructInstance();
-    return $instance;
+    $this->parseDependency($className);
+    return $this->constructInstance();
   }
   
-  public function depends($className, $dependsClassName, $type)
+  private final function parseDependency($class)
   {
-    $this->depends[$className][] = array($dependsClassName, $type);
-  }
-  
-  public function loadInjected($className, $method = '__construct')
-  {
-    return new Sabel_Aspect_Proxy($this->load($className, $method));
-  }
-  
-  public function parseDependency($class, $method = '__construct')
-  {
-    // push to Stack class name
-    $reflectionClass    = new ReflectionClass($class);
-    $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass, $reflectionClass);
+    $method = "__construct";
     
-    if ($reflectionClass->isInterface() || $reflectionClass->isAbstract()) {
-      $reflectionClass    = new ReflectionClass($reflectionClassExt->getImplementClass());
-      $reflectionClassExt = new Sabel_Container_ReflectionClass($reflectionClass);
+    if (!class_exists($class)) {
+      throw new Sabel_Exception_Runtime($class . " does not exists");
     }
     
-    $this->classStack[] = $reflectionClassExt;
+    $reflectionClass = new Sabel_Container_ReflectionClass($class);
+    
+    // push to Stack class name
+    $this->dependStack[] = $reflectionClass;
     
     if ($reflectionClass->hasMethod($method)) {
       // parameters loop
@@ -59,10 +45,10 @@ class Sabel_Container_DI
         if ($dependClass = $param->getClass()) {
           // recursive call if class also depend another class.
           $depend = $dependClass->getName();
-          if ($this->hasParameterDependOnClass($depend)) {
+          if ($this->isParameterDependOnClass($depend)) {
             $this->parseDependency($depend);
           } else {
-            $this->classStack[] = new Sabel_Container_ReflectionClass($dependClass, $reflectionClass);
+            $this->dependStack[] = new Sabel_Container_ReflectionClass($depend);
           }
         }
       }
@@ -71,67 +57,69 @@ class Sabel_Container_DI
     return $this;
   }
   
-  public function constructInstance()
+  /**
+   * constructing depend instance
+   *
+   * @return object
+   */
+  private final function constructInstance()
   {
-    $stackCount =(int) count($this->classStack);
+    $stackCount =(int) count($this->dependStack);
     
     if ($stackCount < 1) {
-      throw new SabelException('invalid stack count:' . var_export($this->classStack, 1));
+      $msg = "invalid stack count:" . var_export($this->dependStack, 1);
+      throw new Sabel_Exception_Runtime($msg);
     }
     
-    $class = array_pop($this->classStack);
-    if ($class === null) throw new Sabel_Exception_Runtime("class is null.");
+    $instance = null;
     
-    if ($class->isInterface()) {
-      $instance = $class->newInstanceForImplementation();
-    } elseif ($class->isAbstract()) {
-      $instance = $class->newInstanceForImplementation();
-    } else {
-      $instance = $class->newInstance();
-    }
-    
-    for ($i = 1; $i < $stackCount; ++$i) {
-      $class = array_pop($this->classStack);
+    for ($i = 0; $i < $stackCount; ++$i) {
+      $reflection = array_pop($this->dependStack);
       
-      if ($class->isInterface()) {
-        $instance = $class->newInstanceForImplementation($instance);
-      } elseif ($class->isAbstract()) {
-        $instance = $class->newInstanceForImplementation($instance);
+      if ($reflection->isImplementation()) {
+        $instance = $this->getInstance($reflection->getName(), $instance);
       } else {
-        $instance = $class->newInstance($instance);
+        $instance = $this->getInstanceWithImplement($reflection->getName(), $instance);
       }
       
-      $this->loadDependsClass($class->getName(), $instance);
+      unset($reflection);
     }
     
     return $instance;
   }
   
-  protected function loadDependsClass($className, $instance)
+  private final function getInstance($className, $instance = null)
   {
-    if (!isset($this->depends[$className])) return;
+    if (!class_exists($className)) {
+      throw new Sabel_Exception_Runtime("class doesn't exists");
+    }
     
-    foreach ($this->depends[$className] as $value) {
-      $className = $value[0];
-      $type      = $value[1];
-      
-      if (class_exists($className)) {
-        switch ($type) {
-          case "Setter":
-            $setter = "set".ucfirst($className);
-            $instance->$setter(self::create()->load($className));
-            break;
-        }
-      }
+    if ($instance) {
+      return new $className($instance);
+    } else {
+      return new $className();
     }
   }
   
-  public function hasParameterDependOnClass($class, $method = '__construct')
+  private final function getInstanceWithImplement($className, $instance = null)
+  {
+    if (!class_exists($className)) {
+      throw new Sabel_Exception_Runtime("class doesn't exists");
+    }
+    
+    if ($instance) {
+      return new $className($instance);
+    } else {
+      return new $className();
+    }
+  }
+  
+  public function isParameterDependOnClass($class, $method = "__construct")
   {
     $refClass  = new ReflectionClass($class);
     $result = null;
     
-    if (self::getClassType($refClass) === 'interface') {
+    if ($refClass->isInterface()) {
       $result = false;
     } elseif ($refClass->hasMethod($method)) {
       $refMethod = new ReflectionMethod($class, $method);
@@ -139,20 +127,5 @@ class Sabel_Container_DI
     }
     
     return $result;
-  }
-  
-  public static function getClassType($reflectionClass)
-  {
-    if ($reflectionClass->isInterface()) {
-      $type = 'interface';
-    } elseif ($reflectionClass->isAbstract()) {
-      $type = 'abstract';
-    } elseif ($reflectionClass->isInstantiable()) {
-      $type = 'class';
-    } else {
-      $type = 'unknown';
-    }
-    
-    return $type;
   }
 }

@@ -51,14 +51,13 @@ require_once('Test/SabelTestSuite.php');
 require_once('Test/Sabel.php');
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
-require_once('Test/DI.php');
+require_once('Test/Container.php');
 require_once('Test/Pager.php');
 require_once('Test/PageViewer.php');
 require_once('Test/Parameters.php');
 require_once('Test/Request.php');
 require_once('Test/Resolver.php');
 
-// require_once('Test/Container.php');
 require_once('Test/Classes.php');
 // require_once('Test/Cache.php');
 
@@ -89,7 +88,7 @@ class SabelAllTests
     }
     
     // $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Validate::suite());
     // $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
@@ -100,7 +99,7 @@ class SabelAllTests
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_Namespace::suite());
     $suite->addTest(Test_Date::suite());
-    $suite->addTest(Test_DI::suite());
+    $suite->addTest(Test_Container::suite());
     return $suite;
     
     // $suite->addTest(Test_Annotation::suite());

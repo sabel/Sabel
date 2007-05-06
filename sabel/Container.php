@@ -13,6 +13,11 @@ class Sabel_Container
 {
   static $instancies = array();
   
+  public static function injector($component)
+  {
+    return new Sabel_Container_Injector($component);
+  }
+  
   public static function load($className, $additional = null)
   {
     if ($additional === null) $additional = array();
