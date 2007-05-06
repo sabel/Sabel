@@ -244,7 +244,10 @@ class Sabel_DB_Model
 
     switch ($columns[$key]->type) {
       case Sabel_DB_Type::INT:
-        return ($value > 2147483647) ? (float)$value : (int)$value;
+        return (int)$value;
+
+      case Sabel_DB_Type::BIGINT:
+        return ($value > 2147483647) ? $value : (int)$value;
 
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:

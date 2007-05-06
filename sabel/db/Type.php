@@ -14,7 +14,6 @@
 interface Sabel_DB_Type
 {
   const INT       = "INT";
-  const SMALLINT  = "SMALLINT";
   const BIGINT    = "BIGINT";
   const FLOAT     = "FLOAT";
   const DOUBLE    = "DOUBLE";

@@ -23,12 +23,14 @@ class Sabel_DB_Validator
   protected
     $errors = array();
 
-  public function __construct($model)
+  public function __construct($model, $configs = null)
   {
     $this->model   = $model;
     $this->mdlName = $mdlName = $model->getModelName();
 
-    $configs = Sabel_DB_Validate_Config::getConfigs();
+    if ($configs === null) {
+      $configs = Sabel_DB_Validate_Config::getConfigs();
+    }
 
     $this->messages      = $configs["messages"];
     $this->datetimeRegex = $configs["datetimeRegex"];
@@ -45,7 +47,7 @@ class Sabel_DB_Validator
 
   public function hasError()
   {
-    return !(empty($this->errors));
+    return !empty($this->errors);
   }
 
   public function validate($ignores = array())
@@ -99,25 +101,38 @@ class Sabel_DB_Validator
   protected function customValidation($validations, $schemas, &$errors)
   {
     foreach ($validations as $colName => $functions) {
-      if (isset($schemas[$colName])) {
-        $value = $schemas[$colName]->value;
-      } else {
-        continue;
-      }
-
-      foreach ($functions as $function) {
-        if (is_array($function)) {
-          list ($function, $args) = $function;
-          if (!is_array($args)) $args = (array)$args;
-
-          $argString = $this->createEvalString($args);
-          eval ('$result = $function($value, ' . $argString . ');');
-        } else {
-          $result = $function($value);
+      if (strpos($colName, "*") !== false) {
+        $regex = str_replace("*", ".*", $colName);
+        $cols  = array();
+        foreach (array_keys($schemas) as $name) {
+          if (preg_match("/{$regex}/", $name)) $cols[] = $name;
         }
 
-        if ($result) $errors[] = $result;
+        foreach ($cols as $name) {
+          $value = $schemas[$name]->value;
+          $this->execCustomValidation($functions, $value, $errors);
+        }
+      } elseif (isset($schemas[$colName])) {
+        $value = $schemas[$colName]->value;
+        $this->execCustomValidation($functions, $value, $errors);
       }
+    }
+  }
+
+  protected function execCustomValidation($functions, $value, &$errors)
+  {
+    foreach ($functions as $function) {
+      if (is_array($function)) {
+        list ($function, $args) = $function;
+        if (!is_array($args)) $args = (array)$args;
+
+        $argString = $this->createEvalString($args);
+        eval ('$result = $function($value, ' . $argString . ');');
+      } else {
+        $result = $function($value);
+      }
+
+      if ($result) $errors[] = $result;
     }
   }
 

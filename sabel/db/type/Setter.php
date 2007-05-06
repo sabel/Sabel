@@ -19,6 +19,7 @@ class Sabel_DB_Type_Setter
       $co->type = Sabel_DB_Type::TIME;
     } else {
       $int    = new Sabel_DB_Type_Integer();
+      $bint   = new Sabel_DB_Type_Bigint();
       $string = new Sabel_DB_Type_String();
       $text   = new Sabel_DB_Type_Text();
       $time   = new Sabel_DB_Type_Datetime();
@@ -27,7 +28,8 @@ class Sabel_DB_Type_Setter
       $byte   = new Sabel_DB_Type_Byte();
       $other  = new Sabel_DB_Type_Other();
 
-      $int->add($string);
+      $int->add($bint);
+      $bint->add($string);
       $string->add($text);
       $text->add($time);
       $time->add($double);

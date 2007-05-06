@@ -327,6 +327,39 @@ class Test_Validate extends SabelTestCase
 
     Sabel_DB_Validate_Config::clearCustomValidations();
   }
+
+  public function testRegex()
+  {
+    $custom = array("function"  => "test_regex_column",
+                    "model"     => array("TargetModel1", "TargetModel2"),
+                    "column"    => "pre_*",
+                    "arguments" => array("a", "b"));
+
+    Sabel_DB_Validate_Config::registCustomValidation($custom);
+
+    $model = new TargetModel1();
+    $model->id = 10;
+    $model->name = "hoge";
+    $model->status = false;
+    $model->registed = "2006-01-10 20:11:44";
+    $model->point = 3000;
+    $model->pre_hoge = "bcd";
+
+    $validator = new Sabel_DB_Validator($model);
+    $validator->validate();
+    $this->assertFalse($validator->hasError());
+
+    $model = new TargetModel2();
+    $model->id = 10;
+    $model->name = "hoge";
+    $model->pre_huga = "bcd";
+
+    $validator = new Sabel_DB_Validator($model);
+    $validator->validate();
+    $this->assertTrue($validator->hasError());
+
+    Sabel_DB_Validate_Config::clearCustomValidations();
+  }
 }
 
 class TargetModel1 extends Sabel_DB_Model
@@ -380,6 +413,13 @@ class Schema_TargetModel1
                            'primary'   => false,
                            'default'   => null);
 
+    $cols['pre_hoge'] = array('type'      => 'STRING',
+                              'increment' => false,
+                              'nullable'  => true,
+                              'primary'   => false,
+                              'max'       => 24,
+                              'default'   => null);
+
     return $cols;
   }
 
@@ -414,6 +454,13 @@ class Schema_TargetModel2
                             'max'       => 24,
                             'default'   => null);
 
+    $cols['pre_huga'] = array('type'      => 'STRING',
+                              'increment' => false,
+                              'nullable'  => true,
+                              'primary'   => false,
+                              'max'       => 24,
+                              'default'   => null);
+
     return $cols;
   }
 
@@ -444,7 +491,9 @@ function validate_function_custom1($value, $arg = 1)
   }
 }
 
-function validate_function_custom2()
+function test_regex_column($value, $arg)
 {
-
+  if (strpos($value, $arg) !== false) {
+    return "invalid value.";
+  }
 }

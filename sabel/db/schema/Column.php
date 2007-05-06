@@ -18,14 +18,12 @@ class Sabel_DB_Schema_Column
   public $primary   = null;
   public $increment = null;
 
-  public function isInt()
+  public function isInt($includeBigInt = true)
   {
-    return ($this->type === Sabel_DB_Type::INT);
-  }
+    $bool = ($this->type === Sabel_DB_Type::INT);
+    if ($bool) return true;
 
-  public function isSmallint()
-  {
-    return ($this->type === Sabel_DB_Type::SMALLINT);
+    return ($includeBigInt) ? $this->isBigint() : false;
   }
 
   public function isBigint()
