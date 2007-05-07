@@ -90,10 +90,11 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     $appSharedHelper = "application";
     $helperPrefix    = "php";
     
+    $pref = "{$appDir}/{$module}/{$helperDirName}/";
     $helpers = array("/{$appDir}/{$helperDirName}/{$appSharedHelper}.{$helperPrefix}",
-                     "/{$appDir}/{$module}/{$helperDirName}/{$appSharedHelper}.{$helperPrefix}",
-                     "/{$appDir}/{$module}/{$helperDirName}/{$cntr}.{$helperPrefix}",
-                     "/{$appDir}/{$module}/{$helperDirName}/{$cntr}.{$action}.{$helperPrefix}");
+                     $pref . "{$appSharedHelper}.{$helperPrefix}",
+                     $pref . "{$cntr}.{$helperPrefix}",
+                     $pref . "{$cntr}.{$action}.{$helperPrefix}");
                      
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;
@@ -149,8 +150,8 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     $view->assignByArray($controller->getRequests());
     
     $html = "";
-    
-    $assigns = array("assign" => $controller->getAssignments());
+    $assigns = array("assign" => array_merge($controller->getAssignments(),
+                                             $controller->getAttributes()));
     
     try {
       $content = Sabel_View::render(null, $assigns);

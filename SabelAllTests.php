@@ -63,10 +63,9 @@ require_once('Test/Classes.php');
 
 require_once('Test/Date.php');
 require_once('Test/DB/Tests.php');
+require_once('Test/Validate.php');
 require_once('Test/Map/Tests.php');
 
-require_once('Test/Namespace.php');
-require_once('Test/Validate.php');
 require_once('Test/VirtualInheritance.php');
 
 // require_once('Test/Controller/Tests.php');
@@ -97,7 +96,6 @@ class SabelAllTests
     $suite->addTest(Test_PageViewer::suite());
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());
-    $suite->addTest(Test_Namespace::suite());
     $suite->addTest(Test_Date::suite());
     $suite->addTest(Test_Container::suite());
     return $suite;
