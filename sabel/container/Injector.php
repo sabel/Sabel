@@ -13,35 +13,77 @@ class Sabel_Container_Injector
 {
   private $injection = null;
   
-  public function __construct(Sabel_Container_Injection $injection)
+  /**
+   * default constructer
+   *
+   * @param Sabel_Container_Injection $injection
+   */
+  public function __construct($injection)
   {
+    if (!$injection instanceof Sabel_Container_Injection) {
+      throw new Sabel_Exception_Runtime("must be Sabel_Container_Injection");
+    }
+    
     $this->injection = $injection;
     $this->injection->configure();
   }
   
-  public function getInstance($className)
+  /**
+   * get new class instance from class name
+   *
+   * @param string $className
+   * @return object
+   */
+  public function newInstance($className)
   {
-    $c = new Sabel_Container_DI();
-    
-    if ($this->injection->hasConstruct()) {
+    if ($this->injection->hasConstruct($className)) {
       $construct = $this->injection->getConstruct($className);
-      if ($construct->isClass()) {
-        $dependClassName = $construct->getConstruct();
-        $instance = new $className(new $dependClassName);
-      } else {
-        $literal = $construct->getConstruct();
-        $instance = new $className($literal);
+      $constructArguments = array();
+      
+      foreach ($construct->getConstructs() as $constructValue) {
+        if ($this->exists($constructValue)) {
+          $constructArguments[] = $this->constructInstance($constructValue);
+        } else {
+          $constructArguments[] = $constructValue;
+        }
       }
+      
+      $reflect = new ReflectionClass($className);
+      $instance = $reflect->newInstanceArgs($constructArguments);
     } else {
-      $instance = $c->load($className);
+      $dependencyResolver = new Sabel_Container_DI();
+      $instance = $dependencyResolver->load($className);
     }
     
     foreach ($this->injection->getBinds() as $name => $bind) {
-      $defaultInjectionMethod = "set" . ucfirst($name);
+      $injectionMethod = "set" . ucfirst($name);
       $implClassName = $bind->getImplementation();
-      $instance->$defaultInjectionMethod($c->load($implClassName));
+      $reflect = new ReflectionClass($instance);
+      if ($reflect->hasMethod($injectionMethod)) {
+        $dependencyResolver = new Sabel_Container_DI();
+        $instance->$injectionMethod($dependencyResolver->load($implClassName));
+      }
     }
     
     return $instance;
+  }
+  
+  private final function constructInstance($dependClassName)
+  {
+    $reflect = new ReflectionClass($dependClassName);
+    if ($reflect->isInterface()) {
+      if ($this->injection->hasBind($dependClassName)) {
+        $bind = $this->injection->getBind($dependClassName);
+        $implClassName = $bind->getImplementation();
+        return $this->newInstance($implClassName);
+      }
+    } else {
+      return $this->newInstance($dependClassName);
+    }
+  }
+  
+  private final function exists($className)
+  {
+    return (class_exists($className) || interface_exists($className));
   }
 }

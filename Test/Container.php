@@ -3,9 +3,13 @@
 require ("sabel/Container.php");
 
 /**
- * TestCase for Sabel Container
+ * TestCase of sabel container
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category   Test
+ * @package    org.sabel.testcase
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Test_Container extends SabelTestCase
 {
@@ -14,57 +18,38 @@ class Test_Container extends SabelTestCase
     return self::createSuite("Test_Container");
   }
   
-  // test case for class A depend class B.
-  public function testDependencyResolve()
-  {
-    $c = new Sabel_Container_DI();
-    
-    $person = $c->load("Person");
-    $this->assertEquals(15, $person->howOldAreYou());
-  }
-  
-  /*
-  public function estSetterInjection()
-  {
-    $c = new Sabel_Container_DI();
-    $c->depends("Person", "FrastrationCalculator", "Setter");
-    $person = $c->load("Person");
-    $this->assertEquals(10, $person->calc());
-  }
-  */
-  
   public function testInjection()
   {
     $injector = Sabel_Container::injector(new Config());
-    $person = $injector->getInstance("Person");
+    $person = $injector->newInstance("Person");
     $this->assertEquals(10, $person->calc());
   }
   
   public function testConstructorInjection()
   {
     $injector = Sabel_Container::injector(new ConstructConfig());
-    $car = $injector->getInstance("Car");
+    $car = $injector->newInstance("Car");
     $this->assertTrue(is_object($car->getEngine()));
   }
   
   public function testStrLiteralConstructorInjection()
   {
     $injector = Sabel_Container::injector(new StrLiteralConstructConfig());
-    $car = $injector->getInstance("Car");
+    $car = $injector->newInstance("Car");
     $this->assertEquals("this is engine", $car->getEngine());
   }
   
   public function testNumLiteralConstructorInjection()
   {
     $injector = Sabel_Container::injector(new NumLiteralConstructConfig());
-    $car = $injector->getInstance("Car");
+    $car = $injector->newInstance("Car");
     $this->assertEquals(123, $car->getEngine());
   }
   
   public function testBoolLiteralConstructorInjection()
   {
     $injector = Sabel_Container::injector(new BoolLiteralConstructConfig());
-    $car = $injector->getInstance("Car");
+    $car = $injector->newInstance("Car");
     $this->assertTrue($car->getEngine());
   }
   
@@ -73,11 +58,80 @@ class Test_Container extends SabelTestCase
     $injector = Sabel_Container::injector(new BadClassNameConfig());
     
     try {
-      $person = $injector->getInstance("Person");
+      $person = $injector->newInstance("Person");
       $this->fail();
     } catch (Sabel_Exception_Runtime $e) {
       $this->assertEquals("BadCalculator does not exists", $e->getMessage());
     }
+  }
+  
+  public function testNoInjectionConfigToConstructer()
+  {
+    try {
+      $injector = Sabel_Container::injector(new StdClass());
+      $this->fail();
+    } catch (Sabel_Exception_Runtime $e) {
+      $msg = "must be Sabel_Container_Injection";
+      $this->assertEquals($msg, $e->getMessage());
+    }
+  }
+  
+  public function testMultipleConstructerInjection()
+  {
+    $injector = Sabel_Container::injector(new MultipleConstructConfig());
+    
+    $oil    = new EngineOil("normal");
+    $engine = new MultiEngine($oil);
+    $car    = new MultiCar($engine, "multiple");
+    
+    $injCar = $injector->newInstance("MultiCar");
+    
+    $this->assertEquals($car, $injCar);
+  }
+}
+
+class MultipleConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("MultiCar")->with("MultiEngine")
+                                ->with("multiple");
+                                    
+    $this->construct("MultiEngine")->with("Oil");
+    $this->construct("EngineOil")->with("normal");
+    
+    $this->bind("Oil")->to("EngineOil");
+  }
+}
+class MultiCar
+{
+  private $engine = null;
+  private $shaft  = null;
+  
+  public function __construct($engine, $shaft)
+  {
+    $this->engine = $engine;
+    $this->shaft  = $shaft;
+  }
+}
+class MultiEngine
+{
+  private $oil = null;
+  
+  public function __construct($oil)
+  {
+    $this->oil = $oil;
+  }
+}
+interface Oil
+{
+}
+class EngineOil implements Oil
+{
+  private $type = "";
+  public function __construct($type)
+  {
+    $this->type = $type;
   }
 }
 
@@ -85,28 +139,28 @@ class ConstructConfig extends Sabel_Container_Injection
 {
   public function configure()
   {
-    $this->bindConstruct("Car")->construct("Engine");
+    $this->construct("Car")->with("Engine");
   }
 }
 class StrLiteralConstructConfig extends Sabel_Container_Injection
 {
   public function configure()
   {
-    $this->bindConstruct("Car")->construct("this is engine");
+    $this->construct("Car")->with("this is engine");
   }
 }
 class NumLiteralConstructConfig extends Sabel_Container_Injection
 {
   public function configure()
   {
-    $this->bindConstruct("Car")->construct(123);
+    $this->construct("Car")->with(123);
   }
 }
 class BoolLiteralConstructConfig extends Sabel_Container_Injection
 {
   public function configure()
   {
-    $this->bindConstruct("Car")->construct(true);
+    $this->construct("Car")->with(true);
   }
 }
 class Car

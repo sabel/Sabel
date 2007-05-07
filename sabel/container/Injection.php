@@ -12,7 +12,7 @@
 abstract class Sabel_Container_Injection
 {
   private $binds = array();
-  private $constructes = array();
+  private $constructs = array();
   
   abstract function configure();
   
@@ -29,25 +29,49 @@ abstract class Sabel_Container_Injection
     return $bind;
   }
   
-  public function bindConstruct($className)
+  /**
+   * bind constructer with object or value
+   *
+   * @param string $interface name of interface
+   * @return Sabel_Container_Bind
+   */
+  public function construct($className)
   {
     $construct = new Sabel_Container_Construct($className);
-    $this->constructes[$className] = $construct;
+    $this->constructs[$className] = $construct;
     return $construct;
   }
   
-  public function hasConstruct()
+  public function hasConstruct($className)
   {
-    return (count($this->constructes) >= 1);
+    return (isset($this->constructs[$className]));
   }
   
   public function getConstruct($className)
   {
-    return $this->constructes[$className];
+    if (isset($this->constructs[$className])) {
+      return $this->constructs[$className];
+    } else {
+      return false;
+    }
   }
   
   public function getBinds()
   {
     return $this->binds;
+  }
+  
+  public function hasBind($className)
+  {
+    return isset($this->binds[$className]);
+  }
+  
+  public function getBind($className)
+  {
+    if ($this->hasBind($className)) {
+      return $this->binds[$className];
+    } else {
+      return false;
+    }
   }
 }

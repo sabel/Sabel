@@ -11,7 +11,7 @@
  */
 class Sabel_Container_Construct
 {
-  private $construct = "";
+  private $constructs = array();
   private $source = "";
   
   public function __construct($className)
@@ -19,19 +19,20 @@ class Sabel_Container_Construct
     $this->source = $className;
   }
   
-  public function construct($className)
+  public function with($className)
   {
-    $this->construct = $className;
+    $this->constructs[] = $className;
+    return $this;
   }
   
   public function hasConstruct()
   {
-    return ($this->construct !== "");
+    return (count($this->constructs) >= 1);
   }
   
-  public function getConstruct()
+  public function getConstructs()
   {
-    return $this->construct;
+    return $this->constructs;
   }
   
   public function isClass()
