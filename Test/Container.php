@@ -100,6 +100,58 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals($instance, $specific);
   }
+  
+  public function testApplyAspect()
+  {
+    $trace = new Trace();
+    $aspectConfig = new AspectConfig($trace);
+    
+    $injector = Sabel_Container::injector($aspectConfig);
+    $instance = $injector->newInstance("AspectTarget");
+    $instance->run("test");
+    
+    $this->assertEquals("test", $trace->getArgument());
+  }
+}
+
+class AspectConfig extends Sabel_Container_Injection
+{
+  private $trace = null;
+  
+  public function __construct($trace)
+  {
+    $this->trace = $trace;
+  }
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply($this->trace)->method("run");
+  }
+  
+  public function getTrace()
+  {
+    return $this->trace;
+  }
+}
+class AspectTarget
+{
+  public function run($parameter)
+  {
+    return $parameter;
+  }
+}
+class Trace
+{
+  private $argument = "";
+  
+  public function after($joinpoint)
+  {
+    $this->argument = $joinpoint->getArgument(0);
+  }
+  
+  public function getArgument()
+  {
+    return $this->argument;
+  }
 }
 
 class SpecificSetter

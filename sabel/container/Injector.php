@@ -42,7 +42,8 @@ class Sabel_Container_Injector
       
       foreach ($construct->getConstructs() as $constructValue) {
         if ($this->exists($constructValue)) {
-          $constructArguments[] = $this->constructInstance($constructValue);
+          $instance = $this->constructInstance($constructValue);
+          $constructArguments[] = $this->applyAspect($instance);
         } else {
           $constructArguments[] = $constructValue;
         }
@@ -53,6 +54,7 @@ class Sabel_Container_Injector
     } else {
       $dependencyResolver = new Sabel_Container_DI();
       $instance = $dependencyResolver->load($className);
+      $instance = $this->applyAspect($instance);
     }
     
     foreach ($this->injection->getBinds() as $name => $bind) {
@@ -69,6 +71,26 @@ class Sabel_Container_Injector
     }
     
     return $instance;
+  }
+  
+  private final function applyAspect($instance)
+  {
+    $reflect = new ReflectionClass($instance);
+    $className = $reflect->getName();
+    
+    if ($this->injection->hasAspect($className)) {
+      $aspect = $this->injection->getAspect($className);
+      foreach ($aspect->getAppliedAspects() as $appliedAspect) {
+        $pointcut = Sabel_Aspect_Pointcut::create($appliedAspect);
+        foreach ($aspect->getAppliedMethods() as $method) {
+          $pointcut->addMethod($method);
+        }
+        Sabel_Aspect_Aspects::singleton()->addPointcut($pointcut);
+      }
+      return new Sabel_Aspect_Proxy($instance);
+    } else {
+      return $instance;
+    }
   }
   
   private final function constructInstance($dependClassName)

@@ -17,7 +17,7 @@ class Sabel_Aspect_Pointcut
   
   protected $type = self::BEFORE;
   
-  protected $name = '';
+  protected $name = "";
   protected $aspect = null;
   
   protected $toAll = false;
@@ -25,31 +25,37 @@ class Sabel_Aspect_Pointcut
   protected $anyException = false;
   protected $exception = false;
   
-  protected $exceptionClass = '';
+  protected $exceptionClass = "";
   protected $hasExceptionClass = false;
-  protected $exceptionClassRegex = '';
+  protected $exceptionClassRegex = "";
   protected $hasExceptionClassRegex = false;
   
-  protected $class      = '';
-  protected $method     = '';
+  protected $class      = "";
+  protected $method     = "";
   protected $methods    = array();
-  protected $package    = '';
+  protected $package    = "";
   protected $hasClass   = false;
   protected $hasMethod  = false;
   protected $hasMethods = false;
   protected $hasPackage = false;
   
-  protected $classRegex      = '';
-  protected $methodRegex     = '';
-  protected $packageRegex    = '';
+  protected $classRegex      = "";
+  protected $methodRegex     = "";
+  protected $packageRegex    = "";
   protected $hasClassRegex   = false;
   protected $hasMethodRegex  = false;
   protected $hasPackageRegex = false;
   
-  public function __construct($name)
+  public function __construct($aspect)
   {
-    $this->name   = $name;
-    $this->aspect = new $name();
+    if (is_object($aspect)) {
+      $reflect = new ReflectionClass($aspect);
+      $this->name = $reflect->getName();
+      $this->aspect = $aspect;
+    } else {
+      $this->name   = $aspect;
+      $this->aspect = new $aspect();
+    }
   }
   
   public static function create($name)

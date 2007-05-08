@@ -48,8 +48,8 @@ class Test_Aspect extends SabelTestCase
   public function testIntertypeDeclaration()
   {
     $obj = new Test_Aspect_IntertypeDeclarator(new Test_Aspect_IntertypeTarget());
-    $this->assertEquals('test',   $obj->added());
-    $this->assertEquals('exists', $obj->exists());
+    $this->assertEquals("test",   $obj->added());
+    $this->assertEquals("exists", $obj->exists());
   }
   
   public function testPointcut()
@@ -61,12 +61,12 @@ class Test_Aspect extends SabelTestCase
     $matcher->add($aspect->pointcut());
     $matcher->add($aspectTwo->pointcut());
     
-    $matches = $matcher->findMatch(array('class'=>'Target', 'method'=>'doSomething'));
-    $this->assertTrue($matches->matched('Test_AspectOne'));
-    $this->assertTrue($matches->matched('Test_AspectTwo'));
+    $matches = $matcher->findMatch(array("class"=>"Target", "method"=>"doSomething"));
+    $this->assertTrue($matches->matched("Test_AspectOne"));
+    $this->assertTrue($matches->matched("Test_AspectTwo"));
     
-    $matches = $matcher->findMatch(array('class'=>'Target', 'method'=>'doWhat'));
-    $this->assertTrue($matches->matched('Test_AspectOne'));
+    $matches = $matcher->findMatch(array("class"=>"Target", "method"=>"doWhat"));
+    $this->assertTrue($matches->matched("Test_AspectOne"));
   }
   
   public function testAspectsContainer()
@@ -74,8 +74,8 @@ class Test_Aspect extends SabelTestCase
     $aspects = Sabel_Aspect_Aspects::singleton();
     $aspects->add(new Test_AspectOne());
     $aspects->add(new Test_AspectTwo());
-    $maches = $aspects->findMatch(array('method' => 'doSome'));
-    $this->assertTrue($maches->matched('Test_AspectOne'));
+    $maches = $aspects->findMatch(array("method" => "doSome"));
+    $this->assertTrue($maches->matched("Test_AspectOne"));
   }
   
   public function testAspect()
