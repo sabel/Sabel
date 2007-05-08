@@ -1,0 +1,35 @@
+概要
+　SabelのDIコンテナは、コンポーネントの取得と、アスペクトの適用を設定することができます。
+
+コンポーネントの取得
+　コンポーネントを取得するには、まずSabel_Container_Injectionを継承した設定クラスを作成します。
+　継承した設定クラスは必ずconfigure()メソッドを実装する必要があります。
+  
+　class Config extends Sabel_Container_Injection
+  {
+    public function configure()
+    {
+      $this->bind("ServiceInterface")->to("ServiceImplementation");
+    }
+  }
+
+  この例では、ServiceInterfaceというインターフェイスをServiceImplementationという実装クラスに
+　設定しています。
+
+　実際にコンポーネントを取得するには、下記のようにします。
+
+  $injection = Sabel_Container::injector(new Config());
+  $server = $injection->newInstance("Server");
+
+  class Server
+  {
+    public function setService(Service $service)
+    {
+      // $serviceがコンテナから渡される
+    }
+  }
+
+  Configクラスに単純なbindしか定義されていない場合、Sabelコンテナはset{インターフェイス名}という
+　メソッドでオブジェクトを渡そうとします。
+　セッターメソッドが定義されていない場合は、無視されます。
+
