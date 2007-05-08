@@ -88,6 +88,35 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals($car, $injCar);
   }
+  
+  public function testSpecificSetter()
+  {
+    $injector = Sabel_Container::injector(new SpecificSetterConfig());
+    $instance = $injector->newInstance("SpecificSetter");
+    
+    $engineOil = new EngineOil("specific");
+    $specific  = new SpecificSetter();
+    $specific->setSpecificSetter($engineOil);
+    
+    $this->assertEquals($instance, $specific);
+  }
+}
+
+class SpecificSetter
+{
+  private $oil = null;
+  public function setSpecificSetter(Oil $oil)
+  {
+    $this->oil = $oil;
+  }
+}
+class SpecificSetterConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("EngineOil")->with("specific");
+    $this->bind("Oil")->to("EngineOil")->setter("setSpecificSetter");
+  }
 }
 
 class MultipleConstructConfig extends Sabel_Container_Injection

@@ -9,10 +9,11 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Container_Bind
+final class Sabel_Container_Bind
 {
   private $interface = "";
   private $implementation = "";
+  private $setter = "";
     
   public function __construct($interface)
   {
@@ -26,13 +27,24 @@ class Sabel_Container_Bind
     return $this;
   }
   
+  public function setter($methodName)
+  {
+    $this->setter = $methodName;
+    return $this;
+  }
+  
+  public function hasSetter()
+  {
+    return ($this->setter !== "");
+  }
+  
+  public function getSetter()
+  {
+    return $this->setter;
+  }
+  
   public function getImplementation()
   {
     return $this->implementation;
-  }
-  
-  public function setter($setterMethod)
-  {
-    return $this;
   }
 }

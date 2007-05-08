@@ -56,12 +56,15 @@ class Sabel_Container_Injector
     }
     
     foreach ($this->injection->getBinds() as $name => $bind) {
-      $injectionMethod = "set" . ucfirst($name);
+      if ($bind->hasSetter()) {
+        $injectionMethod = $bind->getSetter();
+      } else {
+        $injectionMethod = "set" . ucfirst($name);
+      }
       $implClassName = $bind->getImplementation();
       $reflect = new ReflectionClass($instance);
       if ($reflect->hasMethod($injectionMethod)) {
-        $dependencyResolver = new Sabel_Container_DI();
-        $instance->$injectionMethod($dependencyResolver->load($implClassName));
+        $instance->$injectionMethod($this->newInstance($implClassName));
       }
     }
     
