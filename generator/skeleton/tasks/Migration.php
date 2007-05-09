@@ -148,7 +148,7 @@ class Migration extends Sabel_Sakle_Task
   protected function execNextMigration()
   {
     $connectionName = $this->connectionName;
-    system(SAKLE_CMD . " Tmp {$this->strEnv} {$this->migrateTo} $connectionName");
+    system(SAKLE_CMD . " Migration {$this->strEnv} {$this->migrateTo} $connectionName");
   }
 
   protected function toVersionNumber($to)
