@@ -17,7 +17,7 @@ class Sabel_DB_Config
   {
     Sabel::fileUsing(RUN_BASE . "/config/database.php", true);
     foreach (get_db_params() as $connectionName => $params) {
-      self::addConnection($connectionName, $params);
+      self::regist($connectionName, $params);
     }
   }
 
