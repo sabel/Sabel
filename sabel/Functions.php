@@ -57,6 +57,16 @@ function ah($param, $anchor, $uriParameters = null)
   return a($param, htmlspecialchars($anchor), $uriParameters);
 }
 
+function r($const)
+{
+  return ($const === Sabel_Controller_Page::REDIRECTED);
+}
+
+function redirected($const)
+{
+  return ($const === Sabel_Controller_Page::REDIRECTED);
+}
+
 /**
  * internal request
  */

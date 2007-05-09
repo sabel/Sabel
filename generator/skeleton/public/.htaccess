@@ -4,4 +4,4 @@ RewriteCond %{REQUEST_URI} \/\..+$
 RewriteRule .* /index/notfound [R,L]
 
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^(.*)$ index.php [QSA,L]
+RewriteRule !\.(js|ico|gif|jpg|png|bmp|swf|css|html)$ index.php [QSA,L]

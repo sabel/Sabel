@@ -11,6 +11,8 @@
  */
 abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
 {
+  const REDIRECTED = "SABEL_CONTROLLER_REDIRECTED";
+  
   public
     $plugin = null;
   
@@ -195,6 +197,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->redirect = $to;
     $this->plugin->onRedirect($to);
     $this->plugin->onAfterAction();
+    
+    return self::REDIRECTED;
   }
   
   public function redirectTo($params)
@@ -205,6 +209,8 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     $candidate = Sabel_Context::getCurrentCandidate();
     $this->redirect($candidate->uri($params));
+    
+    return self::REDIRECTED;
   }
   
   public function isRedirected()
