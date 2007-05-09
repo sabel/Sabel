@@ -40,11 +40,14 @@ class Sabel_DB_Sql_Common implements Sabel_DB_Sql_Interface
   protected function createInsertSql($tblName, $columns, $values)
   {
     $sql   = array("INSERT INTO $tblName (");
-    $sql[] = implode(", ", $columns);
-    $sql[] = ") VALUES(";
-    $sql[] = implode(", ", $values);
-    $sql[] = ")";
+    $sql[] = implode(", ", $columns) . ") VALUES (";
 
+    $vals = array();
+    foreach ($values as $val) {
+      $vals[] = ($val === null) ? "NULL" : $val;
+    }
+
+    $sql[] = implode(", ", $vals) . ")";
     return implode("", $sql);
   }
 
