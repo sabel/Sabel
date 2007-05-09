@@ -1,0 +1,16 @@
+バリデート
+
+  メッセージのローカライズ
+  　　Sabel_DB_Validate_Config::setLocalizedName("Users", array("id"   => "ID",
+  　　                                                          "name" => "名前"));
+  　　$msgs = array("length"   => "%sが長すぎます",
+  　　              "maximum"  => "Too large. '%s'",
+  　　              "nullable" => "%sは省略できません",
+  　　              "type"     => "Wrong Format. '%s'");
+  　　Sabel_DB_Validate_Config::setMessages($msgs);
+  
+  無視
+    $validator = new Sabel_DB_Validator($model);
+    $validate = $validator->validate(array("id"));
+    
+    上記のように実行した場合、idカラムは検査から除外されます。

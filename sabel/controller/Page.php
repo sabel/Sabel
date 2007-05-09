@@ -31,8 +31,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $storage  = null;
     
   protected
-    $enableSession     = true,
-    $skipDefaultAction = true; 
+    $enableSession = true;
   
   /**
    * reserved name lists of methods(actions)
@@ -165,11 +164,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     if ($this->hasMethod($methodAction)) {
       if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
         $actionResult =(array) $this->$methodAction();
-      }
-      if (!$this->skipDefaultAction) {
-        if ($this->hasMethod($action)) {
-          $actionResult = array_merge((array) $this->$action(), $actionResult);
-        }
       }
     } elseif ($this->hasMethod($action)) {
       if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
