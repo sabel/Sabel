@@ -41,7 +41,11 @@ abstract class Sabel_DB_Migration_Base
   public function execute()
   {
     $command = $this->command;
-    $this->$command();
+    if (method_exists($this, $command)) {
+      $this->$command();
+    } else {
+      throw new Exception($command . "() method not found in Sabel_DB_Migration_Base");
+    }
   }
 
   public function create()
@@ -101,6 +105,8 @@ abstract class Sabel_DB_Migration_Base
         $lines[] = $line;
       }
     }
+    
+    if (!empty($lines)) $cols[] = $parser->toColumn($lines);
 
     if (!empty($opts)) $this->setOptions($opts);
     fclose($fp);

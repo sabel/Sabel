@@ -1,0 +1,55 @@
+Migration
+
+マイグレーションファイルのフォーマット
+  カラム名
+    指示子:指定
+    ...
+
+カラムの型指定
+  type:型名
+  型名には
+    INT
+    BIGINT
+    FLOAT
+    DOUBLE
+    STRING
+    TEXT
+    BOOL
+    DATETIME
+    BYTE
+    DATE
+    TIME
+  これらの型が指定できます。
+  STRING型にはSTRING(長さ)のように、文字列の長さが指定できます。
+  型は全て大文字で指定する必要があります。
+
+インクリメント、プライマリ、ヌラブル
+  これらの指示の指定には、trueか１を指定すると、trueに、
+　それ以外を指定するとfalseになります。
+
+ファイル名規則
+  バージョン番号_モデル名_指示
+  指示には
+    create
+    drop
+  が指定できます。
+
+　例: 1_users_create
+
+  拡張子は必要ありません。拡張子があると正しく動作しません。
+
+記述例
+id
+  type:INT
+  increment:true
+  primary:true
+
+name
+  type:STRING(64)
+
+email
+  type:TEXT
+  nullable:true
+
+注意事項
+　カラム名に続く指示子行ではの間には空白行は許可されません。
