@@ -37,7 +37,7 @@ class Sabel_DB_Migration_Parser
   {
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 4) === "type") {
-        $value = $this->getValue($lines, $num, $line);
+        $value = strtoupper($this->getValue($lines, $num, $line));
         if (strpos($value, "STRING") !== false) {
           $this->setLength(str_replace("STRING", "", $value));
           return constant("Sabel_DB_Type::STRING");
@@ -82,6 +82,8 @@ class Sabel_DB_Migration_Parser
         $d = $this->getValue($lines, $num, $line);
 
         if (substr($d, 0, 1) === "'" && substr($d, -1, 1) === "'") {
+          return substr($d, 1, -1);
+        } elseif (substr($d, 0, 1) === '"' && substr($d, -1, 1) === '"') {
           return substr($d, 1, -1);
         } elseif ($d === "null" || $d === "NULL") {
           return null;

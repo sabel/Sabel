@@ -21,7 +21,6 @@ Migration
     TIME
   これらの型が指定できます。
   STRING型にはSTRING(長さ)のように、文字列の長さが指定できます。
-  型は全て大文字で指定する必要があります。
 
 インクリメント、プライマリ、ヌラブル
   これらの指示の指定には、trueか１を指定すると、trueに、
@@ -46,10 +45,11 @@ id
 
 name
   type:STRING(64)
+　　default:no name
 
 email
   type:TEXT
   nullable:true
 
 注意事項
-　カラム名に続く指示子行ではの間には空白行は許可されません。
+　カラム名と指示子の間には空白行は許可されません。
