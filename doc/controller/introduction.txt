@@ -1,0 +1,25 @@
+Controller
+
+リダイレクト
+コントローラ内で、別のアクションへリダイレクトする場合には、
+$this->redirect();か$this->redirectTo();を使用します。
+
+$this->redirect();には引数としてリダイレクト先のURIを渡します。
+$this->redirect("index/index");
+
+$this->redirectTo();には引数として形式化された文字列を渡します。
+$this->redirectTo("controller: index, action: index");
+
+また、redirect呼び出し時点でそのアクションの処理を終了するには、
+必ずreturnを行ってください。
+return $this->redirect("");
+
+コントローラクラスのインスタンスメソッドを呼び出し、そのメソッド内で
+リダイレクトし、処理を終了したい場合にも、returnを使用してください。
+呼び出しもとでは、リダイレクトされているかどうかの判断に
+redirected()関数を使うことができます。
+if (redirected($this->method())) return null;
+この場合、呼び出し先がでリダイレクトが発生していた場合に、呼び出し元の処理を
+終了します。
+これは、if ($this->method() === self::REDIRECTED) return null;と等価です。
+また、この関数のエイリアスとして、r()が定義されています。if(r($this->method()))でも同様ということです。
