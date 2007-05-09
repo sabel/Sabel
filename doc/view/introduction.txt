@@ -1,0 +1,5 @@
+レイアウト
+  app/views/layout.tplというファイルを作成し、
+  <?= $contentForLayout ?>
+  という内容で保存すると、アクションの実行結果がレイアウトファイルの$contentForLayout部分に入り、
+  レイアウトの内容と合わせたHTMLが得られます。
