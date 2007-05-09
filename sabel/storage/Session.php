@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Storage of session
+ *
+ * @category   Storage
+ * @package    org.sabel.storage
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Storage_Session
 {
   private static $instance = null;
@@ -9,6 +18,11 @@ class Sabel_Storage_Session
   {
     if (!self::$instance) self::$instance = new self();
     return self::$instance;
+  }
+  
+  public function __construct()
+  {
+    $this->start();
   }
   
   public function start()
@@ -45,7 +59,7 @@ class Sabel_Storage_Session
   {
     $ret = null;
     if (isset($_SESSION[$key])) {
-      $ret = $_SESSION[$key]['value'];
+      $ret = $_SESSION[$key]["value"];
     }
     return $ret;
   }

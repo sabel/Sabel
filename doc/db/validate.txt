@@ -14,3 +14,19 @@
     $validate = $validator->validate(array("id"));
     
     上記のように実行した場合、idカラムは検査から除外されます。
+    
+  コールバック
+    $processes = array("class" => "ValidateCallback", "methods" => array("call"));
+    Sabel_DB_Validate_Config::registPostProcessing($processes);
+    
+    class ValidateCallback
+    {
+      public function call($errors, $model)
+      {
+        echo "callback";
+        exit;
+      }
+    }
+    
+    上記のようにするとvalidateが終了した時点で失敗していれば指定されてコールバックが実行される
+    
