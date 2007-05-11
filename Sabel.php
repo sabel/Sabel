@@ -1,7 +1,7 @@
 <?php
 
-if (!defined('DIR_DIVIDER')) define('DIR_DIVIDER', '/');
-define('DEFAULT_PHP_POSTFIX', '.php');
+if (!defined("DIR_DIVIDER")) define("DIR_DIVIDER", "/");
+define("DEFAULT_PHP_SUFFIX", ".php");
 set_include_path(dirname(__FILE__).":".get_include_path());
 
 // regist autoload static method
@@ -24,50 +24,10 @@ final class Sabel
   private static $required   = array();
   private static $fileUsing  = array();
   private static $singletons = array();
-    
-  /**
-   * class instanciate.
-   * if not using class then using
-   *
-   * @param string $className class name to using and instanciate
-   * @param mixed $arg
-   * @param mixed $args
-   * @return object
-   */
-  public static function load($className)
-  {
-    $arg_list = '';
-
-    if (($numargs = func_num_args()) > 1) {
-      $args = func_get_args();
-      $arg_list = array();
-      
-      for ($i = 1; $i < $numargs; $i++) {
-        $arg_list[] = '$args[' . $i . ']';
-      }
-      $arg_list = join(', ', $arg_list);
-    }
-    
-    escapeshellcmd($className);
-    escapeshellcmd($arg_list);
-    eval ('$instance = new ' . $className . '(' . $arg_list . ');');
-    
-    return $instance;
-  }
-  
-  public static function loadSingleton($className, $constructerArg = null)
-  {
-    if (!isset(self::$singletons[$className]))
-      self::$singletons[$className] = self::load($className, $constructerArg);
-      
-    $instance = self::$singletons[$className];
-    
-    return $instance;
-  }
   
   public static function using($className)
   {
-    if (!isset(self::$required[$className]) && !class_exists($className, true)) {
+    if (!isset(self::$required[$className]) && !class_exists($className)) {
       $path = self::convertPath($className);
       if (self::isReadable($path)) {
         require ($path);
@@ -91,11 +51,11 @@ final class Sabel
   
   private static function convertPath($className)
   {
-    $prePath = str_replace('_', DIR_DIVIDER, $className);
+    $prePath = str_replace("_", DIR_DIVIDER, $className);
     $path = strtolower(dirname($prePath)) . DIR_DIVIDER 
-            . basename($prePath) . DEFAULT_PHP_POSTFIX;
+            . basename($prePath) . DEFAULT_PHP_SUFFIX;
     
-    return str_replace('./', '', $path);
+    return str_replace("./", "", $path);
   }
   
   private static function isReadable($path)
@@ -103,10 +63,10 @@ final class Sabel
     if (is_readable($path)) return true;
     
     $includePath = get_include_path();
-    $paths = explode(':', $includePath);
+    $paths = explode(":", $includePath);
     
     foreach ($paths as $p) {
-      if (is_readable($p .'/'. $path)) {
+      if (is_readable($p ."/". $path)) {
         return true;
       }
     }

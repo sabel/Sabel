@@ -245,7 +245,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   protected function __get($name)
   {
-    if (isset($this->attributes[$name])) {
+    if (array_key_exists($name, $this->attributes)) {
       $result = $this->attributes[$name];
     } else {
       $result = $this->request->getParameter($name);

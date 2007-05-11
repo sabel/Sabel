@@ -1,24 +1,13 @@
 <?php
 
-function load($class_name, $config_class = null)
+function load($className, $config)
 {
-  return Sabel_Container::load($class_name, $config_class);
-}
-
-/**
- * alias of Sabel::load()
- *
- */
-if (function_exists('create')) {
-  function __create($className)
-  {
-    return Sabel::load($className);
+  if (!$config instanceof Sabel_Container_Injection) {
+    $msg = var_export($config, 1) . " is not Sabel_Container_Injection";
+    throw new Sabel_Exception_Runtime($msg);
   }
-} else {
-  function create($className)
-  {
-    return Sabel::load($className);
-  }
+  
+  return Sabel_Container::injector($config)->newInstance($className);
 }
 
 function is_not_null($value)
@@ -35,7 +24,7 @@ function uri($param, $withDomain = true, $secure = false)
 {
   $secure = (defined("USE_SSL") && $secure === true);
 
-  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
+  $aCreator = new Sabel_View_Uri();
   return $aCreator->uri($param, $withDomain, $secure);
 }
 
@@ -72,8 +61,8 @@ function redirected($const)
  */
 function request($uri)
 {
-  $front    = Sabel::loadSingleton('Sabel_Controller_Front');
-  $response = $front->ignition(Sabel::load("Sabel_Request_Web", $uri));
+  $front    = new Sabel_Controller_Front();
+  $response = $front->ignition(new Sabel_Request_Web($uri));
   return $response['html'];
 }
 

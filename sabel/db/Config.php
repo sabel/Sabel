@@ -12,13 +12,18 @@
 class Sabel_DB_Config
 {
   protected static $configs = array();
+  private static $initialized = false;
 
   public static function initialize()
   {
+    if (self::$initialized) return;
+    
     Sabel::fileUsing(RUN_BASE . "/config/database.php", true);
     foreach (get_db_params() as $connectionName => $params) {
       self::regist($connectionName, $params);
     }
+    
+    self::$initialized = true;
   }
 
   public static function regist($connectionName, $params)
