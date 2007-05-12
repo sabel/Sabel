@@ -19,6 +19,8 @@ abstract class Sabel_Controller_Flow
   private $activities = array();
   private $inflow = false;
   
+  private $flowVariables = array();
+  
   abstract function configure();
   
   public function activity($name)
@@ -110,5 +112,29 @@ abstract class Sabel_Controller_Flow
   public function getCurrentActivity()
   {
     return $this->currentActivity;
+  }
+  
+  public function __get($key)
+  {
+    return $this->read($key);
+  }
+  
+  public function __set($key, $value)
+  {
+    $this->write($key, $value);
+  }
+  
+  public function read($key)
+  {
+    if (isset($this->flowVariables[$key])) {
+      return $this->flowVariables[$key];
+    } else {
+      return null;
+    }
+  }
+  
+  public function write($key, $value)
+  {
+    $this->flowVariables[$key] = $value;
   }
 }
