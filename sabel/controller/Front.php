@@ -9,28 +9,57 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
+final class Sabel_Controller_Front
 {
+  public
+    $plugin = null;
+  
+  protected
+    $controller   = null,
+    $destination  = null,
+    $request      = null,
+    $requestClass = "Sabel_Request_Web";
+    
   public function __construct($request = null)
   {
     if ($this->request === null) {
       $this->request = new $this->requestClass();
     }
     
-    if (ENVIRONMENT === PRODUCTION) {
-      $cache = Sabel_Cache_Manager::create();
-      if (!($candidates = $cache->read("map_candidates"))) {
-        Sabel::fileUsing(RUN_BASE . '/config/map.php');
-        $serialized = serialize(Sabel_Map_Configurator::getCandidates());
-        $cache->write("map_candidates", $serialized);
-      } else {
-        Sabel_Map_Configurator::setCandidates(unserialize($candidates));
-      }
-    } else {
-      Sabel::fileUsing(RUN_BASE . '/config/map.php');
-    }
+    // @todo renew for new map format
+    Sabel::fileUsing(RUN_BASE . '/config/map.php');
     
     $this->plugin = Sabel_Controller_Plugin::create();
+  }
+    
+  public function ignition($storage = null)
+  {
+    Sabel_Context::log("request " . $this->request);
+    Sabel_Context::initialize();
+    
+    $destination = $this->destination;
+    
+    $filters = $this->loadFilters();
+    $this->processHelper($this->request);
+    $this->processPreFilter($filters, $this->request);
+    
+    $executer = new Sabel_Controller_Executer($destination);
+    $this->controller = $executer->create();
+    $this->plugin->onCreateController($this->controller, $destination);
+    
+    $executer->execute($this->request, $storage);
+    
+    $this->processPostFilter($filters);
+  }
+  
+  public function getController()
+  {
+    return $this->controller;
+  }
+  
+  public function getResult()
+  {
+    return $this->processView($this->controller);
   }
   
   public function processCandidate($request = null)
@@ -46,15 +75,17 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     Sabel_Context::setCurrentCandidate($candidate);
     $this->request->setCandidate($candidate);
     
-    $this->candidate = $candidate;
+    $this->destination = $candidate->getDestination();
     
     return $this;
   }
   
-  protected function loadFilters($candidate)
+  private final function loadFilters()
   {
+    $module = $this->destination->getModule();
+    
     $sharedFiltersDir = RUN_BASE . "/app/filters";
-    $filtersDir       = RUN_BASE . "/app/{$candidate->getModule()}/filters";
+    $filtersDir       = RUN_BASE . "/app/{$module}/filters";
     $filters = array();
     
     if (is_dir($sharedFiltersDir)) {
@@ -63,7 +94,7 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
           if ($file{0} !== ".") {
             if (is_file($filtersDir . "/{$file}")) {
               // use derived class
-              $filters[] = join("_", array(ucfirst($candidate->getModule()),
+              $filters[] = join("_", array(ucfirst($module),
                                            "Filters",
                                             str_replace(".php", "", $file)));
             } elseif (is_file($sharedFiltersDir . "/{$file}")) {
@@ -79,22 +110,20 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     return $filters;
   }
   
-  protected function processHelper($request, $candidate)
+  private final function processHelper($request)
   {
-    $module = $candidate->getModule();
-    $cntr   = $candidate->getController();
-    $action = $candidate->getAction();
+    list($m, $c, $a) = $this->destination->toArray();
     
-    $appDir          = "app";
-    $helperDirName   = "helpers";
-    $appSharedHelper = "application";
-    $helperPrefix    = "php";
+    $appDir       = "app";
+    $helperDir    = "helpers";
+    $sharedHelper = "application";
+    $helperSuffix = "php";
     
-    $pref = "{$appDir}/{$module}/{$helperDirName}/";
-    $helpers = array("/{$appDir}/{$helperDirName}/{$appSharedHelper}.{$helperPrefix}",
-                     $pref . "{$appSharedHelper}.{$helperPrefix}",
-                     $pref . "{$cntr}.{$helperPrefix}",
-                     $pref . "{$cntr}.{$action}.{$helperPrefix}");
+    $pref = "{$appDir}/{$m}/{$helperDir}/";
+    $helpers = array("/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}",
+                     $pref . "{$sharedHelper}.{$helperSuffix}",
+                     $pref . "{$c}.{$helperSuffix}",
+                     $pref . "{$c}.{$a}.{$helperSuffix}");
                      
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;
@@ -102,7 +131,7 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     }
   }
   
-  protected function processPreFilter($filters, $request)
+  private final function processPreFilter($filters, $request)
   {
     foreach ($filters as $filter) {
       $aFilter = Sabel::load($filter);
@@ -113,35 +142,17 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
     return $filters;
   }
   
-  protected function processPageController($candidate)
+  private final function processPostFilter($filters)
   {
-    $classpath  = $candidate->getModule();
-    $classpath .= '_' . trim(Sabel_Const::CONTROLLER_DIR, '/');
-    if ($candidate->hasController()) {
-      $classpath .= '_' . ucfirst($candidate->getController());
-    } else {
-      $classpath .= '_' . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
-    }
-    
-    if (class_exists($classpath)) {
-      $controller = new $classpath();
-    } else {
-      $controller = new Index_Controllers_Index();
-    }
-    
-    Sabel_Context::setPageController($controller);
-    return $controller;
-  }
-  
-  protected function processPostFilter($filters, $controller)
-  {
+    $controller = $this->controller;
     foreach ($filters as $filter) {
       Sabel::load($filter)->output($controller);
     }
   }
   
-  protected function processView($controller)
+  private final function processView()
   {
+    $controller = $this->controller;
     if ($controller->hasRendered()) {
       return $controller->getRendered();
     }
@@ -169,26 +180,6 @@ final class Sabel_Controller_Front extends Sabel_Controller_Front_Base
       } catch (Exception $e) {
         $html = $content;
       }
-    }
-    
-    $html = $this->processCharset($html);
-    
-    return $html;
-  }
-  
-  private final function processCharset($html)
-  {
-    $module = Sabel_Context::getCurrentCandidate()->getModule();
-    
-    if ($module === "mobile") {
-      $header = "Content-Type: text/html; charset=Shift_JIS";
-      $html = mb_convert_encoding($html, "SJIS", "UTF-8");
-    } else {
-      $header = "Content-Type: text/html; charset=UTF-8";
-    }
-    
-    if (!headers_sent()) {
-      header($header);
     }
     
     return $html;

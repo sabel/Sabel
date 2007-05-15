@@ -35,9 +35,9 @@ class Sabel_Map_Candidate implements Iterator
   protected $elements = array();
   
   protected
-    $module     = '',
-    $controller = '',
-    $action     = '';
+    $module     = "",
+    $controller = "",
+    $action     = "";
   
   protected $size     = 0;
   protected $position = 0;
@@ -45,6 +45,11 @@ class Sabel_Map_Candidate implements Iterator
   public function __construct($name = '')
   {
     $this->setName($name);
+  }
+  
+  public function getDestination()
+  {
+    return new Sabel_Destination($this->module, $this->controller, $this->action);
   }
   
   public function setName($name)

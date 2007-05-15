@@ -5,20 +5,18 @@ class Sabel_Controller_Plugin_Dependency extends Sabel_Controller_Page_Plugin
   private $helperPrefix = ".php";
   private $dependency = null;
   
-  public function onCreateController($controller, $candidate)
+  public function onCreateController($controller, $destination)
   {
-    $module = $candidate->getModule();
-    $cntr   = $candidate->getController();
-    $action = $candidate->getAction();
+    list($m, $c, $a) = $destination->toArray();
     
-    $appDir          = "app";
-    $depDirName      = "dependency";
-    $appSharedHelper = "application";
+    $appDir       = "app";
+    $depDir       = "dependency";
+    $sharedHelper = "application";
     
-    $helpers = array(array($appDir, $depDirName, $appSharedHelper),
-                     array($appDir, $module, $depDirName, $appSharedHelper),
-                     array($appDir, $module, $depDirName, ucfirst($cntr)),
-                     array($appDir, $module, $depDirName, $cntr, $action));
+    $helpers = array(array($appDir, $depDir, $sharedHelper),
+                     array($appDir, $m, $depDir, $sharedHelper),
+                     array($appDir, $m, $depDir, ucfirst($c)),
+                     array($appDir, $m, $depDir, $c, $a));
     
     if (is_file($this->createPath($helpers[0]))) {
       //

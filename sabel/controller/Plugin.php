@@ -119,13 +119,13 @@ final class Sabel_Controller_Plugin
     }
   }
   
-  public function onCreateController($controller, $candidate)
+  public function onCreateController($controller, $destination)
   {
     $event = "onCreateController";
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($controller, $candidate);
+        $this->plugins[$name]->$event($controller, $destination);
       }
     }
   }

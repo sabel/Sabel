@@ -181,7 +181,6 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
   
   /**
    * HTTP Redirect to another location.
-   * this method will avoid "back button" problem.
    *
    * @param string $to /Module/Controller/Method
    */
