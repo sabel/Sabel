@@ -15,19 +15,20 @@ final class Sabel_Controller_Front
     $plugin = null;
   
   protected
+    $filters      = null,
     $controller   = null,
     $destination  = null,
-    $request      = null,
-    $requestClass = "Sabel_Request_Web";
+    $request      = null;
     
   public function __construct($request = null)
   {
     if ($this->request === null) {
-      $this->request = new $this->requestClass();
+      $requestClass = Sabel_Const::REQUEST_CLASS;
+      $this->request = new $requestClass();
     }
     
     // @todo renew for new map format
-    Sabel::fileUsing(RUN_BASE . '/config/map.php');
+    Sabel::fileUsing(RUN_BASE . Sabel_Const::DEFAULT_MAP_FILE);
     
     $this->plugin = Sabel_Controller_Plugin::create();
   }
@@ -39,17 +40,18 @@ final class Sabel_Controller_Front
     
     $destination = $this->destination;
     
-    $filters = $this->loadFilters();
-    $this->processHelper($this->request);
-    $this->processPreFilter($filters, $this->request);
+    Sabel_Helper::load($this->request, $destination);
+    
+    $this->processPreFilter();
     
     $executer = new Sabel_Controller_Executer($destination);
     $this->controller = $executer->create();
-    $this->plugin->onCreateController($this->controller, $destination);
+    
+    $this->plugin->onCreateController($destination);
     
     $executer->execute($this->request, $storage);
     
-    $this->processPostFilter($filters);
+    $this->processPostFilter();
   }
   
   public function getController()
@@ -82,6 +84,10 @@ final class Sabel_Controller_Front
   
   private final function loadFilters()
   {
+    if ($this->filters !== null) {
+      return $this->filters;
+    }
+    
     $module = $this->destination->getModule();
     
     $sharedFiltersDir = RUN_BASE . "/app/filters";
@@ -107,32 +113,15 @@ final class Sabel_Controller_Front
       }
     }
     
+    $this->filters = $filters;
     return $filters;
   }
   
-  private final function processHelper($request)
+  private final function processPreFilter()
   {
-    list($m, $c, $a) = $this->destination->toArray();
+    $filters = $this->loadFilters();
+    $request = $this->request;
     
-    $appDir       = "app";
-    $helperDir    = "helpers";
-    $sharedHelper = "application";
-    $helperSuffix = "php";
-    
-    $pref = "{$appDir}/{$m}/{$helperDir}/";
-    $helpers = array("/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}",
-                     $pref . "{$sharedHelper}.{$helperSuffix}",
-                     $pref . "{$c}.{$helperSuffix}",
-                     $pref . "{$c}.{$a}.{$helperSuffix}");
-                     
-    foreach ($helpers as $helper) {
-      $path = RUN_BASE . $helper;
-      if (is_file($path)) Sabel::fileUsing($path);
-    }
-  }
-  
-  private final function processPreFilter($filters, $request)
-  {
     foreach ($filters as $filter) {
       $aFilter = Sabel::load($filter);
       $aFilter->setup($request)->execute();
@@ -142,9 +131,11 @@ final class Sabel_Controller_Front
     return $filters;
   }
   
-  private final function processPostFilter($filters)
+  private final function processPostFilter()
   {
+    $filters = $this->loadFilters();
     $controller = $this->controller;
+    
     foreach ($filters as $filter) {
       Sabel::load($filter)->output($controller);
     }

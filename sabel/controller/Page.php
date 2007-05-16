@@ -37,13 +37,13 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
    * reserved name lists of methods(actions)
    * @var array $reserved
    */
-  private $reserved = array('setup',
-                            'getAction',
-                            'getRequests',
-                            'execute',
-                            'getResult',
-                            'result',
-                            'initialize');
+  private $reserved = array("setup",
+                            "getAction",
+                            "getRequests",
+                            "execute",
+                            "getResult",
+                            "result",
+                            "initialize");
   
   /**
    * default constructer of page controller
@@ -135,7 +135,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       
       $this->plugin->onBeforeAction();
       
-      $result = $this->processAction($action);
+      $this->result = $result = $this->$action();
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
     }
@@ -143,6 +143,17 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     $this->plugin->onAfterAction();
     
     return $this;
+  }
+  
+  /*
+  protected function processAction($action)
+  {
+    $actionResult =(array) $this->$action();
+    
+    $result = (is_array($actionResult)) ? $actionResult : array();
+    $this->result = $result;
+    
+    return $result;
   }
   
   protected function processAction($action)
@@ -156,6 +167,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
       $methodAction = $reqMethod . ucfirst($action);
     }
     $actionResult = array();
+    
     
     if (in_array($methodAction, $this->reserved)) {
       throw new Sabel_Exception_ReservedActionName($methodAction . " is reserved by sabel");
@@ -178,6 +190,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     
     return $result;
   }
+  */
   
   /**
    * HTTP Redirect to another location.
@@ -201,9 +214,7 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     }
     
     $candidate = Sabel_Context::getCurrentCandidate();
-    $this->redirect($candidate->uri($params));
-    
-    return self::REDIRECTED;
+    return $this->redirect($candidate->uri($params));
   }
   
   public function isRedirected()

@@ -15,11 +15,11 @@ final class Sabel_Controller_Plugin
   private $pluginMethods = array();
   private $controller    = null;
   
-  private $eventMethods = array("onBeforeAction",
+  private $eventMethods = array("onCreateController",
+                                "onBeforeAction",
                                 "onAfterAction",
                                 "onRedirect",
                                 "onException",
-                                "onCreateController",
                                 "onExecuteAction");
   
   private $events = array();
@@ -29,7 +29,7 @@ final class Sabel_Controller_Plugin
   public static function create($controller = null)
   {
     if (self::$instance === null) self::$instance = new self();
-    if ($controller !== null) self::$instance->setController($controller);
+    self::$instance->setController($controller);
     
     return self::$instance;
   }
@@ -80,8 +80,8 @@ final class Sabel_Controller_Plugin
     
     $plugin = $this->plugins[$this->pluginMethods[$method]];
     if (!is_object($plugin)) throw new Sabel_Exception_Unexpected();
-      
-    $plugin->setControllerInstance($this->controller);
+    
+    $plugin->setController($this->controller);
     $refPlugin = new ReflectionClass($plugin);
     
     return $refPlugin->getMethod($method)->invokeArgs($plugin, $arguments);
@@ -103,7 +103,7 @@ final class Sabel_Controller_Plugin
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($this->controller, $redirect);
+        $this->plugins[$name]->$event($redirect);
       }
     }
   }
@@ -114,18 +114,18 @@ final class Sabel_Controller_Plugin
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($this->controller, $exception);
+        $this->plugins[$name]->$event($exception);
       }
     }
   }
   
-  public function onCreateController($controller, $destination)
+  public function onCreateController($destination)
   {
     $event = "onCreateController";
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($controller, $destination);
+        $this->plugins[$name]->$event($destination);
       }
     }
   }
@@ -153,7 +153,9 @@ final class Sabel_Controller_Plugin
   {
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($this->controller);
+        $plugin = $this->plugins[$name];
+        $plugin->setController($this->controller);
+        $plugin->$event($this->controller);
       }
     }
   }

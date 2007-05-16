@@ -11,13 +11,13 @@
  */
 class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
 {
-  protected $controller = null;
+  const ARG       = '$in';
+  const STATEMENT = 'return (strstr($in, "filter"));';
   
-  public function onBeforeAction($controller)
+  public function onBeforeAction()
   {
-    $this->controller = $controller;
-    $filters = array_filter(array_keys(get_object_vars($controller)),
-                            create_function('$in', 'return (strstr($in, "filter"));'));
+    $filters = array_filter(array_keys(get_object_vars($this->controller)),
+                            create_function(self::ARG, self::STATEMENT));
                             
     asort($filters);
     foreach ($filters as $pos => $filterName) {
@@ -28,11 +28,10 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
     }
   }
   
-  public function onAfterAction($controller)
+  public function onAfterAction()
   {
-    $this->controller = $controller;
-    $filters = array_filter(array_keys(get_object_vars($controller)),
-                            create_function('$in', 'return (strstr($in, "filter"));'));
+    $filters = array_filter(array_keys(get_object_vars($this->controller)),
+                            create_function(self::ARG, self::STATEMENT));
     
     asort($filters);
     foreach ($filters as $pos => $filterName) {

@@ -12,16 +12,17 @@
  */
 abstract class Sabel_Controller_Page_Plugin
 {
-  protected $controllerInstance = null;
+  protected $controller = null;
   
-  public function setControllerInstance($controller)
+  public function setController($controller)
   {
-    $this->controllerInstance = $controller;
+    $this->controller = $controller;
   }
   
-  public function onBeforeAction($controller){}
-  public function onAfterAction($controller){}
-  public function onRedirect($controller){}
-  public function onException($controller, $exception){}
-  public function onCreateController($controller, $candidate){}
+  public function onBeforeAction(){}
+  public function onAfterAction(){}
+  public function onRedirect($to){}
+  public function onException($exception){}
+  public function onExecuteAction($method){}
+  public function onCreateController($destination){}
 }

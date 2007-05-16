@@ -17,7 +17,7 @@ class Sabel_Controller_Plugin_Model extends Sabel_Controller_Page_Plugin
       throw new Sabel_Exception_Runtime("model isn't Sabel_DB_Model");
     }
     
-    $requests = Sabel_Context::getPageController()->getRequests();
+    $requests = $this->controller->getRequests();
     
     if ($options === null) $options = array("ignores" => array());
     

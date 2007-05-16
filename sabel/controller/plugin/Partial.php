@@ -21,7 +21,7 @@ class Sabel_Controller_Plugin_Partial extends Sabel_Controller_Page_Plugin
    */
   public function partial($action, $assigns = null)
   {
-    $controller = $this->controllerInstance;
+    $controller = $this->controller;
     
     if ($action !== null) {
       $result = $controller->execute($action);

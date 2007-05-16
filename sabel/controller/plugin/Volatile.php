@@ -116,8 +116,10 @@ class Sabel_Controller_Plugin_Volatile extends Sabel_Controller_Page_Plugin
     return $this->volatiles;
   }
   
-  public function onBeforeAction($controller)
+  public function onBeforeAction()
   {
+    $controller = $this->controller;
+    
     $this->volatiles = $this->storage->read("volatiles");
     $this->lists     = $this->storage->read("volatiles_lists");
     $this->ignores   = $this->storage->read("volatiles_ignores");
@@ -151,18 +153,20 @@ class Sabel_Controller_Plugin_Volatile extends Sabel_Controller_Page_Plugin
     }
   }
   
-  public function onAfterAction($controller)
+  public function onAfterAction()
   {
-    $this->shutdown($controller);
+    $this->shutdown();
   }
   
-  public function onRedirect($controller)
+  public function onRedirect()
   {
-    $this->shutdown($controller);
+    $this->shutdown();
   }
   
-  protected function shutdown($controller)
+  protected function shutdown()
   {
+    $controller = $this->controller;
+    
     if (is_array($this->storage->read("volatiles"))) {
       foreach ($this->storage->read("volatiles") as $key => $vvalue) {
         if (isset($this->lists[$key])) {

@@ -5,7 +5,7 @@ class Sabel_Controller_Plugin_Dependency extends Sabel_Controller_Page_Plugin
   private $helperPrefix = ".php";
   private $dependency = null;
   
-  public function onCreateController($controller, $destination)
+  public function onCreateController($destination)
   {
     list($m, $c, $a) = $destination->toArray();
     
@@ -25,7 +25,7 @@ class Sabel_Controller_Plugin_Dependency extends Sabel_Controller_Page_Plugin
     } elseif (is_file($this->createPath($helpers[2]))) {
       $className = ucfirst($helpers[2][1]) . "_" . ucfirst($helpers[2][2]) ."_". ucfirst($helpers[2][3]);
       $ins = new $className();
-      $ins->setController($controller);
+      $ins->setController($this->controller);
       $ins->setter();
       $this->dependency = $ins;
     } elseif (is_file($this->createPath($helpers[3]))) {

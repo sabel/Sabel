@@ -13,6 +13,6 @@ class Sabel_Logger_Factory
   public static function create($class, $option = null)
   {
     $className = "Sabel_Logger_" . ucfirst($class);
-    return load($className, "Dependency_Config", true);
+    return new $className;
   }
 }
