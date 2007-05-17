@@ -14,11 +14,28 @@ class Sabel_Controller_Executer
   private $controller = null;
   private $destination = null;
   
+  /**
+   * default consturcter
+   *
+   * @param Sabel_Destination $destination
+   */
   public function __construct($destination)
   {
+    if (! $destination instanceof Sabel_Destination) {
+      $msg  = "call without require argument ";
+      $msg .= "Sabel_Controller_Executer::__construct(arg)";
+      $msg .= " arg must be Sabel_Destination";
+      throw new Sabel_Exception_Runtime($msg);
+    }
+    
     $this->destination = $destination;
   }
   
+  /**
+   * create controller instance
+   *
+   * @return a subclass instance of Sabel_Controller_Page
+   */
   public function create()
   {
     list($module, $controller,) = $this->destination->toArray();
@@ -47,6 +64,12 @@ class Sabel_Controller_Executer
     return $instance;
   }
   
+  /**
+   * execute an action
+   *
+   * @param Sabel_Request $request
+   * @param Sabel_Storage $storage
+   */
   public function execute($request, $storage)
   {
     $controller = $this->controller;
@@ -55,6 +78,22 @@ class Sabel_Controller_Executer
     $controller->setup($request, $storage);
     $controller->setAction($action);
     $controller->initialize();
-    $controller->execute($action);
+    
+    $this->executeAction($action);
+  }
+  
+  protected function executeAction($action)
+  {
+    $this->controller->execute($action);
+  }
+  
+  protected function getController()
+  {
+    return $this->controller;
+  }
+  
+  protected function setActionToDestination($action)
+  {
+    $this->destination->setAction($action);
   }
 }

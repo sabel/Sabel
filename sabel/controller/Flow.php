@@ -16,10 +16,12 @@ abstract class Sabel_Controller_Flow
     $currentActivity = null,
     $endActivity     = null;
     
-  private $activities = array();
-  private $inflow = false;
-  
-  private $flowVariables = array();
+  private
+    $inflow = false;
+    
+  private
+    $activities    = array(),
+    $flowVariables = array();
   
   abstract function configure();
   

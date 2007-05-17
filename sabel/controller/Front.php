@@ -44,7 +44,7 @@ final class Sabel_Controller_Front
     
     $this->processPreFilter();
     
-    $executer = new Sabel_Controller_Executer($destination);
+    $executer = new Sabel_Controller_Executer_Flow($destination);
     $this->controller = $executer->create();
     
     $this->plugin->onCreateController($destination);
@@ -57,11 +57,6 @@ final class Sabel_Controller_Front
   public function getController()
   {
     return $this->controller;
-  }
-  
-  public function getResult()
-  {
-    return $this->processView($this->controller);
   }
   
   public function processCandidate($request = null)
@@ -141,9 +136,11 @@ final class Sabel_Controller_Front
     }
   }
   
-  private final function processView()
+  public function getResult()
   {
-    $controller = $this->controller;
+    $controller  = $this->controller;
+    $destination = $this->destination;
+    
     if ($controller->hasRendered()) {
       return $controller->getRendered();
     }
@@ -156,7 +153,7 @@ final class Sabel_Controller_Front
                                              $controller->getAttributes()));
     
     try {
-      $content = Sabel_View::render(null, $assigns);
+      $content = Sabel_View::render($destination, $assigns);
     } catch (Exception $e) {
       $content = "";
     }
@@ -166,8 +163,10 @@ final class Sabel_Controller_Front
     } else {
       $assign = array("assign" => array("contentForLayout" => $content));
       try {
-        $content = Sabel_View::render(null, $assigns);
-        $html = Sabel_View::render(Sabel_Const::DEFAULT_LAYOUT, $assign);
+        $content = Sabel_View::render($destination, $assigns);
+        $d = clone $this->destination;
+        $d->setAction(Sabel_Const::DEFAULT_LAYOUT);
+        $html = Sabel_View::render($d, $assign);
       } catch (Exception $e) {
         $html = $content;
       }

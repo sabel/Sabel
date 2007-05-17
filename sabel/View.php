@@ -78,7 +78,7 @@ final class Sabel_View
     }
   }
 
-  public static function render($name = null, $additional)
+  public static function render($destination, $additional = array())
   {
     if (isset($additional["assign"])) {
       self::$values = array_merge(self::$values, $additional["assign"]);
@@ -87,14 +87,14 @@ final class Sabel_View
     if (isset($additional["resource"])) {
       if ($additional["resource"] === "string") {
         $resource = new Sabel_View_Resource_String();
-        $resource->set($name);
+        $resource->set($destination->getAction());
         $resource->setRenderer(new Sabel_View_Renderer_Class());
         return $resource->fetch(self::$values);
       }
     } else {
       return Sabel_View_Locator_Factory::create()
-                                         ->make($name)
-                                         ->locate($name)
+                                         ->make($destination)
+                                         ->locate($destination)
                                          ->fetch(self::$values);
     }
   }

@@ -18,9 +18,9 @@ class Sabel_Destination
   
   public function __construct($module, $controller, $action)
   {
-    $this->module = $module;
+    $this->module     = $module;
     $this->controller = $controller;
-    $this->action = $action;
+    $this->action     = $action;
   }
   
   public function hasModule()
@@ -51,6 +51,21 @@ class Sabel_Destination
   public function getAction()
   {
     return $this->action;
+  }
+  
+  public function setModule($module)
+  {
+    $this->module = $module;
+  }
+  
+  public function setController($controller)
+  {
+    $this->controller = $controller;
+  }
+  
+  public function setAction($action)
+  {
+    $this->action = $action;
   }
   
   public function toArray()

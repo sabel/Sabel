@@ -2,13 +2,13 @@
 
 class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
 {
-  private $flow = null;
-  
   public function flow()
   {
-    return $this->flow;
+    $storage = $this->controller->getStorage();
+    return $storage->read("flow");
   }
   
+  /*
   public function onBeforeAction()
   {
     $storage = $this->controller->getStorage();
@@ -48,4 +48,6 @@ class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
     
     $GLOBALS["flow"] = $flow;
   }
+  
+  */
 }

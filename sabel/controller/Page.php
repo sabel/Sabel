@@ -82,6 +82,88 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
+  /**
+   * execute action
+   *
+   * @param string $action action method name
+   */
+  public function execute($action)
+  {
+    try {
+      if (empty($action)) {
+        throw new Sabel_Exception_InvalidActionName("invalid action name");
+      }
+      
+      if (isset($this->reserved[$this->action])) {
+        throw new Sabel_Exception_Runtime('use reserved action name');
+      }
+      
+      $proceed = $this->plugin->onBeforeAction();
+      
+      if ($proceed) {
+        $this->result = $result = $this->$action();
+      }
+      
+    } catch (Exception $exception) {
+      $this->plugin->onException($exception);
+    }
+    
+    $this->plugin->onAfterAction();
+    
+    return $result;
+  }
+  
+  /**
+   * HTTP Redirect to another location.
+   *
+   * @param string $to /Module/Controller/Method
+   */
+  public function redirect($to)
+  {
+    $this->redirected = true;
+    $this->redirect = $to;
+    $this->plugin->onRedirect($to);
+    $this->plugin->onAfterAction();
+    
+    return self::REDIRECTED;
+  }
+  
+  /**
+   * HTTP Redirect to another location with uri.
+   *
+   * @param string $params
+   */
+  public function redirectTo($params)
+  {
+    if (!is_array($params) && is_string($params)) {
+      $params = array(':action' => $params);
+    }
+    
+    $candidate = Sabel_Context::getCurrentCandidate();
+    return $this->redirect($candidate->uri($params));
+  }
+  
+  public function isRedirected()
+  {
+    return $this->redirected;
+  }
+  
+  public function getRedirect()
+  {
+    return $this->redirect;
+  }
+  
+  /**
+   * assign value to template.
+   *
+   * @param mixed $key search key
+   * @param mixed $value value
+   */
+  protected function assign($key, $value)
+  {
+    $this->assignments[$key] = $value;
+  }
+  
   public function getAttributes()
   {
     return $this->attributes;
@@ -125,129 +207,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function getRequests()
   {
     return $this->request->getPostRequests();
-  }
-  
-  /**
-   * execute action
-   *
-   */
-  public function execute($action)
-  {
-    try {
-      if (empty($action)) {
-        throw new Sabel_Exception_InvalidActionName("invalid action name");
-      }
-      
-      if (isset($this->reserved[$this->action])) {
-        throw new Sabel_Exception_Runtime('use reserved action name');
-      }
-      
-      $proceed = $this->plugin->onBeforeAction();
-      
-      if ($proceed) {
-        $this->result = $result = $this->$action();
-      }
-      
-    } catch (Exception $exception) {
-      $this->plugin->onException($exception);
-    }
-    
-    $this->plugin->onAfterAction();
-    
-    return $this;
-  }
-  
-  /*
-  protected function processAction($action)
-  {
-    $actionResult =(array) $this->$action();
-    
-    $result = (is_array($actionResult)) ? $actionResult : array();
-    $this->result = $result;
-    
-    return $result;
-  }
-  
-  protected function processAction($action)
-  {
-    if ($this->redirected) return false;
-    
-    $methodAction = "";
-    
-    if (is_object($this->request)) {
-      $reqMethod    = strtolower($this->request->getHttpMethod());
-      $methodAction = $reqMethod . ucfirst($action);
-    }
-    $actionResult = array();
-    
-    
-    if (in_array($methodAction, $this->reserved)) {
-      throw new Sabel_Exception_ReservedActionName($methodAction . " is reserved by sabel");
-    }
-    
-    if ($this->hasMethod($methodAction)) {
-      if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
-        $actionResult =(array) $this->$methodAction();
-      }
-    } elseif ($this->hasMethod($action)) {
-      if (($actionResult = $this->plugin->onExecuteAction($action)) === false) {
-        $actionResult = $this->$action();
-      }
-    } elseif ($this->hasMethod('actionMissing')) {
-      $this->actionMissing();
-    }
-    
-    $result = (is_array($actionResult)) ? $actionResult : array();
-    $this->result = $result;
-    
-    return $result;
-  }
-  */
-  
-  /**
-   * HTTP Redirect to another location.
-   *
-   * @param string $to /Module/Controller/Method
-   */
-  public function redirect($to)
-  {
-    $this->redirected = true;
-    $this->redirect = $to;
-    $this->plugin->onRedirect($to);
-    $this->plugin->onAfterAction();
-    
-    return self::REDIRECTED;
-  }
-  
-  public function redirectTo($params)
-  {
-    if (!is_array($params) && is_string($params)) {
-      $params = array(':action' => $params);
-    }
-    
-    $candidate = Sabel_Context::getCurrentCandidate();
-    return $this->redirect($candidate->uri($params));
-  }
-  
-  public function isRedirected()
-  {
-    return $this->redirected;
-  }
-  
-  public function getRedirect()
-  {
-    return $this->redirect;
-  }
-  
-  /**
-   * assign value to template.
-   *
-   * @param mixed $key search key
-   * @param mixed $value value
-   */
-  protected function assign($key, $value)
-  {
-    $this->assignments[$key] = $value;
   }
   
   public function getAssignments()

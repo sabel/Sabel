@@ -10,6 +10,11 @@
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 interface Sabel_View_Locator
-{  
-  public function locate($name = null);
+{
+  /**
+   * locate a template
+   *
+   * @param Sabel_Destination $destination
+   */
+  public function locate($destination);
 }
