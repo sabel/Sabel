@@ -31,6 +31,8 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
       $flow->configure();
     }
     
+    $GLOBALS["flow"] = $flow;
+    
     if ($flow->isInFlow()) {
       if ($flow->canTransitTo($action)) {
         $guard = $controller->execute($action);
@@ -42,7 +44,7 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
           $controller->redirectTo($flow->getCurrentActivity()->getName());
         }
       } elseif ($flow->isCurrent($action)) {
-        // no transit
+        $controller->execute($action);
       } else {
         $this->setActionToDestination(self::INVALID_ACTION);
         $controller->execute(self::INVALID_ACTION);
@@ -58,8 +60,6 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
         $this->setActionToDestination(self::INVALID_ACTION);
         $controller->execute(self::INVALID_ACTION);
       }
-    }
-    
-    $GLOBALS["flow"] = $flow;
+    } 
   }
 }
