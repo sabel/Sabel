@@ -16,10 +16,12 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
   
   public function onBeforeAction()
   {
-    $filters = array_filter(array_keys(get_object_vars($this->controller)),
-                            create_function(self::ARG, self::STATEMENT));
+    $values  = array_keys(get_object_vars($this->controller));
+    $lamda   = create_function(self::ARG, self::STATEMENT);
+    $filters = array_filter($values, $lamda);
                             
     asort($filters);
+    
     foreach ($filters as $pos => $filterName) {
       $filter = $this->controller->$filterName;
       if (isset($filter["before"])) {

@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
+abstract class Sabel_Controller_Page extends Sabel_Object
 {
   const REDIRECTED = "SABEL_CONTROLLER_REDIRECTED";
   
@@ -117,11 +117,20 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
     return $this->action;
   }
   
+  public function getStorage()
+  {
+    return $this->storage;
+  }
+  
   public function getRequests()
   {
     return $this->request->getPostRequests();
   }
   
+  /**
+   * execute action
+   *
+   */
   public function execute($action)
   {
     try {
@@ -133,9 +142,12 @@ abstract class Sabel_Controller_Page extends Sabel_Controller_Page_Base
         throw new Sabel_Exception_Runtime('use reserved action name');
       }
       
-      $this->plugin->onBeforeAction();
+      $proceed = $this->plugin->onBeforeAction();
       
-      $this->result = $result = $this->$action();
+      if ($proceed) {
+        $this->result = $result = $this->$action();
+      }
+      
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
     }

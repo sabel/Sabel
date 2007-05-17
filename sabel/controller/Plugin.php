@@ -87,9 +87,14 @@ final class Sabel_Controller_Plugin
     return $refPlugin->getMethod($method)->invokeArgs($plugin, $arguments);
   }
   
+  /**
+   * before execute action event
+   *
+   * @return boolean
+   */
   public function onBeforeAction()
   {
-    $this->doActionEvent("onBeforeAction");
+    return $this->doActionEvent("onBeforeAction");
   }
   
   public function onAfterAction()
@@ -151,13 +156,18 @@ final class Sabel_Controller_Plugin
   
   private final function doActionEvent($event)
   {
+    $proceed = true;
+    
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
         $plugin = $this->plugins[$name];
         $plugin->setController($this->controller);
-        $plugin->$event($this->controller);
+        $proceed = $plugin->$event();
+        if ($proceed === null) $proceed = true;
       }
     }
+    
+    return $proceed;
   }
   
   private final function isPluginMethodExists($method)
