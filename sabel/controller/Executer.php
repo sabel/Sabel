@@ -11,25 +11,9 @@
  */
 class Sabel_Controller_Executer
 {
-  private $controller = null;
-  private $destination = null;
-  
-  /**
-   * default consturcter
-   *
-   * @param Sabel_Destination $destination
-   */
-  public function __construct($destination)
-  {
-    if (! $destination instanceof Sabel_Destination) {
-      $msg  = "call without require argument ";
-      $msg .= "Sabel_Controller_Executer::__construct(arg)";
-      $msg .= " arg must be Sabel_Destination";
-      throw new Sabel_Exception_Runtime($msg);
-    }
-    
-    $this->destination = $destination;
-  }
+  private
+    $controller  = null,
+    $destination = null;
   
   /**
    * create controller instance
@@ -65,10 +49,30 @@ class Sabel_Controller_Executer
   }
   
   /**
-   * execute an action
+   * set an instance of destination
+   *
+   * @access public
+   * @param Sabel_Destination $destination
+   * @throws Sabel_Exception_Runtime
+   */
+  public function setDestination($destination)
+  {
+    if (! $destination instanceof Sabel_Destination) {
+      $msg  = "call without require argument ";
+      $msg .= "Sabel_Controller_Executer::__construct(arg)";
+      $msg .= " arg must be Sabel_Destination";
+      throw new Sabel_Exception_Runtime($msg);
+    }
+    
+    $this->destination = $destination;
+  }
+  
+  /**
+   * execute an action.
    *
    * @param Sabel_Request $request
    * @param Sabel_Storage $storage
+   * @return void
    */
   public function execute($request, $storage)
   {
@@ -82,9 +86,17 @@ class Sabel_Controller_Executer
     $this->executeAction($action);
   }
   
+  /**
+   * execute an action.
+   *
+   * @access protected
+   * @param string $action the name of action.
+   * @return mixed result of controller
+   */
   protected function executeAction($action)
   {
-    $this->controller->execute($action);
+    Sabel_Context::log("Sabel_Controller_Executer::executeAction({$action})");
+    return $this->controller->execute($action);
   }
   
   protected function getController()

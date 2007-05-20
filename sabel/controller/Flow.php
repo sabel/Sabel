@@ -95,11 +95,17 @@ abstract class Sabel_Controller_Flow
   
   public function transit($event)
   {
+    $currentActivity = $this->currentActivity;
+    $nextActivity = null;
+    
     if ($this->canTransitTo($event)) {
-      $this->currentActivity = $this->currentActivity->getNextActivity($event);
-      if ($this->currentActivity->getName() === $this->endActivity->getName()) {
+      $nextActivity = $currentActivity->getNextActivity($event);
+      $this->currentActivity = $nextActivity;
+      
+      if ($nextActivity->getName() === $this->endActivity->getName()) {;
         $this->inflow = false;
       }
+      
       return true;
     } else {
       return false;
@@ -138,5 +144,10 @@ abstract class Sabel_Controller_Flow
   public function write($key, $value)
   {
     $this->flowVariables[$key] = $value;
+  }
+  
+  public function toArray()
+  {
+    return $this->flowVariables;
   }
 }

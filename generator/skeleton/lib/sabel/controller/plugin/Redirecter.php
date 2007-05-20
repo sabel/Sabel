@@ -14,6 +14,5 @@ class Sabel_Controller_Plugin_Redirecter extends Sabel_Controller_Page_Plugin
     $redirect = 'Location: ' . $absolute . '/' . $to;
     
     header ($redirect);
-    exit;
   }
 }

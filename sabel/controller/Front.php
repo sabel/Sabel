@@ -44,7 +44,8 @@ final class Sabel_Controller_Front
     
     $this->processPreFilter();
     
-    $executer = new Sabel_Controller_Executer_Flow($destination);
+    $executer = new Sabel_Controller_Executer_Flow();
+    $executer->setDestination($destination);
     $this->controller = $executer->create();
     
     $this->plugin->onCreateController($destination);

@@ -15,50 +15,64 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
   
   /**
    * execute an action.
-   * overwrite parent method.
+   * overwrite parent executeAction method.
    *
    * @param string $action
    */
   protected function executeAction($action)
   {
+    $logger = Sabel_Context::getLogger();
+    
+    $manager = new Sabel_Controller_Flow_Manager();
+    
     $controller = $this->getController();
+    $action     = $controller->getAction();
     
-    $storage = $controller->getStorage();
-    $action  = $controller->getAction();
-    
-    if (!($flow = $storage->read("flow"))) {
+    if (!($flow = $manager->restore())) {
       $flow = new FlowConfig();
       $flow->configure();
     }
     
-    $GLOBALS["flow"] = $flow;
-    
+    $controller->flow = $flow;
+        
     if ($flow->isInFlow()) {
       if ($flow->canTransitTo($action)) {
-        $guard = $controller->execute($action);
-        if ($guard === null) $guard = true;
+        $guard = parent::executeAction($action);
+        
+        if ($guard === null) {
+          $guard = true;
+        }
         
         if ($guard) {
           $flow->transit($action);
         } else {
           $controller->redirectTo($flow->getCurrentActivity()->getName());
         }
+        
       } elseif ($flow->isCurrent($action)) {
-        $controller->execute($action);
+        parent::executeAction($action);
       } else {
         $this->setActionToDestination(self::INVALID_ACTION);
-        $controller->execute(self::INVALID_ACTION);
+        parent::executeAction(self::INVALID_ACTION);
       }
-      $storage->write("flow", $flow);
+      
+      $manager->save($flow);
+      
+      $token = $manager->getToken();
+      $controller->token = $token;
+      Sabel_View::assign("token", $token);
+      Sabel_View::assignByArray($flow->toArray());
     } else {
       if ($flow->isEntryActivity($action)) {
+        $logger->log("{$action} is entry activity");
         $flow->start($action);
-        $storage->write("flow", $flow);
+        parent::executeAction($action);
+        $manager->save($flow);
       } elseif ($flow->isEndActivity($action)) {
-        $storage->delete("flow");
+        $manager->remove();
       } else {
         $this->setActionToDestination(self::INVALID_ACTION);
-        $controller->execute(self::INVALID_ACTION);
+        parent::executeAction(self::INVALID_ACTION);
       }
     } 
   }

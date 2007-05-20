@@ -20,10 +20,9 @@ final class Sabel_View
     self::$values[$key] = $value;
   }
 
-  public final function assign($key, $value)
+  public static final function assign($key, $value)
   {
     self::$values[$key] = $value;
-    return $this;
   }
   
   public static function getAssigns()
@@ -36,13 +35,11 @@ final class Sabel_View
     self::$values = array();
   }
 
-  public final function assignByArray($assignments)
+  public static final function assignByArray($assignments)
   {
     if (is_array($assignments)) {
       self::$values = array_merge(self::$values, $assignments);
     }
-
-    return $this;
   }
 
   public final function enableCache()

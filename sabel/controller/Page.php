@@ -31,7 +31,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $storage  = null;
     
   protected
-    $enableSession = true;
+    $enableStorage = true;
   
   /**
    * reserved name lists of methods(actions)
@@ -64,14 +64,16 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * setup of PageController
    *
+   * @access public
    * @param Sabel_Request $request
    * @param Sabel_Storage $storage
+   * @return void
    */
   public function setup(Sabel_Request $request, $storage = null)
   {
     $this->request = $request;
     
-    if ($this->enableSession) {
+    if ($this->enableStorage) {
       if ($storage === null) {
         $this->storage = Sabel_Storage_Session::create();
       } else {
@@ -85,7 +87,9 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * execute action
    *
+   * @access public
    * @param string $action action method name
+   * @return mixed result of execute an action.
    */
   public function execute($action)
   {
@@ -95,7 +99,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       }
       
       if (isset($this->reserved[$this->action])) {
-        throw new Sabel_Exception_Runtime('use reserved action name');
+        throw new Sabel_Exception_Runtime("use reserved action name");
       }
       
       $proceed = $this->plugin->onBeforeAction();
@@ -116,12 +120,15 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * HTTP Redirect to another location.
    *
+   * @access public
    * @param string $to /Module/Controller/Method
+   * @return mixed self::REDIRECTED
    */
   public function redirect($to)
   {
+    $this->redirect   = $to;
     $this->redirected = true;
-    $this->redirect = $to;
+    
     $this->plugin->onRedirect($to);
     $this->plugin->onAfterAction();
     
