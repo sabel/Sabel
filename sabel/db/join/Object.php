@@ -34,7 +34,7 @@ class Sabel_DB_Join_Object
     }
 
     if ($alias !== null) $this->aliasName = $alias;
-    $this->tblName = $tblName = $model->getTableName();
+    $tblName = $this->tblName = $model->getTableName();
 
     if ($columns === null) {
       $this->columns = $model->getColumnNames();

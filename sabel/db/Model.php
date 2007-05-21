@@ -87,6 +87,23 @@ class Sabel_DB_Model
     return new Sabel_DB_Command_Executer($this);
   }
 
+  public function __call($method, $args)
+  {
+    $command = $this->getCommand();
+
+    try {
+      if (empty($args)) {
+        return $command->$method()->getResult();
+      } else {
+        $code = $this->getEvalCode(count($args));
+        eval ('$result = ' . $code);
+        return $result;
+      }
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
+  }
+
   public function __set($key, $val)
   {
     $this->values[$key] = $val;
@@ -631,6 +648,17 @@ class Sabel_DB_Model
   {
     $command->rollback();
     throw new Exception($errorMsg);
+  }
+
+  private function getEvalCode($argsCount)
+  {
+    $args = array();
+    for ($i = 0; $i < $argsCount; $i++) {
+      $args[] = '$args[' . $i . ']';
+    }
+
+    $args = implode(", ", $args);
+    return '$command->$method(' . $args . ')->getResult();';
   }
 
   public function scond($arg1, $arg2 = null, $not = null)

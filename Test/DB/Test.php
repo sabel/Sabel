@@ -3,7 +3,7 @@
 class Test_DB_Test extends SabelTestCase
 {
   public static $db = '';
-  public static $TABLES = array('basic', 'users', 'city', 'country', 'company',
+  public static $TABLES = array('basic', 'users', 'city', 'country', 'company', 'planet',
                                 'test_for_like', 'test_condition', 'blog', 'mail',
                                 'customer_order', 'classification', 'favorite_item',
                                 'student', 'course', 'student_course', 'timer', 'child');
@@ -65,12 +65,17 @@ class Test_DB_Test extends SabelTestCase
     $city->save(array('id' => 2, 'class_name' => 'classname2'));
 
     $data = array();
-    $data[] = array('id' => 1, 'name' => 'japan');
-    $data[] = array('id' => 2, 'name' => 'usa');
-    $data[] = array('id' => 3, 'name' => 'england');
+    $data[] = array('id' => 1, 'planet_id' => 1, 'name' => 'japan');
+    $data[] = array('id' => 2, 'planet_id' => 1, 'name' => 'usa');
+    $data[] = array('id' => 3, 'planet_id' => 1, 'name' => 'england');
 
     $country = new Country();
     $country->arrayInsert($data);
+
+    $planet = Sabel_Model::load('Planet');
+    $planet->id = 1;
+    $planet->name = 'earth';
+    $planet->save();
 
     $model = new Users();
     $model->setConstraint('order', 'users.id');
@@ -509,6 +514,46 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($user4->Company->name, 'tokyo-company2');
   }
 
+  public function testOyanoOyanoOya()
+  {
+    $user = new Users();
+    $user->sconst("order", "Users.id");
+    $joiner = new Sabel_DB_Join($user);
+
+    $country = new Sabel_DB_Join_Relay(MODEL("Country"));
+    $country->add(MODEL("Planet"));
+
+    $city = new Sabel_DB_Join_Relay(MODEL("City"));
+    $city->add($country);
+
+    $joiner->add($city);
+    $users = $joiner->join();
+
+    $this->assertEquals(count($users), 4);
+
+    $user1 = $users[0];
+    $user2 = $users[1];
+    $user3 = $users[2];
+    $user4 = $users[3];
+
+    $this->assertEquals($user1->name, 'username1');
+    $this->assertEquals($user4->name, 'username4');
+
+    $this->assertEquals($user2->City->name, 'san diego');
+    $this->assertEquals($user3->City->name, 'osaka');
+
+    $this->assertEquals($user1->City->Country->name, 'england');
+    $this->assertEquals($user2->City->Country->name, 'usa');
+    $this->assertEquals($user3->City->Country->name, 'japan');
+    $this->assertEquals($user4->City->Country->name, 'japan');
+
+    $this->assertEquals($user4->City->id, 1);
+    $this->assertEquals($user4->City->name, 'tokyo');
+
+    $this->assertEquals($user1->City->Country->Planet->id, 1);
+    $this->assertEquals($user1->City->Country->Planet->name, "earth");
+  }
+
   public function testJoinAlias()
   {
     $data = array();
@@ -879,6 +924,14 @@ class Test_DB_Test extends SabelTestCase
     $this->assertNotNull($model->auto_create);
   }
 
+  public function testCustomCommand()
+  {
+    $model = Sabel_Model::load('Timer');
+    $result = $model->custom("test");
+
+    $this->assertEquals($result, "test");
+  }
+
   public function testClear()
   {
     Sabel_DB_Schema_Loader::clear();
@@ -1079,3 +1132,31 @@ Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
                                       Sabel_DB_Command::INSERT),
                                 array("record"),
                                 array("model" => array("include" => array("Timer"))));
+
+class Sabel_DB_Command_Custom extends Sabel_DB_Command_Base
+{
+  protected $command = Sabel_DB_Command::CUSTOM;
+
+  protected function run($executer)
+  {
+    $args = $executer->getArguments();
+    $executer->setResult($args[0]);
+  }
+}
+
+interface Sabel_DB_Command
+{
+  const SELECT = 0x01;
+  const INSERT = 0x02;
+  const UPDATE = 0x04;
+  const DELETE = 0x08;
+  const QUERY  = 0x10;
+
+  const BEGIN    = 0x20;
+  const COMMIT   = 0x40;
+  const ROLLBACK = 0x80;
+
+  const ARRAY_INSERT = 0x100;
+
+  const CUSTOM = 0x200;
+}

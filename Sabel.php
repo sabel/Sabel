@@ -30,12 +30,13 @@
 
 if (!defined("DIR_DIVIDER")) define("DIR_DIVIDER", "/");
 define("DEFAULT_PHP_SUFFIX", ".php");
-set_include_path(dirname(__FILE__) . ":" . get_include_path());
+define("CURRENT_PATH", dirname(__FILE__));
+set_include_path(CURRENT_PATH . ":" . get_include_path());
 
 // regist autoload static method
 spl_autoload_register(array("Sabel", "using"));
 
-require ("sabel".DIR_DIVIDER."Functions.php");
+require ("sabel" . DIR_DIVIDER . "Functions.php");
 
 /**
  * Sabel
@@ -48,8 +49,8 @@ require ("sabel".DIR_DIVIDER."Functions.php");
  */
 final class Sabel
 {
-  private static $required   = array();
-  private static $fileUsing  = array();
+  private static $required  = array();
+  private static $fileUsing = array();
   
   public static function using($className)
   {
@@ -58,7 +59,12 @@ final class Sabel
     if (!class_exists($className)) {
       $path = self::convertPath($className);
       if (($p = self::isReadable($path)) !== false) {
-        require ($p . DIR_DIVIDER . $path);
+        if ($p === true) {
+          require (CURRENT_PATH . DIR_DIVIDER . $path);
+        } else {
+          require ($p . DIR_DIVIDER . $path);
+        }
+        
         self::$required[$className] = true;
       }
     }

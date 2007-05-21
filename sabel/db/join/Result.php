@@ -35,6 +35,7 @@ class Sabel_DB_Join_Result
   public function changeKeyOfStructure($key, $newKey)
   {
     $structure =& $this->structure;
+
     if (isset($structure[$key])) {
       $structure[$newKey] = $structure[$key];
       unset($structure[$key]);

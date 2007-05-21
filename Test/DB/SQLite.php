@@ -108,6 +108,11 @@ class SQLiteHelper
 
     $sqls[] = 'CREATE TABLE country (
                  id int4 primary key,
+                 planet_id int4,
+                 name varchar(24))';
+
+    $sqls[] = 'CREATE TABLE planet (
+                 id int4 primary key,
                  name varchar(24))';
 
     $sqls[] = 'CREATE TABLE classification (

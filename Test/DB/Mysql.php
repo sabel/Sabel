@@ -117,7 +117,12 @@ class MysqlHelper
 
     $sqls[] = 'CREATE TABLE country (
                  id integer primary key,
+                 planet_id integer,
                  name varchar(24)) type=InnoDB';
+
+    $sqls[] = 'CREATE TABLE planet (
+                 id integer primary key,
+                 name varchar(24))';
 
     $sqls[] = 'CREATE TABLE classification (
                  id integer primary key,
