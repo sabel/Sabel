@@ -42,6 +42,16 @@ abstract class Sabel_Controller_Flow
     return $activities;
   }
   
+  public function getActivities()
+  {
+    return $this->activities;
+  }
+  
+  public function isActivity($action)
+  {
+    return (in_array($action, array_keys($this->getActivities())));
+  }
+  
   public function entry($activity)
   {
     $this->entryActivity = $activity;

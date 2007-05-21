@@ -57,23 +57,30 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
       }
       
       $manager->save($flow);
-      
-      $token = $manager->getToken();
-      $controller->token = $token;
-      Sabel_View::assign("token", $token);
-      Sabel_View::assignByArray($flow->toArray());
+      $this->assignToken($manager, $controller, $flow);
     } else {
       if ($flow->isEntryActivity($action)) {
         $logger->log("{$action} is entry activity");
         $flow->start($action);
+        $this->assignToken($manager, $controller, $flow);
         parent::executeAction($action);
         $manager->save($flow);
       } elseif ($flow->isEndActivity($action)) {
         $manager->remove();
+      } elseif (!$flow->isActivity($action)) {
+        parent::executeAction($action);
       } else {
         $this->setActionToDestination(self::INVALID_ACTION);
         parent::executeAction(self::INVALID_ACTION);
       }
     } 
+  }
+  
+  private final function assignToken($manager, $controller, $flow)
+  {
+    $token = $manager->getToken();
+    $controller->token = $token;
+    Sabel_View::assign("token", $token);
+    Sabel_View::assignByArray($flow->toArray());
   }
 }
