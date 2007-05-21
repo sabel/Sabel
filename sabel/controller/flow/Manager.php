@@ -74,7 +74,7 @@ class Sabel_Controller_Flow_Manager
   
   public function remove()
   {
-    $this->storage->remove($this->key());
+    $this->storage->delete($this->key());
   }
   
   protected final function key($token = null)
