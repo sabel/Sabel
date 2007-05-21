@@ -23,7 +23,7 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
   {
     $logger = Sabel_Context::getLogger();
     
-    $manager = new Sabel_Controller_Flow_Manager();
+    $manager = new Sabel_Controller_Flow_Manager($this->getRequest());
     
     $controller = $this->getController();
     $action     = $controller->getAction();

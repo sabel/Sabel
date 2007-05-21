@@ -12,26 +12,24 @@
 class Sabel_Controller_Flow_Manager
 {
   const PREFIX = "flow_";
+  const TOKEN_KEY = "token";
   
   private
     $token   = "",
     $storage = null;
   
-  public function __construct()
+  public function __construct($request)
   {
     $this->storage = Sabel_Context::getStorage();
-    $this->initializeToken();
+    $this->initializeToken($request);
   }
   
-  /**
-   * @todo remove $_REQUEST dependecy because it's experimental code.
-   */
-  private final function initializeToken()
+  private final function initializeToken($request)
   {
     $storage = $this->storage;
+    $token = $request->getParameter(self::TOKEN_KEY);
     
-    if (array_key_exists("token", $_REQUEST)) {
-      $token = $_REQUEST["token"];
+    if ($token !== null) {
       if (!$storage->has($this->key($token))) {
         $token = $this->createToken();
       }

@@ -12,6 +12,7 @@
 class Sabel_Controller_Executer
 {
   private
+    $request     = null,
     $controller  = null,
     $destination = null;
   
@@ -76,6 +77,7 @@ class Sabel_Controller_Executer
    */
   public function execute($request, $storage)
   {
+    $this->request = $request;
     $controller = $this->controller;
     $action = $this->destination->getAction();
     
@@ -102,6 +104,11 @@ class Sabel_Controller_Executer
   protected function getController()
   {
     return $this->controller;
+  }
+  
+  protected function getRequest()
+  {
+    return $this->request;
   }
   
   protected function setActionToDestination($action)
