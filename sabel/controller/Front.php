@@ -70,7 +70,7 @@ final class Sabel_Controller_Front
     $tokens    = new Sabel_Map_Tokens($this->request->__toString());
     $candidate = $candidate->find($tokens);
     
-    Sabel_Context::setCurrentCandidate($candidate);
+    Sabel_Context::setCandidate($candidate);
     $this->request->setCandidate($candidate);
     
     $this->destination = $candidate->getDestination();

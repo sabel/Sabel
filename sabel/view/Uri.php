@@ -42,7 +42,7 @@ class Sabel_View_Uri
     $protocol = ($secure) ? 'https' : 'http';
     
     $uriPrefix = ($withDomain) ? $protocol . '://' . $httphost : '';
-    $uri = Sabel_Context::getCurrentCandidate()->uri($params);
+    $uri = Sabel_Context::getCandidate()->uri($params);
     return $uriPrefix . "/" . $uri;
   }
   

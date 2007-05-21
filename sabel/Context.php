@@ -14,7 +14,7 @@ class Sabel_Context
   private static $parameters  = array();
   private static $includePath = array();
   
-  private static $pageController = null;
+  private static $controller = null;
   private static $candidate = null;
   private static $view = null;
   
@@ -35,12 +35,12 @@ class Sabel_Context
     return self::$storage;
   }
   
-  public static function setCurrentCandidate($candidate)
+  public static function setCandidate($candidate)
   {
     self::$candidate = $candidate;
   }
   
-  public static function getCurrentCandidate()
+  public static function getCandidate()
   {
     return self::$candidate;
   }
@@ -55,14 +55,14 @@ class Sabel_Context
     return self::$view;
   }
   
-  public static function setPageController($controller)
+  public static function setController($controller)
   {
-    self::$pageController = $controller;
+    self::$controller = $controller;
   }
   
-  public static function getPageController()
+  public static function getController()
   {
-    return self::$pageController;
+    return self::$controller;
   }
   
   public static function setParameter($name, $value)
@@ -85,12 +85,6 @@ class Sabel_Context
   public static function getLogger()
   {
     return Sabel_Logger_File::singleton();
-  }
-  
-  public static function getContainer()
-  {
-    // @TODO alter container make.
-    return new Sabel_Container_DI();
   }
   
   public static function getCache()

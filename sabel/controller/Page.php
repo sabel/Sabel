@@ -146,7 +146,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $params = array(':action' => $params);
     }
     
-    $candidate = Sabel_Context::getCurrentCandidate();
+    $candidate = Sabel_Context::getCandidate();
     return $this->redirect($candidate->uri($params));
   }
   

@@ -42,7 +42,7 @@ class Sabel_Controller_Executer
       $instance = new Index_Controllers_Index();
     }
     
-    Sabel_Context::setPageController($instance);
+    Sabel_Context::setController($instance);
     $this->controller = $instance;
     
     return $instance;
