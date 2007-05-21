@@ -44,7 +44,8 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
         }
         
         if ($guard) {
-          $flow->transit($action);
+          $nextAction = $flow->transit($action);
+          $controller->redirectTo($nextAction->getName());
         } else {
           $controller->redirectTo($flow->getCurrentActivity()->getName());
         }

@@ -116,7 +116,7 @@ abstract class Sabel_Controller_Flow
         $this->inflow = false;
       }
       
-      return true;
+      return $nextActivity;
     } else {
       return false;
     }

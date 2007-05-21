@@ -78,8 +78,8 @@ class Sabel_Controller_Executer
   public function execute($request, $storage)
   {
     $this->request = $request;
-    $controller = $this->controller;
-    $action = $this->destination->getAction();
+    $controller    = $this->controller;
+    $action        = $this->destination->getAction();
     
     $controller->setup($request, $storage);
     $controller->setAction($action);
