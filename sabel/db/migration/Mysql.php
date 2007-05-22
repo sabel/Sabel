@@ -133,7 +133,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
 
   protected function getBooleanAttr($value)
   {
-    $val = (in_array($value, array("true", "TRUE", 1))) ? 1 : 0;
+    $val = ($value) ? 1 : 0;
     return "DEFAULT $val COMMENT 'boolean'";
   }
 }

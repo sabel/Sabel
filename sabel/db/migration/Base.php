@@ -202,22 +202,22 @@ abstract class Sabel_DB_Migration_Base
       fwrite($fp, "\n");
 
       if ($column->nullable) {
-        fwrite($fp, "  nullable: true\n");
+        fwrite($fp, "  nullable: TRUE\n");
       } else {
-        fwrite($fp, "  nullable: false\n");
+        fwrite($fp, "  nullable: FALSE\n");
       }
 
-      if ($column->primary)   fwrite($fp, "  primary: true\n");
-      if ($column->increment) fwrite($fp, "  increment: true\n");
+      if ($column->primary)   fwrite($fp, "  primary: TRUE\n");
+      if ($column->increment) fwrite($fp, "  increment: TRUE\n");
 
       $d = $column->default;
       if ($d === null) {
-        fwrite($fp, "  default: null");
+        fwrite($fp, "  default: NULL");
       } elseif ($column->isBool()) {
         if ($d) {
-          fwrite($fp, "  default: true");
+          fwrite($fp, "  default: TRUE");
         } else {
-          fwrite($fp, "  default: false");
+          fwrite($fp, "  default: FALSE");
         }
       } elseif (is_int($d) || is_float($d)) {
         fwrite($fp, "  default: $d");
@@ -244,6 +244,11 @@ abstract class Sabel_DB_Migration_Base
 
     fclose($fp);
     return $cols;
+  }
+
+  protected function escape($value)
+  {
+    return $this->driver->escape($value);
   }
 
   protected function parseForForeignKey($line)

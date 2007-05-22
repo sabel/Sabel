@@ -80,15 +80,18 @@ class Sabel_DB_Migration_Parser
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 7) === "default") {
         $d = $this->getValue($lines, $num, $line);
+        if (is_numeric($d)) return $d;
 
         if (substr($d, 0, 1) === "'" && substr($d, -1, 1) === "'") {
           return substr($d, 1, -1);
         } elseif (substr($d, 0, 1) === '"' && substr($d, -1, 1) === '"') {
           return substr($d, 1, -1);
-        } elseif ($d === "null" || $d === "NULL") {
+        } elseif ($d === "NULL") {
           return null;
+        } elseif ($d === "null") {
+          throw new Exception("invalid parameter 'null'. => 'NULL'");
         } else {
-          return $d;
+          return $this->toBooleanValue($d);
         }
       }
     }
@@ -134,6 +137,12 @@ class Sabel_DB_Migration_Parser
 
   protected function toBooleanValue($value)
   {
-    return (in_array($value, array("true", "TRUE", 1)));
+    if ($value === "TRUE") {
+      return true;
+    } elseif ($value === "FALSE") {
+      return false;
+    } else {
+      throw new Exception("invalid parameter for boolean value. use TRUE or FALSE.");
+    }
   }
 }

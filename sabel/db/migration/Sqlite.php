@@ -135,19 +135,19 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
     if ($col->nullable === false) $line[] = "NOT NULL";
 
-    if ($col->default !== "EMPTY" && $col->default !== null) {
-      if (is_bool($col->default)) {
-        $value  = ($col->default) ? "true" : "false";
+    $d = $col->default;
+    if ($d !== "EMPTY" && $d !== null) {
+      if ($col->isBool()) {
+        $value  = ($d) ? "true" : "false";
         $line[] = "DEFAULT " . $value;
       } elseif ($col->isString()) {
-        $d = $col->default;
-        if ((substr($d, 0, 1) !== "'" || substr($d, -1, 1) !== "'") && $d !== "null") {
-          $line[] = "DEFAULT '{$d}'";
+        if ($d === "null") {
+          $line[] = "DEFAULT NULL";
         } else {
-          $line[] = "DEFAULT $d";
+          $line[] = "DEFAULT '{$d}'";
         }
       } else {
-        $line[] = "DEFAULT " . $col->default;
+        $line[] = "DEFAULT " . $d;
       }
     }
 

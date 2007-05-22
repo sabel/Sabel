@@ -71,7 +71,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
         if ($col->isBool()) {
           $default = ($col->default) ? "true" : "false";
         } elseif ($col->isString()) {
-          $default = "'" . $col->default . "'";
+          $default = "'{$col->default}'";
         } else {
           $default = $col->default;
         }
@@ -89,15 +89,16 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 
     if ($col->nullable === false) $line[] = "NOT NULL";
 
-    $cd = $col->default;
+    $d = $col->default;
 
-    if ($cd !== "EMPTY") {
-      if ($cd === null) {
+    if ($d !== "EMPTY") {
+      if ($d === null) {
         $line[] = "DEFAULT NULL";
       } elseif ($col->isString()) {
-        $line[] = "DEFAULT '{$cd}'";
+        $line[] = "DEFAULT '{$d}'";
       } else {
-        $line[] = "DEFAULT $cd";
+        if ($col->isBool()) $d = ($d) ? "true" : "false";
+        $line[] = "DEFAULT $d";
       }
     }
 

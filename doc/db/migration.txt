@@ -1,61 +1,70 @@
-Migration
+[Migration]
 
-マイグレーションファイルのフォーマット
-  カラム名
-    指示子:指定
+・マイグレーションファイルのフォーマット
+  カラム名:
+    指示子: 指定
     ...
 
-カラムの型指定
-  type:型名
+・カラムの型指定
+  type: 型名
+
   型名には
-    INT
-    BIGINT
-    FLOAT
-    DOUBLE
-    STRING
-    TEXT
-    BOOL
-    DATETIME
-    BYTE
-    DATE
-    TIME
+    INT, BIGINT, FLOAT, DOUBLE, STRING, TEXT,
+    BOOL, DATETIME, BYTE, DATE, TIME
+
   これらの型が指定できます。
-  STRING型にはSTRING(長さ)のように、文字列の長さが指定できます。
 
-インクリメント、プライマリ、ヌラブル
-  これらの指示の指定には、trueか１を指定すると、trueに、
-　それ以外を指定するとfalseになります。
+  ・STRING型にはSTRING(最大文字数)のように、文字数を指定できます。
+    文字数を指定しない場合は最大文字数は255文字に設定されます。
 
-デフォルト
-  default:test
-  などとすると、デフォルトの値が、testに設定されます。
-  default:'s name
-  というような場合は適切にエスケープした文字列を設定してください。
+・カラム制約
+  increment, primary, nullable
 
-ファイル名規則
+  これらの指示には、TRUEかFALSEを指定します。
+  または指示子自体を省略することもできます。指示子省略はFALSEと同じ挙動です。
+
+  ・incrementをTRUEにするとINSERT順に連番が付けられます。
+  ・primaryをTRUEにするとそのカラムがプライマリキーになります。
+    プライマリキーを複数個のカラムから構成する場合は、それぞれのカラムのprimaryをTRUEに設定します。
+  ・nullableをFALSEにするとカラムにNULL値を許可しません。(バリデーション時にエラーを返します。)
+
+・デフォルト値
+  default: "test"
+  とすると、デフォルトの値がtestに設定されます。
+
+  Boolean型のカラムの場合は次のようにbool値を設定します。
+  default: FALSE
+
+  デフォルト値に"'"や"\"を含めることは出来ません。(対応していません。)
+  今後含めることが出来るようにする予定もありません。
+
+・ファイル名規則
   バージョン番号_モデル名_指示
   指示には
     create
     drop
+    addColumn
+    dropColumn
   が指定できます。
 
-　例: 1_users_create
+　例: 1_users_create (拡張子は必要ありません。)
 
-  拡張子は必要ありません。拡張子があると正しく動作しません。
+・注意!! 大文字・小文字の区別
+  カラム型, TRUE, FALSE, NULLは必ず大文字で記入します。
+  これは複数人で開発するときなどに、統一性を与えるためです。
 
-記述例
-id
-  type:INT
-  increment:true
-  primary:true
 
-name
-  type:STRING(64)
-　　default:no name
+***** マイグレーションファイル記述例 *****
 
-email
-  type:TEXT
-  nullable:true
+id:
+  type: INT
+  increment: TRUE
+  primary: TRUE
 
-注意事項
-　カラム名と指示子の間には空白行は許可されません。
+name:
+  type: STRING(64)
+  default: "no name"
+
+email:
+  type: TEXT
+  nullable: TRUE
