@@ -64,7 +64,13 @@ class Sabel_DB_Command_Before
       foreach ($commands as $command) {
         if ($command === $commandId) {
           foreach ($params["methods"] as $method) {
-            $ins->$method($commandClass);
+            $res = $ins->$method($commandClass);
+
+            if ($res === self::INTERRUPT_IMMEDIATE) {
+              return self::INTERRUPT_IMMEDIATE;
+            } elseif ($res === self::INTERRUPT) {
+              $result = self::INTERRUPT;
+            }
           }
 
           if ($params["continue"] === self::INTERRUPT_IMMEDIATE) {
