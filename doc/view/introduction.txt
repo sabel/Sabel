@@ -3,3 +3,8 @@
   <?= $contentForLayout ?>
   という内容で保存すると、アクションの実行結果がレイアウトファイルの$contentForLayout部分に入り、
   レイアウトの内容と合わせたHTMLが得られます。
+  
+レンダラー
+  Sabel標準
+    制限事項
+      <script>タグは</html>より前になければならない。

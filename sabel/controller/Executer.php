@@ -12,9 +12,16 @@
 class Sabel_Controller_Executer
 {
   private
+    $plugin      = null,
     $request     = null,
     $controller  = null,
     $destination = null;
+  
+  public function __construct()
+  {
+    $this->plugin = Sabel_Plugin::create();
+    $this->plugin->setExecuter($this);
+  }
   
   /**
    * create controller instance
@@ -98,7 +105,12 @@ class Sabel_Controller_Executer
   protected function executeAction($action)
   {
     Sabel_Context::log("Sabel_Controller_Executer::executeAction({$action})");
-    return $this->controller->execute($action);
+    
+    if ($this->plugin->hasExecuteAction()) {
+      $this->plugin->onExecuteAction($action);
+    } else {
+      return $this->controller->execute($action);
+    }
   }
   
   protected function getController()

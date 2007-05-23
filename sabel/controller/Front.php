@@ -30,7 +30,7 @@ final class Sabel_Controller_Front
     // @todo renew for new map format
     Sabel::fileUsing(RUN_BASE . Sabel_Const::DEFAULT_MAP_FILE);
     
-    $this->plugin = Sabel_Controller_Plugin::create();
+    $this->plugin = Sabel_Plugin::create();
   }
     
   public function ignition($storage = null)

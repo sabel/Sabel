@@ -51,7 +51,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function __construct()
   {
-    $this->plugin = Sabel_Controller_Plugin::create($this);
+    $this->plugin = Sabel_Plugin::create($this);
   }
   
   /**
