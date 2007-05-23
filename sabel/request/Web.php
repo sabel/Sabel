@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Request_Web extends Sabel_Request
+class Sabel_Request_Web implements Sabel_Request
 {
   /**
    * @var Sabel_Request_Uri $uri
@@ -69,7 +69,7 @@ class Sabel_Request_Web extends Sabel_Request
   
   public function parameters($params)
   {
-    $this->parameters = Sabel::load('Sabel_Request_Parameters', $params);
+    $this->parameters = new Sabel_Request_Parameters($params);
     return $this;
   }
   

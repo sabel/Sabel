@@ -38,6 +38,10 @@ if (ENVIRONMENT === DEVELOPMENT) {
 add_include_path('/app');
 add_include_path('/app/models');
 add_include_path('/lib');
+// add_include_path('/config');
+require (RUN_BASE . "/config/Factory.php");
 
 define("__TRUE__",  "true");
 define("__FALSE__", "false");
+
+require (RUN_BASE . "/config/localize.php");

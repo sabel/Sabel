@@ -36,6 +36,17 @@ class Sabel_Container_Injector
    */
   public function newInstance($className)
   {
+    $reflect = new ReflectionClass($className);
+    
+    if ($reflect->isInterface()) {
+      foreach ($this->injection->getBinds() as $name => $bind) {
+        if ($name === $className) {
+          $implClassName = $bind->getImplementation();
+          return $this->newInstance($implClassName);
+        }
+      }
+    }
+    
     if ($this->injection->hasConstruct($className)) {
       $construct = $this->injection->getConstruct($className);
       $constructArguments = array();

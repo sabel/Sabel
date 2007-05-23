@@ -64,6 +64,4 @@ class Sabel_Const
   const DEFAULT_LAYOUT = "layout";
   
   const DEFAULT_MAP_FILE = "/config/map.php";
-  
-  const REQUEST_CLASS = "Sabel_Request_Web";
 }

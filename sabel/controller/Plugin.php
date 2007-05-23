@@ -43,6 +43,7 @@ final class Sabel_Controller_Plugin
    * add plugin
    *
    * @param Sabel_Controller_Page_Plugin $plugin
+   * @return object of Sabel_Controller_Plugin
    */
   public function add($plugin)
   {
@@ -88,7 +89,7 @@ final class Sabel_Controller_Plugin
   }
   
   /**
-   * before execute action event
+   * before execute an action event
    *
    * @return boolean
    */
@@ -97,6 +98,11 @@ final class Sabel_Controller_Plugin
     return $this->doActionEvent("onBeforeAction");
   }
   
+  /**
+   * after execute an action event
+   *
+   * @return boolean
+   */
   public function onAfterAction()
   {
     $this->doActionEvent("onAfterAction");

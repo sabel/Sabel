@@ -15,6 +15,7 @@ final class Sabel_Controller_Front
     $plugin = null;
   
   protected
+    $injector     = null,
     $filters      = null,
     $controller   = null,
     $destination  = null,
@@ -23,8 +24,8 @@ final class Sabel_Controller_Front
   public function __construct($request = null)
   {
     if ($this->request === null) {
-      $requestClass = Sabel_Const::REQUEST_CLASS;
-      $this->request = new $requestClass();
+      $this->injector = Sabel_Container::injector(new Factory());
+      $this->request = $this->injector->newInstance("Sabel_Request");
     }
     
     // @todo renew for new map format
@@ -44,10 +45,11 @@ final class Sabel_Controller_Front
     
     $this->processPreFilter();
     
-    $executer = new Sabel_Controller_Executer_Flow();
+    $executer = $this->injector->newInstance("Sabel_Controller_Executer");
     $executer->setDestination($destination);
     $this->controller = $executer->create();
     
+    // @todo move in create() of executer
     $this->plugin->onCreateController($destination);
     
     $executer->execute($this->request, $storage);
@@ -119,7 +121,7 @@ final class Sabel_Controller_Front
     $request = $this->request;
     
     foreach ($filters as $filter) {
-      $aFilter = Sabel::load($filter);
+      $aFilter = new $filter();
       $aFilter->setup($request)->execute();
       $aFilter->input();
     }
@@ -133,7 +135,8 @@ final class Sabel_Controller_Front
     $controller = $this->controller;
     
     foreach ($filters as $filter) {
-      Sabel::load($filter)->output($controller);
+      $instance = new $filter();
+      $instance->output($controller);
     }
   }
   
