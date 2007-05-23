@@ -14,6 +14,12 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
   const ARG       = '$in';
   const STATEMENT = 'return (strstr($in, "filter"));';
   
+  const BEFORE  = "before";
+  const AFTER   = "after";
+  
+  const EXCLUDE_KEY_KEY = "EXCLUDE_KEY";
+  const INCLUDE_KEY_KEY = "INCLUDE_KEY";
+  
   public function onBeforeAction()
   {
     $values  = array_keys(get_object_vars($this->controller));
@@ -24,22 +30,24 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
     
     foreach ($filters as $pos => $filterName) {
       $filter = $this->controller->$filterName;
-      if (isset($filter["before"])) {
-        $this->doFilters($filter["before"]);
+      if (isset($filter[self::BEFORE])) {
+        $this->doFilters($filter[self::BEFORE]);
       }
     }
   }
   
   public function onAfterAction()
   {
-    $filters = array_filter(array_keys(get_object_vars($this->controller)),
-                            create_function(self::ARG, self::STATEMENT));
+    $values  = array_keys(get_object_vars($this->controller));
+    $lamda   = create_function(self::ARG, self::STATEMENT);
+    $filters = array_filter($values, $lamda);
     
     asort($filters);
+    
     foreach ($filters as $pos => $filterName) {
       $filter = $this->controller->$filterName;
-      if (isset($filter["after"])) {
-        $this->doFilters($filter["after"]);
+      if (isset($filter[self::AFTER])) {
+        $this->doFilters($filter[self::AFTER]);
       }
     }
   }
@@ -48,20 +56,21 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
   {
     $actionName = $this->controller->getAction();
     
-    if (isset($filters["exclude"]) && isset($filters["include"])) {
-      throw new Sabel_Exception_Runtime("exclude and include can't define in same time");
+    if (isset($filters[self::EXCLUDE_KEY]) && isset($filters[self::INCLUDE_KEY])) {
+      $msg = "EXCLUDE_KEY and INCLUDE_KEY can't define in same time";
+      throw new Sabel_Exception_Runtime($msg);
     }
     
-    if (isset($filters["exclude"])) {
-      if (in_array($actionName, $filters["exclude"])) {
+    if (isset($filters[self::EXCLUDE_KEY])) {
+      if (in_array($actionName, $filters[self::EXCLUDE_KEY])) {
         return false;
       } else {
-        unset($filters["exclude"]);
+        unset($filters[self::EXCLUDE_KEY]);
         $this->applyFilters($filters);
       }
-    } elseif (isset($filters["include"])) {
-      if (in_array($actionName, $filters["include"])) {
-        unset($filters["include"]);
+    } elseif (isset($filters[self::INCLUDE_KEY])) {
+      if (in_array($actionName, $filters[self::INCLUDE_KEY])) {
+        unset($filters[self::INCLUDE_KEY]);
         $this->applyFilters($filters);
       }
     } else {

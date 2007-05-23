@@ -113,8 +113,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     $this->plugin->onAfterAction();
-    
-    return $result;
   }
   
   /**

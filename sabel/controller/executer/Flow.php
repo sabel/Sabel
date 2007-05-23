@@ -34,7 +34,7 @@ class Sabel_Controller_Executer_Flow extends Sabel_Controller_Executer
     }
     
     $controller->flow = $flow;
-        
+    
     if ($flow->isInFlow()) {
       if ($flow->canTransitTo($action)) {
         $guard = parent::executeAction($action);
