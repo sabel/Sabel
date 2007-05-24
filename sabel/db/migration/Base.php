@@ -80,8 +80,10 @@ abstract class Sabel_DB_Migration_Base
 
     if ($filePath === null) {
       $fp = fopen($this->filePath, "r");
+      $remove = false;
     } else {
       $fp = fopen($filePath, "r");
+      $remove = true;
     }
 
     $cols  = array();
@@ -105,12 +107,12 @@ abstract class Sabel_DB_Migration_Base
         $lines[] = $line;
       }
     }
-    
+
     if (!empty($lines)) $cols[] = $parser->toColumn($lines);
-
     if (!empty($opts)) $this->setOptions($opts);
-    fclose($fp);
+    if ($remove) unlink($filePath);
 
+    fclose($fp);
     return $cols;
   }
 
@@ -172,17 +174,25 @@ abstract class Sabel_DB_Migration_Base
     $this->driver->setSql($query)->execute();
   }
 
-  protected function getMigrationFileName()
-  {
-    $exp = explode("/", $this->filePath);
-    return $exp[count($exp) - 1];
-  }
-
   protected function getRestoreFileName()
   {
-    $file = $this->getMigrationFileName();
-    $num  = substr($file, 0, strpos($file, "_"));
-    return MIG_DIR . "/restore_" . $num;
+    $exp   = explode("/", $this->filePath);
+    $count = count($exp);
+
+    $path = array();
+    for ($i = 0; $i < $count; $i++) {
+      if ($i === $count - 1) {
+        $file = $exp[$i];
+      } else {
+        $path[] = $exp[$i];
+      }
+    }
+
+    $path = implode("/", $path) . "/restores";
+    if (!is_dir($path)) mkdir($path, 0755);
+
+    $num = substr($file, 0, strpos($file, "_"));
+    return $path . "/restore_" . $num;
   }
 
   protected function writeRestoreFile($fp, $isClose = true, $columns = null)
@@ -231,6 +241,45 @@ abstract class Sabel_DB_Migration_Base
     if ($isClose) fclose($fp);
   }
 
+  protected function custom()
+  {
+    $tmpDir = MIG_DIR . "/temporary";
+    mkdir($tmpDir);
+
+    $num = 1;
+    $fileName = "";
+    $files = array();
+    $lines = array();
+
+    $fp = fopen($this->filePath, "r");
+
+    while (!feof($fp)) {
+      $line = trim(fgets($fp, 256));
+      if (empty($lines) && $line === "") continue;
+      if (substr($line, 0, 3) === "###") {
+        if (!empty($lines)) {
+          $this->writeTemporaryFile($lines, "{$tmpDir}/{$num}_{$fileName}");
+          $num++;
+          $lines = array();
+        }
+
+        $fileName = trim(str_replace("#", "", $line));
+        continue;
+      }
+
+      $lines[] = $line;
+    }
+
+    $this->writeTemporaryFile($lines, "{$tmpDir}/{$num}_{$fileName}");
+  }
+
+  private function writeTemporaryFile($lines, $path)
+  {
+    $fp = fopen($path, "w");
+    foreach ($lines as $line) fwrite($fp, $line. "\n", 256);
+    fclose($fp);
+  }
+
   protected function getDropColumns()
   {
     $fp   = fopen($this->filePath, "r");
@@ -244,11 +293,6 @@ abstract class Sabel_DB_Migration_Base
 
     fclose($fp);
     return $cols;
-  }
-
-  protected function escape($value)
-  {
-    return $this->driver->escape($value);
   }
 
   protected function parseForForeignKey($line)
