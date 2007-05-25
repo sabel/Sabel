@@ -27,7 +27,7 @@ class ArrayInsert
 
 Sabel_DB_Command_Before::regist(array("ArrayInsert", true),
                                 Sabel_DB_Command::ARRAY_INSERT,
-                                array("run"),
+                                "run",
                                 array("driver" => array("include" =>
                                                   array("Sabel_DB_Driver_Mysql"))),
                                 Sabel_DB_Command_Before::INTERRUPT);

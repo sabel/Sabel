@@ -12,23 +12,34 @@
  */
 abstract class Sabel_DB_Migration_Base
 {
-  protected $type       = "";
-  protected $filePath   = "";
-  protected $mdlName    = "";
-  protected $command    = "";
-  protected $options    = array();
-  protected $driver     = null;
-  protected $accessor   = null;
+  protected $type     = "";
+  protected $filePath = "";
+  protected $dirPath  = "";
+  protected $mdlName  = "";
+  protected $command  = "";
+
+  protected $driver   = null;
+  protected $accessor = null;
+
   protected $sqlPrimary = false;
 
-  public function __construct($accessor, $driver, $filePath, $type)
+  public function __construct($accessor, $driver, $filePath, $type, $dirPath = null)
   {
+    if ($dirPath === null) {
+      if (defined("MIG_DIR")) {
+        $this->dirPath = MIG_DIR;
+      } else {
+        throw new Exception("__construct() invalid call.");
+      }
+    } else {
+      $this->dirPath = $dirPath;
+    }
+
     $this->type     = $type;
     $this->driver   = $driver;
     $this->accessor = $accessor;
 
-    $exp  = explode("/", $filePath);
-    $file = $exp[count($exp) - 1];
+    $file = getFileName($filePath);
     list ($num, $mdlName, $command) = explode("_", $file);
 
     $this->filePath = $filePath;
@@ -40,6 +51,8 @@ abstract class Sabel_DB_Migration_Base
 
   public function execute()
   {
+    clearstatcache();
+
     $command = $this->command;
     if (method_exists($this, $command)) {
       $this->$command();
@@ -76,7 +89,7 @@ abstract class Sabel_DB_Migration_Base
 
   protected function createColumns($filePath = null)
   {
-    $parser = new Sabel_DB_Migration_Parser();
+    $parser = new Sabel_DB_Migration_Util_Parser();
 
     if ($filePath === null) {
       $fp = fopen($this->filePath, "r");
@@ -176,19 +189,9 @@ abstract class Sabel_DB_Migration_Base
 
   protected function getRestoreFileName()
   {
-    $exp   = explode("/", $this->filePath);
-    $count = count($exp);
+    $file = getFileName($this->filePath);
+    $path = $this->dirPath . "/restores";
 
-    $path = array();
-    for ($i = 0; $i < $count; $i++) {
-      if ($i === $count - 1) {
-        $file = $exp[$i];
-      } else {
-        $path[] = $exp[$i];
-      }
-    }
-
-    $path = implode("/", $path) . "/restores";
     if (!is_dir($path)) mkdir($path, 0755);
 
     $num = substr($file, 0, strpos($file, "_"));
@@ -243,41 +246,35 @@ abstract class Sabel_DB_Migration_Base
 
   protected function custom()
   {
-    $tmpDir = MIG_DIR . "/temporary";
-    mkdir($tmpDir);
+    $custom = new Sabel_DB_Migration_Util_Custom();
+    $filePath = $this->filePath;
 
-    $num = 1;
-    $fileName = "";
-    $files = array();
-    $lines = array();
+    if ($this->type === "upgrade") {
+      // @todo
+      $custom->createRestoreDir($filePath);
+      $temporaryDir = $custom->prepareUpgrade($filePath);
 
-    $fp = fopen($this->filePath, "r");
+      $className = get_class($this);
+      $files = getMigrationFiles($temporaryDir);
 
-    while (!feof($fp)) {
-      $line = trim(fgets($fp, 256));
-      if (empty($lines) && $line === "") continue;
-      if (substr($line, 0, 3) === "###") {
-        if (!empty($lines)) {
-          $this->writeTemporaryFile($lines, "{$tmpDir}/{$num}_{$fileName}");
-          $num++;
-          $lines = array();
-        }
+      foreach ($files as $file) {
+        $path = "{$temporaryDir}/{$file}";
+        $ins = new $className($this->accessor,
+                              $this->driver,
+                              $path,
+                              $this->type,
+                              $temporaryDir);
 
-        $fileName = trim(str_replace("#", "", $line));
-        continue;
+        $ins->execute();
+        unlink($path);
       }
 
-      $lines[] = $line;
+      $custom->createCustomRestoreFile();
+      rmdir($temporaryDir);
+    } else {
+
     }
 
-    $this->writeTemporaryFile($lines, "{$tmpDir}/{$num}_{$fileName}");
-  }
-
-  private function writeTemporaryFile($lines, $path)
-  {
-    $fp = fopen($path, "w");
-    foreach ($lines as $line) fwrite($fp, $line. "\n", 256);
-    fclose($fp);
   }
 
   protected function getDropColumns()

@@ -70,19 +70,11 @@ class Migration extends Sabel_Sakle_Task
 
   protected function getMigrationFiles()
   {
-    if (!is_dir(MIG_DIR)) {
-      throw new Exception("no such dirctory. '" . MIG_DIR . "'");
+    if (is_dir(MIG_DIR)) {
+      return getMigrationFiles(MIG_DIR);
     } else {
-      $handle = opendir(MIG_DIR);
+      throw new Exception("no such dirctory. '" . MIG_DIR . "'");
     }
-
-    $files = array();
-    while (($file = readdir($handle)) !== false) {
-      $num = substr($file, 0, strpos($file, "_"));
-      if (is_numeric($num)) $files[$num] = $file;
-    }
-
-    return $files;
   }
 
   protected function showCurrentVersion($arguments)
@@ -111,10 +103,10 @@ class Migration extends Sabel_Sakle_Task
     if (($env = environment($strEnv)) === null) {
       $msg = "please specify either of 'development' or 'test' or 'production'.";
       throw new Exception($msg);
+    } else {
+      $this->strEnv = $strEnv;
+      return $env;
     }
-
-    $this->strEnv = $strEnv;
-    return $env;
   }
 
   protected function execMigration()
@@ -225,4 +217,23 @@ class Migration extends Sabel_Sakle_Task
 
     return $rows[0]["version"];
   }
+}
+
+function getMigrationFiles($dirPath)
+{
+  $handle = opendir($dirPath);
+
+  $files = array();
+  while (($file = readdir($handle)) !== false) {
+    $num = substr($file, 0, strpos($file, "_"));
+    if (is_numeric($num)) $files[$num] = $file;
+  }
+
+  return $files;
+}
+
+function getFileName($path)
+{
+  $exp = explode("/", $path);
+  return $exp[count($exp) - 1];
 }
