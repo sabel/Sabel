@@ -2,6 +2,11 @@
 
 class Sabel_Controller_Plugin_Redirecter extends Sabel_Controller_Page_Plugin
 {
+  public function enable()
+  {
+    return array(parent::ON_REDIRECT);
+  }
+  
   public function onRedirect($to)
   {
     if (!isset($_SERVER["HTTP_HOST"])) {

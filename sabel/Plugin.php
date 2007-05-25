@@ -56,14 +56,16 @@ final class Sabel_Plugin
       throw new Sabel_Exception_Unexpected();
     }
     
-    $name = get_class($plugin);
+    $pluginName = get_class($plugin);
+    $this->plugins[$pluginName] = $plugin;
     
-    $this->plugins[$name] = $plugin;
-    foreach (get_class_methods($plugin) as $method) {
-      if ($this->isEventMethod($method)) {
-        $this->events[$method][] = $name;
-      } else {
-        $this->pluginMethods[$method] = $name;
+    if (method_exists($plugin, "enable")) {
+      foreach ($plugin->enable() as $method) {
+        if ($this->isEventMethod($method)) {
+          $this->events[$method][] = $pluginName;
+        } else {
+          $this->pluginMethods[$method] = $pluginName;
+        }
       }
     }
     

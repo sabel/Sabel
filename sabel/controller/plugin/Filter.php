@@ -20,6 +20,11 @@ class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
   const EXCLUDE_KEY_KEY = "EXCLUDE_KEY";
   const INCLUDE_KEY_KEY = "INCLUDE_KEY";
   
+  public function enable()
+  {
+    return array(parent::ON_BEFORE_ACTION, parent::ON_AFTER_ACTION);
+  }
+  
   public function onBeforeAction()
   {
     $values  = array_keys(get_object_vars($this->controller));
