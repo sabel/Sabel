@@ -14,7 +14,7 @@ class Sabel_DB_Command_After
   protected static $after     = array();
   protected static $instances = array();
 
-  public static function regist($class, $commands, $methods, $options = null)
+  public static function regist($class, $commands, $method, $options = null)
   {
     if (is_array($class)) {
       $key   = $class[0];
@@ -25,7 +25,7 @@ class Sabel_DB_Command_After
     }
 
     self::$after[$key] = array("commands" => $commands,
-                               "methods"  => $methods,
+                               "method"   => $method,
                                "options"  => $options,
                                "cache"    => $cache);
   }
@@ -56,9 +56,8 @@ class Sabel_DB_Command_After
 
       foreach ($commands as $command) {
         if ($command === $commandId) {
-          foreach ($params["methods"] as $method) {
-            $ins->$method($commandClass);
-          }
+          $method = $params["method"];
+          $ins->$method($commandClass);
         }
       }
     }

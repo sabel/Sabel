@@ -18,8 +18,7 @@ class Sabel_DB_Command_Before
   protected static $before    = array();
   protected static $instances = array();
 
-  public static function regist($class, $commands, $method,
-                                $options = null, $continuation = self::CONTINUOUS)
+  public static function regist($class, $commands, $method, $options = null)
   {
     if (is_array($class)) {
       $key   = $class[0];
@@ -32,8 +31,7 @@ class Sabel_DB_Command_Before
     self::$before[$key] = array("commands" => $commands,
                                 "method"   => $method,
                                 "options"  => $options,
-                                "cache"    => $cache,
-                                "continue" => $continuation);
+                                "cache"    => $cache);
   }
 
   public static function execute($commandId, $commandClass)
@@ -69,12 +67,6 @@ class Sabel_DB_Command_Before
           if ($res === self::INTERRUPT_IMMEDIATE) {
             return self::INTERRUPT_IMMEDIATE;
           } elseif ($res === self::INTERRUPT) {
-            $result = self::INTERRUPT;
-          }
-
-          if ($params["continue"] === self::INTERRUPT_IMMEDIATE) {
-            return self::INTERRUPT_IMMEDIATE;
-          } elseif ($params["continue"] === self::INTERRUPT) {
             $result = self::INTERRUPT;
           }
         }

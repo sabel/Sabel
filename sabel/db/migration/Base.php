@@ -17,6 +17,7 @@ abstract class Sabel_DB_Migration_Base
   protected $dirPath  = "";
   protected $mdlName  = "";
   protected $command  = "";
+  protected $version  = 0;
 
   protected $driver   = null;
   protected $accessor = null;
@@ -25,15 +26,7 @@ abstract class Sabel_DB_Migration_Base
 
   public function __construct($accessor, $driver, $filePath, $type, $dirPath = null)
   {
-    if ($dirPath === null) {
-      if (defined("MIG_DIR")) {
-        $this->dirPath = MIG_DIR;
-      } else {
-        throw new Exception("__construct() invalid call.");
-      }
-    } else {
-      $this->dirPath = $dirPath;
-    }
+    $this->dirPath  = ($dirPath === null) ? MIG_DIR : $dirPath;
 
     $this->type     = $type;
     $this->driver   = $driver;
@@ -42,6 +35,7 @@ abstract class Sabel_DB_Migration_Base
     $file = getFileName($filePath);
     list ($num, $mdlName, $command) = explode("_", $file);
 
+    $this->version  = $num;
     $this->filePath = $filePath;
     $this->mdlName  = $mdlName;
     $this->command  = $command;
@@ -192,10 +186,8 @@ abstract class Sabel_DB_Migration_Base
     $file = getFileName($this->filePath);
     $path = $this->dirPath . "/restores";
 
-    if (!is_dir($path)) mkdir($path, 0755);
-
-    $num = substr($file, 0, strpos($file, "_"));
-    return $path . "/restore_" . $num;
+    if (!is_dir($path)) mkdir($path);
+    return $path . "/restore_" . $this->version;
   }
 
   protected function writeRestoreFile($fp, $isClose = true, $columns = null)
@@ -246,16 +238,13 @@ abstract class Sabel_DB_Migration_Base
 
   protected function custom()
   {
-    $custom = new Sabel_DB_Migration_Util_Custom();
-    $filePath = $this->filePath;
+    $custom    = new Sabel_DB_Migration_Util_Custom();
+    $className = get_class($this);
 
     if ($this->type === "upgrade") {
-      // @todo
-      $custom->createRestoreDir($filePath);
-      $temporaryDir = $custom->prepareUpgrade($filePath);
-
-      $className = get_class($this);
+      $temporaryDir = $custom->prepareUpgrade($this->filePath);
       $files = getMigrationFiles($temporaryDir);
+      $upgradeFiles = array();
 
       foreach ($files as $file) {
         $path = "{$temporaryDir}/{$file}";
@@ -266,15 +255,37 @@ abstract class Sabel_DB_Migration_Base
                               $temporaryDir);
 
         $ins->execute();
+        list ($num) = explode("_", $file);
+        $upgradeFiles[$num] = $file;
         unlink($path);
       }
 
-      $custom->createCustomRestoreFile();
-      rmdir($temporaryDir);
+      $custom->createCustomRestoreFile($this->version, $upgradeFiles);
     } else {
+      $restoreFile  = $this->getRestoreFileName();
+      $temporaryDir = $custom->prepareDowngrade($restoreFile);
+      $files = array_reverse(getMigrationFiles($temporaryDir));
+      $fileNum = count($files) + 1;
+      $prefix  = $temporaryDir . "/";
 
+      for ($i = 1; $i < $fileNum; $i++) {
+        $file = $files[$i - 1];
+        $exp  = explode("_", $file);
+        $exp[0] = $i;
+
+        $path = $prefix . implode("_", $exp);
+        rename($prefix . $file, $path);
+
+        $ins = new $className($this->accessor,
+                              $this->driver,
+                              $path,
+                              $this->type,
+                              $temporaryDir);
+
+        $ins->execute();
+        unlink($path);
+      }
     }
-
   }
 
   protected function getDropColumns()
@@ -294,7 +305,7 @@ abstract class Sabel_DB_Migration_Base
 
   protected function parseForForeignKey($line)
   {
-    $line = str_replace('FKEY', 'FOREIGN KEY', $line);
-    return preg_replace('/\) /', ') REFERENCES ', $line, 1);
+    $line = str_replace("FKEY", "FOREIGN KEY", $line);
+    return preg_replace("/\) /", ") REFERENCES ", $line, 1);
   }
 }

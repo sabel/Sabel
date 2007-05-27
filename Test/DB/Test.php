@@ -1130,7 +1130,7 @@ class TimeRecorder
 Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
                                 array(Sabel_DB_Command::UPDATE,
                                       Sabel_DB_Command::INSERT),
-                                array("record"),
+                                "record",
                                 array("model" => array("include" => array("Timer"))));
 
 class Sabel_DB_Command_Custom extends Sabel_DB_Command_Base

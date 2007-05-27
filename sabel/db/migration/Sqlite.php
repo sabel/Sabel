@@ -83,30 +83,6 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     }
   }
 
-  public function dropColumnsAndRemakeTable($columns, $tblName)
-  {
-    $driver = $this->driver;
-    $driver->begin($driver->getConnectionName());
-
-    $query = $this->getCreateSql($columns);
-    $query = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
-    $this->executeQuery($query);
-
-    $projection = array();
-    foreach (array_keys($columns) as $key) $projection[] = $key;
-
-    $projection = implode(", ", $projection);
-    $query = "INSERT INTO stmp_{$tblName} SELECT $projection FROM $tblName";
-    $this->executeQuery($query);
-
-    $this->executeQuery("DROP TABLE $tblName");
-
-    $query = "ALTER TABLE stmp_{$tblName} RENAME TO $tblName";
-    $this->executeQuery($query);
-
-    $driver->loadTransaction()->commit();
-  }
-
   protected function changeColumnUpgrade($cols, $schema, $tblName)
   {
     $this->alterChange($cols, $schema, $tblName);
@@ -154,7 +130,31 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     return implode(" ", $line);
   }
 
-  protected function getDataType($col)
+  private function dropColumnsAndRemakeTable($columns, $tblName)
+  {
+    $driver = $this->driver;
+    $driver->begin($driver->getConnectionName());
+
+    $query = $this->getCreateSql($columns);
+    $query = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
+    $this->executeQuery($query);
+
+    $projection = array();
+    foreach (array_keys($columns) as $key) $projection[] = $key;
+
+    $projection = implode(", ", $projection);
+    $query = "INSERT INTO stmp_{$tblName} SELECT $projection FROM $tblName";
+    $this->executeQuery($query);
+
+    $this->executeQuery("DROP TABLE $tblName");
+
+    $query = "ALTER TABLE stmp_{$tblName} RENAME TO $tblName";
+    $this->executeQuery($query);
+
+    $driver->loadTransaction()->commit();
+  }
+
+  private function getDataType($col)
   {
     if ($col->increment) {
       $this->sqlPrimary = true;

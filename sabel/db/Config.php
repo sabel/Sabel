@@ -11,18 +11,18 @@
  */
 class Sabel_DB_Config
 {
-  protected static $configs = array();
   private static $initialized = false;
+  private static $configs = array();
 
   public static function initialize()
   {
     if (self::$initialized) return;
-    
-    Sabel::fileUsing(RUN_BASE . "/config/database.php", true);
+
+    Sabel::fileUsing(RUN_BASE . "/config/connection.php", true);
     foreach (get_db_params() as $connectionName => $params) {
       self::regist($connectionName, $params);
     }
-    
+
     self::$initialized = true;
   }
 
@@ -88,7 +88,7 @@ class Sabel_DB_Config
     }
   }
 
-  protected static function getConfig($connectionName)
+  private static function getConfig($connectionName)
   {
     if (isset(self::$configs[$connectionName])) {
       return self::$configs[$connectionName];

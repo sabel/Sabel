@@ -42,7 +42,31 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
     }
   }
 
-  protected function alterChange($current, $col, $tblName)
+  protected function createColumnAttributes($col)
+  {
+    $line   = array();
+    $line[] = $col->name;
+    $line[] = $this->getDataType($col);
+
+    if ($col->nullable === false) $line[] = "NOT NULL";
+
+    $d = $col->default;
+
+    if ($d !== "EMPTY") {
+      if ($d === null) {
+        $line[] = "DEFAULT NULL";
+      } elseif ($col->isString()) {
+        $line[] = "DEFAULT '{$d}'";
+      } else {
+        if ($col->isBool()) $d = ($d) ? "true" : "false";
+        $line[] = "DEFAULT $d";
+      }
+    }
+
+    return implode(" ", $line);
+  }
+
+  private function alterChange($current, $col, $tblName)
   {
     if ($col->type !== "EMPTY") {
       if ($current->type !== $col->type) {
@@ -81,31 +105,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
     }
   }
 
-  protected function createColumnAttributes($col)
-  {
-    $line   = array();
-    $line[] = $col->name;
-    $line[] = $this->getDataType($col);
-
-    if ($col->nullable === false) $line[] = "NOT NULL";
-
-    $d = $col->default;
-
-    if ($d !== "EMPTY") {
-      if ($d === null) {
-        $line[] = "DEFAULT NULL";
-      } elseif ($col->isString()) {
-        $line[] = "DEFAULT '{$d}'";
-      } else {
-        if ($col->isBool()) $d = ($d) ? "true" : "false";
-        $line[] = "DEFAULT $d";
-      }
-    }
-
-    return implode(" ", $line);
-  }
-
-  protected function getDataType($col)
+  private function getDataType($col)
   {
     if ($col->increment) {
       if ($col->isInt()) {
