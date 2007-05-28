@@ -107,6 +107,7 @@ class Sabel_Controller_Executer_Basic
     Sabel_Context::log("Sabel_Controller_Executer::executeAction({$action})");
     
     if ($this->plugin->hasExecuteAction()) {
+      $this->plugin->setDestination($this->destination);
       $this->plugin->onExecuteAction($action);
     } else {
       return $this->controller->execute($action);

@@ -45,6 +45,11 @@ final class Sabel_Plugin
     $this->executer = $executer;
   }
   
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
+  }
+  
   /**
    * add plugin
    *
@@ -156,7 +161,10 @@ final class Sabel_Plugin
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $result = $this->plugins[$name]->$event($method);
+        $plugin = $this->plugins[$name];
+        $plugin->setController($this->controller);
+        $plugin->setDestination($this->destination);
+        $result = $plugin->$event($method);
       }
     }
     

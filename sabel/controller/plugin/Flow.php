@@ -28,21 +28,26 @@ class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
   {
     $logger = Sabel_Context::getLogger();
     
-    $manager = new Sabel_Controller_Flow_Manager($this->getRequest());
-    
-    $controller = $this->getController();
+    $controller = $this->controller;
     $action     = $controller->getAction();
     
+    $manager = new Sabel_Controller_Flow_Manager($controller->getRequest());
+    
     if (!($flow = $manager->restore())) {
-      $flow = new FlowConfig();
-      $flow->configure();
+      $flowClassName = get_class($controller) . "_Flow";
+      if (class_exists($flowClassName)) {
+        $flow = new $flowClassName();
+        $flow->configure();
+      } else {
+        return $controller->execute($action);
+      }
     }
     
     $controller->flow = $flow;
     
     if ($flow->isInFlow()) {
       if ($flow->canTransitTo($action)) {
-        $guard = parent::executeAction($action);
+        $guard = $controller->execute($action);
         
         if ($guard === null) {
           $guard = true;
@@ -56,10 +61,10 @@ class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
         }
         
       } elseif ($flow->isCurrent($action)) {
-        parent::executeAction($action);
+        $controller->execute($action);
       } else {
-        $this->setActionToDestination(self::INVALID_ACTION);
-        parent::executeAction(self::INVALID_ACTION);
+        $this->destination->setAction(self::INVALID_ACTION);
+        $controller->execute(self::INVALID_ACTION);
       }
       
       $manager->save($flow);
@@ -69,15 +74,15 @@ class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
         $logger->log("{$action} is entry activity");
         $flow->start($action);
         $this->assignToken($manager, $controller, $flow);
-        parent::executeAction($action);
+        $controller->execute($action);
         $manager->save($flow);
       } elseif ($flow->isEndActivity($action)) {
         $manager->remove();
       } elseif (!$flow->isActivity($action)) {
-        parent::executeAction($action);
+        $controller->execute($action);
       } else {
-        $this->setActionToDestination(self::INVALID_ACTION);
-        parent::executeAction(self::INVALID_ACTION);
+        $this->destination->setAction(self::INVALID_ACTION);
+        $controller->execute(self::INVALID_ACTION);
       }
     } 
   }

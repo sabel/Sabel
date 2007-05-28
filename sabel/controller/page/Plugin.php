@@ -17,11 +17,17 @@ abstract class Sabel_Controller_Page_Plugin
   const ON_EXECUTE_ACTION = "onExecuteAction";
   const ON_REDIRECT       = "onRedirect";
   
-  protected $controller = null;
+  protected $controller  = null;
+  protected $destination = null;
   
   public function setController($controller)
   {
     $this->controller = $controller;
+  }
+  
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
   }
   
   public function onBeforeAction(){}

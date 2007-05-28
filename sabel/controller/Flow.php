@@ -24,7 +24,7 @@ abstract class Sabel_Controller_Flow
     $flowVariables = array();
   
   abstract function configure();
-  
+    
   public function activity($name)
   {
     return new Sabel_Controller_Flow_Activity($name);
