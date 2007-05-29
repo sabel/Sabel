@@ -47,10 +47,11 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
       $restore = $this->getRestoreFileName();
       if (!is_file($restore)) {
         $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, false);
+        $this->writeRestoreFile($fp);
 
-        $tblName = convert_to_tablename($this->mdlName);
-        $engine  = $this->accessor->getTableEngine($tblName);
+        $tblName  = convert_to_tablename($this->mdlName);
+        $accessor = Sabel_DB_Migration_Manager::getAccessor();
+        $engine   = $accessor->getTableEngine($tblName);
 
         fwrite($fp, "options:\n");
         fwrite($fp, "  engine: {$engine}\n");
@@ -68,7 +69,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
   {
     foreach ($cols as $col) {
       $current = $schema->getColumnByName($col->name);
-      $line = $this->createColumnAttributes($col, $current);
+      $line = $this->alterChange($col, $current);
       $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
     }
   }
@@ -81,59 +82,81 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     }
   }
 
-  protected function createColumnAttributes($col, $current = null)
+  protected function createColumnAttributes($col)
+  {
+    $line   = array();
+    $line[] = $col->name;
+    $line[] = $this->getTypeString($col);
+    $line[] = $this->getNullableString($col);
+    $line[] = $this->getDefaultString($col);
+
+    if ($col->increment) $line[] = "AUTO_INCREMENT";
+    return implode(" ", $line);
+  }
+
+  protected function alterChange($col, $current)
   {
     $line   = array();
     $line[] = $col->name;
 
-    if (isset($current) && $col->type === "EMPTY") {
-      if ($current->isString()) {
-        $line[] = $this->types[$current->type] . "({$current->max})";
-      } else {
-        $line[] = $this->types[$current->type];
-      }
-    } else {
-      if ($col->isString()) {
-        $line[] = $this->types[$col->type] . "({$col->max})";
-      } else {
-        $line[] = $this->types[$col->type];
-      }
-    }
+    $c = ($col->type === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) ? $current : $col;
+    $line[] = $this->getTypeString($c);
 
-    if (isset($current) && $col->nullable === "EMPTY") {
-      if (!$current->nullable) $line[] = "NOT NULL";
-    } else {
-      if ($col->nullable === false) $line[] = "NOT NULL";
-    }
+    $c = ($col->nullable === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) ? $current : $col;
+    $line[] = $this->getNullableString($c);
 
-    $cd = $col->default;
+    $d  = $col->default;
+    $cd = $current->default;
 
-    if (isset($current) && $cd === "EMPTY" && $current->default !== null) {
+    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY && $cd !== null) {
       if ($current->isBool()) {
-        $line[] = $this->getBooleanAttr($current->default);
-      } elseif ($current->isString()) {
-        $line[] = "DEFAULT '{$current->default}'";
-      } else {
-        $line[] = "DEFAULT {$current->default}";
-      }
-    } elseif ($cd !== "EMPTY") {
-      if ($col->isBool()) {
         $line[] = $this->getBooleanAttr($cd);
-      } elseif ($col->isString()) {
-        $line[] = ($cd === null) ? "DEFAULT ''" : "DEFAULT '{$cd}'";
-      } elseif ($cd !== null) {
+      } elseif ($current->isString()) {
+        $line[] = "DEFAULT '{$cd}'";
+      } else {
         $line[] = "DEFAULT $cd";
       }
+    } else {
+      $line[] = $this->getDefaultString($col);
     }
 
     if ($col->increment) $line[] = "AUTO_INCREMENT";
-
     return implode(" ", $line);
   }
 
-  protected function getBooleanAttr($value)
+  private function getTypeString($col)
   {
-    $val = ($value) ? 1 : 0;
-    return "DEFAULT $val COMMENT 'boolean'";
+    if ($col->isString()) {
+      return $this->types[$col->type] . "({$col->max})";
+    } else {
+      return $this->types[$col->type];
+    }
+  }
+
+  private function getNullableString($col)
+  {
+    return ($col->nullable === false) ? "NOT NULL" : "";
+  }
+
+  private function getDefaultString($col)
+  {
+    $d = $col->default;
+
+    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      return "";
+    } else {
+      if ($col->isBool()) {
+        return $this->getBooleanAttr($d);
+      } elseif ($col->isString()) {
+        return ($d === null) ? "DEFAULT ''" : "DEFAULT '{$d}'";
+      } elseif ($d !== null) {
+        return "DEFAULT $d";
+      }
+    }
+  }
+
+  private function getBooleanAttr($value)
+  {
+    return "DEFAULT " . (($value) ? 1 : 0) . " COMMENT 'boolean'";
   }
 }

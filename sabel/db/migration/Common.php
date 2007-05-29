@@ -35,20 +35,8 @@ abstract class Sabel_DB_Migration_Common extends Sabel_DB_Migration_Base
     $tblName = convert_to_tablename($this->mdlName);
 
     if ($this->type === "upgrade") {
-      $cols    = $this->getDropColumns();
-      $restore = $this->getRestoreFileName();
-
-      if (!is_file($restore)) {
-        $columns = array();
-        $schema  = $this->getTableSchema();
-
-        foreach ($schema->getColumns() as $column) {
-          if (in_array($column->name, $cols)) $columns[] = $column;
-        }
-
-        $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true, $columns);
-      }
+      $cols = $this->getDropColumns();
+      $this->writeCurrentColumnsAttr($cols);
 
       foreach ($cols as $column) {
         $this->executeQuery("ALTER TABLE $tblName DROP $column");

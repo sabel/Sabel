@@ -121,7 +121,7 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
 
   protected function getFloatType($type)
   {
-    return (in_array($type, $this->floatTypes)) ? 'float' : 'double';
+    return (in_array($type, $this->floatTypes)) ? "float" : "double";
   }
 
   protected function isString($co, $type)
@@ -182,6 +182,7 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
       $priCol = substr($line, 1, -1);
       $columns[$priCol]->primary = true;
     }
+
     return $columns;
   }
 }

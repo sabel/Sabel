@@ -53,22 +53,10 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     $tblName = convert_to_tablename($this->mdlName);
 
     if ($this->type === "upgrade") {
-      $cols    = $this->getDropColumns();
-      $restore = $this->getRestoreFileName();
-
-      if (!is_file($restore)) {
-        $columns = array();
-        $schema  = $this->getTableSchema();
-
-        foreach ($schema->getColumns() as $column) {
-          if (in_array($column->name, $cols)) $columns[] = $column;
-        }
-
-        $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true, $columns);
-      }
-
+      $cols = $this->getDropColumns();
+      $this->writeCurrentColumnsAttr($cols);
       $columns = $this->getTableSchema()->getColumns();
+
       foreach ($cols as $col) {
         if (isset($columns[$col])) unset($columns[$col]);
       }
@@ -85,22 +73,27 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
   protected function changeColumnUpgrade($cols, $schema, $tblName)
   {
-    $this->alterChange($cols, $schema, $tblName);
+    $columns = $this->getTableSchema()->getColumns();
+
+    foreach ($cols as $col) {
+      if (isset($columns[$col->name])) {
+        $col = $this->setDifferenceAttr($col, $columns[$col->name]);
+        $columns[$col->name] = $col;
+      }
+    }
+
+    $this->dropColumnsAndRemakeTable($columns, $tblName);
   }
 
   protected function changeColumnDowngrade($cols, $schema, $tblName)
   {
-    $this->alterChange($cols, $schema, $tblName);
-  }
-
-  protected function alterChange($cols, $schema, $tblName)
-  {
     $columns = $this->getTableSchema()->getColumns();
+
     foreach ($cols as $col) {
       if (isset($columns[$col->name])) $columns[$col->name] = $col;
     }
 
-    $this->dropColumnsAndRemakeTable($columns, convert_to_tablename($this->mdlName));
+    $this->dropColumnsAndRemakeTable($columns, $tblName);
   }
 
   protected function createColumnAttributes($col)
@@ -112,19 +105,21 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     if ($col->nullable === false) $line[] = "NOT NULL";
 
     $d = $col->default;
-    if ($d !== "EMPTY" && $d !== null) {
-      if ($col->isBool()) {
-        $value  = ($d) ? "true" : "false";
-        $line[] = "DEFAULT " . $value;
-      } elseif ($col->isString()) {
-        if ($d === "null") {
-          $line[] = "DEFAULT NULL";
-        } else {
-          $line[] = "DEFAULT '{$d}'";
-        }
+    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY || $d === null) {
+      return implode(" ", $line);
+    }
+
+    if ($col->isBool()) {
+      $value  = ($d) ? "true" : "false";
+      $line[] = "DEFAULT " . $value;
+    } elseif ($col->isString()) {
+      if ($d === "null") {
+        $line[] = "DEFAULT NULL";
       } else {
-        $line[] = "DEFAULT " . $d;
+        $line[] = "DEFAULT '{$d}'";
       }
+    } else {
+      $line[] = "DEFAULT " . $d;
     }
 
     return implode(" ", $line);
@@ -132,7 +127,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
   private function dropColumnsAndRemakeTable($columns, $tblName)
   {
-    $driver = $this->driver;
+    $driver = Sabel_DB_Migration_Manager::getDriver();
     $driver->begin($driver->getConnectionName());
 
     $query = $this->getCreateSql($columns);
@@ -152,6 +147,24 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     $this->executeQuery($query);
 
     $driver->loadTransaction()->commit();
+  }
+
+  private function setDifferenceAttr($col, $current)
+  {
+    if ($col->type === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      if ($current->isString()) $col->max  = $current->max;
+      $col->type = $current->type;
+    }
+
+    if ($col->nullable === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      $col->nullable = $current->nullable;
+    }
+
+    if ($col->default === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      $col->default = $current->default;
+    }
+
+    return $col;
   }
 
   private function getDataType($col)

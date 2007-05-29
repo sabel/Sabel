@@ -52,10 +52,11 @@ class Migration extends Sabel_Sakle_Task
   {
     $connectionName = $this->connectionName;
     $this->driver = Sabel_DB_Config::loadDriver($connectionName);
+    Sabel_DB_Migration_Manager::setDriver($this->driver);
 
     try {
       $accessor = new Sabel_DB_Schema_Accessor($connectionName);
-      $this->accessor = $accessor;
+      Sabel_DB_Migration_Manager::setAccessor($accessor);
 
       if (!in_array("sversion", $accessor->getTableLists())) {
         $this->createVersionManageTable();
@@ -193,8 +194,8 @@ class Migration extends Sabel_Sakle_Task
     $driverName = Sabel_DB_Config::getDriverName($this->connectionName);
     $driverName = str_replace("pdo-", "", $driverName);
     $className  = "Sabel_DB_Migration_" . ucfirst($driverName);
-    $filePath   = MIG_DIR . "/" . $this->files[$verNum];
-    return new $className($this->accessor, $this->driver, $filePath, $type);
+
+    return new $className(MIG_DIR . "/" . $this->files[$verNum], $type);
   }
 
   protected function getConnectionName($arguments)

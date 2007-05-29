@@ -52,7 +52,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 
     $d = $col->default;
 
-    if ($d !== "EMPTY") {
+    if ($d !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
       if ($d === null) {
         $line[] = "DEFAULT NULL";
       } elseif ($col->isString()) {
@@ -68,18 +68,32 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 
   private function alterChange($current, $col, $tblName)
   {
-    if ($col->type !== "EMPTY") {
-      if ($current->type !== $col->type) {
-        $type = $this->getDataType($col);
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
-      } else {
-        if ($current->isString() && $current->max !== $col->length) {
-          $type = $this->getDataType($col);
-          $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
-        }
-      }
+    if ($col->type !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      $this->changeType($current, $col, $tblName);
     }
 
+    if ($col->nullable !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      $this->changeNullable($current, $col, $tblName);
+    }
+
+    if ($col->default !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      $this->changeDefault($current, $col, $tblName);
+    }
+  }
+
+  private function changeType($current, $col, $tblName)
+  {
+    if ($current->type !== $col->type) {
+      $type = $this->getDataType($col);
+      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
+    } elseif ($current->isString() && $current->max !== $col->length) {
+      $type = $this->getDataType($col);
+      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
+    }
+  }
+
+  private function changeNullable($current, $col, $tblName)
+  {
     if ($current->nullable !== $col->nullable) {
       if ($col->nullable === true) {
         $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP NOT NULL");
@@ -87,21 +101,22 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
         $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET NOT NULL");
       }
     }
+  }
 
-    if ($current->default !== $col->default) {
-      if ($col->default === null) {
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP DEFAULT");
-      } elseif ($col->default !== "EMPTY") {
-        if ($col->isBool()) {
-          $default = ($col->default) ? "true" : "false";
-        } elseif ($col->isString()) {
-          $default = "'{$col->default}'";
-        } else {
-          $default = $col->default;
-        }
-
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT $default");
+  private function changeDefault($current, $col, $tblName)
+  {
+    if ($col->default === null) {
+      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP DEFAULT");
+    } elseif ($col->default !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      if ($col->isBool()) {
+        $default = ($col->default) ? "true" : "false";
+      } elseif ($col->isString()) {
+        $default = "'{$col->default}'";
+      } else {
+        $default = $col->default;
       }
+
+      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT $default");
     }
   }
 

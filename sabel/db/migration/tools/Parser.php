@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Util_Parser
+ * Sabel_DB_Migration_Tools_Parser
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,11 +9,61 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Util_Parser
+class Sabel_DB_Migration_Tools_Parser
 {
+  const IS_EMPTY = "MIGRATE_EMPTY_VALUE";
+
   protected $co = null;
 
-  public function toColumn($lines)
+  public function toColumns($migClass, $filePath)
+  {
+    $fp = fopen($filePath, "r");
+
+    $cols  = array();
+    $lines = array();
+    $opts  = array();
+    $inOpt = false;
+
+    while (!feof($fp)) {
+      $line = trim(fgets($fp, 256));
+
+      if ($line === "options:") {
+        $inOpt = true; continue;
+      }
+
+      if ($inOpt) {
+        $opts[] = $line;
+      } elseif ($line === "" && !empty($lines)) {
+        $cols[] = $this->toColumn($lines);
+        $lines = array();
+      } elseif ($line !== "") {
+        $lines[] = $line;
+      }
+    }
+
+    if (!empty($lines)) $cols[] = $this->toColumn($lines);
+    if (!empty($opts)) $migClass->setOptions($opts);
+
+    fclose($fp);
+    return $cols;
+  }
+
+  public function getDropColumns($filePath)
+  {
+    $fp   = fopen($filePath, "r");
+    $cols = array();
+
+    while (!feof($fp)) {
+      $line = trim(fgets($fp, 256));
+      if ($line === "") continue;
+      $cols[] = $line;
+    }
+
+    fclose($fp);
+    return $cols;
+  }
+
+  protected function toColumn($lines)
   {
     $this->co = $co = new Sabel_DB_Schema_Column();
 
@@ -27,13 +77,13 @@ class Sabel_DB_Migration_Util_Parser
     return $co;
   }
 
-  protected function getName(&$lines)
+  private function getName(&$lines)
   {
     $line = array_shift($lines);
     return trim(str_replace(":", "", $line));
   }
 
-  protected function getType(&$lines)
+  private function getType(&$lines)
   {
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 4) === "type") {
@@ -47,10 +97,10 @@ class Sabel_DB_Migration_Util_Parser
       }
     }
 
-    return "EMPTY";
+    return self::IS_EMPTY;
   }
 
-  protected function setLength($value)
+  private function setLength($value)
   {
     if ($value === "") {
       $this->co->max = 255;
@@ -59,9 +109,9 @@ class Sabel_DB_Migration_Util_Parser
     }
   }
 
-  protected function getNullable(&$lines)
+  private function getNullable(&$lines)
   {
-    if (empty($lines)) return "EMPTY";
+    if (empty($lines)) return IS_EMPTY;
 
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 8) === "nullable") {
@@ -70,12 +120,12 @@ class Sabel_DB_Migration_Util_Parser
       }
     }
 
-    return "EMPTY";
+    return self::IS_EMPTY;
   }
 
-  protected function getDefault(&$lines)
+  private function getDefault(&$lines)
   {
-    if (empty($lines)) return "EMPTY";
+    if (empty($lines)) return IS_EMPTY;
 
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 7) === "default") {
@@ -96,10 +146,10 @@ class Sabel_DB_Migration_Util_Parser
       }
     }
 
-    return "EMPTY";
+    return self::IS_EMPTY;
   }
 
-  protected function getPrimary(&$lines)
+  private function getPrimary(&$lines)
   {
     if (empty($lines)) return false;
 
@@ -113,7 +163,7 @@ class Sabel_DB_Migration_Util_Parser
     return false;
   }
 
-  protected function getIncrement(&$lines)
+  private function getIncrement(&$lines)
   {
     if (empty($lines)) return false;
 
@@ -127,7 +177,7 @@ class Sabel_DB_Migration_Util_Parser
     return false;
   }
 
-  protected function getValue(&$lines, $num, $line)
+  private function getValue(&$lines, $num, $line)
   {
     list (, $value) = explode(":", $line);
     unset($lines[$num]);
@@ -135,7 +185,7 @@ class Sabel_DB_Migration_Util_Parser
     return trim($value);
   }
 
-  protected function toBooleanValue($value)
+  private function toBooleanValue($value)
   {
     if ($value === "TRUE") {
       return true;

@@ -19,18 +19,12 @@ abstract class Sabel_DB_Migration_Base
   protected $command  = "";
   protected $version  = 0;
 
-  protected $driver   = null;
-  protected $accessor = null;
-
   protected $sqlPrimary = false;
 
-  public function __construct($accessor, $driver, $filePath, $type, $dirPath = null)
+  public function __construct($filePath, $type, $dirPath = null)
   {
-    $this->dirPath  = ($dirPath === null) ? MIG_DIR : $dirPath;
-
-    $this->type     = $type;
-    $this->driver   = $driver;
-    $this->accessor = $accessor;
+    $this->type = $type;
+    $this->dirPath = ($dirPath === null) ? MIG_DIR : $dirPath;
 
     $file = getFileName($filePath);
     list ($num, $mdlName, $command) = explode("_", $file);
@@ -41,7 +35,7 @@ abstract class Sabel_DB_Migration_Base
     $this->command  = $command;
   }
 
-  protected function setOptions($opts) {}
+  public function setOptions($opts) {}
 
   public function execute()
   {
@@ -51,7 +45,7 @@ abstract class Sabel_DB_Migration_Base
     if (method_exists($this, $command)) {
       $this->$command();
     } else {
-      throw new Exception($command . "() method not found in Sabel_DB_Migration_Base");
+      throw new Exception("command '$command' not found.");
     }
   }
 
@@ -71,7 +65,8 @@ abstract class Sabel_DB_Migration_Base
       $restore = $this->getRestoreFileName();
       if (!is_file($restore)) {
         $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true);
+        $this->writeRestoreFile($fp);
+        fclose($fp);
       }
 
       $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
@@ -83,44 +78,24 @@ abstract class Sabel_DB_Migration_Base
 
   protected function createColumns($filePath = null)
   {
-    $parser = new Sabel_DB_Migration_Util_Parser();
+    $parser = new Sabel_DB_Migration_Tools_Parser();
 
     if ($filePath === null) {
-      $fp = fopen($this->filePath, "r");
+      $filePath = $this->filePath;
       $remove = false;
     } else {
-      $fp = fopen($filePath, "r");
       $remove = true;
     }
 
-    $cols  = array();
-    $lines = array();
-    $opts  = array();
-    $isOpt = false;
-
-    while (!feof($fp)) {
-      $line = trim(fgets($fp, 256));
-
-      if ($line === "options:") {
-        $isOpt = true; continue;
-      }
-
-      if ($isOpt) {
-        $opts[] = $line;
-      } elseif ($line === "" && !empty($lines)) {
-        $cols[] = $parser->toColumn($lines);
-        $lines = array();
-      } elseif ($line !== "") {
-        $lines[] = $line;
-      }
-    }
-
-    if (!empty($lines)) $cols[] = $parser->toColumn($lines);
-    if (!empty($opts)) $this->setOptions($opts);
+    $columns = $parser->toColumns($this, $filePath);
     if ($remove) unlink($filePath);
+    return $columns;
+  }
 
-    fclose($fp);
-    return $cols;
+  protected function getDropColumns()
+  {
+    $parser = new Sabel_DB_Migration_Tools_Parser();
+    return $parser->getDropColumns($this->filePath);
   }
 
   protected function getCreateSql($cols)
@@ -149,21 +124,9 @@ abstract class Sabel_DB_Migration_Base
 
     if ($this->type === "upgrade") {
       $cols = $this->createColumns();
-      $columnNames = array();
       foreach ($cols as $col) $columnNames[] = $col->name;
 
-      $restore = $this->getRestoreFileName();
-      if (!is_file($restore)) {
-        $columns = array();
-
-        foreach ($schema->getColumns() as $column) {
-          if (in_array($column->name, $columnNames)) $columns[] = $column;
-        }
-
-        $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp, true, $columns);
-      }
-
+      $this->writeCurrentColumnsAttr($columnNames, $schema);
       $this->changeColumnUpgrade($cols, $schema, $tblName);
     } else {
       $cols = $this->createColumns($this->getRestoreFileName());
@@ -171,71 +134,39 @@ abstract class Sabel_DB_Migration_Base
     }
   }
 
-  protected function getTableSchema()
-  {
-    return $this->accessor->get(convert_to_tablename($this->mdlName));
-  }
-
-  protected function executeQuery($query)
-  {
-    $this->driver->setSql($query)->execute();
-  }
-
   protected function getRestoreFileName()
   {
-    $file = getFileName($this->filePath);
     $path = $this->dirPath . "/restores";
-
     if (!is_dir($path)) mkdir($path);
+
     return $path . "/restore_" . $this->version;
   }
 
-  protected function writeRestoreFile($fp, $isClose = true, $columns = null)
+  protected function writeRestoreFile($fp, $columns = null)
   {
-    if ($columns === null) {
-      $columns = $this->getTableSchema()->getColumns();
-    }
-
-    foreach ($columns as $column) {
-      fwrite($fp, $column->name . ":\n");
-      if ($column->isString()) {
-        fwrite($fp, "  type: " . $column->type . "(" . $column->max . ")");
-      } else {
-        fwrite($fp, "  type: " . $column->type);
-      }
-
-      fwrite($fp, "\n");
-
-      if ($column->nullable) {
-        fwrite($fp, "  nullable: TRUE\n");
-      } else {
-        fwrite($fp, "  nullable: FALSE\n");
-      }
-
-      if ($column->primary)   fwrite($fp, "  primary: TRUE\n");
-      if ($column->increment) fwrite($fp, "  increment: TRUE\n");
-
-      $d = $column->default;
-      if ($d === null) {
-        fwrite($fp, "  default: NULL");
-      } elseif ($column->isBool()) {
-        if ($d) {
-          fwrite($fp, "  default: TRUE");
-        } else {
-          fwrite($fp, "  default: FALSE");
-        }
-      } elseif (is_int($d) || is_float($d)) {
-        fwrite($fp, "  default: $d");
-      } else {
-        fwrite($fp, "  default: '{$d}'");
-      }
-
-      fwrite($fp, "\n\n");
-    }
-
-    if ($isClose) fclose($fp);
+    if ($columns === null) $columns = $this->getTableSchema()->getColumns();
+    Sabel_DB_Migration_Tools_Restore::write($fp, $columns);
   }
 
+  protected function writeCurrentColumnsAttr($cols, $schema = null)
+  {
+    $restore = $this->getRestoreFileName();
+
+    if (!is_file($restore)) {
+      $columns = array();
+      if ($schema === null) $schema = $this->getTableSchema();
+
+      foreach ($schema->getColumns() as $column) {
+        if (in_array($column->name, $cols)) $columns[] = $column;
+      }
+
+      $fp = fopen($restore, "w");
+      $this->writeRestoreFile($fp, $columns);
+      fclose($fp);
+    }
+  }
+
+  // @todo refactoring
   protected function custom()
   {
     $custom    = new Sabel_DB_Migration_Util_Custom();
@@ -248,13 +179,9 @@ abstract class Sabel_DB_Migration_Base
 
       foreach ($files as $file) {
         $path = "{$temporaryDir}/{$file}";
-        $ins = new $className($this->accessor,
-                              $this->driver,
-                              $path,
-                              $this->type,
-                              $temporaryDir);
-
+        $ins = new $className($path, $this->type, $temporaryDir);
         $ins->execute();
+
         list ($num) = explode("_", $file);
         $upgradeFiles[$num] = $file;
         unlink($path);
@@ -276,31 +203,23 @@ abstract class Sabel_DB_Migration_Base
         $path = $prefix . implode("_", $exp);
         rename($prefix . $file, $path);
 
-        $ins = new $className($this->accessor,
-                              $this->driver,
-                              $path,
-                              $this->type,
-                              $temporaryDir);
-
+        $ins = new $className($path, $this->type, $temporaryDir);
         $ins->execute();
+
         unlink($path);
       }
     }
   }
 
-  protected function getDropColumns()
+  protected function getTableSchema()
   {
-    $fp   = fopen($this->filePath, "r");
-    $cols = array();
+    $accessor = Sabel_DB_Migration_Manager::getAccessor();
+    return $accessor->get(convert_to_tablename($this->mdlName));
+  }
 
-    while (!feof($fp)) {
-      $line = trim(fgets($fp, 256));
-      if ($line === "") continue;
-      $cols[] = $line;
-    }
-
-    fclose($fp);
-    return $cols;
+  protected function executeQuery($query)
+  {
+    Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
   }
 
   protected function parseForForeignKey($line)
