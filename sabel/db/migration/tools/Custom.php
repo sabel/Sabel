@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Util_Custom
+ * Sabel_DB_Migration_Tools_Custom
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Util_Custom
+class Sabel_DB_Migration_Tools_Custom
 {
   private $isUpgrade     = false;
   private $temporaryPath = "";
@@ -30,6 +30,25 @@ class Sabel_DB_Migration_Util_Custom
     fclose($fp);
 
     return $this->temporaryPath;
+  }
+
+  public function doUpgrade($migClassName, $version)
+  {
+    $temporaryDir = $this->temporaryPath;
+    $upgradeFiles = array();
+    $files = getMigrationFiles($temporaryDir);
+
+    foreach ($files as $file) {
+      $path = "{$temporaryDir}/{$file}";
+      $ins = new $migClassName($path, "upgrade", $temporaryDir);
+      $ins->execute();
+
+      list ($num) = explode("_", $file);
+      $upgradeFiles[$num] = $file;
+      unlink($path);
+    }
+
+    $this->createCustomRestoreFile($upgradeFiles, $version);
   }
 
   public function prepareDowngrade($restoreFile)
@@ -53,23 +72,26 @@ class Sabel_DB_Migration_Util_Custom
     return $this->temporaryPath;
   }
 
-  public function createCustomRestoreFile($version, $upgradeFiles)
+  public function doDowngrade($migClassName)
   {
-    $tmpRestorePath = $this->temporaryPath . "/restores";
-    if (!is_dir($tmpRestorePath)) return;
+    $temporaryDir = $this->temporaryPath;
+    $files = array_reverse(getMigrationFiles($temporaryDir));
+    $fileNum = count($files) + 1;
+    $prefix  = $temporaryDir . "/";
 
-    $handle = opendir($tmpRestorePath);
+    for ($i = 1; $i < $fileNum; $i++) {
+      $file = $files[$i - 1];
+      $exp  = explode("_", $file);
+      $exp[0] = $i;
 
-    $files = array();
-    while (($file = readdir($handle)) !== false) {
-      list (, $num) = explode("_", $file);
+      $path = $prefix . implode("_", $exp);
+      rename($prefix . $file, $path);
 
-      if (is_numeric($num)) {
-        $files[$num] = $tmpRestorePath . "/" . $file;
-      }
+      $ins = new $migClassName($path, "downgrade", $temporaryDir);
+      $ins->execute();
+
+      unlink($path);
     }
-
-    $this->writeRestoreFile($files, $version, $upgradeFiles);
   }
 
   private function splitFiles($fp)
@@ -116,11 +138,25 @@ class Sabel_DB_Migration_Util_Custom
     fclose($fp);
   }
 
-  private function writeRestoreFile($files, $version, $upgradeFiles)
+  private function createCustomRestoreFile($upgradeFiles, $version)
   {
-    $files = array_reverse($files);
+    $tmpRestorePath = $this->temporaryPath . "/restores";
+    if (!is_dir($tmpRestorePath)) return;
+
+    $handle = opendir($tmpRestorePath);
+
+    $files = array();
+    while (($file = readdir($handle)) !== false) {
+      list (, $num) = explode("_", $file);
+
+      if (is_numeric($num)) {
+        $files[$num] = $tmpRestorePath . "/" . $file;
+      }
+    }
+
+    $files   = array_reverse($files);
     $restore = MIG_DIR . "/restores/restore_" . $version;
-    $rfp = fopen($restore, "w");
+    $rfp     = fopen($restore, "w");
 
     foreach ($files as $file) {
       $fp = fopen($file, "r");

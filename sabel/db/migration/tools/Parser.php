@@ -111,7 +111,7 @@ class Sabel_DB_Migration_Tools_Parser
 
   private function getNullable(&$lines)
   {
-    if (empty($lines)) return IS_EMPTY;
+    if (empty($lines)) return self::IS_EMPTY;
 
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 8) === "nullable") {
@@ -125,7 +125,7 @@ class Sabel_DB_Migration_Tools_Parser
 
   private function getDefault(&$lines)
   {
-    if (empty($lines)) return IS_EMPTY;
+    if (empty($lines)) return self::IS_EMPTY;
 
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 7) === "default") {

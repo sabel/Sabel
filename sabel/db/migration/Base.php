@@ -23,14 +23,14 @@ abstract class Sabel_DB_Migration_Base
 
   public function __construct($filePath, $type, $dirPath = null)
   {
-    $this->type = $type;
-    $this->dirPath = ($dirPath === null) ? MIG_DIR : $dirPath;
+    $this->type     = $type;
+    $this->filePath = $filePath;
+    $this->dirPath  = ($dirPath === null) ? MIG_DIR : $dirPath;
 
     $file = getFileName($filePath);
     list ($num, $mdlName, $command) = explode("_", $file);
 
     $this->version  = $num;
-    $this->filePath = $filePath;
     $this->mdlName  = $mdlName;
     $this->command  = $command;
   }
@@ -166,48 +166,18 @@ abstract class Sabel_DB_Migration_Base
     }
   }
 
-  // @todo refactoring
   protected function custom()
   {
-    $custom    = new Sabel_DB_Migration_Util_Custom();
+    $custom = new Sabel_DB_Migration_Tools_Custom();
     $className = get_class($this);
 
     if ($this->type === "upgrade") {
-      $temporaryDir = $custom->prepareUpgrade($this->filePath);
-      $files = getMigrationFiles($temporaryDir);
-      $upgradeFiles = array();
-
-      foreach ($files as $file) {
-        $path = "{$temporaryDir}/{$file}";
-        $ins = new $className($path, $this->type, $temporaryDir);
-        $ins->execute();
-
-        list ($num) = explode("_", $file);
-        $upgradeFiles[$num] = $file;
-        unlink($path);
-      }
-
-      $custom->createCustomRestoreFile($this->version, $upgradeFiles);
+      $custom->prepareUpgrade($this->filePath);
+      $custom->doUpgrade($className, $this->version);
     } else {
-      $restoreFile  = $this->getRestoreFileName();
-      $temporaryDir = $custom->prepareDowngrade($restoreFile);
-      $files = array_reverse(getMigrationFiles($temporaryDir));
-      $fileNum = count($files) + 1;
-      $prefix  = $temporaryDir . "/";
-
-      for ($i = 1; $i < $fileNum; $i++) {
-        $file = $files[$i - 1];
-        $exp  = explode("_", $file);
-        $exp[0] = $i;
-
-        $path = $prefix . implode("_", $exp);
-        rename($prefix . $file, $path);
-
-        $ins = new $className($path, $this->type, $temporaryDir);
-        $ins->execute();
-
-        unlink($path);
-      }
+      $restoreFile = $this->getRestoreFileName();
+      $custom->prepareDowngrade($restoreFile);
+      $custom->doDowngrade($className);
     }
   }
 
