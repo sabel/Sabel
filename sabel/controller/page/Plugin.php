@@ -12,10 +12,11 @@
  */
 abstract class Sabel_Controller_Page_Plugin
 {
-  const ON_BEFORE_ACTION  = "onBeforeAction";
-  const ON_AFTER_ACTION   = "onAfterAction";
-  const ON_EXECUTE_ACTION = "onExecuteAction";
-  const ON_REDIRECT       = "onRedirect";
+  const ON_BEFORE_ACTION     = "onBeforeAction";
+  const ON_AFTER_ACTION      = "onAfterAction";
+  const ON_EXECUTE_ACTION    = "onExecuteAction";
+  const ON_REDIRECT          = "onRedirect";
+  const ON_CREATE_CONTROLLER = "onCreateController";
   
   protected $controller  = null;
   protected $destination = null;

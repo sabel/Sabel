@@ -43,7 +43,7 @@ class Sabel_View_Locator_Factory
     $path = $this->getPath($module);
     $spcPath = $path . self::VIEW_DIR;
     
-    $locator->addLocation(RUN_BASE.self::APP_VIEW, $name);    
+    $locator->addLocation(RUN_BASE.self::APP_VIEW, $name);
     $locator->addLocation($spcPath, $name.self::TPL_SUFFIX);
     $locator->addLocation($spcPath, $controller."/".$name);
     $locator->addLocation($spcPath, $controller.".".$name.self::TPL_SUFFIX);

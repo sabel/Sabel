@@ -49,9 +49,6 @@ final class Sabel_Controller_Front
     $executer->setDestination($destination);
     $this->controller = $executer->create();
     
-    // @todo move in create() of executer
-    $this->plugin->onCreateController($destination);
-    
     $executer->execute($this->request, $storage);
     
     $this->processPostFilter();
