@@ -34,9 +34,12 @@ class Sabel_Controller_Plugin_Flow extends Sabel_Controller_Page_Plugin
     $manager = new Sabel_Controller_Flow_Manager($controller->getRequest());
     
     if (!($flow = $manager->restore())) {
-      $flowClassName = get_class($controller) . "_Flow";
-      if (class_exists($flowClassName)) {
-        $flow = new $flowClassName();
+      $dest = $this->destination->toArray();
+      list($m, $c,) = array_map("ucfirst", $dest);
+
+      $flowClass = $m."_Flow_".$c;
+      if (class_exists($flowClass)) {
+        $flow = new $flowClass();
         $flow->configure();
       } else {
         return $controller->execute($action);

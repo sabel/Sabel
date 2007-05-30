@@ -18,8 +18,10 @@ class Sabel_Controller_Plugin_Common extends Sabel_Controller_Page_Plugin
   
   public function onCreateController($destination)
   {
-    $name = get_class($this->controller);
-    $flowClass = $name . "_Flow";
+    $dest = $destination->toArray();
+    list($m, $c,) = array_map("ucfirst", $dest);
+    
+    $flowClass = $m."_Flow_".$c;
     if (class_exists($flowClass)) {
       Sabel_Plugin::create()->add(new Sabel_Controller_Plugin_Flow());
     }

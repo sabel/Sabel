@@ -36,12 +36,12 @@ class Sabel_Controller_Executer_Basic
     $instance  = null;
     
     $classpath  = $module;
-    $classpath .= '_' . trim(Sabel_Const::CONTROLLER_DIR, '/');
+    $classpath .= "_" . trim(Sabel_Const::CONTROLLER_DIR, "/");
     
     if ($controller !== "") {
-      $classpath .= '_' . ucfirst($controller);
+      $classpath .= "_" . ucfirst($controller);
     } else {
-      $classpath .= '_' . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
+      $classpath .= "_" . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
     }
     
     if (class_exists($classpath)) {
