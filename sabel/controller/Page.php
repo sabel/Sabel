@@ -93,6 +93,8 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action)
   {
+    $result = null;
+    
     try {
       if (empty($action)) {
         throw new Sabel_Exception_InvalidActionName("invalid action name");
