@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Controller_Plugin_Redirecter extends Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_Redirecter extends Sabel_Plugin_Base
 {
   public function onRedirect($controller, $to = null)
   {

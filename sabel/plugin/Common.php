@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_Common extends Sabel_Controller_Page_Plugin
+class Sabel_Plugin_Common extends Sabel_Plugin_Base
 {
   public function enable()
   {
@@ -23,7 +23,7 @@ class Sabel_Controller_Plugin_Common extends Sabel_Controller_Page_Plugin
     
     $flowClass = $m."_Flow_".$c;
     if (class_exists($flowClass)) {
-      Sabel_Plugin::create()->add(new Sabel_Controller_Plugin_Flow());
+      Sabel_Plugin::create()->add(new Sabel_Plugin_Flow());
     }
   }
 }

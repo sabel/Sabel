@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Controller_Plugin_Dependency extends Sabel_Controller_Page_Plugin
+class Sabel_Controller_Plugin_Dependency extends Sabel_Plugin_Base
 {
   private $helperPrefix = ".php";
   private $dependency = null;

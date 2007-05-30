@@ -53,11 +53,11 @@ final class Sabel_Plugin
   /**
    * add plugin
    *
-   * @param Sabel_Controller_Page_Plugin $plugin
+   * @param Sabel_Plugin_Base $plugin
    */
   public function add($plugin)
   {
-    if (!$plugin instanceof Sabel_Controller_Page_Plugin) {
+    if (!$plugin instanceof Sabel_Plugin_Base) {
       throw new Sabel_Exception_Unexpected();
     }
     

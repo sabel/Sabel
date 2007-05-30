@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Controller_Page_Plugin
+abstract class Sabel_Plugin_Base
 {
   const ON_BEFORE_ACTION     = "onBeforeAction";
   const ON_AFTER_ACTION      = "onAfterAction";

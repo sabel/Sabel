@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Plugin_Filter extends Sabel_Controller_Page_Plugin
+class Sabel_Plugin_Filter extends Sabel_Plugin_Base
 {
   const ARG       = '$in';
   const STATEMENT = 'return (strstr($in, "filter"));';

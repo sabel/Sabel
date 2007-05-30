@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Controller_Plugin_Exception extends Sabel_Controller_Page_Plugin
+class Sabel_Plugin_Exception extends Sabel_Plugin_Base
 {
   public function onException($exception)
   {
