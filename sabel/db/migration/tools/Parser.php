@@ -13,7 +13,9 @@ class Sabel_DB_Migration_Tools_Parser
 {
   const IS_EMPTY = "MIGRATE_EMPTY_VALUE";
 
-  protected $co = null;
+  protected $co      = null;
+  protected $fkeys   = array();
+  protected $uniques = array();
 
   public function toColumns($migClass, $filePath)
   {
@@ -26,9 +28,11 @@ class Sabel_DB_Migration_Tools_Parser
 
     while (!feof($fp)) {
       $line = trim(fgets($fp, 256));
+      if (substr($line, 0, 1) === "#") continue;
 
       if ($line === "options:") {
-        $inOpt = true; continue;
+        $inOpt = true;
+        continue;
       }
 
       if ($inOpt) {
@@ -42,7 +46,15 @@ class Sabel_DB_Migration_Tools_Parser
     }
 
     if (!empty($lines)) $cols[] = $this->toColumn($lines);
-    if (!empty($opts)) $migClass->setOptions($opts);
+    if (!empty($opts))  $migClass->setOptions($opts);
+
+    if (!empty($this->fkeys)) {
+      $migClass->setForeignKeys($this->fkeys);
+    }
+
+    if (!empty($this->uniques)) {
+      $migClass->setUniques($this->uniques);
+    }
 
     fclose($fp);
     return $cols;
@@ -63,6 +75,68 @@ class Sabel_DB_Migration_Tools_Parser
     return $cols;
   }
 
+  public function getUpgradeQuery($filePath)
+  {
+    $up    = false;
+    $query = array();
+
+    $fp = fopen($filePath, "r");
+
+    while (!feof($fp)) {
+      $line = trim(fgets($fp));
+      if (substr($line, 0, 1) === "#") continue;
+
+      if ($line === "") {
+        if ($up) {
+          break;
+        } else {
+          continue;
+        }
+      }
+
+      $up = true;
+      $query[] = $line;
+    }
+
+    fclose($fp);
+
+    if (count($query) > 1) {
+      return implode(" ", $query);
+    } else {
+      return $query[0];
+    }
+  }
+
+  public function getDowngradeQuery($filePath)
+  {
+    $up    = false;
+    $down  = false;
+    $query = array();
+
+    $fp = fopen($filePath, "r");
+
+    while (!feof($fp)) {
+      $line = trim(fgets($fp));
+      if (substr($line, 0, 1) === "#") continue;
+
+      if ($line === "") {
+        if ($up) $down = true;
+        continue;
+      }
+
+      $up = true;
+      if ($down) $query[] = $line;
+    }
+
+    fclose($fp);
+
+    if (count($query) > 1) {
+      return implode(" ", $query);
+    } else {
+      return $query[0];
+    }
+  }
+
   protected function toColumn($lines)
   {
     $this->co = $co = new Sabel_DB_Schema_Column();
@@ -74,20 +148,31 @@ class Sabel_DB_Migration_Tools_Parser
     $co->primary   = $this->getPrimary($lines);
     $co->increment = $this->getIncrement($lines);
 
+    $this->setForeignKey($lines, $co);
+    $this->setUnique($lines, $co);
+
     return $co;
   }
 
   private function getName(&$lines)
   {
-    $line = array_shift($lines);
-    return trim(str_replace(":", "", $line));
+    foreach ($lines as $num => $line) {
+      if (substr($line, 0, 1) === "#") {
+        unset($lines[$num]);
+        continue;
+      } else {
+        $name = trim(substr($line, 0, strpos($line, ":")));
+        unset($lines[$num]);
+        return $name;
+      }
+    }
   }
 
   private function getType(&$lines)
   {
     foreach ($lines as $num => $line) {
       if (substr($line, 0, 4) === "type") {
-        $value = strtoupper($this->getValue($lines, $num, $line));
+        $value = $this->getValue($lines, $num, $line);
         if (strpos($value, "STRING") !== false) {
           $this->setLength(str_replace("STRING", "", $value));
           return constant("Sabel_DB_Type::STRING");
@@ -177,12 +262,38 @@ class Sabel_DB_Migration_Tools_Parser
     return false;
   }
 
+  private function setForeignKey(&$lines, $co)
+  {
+    if (empty($lines)) return;
+
+    foreach ($lines as $num => $line) {
+      if (substr($line, 0, 4) === "fkey") {
+        $value = $this->getValue($lines, $num, $line);
+        $this->fkeys[$co->name] = $value;
+      }
+    }
+  }
+
+  private function setUnique(&$lines, $co)
+  {
+    if (empty($lines)) return;
+
+    foreach ($lines as $num => $line) {
+      if (substr($line, 0, 6) === "unique") {
+        $value = $this->getValue($lines, $num, $line);
+        if ($this->toBooleanValue($value)) {
+          $this->uniques[] = $co->name;
+        }
+      }
+    }
+  }
+
   private function getValue(&$lines, $num, $line)
   {
     list (, $value) = explode(":", $line);
     unset($lines[$num]);
 
-    return trim($value);
+    return preg_replace("/\s+#.*$/", "", trim($value));
   }
 
   private function toBooleanValue($value)

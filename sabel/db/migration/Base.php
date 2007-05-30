@@ -18,7 +18,10 @@ abstract class Sabel_DB_Migration_Base
   protected $mdlName  = "";
   protected $command  = "";
   protected $version  = 0;
+  protected $fkeys    = array();
+  protected $uniques  = array();
 
+  // @todo
   protected $sqlPrimary = false;
 
   public function __construct($filePath, $type, $dirPath = null)
@@ -36,6 +39,16 @@ abstract class Sabel_DB_Migration_Base
   }
 
   public function setOptions($opts) {}
+
+  public function setForeignKeys($fkeys)
+  {
+    $this->fkeys = $fkeys;
+  }
+
+  public function setUniques($uniques)
+  {
+    $this->uniques = $uniques;
+  }
 
   public function execute()
   {
@@ -76,6 +89,18 @@ abstract class Sabel_DB_Migration_Base
     }
   }
 
+  public function query()
+  {
+    $parser = new Sabel_DB_Migration_Tools_Parser();
+    if ($this->type === "upgrade") {
+      $query = $parser->getUpgradeQuery($this->filePath);
+    } else {
+      $query = $parser->getDowngradeQuery($this->filePath);
+    }
+
+    $this->executeQuery($query);
+  }
+
   protected function createColumns($filePath = null)
   {
     $parser = new Sabel_DB_Migration_Tools_Parser();
@@ -112,9 +137,20 @@ abstract class Sabel_DB_Migration_Base
       $query[] = "PRIMARY KEY(" . implode(", ", $pKey) . ")";
     }
 
-    $query   = implode(", ", $query);
+    if (!empty($this->fkeys)) {
+      foreach ($this->fkeys as $colName => $param) {
+        $query[] = "FOREIGN KEY ({$colName}) REFERENCES $param";
+      }
+    }
+
+    if (!empty($this->uniques)) {
+      foreach ($this->uniques as $column) {
+        $query[] = "UNIQUE ({$column})";
+      }
+    }
+
     $tblName = convert_to_tablename($this->mdlName);
-    return "CREATE TABLE $tblName (" . $query . ")";
+    return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
   }
 
   protected function changeColumn()
