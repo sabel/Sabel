@@ -10,16 +10,6 @@ function load($className, $config)
   return Sabel_Container::injector($config)->newInstance($className);
 }
 
-function is_not_null($value)
-{
-  return ($value !== null);
-}
-
-function is_not_object($object)
-{
-  return (!is_object($object));
-}
-
 function uri($param, $withDomain = true, $secure = false)
 {
   $secure = (defined("USE_SSL") && $secure === true);
