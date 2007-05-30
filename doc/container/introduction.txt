@@ -37,6 +37,12 @@
 
   とした場合には、指定されたセッターメソッドで実装オブジェクトが渡されます。
 
+  インターフェイスを指定してnewInstanceを行った場合、Configクラスでバインドされている
+　実装クラスが生成されます。
+  $injector = Sabel_Container::injector(new Config());
+  $instance = $injector->newInstance("Interface");
+  
+
 アスペクト
   設定クラスでは、同様にアスペクトの設定を行うこともできます。
 
