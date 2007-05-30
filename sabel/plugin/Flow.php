@@ -31,7 +31,7 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
     $controller = $this->controller;
     $action     = $controller->getAction();
     
-    $manager = new Sabel_Controller_Flow_Manager($controller->getRequest());
+    $manager = new Sabel_Plugin_Flow_Manager($controller->getRequest());
     
     if (!($flow = $manager->restore())) {
       $dest = $this->destination->toArray();

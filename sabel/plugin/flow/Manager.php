@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Flow_Manager
+class Sabel_Plugin_Flow_Manager
 {
   const PREFIX = "flow_";
   const TOKEN_KEY = "token";
@@ -55,7 +55,7 @@ class Sabel_Controller_Flow_Manager
    * @param Sabel_Controller_Flow $flow
    * @return instance of Sabel_Controller_Flow
    */
-  public function save(Sabel_Controller_Flow $flow)
+  public function save(Sabel_Plugin_Flow_Config $flow)
   {
     $this->storage->write($this->key(), $flow);
     return $flow;

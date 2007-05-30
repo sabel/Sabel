@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Flow_Activity
+class Sabel_Plugin_Flow_Activity
 {
   private $transitions = array();
   private $name = "";
@@ -26,7 +26,7 @@ class Sabel_Controller_Flow_Activity
   
   public function addTransition($transition, $activity)
   {
-    $transition = new Sabel_Controller_Flow_Transition($transition, $activity);
+    $transition = new Sabel_Plugin_Flow_Transition($transition, $activity);
     $this->transitions[$transition->getEventName()] = $transition;
     return $this;
   }

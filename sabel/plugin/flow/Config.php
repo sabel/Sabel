@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Controller_Flow
+abstract class Sabel_Plugin_Flow_Config
 {
   private
     $entryActivity   = null,
@@ -27,7 +27,7 @@ abstract class Sabel_Controller_Flow
     
   public function activity($name)
   {
-    return new Sabel_Controller_Flow_Activity($name);
+    return new Sabel_Plugin_Flow_Activity($name);
   }
   
   public function activities()
@@ -36,7 +36,7 @@ abstract class Sabel_Controller_Flow
     
     $args = func_get_args();
     for ($i = 0; $i < func_num_args(); $i++) {
-      $activities[] = new Sabel_Controller_Flow_Activity($args[$i]);
+      $activities[] = new Sabel_Plugin_Flow_Activity($args[$i]);
     }
     
     return $activities;
