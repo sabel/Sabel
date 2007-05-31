@@ -25,8 +25,7 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
 
   public function send($co, $type)
   {
-    $types = array("integer", "int", "int4", "serial",
-                   "smallint", "tinyint");
+    $types = array("integer", "int", "int4", "serial", "tinyint");
 
     if (!in_array($type, $types)) {
       $this->next->send($co, $type);
@@ -35,25 +34,13 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
 
     $co->type = $this->getType();
 
-    switch($type) {
-      case "integer":
-      case "int":
-      case "int4":
-      case "serial":
-        $co->max =  2147483647;
-        $co->min = -2147483648;
-        break;
-
-      case "smallint":
-        $co->max =  32767;
-        $co->min = -32768;
-        break;
-
-      // @todo...
-      case "tinyint":
-        $co->max =  127;
-        $co->min = -128;
-        break;
+    // @todo
+    if ($type === "tinyint") {
+      $co->max =  127;
+      $co->min = -128;
+    } else {
+      $co->max =  2147483647;
+      $co->min = -2147483648;
     }
   }
 }

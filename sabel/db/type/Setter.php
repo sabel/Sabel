@@ -20,6 +20,7 @@ class Sabel_DB_Type_Setter
     } else {
       $int    = new Sabel_DB_Type_Integer();
       $bint   = new Sabel_DB_Type_Bigint();
+      $sint   = new Sabel_DB_Type_Smallint();
       $string = new Sabel_DB_Type_String();
       $text   = new Sabel_DB_Type_Text();
       $time   = new Sabel_DB_Type_Datetime();
@@ -29,7 +30,8 @@ class Sabel_DB_Type_Setter
       $other  = new Sabel_DB_Type_Other();
 
       $int->add($bint);
-      $bint->add($string);
+      $bint->add($sint);
+      $sint->add($string);
       $string->add($text);
       $text->add($time);
       $time->add($double);

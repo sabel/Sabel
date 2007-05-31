@@ -14,6 +14,7 @@ class Sabel_DB_Migration_Tools_Parser
   const IS_EMPTY = "MIGRATE_EMPTY_VALUE";
 
   protected $co      = null;
+  protected $pkeys   = array();
   protected $fkeys   = array();
   protected $uniques = array();
 
@@ -21,10 +22,12 @@ class Sabel_DB_Migration_Tools_Parser
   {
     $fp = fopen($filePath, "r");
 
-    $cols  = array();
-    $lines = array();
-    $opts  = array();
-    $inOpt = false;
+    $cols    = array();
+    $lines   = array();
+    $opts    = array();
+    $inOpt   = false;
+    $consts  = array();
+    $inConst = false;
 
     while (!feof($fp)) {
       $line = trim(fgets($fp, 256));
@@ -33,10 +36,15 @@ class Sabel_DB_Migration_Tools_Parser
       if ($line === "options:") {
         $inOpt = true;
         continue;
+      } elseif ($line === "constraint:") {
+        $inConst = true;
+        continue;
       }
 
       if ($inOpt) {
         $opts[] = $line;
+      } elseif ($inConst) {
+        $consts[] = $line;
       } elseif ($line === "" && !empty($lines)) {
         $cols[] = $this->toColumn($lines);
         $lines = array();
@@ -48,8 +56,16 @@ class Sabel_DB_Migration_Tools_Parser
     if (!empty($lines)) $cols[] = $this->toColumn($lines);
     if (!empty($opts))  $migClass->setOptions($opts);
 
+    if (!empty($consts)) {
+      $this->createConstraints($consts);
+    }
+
     if (!empty($this->fkeys)) {
       $migClass->setForeignKeys($this->fkeys);
+    }
+
+    if (!empty($this->pkeys)) {
+      $migClass->setPrimaryKeys($this->pkeys);
     }
 
     if (!empty($this->uniques)) {
@@ -95,7 +111,7 @@ class Sabel_DB_Migration_Tools_Parser
       }
 
       $up = true;
-      $query[] = $line;
+      $query[] = preg_replace("/\s+#.*$/", "", $line);
     }
 
     fclose($fp);
@@ -125,7 +141,9 @@ class Sabel_DB_Migration_Tools_Parser
       }
 
       $up = true;
-      if ($down) $query[] = $line;
+      if ($down) {
+        $query[] = preg_replace("/\s+#.*$/", "", $line);
+      }
     }
 
     fclose($fp);
@@ -145,8 +163,10 @@ class Sabel_DB_Migration_Tools_Parser
     $co->type      = $this->getType($lines);
     $co->nullable  = $this->getNullable($lines);
     $co->default   = $this->getDefault($lines);
-    $co->primary   = $this->getPrimary($lines);
     $co->increment = $this->getIncrement($lines);
+
+    $co->primary = $this->getPrimary($lines);
+    if ($co->primary) $this->pkeys[] = $co->name;
 
     $this->setForeignKey($lines, $co);
     $this->setUnique($lines, $co);
@@ -284,6 +304,17 @@ class Sabel_DB_Migration_Tools_Parser
         if ($this->toBooleanValue($value)) {
           $this->uniques[] = $co->name;
         }
+      }
+    }
+  }
+
+  private function createConstraints($consts)
+  {
+    foreach ($consts as $line) {
+      if (substr($line, 0, 6) === "unique") {
+        $this->uniques[] = $this->getValue($lines, $num, $line);
+      } elseif (substr($line, 0, 7) === "primary") {
+        $this->pkeys[] = $this->getValue($lines, $num, $line);
       }
     }
   }

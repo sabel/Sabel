@@ -866,6 +866,23 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($tx->nullable);
     $this->assertFalse($tx->increment);
     $this->assertFalse($tx->primary);
+
+    if (self::$db === "MYSQL" || self::$db === "PGSQL") {
+      $this->assertFalse($schema->isForeignKey("name"));
+      $this->assertTrue($schema->isForeignKey("users_id"));
+      $this->assertTrue($schema->isForeignKey("city_id"));
+
+      $fkeys = $schema->getForeignKeys();
+      $this->assertEquals($fkeys["users_id"]["referenced_table"], "users");
+      $this->assertEquals($fkeys["users_id"]["referenced_column"], "id");
+      $this->assertEquals($fkeys["users_id"]["on_delete"], "CASCADE");
+      $this->assertEquals($fkeys["users_id"]["on_update"], "NO ACTION");
+
+      $this->assertEquals($fkeys["city_id"]["referenced_table"], "city");
+      $this->assertEquals($fkeys["city_id"]["referenced_column"], "id");
+      $this->assertEquals($fkeys["city_id"]["on_delete"], "NO ACTION");
+      $this->assertEquals($fkeys["city_id"]["on_update"], "NO ACTION");
+    }
   }
 
   public function testBridge()

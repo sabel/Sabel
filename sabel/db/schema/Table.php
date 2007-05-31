@@ -14,6 +14,7 @@ class Sabel_DB_Schema_Table
   protected $tableName       = "";
   protected $columns         = array();
   protected $primaryKey      = null;
+  protected $foreignKeys     = null;
   protected $incrementColumn = null;
   protected $tableEngine     = null;
 
@@ -89,6 +90,21 @@ class Sabel_DB_Schema_Table
   public function getIncrementColumn()
   {
     return $this->incrementColumn;
+  }
+
+  public function setForeignKeys($fkeys)
+  {
+    $this->foreignKeys = $fkeys;
+  }
+
+  public function getForeignKeys()
+  {
+    return $this->foreignKeys;
+  }
+
+  public function isForeignKey($colName)
+  {
+    return isset($this->foreignKeys[$colName]);
   }
 
   public function setTableEngine($engine)

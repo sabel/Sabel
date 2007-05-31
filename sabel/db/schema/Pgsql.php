@@ -72,4 +72,33 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
     $maxlen  = $row["character_maximum_length"];
     $co->max = (isset($maxlen)) ? (int)$maxlen : 255;
   }
+
+  public function getForeignKey($tblName)
+  {
+    $is  = "information_schema";
+    $cn  = "constraint_name";
+    $ij  = "INNER JOIN";
+
+    $sql = "SELECT kcu.column_name, ccu.table_name AS ref_table, "
+         . "ccu.column_name AS ref_column, rc.delete_rule, rc.update_rule "
+         . "FROM {$is}.table_constraints tc "
+         . "{$ij} {$is}.constraint_column_usage ccu ON tc.{$cn} = ccu.{$cn} "
+         . "{$ij} {$is}.key_column_usage kcu ON tc.{$cn} = kcu.{$cn} "
+         . "{$ij} {$is}.referential_constraints rc ON tc.{$cn} = rc.{$cn} "
+         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}'";
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return null;
+
+    $columns = array();
+    foreach ($rows as $row) {
+      $column = $row["column_name"];
+      $columns[$column]["referenced_table"]  = $row["ref_table"];
+      $columns[$column]["referenced_column"] = $row["ref_column"];
+      $columns[$column]["on_delete"]         = $row["delete_rule"];
+      $columns[$column]["on_update"]         = $row["update_rule"];
+    }
+
+    return $columns;
+  }
 }

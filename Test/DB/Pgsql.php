@@ -165,7 +165,11 @@ class PgsqlHelper
                  dt timestamp,
                  ft_val float4 default 1,
                  db_val double precision not null,
-                 tx text)";
+                 tx text,
+                 users_id integer not null,
+                 city_id integer not null,
+                 foreign key(users_id) references users(id) on delete cascade on update no action,
+                 foreign key(city_id) references city(id) on delete no action)";
 
     $sqls[] = "CREATE TABLE student (
                  id integer primary key,

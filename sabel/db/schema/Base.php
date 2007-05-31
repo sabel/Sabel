@@ -34,7 +34,10 @@ abstract class Sabel_DB_Schema_Base
   public function getTable($tblName)
   {
     $columns = $this->createColumns($tblName);
-    return new Sabel_DB_Schema_Table($tblName, $columns);
+    $schema  = new Sabel_DB_Schema_Table($tblName, $columns);
+    $schema->setForeignKeys($this->getForeignKey($tblName));
+
+    return $schema;
   }
 
   protected function execute($sql)

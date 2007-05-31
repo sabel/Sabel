@@ -164,7 +164,11 @@ class MysqlHelper
                  dt datetime,
                  ft_val float default 1,
                  db_val double not null,
-                 tx text)";
+                 tx text,
+                 users_id integer not null,
+                 city_id integer not null,
+                 foreign key(users_id) references users(id) on delete cascade on update no action,
+                 foreign key(city_id) references city(id) on delete no action) type=InnoDB";
 
     $sqls[] = "CREATE TABLE student (
                  id integer primary key,

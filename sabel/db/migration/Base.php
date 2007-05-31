@@ -18,6 +18,8 @@ abstract class Sabel_DB_Migration_Base
   protected $mdlName  = "";
   protected $command  = "";
   protected $version  = 0;
+
+  protected $pkeys    = array();
   protected $fkeys    = array();
   protected $uniques  = array();
 
@@ -48,6 +50,11 @@ abstract class Sabel_DB_Migration_Base
   public function setUniques($uniques)
   {
     $this->uniques = $uniques;
+  }
+
+  public function setPrimaryKeys($pkeys)
+  {
+    $this->pkeys = $pkeys;
   }
 
   public function execute()
@@ -125,16 +132,14 @@ abstract class Sabel_DB_Migration_Base
 
   protected function getCreateSql($cols)
   {
-    $pKey  = array();
     $query = array();
 
     foreach ($cols as $col) {
-      if ($col->primary) $pKey[] = $col->name;
       $query[] = $this->createColumnAttributes($col);
     }
 
-    if ($pKey && !$this->sqlPrimary) {
-      $query[] = "PRIMARY KEY(" . implode(", ", $pKey) . ")";
+    if (!empty($this->pkeys) && !$this->sqlPrimary) {
+      $query[] = "PRIMARY KEY(" . implode(", ", $this->pkeys) . ")";
     }
 
     if (!empty($this->fkeys)) {

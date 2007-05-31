@@ -57,6 +57,15 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
     $co->max = (int)$row["character_maximum_length"];
   }
 
+  public function getForeignKey($tblName)
+  {
+    $result   = $this->execute("SELECT VERSION() AS version");
+    $version  = $result[0]["version"];
+    $instance = Sabel_DB_Schema_Mysql_Factory::create($version);
+
+    return $instance->getForeignKeys($tblName, $this->driver);
+  }
+
   public function getTableEngine($tblName)
   {
     $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");

@@ -28,7 +28,7 @@ class Test_DB_Tests
       $suite->addTest(Test_DB_Pgsql::suite());
     }
 
-    if (extension_loaded('pdo_sqlite')) $suite->addTest(Test_DB_SQLite::suite());
+    //if (extension_loaded('pdo_sqlite')) $suite->addTest(Test_DB_SQLite::suite());
 
     return $suite;
   }
