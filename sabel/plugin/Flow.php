@@ -63,11 +63,12 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
           $controller->redirectTo($flow->getCurrentActivity()->getName());
         }
         
+        return $controller->getResponse();
       } elseif ($flow->isCurrent($action)) {
-        $controller->execute($action);
+        return $controller->execute($action);
       } else {
         $this->destination->setAction(self::INVALID_ACTION);
-        $controller->execute(self::INVALID_ACTION);
+        return $controller->execute(self::INVALID_ACTION);
       }
       
       $manager->save($flow);
@@ -77,15 +78,16 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
         $logger->log("{$action} is entry activity");
         $flow->start($action);
         $this->assignToken($manager, $controller, $flow);
-        $controller->execute($action);
+        $response = $controller->execute($action);
         $manager->save($flow);
+        return $response;
       } elseif ($flow->isEndActivity($action)) {
         $manager->remove();
       } elseif (!$flow->isActivity($action)) {
-        $controller->execute($action);
+        return $controller->execute($action);
       } else {
         $this->destination->setAction(self::INVALID_ACTION);
-        $controller->execute(self::INVALID_ACTION);
+        return $controller->execute(self::INVALID_ACTION);
       }
     } 
   }

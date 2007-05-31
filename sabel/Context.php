@@ -17,6 +17,7 @@ class Sabel_Context
   private static $controller = null;
   private static $candidate = null;
   private static $view = null;
+  private static $disableLayout = false;
   
   private static $storage = null;
   
@@ -53,6 +54,16 @@ class Sabel_Context
   public static function getView()
   {
     return self::$view;
+  }
+  
+  public static function disableLayout()
+  {
+    self::$disableLayout = true;
+  }
+  
+  public static function isLayoutDisabled()
+  {
+    return self::$disableLayout;
   }
   
   public static function setController($controller)

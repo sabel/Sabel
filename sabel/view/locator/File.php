@@ -18,20 +18,26 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
   
   private $locations = array();
   
+  /**
+   * locate resource from file
+   * 
+   * @param Sabel_Destination $destination
+   * @return Sabel_View_Resource
+   */
   public function locate($destination)
   {
     list($module, $controller, $name) = $destination->toArray();
     
     $location = $this->getLocation($name);
-    
-    if (!$location->valid) {
-      throw new Exception("resource missing");
-    }
-    
     $resource = new Sabel_View_Resource_Template();
-    $resource->setRenderer($location->renderer);
-    $resource->setPath($location->path);
-    $resource->setName($location->name);
+    
+    if ($location->valid) {
+      $resource->setRenderer($location->renderer);
+      $resource->setPath($location->path);
+      $resource->setName($location->name);
+    } else {
+      $resource->missing();
+    }
     
     return $resource;
   }

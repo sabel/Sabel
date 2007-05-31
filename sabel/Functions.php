@@ -87,6 +87,14 @@ function __($text)
   return $array;
 }
 
+
+function d($mixed)
+{
+  echo '<pre style="background: #fff; color: #333;border:1px solid #ccc; margen:2px;padding:3px;font-family:monospace;font-size:12px>"';
+  foreach (func_get_args() as $value) var_dump($value);
+  echo '</pre>';
+}
+
 function dump($mixed)
 {
   echo '<pre>';

@@ -11,6 +11,8 @@
  */
 final class Sabel_Plugin
 {
+  const ENABLE_METHOD = "enable";
+  
   private $plugins       = array();
   private $pluginMethods = array();
   private $controller    = null;
@@ -64,8 +66,11 @@ final class Sabel_Plugin
     $pluginName = get_class($plugin);
     $this->plugins[$pluginName] = $plugin;
     
-    if (method_exists($plugin, "enable")) {
+    if (method_exists($plugin, self::ENABLE_METHOD)) {
       foreach ($plugin->enable() as $method) {
+        if (ENVIRONMENT === DEVELOPMENT) {
+          Sabel_Context::log("enable plugin: " . $pluginName . " on " . $method);
+        }
         if ($this->isEventMethod($method)) {
           $this->events[$method][] = $pluginName;
         } else {

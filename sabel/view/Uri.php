@@ -49,11 +49,11 @@ class Sabel_View_Uri
   private function convert($param)
   {
     $buf = array();
-    $params = explode(',', $param);
+    $params = explode(",", $param);
     $reserved = ";";
     foreach ($params as $part) {
-      $line     = array_map('trim', explode(':', $part));
-      $reserved = ($line[0] === 'n') ? 'candidate' : $line[0];
+      $line     = array_map("trim", explode(":", $part));
+      $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
       $buf[$reserved] = $line[1];
     }
     return $buf;

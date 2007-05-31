@@ -14,6 +14,7 @@ class Sabel_View_Resource_Template implements Sabel_View_Resource_File
   private $path     = "";
   private $name     = "";
   private $renderer = null;
+  private $missing  = false;
   
   public final function setRenderer($renderer)
   {
@@ -68,8 +69,13 @@ class Sabel_View_Resource_Template implements Sabel_View_Resource_File
     return (is_readable($this->path.$this->name));
   }
   
-  public function isResourceMissing()
+  public function missing()
   {
-    return false;
+    $this->missing = true;
+  }
+  
+  public function isMissing()
+  {
+    return $this->missing;
   }
 }

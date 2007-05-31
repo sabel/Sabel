@@ -37,6 +37,9 @@ set_include_path(CURRENT_PATH . ":" . get_include_path());
 spl_autoload_register(array("Sabel", "using"));
 
 require ("sabel" . DIR_DIVIDER . "Functions.php");
+require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Manager.php");
+require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Apc.php");
+require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Null.php");
 
 /**
  * Sabel
@@ -51,22 +54,29 @@ final class Sabel
 {
   private static $required  = array();
   private static $fileUsing = array();
+  private static $cache = null;
   
   public static function using($className)
   {
-    if (isset(self::$required[$className])) return;
+    if (self::$cache === null) {
+      self::$cache = Sabel_Cache_Manager::create();
+    }
     
-    if (!class_exists($className)) {
+    if (isset(self::$required[$className])) return;
+
+    if (!($path = self::$cache->read($className))) {
       $path = self::convertPath($className);
-      if (($p = self::isReadable($path)) !== false) {
-        if ($p === true) {
-          require (CURRENT_PATH . DIR_DIVIDER . $path);
-        } else {
-          require ($p . DIR_DIVIDER . $path);
-        }
-        
-        self::$required[$className] = true;
+      self::$cache->write($className, $path);
+    }
+
+    if (($p = self::isReadable($path)) !== false) {
+      if ($p === true) {
+        require (CURRENT_PATH . DIR_DIVIDER . $path);
+      } else {
+        require ($p . DIR_DIVIDER . $path);
       }
+      
+      self::$required[$className] = 1;
     }
   }
   
@@ -98,22 +108,27 @@ final class Sabel
   
   private static function isReadable($path)
   {
-    if (is_readable($path)) return true;
-    
-    static $paths = null;
-    
-    if ($paths === null) {
-      $includePath = get_include_path();
-      $paths = explode(":", $includePath);
-    }
-    
-    foreach ($paths as $p) {
-      $fpath = $p . DIR_DIVIDER . $path;
-      if (is_readable($fpath)) {
-        return $p;
+    if ($p = self::$cache->read($path)) {
+      return $p;
+    } else {
+      if (is_readable($path)) return true;
+      
+      static $paths = null;
+
+      if ($paths === null) {
+        $includePath = get_include_path();
+        $paths = explode(":", $includePath);
       }
+
+      foreach ($paths as $p) {
+        $fpath = $p . DIR_DIVIDER . $path;
+        if (is_readable($fpath)) {
+          self::$cache->write($path, $p);
+          return $p;
+        }
+      }
+      
+      return false;
     }
-    
-    return false;
   }
 }

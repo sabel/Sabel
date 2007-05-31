@@ -11,6 +11,16 @@
  */
 class Sabel_Plugin_View extends Sabel_Plugin_Base
 {
+  public function enable()
+  {
+    return array("disableLayout");
+  }
+  
+  public function disableLayout()
+  {
+    Sabel_Context::disableLayout();
+  }
+  
   public function render($template, $additional)
   {
     $this->rendered = Sabel_View::Render($template, $additional);

@@ -49,9 +49,22 @@ final class Sabel_Controller_Front
     $executer->setDestination($destination);
     $this->controller = $executer->create();
     
-    $executer->execute($this->request, $storage);
+    $response = $executer->execute($this->request, $storage);
+
+    if ($response->isNotFound()) {
+      $response->outputHeader();
+      $destination->setAction("notFound");
+      $response = $executer->execute($this->request, $storage);
+      if ($response->isNotFound()) {
+        $destination->setController("index");
+        $this->controller = $executer->create();
+        $response = $executer->execute($this->request, $storage);
+      }
+    }
     
     $this->processPostFilter();
+    
+    return $response;
   }
   
   public function getController()
@@ -161,7 +174,7 @@ final class Sabel_Controller_Front
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
-    } else {
+    } elseif (!Sabel_Context::isLayoutDisabled()) {
       $assign = array("assign" => array("contentForLayout" => $content));
       try {
         $content = Sabel_View::render($destination, $assigns);
@@ -171,6 +184,8 @@ final class Sabel_Controller_Front
       } catch (Exception $e) {
         $html = $content;
       }
+    } else {
+      $html = $content;
     }
     
     return $html;

@@ -22,6 +22,7 @@ class Sabel_Cache_Manager
   
   public static function create($type = "")
   {
+    self::init();
     $instance = null;
     
     if (ENVIRONMENT === DEVELOPMENT || ENVIRONMENT === TEST) {

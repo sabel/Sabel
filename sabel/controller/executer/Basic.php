@@ -91,11 +91,11 @@ class Sabel_Controller_Executer_Basic
     $controller    = $this->controller;
     $action        = $this->destination->getAction();
     
-    $controller->setup($request, $storage);
+    $controller->setup($request, $this->destination, $storage);
     $controller->setAction($action);
     $controller->initialize();
     
-    $this->executeAction($action);
+    return $this->executeAction($action);
   }
   
   /**
@@ -111,7 +111,7 @@ class Sabel_Controller_Executer_Basic
     
     if ($this->plugin->hasExecuteAction()) {
       $this->plugin->setDestination($this->destination);
-      $this->plugin->onExecuteAction($action);
+      return $this->plugin->onExecuteAction($action);
     } else {
       return $this->controller->execute($action);
     }

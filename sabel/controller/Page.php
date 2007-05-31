@@ -23,35 +23,44 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $result      = null;
     
   protected
+    $hidden = array();
+    
+  protected
     $attributes  = array(),
     $assignments = array();
   
   protected
     $request  = null,
+    $response = null,
     $storage  = null;
     
   protected
     $enableStorage = true;
+    
+  protected $destination = null;
   
   /**
    * reserved name lists of methods(actions)
    * @var array $reserved
    */
-  private $reserved = array("setup",
-                            "getAction",
-                            "getRequests",
-                            "execute",
-                            "getResult",
-                            "result",
-                            "initialize");
+  private $reserved = array();
   
   /**
    * default constructer of page controller
    *
    */
-  public function __construct()
+  public final function __construct()
   {
+    $ref = new ReflectionClass("Sabel_Controller_Page");
+    $reserved = array();
+    foreach ($ref->getMethods() as $name => $method) {
+      $reserved[] = $method->getName();
+    }
+    
+    $this->reserved = $reserved;
     $this->plugin = Sabel_Plugin::create($this);
+    $injector = Sabel_Container::injector(new Factory());
+    $this->response = $injector->newInstance("Sabel_Response");
   }
   
   /**
@@ -69,9 +78,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * @param Sabel_Storage $storage
    * @return void
    */
-  public function setup(Sabel_Request $request, $storage = null)
+  public function setup($request, $destination, $storage = null)
   {
     $this->request = $request;
+    $this->destination = $destination;
     
     if ($this->enableStorage) {
       if ($storage === null) {
@@ -93,30 +103,46 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action)
   {
-    $result = null;
-    
     try {
-      if (empty($action)) {
-        throw new Sabel_Exception_InvalidActionName("invalid action name");
-      }
+      $response = $this->response;
       
-      if (isset($this->reserved[$this->action])) {
-        throw new Sabel_Exception_Runtime("use reserved action name");
+      if (in_array($action, $this->reserved)) {
+        return $response->notfound();
       }
       
       $proceed = $this->plugin->onBeforeAction();
       
-      if ($proceed) {
-        $this->result = $result = $this->$action();
-      }
+      $isExistance = create_function
+                     (
+                       '$self, $action',
+                       'return is_callable(array($self, $action));'
+                     );
       
+      if ($proceed) {
+        if (method_exists($this, $action)) {
+          $existance = $isExistance($this, $action);
+        } else {
+          $existance = false;
+        }
+        
+        $callable = (!in_array($action, $this->hidden));
+        
+        if ($existance && $callable) {
+          $response->success();
+          $response->result = $this->$action();
+          return $response;
+        } elseif($this->isTemplateFound() && $callable) {
+          return $response->success();
+        } else {
+          return $response->notfound();
+        }
+      }
+      $this->plugin->onAfterAction();
+      return $response;
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
+      echo $exception->getMessage();
     }
-    
-    $this->plugin->onAfterAction();
-    
-    return $result;
   }
   
   /**
@@ -142,22 +168,37 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @param string $params
    */
-  public function redirectTo($params)
+  public final function redirectTo($params)
   {
+    /*
     if (!is_array($params) && is_string($params)) {
       $params = array(':action' => $params);
     }
+    */
     
     $candidate = Sabel_Context::getCandidate();
-    return $this->redirect($candidate->uri($params));
+    return $this->redirect($candidate->uri($this->convertParams($params)));
   }
   
-  public function isRedirected()
+  private function convertParams($param)
+  {
+    $buf = array();
+    $params = explode(",", $param);
+    $reserved = ";";
+    foreach ($params as $part) {
+      $line     = array_map("trim", explode(":", $part));
+      $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
+      $buf[$reserved] = $line[1];
+    }
+    return $buf;
+  }
+  
+  public final function isRedirected()
   {
     return $this->redirected;
   }
   
-  public function getRedirect()
+  public final function getRedirect()
   {
     return $this->redirect;
   }
@@ -173,62 +214,67 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->assignments[$key] = $value;
   }
   
-  public function getAttributes()
+  public final function getAttributes()
   {
     return $this->attributes;
   }
   
-  public function setAttribute($name, $value)
+  public final function setAttribute($name, $value)
   {
     $this->attributes[$name] = $value;
   }
   
-  public function setAttributes($attributes)
+  public final function setAttributes($attributes)
   {
     $this->attributes = array_merge($attributes, $this->attributes);
   }
   
-  public function getResult()
+  public final function getResult()
   {
     return $this->result;
   }
   
-  public function getRequest()
+  public final function getRequest()
   {
     return $this->request;
   }
   
-  public function setAction($action)
+  public function getResponse()
+  {
+    return $this->response;
+  }
+  
+  public final function setAction($action)
   {
     $this->action = $action;
   }
   
-  public function getAction()
+  public final function getAction()
   {
     return $this->action;
   }
   
-  public function getStorage()
+  public final function getStorage()
   {
     return $this->storage;
   }
   
-  public function getRequests()
+  public final function getRequests()
   {
     return $this->request->getPostRequests();
   }
   
-  public function getAssignments()
+  public final function getAssignments()
   {
     return $this->assignments;
   }
   
-  public function hasRendered()
+  public final function hasRendered()
   {
     return (strlen($this->rendered) !== 0);
   }
   
-  public function getRendered()
+  public final function getRendered()
   {
     return $this->rendered;
   }
@@ -274,6 +320,14 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function isGet()
   {
     return ($this->request->isGet());
+  }
+  
+  protected final function isTemplateFound()
+  {
+    $resource = Sabel_View_Locator_Factory::create()
+                                            ->make($this->destination)
+                                            ->locate($this->destination);
+    return (!$resource->isMissing());
   }
 }
 
