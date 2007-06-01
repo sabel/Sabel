@@ -7,23 +7,33 @@ Sabelではconfig/map.phpに記述されている内容に従って、
 リクエストURIからモジュール、コントローラ、アクションを決定します。
 たとえば、map.phpが次のように定義されているとします。
 
-    candidate("default",
-              ":controller/:action/:id",
-              array("module" => "index",
-                    "default" => array(":controller" => "index",
-                                    ":action"    => "index",
-                                    ":id"        => null)));
+<?php
+    class Map extends Sabel_Map_Config
+    {
+      public function configure()
+      {
+        $this->route("default")
+               ->uri(":controller/:action/:id")
+               ->module("index")
+               ->defaults(array(":controller" => "index",
+                                ":action"     => "index",
+                                ":id"         => null));
+      }
+    }
+?>
 
 このとき、http://example.com/user/show/1 というリクエストが到着すると、
 app/index/controllers/User.php内のshowアクションが実行されます。
 このファイルの内容は下記のようになります。
 
+<?php
     class Index_Controllers_User extends Sabel_Controller_Page
     {
       public function show()
       {
       }
-    }
+    }    
+?>
 
 showアクションが存在しない。かつテンプレートが存在しなければ、notFoundアクションが実行されます。
 notfoundアクションもnotfoundテンプレートも見つからない状況では、
@@ -38,6 +48,7 @@ HTTPレスポンスヘッダのStatusには404が設定されます。
 コントローラクラス内に書かれているパブリックメソッドは全てアクションとして扱われます。
 パブリックメソッドをアクションとして扱いたくない場合は、下記の例の様に指定してください。
 
+<?php    
     class Controller extends Sabel_Controller_Page
     {
       protected $hidden = array("show", "lists");
@@ -50,6 +61,7 @@ HTTPレスポンスヘッダのStatusには404が設定されます。
       {
       }
     }
+?>
 
 $hiddenに指定されているメソッドはアクションには含まれません。
 テンプレートのみ存在する場合も、notFoundとして扱われます。
@@ -154,8 +166,85 @@ Sabelでは状態を厳格に制御する機構が用意されています。
 状態とは、UMLでいうところのステートチャートにあたるものです。
 
 使用方法
-- コントローラをSabel_Controller_Flowを継承して作成する
+- コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)
 - 状態設定クラスを作成する
+
+コントローラクラス例
+<?php    
+    class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
+    {
+      public function index()
+      {
+      }
+      
+      public function prepare()
+      {
+      }
+      
+      public function confirmEvent()
+      {
+        $this->flow->name  = $this->name;
+        $this->flow->email = $this->email;
+      }
+      
+      public function confirm()
+      {
+      }
+      
+      public function reprepareEvent()
+      {
+        $this->flow->errors = null;
+      }
+      
+      public function registEvent()
+      {
+        $user = new Users();
+        $user->name  = $this->flow->name;
+        $user->email = $this->flow->email;
+        $user->save();
+        
+        if ($this->flow->errors) {
+          return false;
+        } else {
+          $this->flow->user = $user;
+        }
+      }
+      
+      public function success()
+      {
+      }
+    }
+?>
+
+設定クラス例
+<?php
+    class Index_Flow_Flow extends Sabel_Plugin_Flow_Config
+    {
+      public function configure()
+      {
+        list($prepare, $confirm, $success) = $this->activities("prepare",
+                                                               "confirm",
+                                                               "success");
+        
+        $prepare->addTransition("confirmEvent",   $confirm);
+        $confirm->addTransition("registEvent",    $success);
+        $confirm->addTransition("reprepareEvent", $prepare);
+        
+        $this->entry($prepare)->add($confirm)->end($success);
+      }
+    }
+?>
+
+上記の様に設定すると、状態がコントロールされます。
+
+状態が継続している時は$this->flow変数に状態変数が保持されます。
+
+現時点ではTokenを手動で設定する必要があります。
+フォーム内では次のように設定してください。
+<input type="hidden" name="token" value="<?= $token ?>" />
+
+aタグでは次のようにしてください。
+<a href="reprepareEvent/?token=<?= $token ?>">correct</a>
 
 
 
