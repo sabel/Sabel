@@ -56,8 +56,8 @@ class Sabel_DB_Model
       $tblName = $this->tableName;
     }
 
-    $this->schema  = $schema = Sabel_DB_Schema_Loader::getSchema($this);
-    $this->columns = $schema->getColumnNames();
+    $this->schema  = $schema  = Sabel_DB_Schema_Loader::getSchema($this);
+    $this->columns = $columns = $schema->getColumnNames();
 
     if ($schema->getPrimaryKey() === null) {
       if (!$this->ignoreNothingPrimaryKey && $this->structure !== "view") {
@@ -85,6 +85,10 @@ class Sabel_DB_Model
   public function getCommand()
   {
     return new Sabel_DB_Command_Executer($this);
+  }
+
+  public function __clone()
+  {
   }
 
   public function __call($method, $args)
@@ -441,8 +445,10 @@ class Sabel_DB_Model
     $results   = array();
     $modelName = $this->getModelName();
 
+    $source = MODEL($modelName);
+
     foreach ($rows as $row) {
-      $model = MODEL($modelName);
+      $model = clone $source;
       $model->setProperties($row);
 
       if ($parents) $model->addParent($parents);
