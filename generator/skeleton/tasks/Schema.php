@@ -3,8 +3,7 @@
 if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 define("SCHEMA_DIR", "lib/schema/");
 
-Sabel::fileUsing("tasks/environment.php");
-Sabel::fileUsing("config/connection.php");
+Sabel::fileUsing("config/environment.php");
 
 class Schema
 {

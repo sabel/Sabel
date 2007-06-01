@@ -1,11 +1,9 @@
 <?php
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-
 define("SAKLE_CMD", "sakle");
 
-Sabel::fileUsing("tasks/environment.php");
-Sabel::fileUsing("config/connection.php");
+Sabel::fileUsing("config/environment.php");
 
 /**
  * Migration
