@@ -49,6 +49,11 @@ abstract class Sabel_Plugin_Flow_Config
   
   public function isActivity($action)
   {
+    foreach ($this->getActivities() as $activity) {
+      if ($activity->hasEvent($action)) {
+        return true;
+      }
+    }
     return (in_array($action, array_keys($this->getActivities())));
   }
   
