@@ -211,6 +211,7 @@ final class Sabel_Controller_Front
       } catch (Exception $e) {
         $html = $content;
       }
+      if ($html === null) $html = $content;
     } else {
       $html = $content;
     }
