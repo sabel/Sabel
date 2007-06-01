@@ -28,9 +28,6 @@ final class Sabel_Controller_Front
       $this->request = $this->injector->newInstance("Sabel_Request");
     }
     
-    // @todo renew for new map format
-    Sabel::fileUsing(RUN_BASE . Sabel_Const::DEFAULT_MAP_FILE);
-    
     $this->plugin = Sabel_Plugin::create();
   }
     
@@ -80,6 +77,32 @@ final class Sabel_Controller_Front
   {
     if ($request !== null) {
       $this->request = $request;
+    }
+    
+    $config = new Map();
+    $config->configure();
+    
+    foreach($config->getRoutes() as $route) {
+      $name = $route->getName();
+      $uri  = $route->getUri();
+      $options = array();
+      
+      if ($route->hasModule()) {
+        $options["module"] = $route->getModule();
+      }
+      
+      if ($route->hasController()) {
+        $options["controller"] = $route->getController();
+      }
+      
+      if ($route->hasAction()) {
+        $options["action"] = $route->getAction();
+      }
+      
+      $options["default"]     = $route->getDefaults();
+      $options["requirement"] = $route->getRequirements();
+      
+      Sabel_Map_Configurator::addCandidate($name, $uri, $options);
     }
     
     $candidate = new Sabel_Map_Candidate();
