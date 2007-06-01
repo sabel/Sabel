@@ -50,10 +50,14 @@ final class Sabel_Controller_Front
     $this->controller = $executer->create();
     
     $response = $executer->execute($this->request, $storage);
-
-    if ($response->isNotFound()) {
+    
+    if ($response->isNotFound() || $response->isServerError()) {
       $response->outputHeader();
-      $destination->setAction("notFound");
+      if ($response->isNotFound()) {
+        $destination->setAction("notFound");
+      } elseif ($response->isServerError()) {
+        $destination->setAction("serverError");
+      }
       $response = $executer->execute($this->request, $storage);
       if ($response->isNotFound()) {
         $destination->setController("index");

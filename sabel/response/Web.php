@@ -14,9 +14,10 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   private $location = "";
   private $status = 200;
   
-  const SUCCESS    = 200;
-  const REDIRECTED = 300;
-  const NOT_FOUND  = 400;
+  const SUCCESS      = 200;
+  const REDIRECTED   = 300;
+  const NOT_FOUND    = 400;
+  const SERVER_ERROR = 500;
   
   public function notFound()
   {
@@ -28,6 +29,8 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   {
     if ($this->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
+    } elseif ($this->isServerError()) {
+      header("HTTP/1.0 500 Internal Server Error");
     }
   }
   
@@ -62,5 +65,16 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function isSuccess()
   {
     return ($this->status === self::SUCCESS);
+  }
+  
+  public function serverError()
+  {
+    $this->status = self::SERVER_ERROR;
+    return $this;
+  }
+  
+  public function isServerError()
+  {
+    return ($this->status === self::SERVER_ERROR);
   }
 }
