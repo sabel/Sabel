@@ -50,29 +50,33 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
     
     if ($flow->isInFlow()) {
       if ($flow->canTransitTo($action)) {
-        $guard = $controller->execute($action);
-        
-        if ($guard === null) {
-          $guard = true;
+        $response = $controller->execute($action);
+                
+        if ($response->result === null) {
+          $response->result = true;
         }
         
-        if ($guard) {
+        if ($response->result) {
           $nextAction = $flow->transit($action);
-          $controller->redirectTo($nextAction->getName());
+          $controller->redirectTo("a: " . $nextAction->getName());
         } else {
-          $controller->redirectTo($flow->getCurrentActivity()->getName());
+          $controller->redirectTo("a: " . $flow->getCurrentActivity()->getName());
         }
+        
+        $manager->save($flow);
+        $this->assignToken($manager, $controller, $flow);
         
         return $controller->getResponse();
       } elseif ($flow->isCurrent($action)) {
+        $manager->save($flow);
+        $this->assignToken($manager, $controller, $flow);
         return $controller->execute($action);
       } else {
+        $manager->save($flow);
+        $this->assignToken($manager, $controller, $flow);
         $this->destination->setAction(self::INVALID_ACTION);
         return $controller->execute(self::INVALID_ACTION);
       }
-      
-      $manager->save($flow);
-      $this->assignToken($manager, $controller, $flow);
     } else {
       if ($flow->isEntryActivity($action)) {
         $logger->log("{$action} is entry activity");
@@ -82,7 +86,9 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
         $manager->save($flow);
         return $response;
       } elseif ($flow->isEndActivity($action)) {
+        $response = $controller->execute($action);
         $manager->remove();
+        return $response;
       } elseif (!$flow->isActivity($action)) {
         return $controller->execute($action);
       } else {
