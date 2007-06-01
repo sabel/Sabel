@@ -15,6 +15,7 @@ class Sabel_DB_Schema_Table
   protected $columns         = array();
   protected $primaryKey      = null;
   protected $foreignKeys     = null;
+  protected $uniques         = null;
   protected $incrementColumn = null;
   protected $tableEngine     = null;
 
@@ -105,6 +106,28 @@ class Sabel_DB_Schema_Table
   public function isForeignKey($colName)
   {
     return isset($this->foreignKeys[$colName]);
+  }
+
+  public function setUniques($uniques)
+  {
+    $this->uniques = $uniques;
+  }
+
+  public function getUniques()
+  {
+    return $this->uniques;
+  }
+
+  public function isUnique($colName)
+  {
+    $uniques = $this->uniques;
+    if ($uniques === null) return false;
+
+    foreach ($uniques as $unique) {
+      if (in_array($colName, $unique)) return true;
+    }
+
+    return false;
   }
 
   public function setTableEngine($engine)

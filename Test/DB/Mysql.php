@@ -167,6 +167,10 @@ class MysqlHelper
                  tx text,
                  users_id integer not null,
                  city_id integer not null,
+                 uni1 integer not null,
+                 uni2 integer not null,
+                 uni3 integer not null,
+                 unique(uni1), unique(uni2, uni3),
                  foreign key(users_id) references users(id) on delete cascade on update no action,
                  foreign key(city_id) references city(id) on delete no action) type=InnoDB";
 

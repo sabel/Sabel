@@ -155,7 +155,11 @@ class SQLiteHelper
                  dt datetime,
                  ft_val float default 1,
                  db_val double not null,
-                 tx text)";
+                 tx text,
+                 uni1 integer not null,
+                 uni2 integer not null,
+                 uni3 integer not null,
+                 unique(uni1), unique(uni2, uni3))";
 
     $sqls[] = "CREATE TABLE student (
                  id integer primary key,

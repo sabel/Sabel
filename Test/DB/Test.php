@@ -883,6 +883,11 @@ class Test_DB_Test extends SabelTestCase
       $this->assertEquals($fkeys["city_id"]["on_delete"], "NO ACTION");
       $this->assertEquals($fkeys["city_id"]["on_update"], "NO ACTION");
     }
+
+    $this->assertFalse($schema->isUnique("name"));
+    $this->assertTrue($schema->isUnique("uni1"));
+    $this->assertTrue($schema->isUnique("uni2"));
+    $this->assertTrue($schema->isUnique("uni3"));
   }
 
   public function testBridge()
@@ -907,6 +912,9 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('student_id' => 4, 'course_id' => 3));
     $model->save(array('student_id' => 2, 'course_id' => 3));
     $model->save(array('student_id' => 3, 'course_id' => 2));
+
+    $pkey = $model->getSchema()->getPrimaryKey();
+    $this->assertTrue(is_array($pkey));
 
     $suzuki = Sabel_Model::load('Student')->selectOne(1);
     $this->assertEquals($suzuki->name, 'suzuki');

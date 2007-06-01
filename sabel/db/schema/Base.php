@@ -36,6 +36,7 @@ abstract class Sabel_DB_Schema_Base
     $columns = $this->createColumns($tblName);
     $schema  = new Sabel_DB_Schema_Table($tblName, $columns);
     $schema->setForeignKeys($this->getForeignKey($tblName));
+    $schema->setUniques($this->getUniques($tblName));
 
     return $schema;
   }

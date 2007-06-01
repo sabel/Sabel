@@ -13,13 +13,12 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
 {
   protected
     $tableList    = "SELECT name FROM sqlite_master WHERE type = 'table'",
-    $tableColumns = "SELECT * FROM sqlite_master WHERE name = '%s'";
+    $tableColumns = "SELECT sql FROM sqlite_master WHERE name = '%s'";
 
   private
+    $colLine     = "",
     $floatTypes  = array("float", "float4", "real"),
     $doubleTypes = array("float8", "double");
-
-  protected $colLine = "";
 
   public function getTableLists()
   {
@@ -30,31 +29,46 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     return $tables;
   }
 
-  protected function createColumns($table)
+  public function getForeignKey($tblName)
   {
-    $rows = $this->execute(sprintf($this->tableColumns, $table));
-    return $this->create($rows[0]["sql"]);
+    return null;
   }
 
-  private function create($createSQL)
+  public function getUniques($tblName)
   {
-    $constLine = "";
+    $createSql = $this->getCreateSql($tblName);
+    preg_match_all("/UNIQUE ?(\([^)]+\))/i", $createSql, $matches);
+    if (empty($matches[1])) return null;
 
-    $lines   = $this->splitCreateSQL($createSQL);
+    $uniques = array();
+    foreach ($matches[1] as $unique) {
+      $unique = trim(str_replace(array("(", ")"), "", $unique));
+      $exp = array_map("trim", explode(",", $unique));
+      $uniques[] = $exp;
+    }
+
+    return $uniques;
+  }
+
+  protected function createColumns($tblName)
+  {
+    return $this->create($this->getCreateSql($tblName));
+  }
+
+  private function create($createSql)
+  {
     $columns = array();
+    $lines   = $this->splitCreateSQL($createSql);
+
     foreach ($lines as $key => $line) {
       $co    = new Sabel_DB_Schema_Column();
       $split = explode(" ", $line);
       $name  = $split[0];
       $attr  = trim(substr($line, strlen($name)));
-
       $co->name = $name;
 
-      $ppos = strpos($line, "primary key");
-      if ($ppos !== false && strpos($line, "(") > $ppos) {
-        $constLine = $line . "," . $lines[$key + 1];
-        break;
-      }
+      if (preg_match("/PRIMARY KEY ?\(/i", $line) ||
+          preg_match("/UNIQUE ?\(/i", $line)) break;
 
       $this->setIncrement($co, $attr);
 
@@ -63,10 +77,11 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
         $this->setPrimary($co);
         $this->setDefault($co);
       }
+
       $columns[$name] = $co;
     }
 
-    if ($constLine !== "") $columns = $this->setConstraint($columns, $constLine);
+    $this->setConstraintPrimaryKey($columns, $createSql);
     return $columns;
   }
 
@@ -75,14 +90,6 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     $sql   = substr(strpbrk($sql, "("), 0);
     $lines = explode(",", substr($sql, 1, -1));
     return array_map("strtolower", array_map("trim", $lines));
-  }
-
-  private function setIncrement($co, $attributes)
-  {
-    $pri  = (strpos($attributes, "integer primary key") !== false);
-    $pri2 = (strpos($attributes, "integer not null primary key") !== false);
-
-    $co->increment = ($pri || $pri2);
   }
 
   private function setDataType($co, $attributes)
@@ -148,12 +155,8 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
 
   private function setPrimary($co)
   {
-    if ($this->colLine === "") {
-      $co->primary = false;
-    } else {
-      $co->primary   = (strpos($this->colLine, "primary key") !== false);
-      $this->colLine = str_replace("primary key", "", $this->colLine);
-    }
+    $co->primary   = (strpos($this->colLine, "primary key") !== false);
+    $this->colLine = str_replace("primary key", "", $this->colLine);
   }
 
   private function setDefault($co)
@@ -171,18 +174,32 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     }
   }
 
-  private function setConstraint($columns, $line)
+  private function setIncrement($co, $attributes)
   {
-    $line = strpbrk($line, "(");
-    if (strpbrk($line, ",") !== false) {
-      $parts = explode(",", $line);
-      foreach ($parts as $key => $part) $parts[$key] = str_replace(array("(", ")"), "", $part);
-      foreach ($parts as $key) $columns[$key]->primary = true;
-    } else {
-      $priCol = substr($line, 1, -1);
-      $columns[$priCol]->primary = true;
-    }
+    $pri  = (strpos($attributes, "integer primary key") !== false);
+    $pri2 = (strpos($attributes, "integer not null primary key") !== false);
 
-    return $columns;
+    $co->increment = ($pri || $pri2);
+  }
+
+  private function setConstraintPrimaryKey($columns, $createSql)
+  {
+    preg_match_all("/PRIMARY KEY ?(\([^)]+\))/i", $createSql, $matches);
+    if (empty($matches[1])) return;
+
+    $pkey = str_replace(array("(", ")"), "", $matches[1][0]);
+    $exp  = array_map("trim", explode(",", $pkey));
+
+    foreach ($exp as $colName) {
+      if (isset($columns[$colName])) {
+        $columns[$colName]->primary = true;
+      }
+    }
+  }
+
+  private function getCreateSql($tblName)
+  {
+    $rows = $this->execute(sprintf($this->tableColumns, $tblName));
+    return $rows[0]["sql"];
   }
 }

@@ -59,16 +59,31 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
 
   public function getForeignKey($tblName)
   {
-    $result   = $this->execute("SELECT VERSION() AS version");
-    $version  = $result[0]["version"];
-    $instance = Sabel_DB_Schema_Mysql_Factory::create($version);
-
+    $instance = Sabel_DB_Schema_Mysql_Factory::create($this->getMysqlVersion());
     return $instance->getForeignKeys($tblName, $this->driver);
+  }
+
+  public function getUniques($tblName)
+  {
+    $instance = Sabel_DB_Schema_Mysql_Factory::create($this->getMysqlVersion());
+    return $instance->getUniques($tblName, $this->driver);
   }
 
   public function getTableEngine($tblName)
   {
     $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
     return $row[0]["Engine"];
+  }
+
+  private function getMysqlVersion()
+  {
+    static $version = null;
+
+    if ($version === null) {
+      $result  = $this->execute("SELECT VERSION() AS version");
+      $version = $result[0]["version"];
+    }
+
+    return $version;
   }
 }

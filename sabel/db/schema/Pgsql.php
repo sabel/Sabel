@@ -85,7 +85,8 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
          . "{$ij} {$is}.constraint_column_usage ccu ON tc.{$cn} = ccu.{$cn} "
          . "{$ij} {$is}.key_column_usage kcu ON tc.{$cn} = kcu.{$cn} "
          . "{$ij} {$is}.referential_constraints rc ON tc.{$cn} = rc.{$cn} "
-         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}'";
+         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}' "
+         . "AND tc.constraint_type = 'FOREIGN KEY'";
 
     $rows = $this->execute($sql);
     if (empty($rows)) return null;
@@ -100,5 +101,26 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
     }
 
     return $columns;
+  }
+
+  public function getUniques($tblName)
+  {
+    $is  = "information_schema";
+    $sql = "SELECT tc.constraint_name, kcu.column_name "
+         . "FROM {$is}.table_constraints tc "
+         . "INNER JOIN {$is}.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name "
+         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}' "
+         . "AND tc.constraint_type = 'UNIQUE'";
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return null;
+
+    $uniques = array();
+    foreach ($rows as $row) {
+      $key = $row["constraint_name"];
+      $uniques[$key][] = $row["column_name"];
+    }
+
+    return array_values($uniques);
   }
 }
