@@ -24,7 +24,7 @@ abstract class Sabel_DB_Schema_Base
   public function getAll()
   {
     $tables = array();
-    foreach ($this->getTableNames() as $tblName) {
+    foreach ($this->getTableLists() as $tblName) {
       $tables[$tblName] = $this->getTable($tblName);
     }
 
