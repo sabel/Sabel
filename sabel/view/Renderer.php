@@ -18,6 +18,9 @@ abstract class Sabel_View_Renderer
   
   public function partial($name, $options = array())
   {
-    return Sabel_View::render($name, array("assign" => $options));
+    $destination = clone Sabel_Context::getDestination();
+    $destination->setAction($name);
+    
+    return Sabel_View::render($destination, array("assign" => $options));
   }
 }

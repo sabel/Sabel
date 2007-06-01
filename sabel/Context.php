@@ -14,12 +14,13 @@ class Sabel_Context
   private static $parameters  = array();
   private static $includePath = array();
   
-  private static $controller = null;
-  private static $candidate = null;
-  private static $view = null;
-  private static $disableLayout = false;
+  private static $candidate   = null;
+  private static $destination = null;
+  private static $controller  = null;
+  private static $view        = null;
+  private static $storage     = null;
   
-  private static $storage = null;
+  private static $disableLayout = false;
   
   public static function initialize()
   {
@@ -84,6 +85,16 @@ class Sabel_Context
   public static function getParameter($name)
   {
     return self::$parameters[$name];
+  }
+  
+  public static function setDestination($destination)
+  {
+    self::$destination = $destination;
+  }
+  
+  public static function getDestination()
+  {
+    return self::$destination;
   }
   
   public static function log($message)

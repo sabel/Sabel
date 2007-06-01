@@ -37,6 +37,7 @@ final class Sabel_Controller_Front
     Sabel_Context::initialize();
     
     $destination = $this->destination;
+    Sabel_Context::setDestination($destination);
     
     Sabel_Helper::load($this->request, $destination);
     
