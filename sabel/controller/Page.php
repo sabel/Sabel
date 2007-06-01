@@ -141,6 +141,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       return $response;
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
+      Sabel_Context::log($exception->getMessage());
       return $response->serverError();
     }
   }

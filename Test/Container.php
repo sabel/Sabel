@@ -53,15 +53,15 @@ class Test_Container extends SabelTestCase
     $this->assertTrue($car->getEngine());
   }
   
-  public function testBadInjectionConfig()
+  public function testWrongInjectionConfig()
   {
-    $injector = Sabel_Container::injector(new BadClassNameConfig());
+    $injector = Sabel_Container::injector(new WrongClassNameConfig());
     
     try {
       $person = $injector->newInstance("Person");
       $this->fail();
-    } catch (Sabel_Exception_Runtime $e) {
-      $this->assertEquals("BadCalculator does not exists", $e->getMessage());
+    } catch (Exception $e) {
+      $this->assertEquals("Class WrongCalculator does not exist", $e->getMessage());
     }
   }
   
@@ -271,11 +271,11 @@ class Config extends Sabel_Container_Injection
   }
 }
 
-class BadClassNameConfig extends Sabel_Container_Injection
+class WrongClassNameConfig extends Sabel_Container_Injection
 {
   public function configure()
   {
-    $this->bind("Calculator")->to("BadCalculator");
+    $this->bind("Calculator")->to("WrongCalculator");
   }
 }
 
