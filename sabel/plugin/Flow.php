@@ -49,6 +49,10 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
     $controller->flow = $flow;
     
     if ($flow->isInFlow()) {
+      if (!$flow->isActivity($action)) {
+        return $controller->execute($action);
+      }
+        
       if ($flow->canTransitTo($action)) {
         $response = $controller->execute($action);
                 
