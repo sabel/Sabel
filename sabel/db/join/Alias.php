@@ -13,7 +13,7 @@ class Sabel_DB_Join_Alias
 {
   protected static $objects = array();
 
-  public static function set($source, $object)
+  public static function regist($source, $object)
   {
     $object->setSourceName($source);
     self::$objects[$source][] = $object;

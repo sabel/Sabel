@@ -40,7 +40,7 @@ class Sabel_DB_Model_CascadeDelete
 
     foreach ($childNames as $name) {
       $keys    = $this->getKeys($mdlName, $name, $pKey);
-      $results = $this->pushStack($name, $keys["fKey"], $idValue);
+      $results = $this->pushStack($name, $keys["fkey"], $idValue);
       if ($results) $models[] = $results;
     }
 
@@ -67,7 +67,7 @@ class Sabel_DB_Model_CascadeDelete
     foreach ($childNames as $name) {
       $keys = $this->getKeys($mdlName, $name, $pKey);
       foreach ($children as $child) {
-        $results = $this->pushStack($name, $keys["fKey"], $child->$keys["id"]);
+        $results = $this->pushStack($name, $keys["fkey"], $child->$keys["id"]);
         if ($results) $models[] = $results;
       }
     }
@@ -98,7 +98,7 @@ class Sabel_DB_Model_CascadeDelete
       $keys = null;
     }
 
-    return Sabel_DB_Relation_Key::create(MODEL($parent), $keys);
+    return getRelationalKeys(MODEL($parent), $keys);
   }
 
   private function clearCascadeStack()

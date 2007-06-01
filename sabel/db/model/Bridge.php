@@ -34,7 +34,7 @@ class Sabel_DB_Model_Bridge
     }
 
     $joiner  = new Sabel_DB_Join($bridge);
-    $keys    = array("fKey" => $fKey, "id" => $pKey);
+    $keys    = array("fkey" => $fKey, "id" => $pKey);
     $results = $joiner->add(MODEL($child), $keys)->join();
 
     if (!$results) return false;

@@ -479,13 +479,10 @@ class Sabel_DB_Model
   public function getChild($childName, $constraints = null)
   {
     $child = MODEL($childName);
-    $keys  = Sabel_DB_Relation_Key::create($this, null);
+    $keys  = getRelationalKeys($this);
 
-    if ($constraints) {
-      $child->setConstraint($constraints);
-    }
-
-    return $child->select($keys["fKey"], $this->$keys["id"]);
+    if ($constraints) $child->setConstraint($constraints);
+    return $child->select($keys["fkey"], $this->$keys["id"]);
   }
 
   public function setProperties($row)

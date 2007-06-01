@@ -81,7 +81,6 @@ function __($text)
   $text = preg_replace('/[\s]*,[\s]+/', ',', $text);
   $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
   $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
-  $text = preg_replace("/'__(TRUE|FALSE)__'/", '__$1__', $text);
   $text = str_replace("' ", "'=>", $text);
   eval('$array = array('.$text.');');
   return $array;
@@ -172,7 +171,7 @@ function convert_to_tablename($mdlName)
   if (preg_match("/^[a-z0-9_]+$/", $mdlName)) {
     $tblName = $mdlName;
   } else {
-    $tblName = substr(strtolower(preg_replace("/([A-Z])/", '_$1', $mdlName)), 1);    
+    $tblName = substr(strtolower(preg_replace("/([A-Z])/", '_$1', $mdlName)), 1);
   }
 
   return $cache[$mdlName] = $tblName;
@@ -185,7 +184,7 @@ function convert_to_modelname($tblName)
   if (isset($cache[$tblName])) {
     return $cache[$tblName];
   } else {
-    $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));    
+    $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));
     return $cache[$tblName] = $mdlName;
   }
 }
@@ -194,6 +193,20 @@ function MODEL($mdlName, $arg1 = null, $arg2 = null)
 {
   return Sabel_Model::load($mdlName, $arg1, $arg2);
 }
+
+function getRelationalKeys($model, $keys = array(), $tblName = null)
+{
+  if ($tblName === null) $tblName = $model->getTableName();
+
+  $pKey = $model->getPrimaryKey();
+  $fKey = (isset($keys["fkey"])) ? $keys["fkey"] : $tblName . "_" . $pKey;
+  $id   = (isset($keys["id"]))   ? $keys["id"]   : $pKey;
+
+  return array("id" => $id, "fkey" => $fKey);
+}
+
+
+// end of db functions.
 
 function now()
 {

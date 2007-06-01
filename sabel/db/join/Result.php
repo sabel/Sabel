@@ -11,10 +11,11 @@
  */
 class Sabel_DB_Join_Result
 {
-  protected static $ins = null;
+  private static $ins = null;
+  private static $cacheModels = array();
 
-  protected $objects   = array();
-  protected $structure = array();
+  private $objects   = array();
+  private $structure = array();
 
   private function __construct() {}
 
@@ -50,18 +51,7 @@ class Sabel_DB_Join_Result
   public static function clear()
   {
     self::$ins = null;
-  }
-
-  protected function getUniqueTables()
-  {
-    $tables = array();
-    $structure = $this->structure;
-
-    foreach ($structure as $joinTables) {
-      $tables = array_merge($tables, $joinTables);
-    }
-
-    return array_unique($tables);
+    self::$cacheModels = array();
   }
 
   public function build($source, $rows)
@@ -75,6 +65,8 @@ class Sabel_DB_Join_Result
     }
 
     $results = array();
+    $selfObj = MODEL($source->getModelName());
+
     foreach ($rows as $row) {
       $models = $this->createModels($row, $tables);
 
@@ -86,10 +78,10 @@ class Sabel_DB_Join_Result
         }
       }
 
-      $tblName = $source->getTableName();
-      $self = MODEL(convert_to_modelname($tblName));
+      $self = clone $selfObj;
       $self->setProperties($row);
 
+      $tblName = $source->getTableName();
       foreach ($structure[$tblName] as $parent) {
         $name = convert_to_modelname($parent);
         $self->$name = $models[$parent];
@@ -101,7 +93,7 @@ class Sabel_DB_Join_Result
     return $results;
   }
 
-  protected function createModels($row, $tables)
+  private function createModels($row, $tables)
   {
     $models = array();
 
@@ -113,5 +105,17 @@ class Sabel_DB_Join_Result
     }
 
     return $models;
+  }
+
+  private function getUniqueTables()
+  {
+    $tables = array();
+    $structure = $this->structure;
+
+    foreach ($structure as $joinTables) {
+      $tables = array_merge($tables, $joinTables);
+    }
+
+    return array_unique($tables);
   }
 }

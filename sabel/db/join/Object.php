@@ -40,12 +40,7 @@ class Sabel_DB_Join_Object
       $this->columns = $model->getColumnNames();
     }
 
-    $this->joinKeys = Sabel_DB_Relation_Key::create($model, $joinKeys, $tblName);
-  }
-
-  public function addObject($object)
-  {
-    $this->objects[] = $object;
+    $this->joinKeys = getRelationalKeys($model, $joinKeys, $tblName);
   }
 
   public function isModel()
@@ -165,15 +160,22 @@ class Sabel_DB_Join_Object
     }
 
     $keys = $object->getJoinKeys();
-    $query[] = "ON {$sourceName}.{$keys["fKey"]} = {$name}.{$keys["id"]} ";
+    $query[] = "ON {$sourceName}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
   }
 
   public function createModel(&$row)
   {
     $columns = $this->getColumns();
+    $name    = $this->getName(false);
 
-    $name  = $this->getName(false);
-    $model = MODEL(convert_to_modelname($name));
+    static $models = array();
+
+    if (isset($models[$name])) {
+      $model = clone $models[$name];
+    } else {
+      $model = MODEL(convert_to_modelname($name));
+      $models[$name] = clone $model;
+    }
 
     if ($this->hasAlias()) {
       $name = strtolower($this->getAlias());

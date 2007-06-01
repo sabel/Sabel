@@ -34,7 +34,7 @@ abstract class Sabel_DB_Join_Base
     $builder->setObject($object);
     $builder->addStructure($this->tblName, $object->getName());
 
-    Sabel_DB_Join_Alias::set($this->tblName, $object);
+    Sabel_DB_Join_Alias::regist($this->tblName, $object);
 
     if ($alias !== null) {
       $name = $object->getModel()->getTableName();

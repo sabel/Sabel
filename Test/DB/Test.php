@@ -575,8 +575,9 @@ class Test_DB_Test extends SabelTestCase
     $join = new Sabel_DB_Join_Relay($user);
     $join->add(MODEL("City"));
 
-    $joiner->add($join, array("fKey" => "sender_id"), null, "FromUser");
-    $joiner->add(MODEL("Users"), array("fKey" => "recipient_id"), null, "ToUser");
+    $joiner->add($join, array("fkey" => "sender_id"), null, "FromUser");
+    $joiner->add(MODEL("Users"), array("fkey" => "recipient_id"), null, "ToUser");
+
     $results = $joiner->join();
 
     $this->assertEquals(count($results), 6);
@@ -1117,9 +1118,9 @@ class CountryCascadeDelete
   public function getKeys()
   {
     $keys = array();
-    $keys["Country"]["City"] = array("id" => "id", "fKey" => "country_id");
-    $keys["City"]["Company"] = array("id" => "id", "fKey" => "city_id");
-    $keys["City"]["Users"]   = array("id" => "id", "fKey" => "city_id");
+    $keys["Country"]["City"] = array("id" => "id", "fkey" => "country_id");
+    $keys["City"]["Company"] = array("id" => "id", "fkey" => "city_id");
+    $keys["City"]["Users"]   = array("id" => "id", "fkey" => "city_id");
 
     return $keys;
   }
