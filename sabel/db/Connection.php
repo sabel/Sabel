@@ -88,11 +88,7 @@ class Sabel_DB_Connection
       self::createDatabaseLink($connectionName);
     }
 
-    if (isset(self::$connections[$connectionName])) {
-      return self::$connections[$connectionName];
-    } else {
-      throw new Exception("database connection refused.");
-    }
+    return self::$connections[$connectionName];
   }
 
   public static function close($connectionName)
@@ -116,10 +112,9 @@ class Sabel_DB_Connection
     self::$connections = array();
   }
 
-  public static function error($connectionName)
+  private static function error($connectionName, $errorMsg = "")
   {
-    if (class_exists("Exception_DatabaseConnection")) {
-      Exception_DatabaseConnection::error($connectionName);
-    }
+    $msg = $connectionName . ": " . $errorMsg;
+    throw new Sabel_DB_Exception_Connection($msg);
   }
 }

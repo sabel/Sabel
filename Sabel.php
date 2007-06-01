@@ -34,7 +34,7 @@ define("CURRENT_PATH", dirname(__FILE__));
 set_include_path(CURRENT_PATH . ":" . get_include_path());
 
 // regist autoload static method
-spl_autoload_register(array("Sabel", "using"));
+spl_autoload_register(array("Sabel", "autoload"));
 
 require ("sabel" . DIR_DIVIDER . "Functions.php");
 require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Manager.php");
@@ -57,6 +57,11 @@ final class Sabel
   private static $cache = null;
   
   public static function using($className)
+  {
+    if (!class_exists($className, false)) self::autoload($className);
+  }
+  
+  static function autoload($className)
   {
     if (self::$cache === null) {
       self::$cache = Sabel_Cache_Manager::create();
