@@ -15,11 +15,12 @@ class Sabel_DB_Model
     $connectionName = "default";
 
   protected
-    $tableName = "",
-    $modelName = "",
-    $columns   = array(),
-    $schema    = null,
-    $selected  = false;
+    $tableName  = "",
+    $modelName  = "",
+    $columns    = array(),
+    $schema     = null,
+    $schemaCols = null,
+    $selected   = false;
 
   protected
     $values       = array(),
@@ -35,9 +36,6 @@ class Sabel_DB_Model
     $constraints      = array(),
     $conditionManager = null;
 
-  protected
-    $ignoreNothingPrimaryKey = false;
-
   public function __construct($arg1 = null, $arg2 = null)
   {
     $this->initialize();
@@ -50,20 +48,12 @@ class Sabel_DB_Model
     $this->modelName = $mdlName;
 
     if ($this->tableName === "") {
-      $tblName = convert_to_tablename($mdlName);
-      $this->tableName = $tblName;
-    } else {
-      $tblName = $this->tableName;
+      $this->tableName = convert_to_tablename($mdlName);
     }
 
-    $this->schema  = $schema  = Sabel_DB_Schema_Loader::getSchema($this);
-    $this->columns = $columns = $schema->getColumnNames();
-
-    if ($schema->getPrimaryKey() === null) {
-      if (!$this->ignoreNothingPrimaryKey && $this->structure !== "view") {
-        trigger_error("primary key not found in $tblName", E_USER_NOTICE);
-      }
-    }
+    $this->schema = $schema = Sabel_DB_Schema_Loader::getSchema($this);
+    $this->schemaCols = $columns = $schema->getColumns();
+    $this->columns = array_keys($columns);
   }
 
   protected function initializeSelect($arg1, $arg2 = null)
@@ -85,10 +75,6 @@ class Sabel_DB_Model
   public function getCommand()
   {
     return new Sabel_DB_Command_Executer($this);
-  }
-
-  public function __clone()
-  {
   }
 
   public function __call($method, $args)
@@ -137,6 +123,11 @@ class Sabel_DB_Model
     return $this->columns;
   }
 
+  public function getSchema()
+  {
+    return $this->schema;
+  }
+
   public function getPrimaryKey()
   {
     return $this->schema->getPrimaryKey();
@@ -150,11 +141,6 @@ class Sabel_DB_Model
   public function getTableEngine()
   {
     return $this->schema->getTableEngine();
-  }
-
-  public function getSchema()
-  {
-    return $this->schema;
   }
 
   public function setProjection($p)
@@ -253,43 +239,13 @@ class Sabel_DB_Model
   public function __get($key)
   {
     if (!isset($this->values[$key])) return null;
-    return $this->toRegularValue($key, $this->values[$key]);
-  }
 
-  protected function toRegularValue($key, $value)
-  {
+    $value = $this->values[$key];
     if ($value === null) return null;
 
-    $columns = $this->schema->getColumns();
+    $columns = $this->schemaCols;
     if (!isset($columns[$key])) return $value;
-
-    switch ($columns[$key]->type) {
-      case Sabel_DB_Type::INT:
-        return (int)$value;
-
-      case Sabel_DB_Type::BIGINT:
-        return ($value > 2147483647) ? $value : (int)$value;
-
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        return (float)$value;
-
-      case Sabel_DB_Type::BOOL:
-        if (is_bool($value)) return $value;
-        if (is_int($value))  return ($value === 1);
-
-        if (is_string($value)) {
-          return in_array($value, array("1", "t", "true"));
-        } else {
-          throw new Exception("invalid boolean type.");
-        }
-
-      case Sabel_DB_Type::DATETIME:
-        return (is_object($value)) ? $value : new Sabel_Date($value);
-
-      default:
-        return $value;
-    }
+    return $columns[$key]->cast($value);
   }
 
   public function toArray()
@@ -399,7 +355,7 @@ class Sabel_DB_Model
   public function selectOne($arg1 = null, $arg2 = null, $arg3 = null)
   {
     if ($arg1 === null && $this->conditionManager === null) {
-      throw new Exception("must be set condition ( where ).");
+      throw new Exception("must set the condition");
     }
 
     $this->setCondition($arg1, $arg2, $arg3);

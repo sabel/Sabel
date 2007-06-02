@@ -76,4 +76,35 @@ class Sabel_DB_Schema_Column
   {
     return ($this->type === Sabel_DB_Type::BYTE);
   }
+
+  public function cast($value)
+  {
+    switch ($this->type) {
+      case Sabel_DB_Type::INT:
+        return (int)$value;
+
+      case Sabel_DB_Type::STRING:
+      case Sabel_DB_Type::TEXT:
+        return (string)$value;
+
+      case Sabel_DB_Type::BIGINT:
+        return (string)$value;
+
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        return (float)$value;
+
+      case Sabel_DB_Type::BOOL:
+        if (is_bool($value)) return $value;
+        if (is_int($value))  return ($value === 1);
+
+        return in_array($value, array("1", "t", "true"));
+
+      case Sabel_DB_Type::DATETIME:
+        return (is_object($value)) ? $value : new Sabel_Date($value);
+
+      default:
+        return $value;
+    }
+  }
 }

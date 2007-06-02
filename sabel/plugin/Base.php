@@ -12,11 +12,12 @@
  */
 abstract class Sabel_Plugin_Base
 {
+  const ON_CREATE_CONTROLLER = "onCreateController";
   const ON_BEFORE_ACTION     = "onBeforeAction";
   const ON_AFTER_ACTION      = "onAfterAction";
-  const ON_EXECUTE_ACTION    = "onExecuteAction";
   const ON_REDIRECT          = "onRedirect";
-  const ON_CREATE_CONTROLLER = "onCreateController";
+  const ON_EXCEPTION         = "onException";
+  const ON_EXECUTE_ACTION    = "onExecuteAction";
   
   protected $controller  = null;
   protected $destination = null;
