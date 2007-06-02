@@ -491,17 +491,16 @@ class Sabel_DB_Model
     if (!is_array($pKey)) $pKey = (array)$pKey;
 
     $manager = $this->loadConditionManager();
+    $normal  = Sabel_DB_Condition_Object::NORMAL;
 
     foreach ($pKey as $key) {
       if (isset($row[$key])) {
-        $manager->addUnique(new Sabel_DB_Condition_Object($key, $row[$key]));
+        $c = new Sabel_DB_Condition_Object($key, $row[$key], $normal);
+        $manager->addUnique($c);
       }
     }
 
-    foreach ($row as $key => $val) {
-      $this->values[$key] = $val;
-    }
-
+    $this->values   = $row;
     $this->selected = true;
   }
 

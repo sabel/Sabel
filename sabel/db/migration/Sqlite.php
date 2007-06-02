@@ -21,11 +21,33 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime");
 
-  protected $autoPrimary = false;
+  private $autoPrimary = false;
 
   public function createTable($cols)
   {
     $this->executeQuery($this->getCreateSql($cols));
+  }
+
+  protected function getCreateSql($cols)
+  {
+    $query = array();
+
+    foreach ($cols as $col) {
+      $query[] = $this->createColumnAttributes($col);
+    }
+
+    if (!empty($this->pkeys) && !$this->autoPrimary) {
+      $query[] = "PRIMARY KEY(" . implode(", ", $this->pkeys) . ")";
+    }
+
+    if (!empty($this->uniques)) {
+      foreach ($this->uniques as $column) {
+        $query[] = "UNIQUE ({$column})";
+      }
+    }
+
+    $tblName = convert_to_tablename($this->mdlName);
+    return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
   }
 
   public function addColumn()
@@ -170,7 +192,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
   private function getDataType($col)
   {
     if ($col->increment) {
-      $this->sqlPrimary = true;
+      $this->autoPrimary = true;
       return "integer PRIMARY KEY";
     } else {
       if ($col->isString()) {

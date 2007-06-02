@@ -27,6 +27,7 @@ abstract class Sabel_DB_Driver_Base
   public function setSql($sql)
   {
     $this->sql = $sql;
+
     return $this;
   }
 
@@ -85,7 +86,9 @@ abstract class Sabel_DB_Driver_Base
 
   public function setConnectionName($connectionName)
   {
-    if ($connectionName !== $this->connectionName && isset($this->connection)) {
+    if ($connectionName === $this->connectionName) return;
+
+    if (isset($this->connection)) {
       $this->connection = Sabel_DB_Connection::get($connectionName);
     }
 

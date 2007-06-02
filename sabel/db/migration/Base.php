@@ -18,13 +18,9 @@ abstract class Sabel_DB_Migration_Base
   protected $mdlName  = "";
   protected $command  = "";
   protected $version  = 0;
-
   protected $pkeys    = array();
   protected $fkeys    = array();
   protected $uniques  = array();
-
-  // @todo
-  protected $sqlPrimary = false;
 
   public function __construct($filePath, $type, $dirPath = null)
   {
@@ -85,7 +81,9 @@ abstract class Sabel_DB_Migration_Base
       $restore = $this->getRestoreFileName();
       if (!is_file($restore)) {
         $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp);
+
+        $schema = $this->getTableSchema();
+        Sabel_DB_Migration_Tools_Restore::write($fp, $schema);
         fclose($fp);
       }
 
@@ -138,7 +136,7 @@ abstract class Sabel_DB_Migration_Base
       $query[] = $this->createColumnAttributes($col);
     }
 
-    if (!empty($this->pkeys) && !$this->sqlPrimary) {
+    if (!empty($this->pkeys)) {
       $query[] = "PRIMARY KEY(" . implode(", ", $this->pkeys) . ")";
     }
 
@@ -202,7 +200,7 @@ abstract class Sabel_DB_Migration_Base
       }
 
       $fp = fopen($restore, "w");
-      $this->writeRestoreFile($fp, $columns);
+      Sabel_DB_Migration_Tools_Restore::write($fp, null, $columns);
       fclose($fp);
     }
   }

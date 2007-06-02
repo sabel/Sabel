@@ -25,12 +25,18 @@ class Sabel_DB_Condition_Object
 
   public function __construct($key, $val, $option = null)
   {
-    list($key, $type) = $this->prepare($key, $val);
+    if ($option === self::NORMAL) {
+      $this->values = array("key"   => $this->filterModelAlias($key),
+                            "type"  => self::NORMAL,
+                            "value" => $val);
+    } else {
+      list($key, $type) = $this->prepare($key, $val);
 
-    $this->values = array("key"   => $key,
-                          "type"  => $type,
-                          "value" => $val,
-                          "not"   => ($option === self::NOT));
+      $this->values = array("key"   => $key,
+                            "type"  => $type,
+                            "value" => $val,
+                            "not"   => ($option === self::NOT));
+    }
   }
 
   public function __get($key)
@@ -38,7 +44,12 @@ class Sabel_DB_Condition_Object
     return (isset($this->values[$key])) ? $this->values[$key] : null;
   }
 
-  protected function prepare($key, $val)
+  public function build($builder)
+  {
+    return $builder->build($this);
+  }
+
+  private function prepare($key, $val)
   {
     if (strpos($key, self::IN) === 0) {
       $key  = str_replace(self::IN, "", $key);
@@ -63,16 +74,16 @@ class Sabel_DB_Condition_Object
       $type = self::NORMAL;
     }
 
+    return array($this->filterModelAlias($key), $type);
+  }
+
+  private function filterModelAlias($key)
+  {
     if (strpos($key, ".") !== false) {
       list($mdlName, $key) = explode(".", $key);
       $key = convert_to_tablename($mdlName) . "." . $key;
     }
 
-    return array($key, $type);
-  }
-
-  public function build($builder)
-  {
-    return $builder->build($this);
+    return $key;
   }
 }

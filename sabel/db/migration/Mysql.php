@@ -47,7 +47,9 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
       $restore = $this->getRestoreFileName();
       if (!is_file($restore)) {
         $fp = fopen($restore, "w");
-        $this->writeRestoreFile($fp);
+
+        $schema = $this->getTableSchema();
+        Sabel_DB_Migration_Tools_Restore::write($fp, $schema);
 
         $tblName  = convert_to_tablename($this->mdlName);
         $accessor = Sabel_DB_Migration_Manager::getAccessor();

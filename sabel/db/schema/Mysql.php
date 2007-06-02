@@ -66,7 +66,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
   public function getUniques($tblName)
   {
     $instance = Sabel_DB_Schema_Mysql_Factory::create($this->getMysqlVersion());
-    return $instance->getUniques($tblName, $this->driver);
+    return $instance->getUniques($tblName, $this->schemaName, $this->driver);
   }
 
   public function getTableEngine($tblName)
