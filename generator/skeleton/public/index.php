@@ -12,13 +12,11 @@ if (!defined('ENVIRONMENT')) {
 
 $aFrontController = new Sabel_Controller_Front();
 
-$aFrontController->processCandidate()
-                 ->plugin
+$aFrontController->plugin
                  ->add(new Sabel_Plugin_Common())
                  ->add(new Sabel_Plugin_Filter())
                  ->add(new Sabel_Plugin_View())
                  ->add(new Sabel_Plugin_Exception())
                  ->add(new Sabel_Plugin_Redirecter());
 
-$aFrontController->ignition();
-echo $aFrontController->getResult();
+echo $aFrontController->ignition();

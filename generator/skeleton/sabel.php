@@ -1,6 +1,5 @@
 <?php
 
-ob_start();
 define('RUN_BASE', dirname(realpath('.')));
 
 require ('Sabel/Sabel.php');
@@ -13,13 +12,11 @@ if (!defined('ENVIRONMENT')) {
 
 $aFrontController = new Sabel_Controller_Front();
 
-$aFrontController->processCandidate()
-                 ->plugin
-                 ->add(new Sabel_Plugin_Common())                 
+$aFrontController->plugin
+                 ->add(new Sabel_Plugin_Common())
                  ->add(new Sabel_Plugin_Filter())
                  ->add(new Sabel_Plugin_View())
                  ->add(new Sabel_Plugin_Exception())
                  ->add(new Sabel_Plugin_Redirecter());
-                 
+
 echo $aFrontController->ignition();
-ob_flush();
