@@ -1,0 +1,74 @@
+クイックスタート
+==============================================================================
+
+Sabelを利用した開発におけるクイックスタートマニュアルです。
+インストールから、簡単なアクションの実行までを説明します。
+
+インストール
+------------------------------------------------------------------------------
+
+Subversion
+    $ cd $PHP_INCLUDE_DIR
+    $ svn co svn+ssh://svn.servise.jp/var/svn/sabel/branch/${version} Sabel
+    $ sudo cp -Rp Sabel/bin/sabel /usr/local/bin/
+
+PEAR
+    $ pear channel-discover pear.sabel.jp
+    $ sudo pear install sabel/${version}
+    
+配置
+------------------------------------------------------------------------------
+Sabelアプリケーションを配置します。
+
+    $ cd ${DocumentRoot}
+    $ sabel
+    [SUCCESS] create: app
+    [SUCCESS] create: app/exception
+    [SUCCESS] create: app/index
+    ...
+    
+現段階のSabelでは.htaccessが有効になっている必要があります。
+    
+アクション実行
+------------------------------------------------------------------------------
+実際にアクセスしてみましょう。
+ブラウザで開いてください。 http://localhost/
+
+welcome to Sabel have fun!
+
+というメッセージが出力されると思います。いかがでしょう？
+
+DocumentRoot以下にあるファイルを編集してみましょう。
+    $ cd ${DocumentRoot}
+    $ vi app/index/views/index/index.tpl
+      ようこそ！
+
+もう一度アクセスしてみましょう。
+「ようこそ！」と表示されましたか？
+
+次にGETで渡された値をビューに表示してみましょう。
+
+アクセスするURLは次のようになります。
+http://localhost/?name=foo
+これはもう皆様ご存知の通りですね。
+
+app/index/controllers/Index.phpを開き、下記のように編集してみましょう。
+    <?php
+
+    class Index_Controllers_Index extends Sabel_Controller_Page
+    {
+      public function index()
+      {
+        $this->assign("name", $this->name);
+      }
+    }
+    
+これはIndexモジュールのIndexコントローラにindexというアクションを作成して、ビューにnameという変数をアサインしています。
+$this->nameという部分はURLにある?name=fooという部分ですね。
+echo $this->nameとして実行すればfooが出力されます。
+
+次にapp/index/views/index/index.tplを次のように編集してみましょう。
+    welcome <?= $name ?> !
+
+先ほどのURLにアクセスしてみましょう。
+どうでしょうか？ 「welcome foo !」と表示されましたか？
