@@ -10,7 +10,6 @@ function get_db_params($env = null)
                         "driver"   => "mysql",
                         "host"     => "localhost",
                         "database" => "default",
-                        "schema"   => "default",
                         "user"     => "root",
                         "password" => "")
                      );
@@ -21,7 +20,6 @@ function get_db_params($env = null)
                         "driver"   => "mysql",
                         "host"     => "localhost",
                         "database" => "default",
-                        "schema"   => "default",
                         "user"     => "root",
                         "password" => "")
                      );
@@ -32,7 +30,6 @@ function get_db_params($env = null)
                         "driver"   => "mysql",
                         "host"     => "localhost",
                         "database" => "default",
-                        "schema"   => "default",
                         "user"     => "root",
                         "password" => "")
                      );

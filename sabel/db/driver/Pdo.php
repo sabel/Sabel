@@ -129,12 +129,17 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
         $pdoStmt->closeCursor();
         return $this->result;
       } else {
-        $param = var_export($param, 1);
-        $error = $conn->errorInfo();
-        $error = (isset($error[2])) ? $error[2] : var_export($error, 1);
-        if (is_object($pdoStmt)) $sql = $pdoStmt->queryString;
-        $sql   = substr($sql, 0, 128) . "...";
-        throw new Exception("Error: pdo execute failed: $sql PARAMETERS: $param ERROR: $error");
+        if (is_object($pdoStmt)) {
+          $error = $pdoStmt->errorInfo();
+          $sql   = $pdoStmt->queryString;
+        } else {
+          $error = $conn->errorInfo();
+        }
+
+        $error = (isset($error[2])) ? $error[2] : print_r($error, true);
+        $param = (empty($param)) ? null : $param;
+
+        $this->error("pdo driver execute failed: $error", $sql, $param);
       }
     }
   }

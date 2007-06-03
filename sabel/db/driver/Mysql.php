@@ -40,8 +40,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Base
 
     if (!$result) {
       $error = mysql_error($this->connection);
-      $sql   = substr($this->sql, 0, 128) . "...";
-      throw new Exception("mysql_query execute failed: $sql ERROR: $error");
+      $this->error("mysql driver execute failed: $error");
     }
 
     $rows = array();

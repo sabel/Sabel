@@ -72,8 +72,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
 
     if (!$result) {
       $error = ibase_errmsg();
-      $sql   = substr($this->sql, 0, 128) . " ...";
-      throw new Exception("ibase_query execute failed: $sql ERROR: $error");
+      $this->error("ibase driver execute failed: $error");
     }
 
     $rows = array();

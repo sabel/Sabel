@@ -184,6 +184,6 @@ class Sabel_DB_Connection
                      "CONNECTION_NAME" => $connectionName,
                      "PARAMETERS"      => $params);
 
-    throw new Sabel_DB_Exception_Connection(print_r($message, true));
+    throw new Sabel_DB_Exception(print_r($message, true));
   }
 }

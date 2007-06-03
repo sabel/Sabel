@@ -13,6 +13,7 @@ class Sabel_Plugin_Exception extends Sabel_Plugin_Base
       echo "<PRE>";
       print_r($exception->getTraceAsString());
       print_r($exception->getMessage());
+      echo "</PRE>";
     }
   }
 }

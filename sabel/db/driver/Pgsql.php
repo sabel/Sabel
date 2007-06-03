@@ -34,8 +34,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Base
 
     if (!$result) {
       $error = pg_result_error($result);
-      $sql   = substr($this->sql, 0, 128) . "...";
-      throw new Exception("pg_query execute failed: $sql ERROR: $error");
+      $this->error("pgsql driver execute failed: $error");
     }
 
     $rows = array();

@@ -168,6 +168,27 @@ abstract class Sabel_DB_Driver_Base
     $method = $this->closeFunction;
     $method($connection);
   }
+
+  protected function error($error, $sql = null, $pdoBind = null)
+  {
+    $message = array();
+    $name    = $this->getConnectionName();
+    $params  = Sabel_DB_Config::get($name);
+
+    if ($sql === null) $sql = $this->sql;
+
+    $message["ERROR_MESSAGE"] = $error;
+    $message["EXECUTE_QUERY"] = $sql;
+
+    if ($pdoBind) {
+      $message["PDO_BIND_VALUES"] = $pdoBind;
+    }
+
+    $message["CONNECTION_NAME"] = $name;
+    $message["PARAMETERS"]      = $params;
+
+    throw new Sabel_DB_Exception(print_r($message, true));
+  }
 }
 
 function escapeString($db, $values, $escMethod = null)
