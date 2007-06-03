@@ -42,6 +42,7 @@ final class Sabel_Controller_Front
     Sabel_Context::initialize();
     Sabel_Context::setDestination($destination);
     
+    Sabel_Plugin::create()->setDestination($destination);
     Sabel_Helper::load($this->request, $destination);
     
     $executer = $this->injector->newInstance(self::EXECUTER_INTERFACE);

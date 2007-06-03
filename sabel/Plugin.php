@@ -16,6 +16,7 @@ final class Sabel_Plugin
   private $plugins       = array();
   private $pluginMethods = array();
   private $controller    = null;
+  private $destination   = null;
   private $executer      = null;
   
   private $eventMethods = array("onCreateController",
@@ -67,19 +68,28 @@ final class Sabel_Plugin
     $this->plugins[$pluginName] = $plugin;
     
     if (method_exists($plugin, self::ENABLE_METHOD)) {
-      foreach ($plugin->enable() as $method) {
-        if (ENVIRONMENT === DEVELOPMENT) {
-          Sabel_Context::log("enable plugin: " . $pluginName . " on " . $method);
+      $enables = $plugin->enable();
+      if (is_array($enables)) {
+        foreach ($enables as $method) {
+          $this->registration($method, $pluginName);
         }
-        if ($this->isEventMethod($method)) {
-          $this->events[$method][] = $pluginName;
-        } else {
-          $this->pluginMethods[$method] = $pluginName;
-        }
+      } else {
+        $this->registration($enables, $pluginName);
       }
     }
     
     return $this;
+  }
+  
+  private final function registration($method, $pluginName)
+  {
+    if ($this->isEventMethod($method)) {
+      Sabel_Context::log("[Plugin] " . $pluginName . " event " . $method);
+      $this->events[$method][] = $pluginName;
+    } else {
+      Sabel_Context::log("[Plugin] " . $pluginName . " call " . $method);
+      $this->pluginMethods[$method] = $pluginName;
+    }
   }
   
   /**
@@ -112,11 +122,13 @@ final class Sabel_Plugin
    */
   public function onBeforeAction()
   {
+    Sabel_Context::log("[Plugin] on before");
     return $this->doActionEvent("onBeforeAction");
   }
   
   public function onAfterAction()
   {
+    Sabel_Context::log("[Plugin] on after");
     $this->doActionEvent("onAfterAction");
   }
   
@@ -192,6 +204,7 @@ final class Sabel_Plugin
       foreach ($this->events[$event] as $name) {
         $plugin = $this->plugins[$name];
         $plugin->setController($this->controller);
+        $plugin->setDestination($this->destination);
         $proceed = $plugin->$event();
         if ($proceed === null) $proceed = true;
       }

@@ -214,61 +214,95 @@ Sabelでは状態を厳格に制御する機構が用意されています。
       {                                                                       
       }                                                                       
     }                                                                         
-?>                                                                            
+?>
+
+設定クラス例
+<?php
+    class Index_Flow_Flow extends Sabel_Plugin_Flow_Config
+    {
+      public function configure()
+      {
+        list($prepare, $confirm, $success) = $this->activities("prepare",
+                                                               "confirm",
+                                                               "success");
                                                                               
-設定クラス例                                                                        
-<?php                                                                         
-    class Index_Flow_Flow extends Sabel_Plugin_Flow_Config                    
-    {                                                                         
-      public function configure()                                             
-      {                                                                       
-        list($prepare, $confirm, $success) = $this->activities("prepare",     
-                                                               "confirm",     
-                                                               "success");    
+        $prepare->addTransition("confirmEvent",   $confirm);
+        $confirm->addTransition("registEvent",    $success);
+        $confirm->addTransition("reprepareEvent", $prepare);
                                                                               
-        $prepare->addTransition("confirmEvent",   $confirm);                  
-        $confirm->addTransition("registEvent",    $success);                  
-        $confirm->addTransition("reprepareEvent", $prepare);                  
-                                                                              
-        $this->entry($prepare)->add($confirm)->end($success);                 
-      }                                                                       
-    }                                                                         
-?>                                                                            
-                                                                              
-上記の様に設定すると、状態がコントロールされます。                                                     
-                                                                              
-状態が継続している時は$this->flow変数に状態変数が保持されます。                                         
-                                                                              
-現時点ではTokenを手動で設定する必要があります。                                                    
-フォーム内では次のように設定してください。                                                         
-<input type="hidden" name="token" value="<?= $token ?>" />                    
-                                                                              
-aタグでは次のようにしてください。                                                             
-<a href="reprepareEvent/?token=<?= $token ?>">correct</a>                     
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-アクションの選択                                                                      
+        $this->entry($prepare)->add($confirm)->end($success);
+      }
+    }
+?>
+
+上記の様に設定すると、状態がコントロールされます。
+
+状態が継続している時は$this->flow変数に状態変数が保持されます。
+
+現時点ではTokenを手動で設定する必要があります。
+フォーム内では次のように設定してください。
+<input type="hidden" name="token" value="<?= $token ?>" />
+
+aタグでは次のようにしてください。
+<a href="reprepareEvent/?token=<?= $token ?>">correct</a>
+
+
+
+
+アクションの選択
 ------------------------------------------------------------------------------
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-フィルタ処理                                                                        
+
+
+
+
+プラグイン
 ------------------------------------------------------------------------------
-  アクションフィルタ                                                                   
-  インプットフィルタ                                                                   
-  アウトプットフィルタ                                                                  
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-コントローラプラグインの記述                                                                
-------------------------------------------------------------------------------
-用意されているプラグイン                                                                  
- - ビュー                                                                        
- - リダイレクタ                                                                     
- - 依存                                                                         
- - フィルタ                                                                       
- - 例外ハンドラ
+SabelにはプラグインというSabelを拡張するためのAPIがあります。
+これを利用して簡単なプラグインを記述してみましょう。
+
+showPrivateというアクションが実行される前に拒否してしまうプラグインを書きます。
+
+<?php    
+    class Deny extends Sabel_Plugin_Base
+    {
+      public function enable()
+      {
+        return self::ON_BEFORE_ACTION;
+      }
+      
+      public function onBeforeAction()
+      {
+        if ($this->destination->getAction() === "showPrivate") {
+          return false;
+        }
+      }
+    }
+
+このファイルをlib/Deny.phpとしてconfig/plugin.phpに次の行を追加してください。
+
+$plugin->add(new Deny());
+
+そしてブラウザからhttp://localhost/index/showPrivateを表示してみましょう。
+content not found というメッセージが表示されたら正しくプラグインが動作しています。
+
+プラグインにあるenable()というメソッドは必ず実装してください。
+enable()メソッドでどのタイミングで呼び出されるかという情報をフレームワークに伝えます。
+
+onBeforeActionイベントの他にも次のようなイベントでプラグインを作成することができます。
+ - onAfterAction
+ - onExecuteAction
+ - onRedirect
+ - onException
+ - onCreateController
+
+ひとつのプラグイン内で複数のイベントを処理することもできます。
+
+また、プラグインに通常のメソッドを定義すると、そのメソッドはコントローラから呼び出すことができます。
+このメソッドもenableで指定しなければなりません。
+
+public function enable()
+{
+  return array(self::ON_BEFORE_ACTION, "method");
+}
+
+このように指定します。

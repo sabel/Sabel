@@ -130,15 +130,19 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         if ($existance && $callable) {
           $response->success();
           $response->result = $this->$action();
+          $this->plugin->onAfterAction();
           return $response;
         } elseif($this->isTemplateFound() && $callable) {
+          $this->plugin->onAfterAction();
           return $response->success();
         } else {
+          $this->plugin->onAfterAction();
           return $response->notfound();
         }
+      } else {
+        $this->plugin->onAfterAction();
+        return $response->notfound();
       }
-      $this->plugin->onAfterAction();
-      return $response;
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
       Sabel_Context::log($exception->getMessage());
