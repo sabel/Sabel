@@ -16,32 +16,16 @@ if (!defined('ENVIRONMENT')) define('ENVIRONMENT', DEVELOPMENT);
  */
 if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(E_ALL|E_STRICT);
-  assert_options(ASSERT_ACTIVE,     1);
-  assert_options(ASSERT_WARNING,    0);
-  assert_options(ASSERT_QUIET_EVAL, 1);
-
-  function assert_handler($file, $line, $code)
-  {
-    echo "<hr>Assertion Failed: <br/>";
-    echo "File:\t '$file'<br />";
-    echo "Line:\t '$line'<br />";
-    echo "Code:\t '$code'<br /><hr />";
-  }
-  assert_options(ASSERT_CALLBACK, 'assert_handler');
 } else {
   error_reporting(0);
-  assert_options(ASSERT_ACTIVE,     0);
-  assert_options(ASSERT_WARNING,    0);
-  assert_options(ASSERT_QUIET_EVAL, 0);
 }
 
 add_include_path('/app');
 add_include_path('/app/models');
 add_include_path('/lib');
 add_include_path('/config');
-require (RUN_BASE . "/config/Factory.php");
 
-define("__TRUE__",  "true");
-define("__FALSE__", "false");
+require (RUN_BASE . "/config/plugin.php");
+require (RUN_BASE . "/config/Factory.php");
 
 Sabel_DB_Config::initialize();

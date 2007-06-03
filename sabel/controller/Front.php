@@ -16,9 +16,6 @@ final class Sabel_Controller_Front
   const NOT_FOUND_ACTION    = "notFound";
   const SERVER_ERROR_ACTION = "serverError";
   
-  public
-    $plugin = null;
-    
   private
     $request  = null,
     $response = null;
@@ -34,8 +31,6 @@ final class Sabel_Controller_Front
       $this->injector = Sabel_Container::injector(new Factory());
       $this->request = $this->injector->newInstance(self::REQUEST_INTERFACE);
     }
-    
-    $this->plugin = Sabel_Plugin::create();
   }
     
   public function ignition($storage = null)
