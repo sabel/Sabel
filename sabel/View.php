@@ -95,4 +95,43 @@ final class Sabel_View
                                          ->fetch(self::$values);
     }
   }
+  
+  public static function renderDefault($controller, $destination)
+  {
+    if ($controller->hasRendered()) {
+      return $controller->getRendered();
+    }
+    
+    $view = new Sabel_View();
+    $view->assignByArray($controller->getRequests());
+    
+    $html = "";
+    $assigns = array("assign" => array_merge($controller->getAssignments(),
+                                             $controller->getAttributes()));
+    
+    try {
+      $content = Sabel_View::render($destination, $assigns);
+    } catch (Exception $e) {
+      $content = "";
+    }
+    
+    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+      $html = $content;
+    } elseif (!Sabel_Context::isLayoutDisabled()) {
+      $assign = array("assign" => array("contentForLayout" => $content));
+      try {
+        $content = Sabel_View::render($destination, $assigns);
+        $d = clone $destination;
+        $d->setAction(Sabel_Const::DEFAULT_LAYOUT);
+        $html = Sabel_View::render($d, $assign);
+      } catch (Exception $e) {
+        $html = $content;
+      }
+      if ($html === null) $html = $content;
+    } else {
+      $html = $content;
+    }
+    
+    return $html;
+  }
 }

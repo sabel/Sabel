@@ -1,27 +1,27 @@
-コントローラ                                                                        
+コントローラ
 ==============================================================================
-                                                                              
-概要                                                                            
+
+概要
 ------------------------------------------------------------------------------
-Sabelではconfig/map.phpに記述されている内容に従って、                                          
-リクエストURIからモジュール、コントローラ、アクションを決定します。                                           
-たとえば、map.phpが次のように定義されているとします。                                                
-                                                                              
-<?php                                                                         
-    class Map extends Sabel_Map_Config                                        
-    {                                                                         
-      public function configure()                                             
-      {                                                                       
-        $this->route("default")                                               
-               ->uri(":controller/:action/:id")                               
-               ->module("index")                                              
-               ->defaults(array(":controller" => "index",                     
-                                ":action"     => "index",                     
-                                ":id"         => null));                      
-      }                                                                       
-    }                                                                         
-?>                                                                            
-                                                                              
+Sabelではconfig/map.phpに記述されている内容に従って,
+リクエストURIからモジュール、コントローラ、アクションを決定します。
+たとえば、map.phpが次のように定義されているとします。
+
+<?php
+    class Map extends Sabel_Map_Config
+    {
+      public function configure()
+      {
+        $this->route("default")
+               ->uri(":controller/:action/:id")
+               ->module("index")
+               ->defaults(array(":controller" => "index",
+                                ":action"     => "index",
+                                ":id"         => null));
+      }
+    }
+?>
+
 このとき、http://example.com/user/show/1 というリクエストが到着すると、                           
 app/index/controllers/User.php内のshowアクションが実行されます。                             
 このファイルの内容は下記のようになります。                                                         
