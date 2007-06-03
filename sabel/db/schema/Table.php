@@ -53,39 +53,9 @@ class Sabel_DB_Schema_Table
     return array_keys($this->columns);
   }
 
-  protected function setPrimaryKey()
-  {
-    $pKey = array();
-    foreach ($this->columns as $column) {
-      if ($column->primary) $pKey[] = $column->name;
-    }
-
-    if (empty($pKey)) {
-      $this->primaryKey = null;
-    } elseif (count($pKey) === 1) {
-      $this->primaryKey = $pKey[0];
-    } else {
-      $this->primaryKey = $pKey;
-    }
-  }
-
   public function getPrimaryKey()
   {
     return $this->primaryKey;
-  }
-
-  protected function setIncrementColumn()
-  {
-    $incrementColumn = null;
-
-    foreach ($this->columns as $column) {
-      if ($column->increment) {
-        $incrementColumn = $column->name;
-        break;
-      }
-    }
-
-    $this->incrementColumn = $incrementColumn;
   }
 
   public function getIncrementColumn()
@@ -138,5 +108,35 @@ class Sabel_DB_Schema_Table
   public function getTableEngine()
   {
     return $this->tableEngine;
+  }
+
+  private function setPrimaryKey()
+  {
+    $pKey = array();
+    foreach ($this->columns as $column) {
+      if ($column->primary) $pKey[] = $column->name;
+    }
+
+    if (empty($pKey)) {
+      $this->primaryKey = null;
+    } elseif (count($pKey) === 1) {
+      $this->primaryKey = $pKey[0];
+    } else {
+      $this->primaryKey = $pKey;
+    }
+  }
+
+  private function setIncrementColumn()
+  {
+    $incrementColumn = null;
+
+    foreach ($this->columns as $column) {
+      if ($column->increment) {
+        $incrementColumn = $column->name;
+        break;
+      }
+    }
+
+    $this->incrementColumn = $incrementColumn;
   }
 }

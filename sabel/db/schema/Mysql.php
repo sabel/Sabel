@@ -15,6 +15,14 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
     $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
     $tableColumns = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
 
+  public function getTable($tblName)
+  {
+    $schema = parent::getTable($tblName);
+    $schema->setTableEngine($this->getTableEngine($tblName));
+
+    return $schema;
+  }
+
   public function isBoolean($type, $row)
   {
     return ($type === "tinyint" && $row["column_comment"] === "boolean");

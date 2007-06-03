@@ -5,15 +5,16 @@ define("SCHEMA_DIR", "lib/schema/");
 
 Sabel::fileUsing("config/environment.php");
 
-class Schema
+class Schema extends Sabel_Sakle_Task
 {
-  public function run()
+  public function run($arguments)
   {
-    $input = $this->getInputs();
+    $this->checkInputs($arguments);
+
     clearstatcache();
 
-    $environment  = environment(strtolower($input[2]));
-    $inputSchemas = $this->getWriteSchemas($input);
+    $environment  = environment(strtolower($arguments[2]));
+    $inputSchemas = $this->getWriteSchemas($arguments);
     $schemaWrite  = (!empty($inputSchemas));
 
     if (isset($inputSchemas[0]) && $inputSchemas[0] === "all") {
@@ -27,17 +28,20 @@ class Schema
       $accessor = new Sabel_DB_Schema_Accessor($connectionName);
 
       foreach ($accessor->getAll() as $schema) {
-        $tblName  = $schema->getTableName();
-        $colArray = Schema_Creator::make($schema);
+        $tblName = $schema->getTableName();
 
         if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
-          Schema_Writer::write($tblName, $colArray, $accessor, $params["driver"]);
+          $colLines = $this->createColumnLines($schema);
+          $target   = SCHEMA_DIR . convert_to_modelname($tblName) . ".php";
+          $this->printMessage("generate Schema $target");
+
+          Schema_Writer::write($colLines, $schema);
         }
 
         TableList_Writer::add($connectionName, $tblName);
       }
 
-      if (in_array("-l", $input)) TableList_Writer::write($connectionName);
+      if (in_array("-l", $arguments)) TableList_Writer::write($connectionName);
     }
   }
 
@@ -57,14 +61,148 @@ class Schema
     return $inputSchemas;
   }
 
-  private function getInputs()
+  private function createColumnLines($schema)
   {
-    $input = $_SERVER["argv"];
-    if (count($input) < 3) {
-      sakle_schema_help(); exit;
+    $lines   = array();
+    $tName   = $schema->getTableName();
+    $columns = $schema->getColumns();
+
+    foreach ($columns as $col) {
+      $line  = array();
+      $isNum = false;
+
+      $line[] = '$cols[' . "'{$col->name}'] = array(";
+      $line[] = "'type' => Sabel_DB_Type::{$col->type}, ";
+
+      if ($col->isInt() || $col->isFloat() || $col->isDouble()) {
+        $line[] = "'max' => {$col->max}, ";
+        $line[] = "'min' => {$col->min}, ";
+        $isNum = true;
+      } elseif ($col->isString()) {
+        $line[] = "'max' => {$col->max}, ";
+      }
+
+      $this->setConstraints($line, $col);
+
+      $line[] = "'default' => " . $this->getDefault($isNum, $col);
+      $lines[$col->name] = join("", $line) . ");\n";
     }
 
-    return $input;
+    return $lines;
+  }
+
+  private function setConstraints(&$line, $column)
+  {
+    $increment = ($column->increment) ? "true" : "false";
+    $nullable  = ($column->nullable)  ? "true" : "false";
+    $primary   = ($column->primary)   ? "true" : "false";
+
+    $line[] = "'increment' => {$increment}, ";
+    $line[] = "'nullable' => {$nullable}, ";
+    $line[] = "'primary' => {$primary}, ";
+  }
+
+  private function getDefault($isNum, $column)
+  {
+    $default = $column->default;
+
+    if ($default === null) {
+      $str = "null";
+    } elseif ($isNum) {
+      $str = $default;
+    } elseif ($column->isBool()) {
+      $str = ($default) ? "true" : "false";
+    } else {
+      $str = "'" . $default . "'";
+    }
+
+    return $str;
+  }
+
+  private function checkInputs($arguments)
+  {
+    if (count($arguments) < 3) {
+      sakle_schema_help(); exit;
+    } elseif ($arguments[2] === "--help" || $arguments[2] === "-h") {
+      sakle_schema_help(); exit;
+    }
+  }
+}
+
+class Schema_Writer
+{
+  public static function write($colLines, $schema)
+  {
+    $mdlName   = convert_to_modelname($schema->getTableName());
+    $className = "Schema_" . $mdlName;
+    $target    = SCHEMA_DIR . $mdlName . ".php";
+
+    // @todo
+    if (file_exists($target)) return null;
+
+    $fp = fopen($target, "w");
+
+    fwrite($fp, "<?php\n\n");
+    fwrite($fp, "class {$className}\n{\n");
+    fwrite($fp, "  public static function get()\n  {\n");
+    fwrite($fp, '    $cols = array();');
+    fwrite($fp, "\n\n");
+
+    foreach ($colLines as $line) fwrite($fp, "    " . $line);
+
+    fwrite($fp, "\n    return " . '$cols;' . "\n  }\n");
+
+    $property   = array();
+    $property[] = '$property = array();' . "\n\n";
+
+    self::writeEngine($property, $schema);
+    self::writeUniques($property, $schema);
+    self::writeForeignKeys($property, $schema);
+
+    fwrite($fp, "\n  public function getProperty()\n  {\n");
+    fwrite($fp, "    " . join("", $property));
+    fwrite($fp, "    " . 'return $property;' . "\n  }\n}\n");
+    fclose($fp);
+  }
+
+  private static function writeEngine(&$property, $schema)
+  {
+    $engine = $schema->getTableEngine();
+    $property[] = '    $property' . "['tableEngine'] = '{$engine}';\n";
+  }
+
+  private static function writeUniques(&$property, $schema)
+  {
+    $uniques = $schema->getUniques();
+
+    if ($uniques === null) {
+      $property[] = '    $property' . "['uniques'] = null;\n";
+    } else {
+      foreach ($uniques as $unique) {
+        $us = array();
+        foreach ($unique as $u) $us[] = "'" . $u . "'";
+        $us = implode(", ", $us);
+        $property[] = '    $property' . "['uniques'][] = array({$us});\n";
+      }
+    }
+  }
+
+  private static function writeForeignKeys(&$property, $schema)
+  {
+    $fkeys = $schema->getForeignKeys();
+
+    if ($fkeys === null) {
+      $property[] = '    $property' . "['fkeys'] = null;\n";
+    } else {
+      $space = "                                         ";
+      foreach ($fkeys as $column => $params) {
+        $property[] = '    $property' . "['fkeys']['{$column}'] = ";
+        $property[] = "array('referenced_table'  => '{$params['referenced_table']}',\n";
+        $property[] = $space . "'referenced_column' => '{$params['referenced_column']}',\n";
+        $property[] = $space . "'on_delete'         => '{$params['on_delete']}',\n";
+        $property[] = $space . "'on_update'         => '{$params['on_update']}');\n";
+      }
+    }
   }
 }
 
@@ -107,154 +245,6 @@ class TableList_Writer
 
     fwrite($fp, ");\n  }\n}\n");
     fclose($fp);
-  }
-}
-
-class Schema_Writer
-{
-  public static function write($tblName, $colArray, $sa, $drvName)
-  {
-    $mdlName   = convert_to_modelname($tblName);
-    $className = "Schema_" . $mdlName;
-    $target    = SCHEMA_DIR . $mdlName . ".php";
-
-    echo "generate Schema {$target} \n";
-
-    // @todo
-    if (file_exists($target)) return null;
-
-    $fp = fopen($target, "w");
-
-    fwrite($fp, "<?php\n\n");
-    fwrite($fp, "class {$className}\n{\n");
-    fwrite($fp, "  public static function get()\n  {\n");
-    fwrite($fp, '    $cols = array();');
-    fwrite($fp, "\n\n");
-
-    foreach ($colArray as $line) fwrite($fp, "    " . $line);
-
-    fwrite($fp, "\n    return " . '$cols;' . "\n  }\n");
-
-    $property   = array();
-    $property[] = '$property = array(';
-    self::writePrimary($property, $tblName);
-
-    $property[] = "                      ";
-    self::writeIncrement($property, $tblName);
-
-    $property[] = "                      ";
-    // @todo
-    self::writeEngine($property, $tblName, $sa, $drvName);
-
-    fwrite($fp, "\n  public function getProperty()\n  {\n");
-    fwrite($fp, "    " . join("", $property));
-    fwrite($fp, "    " . 'return $property;' . "\n  }\n}\n");
-    fclose($fp);
-  }
-
-  private static function writePrimary(&$property, $tblName)
-  {
-    if (isset(Schema_Creator::$tblPrimary[$tblName])) {
-      $pkey = Schema_Creator::$tblPrimary[$tblName];
-
-      if (count($pkey) === 1) {
-        $property[] = "'primaryKey'   => '{$pkey[0]}',\n";
-      } else {
-        $keys = array();
-        foreach ($pkey as $key) $keys[] = '"' . $key . '"';
-        $property[] = "'primaryKey'   => array(" . join(", ", $keys) . "),\n";
-      }
-    } else {
-      $property[] = "'primaryKey'   => null,\n";
-    }
-  }
-
-  private static function writeIncrement(&$property, $tblName)
-  {
-    if (isset(Schema_Creator::$tblIncrement[$tblName])) {
-      $iKey = Schema_Creator::$tblIncrement[$tblName];
-      $property[] = "'incrementKey' => '{$iKey}',\n";
-    } else {
-      $property[] = "'incrementKey' => null,\n";
-    }
-  }
-
-  // @todo
-  private static function writeEngine(&$property, $tblName, $accessor, $drvName)
-  {
-    if ($drvName === "mysql" || $drvName === "pdo-mysql") {
-      $engine = $accessor->getTableEngine($tblName);
-      $property[] = "'tableEngine'  => '{$engine}');\n\n";
-    } else {
-      $property[] = "'tableEngine'  => null);\n\n";
-    }
-  }
-}
-
-class Schema_Creator
-{
-  public static $tblPrimary   = array();
-  public static $tblIncrement = array();
-
-  public static function make($schema)
-  {
-    $parsed  = array();
-    $tName   = $schema->getTableName();
-    $columns = $schema->getColumns();
-
-    foreach ($columns as $col) {
-      $info  = array();
-      $isNum = false;
-
-      $info[] = '$cols[' . "'{$col->name}'] = array(";
-      $info[] = "'type' => Sabel_DB_Type::{$col->type}, ";
-
-      if ($col->isInt() || $col->isFloat() || $col->isDouble()) {
-        $info[] = "'max' => {$col->max}, ";
-        $info[] = "'min' => {$col->min}, ";
-        $isNum = true;
-      } elseif ($col->isString()) {
-        $info[] = "'max' => {$col->max}, ";
-      }
-
-      self::setConstraints($info, $col);
-
-      if ($col->primary)   self::$tblPrimary[$tName][] = $col->name;
-      if ($col->increment) self::$tblIncrement[$tName] = $col->name;
-
-      $info[] = "'default' => " . self::getDefault($isNum, $col);
-      $parsed[$col->name] = join("", $info) . ");\n";
-    }
-
-    return $parsed;
-  }
-
-  private static function setConstraints(&$info, $column)
-  {
-    $increment = ($column->increment) ? "true" : "false";
-    $nullable  = ($column->nullable)  ? "true" : "false";
-    $primary   = ($column->primary)   ? "true" : "false";
-
-    $info[] = "'increment' => {$increment}, ";
-    $info[] = "'nullable' => {$nullable}, ";
-    $info[] = "'primary' => {$primary}, ";
-  }
-
-  private static function getDefault($isNum, $column)
-  {
-    $default = $column->default;
-
-    if ($default === null) {
-      $str = "null";
-    } elseif ($isNum) {
-      $str = $default;
-    } elseif ($column->isBool()) {
-      $str = ($default) ? "true" : "false";
-    } else {
-      $str = "'" . $default . "'";
-    }
-
-    return $str;
   }
 }
 

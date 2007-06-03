@@ -35,18 +35,15 @@ class Sabel_DB_Schema_Loader
 
       $tblSchema  = new Sabel_DB_Schema_Table($tblName, $cols);
       $properties = $schemaClass->getProperty();
-      $primary    = $properties["primaryKey"];
-      $increment  = $properties["incrementKey"];
-      $engine     = $properties["tableEngine"];
+      $tblSchema->setTableEngine($properties["tableEngine"]);
+      $tblSchema->setUniques($properties["uniques"]);
+      $tblSchema->setForeignKeys($properties["fkeys"]);
     } else {
       $conName   = $model->getConnectionName();
-      $database  = Sabel_DB_Config::getDB($conName);
       $accessor  = new Sabel_DB_Schema_Accessor($conName);
-      $engine    = ($database === "mysql") ? $accessor->getTableEngine($tblName) : null;
       $tblSchema = $accessor->get($tblName);
     }
 
-    $tblSchema->setTableEngine($engine);
     return self::$schemas[$tblName] = $tblSchema;
   }
 
