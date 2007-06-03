@@ -27,6 +27,8 @@ class Sabel_Helper
     $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
+    
+    $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
                      
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;

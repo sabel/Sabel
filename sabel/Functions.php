@@ -10,32 +10,6 @@ function load($className, $config)
   return Sabel_Container::injector($config)->newInstance($className);
 }
 
-function uri($param, $withDomain = true, $secure = false)
-{
-  $secure = (defined("USE_SSL") && $secure === true);
-
-  $aCreator = new Sabel_View_Uri();
-  return $aCreator->uri($param, $withDomain, $secure);
-}
-
-function hyperlink($params, $anchor = null, $id = null, $class = null)
-{
-  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
-  return $aCreator->hyperlink($params, $anchor, $id, $class);
-}
-
-function a($param, $anchor, $uriParameters = null, $id = null, $class = null, $secure = false)
-{
-  $aCreator = Sabel::loadSingleton('Sabel_View_Uri');
-  $tag = $aCreator->aTag($param, $anchor, $uriParameters, $id, $class, $secure);
-  return $tag;
-}
-
-function ah($param, $anchor, $uriParameters = null)
-{
-  return a($param, htmlspecialchars($anchor), $uriParameters);
-}
-
 function r($const)
 {
   return ($const === Sabel_Controller_Page::REDIRECTED);

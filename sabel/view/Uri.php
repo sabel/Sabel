@@ -17,20 +17,15 @@ class Sabel_View_Uri
   {
   }
   
-  public function hyperlink($params, $anchor = null, $uriParameters = null, $id = null, $class = null, $secure = false, $absolute = false)
+  public function hyperlink($params, $anchor = null)
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
     
-    $fmtUri = "<a id='%s' class='%s' href='%s%s'>%s</a>";
-    return sprintf($fmtUri, $id, $class, $this->uri($params, $absolute, $secure), $uriParameters, $anchor);
+    $fmtUri = "<a href='%s'>%s</a>";
+    return sprintf($fmtUri, $this->uri($params), $anchor);
   }
   
-  public function aTag($param, $anchor, $uriParameters = null, $id, $class, $secure)
-  {
-    return $this->hyperlink($param, $anchor, $uriParameters, $id, $class, $secure);
-  }
-  
-  public function uri($param, $withDomain = false, $secure = false)
+  public function uri($param, $absolute = false, $secure = false)
   {
     $params = $this->convert($param);
     if (isset($_SERVER["SERVER_NAME"])) {
@@ -41,7 +36,7 @@ class Sabel_View_Uri
     
     $protocol = ($secure) ? 'https' : 'http';
     
-    $uriPrefix = ($withDomain) ? $protocol . '://' . $httphost : '';
+    $uriPrefix = ($absolute) ? $protocol . '://' . $httphost : '';
     $uri = Sabel_Context::getCandidate()->uri($params);
     return $uriPrefix . "/" . $uri;
   }
