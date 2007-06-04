@@ -61,9 +61,6 @@ require ($SABEL_DIR . "Map.php");
 require ($SABEL_MAP_DIR . "Candidate.php");
 require ($SABEL_MAP_DIR . "Config.php");
 require ($SABEL_MAP_DIR . "Configurator.php");
-require ($SABEL_MAP_DIR . "Selecter.php");
-require ($SABEL_MAP_DIR . "Tokens.php");
-require ($SABEL_MAP_DIR . "selecter" . DIR_DIVIDER . "Impl.php");
 
 require ($SABEL_DIR . "Request.php");
 require ($SABEL_REQUEST_DIR . "Web.php");

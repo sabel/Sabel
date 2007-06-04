@@ -29,6 +29,7 @@ final class Sabel_Controller_Front
   {
     if ($this->request === null) {
       $this->injector = Sabel_Container::injector(new Factory());
+      Sabel_Context::setDefaultInjector($this->injector);
       $this->request = $this->injector->newInstance(self::REQUEST_INTERFACE);
     }
   }

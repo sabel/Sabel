@@ -252,6 +252,11 @@ class Sabel_Request_Web implements Sabel_Request
     return $this->uri->__toString();
   }
   
+  public function toArray()
+  {
+    return explode("/", $this->uri->__toString());
+  }
+  
   /**
    * remove non alphabet and non numeric characers.
    *

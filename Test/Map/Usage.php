@@ -26,7 +26,7 @@ class Test_Map_Usage extends SabelTestCase
   
   public function testSuccess()
   {
-    $tokens = new Sabel_Map_Tokens("blog/user/const2/foobar/123");
+    $tokens = explode("/", "blog/user/const2/foobar/123");
     
     $c = new Sabel_Map_Candidate();
     $c->setName('default');
@@ -46,13 +46,11 @@ class Test_Map_Usage extends SabelTestCase
     $c->setOmittable('date');
     
     $c->setModule('index');
-
-    $s = new Sabel_Map_Selecter_Impl();
     
     foreach ($c as $current) {
-      $result = $s->select($tokens->current(), $current);
+      $result = $s->select(current($tokens), $current);
       $this->assertTrue($result);
-      $tokens->next();
+      next($tokens);
     }
     
     $this->assertEquals("index",  $c->getModule());

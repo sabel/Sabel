@@ -31,8 +31,7 @@ class Sabel_Map
     }
     
     $candidate = new Sabel_Map_Candidate();
-    $tokens    = new Sabel_Map_Tokens($request->__toString());
-    $candidate = $candidate->find($tokens);
+    $candidate = $candidate->find($request);
     
     Sabel_Context::setCandidate($candidate);
     $request->setCandidate($candidate);

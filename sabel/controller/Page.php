@@ -51,15 +51,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public final function __construct()
   {
-    $ref = new ReflectionClass("Sabel_Controller_Page");
-    $reserved = array();
-    foreach ($ref->getMethods() as $name => $method) {
-      $reserved[] = $method->getName();
-    }
+    $reserved = get_class_methods("Sabel_Controller_Page");
     
-    $this->reserved = $reserved;
     $this->plugin = Sabel_Plugin::create($this);
-    $injector = Sabel_Container::injector(new Factory());
+    $injector = Sabel_Context::getDefaultInjector();
     $this->response = $injector->newInstance("Sabel_Response");
   }
   

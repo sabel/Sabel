@@ -11,27 +11,27 @@
  */
 class Sabel_Map_Candidate implements Iterator
 {
-  const VARIABLE   = 0x01;
-  const CONSTANT   = 0x02;
-  const MODULE     = 0x03;
-  const CONTROLLER = 0x04;
-  const ACTION     = 0x05;
+  const VARIABLE   = "variable";
+  const CONSTANT   = "constant";
+  const MODULE     = "module";
+  const CONTROLLER = "controller";
+  const ACTION     = "action";
   
-  const MODULE_NAME     = 0x40;
-  const CONTROLLER_NAME = 0x41;
-  const ACTION_NAME     = 0x42;
+  const MODULE_NAME     = "module_name";
+  const CONTROLLER_NAME = "controller_name";
+  const ACTION_NAME     = "action_name";
   
-  const TYPE_KEY          = 0x50;
-  const REQUIREMENT_KEY   = 0x51;
-  const OMITTABLE_KEY     = 0x52;
-  const MATCH_ALL_KEY     = 0x53;
-  const VARIABLE_KEY      = 0x54;
-  const DEFAULT_VALUE_KEY = 0x55;
-  const CACHE_KEY         = 0x56;
+  const TYPE_KEY          = "type_key";
+  const REQUIREMENT_KEY   = "requirement_key";
+  const OMITTABLE_KEY     = "omittable_key";
+  const MATCH_ALL_KEY     = "match_all_key";
+  const VARIABLE_KEY      = "variable_key";
+  const DEFAULT_VALUE_KEY = "default_value_key";
+  const CACHE_KEY         = "cache_key";
   
-  const ELEMENT_NAME = "ELEMENT_NAME";
+  const ELEMENT_NAME = "element_name";
   
-  protected $name     = '';
+  protected $name     = "";
   protected $elements = array();
   
   protected
@@ -42,7 +42,9 @@ class Sabel_Map_Candidate implements Iterator
   protected $size     = 0;
   protected $position = 0;
   
-  public function __construct($name = '')
+  private $candidate = null;
+  
+  public function __construct($name = "")
   {
     $this->setName($name);
   }
@@ -332,17 +334,12 @@ class Sabel_Map_Candidate implements Iterator
     return ($this->action !== "");
   }
   
-  public function find($tokens)
+  public function find($request)
   {
-    // @todo bug in here.
-    /*
-    if ($candidate = $this->loadFromCache($tokens)) {
-      return $candidate;
-    }*/
+    $requests = $request->toArray();
     
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
-      if ($this->matchToTokens($candidate, $tokens)) {
-        // $this->saveToCache($candidate, $tokens);
+      if ($this->matchToTokens($candidate, $requests)) {
         return $candidate;
       }
     }
@@ -350,25 +347,66 @@ class Sabel_Map_Candidate implements Iterator
     throw new Sabel_Map_Candidate_NotFound("check your config/map.php");
   }
   
-  protected function matchToTokens($candidate, $tokens)
+  public function select($token, $candidate)
   {
-    $tokens = clone $tokens;
-    $selecter = new Sabel_Map_Selecter_Impl();
+    $result = false;
     
+    if (($token === false || $token === "") && $candidate->hasDefaultValue()) {
+      $token = $candidate->getDefaultValue();
+    }
+    
+    if ($candidate->isMatchAll()) {
+      $result = true;
+    } elseif (($token === false || $token === "") && $candidate->isOmittable()) {
+      $result = true;
+    } elseif ($candidate->hasRequirement()) {
+      $result = $candidate->compareWithRequirement($token);
+    } elseif ($candidate->isConstant() && $token !== $candidate->getElementName()) {
+      return false;
+    } else {
+      $result =(boolean) $token;
+    }
+    
+    // token value as a candidate variable
+    if ($result) {
+      if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
+        $candidate->setModule($token);
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
+        $candidate->setController($token);
+        $candidate->setElementVariable($token);
+      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
+        $candidate->setAction($token);
+        $candidate->setElementVariable($token);
+      }
+    }
+    
+    return $result;
+  }
+  
+  public function isConstantToken($token, $candidate)
+  {
+    return ($candidate->isConstant() && $token === $candidate->getElementName());
+  }
+  
+  protected function matchToTokens($candidate, $requests)
+  {
     $constantEstablished = false;
     foreach ($candidate as $element) {
       if ($constantEstablished) {
-        if ($selecter->select($tokens->current(), $element)) {
-          $tokens->next();
+        if ($this->select(current($requests), $element)) {
+          next($requests);
         }
       } else {
-        if ($selecter->isConstant($tokens->current(), $element)) {
+        if ($this->isConstantToken(current($requests), $element)) {
           $constantEstablished = true;
-          if ($selecter->select($tokens->current(), $element)) {
-            $tokens->next();
+          if ($this->select(current($requests), $element)) {
+            next($requests);
           }
-        } elseif ($selecter->select($tokens->current(), $element)) {
-          $tokens->next();
+        } elseif ($this->select(current($requests), $element)) {
+          next($requests);
         } else {
           return false;
         }
@@ -381,28 +419,29 @@ class Sabel_Map_Candidate implements Iterator
   public function uri($parameters = null)
   {
     $candidate = null;
+    
     if ($parameters === null) $parameters = array();
     
     foreach ($parameters as $key => $param) {
       switch ($key) {
         
-        case 'name':
-        case 'candidate':
+        case "name":
+        case "candidate":
           $candidate = Sabel_Map_Configurator::getCandidate($param);
           break;
-        case 'module':
-        case 'm':
-          $parameters[':module'] = $param;
+        case "module":
+        case "m":
+          $parameters[":module"] = $param;
           unset($parameters[$key]);
           break;
-        case 'controller':
-        case 'c':
-          $parameters[':controller'] = $param;
+        case "controller":
+        case "c":
+          $parameters[":controller"] = $param;
           unset($parameters[$key]);
           break;
-        case 'action':
-        case 'a':
-          $parameters[':action'] = $param;
+        case "action":
+        case "a":
+          $parameters[":action"] = $param;
           unset($parameters[$key]);
           break;
       }
@@ -416,37 +455,50 @@ class Sabel_Map_Candidate implements Iterator
     
     $buffer = array();
     
+    $typeKey = self::TYPE_KEY;
+    $variableKey = self::VARIABLE_KEY;
+    $elementName = self::ELEMENT_NAME;
+    $module  = self::MODULE;
+    $controller = self::CONTROLLER;
+    $action = self::ACTION;
+    
     foreach ($elements as $element) {
-      if ($element[self::TYPE_KEY] === self::MODULE) {
-        if (isset($parameters[':module'])) {
-          $buffer[] = $parameters[':module'];
-        } else {
-          $buffer[] = $element[self::VARIABLE_KEY];
-        }
-      } elseif ($element[self::TYPE_KEY] === self::CONTROLLER) {
-        if (isset($parameters[':controller'])) {
-          $buffer[] = $parameters[':controller'];
-        } else {
-          $buffer[] = $element[self::VARIABLE_KEY];
-        }
-      } elseif ($element[self::TYPE_KEY] === self::ACTION) {
-        if (isset($parameters[':action'])) {
-          $buffer[] = $parameters[':action'];
-        } else {
-          $buffer[] = $element[self::VARIABLE_KEY];
-        }
-      } elseif (isset($parameters[$element[self::ELEMENT_NAME]])) {
-        $buffer[] = $parameters[$element[self::ELEMENT_NAME]];
-      } else {
-        if (!isset($parameters[$element[self::ELEMENT_NAME]]) && isset($element[self::OMITTABLE_KEY])) {
-          // ignore
-        } else {
-          $buffer[] = $element[self::ELEMENT_NAME];
-        }
+      switch ($element[$typeKey]) {
+        case $module:
+          if (isset($parameters[":module"])) {
+            $buffer[] = $parameters[":module"];
+          } else {
+            $buffer[] = $element[$variableKey];
+          }
+          break;
+        case $controller:
+          if (isset($parameters[":controller"])) {
+            $buffer[] = $parameters[":controller"];
+          } else {
+            $buffer[] = $element[$variableKey];
+          }
+          break;
+        case $action:
+          if (isset($parameters[":action"])) {
+            $buffer[] = $parameters[":action"];
+          } else {
+            $buffer[] = $element[$variableKey];
+          }
+          break;
+        case isset($parmeters[$element[$elementName]]):
+          $buffer[] = $parameters[$element[$elementName]];
+          break;
+        default:
+          if (!isset($parameters[$element[$elementName]]) && isset($element[self::OMITTABLE_KEY])) {
+            // ignore
+          } else {
+            $buffer[] = $element[$elementName];
+          }
+          break;
       }
     }
     
-    return join('/', $buffer);
+    return join("/", $buffer);
   }
   
   public function current()
@@ -473,58 +525,6 @@ class Sabel_Map_Candidate implements Iterator
   {
     $this->position = 0;
     $this->size = count($this->elements);
-  }
-  
-  protected function loadFromCache($tokens)
-  {
-    if (ENVIRONMENT !== PRODUCTION) return false;
-    
-    $cache = Sabel_Cache_Manager::create();
-    
-    if ($tokens->get(0) === "") {
-      $key = "map_space";
-      return false;
-    } else {
-      $key = $tokens->get(0);
-    }
-    
-    if (($selCandidate = $cache->read($key))) {
-      $cacheCandidate = unserialize($selCandidate);
-        
-      foreach ($cacheCandidate as $candidate) {
-        $token = $tokens->current();
-        if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
-          $candidate->setElementVariable($token);
-        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
-          $candidate->setModule($token);
-          $candidate->setElementVariable($token);
-        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
-          $candidate->setController($token);
-          $candidate->setElementVariable($token);
-        } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
-          $candidate->setAction($token);
-          $candidate->setElementVariable($token);
-        }
-        $tokens->next();
-      }
-      return $cacheCandidate;
-    } else {
-      return false;
-    }
-  }
-  
-  protected function saveToCache($candidate, $tokens)
-  {
-    if (ENVIRONMENT !== PRODUCTION) return false;
-    
-    $cache = Sabel_Cache_Manager::create();
-    
-    if ($tokens->get(0) === "") {
-      $key = "map_space";
-    } else {
-      $key = $tokens->get(0);
-    }
-    $cache->write($key, serialize($candidate));
   }
 }
 

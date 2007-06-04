@@ -19,6 +19,7 @@ class Sabel_Context
   private static $controller  = null;
   private static $view        = null;
   private static $storage     = null;
+  private static $injector    = null;
   
   private static $disableLayout = false;
   
@@ -107,6 +108,16 @@ class Sabel_Context
   public static function getLogger()
   {
     return Sabel_Logger_File::singleton();
+  }
+  
+  public static function setDefaultInjector($injector)
+  {
+    self::$injector = $injector;
+  }
+  
+  public static function getDefaultInjector()
+  {
+    return self::$injector;
   }
   
   public static function getCache()
