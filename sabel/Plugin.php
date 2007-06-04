@@ -149,7 +149,10 @@ final class Sabel_Plugin
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($exception);
+        $plugin = $this->plugins[$name];
+        $plugin->setController($this->controller);
+        $plugin->setDestination($this->destination);
+        $plugin->$event($exception);
       }
     }
   }
