@@ -100,7 +100,7 @@ class Sabel_Context
   public static function log($message)
   {
     static $log;
-    if (!isset($log)) $log = Sabel_Logger_File::singleton();
+    if (!isset($log)) $log = Sabel_Logger_Factory::create();
     $log->log($message);
   }
   

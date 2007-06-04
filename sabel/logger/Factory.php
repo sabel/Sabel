@@ -10,8 +10,16 @@
  */
 class Sabel_Logger_Factory
 {
-  public static function create($class, $option = null)
+  public static function create($class = null, $option = null)
   {
+    if (ENVIRONMENT === PRODUCTION) {
+      return new Sabel_Logger_Null();
+    }
+    
+    if ($class === null) {
+      $class = "File";
+    }
+    
     $className = "Sabel_Logger_" . ucfirst($class);
     return new $className;
   }

@@ -29,6 +29,7 @@
  */
 
 if (!defined("DIR_DIVIDER")) define("DIR_DIVIDER", "/");
+if (defined("DIR_DIVIDER")) define("D", DIR_DIVIDER);
 define("DEFAULT_PHP_SUFFIX", ".php");
 define("CURRENT_PATH", dirname(__FILE__));
 set_include_path(CURRENT_PATH . ":" . get_include_path());
@@ -36,10 +37,70 @@ set_include_path(CURRENT_PATH . ":" . get_include_path());
 // regist autoload static method
 spl_autoload_register(array("Sabel", "autoload"));
 
-require ("sabel" . DIR_DIVIDER . "Functions.php");
-require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Manager.php");
-require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Apc.php");
-require ("sabel" . DIR_DIVIDER . "cache" . DIR_DIVIDER . "Null.php");
+define("SBL", CURRENT_PATH . DIR_DIVIDER . "sabel" . DIR_DIVIDER);
+
+require (SBL . "Functions.php");
+require (SBL . "cache" . DIR_DIVIDER . "Manager.php");
+require (SBL . "cache" . DIR_DIVIDER . "Apc.php");
+require (SBL . "cache" . DIR_DIVIDER . "Null.php");
+
+require (SBL . "Const.php");
+require (SBL . "Context.php");
+require (SBL . "Object.php");
+
+require (SBL . "Map.php");
+require (SBL . "map" . DIR_DIVIDER . "Candidate.php");
+require (SBL . "map" . DIR_DIVIDER . "Config.php");
+require (SBL . "map" . DIR_DIVIDER . "Configurator.php");
+require (SBL . "map" . DIR_DIVIDER . "Selecter.php");
+require (SBL . "map" . DIR_DIVIDER . "Tokens.php");
+require (SBL . "map" . DIR_DIVIDER . "selecter" . DIR_DIVIDER . "Impl.php");
+
+require (SBL . "Request.php");
+require (SBL . "request" . DIR_DIVIDER . "Web.php");
+require (SBL . "request" . DIR_DIVIDER . "Uri.php");
+require (SBL . "request" . DIR_DIVIDER . "Parameters.php");
+
+require (SBL . "Plugin.php");
+require (SBL . "plugin" . DIR_DIVIDER . "Base.php");
+require (SBL . "plugin" . DIR_DIVIDER . "Common.php");
+
+require (SBL . "Response.php");
+require (SBL . "response" . DIR_DIVIDER . "Abstract.php");
+require (SBL . "response" . DIR_DIVIDER . "Web.php");
+
+require (SBL . "Container.php");
+require (SBL . "container" . DIR_DIVIDER . "Injector.php");
+require (SBL . "container" . DIR_DIVIDER . "Bind.php");
+require (SBL . "container" . DIR_DIVIDER . "DI.php");
+require (SBL . "container" . DIR_DIVIDER . "ReflectionClass.php");
+require (SBL . "container" . DIR_DIVIDER . "Injection.php");
+
+require (SBL . "controller" . DIR_DIVIDER . "Front.php");
+require (SBL . "controller" . DIR_DIVIDER . "Executer.php");
+require (SBL . "controller" . DIR_DIVIDER . "executer" . DIR_DIVIDER . "Basic.php");
+
+require (SBL . "logger" . DIR_DIVIDER . "Factory.php");
+require (SBL . "logger" . DIR_DIVIDER . "Interface.php");
+require (SBL . "logger" . DIR_DIVIDER . "File.php");
+require (SBL . "logger" . DIR_DIVIDER . "Null.php");
+
+require (SBL . "db" . DIR_DIVIDER . "Config.php");
+
+require (SBL . "Destination.php");
+
+require (SBL . "View.php");
+require (SBL . "view" . DIR_DIVIDER . "Renderer.php");
+require (SBL . "view" . DIR_DIVIDER . "renderer" . DIR_DIVIDER . "Class.php");
+require (SBL . "view" . DIR_DIVIDER . "Resource.php");
+require (SBL . "view" . DIR_DIVIDER . "resource" . DIR_DIVIDER . "File.php");
+require (SBL . "view" . DIR_DIVIDER . "resource" . DIR_DIVIDER . "Template.php");
+require (SBL . "view" . DIR_DIVIDER . "Locator.php");
+require (SBL . "view" . DIR_DIVIDER . "locator" . DIR_DIVIDER . "Factory.php");
+require (SBL . "view" . DIR_DIVIDER . "locator" . DIR_DIVIDER . "File.php");
+
+require (SBL . "storage" . DIR_DIVIDER . "Session.php");
+require (SBL . "Helper.php");
 
 /**
  * Sabel

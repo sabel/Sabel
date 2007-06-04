@@ -35,8 +35,8 @@ class Sabel_Controller_Executer_Basic
     $classpath = null;
     $instance  = null;
     
-    $classpath  = $module;
-    $classpath .= "_" . trim(Sabel_Const::CONTROLLER_DIR, "/");
+    $classpath  = ucfirst($module);
+    $classpath .= "_" . ucfirst(trim(Sabel_Const::CONTROLLER_DIR, "/"));
     
     if ($controller !== "") {
       $classpath .= "_" . ucfirst($controller);
