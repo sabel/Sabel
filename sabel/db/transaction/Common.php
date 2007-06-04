@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Transaction_Common extends Sabel_DB_Transaction_Base
 {
+  private static $ins = null;
+
   public static function getInstance()
   {
     if (self::$ins === null) self::$ins = new self();

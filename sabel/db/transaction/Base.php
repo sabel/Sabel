@@ -11,8 +11,6 @@
  */
 class Sabel_DB_Transaction_Base
 {
-  protected static $ins = null;
-
   protected $active = false;
   protected $transactions = array();
 
