@@ -22,11 +22,10 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
                    "27"  => "double",
                    "35"  => "timestamp",
                    "37"  => "varchar",
-                   "40"  => "cstring",
                    "261" => "blob");
 
   protected
-    $genList      = 'SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG = 0',
+    $genList      = 'SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL',
     $priKeys      = 'SELECT RDB$FIELD_NAME FROM RDB$RELATION_CONSTRAINTS rel INNER JOIN RDB$INDEX_SEGMENTS seg
                      ON rel.RDB$INDEX_NAME = seg.RDB$INDEX_NAME WHERE rel.RDB$RELATION_NAME = \'%s\' AND
                      rel.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\'',
@@ -40,31 +39,6 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     $generators  = array(),
     $primaryKeys = array();
 
-  public static function convertToIbaseType($schemaType)
-  {
-    switch ($schemaType) {
-      case Sabel_DB_Type::INT:
-        return 8;
-      case Sabel_DB_Type::FLOAT:
-        return 10;
-      case Sabel_DB_Type::DOUBLE:
-        return 27;
-      case Sabel_DB_Type::STRING:
-        return 37;
-      case Sabel_DB_Type::DATETIME:
-        return 35;
-      case Sabel_DB_Type::DATE:
-        return 12;
-      case Sabel_DB_Type::TIME:
-        return 13;
-      case Sabel_DB_Type::BOOL:
-        return 14;
-      case Sabel_DB_Type::TEXT:
-      case Sabel_DB_Type::BYTE:
-        return 261;
-    }
-  }
-
   public function getTableLists()
   {
     $tables = array();
@@ -75,6 +49,41 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     }
 
     return $tables;
+  }
+
+  public function getForeignKey($tblName)
+  {
+    $tn  = strtoupper($tblName);
+
+    $sql = 'SELECT seg.RDB$FIELD_NAME AS column_name, rc2.RDB$RELATION_NAME AS ref_table, '
+         . 'seg2.RDB$FIELD_NAME AS ref_column, refc.RDB$DELETE_RULE, refc.RDB$UPDATE_RULE '
+         . 'FROM RDB$RELATION_CONSTRAINTS rc '
+         . 'INNER JOIN RDB$INDEX_SEGMENTS seg ON rc.RDB$INDEX_NAME = seg.RDB$INDEX_NAME '
+         . 'INNER JOIN RDB$INDICES ind ON rc.RDB$INDEX_NAME = ind.RDB$INDEX_NAME '
+         . 'INNER JOIN RDB$RELATION_CONSTRAINTS rc2 ON ind.RDB$FOREIGN_KEY = rc2.RDB$INDEX_NAME '
+         . 'INNER JOIN RDB$INDEX_SEGMENTS seg2 ON ind.RDB$FOREIGN_KEY = seg2.RDB$INDEX_NAME '
+         . 'INNER JOIN RDB$REF_CONSTRAINTS refc ON rc2.rdb$constraint_name = refc.RDB$CONST_NAME_UQ '
+         . 'WHERE rc.RDB$CONSTRAINT_TYPE = \'FOREIGN KEY\' AND rc.RDB$RELATION_NAME = \'' . $tn . '\'';
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return null;
+
+    $columns = array();
+    foreach ($rows as $row) {
+      $row = array_map("trim", $row);
+      $column = strtolower($row["column_name"]);
+      $columns[$column]["referenced_table"]  = strtolower($row["ref_table"]);
+      $columns[$column]["referenced_column"] = strtolower($row["ref_column"]);
+      $columns[$column]["on_delete"]         = $row['rdb$delete_rule'];
+      $columns[$column]["on_update"]         = $row['rdb$update_rule'];
+    }
+
+    return $columns;
+  }
+
+  public function getUniques()
+  {
+    return null;
   }
 
   protected function createGenerators()

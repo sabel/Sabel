@@ -156,7 +156,7 @@ class Sabel_DB_Join_Object
 
     if ($object->hasAlias()) {
       $name = strtolower($object->getAlias());
-      $query[] = "AS $name ";
+      $query[] = $name . " ";
     }
 
     $keys = $object->getJoinKeys();

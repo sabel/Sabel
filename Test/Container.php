@@ -1,7 +1,5 @@
 <?php
 
-require ("sabel/Container.php");
-
 /**
  * TestCase of sabel container
  *

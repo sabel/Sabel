@@ -4,6 +4,7 @@ require_once('Test/DB/Test.php');
 require_once('Test/DB/Mysql.php');
 require_once('Test/DB/Pgsql.php');
 require_once('Test/DB/SQLite.php');
+require_once('Test/DB/Ibase.php');
 
 class Test_DB_Tests
 {
@@ -29,6 +30,8 @@ class Test_DB_Tests
     }
 
     if (extension_loaded('pdo_sqlite')) $suite->addTest(Test_DB_SQLite::suite());
+
+    if (extension_loaded('interbase')) $suite->addTest(Test_DB_Ibase::suite());
 
     return $suite;
   }

@@ -37,70 +37,79 @@ set_include_path(CURRENT_PATH . ":" . get_include_path());
 // regist autoload static method
 spl_autoload_register(array("Sabel", "autoload"));
 
-define("SBL", CURRENT_PATH . DIR_DIVIDER . "sabel" . DIR_DIVIDER);
+$SABEL_DIR = "sabel" . DIR_DIVIDER;
 
-require (SBL . "Functions.php");
-require (SBL . "cache" . DIR_DIVIDER . "Manager.php");
-require (SBL . "cache" . DIR_DIVIDER . "Apc.php");
-require (SBL . "cache" . DIR_DIVIDER . "Null.php");
+$SABEL_CACHE_DIR      = $SABEL_DIR . "cache"      . DIR_DIVIDER;
+$SABEL_MAP_DIR        = $SABEL_DIR . "map"        . DIR_DIVIDER;
+$SABEL_VIEW_DIR       = $SABEL_DIR . "view"       . DIR_DIVIDER;
+$SABEL_LOG_DIR        = $SABEL_DIR . "logger"     . DIR_DIVIDER;
+$SABEL_CONTAINER_DIR  = $SABEL_DIR . "container"  . DIR_DIVIDER;
+$SABEL_CONTROLLER_DIR = $SABEL_DIR . "controller" . DIR_DIVIDER;
+$SABEL_REQUEST_DIR    = $SABEL_DIR . "request"    . DIR_DIVIDER;
 
-require (SBL . "Const.php");
-require (SBL . "Context.php");
-require (SBL . "Object.php");
+require ($SABEL_DIR . "Functions.php");
 
-require (SBL . "Map.php");
-require (SBL . "map" . DIR_DIVIDER . "Candidate.php");
-require (SBL . "map" . DIR_DIVIDER . "Config.php");
-require (SBL . "map" . DIR_DIVIDER . "Configurator.php");
-require (SBL . "map" . DIR_DIVIDER . "Selecter.php");
-require (SBL . "map" . DIR_DIVIDER . "Tokens.php");
-require (SBL . "map" . DIR_DIVIDER . "selecter" . DIR_DIVIDER . "Impl.php");
+require ($SABEL_CACHE_DIR . "Manager.php");
+require ($SABEL_CACHE_DIR . "Apc.php");
+require ($SABEL_CACHE_DIR . "Null.php");
 
-require (SBL . "Request.php");
-require (SBL . "request" . DIR_DIVIDER . "Web.php");
-require (SBL . "request" . DIR_DIVIDER . "Uri.php");
-require (SBL . "request" . DIR_DIVIDER . "Parameters.php");
+require ($SABEL_DIR . "Const.php");
+require ($SABEL_DIR . "Context.php");
+require ($SABEL_DIR . "Object.php");
 
-require (SBL . "Plugin.php");
-require (SBL . "plugin" . DIR_DIVIDER . "Base.php");
-require (SBL . "plugin" . DIR_DIVIDER . "Common.php");
+require ($SABEL_DIR . "Map.php");
+require ($SABEL_MAP_DIR . "Candidate.php");
+require ($SABEL_MAP_DIR . "Config.php");
+require ($SABEL_MAP_DIR . "Configurator.php");
+require ($SABEL_MAP_DIR . "Selecter.php");
+require ($SABEL_MAP_DIR . "Tokens.php");
+require ($SABEL_MAP_DIR . "selecter" . DIR_DIVIDER . "Impl.php");
 
-require (SBL . "Response.php");
-require (SBL . "response" . DIR_DIVIDER . "Abstract.php");
-require (SBL . "response" . DIR_DIVIDER . "Web.php");
+require ($SABEL_DIR . "Request.php");
+require ($SABEL_REQUEST_DIR . "Web.php");
+require ($SABEL_REQUEST_DIR . "Uri.php");
+require ($SABEL_REQUEST_DIR . "Parameters.php");
 
-require (SBL . "Container.php");
-require (SBL . "container" . DIR_DIVIDER . "Injector.php");
-require (SBL . "container" . DIR_DIVIDER . "Bind.php");
-require (SBL . "container" . DIR_DIVIDER . "DI.php");
-require (SBL . "container" . DIR_DIVIDER . "ReflectionClass.php");
-require (SBL . "container" . DIR_DIVIDER . "Injection.php");
+require ($SABEL_DIR . "Plugin.php");
+require ($SABEL_DIR . "plugin" . DIR_DIVIDER . "Base.php");
+require ($SABEL_DIR . "plugin" . DIR_DIVIDER . "Common.php");
 
-require (SBL . "controller" . DIR_DIVIDER . "Front.php");
-require (SBL . "controller" . DIR_DIVIDER . "Executer.php");
-require (SBL . "controller" . DIR_DIVIDER . "executer" . DIR_DIVIDER . "Basic.php");
+require ($SABEL_DIR . "Response.php");
+require ($SABEL_DIR . "response" . DIR_DIVIDER . "Abstract.php");
+require ($SABEL_DIR . "response" . DIR_DIVIDER . "Web.php");
 
-require (SBL . "logger" . DIR_DIVIDER . "Factory.php");
-require (SBL . "logger" . DIR_DIVIDER . "Interface.php");
-require (SBL . "logger" . DIR_DIVIDER . "File.php");
-require (SBL . "logger" . DIR_DIVIDER . "Null.php");
+require ($SABEL_DIR . "Container.php");
+require ($SABEL_CONTAINER_DIR ."Injector.php");
+require ($SABEL_CONTAINER_DIR ."Bind.php");
+require ($SABEL_CONTAINER_DIR ."DI.php");
+require ($SABEL_CONTAINER_DIR ."ReflectionClass.php");
+require ($SABEL_CONTAINER_DIR ."Injection.php");
 
-require (SBL . "db" . DIR_DIVIDER . "Config.php");
+require ($SABEL_CONTROLLER_DIR . "Front.php");
+require ($SABEL_CONTROLLER_DIR . "Executer.php");
+require ($SABEL_CONTROLLER_DIR . "executer" . DIR_DIVIDER . "Basic.php");
 
-require (SBL . "Destination.php");
+require ($SABEL_LOG_DIR . "Factory.php");
+require ($SABEL_LOG_DIR . "Interface.php");
+require ($SABEL_LOG_DIR . "File.php");
+require ($SABEL_LOG_DIR . "Null.php");
 
-require (SBL . "View.php");
-require (SBL . "view" . DIR_DIVIDER . "Renderer.php");
-require (SBL . "view" . DIR_DIVIDER . "renderer" . DIR_DIVIDER . "Class.php");
-require (SBL . "view" . DIR_DIVIDER . "Resource.php");
-require (SBL . "view" . DIR_DIVIDER . "resource" . DIR_DIVIDER . "File.php");
-require (SBL . "view" . DIR_DIVIDER . "resource" . DIR_DIVIDER . "Template.php");
-require (SBL . "view" . DIR_DIVIDER . "Locator.php");
-require (SBL . "view" . DIR_DIVIDER . "locator" . DIR_DIVIDER . "Factory.php");
-require (SBL . "view" . DIR_DIVIDER . "locator" . DIR_DIVIDER . "File.php");
+require ($SABEL_DIR . "Destination.php");
 
-require (SBL . "storage" . DIR_DIVIDER . "Session.php");
-require (SBL . "Helper.php");
+require ($SABEL_DIR . "View.php");
+require ($SABEL_VIEW_DIR . "Renderer.php");
+require ($SABEL_VIEW_DIR . "renderer" . DIR_DIVIDER . "Class.php");
+require ($SABEL_VIEW_DIR . "Resource.php");
+require ($SABEL_VIEW_DIR . "resource" . DIR_DIVIDER . "File.php");
+require ($SABEL_VIEW_DIR . "resource" . DIR_DIVIDER . "Template.php");
+require ($SABEL_VIEW_DIR . "Locator.php");
+require ($SABEL_VIEW_DIR . "locator" . DIR_DIVIDER . "Factory.php");
+require ($SABEL_VIEW_DIR . "locator" . DIR_DIVIDER . "File.php");
+
+require ($SABEL_DIR . "storage" . DIR_DIVIDER . "Session.php");
+require ($SABEL_DIR . "Helper.php");
+
+require ($SABEL_DIR . "db" . DIR_DIVIDER . "Config.php");
 
 /**
  * Sabel

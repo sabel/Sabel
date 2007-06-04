@@ -46,7 +46,7 @@ class Sabel_DB_Connection
           break;
 
         case "ibase":
-          list ($conn, $error) = self::pgsqlConnect($params);
+          list ($conn, $error) = self::ibaseConnect($params);
           break;
 
         case "mssql":

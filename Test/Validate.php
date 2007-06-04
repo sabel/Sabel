@@ -425,9 +425,9 @@ class Schema_TargetModel1
 
   public function getProperty()
   {
-    $property = array('primaryKey'   => 'id',
-                      'incrementKey' => 'id',
-                      'tableEngine'  => 'MyISAM');
+    $property['tableEngine'] = 'MyISAM';
+    $property['fkeys']   = null;
+    $property['uniques'] = null;
 
     return $property;
   }
@@ -466,9 +466,9 @@ class Schema_TargetModel2
 
   public function getProperty()
   {
-    $property = array('primaryKey'   => 'id',
-                      'incrementKey' => 'id',
-                      'tableEngine'  => 'MyISAM');
+    $property['tableEngine'] = 'MyISAM';
+    $property['fkeys']   = null;
+    $property['uniques'] = null;
 
     return $property;
   }
