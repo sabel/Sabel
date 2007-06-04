@@ -13,11 +13,6 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
 {
   const INVALID_ACTION = "invalid";
   
-  public function enable()
-  {
-    return array(parent::ON_EXECUTE_ACTION);
-  }
-  
   /**
    * execute an action.
    * overwrite parent executeAction method.

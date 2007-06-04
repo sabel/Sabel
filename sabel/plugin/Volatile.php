@@ -20,13 +20,6 @@ class Sabel_Plugin_Volatile extends Sabel_Plugin_Base
   private $controller = "";
   private $action = "";
   
-  public function enable()
-  {
-    return array(parent::ON_BEFORE_ACTION,
-                 parent::ON_AFTER_ACTION,
-                 parent::ON_REDIRECT);
-  }
-  
   public function __construct($storage = null, $candidate = null)
   {
     if ($storage === null) {

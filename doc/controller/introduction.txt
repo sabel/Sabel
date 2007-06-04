@@ -265,11 +265,6 @@ showPrivateというアクションが実行される前に拒否してしまう
 <?php    
     class Deny extends Sabel_Plugin_Base
     {
-      public function enable()
-      {
-        return self::ON_BEFORE_ACTION;
-      }
-      
       public function onBeforeAction()
       {
         if ($this->destination->getAction() === "showPrivate") {
@@ -285,9 +280,6 @@ $plugin->add(new Deny());
 そしてブラウザからhttp://localhost/index/showPrivateを表示してみましょう。
 content not found というメッセージが表示されたら正しくプラグインが動作しています。
 
-プラグインにあるenable()というメソッドは必ず実装してください。
-enable()メソッドでどのタイミングで呼び出されるかという情報をフレームワークに伝えます。
-
 onBeforeActionイベントの他にも次のようなイベントでプラグインを作成することができます。
  - onAfterAction
  - onExecuteAction
@@ -298,11 +290,3 @@ onBeforeActionイベントの他にも次のようなイベントでプラグイ
 ひとつのプラグイン内で複数のイベントを処理することもできます。
 
 また、プラグインに通常のメソッドを定義すると、そのメソッドはコントローラから呼び出すことができます。
-このメソッドもenableで指定しなければなりません。
-
-public function enable()
-{
-  return array(self::ON_BEFORE_ACTION, "method");
-}
-
-このように指定します。

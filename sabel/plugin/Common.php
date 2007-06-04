@@ -11,11 +11,6 @@
  */
 class Sabel_Plugin_Common extends Sabel_Plugin_Base
 {
-  public function enable()
-  {
-    return array(parent::ON_CREATE_CONTROLLER);
-  }
-  
   public function onCreateController($destination)
   {
     $dest = $destination->toArray();

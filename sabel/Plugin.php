@@ -11,20 +11,26 @@
  */
 final class Sabel_Plugin
 {
-  const ENABLE_METHOD = "enable";
-  
   private $plugins       = array();
   private $pluginMethods = array();
+  
   private $controller    = null;
   private $destination   = null;
   private $executer      = null;
   
-  private $eventMethods = array("onCreateController",
-                                "onBeforeAction",
-                                "onAfterAction",
-                                "onRedirect",
-                                "onException",
-                                "onExecuteAction");
+  const CREATE_CONTROLLER = "onCreateController";
+  const BEFORE_ACTION     = "onBeforeAction";
+  const AFTER_ACTION      = "onAfterAction";
+  const REDIRECT          = "onRedirect";
+  const EXCEPTION         = "onException";
+  const EXECUTE_ACTION    = "onExecuteAction";
+  
+  private $eventMethods = array(self::CREATE_CONTROLLER,
+                                self::BEFORE_ACTION,
+                                self::AFTER_ACTION,
+                                self::REDIRECT,
+                                self::EXCEPTION,
+                                self::EXECUTE_ACTION);
   
   private $events = array();
   
@@ -67,14 +73,12 @@ final class Sabel_Plugin
     $pluginName = get_class($plugin);
     $this->plugins[$pluginName] = $plugin;
     
-    if (method_exists($plugin, self::ENABLE_METHOD)) {
-      $enables = $plugin->enable();
-      if (is_array($enables)) {
-        foreach ($enables as $method) {
-          $this->registration($method, $pluginName);
-        }
-      } else {
-        $this->registration($enables, $pluginName);
+    $ref = new ReflectionClass($pluginName);
+    
+    foreach ($ref->getMethods() as $method) {
+      $name = $method->getName();
+      if ($name !== "setController" && $name !== "setDestination") {
+        $this->registration($name, $pluginName);
       }
     }
     
@@ -122,36 +126,35 @@ final class Sabel_Plugin
    */
   public function onBeforeAction()
   {
-    Sabel_Context::log("[Plugin] on before");
+    Sabel_Context::log("[Plugin] execute on before");
     return $this->doActionEvent("onBeforeAction");
   }
   
   public function onAfterAction()
   {
-    Sabel_Context::log("[Plugin] on after");
+    Sabel_Context::log("[Plugin] execute on after");
     $this->doActionEvent("onAfterAction");
   }
   
   public function onRedirect($redirect)
   {
-    $event = "onRedirect";
+    $event = self::REDIRECT;
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $this->plugins[$name]->$event($redirect);
+        $plugin = $this->getPlugin($name);
+        $plugin->$event($redirect);
       }
     }
   }
   
   public function onException($exception)
   {
-    $event = "onException";
+    $event = self::EXCEPTION;
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $plugin = $this->plugins[$name];
-        $plugin->setController($this->controller);
-        $plugin->setDestination($this->destination);
+        $plugin = $this->getPlugin($name);
         $plugin->$event($exception);
       }
     }
@@ -159,13 +162,11 @@ final class Sabel_Plugin
   
   public function onCreateController($destination)
   {
-    $event = "onCreateController";
+    $event = self::CREATE_CONTROLLER;
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $plugin = $this->plugins[$name];
-        $plugin->setController($this->controller);
-        $plugin->setDestination($destination);
+        $plugin = $this->getPlugin($name);
         $plugin->$event($destination);
       }
     }
@@ -173,20 +174,18 @@ final class Sabel_Plugin
   
   public function hasExecuteAction()
   {
-    $event = "onExecuteAction";
+    $event = self::EXECUTE_ACTION;
     return (isset($this->events[$event]));
   }
   
   public function onExecuteAction($method)
   {
     $result = false; 
-    $event = "onExecuteAction";
+    $event = self::EXECUTE_ACTION;
     
     if (isset($this->events[$event])) {
       foreach ($this->events[$event] as $name) {
-        $plugin = $this->plugins[$name];
-        $plugin->setController($this->controller);
-        $plugin->setDestination($this->destination);
+        $plugin = $this->getPlugin($name);
         $result = $plugin->$event($method);
       }
     }
@@ -197,6 +196,14 @@ final class Sabel_Plugin
   public function toArray()
   {
     return $this->plugins;
+  }
+  
+  private final function getPlugin($name)
+  {
+    $plugin = $this->plugins[$name];
+    $plugin->setController($this->controller);
+    $plugin->setDestination($this->destination);
+    return $plugin;
   }
   
   private final function doActionEvent($event)

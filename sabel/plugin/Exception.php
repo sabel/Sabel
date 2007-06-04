@@ -2,11 +2,6 @@
 
 class Sabel_Plugin_Exception extends Sabel_Plugin_Base
 {
-  public function enable()
-  {
-    return array(parent::ON_EXCEPTION);
-  }
-
   public function onException($exception)
   {
     if (ENVIRONMENT === DEVELOPMENT) {
