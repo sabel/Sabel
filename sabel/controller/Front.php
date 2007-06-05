@@ -72,13 +72,10 @@ final class Sabel_Controller_Front
     }
     
     $this->response = $response;
-    // $this->response->assigns($this->controller->getAttributes());
+    $response->setController($this->controller);
+    $response->setDestination($this->destination);
     
-    if ($response->isRedirected()) {
-      $response->outputHeader();
-    }
-    
-    return Sabel_View::renderDefault($this->controller, $this->destination);
+    return $response;
   }
   
   public function getRequest()

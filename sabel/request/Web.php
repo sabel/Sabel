@@ -20,14 +20,7 @@ class Sabel_Request_Web implements Sabel_Request
    * @var Sabel_Map_Candidate $candidate
    */
   protected $candidate = null;
-  
-  protected $httpMethod = "get";
-  
-  protected $posts = array();
-  
-  private $result = null;
-  private $fController = null;
-  
+    
   /**
    * @var Sabel_Request_Parameters $parameters
    */
@@ -56,11 +49,6 @@ class Sabel_Request_Web implements Sabel_Request
   
   public function parseUri($uri)
   {
-    $this->to($uri);
-  }
-  
-  public function to($uri)
-  {
     $uriAndParams = explode("?", $this->createRequestUri($uri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
     $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
@@ -72,24 +60,6 @@ class Sabel_Request_Web implements Sabel_Request
   public function parameters($params)
   {
     $this->parameters = new Sabel_Request_Parameters($params);
-    return $this;
-  }
-  
-  public function method($httpMethod)
-  {
-    $this->httpMethod = $httpMethod;
-    return $this;
-  }
-  
-  public function value($key, $value)
-  {
-    $this->setPostValue($key, $value);
-    return $this;
-  }
-  
-  public function values($lists)
-  {
-    $this->setPostValues($lists);
     return $this;
   }
   
@@ -132,23 +102,6 @@ class Sabel_Request_Web implements Sabel_Request
     }
   }
   
-  public function setPostValue($name, $value)
-  {
-    $this->posts[$name] = $value;
-    return $this;
-  }
-  
-  public function setPostValues($values)
-  {
-    $this->posts = array_merge($values, $this->posts);
-    return $this;
-  }
-  
-  public function getPostValue($name)
-  {
-    return (isset($this->posts[$name])) ? $this->posts[$name] : null;
-  }
-  
   /**
    * get parameters object
    *
@@ -157,31 +110,6 @@ class Sabel_Request_Web implements Sabel_Request
   public function getParameters()
   {
     return $this->parameters;
-  }
-  
-  public function isPost()
-  {
-    return ($this->httpMethod === "POST");
-  }
-  
-  public function isGet()
-  {
-    return ($this->httpMethod === "GET");
-  }
-  
-  public function isPut()
-  {
-    return ($this->httpMethod === "PUT");
-  }
-  
-  public function isDelete()
-  {
-    return ($this->httpMethod === "DELETE");
-  }
-  
-  public function getHttpMethod()
-  {
-    return $this->httpMethod;
   }
   
   public function setCandidate(Sabel_Map_Candidate $candidate)
@@ -203,50 +131,6 @@ class Sabel_Request_Web implements Sabel_Request
   public function getRequestUri()
   {
     return $this->uri;
-  }
-  
-  public function get($uri)
-  {
-    return $this->method("GET")->to($uri);
-  }
-  
-  public function post($uri)
-  {
-    return $this->method("POST")->to($uri);
-  }
-  
-  public function launch($storage = null)
-  {
-    $aFrontController = new Sabel_Controller_Front();
-    
-    $aFrontController->processCandidate($this);
-    
-    $aFrontController->plugin
-                     ->add(new Sabel_Controller_Plugin_Volatile($storage))
-                     ->add(new Sabel_Controller_Plugin_Filter())
-                     ->add(new Sabel_Controller_Plugin_Model())
-                     ->add(new Sabel_Controller_Plugin_View())
-                     ->add(new Sabel_Controller_Plugin_ExceptionHandler());
-
-    $aFrontController->ignition($storage);
-    $this->fController = $aFrontController;
-    $this->fController->getResult();
-    return $this;
-  }
-  
-  public function isRedirected()
-  {
-    return $this->fController->getController()->isRedirected();
-  }
-  
-  public function controller()
-  {
-    return $this->fController->getController();
-  }
-  
-  public function result()
-  {
-    return $this->fController->getController();
   }
   
   public function __toString()

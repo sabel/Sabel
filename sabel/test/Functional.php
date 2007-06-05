@@ -33,21 +33,36 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     return $aFrontController->getResponse();
   }
   
-  protected function assertRedirect($uri, $toUri)
+  protected function assertRedirect($uri, $toUri, $storage = null)
   {
-    $response = $this->request($uri);
+    $response = $this->request($uri, $storage);
     
     if ($response->isRedirected()) {
       $this->assertEquals($toUri, $response->getLocationUri());
     } else {
       $this->fail("not redirected");
     }
+    
+    return $response;
   }
   
-  protected function assertAssigned($uri, $value)
+  protected function assertAssigned($uri, $key, $value, $storage = null)
   {
-    $response = $this->request($uri);
+    $response = $this->request($uri, $storage);
     
+    $attributs = $response->getAttributes();
+    if (isset($attributs[$key])) {
+      $this->assertEquals($attributs[$key], $value);
+    } else {
+      $this->fail("not assigned");
+    }
+    
+    return $response;
+  }
+  
+  protected function clear()
+  {
+    $this->storage = new Sabel_Storage_InMemory();
   }
   
   protected function assertHtmlElementEquals($expect, $id, $html)

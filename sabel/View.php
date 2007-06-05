@@ -96,8 +96,11 @@ final class Sabel_View
     }
   }
   
-  public static function renderDefault($controller, $destination)
+  public static function renderDefault($response)
   {
+    $controller  = $response->getController();
+    $destination = $response->getDestination();
+    
     if ($controller->hasRendered()) {
       return $controller->getRendered();
     }

@@ -11,4 +11,6 @@ if (!defined("ENVIRONMENT")) {
 }
 
 $aFrontController = new Sabel_Controller_Front();
-echo $aFrontController->ignition();
+$response = $aFrontController->ignition();
+$response->outputHeaderIfRedirectedThenExit();
+echo Sabel_View::renderDefault($response);

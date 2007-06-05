@@ -21,6 +21,33 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   const NOT_FOUND    = 400;
   const SERVER_ERROR = 500;
   
+  private $controller  = null;
+  private $destination = null;
+  
+  public function setController($controller)
+  {
+    if (! $controller instanceof Sabel_Controller_Page) {
+      throw new Sabel_Exception_Runtime("must be Controller");
+    }
+    
+    $this->controller = $controller;
+  }
+  
+  public function getController()
+  {
+    return $this->controller;
+  }
+  
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
+  }
+  
+  public function getDestination()
+  {
+    return $this->destination;
+  }
+  
   public function notFound()
   {
     $this->status = self::NOT_FOUND;
@@ -36,6 +63,21 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     } elseif ($this->isRedirected()) {
       header("Location: " . $this->location);
     }
+  }
+  
+  public function outputHeaderIfRedirected()
+  {
+    if ($this->isRedirected()) {
+      $this->outputHeader();
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  public function outputHeaderIfRedirectedThenExit()
+  {
+    if ($this->outputHeaderIfRedirected()) exit;
   }
   
   public function isNotFound()
@@ -86,5 +128,10 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function isServerError()
   {
     return ($this->status === self::SERVER_ERROR);
+  }
+  
+  public function getAttributes()
+  {
+    return $this->controller->getAttributes();
   }
 }
