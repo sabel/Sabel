@@ -20,15 +20,13 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
   protected function request($uri, $storage = null)
   {
     $aFrontController = new Sabel_Controller_Front();
+    $aFrontController->ignition($uri, $storage);
+    return $aFrontController->getResponse();
+  }
+  
+  protected function assertRedirect($uri, $toUri)
+  {
     
-    $aFrontController->plugin
-                     ->add(new Sabel_Controller_Plugin_Volatile())
-                     ->add(new Sabel_Controller_Plugin_Filter())
-                     ->add(new Sabel_Controller_Plugin_View())
-                     ->add(new Sabel_Controller_Plugin_ExceptionHandler())
-                     ->add(new Sabel_Controller_Plugin_TestRedirecter());
-                   
-    return $aFrontController->ignition($uri, $storage);
   }
   
   protected function assertHtmlElementEquals($expect, $id, $html)
@@ -38,16 +36,5 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     $element = $doc->getElementById($id);
     
     $this->assertEquals($expect, $element->nodeValue);
-  }
-}
-
-class Sabel_Controller_Plugin_TestRedirecter extends Sabel_Plugin_Base
-{    
-  public function onRedirect($controller, $to = null)
-  {
-    $host = Sabel_Environment::get("http_host");
-    
-    $absolute = 'http://' . $host;
-    $redirect = 'Location: ' . $absolute . '/' . $to;
   }
 }
