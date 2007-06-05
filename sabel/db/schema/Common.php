@@ -60,7 +60,9 @@ abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
     $this->setIncrement($co, $row);
     $this->setPrimaryKey($co, $row);
 
+    if ($co->primary) $co->nullable = false;
     if ($co->isString()) $this->setLength($co, $row);
+
     return $co;
   }
 }

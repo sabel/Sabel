@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Schema_Loader
 {
-  protected static $schemas = array();
+  private static $schemas = array();
 
   public static function getSchema($model)
   {

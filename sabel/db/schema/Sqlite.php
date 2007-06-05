@@ -164,12 +164,14 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     if (strpos($this->colLine, "default") === false) {
       $co->default = null;
     } else {
-      $default = trim(str_replace("default ", "", $this->colLine));
-      if ($default === "null" || $default === "NULL") {
+      $d = trim(str_replace("default ", "", $this->colLine));
+      if ($d === "null" || $d === "NULL") {
         $co->default = null;
       } else {
-        if (!is_numeric($default)) $default = substr($default, 1, -1);
-        $this->setDefaultValue($co, $default);
+        if (!$co->isBool()) {
+          if (!is_numeric($d)) $d = substr($d, 1, -1);
+        }
+        $this->setDefaultValue($co, $d);
       }
     }
   }
@@ -192,7 +194,8 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
 
     foreach ($exp as $colName) {
       if (isset($columns[$colName])) {
-        $columns[$colName]->primary = true;
+        $columns[$colName]->primary  = true;
+        $columns[$colName]->nullable = false;
       }
     }
   }

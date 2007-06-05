@@ -215,6 +215,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
   protected function setPrimaryKey($co, $fieldName)
   {
     $co->primary = (in_array($fieldName, $this->primaryKeys));
+    if ($co->primary) $co->nullable = false;
   }
 
   protected function setLength($co, $row)

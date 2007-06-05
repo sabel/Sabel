@@ -20,16 +20,14 @@ class Sabel_DB_Schema_Column
 
   public function isInt($strict = false)
   {
-    $bool = ($this->type === Sabel_DB_Type::INT);
-    if ($bool) return true;
+    if ($strict) {
+      return ($this->type === Sabel_DB_Type::INT);
+    } else {
+      return ($this->type === Sabel_DB_Type::INT    ||
+              $this->type === Sabel_DB_Type::BIGINT ||
+              $this->type === Sabel_DB_Type::SMALLINT);
 
-    $bool = ($this->type === Sabel_DB_Type::BIGINT);
-    if ($bool) return true;
-
-    $bool = ($this->type === Sabel_DB_Type::SMALLINT);
-    if ($bool) return true;
-
-    return false;
+    }
   }
 
   public function isBigint()
@@ -85,8 +83,6 @@ class Sabel_DB_Schema_Column
 
       case Sabel_DB_Type::STRING:
       case Sabel_DB_Type::TEXT:
-        return (string)$value;
-
       case Sabel_DB_Type::BIGINT:
         return (string)$value;
 

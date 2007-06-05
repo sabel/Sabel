@@ -66,7 +66,7 @@ abstract class Sabel_DB_Schema_Base
         break;
 
       case Sabel_DB_Type::BOOL:
-        $co->default = (in_array($default, array("true", "TRUE", 1)));
+        $co->default = in_array($default, array("1", "t", "true"));
         break;
 
       default:
