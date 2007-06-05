@@ -11,7 +11,7 @@ class Sabel_Plugin_Exception extends Sabel_Plugin_Base
         $this->controller->exceptionType = "sabel";
       }
     }
-    
+
     $this->controller->exception = $exception;
   }
 }
