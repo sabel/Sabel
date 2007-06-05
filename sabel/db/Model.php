@@ -578,19 +578,10 @@ class Sabel_DB_Model
 
     if (empty($rows)) return null;
 
-    $models  = array();
-    $mdlName = $this->getModelName();
+    $results = array();
+    foreach ($rows as $row) $results[] = (object)$row;
 
-    foreach ($rows as $row) {
-      $model = MODEL($mdlName);
-      foreach ($row as $key => $val) {
-        $model->values[$key] = $val;
-      }
-
-      $models[] = $model;
-    }
-
-    return $models;
+    return $results;
   }
 
   protected function execSelect($command)

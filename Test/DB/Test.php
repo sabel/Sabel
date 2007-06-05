@@ -884,20 +884,25 @@ class Test_DB_Test extends SabelTestCase
       $this->assertEquals($fkeys["city_id"]["on_delete"], "NO ACTION");
 
       // @todo
-      if (self::$db === "IBASE") {
+      if (self::$db === "MYSQL") {
+        $results = $model->executeQuery("SELECT VERSION() as version");
+        $exp = explode(".", $results[0]->version);
+        if ($exp[1] === "1") {
+          $this->assertEquals($fkeys["city_id"]["on_update"], "RESTRICT");
+        } else {
+          $this->assertEquals($fkeys["city_id"]["on_update"], "NO ACTION");
+        }
+      } elseif (self::$db === "IBASE") {
         $this->assertEquals($fkeys["city_id"]["on_update"], "RESTRICT");
       } else {
         $this->assertEquals($fkeys["city_id"]["on_update"], "NO ACTION");
       }
     }
 
-    // @todo
-    if (self::$db !== "IBASE") {
-      $this->assertFalse($schema->isUnique("name"));
-      $this->assertTrue($schema->isUnique("uni1"));
-      $this->assertTrue($schema->isUnique("uni2"));
-      $this->assertTrue($schema->isUnique("uni3"));
-    }
+    $this->assertFalse($schema->isUnique("name"));
+    $this->assertTrue($schema->isUnique("uni1"));
+    $this->assertTrue($schema->isUnique("uni2"));
+    $this->assertTrue($schema->isUnique("uni3"));
   }
 
   public function testBridge()

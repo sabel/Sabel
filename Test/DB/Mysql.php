@@ -3,17 +3,17 @@
 class Test_DB_Mysql extends Test_DB_Test
 {
   private static $params1 = array('driver'   => 'mysql',
-                                  'host'     => '127.0.0.1',
-                                  'user'     => 'root',
-                                  'password' => '',
-                                  'schema'   => 'edo',
+                                  'host'     => '192.168.0.151',
+                                  'user'     => 'develop',
+                                  'password' => 'develop',
+                                  'port'     => '3308',
                                   'database' => 'edo');
 
   private static $params2 = array('driver'   => 'pdo-mysql',
-                                  'host'     => '127.0.0.1',
-                                  'user'     => 'root',
-                                  'password' => '',
-                                  'schema'   => 'edo2',
+                                  'host'     => '192.168.0.151',
+                                  'user'     => 'develop',
+                                  'password' => 'develop',
+                                  'port'     => '3308',
                                   'database' => 'edo2');
 
   public static function main()

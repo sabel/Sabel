@@ -230,10 +230,4 @@ abstract class Sabel_DB_Migration_Base
   {
     Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
   }
-
-  protected function parseForForeignKey($line)
-  {
-    $line = str_replace("FKEY", "FOREIGN KEY", $line);
-    return preg_replace("/\) /", ") REFERENCES ", $line, 1);
-  }
 }

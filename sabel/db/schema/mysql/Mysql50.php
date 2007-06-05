@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Schema_Mysql_Mysql50 extends Sabel_DB_Schema_Mysql_Base
 {
-  public function getForeignKeys($tblName, $driver)
+  public function getForeignKeys($tblName, $schemaName, $driver)
   {
     $result = $driver->setSql("SHOW CREATE TABLE $tblName")->execute();
     $createSql = $result[0]["Create Table"];

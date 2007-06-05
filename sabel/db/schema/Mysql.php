@@ -68,7 +68,7 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
   public function getForeignKey($tblName)
   {
     $instance = Sabel_DB_Schema_Mysql_Factory::create($this->getMysqlVersion());
-    return $instance->getForeignKeys($tblName, $this->driver);
+    return $instance->getForeignKeys($tblName, $this->schemaName, $this->driver);
   }
 
   public function getUniques($tblName)

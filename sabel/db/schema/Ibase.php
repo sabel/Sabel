@@ -81,9 +81,26 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     return $columns;
   }
 
-  public function getUniques()
+  public function getUniques($tblName)
   {
-    return null;
+    $tn  = strtoupper($tblName);
+
+    $sql = 'SELECT seg.RDB$INDEX_NAME, seg.RDB$FIELD_NAME '
+         . 'FROM RDB$RELATION_CONSTRAINTS rc '
+         . 'INNER JOIN RDB$INDEX_SEGMENTS seg ON seg.RDB$INDEX_NAME = rc.RDB$INDEX_NAME '
+         . 'WHERE rc.RDB$RELATION_NAME = \'' . $tn . '\' AND '
+         . 'rc.RDB$CONSTRAINT_TYPE = \'UNIQUE\'';
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return null;
+
+    $uniques = array();
+    foreach ($rows as $row) {
+      $key = trim($row['rdb$index_name']);
+      $uniques[$key][] = trim(strtolower($row['rdb$field_name']));
+    }
+
+    return array_values($uniques);
   }
 
   protected function createGenerators()
