@@ -44,23 +44,27 @@ class Sabel_Request_Web implements Sabel_Request
       $this->posts = $_POST;
     }
     
-    $uriAndParams = explode("?", $this->createRequestUri($requestUri));
-    $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
+    $uriAndParams = $this->createRequestUri($requestUri);
+    $parameters = (isset($uriAndParams["query"])) ? $uriAndParams["query"] : "";
     
-    $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
+    $uri = ltrim($uriAndParams["path"], "/");
+    
+    $this->uri        = new Sabel_Request_Uri($uri);
     $this->parameters = new Sabel_Request_Parameters($parameters);
   }
   
   public function parseUri($uri)
   {
-    $uriAndParams = explode("?", $this->createRequestUri($uri));
-    $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
-    $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
+    $uriAndParams = $this->createRequestUri($uri);
+    $parameters = (isset($uriAndParams["query"])) ? $uriAndParams["query"] : "";
+    $uri = ltrim($uriAndParams["path"], "/");
+    
+    $this->uri        = new Sabel_Request_Uri($uri);
     $this->parameters = new Sabel_Request_Parameters($parameters);
     
     return $this;
   }
-  
+    
   public function parameters($params)
   {
     $this->parameters = new Sabel_Request_Parameters($params);
@@ -69,18 +73,19 @@ class Sabel_Request_Web implements Sabel_Request
   
   protected function createRequestUri($requestUri)
   {
-    if ($requestUri !== "") return ltrim($requestUri, "/");
-
-    $request_uri = "";    
-    if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
-      $args = $_SERVER['argv'];
+    $argv = isset($_SERVER["argv"]{0}) ? $_SERVER["argv"]{0} : null;
+    
+    if ($argv !== null && strpos($argv, "sabel") !== false) {
+      $args = $_SERVER["argv"];
       array_shift($args);
-      $request_uri = join('/', $args);
-    } elseif (isset($_SERVER['REQUEST_URI'])) {
-      $request_uri = ltrim($_SERVER['REQUEST_URI'], '/');
+      return join("/", $args);
     }
     
-    return $request_uri;
+    if ($requestUri === "") {
+      return parse_url($_SERVER["REQUEST_URI"]);
+    } else {
+      return parse_url($requestUri);
+    }
   }
   
   public function hasParameters()
