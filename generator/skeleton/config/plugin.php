@@ -6,3 +6,4 @@ $plugin->add(new Sabel_Plugin_Common());
 $plugin->add(new Sabel_Plugin_View());
 $plugin->add(new Sabel_Plugin_Redirecter());
 $plugin->add(new Sabel_Plugin_Exception());
+$plugin->add(new Sabel_Plugin_Errors());

@@ -596,7 +596,7 @@ class Sabel_DB_Model
   protected function executeError($errorMsg, $command)
   {
     $command->rollback();
-    throw new Exception($errorMsg);
+    throw new Sabel_DB_Exception($errorMsg);
   }
 
   private function getEvalCode($argsCount)

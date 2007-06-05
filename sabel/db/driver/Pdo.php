@@ -161,7 +161,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     if (!($pdoStmt = $conn->prepare($sql))) {
       $this->data = array();
       $error = $conn->errorInfo();
-      throw new Exception("PdoStatement is null. SQL: $sql ERROR: {$error[2]}");
+      $this->error("PdoStatement is invalid. {$error[2]}", $sql);
     }
 
     return $pdoStmt;

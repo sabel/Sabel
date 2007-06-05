@@ -7,19 +7,15 @@
 例外が発生しました
 </h1>
 
-<? if ($exceptionType === "database") : ?>
-  config/connection.phpを確認してください。<br/>
-<? endif ?>
+下記のエラーを確認してください。<br/>
+<br/>
 
-<hr/>
-
-下記の詳細なエラーを確認してください。
-<div style="border: solid 1px #fcc; mergin: 10px; padding: 10px;">
-  <pre style="font-size: 1.2em;"><?= $exception->getMessage() ?></pre>
+<div style="border: solid 3px #f88; mergin: 10px; padding: 10px;">
+  <pre style="font-size: 1.3em;"><?= $exception->getMessage() ?></pre>
 </div>
 
-<hr/>
+<br/>
 
 <pre>
-  <?= print_r($exception->getTraceAsString()) ?>
+<?= print_r($exception->getTraceAsString()) ?>
 </pre>

@@ -3,7 +3,7 @@
 /**
  * Sabel_Controller_Executer_Flow
  *
- * @category   Controller
+ * @category   Plugin
  * @package    org.sabel.controller.executer
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
