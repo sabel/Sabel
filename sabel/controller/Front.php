@@ -53,7 +53,15 @@ final class Sabel_Controller_Front
     
     $executer = $this->injector->newInstance(self::EXECUTER_INTERFACE);
     $executer->setDestination($destination);
-    $this->controller = $executer->create();
+
+    try {
+      $this->controller = $executer->create();
+    } catch (Sabel_Exception_Runtime $e) {
+      $destination->setModule("index");
+      $destination->setController("index");
+      $destination->setAction(self::NOT_FOUND_ACTION);
+      $this->controller = $executer->create();
+    }
     
     $response = $executer->execute($this->request, $storage);
     

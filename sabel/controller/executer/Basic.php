@@ -47,7 +47,7 @@ class Sabel_Controller_Executer_Basic
     if (class_exists($classpath)) {
       $instance = new $classpath();
     } else {
-      $instance = new Index_Controllers_Index();
+      throw new Sabel_Exception_Runtime("controller not found");
     }
     
     Sabel_Context::setController($instance);
