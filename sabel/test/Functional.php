@@ -17,15 +17,36 @@ require_once ('PHPUnit/Framework/TestCase.php');
  */
 class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
 {
+  protected $storage = null;
+  
   protected function request($uri, $storage = null)
   {
     $aFrontController = new Sabel_Controller_Front();
+    
+    if ($storage === null) {
+      $storage = new Sabel_Storage_InMemory();
+    }
+    
+    $this->storage = $storage;
     $aFrontController->ignition($uri, $storage);
+    
     return $aFrontController->getResponse();
   }
   
   protected function assertRedirect($uri, $toUri)
   {
+    $response = $this->request($uri);
+    
+    if ($response->isRedirected()) {
+      $this->assertEquals($toUri, $response->getLocationUri());
+    } else {
+      $this->fail("not redirected");
+    }
+  }
+  
+  protected function assertAssigned($uri, $value)
+  {
+    $response = $this->request($uri);
     
   }
   

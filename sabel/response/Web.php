@@ -12,6 +12,8 @@
 class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Response
 {
   private $location = "";
+  private $locationUri = "";
+  
   private $status = 200;
   
   const SUCCESS      = 200;
@@ -31,6 +33,8 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       header("HTTP/1.0 404 Not Found");
     } elseif ($this->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
+    } elseif ($this->isRedirected()) {
+      header("Location: " . $this->location);
     }
   }
   
@@ -39,9 +43,10 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     return ($this->status === self::NOT_FOUND);
   }
   
-  public function location($location)
+  public function location($host, $to)
   {
-    $this->location = $location;
+    $this->location = "http://" . $host . "/" . $to;
+    $this->locationUri = $to;
     $this->status = self::REDIRECTED;
     return $this;
   }
@@ -49,6 +54,11 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function getLocation()
   {
     return $this->location;
+  }
+  
+  public function getLocationUri()
+  {
+    return $this->locationUri;
   }
   
   public function isRedirected()

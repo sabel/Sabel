@@ -170,12 +170,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public final function redirectTo($params)
   {
-    /*
-    if (!is_array($params) && is_string($params)) {
-      $params = array(':action' => $params);
-    }
-    */
-    
     $candidate = Sabel_Context::getCandidate();
     return $this->redirect($candidate->uri($this->convertParams($params)));
   }

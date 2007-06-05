@@ -10,7 +10,8 @@ class Sabel_Plugin_Exception extends Sabel_Plugin_Base
       } else {
         $this->controller->exceptionType = "sabel";
       }
-      $this->controller->exception = $exception;
     }
+    
+    $this->controller->exception = $exception;
   }
 }

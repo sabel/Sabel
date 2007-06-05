@@ -34,8 +34,12 @@ final class Sabel_Controller_Front
     }
   }
     
-  public function ignition($storage = null)
+  public function ignition($uri = null, $storage = null)
   {
+    if ($uri !== null) {
+      $this->request->parseUri($uri);
+    }
+    
     $map = new Sabel_Map();
     $destination = $this->destination = $map->route($this->request);
     
@@ -68,6 +72,11 @@ final class Sabel_Controller_Front
     }
     
     $this->response = $response;
+    // $this->response->assigns($this->controller->getAttributes());
+    
+    if ($response->isRedirected()) {
+      $response->outputHeader();
+    }
     
     return Sabel_View::renderDefault($this->controller, $this->destination);
   }

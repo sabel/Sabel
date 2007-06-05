@@ -10,5 +10,5 @@ add_include_path('/lib');
 add_include_path("/components");
 add_include_path("/tests");
 
-define("__TRUE__",  "true");
-define("__FALSE__", "false");
+require (RUN_BASE . "/config/Factory.php");
+require (RUN_BASE . "/config/Map.php");

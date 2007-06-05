@@ -47,19 +47,21 @@ class Sabel_Request_Web implements Sabel_Request
       $this->posts = $_POST;
     }
     
-    $uriAndParams = explode('?', $this->createRequestUri($requestUri));
+    $uriAndParams = explode("?", $this->createRequestUri($requestUri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
     
     $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
     $this->parameters = new Sabel_Request_Parameters($parameters);
-    
-    assert(is_object($this->uri));
-    assert(is_object($this->parameters));
+  }
+  
+  public function parseUri($uri)
+  {
+    $this->to($uri);
   }
   
   public function to($uri)
   {
-    $uriAndParams = explode('?', $this->createRequestUri($uri));
+    $uriAndParams = explode("?", $this->createRequestUri($uri));
     $parameters = (isset($uriAndParams[1])) ? $uriAndParams[1] : "";
     $this->uri        = new Sabel_Request_Uri($uriAndParams[0]);
     $this->parameters = new Sabel_Request_Parameters($parameters);
@@ -93,7 +95,7 @@ class Sabel_Request_Web implements Sabel_Request
   
   protected function createRequestUri($requestUri)
   {
-    if ($requestUri !== "") return ltrim($requestUri, '/');
+    if ($requestUri !== "") return ltrim($requestUri, "/");
 
     $request_uri = "";    
     if (isset($_SERVER['argv']{0}) && strpos($_SERVER['argv']{0}, 'sabel') !== false) {
@@ -159,22 +161,22 @@ class Sabel_Request_Web implements Sabel_Request
   
   public function isPost()
   {
-    return ($this->httpMethod === 'POST');
+    return ($this->httpMethod === "POST");
   }
   
   public function isGet()
   {
-    return ($this->httpMethod === 'GET');
+    return ($this->httpMethod === "GET");
   }
   
   public function isPut()
   {
-    return ($this->httpMethod === 'PUT');
+    return ($this->httpMethod === "PUT");
   }
   
   public function isDelete()
   {
-    return ($this->httpMethod === 'DELETE');
+    return ($this->httpMethod === "DELETE");
   }
   
   public function getHttpMethod()
