@@ -25,7 +25,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     return ob_get_clean();
   }
   
-  private final function initNotInitValues($hash, &$sbl_tpl_values)
+  private final function initializeValues($hash, &$sbl_tpl_values)
   {
     $buf = file_get_contents($this->getCompileFilePath($hash));
     if (preg_match_all('/\$([\w]+)/', $buf, $matches)) {
@@ -47,7 +47,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     $r = '/<\?(=)?\s([^?;\s]+)([^?]+)\?>/';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
     $template = str_replace('<?=', '<? echo', $template);
-    $template = str_replace('<?',  '<?php',   $template);
+    $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
     
     if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
       $template = $this->trimContents($template);
