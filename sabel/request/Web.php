@@ -26,14 +26,18 @@ class Sabel_Request_Web implements Sabel_Request
    */
   protected $parameters = null;
   
-  public function __construct($requestUri = "", $httpMethod = null)
+  private $method = Sabel_Request::GET;
+  
+  private $posts = array();
+  
+  public function __construct($requestUri = "", $method = null)
   {
-    if ($httpMethod === null) {
+    if ($method === null) {
       if (isset($_SERVER["REQUEST_METHOD"])) {
-        $this->httpMethod = $_SERVER["REQUEST_METHOD"];
+        $this->method = $_SERVER["REQUEST_METHOD"];
       }
     } else {
-      $this->httpMethod = $httpMethod;
+      $this->method = $method;
     }
     
     if (isset($_POST)) {
@@ -115,6 +119,15 @@ class Sabel_Request_Web implements Sabel_Request
   public function setCandidate(Sabel_Map_Candidate $candidate)
   {
     $this->candidate = $candidate;
+  }
+  
+  public function getPostValue($key)
+  {
+    if (isset($this->posts[$key])) {
+      return $this->posts[$key];
+    } else {
+      return null;
+    }
   }
   
   public function getPostRequests($postValues = null)

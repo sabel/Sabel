@@ -15,6 +15,7 @@ final class Sabel_Controller_Front
   const EXECUTER_INTERFACE  = "Sabel_Controller_Executer";
   const NOT_FOUND_ACTION    = "notFound";
   const SERVER_ERROR_ACTION = "serverError";
+  const INDEX_PAGE          = "index";
   
   private
     $request  = null,
@@ -65,7 +66,7 @@ final class Sabel_Controller_Front
       }
       $response = $executer->execute($this->request, $storage);
       if ($response->isNotFound()) {
-        $destination->setController("index");
+        $destination->setController(self::INDEX_PAGE);
         $this->controller = $executer->create();
         $response = $executer->execute($this->request, $storage);
       }
