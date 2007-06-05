@@ -44,13 +44,7 @@ class Sabel_Request_Web implements Sabel_Request
       $this->posts = $_POST;
     }
     
-    $uriAndParams = $this->createRequestUri($requestUri);
-    $parameters = (isset($uriAndParams["query"])) ? $uriAndParams["query"] : "";
-    
-    $uri = ltrim($uriAndParams["path"], "/");
-    
-    $this->uri        = new Sabel_Request_Uri($uri);
-    $this->parameters = new Sabel_Request_Parameters($parameters);
+    $this->parseUri($requestUri);
   }
   
   public function parseUri($uri)
@@ -73,18 +67,18 @@ class Sabel_Request_Web implements Sabel_Request
   
   protected function createRequestUri($requestUri)
   {
-    $argv = isset($_SERVER["argv"]{0}) ? $_SERVER["argv"]{0} : null;
-    
-    if ($argv !== null && strpos($argv, "sabel") !== false) {
-      $args = $_SERVER["argv"];
-      array_shift($args);
-      return join("/", $args);
-    }
-    
-    if ($requestUri === "") {
-      return parse_url($_SERVER["REQUEST_URI"]);
-    } else {
+    if ($requestUri !== "") {
       return parse_url($requestUri);
+    } else {
+      $argv = isset($_SERVER["argv"]{0}) ? $_SERVER["argv"]{0} : null;
+
+      if ($argv !== null && strpos($argv, "sabel") !== false) {
+        $args = $_SERVER["argv"];
+        array_shift($args);
+        return join("/", $args);
+      }
+
+      return parse_url($_SERVER["REQUEST_URI"]);
     }
   }
   
@@ -168,16 +162,16 @@ class Sabel_Request_Web implements Sabel_Request
    * @param string $expected
    * @return mixed cleaned string or array
    */
-  protected function removeNonAlphaNumeric(&$target, $expected = '')
+  protected function removeNonAlphaNumeric(&$target, $expected = "")
   {
     $cleaned = null;
     
     if(is_array($target)) {
       foreach ($target as $key => $value) {
-        $cleaned[$key] = preg_replace( "/[^\${$expected}a-zA-Z0-9]/", '', $value);
+        $cleaned[$key] = preg_replace("/[^\${$expected}a-zA-Z0-9]/", "", $value);
       }
     } else {
-      $cleaned = preg_replace( "/[^\${$expected}a-zA-Z0-9]/", '', $target);
+      $cleaned = preg_replace("/[^\${$expected}a-zA-Z0-9]/", "", $target);
     }
     
     return $cleaned;
