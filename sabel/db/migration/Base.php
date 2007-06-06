@@ -22,6 +22,8 @@ abstract class Sabel_DB_Migration_Base
   protected $fkeys    = array();
   protected $uniques  = array();
 
+  abstract protected function getBooleanAttr($value);
+
   public function __construct($filePath, $type, $dirPath = null)
   {
     $this->type     = $type;
@@ -60,6 +62,7 @@ abstract class Sabel_DB_Migration_Base
     $command = $this->command;
     if (method_exists($this, $command)) {
       $this->$command();
+      Sabel_DB_Connection::closeAll();
     } else {
       throw new Exception("command '$command' not found.");
     }
@@ -229,5 +232,24 @@ abstract class Sabel_DB_Migration_Base
   protected function executeQuery($query)
   {
     Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
+  }
+
+  protected function getDefaultValue($col)
+  {
+    $d = $col->default;
+
+    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
+      return "";
+    } else {
+      if ($col->isBool()) {
+        return $this->getBooleanAttr($d);
+      } elseif ($d === null) {
+        return ($col->nullable === true) ? "DEFAULT NULL" : "";
+      } elseif ($col->isNumeric()) {
+        return "DEFAULT $d";
+      } else {
+        return "DEFAULT '{$d}'";
+      }
+    }
   }
 }

@@ -147,6 +147,7 @@ class Sabel_DB_Migration_Tools_Custom
 
     $files = array();
     while (($file = readdir($handle)) !== false) {
+      if ($file === "." || $file === "..") continue;
       list (, $num) = explode("_", $file);
 
       if (is_numeric($num)) {

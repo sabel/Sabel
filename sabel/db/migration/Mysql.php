@@ -30,7 +30,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     }
   }
 
-  public function createTable($cols)
+  protected function createTable($cols)
   {
     $query = $this->getCreateSql($cols);
 
@@ -90,7 +90,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     $line[] = $col->name;
     $line[] = $this->getTypeString($col);
     $line[] = $this->getNullableString($col);
-    $line[] = $this->getDefaultString($col);
+    $line[] = $this->getDefaultValue($col);
 
     if ($col->increment) $line[] = "AUTO_INCREMENT";
     return implode(" ", $line);
@@ -113,13 +113,13 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY && $cd !== null) {
       if ($current->isBool()) {
         $line[] = $this->getBooleanAttr($cd);
-      } elseif ($current->isString()) {
-        $line[] = "DEFAULT '{$cd}'";
-      } else {
+      } elseif ($current->isNumeric()) {
         $line[] = "DEFAULT $cd";
+      } else {
+        $line[] = "DEFAULT '{$cd}'";
       }
     } else {
-      $line[] = $this->getDefaultString($col);
+      $line[] = $this->getDefaultValue($col);
     }
 
     if ($col->increment) $line[] = "AUTO_INCREMENT";
@@ -140,25 +140,9 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     return ($col->nullable === false) ? "NOT NULL" : "";
   }
 
-  private function getDefaultString($col)
+  protected function getBooleanAttr($value)
   {
-    $d = $col->default;
-
-    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      return "";
-    } else {
-      if ($col->isBool()) {
-        return $this->getBooleanAttr($d);
-      } elseif ($col->isString()) {
-        return ($d === null) ? "DEFAULT ''" : "DEFAULT '{$d}'";
-      } elseif ($d !== null) {
-        return "DEFAULT $d";
-      }
-    }
-  }
-
-  private function getBooleanAttr($value)
-  {
-    return "DEFAULT " . (($value) ? 1 : 0) . " COMMENT 'boolean'";
+    $v = ($value === true) ? "1" : "0";
+    return "DEFAULT $v COMMENT 'boolean'";
   }
 }

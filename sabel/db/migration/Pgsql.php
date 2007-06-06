@@ -21,7 +21,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "timestamp");
 
-  public function createTable($cols)
+  protected function createTable($cols)
   {
     $this->executeQuery($this->getCreateSql($cols));
   }
@@ -49,19 +49,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
     $line[] = $this->getDataType($col);
 
     if ($col->nullable === false) $line[] = "NOT NULL";
-
-    $d = $col->default;
-
-    if ($d !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      if ($d === null) {
-        $line[] = "DEFAULT NULL";
-      } elseif ($col->isString()) {
-        $line[] = "DEFAULT '{$d}'";
-      } else {
-        if ($col->isBool()) $d = ($d) ? "true" : "false";
-        $line[] = "DEFAULT $d";
-      }
-    }
+    $line[] = $this->getDefaultValue($col);
 
     return implode(" ", $line);
   }
@@ -137,5 +125,11 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
         return $this->types[$col->type];
       }
     }
+  }
+
+  protected function getBooleanAttr($value)
+  {
+    $v = ($value === true) ? "true" : "false";
+    return "DEFAULT " . $v;
   }
 }

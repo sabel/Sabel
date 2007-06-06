@@ -164,9 +164,12 @@ class Sabel_DB_Migration_Tools_Parser
     $co->nullable  = $this->getNullable($lines);
     $co->default   = $this->getDefault($lines);
     $co->increment = $this->getIncrement($lines);
+    $co->primary   = $this->getPrimary($lines);
 
-    $co->primary = $this->getPrimary($lines);
-    if ($co->primary) $this->pkeys[] = $co->name;
+    if ($co->primary) {
+      $co->nullable  = false;
+      $this->pkeys[] = $co->name;
+    }
 
     $this->setForeignKey($lines, $co);
     $this->setUnique($lines, $co);
@@ -310,11 +313,11 @@ class Sabel_DB_Migration_Tools_Parser
 
   private function createConstraints($consts)
   {
-    foreach ($consts as $line) {
+    foreach ($consts as $num => $line) {
       if (substr($line, 0, 6) === "unique") {
-        $this->uniques[] = $this->getValue($lines, $num, $line);
+        $this->uniques[] = $this->getValue($consts, $num, $line);
       } elseif (substr($line, 0, 7) === "primary") {
-        $this->pkeys[] = $this->getValue($lines, $num, $line);
+        $this->pkeys[] = $this->getValue($consts, $num, $line);
       }
     }
   }

@@ -23,7 +23,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
   private $autoPrimary = false;
 
-  public function createTable($cols)
+  protected function createTable($cols)
   {
     $this->executeQuery($this->getCreateSql($cols));
   }
@@ -125,24 +125,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     $line[] = $this->getDataType($col);
 
     if ($col->nullable === false) $line[] = "NOT NULL";
-
-    $d = $col->default;
-    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY || $d === null) {
-      return implode(" ", $line);
-    }
-
-    if ($col->isBool()) {
-      $value  = ($d) ? "true" : "false";
-      $line[] = "DEFAULT " . $value;
-    } elseif ($col->isString()) {
-      if ($d === "null") {
-        $line[] = "DEFAULT NULL";
-      } else {
-        $line[] = "DEFAULT '{$d}'";
-      }
-    } else {
-      $line[] = "DEFAULT " . $d;
-    }
+    $line[] = $this->getDefaultValue($col);
 
     return implode(" ", $line);
   }
@@ -201,5 +184,11 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
         return $this->types[$col->type];
       }
     }
+  }
+
+  protected function getBooleanAttr($value)
+  {
+    $v = ($value === true) ? "true" : "false";
+    return "DEFAULT " . $v;
   }
 }

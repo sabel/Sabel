@@ -26,7 +26,6 @@ class Sabel_DB_Schema_Column
       return ($this->type === Sabel_DB_Type::INT    ||
               $this->type === Sabel_DB_Type::BIGINT ||
               $this->type === Sabel_DB_Type::SMALLINT);
-
     }
   }
 
@@ -73,6 +72,11 @@ class Sabel_DB_Schema_Column
   public function isByte()
   {
     return ($this->type === Sabel_DB_Type::BYTE);
+  }
+
+  public function isNumeric()
+  {
+    return ($this->isInt() || $this->isFloat() || $this->isDouble());
   }
 
   public function cast($value)

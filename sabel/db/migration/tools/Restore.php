@@ -64,10 +64,11 @@ class Sabel_DB_Migration_Tools_Restore
 
       if (isset($fkeys[$column->name])) {
         $fkey = $fkeys[$column->name];
-        $line = "fkey: {$fkey["referenced_table"]}({$fkey["referenced_column"]}) "
-              . "ON DELETE {$fkey["on_delete"]} ON UPDATE {$fkey["on_update"]}";
+        $onDelete = self::getOnAction("DELETE", $fkey);
+        $onUpdate = self::getOnAction("UPDATE", $fkey);
 
-        fwrite($fp, "\n  " . $line);
+        $line = "fkey: {$fkey["referenced_table"]}({$fkey["referenced_column"]}) ";
+        fwrite($fp, "\n  " . $line . $onDelete . " " . $onUpdate);
       }
 
       fwrite($fp, "\n\n");
@@ -79,7 +80,18 @@ class Sabel_DB_Migration_Tools_Restore
     }
   }
 
-  private function writeConstraint($fp, $uniques, $pkeys)
+  private static function getOnAction($type, $fkey)
+  {
+    $key = "on_" . strtolower($type);
+
+    if (isset($fkey[$key]) && $fkey[$key] !== "RESTRICT") {
+      return "ON $type " . $fkey[$key];
+    } else {
+      return "";
+    }
+  }
+
+  private static function writeConstraint($fp, $uniques, $pkeys)
   {
     $write = (empty($pkeys));
 

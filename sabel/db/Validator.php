@@ -78,7 +78,7 @@ class Sabel_DB_Validator
         }
       }
 
-      if ($schema->isInt() || $schema->isFloat() || $schema->isDouble()) {
+      if ($schema->isNumeric()) {
         if (!$this->maximum($name, $schema)) {
           $errors[] = sprintf($this->messages["maximum"], $msgName);
           continue;

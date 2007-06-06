@@ -45,7 +45,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
 
     $rows = $this->execute($this->tableList);
     foreach ($rows as $row) {
-      $tables[] = strtolower($row['rdb$relation_name']);
+      $tables[] = trim(strtolower($row['rdb$relation_name']));
     }
 
     return $tables;
@@ -149,7 +149,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     $fieldName = trim($row['rdb$field_name']);
 
     $co = new Sabel_DB_Schema_Column();
-    $co->name     = strtolower($fieldName);
+    $co->name = strtolower($fieldName);
     $co->nullable = ($row['rdb$null_flag'] === null);
 
     if ($this->isText($row)) {
@@ -160,20 +160,18 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     }
 
     if (($default = $row['rdb$default_source']) !== null) {
-      $tmp = substr($default, 8);
-      $default = (is_numeric($tmp)) ? $tmp : substr($tmp, 1, -1);
+      $default = substr($default, 8);
     }
 
-    if ($this->isBool($co, $type, $row, $default)) {
-    } else {
+    if (!$this->isBool($co, $type, $row)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
     }
 
     $this->setIncrement($co, $fieldName, $tblName);
     $this->setPrimaryKey($co, $fieldName);
-    $this->setDefaultValue($co, $default);
 
+    $this->setDefaultValue($co, $this->cleaningValue($co, $default));
     if ($co->isString()) $this->setLength($co, $row);
 
     return $co;
@@ -184,16 +182,14 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     return ($row['rdb$field_type'] === 261 && $row['rdb$field_sub_type'] === 1);
   }
 
-  protected function isBool($co, $type, $row, $default)
+  protected function isBool($co, $type, $row)
   {
     if ($type === "char" && $row['rdb$character_length'] === 1) {
-      if ($default === "0" || $default === "1") {
-        $co->type = Sabel_DB_Type::BOOL;
-        return true;
-      }
+      $co->type = Sabel_DB_Type::BOOL;
+      return true;
+    } else {
+      return false;
     }
-
-    return false;
   }
 
   protected function isFloat($type)
@@ -221,5 +217,16 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
   protected function setLength($co, $row)
   {
     $co->max = $row['rdb$character_length'];
+  }
+
+  private function cleaningValue($co, $default)
+  {
+    if ($default === null) return null;
+
+    if (!$co->isNumeric() && !$co->isBool()) {
+      $default = substr($default, 1, -1);
+    }
+
+    return ($default === "NULL") ? null : $default;
   }
 }
