@@ -12,45 +12,56 @@
 class Sabel_Request_Uri
 {
   /**
-   *
    * @var string such as /module/controller/action/something
    */
-  protected $rawUriString = '';
+  private $rawUriString = "";
   
   /**
    * @var Array parts of uri. separate by slash (/)
    */
-  protected $parts = array();
+  private $parts = array();
   
   /**
    * @var type of last element e.g. if requested as /test/test.html type is html
    */
-  protected $type  = '';
+  private $type  = "";
   
   /**
    * constructer
    *
-   * @param string $requestUri this is raw requestUri(query string without query parameter)
+   * @param string $requestUri this is raw requestUri
    * @return void
    */
   public function __construct($rawRequestUri)
   {
-    $this->reset($rawRequestUri);
+    $this->parse($rawRequestUri);
   }
   
-  public function reset($rawUriString)
+  public function parse($rawUriString)
   {
-    $this->rawUriString = $rawUriString;
+    static $filter = null;
+    if ($filter === null) {
+      $filter = create_function('$value',
+                                'return ($value !== "") ? $value : null;');
+    }
     
-    $elements    = explode('/', $rawUriString);
+    $this->rawUriString = $rawUriString;
+    $elements = explode("/", $rawUriString);
+
+    $elements = array_values(array_filter($elements, $filter));
     $lastElement = array_pop($elements);
     
-    if (strpos($lastElement, '.') !== false)
-      list($lastElement, $this->type) = explode('.', $lastElement);
-      
-    array_push($elements, $lastElement);
+    if (strpos($lastElement, ".") !== false) {
+      list($lastElement, $this->type) = explode(".", $lastElement);
+    }
     
+    array_push($elements, $lastElement);
     $this->parts = $elements;
+  }
+  
+  public function getType()
+  {
+    return $this->type;
   }
   
   public function count()
@@ -75,6 +86,6 @@ class Sabel_Request_Uri
   
   public function __toString()
   {
-    return $this->rawUriString;
+    return join("/", $this->parts);
   }
 }

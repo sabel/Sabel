@@ -11,21 +11,21 @@
  */
 class Sabel_Request_Parameters
 {
-  protected $rawParameters = '';
+  protected $rawParameters = "";
   protected $parsedParameters = array();
   
   public function __construct($parameters)
   {
     if (!empty($parameters)) {
       $this->rawParameters = $parameters;
-      $parameters = str_replace('?', '', $parameters);
+      $parameters = str_replace("?", "", $parameters);
       $this->parse($parameters);
     }
   }
   
   public function isEmpty()
   {
-    return ($this->rawParameters === '');
+    return ($this->rawParameters === "");
   }
   
   public function __get($key)
@@ -65,7 +65,7 @@ class Sabel_Request_Parameters
     $parameters = explode("&", $parameters);
     $sets = array();
     foreach ($parameters as $pair) {
-      @list($key, $val) = explode('=', $pair);
+      @list($key, $val) = explode("=", $pair);
       $sets[$key] = $val;
     }
     $this->parsedParameters = $sets;

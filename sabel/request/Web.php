@@ -14,17 +14,17 @@ class Sabel_Request_Web implements Sabel_Request
   /**
    * @var Sabel_Request_Uri $uri
    */
-  protected $uri = null;
+  private $uri = null;
   
   /**
    * @var Sabel_Map_Candidate $candidate
    */
-  protected $candidate = null;
+  private $candidate = null;
     
   /**
    * @var Sabel_Request_Parameters $parameters
    */
-  protected $parameters = null;
+  private $parameters = null;
   
   private $method = Sabel_Request::GET;
   
@@ -131,7 +131,9 @@ class Sabel_Request_Web implements Sabel_Request
   
   public function getPostRequests($postValues = null)
   {
-    if ($postValues === null) $postValues = $_POST;
+    if ($postValues === null) {
+      $postValues = $_POST;
+    }
     
     if (get_magic_quotes_gpc()) {
       array_map("normalize", $postValues);

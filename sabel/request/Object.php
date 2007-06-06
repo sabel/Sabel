@@ -12,7 +12,7 @@
 class Sabel_Request_Object
 {
   private $uri = "";
-  private $values = array(); 
+  private $values = array();
   private $method = Sabel_Request::GET;
   
   public function to($uri)

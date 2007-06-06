@@ -44,7 +44,7 @@ final class Sabel_Controller_Front
     $map = new Sabel_Map();
     $destination = $this->destination = $map->route($this->request);
     
-    Sabel_Context::log("request " . $this->request);
+    Sabel_Context::log("request " . $this->request->__toString());
     Sabel_Context::initialize();
     Sabel_Context::setDestination($destination);
     
@@ -57,8 +57,8 @@ final class Sabel_Controller_Front
     try {
       $this->controller = $executer->create();
     } catch (Sabel_Exception_Runtime $e) {
-      $destination->setModule("index");
-      $destination->setController("index");
+      $destination->setModule(self::INDEX_PAGE);
+      $destination->setController(self::INDEX_PAGE);
       $destination->setAction(self::NOT_FOUND_ACTION);
       $this->controller = $executer->create();
     }
