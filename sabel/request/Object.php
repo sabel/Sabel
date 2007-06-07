@@ -11,13 +11,42 @@
  */
 class Sabel_Request_Object
 {
-  private $uri = "";
-  private $values = array();
-  private $method = Sabel_Request::GET;
+  const ST_NO_INIT = 0;
+  const ST_INIT    = 1;
+  const ST_SET_URI = 2;
+  const ST_SET_PARAM = 3;
+  
+  private $status = self::ST_NO_INIT;
+  
+  /**
+   * @var Sabel_Request_Uri
+   */
+  private $uri = null;
+  
+  /**
+   * @var Sabel_Request_Parameters
+   */
+  private $parameters = null;
+  
+  private
+    $getValues       = array(),
+    $postValues      = array(),
+    $parameterValues = array();
+    
+  private
+    $method = Sabel_Request::GET;
   
   public function to($uri)
   {
-    $this->uri = $uri;
+    $this->uri = new Sabel_Request_Uri($uri);
+    $this->status = self::ST_SET_URI;
+    return $this;
+  }
+  
+  public function parameter($parameters)
+  {
+    $this->parameters = new Sabel_Request_Parameters($parameters);
+    $this->status = self::ST_SET_PARAM;
     return $this;
   }
   
@@ -88,24 +117,39 @@ class Sabel_Request_Object
     }
   }
   
+  public function setGetValues($values)
+  {
+    $this->getValues = $values;
+  }
+  
+  public function setPostValues($values)
+  {
+    $this->postValues = $values;
+  }
+  
+  public function setParameterValues($values)
+  {
+    $this->parameterValues = $values;
+  }
+  
   public function isPost()
   {
-    return ($this->httpMethod === "POST");
+    return ($this->httpMethod === Sabel_Request::POST);
   }
   
   public function isGet()
   {
-    return ($this->httpMethod === "GET");
+    return ($this->httpMethod === Sabel_Request::GET);
   }
   
   public function isPut()
   {
-    return ($this->httpMethod === "PUT");
+    return ($this->httpMethod === Sabel_Request::PUT);
   }
   
   public function isDelete()
   {
-    return ($this->httpMethod === "DELETE");
+    return ($this->httpMethod === Sabel_Request::DELETE);
   }
   
   public function getMethod()
@@ -116,5 +160,15 @@ class Sabel_Request_Object
   public function getUri()
   {
     return $this->uri;
+  }
+  
+  public function __toString()
+  {
+    return $this->uri->__toString() ."?". $this->parameters->__toString();
+  }
+  
+  public function toArray()
+  {
+    return $this->uri->toArray();
   }
 }

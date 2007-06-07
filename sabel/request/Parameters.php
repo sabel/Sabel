@@ -11,8 +11,8 @@
  */
 class Sabel_Request_Parameters
 {
-  protected $rawParameters = "";
-  protected $parsedParameters = array();
+  private $rawParameters = "";
+  private $parsedParameters = array();
   
   public function __construct($parameters)
   {
@@ -21,6 +21,24 @@ class Sabel_Request_Parameters
       $parameters = str_replace("?", "", $parameters);
       $this->parse($parameters);
     }
+  }
+  
+  /**
+   * Parsing URL request
+   *
+   * @param array $parameter list of URI parts
+   * @return void
+   */
+  public function parse($parameters)
+  {
+    $parameters = explode("&", $parameters);
+    $sets = array();
+    foreach ($parameters as $pair) {
+      @list($key, $val) = explode("=", $pair);
+      $sets[$key] = $val;
+    }
+    $this->parsedParameters = $sets;
+    return $parameters;
   }
   
   public function isEmpty()
@@ -54,20 +72,8 @@ class Sabel_Request_Parameters
     return $this->rawParameters;
   }
   
-  /**
-   * Parsing URL request
-   *
-   * @param array $parameter list of URI parts
-   * @return void
-   */
-  protected function parse($parameters)
+  public function toArray()
   {
-    $parameters = explode("&", $parameters);
-    $sets = array();
-    foreach ($parameters as $pair) {
-      @list($key, $val) = explode("=", $pair);
-      $sets[$key] = $val;
-    }
-    $this->parsedParameters = $sets;
+    $this->parsedParameters;
   }
 }

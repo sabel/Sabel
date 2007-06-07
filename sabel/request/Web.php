@@ -30,7 +30,7 @@ class Sabel_Request_Web implements Sabel_Request
   
   private $posts = array();
   
-  public function __construct($requestUri = "", $method = null)
+  public function __construct($uri = "", $method = null)
   {
     if ($method === null) {
       if (isset($_SERVER["REQUEST_METHOD"])) {
@@ -44,10 +44,10 @@ class Sabel_Request_Web implements Sabel_Request
       $this->posts = $_POST;
     }
     
-    $this->parseUri($requestUri);
+    $this->parse($uri);
   }
   
-  public function parseUri($uri)
+  public function parse($uri)
   {
     $uriAndParams = $this->createRequestUri($uri);
     $parameters = (isset($uriAndParams["query"])) ? $uriAndParams["query"] : "";
@@ -154,7 +154,7 @@ class Sabel_Request_Web implements Sabel_Request
   
   public function toArray()
   {
-    return explode("/", $this->uri->__toString());
+    return $this->uri->toArray();
   }
   
   /**

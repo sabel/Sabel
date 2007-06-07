@@ -14,7 +14,7 @@ class Sabel_Request_Uri
   /**
    * @var string such as /module/controller/action/something
    */
-  private $rawUriString = "";
+  private $uri = "";
   
   /**
    * @var Array parts of uri. separate by slash (/)
@@ -32,12 +32,12 @@ class Sabel_Request_Uri
    * @param string $requestUri this is raw requestUri
    * @return void
    */
-  public function __construct($rawRequestUri)
+  public function __construct($uri)
   {
-    $this->parse($rawRequestUri);
+    $this->parse($uri);
   }
   
-  public function parse($rawUriString)
+  public function parse($uri)
   {
     static $filter = null;
     if ($filter === null) {
@@ -45,8 +45,8 @@ class Sabel_Request_Uri
                                 'return ($value !== "") ? $value : null;');
     }
     
-    $this->rawUriString = $rawUriString;
-    $elements = explode("/", $rawUriString);
+    $this->uri = $uri;
+    $elements = explode("/", $uri);
 
     $elements = array_values(array_filter($elements, $filter));
     $lastElement = array_pop($elements);
@@ -57,6 +57,7 @@ class Sabel_Request_Uri
     
     array_push($elements, $lastElement);
     $this->parts = $elements;
+    return $elements;
   }
   
   public function getType()
@@ -87,5 +88,10 @@ class Sabel_Request_Uri
   public function __toString()
   {
     return join("/", $this->parts);
+  }
+  
+  public function toArray()
+  {
+    return $this->parts;
   }
 }

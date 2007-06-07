@@ -11,14 +11,15 @@
  */
 interface Sabel_Request
 {
-  const GET    = "get";
-  const POST   = "post";
-  const PUT    = "put";
-  const delete = "delete";
+  const GET    = "GET";
+  const POST   = "POST";
+  const PUT    = "PUT";
+  const delete = "DELETE";
   
   public function getParameters();
   public function getPostRequests();
   public function hasParameter($name);
   public function getParameter($name);
   public function __toString();
+  public function toArray();
 }

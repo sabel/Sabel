@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Map
+class Sabel_Router_Map implements Sabel_Router
 {
   public function route($request)
   {

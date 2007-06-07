@@ -57,7 +57,6 @@ require ($SABEL_DIR . "Const.php");
 require ($SABEL_DIR . "Context.php");
 require ($SABEL_DIR . "Object.php");
 
-require ($SABEL_DIR . "Map.php");
 require ($SABEL_MAP_DIR . "Candidate.php");
 require ($SABEL_MAP_DIR . "Config.php");
 require ($SABEL_MAP_DIR . "Configurator.php");

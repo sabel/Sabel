@@ -38,11 +38,11 @@ final class Sabel_Controller_Front
   public function ignition($uri = null, $storage = null)
   {
     if ($uri !== null) {
-      $this->request->parseUri($uri);
+      $this->request->parse($uri);
     }
     
-    $map = new Sabel_Map();
-    $destination = $this->destination = $map->route($this->request);
+    $router = new Sabel_Router_Map();
+    $destination = $this->destination = $router->route($this->request);
     
     Sabel_Context::log("request " . $this->request->__toString());
     Sabel_Context::initialize();
