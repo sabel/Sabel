@@ -11,10 +11,8 @@
  */
 class Sabel_Request_Object
 {
-  const ST_NO_INIT = 0;
-  const ST_INIT    = 1;
-  const ST_SET_URI = 2;
-  const ST_SET_PARAM = 3;
+  const ST_SET_URI   = 2;
+  const ST_SET_PARAM = 4;
   
   private $status = self::ST_NO_INIT;
   

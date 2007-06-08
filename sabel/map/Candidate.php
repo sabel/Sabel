@@ -124,8 +124,12 @@ class Sabel_Map_Candidate implements Iterator
     return (isset($this->elements[$name][self::VARIABLE_KEY]));
   }
   
-  public function addElement($name, $type = self::VARIABLE)
+  public function addElement($name, $type = null)
   {
+    if ($type === null) {
+      $type = self::VARIABLE_KEY;
+    }
+    
     $this->elements[$name][self::ELEMENT_NAME] = $name;
     $this->elements[$name][self::TYPE_KEY]     = $type;
   }
@@ -344,7 +348,32 @@ class Sabel_Map_Candidate implements Iterator
       }
     }
     
-    throw new Sabel_Map_Candidate_NotFound("check your config/map.php");
+    return null;
+  }
+  
+  protected function matchToTokens($candidate, $requests)
+  {
+    $constantEstablished = false;
+    foreach ($candidate as $element) {
+      if ($constantEstablished) {
+        if ($this->select(current($requests), $element)) {
+          next($requests);
+        }
+      } else {
+        if ($this->isConstantToken(current($requests), $element)) {
+          $constantEstablished = true;
+          if ($this->select(current($requests), $element)) {
+            next($requests);
+          }
+        } elseif ($this->select(current($requests), $element)) {
+          next($requests);
+        } else {
+          return false;
+        }
+      }
+    }
+    
+    return true;
   }
   
   public function select($token, $candidate)
@@ -391,31 +420,6 @@ class Sabel_Map_Candidate implements Iterator
     return ($candidate->isConstant() && $token === $candidate->getElementName());
   }
   
-  protected function matchToTokens($candidate, $requests)
-  {
-    $constantEstablished = false;
-    foreach ($candidate as $element) {
-      if ($constantEstablished) {
-        if ($this->select(current($requests), $element)) {
-          next($requests);
-        }
-      } else {
-        if ($this->isConstantToken(current($requests), $element)) {
-          $constantEstablished = true;
-          if ($this->select(current($requests), $element)) {
-            next($requests);
-          }
-        } elseif ($this->select(current($requests), $element)) {
-          next($requests);
-        } else {
-          return false;
-        }
-      }
-    }
-    
-    return true;
-  }
-  
   public function uri($parameters = null)
   {
     $candidate = null;
@@ -455,12 +459,12 @@ class Sabel_Map_Candidate implements Iterator
     
     $buffer = array();
     
-    $typeKey = self::TYPE_KEY;
+    $typeKey     = self::TYPE_KEY;
     $variableKey = self::VARIABLE_KEY;
     $elementName = self::ELEMENT_NAME;
-    $module  = self::MODULE;
-    $controller = self::CONTROLLER;
-    $action = self::ACTION;
+    $module      = self::MODULE;
+    $controller  = self::CONTROLLER;
+    $action      = self::ACTION;
     
     foreach ($elements as $element) {
       switch ($element[$typeKey]) {
@@ -475,7 +479,7 @@ class Sabel_Map_Candidate implements Iterator
           if (isset($parameters[":controller"])) {
             $buffer[] = $parameters[":controller"];
           } else {
-            $buffer[] = $element[$variableKey];
+            $buffer[] = $element["default_value_key"];
           }
           break;
         case $action:

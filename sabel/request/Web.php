@@ -32,10 +32,8 @@ class Sabel_Request_Web implements Sabel_Request
   
   public function __construct($uri = "", $method = null)
   {
-    if ($method === null) {
-      if (isset($_SERVER["REQUEST_METHOD"])) {
-        $this->method = $_SERVER["REQUEST_METHOD"];
-      }
+    if ($method === null && isset($_SERVER["REQUEST_METHOD"])) {
+      $this->method = $_SERVER["REQUEST_METHOD"];
     } else {
       $this->method = $method;
     }
