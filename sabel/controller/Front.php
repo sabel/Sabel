@@ -28,18 +28,19 @@ final class Sabel_Controller_Front
     
   public function __construct($request = null)
   {
-    if ($this->request === null) {
-      $this->injector = Sabel_Container::injector(new Factory());
-      Sabel_Context::setDefaultInjector($this->injector);
-      $this->request = $this->injector->newInstance(self::REQUEST_INTERFACE);
-    }
+    $this->injector = Sabel_Container::injector(new Factory());
+    Sabel_Context::setDefaultInjector($this->injector);
   }
-    
-  public function ignition($uri = null, $storage = null)
+  
+  public function ignition($request = null, $storage = null)
   {
-    if ($uri !== null) {
-      $this->request->parse($uri);
+    if ($request === null) {
+      $builder = new Sabel_Request_Builder();
+      $request = new Sabel_Request_Object();
+      $builder->build($request);
     }
+    
+    $this->request = $request;
     
     $router = new Sabel_Router_Map();
     $destination = $this->destination = $router->route($this->request);

@@ -130,6 +130,11 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     return ($this->status === self::SERVER_ERROR);
   }
   
+  public function getAttribute($key)
+  {
+    return $this->controller->$key;
+  }
+  
   public function getAttributes()
   {
     return $this->controller->getAttributes();

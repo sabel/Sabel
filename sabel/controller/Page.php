@@ -255,7 +255,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public final function getRequests()
   {
-    return $this->request->getPostRequests();
+    return $this->request->getPostValues();
   }
   
   public final function getAssignments()
@@ -276,13 +276,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function __get($name)
   {
     if (array_key_exists($name, $this->attributes)) {
-      $result = $this->attributes[$name];
+      return $this->attributes[$name];
     } else {
-      $result = $this->request->getParameter($name);
-      $result = ($result === false || $result === "") ? null : $result;
+      return $this->request->find($name);
     }
-    
-    return $result;
   }
   
   protected function __set($name, $value)

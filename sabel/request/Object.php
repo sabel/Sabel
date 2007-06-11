@@ -11,6 +11,7 @@
  */
 class Sabel_Request_Object
 {
+  const ST_NO_INIT   = 0;
   const ST_SET_URI   = 2;
   const ST_SET_PARAM = 4;
   
@@ -33,18 +34,28 @@ class Sabel_Request_Object
     
   private
     $method = Sabel_Request::GET;
+    
+  private
+    $candidate = null;
+    
+  public static function newInstance()
+  {
+    return new self();
+  }
   
   public function to($uri)
   {
-    $this->uri = new Sabel_Request_Uri($uri);
+    $this->uri    = new Sabel_Request_Uri($uri);
     $this->status = self::ST_SET_URI;
+    
     return $this;
   }
   
   public function parameter($parameters)
   {
     $this->parameters = new Sabel_Request_Parameters($parameters);
-    $this->status = self::ST_SET_PARAM;
+    $this->status     = self::ST_SET_PARAM;
+    
     return $this;
   }
   
@@ -96,13 +107,29 @@ class Sabel_Request_Object
   
   public function value($key, $value)
   {
-    $this->values[$key] = $value;
+    switch ($this->method) {
+      case (Sabel_Request::GET):
+        $this->setGetValue($key, $value);
+        break;
+      case (Sabel_Request::POST):
+        $this->setPostValue($key, $value);
+        break;
+    }
+    
     return $this;
   }
   
   public function values($lists)
   {
-    $this->values = array_merge($lists, $this->values);
+    switch ($this->method) {
+      case (Sabel_Request::GET):
+        $this->setGetValues(array_merge($lists, $this->getValues));
+        break;
+      case (Sabel_Request::POST):
+        $this->setPostValues(array_merge($lists, $this->postValues));
+        break;
+    }
+    
     return $this;
   }
   
@@ -115,9 +142,29 @@ class Sabel_Request_Object
     }
   }
   
+  public function setGetValue($key, $value)
+  {
+    $this->getValues[$key] = $value;
+  }
+  
   public function setGetValues($values)
   {
     $this->getValues = $values;
+  }
+  
+  public function getGetValues()
+  {
+    if (count($this->getValues) === 0) return null;
+    return $this->getValues;
+  }
+  
+  public function getGetValue($key)
+  {
+    if (array_key_exists($key, $this->getValues)) {
+      return $this->getValues[$key];
+    } else {
+      return null;
+    }
   }
   
   public function setPostValues($values)
@@ -125,34 +172,97 @@ class Sabel_Request_Object
     $this->postValues = $values;
   }
   
+  public function getPostValue($key)
+  {
+    if (array_key_exists($key, $this->postValues)) {
+      return $this->postValues[$key];
+    } else {
+      return null;
+    }
+  }
+  
+  public function getPostValues()
+  {
+    if (count($this->postValues) === 0) return null;
+    return $this->postValues;
+  }
+  
   public function setParameterValues($values)
   {
     $this->parameterValues = $values;
   }
   
+  public function getParameterValue($key)
+  {
+    $this->initializeParameterValues();
+    if (array_key_exists($key, $this->parameterValues)) {
+      return $this->parameterValues[$key];
+    } else {
+      return null;
+    }
+  }
+  
+  public function getParameterValues()
+  {
+    $this->initializeParameterValues();
+    if (count($this->parameterValues) === 0) return null;
+    return $this->parameterValues;
+  }
+  
+  private function initializeParameterValues()
+  {
+    if (count($this->parameterValues) !== 0) return;
+    
+    if (is_object($this->candidate)) {
+      $this->parameterValues = $this->candidate->getElementVariables();
+    }
+  }
+  
+  public function find($key)
+  {
+    $result = null;
+    $values = array($this->getPostValues(),
+                    $this->getGetValues(),
+                    $this->getParameterValues());
+    $found = false;
+    
+    foreach ($values as $value) {
+      if (isset($value[$key])) {
+        if ($found) {
+          throw new Sabel_Exception_SecurityWarning("duplicate request key");
+        } else {
+          $result = $value[$key];
+        }
+        $found = true;
+      }
+    }
+    
+    return $result;
+  }
+  
   public function isPost()
   {
-    return ($this->httpMethod === Sabel_Request::POST);
+    return ($this->method === Sabel_Request::POST);
   }
   
   public function isGet()
   {
-    return ($this->httpMethod === Sabel_Request::GET);
+    return ($this->method === Sabel_Request::GET);
   }
   
   public function isPut()
   {
-    return ($this->httpMethod === Sabel_Request::PUT);
+    return ($this->method === Sabel_Request::PUT);
   }
   
   public function isDelete()
   {
-    return ($this->httpMethod === Sabel_Request::DELETE);
+    return ($this->method === Sabel_Request::DELETE);
   }
   
   public function getMethod()
   {
-    return $this->httpMethod;
+    return $this->method;
   }
   
   public function getUri()
@@ -160,9 +270,27 @@ class Sabel_Request_Object
     return $this->uri;
   }
   
+  public function setCandidate($candidate)
+  {
+    $this->candidate = $candidate;
+  }
+  
   public function __toString()
   {
-    return $this->uri->__toString() ."?". $this->parameters->__toString();
+    if ($this->uri->size() === 0) {
+      $uri = "/";
+    } else {
+      $uri = $this->uri->__toString();
+    }
+    
+    if (is_object($this->parameters)) {
+      if ($this->parameters->size() === 0) {
+        return $uri;
+      }
+      return $uri . "?" . $this->parameters->__toString();
+    } else {
+      return $uri;
+    }
   }
   
   public function toArray()

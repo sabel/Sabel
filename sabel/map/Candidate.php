@@ -127,7 +127,7 @@ class Sabel_Map_Candidate implements Iterator
   public function addElement($name, $type = null)
   {
     if ($type === null) {
-      $type = self::VARIABLE_KEY;
+      $type = self::VARIABLE;
     }
     
     $this->elements[$name][self::ELEMENT_NAME] = $name;
@@ -351,7 +351,7 @@ class Sabel_Map_Candidate implements Iterator
     return null;
   }
   
-  protected function matchToTokens($candidate, $requests)
+  private final function matchToTokens($candidate, $requests)
   {
     $constantEstablished = false;
     foreach ($candidate as $element) {
@@ -376,7 +376,7 @@ class Sabel_Map_Candidate implements Iterator
     return true;
   }
   
-  public function select($token, $candidate)
+  private final function select($token, $candidate)
   {
     $result = false;
     

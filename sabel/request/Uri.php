@@ -55,7 +55,10 @@ class Sabel_Request_Uri
       list($lastElement, $this->type) = explode(".", $lastElement);
     }
     
-    array_push($elements, $lastElement);
+    if ($lastElement !== null) {
+      array_push($elements, $lastElement);
+    }
+    
     $this->parts = $elements;
     return $elements;
   }
@@ -65,7 +68,7 @@ class Sabel_Request_Uri
     return $this->type;
   }
   
-  public function count()
+  public function size()
   {
     return count($this->parts);
   }

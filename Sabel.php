@@ -62,7 +62,7 @@ require ($SABEL_MAP_DIR . "Config.php");
 require ($SABEL_MAP_DIR . "Configurator.php");
 
 require ($SABEL_DIR . "Request.php");
-require ($SABEL_REQUEST_DIR . "Web.php");
+require ($SABEL_REQUEST_DIR . "Object.php");
 require ($SABEL_REQUEST_DIR . "Uri.php");
 require ($SABEL_REQUEST_DIR . "Parameters.php");
 

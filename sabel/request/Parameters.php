@@ -51,6 +51,11 @@ class Sabel_Request_Parameters
     return $this->get($key);
   }
   
+  public function size()
+  {
+    return count($this->parsedParameters);
+  }
+  
   public function get($key)
   {
     $pp = $this->parsedParameters;

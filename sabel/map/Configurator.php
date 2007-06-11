@@ -35,7 +35,7 @@ class Sabel_Map_Configurator
             $c->addElement($variableName, Sabel_Map_Candidate::ACTION);
             break;
           default:
-            $c->addElement($variableName);
+            $c->addElement($variableName, Sabel_Map_Candidate::VARIABLE);
             break;
         }
       } else {

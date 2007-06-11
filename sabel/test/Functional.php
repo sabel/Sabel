@@ -19,8 +19,12 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
 {
   protected $storage = null;
   
-  protected function request($uri, $storage = null)
+  protected function request($request, $storage = null)
   {
+    if (!$request instanceof Sabel_Request_Object) {
+      $request = new Sabel_Request_Object($request);
+    }
+    
     $aFrontController = new Sabel_Controller_Front();
     
     if ($storage === null) {
@@ -28,7 +32,7 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     }
     
     $this->storage = $storage;
-    $aFrontController->ignition($uri, $storage);
+    $aFrontController->ignition($request, $storage);
     
     return $aFrontController->getResponse();
   }
@@ -58,6 +62,11 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     }
     
     return $response;
+  }
+  
+  public function eq($from, $to)
+  {
+    $this->assertEquals($from, $to);
   }
   
   protected function clear()
