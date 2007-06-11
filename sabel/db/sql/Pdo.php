@@ -9,15 +9,8 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Sql_Pdo implements Sabel_DB_Sql_Interface
+class Sabel_DB_Sql_Pdo extends Sabel_DB_Sql_Base
 {
-  protected $model = null;
-
-  public function setModel($model)
-  {
-    $this->model = $model;
-  }
-
   public function buildInsertSql($driver)
   {
     $model   = $this->model;
@@ -65,6 +58,8 @@ class Sabel_DB_Sql_Pdo implements Sabel_DB_Sql_Interface
     }
 
     $driver->setBindValues($values, false);
-    return "UPDATE $tblName SET " . implode(", ", $sql);
+
+    $sql = "UPDATE $tblName SET " . implode(", ", $sql);
+    return $sql . $this->getConditionForUpdate($driver);
   }
 }

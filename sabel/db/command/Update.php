@@ -17,14 +17,7 @@ class Sabel_DB_Command_Update extends Sabel_DB_Command_Base
   {
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
-
-    $query = $driver->getSqlClass($model)->buildUpdateSql($driver);
-    $conds = $model->getConditionManager()->getUniqueConditions();
-
-    $manager = new Sabel_DB_Condition_Manager();
-    foreach ($conds as $condition) $manager->add($condition);
-
-    $query .= $manager->build($driver);
+    $query  = $driver->getSqlClass($model)->buildUpdateSql($driver);
 
     $executer->setResult($driver->setSql($query)->execute());
   }

@@ -15,18 +15,9 @@ class Sabel_DB_Command_Select extends Sabel_DB_Command_Base
 
   protected function run($executer)
   {
-    $model   = $executer->getModel();
-    $driver  = $executer->getDriver();
-
-    $tblName = $model->getTableName();
-    $query   = "SELECT " . $model->getProjection() . " FROM " . $tblName;
-    $manager = $model->getConditionManager();
-
-    if (is_object($manager)) $query .= $manager->build($driver);
-
-    if ($constraints = $model->getConstraints()) {
-      $query = $driver->getConstraintSqlClass()->build($query, $constraints);
-    }
+    $model  = $executer->getModel();
+    $driver = $executer->getDriver();
+    $query  = $driver->getSqlClass($model)->buildSelectSql($driver);
 
     $executer->setResult($driver->setSql($query)->execute());
   }
