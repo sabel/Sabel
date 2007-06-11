@@ -44,6 +44,10 @@ abstract class Sabel_DB_Driver_Base
     if ($conn === null) {
       $conn = $this->getConnection();
     }
+    
+    if (get_resource_type($conn) === "Unknown") {
+      $this->error("unknown resource type");
+    }
 
     $func = $this->execFunction;
 
@@ -102,6 +106,12 @@ abstract class Sabel_DB_Driver_Base
 
   public function getConnection()
   {
+    // @todo solve this problem.
+    if (PHP_VERSION === "5.2.3") {
+      $conn = Sabel_DB_Connection::get($this->connectionName);
+      return $this->connection = $conn;
+    }
+    
     if ($this->connection === null) {
       $conn = Sabel_DB_Connection::get($this->connectionName);
       return $this->connection = $conn;
