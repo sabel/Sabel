@@ -38,9 +38,16 @@ class Sabel_Request_Object
   private
     $candidate = null;
     
-  public static function newInstance()
+  public function __construct($uri = null)
   {
-    return new self();
+    if ($uri !== null) {
+      $this->to($uri);
+    }
+  }
+    
+  public static function newInstance($uri = null)
+  {
+    return new self($uri);
   }
   
   public function to($uri)
@@ -54,7 +61,12 @@ class Sabel_Request_Object
   public function parameter($parameters)
   {
     $this->parameters = new Sabel_Request_Parameters($parameters);
-    $this->status     = self::ST_SET_PARAM;
+    
+    if (self::ST_SET_URI & $this->status) {
+      $this->status = self::ST_SET_URI + self::ST_SET_PARAM;
+    } else {
+      $this->status = self::ST_SET_PARAM;
+    }
     
     return $this;
   }
@@ -295,6 +307,10 @@ class Sabel_Request_Object
   
   public function toArray()
   {
-    return $this->uri->toArray();
+    if ($this->status & self::ST_SET_URI) {
+      return $this->uri->toArray();
+    } else {
+      return null;
+    }
   }
 }
