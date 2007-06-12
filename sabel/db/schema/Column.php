@@ -17,6 +17,8 @@ class Sabel_DB_Schema_Column
   public $default   = null;
   public $primary   = null;
   public $increment = null;
+  public $max       = null;
+  public $min       = null;
 
   public function isInt($strict = false)
   {

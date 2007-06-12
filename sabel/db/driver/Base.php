@@ -106,12 +106,6 @@ abstract class Sabel_DB_Driver_Base
 
   public function getConnection()
   {
-    // @todo solve this problem.
-    if (PHP_VERSION === "5.2.3") {
-      $conn = Sabel_DB_Connection::get($this->connectionName);
-      return $this->connection = $conn;
-    }
-    
     if ($this->connection === null) {
       $conn = Sabel_DB_Connection::get($this->connectionName);
       return $this->connection = $conn;
@@ -177,6 +171,8 @@ abstract class Sabel_DB_Driver_Base
   {
     $method = $this->closeFunction;
     $method($connection);
+
+    unset($this->connection);
   }
 
   protected function error($error, $sql = null, $pdoBind = null)

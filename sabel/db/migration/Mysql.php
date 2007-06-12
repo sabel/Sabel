@@ -21,13 +21,9 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime");
 
-  public function setOptions($options)
+  public function setOptions($key, $val)
   {
-    foreach ($options as $opt) {
-      if ($opt === "") continue;
-      list ($name, $value) = array_map("trim", explode(":", $opt));
-      $this->options[$name] = $value;
-    }
+    $this->options[$key] = $val;
   }
 
   protected function createTable($cols)

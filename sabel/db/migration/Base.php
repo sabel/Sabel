@@ -35,10 +35,10 @@ abstract class Sabel_DB_Migration_Base
 
     $this->version  = $num;
     $this->mdlName  = $mdlName;
-    $this->command  = $command;
+    $this->command  = substr($command, 0, strpos($command, "."));
   }
 
-  public function setOptions($opts) {}
+  public function setOptions($key, $val) {}
 
   public function setForeignKeys($fkeys)
   {
@@ -62,7 +62,6 @@ abstract class Sabel_DB_Migration_Base
     $command = $this->command;
     if (method_exists($this, $command)) {
       $this->$command();
-      Sabel_DB_Connection::closeAll();
     } else {
       throw new Exception("command '$command' not found.");
     }
@@ -71,8 +70,9 @@ abstract class Sabel_DB_Migration_Base
   public function create()
   {
     if ($this->type === "upgrade") {
-      $cols = $this->createColumns();
-      $this->createTable($cols);
+      $table = new Sabel_DB_Migration_Classes_Table();
+      eval ($this->getPhpSource());
+      $this->createTable($table->setUp($this)->getColumns());
     } else {
       $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     }
@@ -107,6 +107,14 @@ abstract class Sabel_DB_Migration_Base
     }
 
     $this->executeQuery($query);
+  }
+
+  protected function getPhpSource()
+  {
+    $content = file_get_contents($this->filePath);
+    $content = str_replace("->default(", "->defaultValue(", $content);
+
+    return str_replace(array("<?php", "?>"), "", $content);
   }
 
   protected function createColumns($filePath = null)
