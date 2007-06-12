@@ -619,4 +619,12 @@ class Sabel_DB_Model
   {
     $this->setConstraint($arg1, $arg2);
   }
+  
+  public function validate($ignores = null)
+  {
+    if ($ignores === null) $ignores = array("id");
+    
+    $validator = new Sabel_DB_Validator($this);
+    return $validator->validate($ignores);
+  }
 }

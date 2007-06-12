@@ -179,11 +179,17 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $buf = array();
     $params = explode(",", $param);
     $reserved = ";";
+    
     foreach ($params as $part) {
+      if (strpos(":", $part) === false) {
+        $part = "a: " . $part;
+      }
+      
       $line     = array_map("trim", explode(":", $part));
       $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
       $buf[$reserved] = $line[1];
     }
+    
     return $buf;
   }
   
@@ -255,7 +261,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public final function getRequests()
   {
-    return $this->request->getPostValues();
+    return $this->request->fetchPostValues();
   }
   
   public final function getAssignments()

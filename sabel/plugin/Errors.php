@@ -4,19 +4,22 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
 {
   const MAX_STACK_SIZE = 5;
   
+  const ERROR_KEY = "errors";
+  const STACK_KEY = "stack";
+  
   private $storage = null;
   
   public function onBeforeAction()
   {
     $storage = $this->storage = Sabel_Context::getStorage();
     $current = $this->controller->getRequest()->__toString();
-    $errors  = $storage->read("errors");
+    $errors  = $storage->read(self::ERROR_KEY);
     
     if (is_array($errors)) {
       if ($this->isErrorPage($current, $errors)) {
-        Sabel_View::assign("errors", $errors["messages"]);
+        Sabel_View::assign(self::ERROR_KEY, $errors["messages"]);
       } else {
-        $storage->delete("errors");
+        $storage->delete(self::ERROR_KEY);
       }
     }
     
@@ -28,11 +31,11 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
     if (($messages = $this->controller->errors) === null) return;
     
     $storage = $this->storage;
-    $stack   = $storage->read("stack");
+    $stack   = $storage->read(self::STACK_KEY);
     $index   = count($stack) - 2;
     
-    $storage->write("errors", array("submitUrl" => $stack[$index],
-                                    "messages"  => $messages));
+    $storage->write(self::ERROR_KEY, array("submitUrl" => $stack[$index],
+                                           "messages"  => $messages));
   }
   
   private function isErrorPage($url, $errors)
@@ -43,7 +46,7 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   private function pushStack($url)
   {
     $storage = $this->storage;
-    $stack   = $storage->read("stack");
+    $stack   = $storage->read(self::STACK_KEY);
     
     if (is_array($stack)) {
       $stack[] = $url;
@@ -53,7 +56,6 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
       $stack[] = $url;
     }
     
-    $storage->write("stack", $stack);
+    $storage->write(self::STACK_KEY, $stack);
   }
 }
-

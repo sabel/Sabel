@@ -44,11 +44,6 @@ class Sabel_Request_Object
       $this->to($uri);
     }
   }
-    
-  public static function newInstance($uri = null)
-  {
-    return new self($uri);
-  }
   
   public function to($uri)
   {
@@ -164,13 +159,13 @@ class Sabel_Request_Object
     $this->getValues = $values;
   }
   
-  public function getGetValues()
+  public function fetchGetValues()
   {
     if (count($this->getValues) === 0) return null;
     return $this->getValues;
   }
   
-  public function getGetValue($key)
+  public function fetchGetValue($key)
   {
     if (array_key_exists($key, $this->getValues)) {
       return $this->getValues[$key];
@@ -184,16 +179,17 @@ class Sabel_Request_Object
     $this->postValues = $values;
   }
   
-  public function getPostValue($key)
+  public function fetchPostValue($key)
   {
     if (array_key_exists($key, $this->postValues)) {
-      return $this->postValues[$key];
+      $value = $this->postValues[$key];
+      return ($value === "") ? null : $value;
     } else {
       return null;
     }
   }
   
-  public function getPostValues()
+  public function fetchPostValues()
   {
     if (count($this->postValues) === 0) return null;
     return $this->postValues;
@@ -204,17 +200,18 @@ class Sabel_Request_Object
     $this->parameterValues = $values;
   }
   
-  public function getParameterValue($key)
+  public function fetchParameterValue($key)
   {
     $this->initializeParameterValues();
     if (array_key_exists($key, $this->parameterValues)) {
-      return $this->parameterValues[$key];
+      $value = $this->parameterValues[$key];
+      return ($value === "") ? null : $value;
     } else {
       return null;
     }
   }
   
-  public function getParameterValues()
+  public function fetchParameterValues()
   {
     $this->initializeParameterValues();
     if (count($this->parameterValues) === 0) return null;
@@ -233,9 +230,9 @@ class Sabel_Request_Object
   public function find($key)
   {
     $result = null;
-    $values = array($this->getPostValues(),
-                    $this->getGetValues(),
-                    $this->getParameterValues());
+    $values = array($this->fetchPostValues(),
+                    $this->fetchGetValues(),
+                    $this->fetchParameterValues());
     $found = false;
     
     foreach ($values as $value) {
@@ -249,7 +246,7 @@ class Sabel_Request_Object
       }
     }
     
-    return $result;
+    return ($result === "") ? null : $result;
   }
   
   public function isPost()
