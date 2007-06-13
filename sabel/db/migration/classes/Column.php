@@ -11,12 +11,14 @@
  */
 class Sabel_DB_Migration_Classes_Column
 {
-  private $column = null;
+  private $column   = null;
+  private $isChange = false;
 
-  public function __construct($name)
+  public function __construct($name, $isChange = false)
   {
     $this->column = new Sabel_DB_Schema_Column();
     $this->column->name = $name;
+    $this->isChange = $isChange;
   }
 
   public function getColumn()
@@ -29,7 +31,7 @@ class Sabel_DB_Migration_Classes_Column
     $const = constant("Sabel_DB_Type::{$type}");
 
     if ($const === null) {
-      throw new Exception("does not support datatype '{$type}'.");
+      throw new Exception("datatype '{$type}' is not supported.");
     } else {
       $this->column->type = $const;
     }
@@ -68,6 +70,9 @@ class Sabel_DB_Migration_Classes_Column
   public function length($length)
   {
     if ($this->column->isString()) {
+      $this->column->max = $length;
+      return $this;
+    } elseif ($this->isChange && $this->column->type === null) {
       $this->column->max = $length;
       return $this;
     } else {

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Tools_Custom
+ * Sabel_DB_Migration_Classes_Custom
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Tools_Custom
+class Sabel_DB_Migration_Classes_Custom
 {
   private $isUpgrade     = false;
   private $temporaryPath = "";
@@ -65,7 +65,7 @@ class Sabel_DB_Migration_Tools_Custom
     $this->isUpgrade = true;
     list (, $num) = explode("_", $restoreFile);
 
-    $fp = fopen(MIG_DIR . "/{$num}_Mix_custom", "r");
+    $fp = fopen(MIG_DIR . "/{$num}_Mix.php", "r");
     $this->splitFiles($fp);
     fclose($fp);
 
@@ -102,7 +102,14 @@ class Sabel_DB_Migration_Tools_Custom
 
     while (!feof($fp)) {
       $line = trim(fgets($fp, 256));
+
+      if ($line === "<?php") {
+        $lines = array();
+        continue;
+      }
+
       if (empty($lines) && $line === "") continue;
+
       if (substr($line, 0, 3) === "###") {
         if (!empty($lines)) {
           $this->writeTemporaryFile($lines, $num, $fileName);
@@ -171,6 +178,7 @@ class Sabel_DB_Migration_Tools_Custom
 
       while (!feof($fp)) {
         $line = trim(fgets($fp, 256));
+        if ($line === "<?php" || $line === "?>") continue;
         fwrite($rfp, $line . "\n");
       }
 

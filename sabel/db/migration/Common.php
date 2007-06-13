@@ -12,6 +12,7 @@
  */
 abstract class Sabel_DB_Migration_Common extends Sabel_DB_Migration_Base
 {
+  /*
   public function addColumn()
   {
     $cols = $this->createColumns();
@@ -29,7 +30,9 @@ abstract class Sabel_DB_Migration_Common extends Sabel_DB_Migration_Base
       }
     }
   }
+  */
 
+  /*
   public function dropColumn()
   {
     $tblName = convert_to_tablename($this->mdlName);
@@ -49,4 +52,5 @@ abstract class Sabel_DB_Migration_Common extends Sabel_DB_Migration_Base
       }
     }
   }
+  */
 }

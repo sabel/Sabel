@@ -31,14 +31,26 @@ abstract class Sabel_DB_Migration_Base
     $this->dirPath  = ($dirPath === null) ? MIG_DIR : $dirPath;
 
     $file = getFileName($filePath);
-    list ($num, $mdlName, $command) = explode("_", $file);
+    @list ($num, $mdlName, $command) = explode("_", $file);
 
-    $this->version  = $num;
-    $this->mdlName  = $mdlName;
-    $this->command  = substr($command, 0, strpos($command, "."));
+    $this->version = $num;
+    $this->mdlName = $mdlName;
+
+    if ($mdlName === "Mix.php") {
+      $this->command = "custom";
+    } elseif (($pos = strpos($command, ".")) !== false) {
+      $this->command = substr($command, 0, $pos);
+    } else {
+      $this->command = $command;
+    }
   }
 
   public function setOptions($key, $val) {}
+
+  public function setPrimaryKeys($pkeys)
+  {
+    $this->pkeys = $pkeys;
+  }
 
   public function setForeignKeys($fkeys)
   {
@@ -48,11 +60,6 @@ abstract class Sabel_DB_Migration_Base
   public function setUniques($uniques)
   {
     $this->uniques = $uniques;
-  }
-
-  public function setPrimaryKeys($pkeys)
-  {
-    $this->pkeys = $pkeys;
   }
 
   public function execute()
@@ -70,9 +77,9 @@ abstract class Sabel_DB_Migration_Base
   public function create()
   {
     if ($this->type === "upgrade") {
-      $table = new Sabel_DB_Migration_Classes_Table();
+      $create = new Sabel_DB_Migration_Classes_Create();
       eval ($this->getPhpSource());
-      $this->createTable($table->setUp($this)->getColumns());
+      $this->createTable($create->getColumns($this));
     } else {
       $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     }
@@ -82,61 +89,106 @@ abstract class Sabel_DB_Migration_Base
   {
     if ($this->type === "upgrade") {
       $restore = $this->getRestoreFileName();
-      if (!is_file($restore)) {
-        $fp = fopen($restore, "w");
+      if (is_file($restore)) unlink($restore);
 
-        $schema = $this->getTableSchema();
-        Sabel_DB_Migration_Tools_Restore::write($fp, $schema);
-        fclose($fp);
-      }
+      $schema = $this->getTableSchema();
+
+      $fp = fopen($restore, "w");
+      Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
+      fclose($fp);
 
       $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      $this->createTable($cols);
+      $create = new Sabel_DB_Migration_Classes_Create();
+      eval ($this->getPhpSource($this->getRestoreFileName()));
+      $this->createTable($create->getColumns($this));
+    }
+  }
+
+  public function addColumn()
+  {
+    $add = new Sabel_DB_Migration_Classes_AddColumn();
+    eval ($this->getPhpSource());
+
+    $columns = $add->getAddColumns();
+    $tblName = convert_to_tablename($this->mdlName);
+
+    if ($this->type === "upgrade") {
+      foreach ($columns as $column) {
+        $line = $this->createColumnAttributes($column);
+        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
+      }
+    } else {
+      foreach ($columns as $column) {
+        $this->executeQuery("ALTER TABLE $tblName DROP " . $column->name);
+      }
+    }
+  }
+
+  public function dropColumn()
+  {
+    $restore = $this->getRestoreFileName();
+    $tblName = convert_to_tablename($this->mdlName);
+
+    $drop = new Sabel_DB_Migration_Classes_dropColumn();
+    eval ($this->getPhpSource());
+
+    if ($this->type === "upgrade") {
+      if (is_file($restore)) unlink($restore);
+
+      $columns = $drop->getDropColumns();
+      $currentCols = array();
+
+      $schema = $this->getTableSchema();
+      foreach ($schema->getColumns() as $column) {
+        if (in_array($column->name, $columns)) $currentCols[] = $column;
+      }
+
+      $fp = fopen($restore, "w");
+      Sabel_DB_Migration_Classes_Restore::forColumns($fp, $currentCols);
+      fclose($fp);
+
+      foreach ($columns as $column) {
+        $this->executeQuery("ALTER TABLE $tblName DROP $column");
+      }
+    } else {
+      $add = new Sabel_DB_Migration_Classes_AddColumn();
+      eval ($this->getPhpSource($this->getRestoreFileName()));
+
+      $columns = $add->getAddColumns();
+      $tblName = convert_to_tablename($this->mdlName);
+
+      foreach ($columns as $column) {
+        $line = $this->createColumnAttributes($column);
+        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
+      }
     }
   }
 
   public function query()
   {
-    $parser = new Sabel_DB_Migration_Tools_Parser();
+    $query = new Sabel_DB_Migration_Classes_Query();
+    eval ($this->getPhpSource());
+
     if ($this->type === "upgrade") {
-      $query = $parser->getUpgradeQuery($this->filePath);
+      $queries = $query->getUpgradeQueries();
     } else {
-      $query = $parser->getDowngradeQuery($this->filePath);
+      $queries = $query->getDowngradeQueries();
     }
 
-    $this->executeQuery($query);
+    foreach ($queries as $query) {
+      $this->executeQuery($query);
+    }
   }
 
-  protected function getPhpSource()
+  protected function getPhpSource($path = null)
   {
-    $content = file_get_contents($this->filePath);
+    if ($path === null) $path = $this->filePath;
+
+    $content = file_get_contents($path);
     $content = str_replace("->default(", "->defaultValue(", $content);
 
     return str_replace(array("<?php", "?>"), "", $content);
-  }
-
-  protected function createColumns($filePath = null)
-  {
-    $parser = new Sabel_DB_Migration_Tools_Parser();
-
-    if ($filePath === null) {
-      $filePath = $this->filePath;
-      $remove = false;
-    } else {
-      $remove = true;
-    }
-
-    $columns = $parser->toColumns($this, $filePath);
-    if ($remove) unlink($filePath);
-    return $columns;
-  }
-
-  protected function getDropColumns()
-  {
-    $parser = new Sabel_DB_Migration_Tools_Parser();
-    return $parser->getDropColumns($this->filePath);
   }
 
   protected function getCreateSql($cols)
@@ -147,19 +199,19 @@ abstract class Sabel_DB_Migration_Base
       $query[] = $this->createColumnAttributes($col);
     }
 
-    if (!empty($this->pkeys)) {
+    if ($this->pkeys) {
       $query[] = "PRIMARY KEY(" . implode(", ", $this->pkeys) . ")";
     }
 
-    if (!empty($this->fkeys)) {
+    if ($this->fkeys) {
       foreach ($this->fkeys as $colName => $param) {
         $query[] = "FOREIGN KEY ({$colName}) REFERENCES $param";
       }
     }
 
-    if (!empty($this->uniques)) {
-      foreach ($this->uniques as $column) {
-        $query[] = "UNIQUE ({$column})";
+    if ($this->uniques) {
+      foreach ($this->uniques as $unique) {
+        $query[] = "UNIQUE (" . implode(", ", $unique) . ")";
       }
     }
 
@@ -170,34 +222,41 @@ abstract class Sabel_DB_Migration_Base
   protected function changeColumn()
   {
     $tblName = convert_to_tablename($this->mdlName);
+    $restore = $this->getRestoreFileName();
     $schema  = $this->getTableSchema();
 
     if ($this->type === "upgrade") {
-      $cols = $this->createColumns();
-      foreach ($cols as $col) $columnNames[] = $col->name;
+      if (is_file($restore)) unlink($restore);
 
-      $this->writeCurrentColumnsAttr($columnNames, $schema);
-      $this->changeColumnUpgrade($cols, $schema, $tblName);
+      $change = new Sabel_DB_Migration_Classes_ChangeColumn();
+      eval ($this->getPhpSource());
+
+      $columns = $change->getChangeColumns();
+      $currentCols = array();
+
+      $names = array();
+      foreach ($columns as $column) $names[] = $column->name;
+
+      $schema = $this->getTableSchema();
+      foreach ($schema->getColumns() as $column) {
+        if (in_array($column->name, $names)) $currentCols[] = $column;
+      }
+
+      $fp = fopen($restore, "w");
+      Sabel_DB_Migration_Classes_Restore::forColumns($fp, $currentCols, '$change');
+      fclose($fp);
+
+      $this->changeColumnUpgrade($columns, $schema, $tblName);
     } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      $this->changeColumnDowngrade($cols, $schema, $tblName);
+      $change = new Sabel_DB_Migration_Classes_ChangeColumn();
+      eval ($this->getPhpSource($restore));
+
+      $columns = $change->getChangeColumns();
+      $this->changeColumnDowngrade($columns, $schema, $tblName);
     }
   }
 
-  protected function getRestoreFileName()
-  {
-    $path = $this->dirPath . "/restores";
-    if (!is_dir($path)) mkdir($path);
-
-    return $path . "/restore_" . $this->version;
-  }
-
-  protected function writeRestoreFile($fp, $columns = null)
-  {
-    if ($columns === null) $columns = $this->getTableSchema()->getColumns();
-    Sabel_DB_Migration_Tools_Restore::write($fp, $columns);
-  }
-
+  /*
   protected function writeCurrentColumnsAttr($cols, $schema = null)
   {
     $restore = $this->getRestoreFileName();
@@ -215,10 +274,25 @@ abstract class Sabel_DB_Migration_Base
       fclose($fp);
     }
   }
+  */
+
+  protected function getRestoreFileName()
+  {
+    $path = $this->dirPath . "/restores";
+    if (!is_dir($path)) mkdir($path);
+
+    return $path . "/restore_" . $this->version;
+  }
+
+  protected function writeRestoreFile($fp, $columns = null)
+  {
+    if ($columns === null) $columns = $this->getTableSchema()->getColumns();
+    Sabel_DB_Migration_Tools_Restore::write($fp, $columns);
+  }
 
   protected function custom()
   {
-    $custom = new Sabel_DB_Migration_Tools_Custom();
+    $custom = new Sabel_DB_Migration_Classes_Custom();
     $className = get_class($this);
 
     if ($this->type === "upgrade") {
@@ -242,22 +316,49 @@ abstract class Sabel_DB_Migration_Base
     Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
   }
 
-  protected function getDefaultValue($col)
+  protected function message($message)
   {
-    $d = $col->default;
+    echo "[\x1b[1;34mMESSAGE\x1b[m]: " . $message . "\n";
+  }
 
-    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      return "";
+  protected function getDefaultValue($column)
+  {
+    $d = $column->default;
+
+    if ($column->isBool()) {
+      return $this->getBooleanAttr($d);
+    } elseif ($d === null) {
+      return ($column->nullable === true) ? "DEFAULT NULL" : "";
+    } elseif ($column->isNumeric()) {
+      return "DEFAULT $d";
     } else {
-      if ($col->isBool()) {
-        return $this->getBooleanAttr($d);
-      } elseif ($d === null) {
-        return ($col->nullable === true) ? "DEFAULT NULL" : "";
-      } elseif ($col->isNumeric()) {
-        return "DEFAULT $d";
-      } else {
-        return "DEFAULT '{$d}'";
-      }
+      return "DEFAULT '{$d}'";
     }
   }
+}
+
+function arrange($columns)
+{
+  foreach ($columns as $column) {
+    if ($column->primary === true) {
+      $column->nullable = false;
+    } elseif ($column->nullable === null) {
+      $column->nullable = true;
+    }
+
+    if ($column->primary === null) {
+      $column->primary = false;
+    }
+
+    if ($column->increment === null) {
+      $column->increment = false;
+    }
+
+    if ($column->type === Sabel_DB_Type::STRING &&
+        $column->max === null) $column->max = 255;
+
+    if ($column->primary) $pkeys[] = $column->name;
+  }
+
+  return $columns;
 }

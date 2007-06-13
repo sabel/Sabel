@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
+class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
 {
   protected $types = array(Sabel_DB_Type::INT      => "integer",
                            Sabel_DB_Type::BIGINT   => "bigint",
@@ -41,41 +41,42 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
   {
     if ($this->type === "upgrade") {
       $restore = $this->getRestoreFileName();
-      if (!is_file($restore)) {
-        $fp = fopen($restore, "w");
+      if (is_file($restore)) unlink($restore);
 
-        $schema = $this->getTableSchema();
-        Sabel_DB_Migration_Tools_Restore::write($fp, $schema);
+      $fp = fopen($restore, "w");
 
-        $tblName  = convert_to_tablename($this->mdlName);
-        $accessor = Sabel_DB_Migration_Manager::getAccessor();
-        $engine   = $accessor->getTableEngine($tblName);
+      $schema = $this->getTableSchema();
+      Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
 
-        fwrite($fp, "options:\n");
-        fwrite($fp, "  engine: {$engine}\n");
-        fclose($fp);
-      }
+      $tblName  = convert_to_tablename($this->mdlName);
+      $accessor = Sabel_DB_Migration_Manager::getAccessor();
+      $engine   = $accessor->getTableEngine($tblName);
+
+      fwrite($fp, '$create->options("engine", "' . $engine . '");');
+      fwrite($fp, "\n");
+      fclose($fp);
 
       $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      $this->createTable($cols);
+      $create = new Sabel_DB_Migration_Classes_Create();
+      eval ($this->getPhpSource($this->getRestoreFileName()));
+      $this->createTable($create->getColumns($this));
     }
   }
 
-  protected function changeColumnUpgrade($cols, $schema, $tblName)
+  protected function changeColumnUpgrade($columns, $schema, $tblName)
   {
-    foreach ($cols as $col) {
-      $current = $schema->getColumnByName($col->name);
-      $line = $this->alterChange($col, $current);
+    foreach ($columns as $column) {
+      $current = $schema->getColumnByName($column->name);
+      $line = $this->alterChange($column, $current);
       $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
     }
   }
 
-  protected function changeColumnDowngrade($cols, $schema, $tblName)
+  protected function changeColumnDowngrade($columns, $schema, $tblName)
   {
-    foreach ($cols as $col) {
-      $line = $this->createColumnAttributes($col);
+    foreach ($columns as $column) {
+      $line = $this->createColumnAttributes($column);
       $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
     }
   }
@@ -92,38 +93,40 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     return implode(" ", $line);
   }
 
-  protected function alterChange($col, $current)
+  protected function alterChange($column, $current)
   {
     $line   = array();
-    $line[] = $col->name;
+    $line[] = $column->name;
 
-    $c = ($col->type === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) ? $current : $col;
-    $line[] = $this->getTypeString($c);
+    $c = ($column->type === null) ? $current : $column;
+    $line[] = $this->getTypeString($c, false);
 
-    $c = ($col->nullable === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) ? $current : $col;
-    $line[] = $this->getNullableString($c);
-
-    $d  = $col->default;
-    $cd = $current->default;
-
-    if ($d === Sabel_DB_Migration_Tools_Parser::IS_EMPTY && $cd !== null) {
-      if ($current->isBool()) {
-        $line[] = $this->getBooleanAttr($cd);
-      } elseif ($current->isNumeric()) {
-        $line[] = "DEFAULT $cd";
-      } else {
-        $line[] = "DEFAULT '{$cd}'";
-      }
-    } else {
-      $line[] = $this->getDefaultValue($col);
+    if ($c->isString()) {
+      $max = ($column->max === null) ? $current->max : $column->max;
+      $line[] = "({$max})";
     }
 
-    if ($col->increment) $line[] = "AUTO_INCREMENT";
+    $c = ($column->nullable === null) ? $current : $column;
+    $line[] = $this->getNullableString($c);
+
+    $d  = $column->default;
+    $cd = $current->default;
+
+    if ($d === $cd) {
+      $line[] = $this->getDefaultValue($current);
+    } else {
+      $this->valueCheck($column, $d);
+      $line[] = $this->getDefaultValue($column);
+    }
+
+    if ($column->increment) $line[] = "AUTO_INCREMENT";
     return implode(" ", $line);
   }
 
-  private function getTypeString($col)
+  private function getTypeString($col, $withLength = true)
   {
+    if (!$withLength) return $this->types[$col->type];
+
     if ($col->isString()) {
       return $this->types[$col->type] . "({$col->max})";
     } else {
@@ -131,9 +134,21 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Common
     }
   }
 
-  private function getNullableString($col)
+  private function getNullableString($column)
   {
-    return ($col->nullable === false) ? "NOT NULL" : "";
+    return ($column->nullable === false) ? "NOT NULL" : "";
+  }
+
+  private function valueCheck($column, $default)
+  {
+    if ($default === null) return true;
+
+    if (($column->isBool() && !is_bool($default)) ||
+        ($column->isNumeric() && !is_numeric($default))) {
+      throw new Exception("invalid value for default.");
+    } else {
+      return true;
+    }
   }
 
   protected function getBooleanAttr($value)
