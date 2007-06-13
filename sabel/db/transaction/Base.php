@@ -11,10 +11,22 @@
  */
 class Sabel_DB_Transaction_Base
 {
+  private static $instances = array();
+
   protected $active = false;
   protected $transactions = array();
 
   private function __construct() {}
+
+  public static function registTransaction($instance)
+  {
+    self::$instances[] = $instance;
+  }
+
+  public static function getInstances()
+  {
+    return self::$instances;
+  }
 
   public function isActive($connectionName = null)
   {

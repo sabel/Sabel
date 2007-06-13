@@ -2,7 +2,7 @@
 
 class ArrayInsert
 {
-  public function run($executer)
+  public function execute($executer)
   {
     $model   = $executer->getModel();
     $tblName = $model->getTableName();
@@ -27,7 +27,6 @@ class ArrayInsert
 
 Sabel_DB_Command_Before::regist("ArrayInsert",
                                 Sabel_DB_Command::ARRAY_INSERT,
-                                "run",
                                 array("driver" => array("include" =>
                                                   array("Sabel_DB_Driver_Mysql"))));
 

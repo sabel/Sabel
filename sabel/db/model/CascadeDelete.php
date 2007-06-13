@@ -30,7 +30,7 @@ class Sabel_DB_Model_CascadeDelete
     $this->keys = $config->getKeys();
     $mdlName    = $model->getModelName();
 
-    $model->startTransaction();
+    $model = Sabel_DB_Transaction::begin($model);
 
     $models  = array();
     $pKey    = $model->getPrimaryKey();
@@ -51,7 +51,7 @@ class Sabel_DB_Model_CascadeDelete
     $this->clearCascadeStack();
 
     $model->remove();
-    $model->commit();
+    Sabel_DB_Transaction::commit();
   }
 
   private function makeChainModels($children, &$cascade)
@@ -107,8 +107,7 @@ class Sabel_DB_Model_CascadeDelete
 
     foreach ($stack as $param => $fKey) {
       list($mdlName, $idValue) = explode(":", $param);
-      $model = MODEL($mdlName);
-      $model->addTransaction();
+      $model = Sabel_DB_Transaction::load($mdlName);
       $model->remove($fKey, $idValue);
     }
   }

@@ -11,9 +11,9 @@
  */
 class Sabel_DB_Join extends Sabel_DB_Join_Base
 {
-  const CANNOT_JOIN = 0x00;
+  const CANNOT_JOIN = -0x01;
 
-  protected $possibleTables = array();
+  protected $tableLists = array();
 
   public function buildParents()
   {
@@ -29,17 +29,18 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   protected function addParentModel($parents, $join = null)
   {
-    if (empty($this->possibleTables)) {
-      $possibleTables = $this->getPossibleTables();
+    if (empty($this->tableLists)) {
+      $tableLists = $this->getTableLists();
     } else {
-      $possibleTables = $this->possibleTables;
+      $tableLists = $this->tableLists;
     }
 
     foreach ($parents as $parent) {
-      $model = MODEL($parent);
+      $model   = MODEL($parent);
       $tblName = $model->getTableName();
       $parents = $model->getParents();
-      if (in_array($tblName, $possibleTables)) {
+
+      if (in_array($tblName, $tableLists)) {
         if ($join === null && empty($parents)) {
           $this->add($model);
         } elseif ($join !== null) {
@@ -57,12 +58,12 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     }
   }
 
-  protected function getPossibleTables()
+  protected function getTableLists()
   {
     $connectionName = $this->sourceModel->getConnectionName();
     $accessor = new Sabel_DB_Schema_Accessor($connectionName);
 
-    return $this->possibleTables = $accessor->getTableLists();
+    return $this->tableLists = $accessor->getTableLists();
   }
 
   public function join($joinType = "INNER")
@@ -105,7 +106,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     }
   }
 
-  public function execute($model, $joinQuery)
+  private function execute($model, $joinQuery)
   {
     $command = $model->getCommand();
     $driver  = $command->getDriver();

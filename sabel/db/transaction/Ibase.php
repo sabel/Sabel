@@ -15,7 +15,11 @@ class Sabel_DB_Transaction_Ibase extends Sabel_DB_Transaction_Base
 
   public static function getInstance()
   {
-    if (self::$ins === null) self::$ins = new self();
+    if (self::$ins === null) {
+      self::$ins = new self();
+      parent::registTransaction(self::$ins);
+    }
+
     return self::$ins;
   }
 

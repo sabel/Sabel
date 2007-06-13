@@ -696,14 +696,12 @@ class Test_DB_Test extends SabelTestCase
     $orders = Sabel_Model::load('CustomerOrder')->select();
     $this->assertFalse($orders);
 
-    $model = Sabel_Model::load('CustomerOrder');
-    $model->begin(); // db1 start transaction.
+    $model = Sabel_DB_Transaction::load("CustomerOrder");
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
 
-    $model = Sabel_Model::load('Customer');
-    $model->begin(); // db2 start transaction.
+    $model = Sabel_DB_Transaction::load("Customer");
     $model->save(array('id' => 1, 'name' => 'name'));
     $model->save(array('id' => 2, 'name' => 'name'));
 
@@ -715,7 +713,7 @@ class Test_DB_Test extends SabelTestCase
     }
 
     // not execute.
-    $model->commit();
+    Sabel_DB_Transaction::commit();
 
     $customers = Sabel_Model::load('Customer')->select();
     $this->assertFalse($customers);
@@ -1140,7 +1138,7 @@ class TimeRecorder
   const UPDATE_COLUMN = "auto_update";
   const INSERT_COLUMN = "auto_create";
 
-  public function record($command)
+  public function execute($command)
   {
     $model   = $command->getModel();
     $values  = $model->getSaveValues();
@@ -1162,10 +1160,8 @@ class TimeRecorder
   }
 }
 
-Sabel_DB_Command_Before::regist(array("TimeRecorder", true),
-                                array(Sabel_DB_Command::UPDATE,
-                                      Sabel_DB_Command::INSERT),
-                                "record",
+Sabel_DB_Command_Before::regist("TimeRecorder",
+                                array(Sabel_DB_Command::UPDATE, Sabel_DB_Command::INSERT),
                                 array("model" => array("include" => array("Timer"))));
 
 class Sabel_DB_Command_Custom extends Sabel_DB_Command_Base
@@ -1187,11 +1183,7 @@ interface Sabel_DB_Command
   const DELETE = 0x08;
   const QUERY  = 0x10;
 
-  const BEGIN    = 0x20;
-  const COMMIT   = 0x40;
-  const ROLLBACK = 0x80;
+  const ARRAY_INSERT = 0x20;
 
-  const ARRAY_INSERT = 0x100;
-
-  const CUSTOM = 0x200;
+  const CUSTOM = 0x40;
 }

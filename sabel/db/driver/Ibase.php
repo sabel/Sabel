@@ -34,8 +34,12 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
     return Sabel_DB_Sql_Constraint_Loader::getClass(Sabel_DB_Sql_Constraint_Loader::IBASE);
   }
 
-  public function begin($connectionName)
+  public function begin($connectionName = null)
   {
+    if ($connectionName === null) {
+      $connectionName = $this->connectionName;
+    }
+
     $trans = $this->loadTransaction();
 
     if (!$trans->isActive($connectionName)) {

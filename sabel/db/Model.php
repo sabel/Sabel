@@ -103,6 +103,18 @@ class Sabel_DB_Model
     }
   }
 
+  public function __get($key)
+  {
+    if (!isset($this->values[$key])) return null;
+
+    $value = $this->values[$key];
+    if ($value === null) return null;
+
+    $columns = $this->schemaCols;
+    if (!isset($columns[$key])) return $value;
+    return $columns[$key]->cast($value);
+  }
+
   public function setTableName($tblName)
   {
     $this->tableName = $tblName;
@@ -141,6 +153,20 @@ class Sabel_DB_Model
   public function getTableEngine()
   {
     return $this->schema->getTableEngine();
+  }
+
+  public function setSaveValues($values)
+  {
+    if (!is_array($values)) {
+      throw new Exception("argument must be an array");
+    }
+
+    return $this->saveValues = $values;
+  }
+
+  public function getSaveValues()
+  {
+    return $this->saveValues;
   }
 
   public function setProjection($p)
@@ -236,18 +262,6 @@ class Sabel_DB_Model
     $this->constraints = array();
   }
 
-  public function __get($key)
-  {
-    if (!isset($this->values[$key])) return null;
-
-    $value = $this->values[$key];
-    if ($value === null) return null;
-
-    $columns = $this->schemaCols;
-    if (!isset($columns[$key])) return $value;
-    return $columns[$key]->cast($value);
-  }
-
   public function toArray()
   {
     return $this->values;
@@ -276,31 +290,6 @@ class Sabel_DB_Model
   public function isSelected()
   {
     return $this->selected;
-  }
-
-  public function begin()
-  {
-    $this->getCommand()->begin($this->getConnectionName());
-  }
-
-  public function startTransaction()
-  {
-    $this->begin();
-  }
-
-  public function addTransaction()
-  {
-    $this->begin();
-  }
-
-  public function commit()
-  {
-    $this->getCommand()->commit();
-  }
-
-  public function rollback()
-  {
-    $this->getCommand()->rollback();
   }
 
   public function getFirst($orderColumn)
@@ -501,20 +490,6 @@ class Sabel_DB_Model
     return $newModel;
   }
 
-  public function setSaveValues($values)
-  {
-    if (!is_array($values)) {
-      throw new Exception("argument must be an array");
-    }
-
-    return $this->saveValues = $values;
-  }
-
-  public function getSaveValues()
-  {
-    return $this->saveValues;
-  }
-
   public function arrayInsert($data)
   {
     if (!is_array($data)) {
@@ -525,9 +500,9 @@ class Sabel_DB_Model
     $this->saveValues = $data;
 
     try {
-      $command->begin();
+      Sabel_DB_Transaction::begin($this);
       $command->arrayInsert();
-      $command->commit();
+      Sabel_DB_Transaction::commit();
     } catch (Exception $e) {
       throw new Exception($e->getMessage());
     }
@@ -558,8 +533,7 @@ class Sabel_DB_Model
       $this->setCondition($arg1, $arg2, $arg3);
     }
 
-    $command = $this->getCommand();
-    $command->delete();
+    $this->getCommand()->delete();
   }
 
   public function executeQuery($sql, $inputs = null)
@@ -595,7 +569,7 @@ class Sabel_DB_Model
 
   protected function executeError($errorMsg, $command)
   {
-    $command->rollback();
+    Sabel_DB_Transaction::rollback();
     throw new Sabel_DB_Exception($errorMsg);
   }
 
@@ -619,11 +593,9 @@ class Sabel_DB_Model
   {
     $this->setConstraint($arg1, $arg2);
   }
-  
-  public function validate($ignores = null)
+
+  public function validate($ignores = array("id"))
   {
-    if ($ignores === null) $ignores = array("id");
-    
     $validator = new Sabel_DB_Validator($this);
     return $validator->validate($ignores);
   }

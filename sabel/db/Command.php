@@ -18,9 +18,5 @@ interface Sabel_DB_Command
   const DELETE = 0x08;
   const QUERY  = 0x10;
 
-  const BEGIN    = 0x20;
-  const COMMIT   = 0x40;
-  const ROLLBACK = 0x80;
-
-  const ARRAY_INSERT = 0x100;
+  const ARRAY_INSERT = 0x20;
 }

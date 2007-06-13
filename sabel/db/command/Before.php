@@ -18,20 +18,13 @@ class Sabel_DB_Command_Before
   protected static $before    = array();
   protected static $instances = array();
 
-  public static function regist($class, $commands, $method, $options = null)
+  public static function regist($class, $commands, $options = null)
   {
-    if (is_array($class)) {
-      $key   = $class[0];
-      $cache = ($class[1] === true || $class[1] === 1);
-    } else {
-      $key   = $class;
-      $cache = false;
-    }
+    $method = (isset($options["method"])) ? $options["method"] : "execute";
 
-    self::$before[$key] = array("commands" => $commands,
-                                "method"   => $method,
-                                "options"  => $options,
-                                "cache"    => $cache);
+    self::$before[$class] = array("commands" => $commands,
+                                  "method"   => $method,
+                                  "options"  => $options);
   }
 
   public static function execute($commandId, $commandClass)
@@ -49,14 +42,10 @@ class Sabel_DB_Command_Before
 
       if (!self::isPass($params["options"], $driverName, $modelName)) continue;
 
-      if ($params["cache"]) {
-        if (isset(self::$instances[$className])) {
-          $ins = self::$instances[$className];
-        } else {
-          $ins = self::$instances[$className] = new $className();
-        }
+      if (isset(self::$instances[$className])) {
+        $ins = self::$instances[$className];
       } else {
-        $ins = new $className();
+        $ins = self::$instances[$className] = new $className();
       }
 
       foreach ($commands as $command) {
