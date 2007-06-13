@@ -11,12 +11,12 @@
  */
 class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 {
-  protected $db = "";
-  protected $bindValues = array();
+  private $database   = "";
+  private $bindValues = array();
 
-  public function __construct($db)
+  public function __construct($database)
   {
-    $this->db = $db;
+    $this->database = $database;
   }
 
   public function setBindValues($bindValues, $add = true)
@@ -40,14 +40,19 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return array("insert" => array("getIncrementId"));
   }
 
-  public function getSqlClass($model, $classType = null)
+  public function getSqlClass($model)
   {
-    return parent::getSqlClass($model, Sabel_DB_Sql_Loader::PDO);
+    return Sabel_DB_Sql_Loader::getClass($model, Sabel_DB_Sql_Loader::PDO);
   }
 
-  public function getConditionBuilder($classType = null)
+  public function getConditionBuilder()
   {
-    return parent::getConditionBuilder(Sabel_DB_Condition_Builder_Loader::PDO);
+    return Sabel_DB_Condition_Builder_Loader::getClass($this, Sabel_DB_Condition_Builder_Loader::PDO);
+  }
+
+  public function getConstraintSqlClass()
+  {
+    return Sabel_DB_Sql_Constraint_Loader::getClass(Sabel_DB_Sql_Constraint_Loader::COMMON);
   }
 
   public function begin($connectionName)
@@ -76,35 +81,30 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 
   public function close($connection)
   {
-    $connection = null;
+    unset($connection);
+    unset($this->connection);
   }
 
   public function escape($values)
   {
-    return escapeString($this->db, $values);
+    return escapeString($this->database, $values);
   }
 
   public function getIncrementId($command = null)
   {
-    switch ($this->db) {
-      case 'pgsql':
-        $id = Sabel_DB_Driver_Sequence::getId("pgsql", $command);
-        break;
-
-      case 'mysql':
-        $id = Sabel_DB_Driver_Sequence::getId("mysql", $command);
-        break;
-
-      case 'sqlite':
-        $id = (int)$this->connection->lastInsertId();
-        break;
-    }
-
-    if ($command === null) {
-      return $id;
+    if ($this->database === "pgsql") {
+      $model = $command->getModel();
+      if ($column = $model->getIncrementColumn()) {
+        $tblName = $model->getTableName();
+        $id = (int)$this->connection->lastInsertId("{$tblName}_{$column}_seq");
+      } else {
+        $id = null;
+      }
     } else {
-      $command->setIncrementId($id);
+      $id = (int)$this->connection->lastInsertId();
     }
+
+    $command->setIncrementId($id);
   }
 
   public function execute($conn = null)
@@ -116,7 +116,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
       var_dump($sql);
     }
 
-    if ($conn === null) $conn = $this->getPdoInstance();
+    if ($conn === null) {
+      $conn = $this->getConnection();
+    }
 
     if (is_array($sql)) {
       $this->arrayExecute($conn, $sql);
@@ -144,19 +146,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     }
   }
 
-  protected function getPdoInstance()
-  {
-    if ($this->connection === null) {
-      $conn = Sabel_DB_Connection::get($this->connectionName);
-      $this->connection = $conn;
-    } else {
-      $conn = $this->connection;
-    }
-
-    return $conn;
-  }
-
-  protected function createPdoStatement($conn, $sql)
+  private function createPdoStatement($conn, $sql)
   {
     if (!($pdoStmt = $conn->prepare($sql))) {
       $this->data = array();
@@ -167,7 +157,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return $pdoStmt;
   }
 
-  protected function arrayExecute($conn, $sqls)
+  private function arrayExecute($conn, $sqls)
   {
     $bindValues = $this->bindValues;
 
@@ -178,7 +168,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     }
   }
 
-  protected function createBindParam($bindValues = null)
+  private function createBindParam($bindValues = null)
   {
     $bindParam = array();
     $binds = ($bindValues === null) ? $this->bindValues : $bindValues;
@@ -189,5 +179,24 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 
     $this->bindValues = array();
     return $bindParam;
+  }
+
+  protected function error($error, $sql, $pdoBind = null)
+  {
+    $message = array();
+    $name    = $this->connectionName;
+    $params  = Sabel_DB_Config::get($name);
+
+    $message["ERROR_MESSAGE"] = $error;
+    $message["EXECUTE_QUERY"] = $sql;
+
+    if ($pdoBind) {
+      $message["PDO_BIND_VALUES"] = $pdoBind;
+    }
+
+    $message["CONNECTION_NAME"] = $name;
+    $message["PARAMETERS"]      = $params;
+
+    throw new Sabel_DB_Exception(print_r($message, true));
   }
 }

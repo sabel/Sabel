@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Command_Executer
 {
-  const SKIP = 0x01;
+  const SKIP = -0x01;
 
   protected $model  = null;
   protected $driver = null;

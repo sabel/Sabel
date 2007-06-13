@@ -3,6 +3,7 @@
 /**
  * Sabel_DB_Driver_Base
  *
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
@@ -11,13 +12,12 @@
  */
 abstract class Sabel_DB_Driver_Base
 {
+  protected $sql      = "";
+  protected $driverId = "";
+  protected $result   = array();
+
   protected $connection     = null;
   protected $connectionName = "";
-
-  protected $sql         = "";
-  protected $driverId    = "";
-  protected $result      = array();
-  protected $incrementId = null;
 
   public function getDriverId()
   {
@@ -29,48 +29,6 @@ abstract class Sabel_DB_Driver_Base
     $this->sql = $sql;
 
     return $this;
-  }
-
-  public function execute($conn = null)
-  {
-    $sql = $this->sql;
-
-    // @todo
-    //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
-    if (defined("QUERY_LOG")) {
-      var_dump($sql);
-    }
-
-    if ($conn === null) {
-      $conn = $this->getConnection();
-    }
-    
-    if (get_resource_type($conn) === "Unknown") {
-      $this->error("unknown resource type");
-    }
-
-    $func = $this->execFunction;
-
-    switch ($this->driverId) {
-      case "mysql":
-      case "mysqli":
-      case "mssql":
-        if (is_array($sql)) {
-          foreach ($sql as $s) $func($s, $conn);
-          return true;
-        } else {
-          return $func($sql, $conn);
-        }
-
-      case "pgsql":
-      case "ibase":
-        if (is_array($sql)) {
-          foreach ($sql as $s) $func($conn, $s);
-          return true;
-        } else {
-          return $func($conn, $sql);
-        }
-    }
   }
 
   public function getResult()
@@ -114,86 +72,9 @@ abstract class Sabel_DB_Driver_Base
     }
   }
 
-  public function getSqlClass($model, $classType = null)
-  {
-    if ($classType === null) {
-      $classType = Sabel_DB_Sql_Loader::COMMON;
-    }
-
-    return Sabel_DB_Sql_Loader::getClass($model, $classType);
-  }
-
-  public function getConstraintSqlClass($classType = null)
-  {
-    if ($classType === null) {
-      $classType = Sabel_DB_Sql_Constraint_Loader::COMMON;
-    }
-
-    return Sabel_DB_Sql_Constraint_Loader::getClass($classType);
-  }
-
-  public function getConditionBuilder($classType = null)
-  {
-    if ($classType === null) {
-      $classType = Sabel_DB_Condition_Builder_Loader::COMMON;
-    }
-
-    return Sabel_DB_Condition_Builder_Loader::getClass($this, $classType);
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_Common::getInstance();
-  }
-
-  public function begin($connectionName)
-  {
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      $this->setSql($this->beginCommand)->execute($connection);
-      $trans->start($connection, $this);
-    }
-  }
-
-  public function commit($connection)
-  {
-    $this->setSql($this->commitCommand)->execute($connection);
-  }
-
-  public function rollback($connection)
-  {
-    $this->setSql($this->rollbackCommand)->execute($connection);
-  }
-
-  public function close($connection)
-  {
-    $method = $this->closeFunction;
-    $method($connection);
-
-    unset($this->connection);
-  }
-
-  protected function error($error, $sql = null, $pdoBind = null)
-  {
-    $message = array();
-    $name    = $this->getConnectionName();
-    $params  = Sabel_DB_Config::get($name);
-
-    if ($sql === null) $sql = $this->sql;
-
-    $message["ERROR_MESSAGE"] = $error;
-    $message["EXECUTE_QUERY"] = $sql;
-
-    if ($pdoBind) {
-      $message["PDO_BIND_VALUES"] = $pdoBind;
-    }
-
-    $message["CONNECTION_NAME"] = $name;
-    $message["PARAMETERS"]      = $params;
-
-    throw new Sabel_DB_Exception(print_r($message, true));
   }
 }
 

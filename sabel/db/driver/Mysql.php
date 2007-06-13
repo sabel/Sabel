@@ -11,7 +11,7 @@ include_once("ArrayInsert.php");
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Base
+class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Common
 {
   protected $driverId        = "mysql";
   protected $execFunction    = "mysql_query";
@@ -52,14 +52,8 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Base
     return $this->result = $rows;
   }
 
-  public function getIncrementId($command = null)
+  public function getIncrementId($command)
   {
-    $id = Sabel_DB_Driver_Sequence::getId("mysql", $command);
-
-    if ($command === null) {
-      return $id;
-    } else {
-      $command->setIncrementId($id);
-    }
+    $command->setIncrementId($this->getSequence());
   }
 }

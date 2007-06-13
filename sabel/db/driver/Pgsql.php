@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Base
+class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Common
 {
   protected $driverId        = "pgsql";
   protected $execFunction    = "pg_query";
@@ -58,8 +58,11 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Base
       throw new Exception("pg_insert execute failed: '$tblName' VALUES: $values");
     }
 
-    $id = Sabel_DB_Driver_Sequence::getId("pgsql", $command);
-    $command->setIncrementId($id);
+    if ($model->getIncrementColumn()) {
+      $command->setIncrementId($this->getSequence());
+    } else {
+      $command->setIncrementId(null);
+    }
 
     return Sabel_DB_Command_Executer::SKIP;
   }

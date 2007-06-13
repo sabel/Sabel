@@ -13,7 +13,7 @@ if (!defined("MQ_SYBASE")) {
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
+class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
 {
   protected $driverId      = "ibase";
   protected $execFunction  = "ibase_query";
@@ -24,19 +24,14 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
     return array("insert" => array("setIncrementId"));
   }
 
-  public function getAfterMethods()
-  {
-    return array("insert" => array("getIncrementId"));
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_Ibase::getInstance();
   }
 
-  public function getConstraintSqlClass($classType = null)
+  public function getConstraintSqlClass()
   {
-    return parent::getConstraintSqlClass(Sabel_DB_Sql_Constraint_Loader::IBASE);
+    return Sabel_DB_Sql_Constraint_Loader::getClass(Sabel_DB_Sql_Constraint_Loader::IBASE);
   }
 
   public function begin($connectionName)
@@ -89,15 +84,22 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Base
 
   public function setIncrementId($command)
   {
-    $this->incrementId = Sabel_DB_Driver_Sequence::getId("ibase", $command);
-  }
+    $model = $command->getModel();
+    if (($column = $model->getIncrementColumn()) === null) {
+      return $command->setIncrementId(null);
+    }
 
-  public function getIncrementId($command = null)
-  {
-    if ($command === null) {
-      return $this->incrementId;
+    $tblName = $model->getTableName();
+    $genName = "{$tblName}_{$column}_gen";
+    $values = $model->getSaveValues();
+
+    if (isset($values[$column])) {
+      $command->setIncrementId(null);
     } else {
-      $command->setIncrementId($this->incrementId);
+      $id = Sabel_DB_Driver_Sequence::getIbaseGenId($this, $genName);
+      $values[$column] = $id;
+      $model->setSaveValues($values);
+      $command->setIncrementId($id);
     }
   }
 }
