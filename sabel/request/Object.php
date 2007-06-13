@@ -162,6 +162,13 @@ class Sabel_Request_Object
   public function fetchGetValues()
   {
     if (count($this->getValues) === 0) return null;
+    
+    foreach ($this->getValues as &$value) {
+      if ($value === "") {
+        $value = null;
+      }
+    }
+    
     return $this->getValues;
   }
   
@@ -192,6 +199,13 @@ class Sabel_Request_Object
   public function fetchPostValues()
   {
     if (count($this->postValues) === 0) return null;
+    
+    foreach ($this->postValues as &$value) {
+      if ($value === "") {
+        $value = null;
+      }
+    }
+    
     return $this->postValues;
   }
   

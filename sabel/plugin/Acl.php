@@ -47,6 +47,10 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
         throw new Sabel_Exception_Runtime("duplicate double deny");
       }
       
+      if ($action === "notFound" || $action === "serverError") {
+        return $this->controller->execute($action);
+      }
+      
       if (method_exists($this->controller, $publicActions)) {
         $result = $this->controller->$publicActions();
         if ($result === self::ALLOW_ALL) {
@@ -59,8 +63,12 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
         } elseif ($this->isAuthenticated()) {
           return $this->controller->execute($action);
         } else {
-          $this->destination->setAction(self::DENY_ACTION);
-          return $this->controller->execute(self::DENY_ACTION);
+          if ($this->controller->executable($action)) {
+            $this->destination->setAction(self::DENY_ACTION);
+            return $this->controller->execute(self::DENY_ACTION);
+          } else {
+            return $this->controller->execute($action);
+          }
         }
       } elseif ($this->isAuthenticated()) {
         return $this->controller->execute($action);

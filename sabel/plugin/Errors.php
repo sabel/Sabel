@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_Plugin_Errors
+ *
+ * @category   Plugin
+ * @package    org.sabel.plugin
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Plugin_Errors extends Sabel_Plugin_Base
 {
   const MAX_STACK_SIZE = 5;
@@ -9,6 +18,13 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   
   private $storage = null;
   
+  public function resetErrors()
+  {
+    $storage = $this->storage = Sabel_Context::getStorage();
+    $storage->delete(self::ERROR_KEY);
+    $storage->delete(self::STACK_KEY);
+  }
+  
   public function onBeforeAction()
   {
     $storage = $this->storage = Sabel_Context::getStorage();
@@ -17,7 +33,10 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
     
     if (is_array($errors)) {
       if ($this->isErrorPage($current, $errors)) {
+        $this->controller->hasErrors = true;
+        $this->controller->errorValues = $errors["values"];
         Sabel_View::assign(self::ERROR_KEY, $errors["messages"]);
+        Sabel_View::assignByArray($errors["values"]);        
       } else {
         $storage->delete(self::ERROR_KEY);
       }
@@ -33,9 +52,11 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
     $storage = $this->storage;
     $stack   = $storage->read(self::STACK_KEY);
     $index   = count($stack) - 2;
+    $values  = $this->controller->getRequest()->fetchPostValues();
     
     $storage->write(self::ERROR_KEY, array("submitUrl" => $stack[$index],
-                                           "messages"  => $messages));
+                                           "messages"  => $messages,
+                                           "values"    => $values));
   }
   
   private function isErrorPage($url, $errors)

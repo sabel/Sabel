@@ -102,6 +102,13 @@ class Sabel_DB_Model
       $this->updateValues[$key] = $val;
     }
   }
+  
+  public function setValues($values) 
+  {
+    foreach ($values as $key => $val) {
+      $this->$key = $val;
+    }
+  }
 
   public function __get($key)
   {

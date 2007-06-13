@@ -38,8 +38,13 @@ final class Sabel_Plugin
   
   public static function create($controller = null)
   {
-    if (self::$instance === null) self::$instance = new self();
-    self::$instance->setController($controller);
+    if (self::$instance === null) {
+      self::$instance = new self();
+    }
+    
+    if ($controller !== null) {
+      self::$instance->setController($controller);
+    }
     
     return self::$instance;
   }

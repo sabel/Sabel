@@ -11,6 +11,11 @@
  */
 class Sabel_Plugin_Common extends Sabel_Plugin_Base
 {
+  public function plugin($plugin)
+  {
+    Sabel_Plugin::create()->add($plugin);
+  }
+  
   public function onCreateController($destination)
   {
     $dest = $destination->toArray();

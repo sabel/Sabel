@@ -446,6 +446,79 @@ postRegistrationアクション
 
 
 
+MMValidatorプラグイン
+------------------------------------------------------------------------------
+複数のモデルオブジェクトを同時に編集するときに使います。
+
+プラグイン説明
+ - メソッド
+  - multipleValidate(モデルの配列, [ブール:自動セーブ/デフォルトfalse])
+   - このメソッドは複数のモデルを同時にバリデートします
+  - assignErrors(モデルの配列, エラー配列)
+   - エラーがあった値を各のモデルにセットします
+  - modelize(リクエストされた値の配列)
+   - users::nameという表記を分解します
+
+コントローラで下記のように記述してください。
+
+<?php
+    public function initialize()
+    {
+      // プラグインをロード
+      $this->plugin(new Sabel_Plugin_MMValidator());
+    }
+    
+    public function edit()
+    {
+      $this->user    = $user    = MODEL("Users")->selectOne($this->identity());
+      $this->profile = $profile = MODEL("Profile")->selectOne($user->id);
+
+      if ($this->request->isPost()) {
+        $user->setValues($this->usersValues);
+        $profile->setValues($this->profileValues);
+        $this->multipleValidate(array($user, $profile), true);
+        return $this->redirectTo("c: user, a: edit");
+      } elseif ($this->request->isGet()) {
+        if ($this->hasErrors) {
+          $this->assignErrors(array($user, $profile), $this->errorValues);
+        }
+      }
+    }
+?>
+
+テンプレート内のフォームではname="モデル名::カラム名"という命名規則に従ってください
+
+下記に例を示します。
+<html>
+    <?= $this->partial("error") ?>
+
+    <form action="<?= uri("c: user, a: edit") ?>" method="POST">
+      <p>ユーザ名: 
+        <input type="text" name="users::username" value="<?= $user->username ?>" />
+      </p>
+
+      <p>ハンドル: 
+        <input type="text" name="users::handle" value="<?= $user->handle ?>" />
+      </p>
+
+      <p>メールアドレス: 
+        <input type="text" name="users::email" value="<?= $user->email ?>" />
+      </p>
+
+      <p>パスワード: 
+        <input type="password" name="users::password" value="<?= $user->password ?>" />
+      </p>
+
+      <p>年齢: 
+        <input type="text" name="profile::age" value="<?= $profile->age ?>" />
+      </p>
+
+      <input type="submit" value="編集確定" />
+    </form>
+</html>
+
+
+
 
 機能テスト
 ------------------------------------------------------------------------------

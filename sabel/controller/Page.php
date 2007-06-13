@@ -145,6 +145,35 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
+  public function executable($action)
+  {
+    $isExistance = create_function
+                   (
+                     '$self, $action',
+                     'return is_callable(array($self, $action));'
+                   );
+                   
+    if (method_exists($this, $action)) {
+      $existance = $isExistance($this, $action);
+    } else {
+      $existance = false;
+    }
+    
+    $callable = (!in_array($action, $this->hidden));
+    
+    if ($callable) {
+      if ($existance) {
+        return true;
+      } elseif ($this->isTemplateFound()) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  
   /**
    * HTTP Redirect to another location.
    *
@@ -152,10 +181,15 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * @param string $to /Module/Controller/Method
    * @return mixed self::REDIRECTED
    */
-  public function redirect($to)
+  public function redirect($to, $parameters = null)
   {
-    $this->redirect   = $to;
-    $this->redirected = true;
+    if ($parameters !== null) {
+      $buf = array();
+      foreach ($parameters as $key => $value) {
+        $buf[] = "{$key}={$value}";
+      }
+      $to .= "?" . join("&", $buf);
+    }
     
     $this->plugin->onRedirect($to);
     $this->plugin->onAfterAction();
@@ -168,10 +202,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    *
    * @param string $params
    */
-  public final function redirectTo($params)
+  public final function redirectTo($destination, $parameters = null)
   {
     $candidate = Sabel_Context::getCandidate();
-    return $this->redirect($candidate->uri($this->convertParams($params)));
+    $uri = $candidate->uri($this->convertParams($destination));
+    return $this->redirect($uri, $parameters);
   }
   
   private function convertParams($param)
@@ -181,10 +216,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $reserved = ";";
     
     foreach ($params as $part) {
-      if (strpos(":", $part) === false) {
-        $part = "a: " . $part;
-      }
-      
       $line     = array_map("trim", explode(":", $part));
       $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
       $buf[$reserved] = $line[1];

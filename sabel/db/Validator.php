@@ -95,7 +95,8 @@ class Sabel_DB_Validator
     if ($processes) $this->postProcess($processes, $errors);
 
     $this->errors = $errors;
-    return (empty($errors)) ? null : $errors;
+    // return (empty($errors)) ? null : $errors;
+    return $errors;
   }
 
   protected function customValidation($validations, $schemas, &$errors)
