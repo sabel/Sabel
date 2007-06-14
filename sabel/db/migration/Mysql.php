@@ -34,7 +34,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
       $query .= " ENGINE=" . $this->options["engine"];
     }
 
-    $this->executeQuery($query);
+    executeQuery($query);
   }
 
   public function drop()
@@ -45,7 +45,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
 
       $fp = fopen($restore, "w");
 
-      $schema = $this->getTableSchema();
+      $schema = getSchema($this->mdlName);
       Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
 
       $tblName  = convert_to_tablename($this->mdlName);
@@ -56,11 +56,10 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
       fwrite($fp, "\n");
       fclose($fp);
 
-      $this->executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
+      executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
     } else {
-      $create = new Sabel_DB_Migration_Classes_Create();
-      eval ($this->getPhpSource($this->getRestoreFileName()));
-      $this->createTable($create->getColumns($this));
+      $path = $this->getRestoreFileName();
+      $this->createTable(getCreate($path, $this));
     }
   }
 
@@ -69,7 +68,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     foreach ($columns as $column) {
       $current = $schema->getColumnByName($column->name);
       $line = $this->alterChange($column, $current);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+      executeQuery("ALTER TABLE $tblName MODIFY $line");
     }
   }
 
@@ -77,7 +76,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
   {
     foreach ($columns as $column) {
       $line = $this->createColumnAttributes($column);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+      executeQuery("ALTER TABLE $tblName MODIFY $line");
     }
   }
 

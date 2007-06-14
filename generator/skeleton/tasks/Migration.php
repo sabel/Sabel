@@ -3,7 +3,7 @@
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 define("SAKLE_CMD", "sakle");
 
-Sabel::fileUsing("config/environment.php");
+Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
 
 /**
  * Migration
@@ -93,7 +93,7 @@ class Migration extends Sabel_Sakle_Task
   protected function defineMigrationDir()
   {
     if (!defined("MIG_DIR")) {
-      define("MIG_DIR", RUN_BASE . "/migration/" . $this->connectionName);
+      define("MIG_DIR", RUN_BASE . DIR_DIVIDER . "migration" . DIR_DIVIDER . $this->connectionName);
     }
   }
 
@@ -128,10 +128,9 @@ class Migration extends Sabel_Sakle_Task
       $doNext = ($next > $to);
     }
 
-    $this->printMessage(strtoupper($type) . " FROM $version TO $next");
     $migration = $this->getMigrationClass($type, $num);
     $migration->execute();
-    $this->incrementVersion($next);
+    $this->incrementVersion($next, $type, $version, $next);
 
     return $doNext;
   }
@@ -170,18 +169,24 @@ class Migration extends Sabel_Sakle_Task
         $this->migrateTo = $this->currentVersion;
         $this->execNextMigration();
         return false;
+
+      default:
+        throw new Exception("version '{$to}' is not supported.");
     }
   }
 
-  protected function incrementVersion($num)
+  protected function incrementVersion($num, $type, $version, $next)
   {
     $query = "UPDATE sversion SET version = $num";
     $this->driver->setSql($query)->execute();
+
+    $this->printMessage(strtoupper($type) . " FROM $version TO $next");
   }
 
   protected function initDbConfig($environment)
   {
     $params = get_db_params($environment);
+
     foreach ($params as $connectionName => $param) {
       Sabel_DB_Config::regist($connectionName, $param);
     }
@@ -193,7 +198,7 @@ class Migration extends Sabel_Sakle_Task
     $driverName = str_replace("pdo-", "", $driverName);
     $className  = "Sabel_DB_Migration_" . ucfirst($driverName);
 
-    return new $className(MIG_DIR . "/" . $this->files[$verNum], $type);
+    return new $className(MIG_DIR . DIR_DIVIDER . $this->files[$verNum], $type);
   }
 
   protected function getConnectionName($arguments)
@@ -203,10 +208,15 @@ class Migration extends Sabel_Sakle_Task
 
   protected function createVersionManageTable()
   {
-    $create = "CREATE TABLE sversion(id INTEGER PRIMARY KEY, version INTEGER NOT NULL)";
+    $create = "CREATE TABLE sversion("
+            . "id INTEGER NOT NULL PRIMARY KEY, "
+            . "version INTEGER NOT NULL)";
+
     $insert = "INSERT INTO sversion values(1, 0)";
 
-    $this->driver->setSql(array($create, $insert))->execute();
+    $driver = $this->driver;
+    $driver->setSql($create)->execute();
+    $driver->setSql($insert)->execute();
   }
 
   protected function getVersion()
@@ -233,6 +243,6 @@ function getMigrationFiles($dirPath)
 
 function getFileName($path)
 {
-  $exp = explode("/", $path);
+  $exp = explode(DIR_DIVIDER, $path);
   return $exp[count($exp) - 1];
 }

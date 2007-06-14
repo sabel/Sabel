@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
+class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
 {
   protected $types = array(Sabel_DB_Type::INT      => "integer",
                            Sabel_DB_Type::BIGINT   => "bigint",
@@ -23,88 +23,90 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Common
 
   protected function createTable($cols)
   {
-    $this->executeQuery($this->getCreateSql($cols));
+    executeQuery($this->getCreateSql($cols));
   }
 
-  protected function changeColumnUpgrade($cols, $schema, $tblName)
+  protected function changeColumnUpgrade($columns, $schema, $tblName)
   {
-    foreach ($cols as $col) {
-      $current = $schema->getColumnByName($col->name);
-      $this->alterChange($current, $col, $tblName);
+    foreach ($columns as $column) {
+      $current = $schema->getColumnByName($column->name);
+      $this->alterChange($current, $column, $tblName);
     }
   }
 
-  protected function changeColumnDowngrade($cols, $schema, $tblName)
+  protected function changeColumnDowngrade($columns, $schema, $tblName)
   {
-    foreach ($cols as $col) {
-      $current = $schema->getColumnByName($col->name);
-      $this->alterChange($current, $col, $tblName);
+    foreach ($columns as $column) {
+      $current = $schema->getColumnByName($column->name);
+      $this->alterChange($current, $column, $tblName);
     }
   }
 
-  protected function createColumnAttributes($col)
+  protected function createColumnAttributes($column)
   {
     $line   = array();
-    $line[] = $col->name;
-    $line[] = $this->getDataType($col);
+    $line[] = $column->name;
+    $line[] = $this->getDataType($column);
 
-    if ($col->nullable === false) $line[] = "NOT NULL";
-    $line[] = $this->getDefaultValue($col);
+    if ($column->nullable === false) $line[] = "NOT NULL";
+    $line[] = $this->getDefaultValue($column);
 
     return implode(" ", $line);
   }
 
-  private function alterChange($current, $col, $tblName)
+  private function alterChange($current, $column, $tblName)
   {
-    if ($col->type !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      $this->changeType($current, $col, $tblName);
+    if ($column->type !== null || ($current->isString() && $column->max !== null)) {
+      $this->changeType($current, $column, $tblName);
     }
 
-    if ($col->nullable !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      $this->changeNullable($current, $col, $tblName);
+    if ($column->nullable !== null) {
+      $this->changeNullable($current, $column, $tblName);
     }
 
-    if ($col->default !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      $this->changeDefault($current, $col, $tblName);
+    if ($column->default !== $current->default) {
+      $this->changeDefault($current, $column, $tblName);
     }
   }
 
-  private function changeType($current, $col, $tblName)
+  private function changeType($current, $column, $tblName)
   {
-    if ($current->type !== $col->type) {
-      $type = $this->getDataType($col);
-      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
-    } elseif ($current->isString() && $current->max !== $col->length) {
-      $type = $this->getDataType($col);
-      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} TYPE $type");
+    if ($current->type !== $column->type && $column->type !== null) {
+      $type = $this->getDataType($column);
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
+    } elseif ($current->isString() && $current->max !== $column->max) {
+      $column->type = $current->type;
+      if ($column->max === null) $column->max = 255;
+      $type = $this->getDataType($column);
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
     }
   }
 
-  private function changeNullable($current, $col, $tblName)
+  private function changeNullable($current, $column, $tblName)
   {
-    if ($current->nullable !== $col->nullable) {
-      if ($col->nullable === true) {
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP NOT NULL");
-      } elseif ($col->nullable === false) {
-        $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET NOT NULL");
-      }
+    if ($current->nullable === $column->nullable) return;
+
+    if ($column->nullable) {
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} DROP NOT NULL");
+    } else {
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} SET NOT NULL");
     }
   }
 
-  private function changeDefault($current, $col, $tblName)
+  private function changeDefault($current, $column, $tblName)
   {
-    if ($col->default === null) {
-      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} DROP DEFAULT");
-    } elseif ($col->default !== Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      if ($col->isBool()) {
-        $default = ($col->default) ? "true" : "false";
-      } elseif ($col->isString()) {
-        $default = "'{$col->default}'";
+    if ($column->default === null) {
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} DROP DEFAULT");
+    } else {
+      if ($column->isBool()) {
+        $default = ($column->default) ? "true" : "false";
+      } elseif ($column->isNumeric()) {
+        $default = $column->default;
       } else {
-        $default = $col->default;
+        $default = "'{$column->default}'";
       }
 
-      $this->executeQuery("ALTER TABLE $tblName ALTER {$col->name} SET DEFAULT $default");
+      executeQuery("ALTER TABLE $tblName ALTER {$column->name} SET DEFAULT $default");
     }
   }
 

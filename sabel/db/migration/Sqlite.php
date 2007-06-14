@@ -23,26 +23,26 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
   private $autoPrimary = false;
 
-  protected function createTable($cols)
+  protected function createTable($columns)
   {
-    $this->executeQuery($this->getCreateSql($cols));
+    executeQuery($this->getCreateSql($columns, !$this->autoPrimary, false));
   }
 
-  protected function getCreateSql($cols)
+  protected function getCreateSql($columns)
   {
     $query = array();
 
-    foreach ($cols as $col) {
-      $query[] = $this->createColumnAttributes($col);
+    foreach ($columns as $column) {
+      $query[] = $this->createColumnAttributes($column);
     }
 
-    if (!empty($this->pkeys) && !$this->autoPrimary) {
+    if ($this->pkeys && !$this->autoPrimary) {
       $query[] = "PRIMARY KEY(" . implode(", ", $this->pkeys) . ")";
     }
 
-    if (!empty($this->uniques)) {
-      foreach ($this->uniques as $column) {
-        $query[] = "UNIQUE ({$column})";
+    if ($this->uniques) {
+      foreach ($this->uniques as $unique) {
+        $query[] = "UNIQUE (" . implode(", ", $unique) . ")";
       }
     }
 
@@ -52,70 +52,70 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
 
   public function addColumn()
   {
-    $cols = $this->createColumns();
+    $columns = getAddColumns($this->filePath);
     $tblName = convert_to_tablename($this->mdlName);
 
     if ($this->type === "upgrade") {
-      foreach ($cols as $col) {
-        $line = $this->createColumnAttributes($col);
-        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
-      }
+      $this->execAddColumn($columns);
     } else {
-      $columns = $this->getTableSchema()->getColumns();
-      foreach ($cols as $col) {
-        if (isset($columns[$col->name])) unset($columns[$col->name]);
+      $currentCols = getSchema($this->mdlName)->getColumns();
+      $columnNames = array();
+      foreach ($columns as $column) $columnNames[] = $column->name;
+
+      foreach ($columnNames as $name) {
+        if (isset($currentCols[$name])) unset($currentCols[$name]);
       }
 
-      $this->dropColumnsAndRemakeTable($columns, $tblName);
+      $this->dropColumnsAndRemakeTable($currentCols, $tblName);
     }
   }
 
   public function dropColumn()
   {
-    $tblName = convert_to_tablename($this->mdlName);
-
     if ($this->type === "upgrade") {
-      $cols = $this->getDropColumns();
-      $this->writeCurrentColumnsAttr($cols);
-      $columns = $this->getTableSchema()->getColumns();
+      $restore = $this->getRestoreFileName();
+      if (is_file($restore)) unlink($restore);
 
-      foreach ($cols as $col) {
-        if (isset($columns[$col])) unset($columns[$col]);
+      $columns = getDropColumns($this->filePath);
+      $tblName = convert_to_tablename($this->mdlName);
+
+      $schema = getSchema($this->mdlName);
+      writeColumns($schema, $restore, $columns);
+      $sColumns = $schema->getColumns();
+
+      foreach ($sColumns as $name => $column) {
+        if (in_array($column->name, $columns)) unset($sColumns[$name]);
       }
 
-      $this->dropColumnsAndRemakeTable($columns, $tblName);
+      $this->dropColumnsAndRemakeTable($sColumns, $tblName);
     } else {
-      $cols = $this->createColumns($this->getRestoreFileName());
-      foreach ($cols as $col) {
-        $line = $this->createColumnAttributes($col);
-        $this->executeQuery("ALTER TABLE $tblName ADD " . $line);
-      }
+      $this->restoreDropColumn();
     }
   }
 
-  protected function changeColumnUpgrade($cols, $schema, $tblName)
+  protected function changeColumnUpgrade($columns, $schema, $tblName)
   {
-    $columns = $this->getTableSchema()->getColumns();
+    $sColumns = $schema->getColumns();
 
-    foreach ($cols as $col) {
-      if (isset($columns[$col->name])) {
-        $col = $this->setDifferenceAttr($col, $columns[$col->name]);
-        $columns[$col->name] = $col;
+    foreach ($columns as $column) {
+      if (isset($sColumns[$column->name])) {
+        $column = $this->alterChange($column, $sColumns[$column->name]);
+        $sColumns[$column->name] = $column;
       }
     }
 
-    $this->dropColumnsAndRemakeTable($columns, $tblName);
+    $this->dropColumnsAndRemakeTable($sColumns, $tblName);
   }
 
-  protected function changeColumnDowngrade($cols, $schema, $tblName)
+  protected function changeColumnDowngrade($columns, $schema, $tblName)
   {
-    $columns = $this->getTableSchema()->getColumns();
+    $sColumns = $schema->getColumns();
 
-    foreach ($cols as $col) {
-      if (isset($columns[$col->name])) $columns[$col->name] = $col;
+    foreach ($columns as $column) {
+      if (isset($sColumns[$column->name])) $sColumns[$column->name] = $column;
     }
 
-    $this->dropColumnsAndRemakeTable($columns, $tblName);
+    $this->dropColumnsAndRemakeTable($sColumns, $tblName);
   }
 
   protected function createColumnAttributes($col)
@@ -133,43 +133,42 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
   private function dropColumnsAndRemakeTable($columns, $tblName)
   {
     $driver = Sabel_DB_Migration_Manager::getDriver();
-    $driver->begin($driver->getConnectionName());
+    $driver->begin();
 
     $query = $this->getCreateSql($columns);
     $query = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
-    $this->executeQuery($query);
+    executeQuery($query);
 
     $projection = array();
     foreach (array_keys($columns) as $key) $projection[] = $key;
 
     $projection = implode(", ", $projection);
     $query = "INSERT INTO stmp_{$tblName} SELECT $projection FROM $tblName";
-    $this->executeQuery($query);
 
-    $this->executeQuery("DROP TABLE $tblName");
-
-    $query = "ALTER TABLE stmp_{$tblName} RENAME TO $tblName";
-    $this->executeQuery($query);
+    executeQuery($query);
+    executeQuery("DROP TABLE $tblName");
+    executeQuery("ALTER TABLE stmp_{$tblName} RENAME TO $tblName");
 
     $driver->loadTransaction()->commit();
   }
 
-  private function setDifferenceAttr($col, $current)
+  private function alterChange($column, $current)
   {
-    if ($col->type === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      if ($current->isString()) $col->max  = $current->max;
-      $col->type = $current->type;
+    if ($column->type === null) {
+      $column->type = $current->type;
     }
 
-    if ($col->nullable === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      $col->nullable = $current->nullable;
+    if ($column->isString() && $column->max === null) {
+      $column->max = $current->max;
     }
 
-    if ($col->default === Sabel_DB_Migration_Tools_Parser::IS_EMPTY) {
-      $col->default = $current->default;
+    if ($column->nullable === null) {
+      $column->nullable = $current->nullable;
     }
 
-    return $col;
+    // @todo default value.
+
+    return $column;
   }
 
   private function getDataType($col)
