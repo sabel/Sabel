@@ -1,0 +1,4 @@
+<?php
+
+require("Sabel/Sabel.php");
+require("Sabel/generator/generator.php");

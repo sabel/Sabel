@@ -5,13 +5,13 @@ require_once ('classes.php');
 
 $args = $_SERVER['argv'];
 
+define(RUN_BASE, getcwd());
+
 $pathToSabel = dirname(dirname($args[0]));
 $includePath = get_include_path();
 if (!in_array($pathToSabel, explode(':', $includePath))) {
   set_include_path(get_include_path().':'.$pathToSabel);
 }
-
-//Sabel::using('Sabel_Util_DirectoryTraverser');
 
 $dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . '/skeleton');
 $aCreator = new SabelDirectoryAndFileCreator();

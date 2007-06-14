@@ -1,9 +1,13 @@
 <?php
 
-function a($param, $anchor)
+function a($uri, $anchor, $param = null)
 {
-  $aCreator = new Sabel_View_Uri();
-  return $aCreator->hyperlink($param, $anchor);
+  if ($param === null) {
+    return '<a href="'.uri($uri).'">'.$anchor.'</a>';
+  } else {
+    return '<a href="'.uri($uri).$param.'">'.$anchor.'</a>';
+  }
+  
 }
 
 function ah($param, $anchor)
@@ -14,5 +18,9 @@ function ah($param, $anchor)
 function uri($param)
 {
   $aCreator = new Sabel_View_Uri();
-  return $aCreator->uri($param);
+  $ignored = "";
+  if (defined("URI_IGNORE")) {
+    $ignored = $_SERVER["SCRIPT_NAME"];
+  }
+  return $ignored . $aCreator->uri($param);
 }

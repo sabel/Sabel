@@ -9,7 +9,12 @@ class Sabel_Plugin_Redirecter extends Sabel_Plugin_Base
     } else {
       $host = "localhost";
     }
+    
+    $ignored = "";
+    if (defined("URI_IGNORE")) {
+      $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+    }
         
-    $this->controller->getResponse()->location($host, $to);
+    $this->controller->getResponse()->location($host, $ignored . $to);
   }
 }

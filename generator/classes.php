@@ -21,7 +21,7 @@ class SabelDirectoryAndFileCreator
   
   public function accept($element, $type, $child = null)
   {
-    if (defined('TEST_CASE')) $element = RUN_BASE . '/' . $element;
+    $element = RUN_BASE . DIR_DIVIDER . $element;
     
     if ($this->isIgnore($element)) {
       $this->printMessage("[\x1b[1;34mIGNORE\x1b[m] ignore: ${element}");
