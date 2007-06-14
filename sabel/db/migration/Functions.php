@@ -1,5 +1,21 @@
 <?php
 
+// define types for migration.
+
+define("_INT",      Sabel_DB_Type::INT);
+define("_SMALLINT", Sabel_DB_Type::SMALLINT);
+define("_BIGINT",   Sabel_DB_Type::BIGINT);
+define("_FLOAT",    Sabel_DB_Type::FLOAT);
+define("_DOUBLE",   Sabel_DB_Type::DOUBLE);
+define("_STRING",   Sabel_DB_Type::STRING);
+define("_TEXT",     Sabel_DB_Type::TEXT);
+define("_DATETIME", Sabel_DB_Type::DATETIME);
+define("_BOOL",     Sabel_DB_Type::BOOL);
+define("_BYTE",     Sabel_DB_Type::BYTE);
+define("_DATE",     Sabel_DB_Type::DATE);
+define("_TIME",     Sabel_DB_Type::TIME);
+define("_NULL",     "SDB_NULL_VALUE");
+
 function executeQuery($query)
 {
   Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
@@ -88,6 +104,10 @@ function getPhpSource($path)
 
 function message($message)
 {
-  echo "[\x1b[1;34mMESSAGE\x1b[m]: " . $message . "\n";
+  $type = Sabel_DB_Migration_Manager::getMigrationType();
+
+  if ($type === "upgrade") {
+    echo "[\x1b[1;34mMESSAGE\x1b[m]: " . $message . "\n";
+  }
 }
 

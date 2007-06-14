@@ -95,7 +95,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
 
   private function changeDefault($current, $column, $tblName)
   {
-    if ($column->default === null) {
+    if ($column->default === _NULL) {
       executeQuery("ALTER TABLE $tblName ALTER {$column->name} DROP DEFAULT");
     } else {
       if ($column->isBool()) {

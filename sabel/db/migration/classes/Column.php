@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Migration_Classes_Column
 {
+  const EMPTY_DEFAULT = "SDB_EMPTY_DEFAULT";
+
   private $column   = null;
   private $isChange = false;
 
@@ -28,10 +30,11 @@ class Sabel_DB_Migration_Classes_Column
 
   public function type($type)
   {
-    $const = constant("Sabel_DB_Type::{$type}");
+    $const = @constant($type);
 
     if ($const === null) {
-      throw new Exception("datatype '{$type}' is not supported.");
+      echo "[\x1b[1;31mERROR\x1b[m]: datatype '{$type}' is not supported.\n";
+      exit;
     } else {
       $this->column->type = $const;
     }
@@ -63,7 +66,12 @@ class Sabel_DB_Migration_Classes_Column
       throw new Exception("default value for BOOL column must be a boolean.");
     }
 
-    $this->column->default = $value;
+    if ($this->isChange && $value === null) {
+      $this->column->default = self::EMPTY_DEFAULT;
+    } else {
+      $this->column->default = $value;
+    }
+
     return $this;
   }
 

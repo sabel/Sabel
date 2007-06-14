@@ -63,7 +63,7 @@ class Sabel_DB_Migration_Classes_Restore
     foreach ($columns as $column) {
       $line = array($variable);
       $line[] = '->column("' . $column->name . '")';
-      $line[] = '->type("' . $column->type . '")';
+      $line[] = '->type(' . $column->type . ')';
 
       $bool = ($column->nullable) ? "true" : "false";
       $line[] = '->nullable(' . $bool . ')';
@@ -75,7 +75,7 @@ class Sabel_DB_Migration_Classes_Restore
       $line[] = '->increment(' . $bool . ')';
 
       if ($column->default === null) {
-        $line[] = '->default(null)';
+        $line[] = '->default(_NULL)';
       } else {
         if ($column->isNumeric()) {
           $line[] = '->default(' . $column->default . ')';

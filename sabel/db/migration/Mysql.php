@@ -108,14 +108,15 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     $c = ($column->nullable === null) ? $current : $column;
     $line[] = $this->getNullableString($c);
 
-    $d  = $column->default;
-    $cd = $current->default;
+    if (($d = $column->default) !== _NULL) {
+      $cd = $current->default;
 
-    if ($d === $cd) {
-      $line[] = $this->getDefaultValue($current);
-    } else {
-      $this->valueCheck($column, $d);
-      $line[] = $this->getDefaultValue($column);
+      if ($d === $cd) {
+        $line[] = $this->getDefaultValue($current);
+      } else {
+        $this->valueCheck($column, $d);
+        $line[] = $this->getDefaultValue($column);
+      }
     }
 
     if ($column->increment) $line[] = "AUTO_INCREMENT";

@@ -45,6 +45,8 @@ abstract class Sabel_DB_Migration_Base
     } else {
       $this->command = $command;
     }
+
+    Sabel_DB_Migration_Manager::setMigrationType($type);
   }
 
   public function setOptions($key, $val) {}
@@ -244,7 +246,7 @@ abstract class Sabel_DB_Migration_Base
 
     if ($column->isBool()) {
       return $this->getBooleanAttr($d);
-    } elseif ($d === null) {
+    } elseif ($d === null || $d === _NULL) {
       return ($column->nullable === true) ? "DEFAULT NULL" : "";
     } elseif ($column->isNumeric()) {
       return "DEFAULT $d";

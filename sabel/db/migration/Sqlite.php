@@ -166,7 +166,11 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
       $column->nullable = $current->nullable;
     }
 
-    // @todo default value.
+    if ($column->default === _NULL) {
+      $column->default = null;
+    } elseif ($column->default === null) {
+      $column->default = $current->default;
+    }
 
     return $column;
   }

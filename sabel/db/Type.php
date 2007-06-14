@@ -12,18 +12,18 @@
  */
 interface Sabel_DB_Type
 {
-  const INT       = "INT";
-  const BIGINT    = "BIGINT";
-  const SMALLINT  = "SMALLINT";
-  const FLOAT     = "FLOAT";
-  const DOUBLE    = "DOUBLE";
-  const STRING    = "STRING";
-  const TEXT      = "TEXT";
-  const BOOL      = "BOOL";
-  const DATETIME  = "DATETIME";
-  const BYTE      = "BYTE";
+  const INT       = "_INT";
+  const BIGINT    = "_BIGINT";
+  const SMALLINT  = "_SMALLINT";
+  const FLOAT     = "_FLOAT";
+  const DOUBLE    = "_DOUBLE";
+  const STRING    = "_STRING";
+  const TEXT      = "_TEXT";
+  const BOOL      = "_BOOL";
+  const DATETIME  = "_DATETIME";
+  const BYTE      = "_BYTE";
 
   // @todo
-  const DATE      = "DATE";
-  const TIME      = "TIME";
+  const DATE      = "_DATE";
+  const TIME      = "_TIME";
 }

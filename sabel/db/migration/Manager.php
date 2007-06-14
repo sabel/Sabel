@@ -13,6 +13,7 @@ class Sabel_DB_Migration_Manager
 {
   private static $accessor = null;
   private static $driver   = null;
+  private static $migType  = null;
 
   public static function setAccessor($accessor)
   {
@@ -32,5 +33,15 @@ class Sabel_DB_Migration_Manager
   public static function getDriver()
   {
     return self::$driver;
+  }
+
+  public static function setMigrationType($type)
+  {
+    self::$migType = $type;
+  }
+
+  public static function getMigrationType()
+  {
+    return self::$migType;
   }
 }
