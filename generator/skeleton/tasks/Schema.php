@@ -1,9 +1,9 @@
 <?php
 
 if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-define("SCHEMA_DIR", "lib/schema/");
+define("SCHEMA_DIR", "lib" . DIR_DIVIDER . "schema" . DIR_DIVIDER);
 
-Sabel::fileUsing("config/environment.php");
+Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
 
 class Schema extends Sabel_Sakle_Task
 {
@@ -72,7 +72,9 @@ class Schema extends Sabel_Sakle_Task
       $isNum = false;
 
       $line[] = '$cols[' . "'{$col->name}'] = array(";
-      $line[] = "'type' => Sabel_DB_Type::{$col->type}, ";
+
+      $type   = str_replace("_", "", $col->type);
+      $line[] = "'type' => Sabel_DB_Type::{$type}, ";
 
       if ($col->isInt() || $col->isFloat() || $col->isDouble()) {
         $line[] = "'max' => {$col->max}, ";

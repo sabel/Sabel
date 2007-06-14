@@ -378,7 +378,7 @@ class Schema_TargetModel1
   {
     $cols = array();
 
-    $cols['id']     = array('type'      => 'INT',
+    $cols['id']     = array('type'      => Sabel_DB_Type::INT,
                             'max'       => 2147483647,
                             'min'       => -2147483648,
                             'increment' => true,
@@ -386,26 +386,26 @@ class Schema_TargetModel1
                             'primary'   => true,
                             'default'   => null);
 
-    $cols['status'] = array('type'      => 'BOOL',
+    $cols['status'] = array('type'      => Sabel_DB_Type::BOOL,
                             'increment' => false,
                             'nullable'  => true,
                             'primary'   => false,
                             'default'   => null);
 
-    $cols['name']   = array('type'      => 'STRING',
+    $cols['name']   = array('type'      => Sabel_DB_Type::STRING,
                             'increment' => false,
                             'nullable'  => false,
                             'primary'   => false,
                             'max'       => 24,
                             'default'   => null);
 
-    $cols['registed'] = array('type'      => 'DATETIME',
+    $cols['registed'] = array('type'      => Sabel_DB_Type::DATETIME,
                               'increment' => false,
                               'nullable'  => true,
                               'primary'   => false,
                               'default'   => null);
 
-    $cols['point'] = array('type'      => 'INT',
+    $cols['point'] = array('type'      => Sabel_DB_Type::INT,
                            'max'       => 2147483647,
                            'min'       => -2147483648,
                            'increment' => false,
@@ -413,7 +413,7 @@ class Schema_TargetModel1
                            'primary'   => false,
                            'default'   => null);
 
-    $cols['pre_hoge'] = array('type'      => 'STRING',
+    $cols['pre_hoge'] = array('type'      => Sabel_DB_Type::STRING,
                               'increment' => false,
                               'nullable'  => true,
                               'primary'   => false,
@@ -439,7 +439,7 @@ class Schema_TargetModel2
   {
     $cols = array();
 
-    $cols['id']     = array('type'      => 'INT',
+    $cols['id']     = array('type'      => Sabel_DB_Type::INT,
                             'max'       => 2147483647,
                             'min'       => -2147483648,
                             'increment' => true,
@@ -447,14 +447,14 @@ class Schema_TargetModel2
                             'primary'   => true,
                             'default'   => null);
 
-    $cols['name']   = array('type'      => 'STRING',
+    $cols['name']   = array('type'      => Sabel_DB_Type::STRING,
                             'increment' => false,
                             'nullable'  => false,
                             'primary'   => false,
                             'max'       => 24,
                             'default'   => null);
 
-    $cols['pre_huga'] = array('type'      => 'STRING',
+    $cols['pre_huga'] = array('type'      => Sabel_DB_Type::STRING,
                               'increment' => false,
                               'nullable'  => true,
                               'primary'   => false,

@@ -321,8 +321,8 @@ class Test_DB_Test extends SabelTestCase
     $model1 = $models[0];
     $model2 = $models[1];
 
-    $this->assertEquals($model1->registed, '2004-12-01 10:10:10');
-    $this->assertEquals($model2->registed, '2004-11-01 10:10:10');
+    $this->assertEquals($model1->registed->getDatetime(), '2004-12-01 10:10:10');
+    $this->assertEquals($model2->registed->getDatetime(), '2004-11-01 10:10:10');
 
     $model->unsetConditions();
 
@@ -339,9 +339,9 @@ class Test_DB_Test extends SabelTestCase
     $model2 = $models[1];
     $model3 = $models[2];
 
-    $this->assertEquals($model1->registed, '2005-02-01 10:10:10');
-    $this->assertEquals($model2->registed, '2005-01-01 10:10:10');
-    $this->assertEquals($model3->registed, '2004-10-01 10:10:10');
+    $this->assertEquals($model1->registed->getDatetime(), '2005-02-01 10:10:10');
+    $this->assertEquals($model2->registed->getDatetime(), '2005-01-01 10:10:10');
+    $this->assertEquals($model3->registed->getDatetime(), '2004-10-01 10:10:10');
   }
 
   public function testFirst()
@@ -350,7 +350,7 @@ class Test_DB_Test extends SabelTestCase
     $model = $model->getFirst('registed');
 
     $this->assertTrue($model->status);
-    $this->assertEquals($model->registed, '2004-10-01 10:10:10');
+    $this->assertEquals($model->registed->getDatetime(), '2004-10-01 10:10:10');
     $this->assertEquals($model->point, 13000);
   }
 
@@ -359,7 +359,7 @@ class Test_DB_Test extends SabelTestCase
     $model = Sabel_Model::load('TestCondition');
     $model = $model->getLast('registed');
     $this->assertTrue($model->status);
-    $this->assertEquals($model->registed, '2005-10-01 10:10:10');
+    $this->assertEquals($model->registed->getDatetime(), '2005-10-01 10:10:10');
     $this->assertEquals($model->point, 1000);
   }
 
@@ -406,10 +406,10 @@ class Test_DB_Test extends SabelTestCase
     $order5 = $orders[3];
     $order4 = $orders[4];
 
-    $this->assertEquals($order7->buy_date, '2005-07-01 10:10:10');
-    $this->assertEquals($order6->buy_date, '2005-06-01 10:10:10');
-    $this->assertEquals($order5->buy_date, '2005-05-01 10:10:10');
-    $this->assertEquals($order4->buy_date, '2005-04-01 10:10:10');
+    $this->assertEquals($order7->buy_date->getDatetime(), '2005-07-01 10:10:10');
+    $this->assertEquals($order6->buy_date->getDatetime(), '2005-06-01 10:10:10');
+    $this->assertEquals($order5->buy_date->getDatetime(), '2005-05-01 10:10:10');
+    $this->assertEquals($order4->buy_date->getDatetime(), '2005-04-01 10:10:10');
 
     $order = Sabel_Model::load('CustomerOrder');
     $order->customer_id = 2;
@@ -428,15 +428,15 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($orders[0]->Customer->id, 1);
 
     $this->assertEquals($orders[0]->customer_id, 1);
-    $this->assertEquals($orders[0]->buy_date, '2005-01-01 10:10:10');
+    $this->assertEquals($orders[0]->buy_date->getDatetime(), '2005-01-01 10:10:10');
     $this->assertEquals($orders[0]->amount, 1000);
 
     $this->assertEquals($orders[1]->customer_id, 1);
-    $this->assertEquals($orders[1]->buy_date, '2005-02-01 10:10:10');
+    $this->assertEquals($orders[1]->buy_date->getDatetime(), '2005-02-01 10:10:10');
     $this->assertEquals($orders[1]->amount, 2000);
 
     $this->assertEquals($orders[5]->customer_id, 2);
-    $this->assertEquals($orders[5]->buy_date, '2005-06-01 10:10:10');
+    $this->assertEquals($orders[5]->buy_date->getDatetime(), '2005-06-01 10:10:10');
     $this->assertEquals($orders[5]->amount, 6000);
 
     $this->assertEquals($orders[5]->Customer->id, 2);
@@ -644,12 +644,12 @@ class Test_DB_Test extends SabelTestCase
     $model5 = $models[4];
     $model6 = $models[5];
 
-    $this->assertEquals($model1->registed, '2005-06-01 10:10:10');
-    $this->assertEquals($model2->registed, '2005-05-01 10:10:10');
-    $this->assertEquals($model3->registed, '2005-04-01 10:10:10');
-    $this->assertEquals($model4->registed, '2005-03-01 10:10:10');
-    $this->assertEquals($model5->registed, '2005-02-01 10:10:10');
-    $this->assertEquals($model6->registed, '2004-10-01 10:10:10');
+    $this->assertEquals($model1->registed->getDatetime(), '2005-06-01 10:10:10');
+    $this->assertEquals($model2->registed->getDatetime(), '2005-05-01 10:10:10');
+    $this->assertEquals($model3->registed->getDatetime(), '2005-04-01 10:10:10');
+    $this->assertEquals($model4->registed->getDatetime(), '2005-03-01 10:10:10');
+    $this->assertEquals($model5->registed->getDatetime(), '2005-02-01 10:10:10');
+    $this->assertEquals($model6->registed->getDatetime(), '2004-10-01 10:10:10');
 
     $customer = Sabel_Model::load('Customer')->selectOne(1);
     $customer->remove();
@@ -752,7 +752,7 @@ class Test_DB_Test extends SabelTestCase
     $model = Sabel_Model::load('CustomerOrder')->select();
     $this->assertEquals(count($model), 1);
     $this->assertEquals($model[0]->customer_id, 2);
-    $this->assertEquals($model[0]->buy_date, '2000-02-02 02:02:02');
+    $this->assertEquals($model[0]->buy_date->getDatetime(), '2000-02-02 02:02:02');
     $this->assertEquals($model[0]->amount, 2000);
 
     MODEL('Customer')->executeQuery('DELETE FROM customer');
@@ -804,7 +804,7 @@ class Test_DB_Test extends SabelTestCase
 
     $this->assertEquals($order->id, 5);
     $this->assertEquals($order->customer_id, 10);
-    $this->assertEquals($order->buy_date, '1999-01-01 12:34:55');
+    $this->assertEquals($order->buy_date->getDatetime(), '1999-01-01 12:34:55');
     $this->assertEquals($order->amount, 9999);
   }
 
@@ -987,7 +987,6 @@ class Proxy extends Sabel_DB_Model
 
 class Users extends Sabel_DB_Model
 {
-  protected $childConstraints = array('Blog' => array('order' => 'write_date desc'));
   protected $parents = array('City');
 }
 
@@ -1017,14 +1016,14 @@ class Schema_TestCondition
   {
     $cols = array();
 
-    $cols['id']       = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['id']       = array('type' => Sabel_DB_Type::INT, 'max' => 2147483647, 'min' => -2147483648,
                               'increment' => true, 'nullable' => false, 'primary' => true,
                               'default' => null);
-    $cols['status']   = array('type' => 'BOOL', 'increment' => false, 'nullable' => true,
+    $cols['status']   = array('type' => Sabel_DB_Type::BOOL, 'increment' => false, 'nullable' => true,
                               'primary' => false, 'default' => null);
-    $cols['registed'] = array('type' => 'TIMESTAMP', 'increment' => false, 'nullable' => true,
+    $cols['registed'] = array('type' => Sabel_DB_Type::DATETIME, 'increment' => false, 'nullable' => true,
                               'primary' => false, 'default' => null);
-    $cols['point']    = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['point']    = array('type' => Sabel_DB_Type::INT, 'max' => 2147483647, 'min' => -2147483648,
                               'increment' => false, 'nullable' => true, 'primary' => false,
                               'default' => null);
     return $cols;
@@ -1046,10 +1045,10 @@ class Schema_Customer
   {
     $cols = array();
 
-    $cols['id']   = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['id']   = array('type' => Sabel_DB_Type::INT, 'max' => 2147483647, 'min' => -2147483648,
                           'increment' => false, 'nullable' => false, 'primary' => true,
                           'default' => null);
-    $cols['name'] = array('type' => 'STRING', 'max' => 24, 'increment' => false,
+    $cols['name'] = array('type' => Sabel_DB_Type::STRING, 'max' => 24, 'increment' => false,
                           'nullable' => true, 'primary' => false, 'default' => null);
 
     return $cols;
@@ -1071,15 +1070,15 @@ class Schema_CustomerOrder
   {
     $cols = array();
 
-    $cols['id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['id'] = array('type' => '_INT', 'max' => 2147483647, 'min' => -2147483648,
                         'increment' => true, 'nullable' => false, 'primary' => true,
                         'default' => null);
-    $cols['customer_id'] = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['customer_id'] = array('type' => '_INT', 'max' => 2147483647, 'min' => -2147483648,
                                  'increment' => false, 'nullable' => true, 'primary' => false,
                                  'default' => null);
-    $cols['buy_date'] = array('type' => 'TIMESTAMP', 'increment' => false, 'nullable' => true,
+    $cols['buy_date'] = array('type' => '_DATETIME', 'increment' => false, 'nullable' => true,
                               'primary' => false, 'default' => null);
-    $cols['amount']   = array('type' => 'INT', 'max' => 2147483647, 'min' => -2147483648,
+    $cols['amount']   = array('type' => '_INT', 'max' => 2147483647, 'min' => -2147483648,
                               'increment' => false, 'nullable' => true, 'primary' => false,
                               'default' => null);
     return $cols;

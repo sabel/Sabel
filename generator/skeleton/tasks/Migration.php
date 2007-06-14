@@ -29,8 +29,10 @@ class Migration extends Sabel_Sakle_Task
       throw new Exception("please specify the environment.");
     }
 
-    $environment    = $this->getEnvironment($arguments[1]);
-    $connectionName = $this->getConnectionName($arguments);
+    $this->arguments = $arguments;
+    $environment     = $this->getEnvironment($arguments[1]);
+    $connectionName  = $this->getConnectionName();
+
     $this->connectionName = $connectionName;
 
     $this->initDbConfig($environment);
@@ -76,13 +78,10 @@ class Migration extends Sabel_Sakle_Task
     }
   }
 
-  protected function showCurrentVersion($arguments)
+  protected function showCurrentVersion()
   {
-    if (!isset($arguments[2])) {
-      throw new Exception("too few arguments.");
-    }
+    $to = $this->arguments[2];
 
-    $to = $arguments[2];
     if ($to === "version" || $to === "-v" || $to === "--version") {
       $this->printMessage("CURRENT VERSION: {$this->currentVersion}"); exit;
     }
@@ -100,8 +99,10 @@ class Migration extends Sabel_Sakle_Task
   protected function getEnvironment($strEnv)
   {
     if (($env = environment($strEnv)) === null) {
-      $msg = "please specify either of 'development' or 'test' or 'production'.";
-      throw new Exception($msg);
+      $msg = "environment '{$strEnv}' is not supported. "
+           . "use 'development' or 'test' or 'production'.";
+
+      $this->printMessage($msg, parent::MSG_ERR); exit;
     } else {
       $this->strEnv = $strEnv;
       return $env;
@@ -137,8 +138,8 @@ class Migration extends Sabel_Sakle_Task
 
   protected function execNextMigration()
   {
-    $connectionName = $this->connectionName;
-    system(SAKLE_CMD . " Migration {$this->strEnv} {$this->migrateTo} $connectionName");
+    $instance = new self();
+    $instance->run($this->arguments);
   }
 
   protected function toVersionNumber($to)
@@ -157,21 +158,22 @@ class Migration extends Sabel_Sakle_Task
         break;
 
       case "rehead":
-        $this->migrateTo = 0;
+        $this->arguments[2] = 0;
         $this->execNextMigration();
-        $this->migrateTo = max(array_keys($this->files));
+        $this->arguments[2] = "head";
         $this->execNextMigration();
         return false;
 
       case "reset":
-        $this->migrateTo = 0;
+        $this->arguments[2] = 0;
         $this->execNextMigration();
-        $this->migrateTo = $this->currentVersion;
+        $this->arguments[2] = $this->currentVersion;
         $this->execNextMigration();
         return false;
 
       default:
-        throw new Exception("version '{$to}' is not supported.");
+        $this->printMessage("version '{$to}' is not supported.", parent::MSG_ERR);
+        exit;
     }
   }
 
@@ -201,9 +203,15 @@ class Migration extends Sabel_Sakle_Task
     return new $className(MIG_DIR . DIR_DIVIDER . $this->files[$verNum], $type);
   }
 
-  protected function getConnectionName($arguments)
+  protected function getConnectionName()
   {
-    return (isset($arguments[3])) ? $arguments[3] : "default";
+    $args = $this->arguments;
+
+    if (!isset($args[2])) {
+      $this->printMessage("too few arguments", parent::MSG_ERR); exit;
+    }
+
+    return (isset($args[3])) ? $args[3] : "default";
   }
 
   protected function createVersionManageTable()
