@@ -24,6 +24,9 @@ class Sabel_DB_Command_Query extends Sabel_DB_Command_Base
       $query = $args[0];
     }
 
-    $executer->setResult($driver->setSql($query)->execute());
+    $result = $driver->setSql($query)->execute();
+    $executer->setResult($result);
+
+    return $result;
   }
 }

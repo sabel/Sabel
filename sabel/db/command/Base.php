@@ -18,8 +18,8 @@ abstract class Sabel_DB_Command_Base
     $result = Sabel_DB_Command_Before::execute($this->command, $executer);
     if ($result !== Sabel_DB_Command_Before::CONTINUOUS) return;
 
-    $this->run($executer);
+    $result = $this->run($executer);
 
-    Sabel_DB_Command_After::execute($this->command, $executer);
+    Sabel_DB_Command_After::execute($this->command, $executer, $result);
   }
 }

@@ -28,7 +28,7 @@ class Sabel_DB_Condition_Manager
     return $this->conditions;
   }
 
-  public function create($arg1, $arg2, $arg3 = null)
+  public function create($arg1, $arg2 = null, $arg3 = null)
   {
     if (empty($arg1)) return;
 

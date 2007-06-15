@@ -11,9 +11,9 @@
  */
 class Sabel_DB_Command_Before
 {
-  const INTERRUPT_IMMEDIATE = -0x01;
-  const INTERRUPT           = 0x00;
-  const CONTINUOUS          = 0x01;
+  const INTERRUPT_IMMEDIATE = "INTERRUPT_IMMEDIATE";
+  const INTERRUPT           = "INTERRUPT";
+  const CONTINUOUS          = "CONTINUOUS";
 
   protected static $before    = array();
   protected static $instances = array();
@@ -27,18 +27,16 @@ class Sabel_DB_Command_Before
                                   "options"  => $options);
   }
 
-  public static function execute($commandId, $commandClass)
+  public static function execute($commandId, $executer)
   {
     $result = self::CONTINUOUS;
     if (empty(self::$before)) return $result;
 
-    $modelName  = $commandClass->getModel()->getModelName();
-    $driverName = get_class($commandClass->getDriver());
+    $modelName  = $executer->getModel()->getModelName();
+    $driverName = get_class($executer->getDriver());
 
     foreach (self::$before as $className => $params) {
-      $commands = $params["commands"];
-      if (!is_array($commands)) $commands = (array)$commands;
-      if (!in_array($commandId, $commands)) continue;
+      if (($commandId & $params["commands"]) === 0) continue;
 
       if (!self::isPass($params["options"], $driverName, $modelName)) continue;
 
@@ -48,17 +46,13 @@ class Sabel_DB_Command_Before
         $ins = self::$instances[$className] = new $className();
       }
 
-      foreach ($commands as $command) {
-        if ($command === $commandId) {
-          $method = $params["method"];
-          $res = $ins->$method($commandClass);
+      $method = $params["method"];
+      $res = $ins->$method($executer);
 
-          if ($res === self::INTERRUPT_IMMEDIATE) {
-            return self::INTERRUPT_IMMEDIATE;
-          } elseif ($res === self::INTERRUPT) {
-            $result = self::INTERRUPT;
-          }
-        }
+      if ($res === self::INTERRUPT_IMMEDIATE) {
+        return self::INTERRUPT_IMMEDIATE;
+      } elseif ($res === self::INTERRUPT) {
+        $result = self::INTERRUPT;
       }
     }
 

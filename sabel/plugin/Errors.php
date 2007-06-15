@@ -16,27 +16,25 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   const ERROR_KEY = "errors";
   const STACK_KEY = "stack";
   
-  private $storage = null;
-  
   public function resetErrors()
   {
-    $storage = $this->storage = Sabel_Context::getStorage();
+    $storage = $this->getSessionStorage();
     $storage->delete(self::ERROR_KEY);
     $storage->delete(self::STACK_KEY);
   }
   
   public function onBeforeAction()
   {
-    $storage = $this->storage = Sabel_Context::getStorage();
+    $storage = $this->getSessionStorage();
     $current = $this->controller->getRequest()->__toString();
     $errors  = $storage->read(self::ERROR_KEY);
     
     if (is_array($errors)) {
-      if ($this->isErrorPage($current, $errors)) {
+      if ($current === $errors["submitUri"]) {
         $this->controller->hasErrors = true;
         $this->controller->errorValues = $errors["values"];
         Sabel_View::assign(self::ERROR_KEY, $errors["messages"]);
-        Sabel_View::assignByArray($errors["values"]);        
+        Sabel_View::assignByArray($errors["values"]);
       } else {
         $storage->delete(self::ERROR_KEY);
       }
@@ -49,34 +47,39 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   {
     if (($messages = $this->controller->errors) === null) return;
     
-    $storage = $this->storage;
+    $storage = $this->getSessionStorage();
     $stack   = $storage->read(self::STACK_KEY);
     $index   = count($stack) - 2;
     $values  = $this->controller->getRequest()->fetchPostValues();
     
-    $storage->write(self::ERROR_KEY, array("submitUrl" => $stack[$index],
+    $storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
                                            "messages"  => $messages,
                                            "values"    => $values));
   }
   
-  private function isErrorPage($url, $errors)
+  private function pushStack($uri)
   {
-    return (isset($errors["submitUrl"]) && $errors["submitUrl"] === $url);
-  }
-  
-  private function pushStack($url)
-  {
-    $storage = $this->storage;
+    $storage = $this->getSessionStorage();
     $stack   = $storage->read(self::STACK_KEY);
     
     if (is_array($stack)) {
-      $stack[] = $url;
+      $stack[] = $uri;
       if (count($stack) > self::MAX_STACK_SIZE) array_shift($stack);
     } else {
-      $stack = array();
-      $stack[] = $url;
+      $stack = array($uri);
     }
     
     $storage->write(self::STACK_KEY, $stack);
+  }
+  
+  private function getSessionStorage()
+  {
+    static $storage = null;
+    
+    if ($storage === null) {
+      return $storage = Sabel_Context::getStorage();
+    } else {
+      return $storage;
+    }
   }
 }

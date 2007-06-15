@@ -34,7 +34,7 @@ class Test_Validate extends SabelTestCase
     $this->assertTrue($validator->hasError());
 
     foreach ($validator->getErrors() as $error) {
-      $this->assertEquals($error, "Should not null. 'id'");
+      $this->assertEquals($error, "please enter a id.");
     }
   }
 
@@ -51,7 +51,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
 
     foreach ($validator->getErrors() as $error) {
-      $this->assertEquals($error, "Wrong Format. 'point'");
+      $this->assertEquals($error, "wrong point format.");
     }
   }
 
@@ -68,7 +68,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
 
     foreach ($validator->getErrors() as $error) {
-      $this->assertEquals($error, "Too large. 'point'");
+      $this->assertEquals($error, "point is too large.");
     }
   }
 
@@ -85,7 +85,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
 
     foreach ($validator->getErrors() as $error) {
-      $this->assertEquals($error, "Too long. 'name'");
+      $this->assertEquals($error, "name is too long.");
     }
   }
 

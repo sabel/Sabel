@@ -13,10 +13,11 @@ class Sabel_DB_Validate_Config
 {
   protected static $datetimeRegex = '/^[12]\d{3}(-|\/)(0?[1-9]|1[0-2])(-|\/)(0?[1-9]|[12]\d|3[01])(T| )((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])( )?((\-|\+)([01][\d]|2[0-3])(:)?(0?[\d]|[1-5][\d])?)?$/';
 
-  protected static $messages = array("length"   => "Too long. '%s'",
-                                     "maximum"  => "Too large. '%s'",
-                                     "nullable" => "Should not null. '%s'",
-                                     "type"     => "Wrong Format. '%s'");
+  protected static $messages = array("length"   => "%s is too long.",
+                                     "maximum"  => "%s is too large.",
+                                     "nullable" => "please enter a %s.",
+                                     "type"     => "wrong %s format.",
+                                     "unique"   => "%s: '%s' is unavailable.");
 
   protected static $localizedName = array();
   protected static $postProcesses = array();

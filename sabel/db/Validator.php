@@ -50,53 +50,68 @@ class Sabel_DB_Validator
     return !empty($this->errors);
   }
 
+  // @todo localized. Beta3
   public function validate($ignores = array())
   {
-    $errors   = array();
-    $messages = $this->messages;
-    $schemas  = $this->model->toSchema();
-    $names    = $this->localizedName;
+    $errors    = array();
+    $messages  = $this->messages;
+    $model     = $this->model;
+    $columns   = $model->toSchema();
+    $localized = $this->localizedName;
 
-    foreach ($schemas as $name => $schema) {
+    foreach ($columns as $name => $column) {
       if (in_array($name, $ignores)) continue;
-      $msgName = (isset($names[$name])) ? $names[$name] : $name;
+      $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
 
-      if (!$this->nullable($name, $schema)) {
+      if (!$this->nullable($column)) {
         $errors[] = sprintf($this->messages["nullable"], $msgName);
         continue;
       }
 
-      if (!$this->type($name, $schema)) {
+      if (!$this->type($column)) {
         $errors[] = sprintf($this->messages["type"], $msgName);
         continue;
       }
 
-      if ($schema->isString()) {
-        if (!$this->length($name, $schema)) {
+      if ($column->isString()) {
+        if (!$this->length($column)) {
           $errors[] = sprintf($this->messages["length"], $msgName);
           continue;
         }
       }
 
-      if ($schema->isNumeric()) {
-        if (!$this->maximum($name, $schema)) {
+      if ($column->isNumeric()) {
+        if (!$this->maximum($column)) {
           $errors[] = sprintf($this->messages["maximum"], $msgName);
           continue;
         }
       }
     }
 
+    if ($uniques = $model->getSchema()->getUniques()) {
+      $cloned = clone $model;
+      foreach ($uniques as $unique) {
+        if (count($unique) !== 1) continue;
+
+        $name  = $unique[0];
+        $value = $columns[$name]->value;
+
+        if ($cloned->getCount($name, $value) > 0) {
+          $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
+          $errors[] = sprintf($this->messages["unique"], $msgName, $value);
+        }
+      }
+    }
+
     $customs = Sabel_DB_Validate_Config::getCustomValidations();
     if (isset($customs[$this->mdlName])) {
-      $this->customValidation($customs[$this->mdlName], $schemas, $errors);
+      $this->customValidation($customs[$this->mdlName], $columns, $errors);
     }
 
     $processes = Sabel_DB_Validate_Config::getPostProcesses();
     if ($processes) $this->postProcess($processes, $errors);
 
-    $this->errors = $errors;
-    // return (empty($errors)) ? null : $errors;
-    return $errors;
+    return $this->errors = $errors;
   }
 
   protected function customValidation($validations, $schemas, &$errors)
@@ -157,45 +172,40 @@ class Sabel_DB_Validator
     }
   }
 
-  protected function nullable($name, $schema)
+  protected function nullable($column)
   {
-    if ($schema->nullable) return true;
-    return isset($schema->value);
+    if ($column->nullable) return true;
+    return isset($column->value);
   }
 
-  protected function type($name, $schema)
+  protected function type($column)
   {
-    $value = $schema->value;
+    $value = $column->value;
     if ($value === null) return true;
 
-    switch ($schema->type) {
-      case Sabel_DB_Type::INT:
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        return is_numeric($value);
-
-      case Sabel_DB_Type::BOOL:
-        return is_bool($value);
-
-      case Sabel_DB_Type::DATETIME:
-        return (preg_match($this->datetimeRegex, $value) === 1);
-
-      case Sabel_DB_Type::TIME:
-      case Sabel_DB_Type::DATE:
-
-      default:
-        return true;
+    if ($column->isNumeric()) {
+      return is_numeric($value);
+    } elseif ($column->isBool()) {
+      return is_bool($value);
+    } elseif ($column->isDatetime()) {
+      return (preg_match($this->datetimeRegex, $value) === 1);
+    } else {
+      return true;
     }
+
+    // @todo
+    // if Sabel_DB_Type::TIME
+    // if Sabel_DB_Type::DATE
   }
 
-  protected function length($name, $schema)
+  protected function length($column)
   {
     $method = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
-    return ($method($schema->value) < $schema->max);
+    return ($method($column->value) < $column->max);
   }
 
-  protected function maximum($name, $schema)
+  protected function maximum($column)
   {
-    return ($schema->value < $schema->max);
+    return ($column->value < $column->max);
   }
 }

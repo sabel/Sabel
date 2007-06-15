@@ -23,17 +23,15 @@ class Sabel_DB_Command_After
                                  "options"  => $options);
   }
 
-  public static function execute($commandId, $commandClass)
+  public static function execute($commandId, $executer, $result)
   {
     if (empty(self::$after)) return;
 
-    $modelName  = $commandClass->getModel()->getModelName();
-    $driverName = get_class($commandClass->getDriver());
+    $modelName  = $executer->getModel()->getModelName();
+    $driverName = get_class($executer->getDriver());
 
     foreach (self::$after as $className => $params) {
-      $commands = $params["commands"];
-      if (!is_array($commands)) $commands = (array)$commands;
-      if (!in_array($commandId, $commands)) continue;
+      if (($commandId & $params["commands"]) === 0) continue;
 
       if (!self::isPass($params["options"], $driverName, $modelName)) continue;
 
@@ -43,12 +41,8 @@ class Sabel_DB_Command_After
         $ins = self::$instances[$className] = new $className();
       }
 
-      foreach ($commands as $command) {
-        if ($command === $commandId) {
-          $method = $params["method"];
-          $ins->$method($commandClass);
-        }
-      }
+      $method = $params["method"];
+      $ins->$method($executer, $result);
     }
   }
 

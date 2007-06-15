@@ -18,7 +18,9 @@ class Sabel_DB_Command_Select extends Sabel_DB_Command_Base
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
     $query  = $driver->getSqlClass($model)->buildSelectSql($driver);
+    $result = $driver->setSql($query)->execute();
 
-    $executer->setResult($driver->setSql($query)->execute());
+    $executer->setResult($result);
+    return $result;
   }
 }

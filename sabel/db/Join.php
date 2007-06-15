@@ -94,7 +94,8 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $rows = $this->execute($model, implode("", $query));
+    $query = implode("", $query);
+    $rows  = $model->getCommand()->join($query)->getResult();
 
     if (!$rows) {
       $this->clear();
@@ -104,23 +105,6 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $this->clear();
       return $results;
     }
-  }
-
-  private function execute($model, $joinQuery)
-  {
-    $command = $model->getCommand();
-    $driver  = $command->getDriver();
-    $conditionManager = $model->loadConditionManager();
-
-    if (!$conditionManager->isEmpty()) {
-      $joinQuery .= " " . $conditionManager->build($driver);
-    }
-
-    if ($constraints = $model->getConstraints()) {
-      $joinQuery = $driver->getConstraintSqlClass()->build($joinQuery, $constraints);
-    }
-
-    return $driver->setSql($joinQuery)->execute();
   }
 
   protected function clear()

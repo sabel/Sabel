@@ -1160,7 +1160,7 @@ class TimeRecorder
 }
 
 Sabel_DB_Command_Before::regist("TimeRecorder",
-                                array(Sabel_DB_Command::UPDATE, Sabel_DB_Command::INSERT),
+                                Sabel_DB_Command::UPDATE|Sabel_DB_Command::INSERT,
                                 array("model" => array("include" => array("Timer"))));
 
 class Sabel_DB_Command_Custom extends Sabel_DB_Command_Base
@@ -1181,8 +1181,9 @@ interface Sabel_DB_Command
   const UPDATE = 0x04;
   const DELETE = 0x08;
   const QUERY  = 0x10;
+  const JOIN   = 0x20;
 
-  const ARRAY_INSERT = 0x20;
+  const ARRAY_INSERT = 0x40;
 
-  const CUSTOM = 0x40;
+  const CUSTOM = 0x80;
 }
