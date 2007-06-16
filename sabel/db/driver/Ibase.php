@@ -19,6 +19,20 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
   protected $execFunction  = "ibase_query";
   protected $closeFunction = "ibase_close";
 
+  public function getConnection()
+  {
+    $connection = $this->loadTransaction()->get($this->getConnectionName());
+
+    if ($connection === null) {
+      $connection = parent::getConnection();
+      $this->autoCommit = true;
+    } else {
+      $this->autoCommit = false;
+    }
+
+    return $connection;
+  }
+
   public function getBeforeMethods()
   {
     return array("insert" => array("setIncrementId"));
@@ -56,15 +70,10 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
 
   public function execute($connection = null)
   {
-    $autoCommit = true;
-
     if ($connection === null) {
-      $connection = $this->loadTransaction()->get($this->getConnectionName());
-      if ($connection === null) {
-        $connection = $this->getConnection();
-      } else {
-        $autoCommit = false;
-      }
+      $connection = $this->getConnection();
+    } else {
+      $this->autoCommit = true;
     }
 
     $result = parent::execute($connection);
@@ -82,7 +91,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
       ibase_free_result($result);
     }
 
-    if ($autoCommit) ibase_commit($connection);
+    if ($this->autoCommit) ibase_commit($connection);
     return $this->result = $rows;
   }
 
@@ -93,17 +102,15 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
       return $command->setIncrementId(null);
     }
 
-    $tblName = $model->getTableName();
-    $genName = "{$tblName}_{$column}_gen";
     $values = $model->getSaveValues();
 
     if (isset($values[$column])) {
       $command->setIncrementId(null);
     } else {
-      $id = Sabel_DB_Driver_Sequence::getIbaseGenId($this, $genName);
-      $values[$column] = $id;
+      $genName = $model->getTableName() . "_{$column}_gen";
+      $values[$column] = ibase_gen_id($genName, 1, $this->getConnection());
       $model->setSaveValues($values);
-      $command->setIncrementId($id);
+      $command->setIncrementId($values[$column]);
     }
   }
 }

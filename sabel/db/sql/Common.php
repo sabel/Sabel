@@ -17,6 +17,8 @@ class Sabel_DB_Sql_Common extends Sabel_DB_Sql_Base
     $tblName = $model->getTableName();
     $values  = $model->getSaveValues();
 
+    $this->emptyCheck($values, "insert");
+
     if (isset($values[0])) {
       $sqls = array();
       $cols = array_keys($values[0]);
@@ -49,6 +51,8 @@ class Sabel_DB_Sql_Common extends Sabel_DB_Sql_Base
     $model   = $this->model;
     $tblName = $model->getTableName();
     $values  = $driver->escape($model->getSaveValues());
+
+    $this->emptyCheck($values, "update");
 
     foreach ($values as $column => $value) {
       if ($value === null) {

@@ -51,14 +51,10 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Base
     return $this->result = $rows;
   }
 
-  public function getIncrementId($command = null)
+  public function getIncrementId($command)
   {
-    $id = Sabel_DB_Driver_Sequence::getId("mssql", $command);
-
-    if ($command === null) {
-      return $id;
-    } else {
-      $command->setIncrementId($id);
+    if ($command->getModel()->getIncrementColumn()) {
+      $command->setIncrementId($this->getSequenceId("SELECT SCOPE_IDENTITY() AS id"));
     }
   }
 }

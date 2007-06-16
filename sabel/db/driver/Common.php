@@ -97,22 +97,14 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
     unset($this->connection);
   }
 
-  protected function getSequence()
+  protected function getSequenceId($sql)
   {
-    return Sabel_DB_Driver_Sequence::getId($this->driverId, $this);
+    $rows = $this->setSql($sql)->execute();
+    return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
   }
 
   protected function error($error)
   {
-    $message = array();
-    $name    = $this->connectionName;
-    $params  = Sabel_DB_Config::get($name);
-
-    $message["ERROR_MESSAGE"]   = $error;
-    $message["EXECUTE_QUERY"]   = $this->sql;
-    $message["CONNECTION_NAME"] = $name;
-    $message["PARAMETERS"]      = $params;
-
-    throw new Sabel_DB_Exception(print_r($message, true));
+    Sabel_DB_Exception_Driver::execError($this->sql, $error, $this->connectionName);
   }
 }

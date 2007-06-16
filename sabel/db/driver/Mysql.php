@@ -54,6 +54,8 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Common
 
   public function getIncrementId($command)
   {
-    $command->setIncrementId($this->getSequence());
+    if ($command->getModel()->getIncrementColumn()) {
+      $command->setIncrementId($this->getSequenceId("SELECT last_insert_id() AS id"));
+    }
   }
 }

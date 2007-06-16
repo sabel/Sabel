@@ -66,7 +66,7 @@ class Sabel_DB_Config
     if (isset($config["driver"])) {
       return $config["driver"];
     } else {
-      throw new Exception("driver name is not found.");
+      Sabel_DB_Exception_Config::paramNotFound("getDriverName", "driver");
     }
   }
 
@@ -77,14 +77,14 @@ class Sabel_DB_Config
 
     $config = self::getConfig($connectionName);
 
-    if (in_array($drvName, array("mysql", "pdo-mysql", "mssql"))) {
+    if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"))) {
       return $config["database"];
     } elseif (isset($config["schema"])) {
       return $config["schema"];
     } elseif (($drvName === "pgsql" || $drvName === "pdo-pgsql") && !isset($config["schema"])) {
       return "public";
     } else {
-      throw new Exception("schema name is not found.");
+      Sabel_DB_Exception_Config::paramNotFound("getSchemaName", "schema");
     }
   }
 
@@ -93,7 +93,7 @@ class Sabel_DB_Config
     if (isset(self::$configs[$connectionName])) {
       return self::$configs[$connectionName];
     } else {
-      throw new Exception("connection name '{$connectionName}' is not found.");
+      Sabel_DB_Exception_Config::notFound($connectionName);
     }
   }
 }

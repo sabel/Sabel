@@ -51,6 +51,17 @@ abstract class Sabel_DB_Sql_Base
     return $manager->build($driver);
   }
 
+  protected function emptyCheck($values, $method)
+  {
+    if (empty($values)) {
+      $message = "empty $method values.";
+      $method  = "build" . ucfirst($method) . "Sql";
+      Sabel_DB_Exception_Sql::error($method, $message);
+    } else {
+      return true;
+    }
+  }
+
   abstract public function buildInsertSql($driver);
   abstract public function buildUpdateSql($driver);
 }

@@ -59,7 +59,7 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Common
     }
 
     if ($model->getIncrementColumn()) {
-      $command->setIncrementId($this->getSequence());
+      $command->setIncrementId($this->getSequenceId("SELECT LASTVAL() AS id"));
     } else {
       $command->setIncrementId(null);
     }

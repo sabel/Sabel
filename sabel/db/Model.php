@@ -3,13 +3,14 @@
 /**
  * Sabel_DB_Model
  *
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Model
+abstract class Sabel_DB_Model
 {
   protected
     $connectionName = "default";
@@ -102,8 +103,8 @@ class Sabel_DB_Model
       $this->updateValues[$key] = $val;
     }
   }
-  
-  public function setValues($values) 
+
+  public function setValues($values)
   {
     foreach ($values as $key => $val) {
       $this->$key = $val;
@@ -164,11 +165,11 @@ class Sabel_DB_Model
 
   public function setSaveValues($values)
   {
-    if (!is_array($values)) {
-      throw new Exception("argument must be an array");
+    if (is_array($values)) {
+      return $this->saveValues = $values;
+    } else {
+      Sabel_DB_Exception_Model::isNotArray("setSaveValues", $values);
     }
-
-    return $this->saveValues = $values;
   }
 
   public function getSaveValues()
@@ -188,11 +189,11 @@ class Sabel_DB_Model
 
   public function setParents($parents)
   {
-    if (!is_array($parents)) {
-      throw new Exception("argument should be an array.");
+    if (is_array($parents)) {
+      $this->parents = $parents;
+    } else {
+      Sabel_DB_Exception_Model::isNotArray("setParents", $parents);
     }
-
-    $this->parents = $parents;
   }
 
   public function getParents()
@@ -351,7 +352,7 @@ class Sabel_DB_Model
   public function selectOne($arg1 = null, $arg2 = null, $arg3 = null)
   {
     if ($arg1 === null && $this->conditionManager === null) {
-      throw new Exception("must set the condition");
+      Sabel_DB_Exception_Model::error("selectOne", "must set the condition.");
     }
 
     $this->setCondition($arg1, $arg2, $arg3);
@@ -456,10 +457,16 @@ class Sabel_DB_Model
     $this->selected = true;
   }
 
+  public function validate($ignores = array("id"))
+  {
+    $validator = new Sabel_DB_Validator($this);
+    return $validator->validate($ignores);
+  }
+
   public function save($data = null)
   {
     if (isset($data) && !is_array($data)) {
-      throw new Exception("argument must be an array.");
+      Sabel_DB_Exception_Model::isNotArray("save", $data);
     }
 
     if ($this->isSelected()) {
@@ -475,7 +482,7 @@ class Sabel_DB_Model
     $command = $this->getCommand();
 
     try {
-      $result = $command->$saveMethod()->getResult();
+      $command->$saveMethod()->getResult();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
     }
@@ -497,17 +504,34 @@ class Sabel_DB_Model
     return $newModel;
   }
 
-  public function arrayInsert($data)
+  public function insert($data)
   {
-    if (!is_array($data)) {
-      throw new Exception("arrayInsert() argument is not array.");
+    if (is_array($data)) {
+      $this->saveValues = $data;
+    } else {
+      Sabel_DB_Exception_Model::isNotArray("insert", $data);
     }
 
-    $command = $this->getCommand();
-    $this->saveValues = $data;
+    try {
+      $command = $this->getCommand();
+      $command->insert()->getResult();
+      return $command->getIncrementId();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
+  }
+
+  public function arrayInsert($data)
+  {
+    if (is_array($data)) {
+      $this->saveValues = $data;
+    } else {
+      Sabel_DB_Exception_Model::isNotArray("arrayInsert", $data);
+    }
 
     try {
       Sabel_DB_Transaction::begin($this);
+      $command = $this->getCommand();
       $command->arrayInsert();
       Sabel_DB_Transaction::commit();
     } catch (Exception $e) {
@@ -521,10 +545,10 @@ class Sabel_DB_Model
 
     if ($arg1 === null) {
       if ($manager->isEmpty() && !$this->isSelected()) {
-        throw new Exception("All Delete? must be set condition.");
+        Sabel_DB_Exception_Model::error("remove", "delete all? must set the condition.");
       }
     } elseif ($this->structure === "view") {
-      throw new Exception("delete command cannot execute to view.");
+      Sabel_DB_Exception_Model::error("remove", "delete command cannot execute to view.");
     }
 
     if ($this->isSelected()) {
@@ -546,12 +570,11 @@ class Sabel_DB_Model
   public function executeQuery($sql, $inputs = null)
   {
     if (isset($inputs) && !is_array($inputs)) {
-      throw new Exception("second argument must be an array.");
+      Sabel_DB_Exception_Model::isNotArray("executeQuery", $inputs, "second");
     }
 
-    $command = $this->getCommand();
-
     try {
+      $command = $this->getCommand();
       $rows = $command->query($sql, $inputs)->getResult();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
@@ -599,11 +622,5 @@ class Sabel_DB_Model
   public function sconst($arg1, $arg2 = null)
   {
     $this->setConstraint($arg1, $arg2);
-  }
-
-  public function validate($ignores = array("id"))
-  {
-    $validator = new Sabel_DB_Validator($this);
-    return $validator->validate($ignores);
   }
 }

@@ -94,7 +94,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return escapeString($this->database, $values);
   }
 
-  public function getIncrementId($command = null)
+  public function getIncrementId($command)
   {
     if ($this->database === "pgsql") {
       $model = $command->getModel();
@@ -187,20 +187,16 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 
   protected function error($error, $sql, $pdoBind = null)
   {
-    $message = array();
-    $name    = $this->connectionName;
-    $params  = Sabel_DB_Config::get($name);
-
-    $message["ERROR_MESSAGE"] = $error;
-    $message["EXECUTE_QUERY"] = $sql;
-
     if ($pdoBind) {
-      $message["PDO_BIND_VALUES"] = $pdoBind;
+      $extra = array("PDO_BIND_VALUES" => $pdoBind);
+    } else {
+      $extra = null;
     }
 
-    $message["CONNECTION_NAME"] = $name;
-    $message["PARAMETERS"]      = $params;
-
-    throw new Sabel_DB_Exception(print_r($message, true));
+    Sabel_DB_Exception_Driver::execError($sql,
+                                         $error,
+                                         $this->connectionName,
+                                         $extra);
   }
 }
+
