@@ -1,0 +1,76 @@
+多くのコンテンツデータを扱うようなシステムでは、データベースを複数使用(分割)するかもしれません。
+そのような場合、Sabel_DBではそれぞれにコネクションネームを付けることで対応します。
+
+簡単なデータベース分割の例を示してみます。
+データベースは以下の3つとし、何らかの理由でユーザDBはPostgreSQLになったとします。
+
+  ユーザ(PostgreSQL) - 会員データ、プロフィールデータなど
+  ブログ(MySQL) - ブログ・記事データ、それに付随するコメントのデータなど
+  メール(MySQL) - メール(メッセージ)データなど
+
+config/connection.phpに以下のようにパラメータを記述します。
+
+$params = array("users" => array(
+                  "driver"   => "pgsql",
+                  "host"     => "192.168.0.50",
+                  "database" => "project_users",
+                  "user"     => "web_pg_user",
+                  "password" => "web_pg_pass"),
+                "blog" => array(
+                  "driver"   => "mysql",
+                  "host"     => "192.168.0.51",
+                  "database" => "project_blog",
+                  "user"     => "web_my_user",
+                  "password" => "web_my_pass"),
+                "mail" => array(
+                  "driver"   => "mysql",
+                  "host"     => "192.168.0.52",
+                  "database" => "project_mail",
+                  "user"     => "web_my_user",
+                  "password" => "web_my_pass")
+               );
+
+Model(抽象化レイヤ)を使用する場合はモデルクラスを作成し、コネクションネームを宣言します。
+モデルのサンプルをいくつか示してみます。
+
+class Users extends Sabel_DB_Model
+{
+  protected $connectionName = "users";
+}
+
+class Friends extends Sabel_DB_Model
+{
+  protected $connectionName = "users";
+}
+
+class Blog extends Sabel_DB_Model
+{
+  protected $connectionName = "blog";
+}
+
+class Article extends Sabel_DB_Model
+{
+  protected $connectionName = "blog";
+}
+
+class Mail extends Sabel_DB_Model
+{
+  protected $connectionName = "mail";
+}
+
+このようにモデルを作成し、以下のコードを実行すると会員やメールをデータベースを気にすることなく取得できます。
+
+$allUsers = MODEL("Users")->select();
+$allMails = MODEL("Mail")->select();
+
+モデルを作成していなかったり、コネクションネームを宣言していない場合は次のようにします。
+
+$userModel = MODEL("Users");
+$userModel->setConnectionName("users");
+$allUsers = $userModel->select();
+
+しかしこのコードは現実的ではありません。毎回setConnectionName()をコールしなければならないからです。
+そういう意味で、モデルクラスを作成しコネクションネームを宣言しておくことを推奨します。
+
+しかしながら、setConnectionName()でコネクションネームを切り替えられるというのは、ある場面においては有用なことです。
+

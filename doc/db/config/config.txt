@@ -1,0 +1,67 @@
+sabelコマンドでアプリケーションの雛型を作成すると、configディレクトリの下にconnnection.phpというファイルがあります。
+最初はPRODUCTION, TEST, DEVELOPMENTという3つの環境に同じDB接続パラメータが設定されています。
+
+
+初期パラメータは以下のように設定されています。
+
+$params = array("default" => array(
+                  "driver"   => "mysql",
+                  "host"     => "localhost",
+                  "database" => "default",
+                  "user"     => "root",
+                  "password" => "")
+               );
+
+この配列のキーがコネクションネームとなります。
+設定できるパラメータには以下ものがあります。
+
+[driver]
+使用するドライバ名を指定します。
+Sabel_DBが標準で実装しているドライバは以下のものになります。
+
+  mysql - PHP MySQL関数群
+  pdo-mysql - PDO_MYSQL
+  pgsql - PHP PostgreSQL関数群
+  pdo-pgsql - PDO_PGSQL
+  pdo-sqlite - PDO_SQLite
+  ibase - Firebird/InterBase関数群
+  mssql - Microsoft SQL Server関数群
+
+※ PDOを使用する場合はPDOエクステンションが必要です。
+
+[host]
+接続するDBサーバのホスト名、またはIPアドレスを指定します。
+
+[database]
+接続(使用)するデータベース名を指定します。
+
+[user]
+DBサーバへの接続ユーザ名を指定します。
+
+[password]
+上で指定したユーザのパスワードを指定します。
+
+[port]
+DBサーバのポート番号を指定します。
+DB側で明示的にポートを変更した場合はこれを設定する必要があるでしょう。
+
+[schema]
+接続(使用)するスキーマ名を指定します。
+"CREATE SCHEMA"のような構文が利用できるDBサーバで、明示的にスキーマを作成した場合はこれを設定する必要があるでしょう。
+
+[encoding]
+クライアントのエンコーディングを指定します。
+"utf8"のような文字列を指定しますが、使用するDBサーバが解釈できるエンコーディング名である必要があります。
+
+※ Sabel_DBでは、HTMLの文字コード・内部(PHP)エンコーディング・DBサーバの文字コード、全てUTF-8を推奨しています。
+
+使用するDBサーバに合わせパラメータを設定したら、Sabel_DBがこれを使用するように登録する必要があります。
+それを実現するには、アプリケーションに以下の一行を追加することです。
+
+Sabel_DB_Config::initialize();
+
+Sabelでは、初期化時に読み込むconfig/environment.phpでこれを行っています。
+なので実際にこの一行をどこかに書く必要はありません。
+
+※ initialize()をコールした段階ではDBサーバとのコネクションは確立されません。
+
