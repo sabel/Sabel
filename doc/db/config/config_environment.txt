@@ -21,8 +21,8 @@ $params = array("default" => array(
                   "password" => "web_pass")
                );
 
-subversionなどでconfig/connection.phpもconfig/environment.phpも除外されていれば、環境の違いはほとんど気にする必要はありません。
-config/connection.phpを編集する必要もありません。
+パラメータは環境ごとに設定できます。
+DBサーバに変更がない限り、一回設定してしまえば編集する必要はありません。
 
 前ページでは複数のデータベースを扱うように、config/connection.phpを編集しました。
 その設定をもう一度ここに書きます。そして、これをPRODUCTION環境でのパラメータだとします。
