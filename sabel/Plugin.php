@@ -80,10 +80,18 @@ final class Sabel_Plugin
     
     $ref = new ReflectionClass($pluginName);
     
+    $notPluginMethods = array("setController",
+                              "setDestination",
+                              "__construct",
+                              "__destruct");
+    
     foreach ($ref->getMethods() as $method) {
       $name = $method->getName();
-      if ($name !== "setController" && $name !== "setDestination") {
-        $this->registration($name, $pluginName);
+      
+      if ($method->isPublic()) {
+        if (!in_array($name, $notPluginMethods)) {
+          $this->registration($name, $pluginName);
+        }
       }
     }
     

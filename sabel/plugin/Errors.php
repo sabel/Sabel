@@ -16,6 +16,8 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   const ERROR_KEY = "errors";
   const STACK_KEY = "stack";
   
+  private $ignoreUrls = array();
+  
   public function resetErrors()
   {
     $storage = $this->getSessionStorage();
@@ -29,6 +31,11 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
     $current = $this->controller->getRequest()->__toString();
     $errors  = $storage->read(self::ERROR_KEY);
     
+    $ignores = array();
+    $ignores[] = (!in_array($current, $this->ignoreUrls));
+    $ignores[] = (!$this->controller->getRequest()->isTypeOf("css"));
+    $ignores[] = (!$this->controller->getRequest()->isTypeOf("js"));
+    
     if (is_array($errors)) {
       if ($current === $errors["submitUri"]) {
         $this->controller->hasErrors = true;
@@ -36,11 +43,15 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
         Sabel_View::assign(self::ERROR_KEY, $errors["messages"]);
         Sabel_View::assignByArray($errors["values"]);
       } else {
-        $storage->delete(self::ERROR_KEY);
+        if (!in_array(false, $ignores)) {
+          $storage->delete(self::ERROR_KEY);
+        }
       }
     }
     
-    $this->pushStack($current);
+    if (!in_array(false, $ignores)) {
+      $this->pushStack($current);
+    }
   }
   
   public function onRedirect()

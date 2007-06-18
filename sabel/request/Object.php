@@ -293,6 +293,11 @@ class Sabel_Request_Object
     return $this->uri;
   }
   
+  public function isTypeOf($type)
+  {
+    return ($this->uri->getType() === $type);
+  }
+  
   public function setCandidate($candidate)
   {
     $this->candidate = $candidate;

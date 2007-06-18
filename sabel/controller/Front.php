@@ -66,8 +66,9 @@ final class Sabel_Controller_Front
     
     $response = $executer->execute($this->request, $storage);
     
+    $response->outputHeader();
+    
     if ($response->isNotFound() || $response->isServerError()) {
-      $response->outputHeader();
       if ($response->isNotFound()) {
         $destination->setAction(self::NOT_FOUND_ACTION);
       } elseif ($response->isServerError()) {

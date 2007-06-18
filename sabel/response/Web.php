@@ -23,6 +23,12 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   
   private $controller  = null;
   private $destination = null;
+  private $contentType = "";
+  
+  public function setContentType($type)
+  {
+    $this->contentType = $type;
+  }
   
   public function setController($controller)
   {
@@ -62,6 +68,10 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       header("HTTP/1.0 500 Internal Server Error");
     } elseif ($this->isRedirected()) {
       header("Location: " . $this->location);
+    }
+    
+    if ($this->contentType !== "") {
+      header("Content-Type: " . $this->contentType);
     }
   }
   
