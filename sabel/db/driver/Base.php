@@ -76,6 +76,11 @@ abstract class Sabel_DB_Driver_Base
   {
     return Sabel_DB_Transaction_Common::getInstance();
   }
+
+  protected function error($error)
+  {
+    Sabel_DB_Exception_Driver::execError($this->sql, $error, $this->connectionName);
+  }
 }
 
 function escapeString($db, $values, $escMethod = null)
@@ -86,6 +91,7 @@ function escapeString($db, $values, $escMethod = null)
     if (is_bool($val)) {
       switch ($db) {
         case "mysql":
+        case "oci":
         case "ibase":
           $val = ($val) ? 1 : 0;
           break;

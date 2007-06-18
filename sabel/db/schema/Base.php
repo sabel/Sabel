@@ -57,6 +57,7 @@ abstract class Sabel_DB_Schema_Base
 
     switch ($co->type) {
       case Sabel_DB_Type::INT:
+      case Sabel_DB_Type::SMALLINT:
         $co->default = (int)$default;
         break;
 

@@ -18,7 +18,7 @@ class Sabel_DB_Transaction_Base
 
   private function __construct() {}
 
-  public static function registTransaction($instance)
+  public static function registInstance($instance)
   {
     self::$instances[] = $instance;
   }

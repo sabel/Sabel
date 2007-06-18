@@ -54,13 +54,15 @@ class Sabel_DB_Command_Executer
   {
     $this->arguments = $args;
 
-    $skip = $this->execRegisteredMethods("before", $command);
+    $commander = Sabel_DB_Command_Loader::getClass($command);
+    $commandId = $commander->getCommandId();
+
+    $skip = $this->execRegisteredMethods("before", $commandId);
     if ($skip) return $this;
 
-    $commander = Sabel_DB_Command_Loader::getClass($command);
     $commander->execute($this);
 
-    $this->execRegisteredMethods("after", $command);
+    $this->execRegisteredMethods("after", $commandId);
 
     return $this;
   }
@@ -85,7 +87,7 @@ class Sabel_DB_Command_Executer
     $this->incrementId = $id;
   }
 
-  protected function execRegisteredMethods($type, $command)
+  protected function execRegisteredMethods($type, $commandId)
   {
     if ($type === "before") {
       $methods = $this->beforeMethods;
@@ -93,22 +95,22 @@ class Sabel_DB_Command_Executer
       $methods = $this->afterMethods;
     }
 
-    if (isset($methods[$command])) {
-      return $this->doMethods($methods[$command]);
+    if (isset($methods["all"])) {
+      $method = $methods["all"];
+      $this->driver->$method($this);
     }
 
-    if (isset($methods["all"])) {
-      return $this->doMethods($methods["all"]);
+    if (isset($methods[$commandId])) {
+      return $this->doMethod($methods[$commandId]);
     }
   }
 
-  protected function doMethods($methods)
+  protected function doMethod($method)
   {
     $skip = false;
-    foreach ($methods as $method) {
-      $result = $this->driver->$method($this);
-      if ($result === self::SKIP) $skip = true;
-    }
+
+    $result = $this->driver->$method($this);
+    if ($result === self::SKIP) $skip = true;
 
     return $skip;
   }

@@ -35,7 +35,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
 
   public function getBeforeMethods()
   {
-    return array("insert" => array("setIncrementId"));
+    return array(Sabel_DB_Command::INSERT => "setIncrementId");
   }
 
   public function loadTransaction()
@@ -104,6 +104,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
 
     $values = $model->getSaveValues();
 
+    // @todo erase
     if (isset($values[$column])) {
       $command->setIncrementId(null);
     } else {
@@ -123,3 +124,4 @@ function ibase_escape_string($val)
     return str_replace("'", "''", $val);
   }
 }
+

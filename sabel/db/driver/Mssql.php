@@ -20,12 +20,12 @@ class Sabel_DB_Driver_Mssql extends Sabel_DB_Driver_Base
 
   public function getAfterMethods()
   {
-    return array("insert" => array("getIncrementId"));
+    return array(Sabel_DB_Command::INSERT => "getIncrementId");
   }
 
   public function escape($values)
   {
-    return escapeString("mssql", $values, "mssql_escape_string");
+    return escapeString($this->driverId, $values, "mssql_escape_string");
   }
 
   public function getConstraintSqlClass($classType = null)

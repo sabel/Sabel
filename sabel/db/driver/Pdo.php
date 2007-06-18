@@ -37,7 +37,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 
   public function getAfterMethods()
   {
-    return array("insert" => array("getIncrementId"));
+    return array(Sabel_DB_Command::INSERT => "getIncrementId");
   }
 
   public function getSqlClass($model)

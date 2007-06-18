@@ -13,6 +13,11 @@ abstract class Sabel_DB_Command_Base
 {
   protected abstract function run($command);
 
+  public function getCommandId()
+  {
+    return $this->command;
+  }
+
   public function execute($executer)
   {
     $result = Sabel_DB_Command_Before::execute($this->command, $executer);

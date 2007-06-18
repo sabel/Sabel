@@ -102,9 +102,4 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
     $rows = $this->setSql($sql)->execute();
     return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
   }
-
-  protected function error($error)
-  {
-    Sabel_DB_Exception_Driver::execError($this->sql, $error, $this->connectionName);
-  }
 }

@@ -18,13 +18,13 @@ class Sabel_DB_Connection
   public static function get($connectionName)
   {
     if (!isset(self::$connections[$connectionName])) {
-      self::createDatabaseLink($connectionName);
+      self::connect($connectionName);
     }
 
     return self::$connections[$connectionName];
   }
 
-  protected static function createDatabaseLink($connectionName)
+  protected static function connect($connectionName)
   {
     $error   = "";
     $params  = Sabel_DB_Config::get($connectionName);
@@ -47,6 +47,10 @@ class Sabel_DB_Connection
 
         case "ibase":
           list ($conn, $error) = self::ibaseConnect($params);
+          break;
+
+        case "oci":
+          list ($conn, $error) = self::ociConnect($params);
           break;
 
         case "mssql":
@@ -142,6 +146,21 @@ class Sabel_DB_Connection
     }
   }
 
+  private static function ociConnect($params)
+  {
+    $database = "//" . $params["host"] . "/" . $params["database"];
+    $encoding = (isset($params["encoding"])) ? $params["encoding"] : null;
+
+    $conn = oci_connect($params["user"], $params["password"], $database, $encoding);
+
+    if ($conn) {
+      return array($conn, "");
+    } else {
+      $e = oci_error();
+      return array($conn, $e["message"]);
+    }
+  }
+
   private static function mssqlConnect($params)
   {
     $host = $params["host"];
@@ -180,10 +199,12 @@ class Sabel_DB_Connection
 
   private static function error($connectionName, $message, $params)
   {
-    $message = array("ERROR_MESSAGE"   => $message,
-                     "CONNECTION_NAME" => $connectionName,
-                     "PARAMETERS"      => $params);
+    $extra = array("CONNECTION_NAME" => $connectionName,
+                   "PARAMETERS"      => $params);
 
-    throw new Sabel_DB_Exception(print_r($message, true));
+    Sabel_DB_Exception::displayError("connect",
+                                     $message,
+                                     "sabel.db.connection",
+                                     $extra);
   }
 }

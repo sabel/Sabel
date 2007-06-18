@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Transaction_Ibase
+ * Sabel_DB_Transaction_Oci
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Transaction_Ibase extends Sabel_DB_Transaction_Base
+class Sabel_DB_Transaction_Oci extends Sabel_DB_Transaction_Base
 {
   private static $ins = null;
 
@@ -37,12 +37,12 @@ class Sabel_DB_Transaction_Ibase extends Sabel_DB_Transaction_Base
 
   public function commit()
   {
-    $this->executeMethod("ibase_commit");
+    $this->executeMethod("oci_commit");
   }
 
   public function rollback()
   {
-    $this->executeMethod("ibase_rollback");
+    $this->executeMethod("oci_rollback");
   }
 
   private function executeMethod($method)

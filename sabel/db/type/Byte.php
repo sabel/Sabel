@@ -25,6 +25,7 @@ class Sabel_DB_Type_Byte implements Sabel_DB_Type_Interface
 
   public function send($co, $type)
   {
+    $type  = strtolower($type);
     $types = array("blob", "bytea", "longblob", "mediumblob");
 
     if (in_array($type, $types)) {

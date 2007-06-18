@@ -17,7 +17,7 @@ class Sabel_DB_Transaction_Common extends Sabel_DB_Transaction_Base
   {
     if (self::$ins === null) {
       self::$ins = new self();
-      parent::registTransaction(self::$ins);
+      parent::registInstance(self::$ins);
     }
 
     return self::$ins;

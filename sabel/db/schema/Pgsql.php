@@ -42,7 +42,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
         $default = $matches[1];
       }
 
-      $default = str_replace("''", "'", $default);
       $this->setDefaultValue($co, $default);
     }
   }

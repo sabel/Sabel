@@ -163,7 +163,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
       $default = substr($default, 8);
     }
 
-    if (!$this->isBool($co, $type, $row)) {
+    if (!$this->isBoolean($co, $type, $row)) {
       if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
     }
@@ -182,7 +182,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     return ($row['rdb$field_type'] === 261 && $row['rdb$field_sub_type'] === 1);
   }
 
-  protected function isBool($co, $type, $row)
+  protected function isBoolean($co, $type, $row)
   {
     if ($type === "char" && $row['rdb$character_length'] === 1) {
       $co->type = Sabel_DB_Type::BOOL;

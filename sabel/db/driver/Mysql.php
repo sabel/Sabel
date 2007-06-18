@@ -22,7 +22,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Common
 
   public function getAfterMethods()
   {
-    return array("insert" => array("getIncrementId"));
+    return array(Sabel_DB_Command::INSERT => "getIncrementId");
   }
 
   public function escape($values)
@@ -31,7 +31,7 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Common
       $this->connection = Sabel_DB_Connection::get($this->connectionName);
     }
 
-    return escapeString("mysql", $values, "mysql_real_escape_string");
+    return escapeString($this->driverId, $values, "mysql_real_escape_string");
   }
 
   public function execute($connection = null)

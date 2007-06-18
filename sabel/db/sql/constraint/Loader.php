@@ -12,8 +12,9 @@
 class Sabel_DB_Sql_Constraint_Loader
 {
   const COMMON = "Common";
-  const IBASE  = "Ibase";
+  const OCI    = "Oci";
   const MSSQL  = "Mssql";
+  const IBASE  = "Ibase";
 
   protected static $classes = array();
 
