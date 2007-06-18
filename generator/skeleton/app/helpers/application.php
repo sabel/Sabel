@@ -24,3 +24,25 @@ function uri($param)
   }
   return $ignored . $aCreator->uri($param);
 }
+
+function linkto($file)
+{
+  $ignored = "";
+  if (defined("URI_IGNORE")) {
+    $ignored = dirname($_SERVER["SCRIPT_NAME"]);
+  }
+  return $ignored . "/" . $file;
+}
+
+function css($file)
+{
+  $ignored = "";
+  if (defined("URI_IGNORE")) {
+    $ignored = dirname($_SERVER["SCRIPT_NAME"]);
+    $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
+    return sprintf($fmt, $ignored . "/css/" . $file . ".css");;
+  } else {
+    $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
+    return sprintf($fmt, "/css/{$file}.css");
+  }
+}

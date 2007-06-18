@@ -49,6 +49,13 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     $template = str_replace('<?=', '<? echo', $template);
     $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
     
+    if (defined("URI_IGNORE")) {
+      $images = "jpg|gif|bmp|tiff|png|swf|jpeg|css|js";
+      $quote = '"|\'';
+      $pat = "@(({$quote})/[\w-_/.]*([.]({$images}))?({$quote}))@";
+      $template = preg_replace($pat, '<?= linkto($1) ?>', $template);
+    }
+    
     if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
       $template = $this->trimContents($template);
     }
