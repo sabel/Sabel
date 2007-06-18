@@ -28,7 +28,7 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
   public function onBeforeAction()
   {
     $storage = $this->getSessionStorage();
-    $current = $this->controller->getRequest()->__toString();
+    $current = $this->controller->getRequest()->getUri()->__toString();
     $errors  = $storage->read(self::ERROR_KEY);
     
     $ignores = array();
@@ -48,7 +48,7 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
         }
       }
     }
-    
+    Sabel_Context::log("current: " . $current);
     if (!in_array(false, $ignores)) {
       $this->pushStack($current);
     }
