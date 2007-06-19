@@ -28,9 +28,9 @@ class Sabel_DB_Driver_Pgsql extends Sabel_DB_Driver_Common
     return escapeString($this->driverId, $values, "pg_escape_string");
   }
 
-  public function execute($connection = null)
+  public function execute()
   {
-    $result = parent::execute($connection);
+    $result = parent::execute();
 
     if (!$result) {
       $error = pg_result_error($result);

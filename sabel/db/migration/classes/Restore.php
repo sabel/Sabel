@@ -45,14 +45,13 @@ class Sabel_DB_Migration_Classes_Restore
 
     if ($fkeys) {
       foreach ($fkeys as $colName => $param) {
-        $line = '$create->fkey("' . $colName . '", "'
-              . $param["referenced_table"]
-              . "({$param["referenced_column"]})"
-              . " ON DELETE " . $param["on_delete"]
-              . " ON UPDATE " . $param["on_update"];
+        $line = '$create->fkey("' . $colName . '")->table("'
+              . $param["referenced_table"] . '")->column("'
+              . $param["referenced_column"] . '")->onDelete("'
+              . $param["on_delete"] . '")->onUpdate("'
+              . $param["on_update"] . '");';
 
-        fwrite($fp, $line . '");');
-        fwrite($fp, "\n");
+        fwrite($fp, $line . "\n");
       }
     }
   }

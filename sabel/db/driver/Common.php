@@ -11,9 +11,8 @@
  */
 class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
 {
-  public function execute($conn = null)
+  public function execute()
   {
-    $sql = $this->sql;
 
     // @todo
     //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
@@ -21,10 +20,8 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
       var_dump($sql);
     }
 
-    if ($conn === null) {
-      $conn = $this->getConnection();
-    }
-
+    $sql  = $this->sql;
+    $conn = $this->getConnection();
     $func = $this->execFunction;
 
     switch ($this->driverId) {
@@ -81,12 +78,14 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
 
   public function commit($connection)
   {
-    $this->setSql($this->commitCommand)->execute($connection);
+    $this->connection = $connection;
+    $this->setSql($this->commitCommand)->execute();
   }
 
   public function rollback($connection)
   {
-    $this->setSql($this->rollbackCommand)->execute($connection);
+    $this->connection = $connection;
+    $this->setSql($this->rollbackCommand)->execute();
   }
 
   public function close($connection)

@@ -70,9 +70,10 @@ class Sabel_DB_Migration_Classes_Create
     }
   }
 
-  public function fkey($colName, $param)
+  public function fkey($colName)
   {
-    $this->fkeys[$colName] = $param;
+    $fKey = new Sabel_DB_Migration_Classes_ForeignKey($colName);
+    return $this->fkeys[$colName] = $fKey;
   }
 
   public function options($key, $val)

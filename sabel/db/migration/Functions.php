@@ -16,17 +16,6 @@ define("_DATE",     Sabel_DB_Type::DATE);
 define("_TIME",     Sabel_DB_Type::TIME);
 define("_NULL",     "SDB_NULL_VALUE");
 
-function executeQuery($query)
-{
-  Sabel_DB_Migration_Manager::getDriver()->setSql($query)->execute();
-}
-
-function getSchema($mdlName)
-{
-  $accessor = Sabel_DB_Migration_Manager::getAccessor();
-  return $accessor->get(convert_to_tablename($mdlName));
-}
-
 function getCreate($path, $migClass)
 {
   $create = new Sabel_DB_Migration_Classes_Create();
@@ -109,5 +98,17 @@ function message($message)
   if ($type === "upgrade") {
     echo "[\x1b[1;34mMESSAGE\x1b[m]: " . $message . "\n";
   }
+}
+
+function executeQuery($query)
+{
+  $driver = Sabel_DB_Migration_Manager::getDriver();
+  $driver->setSql($query)->execute();
+}
+
+function getSchema($mdlName)
+{
+  $accessor = Sabel_DB_Migration_Manager::getAccessor();
+  return $accessor->get(convert_to_tablename($mdlName));
 }
 

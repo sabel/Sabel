@@ -30,7 +30,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
       $this->autoCommit = false;
     }
 
-    return $connection;
+    return $this->connection = $connection;
   }
 
   public function getBeforeMethods()
@@ -68,15 +68,9 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
     return escapeString("ibase", $values, "ibase_escape_string");
   }
 
-  public function execute($connection = null)
+  public function execute()
   {
-    if ($connection === null) {
-      $connection = $this->getConnection();
-    } else {
-      $this->autoCommit = true;
-    }
-
-    $result = parent::execute($connection);
+    $result = parent::execute();
 
     if (!$result) {
       $error = ibase_errmsg();
@@ -91,7 +85,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
       ibase_free_result($result);
     }
 
-    if ($this->autoCommit) ibase_commit($connection);
+    if ($this->autoCommit) ibase_commit($this->connection);
     return $this->result = $rows;
   }
 

@@ -91,6 +91,7 @@ function escapeString($db, $values, $escMethod = null)
     if (is_bool($val)) {
       switch ($db) {
         case "mysql":
+        case "mysqli":
         case "oci":
         case "ibase":
           $val = ($val) ? 1 : 0;
@@ -116,3 +117,4 @@ function escapeString($db, $values, $escMethod = null)
     return $values;
   }
 }
+

@@ -175,8 +175,8 @@ abstract class Sabel_DB_Migration_Base
     }
 
     if ($this->fkeys) {
-      foreach ($this->fkeys as $colName => $param) {
-        $query[] = "FOREIGN KEY ({$colName}) REFERENCES $param";
+      foreach ($this->fkeys as $fKey) {
+        $query[] = $this->createForeignKey($fKey->get());
       }
     }
 
@@ -188,6 +188,22 @@ abstract class Sabel_DB_Migration_Base
 
     $tblName = convert_to_tablename($this->mdlName);
     return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
+  }
+
+  private function createForeignKey($object)
+  {
+    $query  = "FOREIGN KEY ({$object->column}) "
+            . "REFERENCES {$object->refTable}({$object->refColumn})";
+
+    if ($object->onDelete !== null) {
+      $query .= " ON DELETE " . $object->onDelete;
+    }
+
+    if ($object->onUpdate !== null) {
+      $query .= " ON UPDATE " . $object->onUpdate;
+    }
+
+    return $query;
   }
 
   protected function changeColumn()

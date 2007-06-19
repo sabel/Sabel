@@ -29,7 +29,7 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
       $this->execMode = OCI_DEFAULT;
     }
 
-    return $connection;
+    return $this->connection = $connection;
   }
 
   public function getBeforeMethods()
@@ -94,13 +94,9 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
     return escapeString($this->driverId, $values, "oci_escape_string");
   }
 
-  public function execute($connection = null)
+  public function execute()
   {
-    if ($connection === null) {
-      $connection = $this->getConnection();
-    }
-
-    $stmt   = oci_parse($connection, $this->sql);
+    $stmt   = oci_parse($this->getConnection(), $this->sql);
     $result = oci_execute($stmt, $this->execMode);
 
     if (!$result) {

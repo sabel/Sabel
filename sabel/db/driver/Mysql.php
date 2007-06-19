@@ -34,9 +34,9 @@ class Sabel_DB_Driver_Mysql extends Sabel_DB_Driver_Common
     return escapeString($this->driverId, $values, "mysql_real_escape_string");
   }
 
-  public function execute($connection = null)
+  public function execute()
   {
-    $result = parent::execute($connection);
+    $result = parent::execute();
 
     if (!$result) {
       $error = mysql_error($this->connection);
