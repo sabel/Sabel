@@ -22,6 +22,8 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
   
   private $rule = null;
   
+  private $user = null;
+  
   public function __construct($defualtRule = null)
   {
     if ($defualtRule === null) {
@@ -39,6 +41,17 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
    */
   public function onExecuteAction($action)
   {
+    $this->user = new Sabel_Plugin_Acl_User();
+    
+    $storage = $this->controller->getStorage();
+    if ($storage->has("acl_user")) {
+      $this->user->restore($storage->read("acl_user"));
+    }
+    
+    Sabel_Context::getView()->assign("user", $this->user);
+    
+    $this->controller->getRequest()->setVariable("user", $this->user);
+    
     $privateActions = "aclPrivateActions";
     $publicActions  = "aclPublicActions";
     
@@ -60,7 +73,7 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
         }
         if (in_array($action, $result)) {
           return $this->controller->execute($action);
-        } elseif ($this->isAuthenticated()) {
+        } elseif ($this->user->isAuthenticated()) {
           return $this->controller->execute($action);
         } else {
           if ($this->controller->executable($action)) {
@@ -70,7 +83,7 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
             return $this->controller->execute($action);
           }
         }
-      } elseif ($this->isAuthenticated()) {
+      } elseif ($this->user->isAuthenticated()) {
         return $this->controller->execute($action);
       } else {
         $this->destination->setAction(self::DENY_ACTION);
@@ -90,7 +103,7 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
           throw new Sabel_Exception_Runtime("duplicate double allow");
         }
         if (in_array($action, $result)) {
-          if ($this->isAuthenticated()) {
+          if ($this->user->isAuthenticated()) {
             return $this->controller->execute($action);
           } else {
             $this->destination->setAction(self::DENY_ACTION);
@@ -103,34 +116,12 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
         return $this->controller->execute($action);
       }
     }
-    
-    
   }
   
-  public function authenticate($authentication)
+  public function onAfterAction()
   {
-    if ($authentication->authenticate()) {
-      $identity = $authentication->fetchIdentity();
-      $this->controller->getStorage()->write(self::ACL_LOGIN_KEY, $identity);
-      return true;
-    } else {
-      return false;
-    }
-  }
-  
-  public function unAuthenticate()
-  {
-    $this->controller->getStorage()->delete(self::ACL_LOGIN_KEY);
-  }
-  
-  public function identity()
-  {
-    return $this->controller->getStorage()->read(self::ACL_LOGIN_KEY);
-  }
-  
-  public function isAuthenticated()
-  {
-    return ($this->controller->getStorage()->has(self::ACL_LOGIN_KEY));
+    $storage = $this->controller->getStorage();
+    $storage->write("acl_user", $this->user->toArray());
   }
   
   public function allowAll()

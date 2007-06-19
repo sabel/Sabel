@@ -17,6 +17,8 @@ class Sabel_Request_Object
   
   private $status = self::ST_NO_INIT;
   
+  private $variableHolder = array();
+  
   /**
    * @var Sabel_Request_Uri
    */
@@ -325,6 +327,20 @@ class Sabel_Request_Object
   {
     if ($this->status & self::ST_SET_URI) {
       return $this->uri->toArray();
+    } else {
+      return null;
+    }
+  }
+  
+  public function setVariable($key, $value)
+  {
+    $this->variableHolder[$key] = $value;
+  }
+  
+  public function __get($key)
+  {
+    if (array_key_exists($key, $this->variableHolder)) {
+      return $this->variableHolder[$key];
     } else {
       return null;
     }
