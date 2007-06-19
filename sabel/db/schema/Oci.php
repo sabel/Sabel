@@ -26,6 +26,18 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
     $sequences   = array(),
     $primaryKeys = array();
 
+  public function getTableLists()
+  {
+    $tables = array();
+    $rows   = $this->execute(sprintf($this->tableList, $this->schemaName));
+
+    foreach ($rows as $row) {
+      $tables[] = strtolower($row["table_name"]);
+    }
+
+    return $tables;
+  }
+
   public function getForeignKey($tblName)
   {
     $tblName = strtoupper($tblName);
@@ -133,10 +145,17 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
   {
     $default = $row["data_default"];
 
-    if ($co->isString()) {
-      $co->default = substr($default, 1, -1);
+    if ($default === null) {
+      $co->default = null;
     } else {
-      $this->setDefaultValue($co, $default);
+      $default = trim($default);
+      if ($default === "null") {
+        $co->default = null;
+      } elseif ($co->isString()) {
+        $co->default = substr($default, 1, -1);
+      } else {
+        $this->setDefaultValue($co, $default);
+      }
     }
   }
 

@@ -21,7 +21,8 @@ class Sabel_DB_Validator
     $datetimeRegex = array();
 
   protected
-    $errors = array();
+    $errors  = array(),
+    $ignores = array();
 
   public function __construct($model, $configs = null)
   {
@@ -50,9 +51,11 @@ class Sabel_DB_Validator
     return !empty($this->errors);
   }
 
-  // @todo localized. Beta3
+  // @todo localized(beta3) && refactoring
   public function validate($ignores = array())
   {
+    $this->ignores = $ignores;
+
     $errors    = array();
     $messages  = $this->messages;
     $model     = $this->model;
@@ -61,6 +64,13 @@ class Sabel_DB_Validator
 
     foreach ($columns as $name => $column) {
       if (in_array($name, $ignores)) continue;
+
+      if ($column->increment) {
+        if ($column->value === null) continue;
+        $message = "don't set the value in the '{$column->name}'(auto increment column).";
+        Sabel_DB_Exception_Validate::error("validate", $message);
+      }
+
       $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
 
       if (!$this->nullable($column)) {
@@ -88,14 +98,16 @@ class Sabel_DB_Validator
       }
     }
 
+    // @todo refactoring
     if ($uniques = $model->getSchema()->getUniques()) {
       $cloned = clone $model;
       foreach ($uniques as $unique) {
         if (count($unique) !== 1) continue;
 
-        $name  = $unique[0];
-        $value = $columns[$name]->value;
+        $name = $unique[0];
+        if (in_array($name, $this->ignores)) continue;
 
+        $value = $columns[$name]->value;
         if ($cloned->getCount($name, $value) > 0) {
           $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
           $errors[] = sprintf($this->messages["unique"], $msgName, $value);

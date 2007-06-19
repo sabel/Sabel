@@ -457,7 +457,7 @@ abstract class Sabel_DB_Model
     $this->selected = true;
   }
 
-  public function validate($ignores = array("id"))
+  public function validate($ignores = array())
   {
     $validator = new Sabel_DB_Validator($this);
     return $validator->validate($ignores);

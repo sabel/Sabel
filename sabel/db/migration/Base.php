@@ -110,7 +110,7 @@ abstract class Sabel_DB_Migration_Base
     } else {
       $tblName = convert_to_tablename($this->mdlName);
       foreach ($columns as $column) {
-        executeQuery("ALTER TABLE $tblName DROP " . $column->name);
+        executeQuery("ALTER TABLE $tblName DROP COLUMN " . $column->name);
       }
     }
   }
@@ -136,7 +136,7 @@ abstract class Sabel_DB_Migration_Base
       writeColumns(getSchema($this->mdlName), $restore, $columns);
 
       foreach ($columns as $column) {
-        executeQuery("ALTER TABLE $tblName DROP $column");
+        executeQuery("ALTER TABLE $tblName DROP COLUMN $column");
       }
     } else {
       $this->restoreDropColumn();
