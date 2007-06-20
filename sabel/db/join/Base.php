@@ -25,9 +25,11 @@ abstract class Sabel_DB_Join_Base
     $this->resultBuilder = Sabel_DB_Join_Result::getInstance();
   }
 
-  public function add($object, $joinKeys = null, $columns = null, $alias = null)
+  public function add($object, $columns = null, $alias = null, $joinKeys = null)
   {
-    $object = new Sabel_DB_Join_Object($object, $joinKeys, $columns, $alias);
+    $fkeys  = $this->sourceModel->getSchema()->getForeignKeys();
+    $object = new Sabel_DB_Join_Object($object, $fkeys, $joinKeys, $columns, $alias);
+
     $this->objects[] = $object;
 
     $builder = $this->resultBuilder;

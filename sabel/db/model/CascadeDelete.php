@@ -50,7 +50,7 @@ class Sabel_DB_Model_CascadeDelete
 
     $this->clearCascadeStack();
 
-    $model->remove();
+    $model->delete();
     Sabel_DB_Transaction::commit();
   }
 
@@ -108,7 +108,7 @@ class Sabel_DB_Model_CascadeDelete
     foreach ($stack as $param => $fKey) {
       list($mdlName, $idValue) = explode(":", $param);
       $model = Sabel_DB_Transaction::load($mdlName);
-      $model->remove($fKey, $idValue);
+      $model->delete($fKey, $idValue);
     }
   }
 }

@@ -21,7 +21,7 @@ class Sabel_DB_Join_Object
   protected $aliasName   = null;
   protected $sourceAlias = "";
 
-  public function __construct($object, $joinKeys = null, $columns = null, $alias = null)
+  public function __construct($object, $fkeys, $joinKeys, $columns = null, $alias = null)
   {
     if ($object instanceof Sabel_DB_Join_Relay) {
       $model = $this->model = $object->getSourceModel();
@@ -38,9 +38,24 @@ class Sabel_DB_Join_Object
 
     if ($columns === null) {
       $this->columns = $model->getColumnNames();
+    } else {
+      $this->columns = $columns;
     }
 
-    $this->joinKeys = getRelationalKeys($model, $joinKeys, $tblName);
+    if (!is_array($fkeys) && $joinKeys === null) {
+      // @todo ...
+      $this->joinKeys = getRelationalKeys($model, $joinKeys, $tblName);
+      // throw new Exception("please specify join keys.");
+    } elseif ($joinKeys !== null) {
+      $this->joinKeys = $joinKeys;
+    } elseif (is_array($fkeys)) {
+      foreach ($fkeys as $colName => $fkey) {
+        if ($fkey["referenced_table"] === $tblName) {
+          $this->joinKeys = array("id" => $fkey["referenced_column"], "fkey" => $colName);
+          break;
+        }
+      }
+    }
   }
 
   public function isModel()

@@ -24,18 +24,22 @@ class Sabel_DB_Model_Bridge
   {
     $model = $this->model;
 
+    // @todo use foreign key of schema.
+
     $bridge = MODEL($this->bridgeName);
     $pKey   = $model->getPrimaryKey();
-    $fKey   = $model->getTableName() . "_" . $pKey;
-    $bridge->setCondition($fKey, $model->$pKey);
+    $bridge->setCondition($model->getTableName() . "_" . $pKey, $model->$pKey);
 
     if ($constraints) {
       $bridge->setConstraint($constraints);
     }
 
     $joiner  = new Sabel_DB_Join($bridge);
-    $keys    = array("fkey" => $fKey, "id" => $pKey);
-    $results = $joiner->add(MODEL($child), $keys)->join();
+
+    $cModel  = MODEL($child);
+    $cPkey   = $cModel->getPrimaryKey();
+    $keys    = array("id" => $cPkey, "fkey" => $cModel->getTableName() . "_" . $cPkey);
+    $results = $joiner->add($cModel, null, null, $keys)->join();
 
     if (!$results) return false;
 

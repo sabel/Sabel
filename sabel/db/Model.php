@@ -539,7 +539,7 @@ abstract class Sabel_DB_Model
     }
   }
 
-  public function remove($arg1 = null, $arg2 = null, $arg3 = null)
+  public function delete($arg1 = null, $arg2 = null, $arg3 = null)
   {
     $manager = $this->loadConditionManager();
 
@@ -612,15 +612,5 @@ abstract class Sabel_DB_Model
 
     $args = implode(", ", $args);
     return '$command->$method(' . $args . ')->getResult();';
-  }
-
-  public function scond($arg1, $arg2 = null, $not = null)
-  {
-    $this->setCondition($arg1, $arg2, $not);
-  }
-
-  public function sconst($arg1, $arg2 = null)
-  {
-    $this->setConstraint($arg1, $arg2);
   }
 }

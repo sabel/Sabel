@@ -381,7 +381,7 @@ class Schema_TargetModel1
     $cols['id']     = array('type'      => Sabel_DB_Type::INT,
                             'max'       => 2147483647,
                             'min'       => -2147483648,
-                            'increment' => true,
+                            'increment' => false,
                             'nullable'  => false,
                             'primary'   => true,
                             'default'   => null);
@@ -442,7 +442,7 @@ class Schema_TargetModel2
     $cols['id']     = array('type'      => Sabel_DB_Type::INT,
                             'max'       => 2147483647,
                             'min'       => -2147483648,
-                            'increment' => true,
+                            'increment' => false,
                             'nullable'  => false,
                             'primary'   => true,
                             'default'   => null);

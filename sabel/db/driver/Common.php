@@ -17,7 +17,7 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
     // @todo
     //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
     if (defined("QUERY_LOG")) {
-      var_dump($sql);
+      var_dump($this->sql); exit;
     }
 
     $sql  = $this->sql;

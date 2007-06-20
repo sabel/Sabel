@@ -102,9 +102,6 @@ class Sabel_DB_Schema_Column
 
         return in_array($value, array("1", "t", "true"));
 
-      case Sabel_DB_Type::DATETIME:
-        return (is_object($value)) ? $value : new Sabel_Date($value);
-
       default:
         return $value;
     }
