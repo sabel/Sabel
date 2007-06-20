@@ -337,6 +337,11 @@ class Sabel_Request_Object
     $this->variableHolder[$key] = $value;
   }
   
+  public function clearVariable()
+  {
+    $this->variableHolder = array();
+  }
+  
   public function __get($key)
   {
     if (array_key_exists($key, $this->variableHolder)) {

@@ -11,7 +11,11 @@ class Sabel_Plugin_Acl_User
   
   public function __get($key)
   {
-    return $this->attributes[$key];
+    if (array_key_exists($key, $this->attributes)) {
+      return $this->attributes[$key];
+    } else {
+      return null;
+    }
   }
   
   public function toArray()
@@ -42,5 +46,11 @@ class Sabel_Plugin_Acl_User
   {
     if (!isset($this->attributes["type"])) return false;
     return ($this->attributes["type"] === $compare);
+  }
+  
+  public function destroy()
+  {
+    $this->attributes = array();
+    $this->attributes["authenticated"] = false;
   }
 }
