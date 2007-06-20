@@ -252,8 +252,8 @@ class TableList_Writer
 
 function sakle_schema_help()
 {
-  echo "Usage: sakle Schema [environment]\n";
+  echo "Usage: sakle Schema [environment] [-l] [-s ...]\n";
   echo "       -l  create table list\n";
-  echo "       -s  create schema : table_name1, table_name2... , or all\n";
+  echo "       -s  create schema: table_name1, table_name2... , or all\n";
   exit;
 }

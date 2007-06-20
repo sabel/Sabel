@@ -1,7 +1,5 @@
 <?php
 
-//Sabel::using('Sabel_DB_Model');
-
 /**
  * Sabel_Model
  *
@@ -17,20 +15,19 @@ class Sabel_Model
     return self::createModel($mdlName, $arg1, $arg2);
   }
 
-  public static function fusion($mdlNames)
-  {
-    $models = array();
-    foreach ($mdlNames as $name) $models[] = self::createModel($name);
-    return Sabel::load('Sabel_DB_Model_Fusion', $models, $mdlNames);
-  }
-
   protected static function createModel($mdlName, $arg1 = null, $arg2 = null)
   {
     Sabel::using($mdlName);
+
     if (class_exists($mdlName, true)) {
       return new $mdlName($arg1, $arg2);
     } else {
-      return new Proxy($mdlName);
+      if ($arg1 === null) {
+        return new Proxy($mdlName);
+      } else {
+        $proxy = new Proxy($mdlName);
+        return $proxy->selectOne($arg1, $arg2);
+      }
     }
   }
 }

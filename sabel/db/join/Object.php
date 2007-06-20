@@ -43,9 +43,7 @@ class Sabel_DB_Join_Object
     }
 
     if (!is_array($fkeys) && $joinKeys === null) {
-      // @todo ...
-      $this->joinKeys = getRelationalKeys($model, $joinKeys, $tblName);
-      // throw new Exception("please specify join keys.");
+      $this->joinKeys = array("id" => "id", "fkey" => $tblName . "_id");
     } elseif ($joinKeys !== null) {
       $this->joinKeys = $joinKeys;
     } elseif (is_array($fkeys)) {

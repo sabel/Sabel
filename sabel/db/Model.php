@@ -431,11 +431,25 @@ abstract class Sabel_DB_Model
 
   public function getChild($childName, $constraints = null)
   {
-    $child = MODEL($childName);
-    $keys  = getRelationalKeys($this);
+    $child   = MODEL($childName);
+    $foreign = $child->getSchema()->getForeignKeys();
+    $pkey    = $this->getPrimaryKey();
+
+    if ($foreign === null) {
+      $col  = "id";
+      $fkey = $this->getTableName() . "_id";
+    } else {
+      $tblName = $this->tableName;
+      foreach ($foreign as $fkey => $params) {
+        if ($params["referenced_table"] === $tblName) {
+          $col = $params["referenced_column"];
+          break;
+        }
+      }
+    }
 
     if ($constraints) $child->setConstraint($constraints);
-    return $child->select($keys["fkey"], $this->$keys["id"]);
+    return $child->select($fkey, $this->$col);
   }
 
   public function setProperties($row)

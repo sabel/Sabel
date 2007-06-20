@@ -146,11 +146,11 @@ function environment($string)
 function convert_to_tablename($mdlName)
 {
   static $cache = array();
-  
+
   if (isset($cache[$mdlName])) {
     return $cache[$mdlName];
   }
-  
+
   if (preg_match("/^[a-z0-9_]+$/", $mdlName)) {
     $tblName = $mdlName;
   } else {
@@ -163,7 +163,7 @@ function convert_to_tablename($mdlName)
 function convert_to_modelname($tblName)
 {
   static $cache = array();
-  
+
   if (isset($cache[$tblName])) {
     return $cache[$tblName];
   } else {
