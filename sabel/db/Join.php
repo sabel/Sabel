@@ -14,33 +14,6 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
   const CANNOT_JOIN = "CANNOT_JOIN";
 
   protected $tableLists = array();
-  protected $conditionManager = null;
-
-  public function loadConditionManager()
-  {
-    if ($this->conditionManager === null) {
-      return $this->conditionManager = new Sabel_DB_Condition_Manager();
-    } else {
-      return $this->conditionManager;
-    }
-  }
-
-  public function setCondition($arg1, $arg2 = null, $arg3 = null)
-  {
-    $manager = $this->loadConditionManager();
-
-    if (is_array($arg1)) {
-      $manager->create($arg1);
-    } elseif ($arg1 instanceof Sabel_DB_Condition_Object) {
-      $manager->add($arg1);
-    } elseif ($arg2 === null) {
-      $model = $this->sourceModel;
-      $key   = $model->getModelName() . "." . $model->getPrimaryKey();
-      $manager->create($key, $arg1);
-    } else {
-      $manager->create($arg1, $arg2, $arg3);
-    }
-  }
 
   public function buildParents()
   {
