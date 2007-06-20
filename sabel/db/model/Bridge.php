@@ -26,7 +26,7 @@ class Sabel_DB_Model_Bridge
 
     $bridge = MODEL($this->bridgeName);
     $pKey   = $model->getPrimaryKey();
-    $fKey   = convert_to_tablename($child) . "_" . $model->getPrimaryKey();
+    $fKey   = $model->getTableName() . "_" . $pKey;
     $bridge->setCondition($fKey, $model->$pKey);
 
     if ($constraints) {
