@@ -44,7 +44,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
       if (is_readable($this->getCompileFilePath($hash))) return;
     }
     
-    $r = '/<\?(=)?\s([^?;\s]+)([^?]+)\?>/';
+    $r = '/<\?(=)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
     $template = str_replace('<?=', '<? echo', $template);
     $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
@@ -105,28 +105,31 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 
 function _sbl_tpl_pipe_to_func($matches)
 {
-  $pre   = trim($matches[1]);
-  $value = $matches[2];
-  $post  = rtrim($matches[3]);
+  $pre    = trim($matches[1]);
+  $values = explode(" ", $matches[2]);
   
-  if (strpos($value, '|') !== false) {
-    $functions = explode('|', $value);
-    $value = array_shift($functions);
-    $lamdaBody = 'return (is_string($val)) ? "\"".$val."\"" : $val;';
-    $lamda = create_function('$val', $lamdaBody);
-    foreach ($functions as $function) {
-      $params = '';
-      if (strpos($function, ':') !== false) {
-        $params   = explode(':', $function);
-        $function = array_shift($params);
-        $params   = array_map($lamda, $params);
-        $params   = ', ' . implode(', ', $params);
+  foreach ($values as &$value) {
+    if ($value === '||') continue;
+    if (strpos($value, '|') !== false) {
+      $functions = explode('|', $value);
+      $value = array_shift($functions);
+      $lamdaBody = 'return (is_string($val)) ? "\"".$val."\"" : $val;';
+      $lamda = create_function('$val', $lamdaBody);
+      foreach ($functions as $function) {
+        $params = '';
+        if (strpos($function, ':') !== false) {
+          $params   = explode(':', $function);
+          $function = array_shift($params);
+          $params   = array_map($lamda, $params);
+          $params   = ', ' . implode(', ', $params);
+        }
+        $value = "$function($value$params)";
       }
-      $value = "$function($value$params)";
     }
   }
   
-  return "<?${pre} ${value}${post} ?>";
+  $value = implode(' ', $values);
+  return "<?${pre} ${value} ?>";
 }
 
 function _sbl_internal_remove_this($arg)
