@@ -300,35 +300,6 @@ abstract class Sabel_DB_Model
     return $this->selected;
   }
 
-  public function getFirst($orderColumn)
-  {
-    return $this->getEdge("ASC", $orderColumn);
-  }
-
-  public function getLast($orderColumn)
-  {
-    return $this->getEdge("DESC", $orderColumn);
-  }
-
-  protected function getEdge($order, $orderColumn)
-  {
-    $this->setCondition($orderColumn, Sabel_DB_Condition_Object::NOTNULL);
-
-    $c =& $this->constraints;
-    $tmpLimit = (isset($c["limit"])) ? $c["limit"] : null;
-    $tmpOrder = (isset($c["order"])) ? $c["order"] : null;
-
-    $c["limit"] = 1;
-    $c["order"] = $orderColumn . " " . $order;
-
-    $result = $this->selectOne();
-
-    if ($tmpLimit !== null) $c["limit"] = $tmpLimit;
-    if ($tmpOrder !== null) $c["order"] = $tmpOrder;
-
-    return $result;
-  }
-
   public function getCount($arg1 = null, $arg2 = null, $arg3 = null)
   {
     $this->setCondition($arg1, $arg2, $arg3);

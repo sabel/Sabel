@@ -344,25 +344,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model3->registed, '2004-10-01 10:10:10');
   }
 
-  public function testFirst()
-  {
-    $model = Sabel_Model::load('TestCondition');
-    $model = $model->getFirst('registed');
-
-    $this->assertTrue($model->status);
-    $this->assertEquals($model->registed, '2004-10-01 10:10:10');
-    $this->assertEquals($model->point, 13000);
-  }
-
-  public function testLast()
-  {
-    $model = Sabel_Model::load('TestCondition');
-    $model = $model->getLast('registed');
-    $this->assertTrue($model->status);
-    $this->assertEquals($model->registed, '2005-10-01 10:10:10');
-    $this->assertEquals($model->point, 1000);
-  }
-
   public function testTest()
   {
     $model = Sabel_Model::load('Customer');
