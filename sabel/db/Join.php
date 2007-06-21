@@ -15,15 +15,22 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   protected $tableLists = array();
 
+  public function __construct($model)
+  {
+    parent::__construct($model);
+    Sabel_DB_Join_Alias::setBaseTableName($this->tblName);
+  }
+
   public function buildParents()
   {
     $parents = $this->sourceModel->getParents();
     $result  = $this->addParentModel($parents);
 
     if ($result === self::CANNOT_JOIN) {
+      $this->clear();
       return self::CANNOT_JOIN;
     } else {
-      return $this->objects;
+      return true;
     }
   }
 
