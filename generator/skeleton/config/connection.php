@@ -38,3 +38,6 @@ function get_db_params($env = null)
 
   return $params;
 }
+
+Sabel_DB_Config::initialize();
+

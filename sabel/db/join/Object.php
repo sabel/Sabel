@@ -23,7 +23,7 @@ class Sabel_DB_Join_Object
 
   public function __construct($object, $fkeys, $joinKeys, $columns = null, $alias = null)
   {
-    if ($object instanceof Sabel_DB_Join_Relay) {
+    if ($object instanceof Sabel_DB_Join_Relation) {
       $model = $this->model = $object->getSourceModel();
       $this->objects = $object->getObjects();
     } elseif ($object instanceof Sabel_DB_Model) {

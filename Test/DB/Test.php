@@ -449,7 +449,7 @@ class Test_DB_Test extends SabelTestCase
 
     $joiner = new Sabel_DB_Join($users);
 
-    $join = new Sabel_DB_Join_Relay(MODEL("City"));
+    $join = new Sabel_DB_Join_Relation(MODEL("City"));
     $join->add(MODEL("Country"), null, null, array("id" => "id", "fkey" => "country_id"));
 
     $joiner->add($join, null, null, array("id" => "id", "fkey" => "city_id"));
@@ -478,7 +478,7 @@ class Test_DB_Test extends SabelTestCase
     $joiner = new Sabel_DB_Join($users);
     $joiner->add(MODEL("Company"), null, null, array("id" => "id", "fkey" => "company_id"));
 
-    $join = new Sabel_DB_Join_Relay(MODEL("City"));
+    $join = new Sabel_DB_Join_Relation(MODEL("City"));
     $join->add(MODEL("Country"), null, null, array("id" => "id", "fkey" => "country_id"))
          ->add(MODEL("Classification"), null, null, array("id" => "id", "fkey" => "classification_id"));
 
@@ -520,10 +520,10 @@ class Test_DB_Test extends SabelTestCase
     $user->setConstraint("order", "Users.id");
     $joiner = new Sabel_DB_Join($user);
 
-    $country = new Sabel_DB_Join_Relay(MODEL("Country"));
+    $country = new Sabel_DB_Join_Relation(MODEL("Country"));
     $country->add(MODEL("Planet"), null, null, array("id" => "id", "fkey" => "planet_id"));
 
-    $city = new Sabel_DB_Join_Relay(MODEL("City"));
+    $city = new Sabel_DB_Join_Relation(MODEL("City"));
     $city->add($country, null, null, array("id" => "id", "fkey" => "country_id"));
 
     $joiner->add($city, null, null, array("id" => "id", "fkey" => "city_id"));
@@ -572,7 +572,7 @@ class Test_DB_Test extends SabelTestCase
     $joiner = new Sabel_DB_Join($mail);
 
     $user = MODEL("Users");
-    $join = new Sabel_DB_Join_Relay($user);
+    $join = new Sabel_DB_Join_Relation($user);
     $join->add(MODEL("City"), null, null, array("id" => "id", "fkey" => "city_id"));
 
     $joiner->add($join, null, "FromUser", array("id" => "id", "fkey" => "sender_id"));

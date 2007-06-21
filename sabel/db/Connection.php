@@ -154,6 +154,8 @@ class Sabel_DB_Connection
     $conn = oci_connect($params["user"], $params["password"], $database, $encoding);
 
     if ($conn) {
+      $stmt = oci_parse($conn, "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+      oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
       return array($conn, "");
     } else {
       $e = oci_error();

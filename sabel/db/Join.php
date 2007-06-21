@@ -58,7 +58,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       }
 
       if ($parents = $model->getParents()) {
-        $more = new Sabel_DB_Join_Relay($model);
+        $more = new Sabel_DB_Join_Relation($model);
         $this->addParentModel($parents, $more);
         $this->add($more);
       }

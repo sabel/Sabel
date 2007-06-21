@@ -27,5 +27,4 @@ add_include_path("/config");
 
 require (RUN_BASE . "/config/plugin.php");
 require (RUN_BASE . "/config/Factory.php");
-
-Sabel_DB_Config::initialize();
+require (RUN_BASE . "/config/connection.php");
