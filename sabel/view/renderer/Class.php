@@ -112,7 +112,7 @@ function _sbl_tpl_pipe_to_func($matches)
   if (strpos($value, '|') !== false) {
     $functions = explode('|', $value);
     $value = array_shift($functions);
-    $lamdaBody = 'return (is_string($val)) ? "\'".$val."\'" : $val;';
+    $lamdaBody = 'return (is_string($val)) ? '"'.$val.'"' : $val;';
     $lamda = create_function('$val', $lamdaBody);
     foreach ($functions as $function) {
       $params = '';
