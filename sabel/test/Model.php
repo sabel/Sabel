@@ -28,13 +28,17 @@ class Sabel_Test_Model extends PHPUnit_Framework_TestCase
     
     $ref = new ReflectionClass($this);
     $fixtureName = "Fixtures_" . array_pop(explode("_", $ref->getName()));
-    //Sabel::using($fixtureName);
     
     try {
-      if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");
+      if (class_exists($fixtureName)) {
+        // eval("{$fixtureName}::upFixture();");
+        call_user_func(array($fixtureName, "upFixture"));
+      }
       $this->setUp();
     } catch (Exception $e) {
       echo "fixture throws exception: " . $e->getMessage() . "\n";
+      call_user_func(array($fixtureName, "downFixture"));
+      call_user_func(array($fixtureName, "upFixture"));
     }
     
     try {
@@ -44,7 +48,11 @@ class Sabel_Test_Model extends PHPUnit_Framework_TestCase
     }
     
     try {
-      if (class_exists($fixtureName)) eval("{$fixtureName}::downFixture();");
+      if (class_exists($fixtureName)) {
+        // eval("{$fixtureName}::downFixture();");
+        call_user_func(array($fixtureName, "downFixture"));
+      }
+        
       $this->tearDown();
     } catch (Exception $e) {
       $e->getMessage() . "\n";

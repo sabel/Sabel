@@ -3,7 +3,6 @@
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
 Sabel::fileUsing("tasks/environment.php");
-Sabel::fileUsing("config/connection.php");
 
 /**
  * Functional
@@ -21,6 +20,8 @@ class TestSuite extends Sabel_Sakle_Task
     } else {
       define ("ENVIRONMENT", TEST);
     }
+    
+    Sabel::fileUsing("config/connection.php");
     
     $pathToTest = RUN_BASE . '/tests/functional';
     $dir = new DirectoryIterator($pathToTest);

@@ -3,12 +3,6 @@
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
 Sabel::fileUsing("tasks/environment.php");
-Sabel::fileUsing("config/database.php");
-
-//Sabel::using('Sabel_Sakle_Task');
-//Sabel::using('Sabel_DB_Migration');
-//Sabel::using('Sabel_DB_Connection');
-//Sabel::using('Sabel_DB_Model');
 
 /**
  * Fixture
@@ -22,21 +16,84 @@ class Fixture extends Sabel_Sakle_Task
   public function run($arguments)
   {
     if (!defined("ENVIRONMENT")) {
-      if (isset($arguments[2])) {
-        define ("ENVIRONMENT", environment($arguments[2]));
+      if (isset($arguments[1])) {
+        define ("ENVIRONMENT", constant(strtoupper($arguments[1])));
       } else {
         define ("ENVIRONMENT", TEST);
       }
     }
     
-    $fixtureName = "Fixtures_" . $arguments[1];
-    //Sabel::using($fixtureName);
+    Sabel::fileUsing(RUN_BASE . "/config/connection.php");
     
-    try {
-      $this->printMessage("up fixture");
-      if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");
-    } catch (Exception $e) {
-      $this->printMessage($e->getMessage());
+    if (isset($arguments[2]) && $arguments[2] === "run") {
+      $fixtureName = "Fixtures_" . $arguments[3];
+      
+      try {
+        $this->printMessage("up fixture");
+        if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");
+      } catch (Exception $e) {
+        $this->printMessage($e->getMessage());
+      }
+    } elseif (isset($arguments[2]) && $arguments[2] === "import") {
+      $this->printMessage("import");
+      
+      if (isset($arguments[3]) && $arguments[3] === "all") {
+        $this->printMessage("create all fixtures");
+        $name = array_keys(get_db_params());
+        $sa = new Sabel_DB_Schema_Accessor($name[0]);
+        
+        foreach ($sa->getTableLists() as $table) {
+          if ($table == "sversion") continue;
+          $this->printMessage("create " . convert_to_modelname($table));
+          $this->createModelFixture(convert_to_modelname($table));
+        }
+        
+      } else {
+        $modelName = $arguments[3];
+        $this->createModelFixture($modelName);
+      }
+    }
+  }
+  
+  /**
+   * create fixture class from template with schema
+   *
+   * @param string $modelName
+   */
+  protected function createModelFixture($modelName)
+  {
+    $model = MODEL($modelName);
+    $instancies = $model->select();
+    
+    $lines = array();
+    
+    if (count($instancies) > 1) {
+      foreach ($instancies as $instance) {
+        $lines[] = '$model = ' . 'new ' . $modelName . "();\n";
+        foreach ($instance->getColumnNames() as $column) {
+          $line = '$model->' . $column . " = ";
+          
+          if ($column == "") {
+            $line .= 0;
+          } elseif (is_numeric($instance->$column)) {
+            $line .= $instance->$column . ";";
+          } else {
+            $line .= "'" . $instance->$column . "';";
+          }
+          
+          $lines[] = $line . "\n";
+        }
+        $lines[] = 'if(!$model->save()) {' . "\n";
+        $lines[] = '  dump($model->getErrors());' . "\n";
+        $lines[] = "}\n";
+        
+        $tblName = convert_to_tablename($modelName);
+        ob_start();
+        include RUN_BASE . "/tests/fixtures/Template.tphp";
+        $fixtureFile = ob_get_clean();
+        $fixtureFile = str_replace("#?php", "?php", $fixtureFile);
+        file_put_contents(RUN_BASE . "/tests/fixtures/".$modelName.".php", $fixtureFile);
+      }
     }
   }
 }
