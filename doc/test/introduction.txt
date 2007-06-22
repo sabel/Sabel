@@ -37,27 +37,27 @@ tests/units/Member.php
 ?>
 
 実行してみましょう。
-% sakle UnitTest Member
-PHPUnit 3.0.6 by Sebastian Bergmann.
-
-F
-
-Time: 00:00
-
-There was 1 failure:
-
-1) testMember(Units_Member)
-Failed asserting that <string:first> is equal to <null>.
-/Users/morireo/Sites/progressive/tests/units/Member.php:8
-/Users/morireo/Repository/sabel/sabel/test/Model.php:45
-/Users/morireo/Repository/sabel/sabel/test/ModelRunner.php:23
-/Users/morireo/Sites/progressive/tasks/UnitTest.php:30
-/Users/morireo/Repository/sabel/sabel/Sakle.php:58
-/Users/morireo/Repository/sabel/sabel/Sakle.php:39
-/Users/morireo/Repository/sabel/sabel/Sakle.php:13
-
-FAILURES!
-Tests: 1, Failures: 1.
+    % sakle UnitTest Member
+    PHPUnit 3.0.6 by Sebastian Bergmann.
+    
+    F
+    
+    Time: 00:00
+    
+    There was 1 failure:
+    
+    1) testMember(Units_Member)
+    Failed asserting that <string:first> is equal to <null>.
+    /Users/morireo/Sites/progressive/tests/units/Member.php:8
+    /Users/morireo/Repository/sabel/sabel/test/Model.php:45
+    /Users/morireo/Repository/sabel/sabel/test/ModelRunner.php:23
+    /Users/morireo/Sites/progressive/tasks/UnitTest.php:30
+    /Users/morireo/Repository/sabel/sabel/Sakle.php:58
+    /Users/morireo/Repository/sabel/sabel/Sakle.php:39
+    /Users/morireo/Repository/sabel/sabel/Sakle.php:13
+    
+    FAILURES!
+    Tests: 1, Failures: 1.
 
 おっと、失敗してしまいました。なぜでしょうか？
 そう、データベースに行がありません。
@@ -102,16 +102,16 @@ DEVELOPMENT環境でデータが既にデータベースにある場合は簡単
 
 さて、これで準備は整いました。もう一度テストを実行してみましょう。
 
-% sakle UnitTest Member
-PHPUnit 3.0.6 by Sebastian Bergmann.
-
-.
-
-Time: 00:00
-
-
-OK (1 test)
-
+    % sakle UnitTest Member
+    PHPUnit 3.0.6 by Sebastian Bergmann.
+    
+    .
+    
+    Time: 00:00
+    
+    
+    OK (1 test)
+    
 成功しましたね！
 
 upFixture()とdownFixture()はテストケース毎に実行されます。

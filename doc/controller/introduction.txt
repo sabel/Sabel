@@ -269,10 +269,10 @@ app/index/flow/User.php # 状態設定クラス
 
 現時点ではTokenを手動で設定する必要があります。
 フォーム内では次のように設定してください。
-<input type="hidden" name="token" value="<?= $token ?>" />
+    <input type="hidden" name="token" value="<?= $token ?>" />
 
 aタグでは次のようにしてください。
-<a href="reprepareEvent/?token=<?= $token ?>">correct</a>
+    <a href="reprepareEvent/?token=<?= $token ?>">correct</a>
 
 
 
@@ -335,18 +335,18 @@ $this->partial("error")はerrorテンプレートを描画します。
 これは標準でよういされていて、自分で用意する必要はありません。もちろん、ファイルを開いて普通に編集することも可能です。
 
 registrationアクション
-<html
-  登録
-
-  <?= $this->partial("error") ?>
-
-  <form action="postRegistration" method="post">
-    <p>ユーザ名: <input type="text" name="username" /></p>
-    <p>メールアドレス:<input type="text" name="email" /></p>
-    <p>パスワード:<input type="text" name="password" /></p>
-    <input type="submit" />
-  </form>
-</html>
+    <html
+      登録
+    
+      <?= $this->partial("error") ?>
+    
+      <form action="postRegistration" method="post">
+        <p>ユーザ名: <input type="text" name="username" /></p>
+        <p>メールアドレス:<input type="text" name="email" /></p>
+        <p>パスワード:<input type="text" name="password" /></p>
+        <input type="submit" />
+      </form>
+    </html>
 
 postRegistrationアクション
 <?php
