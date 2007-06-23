@@ -168,7 +168,8 @@ abstract class Sabel_DB_Model
     if (is_array($values)) {
       return $this->saveValues = $values;
     } else {
-      Sabel_DB_Exception_Model::isNotArray("setSaveValues", $values);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("setSaveValues", $values);
     }
   }
 
@@ -192,7 +193,8 @@ abstract class Sabel_DB_Model
     if (is_array($parents)) {
       $this->parents = $parents;
     } else {
-      Sabel_DB_Exception_Model::isNotArray("setParents", $parents);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("setParents", $parents);
     }
   }
 
@@ -323,7 +325,8 @@ abstract class Sabel_DB_Model
   public function selectOne($arg1 = null, $arg2 = null)
   {
     if ($arg1 === null && $this->conditionManager === null) {
-      Sabel_DB_Exception_Model::error("selectOne", "must set the condition.");
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->exception("selectOne", "must set the condition.");
     }
 
     $this->setCondition($arg1, $arg2);
@@ -453,7 +456,8 @@ abstract class Sabel_DB_Model
   public function save($data = null)
   {
     if (isset($data) && !is_array($data)) {
-      Sabel_DB_Exception_Model::isNotArray("save", $data);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("save", $data);
     }
 
     if ($this->isSelected()) {
@@ -496,7 +500,8 @@ abstract class Sabel_DB_Model
     if (is_array($data)) {
       $this->saveValues = $data;
     } else {
-      Sabel_DB_Exception_Model::isNotArray("insert", $data);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("insert", $data);
     }
 
     try {
@@ -513,7 +518,8 @@ abstract class Sabel_DB_Model
     if (is_array($data)) {
       $this->saveValues = $data;
     } else {
-      Sabel_DB_Exception_Model::isNotArray("arrayInsert", $data);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("arrayInsert", $data);
     }
 
     try {
@@ -532,10 +538,9 @@ abstract class Sabel_DB_Model
 
     if ($arg1 === null) {
       if ($manager->isEmpty() && !$this->isSelected()) {
-        Sabel_DB_Exception_Model::error("remove", "delete all? must set the condition.");
+        $e = new Sabel_DB_Exception_Model();
+        throw $e->exception("remove", "delete all? must set the condition.");
       }
-    } elseif ($this->structure === "view") {
-      Sabel_DB_Exception_Model::error("remove", "delete command cannot execute to view.");
     }
 
     if ($this->isSelected()) {
@@ -557,7 +562,8 @@ abstract class Sabel_DB_Model
   public function executeQuery($sql, $inputs = null)
   {
     if (isset($inputs) && !is_array($inputs)) {
-      Sabel_DB_Exception_Model::isNotArray("executeQuery", $inputs, "second");
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("executeQuery", $inputs, "second");
     }
 
     try {

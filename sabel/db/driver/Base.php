@@ -79,7 +79,8 @@ abstract class Sabel_DB_Driver_Base
 
   protected function error($error)
   {
-    Sabel_DB_Exception_Driver::execError($this->sql, $error, $this->connectionName);
+    $e = new Sabel_DB_Exception_Driver();
+    throw $e->exception($this->sql, $error, $this->connectionName);
   }
 }
 

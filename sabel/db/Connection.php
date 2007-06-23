@@ -204,9 +204,7 @@ class Sabel_DB_Connection
     $extra = array("CONNECTION_NAME" => $connectionName,
                    "PARAMETERS"      => $params);
 
-    Sabel_DB_Exception::displayError("connect",
-                                     $message,
-                                     "sabel.db.connection",
-                                     $extra);
+    $e = new Sabel_DB_Exception_Connection();
+    throw $e->exception($message, $extra);
   }
 }

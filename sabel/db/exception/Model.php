@@ -11,20 +11,19 @@
  */
 class Sabel_DB_Exception_Model extends Sabel_DB_Exception
 {
-  const PKG_NAME = "sabel.db.model";
+  protected $pkg_name = "sabel.db.model";
 
-  public static function error($method, $error)
+  public function exception($method, $error)
   {
-    parent::displayError($method, $error, self::PKG_NAME);
+    return parent::message($method, $error);
   }
 
-  public static function isNotArray($method, $arguments, $prefix = "")
+  public function missing($method, $arguments, $prefix = null)
   {
     $error = "argument should be an array.";
     if ($prefix !== null) $error = $prefix . " " . $error;
 
-    $extra = array("INVALID_ARG" => parent::createArguments($arguments));
-    parent::displayError($method, $error, self::PKG_NAME, $extra);
+    $extra = array("INVALID_ARG" => $this->createArguments($arguments));
+    return parent::message($method, $error, $extra);
   }
 }
-

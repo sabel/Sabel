@@ -11,22 +11,22 @@
  */
 class Sabel_DB_Exception_Config extends Sabel_DB_Exception
 {
-  const PKG_NAME = "sabel.db.config";
+  protected $pkg_name = "sabel.db.config";
 
-  public static function notFound($connectionName)
+  public function notFound($connectionName)
   {
-    $error = "connection name '{$connectionName}' is not found.";
-    $extra = array("CONFIGS" => self::getConfig());
+    $message = "connection name '{$connectionName}' is not found.";
+    $extra   = array("CONFIGS" => self::getConfig());
 
-    parent::displayError("getConfig", $error, self::PKG_NAME, $extra);
+    return parent::message("getConfig", $message, $extra);
   }
 
-  public static function paramNotFound($method, $paramName)
+  public function undefinedIndex($method, $index)
   {
-    $error = "parameter '{$paramName}' is not found.";
-    $extra = array("CONFIGS" => self::getConfig());
+    $message = "parameter '{$index}' is not found.";
+    $extra   = array("CONFIGS" => self::getConfig());
 
-    parent::displayError($method, $error, self::PKG_NAME, $extra);
+    return parent::message($method, $message, $extra);
   }
 
   private static function getConfig()
@@ -34,4 +34,3 @@ class Sabel_DB_Exception_Config extends Sabel_DB_Exception
     return get_db_params(ENVIRONMENT);
   }
 }
-

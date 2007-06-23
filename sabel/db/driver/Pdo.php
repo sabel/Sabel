@@ -185,7 +185,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return $bindParam;
   }
 
-  protected function error($error, $sql, $pdoBind = null)
+  protected function error($error, $sql = null, $pdoBind = null)
   {
     if ($pdoBind) {
       $extra = array("PDO_BIND_VALUES" => $pdoBind);
@@ -193,10 +193,8 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
       $extra = null;
     }
 
-    Sabel_DB_Exception_Driver::execError($sql,
-                                         $error,
-                                         $this->connectionName,
-                                         $extra);
+    $e = new Sabel_DB_Exception_Driver();
+    throw $e->exception($this->sql, $error, $this->connectionName, $extra);
   }
 }
 

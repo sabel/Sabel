@@ -11,11 +11,10 @@
  */
 class Sabel_DB_Exception_Validate extends Sabel_DB_Exception
 {
-  const PKG_NAME = "sabel.db.validate";
+  protected $pkg_name = "sabel.db.validate";
 
-  public static function error($method, $error)
+  public function exception($method, $message)
   {
-    parent::displayError($method, $error, self::PKG_NAME);
+    return parent::message($method, $message);
   }
 }
-

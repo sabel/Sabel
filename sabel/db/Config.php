@@ -66,7 +66,8 @@ class Sabel_DB_Config
     if (isset($config["driver"])) {
       return $config["driver"];
     } else {
-      Sabel_DB_Exception_Config::paramNotFound("getDriverName", "driver");
+      $e = new Sabel_DB_Exception_Config();
+      throw $e->undefinedIndex("getDriverName", "driver");
     }
   }
 
@@ -84,7 +85,8 @@ class Sabel_DB_Config
     } elseif (($drvName === "pgsql" || $drvName === "pdo-pgsql") && !isset($config["schema"])) {
       return "public";
     } else {
-      Sabel_DB_Exception_Config::paramNotFound("getSchemaName", "schema");
+      $e = new Sabel_DB_Exception_Config();
+      throw $e->undefinedIndex("getSchemaName", "schema");
     }
   }
 
@@ -93,7 +95,8 @@ class Sabel_DB_Config
     if (isset(self::$configs[$connectionName])) {
       return self::$configs[$connectionName];
     } else {
-      Sabel_DB_Exception_Config::notFound($connectionName);
+      $e = new Sabel_DB_Exception_Config();
+      throw $e->notFound($connectionName);
     }
   }
 }

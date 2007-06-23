@@ -11,9 +11,9 @@
  */
 class Sabel_DB_Exception_Driver extends Sabel_DB_Exception
 {
-  const PKG_NAME = "sabel.db.driver";
+  protected $pkg_name = "sabel.db.driver";
 
-  public static function execError($sql, $error, $connnectionName, $extra = null)
+  public function exception($sql, $error, $connnectionName, $extra = null)
   {
     $message = array();
     $params  = Sabel_DB_Config::get($connnectionName);
@@ -22,9 +22,12 @@ class Sabel_DB_Exception_Driver extends Sabel_DB_Exception
     $message["CONNECTION_NAME"] = $connnectionName;
     $message["PARAMETERS"]      = $params;
 
-    if ($extra !== null) $message = $message + $extra;
+    if ($extra === null) {
+      $this->message = $message;
+    } else {
+      $this->message = $message + $extra;
+    }
 
-    parent::displayError("execute", $error, self::PKG_NAME, $message);
+    return parent::message("execute", $error);
   }
 }
-

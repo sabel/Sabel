@@ -14,24 +14,26 @@ class Sabel_DB_Exception extends Exception
   const DISPLAY_TRACE_COUNT = 10;
 
   private static $traces = array();
+  protected $message     = array();
 
-  public static function displayError($method, $error, $thrown, $extra = null)
+  protected function message($method, $error, $extra = null)
   {
-    $message = array();
+    $addMessages = array();
 
-    $message["THROWN"]        = $thrown;
-    $message["ERROR_MESSAGE"] = $error;
-    $message["METHOD"]        = $method . "()";
+    $addMessages["THROWN"]        = $this->pkg_name;
+    $addMessages["ERROR_MESSAGE"] = $error;
+    $addMessages["METHOD"]        = $method . "()";
 
-    if ($extra !== null) {
-      $message  = $message + $extra;
+    if ($extra === null) {
+      $message = $addMessages + $this->message;
+    } else {
+      $message = $addMessages + $this->message + $extra;
     }
 
-    $traces = debug_backtrace();
-    array_shift($traces);
-    self::$traces = $traces;
+    $this->message = print_r($message, true);
+    $this->createTrace();
 
-    throw new self(print_r($message, true));
+    return $this;
   }
 
   public static function displayTrace()
@@ -80,7 +82,7 @@ class Sabel_DB_Exception extends Exception
     echo "</pre></b>";
   }
 
-  protected static function createArguments($arguments)
+  protected function createArguments($arguments)
   {
     $type = "(" . ucfirst(getType($arguments)) . ")";
 
@@ -97,5 +99,15 @@ class Sabel_DB_Exception extends Exception
 
     return $arguments;
   }
-}
 
+  private function createTrace()
+  {
+    $traces = debug_backtrace();
+
+    array_shift($traces);
+    array_shift($traces);
+    array_shift($traces);
+
+    self::$traces = $traces;
+  }
+}

@@ -67,8 +67,9 @@ class Sabel_DB_Validator
 
       if ($column->increment) {
         if ($column->value === null || $this->model->isSelected()) continue;
-        $message = "don't set the value in the '{$column->name}'(auto increment column).";
-        Sabel_DB_Exception_Validate::error("validate", $message);
+        $message = "don't set the value in '{$column->name}'(auto increment column).";
+        $e = new Sabel_DB_Exception_Validate();
+        throw $e->exception("validate", $message);
       }
 
       $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
