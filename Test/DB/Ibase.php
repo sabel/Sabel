@@ -48,7 +48,7 @@ class Test_DB_Ibase extends Test_DB_Test
     Test_DB_Test::$db = "IBASE";
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_Model::load('Basic');
+    $model  = MODEL('Basic');
     foreach ($tables as $table) @$model->executeQuery("DELETE FROM $table");
 
     /*
@@ -79,7 +79,7 @@ class Test_DB_Ibase extends Test_DB_Test
     try { @$model->executeQuery($sql); } catch (Exception $e) {}
 
     */
-    $model = Sabel_Model::load('Customer');
+    $model = MODEL('Customer');
     $model->executeQuery('DELETE FROM customer');
   }
 }

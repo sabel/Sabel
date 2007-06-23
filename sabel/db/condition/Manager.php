@@ -28,16 +28,16 @@ class Sabel_DB_Condition_Manager
     return $this->conditions;
   }
 
-  public function create($arg1, $arg2 = null, $arg3 = null)
+  public function create($key, $val = null)
   {
-    if (empty($arg1)) return;
+    if (empty($key)) return;
 
-    if (is_array($arg1)) {
-      foreach ($arg1 as $key => $val) {
-        $this->add(new Sabel_DB_Condition_Object($key, $val));
+    if (is_array($key)) {
+      foreach ($key as $column => $value) {
+        $this->add(new Sabel_DB_Condition_Object($column, $value));
       }
     } else {
-      $this->add(new Sabel_DB_Condition_Object($arg1, $arg2, $arg3));
+      $this->add(new Sabel_DB_Condition_Object($key, $val));
     }
   }
 

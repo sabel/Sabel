@@ -10,25 +10,25 @@ class Test_DB_Test extends SabelTestCase
 
   public function testBasic()
   {
-    $basic = Sabel_Model::load('Basic');
+    $basic = MODEL('Basic');
     $basic->id   = 1;
     $basic->name = 'basic name1';
     $basic->save();
 
-    $basic = Sabel_Model::load('Basic');
+    $basic = MODEL('Basic');
     $basic->save(array('id' => 2, 'name' => 'basic name2'));
 
-    $basic = Sabel_Model::load('Basic');
+    $basic = MODEL('Basic');
     $model = $basic->selectOne(1);
     $this->assertEquals($model->name, 'basic name1');
 
-    $model = Sabel_Model::load('Basic')->selectOne('name', 'basic name2');
+    $model = MODEL('Basic')->selectOne('name', 'basic name2');
     $this->assertEquals((int)$model->id, 2);
   }
 
   public function testParent()
   {
-    $shop = Sabel_Model::load('Company');
+    $shop = MODEL('Company');
     $shop->save(array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1));
     $shop->save(array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1));
     $shop->save(array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2));
@@ -57,10 +57,10 @@ class Test_DB_Test extends SabelTestCase
     $data[] = array('id' => 3, 'name' => 'san diego', 'classification_id' => 2, 'country_id' => 2);
     $data[] = array('id' => 4, 'name' => 'rondon',    'classification_id' => 1, 'country_id' => 3);
 
-    $city = Sabel_Model::load('City');
+    $city = MODEL('City');
     $city->arrayInsert($data);
 
-    $city = Sabel_Model::load('Classification');
+    $city = MODEL('Classification');
     $city->save(array('id' => 1, 'class_name' => 'classname1'));
     $city->save(array('id' => 2, 'class_name' => 'classname2'));
 
@@ -72,7 +72,7 @@ class Test_DB_Test extends SabelTestCase
     $country = new Country();
     $country->arrayInsert($data);
 
-    $planet = Sabel_Model::load('Planet');
+    $planet = MODEL('Planet');
     $planet->id = 1;
     $planet->name = 'earth';
     $planet->save();
@@ -144,7 +144,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testLike()
   {
-    $model = Sabel_Model::load('TestForLike');
+    $model = MODEL('TestForLike');
     $model->save(array('string' => 'aaa'));
     $model->save(array('string' => 'aa_'));
     $model->save(array('string' => 'aba'));
@@ -153,31 +153,31 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue(($newModel->id > 0));
     $this->assertEquals($newModel->string, 'a%a');
 
-    $model = Sabel_Model::load('TestForLike');
-    $model->setCondition('LIKE_string', 'aa_');
+    $model = MODEL('TestForLike');
+    $model->setCondition(new Condition("string", "aa_", LIKE));
     $result = $model->select();
 
     $this->assertTrue(is_array($result));
     $this->assertEquals(count($result), 1);
     $this->assertEquals($result[0]->string, 'aa_');
 
-    $model = Sabel_Model::load('TestForLike');
-    $model->setCondition('LIKE_string', array('aa_', false));
+    $model = MODEL('TestForLike');
+    $model->setCondition(new Condition("string", array("aa_", false), LIKE));
     $result = $model->select();
 
     $this->assertEquals(count($result), 2);
     $this->assertEquals($result[0]->string, 'aaa');
     $this->assertEquals($result[1]->string, 'aa_');
 
-    $model = Sabel_Model::load('TestForLike');
-    $model->setCondition('LIKE_string', 'a%a');
+    $model = MODEL('TestForLike');
+    $model->setCondition(new Condition("string", "a%a", LIKE));
     $result = $model->select();
 
     $this->assertEquals(count($result), 1);
     $this->assertEquals($result[0]->string, 'a%a');
 
-    $model = Sabel_Model::load('TestForLike');
-    $model->setCondition('LIKE_string', array('a%a', false));
+    $model = MODEL('TestForLike');
+    $model->setCondition(new Condition("string", array("a%a", false), LIKE));
     $result = $model->select();
 
     $this->assertEquals(count($result), 3);
@@ -188,7 +188,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testCondition()
   {
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $model->save(array('status' => true,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
     $model->save(array('status' => false, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
     $model->save(array('status' => false, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
@@ -200,34 +200,34 @@ class Test_DB_Test extends SabelTestCase
     $model->save(array('status' => false, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
     $model->save(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
 
-    $model = Sabel_Model::load('TestCondition');
-    $model->setCondition('COMP_point', array('>=', 8000));
+    $model = MODEL('TestCondition');
+    $model->setCondition(new Condition("point", array(">=", 8000), COMPARE));
     $models = $model->select();
     $this->assertEquals(count($models), 3);
 
-    $models = Sabel_Model::load('TestCondition')->select('COMP_point', array('>=', 8000));
+    $models = MODEL('TestCondition')->select(new Condition("point", array(">=", 8000), COMPARE));
     $this->assertEquals(count($models), 3);
 
-    $models = Sabel_Model::load('TestCondition')->select('COMP_point', array('>', 8000));
+    $models = MODEL('TestCondition')->select(new Condition("point", array(">", 8000), COMPARE));
     $this->assertEquals(count($models), 2);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $manager = $model->loadConditionManager();
 
-    $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('>=', 8000)));
-    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('<=', 3000)));
+    $or = new OrCondition();
+    $or->add(new Condition("point", array(">=", 8000), COMPARE));
+    $or->add(new Condition("point", array("<=", 3000), COMPARE));
     $manager->add($or);
 
     $models = $model->select();
     $this->assertEquals(count($models), 6);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $manager = $model->loadConditionManager();
 
-    $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('>=', 8000)));
-    $or->add(new Sabel_DB_Condition_Object('COMP_registed', array('>', '2005-08-01 01:01:01')));
+    $or = new OrCondition();
+    $or->add(new Condition("point", array(">=", 8000), COMPARE));
+    $or->add(new Condition("registed", array(">", "2005-08-01 01:01:01"), COMPARE));
     $manager->add($or);
 
     $model->setConstraint('order', 'id');
@@ -249,7 +249,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model5->point, 9000);
     $this->assertEquals($model6->point, 10000);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $model->setCondition('status', false);
     $models = $model->select();
     $this->assertEquals(count($models), 6);
@@ -263,7 +263,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model3->point, 5000);
 
     $model->unsetConditions();
-    $model->setCondition('status', false, Sabel_DB_Condition_Object::NOT);
+    $model->setCondition(new Condition("status", false, NOT));
     $models = $model->select();
     $this->assertEquals(count($models), 4);
 
@@ -277,8 +277,11 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model3->point, 7000);
     $this->assertEquals($model4->point, 10000);
 
-    $model = Sabel_Model::load('TestCondition');
-    $model->setCondition('BET_registed', array('2005-01-01 11:11:11', '2005-05-05 11:11:11'));
+    $model = MODEL('TestCondition');
+    $model->setCondition(new Condition("registed",
+                                       array("2005-01-01 11:11:11", "2005-05-05 11:11:11"),
+                                       BETWEEN));
+
     $model->setConstraint('order', 'registed');
     $models = $model->select();
     $this->assertEquals(count($models), 4);
@@ -295,10 +298,10 @@ class Test_DB_Test extends SabelTestCase
 
     $model->unsetConditions();
 
-    $condition = new Sabel_DB_Condition_Object('BET_registed',
-                                        array('2005-01-01 11:11:11', '2005-05-05 11:11:11'),
-                                        Sabel_DB_Condition_Object::NOT);
-    $model->setCondition($condition);
+    $model->setCondition(new Condition("registed",
+                                       array("2005-01-01 11:11:11", "2005-05-05 11:11:11"),
+                                       BETWEEN, NOT));
+
     $model->setConstraint('order', 'registed');
     $models = $model->select();
     $this->assertEquals(count($models), 6);
@@ -309,12 +312,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model1->point, 10000);
     $this->assertEquals($model2->point, 5000);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $model->save(array('status' => false, 'registed' => '2004-12-01 10:10:10'));
     $model->save(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
     $model->save(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
 
-    $model->setCondition('point', Sabel_DB_Condition_Object::ISNULL);
+    $model->setCondition("point", IS_NULL);
     $models = $model->select();
     $this->assertEquals(count($models), 2);
 
@@ -326,12 +329,12 @@ class Test_DB_Test extends SabelTestCase
 
     $model->unsetConditions();
 
-    $models = $model->select('point', Sabel_DB_Condition_Object::NOTNULL);
+    $models = $model->select("point", IS_NOT_NULL);
     $this->assertEquals(count($models), 11);
 
-    $model = Sabel_Model::load('TestCondition');
-    $model->setCondition('point', Sabel_DB_Condition_Object::NOTNULL);
-    $model->setCondition('COMP_registed', array('<=', '2005-02-01 10:10:10'));
+    $model = MODEL('TestCondition');
+    $model->setCondition("point", IS_NOT_NULL);
+    $model->setCondition(new Condition("registed", array("<=", "2005-02-01 10:10:10"), COMPARE));
     $models = $model->select();
     $this->assertEquals(count($models), 3);
 
@@ -346,13 +349,13 @@ class Test_DB_Test extends SabelTestCase
 
   public function testTest()
   {
-    $model = Sabel_Model::load('Customer');
+    $model = MODEL('Customer');
     $model->executeQuery('DELETE FROM customer');
 
     $model->save(array('id' => 1, 'name' => 'name1'));
     $model->save(array('id' => 2, 'name' => 'name2'));
 
-    $order = Sabel_Model::load('CustomerOrder');
+    $order = MODEL('CustomerOrder');
     $order->save(array('customer_id' => 1, 'buy_date' => '2005-01-01 10:10:10', 'amount' => 1000));
     $order->save(array('customer_id' => 1, 'buy_date' => '2005-02-01 10:10:10', 'amount' => 2000));
     $order->save(array('customer_id' => 1, 'buy_date' => '2005-03-01 10:10:10', 'amount' => 3000));
@@ -365,7 +368,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testDBRelation()
   {
-    $customer = Sabel_Model::load('Customer')->selectOne(2);
+    $customer = MODEL('Customer')->selectOne(2);
     $orders   = $customer->getChild('CustomerOrder');
     $this->assertEquals(count($orders), 3);
 
@@ -377,7 +380,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($order2->amount, 7000);
     $this->assertEquals($order3->amount, 8000);
 
-    $model = Sabel_Model::load('CustomerOrder');
+    $model = MODEL('CustomerOrder');
     $model->setConstraint('order', 'buy_date desc');
     $orders = $model->select();
     $this->assertEquals(count($orders), 8);
@@ -392,13 +395,13 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($order5->buy_date, '2005-05-01 10:10:10');
     $this->assertEquals($order4->buy_date, '2005-04-01 10:10:10');
 
-    $order = Sabel_Model::load('CustomerOrder');
+    $order = MODEL('CustomerOrder');
     $order->customer_id = 2;
     $order->buy_date = '2005-08-01 10:10:10';
     $order->amount   = 9000;
     $order->save();
 
-    $orders = Sabel_Model::load('Customer')->selectOne(2)->getChild('CustomerOrder');
+    $orders = MODEL('Customer')->selectOne(2)->getChild('CustomerOrder');
     $this->assertEquals(count($orders), 4);
 
     $order = MODEL('CustomerOrder');
@@ -586,34 +589,34 @@ class Test_DB_Test extends SabelTestCase
 
   public function testRemove()
   {
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $this->assertEquals($model->getCount(), 13);
 
     $model->delete('point', 1000);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $this->assertEquals($model->getCount(), 12);
     $model->unsetConditions();
 
-    $model->setCondition('point', Sabel_DB_Condition_Object::ISNULL);
+    $model->setCondition('point', IS_NULL);
     $this->assertEquals($model->getCount(), 2);
 
-    Sabel_Model::load('TestCondition')->delete('point', Sabel_DB_Condition_Object::ISNULL);
+    MODEL('TestCondition')->delete('point', IS_NULL);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $this->assertEquals($model->getCount(), 10);
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $manager = $model->loadConditionManager();
     $manager->clear();
 
-    $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object('point', 10000));
-    $or->add(new Sabel_DB_Condition_Object('COMP_point', array('<=', 4000)));
+    $or = new OrCondition();
+    $or->add(new Condition("point", 10000));
+    $or->add(new Condition("point", array("<=", 4000), COMPARE));
     $manager->add($or);
     $model->delete();
 
-    $model = Sabel_Model::load('TestCondition');
+    $model = MODEL('TestCondition');
     $this->assertEquals($model->getCount(), 6);
 
     $models = $model->select();
@@ -631,17 +634,17 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model5->registed, '2005-02-01 10:10:10');
     $this->assertEquals($model6->registed, '2004-10-01 10:10:10');
 
-    $customer = Sabel_Model::load('Customer')->selectOne(1);
+    $customer = MODEL('Customer')->selectOne(1);
     $customer->delete();
 
-    $customer = Sabel_Model::load('Customer')->selectOne(2);
+    $customer = MODEL('Customer')->selectOne(2);
     $customer->delete();
   }
 
   public function testCascadeDelete()
   {
     $deleter = new Sabel_DB_Model_CascadeDelete("Country", 1);
-    $deleter->execute("CountryCascadeDelete");
+    $deleter->execute(new CountryCascadeDelete());
 
     $country   = new Country();
     $countries = $country->select();
@@ -650,7 +653,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($countries[0]->name, 'usa');
     $this->assertEquals($countries[1]->name, 'england');
 
-    $model  = Sabel_Model::load('City');
+    $model  = MODEL('City');
     $cities = $model->select();
 
     $this->assertEquals(count($cities), 2);
@@ -668,12 +671,12 @@ class Test_DB_Test extends SabelTestCase
 
   public function testTransaction()
   {
-    Sabel_Model::load('CustomerOrder')->executeQuery('DELETE FROM customer_order');
+    MODEL('CustomerOrder')->executeQuery('DELETE FROM customer_order');
 
-    $customers = Sabel_Model::load('Customer')->select();
+    $customers = MODEL('Customer')->select();
     $this->assertFalse($customers);
 
-    $orders = Sabel_Model::load('CustomerOrder')->select();
+    $orders = MODEL('CustomerOrder')->select();
     $this->assertFalse($orders);
 
     $model = Sabel_DB_Transaction::load("CustomerOrder");
@@ -695,32 +698,32 @@ class Test_DB_Test extends SabelTestCase
     // not execute.
     Sabel_DB_Transaction::commit();
 
-    $customers = Sabel_Model::load('Customer')->select();
+    $customers = MODEL('Customer')->select();
     $this->assertFalse($customers);
 
-    $orders = Sabel_Model::load('CustomerOrder')->select();
+    $orders = MODEL('CustomerOrder')->select();
     $this->assertFalse($orders);
   }
 
   public function testDatabasesCasecadeDelete()
   {
-    $model = Sabel_Model::load('CustomerOrder');
+    $model = MODEL('CustomerOrder');
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->save(array('customer_id' => 2, 'buy_date' => '2000-02-02 02:02:02', 'amount' => 2000));
 
-    $model = Sabel_Model::load('Customer');
+    $model = MODEL('Customer');
     $model->save(array('id' => 1, 'name' => 'name1'));
     $model->save(array('id' => 2, 'name' => 'name2'));
     $model->save(array('id' => 3, 'name' => 'name3'));
 
     $deleter = new Sabel_DB_Model_CascadeDelete("Customer", 1);
-    $deleter->execute("CustomerCascadeDelete");
+    $deleter->execute(new CustomerCascadeDelete());
 
-    $this->assertEquals(Sabel_Model::load('Customer')->getCount(), 2);
+    $this->assertEquals(MODEL('Customer')->getCount(), 2);
 
-    $model = Sabel_Model::load('Customer')->select();
+    $model = MODEL('Customer')->select();
     $cus1  = $model[0];
     $cus2  = $model[1];
 
@@ -729,7 +732,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($cus2->id, 3);
     $this->assertEquals($cus2->name, 'name3');
 
-    $model = Sabel_Model::load('CustomerOrder')->select();
+    $model = MODEL('CustomerOrder')->select();
     $this->assertEquals(count($model), 1);
     $this->assertEquals($model[0]->customer_id, 2);
     $this->assertEquals($model[0]->buy_date, '2000-02-02 02:02:02');
@@ -741,11 +744,11 @@ class Test_DB_Test extends SabelTestCase
 
   public function testUpdate()
   {
-    $model = Sabel_Model::load('Customer');
+    $model = MODEL('Customer');
     $model->save(array('id' => 1, 'name' => 'name1'));
     $model->save(array('id' => 2, 'name' => 'name2'));
 
-    $customer = Sabel_Model::load('Customer')->selectOne(1);
+    $customer = MODEL('Customer')->selectOne(1);
     $this->assertEquals($customer->name, 'name1');
 
     $customer->name = 'new name1';
@@ -754,10 +757,10 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$customer->id, 1);
     $this->assertEquals($customer->name, 'new name1');
 
-    $customer = Sabel_Model::load('Customer')->selectOne(1);
+    $customer = MODEL('Customer')->selectOne(1);
     $this->assertEquals($customer->name, 'new name1');
 
-    $customer = Sabel_Model::load('Customer')->selectOne(100);
+    $customer = MODEL('Customer')->selectOne(100);
     $this->assertFalse($customer->isSelected());
 
     $customer->name = 'name100';
@@ -765,11 +768,11 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals((int)$customer->id, 100);
     $this->assertEquals($customer->name, 'name100');
 
-    $customer = Sabel_Model::load('Customer')->selectOne(100);
+    $customer = MODEL('Customer')->selectOne(100);
     $this->assertTrue($customer->isSelected());
     $this->assertEquals($customer->name, 'name100');
 
-    $model = Sabel_Model::load('CustomerOrder');
+    $model = MODEL('CustomerOrder');
     $model->setCondition(5);
     $model->setCondition('customer_id', 10);
     $order = $model->selectOne();
@@ -779,7 +782,7 @@ class Test_DB_Test extends SabelTestCase
     $order->amount   = 9999;
     $order->save();
 
-    $order = Sabel_Model::load('CustomerOrder')->selectOne(5);
+    $order = MODEL('CustomerOrder')->selectOne(5);
     $this->assertTrue($order->isSelected());
 
     $this->assertEquals($order->id, 5);
@@ -790,7 +793,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testSchema()
   {
-    $model  = Sabel_Model::load('SchemaTest');
+    $model  = MODEL('SchemaTest');
     $schema = $model->getSchema();
 
     $id = $schema->id;
@@ -885,19 +888,19 @@ class Test_DB_Test extends SabelTestCase
 
   public function testBridge()
   {
-    $model = Sabel_Model::load('Student');
+    $model = MODEL('Student');
     $model->save(array('id' => 1, 'name' => 'suzuki'));
     $model->save(array('id' => 2, 'name' => 'satou'));
     $model->save(array('id' => 3, 'name' => 'tanaka'));
     $model->save(array('id' => 4, 'name' => 'koike'));
     $model->save(array('id' => 5, 'name' => 'yamada'));
 
-    $model = Sabel_Model::load('Course');
+    $model = MODEL('Course');
     $model->save(array('id' => 1, 'course_name' => 'math'));
     $model->save(array('id' => 2, 'course_name' => 'physics'));
     $model->save(array('id' => 3, 'course_name' => 'sience'));
 
-    $model = Sabel_Model::load('StudentCourse');
+    $model = MODEL('StudentCourse');
     $model->save(array('student_id' => 1, 'course_id' => 1));
     $model->save(array('student_id' => 1, 'course_id' => 2));
     $model->save(array('student_id' => 2, 'course_id' => 2));
@@ -909,21 +912,21 @@ class Test_DB_Test extends SabelTestCase
     $pkey = $model->getSchema()->getPrimaryKey();
     $this->assertTrue(is_array($pkey));
 
-    $suzuki = Sabel_Model::load('Student')->selectOne(1);
+    $suzuki = MODEL('Student')->selectOne(1);
     $this->assertEquals($suzuki->name, 'suzuki');
 
     $bridge = new Sabel_DB_Model_Bridge($suzuki, "StudentCourse");
     $courses = $bridge->getChild('Course');
     $this->assertEquals(count($courses), 2);
 
-    $yamada = Sabel_Model::load('Student')->selectOne(5);
+    $yamada = MODEL('Student')->selectOne(5);
     $this->assertEquals($yamada->name, 'yamada');
 
     $bridge = new Sabel_DB_Model_Bridge($yamada, "StudentCourse");
     $courses = $bridge->getChild('Course');
     $this->assertFalse($courses);
 
-    $course = Sabel_Model::load('Course')->selectOne(1);
+    $course = MODEL('Course')->selectOne(1);
     $this->assertEquals($course->course_name, 'math');
 
     $bridge = new Sabel_DB_Model_Bridge($course, "StudentCourse");
@@ -933,17 +936,17 @@ class Test_DB_Test extends SabelTestCase
 
   public function testTimer()
   {
-    $model = Sabel_Model::load('Timer');
+    $model = MODEL('Timer');
     $model->save(array('id' => 1));
 
-    $model = Sabel_Model::load('Timer')->selectOne(1);
+    $model = MODEL('Timer')->selectOne(1);
     $this->assertEquals($model->id, 1);
     $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
 
     $model->save(array('auto_create' => date('Y-m-d H:i:s')));
 
-    $model = Sabel_Model::load('Timer')->selectOne(1);
+    $model = MODEL('Timer')->selectOne(1);
     $this->assertEquals($model->id, 1);
     $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
@@ -951,7 +954,7 @@ class Test_DB_Test extends SabelTestCase
 
   public function testCustomCommand()
   {
-    $model = Sabel_Model::load('Timer');
+    $model = MODEL('Timer');
     $result = $model->custom("test");
 
     $this->assertEquals($result, "test");
@@ -1090,7 +1093,10 @@ class CustomerCascadeDelete
 
   public function getKeys()
   {
+    $keys = array();
+    $keys["Customer"]["CustomerOrder"] = array("id" => "id", "fkey" => "customer_id");
 
+    return $keys;
   }
 }
 
@@ -1100,10 +1106,10 @@ class CountryCascadeDelete
   {
     $chains = array();
 
-    $chains["Users"]   = array("Blog");
     $chains["Country"] = array("City");
     $chains["City"]    = array("Company", "Users");
     $chains["Company"] = array("Users");
+    $chains["Users"]   = array("Blog");
 
     return $chains;
   }
@@ -1111,9 +1117,11 @@ class CountryCascadeDelete
   public function getKeys()
   {
     $keys = array();
-    $keys["Country"]["City"] = array("id" => "id", "fkey" => "country_id");
-    $keys["City"]["Company"] = array("id" => "id", "fkey" => "city_id");
-    $keys["City"]["Users"]   = array("id" => "id", "fkey" => "city_id");
+    $keys["Country"]["City"]  = array("id" => "id", "fkey" => "country_id");
+    $keys["City"]["Company"]  = array("id" => "id", "fkey" => "city_id");
+    $keys["City"]["Users"]    = array("id" => "id", "fkey" => "city_id");
+    $keys["Company"]["Users"] = array("id" => "id", "fkey" => "company_id");
+    $keys["Users"]["Blog"]    = array("id" => "id", "fkey" => "users_id");
 
     return $keys;
   }
@@ -1174,3 +1182,4 @@ interface Sabel_DB_Command
 
   const CUSTOM = 0x80;
 }
+

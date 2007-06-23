@@ -20,7 +20,7 @@ abstract class Sabel_DB_Condition_Builder_Base implements Sabel_DB_Condition_Bui
       case Sabel_DB_Condition_Object::NORMAL:
         return $this->buildNormal($condition);
 
-      case Sabel_DB_Condition_Object::BET:
+      case Sabel_DB_Condition_Object::BETWEEN:
         return $this->buildBetween($condition);
 
       case Sabel_DB_Condition_Object::LIKE:
@@ -32,10 +32,10 @@ abstract class Sabel_DB_Condition_Builder_Base implements Sabel_DB_Condition_Bui
       case Sabel_DB_Condition_Object::ISNULL:
         return $this->buildIsNull($condition->key);
 
-      case Sabel_DB_Condition_Object::NOTNULL:
+      case Sabel_DB_Condition_Object::ISNOTNULL:
         return $this->buildIsNotNull($condition->key);
 
-      case Sabel_DB_Condition_Object::COMP:
+      case Sabel_DB_Condition_Object::COMPARE:
         return $this->buildCompare($condition);
     }
   }

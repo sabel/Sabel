@@ -215,7 +215,7 @@ abstract class Sabel_DB_Model
     $this->conditionManager = $manager;
   }
 
-  public function setCondition($arg1, $arg2 = null, $arg3 = null)
+  public function setCondition($arg1, $arg2 = null)
   {
     if (empty($arg1)) return null;
 
@@ -228,7 +228,7 @@ abstract class Sabel_DB_Model
     } elseif ($arg2 === null) {
       $manager->create($this->getPrimaryKey(), $arg1);
     } else {
-      $manager->create($arg1, $arg2, $arg3);
+      $manager->create($arg1, $arg2);
     }
   }
 
@@ -300,9 +300,9 @@ abstract class Sabel_DB_Model
     return $this->selected;
   }
 
-  public function getCount($arg1 = null, $arg2 = null, $arg3 = null)
+  public function getCount($arg1 = null, $arg2 = null)
   {
-    $this->setCondition($arg1, $arg2, $arg3);
+    $this->setCondition($arg1, $arg2);
 
     $tmpProjection  = $this->projection;
     $tmpConstraints = $this->constraints;
@@ -320,13 +320,13 @@ abstract class Sabel_DB_Model
     return (int)$rows[0]["cnt"];
   }
 
-  public function selectOne($arg1 = null, $arg2 = null, $arg3 = null)
+  public function selectOne($arg1 = null, $arg2 = null)
   {
     if ($arg1 === null && $this->conditionManager === null) {
       Sabel_DB_Exception_Model::error("selectOne", "must set the condition.");
     }
 
-    $this->setCondition($arg1, $arg2, $arg3);
+    $this->setCondition($arg1, $arg2);
     return $this->createModel(clone $this);
   }
 
@@ -352,9 +352,9 @@ abstract class Sabel_DB_Model
     return $model;
   }
 
-  public function select($arg1 = null, $arg2 = null, $arg3 = null)
+  public function select($arg1 = null, $arg2 = null)
   {
-    $this->setCondition($arg1, $arg2, $arg3);
+    $this->setCondition($arg1, $arg2);
     $parents = $this->parents;
 
     if ($parents) {
@@ -404,7 +404,6 @@ abstract class Sabel_DB_Model
   {
     $child   = MODEL($childName);
     $foreign = $child->getSchema()->getForeignKeys();
-    $pkey    = $this->getPrimaryKey();
 
     if ($foreign === null) {
       $col  = "id";
@@ -428,18 +427,21 @@ abstract class Sabel_DB_Model
     $pKey = $this->getPrimaryKey();
     if (!is_array($pKey)) $pKey = (array)$pKey;
 
-    $manager = $this->loadConditionManager();
-    $normal  = Sabel_DB_Condition_Object::NORMAL;
+    $manager  = $this->loadConditionManager();
+    $normal   = Sabel_DB_Condition_Object::NORMAL;
+    $selected = true;
 
     foreach ($pKey as $key) {
       if (isset($row[$key])) {
         $c = new Sabel_DB_Condition_Object($key, $row[$key], $normal);
         $manager->addUnique($c);
+      } else {
+        $selected = false;
       }
     }
 
     $this->values   = $row;
-    $this->selected = true;
+    $this->selected = $selected;
   }
 
   public function validate($ignores = array())
@@ -524,7 +526,7 @@ abstract class Sabel_DB_Model
     }
   }
 
-  public function delete($arg1 = null, $arg2 = null, $arg3 = null)
+  public function delete($arg1 = null, $arg2 = null)
   {
     $manager = $this->loadConditionManager();
 
@@ -546,7 +548,7 @@ abstract class Sabel_DB_Model
         $this->setCondition($key, $ucond[$key]->value);
       }
     } else {
-      $this->setCondition($arg1, $arg2, $arg3);
+      $this->setCondition($arg1, $arg2);
     }
 
     $this->getCommand()->delete();

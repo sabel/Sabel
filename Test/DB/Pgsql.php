@@ -49,7 +49,7 @@ class Test_DB_Pgsql extends Test_DB_Test
     Test_DB_Test::$db = 'PGSQL';
 
     $tables = Test_DB_Test::$TABLES;
-    $model  = Sabel_Model::load('Basic');
+    $model  = MODEL('Basic');
 
     $ph = new PgsqlHelper();
 
@@ -66,7 +66,7 @@ class Test_DB_Pgsql extends Test_DB_Test
       @$model->executeQuery("DROP TABLE customer");
     } catch (Exception $e) { }
 
-    $model = Sabel_Model::load('Customer');
+    $model = MODEL('Customer');
 
     $sqls = array('CREATE TABLE customer( id integer primary key, name varchar(24))',
                   'CREATE TABLE parents( id integer primary key, name varchar(24))',

@@ -139,58 +139,6 @@ function environment($string)
   }
 }
 
-/**
- * Sabel db functions
- *
- */
-function convert_to_tablename($mdlName)
-{
-  static $cache = array();
-
-  if (isset($cache[$mdlName])) {
-    return $cache[$mdlName];
-  }
-
-  if (preg_match("/^[a-z0-9_]+$/", $mdlName)) {
-    $tblName = $mdlName;
-  } else {
-    $tblName = substr(strtolower(preg_replace("/([A-Z])/", '_$1', $mdlName)), 1);
-  }
-
-  return $cache[$mdlName] = $tblName;
-}
-
-function convert_to_modelname($tblName)
-{
-  static $cache = array();
-
-  if (isset($cache[$tblName])) {
-    return $cache[$tblName];
-  } else {
-    $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));
-    return $cache[$tblName] = $mdlName;
-  }
-}
-
-function MODEL($mdlName, $arg1 = null, $arg2 = null)
-{
-  return Sabel_Model::load($mdlName, $arg1, $arg2);
-}
-
-function getRelationalKeys($model, $keys = array(), $tblName = null)
-{
-  if ($tblName === null) $tblName = $model->getTableName();
-
-  $pKey = $model->getPrimaryKey();
-  $fKey = (isset($keys["fkey"])) ? $keys["fkey"] : $tblName . "_" . $pKey;
-  $id   = (isset($keys["id"]))   ? $keys["id"]   : $pKey;
-
-  return array("id" => $id, "fkey" => $fKey);
-}
-
-
-// end of db functions.
-
 function now()
 {
   return date("Y-m-d H:i:s");
@@ -222,5 +170,48 @@ function renderingComponentAsString($componentName, $args)
     return $view->rendering(false);
   } else {
     throw new Sabel_Exception_Runtime($path . " controller notfound");
+  }
+}
+
+/***   sabel.db functions   ***/
+
+function convert_to_tablename($mdlName)
+{
+  static $cache = array();
+
+  if (isset($cache[$mdlName])) {
+    return $cache[$mdlName];
+  }
+
+  if (preg_match("/^[a-z0-9_]+$/", $mdlName)) {
+    $tblName = $mdlName;
+  } else {
+    $tblName = substr(strtolower(preg_replace("/([A-Z])/", '_$1', $mdlName)), 1);
+  }
+
+  return $cache[$mdlName] = $tblName;
+}
+
+function convert_to_modelname($tblName)
+{
+  static $cache = array();
+
+  if (isset($cache[$tblName])) {
+    return $cache[$tblName];
+  } else {
+    $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));
+    return $cache[$tblName] = $mdlName;
+  }
+}
+
+function MODEL($mdlName, $arg1 = null, $arg2 = null)
+{
+  if (class_exists($mdlName, true)) {
+    return new $mdlName($arg1, $arg2);
+  } elseif ($arg1 === null) {
+    return new Proxy($mdlName);
+  } else {
+    $proxy = new Proxy($mdlName);
+    return $proxy->selectOne($arg1, $arg2);
   }
 }

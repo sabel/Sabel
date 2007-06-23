@@ -1,5 +1,7 @@
 <?php
 
+require (dirname(__FILE__) . "/db.php");
+
 function a($uri, $anchor, $param = null)
 {
   if ($param === null) {
@@ -44,39 +46,4 @@ function css($file)
     $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
     return sprintf($fmt, "/css/{$file}.css");
   }
-}
-
-/***   helpers for sabel.db   ***/
-
-$SABEL_DB_DIR = "sabel" . DIR_DIVIDER . "db" . DIR_DIVIDER;
-
-require ($SABEL_DB_DIR . "Join.php");
-require ($SABEL_DB_DIR . "join"      . DIR_DIVIDER . "Relation.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "Object.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "Or.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "And.php");
-
-class Join         extends Sabel_DB_Join {}
-class Relation     extends Sabel_DB_Join_Relation {}
-class Condition    extends Sabel_DB_Condition_Object {}
-class OrCondition  extends Sabel_DB_Condition_Or {}
-class AndCondition extends Sabel_DB_Condition_And {}
-
-define("NOT",         Sabel_DB_Condition_Object::NOT);
-define("IS_NULL",     Sabel_DB_Condition_Object::ISNULL);
-define("IS_NOT_NULL", Sabel_DB_Condition_Object::NOTNULL);
-
-function trans_begin($model)
-{
-  return Sabel_DB_Transaction::begin($model);
-}
-
-function trans_commit()
-{
-  Sabel_DB_Transaction::commit();
-}
-
-function trans_rollback()
-{
-  Sabel_DB_Transaction::rollback();
 }

@@ -11,31 +11,31 @@
  */
 class Sabel_DB_Condition_Object
 {
-  const NOT     = "NOT";
-  const NORMAL  = "NORMAL";
-  const ISNULL  = "NULL";
-  const NOTNULL = "NOTNULL";
-
-  const BET  = "BET_";
-  const IN   = "IN_";
-  const LIKE = "LIKE_";
-  const COMP = "COMP_";
+  const ISNULL    = "CONDITION_NULL";
+  const ISNOTNULL = "CONDITION_NOTNULL";
+  const NORMAL    = "CONDITION_NORMAL";
+  const IN        = "CONDITION_IN";
+  const BETWEEN   = "CONDITION_BETWEEN";
+  const LIKE      = "CONDITION_LIKE";
+  const COMPARE   = "CONDITION_COMPARE";
+  const NOT       = "CONDITION_NOT";
 
   protected $values = array();
 
-  public function __construct($key, $val, $option = null)
+  public function __construct($key, $val, $type = self::NORMAL, $not = false)
   {
-    if ($option === self::NORMAL) {
-      $this->values = array("key"   => $this->filterModelAlias($key),
-                            "type"  => self::NORMAL,
-                            "value" => $val);
-    } else {
-      list($key, $type) = $this->prepare($key, $val);
+    if (strpos($key, ".") !== false) {
+      list($mdlName, $key) = explode(".", $key);
+      $key = convert_to_tablename($mdlName) . "." . $key;
+    }
 
-      $this->values = array("key"   => $key,
-                            "type"  => $type,
-                            "value" => $val,
-                            "not"   => ($option === self::NOT));
+    if ($val === self::ISNULL || $val === self::ISNOTNULL) {
+      $this->values = array("key" => $key, "type"  => $val);
+    } elseif($type === self::NOT) {
+      $this->values = array("key" => $key, "value" => $val, "type" => self::NORMAL, "not" => true);
+    } else {
+      $not = ($not === self::NOT);
+      $this->values = array("key" => $key, "value" => $val, "type" => $type, "not" => $not);
     }
   }
 
@@ -47,43 +47,5 @@ class Sabel_DB_Condition_Object
   public function build($builder)
   {
     return $builder->build($this);
-  }
-
-  private function prepare($key, $val)
-  {
-    if (strpos($key, self::IN) === 0) {
-      $key  = str_replace(self::IN, "", $key);
-      $type = self::IN;
-      if (!is_array($val)) {
-        throw new Exception("parameter of 'IN_' should be an array.");
-      }
-    } elseif (strpos($key, self::LIKE) === 0) {
-      $key  = str_replace(self::LIKE, "", $key);
-      $type = self::LIKE;
-    } elseif (strpos($key, self::BET) === 0) {
-      $key  = str_replace(self::BET, "", $key);
-      $type = self::BET;
-    } elseif (strpos($key, self::COMP) === 0) {
-      $key  = str_replace(self::COMP, "", $key);
-      $type = self::COMP;
-    } elseif ($val === self::ISNULL) {
-      $type = self::ISNULL;
-    } elseif ($val === self::NOTNULL) {
-      $type = self::NOTNULL;
-    } else {
-      $type = self::NORMAL;
-    }
-
-    return array($this->filterModelAlias($key), $type);
-  }
-
-  private function filterModelAlias($key)
-  {
-    if (strpos($key, ".") !== false) {
-      list($mdlName, $key) = explode(".", $key);
-      $key = convert_to_tablename($mdlName) . "." . $key;
-    }
-
-    return $key;
   }
 }

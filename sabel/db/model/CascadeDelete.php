@@ -21,11 +21,13 @@ class Sabel_DB_Model_CascadeDelete
     $this->model = MODEL($mdlName, $id);
   }
 
-  public function execute($configClassName)
+  public function execute($config)
   {
-    $model   = $this->model;
-    $config  = new $configClassName();
+    if (!is_object($config)) {
+      throw new Exception("argument should be an object of cascade delete config.");
+    }
 
+    $model      = $this->model;
     $cascade    = $config->getChain();
     $this->keys = $config->getKeys();
     $mdlName    = $model->getModelName();
@@ -93,12 +95,11 @@ class Sabel_DB_Model_CascadeDelete
   protected function getKeys($parent, $child, $pKey)
   {
     if (isset($this->keys[$parent][$child])) {
-      $keys = $this->keys[$parent][$child];
+      return $this->keys[$parent][$child];
     } else {
-      $keys = null;
+      $tblName = convert_to_tablename($parent);
+      return array("id" => "id", "fkey" => "{$tblName}_id");
     }
-
-    return getRelationalKeys(MODEL($parent), $keys);
   }
 
   private function clearCascadeStack()
