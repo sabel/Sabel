@@ -15,23 +15,13 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   protected $tableLists = array();
 
-  public function __construct($model)
-  {
-    parent::__construct($model);
-    Sabel_DB_Join_Alias::setBaseTableName($this->tblName);
-  }
-
   public function buildParents()
   {
     $parents = $this->sourceModel->getParents();
     $result  = $this->addParentModel($parents);
 
-    if ($result === self::CANNOT_JOIN) {
-      $this->clear();
-      return self::CANNOT_JOIN;
-    } else {
-      return true;
-    }
+    if ($result === self::CANNOT_JOIN) $this->clear();
+    return $result;
   }
 
   protected function addParentModel($parents, $join = null)
@@ -59,10 +49,13 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
       if ($parents = $model->getParents()) {
         $more = new Sabel_DB_Join_Relation($model);
-        $this->addParentModel($parents, $more);
+        $res  = $this->addParentModel($parents, $more);
+        if ($res === self::CANNOT_JOIN) return self::CANNOT_JOIN;
         $this->add($more);
       }
     }
+
+    return true;
   }
 
   protected function getTableLists()
@@ -91,10 +84,9 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $cols[] = $tblName . "." . $column;
     }
 
-    $projection = implode(", ", $cols) . ", "
-                . implode(", ", $projection);
+    $projection = implode(", ", $cols) . ", " . implode(", ", $projection);
 
-    $query = array();
+    $query   = array();
     $query[] = "SELECT $projection FROM $tblName";
 
     foreach ($objects as $object) {
@@ -105,13 +97,13 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     $rows  = $model->getCommand()->join($query)->getResult();
 
     if (!$rows) {
-      $this->clear();
-      return false;
+      $results = false;
     } else {
       $results = $this->resultBuilder->build($model, $rows);
-      $this->clear();
-      return $results;
     }
+
+    $this->clear();
+    return $results;
   }
 
   protected function clear()

@@ -41,16 +41,6 @@ abstract class Sabel_DB_Sql_Base
     }
   }
 
-  protected function getConditionForUpdate($driver)
-  {
-    $conds = $this->model->getConditionManager()->getUniqueConditions();
-
-    $manager = new Sabel_DB_Condition_Manager();
-    foreach ($conds as $condition) $manager->add($condition);
-
-    return $manager->build($driver);
-  }
-
   protected function emptyCheck($values, $method)
   {
     if (empty($values)) {

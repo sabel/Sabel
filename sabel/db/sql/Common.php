@@ -62,7 +62,6 @@ class Sabel_DB_Sql_Common extends Sabel_DB_Sql_Base
       }
     }
 
-    $sql = "UPDATE $tblName SET " . implode(", ", $sql);
-    return $sql . $this->getConditionForUpdate($driver);
+    return "UPDATE $tblName SET " . implode(", ", $sql);
   }
 }

@@ -12,8 +12,7 @@
  */
 abstract class Sabel_DB_Join_Base
 {
-  protected $objects = array();
-
+  protected $objects       = array();
   protected $tblName       = "";
   protected $sourceModel   = null;
   protected $resultBuilder = null;

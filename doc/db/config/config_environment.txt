@@ -1,110 +1,97 @@
 環境が違えばDBサーバの構成が違うこともごく当たり前のことです。
-config/connection.phpではSabelが実行される環境によってDB接続のパラメータが切り替わるようになっています。
 
 例えばDEVELOPMENT(開発環境)においては次のようなパラメータかもしれません。
 
-$params = array("default" => array(
-                  "driver"   => "mysql",
-                  "host"     => "localhost",
-                  "database" => "project_db",
-                  "user"     => "root",
-                  "password" => "")
-               );
+  $params = array("default" => array(
+                    "driver" => "mysql",
+                    "host" => "localhost",
+                    "database" => "project_db",
+                    "user" => "root",
+                    "password" => "")
+                 );
 
 そしてPRODUCTION(運用環境)においては次のようなパラメータかもしれません。
 
-$params = array("default" => array(
-                  "driver"   => "mysql",
-                  "host"     => "192.168.0.50",
-                  "database" => "project_db",
-                  "user"     => "web_user",
-                  "password" => "web_pass")
-               );
+  $params = array("default" => array(
+                    "driver" => "mysql",
+                    "host" => "192.168.0.50",
+                    "database" => "project_db",
+                    "user" => "web_user",
+                    "password" => "web_pass")
+                 );
 
 パラメータは環境ごとに設定できます。
 DBサーバに変更がない限り、一回設定してしまえば編集する必要はありません。
 
-前ページでは複数のデータベースを扱うように、config/connection.phpを編集しました。
+前ページでは3台のデータベースを扱うように、config/connection.phpを編集しました。
 その設定をもう一度ここに書きます。そして、これをPRODUCTION環境でのパラメータだとします。
 
-$params = array("users" => array(
-                  "driver"   => "pgsql",
-                  "host"     => "192.168.0.50",
-                  "database" => "project_users",
-                  "user"     => "web_pg_user",
-                  "password" => "web_pg_pass"),
-                "blog" => array(
-                  "driver"   => "mysql",
-                  "host"     => "192.168.0.51",
-                  "database" => "project_blog",
-                  "user"     => "web_my_user",
-                  "password" => "web_my_pass"),
-                "mail" => array(
-                  "driver"   => "mysql",
-                  "host"     => "192.168.0.52",
-                  "database" => "project_mail",
-                  "user"     => "web_my_user",
-                  "password" => "web_my_pass")
-               );
+  $params = array("users" => array(
+                    "driver" => "mysql",
+                    "host" => "192.168.0.50",
+                    "database" => "project_users",
+                    "user" => "web_user",
+                    "password" => "web_pass"),
+                  "blog" => array(
+                    "driver" => "mysql",
+                    "host" => "192.168.0.51",
+                    "database" => "project_blog",
+                    "user" => "web_user",
+                    "password" => "web_pass"),
+                  "mail" => array(
+                    "driver" => "mysql",
+                    "host" => "192.168.0.52",
+                    "database" => "project_mail",
+                    "user" => "web_user",
+                    "password" => "web_pass")
+                 );
 
 ローカル(開発環境)においてDBサーバを3つも立てるのは面倒かもしれません。
-とはいってもこの例では「何らかの理由」というものを想定し、PostgreSQLとMySQLという2つのDB製品を使用しました。
-PostgreSQLでしかできない機能を使っていると考えると、当然アプリケーション側もPostgreSQLに依存しているでしょう。
-そこまで想定すると、"users"はPostgreSQLである必要があります。
+それぞれを異なるポートで動作させるという手があります。その時の設定は次のようになるかもしれません。
 
-ローカル(開発環境)でもPostgreSQLとMySQL、2つのDBサーバを動作させる必要があります。問題は2台のMySQLです。
-MySQLを異なるポートで2つ動作させるという手があります。その時の設定は次のようになるかもしれません。
+  $params = array("users" => array(
+                    "driver" => "mysql",
+                    "host" => "127.0.0.1",
+                    "port" => "3306",
+                    "database" => "local_users",
+                    "user" => "root",
+                    "password" => ""),
+                  "blog" => array(
+                    "driver" => "mysql",
+                    "host" => "127.0.0.1",
+                    "port" => "3307",
+                    "database" => "local_blog",
+                    "user" => "root",
+                    "password" => ""),
+                  "mail" => array(
+                    "driver" => "mysql",
+                    "host" => "127.0.0.1",
+                    "port" => "3308",
+                    "database" => "local_mail",
+                    "user" => "root",
+                    "password" => "")
+                 );
 
-$params = array("users" => array(
-                  "driver"   => "pgsql",
-                  "host"     => "localhost",
-                  "database" => "local_users",
-                  "user"     => "pg_root",
-                  "password" => "pg_pass"),
-                "blog" => array(
-                  "driver"   => "mysql",
-                  "host"     => "127.0.0.1",
-                  "port"     => "3306",
-                  "database" => "local_blog",
-                  "user"     => "root",
-                  "password" => ""),
-                "mail" => array(
-                  "driver"   => "mysql",
-                  "host"     => "127.0.0.1",
-                  "port"     => "3307",
-                  "database" => "local_mail",
-                  "user"     => "root",
-                  "password" => "")
-               );
+このように設定すれば、環境の違いを気にせずにコーディングできるでしょう。
+しかし、やはりMySQLサーバを3台構築するのは面倒かもしれません。特別な理由がなければ、少なくとも私は面倒です。
 
-このように設定すれば、アプリケーションは正常に動作するでしょう。
-しかし、やはりMySQLサーバを2台構築するのは面倒かもしれません。特別な理由がなければ、少なくとも私は面倒です。
+以下のようにすることで、この問題を解決することができます。
 
-MySQLを1台で、アプリケーションを動作させる場合は次のようにします。
+  $params = array();
+  $params["users"] = array("driver" => "mysql",
+                           "host" => "localhost",
+                           "database" => "local_db",
+                           "user" => "root",
+                           "password" => "");
 
-$params = array();
-$params["users"] = array("driver" => "pgsql",
-                         "host"     => "localhost",
-                         "database" => "local_pg",
-                         "user"     => "pg_root",
-                         "password" => "pg_pass");
-
-$params["blog"] = array("driver" => "mysql",
-                        "host"     => "127.0.0.1",
-                        "database" => "local_my",
-                        "user"     => "root",
-                        "password" => "");
-
-$params["mail"] = $params["blog"];
+  $params["blog"] = $params["users"];
+  $params["mail"] = $params["users"];
 
 このようにすればMySQLサーバは1台で済みますし、アプリケーションはRODUCTION(運用環境)と同様に動作します。
 
-PRODUCTIONでは"project_blog"と"project_mail"に存在するテーブルが、ローカル(DEVELOPMENT)では"local_my"というデータベースに全て存在します。
-しかし、アプリケーション側はテーブルがどこにあるかを気にする必要はありません。データベースがどこにあるかさえ気にしていないのですから。
+PRODUCTIONのDBサーバごとのテーブルが、ローカル(DEVELOPMENT)では"local_db"というデータベースに全て存在します。
+しかし、アプリケーションはテーブルがどこにあるかを気にする必要はありません。データベースがどこにあるかさえ気にしていないのですから。
 
 しかしながら注意点はあります。
 テーブルが同じデータベースに存在するということは、テーブル結合が可能です。
 アプリケーションを作成(コーディング)している時にそのような処理を記述してしまうと、PRODUCTION環境に移行した時にアプリケーションは動作しなくなります。
-
-全てが同じDB製品ならば、PRODUCTION環境でいくつDBサーバを使用するとしてもDEVELOPMENT環境では1台で済みます。
-

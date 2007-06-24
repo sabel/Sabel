@@ -346,7 +346,7 @@ abstract class Sabel_DB_Model
       $conditions = $manager->getConditions();
 
       foreach ($conditions as $condition) {
-        if ($manager->addUnique($condition)) {
+        if ($manager->isObject($condition)) {
           $model->{$condition->key} = $condition->value;
         }
       }
@@ -431,12 +431,11 @@ abstract class Sabel_DB_Model
     if (!is_array($pKey)) $pKey = (array)$pKey;
 
     $manager  = $this->loadConditionManager();
-    $normal   = Sabel_DB_Condition_Object::NORMAL;
     $selected = true;
 
     foreach ($pKey as $key) {
       if (isset($row[$key])) {
-        $c = new Sabel_DB_Condition_Object($key, $row[$key], $normal);
+        $c = new Sabel_DB_Condition_Object($key, $row[$key]);
         $manager->addUnique($c);
       } else {
         $selected = false;
@@ -463,7 +462,7 @@ abstract class Sabel_DB_Model
     if ($this->isSelected()) {
       $saveValues = ($data) ? $data : $this->updateValues;
       $saveMethod = "update";
-      $this->updateValues= array();
+      $this->updateValues = array();
     } else {
       $saveValues = ($data) ? $data : $this->values;
       $saveMethod = "insert";
@@ -495,14 +494,9 @@ abstract class Sabel_DB_Model
     return $newModel;
   }
 
-  public function insert($data)
+  public function insert($data = null)
   {
-    if (is_array($data)) {
-      $this->saveValues = $data;
-    } else {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("insert", $data);
-    }
+    $this->saveValues = $this->chooseValues($data, "insert");
 
     try {
       $command = $this->getCommand();
@@ -513,13 +507,34 @@ abstract class Sabel_DB_Model
     }
   }
 
+  public function update($data = null)
+  {
+    $this->saveValues = $this->chooseValues($data, "update");
+
+    try {
+      $command = $this->getCommand();
+      $command->update($this->loadConditionManager()->getConditions());
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
+  }
+
+  private function chooseValues($data, $method)
+  {
+    if (isset($data) && !is_array($data)) {
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing($method, $data);
+    } else {
+      return ($data === null) ? $this->values : $data;
+    }
+  }
+
   public function arrayInsert($data)
   {
     if (is_array($data)) {
       $this->saveValues = $data;
     } else {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("arrayInsert", $data);
+      $e = new Sabel_DB_Exception_Model(); throw $e->missing("arrayInsert", $data);
     }
 
     try {

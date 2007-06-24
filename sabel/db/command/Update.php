@@ -19,6 +19,16 @@ class Sabel_DB_Command_Update extends Sabel_DB_Command_Base
     $driver = $executer->getDriver();
     $query  = $driver->getSqlClass($model)->buildUpdateSql($driver);
 
+    if ($args = $executer->getArguments()) {
+      $conditions = $args[0];
+    } else {
+      $conditions = $model->getConditionManager()->getUniqueConditions();
+    }
+
+    $manager = new Sabel_DB_Condition_Manager();
+    foreach ($conditions as $condition) $manager->add($condition);
+    $query .= $manager->build($driver);
+
     $executer->setResult($driver->setSql($query)->execute());
   }
 }

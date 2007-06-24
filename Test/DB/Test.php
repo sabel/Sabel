@@ -560,7 +560,7 @@ class Test_DB_Test extends SabelTestCase
     $join->add(MODEL("City"), null, null, array("id" => "id", "fkey" => "city_id"));
 
     $joiner->add($join, null, "FromUser", array("id" => "id", "fkey" => "sender_id"));
-    $joiner->add(MODEL("Users"), null, "ToUser", array("id" => "id", "fkey" => "recipient_id"));
+    $joiner->add($user, null, "ToUser", array("id" => "id", "fkey" => "recipient_id"));
 
     $results = $joiner->join();
     $this->assertEquals(count($results), 6);
