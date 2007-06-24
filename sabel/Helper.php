@@ -20,15 +20,13 @@ class Sabel_Helper
     $sharedHelper = "application";
     $helperSuffix = "php";
     
-    $pref = "{$appDir}/{$m}/{$helperDir}/";
+    $pref = "/{$appDir}/{$m}/{$helperDir}/";
     
     $helpers = array();
     
     $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
-    
-    $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
                      
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;

@@ -53,7 +53,7 @@ class Sakle
   {
     $pathToClass = $this->runningDirectory . '/tasks/' . $class . '.php';
     if (is_readable($pathToClass)) {
-      require ($pathToClass); 
+      require ($pathToClass);
       $ins = new $class();
       $ins->run($this->arguments);
     }

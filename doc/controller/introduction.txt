@@ -22,54 +22,63 @@ Sabelではconfig/map.phpに記述されている内容に従って,
     }
 ?>
 
-このとき、http://example.com/user/show/1 というリクエストが到着すると、                           
-app/index/controllers/User.php内のshowアクションが実行されます。                             
-このファイルの内容は下記のようになります。                                                         
-                                                                              
-<?php                                                                         
-    class Index_Controllers_User extends Sabel_Controller_Page                
-    {                                                                         
-      public function show()                                                  
-      {                                                                       
-      }                                                                       
-    }                                                                         
-?>                                                                            
-                                                                              
-showアクションが存在しない。かつテンプレートが存在しなければ、notFoundアクションが実行されます。                        
-notfoundアクションもnotfoundテンプレートも見つからない状況では、                                      
-現在のモジュールのIndexコントローラのnotFoundアクションが実行されます。                                    
-HTTPレスポンスヘッダのStatusには404が設定されます。                                              
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-アクション                                                                         
+このとき、http://example.com/user/show/1 というリクエストが到着すると、
+app/index/controllers/User.php内のshowアクションが実行されます。
+このファイルの内容は下記のようになります。
+
+<?php
+    class Index_Controllers_User extends Sabel_Controller_Page
+    {
+      public function show()
+      {
+      }
+    }
+?>
+
+showアクションが存在しない。かつテンプレートが存在しなければ、notFoundアクションが実行されます。
+notfoundアクションもnotfoundテンプレートも見つからない状況では、
+現在のモジュールのIndexコントローラのnotFoundアクションが実行されます。
+HTTPレスポンスヘッダのStatusには404が設定されます。
+アクション
 ------------------------------------------------------------------------------
-コントローラクラス内に書かれているパブリックメソッドは全てアクションとして扱われます。                                   
-パブリックメソッドをアクションとして扱いたくない場合は、下記の例の様に指定してください。                                  
-                                                                              
-<?php                                                                         
-    class Controller extends Sabel_Controller_Page                            
-    {                                                                         
-      protected $hidden = array("show", "lists");                             
-                                                                              
-      public function show()                                                  
-      {                                                                       
-      }                                                                       
-                                                                              
-      public function lists()                                                 
-      {                                                                       
-      }                                                                       
-    }                                                                         
-?>                                                                            
-                                                                              
-$hiddenに指定されているメソッドはアクションには含まれません。                                            
-テンプレートのみ存在する場合も、notFoundとして扱われます。                                             
-                                                                              
-プロテクテッドまたはプライベートなメソッドはアクションとして認識されないので、hiddenアクション同様                          
-コールされません。                                                                     
-                                                                              
-予約語としてSabel_Controller_Pageに定義されているパブリックメソッド名はアクション名には使えません。                  
+コントローラクラス内に書かれているパブリックメソッドは全てアクションとして扱われます。
+パブリックメソッドをアクションとして扱いたくない場合は、下記の例の様に指定してください。
+
+<?php
+    class Controller extends Sabel_Controller_Page
+    {
+      protected $hidden = array("show", "lists");
+      public function show()
+      {
+      }
+      public function lists()
+      {
+      }
+    }
+?>
+
+$hiddenに指定されているメソッドはアクションには含まれません。
+テンプレートのみ存在する場合も、notFoundとして扱われます。
+
+プロテクテッドまたはプライベートなメソッドはアクションとして認識されないので、hiddenアクション同様
+コールされません。
+
+予約語としてSabel_Controller_Pageに定義されているパブリックメソッド名はアクション名には使えません。
+
+
+
+
+ヘルパー
+------------------------------------------------------------------------------
+必ずロードされるヘルパー
+  - app/helpers/application.php
+
+モジュール毎にロードされるヘルパー  
+  - app/index/helpers/application.php
+
+リクエスト時のコントローラ専用にロードされるヘルパー
+  - app/index/helpers/index.php
+
 
 
 リクエスト
@@ -78,35 +87,30 @@ $hiddenに指定されているメソッドはアクションには含まれま�
 
 GETリクエスト
   $this->request->fetchGetValue("キー");
-  
-
 POSTリクエスト
   $this->request->fetchPostValue("キー");
-  
 パラメータリクエスト
   $this->request->fetchParameterValue("キー");
   パラメータはMapで指定されている値をリクエストされたURIから取得します
   たとえば、MapのURI設定が":controller/:action/:value"とされているとき、
   index/index/abcdがリクエストされると$this->request->fetchParameterValue("value")
   とするとabcdが取得できます。
-
-
-
-アクション例外                                                                       
+  
+  
+  
+  
+アクション例外
 ------------------------------------------------------------------------------
-アクション内で発生した例外は、Sabelで補足されます。                                                  
-補足された例外は、例外の種類にかかわらずログに記録されます。                                                
-                                                                              
-Sabelは例外が発生したコントローラのserverError()アクションを呼び出します。                                
-そのコントローラにserverErrorが存在しなければ、同一モジュールのIndexコントローラの                             
-同アクションが実行されます。                                                                
-                                                                              
-この際、クライアントには500 internal server errorが渡されます。                                  
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-リダイレクト                                                                        
+アクション内で発生した例外は、Sabelで補足されます。
+補足された例外は、例外の種類にかかわらずログに記録されます。
+Sabelは例外が発生したコントローラのserverError()アクションを呼び出します。
+そのコントローラにserverErrorが存在しなければ、同一モジュールのIndexコントローラの同アクションが実行されます。
+
+この際、クライアントには500 internal server errorが渡されます。
+
+
+
+リダイレクト
 ------------------------------------------------------------------------------
 コントローラ内で、別のアクションへリダイレクトする場合には、
     $this->redirect();
@@ -129,8 +133,7 @@ $this->redirectTo("アクション名")とした場合には同一コントロ�
 
 コントローラクラスのインスタンスメソッドを呼び出し、そのメソッド内で
 リダイレクトし、処理を終了したい場合にも、returnを使用してください。
-呼び出しもとでは、リダイレクトされているかどうかの判断に
-redirected()関数を使うことができます。
+呼び出しもとでは、リダイレクトされているかどうかの判断にredirected()関数を使うことができます。
 if (redirected($this->method())) return null;
 この場合、呼び出し先がでリダイレクトが発生していた場合に、呼び出し元の処理を終了します。
 これは、if ($this->method() === self::REDIRECTED) return null;と等価です。
@@ -139,97 +142,92 @@ if(r($this->method()))でも同様ということです。
 
 
 
-テンプレート                                                                        
+テンプレート
 ------------------------------------------------------------------------------
 
 
-アサイン                                                                          
+アサイン
 ------------------------------------------------------------------------------
-コントローラからテンプレートに変数を割り当てる時には、$this->name = "foo";の様にします。                        
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-レイアウト                                                                         
+コントローラからテンプレートに変数を割り当てる時には、$this->name = "foo";の様にします。
+
+
+
+
+レイアウト
 ------------------------------------------------------------------------------
-レイアウトはHTMLやその他のビューにおける外枠のひな形を提供する機能です。                                        
-HTMLで言えば、ヘッダーとフッターを記述しておき、その中に固有のアクションの結果が挿入されます。                             
-レイアウトファイルはlayout.tplというファイルに記述します。                                            
-                                                                              
-下記にレイアウトの例を示します。                                                              
-                                                                              
-layout.tpl                                                                    
-    <html>                                                                    
-    <body>                                                                    
-      <?= $contentForLayout ?>                                                
-    </body>                                                                   
-    <html>                                                                    
-                                                                              
-特定のアクション内でレイアウトを無効にするときは、アクション内で$this->disableLayout()を実行します。                 
-このメソッドはビュープラグインに含まれています。                                                      
-                                                                              
-    public function disable()                                                 
-    {                                                                         
-      $this->disableLayout();                                                 
-    }                                                                         
-                                                                              
-                                                                              
-                                                                              
-                                                                              
-状態制御                                                                          
+レイアウトはHTMLやその他のビューにおける外枠のひな形を提供する機能です。
+HTMLで言えば、ヘッダーとフッターを記述しておき、その中に固有のアクションの結果が挿入されます。
+レイアウトファイルはlayout.tplというファイルに記述します。
+
+下記にレイアウトの例を示します。
+
+layout.tpl
+    <html>
+    <body>
+      <?= $contentForLayout ?>
+    </body>
+    <html>
+
+特定のアクション内でレイアウトを無効にするときは、アクション内で$this->disableLayout()を実行します。
+このメソッドはビュープラグインに含まれています。
+
+<?php
+    public function disable()
+    {
+      $this->disableLayout();
+    }
+?>
+
+
+
+
+状態制御
 ------------------------------------------------------------------------------
-Sabelでは状態を厳格に制御する機構が用意されています。                                                 
-状態とは、UMLでいうところのステートチャートにあたるものです。                                              
-                                                                              
-使用方法                                                                          
-- コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)                      
-- 状態設定クラスを作成する                                                                
-                                                                              
-コントローラクラス例                                                                    
-<?php                                                                         
-    class Index_Controllers_Flow extends Sabel_Controller_Page_Flow           
-    {                                                                         
-      public function index()                                                 
-      {                                                                       
-      }                                                                       
-                                                                              
-      public function prepare()                                               
-      {                                                                       
-      }                                                                       
-                                                                              
-      public function confirmEvent()                                          
-      {                                                                       
-        $this->flow->name  = $this->name;                                     
-        $this->flow->email = $this->email;                                    
-      }                                                                       
-                                                                              
-      public function confirm()                                               
-      {                                                                       
-      }                                                                       
-                                                                              
-      public function reprepareEvent()                                        
-      {                                                                       
-        $this->flow->errors = null;                                           
-      }                                                                       
-                                                                              
-      public function registEvent()                                           
-      {                                                                       
-        $user = new Users();                                                  
-        $user->name  = $this->flow->name;                                     
-        $user->email = $this->flow->email;                                    
-        $user->save();                                                        
-                                                                              
-        if ($this->flow->errors) {                                            
-          return false;                                                       
-        } else {                                                              
-          $this->flow->user = $user;                                          
-        }                                                                     
-      }                                                                       
-                                                                              
-      public function success()                                               
-      {                                                                       
-      }                                                                       
-    }                                                                         
+Sabelでは状態を厳格に制御する機構が用意されています。
+状態とは、UMLでいうところのステートチャートにあたるものです。
+
+使用方法
+- コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)
+- 状態設定クラスを作成する
+
+コントローラクラス例
+<?php
+    class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
+    {
+      public function index()
+      {
+      }
+      public function prepare()
+      {
+      }
+      public function confirmEvent()
+      {
+        $this->flow->name  = $this->name;
+        $this->flow->email = $this->email;
+      }
+      public function confirm()
+      {
+      }
+      public function reprepareEvent()
+      {
+        $this->flow->errors = null;
+      }
+      public function registEvent()
+      {
+        $user = new Users();
+        $user->name  = $this->flow->name;
+        $user->email = $this->flow->email;
+        $user->save();
+        if ($this->flow->errors) {
+          return false;
+        } else {
+          $this->flow->user = $user;
+        }
+      }
+      public function success()
+      {
+      }
+    }
 ?>
 
 設定クラス例
@@ -241,11 +239,9 @@ Sabelでは状態を厳格に制御する機構が用意されています。
         list($prepare, $confirm, $success) = $this->activities("prepare",
                                                                "confirm",
                                                                "success");
-                                                                              
         $prepare->addTransition("confirmEvent",   $confirm);
         $confirm->addTransition("registEvent",    $success);
         $confirm->addTransition("reprepareEvent", $prepare);
-                                                                              
         $this->entry($prepare)->add($confirm)->end($success);
       }
     }
@@ -276,13 +272,6 @@ aタグでは次のようにしてください。
 
 
 
-
-アクションの選択
-------------------------------------------------------------------------------
-
-
-
-
 プラグイン
 ------------------------------------------------------------------------------
 SabelにはプラグインというSabelを拡張するためのAPIがあります。
@@ -290,7 +279,7 @@ SabelにはプラグインというSabelを拡張するためのAPIがありま�
 
 showPrivateというアクションが実行される前に拒否してしまうプラグインを書きます。
 
-<?php    
+<?php
     class Deny extends Sabel_Plugin_Base
     {
       public function onBeforeAction()
@@ -337,9 +326,7 @@ $this->partial("error")はerrorテンプレートを描画します。
 registrationアクション
     <html
       登録
-    
       <?= $this->partial("error") ?>
-    
       <form action="postRegistration" method="post">
         <p>ユーザ名: <input type="text" name="username" /></p>
         <p>メールアドレス:<input type="text" name="email" /></p>
@@ -370,6 +357,8 @@ postRegistrationアクション
       }
     }
 ?>
+
+
 
 
 認証プラグイン
@@ -467,7 +456,6 @@ MMValidatorプラグイン
       // プラグインをロード
       $this->plugin(new Sabel_Plugin_MMValidator());
     }
-    
     public function edit()
     {
       $this->user    = $user    = MODEL("Users")->selectOne($this->identity());
@@ -522,11 +510,3 @@ MMValidatorプラグイン
 
 機能テスト
 ------------------------------------------------------------------------------
-
-
-
-
-
-
-
-

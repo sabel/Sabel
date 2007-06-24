@@ -36,18 +36,24 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   public function __construct($option = null)
   {
     if ($option === null) {
-      switch (ENVIRONMENT) {
-        case PRODUCTION:
-          $env = 'production';
-          break;
-        case TEST:
-          $env = 'test';
-          break;
-        case DEVELOPMENT:
-          $env = 'development';
-          break;
+      if (!defined("ENVIRONMENT")) {
+        $option = "test." . self::DEFAULT_LOG_FILE;
+      } else {
+        if ($option === null) {
+          switch (ENVIRONMENT) {
+            case PRODUCTION:
+              $env = 'production';
+              break;
+            case TEST:
+              $env = 'test';
+              break;
+            case DEVELOPMENT:
+              $env = 'development';
+              break;
+          }
+          $option = $env . "." . self::DEFAULT_LOG_FILE;
+        }
       }
-      $option = $env . "." . self::DEFAULT_LOG_FILE;
     }
     
     $this->path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;

@@ -12,8 +12,10 @@ class Sabel_Logger_Factory
 {
   public static function create($class = null, $option = null)
   {
-    if (ENVIRONMENT === PRODUCTION) {
-      return new Sabel_Logger_Null();
+    if (defined("ENVIRONMENT")) {
+      if (ENVIRONMENT === PRODUCTION) {
+        return new Sabel_Logger_Null();
+      }
     }
     
     if ($class === null) {

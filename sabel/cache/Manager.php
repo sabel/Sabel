@@ -25,6 +25,10 @@ class Sabel_Cache_Manager
     self::init();
     $instance = null;
     
+    if (!defined("ENVIRONMENT")) {
+      return Sabel_Cache_Null::create();
+    }
+    
     if (ENVIRONMENT === DEVELOPMENT || ENVIRONMENT === TEST) {
       $instance = Sabel_Cache_Null::create();
     } elseif (isset(self::$support["apc"]) && self::$support["apc"] === true) {
