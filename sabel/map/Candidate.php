@@ -479,7 +479,7 @@ class Sabel_Map_Candidate implements Iterator
           if (isset($parameters[":controller"])) {
             $buffer[] = $parameters[":controller"];
           } else {
-            $buffer[] = $element["default_value_key"];
+            $buffer[] = $element[$variableKey];
           }
           break;
         case $action:
