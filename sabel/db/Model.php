@@ -452,27 +452,38 @@ abstract class Sabel_DB_Model
     return $validator->validate($ignores);
   }
 
-  public function save($data = null)
+  public function save($ignores = null)
   {
-    if (isset($data) && !is_array($data)) {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("save", $data);
+    if ($ignores) {
+      if ($ignores === true) {
+        $errors = $this->validate();
+      } else {
+        $errors = $this->validate($ignores);
+      }
+      
+      if ($errors) {
+        $std = new stdClass();
+        $std->hasError = true;
+        $std->errors = $errors;
+        
+        return $std;
+      }
     }
 
     if ($this->isSelected()) {
-      $saveValues = ($data) ? $data : $this->updateValues;
+      $saveValues = $this->updateValues;
       $saveMethod = "update";
       $this->updateValues = array();
     } else {
-      $saveValues = ($data) ? $data : $this->values;
+      $saveValues = $this->values;
       $saveMethod = "insert";
     }
 
     $this->saveValues = $saveValues;
-    $command = $this->getCommand();
 
     try {
-      $command->$saveMethod()->getResult();
+      $command = $this->getCommand();
+      $command->$saveMethod();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
     }

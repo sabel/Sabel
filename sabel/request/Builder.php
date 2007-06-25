@@ -34,4 +34,24 @@ class Sabel_Request_Builder extends Sabel_Request_AbstractBuilder
   protected function setParameterValues($request)
   {
   }
+  
+  protected function setHeaders($request)
+  {
+    foreach ($_SERVER as $key => $value) {
+      if (strpos($key, "HTTP_") !== false) {
+        if (strpos($key, "_") !== false) {
+          $buf = array();
+          $heads = explode("_", $key);
+          foreach ($heads as $head) {
+            if ($head !== "HTTP") {
+              $buf[] = ucfirst(strtolower($head));
+            }
+          }
+          $request->setHeader(join("-", $buf), $value);
+        } else {
+          $request->setHeader(ucfirst(strtolower($key)), $value);
+        }
+      }
+    }
+  }
 }

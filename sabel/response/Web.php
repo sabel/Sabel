@@ -106,6 +106,11 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     $this->setHeader("Pragma", "");
   }
   
+  public function etag($value)
+  {
+    $this->setHeader("Etag", '"' . $value . '"');
+  }
+  
   public function outputHeaderIfRedirectedThenExit()
   {
     if ($this->outputHeaderIfRedirected()) exit;

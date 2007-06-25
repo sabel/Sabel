@@ -29,6 +29,11 @@ class Sabel_Request_Object
    */
   private $parameters = null;
   
+  /**
+   * @var headers
+   */
+  private $headers = array();
+  
   private
     $getValues       = array(),
     $postValues      = array(),
@@ -340,6 +345,30 @@ class Sabel_Request_Object
   public function clearVariable()
   {
     $this->variableHolder = array();
+  }
+  
+  public function setHeader($name, $value)
+  {
+    $this->headers[$name] = $value;
+  }
+  
+  public function hasHeader($name)
+  {
+    return (array_key_exists($this->headers, $name));
+  }
+  
+  public function getHeader($name)
+  {
+    if ($this->hasHeader($name)) {
+      return $this->headers[$name];
+    } else {
+      return null;
+    }
+  }
+  
+  public function getHeaders()
+  {
+    return $this->headers;
   }
   
   public function __get($key)

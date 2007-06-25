@@ -19,7 +19,8 @@ abstract class Sabel_Request_AbstractBuilder
     $this->setParameters($request, $params);
     $this->setGetValues($request);
     $this->setPostValues($request);
-    $this->setParameterValues($request);  
+    $this->setParameterValues($request);
+    $this->setHeaders($request);
     return $request;
   }
   
@@ -58,4 +59,6 @@ abstract class Sabel_Request_AbstractBuilder
   abstract protected function setPostValues($request);
   
   abstract protected function setParameterValues($request);
+  
+  abstract protected function setHeaders($request);
 }
