@@ -354,7 +354,7 @@ class Sabel_Request_Object
   
   public function hasHeader($name)
   {
-    return (array_key_exists($this->headers, $name));
+    return (array_key_exists($name, $this->headers));
   }
   
   public function getHeader($name)
