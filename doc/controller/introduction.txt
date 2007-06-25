@@ -7,7 +7,7 @@ Sabelではconfig/map.phpに記述されている内容に従って,
 リクエストURIからモジュール、コントローラ、アクションを決定します。
 たとえば、map.phpが次のように定義されているとします。
 
-<?php
+    <?php
     class Map extends Sabel_Map_Config
     {
       public function configure()
@@ -20,20 +20,20 @@ Sabelではconfig/map.phpに記述されている内容に従って,
                                 ":id"         => null));
       }
     }
-?>
+    ?>
 
 このとき、http://example.com/user/show/1 というリクエストが到着すると、
 app/index/controllers/User.php内のshowアクションが実行されます。
 このファイルの内容は下記のようになります。
 
-<?php
+    <?php
     class Index_Controllers_User extends Sabel_Controller_Page
     {
       public function show()
       {
       }
     }
-?>
+    ?>
 
 showアクションが存在しない。かつテンプレートが存在しなければ、notFoundアクションが実行されます。
 notfoundアクションもnotfoundテンプレートも見つからない状況では、
@@ -48,7 +48,7 @@ HTTPレスポンスヘッダのStatusには404が設定されます。
 コントローラクラス内に書かれているパブリックメソッドは全てアクションとして扱われます。
 パブリックメソッドをアクションとして扱いたくない場合は、下記の例の様に指定してください。
 
-<?php
+    <?php
     class Controller extends Sabel_Controller_Page
     {
       protected $hidden = array("show", "lists");
@@ -59,7 +59,7 @@ HTTPレスポンスヘッダのStatusには404が設定されます。
       {
       }
     }
-?>
+    ?>
 
 $hiddenに指定されているメソッドはアクションには含まれません。
 テンプレートのみ存在する場合も、notFoundとして扱われます。
@@ -74,14 +74,14 @@ $hiddenに指定されているメソッドはアクションには含まれま�
 
 ヘルパー
 ------------------------------------------------------------------------------
-必ずロードされるヘルパー
-  - app/helpers/application.php
++ 必ずロードされるヘルパー
+ + app/helpers/application.php
 
-モジュール毎にロードされるヘルパー  
-  - app/index/helpers/application.php
++ モジュール毎にロードされるヘルパー  
+ + app/index/helpers/application.php
 
-リクエスト時のコントローラ専用にロードされるヘルパー
-  - app/index/helpers/index.php
++ リクエスト時のコントローラ専用にロードされるヘルパー
+ + app/index/helpers/index.php
 
 
 
@@ -89,92 +89,94 @@ $hiddenに指定されているメソッドはアクションには含まれま�
 ------------------------------------------------------------------------------
 アクション内でリクエストされた値を取得する。
 
-GETリクエスト
-  $this->request->fetchGetValue("キー");
-POSTリクエスト
-  $this->request->fetchPostValue("キー");
-パラメータリクエスト
-  $this->request->fetchParameterValue("キー");
-  パラメータはMapで指定されている値をリクエストされたURIから取得します
-  たとえば、MapのURI設定が":controller/:action/:value"とされているとき、
-  index/index/abcdがリクエストされると$this->request->fetchParameterValue("value")
-  とするとabcdが取得できます。
++ GETリクエスト
+ + $this->request->fetchGetValue("キー");
+
++ POSTリクエスト
+ + $this->request->fetchPostValue("キー");
+
++ パラメータリクエスト
+ + $this->request->fetchParameterValue("キー");  
+   パラメータはMapで指定されている値をリクエストされたURIから取得します  
+   たとえば、MapのURI設定が":controller/:action/:value"とされているとき、  
+   index/index/abcdがリクエストされると$this->request->fetchParameterValue("value")  
+   とするとabcdが取得できます。  
   
   
   
   
 アクション例外
 ------------------------------------------------------------------------------
-アクション内で発生した例外は、Sabelで補足されます。
-補足された例外は、例外の種類にかかわらずログに記録されます。
-Sabelは例外が発生したコントローラのserverError()アクションを呼び出します。
-そのコントローラにserverErrorが存在しなければ、同一モジュールのIndexコントローラの同アクションが実行されます。
+アクション内で発生した例外は、Sabelで補足されます。  
+補足された例外は、例外の種類にかかわらずログに記録されます。  
+Sabelは例外が発生したコントローラのserverError()アクションを呼び出します。  
+そのコントローラにserverErrorが存在しなければ、同一モジュールのIndexコントローラの同アクションが実行されます。  
 
-この際、クライアントには500 internal server errorが渡されます。
-もしテンプレートにserverError.tplが発見されれば、そのテンプレートが表示されます。
-通常、sabelコマンドで展開した状態でserverError.tplは用意されています。
+この際、クライアントには500 internal server errorが渡されます。  
+もしテンプレートにserverError.tplが発見されれば、そのテンプレートが表示されます。  
+通常、sabelコマンドで展開した状態でserverError.tplは用意されています。  
 
 
 
 リダイレクト
 ------------------------------------------------------------------------------
-コントローラ内で、別のアクションへリダイレクトする場合には、
-    $this->redirect();
-か
-    $this->redirectTo();
-を使用します。
+コントローラ内で、別のアクションへリダイレクトする場合には、  
+    $this->redirect();  
+か  
+    $this->redirectTo();  
+を使用します。  
 
-$this->redirect();には引数としてリダイレクト先のURIを渡します。
-$this->redirect("index/index");
+$this->redirect();には引数としてリダイレクト先のURIを渡します。  
+$this->redirect("index/index");  
 
-$this->redirectTo();には引数として形式化された文字列を渡します。
-$this->redirectTo("controller: index, action: index");
-短縮形として"c: index, a: index"という形式も利用可能です。
+$this->redirectTo();には引数として形式化された文字列を渡します。  
+$this->redirectTo("controller: index, action: index");  
+短縮形として"c: index, a: index"という形式も利用可能です。  
 
-$this->redirectTo("アクション名")とした場合には同一コントローラの指定されたアクションにリダイレクトします。
+$this->redirectTo("アクション名")とした場合には同一コントローラの指定されたアクションにリダイレクトします。  
 
-また、redirect呼び出し時点でそのアクションの処理を終了するには、
-必ずreturnを行ってください。
-    return $this->redirect("");
+また、redirect呼び出し時点でそのアクションの処理を終了するには、  
+必ずreturnを行ってください。  
+    return $this->redirect("");  
 
-コントローラクラスのインスタンスメソッドを呼び出し、そのメソッド内で
-リダイレクトし、処理を終了したい場合にも、returnを使用してください。
-呼び出しもとでは、リダイレクトされているかどうかの判断にredirected()関数を使うことができます。
-if (redirected($this->method())) return null;
-この場合、呼び出し先がでリダイレクトが発生していた場合に、呼び出し元の処理を終了します。
-これは、if ($this->method() === self::REDIRECTED) return null;と等価です。
-また、この関数のエイリアスとして、r()が定義されています。
-if(r($this->method()))でも同様ということです。
+コントローラクラスのインスタンスメソッドを呼び出し、そのメソッド内で  
+リダイレクトし、処理を終了したい場合にも、returnを使用してください。  
+呼び出しもとでは、リダイレクトされているかどうかの判断にredirected()関数を使うことができます。  
+if (redirected($this->method())) return null;  
+この場合、呼び出し先がでリダイレクトが発生していた場合に、呼び出し元の処理を終了します。  
+これは、if ($this->method() === self::REDIRECTED) return null;と等価です。  
+また、この関数のエイリアスとして、r()が定義されています。  
+if(r($this->method()))でも同様ということです。  
 
-redirectTo()の第二引数にはパラメータを渡すことができます。
-たとえば、redirectTo("a: top", array("id" => 1));などとすると、topアクションにGETでidが渡されます。
+redirectTo()の第二引数にはパラメータを渡すことができます。  
+たとえば、redirectTo("a: top", array("id" => 1));などとすると、topアクションにGETでidが渡されます。  
 
 
 
 
 リクエストとレスポンス
 ------------------------------------------------------------------------------
-SabelではPHPの$_POSTや$_GETを直接は扱いません。
-理由はアクションがウェブ環境に依存しないようにするためです。
+SabelではPHPの$_POSTや$_GETを直接は扱いません。  
+理由はアクションがウェブ環境に依存しないようにするためです。  
 
-アクション内では簡単にPOSTやGETの値を受け取ることができます。
+アクション内では簡単にPOSTやGETの値を受け取ることができます。  
 
-GETの値を受け取る
-  $this->request->fetchGetValues(); // 結果は配列です。$_GETと同等の配列です
-  $this->request->fetchGetValue("キー");
++ GETの値を受け取る
+ + $this->request->fetchGetValues(); // 結果は配列です。$_GETと同等の配列です
+ + $this->request->fetchGetValue("キー");
 
-POSTの値を受け取る
-  $this->request->fetchPostValues(); // 結果は配列です。$_GETと同等の配列です
-  $this->request->fetchPostValue("キー");
++ POSTの値を受け取る  
+ + $this->request->fetchPostValues(); // 結果は配列です。$_POSTと同等の配列です  
+ + $this->request->fetchPostValue("キー");  
 
-ショートカット
-  $this->名前;これで値を受け取れます。
-  この方法の使用には注意が必要です。POSTとGETでキーが競合する場合、Sabelは例外を発生させます。
-  これは値の不正な上書きを防止するためです。
++ ショートカット
+ + $this->名前;これで値を受け取れます。  
+   この方法の使用には注意が必要です。POSTとGETでキーが競合する場合、Sabelは例外を発生させます。  
+   これは値の不正な上書きを防止するためです。  
   
-POSTかGETかを判断する
-  $this->isPost();
-  $this->isGet();
++ POSTかGETかを判断する  
+ + $this->isPost();  
+ + $this->isGet();  
 
 
 
@@ -185,50 +187,51 @@ POSTかGETかを判断する
 
 アサイン
 ------------------------------------------------------------------------------
-コントローラからテンプレートに変数を割り当てる時には、$this->name = "foo";の様にします。
+コントローラからテンプレートに変数を割り当てる時には、$this->name = "foo";の様にします。  
 
 
 
 
 レイアウト
 ------------------------------------------------------------------------------
-レイアウトはHTMLやその他のビューにおける外枠のひな形を提供する機能です。
-HTMLで言えば、ヘッダーとフッターを記述しておき、その中に固有のアクションの結果が挿入されます。
-レイアウトファイルはlayout.tplというファイルに記述します。
+レイアウトはHTMLやその他のビューにおける外枠のひな形を提供する機能です。  
+HTMLで言えば、ヘッダーとフッターを記述しておき、その中に固有のアクションの結果が挿入されます。  
+レイアウトファイルはlayout.tplというファイルに記述します。  
 
-下記にレイアウトの例を示します。
+下記にレイアウトの例を示します。  
 
 layout.tpl
-    <html>
-    <body>
-      <?= $contentForLayout ?>
-    </body>
-    <html>
 
-特定のアクション内でレイアウトを無効にするときは、アクション内で$this->disableLayout()を実行します。
-このメソッドはビュープラグインに含まれています。
+    <html>  
+      <body>  
+        <?= $contentForLayout ?>  
+      </body>  
+    <html>  
 
-<?php
+特定のアクション内でレイアウトを無効にするときは、アクション内で$this->disableLayout()を実行します。  
+このメソッドはビュープラグインに含まれています。  
+
+    <?php
     public function disable()
     {
       $this->disableLayout();
     }
-?>
-
+    ?>
 
 
 
 状態制御プラグイン
 ------------------------------------------------------------------------------
-Sabelでは状態を厳格に制御する機構が用意されています。
-状態とは、UMLでいうところのステートチャートにあたるものです。
+Sabelでは状態を厳格に制御する機構が用意されています。  
+状態とは、UMLでいうところのステートチャートにあたるものです。  
 
-使用方法
-- コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)
-- 状態設定クラスを作成する
+使用方法  
++ コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)
++ 状態設定クラスを作成する
 
-コントローラクラス例
-<?php
+コントローラクラス例  
+
+    <?php
     class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
     {
       public function index()
@@ -265,10 +268,11 @@ Sabelでは状態を厳格に制御する機構が用意されています。
       {
       }
     }
-?>
+    ?>
 
-設定クラス例
-<?php
+設定クラス例  
+
+    <?php
     class Index_Flow_Flow extends Sabel_Plugin_Flow_Config
     {
       public function configure()
@@ -282,41 +286,43 @@ Sabelでは状態を厳格に制御する機構が用意されています。
         $this->entry($prepare)->add($confirm)->end($success);
       }
     }
-?>
+    ?>
 
-上記の様に設定すると、状態がコントロールされます。
-このファイルの命名規則は次の通りです。
+上記の様に設定すると、状態がコントロールされます。  
+このファイルの命名規則は次の通りです。  
 
-モジュール名_Flow_コントローラ名
+モジュール名_Flow_コントローラ名  
 
-このクラスが発見されると、Flowプラグインが自動的にロードされます。
-この自動ロードはCommonプラグインが行っています。
+このクラスが発見されると、Flowプラグインが自動的にロードされます。  
+この自動ロードはCommonプラグインが行っています。  
 
-たとえば、IndexモジュールのUserコントローラが呼び出された場合、下記の様に使用されます。
-app/index/controllers/User.php # コントローラ
-app/index/flow/User.php # 状態設定クラス
+たとえば、IndexモジュールのUserコントローラが呼び出された場合、下記の様に使用されます。  
+app/index/controllers/User.php # コントローラ  
+app/index/flow/User.php # 状態設定クラス  
 
-また、状態設定クラスはコントローラクラス内に定義されていても構いません。
+また、状態設定クラスはコントローラクラス内に定義されていても構いません。  
 
-状態が継続している時は$this->flow変数に状態変数が保持されます。
+状態が継続している時は$this->flow変数に状態変数が保持されます。  
 
-現時点ではTokenを手動で設定する必要があります。
-フォーム内では次のように設定してください。
-    <input type="hidden" name="token" value="<?= $token ?>" />
+現時点ではTokenを手動で設定する必要があります。  
+フォーム内では次のように設定してください。  
 
-aタグでは次のようにしてください。
-    <a href="reprepareEvent/?token=<?= $token ?>">correct</a>
+    <input type="hidden" name="token" value="<?= $token ?>" />  
+
+aタグでは次のようにしてください。  
+
+    <a href="reprepareEvent/?token=<?= $token ?>">correct</a>  
 
 
 
 プラグイン
 ------------------------------------------------------------------------------
-SabelにはプラグインというSabelを拡張するためのAPIがあります。
-これを利用して簡単なプラグインを記述してみましょう。
+SabelにはプラグインというSabelを拡張するためのAPIがあります。  
+これを利用して簡単なプラグインを記述してみましょう。  
 
-showPrivateというアクションが実行される前に拒否してしまうプラグインを書きます。
+showPrivateというアクションが実行される前に拒否してしまうプラグインを書きます。  
 
-<?php
+    <?php
     class Deny extends Sabel_Plugin_Base
     {
       public function onBeforeAction()
@@ -326,41 +332,42 @@ showPrivateというアクションが実行される前に拒否してしまう
         }
       }
     }
-?>
+    ?>
+    
+このファイルをlib/Deny.phpとしてconfig/plugin.phpに次の行を追加してください。  
 
-このファイルをlib/Deny.phpとしてconfig/plugin.phpに次の行を追加してください。
+$plugin->add(new Deny());  
 
-$plugin->add(new Deny());
+そしてブラウザからhttp://localhost/index/showPrivateを表示してみましょう。  
+content not found というメッセージが表示されたら正しくプラグインが動作しています。  
 
-そしてブラウザからhttp://localhost/index/showPrivateを表示してみましょう。
-content not found というメッセージが表示されたら正しくプラグインが動作しています。
+onBeforeActionイベントの他にも次のようなイベントでプラグインを作成することができます。  
+ + onAfterAction
+ + onExecuteAction
+ + onRedirect
+ + onException
+ + onCreateController
 
-onBeforeActionイベントの他にも次のようなイベントでプラグインを作成することができます。
- - onAfterAction
- - onExecuteAction
- - onRedirect
- - onException
- - onCreateController
+ひとつのプラグイン内で複数のイベントを処理することもできます。  
 
-ひとつのプラグイン内で複数のイベントを処理することもできます。
-
-また、プラグインに通常のメソッドを定義すると、そのメソッドはコントローラから呼び出すことができます。
+また、プラグインに通常のメソッドを定義すると、そのメソッドはコントローラから呼び出すことができます。  
 
 
 
 
 エラープラグイン
 ------------------------------------------------------------------------------
-エラープラグインは標準でロードされているプラグインの一つです。
+エラープラグインは標準でロードされているプラグインの一つです。  
 
-コントローラ内で$this->errorsに変数を代入すると、ポストする前のアクションのビュー内でエラー変数が使用できます。
+コントローラ内で$this->errorsに変数を代入すると、ポストする前のアクションのビュー内でエラー変数が使用できます。  
 
-たとえば下記のアクションでは、postRegistrationでエラーが発見され、入力ページへリダイレクトすると、
-入力ページ内ではpostRegistrationで割り当てられたerrors変数がテンプレート内で使用されます。
-$this->partial("error")はerrorテンプレートを描画します。
-これは標準でよういされていて、自分で用意する必要はありません。もちろん、ファイルを開いて普通に編集することも可能です。
+たとえば下記のアクションでは、postRegistrationでエラーが発見され、入力ページへリダイレクトすると、  
+入力ページ内ではpostRegistrationで割り当てられたerrors変数がテンプレート内で使用されます。  
+$this->partial("error")はerrorテンプレートを描画します。  
+これは標準でよういされていて、自分で用意する必要はありません。もちろん、ファイルを開いて普通に編集することも可能です。  
 
 registrationアクション
+
     <html
       登録
       <?= $this->partial("error") ?>
@@ -373,7 +380,8 @@ registrationアクション
     </html>
 
 postRegistrationアクション
-<?php
+
+    <?php
     public function postRegistration()
     {
       if (!$this->request->isPost()) {
@@ -393,37 +401,40 @@ postRegistrationアクション
         $this->redirectTo("registration");
       }
     }
-?>
+    ?>
 
 
 
 
 認証プラグイン
 ------------------------------------------------------------------------------
-このプラグインは標準ではロードされません。
+このプラグインは標準ではロードされません。  
 
-このプラグインは非ログインユーザには実行権限を与えないという機能を簡単に実現できます。
-つまり、ログイン状態とログアウト状態を制御するプラグインです。
+このプラグインは非ログインユーザには実行権限を与えないという機能を簡単に実現できます。  
+つまり、ログイン状態とログアウト状態を制御するプラグインです。  
 
-コントローラにaclPriavteActions()というメソッドを用意してください。
-その中でアクセスを制限したいアクションの配列を戻します。
-<?php
+コントローラにaclPriavteActions()というメソッドを用意してください。  
+その中でアクセスを制限したいアクションの配列を戻します。  
+
+    <?php
     public function aclPrivateActions()
     {
       return array("privateAction");
     }
-?>
-こうした場合、privateActionはログインしているユーザしか参照できません。
-ログインしていないユーザが実行すると、accessDenyアクションが実行されます。
+    ?>
+    
+こうした場合、privateActionはログインしているユーザしか参照できません。  
+ログインしていないユーザが実行すると、accessDenyアクションが実行されます。  
 
 ログイン処理を行うには下記の手順で作成します。
- - Sabel_Plugin_Acl_Authenticationインタフェイスを継承したクラスを作成する
- - authenticate()とfetchIdentity()インタフェイスメソッドを適切に実装する
- - ログイン用のアクションを作成する
- - $this->authenticate()プラグインメソッドに手順１で作成したクラスのインスタンスを渡す
+ + Sabel_Plugin_Acl_Authenticationインタフェイスを継承したクラスを作成する
+ + authenticate()とfetchIdentity()インタフェイスメソッドを適切に実装する
+ + ログイン用のアクションを作成する
+ + $this->authenticate()プラグインメソッドに手順１で作成したクラスのインスタンスを渡す
  
 実際のクラスとコントローラクラスは下記の様になります。
-<?php
+
+    <?php
     public function postLogin()
     {
       if (!$this->request->isPost()) {
@@ -446,9 +457,9 @@ postRegistrationアクション
       $this->unAuthenticate();
       $this->redirectTo("privateAction");
     }
-?>
+    ?>
 
-<?php
+    <?php
     class Users extends Sabel_DB_Model implements Sabel_Plugin_Acl_Authentication
     {
       public function authenticate()
@@ -465,10 +476,10 @@ postRegistrationアクション
         return $this->id;
       }
     }
-?>
+    ?>
 
-この例ではUsersモデルをそのまま認証オブジェクトとして使用しています。
-ログアウトするには上述の通り$this->unAuthenticate()プラグインメソッドを呼び出します。
+この例ではUsersモデルをそのまま認証オブジェクトとして使用しています。  
+ログアウトするには上述の通り$this->unAuthenticate()プラグインメソッドを呼び出します。  
 
 
 
@@ -477,17 +488,17 @@ MMValidatorプラグイン
 複数のモデルオブジェクトを同時に編集するときに使います。
 
 プラグイン説明
- - メソッド
-  - multipleValidate(モデルの配列, [ブール:自動セーブ/デフォルトfalse])
-   - このメソッドは複数のモデルを同時にバリデートします
-  - assignErrors(モデルの配列, エラー配列)
-   - エラーがあった値を各のモデルにセットします
-  - modelize(リクエストされた値の配列)
-   - users::nameという表記を分解します
++ メソッド
+ + multipleValidate(モデルの配列, [ブール:自動セーブ/デフォルトfalse])
+  + このメソッドは複数のモデルを同時にバリデートします
+ + assignErrors(モデルの配列, エラー配列)
+  + エラーがあった値を各のモデルにセットします
+ + modelize(リクエストされた値の配列)
+  + users::nameという表記を分解します
 
 コントローラで下記のように記述してください。
 
-<?php
+    <?php
     public function initialize()
     {
       // プラグインをロード
@@ -509,41 +520,37 @@ MMValidatorプラグイン
         }
       }
     }
-?>
+    ?>
 
 テンプレート内のフォームではname="モデル名::カラム名"という命名規則に従ってください
 
 下記に例を示します。
-<html>
-    <?= $this->partial("error") ?>
 
-    <form action="<?= uri("c: user, a: edit") ?>" method="POST">
-      <p>ユーザ名: 
-        <input type="text" name="users::username" value="<?= $user->username ?>" />
-      </p>
+    <html>
+      <?= $this->partial("error") ?>
+      
+      <form action="<?= uri("c: user, a: edit") ?>" method="POST">
+        <p>ユーザ名: 
+          <input type="text" name="users::username" value="<?= $user->username ?>" />
+        </p>
+      
+        <p>ハンドル: 
+          <input type="text" name="users::handle" value="<?= $user->handle ?>" />
+        </p>
+      
+        <p>メールアドレス: 
+          <input type="text" name="users::email" value="<?= $user->email ?>" />
+        </p>
+      
+        <p>パスワード: 
+          <input type="password" name="users::password" value="<?= $user->password ?>" />
+        </p>
+      
+        <p>年齢: 
+          <input type="text" name="profile::age" value="<?= $profile->age ?>" />
+        </p>
+      
+        <input type="submit" value="編集確定" />
+      </form>
+    </html>
 
-      <p>ハンドル: 
-        <input type="text" name="users::handle" value="<?= $user->handle ?>" />
-      </p>
-
-      <p>メールアドレス: 
-        <input type="text" name="users::email" value="<?= $user->email ?>" />
-      </p>
-
-      <p>パスワード: 
-        <input type="password" name="users::password" value="<?= $user->password ?>" />
-      </p>
-
-      <p>年齢: 
-        <input type="text" name="profile::age" value="<?= $profile->age ?>" />
-      </p>
-
-      <input type="submit" value="編集確定" />
-    </form>
-</html>
-
-
-
-
-機能テスト
-------------------------------------------------------------------------------
