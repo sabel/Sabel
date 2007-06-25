@@ -18,12 +18,15 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   
   const SUCCESS      = 200;
   const REDIRECTED   = 300;
+  const NOT_MODIFIED = 304;
   const NOT_FOUND    = 400;
   const SERVER_ERROR = 500;
   
   private $controller  = null;
   private $destination = null;
   private $contentType = "";
+  
+  private $headers = array();
   
   public function setContentType($type)
   {
@@ -62,16 +65,25 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   
   public function outputHeader()
   {
+    if ($this->contentType !== "") {
+      header("Content-Type: " . $this->contentType);
+    }
+    
+    if ($this->headers) {
+      foreach ($this->headers as $message => $value) {
+        header(ucfirst($message) . ": " . $value);
+      }
+    }
+    
     if ($this->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
     } elseif ($this->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
     } elseif ($this->isRedirected()) {
       header("Location: " . $this->location);
-    }
-    
-    if ($this->contentType !== "") {
-      header("Content-Type: " . $this->contentType);
+    } else if ($this->isNotModified()) {
+      header("HTTP/1.0 304 Not Modified");
+      exit;
     }
   }
   
@@ -83,6 +95,15 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     } else {
       return false;
     }
+  }
+  
+  public function expiredCache($expire = 31536000)
+  {
+    $this->setHeader("Expires",       date(DATE_RFC822, time() + $expire) . " GMT");
+    $this->setHeader("Last-Modified", date(DATE_RFC822, time() - $expire) . " GMT" );
+           
+    $this->setHeader("Cache-Control", "max-age={$expire}");
+    $this->setHeader("Pragma", "");
   }
   
   public function outputHeaderIfRedirectedThenExit()
@@ -118,6 +139,16 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     return ($this->status === self::REDIRECTED);
   }
   
+  public function notModified()
+  {
+    $this->status = self::NOT_MODIFIED;
+  }
+  
+  public function isNotModified()
+  {
+    return $this->status === self::NOT_MODIFIED;
+  }
+  
   public function success()
   {
     $this->status = self::SUCCESS;
@@ -148,5 +179,10 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function getAttributes()
   {
     return $this->controller->getAttributes();
+  }
+  
+  public function setHeader($message, $value)
+  {
+    $this->headers[$message] = $value;
   }
 }
