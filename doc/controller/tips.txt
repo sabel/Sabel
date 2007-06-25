@@ -1,0 +1,40 @@
+TIPS
+==============================================================================
+
+特定のヘッダ情報を取得したい
+------------------------------------------------------------------------------
+
+アクション内で簡単に取得できます。
+
+    <?php
+    if ($this->request->hasHeader("Cache-Controler")) {
+      $this->request->getHeader("Cache-Control"); // Cache-Controlヘッダを取得
+    }
+    ?>
+
+---
+
+コンテンツや画像をブラウザにキャッシュさせたい
+------------------------------------------------------------------------------
+
+画像をSabelから表示します。
+
+下記のようにアクションを記述します。
+
+    <?php
+    public function show()
+    {
+      $this->response->setHeader("Content-Type", "image/gif");
+      
+      $this->response->expiredCache();
+      
+      if ($this->request->hasHeader("If-Modified-Since")) {
+        $this->response->notModified();
+      } else {
+        $path = RUN_BASE . "/public/images/image/";
+        echo file_get_contents($path . "image.gif");
+      }
+    }
+    ?>
+
+---

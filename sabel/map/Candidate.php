@@ -465,7 +465,7 @@ class Sabel_Map_Candidate implements Iterator
     $module      = self::MODULE;
     $controller  = self::CONTROLLER;
     $action      = self::ACTION;
-    
+        
     foreach ($elements as $element) {
       switch ($element[$typeKey]) {
         case $module:
@@ -489,11 +489,12 @@ class Sabel_Map_Candidate implements Iterator
             $buffer[] = $element[$variableKey];
           }
           break;
-        case isset($parmeters[$element[$elementName]]):
+        case (array_key_exists($element[$elementName], $parameters)):
           $buffer[] = $parameters[$element[$elementName]];
           break;
         default:
-          if (!isset($parameters[$element[$elementName]]) && isset($element[self::OMITTABLE_KEY])) {
+          if (!isset($parameters[$element[$elementName]]) &&
+               isset($element[self::OMITTABLE_KEY])) {
             // ignore
           } else {
             $buffer[] = $element[$elementName];
@@ -501,6 +502,7 @@ class Sabel_Map_Candidate implements Iterator
           break;
       }
     }
+
     
     return join("/", $buffer);
   }

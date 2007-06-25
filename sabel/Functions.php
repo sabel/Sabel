@@ -25,9 +25,10 @@ function redirected($const)
  */
 function request($uri)
 {
-  $front    = new Sabel_Controller_Front();
-  $response = $front->ignition(new Sabel_Request_Web($uri));
-  return $response['html'];
+  $front   = new Sabel_Controller_Front();
+  $request = new Sabel_Request_Object($uri);
+  $response = $front->ignition($request);
+  return Sabel_View::renderDefault($response);
 }
 
 if (!function_exists("_")) {
