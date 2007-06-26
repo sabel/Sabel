@@ -96,8 +96,25 @@ final class Sabel_View
     }
   }
   
+  public static function renderNoLayout($response)
+  {
+    $controller  = $response->getController();
+    $destination = $response->getDestination();
+    
+    $view = new Sabel_View();
+    $view->assignByArray($controller->getRequests());
+    
+    $html = "";
+    $assigns = array("assign" => array_merge($controller->getAssignments(),
+                                             $controller->getAttributes()));
+    
+    return Sabel_View::render($destination, $assigns);
+  }
+  
   public static function renderDefault($response)
   {
+    $context = Sabel_Context::getContext();
+    
     $controller  = $response->getController();
     $destination = $response->getDestination();
     
@@ -120,7 +137,7 @@ final class Sabel_View
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
-    } elseif (!Sabel_Context::isLayoutDisabled()) {
+    } elseif (!$context->isLayoutDisabled()) {
       $assign = array("assign" => array("contentForLayout" => $content));
       try {
         $content = Sabel_View::render($destination, $assigns);

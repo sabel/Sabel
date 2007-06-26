@@ -11,91 +11,103 @@
  */
 class Sabel_Context
 {
-  private static $parameters  = array();
   private static $includePath = array();
   
-  private static $candidate   = null;
-  private static $destination = null;
-  private static $controller  = null;
-  private static $view        = null;
-  private static $storage     = null;
-  private static $injector    = null;
+  private static $context = null;
   
-  private static $disableLayout = false;
+  private $plugin      = null;
+  private $candidate   = null;
+  private $destination = null;
+  private $controller  = null;
+  private $view        = null;
+  private $storage     = null;
+  private $injector    = null;
   
-  public static function initialize()
+  private $disableLayout = false;
+  
+  public static function setContext($context)
   {
-    self::setView(new Sabel_View());
+    self::$context = $context;
   }
   
-  public static function setStorage($storage)
+  public static function getContext()
   {
-    self::$storage = $storage;
+    return self::$context;
   }
   
-  public static function getStorage()
+  public function setPlugin($plugin)
   {
-    return self::$storage;
+    $this->plugin = $plugin;
   }
   
-  public static function setCandidate($candidate)
+  public function getPlugin()
   {
-    self::$candidate = $candidate;
+    return $this->plugin;
   }
   
-  public static function getCandidate()
+  public function setStorage($storage)
   {
-    return self::$candidate;
+    $this->storage = $storage;
   }
   
-  public static function setView($view)
+  public function getStorage()
   {
-    self::$view = $view;
+    return $this->storage;
   }
   
-  public static function getView()
+  public function setCandidate($candidate)
   {
-    return self::$view;
+    $this->candidate = $candidate;
   }
   
-  public static function disableLayout()
+  public function getCandidate()
   {
-    self::$disableLayout = true;
+    return $this->candidate;
   }
   
-  public static function isLayoutDisabled()
+  public function setController($controller)
   {
-    return self::$disableLayout;
+    $this->controller = $controller;
   }
   
-  public static function setController($controller)
+  public function getController()
   {
-    self::$controller = $controller;
+    return $this->controller;
+  }
+    
+  public function setDestination($destination)
+  {
+    $this->destination = $destination;
   }
   
-  public static function getController()
+  public function getDestination()
   {
-    return self::$controller;
+    return $this->destination;
   }
   
-  public static function setParameter($name, $value)
+  public function setInjector($injector)
   {
-    self::$parameters[$name] = $value;
+    $this->injector = $injector;
   }
   
-  public static function getParameter($name)
+  public function getInjector()
   {
-    return self::$parameters[$name];
+    return $this->injector;
   }
   
-  public static function setDestination($destination)
+  public function setLayoutDisable($bool)
   {
-    self::$destination = $destination;
+    $this->disableLayout = $bool;
   }
   
-  public static function getDestination()
+  public function isLayoutDisabled()
   {
-    return self::$destination;
+    return $this->disableLayout;
+  }
+  
+  public function getView()
+  {
+    return new Sabel_View();
   }
   
   public static function log($message)
@@ -108,16 +120,6 @@ class Sabel_Context
   public static function getLogger()
   {
     return Sabel_Logger_File::singleton();
-  }
-  
-  public static function setDefaultInjector($injector)
-  {
-    self::$injector = $injector;
-  }
-  
-  public static function getDefaultInjector()
-  {
-    return self::$injector;
   }
   
   public static function getCache()

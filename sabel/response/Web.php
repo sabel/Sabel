@@ -75,13 +75,16 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       }
     }
     
+    l("is redirected: " . var_export($this->isRedirected(), 1));
+    l("location: " . var_export($this->location, 1));
+    
     if ($this->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
     } elseif ($this->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
     } elseif ($this->isRedirected()) {
       header("Location: " . $this->location);
-    } else if ($this->isNotModified()) {
+    } elseif ($this->isNotModified()) {
       header("HTTP/1.0 304 Not Modified");
       exit;
     }

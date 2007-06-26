@@ -15,12 +15,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public
     $plugin = null;
+    
+  public
+    $context = null;
   
   protected
-    $redirect    = "",
-    $redirected  = false,
-    $rendered    = "",
-    $result      = null;
+    $result = null;
     
   protected
     $hidden = array();
@@ -49,12 +49,18 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * default constructer of page controller
    *
    */
-  public final function __construct()
+  public final function __construct($context)
   {
     $reserved = get_class_methods("Sabel_Controller_Page");
     
-    $this->plugin = Sabel_Plugin::create($this);
-    $injector = Sabel_Context::getDefaultInjector();
+    $plugin = $context->getPlugin();
+    $plugin->setController($this);
+    $this->plugin  = $plugin;
+    $this->context = $context;
+    
+    // $this->plugin = Sabel_Plugin::create($this);
+    
+    $injector = $context->getInjector();
     $this->response = $injector->newInstance("Sabel_Response");
   }
   
@@ -85,7 +91,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         $this->storage = $storage;
       }
       
-      Sabel_Context::setStorage($this->storage);
+      $this->context->setStorage($this->storage);
     }
   }
   
@@ -145,7 +151,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       }
     } catch (Exception $exception) {
       $this->plugin->onException($exception);
-      Sabel_Context::log($exception->getMessage());
+      l($exception->getMessage());
       return $response->serverError();
     }
   }
@@ -197,7 +203,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     $this->plugin->onRedirect($to);
-    $this->plugin->onAfterAction();
     
     return self::REDIRECTED;
   }
@@ -209,7 +214,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public final function redirectTo($destination, $parameters = null)
   {
-    $candidate = Sabel_Context::getCandidate();
+    $candidate = $this->context->getCandidate();
     $uri = $candidate->uri($this->convertParams($destination));
     return $this->redirect($uri, $parameters);
   }
@@ -227,16 +232,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     return $buf;
-  }
-  
-  public final function isRedirected()
-  {
-    return $this->redirected;
-  }
-  
-  public final function getRedirect()
-  {
-    return $this->redirect;
   }
   
   /**
@@ -293,6 +288,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public final function getStorage()
   {
     return $this->storage;
+  }
+  
+  public final function getContext()
+  {
+    return $this->context;
   }
   
   public final function getRequests()

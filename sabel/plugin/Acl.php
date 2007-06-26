@@ -48,8 +48,7 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
       $this->user->restore($storage->read("acl_user"));
     }
     
-    Sabel_Context::getView()->assign("user", $this->user);
-    
+    $this->controller->getContext()->getView()->assign("user", $this->user);
     $this->controller->getRequest()->setVariable("user", $this->user);
     
     $privateActions = "aclPrivateActions";

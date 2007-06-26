@@ -12,15 +12,23 @@
 class Sabel_Controller_Executer_Basic
 {
   private
-    $plugin      = null,
+    // $plugin      = null,
+    $context     = null,
     $request     = null,
     $controller  = null,
     $destination = null;
   
   public function __construct()
   {
-    $this->plugin = Sabel_Plugin::create();
-    $this->plugin->setExecuter($this);
+    // $this->plugin = Sabel_Plugin::create();
+    // $this->context = $context;
+    // $context->getPlugin()->setExecuter($this);
+  }
+  
+  public function setContext($context)
+  {
+    $this->context = $context;
+    $context->getPlugin()->setExecuter($this);
   }
   
   /**
@@ -45,16 +53,16 @@ class Sabel_Controller_Executer_Basic
     }
     
     if (class_exists($classpath)) {
-      $instance = new $classpath();
+      $instance = new $classpath($this->context);
     } else {
       throw new Sabel_Exception_Runtime("controller not found");
     }
     
-    Sabel_Context::setController($instance);
     $this->controller = $instance;
     
-    $this->plugin->onCreateController($this->destination);
-    $this->plugin->setController($instance);
+    $plugin = $this->context->getPlugin();
+    $plugin->onCreateController($this->destination);
+    $plugin->setController($instance);
     
     return $instance;
   }
@@ -85,7 +93,7 @@ class Sabel_Controller_Executer_Basic
    * @param Sabel_Storage $storage
    * @return void
    */
-  public function execute($request, $storage)
+  public function execute($request, $storage, $plugin = true)
   {
     $this->request = $request;
     $controller    = $this->controller;
@@ -95,7 +103,7 @@ class Sabel_Controller_Executer_Basic
     $controller->setAction($action);
     $controller->initialize();
     
-    return $this->executeAction($action);
+    return $this->executeAction($action, $plugin);
   }
   
   /**
@@ -105,13 +113,19 @@ class Sabel_Controller_Executer_Basic
    * @param string $action the name of action.
    * @return mixed result of controller
    */
-  protected function executeAction($action)
+  protected function executeAction($action, $pluginUse)
   {
-    Sabel_Context::log("Sabel_Controller_Executer::executeAction({$action})");
+    l("Sabel_Controller_Executer::executeAction({$action})");
     
-    if ($this->plugin->hasExecuteAction()) {
-      $this->plugin->setDestination($this->destination);
-      return $this->plugin->onExecuteAction($action);
+    $plugin = $this->context->getPlugin();
+    
+    if ($pluginUse === false) {
+      return $this->controller->execute($action);
+    }
+    
+    if ($plugin->hasExecuteAction()) {
+      $plugin->setDestination($this->destination);
+      return $plugin->onExecuteAction($action);
     } else {
       return $this->controller->execute($action);
     }

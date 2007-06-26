@@ -34,21 +34,6 @@ final class Sabel_Plugin
   
   private $events = array();
   
-  private static $instance = null;
-  
-  public static function create($controller = null)
-  {
-    if (self::$instance === null) {
-      self::$instance = new self();
-    }
-    
-    if ($controller !== null) {
-      self::$instance->setController($controller);
-    }
-    
-    return self::$instance;
-  }
-  
   public function setController($controller)
   {
     $this->controller = $controller;

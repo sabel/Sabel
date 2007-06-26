@@ -22,18 +22,23 @@ final class Sabel_Controller_Front
     $response = null;
   
   protected
-    $injector    = null,
     $controller  = null,
     $destination = null;
     
+  private $context = null;
+    
   public function __construct($request = null)
   {
-    $this->injector = Sabel_Container::injector(new Factory());
-    Sabel_Context::setDefaultInjector($this->injector);
+    $injector = Sabel_Container::injector(new Factory());
+    $this->context = new Sabel_Context();
+    Sabel_Context::setContext($this->context);
+    $this->context->setInjector($injector);
   }
   
   public function ignition($request = null, $storage = null)
   {
+    $context = $this->context;
+    
     if ($request === null) {
       $builder = new Sabel_Request_Builder();
       $request = new Sabel_Request_Object();
@@ -43,18 +48,29 @@ final class Sabel_Controller_Front
     $this->request = $request;
     
     $router = new Sabel_Router_Map();
-    $destination = $this->destination = $router->route($this->request);
+    $destination = $this->destination = $router->route($this->request, $context);
     
-    Sabel_Context::log("request " . $this->request->__toString());
-    Sabel_Context::initialize();
-    Sabel_Context::setDestination($destination);
+    l("request " . $this->request->__toString());
+    $context->setDestination($destination);
     
-    Sabel_Plugin::create()->setDestination($destination);
+    $pc = new Plugin();
+    $pc->configure();
+    
+    $plugin = new Sabel_Plugin();
+    $plugin->setDestination($destination);
+    $context->setPlugin($plugin);
+    
+    foreach ($pc->plugins() as $p) {
+      $plugin->add($p);
+    }
+    
     Sabel_Helper::load($this->request, $destination);
     
-    $executer = $this->injector->newInstance(self::EXECUTER_INTERFACE);
+    $injector = $context->getInjector();
+    $executer = $injector->newInstance(self::EXECUTER_INTERFACE);
+    $executer->setContext($context);
     $executer->setDestination($destination);
-
+    
     try {
       $this->controller = $executer->create();
     } catch (Sabel_Exception_Runtime $e) {

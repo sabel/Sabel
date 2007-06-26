@@ -14,6 +14,7 @@ abstract class Sabel_Request_AbstractBuilder
   public final function build($request, $uri = null)
   {
     list($uri, $params) = $this->divideUriAndParameter($uri);
+    
     $this->setMethod($request);
     $this->setUri($request, $uri);
     $this->setParameters($request, $params);
@@ -21,6 +22,7 @@ abstract class Sabel_Request_AbstractBuilder
     $this->setPostValues($request);
     $this->setParameterValues($request);
     $this->setHeaders($request);
+    
     return $request;
   }
   

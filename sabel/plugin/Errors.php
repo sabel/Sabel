@@ -88,7 +88,7 @@ class Sabel_Plugin_Errors extends Sabel_Plugin_Base
     static $storage = null;
     
     if ($storage === null) {
-      return $storage = Sabel_Context::getStorage();
+      return $storage = $this->controller->getContext()->getStorage();
     } else {
       return $storage;
     }

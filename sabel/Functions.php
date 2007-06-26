@@ -10,6 +10,11 @@ function load($className, $config)
   return Sabel_Container::injector($config)->newInstance($className);
 }
 
+function l($message)
+{
+  Sabel_Context::log($message);
+}
+
 function r($const)
 {
   return ($const === Sabel_Controller_Page::REDIRECTED);
@@ -23,12 +28,53 @@ function redirected($const)
 /**
  * internal request
  */
-function request($uri)
+function request($uri, $destination = null, $request = null, $storage = null)
 {
-  $front   = new Sabel_Controller_Front();
-  $request = new Sabel_Request_Object($uri);
-  $response = $front->ignition($request);
-  return Sabel_View::renderDefault($response);
+  $context = new Sabel_Context();
+  $previousContext = Sabel_Context::getContext();
+  Sabel_Context::setContext($context);
+  
+  if ($request === null) {
+    $request = new Sabel_Request_Object();
+  }
+  
+  $builder = new Sabel_Request_Builder();
+  $builder->build($request, $uri);
+  
+  if ($destination === null) {
+    $router = new Sabel_Router_Map();
+    $destination = $router->route($request, $context);
+  }
+  $context->setDestination($destination);
+  
+  if ($storage === null) {
+    $storage = new Sabel_Storage_Session();
+  }
+  
+  $context->setStorage($storage);
+  
+  Sabel_Helper::load($request, $destination);
+    
+  $plugin = new Sabel_Plugin();
+  $plugin->setDestination($destination);
+  $context->setPlugin($plugin);
+  
+  $injector = Sabel_Container::injector(new Factory());
+  $context->setInjector($injector);
+  $executer = $injector->newInstance(Sabel_Controller_Front::EXECUTER_INTERFACE);
+  $executer->setContext($context);
+  $executer->setDestination($destination);
+  
+  $controller = $executer->create();
+  $response = $executer->execute($request, $storage, false);
+  $response->setController($controller);
+  $response->setDestination($destination);
+  
+  $result = Sabel_View::renderNoLayout($response);
+  
+  Sabel_Context::setContext($previousContext);
+  
+  return $result;
 }
 
 if (!function_exists("_")) {

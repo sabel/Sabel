@@ -13,7 +13,8 @@ class Sabel_Plugin_View extends Sabel_Plugin_Base
 {
   public function disableLayout()
   {
-    Sabel_Context::disableLayout();
+    $context = Sabel_Context::getContext();
+    $context->setDisableLayout(true);
   }
   
   public function render($template, $additional)
