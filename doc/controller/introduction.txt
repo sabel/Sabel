@@ -8,18 +8,18 @@ Sabelではconfig/map.phpに記述されている内容に従って,
 たとえば、map.phpが次のように定義されているとします。
 
     <?php
-    class Map extends Sabel_Map_Config
-    {
-      public function configure()
-      {
-        $this->route("default")
-               ->uri(":controller/:action/:id")
-               ->module("index")
-               ->defaults(array(":controller" => "index",
-                                ":action"     => "index",
-                                ":id"         => null));
-      }
-    }
+        class Map extends Sabel_Map_Config
+        {
+            public function configure()
+            {
+                $this->route("default")
+                     ->uri(":controller/:action/:id")
+                     ->module("index")
+                     ->defaults(array(":controller" => "index",
+                                      ":action"     => "index",
+                                      ":id"         => null));
+            }
+        }
     ?>
 
 このとき、http://example.com/user/show/1 というリクエストが到着すると、
@@ -27,12 +27,12 @@ app/index/controllers/User.php内のshowアクションが実行されます。
 このファイルの内容は下記のようになります。
 
     <?php
-    class Index_Controllers_User extends Sabel_Controller_Page
-    {
-      public function show()
+      class Index_Controllers_User extends Sabel_Controller_Page
       {
+          public function show()
+          {
+          }
       }
-    }
     ?>
 
 showアクションが存在しない。かつテンプレートが存在しなければ、notFoundアクションが実行されます。
@@ -51,13 +51,15 @@ HTTPレスポンスヘッダのStatusには404が設定されます。
     <?php
     class Controller extends Sabel_Controller_Page
     {
-      protected $hidden = array("show", "lists");
-      public function show()
-      {
-      }
-      public function lists()
-      {
-      }
+        protected $hidden = array("show", "lists");
+        
+        public function show()
+        {
+        }
+        
+        public function lists()
+        {
+        }
     }
     ?>
 
@@ -212,10 +214,10 @@ layout.tpl
 このメソッドはビュープラグインに含まれています。  
 
     <?php
-    public function disable()
-    {
-      $this->disableLayout();
-    }
+      public function disable()
+      {
+          $this->disableLayout();
+      }
     ?>
 
 
@@ -232,60 +234,66 @@ Sabelでは状態を厳格に制御する機構が用意されています。
 コントローラクラス例  
 
     <?php
-    class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
-    {
-      public function index()
+      class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
       {
+         public function index()
+         {
+         }
+         
+         public function prepare()
+         {
+         }
+         
+         public function confirmEvent()
+         {
+            $this->flow->name  = $this->name;
+            $this->flow->email = $this->email;
+         }
+         
+         public function confirm()
+         {
+         }
+         
+         public function reprepareEvent()
+         {
+           $this->flow->errors = null;
+         }
+         
+         public function registEvent()
+         {
+             $user = new Users();
+             $user->name  = $this->flow->name;
+             $user->email = $this->flow->email;
+             $user->save();
+             if ($this->flow->errors) {
+                return false;
+             } else {
+                $this->flow->user = $user;
+             }
+         }
+         
+         public function success()
+         {
+         }
       }
-      public function prepare()
-      {
-      }
-      public function confirmEvent()
-      {
-        $this->flow->name  = $this->name;
-        $this->flow->email = $this->email;
-      }
-      public function confirm()
-      {
-      }
-      public function reprepareEvent()
-      {
-        $this->flow->errors = null;
-      }
-      public function registEvent()
-      {
-        $user = new Users();
-        $user->name  = $this->flow->name;
-        $user->email = $this->flow->email;
-        $user->save();
-        if ($this->flow->errors) {
-          return false;
-        } else {
-          $this->flow->user = $user;
-        }
-      }
-      public function success()
-      {
-      }
-    }
     ?>
 
 設定クラス例  
 
     <?php
-    class Index_Flow_Flow extends Sabel_Plugin_Flow_Config
-    {
-      public function configure()
+      class Index_Flow_Flow extends Sabel_Plugin_Flow_Config
       {
-        list($prepare, $confirm, $success) = $this->activities("prepare",
-                                                               "confirm",
-                                                               "success");
-        $prepare->addTransition("confirmEvent",   $confirm);
-        $confirm->addTransition("registEvent",    $success);
-        $confirm->addTransition("reprepareEvent", $prepare);
-        $this->entry($prepare)->add($confirm)->end($success);
+          public function configure()
+          {
+              list($prepare, $confirm, $success) = $this->activities("prepare",
+                                                                     "confirm",
+                                                                     "success");
+              $prepare->addTransition("confirmEvent",   $confirm);
+              $confirm->addTransition("registEvent",    $success);
+              $confirm->addTransition("reprepareEvent", $prepare);
+              $this->entry($prepare)->add($confirm)->end($success);
+          }
       }
-    }
     ?>
 
 上記の様に設定すると、状態がコントロールされます。  
@@ -323,15 +331,15 @@ SabelにはプラグインというSabelを拡張するためのAPIがありま�
 showPrivateというアクションが実行される前に拒否してしまうプラグインを書きます。  
 
     <?php
-    class Deny extends Sabel_Plugin_Base
-    {
-      public function onBeforeAction()
-      {
-        if ($this->destination->getAction() === "showPrivate") {
-          return false;
+     class Deny extends Sabel_Plugin_Base
+     {
+        public function onBeforeAction()
+        {
+          if ($this->destination->getAction() === "showPrivate") {
+            return false;
+          }
         }
-      }
-    }
+     }
     ?>
     
 このファイルをlib/Deny.phpとしてconfig/plugin.phpに次の行を追加してください。  
@@ -382,25 +390,25 @@ registrationアクション
 postRegistrationアクション
 
     <?php
-    public function postRegistration()
-    {
-      if (!$this->request->isPost()) {
-        $this->redirectTo("registration");
+      public function postRegistration()
+      {
+          if (!$this->request->isPost()) {
+              $this->redirectTo("registration");
+          }
+          
+          $user = MODEL("Users");
+          $user->username = $this->username;
+          $user->email    = $this->email;
+          $user->password = $this->password;
+          
+          if ($validate = $user->validate()) {
+              $this->errors = $validate;
+              $this->redirectTo("registration");
+          } else {
+              $user->save();
+              $this->redirectTo("registration");
+          }
       }
-
-      $user = MODEL("Users");
-      $user->username = $this->username;
-      $user->email    = $this->email;
-      $user->password = $this->password;
-
-      if ($validate = $user->validate()) {
-        $this->errors = $validate;
-        $this->redirectTo("registration");
-      } else {
-        $user->save();
-        $this->redirectTo("registration");
-      }
-    }
     ?>
 
 
@@ -417,10 +425,10 @@ postRegistrationアクション
 その中でアクセスを制限したいアクションの配列を戻します。  
 
     <?php
-    public function aclPrivateActions()
-    {
-      return array("privateAction");
-    }
+      public function aclPrivateActions()
+      {
+          return array("privateAction");
+      }
     ?>
     
 こうした場合、privateActionはログインしているユーザしか参照できません。  
@@ -435,47 +443,47 @@ postRegistrationアクション
 実際のクラスとコントローラクラスは下記の様になります。
 
     <?php
-    public function postLogin()
-    {
-      if (!$this->request->isPost()) {
-        $this->redirectTo("login");
-      }
-
-      $authentication = MODEL("Users");
-      $authentication->email    = $this->email;
-      $authentication->password = $this->password;
-
-      if ($this->authenticate($authentication)) {
-        $this->redirectTo("loginSuccess");
-      } else {
-        $this->redirectTo("loginFail");
-      }
-    }
-
-    public function logout()
-    {
-      $this->unAuthenticate();
-      $this->redirectTo("privateAction");
-    }
+     public function postLogin()
+     {
+        if (!$this->request->isPost()) {
+            $this->redirectTo("login");
+        }
+        
+        $authentication = MODEL("Users");
+        $authentication->email    = $this->email;
+        $authentication->password = $this->password;
+        
+        if ($this->authenticate($authentication)) {
+            $this->redirectTo("loginSuccess");
+        } else {
+            $this->redirectTo("loginFail");
+        }
+     }
+    
+     public function logout()
+     {
+        $this->unAuthenticate();
+        $this->redirectTo("privateAction");
+     }
     ?>
 
     <?php
-    class Users extends Sabel_DB_Model implements Sabel_Plugin_Acl_Authentication
-    {
-      public function authenticate()
+      class Users extends Sabel_DB_Model implements Sabel_Plugin_Acl_Authentication
       {
-        $result = $this->select("email", $this->email);
-        if ($result) {
-          $this->id = $result[0]->id;
-          return ($result[0]->password === $this->password);
-        }
+          public function authenticate()
+          {
+              $result = $this->select("email", $this->email);
+              if ($result) {
+                  $this->id = $result[0]->id;
+                  return ($result[0]->password === $this->password);
+              }
+          }
+          
+          public function fetchIdentity()
+          {
+              return $this->id;
+          }
       }
-
-      public function fetchIdentity()
-      {
-        return $this->id;
-      }
-    }
     ?>
 
 この例ではUsersモデルをそのまま認証オブジェクトとして使用しています。  
@@ -499,27 +507,28 @@ MMValidatorプラグイン
 コントローラで下記のように記述してください。
 
     <?php
-    public function initialize()
-    {
-      // プラグインをロード
-      $this->plugin(new Sabel_Plugin_MMValidator());
-    }
-    public function edit()
-    {
-      $this->user    = $user    = MODEL("Users")->selectOne($this->identity());
-      $this->profile = $profile = MODEL("Profile")->selectOne($user->id);
-
-      if ($this->request->isPost()) {
-        $user->setValues($this->usersValues);
-        $profile->setValues($this->profileValues);
-        $this->multipleValidate(array($user, $profile), true);
-        return $this->redirectTo("c: user, a: edit");
-      } elseif ($this->request->isGet()) {
-        if ($this->hasErrors) {
-          $this->assignErrors(array($user, $profile), $this->errorValues);
-        }
+      public function initialize()
+      {
+        // プラグインをロード
+        $this->plugin(new Sabel_Plugin_MMValidator());
       }
-    }
+      
+      public function edit()
+      {
+         $this->user    = $user    = MODEL("Users")->selectOne($this->identity());
+         $this->profile = $profile = MODEL("Profile")->selectOne($user->id);
+        
+         if ($this->request->isPost()) {
+            $user->setValues($this->usersValues);
+            $profile->setValues($this->profileValues);
+            $this->multipleValidate(array($user, $profile), true);
+            return $this->redirectTo("c: user, a: edit");
+         } elseif ($this->request->isGet()) {
+             if ($this->hasErrors) {
+                $this->assignErrors(array($user, $profile), $this->errorValues);
+             }
+         }
+      }
     ?>
 
 テンプレート内のフォームではname="モデル名::カラム名"という命名規則に従ってください
@@ -553,4 +562,3 @@ MMValidatorプラグイン
         <input type="submit" value="編集確定" />
       </form>
     </html>
-
