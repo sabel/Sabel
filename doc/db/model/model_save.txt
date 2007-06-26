@@ -6,7 +6,7 @@
 前項ではselect()メソッドを使用して会員を検索、取得しました。
 ここでも、前項と同じデータを用いてサンプルを示します。
 
-select()を使用する方法では、下記のようなコードになります。
+select()を使用し一人の会員を取得するには以下のようなコードを書きます。
 
   $members = MODEL("Member")->select(2);
   $member = (isset($members[0])) ? $members[0] : null;
@@ -43,6 +43,7 @@ selectOne()でレコードが存在したかどうか確かめるにはisSelecte
 
 更新にはsave()メソッドを使用します。
 save()メソッドの返り値は更新(登録)された新規モデルです。
+更新するデータをエスケープする必要はありません。
 
   $member = MODEL("Member")->selectOne(1);
 
@@ -78,7 +79,8 @@ save()メソッドの返り値は更新(登録)された新規モデルです。
 
 では次に新規会員を登録してみましょう。
 登録もsave()を使用して行うことができます。
-save()は自身がisSelected()かどうかを調べて、更新か登録かを切り替えます。
+更新と同様、登録するデータをエスケープする必要はありません。
+save()メソッドは自身がisSelected()かどうかを調べて、更新か登録かを切り替えています。
 
   $member = MODEL("Member");
   $member->id = 4;
@@ -107,7 +109,7 @@ save()は自身がisSelected()かどうかを調べて、更新か登録かを�
 insert()メソッドは、テーブルにAUTO INCREMENT(SEQUENCE)カラムがあれば、そのINSERTにより生成された値を返します。
 またsave()メソッドで登録した場合も、返り値のモデルには生成された値がセットされています。
 
-例えばこの'member'テーブルの'id'カラムがAUTO INCREMENT(SEQUENCE)カラムだったとします。
+例えばこの'member'テーブルの'id'カラムがAUTO INCREMENT(SEQUENCE)カラムであるとします。
 その時は以下のように、生成された値を取得することができます。
 
   $test = MODEL("Member");
@@ -124,13 +126,11 @@ insert()メソッドは、テーブルにAUTO INCREMENT(SEQUENCE)カラムがあ
 
   echo $id; // new id
 
-最後に、selectOne()とsave()の便利な使用法を示します。
-IPアドレスごとのアクセス数を記録するテーブルを作成します。
+最後に、selectOne()とsave()の組み合わせの、良い使用法を示します。
+IPアドレスごとのアクセス数を記録するテーブル'access_log'を作成します。
 
-テーブル名: access_log
-
-  ip: VARCHAR(15) NOT NULL (PRIMARY KEY)
-  count: INTEGER DEFAULT 0
+  * ip: VARCHAR(15) NOT NULL (PRIMARY KEY)
+  * count: INTEGER DEFAULT 1
 
 アクセスを記録するコードは以下のようになります。
 

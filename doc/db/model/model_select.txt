@@ -1,6 +1,6 @@
 テーブルからレコードを取得するにはselect()メソッドを使用します。
 
-以下のカラムを持つmemberという名前のテーブルを作成しました。
+以下のカラムを持つ'member'という名前のテーブルを作成しました。
 
   * id: INTEGER (PRIMARY KEY)
   * name: VARCHAR(24)

@@ -27,7 +27,7 @@ class Sabel_Helper
     $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
-                     
+    
     foreach ($helpers as $helper) {
       $path = RUN_BASE . $helper;
       if (is_file($path)) Sabel::fileUsing($path);
