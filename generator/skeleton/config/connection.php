@@ -40,4 +40,3 @@ function get_db_params($env = null)
 }
 
 Sabel_DB_Config::initialize();
-

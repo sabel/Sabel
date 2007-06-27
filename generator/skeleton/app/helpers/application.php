@@ -1,13 +1,16 @@
 <?php
 
-require (dirname(__FILE__) . "/db.php");
+$HELPERS_DIR = RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "helpers" . DIR_DIVIDER;
+
+require ($HELPERS_DIR . "db.php");
+require ($HELPERS_DIR . "validate.php");
 
 function a($uri, $anchor, $param = null)
 {
   if ($param === null) {
-    return '<a href="'.uri($uri).'">'.$anchor.'</a>';
+    return '<a href="' . uri($uri) . '">' . $anchor . '</a>';
   } else {
-    return '<a href="'.uri($uri).$param.'">'.$anchor.'</a>';
+    return '<a href="' . uri($uri) . $param . '">' . $anchor . '</a>';
   }
 }
 
@@ -51,4 +54,9 @@ function css($file)
 function h($content)
 {
   return htmlspecialchars($content);
+}
+
+function to_date($date, $format)
+{
+  return DateHelper::format($date, constant("DateHelper::" . $format));
 }

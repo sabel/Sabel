@@ -86,7 +86,11 @@ abstract class Sabel_DB_Driver_Base
 
 function escapeString($db, $values, $escMethod = null)
 {
-  if (!is_array($values)) $values = (array)$values;
+  if ($values === null) {
+    $values = array("");
+  } elseif (!is_array($values)) {
+    $values = (array)$values;
+  }
 
   foreach ($values as &$val) {
     if (is_bool($val)) {
