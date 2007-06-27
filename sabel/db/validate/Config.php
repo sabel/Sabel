@@ -60,7 +60,7 @@ class Sabel_DB_Validate_Config
     return self::$postProcesses;
   }
 
-  public static function registCustomValidation($custom)
+  public static function addValidator($custom)
   {
     $cvs =& self::$customValidations;
 

@@ -214,7 +214,7 @@ class Test_Validate extends SabelTestCase
                     "model"    => "TargetModel1",
                     "column"   => "name");
 
-    Sabel_DB_Validate_Config::registCustomValidation($custom);
+    Sabel_DB_Validate_Config::addValidator($custom);
 
     $model = new TargetModel1();
     $model->id = 10;
@@ -241,7 +241,7 @@ class Test_Validate extends SabelTestCase
                     "column"    => "name",
                     "arguments" => array(5));
 
-    Sabel_DB_Validate_Config::registCustomValidation($custom);
+    Sabel_DB_Validate_Config::addValidator($custom);
 
     $model = new TargetModel1();
     $model->id = 10;
@@ -264,7 +264,7 @@ class Test_Validate extends SabelTestCase
                     "column"    => "name",
                     "arguments" => array(5, 2));
 
-    Sabel_DB_Validate_Config::registCustomValidation($custom);
+    Sabel_DB_Validate_Config::addValidator($custom);
 
     $model = new TargetModel1();
     $model->id = 10;
@@ -335,7 +335,7 @@ class Test_Validate extends SabelTestCase
                     "column"    => "pre_*",
                     "arguments" => array("a", "b"));
 
-    Sabel_DB_Validate_Config::registCustomValidation($custom);
+    Sabel_DB_Validate_Config::addValidator($custom);
 
     $model = new TargetModel1();
     $model->id = 10;
