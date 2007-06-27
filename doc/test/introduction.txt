@@ -25,7 +25,8 @@ Sabelで開発されているアプリケーションはSabelでテストでき�
 まず簡単なテストクラスを作成します。
 
 tests/units/Member.php
-<?php
+
+    <?php
     class Units_Member extends Sabel_Test_Model
     {
       public function testMember()
@@ -34,7 +35,7 @@ tests/units/Member.php
         $this->assertEquals($member->name, "first");
       }
     }
-?>
+    ?>
 
 実行してみましょう。
     % sakle UnitTest Member
@@ -71,7 +72,7 @@ DEVELOPMENT環境でデータが既にデータベースにある場合は簡単
 実行が成功するとtests/fixture/Member.phpにフィクスチャクラスが作成されます。
 内容は次のようになります。
 
-<?php
+    <?php
     /**
      * Fixtures of member
      * this fixture class automaticaly generated from sakle Fixture task
@@ -98,7 +99,7 @@ DEVELOPMENT環境でデータが既にデータベースにある場合は簡単
         $model->executeQuery("DELETE FROM member");
       }
     }
-?>
+    ?>
 
 さて、これで準備は整いました。もう一度テストを実行してみましょう。
 

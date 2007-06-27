@@ -64,13 +64,22 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
       }
       
       if (method_exists($this->controller, $publicActions)) {
-        $result = $this->controller->$publicActions();
-        if ($result === self::ALLOW_ALL) {
+        $pubActions = $this->controller->$publicActions();
+        if ($pubActions === self::ALLOW_ALL) {
           return $this->controller->execute($action);
-        } elseif ($result === self::DENY_ALL) {
+        } elseif ($pubActions === self::DENY_ALL) {
           throw new Sabel_Exception_Runtime("duplicate double deny");
         }
-        if (in_array($action, $result)) {
+        
+        $found = false;
+        foreach ($pubActions as $publicAction) {
+          if (fnmatch($publicAction, $action)) {
+            $found = true;
+            break;
+          }
+        }
+        
+        if ($found) {
           return $this->controller->execute($action);
         } elseif ($this->user->isAuthenticated()) {
           return $this->controller->execute($action);
@@ -94,14 +103,23 @@ class Sabel_Plugin_Acl extends Sabel_Plugin_Base
       }
       
       if (method_exists($this->controller, $privateActions)) {
-        $result = $this->controller->$privateActions();
-        if ($result === self::DENY_ALL) {
+        $priActions = $this->controller->$privateActions();
+        if ($priActions === self::DENY_ALL) {
           $this->destination->setAction(self::DENY_ACTION);
           return $this->controller->execute(self::DENY_ACTION);
-        } elseif ($result === self::ALLOW_ALL) {
+        } elseif ($priActions === self::ALLOW_ALL) {
           throw new Sabel_Exception_Runtime("duplicate double allow");
         }
-        if (in_array($action, $result)) {
+        
+        $found = false;
+        foreach ($priActions as $privateAction) {
+          if (fnmatch($privateAction, $action)) {
+            $found = true;
+            break;
+          }
+        }
+        
+        if ($found) {
           if ($this->user->isAuthenticated()) {
             return $this->controller->execute($action);
           } else {

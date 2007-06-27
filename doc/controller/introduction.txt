@@ -314,11 +314,11 @@ app/index/flow/User.php # 状態設定クラス
 現時点ではTokenを手動で設定する必要があります。  
 フォーム内では次のように設定してください。  
 
-    <input type="hidden" name="token" value="<?= $token ?>" />  
+`<input type="hidden" name="token" value="<?= $token ?>" />`
 
 aタグでは次のようにしてください。  
 
-    <a href="reprepareEvent/?token=<?= $token ?>">correct</a>  
+`<a href="reprepareEvent/?token=<?= $token ?>">correct</a>`
 
 
 
@@ -432,6 +432,12 @@ postRegistrationアクション
     
 こうした場合、privateActionはログインしているユーザしか参照できません。  
 ログインしていないユーザが実行すると、accessDenyアクションが実行されます。  
+
+配列中の文字列にはワイルドカードが使用できます。
+
+`return array("public*")`
+
+とすれば、publicから始まるアクションは全て許可(or 拒否)されることになります。
 
 ログイン処理を行うには下記の手順で作成します。
  + ログイン用のアクションを作成する
