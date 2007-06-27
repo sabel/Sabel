@@ -51,7 +51,7 @@ class Sabel_DB_Validator
     return !empty($this->errors);
   }
 
-  // @todo localized(beta3) && refactoring
+  // @todo i18n(beta3)
   public function validate($ignores = array())
   {
     $this->ignores = $ignores;
@@ -67,7 +67,7 @@ class Sabel_DB_Validator
 
       if ($column->increment) {
         if ($column->value === null || $this->model->isSelected()) continue;
-        $message = "don't set the value in '{$column->name}'(auto increment column).";
+        $message = "don't set a value in '{$column->name}'(auto increment column).";
         $e = new Sabel_DB_Exception_Validate();
         throw $e->exception("validate", $message);
       }
@@ -99,21 +99,8 @@ class Sabel_DB_Validator
       }
     }
 
-    // @todo refactoring
     if ($uniques = $model->getSchema()->getUniques()) {
-      $cloned = clone $model;
-      foreach ($uniques as $unique) {
-        if (count($unique) !== 1) continue;
-
-        $name = $unique[0];
-        if (in_array($name, $this->ignores)) continue;
-
-        $value = $columns[$name]->value;
-        if ($cloned->getCount($name, $value) > 0) {
-          $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
-          $errors[] = sprintf($this->messages["unique"], $msgName, $value);
-        }
-      }
+      $this->unique($model, $columns, $uniques, $errors);
     }
 
     $customs = Sabel_DB_Validate_Config::getCustomValidations();
@@ -187,8 +174,11 @@ class Sabel_DB_Validator
 
   protected function nullable($column)
   {
-    if ($column->nullable) return true;
-    return isset($column->value);
+    if ($column->nullable) {
+      return true;
+    } else {
+      return isset($column->value);
+    }
   }
 
   protected function type($column)
@@ -220,5 +210,49 @@ class Sabel_DB_Validator
   protected function maximum($column)
   {
     return ($column->value < $column->max);
+  }
+
+  protected function unique($model, $columns, $uniques, &$errors)
+  {
+    $copy = MODEL($model->getModelName());
+    $pkey = $model->getPrimaryKey();
+
+    if (!is_array($pkey)) $pkey = (array)$pkey;
+
+    foreach ($uniques as $unique) {
+      $values = array();
+      foreach ($unique as $uni) {
+        $val = $columns[$uni]->value;
+        $copy->setCondition($uni, $val);
+        $values[] = $val;
+      }
+
+      $result = $copy->selectOne();
+      if (!$result->isSelected()) continue;
+
+      if ($model->isSelected()) {
+        $invalid = false;
+        foreach ($pkey as $key) {
+          if ($model->$key !== $result->$key) {
+            $invalid = true;
+            break;
+          }
+        }
+      } else {
+        $invalid = true;
+      }
+
+      if ($invalid) {
+        // @todo i18n
+
+        if (count($unique) > 1) {
+          $name = implode(", ", $unique);
+        } else {
+          $name = $unique[0];
+        }
+
+        $errors[] = sprintf($this->messages["unique"], $name, implode(", ", $values));
+      }
+    }
   }
 }

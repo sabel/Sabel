@@ -455,18 +455,14 @@ abstract class Sabel_DB_Model
   public function save($ignores = null)
   {
     if ($ignores) {
-      if ($ignores === true) {
-        $errors = $this->validate();
-      } else {
-        $errors = $this->validate($ignores);
-      }
-      
+      if ($ignores === true) $ignores = array();
+      $errors = $this->validate($ignores);
+
       if ($errors) {
-        $std = new stdClass();
-        $std->hasError = true;
-        $std->errors = $errors;
-        
-        return $std;
+        $stdClass = new stdClass();
+        $stdClass->hasError = true;
+        $stdClass->errors = $errors;
+        return $stdClass;
       }
     }
 

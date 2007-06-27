@@ -16,7 +16,7 @@ class Test_DB_Test extends SabelTestCase
     $basic->save();
 
     $basic = MODEL('Basic');
-    $basic->save(array('id' => 2, 'name' => 'basic name2'));
+    $basic->insert(array('id' => 2, 'name' => 'basic name2'));
 
     $basic = MODEL('Basic');
     $model = $basic->selectOne(1);
@@ -29,14 +29,14 @@ class Test_DB_Test extends SabelTestCase
   public function testParent()
   {
     $shop = MODEL('Company');
-    $shop->save(array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1));
-    $shop->save(array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1));
-    $shop->save(array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2));
-    $shop->save(array('id' => 4, 'name' => 'osaka-company2',     'city_id' => 2));
-    $shop->save(array('id' => 5, 'name' => 'san diego-company1', 'city_id' => 3));
-    $shop->save(array('id' => 6, 'name' => 'san diego-company2', 'city_id' => 3));
-    $shop->save(array('id' => 7, 'name' => 'rondon-company1',    'city_id' => 4));
-    $shop->save(array('id' => 8, 'name' => 'rondon-company2',    'city_id' => 4));
+    $shop->insert(array('id' => 1, 'name' => 'tokyo-company1',     'city_id' => 1));
+    $shop->insert(array('id' => 2, 'name' => 'tokyo-company2',     'city_id' => 1));
+    $shop->insert(array('id' => 3, 'name' => 'osaka-company1',     'city_id' => 2));
+    $shop->insert(array('id' => 4, 'name' => 'osaka-company2',     'city_id' => 2));
+    $shop->insert(array('id' => 5, 'name' => 'san diego-company1', 'city_id' => 3));
+    $shop->insert(array('id' => 6, 'name' => 'san diego-company2', 'city_id' => 3));
+    $shop->insert(array('id' => 7, 'name' => 'rondon-company1',    'city_id' => 4));
+    $shop->insert(array('id' => 8, 'name' => 'rondon-company2',    'city_id' => 4));
 
     $data = array();
     $data[] = array('id' => 1, 'name' => 'username1', 'email' => 'user1@example.com',
@@ -61,8 +61,8 @@ class Test_DB_Test extends SabelTestCase
     $city->arrayInsert($data);
 
     $city = MODEL('Classification');
-    $city->save(array('id' => 1, 'class_name' => 'classname1'));
-    $city->save(array('id' => 2, 'class_name' => 'classname2'));
+    $city->insert(array('id' => 1, 'class_name' => 'classname1'));
+    $city->insert(array('id' => 2, 'class_name' => 'classname2'));
 
     $data = array();
     $data[] = array('id' => 1, 'planet_id' => 1, 'name' => 'japan');
@@ -145,10 +145,14 @@ class Test_DB_Test extends SabelTestCase
   public function testLike()
   {
     $model = MODEL('TestForLike');
-    $model->save(array('string' => 'aaa'));
-    $model->save(array('string' => 'aa_'));
-    $model->save(array('string' => 'aba'));
-    $newModel = $model->save(array('string' => 'a%a'));
+    $model->insert(array('string' => 'aaa'));
+    $model->insert(array('string' => 'aa_'));
+    $model->insert(array('string' => 'aba'));
+
+    $model = MODEL('TestForLike');
+    $model->string = 'a%a';
+    $newModel = $model->save();
+
     $this->assertTrue(is_numeric($newModel->id));
     $this->assertTrue(($newModel->id > 0));
     $this->assertEquals($newModel->string, 'a%a');
@@ -189,16 +193,16 @@ class Test_DB_Test extends SabelTestCase
   public function testCondition()
   {
     $model = MODEL('TestCondition');
-    $model->save(array('status' => true,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
-    $model->save(array('status' => false, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
-    $model->save(array('status' => false, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
-    $model->save(array('status' => true,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
-    $model->save(array('status' => false, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
-    $model->save(array('status' => false, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
-    $model->save(array('status' => true,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
-    $model->save(array('status' => false, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
-    $model->save(array('status' => false, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
-    $model->save(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
+    $model->insert(array('status' => true,  'registed' => '2005-10-01 10:10:10', 'point' => 1000));
+    $model->insert(array('status' => false, 'registed' => '2005-09-01 10:10:10', 'point' => 2000));
+    $model->insert(array('status' => false, 'registed' => '2005-08-01 10:10:10', 'point' => 3000));
+    $model->insert(array('status' => true,  'registed' => '2005-07-01 10:10:10', 'point' => 4000));
+    $model->insert(array('status' => false, 'registed' => '2005-06-01 10:10:10', 'point' => 5000));
+    $model->insert(array('status' => false, 'registed' => '2005-05-01 10:10:10', 'point' => 6000));
+    $model->insert(array('status' => true,  'registed' => '2005-04-01 10:10:10', 'point' => 7000));
+    $model->insert(array('status' => false, 'registed' => '2005-03-01 10:10:10', 'point' => 8000));
+    $model->insert(array('status' => false, 'registed' => '2005-02-01 10:10:10', 'point' => 9000));
+    $model->insert(array('status' => true,  'registed' => '2005-01-01 10:10:10', 'point' => 10000));
 
     $model = MODEL('TestCondition');
     $model->setCondition(new Condition("point", array(">=", 8000), COMPARE));
@@ -313,9 +317,9 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($model2->point, 5000);
 
     $model = MODEL('TestCondition');
-    $model->save(array('status' => false, 'registed' => '2004-12-01 10:10:10'));
-    $model->save(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
-    $model->save(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
+    $model->insert(array('status' => false, 'registed' => '2004-12-01 10:10:10'));
+    $model->insert(array('status' => false, 'registed' => '2004-11-01 10:10:10'));
+    $model->insert(array('status' => true,  'registed' => '2004-10-01 10:10:10', 'point' => 13000));
 
     $model->setCondition("point", IS_NULL);
     $models = $model->select();
@@ -352,18 +356,18 @@ class Test_DB_Test extends SabelTestCase
     $model = MODEL('Customer');
     $model->executeQuery('DELETE FROM customer');
 
-    $model->save(array('id' => 1, 'name' => 'name1'));
-    $model->save(array('id' => 2, 'name' => 'name2'));
+    $model->insert(array('id' => 1, 'name' => 'name1'));
+    $model->insert(array('id' => 2, 'name' => 'name2'));
 
     $order = MODEL('CustomerOrder');
-    $order->save(array('customer_id' => 1, 'buy_date' => '2005-01-01 10:10:10', 'amount' => 1000));
-    $order->save(array('customer_id' => 1, 'buy_date' => '2005-02-01 10:10:10', 'amount' => 2000));
-    $order->save(array('customer_id' => 1, 'buy_date' => '2005-03-01 10:10:10', 'amount' => 3000));
-    $order->save(array('customer_id' => 1, 'buy_date' => '2005-04-01 10:10:10', 'amount' => 4000));
-    $order->save(array('customer_id' => 1, 'buy_date' => '2005-05-01 10:10:10', 'amount' => 5000));
-    $order->save(array('customer_id' => 2, 'buy_date' => '2005-06-01 10:10:10', 'amount' => 6000));
-    $order->save(array('customer_id' => 2, 'buy_date' => '2005-07-01 10:10:10', 'amount' => 7000));
-    $order->save(array('customer_id' => 2, 'buy_date' => '2005-08-01 10:10:10', 'amount' => 8000));
+    $order->insert(array('customer_id' => 1, 'buy_date' => '2005-01-01 10:10:10', 'amount' => 1000));
+    $order->insert(array('customer_id' => 1, 'buy_date' => '2005-02-01 10:10:10', 'amount' => 2000));
+    $order->insert(array('customer_id' => 1, 'buy_date' => '2005-03-01 10:10:10', 'amount' => 3000));
+    $order->insert(array('customer_id' => 1, 'buy_date' => '2005-04-01 10:10:10', 'amount' => 4000));
+    $order->insert(array('customer_id' => 1, 'buy_date' => '2005-05-01 10:10:10', 'amount' => 5000));
+    $order->insert(array('customer_id' => 2, 'buy_date' => '2005-06-01 10:10:10', 'amount' => 6000));
+    $order->insert(array('customer_id' => 2, 'buy_date' => '2005-07-01 10:10:10', 'amount' => 7000));
+    $order->insert(array('customer_id' => 2, 'buy_date' => '2005-08-01 10:10:10', 'amount' => 8000));
   }
 
   public function testDBRelation()
@@ -680,17 +684,17 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($orders);
 
     $model = Sabel_DB_Transaction::load("CustomerOrder");
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
 
     $model = Sabel_DB_Transaction::load("Customer");
-    $model->save(array('id' => 1, 'name' => 'name'));
-    $model->save(array('id' => 2, 'name' => 'name'));
+    $model->insert(array('id' => 1, 'name' => 'name'));
+    $model->insert(array('id' => 2, 'name' => 'name'));
 
     try {
       // 'nama' not found -> execute rollback.
-      @$model->save(array('id' => 3, 'nama' => 'name'));
+      @$model->insert(array('id' => 3, 'nama' => 'name'));
     } catch (Exception $e) {
 
     }
@@ -708,15 +712,15 @@ class Test_DB_Test extends SabelTestCase
   public function testDatabasesCasecadeDelete()
   {
     $model = MODEL('CustomerOrder');
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
-    $model->save(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
-    $model->save(array('customer_id' => 2, 'buy_date' => '2000-02-02 02:02:02', 'amount' => 2000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
+    $model->insert(array('customer_id' => 2, 'buy_date' => '2000-02-02 02:02:02', 'amount' => 2000));
 
     $model = MODEL('Customer');
-    $model->save(array('id' => 1, 'name' => 'name1'));
-    $model->save(array('id' => 2, 'name' => 'name2'));
-    $model->save(array('id' => 3, 'name' => 'name3'));
+    $model->insert(array('id' => 1, 'name' => 'name1'));
+    $model->insert(array('id' => 2, 'name' => 'name2'));
+    $model->insert(array('id' => 3, 'name' => 'name3'));
 
     $deleter = new Sabel_DB_Model_CascadeDelete("Customer", 1);
     $deleter->execute(new CustomerCascadeDelete());
@@ -745,8 +749,8 @@ class Test_DB_Test extends SabelTestCase
   public function testUpdate()
   {
     $model = MODEL('Customer');
-    $model->save(array('id' => 1, 'name' => 'name1'));
-    $model->save(array('id' => 2, 'name' => 'name2'));
+    $model->insert(array('id' => 1, 'name' => 'name1'));
+    $model->insert(array('id' => 2, 'name' => 'name2'));
 
     $customer = MODEL('Customer')->selectOne(1);
     $this->assertEquals($customer->name, 'name1');
@@ -889,25 +893,25 @@ class Test_DB_Test extends SabelTestCase
   public function testBridge()
   {
     $model = MODEL('Student');
-    $model->save(array('id' => 1, 'name' => 'suzuki'));
-    $model->save(array('id' => 2, 'name' => 'satou'));
-    $model->save(array('id' => 3, 'name' => 'tanaka'));
-    $model->save(array('id' => 4, 'name' => 'koike'));
-    $model->save(array('id' => 5, 'name' => 'yamada'));
+    $model->insert(array('id' => 1, 'name' => 'suzuki'));
+    $model->insert(array('id' => 2, 'name' => 'satou'));
+    $model->insert(array('id' => 3, 'name' => 'tanaka'));
+    $model->insert(array('id' => 4, 'name' => 'koike'));
+    $model->insert(array('id' => 5, 'name' => 'yamada'));
 
     $model = MODEL('Course');
-    $model->save(array('id' => 1, 'course_name' => 'math'));
-    $model->save(array('id' => 2, 'course_name' => 'physics'));
-    $model->save(array('id' => 3, 'course_name' => 'sience'));
+    $model->insert(array('id' => 1, 'course_name' => 'math'));
+    $model->insert(array('id' => 2, 'course_name' => 'physics'));
+    $model->insert(array('id' => 3, 'course_name' => 'sience'));
 
     $model = MODEL('StudentCourse');
-    $model->save(array('student_id' => 1, 'course_id' => 1));
-    $model->save(array('student_id' => 1, 'course_id' => 2));
-    $model->save(array('student_id' => 2, 'course_id' => 2));
-    $model->save(array('student_id' => 3, 'course_id' => 1));
-    $model->save(array('student_id' => 4, 'course_id' => 3));
-    $model->save(array('student_id' => 2, 'course_id' => 3));
-    $model->save(array('student_id' => 3, 'course_id' => 2));
+    $model->insert(array('student_id' => 1, 'course_id' => 1));
+    $model->insert(array('student_id' => 1, 'course_id' => 2));
+    $model->insert(array('student_id' => 2, 'course_id' => 2));
+    $model->insert(array('student_id' => 3, 'course_id' => 1));
+    $model->insert(array('student_id' => 4, 'course_id' => 3));
+    $model->insert(array('student_id' => 2, 'course_id' => 3));
+    $model->insert(array('student_id' => 3, 'course_id' => 2));
 
     $pkey = $model->getSchema()->getPrimaryKey();
     $this->assertTrue(is_array($pkey));
@@ -937,14 +941,15 @@ class Test_DB_Test extends SabelTestCase
   public function testTimer()
   {
     $model = MODEL('Timer');
-    $model->save(array('id' => 1));
+    $model->insert(array('id' => 1));
 
     $model = MODEL('Timer')->selectOne(1);
     $this->assertEquals($model->id, 1);
     $this->assertNotNull($model->auto_update);
     $this->assertNotNull($model->auto_create);
 
-    $model->save(array('auto_create' => date('Y-m-d H:i:s')));
+    $model->auto_create = date("Y-m-d H:i:s");
+    $model->save();
 
     $model = MODEL('Timer')->selectOne(1);
     $this->assertEquals($model->id, 1);
