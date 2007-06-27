@@ -435,10 +435,13 @@ postRegistrationアクション
 ログインしていないユーザが実行すると、accessDenyアクションが実行されます。  
 
 ログイン処理を行うには下記の手順で作成します。
- + Sabel_Plugin_Acl_Authenticationインタフェイスを継承したクラスを作成する
- + authenticate()とfetchIdentity()インタフェイスメソッドを適切に実装する
  + ログイン用のアクションを作成する
- + $this->authenticate()プラグインメソッドに手順１で作成したクラスのインスタンスを渡す
+ + ログインが成功したら $this->request->user->setAuthenticated(true); を実行する
+ 
+$this->request->userオブジェクトには自由にプロパティをセットできる
+たとえば、
+$this->request->user->id = $member->id;
+などとするとログアウトされるまではどこでもidが参照できる。
  
 実際のクラスとコントローラクラスは下記の様になります。
 
@@ -449,11 +452,12 @@ postRegistrationアクション
             $this->redirectTo("login");
         }
         
-        $authentication = MODEL("Users");
-        $authentication->email    = $this->email;
-        $authentication->password = $this->password;
+        $user = MODEL("Users");
+        $authResult = $user->auth($this->email, $this->password);
         
-        if ($this->authenticate($authentication)) {
+        if ($authResult) {
+            $this->request->user->setAuthenticated(true);
+            $this->request->user->id = $user->id;
             $this->redirectTo("loginSuccess");
         } else {
             $this->redirectTo("loginFail");

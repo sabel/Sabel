@@ -47,3 +47,8 @@ function css($file)
     return sprintf($fmt, "/css/{$file}.css");
   }
 }
+
+function h($content)
+{
+  return htmlspecialchars($content);
+}
