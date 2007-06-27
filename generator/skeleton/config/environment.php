@@ -25,6 +25,5 @@ add_include_path("/app/models");
 add_include_path("/lib");
 add_include_path("/config");
 
-require (RUN_BASE . "/config/plugin.php");
 require (RUN_BASE . "/config/Factory.php");
 require (RUN_BASE . "/config/connection.php");

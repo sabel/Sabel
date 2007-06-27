@@ -9,6 +9,6 @@ class Plugin extends Sabel_Plugin_Config
     $this->add(new Sabel_Plugin_Redirecter());
     $this->add(new Sabel_Plugin_Exception());
     $this->add(new Sabel_Plugin_Errors());
-    $this->add(new Sabel_Plugin_Acl());
+    // $this->add(new Sabel_Plugin_Acl());
   }
 }

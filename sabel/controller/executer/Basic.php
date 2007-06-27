@@ -63,6 +63,7 @@ class Sabel_Controller_Executer_Basic
     $plugin = $this->context->getPlugin();
     $plugin->onCreateController($this->destination);
     $plugin->setController($instance);
+    $this->context->setController($this->controller);
     
     return $instance;
   }

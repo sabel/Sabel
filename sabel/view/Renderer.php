@@ -16,10 +16,15 @@ abstract class Sabel_View_Renderer
   
   protected $trim = true;
   
-  public function partial($name, $options = array())
+  public function partial($name, $controller = null, $options = array())
   {
     $context = Sabel_Context::getContext();
     $destination = clone $context->getDestination();
+    
+    if ($controller !== null) {
+      $destination->setController($controller);
+    }
+    
     $destination->setAction($name);
     
     return Sabel_View::render($destination, array("assign" => $options));
