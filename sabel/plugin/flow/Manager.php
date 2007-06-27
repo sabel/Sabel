@@ -20,14 +20,14 @@ class Sabel_Plugin_Flow_Manager
   
   public function __construct($request)
   {
-    $this->storage = Sabel_Context::getStorage();
+    $this->storage = Sabel_Context::getContext()->getStorage();
     $this->initializeToken($request);
   }
   
   private final function initializeToken($request)
   {
     $storage = $this->storage;
-    $token = $request->getParameter(self::TOKEN_KEY);
+    $token = $request->find(self::TOKEN_KEY);
     
     if ($token !== null) {
       if (!$storage->has($this->key($token))) {

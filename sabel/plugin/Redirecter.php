@@ -15,7 +15,7 @@ class Sabel_Plugin_Redirecter extends Sabel_Plugin_Base
       $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
     }
     
-    l("RED: " . $to);
+    l("REDIRECT: " . $to);
     
     $this->controller->getResponse()->location($host, $ignored . $to);
   }

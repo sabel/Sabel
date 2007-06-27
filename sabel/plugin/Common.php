@@ -11,9 +11,12 @@
  */
 class Sabel_Plugin_Common extends Sabel_Plugin_Base
 {
+  private $context = null;
+  
   public function plugin($plugin)
   {
-    Sabel_Plugin::create()->add($plugin);
+    $this->context = Sabel_Context::getContext();
+    $this->context->getPlugin()->add($plugin);
   }
   
   public function onCreateController($destination)
@@ -23,7 +26,7 @@ class Sabel_Plugin_Common extends Sabel_Plugin_Base
     
     $flowClass = $m."_Flow_".$c;
     if (class_exists($flowClass)) {
-      Sabel_Plugin::create()->add(new Sabel_Plugin_Flow());
+      $this->plugin(new Sabel_Plugin_Flow());
     }
   }
 }

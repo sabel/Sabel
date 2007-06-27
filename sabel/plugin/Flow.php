@@ -78,7 +78,7 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
       }
     } else {
       if ($flow->isEntryActivity($action)) {
-        $logger->log("{$action} is entry activity");
+        l("{$action} is entry activity");
         $flow->start($action);
         $this->assignToken($manager, $controller, $flow);
         $response = $controller->execute($action);
@@ -95,6 +95,27 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
         return $controller->execute(self::INVALID_ACTION);
       }
     } 
+  }
+  
+  public function onRedirect($to)
+  {
+    if (isset($_SERVER["HTTP_HOST"])) {
+      $host = $_SERVER["HTTP_HOST"];
+    } else {
+      $host = "localhost";
+    }
+    
+    $ignored = "";
+    if (defined("URI_IGNORE")) {
+      $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+    }
+    
+    $controller = $this->controller;
+    $param = "?token=" . $controller->token;
+    
+    l("[Plugin::FLOW]: redirect to " . $param);
+    
+    $controller->getResponse()->location($host, $ignored . $to . $param);
   }
   
   private final function assignToken($manager, $controller, $flow)

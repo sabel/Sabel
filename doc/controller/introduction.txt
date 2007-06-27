@@ -228,13 +228,12 @@ Sabelでは状態を厳格に制御する機構が用意されています。
 状態とは、UMLでいうところのステートチャートにあたるものです。  
 
 使用方法  
-+ コントローラをSabel_Controller_Flowを継承して作成する (次のバージョンで改善されます)
 + 状態設定クラスを作成する
 
 コントローラクラス例  
 
     <?php
-      class Index_Controllers_Flow extends Sabel_Controller_Page_Flow
+      class Index_Controllers_Flow extends Sabel_Controller_Page
       {
          public function index()
          {

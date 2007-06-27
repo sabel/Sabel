@@ -37,6 +37,8 @@ final class Sabel_Controller_Front
   
   public function ignition($request = null, $storage = null)
   {
+    l("[Core::Front] start of request -------------------");
+    
     $context = $this->context;
     
     if ($request === null) {
@@ -50,7 +52,7 @@ final class Sabel_Controller_Front
     $router = new Sabel_Router_Map();
     $destination = $this->destination = $router->route($this->request, $context);
     
-    l("request " . $this->request->__toString());
+    l("[Core::Front] request " . $this->request->__toString());
     $context->setDestination($destination);
     
     $pc = new Plugin();
@@ -101,6 +103,8 @@ final class Sabel_Controller_Front
     $this->response = $response;
     $response->setController($this->controller);
     $response->setDestination($this->destination);
+    
+    l("[Core::Front] end of request -------------------\n");
     
     return $response;
   }
