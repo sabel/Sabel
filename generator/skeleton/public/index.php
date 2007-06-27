@@ -1,5 +1,7 @@
 <?php
 
+ob_start();
+
 define("RUN_BASE", dirname(realpath(".")));
 
 require ("Sabel/Sabel.php");
@@ -10,17 +12,15 @@ if (!defined("ENVIRONMENT")) {
   exit;
 }
 
-if (strpos($_SERVER["SCRIPT_NAME"], "index.php") !== false) {
-  define("URI_IGNORE", true);
+if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
   $ignore = str_replace($_SERVER["SCRIPT_NAME"], "", $_SERVER["REQUEST_URI"]);
+  define("URI_IGNORE", $ignore);
   $_SERVER["REQUEST_URI"] = ltrim($ignore, "/");
-} elseif (substr($_SERVER["SCRIPT_NAME"], 0, 7) !== "/public") {
-  define("URI_IGNORE", true);
-  $ignore = str_replace("public/index.php", "", $_SERVER["SCRIPT_NAME"]);
-  $_SERVER["REQUEST_URI"] = str_replace($ignore, "", $_SERVER["REQUEST_URI"]);
 }
 
 $aFrontController = new Sabel_Controller_Front();
 $response = $aFrontController->ignition();
 $response->outputHeaderIfRedirectedThenExit();
 echo Sabel_View::renderDefault($response);
+
+ob_flush();
