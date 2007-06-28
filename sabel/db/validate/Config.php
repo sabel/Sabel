@@ -20,8 +20,7 @@ class Sabel_DB_Validate_Config
                                      "unique"   => "%s: '%s' is unavailable.");
 
   protected static $localizedName = array();
-  protected static $postProcesses = array();
-  protected static $customValidations = array();
+  protected static $customValidators = array();
 
   public static function getConfigs()
   {
@@ -50,19 +49,9 @@ class Sabel_DB_Validate_Config
     return self::$datetimeRegex;
   }
 
-  public static function registPostProcessing($process)
-  {
-    self::$postProcesses[] = $process;
-  }
-
-  public static function getPostProcesses()
-  {
-    return self::$postProcesses;
-  }
-
   public static function addValidator($custom)
   {
-    $cvs =& self::$customValidations;
+    $cvs =& self::$customValidators;
 
     $colName = $custom["column"];
     $models  = $custom["model"];
@@ -87,9 +76,9 @@ class Sabel_DB_Validate_Config
     }
   }
 
-  public static function getCustomValidations()
+  public static function getCustomValidators()
   {
-    return self::$customValidations;
+    return self::$customValidators;
   }
 
   public static function setLocalizedName($mdlName, $names)
@@ -102,8 +91,11 @@ class Sabel_DB_Validate_Config
     return self::$localizedName;
   }
 
-  public static function clearCustomValidations()
+  public static function clearCustomValidators()
   {
-    self::$customValidations = array();
+    $validators = self::$customValidators;
+    self::$customValidators = array();
+
+    return $validators;
   }
 }

@@ -103,13 +103,10 @@ class Sabel_DB_Validator
       $this->unique($model, $columns, $uniques, $errors);
     }
 
-    $customs = Sabel_DB_Validate_Config::getCustomValidations();
+    $customs = Sabel_DB_Validate_Config::getCustomValidators();
     if (isset($customs[$this->mdlName])) {
       $this->customValidation($customs[$this->mdlName], $columns, $errors);
     }
-
-    $processes = Sabel_DB_Validate_Config::getPostProcesses();
-    if ($processes) $this->postProcess($processes, $errors);
 
     return $this->errors = $errors;
   }
@@ -161,17 +158,6 @@ class Sabel_DB_Validator
     return str_replace(";", "", implode(",", $args));
   }
 
-  protected function postProcess($processes, &$errors)
-  {
-    foreach ($processes as $process) {
-      $class = new $process["class"]();
-
-      foreach ($process["methods"] as $method) {
-        $class->$method($errors, $this->model);
-      }
-    }
-  }
-
   protected function nullable($column)
   {
     if ($column->nullable) {
@@ -217,7 +203,7 @@ class Sabel_DB_Validator
     $copy = MODEL($model->getModelName());
     $pkey = $model->getPrimaryKey();
 
-    if (!is_array($pkey)) $pkey = (array)$pkey;
+    if (is_string($pkey)) $pkey = (array)$pkey;
 
     foreach ($uniques as $unique) {
       $values = array();

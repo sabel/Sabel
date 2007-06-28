@@ -109,6 +109,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
   protected function clear()
   {
     $this->objects = array();
+
     Sabel_DB_Join_Result::clear();
     Sabel_DB_Join_Alias::clear();
   }

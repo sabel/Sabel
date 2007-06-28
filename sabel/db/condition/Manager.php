@@ -68,7 +68,10 @@ class Sabel_DB_Condition_Manager
 
   public function clear()
   {
+    $conditions = $this->conditions;
     $this->conditions = array();
+
+    return $conditions;
   }
 
   public function build($driver)

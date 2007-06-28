@@ -15,11 +15,9 @@ abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
   public function getTableLists()
   {
     $tables = array();
+    $sql    = sprintf($this->tableList, $this->schemaName);
 
-    $sql = sprintf($this->tableList, $this->schemaName);
-    $this->execute($sql);
-
-    foreach ($this->driver->getResult() as $row) {
+    foreach ($this->execute($sql) as $row) {
       $row = array_change_key_case($row);
       $tables[] = $row["table_name"];
     }
@@ -29,10 +27,9 @@ abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
   protected function createColumns($tblName)
   {
     $sql = sprintf($this->tableColumns, $this->schemaName, $tblName);
-    $this->execute($sql);
 
     $columns = array();
-    foreach ($this->driver->getResult() as $row) {
+    foreach ($this->execute($sql) as $row) {
       $row = array_change_key_case($row);
       $colName = $row["column_name"];
       $columns[$colName] = $this->makeColumnValueObject($row);

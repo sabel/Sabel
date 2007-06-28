@@ -122,4 +122,3 @@ function escapeString($db, $values, $escMethod = null)
     return $values;
   }
 }
-

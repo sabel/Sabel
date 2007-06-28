@@ -3,13 +3,14 @@
 /**
  * Sabel_DB_Transaction_Base
  *
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Transaction_Base
+abstract class Sabel_DB_Transaction_Base
 {
   private static $instances = array();
 
@@ -17,6 +18,8 @@ class Sabel_DB_Transaction_Base
   protected $transactions = array();
 
   private function __construct() {}
+  abstract public function commit();
+  abstract public function rollback();
 
   public static function registInstance($instance)
   {

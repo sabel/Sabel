@@ -43,10 +43,11 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
     $tblName = strtoupper($tblName);
 
     $ij  = "INNER JOIN";
+    $cn  = "constraint_name";
     $sql = "SELECT acc.column_name, ac2.table_name AS ref_table, acc2.column_name AS ref_column, ac.delete_rule "
-         . "FROM all_constraints ac {$ij} all_cons_columns acc ON acc.constraint_name = ac.constraint_name "
-         . "{$ij} all_constraints ac2 ON ac2.constraint_name = ac.r_constraint_name "
-         . "{$ij} all_cons_columns acc2 ON acc2.constraint_name = ac2.constraint_name "
+         . "FROM all_constraints ac {$ij} all_cons_columns acc ON acc.{$cn} = ac.{$cn} "
+         . "{$ij} all_constraints ac2 ON ac2.{$cn} = ac.r_constraint_name "
+         . "{$ij} all_cons_columns acc2 ON acc2.{$cn} = ac2.{$cn} "
          . "WHERE ac.owner = '{$this->schemaName}' AND ac.constraint_type = 'R' AND ac.table_name = '{$tblName}'";
 
     $rows = $this->execute($sql);

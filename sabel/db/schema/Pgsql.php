@@ -57,13 +57,28 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
 
   public function setPrimaryKey($co, $row)
   {
-    $sql = "SELECT * FROM information_schema.key_column_usage "
-         . "WHERE table_schema = '{$this->schemaName}' "
-         . "AND table_name = '{$row["table_name"]}' "
-         . "AND column_name = '{$co->name}' AND constraint_name LIKE '%\_pkey'";
+    static $pkeys = array();
 
-    $result = $this->execute($sql);
-    $co->primary = !(empty($result));
+    $tblName = $row["table_name"];
+    if (isset($pkeys[$tblName])) {
+      $keys = $pkeys[$tblName];
+    } else {
+      $sql = "SELECT column_name FROM information_schema.key_column_usage "
+           . "WHERE table_schema = '{$this->schemaName}' "
+           . "AND table_name = '{$row["table_name"]}' AND constraint_name LIKE '%\_pkey'";
+
+      $result = $this->execute($sql);
+
+      if (empty($result)) {
+        $keys = $pkeys[$tblName] = array();
+      } else {
+        $keys = array();
+        foreach ($result as $row) $keys[] = $row["column_name"];
+        $pkeys[$tblName] = $keys;
+      }
+    }
+
+    $co->primary = in_array($co->name, $keys);
   }
 
   public function setLength($co, $row)

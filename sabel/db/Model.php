@@ -18,20 +18,17 @@ abstract class Sabel_DB_Model
   protected
     $tableName  = "",
     $modelName  = "",
-    $columns    = array(),
     $schema     = null,
-    $schemaCols = null,
-    $selected   = false;
+    $columns    = array(),
+    $schemaCols = array(),
+    $selected   = false,
+    $projection = "*",
+    $parents    = array();
 
   protected
     $values       = array(),
     $updateValues = array(),
     $saveValues   = array();
-
-  protected
-    $projection  = "*",
-    $structure   = "normal",
-    $parents     = array();
 
   protected
     $constraints      = array(),
@@ -107,7 +104,7 @@ abstract class Sabel_DB_Model
   public function setValues($values)
   {
     foreach ($values as $key => $val) {
-      $this->$key = $val;
+      $this->__set($key, $val);
     }
   }
 
@@ -156,11 +153,6 @@ abstract class Sabel_DB_Model
   public function getIncrementColumn()
   {
     return $this->schema->getIncrementColumn();
-  }
-
-  public function getTableEngine()
-  {
-    return $this->schema->getTableEngine();
   }
 
   public function setSaveValues($values)
@@ -281,9 +273,8 @@ abstract class Sabel_DB_Model
   {
     $schemas = array();
     $values  = $this->values;
-    $columns = $this->schema->getColumns();
 
-    foreach ($columns as $name => $schema) {
+    foreach ($this->schemaCols as $name => $schema) {
       $cloned = clone $schema;
       if (isset($values[$name])) {
         $cloned->value = $values[$name];
@@ -387,13 +378,13 @@ abstract class Sabel_DB_Model
 
   protected function internalJoin()
   {
-    $joiner = new Sabel_DB_Join($this);
-    $result = $joiner->buildParents();
+    $join   = new Sabel_DB_Join($this);
+    $result = $join->buildParents();
 
     if ($result === Sabel_DB_Join::CANNOT_JOIN) {
       return Sabel_DB_Join::CANNOT_JOIN;
     } else {
-      return $joiner->join();
+      return $join->join();
     }
   }
 
@@ -427,13 +418,13 @@ abstract class Sabel_DB_Model
 
   public function setProperties($row)
   {
-    $pKey = $this->getPrimaryKey();
-    if (!is_array($pKey)) $pKey = (array)$pKey;
+    $pkey = $this->getPrimaryKey();
+    if (!is_array($pkey)) $pkey = (array)$pkey;
 
     $manager  = $this->loadConditionManager();
     $selected = true;
 
-    foreach ($pKey as $key) {
+    foreach ($pkey as $key) {
       if (isset($row[$key])) {
         $c = new Sabel_DB_Condition_Object($key, $row[$key]);
         $manager->addUnique($c);
@@ -467,9 +458,14 @@ abstract class Sabel_DB_Model
     }
 
     if ($this->isSelected()) {
-      $saveValues = $this->updateValues;
-      $saveMethod = "update";
-      $this->updateValues = array();
+      if ($this->getPrimaryKey() === null) {
+        $e = new Sabel_DB_Exception_Model();
+        throw $e->exception("save", "cannot update model(there is not primary key).");
+      } else {
+        $saveValues = $this->updateValues;
+        $saveMethod = "update";
+        $this->updateValues = array();
+      }
     } else {
       $saveValues = $this->values;
       $saveMethod = "insert";
@@ -488,11 +484,8 @@ abstract class Sabel_DB_Model
 
     if ($this->isSelected()) {
       $saveValues = array_merge($this->toArray(), $saveValues);
-    } else {
-      if (($incCol = $this->getIncrementColumn()) !== null) {
-        $id = $command->getIncrementId();
-        if (!isset($saveValues[$incCol])) $saveValues[$incCol] = $id;
-      }
+    } elseif (($incCol = $this->getIncrementColumn()) !== null) {
+      $saveValues[$incCol] = $command->getIncrementId();
     }
 
     $newModel = MODEL($this->getModelName());
@@ -526,22 +519,13 @@ abstract class Sabel_DB_Model
     }
   }
 
-  private function chooseValues($data, $method)
-  {
-    if (isset($data) && !is_array($data)) {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing($method, $data);
-    } else {
-      return ($data === null) ? $this->values : $data;
-    }
-  }
-
   public function arrayInsert($data)
   {
     if (is_array($data)) {
       $this->saveValues = $data;
     } else {
-      $e = new Sabel_DB_Exception_Model(); throw $e->missing("arrayInsert", $data);
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing("arrayInsert", $data);
     }
 
     try {
@@ -558,24 +542,25 @@ abstract class Sabel_DB_Model
   {
     $manager = $this->loadConditionManager();
 
-    if ($arg1 === null) {
-      if ($manager->isEmpty() && !$this->isSelected()) {
-        $e = new Sabel_DB_Exception_Model();
-        throw $e->exception("remove", "delete all? must set the condition.");
-      }
+    if (!$this->isSelected() && $arg1 === null && $manager->isEmpty()) {
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->exception("remove", "delete all? must set the condition.");
     }
 
-    if ($this->isSelected()) {
-      $pKey  = $this->getPrimaryKey();
-      $ucond = $this->conditionManager->getUniqueConditions();
-
-      if (!is_array($pKey)) $pKey = (array)$pKey;
-
-      foreach ($pKey as $key) {
-        $this->setCondition($key, $ucond[$key]->value);
-      }
-    } else {
+    if ($arg1 !== null) {
       $this->setCondition($arg1, $arg2);
+    } elseif ($this->isSelected()) {
+      if (($pkey = $this->getPrimaryKey()) === null) {
+        $e = new Sabel_DB_Exception_Model();
+        throw $e->exception("save", "cannot delete model(there is not primary key).");
+      } else {
+        $ucond = $this->conditionManager->getUniqueConditions();
+        if (is_string($pkey)) $pkey = (array)$pkey;
+
+        foreach ($pkey as $key) {
+          $this->setCondition($key, $ucond[$key]->value);
+        }
+      }
     }
 
     $this->getCommand()->delete();
@@ -612,13 +597,17 @@ abstract class Sabel_DB_Model
     }
   }
 
-  protected function executeError($errorMsg, $command)
+  private function chooseValues($data, $method)
   {
-    Sabel_DB_Transaction::rollback();
-    throw new Sabel_DB_Exception($errorMsg);
+    if (isset($data) && !is_array($data)) {
+      $e = new Sabel_DB_Exception_Model();
+      throw $e->missing($method, $data);
+    } else {
+      return ($data === null) ? $this->values : $data;
+    }
   }
 
-  private function getEvalCode($argsCount)
+  private final function getEvalCode($argsCount)
   {
     $args = array();
     for ($i = 0; $i < $argsCount; $i++) {
@@ -627,5 +616,11 @@ abstract class Sabel_DB_Model
 
     $args = implode(", ", $args);
     return '$command->$method(' . $args . ')->getResult();';
+  }
+
+  private final function executeError($message, $command)
+  {
+    Sabel_DB_Transaction::rollback();
+    throw new Sabel_DB_Exception($message);
   }
 }

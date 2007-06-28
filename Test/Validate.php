@@ -186,28 +186,6 @@ class Test_Validate extends SabelTestCase
     $this->assertFalse($validator->hasError());
   }
 
-  public function testPostProcess()
-  {
-    $this->assertFalse(PostProcess::$called);
-
-    $processes = array("class"   => "PostProcess",
-                       "methods" => array("call"));
-
-    Sabel_DB_Validate_Config::registPostProcessing($processes);
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->status = false;
-    $model->registed = "2006-01-10 20:11:44";
-    $model->point = 3000;
-
-    $validator = new Sabel_DB_Validator($model);
-    $result = $validator->validate();
-
-    $this->assertTrue(PostProcess::$called);
-  }
-
   public function testCustom1()
   {
     $custom = array("function" => "validate_function_custom1",
@@ -231,7 +209,7 @@ class Test_Validate extends SabelTestCase
       $this->assertEquals($error, "value is dekai.");
     }
 
-    Sabel_DB_Validate_Config::clearCustomValidations();
+    Sabel_DB_Validate_Config::clearCustomValidators();
   }
 
   public function testCustom2()
@@ -254,7 +232,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
     $this->assertFalse($validator->hasError());
 
-    Sabel_DB_Validate_Config::clearCustomValidations();
+    Sabel_DB_Validate_Config::clearCustomValidators();
   }
 
   public function testCustom3()
@@ -285,7 +263,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
     $this->assertTrue($validator->hasError());
 
-    Sabel_DB_Validate_Config::clearCustomValidations();
+    Sabel_DB_Validate_Config::clearCustomValidators();
   }
 
   public function testLocalized()
@@ -325,7 +303,7 @@ class Test_Validate extends SabelTestCase
     $this->assertEquals($error2, "ステータスの形式が不正です");
     $this->assertEquals($error3, "名前が長すぎます");
 
-    Sabel_DB_Validate_Config::clearCustomValidations();
+    Sabel_DB_Validate_Config::clearCustomValidators();
   }
 
   public function testRegex()
@@ -358,7 +336,7 @@ class Test_Validate extends SabelTestCase
     $validator->validate();
     $this->assertTrue($validator->hasError());
 
-    Sabel_DB_Validate_Config::clearCustomValidations();
+    Sabel_DB_Validate_Config::clearCustomValidators();
   }
 }
 
@@ -471,16 +449,6 @@ class Schema_TargetModel2
     $property['uniques'] = null;
 
     return $property;
-  }
-}
-
-class PostProcess
-{
-  public static $called = false;
-
-  public function call($errors, $model)
-  {
-    self::$called = true;
   }
 }
 

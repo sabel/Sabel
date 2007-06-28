@@ -14,7 +14,7 @@ class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
   private $connectionName = "";
   private $schemaClass = null;
 
-  public function __construct($connectionName)
+  public function __construct($connectionName = "default")
   {
     $dbName = Sabel_DB_Config::getDB($connectionName);
     $className = "Sabel_DB_Schema_" . ucfirst($dbName);
