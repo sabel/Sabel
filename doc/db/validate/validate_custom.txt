@@ -1,0 +1,130 @@
+詳細で変化することのない仕様をもとに、テーブルを定義できれば、前項の基本的(しかし重要な)バリデートだけでほとんどは事足ります。
+しかし、スキーマから判断することが困難(不可能)なものも、いくつかあるでしょう。
+
+前項でも扱いましたが、メールアドレスを例にしてみます。
+メールアドレス用のカスタムバリデーターは、標準で app/helpers/validate.php に置かれています。
+バリデーター(functions)はこのファイルにまとめておくのが良いでしょう。
+
+バリデーターの登録はどこで行っても良いですが、私は config/database.php というものを作成し、environment.php の一番下に以下の一行を加えることで必ず読み込まれるようにしました。
+
+  require (RUN_BASE . "/config/database.php");
+
+準備が整ったので、早速バリデーターを登録してみましょう。
+config/database.php に以下のコードを記述します。
+
+  Sabel_DB_Validate_Config::addValidator(array("function" => "validateEmailAddress",
+                                              "model"    => "Member",
+                                              "column"   => "email"));
+
+'Member'モデルの登録・更新時に'email'カラム(の値)に対して、バリデーター(validateEmailAddress())が実行されます。
+
+  $member = MODEL("Member");
+  $member->name = "hoge";
+  $member->email = "hoge@example@com";
+  $result = $member->save(true);
+
+  if ($result->hasError) {
+    foreach ($result->errors as $error) {
+      echo $error . "<br/>";
+    }
+  }
+
+  出力結果:
+    invalid email format.
+
+これでメールアドレス形式のチェックが行われるようになりました。
+
+次は最大文字数を例にとってみます。
+ブログテーブルがあり、当初の仕様ではブログタイトルは最大128文字でした。
+しかし、後になってデザインなどの都合で最大64文字にしたいとなりました。さて、どうしましょうか。
+テーブル定義を変更し、64文字にしたとしても、また後で変更...という可能性もありそうです。
+
+これはバリデーターを作成(登録)して解決するのが良い選択かもしれません。
+app/helpers/validate.php に以下の関数を作成します。
+
+  function validateLength($string, $name)
+  {
+    if (strlen($string) > 64) {
+      return "$name is too long.";
+    }
+  }
+
+バリデート関数はエラーならば、エラーメッセージを返すようにします。
+値が正常な場合は何も返さないか、nullを返すようにします。
+
+ではメールアドレス用バリデーターを登録したのと同様に、これも登録します。
+config/database.php に以下のコードを追加します。
+
+  Sabel_DB_Validate_Config::addValidator(array("function"  => "validateLength",
+                                              "model"     => "Blog",
+                                              "column"    => "title"));
+
+このバリデーターを作成・登録後、長いタイトル名(65文字以上)を入力すると、正常にエラーメッセージが出力されます。
+
+  $blog = MODEL("Blog");
+  $blog->title = "longtitle longtitle ... ... ";
+  $result = $blog->save(true);
+
+  if ($result->hasError) {
+    foreach ($result->errors as $error) {
+      echo $error . "<br/>";
+    }
+  }
+
+  出力結果:
+    title is too long.
+
+ブログタイトルに文字数制限があるように、記事タイトルにも文字数制限があるかもしれません。
+その時はバリデーターの登録を以下のように変更します。
+
+  Sabel_DB_Validate_Config::addValidator(array("function" => "validateLength",
+                                              "model"    => array("Blog", "Article"),
+                                              "column"   => "title"));
+
+このように変更することにより、ブログタイトル同様、記事タイトルも最大64文字に制限することができます。
+もしブログタイトルと記事タイトルで最大文字数が違うのなら、'arguments'を指定してください。
+
+  Sabel_DB_Validate_Config::addValidator(array("function"  => "validateLength",
+                                              "model"     => array("Blog", "Article"),
+                                              "column"    => "title",
+                                              "arguments" => array(64, 32)));
+
+'model'と'arguments'の順番は重要です。
+Blogモデルの時は64文字でチェックし、Articleモデルの時は32文字でチェックするからです。
+この'arguments'はバリデーターの第3引数に渡されるので、バリデーターを以下のように変更します。
+
+  function validateLength($string, $name, $maxLen)
+  {
+    if (strlen($string) > $maxLen) {
+      return "$name is too long.";
+    }
+  }
+
+'model'には’all'というキーワードを使用することもできます。
+'all'を使用すると全てのモデルの、指定したカラムにバリデーション(validateLength())が行われます。
+もちろん、そのカラムを持たないモデル(テーブル)があっても無視されるだけです。問題ありません。
+
+  Sabel_DB_Validate_Config::addValidator(array("function" => "validateLength",
+                                              "model"    => "all",
+                                              "column"   => "title"));
+
+また、'model'には親クラス(モデル)の名前を指定することもできます。
+Child1モデルとChild2モデルがParentモデルを継承している場合、次のようにバリデーターを登録すると、Child1、Child2ともに'title'カラムに対してバリデーション(validateLength())が行われます。
+
+  Sabel_DB_Validate_Config::addValidator(array("function" => "validateLength",
+                                              "model"    => "Parent",
+                                              "column"   => "title"));
+
+カラム名の指定には '*' を使用することも可能です。
+'*name'と指定した場合は'name'で終わるカラム、または'name'カラムが対象になります。
+'name*'と指定した場合は'name'で始まるカラム、または'name'カラムが対象になります。
+あまり無いとは思いますが、'abc*def'のように、abcで始まり、defで終わるカラムという指定もできます。
+もちろん、'*' はいくつでも使用できます。
+
+異なるテーブルでも類似カラムは、同じカラム名、または似たようなカラム名('*_colname'が使用できるような)にするといいでしょう。
+そしてSabel_DBはそれを推奨します。そうしておくことで、このバリデートのようにいくらか楽をできる場面があるからです。
+
+カスタムバリデートの作成・登録の仕方を説明しましたが、これに頼り過ぎないでください。
+テーブル(モデル)にどのようなデータが入るかどうかを知っているべきなのは、アプリケーションではなくテーブルだからです。
+つまり、データ定義に変更があった時は、可能ならばテーブルを変更するべきです。あくまでも、「可能ならば」ですが。
+

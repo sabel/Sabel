@@ -452,14 +452,14 @@ class Schema_TargetModel2
   }
 }
 
-function validate_function_custom1($value, $arg = 1)
+function validate_function_custom1($value, $column, $arg = 1)
 {
   if (strlen($value) > $arg) {
     return "value is dekai.";
   }
 }
 
-function test_regex_column($value, $arg)
+function test_regex_column($value, $column, $arg)
 {
   if (strpos($value, $arg) !== false) {
     return "invalid value.";

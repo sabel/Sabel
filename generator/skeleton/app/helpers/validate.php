@@ -1,12 +1,12 @@
 <?php
 
-function validateEmailAddress($address)
+function validateEmailAddress($address, $name)
 {
   if ($address !== null) {
     $result = preg_match("/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/", $address);
 
     if ($result === 0) {
-      return "invalid email format.";
+      return "invalid $name format.";
     }
   }
 }

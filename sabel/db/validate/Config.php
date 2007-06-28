@@ -63,7 +63,7 @@ class Sabel_DB_Validate_Config
       if (!is_array($arguments)) $arguments = (array)$arguments;
 
       if (count($arguments) !== count($models)) {
-        throw new Exception("invalid parameter count.");
+        throw new Exception("invalid arguments count.");
       }
     }
 

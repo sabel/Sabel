@@ -103,59 +103,11 @@ class Sabel_DB_Validator
       $this->unique($model, $columns, $uniques, $errors);
     }
 
-    $customs = Sabel_DB_Validate_Config::getCustomValidators();
-    if (isset($customs[$this->mdlName])) {
-      $this->customValidation($customs[$this->mdlName], $columns, $errors);
+    if ($customs = Sabel_DB_Validate_Config::getCustomValidators()) {
+      $this->customs($customs, $columns, $errors);
     }
 
     return $this->errors = $errors;
-  }
-
-  protected function customValidation($validations, $schemas, &$errors)
-  {
-    foreach ($validations as $colName => $functions) {
-      if (strpos($colName, "*") !== false) {
-        $regex = str_replace("*", ".*", $colName);
-        $cols  = array();
-        foreach (array_keys($schemas) as $name) {
-          if (preg_match("/{$regex}/", $name)) $cols[] = $name;
-        }
-
-        foreach ($cols as $name) {
-          $value = $schemas[$name]->value;
-          $this->execCustomValidation($functions, $value, $errors);
-        }
-      } elseif (isset($schemas[$colName])) {
-        $value = $schemas[$colName]->value;
-        $this->execCustomValidation($functions, $value, $errors);
-      }
-    }
-  }
-
-  protected function execCustomValidation($functions, $value, &$errors)
-  {
-    foreach ($functions as $function) {
-      if (is_array($function)) {
-        list ($function, $args) = $function;
-        if (!is_array($args)) $args = (array)$args;
-
-        $argString = $this->createEvalString($args);
-        eval ('$result = $function($value, ' . $argString . ');');
-      } else {
-        $result = $function($value);
-      }
-
-      if ($result) $errors[] = $result;
-    }
-  }
-
-  protected function createEvalString(&$arguments)
-  {
-    for ($i = 0; $i < count($arguments); $i++) {
-      $args[] = '$args[' . $i . ']';
-    }
-
-    return str_replace(";", "", implode(",", $args));
   }
 
   protected function nullable($column)
@@ -196,6 +148,72 @@ class Sabel_DB_Validator
   protected function maximum($column)
   {
     return ($column->value < $column->max);
+  }
+
+  protected function customs($customs, $columns, &$errors)
+  {
+    if (isset($customs[$this->mdlName])) {
+      $this->customValidation($customs[$this->mdlName], $columns, $errors);
+    }
+
+    if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Model") {
+      if (isset($customs[$parent])) {
+        $this->customValidation($customs[$parent], $columns, $errors);
+      }
+    }
+
+    if (isset($customs["all"])) {
+      $this->customValidation($customs["all"], $columns, $errors);
+    }
+  }
+
+  protected function customValidation($validations, $schemas, &$errors)
+  {
+    foreach ($validations as $colName => $functions) {
+      if (strpos($colName, "*") !== false) {
+        $regex = str_replace("*", ".*", $colName);
+        $cols  = array();
+        foreach (array_keys($schemas) as $name) {
+          if (preg_match("/{$regex}/", $name)) $cols[] = $name;
+        }
+
+        if (empty($cols)) continue;
+
+        foreach ($cols as $name) {
+          $value = $schemas[$name]->value;
+          $this->execCustomValidation($functions, $value, $name, $errors);
+        }
+      } elseif (isset($schemas[$colName])) {
+        $value = $schemas[$colName]->value;
+        $this->execCustomValidation($functions, $value, $colName, $errors);
+      }
+    }
+  }
+
+  protected function execCustomValidation($functions, $value, $name, &$errors)
+  {
+    foreach ($functions as $function) {
+      if (is_array($function)) {
+        list ($function, $args) = $function;
+        if (!is_array($args)) $args = (array)$args;
+
+        $argString = $this->createEvalString($args);
+        eval ('$result = $function($value, $name, ' . $argString . ');');
+      } else {
+        $result = $function($value, $name);
+      }
+
+      if ($result) $errors[] = $result;
+    }
+  }
+
+  protected function createEvalString(&$arguments)
+  {
+    for ($i = 0; $i < count($arguments); $i++) {
+      $args[] = '$args[' . $i . ']';
+    }
+
+    return str_replace(";", "", implode(",", $args));
   }
 
   protected function unique($model, $columns, $uniques, &$errors)
