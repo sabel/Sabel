@@ -44,7 +44,6 @@ class Fixture extends Sabel_Sakle_Task
         
         foreach ($sa->getTableLists() as $table) {
           if ($table == "sversion") continue;
-          $this->printMessage("create " . convert_to_modelname($table));
           $this->createModelFixture(convert_to_modelname($table));
         }
         
@@ -67,7 +66,7 @@ class Fixture extends Sabel_Sakle_Task
     
     $lines = array();
     
-    if (count($instancies) > 1) {
+    if ($instancies) {
       foreach ($instancies as $instance) {
         $lines[] = '$model = ' . 'new ' . $modelName . "();\n";
         foreach ($instance->getColumnNames() as $column) {
@@ -78,7 +77,7 @@ class Fixture extends Sabel_Sakle_Task
           } elseif (is_numeric($instance->$column)) {
             $line .= $instance->$column . ";";
           } else {
-            $line .= "'" . $instance->$column . "';";
+            $line .= "'" . addslashes($instance->$column) . "';";
           }
           
           $lines[] = $line . "\n";
@@ -92,8 +91,17 @@ class Fixture extends Sabel_Sakle_Task
         include RUN_BASE . "/tests/fixtures/Template.tphp";
         $fixtureFile = ob_get_clean();
         $fixtureFile = str_replace("#?php", "?php", $fixtureFile);
-        file_put_contents(RUN_BASE . "/tests/fixtures/".$modelName.".php", $fixtureFile);
+        $path = RUN_BASE . "/tests/fixtures/".$modelName.".php";
+        $result = file_put_contents($path, $fixtureFile);
+        if ($result) {
+          $this->printMessage("create " . $modelName);
+        } else {
+          $this->printMessage("fail " . $modelName);
+        }
       }
+    } else {
+      $this->printMessage("no instance found in " . $modelName);
     }
   }
+
 }

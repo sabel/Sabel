@@ -31,7 +31,6 @@ class Sabel_Test_Model extends PHPUnit_Framework_TestCase
     
     try {
       if (class_exists($fixtureName)) {
-        // eval("{$fixtureName}::upFixture();");
         call_user_func(array($fixtureName, "upFixture"));
       }
       $this->setUp();
@@ -49,7 +48,6 @@ class Sabel_Test_Model extends PHPUnit_Framework_TestCase
     
     try {
       if (class_exists($fixtureName)) {
-        // eval("{$fixtureName}::downFixture();");
         call_user_func(array($fixtureName, "downFixture"));
       }
         
