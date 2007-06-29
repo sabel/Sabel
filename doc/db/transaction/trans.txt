@@ -1,0 +1,123 @@
+複数の処理(更新)を一つの処理として扱うことが重要になることもあります。
+
+記事(ブログ)とカテゴリで、単純な例を示します。
+カテゴリは自分のブログに好きなように作れるものとします。
+
+'article'テーブルの定義は以下の通りです。
+本来ならあるはずの'blog_id'や'member_id'のようなカラムは省きます。
+
+    * id: INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT(SEQUENCE)
+    * category_id: INTEGER NOT NULL
+    * title: VARCHAR(64) NOT NULL
+    * body: TEXT NOT NULL
+
+'category'テーブル
+
+    * id: INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT(SEQUENCE)
+    * name: VARCHAR(32) NOT NULL
+    * article_count: SMALLINT DEFAULT 0
+
+categoryテーブルにはid=1のカテゴリが既に存在するとし、そのカテゴリの記事を書くとします。
+
+ブログページにカテゴリ一覧を表示させるでしょう。
+カテゴリ名の横には、そのカテゴリに含まれる記事数を表示したいものです。
+ページを表示する度にカテゴリごとの記事数をカウントするのは非効率なので、記事登録時にカテゴリの'article_count'を+1するようにします。
+
+まずは以下のコードを実行してみます。
+
+  $article = MODEL("Article");
+  $article->title = "title";
+  $article->body  = "body";
+  $article->category_id = 1;
+  $result = $article->save(true);
+
+  if ($result->hasError) {
+    foreach ($result->errors as $error) {
+      echo $error . "<br/>";
+    }
+  } else {
+    $category = MODEL("Category", 1);
+
+    if ($category->isSelected()) {
+      $category->article_count += 1;
+      $category->save();
+    } else {
+      echo "category not found.";
+    }
+  }
+
+このコードはうまく働きますが、とても不安なコードです。
+サンプルコードでは値を直接セットしていますが、これらは通常ユーザから入力(POST)されるものです。
+存在しないカテゴリIDを不正に入力されたら、記事は保存されますが、どのカテゴリの記事数も増やされません。(この例でのこの問題は外部キー制約を使用すれば回避できること、また、この例のテーブル関連では外部キー制約を使用すべきであることを、今は気にしないでください。)
+
+また、記事が保存され、その後カテゴリの記事数が更新されるまでの間に、何か障害が発生するかもしれません。(可能性は限りなく0に近いですが。)
+
+では、このコードをトランザクションを使用し、一つの処理として扱えるようにしましょう。
+先ほどのコードの、モデルを生成している箇所を以下のように書き換えます。
+
+  $article = Sabel_DB_Transaction::begin(MODEL("Article"));
+  $category = Sabel_DB_Transaction::begin(MODEL("Category", 1));
+
+生成したモデルを、Sabel_DB_Transactionのbegin()メソッドに渡しています。
+begin()メソッドの返り値は、渡したモデルです。begin()に「通す」というイメージです。
+このコードは先ほどと同様何のエラーもなく処理されますが、先ほどと違うのはデータが保存されないことです。
+begin()を通すことにより、確定(commit)されるまで更新は反映されないのです。
+
+なのでこの処理を確定するには、以下の一行が必要になります。
+
+  Sabel_DB_Transaction::commit();
+
+もし何らかの理由により確定したくない場合はcommit()をしない、もしくは明示的にrollback()を実行します。
+
+  Sabel_DB_Transaction::rollback();
+
+Sabel_DB_Transaction:: というのは少し長いかもしれません。
+面倒な人(私を含む)は、標準のヘルパー(app/helpers/db.php)の以下の関数を使用してください。
+
+  Sabel_DB_Transaction::begin() => trans_begin()
+  Sabel_DB_Transaction::commit() => trans_commit()
+  Sabel_DB_Transaction::rollback() => trans_rollback()
+
+
+最終的なコードは以下のようになります。
+
+  $article = trans_begin(MODEL("Article"));
+  $article->title = "title";
+  $article->body  = "body";
+  $article->category_id = 1;
+  $result = $article->save(true);
+
+  if ($result->hasError) {
+    foreach ($result->errors as $error) {
+      echo $error . "<br/>";
+    }
+  } else {
+    $category = trans_begin(MODEL("Category", 1));
+
+    if ($category->isSelected()) {
+      $category->article_count += 1;
+      $category->save();
+      trans_commit();
+    } else {
+      echo "category not found.";
+      trans_rollback();
+    }
+  }
+
+覚えることは単純です。
+トランザクション処理を行う場合は、その処理の中で使用するモデルをtrans_begin()に通すことです。
+そして、trans_commit()かtrans_rollback()を実行するだけです。
+
+少し内部の話をしましょう。
+Sabel_DB_Transaction::begin()がしていることは、渡されたモデルのコネクションネームからDBサーバを特定し、そのDBサーバにトランザクションを開始することを通知します。
+このArticleとCategoryは同じDBサーバ内にあるので、この2回目のCategoryのbeginは内部で何もしていません。既にそのDBサーバではトランザクションが開始されているからです。実はCategoryはbeginに通さなくても何ら変わりはないのです(私は推奨しませんが)。
+
+複数のDBサーバを使用する場合は、それぞれのモデルをbegin()に通すことが必須です。
+Model1がDBサーバ1にあり、Model2がDBサーバ2にあるとして、それぞれのモデルをbegin()に通すと、DBサーバ1とDBサーバ2は両方ともトランザクションが開始された状態になります。2つのモデルに対しての更新が正常に処理されcommit()をコールすれば、開始されているトランザクション全てを確定します。これは、疑似2相コミットです。
+rollback()も同様、複数のトランザクションが開始されていれば、全てのトランザクションを破棄します。
+
+生成するモデルがどのDBサーバにあるのかを気にしないように、トランザクション内では全てのモデルをbegin()に通すほうが良いでしょう。
+そうすれば、使用するDBサーバがいくつであれ、常に同じようなコードの記述でトランザクションを扱うことができます。
+
+モデルを通して(ドライバなど下位レイヤを直接使用せずに)DBアクセスをしていれば、トランザクション内で実行エラー(例外)があっても、内部でrollback()をコールしているので安全です。
+

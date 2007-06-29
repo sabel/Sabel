@@ -153,21 +153,21 @@ class Sabel_DB_Validator
   protected function customs($customs, $columns, &$errors)
   {
     if (isset($customs[$this->mdlName])) {
-      $this->customValidation($customs[$this->mdlName], $columns, $errors);
+      $this->customValidate($customs[$this->mdlName], $columns, $errors);
     }
 
     if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Model") {
       if (isset($customs[$parent])) {
-        $this->customValidation($customs[$parent], $columns, $errors);
+        $this->customValidate($customs[$parent], $columns, $errors);
       }
     }
 
     if (isset($customs["all"])) {
-      $this->customValidation($customs["all"], $columns, $errors);
+      $this->customValidate($customs["all"], $columns, $errors);
     }
   }
 
-  protected function customValidation($validations, $schemas, &$errors)
+  protected function customValidate($validations, $schemas, &$errors)
   {
     foreach ($validations as $colName => $functions) {
       if (strpos($colName, "*") !== false) {

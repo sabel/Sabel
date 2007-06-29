@@ -80,10 +80,25 @@ abstract class Sabel_DB_Migration_Base
 
   public function create()
   {
+    $tblName = convert_to_tablename($this->mdlName);
+
     if ($this->type === "upgrade") {
-      $this->createTable(getCreate($this->filePath, $this));
+      $this->createUpgrade($tblName);
     } else {
-      executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
+      if (is_table_exists($tblName)) {
+        executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
+      } else {
+        Sabel_Sakle_Task::warning("unknown table '{$tblName}'. (SKIP)");
+      }
+    }
+  }
+
+  protected function createUpgrade($tblName)
+  {
+    if (is_table_exists($tblName)) {
+      Sabel_Sakle_Task::warning("table '{$tblName}' already exists. (SKIP)");
+    } else {
+      $this->createTable(getCreate($this->filePath, $this));
     }
   }
 
@@ -118,10 +133,15 @@ abstract class Sabel_DB_Migration_Base
   protected function execAddColumn($columns)
   {
     $tblName = convert_to_tablename($this->mdlName);
+    $names   = getSchema($this->mdlName)->getColumnNames();
 
     foreach ($columns as $column) {
-      $line = $this->createColumnAttributes($column);
-      executeQuery("ALTER TABLE $tblName ADD " . $line);
+      if (in_array($column->name, $names)) {
+        Sabel_Sakle_Task::warning("duplicate column name '{$column->name}'. (SKIP)");
+      } else {
+        $line = $this->createColumnAttributes($column);
+        executeQuery("ALTER TABLE $tblName ADD " . $line);
+      }
     }
   }
 
@@ -131,12 +151,19 @@ abstract class Sabel_DB_Migration_Base
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 
-      $columns = getDropColumns($this->filePath);
-      $tblName = convert_to_tablename($this->mdlName);
-      writeColumns(getSchema($this->mdlName), $restore, $columns);
+      $columns  = getDropColumns($this->filePath);
+      $tblName  = convert_to_tablename($this->mdlName);
+      $schema   = getSchema($this->mdlName);
+      $colNames = $schema->getColumnNames();
+
+      writeColumns($schema, $restore, $columns);
 
       foreach ($columns as $column) {
-        executeQuery("ALTER TABLE $tblName DROP COLUMN $column");
+        if (in_array($column, $colNames)) {
+          executeQuery("ALTER TABLE $tblName DROP COLUMN $column");
+        } else {
+          Sabel_Sakle_Task::warning("column '{$column}' of $tblName does not exist. (SKIP)");
+        }
       }
     } else {
       $this->restoreDropColumn();

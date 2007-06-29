@@ -87,6 +87,13 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
         if (in_array($column->name, $columns)) unset($sColumns[$name]);
       }
 
+      foreach ($columns as $column) {
+        if (!isset($sColumns[$column])) {
+          $warning = "column '{$column}' of $tblName does not exist. (SKIP)";
+          Sabel_Sakle_Task::warning($warning);
+        }
+      }
+
       $this->dropColumnsAndRemakeTable($sColumns, $tblName);
     } else {
       $this->restoreDropColumn();

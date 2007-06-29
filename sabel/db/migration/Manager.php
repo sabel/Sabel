@@ -14,6 +14,22 @@ class Sabel_DB_Migration_Manager
   private static $accessor = null;
   private static $driver   = null;
   private static $migType  = null;
+  private static $start    = null;
+
+  public static function setStartVersion($version)
+  {
+    if (self::$start === null) self::$start = $version;
+  }
+
+  public static function getStartVersion()
+  {
+    return self::$start;
+  }
+
+  public static function clearStartVersion()
+  {
+    self::$start = null;
+  }
 
   public static function setAccessor($accessor)
   {

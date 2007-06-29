@@ -13,7 +13,6 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
 {
   public function execute()
   {
-
     // @todo
     //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
     if (defined("QUERY_LOG")) {

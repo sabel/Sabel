@@ -25,7 +25,7 @@ class Sakle
                                     self::MSG_WARN => "[\x1b[1;33mWARNING\x1b[m]",
                                     self::MSG_ERR  => "[\x1b[1;31mERROR\x1b[m]");
   
-  protected $runningDirectory = '';
+  protected $runningDirectory = "";
   
   protected $arguments = array();
   
@@ -56,6 +56,10 @@ class Sakle
       require ($pathToClass);
       $ins = new $class();
       $ins->run($this->arguments);
+      
+      if (method_exists($ins, "finalize")) {
+        $ins->finalize();
+      }
     }
   }
   

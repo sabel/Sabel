@@ -23,14 +23,18 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
 
   public function create()
   {
-    if ($this->type === "upgrade") {
-      $this->createTable(getCreate($this->filePath, $this));
-    } else {
-      $mdlName = $this->mdlName;
-      $schema  = getSchema($mdlName);
+    $tblName = convert_to_tablename($this->mdlName);
 
-      executeQuery("DROP TABLE " . convert_to_tablename($mdlName));
-      $this->dropSequence($schema->getIncrementColumn());
+    if ($this->type === "upgrade") {
+      $this->createUpgrade($tblName);
+    } else {
+      if (is_table_exists($tblName)) {
+        $schema = getSchema($this->mdlName);
+        executeQuery("DROP TABLE $tblName");
+        $this->dropSequence($schema->getIncrementColumn());
+      } else {
+        Sabel_Sakle_Task::warning("unknown table '{$tblName}'. (SKIP)");
+      }
     }
   }
 

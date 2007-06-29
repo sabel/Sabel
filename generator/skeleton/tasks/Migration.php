@@ -14,11 +14,13 @@ Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
  */
 class Migration extends Sabel_Sakle_Task
 {
-  protected $files      = array();
-  protected $arguments  = array();
-  protected $strEnv     = "";
-  protected $migrateTo  = 0;
-  protected $accessor   = null;
+  private static $execFinalize = true;
+
+  protected $files     = array();
+  protected $arguments = array();
+  protected $strEnv    = "";
+  protected $migrateTo = 0;
+  protected $accessor  = null;
 
   protected $connectionName = "";
   protected $currentVersion = 0;
@@ -39,6 +41,8 @@ class Migration extends Sabel_Sakle_Task
     $this->defineMigrationDir();
 
     $this->currentVersion = $this->getCurrentVersion();
+    Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
+
     $to = $this->showCurrentVersion($arguments);
     $this->files = $this->getMigrationFiles();
 
@@ -46,6 +50,17 @@ class Migration extends Sabel_Sakle_Task
       $doNext = $this->execMigration();
       if ($doNext) $this->execNextMigration();
     }
+  }
+
+  public function finalize()
+  {
+    if (!self::$execFinalize) return;
+
+    $start = Sabel_DB_Migration_Manager::getStartVersion();
+    $end   = $this->getCurrentVersion();
+
+    $type = ($start < $end) ? "UPGRADE" : "DOWNGRADE";
+    $this->printMessage("$type FROM $start TO $end");
   }
 
   protected function getCurrentVersion()
@@ -131,7 +146,7 @@ class Migration extends Sabel_Sakle_Task
 
     $migration = $this->getMigrationClass($type, $num);
     $migration->execute();
-    $this->incrementVersion($next, $type, $version, $next);
+    $this->incrementVersion($next);
 
     return $doNext;
   }
@@ -145,7 +160,7 @@ class Migration extends Sabel_Sakle_Task
   protected function toVersionNumber($to)
   {
     if (is_numeric($to)) {
-      $this->migrateTo = $to; return;
+      return $this->migrateTo = $to;
     }
 
     switch (strtolower($to)) {
@@ -160,16 +175,22 @@ class Migration extends Sabel_Sakle_Task
       case "rehead":
         $this->arguments[2] = 0;
         $this->execNextMigration();
+        $this->printMessage("DOWNGRADE FROM {$this->currentVersion} TO 0");
         $this->arguments[2] = "head";
         $this->execNextMigration();
-        return false;
+        $version = $this->getCurrentVersion();
+        $this->printMessage("UPGRADE FROM 0 TO $version");
+        return self::$execFinalize = false;
 
       case "reset":
+        $version = $this->currentVersion;
         $this->arguments[2] = 0;
         $this->execNextMigration();
-        $this->arguments[2] = $this->currentVersion;
+        $this->printMessage("DOWNGRADE FROM $version TO 0");
+        $this->arguments[2] = $version;
         $this->execNextMigration();
-        return false;
+        $this->printMessage("UPGRADE FROM 0 TO $version");
+        return self::$execFinalize = false;
 
       default:
         $this->printMessage("version '{$to}' is not supported.", parent::MSG_ERR);
@@ -177,12 +198,9 @@ class Migration extends Sabel_Sakle_Task
     }
   }
 
-  protected function incrementVersion($num, $type, $version, $next)
+  protected function incrementVersion($num)
   {
-    $query = "UPDATE sversion SET version = $num";
-    $this->driver->setSql($query)->execute();
-
-    $this->printMessage(strtoupper($type) . " FROM $version TO $next");
+    $this->driver->setSql("UPDATE sversion SET version = $num")->execute();
   }
 
   protected function initDbConfig($environment)
@@ -243,9 +261,16 @@ function getMigrationFiles($dirPath)
   $files = array();
   while (($file = readdir($handle)) !== false) {
     $num = substr($file, 0, strpos($file, "_"));
-    if (is_numeric($num)) $files[$num] = $file;
+    if (is_numeric($num)) {
+      if (isset($files[$num])) {
+        Sabel_Sakle_Task::error("the migration file of the same version({$num}) exists.");
+      } else {
+        $files[$num] = $file;
+      }
+    }
   }
 
+  closedir($handle);
   return $files;
 }
 

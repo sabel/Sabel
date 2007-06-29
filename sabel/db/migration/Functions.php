@@ -96,7 +96,7 @@ function message($message)
   $type = Sabel_DB_Migration_Manager::getMigrationType();
 
   if ($type === "upgrade") {
-    echo "[\x1b[1;34mMESSAGE\x1b[m]: " . $message . "\n";
+    Sabel_Sakle_Task::message($message);
   }
 }
 
@@ -112,3 +112,8 @@ function getSchema($mdlName)
   return $accessor->get(convert_to_tablename($mdlName));
 }
 
+function is_table_exists($tblName)
+{
+  $accessor = Sabel_DB_Migration_Manager::getAccessor();
+  return in_array($tblName, $accessor->getTableLists());
+}

@@ -1,6 +1,6 @@
 <?php
 
-$HELPERS_DIR = RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "helpers" . DIR_DIVIDER;
+$HELPERS_DIR = dirname(__FILE__) . DIR_DIVIDER;
 
 require ($HELPERS_DIR . "db.php");
 require ($HELPERS_DIR . "validate.php");
