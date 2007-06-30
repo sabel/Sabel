@@ -4,6 +4,7 @@ if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 define("SAKLE_CMD", "sakle");
 
 Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
+Sabel::using("Sabel_DB_Migration_Base");
 
 /**
  * Migration
@@ -18,7 +19,6 @@ class Migration extends Sabel_Sakle_Task
 
   protected $files     = array();
   protected $arguments = array();
-  protected $strEnv    = "";
   protected $migrateTo = 0;
   protected $accessor  = null;
 
@@ -32,7 +32,7 @@ class Migration extends Sabel_Sakle_Task
     }
 
     $this->arguments = $arguments;
-    $environment     = $this->getEnvironment($arguments[1]);
+    $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
 
     $this->connectionName = $connectionName;
@@ -111,17 +111,18 @@ class Migration extends Sabel_Sakle_Task
     }
   }
 
-  protected function getEnvironment($strEnv)
+  protected function getEnvironment()
   {
-    if (($env = environment($strEnv)) === null) {
-      $msg = "environment '{$strEnv}' is not supported. "
+    $inputEnv = $this->arguments[1];
+    if (($env = environment($inputEnv)) === null) {
+      $msg = "environment '{$inputEnv}' is not supported. "
            . "use 'development' or 'test' or 'production'.";
 
-      $this->printMessage($msg, parent::MSG_ERR); exit;
-    } else {
-      $this->strEnv = $strEnv;
-      return $env;
+      $this->printMessage($msg, parent::MSG_ERR);
+      exit;
     }
+
+    return $env;
   }
 
   protected function execMigration()
@@ -252,30 +253,4 @@ class Migration extends Sabel_Sakle_Task
 
     return $rows[0]["version"];
   }
-}
-
-function getMigrationFiles($dirPath)
-{
-  $handle = opendir($dirPath);
-
-  $files = array();
-  while (($file = readdir($handle)) !== false) {
-    $num = substr($file, 0, strpos($file, "_"));
-    if (is_numeric($num)) {
-      if (isset($files[$num])) {
-        Sabel_Sakle_Task::error("the migration file of the same version({$num}) exists.");
-      } else {
-        $files[$num] = $file;
-      }
-    }
-  }
-
-  closedir($handle);
-  return $files;
-}
-
-function getFileName($path)
-{
-  $exp = explode(DIR_DIVIDER, $path);
-  return $exp[count($exp) - 1];
 }

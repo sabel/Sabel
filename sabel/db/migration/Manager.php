@@ -11,10 +11,10 @@
  */
 class Sabel_DB_Migration_Manager
 {
-  private static $accessor = null;
-  private static $driver   = null;
-  private static $migType  = null;
-  private static $start    = null;
+  private static $accessor  = null;
+  private static $driver    = null;
+  private static $applyMode = null;
+  private static $start     = null;
 
   public static function setStartVersion($version)
   {
@@ -51,13 +51,13 @@ class Sabel_DB_Migration_Manager
     return self::$driver;
   }
 
-  public static function setMigrationType($type)
+  public static function setApplyMode($type)
   {
-    self::$migType = $type;
+    self::$applyMode = $type;
   }
 
-  public static function getMigrationType()
+  public static function getApplyMode()
   {
-    return self::$migType;
+    return self::$applyMode;
   }
 }

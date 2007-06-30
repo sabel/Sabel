@@ -13,7 +13,8 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
 {
   protected
     $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
-    $tableColumns = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
+    $tableColumns = "SELECT table_name, column_name, data_type, is_nullable, column_default, character_maximum_length
+                     FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
 
   public function isBoolean($type, $row)
   {
@@ -92,7 +93,6 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
     $is  = "information_schema";
     $cn  = "constraint_name";
     $ij  = "INNER JOIN";
-
     $sql = "SELECT kcu.column_name, ccu.table_name AS ref_table, "
          . "ccu.column_name AS ref_column, rc.delete_rule, rc.update_rule "
          . "FROM {$is}.table_constraints tc "
@@ -120,9 +120,10 @@ class Sabel_DB_Schema_Pgsql extends Sabel_DB_Schema_Common
   public function getUniques($tblName)
   {
     $is  = "information_schema";
+    $cn  = "constraint_name";
     $sql = "SELECT tc.constraint_name, kcu.column_name "
          . "FROM {$is}.table_constraints tc "
-         . "INNER JOIN {$is}.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name "
+         . "INNER JOIN {$is}.key_column_usage kcu ON tc.{$cn} = kcu.{$cn} "
          . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}' "
          . "AND tc.constraint_type = 'UNIQUE'";
 

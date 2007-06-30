@@ -11,26 +11,37 @@
  */
 class Sabel_DB_Migration_Classes_Query
 {
-  private $upgradeQueries   = "";
-  private $downgradeQueries = "";
+  private
+    $upgradeQueries   = array(),
+    $downgradeQueries = array();
 
   public function upgrade($query)
   {
-    $this->upgradeQueries[] = $query;
+    if (is_string($query)) {
+      $this->upgradeQueries[] = $query;
+    } else {
+      Sabel_Sakle_Task::error("query should be a string.");
+      exit;
+    }
   }
 
   public function downgrade($query)
   {
-    $this->downgradeQueries[] = $query;
+    if (is_string($query)) {
+      $this->downgradeQueries[] = $query;
+    } else {
+      Sabel_Sakle_Task::error("query should be a string.");
+      exit;
+    }
   }
 
-  public function getUpgradeQueries()
+  public function execute()
   {
-    return $this->upgradeQueries;
-  }
+    $type = Sabel_DB_Migration_Manager::getApplyMode();
 
-  public function getDowngradeQueries()
-  {
-    return $this->downgradeQueries;
+    $queries = ($type === "upgrade") ? $this->upgradeQueries
+                                     : $this->downgradeQueries;
+
+    foreach ($queries as $query) executeQuery($query);
   }
 }

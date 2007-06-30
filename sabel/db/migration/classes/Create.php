@@ -55,7 +55,8 @@ class Sabel_DB_Migration_Classes_Create
     } elseif (is_array($columnNames)) {
       $this->pkeys = $columnNames;
     } else {
-      throw new Exception("argument must be a string or array.");
+      Sabel_Sakle_Task::error("argument for primary() should be a string or an array.");
+      exit;
     }
   }
 
@@ -66,7 +67,8 @@ class Sabel_DB_Migration_Classes_Create
     } elseif (is_array($columnNames)) {
       $this->uniques[] = $columnNames;
     } else {
-      throw new Exception("argument must be a string or array.");
+      Sabel_Sakle_Task::error("argument for unique() should be a string or an array.");
+      exit;
     }
   }
 

@@ -109,8 +109,9 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
     $co->name = strtolower($row["column_name"]);
     $co->nullable = ($row["nullable"] !== "N");
 
-    $type = $row["data_type"];
-    if ($type === "NUMBER") {
+    $type = strtolower($row["data_type"]);
+
+    if ($type === "number") {
       if ($row["data_default"] === "1" || $row["data_default"] === "0") {
         $co->type = Sabel_DB_Type::BOOL;
       } else {
@@ -119,12 +120,14 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
     }
 
     if (!$co->isBool()) {
-      if ($type === "FLOAT") {
+      if ($type === "float") {
         $type = ((int)$row["data_precision"] === 24) ? "float" : "double";
-      } elseif ($type === "VARCHAR2") {
+      } elseif ($type === "varchar2") {
         $type = "varchar";
-      } elseif ($type === "CLOB") {
+      } elseif ($type === "clob") {
         $type = "text";
+      } elseif ($type === "date") {
+        $type = "datetime";
       }
 
       Sabel_DB_Type_Setter::send($co, $type);
@@ -150,7 +153,7 @@ class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
       $co->default = null;
     } else {
       $default = trim($default);
-      if ($default === "null") {
+      if (strcasecmp($default, "null") === 0) {
         $co->default = null;
       } elseif ($co->isString()) {
         $co->default = substr($default, 1, -1);

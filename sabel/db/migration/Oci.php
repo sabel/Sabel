@@ -19,13 +19,13 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::BOOL     => "number(1)",
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "clob",
-                           Sabel_DB_Type::DATETIME => "timestamp");
+                           Sabel_DB_Type::DATETIME => "date");
 
   public function create()
   {
     $tblName = convert_to_tablename($this->mdlName);
 
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $this->createUpgrade($tblName);
     } else {
       if (is_table_exists($tblName)) {
@@ -82,23 +82,9 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
     return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
   }
 
-  /*
-  private function createForeignKey($object)
-  {
-    $query  = "FOREIGN KEY ({$object->column}) "
-            . "REFERENCES {$object->refTable}({$object->refColumn})";
-
-    if ($object->onDelete !== null) {
-      $query .= " ON DELETE " . $object->onDelete;
-    }
-
-    return $query;
-  }
-  */
-
   public function drop()
   {
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 
@@ -160,12 +146,18 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
     $line   = array();
     $line[] = $column->name;
 
-    $c = ($column->type === null) ? $current : $column;
-    $line[] = $this->getTypeString($c, false);
+    if ($current->isText() && $column->type !== null && !$column->isText()) {
+      Sabel_Sakle_Task::warning("cannot modify lob column '{$current->name}'. (SKIP)");
+    } elseif (!$current->isText()) {
+      $col  = ($column->type === null) ? $current : $column;
+      $type = $this->getTypeString($col, false);
 
-    if ($c->isString()) {
-      $max = ($column->max === null) ? $current->max : $column->max;
-      $line[] = "({$max})";
+      if ($col->isString()) {
+        $max = ($column->max === null) ? $current->max : $column->max;
+        $line[] = $type . "({$max})";
+      } else {
+        $line[] = $type;
+      }
     }
 
     if (($d = $column->default) === _NULL) {
@@ -192,9 +184,7 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
 
   private function getTypeString($col, $withLength = true)
   {
-    if (!$withLength) return $this->types[$col->type];
-
-    if ($col->isString()) {
+    if ($col->isString() && $withLength) {
       return $this->types[$col->type] . "({$col->max})";
     } else {
       return $this->types[$col->type];

@@ -39,7 +39,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
 
   public function drop()
   {
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 

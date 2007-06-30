@@ -55,10 +55,12 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     $columns = getAddColumns($this->filePath);
     $tblName = convert_to_tablename($this->mdlName);
 
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $this->execAddColumn($columns);
     } else {
-      $currentCols = getSchema($this->mdlName)->getColumns();
+      $schema = getSchema($this->mdlName);
+      $currentCols = $schema->getColumns();
+
       $columnNames = array();
       foreach ($columns as $column) $columnNames[] = $column->name;
 
@@ -66,13 +68,14 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
         if (isset($currentCols[$name])) unset($currentCols[$name]);
       }
 
+      $this->setTableConstraints($schema);
       $this->dropColumnsAndRemakeTable($currentCols, $tblName);
     }
   }
 
   public function dropColumn()
   {
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 
@@ -83,10 +86,6 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
       writeColumns($schema, $restore, $columns);
       $sColumns = $schema->getColumns();
 
-      foreach ($sColumns as $name => $column) {
-        if (in_array($column->name, $columns)) unset($sColumns[$name]);
-      }
-
       foreach ($columns as $column) {
         if (!isset($sColumns[$column])) {
           $warning = "column '{$column}' of $tblName does not exist. (SKIP)";
@@ -94,6 +93,11 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
         }
       }
 
+      foreach ($sColumns as $name => $column) {
+        if (in_array($column->name, $columns)) unset($sColumns[$name]);
+      }
+
+      $this->setTableConstraints($schema);
       $this->dropColumnsAndRemakeTable($sColumns, $tblName);
     } else {
       $this->restoreDropColumn();
@@ -111,6 +115,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
       }
     }
 
+    $this->setTableConstraints($schema);
     $this->dropColumnsAndRemakeTable($sColumns, $tblName);
   }
 
@@ -122,6 +127,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
       if (isset($sColumns[$column->name])) $sColumns[$column->name] = $column;
     }
 
+    $this->setTableConstraints($schema);
     $this->dropColumnsAndRemakeTable($sColumns, $tblName);
   }
 
@@ -194,6 +200,12 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
         return $this->types[$col->type];
       }
     }
+  }
+
+  private function setTableConstraints($schema)
+  {
+    $this->pkeys   = $schema->getPrimaryKey();
+    $this->uniques = $schema->getUniques();
   }
 
   protected function getBooleanAttr($value)

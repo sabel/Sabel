@@ -13,7 +13,9 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
 {
   protected
     $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
-    $tableColumns = "SELECT * FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
+    $tableColumns = "SELECT column_name, data_type, is_nullable, column_default, column_comment,
+                     column_key, character_maximum_length, extra FROM information_schema.columns
+                     WHERE table_schema = '%s' AND table_name = '%s'";
 
   public function getTable($tblName)
   {
@@ -61,7 +63,6 @@ class Sabel_DB_Schema_Mysql extends Sabel_DB_Schema_Common
 
   public function setLength($co, $row)
   {
-    //$co->max = (int)$row["character_octet_length"];
     $co->max = (int)$row["character_maximum_length"];
   }
 

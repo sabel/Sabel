@@ -16,6 +16,32 @@ define("_DATE",     Sabel_DB_Type::DATE);
 define("_TIME",     Sabel_DB_Type::TIME);
 define("_NULL",     "SDB_NULL_VALUE");
 
+function getMigrationFiles($dirPath)
+{
+  $files = array();
+  foreach (scandir($dirPath) as $file) {
+    $num = substr($file, 0, strpos($file, "_"));
+    if (is_numeric($num)) {
+      if (isset($files[$num])) {
+        $msg = "the migration file of the same version({$num}) exists.";
+        Sabel_Sakle_Task::error($msg);
+        exit;
+      } else {
+        $files[$num] = $file;
+      }
+    }
+  }
+
+  ksort($files);
+  return $files;
+}
+
+function getFileName($path)
+{
+  $exp = explode(DIR_DIVIDER, $path);
+  return $exp[count($exp) - 1];
+}
+
 function getCreate($path, $migClass)
 {
   $create = new Sabel_DB_Migration_Classes_Create();
@@ -93,7 +119,7 @@ function getPhpSource($path)
 
 function message($message)
 {
-  $type = Sabel_DB_Migration_Manager::getMigrationType();
+  $type = Sabel_DB_Migration_Manager::getApplyMode();
 
   if ($type === "upgrade") {
     Sabel_Sakle_Task::message($message);

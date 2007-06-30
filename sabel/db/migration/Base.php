@@ -14,23 +14,23 @@ Sabel::fileUsing(dirname(__FILE__) . DIR_DIVIDER . "Functions.php", true);
  */
 abstract class Sabel_DB_Migration_Base
 {
-  protected $type     = "";
-  protected $filePath = "";
-  protected $dirPath  = "";
-  protected $mdlName  = "";
-  protected $command  = "";
-  protected $version  = 0;
-  protected $pkeys    = array();
-  protected $fkeys    = array();
-  protected $uniques  = array();
+  protected $applyMode = "";
+  protected $filePath  = "";
+  protected $dirPath   = "";
+  protected $mdlName   = "";
+  protected $command   = "";
+  protected $version   = 0;
+  protected $pkeys     = array();
+  protected $fkeys     = array();
+  protected $uniques   = array();
 
   abstract protected function getBooleanAttr($value);
 
-  public function __construct($filePath, $type, $dirPath = null)
+  public function __construct($filePath, $applyMode, $dirPath = null)
   {
-    $this->type     = $type;
-    $this->filePath = $filePath;
-    $this->dirPath  = ($dirPath === null) ? MIG_DIR : $dirPath;
+    $this->applyMode = $applyMode;
+    $this->filePath  = $filePath;
+    $this->dirPath   = ($dirPath === null) ? MIG_DIR : $dirPath;
 
     $file = getFileName($filePath);
     @list ($num, $mdlName, $command) = explode("_", $file);
@@ -38,15 +38,17 @@ abstract class Sabel_DB_Migration_Base
     $this->version = $num;
     $this->mdlName = $mdlName;
 
-    if ($mdlName === "Mix.php") {
+    if ($mdlName === "mix.php") {
       $this->command = "custom";
+    } elseif ($mdlName === "query.php") {
+      $this->command = "query";
     } elseif (($pos = strpos($command, ".")) !== false) {
       $this->command = substr($command, 0, $pos);
     } else {
       $this->command = $command;
     }
 
-    Sabel_DB_Migration_Manager::setMigrationType($type);
+    Sabel_DB_Migration_Manager::setApplyMode($applyMode);
   }
 
   public function setOptions($key, $val) {}
@@ -82,7 +84,7 @@ abstract class Sabel_DB_Migration_Base
   {
     $tblName = convert_to_tablename($this->mdlName);
 
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $this->createUpgrade($tblName);
     } else {
       if (is_table_exists($tblName)) {
@@ -104,7 +106,7 @@ abstract class Sabel_DB_Migration_Base
 
   public function drop()
   {
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 
@@ -120,7 +122,7 @@ abstract class Sabel_DB_Migration_Base
   {
     $columns = getAddColumns($this->filePath);
 
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $this->execAddColumn($columns);
     } else {
       $tblName = convert_to_tablename($this->mdlName);
@@ -147,7 +149,7 @@ abstract class Sabel_DB_Migration_Base
 
   public function dropColumn()
   {
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
 
@@ -173,20 +175,6 @@ abstract class Sabel_DB_Migration_Base
   protected function restoreDropColumn()
   {
     $this->execAddColumn(getAddColumns($this->getRestoreFileName()));
-  }
-
-  public function query()
-  {
-    $query = new Sabel_DB_Migration_Classes_Query();
-    eval (getPhpSource($this->filePath));
-
-    if ($this->type === "upgrade") {
-      $queries = $query->getUpgradeQueries();
-    } else {
-      $queries = $query->getDowngradeQueries();
-    }
-
-    foreach ($queries as $query) executeQuery($query);
   }
 
   protected function getCreateSql($columns)
@@ -239,7 +227,7 @@ abstract class Sabel_DB_Migration_Base
     $restore = $this->getRestoreFileName();
     $schema  = getSchema($this->mdlName);
 
-    if ($this->type === "upgrade") {
+    if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
 
       $change = new Sabel_DB_Migration_Classes_ChangeColumn();
@@ -268,19 +256,23 @@ abstract class Sabel_DB_Migration_Base
     return $dir . DIR_DIVIDER . "restore_" . $this->version;
   }
 
+  protected function query()
+  {
+    $query = new Sabel_DB_Migration_Classes_Query();
+    eval (getPhpSource($this->filePath));
+    $query->execute();
+  }
+
   protected function custom()
   {
-    $custom = new Sabel_DB_Migration_Classes_Custom();
-    $className = get_class($this);
-
-    if ($this->type === "upgrade") {
-      $custom->prepareUpgrade($this->filePath);
-      $custom->doUpgrade($className, $this->version);
+    if ($this->applyMode === "upgrade") {
+      $file = $this->filePath;
     } else {
-      $restoreFile = $this->getRestoreFileName();
-      $custom->prepareDowngrade($restoreFile);
-      $custom->doDowngrade($className);
+      $file = $this->getRestoreFileName();
     }
+
+    $mix  = new Sabel_DB_Migration_Classes_Custom();
+    $mix->execute(get_class($this), $this->version, $file);
   }
 
   protected function getDefaultValue($column)

@@ -77,6 +77,14 @@ abstract class Sabel_DB_Driver_Base
     return Sabel_DB_Transaction_Common::getInstance();
   }
 
+  public function close($connection)
+  {
+    $method = $this->closeFunction;
+    $method($connection);
+
+    unset($this->connection);
+  }
+
   protected function error($error)
   {
     $e = new Sabel_DB_Exception_Driver();

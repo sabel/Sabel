@@ -87,14 +87,6 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
     $this->setSql($this->rollbackCommand)->execute();
   }
 
-  public function close($connection)
-  {
-    $method = $this->closeFunction;
-    $method($connection);
-
-    unset($this->connection);
-  }
-
   protected function getSequenceId($sql)
   {
     $rows = $this->setSql($sql)->execute();

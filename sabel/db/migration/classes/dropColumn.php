@@ -15,7 +15,12 @@ class Sabel_DB_Migration_Classes_dropColumn
 
   public function column($name)
   {
-    $this->dropColumns[] = $name;
+    if (is_string($name)) {
+      $this->dropColumns[] = $name;
+    } else {
+      Sabel_Sakle_Task::error("column name should be a string.");
+      exit;
+    }
   }
 
   public function getDropColumns()

@@ -16,7 +16,7 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
     $tableColumns = "SELECT sql FROM sqlite_master WHERE name = '%s'";
 
   private
-    $colLine     = "",
+    $difinition  = "",
     $floatTypes  = array("float", "float4", "real"),
     $doubleTypes = array("float8", "double");
 
@@ -111,7 +111,7 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
       $co->default  = null;
       return false;
     } else {
-      $this->colLine = $colLine;
+      $this->difinition = $colLine;
       return true;
     }
   }
@@ -149,22 +149,22 @@ class Sabel_DB_Schema_Sqlite extends Sabel_DB_Schema_Base
 
   private function setNotNull($co)
   {
-    $co->nullable  = (strpos($this->colLine, "not null") === false);
-    $this->colLine = str_replace("not null", "", $this->colLine);
+    $co->nullable  = (strpos($this->difinition, "not null") === false);
+    $this->difinition = str_replace("not null", "", $this->difinition);
   }
 
   private function setPrimary($co)
   {
-    $co->primary   = (strpos($this->colLine, "primary key") !== false);
-    $this->colLine = str_replace("primary key", "", $this->colLine);
+    $co->primary   = (strpos($this->difinition, "primary key") !== false);
+    $this->difinition = str_replace("primary key", "", $this->difinition);
   }
 
   private function setDefault($co)
   {
-    if (strpos($this->colLine, "default") === false) {
+    if (strpos($this->difinition, "default") === false) {
       $co->default = null;
     } else {
-      $d = trim(str_replace("default ", "", $this->colLine));
+      $d = substr(trim($this->difinition), 8);
       if ($d === "null" || $d === "NULL") {
         $co->default = null;
       } else {

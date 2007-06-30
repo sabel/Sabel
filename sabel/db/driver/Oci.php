@@ -12,7 +12,8 @@
 class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
 {
   protected
-    $driverId = "oci";
+    $driverId      = "oci",
+    $closeFunction = "oci_close";
 
   private
     $limit  = null,
