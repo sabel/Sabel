@@ -921,4 +921,25 @@ Sabel.History = {
   }
 };
 
+Sabel.Iterator = function(ary) {
+  this.init(ary);
+}
+Sabel.Iterator.prototype = {
+  index: 0,
 
+  init: function(ary)
+  {
+    this.items = ary;
+    this.index = 0;
+  },
+
+  hasNext: function()
+  {
+    return (this.index < this.items.length);
+  },
+
+  next: function()
+  {
+    return this.items[this.index++];
+  }
+}
