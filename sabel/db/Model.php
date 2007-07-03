@@ -237,8 +237,7 @@ abstract class Sabel_DB_Model
 
     foreach ($arg1 as $key => $val) {
       if (strpos($val, ".") !== false) {
-        list($mdlName, $val) = explode(".", $val);
-        $val = convert_to_tablename($mdlName) . "." . $val;
+        $val = preg_replace_callback("/[^|,][^\.,]+\./", '_sc_cb_func', $val);
       }
 
       $this->constraints[$key] = $val;
@@ -622,4 +621,9 @@ abstract class Sabel_DB_Model
     Sabel_DB_Transaction::rollback();
     throw new Sabel_DB_Exception($message);
   }
+}
+
+function _sc_cb_func($matches)
+{
+  return convert_to_tablename(trim($matches[0]));
 }

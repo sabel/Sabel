@@ -41,9 +41,14 @@ class Sabel_DB_Schema_Column
     return ($this->type === Sabel_DB_Type::SMALLINT);
   }
 
-  public function isFloat()
+  public function isFloat($strict = false)
   {
-    return ($this->type === Sabel_DB_Type::FLOAT);
+    if ($strict) {
+      return ($this->type === Sabel_DB_Type::FLOAT);
+    } else {
+      return ($this->type === Sabel_DB_Type::FLOAT ||
+              $this->type === Sabel_DB_Type::DOUBLE);
+    }
   }
 
   public function isDouble()
@@ -85,8 +90,10 @@ class Sabel_DB_Schema_Column
   {
     switch ($this->type) {
       case Sabel_DB_Type::INT:
+        return _int_cast_func($value, INT_MAX);
+
       case Sabel_DB_Type::SMALLINT:
-        return (int)$value;
+        return _int_cast_func($value, SMALLINT_MAX);
 
       case Sabel_DB_Type::STRING:
       case Sabel_DB_Type::TEXT:
@@ -95,16 +102,48 @@ class Sabel_DB_Schema_Column
 
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:
-        return (float)$value;
+        if (is_string($value) && $value === (string)(float)$value || is_int($value)) {
+          return (float)$value;
+        } else {
+          return $value;
+        }
 
       case Sabel_DB_Type::BOOL:
-        if (is_bool($value)) return $value;
-        if (is_int($value))  return ($value === 1);
+        if (is_string($value)) {
+          if ($value === "1" || $value === "t" || $value === "true") {
+            return true;
+          } elseif ($value === "0" || $value === "f" || $value === "false") {
+            return false;
+          }
+        } elseif (is_int($value)) {
+          if ($value === 1) {
+            return true;
+          } elseif ($value === 0) {
+            return false;
+          }
+        }
 
-        return in_array($value, array("1", "t", "true"));
+        return $value;
 
       default:
         return $value;
     }
+  }
+}
+
+function _int_cast_func($value, $max)
+{
+  if (is_string($value) && is_numeric($value) && $value <= $max) {
+    if (($pos = strpos($value, ".")) === false && $value{0} !== "0") {
+      return (int)$value;
+    } elseif (substr_count($value, ".") === 1 && preg_match("/0+$/", substr($value, ++$pos))) {
+      return (int)$value;
+    } else {
+      return $value;
+    }
+  } elseif (is_float($value) && fmod($value, 1.0) === 0.0 && $value <= $max) {
+    return (int)$value;
+  } else {
+    return $value;
   }
 }

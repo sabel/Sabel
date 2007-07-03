@@ -39,8 +39,8 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
       $co->max =  127;
       $co->min = -128;
     } else {
-      $co->max =  2147483647;
-      $co->min = -2147483648;
+      $co->max = INT_MAX;
+      $co->min = INT_MIN;
     }
   }
 }

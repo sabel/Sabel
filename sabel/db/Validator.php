@@ -124,11 +124,22 @@ class Sabel_DB_Validator
     $value = $column->value;
     if ($value === null) return true;
 
-    if ($column->isNumeric()) {
-      return is_numeric($value);
+    /**
+     *  don't care if value of integer column is too large.
+     *  because the problem of the datatype occurs. (too large integer is float.)
+     */
+    if ($column->isInt(true)) {
+      return ($value > INT_MAX || is_int($value));
+    } elseif ($column->isSmallint()) {
+      return ($value > SMALLINT_MAX || is_int($value));
+    } elseif ($column->isBigint()) {
+      return (is_numeric($value) && $value{0} !== "0");
     } elseif ($column->isBool()) {
       return is_bool($value);
+    } elseif ($column->isFloat(false)) {
+      return is_float($value);
     } elseif ($column->isDatetime()) {
+      // @todo regex.
       return (preg_match($this->datetimeRegex, $value) === 1);
     } else {
       return true;

@@ -78,7 +78,7 @@ class Test_DB_Test extends SabelTestCase
     $planet->save();
 
     $model = new Users();
-    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('order', 'Users.id');
     $users = $model->select();
 
     $user1 = $users[0];
@@ -103,7 +103,7 @@ class Test_DB_Test extends SabelTestCase
   public function testLimitation()
   {
     $model = new Users();
-    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('order', 'Users.id');
     $users = $model->select();
     $this->assertEquals(count($users), 4);
 
@@ -113,7 +113,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($users[3]->id, 4);
 
     $model = new Users();
-    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('order', 'Users.id');
     $model->setConstraint('limit', 2);
     $users = $model->select();
     $this->assertEquals(count($users), 2);
@@ -122,7 +122,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($users[1]->id, 2);
 
     $model = new Users();
-    $model->setConstraint('order', 'users.id');
+    $model->setConstraint('order', 'Users.id');
     $model->setConstraint('offset', 1);
     $users = $model->select();
     $this->assertEquals(count($users), 3);
@@ -132,7 +132,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($users[2]->id, 4);
 
     $model = new Users();
-    $model->setConstraint('order', 'users.id DESC');
+    $model->setConstraint('order', 'Users.id DESC');
     $model->setConstraint('offset', 2);
     $model->setConstraint('limit',  2);
     $users = $model->select();
@@ -461,7 +461,7 @@ class Test_DB_Test extends SabelTestCase
   public function testMoreJoin()
   {
     $users = new Users();
-    $users->setConstraint("order", "users.id");
+    $users->setConstraint("order", "Users.id");
 
     $joiner = new Sabel_DB_Join($users);
     $joiner->add(MODEL("Company"), null, null, array("id" => "id", "fkey" => "company_id"));
@@ -665,7 +665,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($cities[1]->name, 'rondon');
 
     $users = new Users();
-    $users->setConstraint('order', 'users.id');
+    $users->setConstraint('order', 'Users.id');
     $users = $users->select();
 
     $this->assertEquals(count($users), 2);
