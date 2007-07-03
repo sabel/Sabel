@@ -277,7 +277,7 @@ abstract class Sabel_DB_Model
     foreach ($this->schemaCols as $name => $schema) {
       $cloned = clone $schema;
       if (isset($values[$name])) {
-        $cloned->value = $values[$name];
+        $cloned->value = $cloned->cast($values[$name]);
       } else {
         $cloned->value = null;
       }
@@ -378,10 +378,9 @@ abstract class Sabel_DB_Model
 
   protected function internalJoin()
   {
-    $join   = new Sabel_DB_Join($this);
-    $result = $join->buildParents();
+    $join = new Sabel_DB_Join($this);
 
-    if ($result === Sabel_DB_Join::CANNOT_JOIN) {
+    if ($join->buildParents() === Sabel_DB_Join::CANNOT_JOIN) {
       return Sabel_DB_Join::CANNOT_JOIN;
     } else {
       return $join->join();

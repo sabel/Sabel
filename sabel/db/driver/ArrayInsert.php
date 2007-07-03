@@ -22,6 +22,8 @@ class ArrayInsert
 
     $query = $sql . implode(", ", $vals);
     $executer->setResult($driver->setSql($query)->execute());
+
+    return Sabel_DB_Command_Before::INTERRUPT;
   }
 }
 

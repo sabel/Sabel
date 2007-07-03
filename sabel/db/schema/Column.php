@@ -85,6 +85,7 @@ class Sabel_DB_Schema_Column
   {
     switch ($this->type) {
       case Sabel_DB_Type::INT:
+      case Sabel_DB_Type::SMALLINT:
         return (int)$value;
 
       case Sabel_DB_Type::STRING:
