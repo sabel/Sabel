@@ -45,7 +45,7 @@ class Sabel_DB_Model_Bridge
       list ($pkey, $fkey) = $this->getJoinParam($foreign, $model->getTableName());
     }
 
-    $bridge->setCondition($fkey, $model->$pkey);
+    $bridge->setCondition("{$this->bridgeName}.{$fkey}", $model->$pkey);
 
     if ($constraints) {
       $bridge->setConstraint($constraints);

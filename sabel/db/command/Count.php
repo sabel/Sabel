@@ -31,8 +31,9 @@ class Sabel_DB_Command_Count extends Sabel_DB_Command_Base
 
     $query = $driver->getConstraintSqlClass()->build($query, array("limit" => 1));
     $rows  = $driver->setSql($query)->execute();
-    $executer->setResult($rows[0]["cnt"]);
+    $count = (int)$rows[0]["cnt"];
+    $executer->setResult($count);
 
-    return $rows[0]["cnt"];
+    return $count;
   }
 }
