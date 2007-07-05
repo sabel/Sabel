@@ -17,7 +17,8 @@ interface Sabel_DB_Command
   const UPDATE = 0x04;
   const DELETE = 0x08;
   const QUERY  = 0x10;
-  const JOIN   = 0x20;
+  const COUNT  = 0x20;
+  const JOIN   = 0x40;
 
-  const ARRAY_INSERT = 0x40;
+  const ARRAY_INSERT = 0x80;
 }

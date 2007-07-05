@@ -19,9 +19,7 @@ class Sabel_DB_Sql_Constraint_Common implements Sabel_DB_Sql_Constraint_Interfac
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
     if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
 
-    if (isset($c["limit"]) && !isset($c["offset"])) {
-      $sql .= " LIMIT " . $c["limit"] . " OFFSET 0";
-    } elseif (isset($c["offset"]) && !isset($c["limit"])) {
+    if (isset($c["offset"]) && !isset($c["limit"])) {
       $sql .= " LIMIT 100 OFFSET " . $c["offset"];
     } else {
       if (isset($c["limit"]))  $sql .= " LIMIT "  . $c["limit"];

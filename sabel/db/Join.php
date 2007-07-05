@@ -66,6 +66,19 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     return $this->tableLists = $accessor->getTableLists();
   }
 
+  public function getCount($joinType = "INNER")
+  {
+    $query = array();
+    $model = $this->sourceModel;
+
+    foreach ($this->objects as $object) {
+      $query[] = $object->getJoinQuery($joinType);
+    }
+
+    $query = implode("", $query);
+    return $model->getCommand()->count($query)->getResult();
+  }
+
   public function join($joinType = "INNER")
   {
     $objects = $this->objects;

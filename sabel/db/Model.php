@@ -296,20 +296,12 @@ abstract class Sabel_DB_Model
   {
     $this->setCondition($arg1, $arg2);
 
-    $tmpProjection  = $this->projection;
-    $tmpConstraints = $this->constraints;
-    $this->unsetConstraints();
-
-    $this->setProjection("count(*) AS cnt");
-    $this->setConstraint("limit", 1);
-
-    $command = $this->getCommand();
-    $rows = $this->execSelect($command);
-
-    $this->projection  = $tmpProjection;
-    $this->constraints = $tmpConstraints;
-
-    return (int)$rows[0]["cnt"];
+    try {
+      $command = $this->getCommand();
+      return $command->count()->getResult();
+    } catch (Exception $e) {
+      $this->executeError($e->getMessage(), $command);
+    }
   }
 
   public function selectOne($arg1 = null, $arg2 = null)
