@@ -28,10 +28,12 @@ class Sabel_Plugin_Filter extends Sabel_Plugin_Base
                             
     asort($filters);
     
-    foreach ($filters as $pos => $filterName) {
+    foreach ($filters as $filterName) {
       $filter = $this->controller->$filterName;
       if (isset($filter[self::BEFORE])) {
-        $this->doFilters($filter[self::BEFORE]);
+        if (redirected($this->doFilters($filter[self::BEFORE]))) {
+          return false;
+        }
       }
     }
   }
@@ -44,10 +46,12 @@ class Sabel_Plugin_Filter extends Sabel_Plugin_Base
     
     asort($filters);
     
-    foreach ($filters as $pos => $filterName) {
+    foreach ($filters as $filterName) {
       $filter = $this->controller->$filterName;
       if (isset($filter[self::AFTER])) {
-        $this->doFilters($filter[self::AFTER]);
+        if (redirected($this->doFilters($filter[self::AFTER]))) {
+          return false;
+        }
       }
     }
   }
@@ -66,15 +70,15 @@ class Sabel_Plugin_Filter extends Sabel_Plugin_Base
         return false;
       } else {
         unset($filters[self::EXCLUDE_KEY]);
-        $this->applyFilters($filters);
+        return $this->applyFilters($filters);
       }
     } elseif (isset($filters[self::INCLUDE_KEY])) {
       if (in_array($actionName, $filters[self::INCLUDE_KEY])) {
         unset($filters[self::INCLUDE_KEY]);
-        $this->applyFilters($filters);
+        return $this->applyFilters($filters);
       }
     } else {
-      $this->applyFilters($filters);
+      return $this->applyFilters($filters);
     }
   }
   
@@ -84,10 +88,14 @@ class Sabel_Plugin_Filter extends Sabel_Plugin_Base
     
     foreach ($filters as $filter) {
       if ($this->controller->hasMethod($filter)) {
-        if ($this->controller->$filter() === false) {
-          Sabel_Context::log("apply filter " . $filter);
+        Sabel_Context::log("apply filter " . $filter);
+        $result = $this->controller->$filter();
+        
+        if ($result === false) {
           break;
-        } else {
+        } elseif (redirected($result)) {
+          return Sabel_Controller_Page::REDIRECTED;
+          break;
         }
       } else {
         throw new Sabel_Exception_Runtime($filter . " is not found in any actions");
