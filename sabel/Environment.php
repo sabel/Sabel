@@ -19,7 +19,7 @@ class Sabel_Environment
   
   public static function create()
   {
-    if (is_not_object(self::$instance)) self::$instance = new self();
+    if (!is_object(self::$instance)) self::$instance = new self();
     return self::$instance;
   }
   

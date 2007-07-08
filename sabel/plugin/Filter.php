@@ -17,13 +17,8 @@ class Sabel_Plugin_Filter extends Sabel_Plugin_Base
   const BEFORE  = "before";
   const AFTER   = "after";
   
-  const EXCLUDE_KEY_KEY = "EXCLUDE_KEY";
-  const INCLUDE_KEY_KEY = "INCLUDE_KEY";
-  
-  public function enable()
-  {
-    return array(parent::ON_BEFORE_ACTION, parent::ON_AFTER_ACTION);
-  }
+  const EXCLUDE_KEY = "exclude";
+  const INCLUDE_KEY = "include";
   
   public function onBeforeAction()
   {

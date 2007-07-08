@@ -67,7 +67,7 @@ class Sabel_DB_Validator
 
       if ($column->increment) {
         if ($column->value === null || $this->model->isSelected()) continue;
-        $message = "don't set a value in '{$column->name}'(auto increment column).";
+        $message = "don't set a value in '{$column->name}'(sequence column).";
         $e = new Sabel_DB_Exception_Validate();
         throw $e->exception("validate", $message);
       }

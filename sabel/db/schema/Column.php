@@ -134,7 +134,7 @@ class Sabel_DB_Schema_Column
 function _int_cast_func($value, $max)
 {
   if (is_string($value) && is_numeric($value) && $value <= $max) {
-    if (($pos = strpos($value, ".")) === false && $value{0} !== "0") {
+    if ($value === "0" || ($pos = strpos($value, ".")) === false && $value{0} !== "0") {
       return (int)$value;
     } elseif (substr_count($value, ".") === 1 && preg_match("/0+$/", substr($value, ++$pos))) {
       return (int)$value;

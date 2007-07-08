@@ -80,9 +80,11 @@ class Sabel_DB_Config
 
     if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"))) {
       return $config["database"];
+    } elseif ($drvName === "oci") {
+      return strtoupper($config["user"]);
     } elseif (isset($config["schema"])) {
       return $config["schema"];
-    } elseif (($drvName === "pgsql" || $drvName === "pdo-pgsql") && !isset($config["schema"])) {
+    } elseif ($drvName === "pgsql" || $drvName === "pdo-pgsql") {
       return "public";
     } else {
       $e = new Sabel_DB_Exception_Config();
