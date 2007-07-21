@@ -95,10 +95,7 @@ abstract class Sabel_DB_Model
   public function __set($key, $val)
   {
     $this->values[$key] = $val;
-
-    if ($this->selected && in_array($key, $this->columns)) {
-      $this->updateValues[$key] = $val;
-    }
+    if ($this->selected) $this->updateValues[$key] = $val;
   }
 
   public function setValues($values)
@@ -170,6 +167,11 @@ abstract class Sabel_DB_Model
     return $this->saveValues;
   }
 
+  public function getUpdateValues()
+  {
+    return $this->updateValues;
+  }
+
   public function setProjection($p)
   {
     $this->projection = (is_array($p)) ? join(", ", $p) : $p;
@@ -220,7 +222,7 @@ abstract class Sabel_DB_Model
     } elseif ($arg1 instanceof Sabel_DB_Condition_Object) {
       $manager->add($arg1);
     } elseif ($arg2 === null) {
-      $manager->create($this->getPrimaryKey(), $arg1);
+      $manager->create($this->schema->getPrimaryKey(), $arg1);
     } else {
       $manager->create($arg1, $arg2);
     }
@@ -266,25 +268,6 @@ abstract class Sabel_DB_Model
   public function toArray()
   {
     return $this->values;
-  }
-
-  public function toSchema()
-  {
-    $schemas = array();
-    $values  = $this->values;
-
-    foreach ($this->schemaCols as $name => $schema) {
-      $cloned = clone $schema;
-      if (isset($values[$name])) {
-        $cloned->value = $cloned->cast($values[$name]);
-      } else {
-        $cloned->value = null;
-      }
-
-      $schemas[$name] = $cloned;
-    }
-
-    return $schemas;
   }
 
   public function isSelected()
@@ -351,10 +334,8 @@ abstract class Sabel_DB_Model
     $rows = $this->execSelect($command);
     if (empty($rows)) return false;
 
-    $results   = array();
-    $modelName = $this->getModelName();
-
-    $source = MODEL($modelName);
+    $results = array();
+    $source  = MODEL($this->modelName);
 
     foreach ($rows as $row) {
       $model = clone $source;
@@ -403,12 +384,12 @@ abstract class Sabel_DB_Model
     }
 
     if ($constraints) $child->setConstraint($constraints);
-    return $child->select($fkey, $this->$col);
+    return $child->select($fkey, $this->__get($col));
   }
 
   public function setProperties($row)
   {
-    $pkey = $this->getPrimaryKey();
+    $pkey = $this->schema->getPrimaryKey();
     if (!is_array($pkey)) $pkey = (array)$pkey;
 
     $manager  = $this->loadConditionManager();
@@ -435,7 +416,7 @@ abstract class Sabel_DB_Model
 
   public function save($ignores = null)
   {
-    if ($ignores) {
+    if ($ignores !== null) {
       if ($ignores === true) $ignores = array();
       $errors = $this->validate($ignores);
 
@@ -448,7 +429,7 @@ abstract class Sabel_DB_Model
     }
 
     if ($this->isSelected()) {
-      if ($this->getPrimaryKey() === null) {
+      if ($this->schema->getPrimaryKey() === null) {
         $e = new Sabel_DB_Exception_Model();
         throw $e->exception("save", "cannot update model(there is not primary key).");
       } else {
@@ -461,6 +442,10 @@ abstract class Sabel_DB_Model
       $saveMethod = "insert";
     }
 
+    foreach ($saveValues as $key => $val) {
+      $saveValues[$key] = $this->__get($key);
+    }
+
     $this->saveValues = $saveValues;
 
     try {
@@ -470,16 +455,15 @@ abstract class Sabel_DB_Model
       $this->executeError($e->getMessage(), $command);
     }
 
-    $this->saveValues = array();
-
     if ($this->isSelected()) {
       $saveValues = array_merge($this->toArray(), $saveValues);
-    } elseif (($incCol = $this->getIncrementColumn()) !== null) {
+    } elseif (($incCol = $this->schema->getIncrementColumn()) !== null) {
       $saveValues[$incCol] = $command->getIncrementId();
     }
 
-    $newModel = MODEL($this->getModelName());
+    $newModel = MODEL($this->modelName);
     $newModel->setProperties($saveValues);
+    $this->saveValues = array();
 
     return $newModel;
   }
@@ -490,7 +474,7 @@ abstract class Sabel_DB_Model
 
     try {
       $command = $this->getCommand();
-      $command->insert()->getResult();
+      $command->insert();
       return $command->getIncrementId();
     } catch (Exception $e) {
       $this->executeError($e->getMessage(), $command);
@@ -540,7 +524,7 @@ abstract class Sabel_DB_Model
     if ($arg1 !== null) {
       $this->setCondition($arg1, $arg2);
     } elseif ($this->isSelected()) {
-      if (($pkey = $this->getPrimaryKey()) === null) {
+      if (($pkey = $this->schema->getPrimaryKey()) === null) {
         $e = new Sabel_DB_Exception_Model();
         throw $e->exception("save", "cannot delete model(there is not primary key).");
       } else {

@@ -16,7 +16,7 @@ class Sabel_DB_Type_Other implements Sabel_DB_Type_Interface
 
   public function getType()
   {
-    return null;
+    return Sabel_DB_Type::UNKNOWN;
   }
 
   public function add($chain)

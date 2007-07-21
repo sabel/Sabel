@@ -86,6 +86,15 @@ class Sabel_DB_Schema_Column
     return ($this->isInt() || $this->isFloat() || $this->isDouble());
   }
 
+  public function isUnknown($strict = false)
+  {
+    if ($strict) {
+      return ($this->type === Sabel_DB_Type::UNKNOWN);
+    } else {
+      return ($this->type === Sabel_DB_Type::UNKNOWN || $this->type === null);
+    }
+  }
+
   public function cast($value)
   {
     switch ($this->type) {

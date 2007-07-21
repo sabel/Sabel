@@ -74,7 +74,7 @@ class Sabel_DB_Join_Result
         if (!isset($structure[$tblName])) continue;
         foreach ($structure[$tblName] as $parent) {
           $name = convert_to_modelname($parent);
-          $models[$tblName]->$name = $models[$parent];
+          $models[$tblName]->__set($name, $models[$parent]);
         }
       }
 
@@ -84,7 +84,7 @@ class Sabel_DB_Join_Result
       $tblName = $source->getTableName();
       foreach ($structure[$tblName] as $parent) {
         $name = convert_to_modelname($parent);
-        $self->$name = $models[$parent];
+        $self->__set($name, $models[$parent]);
       }
 
       $results[] = $self;
@@ -95,9 +95,9 @@ class Sabel_DB_Join_Result
 
   private function createModels($row, $tables)
   {
-    $models = array();
-
+    $models  = array();
     $objects = $this->objects;
+
     foreach ($tables as $tblName) {
       $object = $objects[$tblName];
       $model  = $object->createModel($row);

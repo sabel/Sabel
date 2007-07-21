@@ -21,7 +21,8 @@ abstract class Sabel_DB_Schema_Mysql_Base
          . "FROM {$is}.table_constraints tc "
          . "INNER JOIN {$is}.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name "
          . "WHERE tc.constraint_schema = kcu.constraint_schema AND tc.table_name='{$tblName}' "
-         . "AND tc.constraint_schema = '{$schemaName}' AND tc.constraint_type='UNIQUE'";
+         . "AND kcu.table_name='{$tblName}' AND tc.constraint_schema = '{$schemaName}' "
+         . "AND tc.constraint_type='UNIQUE'";
 
     $rows = $driver->setSql($sql)->execute();
     if (empty($rows)) return null;

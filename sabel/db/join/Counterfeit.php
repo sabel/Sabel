@@ -23,19 +23,15 @@ class Sabel_DB_Join_Counterfeit
     $source = $this->model;
 
     foreach ($parents as $parent) {
-      $model   = MODEL($parent);
-      $tblName = $model->getTableName();
-      $pKey    = $model->getPrimaryKey();
+      $model = MODEL($parent);
+      $fKey  = $model->getTableName() . "_" . $model->getPrimaryKey();
 
-      $fKey = $tblName . "_" . $pKey;
-      $fId  = $source->$fKey;
-
-      if ($fId === null) {
+      if (($fId = $source->__get($fKey)) === null) {
         throw new Exception("id of foreign key not found.");
+      } else {
+        $parentModel = $model->selectOne($fId);
+        $source->__set($parent, $parentModel);
       }
-
-      $parentModel = $model->selectOne($fId);
-      $source->$parent = $parentModel;
     }
   }
 }

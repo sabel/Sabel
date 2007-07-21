@@ -51,6 +51,38 @@ class Sabel_DB_Validator
     return !empty($this->errors);
   }
 
+  protected function getColumns()
+  {
+    $columns = array();
+    $model   = $this->model;
+    $schemas = $model->getSchema()->getColumns();
+
+    if ($model->isSelected()) {
+      $values = $model->getUpdateValues();
+      foreach ($values as $name => $val) {
+        if (isset($schemas[$name])) {
+          $column = clone $schemas[$name];
+          $column->value = $column->cast($val);
+          $columns[$name] = $column;
+        }
+      }
+    } else {
+      $values = $model->toArray();
+      foreach ($schemas as $name => $schema) {
+        $column = clone $schema;
+        if (isset($values[$name])) {
+          $column->value = $column->cast($values[$name]);
+        } else {
+          $column->value = null;
+        }
+
+        $columns[$name] = $column;
+      }
+    }
+
+    return $columns;
+  }
+
   // @todo i18n(beta3)
   public function validate($ignores = array())
   {
@@ -59,7 +91,7 @@ class Sabel_DB_Validator
     $errors    = array();
     $messages  = $this->messages;
     $model     = $this->model;
-    $columns   = $model->toSchema();
+    $columns   = $this->getColumns();
     $localized = $this->localizedName;
 
     foreach ($columns as $name => $column) {
@@ -100,7 +132,7 @@ class Sabel_DB_Validator
     }
 
     if ($uniques = $model->getSchema()->getUniques()) {
-      $this->unique($model, $columns, $uniques, $errors);
+      $this->unique($model, $uniques, $errors);
     }
 
     if ($customs = Sabel_DB_Validate_Config::getCustomValidators()) {
@@ -128,10 +160,8 @@ class Sabel_DB_Validator
      *  don't care if value of integer column is too large.
      *  because the problem of the datatype occurs. (too large integer is float.)
      */
-    if ($column->isInt(true)) {
+    if ($column->isInt(true) || $column->isSmallint()) {
       return ($value > INT_MAX || is_int($value));
-    } elseif ($column->isSmallint()) {
-      return ($value > SMALLINT_MAX || is_int($value));
     } elseif ($column->isBigint()) {
       return (is_numeric($value) && $value{0} !== "0");
     } elseif ($column->isBool()) {
@@ -152,7 +182,12 @@ class Sabel_DB_Validator
 
   protected function length($column)
   {
-    $method = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
+    static $method = "";
+
+    if ($method === "") {
+      $method = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
+    }
+
     return ($method($column->value) < $column->max);
   }
 
@@ -227,7 +262,7 @@ class Sabel_DB_Validator
     return str_replace(";", "", implode(",", $args));
   }
 
-  protected function unique($model, $columns, $uniques, &$errors)
+  protected function unique($model, $uniques, &$errors)
   {
     $copy = MODEL($model->getModelName());
     $pkey = $model->getPrimaryKey();
@@ -237,7 +272,7 @@ class Sabel_DB_Validator
     foreach ($uniques as $unique) {
       $values = array();
       foreach ($unique as $uni) {
-        $val = $columns[$uni]->value;
+        $val = $model->$uni;
         $copy->setCondition($uni, $val);
         $values[] = $val;
       }

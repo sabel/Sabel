@@ -11,15 +11,15 @@
  */
 class Sabel_DB_Join_Object
 {
-  protected $model   = null;
-  protected $isModel = false;
-  protected $objects = array();
-
-  protected $tblName     = "";
-  protected $columns     = array();
-  protected $joinKeys    = array();
-  protected $aliasName   = null;
-  protected $sourceAlias = "";
+  protected
+    $model       = null,
+    $isModel     = false,
+    $objects     = array(),
+    $columns     = array(),
+    $joinKeys    = array(),
+    $tblName     = "",
+    $aliasName   = null,
+    $sourceAlias = "";
 
   public function __construct($object, $fkeys, $joinKeys, $columns = null, $alias = null)
   {
@@ -176,7 +176,7 @@ class Sabel_DB_Join_Object
     $query[] = "ON {$sourceName}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
   }
 
-  public function createModel(&$row)
+  public function createModel($row)
   {
     $columns = $this->getColumns();
     $name    = $this->getName(false);

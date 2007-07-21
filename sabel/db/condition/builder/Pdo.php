@@ -22,7 +22,7 @@ class Sabel_DB_Condition_Builder_Pdo extends Sabel_DB_Condition_Builder_Base
   public function buildNormal($condition)
   {
     $driver  = $this->driver;
-    $bindKey = $this->dotRep($condition->key . $this->count++);
+    $bindKey = "param" . $this->count++;
     $bindVal = $driver->escape($condition->value);
     $driver->setBindValues(array($bindKey => $bindVal));
     return $this->getKey($condition) . " = :{$bindKey}";
@@ -45,7 +45,7 @@ class Sabel_DB_Condition_Builder_Pdo extends Sabel_DB_Condition_Builder_Base
   public function buildCompare($condition)
   {
     $driver  = $this->driver;
-    $bindKey = $this->dotRep($condition->key . $this->count++);
+    $bindKey = "param" . $this->count++;
 
     list ($lg, $val) = $condition->value;
 
@@ -56,7 +56,7 @@ class Sabel_DB_Condition_Builder_Pdo extends Sabel_DB_Condition_Builder_Base
   protected function createLike($val, $condition, $esc = null)
   {
     $driver  = $this->driver;
-    $bindKey = $this->dotRep($condition->key . $this->count++);
+    $bindKey = "param" . $this->count++;
     $bindVal = $driver->escape($val);
     $driver->setBindValues(array($bindKey => $bindVal));
 
@@ -64,10 +64,5 @@ class Sabel_DB_Condition_Builder_Pdo extends Sabel_DB_Condition_Builder_Base
     if (isset($esc)) $query .= " escape '{$esc}'";
 
     return $query;
-  }
-
-  private function dotRep($bindKey)
-  {
-    return (strpos($bindKey, ".") === false) ? $bindKey : str_replace(".", "_", $bindKey);
   }
 }

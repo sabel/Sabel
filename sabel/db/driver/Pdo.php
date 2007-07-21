@@ -178,10 +178,6 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     $binds = ($bindValues === null) ? $this->bindValues : $bindValues;
 
     foreach ($binds as $key => $value) {
-      if (strpos($key, ".") === false) {
-        $key = str_replace(".", "_", $key);
-      }
-
       $bindParam[":{$key}"] = $value;
     }
 
