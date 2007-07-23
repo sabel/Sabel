@@ -22,9 +22,13 @@ define("BETWEEN",     Sabel_DB_Condition_Object::BETWEEN);
 define("LIKE",        Sabel_DB_Condition_Object::LIKE);
 define("COMPARE",     Sabel_DB_Condition_Object::COMPARE);
 
-function trans_begin($model)
+function trans_begin($model = null)
 {
-  return Sabel_DB_Transaction::begin($model);
+  if ($model === null) {
+    Sabel_DB_Transaction::activate();
+  } else {
+    Sabel_DB_Transaction::begin($model->getConnectionName());
+  }
 }
 
 function trans_commit()
