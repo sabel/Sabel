@@ -683,12 +683,13 @@ class Test_DB_Test extends SabelTestCase
     $orders = MODEL('CustomerOrder')->select();
     $this->assertFalse($orders);
 
-    $model = Sabel_DB_Transaction::load("CustomerOrder");
+    Sabel_DB_Transaction::activate();
+    $model = MODEL("CustomerOrder");
     $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
     $model->insert(array('customer_id' => 1, 'buy_date' => '1000-01-01 01:01:01', 'amount' => 1000));
 
-    $model = Sabel_DB_Transaction::load("Customer");
+    $model = MODEL("Customer");
     $model->insert(array('id' => 1, 'name' => 'name'));
     $model->insert(array('id' => 2, 'name' => 'name'));
 

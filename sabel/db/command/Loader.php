@@ -12,16 +12,33 @@
 class Sabel_DB_Command_Loader
 {
   protected static $instances = array();
+  protected static $overwrite = array();
 
-  public static function getClass($command)
+  public static function load($command)
   {
     $className = "Sabel_DB_Command_" . ucfirst($command);
 
     if (isset(self::$instances[$className])) {
       return self::$instances[$className];
     } else {
-      $instance = new $className();
-      return self::$instances[$className] = $instance;
+      $instance  = new $className();
+      $commandId = $instance->getCommandId();
+
+      if (isset(self::$overwrite[$commandId])) {
+        return self::$overwrite[$commandId];
+      } else {
+        return self::$instances[$className] = $instance;
+      }
+    }
+  }
+
+  public static function setInstance($commandId, $instance)
+  {
+    if ($instance instanceof Sabel_DB_Command_Base) {
+      self::$overwrite[$commandId] = $instance;
+    } else {
+      // @todo
+      throw new Exception("invalid object type.");
     }
   }
 

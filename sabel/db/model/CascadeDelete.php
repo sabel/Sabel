@@ -32,7 +32,7 @@ class Sabel_DB_Model_CascadeDelete
     $this->keys = $config->getKeys();
     $mdlName    = $model->getModelName();
 
-    $model = Sabel_DB_Transaction::begin($model);
+    Sabel_DB_Transaction::begin($model->getConnectionName());
 
     $models  = array();
     $pKey    = $model->getPrimaryKey();
@@ -80,13 +80,13 @@ class Sabel_DB_Model_CascadeDelete
     }
   }
 
-  protected function pushStack($child, $fKey, $idValue)
+  protected function pushStack($child, $fkey, $idValue)
   {
     $model  = MODEL($child);
-    $models = $model->select($fKey, $idValue);
+    $models = $model->select($fkey, $idValue);
 
     if ($models) {
-      $this->cascadeStack["{$child}:{$idValue}"] = $fKey;
+      $this->cascadeStack["{$child}:{$idValue}"] = $fkey;
     }
 
     return $models;
@@ -106,10 +106,9 @@ class Sabel_DB_Model_CascadeDelete
   {
     $stack = array_reverse($this->cascadeStack);
 
-    foreach ($stack as $param => $fKey) {
+    foreach ($stack as $param => $fkey) {
       list($mdlName, $idValue) = explode(":", $param);
-      $model = Sabel_DB_Transaction::load($mdlName);
-      $model->delete($fKey, $idValue);
+      MODEL($mdlName)->delete($fkey, $idValue);
     }
   }
 }

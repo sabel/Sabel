@@ -11,28 +11,19 @@
  */
 class Sabel_DB_Command_Executer
 {
-  const SKIP = -0x01;
+  const SKIP = -1;
 
-  protected $model  = null;
-  protected $driver = null;
-  protected $result = null;
-
-  protected $arguments = array();
-
-  protected $incrementId   = null;
-  protected $beforeMethods = array();
-  protected $afterMethods  = array();
-  protected $afterResult   = null;
+  protected
+    $model       = null,
+    $driver      = null,
+    $result      = null,
+    $arguments   = array(),
+    $incrementId = null;
 
   public function __construct($model)
   {
-    $this->model = $model;
-    $driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
-
-    $this->beforeMethods = $driver->getBeforeMethods();
-    $this->afterMethods  = $driver->getAfterMethods();
-
-    $this->driver = $driver;
+    $this->model  = $model;
+    $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
   }
 
   public function getModel()
@@ -54,15 +45,13 @@ class Sabel_DB_Command_Executer
   {
     $this->arguments = $args;
 
-    $commander = Sabel_DB_Command_Loader::getClass($command);
+    $commander = Sabel_DB_Command_Loader::load($command);
     $commandId = $commander->getCommandId();
 
-    $skip = $this->execRegisteredMethods("before", $commandId);
-    if ($skip) return $this;
-
-    $commander->execute($this);
-
-    $this->execRegisteredMethods("after", $commandId);
+    if (!$this->doInterrupt("before", $commandId)) {
+      $commander->execute($this);
+      $this->doInterrupt("after", $commandId);
+    }
 
     return $this;
   }
@@ -87,31 +76,24 @@ class Sabel_DB_Command_Executer
     $this->incrementId = $id;
   }
 
-  protected function execRegisteredMethods($type, $commandId)
+  protected function doInterrupt($type, $commandId)
   {
+    $driver = $this->driver;
+
     if ($type === "before") {
-      $methods = $this->beforeMethods;
+      $methods = $driver->getBeforeMethods();
     } else {
-      $methods = $this->afterMethods;
+      $methods = $driver->getAfterMethods();
     }
 
     if (isset($methods["all"])) {
       $method = $methods["all"];
-      $this->driver->$method($this);
+      $driver->$method($this);
     }
 
     if (isset($methods[$commandId])) {
-      return $this->doMethod($methods[$commandId]);
+      $method = $methods[$commandId];
+      return ($driver->$method($this) === self::SKIP);
     }
-  }
-
-  protected function doMethod($method)
-  {
-    $skip = false;
-
-    $result = $this->driver->$method($this);
-    if ($result === self::SKIP) $skip = true;
-
-    return $skip;
   }
 }

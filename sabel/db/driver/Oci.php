@@ -77,17 +77,17 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
 
   public function getSqlClass($model)
   {
-    return Sabel_DB_Sql_Loader::getClass($model, Sabel_DB_Sql_Loader::COMMON);
+    return Sabel_DB_Sql_Loader::load($model, Sabel_DB_Sql_Loader::COMMON);
   }
 
   public function getConditionBuilder()
   {
-    return Sabel_DB_Condition_Builder_Loader::getClass($this, Sabel_DB_Condition_Builder_Loader::COMMON);
+    return Sabel_DB_Condition_Builder_Loader::load($this, Sabel_DB_Condition_Builder_Loader::COMMON);
   }
 
   public function getConstraintSqlClass()
   {
-    return Sabel_DB_Sql_Constraint_Loader::getClass(Sabel_DB_Sql_Constraint_Loader::OCI);
+    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::OCI);
   }
 
   public function escape($values)

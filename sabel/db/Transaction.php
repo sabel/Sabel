@@ -11,32 +11,41 @@
  */
 class Sabel_DB_Transaction
 {
-  public static function load($mdlName)
+  private static $active = false;
+
+  public static function activate()
   {
-    return self::begin(MODEL($mdlName));
+    self::$active = true;
   }
 
-  public static function begin($model)
+  public static function isActive()
   {
-    Sabel_DB_Config::loadDriver($model->getConnectionName())->begin();
+    return self::$active;
+  }
 
-    return $model;
+  public static function begin($connectionName)
+  {
+    Sabel_DB_Config::loadDriver($connectionName)->begin();
+    self::$active = true;
   }
 
   public static function commit()
   {
-    $instances = Sabel_DB_Transaction_Base::getInstances();
-    if (!$instances) return;
-
-    foreach ($instances as $ins) $ins->commit();
+    self::finish("commit");
   }
 
   public static function rollback()
   {
+    self::finish("rollback");
+  }
+
+  private static function finish($method)
+  {
     $instances = Sabel_DB_Transaction_Base::getInstances();
     if (!$instances) return;
 
-    foreach ($instances as $ins) $ins->rollback();
+    foreach ($instances as $instance) $instance->$method();
+    self::$active = false;
   }
 
   public static function registBefore()

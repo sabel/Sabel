@@ -16,16 +16,16 @@ class Sabel_DB_Sql_Constraint_Loader
   const MSSQL  = "Mssql";
   const IBASE  = "Ibase";
 
-  protected static $classes = array();
+  protected static $instances = array();
 
-  public static function getClass($type = self::COMMON)
+  public static function load($type = self::COMMON)
   {
     $className = "Sabel_DB_Sql_Constraint_" . $type;
 
-    if (isset(self::$classes[$className])) {
-      $instance = self::$classes[$className];
+    if (isset(self::$instances[$className])) {
+      $instance = self::$instances[$className];
     } else {
-      $instance = self::$classes[$className] = new $className();
+      $instance = self::$instances[$className] = new $className();
     }
 
     return $instance;

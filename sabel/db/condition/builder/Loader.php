@@ -14,16 +14,16 @@ class Sabel_DB_Condition_Builder_Loader
   const COMMON = "Common";
   const PDO    = "Pdo";
 
-  protected static $classes = array();
+  protected static $instances = array();
 
-  public static function getClass($driver, $type = self::COMMON)
+  public static function load($driver, $type = self::COMMON)
   {
     $className = "Sabel_DB_Condition_Builder_" . $type;
 
-    if (isset(self::$classes[$className])) {
-      $instance = self::$classes[$className];
+    if (isset(self::$instances[$className])) {
+      $instance = self::$instances[$className];
     } else {
-      $instance = self::$classes[$className] = new $className();
+      $instance = self::$instances[$className] = new $className();
     }
 
     $instance->initialize($driver);

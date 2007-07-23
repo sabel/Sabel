@@ -52,6 +52,10 @@ abstract class Sabel_DB_Model
     $this->schema = $schema = Sabel_DB_Schema_Loader::getSchema($this);
     $this->schemaCols = $columns = $schema->getColumns();
     $this->columns = array_keys($columns);
+
+    if (Sabel_DB_Transaction::isActive()) {
+      Sabel_DB_Transaction::begin($this->connectionName);
+    }
   }
 
   protected function initializeSelect($arg1, $arg2 = null)
@@ -239,7 +243,7 @@ abstract class Sabel_DB_Model
 
     foreach ($arg1 as $key => $val) {
       if (strpos($val, ".") !== false) {
-        $val = preg_replace_callback("/[^|,][^\.,]+\./", '_sc_cb_func', $val);
+        $val = preg_replace_callback("/[^|,][^\.,]+\./", "_sc_cb_func", $val);
       }
 
       $this->constraints[$key] = $val;
@@ -503,7 +507,7 @@ abstract class Sabel_DB_Model
     }
 
     try {
-      Sabel_DB_Transaction::begin($this);
+      Sabel_DB_Transaction::begin($this->connectionName);
       $command = $this->getCommand();
       $command->arrayInsert();
       Sabel_DB_Transaction::commit();

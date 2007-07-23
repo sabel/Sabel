@@ -45,7 +45,7 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
 
   public function getConstraintSqlClass()
   {
-    return Sabel_DB_Sql_Constraint_Loader::getClass(Sabel_DB_Sql_Constraint_Loader::IBASE);
+    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::IBASE);
   }
 
   public function begin($connectionName = null)

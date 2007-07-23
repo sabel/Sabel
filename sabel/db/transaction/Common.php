@@ -16,8 +16,7 @@ class Sabel_DB_Transaction_Common extends Sabel_DB_Transaction_Base
   public static function getInstance()
   {
     if (self::$ins === null) {
-      self::$ins = new self();
-      parent::registInstance(self::$ins);
+      parent::registInstance(self::$ins = new self());
     }
 
     return self::$ins;
