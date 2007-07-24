@@ -21,6 +21,7 @@ class Sabel_Context
   private $controller  = null;
   private $view        = null;
   private $storage     = null;
+  private $locale      = null;
   private $injector    = null;
   
   private $disableLayout = false;
@@ -108,6 +109,11 @@ class Sabel_Context
   public function getView()
   {
     return new Sabel_View();
+  }
+  
+  public function setLocale($locale)
+  {
+    $this->locale = $locale;
   }
   
   public static function log($message)

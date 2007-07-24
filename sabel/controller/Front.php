@@ -47,6 +47,8 @@ final class Sabel_Controller_Front
       $builder->build($request);
     }
     
+    $context->setLocale($context->getInjector()->newInstance("Sabel_Locale"));
+    
     $this->request = $request;
     
     $router = new Sabel_Router_Map();
