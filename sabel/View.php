@@ -111,7 +111,7 @@ final class Sabel_View
     return Sabel_View::render($destination, $assigns);
   }
   
-  public static function renderDefault($response)
+  public static function renderDefault($response, $withLayout = true)
   {
     $context = Sabel_Context::getContext();
     
@@ -137,7 +137,7 @@ final class Sabel_View
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
-    } elseif (!$context->isLayoutDisabled()) {
+    } elseif (!$context->isLayoutDisabled() && $withLayout) {
       $assign = array("assign" => array("contentForLayout" => $content));
       try {
         $content = Sabel_View::render($destination, $assigns);

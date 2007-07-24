@@ -196,28 +196,30 @@ function _A($obj)
   return new Sabel_Aspect_Proxy($obj);
 }
 
-function renderingComponent($componentName, $args)
+function component($action, $args = null)
 {
-  echo renderingComponentAsString($componentName, $args);
-}
-
-function renderingComponentAsString($componentName, $args)
-{
-  $path = RUN_BASE . "/components/".$componentName . "/controllers/". $args["controller"] . ".php";
-  $cClassName = ucfirst($componentName) . "_Controllers_" . ucfirst($args["controller"]);
+  $context = Sabel_Context::getContext();
   
-  if (is_readable($path)) {
-    $controller = Sabel::load($cClassName);
-    $view = new Sabel_View();
-    $view->setTemplatePath(RUN_BASE . "/components/" . $componentName . "/views/");
-    $view->setTemplateName($args["controller"] . "." . $args["action"] . ".tpl");
-    $controller->setup(new Sabel_Request_Web(), $view);
-    $controller->execute($args["action"]);
-    
-    return $view->rendering(false);
-  } else {
-    throw new Sabel_Exception_Runtime($path . " controller notfound");
+  $executer    = clone $context->getExecuter();
+  $destination = clone $context->getDestination();
+  
+  if (isset($args["controller"])) {
+    $destination->setController($args["controller"]);
   }
+  
+  if (isset($args["module"])) {
+    $destination->setController($args["module"]);
+  }
+  
+  $destination->setAction($action);
+  
+  $executer->setDestination($destination);
+  $controller = $executer->create();
+  $response = $executer->execute($context->getRequest(), $context->getStorage());
+  $response->setController($controller);
+  $response->setDestination($destination);
+  
+  return Sabel_View::renderDefault($response, false);
 }
 
 /***   sabel.db functions   ***/

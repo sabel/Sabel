@@ -47,6 +47,7 @@ final class Sabel_Controller_Front
       $builder->build($request);
     }
     
+    $context->setRequest($request);
     $context->setLocale($context->getInjector()->newInstance("Sabel_Locale"));
     
     $this->request = $request;
@@ -72,6 +73,7 @@ final class Sabel_Controller_Front
     
     $injector = $context->getInjector();
     $executer = $injector->newInstance(self::EXECUTER_INTERFACE);
+    $context->setExecuter($executer);
     $executer->setContext($context);
     $executer->setDestination($destination);
     

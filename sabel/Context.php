@@ -15,6 +15,7 @@ class Sabel_Context
   
   private static $context = null;
   
+  private $request     = null;
   private $plugin      = null;
   private $candidate   = null;
   private $destination = null;
@@ -22,6 +23,7 @@ class Sabel_Context
   private $view        = null;
   private $storage     = null;
   private $locale      = null;
+  private $executer    = null;
   private $injector    = null;
   
   private $disableLayout = false;
@@ -34,6 +36,17 @@ class Sabel_Context
   public static function getContext()
   {
     return self::$context;
+  }
+  
+  public function setRequest($request)
+  {
+    $this->request = $request;
+    return $request;
+  }
+  
+  public function getRequest()
+  {
+    return $this->request;
   }
   
   public function setPlugin($plugin)
@@ -114,6 +127,22 @@ class Sabel_Context
   public function setLocale($locale)
   {
     $this->locale = $locale;
+  }
+  
+  public function getLocale()
+  {
+    return $this->locale;
+  }
+  
+  public function setExecuter($executer)
+  {
+    $this->executer = $executer;
+    return $executer;
+  }
+  
+  public function getExecuter()
+  {
+    return $this->executer;
   }
   
   public static function log($message)
