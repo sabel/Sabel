@@ -42,6 +42,11 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
     $this->controller = $controller;
   }
   
+  public function hasController()
+  {
+    return (is_object($this->controller));
+  }
+  
   public function getController()
   {
     return $this->controller;

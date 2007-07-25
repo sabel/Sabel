@@ -16,14 +16,6 @@ final class Sabel_Controller_Front
   const NOT_FOUND_ACTION    = "notFound";
   const SERVER_ERROR_ACTION = "serverError";
   const INDEX_PAGE          = "index";
-  
-  private
-    $request  = null,
-    $response = null;
-  
-  protected
-    $controller  = null,
-    $destination = null;
     
   private $context = null;
     
@@ -50,26 +42,14 @@ final class Sabel_Controller_Front
     $context->setRequest($request);
     $context->setLocale($context->getInjector()->newInstance("Sabel_Locale"));
     
-    $this->request = $request;
-    
     $router = new Sabel_Router_Map();
-    $destination = $this->destination = $router->route($this->request, $context);
-    
-    l("[Core::Front] request " . $this->request->__toString());
+    $destination = $router->route($request, $context);
     $context->setDestination($destination);
     
-    $pc = new Plugin();
-    $pc->configure();
+    l("[Core::Front] request " . $request->__toString());
     
-    $plugin = new Sabel_Plugin();
-    $plugin->setDestination($destination);
-    $context->setPlugin($plugin);
-    
-    foreach ($pc->plugins() as $p) {
-      $plugin->add($p);
-    }
-    
-    Sabel_Helper::load($this->request, $destination);
+    Sabel_Plugin::load($context);
+    Sabel_Helper::load($request, $destination);
     
     $injector = $context->getInjector();
     $executer = $injector->newInstance(self::EXECUTER_INTERFACE);
@@ -78,15 +58,32 @@ final class Sabel_Controller_Front
     $executer->setDestination($destination);
     
     try {
-      $this->controller = $executer->create();
+      $controller = $executer->create();
     } catch (Sabel_Exception_Runtime $e) {
       $destination->setModule(self::INDEX_PAGE);
       $destination->setController(self::INDEX_PAGE);
       $destination->setAction(self::NOT_FOUND_ACTION);
-      $this->controller = $executer->create();
+      $controller = $executer->create();
     }
     
-    $response = $executer->execute($this->request, $storage);
+    $response = $this->executeAction($executer, $request, $storage, $destination);
+    if (!$response->hasController()) {
+      $response->setController($controller);
+    }
+    
+    l("[Core::Front] end of request -------------------\n");
+    
+    return $response;
+  }
+  
+  /**
+   * execute an action and output header
+   *
+   * @return Sabel_Response
+   */
+  public function executeAction($executer, $request, $storage, $destination)
+  {
+    $response = $executer->execute($request, $storage);
     
     $response->outputHeader();
     
@@ -96,40 +93,18 @@ final class Sabel_Controller_Front
       } elseif ($response->isServerError()) {
         $destination->setAction(self::SERVER_ERROR_ACTION);
       }
-      $response = $executer->execute($this->request, $storage);
+      
+      $response = $executer->execute($request, $storage);
       if ($response->isNotFound()) {
         $destination->setController(self::INDEX_PAGE);
-        $this->controller = $executer->create();
-        $response = $executer->execute($this->request, $storage);
+        $controller = $executer->create();
+        $response->setController($controller);
+        $response = $executer->execute($request, $storage);
       }
     }
     
-    $this->response = $response;
-    $response->setController($this->controller);
-    $response->setDestination($this->destination);
-    
-    l("[Core::Front] end of request -------------------\n");
+    $response->setDestination($destination);
     
     return $response;
-  }
-  
-  public function getRequest()
-  {
-    return $this->request;
-  }
-  
-  public function getResponse()
-  {
-    return $this->response;
-  }
-  
-  public function getController()
-  {
-    return $this->controller;
-  }
-  
-  public function getDestination()
-  {
-    return $this->destination;
   }
 }

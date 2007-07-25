@@ -34,6 +34,22 @@ final class Sabel_Plugin
   
   private $events = array();
   
+  public static function load($context)
+  {
+    $pluginConfig = new Plugin();
+    $pluginConfig->configure();
+    
+    $plugin = new Sabel_Plugin();
+    $plugin->setDestination($context->getDestination());
+    $context->setPlugin($plugin);
+    
+    foreach ($pluginConfig->plugins() as $module) {
+      $plugin->add($module);
+    }
+    
+    return $plugin;
+  }
+  
   public function setController($controller)
   {
     $this->controller = $controller;
