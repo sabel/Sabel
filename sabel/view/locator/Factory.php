@@ -16,9 +16,14 @@ class Sabel_View_Locator_Factory
   const DEF_LAYOUT = "layout.tpl";
   const TPL_SUFFIX = ".tpl";
   
+  private $gettext = null;
+  
   public static function create()
   {
-    return new self();
+    $ins = new self();
+    $ins->gettext = Sabel_I18n_Gettext::getInstance();
+    
+    return $ins;
   }
   
   public function make($destination)
@@ -39,18 +44,40 @@ class Sabel_View_Locator_Factory
     
     list($module, $controller, $name) = $destination->toArray();
     
-    $tpldir = Sabel_Const::TEMPLATE_DIR;
-    $path = $this->getPath($module);
-    $spcPath = $path . self::VIEW_DIR;
+    $locations = array();
+    $path      = $this->getPath($module);
+    $spcPath   = $path . self::VIEW_DIR;
+    $tplFile   = $name . self::TPL_SUFFIX;
     
-    $locator->addLocation(RUN_BASE . self::APP_VIEW, $name);
-    $locator->addLocation($spcPath, $name.self::TPL_SUFFIX);
-    $locator->addLocation($spcPath, $controller . "/" . $name.self::TPL_SUFFIX);
-    $locator->addLocation($spcPath, $controller . "." . $name.self::TPL_SUFFIX);
-    $locator->addLocation($path, $name);
-    $locator->addLocation($path . $tpldir, $name);
-    $locator->addLocation($path, $name);
-    $locator->addLocation($path, $name.self::TPL_SUFFIX);
+    // app/views/{action}.tpl
+    $locations[] = array("path" => RUN_BASE . self::APP_VIEW, "file" => $tplFile);
+    
+    // app/{module}/views/{action}.tpl
+    $locations[] = array("path" => $spcPath, "file" => $tplFile);
+    
+    // app/{module}/views/{controller}/{action}.tpl
+    $mcaPath = $spcPath . $controller . DIR_DIVIDER;
+    $locations[] = array("path" => $mcaPath, "file" => $tplFile);
+    
+    // app/{module}/views/{controller}.{action}.tpl
+    $locations[] = array("path" => $spcPath, "file" => $controller . "." . $tplFile);
+    
+    // app/{module}/{action}.tpl
+    // $locations[] = array("path" => $path, "file" => $tplFile);
+    
+    $gettext = $this->gettext;
+    if ($gettext->isInitialized() && !$gettext->isGettext()) {
+      $locale = $gettext->getBrowser()->getLocale();
+      foreach ($locations as $l) {
+        $localePath = $l["path"] . $name . DIR_DIVIDER;
+        $locator->addLocation($localePath, $locale . self::TPL_SUFFIX);
+        $locator->addLocation($l["path"], $l["file"]);
+      }
+    } else {
+      foreach ($locations as $l) {
+        $locator->addLocation($l["path"], $l["file"]);
+      }
+    }
   }
   
   private final function getPath($module)

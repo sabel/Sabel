@@ -47,7 +47,7 @@ class Sabel_View_Locator_File implements Sabel_View_Locator
     $location = new StdClass();
     foreach ($this->locations as $l) {
       list($path, $name) = $l;
-      if (is_readable($path.$name)) {
+      if (is_readable($path . $name)) {
         $location->path = $path;
         $location->name = $name;
         $location->renderer = new Sabel_View_Renderer_Class();

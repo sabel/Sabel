@@ -55,7 +55,7 @@ abstract class Sabel_Sakle_Task
   
   private static function getHeader($type)
   {
-    $headers = (DIRECTORY_SEPARATOR === "\\") ? self::$winHeaders : self::$headers;
+    $headers = (IS_WIN) ? self::$winHeaders : self::$headers;
     return $headers[$type];
   }
 }

@@ -77,22 +77,6 @@ function request($uri, $destination = null, $request = null, $storage = null)
   return $result;
 }
 
-if (!function_exists("_")) {
-  function _($text)
-  {
-    Sabel::fileUsing(dirname(__FILE__ ). "/i18n/Gettext.php");
-    Sabel::fileUsing(dirname(__FILE__ ). "/i18n/php-gettext/gettext.inc");
-    return __($text);
-  }
-}
-
-if (!function_exists("_") && !extension_loaded('gettext')) {
-  function _($val)
-  {
-    return $val;
-  }
-}
-
 /**
  * array create utility
  * __(a 10, b 20, c 20) === array("a" => "10", "b" => "20", "c" => "30")
@@ -180,9 +164,9 @@ function add_include_path($path)
 function environment($string)
 {
   switch ($string) {
-    case 'production':  return PRODUCTION;
-    case 'test':        return TEST;
-    case 'development': return DEVELOPMENT;
+    case "production":  return PRODUCTION;
+    case "test":        return TEST;
+    case "development": return DEVELOPMENT;
   }
 }
 

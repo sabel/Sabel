@@ -28,10 +28,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-if (!defined("DIR_DIVIDER")) define("DIR_DIVIDER", "/");
-if (defined("DIR_DIVIDER")) define("D", DIR_DIVIDER);
+$IS_WIN = (strtoupper(substr(PHP_OS, 0, 3)) === "WIN");
+define("IS_WIN", $IS_WIN);
+
+if (!defined("DIR_DIVIDER")) {
+  define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
+}
+
+define("DS", DIRECTORY_SEPARATOR);
 define("DEFAULT_PHP_SUFFIX", ".php");
 define("CURRENT_PATH", dirname(__FILE__));
+
 set_include_path(CURRENT_PATH . ":" . get_include_path());
 
 // regist autoload static method
@@ -105,8 +112,6 @@ require ($SABEL_VIEW_DIR . "locator" . DIR_DIVIDER . "File.php");
 require ($SABEL_DIR . "storage" . DIR_DIVIDER . "Session.php");
 require ($SABEL_DIR . "Helper.php");
 
-require ($SABEL_DIR . "db" . DIR_DIVIDER . "Config.php");
-
 /**
  * Sabel
  *
@@ -174,7 +179,7 @@ final class Sabel
     $path = strtolower(dirname($prePath)) . DIR_DIVIDER 
             . basename($prePath) . DEFAULT_PHP_SUFFIX;
     
-    return str_replace(".".DIR_DIVIDER, "", $path);
+    return str_replace("." . DIR_DIVIDER, "", $path);
   }
   
   private static function isReadable($path)
