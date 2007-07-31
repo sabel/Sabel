@@ -160,7 +160,7 @@ final class Sabel
   {
     if (!isset(self::$fileUsing[$path])) {
       if (!is_readable($path)) {
-        // throw new Exception("{$path} file not found");
+        return;
       }
       
       if ($once) {

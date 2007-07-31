@@ -29,4 +29,11 @@ class Sabel_Plugin_Common extends Sabel_Plugin_Base
       $this->plugin(new Sabel_Plugin_Flow());
     }
   }
+  
+  public function onBeforeAction()
+  {
+    $module = Sabel_Context::getContext()->getDestination()->getModule();
+    Sabel::fileUsing(RUN_BASE . "/app/initialize.php");
+    Sabel::fileUsing(RUN_BASE . "/app/{$module}/initialize.php");
+  }
 }

@@ -24,6 +24,7 @@ add_include_path("/app");
 add_include_path("/app/models");
 add_include_path("/lib");
 add_include_path("/config");
+add_include_path("/app/helpers");
 
 require (RUN_BASE . "/config/Factory.php");
 require (RUN_BASE . "/config/connection.php");
