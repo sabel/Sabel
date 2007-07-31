@@ -17,7 +17,7 @@ class Sabel_DB_Validator
 
   protected
     $messages      = array(),
-    $localizedName = array(),
+    $displayNames  = array(),
     $datetimeRegex = array();
 
   protected
@@ -35,10 +35,7 @@ class Sabel_DB_Validator
 
     $this->messages      = $configs["messages"];
     $this->datetimeRegex = $configs["datetimeRegex"];
-
-    if (isset($configs["localizedName"][$mdlName])) {
-      $this->localizedName = $configs["localizedName"][$mdlName];
-    }
+    $this->displayNames  = Sabel_DB_Model_Localize::getColumnNames($mdlName);
   }
 
   public function getErrors()
@@ -92,7 +89,7 @@ class Sabel_DB_Validator
     $messages  = $this->messages;
     $model     = $this->model;
     $columns   = $this->getColumns();
-    $localized = $this->localizedName;
+    $localized = $this->displayNames;
 
     foreach ($columns as $name => $column) {
       if (in_array($name, $ignores)) continue;
@@ -293,15 +290,7 @@ class Sabel_DB_Validator
       }
 
       if ($invalid) {
-        // @todo i18n
-
-        if (count($unique) > 1) {
-          $name = implode(", ", $unique);
-        } else {
-          $name = $unique[0];
-        }
-
-        $errors[] = sprintf($this->messages["unique"], $name, implode(", ", $values));
+        $errors[] = sprintf($this->messages["unique"], implode(", ", $values));
       }
     }
   }

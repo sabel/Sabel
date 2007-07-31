@@ -17,15 +17,13 @@ class Sabel_DB_Validate_Config
                                      "maximum"  => "%s is too large.",
                                      "nullable" => "please enter a %s.",
                                      "type"     => "wrong %s format.",
-                                     "unique"   => "%s: '%s' is unavailable.");
+                                     "unique"   => "'%s' is unavailable.");
 
-  protected static $localizedName = array();
   protected static $customValidators = array();
 
   public static function getConfigs()
   {
     return array("messages"      => self::$messages,
-                 "localizedName" => self::$localizedName,
                  "datetimeRegex" => self::$datetimeRegex);
   }
 
@@ -79,16 +77,6 @@ class Sabel_DB_Validate_Config
   public static function getCustomValidators()
   {
     return self::$customValidators;
-  }
-
-  public static function setLocalizedName($mdlName, $names)
-  {
-    self::$localizedName[$mdlName] = $names;
-  }
-
-  public static function getLocalizedName()
-  {
-    return self::$localizedName;
   }
 
   public static function clearCustomValidators()

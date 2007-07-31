@@ -279,7 +279,7 @@ class Test_Validate extends SabelTestCase
                        "name"   => "名前",
                        "status" => "ステータス");
 
-    Sabel_DB_Validate_Config::setLocalizedName("TargetModel1", $localized);
+    Sabel_DB_Model_Localize::setColumnNames("TargetModel1", $localized);
 
     $model = new TargetModel1();
     $model->id = 100000000000;
