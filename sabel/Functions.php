@@ -158,7 +158,18 @@ function candidate($name, $uri, $options = null)
 
 function add_include_path($path)
 {
-  set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+  set_include_path(get_include_path() . ":" . RUN_BASE . "{$path}");
+}
+
+function add_include_paths($paths)
+{
+  $pathstr = "";
+  
+  foreach ($paths as $path) {
+    $pathstr .= ":" . RUN_BASE . "{$path}";
+  }
+  
+  set_include_path(get_include_path() . $pathstr);
 }
 
 function environment($string)
