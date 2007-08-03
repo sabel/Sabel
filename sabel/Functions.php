@@ -186,6 +186,16 @@ function now()
   return date("Y-m-d H:i:s");
 }
 
+function _hash($array)
+{
+  return new Sabel_Hash($array);
+}
+
+function is_hash($object)
+{
+  return ($object instanceof Sabel_Hash);
+}
+
 function _A($obj)
 {
   return new Sabel_Aspect_Proxy($obj);

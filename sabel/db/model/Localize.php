@@ -13,17 +13,17 @@ class Sabel_DB_Model_Localize
 {
   protected static $modelNames  = array();
   protected static $columnNames = array();
-
+  
   public static function setName($mdlName, $name)
   {
     self::$modelNames[$mdlName] = $name;
   }
-
+  
   public static function setColumnNames($mdlName, $names)
   {
     self::$columnNames[$mdlName] = $names;
   }
-
+  
   public static function getName($mdlName)
   {
     if (isset(self::$modelNames[$mdlName])) {
@@ -32,7 +32,7 @@ class Sabel_DB_Model_Localize
       return $mdlName;
     }
   }
-
+  
   public static function getColumnNames($mdlName)
   {
     if (isset(self::$columnNames[$mdlName])) {

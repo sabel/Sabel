@@ -1,6 +1,13 @@
 <?php
 
-class DateHelper
+/**
+ * Helpers_Date
+ *
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
+ */
+class Helpers_Date
 {
   const NORMAL  = 0;
   const ATOM    = 1;
@@ -100,7 +107,7 @@ class DateHelper
 
       $this->timestamp = mktime($h, $i, $s, $m, $d, $y);
     } else {
-      throw new Exception("DateHelper::__construct() invalid parameter.");
+      throw new Exception("Helpers_Date::__construct() invalid parameter.");
     }
   }
 

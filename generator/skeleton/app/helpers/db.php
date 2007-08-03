@@ -40,3 +40,8 @@ function trans_rollback()
 {
   Sabel_DB_Transaction::rollback();
 }
+
+function modelbox($mdlName, $size = 1)
+{
+  return new Helpers_Form_Select_Model($mdlName, $size);
+}
