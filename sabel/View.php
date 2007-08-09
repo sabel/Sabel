@@ -113,7 +113,7 @@ final class Sabel_View
   
   public static function renderDefault($response, $withLayout = true)
   {
-    $context = Sabel_Context::getContext();
+    // $context = Sabel_Context::getContext();
     
     $controller  = $response->getController();
     $destination = $response->getDestination();
@@ -135,6 +135,18 @@ final class Sabel_View
       $content = "";
     }
     
+    $assign = array("assign" => array("contentForLayout" => $content));
+    try {
+      $content = Sabel_View::render($destination, $assigns);
+      $d = clone $destination;
+      $d->setAction(Sabel_Const::DEFAULT_LAYOUT);
+      $html = Sabel_View::render($d, $assign);
+    } catch (Exception $e) {
+      $html = $content;
+    }
+    if ($html === null) $html = $content;
+    
+    /*
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
     } elseif (!$context->isLayoutDisabled() && $withLayout) {
@@ -151,6 +163,7 @@ final class Sabel_View
     } else {
       $html = $content;
     }
+    */
     
     return $html;
   }

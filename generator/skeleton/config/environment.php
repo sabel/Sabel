@@ -20,8 +20,13 @@ if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(0);
 }
 
-add_include_paths(array("/app", "/app/models", "/lib", "/config"));
+add_include_path("/app");
+add_include_path("/app/models");
+add_include_path("/lib");
+add_include_path("/config");
 add_include_path("/app/helpers");
 
-require (RUN_BASE . "/config/Factory.php");
-require (RUN_BASE . "/config/connection.php");
+function add_include_path($path)
+{
+  set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+}

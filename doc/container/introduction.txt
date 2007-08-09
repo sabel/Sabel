@@ -1,81 +1,101 @@
 コンテナー
 ==============================================================================
 
+
+
 概要
 ------------------------------------------------------------------------------
 SabelのDIコンテナは、コンポーネントの取得と、アスペクトの適用を設定することができます。
+
+
 
 コンポーネントの取得
 ------------------------------------------------------------------------------
 コンポーネントを取得するには、まずSabel_Container_Injectionを継承した設定クラスを作成します。
 継承した設定クラスは必ずconfigure()メソッドを実装する必要があります。
 
-<?php 
-    class Config extends Sabel_Container_Injection
-    {
-      public function configure()
-      {
-        $this->bind("ServiceInterface")->to("ServiceImplementation");
-      }
-    }
+<code>
+<?php
+
+class Config extends Sabel_Container_Injection
+{
+	public function configure()
+  {
+    $this->bind("ServiceInterface")->to("ServiceImplementation");
+  }
+}
+
 ?>
+</code>
 
 この例では、ServiceInterfaceというインターフェイスをServiceImplementationという実装クラスに
 設定しています。
 
 実際にコンポーネントを取得するには、下記のようにします。
 
+<code>
 <?php
-    $injection = Sabel_Container::injector(new Config());
-    $server = $injection->newInstance("Server");
-    
-    class Server
-    {
-      public function setService(Service $service)
-      {
-        // $serviceがコンテナから渡される
-      }
-    }
+
+$injection = Sabel_Container::injector(new Config());
+$server    = $injection->newInstance("Server");
+
+class Server
+{
+  public function setService(Service $service)
+  {
+    // $serviceがコンテナから渡される
+  }
+}
 ?>
+</code>
 
 Configクラスに単純なbindしか定義されていない場合、Sabelコンテナはset{インターフェイス名}という
 メソッドでオブジェクトを渡そうとします。
 セッターメソッドが定義されていない場合は、無視されます。
 
+<code>
 <?php
-    $this->bind("interface")->to("implement")->setter("setImplementation");
+$this->bind("interface")->to("implement")->setter("setImplementation");
 ?>
+</code>
 
- とした場合には、指定されたセッターメソッドで実装オブジェクトが渡されます。
+とした場合には、指定されたセッターメソッドで実装オブジェクトが渡されます。
 
 インターフェイスを指定してnewInstanceを行った場合、Configクラスでバインドされている実装クラスが生成されます。
 
+<code>
 <?php
-    $injector = Sabel_Container::injector(new Config());
-    $instance = $injector->newInstance("Interface");
+$injector = Sabel_Container::injector(new Config());
+$instance = $injector->newInstance("Interface");
 ?>
+</code>
 
 
 
 コンストラクタ
 ------------------------------------------------------------------------------
+
+<code>
 <?php 
-    class Config extends Sabel_Container_Injection
-    {
-      public function configure()
-      {
-        $this->construct("SomeClass")->with("test");
-      }
-    }
+class Config extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("SomeClass")->with("test");
+  }
+}
 ?>
+</code>
 
 上記の様に設定すると、SomeClassを生成したときに、SomeClassのコンストラクタにはtestという文字列が渡されます。
+
+
 
 アスペクト
 ------------------------------------------------------------------------------
 設定クラスでは、同様にアスペクトの設定を行うこともできます。
 
-$this->aspect("適用されるクラス")->apply("アスペクト")->method("適用メソッド");
+`$this->aspect("適用されるクラス")->apply("アスペクト")->method("適用メソッド");`
 
 この設定では、"適用されるクラス"をコンテナから取得した時に、"アスペクト"が適用されます。
 取得したインスタンスの"適用メソッド"を呼び出したときに、設定したアスペクトが適用されます。

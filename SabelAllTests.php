@@ -43,6 +43,7 @@ require_once('Sabel.php');
 require_once('Test/SabelTestCase.php');
 require_once('Test/SabelTestSuite.php');
 require_once('Test/Sabel.php');
+require_once('Test/Bus.php');
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
 require_once('Test/Container.php');
@@ -80,6 +81,7 @@ class SabelAllTests
     }
     
     // $suite->addTest(Test_Sabel::suite());
+    $suite->addTest(Test_Bus::suite());
     $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Validate::suite());
     // $suite->addTest(Test_Controller_Tests::suite());

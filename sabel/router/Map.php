@@ -2,7 +2,7 @@
 
 class Sabel_Router_Map implements Sabel_Router
 {
-  public function route($request, $context)
+  public function route($request)
   {
     $config = new Map();
     $config->configure();
@@ -38,12 +38,12 @@ class Sabel_Router_Map implements Sabel_Router
       $candidate->setModule("index");
       $candidate->setController("index");
       $candidate->setAction("index");
-      $context->setCandidate($candidate);
+      // $context->setCandidate($candidate);
       $request->setCandidate($candidate);
       $destination = $candidate->getDestination();
       return $destination;
     } else {
-      $context->setCandidate($candidate);
+      // $context->setCandidate($candidate);
       $request->setCandidate($candidate);
       return $candidate->getDestination();
     }

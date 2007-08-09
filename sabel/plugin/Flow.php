@@ -32,7 +32,7 @@ class Sabel_Plugin_Flow extends Sabel_Plugin_Base
       $dest = $this->destination->toArray();
       list($m, $c,) = array_map("ucfirst", $dest);
 
-      $flowClass = $m."_Flow_".$c;
+      $flowClass = $m . "_Flow_" . $c;
       if (class_exists($flowClass)) {
         $flow = new $flowClass();
         $flow->configure();

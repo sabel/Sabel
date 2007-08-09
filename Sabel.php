@@ -61,7 +61,7 @@ require ($SABEL_CACHE_DIR . "Apc.php");
 require ($SABEL_CACHE_DIR . "Null.php");
 
 require ($SABEL_DIR . "Const.php");
-require ($SABEL_DIR . "Context.php");
+// require ($SABEL_DIR . "Context.php");
 require ($SABEL_DIR . "Object.php");
 
 require ($SABEL_MAP_DIR . "Candidate.php");
@@ -89,8 +89,6 @@ require ($SABEL_CONTAINER_DIR ."ReflectionClass.php");
 require ($SABEL_CONTAINER_DIR ."Injection.php");
 
 require ($SABEL_CONTROLLER_DIR . "Front.php");
-require ($SABEL_CONTROLLER_DIR . "Executer.php");
-require ($SABEL_CONTROLLER_DIR . "executer" . DIR_DIVIDER . "Basic.php");
 
 require ($SABEL_LOG_DIR . "Factory.php");
 require ($SABEL_LOG_DIR . "Interface.php");
@@ -144,7 +142,7 @@ final class Sabel
       $path = self::convertPath($className);
       self::$cache->write($className, $path);
     }
-
+    
     if (($p = self::isReadable($path)) !== false) {
       if ($p === true) {
         require (CURRENT_PATH . DIR_DIVIDER . $path);
@@ -195,7 +193,7 @@ final class Sabel
         $includePath = get_include_path();
         $paths = explode(":", $includePath);
       }
-
+      
       foreach ($paths as $p) {
         $fpath = $p . DIR_DIVIDER . $path;
         if (is_readable($fpath)) {

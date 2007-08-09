@@ -2,5 +2,5 @@
 
 interface Sabel_Router
 {
-  public function route($request, $context);
+  public function route($request);
 }

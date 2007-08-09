@@ -156,22 +156,6 @@ function candidate($name, $uri, $options = null)
   Sabel_Map_Configurator::addCandidate($name, $uri, $options);
 }
 
-function add_include_path($path)
-{
-  set_include_path(get_include_path() . ":" . RUN_BASE . "{$path}");
-}
-
-function add_include_paths($paths)
-{
-  $pathstr = "";
-  
-  foreach ($paths as $path) {
-    $pathstr .= ":" . RUN_BASE . "{$path}";
-  }
-  
-  set_include_path(get_include_path() . $pathstr);
-}
-
 function environment($string)
 {
   switch ($string) {

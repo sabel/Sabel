@@ -4,8 +4,10 @@ ob_start();
 
 define("RUN_BASE", dirname(realpath(".")));
 
-require ("Sabel/Sabel.php");
 require (RUN_BASE . "/config/environment.php");
+require ("Sabel/Sabel.php");
+require (RUN_BASE . "/config/Factory.php");
+require (RUN_BASE . "/config/connection.php");
 
 if (!defined("ENVIRONMENT")) {
   echo "SABEL FATAL ERROR: must define ENVIRONMENT in config/environment.php";
@@ -19,8 +21,6 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
 }
 
 $aFrontController = new Sabel_Controller_Front();
-$response = $aFrontController->ignition();
-$response->outputHeaderIfRedirectedThenExit();
-echo Sabel_View::renderDefault($response);
+echo $aFrontController->ignition();
 
 ob_flush();

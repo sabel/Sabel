@@ -21,7 +21,7 @@ class Sabel_View_Locator_Factory
   public static function create()
   {
     $ins = new self();
-    $ins->gettext = Sabel_I18n_Gettext::getInstance();
+    // $ins->gettext = Sabel_I18n_Gettext::getInstance();
     
     return $ins;
   }
@@ -65,6 +65,7 @@ class Sabel_View_Locator_Factory
     // app/{module}/{action}.tpl
     // $locations[] = array("path" => $path, "file" => $tplFile);
     
+    /* @todo move to another
     $gettext = $this->gettext;
     if ($gettext->isInitialized() && !$gettext->isGettext()) {
       $locale = $gettext->getBrowser()->getLocale();
@@ -77,6 +78,11 @@ class Sabel_View_Locator_Factory
       foreach ($locations as $l) {
         $locator->addLocation($l["path"], $l["file"]);
       }
+    }
+    */
+    
+    foreach ($locations as $l) {
+      $locator->addLocation($l["path"], $l["file"]);
     }
   }
   

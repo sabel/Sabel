@@ -11,8 +11,18 @@
  */
 class Sabel_Container
 {
+  private static $components = array();
+  
   public static function injector($component)
   {
-    return new Sabel_Container_Injector($component);
+    $name = get_class($component);
+    if (isset(self::$components[$name])) {
+      return self::$components[$name];
+    }
+    
+    $injector = new Sabel_Container_Injector($component);
+    self::$components[$name] = $injector;
+    
+    return $injector;
   }
 }

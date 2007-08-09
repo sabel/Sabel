@@ -13,12 +13,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
 {
   const REDIRECTED = "SABEL_CONTROLLER_REDIRECTED";
   
-  public
-    $plugin = null;
-    
-  public
-    $context = null;
-  
   protected
     $result = null;
     
@@ -28,14 +22,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected
     $attributes  = array(),
     $assignments = array();
-  
+    
   protected
     $request  = null,
     $response = null,
     $storage  = null;
-    
-  protected
-    $enableStorage = true;
     
   protected $destination = null;
   
@@ -49,18 +40,13 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * default constructer of page controller
    *
    */
-  public final function __construct($context)
+  // public final function __construct($context)
+  
+  public final function __construct()
   {
     $reserved = get_class_methods("Sabel_Controller_Page");
     
-    $plugin = $context->getPlugin();
-    $plugin->setController($this);
-    $this->plugin  = $plugin;
-    $this->context = $context;
-    
-    // $this->plugin = Sabel_Plugin::create($this);
-    
-    $injector = $context->getInjector();
+    $injector = Sabel_Container::injector(new Factory());
     $this->response = $injector->newInstance("Sabel_Response");
   }
   
@@ -81,18 +67,16 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function setup($request, $destination, $storage = null)
   {
-    $this->request = $request;
-    $this->destination = $destination;
-    
-    if ($this->enableStorage) {
-      if ($storage === null) {
-        $this->storage = Sabel_Storage_Session::create();
-      } else {
-        $this->storage = $storage;
-      }
-      
-      $this->context->setStorage($this->storage);
+    if (!$request instanceof Sabel_Request_Object) {
+      throw new Sabel_Exception_Runtime("invalid request object");
     }
+    
+    if (!$destination instanceof Sabel_Destination) {
+      throw new Sabel_Exception_Runtime("invalid destination object");
+    }
+    
+    $this->request     = $request;
+    $this->destination = $destination;
   }
   
   /**
@@ -104,6 +88,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action)
   {
+    if (!$this->request instanceof Sabel_Request_Object) {
+      throw new Sabel_Exception_Runtime("invalid request object");
+    }
+    
     try {
       if ($this->request->isTypeOf("css")) {
         $this->response->setContentType("text/css");
@@ -116,41 +104,40 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         return $response->notfound();
       }
       
-      $proceed = $this->plugin->onBeforeAction();
+      // $proceed = $this->plugin->onBeforeAction();
       
       $isExistance = create_function
-                     (
-                       '$self, $action',
-                       'return is_callable(array($self, $action));'
-                     );
-      
-      if ($proceed) {
-        if (method_exists($this, $action)) {
-          $existance = $isExistance($this, $action);
-        } else {
-          $existance = false;
-        }
-        
-        $callable = (!in_array($action, $this->hidden));
-        
-        if ($existance && $callable) {
-          $response->success();
-          $response->result = $this->$action();
-          $this->plugin->onAfterAction();
-          return $response;
-        } elseif($this->isTemplateFound() && $callable) {
-          $this->plugin->onAfterAction();
-          return $response->success();
-        } else {
-          $this->plugin->onAfterAction();
-          return $response->notfound();
-        }
+                       ('$self, $action',
+                        'return is_callable(array($self, $action));');
+                     
+      if (method_exists($this, $action)) {
+        $existance = $isExistance($this, $action);
       } else {
-        $this->plugin->onAfterAction();
+        $existance = false;
+      }
+      
+      $callable = (!in_array($action, $this->hidden));
+      
+      if ($existance && $callable) {
+        $response->success();
+        $response->result = $this->$action();
+        // $this->plugin->onAfterAction();
+        return $response;
+      } elseif($this->isTemplateFound() && $callable) {
+        // $this->plugin->onAfterAction();
+        return $response->success();
+      } else {
+        if (ENVIRONMENT === DEVELOPMENT) {
+          $this->assign("module",     $this->destination->getModule());
+          $this->assign("controller", $this->destination->getController());
+          $this->assign("action",     $this->destination->getAction());
+        }
+        
+        // $this->plugin->onAfterAction();
         return $response->notfound();
       }
     } catch (Exception $exception) {
-      $this->plugin->onException($exception);
+      // $this->plugin->onException($exception);
       l($exception->getMessage());
       return $response->serverError();
     }
@@ -202,7 +189,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $to .= "?" . join("&", $buf);
     }
     
-    $this->plugin->onRedirect($to);
+    // $this->plugin->onRedirect($to);
     
     return self::REDIRECTED;
   }
@@ -305,16 +292,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return $this->assignments;
   }
   
-  public final function hasRendered()
-  {
-    return (strlen($this->rendered) !== 0);
-  }
-  
-  public final function getRendered()
-  {
-    return $this->rendered;
-  }
-  
   protected function __get($name)
   {
     if (array_key_exists($name, $this->attributes)) {
@@ -331,7 +308,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   protected function __call($method, $arguments)
   {
-    return $this->plugin->call($method, $arguments);
+    // return $this->plugin->call($method, $arguments);
   }
   
   /**
