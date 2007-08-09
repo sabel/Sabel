@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Sql_Constraint_Common
+ * Sabel_DB_Sql_Constraint_General
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Sql_Constraint_Common implements Sabel_DB_Sql_Constraint_Interface
+class Sabel_DB_Sql_Constraint_General implements Sabel_DB_Sql_Constraint_Interface
 {
   public function build($sql, $constraints)
   {

@@ -13,11 +13,10 @@
 interface Sabel_DB_Condition_Builder_Interface
 {
   public function initialize($driver);
-  public function build($condition);
 
+  public function build($condition);
   public function buildIsNull($key);
   public function buildIsNotNull($key);
-
   public function buildIn($condition);
   public function buildNormal($condition);
   public function buildBetween($condition);

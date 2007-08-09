@@ -11,17 +11,10 @@
  */
 class Sabel_DB_Sql_Constraint_Loader
 {
-  const COMMON = "Common";
-  const OCI    = "Oci";
-  const MSSQL  = "Mssql";
-  const IBASE  = "Ibase";
+  private static $instances = array();
 
-  protected static $instances = array();
-
-  public static function load($type = self::COMMON)
+  public static function load($className)
   {
-    $className = "Sabel_DB_Sql_Constraint_" . $type;
-
     if (isset(self::$instances[$className])) {
       $instance = self::$instances[$className];
     } else {
@@ -29,5 +22,10 @@ class Sabel_DB_Sql_Constraint_Loader
     }
 
     return $instance;
+  }
+
+  public static function clear()
+  {
+    self::$instances = array();
   }
 }

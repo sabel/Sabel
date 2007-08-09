@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Condition_Builder_Base implements Sabel_DB_Condition_Builder_Interface
+abstract class Sabel_DB_Condition_Builder_Base
 {
   protected $driver = null;
 

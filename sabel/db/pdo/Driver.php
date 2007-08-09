@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Pdo
+ * Sabel_DB_Pdo_Driver
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
+class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
   private $database   = "";
   private $bindValues = array();
@@ -17,6 +17,21 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
   public function __construct($database)
   {
     $this->database = $database;
+  }
+
+  public function loadSqlClass($model)
+  {
+    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_Pdo");
+  }
+
+  public function loadConditionBuilder()
+  {
+    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_Pdo");
+  }
+
+  public function loadConstraintSqlClass()
+  {
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
   }
 
   public function setBindValues($bindValues, $add = true)
@@ -30,29 +45,9 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     }
   }
 
-  public function getBinds()
-  {
-    return $this->bindValues;
-  }
-
   public function getAfterMethods()
   {
     return array(Sabel_DB_Command::INSERT => "getIncrementId");
-  }
-
-  public function getSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, Sabel_DB_Sql_Loader::PDO);
-  }
-
-  public function getConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, Sabel_DB_Condition_Builder_Loader::PDO);
-  }
-
-  public function getConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::COMMON);
   }
 
   public function begin($connectionName = null)
@@ -111,7 +106,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     $command->setIncrementId($id);
   }
 
-  public function execute($conn = null)
+  public function execute()
   {
     $sql = $this->sql;
 
@@ -120,9 +115,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
       var_dump($sql);
     }
 
-    if ($conn === null) {
-      $conn = $this->getConnection();
-    }
+    $conn = $this->getConnection();
 
     if (is_array($sql)) {
       $this->arrayExecute($conn, $sql);
@@ -135,17 +128,7 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
         $pdoStmt->closeCursor();
         return $this->result;
       } else {
-        if (is_object($pdoStmt)) {
-          $error = $pdoStmt->errorInfo();
-          $sql   = $pdoStmt->queryString;
-        } else {
-          $error = $conn->errorInfo();
-        }
-
-        $error = (isset($error[2])) ? $error[2] : print_r($error, true);
-        $param = (empty($param)) ? null : $param;
-
-        $this->error("pdo driver execute failed: $error", $sql, $param);
+        $this->executeError($conn, $pdoStmt, $param);
       }
     }
   }
@@ -161,17 +144,6 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
     return $pdoStmt;
   }
 
-  private function arrayExecute($conn, $sqls)
-  {
-    $bindValues = $this->bindValues;
-
-    foreach ($sqls as $sql) {
-      $pdoStmt = $this->createPdoStatement($conn, $sql);
-      $param   = $this->createBindParam(array_shift($bindValues));
-      $pdoStmt->execute($param);
-    }
-  }
-
   private function createBindParam($bindValues = null)
   {
     $bindParam = array();
@@ -183,6 +155,36 @@ class Sabel_DB_Driver_Pdo extends Sabel_DB_Driver_Base
 
     $this->bindValues = array();
     return $bindParam;
+  }
+
+  private function arrayExecute($conn, $sqls)
+  {
+    $bindValues = $this->bindValues;
+
+    foreach ($sqls as $sql) {
+      $pdoStmt = $this->createPdoStatement($conn, $sql);
+      $param   = $this->createBindParam(array_shift($bindValues));
+
+      if (!$pdoStmt->execute($param)) {
+        $this->executeError($conn, $pdoStmt, $param);
+        break;
+      }
+    }
+  }
+
+  private function executeError($conn, $pdoStmt, $bindParam)
+  {
+    if (is_object($pdoStmt)) {
+      $error = $pdoStmt->errorInfo();
+      $sql   = $pdoStmt->queryString;
+    } else {
+      $error = $conn->errorInfo();
+    }
+
+    $error = (isset($error[2])) ? $error[2] : print_r($error, true);
+    $param = (empty($param)) ? null : $param;
+
+    $this->error("pdo driver execute failed: $error", $sql, $param);
   }
 
   protected function error($error, $sql = null, $pdoBind = null)

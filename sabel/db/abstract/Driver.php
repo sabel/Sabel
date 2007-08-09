@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Base
+ * Sabel_DB_Abstract_Driver
  *
  * @abstract
  * @category   DB
@@ -10,14 +10,19 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Driver_Base
+abstract class Sabel_DB_Abstract_Driver
 {
-  protected $sql      = "";
-  protected $driverId = "";
-  protected $result   = array();
-
+  protected $sql            = "";
+  protected $driverId       = "";
+  protected $result         = array();
   protected $connection     = null;
   protected $connectionName = "";
+
+  abstract public function execute();
+  abstract public function escape($values);
+  abstract public function loadSqlClass($model);
+  abstract public function loadConditionBuilder();
+  abstract public function loadConstraintSqlClass();
 
   public function getDriverId()
   {
@@ -95,7 +100,7 @@ abstract class Sabel_DB_Driver_Base
 function escapeString($db, $values, $escMethod = null)
 {
   if ($values === null) {
-    $values = array("");
+    return "''";
   } elseif (!is_array($values)) {
     $values = (array)$values;
   }

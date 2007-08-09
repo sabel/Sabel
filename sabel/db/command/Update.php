@@ -17,7 +17,7 @@ class Sabel_DB_Command_Update extends Sabel_DB_Command_Base
   {
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
-    $query  = $driver->getSqlClass($model)->buildUpdateSql($driver);
+    $query  = $driver->loadSqlClass($model)->buildUpdateSql($driver);
 
     if ($args = $executer->getArguments()) {
       $conditions = $args[0];

@@ -17,7 +17,7 @@ class Sabel_DB_Command_Insert extends Sabel_DB_Command_Base
   {
     $model  = $executer->getModel();
     $driver = $executer->getDriver();
-    $query  = $driver->getSqlClass($model)->buildInsertSql($driver);
+    $query  = $driver->loadSqlClass($model)->buildInsertSql($driver);
 
     $executer->setResult($driver->setSql($query)->execute());
   }

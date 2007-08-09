@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Base
+ * Sabel_DB_Abstract_Schema
  *
  * @abstract
  * @category   DB
@@ -10,10 +10,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Schema_Base
+abstract class Sabel_DB_Abstract_Schema
 {
   protected $driver = null;
   protected $schemaName = "";
+
+  abstract public function getTableLists();
+  abstract public function getForeignKeys($tblName);
+  abstract public function getUniques($tblName);
 
   public function __construct($connectionName, $schemaName)
   {
@@ -35,7 +39,7 @@ abstract class Sabel_DB_Schema_Base
   {
     $columns = $this->createColumns($tblName);
     $schema  = new Sabel_DB_Schema_Table($tblName, $columns);
-    $schema->setForeignKeys($this->getForeignKey($tblName));
+    $schema->setForeignKeys($this->getForeignKeys($tblName));
     $schema->setUniques($this->getUniques($tblName));
 
     return $schema;
@@ -73,5 +77,10 @@ abstract class Sabel_DB_Schema_Base
       default:
         $co->default = $default;
     }
+  }
+
+  public function getTableEngine($tblName)
+  {
+    return null;
   }
 }

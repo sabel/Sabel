@@ -27,7 +27,7 @@ class Sabel_DB_Command_Join extends Sabel_DB_Command_Base
     }
 
     if ($constraints = $model->getConstraints()) {
-      $joinQuery = $driver->getConstraintSqlClass()->build($joinQuery, $constraints);
+      $joinQuery = $driver->loadConstraintSqlClass()->build($joinQuery, $constraints);
     }
 
     $result = $driver->setSql($joinQuery)->execute();

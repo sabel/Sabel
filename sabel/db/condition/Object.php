@@ -30,12 +30,17 @@ class Sabel_DB_Condition_Object
     }
 
     if ($val === self::ISNULL || $val === self::ISNOTNULL) {
-      $this->values = array("key" => $key, "type"  => $val);
+      $this->values = array("key" => $key, "type" => $val);
     } elseif($type === self::NOT) {
-      $this->values = array("key" => $key, "value" => $val, "type" => self::NORMAL, "not" => true);
+      $this->values = array("key"   => $key,
+                            "value" => $val,
+                            "type"  => self::NORMAL,
+                            "not"   => true);
     } else {
-      $not = ($not === self::NOT);
-      $this->values = array("key" => $key, "value" => $val, "type" => $type, "not" => $not);
+      $this->values = array("key"   => $key,
+                            "value" => $val,
+                            "type"  => $type,
+                            "not"   => ($not === self::NOT));
     }
   }
 

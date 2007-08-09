@@ -5,7 +5,7 @@ if (!defined("MQ_SYBASE")) {
 }
 
 /**
- * Sabel_DB_Driver_Ibase
+ * Sabel_DB_Ibase_Driver
  *
  * @category   DB
  * @package    org.sabel.db
@@ -13,11 +13,26 @@ if (!defined("MQ_SYBASE")) {
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
+class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 {
   protected $driverId      = "ibase";
   protected $execFunction  = "ibase_query";
   protected $closeFunction = "ibase_close";
+
+  public function loadSqlClass($model)
+  {
+    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
+  }
+
+  public function loadConditionBuilder()
+  {
+    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
+  }
+
+  public function loadConstraintSqlClass()
+  {
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_Ibase");
+  }
 
   public function getConnection()
   {
@@ -41,11 +56,6 @@ class Sabel_DB_Driver_Ibase extends Sabel_DB_Driver_Common
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_Ibase::getInstance();
-  }
-
-  public function getConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::IBASE);
   }
 
   public function begin($connectionName = null)
@@ -118,4 +128,3 @@ function ibase_escape_string($val)
     return str_replace("'", "''", $val);
   }
 }
-

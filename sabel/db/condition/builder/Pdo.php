@@ -9,7 +9,9 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Builder_Pdo extends Sabel_DB_Condition_Builder_Base
+class Sabel_DB_Condition_Builder_Pdo
+  extends    Sabel_DB_Condition_Builder_Base
+  implements Sabel_DB_Condition_Builder_Interface
 {
   protected $count = 1;
 

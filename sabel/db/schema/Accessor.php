@@ -9,17 +9,17 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Accessor implements Sabel_DB_Schema_Interface
+class Sabel_DB_Schema_Accessor
 {
   private $connectionName = "";
   private $schemaClass = null;
 
   public function __construct($connectionName = "default")
   {
-    $dbName = Sabel_DB_Config::getDB($connectionName);
-    $className = "Sabel_DB_Schema_" . ucfirst($dbName);
-
+    $dbName     = Sabel_DB_Config::getDB($connectionName);
+    $className  = "Sabel_DB_" . ucfirst($dbName) . "_Schema";
     $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
+
     $this->schemaClass = new $className($connectionName, $schemaName);
     $this->connectionName = $connectionName;
   }

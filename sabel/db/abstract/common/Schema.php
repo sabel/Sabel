@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Common
+ * Sabel_DB_Abstract_Common_Schema
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Schema_Common extends Sabel_DB_Schema_Base
+abstract class Sabel_DB_Abstract_Common_Schema extends Sabel_DB_Abstract_Schema
 {
   public function getTableLists()
   {

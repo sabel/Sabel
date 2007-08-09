@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Oci
+ * Sabel_DB_Oci_Driver
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
+class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
 {
   protected
     $driverId      = "oci",
@@ -18,6 +18,21 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
   private
     $limit  = null,
     $offset = null;
+
+  public function loadSqlClass($model)
+  {
+    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
+  }
+
+  public function loadConditionBuilder()
+  {
+    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
+  }
+
+  public function loadConstraintSqlClass()
+  {
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_Oci");
+  }
 
   public function getConnection()
   {
@@ -46,11 +61,13 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
     if (isset($c["offset"])) $this->offset = $c["offset"];
   }
 
+  // @todo
   public function setLimit($limit)
   {
     $this->limit = $limit;
   }
 
+  // @todo
   public function setOffset($offset)
   {
     $this->offset = $offset;
@@ -73,21 +90,6 @@ class Sabel_DB_Driver_Oci extends Sabel_DB_Driver_Base
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_Oci::getInstance();
-  }
-
-  public function getSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, Sabel_DB_Sql_Loader::COMMON);
-  }
-
-  public function getConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, Sabel_DB_Condition_Builder_Loader::COMMON);
-  }
-
-  public function getConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::OCI);
   }
 
   public function escape($values)

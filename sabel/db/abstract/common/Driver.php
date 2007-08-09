@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Sabel_DB_Driver_Common
+ * Sabel_DB_Abstract_Commoin_Driver
  *
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
+abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
 {
   public function execute()
   {
@@ -43,21 +44,6 @@ class Sabel_DB_Driver_Common extends Sabel_DB_Driver_Base
           return $func($conn, $sql);
         }
     }
-  }
-
-  public function getSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, Sabel_DB_Sql_Loader::COMMON);
-  }
-
-  public function getConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, Sabel_DB_Condition_Builder_Loader::COMMON);
-  }
-
-  public function getConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load(Sabel_DB_Sql_Constraint_Loader::COMMON);
   }
 
   public function begin($connectionName = null)

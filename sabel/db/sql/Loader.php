@@ -11,15 +11,10 @@
  */
 class Sabel_DB_Sql_Loader
 {
-  const COMMON = "Common";
-  const PDO    = "Pdo";
-
   protected static $instances = array();
 
-  public static function load($model, $type = self::COMMON)
+  public static function load($model, $className)
   {
-    $className = "Sabel_DB_Sql_" . $type;
-
     if (isset(self::$instances[$className])) {
       $instance = self::$instances[$className];
     } else {

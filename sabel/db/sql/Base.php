@@ -35,7 +35,7 @@ abstract class Sabel_DB_Sql_Base
     if (is_object($cmanager)) $sql .= $cmanager->build($driver);
 
     if ($constraints = $model->getConstraints()) {
-      return $driver->getConstraintSqlClass()->build($sql, $constraints);
+      return $driver->loadConstraintSqlClass()->build($sql, $constraints);
     } else {
       return $sql;
     }
@@ -50,7 +50,4 @@ abstract class Sabel_DB_Sql_Base
       return true;
     }
   }
-
-  abstract public function buildInsertSql($driver);
-  abstract public function buildUpdateSql($driver);
 }

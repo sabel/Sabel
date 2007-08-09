@@ -76,7 +76,7 @@ class Sabel_DB_Condition_Manager
 
   public function build($driver)
   {
-    $builder = $driver->getConditionBuilder();
+    $builder = $driver->loadConditionBuilder();
 
     $set   = false;
     $query = array();

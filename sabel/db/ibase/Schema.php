@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Ibase
+ * Sabel_DB_Ibase_Schema
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
+class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
 {
   protected
     $types = array("7"   => "smallint",
@@ -51,7 +51,7 @@ class Sabel_DB_Schema_Ibase extends Sabel_DB_Schema_Base
     return $tables;
   }
 
-  public function getForeignKey($tblName)
+  public function getForeignKeys($tblName)
   {
     $tn  = strtoupper($tblName);
 
