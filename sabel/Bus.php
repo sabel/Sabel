@@ -17,13 +17,8 @@ class Sabel_Bus
   private $processors = array();
   private $listeners  = array();
   
-  public function __construct($data = null)
+  public function __construct()
   {
-    if ($data === null) {
-      $this->data = new Sabel_Bus_Data();
-    } else {
-      $this->data = $data;
-    }
   }
   
   public function init($data)
