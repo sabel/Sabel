@@ -113,7 +113,11 @@ class Sabel_Bus
       $processor->execute($this);
     }
     
-    return $this->get("result");
+    if ($this->has("result")) {
+      return $this->get("result");
+    } else {
+      return null;
+    }
   }
   
   public function addBus($name, $bus)
@@ -128,6 +132,15 @@ class Sabel_Bus
   
   public function get($key)
   {
-    return $this->holder[$key];
+    if ($this->has($key)) {
+      return $this->holder[$key];
+    } else {
+      return null;
+    }
+  }
+  
+  public function has($key)
+  {
+    return (array_key_exists($key, $this->holder));
   }
 }

@@ -12,102 +12,57 @@ class Test_Bus extends SabelTestCase
     return self::createSuite("Test_Bus");
   }
   
-  public function testBusStandard()
+  public function testBusProcessor()
   {
     $bus = new Sabel_Bus();
-    $bus->addProcessor("request", new RequestProcessor());
-    $bus->addProcessor("choicer", new MapChoicer());
-    $bus->addProcessor("ae", new ActionExecuter());
-    $bus->process();
+    
+    $bus->addProcessor("test", new Test_Bus_Processor());
+    $bus->run();
+    
+    $this->assertEquals("test", $bus->get("test"));
   }
   
-  public function testBusComposit()
-  {
-    $mainBus = new Sabel_Bus();
-    
-    $input   = new Sabel_Bus();
-    $input->addProcessor("request", new RequestProcessor());
-    $input->addProcessor("choicer", new MapChoicer());
-    
-    $process = new Sabel_Bus();
-    $process->addProcessor("ae", new ActionExecuter());
-    
-    $output  = new Sabel_Bus();
-    
-    $mainBus->addBus("input",   $input);
-    $mainBus->addBus("process", $process);
-    $mainBus->addBus("output",  $output);
-    
-    $mainBus->process();
-  }
-  
-  public function testBusInterrupt()
+  public function testBusInit()
   {
     $bus = new Sabel_Bus();
-    $bus->addProcessor("some", new Wrapper(new RequestProcessor()));
-  }
-}
-
-class Wrapper implements Sabel_Bus_Processor
-{
-  private $wrap = null;
-  
-  public function __construct($processor)
-  {
-    $this->wrap = $processor;
+    $bus->init(array("null"   => null,
+                     "int"    => 10,
+                     "string" => "test",
+                     "bool"   => false));
+    
+    $this->assertEquals(null,   $bus->get("null"));
+    $this->assertEquals(10,     $bus->get("int"));
+    $this->assertEquals("test", $bus->get("string"));
+    $this->assertEquals(false,  $bus->get("bool"));
   }
   
-  public function execute($bus)
+  public function testAddAndGetBusGroup()
   {
-    return $this->wrap->execute($bus);
-  }
-}
-
-class RequestProcessor implements Sabel_Bus_Processor
-{
-  public function execute($bus)
-  {
-    $request = new Sabel_Request_Object();
-    $request->to("index/index");
-    $bus->set("request", $request);
-  }
-}
-
-class MapChoicer implements Sabel_Bus_Processor
-{
-  public function execute($bus)
-  {
-    $sc = new Sabel_Context();
-    $router = new Sabel_Router_Map();
+    $bus = new Sabel_Bus();
     
-    $request = $bus->get("request");
-    $destination = $router->route($request, $sc);
+    $bus->addGroup("request",  new Test_Bus_Processor());
+    $bus->addGroup("executer", new Test_Bus_Processor());
     
-    $bus->set("router", $router);
-    $bus->set("destination", $destination);
-    $bus->set("context", $sc);
+    $this->assertTrue(is_object($bus->getGroup("request")));
+    $this->assertTrue(is_object($bus->getGroup("executer")));
+  }
+  
+  public function testBusGroupInsertPrevious()
+  {
+    $group = new Sabel_Bus_ProcessorGroup();
+    $this->assertTrue(is_object($group));
+  }
+  
+  public function testBusGroupInsertNext()
+  {
+    
   }
 }
 
-class ActionExecuter implements Sabel_Bus_Processor
+class Test_Bus_Processor implements Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $array = $bus->get("request")->toArray();
-    echo "execute action\n";
+    $bus->set("test", "test");
   }
 }
-
-
-class Map extends Sabel_Map_Config
-{
-  public function configure()
-  {
-    $this->route("default")
-           ->uri(":controller/:action")
-           ->module("index")
-           ->defaults(array(":controller" => "index",
-                            ":action"     => "index"));
-  }
-}
-
