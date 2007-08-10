@@ -1,20 +1,24 @@
 <?php
 
 /**
- * Sabel_DB_Sql_Interface
+ * Sabel_DB_Abstract_Statement
  *
- * @interface
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_DB_Sql_Interface
+abstract class Sabel_DB_Abstract_Statement
 {
-  public function setExecuter($executer);
+  protected $sql = "";
 
-  public function buildSelectSql($driver);
-  public function buildInsertSql($driver);
-  public function buildUpdateSql($driver);
+  abstract public function create($executer);
+  abstract public function getStatementType();
+
+  public function getSql()
+  {
+    return $this->sql;
+  }
 }

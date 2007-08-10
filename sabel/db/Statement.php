@@ -1,20 +1,23 @@
 <?php
 
 /**
- * Sabel_DB_Sql_Interface
+ * Sabel_DB_Statement
  *
- * @interface
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_DB_Sql_Interface
+class Sabel_DB_Statement
 {
-  public function setExecuter($executer);
+  const SELECT = 0x01;
+  const INSERT = 0x02;
+  const UPDATE = 0x04;
+  const DELETE = 0x08;
+  const QUERY  = 0x10;
+  const COUNT  = 0x20;
+  const JOIN   = 0x40;
 
-  public function buildSelectSql($driver);
-  public function buildInsertSql($driver);
-  public function buildUpdateSql($driver);
+  const ARRAY_INSERT = 0x80;
 }

@@ -12,18 +12,21 @@
  */
 abstract class Sabel_DB_Abstract_Sql
 {
-  protected $model = null;
+  protected $executer = null;
+  protected $model    = null;
 
-  public function setModel($model)
+  public function setExecuter($executer)
   {
-    $this->model = $model;
+    $this->executer = $executer;
+    $this->model    = $executer->getModel();
   }
 
   public function buildSelectSql($driver)
   {
     $model      = $this->model;
+    $executer   = $this->executer;
     $tblName    = $model->getTableName();
-    $projection = $model->getProjection();
+    $projection = $executer->getProjection();
 
     if ($projection === "*") {
       $projection = implode(", ", $model->getColumnNames());
@@ -31,10 +34,10 @@ abstract class Sabel_DB_Abstract_Sql
 
     $sql = "SELECT $projection FROM $tblName";
 
-    $cmanager = $model->getConditionManager();
+    $cmanager = $executer->getConditionManager();
     if (is_object($cmanager)) $sql .= $cmanager->build($driver);
 
-    if ($constraints = $model->getConstraints()) {
+    if ($constraints = $executer->getConstraints()) {
       return $driver->loadConstraintSqlClass()->build($sql, $constraints);
     } else {
       return $sql;

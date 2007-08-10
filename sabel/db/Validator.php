@@ -261,7 +261,7 @@ class Sabel_DB_Validator
 
   protected function unique($model, $uniques, &$errors)
   {
-    $copy = MODEL($model->getModelName());
+    $executer = new Sabel_DB_Model_Executer($model->getModelName());
     $pkey = $model->getPrimaryKey();
 
     if (is_string($pkey)) $pkey = (array)$pkey;
@@ -270,11 +270,11 @@ class Sabel_DB_Validator
       $values = array();
       foreach ($unique as $uni) {
         $val = $model->$uni;
-        $copy->setCondition($uni, $val);
+        $executer->setCondition($uni, $val);
         $values[] = $val;
       }
 
-      $result = $copy->selectOne();
+      $result = $executer->selectOne()->execute();
       if (!$result->isSelected()) continue;
 
       if ($model->isSelected()) {

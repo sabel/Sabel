@@ -11,8 +11,7 @@
  */
 class Sabel_DB_Condition_Manager
 {
-  protected $conditions       = array();
-  protected $uniqueConditions = array();
+  protected $conditions = array();
 
   public function add($condition)
   {
@@ -44,21 +43,6 @@ class Sabel_DB_Condition_Manager
   public function isObject($condition)
   {
     return ($condition instanceof Sabel_DB_Condition_Object);
-  }
-
-  public function addUnique($condition)
-  {
-    if ($this->isObject($condition)) {
-      $this->uniqueConditions[$condition->key] = $condition;
-      return $this->uniqueConditions;
-    } else {
-      return false;
-    }
-  }
-
-  public function getUniqueConditions()
-  {
-    return $this->uniqueConditions;
   }
 
   public function isEmpty()

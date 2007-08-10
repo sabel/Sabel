@@ -40,7 +40,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function getAfterMethods()
   {
-    return array(Sabel_DB_Command::INSERT => "getIncrementId");
+    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
   }
 
   public function escape($values)

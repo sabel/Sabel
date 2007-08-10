@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Command_Query
+ * Sabel_DB_Sql_Statement_Query
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,11 +9,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Command_Query extends Sabel_DB_Command_Base
+class Sabel_DB_Sql_Statement_Query extends Sabel_DB_Abstract_Statement
 {
-  protected $command = Sabel_DB_Command::QUERY;
+  public function getStatementType()
+  {
+    return Sabel_DB_Statement::QUERY;
+  }
 
-  protected function run($executer)
+  public function create($executer, $inputs)
   {
     $args = $executer->getArguments();
     $driver = $executer->getDriver();

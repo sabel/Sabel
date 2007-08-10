@@ -13,7 +13,7 @@ class Sabel_DB_Sql_Loader
 {
   protected static $instances = array();
 
-  public static function load($model, $className)
+  public static function load($executer, $className)
   {
     if (isset(self::$instances[$className])) {
       $instance = self::$instances[$className];
@@ -25,7 +25,8 @@ class Sabel_DB_Sql_Loader
       }
     }
 
-    $instance->setModel($model);
+    $instance->setExecuter($executer);
+
     return $instance;
   }
 
