@@ -19,6 +19,10 @@ class Sabel_DB_Sql_Loader
       $instance = self::$instances[$className];
     } else {
       $instance = self::$instances[$className] = new $className();
+      if (!$instance instanceof Sabel_DB_Sql_Interface) {
+        $name = get_class($instance);
+        throw new Exception("'{$name}' should implement Sabel_DB_Sql_Interface.");
+      }
     }
 
     $instance->setModel($model);

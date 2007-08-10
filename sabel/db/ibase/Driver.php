@@ -31,7 +31,12 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function loadConstraintSqlClass()
   {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_Ibase");
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Ibase_SqlConstraint");
+  }
+
+  public function loadTransaction()
+  {
+    return Sabel_DB_Ibase_Transaction::getInstance();
   }
 
   public function getConnection()
@@ -51,11 +56,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
   public function getBeforeMethods()
   {
     return array(Sabel_DB_Command::INSERT => "setIncrementId");
-  }
-
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_Ibase::getInstance();
   }
 
   public function begin($connectionName = null)

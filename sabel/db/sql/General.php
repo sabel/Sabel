@@ -10,7 +10,7 @@
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Sql_General
-  extends    Sabel_DB_Sql_Base
+  extends    Sabel_DB_Abstract_Sql
   implements Sabel_DB_Sql_Interface
 {
   public function buildInsertSql($driver)

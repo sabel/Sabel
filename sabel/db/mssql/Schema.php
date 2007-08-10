@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Mssql
+ * Sabel_DB_Mssql_Schema
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Mssql extends Sabel_DB_Schema_Common
+class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Common_Schema
 {
   protected
     $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_catalog = '%s'",

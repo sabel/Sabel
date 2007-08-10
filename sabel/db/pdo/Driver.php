@@ -21,17 +21,22 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function loadSqlClass($model)
   {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_Pdo");
+    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Pdo_Sql");
   }
 
   public function loadConditionBuilder()
   {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_Pdo");
+    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Pdo_ConditionBuilder");
   }
 
   public function loadConstraintSqlClass()
   {
     return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
+  }
+
+  public function loadTransaction()
+  {
+    return Sabel_DB_Transaction_General::getInstance();
   }
 
   public function setBindValues($bindValues, $add = true)

@@ -33,6 +33,11 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
     return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
   }
 
+  public function loadTransaction()
+  {
+    return Sabel_DB_Transaction_General::getInstance();
+  }
+
   public function getAfterMethods()
   {
     return array(Sabel_DB_Command::INSERT => "getIncrementId");

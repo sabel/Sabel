@@ -22,8 +22,18 @@ class Sabel_DB_Command_Executer
 
   public function __construct($model)
   {
+    if (!$model instanceof Sabel_DB_Model) {
+      $name = get_class($model);
+      throw new Exception("'{$name}' should be instance of Sabel_DB_Model.");
+    }
+
     $this->model  = $model;
     $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
+
+    if (!$this->driver instanceof Sabel_DB_Abstract_Driver) {
+      $name = get_class($model);
+      throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_Driver.");
+    }
   }
 
   public function getModel()

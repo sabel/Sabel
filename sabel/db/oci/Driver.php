@@ -31,7 +31,12 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
 
   public function loadConstraintSqlClass()
   {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_Oci");
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Oci_SqlConstraint");
+  }
+
+  public function loadTransaction()
+  {
+    return Sabel_DB_Oci_Transaction::getInstance();
   }
 
   public function getConnection()
@@ -85,11 +90,6 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
       $connection = Sabel_DB_Connection::get($connectionName);
       $trans->start($connection, $connectionName);
     }
-  }
-
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_Oci::getInstance();
   }
 
   public function escape($values)

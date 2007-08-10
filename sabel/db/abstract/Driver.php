@@ -23,6 +23,7 @@ abstract class Sabel_DB_Abstract_Driver
   abstract public function loadSqlClass($model);
   abstract public function loadConditionBuilder();
   abstract public function loadConstraintSqlClass();
+  abstract public function loadTransaction();
 
   public function getDriverId()
   {
@@ -75,11 +76,6 @@ abstract class Sabel_DB_Abstract_Driver
     } else {
       return $this->connection;
     }
-  }
-
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_Common::getInstance();
   }
 
   public function close($connection)

@@ -41,7 +41,7 @@ class Sabel_DB_Transaction
 
   private static function finish($method)
   {
-    $instances = Sabel_DB_Transaction_Base::getInstances();
+    $instances = Sabel_DB_Abstract_Transaction::getInstances();
     if (!$instances) return;
 
     foreach ($instances as $instance) $instance->$method();

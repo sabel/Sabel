@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Oci
+ * Sabel_DB_Oci_Schema
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Oci extends Sabel_DB_Schema_Base
+class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
 {
   protected
     $tableList    = "SELECT table_name FROM all_tables WHERE owner = '%s'",

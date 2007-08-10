@@ -19,6 +19,10 @@ class Sabel_DB_Sql_Constraint_Loader
       $instance = self::$instances[$className];
     } else {
       $instance = self::$instances[$className] = new $className();
+      if (!$instance instanceof Sabel_DB_Sql_Constraint_Interface) {
+        $name = get_class($instance);
+        throw new Exception("'{$name}' should implement Sabel_DB_Sql_Constraint_Interface.");
+      }
     }
 
     return $instance;

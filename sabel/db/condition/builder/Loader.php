@@ -19,6 +19,11 @@ class Sabel_DB_Condition_Builder_Loader
       $instance = self::$instances[$className];
     } else {
       $instance = self::$instances[$className] = new $className();
+
+      if (!$instance instanceof Sabel_DB_Abstract_ConditionBuilder) {
+        $name = get_class($instance);
+        throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_ConditionBuilder.");
+      }
     }
 
     $instance->initialize($driver);

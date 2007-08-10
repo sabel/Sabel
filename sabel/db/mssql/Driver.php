@@ -30,7 +30,12 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
 
   public function loadConstraintSqlClass()
   {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_Mssql");
+    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Mssql_SqlConstraint");
+  }
+
+  public function loadTransaction()
+  {
+    return Sabel_DB_Transaction_General::getInstance();
   }
 
   public function getAfterMethods()
