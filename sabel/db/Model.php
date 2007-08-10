@@ -31,7 +31,6 @@ abstract class Sabel_DB_Model
   public function __construct($arg1 = null, $arg2 = null)
   {
     $this->initialize();
-    if (!empty($arg1)) $this->initializeSelect($arg1, $arg2);
   }
 
   protected function initialize($mdlName = null)
@@ -50,14 +49,6 @@ abstract class Sabel_DB_Model
     if (Sabel_DB_Transaction::isActive()) {
       Sabel_DB_Transaction::begin($this->connectionName);
     }
-  }
-
-  protected function initializeSelect($arg1, $arg2 = null)
-  {
-    // @todo
-    echo "@todo initializeSelect"; exit;
-    //$this->setCondition($arg1, $arg2);
-    //$this->createModel($this);
   }
 
   public function setConnectionName($connectionName)
@@ -177,7 +168,7 @@ abstract class Sabel_DB_Model
   public function setProperties($row)
   {
     $pkey = $this->schema->getPrimaryKey();
-    if (!is_array($pkey)) $pkey = (array)$pkey;
+    if (is_string($pkey)) $pkey = (array)$pkey;
 
     $selected = true;
 

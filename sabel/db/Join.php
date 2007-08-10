@@ -13,70 +13,57 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 {
   const CANNOT_JOIN = "CANNOT_JOIN";
 
-  protected $tableLists = array();
+  protected $executer = null;
+
+  public function __construct($executer)
+  {
+    $model = $executer->getModel();
+
+    $this->executer      = $executer;
+    $this->sourceModel   = $executer->getModel();
+    $this->tblName       = $this->sourceModel->getTableName();
+    $this->resultBuilder = Sabel_DB_Join_Result::getInstance();
+  }
 
   public function buildParents()
   {
-    $parents = $this->sourceModel->getParents();
-    $result  = $this->addParentModel($parents);
+    $parents = $this->executer->getParents();
+    $connectionName = $this->sourceModel->getConnectionName();
+    $accessor = new Sabel_DB_Schema_Accessor($connectionName);
+    $tableLists = $accessor->getTableLists();
 
-    if ($result === self::CANNOT_JOIN) $this->clear();
-    return $result;
-  }
-
-  protected function addParentModel($parents, $join = null)
-  {
-    if (empty($this->tableLists)) {
-      $tableLists = $this->getTableLists();
-    } else {
-      $tableLists = $this->tableLists;
-    }
+    $result = true;
 
     foreach ($parents as $parent) {
       $model   = MODEL($parent);
       $tblName = $model->getTableName();
-      $parents = $model->getParents();
 
       if (in_array($tblName, $tableLists)) {
-        if ($join === null && empty($parents)) {
-          $this->add($model);
-        } elseif ($join !== null) {
-          $join->add($model);
-        }
+        $this->add($model);
       } else {
-        return self::CANNOT_JOIN;
-      }
-
-      if ($parents = $model->getParents()) {
-        $more = new Sabel_DB_Join_Relation($model);
-        $res  = $this->addParentModel($parents, $more);
-        if ($res === self::CANNOT_JOIN) return self::CANNOT_JOIN;
-        $this->add($more);
+        $result = self::CANNOT_JOIN;
+        break;
       }
     }
 
-    return true;
-  }
+    if ($result === self::CANNOT_JOIN) $this->clear();
 
-  protected function getTableLists()
-  {
-    $connectionName = $this->sourceModel->getConnectionName();
-    $accessor = new Sabel_DB_Schema_Accessor($connectionName);
-
-    return $this->tableLists = $accessor->getTableLists();
+    return $result;
   }
 
   public function getCount($joinType = "INNER")
   {
-    $query = array();
     $model = $this->sourceModel;
+    $query = array("SELECT COUNT(*) AS cnt FROM " . $model->getTableName());
 
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $query = implode("", $query);
-    return $model->getCommand()->count($query)->getResult();
+    $stmt = $this->executer->createSelectStatement(implode("", $query));
+    $rows = $this->executer->query($stmt->getSql(), null, true)->execute();
+
+    return $rows[0]["cnt"];
   }
 
   public function join($joinType = "INNER")
@@ -106,8 +93,8 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $query = implode("", $query);
-    $rows  = $model->getCommand()->join($query)->getResult();
+    $stmt = $this->executer->createSelectStatement(implode("", $query));
+    $rows = $this->executer->query($stmt->getSql(), null, true)->execute();
 
     if (!$rows) {
       $results = false;

@@ -11,6 +11,13 @@
  */
 class Sabel_DB_Join_Relation extends Sabel_DB_Join_Base
 {
+  public function __construct($model)
+  {
+    $this->sourceModel   = $model;
+    $this->tblName       = $model->getTableName();
+    $this->resultBuilder = Sabel_DB_Join_Result::getInstance();
+  }
+
   public function getSourceModel()
   {
     return $this->sourceModel;

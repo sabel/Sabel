@@ -17,13 +17,6 @@ abstract class Sabel_DB_Join_Base
   protected $sourceModel   = null;
   protected $resultBuilder = null;
 
-  public function __construct($model)
-  {
-    $this->sourceModel   = $model;
-    $this->tblName       = $model->getTableName();
-    $this->resultBuilder = Sabel_DB_Join_Result::getInstance();
-  }
-
   public function add($object, $columns = null, $alias = null, $joinKeys = null)
   {
     $fkeys  = $this->sourceModel->getSchema()->getForeignKeys();

@@ -35,7 +35,7 @@ class Sabel_DB_Model_Executer
     $this->setModel($model);
   }
 
-  public function setModel($model)
+  public function setModel($model, $clearState = true)
   {
     if (!$model instanceof Sabel_DB_Model) {
       $name = get_class($model);
@@ -50,6 +50,8 @@ class Sabel_DB_Model_Executer
       throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_Driver.");
     }
 
+    if ($clearState) $this->clearState();
+
     return $this;
   }
 
@@ -61,13 +63,6 @@ class Sabel_DB_Model_Executer
   public function getDriver()
   {
     return $this->driver;
-  }
-
-  public function set($method)
-  {
-    $this->method = $method;
-
-    return $this;
   }
 
   public function execute($clearState = true)
@@ -135,12 +130,11 @@ class Sabel_DB_Model_Executer
 
   public function setParents($parents)
   {
-    if (is_array($parents)) {
-      $this->parents = $parents;
-    } else {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("setParents", $parents);
+    if (is_string($parents)) {
+      $parents = (array)$parents;
     }
+
+    $this->parents = $parents;
   }
 
   public function getParents()
@@ -229,8 +223,15 @@ class Sabel_DB_Model_Executer
     list ($arg1, $arg2) = $this->arguments;
     $this->setCondition($arg1, $arg2);
 
-    $stmt = $this->createCountStatement();
+    $constraints = $this->constraints;
+    $this->constraints = array("limit", 1);
+
+    $sql  = "SELECT COUNT(*) AS cnt FROM " . $this->model->getTableName();
+    $stmt = $this->createSelectStatement($sql);
     $rows = $this->_execute($stmt);
+
+    $this->constraints = $constraints;
+
     return $rows[0]["cnt"];
   }
 
@@ -453,21 +454,25 @@ class Sabel_DB_Model_Executer
 
   public function arrayInsert($data)
   {
-    if (is_array($data)) {
-      $this->saveValues = $data;
-    } else {
+    $this->method    = "arrayInsert";
+    $this->arguments = array($data);
+
+    return $this;
+  }
+
+  public function _arrayInsert()
+  {
+    list ($data) = $this->arguments;
+
+    if (!is_array($data)) {
       $e = new Sabel_DB_Exception_Model();
       throw $e->missing("arrayInsert", $data);
     }
 
-    try {
-      Sabel_DB_Transaction::begin($this->connectionName);
-      $command = $this->getCommand();
-      $command->arrayInsert();
-      Sabel_DB_Transaction::commit();
-    } catch (Exception $e) {
-      throw new Exception($e->getMessage());
-    }
+    Sabel_DB_Transaction::begin($this->model->getConnectionName());
+    $this->model->setSaveValues($data);
+    $this->_execute($this->createInsertStatement());
+    Sabel_DB_Transaction::commit();
   }
 
   public function delete($arg1 = null, $arg2 = null)
@@ -509,17 +514,17 @@ class Sabel_DB_Model_Executer
     $this->_execute($stmt);
   }
 
-  public function query($sql, $inputs = null)
+  public function query($sql, $inputs = null, $assoc = false)
   {
     $this->method    = "query";
-    $this->arguments = array($sql, $inputs);
+    $this->arguments = array($sql, $inputs, $assoc);
 
     return $this;
   }
 
-  public function _query()
+  protected function _query()
   {
-    list ($sql, $inputs) = $this->arguments;
+    list ($sql, $inputs, $assoc) = $this->arguments;
 
     if (isset($inputs) && !is_array($inputs)) {
       $e = new Sabel_DB_Exception_Model();
@@ -535,20 +540,18 @@ class Sabel_DB_Model_Executer
     $rows = $driver->setSql($sql)->execute();
     if (empty($rows)) return null;
 
-    $results = array();
-    foreach ($rows as $row) $results[] = (object)$row;
-
-    return $results;
+    if ($assoc) {
+      return $rows;
+    } else {
+      $results = array();
+      foreach ($rows as $row) $results[] = (object)$row;
+      return $results;
+    }
   }
 
-  public function createSelectStatement()
+  public function createSelectStatement($sql = "")
   {
-    return Sabel_DB_Sql_Statement_Loader::load("select")->create($this);
-  }
-
-  public function createCountStatement($joinQuery = "")
-  {
-    return Sabel_DB_Sql_Statement_Loader::load("count")->create($this, $joinQuery);
+    return Sabel_DB_Sql_Statement_Loader::load("select")->create($this, $sql);
   }
 
   public function createInsertStatement()
@@ -574,17 +577,6 @@ class Sabel_DB_Model_Executer
     } else {
       return ($data === null) ? $this->model->toArray() : $data;
     }
-  }
-
-  private function getEvalCode($argsCount)
-  {
-    $args = array();
-    for ($i = 0; $i < $argsCount; $i++) {
-      $args[] = '$args[' . $i . ']';
-    }
-
-    $args = implode(", ", $args);
-    return '$command->$method(' . $args . ')->getResult();';
   }
 
   public function setIncrementId($id)
