@@ -24,6 +24,7 @@ abstract class Sabel_DB_Abstract_Driver
   abstract public function loadConditionBuilder();
   abstract public function loadConstraintSqlClass();
   abstract public function loadTransaction();
+  abstract public function begin($connectionName = null);
 
   public function getDriverId()
   {
@@ -88,8 +89,7 @@ abstract class Sabel_DB_Abstract_Driver
 
   protected function error($error)
   {
-    $e = new Sabel_DB_Exception_Driver();
-    throw $e->exception($this->sql, $error, $this->connectionName);
+    throw new Sabel_DB_Exception($error);
   }
 }
 

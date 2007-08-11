@@ -47,8 +47,8 @@ abstract class Sabel_DB_Abstract_Sql
   protected function emptyCheck($values, $method)
   {
     if (empty($values)) {
-      $e = new Sabel_DB_Exception_Sql();
-      throw $e->exception("build" . ucfirst($method) . "Sql", "empty $method values.");
+      $message = "build" . ucfirst($method) . "Sql() empty $method values.";
+      throw new Sabel_DB_Exception($message);
     } else {
       return true;
     }

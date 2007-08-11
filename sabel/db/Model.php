@@ -28,7 +28,7 @@ abstract class Sabel_DB_Model
     $updateValues = array(),
     $saveValues   = array();
 
-  public function __construct($arg1 = null, $arg2 = null)
+  public function __construct()
   {
     $this->initialize();
   }
@@ -181,12 +181,5 @@ abstract class Sabel_DB_Model
 
     $this->values   = $row;
     $this->selected = $selected;
-  }
-
-  // @todo
-  public function validate($ignores = array())
-  {
-    $validator = new Sabel_DB_Validator($this);
-    return $validator->validate($ignores);
   }
 }

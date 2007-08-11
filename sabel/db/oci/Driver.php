@@ -16,8 +16,7 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
     $closeFunction = "oci_close";
 
   private
-    $limit  = null,
-    $offset = null;
+    $execMode = OCI_COMMIT_ON_SUCCESS;
 
   public function loadSqlClass($model)
   {
@@ -141,4 +140,3 @@ function oci_escape_string($val)
 {
   return str_replace("'", "''", $val);
 }
-

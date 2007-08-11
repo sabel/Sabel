@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Exception_Sql
+ * Sabel_DB_Mysqli_Schema
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,12 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Exception_Sql extends Sabel_DB_Exception
+class Sabel_DB_Mysqli_Schema extends Sabel_DB_Mysql_Schema
 {
-  protected $pkg_name = "sabel.db.sql";
-
-  public function exception($method, $message)
+  protected function getMysqlVersion()
   {
-    return parent::message($method, $message);
+    $conn = $this->driver->getConnection();
+    return mysqli_get_server_info($conn);
   }
 }

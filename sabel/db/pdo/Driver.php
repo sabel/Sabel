@@ -113,13 +113,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function execute()
   {
-    $sql = $this->sql;
-
-    // @todo
-    if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
-      var_dump($sql);
-    }
-
+    $sql  = $this->sql;
     $conn = $this->getConnection();
 
     if (is_array($sql)) {
@@ -143,7 +137,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     if (!($pdoStmt = $conn->prepare($sql))) {
       $this->data = array();
       $error = $conn->errorInfo();
-      $this->error("PdoStatement is invalid. {$error[2]}", $sql);
+      throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
     return $pdoStmt;
@@ -189,19 +183,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     $error = (isset($error[2])) ? $error[2] : print_r($error, true);
     $param = (empty($param)) ? null : $param;
 
-    $this->error("pdo driver execute failed: $error", $sql, $param);
-  }
-
-  protected function error($error, $sql = null, $pdoBind = null)
-  {
-    if ($pdoBind) {
-      $extra = array("PDO_BIND_VALUES" => $pdoBind);
-    } else {
-      $extra = null;
-    }
-
-    $e = new Sabel_DB_Exception_Driver();
-    throw $e->exception($this->sql, $error, $this->connectionName, $extra);
+    throw new Sabel_DB_Exception("pdo driver execute failed: $error");
   }
 }
 

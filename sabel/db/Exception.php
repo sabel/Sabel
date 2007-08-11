@@ -13,34 +13,23 @@ class Sabel_DB_Exception extends Exception
 {
   const DISPLAY_TRACE_COUNT = 10;
 
-  private static $traces = array();
-  protected $message     = array();
+  protected $traces  = array();
+  protected $message = "";
 
-  protected function message($method, $error, $extra = null)
+  public function __construct($message, $code = 0)
   {
-    $addMessages = array();
-
-    $addMessages["THROWN"]        = $this->pkg_name;
-    $addMessages["ERROR_MESSAGE"] = $error;
-    $addMessages["METHOD"]        = $method . "()";
-
-    if ($extra === null) {
-      $message = $addMessages + $this->message;
-    } else {
-      $message = $addMessages + $this->message + $extra;
-    }
-
-    $this->message = print_r($message, true);
+    $this->message = $message;
     $this->createTrace();
 
-    return $this;
+    parent::__construct($message, $code);
   }
 
-  public static function displayTrace()
+  public function __toString()
   {
     $i = 0;
 
     echo '<b><pre>';
+
     foreach (self::$traces as $trace) {
       if (isset($trace["file"])) {
         echo '<br/>';
@@ -79,25 +68,8 @@ class Sabel_DB_Exception extends Exception
 
       if ($i === self::DISPLAY_TRACE_COUNT) break;
     }
+
     echo "</pre></b>";
-  }
-
-  protected function createArguments($arguments)
-  {
-    $type = "(" . ucfirst(getType($arguments)) . ")";
-
-    if (is_object($arguments)) {
-      $arguments = $type . get_class($arguments);
-    } elseif (is_resource($arguments)) {
-      $arguments = $type . get_resource_type($arguments);
-    } elseif (is_bool($arguments)) {
-      $bool = ($arguments) ? "true" : "false";
-      $arguments = $type . $bool;
-    } else {
-      $arguments = $type . $arguments;
-    }
-
-    return $arguments;
   }
 
   private function createTrace()
@@ -108,6 +80,6 @@ class Sabel_DB_Exception extends Exception
     array_shift($traces);
     array_shift($traces);
 
-    self::$traces = $traces;
+    $this->traces = $traces;
   }
 }

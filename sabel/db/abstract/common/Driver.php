@@ -14,19 +14,12 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
 {
   public function execute()
   {
-    // @todo
-    //if (defined("QUERY_LOG") && ENVIRONMENT === DEVELOPMENT) {
-    if (defined("QUERY_LOG")) {
-      var_dump($this->sql);
-    }
-
     $sql  = $this->sql;
     $conn = $this->getConnection();
     $func = $this->execFunction;
 
     switch ($this->driverId) {
       case "mysql":
-      case "mysqli":
       case "mssql":
         if (is_array($sql)) {
           foreach ($sql as $s) $func($s, $conn);
@@ -35,6 +28,7 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
           return $func($sql, $conn);
         }
 
+      case "mysqli":
       case "pgsql":
       case "ibase":
         if (is_array($sql)) {

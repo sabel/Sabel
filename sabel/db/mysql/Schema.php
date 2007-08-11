@@ -109,7 +109,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
   }
 
   // @todo
-  private function getMysqlVersion()
+  protected function getMysqlVersion()
   {
     $result  = $this->execute("SELECT VERSION() AS version");
     $version = $result[0]["version"];
@@ -117,7 +117,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     return $version;
   }
 
-  private function getForeignKeys50($tblName)
+  protected function getForeignKeys50($tblName)
   {
     $driver     = $this->driver;
     $schemaName = $this->schemaName;
@@ -144,7 +144,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     return $columns;
   }
 
-  private function getRule($rule, $ruleName)
+  protected function getRule($rule, $ruleName)
   {
     if (($pos = strpos($rule, $ruleName)) !== false) {
       $on = substr($rule, $pos + 10);
@@ -158,7 +158,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     }
   }
 
-  private function getForeignKeys51($tblName)
+  protected function getForeignKeys51($tblName)
   {
     $driver     = $this->driver;
     $schemaName = $this->schemaName;

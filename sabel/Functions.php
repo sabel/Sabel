@@ -242,14 +242,22 @@ function convert_to_modelname($tblName)
   }
 }
 
-function MODEL($mdlName, $arg1 = null, $arg2 = null)
+function MODEL($mdlName)
 {
-  if (class_exists($mdlName, true)) {
-    return new $mdlName($arg1, $arg2);
-  } elseif ($arg1 === null) {
-    return new Proxy($mdlName);
+  static $cache = array();
+
+  if (isset($cache[$mdlName])) {
+    return ($cache[$mdlName]) ? new $mdlName() : new Proxy($mdlName);
+  }
+
+  Sabel::using($mdlName);
+
+  $exists = class_exists($mdlName, false);
+  $cache[$mdlName] = $exists;
+
+  if ($exists) {
+    return new $mdlName();
   } else {
-    $proxy = new Proxy($mdlName);
-    return $proxy->selectOne($arg1, $arg2);
+    return new Proxy($mdlName);
   }
 }

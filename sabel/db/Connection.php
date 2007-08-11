@@ -41,6 +41,10 @@ class Sabel_DB_Connection
           list ($conn, $error) = self::mysqlConnect($params);
           break;
 
+        case "mysqli":
+          list ($conn, $error) = self::mysqliConnect($params);
+          break;
+
         case "pgsql":
           list ($conn, $error) = self::pgsqlConnect($params);
           break;
@@ -64,7 +68,7 @@ class Sabel_DB_Connection
     if ($conn) {
       self::$connections[$connectionName] = $conn;
     } else {
-      self::error($connectionName, $error, $params);
+      throw new Sabel_DB_Exception($error);
     }
   }
 
@@ -79,10 +83,10 @@ class Sabel_DB_Connection
         $dsn = "{$name}:host={$params["host"]};dbname={$params["database"]}";
         if (isset($params["port"])) $dsn .= ";port={$params["port"]}";
         $conn = new PDO($dsn, $params["user"], $params["password"]);
-      }
 
-      if (isset($params["encoding"])) {
-        $conn->exec(sprintf(self::SET_ENCODING, $params["encoding"]));
+        if (isset($params["encoding"])) {
+          $conn->exec(sprintf(self::SET_ENCODING, $params["encoding"]));
+        }
       }
 
       return array($conn, "");
@@ -94,9 +98,8 @@ class Sabel_DB_Connection
   private static function mysqlConnect($params)
   {
     $host = $params["host"];
-
     $host = (isset($params["port"])) ? $host . ":" . $params["port"] : $host;
-    $conn = mysql_connect($host, $params["user"], $params["password"]);
+    $conn = mysql_connect($host, $params["user"], $params["password"], true);
 
     if ($conn) {
       mysql_select_db($params["database"], $conn);
@@ -108,6 +111,30 @@ class Sabel_DB_Connection
       return array($conn, "");
     } else {
       return array($conn, mysql_error());
+    }
+  }
+
+  private static function mysqliConnect($params)
+  {
+    $h = $params["hoge"];
+    $u = $params["user"];
+    $p = $params["password"];
+    $d = $params["database"];
+
+    if (isset($params["port"])) {
+      $conn = mysqli_connect($h, $u, $p, $d, (int)$params["port"]);
+    } else {
+      $conn = mysqli_connect($h, $u, $p, $d);
+    }
+
+    if ($conn) {
+      if (isset($params["encoding"])) {
+        // @todo
+      }
+
+      return array($conn, "");
+    } else {
+      return array($conn, mysqli_connect_error());
     }
   }
 
@@ -166,9 +193,8 @@ class Sabel_DB_Connection
   private static function mssqlConnect($params)
   {
     $host = $params["host"];
-
     $host = (isset($params["port"])) ? $host . "," . $params["port"] : $host;
-    $conn = mssql_connect($host, $params["user"], $params["password"]);
+    $conn = mssql_connect($host, $params["user"], $params["password"], true);
 
     if ($conn) {
       mssql_select_db($params["database"], $conn);
@@ -197,14 +223,5 @@ class Sabel_DB_Connection
     }
 
     self::$connections = array();
-  }
-
-  private static function error($connectionName, $message, $params)
-  {
-    $extra = array("CONNECTION_NAME" => $connectionName,
-                   "PARAMETERS"      => $params);
-
-    $e = new Sabel_DB_Exception_Connection();
-    throw $e->exception($message, $extra);
   }
 }

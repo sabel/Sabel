@@ -248,8 +248,7 @@ class Sabel_DB_Model_Executer
     list ($arg1, $arg2) = $this->arguments;
 
     if ($arg1 === null && $this->conditionManager === null) {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->exception("selectOne", "must set the condition.");
+      throw new Sabel_DB_Exception("selectOne() must set the condition.");
     }
 
     $this->setCondition($arg1, $arg2);
@@ -355,17 +354,9 @@ class Sabel_DB_Model_Executer
     return $child->select($fkey, $this->__get($col));
   }
 
-  // @todo
-  public function validate($ignores = array())
+  public function save()
   {
-    $validator = new Sabel_DB_Validator($this->model);
-    return $validator->validate($ignores);
-  }
-
-  public function save($validateOpt = null)
-  {
-    $this->method    = "save";
-    $this->arguments = array($validateOpt);
+    $this->method = "save";
 
     return $this;
   }
@@ -375,24 +366,10 @@ class Sabel_DB_Model_Executer
     $model = $this->model;
     $mode  = ($model->isSelected()) ? "update" : "insert";
 
-    list ($ignores) = $this->arguments;
-
-    if ($ignores !== null) {
-      if ($ignores === true) $ignores = array();
-      $errors = $this->validate($ignores);
-
-      if ($errors) {
-        $stdClass = new stdClass();
-        $stdClass->hasError = true;
-        $stdClass->errors = $errors;
-        return $stdClass;
-      }
-    }
-
     if ($mode === "update") {
       if ($model->getPrimaryKey() === null) {
-        $e = new Sabel_DB_Exception_Model();
-        throw $e->exception("save", "cannot update model(there is not primary key).");
+        $message = "save() cannot update model(there is not primary key).";
+        throw new Sabel_DB_Exception($message);
       } else {
         $saveValues = $model->getUpdateValues();
       }
@@ -491,16 +468,16 @@ class Sabel_DB_Model_Executer
     list ($arg1, $arg2) = $this->arguments;
 
     if (!$model->isSelected() && $arg1 === null && $manager->isEmpty()) {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->exception("remove", "delete all? must set the condition.");
+      $message = "delete() must set the condition.";
+      throw new Sabel_DB_Exception($message);
     }
 
     if ($arg1 !== null) {
       $this->setCondition($arg1, $arg2);
     } elseif ($model->isSelected()) {
       if (($pkey = $model->getPrimaryKey()) === null) {
-        $e = new Sabel_DB_Exception_Model();
-        throw $e->exception("save", "cannot delete model(there is not primary key).");
+        $message = "delete() cannot delete model(there is not primary key).";
+        throw new Sabel_DB_Exception($message);
       } else {
         if (is_string($pkey)) $pkey = (array)$pkey;
 
