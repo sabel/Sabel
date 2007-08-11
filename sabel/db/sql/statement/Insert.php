@@ -16,9 +16,9 @@ class Sabel_DB_Sql_Statement_Insert extends Sabel_DB_Abstract_Statement
     return Sabel_DB_Statement::INSERT;
   }
 
-  public function create($executer)
+  public function create(Sabel_DB_Model_Executer $executer)
   {
-    $driver = $executer->getDriver();
+    $driver    = $executer->getDriver();
     $this->sql = $driver->loadSqlClass($executer)->buildInsertSql($driver);
 
     return $this;

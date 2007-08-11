@@ -188,34 +188,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertFalse($member2->is_temp);
   }
 
-  public function testQuery()
-  {
-    $sql = "SELECT * FROM member ORDER BY id ASC";
-    $executer = new Sabel_DB_Model_Executer("Member");
-    $result = $executer->query($sql)->execute();
-    $this->assertEquals(count($result), 2);
-
-    $member1 = $result[0];
-    $member2 = $result[1];
-
-    $this->assertEquals($member1->name, "test1");
-    $this->assertEquals($member2->name, "test2");
-
-    $sql = "SELECT * FROM member WHERE name = %s ORDER BY id ASC";
-    $executer = new Sabel_DB_Model_Executer("Member");
-    $result = $executer->query($sql, array("test2"))->execute();
-    $this->assertEquals(count($result), 1);
-
-    $this->assertEquals($result[0]->name, "test2");
-
-    $executer = new Sabel_DB_Model_Executer("Member");
-    $result = $executer->query($sql, array("test2"), true)->execute();
-    $this->assertEquals(count($result), 1);
-
-    $this->assertTrue(is_array($result[0]));
-    $this->assertEquals($result[0]["name"], "test2");
-  }
-
   public function testParents()
   {
     $executer = new Sabel_DB_Model_Executer("Member");
@@ -333,6 +305,12 @@ class Test_DB_Test extends SabelTestCase
 
     $count = $executer->getCount()->execute();
     $this->assertEquals($count, 5);
+  }
+
+  public function testClear()
+  {
+    Sabel_DB_Schema_Loader::clear();
+    Sabel_DB_Connection::closeAll();
   }
 }
 

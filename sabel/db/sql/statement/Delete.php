@@ -16,7 +16,7 @@ class Sabel_DB_Sql_Statement_Delete extends Sabel_DB_Abstract_Statement
     return Sabel_DB_Statement::DELETE;
   }
 
-  public function create($executer)
+  public function create(Sabel_DB_Model_Executer $executer)
   {
     $model     = $executer->getModel();
     $driver    = $executer->getDriver();

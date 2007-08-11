@@ -60,8 +60,8 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $stmt = $this->executer->createSelectStatement(implode("", $query));
-    $rows = $this->executer->query($stmt->getSql(), null, true)->execute();
+    $rows = $this->execute(implode("", $query));
+    $this->clear();
 
     return $rows[0]["cnt"];
   }
@@ -93,10 +93,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $stmt = $this->executer->createSelectStatement(implode("", $query));
-    $rows = $this->executer->query($stmt->getSql(), null, true)->execute();
-
-    if (!$rows) {
+    if (!$rows = $this->execute(implode("", $query))) {
       $results = false;
     } else {
       $results = $this->resultBuilder->build($model, $rows);
@@ -106,7 +103,14 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     return $results;
   }
 
-  protected function clear()
+  protected function execute($query)
+  {
+    $executer = $this->executer;
+    $stmt = Sabel_DB_Statement::createSelectStatement($executer, $query);
+    return $executer->query($stmt->getSql(), true)->execute();
+  }
+
+  public function clear()
   {
     $this->objects = array();
 

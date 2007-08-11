@@ -2,13 +2,14 @@
 
 class Test_DB_SQLite extends Test_DB_Test
 {
-  private static $params1 = array('driver'   => 'pdo-sqlite',
-                                  'database' => 'Test/data/log1.sq3');
+  private static $params1 = array("driver"   => "pdo-sqlite",
+                                  "database" => "/usr/local/lib/php/Sabel/Test/data/sdb_test.sq3");
 
-  private static $params2 = array('driver'   => 'pdo-sqlite',
-                                  'database' => 'Test/data/log2.sq3');
+  private static $params2 = array("driver"   => "pdo-sqlite",
+                                  "database" => "/usr/local/lib/php/Sabel/Test/data/sdb_test2.sq3");
 
-  public static function main() {
+  public static function main()
+  {
     require_once "PHPUnit/TextUI/TestRunner.php";
 
     $suite  = new PHPUnit_Framework_TestSuite("Test_DB_SQLite");
@@ -34,163 +35,16 @@ class Test_DB_SQLite extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Config::regist('default',  self::$params1);
-    Sabel_DB_Config::regist('default2', self::$params2);
+    Sabel_DB_Config::regist("default",  self::$params1);
+    //Sabel_DB_Config::regist("default2", self::$params2);
 
-    Test_DB_Test::$db = 'SQLITE';
+    Test_DB_Test::$db = "PGSQL";
 
-    $tables = Test_DB_Test::$TABLES;
-    $model  = MODEL('Basic');
+    $tables   = Test_DB_Test::$tables;
+    $executer = new Sabel_DB_Model_Executer("Member");
 
-    $sh = new SQLiteHelper();
-
-    foreach ($sh->sqls as $query) {
-      try { @$model->executeQuery($query); } catch (Exception $e) {}
+    foreach ($tables as $table) {
+      $executer->query("DELETE FROM $table")->execute();
     }
-
-    try {
-      foreach ($tables as $table) $model->executeQuery("DELETE FROM $table");
-      @$model->executeQuery("DROP TABLE parents");
-      @$model->executeQuery("DROP TABLE grand_child");
-      @$model->executeQuery("DROP TABLE customer");
-    } catch (Exception $e) {
-    }
-
-    $model = MODEL('Customer');
-
-    $sqls = array('CREATE TABLE customer( id int4 primary key, name varchar(24))',
-                  'CREATE TABLE parents( id int4 primary key, name varchar(24))',
-                  'CREATE TABLE grand_child( id int4 primary key, child_id integer, name varchar(24), age integer)');
-
-    foreach ($sqls as $query) {
-      try { @$model->executeQuery($query); } catch (Exception $e) {}
-    }
-
-    $model->executeQuery('DELETE FROM customer');
-    $model->executeQuery('DELETE FROM parents');
-    $model->executeQuery('DELETE FROM grand_child');
-  }
-}
-
-/**
- * create query for sqlite unit test.
- *
- */
-class SQLiteHelper
-{
-  public $sqls = null;
-
-  public function __construct()
-  {
-    $sqls = array();
-
-    $sqls[] = 'CREATE TABLE basic (
-                 id int4 primary key,
-                 name varchar(24))';
-
-    $sqls[] = 'CREATE TABLE users (
-                 id int4 primary key,
-                 name varchar(24),
-                 email varchar(128),
-                 city_id int4 not null,
-                 company_id integer not null)';
-
-    $sqls[] = 'CREATE TABLE city (
-                 id int4 primary key,
-                 name varchar(24),
-                 classification_id integer,
-                 country_id int4 not null)';
-
-    $sqls[] = 'CREATE TABLE company (
-                 id integer primary key,
-                 city_id integer not null,
-                 name varchar(24))';
-
-    $sqls[] = 'CREATE TABLE country (
-                 id int4 primary key,
-                 planet_id int4,
-                 name varchar(24))';
-
-    $sqls[] = 'CREATE TABLE planet (
-                 id int4 primary key,
-                 name varchar(24))';
-
-    $sqls[] = 'CREATE TABLE classification (
-                 id int4 primary key,
-                 class_name varchar(24))';
-
-    $sqls[] = 'CREATE TABLE test_for_like (
-                 id integer primary key,
-                 string varchar(24))';
-
-    $sqls[] = "CREATE TABLE test_condition (
-                 id integer primary key,
-                 status boolean,
-                 registed datetime,
-                 point int4)";
-
-    $sqls[] = "CREATE TABLE blog (
-                 id int4 primary key,
-                 title varchar(24),
-                 article text,
-                 write_date datetime,
-                 users_id int4)";
-
-    $sqls[] = "CREATE TABLE favorite_item (
-                 id int4 primary key,
-                 users_id int4,
-                 registed datetime,
-                 name varchar(24))";
-
-    $sqls[] = "CREATE TABLE customer_order (
-                 id integer primary key,
-                 customer_id int4,
-                 buy_date datetime,
-                 amount integer)";
-
-    $sqls[] = "CREATE TABLE schema_test (
-                 id integer not null primary key,
-                 name varchar(128) not null default 'test',
-                 bl boolean default false,
-                 dt datetime,
-                 ft_val float default 1,
-                 db_val double not null,
-                 tx text,
-                 uni1 integer not null,
-                 uni2 integer not null,
-                 uni3 integer not null,
-                 unique(uni1), unique(uni2, uni3))";
-
-    $sqls[] = "CREATE TABLE student (
-                 id integer primary key,
-                 name varchar(24))";
-
-    $sqls[] = "CREATE TABLE course (
-                 id integer primary key,
-                 course_name varchar(24))";
-
-    $sqls[] = "CREATE TABLE student_course (
-                 student_id integer not null,
-                 course_id  integer not null,
-                 primary key (student_id, course_id))";
-
-    $sqls[] = "CREATE TABLE timer (
-                 id int4 primary key,
-                 auto_update timestamp,
-                 auto_create timestamp)";
-
-    $sqls[] = "CREATE TABLE child (
-                 id integer primary key,
-                 parents_id integer not null,
-                 name varchar(24),
-                 height integer)";
-
-    $sqls[] = "CREATE TABLE mail (
-                 id int4 primary key,
-                 sender_id integer not null,
-                 recipient_id integer not null,
-                 subject varchar(255))";
-
-    $this->sqls = $sqls;
   }
 }

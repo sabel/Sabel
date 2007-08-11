@@ -13,9 +13,9 @@ class Sabel_DB_Sql_Statement_Loader
 {
   protected static $instances = array();
 
-  public static function load($command)
+  public static function load($stmtType)
   {
-    $className = "Sabel_DB_Sql_Statement_" . ucfirst($command);
+    $className = "Sabel_DB_Sql_Statement_" . ucfirst($stmtType);
 
     if (isset(self::$instances[$className])) {
       return self::$instances[$className];

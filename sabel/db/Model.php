@@ -71,7 +71,7 @@ abstract class Sabel_DB_Model
     if ($this->selected) $this->updateValues[$key] = $val;
   }
 
-  public function setValues($values)
+  public function setValues(array $values)
   {
     foreach ($values as $key => $val) {
       $this->__set($key, $val);
@@ -125,14 +125,9 @@ abstract class Sabel_DB_Model
     return $this->schema->getIncrementColumn();
   }
 
-  public function setSaveValues($values)
+  public function setSaveValues(array $values)
   {
-    if (is_array($values)) {
-      return $this->saveValues = $values;
-    } else {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("setSaveValues", $values);
-    }
+    return $this->saveValues = $values;
   }
 
   public function getSaveValues()
@@ -140,14 +135,9 @@ abstract class Sabel_DB_Model
     return $this->saveValues;
   }
 
-  public function setUpdateValues($values)
+  public function setUpdateValues(array $values)
   {
-    if (is_array($values)) {
-      return $this->updateValues = $values;
-    } else {
-      $e = new Sabel_DB_Exception_Model();
-      throw $e->missing("setUpdateValues", $values);
-    }
+    return $this->updateValues = $values;
   }
 
   public function getUpdateValues()

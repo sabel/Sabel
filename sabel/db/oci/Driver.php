@@ -16,6 +16,8 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
     $closeFunction = "oci_close";
 
   private
+    $limit    = null,
+    $offset   = null,
     $execMode = OCI_COMMIT_ON_SUCCESS;
 
   public function loadSqlClass($model)
@@ -54,27 +56,16 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
 
   public function getBeforeMethods()
   {
-    return array("all" => "setConstraints", Sabel_DB_Command::INSERT => "setIncrementId");
+    return array(Sabel_DB_Statement::SELECT => "setLimitation",
+                 Sabel_DB_Statement::INSERT => "setIncrementId");
   }
 
-  public function setConstraints($command)
+  public function setLimitation($executer)
   {
-    $c = $command->getModel()->getConstraints();
+    $c = $executer->getModel()->getConstraints();
 
     if (isset($c["limit"]))  $this->limit  = $c["limit"];
     if (isset($c["offset"])) $this->offset = $c["offset"];
-  }
-
-  // @todo
-  public function setLimit($limit)
-  {
-    $this->limit = $limit;
-  }
-
-  // @todo
-  public function setOffset($offset)
-  {
-    $this->offset = $offset;
   }
 
   public function begin($connectionName = null)
@@ -119,11 +110,11 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
     return $this->result = $rows;
   }
 
-  public function setIncrementId($command)
+  public function setIncrementId($executer)
   {
-    $model = $command->getModel();
+    $model = $executer->getModel();
     if (($column = $model->getIncrementColumn()) === null) {
-      return $command->setIncrementId(null);
+      return $executer->setIncrementId(null);
     }
 
     $values = $model->getSaveValues();
@@ -132,7 +123,7 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
     $rows = $this->setSql("SELECT {$seqName}.nextval AS id FROM dual")->execute();
     $values[$column] = (int)$rows[0]["id"];
     $model->setSaveValues($values);
-    $command->setIncrementId($values[$column]);
+    $executer->setIncrementId($values[$column]);
   }
 }
 

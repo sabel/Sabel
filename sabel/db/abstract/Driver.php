@@ -125,9 +125,5 @@ function escapeString($db, $values, $escMethod = null)
     }
   }
 
-  if (isset($values[0]) && count($values) === 1) {
-    return $values[0];
-  } else {
-    return $values;
-  }
+  return (isset($values[0])) ? $values[0] : $values;
 }

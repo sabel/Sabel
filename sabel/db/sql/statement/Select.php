@@ -16,19 +16,18 @@ class Sabel_DB_Sql_Statement_Select extends Sabel_DB_Abstract_Statement
     return Sabel_DB_Statement::SELECT;
   }
 
-  public function create($executer, $sql = null)
+  public function create(Sabel_DB_Model_Executer $executer, $sql = null)
   {
     if ($sql === "" || $sql === null) {
       $driver = $executer->getDriver();
       $this->sql = $driver->loadSqlClass($executer)->buildSelectSql($driver);
     } else {
-      $model  = $executer->getModel();
-      $driver = $executer->getDriver();
+      $model   = $executer->getModel();
+      $driver  = $executer->getDriver();
+      $manager = $executer->loadConditionManager();
 
-      $conditionManager = $executer->loadConditionManager();
-
-      if (!$conditionManager->isEmpty()) {
-        $sql .= " " . $conditionManager->build($driver);
+      if (!$manager->isEmpty()) {
+        $sql .= " " . $manager->build($driver);
       }
 
       if ($constraints = $executer->getConstraints()) {

@@ -14,8 +14,15 @@ abstract class Sabel_DB_Abstract_Statement
 {
   protected $sql = "";
 
-  abstract public function create($executer);
+  abstract public function create(Sabel_DB_Model_Executer $executer);
   abstract public function getStatementType();
+
+  public function setSql($sql)
+  {
+    $this->sql = $sql;
+
+    return $this;
+  }
 
   public function getSql()
   {

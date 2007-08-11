@@ -40,7 +40,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function getBeforeMethods()
   {
-    return array(Sabel_DB_Command::INSERT => "insert");
+    return array(Sabel_DB_Statement::INSERT => "insert");
   }
 
   public function escape($values)
@@ -66,24 +66,33 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return $this->result = $rows;
   }
 
-  public function insert($command)
+  public function insert($executer)
   {
-    $model   = $command->getModel();
+    $model   = $executer->getModel();
     $tblName = $model->getTableName();
     $values  = $model->getSaveValues();
     $conn    = $this->getConnection();
 
+    if (!isset($values[0])) $values = array($values);
+
+    foreach ($values as $value) {
+      $this->exec_pg_insert($conn, $tblName, $value);
+    }
+
+    if ($model->getIncrementColumn()) {
+      $executer->setIncrementId($this->getSequenceId("SELECT LASTVAL() AS id"));
+    } else {
+      $executer->setIncrementId(null);
+    }
+
+    return true;
+  }
+
+  private function exec_pg_insert($conn, $tblName, $values)
+  {
     if (!$result = pg_insert($conn, $tblName, $values)) {
       $values = var_export($values, true);
       throw new Exception("pg_insert execute failed: '$tblName' VALUES: $values");
     }
-
-    if ($model->getIncrementColumn()) {
-      $command->setIncrementId($this->getSequenceId("SELECT LASTVAL() AS id"));
-    } else {
-      $command->setIncrementId(null);
-    }
-
-    return Sabel_DB_Command_Executer::SKIP;
   }
 }

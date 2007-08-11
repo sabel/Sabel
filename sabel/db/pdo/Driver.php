@@ -52,7 +52,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function getAfterMethods()
   {
-    return array(Sabel_DB_Command::INSERT => "getIncrementId");
+    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
   }
 
   public function begin($connectionName = null)
@@ -94,11 +94,11 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     return escapeString($this->database, $values);
   }
 
-  public function getIncrementId($command)
+  public function getIncrementId($executer)
   {
     if ($this->database === "pgsql") {
-      $model = $command->getModel();
-      if ($column = $model->getIncrementColumn()) {
+      $model = $executer->getModel();
+      if (($column = $model->getIncrementColumn()) !== null) {
         $tblName = $model->getTableName();
         $id = (int)$this->connection->lastInsertId("{$tblName}_{$column}_seq");
       } else {
@@ -108,7 +108,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $id = (int)$this->connection->lastInsertId();
     }
 
-    $command->setIncrementId($id);
+    $executer->setIncrementId($id);
   }
 
   public function execute()

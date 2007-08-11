@@ -16,24 +16,12 @@ class Sabel_DB_Sql_Statement_Update extends Sabel_DB_Abstract_Statement
     return Sabel_DB_Statement::UPDATE;
   }
 
-  public function create($executer, $conditions = array())
+  public function create(Sabel_DB_Model_Executer $executer)
   {
-    $model  = $executer->getModel();
-    $driver = $executer->getDriver();
-    $query  = $driver->loadSqlClass($executer)->buildUpdateSql($driver);
-
-    if (empty($conditions)) {
-      $pkey = $model->getPrimaryKey();
-      if (is_string($pkey)) $pkey = (array)$pkey;
-
-      $conditions = array();
-      foreach ($pkey as $key) {
-        $conditions[] = new Sabel_DB_Condition_Object($key, $model->__get($key));
-      }
-    }
-
-    $manager = new Sabel_DB_Condition_Manager();
-    foreach ($conditions as $condition) $manager->add($condition);
+    $model     = $executer->getModel();
+    $driver    = $executer->getDriver();
+    $query     = $driver->loadSqlClass($executer)->buildUpdateSql($driver);
+    $manager   = $executer->getConditionManager();
     $this->sql = $query . $manager->build($driver);
 
     return $this;
