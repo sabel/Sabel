@@ -129,7 +129,7 @@ class Sabel_DB_Connection
 
     if ($conn) {
       if (isset($params["encoding"])) {
-        // @todo
+        mysqli_set_charset($conn, $params["encoding"]);
       }
 
       return array($conn, "");

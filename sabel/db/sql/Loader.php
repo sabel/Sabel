@@ -13,19 +13,20 @@ class Sabel_DB_Sql_Loader
 {
   protected static $instances = array();
 
-  public static function load($executer, $className)
+  public static function load($model, $className)
   {
     if (isset(self::$instances[$className])) {
       $instance = self::$instances[$className];
     } else {
       $instance = self::$instances[$className] = new $className();
-      if (!$instance instanceof Sabel_DB_Sql_Interface) {
+      if (!$instance instanceof Sabel_DB_Abstract_Sql) {
         $name = get_class($instance);
-        throw new Exception("'{$name}' should implement Sabel_DB_Sql_Interface.");
+        $message = "'{$name}' should implement Sabel_DB_Abstract_Sql.";
+        throw new Sabel_DB_Exception($message);
       }
     }
 
-    $instance->setExecuter($executer);
+    $instance->setModel($model);
 
     return $instance;
   }

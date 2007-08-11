@@ -12,36 +12,26 @@
  */
 abstract class Sabel_DB_Abstract_Sql
 {
-  protected $executer = null;
-  protected $model    = null;
+  protected $model = null;
 
-  public function setExecuter($executer)
+  abstract public function buildInsertSql(Sabel_DB_Abstract_Driver $driver);
+  abstract public function buildUpdateSql(Sabel_DB_Abstract_Driver $driver);
+
+  public function setModel(Sabel_DB_Model $model)
   {
-    $this->executer = $executer;
-    $this->model    = $executer->getModel();
+    $this->model = $model;
   }
 
-  public function buildSelectSql($driver)
+  public function buildSelectSql(Sabel_DB_Abstract_Driver $driver, $projection = "*")
   {
-    $model      = $this->model;
-    $executer   = $this->executer;
-    $tblName    = $model->getTableName();
-    $projection = $executer->getProjection();
+    $model   = $this->model;
+    $tblName = $model->getTableName();
 
     if ($projection === "*") {
       $projection = implode(", ", $model->getColumnNames());
     }
 
-    $sql = "SELECT $projection FROM $tblName";
-
-    $cmanager = $executer->getConditionManager();
-    if (is_object($cmanager)) $sql .= $cmanager->build($driver);
-
-    if ($constraints = $executer->getConstraints()) {
-      return $driver->loadConstraintSqlClass()->build($sql, $constraints);
-    } else {
-      return $sql;
-    }
+    return "SELECT $projection FROM $tblName";
   }
 
   protected function emptyCheck($values, $method)

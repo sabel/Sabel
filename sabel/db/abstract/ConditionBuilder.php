@@ -14,6 +14,11 @@ abstract class Sabel_DB_Abstract_ConditionBuilder
 {
   protected $driver = null;
 
+  abstract public function initialize($driver);
+  abstract public function buildNormal($condition);
+  abstract public function buildBetween($condition);
+  abstract public function buildCompare($condition);
+
   public function build($condition)
   {
     switch ($condition->type) {

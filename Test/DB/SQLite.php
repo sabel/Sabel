@@ -38,7 +38,7 @@ class Test_DB_SQLite extends Test_DB_Test
     Sabel_DB_Config::regist("default",  self::$params1);
     //Sabel_DB_Config::regist("default2", self::$params2);
 
-    Test_DB_Test::$db = "PGSQL";
+    Test_DB_Test::$db = "SQLITE";
 
     $tables   = Test_DB_Test::$tables;
     $executer = new Sabel_DB_Model_Executer("Member");

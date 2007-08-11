@@ -16,20 +16,26 @@ class Sabel_DB_Statement
   const UPDATE  = 0x04;
   const DELETE  = 0x08;
 
-  public static function create($executer, $stmtType)
+  private static $statements = array();
+
+  public static function create($stmtType)
   {
+    if (isset(self::$statements[$stmtType])) {
+      return new self::$statements[$stmtType];
+    }
+
     switch ($stmtType) {
       case self::SELECT:
-        return self::createSelectStatement($executer);
+        return new Sabel_DB_Sql_Statement_Select();
 
       case self::INSERT:
-        return self::createInsertStatement($executer);
+        return new Sabel_DB_Sql_Statement_Insert();
 
       case self::UPDATE:
-        return self::createUpdateStatement($executer);
+        return new Sabel_DB_Sql_Statement_Update();
 
       case self::DELETE:
-        return self::createDeleteStatement($executer);
+        return new Sabel_DB_Sql_Statement_Delete();
 
       default:
         $message = "Sabel_DB_Sql_Statement::create() invalid statement type.";
@@ -37,24 +43,8 @@ class Sabel_DB_Statement
     }
   }
 
-  public static function createSelectStatement($executer, $sql = "")
+  public static function registStatement($stmtType, $className)
   {
-    // @todo two arguments are bad for interface.
-    return Sabel_DB_Sql_Statement_Loader::load("select")->create($executer, $sql);
-  }
-
-  public static function createInsertStatement($executer)
-  {
-    return Sabel_DB_Sql_Statement_Loader::load("insert")->create($executer);
-  }
-
-  public static function createUpdateStatement($executer)
-  {
-    return Sabel_DB_Sql_Statement_Loader::load("update")->create($executer);
-  }
-
-  public static function createDeleteStatement($executer)
-  {
-    return Sabel_DB_Sql_Statement_Loader::load("delete")->create($executer);
+    self::$statements[$stmtType] = $className;
   }
 }

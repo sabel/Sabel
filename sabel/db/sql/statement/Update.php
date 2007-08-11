@@ -15,15 +15,4 @@ class Sabel_DB_Sql_Statement_Update extends Sabel_DB_Abstract_Statement
   {
     return Sabel_DB_Statement::UPDATE;
   }
-
-  public function create(Sabel_DB_Model_Executer $executer)
-  {
-    $model     = $executer->getModel();
-    $driver    = $executer->getDriver();
-    $query     = $driver->loadSqlClass($executer)->buildUpdateSql($driver);
-    $manager   = $executer->getConditionManager();
-    $this->sql = $query . $manager->build($driver);
-
-    return $this;
-  }
 }

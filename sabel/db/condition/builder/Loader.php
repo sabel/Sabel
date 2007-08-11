@@ -22,11 +22,13 @@ class Sabel_DB_Condition_Builder_Loader
 
       if (!$instance instanceof Sabel_DB_Abstract_ConditionBuilder) {
         $name = get_class($instance);
-        throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_ConditionBuilder.");
+        $message = "'{$name}' should be instance of Sabel_DB_Abstract_ConditionBuilder.";
+        throw new Sabel_DB_Exception($message);
       }
     }
 
     $instance->initialize($driver);
+
     return $instance;
   }
 

@@ -58,7 +58,7 @@ class Sabel_DB_Condition_Manager
     return $conditions;
   }
 
-  public function build($driver)
+  public function build(Sabel_DB_Abstract_Driver $driver)
   {
     $builder = $driver->loadConditionBuilder();
 

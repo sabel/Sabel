@@ -9,9 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Builder_General
-  extends    Sabel_DB_Abstract_ConditionBuilder
-  implements Sabel_DB_Condition_Builder_Interface
+class Sabel_DB_Condition_Builder_General extends Sabel_DB_Abstract_ConditionBuilder
 {
   public function initialize($driver)
   {

@@ -103,11 +103,23 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     return $results;
   }
 
-  protected function execute($query)
+  protected function execute($sql)
   {
-    $executer = $this->executer;
-    $stmt = Sabel_DB_Statement::createSelectStatement($executer, $query);
-    return $executer->query($stmt->getSql(), true)->execute();
+    $executer    = $this->executer;
+    $driver      = $executer->getDriver();
+    $manager     = $executer->getConditionManager();
+    $constraints = $executer->getConstraints();
+
+    if ($manager !== null && !$manager->isEmpty()) {
+      $sql .= $manager->build($driver);
+    }
+
+    if (!empty($constraints)) {
+      $sql = $driver->loadConstraintSqlClass()->build($sql, $constraints);
+    }
+
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
+    return $executer->executeStatement($stmt->setSql($sql));
   }
 
   public function clear()

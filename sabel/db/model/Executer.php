@@ -58,6 +58,11 @@ class Sabel_DB_Model_Executer
     return $this->driver;
   }
 
+  public function getArguments()
+  {
+    return $this->arguments;
+  }
+
   public function before($method)
   {
     return null;
@@ -66,6 +71,11 @@ class Sabel_DB_Model_Executer
   public function after($method)
   {
     return null;
+  }
+
+  public function executeStatement($stmt)
+  {
+    return $this->_execute($stmt);
   }
 
   public final function execute($clearState = true)
@@ -86,7 +96,7 @@ class Sabel_DB_Model_Executer
     return $result;
   }
 
-  private final function _execute($stmt)
+  private final function _execute(Sabel_DB_Abstract_Statement $stmt)
   {
     $stmtType = $stmt->getStatementType();
 
@@ -111,11 +121,6 @@ class Sabel_DB_Model_Executer
     $this->projection = "*";
     $this->arguments  = array();
     $this->parents    = array();
-  }
-
-  public function getArguments()
-  {
-    return $this->arguments;
   }
 
   public function setProjection($p)
@@ -223,14 +228,16 @@ class Sabel_DB_Model_Executer
     list ($arg1, $arg2) = $this->arguments;
     $this->setCondition($arg1, $arg2);
 
-    $constraints = $this->constraints;
-    $this->constraints = array("limit", 1);
+    $projection = $this->projection;
+    $this->projection = "COUNT(*) AS cnt";
 
-    $sql  = "SELECT COUNT(*) AS cnt FROM " . $this->model->getTableName();
-    $stmt = Sabel_DB_Statement::createSelectStatement($this, $sql);
-    $rows = $this->_execute($stmt);
+    $sql  = $this->createSelectSql();
+    $sql .= $this->createConditionSql();
+    $sql  = $this->createConstraintSql($sql, array("limit" => 1));
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
+    $rows = $this->_execute($stmt->setSql($sql));
 
-    $this->constraints = $constraints;
+    $this->projection = $projection;
 
     return $rows[0]["cnt"];
   }
@@ -257,8 +264,11 @@ class Sabel_DB_Model_Executer
 
   protected function createModel($model)
   {
-    $stmt = Sabel_DB_Statement::createSelectStatement($this);
-    $rows = $this->_execute($stmt);
+    $sql  = $this->createSelectSql();
+    $sql .= $this->createConditionSql();
+    $sql  = $this->createConstraintSql($sql);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
+    $rows = $this->_execute($stmt->setSql($sql));
 
     if (isset($rows[0])) {
       $model->setProperties($rows[0]);
@@ -297,8 +307,12 @@ class Sabel_DB_Model_Executer
       if ($result !== Sabel_DB_Join::CANNOT_JOIN) return $result;
     }
 
-    $stmt = Sabel_DB_Statement::createSelectStatement($this);
-    $rows = $this->_execute($stmt);
+    $sql  = $this->createSelectSql();
+    $sql .= $this->createConditionSql();
+    $sql  = $this->createConstraintSql($sql);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
+    $rows = $this->_execute($stmt->setSql($sql));
+
     if (empty($rows)) return false;
 
     $results = array();
@@ -363,24 +377,22 @@ class Sabel_DB_Model_Executer
 
   protected function _save()
   {
-    $model = $this->model;
-    $mode  = ($model->isSelected()) ? "update" : "insert";
-
-    if ($mode === "update") {
-      if (($pkey = $model->getPrimaryKey()) === null) {
-        $message = "save() cannot update model(there is not primary key).";
-        throw new Sabel_DB_Exception($message);
-      } else {
-        if (is_string($pkey)) $pkey = (array)$pkey;
-
-        foreach ($pkey as $key) {
-          $this->setCondition($key, $model->__get($key));
-        }
-      }
-      $saveValues = $model->getUpdateValues();
+    if ($this->model->isSelected()) {
+      $saveValues = $this->_saveUpdate();
     } else {
-      $saveValues = $model->toArray();
+      $saveValues = $this->_saveInsert();
     }
+
+    $model = MODEL($this->model->getModelName());
+    $model->setProperties($saveValues);
+
+    return $model;
+  }
+
+  protected function _saveInsert()
+  {
+    $model      = $this->model;
+    $saveValues = $model->toArray();
 
     foreach ($saveValues as $key => $val) {
       $saveValues[$key] = $model->__get($key);
@@ -388,24 +400,50 @@ class Sabel_DB_Model_Executer
 
     $model->setSaveValues($saveValues);
 
-    if ($mode === "update") {
-      $stmt = Sabel_DB_Statement::createUpdateStatement($this);
-    } else {
-      $stmt = Sabel_DB_Statement::createInsertStatement($this);
-    }
+    $driver = $this->driver;
+    $stmt   = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT);
+    $sql    = $driver->loadSqlClass($model)->buildInsertSql($driver);
 
-    $this->_execute($stmt);
+    $this->_execute($stmt->setSql($sql));
 
-    if ($mode === "update") {
-      $saveValues = array_merge($model->toArray(), $saveValues);
-    } elseif (($incCol = $model->getIncrementColumn()) !== null) {
+    if (($incCol = $model->getIncrementColumn()) !== null) {
       $saveValues[$incCol] = $this->incrementId;
     }
 
-    $newModel = MODEL($model->getModelName());
-    $newModel->setProperties($saveValues);
+    return $saveValues;
+  }
 
-    return $newModel;
+  protected function _saveUpdate()
+  {
+    $model = $this->model;
+
+    if (($pkey = $model->getPrimaryKey()) === null) {
+      $message = "save() cannot update model(there is not primary key).";
+      throw new Sabel_DB_Exception($message);
+    } else {
+      if (is_string($pkey)) $pkey = (array)$pkey;
+
+      foreach ($pkey as $key) {
+        $this->setCondition($key, $model->__get($key));
+      }
+    }
+
+    $saveValues = $model->getUpdateValues();
+
+    foreach ($saveValues as $key => $val) {
+      $saveValues[$key] = $model->__get($key);
+    }
+
+    $model->setSaveValues($saveValues);
+
+    $driver = $this->driver;
+    $stmt   = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE);
+    $sql    = $driver->loadSqlClass($this->model)->buildUpdateSql($driver);
+    $sql   .= $this->createConditionSql();
+
+    $this->_execute($stmt->setSql($sql));
+
+    return array_merge($model->toArray(), $saveValues);
   }
 
   public function insert($data = null)
@@ -420,8 +458,10 @@ class Sabel_DB_Model_Executer
   {
     list ($data) = $this->arguments;
     $this->model->setSaveValues($this->chooseValues($data, "insert"));
-    $stmt = Sabel_DB_Statement::createInsertStatement($this);
-    $this->_execute($stmt);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT);
+    $driver = $this->driver;
+    $sql = $driver->loadSqlClass($this->model)->buildInsertSql($driver);
+    $this->_execute($stmt->setSql($sql));
 
     return $this->incrementId;
   }
@@ -438,8 +478,11 @@ class Sabel_DB_Model_Executer
   {
     list ($data) = $this->arguments;
     $this->model->setSaveValues($this->chooseValues($data, "update"));
-    $stmt = Sabel_DB_Statement::createUpdateStatement($this);
-    $this->_execute($stmt);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE);
+    $driver = $this->driver;
+    $sql  = $driver->loadSqlClass($this->model)->buildUpdateSql($driver);
+    $sql .= $this->createConditionSql();
+    $this->_execute($stmt->setSql($sql));
   }
 
   protected function chooseValues($data, $method)
@@ -465,9 +508,11 @@ class Sabel_DB_Model_Executer
 
     Sabel_DB_Transaction::begin($this->model->getConnectionName());
 
+    $driver = $this->driver;
     $this->model->setSaveValues($data);
-    $stmt = Sabel_DB_Statement::createInsertStatement($this);
-    $this->_execute($stmt);
+    $sqls = $driver->loadSqlClass($this->model)->buildInsertSql($driver);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT);
+    $this->_execute($stmt->setSql($sqls));
 
     Sabel_DB_Transaction::commit();
   }
@@ -523,9 +568,8 @@ class Sabel_DB_Model_Executer
   {
     list ($sql, $assoc, $stmtType) = $this->arguments;
 
-    $stmt = Sabel_DB_Statement::create($this, $stmtType);
-    $stmt->setSql($sql);
-    $rows = $this->_execute($stmt);
+    $stmt = Sabel_DB_Statement::create($stmtType);
+    $rows = $this->_execute($stmt->setSql($sql));
 
     if (empty($rows)) return null;
 
@@ -561,6 +605,41 @@ class Sabel_DB_Model_Executer
     if (isset($methods[$stmtType])) {
       $method = $methods[$stmtType];
       return $driver->$method($this);
+    }
+  }
+
+  protected function createSelectSql()
+  {
+    $driver     = $this->driver;
+    $projection = $this->projection;
+    $sqlBulder  = $driver->loadSqlClass($this->model);
+    return $sqlBulder->buildSelectSql($driver, $projection);
+  }
+
+  protected function createConditionSql($manager = null)
+  {
+    if ($manager === null) {
+      $manager = $this->conditionManager;
+    }
+
+    if ($manager !== null && !$manager->isEmpty()) {
+      return $manager->build($this->driver);
+    } else {
+      return "";
+    }
+  }
+
+  protected function createConstraintSql($sql, $constraints = null)
+  {
+    if ($constraints === null) {
+      $constraints = $this->constraints;
+    }
+
+    if (!empty($constraints)) {
+      $builder = $this->driver->loadConstraintSqlClass();
+      return $builder->build($sql, $constraints);
+    } else {
+      return $sql;
     }
   }
 }

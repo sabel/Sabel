@@ -9,11 +9,9 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Sql_General
-  extends    Sabel_DB_Abstract_Sql
-  implements Sabel_DB_Sql_Interface
+class Sabel_DB_Sql_General extends Sabel_DB_Abstract_Sql
 {
-  public function buildInsertSql($driver)
+  public function buildInsertSql(Sabel_DB_Abstract_Driver $driver)
   {
     $model   = $this->model;
     $tblName = $model->getTableName();
@@ -34,7 +32,7 @@ class Sabel_DB_Sql_General
     }
   }
 
-  protected function createInsertSql($tblName, $columns, $values)
+  private function createInsertSql($tblName, $columns, $values)
   {
     $sql   = array("INSERT INTO $tblName (");
     $sql[] = implode(", ", $columns) . ") VALUES (";
@@ -48,7 +46,7 @@ class Sabel_DB_Sql_General
     return implode("", $sql);
   }
 
-  public function buildUpdateSql($driver)
+  public function buildUpdateSql(Sabel_DB_Abstract_Driver $driver)
   {
     $model   = $this->model;
     $tblName = $model->getTableName();
