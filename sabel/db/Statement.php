@@ -16,14 +16,8 @@ class Sabel_DB_Statement
   const UPDATE  = 0x04;
   const DELETE  = 0x08;
 
-  private static $statements = array();
-
   public static function create($stmtType)
   {
-    if (isset(self::$statements[$stmtType])) {
-      return new self::$statements[$stmtType];
-    }
-
     switch ($stmtType) {
       case self::SELECT:
         return new Sabel_DB_Sql_Statement_Select();
@@ -41,10 +35,5 @@ class Sabel_DB_Statement
         $message = "Sabel_DB_Sql_Statement::create() invalid statement type.";
         throw new Sabel_DB_Exception($message);
     }
-  }
-
-  public static function registStatement($stmtType, $className)
-  {
-    self::$statements[$stmtType] = $className;
   }
 }

@@ -273,7 +273,7 @@ class Sabel_DB_Validator
         $values[] = $val;
       }
 
-      $result = $executer->selectOne()->execute();
+      $result = $executer->selectOne();
       if (!$result->isSelected()) continue;
 
       if ($model->isSelected()) {

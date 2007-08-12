@@ -2,7 +2,7 @@
 
 class Test_DB_Mysql extends Test_DB_Test
 {
-  private static $params1 = array("driver"   => "mysql",
+  private static $params1 = array("driver"   => "mysqli",
                                   "host"     => "127.0.0.1",
                                   "user"     => "root",
                                   "password" => "",
@@ -50,7 +50,7 @@ class Test_DB_Mysql extends Test_DB_Test
     $executer = new Sabel_DB_Model_Executer("Member");
 
     foreach ($tables as $table) {
-      $executer->query("DELETE FROM $table")->execute();
+      $executer->query("DELETE FROM $table");
     }
   }
 }

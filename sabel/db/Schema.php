@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Loader
+ * Sabel_DB_Schema
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,11 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Loader
+class Sabel_DB_Schema
 {
   private static $schemas = array();
 
-  public static function getSchema($model)
+  public static function get($model)
   {
     $tblName = $model->getTableName();
 
@@ -22,8 +22,9 @@ class Sabel_DB_Schema_Loader
     }
 
     $className = "Schema_" . convert_to_modelname($tblName);
+    Sabel::using($className);
 
-    if (class_exists($className, true)) {
+    if (class_exists($className, false)) {
       $cols = array();
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {

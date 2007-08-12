@@ -19,11 +19,11 @@ abstract class Sabel_DB_Abstract_Driver
   protected $connectionName = "";
 
   abstract public function execute();
-  abstract public function escape($values);
   abstract public function loadSqlClass($model);
   abstract public function loadConditionBuilder();
   abstract public function loadConstraintSqlClass();
   abstract public function loadTransaction();
+  abstract public function escape($values);
   abstract public function begin($connectionName = null);
 
   public function getDriverId()

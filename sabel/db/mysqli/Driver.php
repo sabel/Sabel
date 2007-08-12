@@ -56,6 +56,8 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape($values)
   {
+    if ($values === null) return "''";
+
     if ($this->connection === null) {
       $this->connection = Sabel_DB_Connection::get($this->connectionName);
     }

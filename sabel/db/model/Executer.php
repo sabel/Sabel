@@ -14,6 +14,7 @@ class Sabel_DB_Model_Executer
   protected
     $model  = null,
     $driver = null,
+    $stmt   = null,
     $method = "";
 
   protected
@@ -22,6 +23,7 @@ class Sabel_DB_Model_Executer
     $arguments        = array(),
     $constraints      = array(),
     $conditionManager = null,
+    $autoReinit       = true,
     $incrementId      = null;
 
   public function __construct($model)
@@ -30,10 +32,10 @@ class Sabel_DB_Model_Executer
       $model = MODEL($model);
     }
 
-    $this->setModel($model);
+    $this->setModel($model, false);
   }
 
-  public function setModel(Sabel_DB_Model $model, $clearState = true)
+  public function setModel(Sabel_DB_Model $model, $reinit = true)
   {
     $this->model  = $model;
     $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
@@ -43,7 +45,7 @@ class Sabel_DB_Model_Executer
       throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_Driver.");
     }
 
-    if ($clearState) $this->clearState();
+    if ($reinit) $this->initState();
 
     return $this;
   }
@@ -68,7 +70,7 @@ class Sabel_DB_Model_Executer
     return null;
   }
 
-  public function after($method)
+  public function after($method, $result)
   {
     return null;
   }
@@ -78,7 +80,7 @@ class Sabel_DB_Model_Executer
     return $this->_execute($stmt);
   }
 
-  public final function execute($clearState = true)
+  public final function execute()
   {
     $method = $this->method;
     $result = $this->before($method);
@@ -91,16 +93,21 @@ class Sabel_DB_Model_Executer
     $afterResult = $this->after($method, $result);
     if ($afterResult !== null) $result = $afterResult;
 
-    if ($clearState) $this->clearState();
+    if ($this->autoReinit) $this->initState();
 
     return $result;
   }
 
-  private final function _execute(Sabel_DB_Abstract_Statement $stmt)
+  protected final function _execute(Sabel_DB_Abstract_Statement $stmt)
   {
+    $this->stmt = $stmt;
     $stmtType = $stmt->getStatementType();
 
     try {
+      if (Sabel_DB_Transaction::isActive()) {
+        Sabel_DB_Transaction::begin($this->model->getConnectionName());
+      }
+
       $result = $this->driverInterrupt("before", $stmtType);
       if ($result === null) {
         $result = $this->driver->setSql($stmt->getSql())->execute();
@@ -114,10 +121,32 @@ class Sabel_DB_Model_Executer
     }
   }
 
-  public function clearState()
+  protected function driverInterrupt($type, $stmtType)
+  {
+    $driver = $this->driver;
+
+    if ($type === "before") {
+      $methods = $driver->getBeforeMethods();
+    } else {
+      $methods = $driver->getAfterMethods();
+    }
+
+    if (isset($methods[$stmtType])) {
+      $method = $methods[$stmtType];
+      return $driver->$method($this);
+    }
+  }
+
+  public function autoReinit($bool)
+  {
+    $this->autoReinit = $bool;
+  }
+
+  public function initState()
   {
     $this->unsetConditions(true);
 
+    $this->method     = "";
     $this->projection = "*";
     $this->arguments  = array();
     $this->parents    = array();
@@ -217,42 +246,40 @@ class Sabel_DB_Model_Executer
 
   public function getCount($arg1 = null, $arg2 = null)
   {
-    $this->method    = "getCount";
-    $this->arguments = array($arg1, $arg2);
-
-    return $this;
+    $args = func_get_args();
+    return $this->prepare("getCount", $args);
   }
 
   protected function _getCount()
   {
-    list ($arg1, $arg2) = $this->arguments;
+    @list ($arg1, $arg2) = $this->arguments;
     $this->setCondition($arg1, $arg2);
 
-    $projection = $this->projection;
-    $this->projection = "COUNT(*) AS cnt";
+    $projection  = $this->projection;
+    $constraints = $this->constraints;
+    $this->projection  = "COUNT(*) AS cnt";
+    $this->constraints = array("limit" => 1);
 
-    $sql  = $this->createSelectSql();
-    $sql .= $this->createConditionSql();
-    $sql  = $this->createConstraintSql($sql, array("limit" => 1));
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
-    $rows = $this->_execute($stmt->setSql($sql));
+    $rows = $this->_execute($stmt->setSql($this->createSelectSql()));
 
-    $this->projection = $projection;
+    $this->projection  = $projection;
+    $this->constraints = $constraints;
 
     return $rows[0]["cnt"];
   }
 
   public function selectOne($arg1 = null, $arg2 = null)
   {
-    $this->method    = "selectOne";
-    $this->arguments = array($arg1, $arg2);
+    $args = func_get_args();
+    $this->prepare("selectOne", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _selectOne()
   {
-    list ($arg1, $arg2) = $this->arguments;
+    @list ($arg1, $arg2) = $this->arguments;
 
     if ($arg1 === null && $this->conditionManager === null) {
       throw new Sabel_DB_Exception("selectOne() must set the condition.");
@@ -264,11 +291,8 @@ class Sabel_DB_Model_Executer
 
   protected function createModel($model)
   {
-    $sql  = $this->createSelectSql();
-    $sql .= $this->createConditionSql();
-    $sql  = $this->createConstraintSql($sql);
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
-    $rows = $this->_execute($stmt->setSql($sql));
+    $rows = $this->_execute($stmt->setSql($this->createSelectSql()));
 
     if (isset($rows[0])) {
       $model->setProperties($rows[0]);
@@ -289,15 +313,15 @@ class Sabel_DB_Model_Executer
 
   public function select($arg1 = null, $arg2 = null)
   {
-    $this->method    = "select";
-    $this->arguments = array($arg1, $arg2);
+    $args = func_get_args();
+    $this->prepare("select", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _select()
   {
-    list ($arg1, $arg2) = $this->arguments;
+    @list ($arg1, $arg2) = $this->arguments;
 
     $this->setCondition($arg1, $arg2);
     $parents = $this->parents;
@@ -307,11 +331,8 @@ class Sabel_DB_Model_Executer
       if ($result !== Sabel_DB_Join::CANNOT_JOIN) return $result;
     }
 
-    $sql  = $this->createSelectSql();
-    $sql .= $this->createConditionSql();
-    $sql  = $this->createConstraintSql($sql);
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
-    $rows = $this->_execute($stmt->setSql($sql));
+    $rows = $this->_execute($stmt->setSql($this->createSelectSql()));
 
     if (empty($rows)) return false;
 
@@ -348,14 +369,25 @@ class Sabel_DB_Model_Executer
 
   public function getChild($childName, $constraints = null)
   {
+    $args = func_get_args();
+    $this->prepare("getChild", $args);
+
+    return $this->execute();
+  }
+
+  public function _getChild()
+  {
+    @list ($childName, $constraints) = $this->arguments;
+
+    $model   = $this->model;
     $child   = MODEL($childName);
     $foreign = $child->getSchema()->getForeignKeys();
+    $tblName = $model->getTableName();
 
     if ($foreign === null) {
       $col  = "id";
-      $fkey = $this->getTableName() . "_id";
+      $fkey = $tblName . "_id";
     } else {
-      $tblName = $this->tableName;
       foreach ($foreign as $fkey => $params) {
         if ($params["referenced_table"] === $tblName) {
           $col = $params["referenced_column"];
@@ -364,15 +396,22 @@ class Sabel_DB_Model_Executer
       }
     }
 
-    if ($constraints) $child->setConstraint($constraints);
-    return $child->select($fkey, $this->__get($col));
+    $self = get_class($this);
+    $executer = new $self($child);
+
+    if (!empty($constraints)) {
+      $executer->setConstraint($constraints);
+    }
+
+    return $executer->select($fkey, $model->__get($col));
   }
 
   public function save()
   {
-    $this->method = "save";
+    $args = func_get_args();
+    $this->prepare("save", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _save()
@@ -435,28 +474,23 @@ class Sabel_DB_Model_Executer
     }
 
     $model->setSaveValues($saveValues);
-
-    $driver = $this->driver;
-    $stmt   = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE);
-    $sql    = $driver->loadSqlClass($this->model)->buildUpdateSql($driver);
-    $sql   .= $this->createConditionSql();
-
-    $this->_execute($stmt->setSql($sql));
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE);
+    $this->_execute($stmt->setSql($this->createUpdateSql()));
 
     return array_merge($model->toArray(), $saveValues);
   }
 
   public function insert($data = null)
   {
-    $this->method    = "insert";
-    $this->arguments = array($data);
+    $args = func_get_args();
+    $this->prepare("insert", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _insert()
   {
-    list ($data) = $this->arguments;
+    @list ($data) = $this->arguments;
     $this->model->setSaveValues($this->chooseValues($data, "insert"));
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT);
     $driver = $this->driver;
@@ -468,21 +502,19 @@ class Sabel_DB_Model_Executer
 
   public function update($data = null)
   {
-    $this->method    = "update";
-    $this->arguments = array($data);
+    $args = func_get_args();
+    $this->prepare("update", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _update($data = null)
   {
-    list ($data) = $this->arguments;
+    @list ($data) = $this->arguments;
     $this->model->setSaveValues($this->chooseValues($data, "update"));
+
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE);
-    $driver = $this->driver;
-    $sql  = $driver->loadSqlClass($this->model)->buildUpdateSql($driver);
-    $sql .= $this->createConditionSql();
-    $this->_execute($stmt->setSql($sql));
+    $this->_execute($stmt->setSql($this->createUpdateSql()));
   }
 
   protected function chooseValues($data, $method)
@@ -496,10 +528,10 @@ class Sabel_DB_Model_Executer
 
   public function arrayInsert(array $data)
   {
-    $this->method    = "arrayInsert";
-    $this->arguments = array($data);
+    $args = func_get_args();
+    $this->prepare("arrayInsert", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   public function _arrayInsert()
@@ -519,10 +551,10 @@ class Sabel_DB_Model_Executer
 
   public function delete($arg1 = null, $arg2 = null)
   {
-    $this->method    = "delete";
-    $this->arguments = array($arg1, $arg2);
+    $args = func_get_args();
+    $this->prepare("delete", $args);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _delete()
@@ -530,7 +562,7 @@ class Sabel_DB_Model_Executer
     $model   = $this->model;
     $manager = $this->loadConditionManager();
 
-    list ($arg1, $arg2) = $this->arguments;
+    @list ($arg1, $arg2) = $this->arguments;
 
     if (!$model->isSelected() && $arg1 === null && $manager->isEmpty()) {
       $message = "delete() must set the condition.";
@@ -561,7 +593,7 @@ class Sabel_DB_Model_Executer
     $this->method = "query";
     $this->arguments = array($sql, $assoc, $stmtType);
 
-    return $this;
+    return $this->execute();
   }
 
   protected function _query()
@@ -587,25 +619,12 @@ class Sabel_DB_Model_Executer
     $this->incrementId = $id;
   }
 
-  protected function driverInterrupt($type, $stmtType)
+  protected function prepare($method, $args)
   {
-    $driver = $this->driver;
+    $this->arguments = $args;
+    $this->method    = $method;
 
-    if ($type === "before") {
-      $methods = $driver->getBeforeMethods();
-    } else {
-      $methods = $driver->getAfterMethods();
-    }
-
-    if (isset($methods["all"])) {
-      $method = $methods["all"];
-      $driver->$method($this);
-    }
-
-    if (isset($methods[$stmtType])) {
-      $method = $methods[$stmtType];
-      return $driver->$method($this);
-    }
+    return $this;
   }
 
   protected function createSelectSql()
@@ -613,7 +632,20 @@ class Sabel_DB_Model_Executer
     $driver     = $this->driver;
     $projection = $this->projection;
     $sqlBulder  = $driver->loadSqlClass($this->model);
-    return $sqlBulder->buildSelectSql($driver, $projection);
+
+    $sql  = $sqlBulder->buildSelectSql($driver, $projection);
+    $sql .= $this->createConditionSql();
+
+    return $this->createConstraintSql($sql);
+  }
+
+  protected function createUpdateSql()
+  {
+    $driver = $this->driver;
+    $sql    = $driver->loadSqlClass($this->model)->buildUpdateSql($driver);
+    $sql   .= $this->createConditionSql();
+
+    return $this->createConstraintSql($sql);
   }
 
   protected function createConditionSql($manager = null)
