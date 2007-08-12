@@ -105,20 +105,22 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   protected function execute($sql)
   {
-    $executer    = $this->executer;
-    $driver      = $executer->getDriver();
-    $manager     = $executer->getConditionManager();
-    $constraints = $executer->getConstraints();
+    $executer = $this->executer;
+    $driver = $executer->getDriver();
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $driver);
+
+    $manager = $executer->getConditionManager();
 
     if ($manager !== null && !$manager->isEmpty()) {
-      $sql .= $manager->build($driver);
+      $sql .= $manager->build($stmt);
     }
+
+    $constraints = $executer->getConstraints();
 
     if (!empty($constraints)) {
       $sql = $driver->loadConstraintSqlClass()->build($sql, $constraints);
     }
 
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT);
     return $executer->executeStatement($stmt->setSql($sql));
   }
 

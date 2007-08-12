@@ -14,16 +14,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   protected $driverId      = "mysqli";
   protected $closeFunction = "mysqli_close";
 
-  public function loadSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
-  }
-
-  public function loadConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
-  }
-
   public function loadConstraintSqlClass()
   {
     return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
@@ -56,45 +46,30 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape($values)
   {
-    if ($values === null) return "''";
-
-    if ($this->connection === null) {
-      $this->connection = Sabel_DB_Connection::get($this->connectionName);
-    }
-
-    $conn   = $this->connection;
-    $values = escapeString($this->driverId, $values);
-    if (!is_array($values)) $values = (array)$values;
-
-    foreach ($values as &$value) {
-      if (!is_string($value)) continue;
-      $value = "'" . mysqli_real_escape_string($conn, $value) . "'";
-    }
-
-    if (isset($values[0]) && count($values) === 1) {
-      return $values[0];
-    } else {
-      return $values;
-    }
-  }
-
-  public function execute()
-  {
     $conn = $this->getConnection();
 
-    if (is_array($this->sql)) {
-      foreach ($this->sql as $sql) {
-        $result = mysqli_query($conn, $sql);
-        if (!$result) break;
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? 1 : 0;
+      } elseif (is_string($val)) {
+        $val = "'" . mysqli_real_escape_string($conn, $val) . "'";
       }
-    } else {
-      $result = mysqli_query($conn, $this->sql);
     }
 
-    if (!$result) {
-      $error = mysqli_error($conn);
-      $this->error("mysql driver execute failed: $error");
+    return $values;
+  }
+
+  public function execute($sql, $bindParam = null)
+  {
+    if ($bindParam !== null) {
+      $bindParam = $this->escape($bindParam);
     }
+
+    $conn   = $this->getConnection();
+    $sql    = $this->bind($sql, $bindParam);
+    $result = mysqli_query($conn, $sql);
+
+    if (!$result) $this->executeError($sql);
 
     $rows = array();
     if (is_object($result)) {
@@ -110,5 +85,12 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if ($executer->getModel()->getIncrementColumn()) {
       $executer->setIncrementId(mysqli_insert_id($this->connection));
     }
+  }
+
+  private function executeError($sql)
+  {
+    $error   = mysqli_error($this->connection);
+    $message = "mysqli driver execute failed: $error, SQL: $sql";
+    throw new Sabel_DB_Exception($message);
   }
 }

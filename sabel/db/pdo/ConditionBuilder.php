@@ -24,7 +24,7 @@ class Sabel_DB_Pdo_ConditionBuilder extends Sabel_DB_Abstract_ConditionBuilder
     $driver  = $this->driver;
     $bindKey = "param" . $this->count++;
     $bindVal = $driver->escape($condition->value);
-    $driver->setBindValues(array($bindKey => $bindVal));
+    $driver->setBind(array($bindKey => $bindVal));
     return $this->getKey($condition) . " = :{$bindKey}";
   }
 
@@ -36,8 +36,8 @@ class Sabel_DB_Pdo_ConditionBuilder extends Sabel_DB_Abstract_ConditionBuilder
     $t   = $this->count++;
     $val = $driver->escape($condition->value);
 
-    $driver->setBindValues(array("from{$f}" => $val[0],
-                                 "to{$t}"   => $val[1]));
+    $driver->setBind(array("from{$f}" => $val[0],
+                           "to{$t}"   => $val[1]));
 
     return $this->getKey($condition) . " BETWEEN :from{$f} AND :to{$t}";
   }
@@ -49,7 +49,7 @@ class Sabel_DB_Pdo_ConditionBuilder extends Sabel_DB_Abstract_ConditionBuilder
 
     list ($lg, $val) = $condition->value;
 
-    $driver->setBindValues(array($bindKey => $driver->escape($val)));
+    $driver->setBind(array($bindKey => $driver->escape($val)));
     return $condition->key . " $lg :{$bindKey}";
   }
 
@@ -58,7 +58,7 @@ class Sabel_DB_Pdo_ConditionBuilder extends Sabel_DB_Abstract_ConditionBuilder
     $driver  = $this->driver;
     $bindKey = "param" . $this->count++;
     $bindVal = $driver->escape($val);
-    $driver->setBindValues(array($bindKey => $bindVal));
+    $driver->setBind(array($bindKey => $bindVal));
 
     $query = $this->getKey($condition) . " LIKE :{$bindKey}";
     if (isset($esc)) $query .= " escape '{$esc}'";

@@ -1,25 +1,26 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_ConditionBuilder
+ * Sabel_DB_Condition_Builder
  *
- * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_ConditionBuilder
+class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
 {
-  protected $driver = null;
+  protected $count = 1;
+  protected $stmt  = null;
 
-  abstract public function initialize($driver);
-  abstract public function buildNormal($condition);
-  abstract public function buildBetween($condition);
-  abstract public function buildCompare($condition);
+  public function __construct(Sabel_DB_Abstract_Statement $stmt)
+  {
+    $this->count = 1;
+    $this->stmt  = $stmt;
+  }
 
-  public function build($condition)
+  public function build(Sabel_DB_Condition_Object $condition)
   {
     switch ($condition->type) {
       case Sabel_DB_Condition_Object::NORMAL:
@@ -45,9 +46,11 @@ abstract class Sabel_DB_Abstract_ConditionBuilder
     }
   }
 
-  protected function getKey($condition)
+  public function buildNormal(Sabel_DB_Condition_Object $condition)
   {
-    return ($condition->not) ? "NOT " . $condition->key : $condition->key;
+    $bindKey = "param" . $this->count++;
+    $this->stmt->setBind(array($bindKey => $condition->value));
+    return $this->getKey($condition) . " = :{$bindKey}";
   }
 
   public function buildIsNull($key)
@@ -60,18 +63,13 @@ abstract class Sabel_DB_Abstract_ConditionBuilder
     return $key . " IS NOT NULL";
   }
 
-  public function buildIn($condition)
+  public function buildIn(Sabel_DB_Condition_Object $condition)
   {
-    $values = $this->driver->escape($condition->value);
-    return $this->getKey($condition) . " IN (" . implode(", ", $values) . ")";
+    // @todo escape or bind.
+    return $this->getKey($condition) . " IN (" . implode(", ", $condition->value) . ")";
   }
 
-  public function buildLike($condition)
-  {
-    return $this->getLike($condition);
-  }
-
-  protected function getLike($condition)
+  public function buildLike(Sabel_DB_Condition_Object $condition)
   {
     $value = $condition->value;
 
@@ -89,6 +87,43 @@ abstract class Sabel_DB_Abstract_ConditionBuilder
       list($val, $esc) = $this->escapeForLike($val);
       return $this->createLike($val, $condition, $esc);
     }
+  }
+
+  public function buildBetween(Sabel_DB_Condition_Object $condition)
+  {
+    $f   = $this->count++;
+    $t   = $this->count++;
+    $val = $condition->value;
+
+    $this->stmt->setBind(array("from{$f}" => $val[0],
+                               "to{$t}"   => $val[1]));
+
+    return $this->getKey($condition) . " BETWEEN :from{$f} AND :to{$t}";
+  }
+
+  public function buildCompare(Sabel_DB_Condition_Object $condition)
+  {
+    $bindKey = "param" . $this->count++;
+    list ($lg, $val) = $condition->value;
+
+    $this->stmt->setBind(array($bindKey => $val));
+    return $condition->key . " $lg :{$bindKey}";
+  }
+
+  protected function createLike($val, $condition, $esc = null)
+  {
+    $bindKey = "param" . $this->count++;
+    $this->stmt->setBind(array($bindKey => $val));
+
+    $query = $this->getKey($condition) . " LIKE :{$bindKey}";
+    if (isset($esc)) $query .= " escape '{$esc}'";
+
+    return $query;
+  }
+
+  protected function getKey($condition)
+  {
+    return ($condition->not) ? "NOT " . $condition->key : $condition->key;
   }
 
   protected function escapeForLike($val)

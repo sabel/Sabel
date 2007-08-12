@@ -13,8 +13,15 @@
 abstract class Sabel_DB_Abstract_Statement
 {
   protected $sql = "";
+  protected $driver = null;
+  protected $bindValues = array();
 
   abstract public function getStatementType();
+
+  public function __construct(Sabel_DB_Abstract_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
 
   public function setSql($sql)
   {
@@ -26,5 +33,44 @@ abstract class Sabel_DB_Abstract_Statement
   public function getSql()
   {
     return $this->sql;
+  }
+
+  public function execute()
+  {
+    $driver = $this->driver;
+    $bindValues = $this->bindValues;
+
+    if (is_array($this->sql)) {
+      foreach ($this->sql as $sql) {
+        $bindParam = array_shift($bindValues);
+        $driver->execute($sql, $this->createBindParam($bindParam));
+      }
+    } else {
+      $bindParam = $this->createBindParam($bindValues);
+      return $this->driver->execute($this->sql, $bindParam);
+    }
+  }
+
+  public function setBind($bindValues, $add = true)
+  {
+    if ($add) {
+      foreach ($bindValues as $key => $val) {
+        $this->bindValues[$key] = $val;
+      }
+    } else {
+      $this->bindValues = $bindValues;
+    }
+  }
+
+  protected function createBindParam($bindValues)
+  {
+    $bindParam = array();
+
+    foreach ($bindValues as $key => $value) {
+      $bindParam[":{$key}"] = $value;
+    }
+
+    $this->bindValues = array();
+    return $bindParam;
   }
 }

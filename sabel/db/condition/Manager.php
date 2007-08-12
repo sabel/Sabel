@@ -15,7 +15,7 @@ class Sabel_DB_Condition_Manager
 
   public function add($condition)
   {
-    if ($condition instanceof Sabel_DB_Condition_Object) {
+    if ($this->isObject($condition)) {
       $this->conditions[$condition->key] = $condition;
     } else {
       $this->conditions[] = $condition;
@@ -58,9 +58,9 @@ class Sabel_DB_Condition_Manager
     return $conditions;
   }
 
-  public function build(Sabel_DB_Abstract_Driver $driver)
+  public function build(Sabel_DB_Abstract_Statement $stmt)
   {
-    $builder = $driver->loadConditionBuilder();
+    $builder = new Sabel_DB_Condition_Builder($stmt);
 
     $set   = false;
     $query = array();

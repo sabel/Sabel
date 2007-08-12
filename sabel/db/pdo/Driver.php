@@ -11,22 +11,11 @@
  */
 class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
-  private $database   = "";
-  private $bindValues = array();
+  private $database = "";
 
   public function __construct($database)
   {
     $this->database = $database;
-  }
-
-  public function loadSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Pdo_Sql");
-  }
-
-  public function loadConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Pdo_ConditionBuilder");
   }
 
   public function loadConstraintSqlClass()
@@ -37,17 +26,6 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_General::getInstance();
-  }
-
-  public function setBindValues($bindValues, $add = true)
-  {
-    if ($add) {
-      foreach ($bindValues as $key => $val) {
-        $this->bindValues[$key] = $val;
-      }
-    } else {
-      $this->bindValues = $bindValues;
-    }
   }
 
   public function getAfterMethods()
@@ -91,7 +69,25 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape($values)
   {
-    return escapeString($this->database, $values);
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        switch ($this->database) {
+          case "mysql":
+            $val = ($val) ? 1 : 0;
+            break;
+
+          case "pgsql":
+            $val = ($val) ? "t" : "f";
+            break;
+
+          case "sqlite":
+            $val = ($val) ? "true" : "false";
+            break;
+        }
+      }
+    }
+
+    return $values;
   }
 
   public function getIncrementId($executer)
@@ -111,63 +107,27 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     $executer->setIncrementId($id);
   }
 
-  public function execute()
+  public function execute($sql, $bindParam = null)
   {
-    $sql  = $this->sql;
+    if ($bindParam === null) {
+      $bindParam = array();
+    } else {
+      $bindParam = $this->escape($bindParam);
+    }
+
     $conn = $this->getConnection();
 
-    if (is_array($sql)) {
-      $this->arrayExecute($conn, $sql);
-    } else {
-      $pdoStmt = $this->createPdoStatement($conn, $sql);
-      $param   = $this->createBindParam();
-
-      if ($pdoStmt->execute($param)) {
-        $this->result = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
-        $pdoStmt->closeCursor();
-        return $this->result;
-      } else {
-        $this->executeError($conn, $pdoStmt, $param);
-      }
-    }
-  }
-
-  private function createPdoStatement($conn, $sql)
-  {
     if (!($pdoStmt = $conn->prepare($sql))) {
-      $this->data = array();
       $error = $conn->errorInfo();
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
-    return $pdoStmt;
-  }
-
-  private function createBindParam($bindValues = null)
-  {
-    $bindParam = array();
-    $binds = ($bindValues === null) ? $this->bindValues : $bindValues;
-
-    foreach ($binds as $key => $value) {
-      $bindParam[":{$key}"] = $value;
-    }
-
-    $this->bindValues = array();
-    return $bindParam;
-  }
-
-  private function arrayExecute($conn, $sqls)
-  {
-    $bindValues = $this->bindValues;
-
-    foreach ($sqls as $sql) {
-      $pdoStmt = $this->createPdoStatement($conn, $sql);
-      $param   = $this->createBindParam(array_shift($bindValues));
-
-      if (!$pdoStmt->execute($param)) {
-        $this->executeError($conn, $pdoStmt, $param);
-        break;
-      }
+    if ($pdoStmt->execute($bindParam)) {
+      $this->result = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
+      $pdoStmt->closeCursor();
+      return $this->result;
+    } else {
+      $this->executeError($conn, $pdoStmt, $bindParam);
     }
   }
 
@@ -186,4 +146,3 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     throw new Sabel_DB_Exception("pdo driver execute failed: $error");
   }
 }
-

@@ -47,10 +47,7 @@ abstract class Sabel_DB_Abstract_Schema
 
   protected function execute($sql)
   {
-    $driver = $this->driver;
-
-    $driver->setSql($sql)->execute();
-    return $driver->getResult();
+    return $this->driver->execute($sql);
   }
 
   protected function setDefaultValue($co, $default)

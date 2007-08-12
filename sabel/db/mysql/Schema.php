@@ -80,7 +80,6 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
   public function getUniques($tblName)
   {
     $schemaName = $this->schemaName;
-    $driver = $this->driver;
 
     $is  = "information_schema";
     $sql = "SELECT tc.constraint_name as unique_key, kcu.column_name "
@@ -90,7 +89,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
          . "AND kcu.table_name='{$tblName}' AND tc.constraint_schema = '{$schemaName}' "
          . "AND tc.constraint_type='UNIQUE'";
 
-    $rows = $driver->setSql($sql)->execute();
+    $rows = $this->execute($sql);
     if (empty($rows)) return null;
 
     $uniques = array();
@@ -119,9 +118,8 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
 
   protected function getForeignKeys50($tblName)
   {
-    $driver     = $this->driver;
     $schemaName = $this->schemaName;
-    $result     = $driver->setSql("SHOW CREATE TABLE $tblName")->execute();
+    $result     = $this->execute("SHOW CREATE TABLE $tblName");
     $createSql  = $result[0]["Create Table"];
 
     preg_match_all("/CONSTRAINT .+ FOREIGN KEY (.+)/", $createSql, $matches);

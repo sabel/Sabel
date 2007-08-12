@@ -18,16 +18,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
   protected $commitCommand   = "COMMIT";
   protected $rollbackCommand = "ROLLBACK";
 
-  public function loadSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
-  }
-
-  public function loadConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
-  }
-
   public function loadConstraintSqlClass()
   {
     return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
@@ -38,24 +28,37 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return Sabel_DB_Transaction_General::getInstance();
   }
 
-  public function getBeforeMethods()
+  public function getAfterMethods()
   {
-    return array(Sabel_DB_Statement::INSERT => "insert");
+    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
   }
 
   public function escape($values)
   {
-    return escapeString($this->driverId, $values, "pg_escape_string");
+    $conn = $this->getConnection();
+
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? "'t'" : "'f'";
+      } elseif (is_string($val)) {
+        $val = "'" . pg_escape_string($conn, $val) . "'";
+      }
+    }
+
+    return $values;
   }
 
-  public function execute()
+  public function execute($sql, $bindParam = null)
   {
-    $result = parent::execute();
-
-    if (!$result) {
-      $error = pg_result_error($result);
-      $this->error("pgsql driver execute failed: $error");
+    if ($bindParam !== null) {
+      $bindParam = $this->escape($bindParam);
     }
+
+    $conn   = $this->getConnection();
+    $sql    = $this->bind($sql, $bindParam);
+    $result = pg_query($conn, $sql);
+
+    if (!$result) $this->executeError($result);
 
     $rows = array();
     if (is_resource($result)) {
@@ -66,33 +69,18 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return $this->result = $rows;
   }
 
-  public function insert($executer)
+  public function getIncrementId($executer)
   {
-    $model   = $executer->getModel();
-    $tblName = $model->getTableName();
-    $values  = $model->getSaveValues();
-    $conn    = $this->getConnection();
-
-    if (!isset($values[0])) $values = array($values);
-
-    foreach ($values as $value) {
-      $this->exec_pg_insert($conn, $tblName, $value);
-    }
-
-    if ($model->getIncrementColumn()) {
+    if (($column = $executer->getModel()->getIncrementColumn()) !== null) {
       $executer->setIncrementId($this->getSequenceId("SELECT LASTVAL() AS id"));
     } else {
       $executer->setIncrementId(null);
     }
-
-    return true;
   }
 
-  private function exec_pg_insert($conn, $tblName, $values)
+  private function executeError($result)
   {
-    if (!$result = pg_insert($conn, $tblName, $values)) {
-      $values = var_export($values, true);
-      throw new Exception("pg_insert execute failed: '$tblName' VALUES: $values");
-    }
+    $error = pg_result_error($result);
+    throw new Sabel_DB_Exception("pgsql driver execute failed: $error");
   }
 }

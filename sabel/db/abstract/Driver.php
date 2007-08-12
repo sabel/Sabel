@@ -14,16 +14,13 @@ abstract class Sabel_DB_Abstract_Driver
 {
   protected $sql            = "";
   protected $driverId       = "";
-  protected $result         = array();
   protected $connection     = null;
   protected $connectionName = "";
 
-  abstract public function execute();
-  abstract public function loadSqlClass($model);
-  abstract public function loadConditionBuilder();
+  abstract public function escape($values);
+  abstract public function execute($sql, $bindParam = null);
   abstract public function loadConstraintSqlClass();
   abstract public function loadTransaction();
-  abstract public function escape($values);
   abstract public function begin($connectionName = null);
 
   public function getDriverId()
@@ -36,11 +33,6 @@ abstract class Sabel_DB_Abstract_Driver
     $this->sql = $sql;
 
     return $this;
-  }
-
-  public function getResult()
-  {
-    return $this->result;
   }
 
   public function getBeforeMethods()
@@ -87,12 +79,22 @@ abstract class Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
+  protected function bind($sql, $bindParam)
+  {
+    if (!empty($bindParam)) {
+      return str_replace(array_keys($bindParam), $bindParam, $sql);
+    } else {
+      return $sql;
+    }
+  }
+
   protected function error($error)
   {
     throw new Sabel_DB_Exception($error);
   }
 }
 
+// @todo
 function escapeString($db, $values, $escMethod = null)
 {
   if ($values === null) {
@@ -104,16 +106,9 @@ function escapeString($db, $values, $escMethod = null)
   foreach ($values as &$val) {
     if (is_bool($val)) {
       switch ($db) {
-        case "mysql":
-        case "mysqli":
         case "oci":
         case "ibase":
           $val = ($val) ? 1 : 0;
-          break;
-
-        case "pgsql":
-        case "sqlite":
-          $val = ($val) ? "true" : "false";
           break;
 
         case "mssql":
@@ -125,5 +120,9 @@ function escapeString($db, $values, $escMethod = null)
     }
   }
 
-  return (isset($values[0])) ? $values[0] : $values;
+  if (isset($values[0]) && count($values) === 1) {
+    return $values[0];
+  } else {
+    return $values;
+  }
 }

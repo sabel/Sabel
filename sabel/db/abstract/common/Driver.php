@@ -12,7 +12,7 @@
  */
 abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function execute()
+  public function executeQuery()
   {
     $sql  = $this->sql;
     $conn = $this->getConnection();
@@ -49,27 +49,27 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
     $trans = $this->loadTransaction();
 
     if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      $this->setSql($this->beginCommand)->execute($connection);
-      $trans->start($connection, $this);
+      $this->connection = Sabel_DB_Connection::get($connectionName);
+      $this->execute($this->beginCommand);
+      $trans->start($this->connection, $this);
     }
   }
 
   public function commit($connection)
   {
     $this->connection = $connection;
-    $this->setSql($this->commitCommand)->execute();
+    $this->execute($this->commitCommand);
   }
 
   public function rollback($connection)
   {
     $this->connection = $connection;
-    $this->setSql($this->rollbackCommand)->execute();
+    $this->execute($this->rollbackCommand);
   }
 
   protected function getSequenceId($sql)
   {
-    $rows = $this->setSql($sql)->execute();
+    $rows = $this->execute($sql);
     return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
   }
 }
