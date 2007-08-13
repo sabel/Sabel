@@ -37,18 +37,8 @@ abstract class Sabel_DB_Abstract_Statement
 
   public function execute()
   {
-    $driver = $this->driver;
-    $bindValues = $this->bindValues;
-
-    if (is_array($this->sql)) {
-      foreach ($this->sql as $sql) {
-        $bindParam = array_shift($bindValues);
-        $driver->execute($sql, $this->createBindParam($bindParam));
-      }
-    } else {
-      $bindParam = $this->createBindParam($bindValues);
-      return $this->driver->execute($this->sql, $bindParam);
-    }
+    $bindParam = $this->createBindParam($this->bindValues);
+    return $this->driver->execute($this->sql, $bindParam);
   }
 
   public function setBind($bindValues, $add = true)

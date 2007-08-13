@@ -28,11 +28,6 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     return Sabel_DB_Transaction_General::getInstance();
   }
 
-  public function getAfterMethods()
-  {
-    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
@@ -90,31 +85,8 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function getIncrementId($executer)
-  {
-    if ($this->database === "pgsql") {
-      $model = $executer->getModel();
-      if (($column = $model->getIncrementColumn()) !== null) {
-        $tblName = $model->getTableName();
-        $id = (int)$this->connection->lastInsertId("{$tblName}_{$column}_seq");
-      } else {
-        $id = null;
-      }
-    } else {
-      $id = (int)$this->connection->lastInsertId();
-    }
-
-    $executer->setIncrementId($id);
-  }
-
   public function execute($sql, $bindParam = null)
   {
-    if ($bindParam === null) {
-      $bindParam = array();
-    } else {
-      $bindParam = $this->escape($bindParam);
-    }
-
     $conn = $this->getConnection();
 
     if (!($pdoStmt = $conn->prepare($sql))) {
@@ -122,12 +94,30 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
+    if ($bindParam === null) {
+      $bindParam = array();
+    } else {
+      $bindParam = $this->escape($bindParam);
+    }
+
     if ($pdoStmt->execute($bindParam)) {
-      $this->result = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
+      $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
       $pdoStmt->closeCursor();
-      return $this->result;
+      return $rows;
     } else {
       $this->executeError($conn, $pdoStmt, $bindParam);
+    }
+  }
+
+  public function getLastInsertId(Sabel_DB_Model $model)
+  {
+    if ($this->database === "pgsql") {
+      if (($column = $model->getIncrementColumn()) !== null) {
+        $tblName = $model->getTableName();
+        return $this->connection->lastInsertId("{$tblName}_{$column}_seq");
+      }
+    } else {
+      return $this->connection->lastInsertId();
     }
   }
 

@@ -28,11 +28,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return Sabel_DB_Transaction_General::getInstance();
   }
 
-  public function getAfterMethods()
-  {
-    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
-  }
-
   public function escape($values)
   {
     $conn = $this->getConnection();
@@ -58,7 +53,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     $sql    = $this->bind($sql, $bindParam);
     $result = pg_query($conn, $sql);
 
-    if (!$result) $this->executeError($result);
+    if (!$result) $this->executeError($result, $sql);
 
     $rows = array();
     if (is_resource($result)) {
@@ -66,21 +61,19 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
       pg_free_result($result);
     }
 
-    return $this->result = $rows;
+    return $rows;
   }
 
-  public function getIncrementId($executer)
+  public function getLastInsertId(Sabel_DB_Model $model)
   {
-    if (($column = $executer->getModel()->getIncrementColumn()) !== null) {
-      $executer->setIncrementId($this->getSequenceId("SELECT LASTVAL() AS id"));
-    } else {
-      $executer->setIncrementId(null);
-    }
+    $rows = $this->execute("SELECT LASTVAL() AS id");
+    return (int)$rows[0]["id"];
   }
 
-  private function executeError($result)
+  private function executeError($result, $sql)
   {
     $error = pg_result_error($result);
-    throw new Sabel_DB_Exception("pgsql driver execute failed: $error");
+    $message = "pgsql driver execute failed: $error, SQL: $sql";
+    throw new Sabel_DB_Exception($message);
   }
 }

@@ -20,19 +20,19 @@ class Sabel_DB_Statement
   {
     switch ($stmtType) {
       case self::SELECT:
-        return new Sabel_DB_Sql_Statement_Select($driver);
+        return new Sabel_DB_Statement_Select($driver);
 
       case self::INSERT:
-        return new Sabel_DB_Sql_Statement_Insert($driver);
+        return new Sabel_DB_Statement_Insert($driver);
 
       case self::UPDATE:
-        return new Sabel_DB_Sql_Statement_Update($driver);
+        return new Sabel_DB_Statement_Update($driver);
 
       case self::DELETE:
-        return new Sabel_DB_Sql_Statement_Delete($driver);
+        return new Sabel_DB_Statement_Delete($driver);
 
       default:
-        $message = "Sabel_DB_Sql_Statement::create() invalid statement type.";
+        $message = "Sabel_DB_Statement::create() invalid statement type.";
         throw new Sabel_DB_Exception($message);
     }
   }

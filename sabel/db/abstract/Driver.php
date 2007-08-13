@@ -12,7 +12,6 @@
  */
 abstract class Sabel_DB_Abstract_Driver
 {
-  protected $sql            = "";
   protected $driverId       = "";
   protected $connection     = null;
   protected $connectionName = "";
@@ -28,13 +27,6 @@ abstract class Sabel_DB_Abstract_Driver
     return $this->driverId;
   }
 
-  public function setSql($sql)
-  {
-    $this->sql = $sql;
-
-    return $this;
-  }
-
   public function getBeforeMethods()
   {
     return array();
@@ -43,6 +35,16 @@ abstract class Sabel_DB_Abstract_Driver
   public function getAfterMethods()
   {
     return array();
+  }
+
+  public function getSequenceId(Sabel_DB_Model $model)
+  {
+    return null;
+  }
+
+  public function getLastInsertId(Sabel_DB_Model $model)
+  {
+    return null;
   }
 
   public function setConnectionName($connectionName)
@@ -87,11 +89,6 @@ abstract class Sabel_DB_Abstract_Driver
       return $sql;
     }
   }
-
-  protected function error($error)
-  {
-    throw new Sabel_DB_Exception($error);
-  }
 }
 
 // @todo
@@ -107,7 +104,6 @@ function escapeString($db, $values, $escMethod = null)
     if (is_bool($val)) {
       switch ($db) {
         case "oci":
-        case "ibase":
           $val = ($val) ? 1 : 0;
           break;
 

@@ -12,34 +12,6 @@
  */
 abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function executeQuery()
-  {
-    $sql  = $this->sql;
-    $conn = $this->getConnection();
-    $func = $this->execFunction;
-
-    switch ($this->driverId) {
-      case "mysql":
-      case "mssql":
-        if (is_array($sql)) {
-          foreach ($sql as $s) $func($s, $conn);
-          return true;
-        } else {
-          return $func($sql, $conn);
-        }
-
-      case "mysqli":
-      case "pgsql":
-      case "ibase":
-        if (is_array($sql)) {
-          foreach ($sql as $s) $func($conn, $s);
-          return true;
-        } else {
-          return $func($conn, $sql);
-        }
-    }
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
@@ -65,11 +37,5 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
   {
     $this->connection = $connection;
     $this->execute($this->rollbackCommand);
-  }
-
-  protected function getSequenceId($sql)
-  {
-    $rows = $this->execute($sql);
-    return (isset($rows[0]["id"])) ? (int)$rows[0]["id"] : null;
   }
 }

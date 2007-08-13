@@ -4,7 +4,7 @@ class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";
   public static $tables = array("member", "member_sub_group", "member_group",
-                                "super_group", "location");
+                                "super_group", "location", "condition_test");
 
   public function testInsert()
   {
@@ -89,7 +89,7 @@ class Test_DB_Test extends SabelTestCase
 
     $this->assertTrue($threw);
 
-    $count = $executer->getCount()->execute();
+    $count = $executer->getCount();
     $this->assertEquals($count, 1);
   }
 
@@ -107,7 +107,7 @@ class Test_DB_Test extends SabelTestCase
     $executer = new Executer($member);
     $executer->save();
 
-    $count = $executer->getCount()->execute();
+    $count = $executer->getCount();
     $this->assertEquals($count, 2);
   }
 
@@ -322,7 +322,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($count, 1);
   }
 
-  public function testArrayInsert()
+  public function testInserts()
   {
     $data = array();
 
@@ -354,9 +354,12 @@ class Test_DB_Test extends SabelTestCase
                     "created_at" => "2007-01-01 00:00:00");
 
     $executer = new Executer("Member");
-    $executer->arrayInsert($data);
 
-    $count = $executer->getCount()->execute();
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $count = $executer->getCount();
     $this->assertEquals($count, 5);
   }
 
@@ -429,6 +432,168 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($result), 1);
   }
 
+  public function testConditionTest()
+  {
+    $data = array("bool_flag" => true);
+
+    $executer = new Executer("ConditionTest");
+    $executer->insert($data);
+
+    //==============================================
+
+    $data = array("point"     => 200,
+                  "bool_flag" => false);
+
+    $executer->insert($data);
+
+    //==============================================
+
+    $data = array("name"      => "name3",
+                  "point"     => 300,
+                  "bool_flag" => true);
+
+    $executer->insert($data);
+
+    //==============================================
+
+    $data = array("name"      => "name4",
+                  "point"     => 400,
+                  "bool_flag" => false);
+
+    $executer->insert($data);
+
+    //==============================================
+
+    $model = MODEL("ConditionTest");
+    $model->name  = "name5";
+    $model->point = 500;
+    $model->bool_flag = false;
+
+    $executer = new Executer($model);
+    $saved = $executer->save();
+
+    // new sequence id.
+    $this->assertTrue(is_int($saved->id));
+
+    //==============================================
+
+    $data = array("name"      => "name%",
+                  "point"     => 600,
+                  "bool_flag" => false);
+
+    $executer->insert($data);
+
+    //==============================================
+
+    // boolean condition.
+    $executer = new Executer("ConditionTest");
+    $models = $executer->select("bool_flag", false);
+    $this->assertEquals(count($models), 4);
+
+    $count = $executer->getCount("bool_flag", true);
+    $this->assertEquals($count, 2);
+
+    // normal condition.
+    $executer = new Executer("ConditionTest");
+    $model = $executer->selectOne("point", 400);
+    $this->assertTrue($model->isSelected());
+    $this->assertEquals($model->point, 400);
+
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition("point", 400);
+    $model = $executer->selectOne();
+    $this->assertTrue($model->isSelected());
+    $this->assertEquals($model->point, 400);
+
+    // and condition.
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition("point", 400);
+    $executer->setCondition("name", "name4");
+    $model = $executer->selectOne();
+    $this->assertTrue($model->isSelected());
+    $this->assertEquals($model->point, 400);
+    $this->assertEquals($model->name, "name4");
+
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition("point", 400);
+    $executer->setCondition("name", "name5");
+    $model = $executer->selectOne();
+    $this->assertFalse($model->isSelected());
+
+    // or condition.
+    $executer = new Executer("ConditionTest");
+    $or = new OrCondition();
+    $or->add(new Condition("point", 400));
+    $or->add(new Condition("name", "name5"));
+    $executer->loadConditionManager()->add($or);
+    $executer->setConstraint("order", "id ASC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 2);
+    $this->assertEquals($models[0]->point, 400);
+    $this->assertEquals($models[1]->name, "name5");
+
+    // between condition.
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition(new Condition("point", array(200, 400), BETWEEN));
+    $executer->setConstraint("order", "point DESC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 3);
+    $this->assertEquals($models[0]->point, 400);
+    $this->assertEquals($models[1]->point, 300);
+    $this->assertEquals($models[2]->point, 200);
+
+    // compare condition.
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition(new Condition("point", array("<", 400), COMPARE));
+    $executer->setConstraint("order", "point DESC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 3);
+    $this->assertEquals($models[0]->point, 300);
+    $this->assertEquals($models[1]->point, 200);
+    $this->assertEquals($models[2]->point, 100);
+
+    // or compare condition.
+    $executer = new Executer("ConditionTest");
+    $or = new OrCondition();
+    $or->add(new Condition("point", array(">=", 400), COMPARE));
+    $or->add(new Condition("point", array("<=", 200), COMPARE));
+    $executer->loadConditionManager()->add($or);
+    $executer->setConstraint("order", "point DESC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 5);
+    $this->assertEquals($models[0]->point, 600);
+    $this->assertEquals($models[1]->point, 500);
+    $this->assertEquals($models[2]->point, 400);
+    $this->assertEquals($models[3]->point, 200);
+    $this->assertEquals($models[4]->point, 100);
+
+    // like condition.
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition(new Condition("name", array("name_", false), LIKE));
+    $executer->setConstraint("order", "id ASC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 4);
+    $this->assertEquals($models[0]->name, "name3");
+    $this->assertEquals($models[1]->name, "name4");
+    $this->assertEquals($models[2]->name, "name5");
+    $this->assertEquals($models[3]->name, "name%");
+
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition(new Condition("name", "name%", LIKE));
+    $models = $executer->select();
+    $this->assertEquals(count($models), 1);
+
+    $executer = new Executer("ConditionTest");
+    $executer->setCondition(new Condition("name", array("nam%", false), LIKE));
+    $executer->setConstraint("order", "id ASC");
+    $models = $executer->select();
+    $this->assertEquals(count($models), 4);
+    $this->assertEquals($models[0]->name, "name3");
+    $this->assertEquals($models[1]->name, "name4");
+    $this->assertEquals($models[2]->name, "name5");
+    $this->assertEquals($models[3]->name, "name%");
+  }
+
   public function testClear()
   {
     Sabel_DB_Schema::clear();
@@ -463,7 +628,7 @@ class Executer extends Sabel_DB_Model_Executer
 
   public function after($method, $result)
   {
-    //$this->log();
+    $this->log();
   }
 
   private function beforeSave()

@@ -1,9 +1,5 @@
 <?php
 
-if (!defined("MQ_SYBASE")) {
-  define("MQ_SYBASE", ini_get("magic_quotes_sybase"));
-}
-
 /**
  * Sabel_DB_Ibase_Driver
  *
@@ -18,16 +14,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
   protected $driverId      = "ibase";
   protected $execFunction  = "ibase_query";
   protected $closeFunction = "ibase_close";
-
-  public function loadSqlClass($model)
-  {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
-  }
-
-  public function loadConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
-  }
 
   public function loadConstraintSqlClass()
   {
@@ -53,9 +39,11 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     return $this->connection = $connection;
   }
 
-  public function getBeforeMethods()
+  public function getSequenceId(Sabel_DB_Model $model)
   {
-    return array(Sabel_DB_Command::INSERT => "setIncrementId");
+    $column  = $model->getIncrementColumn();
+    $genName = strtoupper($model->getTableName() . "_{$column}_gen");
+    return ibase_gen_id($genName, 1, $this->getConnection());
   }
 
   public function begin($connectionName = null)
@@ -75,17 +63,28 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function escape($values)
   {
-    return escapeString("ibase", $values, "ibase_escape_string");
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? 1 : 0;
+      } elseif (is_string($val)) {
+        $val = "'" . ibase_escape_string($val) . "'";
+      }
+    }
+
+    return $values;
   }
 
-  public function execute()
+  public function execute($sql, $bindParam = null)
   {
-    $result = parent::execute();
-
-    if (!$result) {
-      $error = ibase_errmsg();
-      $this->error("ibase driver execute failed: $error");
+    if ($bindParam !== null) {
+      $bindParam = $this->escape($bindParam);
     }
+
+    $conn   = $this->getConnection();
+    $sql    = $this->bind($sql, $bindParam);
+    $result = ibase_query($conn, $sql);
+
+    if (!$result) $this->executeError($sql);
 
     $rows = array();
     if (is_resource($result)) {
@@ -96,28 +95,19 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     }
 
     if ($this->autoCommit) ibase_commit($this->connection);
-    return $this->result = $rows;
+    return $rows;
   }
 
-  public function setIncrementId($command)
+  private function executeError($sql)
   {
-    $model = $command->getModel();
-    if (($column = $model->getIncrementColumn()) === null) {
-      return $command->setIncrementId(null);
-    }
-
-    $values = $model->getSaveValues();
-
-    // @todo erase
-    if (isset($values[$column])) {
-      $command->setIncrementId(null);
-    } else {
-      $genName = $model->getTableName() . "_{$column}_gen";
-      $values[$column] = ibase_gen_id($genName, 1, $this->getConnection());
-      $model->setSaveValues($values);
-      $command->setIncrementId($values[$column]);
-    }
+    $error   = ibase_errmsg();
+    $message = "ibase driver execute failed: $error, SQL: $sql";
+    throw new Sabel_DB_Exception($message);
   }
+}
+
+if (!defined("MQ_SYBASE")) {
+  define("MQ_SYBASE", ini_get("magic_quotes_sybase"));
 }
 
 function ibase_escape_string($val)

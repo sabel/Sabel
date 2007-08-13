@@ -39,11 +39,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     }
   }
 
-  public function getAfterMethods()
-  {
-    return array(Sabel_DB_Statement::INSERT => "getIncrementId");
-  }
-
   public function escape($values)
   {
     $conn = $this->getConnection();
@@ -77,14 +72,12 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       mysqli_free_result($result);
     }
 
-    return $this->result = $rows;
+    return $rows;
   }
 
-  public function getIncrementId($executer)
+  public function getLastInsertId(Sabel_DB_Model $model)
   {
-    if ($executer->getModel()->getIncrementColumn()) {
-      $executer->setIncrementId(mysqli_insert_id($this->connection));
-    }
+    return mysqli_insert_id($this->connection);
   }
 
   private function executeError($sql)

@@ -24,7 +24,7 @@ class Sabel_DB_Model_Executer
     $constraints      = array(),
     $conditionManager = null,
     $autoReinit       = true,
-    $incrementId      = null;
+    $lastInsertId     = null;
 
   public function __construct($model)
   {
@@ -154,10 +154,11 @@ class Sabel_DB_Model_Executer
   {
     $this->unsetConditions(true);
 
-    $this->method     = "";
-    $this->projection = "*";
-    $this->arguments  = array();
-    $this->parents    = array();
+    $this->method       = "";
+    $this->projection   = "*";
+    $this->lastInsertId = null;
+    $this->arguments    = array();
+    $this->parents      = array();
   }
 
   public function setProjection($p)
@@ -450,8 +451,13 @@ class Sabel_DB_Model_Executer
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
     $this->_execute($stmt->setSql($this->createInsertSql($stmt, $saveValues)));
 
-    if (($incCol = $model->getIncrementColumn()) !== null) {
-      $saveValues[$incCol] = $this->incrementId;
+    if (($column = $model->getIncrementColumn()) !== null) {
+      $newId = $this->driver->getLastInsertId($model);
+      if ($newId === null) {
+        $saveValues[$column] = $this->lastInsertId;
+      } else {
+        $saveValues[$column] = $newId;
+      }
     }
 
     return $saveValues;
@@ -498,7 +504,7 @@ class Sabel_DB_Model_Executer
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
     $this->_execute($stmt->setSql($this->createInsertSql($stmt, $data)));
 
-    return $this->incrementId;
+    return $this->lastInsertId;
   }
 
   public function update($data = null)
@@ -514,26 +520,6 @@ class Sabel_DB_Model_Executer
     @list ($data) = $this->arguments;
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE, $this->driver);
     $this->_execute($stmt->setSql($this->createUpdateSql($stmt, $data)));
-  }
-
-  public function arrayInsert(array $data)
-  {
-    $args = func_get_args();
-    $this->prepare("arrayInsert", $args);
-
-    return $this->execute();
-  }
-
-  public function _arrayInsert()
-  {
-    list ($data) = $this->arguments;
-
-    Sabel_DB_Transaction::begin($this->model->getConnectionName());
-
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
-    $this->_execute($stmt->setSql($this->createInsertSql($stmt, $data)));
-
-    Sabel_DB_Transaction::commit();
   }
 
   public function delete($arg1 = null, $arg2 = null)
@@ -572,7 +558,7 @@ class Sabel_DB_Model_Executer
     }
 
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::DELETE, $this->driver);
-    $this->_execute($stmt);
+    $this->_execute($stmt->setSql($this->createDeleteSql($stmt)));
   }
 
   public function query($sql, $assoc = false, $stmtType = Sabel_DB_Statement::SELECT)
@@ -601,18 +587,13 @@ class Sabel_DB_Model_Executer
     }
   }
 
-  public function setIncrementId($id)
-  {
-    $this->incrementId = $id;
-  }
-
   protected function createSelectSql($stmt)
   {
     if (($projection = $this->projection) === "*") {
       $projection = implode(", ", $this->model->getColumnNames());
     }
 
-    $sql  = Sabel_DB_Sql::buildSelectSql($this->model->getTableName(), $projection);
+    $sql  = "SELECT $projection FROM " . $this->model->getTableName();
     $sql .= $this->createConditionSql($stmt);
     return $this->createConstraintSql($sql);
   }
@@ -622,17 +603,51 @@ class Sabel_DB_Model_Executer
     $values = $this->chooseValues($data, "update");
     $stmt->setBind($values, false);
 
-    $sql  = Sabel_DB_Sql::buildUpdateSql($this->model->getTableName(), $values);
+    $updates = array();
+    foreach ($values as $column => $value) {
+      $updates[] = "$column = :{$column}";
+    }
+
+    $tblName = $this->model->getTableName();
+    $sql  =  "UPDATE $tblName SET " . implode(", ", $updates);
     $sql .= $this->createConditionSql($stmt);
     return $this->createConstraintSql($sql);
   }
 
   protected function createInsertSql($stmt, $data)
   {
-    $values  = $this->chooseValues($data, "insert");
+    $model  = $this->model;
+    $values = $this->chooseValues($data, "insert");
+
+    if (($column = $model->getIncrementColumn()) !== null) {
+      $newId = $this->driver->getSequenceId($model);
+      if ($newId !== null) {
+        $values[$column] = $this->lastInsertId = $newId;
+      }
+    }
+
     $tblName = $this->model->getTableName();
     $stmt->setBind($values, false);
-    return Sabel_DB_Sql::buildInsertSql($tblName, $values);
+
+    $binds = array();
+    $keys  = array_keys($values);
+
+    foreach ($keys as $key) $binds[] = ":" . $key;
+
+    $sql = array("INSERT INTO $tblName (");
+    $sql[] = join(", ", $keys);
+    $sql[] = ") VALUES(";
+    $sql[] = join(", ", $binds);
+    $sql[] = ")";
+
+    return implode("", $sql);
+  }
+
+  protected function createDeleteSql($stmt)
+  {
+    $sql  = "DELETE FROM " . $this->model->getTableName();
+    $sql .= $this->createConditionSql($stmt);
+    return $this->createConstraintSql($sql);
   }
 
   protected function chooseValues($data, $method)
@@ -640,7 +655,13 @@ class Sabel_DB_Model_Executer
     if (isset($data) && !is_array($data)) {
       throw new Sabel_DB_Exception("{$method}() argument should be an array.");
     } else {
-      return ($data === null) ? $this->model->toArray() : $data;
+      $data = ($data === null) ? $this->model->toArray() : $data;
+
+      if (empty($data)) {
+        throw new Sabel_DB_Exception("empty $method values.");
+      } else {
+        return $data;
+      }
     }
   }
 
