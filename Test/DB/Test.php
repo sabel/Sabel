@@ -437,7 +437,8 @@ class Test_DB_Test extends SabelTestCase
     $data = array("bool_flag" => true);
 
     $executer = new Executer("ConditionTest");
-    $executer->insert($data);
+    $newId = $executer->insert($data);
+    $this->assertTrue(is_numeric($newId));
 
     //==============================================
 

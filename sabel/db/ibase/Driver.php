@@ -39,13 +39,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     return $this->connection = $connection;
   }
 
-  public function getSequenceId(Sabel_DB_Model $model)
-  {
-    $column  = $model->getIncrementColumn();
-    $genName = strtoupper($model->getTableName() . "_{$column}_gen");
-    return ibase_gen_id($genName, 1, $this->getConnection());
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
@@ -96,6 +89,13 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 
     if ($this->autoCommit) ibase_commit($this->connection);
     return $rows;
+  }
+
+  public function getSequenceId(Sabel_DB_Model $model)
+  {
+    $column  = $model->getIncrementColumn();
+    $genName = strtoupper($model->getTableName() . "_{$column}_gen");
+    return ibase_gen_id($genName, 1, $this->getConnection());
   }
 
   private function executeError($sql)

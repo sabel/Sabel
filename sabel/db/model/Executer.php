@@ -117,10 +117,7 @@ class Sabel_DB_Model_Executer
       }
 
       $result = $this->driverInterrupt("before", $stmtType);
-      if ($result === null) {
-        $result = $stmt->execute();
-      }
-
+      if ($result === null) $result = $stmt->execute();
       $afterResult = $this->driverInterrupt("after", $stmtType);
       return ($afterResult === null) ? $result : $afterResult;
     } catch (Exception $e) {
@@ -441,7 +438,7 @@ class Sabel_DB_Model_Executer
 
   protected function _saveInsert()
   {
-    $model      = $this->model;
+    $model = $this->model;
     $saveValues = $model->toArray();
 
     foreach ($saveValues as $key => $val) {
@@ -453,11 +450,7 @@ class Sabel_DB_Model_Executer
 
     if (($column = $model->getIncrementColumn()) !== null) {
       $newId = $this->driver->getLastInsertId($model);
-      if ($newId === null) {
-        $saveValues[$column] = $this->lastInsertId;
-      } else {
-        $saveValues[$column] = $newId;
-      }
+      $saveValues[$column] = ($newId === null) ? $this->lastInsertId : $newId;
     }
 
     return $saveValues;
@@ -504,7 +497,12 @@ class Sabel_DB_Model_Executer
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
     $this->_execute($stmt->setSql($this->createInsertSql($stmt, $data)));
 
-    return $this->lastInsertId;
+    if (($column = $this->model->getIncrementColumn()) !== null) {
+      $newId = $this->driver->getLastInsertId($this->model);
+      return ($newId === null) ? $this->lastInsertId : $newId;
+    } else {
+      return null;
+    }
   }
 
   public function update($data = null)
