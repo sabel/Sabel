@@ -50,6 +50,10 @@ abstract class Sabel_DB_Model
   public function setConnectionName($connectionName)
   {
     $this->connectionName = $connectionName;
+
+    if (Sabel_DB_Transaction::isActive()) {
+      Sabel_DB_Transaction::begin($connectionName);
+    }
   }
 
   public function getConnectionName()

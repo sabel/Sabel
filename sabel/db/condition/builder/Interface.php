@@ -14,6 +14,7 @@ interface Sabel_DB_Condition_Builder_Interface
 {
   public function __construct(Sabel_DB_Abstract_Statement $stmt);
 
+  public function build($condition);
   public function buildIsNull($key);
   public function buildIsNotNull($key);
   public function build(Sabel_DB_Condition_Object $condition);
