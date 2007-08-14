@@ -28,13 +28,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-$IS_WIN = (strtoupper(substr(PHP_OS, 0, 3)) === "WIN");
+$IS_WIN = (DIRECTORY_SEPARATOR === '\\');
 define("IS_WIN", $IS_WIN);
-
-if (!defined("DIR_DIVIDER")) {
-  define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
-}
-
+define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
 define("DS", DIRECTORY_SEPARATOR);
 define("DEFAULT_PHP_SUFFIX", ".php");
 define("CURRENT_PATH", dirname(__FILE__));
@@ -61,7 +57,6 @@ require ($SABEL_CACHE_DIR . "Apc.php");
 require ($SABEL_CACHE_DIR . "Null.php");
 
 require ($SABEL_DIR . "Const.php");
-// require ($SABEL_DIR . "Context.php");
 require ($SABEL_DIR . "Object.php");
 
 require ($SABEL_MAP_DIR . "Candidate.php");
@@ -87,8 +82,6 @@ require ($SABEL_CONTAINER_DIR ."Bind.php");
 require ($SABEL_CONTAINER_DIR ."DI.php");
 require ($SABEL_CONTAINER_DIR ."ReflectionClass.php");
 require ($SABEL_CONTAINER_DIR ."Injection.php");
-
-require ($SABEL_CONTROLLER_DIR . "Front.php");
 
 require ($SABEL_LOG_DIR . "Factory.php");
 require ($SABEL_LOG_DIR . "Interface.php");

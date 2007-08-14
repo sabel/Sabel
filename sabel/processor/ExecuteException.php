@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Processor_ExecuteException implements Sabel_Bus_Processor
+class Sabel_Processor_ExecuteException extends Sabel_Bus_Processor
 {
   private $processor = null;
   

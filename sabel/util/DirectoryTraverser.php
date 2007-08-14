@@ -1,7 +1,19 @@
 <?php
 
+/**
+ * Sabel_Util_DirectoryTraverser
+ *
+ * @category   Bus
+ * @package    org.sabel.util
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Util_DirectoryTraverser
 {
+  const TYPE_DIR  = "dir";
+  const TYPE_FILE = "file";
+  
   protected $dir         = '';
   protected $directories = null;
   protected $visitors    = array();
@@ -20,17 +32,24 @@ class Sabel_Util_DirectoryTraverser
   public function traverse(DirectoryIterator $fromElement = null)
   {
     $element = ($fromElement === null) ? $this->directories : $fromElement;
+    
     foreach ($element as $e) {
       $child = $e->getPathName();
       $entry = ltrim(str_replace($this->dir, "", $child), DIR_DIVIDER);
+      
       if ($this->isValidDirectory($e)) {
         foreach ($this->visitors as $visitor) {
-          $visitor->accept($entry, "dir");
+          $visitor->accept($entry, self::TYPE_DIR);
         }
-        $this->traverse(new DirectoryIterator($child));
+        
+        try {
+          $this->traverse(new DirectoryIterator($child));
+        } catch (Exception $e) {
+          
+        }
       } elseif ($this->isValidFile($e)) {
         foreach ($this->visitors as $visitor) {
-          $visitor->accept($entry, "file", $child);
+          $visitor->accept($entry, self::TYPE_FILE, $child);
         }
       }
     }

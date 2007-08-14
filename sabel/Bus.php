@@ -17,50 +17,69 @@ class Sabel_Bus
   private $processors = array();
   private $listeners  = array();
   
-  public function __construct()
-  {
-  }
-  
+  /**
+   * initialize bus data
+   *
+   * @param array $data
+   * @return Sabel_Bus
+   */
   public function init($data)
   {
     foreach ($data as $name => $value) {
       $this->set($name, $value);
     }
+    return $this;
   }
   
-  public function addProcessorAsListener($name, $listener)
+  /**
+   * add processor as listener.
+   * 
+   * @param string $name
+   * @param Sabel_Bus_Processor $listener
+   * @return Sabel_Bus
+   */
+  public function addProcessorAsListener($listener)
   {
-    $this->listeners[$name] = $listener;
+    $this->listeners[$listener->name] = $listener;
+    return $this;
   }
   
-  public function addProcessor($name, Sabel_Bus_Processor $processor)
+  /**
+   * add processor to bus.
+   *
+   * @param string $name
+   * @param Sabel_Bus_Processor $processor
+   * @return Sabel_Bus
+   */
+  public function addProcessor(Sabel_Bus_Processor $processor)
   {
-    $this->processors[$name] = $processor;
+    $this->processors[$processor->name] = $processor;
+    return $this;
   }
   
-  public function addGroup($name, $processor = null)
+  public function addGroup(Sabel_Bus_Processor $processor = null)
   {
-    $group = new Sabel_Bus_ProcessorGroup();
+    $group = new Sabel_Bus_ProcessorGroup($processor->name);
     
     if ($processor !== null) {
-      $group->add($name, $processor);
+      $group->add($processor);
     }
     
-    $this->processors[$name] = $group;
+    $this->processors[$processor->name] = $group;
     
     return $this;
   }
   
-  public function replaceGroup($name, $processor = null)
+  public function replaceGroup(Sabel_Bus_Processor $processor = null)
   {
     $group = new Sabel_Bus_ProcessorGroup();
     
     if ($processor !== null) {
-      $group->add($name, $processor);
+      $group->add($processor->name, $processor);
     }
     
     unset($this->processors[$name]);
-    $this->processors[$name] = $group;
+    $this->processors[$processor->name] = $group;
     
     return $this;
   }

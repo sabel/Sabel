@@ -11,16 +11,16 @@
  */
 class Sabel_Bus_ProcessorList
 {
-  private $name     = "";
-  private $previous = null;
-  private $current  = null;
-  private $next     = null;
+  public $name     = "";
+  public $previous = null;
+  public $current  = null;
+  public $next     = null;
   
   private $listeners = array();
   
-  public function __construct($name, $processor)
+  public function __construct($processor)
   {
-    $this->name = $name;
+    $this->name = $processor->name;
     $this->current = $processor;
   }
   
@@ -51,9 +51,22 @@ class Sabel_Bus_ProcessorList
     return $buf;
   }
   
-  public function insertPrevious($name, $processor)
+  public function size()
   {
-    $previous = new self($name, $processor);
+    $list = $this->getFirst();
+    $size = 1;
+    
+    while ($list->hasNext()) {
+      $size++;
+      $list = $list->next;
+    }
+    
+    return $size;
+  }
+  
+  public function insertPrevious($processor)
+  {
+    $previous = new self($processor);
     
     $previous->setNext($this);
     
@@ -66,14 +79,14 @@ class Sabel_Bus_ProcessorList
     
     $this->setPrevious($previous);
     
-    $this->notify($name, $previous);
+    $this->notify($previous);
     
     return $this;
   }
   
-  public function insertNext($name, $processor)
+  public function insertNext($processor)
   {
-    $next = new self($name, $processor);
+    $next = new self($processor);
     
     $next->setPrevious($this);
     
@@ -84,18 +97,19 @@ class Sabel_Bus_ProcessorList
     }
     
     $this->setNext($next);
-    $this->notify($name, $next);
-    return $this;
+    $this->notify($next);
+    
+    return $next;
   }
   
-  public function notify($name, $processor)
+  public function notify($processor)
   {
     foreach ($this->listeners as $listener) {
-      $listener->update($name, $processor);
+      $listener->update($processor);
     }
   }
   
-  public function addNext($processor)
+  public function add($processor)
   {
     $this->next = $processor;
   }
@@ -105,6 +119,11 @@ class Sabel_Bus_ProcessorList
     $this->next = $processor;
   }
   
+  public function unlinkNext()
+  {
+    $this->next = null;
+  }
+    
   public function setPrevious($processor)
   {
     $this->previous = $processor;

@@ -11,8 +11,6 @@
  */
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
-  const REDIRECTED = "SABEL_CONTROLLER_REDIRECTED";
-  
   protected
     $result = null;
     
@@ -104,8 +102,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         return $response->notfound();
       }
       
-      // $proceed = $this->plugin->onBeforeAction();
-      
       $isExistance = create_function
                        ('$self, $action',
                         'return is_callable(array($self, $action));');
@@ -121,10 +117,8 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       if ($existance && $callable) {
         $response->success();
         $response->result = $this->$action();
-        // $this->plugin->onAfterAction();
         return $response;
       } elseif($this->isTemplateFound() && $callable) {
-        // $this->plugin->onAfterAction();
         return $response->success();
       } else {
         if (ENVIRONMENT === DEVELOPMENT) {
@@ -133,11 +127,9 @@ abstract class Sabel_Controller_Page extends Sabel_Object
           $this->assign("action",     $this->destination->getAction());
         }
         
-        // $this->plugin->onAfterAction();
         return $response->notfound();
       }
     } catch (Exception $exception) {
-      // $this->plugin->onException($exception);
       l($exception->getMessage());
       return $response->serverError();
     }
@@ -188,8 +180,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       }
       $to .= "?" . join("&", $buf);
     }
-    
-    // $this->plugin->onRedirect($to);
     
     return self::REDIRECTED;
   }

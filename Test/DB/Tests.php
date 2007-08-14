@@ -6,18 +6,6 @@ require_once("Test/DB/Pgsql.php");
 require_once("Test/DB/SQLite.php");
 require_once("Test/DB/Ibase.php");
 
-define("NOT",         Sabel_DB_Condition_Object::NOT);
-define("IS_NULL",     Sabel_DB_Condition_Object::ISNULL);
-define("IS_NOT_NULL", Sabel_DB_Condition_Object::ISNOTNULL);
-define("IN",          Sabel_DB_Condition_Object::IN);
-define("BETWEEN",     Sabel_DB_Condition_Object::BETWEEN);
-define("LIKE",        Sabel_DB_Condition_Object::LIKE);
-define("COMPARE",     Sabel_DB_Condition_Object::COMPARE);
-
-class Condition    extends Sabel_DB_Condition_Object {}
-class OrCondition  extends Sabel_DB_Condition_Or {}
-class AndCondition extends Sabel_DB_Condition_And {}
-
 class Test_DB_Tests
 {
   public static function main()

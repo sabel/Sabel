@@ -2,11 +2,11 @@
 
 $SABEL_DB_DIR = "sabel" . DIR_DIVIDER . "db" . DIR_DIVIDER;
 
-require ($SABEL_DB_DIR . "Join.php");
-require ($SABEL_DB_DIR . "join"      . DIR_DIVIDER . "Relation.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "Object.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "Or.php");
-require ($SABEL_DB_DIR . "condition" . DIR_DIVIDER . "And.php");
+Sabel::using("Sabel_DB_Join");
+Sabel::using("Sabel_DB_Join_Relation");
+Sabel::using("Sabel_DB_Condition_Object");
+Sabel::using("Sabel_DB_Condition_Or");
+Sabel::using("Sabel_DB_Condition_And");
 
 class Join         extends Sabel_DB_Join {}
 class Relation     extends Sabel_DB_Join_Relation {}

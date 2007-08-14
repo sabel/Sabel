@@ -9,10 +9,12 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Bus_ProcessorGroup implements Sabel_Bus_Processor
+class Sabel_Bus_ProcessorGroup extends Sabel_Bus_Processor
 {
   private $processors = array();
   private $processor  = null;
+  
+  private $controller = null;
   
   /** 
    * implements interface from Sabel_Bus_Processor
@@ -23,21 +25,45 @@ class Sabel_Bus_ProcessorGroup implements Sabel_Bus_Processor
   {
     $processorList = $this->processor->getFirst();
     
-    while ($processorList !== null) {
-      $processorList->get()->execute($bus);
-      $processorList = $processorList->next();
+    if ($this->controller !== null) {
+      while ($processorList !== null) {
+        $result = $this->controller->execute($processorList->get(), $bus);
+        
+        switch ($result) {
+          case true:
+            $processorList->get()->execute($bus);
+            $processorList = $processorList->next();
+            break;
+          case false:
+            break 2;
+          default:
+            break 2;
+        }
+      }
+    } else {
+      while ($processorList !== null) {
+        $processorList->get()->execute($bus);
+        $processorList = $processorList->next();
+      }
     }
+    
+
   }
   
-  public function add($name, $processor)
+  public function add($processor)
   {
-    $processor = new Sabel_Bus_ProcessorList($name, $processor);
+    $processor = new Sabel_Bus_ProcessorList($processor);
     $processor->addListener($this);
     
-    $this->processor         = $processor;
-    $this->processors[$name] = $processor;
+    $this->processor = $processor;
+    $this->processors[$processor->name] = $processor;
     
     return $this;
+  }
+  
+  public function addController($controller)
+  {
+    $this->controller = $controller;
   }
   
   public function get($name)
@@ -50,9 +76,9 @@ class Sabel_Bus_ProcessorGroup implements Sabel_Bus_Processor
     return $this->processor;
   }
   
-  public function update($name, $processor)
+  public function update($processor)
   {
     $processor->addListener($this);
-    $this->processors[$name] = $processor;
+    $this->processors[$processor->name] = $processor;
   }
 }
