@@ -43,14 +43,14 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return $values;
   }
 
-  public function execute($sql, $bindParam = null)
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
-    if ($bindParam !== null) {
-      $bindParam = $this->escape($bindParam);
+    if (($bindParams = $stmt->getBindParams()) !== null) {
+      $bindParams = $this->escape($bindParams);
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($sql, $bindParam);
+    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = pg_query($conn, $sql);
 
     if (!$result) $this->executeError($result, $sql);
@@ -64,10 +64,11 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
     return $rows;
   }
 
-  public function getLastInsertId(Sabel_DB_Model $model)
+  public function getLastInsertId()
   {
-    $rows = $this->execute("SELECT LASTVAL() AS id");
-    return (int)$rows[0]["id"];
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this);
+    $rows = $stmt->setSql("SELECT LASTVAL() AS id")->execute();
+    return $rows[0]["id"];
   }
 
   private function executeError($result, $sql)

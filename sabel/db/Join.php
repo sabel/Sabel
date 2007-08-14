@@ -53,14 +53,12 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   public function getCount($joinType = "INNER")
   {
-    $model = $this->sourceModel;
-    $query = array("SELECT COUNT(*) AS cnt FROM " . $model->getTableName());
-
+    $query = array();
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $rows = $this->execute(implode("", $query));
+    $rows = $this->execute("COUNT(*) AS cnt", implode("", $query));
     $this->clear();
 
     return $rows[0]["cnt"];
@@ -76,7 +74,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $projection[] = $object->getProjection();
     }
 
-    $cols = array();
+    $cols    = array();
     $tblName = $model->getTableName();
     $columns = $model->getColumnNames();
 
@@ -86,14 +84,12 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
     $projection = implode(", ", $cols) . ", " . implode(", ", $projection);
 
-    $query   = array();
-    $query[] = "SELECT $projection FROM $tblName";
-
+    $query = array();
     foreach ($objects as $object) {
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    if (!$rows = $this->execute(implode("", $query))) {
+    if (!$rows = $this->execute($projection, implode("", $query))) {
       $results = false;
     } else {
       $results = $this->resultBuilder->build($model, $rows);
@@ -103,25 +99,20 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     return $results;
   }
 
-  protected function execute($sql)
+  protected function execute($projection, $join)
   {
     $executer = $this->executer;
     $driver = $executer->getDriver();
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $driver);
 
-    $manager = $executer->getConditionManager();
+    $object = new Sabel_DB_Sql_Object();
+    $object->table = $this->sourceModel->getTableName();
+    $object->join  = $join;
+    $object->projection  = $projection;
+    $object->condition   = $executer->loadConditionManager()->build($stmt);
+    $object->constraints = $executer->getConstraints();
 
-    if ($manager !== null && !$manager->isEmpty()) {
-      $sql .= $manager->build($stmt);
-    }
-
-    $constraints = $executer->getConstraints();
-
-    if (!empty($constraints)) {
-      $sql = $driver->loadConstraintSqlClass()->build($sql, $constraints);
-    }
-
-    return $executer->executeStatement($stmt->setSql($sql));
+    return $executer->executeStatement($stmt->setSqlObject($object));
   }
 
   public function clear()

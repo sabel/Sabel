@@ -18,11 +18,6 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     $this->database = $database;
   }
 
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_General::getInstance();
@@ -85,37 +80,36 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute($sql, $bindParam = null)
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
     $conn = $this->getConnection();
 
-    if (!($pdoStmt = $conn->prepare($sql))) {
+    if (!($pdoStmt = $conn->prepare($stmt->getSql()))) {
       $error = $conn->errorInfo();
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
-    if ($bindParam === null) {
-      $bindParam = array();
+    if (($bindParams = $stmt->getBindParams()) === null) {
+      $bindParams = array();
     } else {
-      $bindParam = $this->escape($bindParam);
+      $bindParams = $this->escape($bindParams);
     }
 
-    if ($pdoStmt->execute($bindParam)) {
+    if ($pdoStmt->execute($bindParams)) {
       $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
       $pdoStmt->closeCursor();
       return $rows;
     } else {
-      $this->executeError($conn, $pdoStmt, $bindParam);
+      $this->executeError($conn, $pdoStmt, $bindParams);
     }
   }
 
-  public function getLastInsertId(Sabel_DB_Model $model)
+  public function getLastInsertId()
   {
     if ($this->database === "pgsql") {
-      if (($column = $model->getIncrementColumn()) !== null) {
-        $tblName = $model->getTableName();
-        return $this->connection->lastInsertId("{$tblName}_{$column}_seq");
-      }
+      $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this);
+      $rows = $stmt->setSql("SELECT LASTVAL() AS id")->execute();
+      return $rows[0]["id"];
     } else {
       return $this->connection->lastInsertId();
     }

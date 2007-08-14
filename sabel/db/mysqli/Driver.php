@@ -14,11 +14,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   protected $driverId      = "mysqli";
   protected $closeFunction = "mysqli_close";
 
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Mysqli_Transaction::getInstance();
@@ -54,14 +49,14 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute($sql, $bindParam = null)
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
-    if ($bindParam !== null) {
-      $bindParam = $this->escape($bindParam);
+    if (($bindParams = $stmt->getBindParams()) !== null) {
+      $bindParams = $this->escape($bindParams);
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($sql, $bindParam);
+    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = mysqli_query($conn, $sql);
 
     if (!$result) $this->executeError($sql);
@@ -75,7 +70,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return $rows;
   }
 
-  public function getLastInsertId(Sabel_DB_Model $model)
+  public function getLastInsertId()
   {
     return mysqli_insert_id($this->connection);
   }

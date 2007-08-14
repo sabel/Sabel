@@ -22,7 +22,8 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
 
     if (!$trans->isActive($connectionName)) {
       $this->connection = Sabel_DB_Connection::get($connectionName);
-      $this->execute($this->beginCommand);
+      $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::TRANSACTION, $this);
+      $stmt->setSql($this->beginCommand)->execute();
       $trans->start($this->connection, $this);
     }
   }
@@ -30,12 +31,14 @@ abstract class Sabel_DB_Abstract_Common_Driver extends Sabel_DB_Abstract_Driver
   public function commit($connection)
   {
     $this->connection = $connection;
-    $this->execute($this->commitCommand);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::TRANSACTION, $this);
+    $stmt->setSql($this->commitCommand)->execute();
   }
 
   public function rollback($connection)
   {
     $this->connection = $connection;
-    $this->execute($this->rollbackCommand);
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::TRANSACTION, $this);
+    $stmt->setSql($this->rollbackCommand)->execute();
   }
 }

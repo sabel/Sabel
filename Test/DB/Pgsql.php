@@ -45,12 +45,5 @@ class Test_DB_Pgsql extends Test_DB_Test
     //Sabel_DB_Config::regist("default2", self::$params2);
 
     Test_DB_Test::$db = "PGSQL";
-
-    $tables   = Test_DB_Test::$tables;
-    $executer = new Sabel_DB_Model_Executer("Member");
-
-    foreach ($tables as $table) {
-      $executer->query("DELETE FROM $table");
-    }
   }
 }

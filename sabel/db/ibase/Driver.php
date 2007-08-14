@@ -14,11 +14,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
   protected $driverId      = "ibase";
   protected $execFunction  = "ibase_query";
   protected $closeFunction = "ibase_close";
-
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Ibase_SqlConstraint");
-  }
+  protected $lastInsertId  = null;
 
   public function loadTransaction()
   {
@@ -67,14 +63,21 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     return $values;
   }
 
-  public function execute($sql, $bindParam = null)
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
-    if ($bindParam !== null) {
-      $bindParam = $this->escape($bindParam);
+    $sql = $stmt->getSql();
+
+    if ($stmt->isInsert() && $this->lastInsertId !== null) {
+      list ($column, $value) = explode(":", $this->lastInsertId);
+      $stmt->setBind(array($column => $value));
+    }
+
+    if (($bindParams = $stmt->getBindParams()) !== null) {
+      $bindParams = $this->escape($bindParams);
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($sql, $bindParam);
+    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = ibase_query($conn, $sql);
 
     if (!$result) $this->executeError($sql);
@@ -88,14 +91,70 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     }
 
     if ($this->autoCommit) ibase_commit($this->connection);
-    return $rows;
+    return (empty($rows)) ? null : $rows;
   }
 
-  public function getSequenceId(Sabel_DB_Model $model)
+  public function getLastInsertId()
   {
-    $column  = $model->getIncrementColumn();
-    $genName = strtoupper($model->getTableName() . "_{$column}_gen");
-    return ibase_gen_id($genName, 1, $this->getConnection());
+    if ($this->lastInsertId === null) {
+      return null;
+    } else {
+      list ($column, $value) = explode(":", $this->lastInsertId);
+      return $value;
+    }
+  }
+
+  public function createSelectSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    $sql = "SELECT ";
+    $constraints = $sqlObject->constraints;
+
+    if (isset($constraints["limit"])) {
+      $query  = "FIRST {$constraints["limit"]} ";
+      $query .= (isset($constraints["offset"])) ? "SKIP " . $constraints["offset"] : "SKIP 0";
+      $sql   .= $query;
+    } elseif (isset($constraints["offset"])) {
+      $sql   .= "SKIP " . $constraints["offset"];
+    }
+
+    $sql .= " {$sqlObject->projection} FROM ";
+    $sql .= $sqlObject->table . $sqlObject->join . $sqlObject->condition;
+
+    return $sql . $this->createConstraintSql($sqlObject->constraints);
+  }
+
+  public function createInsertSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    $binds = array();
+    $keys  = array_keys($sqlObject->saveValues);
+
+    if (($column = $sqlObject->sequenceColumn) !== null) {
+      $keys[] = $column;
+      $genName = strtoupper($sqlObject->table . "_{$column}_gen");
+      $newId = ibase_gen_id($genName, 1, $this->getConnection());
+      $this->lastInsertId = $column . ":" . $newId;
+    }
+
+    foreach ($keys as $key) $binds[] = ":" . $key;
+
+    $sql = array("INSERT INTO {$sqlObject->table} (");
+    $sql[] = join(", ", $keys);
+    $sql[] = ") VALUES(";
+    $sql[] = join(", ", $binds);
+    $sql[] = ")";
+
+    return implode("", $sql);
+  }
+
+  protected function createConstraintSql($constraints)
+  {
+    $sql = "";
+
+    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
+    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
+    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+
+    return $sql;
   }
 
   private function executeError($sql)

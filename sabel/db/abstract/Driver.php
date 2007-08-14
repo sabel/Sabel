@@ -17,34 +17,14 @@ abstract class Sabel_DB_Abstract_Driver
   protected $connectionName = "";
 
   abstract public function escape($values);
-  abstract public function execute($sql, $bindParam = null);
-  abstract public function loadConstraintSqlClass();
+  abstract public function execute(Sabel_DB_Abstract_Statement $stmt);
   abstract public function loadTransaction();
+  abstract public function getLastInsertId();
   abstract public function begin($connectionName = null);
 
   public function getDriverId()
   {
     return $this->driverId;
-  }
-
-  public function getBeforeMethods()
-  {
-    return array();
-  }
-
-  public function getAfterMethods()
-  {
-    return array();
-  }
-
-  public function getSequenceId(Sabel_DB_Model $model)
-  {
-    return null;
-  }
-
-  public function getLastInsertId(Sabel_DB_Model $model)
-  {
-    return null;
   }
 
   public function setConnectionName($connectionName)
@@ -83,11 +63,71 @@ abstract class Sabel_DB_Abstract_Driver
 
   protected function bind($sql, $bindParam)
   {
-    if (!empty($bindParam)) {
-      return str_replace(array_keys($bindParam), $bindParam, $sql);
-    } else {
+    if (empty($bindParam)) {
       return $sql;
+    } else {
+      return str_replace(array_keys($bindParam), $bindParam, $sql);
     }
+  }
+
+  public function createSelectSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    $sql = "SELECT {$sqlObject->projection} FROM "
+         . $sqlObject->table . $sqlObject->join . $sqlObject->condition;
+
+    return $sql . $this->createConstraintSql($sqlObject->constraints);
+  }
+
+  public function createInsertSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    $binds = array();
+    $keys  = array_keys($sqlObject->saveValues);
+
+    foreach ($keys as $key) $binds[] = ":" . $key;
+
+    $sql = array("INSERT INTO {$sqlObject->table} (");
+    $sql[] = join(", ", $keys);
+    $sql[] = ") VALUES(";
+    $sql[] = join(", ", $binds);
+    $sql[] = ")";
+
+    return implode("", $sql);
+  }
+
+  public function createUpdateSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    $tblName   = $sqlObject->table;
+    $condition = $sqlObject->condition;
+
+    $updates = array();
+    foreach ($sqlObject->saveValues as $column => $value) {
+      $updates[] = "$column = :{$column}";
+    }
+
+    return "UPDATE $tblName SET " . implode(", ", $updates) . $condition;
+  }
+
+  public function createDeleteSql(Sabel_DB_Sql_Object $sqlObject)
+  {
+    return "DELETE FROM " . $sqlObject->table . $sqlObject->condition;
+  }
+
+  protected function createConstraintSql($constraints)
+  {
+    $sql = "";
+
+    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
+    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
+    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+
+    if (isset($constraints["offset"]) && !isset($constraints["limit"])) {
+      $sql .= " LIMIT 100 OFFSET " . $constraints["offset"];
+    } else {
+      if (isset($constraints["limit"]))  $sql .= " LIMIT "  . $constraints["limit"];
+      if (isset($constraints["offset"])) $sql .= " OFFSET " . $constraints["offset"];
+    }
+
+    return $sql;
   }
 }
 

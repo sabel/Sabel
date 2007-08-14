@@ -6,6 +6,16 @@ class Test_DB_Test extends SabelTestCase
   public static $tables = array("member", "member_sub_group", "member_group",
                                 "super_group", "location", "condition_test");
 
+  public function testClean()
+  {
+    $tables   = self::$tables;
+    $executer = new Executer("Member");
+
+    foreach ($tables as $table) {
+      $executer->query("DELETE FROM $table", false, Sabel_DB_Statement::DELETE);
+    }
+  }
+
   public function testInsert()
   {
     $data = array("id"   => 1,
@@ -523,9 +533,9 @@ class Test_DB_Test extends SabelTestCase
 
     // or condition.
     $executer = new Executer("ConditionTest");
-    $or = new OrCondition();
-    $or->add(new Condition("point", 400));
-    $or->add(new Condition("name", "name5"));
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(new Sabel_DB_Condition_Object("point", 400));
+    $or->add(new Sabel_DB_Condition_Object("name", "name5"));
     $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
@@ -535,7 +545,7 @@ class Test_DB_Test extends SabelTestCase
 
     // between condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Condition("point", array(200, 400), BETWEEN));
+    $executer->setCondition(new Sabel_DB_Condition_Object("point", array(200, 400), BETWEEN));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -545,7 +555,7 @@ class Test_DB_Test extends SabelTestCase
 
     // compare condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Condition("point", array("<", 400), COMPARE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("point", array("<", 400), COMPARE));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -555,9 +565,9 @@ class Test_DB_Test extends SabelTestCase
 
     // or compare condition.
     $executer = new Executer("ConditionTest");
-    $or = new OrCondition();
-    $or->add(new Condition("point", array(">=", 400), COMPARE));
-    $or->add(new Condition("point", array("<=", 200), COMPARE));
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(new Sabel_DB_Condition_Object("point", array(">=", 400), COMPARE));
+    $or->add(new Sabel_DB_Condition_Object("point", array("<=", 200), COMPARE));
     $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
@@ -570,7 +580,7 @@ class Test_DB_Test extends SabelTestCase
 
     // like condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Condition("name", array("name_", false), LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("name_", false), LIKE));
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);
@@ -580,12 +590,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($models[3]->name, "name%");
 
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Condition("name", "name%", LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", "name%", LIKE));
     $models = $executer->select();
     $this->assertEquals(count($models), 1);
 
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Condition("name", array("nam%", false), LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("nam%", false), LIKE));
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);

@@ -115,11 +115,7 @@ class Sabel_DB_Model_Executer
       if (Sabel_DB_Transaction::isActive()) {
         Sabel_DB_Transaction::begin($this->model->getConnectionName());
       }
-
-      $result = $this->driverInterrupt("before", $stmtType);
-      if ($result === null) $result = $stmt->execute();
-      $afterResult = $this->driverInterrupt("after", $stmtType);
-      return ($afterResult === null) ? $result : $afterResult;
+      return $result = $stmt->execute();
     } catch (Exception $e) {
       Sabel_DB_Transaction::rollback();
       throw new Sabel_DB_Exception($e->getMessage());
@@ -269,7 +265,7 @@ class Sabel_DB_Model_Executer
     $this->constraints = array("limit" => 1);
 
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this->driver);
-    $rows = $this->_execute($stmt->setSql($this->createSelectSql($stmt)));
+    $rows = $this->_execute($this->prepareSelect($stmt));
 
     $this->projection  = $projection;
     $this->constraints = $constraints;
@@ -300,7 +296,7 @@ class Sabel_DB_Model_Executer
   protected function createModel($model)
   {
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this->driver);
-    $rows = $this->_execute($stmt->setSql($this->createSelectSql($stmt)));
+    $rows = $this->_execute($this->prepareSelect($stmt));
 
     if (isset($rows[0])) {
       $model->setProperties($rows[0]);
@@ -340,7 +336,7 @@ class Sabel_DB_Model_Executer
     }
 
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this->driver);
-    $rows = $this->_execute($stmt->setSql($this->createSelectSql($stmt)));
+    $rows = $this->_execute($this->prepareSelect($stmt));
 
     if (empty($rows)) return false;
 
@@ -445,12 +441,12 @@ class Sabel_DB_Model_Executer
       $saveValues[$key] = $model->__get($key);
     }
 
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
-    $this->_execute($stmt->setSql($this->createInsertSql($stmt, $saveValues)));
+    $stmt  = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
+    $newId = $this->_execute($this->prepareInsert($stmt, $saveValues));
 
-    if (($column = $model->getIncrementColumn()) !== null) {
-      $newId = $this->driver->getLastInsertId($model);
-      $saveValues[$column] = ($newId === null) ? $this->lastInsertId : $newId;
+    if ($newId !== null) {
+      $column = $model->getIncrementColumn();
+      $saveValues[$column] = $newId;
     }
 
     return $saveValues;
@@ -478,7 +474,7 @@ class Sabel_DB_Model_Executer
     }
 
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE, $this->driver);
-    $this->_execute($stmt->setSql($this->createUpdateSql($stmt, $saveValues)));
+    $this->_execute($this->prepareUpdate($stmt, $saveValues));
 
     return array_merge($model->toArray(), $saveValues);
   }
@@ -494,15 +490,9 @@ class Sabel_DB_Model_Executer
   protected function _insert()
   {
     @list ($data) = $this->arguments;
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
-    $this->_execute($stmt->setSql($this->createInsertSql($stmt, $data)));
 
-    if (($column = $this->model->getIncrementColumn()) !== null) {
-      $newId = $this->driver->getLastInsertId($this->model);
-      return ($newId === null) ? $this->lastInsertId : $newId;
-    } else {
-      return null;
-    }
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::INSERT, $this->driver);
+    return $this->_execute($this->prepareInsert($stmt, $data));
   }
 
   public function update($data = null)
@@ -517,7 +507,7 @@ class Sabel_DB_Model_Executer
   {
     @list ($data) = $this->arguments;
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::UPDATE, $this->driver);
-    $this->_execute($stmt->setSql($this->createUpdateSql($stmt, $data)));
+    $this->_execute($this->prepareUpdate($stmt, $data));
   }
 
   public function delete($arg1 = null, $arg2 = null)
@@ -556,7 +546,7 @@ class Sabel_DB_Model_Executer
     }
 
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::DELETE, $this->driver);
-    $this->_execute($stmt->setSql($this->createDeleteSql($stmt)));
+    $this->_execute($this->prepareDelete($stmt));
   }
 
   public function query($sql, $assoc = false, $stmtType = Sabel_DB_Statement::SELECT)
@@ -574,9 +564,9 @@ class Sabel_DB_Model_Executer
     $stmt = Sabel_DB_Statement::create($stmtType, $this->driver);
     $rows = $this->_execute($stmt->setSql($sql));
 
-    if (empty($rows)) return null;
-
-    if ($assoc) {
+    if (empty($rows) || $assoc === null) {
+      return null;
+    } elseif ($assoc) {
       return $rows;
     } else {
       $results = array();
@@ -585,67 +575,56 @@ class Sabel_DB_Model_Executer
     }
   }
 
-  protected function createSelectSql($stmt)
+  protected function prepareSelect($stmt)
   {
+    $model = $this->model;
+
     if (($projection = $this->projection) === "*") {
       $projection = implode(", ", $this->model->getColumnNames());
     }
 
-    $sql  = "SELECT $projection FROM " . $this->model->getTableName();
-    $sql .= $this->createConditionSql($stmt);
-    return $this->createConstraintSql($sql);
+    $object = new Sabel_DB_Sql_Object();
+    $object->table = $model->getTableName();
+    $object->projection  = $projection;
+    $object->condition   = $this->loadConditionManager()->build($stmt);
+    $object->constraints = $this->constraints;
+
+    return $stmt->setSqlObject($object);
   }
 
-  protected function createUpdateSql($stmt, $data)
+  protected function prepareUpdate($stmt, $data)
   {
     $values = $this->chooseValues($data, "update");
     $stmt->setBind($values, false);
 
-    $updates = array();
-    foreach ($values as $column => $value) {
-      $updates[] = "$column = :{$column}";
-    }
+    $object = new Sabel_DB_Sql_Object();
+    $object->table = $this->model->getTableName();
+    $object->saveValues = $values;
+    $object->condition = $this->loadConditionManager()->build($stmt);
 
-    $tblName = $this->model->getTableName();
-    $sql  =  "UPDATE $tblName SET " . implode(", ", $updates);
-    $sql .= $this->createConditionSql($stmt);
-    return $this->createConstraintSql($sql);
+    return $stmt->setSqlObject($object);
   }
 
-  protected function createInsertSql($stmt, $data)
+  protected function prepareInsert($stmt, $data)
   {
-    $model  = $this->model;
     $values = $this->chooseValues($data, "insert");
-
-    if (($column = $model->getIncrementColumn()) !== null) {
-      $newId = $this->driver->getSequenceId($model);
-      if ($newId !== null) {
-        $values[$column] = $this->lastInsertId = $newId;
-      }
-    }
-
-    $tblName = $this->model->getTableName();
     $stmt->setBind($values, false);
 
-    $binds = array();
-    $keys  = array_keys($values);
+    $object = new Sabel_DB_Sql_Object();
+    $object->table = $this->model->getTableName();
+    $object->saveValues = $values;
+    $object->sequenceColumn = $this->model->getIncrementColumn();
 
-    foreach ($keys as $key) $binds[] = ":" . $key;
-
-    $sql = array("INSERT INTO $tblName (");
-    $sql[] = join(", ", $keys);
-    $sql[] = ") VALUES(";
-    $sql[] = join(", ", $binds);
-    $sql[] = ")";
-
-    return implode("", $sql);
+    return $stmt->setSqlObject($object);
   }
 
-  protected function createDeleteSql($stmt)
+  protected function prepareDelete($stmt)
   {
-    $sql  = "DELETE FROM " . $this->model->getTableName();
-    $sql .= $this->createConditionSql($stmt);
-    return $this->createConstraintSql($sql);
+    $object = new Sabel_DB_Sql_Object();
+    $object->table = $this->model->getTableName();
+    $object->condition = $this->loadConditionManager()->build($stmt);
+
+    return $stmt->setSqlObject($object);
   }
 
   protected function chooseValues($data, $method)
@@ -660,33 +639,6 @@ class Sabel_DB_Model_Executer
       } else {
         return $data;
       }
-    }
-  }
-
-  protected function createConditionSql($stmt, $manager = null)
-  {
-    if ($manager === null) {
-      $manager = $this->conditionManager;
-    }
-
-    if ($manager !== null && !$manager->isEmpty()) {
-      return $manager->build($stmt);
-    } else {
-      return "";
-    }
-  }
-
-  protected function createConstraintSql($sql, $constraints = null)
-  {
-    if ($constraints === null) {
-      $constraints = $this->constraints;
-    }
-
-    if (!empty($constraints)) {
-      $builder = $this->driver->loadConstraintSqlClass();
-      return $builder->build($sql, $constraints);
-    } else {
-      return $sql;
     }
   }
 }

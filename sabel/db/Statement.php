@@ -11,10 +11,11 @@
  */
 class Sabel_DB_Statement
 {
-  const SELECT  = 0x01;
-  const INSERT  = 0x02;
-  const UPDATE  = 0x04;
-  const DELETE  = 0x08;
+  const SELECT      = 0x01;
+  const INSERT      = 0x02;
+  const UPDATE      = 0x04;
+  const DELETE      = 0x08;
+  const TRANSACTION = 0x10;
 
   public static function create($stmtType, $driver)
   {
@@ -30,6 +31,9 @@ class Sabel_DB_Statement
 
       case self::DELETE:
         return new Sabel_DB_Statement_Delete($driver);
+
+      case self::TRANSACTION:
+        return new Sabel_DB_Statement_Transaction($driver);
 
       default:
         $message = "Sabel_DB_Statement::create() invalid statement type.";

@@ -18,11 +18,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
   protected $commitCommand   = "COMMIT";
   protected $rollbackCommand = "ROLLBACK";
 
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_General::getInstance();
@@ -43,14 +38,14 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
     return $values;
   }
 
-  public function execute($sql, $bindParam = null)
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
-    if ($bindParam !== null) {
-      $bindParam = $this->escape($bindParam);
+    if (($bindParams = $stmt->getBindParams()) !== null) {
+      $bindParams = $this->escape($bindParams);
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($sql, $bindParam);
+    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = mysql_query($sql, $conn);
 
     if (!$result) $this->executeError($sql);
@@ -61,12 +56,13 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
       mysql_free_result($result);
     }
 
-    return $rows;
+    return (empty($rows)) ? null : $rows;
   }
 
-  public function getLastInsertId(Sabel_DB_Model $model)
+  public function getLastInsertId()
   {
-    $rows = $this->execute("SELECT last_insert_id() AS id");
+    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this);
+    $rows = $stmt->setSql("SELECT LAST_INSERT_ID() AS id")->execute();
     return $rows[0]["id"];
   }
 
