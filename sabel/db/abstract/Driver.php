@@ -12,20 +12,15 @@
  */
 abstract class Sabel_DB_Abstract_Driver
 {
-  protected $driverId       = "";
   protected $connection     = null;
   protected $connectionName = "";
 
+  abstract public function getDriverId();
   abstract public function escape($values);
   abstract public function execute(Sabel_DB_Abstract_Statement $stmt);
   abstract public function loadTransaction();
   abstract public function getLastInsertId();
   abstract public function begin($connectionName = null);
-
-  public function getDriverId()
-  {
-    return $this->driverId;
-  }
 
   public function setConnectionName($connectionName)
   {

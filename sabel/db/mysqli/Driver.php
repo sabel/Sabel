@@ -11,8 +11,12 @@
  */
 class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected $driverId      = "mysqli";
   protected $closeFunction = "mysqli_close";
+
+  public function getDriverId()
+  {
+    return "mysqli";
+  }
 
   public function loadTransaction()
   {

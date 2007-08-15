@@ -11,16 +11,15 @@
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
 {
-  protected $driverId        = "pgsql";
-  protected $execFunction    = "pg_query";
-  protected $closeFunction   = "pg_close";
-  protected $beginCommand    = "START TRANSACTION";
-  protected $commitCommand   = "COMMIT";
-  protected $rollbackCommand = "ROLLBACK";
+  protected
+    $closeFunction   = "pg_close",
+    $beginCommand    = "START TRANSACTION",
+    $commitCommand   = "COMMIT",
+    $rollbackCommand = "ROLLBACK";
 
-  public function loadConstraintSqlClass()
+  public function getDriverId()
   {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Sql_Constraint_General");
+    return "pgsql";
   }
 
   public function loadTransaction()

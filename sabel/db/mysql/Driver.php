@@ -11,12 +11,16 @@
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Common_Driver
 {
-  protected $driverId        = "mysql";
-  protected $execFunction    = "mysql_query";
-  protected $closeFunction   = "mysql_close";
-  protected $beginCommand    = "START TRANSACTION";
-  protected $commitCommand   = "COMMIT";
-  protected $rollbackCommand = "ROLLBACK";
+  protected
+    $closeFunction   = "mysql_close",
+    $beginCommand    = "START TRANSACTION",
+    $commitCommand   = "COMMIT",
+    $rollbackCommand = "ROLLBACK";
+
+  public function getDriverId()
+  {
+    return "mysql";
+  }
 
   public function loadTransaction()
   {

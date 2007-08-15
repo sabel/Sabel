@@ -9,12 +9,18 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
+class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected $driverId      = "ibase";
-  protected $execFunction  = "ibase_query";
   protected $closeFunction = "ibase_close";
-  protected $lastInsertId  = null;
+
+  private
+    $autoCommit   = true,
+    $lastInsertId = null;
+
+  public function getDriverId()
+  {
+    return "ibase";
+  }
 
   public function loadTransaction()
   {
@@ -26,13 +32,12 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
     $connection = $this->loadTransaction()->get($this->getConnectionName());
 
     if ($connection === null) {
-      $connection = parent::getConnection();
       $this->autoCommit = true;
+      return parent::getConnection();
     } else {
       $this->autoCommit = false;
+      return $connection;
     }
-
-    return $this->connection = $connection;
   }
 
   public function begin($connectionName = null)
@@ -83,7 +88,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
       ibase_free_result($result);
     }
 
-    if ($this->autoCommit) ibase_commit($this->connection);
+    if ($this->autoCommit) ibase_commit($conn);
     return (empty($rows)) ? null : $rows;
   }
 
@@ -154,13 +159,15 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
   }
 }
 
-if (!defined("MQ_SYBASE")) {
-  define("MQ_SYBASE", ini_get("magic_quotes_sybase"));
-}
-
 function ibase_escape_string($val)
 {
-  if (MQ_SYBASE) {
+  static $mqs = null;
+
+  if ($mqs = null) {
+    $mqs = ini_get("magic_quotes_sybase");
+  }
+
+  if ($mqs) {
     return $val;
   } else {
     return str_replace("'", "''", $val);

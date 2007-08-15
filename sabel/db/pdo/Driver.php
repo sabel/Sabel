@@ -13,9 +13,16 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
   private $database = "";
 
+  // @todo
   public function __construct($database)
   {
     $this->database = $database;
+  }
+
+  public function getDriverId()
+  {
+    // @todo
+    return "pdo";
   }
 
   public function loadTransaction()
