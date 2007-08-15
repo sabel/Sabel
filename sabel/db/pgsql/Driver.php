@@ -61,7 +61,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
       pg_free_result($result);
     }
 
-    return $rows;
+    return (empty($rows)) ? null : $rows;
   }
 
   public function getLastInsertId()

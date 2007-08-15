@@ -104,15 +104,13 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
     $executer = $this->executer;
     $driver = $executer->getDriver();
     $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $driver);
+    $stmt->table($this->sourceModel->getTableName());
+    $stmt->join($join);
+    $stmt->projection($projection);
+    $stmt->where($executer->loadConditionManager()->build($stmt));
+    $stmt->constraints($executer->getConstraints());
 
-    $object = new Sabel_DB_Sql_Object();
-    $object->table = $this->sourceModel->getTableName();
-    $object->join  = $join;
-    $object->projection  = $projection;
-    $object->condition   = $executer->loadConditionManager()->build($stmt);
-    $object->constraints = $executer->getConstraints();
-
-    return $executer->executeStatement($stmt->setSqlObject($object));
+    return $executer->executeStatement($stmt);
   }
 
   public function clear()

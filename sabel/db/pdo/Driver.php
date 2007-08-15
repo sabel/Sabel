@@ -98,7 +98,7 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     if ($pdoStmt->execute($bindParams)) {
       $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
       $pdoStmt->closeCursor();
-      return $rows;
+      return (empty($rows)) ? null : $rows;
     } else {
       $this->executeError($conn, $pdoStmt, $bindParams);
     }

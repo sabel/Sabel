@@ -25,8 +25,7 @@ abstract class Sabel_DB_Model
 
   protected
     $values       = array(),
-    $updateValues = array(),
-    $saveValues   = array();
+    $updateValues = array();
 
   public function __construct()
   {
@@ -50,10 +49,6 @@ abstract class Sabel_DB_Model
   public function setConnectionName($connectionName)
   {
     $this->connectionName = $connectionName;
-
-    if (Sabel_DB_Transaction::isActive()) {
-      Sabel_DB_Transaction::begin($connectionName);
-    }
   }
 
   public function getConnectionName()
@@ -119,21 +114,6 @@ abstract class Sabel_DB_Model
   public function getIncrementColumn()
   {
     return $this->schema->getIncrementColumn();
-  }
-
-  public function setSaveValues(array $values)
-  {
-    return $this->saveValues = $values;
-  }
-
-  public function getSaveValues()
-  {
-    return $this->saveValues;
-  }
-
-  public function setUpdateValues(array $values)
-  {
-    return $this->updateValues = $values;
   }
 
   public function getUpdateValues()

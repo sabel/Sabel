@@ -21,16 +21,130 @@ abstract class Sabel_DB_Abstract_Statement
   protected
     $tblName     = "",
     $projection  = "*",
-    $manager     = null,
+    $join        = "",
+    $where       = "",
     $constraints = array(),
-    $saveValues  = array(),
-    $seqColumn   = "";
+    $values      = array(),
+    $seqColumn   = null;
 
   abstract public function getStatementType();
 
   public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
     $this->driver = $driver;
+  }
+
+  public function setSql($sql)
+  {
+    $this->sql = $sql;
+
+    return $this;
+  }
+
+  public function getSql()
+  {
+    if ($this->hasSql()) {
+      return $this->sql;
+    } else {
+      return $this->sql = $this->build();
+    }
+  }
+
+  public function hasSql()
+  {
+    return (is_string($this->sql) && $this->sql !== "");
+  }
+
+  public function table($table)
+  {
+    if (is_string($table)) {
+      $this->table = $table;
+    } else {
+      throw new Sabel_DB_Exception("argument should be a string.");
+    }
+  }
+
+  public function getTable()
+  {
+    return $this->table;
+  }
+
+  public function projection($projection)
+  {
+    if (is_string($projection)) {
+      $this->projection = $projection;
+    } else {
+      throw new Sabel_DB_Exception("argument should be a string.");
+    }
+  }
+
+  public function getProjection()
+  {
+    return $this->projection;
+  }
+
+  public function join($join)
+  {
+    if (is_string($join)) {
+      $this->join = $join;
+    } else {
+      throw new Sabel_DB_Exception("argument should be a string.");
+    }
+  }
+
+  public function getJoin()
+  {
+    return $this->join;
+  }
+
+  public function where($where)
+  {
+    if (is_string($where)) {
+      $this->where = $where;
+    } else {
+      throw new Sabel_DB_Exception("argument should be a string.");
+    }
+  }
+
+  public function getWhere()
+  {
+    return $this->where;
+  }
+
+  public function constraints(array $constraints)
+  {
+    $this->constraints = $constraints;
+  }
+
+  public function getConstraints()
+  {
+    return $this->constraints;
+  }
+
+  public function values(array $values)
+  {
+    $this->values = $values;
+  }
+
+  public function getValues()
+  {
+    return $this->values;
+  }
+
+  public function sequenceColumn($seqColumn)
+  {
+    if ($seqColumn === null) {
+      $this->seqColumn = null;
+    } elseif (is_string($seqColumn)) {
+      $this->seqColumn = $seqColumn;
+    } else {
+      throw new Sabel_DB_Exception("argument should be a string.");
+    }
+  }
+
+  public function getSequenceColumn()
+  {
+    return $this->seqColumn;
   }
 
   public function isSelect()
@@ -53,36 +167,12 @@ abstract class Sabel_DB_Abstract_Statement
     return ($this->getStatementType() === Sabel_DB_Statement::DELETE);
   }
 
-  public function setSqlObject(Sabel_DB_Sql_Object $object)
-  {
-    $this->sqlObject = $object;
-
-    return $this;
-  }
-
-  public function setSql($sql)
-  {
-    $this->sql = $sql;
-
-    return $this;
-  }
-
-  public function getSql()
-  {
-    return ($this->hasSql()) ? $this->sql : $this->build();
-  }
-
-  public function hasSql()
-  {
-    return (is_string($this->sql) && $this->sql !== "");
-  }
-
   public function execute()
   {
+    if (!$this->hasSql()) $this->build();
     $result = $this->driver->execute($this);
-    $object = $this->sqlObject;
 
-    if ($this->isInsert() && is_object($object) && $object->sequenceColumn !== null) {
+    if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
     }
 
@@ -107,7 +197,6 @@ abstract class Sabel_DB_Abstract_Statement
     }
 
     $bindParam = array();
-
     foreach ($this->bindValues as $key => $value) {
       $bindParam[":{$key}"] = $value;
     }
@@ -119,15 +208,17 @@ abstract class Sabel_DB_Abstract_Statement
   public function build()
   {
     if ($this->isSelect()) {
-      return $this->driver->createSelectSql($this->sqlObject);
+      $sql = $this->driver->createSelectSql($this);
     } elseif ($this->isInsert()) {
-      return $this->driver->createInsertSql($this->sqlObject);
+      $sql = $this->driver->createInsertSql($this);
     } elseif ($this->isUpdate()) {
-      return $this->driver->createUpdateSql($this->sqlObject);
+      $sql = $this->driver->createUpdateSql($this);
     } elseif ($this->isDelete()) {
-      return $this->driver->createDeleteSql($this->sqlObject);
+      $sql = $this->driver->createDeleteSql($this);
     } else {
       throw new Sabel_DB_Exception("invalid statement type.");
     }
+
+    return $this->sql = $sql;
   }
 }

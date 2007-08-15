@@ -65,13 +65,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function execute(Sabel_DB_Abstract_Statement $stmt)
   {
-    $sql = $stmt->getSql();
-
-    if ($stmt->isInsert() && $this->lastInsertId !== null) {
-      list ($column, $value) = explode(":", $this->lastInsertId);
-      $stmt->setBind(array($column => $value));
-    }
-
     if (($bindParams = $stmt->getBindParams()) !== null) {
       $bindParams = $this->escape($bindParams);
     }
@@ -96,18 +89,13 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function getLastInsertId()
   {
-    if ($this->lastInsertId === null) {
-      return null;
-    } else {
-      list ($column, $value) = explode(":", $this->lastInsertId);
-      return $value;
-    }
+    return $this->lastInsertId;
   }
 
-  public function createSelectSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
   {
     $sql = "SELECT ";
-    $constraints = $sqlObject->constraints;
+    $constraints = $stmt->getConstraints();
 
     if (isset($constraints["limit"])) {
       $query  = "FIRST {$constraints["limit"]} ";
@@ -117,27 +105,28 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Common_Driver
       $sql   .= "SKIP " . $constraints["offset"];
     }
 
-    $sql .= " {$sqlObject->projection} FROM ";
-    $sql .= $sqlObject->table . $sqlObject->join . $sqlObject->condition;
+    $sql .= " " . $stmt->getProjection() . " FROM ";
+    $sql .= $stmt->getTable() . $stmt->getJoin() . $stmt->getWhere();
 
-    return $sql . $this->createConstraintSql($sqlObject->constraints);
+    return $sql . $this->createConstraintSql($constraints);
   }
 
-  public function createInsertSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    $binds = array();
-    $keys  = array_keys($sqlObject->saveValues);
+    $binds   = array();
+    $tblName = $stmt->getTable();
+    $keys    = array_keys($stmt->getValues());
 
-    if (($column = $sqlObject->sequenceColumn) !== null) {
+    if (($column = $stmt->getSequenceColumn()) !== null) {
       $keys[] = $column;
-      $genName = strtoupper($sqlObject->table . "_{$column}_gen");
-      $newId = ibase_gen_id($genName, 1, $this->getConnection());
-      $this->lastInsertId = $column . ":" . $newId;
+      $genName = strtoupper("{$tblName}_{$column}_gen");
+      $this->lastInsertId = ibase_gen_id($genName, 1, $this->getConnection());
+      $stmt->setBind(array($column => $this->lastInsertId));
     }
 
     foreach ($keys as $key) $binds[] = ":" . $key;
 
-    $sql = array("INSERT INTO {$sqlObject->table} (");
+    $sql = array("INSERT INTO $tblName (");
     $sql[] = join(", ", $keys);
     $sql[] = ") VALUES(";
     $sql[] = join(", ", $binds);

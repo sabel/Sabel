@@ -70,22 +70,22 @@ abstract class Sabel_DB_Abstract_Driver
     }
   }
 
-  public function createSelectSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    $sql = "SELECT {$sqlObject->projection} FROM "
-         . $sqlObject->table . $sqlObject->join . $sqlObject->condition;
+    $sql = "SELECT " . $stmt->getProjection() . " FROM " . $stmt->getTable()
+         . $stmt->getJoin() . $stmt->getWhere();
 
-    return $sql . $this->createConstraintSql($sqlObject->constraints);
+    return $sql . $this->createConstraintSql($stmt->getConstraints());
   }
 
-  public function createInsertSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
   {
     $binds = array();
-    $keys  = array_keys($sqlObject->saveValues);
+    $keys  = array_keys($stmt->getValues());
 
     foreach ($keys as $key) $binds[] = ":" . $key;
 
-    $sql = array("INSERT INTO {$sqlObject->table} (");
+    $sql = array("INSERT INTO " . $stmt->getTable() . " (");
     $sql[] = join(", ", $keys);
     $sql[] = ") VALUES(";
     $sql[] = join(", ", $binds);
@@ -94,22 +94,22 @@ abstract class Sabel_DB_Abstract_Driver
     return implode("", $sql);
   }
 
-  public function createUpdateSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createUpdateSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    $tblName   = $sqlObject->table;
-    $condition = $sqlObject->condition;
+    $tblName = $stmt->getTable();
+    $where   = $stmt->getWhere();
 
     $updates = array();
-    foreach ($sqlObject->saveValues as $column => $value) {
+    foreach ($stmt->getValues() as $column => $value) {
       $updates[] = "$column = :{$column}";
     }
 
-    return "UPDATE $tblName SET " . implode(", ", $updates) . $condition;
+    return "UPDATE $tblName SET " . implode(", ", $updates) . $where;
   }
 
-  public function createDeleteSql(Sabel_DB_Sql_Object $sqlObject)
+  public function createDeleteSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    return "DELETE FROM " . $sqlObject->table . $sqlObject->condition;
+    return "DELETE FROM " . $stmt->getTable() . $stmt->getWhere();
   }
 
   protected function createConstraintSql($constraints)

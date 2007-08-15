@@ -23,8 +23,7 @@ class Sabel_DB_Model_Executer
     $arguments        = array(),
     $constraints      = array(),
     $conditionManager = null,
-    $autoReinit       = true,
-    $lastInsertId     = null;
+    $autoReinit       = true;
 
   public function __construct($model)
   {
@@ -122,22 +121,6 @@ class Sabel_DB_Model_Executer
     }
   }
 
-  protected function driverInterrupt($type, $stmtType)
-  {
-    $driver = $this->driver;
-
-    if ($type === "before") {
-      $methods = $driver->getBeforeMethods();
-    } else {
-      $methods = $driver->getAfterMethods();
-    }
-
-    if (isset($methods[$stmtType])) {
-      $method = $methods[$stmtType];
-      return $driver->$method($this);
-    }
-  }
-
   public function autoReinit($bool)
   {
     $this->autoReinit = $bool;
@@ -147,21 +130,15 @@ class Sabel_DB_Model_Executer
   {
     $this->unsetConditions(true);
 
-    $this->method       = "";
-    $this->projection   = "*";
-    $this->lastInsertId = null;
-    $this->arguments    = array();
-    $this->parents      = array();
+    $this->method     = "";
+    $this->projection = "*";
+    $this->arguments  = array();
+    $this->parents    = array();
   }
 
   public function setProjection($p)
   {
     $this->projection = (is_array($p)) ? join(", ", $p) : $p;
-  }
-
-  public function getProjection()
-  {
-    return $this->projection;
   }
 
   public function setParents($parents)
@@ -583,48 +560,44 @@ class Sabel_DB_Model_Executer
       $projection = implode(", ", $this->model->getColumnNames());
     }
 
-    $object = new Sabel_DB_Sql_Object();
-    $object->table = $model->getTableName();
-    $object->projection  = $projection;
-    $object->condition   = $this->loadConditionManager()->build($stmt);
-    $object->constraints = $this->constraints;
+    $stmt->table($model->getTableName());
+    $stmt->projection($projection);
+    $stmt->where($this->loadConditionManager()->build($stmt));
+    $stmt->constraints($this->constraints);
 
-    return $stmt->setSqlObject($object);
+    return $stmt;
   }
 
   protected function prepareUpdate($stmt, $data)
   {
     $values = $this->chooseValues($data, "update");
+
     $stmt->setBind($values, false);
+    $stmt->table($this->model->getTableName());
+    $stmt->values($values);
+    $stmt->where($this->loadConditionManager()->build($stmt));
 
-    $object = new Sabel_DB_Sql_Object();
-    $object->table = $this->model->getTableName();
-    $object->saveValues = $values;
-    $object->condition = $this->loadConditionManager()->build($stmt);
-
-    return $stmt->setSqlObject($object);
+    return $stmt;
   }
 
   protected function prepareInsert($stmt, $data)
   {
     $values = $this->chooseValues($data, "insert");
+
     $stmt->setBind($values, false);
+    $stmt->table($this->model->getTableName());
+    $stmt->values($values);
+    $stmt->sequenceColumn($this->model->getIncrementColumn());
 
-    $object = new Sabel_DB_Sql_Object();
-    $object->table = $this->model->getTableName();
-    $object->saveValues = $values;
-    $object->sequenceColumn = $this->model->getIncrementColumn();
-
-    return $stmt->setSqlObject($object);
+    return $stmt;
   }
 
   protected function prepareDelete($stmt)
   {
-    $object = new Sabel_DB_Sql_Object();
-    $object->table = $this->model->getTableName();
-    $object->condition = $this->loadConditionManager()->build($stmt);
+    $stmt->table($this->model->getTableName());
+    $stmt->where($this->loadConditionManager()->build($stmt));
 
-    return $stmt->setSqlObject($object);
+    return $stmt;
   }
 
   protected function chooseValues($data, $method)

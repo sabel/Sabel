@@ -67,7 +67,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       mysqli_free_result($result);
     }
 
-    return $rows;
+    return (empty($rows)) ? null : $rows;
   }
 
   public function getLastInsertId()

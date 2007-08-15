@@ -630,8 +630,10 @@ class Executer extends Sabel_DB_Model_Executer
     switch ($method) {
       case "save":
         return $this->beforeSave();
+
       case "insert":
         return $this->beforeInsert();
+
       case "update":
         return $this->beforeUpdate();
     }
