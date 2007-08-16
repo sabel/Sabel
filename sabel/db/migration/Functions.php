@@ -129,7 +129,7 @@ function message($message)
 function executeQuery($query)
 {
   $driver = Sabel_DB_Migration_Manager::getDriver();
-  $driver->setSql($query)->execute();
+  Sabel_DB_Statement::create($driver)->setSql($query)->execute();
 }
 
 function getSchema($mdlName)

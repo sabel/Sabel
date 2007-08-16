@@ -9,36 +9,74 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Join extends Sabel_DB_Join_Base
+class Sabel_DB_Join
 {
   const CANNOT_JOIN = "CANNOT_JOIN";
 
-  protected $executer = null;
+  private
+    $executer = null,
+    $model    = null,
+    $objects  = array(),
+    $tblName  = "";
 
-  public function __construct($executer)
+  public function __construct(Sabel_DB_Model_Executer $executer)
   {
     $model = $executer->getModel();
 
-    $this->executer      = $executer;
-    $this->sourceModel   = $executer->getModel();
-    $this->tblName       = $this->sourceModel->getTableName();
-    $this->resultBuilder = Sabel_DB_Join_Result::getInstance();
+    $this->executer = $executer;
+    $this->model    = $executer->getModel();
+    $this->tblName  = $this->model->getTableName();
+  }
+
+  public function createRelation(Sabel_DB_Model $model)
+  {
+    return new Sabel_DB_Join_Relation($model);
+  }
+
+  public function add($object)
+  {
+    if ($object instanceof Sabel_DB_Model) {
+      $object = new Sabel_DB_Join_Object($object);
+    }
+
+    $structure = Sabel_DB_Join_Structure::getInstance();
+    $structure->addJoinObject($object);
+    $object->setSourceName($this->tblName);
+    $this->objects[] = $object;
+
+    $structure->add($this->tblName, $object->getName());
+
+    $name  = $object->getModel()->getTableName();
+    $fkeys = $this->model->getSchema()->getForeignKeys();
+
+    if (is_array($fkeys)) {
+      foreach ($fkeys as $colName => $fkey) {
+        if ($fkey["referenced_table"] === $name) {
+          $joinKey = array("id" => $fkey["referenced_column"], "fkey" => $colName);
+          break;
+        }
+      }
+    } else {
+      $joinKey = array("id" => "id", "fkey" => $name . "_id");
+    }
+
+    $object->setJoinKey($joinKey);
+
+    return $this;
   }
 
   public function buildParents()
   {
     $parents = $this->executer->getParents();
-    $connectionName = $this->sourceModel->getConnectionName();
+    $connectionName = $this->model->getConnectionName();
     $accessor = new Sabel_DB_Schema_Accessor($connectionName);
     $tableLists = $accessor->getTableLists();
 
     $result = true;
 
     foreach ($parents as $parent) {
-      $model   = MODEL($parent);
-      $tblName = $model->getTableName();
-
-      if (in_array($tblName, $tableLists)) {
+      $model = MODEL($parent);
+      if (in_array($model->getTableName(), $tableLists)) {
         $this->add($model);
       } else {
         $result = self::CANNOT_JOIN;
@@ -66,8 +104,9 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
 
   public function join($joinType = "INNER")
   {
-    $objects = $this->objects;
-    $model   = $this->sourceModel;
+    $structure = Sabel_DB_Join_Structure::getInstance();
+    $objects   = $this->objects;
+    $model     = $this->model;
 
     $projection = array();
     foreach ($objects as $object) {
@@ -89,10 +128,11 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    if (!$rows = $this->execute($projection, implode("", $query))) {
-      $results = false;
+    if ($rows = $this->execute($projection, implode("", $query))) {
+      $builder = new Sabel_DB_Join_Result();
+      $results = $builder->build($model, $structure, $rows);
     } else {
-      $results = $this->resultBuilder->build($model, $rows);
+      $results = false;
     }
 
     $this->clear();
@@ -103,8 +143,8 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
   {
     $executer = $this->executer;
     $driver = $executer->getDriver();
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $driver);
-    $stmt->table($this->sourceModel->getTableName());
+    $stmt = Sabel_DB_Statement::create($driver, Sabel_DB_Statement::SELECT);
+    $stmt->table($this->model->getTableName());
     $stmt->join($join);
     $stmt->projection($projection);
     $stmt->where($executer->loadConditionManager()->build($stmt));
@@ -117,7 +157,7 @@ class Sabel_DB_Join extends Sabel_DB_Join_Base
   {
     $this->objects = array();
 
-    Sabel_DB_Join_Result::clear();
-    Sabel_DB_Join_Alias::clear();
+    Sabel_DB_Join_Structure::getInstance()->clear();
+    Sabel_DB_Join_ColumnHash::clear();
   }
 }

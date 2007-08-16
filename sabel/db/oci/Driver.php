@@ -9,63 +9,35 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
+class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected
-    $driverId      = "oci",
-    $closeFunction = "oci_close";
-
   private
-    $limit    = null,
-    $offset   = null,
-    $execMode = OCI_COMMIT_ON_SUCCESS;
+    $limit        = null,
+    $offset       = null,
+    $lastInsertId = null,
+    $execMode     = OCI_COMMIT_ON_SUCCESS;
 
-  public function loadSqlClass($model)
+  public function getDriverId()
   {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
-  }
-
-  public function loadConditionBuilder()
-  {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
-  }
-
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Oci_SqlConstraint");
+    return "oci";
   }
 
   public function loadTransaction()
   {
-    return Sabel_DB_Oci_Transaction::getInstance();
+    return Sabel_DB_Transaction_General::getInstance();
   }
 
   public function getConnection()
   {
-    $connection = $this->loadTransaction()->get($this->connectionName);
+    $connection = $this->loadTransaction()->getConnection($this->connectionName);
 
     if ($connection === null) {
-      $connection     = parent::getConnection();
       $this->execMode = OCI_COMMIT_ON_SUCCESS;
+      return parent::getConnection();
     } else {
       $this->execMode = OCI_DEFAULT;
+      return $connection;
     }
-
-    return $this->connection = $connection;
-  }
-
-  public function getBeforeMethods()
-  {
-    return array(Sabel_DB_Statement::SELECT => "setLimitation",
-                 Sabel_DB_Statement::INSERT => "setIncrementId");
-  }
-
-  public function setLimitation($executer)
-  {
-    $c = $executer->getModel()->getConstraints();
-
-    if (isset($c["limit"]))  $this->limit  = $c["limit"];
-    if (isset($c["offset"])) $this->offset = $c["offset"];
   }
 
   public function begin($connectionName = null)
@@ -78,52 +50,126 @@ class Sabel_DB_Oci_Driver_Oci extends Sabel_DB_Abstract_Driver
 
     if (!$trans->isActive($connectionName)) {
       $connection = Sabel_DB_Connection::get($connectionName);
-      $trans->start($connection, $connectionName);
+      $trans->start($connection, $this);
     }
+  }
+
+  public function commit($connection)
+  {
+    oci_commit($connection);
+  }
+
+  public function rollback($connection)
+  {
+    oci_rollback($connection);
+  }
+
+  public function close($connection)
+  {
+    oci_close($connection);
+    unset($this->connection);
   }
 
   public function escape($values)
   {
-    return escapeString($this->driverId, $values, "oci_escape_string");
-  }
-
-  public function execute()
-  {
-    $stmt   = oci_parse($this->getConnection(), $this->sql);
-    $result = oci_execute($stmt, $this->execMode);
-
-    if (!$result) {
-      $error = oci_error($stmt);
-      $this->error("oci driver execute failed: {$error["message"]}");
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? 1 : 0;
+      } elseif (is_string($val)) {
+        $val = "'" . oci_escape_string($val) . "'";
+      }
     }
 
-    if (oci_statement_type($stmt) === "SELECT") {
-      oci_fetch_all($stmt, $rows, $this->offset, $this->limit, OCI_ASSOC|OCI_FETCHSTATEMENT_BY_ROW);
+    return $values;
+  }
+
+  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  {
+    if (($bindParams = $stmt->getBindParams()) !== null) {
+      $bindParams = $this->escape($bindParams);
+    }
+
+    $conn    = $this->getConnection();
+    $sql     = $this->bind($stmt->getSql(), $bindParams);
+    $ociStmt = oci_parse($conn, $sql);
+    $result  = oci_execute($ociStmt, $this->execMode);
+
+    if (!$result) $this->executeError($ociStmt);
+
+    if (oci_statement_type($ociStmt) === "SELECT") {
+      oci_fetch_all($ociStmt, $rows, $this->offset, $this->limit, OCI_ASSOC|OCI_FETCHSTATEMENT_BY_ROW);
       $rows = array_map("array_change_key_case", $rows);
     } else {
       $rows = array();
     }
 
-    oci_free_statement($stmt);
-    $this->limit = $this->offset = null;
+    oci_free_statement($ociStmt);
 
-    return $this->result = $rows;
+    // @todo...
+    // $this->limit = $this->offset = null;
+
+    return (empty($rows)) ? null : $rows;
   }
 
-  public function setIncrementId($executer)
+  public function getLastInsertId()
   {
-    $model = $executer->getModel();
-    if (($column = $model->getIncrementColumn()) === null) {
-      return $executer->setIncrementId(null);
+    return $this->lastInsertId;
+  }
+
+  public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
+  {
+    $binds   = array();
+    $tblName = $stmt->getTable();
+    $keys    = array_keys($stmt->getValues());
+
+    if (($column = $stmt->getSequenceColumn()) !== null) {
+      $keys[] = $column;
+      $seqName = strtoupper("{$tblName}_{$column}_seq");
+      $seqStmt = Sabel_DB_Statement::create($this, Sabel_DB_Statement::SELECT);
+      $rows = $seqStmt->setSql("SELECT {$seqName}.nextval AS id FROM dual")->execute();
+      $this->lastInsertId = $rows[0]["id"];
+      $stmt->setBind(array($column => $this->lastInsertId));
     }
 
-    $values = $model->getSaveValues();
+    foreach ($keys as $key) $binds[] = ":" . $key;
 
-    $seqName = strtoupper($model->getTableName() . "_{$column}_seq");
-    $rows = $this->setSql("SELECT {$seqName}.nextval AS id FROM dual")->execute();
-    $values[$column] = (int)$rows[0]["id"];
-    $model->setSaveValues($values);
-    $executer->setIncrementId($values[$column]);
+    $sql = array("INSERT INTO $tblName (");
+    $sql[] = join(", ", $keys);
+    $sql[] = ") VALUES(";
+    $sql[] = join(", ", $binds);
+    $sql[] = ")";
+
+    return implode("", $sql);
+  }
+
+  protected function createConstraintSql($constraints)
+  {
+    $sql = "";
+
+    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
+    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
+    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+
+    if (isset($constraints["limit"])) {
+      $this->limit = $constraints["limit"];
+    } else {
+      $this->limit = null;
+    }
+
+    if (isset($constraints["offset"])) {
+      $this->offset = $constraints["offset"];
+    } else {
+      $this->offset = null;
+    }
+
+    return $sql;
+  }
+
+  private function executeError($ociStmt)
+  {
+    $error   = oci_error($ociStmt);
+    $message = "oci driver execute failed: " . $error["message"];
+    throw new Sabel_DB_Exception($message);
   }
 }
 

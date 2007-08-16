@@ -21,16 +21,19 @@ abstract class Sabel_DB_Abstract_Driver
   abstract public function loadTransaction();
   abstract public function getLastInsertId();
   abstract public function begin($connectionName = null);
+  abstract public function commit($connection);
+  abstract public function rollback($connection);
+  abstract public function close($connection);
 
   public function setConnectionName($connectionName)
   {
-    if ($connectionName === $this->connectionName) return;
-
-    if (isset($this->connection)) {
-      $this->connection = Sabel_DB_Connection::get($connectionName);
-    }
+    if ($this->connectionName === $connectionName) return;
 
     $this->connectionName = $connectionName;
+
+    if ($this->connection !== null) {
+      $this->connection = Sabel_DB_Connection::get($connectionName);
+    }
   }
 
   public function getConnectionName()
@@ -46,14 +49,6 @@ abstract class Sabel_DB_Abstract_Driver
     } else {
       return $this->connection;
     }
-  }
-
-  public function close($connection)
-  {
-    $method = $this->closeFunction;
-    $method($connection);
-
-    unset($this->connection);
   }
 
   protected function bind($sql, $bindParam)
@@ -137,15 +132,7 @@ function escapeString($db, $values, $escMethod = null)
 
   foreach ($values as &$val) {
     if (is_bool($val)) {
-      switch ($db) {
-        case "oci":
-          $val = ($val) ? 1 : 0;
-          break;
-
-        case "mssql":
-          $val = ($val) ? "'true'" : "'false'";
-          break;
-      }
+      $val = ($val) ? "'true'" : "'false'";
     } elseif (is_string($val) && $escMethod !== null) {
       $val = "'" . $escMethod($val) . "'";
     }

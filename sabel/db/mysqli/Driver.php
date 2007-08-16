@@ -11,8 +11,6 @@
  */
 class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected $closeFunction = "mysqli_close";
-
   public function getDriverId()
   {
     return "mysqli";
@@ -20,7 +18,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function loadTransaction()
   {
-    return Sabel_DB_Mysqli_Transaction::getInstance();
+    return Sabel_DB_Transaction_General::getInstance();
   }
 
   public function begin($connectionName = null)
@@ -34,8 +32,26 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (!$trans->isActive($connectionName)) {
       $connection = Sabel_DB_Connection::get($connectionName);
       mysqli_autocommit($connection, false);
-      $trans->start($connection, $connectionName);
+      $trans->start($connection, $this);
     }
+  }
+
+  public function commit($connection)
+  {
+    mysqli_commit($connection);
+    mysqli_autocommit($connection, true);
+  }
+
+  public function rollback($connection)
+  {
+    mysqli_rollback($connection);
+    mysqli_autocommit($connection, true);
+  }
+
+  public function close($connection)
+  {
+    mysqli_close($connection);
+    unset($this->connection);
   }
 
   public function escape($values)

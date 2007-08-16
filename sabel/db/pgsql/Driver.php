@@ -9,14 +9,8 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
+class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected
-    $closeFunction   = "pg_close",
-    $beginCommand    = "START TRANSACTION",
-    $commitCommand   = "COMMIT",
-    $rollbackCommand = "ROLLBACK";
-
   public function getDriverId()
   {
     return "pgsql";
@@ -25,6 +19,43 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_General::getInstance();
+  }
+
+  public function begin($connectionName = null)
+  {
+    if ($connectionName === null) {
+      $connectionName = $this->connectionName;
+    }
+
+    $trans = $this->loadTransaction();
+
+    if (!$trans->isActive($connectionName)) {
+      $this->connection = Sabel_DB_Connection::get($connectionName);
+      if (!pg_query($this->connection, "START TRANSACTION")) {
+        throw new Sabel_DB_Exception("pgsql driver begin failed.");
+      }
+      $trans->start($this->connection, $this);
+    }
+  }
+
+  public function commit($connection)
+  {
+    if (!pg_query($connection, "COMMIT")) {
+      throw new Sabel_DB_Exception("pgsql driver commit failed.");
+    }
+  }
+
+  public function rollback($connection)
+  {
+    if (!pg_query($connection, "ROLLBACK")) {
+      throw new Sabel_DB_Exception("pgsql driver rollback failed.");
+    }
+  }
+
+  public function close($connection)
+  {
+    pg_close($connection);
+    unset($this->connection);
   }
 
   public function escape($values)
@@ -65,7 +96,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Common_Driver
 
   public function getLastInsertId()
   {
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this);
+    $stmt = Sabel_DB_Statement::create($this, Sabel_DB_Statement::SELECT);
     $rows = $stmt->setSql("SELECT LASTVAL() AS id")->execute();
     return $rows[0]["id"];
   }

@@ -41,20 +41,9 @@ class Sabel_DB_Transaction
 
   private static function finish($method)
   {
-    $instances = Sabel_DB_Abstract_Transaction::getInstances();
-    if (!$instances) return;
+    $instance = Sabel_DB_Transaction_General::getInstance();
+    $instance->$method();
 
-    foreach ($instances as $instance) $instance->$method();
     self::$active = false;
-  }
-
-  public static function registBefore()
-  {
-    // @todo
-  }
-
-  public static function registAfter()
-  {
-    // @todo
   }
 }

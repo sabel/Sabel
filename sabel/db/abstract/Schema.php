@@ -47,7 +47,7 @@ abstract class Sabel_DB_Abstract_Schema
 
   protected function execute($sql)
   {
-    $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this->driver);
+    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::SELECT);
     return $stmt->setSql($sql)->execute();
   }
 

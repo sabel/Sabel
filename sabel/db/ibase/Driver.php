@@ -11,8 +11,6 @@
  */
 class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected $closeFunction = "ibase_close";
-
   private
     $autoCommit   = true,
     $lastInsertId = null;
@@ -24,12 +22,12 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 
   public function loadTransaction()
   {
-    return Sabel_DB_Ibase_Transaction::getInstance();
+    return Sabel_DB_Transaction_General::getInstance();
   }
 
   public function getConnection()
   {
-    $connection = $this->loadTransaction()->get($this->getConnectionName());
+    $connection = $this->loadTransaction()->getConnection($this->connectionName);
 
     if ($connection === null) {
       $this->autoCommit = true;
@@ -51,8 +49,24 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     if (!$trans->isActive($connectionName)) {
       $connection = Sabel_DB_Connection::get($connectionName);
       $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $connection);
-      $trans->start($resource, $connectionName);
+      $trans->start($resource, $this);
     }
+  }
+
+  public function commit($connection)
+  {
+    ibase_commit($connection);
+  }
+
+  public function rollback($connection)
+  {
+    ibase_rollback($connection);
+  }
+
+  public function close($connection)
+  {
+    ibase_close($connection);
+    unset($this->connection);
   }
 
   public function escape($values)
@@ -163,8 +177,8 @@ function ibase_escape_string($val)
 {
   static $mqs = null;
 
-  if ($mqs = null) {
-    $mqs = ini_get("magic_quotes_sybase");
+  if ($mqs === null) {
+    $mqs = (ini_get("magic_quotes_sybase") === "1");
   }
 
   if ($mqs) {

@@ -3,28 +3,15 @@
 /**
  * Sabel_DB_Pdo_Driver
  *
+ * @abstract
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
+abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
-  private $database = "";
-
-  // @todo
-  public function __construct($database)
-  {
-    $this->database = $database;
-  }
-
-  public function getDriverId()
-  {
-    // @todo
-    return "pdo";
-  }
-
   public function loadTransaction()
   {
     return Sabel_DB_Transaction_General::getInstance();
@@ -40,7 +27,10 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
     if (!$trans->isActive($connectionName)) {
       $connection = Sabel_DB_Connection::get($connectionName);
-      $connection->beginTransaction();
+      if (!$connection->beginTransaction()) {
+        $error = $connection->errorInfo();
+        throw new Exception("pdo driver begin failed. {$error[2]}");
+      }
       $trans->start($connection, $this);
     }
   }
@@ -49,42 +39,22 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   {
     if (!$connection->commit()) {
       $error = $connection->errorInfo();
-      throw new Exception("transaction commit failed. {$error[2]}");
+      throw new Exception("pdo driver commit failed. {$error[2]}");
     }
   }
 
   public function rollback($connection)
   {
-    $connection->rollBack();
+    if (!$connection->rollback()) {
+      $error = $connection->errorInfo();
+      throw new Exception("pdo driver rollback failed. {$error[2]}");
+    }
   }
 
   public function close($connection)
   {
     unset($connection);
     unset($this->connection);
-  }
-
-  public function escape($values)
-  {
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        switch ($this->database) {
-          case "mysql":
-            $val = ($val) ? 1 : 0;
-            break;
-
-          case "pgsql":
-            $val = ($val) ? "t" : "f";
-            break;
-
-          case "sqlite":
-            $val = ($val) ? "true" : "false";
-            break;
-        }
-      }
-    }
-
-    return $values;
   }
 
   public function execute(Sabel_DB_Abstract_Statement $stmt)
@@ -108,17 +78,6 @@ class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       return (empty($rows)) ? null : $rows;
     } else {
       $this->executeError($conn, $pdoStmt, $bindParams);
-    }
-  }
-
-  public function getLastInsertId()
-  {
-    if ($this->database === "pgsql") {
-      $stmt = Sabel_DB_Statement::create(Sabel_DB_Statement::SELECT, $this);
-      $rows = $stmt->setSql("SELECT LASTVAL() AS id")->execute();
-      return $rows[0]["id"];
-    } else {
-      return $this->connection->lastInsertId();
     }
   }
 

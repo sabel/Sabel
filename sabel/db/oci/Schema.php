@@ -38,7 +38,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     return $tables;
   }
 
-  public function getForeignKey($tblName)
+  public function getForeignKeys($tblName)
   {
     $tblName = strtoupper($tblName);
 

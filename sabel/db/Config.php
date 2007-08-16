@@ -46,11 +46,12 @@ class Sabel_DB_Config
 
     if (strpos($driverName, "pdo") === false) {
       $className = "Sabel_DB_" . ucfirst($driverName) . "_Driver";
-      $driver = new $className();
     } else {
-      $driver = new Sabel_DB_Pdo_Driver(Sabel_DB_Config::getDB($connectionName));
+      list (, $db) = explode("-", $driverName);
+      $className = "Sabel_DB_Pdo_Driver_" . ucfirst($db);
     }
 
+    $driver = new $className();
     $driver->setConnectionName($connectionName);
     return $driver;
   }

@@ -315,7 +315,7 @@ class Test_DB_Test extends SabelTestCase
     $executer = new Executer("Member");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
+    $relation = $join->createRelation(MODEL("MemberSubGroup"));
     $relation->add(MODEL("MemberGroup"));
     $count = $join->add($relation)->getCount();
 
@@ -325,13 +325,33 @@ class Test_DB_Test extends SabelTestCase
     $executer->setCondition("MemberGroup.name", "group1");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
+    $relation = $join->createRelation(MODEL("MemberSubGroup"));
     $relation->add(MODEL("MemberGroup"));
     $count = $join->add($relation)->getCount();
 
     $this->assertEquals($count, 1);
   }
+  /* @todo
+  public function testJoinAlias()
+  {
+    $executer = new Executer("Member");
+    $executer->setConstraint("order", "Member.id ASC");
 
+    $join = new Sabel_DB_Join($executer);
+    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
+    $relation->add(MODEL("MemberGroup"), null, "MemGrp");
+    $members = $join->add($relation, null, "Msg")->join();
+    $member1 = $members[0];
+    $member2 = $members[1];
+
+    $this->assertEquals($member1->Msg->id, 2);
+    $this->assertEquals($member1->Msg->MemGrp->id, 1);
+    $this->assertEquals($member1->Msg->MemGrp->name, "group1");
+    $this->assertEquals($member2->Msg->id, 1);
+    $this->assertEquals($member2->Msg->MemGrp->id, 2);
+    $this->assertEquals($member2->Msg->MemGrp->name, "group2");
+  }
+  */
   public function testInserts()
   {
     $data = array();
@@ -603,6 +623,64 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($models[1]->name, "name4");
     $this->assertEquals($models[2]->name, "name5");
     $this->assertEquals($models[3]->name, "name%");
+  }
+
+  public function testTransaction()
+  {
+    Sabel_DB_Transaction::activate();
+
+    $data = array();
+
+    $data[] = array("id"      => 6,
+                    "name"    => "test6",
+                    "email"   => "test6@example.com",
+                    "is_temp" => true,
+                    "location_id" => 1,
+                    "member_sub_group_id" => 2,
+                    "updated_at" => "2007-01-01 00:00:00",
+                    "created_at" => "2007-01-01 00:00:00");
+
+    $data[] = array("id"      => 7,
+                    "name"    => "test7",
+                    "email"   => "test7@example.com",
+                    "is_temp" => true,
+                    "location_id" => 2,
+                    "member_sub_group_id" => 1,
+                    "updated_at" => "2007-01-01 00:00:00",
+                    "created_at" => "2007-01-01 00:00:00");
+
+    $data[] = array("id"      => 8,
+                    "name"    => "test8",
+                    "email"   => "test8@example.com",
+                    "is_temp" => true,
+                    "location_id" => 3,
+                    "member_sub_group_id" => 1,
+                    "updated_at" => "2007-01-01 00:00:00",
+                    "created_at" => "2007-01-01 00:00:00");
+
+    $executer = new Executer("Member");
+
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    Sabel_DB_Transaction::rollback();
+
+    $count = $executer->getCount();
+    $this->assertEquals($count, 5);
+
+    Sabel_DB_Transaction::activate();
+
+    $executer = new Executer("Member");
+
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    Sabel_DB_Transaction::commit();
+
+    $count = $executer->getCount();
+    $this->assertEquals($count, 8);
   }
 
   public function testClear()

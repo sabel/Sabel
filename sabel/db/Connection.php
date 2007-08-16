@@ -32,43 +32,43 @@ class Sabel_DB_Connection
 
     if (strpos($drvName, "pdo-") === 0) {
       $drvName = str_replace("pdo-", "", $drvName);
-      list ($conn, $error) = self::pdoConnect($drvName, $params);
+      $result  = self::pdoConnect($drvName, $params);
     } else {
       $currentLevel = error_reporting(0);
 
       switch ($drvName) {
         case "mysql":
-          list ($conn, $error) = self::mysqlConnect($params);
+          $result = self::mysqlConnect($params);
           break;
 
         case "mysqli":
-          list ($conn, $error) = self::mysqliConnect($params);
+          $result = self::mysqliConnect($params);
           break;
 
         case "pgsql":
-          list ($conn, $error) = self::pgsqlConnect($params);
-          break;
-
-        case "ibase":
-          list ($conn, $error) = self::ibaseConnect($params);
+          $result = self::pgsqlConnect($params);
           break;
 
         case "oci":
-          list ($conn, $error) = self::ociConnect($params);
+          $result = self::ociConnect($params);
+          break;
+
+        case "ibase":
+          $result = self::ibaseConnect($params);
           break;
 
         case "mssql":
-          list ($conn, $error) = self::mssqlConnect($params);
+          $result = self::mssqlConnect($params);
           break;
       }
 
       error_reporting($currentLevel);
     }
 
-    if ($conn) {
-      self::$connections[$connectionName] = $conn;
+    if (is_string($result)) {
+      throw new Sabel_DB_Exception($result);
     } else {
-      throw new Sabel_DB_Exception($error);
+      self::$connections[$connectionName] = $result;
     }
   }
 
@@ -89,9 +89,9 @@ class Sabel_DB_Connection
         }
       }
 
-      return array($conn, "");
+      return $conn;
     } catch (PDOException $e) {
-      return array(false, $e->getMessage());
+      return $e->getMessage();
     }
   }
 
@@ -108,9 +108,9 @@ class Sabel_DB_Connection
         mysql_query(sprintf(self::SET_ENCODING, $params["encoding"]), $conn);
       }
 
-      return array($conn, "");
+      return $conn;
     } else {
-      return array($conn, mysql_error());
+      return mysql_error();
     }
   }
 
@@ -132,9 +132,9 @@ class Sabel_DB_Connection
         mysqli_set_charset($conn, $params["encoding"]);
       }
 
-      return array($conn, "");
+      return $conn;
     } else {
-      return array($conn, mysqli_connect_error());
+      return mysqli_connect_error();
     }
   }
 
@@ -153,10 +153,17 @@ class Sabel_DB_Connection
         pg_query($conn, sprintf(self::SET_ENCODING, $params["encoding"]));
       }
 
-      return array($conn, "");
+      return $conn;
     } else {
-      $error = error_get_last();
-      return array($conn, $error["message"]);
+      list (, $minorVersion) = explode(".", PHP_VERSION);
+
+      if ($minorVersion > 1) {
+        $error = error_get_last();
+        return $error["message"];
+      } else {
+        $message = "cannot connect to PostgreSQL. please check your configuration.";
+        return $message;
+      }
     }
   }
 
@@ -167,9 +174,9 @@ class Sabel_DB_Connection
     $conn = ibase_connect($host, $params["user"], $params["password"], $enc);
 
     if ($conn) {
-      return array($conn, "");
+      return $conn;
     } else {
-      return array($conn, ibase_errmsg());
+      return ibase_errmsg();
     }
   }
 
@@ -183,10 +190,10 @@ class Sabel_DB_Connection
     if ($conn) {
       $stmt = oci_parse($conn, "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
       oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
-      return array($conn, "");
+      return $conn;
     } else {
       $e = oci_error();
-      return array($conn, $e["message"]);
+      return $e["message"];
     }
   }
 
@@ -198,9 +205,9 @@ class Sabel_DB_Connection
 
     if ($conn) {
       mssql_select_db($params["database"], $conn);
-      return array($conn, "");
+      return $conn;
     } else {
-      return array($conn, mssql_get_last_message());
+      return mssql_get_last_message();
     }
   }
 

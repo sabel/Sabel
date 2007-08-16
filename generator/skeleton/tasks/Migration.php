@@ -201,7 +201,8 @@ class Migration extends Sabel_Sakle_Task
 
   protected function incrementVersion($num)
   {
-    $this->driver->setSql("UPDATE sversion SET version = $num")->execute();
+    $stmt = Sabel_DB_Statement::create($this->driver);
+    $stmt->setSql("UPDATE sversion SET version = $num")->execute();
   }
 
   protected function initDbConfig($environment)
@@ -240,16 +241,16 @@ class Migration extends Sabel_Sakle_Task
             . "version INTEGER NOT NULL)";
 
     $insert = "INSERT INTO sversion values(1, 0)";
-
-    $driver = $this->driver;
-    $driver->setSql($create)->execute();
-    $driver->setSql($insert)->execute();
+    $stmt   = Sabel_DB_Statement::create($this->driver);
+    $stmt->setSql($create)->execute();
+    $stmt->setSql($insert)->execute();
   }
 
   protected function getVersion()
   {
     $select = "SELECT version FROM sversion WHERE id = 1";
-    $rows   = $this->driver->setSql($select)->execute();
+    $stmt   = Sabel_DB_Statement::create($this->driver);
+    $rows   = $stmt->setSql($select)->execute();
 
     return $rows[0]["version"];
   }
