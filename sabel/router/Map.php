@@ -38,12 +38,12 @@ class Sabel_Router_Map implements Sabel_Router
       $candidate->setModule("index");
       $candidate->setController("index");
       $candidate->setAction("index");
-      // $context->setCandidate($candidate);
+      Sabel_Context::getContext()->setCandidate($candidate);
       $request->setCandidate($candidate);
       $destination = $candidate->getDestination();
       return $destination;
     } else {
-      // $context->setCandidate($candidate);
+      Sabel_Context::getContext()->setCandidate($candidate);
       $request->setCandidate($candidate);
       return $candidate->getDestination();
     }

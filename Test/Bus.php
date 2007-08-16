@@ -82,6 +82,14 @@ class Test_Bus extends SabelTestCase
     $this->assertEquals(array("r1", "r2"), $controller->results);
   }
   
+  /**
+   * バスコントローラはプロセッサをスキップすることができる
+   */
+  public function testBusControllerSkip()
+  {
+    
+  }
+  
   public function testListSize()
   {
     $list = new Sabel_Bus_ProcessorList(new Test_Bus_Processor("r1"));

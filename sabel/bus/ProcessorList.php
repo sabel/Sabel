@@ -123,7 +123,7 @@ class Sabel_Bus_ProcessorList
   {
     $this->next = null;
   }
-    
+  
   public function setPrevious($processor)
   {
     $this->previous = $processor;

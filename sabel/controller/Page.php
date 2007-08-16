@@ -12,21 +12,16 @@
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
   protected
-    $result = null;
-    
-  protected
-    $hidden = array();
-    
-  protected
-    $attributes  = array(),
-    $assignments = array();
-    
-  protected
+    $bus      = null,
     $request  = null,
     $response = null,
     $storage  = null;
-    
-  protected $destination = null;
+
+  protected
+    $hidden      = array(),
+    $attributes  = array(),
+    $assignments = array(),
+    $destination = null;
   
   /**
    * reserved name lists of methods(actions)
@@ -38,8 +33,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * default constructer of page controller
    *
    */
-  // public final function __construct($context)
-  
   public final function __construct()
   {
     $reserved = get_class_methods("Sabel_Controller_Page");
@@ -75,6 +68,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
     $this->request     = $request;
     $this->destination = $destination;
+  }
+  
+  public function setBus($bus)
+  {
+    $this->bus = $bus;
   }
   
   /**
@@ -165,53 +163,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   }
   
   /**
-   * HTTP Redirect to another location.
-   *
-   * @access public
-   * @param string $to /Module/Controller/Method
-   * @return mixed self::REDIRECTED
-   */
-  public function redirect($to, $parameters = null)
-  {
-    if ($parameters !== null) {
-      $buf = array();
-      foreach ($parameters as $key => $value) {
-        $buf[] = "{$key}={$value}";
-      }
-      $to .= "?" . join("&", $buf);
-    }
-    
-    return self::REDIRECTED;
-  }
-  
-  /**
-   * HTTP Redirect to another location with uri.
-   *
-   * @param string $params
-   */
-  public final function redirectTo($destination, $parameters = null)
-  {
-    $candidate = $this->context->getCandidate();
-    $uri = $candidate->uri($this->convertParams($destination));
-    return $this->redirect($uri, $parameters);
-  }
-  
-  private function convertParams($param)
-  {
-    $buf = array();
-    $params = explode(",", $param);
-    $reserved = ";";
-    
-    foreach ($params as $part) {
-      $line     = array_map("trim", explode(":", $part));
-      $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
-      $buf[$reserved] = $line[1];
-    }
-    
-    return $buf;
-  }
-  
-  /**
    * assign value to template.
    *
    * @param mixed $key search key
@@ -222,9 +173,9 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->assignments[$key] = $value;
   }
   
-  public final function getAttributes()
+  public final function getAttribute($name)
   {
-    return $this->attributes;
+    return $this->attributes[$name];
   }
   
   public final function setAttribute($name, $value)
@@ -232,24 +183,19 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->attributes[$name] = $value;
   }
   
+  public final function getAttributes()
+  {
+    return $this->attributes;
+  }
+  
   public final function setAttributes($attributes)
   {
     $this->attributes = array_merge($attributes, $this->attributes);
   }
   
-  public final function getResult()
+  public final function hasAttribute($name)
   {
-    return $this->result;
-  }
-  
-  public final function getRequest()
-  {
-    return $this->request;
-  }
-  
-  public function getResponse()
-  {
-    return $this->response;
+    return isset($this->attributes[$name]);
   }
   
   public final function setAction($action)
@@ -265,11 +211,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public final function getStorage()
   {
     return $this->storage;
-  }
-  
-  public final function getContext()
-  {
-    return $this->context;
   }
   
   public final function getRequests()
@@ -294,11 +235,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function __set($name, $value)
   {
     $this->attributes[$name] = $value;
-  }
-  
-  protected function __call($method, $arguments)
-  {
-    // return $this->plugin->call($method, $arguments);
   }
   
   /**

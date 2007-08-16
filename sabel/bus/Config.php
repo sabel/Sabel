@@ -32,6 +32,11 @@ abstract class Sabel_Bus_Config
     return $this;
   }
   
+  public function getGroup($name)
+  {
+    return $this->bus->getGroup($name);
+  }
+  
   public function getBus()
   {
     return $this->bus;

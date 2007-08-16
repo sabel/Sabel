@@ -15,18 +15,7 @@ class Sabel_Context
   
   private static $context = null;
   
-  private $request     = null;
-  private $plugin      = null;
   private $candidate   = null;
-  private $destination = null;
-  private $controller  = null;
-  private $view        = null;
-  private $storage     = null;
-  private $locale      = null;
-  private $executer    = null;
-  private $injector    = null;
-  
-  private $disableLayout = false;
   
   public static function setContext($context)
   {
@@ -35,38 +24,11 @@ class Sabel_Context
   
   public static function getContext()
   {
+    if (self::$context === null) {
+      self::$context = new self();
+    }
+    
     return self::$context;
-  }
-  
-  public function setRequest($request)
-  {
-    $this->request = $request;
-    return $request;
-  }
-  
-  public function getRequest()
-  {
-    return $this->request;
-  }
-  
-  public function setPlugin($plugin)
-  {
-    $this->plugin = $plugin;
-  }
-  
-  public function getPlugin()
-  {
-    return $this->plugin;
-  }
-  
-  public function setStorage($storage)
-  {
-    $this->storage = $storage;
-  }
-  
-  public function getStorage()
-  {
-    return $this->storage;
   }
   
   public function setCandidate($candidate)
@@ -77,72 +39,6 @@ class Sabel_Context
   public function getCandidate()
   {
     return $this->candidate;
-  }
-  
-  public function setController($controller)
-  {
-    $this->controller = $controller;
-  }
-  
-  public function getController()
-  {
-    return $this->controller;
-  }
-    
-  public function setDestination($destination)
-  {
-    $this->destination = $destination;
-  }
-  
-  public function getDestination()
-  {
-    return $this->destination;
-  }
-  
-  public function setInjector($injector)
-  {
-    $this->injector = $injector;
-  }
-  
-  public function getInjector()
-  {
-    return $this->injector;
-  }
-  
-  public function setLayoutDisable($bool)
-  {
-    $this->disableLayout = $bool;
-  }
-  
-  public function isLayoutDisabled()
-  {
-    return $this->disableLayout;
-  }
-  
-  public function getView()
-  {
-    return new Sabel_View();
-  }
-  
-  public function setLocale($locale)
-  {
-    $this->locale = $locale;
-  }
-  
-  public function getLocale()
-  {
-    return $this->locale;
-  }
-  
-  public function setExecuter($executer)
-  {
-    $this->executer = $executer;
-    return $executer;
-  }
-  
-  public function getExecuter()
-  {
-    return $this->executer;
   }
   
   public static function log($message)

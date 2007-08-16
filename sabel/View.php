@@ -118,10 +118,6 @@ final class Sabel_View
     $controller  = $response->getController();
     $destination = $response->getDestination();
     
-    if ($controller->hasRendered()) {
-      return $controller->getRendered();
-    }
-    
     $view = new Sabel_View();
     $view->assignByArray($controller->getRequests());
     

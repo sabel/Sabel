@@ -21,6 +21,7 @@ class Sabel_Processor_Creator extends Sabel_Bus_Processor
     
     $creator = new Sabel_Controller_Creator(); 
     $controller = $creator->create($destination);
+    $controller->setBus($bus);
     
     $controller->setup($request, $destination, $storage);
     $controller->setAction($destination->getAction());

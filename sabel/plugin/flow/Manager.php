@@ -18,9 +18,9 @@ class Sabel_Plugin_Flow_Manager
     $token   = "",
     $storage = null;
   
-  public function __construct($request)
+  public function __construct($request, $storage)
   {
-    $this->storage = Sabel_Context::getContext()->getStorage();
+    $this->storage = $storage;
     $this->initializeToken($request);
   }
   
