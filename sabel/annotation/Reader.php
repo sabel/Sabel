@@ -11,8 +11,8 @@
  */
 class Sabel_Annotation_Reader
 {
-  protected $list = null;
-  protected $path = '';
+  protected $list = array();
+  protected $path = "";
   
   protected static $annotation = array();
   protected static $instance = null;
@@ -24,13 +24,11 @@ class Sabel_Annotation_Reader
    */
   public function __construct()
   {
-    $this->path = $path = RUN_BASE . '/cache/annotation.cache';
+    $this->path = $path = RUN_BASE . "/cache/annotation.cache";
     
     if (is_readable($path)) {
       self::$annotation = unserialize(file_get_contents($path));
     }
-    
-    $this->list = new Sabel_Library_ArrayList();
   }
   
   public static function create()
@@ -47,10 +45,12 @@ class Sabel_Annotation_Reader
       foreach ($ref->getMethods() as $method) {
         $this->process($method->getDocComment());
       }
+      
       self::$annotation[$className] = $this->list;
+      
       if (is_writable($this->path)) {
         file_put_contents($this->path, serialize(self::$annotation));
-      } elseif (($fp = fopen($this->path, 'w+'))) {
+      } else if (($fp = fopen($this->path, "w+"))) {
         fwrite($fp, serialize(self::$annotation));
         fclose($fp);
       } else {
@@ -97,8 +97,8 @@ class Sabel_Annotation_Reader
     foreach (self::splitComment($comment) as $line) {
       $annot = Sabel_Annotation_Utility::processAnnotation($line);
       if ($annot) {
-        $this->list->push($annot);
-        $this->list->set($annot->getName(), $annot);
+        $this->list[] = $annot;
+        $this->list[$annot->getName()] = $annot;
       }
     }
   }

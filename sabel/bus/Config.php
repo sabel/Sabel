@@ -23,18 +23,22 @@ abstract class Sabel_Bus_Config
   
   public function add($processor)
   {
-    $this->bus->add($processor);
+    $this->bus->addProcessor($processor);
   }
   
-  public function addGroup($processor)
+  public function addAsGroup($processor)
   {
-    $this->bus->addGroup($processor);
+    $group = new Sabel_Bus_ProcessorGroup($processor->name);
+    $group->add($processor);
+    
+    $this->bus->addProcessor($group);
+    
     return $this;
   }
   
-  public function getGroup($name)
+  public function get($name)
   {
-    return $this->bus->getGroup($name);
+    return $this->bus->getProcessor($name);
   }
   
   public function getBus()

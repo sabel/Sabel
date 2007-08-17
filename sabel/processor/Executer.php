@@ -14,18 +14,13 @@ class Sabel_Processor_Executer extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $injector = Sabel_Container::injector(new Factory());
+    
+    $controller  = $bus->get("controller");
     $request     = $bus->get("request");
     $destination = $bus->get("destination");
     $storage     = $bus->get("storage");
-        
-    $bus->set("response",   $this->executeAction($bus));
-  }
-  
-  public function executeAction($bus)
-  {
-    $controller  = $bus->get("controller");
-    $destination = $bus->get("destination");
     
-    return $controller->execute($destination->getAction());
+    $response = $controller->execute($destination->getAction());
+    $bus->set("response",   $response);
   }
 }

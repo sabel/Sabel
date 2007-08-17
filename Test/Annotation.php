@@ -1,15 +1,19 @@
 <?php
 
+/**
+ * Test_Annotation
+ *
+ * @category   Test
+ * @package    org.sabel.test
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Test_Annotation extends SabelTestCase
 {
   public static function suite()
   {
     return new PHPUnit_Framework_TestSuite("Test_Annotation");
-  }
-  
-  public function __construct()
-  {
-    
   }
   
   public function setUp()
@@ -18,36 +22,35 @@ class Test_Annotation extends SabelTestCase
   
   public function tearDown()
   {
-    
   }
   
   public function testAnnotation()
   {
-    $ar   = new Sabel_annotation_Reader();
-    $list = $ar->annotation('AnnotatedTestClass');
+    $reader   = new Sabel_annotation_Reader();
+    $list = $reader->annotation("AnnotatedTestClass");
     
     foreach ($list as $annotation) {
       
       if (!is_object($annotation)) continue;
       
       switch ($annotation->getName()) {
-        case 'annotclass':
-          $this->assertEquals('annotclass', $annotation->getContents());
+        case "annotclass":
+          $this->assertEquals("annotclass", $annotation->getContents());
           break;
-        case 'annot':
-          $this->assertEquals('test1', $annotation->getContents());
+        case "annot":
+          $this->assertEquals("test1", $annotation->getContents());
           break;
-        case 'annot2':
-          $this->assertEquals('test2', $annotation->getContents());
+        case "annot2":
+          $this->assertEquals("test2", $annotation->getContents());
           break;
-        case 'annot3':
-          $this->assertEquals('test3', $annotation->getContents());
+        case "annot3":
+          $this->assertEquals("test3", $annotation->getContents());
           $this->assertFalse(is_object($annotation->createInjection()));
           break;
-        case 'annot4':
+        case "annot4":
           $this->assertTrue(is_array($annotation->getContents()));
           break;
-        case 'injection':
+        case "injection":
           $this->assertTrue(is_object($annotation->createInjection()));
           break;
       }
@@ -60,9 +63,9 @@ class Test_Annotation extends SabelTestCase
    */
   public function estByName()
   {
-    $sameName = $ar->getAnnotationsByName('AnnotatedTestClass', 'same');
+    $sameName = $ar->getAnnotationsByName("AnnotatedTestClass", "same");
     foreach ($sameName as $entry) {
-      $this->assertEquals('value', $entry->getContents());
+      $this->assertEquals("value", $entry->getContents());
     }
   }
 }
@@ -86,6 +89,10 @@ class AnnotatedTestClass
    * @same value
    */
   public function testMethod()
+  {
+  }
+  
+  public function ()
   {
     
   }

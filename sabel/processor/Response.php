@@ -24,9 +24,7 @@ class Sabel_Processor_Response extends Sabel_Bus_Processor
     $response->setDestination($destination);
     
     $response->outputHeader();
-    
-    $executerProcessor = $bus->getGroupProcessor("executer", "executer");
-    
+        
     if ($response->isNotFound() || $response->isServerError()) {
       if ($response->isNotFound()) {
         $destination->setAction("notFound");
@@ -34,13 +32,12 @@ class Sabel_Processor_Response extends Sabel_Bus_Processor
         $destination->setAction("serverError");
       }
       
-      $response = $executerProcessor->get()->executeAction($bus);
+      $response = $controller->execute($destination->getAction());
       
       if ($response->isNotFound()) {
         $destination->setController("index");
         $controller = $creator->create($destination);
-        $response->setController($controller);
-        $response = $executerProcessor->executeAction($bus);
+        $response = $controller->execute($destination->getAction());
       }
     }
     

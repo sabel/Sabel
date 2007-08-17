@@ -50,13 +50,29 @@ class Test_Sabel extends SabelTestCase
     $bus->set("request", $request);
     $bus->set("storage", $storage);
     
-    $bus->addGroup(new Sabel_Processor_Request("request"));
-    $bus->addGroup(new Sabel_Processor_Router("router"));
-    $bus->addGroup(new Sabel_Processor_Helper("helper"));
-    $bus->addGroup(new Sabel_Processor_Creator("creator"));
-    $bus->addGroup(new Sabel_Processor_Executer("executer"));
-    $bus->addGroup(new Sabel_Processor_Response("response"));
-    $bus->addGroup(new Sabel_Processor_Renderer("renderer"));
+    $request  = new Sabel_Bus_ProcessorGroup("request");
+    $router   = new Sabel_Bus_ProcessorGroup("router");
+    $helper   = new Sabel_Bus_ProcessorGroup("helper");
+    $creator  = new Sabel_Bus_ProcessorGroup("creator");
+    $executer = new Sabel_Bus_ProcessorGroup("executer");
+    $response = new Sabel_Bus_ProcessorGroup("response");
+    $renderer = new Sabel_Bus_ProcessorGroup("renderer");
+    
+    $request->add(new Sabel_Processor_Request("request"));
+    $router->add(new Sabel_Processor_Router("router"));
+    $helper->add(new Sabel_Processor_Helper("helper"));
+    $creator->add(new Sabel_Processor_Creator("creator"));
+    $executer->add(new Sabel_Processor_Executer("executer"));
+    $response->add(new Sabel_Processor_Response("response"));
+    $renderer->add(new Sabel_Processor_Renderer("renderer"));
+    
+    $bus->addProcessor($request);
+    $bus->addProcessor($router);
+    $bus->addProcessor($helper);
+    $bus->addProcessor($creator);
+    $bus->addProcessor($executer);
+    $bus->addProcessor($response);
+    $bus->addProcessor($renderer);
     
     $result = $bus->run();
     

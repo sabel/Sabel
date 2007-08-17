@@ -15,7 +15,7 @@ class Sabel_Bus_ProcessorGroup extends Sabel_Bus_Processor
   private $processor  = null;
   
   private $controller = null;
-  
+    
   /** 
    * implements interface from Sabel_Bus_Processor
    *

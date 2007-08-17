@@ -57,56 +57,6 @@ class Sabel_Bus
     return $this;
   }
   
-  public function addGroup(Sabel_Bus_Processor $processor = null)
-  {
-    $group = new Sabel_Bus_ProcessorGroup($processor->name);
-    
-    if ($processor !== null) {
-      $group->add($processor);
-    }
-    
-    $this->processors[$processor->name] = $group;
-    
-    return $this;
-  }
-  
-  public function replaceGroup(Sabel_Bus_Processor $processor = null)
-  {
-    $group = new Sabel_Bus_ProcessorGroup();
-    
-    if ($processor !== null) {
-      $group->add($processor->name, $processor);
-    }
-    
-    unset($this->processors[$name]);
-    $this->processors[$processor->name] = $group;
-    
-    return $this;
-  }
-  
-  public function getGroup($name)
-  {
-    if (array_key_exists($name, $this->processors)) {
-      return $this->processors[$name];
-    } else {
-      throw new Sabel_Exception_Runtime("group not found");
-    }
-  }
-  
-  public function getGroupProcessor($group, $name)
-  {
-    if (array_key_exists($group, $this->processors)) {
-      return $this->processors[$group]->get($name);
-    } else {
-      throw new Sabel_Exception_Runtime("group not found");
-    }
-  }
-  
-  public function addProcessorToGroup($group, $name, $processor)
-  {
-    $this->processors[$group]->add($name, $processor);
-  }
-  
   public function getProcessor($name)
   {
     return $this->processors[$name];

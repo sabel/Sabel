@@ -38,16 +38,16 @@ class Test_Bus extends SabelTestCase
   
   public function testAddAndGetBusGroup()
   {
-    $request = "request";
+    $request  = "request";
     $executer = "executer";
     
     $bus = new Sabel_Bus();
     
-    $bus->addGroup(new Test_Bus_Processor($request));
-    $bus->addGroup(new Test_Bus_Processor($executer));
+    $bus->addProcessor(new Test_Bus_Processor($request));
+    $bus->addProcessor(new Test_Bus_Processor($executer));
     
-    $this->assertTrue(is_object($bus->getGroup($request)));
-    $this->assertTrue(is_object($bus->getGroup($executer)));
+    $this->assertTrue(is_object($bus->getProcessor($request)));
+    $this->assertTrue(is_object($bus->getProcessor($executer)));
   }
   
   public function testBusGroupInsertPrevious()
@@ -102,6 +102,12 @@ class Test_Bus extends SabelTestCase
     
     $last->previous->unlinkNext();
     $this->assertEquals(2, $list->size());
+  }
+  
+  public function testBusEvent()
+  {
+    $bus = new Sabel_Bus();
+    
   }
 }
 
