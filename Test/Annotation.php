@@ -91,11 +91,6 @@ class AnnotatedTestClass
   public function testMethod()
   {
   }
-  
-  public function ()
-  {
-    
-  }
 }
 
 class AnnotationsInjectionTestClass
