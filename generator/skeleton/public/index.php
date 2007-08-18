@@ -6,6 +6,7 @@ define("RUN_BASE", dirname(realpath(".")));
 
 require (RUN_BASE . "/config/environment.php");
 require ("Sabel/Sabel.php");
+require (RUN_BASE . "/config/Bus.php");
 require (RUN_BASE . "/config/Factory.php");
 require (RUN_BASE . "/config/connection.php");
 
@@ -20,7 +21,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
   $_SERVER["REQUEST_URI"] = ltrim($ignore, "/");
 }
 
-$aFrontController = new Sabel_Controller_Front();
-echo $aFrontController->ignition();
+$config = new Config_Bus();
+echo $config->configure()->getBus()->run();
 
 ob_flush();

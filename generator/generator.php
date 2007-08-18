@@ -13,7 +13,9 @@ if (isset($args[1])) {
   $dir = getcwd();
 }
 
-define(RUN_BASE, $dir);
+if (!defined("RUN_BASE")) {
+  define("RUN_BASE", $dir);
+}
 
 if (!is_dir(RUN_BASE)) {
   mkdir(RUN_BASE);
