@@ -39,23 +39,11 @@ class Test_Annotation extends SabelTestCase
   public function testDuplicateEntry()
   {
     $reader = new Sabel_Annotation_Reader();
-    try {
-      $reader->read("Test_Annotation_Duplicate");
-      $this->fail();
-    } catch (Exception $e) {
-      $this->assertTrue(true, $e->getMessage());
-    }
-  }
-  
-  public function testMethodDuplicateEntry()
-  {
-    $reader = new Sabel_Annotation_Reader();
-    try {
-      $reader->readMethods("Test_Annotation_Duplicate");
-      $this->fail();
-    } catch (Exception $e) {
-      $this->assertTrue(true, $e->getMessage());
-    }
+    
+    $annotations = $reader->read("Test_Annotation_Dupulicate");
+    $expected = array("dupOne", "dupTwo", "dupThree");
+    
+    $this->assertEquals($expected, $annotations["annotation"]);
   }
   
   public function testAnnotationReflectionClass()
@@ -112,16 +100,17 @@ class Test_Annotation_Class
 /**
  * test for duplicate entry
  *
- * @annotation dup
- * @annotation dup
+ * @annotation dupOne
+ * @annotation dupTwo
+ * @annotation dupThree
  */
-class Test_Annotation_DupulicateEntry
+class Test_Annotation_Dupulicate
 {
   /**
    * this is annotation test
    *
-   * @dup dup
-   * @dup dup
+   * @dup dupOne
+   * @dup dupTwo
    */
   public function testMethod()
   {

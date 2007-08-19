@@ -31,7 +31,7 @@ class Sabel_Annotation_Reader
   public function read($className)
   {
     $ref = new ReflectionClass($className);
-    return $this->process($ref->getDocComment());   
+    return $this->process($ref->getDocComment());
   }
   
   public function readMethods($className)
@@ -52,13 +52,17 @@ class Sabel_Annotation_Reader
     $comments = self::splitComment($comment);
     
     foreach ($comments as $line) {
-      list($name, $value) = self::processAnnotation($line);
+      list($name, $value) = self::extract($line);
       
       if (isset($annotations[$name])) {
-        throw new Sabel_Exception_Runtime("duplicate entry {$name}");
+        if (is_array($annotations[$name])) {
+          $annotations[$name][] = $value;
+        } else {
+          $annotations[$name] = array($annotations[$name], $value);
+        }
+      } else {
+        $annotations[$name] = $value;
       }
-      
-      $annotations[$name] = $value;
     }
     
     return $annotations;
@@ -69,15 +73,16 @@ class Sabel_Annotation_Reader
     return preg_split("/[\r\n]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
   }
   
-  protected static function processAnnotation($line)
+  protected static function extract($line)
   {
     $annotation = preg_split("/ +/", self::removeComment($line));
     
     if (strpos($annotation[0], "@") === 0) {
-      $name       = array_shift($annotation);
+      $name  = array_shift($annotation);
       $value = (count($annotation) > 2) ? $annotation : $annotation[0];
-      
       return array(ltrim($name, "@ "), $value);
+    } else {
+      return null;
     }
   }
   

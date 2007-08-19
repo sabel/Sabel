@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Sabel_Annotation_ReflectionMethod
+ *
+ * @category   Annotation
+ * @package    org.sabel.annotation
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Annotation_ReflectionMethod extends ReflectionMethod
 {
   private $annotations = array();
