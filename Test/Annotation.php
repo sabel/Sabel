@@ -24,77 +24,105 @@ class Test_Annotation extends SabelTestCase
   {
   }
   
-  public function testAnnotation()
+  public function testAnnotationReader()
   {
-    $reader   = new Sabel_annotation_Reader();
-    $list = $reader->annotation("AnnotatedTestClass");
+    $reader = new Sabel_Annotation_Reader();
+    $annotation = $reader->read("Test_Annotation_Class");
     
-    foreach ($list as $annotation) {
-      
-      if (!is_object($annotation)) continue;
-      
-      switch ($annotation->getName()) {
-        case "annotclass":
-          $this->assertEquals("annotclass", $annotation->getContents());
-          break;
-        case "annot":
-          $this->assertEquals("test1", $annotation->getContents());
-          break;
-        case "annot2":
-          $this->assertEquals("test2", $annotation->getContents());
-          break;
-        case "annot3":
-          $this->assertEquals("test3", $annotation->getContents());
-          $this->assertFalse(is_object($annotation->createInjection()));
-          break;
-        case "annot4":
-          $this->assertTrue(is_array($annotation->getContents()));
-          break;
-        case "injection":
-          $this->assertTrue(is_object($annotation->createInjection()));
-          break;
-      }
+    $this->assertEquals($annotation["annotation"], "class");
+    
+    $annotations = $reader->readMethods("Test_Annotation_Class");
+    $this->assertEquals($annotations["testMethod"]["normal"], "test1");
+    $this->assertEquals($annotations["testMethod"]["ignoreSpace"], "test2");
+  }
+  
+  public function testDuplicateEntry()
+  {
+    $reader = new Sabel_Annotation_Reader();
+    try {
+      $reader->read("Test_Annotation_Duplicate");
+      $this->fail();
+    } catch (Exception $e) {
+      $this->assertTrue(true, $e->getMessage());
     }
   }
   
-  /**
-   *
-   * @todo reimplement
-   */
-  public function estByName()
+  public function testMethodDuplicateEntry()
   {
-    $sameName = $ar->getAnnotationsByName("AnnotatedTestClass", "same");
-    foreach ($sameName as $entry) {
-      $this->assertEquals("value", $entry->getContents());
+    $reader = new Sabel_Annotation_Reader();
+    try {
+      $reader->readMethods("Test_Annotation_Duplicate");
+      $this->fail();
+    } catch (Exception $e) {
+      $this->assertTrue(true, $e->getMessage());
     }
+  }
+  
+  public function testAnnotationReflectionClass()
+  {
+    $reflect = new Sabel_Annotation_ReflectionClass("Test_Annotation_Class");
+    $annot = $reflect->getAnnotation("annotation");
+    $this->assertEquals($annot, "class");
+  }
+  
+  public function testAnnotationReflectionMethod()
+  {
+    $reflect = new Sabel_Annotation_ReflectionClass("Test_Annotation_Class");
+    $methods = $reflect->getMethodsAsAssoc();
+    
+    $this->assertTrue(is_array($methods));
+    
+    $testMethod = $methods["testMethod"];
+    $this->assertEquals(2, $testMethod->getNumberOfParameters());
+    $this->assertEquals("test1", $testMethod->getAnnotation("normal"));
+    $this->assertTrue(is_array($testMethod->getAnnotation("array")));
   }
 }
 
 /**
  * class annotation
  *
- * @annotclass annotclass
+ * @annotation class
  */
-class AnnotatedTestClass
+class Test_Annotation_Class
 {
   /**
    * this is annotation test
    *
-   * @annot  test1
-   * @annot2   test2
-   * @annot3    test3
-   * @annot4      test4 elem1 elem2 elem3
-   * @injection  AnnotationsInjectionTestClass
-   * @same value
-   * @same value
+   * @normal test1
+   * @ignoreSpace   test2
+   * @array      test4 elem1 elem2 elem3
    */
-  public function testMethod()
+  public function testMethod($test, $test = null)
+  {
+  }
+  
+  /**
+   * this is annotation test
+   *
+   * @normal test1
+   * @ignoreSpace   test2
+   * @array      test4 elem1 elem2 elem3
+   */
+  public function testMethodTwo($test, $test = null)
   {
   }
 }
 
-class AnnotationsInjectionTestClass
+/**
+ * test for duplicate entry
+ *
+ * @annotation dup
+ * @annotation dup
+ */
+class Test_Annotation_DupulicateEntry
 {
+  /**
+   * this is annotation test
+   *
+   * @dup dup
+   * @dup dup
+   */
   public function testMethod()
   {
   }

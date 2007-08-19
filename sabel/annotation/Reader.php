@@ -11,10 +11,6 @@
  */
 class Sabel_Annotation_Reader
 {
-  protected $list = array();
-  protected $path = "";
-  
-  protected static $annotation = array();
   protected static $instance = null;
   
   /**
@@ -24,11 +20,6 @@ class Sabel_Annotation_Reader
    */
   public function __construct()
   {
-    $this->path = $path = RUN_BASE . "/cache/annotation.cache";
-    
-    if (is_readable($path)) {
-      self::$annotation = unserialize(file_get_contents($path));
-    }
   }
   
   public static function create()
@@ -37,74 +28,62 @@ class Sabel_Annotation_Reader
     return self::$instance;
   }
   
-  public function annotation($className)
+  public function read($className)
   {
-    if (!isset(self::$annotation[$className])) {
-      $ref = new ReflectionClass($className);
-      $this->process($ref->getDocComment());
-      foreach ($ref->getMethods() as $method) {
-        $this->process($method->getDocComment());
-      }
-      
-      self::$annotation[$className] = $this->list;
-      
-      if (is_writable($this->path)) {
-        file_put_contents($this->path, serialize(self::$annotation));
-      } else if (($fp = fopen($this->path, "w+"))) {
-        fwrite($fp, serialize(self::$annotation));
-        fclose($fp);
-      } else {
-        throw new Sabel_Exception_Runtime($this->path . "can't open");
-      }
-    }
-    return self::$annotation[$className];
+    $ref = new ReflectionClass($className);
+    return $this->process($ref->getDocComment());   
   }
   
-  public function getAnnotationsByName($className, $name)
+  public function readMethods($className)
   {
-    $annotations = array();
-    $annos = self::$annotation[$className]->toArray();
+    $methods = array();
+    $reflection = new ReflectionClass($className);
     
-    foreach ($annos as $annot) {
-      if (isset($annos[$name])) $annotations[] = $annot;
+    foreach ($reflection->getMethods() as $method) {
+      $methods[$method->getName()] = $this->process($method->getDocComment());
     }
     
-    return $annotations;
+    return $methods;
   }
   
-  public static function getAnnotations($comment)
+  public function process($comment)
   {
     $annotations = array();
-    foreach (self::splitComment($comment) as $line) {
-      $annot = Sabel_Annotation_Utility::processAnnotation($line);
-      if ($annot) $annotations[] = $annot;
-    }
-    return $annotations;
-  }
-  
-  public static function getAnnotationsByProperty($property)
-  {
-    $rawComment  = $property->getDocComment();
-    $annotations = array();
-    foreach (self::getAnnotations($rawComment) as $annotation) {
-      $annotations[$property->getName()][$annotation->getName()] = $annotation;
-    }
-    return $annotations;
-  }
-  
-  protected function process($comment)
-  {
-    foreach (self::splitComment($comment) as $line) {
-      $annot = Sabel_Annotation_Utility::processAnnotation($line);
-      if ($annot) {
-        $this->list[] = $annot;
-        $this->list[$annot->getName()] = $annot;
+    $comments = self::splitComment($comment);
+    
+    foreach ($comments as $line) {
+      list($name, $value) = self::processAnnotation($line);
+      
+      if (isset($annotations[$name])) {
+        throw new Sabel_Exception_Runtime("duplicate entry {$name}");
       }
+      
+      $annotations[$name] = $value;
     }
+    
+    return $annotations;
   }
   
   protected static function splitComment($comment)
   {
     return preg_split("/[\r\n]/", $comment, -1, PREG_SPLIT_NO_EMPTY);
+  }
+  
+  protected static function processAnnotation($line)
+  {
+    $annotation = preg_split("/ +/", self::removeComment($line));
+    
+    if (strpos($annotation[0], "@") === 0) {
+      $name       = array_shift($annotation);
+      $value = (count($annotation) > 2) ? $annotation : $annotation[0];
+      
+      return array(ltrim($name, "@ "), $value);
+    }
+  }
+  
+  protected static function removeComment($line)
+  {
+    $line = preg_replace('/^\/?[\s\*]+/', "", trim($line));
+    return  preg_replace('/[\s\*]+\/$/',  "", $line);
   }
 }
