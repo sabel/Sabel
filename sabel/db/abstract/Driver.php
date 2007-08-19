@@ -119,27 +119,3 @@ abstract class Sabel_DB_Abstract_Driver
     return $sql;
   }
 }
-
-// @todo mssql.
-function escapeString($db, $values, $escMethod = null)
-{
-  if ($values === null) {
-    return "''";
-  } elseif (!is_array($values)) {
-    $values = (array)$values;
-  }
-
-  foreach ($values as &$val) {
-    if (is_bool($val)) {
-      $val = ($val) ? "'true'" : "'false'";
-    } elseif (is_string($val) && $escMethod !== null) {
-      $val = "'" . $escMethod($val) . "'";
-    }
-  }
-
-  if (isset($values[0]) && count($values) === 1) {
-    return $values[0];
-  } else {
-    return $values;
-  }
-}

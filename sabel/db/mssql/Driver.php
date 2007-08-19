@@ -11,51 +11,72 @@
  */
 class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
 {
-  protected $driverId        = "mssql";
-  protected $execFunction    = "mssql_query";
-  protected $closeFunction   = "mssql_close";
-  protected $beginCommand    = "BEGIN TRANSACTION";
-  protected $commitCommand   = "COMMIT TRANSACTION";
-  protected $rollbackCommand = "ROLLBACK TRANSACTION";
-
-  public function loadSqlClass($model)
+  public function getDriverId()
   {
-    return Sabel_DB_Sql_Loader::load($model, "Sabel_DB_Sql_General");
+    return "mssql";
   }
 
-  public function loadConditionBuilder()
+  public function begin($connectionName = null)
   {
-    return Sabel_DB_Condition_Builder_Loader::load($this, "Sabel_DB_Condition_Builder_General");
-  }
-
-  public function loadConstraintSqlClass()
-  {
-    return Sabel_DB_Sql_Constraint_Loader::load("Sabel_DB_Mssql_SqlConstraint");
-  }
-
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
-  public function getAfterMethods()
-  {
-    return array(Sabel_DB_Command::INSERT => "getIncrementId");
-  }
-
-  public function escape($values)
-  {
-    return escapeString($this->driverId, $values, "mssql_escape_string");
-  }
-
-  public function execute($connection = null)
-  {
-    $result = parent::execute($connection);
-
-    if (!$result) {
-      $error = mssql_get_last_message();
-      $this->error("mssql driver execute failed: $error");
+    if ($connectionName === null) {
+      $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
+
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      $conn = $this->getConnection();
+      if (!mssql_query("BEGIN TRANSACTION", $conn)) {
+        throw new Sabel_DB_Exception("mssql driver begin failed.");
+      }
+
+      Sabel_DB_Transaction::start($conn, $this);
+    }
+  }
+
+  public function commit($connection)
+  {
+    if (!mssql_query("COMMIT TRANSACTION", $connection)) {
+      throw new Sabel_DB_Exception("mssql driver commit failed.");
+    }
+  }
+
+  public function rollback($connection)
+  {
+    if (!mssql_query("ROLLBACK TRANSACTION", $connection)) {
+      throw new Sabel_DB_Exception("mssql driver rollback failed.");
+    }
+  }
+
+  public function close($connection)
+  {
+    mssql_close($connection);
+    unset($this->connection);
+  }
+
+  public function escape(array $values)
+  {
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? "'true'" : "'false'";
+      } elseif (is_string($val)) {
+        $val = "'" . mssql_escape_string($val) . "'";
+      }
+    }
+
+    return $values;
+  }
+
+  public function execute($sql, $bindParams = null)
+  {
+    if ($bindParams !== null) {
+      $sql = $this->bind($sql, $this->escape($bindParams));
+    }
+
+    $conn   = $this->getConnection();
+    $result = mssql_query($sql, $conn);
+
+    if (!$result) $this->executeError($sql);
 
     $rows = array();
     if (is_resource($result)) {
@@ -63,14 +84,68 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
       mssql_free_result($result);
     }
 
-    return $this->result = $rows;
+    return (empty($rows)) ? null : $rows;
   }
 
-  public function getIncrementId($command)
+  public function getLastInsertId()
   {
-    if ($command->getModel()->getIncrementColumn()) {
-      $command->setIncrementId($this->getSequenceId("SELECT SCOPE_IDENTITY() AS id"));
+    $rows = $this->execute("SELECT SCOPE_IDENTITY() AS id");
+    return $rows[0]["id"];
+  }
+
+  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
+  {
+    echo '@todo mssql createSelectSql()';
+    exit;
+    /* @todo
+    $c = $constraints;
+    $skipOrder = false;
+
+    if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
+    if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
+
+    if (isset($c["limit"]) && isset($c["offset"])) {
+      $rn   = "row_number() over (order by {$c["order"]}) as rn, ";
+      $sql  = "SELECT * FROM ( SELECT " . $rn . substr($sql, 6) . ") tmp";
+      $sql .= " WHERE rn between " . ($c["offset"] + 1) . " AND " . ($c["offset"] + $c["limit"]);
+      $skipOrder = true;
+    } elseif (isset($c["limit"]) && !isset($c["offset"])) {
+      $sql = "SELECT TOP " . $c["limit"] . substr($sql, 6);
+    } elseif (isset($c["offset"])) {
+      $rn   = "row_number() over (order by {$c["order"]}) as rn, ";
+      $sql  = "SELECT * FROM ( SELECT " . $rn . substr($sql, 6) . ") tmp";
+      $sql .= " WHERE rn > {$c["offset"]}";
+      $skipOrder = true;
     }
+
+    if (!$skipOrder) {
+      if (isset($c["order"])) $sql .= " ORDER BY " . $c["order"];
+    }
+
+    return $sql;
+    */
+  }
+
+  protected function createConstraintSql($constraints)
+  {
+    echo '@todo mssql createConstraintSql()';
+    exit;
+    /* @todo
+    $sql = "";
+
+    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
+    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
+    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+
+    return $sql;
+    */
+  }
+
+  private function executeError($sql)
+  {
+    $error   = mssql_get_last_message();
+    $message = "mssql driver execute failed: $error, SQL: $sql";
+    throw new Sabel_DB_Exception($message);
   }
 }
 
