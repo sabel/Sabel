@@ -11,7 +11,7 @@ class Sabel_Processor_Flow extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $this->bus         = $bus;
+    $this->bus = $bus;
     
     $this->controller  = $bus->get("controller");
     $this->destination = $bus->get("destination");
@@ -19,6 +19,10 @@ class Sabel_Processor_Flow extends Sabel_Bus_Processor
     $this->storage     = $bus->get("storage");
     
     $action = $this->destination->getAction();
+    
+    $this->controller->setup($this->request, $this->destination, $this->storage);
+    $this->controller->setAction($action);
+    $this->controller->initialize();
     
     $manager = new Sabel_Plugin_Flow_Manager($this->request, $this->storage);
     

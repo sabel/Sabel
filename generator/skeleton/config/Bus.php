@@ -10,12 +10,14 @@ class Config_Bus extends Sabel_Bus_Config
     $this->addAsGroup(new Sabel_Processor_Creator("creator"));
     $this->addAsGroup(new Sabel_Processor_Executer("executer"));
     $this->addAsGroup(new Sabel_Processor_Response("response"));
+    $this->addAsGroup(new Sabel_Processor_Renderer("renderer"));
     
     $redirecter = new Sabel_Processor_Redirecter("redirecter");
     $this->get("executer")->get("executer")->insertPrevious($redirecter);
     $this->get("executer")->get("executer")->insertNext($redirecter);
-                               
-    $this->addAsGroup(new Sabel_Processor_Renderer("renderer"));
+    
+    $selecter = new Sabel_Processor_Selecter("selecter");
+    $this->get("executer")->get("executer")->getFirst()->insertPrevious($selecter);
     
     return $this;
   }

@@ -46,8 +46,6 @@ class Sabel_Bus_ProcessorGroup extends Sabel_Bus_Processor
         $processorList = $processorList->next();
       }
     }
-    
-
   }
   
   public function add($processor)

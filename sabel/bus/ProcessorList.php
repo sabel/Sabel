@@ -67,9 +67,7 @@ class Sabel_Bus_ProcessorList
   public function insertPrevious($processor)
   {
     $previous = new self($processor);
-    
     $previous->setNext($this);
-    
     
     if ($this->isFirst()) {
       $previous->setPrevious(null);
@@ -100,6 +98,13 @@ class Sabel_Bus_ProcessorList
     $this->notify($next);
     
     return $next;
+  }
+  
+  public function replace($processor)
+  {
+    unset($this->current);
+    $this->current = $processor;
+    $this->notify($this);
   }
   
   public function notify($processor)
