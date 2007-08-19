@@ -16,9 +16,8 @@ abstract class Sabel_DB_Abstract_Driver
   protected $connectionName = "";
 
   abstract public function getDriverId();
-  abstract public function escape($values);
-  abstract public function execute(Sabel_DB_Abstract_Statement $stmt);
-  abstract public function loadTransaction();
+  abstract public function escape(array $values);
+  abstract public function execute($sql, $bindParams = null);
   abstract public function getLastInsertId();
   abstract public function begin($connectionName = null);
   abstract public function commit($connection);
@@ -121,7 +120,7 @@ abstract class Sabel_DB_Abstract_Driver
   }
 }
 
-// @todo
+// @todo mssql.
 function escapeString($db, $values, $escMethod = null)
 {
   if ($values === null) {

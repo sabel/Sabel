@@ -16,7 +16,7 @@ class Sabel_DB_Pdo_Driver_Sqlite extends Sabel_DB_Pdo_Driver
     return "pdo-sqlite";
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {

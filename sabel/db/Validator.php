@@ -24,7 +24,7 @@ class Sabel_DB_Validator
     $errors  = array(),
     $ignores = array();
 
-  public function __construct($model, $configs = null)
+  public function __construct(Sabel_DB_Model $model, $configs = null)
   {
     $this->model   = $model;
     $this->mdlName = $mdlName = $model->getModelName();
@@ -80,12 +80,11 @@ class Sabel_DB_Validator
     return $columns;
   }
 
-  // @todo i18n(beta3)
   public function validate($ignores = array())
   {
     $this->ignores = $ignores;
+    $this->errors  = array();
 
-    $errors    = array();
     $messages  = $this->messages;
     $model     = $this->model;
     $columns   = $this->getColumns();
@@ -103,39 +102,35 @@ class Sabel_DB_Validator
       $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
 
       if (!$this->nullable($column)) {
-        $errors[] = sprintf($this->messages["nullable"], $msgName);
+        $this->errors[] = sprintf($this->messages["nullable"], $msgName);
         continue;
       }
 
       if (!$this->type($column)) {
-        $errors[] = sprintf($this->messages["type"], $msgName);
+        $this->errors[] = sprintf($this->messages["type"], $msgName);
         continue;
       }
 
-      if ($column->isString()) {
-        if (!$this->length($column)) {
-          $errors[] = sprintf($this->messages["length"], $msgName);
-          continue;
-        }
+      if ($column->isString() && !$this->length($column)) {
+        $this->errors[] = sprintf($this->messages["length"], $msgName);
+        continue;
       }
 
-      if ($column->isNumeric()) {
-        if (!$this->maximum($column)) {
-          $errors[] = sprintf($this->messages["maximum"], $msgName);
-          continue;
-        }
+      if ($column->isNumeric() && !$this->maximum($column)) {
+        $this->errors[] = sprintf($this->messages["maximum"], $msgName);
+        continue;
       }
     }
 
     if ($uniques = $model->getSchema()->getUniques()) {
-      $this->unique($model, $uniques, $errors);
+      $this->unique($model, $uniques);
     }
 
     if ($customs = Sabel_DB_Validate_Config::getCustomValidators()) {
-      $this->customs($customs, $columns, $errors);
+      $this->customs($customs, $columns);
     }
 
-    return $this->errors = $errors;
+    return $this->errors;
   }
 
   protected function nullable($column)
@@ -192,24 +187,24 @@ class Sabel_DB_Validator
     return ($column->value < $column->max);
   }
 
-  protected function customs($customs, $columns, &$errors)
+  protected function customs($customs, $columns)
   {
     if (isset($customs[$this->mdlName])) {
-      $this->customValidate($customs[$this->mdlName], $columns, $errors);
+      $this->customValidate($customs[$this->mdlName], $columns);
     }
 
     if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Model") {
       if (isset($customs[$parent])) {
-        $this->customValidate($customs[$parent], $columns, $errors);
+        $this->customValidate($customs[$parent], $columns);
       }
     }
 
     if (isset($customs["all"])) {
-      $this->customValidate($customs["all"], $columns, $errors);
+      $this->customValidate($customs["all"], $columns);
     }
   }
 
-  protected function customValidate($validations, $schemas, &$errors)
+  protected function customValidate($validations, $schemas)
   {
     foreach ($validations as $colName => $functions) {
       if (strpos($colName, "*") !== false) {
@@ -223,16 +218,16 @@ class Sabel_DB_Validator
 
         foreach ($cols as $name) {
           $value = $schemas[$name]->value;
-          $this->execCustomValidation($functions, $value, $name, $errors);
+          $this->execCustomValidation($functions, $value, $name);
         }
       } elseif (isset($schemas[$colName])) {
         $value = $schemas[$colName]->value;
-        $this->execCustomValidation($functions, $value, $colName, $errors);
+        $this->execCustomValidation($functions, $value, $colName);
       }
     }
   }
 
-  protected function execCustomValidation($functions, $value, $name, &$errors)
+  protected function execCustomValidation($functions, $value, $name)
   {
     foreach ($functions as $function) {
       if (is_array($function)) {
@@ -245,7 +240,7 @@ class Sabel_DB_Validator
         $result = $function($value, $name);
       }
 
-      if ($result) $errors[] = $result;
+      if ($result) $this->errors[] = $result;
     }
   }
 
@@ -258,7 +253,7 @@ class Sabel_DB_Validator
     return str_replace(";", "", implode(",", $args));
   }
 
-  protected function unique($model, $uniques, &$errors)
+  protected function unique($model, $uniques)
   {
     $executer = new Sabel_DB_Model_Executer($model->getModelName());
     $pkey = $model->getPrimaryKey();
@@ -289,7 +284,8 @@ class Sabel_DB_Validator
       }
 
       if ($invalid) {
-        $errors[] = sprintf($this->messages["unique"], implode(", ", $values));
+        $values = implode(", ", $values);
+        $this->errors[] = sprintf($this->messages["unique"], $values);
       }
     }
   }

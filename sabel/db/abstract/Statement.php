@@ -15,7 +15,6 @@ abstract class Sabel_DB_Abstract_Statement
   protected
     $sql        = "",
     $driver     = null,
-    $sqlObject  = null,
     $bindValues = array();
 
   protected
@@ -28,6 +27,7 @@ abstract class Sabel_DB_Abstract_Statement
     $seqColumn   = null;
 
   abstract public function getStatementType();
+  abstract public function build();
 
   public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
@@ -36,18 +36,18 @@ abstract class Sabel_DB_Abstract_Statement
 
   public function setSql($sql)
   {
-    $this->sql = $sql;
+    if (is_string($sql)) {
+      $this->sql = $sql;
+    } else {
+      throw new Sabel_DB_Exception("setSql() argument should be a string.");
+    }
 
     return $this;
   }
 
   public function getSql()
   {
-    if ($this->hasSql()) {
-      return $this->sql;
-    } else {
-      return $this->sql = $this->build();
-    }
+    return ($this->hasSql()) ? $this->sql : $this->build();
   }
 
   public function hasSql()
@@ -60,7 +60,7 @@ abstract class Sabel_DB_Abstract_Statement
     if (is_string($table)) {
       $this->table = $table;
     } else {
-      throw new Sabel_DB_Exception("argument should be a string.");
+      throw new Sabel_DB_Exception("table() argument should be a string.");
     }
   }
 
@@ -74,7 +74,7 @@ abstract class Sabel_DB_Abstract_Statement
     if (is_string($projection)) {
       $this->projection = $projection;
     } else {
-      throw new Sabel_DB_Exception("argument should be a string.");
+      throw new Sabel_DB_Exception("projection() argument should be a string.");
     }
   }
 
@@ -88,7 +88,7 @@ abstract class Sabel_DB_Abstract_Statement
     if (is_string($join)) {
       $this->join = $join;
     } else {
-      throw new Sabel_DB_Exception("argument should be a string.");
+      throw new Sabel_DB_Exception("join() argument should be a string.");
     }
   }
 
@@ -102,7 +102,7 @@ abstract class Sabel_DB_Abstract_Statement
     if (is_string($where)) {
       $this->where = $where;
     } else {
-      throw new Sabel_DB_Exception("argument should be a string.");
+      throw new Sabel_DB_Exception("where() argument should be a string.");
     }
   }
 
@@ -138,13 +138,54 @@ abstract class Sabel_DB_Abstract_Statement
     } elseif (is_string($seqColumn)) {
       $this->seqColumn = $seqColumn;
     } else {
-      throw new Sabel_DB_Exception("argument should be a string.");
+      throw new Sabel_DB_Exception("sequenceColumn() argument should be a string.");
     }
   }
 
   public function getSequenceColumn()
   {
     return $this->seqColumn;
+  }
+
+  public function execute()
+  {
+    if ($this->hasSql()) {
+      $result = $this->driver->execute($this->sql);
+    } else {
+      $sql = $this->build();
+      $bindParams = $this->getBindParams();
+      $result = $this->driver->execute($sql, $bindParams);
+    }
+
+    if ($this->isInsert() && $this->seqColumn !== null) {
+      return $this->driver->getLastInsertId();
+    }
+
+    return $result;
+  }
+
+  public function setBindValues(array $bindValues)
+  {
+    $this->bindValues = $bindValues;
+  }
+
+  public function setBindValue($key, $val)
+  {
+    $this->bindValues[$key] = $val;
+  }
+
+  public function getBindParams()
+  {
+    if (empty($this->bindValues)) {
+      return null;
+    }
+
+    $bindParams = array();
+    foreach ($this->bindValues as $key => $value) {
+      $bindParams[":{$key}"] = $value;
+    }
+
+    return $bindParams;
   }
 
   public function isSelect()
@@ -165,60 +206,5 @@ abstract class Sabel_DB_Abstract_Statement
   public function isDelete()
   {
     return ($this->getStatementType() === Sabel_DB_Statement::DELETE);
-  }
-
-  public function execute()
-  {
-    if (!$this->hasSql()) $this->build();
-    $result = $this->driver->execute($this);
-
-    if ($this->isInsert() && $this->seqColumn !== null) {
-      return $this->driver->getLastInsertId();
-    }
-
-    return $result;
-  }
-
-  public function setBind($bindValues, $add = true)
-  {
-    if ($add) {
-      foreach ($bindValues as $key => $val) {
-        $this->bindValues[$key] = $val;
-      }
-    } else {
-      $this->bindValues = $bindValues;
-    }
-  }
-
-  public function getBindParams()
-  {
-    if (empty($this->bindValues)) {
-      return null;
-    }
-
-    $bindParam = array();
-    foreach ($this->bindValues as $key => $value) {
-      $bindParam[":{$key}"] = $value;
-    }
-
-    $this->bindValues = array();
-    return $bindParam;
-  }
-
-  public function build()
-  {
-    if ($this->isSelect()) {
-      $sql = $this->driver->createSelectSql($this);
-    } elseif ($this->isInsert()) {
-      $sql = $this->driver->createInsertSql($this);
-    } elseif ($this->isUpdate()) {
-      $sql = $this->driver->createUpdateSql($this);
-    } elseif ($this->isDelete()) {
-      $sql = $this->driver->createDeleteSql($this);
-    } else {
-      throw new Sabel_DB_Exception("invalid statement type.");
-    }
-
-    return $this->sql = $sql;
   }
 }

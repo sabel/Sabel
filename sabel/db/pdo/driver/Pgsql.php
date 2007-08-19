@@ -16,7 +16,7 @@ class Sabel_DB_Pdo_Driver_Pgsql extends Sabel_DB_Pdo_Driver
     return "pdo-pgsql";
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -29,8 +29,7 @@ class Sabel_DB_Pdo_Driver_Pgsql extends Sabel_DB_Pdo_Driver
 
   public function getLastInsertId()
   {
-    $stmt = Sabel_DB_Statement::create($this, Sabel_DB_Statement::SELECT);
-    $rows = $stmt->setSql("SELECT LASTVAL() AS id")->execute();
+    $rows = $this->execute("SELECT LASTVAL() AS id");
     return $rows[0]["id"];
   }
 }

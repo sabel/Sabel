@@ -22,14 +22,9 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return "oci";
   }
 
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
   public function getConnection()
   {
-    $connection = $this->loadTransaction()->getConnection($this->connectionName);
+    $connection = Sabel_DB_Transaction::getConnection($this->connectionName);
 
     if ($connection === null) {
       $this->execMode = OCI_COMMIT_ON_SUCCESS;
@@ -44,24 +39,27 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   {
     if ($connectionName === null) {
       $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
 
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      $trans->start($connection, $this);
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      Sabel_DB_Transaction::start($this->getConnection(), $this);
     }
   }
 
   public function commit($connection)
   {
-    oci_commit($connection);
+    if (!oci_commit($connection)) {
+      throw new Sabel_DB_Exception("oci driver commit failed.");
+    }
   }
 
   public function rollback($connection)
   {
-    oci_rollback($connection);
+    if (!oci_rollback($connection)) {
+      throw new Sabel_DB_Exception("oci driver rollback failed.");
+    }
   }
 
   public function close($connection)
@@ -70,7 +68,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -83,14 +81,13 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  public function execute($sql, $bindParams = null)
   {
-    if (($bindParams = $stmt->getBindParams()) !== null) {
-      $bindParams = $this->escape($bindParams);
+    if ($bindParams !== null) {
+      $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
     $conn    = $this->getConnection();
-    $sql     = $this->bind($stmt->getSql(), $bindParams);
     $ociStmt = oci_parse($conn, $sql);
     $result  = oci_execute($ociStmt, $this->execMode);
 
@@ -104,9 +101,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     }
 
     oci_free_statement($ociStmt);
-
-    // @todo...
-    // $this->limit = $this->offset = null;
 
     return (empty($rows)) ? null : $rows;
   }
@@ -125,10 +119,9 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (($column = $stmt->getSequenceColumn()) !== null) {
       $keys[] = $column;
       $seqName = strtoupper("{$tblName}_{$column}_seq");
-      $seqStmt = Sabel_DB_Statement::create($this, Sabel_DB_Statement::SELECT);
-      $rows = $seqStmt->setSql("SELECT {$seqName}.nextval AS id FROM dual")->execute();
+      $rows = $this->execute("SELECT {$seqName}.nextval AS id FROM dual");
       $this->lastInsertId = $rows[0]["id"];
-      $stmt->setBind(array($column => $this->lastInsertId));
+      $stmt->setBindValue($column, $this->lastInsertId);
     }
 
     foreach ($keys as $key) $binds[] = ":" . $key;
@@ -150,17 +143,8 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
     if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
 
-    if (isset($constraints["limit"])) {
-      $this->limit = $constraints["limit"];
-    } else {
-      $this->limit = null;
-    }
-
-    if (isset($constraints["offset"])) {
-      $this->offset = $constraints["offset"];
-    } else {
-      $this->offset = null;
-    }
+    $this->limit  = (isset($constraints["limit"]))  ? $constraints["limit"]  : null;
+    $this->offset = (isset($constraints["offset"])) ? $constraints["offset"] : null;
 
     return $sql;
   }

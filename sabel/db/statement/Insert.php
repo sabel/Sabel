@@ -15,4 +15,9 @@ class Sabel_DB_Statement_Insert extends Sabel_DB_Abstract_Statement
   {
     return Sabel_DB_Statement::INSERT;
   }
+
+  public function build()
+  {
+    return $this->sql = $this->driver->createInsertSql($this);
+  }
 }

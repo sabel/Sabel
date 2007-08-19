@@ -12,26 +12,22 @@
  */
 abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
       $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
 
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      if (!$connection->beginTransaction()) {
-        $error = $connection->errorInfo();
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      $conn = $this->getConnection();
+      if (!$conn->beginTransaction()) {
+        $error = $conn->errorInfo();
         throw new Exception("pdo driver begin failed. {$error[2]}");
       }
-      $trans->start($connection, $this);
+
+      Sabel_DB_Transaction::start($conn, $this);
     }
   }
 
@@ -57,16 +53,16 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  public function execute($sql, $bindParams = null)
   {
     $conn = $this->getConnection();
 
-    if (!($pdoStmt = $conn->prepare($stmt->getSql()))) {
+    if (!($pdoStmt = $conn->prepare($sql))) {
       $error = $conn->errorInfo();
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
-    if (($bindParams = $stmt->getBindParams()) === null) {
+    if ($bindParams === null) {
       $bindParams = array();
     } else {
       $bindParams = $this->escape($bindParams);

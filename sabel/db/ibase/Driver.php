@@ -20,14 +20,9 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     return "ibase";
   }
 
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
   public function getConnection()
   {
-    $connection = $this->loadTransaction()->getConnection($this->connectionName);
+    $connection = Sabel_DB_Transaction::getConnection($this->connectionName);
 
     if ($connection === null) {
       $this->autoCommit = true;
@@ -42,25 +37,29 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   {
     if ($connectionName === null) {
       $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
 
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $connection);
-      $trans->start($resource, $this);
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      $conn = $this->getConnection();
+      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
+      Sabel_DB_Transaction::start($resource, $this);
     }
   }
 
   public function commit($connection)
   {
-    ibase_commit($connection);
+    if (!ibase_commit($connection)) {
+      throw new Sabel_DB_Exception("ibase driver commit failed.");
+    }
   }
 
   public function rollback($connection)
   {
-    ibase_rollback($connection);
+    if (!ibase_rollback($connection)) {
+      throw new Sabel_DB_Exception("ibase driver rollback failed.");
+    }
   }
 
   public function close($connection)
@@ -69,7 +68,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -82,14 +81,13 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  public function execute($sql, $bindParams = null)
   {
-    if (($bindParams = $stmt->getBindParams()) !== null) {
-      $bindParams = $this->escape($bindParams);
+    if ($bindParams !== null) {
+      $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = ibase_query($conn, $sql);
 
     if (!$result) $this->executeError($sql);
@@ -140,7 +138,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       $keys[] = $column;
       $genName = strtoupper("{$tblName}_{$column}_gen");
       $this->lastInsertId = ibase_gen_id($genName, 1, $this->getConnection());
-      $stmt->setBind(array($column => $this->lastInsertId));
+      $stmt->setBindValue($column, $this->lastInsertId);
     }
 
     foreach ($keys as $key) $binds[] = ":" . $key;

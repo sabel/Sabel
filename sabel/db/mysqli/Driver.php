@@ -16,35 +16,36 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return "mysqli";
   }
 
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
       $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
 
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      mysqli_autocommit($connection, false);
-      $trans->start($connection, $this);
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      $conn = $this->getConnection();
+      mysqli_autocommit($conn, false);
+      Sabel_DB_Transaction::start($conn, $this);
     }
   }
 
   public function commit($connection)
   {
-    mysqli_commit($connection);
+    if (!mysqli_commit($connection)) {
+      throw new Sabel_DB_Exception("mysqli driver commit failed.");
+    }
+
     mysqli_autocommit($connection, true);
   }
 
   public function rollback($connection)
   {
-    mysqli_rollback($connection);
+    if (!mysqli_rollback($connection)) {
+      throw new Sabel_DB_Exception("mysqli driver rollback failed.");
+    }
+
     mysqli_autocommit($connection, true);
   }
 
@@ -54,7 +55,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     $conn = $this->getConnection();
 
@@ -69,14 +70,13 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  public function execute($sql, $bindParams = null)
   {
-    if (($bindParams = $stmt->getBindParams()) !== null) {
-      $bindParams = $this->escape($bindParams);
+    if ($bindParams !== null) {
+      $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = mysqli_query($conn, $sql);
 
     if (!$result) $this->executeError($sql);

@@ -15,4 +15,9 @@ class Sabel_DB_Statement_Select extends Sabel_DB_Abstract_Statement
   {
     return Sabel_DB_Statement::SELECT;
   }
+
+  public function build()
+  {
+    return $this->sql = $this->driver->createSelectSql($this);
+  }
 }

@@ -49,7 +49,7 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
   public function buildNormal(Sabel_DB_Condition_Object $condition)
   {
     $bindKey = "param" . $this->count++;
-    $this->stmt->setBind(array($bindKey => $condition->value));
+    $this->stmt->setBindValue($bindKey, $condition->value);
     return $this->getKey($condition) . " = :{$bindKey}";
   }
 
@@ -95,8 +95,8 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
     $t   = $this->count++;
     $val = $condition->value;
 
-    $this->stmt->setBind(array("from{$f}" => $val[0],
-                               "to{$t}"   => $val[1]));
+    $this->stmt->setBindValue("from{$f}", $val[0]);
+    $this->stmt->setBindValue("to{$t}",   $val[1]);
 
     return $this->getKey($condition) . " BETWEEN :from{$f} AND :to{$t}";
   }
@@ -106,14 +106,14 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
     $bindKey = "param" . $this->count++;
     list ($lg, $val) = $condition->value;
 
-    $this->stmt->setBind(array($bindKey => $val));
+    $this->stmt->setBindValue($bindKey, $val);
     return $condition->key . " $lg :{$bindKey}";
   }
 
   protected function createLike($val, $condition, $esc = null)
   {
     $bindKey = "param" . $this->count++;
-    $this->stmt->setBind(array($bindKey => $val));
+    $this->stmt->setBindValue($bindKey, $val);
 
     $query = $this->getKey($condition) . " LIKE :{$bindKey}";
     if (isset($esc)) $query .= " escape '{$esc}'";

@@ -15,4 +15,9 @@ class Sabel_DB_Statement_Query extends Sabel_DB_Abstract_Statement
   {
     return Sabel_DB_Statement::QUERY;
   }
+
+  public function build()
+  {
+    return $this->sql;
+  }
 }

@@ -16,7 +16,7 @@ class Sabel_DB_Pdo_Driver_Mysql extends Sabel_DB_Pdo_Driver
     return "pdo-mysql";
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {

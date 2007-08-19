@@ -15,4 +15,9 @@ class Sabel_DB_Statement_Update extends Sabel_DB_Abstract_Statement
   {
     return Sabel_DB_Statement::UPDATE;
   }
+
+  public function build()
+  {
+    return $this->sql = $this->driver->createUpdateSql($this);
+  }
 }

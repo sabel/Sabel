@@ -114,7 +114,7 @@ class Sabel_DB_Model_Executer
       if (Sabel_DB_Transaction::isActive()) {
         Sabel_DB_Transaction::begin($this->model->getConnectionName());
       }
-      return $result = $stmt->execute();
+      return $stmt->execute();
     } catch (Exception $e) {
       Sabel_DB_Transaction::rollback();
       throw new Sabel_DB_Exception($e->getMessage());
@@ -572,7 +572,7 @@ class Sabel_DB_Model_Executer
   {
     $values = $this->chooseValues($data, "update");
 
-    $stmt->setBind($values, false);
+    $stmt->setBindValues($values, false);
     $stmt->table($this->model->getTableName());
     $stmt->values($values);
     $stmt->where($this->loadConditionManager()->build($stmt));
@@ -584,7 +584,7 @@ class Sabel_DB_Model_Executer
   {
     $values = $this->chooseValues($data, "insert");
 
-    $stmt->setBind($values, false);
+    $stmt->setBindValues($values, false);
     $stmt->table($this->model->getTableName());
     $stmt->values($values);
     $stmt->sequenceColumn($this->model->getIncrementColumn());

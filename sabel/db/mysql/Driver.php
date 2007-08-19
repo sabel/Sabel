@@ -16,25 +16,21 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return "mysql";
   }
 
-  public function loadTransaction()
-  {
-    return Sabel_DB_Transaction_General::getInstance();
-  }
-
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {
       $connectionName = $this->connectionName;
+    } else {
+      $this->setConnectionName($connectionName);
     }
 
-    $trans = $this->loadTransaction();
-
-    if (!$trans->isActive($connectionName)) {
-      $this->connection = Sabel_DB_Connection::get($connectionName);
-      if (!mysql_query("START TRANSACTION", $this->connection)) {
+    if (!Sabel_DB_Transaction::isActive($connectionName)) {
+      $conn = $this->getConnection();
+      if (!mysql_query("START TRANSACTION", $conn)) {
         throw new Sabel_DB_Exception("mysql driver begin failed.");
       }
-      $trans->start($this->connection, $this);
+
+      Sabel_DB_Transaction::start($conn, $this);
     }
   }
 
@@ -58,7 +54,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape($values)
+  public function escape(array $values)
   {
     $conn = $this->getConnection();
 
@@ -73,14 +69,13 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
-  public function execute(Sabel_DB_Abstract_Statement $stmt)
+  public function execute($sql, $bindParams = null)
   {
-    if (($bindParams = $stmt->getBindParams()) !== null) {
-      $bindParams = $this->escape($bindParams);
+    if ($bindParams !== null) {
+      $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
     $conn   = $this->getConnection();
-    $sql    = $this->bind($stmt->getSql(), $bindParams);
     $result = mysql_query($sql, $conn);
 
     if (!$result) $this->executeError($sql);
@@ -96,8 +91,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function getLastInsertId()
   {
-    $stmt = Sabel_DB_Statement::create($this, Sabel_DB_Statement::SELECT);
-    $rows = $stmt->setSql("SELECT LAST_INSERT_ID() AS id")->execute();
+    $rows = $this->execute("SELECT LAST_INSERT_ID() AS id");
     return $rows[0]["id"];
   }
 

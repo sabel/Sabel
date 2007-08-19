@@ -12,20 +12,38 @@
 class Sabel_DB_Transaction
 {
   private static $active = false;
+  private static $transactions = array();
 
   public static function activate()
   {
     self::$active = true;
   }
 
-  public static function isActive()
+  public static function isActive($connectionName = null)
   {
-    return self::$active;
+    if ($connectionName === null) {
+      return self::$active;
+    } else {
+      return (isset(self::$transactions[$connectionName]));
+    }
+  }
+
+  public static function getConnection($connectionName)
+  {
+    $ts = self::$transactions;
+    return (isset($ts[$connectionName]["conn"])) ? $ts[$connectionName]["conn"] : null;
   }
 
   public static function begin($connectionName)
   {
     Sabel_DB_Config::loadDriver($connectionName)->begin();
+  }
+
+  public static function start($connection, $driver)
+  {
+    $connectionName = $driver->getConnectionName();
+    self::$transactions[$connectionName]["conn"]   = $connection;
+    self::$transactions[$connectionName]["driver"] = $driver;
     self::$active = true;
   }
 
@@ -41,9 +59,18 @@ class Sabel_DB_Transaction
 
   private static function finish($method)
   {
-    $instance = Sabel_DB_Transaction_General::getInstance();
-    $instance->$method();
+    if (self::$active) {
+      foreach (self::$transactions as $trans) {
+        $trans["driver"]->$method($trans["conn"]);
+      }
 
+      self::clear();
+    }
+  }
+
+  public static function clear()
+  {
     self::$active = false;
+    self::$transactions = array();
   }
 }

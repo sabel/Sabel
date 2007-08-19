@@ -34,7 +34,10 @@ abstract class Sabel_DB_Model
 
   protected function initialize($mdlName = null)
   {
-    if ($mdlName === null) $mdlName = get_class($this);
+    if ($mdlName === null) {
+      $mdlName = get_class($this);
+    }
+
     $this->modelName = $mdlName;
 
     if ($this->tableName === "") {
