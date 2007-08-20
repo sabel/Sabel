@@ -17,6 +17,13 @@ class Sabel_Bus
   private $processors = array();
   private $listeners  = array();
   
+  private $callbacks = array();
+  
+  public function __construct()
+  {
+    Sabel_Context::getContext()->setBus($this);
+  }
+  
   /**
    * initialize bus data
    *
@@ -79,6 +86,9 @@ class Sabel_Bus
         $listener->event($name, $processor, $this);
       }
       
+      if (isset($this->callbacks[$name])) {
+      }
+      
       $processor->execute($this);
     }
     
@@ -92,6 +102,13 @@ class Sabel_Bus
   public function addBus($name, $bus)
   {
     $this->bus[$name] = $bus;
+  }
+  
+  public function callback($processor, $method, $when)
+  {
+    $callback = array("processor" => $processor, "method" => $method);
+    $this->callbacks[$when] = $callback;
+    return $this;
   }
   
   public function set($key, $value)

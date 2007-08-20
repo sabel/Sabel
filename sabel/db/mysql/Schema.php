@@ -170,7 +170,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
          . "WHERE tc.constraint_schema = '{$schemaName}' AND tc.table_name = '{$tblName}'"
          . "AND tc.constraint_type = 'FOREIGN KEY'";
 
-    $rows = $driver->setSql($sql)->execute();
+    $rows = $driver->execute($sql);
     if (empty($rows)) return null;
 
     $columns = array();

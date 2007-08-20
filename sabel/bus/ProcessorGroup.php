@@ -41,8 +41,23 @@ class Sabel_Bus_ProcessorGroup extends Sabel_Bus_Processor
         }
       }
     } else {
+      $callbacks = array();
+      
       while ($processorList !== null) {
-        $processorList->get()->execute($bus);
+        $processor = $processorList->get();
+        $result = $processor->execute($bus);
+        
+        if (isset($callbacks[$processor->name])) {
+          if ($result === true) {
+            $callback = $callbacks[$processor->name];
+            $callback->processor->{$callback->method}();
+          }
+        }
+        
+        if ($result instanceof Sabel_Bus_ProcessorCallback) {
+          $callbacks[$result->when] = $result;
+        }
+        
         $processorList = $processorList->next();
       }
     }

@@ -19,7 +19,7 @@ abstract class Sabel_View_Renderer
   public function partial($name, $controller = null, $options = array())
   {
     $context = Sabel_Context::getContext();
-    $destination = clone $context->getDestination();
+    $destination = clone $context->getBus()->get("destination");
     
     if ($controller !== null) {
       $destination->setController($controller);

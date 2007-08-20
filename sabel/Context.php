@@ -16,6 +16,7 @@ class Sabel_Context
   private static $context = null;
   
   private $candidate   = null;
+  private $bus = null;
   
   public static function setContext($context)
   {
@@ -39,6 +40,16 @@ class Sabel_Context
   public function getCandidate()
   {
     return $this->candidate;
+  }
+  
+  public function setBus($bus)
+  {
+    $this->bus = $bus;
+  }
+  
+  public function getBus()
+  {
+    return $this->bus;
   }
   
   public static function log($message)

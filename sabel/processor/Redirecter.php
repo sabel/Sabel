@@ -30,6 +30,7 @@ class Sabel_Processor_Redirecter extends Sabel_Bus_Processor
         }
         $to = $redirect->getUrl();
         $bus->get("response")->location($host, $ignored . $to);
+        return true;
       }
     } else {
       $redirect = new Redirect($bus);
