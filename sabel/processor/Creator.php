@@ -22,11 +22,11 @@ class Sabel_Processor_Creator extends Sabel_Bus_Processor
     $creator = new Sabel_Controller_Creator(); 
     try {
       $controller = $creator->create($destination);
+      $controller->setup($request, $destination, $storage);
     } catch (Exception $e) {
       $destination->setModule("index");
       $destination->setController("index");
       $destination->setAction("index");
-      
       $controller = $creator->create($destination);
     }
     

@@ -240,7 +240,7 @@ class Sabel_I18n_Gettext
   public function setBrowser($browser = null)
   {
     if ($browser === null) {
-      $this->browser = Sabel_Context::getContext()->getLocale()->getBrowser();
+      $this->browser = new Sabel_Locale_Browser();
     } else {
       $this->browser = $browser;
     }

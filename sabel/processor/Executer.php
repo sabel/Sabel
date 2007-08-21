@@ -20,11 +20,12 @@ class Sabel_Processor_Executer extends Sabel_Bus_Processor
     $destination = $bus->get("destination");
     $storage     = $bus->get("storage");
     
-    $controller->setup($request, $destination, $storage);
     $controller->setAction($destination->getAction());
     $controller->initialize();
     
     $response = $controller->execute($destination->getAction());
     $bus->set("response",   $response);
+    
+    return true;
   }
 }

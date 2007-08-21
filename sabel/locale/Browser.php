@@ -16,7 +16,7 @@ class Sabel_Locale_Browser
   
   public function __construct()
   {
-    $request = Sabel_Context::getContext()->getRequest();
+    $request = Sabel_Context::getContext()->getBus()->get("request");
     $header  = $request->getHeader("Accept-Language");
     
     if ($header === "" || $header === null) {

@@ -1,9 +1,18 @@
 <?php
 
-class Sabel_Processor_Acl implements Sabel_Bus_Processor
+/**
+ * Sabel_Processor_Acl
+ *
+ * @category   Plugin
+ * @package    org.sabel.controller.executer
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Processor_Acl extends Sabel_Bus_Processor
 {
   const ACL_LOGIN_KEY = "acl_login_id";
-  const DENY_ACTION   = "accessDeny";
+  const DENY_ACTION   = "deny";
   
   const RULE_DENY  = "deny";
   const RULE_ALLOW = "allow";
@@ -13,25 +22,37 @@ class Sabel_Processor_Acl implements Sabel_Bus_Processor
   
   private $rule = null;
   private $user = null;
+    
+  public function __construct($name, $defualtRule = null)
+  {
+    parent::__construct($name);
+    
+    if ($defualtRule === null) {
+      $this->rule = self::RULE_DENY;
+    } else {
+      $this->rule = self::RULE_ALLOW;
+    }
+  }
   
+  /**
+   * execute an action.
+   * overwrite parent executeAction method.
+   *
+   * @param string $action
+   */
   public function execute($bus)
   {
-    $this->rule = self::RULE_DENY;
+    $this->storage = $storage = $bus->get("storage");
     
-    $this->user = new Sabel_Plugin_Acl_User();
-    
-    $storage     = $bus->get("storage");
     $controller  = $bus->get("controller");
-    $request     = $bus->get("request");
     $destination = $bus->get("destination");
-    
     $action = $destination->getAction();
     
+    $this->user = new Sabel_Plugin_Acl_User();
     if ($storage->has("acl_user")) {
       $this->user->restore($storage->read("acl_user"));
     }
-    
-    $request->setVariable("user", $this->user);
+    $controller->user = $this->user;
     
     $privateActions = "aclPrivateActions";
     $publicActions  = "aclPublicActions";
@@ -41,15 +62,10 @@ class Sabel_Processor_Acl implements Sabel_Bus_Processor
         throw new Sabel_Exception_Runtime("duplicate double deny");
       }
       
-      if ($action === "notFound" || $action === "serverError") {
-        return $controller->execute($action);
-      }
-      
       if (method_exists($controller, $publicActions)) {
         $pubActions = $controller->$publicActions();
-        if ($pubActions === self::ALLOW_ALL) {
-          return $controller->execute($action);
-        } elseif ($pubActions === self::DENY_ALL) {
+        
+        if ($pubActions === self::DENY_ALL) {
           throw new Sabel_Exception_Runtime("duplicate double deny");
         }
         
@@ -61,23 +77,13 @@ class Sabel_Processor_Acl implements Sabel_Bus_Processor
           }
         }
         
-        if ($found) {
-          return $controller->execute($action);
-        } elseif ($this->user->isAuthenticated()) {
-          return $controller->execute($action);
-        } else {
+        if (!$found && !$this->user->isAuthenticated()) {
           if ($controller->executable($action)) {
             $destination->setAction(self::DENY_ACTION);
-            return $controller->execute(self::DENY_ACTION);
-          } else {
-            return $controller->execute($action);
           }
         }
-      } elseif ($this->user->isAuthenticated()) {
-        return $controller->execute($action);
       } else {
         $destination->setAction(self::DENY_ACTION);
-        return $controller->execute(self::DENY_ACTION);
       }
     } elseif ($this->rule === self::RULE_ALLOW) {
       if (method_exists($controller, $publicActions)) {
@@ -88,7 +94,6 @@ class Sabel_Processor_Acl implements Sabel_Bus_Processor
         $priActions = $controller->$privateActions();
         if ($priActions === self::DENY_ALL) {
           $destination->setAction(self::DENY_ACTION);
-          return $controller->execute(self::DENY_ACTION);
         } elseif ($priActions === self::ALLOW_ALL) {
           throw new Sabel_Exception_Runtime("duplicate double allow");
         }
@@ -102,20 +107,18 @@ class Sabel_Processor_Acl implements Sabel_Bus_Processor
         }
         
         if ($found) {
-          if ($this->user->isAuthenticated()) {
-            return $controller->execute($action);
-          } else {
+          if (!$this->user->isAuthenticated()) {
             $destination->setAction(self::DENY_ACTION);
-            return $controller->execute(self::DENY_ACTION);
           }
-        } else {
-          return $controller->execute($action);
         }
-      } else {
-        return $controller->execute($action);
       }
     }
     
-    $storage->write("acl_user", $this->user->toArray());
+    return new Sabel_Bus_ProcessorCallback($this, "onAfterAction", "executer");
+  }
+  
+  public function onAfterAction()
+  {
+    $this->storage->write("acl_user", $this->user->toArray());
   }
 }
