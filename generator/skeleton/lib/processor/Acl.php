@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Processor_Acl
+ * Processor_Acl
  *
  * @category   Plugin
  * @package    org.sabel.controller.executer
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Processor_Acl extends Sabel_Bus_Processor
+class Processor_Acl extends Sabel_Bus_Processor
 {
   const ACL_LOGIN_KEY = "acl_login_id";
   const DENY_ACTION   = "deny";
@@ -48,7 +48,7 @@ class Sabel_Processor_Acl extends Sabel_Bus_Processor
     $destination = $bus->get("destination");
     $action = $destination->getAction();
     
-    $this->user = new Sabel_Plugin_Acl_User();
+    $this->user = new Processor_Acl_User();
     if ($storage->has("acl_user")) {
       $this->user->restore($storage->read("acl_user"));
     }
