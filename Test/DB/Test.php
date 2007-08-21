@@ -4,7 +4,8 @@ class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";
   public static $tables = array("member", "member_sub_group", "member_group",
-                                "super_group", "location", "condition_test");
+                                "super_group", "location", "condition_test",
+                                "student_course", "student", "course");
 
   public function testClean()
   {
@@ -681,6 +682,87 @@ class Test_DB_Test extends SabelTestCase
 
     $count = $executer->getCount();
     $this->assertEquals($count, 8);
+  }
+
+  public function testBridge()
+  {
+    $data = array();
+    $data[] = array("id" => 1, "name" => "tanaka");
+    $data[] = array("id" => 2, "name" => "yamada");
+    $data[] = array("id" => 3, "name" => "satou");
+    $data[] = array("id" => 4, "name" => "koike");
+
+    $executer = new Executer("Student");
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $data = array();
+    $data[] = array("id" => 1, "name" => "science");
+    $data[] = array("id" => 2, "name" => "history");
+    $data[] = array("id" => 3, "name" => "mathematics");
+
+    $executer = new Executer("Course");
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $data = array();
+    $data[] = array("student_id" => 1, "course_id" => 2);
+    $data[] = array("student_id" => 1, "course_id" => 3);
+    $data[] = array("student_id" => 2, "course_id" => 1);
+    $data[] = array("student_id" => 2, "course_id" => 3);
+    $data[] = array("student_id" => 3, "course_id" => 1);
+    $data[] = array("student_id" => 3, "course_id" => 2);
+    $data[] = array("student_id" => 3, "course_id" => 3);
+    $data[] = array("student_id" => 4, "course_id" => 3);
+
+    $executer = new Executer("StudentCourse");
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $executer = new Executer("Student");
+    $tanaka = $executer->selectOne(1);
+    $bridge = new Sabel_DB_Model_Bridge($tanaka, "StudentCourse");
+    $course = $bridge->getChild("Course");
+
+    $this->assertEquals(count($course), 2);
+
+    $executer = new Executer("Student");
+    $yamada = $executer->selectOne(2);
+    $bridge = new Sabel_DB_Model_Bridge($yamada, "StudentCourse");
+    $course = $bridge->getChild("Course");
+
+    $this->assertEquals(count($course), 2);
+
+    $executer = new Executer("Student");
+    $satou  = $executer->selectOne(3);
+    $bridge = new Sabel_DB_Model_Bridge($satou, "StudentCourse");
+    $course = $bridge->getChild("Course");
+
+    $this->assertEquals(count($course), 3);
+
+    $executer = new Executer("Course");
+    $science = $executer->selectOne(1);
+    $bridge  = new Sabel_DB_Model_Bridge($science, "StudentCourse");
+    $student = $bridge->getChild("Student");
+
+    $this->assertEquals(count($student), 2);
+
+    $executer = new Executer("Course");
+    $history = $executer->selectOne(2);
+    $bridge  = new Sabel_DB_Model_Bridge($history, "StudentCourse");
+    $student = $bridge->getChild("Student");
+
+    $this->assertEquals(count($student), 2);
+
+    $executer = new Executer("Course");
+    $math    = $executer->selectOne(3);
+    $bridge  = new Sabel_DB_Model_Bridge($math, "StudentCourse");
+    $student = $bridge->getChild("Student");
+
+    $this->assertEquals(count($student), 4);
   }
 
   public function testClear()

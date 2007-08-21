@@ -14,11 +14,16 @@ class Sabel_DB_Config
   private static $initialized = false;
   private static $configs = array();
 
-  public static function initialize()
+  public static function initialize($configPath = "")
   {
     if (self::$initialized) return;
 
-    Sabel::fileUsing(RUN_BASE . "/config/connection.php", true);
+    if ($configPath === "") {
+      $configPath = RUN_BASE . DIR_DIVIDER . "config" . DIR_DIVIDER . "connection.php";
+    }
+
+    Sabel::fileUsing($configPath, true);
+
     foreach (get_db_params() as $connectionName => $params) {
       self::regist($connectionName, $params);
     }
@@ -68,8 +73,8 @@ class Sabel_DB_Config
     if (isset($config["driver"])) {
       return $config["driver"];
     } else {
-      $e = new Sabel_DB_Exception_Config();
-      throw $e->undefinedIndex("getDriverName", "driver");
+      $message = "getDriverName() 'driver' not found in config.";
+      throw new Sabel_DB_Exception($message);
     }
   }
 
@@ -89,8 +94,8 @@ class Sabel_DB_Config
     } elseif ($drvName === "pgsql" || $drvName === "pdo-pgsql") {
       return "public";
     } else {
-      $e = new Sabel_DB_Exception_Config();
-      throw $e->undefinedIndex("getSchemaName", "schema");
+      $message = "getSchemaName() 'schema' not found in config.";
+      throw new Sabel_DB_Exception($message);
     }
   }
 
@@ -99,8 +104,8 @@ class Sabel_DB_Config
     if (isset(self::$configs[$connectionName])) {
       return self::$configs[$connectionName];
     } else {
-      $e = new Sabel_DB_Exception_Config();
-      throw $e->notFound($connectionName);
+      $message = "getConfig() config for '{$connectionName}' not found.";
+      throw new Sabel_DB_Exception($message);
     }
   }
 }

@@ -21,7 +21,6 @@ if (ENVIRONMENT === DEVELOPMENT) {
 }
 
 add_include_path("/app");
-add_include_path("/app/models");
 add_include_path("/lib");
 add_include_path("/config");
 add_include_path("/app/helpers");

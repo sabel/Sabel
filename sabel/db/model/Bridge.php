@@ -14,30 +14,31 @@ class Sabel_DB_Model_Bridge
   protected
     $model      = null,
     $bridgeName = null,
-    $joinKeys   = array();
+    $joinKey    = array();
 
-  public function __construct($model, $bridgeName)
+  public function __construct(Sabel_DB_Model $model, $bridgeName)
   {
     $this->model      = $model;
     $this->bridgeName = $bridgeName;
   }
 
-  public function setJoinKeys($mdlName, $keys)
+  public function setJoinKey($mdlName, $keys)
   {
-    $this->joinKeys[$mdlName] = $keys;
+    $this->joinKey[$mdlName] = $keys;
   }
 
   public function getChild($child, $constraints = null)
   {
     $model    = $this->model;
     $mdlName  = $model->getModelName();
-    $joinKeys = $this->joinKeys;
+    $joinKey  = $this->joinKey;
     $bridge   = MODEL($this->bridgeName);
+    $executer = new Sabel_DB_Model_Executer($bridge);
     $foreign  = $bridge->getSchema()->getForeignKeys();
 
-    if (isset($joinKeys[$mdlName])) {
-      $pkey = $joinKeys[$mdlName]["id"];
-      $fkey = $joinKeys[$mdlName]["fkey"];
+    if (isset($joinKey[$mdlName])) {
+      $pkey = $joinKey[$mdlName]["id"];
+      $fkey = $joinKey[$mdlName]["fkey"];
     } elseif ($foreign === null) {
       $pkey = "id";
       $fkey = convert_to_tablename($mdlName) . "_id";
@@ -45,19 +46,15 @@ class Sabel_DB_Model_Bridge
       list ($pkey, $fkey) = $this->getJoinParam($foreign, $model->getTableName());
     }
 
-    $bridge->setCondition("{$this->bridgeName}.{$fkey}", $model->$pkey);
+    $executer->setCondition("{$this->bridgeName}.{$fkey}", $model->$pkey);
+    if ($constraints) $executer->setConstraint($constraints);
 
-    if ($constraints) {
-      $bridge->setConstraint($constraints);
-    }
-
-    $joiner  = new Sabel_DB_Join($bridge);
     $cModel  = MODEL($child);
     $mdlName = $cModel->getModelName();
 
-    if (isset($joinKeys[$mdlName])) {
-      $pkey = $joinKeys[$mdlName]["id"];
-      $fkey = $joinKeys[$mdlName]["fkey"];
+    if (isset($joinKey[$mdlName])) {
+      $pkey = $joinKey[$mdlName]["id"];
+      $fkey = $joinKey[$mdlName]["fkey"];
     } elseif ($foreign === null) {
       $pkey = "id";
       $fkey = convert_to_tablename($mdlName) . "_id";
@@ -66,6 +63,7 @@ class Sabel_DB_Model_Bridge
     }
 
     $keys    = array("id" => $pkey, "fkey" => $fkey);
+    $joiner  = new Sabel_DB_Join($executer);
     $results = $joiner->add($cModel, null, null, $keys)->join();
 
     if (!$results) return false;

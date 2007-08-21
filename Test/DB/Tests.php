@@ -33,7 +33,7 @@ class Test_DB_Tests
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_SQLite::suite());
     }
-
+    /*
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
@@ -41,7 +41,7 @@ class Test_DB_Tests
     if (extension_loaded("oci8")) {
       $suite->addTest(Test_DB_Oci::suite());
     }
-
+    */
     return $suite;
   }
 }

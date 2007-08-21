@@ -35,21 +35,25 @@ class Migration extends Sabel_Sakle_Task
     $this->arguments = $arguments;
     $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
-
-    $this->connectionName = $connectionName;
+    $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
 
     $this->initDbConfig($environment);
-    $this->defineMigrationDir();
 
-    $this->currentVersion = $this->getCurrentVersion();
-    Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
+    if ($arguments[2] === "export") {
+      $this->export();
+      self::$execFinalize = false;
+    } else {
+      $this->defineMigrationDir();
+      $this->currentVersion = $this->getCurrentVersion();
+      Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
 
-    $to = $this->showCurrentVersion($arguments);
-    $this->files = $this->getMigrationFiles();
+      $to = $this->showCurrentVersion($arguments);
+      $this->files = $this->getMigrationFiles();
 
-    if ($this->toVersionNumber($to) !== false) {
-      $doNext = $this->execMigration();
-      if ($doNext) $this->execNextMigration();
+      if ($this->toVersionNumber($to) !== false) {
+        $doNext = $this->execMigration();
+        if ($doNext) $this->execNextMigration();
+      }
     }
   }
 
@@ -71,10 +75,8 @@ class Migration extends Sabel_Sakle_Task
     Sabel_DB_Migration_Manager::setDriver($this->driver);
 
     try {
-      $accessor = new Sabel_DB_Schema_Accessor($connectionName);
-      Sabel_DB_Migration_Manager::setAccessor($accessor);
-
-      if (!in_array("sversion", $accessor->getTableLists())) {
+      Sabel_DB_Migration_Manager::setAccessor($this->accessor);
+      if (!in_array("sversion", $this->accessor->getTableLists())) {
         $this->createVersionManageTable();
         return 0;
       } else {
@@ -202,8 +204,7 @@ class Migration extends Sabel_Sakle_Task
 
   protected function incrementVersion($num)
   {
-    $stmt = Sabel_DB_Statement::create($this->driver);
-    $stmt->setSql("UPDATE sversion SET version = $num")->execute();
+    $this->driver->execute("UPDATE sversion SET version = $num");
   }
 
   protected function initDbConfig($environment)
@@ -232,7 +233,8 @@ class Migration extends Sabel_Sakle_Task
       $this->printMessage("too few arguments", parent::MSG_ERR); exit;
     }
 
-    return (isset($args[3])) ? $args[3] : "default";
+    $name = (isset($args[3])) ? $args[3] : "default";
+    return $this->connectionName = $name;
   }
 
   protected function createVersionManageTable()
@@ -242,17 +244,41 @@ class Migration extends Sabel_Sakle_Task
             . "version INTEGER NOT NULL)";
 
     $insert = "INSERT INTO sversion values(1, 0)";
-    $stmt   = Sabel_DB_Statement::create($this->driver);
-    $stmt->setSql($create)->execute();
-    $stmt->setSql($insert)->execute();
+
+    $this->driver->execute($create);
+    $this->driver->execute($insert);
   }
 
   protected function getVersion()
   {
-    $select = "SELECT version FROM sversion WHERE id = 1";
-    $stmt   = Sabel_DB_Statement::create($this->driver);
-    $rows   = $stmt->setSql($select)->execute();
-
+    $rows = $this->driver->execute("SELECT version FROM sversion WHERE id = 1");
     return $rows[0]["version"];
+  }
+
+  protected function export()
+  {
+    $fileNum  = 1;
+    $accessor = $this->accessor;
+    $path     = RUN_BASE . DIR_DIVIDER . "migration" . DIR_DIVIDER . $this->connectionName;
+
+    // @todo
+    // check constraint of foreign key. ( export sequence )
+
+    try {
+      foreach ($accessor->getTableLists() as $table) {
+        if ($table === "sversion") continue;
+        $schema = $accessor->get($table);
+        $filePath = $path . DIR_DIVIDER . $fileNum . "_" . convert_to_modelname($table) . "_create.php";
+        $fp = fopen($filePath, "w");
+        Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
+
+        // @todo table engine.
+        fwrite($fp, '$create->options("engine", "InnoDB");');
+        fclose($fp);
+        $fileNum++;
+      }
+    } catch (Exception $e) {
+      $this->printMessage($e->getMessage(), self::MSG_ERR); exit;
+    }
   }
 }

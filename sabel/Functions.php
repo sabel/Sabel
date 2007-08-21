@@ -213,6 +213,8 @@ function component($action, $args = null)
 
 /***   sabel.db functions   ***/
 
+define("MODELS_DIR", RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "models" . DIR_DIVIDER);
+
 function convert_to_tablename($mdlName)
 {
   static $cache = array();
@@ -247,10 +249,14 @@ function MODEL($mdlName)
   static $cache = array();
 
   if (isset($cache[$mdlName])) {
-    return ($cache[$mdlName]) ? new $mdlName() : new Proxy($mdlName);
+    if ($cache[$mdlName]) {
+      return new $mdlName();
+    } else {
+      return new Sabel_DB_Model_Proxy($mdlName);
+    }
   }
 
-  Sabel::using($mdlName);
+  Sabel::fileUsing(MODELS_DIR . $mdlName);
 
   $exists = class_exists($mdlName, false);
   $cache[$mdlName] = $exists;
@@ -258,6 +264,6 @@ function MODEL($mdlName)
   if ($exists) {
     return new $mdlName();
   } else {
-    return new Proxy($mdlName);
+    return new Sabel_DB_Model_Proxy($mdlName);
   }
 }

@@ -24,7 +24,7 @@ class Sabel_Processor_Executer extends Sabel_Bus_Processor
     $controller->initialize();
     
     $response = $controller->execute($destination->getAction());
-    $bus->set("response",   $response);
+    $bus->set("response", $response);
     
     return true;
   }

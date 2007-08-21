@@ -139,12 +139,15 @@ abstract class Sabel_DB_Model
     $pkey = $this->schema->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
 
-    $selected = true;
-
-    foreach ($pkey as $key) {
-      if (!isset($row[$key])) {
-        $selected = false;
-        break;
+    if (empty($pkey)) {
+      $selected = false;
+    } else {
+      $selected = true;
+      foreach ($pkey as $key) {
+        if (!isset($row[$key])) {
+          $selected = false;
+          break;
+        }
       }
     }
 

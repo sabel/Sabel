@@ -1,12 +1,13 @@
 <?php
 
-require_once('Sabel/Sabel.php');
+require_once ("Sabel/Sabel.php");
 
-$args = $_SERVER['argv'];
+$args = $_SERVER["argv"];
 $pathToSabel = dirname(dirname($args[0]));
 $includePath = get_include_path();
-if (!in_array($pathToSabel, explode(':', $includePath))) {
-  set_include_path(get_include_path().':'.$pathToSabel);
+
+if (!in_array($pathToSabel, explode(":", $includePath))) {
+  set_include_path(get_include_path() . ":" . $pathToSabel);
 }
 
 if (isset($args[1])) {
@@ -26,7 +27,6 @@ class Sakle
                                     self::MSG_ERR  => "[\x1b[1;31mERROR\x1b[m]");
   
   protected $runningDirectory = "";
-  
   protected $arguments = array();
   
   public static function main($class)
@@ -44,14 +44,16 @@ class Sakle
   {
     // @todo compatibility for Windows
     $this->runningDirectory = getcwd();
-    $args = $_SERVER['argv'];
+    $args = $_SERVER["argv"];
     array_shift($args);
     $this->arguments = $args;
   }
   
   public function run($class)
   {
-    $pathToClass = $this->runningDirectory . '/tasks/' . $class . '.php';
+    $pathToClass = $this->runningDirectory . DIR_DIVIDER
+                 . "tasks" . DIR_DIVIDER . $class . ".php";
+                 
     if (is_readable($pathToClass)) {
       require ($pathToClass);
       $ins = new $class();
@@ -65,9 +67,11 @@ class Sakle
   
   public function allTestRun()
   {
-    $pathToClass = $this->runningDirectory . '/tasks/TestSuite.php';
+    $pathToClass = $this->runningDirectory . DIR_DIVIDER
+                 . "tasks" . DIR_DIVIDER . "TestSuite.php";
+                 
     if (is_readable($pathToClass)) {
-      require ($pathToClass); 
+      require ($pathToClass);
       $ins = new TestSuite();
       $ins->run($this->arguments);
     }

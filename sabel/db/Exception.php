@@ -28,21 +28,21 @@ class Sabel_DB_Exception extends Exception
   {
     $i = 0;
 
-    echo '<b><pre>';
+    $html = array('<b><pre>');
 
-    foreach (self::$traces as $trace) {
+    foreach ($this->traces as $trace) {
       if (isset($trace["file"])) {
-        echo '<br/>';
-        echo 'FILE: ' . $trace["file"] . '<br/>';
-        echo '<font color="blue">';
-        echo 'CALL: ' . $trace["class"] . $trace["type"] . $trace["function"] . '()<br/>';
-        echo '</font>';
+        $html[] = '<br/>';
+        $html[] = 'FILE: ' . $trace["file"] . '<br/>';
+        $html[] = '<font color="blue">';
+        $html[] = 'CALL: ' . $trace["class"] . $trace["type"] . $trace["function"] . '()<br/>';
+        $html[] = '</font>';
 
         $line  = $trace["line"];
         $lines = file($trace["file"]);
 
-        echo '<div style="border: 1px solid green; margin-top: 10px; padding: 10px;">';
-        echo '<code>';
+        $html[] = '<div style="border: 1px solid green; margin-top: 10px; padding: 10px;">';
+        $html[] = '<code>';
 
         for ($j = $line - 6; $j < $line + 5; $j++) {
           if (!isset($lines[$j])) continue;
@@ -52,16 +52,16 @@ class Sabel_DB_Exception extends Exception
           for ($k = $len; $k < 6; $k++) $lineNum .= ' ';
 
           if ($num === $line) {
-            echo '<font color="red">' . $lineNum . $lines[$j] . '</font>';
+            $html[] = '<font color="red">' . $lineNum . $lines[$j] . '</font>';
           } else {
-            echo $lineNum . $lines[$j];
+            $html[] = $lineNum . $lines[$j];
           }
         }
 
-        echo '</code>';
-        echo '</div>';
-        echo '<br/>';
-        echo '<hr/>';
+        $html[] = '</code>';
+        $html[] = '</div>';
+        $html[] = '<br/>';
+        $html[] = '<hr/>';
 
         $i++;
       }
@@ -69,7 +69,8 @@ class Sabel_DB_Exception extends Exception
       if ($i === self::DISPLAY_TRACE_COUNT) break;
     }
 
-    echo "</pre></b>";
+    $html[] = "</pre></b>";
+    return implode("\n", $html);
   }
 
   private function createTrace()
