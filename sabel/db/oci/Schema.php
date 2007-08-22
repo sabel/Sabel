@@ -183,6 +183,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
 
     $seqs =& $this->sequences;
     $rows = $this->execute(sprintf($this->sequenceList, $this->schemaName));
+    if (!$rows) return;
 
     foreach ($rows as $row) {
       $seqs[] = $row["sequence_name"];
@@ -196,6 +197,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     $keys =& $this->primaryKeys;
     $sql  = sprintf($this->primaryList, $this->schemaName, strtoupper($tblName));
     $rows = $this->execute($sql);
+    if (!$rows) return;
 
     foreach ($rows as $row) {
       $keys[] = strtolower($row["column_name"]);

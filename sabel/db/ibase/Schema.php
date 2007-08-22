@@ -109,6 +109,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
 
     $gens =& $this->generators;
     $rows = $this->execute($this->genList);
+    if (!$rows) return;
 
     foreach ($rows as $row) {
       $gens[] = trim($row['rdb$generator_name']);
@@ -121,6 +122,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
 
     $keys =& $this->primaryKeys;
     $rows = $this->execute(sprintf($this->priKeys, $tblName));
+    if (!$rows) return;
 
     foreach ($rows as $row) {
       $keys[] = trim($row['rdb$field_name']);

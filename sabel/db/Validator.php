@@ -24,18 +24,13 @@ class Sabel_DB_Validator
     $errors  = array(),
     $ignores = array();
 
-  public function __construct(Sabel_DB_Model $model, $configs = null)
+  public function __construct(Sabel_DB_Model $model)
   {
-    $this->model   = $model;
-    $this->mdlName = $mdlName = $model->getModelName();
-
-    if ($configs === null) {
-      $configs = Sabel_DB_Validate_Config::getConfigs();
-    }
-
-    $this->messages      = $configs["messages"];
-    $this->datetimeRegex = $configs["datetimeRegex"];
-    $this->displayNames  = Sabel_DB_Model_Localize::getColumnNames($mdlName);
+    $this->model         = $model;
+    $this->mdlName       = $model->getModelName();
+    $this->messages      = Sabel_DB_Validate_Config::getMessages();
+    $this->datetimeRegex = Sabel_DB_Validate_Config::getDatetimeRegex();
+    $this->displayNames  = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
   }
 
   public function getErrors()
@@ -45,7 +40,7 @@ class Sabel_DB_Validator
 
   public function hasError()
   {
-    return !empty($this->errors);
+    return !(empty($this->errors));
   }
 
   protected function getColumns()
@@ -160,15 +155,10 @@ class Sabel_DB_Validator
     } elseif ($column->isFloat(false)) {
       return is_float($value);
     } elseif ($column->isDatetime()) {
-      // @todo regex.
       return (preg_match($this->datetimeRegex, $value) === 1);
     } else {
       return true;
     }
-
-    // @todo
-    // if Sabel_DB_Type::TIME
-    // if Sabel_DB_Type::DATE
   }
 
   protected function length($column)

@@ -109,14 +109,6 @@ class Sabel_DB_Schema_Column
       case Sabel_DB_Type::BIGINT:
         return (string)$value;
 
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        if (is_string($value) && $value === (string)(float)$value || is_int($value)) {
-          return (float)$value;
-        } else {
-          return $value;
-        }
-
       case Sabel_DB_Type::BOOL:
         if (is_string($value)) {
           if ($value === "1" || $value === "t" || $value === "true") {
@@ -133,6 +125,14 @@ class Sabel_DB_Schema_Column
         }
 
         return $value;
+
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        if (is_string($value) && $value === (string)(float)$value || is_int($value)) {
+          return (float)$value;
+        } else {
+          return $value;
+        }
 
       default:
         return $value;

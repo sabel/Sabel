@@ -15,6 +15,9 @@ class Test_DB_Test extends SabelTestCase
     foreach ($tables as $table) {
       $executer->query("DELETE FROM $table", false, Sabel_DB_Statement::DELETE);
     }
+
+    $executer->query("DELETE FROM tree WHERE id > 2");
+    $executer->query("DELETE FROM tree");
   }
 
   public function testInsert()
@@ -298,9 +301,6 @@ class Test_DB_Test extends SabelTestCase
     $member1 = $members[0];
     $member2 = $members[1];
 
-    $this->assertEquals($member1->id, 1);
-    $this->assertEquals($member2->id, 2);
-
     $this->assertEquals($member1->MemberSubGroup->id, 2);
     $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
     $this->assertEquals($member1->MemberSubGroup->MemberGroup->id, 1);
@@ -316,7 +316,7 @@ class Test_DB_Test extends SabelTestCase
     $executer = new Executer("Member");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = $join->createRelation(MODEL("MemberSubGroup"));
+    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
     $relation->add(MODEL("MemberGroup"));
     $count = $join->add($relation)->getCount();
 
@@ -326,22 +326,22 @@ class Test_DB_Test extends SabelTestCase
     $executer->setCondition("MemberGroup.name", "group1");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = $join->createRelation(MODEL("MemberSubGroup"));
+    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
     $relation->add(MODEL("MemberGroup"));
     $count = $join->add($relation)->getCount();
 
     $this->assertEquals($count, 1);
   }
-  /* @todo
+
   public function testJoinAlias()
   {
     $executer = new Executer("Member");
     $executer->setConstraint("order", "Member.id ASC");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
-    $relation->add(MODEL("MemberGroup"), null, "MemGrp");
-    $members = $join->add($relation, null, "Msg")->join();
+    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"), null, "Msg");
+    $relation->add(new Sabel_DB_Join_Object(MODEL("MemberGroup"), null, "MemGrp"));
+    $members = $join->add($relation)->join();
     $member1 = $members[0];
     $member2 = $members[1];
 
@@ -352,7 +352,47 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($member2->Msg->MemGrp->id, 2);
     $this->assertEquals($member2->Msg->MemGrp->name, "group2");
   }
-  */
+
+  public function testJoinAlias2()
+  {
+    // @todo mail example.
+    // use alias for sender, recipient.
+  }
+
+  public function testParentParentParent()
+  {
+    $executer = new Executer("Member");
+    $executer->setConstraint("order", "Member.id ASC");
+
+    $join = new Sabel_DB_Join($executer);
+    $memberGroup = new Sabel_DB_Join_Relation(MODEL("MemberGroup"));
+    $memberGroup->add(MODEL("SuperGroup"));
+    $memberSubGroup = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
+    $memberSubGroup->add($memberGroup);
+    $result = $join->add($memberSubGroup)->join();
+
+    $member1 = $result[0];
+    $member2 = $result[1];
+
+    $this->assertEquals($member1->id, 1);
+    $this->assertEquals($member1->name, "test1");
+    $this->assertEquals($member1->MemberSubGroup->id, 2);
+    $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
+    $this->assertEquals($member1->MemberSubGroup->MemberGroup->id, 1);
+    $this->assertEquals($member1->MemberSubGroup->MemberGroup->name, "group1");
+    $this->assertEquals($member1->MemberSubGroup->MemberGroup->SuperGroup->id, 2);
+    $this->assertEquals($member1->MemberSubGroup->MemberGroup->SuperGroup->name, "sgroup2");
+
+    $this->assertEquals($member2->id, 2);
+    $this->assertEquals($member2->name, "test2");
+    $this->assertEquals($member2->MemberSubGroup->id, 1);
+    $this->assertEquals($member2->MemberSubGroup->name, "sub_group1");
+    $this->assertEquals($member2->MemberSubGroup->MemberGroup->id, 2);
+    $this->assertEquals($member2->MemberSubGroup->MemberGroup->name, "group2");
+    $this->assertEquals($member2->MemberSubGroup->MemberGroup->SuperGroup->id, 1);
+    $this->assertEquals($member2->MemberSubGroup->MemberGroup->SuperGroup->name, "sgroup1");
+  }
+
   public function testInserts()
   {
     $data = array();
@@ -765,18 +805,57 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(count($student), 4);
   }
 
+  public function testSelfJoin()
+  {
+    if (self::$db === "IBASE") return;
+
+    $data   = array();
+    $data[] = array("id" => 1, "name" => "root1");
+    $data[] = array("id" => 2, "name" => "root2");
+    $data[] = array("id" => 3, "name" => "node1", "tree_id" => 2);
+    $data[] = array("id" => 4, "name" => "node2", "tree_id" => 2);
+    $data[] = array("id" => 5, "name" => "node3", "tree_id" => 1);
+    $data[] = array("id" => 6, "name" => "node4", "tree_id" => 1);
+    $data[] = array("id" => 7, "name" => "node5", "tree_id" => 1);
+
+    $executer = new Executer("Tree");
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $executer = new Executer("Tree");
+    $executer->setConstraint("order", "Tree.id ASC");
+    $join = new Sabel_DB_Join($executer);
+    $join->add(new Sabel_DB_Join_Object(MODEL("Tree"), null, "Root"));
+    $result = $join->join("LEFT");
+
+    $this->assertEquals($result[0]->id, 1);
+    $this->assertEquals($result[1]->id, 2);
+
+    $node1 = $result[2];
+    $node2 = $result[3];
+    $node3 = $result[4];
+
+    $this->assertEquals($node1->name, "node1");
+    $this->assertEquals($node1->tree_id, 2);
+    $this->assertEquals($node1->Root->id, 2);
+    $this->assertEquals($node1->Root->name, "root2");
+
+    $this->assertEquals($node2->name, "node2");
+    $this->assertEquals($node2->tree_id, 2);
+    $this->assertEquals($node2->Root->id, 2);
+    $this->assertEquals($node2->Root->name, "root2");
+
+    $this->assertEquals($node3->name, "node3");
+    $this->assertEquals($node3->tree_id, 1);
+    $this->assertEquals($node3->Root->id, 1);
+    $this->assertEquals($node3->Root->name, "root1");
+  }
+
   public function testClear()
   {
     Sabel_DB_Schema::clear();
     Sabel_DB_Connection::closeAll();
-  }
-}
-
-class Proxy extends Sabel_DB_Model
-{
-  public function __construct($mdlName)
-  {
-    $this->initialize($mdlName);
   }
 }
 

@@ -21,16 +21,10 @@ class Sabel_DB_Join
 
   public function __construct(Sabel_DB_Model_Executer $executer)
   {
-    $model = $executer->getModel();
-
-    $this->executer = $executer;
-    $this->model    = $executer->getModel();
-    $this->tblName  = $this->model->getTableName();
-  }
-
-  public function createRelation(Sabel_DB_Model $model)
-  {
-    return new Sabel_DB_Join_Relation($model);
+    $this->executer  = $executer;
+    $this->model     = $executer->getModel();
+    $this->tblName   = $this->model->getTableName();
+    $this->structure = Sabel_DB_Join_Structure::getInstance();
   }
 
   public function add($object)
@@ -39,12 +33,10 @@ class Sabel_DB_Join
       $object = new Sabel_DB_Join_Object($object);
     }
 
-    $structure = Sabel_DB_Join_Structure::getInstance();
-    $structure->addJoinObject($object);
     $object->setSourceName($this->tblName);
     $this->objects[] = $object;
-
-    $structure->add($this->tblName, $object->getName());
+    $this->structure->addJoinObject($object);
+    $this->structure->add($this->tblName, $object->getName());
 
     $name  = $object->getModel()->getTableName();
     $fkeys = $this->model->getSchema()->getForeignKeys();
@@ -77,7 +69,7 @@ class Sabel_DB_Join
     foreach ($parents as $parent) {
       $model = MODEL($parent);
       if (in_array($model->getTableName(), $tableLists)) {
-        $this->add($model);
+        $this->add(new Sabel_DB_Join_Object($model));
       } else {
         $result = self::CANNOT_JOIN;
         break;
@@ -104,33 +96,28 @@ class Sabel_DB_Join
 
   public function join($joinType = "INNER")
   {
-    $structure = Sabel_DB_Join_Structure::getInstance();
-    $objects   = $this->objects;
-    $model     = $this->model;
-
     $projection = array();
-    foreach ($objects as $object) {
+    foreach ($this->objects as $object) {
       $projection[] = $object->getProjection();
     }
 
     $cols    = array();
+    $model   = $this->model;
     $tblName = $model->getTableName();
-    $columns = $model->getColumnNames();
 
-    foreach ($columns as $column) {
+    foreach ($model->getColumnNames() as $column) {
       $cols[] = $tblName . "." . $column;
     }
 
     $projection = implode(", ", $cols) . ", " . implode(", ", $projection);
 
     $query = array();
-    foreach ($objects as $object) {
+    foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($joinType);
     }
 
     if ($rows = $this->execute($projection, implode("", $query))) {
-      $builder = new Sabel_DB_Join_Result();
-      $results = $builder->build($model, $structure, $rows);
+      $results = Sabel_DB_Join_Result::build($model, $this->structure, $rows);
     } else {
       $results = false;
     }
@@ -156,8 +143,8 @@ class Sabel_DB_Join
   public function clear()
   {
     $this->objects = array();
+    $this->structure->clear();
 
-    Sabel_DB_Join_Structure::getInstance()->clear();
     Sabel_DB_Join_ColumnHash::clear();
   }
 }

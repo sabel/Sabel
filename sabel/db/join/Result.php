@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Join_Result
 {
-  public function build(Sabel_DB_Model $source, Sabel_DB_Join_Structure $structure, $rows)
+  public static function build(Sabel_DB_Model $source, Sabel_DB_Join_Structure $structure, $rows)
   {
     $objects = $structure->getJoinObjects();
     $structure = $structure->getStructure();
@@ -25,7 +25,7 @@ class Sabel_DB_Join_Result
     $selfObj = MODEL($source->getModelName());
 
     foreach ($rows as $row) {
-      $models = $this->createModels($row, $tables, $objects);
+      $models = self::createModels($row, $tables, $objects);
 
       foreach ($tables as $tblName) {
         if (!isset($structure[$tblName])) continue;
@@ -50,7 +50,7 @@ class Sabel_DB_Join_Result
     return $results;
   }
 
-  private function createModels($row, $tables, $objects)
+  private static function createModels($row, $tables, $objects)
   {
     $models = array();
     foreach ($tables as $tblName) {

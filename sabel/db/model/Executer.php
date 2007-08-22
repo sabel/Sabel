@@ -74,11 +74,6 @@ class Sabel_DB_Model_Executer
     return null;
   }
 
-  public function executeStatement($stmt)
-  {
-    return $this->_execute($stmt);
-  }
-
   protected function prepare($method, $args)
   {
     $this->arguments = $args;
@@ -524,6 +519,19 @@ class Sabel_DB_Model_Executer
 
     $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::DELETE);
     $this->_execute($this->prepareDelete($stmt));
+  }
+
+  public function executeStatement($stmt)
+  {
+    $this->arguments = array($stmt);
+    $this->method    = "executeStatement";
+
+    return $this->execute();
+  }
+
+  public function _executeStatement()
+  {
+    return $this->_execute($this->arguments[0]);
   }
 
   public function query($sql, $assoc = false, $stmtType = Sabel_DB_Statement::SELECT)

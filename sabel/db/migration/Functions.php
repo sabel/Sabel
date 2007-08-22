@@ -12,8 +12,6 @@ define("_TEXT",     Sabel_DB_Type::TEXT);
 define("_DATETIME", Sabel_DB_Type::DATETIME);
 define("_BOOL",     Sabel_DB_Type::BOOL);
 define("_BYTE",     Sabel_DB_Type::BYTE);
-define("_DATE",     Sabel_DB_Type::DATE);
-define("_TIME",     Sabel_DB_Type::TIME);
 define("_NULL",     "SDB_NULL_VALUE");
 
 function getMigrationFiles($dirPath)

@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Validate_Config
 {
-  protected static $datetimeRegex = '/^[12]\d{3}(-|\/)(0?[1-9]|1[0-2])(-|\/)(0?[1-9]|[12]\d|3[01])(T| )((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])( )?((\-|\+)([01][\d]|2[0-3])(:)?(0?[\d]|[1-5][\d])?)?$/';
+  protected static $datetimeRegex = "/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01]) ((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/";
 
   protected static $messages = array("length"   => "%s is too long.",
                                      "maximum"  => "%s is too large.",
@@ -20,12 +20,6 @@ class Sabel_DB_Validate_Config
                                      "unique"   => "'%s' is unavailable.");
 
   protected static $customValidators = array();
-
-  public static function getConfigs()
-  {
-    return array("messages"      => self::$messages,
-                 "datetimeRegex" => self::$datetimeRegex);
-  }
 
   public static function setMessages($messages)
   {

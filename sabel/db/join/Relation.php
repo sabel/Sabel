@@ -76,7 +76,8 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_Template
       $query[] = $name . " ";
     }
 
-    $query[] = "ON {$this->sourceName}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
+    $lower   = strtolower($this->sourceName);
+    $query[] = "ON {$lower}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
 
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($joinType);

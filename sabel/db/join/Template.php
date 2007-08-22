@@ -19,12 +19,12 @@ class Sabel_DB_Join_Template
     $aliasName  = "",
     $sourceName = "";
 
-  public function __construct($model, $columns = null, $alias = "", $joinKey = array())
+  public function __construct($model, $columns = array(), $alias = "", $joinKey = array())
   {
     $this->model   = $model;
     $this->tblName = $model->getTableName();
 
-    if ($columns === null) {
+    if (empty($columns)) {
       $this->columns = $model->getColumnNames();
     } else {
       $this->columns = $columns;

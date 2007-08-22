@@ -94,60 +94,6 @@ class Test_Validate extends SabelTestCase
     $model = new TargetModel1();
     $model->id = 10;
     $model->name = "hoge";
-    $model->registed = "2006-01-10T20:11:44";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertFalse($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->registed = "2006/01/10 00:11:44";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertFalse($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->registed = "2006-01-10T00:11:44+0900";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertFalse($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->registed = "1915-1-9 1:1:1 -0900";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertFalse($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->registed = "1915-a-9 1:1:1 -0900";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertTrue($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
-    $model->registed = "1915-01-10 24:10:01 +0900";
-
-    $validator = new Sabel_DB_Validator($model);
-    $validator->validate();
-    $this->assertTrue($validator->hasError());
-
-    $model = new TargetModel1();
-    $model->id = 10;
-    $model->name = "hoge";
     $model->registed = "1915-13-10 23:10:01";
 
     $validator = new Sabel_DB_Validator($model);
