@@ -5,7 +5,7 @@ class Config_Bus extends Sabel_Bus_Config
   public function configure()
   {
     $this->addAsGroup(new Sabel_Processor_Request("request"));
-    // $this->addAsGroup(new Sabel_Processor_I18n("i18n"));
+    // $this->addAsGroup(new Processor_I18n("i18n"));
     $this->addAsGroup(new Sabel_Processor_Router("router"));
     $this->addAsGroup(new Sabel_Processor_Helper("helper"));
     $this->addAsGroup(new Sabel_Processor_Creator("creator"));

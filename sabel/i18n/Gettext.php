@@ -34,26 +34,10 @@ class Sabel_I18n_Gettext
   
   private function __construct() {}
   
-  public static function getInstance($type = self::SABEL)
+  public static function getInstance()
   {
     if (self::$ins === null) {
       self::$ins = new self();
-      self::$ins->setBrowser();
-      
-      if (extension_loaded("gettext")) {
-        $type   = self::GETTEXT;
-        $config = RUN_BASE . DIR_DIVIDER . "config" . DIR_DIVIDER . "locales.php";
-        Sabel::fileUsing($config);
-      } else {
-        $dir = dirname(__FILE__) . DIR_DIVIDER;
-        if ($type === self::SABEL) {
-          Sabel::fileUsing($dir . "sabel" . DIR_DIVIDER . "Gettext.php");
-        } else {
-          Sabel::fileUsing($dir . "php-gettext" . DIR_DIVIDER . "gettext.inc");
-        }
-      }
-      
-      self::$type = $type;
     }
     
     return self::$ins;
@@ -117,15 +101,28 @@ class Sabel_I18n_Gettext
     return $this;
   }
   
-  public function init()
+  public function init($type = self::SABEL)
   {
     if ($this->initialized) return;
+
+    $browser = new Sabel_Locale_Browser();
     
-    if ($this->browser === null) {
-      throw new Sabel_Exception_Runtime("browser object is null.");
+    if (extension_loaded("gettext")) {
+      $type   = self::GETTEXT;
+      $config = RUN_BASE . DIR_DIVIDER . "config" . DIR_DIVIDER . "locales.php";
+      Sabel::fileUsing($config);
+    } else {
+      $dir = dirname(__FILE__) . DIR_DIVIDER;
+      if ($type === self::SABEL) {
+        Sabel::fileUsing($dir . "sabel" . DIR_DIVIDER . "Gettext.php");
+      } else {
+        Sabel::fileUsing($dir . "php-gettext" . DIR_DIVIDER . "gettext.inc");
+      }
     }
     
-    if (($languages = $this->browser->getLanguages()) !== null) {
+    self::$type = $type;
+    
+    if (($languages = $browser->getLanguages()) !== null) {
       if (self::$type === self::GETTEXT) {
         $this->gettextInit($languages);
       } else {
@@ -135,10 +132,15 @@ class Sabel_I18n_Gettext
           if (strpos($language, "-") !== false) {
             list ($ll, $cc) = explode("-", $language);
             $language = $ll . "_" . strtoupper($cc);
+          } else {
+            $ll = "";
           }
           
           if (isset($dirs[$language])) {
             $locale = $language;
+            break;
+          } elseif (isset($dirs[$ll])) {
+            $locale = $ll;
             break;
           }
         }
@@ -149,10 +151,11 @@ class Sabel_I18n_Gettext
           if ($locale !== null) $this->phpGettextInit();
         }
         
-        $this->browser->setLocale($locale);
+        $browser->setLocale($locale);
       }
     }
     
+    $this->browser = $browser;
     $this->initialized = true;
   }
   
@@ -237,13 +240,9 @@ class Sabel_I18n_Gettext
     }
   }
   
-  public function setBrowser($browser = null)
+  public function setBrowser($browser)
   {
-    if ($browser === null) {
-      $this->browser = new Sabel_Locale_Browser();
-    } else {
-      $this->browser = $browser;
-    }
+    $this->browser = $browser;
   }
   
   public function getBrowser()

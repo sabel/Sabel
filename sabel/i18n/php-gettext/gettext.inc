@@ -77,7 +77,7 @@ function _get_reader($domain = null, $category = 5, $enable_cache = true) {
   
   if ($domain === null) $domain = $default_domain;
   if (!isset($text_domains[$domain]->l10n)) {
-    $locale = Sabel_Context::getContext()->getLocale()->getBrowser()->getLocale();
+    $locale = Sabel_I18n_Gettext::getInstance()->getBrowser()->getLocale();
     
     $path = $text_domains[$domain]->path;
     $filePath = $path . $locale . DIR_DIVIDER . "LC_MESSAGES" . DIR_DIVIDER . "{$domain}.mo";

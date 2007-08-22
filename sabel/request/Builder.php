@@ -33,6 +33,7 @@ class Sabel_Request_Builder extends Sabel_Request_AbstractBuilder
   
   protected function setParameterValues($request)
   {
+
   }
   
   protected function setHeaders($request)

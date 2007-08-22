@@ -15,6 +15,7 @@ class Sabel_Environment
   
   private function __construct()
   {
+
   }
   
   public static function create()

@@ -11,19 +11,21 @@
  */
 class Sabel_Locale_Browser
 {
-  protected $languages = array();
-  protected $locale    = "";
+  protected
+    $locale    = "",
+    $languages = array();
   
-  public function __construct()
+  public function __construct($acceptLanguage = null)
   {
-    $request = Sabel_Context::getContext()->getBus()->get("request");
-    $header  = $request->getHeader("Accept-Language");
+    if ($acceptLanguage === null) {
+      $acceptLanguage = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
+    }
     
-    if ($header === "" || $header === null) {
+    if ($acceptLanguage === "" || $acceptLanguage === null) {
       $this->languages = null;
     } else {
       $languages = array();
-      foreach (explode(",", $header) as $lang) {
+      foreach (explode(",", $acceptLanguage) as $lang) {
         if (strpos($lang, ";") === false) {
           $q = "1.0";
         } else {
