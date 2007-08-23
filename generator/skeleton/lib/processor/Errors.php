@@ -12,14 +12,12 @@
 class Processor_Errors extends Sabel_Bus_Processor
 {
   const MAX_STACK_SIZE = 5;
+  const ERROR_KEY      = "errors";
+  const STACK_KEY      = "stack";
   
-  const ERROR_KEY = "errors";
-  const STACK_KEY = "stack";
-  
-  private $ignoreUrls = array();
-  
-  private $storage = null;
-  private $request = null;
+  private $ignoreUrls  = array();
+  private $storage     = null;
+  private $request     = null;
   
   public function resetErrors()
   {
@@ -35,27 +33,47 @@ class Processor_Errors extends Sabel_Bus_Processor
     
     $current = $request->getUri()->__toString();
     $errors  = $storage->read(self::ERROR_KEY);
-    
-    $ignores = array();
-    $ignores[] = (!in_array($current, $this->ignoreUrls));
-    $ignores[] = (!$request->isTypeOf("css"));
-    $ignores[] = (!$request->isTypeOf("js"));
+    $ignore  = (in_array($current, $this->ignoreUrls) ||
+                $request->isTypeOf("css") ||
+                $request->isTypeOf("js"));
     
     if (is_array($errors)) {
       if ($current === $errors["submitUri"]) {
-        $this->controller->hasErrors = true;
-        $this->controller->errorValues = $errors["values"];
-        Sabel_View::assign(self::ERROR_KEY, $errors["messages"]);
-        Sabel_View::assignByArray($errors["values"]);
-      } else {
-        if (!in_array(false, $ignores)) {
-          $storage->delete(self::ERROR_KEY);
+        $this->controller->setAttribute(self::ERROR_KEY, $errors["messages"]);
+        $this->controller->setAttributes($errors["values"]);
+        
+        $models = array();
+        foreach ($errors["values"] as $key => $value) {
+          if (strpos($key, "::") !== false) {
+            list ($mdlName, $colName) = explode("::", $key);
+            if (!isset($models[$mdlName])) {
+              $models[$mdlName] = MODEL($mdlName);
+            }
+            
+            $models[$mdlName]->$colName = $value;
+          }
         }
+        
+        foreach ($models as $mdlName => $model) {
+          $mdlName{0} = strtolower($mdlName{0});
+          $controller->setAttribute("{$mdlName}Form", new Helpers_Form($model));
+        }
+      } elseif (!$ignore && !$request->isPost()) {
+        $storage->delete(self::ERROR_KEY);
       }
     }
     
-    if (!in_array(false, $ignores)) {
-      $this->pushStack($current);
+    if (!$ignore) {
+      $stack = $this->storage->read(self::STACK_KEY);
+      
+      if (is_array($stack)) {
+        $stack[] = $current;
+        if (count($stack) > self::MAX_STACK_SIZE) array_shift($stack);
+      } else {
+        $stack = array($current);
+      }
+      
+      $this->storage->write(self::STACK_KEY, $stack);
     }
   }
   
@@ -69,26 +87,12 @@ class Processor_Errors extends Sabel_Bus_Processor
       if (($messages = $controller->errors) === null) return;
 
       $stack  = $storage->read(self::STACK_KEY);
-      $index  = count($stack) - 2;
+      $index  = count($stack) - 1;
       $values = $request->fetchPostValues();
 
       $storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
                                              "messages"  => $messages,
                                              "values"    => $values));
     }
-  }
-  
-  private function pushStack($uri)
-  {
-    $stack = $this->storage->read(self::STACK_KEY);
-    
-    if (is_array($stack)) {
-      $stack[] = $uri;
-      if (count($stack) > self::MAX_STACK_SIZE) array_shift($stack);
-    } else {
-      $stack = array($uri);
-    }
-    
-    $this->storage->write(self::STACK_KEY, $stack);
   }
 }

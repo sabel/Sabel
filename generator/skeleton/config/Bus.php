@@ -10,6 +10,7 @@ class Config_Bus extends Sabel_Bus_Config
     $this->add(new Sabel_Processor_Helper("helper"));
     $this->add(new Sabel_Processor_Creator("creator"));
     $this->add(new Sabel_Processor_Redirecter("redirecter"));
+    $this->add(new Processor_Model("model"));
     $this->add(new Sabel_Processor_Executer("executer"));
     $this->add(new Sabel_Processor_Response("response"));
     $this->add(new Sabel_Processor_Renderer("renderer"));
@@ -18,7 +19,7 @@ class Config_Bus extends Sabel_Bus_Config
     // $this->bus->getList()->getFirst()->insertPrevious($selecter);
     
     $errors = new Processor_Errors("errors");
-    $this->bus->getList()->find("executer")->insertPrevious($errors);
+    $this->bus->getList()->find("executer")->insertNext($errors);
     $this->bus->addProcessorAsListener($errors);
     
     // $acl = new Processor_Acl("acl");
