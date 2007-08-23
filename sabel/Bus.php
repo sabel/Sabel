@@ -50,13 +50,6 @@ class Sabel_Bus
   public function addProcessorAsListener($processor)
   {
     $this->listeners[$processor->name] = $processor;
-    if ($this->list === null) {
-      $this->list = new Sabel_Bus_ProcessorList($processor);
-    } else {
-      $this->list->insertNext($processor);
-      $this->list = $this->list->getLast();
-    }
-    
     return $this;
   }
   
@@ -103,6 +96,7 @@ class Sabel_Bus
           if (is_array($callback)) {
             foreach ($callback as $c) {
               $result = $c->processor->{$c->method}($this);
+              if ($result === false) break;
               foreach ($this->listeners as $listener) {
                 $listener->event($this, $c->processor, $c->method, $result);
               }
