@@ -57,21 +57,25 @@ class Processor_Errors extends Sabel_Bus_Processor
     if (!in_array(false, $ignores)) {
       $this->pushStack($current);
     }
-    
-    return new Sabel_Bus_ProcessorCallback($this, "onRedirect", "redirecter");
   }
   
-  public function onRedirect()
+  public function event($bus, $processor, $method, $result)
   {
-    if (($messages = $this->controller->errors) === null) return;
-    
-    $stack  = $this->storage->read(self::STACK_KEY);
-    $index  = count($stack) - 2;
-    $values = $this->request->fetchPostValues();
-    
-    $this->storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
-                                                 "messages"  => $messages,
-                                                 "values"    => $values));
+    if ($processor->name === "redirecter" && $method === "onRedirect") {
+      $controller = $bus->get("controller");
+      $storage    = $bus->get("storage");
+      $request    = $bus->get("request");
+
+      if (($messages = $controller->errors) === null) return;
+
+      $stack  = $storage->read(self::STACK_KEY);
+      $index  = count($stack) - 2;
+      $values = $request->fetchPostValues();
+
+      $storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
+                                             "messages"  => $messages,
+                                             "values"    => $values));
+    }
   }
   
   private function pushStack($uri)
