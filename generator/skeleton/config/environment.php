@@ -20,12 +20,19 @@ if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(0);
 }
 
-add_include_path("/app");
-add_include_path("/lib");
-add_include_path("/config");
-add_include_path("/app/helpers");
+add_include_paths(array(DIRECTORY_SEPARATOR . "app",
+                        DIRECTORY_SEPARATOR . "lib",
+                        DIRECTORY_SEPARATOR . "config",
+                        DIRECTORY_SEPARATOR . "app" . DIRECTORY_SEPARATOR . "helpers"));
 
 function add_include_path($path)
 {
   set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+}
+
+function add_include_paths($paths)
+{
+  $path = "";
+  foreach ($paths as $p) $path .= RUN_BASE . $p . ":";
+  set_include_path($path . get_include_path());
 }

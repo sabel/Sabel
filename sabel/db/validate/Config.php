@@ -12,14 +12,21 @@
 class Sabel_DB_Validate_Config
 {
   protected static $datetimeRegex = "/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01]) ((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/";
-
-  protected static $messages = array("length"   => "%s is too long.",
-                                     "maximum"  => "%s is too large.",
-                                     "nullable" => "please enter a %s.",
-                                     "type"     => "wrong %s format.",
-                                     "unique"   => "'%s' is unavailable.");
+  protected static $dateRegex = "/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/";
+  protected static $messages  = array("length"   => "%s is too long.",
+                                      "maximum"  => "%s is too large.",
+                                      "nullable" => "please enter a %s.",
+                                      "type"     => "wrong %s format.",
+                                      "unique"   => "'%s' is unavailable.");
 
   protected static $customValidators = array();
+
+  public static function getConfigs()
+  {
+    return array("messages"      => self::$messages,
+                 "datetimeRegex" => self::$datetimeRegex,
+                 "dateRegex"     => self::$dateRegex);
+  }
 
   public static function setMessages($messages)
   {
@@ -39,6 +46,16 @@ class Sabel_DB_Validate_Config
   public static function getDatetimeRegex()
   {
     return self::$datetimeRegex;
+  }
+
+  public static function setDateRegex($regex)
+  {
+    self::$dateRegex = $regex;
+  }
+
+  public static function getDateRegex()
+  {
+    return self::$dateRegex;
   }
 
   public static function addValidator($custom)

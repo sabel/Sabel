@@ -20,11 +20,14 @@ class Sabel_Helper
     $sharedHelper = "application";
     $helperSuffix = "php";
     
-    $pref = "/{$appDir}/{$m}/{$helperDir}/";
+    $pref = DIR_DIVIDER . $appDir . DIR_DIVIDER . $m
+          . DIR_DIVIDER . $helperDir . DIR_DIVIDER;
     
     $helpers = array();
     
-    $helpers[] = "/{$appDir}/{$helperDir}/{$sharedHelper}.{$helperSuffix}";
+    $helpers[] = DIR_DIVIDER . $appDir . DIR_DIVIDER . $helperDir
+               . DIR_DIVIDER . "{$sharedHelper}.{$helperSuffix}";
+               
     $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
     

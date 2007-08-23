@@ -18,7 +18,8 @@ class Sabel_DB_Validator
   protected
     $messages      = array(),
     $displayNames  = array(),
-    $datetimeRegex = array();
+    $datetimeRegex = "",
+    $dateRegex     = "";
 
   protected
     $errors  = array(),
@@ -26,11 +27,15 @@ class Sabel_DB_Validator
 
   public function __construct(Sabel_DB_Model $model)
   {
-    $this->model         = $model;
-    $this->mdlName       = $model->getModelName();
-    $this->messages      = Sabel_DB_Validate_Config::getMessages();
-    $this->datetimeRegex = Sabel_DB_Validate_Config::getDatetimeRegex();
-    $this->displayNames  = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+    $this->model        = $model;
+    $this->mdlName      = $model->getModelName();
+    $this->displayNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+
+    $configs = Sabel_DB_Validate_Config::getConfigs();
+
+    $this->messages      = $configs["messages"];
+    $this->datetimeRegex = $configs["datetimeRegex"];
+    $this->dateRegex     = $configs["dateRegex"];
   }
 
   public function getErrors()
@@ -156,6 +161,8 @@ class Sabel_DB_Validator
       return is_float($value);
     } elseif ($column->isDatetime()) {
       return (preg_match($this->datetimeRegex, $value) === 1);
+    } elseif ($column->isDate()) {
+      return (preg_match($this->dateRegex, $value) === 1);
     } else {
       return true;
     }
