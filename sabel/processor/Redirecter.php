@@ -15,27 +15,33 @@ class Sabel_Processor_Redirecter extends Sabel_Bus_Processor
   {
     $controller = $bus->get("controller");
     
-    if ($controller->hasAttribute("redirect")) {
-      $redirect = $controller->getAttribute("redirect");
-      if ($redirect->isRedirected()) {
-        if (isset($_SERVER["HTTP_HOST"])) {
-          $host = $_SERVER["HTTP_HOST"];
-        } else {
-          $host = "localhost";
-        }
-
-        $ignored = "";
-        if (defined("URI_IGNORE")) {
-          $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
-        }
-        $to = $redirect->getUrl();
-        $bus->get("response")->location($host, $ignored . $to);
-        return true;
+    $redirect = new Redirect($bus);
+    $controller->setAttribute("redirect", $redirect);
+    
+    return new Sabel_Bus_ProcessorCallback($this, "onRedirect", "executer");
+  }
+  
+  public function onRedirect($bus)
+  {
+    $controller = $bus->get("controller");
+    $redirect = $controller->getAttribute("redirect");
+    
+    if ($redirect->isRedirected()) {
+      if (isset($_SERVER["HTTP_HOST"])) {
+        $host = $_SERVER["HTTP_HOST"];
+      } else {
+        $host = "localhost";
       }
-    } else {
-      $redirect = new Redirect($bus);
-      $controller->setAttribute("redirect", $redirect);
+     $ignored = "";
+     
+     if (defined("URI_IGNORE")) {
+       $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+     }
+     $to = $redirect->getUrl();
+     $bus->get("response")->location($host, $ignored . $to);
     }
+    
+   return true;
   }
 }
 

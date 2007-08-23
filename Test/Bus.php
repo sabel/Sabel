@@ -36,52 +36,6 @@ class Test_Bus extends SabelTestCase
     $this->assertEquals(false,  $bus->get("bool"));
   }
   
-  public function testAddAndGetBusGroup()
-  {
-    $request  = "request";
-    $executer = "executer";
-    
-    $bus = new Sabel_Bus();
-    
-    $bus->addProcessor(new Test_Bus_Processor($request));
-    $bus->addProcessor(new Test_Bus_Processor($executer));
-    
-    $this->assertTrue(is_object($bus->getProcessor($request)));
-    $this->assertTrue(is_object($bus->getProcessor($executer)));
-  }
-  
-  public function testBusGroupInsertPrevious()
-  {
-    $group = new Sabel_Bus_ProcessorGroup("test");
-    $this->assertTrue(is_object($group));
-  }
-  
-  public function testBusGroupInsertNext()
-  {
-    
-  }
-  
-  public function testBusGroupSequential()
-  {
-    $bus = new Sabel_Bus_ProcessorGroup("test");
-  }
-  
-  public function testBusController()
-  {
-    $bus = new Sabel_Bus();
-    
-    $bg = new Sabel_Bus_ProcessorGroup("r0");
-    $bg->add(new RequestProcessor("r1"));
-    $bg->get("r1")->insertNext(new RequestProcessor("r2"));
-    
-    $controller = new Controller();
-    $bg->addController($controller);
-    
-    $bg->execute($bus);
-    
-    $this->assertEquals(array("r1", "r2"), $controller->results);
-  }
-  
   /**
    * バスコントローラはプロセッサをスキップすることができる
    */
@@ -104,10 +58,13 @@ class Test_Bus extends SabelTestCase
     $this->assertEquals(2, $list->size());
   }
   
-  public function testBusEvent()
+  public function testInsertPrevious()
   {
-    $bus = new Sabel_Bus();
-    
+    $list = new Sabel_Bus_ProcessorList(new Test_Bus_Processor("r1"));
+    $list->insertPrevious(new Test_Bus_Processor("r2"));
+    $this->assertEquals(2, $list->size());
+    $list->insertPrevious(new Test_Bus_Processor("r2"));
+    $this->assertEquals(3, $list->size());
   }
 }
 

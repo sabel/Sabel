@@ -19,6 +19,8 @@ class Sabel_Bus
   
   private $callbacks = array();
   
+  private $list = null;
+  
   public function __construct()
   {
     Sabel_Context::getContext()->setBus($this);
@@ -45,9 +47,16 @@ class Sabel_Bus
    * @param Sabel_Bus_Processor $listener
    * @return Sabel_Bus
    */
-  public function addProcessorAsListener($listener)
+  public function addProcessorAsListener($processor)
   {
-    $this->listeners[$listener->name] = $listener;
+    $this->listeners[$processor->name] = $processor;
+    if ($this->list === null) {
+      $this->list = new Sabel_Bus_ProcessorList($processor);
+    } else {
+      $this->list->insertNext($processor);
+      $this->list = $this->list->getLast();
+    }
+    
     return $this;
   }
   
@@ -60,13 +69,19 @@ class Sabel_Bus
    */
   public function addProcessor(Sabel_Bus_Processor $processor)
   {
-    $this->processors[$processor->name] = $processor;
+    if ($this->list === null) {
+      $this->list = new Sabel_Bus_ProcessorList($processor);
+    } else {
+      $this->list->insertNext($processor);
+      $this->list = $this->list->getLast();
+    }
+    
     return $this;
   }
   
-  public function getProcessor($name)
+  public function getList()
   {
-    return $this->processors[$name];
+    return $this->list;
   }
   
   public function run($data = null)
@@ -75,21 +90,38 @@ class Sabel_Bus
       $through = $data;
     }
     
-    if (count($this->bus) > 1) {
-      foreach ($this->bus as $bus) {
-        $bus->run($through);
-      }
-    }
+    $processorList = $this->list->getFirst();
+    $callbacks = array();
     
-    foreach ($this->processors as $name => $processor) {
-      foreach ($this->listeners as $listener) {
-        $listener->event($name, $processor, $this);
+    while ($processorList !== null) {
+      $processor = $processorList->get();
+      $result = $processor->execute($this);
+      
+      if (isset($callbacks[$processor->name])) {
+        if ($result === true) {
+          $callback = $callbacks[$processor->name];
+          if (is_array($callback)) {
+            foreach ($callback as $c) {
+              $result = $c->processor->{$c->method}($this);
+              foreach ($this->listeners as $listener) {
+                $listener->event($this, $c->processor, $c->method, $result);
+              }
+            }
+          } else {
+            $result = $callback->processor->{$callback->method}($this);
+            foreach ($this->listeners as $listener) {
+              $listener->event($this, $callback->processor, $callback->method, $result);
+            }
+          }
+
+        }
       }
       
-      if (isset($this->callbacks[$name])) {
+      if ($result instanceof Sabel_Bus_ProcessorCallback) {
+        $callbacks[$result->when][] = $result;
       }
       
-      $processor->execute($this);
+      $processorList = $processorList->next();
     }
     
     if ($this->has("result")) {
@@ -102,13 +134,6 @@ class Sabel_Bus
   public function addBus($name, $bus)
   {
     $this->bus[$name] = $bus;
-  }
-  
-  public function callback($processor, $method, $when)
-  {
-    $callback = array("processor" => $processor, "method" => $method);
-    $this->callbacks[$when] = $callback;
-    return $this;
   }
   
   public function set($key, $value)

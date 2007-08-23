@@ -13,18 +13,12 @@ class Config_Bus extends Sabel_Bus_Config
     $this->addAsGroup(new Sabel_Processor_Response("response"));
     $this->addAsGroup(new Sabel_Processor_Renderer("renderer"));
     
-    $redirecter = new Sabel_Processor_Redirecter("redirecter");
-    $this->get("executer")->get("executer")->insertPrevious($redirecter);
-    $this->get("executer")->get("executer")->insertNext($redirecter);
-    
-    $selecter = new Sabel_Processor_Selecter("selecter");
-    $this->get("executer")->get("executer")->getFirst()->insertPrevious($selecter);
-    
     $errors = new Processor_Errors("errors");
-    $this->get("executer")->get("executer")->insertNext($errors);
+    $this->bus->getList()->find("executer")->insertPrevious($errors);
+    $this->bus->addProcessorAsListener($errors);
     
     // $acl = new Processor_Acl("acl");
-    // $this->get("executer")->get("executer")->getFirst()->insertPrevious($acl);
+    // $this->bus->getList()->find("executer")->insertPrevious($acl);
     
     return $this;
   }

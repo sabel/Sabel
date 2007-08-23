@@ -69,15 +69,16 @@ class Sabel_Bus_ProcessorList
     $previous = new self($processor);
     $previous->setNext($this);
     
+    
     if ($this->isFirst()) {
       $previous->setPrevious(null);
     } else {
+      $this->previous->setNext($previous);
       $previous->setPrevious($this->previous);
     }
     
-    $this->setPrevious($previous);
     
-    $this->notify($previous);
+    $this->setPrevious($previous);
     
     return $this;
   }
@@ -95,23 +96,25 @@ class Sabel_Bus_ProcessorList
     }
     
     $this->setNext($next);
-    $this->notify($next);
     
     return $next;
+  }
+  
+  public function find($name)
+  {
+    $list = $this->getFirst();
+    while ($list !== null) {
+      if ($name === $list->get()->name) {
+        return $list;
+      }
+      $list = $list->next();
+    }
   }
   
   public function replace($processor)
   {
     unset($this->current);
     $this->current = $processor;
-    $this->notify($this);
-  }
-  
-  public function notify($processor)
-  {
-    foreach ($this->listeners as $listener) {
-      $listener->update($processor);
-    }
   }
   
   public function add($processor)
@@ -157,10 +160,5 @@ class Sabel_Bus_ProcessorList
   public function hasNext()
   {
     return ($this->next !== null);
-  }
-  
-  public function addListener($listener)
-  {
-    $this->listeners[] = $listener;
   }
 }

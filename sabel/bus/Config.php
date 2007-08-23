@@ -11,7 +11,7 @@
  */
 abstract class Sabel_Bus_Config
 {
-  private $bus = null;
+  protected $bus = null;
   
   abstract public function configure();
   
@@ -24,16 +24,6 @@ abstract class Sabel_Bus_Config
   public function add($processor)
   {
     $this->bus->addProcessor($processor);
-  }
-  
-  public function addAsGroup($processor)
-  {
-    $group = new Sabel_Bus_ProcessorGroup($processor->name);
-    $group->add($processor);
-    
-    $this->bus->addProcessor($group);
-    
-    return $this;
   }
   
   public function get($name)
