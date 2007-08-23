@@ -4,14 +4,18 @@ class Config_Bus extends Sabel_Bus_Config
 {
   public function configure()
   {
-    $this->addAsGroup(new Sabel_Processor_Request("request"));
-    // $this->addAsGroup(new Processor_I18n("i18n"));
-    $this->addAsGroup(new Sabel_Processor_Router("router"));
-    $this->addAsGroup(new Sabel_Processor_Helper("helper"));
-    $this->addAsGroup(new Sabel_Processor_Creator("creator"));
-    $this->addAsGroup(new Sabel_Processor_Executer("executer"));
-    $this->addAsGroup(new Sabel_Processor_Response("response"));
-    $this->addAsGroup(new Sabel_Processor_Renderer("renderer"));
+    $this->add(new Sabel_Processor_Request("request"));
+    // $this->add(new Sabel_Processor_I18n("i18n"));
+    $this->add(new Sabel_Processor_Router("router"));
+    $this->add(new Sabel_Processor_Helper("helper"));
+    $this->add(new Sabel_Processor_Creator("creator"));
+    $this->add(new Sabel_Processor_Redirecter("redirecter"));
+    $this->add(new Sabel_Processor_Executer("executer"));
+    $this->add(new Sabel_Processor_Response("response"));
+    $this->add(new Sabel_Processor_Renderer("renderer"));
+        
+    // $selecter = new Sabel_Processor_Selecter("selecter");
+    // $this->bus->getList()->getFirst()->insertPrevious($selecter);
     
     $errors = new Processor_Errors("errors");
     $this->bus->getList()->find("executer")->insertPrevious($errors);
