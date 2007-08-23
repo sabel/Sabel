@@ -26,6 +26,7 @@ interface Sabel_DB_Type
   const TEXT      = "_TEXT";
   const BOOL      = "_BOOL";
   const DATETIME  = "_DATETIME";
+  const DATE      = "_DATE";
   const BYTE      = "_BYTE";
   const UNKNOWN   = "_UNKNOWN";
 }

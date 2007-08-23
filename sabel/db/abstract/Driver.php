@@ -50,15 +50,6 @@ abstract class Sabel_DB_Abstract_Driver
     }
   }
 
-  protected function bind($sql, $bindParam)
-  {
-    if (empty($bindParam)) {
-      return $sql;
-    } else {
-      return str_replace(array_keys($bindParam), $bindParam, $sql);
-    }
-  }
-
   public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
   {
     $sql = "SELECT " . $stmt->getProjection() . " FROM " . $stmt->getTable()
@@ -117,5 +108,14 @@ abstract class Sabel_DB_Abstract_Driver
     }
 
     return $sql;
+  }
+
+  protected function bind($sql, $bindParam)
+  {
+    if (empty($bindParam)) {
+      return $sql;
+    } else {
+      return str_replace(array_keys($bindParam), $bindParam, $sql);
+    }
   }
 }

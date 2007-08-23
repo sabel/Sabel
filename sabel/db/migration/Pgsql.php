@@ -19,7 +19,8 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::BOOL     => "boolean",
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "text",
-                           Sabel_DB_Type::DATETIME => "timestamp");
+                           Sabel_DB_Type::DATETIME => "timestamp",
+                           Sabel_DB_Type::DATE     => "date");
 
   protected function createTable($cols)
   {

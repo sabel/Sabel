@@ -19,7 +19,8 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::BOOL     => "number(1)",
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "clob",
-                           Sabel_DB_Type::DATETIME => "date");
+                           Sabel_DB_Type::DATETIME => "date",
+                           Sabel_DB_Type::DATE     => "date");
 
   public function create()
   {
@@ -47,7 +48,9 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
         $tblName = convert_to_tablename($this->mdlName);
         $seqName = strtoupper($tblName) . "_" . strtoupper($col->name) . "_SEQ";
         executeQuery("CREATE SEQUENCE " . $seqName);
-        break;
+      } elseif ($col->isDate()) {
+        $tblName = convert_to_tablename($this->mdlName);
+        executeQuery("COMMENT ON COLUMN {$tblName}.{$col->name} IS 'date'");
       }
     }
   }

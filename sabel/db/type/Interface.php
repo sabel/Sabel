@@ -13,6 +13,6 @@
 interface Sabel_DB_Type_Interface
 {
   public function getType();
-  public function add($chain);
-  public function send($columnObj, $type);
+  public function add(Sabel_DB_Type_Interface $next);
+  public function send(Sabel_DB_Schema_Column $column, $type);
 }

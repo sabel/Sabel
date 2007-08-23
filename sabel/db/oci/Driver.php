@@ -110,6 +110,28 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return $this->lastInsertId;
   }
 
+  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
+  {
+    static $nlsDateFormat = null;
+
+    $columns = $stmt->getModel()->getSchema()->getColumns();
+    $conn = $this->getConnection();
+
+    foreach ($columns as $column) {
+      if ($column->isDatetime() && ($nlsDateFormat === null || $nlsDateFormat === "date")) {
+        $this->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+        $nlsDateFormat = "datetime";
+        break;
+      } elseif ($column->isDate() && ($nlsDateFormat === null || $nlsDateFormat === "datetime")) {
+        $this->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
+        $nlsDateFormat = "date";
+        break;
+      }
+    }
+
+    return parent::createSelectSql($stmt);
+  }
+
   public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
   {
     $binds   = array();

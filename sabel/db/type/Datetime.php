@@ -18,12 +18,12 @@ class Sabel_DB_Type_DateTime implements Sabel_DB_Type_Interface
     return Sabel_DB_Type::DATETIME;
   }
 
-  public function add($chain)
+  public function add(Sabel_DB_Type_Interface $next)
   {
-    $this->next = $chain;
+    $this->next = $next;
   }
 
-  public function send($co, $type)
+  public function send(Sabel_DB_Schema_Column $co, $type)
   {
     $types = array("timestamp", "timestamp without time zone",
                    "datetime" , "timestamp with time zone");

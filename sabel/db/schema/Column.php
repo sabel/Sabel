@@ -71,6 +71,11 @@ class Sabel_DB_Schema_Column
     return ($this->type === Sabel_DB_Type::DATETIME);
   }
 
+  public function isDate()
+  {
+    return ($this->type === Sabel_DB_Type::DATE);
+  }
+
   public function isBool()
   {
     return ($this->type === Sabel_DB_Type::BOOL);

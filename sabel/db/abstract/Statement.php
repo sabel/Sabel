@@ -14,6 +14,7 @@ abstract class Sabel_DB_Abstract_Statement
 {
   protected
     $sql        = "",
+    $model      = null,
     $driver     = null,
     $bindValues = array();
 
@@ -29,9 +30,15 @@ abstract class Sabel_DB_Abstract_Statement
   abstract public function getStatementType();
   abstract public function build();
 
-  public function __construct(Sabel_DB_Abstract_Driver $driver)
+  public function __construct(Sabel_DB_Model $model)
   {
-    $this->driver = $driver;
+    $this->model  = $model;
+    $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
+  }
+
+  public function getModel()
+  {
+    return $this->model;
   }
 
   public function setSql($sql)

@@ -17,23 +17,23 @@ class Sabel_DB_Statement
   const DELETE = 0x08;
   const QUERY  = 0x10;
 
-  public static function create(Sabel_DB_Abstract_Driver $driver, $stmtType = self::QUERY)
+  public static function create(Sabel_DB_Model $model, $stmtType = self::QUERY)
   {
     switch ($stmtType) {
       case self::SELECT:
-        return new Sabel_DB_Statement_Select($driver);
+        return new Sabel_DB_Statement_Select($model);
 
       case self::INSERT:
-        return new Sabel_DB_Statement_Insert($driver);
+        return new Sabel_DB_Statement_Insert($model);
 
       case self::UPDATE:
-        return new Sabel_DB_Statement_Update($driver);
+        return new Sabel_DB_Statement_Update($model);
 
       case self::DELETE:
-        return new Sabel_DB_Statement_Delete($driver);
+        return new Sabel_DB_Statement_Delete($model);
 
       case self::QUERY:
-        return new Sabel_DB_Statement_Query($driver);
+        return new Sabel_DB_Statement_Query($model);
 
       default:
         $message = "Sabel_DB_Statement::create() invalid statement type.";

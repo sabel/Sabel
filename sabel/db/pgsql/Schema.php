@@ -38,9 +38,12 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Common_Schema
     if ($default === null || strpos($default, "nextval") !== false) {
       $co->default = null;
     } else {
-      if (strpos($default, "'::") !== false) {
-        preg_match("/'(.*)'/", $default, $matches);
-        $default = $matches[1];
+      if (($pos = strpos($default, "::")) !== false) {
+        $default = substr($default, 0, $pos);
+        if ($default{0} === "'") {
+          preg_match("/'(.*)'/", $default, $matches);
+          $default = $matches[1];
+        }
       }
 
       $this->setDefaultValue($co, $default);

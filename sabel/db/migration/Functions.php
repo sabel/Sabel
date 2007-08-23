@@ -10,6 +10,7 @@ define("_DOUBLE",   Sabel_DB_Type::DOUBLE);
 define("_STRING",   Sabel_DB_Type::STRING);
 define("_TEXT",     Sabel_DB_Type::TEXT);
 define("_DATETIME", Sabel_DB_Type::DATETIME);
+define("_DATE",     Sabel_DB_Type::DATE);
 define("_BOOL",     Sabel_DB_Type::BOOL);
 define("_BYTE",     Sabel_DB_Type::BYTE);
 define("_NULL",     "SDB_NULL_VALUE");
@@ -127,7 +128,7 @@ function message($message)
 function executeQuery($query)
 {
   $driver = Sabel_DB_Migration_Manager::getDriver();
-  Sabel_DB_Statement::create($driver)->setSql($query)->execute();
+  $driver->execute($query);
 }
 
 function getSchema($mdlName)

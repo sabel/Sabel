@@ -19,12 +19,12 @@ class Sabel_DB_Type_Other implements Sabel_DB_Type_Interface
     return Sabel_DB_Type::UNKNOWN;
   }
 
-  public function add($chain)
+  public function add(Sabel_DB_Type_Interface $next)
   {
-    $this->next = $chain;
+    $this->next = $next;
   }
 
-  public function send($co, $type)
+  public function send(Sabel_DB_Schema_Column $co, $type)
   {
     $co->type = $this->getType();
   }

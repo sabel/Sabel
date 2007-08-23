@@ -18,12 +18,12 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
     return Sabel_DB_Type::INT;
   }
 
-  public function add($chain)
+  public function add(Sabel_DB_Type_Interface $next)
   {
-    $this->next = $chain;
+    $this->next = $next;
   }
 
-  public function send($co, $type)
+  public function send(Sabel_DB_Schema_Column $co, $type)
   {
     $types = array("integer", "int", "int4", "serial", "tinyint");
 
@@ -33,14 +33,7 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
     }
 
     $co->type = $this->getType();
-
-    // @todo
-    if ($type === "tinyint") {
-      $co->max =  127;
-      $co->min = -128;
-    } else {
-      $co->max = INT_MAX;
-      $co->min = INT_MIN;
-    }
+    $co->max  = INT_MAX;
+    $co->min  = INT_MIN;
   }
 }

@@ -13,7 +13,6 @@ class Sabel_DB_Model_Executer
 {
   protected
     $model  = null,
-    $driver = null,
     $stmt   = null,
     $method = "";
 
@@ -36,14 +35,7 @@ class Sabel_DB_Model_Executer
 
   public function setModel(Sabel_DB_Model $model, $reinit = true)
   {
-    $this->model  = $model;
-    $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());
-
-    if (!$this->driver instanceof Sabel_DB_Abstract_Driver) {
-      $name = get_class($model);
-      throw new Exception("'{$name}' should be instance of Sabel_DB_Abstract_Driver.");
-    }
-
+    $this->model = $model;
     if ($reinit) $this->initState();
 
     return $this;
@@ -54,11 +46,6 @@ class Sabel_DB_Model_Executer
     return $this->model;
   }
 
-  public function getDriver()
-  {
-    return $this->driver;
-  }
-
   public function getArguments()
   {
     return $this->arguments;
@@ -66,12 +53,12 @@ class Sabel_DB_Model_Executer
 
   public function before($method)
   {
-    return null;
+    return;
   }
 
   public function after($method, $result)
   {
-    return null;
+    return;
   }
 
   protected function prepare($method, $args)
@@ -103,7 +90,6 @@ class Sabel_DB_Model_Executer
   protected final function _execute(Sabel_DB_Abstract_Statement $stmt)
   {
     $this->stmt = $stmt;
-    $stmtType = $stmt->getStatementType();
 
     try {
       if (Sabel_DB_Transaction::isActive()) {
@@ -236,7 +222,7 @@ class Sabel_DB_Model_Executer
     $this->projection  = "COUNT(*) AS cnt";
     $this->constraints = array("limit" => 1);
 
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::SELECT);
+    $stmt = $this->createStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($stmt));
 
     $this->projection  = $projection;
@@ -267,7 +253,7 @@ class Sabel_DB_Model_Executer
 
   protected function createModel($model)
   {
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::SELECT);
+    $stmt = $this->createStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($stmt));
 
     if (isset($rows[0])) {
@@ -307,7 +293,7 @@ class Sabel_DB_Model_Executer
       if ($result !== Sabel_DB_Join::CANNOT_JOIN) return $result;
     }
 
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::SELECT);
+    $stmt = $this->createStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($stmt));
 
     if (empty($rows)) return false;
@@ -413,7 +399,7 @@ class Sabel_DB_Model_Executer
       $saveValues[$key] = $model->__get($key);
     }
 
-    $stmt  = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::INSERT);
+    $stmt  = $this->createStatement(Sabel_DB_Statement::INSERT);
     $newId = $this->_execute($this->prepareInsert($stmt, $saveValues));
 
     if ($newId !== null) {
@@ -445,7 +431,7 @@ class Sabel_DB_Model_Executer
       $saveValues[$key] = $model->__get($key);
     }
 
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::UPDATE);
+    $stmt = $this->createStatement(Sabel_DB_Statement::UPDATE);
     $this->_execute($this->prepareUpdate($stmt, $saveValues));
 
     return array_merge($model->toArray(), $saveValues);
@@ -463,7 +449,7 @@ class Sabel_DB_Model_Executer
   {
     @list ($data) = $this->arguments;
 
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::INSERT);
+    $stmt = $this->createStatement(Sabel_DB_Statement::INSERT);
     return $this->_execute($this->prepareInsert($stmt, $data));
   }
 
@@ -478,7 +464,7 @@ class Sabel_DB_Model_Executer
   protected function _update($data = null)
   {
     @list ($data) = $this->arguments;
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::UPDATE);
+    $stmt = $this->createStatement(Sabel_DB_Statement::UPDATE);
     $this->_execute($this->prepareUpdate($stmt, $data));
   }
 
@@ -517,7 +503,7 @@ class Sabel_DB_Model_Executer
       }
     }
 
-    $stmt = Sabel_DB_Statement::create($this->driver, Sabel_DB_Statement::DELETE);
+    $stmt = $this->createStatement(Sabel_DB_Statement::DELETE);
     $this->_execute($this->prepareDelete($stmt));
   }
 
@@ -546,7 +532,7 @@ class Sabel_DB_Model_Executer
   {
     list ($sql, $assoc, $stmtType) = $this->arguments;
 
-    $stmt = Sabel_DB_Statement::create($this->driver, $stmtType);
+    $stmt = $this->createStatement($stmtType);
     $rows = $this->_execute($stmt->setSql($sql));
 
     if (empty($rows) || $assoc === null) {
@@ -558,6 +544,11 @@ class Sabel_DB_Model_Executer
       foreach ($rows as $row) $results[] = (object)$row;
       return $results;
     }
+  }
+
+  protected function createStatement($stmtType)
+  {
+    return Sabel_DB_Statement::create($this->model, $stmtType);
   }
 
   protected function prepareSelect($stmt)

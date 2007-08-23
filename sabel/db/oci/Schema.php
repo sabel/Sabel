@@ -110,23 +110,24 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     $co->nullable = ($row["nullable"] !== "N");
 
     $type = strtolower($row["data_type"]);
+    $precision = (int)$row["data_precision"];
 
     if ($type === "number") {
-      if ($row["data_default"] === "1" || $row["data_default"] === "0") {
+      if ($precision === 1 && ($row["data_default"] === "1" || $row["data_default"] === "0")) {
         $co->type = Sabel_DB_Type::BOOL;
       } else {
-        $type = $this->toInternalNumberType($row["data_precision"]);
+        $type = $this->toInternalNumberType($precision);
       }
     }
 
     if (!$co->isBool()) {
       if ($type === "float") {
-        $type = ((int)$row["data_precision"] === 24) ? "float" : "double";
+        $type = ($precision === 24) ? "float" : "double";
       } elseif ($type === "varchar2") {
         $type = "varchar";
       } elseif ($type === "clob") {
         $type = "text";
-      } elseif ($type === "date") {
+      } elseif ($type === "date" && !$this->isDate($row)) {
         $type = "datetime";
       }
 
@@ -163,13 +164,25 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     }
   }
 
+  private function isDate($row)
+  {
+    $tblName = $row["table_name"];
+    $colName = $row["column_name"];
+
+    $sql = "SELECT comments FROM all_col_comments WHERE owner = '{$this->schemaName}' "
+         . "AND table_name = '{$tblName}' AND column_name = '{$colName}'";
+
+    $rows = $this->execute($sql);
+    return (isset($rows[0]) && $rows[0]["comments"] === "date");
+  }
+
   private function toInternalNumberType($precision)
   {
     switch ($precision) {
-      case "5":
+      case 5:
         return "smallint";
 
-      case "19":
+      case 19:
         return "bigint";
 
       default:

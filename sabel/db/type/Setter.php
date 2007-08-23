@@ -19,6 +19,7 @@ class Sabel_DB_Type_Setter
     $string = new Sabel_DB_Type_String();
     $text   = new Sabel_DB_Type_Text();
     $time   = new Sabel_DB_Type_Datetime();
+    $date   = new Sabel_DB_Type_Date();
     $double = new Sabel_DB_Type_Double();
     $float  = new Sabel_DB_Type_Float();
     $byte   = new Sabel_DB_Type_Byte();
@@ -29,7 +30,8 @@ class Sabel_DB_Type_Setter
     $sint->add($string);
     $string->add($text);
     $text->add($time);
-    $time->add($double);
+    $time->add($date);
+    $date->add($double);
     $double->add($float);
     $float->add($byte);
     $byte->add($other);

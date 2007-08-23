@@ -129,8 +129,7 @@ class Sabel_DB_Join
   protected function execute($projection, $join)
   {
     $executer = $this->executer;
-    $driver = $executer->getDriver();
-    $stmt = Sabel_DB_Statement::create($driver, Sabel_DB_Statement::SELECT);
+    $stmt = Sabel_DB_Statement::create($this->model, Sabel_DB_Statement::SELECT);
     $stmt->table($this->model->getTableName());
     $stmt->join($join);
     $stmt->projection($projection);

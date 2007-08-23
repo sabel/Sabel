@@ -19,7 +19,8 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::BOOL     => "tinyint",
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "text",
-                           Sabel_DB_Type::DATETIME => "datetime");
+                           Sabel_DB_Type::DATETIME => "datetime",
+                           Sabel_DB_Type::DATE     => "date");
 
   public function setOptions($key, $val)
   {

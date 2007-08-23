@@ -5,7 +5,7 @@ class Test_DB_Test extends SabelTestCase
   public static $db = "";
   public static $tables = array("member", "member_sub_group", "member_group",
                                 "super_group", "location", "condition_test",
-                                "student_course", "student", "course");
+                                "student_course", "student", "course", "schema_test");
 
   public function testClean()
   {
@@ -850,6 +850,70 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($node3->tree_id, 1);
     $this->assertEquals($node3->Root->id, 1);
     $this->assertEquals($node3->Root->name, "root1");
+  }
+
+  public function testSchema()
+  {
+    $test   = MODEL("SchemaTest");
+    $schema = $test->getSchema();
+    $id     = $schema->id;
+    $name   = $schema->name;
+    $bint   = $schema->bint;
+    $sint   = $schema->sint;
+    $txt    = $schema->txt;
+    $bl     = $schema->bl;
+    $ft     = $schema->ft;
+    $dbl    = $schema->dbl;
+    $dt     = $schema->dt;
+
+    $this->assertTrue($id->isInt(true));
+    $this->assertTrue($name->isString());
+    $this->assertTrue($bint->isBigint());
+    $this->assertTrue($sint->isSmallint());
+    $this->assertTrue($txt->isText());
+    $this->assertTrue($bl->isBool());
+    $this->assertTrue($ft->isFloat());
+    $this->assertTrue($dbl->isDouble());
+    $this->assertTrue($dt->isDate());
+
+    $this->assertEquals($name->default, "hoge");
+    $this->assertEquals($name->max, 128);
+    $this->assertEquals($bint->default, "90000000000");
+    $this->assertEquals($sint->default, 30000);
+    $this->assertEquals($ft->default, 1.234);
+    $this->assertEquals($dbl->default, 1.23456);
+
+    $this->assertFalse($id->nullable);
+    $this->assertFalse($name->nullable);
+
+    $data = array();
+    $data[] = array("id" => 1, "name" => "test1", "dt" => "2007-01-01");
+    $data[] = array("id" => 2, "name" => "test2", "dt" => "2007-01-02");
+    $data[] = array("id" => 3, "name" => "test3", "dt" => "2007-01-03");
+    $data[] = array("id" => 4, "name" => "test4", "dt" => "2007-01-04");
+    $data[] = array("id" => 5, "name" => "test5", "dt" => "2007-01-05");
+
+    $executer = new Executer($test);
+    foreach ($data as $values) {
+      $executer->insert($values);
+    }
+
+    $executer = new Executer("SchemaTest");
+    $results = $executer->select("dt", "2007-01-03");
+    $this->assertEquals(count($results), 1);
+    $this->assertEquals($results[0]->id, 3);
+    $this->assertEquals($results[0]->name, "test3");
+    $this->assertEquals($results[0]->dt, "2007-01-03");
+
+    $executer = new Executer("SchemaTest");
+    $executer->setCondition(new Sabel_DB_Condition_Object("dt", array("<=", "2007-01-04"), COMPARE));
+    $executer->setConstraint("order", "id DESC");
+    $results = $executer->select();
+    $this->assertEquals(count($results), 4);
+    $this->assertEquals($results[0]->dt, "2007-01-04");
+    $this->assertEquals($results[1]->dt, "2007-01-03");
+    $this->assertEquals($results[2]->dt, "2007-01-02");
+    $this->assertEquals($results[3]->dt, "2007-01-01");
   }
 
   public function testClear()
