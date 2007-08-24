@@ -79,8 +79,27 @@ class Sabel_Annotation_Reader
     
     if (strpos($annotation[0], "@") === 0) {
       $name  = array_shift($annotation);
-      $value = (count($annotation) > 2) ? $annotation : $annotation[0];
-      return array(ltrim($name, "@ "), $value);
+      $values = (count($annotation) >= 2) ? $annotation : $annotation[0];
+      
+      if (is_array($values)) {
+        $in = false;
+        $buf = "";
+        $nval = array();
+        foreach ($values as $value) {
+          if ($value{0} === '"') {
+            $in = true;
+            $buf .= substr($value, 1, strlen($value));
+          } elseif ($value{strlen($value)-1} === '"') {
+            $in = false;
+            $buf .= " " . substr($value, 0, strlen($value)-1);
+            $nval[] = $buf;
+          } elseif (!$in) {
+            $nval[] = $value;
+          }
+        }
+      }
+      
+      return array(ltrim($name, "@ "), $values);
     } else {
       return null;
     }

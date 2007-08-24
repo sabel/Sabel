@@ -34,6 +34,8 @@ class Test_Annotation extends SabelTestCase
     $annotations = $reader->readMethods("Test_Annotation_Class");
     $this->assertEquals($annotations["testMethod"]["normal"], "test1");
     $this->assertEquals($annotations["testMethod"]["ignoreSpace"], "test2");
+    $this->assertEquals($annotations["testMethod"]["array"][0], "test4");
+    $this->assertEquals($annotations["testMethod"]["array"][1], "elem1");
   }
   
   public function testDuplicateEntry()
@@ -79,7 +81,7 @@ class Test_Annotation_Class
    *
    * @normal test1
    * @ignoreSpace   test2
-   * @array      test4 elem1 elem2 elem3
+   * @array      test4 elem1 "test test test"
    */
   public function testMethod($test, $test = null)
   {
