@@ -97,9 +97,12 @@ class Sabel_Annotation_Reader
             $nval[] = $value;
           }
         }
+        return array(ltrim($name, "@ "), $nval);
+      } else {
+        return array(ltrim($name, "@ "), $values);
       }
       
-      return array(ltrim($name, "@ "), $values);
+      
     } else {
       return null;
     }
