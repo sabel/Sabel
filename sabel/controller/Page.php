@@ -219,6 +219,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return $this->request->fetchPostValues();
   }
   
+  public function getResponse()
+  {
+    return $this->response;
+  }
+  
   public final function getAssignments()
   {
     return $this->assignments;
