@@ -37,7 +37,7 @@ class Processor_Model extends Sabel_Bus_Processor
           }
         }
         
-        $controller->setAttribute("{$mdlName}Executer", new Executer($model));
+        $controller->setAttribute("{$mdlName}Executer", new Manipulator($model));
       }
     }
     
