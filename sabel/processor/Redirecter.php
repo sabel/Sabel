@@ -51,7 +51,7 @@ class Redirect
   private $url = "";
   private $redirected = false;
   
-  const REDIRECTED = "SABEL_CONTROLLER_REDIRECTED";
+  const REDIRECTED = "SABEL_REDIRECTED";
   
   public function __construct($bus)
   {

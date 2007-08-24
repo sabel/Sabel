@@ -42,7 +42,7 @@ class Helpers_Form_Select
           
     $html = array($html);
     
-    if (is_hash($options)) {
+    if (is_hashtable($options)) {
       $this->hashOptions($html, $options, $selected);
     } else {
       $this->arrayOptions($html, $options, $selected);

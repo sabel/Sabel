@@ -17,12 +17,12 @@ function l($message)
 
 function r($const)
 {
-  return ($const === Sabel_Controller_Page::REDIRECTED);
+  return ($const === Redirect::REDIRECTED);
 }
 
 function redirected($const)
 {
-  return ($const === Sabel_Controller_Page::REDIRECTED);
+  return ($const === Redirect::REDIRECTED);
 }
 
 /**
@@ -170,14 +170,14 @@ function now()
   return date("Y-m-d H:i:s");
 }
 
-function _hash($array)
+function _hashtable($array)
 {
-  return new Sabel_Hash($array);
+  return new Sabel_Util_Hashtable($array);
 }
 
-function is_hash($object)
+function is_hashtable($object)
 {
-  return ($object instanceof Sabel_Hash);
+  return ($object instanceof Sabel_Util_Hash);
 }
 
 function _A($obj)

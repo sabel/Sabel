@@ -124,11 +124,8 @@ class Sabel_Bus
             $listener->event($this, $callback->processor, $callback->method, $result);
           }
         }
-
       }
     }
-    
-
   }
   
   public function addBus($name, $bus)
