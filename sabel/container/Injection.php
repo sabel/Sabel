@@ -9,13 +9,11 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Container_Injection
+abstract class Sabel_Container_Injection implements Sabel_Config
 {
   private $binds      = array();
   private $aspects    = array();
   private $constructs = array();
-  
-  abstract function configure();
   
   /**
    * bind interface to implementation
