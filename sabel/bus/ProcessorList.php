@@ -132,6 +132,12 @@ class Sabel_Bus_ProcessorList
     $this->next = null;
   }
   
+  public function unlink()
+  {
+    $this->previous->next = $this->next;
+    $this->next->previous = $this->previous;
+  }
+  
   public function setPrevious($processor)
   {
     $this->previous = $processor;
