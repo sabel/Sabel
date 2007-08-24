@@ -131,6 +131,12 @@ class Sabel_Util_List extends Sabel_Object
     $this->next = null;
   }
   
+  public function unlink()
+  {
+    $this->previous->next = $this->next;
+    $this->next->previous = $this->previous;
+  }
+  
   public function setPrevious($object)
   {
     $this->previous = $object;

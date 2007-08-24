@@ -63,13 +63,19 @@ class Sabel_Bus
   public function addProcessor(Sabel_Bus_Processor $processor)
   {
     if ($this->list === null) {
-      $this->list = new Sabel_Bus_ProcessorList($processor);
+      $this->list = new Sabel_Util_List($processor->name, $processor);
     } else {
-      $this->list->insertNext($processor);
+      $this->list->insertNext($processor->name, $processor);
       $this->list = $this->list->getLast();
     }
     
     return $this;
+  }
+  
+  public function addProcessorAndListener(Sabel_Bus_Processor $processor)
+  {
+    $this->addProcessor($processor);
+    $this->addProcessorAsListener($processor);
   }
   
   public function getList()
