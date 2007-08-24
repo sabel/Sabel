@@ -213,29 +213,27 @@ function component($action, $args = null)
 
 /***   sabel.db functions   ***/
 
-define("MODELS_DIR", RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "models" . DIR_DIVIDER);
-
 function convert_to_tablename($mdlName)
 {
   static $cache = array();
-
+  
   if (isset($cache[$mdlName])) {
     return $cache[$mdlName];
   }
-
+  
   if (preg_match("/^[a-z0-9_]+$/", $mdlName)) {
     $tblName = $mdlName;
   } else {
     $tblName = substr(strtolower(preg_replace("/([A-Z])/", '_$1', $mdlName)), 1);
   }
-
+  
   return $cache[$mdlName] = $tblName;
 }
 
 function convert_to_modelname($tblName)
 {
   static $cache = array();
-
+  
   if (isset($cache[$tblName])) {
     return $cache[$tblName];
   } else {
@@ -247,7 +245,7 @@ function convert_to_modelname($tblName)
 function MODEL($mdlName)
 {
   static $cache = array();
-
+  
   if (isset($cache[$mdlName])) {
     if ($cache[$mdlName]) {
       return new $mdlName();
@@ -255,12 +253,12 @@ function MODEL($mdlName)
       return new Sabel_DB_Model_Proxy($mdlName);
     }
   }
-
-  Sabel::fileUsing(MODELS_DIR . $mdlName);
-
+  
+  Sabel::fileUsing(MODELS_DIR . $mdlName . ".php");
+  
   $exists = class_exists($mdlName, false);
   $cache[$mdlName] = $exists;
-
+  
   if ($exists) {
     return new $mdlName();
   } else {

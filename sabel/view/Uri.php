@@ -15,6 +15,7 @@ class Sabel_View_Uri
   
   public function __construct()
   {
+
   }
   
   public function hyperlink($params, $anchor = null)
@@ -49,9 +50,10 @@ class Sabel_View_Uri
     $reserved = ";";
     foreach ($params as $part) {
       $line     = array_map("trim", explode(":", $part));
-      $reserved = ($line[0] === 'n') ? "candidate" : $line[0];
-      $buf[$reserved] = $line[1];
+      $reserved = ($line[0] === "n") ? "candidate" : $line[0];
+      $buf[$reserved] = (isset($line[1])) ? $line[1] : "";
     }
+    
     return $buf;
   }
 }

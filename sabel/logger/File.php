@@ -10,8 +10,8 @@
  */
 class Sabel_Logger_File implements Sabel_Logger_Interface
 {
-  const DEFAULT_LOG_PATH = '/logs';
-  const DEFAULT_LOG_FILE = 'sabel.log';
+  const DEFAULT_LOG_DIR  = "logs";
+  const DEFAULT_LOG_FILE = "sabel.log";
   
   private $fp = null;
   private $messages = array();
@@ -19,7 +19,7 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   private static $instance = null;
   
-  public static function singleton($option = null)
+  public static function singleton($fileName = null)
   {
     if (ENVIRONMENT === PRODUCTION) {
       self::$instance = new Sabel_Logger_File();
@@ -28,44 +28,46 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
     if (is_object(self::$instance)) {
       return self::$instance;
     } else {
-      self::$instance = new self($option);
+      self::$instance = new self($fileName);
       return self::$instance;
     }
   }
   
-  public function __construct($option = null)
+  public function __construct($fileName = null)
   {
-    if ($option === null) {
+    if ($fileName === null) {
       if (!defined("ENVIRONMENT")) {
-        $option = "test." . self::DEFAULT_LOG_FILE;
+        $fileName = "test." . self::DEFAULT_LOG_FILE;
       } else {
-        if ($option === null) {
-          switch (ENVIRONMENT) {
-            case PRODUCTION:
-              $env = 'production';
-              break;
-            case TEST:
-              $env = 'test';
-              break;
-            case DEVELOPMENT:
-              $env = 'development';
-              break;
-          }
-          $option = $env . "." . self::DEFAULT_LOG_FILE;
+        switch (ENVIRONMENT) {
+          case PRODUCTION:
+            $env = "production";
+            break;
+          case TEST:
+            $env = "test";
+            break;
+          case DEVELOPMENT:
+            $env = "development";
+            break;
         }
+        
+        $fileName = $env . "." . self::DEFAULT_LOG_FILE;
       }
     }
     
-    $this->path = RUN_BASE . self::DEFAULT_LOG_PATH ."/" . $option;
+    $this->path = RUN_BASE . DIR_DIVIDER
+                . self::DEFAULT_LOG_DIR . DIR_DIVIDER . $fileName;
+                
     $this->fp = fopen($this->path, "a+");
   }
   
   public function log($text)
   {
-    fwrite($this->fp, date("c") ." ". $text . "\n");
+    fwrite($this->fp, date("Y-m-d H:i:s") ." ". $text . "\n");
   }
   
   public function __destruct()
   {
+
   }
 }

@@ -32,15 +32,19 @@ class Sabel_Processor_Redirecter extends Sabel_Bus_Processor
       } else {
         $host = "localhost";
       }
-     $ignored = "";
-     
-     if (defined("URI_IGNORE")) {
-       $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
-     }
-     $to = $redirect->getUrl();
-     $bus->get("response")->location($host, $ignored . $to);
-     return true;
+      
+      $ignored = "";
+      
+      if (defined("URI_IGNORE")) {
+        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+      }
+      
+      $to = $redirect->getUrl();
+      $bus->get("response")->location($host, $ignored . $to);
+      
+      return true;
     }
+    
     return false; 
   }
 }

@@ -55,11 +55,11 @@ class Sabel_Annotation_Reader
       list($name, $value) = self::extract($line);
       
       if (isset($annotations[$name])) {
-        if (is_array($annotations[$name])) {
-          $annotations[$name][] = $value;
-        } else {
-          $annotations[$name] = array($annotations[$name], $value);
+        if (is_string($annotations[$name])) {
+          $annotations[$name] = array($annotations[$name]);
         }
+        
+        $annotations[$name][] = $value;
       } else {
         $annotations[$name] = $value;
       }
@@ -97,12 +97,11 @@ class Sabel_Annotation_Reader
             $nval[] = $value;
           }
         }
+        if (count($nval) === 1) $nval = $nval[0];
         return array(ltrim($name, "@ "), $nval);
       } else {
         return array(ltrim($name, "@ "), $values);
       }
-      
-      
     } else {
       return null;
     }

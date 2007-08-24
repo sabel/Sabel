@@ -41,6 +41,11 @@ abstract class Sabel_DB_Abstract_Statement
     return $this->model;
   }
 
+  public function getDriver()
+  {
+    return $this->driver;
+  }
+
   public function setSql($sql)
   {
     if (is_string($sql)) {

@@ -11,9 +11,12 @@
  */
 class Processor_Model extends Sabel_Bus_Processor
 {
-  const MAX_STACK_SIZE = 5;
-  const ERROR_KEY      = "errors";
-  const STACK_KEY      = "stack";
+  const STACK_SIZE = 5;
+  const ERROR_KEY  = "errors";
+  const STACK_KEY  = "stack";
+  
+  const ANNOTATION_VALIDATION_FAILURE = "validation_failure";
+  const ANNOTATION_VALIDATION_IGNORES = "validation_ignores";
   
   public function execute($bus)
   {
@@ -23,32 +26,37 @@ class Processor_Model extends Sabel_Bus_Processor
     $destination = $bus->get("destination");
     
     if ($request->isPost()) {
-      $toAction = $this->getAnnotationForValidate($destination, $controller);
+      $result = $this->getAnnotationForValidate($destination, $controller);
       $models = $this->createModels($request->fetchPostValues());
+      list ($toAction, $ignores) = $result;
       
+      $errored = false;
       foreach ($models as $mdlName => $model) {
         $mdlName{0} = strtolower($mdlName{0});
         
         if ($toAction !== null) {
-          if ($errors = $this->validate($model)) {
+          if ($errors = $this->validate($model, $ignores)) {
             $controller->errors = $errors;
             $this->redirect($bus, $controller, $toAction);
+            $errored = true;
             break;
           }
         }
         
-        $controller->setAttribute("{$mdlName}Executer", new Manipulator($model));
+        $controller->setAttribute("{$mdlName}Manipulator", new Manipulator($model));
+      }
+      
+      if (!$errored) {
+        $this->resetErrors($storage);
       }
     }
     
-    $executerList = $bus->getList()->find("executer");
-    
-    if ($executerList !== null) {
+    if (($executerList = $bus->getList()->find("executer")) !== null) {
       $executer = $executerList->get();
       $bus->callback($executer, $executer->execute($bus));
       $executerList->unlink();
     }
-
+    
     $current = $request->getUri()->__toString();
     $errors  = $storage->read(self::ERROR_KEY);
     $ignore  = ($request->isTypeOf("css") || $request->isTypeOf("js"));
@@ -73,7 +81,7 @@ class Processor_Model extends Sabel_Bus_Processor
       
       if (is_array($stack)) {
         $stack[] = $current;
-        if (count($stack) > self::MAX_STACK_SIZE) array_shift($stack);
+        if (count($stack) > self::STACK_SIZE) array_shift($stack);
       } else {
         $stack = array($current);
       }
@@ -88,11 +96,11 @@ class Processor_Model extends Sabel_Bus_Processor
       $storage  = $bus->get("storage");
       $messages = $bus->get("controller")->errors;
       if ($messages === null) return;
-
+      
       $stack  = $storage->read(self::STACK_KEY);
       $index  = count($stack) - 1;
       $values = $bus->get("request")->fetchPostValues();
-
+      
       $storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
                                              "messages"  => $messages,
                                              "values"    => $values));
@@ -121,31 +129,45 @@ class Processor_Model extends Sabel_Bus_Processor
     $action     = $destination->getAction();
     $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
     $methods    = $annotation->getMethodsAsAssoc();
-    $elements   = $methods[$action]->getAnnotation("validate");
     
-    return ($elements === null) ? null : $elements[1];
+    if (isset($methods[$action])) {
+      $method = $methods[$action];
+      return array($method->getAnnotation(self::ANNOTATION_VALIDATION_FAILURE),
+                   $method->getAnnotation(self::ANNOTATION_VALIDATION_IGNORES));
+    } else {
+      return array(null, null);
+    }
   }
   
-  protected function validate($model)
+  protected function validate($model, $ignores)
   {
+    if ($ignores === null) {
+      $ignores = array();
+    } elseif (is_string($ignores)) {
+      $ignores = array($ignores);
+    }
+    
     $validator = new Sabel_DB_Validator($model);
-    return $validator->validate(array());
+    return $validator->validate($ignores);
   }
   
   protected function redirect($bus, $controller, $toAction)
   {
     $controller->getAttribute("redirect")->to($toAction);
-    $redirecter = $bus->getList()->find("redirecter")->get();
     $bus->set("response", $controller->getResponse());
+    $redirecter = $bus->getList()->find("redirecter")->get();
     $redirecter->onRedirect($bus);
     $bus->getList()->find("executer")->unlink();
     
     $this->event($bus, $redirecter, "onRedirect", true);
   }
   
-  public function resetErrors()
+  public function resetErrors($storage = null)
   {
-    $storage = Sabel_Context::getBus()->get("storage");
+    if ($storage === null) {
+      $storage = Sabel_Context::getContext()->getBus()->get("storage");
+    }
+    
     $storage->delete(self::ERROR_KEY);
     $storage->delete(self::STACK_KEY);
   }

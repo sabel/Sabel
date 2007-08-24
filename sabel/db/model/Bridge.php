@@ -33,7 +33,7 @@ class Sabel_DB_Model_Bridge
     $mdlName  = $model->getModelName();
     $joinKey  = $this->joinKey;
     $bridge   = MODEL($this->bridgeName);
-    $executer = new Sabel_DB_Model_Manipulator($bridge);
+    $executer = new Manipulator($bridge);
     $foreign  = $bridge->getSchema()->getForeignKeys();
 
     if (isset($joinKey[$mdlName])) {

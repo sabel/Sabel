@@ -25,7 +25,9 @@ class Sabel_DB_Type_Text implements Sabel_DB_Type_Interface
 
   public function send(Sabel_DB_Schema_Column $co, $type)
   {
-    if (in_array($type, array("text", "mediumtext", "tinytext"))) {
+    $types = array("text", "clob", "mediumtext", "tinytext");
+
+    if (in_array($type, $types)) {
       $co->type = $this->getType();
     } else {
       $this->next->send($co, $type);

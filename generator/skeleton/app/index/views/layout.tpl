@@ -2,7 +2,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-  <title>Sabel</title>
+  <title><?= $title ?></title>
   <meta http-equiv="Content-Language" content="English" />
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="author" content="" />
@@ -14,18 +14,20 @@
 
 <div class="content">
   <div id="top">
-    <h1>Sabel.</h1>
-    <h2>auto generated page</h2>
+    <h1>Sabel</h1>
+    <h2>Welcome to Sabel have fun!</h2>
   </div>
 </div>
 
+<!--
 <div id="prec">
   <div id="wrap">
     <div id="menu">
-      <?= $title ?>
+      <?= $menu ?>
     </div>
   </div>
 </div>
+-->
 
 <div class="content">
   <div id="ad">
@@ -39,8 +41,8 @@
   
   <div id="footer">
     <div class="right">&copy; Copyright 2007, </div>
-    </div>
   </div>
+</div>
 
 </body>
 </html>

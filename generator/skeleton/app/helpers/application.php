@@ -53,5 +53,5 @@ function h($content)
 
 function to_date($date, $format)
 {
-  return DateHelper::format($date, constant("DateHelper::" . $format));
+  return Helpers_Date::format($date, constant("Helpers_Date::" . $format));
 }

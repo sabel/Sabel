@@ -252,7 +252,7 @@ class Sabel_DB_Validator
 
   protected function unique($model, $uniques)
   {
-    $executer = new Sabel_DB_Model_Manipulator($model->getModelName());
+    $executer = new Manipulator($model->getModelName());
     $pkey = $model->getPrimaryKey();
 
     if (is_string($pkey)) $pkey = (array)$pkey;

@@ -123,10 +123,6 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     if (!$co->isBool()) {
       if ($type === "float") {
         $type = ($precision === 24) ? "float" : "double";
-      } elseif ($type === "varchar2") {
-        $type = "varchar";
-      } elseif ($type === "clob") {
-        $type = "text";
       } elseif ($type === "date" && !$this->isDate($row)) {
         $type = "datetime";
       }

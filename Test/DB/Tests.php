@@ -1,5 +1,7 @@
 <?php
 
+define("MODELS_DIR", RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "models" . DIR_DIVIDER);
+
 require_once("Test/DB/Test.php");
 require_once("Test/DB/Mysql.php");
 require_once("Test/DB/Pgsql.php");

@@ -26,7 +26,7 @@ class Sabel_DB_Type_String implements Sabel_DB_Type_Interface
   public function send(Sabel_DB_Schema_Column $co, $type)
   {
     $types = array("varchar", "char", "character varying",
-                   "character", "cstring");
+                   "character", "varchar2", "cstring");
 
     if (in_array($type, $types)) {
       $co->type = $this->getType();

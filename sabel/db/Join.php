@@ -19,7 +19,7 @@ class Sabel_DB_Join
     $objects  = array(),
     $tblName  = "";
 
-  public function __construct(Sabel_DB_Model_Manipulator $executer)
+  public function __construct(Sabel_DB_Manipulator $executer)
   {
     $this->executer  = $executer;
     $this->model     = $executer->getModel();
