@@ -12,7 +12,7 @@ define("__TRUE__",  "true");
 define("__FALSE__", "false");
 
 error_reporting(E_ALL|E_STRICT);
-ini_set('memory_limit', '16m');
+ini_set('memory_limit', '32m');
 
 if (!defined('PHPUnit_MAIN_METHOD')) {
   define('PHPUnit_MAIN_METHOD', 'SabelAllTests::main');
@@ -56,6 +56,7 @@ require_once('Test/Experimental.php');
 
 require_once('Test/Classes.php');
 // require_once('Test/Cache.php');
+require_once('Test/Util.php');
 
 require_once('Test/DB/Tests.php');
 require_once('Test/Validate.php');
@@ -79,7 +80,7 @@ class SabelAllTests
     }
     
     $suite->addTest(Test_Sabel::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Bus::suite());
     // $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Validate::suite());
@@ -89,6 +90,7 @@ class SabelAllTests
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_Container::suite());
+    $suite->addTest(Test_Util::suite());
     $suite->addTest(Test_Experimental::suite());
     
     return $suite;

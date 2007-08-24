@@ -84,35 +84,15 @@ class Sabel_Bus
     }
     
     $processorList = $this->list->getFirst();
-    $callbacks = array();
     
     while ($processorList !== null) {
       $processor = $processorList->get();
       $result = $processor->execute($this);
       
-      if (isset($callbacks[$processor->name])) {
-        if ($result === true) {
-          $callback = $callbacks[$processor->name];
-          if (is_array($callback)) {
-            foreach ($callback as $c) {
-              $result = $c->processor->{$c->method}($this);
-              if ($result === false) break;
-              foreach ($this->listeners as $listener) {
-                $listener->event($this, $c->processor, $c->method, $result);
-              }
-            }
-          } else {
-            $result = $callback->processor->{$callback->method}($this);
-            foreach ($this->listeners as $listener) {
-              $listener->event($this, $callback->processor, $callback->method, $result);
-            }
-          }
-
-        }
-      }
+      $this->callback($processor, $result);
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
-        $callbacks[$result->when][] = $result;
+        $this->callbacks[$result->when][] = $result;
       }
       
       $processorList = $processorList->next();
@@ -123,6 +103,32 @@ class Sabel_Bus
     } else {
       return null;
     }
+  }
+  
+  public function callback($processor, $result)
+  {
+    if (isset($this->callbacks[$processor->name])) {
+      if ($result === true) {
+        $callback = $this->callbacks[$processor->name];
+        if (is_array($callback)) {
+          foreach ($callback as $c) {
+            $result = $c->processor->{$c->method}($this);
+            if ($result === false) break;
+            foreach ($this->listeners as $listener) {
+              $listener->event($this, $c->processor, $c->method, $result);
+            }
+          }
+        } else {
+          $result = $callback->processor->{$callback->method}($this);
+          foreach ($this->listeners as $listener) {
+            $listener->event($this, $callback->processor, $callback->method, $result);
+          }
+        }
+
+      }
+    }
+    
+
   }
   
   public function addBus($name, $bus)
