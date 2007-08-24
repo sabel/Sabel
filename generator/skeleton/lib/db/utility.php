@@ -1,7 +1,5 @@
 <?php
 
-$SABEL_DB_DIR = "sabel" . DIR_DIVIDER . "db" . DIR_DIVIDER;
-
 Sabel::using("Sabel_DB_Join");
 Sabel::using("Sabel_DB_Join_Relation");
 Sabel::using("Sabel_DB_Condition_Object");
@@ -22,13 +20,9 @@ define("BETWEEN",     Sabel_DB_Condition_Object::BETWEEN);
 define("LIKE",        Sabel_DB_Condition_Object::LIKE);
 define("COMPARE",     Sabel_DB_Condition_Object::COMPARE);
 
-function trans_begin($model = null)
+function trans_begin()
 {
-  if ($model === null) {
-    Sabel_DB_Transaction::activate();
-  } else {
-    Sabel_DB_Transaction::begin($model->getConnectionName());
-  }
+  Sabel_DB_Transaction::activate();
 }
 
 function trans_commit()

@@ -606,7 +606,7 @@ class Test_DB_Test extends SabelTestCase
 
     // between condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("point", array(200, 400), BETWEEN));
+    $executer->setCondition(new Sabel_DB_Condition_Object("point", array(200, 400), Sabel_DB_Condition_Object::BETWEEN));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -616,7 +616,7 @@ class Test_DB_Test extends SabelTestCase
 
     // compare condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("point", array("<", 400), COMPARE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("point", array("<", 400), Sabel_DB_Condition_Object::COMPARE));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -627,8 +627,8 @@ class Test_DB_Test extends SabelTestCase
     // or compare condition.
     $executer = new Executer("ConditionTest");
     $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object("point", array(">=", 400), COMPARE));
-    $or->add(new Sabel_DB_Condition_Object("point", array("<=", 200), COMPARE));
+    $or->add(new Sabel_DB_Condition_Object("point", array(">=", 400), Sabel_DB_Condition_Object::COMPARE));
+    $or->add(new Sabel_DB_Condition_Object("point", array("<=", 200), Sabel_DB_Condition_Object::COMPARE));
     $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
@@ -641,7 +641,7 @@ class Test_DB_Test extends SabelTestCase
 
     // like condition.
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("name_", false), LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("name_", false), Sabel_DB_Condition_Object::LIKE));
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);
@@ -651,12 +651,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($models[3]->name, "name%");
 
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", "name%", LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", "name%", Sabel_DB_Condition_Object::LIKE));
     $models = $executer->select();
     $this->assertEquals(count($models), 1);
 
     $executer = new Executer("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("nam%", false), LIKE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("nam%", false), Sabel_DB_Condition_Object::LIKE));
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);
@@ -906,7 +906,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($results[0]->dt, "2007-01-03");
 
     $executer = new Executer("SchemaTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("dt", array("<=", "2007-01-04"), COMPARE));
+    $executer->setCondition(new Sabel_DB_Condition_Object("dt", array("<=", "2007-01-04"), Sabel_DB_Condition_Object::COMPARE));
     $executer->setConstraint("order", "id DESC");
     $results = $executer->select();
     $this->assertEquals(count($results), 4);
@@ -923,7 +923,7 @@ class Test_DB_Test extends SabelTestCase
   }
 }
 
-class Executer extends Sabel_DB_Model_Executer
+class Executer extends Sabel_DB_Model_Manipulator
 {
   const INSERT_DATETIME_COLUMN = "created_at";
   const UPDATE_DATETIME_COLUMN = "updated_at";

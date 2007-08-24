@@ -57,12 +57,13 @@ class Helpers_Form
       }
     }
     
+    $html[] = "<br/>" . $this->submit();
     $html[] = $this->end();
     
     return implode("<br/>\n", $html) . "\n";
   }
   
-  public function start($uri, $id = null, $class = null, $method = "POST", $name = null)
+  public function start($uri, $class = null, $id = null, $method = "POST", $name = null)
   {
     $html = '<form action="' . uri($uri) . '" method="' . $method . '" ';
     $this->addIdAndClass($html, $id, $class);
@@ -76,7 +77,7 @@ class Helpers_Form
     return "</form>";
   }
   
-  public function text($name, $id = null, $class = null)
+  public function text($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
     $name  = $this->getName($name);
@@ -87,7 +88,7 @@ class Helpers_Form
     return $html;
   }
   
-  public function textarea($name, $id = null, $class = null)
+  public function textarea($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
     $name  = $this->getName($name);
@@ -98,7 +99,7 @@ class Helpers_Form
     return $html;
   }
   
-  public function select($name, $values, $id = null, $class = null, $size = 1)
+  public function select($name, $values, $class = null, $id = null, $size = 1)
   {
     $value  = $this->getValue($name);
     $name   = $this->getName($name);
@@ -107,7 +108,7 @@ class Helpers_Form
     return $select->create($id, $class);
   }
   
-  public function checkbox($name, $id = null, $class = null)
+  public function checkbox($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
     $name  = $this->getName($name);
@@ -120,7 +121,7 @@ class Helpers_Form
     return $html . ' />';
   }
   
-  public function radio($name, $values, $selected = null, $id = null, $class = null)
+  public function radio($name, $values, $selected = null, $class = null, $id = null)
   {
     $value = $this->getValue($name);
     $name  = $this->getName($name);
@@ -151,7 +152,7 @@ class Helpers_Form
     return $dtime->create();
   }
   
-  public function hidden($name, $id = null, $class = null)
+  public function hidden($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
     $name  = $this->getName($name);
@@ -162,6 +163,12 @@ class Helpers_Form
     return $html;
   }
   
+  public function submit($value = "")
+  {
+    if ($value !== "") $value = 'value="' . $value. '" ';
+    return '<input type="submit" ' . $value . '/>';
+  }
+
   protected function getName($name)
   {
     if (isset($this->columns[$name])) {

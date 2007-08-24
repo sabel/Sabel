@@ -1,10 +1,5 @@
 <?php
 
-$HELPERS_DIR = dirname(__FILE__) . DIR_DIVIDER;
-
-require ($HELPERS_DIR . "db.php");
-require ($HELPERS_DIR . "validate.php");
-
 function a($uri, $anchor, $param = null)
 {
   if ($param === null) {

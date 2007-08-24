@@ -32,8 +32,7 @@ class Sabel_Helper
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
     
     foreach ($helpers as $helper) {
-      $path = RUN_BASE . $helper;
-      if (is_file($path)) Sabel::fileUsing($path);
+      Sabel::fileUsing(RUN_BASE . $helper);
     }
   }
 }

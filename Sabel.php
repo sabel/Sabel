@@ -149,18 +149,13 @@ final class Sabel
   
   public static function fileUsing($path, $once = false)
   {
-    if (!isset(self::$fileUsing[$path])) {
-      if (!is_readable($path)) {
-        return;
-      }
-      
-      if ($once) {
-        require_once ($path);
-      } else {
-        require ($path);
-      }
-      
-      self::$fileUsing[$path] = true;
+    if ($once && isset(self::$fileUsing[$path])) return true;
+    
+    if (is_readable($path)) {
+      ($once) ? require_once ($path) : require ($path);
+      return self::$fileUsing[$path] = true;
+    } else {
+      return false;
     }
   }
   
@@ -169,7 +164,7 @@ final class Sabel
     $prePath = str_replace("_", DIR_DIVIDER, $className);
     $path = strtolower(dirname($prePath)) . DIR_DIVIDER 
             . basename($prePath) . DEFAULT_PHP_SUFFIX;
-    
+            
     return str_replace("." . DIR_DIVIDER, "", $path);
   }
   
