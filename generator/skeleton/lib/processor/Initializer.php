@@ -16,6 +16,8 @@ class Processor_Initializer extends Sabel_Bus_Processor
     Sabel::fileUsing($libDb . "utility.php");
     Sabel::fileUsing($libDb . "validators.php");
     Sabel::fileUsing($libDb . "Manipulator.php");
+    Sabel::fileUsing($libDb . "ModelForm.php");
+    
     Sabel_DB_Config::initialize();
     
     $controller = $bus->get("controller");

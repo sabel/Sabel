@@ -171,9 +171,7 @@ class Sabel_Request_Object
     if (count($this->getValues) === 0) return null;
     
     foreach ($this->getValues as &$value) {
-      if ($value === "") {
-        $value = null;
-      }
+      if ($value === "") $value = null;
     }
     
     return $this->getValues;
@@ -208,9 +206,7 @@ class Sabel_Request_Object
     if (count($this->postValues) === 0) return null;
     
     foreach ($this->postValues as &$value) {
-      if ($value === "") {
-        $value = null;
-      }
+      if ($value === "") $value = null;
     }
     
     return $this->postValues;

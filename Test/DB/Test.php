@@ -807,8 +807,6 @@ class Test_DB_Test extends SabelTestCase
 
   public function testSelfJoin()
   {
-    if (self::$db === "IBASE") return;
-
     $data   = array();
     $data[] = array("id" => 1, "name" => "root1");
     $data[] = array("id" => 2, "name" => "root2");
@@ -822,6 +820,8 @@ class Test_DB_Test extends SabelTestCase
     foreach ($data as $values) {
       $executer->insert($values);
     }
+
+    if (self::$db === "IBASE") return;
 
     $executer = new Manipulator("Tree");
     $executer->setConstraint("order", "Tree.id ASC");
@@ -945,7 +945,7 @@ class Manipulator extends Sabel_DB_Manipulator
   
   public function after($method, $result)
   {
-    //$this->log();
+    // $this->log();
   }
   
   private function beforeSave()

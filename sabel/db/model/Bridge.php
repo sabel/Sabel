@@ -31,7 +31,6 @@ class Sabel_DB_Model_Bridge
   {
     $model   = $this->model;
     $mdlName = $model->getModelName();
-    $joinKey = $this->joinKey;
     $bridge  = MODEL($this->bridgeName);
     $manip   = new Manipulator($bridge);
     $foreign = $bridge->getSchema()->getForeignKeys();
@@ -73,7 +72,7 @@ class Sabel_DB_Model_Bridge
         }
       }
 
-      throw new Exception("please specify keys for reference.");
+      throw new Exception("please specify keys for references.");
     }
   }
 }

@@ -11,136 +11,24 @@
  */
 class Processor_Model extends Sabel_Bus_Processor
 {
-  const STACK_SIZE = 5;
-  const ERROR_KEY  = "errors";
-  const STACK_KEY  = "stack";
-  
-  const ANNOTATION_VALIDATION_FAILURE = "validation_failure";
-  const ANNOTATION_VALIDATION_IGNORES = "validation_ignores";
+  protected
+    $bus     = null,
+    $request = null;
   
   public function execute($bus)
   {
-    $storage     = $bus->get("storage");
-    $request     = $bus->get("request");
-    $controller  = $bus->get("controller");
-    $destination = $bus->get("destination");
+    $this->bus     = $bus;
+    $this->request = $bus->get("request");
+    $controller    = $bus->get("controller");
     
-    if ($request->isPost()) {
-      $result = $this->getAnnotationForValidate($destination, $controller);
-      $models = $this->createModels($request->fetchPostValues());
-      list ($toAction, $ignores) = $result;
-      
-      $errored = false;
-      foreach ($models as $mdlName => $model) {
-        $mdlName{0} = strtolower($mdlName{0});
-        
-        if ($toAction !== null) {
-          if ($errors = $this->validate($model, $ignores)) {
-            $controller->errors = $errors;
-            $this->redirect($bus, $controller, $toAction);
-            $errored = true;
-            break;
-          }
-        }
-        
-        $controller->setAttribute("{$mdlName}Manipulator", new Manipulator($model));
-      }
-      
-      if (!$errored) {
-        $this->resetErrors($storage);
-      }
-    }
-    
-    if (($executerList = $bus->getList()->find("executer")) !== null) {
-      $executer = $executerList->get();
-      $bus->callback($executer, $executer->execute($bus));
-      $executerList->unlink();
-    }
-    
-    $current = $request->getUri()->__toString();
-    $errors  = $storage->read(self::ERROR_KEY);
-    $ignore  = ($request->isTypeOf("css") || $request->isTypeOf("js"));
-    
-    if (is_array($errors)) {
-      if ($current === $errors["submitUri"]) {
-        $controller->setAttribute(self::ERROR_KEY, $errors["messages"]);
-        $controller->setAttributes($errors["values"]);
-        $models = $this->createModels($errors["values"]);
-        
-        foreach ($models as $mdlName => $model) {
-          $mdlName{0} = strtolower($mdlName{0});
-          $controller->setAttribute("{$mdlName}Form", new Helpers_Form($model));
-        }
-      } elseif (!$ignore && $request->isGet()) {
-        $storage->delete(self::ERROR_KEY);
-      }
-    }
-    
-    if (!$ignore) {
-      $stack = $storage->read(self::STACK_KEY);
-      
-      if (is_array($stack)) {
-        $stack[] = $current;
-        if (count($stack) > self::STACK_SIZE) array_shift($stack);
-      } else {
-        $stack = array($current);
-      }
-      
-      $storage->write(self::STACK_KEY, $stack);
-    }
+    $controller->setAttribute("model", $this);
   }
   
-  public function event($bus, $processor, $method, $result)
+  public function validate($model, $ignores = null)
   {
-    if ($processor->name === "redirecter" && $method === "onRedirect") {
-      $storage  = $bus->get("storage");
-      $messages = $bus->get("controller")->errors;
-      if ($messages === null) return;
-      
-      $stack  = $storage->read(self::STACK_KEY);
-      $index  = count($stack) - 1;
-      $values = $bus->get("request")->fetchPostValues();
-      
-      $storage->write(self::ERROR_KEY, array("submitUri" => $stack[$index],
-                                             "messages"  => $messages,
-                                             "values"    => $values));
-    }
-  }
-  
-  protected function createModels($values)
-  {
-    $models = array();
-    foreach ($values as $key => $value) {
-      if (strpos($key, "::") !== false) {
-        list ($mdlName, $colName) = explode("::", $key);
-        if (!isset($models[$mdlName])) {
-          $models[$mdlName] = MODEL($mdlName);
-        }
-        
-        $models[$mdlName]->$colName = $value;
-      }
-    }
+    $values = $this->request->fetchPostValues();
+    $model  = $this->createModel($model, $values);
     
-    return $models;
-  }
-  
-  protected function getAnnotationForValidate($destination, $controller)
-  {
-    $action     = $destination->getAction();
-    $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
-    $methods    = $annotation->getMethodsAsAssoc();
-    
-    if (isset($methods[$action])) {
-      $method = $methods[$action];
-      return array($method->getAnnotation(self::ANNOTATION_VALIDATION_FAILURE),
-                   $method->getAnnotation(self::ANNOTATION_VALIDATION_IGNORES));
-    } else {
-      return array(null, null);
-    }
-  }
-  
-  protected function validate($model, $ignores)
-  {
     if ($ignores === null) {
       $ignores = array();
     } elseif (is_string($ignores)) {
@@ -148,27 +36,55 @@ class Processor_Model extends Sabel_Bus_Processor
     }
     
     $validator = new Sabel_DB_Validator($model);
-    return $validator->validate($ignores);
-  }
-  
-  protected function redirect($bus, $controller, $toAction)
-  {
-    $controller->getAttribute("redirect")->to($toAction);
-    $bus->set("response", $controller->getResponse());
-    $redirecter = $bus->getList()->find("redirecter")->get();
-    $redirecter->onRedirect($bus);
-    $bus->getList()->find("executer")->unlink();
+    $errors = $validator->validate($ignores);
     
-    $this->event($bus, $redirecter, "onRedirect", true);
+    if ($errors) {
+      $this->bus->get("controller")->errors = $errors;
+      return false;
+    } else {
+      return new Manipulator($model);
+    }
   }
   
-  public function resetErrors($storage = null)
+  public function createModel($model, $values)
   {
-    if ($storage === null) {
-      $storage = Sabel_Context::getContext()->getBus()->get("storage");
+    if (is_string($model)) {
+      $model = MODEL($model);
     }
     
-    $storage->delete(self::ERROR_KEY);
-    $storage->delete(self::STACK_KEY);
+    $mdlName = $model->getModelName();
+    
+    foreach ($values as $key => $value) {
+      if (strpos($key, "::") !== false) {
+        list ($name, $colName) = explode("::", $key);
+        if ($name !== $mdlName) continue;
+        
+        if ($colName === "datetime") {
+          foreach ($value as $key => $date) {
+            if (!isset($date["second"])) {
+              $date["second"] = "00";
+            }
+            
+            $datetime = $date["year"]   . "-"
+                      . $date["month"]  . "-"
+                      . $date["day"]    . " "
+                      . $date["hour"]   . ":"
+                      . $date["minute"] . ":"
+                      . $date["second"];
+                      
+            $model->$key = $datetime;
+          }
+        } elseif ($colName === "date") {
+          foreach ($value as $key => $date) {
+            $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
+            $model->$key = $date;
+          }
+        } else {
+          $model->$colName = $value;
+        }
+      }
+    }
+    
+    return $model;
   }
 }

@@ -11,9 +11,9 @@
  */
 class Manipulator extends Sabel_DB_Manipulator
 {
-  const CREATED_COLUMN = "created";
-  const UPDATED_COLUMN = "updated";
-  const DELETED_COLUMN = "deleted";
+  const CREATED_TIME_COLUMN = "created";
+  const UPDATED_TIME_COLUMN = "updated";
+  const DELETED_TIME_COLUMN = "deleted";
   
   public function before($method)
   {
@@ -42,13 +42,13 @@ class Manipulator extends Sabel_DB_Manipulator
     $columns  = $model->getColumnNames();
     $datetime = now();
     
-    if (in_array(self::UPDATED_COLUMN, $columns)) {
-      $model->{self::UPDATED_COLUMN} = $datetime;
+    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
+      $model->{self::UPDATED_TIME_COLUMN} = $datetime;
     }
     
     if (!$model->isSelected()) {
-      if (in_array(self::CREATED_COLUMN, $columns)) {
-        $model->{self::CREATED_COLUMN} = $datetime;
+      if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
+        $model->{self::CREATED_TIME_COLUMN} = $datetime;
       }
     }
     
@@ -67,12 +67,12 @@ class Manipulator extends Sabel_DB_Manipulator
     $columns  = $this->model->getColumnNames();
     $datetime = now();
     
-    if (in_array(self::UPDATED_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_COLUMN] = $datetime;
+    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
+      $this->arguments[0][self::UPDATED_TIME_COLUMN] = $datetime;
     }
     
-    if (in_array(self::CREATED_COLUMN, $columns)) {
-      $this->arguments[0][self::CREATED_COLUMN] = $datetime;
+    if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
+      $this->arguments[0][self::CREATED_TIME_COLUMN] = $datetime;
     }
   }
   
@@ -81,8 +81,8 @@ class Manipulator extends Sabel_DB_Manipulator
     if (!isset($this->arguments[0])) return;
     $columns = $this->model->getColumnNames();
     
-    if (in_array(self::UPDATED_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_COLUMN] = now();
+    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
+      $this->arguments[0][self::UPDATED_TIME_COLUMN] = now();
     }
   }
   

@@ -13,8 +13,9 @@ class Config_Bus extends Sabel_Bus_Config
     $this->add(new Processor_Initializer("initializer"));
     $this->add(new Sabel_Processor_Redirecter("redirecter"));
     // $this->add(new Processor_Acl("acl"));
-    $this->bus->addProcessorAndListener(new Processor_Model("model"));
+    $this->add(new Processor_Model("model"));
     $this->add(new Sabel_Processor_Executer("executer"));
+    $this->bus->addProcessorAndListener(new Processor_Errors("errors"));
     $this->add(new Sabel_Processor_Response("response"));
     $this->add(new Sabel_Processor_Renderer("renderer"));
     

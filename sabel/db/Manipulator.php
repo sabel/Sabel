@@ -23,7 +23,7 @@ class Sabel_DB_Manipulator
     $conditionManager = null,
     $autoReinit       = true;
 
-  public function __construct($model)
+  public function __construct($model = null)
   {
     if (is_string($model)) {
       $model = MODEL($model);
@@ -43,11 +43,6 @@ class Sabel_DB_Manipulator
   public function getModel()
   {
     return $this->model;
-  }
-
-  public function getArguments()
-  {
-    return $this->arguments;
   }
 
   public function before($method)
@@ -128,11 +123,6 @@ class Sabel_DB_Manipulator
     } else {
       return $this->conditionManager;
     }
-  }
-
-  public function setConditionManager(Sabel_DB_Condition_Manager $manager)
-  {
-    $this->conditionManager = $manager;
   }
 
   public function setCondition($arg1, $arg2 = null)
@@ -295,7 +285,7 @@ class Sabel_DB_Manipulator
     return $this->execute();
   }
 
-  public function _getChild()
+  protected function _getChild()
   {
     @list ($childName, $constraints) = $this->arguments;
 
@@ -473,7 +463,7 @@ class Sabel_DB_Manipulator
     return $this->execute();
   }
 
-  public function _executeStatement()
+  protected function _executeStatement()
   {
     return $this->_execute($this->arguments[0]);
   }

@@ -102,6 +102,8 @@ class Sabel_DB_Schema_Column
 
   public function cast($value)
   {
+    if ($value === null) return null;
+
     switch ($this->type) {
       case Sabel_DB_Type::INT:
         return _int_cast_func($value, INT_MAX);
