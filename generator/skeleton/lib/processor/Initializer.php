@@ -19,6 +19,6 @@ class Processor_Initializer extends Sabel_Bus_Processor
     Sabel_DB_Config::initialize();
     
     $controller = $bus->get("controller");
-    $controller->title = "Sabel"; // default page title.
+    $controller->pageTitle = "Sabel"; // default page title.
   }
 }

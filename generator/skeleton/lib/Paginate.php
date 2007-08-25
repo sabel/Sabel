@@ -13,11 +13,23 @@ class Paginate
 {
   protected
     $manipulator = null,
+    $isJoin      = false,
     $attributes  = array(),
     $method      = "select";
   
-  public function __construct(Sabel_DB_Manipulator $manipulator)
+  public function __construct($manipulator)
   {
+    if ($manipulator instanceof Sabel_DB_Manipulator) {
+      $manipulator->autoReinit(false);
+      $this->method = "select";
+    } elseif ($manipulator instanceof Sabel_DB_Join) {
+      $manipulator->getManipulator()->autoReinit(false);
+      $this->method = "join";
+      $this->isJoin = true;
+    } else {
+      throw new Exception("Paginate::__construct() invalid instance.");
+    }
+    
     $this->manipulator = $manipulator;
   }
   
@@ -43,8 +55,12 @@ class Paginate
     
     $attributes =& $this->attributes;
     $manipulator = $this->manipulator;
-    $manipulator->autoReinit(false);
-    $count = $manipulator->getCount();
+    
+    if ($this->isJoin) {
+      $count = $manipulator->getCount(null, false);
+    } else {
+      $count = $manipulator->getCount();
+    }
     
     $attributes["count"] = $count;
     $attributes["limit"] = $limit;
@@ -59,8 +75,15 @@ class Paginate
       $attributes["results"] = false;
     } else {
       $offset = $pager->getSqlOffset();
-      $manipulator->setConstraint("limit",  $limit);
-      $manipulator->setConstraint("offset", $offset);
+      
+      if ($this->isJoin) {
+        $manip = $manipulator->getManipulator();
+        $manip->setConstraint("limit",  $limit);
+        $manip->setConstraint("offset", $offset);
+      } else {
+        $manipulator->setConstraint("limit",  $limit);
+        $manipulator->setConstraint("offset", $offset);
+      }
       
       $attributes["offset"]  = $offset;
       $attributes["results"] = $manipulator->{$this->method}();

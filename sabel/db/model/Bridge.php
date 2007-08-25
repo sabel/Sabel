@@ -29,41 +29,22 @@ class Sabel_DB_Model_Bridge
 
   public function getChild($child, $constraints = null)
   {
-    $model    = $this->model;
-    $mdlName  = $model->getModelName();
-    $joinKey  = $this->joinKey;
-    $bridge   = MODEL($this->bridgeName);
-    $executer = new Manipulator($bridge);
-    $foreign  = $bridge->getSchema()->getForeignKeys();
+    $model   = $this->model;
+    $mdlName = $model->getModelName();
+    $joinKey = $this->joinKey;
+    $bridge  = MODEL($this->bridgeName);
+    $manip   = new Manipulator($bridge);
+    $foreign = $bridge->getSchema()->getForeignKeys();
 
-    if (isset($joinKey[$mdlName])) {
-      $pkey = $joinKey[$mdlName]["id"];
-      $fkey = $joinKey[$mdlName]["fkey"];
-    } elseif ($foreign === null) {
-      $pkey = "id";
-      $fkey = convert_to_tablename($mdlName) . "_id";
-    } else {
-      list ($pkey, $fkey) = $this->getJoinParam($foreign, $model->getTableName());
-    }
-
-    $executer->setCondition("{$this->bridgeName}.{$fkey}", $model->$pkey);
-    if ($constraints) $executer->setConstraint($constraints);
+    list ($pkey, $fkey) = $this->getJoinKey($foreign, $mdlName, $model);
+    $manip->setCondition("{$this->bridgeName}.{$fkey}", $model->$pkey);
+    if ($constraints) $manip->setConstraint($constraints);
 
     $cModel  = MODEL($child);
     $mdlName = $cModel->getModelName();
-
-    if (isset($joinKey[$mdlName])) {
-      $pkey = $joinKey[$mdlName]["id"];
-      $fkey = $joinKey[$mdlName]["fkey"];
-    } elseif ($foreign === null) {
-      $pkey = "id";
-      $fkey = convert_to_tablename($mdlName) . "_id";
-    } else {
-      list ($pkey, $fkey) = $this->getJoinParam($foreign, $cModel->getTableName());
-    }
-
+    list ($pkey, $fkey) = $this->getJoinKey($foreign, $mdlName, $cModel);
     $keys    = array("id" => $pkey, "fkey" => $fkey);
-    $joiner  = new Sabel_DB_Join($executer);
+    $joiner  = new Sabel_DB_Join($manip);
     $results = $joiner->add($cModel, null, null, $keys)->join();
 
     if (!$results) return false;
@@ -76,14 +57,23 @@ class Sabel_DB_Model_Bridge
     return $children;
   }
 
-  private function getJoinParam($foreign, $tblName)
+  private function getJoinKey($foreign, $mdlName, $model)
   {
-    foreach ($foreign as $fkey => $params) {
-      if ($params["referenced_table"] === $tblName) {
-        return array($params["referenced_column"], $fkey);
-      }
-    }
+    $joinKey = $this->joinKey;
 
-    throw new Exception("please specify keys for reference.");
+    if (isset($joinKey[$mdlName])) {
+      return array($joinKey[$mdlName]["id"], $joinKey[$mdlName]["fkey"]);
+    } elseif ($foreign === null) {
+      return array("id", convert_to_tablename($mdlName) . "_id");
+    } else {
+      $tblName = $model->getTableName();
+      foreach ($foreign as $fkey => $params) {
+        if ($params["referenced_table"] === $tblName) {
+          return array($params["referenced_column"], $fkey);
+        }
+      }
+
+      throw new Exception("please specify keys for reference.");
+    }
   }
 }

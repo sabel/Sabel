@@ -11,20 +11,29 @@
  */
 class Sabel_DB_Join
 {
-  const CANNOT_JOIN = "CANNOT_JOIN";
-
   private
-    $executer = null,
+    $manip    = null,
     $model    = null,
     $objects  = array(),
+    $joinType = "INNER",
     $tblName  = "";
 
-  public function __construct(Sabel_DB_Manipulator $executer)
+  public function __construct(Sabel_DB_Manipulator $manip)
   {
-    $this->executer  = $executer;
-    $this->model     = $executer->getModel();
+    $this->manip     = $manip;
+    $this->model     = $manip->getModel();
     $this->tblName   = $this->model->getTableName();
     $this->structure = Sabel_DB_Join_Structure::getInstance();
+  }
+
+  public function getManipulator()
+  {
+    return $this->manip;
+  }
+
+  public function setJoinType($joinType)
+  {
+    $this->joinType = $joinType;
   }
 
   public function add($object)
@@ -57,45 +66,38 @@ class Sabel_DB_Join
     return $this;
   }
 
-  public function buildParents()
+  public function setParents(array $parents)
   {
-    $parents = $this->executer->getParents();
-    $connectionName = $this->model->getConnectionName();
-    $accessor = new Sabel_DB_Schema_Accessor($connectionName);
-    $tableLists = $accessor->getTableLists();
-
-    $result = true;
-
     foreach ($parents as $parent) {
-      $model = MODEL($parent);
-      if (in_array($model->getTableName(), $tableLists)) {
-        $this->add(new Sabel_DB_Join_Object($model));
-      } else {
-        $result = self::CANNOT_JOIN;
-        break;
-      }
+      $this->add(MODEL($parent));
     }
 
-    if ($result === self::CANNOT_JOIN) $this->clear();
-
-    return $result;
+    return $this;
   }
 
-  public function getCount($joinType = "INNER")
+  public function getCount($joinType = null, $clearState = true)
   {
+    if ($joinType === null) {
+      $joinType = $this->joinType;
+    }
+
     $query = array();
     foreach ($this->objects as $object) {
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $rows = $this->execute("COUNT(*) AS cnt", implode("", $query));
-    $this->clear();
+    $rows = $this->execute("COUNT(*) AS cnt", implode("", $query), array("limit" => 1));
+    if ($clearState) $this->clear();
 
     return $rows[0]["cnt"];
   }
 
-  public function join($joinType = "INNER")
+  public function join($joinType = null)
   {
+    if ($joinType === null) {
+      $joinType = $this->joinType;
+    }
+
     $projection = array();
     foreach ($this->objects as $object) {
       $projection[] = $object->getProjection();
@@ -126,24 +128,27 @@ class Sabel_DB_Join
     return $results;
   }
 
-  protected function execute($projection, $join)
+  protected function execute($projection, $join, $constraints = null)
   {
-    $executer = $this->executer;
-    $stmt = Sabel_DB_Statement::create($this->model, Sabel_DB_Statement::SELECT);
+    $manip = $this->manip;
+    $stmt  = Sabel_DB_Statement::create($this->model, Sabel_DB_Statement::SELECT);
     $stmt->table($this->model->getTableName());
     $stmt->join($join);
     $stmt->projection($projection);
-    $stmt->where($executer->loadConditionManager()->build($stmt));
-    $stmt->constraints($executer->getConstraints());
+    $stmt->where($manip->loadConditionManager()->build($stmt));
 
-    return $executer->executeStatement($stmt);
+    if ($constraints === null) {
+      $stmt->constraints($manip->getConstraints());
+    } else {
+      $stmt->constraints($constraints);
+    }
+
+    return $manip->executeStatement($stmt);
   }
 
   public function clear()
   {
-    $this->objects = array();
     $this->structure->clear();
-
     Sabel_DB_Join_ColumnHash::clear();
   }
 }

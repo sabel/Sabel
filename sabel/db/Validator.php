@@ -252,8 +252,8 @@ class Sabel_DB_Validator
 
   protected function unique($model, $uniques)
   {
-    $executer = new Manipulator($model->getModelName());
-    $pkey = $model->getPrimaryKey();
+    $manip = new Manipulator($model->getModelName());
+    $pkey  = $model->getPrimaryKey();
 
     if (is_string($pkey)) $pkey = (array)$pkey;
 
@@ -261,11 +261,11 @@ class Sabel_DB_Validator
       $values = array();
       foreach ($unique as $uni) {
         $val = $model->$uni;
-        $executer->setCondition($uni, $val);
+        $manip->setCondition($uni, $val);
         $values[] = $val;
       }
 
-      $result = $executer->selectOne();
+      $result = $manip->selectOne();
       if (!$result->isSelected()) continue;
 
       if ($model->isSelected()) {

@@ -18,7 +18,6 @@ class Sabel_DB_Manipulator
 
   protected
     $projection       = "*",
-    $parents          = array(),
     $arguments        = array(),
     $constraints      = array(),
     $conditionManager = null,
@@ -122,20 +121,6 @@ class Sabel_DB_Manipulator
     $this->projection = (is_array($p)) ? join(", ", $p) : $p;
   }
 
-  public function setParents($parents)
-  {
-    if (is_string($parents)) {
-      $parents = (array)$parents;
-    }
-
-    $this->parents = $parents;
-  }
-
-  public function getParents()
-  {
-    return $this->parents;
-  }
-
   public function loadConditionManager()
   {
     if ($this->conditionManager === null) {
@@ -152,7 +137,7 @@ class Sabel_DB_Manipulator
 
   public function setCondition($arg1, $arg2 = null)
   {
-    if (empty($arg1)) return null;
+    if (empty($arg1)) return;
 
     $manager = $this->loadConditionManager();
 
@@ -258,7 +243,6 @@ class Sabel_DB_Manipulator
 
     if (isset($rows[0])) {
       $model->setProperties($rows[0]);
-      if ($this->parents) $model->addParent($this->parents);
     } else {
       $manager = $this->loadConditionManager();
       $conditions = $manager->getConditions();
@@ -286,13 +270,6 @@ class Sabel_DB_Manipulator
     @list ($arg1, $arg2) = $this->arguments;
 
     $this->setCondition($arg1, $arg2);
-    $parents = $this->parents;
-
-    if ($parents) {
-      $result = $this->internalJoin();
-      if ($result !== Sabel_DB_Join::CANNOT_JOIN) return $result;
-    }
-
     $stmt = $this->createStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($stmt));
 
@@ -304,29 +281,10 @@ class Sabel_DB_Manipulator
     foreach ($rows as $row) {
       $model = clone $source;
       $model->setProperties($row);
-
-      if ($parents) $model->addParent($parents);
       $results[] = $model;
     }
 
     return $results;
-  }
-
-  protected function internalJoin()
-  {
-    $join = new Sabel_DB_Join($this);
-
-    if ($join->buildParents() === Sabel_DB_Join::CANNOT_JOIN) {
-      return Sabel_DB_Join::CANNOT_JOIN;
-    } else {
-      return $join->join();
-    }
-  }
-
-  protected function addParent($parents)
-  {
-    $counterfeit = new Sabel_DB_Join_Counterfeit($this);
-    $counterfeit->setParents($parents);
   }
 
   public function getChild($childName, $constraints = null)
@@ -358,14 +316,14 @@ class Sabel_DB_Manipulator
       }
     }
 
-    $self = get_class($this);
-    $executer = new $self($child);
+    $self  = get_class($this);
+    $manip = new $self($child);
 
     if (!empty($constraints)) {
-      $executer->setConstraint($constraints);
+      $manip->setConstraint($constraints);
     }
 
-    return $executer->select($fkey, $model->__get($col));
+    return $manip->select($fkey, $model->__get($col));
   }
 
   public function save()

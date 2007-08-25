@@ -249,9 +249,9 @@ class Test_DB_Test extends SabelTestCase
   public function testParents()
   {
     $executer = new Manipulator("Member");
-    $executer->setParents(array("MemberSubGroup"));
     $executer->setConstraint("order", "Member.id ASC");
-    $members = $executer->select();
+    $join = new Sabel_DB_Join($executer);
+    $members = $join->setParents(array("MemberSubGroup"))->join();
 
     $this->assertEquals(count($members), 2);
 
