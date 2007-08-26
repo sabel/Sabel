@@ -1,15 +1,15 @@
 <?php
 
 /**
- * ModelForm
+ * Form
  *
  * @category  DB
- * @package   lib.db
+ * @package   org.sabel.db
  * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class ModelForm
+class Form
 {
   protected $model   = null;
   protected $mdlName = "";
@@ -127,7 +127,7 @@ class ModelForm
   {
     $value = $this->getValue($name);
     $name  = $this->getName("datetime") . "[{$name}]";
-    $dtime = new ModelFormDatetime($name, $value);
+    $dtime = new FormDatetime($name, $value);
     return $dtime->datetime($yearRange, $withSecond);
   }
   
@@ -135,7 +135,7 @@ class ModelForm
   {
     $value = $this->getValue($name);
     $name  = $this->getName("date") . "[{$name}]";
-    $dtime = new ModelFormDatetime($name, $value);
+    $dtime = new FormDatetime($name, $value);
     return $dtime->date($yearRange);
   }
   
@@ -174,7 +174,7 @@ class ModelForm
   }
 }
 
-class ModelFormDatetime
+class FormDatetime
 {
   protected
     $name      = "",
