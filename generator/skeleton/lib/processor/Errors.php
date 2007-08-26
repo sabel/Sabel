@@ -21,7 +21,7 @@ class Processor_Errors extends Sabel_Bus_Processor
     $storage    = $bus->get("storage");
     $request    = $bus->get("request");
     $controller = $bus->get("controller");
-    $model      = $controller->getAttribute("model");
+    $modelForm  = $controller->getAttribute("modelForm");
     $current    = $request->getUri()->__toString();
     $ignore     = ($request->isTypeOf("css") || $request->isTypeOf("js"));
     $errors     = $storage->read(self::ERROR_KEY);
@@ -31,15 +31,16 @@ class Processor_Errors extends Sabel_Bus_Processor
         $controller->setAttribute(self::ERROR_KEY, $errors["messages"]);
         $controller->setAttributes($errors["values"]);
         
-        if ($names = $this->getModelNames($errors["values"])) {
+        $names = $this->getModelNames($errors["values"]);
+        if (is_object($modelForm) && !empty($names)) {
           $models = array();
           foreach ($names as $name) {
-            $models[$name] = $model->createModel($name, $errors["values"]);
+            $models[$name] = $modelForm->createModel($name, $errors["values"]);
           }
           
           foreach ($models as $mdlName => $model) {
             $mdlName{0} = strtolower($mdlName{0});
-            $controller->setAttribute("{$mdlName}Form", new ModelForm($model));
+            $controller->setAttribute("{$mdlName}Form", new Form($model));
           }
         }
       } elseif (!$ignore && $request->isGet()) {

@@ -11,16 +11,17 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $libDb = RUN_BASE . DIR_DIVIDER . "lib" . DIR_DIVIDER . "db" . DIR_DIVIDER;
+    $libDb = RUN_BASE . DS . "lib" . DS . "db" . DS;
     
     Sabel::fileUsing($libDb . "utility.php");
     Sabel::fileUsing($libDb . "validators.php");
     Sabel::fileUsing($libDb . "Manipulator.php");
-    Sabel::fileUsing($libDb . "ModelForm.php");
+    Sabel::fileUsing($libDb . "Form.php");
     
     Sabel_DB_Config::initialize();
     
     $controller = $bus->get("controller");
-    $controller->pageTitle = "Sabel"; // default page title.
+    $controller->setAttribute("pageTitle", "Sabel"); // default page title.
+    $controller->setAttribute("modelForm", new ModelForm($bus));
   }
 }

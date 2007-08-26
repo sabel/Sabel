@@ -1,27 +1,24 @@
 <?php
 
 /**
- * Processor_Model
+ * ModelForm
  *
- * @category   Processor
- * @package    lib.processor
+ * @category   DB
+ * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Model extends Sabel_Bus_Processor
+class ModelForm
 {
   protected
-    $bus     = null,
-    $request = null;
+    $request    = null,
+    $controller = null;
   
-  public function execute($bus)
+  public function __construct($bus)
   {
-    $this->bus     = $bus;
-    $this->request = $bus->get("request");
-    $controller    = $bus->get("controller");
-    
-    $controller->setAttribute("model", $this);
+    $this->request    = $bus->get("request");
+    $this->controller = $bus->get("controller");
   }
   
   public function validate($model, $ignores = null)
@@ -39,7 +36,12 @@ class Processor_Model extends Sabel_Bus_Processor
     $errors = $validator->validate($ignores);
     
     if ($errors) {
-      $this->bus->get("controller")->errors = $errors;
+      if ($this->controller->hasAttribute("errors")) {
+        $e = $this->controller->errors;
+        $this->controller->errors = array_merge($e, $errors);
+      } else {
+        $this->controller->errors = $errors;
+      }
       return false;
     } else {
       return new Manipulator($model);

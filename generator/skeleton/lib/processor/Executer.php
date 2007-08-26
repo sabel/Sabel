@@ -19,11 +19,21 @@ class Processor_Executer extends Sabel_Bus_Processor
     $request     = $bus->get("request");
     $destination = $bus->get("destination");
     $storage     = $bus->get("storage");
+    $action      = $destination->getAction();
     
-    $controller->setAction($destination->getAction());
+    $controller->setAction($action);
     $controller->initialize();
     
-    $response = $controller->execute($destination->getAction());
+    if (method_exists($controller, $action)) {
+      $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
+      $method = $annotation->getMethod($action);
+      if ($method->getAnnotation("post") === "only" && !$request->isPost()) {
+        $bus->set("response", $controller->getResponse()->notFound());
+        return true;
+      }
+    }
+    
+    $response = $controller->execute($action);
     $bus->set("response", $response);
     
     return true;

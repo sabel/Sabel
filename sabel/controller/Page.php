@@ -176,7 +176,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public final function getAttribute($name)
   {
-    return $this->attributes[$name];
+    if (isset($this->attributes[$name])) {
+      return $this->attributes[$name];
+    } else {
+      return null;
+    }
   }
   
   public final function setAttribute($name, $value)

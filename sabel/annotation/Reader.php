@@ -20,6 +20,7 @@ class Sabel_Annotation_Reader
    */
   public function __construct()
   {
+
   }
   
   public static function create()
