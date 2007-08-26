@@ -156,6 +156,28 @@ class Sabel_Request_Object
     }
   }
   
+  public function hasValueWithMethod($name)
+  {
+    if ($this->isPost()) {
+      return ($this->hasPostValue($name));
+    } elseif ($this->isGet()) {
+      return ($this->hasGetValue($name));
+    }
+  }
+  
+  public function getValueWithMethod($name)
+  {
+    if ($this->hasValueWithMethod($name)) {
+      if ($this->isPost()) {
+        return $this->fetchPostValue($name);
+      } elseif ($this->isGet()) {
+        return $this->fetchGetValue($name);
+      }
+    } else {
+      return null;
+    }
+  }
+  
   public function setGetValue($key, $value)
   {
     $this->getValues[$key] = $value;
@@ -177,6 +199,11 @@ class Sabel_Request_Object
     return $this->getValues;
   }
   
+  public function hasGetValue($name)
+  {
+    return (isset($this->getValues[$name]));
+  }
+  
   public function fetchGetValue($key)
   {
     if (array_key_exists($key, $this->getValues)) {
@@ -189,6 +216,11 @@ class Sabel_Request_Object
   public function setPostValues($values)
   {
     $this->postValues = $values;
+  }
+  
+  public function hasPostValue($name)
+  {
+    return (isset($this->postValues[$name]));
   }
   
   public function fetchPostValue($key)

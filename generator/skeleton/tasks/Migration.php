@@ -31,7 +31,8 @@ class Migration extends Sabel_Sakle_Task
     if (!isset($arguments[1])) {
       throw new Exception("please specify the environment.");
     }
-
+    
+    Sabel_DB_Config::initialize();
     $this->arguments = $arguments;
     $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();

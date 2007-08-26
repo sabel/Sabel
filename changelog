@@ -1,0 +1,6 @@
+2007-08-26  Mori Reo  <morireo@sabel.jp>
+	* Flowプロセッサ(alpha)を追加
+	* プロセッサをアプリケーション側へ移動
+	* Request_Objectにメソッドを追加
+	* Annotation_ReflectionClassのgetMethod($name)を動作するようにした
+	* Sabel_Bus_Configのaddのシグニチャを変更($processor, $asListener)

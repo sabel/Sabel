@@ -19,9 +19,13 @@ abstract class Sabel_Bus_Config implements Sabel_Config
     $this->bus->init(array("storage" => null, "request" => null));
   }
   
-  public function add($processor)
+  public function add($processor, $enableListener = false)
   {
-    $this->bus->addProcessor($processor);
+    if ($enableListener) {
+      $this->bus->addProcessorAndListener($processor);
+    } else {
+      $this->bus->addProcessor($processor);
+    }
   }
   
   public function get($name)
