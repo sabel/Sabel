@@ -20,7 +20,6 @@ class Sabel_Annotation_Reader
    */
   public function __construct()
   {
-
   }
   
   public static function create()
@@ -53,16 +52,13 @@ class Sabel_Annotation_Reader
     $comments = self::splitComment($comment);
     
     foreach ($comments as $line) {
-      list($name, $value) = self::extract($line);
+      if ((list($name, $value) = self::extract($line)) !== null) {
       
-      if (isset($annotations[$name])) {
-        if (is_string($annotations[$name])) {
-          $annotations[$name] = array($annotations[$name]);
+        if (is_array($value)) {
+          $annotations[$name][] = $value;
+        } else {
+          $annotations[$name][] = array($value);
         }
-        
-        $annotations[$name][] = $value;
-      } else {
-        $annotations[$name] = $value;
       }
     }
     
