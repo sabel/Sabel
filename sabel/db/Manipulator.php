@@ -316,6 +316,28 @@ class Sabel_DB_Manipulator
     return $manip->select($fkey, $model->__get($col));
   }
 
+  public function validate($ignores = null)
+  {
+    $args = func_get_args();
+    $this->prepare("validate", $args);
+
+    return $this->execute();
+  }
+
+  public function _validate()
+  {
+    @list ($ignores) = $this->arguments;
+
+    if ($ignores === null) {
+      $ignores = array();
+    } elseif (is_string($ignores)) {
+      $ignores = array($ignores);
+    }
+
+    $validator = new Sabel_DB_Validator($this->model);
+    return $validator->validate($ignores);
+  }
+
   public function save()
   {
     $args = func_get_args();

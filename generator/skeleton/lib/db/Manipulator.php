@@ -11,83 +11,29 @@
  */
 class Manipulator extends Sabel_DB_Manipulator
 {
-  const CREATED_TIME_COLUMN = "created";
-  const UPDATED_TIME_COLUMN = "updated";
-  const DELETED_TIME_COLUMN = "deleted";
-  
   public function before($method)
   {
-    switch ($method) {
-      case "save":
-        return $this->beforeSave();
-        
-      case "insert":
-        return $this->beforeInsert();
-        
-      case "update":
-        return $this->beforeUpdate();
+    /* example.
+    $method = "before" . ucfirst($method);
+    if (method_exists($this, $method)) {
+      return $this->$method();
     }
+    */
   }
   
   public function after($method, $result)
   {
+    /* example.
     if (ENVIRONMENT === DEVELOPMENT) {
       $this->log();
     }
-  }
-  
-  private function beforeSave()
-  {
-    $model    = $this->model;
-    $columns  = $model->getColumnNames();
-    $datetime = now();
-    
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $model->{self::UPDATED_TIME_COLUMN} = $datetime;
-    }
-    
-    if (!$model->isSelected()) {
-      if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
-        $model->{self::CREATED_TIME_COLUMN} = $datetime;
-      }
-    }
-    
-    $args = $this->arguments;
-    
-    if (isset($args[0]) && is_array($args[0])) {
-      $validator = new Sabel_DB_Validator($model);
-      $errors = $validator->validate($args[0]);
-      if ($errors) return $errors;
-    }
-  }
-  
-  private function beforeInsert()
-  {
-    if (!isset($this->arguments[0])) return;
-    $columns  = $this->model->getColumnNames();
-    $datetime = now();
-    
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_TIME_COLUMN] = $datetime;
-    }
-    
-    if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::CREATED_TIME_COLUMN] = $datetime;
-    }
-  }
-  
-  private function beforeUpdate()
-  {
-    if (!isset($this->arguments[0])) return;
-    $columns = $this->model->getColumnNames();
-    
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_TIME_COLUMN] = now();
-    }
+    */
   }
   
   private function log()
   {
+    /* simple logging. */
+    
     static $selectLog = null;
     static $insertLog = null;
     static $updateLog = null;

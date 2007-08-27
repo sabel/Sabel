@@ -50,13 +50,13 @@ class Test_Sabel extends SabelTestCase
     $bus->set("request", $request);
     $bus->set("storage", $storage);
     
-    $bus->addProcessor(new Sabel_Processor_Request("request"));
-    $bus->addProcessor(new Sabel_Processor_Router("router"));
-    $bus->addProcessor(new Sabel_Processor_Helper("helper"));
-    $bus->addProcessor(new Sabel_Processor_Creator("creator"));
-    $bus->addProcessor(new Sabel_Processor_Executer("executer"));
-    $bus->addProcessor(new Sabel_Processor_Response("response"));
-    $bus->addProcessor(new Sabel_Processor_Renderer("renderer"));
+    $bus->addProcessor(new Processor_Request("request"));
+    $bus->addProcessor(new Processor_Router("router"));
+    $bus->addProcessor(new Processor_Helper("helper"));
+    $bus->addProcessor(new Processor_Creator("creator"));
+    $bus->addProcessor(new Processor_Executer("executer"));
+    $bus->addProcessor(new Processor_Response("response"));
+    $bus->addProcessor(new Processor_Renderer("renderer"));
     
     $result = $bus->run();
     

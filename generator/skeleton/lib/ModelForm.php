@@ -25,26 +25,20 @@ class ModelForm
   {
     $values = $this->request->fetchPostValues();
     $model  = $this->createModel($model, $values);
+    $manip  = new Manipulator($model);
+    $errors = $manip->validate($ignores);
     
-    if ($ignores === null) {
-      $ignores = array();
-    } elseif (is_string($ignores)) {
-      $ignores = array($ignores);
-    }
-    
-    $validator = new Sabel_DB_Validator($model);
-    $errors = $validator->validate($ignores);
-    
-    if ($errors) {
+    if (empty($errors)) {
+      return $manip;
+    } else {
       if ($this->controller->hasAttribute("errors")) {
         $e = $this->controller->errors;
         $this->controller->errors = array_merge($e, $errors);
       } else {
         $this->controller->errors = $errors;
       }
+      
       return false;
-    } else {
-      return new Manipulator($model);
     }
   }
   

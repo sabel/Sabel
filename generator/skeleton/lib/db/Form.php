@@ -17,6 +17,10 @@ class Form
   
   public function __construct($model)
   {
+    if (is_string($model)) {
+      $model = MODEL($model);
+    }
+    
     $this->model   = $model;
     $this->mdlName = $model->getModelName();
     $this->columns = $model->getSchema()->getColumns();

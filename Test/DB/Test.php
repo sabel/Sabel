@@ -460,7 +460,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($member3->name, "test5");
   }
 
-  public function testBeforeValidate()
+  public function testValidate()
   {
     $member = MODEL("Member");
     $member->name    = "test6";
@@ -470,7 +470,7 @@ class Test_DB_Test extends SabelTestCase
     $member->member_sub_group_id = 1;
 
     $executer = new Manipulator($member);
-    $result = $executer->save(array());
+    $result = $executer->validate();
 
     $this->assertEquals(count($result), 1);
     $this->assertEquals($result[0], "please enter a id.");
@@ -484,7 +484,7 @@ class Test_DB_Test extends SabelTestCase
     $member->member_sub_group_id = 1;
 
     $executer = new Manipulator($member);
-    $result = $executer->save(array());
+    $result = $executer->validate();
 
     $this->assertEquals(count($result), 2);
 
@@ -496,9 +496,8 @@ class Test_DB_Test extends SabelTestCase
     $member->location_id = 1;
     $member->member_sub_group_id = 1;
 
-    $ignores  = array("name");
     $executer = new Manipulator($member);
-    $result = $executer->save($ignores);
+    $result = $executer->validate("name");
 
     $this->assertEquals(count($result), 1);
   }
@@ -931,48 +930,48 @@ class Manipulator extends Sabel_DB_Manipulator
   
   public function before($method)
   {
-    switch ($method) {
-      case "save":
-        return $this->beforeSave();
-        
-      case "insert":
-        return $this->beforeInsert();
-        
-      case "update":
-        return $this->beforeUpdate();
+    $method = "before" . ucfirst($method);
+    if (method_exists($this, $method)) {
+      return $this->$method();
     }
   }
   
   public function after($method, $result)
   {
-    // $this->log();
+    if (ENVIRONMENT === DEVELOPMENT) {
+      $this->log();
+    }
+  }
+  
+  private function beforeValidate()
+  {
+    $this->setTimestamp();
   }
   
   private function beforeSave()
+  {
+    $this->setTimestamp();
+  }
+  
+  private function setTimestamp()
   {
     $model    = $this->model;
     $columns  = $model->getColumnNames();
     $datetime = now();
     
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $model->{self::UPDATED_TIME_COLUMN} = $datetime;
+    if ($model->{self::UPDATED_TIME_COLUMN} === null) {
+      if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
+        $model->{self::UPDATED_TIME_COLUMN} = $datetime;
+      }
     }
     
-    if (!$model->isSelected()) {
+    if (!$model->isSelected() && $model->{self::CREATED_TIME_COLUMN} === null) {
       if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
         $model->{self::CREATED_TIME_COLUMN} = $datetime;
       }
     }
-    
-    $args = $this->arguments;
-    
-    if (isset($args[0]) && is_array($args[0])) {
-      $validator = new Sabel_DB_Validator($model);
-      $errors = $validator->validate($args[0]);
-      if ($errors) return $errors;
-    }
   }
-  
+
   private function beforeInsert()
   {
     if (!isset($this->arguments[0])) return;
@@ -1000,15 +999,38 @@ class Manipulator extends Sabel_DB_Manipulator
   
   private function log()
   {
+    static $selectLog = null;
+    static $insertLog = null;
+    static $updateLog = null;
+    static $deleteLog = null;
+    static $queryLog  = null;
+    
     $stmt = $this->stmt;
     if (is_object($stmt)) {
+      if ($stmt->isSelect()) {
+        $name = "select";
+      } elseif ($stmt->isInsert()) {
+        $name = "insert";
+      } elseif ($stmt->isUpdate()) {
+        $name = "update";
+      } elseif ($stmt->isDelete()) {
+        $name = "delete";
+      } else {
+        $name = "query";
+      }
+      
+      $logger = $name . "Log";
+      if ($$logger === null) {
+        $$logger = new Sabel_Logger_File($name . ".log");
+      }
+      
       $sql = $stmt->getSql();
       if ($bindParams = $stmt->getBindParams()) {
         $bindParams = $stmt->getDriver()->escape($bindParams);
         $sql = str_replace(array_keys($bindParams), $bindParams, $sql);
       }
       
-      var_dump($sql);
+      $$logger->log($sql);
     }
   }
 }
