@@ -1,12 +1,13 @@
 <?php
 
 class SabelDirectoryAndFileCreator
-{  
+{
   protected $overwrite = false;
   protected $ignores = array();
   
   public function __construct()
   {
+
   }
   
   public function setOverwrite($condition)
@@ -21,7 +22,7 @@ class SabelDirectoryAndFileCreator
   
   public function accept($element, $type, $child = null)
   {
-    $element = RUN_BASE . DIR_DIVIDER . $element;
+    $element = RUN_BASE . DS . $element;
     
     if ($this->isIgnore($element)) {
       $this->printMessage("[\x1b[1;34mIGNORE\x1b[m] ignore: ${element}");
@@ -34,7 +35,12 @@ class SabelDirectoryAndFileCreator
       } else {
         $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
         mkdir($element);
-        if (in_array($element, array(RUN_BASE."/data", RUN_BASE."/cache", RUN_BASE."/logs", RUN_BASE."/data/compiled"))) {
+        $targets = array(RUN_BASE . DS . "data",
+                         RUN_BASE . DS . "cache",
+                         RUN_BASE . DS . "logs",
+                         RUN_BASE . DS . "data" . DS . "compiled");
+                         
+        if (in_array($element, $targets)) {
           if (chmod($element, 0777)) {
             $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] chmod {$element}");
           } else {
@@ -72,11 +78,13 @@ class SabelDirectoryAndFileRemover
   
   public function accept($element, $type, $child = null)
   {
-    if (defined('TEST_CASE')) $element = RUN_BASE  . '/' . $element;
+    if (defined("TEST_CASE")) {
+      $element = RUN_BASE  . DS . $element;
+    }
     
-    if ($type === 'dir') {
+    if ($type === "dir") {
       if (!@rmdir($element)) $this->stack[] = $element;
-    } elseif ($type === 'file') {
+    } elseif ($type === "file") {
       unlink($element);
     }
   }

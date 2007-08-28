@@ -398,14 +398,14 @@ class Schema_TargetModel2
   }
 }
 
-function validate_function_custom1($value, $column, $arg = 1)
+function validate_function_custom1($value, $column, $model, $arg = 1)
 {
   if (strlen($value) > $arg) {
     return "value is dekai.";
   }
 }
 
-function test_regex_column($value, $column, $arg)
+function test_regex_column($value, $column, $model, $arg)
 {
   if (strpos($value, $arg) !== false) {
     return "invalid value.";

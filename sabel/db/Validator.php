@@ -232,9 +232,9 @@ class Sabel_DB_Validator
         if (!is_array($args)) $args = (array)$args;
 
         $argString = $this->createEvalString($args);
-        eval ('$result = $function($value, $name, ' . $argString . ');');
+        eval ('$result = $function($value, $name, $this->model, ' . $argString . ');');
       } else {
-        $result = $function($value, $name);
+        $result = $function($value, $name, $this->model);
       }
 
       if ($result) $this->errors[] = $result;
