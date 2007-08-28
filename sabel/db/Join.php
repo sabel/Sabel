@@ -38,7 +38,7 @@ class Sabel_DB_Join
 
   public function add($object)
   {
-    if ($object instanceof Sabel_DB_Model) {
+    if ($object instanceof Sabel_DB_Abstract_Model) {
       $object = new Sabel_DB_Join_Object($object);
     }
 

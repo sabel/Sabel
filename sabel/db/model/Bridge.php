@@ -16,7 +16,7 @@ class Sabel_DB_Model_Bridge
     $bridgeName = null,
     $joinKey    = array();
 
-  public function __construct(Sabel_DB_Model $model, $bridgeName)
+  public function __construct(Sabel_DB_Abstract_Model $model, $bridgeName)
   {
     $this->model      = $model;
     $this->bridgeName = $bridgeName;

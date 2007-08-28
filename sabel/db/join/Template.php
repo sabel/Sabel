@@ -88,7 +88,7 @@ class Sabel_DB_Join_Template
       $props[$column] = $row[$hash];
     }
 
-    $model->setProperties($props);
+    $model->setAttributes($props);
     return $model;
   }
 }

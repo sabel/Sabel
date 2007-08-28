@@ -286,12 +286,12 @@ class Test_Validate extends SabelTestCase
   }
 }
 
-class TargetModel1 extends Sabel_DB_Model
+class TargetModel1 extends Sabel_DB_Abstract_Model
 {
 
 }
 
-class TargetModel2 extends Sabel_DB_Model
+class TargetModel2 extends Sabel_DB_Abstract_Model
 {
 
 }

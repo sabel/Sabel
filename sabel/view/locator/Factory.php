@@ -11,10 +11,10 @@
  */
 class Sabel_View_Locator_Factory
 {
-  const VIEW_DIR   = "views/";
-  const APP_VIEW   = "/app/views/";
-  const DEF_LAYOUT = "layout.tpl";
-  const TPL_SUFFIX = ".tpl";
+  const VIEW_DIR    = "views/";
+  const APP_VIEW    = "/app/views/";
+  const DEF_LAYOUT  = "layout.tpl";
+  const MODULES_DIR = "app";
   
   private $gettext = null;
   
@@ -47,7 +47,7 @@ class Sabel_View_Locator_Factory
     $locations = array();
     $path      = $this->getPath($module);
     $spcPath   = $path . self::VIEW_DIR;
-    $tplFile   = $name . self::TPL_SUFFIX;
+    $tplFile   = $name . TPL_SUFFIX;
     
     // app/views/{action}.tpl
     $locations[] = array("path" => RUN_BASE . self::APP_VIEW, "file" => $tplFile);
@@ -71,7 +71,7 @@ class Sabel_View_Locator_Factory
       $locale = $gettext->getBrowser()->getLocale();
       foreach ($locations as $l) {
         $localePath = $l["path"] . $name . DIR_DIVIDER;
-        $locator->addLocation($localePath, $locale . self::TPL_SUFFIX);
+        $locator->addLocation($localePath, $locale . TPL_SUFFIX);
         $locator->addLocation($l["path"], $l["file"]);
       }
     } else {
@@ -88,6 +88,6 @@ class Sabel_View_Locator_Factory
   
   private final function getPath($module)
   {
-    return RUN_BASE . Sabel_Const::MODULES_DIR . $module . DIR_DIVIDER;
+    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DIR_DIVIDER;
   }
 }

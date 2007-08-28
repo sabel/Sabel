@@ -11,10 +11,12 @@
  */
 final class Sabel_View
 {
+  const DEFAULT_LAYOUT = "layout";
+  
   private static $values = array();
-
+  
   private $resource = null;
-
+  
   public function __set($key, $value)
   {
     self::$values[$key] = $value;
@@ -34,31 +36,31 @@ final class Sabel_View
   {
     self::$values = array();
   }
-
+  
   public static final function assignByArray($assignments)
   {
     if (is_array($assignments)) {
       self::$values = array_merge(self::$values, $assignments);
     }
   }
-
+  
   public final function enableCache()
   {
     $this->renderer->enableCache();
     return $this;
   }
-
+  
   public final function setResource($resource)
   {
     $this->resource = $resource;
     return $this;
   }
-
+  
   public final function isResourceMissing()
   {
     return $this->resource->isResourceMissing();
   }
-
+  
   /**
    * rendering template resource
    *
@@ -74,7 +76,7 @@ final class Sabel_View
       throw new Exception("invalid resource");
     }
   }
-
+  
   public static function render($destination, $additional = array())
   {
     if (isset($additional["assign"])) {
@@ -132,10 +134,11 @@ final class Sabel_View
     }
     
     $assign = array("assign" => array("contentForLayout" => $content));
+    
     try {
       $content = Sabel_View::render($destination, $assigns);
       $d = clone $destination;
-      $d->setAction(Sabel_Const::DEFAULT_LAYOUT);
+      $d->setAction(self::DEFAULT_LAYOUT);
       $html = Sabel_View::render($d, $assign);
     } catch (Exception $e) {
       $html = $content;
@@ -150,7 +153,7 @@ final class Sabel_View
       try {
         $content = Sabel_View::render($destination, $assigns);
         $d = clone $destination;
-        $d->setAction(Sabel_Const::DEFAULT_LAYOUT);
+        $d->setAction(self::DEFAULT_LAYOUT);
         $html = Sabel_View::render($d, $assign);
       } catch (Exception $e) {
         $html = $content;

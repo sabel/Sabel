@@ -11,11 +11,6 @@
  */
 class Sabel_View_Locator_File implements Sabel_View_Locator
 {
-  const VIEW_DIR   = "views/";
-  const APP_VIEW   = "/app/views/";
-  const DEF_LAYOUT = "layout.tpl";
-  const TPL_SUFFIX = ".tpl";
-  
   private $locations = array();
   
   /**

@@ -25,7 +25,7 @@ class Sabel_DB_Schema_Table
     $this->columns   = $columns;
 
     $this->setPrimaryKey();
-    $this->setIncrementColumn();
+    $this->setSequenceColumn();
   }
 
   public function __get($key)
@@ -58,7 +58,7 @@ class Sabel_DB_Schema_Table
     return $this->primaryKey;
   }
 
-  public function getIncrementColumn()
+  public function getSequenceColumn()
   {
     return $this->incrementColumn;
   }
@@ -126,7 +126,7 @@ class Sabel_DB_Schema_Table
     }
   }
 
-  private function setIncrementColumn()
+  private function setSequenceColumn()
   {
     $incrementColumn = null;
 

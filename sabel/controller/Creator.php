@@ -11,6 +11,9 @@
  */
 class Sabel_Controller_Creator
 {
+  const CONTROLLERS_DIR    = "controllers";
+  const DEFAULT_CONTROLLER = "index";
+  
   /**
    * create controller instance
    *
@@ -27,12 +30,12 @@ class Sabel_Controller_Creator
     $instance  = null;
     
     $class  = ucfirst($module);
-    $class .= "_" . ucfirst(trim(Sabel_Const::CONTROLLER_DIR, "/"));
+    $class .= "_" . ucfirst(self::CONTROLLERS_DIR);
     
     if ($controller !== "") {
       $class .= "_" . ucfirst($controller);
     } else {
-      $class .= "_" . ucfirst(Sabel_Const::DEFAULT_CONTROLLER);
+      $class .= "_" . ucfirst(self::DEFAULT_CONTROLLER);
     }
     
     if (class_exists($class, true)) {

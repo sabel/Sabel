@@ -28,80 +28,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-$IS_WIN = (DIRECTORY_SEPARATOR === '\\');
-define("IS_WIN", $IS_WIN);
-define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
-define("DS", DIRECTORY_SEPARATOR);
-define("DEFAULT_PHP_SUFFIX", ".php");
-define("CURRENT_PATH", dirname(__FILE__));
-
-set_include_path(CURRENT_PATH . ":" . get_include_path());
-
-// regist autoload static method
+/* regist autoload static method */
 spl_autoload_register(array("Sabel", "autoload"));
-
-$SABEL_DIR = "sabel" . DIR_DIVIDER;
-
-$SABEL_CACHE_DIR      = $SABEL_DIR . "cache"      . DIR_DIVIDER;
-$SABEL_MAP_DIR        = $SABEL_DIR . "map"        . DIR_DIVIDER;
-$SABEL_VIEW_DIR       = $SABEL_DIR . "view"       . DIR_DIVIDER;
-$SABEL_LOG_DIR        = $SABEL_DIR . "logger"     . DIR_DIVIDER;
-$SABEL_CONTAINER_DIR  = $SABEL_DIR . "container"  . DIR_DIVIDER;
-$SABEL_CONTROLLER_DIR = $SABEL_DIR . "controller" . DIR_DIVIDER;
-$SABEL_REQUEST_DIR    = $SABEL_DIR . "request"    . DIR_DIVIDER;
-
-require ($SABEL_DIR . "Functions.php");
-
-require ($SABEL_CACHE_DIR . "Manager.php");
-require ($SABEL_CACHE_DIR . "Apc.php");
-require ($SABEL_CACHE_DIR . "Null.php");
-
-require ($SABEL_DIR . "Const.php");
-require ($SABEL_DIR . "Object.php");
-
-require ($SABEL_MAP_DIR . "Candidate.php");
-require ($SABEL_MAP_DIR . "Config.php");
-require ($SABEL_MAP_DIR . "Configurator.php");
-
-require ($SABEL_DIR . "Request.php");
-require ($SABEL_REQUEST_DIR . "Object.php");
-require ($SABEL_REQUEST_DIR . "Uri.php");
-require ($SABEL_REQUEST_DIR . "Parameters.php");
-
-require ($SABEL_DIR . "Plugin.php");
-require ($SABEL_DIR . "plugin" . DIR_DIVIDER . "Base.php");
-require ($SABEL_DIR . "plugin" . DIR_DIVIDER . "Common.php");
-
-require ($SABEL_DIR . "Response.php");
-require ($SABEL_DIR . "response" . DIR_DIVIDER . "Abstract.php");
-require ($SABEL_DIR . "response" . DIR_DIVIDER . "Web.php");
-
-require ($SABEL_DIR . "Container.php");
-require ($SABEL_CONTAINER_DIR ."Injector.php");
-require ($SABEL_CONTAINER_DIR ."Bind.php");
-require ($SABEL_CONTAINER_DIR ."DI.php");
-require ($SABEL_CONTAINER_DIR ."ReflectionClass.php");
-require ($SABEL_CONTAINER_DIR ."Injection.php");
-
-require ($SABEL_LOG_DIR . "Factory.php");
-require ($SABEL_LOG_DIR . "Interface.php");
-require ($SABEL_LOG_DIR . "File.php");
-require ($SABEL_LOG_DIR . "Null.php");
-
-require ($SABEL_DIR . "Destination.php");
-
-require ($SABEL_DIR . "View.php");
-require ($SABEL_VIEW_DIR . "Renderer.php");
-require ($SABEL_VIEW_DIR . "renderer" . DIR_DIVIDER . "Class.php");
-require ($SABEL_VIEW_DIR . "Resource.php");
-require ($SABEL_VIEW_DIR . "resource" . DIR_DIVIDER . "File.php");
-require ($SABEL_VIEW_DIR . "resource" . DIR_DIVIDER . "Template.php");
-require ($SABEL_VIEW_DIR . "Locator.php");
-require ($SABEL_VIEW_DIR . "locator" . DIR_DIVIDER . "Factory.php");
-require ($SABEL_VIEW_DIR . "locator" . DIR_DIVIDER . "File.php");
-
-require ($SABEL_DIR . "storage" . DIR_DIVIDER . "Session.php");
-require ($SABEL_DIR . "Helper.php");
 
 /**
  * Sabel
@@ -116,7 +44,13 @@ final class Sabel
 {
   private static $required  = array();
   private static $fileUsing = array();
-  private static $cache = null;
+  private static $cache     = null;
+  private static $path      = "";
+  
+  public static function getPath()
+  {
+    return self::$path;
+  }
   
   public static function using($className)
   {
@@ -138,9 +72,9 @@ final class Sabel
     
     if (($p = self::isReadable($path)) !== false) {
       if ($p === true) {
-        require (CURRENT_PATH . DIR_DIVIDER . $path);
+        require (self::$path . DS . $path);
       } else {
-        require ($p . DIR_DIVIDER . $path);
+        require ($p . DS . $path);
       }
       
       self::$required[$className] = 1;
@@ -161,11 +95,10 @@ final class Sabel
   
   private static function convertPath($className)
   {
-    $prePath = str_replace("_", DIR_DIVIDER, $className);
-    $path = strtolower(dirname($prePath)) . DIR_DIVIDER 
-            . basename($prePath) . DEFAULT_PHP_SUFFIX;
-            
-    return str_replace("." . DIR_DIVIDER, "", $path);
+    $prePath = str_replace("_", DS, $className);
+    $path = strtolower(dirname($prePath)) . DS . basename($prePath) . PHP_SUFFIX;
+    
+    return str_replace("." . DS, "", $path);
   }
   
   private static function isReadable($path)
@@ -183,7 +116,7 @@ final class Sabel
       }
       
       foreach ($paths as $p) {
-        $fpath = $p . DIR_DIVIDER . $path;
+        $fpath = $p . DS . $path;
         if (is_readable($fpath)) {
           self::$cache->write($path, $p);
           return $p;
@@ -193,4 +126,98 @@ final class Sabel
       return false;
     }
   }
+  
+  public static function main()
+  {
+    self::$path = dirname(__FILE__);
+    set_include_path(self::$path . ":" . get_include_path());
+    
+    define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
+    define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
+    define("DS", DIRECTORY_SEPARATOR);
+    
+    define("PHP_SUFFIX", ".php");
+    define("TPL_SUFFIX", ".tpl");
+    
+    $SABEL = "sabel" . DS;
+    
+    require ($SABEL . "Functions.php");
+    require ($SABEL . "Bus.php");
+    require ($SABEL . "Config.php");
+    require ($SABEL . "Context.php");
+    require ($SABEL . "Object.php");
+    require ($SABEL . "Router.php");
+    require ($SABEL . "Request.php");
+    require ($SABEL . "Destination.php");
+    require ($SABEL . "Container.php");
+    require ($SABEL . "Response.php");
+    require ($SABEL . "Helper.php");
+    require ($SABEL . "View.php");
+    
+    $BUS        = $SABEL . "bus"        . DS;
+    $CACHE      = $SABEL . "cache"      . DS;
+    $MAP        = $SABEL . "map"        . DS;
+    $REQUEST    = $SABEL . "request"    . DS;
+    $RESPONSE   = $SABEL . "response"   . DS;
+    $VIEW       = $SABEL . "view"       . DS;
+    $CONTAINER  = $SABEL . "container"  . DS;
+    $CONTROLLER = $SABEL . "controller" . DS;
+    $ANNOTATION = $SABEL . "annotation" . DS;
+    $LOG        = $SABEL . "logger"     . DS;
+    
+    require ($BUS . "Config.php");
+    require ($BUS . "Processor.php");
+    require ($BUS . "ProcessorCallback.php");
+    
+    require ($CACHE . "Manager.php");
+    require ($CACHE . "Apc.php");
+    require ($CACHE . "Null.php");
+    
+    require ($MAP . "Candidate.php");
+    require ($MAP . "Config.php");
+    require ($MAP . "Configurator.php");
+    require ($MAP . "config" . DS . "Route.php");
+    
+    require ($REQUEST . "Object.php");
+    require ($REQUEST . "Uri.php");
+    require ($REQUEST . "Parameters.php");
+    require ($REQUEST . "AbstractBuilder.php");
+    require ($REQUEST . "Builder.php");
+    
+    require ($ANNOTATION . "Reader.php");
+    require ($ANNOTATION . "ReflectionClass.php");
+    require ($ANNOTATION . "ReflectionMethod.php");
+    
+    require ($CONTROLLER . "Creator.php");
+    require ($CONTROLLER . "Page.php");
+    
+    require ($RESPONSE . "Abstract.php");
+    require ($RESPONSE . "Web.php");
+    
+    require ($CONTAINER . "Injector.php");
+    require ($CONTAINER . "Bind.php");
+    require ($CONTAINER . "DI.php");
+    require ($CONTAINER . "ReflectionClass.php");
+    require ($CONTAINER . "Injection.php");
+    
+    require ($VIEW . "Uri.php");
+    require ($VIEW . "Resource.php");
+    require ($VIEW . "Renderer.php");
+    require ($VIEW . "Locator.php");
+    require ($VIEW . "renderer" . DS . "Class.php");
+    require ($VIEW . "resource" . DS . "File.php");
+    require ($VIEW . "resource" . DS . "Template.php");
+    require ($VIEW . "locator"  . DS . "Factory.php");
+    require ($VIEW . "locator"  . DS . "File.php");
+    
+    require ($LOG . "Factory.php");
+    require ($LOG . "Interface.php");
+    require ($LOG . "File.php");
+    require ($LOG . "Null.php");
+    
+    require ($SABEL . "storage" . DS . "Session.php");
+    require ($SABEL . "router"  . DS . "Map.php");
+  }
 }
+
+Sabel::main();

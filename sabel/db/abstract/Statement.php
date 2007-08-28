@@ -30,7 +30,7 @@ abstract class Sabel_DB_Abstract_Statement
   abstract public function getStatementType();
   abstract public function build();
 
-  public function __construct(Sabel_DB_Model $model)
+  public function __construct(Sabel_DB_Abstract_Model $model)
   {
     $this->model  = $model;
     $this->driver = Sabel_DB_Config::loadDriver($model->getConnectionName());

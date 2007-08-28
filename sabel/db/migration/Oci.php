@@ -32,7 +32,7 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
       if (is_table_exists($tblName)) {
         $schema = getSchema($this->mdlName);
         executeQuery("DROP TABLE $tblName");
-        $this->dropSequence($schema->getIncrementColumn());
+        $this->dropSequence($schema->getSequenceColumn());
       } else {
         Sabel_Sakle_Task::warning("unknown table '{$tblName}'. (SKIP)");
       }
@@ -96,7 +96,7 @@ class Sabel_DB_Migration_Oci extends Sabel_DB_Migration_Base
 
       writeTable($schema, $restore);
       executeQuery("DROP TABLE $tblName");
-      $this->dropSequence($schema->getIncrementColumn());
+      $this->dropSequence($schema->getSequenceColumn());
     } else {
       $path = $this->getRestoreFileName();
       $this->createTable(getCreate($path, $this));

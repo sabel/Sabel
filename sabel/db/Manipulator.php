@@ -32,7 +32,7 @@ class Sabel_DB_Manipulator
     $this->setModel($model, false);
   }
 
-  public function setModel(Sabel_DB_Model $model, $reinit = true)
+  public function setModel(Sabel_DB_Abstract_Model $model, $reinit = true)
   {
     $this->model = $model;
     if ($reinit) $this->initState();
@@ -232,7 +232,7 @@ class Sabel_DB_Manipulator
     $rows = $this->_execute($this->prepareSelect($stmt));
 
     if (isset($rows[0])) {
-      $model->setProperties($rows[0]);
+      $model->setAttributes($rows[0]);
     } else {
       $manager = $this->loadConditionManager();
       $conditions = $manager->getConditions();
@@ -270,7 +270,7 @@ class Sabel_DB_Manipulator
 
     foreach ($rows as $row) {
       $model = clone $source;
-      $model->setProperties($row);
+      $model->setAttributes($row);
       $results[] = $model;
     }
 
@@ -355,7 +355,7 @@ class Sabel_DB_Manipulator
     }
 
     $model = MODEL($this->model->getModelName());
-    $model->setProperties($saveValues);
+    $model->setAttributes($saveValues);
 
     return $model;
   }
@@ -373,7 +373,7 @@ class Sabel_DB_Manipulator
     $newId = $this->_execute($this->prepareInsert($stmt, $saveValues));
 
     if ($newId !== null) {
-      $column = $model->getIncrementColumn();
+      $column = $model->getSequenceColumn();
       $saveValues[$column] = $newId;
     }
 
@@ -556,7 +556,7 @@ class Sabel_DB_Manipulator
     $stmt->setBindValues($values, false);
     $stmt->table($this->model->getTableName());
     $stmt->values($values);
-    $stmt->sequenceColumn($this->model->getIncrementColumn());
+    $stmt->sequenceColumn($this->model->getSequenceColumn());
 
     return $stmt;
   }

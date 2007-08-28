@@ -17,7 +17,7 @@ class Sabel_DB_Statement
   const DELETE = 0x08;
   const QUERY  = 0x10;
 
-  public static function create(Sabel_DB_Model $model, $stmtType = self::QUERY)
+  public static function create(Sabel_DB_Abstract_Model $model, $stmtType = self::QUERY)
   {
     switch ($stmtType) {
       case self::SELECT:

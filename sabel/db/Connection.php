@@ -155,7 +155,7 @@ class Sabel_DB_Connection
 
     if ($conn) {
       if (isset($params["encoding"])) {
-        pg_query($conn, sprintf(self::SET_ENCODING, $params["encoding"]));
+        pg_set_client_encoding($conn, $params["encoding"]);
       }
 
       return $conn;

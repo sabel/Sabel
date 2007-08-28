@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Model
+ * Sabel_DB_Abstract_Model
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Model
+abstract class Sabel_DB_Abstract_Model
 {
   protected
     $connectionName = "default";
@@ -114,9 +114,9 @@ abstract class Sabel_DB_Model
     return $this->schema->getPrimaryKey();
   }
 
-  public function getIncrementColumn()
+  public function getSequenceColumn()
   {
-    return $this->schema->getIncrementColumn();
+    return $this->schema->getSequenceColumn();
   }
 
   public function getUpdateValues()
@@ -134,7 +134,7 @@ abstract class Sabel_DB_Model
     return $this->selected;
   }
 
-  public function setProperties($row)
+  public function setAttributes($row)
   {
     $pkey = $this->schema->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
