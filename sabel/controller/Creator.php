@@ -26,8 +26,8 @@ class Sabel_Controller_Creator
     }
     
     list($module, $controller,) = $destination->toArray();
-    $class     = null;
-    $instance  = null;
+    $class    = null;
+    $instance = null;
     
     $class  = ucfirst($module);
     $class .= "_" . ucfirst(self::CONTROLLERS_DIR);
