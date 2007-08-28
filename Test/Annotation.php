@@ -1,5 +1,8 @@
 <?php
 
+require ("annotation/Class.php");
+require ("annotation/Duplicate.php");
+
 /**
  * Test_Annotation
  *
@@ -73,55 +76,5 @@ class Test_Annotation extends SabelTestCase
     $this->assertEquals(2, $testMethod->getNumberOfParameters());
     $this->assertEquals(array(array("test1")), $testMethod->getAnnotation("normal"));
     $this->assertTrue(is_array($testMethod->getAnnotation("array")));
-  }
-}
-
-/**
- * class annotation
- *
- * @annotation class
- */
-class Test_Annotation_Class
-{
-  /**
-   * this is annotation test
-   *
-   * @normal test1
-   * @ignoreSpace   test2
-   * @array      test4 elem1 "a: index"
-   */
-  public function testMethod($test, $test = null)
-  {
-  }
-  
-  /**
-   * this is annotation test
-   *
-   * @normal test1
-   * @ignoreSpace   test2
-   * @array      test4 elem1 elem2 elem3
-   */
-  public function testMethodTwo($test, $test = null)
-  {
-  }
-}
-
-/**
- * test for duplicate entry
- *
- * @annotation dupOne
- * @annotation dupTwo two
- * @annotation dupThree
- */
-class Test_Annotation_Dupulicate
-{
-  /**
-   * this is annotation test
-   *
-   * @dup dupOne
-   * @dup dupTwo
-   */
-  public function testMethod()
-  {
   }
 }

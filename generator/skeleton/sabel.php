@@ -1,22 +1,20 @@
 <?php
 
-define('RUN_BASE', dirname(realpath('.')));
+define("RUN_BASE", realpath("."));
+require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 
-require ('Sabel/Sabel.php');
-require (RUN_BASE . '/config/environment.php');
+require (RUN_BASE . DS . "config" . DS . "environment.php");
+require (RUN_BASE . DS . "config" . DS . "Bus.php");
+require (RUN_BASE . DS . "config" . DS . "Factory.php");
+require (RUN_BASE . DS . "config" . DS . "connection.php");
 
-if (!defined('ENVIRONMENT')) {
-  echo "SABEL FATAL ERROR: you must define ENVIRONMENT in config/environment.php";
+if (!defined("ENVIRONMENT")) {
+  echo "SABEL FATAL ERROR: must define ENVIRONMENT in config/environment.php";
   exit;
 }
 
-$aFrontController = new Sabel_Controller_Front();
+$_SERVER["HTTP_HOST"] = "localhost";
+$_SERVER["REQUEST_URI"] = $_SERVER["argv"][1];
 
-$aFrontController->plugin
-                 ->add(new Sabel_Plugin_Common())
-                 ->add(new Sabel_Plugin_Filter())
-                 ->add(new Sabel_Plugin_View())
-                 ->add(new Sabel_Plugin_Exception())
-                 ->add(new Sabel_Plugin_Redirecter());
-
-echo $aFrontController->ignition();
+$config = new Config_Bus();
+echo $config->configure()->getBus()->run();
