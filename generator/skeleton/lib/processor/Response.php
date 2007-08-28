@@ -22,7 +22,6 @@ class Processor_Response extends Sabel_Bus_Processor
     $creator = new Sabel_Controller_Creator();
     
     $response->setDestination($destination);
-    $response->outputHeader();
         
     if ($response->isNotFound() || $response->isServerError()) {
       if ($response->isNotFound()) {

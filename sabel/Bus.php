@@ -93,6 +93,7 @@ class Sabel_Bus
     
     while ($processorList !== null) {
       $processor = $processorList->get();
+      l("[bus] execute " . $processor->name);
       $result = $processor->execute($this);
       
       $this->callback($processor, $result);
