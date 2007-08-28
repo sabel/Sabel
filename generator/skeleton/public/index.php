@@ -3,12 +3,12 @@
 ob_start();
 
 define("RUN_BASE", dirname(realpath(".")));
+require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 
-require (RUN_BASE . "/config/environment.php");
-require ("Sabel/Sabel.php");
-require (RUN_BASE . "/config/Bus.php");
-require (RUN_BASE . "/config/Factory.php");
-require (RUN_BASE . "/config/connection.php");
+require (RUN_BASE . DS . "config" . DS . "environment.php");
+require (RUN_BASE . DS . "config" . DS . "Bus.php");
+require (RUN_BASE . DS . "config" . DS . "Factory.php");
+require (RUN_BASE . DS . "config" . DS . "connection.php");
 
 if (!defined("ENVIRONMENT")) {
   echo "SABEL FATAL ERROR: must define ENVIRONMENT in config/environment.php";

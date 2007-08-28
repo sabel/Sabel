@@ -1,5 +1,17 @@
 <?php
 
+function add_include_path($path)
+{
+  set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+}
+
+function add_include_paths($paths)
+{
+  $path = "";
+  foreach ($paths as $p) $path .= RUN_BASE . DS . $p . ":";
+  set_include_path($path . get_include_path());
+}
+
 function load($className, $config)
 {
   if (!$config instanceof Sabel_Container_Injection) {

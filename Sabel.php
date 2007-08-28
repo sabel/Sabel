@@ -130,7 +130,6 @@ final class Sabel
   public static function main()
   {
     self::$path = dirname(__FILE__);
-    set_include_path(self::$path . ":" . get_include_path());
     
     define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
     define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
@@ -215,8 +214,9 @@ final class Sabel
     require ($LOG . "File.php");
     require ($LOG . "Null.php");
     
-    require ($SABEL . "storage" . DS . "Session.php");
-    require ($SABEL . "router"  . DS . "Map.php");
+    require ($SABEL . "storage"   . DS . "Session.php");
+    require ($SABEL . "router"    . DS . "Map.php");
+    require ($SABEL . "exception" . DS . "Runtime.php");
   }
 }
 

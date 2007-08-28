@@ -276,7 +276,3 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return (!$resource->isMissing());
   }
 }
-
-class Sabel_Exception_ReservedActionName extends Sabel_Exception_Runtime {}
-class Sabel_Exception_InvalidActionName  extends Sabel_Exception_Runtime {}
-class Sabel_Exception_InvalidPlugin      extends Sabel_Exception_Runtime {}
