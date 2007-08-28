@@ -23,7 +23,9 @@ class Processor_Creator extends Sabel_Bus_Processor
     try {
       $controller = $creator->create($destination);
     } catch (Exception $e) {
-      $destination->setModule("index");
+      $module = $destination->getModule();
+      l("can't create controller use default {$module}/index/index");
+      $destination->setModule($module);
       $destination->setController("index");
       $destination->setAction("notFound");
       $controller = $creator->create($destination);

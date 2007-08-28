@@ -68,6 +68,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
     $this->request     = $request;
     $this->destination = $destination;
+    $this->storage     = $storage;
   }
   
   public function setBus($bus)
