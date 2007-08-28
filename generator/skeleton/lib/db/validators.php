@@ -1,12 +1,20 @@
 <?php
 
-function validateEmailAddress($address, $name)
+/*
+$custom = array("function" => "validateEmailAddress",
+                "model"    => "Members",
+                "column"   => "email");
+
+Sabel_DB_Validate_Config::addValidator($custom);
+*/
+
+function validateEmailAddress($model, $name)
 {
-  if ($address !== null) {
-    $result = preg_match("/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/", $address);
+  if ($model->$name !== null) {
+    $result = preg_match("/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/", $model->$name);
 
     if ($result === 0) {
-      return "invalid $name format.";
+      return "invalid email format";
     }
   }
 }

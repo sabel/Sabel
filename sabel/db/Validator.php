@@ -215,16 +215,16 @@ class Sabel_DB_Validator
 
         foreach ($cols as $name) {
           $value = $schemas[$name]->value;
-          $this->execCustomValidation($functions, $value, $name);
+          $this->execCustomValidation($functions, $name);
         }
       } elseif (isset($schemas[$colName])) {
         $value = $schemas[$colName]->value;
-        $this->execCustomValidation($functions, $value, $colName);
+        $this->execCustomValidation($functions, $colName);
       }
     }
   }
 
-  protected function execCustomValidation($functions, $value, $name)
+  protected function execCustomValidation($functions, $name)
   {
     foreach ($functions as $function) {
       if (is_array($function)) {
@@ -232,9 +232,9 @@ class Sabel_DB_Validator
         if (!is_array($args)) $args = (array)$args;
 
         $argString = $this->createEvalString($args);
-        eval ('$result = $function($value, $name, $this->model, ' . $argString . ');');
+        eval ('$result = $function($this->model, $name, ' . $argString . ');');
       } else {
-        $result = $function($value, $name, $this->model);
+        $result = $function($this->model, $name);
       }
 
       if ($result) $this->errors[] = $result;

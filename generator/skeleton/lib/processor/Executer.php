@@ -27,7 +27,8 @@ class Processor_Executer extends Sabel_Bus_Processor
     if (method_exists($controller, $action)) {
       $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
       $method = $annotation->getMethod($action);
-      if ($method->getAnnotation("post") === "only" && !$request->isPost()) {
+      $annot = $method->getAnnotation("post");
+      if ($annot[0][0] === "only" && !$request->isPost()) {
         $bus->set("response", $controller->getResponse()->notFound());
         return true;
       }
