@@ -40,6 +40,7 @@ class Sabel_Controller_Creator
     
     if (class_exists($class, true)) {
       $instance = new $class();
+      l("instanciate " . $class);
     } else {
       throw new Sabel_Exception_Runtime("controller not found");
     }
