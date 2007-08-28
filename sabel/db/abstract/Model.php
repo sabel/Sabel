@@ -64,6 +64,11 @@ abstract class Sabel_DB_Abstract_Model
     $this->values[$key] = $val;
     if ($this->selected) $this->updateValues[$key] = $val;
   }
+  
+  public function unsetValue($key)
+  {
+    unset($this->values[$key]);
+  }
 
   public function setValues(array $values)
   {

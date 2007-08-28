@@ -1,3 +1,7 @@
+2007-08-28  Mori Reo  <mori.reo@sabel.jp>
+	* Sabel_DB_ModelにunsetValue()メソッドを追加
+	* CustomValidatorのメソッドシグニチャを変更
+
 2007-08-26  Mori Reo  <morireo@sabel.jp>
 	* Flowプロセッサ(alpha)を追加
 	* プロセッサをアプリケーション側へ移動
