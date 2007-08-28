@@ -25,16 +25,18 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
       $request = new Sabel_Request_Object($request);
     }
     
-    $aFrontController = new Sabel_Controller_Front();
-    
     if ($storage === null) {
       $storage = new Sabel_Storage_InMemory();
     }
     
     $this->storage = $storage;
-    $aFrontController->ignition($request, $storage);
     
-    return $aFrontController->getResponse();
+    $config = new Config_Bus();
+    $bus = $config->configure()->getBus();
+    $bus->set("request", $request);
+    $bus->set("storage", $storage);
+    $bus->run();
+    return $bus->get("response");
   }
   
   protected function assertRedirect($uri, $toUri, $storage = null)

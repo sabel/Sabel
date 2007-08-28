@@ -22,46 +22,40 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   const NOT_FOUND    = 400;
   const SERVER_ERROR = 500;
   
-  private $controller  = null;
-  private $destination = null;
   private $contentType = "";
   
   private $headers = array();
+  private $responses = array();
   
+  public function setResponses($array)
+  {
+    $this->responses = $array;
+  }
+  
+  public function toArray()
+  {
+    return $this->responses;
+  }
+  
+  public function getResponses()
+  {
+    return $this->responses;
+  }
+  
+  public function getResponse($key)
+  {
+    if (isset($this->responses[$key])) {
+      return $this->responses[$key];
+    } else {
+      return null;
+    }
+  }
+    
   public function setContentType($type)
   {
     $this->contentType = $type;
   }
-  
-  public function setController($controller)
-  {
-    if (! $controller instanceof Sabel_Controller_Page) {
-      throw new Sabel_Exception_Runtime("must be Controller");
-    }
     
-    $this->controller = $controller;
-  }
-  
-  public function hasController()
-  {
-    return (is_object($this->controller));
-  }
-  
-  public function getController()
-  {
-    return $this->controller;
-  }
-  
-  public function setDestination($destination)
-  {
-    $this->destination = $destination;
-  }
-  
-  public function getDestination()
-  {
-    return $this->destination;
-  }
-  
   public function notFound()
   {
     $this->status = self::NOT_FOUND;
@@ -183,16 +177,6 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function isServerError()
   {
     return ($this->status === self::SERVER_ERROR);
-  }
-  
-  public function getAttribute($key)
-  {
-    return $this->controller->$key;
-  }
-  
-  public function getAttributes()
-  {
-    return $this->controller->getAttributes();
   }
   
   public function setHeader($message, $value)

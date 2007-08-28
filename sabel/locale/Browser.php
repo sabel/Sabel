@@ -18,7 +18,7 @@ class Sabel_Locale_Browser
   public function __construct($acceptLanguage = null)
   {
     if ($acceptLanguage === null) {
-      $acceptLanguage = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
+      $acceptLanguage = Sabel_Environment::get("HTTP_ACCEPT_LANGUAGE");
     }
     
     if ($acceptLanguage === "" || $acceptLanguage === null) {

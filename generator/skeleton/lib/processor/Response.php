@@ -19,9 +19,9 @@ class Processor_Response extends Sabel_Bus_Processor
     $request     = $bus->get("request");
     $storage     = $bus->get("storage");
     
-    $creator = new Sabel_Controller_Creator();
+    $response->setResponses($controller->getAttributes());
     
-    $response->setDestination($destination);
+    $creator = new Sabel_Controller_Creator();
         
     if ($response->isNotFound() || $response->isServerError()) {
       if ($response->isNotFound()) {
@@ -37,12 +37,6 @@ class Processor_Response extends Sabel_Bus_Processor
         $controller = $creator->create($destination);
         $response = $controller->execute($destination->getAction());
       }
-    }
-    
-    $controller->setup($request, $destination, $storage);
-    
-    if (!$response->hasController()) {
-      $response->setController($controller);
     }
   }
 }

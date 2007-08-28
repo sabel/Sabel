@@ -113,19 +113,13 @@ final class Sabel_View
     return Sabel_View::render($destination, $assigns);
   }
   
-  public static function renderDefault($response, $withLayout = true)
+  public static function renderDefault($request, $response, $destination, $withLayout = true)
   {
-    // $context = Sabel_Context::getContext();
-    
-    $controller  = $response->getController();
-    $destination = $response->getDestination();
-    
     $view = new Sabel_View();
-    $view->assignByArray($controller->getRequests());
+    $view->assignByArray($request->fetchPostValues());
     
     $html = "";
-    $assigns = array("assign" => array_merge($controller->getAssignments(),
-                                             $controller->getAttributes()));
+    $assigns = array("assign" => array_merge($response->getResponses()));
     
     try {
       $content = Sabel_View::render($destination, $assigns);

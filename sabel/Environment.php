@@ -12,11 +12,7 @@
 class Sabel_Environment
 {
   private static $instance = null;
-  
-  private function __construct()
-  {
-
-  }
+  private $environments = array();
   
   public static function create()
   {
@@ -31,6 +27,10 @@ class Sabel_Environment
   
   public function __get($key)
   {
+    if (isset($this->environments[$key])) {
+      return $this->environments[$key];
+    }
+    
     $key = strtoupper($key);
     if ($key === "HTTP_HOST" && !isset($_SERVER[$key])) {
       return "localhost";
@@ -39,6 +39,11 @@ class Sabel_Environment
     }
     
     return (isset($_SERVER[$key])) ? $_SERVER[$key] : null;
+  }
+  
+  public function set($key, $value)
+  {
+    $this->environments[$key] = $value;
   }
   
   public function isMethod($expected)

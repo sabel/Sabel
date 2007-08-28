@@ -172,7 +172,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   protected function assign($key, $value)
   {
-    $this->assignments[$key] = $value;
+    $this->attributes[$key] = $value;
   }
   
   public final function getAttribute($name)
