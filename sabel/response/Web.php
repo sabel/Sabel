@@ -80,7 +80,9 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       }
     }
     
-    l("[Core] Header location: " . var_export($this->location, 1));
+    if ($this->location) {
+      l("[Core] Header location: " . var_export($this->location, 1));
+    }
     
     if ($this->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
