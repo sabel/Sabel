@@ -105,7 +105,12 @@ class Sabel_DB_Connection
       mysql_select_db($params["database"], $conn);
 
       if (isset($params["encoding"])) {
-        mysql_query(sprintf(self::SET_ENCODING, $params["encoding"]), $conn);
+        list (,,$v) = explode(".", PHP_VERSION);
+        if ($v{0} >= 3) {
+          mysql_set_charset($params["encoding"], $conn);
+        } else {
+          mysql_query(sprintf(self::SET_ENCODING, $params["encoding"]), $conn);
+        }
       }
 
       return $conn;
@@ -155,9 +160,9 @@ class Sabel_DB_Connection
 
       return $conn;
     } else {
-      list (, $minorVersion) = explode(".", PHP_VERSION);
+      list (, $v) = explode(".", PHP_VERSION);
 
-      if ($minorVersion > 1) {
+      if ($v >= 2) {
         $error = error_get_last();
         return $error["message"];
       } else {

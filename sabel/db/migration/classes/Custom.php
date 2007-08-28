@@ -17,7 +17,7 @@ class Sabel_DB_Migration_Classes_Custom
 
   public function __construct()
   {
-    $this->temporaryDir = $tp = MIG_DIR . DIR_DIVIDER . "temporary";
+    $this->temporaryDir = $tp = MIG_DIR . DS . "temporary";
     if (!is_dir($tp)) mkdir($tp);
   }
 
@@ -55,9 +55,9 @@ class Sabel_DB_Migration_Classes_Custom
       list ($num) = explode("_", $file);
       $upgradeFiles[$num] = $file;
 
-      file_put_contents($restoreDir . DIR_DIVIDER . "restore_{$num}", "\n");
+      file_put_contents($restoreDir . DS . "restore_{$num}", "\n");
 
-      $path = $temporaryDir . DIR_DIVIDER . $file;
+      $path = $temporaryDir . DS . $file;
       $ins = new $migClassName($path, "upgrade", $temporaryDir);
       $ins->execute();
 
@@ -78,7 +78,7 @@ class Sabel_DB_Migration_Classes_Custom
     $this->isUpgrade = true;
     list (, $num) = explode("_", $restoreFile);
 
-    $fp = fopen(MIG_DIR . DIR_DIVIDER . "{$num}_mix.php", "r");
+    $fp = fopen(MIG_DIR . DS . "{$num}_mix.php", "r");
     $this->splitFiles($fp);
     fclose($fp);
 
@@ -90,7 +90,7 @@ class Sabel_DB_Migration_Classes_Custom
     $temporaryDir = $this->temporaryDir;
     $files = array_reverse(getMigrationFiles($temporaryDir));
     $fileNum = count($files) + 1;
-    $prefix  = $temporaryDir . DIR_DIVIDER;
+    $prefix  = $temporaryDir . DS;
 
     for ($i = 1; $i < $fileNum; $i++) {
       $file = $files[$i - 1];
@@ -145,10 +145,10 @@ class Sabel_DB_Migration_Classes_Custom
     $tmpDir = $this->temporaryDir;
 
     if ($this->isUpgrade) {
-      $path = $tmpDir . DIR_DIVIDER . "{$num}_{$fName}";
+      $path = $tmpDir . DS . "{$num}_{$fName}";
     } else {
       $dir  = $this->getTemporaryRestoresDir();
-      $path = $dir . DIR_DIVIDER . "restore_" . $num;
+      $path = $dir . DS . "restore_" . $num;
     }
 
     file_put_contents($path, implode($lines, "\n"));
@@ -164,12 +164,15 @@ class Sabel_DB_Migration_Classes_Custom
       list (, $num) = explode("_", $file);
 
       if (is_numeric($num)) {
-        $files[$num] = $restoreDir. DIR_DIVIDER . $file;
+        $files[$num] = $restoreDir. DS . $file;
       }
     }
 
-    $files   = array_reverse($files);
-    $restore = MIG_DIR . DIR_DIVIDER . "restores" . DIR_DIVIDER . "restore_{$version}";
+    $files = array_reverse($files);
+    $dir   = MIG_DIR . DS . "restores";
+    if (!is_dir($dir)) mkdir($dir);
+
+    $restore = $dir . DS . "restore_{$version}";
     $rfp     = fopen($restore, "w");
 
     foreach ($files as $file) {
@@ -197,7 +200,7 @@ class Sabel_DB_Migration_Classes_Custom
 
   private function getTemporaryRestoresDir()
   {
-    $dir = $this->temporaryDir . DIR_DIVIDER . "restores";
+    $dir = $this->temporaryDir . DS . "restores";
     if (!is_dir($dir)) mkdir($dir);
 
     return $dir;

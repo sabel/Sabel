@@ -3,9 +3,10 @@
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 define("SAKLE_CMD", "sakle");
 
-Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
-Sabel::fileUsing("config" . DIR_DIVIDER . "connection.php");
+Sabel::fileUsing("config" . DS . "environment.php");
+Sabel::fileUsing("config" . DS . "connection.php");
 Sabel::using("Sabel_DB_Migration_Base");
+Sabel_DB_Config::initialize();
 
 /**
  * Migration
@@ -32,7 +33,6 @@ class Migration extends Sabel_Sakle_Task
       throw new Exception("please specify the environment.");
     }
     
-    Sabel_DB_Config::initialize();
     $this->arguments = $arguments;
     $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
@@ -111,7 +111,7 @@ class Migration extends Sabel_Sakle_Task
   protected function defineMigrationDir()
   {
     if (!defined("MIG_DIR")) {
-      define("MIG_DIR", RUN_BASE . DIR_DIVIDER . "migration" . DIR_DIVIDER . $this->connectionName);
+      define("MIG_DIR", RUN_BASE . DS . "migration" . DS . $this->connectionName);
     }
   }
 
@@ -223,7 +223,7 @@ class Migration extends Sabel_Sakle_Task
     $driverName = str_replace("pdo-", "", $driverName);
     $className  = "Sabel_DB_Migration_" . ucfirst($driverName);
 
-    return new $className(MIG_DIR . DIR_DIVIDER . $this->files[$verNum], $type);
+    return new $className(MIG_DIR . DS . $this->files[$verNum], $type);
   }
 
   protected function getConnectionName()
@@ -258,28 +258,75 @@ class Migration extends Sabel_Sakle_Task
 
   protected function export()
   {
-    $fileNum  = 1;
-    $accessor = $this->accessor;
-    $path     = RUN_BASE . DIR_DIVIDER . "migration" . DIR_DIVIDER . $this->connectionName;
+    $exporter = new MigrationExport($this->accessor, $this->connectionName);
+    $exporter->export();
+  }
+}
 
-    // @todo
-    // check constraint of foreign key. ( export sequence )
+class MigrationExport
+{
+  private $fileNum  = 1;
+  private $path     = "";
+  private $schemas  = array();
+  private $exported = array();
 
-    try {
-      foreach ($accessor->getTableLists() as $table) {
-        if ($table === "sversion") continue;
-        $schema = $accessor->get($table);
-        $filePath = $path . DIR_DIVIDER . $fileNum . "_" . convert_to_modelname($table) . "_create.php";
-        $fp = fopen($filePath, "w");
-        Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
+  public function __construct($accessor, $connectionName)
+  {
+    $this->schemas = $accessor->getAll();
+    $this->path = RUN_BASE . DS . "migration" . DS . $connectionName;
+  }
 
-        // @todo table engine.
-        fwrite($fp, '$create->options("engine", "InnoDB");');
-        fclose($fp);
-        $fileNum++;
+  public function export()
+  {
+    if (empty($this->schemas)) return;
+
+    foreach ($this->schemas as $tblName => $schema) {
+      $foreignKeys = $schema->getForeignKeys();
+      if ($foreignKeys === null) {
+        $this->doExport($schema);
+        $this->exported[$tblName] = true;
+        unset($this->schemas[$tblName]);
+        continue;
       }
+
+      $enable = true;
+      foreach ($foreignKeys as $key) {
+        $parent = $key["referenced_table"];
+        if ($parent === $tblName) continue;
+        if (!isset($this->exported[$parent])) {
+          $enable = false;
+          break;
+        }
+      }
+
+      if ($enable) {
+        $this->doExport($schema);
+        $this->exported[$tblName] = true;
+        unset($this->schemas[$tblName]);
+      }
+    }
+
+    $this->export();
+  }
+
+  public function doExport($schema)
+  {
+    try {
+      $tblName = $schema->getTableName();
+      if ($tblName === "sversion") return;
+      $filePath = $this->path . DS . $this->fileNum . "_"
+                . convert_to_modelname($tblName) . "_create.php";
+
+      $fp = fopen($filePath, "w");
+      Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
+
+      // @todo table engine.
+      fwrite($fp, '$create->options("engine", "InnoDB");');
+      fclose($fp);
+      $this->fileNum++;
     } catch (Exception $e) {
-      $this->printMessage($e->getMessage(), self::MSG_ERR); exit;
+      $this->printMessage($e->getMessage(), self::MSG_ERR);
+      exit;
     }
   }
 }
