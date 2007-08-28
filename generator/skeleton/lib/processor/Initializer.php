@@ -23,5 +23,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
     $controller = $bus->get("controller");
     $controller->setAttribute("pageTitle", "Sabel"); // default page title.
     $controller->setAttribute("modelForm", new ModelForm($bus));
+    
+    $bus->get("storage")->start();
   }
 }

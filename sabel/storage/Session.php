@@ -22,7 +22,7 @@ class Sabel_Storage_Session
   
   public function __construct()
   {
-    $this->start();
+
   }
   
   public function start()
