@@ -36,9 +36,9 @@ class Migration extends Sabel_Sakle_Task
     $this->arguments = $arguments;
     $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
-    $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
-
+    
     $this->initDbConfig($environment);
+    $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
 
     if ($arguments[2] === "export") {
       $this->export();
@@ -74,7 +74,7 @@ class Migration extends Sabel_Sakle_Task
     $connectionName = $this->connectionName;
     $this->driver = Sabel_DB_Config::loadDriver($connectionName);
     Sabel_DB_Migration_Manager::setDriver($this->driver);
-
+    
     try {
       Sabel_DB_Migration_Manager::setAccessor($this->accessor);
       if (!in_array("sversion", $this->accessor->getTableLists())) {
@@ -233,9 +233,8 @@ class Migration extends Sabel_Sakle_Task
     if (!isset($args[2])) {
       $this->printMessage("too few arguments", parent::MSG_ERR); exit;
     }
-
-    $name = (isset($args[3])) ? $args[3] : "default";
-    return $this->connectionName = $name;
+    
+    return $this->connectionName = (isset($args[3])) ? $args[3] : "default";
   }
 
   protected function createVersionManageTable()
