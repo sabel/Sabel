@@ -51,6 +51,11 @@ function h($content)
   return htmlspecialchars($content);
 }
 
+function mb_trim($string)
+{
+  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
+}
+
 function to_date($date, $format)
 {
   return Helpers_Date::format($date, constant("Helpers_Date::" . $format));

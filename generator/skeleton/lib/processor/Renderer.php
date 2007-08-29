@@ -21,7 +21,8 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     // @todo use instance of Sabel_View. don't use static.
     $result = Sabel_View::renderDefault($request, $response, $destination);
-    
     $bus->set("result", $result);
+
+    return true;
   }
 }

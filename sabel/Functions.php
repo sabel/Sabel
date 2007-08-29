@@ -266,13 +266,11 @@ function MODEL($mdlName)
     }
   }
   
-  $exists = class_exists($mdlName, false);
-  
-  if (!$exists) {
-    Sabel::fileUsing(MODELS_DIR . $mdlName . ".php");
+  if (!$exists = class_exists($mdlName, false)) {
+    $exists = Sabel::fileUsing(MODELS_DIR . $mdlName . ".php");
   }
   
-  $exists = $cache[$mdlName] = class_exists($mdlName, false);
+  $cache[$mdlName] = $exists;
   
   if ($exists) {
     return new $mdlName();
