@@ -28,9 +28,9 @@ class Sabel_Annotation_Reader
     return self::$instance;
   }
   
-  public function read($className)
+  public function read($class)
   {
-    $ref = new ReflectionClass($className);
+    $ref = new ReflectionClass($class);
     return $this->process($ref->getDocComment());
   }
   
@@ -52,7 +52,13 @@ class Sabel_Annotation_Reader
     $comments = self::splitComment($comment);
     
     foreach ($comments as $line) {
-      if ((list($name, $value) = self::extract($line)) !== null) {
+      $annotation = self::extract($line);
+      
+      if (count($annotation) === 0) {
+        continue;
+      }
+      
+      if ((list($name, $value) = $annotation) !== null) {
       
         if (is_array($value)) {
           $annotations[$name][] = $value;
@@ -76,6 +82,11 @@ class Sabel_Annotation_Reader
     
     if (strpos($annotation[0], "@") === 0) {
       $name  = array_shift($annotation);
+      
+      if (count($annotation) === 0) {
+        return array();
+      }
+      
       $values = (count($annotation) >= 2) ? $annotation : $annotation[0];
       
       if (is_array($values)) {

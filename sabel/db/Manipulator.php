@@ -203,7 +203,7 @@ class Sabel_DB_Manipulator
     $this->projection  = $projection;
     $this->constraints = $constraints;
 
-    return $rows[0]["cnt"];
+    return (int)$rows[0]["cnt"];
   }
 
   public function selectOne($arg1 = null, $arg2 = null)

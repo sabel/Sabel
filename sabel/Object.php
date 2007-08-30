@@ -16,4 +16,9 @@ abstract class Sabel_Object
   {
     return (method_exists($this, $name));
   }
+  
+  public final function getName()
+  {
+    return get_class($this);
+  }
 }

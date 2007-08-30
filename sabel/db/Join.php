@@ -89,7 +89,7 @@ class Sabel_DB_Join
     $rows = $this->execute("COUNT(*) AS cnt", implode("", $query), array("limit" => 1));
     if ($clearState) $this->clear();
 
-    return $rows[0]["cnt"];
+    return (int)$rows[0]["cnt"];
   }
 
   public function join($joinType = null)
