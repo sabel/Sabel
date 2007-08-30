@@ -63,7 +63,7 @@ class Gettext extends Sabel_Sakle_Task
     $messages = array();
     foreach ($this->files as $file) {
       $contents = file_get_contents($file);
-      preg_match_all("/_\(('|\")([^'\"]+)\\1\)/", $contents, $matches);
+      preg_match_all("/_\(('|\")(?>[^'\"]+)\\1\)/", $contents, $matches);
       if (!empty($matches[2])) {
         $messages = array_merge($messages, $matches[2]);
       }
