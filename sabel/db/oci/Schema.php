@@ -11,44 +11,118 @@
  */
 class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
 {
-  protected
-    $tableList    = "SELECT table_name FROM all_tables WHERE owner = '%s'",
-    $tableColumns = "SELECT table_name, column_name, data_type, data_precision, nullable, data_default,
-                     char_length FROM all_tab_columns WHERE owner = '%s' AND table_name = '%s'";
-
   private
-    $sequenceList = "SELECT sequence_name FROM all_sequences WHERE sequence_owner = '%s'",
-    $primaryList  = "SELECT acc.column_name FROM all_cons_columns acc
-                     INNER JOIN all_constraints ac ON ac.constraint_name = acc.constraint_name
-                     WHERE ac.owner = '%s' AND ac.constraint_type = 'P' AND acc.table_name = '%s'";
-
-  private
+    $comments    = array(),
     $sequences   = array(),
     $primaryKeys = array();
 
-  public function getTableLists()
+  public function getTableList()
   {
-    $tables = array();
-    $rows   = $this->execute(sprintf($this->tableList, $this->schemaName));
+    $sql  = "SELECT table_name FROM all_tables WHERE owner = '{$this->schemaName}'";
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
+    $tables = array();
     foreach ($rows as $row) {
-      $tables[] = strtolower($row["table_name"]);
+      $tables[] = $row["table_name"];
     }
 
-    return $tables;
+    return array_map("strtolower", $tables);
+  }
+
+  protected function createColumns($tblName)
+  {
+    $tblName = strtoupper($tblName);
+
+    $sql = "SELECT table_name, column_name, data_type, "
+         . "data_precision, nullable, data_default, "
+         . "char_length FROM all_tab_columns "
+         . "WHERE owner = '{$this->schemaName}' "
+         . "AND table_name = '{$tblName}'";
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
+
+    $this->createSequences();
+    $this->createPrimaryKeys($tblName);
+    $this->createComments($tblName);
+
+    $columns = array();
+    foreach ($rows as $row) {
+      $colName = strtolower($row["column_name"]);
+      $columns[$colName] = $this->createColumn($row);
+    }
+
+    return $columns;
+  }
+
+  protected function createColumn($row)
+  {
+    $column = new Sabel_DB_Schema_Column();
+    $column->name = strtolower($row["column_name"]);
+    $column->nullable = ($row["nullable"] !== "N");
+
+    $type = strtolower($row["data_type"]);
+    $default = trim($row["data_default"]);
+    $precision = (int)$row["data_precision"];
+
+    if ($type === "number") {
+      if ($precision === 1 && ($default === "1" || $default === "0")) {
+        $column->type = Sabel_DB_Type::BOOL;
+      } else {
+        if ($precision === 5) {
+          $type = "smallint";
+        } elseif ($precision === 19) {
+          $type = "bigint";
+        } else {
+          $type = "integer";
+        }
+      }
+    }
+
+    if (!$column->isBool()) {
+      if ($type === "float") {
+        $type = ($precision === 24) ? "float" : "double";
+      } elseif ($type === "date" && !$this->isDate($column->name)) {
+        $type = "datetime";
+      }
+
+      Sabel_DB_Type_Setter::send($column, $type);
+    }
+
+    $this->setDefault($column, $default);
+
+    $seq = $row["table_name"] . "_" . $row["column_name"] . "_seq";
+    $column->increment = (in_array(strtoupper($seq), $this->sequences));
+    $column->primary   = (in_array($column->name, $this->primaryKeys));
+
+    if ($column->primary) {
+      $column->nullable = false;
+    }
+
+    if ($column->isString()) {
+      $column->max = (int)$row["char_length"];
+    }
+
+    return $column;
   }
 
   public function getForeignKeys($tblName)
   {
     $tblName = strtoupper($tblName);
 
-    $ij  = "INNER JOIN";
-    $cn  = "constraint_name";
-    $sql = "SELECT acc.column_name, ac2.table_name AS ref_table, acc2.column_name AS ref_column, ac.delete_rule "
-         . "FROM all_constraints ac {$ij} all_cons_columns acc ON acc.{$cn} = ac.{$cn} "
-         . "{$ij} all_constraints ac2 ON ac2.{$cn} = ac.r_constraint_name "
-         . "{$ij} all_cons_columns acc2 ON acc2.{$cn} = ac2.{$cn} "
-         . "WHERE ac.owner = '{$this->schemaName}' AND ac.constraint_type = 'R' AND ac.table_name = '{$tblName}'";
+    $sql = "SELECT acc.column_name, ac2.table_name AS ref_table, "
+         . "acc2.column_name AS ref_column, ac.delete_rule "
+         . "FROM all_constraints ac "
+         . "INNER JOIN all_cons_columns acc "
+         . "ON acc.constraint_name = ac.constraint_name "
+         . "INNER JOIN all_constraints ac2 "
+         . "ON ac2.constraint_name = ac.r_constraint_name "
+         . "INNER JOIN all_cons_columns acc2 "
+         . "ON acc2.constraint_name = ac2.constraint_name "
+         . "WHERE ac.owner = '{$this->schemaName}' "
+         . "AND ac.constraint_type = 'R' "
+         . "AND ac.table_name = '{$tblName}'";
 
     $rows = $this->execute($sql);
     if (empty($rows)) return null;
@@ -69,8 +143,10 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
   {
     $tblName = strtoupper($tblName);
 
-    $sql = "SELECT acc.constraint_name, acc.column_name FROM all_cons_columns acc "
-         . "INNER JOIN all_constraints ac ON ac.constraint_name = acc.constraint_name "
+    $sql = "SELECT acc.constraint_name, acc.column_name "
+         . "FROM all_cons_columns acc "
+         . "INNER JOIN all_constraints ac "
+         . "ON ac.constraint_name = acc.constraint_name "
          . "where ac.owner = '{$this->schemaName}' "
          . "AND ac.constraint_type = 'U' AND acc.table_name = '{$tblName}'";
 
@@ -86,113 +162,16 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     return array_values($uniques);
   }
 
-  protected function createColumns($tblName)
-  {
-    $sql  = sprintf($this->tableColumns, $this->schemaName, strtoupper($tblName));
-    $rows = $this->execute($sql);
-
-    $this->createSequences();
-    $this->createPrimaryKeys($tblName);
-
-    $columns = array();
-    foreach ($rows as $row) {
-      $colName = strtolower($row["column_name"]);
-      $columns[$colName] = $this->makeColumnValueObject($row);
-    }
-
-    return $columns;
-  }
-
-  protected function makeColumnValueObject($row)
-  {
-    $co = new Sabel_DB_Schema_Column();
-    $co->name = strtolower($row["column_name"]);
-    $co->nullable = ($row["nullable"] !== "N");
-
-    $type = strtolower($row["data_type"]);
-    $precision = (int)$row["data_precision"];
-
-    if ($type === "number") {
-      if ($precision === 1 && ($row["data_default"] === "1" || $row["data_default"] === "0")) {
-        $co->type = Sabel_DB_Type::BOOL;
-      } else {
-        $type = $this->toInternalNumberType($precision);
-      }
-    }
-
-    if (!$co->isBool()) {
-      if ($type === "float") {
-        $type = ($precision === 24) ? "float" : "double";
-      } elseif ($type === "date" && !$this->isDate($row)) {
-        $type = "datetime";
-      }
-
-      Sabel_DB_Type_Setter::send($co, $type);
-    }
-
-    $this->setDefault($co, $row);
-
-    $seq = $row["table_name"] . "_" . $row["column_name"] . "_seq";
-    $co->increment = (in_array(strtoupper($seq), $this->sequences));
-    $co->primary   = (in_array($co->name, $this->primaryKeys));
-
-    if ($co->primary) $co->nullable = false;
-    if ($co->isString()) $co->max = (int)$row["char_length"];
-
-    return $co;
-  }
-
-  protected function setDefault($co, $row)
-  {
-    $default = $row["data_default"];
-
-    if ($default === null) {
-      $co->default = null;
-    } else {
-      $default = trim($default);
-      if (strcasecmp($default, "null") === 0) {
-        $co->default = null;
-      } elseif ($co->isString()) {
-        $co->default = substr($default, 1, -1);
-      } else {
-        $this->setDefaultValue($co, $default);
-      }
-    }
-  }
-
-  private function isDate($row)
-  {
-    $tblName = $row["table_name"];
-    $colName = $row["column_name"];
-
-    $sql = "SELECT comments FROM all_col_comments WHERE owner = '{$this->schemaName}' "
-         . "AND table_name = '{$tblName}' AND column_name = '{$colName}'";
-
-    $rows = $this->execute($sql);
-    return (isset($rows[0]) && $rows[0]["comments"] === "date");
-  }
-
-  private function toInternalNumberType($precision)
-  {
-    switch ($precision) {
-      case 5:
-        return "smallint";
-
-      case 19:
-        return "bigint";
-
-      default:
-        return "integer";
-    }
-  }
-
   private function createSequences()
   {
     if (!empty($this->sequences)) return;
 
+    $sql = "SELECT sequence_name FROM all_sequences "
+         . "WHERE sequence_owner = '{$this->schemaName}'";
+
     $seqs =& $this->sequences;
-    $rows = $this->execute(sprintf($this->sequenceList, $this->schemaName));
-    if (!$rows) return;
+    $rows = $this->execute($sql);
+    if (empty($rows)) return;
 
     foreach ($rows as $row) {
       $seqs[] = $row["sequence_name"];
@@ -203,13 +182,50 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
   {
     if (!empty($this->primaryKeys)) return;
 
+    $sql = "SELECT acc.column_name FROM all_cons_columns acc "
+         . "INNER JOIN all_constraints ac "
+         . "ON ac.constraint_name = acc.constraint_name "
+         . "WHERE ac.owner = '{$this->schemaName}' "
+         . "AND ac.constraint_type = 'P' "
+         . "AND acc.table_name = '{$tblName}'";
+
     $keys =& $this->primaryKeys;
-    $sql  = sprintf($this->primaryList, $this->schemaName, strtoupper($tblName));
     $rows = $this->execute($sql);
-    if (!$rows) return;
+    if (empty($rows)) return;
 
     foreach ($rows as $row) {
       $keys[] = strtolower($row["column_name"]);
     }
+  }
+
+  private function createComments($tblName)
+  {
+    $sql = "SELECT column_name, comments FROM all_col_comments "
+         . "WHERE owner = '{$this->schemaName}' AND table_name = '{$tblName}'";
+
+    if ($rows = $this->execute($sql)) {
+      foreach ($rows as $row) {
+        if (($comment = $row["comments"]) !== null) {
+          $colName = strtolower($row["column_name"]);
+          $this->comments[$colName] = $comment;
+        }
+      }
+    }
+  }
+
+  private function setDefault($column, $default)
+  {
+    if (strcasecmp($default, "null") === 0) {
+      $column->default = null;
+    } elseif ($column->isString()) {
+      $column->default = substr($default, 1, -1);
+    } else {
+      $this->setDefaultValue($column, $default);
+    }
+  }
+
+  private function isDate($colName)
+  {
+    return (isset($this->comments[$colName]) && $this->comments[$colName] === "date");
   }
 }

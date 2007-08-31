@@ -42,7 +42,7 @@ class Fixture extends Sabel_Sakle_Task
         $name = array_keys(get_db_params());
         $sa = new Sabel_DB_Schema_Accessor($name[0]);
         
-        foreach ($sa->getTableLists() as $table) {
+        foreach ($sa->getTableList() as $table) {
           if ($table == "sversion") continue;
           $this->createModelFixture(convert_to_modelname($table));
         }

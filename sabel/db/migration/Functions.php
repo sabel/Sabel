@@ -140,5 +140,5 @@ function getSchema($mdlName)
 function is_table_exists($tblName)
 {
   $accessor = Sabel_DB_Migration_Manager::getAccessor();
-  return in_array($tblName, $accessor->getTableLists());
+  return in_array($tblName, $accessor->getTableList());
 }

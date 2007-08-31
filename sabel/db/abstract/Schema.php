@@ -15,7 +15,7 @@ abstract class Sabel_DB_Abstract_Schema
   protected $driver = null;
   protected $schemaName = "";
 
-  abstract public function getTableLists();
+  abstract public function getTableList();
   abstract public function getForeignKeys($tblName);
   abstract public function getUniques($tblName);
 
@@ -28,7 +28,7 @@ abstract class Sabel_DB_Abstract_Schema
   public function getAll()
   {
     $tables = array();
-    foreach ($this->getTableLists() as $tblName) {
+    foreach ($this->getTableList() as $tblName) {
       $tables[$tblName] = $this->getTable($tblName);
     }
 
@@ -50,29 +50,37 @@ abstract class Sabel_DB_Abstract_Schema
     return $this->driver->execute($sql);
   }
 
-  protected function setDefaultValue($co, $default)
+  protected function setDefaultValue($column, $default)
   {
     if ($default === null) {
-      $co->default = null; return;
-    }
+      $column->default = null;
+    } else {
+      switch ($column->type) {
+        case Sabel_DB_Type::INT:
+        case Sabel_DB_Type::SMALLINT:
+          $column->default = (int)$default;
+          break;
 
-    switch ($co->type) {
-      case Sabel_DB_Type::INT:
-      case Sabel_DB_Type::SMALLINT:
-        $co->default = (int)$default;
-        break;
+        case Sabel_DB_Type::FLOAT:
+        case Sabel_DB_Type::DOUBLE:
+          $column->default = (float)$default;
+          break;
 
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
-        $co->default = (float)$default;
-        break;
+        case Sabel_DB_Type::BOOL:
+          if (is_bool($default)) {
+            $column->default = $default;
+          } else {
+            $column->default = in_array($default, array("1", "t", "true"));
+          }
+          break;
 
-      case Sabel_DB_Type::BOOL:
-        $co->default = in_array($default, array("1", "t", "true"));
-        break;
+        case Sabel_DB_Type::BIGINT:
+          $column->default = (string)$default;
+          break;
 
-      default:
-        $co->default = $default;
+        default:
+          $column->default = $default;
+      }
     }
   }
 

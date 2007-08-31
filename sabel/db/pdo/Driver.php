@@ -20,8 +20,8 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
+    $conn = $this->getConnection();
     if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      $conn = $this->getConnection();
       if (!$conn->beginTransaction()) {
         $error = $conn->errorInfo();
         throw new Exception("pdo driver begin failed. {$error[2]}");
@@ -29,6 +29,8 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
       Sabel_DB_Transaction::start($conn, $this);
     }
+
+    return $conn;
   }
 
   public function commit($connection)

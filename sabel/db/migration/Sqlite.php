@@ -147,7 +147,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
   private function dropColumnsAndRemakeTable($columns, $tblName)
   {
     $driver = Sabel_DB_Migration_Manager::getDriver();
-    $driver->begin();
+    $conn   = $driver->begin();
 
     $query = $this->getCreateSql($columns);
     $query = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
@@ -163,7 +163,7 @@ class Sabel_DB_Migration_Sqlite extends Sabel_DB_Migration_Base
     executeQuery("DROP TABLE $tblName");
     executeQuery("ALTER TABLE stmp_{$tblName} RENAME TO $tblName");
 
-    $driver->loadTransaction()->commit();
+    $driver->commit($conn);
   }
 
   private function alterChange($column, $current)

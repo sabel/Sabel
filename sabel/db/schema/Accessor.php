@@ -34,7 +34,7 @@ class Sabel_DB_Schema_Accessor
     return $this->schemaClass->getAll();
   }
 
-  public function getTableLists()
+  public function getTableList()
   {
     $sClass = "Schema_{$this->connectionName}TableList";
 
@@ -42,7 +42,7 @@ class Sabel_DB_Schema_Accessor
       $sc = new $sClass();
       return $sc->get();
     } else {
-      return $this->schemaClass->getTableLists();
+      return $this->schemaClass->getTableList();
     }
   }
 

@@ -77,7 +77,7 @@ class Migration extends Sabel_Sakle_Task
     
     try {
       Sabel_DB_Migration_Manager::setAccessor($this->accessor);
-      if (!in_array("sversion", $this->accessor->getTableLists())) {
+      if (!in_array("sversion", $this->accessor->getTableList())) {
         $this->createVersionManageTable();
         return 0;
       } else {

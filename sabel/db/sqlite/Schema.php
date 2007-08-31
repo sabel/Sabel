@@ -11,20 +11,15 @@
  */
 class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
 {
-  protected
-    $tableList    = "SELECT name FROM sqlite_master WHERE type = 'table'",
-    $tableColumns = "SELECT sql FROM sqlite_master WHERE name = '%s'";
+  private $difinition = "";
 
-  private
-    $difinition  = "",
-    $floatTypes  = array("float", "float4", "real"),
-    $doubleTypes = array("float8", "double");
-
-  public function getTableLists()
+  public function getTableList()
   {
-    $tables = array();
+    $sql  = "SELECT name FROM sqlite_master WHERE type = 'table'";
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
-    $rows = $this->execute($this->tableList);
+    $tables = array();
     foreach ($rows as $row) $tables[] = $row["name"];
     return $tables;
   }
@@ -101,7 +96,6 @@ class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
     if ($this->isBoolean($type)) {
       $co->type = Sabel_DB_Type::BOOL;
     } elseif (!$this->isString($co, $type)) {
-      if ($this->isFloat($type)) $type = $this->getFloatType($type);
       Sabel_DB_Type_Setter::send($co, $type);
     }
 
@@ -119,16 +113,6 @@ class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
   protected function isBoolean($type)
   {
     return ($type === "boolean" || $type === "bool");
-  }
-
-  protected function isFloat($type)
-  {
-    return (in_array($type, $this->floatTypes) || in_array($type, $this->doubleTypes));
-  }
-
-  protected function getFloatType($type)
-  {
-    return (in_array($type, $this->floatTypes)) ? "float" : "double";
   }
 
   protected function isString($co, $type)
@@ -202,7 +186,8 @@ class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
 
   private function getCreateSql($tblName)
   {
-    $rows = $this->execute(sprintf($this->tableColumns, $tblName));
+    $sql  = "SELECT sql FROM sqlite_master WHERE name = '{$tblName}'";
+    $rows = $this->execute($sql);
     return $rows[0]["sql"];
   }
 }

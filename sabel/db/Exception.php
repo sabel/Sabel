@@ -24,7 +24,7 @@ class Sabel_DB_Exception extends Exception
     parent::__construct($message, $code);
   }
 
-  public function __toString()
+  public function printTrace()
   {
     $i = 0;
 

@@ -76,8 +76,7 @@ class Sabel_DB_Migration_Classes_Custom
     fclose($fp);
 
     $this->isUpgrade = true;
-    list (, $num) = explode("_", $restoreFile);
-
+    list (, $num) = explode("_", getFileName($restoreFile));
     $fp = fopen(MIG_DIR . DS . "{$num}_mix.php", "r");
     $this->splitFiles($fp);
     fclose($fp);
@@ -112,6 +111,8 @@ class Sabel_DB_Migration_Classes_Custom
     $num   = 1;
     $lines = array();
     $fName = null;
+
+    if (!is_resource($fp)) return;
 
     while (!feof($fp)) {
       $line = trim(fgets($fp, 256));

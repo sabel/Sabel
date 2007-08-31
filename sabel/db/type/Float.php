@@ -25,7 +25,9 @@ class Sabel_DB_Type_Float implements Sabel_DB_Type_Interface
 
   public function send(Sabel_DB_Schema_Column $co, $type)
   {
-    if ($type === "float") {
+    $types = array("float", "real", "float4");
+
+    if (in_array($type, $types)) {
       $co->type = $this->getType();
       $co->max  =  3.4028235E38;
       $co->min  = -3.4028235E38;

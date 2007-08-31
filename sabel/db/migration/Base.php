@@ -76,7 +76,7 @@ abstract class Sabel_DB_Migration_Base
     if (method_exists($this, $command)) {
       $this->$command();
     } else {
-      throw new Exception("command '$command' not found.");
+      throw new Sabel_DB_Exception("command '$command' not found.");
     }
   }
 

@@ -919,6 +919,21 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($results[3]->dt, "2007-01-01");
   }
 
+  public function testTableList()
+  {
+    $accessor = new Sabel_DB_Schema_Accessor();
+    $tables   = $accessor->getTableList();
+
+    foreach ($tables as $key => $tblName) {
+      if ($tblName === "sversion") unset($tables[$key]);
+    }
+
+    $this->assertEquals(count($tables), 11);
+    $this->assertTrue(in_array("schema_test",  $tables));
+    $this->assertTrue(in_array("member_group", $tables));
+    $this->assertFalse(in_array("hogehoge",    $tables));
+  }
+
   public function testClear()
   {
     Sabel_DB_Schema::clear();

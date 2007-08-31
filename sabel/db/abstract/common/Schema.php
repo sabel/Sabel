@@ -14,22 +14,27 @@ abstract class Sabel_DB_Abstract_Common_Schema extends Sabel_DB_Abstract_Schema
 {
   public function getTableLists()
   {
-    $tables = array();
-    $sql    = sprintf($this->tableList, $this->schemaName);
+    $sql  = sprintf($this->tablesSql, $this->schemaName);
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
-    foreach ($this->execute($sql) as $row) {
+    $tables = array();
+    foreach ($rows as $row) {
       $row = array_change_key_case($row);
       $tables[] = $row["table_name"];
     }
+
     return $tables;
   }
 
   protected function createColumns($tblName)
   {
-    $sql = sprintf($this->tableColumns, $this->schemaName, $tblName);
+    $sql  = sprintf($this->columnsSql, $this->schemaName, $tblName);
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
     $columns = array();
-    foreach ($this->execute($sql) as $row) {
+    foreach ($rows as $row) {
       $row = array_change_key_case($row);
       $colName = $row["column_name"];
       $columns[$colName] = $this->makeColumnValueObject($row);
@@ -40,26 +45,25 @@ abstract class Sabel_DB_Abstract_Common_Schema extends Sabel_DB_Abstract_Schema
 
   protected function makeColumnValueObject($row)
   {
-    $co           = new Sabel_DB_Schema_Column();
-    $co->name     = $row["column_name"];
-    $co->nullable = ($row["is_nullable"] !== "NO");
+    $column = new Sabel_DB_Schema_Column();
+    $column->name = $row["column_name"];
+    $column->nullable = ($row["is_nullable"] !== "NO");
 
     $type = $row["data_type"];
 
     if ($this->isBoolean($type, $row)) {
-      $co->type = Sabel_DB_Type::BOOL;
+      $column->type = Sabel_DB_Type::BOOL;
     } else {
-      if ($this->isFloat($type)) $type = $this->getFloatType($type);
-      Sabel_DB_Type_Setter::send($co, $type);
+      Sabel_DB_Type_Setter::send($column, $type);
     }
 
-    $this->setDefault($co, $row);
-    $this->setIncrement($co, $row);
-    $this->setPrimaryKey($co, $row);
+    $this->setDefault($column, $row);
+    $this->setIncrement($column, $row);
+    $this->setPrimaryKey($column, $row);
 
-    if ($co->primary) $co->nullable = false;
-    if ($co->isString()) $this->setLength($co, $row);
+    if ($column->primary) $column->nullable = false;
+    if ($column->isString()) $this->setLength($column, $row);
 
-    return $co;
+    return $column;
   }
 }

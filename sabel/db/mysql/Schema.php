@@ -9,14 +9,8 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
+class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
 {
-  protected
-    $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
-    $tableColumns = "SELECT column_name, data_type, is_nullable, column_default, column_comment,
-                     column_key, character_maximum_length, extra FROM information_schema.columns
-                     WHERE table_schema = '%s' AND table_name = '%s'";
-
   public function getTable($tblName)
   {
     $schema = parent::getTable($tblName);
@@ -25,45 +19,69 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     return $schema;
   }
 
-  public function isBoolean($type, $row)
+  public function getTableList()
   {
-    return ($type === "tinyint" && $row["column_comment"] === "boolean");
-  }
+    $sql = "SELECT table_name FROM information_schema.tables "
+         . "WHERE table_schema = '{$this->schemaName}'";
 
-  public function isFloat($type)
-  {
-    return ($type === "float" || $type === "double");
-  }
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
-  public function getFloatType($type)
-  {
-    return ($type === "float") ? "float" : "double";
-  }
-
-  public function setDefault($co, $row)
-  {
-    $default = $row["column_default"];
-
-    if ($default === null) {
-      $co->default = null;
-    } else {
-      $this->setDefaultValue($co, $default);
+    $tables = array();
+    foreach ($rows as $row) {
+      $row = array_change_key_case($row);
+      $tables[] = $row["table_name"];
     }
+
+    return $tables;
   }
 
-  public function setIncrement($co, $row)
+  protected function createColumns($tblName)
   {
-    $co->increment = ($row["extra"] === "auto_increment");
+    $sql = "SELECT column_name, data_type, is_nullable, "
+         . "column_default, column_comment, column_key, "
+         . "column_type, character_maximum_length, extra "
+         . "FROM information_schema.columns "
+         . "WHERE table_schema = '{$this->schemaName}' "
+         . "AND table_name = '{$tblName}'";
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
+
+    $columns = array();
+    foreach ($rows as $row) {
+      $colName = $row["column_name"];
+      $columns[$colName] = $this->createColumn($row);
+    }
+
+    return $columns;
   }
 
-  public function setPrimaryKey($co, $row)
+  protected function createColumn($row)
   {
-    $co->primary = ($row["column_key"] === "PRI");
-  }
+    $column = new Sabel_DB_Schema_Column();
+    $column->name = $row["column_name"];
+    $column->nullable = ($row["is_nullable"] !== "NO");
 
-  public function setLength($co, $row)
-  {
-    $co->max = (int)$row["character_maximum_length"];
+    if ($row["column_type"] === "tinyint(1)") {
+      $column->type = Sabel_DB_Type::BOOL;
+    } else {
+      Sabel_DB_Type_Setter::send($column, $row["data_type"]);
+    }
+
+    $this->setDefault($column, $row["column_default"]);
+    $column->primary   = ($row["column_key"] === "PRI");
+    $column->increment = ($row["extra"] === "auto_increment");
+
+    if ($column->primary) {
+      $column->nullable = false;
+    }
+
+    if ($column->isString()) {
+      $column->max = (int)$row["character_maximum_length"];
+    }
+
+    return $column;
   }
 
   public function getForeignKeys($tblName)
@@ -79,15 +97,15 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
 
   public function getUniques($tblName)
   {
-    $schemaName = $this->schemaName;
+    $schema = $this->schemaName;
 
-    $is  = "information_schema";
     $sql = "SELECT tc.constraint_name as unique_key, kcu.column_name "
-         . "FROM {$is}.table_constraints tc "
-         . "INNER JOIN {$is}.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name "
-         . "WHERE tc.constraint_schema = kcu.constraint_schema AND tc.table_name='{$tblName}' "
-         . "AND kcu.table_name='{$tblName}' AND tc.constraint_schema = '{$schemaName}' "
-         . "AND tc.constraint_type='UNIQUE'";
+         . "FROM information_schema.table_constraints tc "
+         . "INNER JOIN information_schema.key_column_usage kcu ON "
+         . "tc.constraint_name = kcu.constraint_name "
+         . "WHERE tc.constraint_schema = kcu.constraint_schema "
+         . "AND tc.table_name='{$tblName}' AND kcu.table_name='{$tblName}' "
+         . "AND tc.constraint_schema = '{$schema}' AND tc.constraint_type='UNIQUE'";
 
     $rows = $this->execute($sql);
     if (empty($rows)) return null;
@@ -116,7 +134,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     return $version;
   }
 
-  protected function getForeignKeys50($tblName)
+  private function getForeignKeys50($tblName)
   {
     $schemaName = $this->schemaName;
     $result     = $this->execute("SHOW CREATE TABLE $tblName");
@@ -142,7 +160,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     return $columns;
   }
 
-  protected function getRule($rule, $ruleName)
+  private function getRule($rule, $ruleName)
   {
     if (($pos = strpos($rule, $ruleName)) !== false) {
       $on = substr($rule, $pos + 10);
@@ -156,18 +174,19 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     }
   }
 
-  protected function getForeignKeys51($tblName)
+  private function getForeignKeys51($tblName)
   {
-    $driver     = $this->driver;
-    $schemaName = $this->schemaName;
+    $driver = $this->driver;
+    $schema = $this->schemaName;
 
-    $is  = "information_schema";
     $sql = "SELECT kcu.column_name, kcu.referenced_table_name as ref_table, "
-         . "kcu.referenced_column_name ref_column, refc.delete_rule, refc.update_rule "
-         . "FROM {$is}.table_constraints tc "
-         . "INNER JOIN {$is}.referential_constraints refc ON refc.constraint_name = tc.constraint_name "
-         . "INNER JOIN {$is}.key_column_usage kcu ON kcu.constraint_name = tc.constraint_name "
-         . "WHERE tc.constraint_schema = '{$schemaName}' AND tc.table_name = '{$tblName}'"
+         . "kcu.referenced_column_name ref_column, refc.delete_rule, "
+         . "refc.update_rule FROM information_schema.table_constraints tc "
+         . "INNER JOIN information_schema.referential_constraints refc ON "
+         . "refc.constraint_name = tc.constraint_name "
+         . "INNER JOIN information_schema.key_column_usage kcu ON "
+         . "kcu.constraint_name = tc.constraint_name "
+         . "WHERE tc.constraint_schema = '{$schema}' AND tc.table_name = '{$tblName}'"
          . "AND tc.constraint_type = 'FOREIGN KEY'";
 
     $rows = $driver->execute($sql);
@@ -183,5 +202,14 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Common_Schema
     }
 
     return $columns;
+  }
+
+  private function setDefault($co, $default)
+  {
+    if ($default === null || $co->isString() && $default === "") {
+      $co->default = null;
+    } else {
+      $this->setDefaultValue($co, $default);
+    }
   }
 }

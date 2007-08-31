@@ -18,7 +18,8 @@ class Sabel_DB_Type_Setter
     $sint   = new Sabel_DB_Type_Smallint();
     $string = new Sabel_DB_Type_String();
     $text   = new Sabel_DB_Type_Text();
-    $time   = new Sabel_DB_Type_Datetime();
+    $bool   = new Sabel_DB_Type_Boolean();
+    $dtime  = new Sabel_DB_Type_Datetime();
     $date   = new Sabel_DB_Type_Date();
     $double = new Sabel_DB_Type_Double();
     $float  = new Sabel_DB_Type_Float();
@@ -29,8 +30,9 @@ class Sabel_DB_Type_Setter
     $bint->add($sint);
     $sint->add($string);
     $string->add($text);
-    $text->add($time);
-    $time->add($date);
+    $text->add($bool);
+    $bool->add($dtime);
+    $dtime->add($date);
     $date->add($double);
     $double->add($float);
     $float->add($byte);

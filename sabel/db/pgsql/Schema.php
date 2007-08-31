@@ -9,101 +9,83 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Common_Schema
+class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
 {
-  protected
-    $tableList    = "SELECT table_name FROM information_schema.tables WHERE table_schema = '%s'",
-    $tableColumns = "SELECT table_name, column_name, data_type, is_nullable, column_default, character_maximum_length
-                     FROM information_schema.columns WHERE table_schema = '%s' AND table_name = '%s'";
+  private
+    $sequences   = array(),
+    $primaryKeys = array();
 
-  public function isBoolean($type, $row)
+  public function getTableList()
   {
-    return ($type === "boolean");
-  }
+    $sql = "SELECT table_name FROM information_schema.tables "
+         . "WHERE table_schema = '{$this->schemaName}'";
 
-  public function isFloat($type)
-  {
-    return ($type === "real" || $type === "double precision");
-  }
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
 
-  public function getFloatType($type)
-  {
-    return ($type === "real") ? "float" : "double";
-  }
-
-  public function setDefault($co, $row)
-  {
-    $default = $row["column_default"];
-
-    if ($default === null || strpos($default, "nextval") !== false) {
-      $co->default = null;
-    } else {
-      if (($pos = strpos($default, "::")) !== false) {
-        $default = substr($default, 0, $pos);
-        if ($default{0} === "'") {
-          preg_match("/'(.*)'/", $default, $matches);
-          $default = $matches[1];
-        }
-      }
-
-      $this->setDefaultValue($co, $default);
-    }
-  }
-
-  public function setIncrement($co, $row)
-  {
-    $sql = "SELECT * FROM pg_statio_user_sequences "
-         . "WHERE relname = '{$row["table_name"]}_{$co->name}_seq'";
-
-    $result = $this->execute($sql);
-    $co->increment = !(empty($result));
-  }
-
-  public function setPrimaryKey($co, $row)
-  {
-    static $pkeys = array();
-
-    $tblName = $row["table_name"];
-    if (isset($pkeys[$tblName])) {
-      $keys = $pkeys[$tblName];
-    } else {
-      $sql = "SELECT column_name FROM information_schema.key_column_usage "
-           . "WHERE table_schema = '{$this->schemaName}' "
-           . "AND table_name = '{$row["table_name"]}' AND constraint_name LIKE '%\_pkey'";
-
-      $result = $this->execute($sql);
-
-      if (empty($result)) {
-        $keys = $pkeys[$tblName] = array();
-      } else {
-        $keys = array();
-        foreach ($result as $row) $keys[] = $row["column_name"];
-        $pkeys[$tblName] = $keys;
-      }
+    $tables = array();
+    foreach ($rows as $row) {
+      $row = array_change_key_case($row);
+      $tables[] = $row["table_name"];
     }
 
-    $co->primary = in_array($co->name, $keys);
+    return $tables;
   }
 
-  public function setLength($co, $row)
+  protected function createColumns($tblName)
   {
-    $maxlen  = $row["character_maximum_length"];
-    $co->max = (isset($maxlen)) ? (int)$maxlen : 255;
+    $sql = "SELECT table_name, column_name, data_type, is_nullable, "
+         . "column_default, character_maximum_length "
+         . "FROM information_schema.columns "
+         . "WHERE table_schema = '{$this->schemaName}' "
+         . "AND table_name = '{$tblName}'";
+
+    $rows = $this->execute($sql);
+    if (empty($rows)) return array();
+
+    $this->createSequences();
+    $this->createPrimaryKeys($tblName);
+
+    $columns = array();
+    foreach ($rows as $row) {
+      $colName = $row["column_name"];
+      $columns[$colName] = $this->createColumn($row);
+    }
+
+    return $columns;
+  }
+
+  protected function createColumn($row)
+  {
+    $column = new Sabel_DB_Schema_Column();
+    $column->name = $row["column_name"];
+    $column->nullable = ($row["is_nullable"] !== "NO");
+    Sabel_DB_Type_Setter::send($column, $row["data_type"]);
+    $this->setDefault($column, $row["column_default"]);
+
+    $column->primary = (in_array($column->name, $this->primaryKeys));
+    $seq = $row["table_name"] . "_" . $column->name . "_seq";
+    $column->increment = (in_array($seq, $this->sequences));
+
+    if ($column->primary) $column->nullable = false;
+    if ($column->isString()) $this->setLength($column, $row);
+
+    return $column;
   }
 
   public function getForeignKeys($tblName)
   {
-    $is  = "information_schema";
-    $cn  = "constraint_name";
-    $ij  = "INNER JOIN";
     $sql = "SELECT kcu.column_name, ccu.table_name AS ref_table, "
          . "ccu.column_name AS ref_column, rc.delete_rule, rc.update_rule "
-         . "FROM {$is}.table_constraints tc "
-         . "{$ij} {$is}.constraint_column_usage ccu ON tc.{$cn} = ccu.{$cn} "
-         . "{$ij} {$is}.key_column_usage kcu ON tc.{$cn} = kcu.{$cn} "
-         . "{$ij} {$is}.referential_constraints rc ON tc.{$cn} = rc.{$cn} "
-         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}' "
-         . "AND tc.constraint_type = 'FOREIGN KEY'";
+         . "FROM information_schema.table_constraints tc "
+         . "INNER JOIN information_schema.constraint_column_usage ccu "
+         . "ON tc.constraint_name = ccu.constraint_name "
+         . "INNER JOIN information_schema.key_column_usage kcu "
+         . "ON tc.constraint_name = kcu.constraint_name "
+         . "INNER JOIN information_schema.referential_constraints rc "
+         . "ON tc.constraint_name = rc.constraint_name "
+         . "WHERE tc.table_schema = '{$this->schemaName}' "
+         . "AND tc.table_name = '{$tblName}' AND tc.constraint_type = 'FOREIGN KEY'";
 
     $rows = $this->execute($sql);
     if (empty($rows)) return null;
@@ -127,7 +109,8 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Common_Schema
     $sql = "SELECT tc.constraint_name, kcu.column_name "
          . "FROM {$is}.table_constraints tc "
          . "INNER JOIN {$is}.key_column_usage kcu ON tc.{$cn} = kcu.{$cn} "
-         . "WHERE tc.table_schema = '{$this->schemaName}' AND tc.table_name = '{$tblName}' "
+         . "WHERE tc.table_schema = '{$this->schemaName}' "
+         . "AND tc.table_name = '{$tblName}' "
          . "AND tc.constraint_type = 'UNIQUE'";
 
     $rows = $this->execute($sql);
@@ -140,5 +123,54 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Common_Schema
     }
 
     return array_values($uniques);
+  }
+
+  private function createSequences()
+  {
+    if (!empty($this->sequences)) return;
+
+    $seqs =& $this->sequences;
+    $sql  = "SELECT relname FROM pg_statio_user_sequences";
+    $rows = $this->execute($sql);
+    if (!$rows) return;
+
+    foreach ($rows as $row) $seqs[] = $row["relname"];
+  }
+
+  private function createPrimaryKeys($tblName)
+  {
+    if (!empty($this->primaryKeys)) return;
+
+    $sql = "SELECT column_name FROM information_schema.key_column_usage "
+         . "WHERE table_schema = '{$this->schemaName}' "
+         . "AND table_name = '{$tblName}' AND constraint_name LIKE '%\_pkey'";
+
+    $keys =& $this->primaryKeys;
+    $rows = $this->execute($sql);
+    if (!$rows) return;
+
+    foreach ($rows as $row) $keys[] = $row["column_name"];
+  }
+
+  private function setDefault($column, $default)
+  {
+    if (strpos($default, "nextval") !== false) {
+      $column->default = null;
+    } else {
+      if (($pos = strpos($default, "::")) !== false) {
+        $default = substr($default, 0, $pos);
+        if ($default{0} === "'") {
+          $default = substr($default, 1, -1);
+        }
+      }
+
+      $this->setDefaultValue($column, $default);
+    }
+  }
+
+  private function setLength($column, $row)
+  {
+    $maxlen = $row["character_maximum_length"];
+    $column->max = ($maxlen === null) ? 255 : (int)$maxlen;
   }
 }

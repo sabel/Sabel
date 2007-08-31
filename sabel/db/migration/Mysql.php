@@ -16,7 +16,7 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::SMALLINT => "smallint",
                            Sabel_DB_Type::FLOAT    => "float",
                            Sabel_DB_Type::DOUBLE   => "double",
-                           Sabel_DB_Type::BOOL     => "tinyint",
+                           Sabel_DB_Type::BOOL     => "tinyint(1)",
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime",
@@ -152,9 +152,28 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     }
   }
 
+  protected function getDefaultValue($column)
+  {
+    $d = $column->default;
+
+    if ($column->isBool()) {
+      return $this->getBooleanAttr($d);
+    } elseif ($d === null || $d === _NULL) {
+      if ($column->isString()) {
+        return ($column->nullable === true) ? "DEFAULT ''" : "";
+      } else {
+        return ($column->nullable === true) ? "DEFAULT NULL" : "";
+      }
+    } elseif ($column->isNumeric()) {
+      return "DEFAULT $d";
+    } else {
+      return "DEFAULT '{$d}'";
+    }
+  }
+
   protected function getBooleanAttr($value)
   {
-    $v = ($value === true) ? "1" : "0";
-    return "DEFAULT $v COMMENT 'boolean'";
+    $value = ($value === true) ? "1" : "0";
+    return "DEFAULT " . $value;
   }
 }
