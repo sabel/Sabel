@@ -1,5 +1,18 @@
 <?php
 
+define("_INT",      Sabel_DB_Type::INT);
+define("_SMALLINT", Sabel_DB_Type::SMALLINT);
+define("_BIGINT",   Sabel_DB_Type::BIGINT);
+define("_FLOAT",    Sabel_DB_Type::FLOAT);
+define("_DOUBLE",   Sabel_DB_Type::DOUBLE);
+define("_STRING",   Sabel_DB_Type::STRING);
+define("_TEXT",     Sabel_DB_Type::TEXT);
+define("_DATETIME", Sabel_DB_Type::DATETIME);
+define("_DATE",     Sabel_DB_Type::DATE);
+define("_BOOL",     Sabel_DB_Type::BOOL);
+define("_BYTE",     Sabel_DB_Type::BYTE);
+define("_NULL",     "SDB_NULL_VALUE");
+
 /**
  * Sabel_DB_Migration_Manager
  *
@@ -13,11 +26,13 @@ class Sabel_DB_Migration_Manager
 {
   private static $accessor  = null;
   private static $driver    = null;
-  private static $applyMode = null;
+  private static $directory = "";
+  private static $applyMode = "";
   private static $start     = null;
 
   public static function setStartVersion($version)
   {
+    // @todo
     if (self::$start === null) self::$start = $version;
   }
 
@@ -59,5 +74,45 @@ class Sabel_DB_Migration_Manager
   public static function getApplyMode()
   {
     return self::$applyMode;
+  }
+
+  public static function setDirectory($dirPath)
+  {
+    $current = self::$directory;
+    self::$directory = $dirPath;
+
+    return $current;
+  }
+
+  public static function getDirectory()
+  {
+    return self::$directory;
+  }
+
+  public static function getFiles($dirPath = null)
+  {
+    if ($dirPath === null) $dirPath = self::$directory;
+
+    if (!is_dir($dirPath)) {
+      Sabel_Sakle_Task::error("no such dirctory. '{$dirPath}'");
+      exit;
+    }
+
+    $files = array();
+    foreach (scandir($dirPath) as $file) {
+      $num = substr($file, 0, strpos($file, "_"));
+      if (!is_numeric($num)) continue;
+
+      if (isset($files[$num])) {
+        $message = "migration file of the same version({$num}) exists.";
+        Sabel_Sakle_Task::error($message);
+        exit;
+      } else {
+        $files[$num] = $file;
+      }
+    }
+
+    ksort($files);
+    return $files;
   }
 }

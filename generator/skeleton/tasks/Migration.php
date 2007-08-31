@@ -1,12 +1,9 @@
 <?php
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-define("SAKLE_CMD", "sakle");
 
 Sabel::fileUsing("config" . DS . "environment.php");
 Sabel::fileUsing("config" . DS . "connection.php");
-Sabel::using("Sabel_DB_Migration_Base");
-Sabel_DB_Config::initialize();
 
 /**
  * Migration
@@ -32,24 +29,25 @@ class Migration extends Sabel_Sakle_Task
     if (!isset($arguments[1])) {
       throw new Exception("please specify the environment.");
     }
-    
+
+    Sabel_DB_Config::initialize();
+
     $this->arguments = $arguments;
     $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
-    
-    $this->initDbConfig($environment);
+    $directory       = $this->getMigrationDirectory();
     $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
+    $this->initDbConfig($environment);
 
     if ($arguments[2] === "export") {
       $this->export();
       self::$execFinalize = false;
     } else {
-      $this->defineMigrationDir();
       $this->currentVersion = $this->getCurrentVersion();
       Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
 
       $to = $this->showCurrentVersion($arguments);
-      $this->files = $this->getMigrationFiles();
+      $this->files = Sabel_DB_Migration_Manager::getFiles();
 
       if ($this->toVersionNumber($to) !== false) {
         $doNext = $this->execMigration();
@@ -74,7 +72,7 @@ class Migration extends Sabel_Sakle_Task
     $connectionName = $this->connectionName;
     $this->driver = Sabel_DB_Config::loadDriver($connectionName);
     Sabel_DB_Migration_Manager::setDriver($this->driver);
-    
+
     try {
       Sabel_DB_Migration_Manager::setAccessor($this->accessor);
       if (!in_array("sversion", $this->accessor->getTableList())) {
@@ -85,15 +83,6 @@ class Migration extends Sabel_Sakle_Task
       }
     } catch (Exception $e) {
       $this->printMessage($e->getMessage(), self::MSG_ERR); exit;
-    }
-  }
-
-  protected function getMigrationFiles()
-  {
-    if (is_dir(MIG_DIR)) {
-      return getMigrationFiles(MIG_DIR);
-    } else {
-      throw new Exception("no such dirctory. '" . MIG_DIR . "'");
     }
   }
 
@@ -108,11 +97,17 @@ class Migration extends Sabel_Sakle_Task
     return $to;
   }
 
-  protected function defineMigrationDir()
+  protected function getMigrationDirectory()
   {
-    if (!defined("MIG_DIR")) {
-      define("MIG_DIR", RUN_BASE . DS . "migration" . DS . $this->connectionName);
+    if (in_array("-d", $this->arguments, true)) {
+      $index = array_search("-d", $this->arguments) + 1;
+      $dir = $this->arguments[$index];
+    } else {
+      $dir = RUN_BASE . DS . "migration" . DS . $this->connectionName;
     }
+
+    Sabel_DB_Migration_Manager::setDirectory($dir);
+    return $dir;
   }
 
   protected function getEnvironment()
@@ -220,10 +215,16 @@ class Migration extends Sabel_Sakle_Task
   protected function getMigrationClass($type, $verNum)
   {
     $driverName = Sabel_DB_Config::getDriverName($this->connectionName);
-    $driverName = str_replace("pdo-", "", $driverName);
-    $className  = "Sabel_DB_Migration_" . ucfirst($driverName);
 
-    return new $className(MIG_DIR . DS . $this->files[$verNum], $type);
+    if (strpos($driverName, "pdo") !== false) {
+      $driverName = str_replace("pdo-", "", $driverName);
+    } elseif ($driverName === "mysqli") {
+      $driverName = "mysql";
+    }
+
+    $className = "Sabel_DB_" . ucfirst($driverName) . "_Migration";
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    return new $className($directory . DS . $this->files[$verNum], $type);
   }
 
   protected function getConnectionName()
@@ -231,10 +232,12 @@ class Migration extends Sabel_Sakle_Task
     $args = $this->arguments;
 
     if (!isset($args[2])) {
-      $this->printMessage("too few arguments", parent::MSG_ERR); exit;
+      $this->printMessage("too few arguments", parent::MSG_ERR);
+      exit;
+    } else {
+      $name = (isset($args[3])) ? $args[3] : "default";
+      return $this->connectionName = $name;
     }
-    
-    return $this->connectionName = (isset($args[3])) ? $args[3] : "default";
   }
 
   protected function createVersionManageTable()
@@ -310,22 +313,18 @@ class MigrationExport
 
   public function doExport($schema)
   {
-    try {
-      $tblName = $schema->getTableName();
-      if ($tblName === "sversion") return;
-      $filePath = $this->path . DS . $this->fileNum . "_"
-                . convert_to_modelname($tblName) . "_create.php";
+    $tblName = $schema->getTableName();
+    if ($tblName === "sversion") return;
+    $filePath = $this->path . DS . $this->fileNum . "_"
+              . convert_to_modelname($tblName) . "_create.php";
 
-      $fp = fopen($filePath, "w");
-      Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
+    $writer = new Sabel_DB_Migration_Writer($filePath);
+    $writer->writeTable($schema);
+    $fp =& $writer->getFilePointer();
 
-      // @todo table engine.
-      fwrite($fp, '$create->options("engine", "InnoDB");');
-      fclose($fp);
-      $this->fileNum++;
-    } catch (Exception $e) {
-      $this->printMessage($e->getMessage(), self::MSG_ERR);
-      exit;
-    }
+    // @todo table engine.
+    fwrite($fp, '$create->options("engine", "InnoDB");');
+    $writer->close();
+    $this->fileNum++;
   }
 }

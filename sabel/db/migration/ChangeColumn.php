@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_AddColumn
+ * Sabel_DB_Migration_ChangeColumn
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,23 +9,25 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_AddColumn
+class Sabel_DB_Migration_ChangeColumn
 {
-  private $addColumns = array();
+  private
+    $mcolumns = array(),
+    $columns  = array();
 
   public function column($name)
   {
-    $column = new Sabel_DB_Migration_Classes_Column($name);
-    return $this->addColumns[$name] = $column;
+    $column = new Sabel_DB_Migration_Column($name, true);
+    return $this->mcolumns[$name] = $column;
   }
 
-  public function getAddColumns()
+  public function getColumns()
   {
     $columns = array();
-    foreach ($this->addColumns as $column) {
+    foreach ($this->mcolumns as $column) {
       $columns[] = $column->getColumn();
     }
 
-    return arrange($columns);
+    return $columns;
   }
 }

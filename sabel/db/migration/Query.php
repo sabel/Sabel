@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_Query
+ * Sabel_DB_Migration_Query
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_Query
+class Sabel_DB_Migration_Query
 {
   private
     $upgradeQueries   = array(),
@@ -37,11 +37,14 @@ class Sabel_DB_Migration_Classes_Query
 
   public function execute()
   {
-    $type = Sabel_DB_Migration_Manager::getApplyMode();
+    $mode   = Sabel_DB_Migration_Manager::getApplyMode();
+    $driver = Sabel_DB_Migration_Manager::getDriver();
 
-    $queries = ($type === "upgrade") ? $this->upgradeQueries
+    $queries = ($mode === "upgrade") ? $this->upgradeQueries
                                      : $this->downgradeQueries;
 
-    foreach ($queries as $query) executeQuery($query);
+    foreach ($queries as $query) {
+      $driver->execute($query);
+    }
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_Custom
+ * Sabel_DB_Migration_Custom
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,16 +9,18 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_Custom
+class Sabel_DB_Migration_Custom
 {
-  private $isUpgrade    = false;
-  private $temporaryDir = "";
-  private $restorePath  = "";
+  private
+    $isUpgrade    = false,
+    $temporaryDir = "",
+    $restorePath  = "";
 
   public function __construct()
   {
-    $this->temporaryDir = $tp = MIG_DIR . DS . "temporary";
-    if (!is_dir($tp)) mkdir($tp);
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    $this->temporaryDir = $dir = $directory . DS . "temporary";
+    if (!is_dir($dir)) mkdir($dir);
   }
 
   public function execute($migClassName, $version, $file)
@@ -50,20 +52,23 @@ class Sabel_DB_Migration_Classes_Custom
     $upgradeFiles = array();
     $temporaryDir = $this->temporaryDir;
     $restoreDir   = $this->getTemporaryRestoresDir();
+    $directory    = Sabel_DB_Migration_Manager::setDirectory($temporaryDir);
+    $files        = Sabel_DB_Migration_Manager::getFiles($temporaryDir);
 
-    foreach (getMigrationFiles($temporaryDir) as $file) {
+    foreach ($files as $file) {
       list ($num) = explode("_", $file);
       $upgradeFiles[$num] = $file;
 
       file_put_contents($restoreDir . DS . "restore_{$num}", "\n");
 
       $path = $temporaryDir . DS . $file;
-      $ins = new $migClassName($path, "upgrade", $temporaryDir);
+      $ins = new $migClassName($path, "upgrade");
       $ins->execute();
 
       unlink($path);
     }
 
+    Sabel_DB_Migration_Manager::setDirectory($directory);
     $this->createCustomRestoreFile($upgradeFiles, $version);
   }
 
@@ -76,8 +81,9 @@ class Sabel_DB_Migration_Classes_Custom
     fclose($fp);
 
     $this->isUpgrade = true;
-    list (, $num) = explode("_", getFileName($restoreFile));
-    $fp = fopen(MIG_DIR . DS . "{$num}_mix.php", "r");
+    list (, $num) = explode("_", basename($restoreFile));
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    $fp = fopen($directory . DS . "{$num}_mix.php", "r");
     $this->splitFiles($fp);
     fclose($fp);
 
@@ -87,9 +93,12 @@ class Sabel_DB_Migration_Classes_Custom
   public function doDowngrade($migClassName)
   {
     $temporaryDir = $this->temporaryDir;
-    $files = array_reverse(getMigrationFiles($temporaryDir));
-    $fileNum = count($files) + 1;
-    $prefix  = $temporaryDir . DS;
+
+    $directory = Sabel_DB_Migration_Manager::setDirectory($temporaryDir);
+    $files     = Sabel_DB_Migration_Manager::getFiles();
+    $files     = array_reverse($files);
+    $fileNum   = count($files) + 1;
+    $prefix    = $temporaryDir . DS;
 
     for ($i = 1; $i < $fileNum; $i++) {
       $file = $files[$i - 1];
@@ -104,6 +113,8 @@ class Sabel_DB_Migration_Classes_Custom
 
       unlink($path);
     }
+
+    Sabel_DB_Migration_Manager::setDirectory($directory);
   }
 
   private function splitFiles($fp)
@@ -170,7 +181,8 @@ class Sabel_DB_Migration_Classes_Custom
     }
 
     $files = array_reverse($files);
-    $dir   = MIG_DIR . DS . "restores";
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    $dir = $directory . DS . "restores";
     if (!is_dir($dir)) mkdir($dir);
 
     $restore = $dir . DS . "restore_{$version}";
@@ -178,7 +190,7 @@ class Sabel_DB_Migration_Classes_Custom
 
     foreach ($files as $file) {
       $fp    = fopen($file, "r");
-      $fName = getFileName($file);
+      $fName = basename($file);
 
       list (, $num) = explode("_", $fName);
       list (, $mdlName, $command) = explode("_", $upgradeFiles[$num]);

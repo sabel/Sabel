@@ -22,9 +22,11 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
     $conn = $this->getConnection();
     if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      if (!$conn->beginTransaction()) {
-        $error = $conn->errorInfo();
-        throw new Exception("pdo driver begin failed. {$error[2]}");
+      try {
+        $conn->beginTransaction();
+      } catch (PDOException $e) {
+        $message = $e->getMessage();
+        throw new Sabel_DB_Exception("pdo driver begin failed. {$message}");
       }
 
       Sabel_DB_Transaction::start($conn, $this);
@@ -35,17 +37,21 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function commit($connection)
   {
-    if (!$connection->commit()) {
-      $error = $connection->errorInfo();
-      throw new Exception("pdo driver commit failed. {$error[2]}");
+    try {
+      $connection->commit();
+    } catch (PDOException $e) {
+      $message = $e->getMessage();
+      throw new Sabel_DB_Exception("pdo driver commit failed. {$message}");
     }
   }
 
   public function rollback($connection)
   {
-    if (!$connection->rollback()) {
-      $error = $connection->errorInfo();
-      throw new Exception("pdo driver rollback failed. {$error[2]}");
+    try {
+      $connection->rollback();
+    } catch (PDOException $e) {
+      $message = $e->getMessage();
+      throw new Sabel_DB_Exception("pdo driver rollback failed. {$message}");
     }
   }
 

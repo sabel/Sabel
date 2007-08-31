@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Pgsql
+ * Sabel_DB_Pgsql_Migration
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
+class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
 {
   protected $types = array(Sabel_DB_Type::INT      => "integer",
                            Sabel_DB_Type::BIGINT   => "bigint",
@@ -22,25 +22,21 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::DATETIME => "timestamp",
                            Sabel_DB_Type::DATE     => "date");
 
-  protected function createTable($cols)
+  protected function createTable($filePath)
   {
-    executeQuery($this->getCreateSql($cols));
+    $reader = new Sabel_DB_Migration_Reader($filePath);
+    $query  = $this->getCreateSql($reader->readCreate());
+    Sabel_DB_Migration_Manager::getDriver()->execute($query);
   }
 
-  protected function changeColumnUpgrade($columns, $schema, $tblName)
+  protected function changeColumnUpgrade($columns, $schema)
   {
-    foreach ($columns as $column) {
-      $current = $schema->getColumnByName($column->name);
-      $this->alterChange($current, $column, $tblName);
-    }
+    $this->alterChange($columns, $schema);
   }
 
-  protected function changeColumnDowngrade($columns, $schema, $tblName)
+  protected function changeColumnDowngrade($columns, $schema)
   {
-    foreach ($columns as $column) {
-      $current = $schema->getColumnByName($column->name);
-      $this->alterChange($current, $column, $tblName);
-    }
+    $this->alterChange($columns, $schema);
   }
 
   protected function createColumnAttributes($column)
@@ -55,49 +51,58 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
     return implode(" ", $line);
   }
 
-  private function alterChange($current, $column, $tblName)
+  private function alterChange($columns, $schema)
   {
-    if ($column->type !== null || ($current->isString() && $column->max !== null)) {
-      $this->changeType($current, $column, $tblName);
+    $tblName = $schema->getTableName();
+    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver->begin();
+
+    foreach ($columns as $column) {
+      $current = $schema->getColumnByName($column->name);
+      if ($column->type !== null || ($current->isString() && $column->max !== null)) {
+        $this->changeType($current, $column, $tblName, $driver);
+      }
+
+      if ($column->nullable !== null) {
+        $this->changeNullable($current, $column, $tblName, $driver);
+      }
+
+      if ($column->default !== $current->default) {
+        $this->changeDefault($current, $column, $tblName, $driver);
+      }
     }
 
-    if ($column->nullable !== null) {
-      $this->changeNullable($current, $column, $tblName);
-    }
-
-    if ($column->default !== $current->default) {
-      $this->changeDefault($current, $column, $tblName);
-    }
+    Sabel_DB_Transaction::commit();
   }
 
-  private function changeType($current, $column, $tblName)
+  private function changeType($current, $column, $tblName, $driver)
   {
     if ($current->type !== $column->type && $column->type !== null) {
       $type = $this->getDataType($column);
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
     } elseif ($current->isString() && $current->max !== $column->max) {
       $column->type = $current->type;
       if ($column->max === null) $column->max = 255;
       $type = $this->getDataType($column);
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
     }
   }
 
-  private function changeNullable($current, $column, $tblName)
+  private function changeNullable($current, $column, $tblName, $driver)
   {
     if ($current->nullable === $column->nullable) return;
 
     if ($column->nullable) {
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} DROP NOT NULL");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} DROP NOT NULL");
     } else {
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} SET NOT NULL");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} SET NOT NULL");
     }
   }
 
-  private function changeDefault($current, $column, $tblName)
+  private function changeDefault($current, $column, $tblName, $driver)
   {
     if ($column->default === _NULL) {
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} DROP DEFAULT");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} DROP DEFAULT");
     } else {
       if ($column->isBool()) {
         $default = ($column->default) ? "true" : "false";
@@ -107,7 +112,7 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
         $default = "'{$column->default}'";
       }
 
-      executeQuery("ALTER TABLE $tblName ALTER {$column->name} SET DEFAULT $default");
+      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} SET DEFAULT $default");
     }
   }
 
@@ -121,12 +126,10 @@ class Sabel_DB_Migration_Pgsql extends Sabel_DB_Migration_Base
       } else {
         throw new Exception("invalid data type for sequence.");
       }
+    } elseif ($col->isString()) {
+      return $this->types[$col->type] . "({$col->max})";
     } else {
-      if ($col->isString()) {
-        return $this->types[$col->type] . "({$col->max})";
-      } else {
-        return $this->types[$col->type];
-      }
+      return $this->types[$col->type];
     }
   }
 

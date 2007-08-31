@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Mysql
+ * Sabel_DB_Mysql_Migration
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
+class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 {
   protected $types = array(Sabel_DB_Type::INT      => "integer",
                            Sabel_DB_Type::BIGINT   => "bigint",
@@ -22,20 +22,18 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
                            Sabel_DB_Type::DATETIME => "datetime",
                            Sabel_DB_Type::DATE     => "date");
 
-  public function setOptions($key, $val)
+  protected function createTable($filePath)
   {
-    $this->options[$key] = $val;
-  }
+    $reader  = new Sabel_DB_Migration_Reader($filePath);
+    $create  = $reader->readCreate();
+    $query   = $this->getCreateSql($create);
+    $options = $create->getOptions();
 
-  protected function createTable($cols)
-  {
-    $query = $this->getCreateSql($cols);
-
-    if (isset($this->options["engine"])) {
-      $query .= " ENGINE=" . $this->options["engine"];
+    if (isset($options["engine"])) {
+      $query .= " ENGINE=" . $options["engine"];
     }
 
-    executeQuery($query);
+    Sabel_DB_Migration_Manager::getDriver()->execute($query);
   }
 
   public function drop()
@@ -43,41 +41,45 @@ class Sabel_DB_Migration_Mysql extends Sabel_DB_Migration_Base
     if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
-
-      $fp = fopen($restore, "w");
-
-      $schema = getSchema($this->mdlName);
-      Sabel_DB_Migration_Classes_Restore::forCreate($fp, $schema);
-
-      $tblName  = convert_to_tablename($this->mdlName);
+      $driver   = Sabel_DB_Migration_Manager::getDriver();
       $accessor = Sabel_DB_Migration_Manager::getAccessor();
+      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
+      $tblName  = $schema->getTableName();
       $engine   = $accessor->getTableEngine($tblName);
+      $writer   = new Sabel_DB_Migration_Writer($restore);
+      $writer->writeTable($schema);
 
+      $fp =& $writer->getFilePointer();
       fwrite($fp, '$create->options("engine", "' . $engine . '");');
       fwrite($fp, "\n");
-      fclose($fp);
+      $writer->close();
 
-      executeQuery("DROP TABLE " . convert_to_tablename($this->mdlName));
+      $driver->execute("DROP TABLE " . $tblName);
     } else {
-      $path = $this->getRestoreFileName();
-      $this->createTable(getCreate($path, $this));
+      $this->createTable($this->getRestoreFileName());
     }
   }
 
-  protected function changeColumnUpgrade($columns, $schema, $tblName)
+  protected function changeColumnUpgrade($columns, $schema)
   {
+    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $tblName = $schema->getTableName();
+
     foreach ($columns as $column) {
       $current = $schema->getColumnByName($column->name);
       $line = $this->alterChange($column, $current);
-      executeQuery("ALTER TABLE $tblName MODIFY $line");
+      $driver->execute("ALTER TABLE $tblName MODIFY $line");
     }
   }
 
-  protected function changeColumnDowngrade($columns, $schema, $tblName)
+  protected function changeColumnDowngrade($columns, $schema)
   {
+    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $tblName = $schema->getTableName();
+
     foreach ($columns as $column) {
       $line = $this->createColumnAttributes($column);
-      executeQuery("ALTER TABLE $tblName MODIFY $line");
+      $driver->execute("ALTER TABLE $tblName MODIFY $line");
     }
   }
 

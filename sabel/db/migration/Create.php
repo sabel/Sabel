@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_Create
+ * Sabel_DB_Migration_Create
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,43 +9,63 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_Create
+class Sabel_DB_Migration_Create
 {
-  private $mcolumns = array();
-  private $columns  = array();
-  private $pkeys    = array();
-  private $fkeys    = array();
-  private $uniques  = array();
-  private $options  = array();
+  private
+    $mcolumns = array(),
+    $columns  = array(),
+    $pkeys    = array(),
+    $fkeys    = array(),
+    $uniques  = array(),
+    $options  = array();
 
   public function column($name)
   {
-    $mcolumn = new Sabel_DB_Migration_Classes_Column($name);
+    $mcolumn = new Sabel_DB_Migration_Column($name);
     return $this->mcolumns[$name] = $mcolumn;
   }
 
-  public function getColumns($migClass)
+  public function build()
   {
     $columns = array();
 
     foreach ($this->mcolumns as $column) {
-      $columns[] = $column->getColumn();
+      $columns[] = $column->arrange()->getColumn();
     }
 
     $pkeys =& $this->pkeys;
-    foreach (arrange($columns) as $column) {
+    foreach ($columns as $column) {
       if ($column->primary) $pkeys[] = $column->name;
     }
 
-    foreach ($this->options as $key => $val) {
-      $migClass->setOptions($key, $val);
-    }
+    $this->columns = $columns;
 
-    $migClass->setPrimaryKeys(array_unique($pkeys));
-    $migClass->setUniques($this->uniques);
-    $migClass->setForeignKeys($this->fkeys);
+    return $this;
+  }
 
-    return $columns;
+  public function getColumns()
+  {
+    return $this->columns;
+  }
+
+  public function getPrimaryKeys()
+  {
+    return $this->pkeys;
+  }
+
+  public function getForeignKeys()
+  {
+    return $this->fkeys;
+  }
+
+  public function getUniques()
+  {
+    return $this->uniques;
+  }
+
+  public function getOptions()
+  {
+    return $this->options;
   }
 
   public function primary($columnNames)
@@ -74,7 +94,7 @@ class Sabel_DB_Migration_Classes_Create
 
   public function fkey($colName)
   {
-    $fKey = new Sabel_DB_Migration_Classes_ForeignKey($colName);
+    $fKey = new Sabel_DB_Migration_ForeignKey($colName);
     return $this->fkeys[$colName] = $fKey;
   }
 

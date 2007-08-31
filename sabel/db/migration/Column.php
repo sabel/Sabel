@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_Column
+ * Sabel_DB_Migration_Column
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,12 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_Column
+class Sabel_DB_Migration_Column
 {
-  const EMPTY_DEFAULT = "SDB_EMPTY_DEFAULT";
-
-  private $column   = null;
-  private $isChange = false;
+  private
+    $column   = null,
+    $isChange = false;
 
   public function __construct($name, $isChange = false)
   {
@@ -65,23 +64,15 @@ class Sabel_DB_Migration_Classes_Column
     if ($this->column->isBool() && !is_bool($value)) {
       Sabel_Sakle_Task::error("default value for BOOL column should be a boolean.");
       exit;
-    }
-
-    if ($this->isChange && $value === null) {
-      $this->column->default = self::EMPTY_DEFAULT;
     } else {
       $this->column->default = $value;
+      return $this;
     }
-
-    return $this;
   }
 
   public function length($length)
   {
-    if ($this->column->isString()) {
-      $this->column->max = $length;
-      return $this;
-    } elseif ($this->isChange && $this->column->type === null) {
+    if ($this->column->isString() || $this->isChange && $this->column->type === null) {
       $this->column->max = $length;
       return $this;
     } else {
@@ -98,5 +89,29 @@ class Sabel_DB_Migration_Classes_Column
       Sabel_Sakle_Task::error("argument for {$key}() should be a boolean.");
       exit;
     }
+  }
+
+  public function arrange()
+  {
+    $column = $this->column;
+
+    if ($column->primary === true) {
+      $column->nullable = false;
+    } elseif ($column->nullable === null) {
+      $column->nullable = true;
+    }
+
+    if ($column->primary === null) {
+      $column->primary = false;
+    }
+
+    if ($column->increment === null) {
+      $column->increment = false;
+    }
+
+    if ($column->type === Sabel_DB_Type::STRING &&
+        $column->max === null) $column->max = 255;
+
+    return $this;
   }
 }

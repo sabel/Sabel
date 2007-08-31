@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_ForeignKey
+ * Sabel_DB_Migration_ForeignKey
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,13 +9,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_ForeignKey
+class Sabel_DB_Migration_ForeignKey
 {
-  public $column    = null;
-  public $refTable  = null;
-  public $refColumn = null;
-  public $onDelete  = null;
-  public $onUpdate  = null;
+  public
+    $column    = null,
+    $refTable  = null,
+    $refColumn = null,
+    $onDelete  = null,
+    $onUpdate  = null;
 
   public function __construct($column)
   {

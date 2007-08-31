@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Classes_Restore
+ * Sabel_DB_Migration_Writer
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,13 +9,26 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Classes_Restore
+class Sabel_DB_Migration_Writer
 {
-  public static function forCreate($fp, $schema)
+  private $fp = null;
+
+  public function __construct($filePath)
+  {
+    $this->fp = fopen($filePath, "w");
+  }
+
+  public function &getFilePointer()
+  {
+    return $this->fp;
+  }
+
+  public function writeTable($schema)
   {
     $columns = $schema->getColumns();
-    self::forColumns($fp, $columns, '$create');
+    $this->_writeColumns($columns, '$create');
 
+    $fp   = $this->fp;
     $pkey = $schema->getPrimarykey();
 
     if (is_array($pkey)) {
@@ -56,8 +69,21 @@ class Sabel_DB_Migration_Classes_Restore
     }
   }
 
-  public static function forColumns($fp, $columns, $variable = '$add')
+  public function writeColumns($schema, $alterCols, $variable = '$add')
   {
+    $columns = array();
+
+    foreach ($schema->getColumns() as $column) {
+      if (in_array($column->name, $alterCols)) $columns[] = $column;
+    }
+
+    $this->_writeColumns($columns, $variable);
+  }
+
+  private function _writeColumns($columns, $variable)
+  {
+    $fp = $this->fp;
+
     $lines = array();
     foreach ($columns as $column) {
       $line = array($variable);
@@ -99,5 +125,10 @@ class Sabel_DB_Migration_Classes_Restore
     fwrite($fp, "<?php\n\n");
     fwrite($fp, $lines);
     fwrite($fp, "\n\n");
+  }
+
+  public function close()
+  {
+    fclose($this->fp);
   }
 }

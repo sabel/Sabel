@@ -54,7 +54,7 @@ class Sabel_DB_Schema_Accessor
       $sClass = new $sClsName();
       $cols   = $sClass->get();
     } else {
-      $cols = $this->getTable($tblName)->getColumns();
+      $cols = $this->get($tblName)->getColumns();
     }
 
     return array_keys($cols);
