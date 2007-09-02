@@ -1,10 +1,19 @@
-2007-08-28  Mori Reo  <mori.reo@sabel.jp>
-	* Sabel_DB_ModelにunsetValue()メソッドを追加
-	* CustomValidatorのメソッドシグニチャを変更
+2007-09-03  Ebine Yutaka <ebine.yutaka@sabel.jp>
+  * Sabel_Objectに__toString(), toString(), equals(), hashCode()追加
+  * Sabel_Util_Stringを追加
+  * Sabel_Util_Mapを追加
+  * Sabel_DB_Abstract_ModelがSabel_Objectを継承
+  * Sabel_DB_Abstract_ModelのgetModelName()をgetName()に変更
+  * Sabel_DB_Schema_Columnのcast()の挙動を変更
+    INT, SMALLINT型のカラムは"003"のような文字列も3に変換する
 
-2007-08-26  Mori Reo  <morireo@sabel.jp>
-	* Flowプロセッサ(alpha)を追加
-	* プロセッサをアプリケーション側へ移動
-	* Request_Objectにメソッドを追加
-	* Annotation_ReflectionClassのgetMethod($name)を動作するようにした
-	* Sabel_Bus_Configのaddのシグニチャを変更($processor, $asListener)
+2007-08-28  Mori Reo <mori.reo@sabel.jp>
+  * Sabel_DB_ModelにunsetValue()メソッドを追加
+  * CustomValidatorのメソッドシグニチャを変更
+
+2007-08-26  Mori Reo <morireo@sabel.jp>
+  * Flowプロセッサ(alpha)を追加
+  * プロセッサをアプリケーション側へ移動
+  * Request_Objectにメソッドを追加
+  * Annotation_ReflectionClassのgetMethod($name)を動作するようにした
+  * Sabel_Bus_Configのaddのシグニチャを変更($processor, $asListener)
