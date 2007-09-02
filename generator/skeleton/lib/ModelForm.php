@@ -48,7 +48,7 @@ class ModelForm
       $model = MODEL($model);
     }
     
-    $mdlName = $model->getModelName();
+    $mdlName = $model->getName();
     
     foreach ($values as $key => $value) {
       if (strpos($key, "::") !== false) {

@@ -182,16 +182,6 @@ function now()
   return date("Y-m-d H:i:s");
 }
 
-function _hashtable($array)
-{
-  return new Sabel_Util_Hashtable($array);
-}
-
-function is_hashtable($object)
-{
-  return ($object instanceof Sabel_Util_Hash);
-}
-
 function _A($obj)
 {
   return new Sabel_Aspect_Proxy($obj);

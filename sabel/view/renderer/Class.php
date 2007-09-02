@@ -7,7 +7,6 @@
  * @package    org.sabel.template.engine
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  *             Mori Reo <mori.reo@gmail.com>
- *
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */

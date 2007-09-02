@@ -18,9 +18,14 @@ class Sabel_DB_Migration_Writer
     $this->fp = fopen($filePath, "w");
   }
 
-  public function &getFilePointer()
+  public function write($line)
   {
-    return $this->fp;
+    fwrite($this->fp, $line);
+  }
+
+  public function close()
+  {
+    fclose($this->fp);
   }
 
   public function writeTable($schema)
@@ -125,10 +130,5 @@ class Sabel_DB_Migration_Writer
     fwrite($fp, "<?php\n\n");
     fwrite($fp, $lines);
     fwrite($fp, "\n\n");
-  }
-
-  public function close()
-  {
-    fclose($this->fp);
   }
 }

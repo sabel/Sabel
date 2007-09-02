@@ -3,7 +3,7 @@
 /**
  * Sabel_Util_DirectoryTraverser
  *
- * @category   Bus
+ * @category   Util
  * @package    org.sabel.util
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>

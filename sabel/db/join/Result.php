@@ -22,7 +22,7 @@ class Sabel_DB_Join_Result
     }
 
     $results = array();
-    $selfObj = MODEL($source->getModelName());
+    $selfObj = MODEL($source->getName());
 
     foreach ($rows as $row) {
       $models = self::createModels($row, $tables, $objects);

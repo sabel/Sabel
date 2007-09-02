@@ -22,7 +22,7 @@ class Form
     }
     
     $this->model   = $model;
-    $this->mdlName = $model->getModelName();
+    $this->mdlName = $model->getName();
     $this->columns = $model->getSchema()->getColumns();
   }
   

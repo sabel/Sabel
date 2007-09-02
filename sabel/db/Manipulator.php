@@ -266,7 +266,7 @@ class Sabel_DB_Manipulator
     if (empty($rows)) return false;
 
     $results = array();
-    $source  = MODEL($this->model->getModelName());
+    $source  = MODEL($this->model->getName());
 
     foreach ($rows as $row) {
       $model = clone $source;
@@ -354,7 +354,7 @@ class Sabel_DB_Manipulator
       $saveValues = $this->_saveInsert();
     }
 
-    $model = MODEL($this->model->getModelName());
+    $model = MODEL($this->model->getName());
     $model->setAttributes($saveValues);
 
     return $model;

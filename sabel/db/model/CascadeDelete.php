@@ -30,7 +30,7 @@ class Sabel_DB_Model_CascadeDelete
     $model      = $this->model;
     $cascade    = $config->getChain();
     $this->keys = $config->getKeys();
-    $mdlName    = $model->getModelName();
+    $mdlName    = $model->getName();
 
     Sabel_DB_Transaction::begin($model->getConnectionName());
 
@@ -59,7 +59,7 @@ class Sabel_DB_Model_CascadeDelete
   private function makeChainModels($children, &$cascade)
   {
     $childObj = $children[0];
-    $mdlName  = $childObj->getModelName();
+    $mdlName  = $childObj->getName();
     if (!isset($cascade[$mdlName])) return;
 
     $models = array();

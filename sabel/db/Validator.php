@@ -28,7 +28,7 @@ class Sabel_DB_Validator
   public function __construct(Sabel_DB_Abstract_Model $model)
   {
     $this->model        = $model;
-    $this->mdlName      = $model->getModelName();
+    $this->mdlName      = $model->getName();
     $this->displayNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
 
     $configs = Sabel_DB_Validate_Config::getConfigs();
@@ -252,7 +252,7 @@ class Sabel_DB_Validator
 
   protected function unique($model, $uniques)
   {
-    $manip = new Manipulator($model->getModelName());
+    $manip = new Manipulator($model->getName());
     $pkey  = $model->getPrimaryKey();
 
     if (is_string($pkey)) $pkey = (array)$pkey;

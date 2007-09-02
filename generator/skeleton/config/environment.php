@@ -20,5 +20,10 @@ if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(0);
 }
 
-add_include_paths(array("app", "lib", "config", "app" . DS. "helpers"));
+add_include_paths(array("app",
+                        "lib",
+                        "config",
+                        "app" . DS. "models",
+                        "app" . DS. "helpers"));
+
 set_include_path(Sabel::getPath() . ":" . get_include_path());

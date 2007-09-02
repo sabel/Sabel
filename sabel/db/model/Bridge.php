@@ -30,7 +30,7 @@ class Sabel_DB_Model_Bridge
   public function getChild($child, $constraints = null)
   {
     $model   = $this->model;
-    $mdlName = $model->getModelName();
+    $mdlName = $model->getName();
     $bridge  = MODEL($this->bridgeName);
     $manip   = new Manipulator($bridge);
     $foreign = $bridge->getSchema()->getForeignKeys();
@@ -40,7 +40,7 @@ class Sabel_DB_Model_Bridge
     if ($constraints) $manip->setConstraint($constraints);
 
     $cModel  = MODEL($child);
-    $mdlName = $cModel->getModelName();
+    $mdlName = $cModel->getName();
     list ($pkey, $fkey) = $this->getJoinKey($foreign, $mdlName, $cModel);
     $keys    = array("id" => $pkey, "fkey" => $fkey);
     $joiner  = new Sabel_DB_Join($manip);

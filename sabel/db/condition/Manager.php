@@ -22,6 +22,11 @@ class Sabel_DB_Condition_Manager
     }
   }
 
+  public function has($key)
+  {
+    return isset($this->conditions[$key]);
+  }
+
   public function getConditions()
   {
     return $this->conditions;
@@ -47,7 +52,7 @@ class Sabel_DB_Condition_Manager
 
   public function isEmpty()
   {
-    return (empty($this->conditions));
+    return empty($this->conditions);
   }
 
   public function clear()

@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Model
+abstract class Sabel_DB_Abstract_Model extends Sabel_Object
 {
   protected
     $connectionName = "default";
@@ -99,7 +99,7 @@ abstract class Sabel_DB_Abstract_Model
     return $this->tableName;
   }
 
-  public function getModelName()
+  public function getName()
   {
     return $this->modelName;
   }
