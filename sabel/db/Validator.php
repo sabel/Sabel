@@ -27,15 +27,15 @@ class Sabel_DB_Validator
 
   public function __construct(Sabel_DB_Abstract_Model $model)
   {
-    $this->model        = $model;
-    $this->mdlName      = $model->getName();
-    $this->displayNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+    $this->model   = $model;
+    $this->mdlName = $model->getName();
 
     $configs = Sabel_DB_Validate_Config::getConfigs();
 
-    $this->messages      = $configs["messages"];
-    $this->datetimeRegex = $configs["datetimeRegex"];
-    $this->dateRegex     = $configs["dateRegex"];
+    $this->messages       = $configs["messages"];
+    $this->datetimeRegex  = $configs["datetimeRegex"];
+    $this->dateRegex      = $configs["dateRegex"];
+    $this->localizedNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
   }
 
   public function getErrors()
@@ -85,10 +85,9 @@ class Sabel_DB_Validator
     $this->ignores = $ignores;
     $this->errors  = array();
 
-    $messages  = $this->messages;
-    $model     = $this->model;
-    $columns   = $this->getColumns();
-    $localized = $this->displayNames;
+    $messages = $this->messages;
+    $model    = $this->model;
+    $columns  = $this->getColumns();
 
     foreach ($columns as $name => $column) {
       if (in_array($name, $ignores)) continue;
@@ -99,25 +98,25 @@ class Sabel_DB_Validator
         throw new Sabel_DB_Exception($message);
       }
 
-      $msgName = (isset($localized[$name])) ? $localized[$name] : $name;
+      $lName = $this->getLocalizedName($name);
 
       if (!$this->nullable($column)) {
-        $this->errors[] = sprintf($this->messages["nullable"], $msgName);
+        $this->errors[] = sprintf($this->messages["nullable"], $lName);
         continue;
       }
 
       if (!$this->type($column)) {
-        $this->errors[] = sprintf($this->messages["type"], $msgName);
+        $this->errors[] = sprintf($this->messages["type"], $lName);
         continue;
       }
 
       if ($column->isString() && !$this->length($column)) {
-        $this->errors[] = sprintf($this->messages["length"], $msgName);
+        $this->errors[] = sprintf($this->messages["length"], $lName);
         continue;
       }
 
       if ($column->isNumeric() && !$this->maximum($column)) {
-        $this->errors[] = sprintf($this->messages["maximum"], $msgName);
+        $this->errors[] = sprintf($this->messages["maximum"], $lName);
         continue;
       }
     }
@@ -226,19 +225,26 @@ class Sabel_DB_Validator
 
   protected function execCustomValidation($functions, $name)
   {
+    $lName = $this->getLocalizedName($name);
+
     foreach ($functions as $function) {
+      $code = '$function($this->model, $name, $lName';
+
       if (is_array($function)) {
         list ($function, $args) = $function;
         if (!is_array($args)) $args = (array)$args;
-
-        $argString = $this->createEvalString($args);
-        eval ('$result = $function($this->model, $name, ' . $argString . ');');
-      } else {
-        $result = $function($this->model, $name);
+        $code .= ", " . $this->createEvalString($args);
       }
 
+      eval ('$result = ' . $code . ');');
       if ($result) $this->errors[] = $result;
     }
+  }
+
+  protected function getLocalizedName($colName)
+  {
+    $lNames = $this->localizedNames;
+    return (isset($lNames[$colName])) ? $lNames[$colName] : $colName;
   }
 
   protected function createEvalString(&$arguments)
