@@ -69,28 +69,23 @@ class Sabel_DB_Validate_Config
     $arguments = null;
     if (isset($custom["arguments"])) {
       $arguments = $custom["arguments"];
-      if (!is_array($arguments)) $arguments = (array)$arguments;
-
-      if (count($arguments) !== count($models)) {
-        throw new Exception("invalid arguments count.");
-      }
     }
 
-    foreach ($models as $i => $mdlName) {
+    foreach ($models as $mdlName) {
       if ($arguments) {
-        $cvs[$mdlName][$colName][] = array($custom["function"], $arguments[$i]);
+        $cvs[$mdlName][$colName][] = array($custom["function"], $arguments);
       } else {
         $cvs[$mdlName][$colName][] = $custom["function"];
       }
     }
   }
 
-  public static function getCustomValidators()
+  public static function getValidators()
   {
     return self::$customValidators;
   }
 
-  public static function clearCustomValidators()
+  public static function clearValidators()
   {
     $validators = self::$customValidators;
     self::$customValidators = array();

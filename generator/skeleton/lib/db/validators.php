@@ -2,23 +2,23 @@
 
 /*
 $emailValidator = array("function" => "validateEmailAddress",
-                        "model"    => "Member",
-                        "column"   => "email");
+                        "model"    => "MODEL_NAME",
+                        "column"   => "COLUMN_NAME");
 
 $passwdValidator = array("function"  => "validatePasswords",
-                         "model"     => "Member",
-                         "column"    => "password",
-                         "arguments" => "retype");
+                         "model"     => "MODEL_NAME",
+                         "column"    => "COLUMN_NAME",
+                         "arguments" => "RETYPE_INPUT_NAME");
 
 $lengthValidator = array("function"  => "validateLength",
-                         "model"     => "Member",
-                         "column"    => "nickname",
-                         "arguments" => array(array(10, 4)));
-
-Sabel_DB_Validate_Config::addValidator($emailValidator);
-Sabel_DB_Validate_Config::addValidator($passwdValidator);
-Sabel_DB_Validate_Config::addValidator($lengthValidator);
+                         "model"     => "MODEL_NAME",
+                         "column"    => "COLUMN_NAME",
+                         "arguments" => array(MAX, MIN));
 */
+
+// Sabel_DB_Validate_Config::addValidator($emailValidator);
+// Sabel_DB_Validate_Config::addValidator($passwdValidator);
+// Sabel_DB_Validate_Config::addValidator($lengthValidator);
 
 function validateEmailAddress($model, $name, $localizedName)
 {

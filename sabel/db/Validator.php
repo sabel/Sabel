@@ -125,7 +125,7 @@ class Sabel_DB_Validator
       $this->unique($model, $uniques);
     }
 
-    if ($customs = Sabel_DB_Validate_Config::getCustomValidators()) {
+    if ($customs = Sabel_DB_Validate_Config::getValidators()) {
       $this->customs($customs, $columns);
     }
 

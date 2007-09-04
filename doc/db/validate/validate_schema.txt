@@ -1,146 +1,108 @@
-データベースへの登録や更新処理において、入力値のチェックは欠かせないものです。
-Sabel_DBでは、最大値(最大長)、必須かどうか、型、ユニークかどうか、のバリデーションをサポートしています。
+テスト用のテーブルを作成します。
+* このCREATE文は疑似SQLです
 
-今回使用するのは以下の定義の'member'テーブルです。
+CREATE TABLE hoge
+(
+  id INT NOT NULL SEQUENCE,
+  name STRING(24) NOT NULL,
+  age SMALLINT NOT NULL,
+  email STRING(255) NOT NULL,
+  PRIMARY KEY id,
+  UNIQUE email
+)
 
-  * id: INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT(SEQUENCE)
-  * name: VARCHAR(24) NOT NULL
-  * age: SMALLINT
-  * email: VARCHAR(256) NOT NULL UNIQUE
+Sabel_DB_Validatorのコンストラクタにモデルを渡し、validate()メソッドをコールします。
+まずはモデルに何も値をセットしないでバリデートしてみます。
 
-テーブルの作成後、以下のコードを実行します。
-
-  $member = MODEL("Member");
-  $errors = $member->validate();
+  $hoge = MODEL("Hoge");
+  $validator = new Sabel_DB_Validator($hoge);
+  $errors = $validator->validate();
 
   if ($errors) {
     foreach ($errors as $error) {
       echo $error . "<br/>";
     }
   } else {
-    $saved = $member->save();
+    $manipulator = new Manipulator($hoge);
+    $manipulator->save();
   }
 
   出力結果:
     please enter a name.
+    please enter a age.
     please enter a email.
 
-'name'カラムと'email'カラムはNOT NULL(必須)で定義されているので、このようにエラーメッセージが出力されました。
-validate()メソッドの返り値は配列であり、エラーが無い場合は空の配列となります。
-'id'カラムもNOT NULLですが、このカラムはシーケンス番号が振られるカラムなので入力値は空で問題ありません。
-では、入力するとどうなるか、やってみましょう。
+NOT NULLのカラムに値がセットされていないので、エラーメッセージが3つ出力されました。
+'id'カラムもNOT NULLですが、'id'はシーケンス(連番)カラムなので無視されます。
+シーケンスカラムに値がセットされている場合は例外を投げます。
 
-  $member = MODEL("Member");
-  $member->id = 1;
-  $errors = $member->validate();
+では、名前と年齢を入力(セット)してみましょう。
 
-  ...
+  $hoge = MODEL("Hoge");
+  $hoge->name = "tanaka";
+  $hoge->age = 30;
+  $validator = new Sabel_DB_Validator($hoge);
+  $errors = $validator->validate();
+
+  if ($errors) {
+    foreach ($errors as $error) {
+      echo $error . "<br/>";
+    }
+  } else {
+    $manipulator = new Manipulator($hoge);
+    $manipulator->save();
+  }
 
   出力結果:
-    Array
-    (
-        [THROWN] => sabel.db.validate
-        [ERROR_MESSAGE] => don't set a value in 'id'(auto increment column).
-        [METHOD] => validate()
-    )
+    please enter a email.
 
-例外(Exception)が投げられました。
-AUTO INCREMENT(SEQUENCE)カラムに値をセットすることは禁じられています。
+名前と年齢のエラーメッセージが出力されなくなりました。
 
-では次に、いくつかの入力を与えてみます。
+では、24文字より長い名前を入力してみましょう。
 
-  $member = MODEL("Member");
-  $member->name = "HogeHogeHogeHogeHogeHogeH";
-  $member->age = "age";
-  $errors = $member->validate();
+  $hoge = MODEL("Hoge");
+  $hoge->name = "toooooooooooooo long name";
+  $hoge->age = 30;
+  $validator = new Sabel_DB_Validator($hoge);
+  $errors = $validator->validate();
 
-  ...
+  if ($errors) {
+    foreach ($errors as $error) {
+      echo $error . "<br/>";
+    }
+  } else {
+    $manipulator = new Manipulator($hoge);
+    $manipulator->save();
+  }
 
   出力結果:
     name is too long.
-    wrong age format.
     please enter a email.
 
-'name'がカラム定義の24文字をオーバーしていることが出力されました。
-また、年齢は数値(SMALLINT)を期待しているのに文字列を入力したので、形式が間違っていると出力されました。
+名前が長すぎると、エラーメッセージが出力されました。
 
-では一度、正常なデータで登録を行ってみます。
+では、名前を元に戻し、'email'にもデータをセットします。
+そして、このプログラムを2回走らせてみます。
 
-  $member = MODEL("Member");
-  $member->name = "satou";
-  $member->age = 31;
-  $member->email = "satou@example.com";
-  $errors = $member->validate();
+  $hoge = MODEL("Hoge");
+  $hoge->name = "tanaka";
+  $hoge->age  = 30;
+  $hoge->email = "tanaka@example.com";
+  $validator = new Sabel_DB_Validator($hoge);
+  $errors = $validator->validate();
 
   if ($errors) {
     foreach ($errors as $error) {
       echo $error . "<br/>";
     }
   } else {
-    $saved = $member->save();
-    echo "NEW MEMBER ID: " . $saved->id;
+    $manipulator = new Manipulator($hoge);
+    $manipulator->save();
   }
 
   出力結果:
-    NEW MEMBER ID: 1
+    'tanaka@example.com' is unavailable.
 
-正常に登録処理が行われました。
-このコードを、もう一度実行すると、以下のエラーメッセージが出力されます。
-これは'email'カラムがUNIQUEで定義されているためです。
+2回目は、'tanaka@example.com'というメールアドレスは使用されているというエラーメッセージが出力されました。
+これは'email'カラムがUNIQUEで宣言されているためです。
 
-  email: 'satou@example.com' is unavailable.
-
-「メールアドレス形式」や、「年齢は120歳まで」のようなバリデートは、カスタムバリデートを登録することで実現可能です。
-カスタムバリデートに関しては、次項を参照ください。
-
-save()メソッドにtrueを渡すことで、登録(更新)する前にバリデーションを実行することもできます。
-この項の初めの例を書き換えます。もちろん、これは全く同じように動作します。
-
-  $member = MODEL("Member");
-  $result = $member->save(true);
-
-  if ($result->hasError) {
-    foreach ($result->errors as $error) {
-      echo $error . "<br/>";
-    }
-  }
-
-  出力結果:
-    please enter a name.
-    please enter a email.
-
-save()メソッドの返り値は通常登録(更新)された新規モデルですが、このようにバリデーションを実行し、エラーがあった場合はstdClassが返されます。
-stdClassのhasErrorにはtrueがセットされ、errorsにはエラーメッセージの配列がセットされています。
-このerrorsはvalidate()メソッドの返り値と同様のものです。
-
-登録(更新)が成功した場合はモデルが返されますが、モデルのhasErrorを参照してもnullが返されるので、このif文を通過することはありません。
-
-次に、更新時においてのバリデーションを行ってみます。
-基本的には登録時と同様です。
-
-  $member = MODEL("Member", 1);
-  $member->age = 32;
-  $result = $member->save(true);
-
-  ...
-
-これで先ほど登録した'satou'さんの年齢を、安全に更新することができました。
-
-何らかの事情により、特定のカラムに対してのバリデーションを無視(スキップ)したいかもしれません。
-これは特殊なケースですが、時々必要になることがあります。
-無視したいカラムがあれば、save()にtrueではなくカラム名の配列を渡してください。
-
-  $member = MODEL("Member");
-  $result = $member->save(array("name"));
-
-  if ($result->hasError) {
-    foreach ($result->errors as $error) {
-      echo $error . "<br/>";
-    }
-  }
-
-  出力結果:
-    please enter a email.
-
-'name'カラムを無視したので、'please enter a name.'というエラーメッセージは出力されなくなりました。
-この無視するカラムの配列は、同様にvalidate()メソッドに渡すことも可能です。

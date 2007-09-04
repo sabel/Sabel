@@ -1,97 +1,87 @@
-環境が違えばDBサーバの構成が違うこともごく当たり前のことです。
-
-例えばDEVELOPMENT(開発環境)においては次のようなパラメータかもしれません。
+環境が違えばデータベースの構成が違うこともあるでしょう。
+例えばDEVELOPMENT環境においては次のようなパラメータかもしれません。
 
   $params = array("default" => array(
-                    "driver" => "mysql",
-                    "host" => "localhost",
+                    "driver"   => "mysql",
+                    "host"     => "localhost",
                     "database" => "project_db",
-                    "user" => "root",
+                    "user"     => "root",
                     "password" => "")
                  );
 
 そしてPRODUCTION(運用環境)においては次のようなパラメータかもしれません。
 
   $params = array("default" => array(
-                    "driver" => "mysql",
-                    "host" => "192.168.0.50",
+                    "driver"   => "mysql",
+                    "host"     => "192.168.0.50",
                     "database" => "project_db",
-                    "user" => "web_user",
+                    "user"     => "web_user",
                     "password" => "web_pass")
                  );
 
-パラメータは環境ごとに設定できます。
-DBサーバに変更がない限り、一回設定してしまえば編集する必要はありません。
-
-前ページでは3台のデータベースを扱うように、config/connection.phpを編集しました。
-その設定をもう一度ここに書きます。そして、これをPRODUCTION環境でのパラメータだとします。
+例として、ユーザに関するデータベース、ブログに関するデータベース、メールに関するデータベースの3台を使用するアプリケーションがあるとします。PRODUCTION環境は以下の設定です。
 
   $params = array("users" => array(
-                    "driver" => "mysql",
-                    "host" => "192.168.0.50",
+                    "driver"   => "mysql",
+                    "host"     => "192.168.0.50",
                     "database" => "project_users",
-                    "user" => "web_user",
+                    "user"     => "web_user",
                     "password" => "web_pass"),
                   "blog" => array(
-                    "driver" => "mysql",
-                    "host" => "192.168.0.51",
+                    "driver"   => "mysql",
+                    "host"     => "192.168.0.51",
                     "database" => "project_blog",
-                    "user" => "web_user",
+                    "user"     => "web_user",
                     "password" => "web_pass"),
                   "mail" => array(
-                    "driver" => "mysql",
-                    "host" => "192.168.0.52",
+                    "driver"   => "mysql",
+                    "host"     => "192.168.0.52",
                     "database" => "project_mail",
-                    "user" => "web_user",
+                    "user"     => "web_user",
                     "password" => "web_pass")
                  );
 
-ローカル(開発環境)においてDBサーバを3つも立てるのは面倒かもしれません。
-それぞれを異なるポートで動作させるという手があります。その時の設定は次のようになるかもしれません。
+DEVELOPMENT環境(1台のマシン)にデータベースを3台動かすのなら、それぞれ異なるポートを使用するでしょう。
+例えば次のような設定になります。
 
   $params = array("users" => array(
-                    "driver" => "mysql",
-                    "host" => "127.0.0.1",
-                    "port" => "3306",
+                    "driver"   => "mysql",
+                    "host"     => "127.0.0.1",
+                    "port"     => "3306",
                     "database" => "local_users",
-                    "user" => "root",
+                    "user"     => "root",
                     "password" => ""),
                   "blog" => array(
-                    "driver" => "mysql",
-                    "host" => "127.0.0.1",
-                    "port" => "3307",
+                    "driver"   => "mysql",
+                    "host"     => "127.0.0.1",
+                    "port"     => "3307",
                     "database" => "local_blog",
-                    "user" => "root",
+                    "user"     => "root",
                     "password" => ""),
                   "mail" => array(
-                    "driver" => "mysql",
-                    "host" => "127.0.0.1",
-                    "port" => "3308",
+                    "driver"   => "mysql",
+                    "host"     => "127.0.0.1",
+                    "port"     => "3308",
                     "database" => "local_mail",
-                    "user" => "root",
+                    "user"     => "root",
                     "password" => "")
                  );
 
-このように設定すれば、環境の違いを気にせずにコーディングできるでしょう。
-しかし、やはりMySQLサーバを3台構築するのは面倒かもしれません。特別な理由がなければ、少なくとも私は面倒です。
-
-以下のようにすることで、この問題を解決することができます。
+しかし、以下のような設定をすることで、1台のデータベースでアプリケーションを動作させることも可能です。
 
   $params = array();
-  $params["users"] = array("driver" => "mysql",
-                           "host" => "localhost",
+  $params["users"] = array("driver"   => "mysql",
+                           "host"     => "localhost",
                            "database" => "local_db",
-                           "user" => "root",
+                           "user"     => "root",
                            "password" => "");
 
   $params["blog"] = $params["users"];
   $params["mail"] = $params["users"];
 
-このようにすればMySQLサーバは1台で済みますし、アプリケーションはRODUCTION(運用環境)と同様に動作します。
-
-PRODUCTIONのDBサーバごとのテーブルが、ローカル(DEVELOPMENT)では"local_db"というデータベースに全て存在します。
-しかし、アプリケーションはテーブルがどこにあるかを気にする必要はありません。データベースがどこにあるかさえ気にしていないのですから。
+PRODUCTION環境のデータベースごとのテーブルが、DEVELOPMENT環境では'local_db'というデータベースに全て存在します。しかし、アプリケーションはテーブルがどこにあるかを気にする必要はありません。データベースがどこにあるかさえ気にしていないのですから。
 
 しかしながら注意点はあります。
-テーブルが同じデータベースに存在するということは、テーブル結合が可能です。
-アプリケーションを作成(コーディング)している時にそのような処理を記述してしまうと、PRODUCTION環境に移行した時にアプリケーションは動作しなくなります。
+テーブルが同じデータベースに存在するということは、テーブル結合(JOIN)が可能です。
+開発時に、本来なら別データベースのはずのテーブルを結合してしまうと、PRODUCTION環境に移行した時にアプリケーションは動作しなくなるでしょう。
+
