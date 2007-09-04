@@ -24,11 +24,10 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
-    if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      $conn = $this->getConnection();
-      mysqli_autocommit($conn, false);
-      Sabel_DB_Transaction::start($conn, $this);
-    }
+    $connection = $this->getConnection();
+    mysqli_autocommit($connection, false);
+
+    return $connection;
   }
 
   public function commit($connection)

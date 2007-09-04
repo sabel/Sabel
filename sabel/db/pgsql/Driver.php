@@ -24,14 +24,12 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
-    if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      $conn = $this->getConnection();
-      if (!pg_query($conn, "START TRANSACTION")) {
-        throw new Sabel_DB_Exception("pgsql driver begin failed.");
-      }
-
-      Sabel_DB_Transaction::start($conn, $this);
+    $connection = $this->getConnection();
+    if (!pg_query($connection, "START TRANSACTION")) {
+      throw new Sabel_DB_Exception("pgsql driver begin failed.");
     }
+
+    return $connection;
   }
 
   public function commit($connection)

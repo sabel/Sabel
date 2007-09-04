@@ -20,16 +20,12 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
-    $conn = $this->getConnection();
-    if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      try {
-        $conn->beginTransaction();
-      } catch (PDOException $e) {
-        $message = $e->getMessage();
-        throw new Sabel_DB_Exception("pdo driver begin failed. {$message}");
-      }
-
-      Sabel_DB_Transaction::start($conn, $this);
+    try {
+      $conn = $this->getConnection();
+      $conn->beginTransaction();
+    } catch (PDOException $e) {
+      $message = $e->getMessage();
+      throw new Sabel_DB_Exception("pdo driver begin failed. {$message}");
     }
 
     return $conn;

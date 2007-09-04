@@ -41,11 +41,8 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
-    if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      $conn = $this->getConnection();
-      $resource = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $conn);
-      Sabel_DB_Transaction::start($resource, $this);
-    }
+    $connection = $this->getConnection();
+    return ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $connection);
   }
 
   public function commit($connection)

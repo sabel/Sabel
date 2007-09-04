@@ -36,15 +36,12 @@ class Sabel_DB_Transaction
 
   public static function begin($connectionName)
   {
-    Sabel_DB_Config::loadDriver($connectionName)->begin();
-  }
-
-  public static function start($connection, $driver)
-  {
-    $connectionName = $driver->getConnectionName();
-    self::$transactions[$connectionName]["conn"]   = $connection;
-    self::$transactions[$connectionName]["driver"] = $driver;
-    self::$active = true;
+    if (!self::isActive($connectionName)) {
+      $driver = Sabel_DB_Config::loadDriver($connectionName);
+      self::$transactions[$connectionName]["conn"] = $driver->begin();
+      self::$transactions[$connectionName]["driver"] = $driver;
+      self::$active = true;
+    }
   }
 
   public static function commit()

@@ -24,14 +24,12 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
       $this->setConnectionName($connectionName);
     }
 
-    if (!Sabel_DB_Transaction::isActive($connectionName)) {
-      $conn = $this->getConnection();
-      if (!mysql_query("START TRANSACTION", $conn)) {
-        throw new Sabel_DB_Exception("mysql driver begin failed.");
-      }
-
-      Sabel_DB_Transaction::start($conn, $this);
+    $connection = $this->getConnection();
+    if (!mysql_query("START TRANSACTION", $connection)) {
+      throw new Sabel_DB_Exception("mysql driver begin failed.");
     }
+
+    return $connection;
   }
 
   public function commit($connection)

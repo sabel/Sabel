@@ -144,7 +144,7 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
     $query   = $this->makeCreateSql($columns, $pkeys, $uniques);
     $query   = str_replace(" TABLE $tblName", " TABLE stmp_{$tblName}", $query);
 
-    $driver->begin();
+    $conn = $driver->begin();
     $driver->execute($query);
 
     $projection = array();
@@ -156,7 +156,7 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
     $driver->execute($query);
     $driver->execute("DROP TABLE $tblName");
     $driver->execute("ALTER TABLE stmp_{$tblName} RENAME TO $tblName");
-    Sabel_DB_Transaction::commit();
+    $driver->commit($conn);
   }
 
   private function alterChange($column, $current)
