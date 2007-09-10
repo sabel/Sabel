@@ -20,6 +20,7 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   const REDIRECTED   = 300;
   const NOT_MODIFIED = 304;
   const NOT_FOUND    = 400;
+  const FORBIDDEN    = 403;
   const SERVER_ERROR = 500;
   
   private $contentType = "";
@@ -78,7 +79,9 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       l("[Core] Header location: " . var_export($this->location, 1));
     }
     
-    if ($this->isNotFound()) {
+    if ($this->isForbidden()) {
+      header("HTTP/1.0 403 Forbidden");
+    } elseif ($this->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
     } elseif ($this->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
@@ -182,5 +185,15 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   public function setHeader($message, $value)
   {
     $this->headers[$message] = $value;
+  }
+  
+  public function forbidden()
+  {
+    $this->status = self::FORBIDDEN;
+  }
+  
+  public function isForbidden()
+  {
+    return ($this->status === self::FORBIDDEN);
   }
 }

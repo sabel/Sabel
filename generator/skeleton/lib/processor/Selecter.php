@@ -13,14 +13,14 @@ class Processor_Selecter extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $name = get_class($bus->get("controller"));
+    $name = $bus->get("controller")->getName();
     $reflect = new Sabel_Annotation_ReflectionClass($name);
     
     if ($reflect->hasAnnotation("executer")) {
       $executer = $reflect->getAnnotation("executer");
-      if ($executer === "flow") {
-        $flow = new Sabel_Processor_Flow("flow");
-        $bus->getProcessor("executer")->get("executer")->replace($flow);
+      if ($executer[0][0] === "flow") {
+        $flow = new Processor_Flow("flow");
+        $bus->getList()->find("executer")->replace($flow);
       }
     }
   }
