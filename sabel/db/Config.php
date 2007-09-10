@@ -45,22 +45,6 @@ class Sabel_DB_Config
     }
   }
 
-  public static function loadDriver($connectionName)
-  {
-    $driverName = Sabel_DB_Config::getDriverName($connectionName);
-
-    if (strpos($driverName, "pdo") === false) {
-      $className = "Sabel_DB_" . ucfirst($driverName) . "_Driver";
-    } else {
-      list (, $db) = explode("-", $driverName);
-      $className = "Sabel_DB_Pdo_Driver_" . ucfirst($db);
-    }
-
-    $driver = new $className();
-    $driver->setConnectionName($connectionName);
-    return $driver;
-  }
-
   public static function getDB($connectionName)
   {
     return str_replace("pdo-", "", self::getDriverName($connectionName));

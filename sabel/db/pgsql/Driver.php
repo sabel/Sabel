@@ -16,20 +16,13 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     return "pgsql";
   }
 
-  public function begin($connectionName = null)
+  public function begin()
   {
-    if ($connectionName === null) {
-      $connectionName = $this->connectionName;
-    } else {
-      $this->setConnectionName($connectionName);
-    }
-
-    $connection = $this->getConnection();
-    if (!pg_query($connection, "START TRANSACTION")) {
+    if (!pg_query($this->connection, "START TRANSACTION")) {
       throw new Sabel_DB_Exception("pgsql driver begin failed.");
+    } else {
+      return $this->connection;
     }
-
-    return $connection;
   }
 
   public function commit($connection)
@@ -54,7 +47,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape(array $values)
   {
-    $conn = $this->getConnection();
+    $conn = $this->connection;
 
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -73,9 +66,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $conn   = $this->getConnection();
-    $result = pg_query($conn, $sql);
-
+    $result = pg_query($this->connection, $sql);
     if (!$result) $this->executeError($result, $sql);
 
     $rows = array();

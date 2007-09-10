@@ -34,14 +34,15 @@ class Sabel_DB_Transaction
     return (isset($ts[$connectionName]["conn"])) ? $ts[$connectionName]["conn"] : null;
   }
 
-  public static function begin($connectionName)
+  public static function begin($driver, $connectionName)
   {
-    if (!self::isActive($connectionName)) {
-      $driver = Sabel_DB_Config::loadDriver($connectionName);
-      self::$transactions[$connectionName]["conn"] = $driver->begin();
-      self::$transactions[$connectionName]["driver"] = $driver;
-      self::$active = true;
-    }
+    $trans = $driver->begin();
+
+    self::$transactions[$connectionName]["conn"]   = $trans;
+    self::$transactions[$connectionName]["driver"] = $driver;
+    self::$active = true;
+
+    return $trans;
   }
 
   public static function commit()

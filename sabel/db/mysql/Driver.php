@@ -16,20 +16,13 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return "mysql";
   }
 
-  public function begin($connectionName = null)
+  public function begin()
   {
-    if ($connectionName === null) {
-      $connectionName = $this->connectionName;
-    } else {
-      $this->setConnectionName($connectionName);
-    }
-
-    $connection = $this->getConnection();
-    if (!mysql_query("START TRANSACTION", $connection)) {
+    if (!mysql_query("START TRANSACTION", $this->connection)) {
       throw new Sabel_DB_Exception("mysql driver begin failed.");
+    } else {
+      return $this->connection;
     }
-
-    return $connection;
   }
 
   public function commit($connection)
@@ -54,7 +47,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape(array $values)
   {
-    $conn = $this->getConnection();
+    $conn = $this->connection;
 
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -73,9 +66,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $conn   = $this->getConnection();
-    $result = mysql_query($sql, $conn);
-
+    $result = mysql_query($sql, $this->connection);
     if (!$result) $this->executeError($sql);
 
     $rows = array();

@@ -21,7 +21,7 @@ abstract class Sabel_DB_Abstract_Schema
 
   public function __construct($connectionName, $schemaName)
   {
-    $this->driver = Sabel_DB_Config::loadDriver($connectionName);
+    $this->driver = Sabel_DB_Driver::create($connectionName);
     $this->schemaName = $schemaName;
   }
 

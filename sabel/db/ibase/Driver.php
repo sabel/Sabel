@@ -11,38 +11,16 @@
  */
 class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 {
-  private
-    $autoCommit   = true,
-    $lastInsertId = null;
+  private $lastInsertId = null;
 
   public function getDriverId()
   {
     return "ibase";
   }
 
-  public function getConnection()
+  public function begin()
   {
-    $connection = Sabel_DB_Transaction::getConnection($this->connectionName);
-
-    if ($connection === null) {
-      $this->autoCommit = true;
-      return parent::getConnection();
-    } else {
-      $this->autoCommit = false;
-      return $connection;
-    }
-  }
-
-  public function begin($connectionName = null)
-  {
-    if ($connectionName === null) {
-      $connectionName = $this->connectionName;
-    } else {
-      $this->setConnectionName($connectionName);
-    }
-
-    $connection = $this->getConnection();
-    return ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $connection);
+    return ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->connection);
   }
 
   public function commit($connection)
@@ -84,9 +62,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $conn   = $this->getConnection();
-    $result = ibase_query($conn, $sql);
-
+    $result = ibase_query($this->connection, $sql);
     if (!$result) $this->executeError($sql);
 
     $rows = array();
@@ -97,7 +73,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       ibase_free_result($result);
     }
 
-    if ($this->autoCommit) ibase_commit($conn);
+    if ($this->autoCommit) ibase_commit($this->connection);
     return (empty($rows)) ? null : $rows;
   }
 
@@ -134,7 +110,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     if (($column = $stmt->getSequenceColumn()) !== null) {
       $keys[] = $column;
       $genName = strtoupper("{$tblName}_{$column}_gen");
-      $this->lastInsertId = ibase_gen_id($genName, 1, $this->getConnection());
+      $this->lastInsertId = ibase_gen_id($genName, 1, $this->connection);
       $stmt->setBindValue($column, $this->lastInsertId);
     }
 

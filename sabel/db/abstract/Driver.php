@@ -12,42 +12,32 @@
  */
 abstract class Sabel_DB_Abstract_Driver
 {
-  protected $connection     = null;
-  protected $connectionName = "";
+  protected
+    $autoCommit = true,
+    $connection = null;
 
   abstract public function getDriverId();
   abstract public function escape(array $values);
   abstract public function execute($sql, $bindParams = null);
   abstract public function getLastInsertId();
-  abstract public function begin($connectionName = null);
+  abstract public function begin();
   abstract public function commit($connection);
   abstract public function rollback($connection);
   abstract public function close($connection);
 
-  public function setConnectionName($connectionName)
+  public function __construct($connection)
   {
-    if ($this->connectionName === $connectionName) return;
-
-    $this->connectionName = $connectionName;
-
-    if ($this->connection !== null) {
-      $this->connection = Sabel_DB_Connection::get($connectionName);
-    }
+    $this->connection = $connection;
   }
 
-  public function getConnectionName()
+  public function setConnection($connection)
   {
-    return $this->connectionName;
+    $this->connection = $connection;
   }
 
-  public function getConnection()
+  public function autoCommit($bool)
   {
-    if ($this->connection === null) {
-      $conn = Sabel_DB_Connection::get($this->connectionName);
-      return $this->connection = $conn;
-    } else {
-      return $this->connection;
-    }
+    $this->autoCommit = $bool;
   }
 
   public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)

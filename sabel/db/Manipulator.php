@@ -84,16 +84,7 @@ class Sabel_DB_Manipulator
   protected final function _execute(Sabel_DB_Abstract_Statement $stmt)
   {
     $this->stmt = $stmt;
-
-    try {
-      if (Sabel_DB_Transaction::isActive()) {
-        Sabel_DB_Transaction::begin($this->model->getConnectionName());
-      }
-      return $stmt->execute();
-    } catch (Exception $e) {
-      Sabel_DB_Transaction::rollback();
-      throw new Sabel_DB_Exception($e->getMessage());
-    }
+    return $stmt->execute();
   }
 
   public function autoReinit($bool)
@@ -108,7 +99,6 @@ class Sabel_DB_Manipulator
     $this->method     = "";
     $this->projection = "*";
     $this->arguments  = array();
-    $this->parents    = array();
   }
 
   public function setProjection($p)

@@ -14,36 +14,16 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   private
     $limit        = null,
     $offset       = null,
-    $lastInsertId = null,
-    $execMode     = OCI_COMMIT_ON_SUCCESS;
+    $lastInsertId = null;
 
   public function getDriverId()
   {
     return "oci";
   }
 
-  public function getConnection()
+  public function begin()
   {
-    $connection = Sabel_DB_Transaction::getConnection($this->connectionName);
-
-    if ($connection === null) {
-      $this->execMode = OCI_COMMIT_ON_SUCCESS;
-      return parent::getConnection();
-    } else {
-      $this->execMode = OCI_DEFAULT;
-      return $connection;
-    }
-  }
-
-  public function begin($connectionName = null)
-  {
-    if ($connectionName === null) {
-      $connectionName = $this->connectionName;
-    } else {
-      $this->setConnectionName($connectionName);
-    }
-
-    return $this->getConnection();
+    return $this->connection;
   }
 
   public function commit($connection)
@@ -85,10 +65,9 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $conn    = $this->getConnection();
-    $ociStmt = oci_parse($conn, $sql);
-    $result  = oci_execute($ociStmt, $this->execMode);
-
+    $execMode = ($this->autoCommit) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
+    $ociStmt  = oci_parse($this->connection, $sql);
+    $result   = oci_execute($ociStmt, $execMode);
     if (!$result) $this->executeError($ociStmt);
 
     if (oci_statement_type($ociStmt) === "SELECT") {
