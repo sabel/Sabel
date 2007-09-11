@@ -25,41 +25,51 @@ class Processor_Flow extends Sabel_Bus_Processor
     $state = new Processor_Flow_State($this->storage);
     $token = $this->request->getValueWithMethod("token");
     
+    l("[flow] token is " . $token);
+    
     if ($token !== null) {
       $state = $state->restore($token);
     }
     
     if ($state->isInFlow()) {
-      $GLOBALS["token"] = $state->getToken();
       $method = $this->reflection->getMethod($this->action);
       
-      if ($method->hasAnnotation("end")) {
-        $this->controller->setAttribute("flow", $state);
+      $this->controller->setAttribute("flow", $state);
+      $this->controller->setAttribute("token", $token);
+      
+      if ($method->hasAnnotation("end")) {  
         $this->executeAction($bus);
         $state->end($token);
       } else {
-        $anot = $method->getAnnotation("next");
-        $nextAction = $anot[0][0];
+        // 状態中の通常アクション
+        $annot = $method->getAnnotation("next");
+        $nextAction = $annot[0][0];
         
         if ($state->isMatchToNext($this->action)) {
           $this->controller->setAttribute("flow", $state);
 
-          $this->executeAction($bus);
+          $response = $this->executeAction($bus);
           
           $method = $this->reflection->getMethod($this->action);
           $next = $method->getAnnotation("next");
-          $state->setNextAction($next[0][0]);
-          
+          $state->setNextActions($next[0]);
+          $state->transit($this->action);
           $state->save();
         } else {
+          l("[flow] invalid sequence");
           $this->controller->setAction($this->action);
           $this->controller->initialize();
           
           $injector = Sabel_Container::injector(new Factory());
+          
+          $state->setNextActions(array($state->getCurrent()));
+          $this->controller->redirect->to("a: " . $state->getCurrent());
           $response = $injector->newInstance("Sabel_Response");
           $response->forbidden();
           
           $bus->set("response", $response);
+          
+          return true;
         }
       }
     } else {
@@ -72,18 +82,20 @@ class Processor_Flow extends Sabel_Bus_Processor
         
         $method = $this->reflection->getMethod($this->action);
         $next = $method->getAnnotation("next");
-        $state->setNextAction($next[0][0]);
+        $state->setNextActions($next[0]);
+        l("[flow] start state with " . $token);
+
+        $this->controller->setAttribute("flow", $state);
+        $this->controller->setAttribute("token", $token);
+
+        $this->executeAction($bus);
+        $state->save();
+      } else {
+        echo "[flow] your request was denied";exit;
       }
-      
-      l("[flow] start state with " . $token);
-      
-      $GLOBALS["token"] = $token;
-
-      $this->controller->setAttribute("flow", $state);
-
-      $this->executeAction($bus);
-      $state->save();
     }
+    
+    output_add_rewrite_var("token", $token);
     
     return true;
   }
@@ -95,6 +107,8 @@ class Processor_Flow extends Sabel_Bus_Processor
     
     $response = $this->controller->execute($this->action);
     $bus->set("response", $response);
+    
+    return $response;
   }
   
   public function startFlow()

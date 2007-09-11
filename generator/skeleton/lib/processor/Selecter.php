@@ -19,8 +19,10 @@ class Processor_Selecter extends Sabel_Bus_Processor
     if ($reflect->hasAnnotation("executer")) {
       $executer = $reflect->getAnnotation("executer");
       if ($executer[0][0] === "flow") {
-        $flow = new Processor_Flow("flow");
+        $flow = new Processor_Flow("executer");
+        $redirecter = new Processor_Flow_Redirecter("redirecter");
         $bus->getList()->find("executer")->replace($flow);
+        $bus->getList()->find("redirecter")->replace($redirecter);
       }
     }
   }

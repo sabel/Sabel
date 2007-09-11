@@ -8,7 +8,7 @@ class Processor_Flow_State
   
   private $storage = null;
   private $properties = array();
-  private $next = "";
+  private $nexts = array();
   
   public function __construct($storage)
   {
@@ -31,6 +31,16 @@ class Processor_Flow_State
     return $this->token;
   }
   
+  public function transit($action)
+  {
+    $this->currentActivity = $action;
+  }
+  
+  public function getCurrent()
+  {
+    return $this->currentActivity;
+  }
+  
   public function restore($token)
   {
     $this->token = $token;
@@ -47,19 +57,24 @@ class Processor_Flow_State
     $this->storage->delete($this->getStateKey());
   }
   
-  public function setNextAction($action)
+  public function setNextActions($actions)
   {
-    $this->next = $action;
+    $this->nexts = $actions;
   }
   
-  public function isMatchToNext($currenctAction)
+  public function addNextAction($action)
   {
-    return ($this->next === $currenctAction);
+    $this->nexts[] = $action;
   }
   
-  public function getNextAction()
+  public function isMatchToNext($currentAction)
   {
-    return $this->next;
+    return (in_array($currentAction, $this->nexts));
+  }
+  
+  public function getNextActions()
+  {
+    return $this->nexts;
   }
   
   public function read($name)
