@@ -40,6 +40,7 @@ class Sabel_View_Uri
     $uriPrefix = ($absolute) ? $protocol . '://' . $httphost : '';
     $context = Sabel_Context::getContext();
     $uri = $context->getCandidate()->uri($params);
+    
     return $uriPrefix . "/" . $uri;
   }
   

@@ -139,10 +139,9 @@ final class Sabel_View
     }
     if ($html === null) $html = $content;
     
-    /*
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $html = $content;
-    } elseif (!$context->isLayoutDisabled() && $withLayout) {
+    } else {
       $assign = array("assign" => array("contentForLayout" => $content));
       try {
         $content = Sabel_View::render($destination, $assigns);
@@ -153,10 +152,7 @@ final class Sabel_View
         $html = $content;
       }
       if ($html === null) $html = $content;
-    } else {
-      $html = $content;
     }
-    */
     
     return $html;
   }
