@@ -70,7 +70,7 @@ class Migration extends Sabel_Sakle_Task
   protected function getCurrentVersion()
   {
     $connectionName = $this->connectionName;
-    $this->driver = Sabel_DB_Config::loadDriver($connectionName);
+    $this->driver = Sabel_DB_Driver::create($connectionName);
     Sabel_DB_Migration_Manager::setDriver($this->driver);
 
     try {
