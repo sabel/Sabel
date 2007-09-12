@@ -18,23 +18,23 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    if (!pg_query($this->connection, "START TRANSACTION")) {
-      throw new Sabel_DB_Exception("pgsql driver begin failed.");
-    } else {
+    if (pg_query($this->connection, "START TRANSACTION")) {
       return $this->connection;
+    } else {
+      throw new Sabel_DB_Exception("pgsql driver begin failed.");
     }
   }
 
-  public function commit($connection)
+  public function commit()
   {
-    if (!pg_query($connection, "COMMIT")) {
+    if (!pg_query($this->connection, "COMMIT")) {
       throw new Sabel_DB_Exception("pgsql driver commit failed.");
     }
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
-    if (!pg_query($connection, "ROLLBACK")) {
+    if (!pg_query($this->connection, "ROLLBACK")) {
       throw new Sabel_DB_Exception("pgsql driver rollback failed.");
     }
   }

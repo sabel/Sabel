@@ -267,45 +267,6 @@ class Sabel_DB_Manipulator
     return $results;
   }
 
-  public function getChild($childName, $constraints = null)
-  {
-    $args = func_get_args();
-    $this->prepare("getChild", $args);
-
-    return $this->execute();
-  }
-
-  protected function _getChild()
-  {
-    @list ($childName, $constraints) = $this->arguments;
-
-    $model   = $this->model;
-    $child   = MODEL($childName);
-    $foreign = $child->getSchema()->getForeignKeys();
-    $tblName = $model->getTableName();
-
-    if ($foreign === null) {
-      $col  = "id";
-      $fkey = $tblName . "_id";
-    } else {
-      foreach ($foreign as $fkey => $params) {
-        if ($params["referenced_table"] === $tblName) {
-          $col = $params["referenced_column"];
-          break;
-        }
-      }
-    }
-
-    $self  = get_class($this);
-    $manip = new $self($child);
-
-    if (!empty($constraints)) {
-      $manip->setConstraint($constraints);
-    }
-
-    return $manip->select($fkey, $model->__get($col));
-  }
-
   public function validate($ignores = null)
   {
     $args = func_get_args();

@@ -36,13 +36,10 @@ class Sabel_DB_Transaction
 
   public static function begin($driver, $connectionName)
   {
-    $trans = $driver->begin();
-
-    self::$transactions[$connectionName]["conn"]   = $trans;
+    self::$transactions[$connectionName]["conn"]   = $driver->begin();
     self::$transactions[$connectionName]["driver"] = $driver;
-    self::$active = true;
 
-    return $trans;
+    self::$active = true;
   }
 
   public static function commit()
@@ -59,7 +56,7 @@ class Sabel_DB_Transaction
   {
     if (self::$active) {
       foreach (self::$transactions as $trans) {
-        $trans["driver"]->$method($trans["conn"]);
+        $trans["driver"]->$method();
       }
 
       self::clear();

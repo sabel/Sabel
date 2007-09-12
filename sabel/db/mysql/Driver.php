@@ -18,23 +18,23 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    if (!mysql_query("START TRANSACTION", $this->connection)) {
-      throw new Sabel_DB_Exception("mysql driver begin failed.");
-    } else {
+    if (mysql_query("START TRANSACTION", $this->connection)) {
       return $this->connection;
+    } else {
+      throw new Sabel_DB_Exception("mysql driver begin failed.");
     }
   }
 
-  public function commit($connection)
+  public function commit()
   {
-    if (!mysql_query("COMMIT", $connection)) {
+    if (!mysql_query("COMMIT", $this->connection)) {
       throw new Sabel_DB_Exception("mysql driver commit failed.");
     }
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
-    if (!mysql_query("ROLLBACK", $connection)) {
+    if (!mysql_query("ROLLBACK", $this->connection)) {
       throw new Sabel_DB_Exception("mysql driver rollback failed.");
     }
   }

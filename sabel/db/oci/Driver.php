@@ -23,19 +23,24 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
+    $this->autoCommit = false;
     return $this->connection;
   }
 
-  public function commit($connection)
+  public function commit()
   {
-    if (!oci_commit($connection)) {
+    if (oci_commit($this->connection)) {
+      $this->autoCommit = true;
+    } else {
       throw new Sabel_DB_Exception("oci driver commit failed.");
     }
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
-    if (!oci_rollback($connection)) {
+    if (oci_rollback($this->connection)) {
+      $this->autoCommit = true;
+    } else {
       throw new Sabel_DB_Exception("oci driver rollback failed.");
     }
   }

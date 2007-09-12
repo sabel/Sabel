@@ -20,19 +20,25 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    return ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->connection);
+    $this->autoCommit = false;
+    $trans = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->connection);
+    return $this->connection = $trans;
   }
 
-  public function commit($connection)
+  public function commit()
   {
-    if (!ibase_commit($connection)) {
+    if (ibase_commit($this->connection)) {
+      $this->autoCommit = true;
+    } else {
       throw new Sabel_DB_Exception("ibase driver commit failed.");
     }
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
-    if (!ibase_rollback($connection)) {
+    if (ibase_rollback($this->connection)) {
+      $this->autoCommit = true;
+    } else {
       throw new Sabel_DB_Exception("ibase driver rollback failed.");
     }
   }

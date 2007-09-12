@@ -55,7 +55,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
   {
     $tblName = $schema->getTableName();
     $driver = Sabel_DB_Migration_Manager::getDriver();
-    $connection = $driver->begin();
+    $driver->begin();
 
     foreach ($columns as $column) {
       $current = $schema->getColumnByName($column->name);
@@ -72,7 +72,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
       }
     }
 
-    $driver->commit($connection);
+    $driver->commit();
   }
 
   private function changeType($current, $column, $tblName, $driver)

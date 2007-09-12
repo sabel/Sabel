@@ -4,8 +4,7 @@ class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";
   public static $tables = array("member", "member_sub_group", "member_group",
-                                "super_group", "location", "condition_test",
-                                "student_course", "student", "course", "schema_test");
+                                "super_group", "location", "condition_test", "schema_test");
 
   public function testClean()
   {
@@ -438,32 +437,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($count, 5);
   }
 
-  public function testGetChild()
-  {
-    $executer = new Manipulator("MemberSubGroup");
-    $subGroup = $executer->selectOne(1);
-
-    $this->assertTrue($subGroup->isSelected());
-    $this->assertEquals($subGroup->id, 1);
-
-    $executer->setModel($subGroup);
-    $constraints = array("order" => "Member.id ASC");
-    $members = $executer->getChild("Member", $constraints);
-
-    $this->assertEquals(count($members), 3);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-    $member3 = $members[2];
-
-    $this->assertEquals($member1->id, 2);
-    $this->assertEquals($member1->name, "test2");
-    $this->assertEquals($member2->id, 4);
-    $this->assertEquals($member2->name, "test4");
-    $this->assertEquals($member3->id, 5);
-    $this->assertEquals($member3->name, "test5");
-  }
-
   public function testValidate()
   {
     $member = MODEL("Member");
@@ -725,87 +698,6 @@ class Test_DB_Test extends SabelTestCase
 
     $count = $executer->getCount();
     $this->assertEquals($count, 8);
-  }
-
-  public function testBridge()
-  {
-    $data = array();
-    $data[] = array("id" => 1, "name" => "tanaka");
-    $data[] = array("id" => 2, "name" => "yamada");
-    $data[] = array("id" => 3, "name" => "satou");
-    $data[] = array("id" => 4, "name" => "koike");
-
-    $executer = new Manipulator("Student");
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    $data = array();
-    $data[] = array("id" => 1, "name" => "science");
-    $data[] = array("id" => 2, "name" => "history");
-    $data[] = array("id" => 3, "name" => "mathematics");
-
-    $executer = new Manipulator("Course");
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    $data = array();
-    $data[] = array("student_id" => 1, "course_id" => 2);
-    $data[] = array("student_id" => 1, "course_id" => 3);
-    $data[] = array("student_id" => 2, "course_id" => 1);
-    $data[] = array("student_id" => 2, "course_id" => 3);
-    $data[] = array("student_id" => 3, "course_id" => 1);
-    $data[] = array("student_id" => 3, "course_id" => 2);
-    $data[] = array("student_id" => 3, "course_id" => 3);
-    $data[] = array("student_id" => 4, "course_id" => 3);
-
-    $executer = new Manipulator("StudentCourse");
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    $executer = new Manipulator("Student");
-    $tanaka = $executer->selectOne(1);
-    $bridge = new Sabel_DB_Model_Bridge($tanaka, "StudentCourse");
-    $course = $bridge->getChild("Course");
-
-    $this->assertEquals(count($course), 2);
-
-    $executer = new Manipulator("Student");
-    $yamada = $executer->selectOne(2);
-    $bridge = new Sabel_DB_Model_Bridge($yamada, "StudentCourse");
-    $course = $bridge->getChild("Course");
-
-    $this->assertEquals(count($course), 2);
-
-    $executer = new Manipulator("Student");
-    $satou  = $executer->selectOne(3);
-    $bridge = new Sabel_DB_Model_Bridge($satou, "StudentCourse");
-    $course = $bridge->getChild("Course");
-
-    $this->assertEquals(count($course), 3);
-
-    $executer = new Manipulator("Course");
-    $science = $executer->selectOne(1);
-    $bridge  = new Sabel_DB_Model_Bridge($science, "StudentCourse");
-    $student = $bridge->getChild("Student");
-
-    $this->assertEquals(count($student), 2);
-
-    $executer = new Manipulator("Course");
-    $history = $executer->selectOne(2);
-    $bridge  = new Sabel_DB_Model_Bridge($history, "StudentCourse");
-    $student = $bridge->getChild("Student");
-
-    $this->assertEquals(count($student), 2);
-
-    $executer = new Manipulator("Course");
-    $math    = $executer->selectOne(3);
-    $bridge  = new Sabel_DB_Model_Bridge($math, "StudentCourse");
-    $student = $bridge->getChild("Student");
-
-    $this->assertEquals(count($student), 4);
   }
 
   public function testSelfJoin()

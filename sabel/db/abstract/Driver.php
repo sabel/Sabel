@@ -21,16 +21,11 @@ abstract class Sabel_DB_Abstract_Driver
   abstract public function execute($sql, $bindParams = null);
   abstract public function getLastInsertId();
   abstract public function begin();
-  abstract public function commit($connection);
-  abstract public function rollback($connection);
+  abstract public function commit();
+  abstract public function rollback();
   abstract public function close($connection);
 
   public function __construct($connection)
-  {
-    $this->connection = $connection;
-  }
-
-  public function setConnection($connection)
   {
     $this->connection = $connection;
   }

@@ -24,20 +24,20 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     return $this->connection;
   }
 
-  public function commit($connection)
+  public function commit()
   {
     try {
-      $connection->commit();
+      $this->connection->commit();
     } catch (PDOException $e) {
       $message = $e->getMessage();
       throw new Sabel_DB_Exception("pdo driver commit failed. {$message}");
     }
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
     try {
-      $connection->rollback();
+      $this->connection->rollback();
     } catch (PDOException $e) {
       $message = $e->getMessage();
       throw new Sabel_DB_Exception("pdo driver rollback failed. {$message}");

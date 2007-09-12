@@ -11,9 +11,5 @@
  */
 class Sabel_DB_Mysqli_Schema extends Sabel_DB_Mysql_Schema
 {
-  protected function getMysqlVersion()
-  {
-    $conn = $this->driver->getConnection();
-    return mysqli_get_server_info($conn);
-  }
+
 }

@@ -16,36 +16,28 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return "mysqli";
   }
 
-  public function begin($connectionName = null)
+  public function begin()
   {
-    if ($connectionName === null) {
-      $connectionName = $this->connectionName;
-    } else {
-      $this->setConnectionName($connectionName);
-    }
-
-    $connection = $this->getConnection();
-    mysqli_autocommit($connection, false);
-
-    return $connection;
+    mysqli_autocommit($this->connection, false);
+    return $this->connection;
   }
 
-  public function commit($connection)
+  public function commit()
   {
-    if (!mysqli_commit($connection)) {
+    if (mysqli_commit($this->connection)) {
+      mysqli_autocommit($this->connection, true);
+    } else {
       throw new Sabel_DB_Exception("mysqli driver commit failed.");
     }
-
-    mysqli_autocommit($connection, true);
   }
 
-  public function rollback($connection)
+  public function rollback()
   {
-    if (!mysqli_rollback($connection)) {
+    if (mysqli_rollback($this->connection)) {
+      mysqli_autocommit($this->connection, true);
+    } else {
       throw new Sabel_DB_Exception("mysqli driver rollback failed.");
     }
-
-    mysqli_autocommit($connection, true);
   }
 
   public function close($connection)
@@ -56,7 +48,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape(array $values)
   {
-    $conn = $this->getConnection();
+    $conn = $this->connection;
 
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -75,9 +67,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $conn   = $this->getConnection();
-    $result = mysqli_query($conn, $sql);
-
+    $result = mysqli_query($this->connection, $sql);
     if (!$result) $this->executeError($sql);
 
     $rows = array();
