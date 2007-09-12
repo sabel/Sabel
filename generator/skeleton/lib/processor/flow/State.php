@@ -2,8 +2,10 @@
 
 class Processor_Flow_State
 {
+  private $key = "";
   private $currentActivity = "";
   private $nextActivities = array();
+  private $endAction = "";
   private $token = "";
   
   private $storage = null;
@@ -15,10 +17,21 @@ class Processor_Flow_State
     $this->storage = $storage;
   }
   
-  public function start($activity, $token)
+  public function start($key, $activity, $token)
   {
+    $this->key = $key;
     $this->currentActivity = $activity;
     $this->token = $token;
+  }
+  
+  public function setEndAction($endAction)
+  {
+    $this->endAction = $endAction;
+  }
+  
+  public function isEndAction($action)
+  {
+    return ($this->endAction === $action);
   }
   
   public function isInFlow()
@@ -41,10 +54,10 @@ class Processor_Flow_State
     return $this->currentActivity;
   }
   
-  public function restore($token)
+  public function restore($key, $token)
   {
     $this->token = $token;
-    return $this->storage->read($this->getStateKey());
+    return $this->storage->read($this->getStateKey($key));
   }
   
   public function save()
@@ -97,8 +110,12 @@ class Processor_Flow_State
     $this->write($name, $value);
   }
   
-  public function getStateKey()
+  public function getStateKey($key = "")
   {
-    return "flow_state_" . $this->token;
+    if ($key !== "") {
+      return $key . "_flow_state_" . $this->token;
+    } else {
+      return $this->key . "_flow_state_" . $this->token;
+    }
   }
 }

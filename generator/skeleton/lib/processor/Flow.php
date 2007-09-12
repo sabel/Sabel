@@ -19,6 +19,9 @@ class Processor_Flow extends Sabel_Bus_Processor
     $this->destination = $bus->get("destination");
     $this->action = $this->destination->getAction();
     
+    $key = implode("_", array($this->destination->getModule(),
+                              $this->destination->getController()));
+    
     $name = $this->controller->getName();
     $this->reflection = new Sabel_Annotation_ReflectionClass($name);
     
@@ -28,66 +31,52 @@ class Processor_Flow extends Sabel_Bus_Processor
     l("[flow] token is " . $token);
     
     if ($token !== null) {
-      $state = $state->restore($token);
+      $state = $state->restore($key, $token);
+    }
+    
+    if ($state === null) {
+      echo "invalid token";exit;
+    }
+    
+    $method = $this->reflection->getMethod($this->action);
+    $methodAnnotation = $method->getAnnotation("flow");
+    if ($methodAnnotation[0][0] === "ignore") {
+      $this->executeAction($bus);
+      return true;
     }
     
     if ($state->isInFlow()) {
-      $method = $this->reflection->getMethod($this->action);
-      
       $this->controller->setAttribute("flow", $state);
       $this->controller->setAttribute("token", $token);
       
-      if ($method->hasAnnotation("end")) {  
+      if (!$method->hasAnnotation("end")) {
+        $this->executeInFlowAction($method, $state, $bus);
+      } elseif ($state->isEndAction($this->action)) {
         $this->executeAction($bus);
         $state->end($token);
       } else {
-        // 状態中の通常アクション
-        $annot = $method->getAnnotation("next");
-        $nextAction = $annot[0][0];
+        $this->executeAction($bus);
+        $state->end($token);
+      }
+    } else {
+      // start flow state      
+      if ($this->isStartAction()) {
+        $token = $this->createToken();
+        $state->start($key, $this->action, $token);
         
-        if ($state->isMatchToNext($this->action)) {
-          $this->controller->setAttribute("flow", $state);
-
-          $response = $this->executeAction($bus);
-          
+        l("[flow] start state with " . $token);
+        
+        if (($endAction = $this->isOnce()) !== false) {
+          $state->setEndAction($endAction);
+          $state->setNextActions(array($endAction));
+        } else {
           $method = $this->reflection->getMethod($this->action);
           $next = $method->getAnnotation("next");
           $state->setNextActions($next[0]);
-          $state->transit($this->action);
-          $state->save();
-        } else {
-          l("[flow] invalid sequence");
-          $this->controller->setAction($this->action);
-          $this->controller->initialize();
-          
-          $injector = Sabel_Container::injector(new Factory());
-          
-          $state->setNextActions(array($state->getCurrent()));
-          $this->controller->redirect->to("a: " . $state->getCurrent());
-          $response = $injector->newInstance("Sabel_Response");
-          $response->forbidden();
-          
-          $bus->set("response", $response);
-          
-          return true;
         }
-      }
-    } else {
-      // start flow state
-      $startAction = $this->reflection->getAnnotation("flow");
-      
-      if ($startAction[0][1] === $this->action) {
-        $token = $this->createToken();
-        $state->start($this->action, $token);
         
-        $method = $this->reflection->getMethod($this->action);
-        $next = $method->getAnnotation("next");
-        $state->setNextActions($next[0]);
-        l("[flow] start state with " . $token);
-
         $this->controller->setAttribute("flow", $state);
         $this->controller->setAttribute("token", $token);
-
         $this->executeAction($bus);
         $state->save();
       } else {
@@ -98,6 +87,66 @@ class Processor_Flow extends Sabel_Bus_Processor
     output_add_rewrite_var("token", $token);
     
     return true;
+  }
+  
+  private function isStartAction()
+  {
+    $method = $this->reflection->getMethod($this->action);
+    if ($method->hasAnnotation("flow")) {
+      $annot = $method->getAnnotation("flow");
+      if ($annot[0][0] === "start" || $this->isOnce()) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  
+  private function isOnce()
+  {
+    $method = $this->reflection->getMethod($this->action);
+    if ($method->hasAnnotation("flow")) {
+      $annot = $method->getAnnotation("flow");
+      if ($annot[0][0] === "once") {
+        return $annot[0][1];
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+  
+  private function executeInFlowAction($method, $state, $bus)
+  {
+    $annot = $method->getAnnotation("next");
+    $nextAction = $annot[0][0];
+    
+    if ($state->isMatchToNext($this->action)) {
+      $this->controller->setAttribute("flow", $state);
+      $response = $this->executeAction($bus);
+      $next = $method->getAnnotation("next");
+      $state->setNextActions($next[0]);
+      $state->transit($this->action);
+      $state->save();
+    } else {
+      l("[flow] invalid sequence");
+      $this->controller->setAction($this->action);
+      $this->controller->initialize();
+      
+      $injector = Sabel_Container::injector(new Factory());
+      
+      $state->setNextActions(array($state->getCurrent()));
+      $this->controller->redirect->to("a: " . $state->getCurrent());
+      $response = $injector->newInstance("Sabel_Response");
+      $response->forbidden();
+      
+      $bus->set("response", $response);
+      
+      return true;
+    }
   }
   
   private final function executeAction($bus)
@@ -111,34 +160,8 @@ class Processor_Flow extends Sabel_Bus_Processor
     return $response;
   }
   
-  public function startFlow()
-  {
-    if ($this->isEntryActivity()) {
-      l("{$action} is entry activity");
-      $flow->start($action);
-      $this->assignToken($manager, $controller, $flow);
-      $response = $controller->execute($action);
-      $manager->save($flow);
-      return $response;
-    } elseif ($flow->isEndActivity($action)) {
-      $response = $controller->execute($action);
-      $manager->remove();
-      return $response;
-    } elseif (!$flow->isActivity($action)) {
-      return $controller->execute($action);
-    } else {
-      $this->destination->setAction(self::INVALID_ACTION);
-      return $controller->execute(self::INVALID_ACTION);
-    }
-  }
-  
   private function createToken()
   {
-    $token = "";
-    
-    $token  = substr(sha1(uniqid(microtime().mt_rand(), true)), 0, 5);
-    $token .= substr(sha1(uniqid(microtime().mt_rand(), true)), 35, 40);
-    
-    return $token;
+    return md5(uniqid(microtime() . mt_rand(), true));
   }
 }
