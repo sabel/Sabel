@@ -11,6 +11,9 @@
  */
 class Sabel_Request_Object
 {
+  /**
+   * @var status
+   */
   const ST_NO_INIT   = 0;
   const ST_SET_URI   = 2;
   const ST_SET_PARAM = 4;
@@ -49,6 +52,8 @@ class Sabel_Request_Object
   {
     if ($uri !== null) {
       $this->to($uri);
+    } else {
+      $this->uri = new Sabel_Request_Uri("");
     }
   }
   
@@ -142,6 +147,8 @@ class Sabel_Request_Object
       case (Sabel_Request::POST):
         $this->setPostValues(array_merge($lists, $this->postValues));
         break;
+      default:
+        $this->setGetValues(array_merge($lists, $this->getValues));
     }
     
     return $this;

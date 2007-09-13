@@ -13,27 +13,43 @@ class Test_Request extends SabelTestCase
     return self::createSuite("Test_Request");
   }
   
-  public function setUp()
+  public function testEmptyUri()
   {
-  }
-
-  public function tearDown()
-  {
-  }
-  
-  public function testGetPostRequests()
-  {
+    $request = new Sabel_Request_Object();
+    $uri = $request->getUri();
+    $this->assertEquals("", $uri->__toString());
   }
   
-  public function testInvalidModule()
+  public function testNormalUri()
   {
+    $request = new Sabel_Request_Object("index/index");
+    $uri = $request->getUri();
+    $this->assertEquals("index/index", $uri->__toString());
   }
   
-  public function testRequestWithParameters()
+  public function testValuesDefault()
   {
+    $request = new Sabel_Request_Object();
+    $values = array("test" => "test");
+    $request->values($values);
+    $this->assertEquals($values, $request->fetchGetValues());
   }
   
-  public function testRequestInvalid()
+  public function testValuesGet()
   {
+    $request = new Sabel_Request_Object();
+    $request->method("GET");
+    $values = array("test" => "test");
+    $request->values($values);
+    $this->assertEquals($values, $request->fetchGetValues());
+  }
+  
+  public function testValuesPost()
+  {
+    $request = new Sabel_Request_Object();
+    $request->method("POST");
+    $values = array("test" => "test");
+    $request->values($values);
+    $this->assertNotEquals($values, $request->fetchGetValues());
   }
 }
