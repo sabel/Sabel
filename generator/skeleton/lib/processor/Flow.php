@@ -10,14 +10,25 @@ class Processor_Flow extends Sabel_Bus_Processor
   private $destination = null;
   
   private $action = "";
+  
+  private function initialize($bus)
+  {
+    $require = array("request", "storage", "controller", "destination");
+    
+    if ($bus->has($require)) {
+      foreach ($require as $r) {
+        $this->{$r} = $bus->get($r);
+      }
+      $this->action = $this->destination->getAction();
+    } else {
+      $msg = "must need required bus data: " . join(", ", $require);
+      throw new Sabel_Exception_Runtime($msg);
+    }
+  }
     
   public function execute($bus)
   {
-    $this->request     = $bus->get("request");
-    $this->storage     = $bus->get("storage");
-    $this->controller  = $bus->get("controller");
-    $this->destination = $bus->get("destination");
-    $this->action = $this->destination->getAction();
+    $this->initialize($bus);
     
     $key = implode("_", array($this->destination->getModule(),
                               $this->destination->getController()));

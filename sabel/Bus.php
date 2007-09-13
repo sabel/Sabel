@@ -154,8 +154,23 @@ class Sabel_Bus
     }
   }
   
+  /**
+   * check bus has a data
+   * 
+   * @param mixed string or array
+   * @return bool
+   */
   public function has($key)
   {
-    return (array_key_exists($key, $this->holder));
+    if (is_array($key)) {
+      $result = true;
+      foreach ($key as $k) {
+        $result = $this->has($k);
+        if (!$result) return false;
+      }
+      return $result;
+    } else {
+      return (array_key_exists($key, $this->holder));
+    }
   }
 }

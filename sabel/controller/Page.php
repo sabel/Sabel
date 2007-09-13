@@ -18,6 +18,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $storage  = null;
 
   protected
+    $setup       = false,
     $hidden      = array(),
     $attributes  = array(),
     $assignments = array(),
@@ -69,6 +70,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->request     = $request;
     $this->destination = $destination;
     $this->storage     = $storage;
+    $this->setup = true;
   }
   
   public function setBus($bus)
@@ -85,6 +87,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action)
   {
+    if (!$this->setup) {
+      throw new Sabel_Exception_Runtime("page controller must be setup");
+    }
+    
     if (!$this->request instanceof Sabel_Request_Object) {
       throw new Sabel_Exception_Runtime("invalid request object");
     }
