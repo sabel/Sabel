@@ -62,6 +62,7 @@ require_once('Test/UtilMap.php');
 require_once('Test/DB/Tests.php');
 require_once('Test/Validate.php');
 require_once('Test/Map/Tests.php');
+require_once('Test/View/Tests.php');
 require_once('Test/Processor/Tests.php');
 
 require_once('Test/VirtualInheritance.php');
@@ -95,6 +96,7 @@ class SabelAllTests
     $suite->addTest(Test_Util::suite());
     $suite->addTest(Test_String::suite());
     $suite->addTest(Test_UtilMap::suite());
+    $suite->addTest(Test_View_Tests::suite());
     $suite->addTest(Test_Processor_Tests::suite());
     $suite->addTest(Test_Experimental::suite());
     
