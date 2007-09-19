@@ -18,8 +18,10 @@ class Test_View_Repository extends SabelTestCase
   public function testRepositoryTemplateFile()
   {
     $repository = new Sabel_View_Repository_File();
-    $basedir = "/Users/morireo/Repository/sabel/Test/data/application/app/index/";
-    $this->assertEquals($basedir, $repository->getPathToBaseDirectory("index"));
+    $module = "index";
+    
+    $basedir = "/Users/morireo/Repository/sabel/Test/data/application/app/{$module}/";
+    $this->assertEquals($basedir, $repository->getPathToBaseDirectory($module));
     
     $resource = $repository->get("index", "index", "index");
   }
