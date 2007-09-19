@@ -20,9 +20,11 @@ class Test_View_Repository extends SabelTestCase
     $repository = new Sabel_View_Repository_File();
     $module = "index";
     
-    $basedir = "/Users/morireo/Repository/sabel/Test/data/application/app/{$module}/";
+    $basedir = RUN_BASE . "/app/{$module}/";
     $this->assertEquals($basedir, $repository->getPathToBaseDirectory($module));
     
     $resource = $repository->get("index", "index", "index");
+    $this->assertEquals(RUN_BASE . "/app/index/views/index/", $resource->getPath());
+    $this->assertEquals("index.tpl", $resource->getName());
   }
 }

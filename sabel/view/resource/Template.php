@@ -48,10 +48,20 @@ class Sabel_View_Resource_Template implements Sabel_View_Resource_File
     }
   }
   
+  public final function getName()
+  {
+    return $this->name;
+  }
+  
   public final function setFullPath($path, $name)
   {
     $this->setPath($path);
     $this->setName($name);
+  }
+  
+  public final function getFullpath()
+  {
+    return $this->path . $this->name;
   }
   
   public function fetch($values)
