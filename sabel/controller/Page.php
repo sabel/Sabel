@@ -277,9 +277,13 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   protected final function isTemplateFound()
   {
+    /*
     $resource = Sabel_View_Locator_Factory::create()
                                             ->make($this->destination)
                                             ->locate($this->destination);
     return (!$resource->isMissing());
+    */
+    
+    return true;
   }
 }

@@ -12,13 +12,20 @@
  */
 final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
 {
-  public function rendering($sbl_template, &$sbl_tpl_values)
+  public function rendering($sbl_template, $sbl_tpl_values)
   {
     $hash = md5(substr($sbl_template, 0, 256));
     $this->makeCompileFile($sbl_template, $hash);
-        
+    
     $this->initializeValues($hash, $sbl_tpl_values);
-    extract($sbl_tpl_values, EXTR_OVERWRITE);
+    if (is_array($sbl_tpl_values)) {
+      foreach ($sbl_tpl_values as $_sbl_tpl_values) {
+        extract($sbl_tpl_values, EXTR_OVERWRITE);
+      }
+    } else {
+      extract($sbl_tpl_values, EXTR_OVERWRITE);
+    }
+    
     ob_start();
     include ($this->getCompileFilePath($hash));
     return ob_get_clean();

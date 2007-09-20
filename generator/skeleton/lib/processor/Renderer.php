@@ -19,8 +19,19 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     $response->outputHeader();
     
-    // @todo use instance of Sabel_View. don't use static.
-    $result = Sabel_View::renderDefault($request, $response, $destination);
+    $responses = $response->getResponses();
+    
+    $repository = new Sabel_View_Repository_File($destination);
+    $renderer = new Sabel_View_Renderer_Class();
+    $resource = $repository->find();
+    $contents = $renderer->rendering($resource->fetch(), $responses);
+    
+    $repository = new Sabel_View_Repository_File($destination);
+    $layout = $repository->find("layout");
+    
+    $forLayout = array($responses, "contentForLayout" => $contents);
+    $result = $renderer->rendering($layout->fetch(), $forLayout);
+    
     $bus->set("result", $result);
 
     return true;

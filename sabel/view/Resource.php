@@ -13,5 +13,5 @@ interface Sabel_View_Resource
 {
   public function missing();
   public function isMissing();
-  public function fetch($values);
+  public function fetch();
 }

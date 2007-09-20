@@ -1,73 +1,134 @@
 <?php
 
-class Sabel_View_Repository_File extends Sabel_Object
+class Sabel_View_Repository_File implements Sabel_View_Repository
 {
   const VIEW_DIR    = "views/";
   const APP_VIEW    = "/app/views/";
   const DEF_LAYOUT  = "layout.tpl";
   const MODULES_DIR = "app";
   
-  private $locator = null;
-  private $locations = array();
-  private $create = "";
-  private $path = "";
+  private $destination = null;
   
-  public function __construct()
+  private $locations = array();
+  
+  public function __construct($destination)
   {
+    $this->initialize($destination);
   }
   
-  public function get($module, $controller, $action)
+  public function initialize($destination)
   {
-    $destination = new Sabel_Destination($module, $controller, $action);
-    $locator = new Sabel_View_Locator_File();
-    
-    $name = $action;
-    
     $locations = array();
+    $this->destination = $destination;
     
-    $path = $this->getPathToBaseDirectory($module);
-    $this->path = $path;
-    $spcPath = $path . self::VIEW_DIR;
-    $tplFile = $name . TPL_SUFFIX;
+    list ($module, $controller,) = $destination->toArray();
     
-    // app/views/{action}.tpl
-    $locations[] = array("path" => RUN_BASE . self::APP_VIEW, "file" => $tplFile);
+    $base = $this->getPathToBaseDirectory($module);
     
-    // app/{module}/views/{action}.tpl
-    $locations[] = array("path" => $spcPath, "file" => $tplFile);
+    // app/views/
+    $rootLocation = new Sabel_View_Location_File("root", $destination);
+    $rootLocation->setPath(RUN_BASE . self::APP_VIEW);
     
-    // app/{module}/views/{controller}/{action}.tpl
-    $mcaPath = $spcPath . $controller . DIR_DIVIDER;
-    $locations[] = array("path" => $mcaPath, "file" => $tplFile);
+    // app/{module}/views/
+    $moduleLocation = new Sabel_View_Location_File("module", $destination);
+    $moduleLocation->setPath($base . self::VIEW_DIR);
     
-    // app/{module}/views/{controller}.{action}.tpl
-    $locations[] = array("path" => $spcPath, "file" => $controller . "." . $tplFile);
-        
-    foreach ($locations as $l) {
-      $locator->addLocation($l["path"], $l["file"]);
-    }
+    // app/{module}/views/{controller}/
+    $leafLocation = new Sabel_View_Location_File("leaf", $destination);
+    $leafLocation->setPath($base . self::VIEW_DIR . $controller . DIR_DIVIDER);
+    
+    $locations[$rootLocation->getName()]   = $rootLocation;
+    $locations[$moduleLocation->getName()] = $moduleLocation;
+    $locations[$leafLocation->getName()]   = $leafLocation;
     
     $this->locations = $locations;
+  }
+  
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function find($action = null)
+  {
+    $destination = $this->getDestination($action);
     
-    $this->locator = $locator;
-    return $locator->locate($destination);
+    $action = $destination->getAction();
+    $templateName = $action . TPL_SUFFIX;
+    
+    foreach ($this->locations as $location) {
+      $resource = $location->getResource($templateName);
+      if ($resource && !$resource->isMissing()) {
+        return $resource;
+      }
+    }
+    
+    return false;  
   }
   
-  public function getPathToBaseDirectory($module)
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function getByLocation($locationName, $name)
   {
-    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DIR_DIVIDER;
+    return $this->locations[$locationName]->getResource($name);
   }
   
-  public function createResource($module, $controller, $action, $body)
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function createResource($locationName, $body, $action = null)
   {
-    $path  = $this->getPathToBaseDirectory($module) . self::VIEW_DIR;
-    $path .= $controller . DIR_DIVIDER . $action . TPL_SUFFIX;
-    $fp = fopen ($path, "w+");
+    $fp = fopen($this->getPathToResource($locationName, $action), "w+");
     fwrite($fp, $body);
     fclose($fp);
   }
   
-  public function add($module, $controller, $action)
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function deleteResource($locationName, $action = null)
   {
+    unlink($this->getPathToResource($locationName, $action));
+  }
+  
+  protected function getPathToResource($locationName, $action)
+  {
+    $destination = $this->getDestination($action);
+    list ($module, $controller, $action) = $destination->toArray();
+    
+    $action = $destination->getAction();
+    $templateName = $action . TPL_SUFFIX;
+    
+    if (!isset($this->locations[$locationName])) {
+      throw new Sabel_Exception_Runtime("no location");
+    }
+    
+    return $this->locations[$locationName]->getPath() . $templateName;
+  }
+  
+  public function getResourceList($locationName)
+  {
+    return $this->locations[$locationName]->getResourceList();
+  }
+  
+  public function isResourceValid($locationName, $name)
+  {
+    return $this->locations[$locationName]->isResourceValid($name);
+  }
+  
+  protected function getDestination($action)
+  {
+    if ($action === null) {
+      $destination = $this->destination;
+    } else {
+      $destination = clone $this->destination;
+      $destination->setAction($action);
+    }
+    
+    return $destination;
+  }
+  
+  protected function getPathToBaseDirectory($module)
+  {
+    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DIR_DIVIDER;
   }
 }

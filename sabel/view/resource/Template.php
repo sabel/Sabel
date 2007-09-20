@@ -13,17 +13,7 @@ class Sabel_View_Resource_Template implements Sabel_View_Resource_File
 {
   private $path     = "";
   private $name     = "";
-  private $renderer = null;
   private $missing  = false;
-  
-  public final function setRenderer($renderer)
-  {
-    if ($renderer instanceof Sabel_View_Renderer) {
-      $this->renderer = $renderer;
-    } else {
-      throw new Exception("pass invalid renderer");
-    }
-  }
   
   public final function setPath($path)
   {
@@ -64,13 +54,12 @@ class Sabel_View_Resource_Template implements Sabel_View_Resource_File
     return $this->path . $this->name;
   }
   
-  public function fetch($values)
+  public function fetch()
   {
     if ($this->isValid()) {
-      $template = file_get_contents($this->path . $this->name);
-      return $this->renderer->rendering($template, $values);
+      return file_get_contents($this->path . $this->name);
     } else {
-      // throw new Sabel_Exception_ResourceMissing();
+      return false;
     }
   }
     

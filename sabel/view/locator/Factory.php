@@ -28,9 +28,11 @@ class Sabel_View_Locator_Factory
   
   public function make($destination)
   {
+    /*
     $locator = new Sabel_View_Locator_File();
     $this->setLocations($locator, $destination);
     return $locator;
+    */
   }
   
   private final function setLocations($locator, $destination)

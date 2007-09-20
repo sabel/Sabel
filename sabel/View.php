@@ -68,6 +68,7 @@ final class Sabel_View
    */
   public final function rendering($resource = null)
   {
+    /*
     if ($resource instanceof Sabel_View_Resource) {
       return $resource->fetch(self::$values);
     } elseif ($this->resource instanceof Sabel_View_Resource) {
@@ -75,10 +76,12 @@ final class Sabel_View
     } else {
       throw new Exception("invalid resource");
     }
+    */
   }
   
   public static function render($destination, $additional = array())
   {
+    /*
     if (isset($additional["assign"])) {
       self::$values = array_merge(self::$values, $additional["assign"]);
     }
@@ -96,10 +99,12 @@ final class Sabel_View
                                          ->locate($destination)
                                          ->fetch(self::$values);
     }
+    */
   }
   
   public static function renderNoLayout($response)
   {
+    /*
     $controller  = $response->getController();
     $destination = $response->getDestination();
     
@@ -111,10 +116,12 @@ final class Sabel_View
                                              $controller->getAttributes()));
     
     return Sabel_View::render($destination, $assigns);
+    */
   }
   
   public static function renderDefault($request, $response, $destination, $withLayout = true)
   {
+    /*
     $view = new Sabel_View();
     $view->assignByArray($request->fetchPostValues());
     
@@ -155,5 +162,6 @@ final class Sabel_View
     }
     
     return $html;
+    */
   }
 }
