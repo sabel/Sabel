@@ -8,6 +8,8 @@ class Sabel_View_Repository_File extends Sabel_Object
   const MODULES_DIR = "app";
   
   private $locator = null;
+  private $locations = array();
+  private $create = "";
   private $path = "";
   
   public function __construct()
@@ -23,7 +25,7 @@ class Sabel_View_Repository_File extends Sabel_Object
     
     $locations = array();
     
-    $path    = $this->getPathToBaseDirectory($module);
+    $path = $this->getPathToBaseDirectory($module);
     $this->path = $path;
     $spcPath = $path . self::VIEW_DIR;
     $tplFile = $name . TPL_SUFFIX;
@@ -45,6 +47,8 @@ class Sabel_View_Repository_File extends Sabel_Object
       $locator->addLocation($l["path"], $l["file"]);
     }
     
+    $this->locations = $locations;
+    
     $this->locator = $locator;
     return $locator->locate($destination);
   }
@@ -54,8 +58,13 @@ class Sabel_View_Repository_File extends Sabel_Object
     return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DIR_DIVIDER;
   }
   
-  public function create($module, $controller, $action)
+  public function createResource($module, $controller, $action, $body)
   {
+    $path  = $this->getPathToBaseDirectory($module) . self::VIEW_DIR;
+    $path .= $controller . DIR_DIVIDER . $action . TPL_SUFFIX;
+    $fp = fopen ($path, "w+");
+    fwrite($fp, $body);
+    fclose($fp);
   }
   
   public function add($module, $controller, $action)
