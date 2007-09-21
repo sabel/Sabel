@@ -23,6 +23,8 @@ class Sabel_View_Location_File extends Sabel_View_Location
   
   public function getResource($name)
   {
+    $name .= TPL_SUFFIX;
+    
     if (!$this->isResourceValid($name)) return false;
     
     $resource = new Sabel_View_Resource_Template();
@@ -42,7 +44,7 @@ class Sabel_View_Location_File extends Sabel_View_Location
     if ($dir) {
       while (($filename = readdir($dir)) !== false) {
         if ($filename !== "." && $filename !== "..") {
-          $resourceFiles[] = $filename;
+          $resourceFiles[] = str_replace(".tpl", "", $filename);
         }
       }
     }

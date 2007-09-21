@@ -52,7 +52,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     $destination = $this->getDestination($action);
     
     $action = $destination->getAction();
-    $templateName = $action . TPL_SUFFIX;
+    $templateName = $action;
     
     foreach ($this->locations as $location) {
       $resource = $location->getResource($templateName);
@@ -67,7 +67,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
   /**
    * implements Sabel_View_Repository
    */
-  public function getByLocation($locationName, $name)
+  public function getResourceFromLocation($locationName, $name)
   {
     return $this->locations[$locationName]->getResource($name);
   }
@@ -76,6 +76,16 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
    * implements Sabel_View_Repository
    */
   public function createResource($locationName, $body, $action = null)
+  {
+    $fp = fopen($this->getPathToResource($locationName, $action), "w+");
+    fwrite($fp, $body);
+    fclose($fp);
+  }
+  
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function editResource($locationName, $body, $action = null)
   {
     $fp = fopen($this->getPathToResource($locationName, $action), "w+");
     fwrite($fp, $body);
