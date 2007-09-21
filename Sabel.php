@@ -151,7 +151,6 @@ final class Sabel
     require ($SABEL . "Container.php");
     require ($SABEL . "Response.php");
     require ($SABEL . "Helper.php");
-    require ($SABEL . "View.php");
     
     $BUS        = $SABEL . "bus"        . DS;
     $CACHE      = $SABEL . "cache"      . DS;
@@ -202,12 +201,9 @@ final class Sabel
     require ($VIEW . "Uri.php");
     require ($VIEW . "Resource.php");
     require ($VIEW . "Renderer.php");
-    require ($VIEW . "Locator.php");
     require ($VIEW . "renderer" . DS . "Class.php");
     require ($VIEW . "resource" . DS . "File.php");
     require ($VIEW . "resource" . DS . "Template.php");
-    require ($VIEW . "locator"  . DS . "Factory.php");
-    require ($VIEW . "locator"  . DS . "File.php");
     
     require ($LOG . "Factory.php");
     require ($LOG . "Interface.php");
