@@ -20,6 +20,7 @@ abstract class Sabel_View_Renderer
   {
     $context = Sabel_Context::getContext();
     $destination = clone $context->getBus()->get("destination");
+    $responses   = $context->getBus()->get("response")->getResponses();
     
     if ($controller !== null) {
       $destination->setController($controller);
@@ -27,6 +28,9 @@ abstract class Sabel_View_Renderer
     
     $destination->setAction($name);
     
-    return Sabel_View::render($destination, array("assign" => $options));
+    $repository = new Sabel_View_Repository_File($destination);
+    $renderer = new Sabel_View_Renderer_Class();
+    $resource = $repository->find();
+    return $renderer->rendering($resource->fetch(), $responses);
   }
 }

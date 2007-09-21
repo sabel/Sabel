@@ -47,7 +47,6 @@ class Sabel_Request_Uri
     
     $this->uri = $uri;
     $elements = explode("/", $uri);
-
     $elements = array_values(array_filter($elements, $filter));
     $lastElement = array_pop($elements);
     
