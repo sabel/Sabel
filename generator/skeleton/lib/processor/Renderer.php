@@ -27,8 +27,13 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     $repository = new Sabel_View_Repository_File($destination);
     $renderer = new Sabel_View_Renderer_Class();
-    $resource = $repository->find();
-    $contents = $renderer->rendering($resource->fetch(), $responses);
+    
+    if (($resource = $repository->find())) {
+      $contents = $renderer->rendering($resource->fetch(), $responses);
+    } else {
+      $resource = $repository->getResourceFromLocation("module", "notFound");
+      $contents = $renderer->rendering($resource->fetch(), $responses);
+    }
     
     if (!isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $repository = new Sabel_View_Repository_File($destination);
