@@ -1,19 +1,25 @@
+2007-09-21  Mori Reo <mori.reo@sabel.jp>
+  * Sabel_Viewã®è¨­è¨ˆã‚’å¤‰æ›´
+    * Repositoryã‚’è¿½åŠ 
+    * Locationã®è¿½åŠ 
+    * Locatorã®å‰Šé™¤
+
 2007-09-03  Ebine Yutaka <ebine.yutaka@sabel.jp>
-  * Sabel_Object¤Ë__toString(), toString(), equals(), hashCode()ÄÉ²Ã
-  * Sabel_Util_String¤òÄÉ²Ã
-  * Sabel_Util_Map¤òÄÉ²Ã
-  * Sabel_DB_Abstract_Model¤¬Sabel_Object¤ò·Ñ¾µ
-  * Sabel_DB_Abstract_Model¤ÎgetModelName()¤ògetName()¤ËÊÑ¹¹
-  * Sabel_DB_Schema_Column¤Îcast()¤ÎµóÆ°¤òÊÑ¹¹
-    INT, SMALLINT·¿¤Î¥«¥é¥à¤Ï"003"¤Î¤è¤¦¤ÊÊ¸»úÎó¤â3¤ËÊÑ´¹¤¹¤ë
+  * Sabel_Objectã«__toString(), toString(), equals(), hashCode()è¿½åŠ 
+  * Sabel_Util_Stringã‚’è¿½åŠ 
+  * Sabel_Util_Mapã‚’è¿½åŠ 
+  * Sabel_DB_Abstract_ModelãŒSabel_Objectã‚’ç¶™æ‰¿
+  * Sabel_DB_Abstract_Modelã®getModelName()ã‚’getName()ã«å¤‰æ›´
+  * Sabel_DB_Schema_Columnã®cast()ã®æŒ™å‹•ã‚’å¤‰æ›´
+    INT, SMALLINTå‹ã®ã‚«ãƒ©ãƒ ã¯"003"ã®ã‚ˆã†ãªæ–‡å­—åˆ—ã‚‚3ã«å¤‰æ›ã™ã‚‹
 
 2007-08-28  Mori Reo <mori.reo@sabel.jp>
-  * Sabel_DB_Model¤ËunsetValue()¥á¥½¥Ã¥É¤òÄÉ²Ã
-  * CustomValidator¤Î¥á¥½¥Ã¥É¥·¥°¥Ë¥Á¥ã¤òÊÑ¹¹
+  * Sabel_DB_Modelã«unsetValue()ãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¿½åŠ 
+  * CustomValidatorã®ãƒ¡ã‚½ãƒƒãƒ‰ã‚·ã‚°ãƒ‹ãƒãƒ£ã‚’å¤‰æ›´
 
 2007-08-26  Mori Reo <morireo@sabel.jp>
-  * Flow¥×¥í¥»¥Ã¥µ(alpha)¤òÄÉ²Ã
-  * ¥×¥í¥»¥Ã¥µ¤ò¥¢¥×¥ê¥±¡¼¥·¥ç¥óÂ¦¤Ø°ÜÆ°
-  * Request_Object¤Ë¥á¥½¥Ã¥É¤òÄÉ²Ã
-  * Annotation_ReflectionClass¤ÎgetMethod($name)¤òÆ°ºî¤¹¤ë¤è¤¦¤Ë¤·¤¿
-  * Sabel_Bus_Config¤Îadd¤Î¥·¥°¥Ë¥Á¥ã¤òÊÑ¹¹($processor, $asListener)
+  * Flowãƒ—ãƒ­ã‚»ãƒƒã‚µ(alpha)ã‚’è¿½åŠ 
+  * ãƒ—ãƒ­ã‚»ãƒƒã‚µã‚’ã‚¢ãƒ—ãƒªã‚±ãƒ¼ã‚·ãƒ§ãƒ³å´ã¸ç§»å‹•
+  * Request_Objectã«ãƒ¡ã‚½ãƒƒãƒ‰ã‚’è¿½åŠ 
+  * Annotation_ReflectionClassã®getMethod($name)ã‚’å‹•ä½œã™ã‚‹ã‚ˆã†ã«ã—ãŸ
+  * Sabel_Bus_Configã®addã®ã‚·ã‚°ãƒ‹ãƒãƒ£ã‚’å¤‰æ›´($processor, $asListener)
