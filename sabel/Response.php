@@ -2,5 +2,8 @@
 
 interface Sabel_Response
 {
-  // prototype
+  public function setResponse($key, $value);
+  public function getResponse($key);
+  public function setResponses($array);
+  public function getResponses();
 }

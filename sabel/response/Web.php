@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Response
+class Sabel_Response_Web implements Sabel_Response
 {
   private $location = "";
   private $locationUri = "";
@@ -28,19 +28,16 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
   private $headers = array();
   private $responses = array();
   
-  public function setResponses($array)
+  protected $parameters = array();
+  
+  public function __get($key)
   {
-    $this->responses = $array;
+    return $this->parameters[$key];
   }
   
-  public function toArray()
+  public function __set($key, $value)
   {
-    return $this->responses;
-  }
-  
-  public function getResponses()
-  {
-    return $this->responses;
+    $this->parameters[$key] = $value;
   }
   
   public function getResponse($key)
@@ -51,46 +48,65 @@ class Sabel_Response_Web extends Sabel_Response_Abstract implements Sabel_Respon
       return null;
     }
   }
-    
+  
+  public function setResponse($key, $value)
+  {
+    $this->responses[$key] = $value;
+  }
+  
+  public function getResponses()
+  {
+    return $this->responses;
+  }
+  
+  public function setResponses($array)
+  {
+    $this->responses = $array;
+  }
+  
+  public function toArray()
+  {
+    return $this->responses;
+  }
+  
   public function setContentType($type)
   {
     $this->contentType = $type;
   }
-    
+  
+  public function getContentType()
+  {
+    return $this->contentType;
+  }
+  
+  public function hasContentType()
+  {
+    return ($this->contentType !== "");
+  }
+   
   public function notFound()
   {
     $this->status = self::NOT_FOUND;
     return $this;
   }
   
+  public function getHeaders()
+  {
+    return $this->headers;
+  }
+  
+  public function hasHeaders()
+  {
+    return (count($this->headers) !== 0);
+  }
+  
   public function outputHeader()
   {
-    if ($this->contentType !== "") {
-      header("Content-Type: " . $this->contentType);
-    }
-    
-    if ($this->headers) {
-      foreach ($this->headers as $message => $value) {
-        header(ucfirst($message) . ": " . $value);
-      }
-    }
-    
-    if ($this->location) {
-      l("[Core] Header location: " . var_export($this->location, 1));
-    }
-    
-    if ($this->isForbidden()) {
-      header("HTTP/1.0 403 Forbidden");
-    } elseif ($this->isNotFound()) {
-      header("HTTP/1.0 404 Not Found");
-    } elseif ($this->isServerError()) {
-      header("HTTP/1.0 500 Internal Server Error");
-    } elseif ($this->isRedirected()) {
-      header("Location: " . $this->location);
-    } elseif ($this->isNotModified()) {
-      header("HTTP/1.0 304 Not Modified");
-      exit;
-    }
+    dump($_ENV);
+    dump($_SERVER);
+    dump(PHP_CLI);
+    $header = new Sabel_Response_Header_Http();
+    $header->output($this);
   }
   
   public function outputHeaderIfRedirected()

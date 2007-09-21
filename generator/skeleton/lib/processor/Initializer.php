@@ -19,10 +19,10 @@ class Processor_Initializer extends Sabel_Bus_Processor
 
     $libDb = RUN_BASE . DS . "lib" . DS . "db" . DS;
     
-    Sabel::fileUsing($libDb . "utility.php");
-    Sabel::fileUsing($libDb . "validators.php");
-    Sabel::fileUsing($libDb . "Manipulator.php");
-    Sabel::fileUsing($libDb . "Form.php");
+    Sabel::fileUsing($libDb . "utility.php", true);
+    Sabel::fileUsing($libDb . "validators.php", true);
+    Sabel::fileUsing($libDb . "Manipulator.php", true);
+    Sabel::fileUsing($libDb . "Form.php", true);
     
     Sabel_DB_Config::initialize();
 

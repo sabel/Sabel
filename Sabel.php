@@ -189,7 +189,6 @@ final class Sabel
     require ($CONTROLLER . "Creator.php");
     require ($CONTROLLER . "Page.php");
     
-    require ($RESPONSE . "Abstract.php");
     require ($RESPONSE . "Web.php");
     
     require ($CONTAINER . "Injector.php");
