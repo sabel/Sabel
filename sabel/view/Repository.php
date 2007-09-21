@@ -21,4 +21,6 @@ interface Sabel_View_Repository
   public function createResource($locationName, $body, $action = null);
   public function editResource($locationName, $body, $action = null);
   public function deleteResource($locationName, $action = null);
+  public function getResourceList($locationName);
+  public function isResourceValid($locationName, $name);
 }

@@ -109,6 +109,22 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     unlink($this->getPathToResource($locationName, $action));
   }
   
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function getResourceList($locationName)
+  {
+    return $this->locations[$locationName]->getResourceList();
+  }
+  
+  /**
+   * implements Sabel_View_Repository
+   */
+  public function isResourceValid($locationName, $name)
+  {
+    return $this->locations[$locationName]->isResourceValid($name);
+  }
+  
   protected function getPathToResource($locationName, $action)
   {
     $destination = $this->getDestination($action);
@@ -122,16 +138,6 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     }
     
     return $this->locations[$locationName]->getPath() . $templateName;
-  }
-  
-  public function getResourceList($locationName)
-  {
-    return $this->locations[$locationName]->getResourceList();
-  }
-  
-  public function isResourceValid($locationName, $name)
-  {
-    return $this->locations[$locationName]->isResourceValid($name);
   }
   
   protected function getDestination($action)
