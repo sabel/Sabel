@@ -102,10 +102,12 @@ class Sabel_Response_Web implements Sabel_Response
   
   public function outputHeader()
   {
-    dump($_ENV);
-    dump($_SERVER);
-    dump(PHP_CLI);
-    $header = new Sabel_Response_Header_Http();
+    if (PHP_SAPI === "cli") {
+      $header = new Sabel_Response_Header_Cli();
+    } else {
+      $header = new Sabel_Response_Header_Http();
+    }
+    
     $header->output($this);
   }
   
