@@ -9,7 +9,7 @@
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Form
+class Form extends Sabel_Object
 {
   protected $model   = null;
   protected $mdlName = "";
@@ -26,12 +26,17 @@ class Form
     $this->columns = $model->getSchema()->getColumns();
   }
   
-  public function create($uri, $id = null, $class = null, $name = null)
+  public function getModel()
   {
+    return $this->model;
+  }
+  
+  public function create($uri, $id = null, $class = null, $submitText = "")
+  {
+    $html    = array();
     $columns = $this->columns;
     $schema  = $this->model->getSchema();
     $mdlName = $this->mdlName;
-    $html    = array($this->start($uri, $id, $class, "POST", $name));
     $names   = Sabel_DB_Model_Localize::getColumnNames($mdlName);
     
     foreach ($columns as $colName => $column) {
@@ -61,10 +66,11 @@ class Form
       }
     }
     
-    $html[] = "<br/>" . $this->submit();
+    $html[] = "<br/>" . $this->submit($submitText);
     $html[] = $this->end();
+    $start  = $this->start($uri, $id, $class, "POST");
     
-    return implode("<br/>\n", $html) . "\n";
+    return $start . "\n" . implode("<br/>\n", $html) . "\n";
   }
   
   public function start($uri, $class = null, $id = null, $method = "POST", $name = null)
@@ -73,7 +79,7 @@ class Form
     $this->addIdAndClass($html, $id, $class);
     if ($name !== null) $html .= 'name="' . $name . '" ';
     
-    return $html . " />";
+    return $html . ">";
   }
   
   public function end()
@@ -84,7 +90,7 @@ class Form
   public function text($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName($name);
+    $name  = $this->createName($name);
     $html  = '<input type="text" ';
     $this->addIdAndClass($html, $id, $class);
     $html .= 'name="' . $name . '" value="' . $value . '">';
@@ -95,7 +101,7 @@ class Form
   public function password($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName($name);
+    $name  = $this->createName($name);
     $html  = '<input type="password" ';
     $this->addIdAndClass($html, $id, $class);
     $html .= 'name="' . $name . '" value="' . $value . '">';
@@ -106,7 +112,7 @@ class Form
   public function textarea($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName($name);
+    $name  = $this->createName($name);
     $html  = '<textarea ';
     $this->addIdAndClass($html, $id, $class);
     $html .= 'name="' . $name . '">' . $value . '</textarea>';
@@ -117,7 +123,7 @@ class Form
   public function checkbox($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName($name);
+    $name  = $this->createName($name);
     $html  = '<input type="checkbox" ';
     $this->addIdAndClass($html, $id, $class);
     $html .= 'name="' . $name . '" value="1"';
@@ -130,7 +136,7 @@ class Form
   public function datetime($name, $yearRange = null, $withSecond = false)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName("datetime") . "[{$name}]";
+    $name  = $this->createName("datetime") . "[{$name}]";
     $dtime = new FormDatetime($name, $value);
     return $dtime->datetime($yearRange, $withSecond);
   }
@@ -138,7 +144,7 @@ class Form
   public function date($name, $yearRange = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName("date") . "[{$name}]";
+    $name  = $this->createName("date") . "[{$name}]";
     $dtime = new FormDatetime($name, $value);
     return $dtime->date($yearRange);
   }
@@ -146,7 +152,7 @@ class Form
   public function hidden($name, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->getName($name);
+    $name  = $this->createName($name);
     $html  = '<input type="hidden" ';
     $this->addIdAndClass($html, $id, $class);
     $html .= 'name="' . $name . '" value="' . $value . '">';
@@ -160,7 +166,7 @@ class Form
     return '<input type="submit" ' . $value . '/>';
   }
 
-  protected function getName($name)
+  protected function createName($name)
   {
     return $this->mdlName . "::" . $name;
   }
@@ -201,14 +207,14 @@ class FormDatetime
     list ($first, $last) = $this->getYearRange($yearRange);
     
     $html   = array();
-    $html[] = $this->numSelect("year",   $name, "year", $first, $last);
-    $html[] = $this->numSelect("month",  $name, "month",  1, 12);
-    $html[] = $this->numSelect("day",    $name, "day",    1, 31);
-    $html[] = $this->numSelect("hour",   $name, "hour",   0, 23);
-    $html[] = $this->numSelect("minute", $name, "minute", 0, 59);
+    $html[] = $this->numSelect("year",   $name, $first, $last);
+    $html[] = $this->numSelect("month",  $name, 1, 12);
+    $html[] = $this->numSelect("day",    $name, 1, 31);
+    $html[] = $this->numSelect("hour",   $name, 0, 23);
+    $html[] = $this->numSelect("minute", $name, 0, 59);
     
     if ($withSecond) {
-      $html[] = $this->numSelect("second", $name . "_second", 0, 59);
+      $html[] = $this->numSelect("second", $name, 0, 59);
     }
     
     return implode("&nbsp;", $html);
@@ -220,14 +226,14 @@ class FormDatetime
     list ($first, $last) = $this->getYearRange($yearRange);
     
     $html   = array();
-    $html[] = $this->numSelect("year",  $name, "year",  $first, $last);
-    $html[] = $this->numSelect("month", $name, "month", 1, 12);
-    $html[] = $this->numSelect("day",   $name, "day",   1, 31);
+    $html[] = $this->numSelect("year",  $name, $first, $last);
+    $html[] = $this->numSelect("month", $name, 1, 12);
+    $html[] = $this->numSelect("day",   $name, 1, 31);
     
     return implode("&nbsp;", $html);
   }
   
-  protected function numSelect($type, $name, $type, $start, $end)
+  protected function numSelect($type, $name, $start, $end)
   {
     $html = array('<select name="' . $name . '[' . $type . ']">');
     $val  = (int)$this->selectedValue($type);

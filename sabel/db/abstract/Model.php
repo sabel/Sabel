@@ -68,6 +68,7 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
   public function unsetValue($key)
   {
     unset($this->values[$key]);
+    unset($this->updateValues[$key]);
   }
 
   public function setValues(array $values)

@@ -23,11 +23,9 @@ class Manipulator extends Sabel_DB_Manipulator
   
   public function after($method, $result)
   {
-    /* example.
     if (ENVIRONMENT === DEVELOPMENT) {
       $this->log();
     }
-    */
   }
   
   private function log()

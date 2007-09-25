@@ -102,7 +102,9 @@ class Sabel_DB_Connection
     $conn = mysql_connect($host, $params["user"], $params["password"], true);
 
     if ($conn) {
-      mysql_select_db($params["database"], $conn);
+      if (!mysql_select_db($params["database"], $conn)) {
+        return mysql_error();
+      }
 
       if (isset($params["encoding"])) {
         list (,,$v) = explode(".", PHP_VERSION);
