@@ -85,7 +85,7 @@ function edit(evt, key)
 {
   if (evt.target.nodeName == "INPUT") return;
 
-  new Sabel.Ajax().Request("/admin/table/prepareEdit/" + mdlName,
+  new Sabel.Ajax().request("<?= uri("c: table, a: prepareEdit, param: {$models[0]->getName()}") ?>",
                            { params: "key=" + key,
                              onComplete: function(res) {
                                Sabel.get("model_form").innerHTML = res.responseText;

@@ -34,20 +34,6 @@ class Admin_Controllers_Index extends Sabel_Controller_Page
     }
   }
   
-  public function openConfigFile()
-  {
-    $content = file_get_contents($this->configFile);
-    $writeable = is_writeable($this->configFile);
-    echo json_encode(array("writeable" => $writeable, "content" => $content));
-  }
-  
-  public function saveConfigFile()
-  {
-    $content = str_replace(array("\r\n", "\r"), PHP_EOL, $this->content);
-    file_put_contents($this->configFile, $content);
-    $this->redirect->to("a: index");
-  }
-  
   public function show()
   {
     $accessor = new Sabel_DB_Schema_Accessor($this->db);

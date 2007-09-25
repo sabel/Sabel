@@ -46,7 +46,7 @@ Config.prototype = {
 
   openFile: function()
   {
-    new Sabel.Ajax().Request('/admin/index/openConfigFile',
+    new Sabel.Ajax().request('<?= uri("c: index, a: openConfigFile") ?>',
                              { onComplete: this.showFile });
   },
 
