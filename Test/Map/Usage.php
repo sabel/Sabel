@@ -3,6 +3,7 @@
 /**
  * TestCase of usage sabel map
  *
+ * @todo add many many many test cases
  * @category   Test
  * @package    org.sabel.test
  * @author     Mori Reo <mori.reo@gmail.com>
@@ -24,135 +25,49 @@ class Test_Map_Usage extends SabelTestCase
   {
   }
   
-  public function testSuccess()
-  {
-    $tokens = explode("/", "blog/user/const2/foobar/123");
-    
-    $c = new Sabel_Map_Candidate();
-    $c->setName('default');
-    
-    $c->addElement('blog',       Sabel_Map_Candidate::CONSTANT);
-    $c->addElement('controller', Sabel_Map_Candidate::CONTROLLER);
-    $c->addElement('const2',     Sabel_Map_Candidate::CONSTANT);
-    
-    $c->addElement('userName', Sabel_Map_Candidate::ACTION);
-    $c->setRequirement('userName', new Sabel_Map_Requirement_Regex('/([a-zA-Z].*)/'));
-    
-    $c->addElement('id');
-    $c->setOmittable('id');
-    $c->setRequirement('id', new Sabel_Map_Requirement_Regex('/([0-9].*)/'));
-    
-    $c->addElement('date');
-    $c->setOmittable('date');
-    
-    $c->setModule('index');
-    
-    foreach ($c as $current) {
-      $result = $s->select(current($tokens), $current);
-      $this->assertTrue($result);
-      next($tokens);
-    }
-    
-    $this->assertEquals("index",  $c->getModule());
-    $this->assertEquals("user",   $c->getController());
-    $this->assertEquals("foobar", $c->getAction());
-    
-    $this->assertEquals("user",   $c->getElementVariableByName('controller'));
-    $this->assertEquals("foobar", $c->getElementVariableByName('userName'));
-    $this->assertEquals("123",    $c->getElementVariableByName('id'));
-  }
-  
-  public function testMultipleCandidates()
-  {
-    $tokens = new Sabel_Map_Tokens("users/show/12");
-    
+  public function testMatchTo()
+  {    
     // :controller/:action/:id
     $default = new Sabel_Map_Candidate("defualt");
-    $default->addElement('controller', Sabel_Map_Candidate::CONTROLLER);
-    $default->addElement('action',     Sabel_Map_Candidate::ACTION);
-    $default->addElement('id');
-    $default->setOmittable('id');
+    $default->route(":controller/:action/:id");
+    $default->setOmittable("id");
     
     // :action/:year/:month/:day
     $blog = new Sabel_Map_Candidate("blog");
-    $blog->addElement('action', Sabel_Map_Candidate::ACTION);
-    $blog->addElement('year');
-    $blog->setOmittable('year');
-    $blog->setRequirement('year', new Sabel_Map_Requirement_Regex('/20[0-9]/'));
-    $blog->addElement('month');
-    $blog->setOmittable('month');
-    $blog->addElement('day');
-    $blog->setOmittable('day');
+    $blog->route(":action/:year/:month/:day");
+    $blog->setRequirement("year", new Sabel_Map_Requirement_Regex("/20[0-9]/"));
+    $blog->setOmittables(array("year", "month", "day"));
     
-    $selecter = new Sabel_Map_Selecter_Impl();
-    $results = array();
-    
-    foreach (array($blog, $default) as $candidate) {
-      foreach ($candidate as $element) {
-        $result = $selecter->select($tokens->current(), $element);
-        
-        // found unmatch. skip compare
-        if ($result === false) {
-          $results[] = false;
-          break 1;
-        }
-        
-        $tokens->next();
-      }
-      
-      if (array_pop($results) !== false) {
-        // candidate is match we finished compare with uri
-        $matchedCandidate = $candidate;
-        break 1;
-      } else {
-        // does't match initialize temporary variables
-        $tokens->rewind();
-        $results = array();
-      }
-    }
-    
-    $this->assertEquals('defualt', $matchedCandidate->getName());
+    $this->assertTrue($default->isMatch(explode("/", "test/test/1")));
   }
   
-  public function testFail()
+  public function testArray()
   {
-    $tokens = new Sabel_Map_Tokens("blog/foo");
+    $default = new Sabel_Map_Candidate("defualt");
+    $default->route(":directories[]/:action");
     
-    $c = new Sabel_Map_Candidate();
-    $c->setName("default");
+    $default->isMatch(explode("/", "a/b/c/d"));
     
-    $c->addElement("blog", Sabel_Map_Candidate::CONSTANT);
-    $c->addElement("user");
-    $c->addElement("option");
+    $d = $default->getElementByName("directories");
+    $this->assertEquals(array("a", "b", "c", "d"), $d->variable);
+  }
+  
+  public function testArrayWithEndSpecificDirective()
+  {
+    $default = new Sabel_Map_Candidate("defualt");
+    $default->route(":directories[]/:action.html");
     
-    $s = new Sabel_Map_Selecter_Impl();
+    $default->isMatch(explode("/", "a/b/c/d.html"));
     
-    foreach ($c as $currentCandidate) {
-      $result = $s->select($tokens->current(), $currentCandidate);
-      $tokens->next();
-    }
-    
-    $this->assertFalse($result);
+    $d = $default->getElementByName("directories");
+    $this->assertEquals(array("a", "b", "c"), $d->variable,
+    "\n\n\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\nthis fail i mean it. you can ignore this fail. as soon success. \n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n\n\n");
   }
   
   public function testUseWildCard()
   {
-    $tokens = new Sabel_Map_Tokens("blog/test/adfkaa/a/aff/ff/ff/ff");
-    $s = new Sabel_Map_Selecter_Impl();
-    
-    $c = new Sabel_Map_Candidate();
-    $c->setName("wild");
-    
-    $c->addElement("blog", Sabel_Map_Candidate::CONSTANT);
-    $c->addElement("wildcard");
-    $c->setMatchAll("wildcard", true);
-    
-    $this->assertFalse($c->isMatchAll());
-    $this->assertTrue($s->select($tokens->current(), $c->current()));
-    $tokens->next();
-    $c->next();
-    
-    $this->assertTrue($c->isMatchAll(), '$c->isMatchAll must be true');
-    $this->assertTrue($s->select($tokens->current(), $c->current()));
+    $c = new Sabel_Map_Candidate("wild");
+    $c->route("blog/:all");
+    $c->setMatchAll("all", true);
   }
 }

@@ -85,7 +85,7 @@ class SabelAllTests
     $suite->addTest(Test_Sabel::suite());
     // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Bus::suite());
-    // $suite->addTest(Test_Map_Tests::suite());
+    $suite->addTest(Test_Map_Tests::suite());
     // $suite->addTest(Test_Validate::suite());
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Pager::suite());

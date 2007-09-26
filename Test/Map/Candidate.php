@@ -24,41 +24,25 @@ class Test_Map_Candidate extends SabelTestCase
   {
   }
   
-  public function testName()
-  {
-    $c = new Sabel_Map_Candidate();
-    $c->setName("default");
-    $this->assertEquals("default", $c->getName());
-  }
-  
   public function testUri()
   {
     $defc = new Sabel_Map_Candidate("default");
-    $defc->addElement('controller', Sabel_Map_Candidate::CONTROLLER);
-    $defc->addElement('action',     Sabel_Map_Candidate::ACTION);
-    $defc->addElement('id');
-    $defc->setOmittable('id');
+    $defc->route(":controller/:action/:id");
+    $defc->setOmittable("id");
     
-    $selecter = new Sabel_Map_Selecter_Impl();
-    $tokens = new Sabel_Map_Tokens("blog/show");
-    foreach ($defc as $current) {
-      $selecter->select($tokens->current(), $current);
-      $tokens->next();
-    }
-    
-    $result = $defc->uri();
+    $result = $defc->uri(array(":controller" => "blog", "a" => "show"));
     $this->assertEquals("blog/show", $result);
     
-    $result = $defc->uri(array("a"=>"delete"));
+    $result = $defc->uri(array(":controller" => "blog", "a" => "delete"));
     $this->assertEquals("blog/delete", $result);
     
-    $result = $defc->uri(array(":action"=>"delete", 'id'=>123));
-    $this->assertEquals("blog/delete/123", $result);
+    $result = $defc->uri(array(":action" => "delete", 'id' => 123));
+    $this->assertEquals("delete/123", $result);
     
-    $result = $defc->uri(array(':controller'=>'bbs',':action'=>'delete'));
+    $result = $defc->uri(array(':controller' => 'bbs',':action' => 'delete'));
     $this->assertEquals("bbs/delete", $result);
     
-    $result = $defc->uri(array(':module'=>'index',':action'=>'delete'));
-    $this->assertEquals("blog/delete", $result);
+    $result = $defc->uri(array(':module' => 'index',':action' => 'delete'));
+    $this->assertEquals("delete", $result);
   }
 }

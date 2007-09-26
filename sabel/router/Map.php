@@ -30,22 +30,20 @@ class Sabel_Router_Map implements Sabel_Router
       Sabel_Map_Configurator::addCandidate($name, $uri, $options);
     }
     
-    $candidate = new Sabel_Map_Candidate();
-    $candidate = $candidate->find($request);
-    
-    if ($candidate === null) {
-      $candidate = Sabel_Map_Configurator::getCandidate("default");
-      $candidate->setModule("index");
-      $candidate->setController("index");
-      $candidate->setAction("index");
-      Sabel_Context::getContext()->setCandidate($candidate);
-      $request->setCandidate($candidate);
-      $destination = $candidate->getDestination();
-      return $destination;
-    } else {
-      Sabel_Context::getContext()->setCandidate($candidate);
-      $request->setCandidate($candidate);
-      return $candidate->getDestination();
+    foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
+      if ($candidate->isMatch($request->toArray())) {
+        Sabel_Context::getContext()->setCandidate($candidate);
+        $request->setCandidate($candidate);
+        return $candidate->getDestination();
+      }
     }
+    
+    $candidate = Sabel_Map_Configurator::getCandidate("default");
+    $candidate->setModule("index");
+    $candidate->setController("index");
+    $candidate->setAction("index");
+    Sabel_Context::getContext()->setCandidate($candidate);
+    $request->setCandidate($candidate);
+    return $candidate->getDestination();
   }
 }

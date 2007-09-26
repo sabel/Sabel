@@ -11,25 +11,15 @@
  */
 class Sabel_Map_Candidate implements Iterator
 {
+  const VARIABLE_MARK = ":";
+  
   const VARIABLE   = "variable";
   const CONSTANT   = "constant";
+  const TYPE_ARRAY = "array";
+  
   const MODULE     = "module";
   const CONTROLLER = "controller";
   const ACTION     = "action";
-  
-  const MODULE_NAME     = "module_name";
-  const CONTROLLER_NAME = "controller_name";
-  const ACTION_NAME     = "action_name";
-  
-  const TYPE_KEY          = "type_key";
-  const REQUIREMENT_KEY   = "requirement_key";
-  const OMITTABLE_KEY     = "omittable_key";
-  const MATCH_ALL_KEY     = "match_all_key";
-  const VARIABLE_KEY      = "variable_key";
-  const DEFAULT_VALUE_KEY = "default_value_key";
-  const CACHE_KEY         = "cache_key";
-  
-  const ELEMENT_NAME = "element_name";
   
   protected $name     = "";
   protected $elements = array();
@@ -49,6 +39,70 @@ class Sabel_Map_Candidate implements Iterator
     $this->setName($name);
   }
   
+  public function route($uriRule)
+  {
+    $rules = explode("/", $uriRule);
+        
+    foreach ($rules as $element) {
+      if (stripos($element, self::VARIABLE_MARK) === 0) {
+        $name = ltrim($element, self::VARIABLE_MARK);
+        switch ($name) {
+          case self::MODULE:
+            $this->createElement($name, self::MODULE);
+            break;
+          case self::CONTROLLER:
+            $this->createElement($name, self::CONTROLLER);
+            break;
+          case self::ACTION:
+            $this->createElement($name, self::ACTION);
+            break;
+          case ($this->isArrayElement($name)):
+            $name = str_replace("[]", "", $name);
+            $this->createElement($name, self::TYPE_ARRAY);
+            break;
+          default:
+            $this->createElement($name, self::VARIABLE);
+            break;
+        }
+      } else {
+        $this->createElement($element, self::CONSTANT);
+      }
+    }
+    
+    return $this;
+  }
+  
+  private function isArrayElement($name)
+  {
+    return (strpos($name, "[]") !== false);
+  }
+  
+  public function setOptions($options)
+  {
+    if (isset($options["default"])) {
+      foreach ($options["default"] as $key => $default) {
+        $key = ltrim($key, self::VARIABLE_MARK);
+        $this->setOmittable($key);
+        if ($default !== null) $this->setDefaultValue($key, $default);
+      }
+    }
+    
+    if (isset($options["requirements"])) {
+      foreach ($options["requirements"] as $key => $value) {
+        $key = ltrim($key, self::VARIABLE_MARK);
+        $this->setRequirement($key, new Sabel_Map_Requirement_Regex($value));
+      }
+    }
+    
+    if (isset($options["cache"])) {
+      $this->setCache($options["cache"]);
+    }
+    
+    if (isset($options["module"]))     $this->setModule($options["module"]);
+    if (isset($options["controller"])) $this->setController($options["controller"]);
+    if (isset($options["action"]))     $this->setAction($options["action"]);
+  }
+  
   public function getDestination()
   {
     return new Sabel_Destination($this->module, $this->controller, $this->action);
@@ -64,74 +118,13 @@ class Sabel_Map_Candidate implements Iterator
     return $this->name;
   }
   
-  public function getElementType()
-  {
-    $element = $this->getElement();
-    return $element[self::TYPE_KEY];
-  }
-  
-  public function equalsElementTypeWith($target)
-  {
-    return ($this->getElementType() === $target);
-  }
-  
-  public function setElementVariable($value)
-  {
-    $element = $this->getElement();
-    $this->elements[$element[self::ELEMENT_NAME]][self::VARIABLE_KEY] = $value;
-  }
-  
-  public function getElementVariable()
-  {
-    $element = $this->getElement();
-    if (isset($element[self::VARIABLE_KEY])) {
-      return $element[self::VARIABLE_KEY];
-    } else {
-      return false;
-    }
-  }
-  
-  public function setElementVariableByName($name, $value)
-  {
-    if (isset($this->elements[$name])) {
-      $this->elements[$name][self::VARIABLE_KEY] = $value;
-    }
-  }
-  
-  public function getElementVariables()
-  {
-    $results = array();
-    $elements = $this->elements;
-    foreach ($elements as $name => $variable) {
-      if (isset($variable[self::VARIABLE_KEY])) {
-        $results[$name] = $variable[self::VARIABLE_KEY];
-      }
-    }
-    return $results;
-  }
-  
-  public function getElementVariableByName($name)
-  {
-    $result = false;
-    if (isset($this->elements[$name][self::VARIABLE_KEY])) {
-      $result = $this->elements[$name][self::VARIABLE_KEY];
-    }
-    return $result;
-  }
-  
-  public function hasElementVariableByName($name)
-  {
-    return (isset($this->elements[$name][self::VARIABLE_KEY]));
-  }
-  
-  public function addElement($name, $type = null)
+  public function createElement($name, $type = null)
   {
     if ($type === null) {
       $type = self::VARIABLE;
     }
     
-    $this->elements[$name][self::ELEMENT_NAME] = $name;
-    $this->elements[$name][self::TYPE_KEY]     = $type;
+    $this->elements[$name] = new Sabel_Map_Element($name, $type);
   }
   
   public function getElement()
@@ -148,7 +141,7 @@ class Sabel_Map_Candidate implements Iterator
   public function getElementName()
   {
     $element = $this->getElement();
-    return $element[self::ELEMENT_NAME];
+    return $element->name;
   }
   
   public function getElementByName($name)
@@ -157,60 +150,104 @@ class Sabel_Map_Candidate implements Iterator
     return ($result === false) ? null : $result;
   }
   
+  public function equalsElementTypeWith($target)
+  {
+    return ($this->getElementType() === $target);
+  }
+  
+  public function setElementVariable($value)
+  {
+    $element = $this->getElement();
+    $this->elements[$element->name]->variable = $value;
+  }
+  
+  public function getElementVariables()
+  {
+    $results = array();
+    $elements = $this->elements;
+    
+    foreach ($elements as $name => $element) {
+      if ($element->hasVariable()) {
+        $results[$name] = $element->variable;
+      }
+    }
+    
+    return $results;
+  }
+  
+  public function getElementVariableByName($name)
+  {
+    $result = false;
+    
+    if (isset($this->elements[$name])) {
+      $result = $this->elements[$name]->variable;
+    }
+    
+    return $result;
+  }
+  
   public function setRequirement($name, $requirement)
   {
-    if ($this->elements[$name][self::TYPE_KEY] === self::CONSTANT) {
+    if ($this->elements[$name]->isTypeOf(self::CONSTANT)) {
       $msg = "could't apply requirement to constant elements";
       throw new Sabel_Map_Candidate_IllegalSetting($msg);
     }
     
     if (isset($this->elements[$name])) {
-      $this->elements[$name][self::REQUIREMENT_KEY] = $requirement;
+      $this->elements[$name]->requirement = $requirement;
     }
   }
   
   public function getRequirement()
   {
     $element = $this->getElement();
-    return $element[self::REQUIREMENT_KEY];
+    return $element->requirement;
   }
   
   public function getRequirementByName($name)
   {
-    if (isset($this->elements[$name][self::REQUIREMENT_KEY])) {
-      return $this->elements[$name][self::REQUIREMENT_KEY];
+    if (isset($this->elements[$name]->requirement)) {
+      return $this->elements[$name]->requirement;
     }
   }
   
   public function hasRequirement()
   {
-    $element = $this->getElement();
-    return (isset($element[self::REQUIREMENT_KEY]));
+    return $this->getElement()->hasRequirement();
   }
   
   public function clearRequirement()
   {
-    $element = $this->getElement();
-    unset($element[self::REQUIREMENT_KEY]);
+    $this->getElement()->requirement = null;
   }
   
   public function setOmittable($name)
   {
     if (isset($this->elements[$name])) {
-      $this->elements[$name][self::OMITTABLE_KEY] = true;
+      $this->elements[$name]->omittable = true;
     }
+    
+    return $this;
+  }
+  
+  public function setOmittables($elements)
+  {
+    foreach ($elements as $name) {
+      $this->setOmittable($name);
+    }
+    
+    return $this;
   }
   
   public function isOmittable()
   {
-    $element = $this->getElement();
-    return (isset($element[self::OMITTABLE_KEY]));
+    return $this->getElement()->omittable;
   }
   
   public function setCache($key)
   {
     $element = $this->getElement();
-    $element[self::CACHE_KEY] = $key;
+    $element->cache = $key;
   }
   
   public function setDefaultValue($name, $value)
@@ -219,40 +256,46 @@ class Sabel_Map_Candidate implements Iterator
       if ($name === "action") {
         $this->setAction($value);
       }
-      $this->elements[$name][self::DEFAULT_VALUE_KEY] = $value;
+      $this->elements[$name]->default = $value;
     }
   }
   
   public function getDefaultValue()
   {
     if ($this->hasDefaultValue()) {
-      $element = $this->getElement();
-      return $element[self::DEFAULT_VALUE_KEY];
+      return $this->getElement()->default;
     }
   }
   
   public function getDefaultValueByName($name)
   {
     if ($this->hasDefaultValueByName($name)) {
-      return $this->elements[$name][self::DEFAULT_VALUE_KEY];
+      return $this->elements[$name]->default;
     }
   }
   
   public function hasDefaultValue()
   {
-    $element = $this->getElement();
-    return (isset($element[self::DEFAULT_VALUE_KEY]));
+    return $this->getElement()->default;
   }
   
   public function hasDefaultValueByName($name)
   {
-    return (isset($this->elements[$name][self::DEFAULT_VALUE_KEY]));
+    return $this->elements[$name]->hasDefault();
   }
   
   public function isConstant()
   {
-    $element = $this->getElement();
-    return ($element[self::TYPE_KEY] === self::CONSTANT);
+    return $this->getElement()->isTypeOf(self::CONSTANT);
+  }
+  
+  public function isConstantToken($rawElement, $element)
+  {
+    if ($element->isTypeOf(self::CONSTANT)) {
+      return $element->equalsTo($urlElement);
+    }
+    
+    return false;
   }
   
   public function setConstant($name)
@@ -263,34 +306,25 @@ class Sabel_Map_Candidate implements Iterator
     }
     
     if (isset($this->elements[$name])) {
-      $this->elements[$name][self::TYPE_KEY] = self::CONSTANT;
+      $this->elements[$name]->type = self::CONSTANT;
     }
-  }
-  
-  public function compareWithRequirement($value)
-  {
-    $requirement = $this->getRequirement();
-    return ($requirement->isMatch($value));
   }
   
   public function setMatchAll($name, $bool)
   {
     if (isset($this->elements[$name])) {
-      $this->elements[$name][self::MATCH_ALL_KEY] = $bool;
+      $this->elements[$name]->matchAll = $bool;
     }
   }
   
   public function setMatchAllByPosition($bool)
   {
-    $element = $this->getElement();
-    $element[self::MATCH_ALL_KEY] = $bool;
+    $this->getElement()->matchAll = $bool;
   }
   
   public function isMatchAll()
   {
-    $element = $this->getElement();
-    return (isset($element[self::MATCH_ALL_KEY]) &&
-            $element[self::MATCH_ALL_KEY] === true);
+    return $this->getElement()->isMatchAll();
   }
   
   public function setModule($module)
@@ -338,86 +372,95 @@ class Sabel_Map_Candidate implements Iterator
     return ($this->action !== "");
   }
   
-  public function find($request)
-  {
-    $requests = $request->toArray();
-    
-    foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
-      if ($this->matchToTokens($candidate, $requests)) {
-        return $candidate;
-      }
-    }
-    
-    return null;
-  }
-  
-  private final function matchToTokens($candidate, $requests)
+  public final function isMatch($requests)
   {
     $constantEstablished = false;
-    foreach ($candidate as $element) {
+    $inArray = false;
+    
+    $uriElement = "";
+    
+    $elements = $this->getElements();
+    
+    foreach ($elements as $element) {
+      $uriElement = current($requests);
+      
+      if (!is_string($uriElement)) break;
+      
       if ($constantEstablished) {
-        if ($this->select(current($requests), $element)) {
+        if ($this->compare($uriElement, $element)) {
           next($requests);
+          $this->setVariableToElement($uriElement, $element);
         }
+        continue;
+      }
+      
+      if ($this->isConstantToken($uriElement, $element)) {
+        $constantEstablished = true;
+        if ($this->compare($uriElement, $element)) {
+          next($requests);
+          $this->setVariableToElement($uriElement, $element);
+        }
+      } elseif ($element->isTypeOf(self::TYPE_ARRAY)) {
+        $inArray = true;
+        foreach ($requests as $request) {
+          $element->addVariable($request);
+        }
+      } elseif ($this->compare($uriElement, $element)) {
+        next($requests);
+        $this->setVariableToElement($uriElement, $element);
       } else {
-        if ($this->isConstantToken(current($requests), $element)) {
-          $constantEstablished = true;
-          if ($this->select(current($requests), $element)) {
-            next($requests);
-          }
-        } elseif ($this->select(current($requests), $element)) {
-          next($requests);
-        } else {
-          return false;
-        }
+        return false;
       }
     }
     
     return true;
   }
   
-  private final function select($token, $candidate)
+  private function compare($uriElement, $element)
   {
     $result = false;
     
-    if (($token === false || $token === "") && $candidate->hasDefaultValue()) {
-      $token = $candidate->getDefaultValue();
+    if (empty($uriElement) && $element->hasDefault()) {
+      $uriElement = $element->default;
     }
     
-    if ($candidate->isMatchAll()) {
+    if ($element->isMatchAll()) {
       $result = true;
-    } elseif (($token === false || $token === "") && $candidate->isOmittable()) {
+    } elseif (empty($uriElement) && $element->omittable) {
       $result = true;
-    } elseif ($candidate->hasRequirement()) {
-      $result = $candidate->compareWithRequirement($token);
-    } elseif ($candidate->isConstant() && $token !== $candidate->getElementName()) {
-      return false;
+    } elseif ($element->hasRequirement()) {
+      $result = $element->compareWithRequirement($token);
+    } elseif ($element->isTypeOf(self::CONSTANT) && $uriElement !== $element->name) {
+      $result = false;
     } else {
-      $result =(boolean) $token;
-    }
-    
-    // token value as a candidate variable
-    if ($result) {
-      if ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::VARIABLE)) {
-        $candidate->setElementVariable($token);
-      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::MODULE)) {
-        $candidate->setModule($token);
-        $candidate->setElementVariable($token);
-      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::CONTROLLER)) {
-        $candidate->setController($token);
-        $candidate->setElementVariable($token);
-      } elseif ($candidate->equalsElementTypeWith(Sabel_Map_Candidate::ACTION)) {
-        $candidate->setAction($token);
-        $candidate->setElementVariable($token);
-      }
+      $result =(boolean) $uriElement;
     }
     
     return $result;
   }
   
-  public function isConstantToken($token, $candidate)
+  private function setVariableToElement($uriElement, $element)
   {
-    return ($candidate->isConstant() && $token === $candidate->getElementName());
+    switch ($element->type) {
+      case self::VARIABLE:
+        $element->variable = $uriElement;
+        break;
+      case self::MODULE:
+        $this->setModule($uriElement);
+        $element->variable = $uriElement;
+        break;
+      case self::CONTROLLER:
+        $this->setController($uriElement);
+        $element->variable = $uriElement;
+        break;
+      case self::ACTION;
+        $this->setAction($uriElement);
+        $element->variable = $element;
+        break;
+      case self::TYPE_ARRAY:
+        $element->variable = $element;
+        break;
+    }
   }
   
   public function uri($parameters = null)
@@ -458,46 +501,40 @@ class Sabel_Map_Candidate implements Iterator
     }
     
     $buffer = array();
-    
-    $typeKey     = self::TYPE_KEY;
-    $variableKey = self::VARIABLE_KEY;
-    $elementName = self::ELEMENT_NAME;
-    $module      = self::MODULE;
-    $controller  = self::CONTROLLER;
-    $action      = self::ACTION;
-        
+            
     foreach ($elements as $element) {
-      switch ($element[$typeKey]) {
-        case $module:
+      switch ($element->type) {
+        case self::MODULE:
           if (isset($parameters[":module"])) {
             $buffer[] = $parameters[":module"];
           } else {
-            $buffer[] = $element[$variableKey];
+            $buffer[] = $element->variable;
           }
           break;
-        case $controller:
+        case self::CONTROLLER:
           if (isset($parameters[":controller"])) {
             $buffer[] = $parameters[":controller"];
           } else {
-            $buffer[] = $element[$variableKey];
+            if ($element->hasVariable()) {
+              $buffer[] = $element->variable;
+            }
           }
           break;
-        case $action:
+        case self::ACTION:
           if (isset($parameters[":action"])) {
             $buffer[] = $parameters[":action"];
           } else {
-            $buffer[] = $element[$variableKey];
+            $buffer[] = $element->variable;
           }
           break;
-        case (array_key_exists($element[$elementName], $parameters)):
-          $buffer[] = $parameters[$element[$elementName]];
+        case (array_key_exists($element->name, $parameters)):
+          $buffer[] = $parameters[$element->name];
           break;
         default:
-          if (!isset($parameters[$element[$elementName]]) &&
-               isset($element[self::OMITTABLE_KEY])) {
+          if (!isset($parameters[$element->name]) && $element->omittable) {
             // ignore
           } else {
-            $buffer[] = $element[$elementName];
+            $buffer[] = $element->name;
           }
           break;
       }
