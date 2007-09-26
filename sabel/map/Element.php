@@ -5,12 +5,13 @@ class Sabel_Map_Element
   public $name = "";
   public $type = "";
   
-  public $default = "";
-  public $variable  = "";
+  public $default  = "";
+  public $variable = "";
   
-  public $cache = "";
-  public $omittable = false;
-  public $matchAll = false;
+  public $cache       = "";
+  public $omittable   = false;
+  public $extension   = "";
+  public $matchAll    = false;
   public $requirement = null;
   
   public function __construct($name, $type)
@@ -58,5 +59,10 @@ class Sabel_Map_Element
   public function compareWithRequirement($value)
   {
     $this->requirement->isMatch($value);
+  }
+  
+  public function hasExtension()
+  {
+    return ($this->extension !== "");
   }
 }

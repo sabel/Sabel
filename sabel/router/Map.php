@@ -31,7 +31,7 @@ class Sabel_Router_Map implements Sabel_Router
     }
     
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
-      if ($candidate->isMatch($request->toArray())) {
+      if ($candidate->evalute($request->toArray())) {
         Sabel_Context::getContext()->setCandidate($candidate);
         $request->setCandidate($candidate);
         return $candidate->getDestination();

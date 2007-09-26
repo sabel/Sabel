@@ -1,3 +1,8 @@
+2007-09-27  Mori Reo <mori.reo@sabel.jp>
+  * Sabel_Mapパッケージの設計向上
+    * 配列ディレクティブの追加 (:structure[]/:action)
+    * :action指示子に拡張子指定を追加 (:controller/:action.html)
+
 2007-09-21  Mori Reo <mori.reo@sabel.jp>
   * Sabel_Viewの設計を変更
     * Repositoryを追加

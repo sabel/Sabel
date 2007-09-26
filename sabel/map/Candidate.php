@@ -56,10 +56,22 @@ class Sabel_Map_Candidate implements Iterator
           case self::ACTION:
             $this->createElement($name, self::ACTION);
             break;
+          case ($this->hasExtension($name)):
+            list($left, $right) = $this->diviedByExtension($name);
+            if ($left === self::ACTION) {
+              $element = new Sabel_Map_Element($name, self::ACTION);
+              $element->extension = $right;
+              $this->elements[$left] = $element;
+            }
+            break;
           case ($this->isArrayElement($name)):
             $name = str_replace("[]", "", $name);
             $this->createElement($name, self::TYPE_ARRAY);
             break;
+          case ($this->hasExtension($name)):
+            list($left, $right) = $this->diviedByExtension($name);
+            $element = $this->createElement($left, self::VARIABLE);
+            $element->extension = $right;
           default:
             $this->createElement($name, self::VARIABLE);
             break;
@@ -75,6 +87,20 @@ class Sabel_Map_Candidate implements Iterator
   private function isArrayElement($name)
   {
     return (strpos($name, "[]") !== false);
+  }
+  
+  public function hasExtension($name)
+  {
+    $result = preg_match('/([a-zA-Z].*)[.]([a-zA-Z].*)/', $name);
+    return ($result >= 1);
+  }
+  
+  public function diviedByExtension($name)
+  {
+    $matches = array();
+    preg_match('/([a-zA-Z].*)[.]([a-zA-Z].*)/', $name, $matches);
+    array_shift($matches);
+    return $matches;
   }
   
   public function setOptions($options)
@@ -124,7 +150,9 @@ class Sabel_Map_Candidate implements Iterator
       $type = self::VARIABLE;
     }
     
-    $this->elements[$name] = new Sabel_Map_Element($name, $type);
+    $element = new Sabel_Map_Element($name, $type);
+    $this->elements[$name] = $element;
+    return $element;
   }
   
   public function getElement()
@@ -372,16 +400,17 @@ class Sabel_Map_Candidate implements Iterator
     return ($this->action !== "");
   }
   
-  public final function isMatch($requests)
+  public final function evalute($requests)
   {
     $constantEstablished = false;
     $inArray = false;
     
     $uriElement = "";
     
-    $elements = $this->getElements();
+    $elements = array_values($this->getElements());
     
-    foreach ($elements as $element) {
+    for ($i = 0; $i < count($elements); ++$i) {
+      $element = $elements[$i];
       $uriElement = current($requests);
       
       if (!is_string($uriElement)) break;
@@ -401,9 +430,19 @@ class Sabel_Map_Candidate implements Iterator
           $this->setVariableToElement($uriElement, $element);
         }
       } elseif ($element->isTypeOf(self::TYPE_ARRAY)) {
-        $inArray = true;
-        foreach ($requests as $request) {
+        for ($rp = key($requests); $rp < count($requests); ++$rp) {
+          $request = $requests[$rp];
+          if ($this->hasExtension($request)) {
+            if (isset($elements[$i+1]) && $elements[$i+1]->hasExtension()) {
+              list(, $request_extension) = $this->diviedByExtension($request);
+              if ($request_extension === $elements[$i+1]->extension) {
+                break;
+              }
+            }
+          }
+          
           $element->addVariable($request);
+          next($requests);
         }
       } elseif ($this->compare($uriElement, $element)) {
         next($requests);
@@ -429,7 +468,7 @@ class Sabel_Map_Candidate implements Iterator
     } elseif (empty($uriElement) && $element->omittable) {
       $result = true;
     } elseif ($element->hasRequirement()) {
-      $result = $element->compareWithRequirement($token);
+      $result = $element->compareWithRequirement($uriElement);
     } elseif ($element->isTypeOf(self::CONSTANT) && $uriElement !== $element->name) {
       $result = false;
     } else {
@@ -443,7 +482,13 @@ class Sabel_Map_Candidate implements Iterator
   {
     switch ($element->type) {
       case self::VARIABLE:
-        $element->variable = $uriElement;
+        if ($this->hasExtension($uriElement)) {
+          list($variable, $extension) = $this->diviedByExtension($uriElement);
+          $element->variable  = $variable;
+          $element->extension = $extension;
+        } else {
+          $element->variable = $uriElement;
+        }
         break;
       case self::MODULE:
         $this->setModule($uriElement);
@@ -455,10 +500,16 @@ class Sabel_Map_Candidate implements Iterator
         break;
       case self::ACTION;
         $this->setAction($uriElement);
-        $element->variable = $element;
+        if ($this->hasExtension($uriElement)) {
+          list($variable, $extension) = $this->diviedByExtension($uriElement);
+          $element->variable  = $variable;
+          $element->extension = $extension;
+        } else {
+          $element->variable = $uriElement;
+        }
         break;
       case self::TYPE_ARRAY:
-        $element->variable = $element;
+        $element->variable = $uriElement;
         break;
     }
   }

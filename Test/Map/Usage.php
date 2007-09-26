@@ -25,20 +25,35 @@ class Test_Map_Usage extends SabelTestCase
   {
   }
   
-  public function testMatchTo()
-  {    
-    // :controller/:action/:id
-    $default = new Sabel_Map_Candidate("defualt");
-    $default->route(":controller/:action/:id");
-    $default->setOmittable("id");
-    
+  public function testEvaluteFail()
+  {
     // :action/:year/:month/:day
     $blog = new Sabel_Map_Candidate("blog");
     $blog->route(":action/:year/:month/:day");
     $blog->setRequirement("year", new Sabel_Map_Requirement_Regex("/20[0-9]/"));
     $blog->setOmittables(array("year", "month", "day"));
     
-    $this->assertTrue($default->isMatch(explode("/", "test/test/1")));
+    $this->assertFalse($blog->evalute(explode("/", "test/test/1")));
+  }
+  
+  public function testStandard()
+  {
+    // :controller/:action/:id
+    $default = new Sabel_Map_Candidate("defualt");
+    $default->route(":controller/:action/:id");
+    $default->setOmittable("id");
+    
+    $default->evalute(explode("/", "index/toppage"));
+    
+    $c = $default->getElementByName("controller");
+    $this->assertEquals("index", $c->variable);
+    
+    $a = $default->getElementByName("action");
+    $this->assertEquals("toppage", $a->variable);
+    $this->assertFalse($a->hasExtension());
+    
+    $this->assertTrue($default->hasAction());
+    $this->assertTrue($default->hasAction());
   }
   
   public function testArray()
@@ -46,7 +61,7 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("defualt");
     $default->route(":directories[]/:action");
     
-    $default->isMatch(explode("/", "a/b/c/d"));
+    $default->evalute(explode("/", "a/b/c/d"));
     
     $d = $default->getElementByName("directories");
     $this->assertEquals(array("a", "b", "c", "d"), $d->variable);
@@ -57,11 +72,14 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("defualt");
     $default->route(":directories[]/:action.html");
     
-    $default->isMatch(explode("/", "a/b/c/d.html"));
+    $default->evalute(explode("/", "a/b/c/d.html"));
     
     $d = $default->getElementByName("directories");
-    $this->assertEquals(array("a", "b", "c"), $d->variable,
-    "\n\n\n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\nthis fail i mean it. you can ignore this fail. as soon success. \n\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n\n\n\n");
+    $this->assertEquals(array("a", "b", "c"), $d->variable);
+    
+    $a = $default->getElementByName("action");
+    $this->assertEquals("d", $a->variable);
+    $this->assertEquals("html", $a->extension);
   }
   
   public function testUseWildCard()
