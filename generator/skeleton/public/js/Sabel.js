@@ -411,7 +411,7 @@
 		setRequestHeaders: function()
 		{
 			var headers = {
-				"X_Requested-With": "XMLHttpRequest",
+				"X_Requested_With": "XMLHttpRequest",
 				"Accept": "text/javascript, text/html, application/xml, text/xml, */*"
 			};
 			var xmlhttp = this.xmlhttp;
