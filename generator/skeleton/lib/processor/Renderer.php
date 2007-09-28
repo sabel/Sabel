@@ -37,7 +37,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $result = $contents;
-    } else {
+    } elseif (isset($contents)) {
       $layout = $repository->find("layout");
       $forLayout = array($responses, "contentForLayout" => $contents);
       $result = $renderer->rendering($layout->fetch(), $forLayout);
