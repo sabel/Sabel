@@ -1,7 +1,6 @@
-(function() {
 	if (typeof window.Sabel !== "undefined") throw "Sabel is already loaded.";
 
-	var Sabel = window.Sabel = {
+	window.Sabel = {
 		version: "0.1.0"
 	};
 
@@ -336,7 +335,7 @@
 		var events = Sabel.Event._events;
 		for (var i = 0, len = events.length; i < len; i++) events[i].stop();
 	}
-	if (window.attachEvent) window.attachEvent("onunload", Sabel.Event.destory);
+	if (window.attachEvent) window.attachEvent("onunload", Sabel.Event.destroy);
 
 	if (typeof window.XMLHttpRequest === "undefined") {
 		window.XMLHttpRequest = function()
@@ -467,4 +466,3 @@
 			return text;
 		}
 	};
-})();
