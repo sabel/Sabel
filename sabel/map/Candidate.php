@@ -412,7 +412,7 @@ class Sabel_Map_Candidate implements Iterator
       $uriElement = current($requests);
       
       if ($constantEstablished) {
-        if ($this->compare($uriElement, $element)) {
+        if (($uriElement = $this->compare($uriElement, $element)) !== false) {
           next($requests);
           $this->setVariableToElement($uriElement, $element);
         }

@@ -67,6 +67,34 @@ class Test_Map_Usage extends SabelTestCase
     $this->assertEquals(array("a", "b", "c", "d"), $d->variable);
   }
   
+  public function testConstant()
+  {
+    $default = new Sabel_Map_Candidate("defualt");
+    $default->route("const/:controller/:action");
+    $opt = array("default"=>array(":controller" => "index",
+                                  ":action"     => "index"));
+    $default->setOptions($opt);
+    
+    $default->evalute(explode("/", "const/cont/act"));
+    
+    $c = $default->getElementByName("controller");
+    $this->assertEquals("cont", $c->variable);
+  }
+  
+  public function testConstantWithDefault()
+  {
+    $default = new Sabel_Map_Candidate("defualt");
+    $default->route("const/:controller/:action");
+    $opt = array("default"=>array(":controller" => "index",
+                                  ":action"     => "index"));
+    $default->setOptions($opt);
+    
+    $default->evalute(explode("/", "const"));
+    
+    $c = $default->getElementByName("controller");
+    $this->assertEquals("index", $c->variable);
+  }
+  
   public function testArrayWithEndSpecificDirective()
   {
     $default = new Sabel_Map_Candidate("defualt");
