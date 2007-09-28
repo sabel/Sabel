@@ -40,7 +40,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     $action = $destination->getAction();
     $templateName = $action;
     
-    foreach ($this->locations as $location) {
+    foreach (self::$locations as $location) {
       $resource = $location->getResource($templateName);
       if ($resource && !$resource->isMissing()) {
         return $resource;
@@ -55,7 +55,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
    */
   public function getResourceFromLocation($locationName, $name)
   {
-    return $this->locations[$locationName]->getResource($name);
+    return self::$locations[$locationName]->getResource($name);
   }
   
   /**
@@ -91,7 +91,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
    */
   public function getResourceList($locationName)
   {
-    return $this->locations[$locationName]->getResourceList();
+    return self::$locations[$locationName]->getResourceList();
   }
   
   /**
@@ -99,7 +99,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
    */
   public function isResourceValid($locationName, $name)
   {
-    return $this->locations[$locationName]->isResourceValid($name);
+    return self::$locations[$locationName]->isResourceValid($name);
   }
   
   protected function getPathToResource($locationName, $action)
@@ -110,11 +110,11 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     $action = $destination->getAction();
     $templateName = $action . TPL_SUFFIX;
     
-    if (!isset($this->locations[$locationName])) {
+    if (!isset(self::$locations[$locationName])) {
       throw new Sabel_Exception_Runtime("no location");
     }
     
-    return $this->locations[$locationName]->getPath() . $templateName;
+    return self::$locations[$locationName]->getPath() . $templateName;
   }
   
   protected function getDestination($action)
