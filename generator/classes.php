@@ -53,8 +53,9 @@ class SabelDirectoryAndFileCreator
         $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] ${element} already exists.");
       } else {
         $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
-        fwrite(fopen($element, 'w'), file_get_contents($child));
-        if ($element === "logs/sabel.log" || $element === "config/connection.php") {
+        fwrite(fopen($element, "w"), file_get_contents($child));
+        if ($element == RUN_BASE . DS . "logs/sabel.log" ||
+            $element == RUN_BASE . DS . "config/connection.php") {
           chmod($element, 0777);
         }
       }

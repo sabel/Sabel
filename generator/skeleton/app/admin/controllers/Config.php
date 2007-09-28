@@ -43,8 +43,11 @@ class Admin_Controllers_Config extends Sabel_Controller_Page
   
   public function saveConfigFile()
   {
-    $content = str_replace(array("\r\n", "\r"), PHP_EOL, $this->content);
-    file_put_contents($this->filePath, $content);
+    if (@eval($this->content) !== false) {
+      $content = str_replace(array("\r\n", "\r"), PHP_EOL, $this->content);
+      file_put_contents($this->filePath, $content);
+    }
+    
     $this->redirect->to("a: file");
   }
 }

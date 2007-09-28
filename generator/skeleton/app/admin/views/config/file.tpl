@@ -20,17 +20,17 @@
 <br/>
 <input id="open_button" type="button" value="open file" onclick="config.openFile()" ?>
 
-<div id="config_area" style="display: none;">
+<div id="config_area">
   <span id="warn"></span>
   <form action="<?= uri("a: saveConfigFile") ?>" method="POST" name="fileform">
-    <textarea id="contarea" name="content" style="height: 400px; width: 600px;"></textarea>
+    <textarea id="edit_textarea" name="content"></textarea>
     <br/>
     <input type="button" value="save"  onclick="document.fileform.submit()" />
     <input type="button" value="close" onclick="config.closeFile()" />
   </form>
 </div>
 
-<div id="black_layer" style="display: none;"></div>
+<div id="black_layer"></div>
 
 <script type="text/javascript">
 
@@ -46,7 +46,7 @@ Config.prototype = {
 
   openFile: function()
   {
-    new Sabel.Ajax().request('<?= uri("c: index, a: openConfigFile") ?>',
+    new Sabel.Ajax().request('<?= uri("a: openConfigFile") ?>',
                              { onComplete: this.showFile });
   },
 
@@ -61,7 +61,7 @@ Config.prototype = {
   showFile: function(res)
   {
     var bl = Sabel.get('black_layer');
-    bl.style.zIndex = 5000;
+    bl.style.zIndex = 1000;
     bl.style.display = 'block';
 
     var fa = Sabel.get('config_area');
@@ -72,11 +72,11 @@ Config.prototype = {
       Sabel.get('warn').innerHTML = text;
     }
 
-    Sabel.get('contarea').value = results.content;
+    Sabel.get('edit_textarea').value = results.content;
 
-    fa.style.left    = Math.round((document.width - 550) / 2) + 'px';
+    fa.style.left    = Math.round((Sabel.Window.width - 600) / 2) + 'px';
     fa.style.display = 'block';
-    fa.style.zIndex  = 10000;
+    fa.style.zIndex  = 2000;
   },
 }
 
