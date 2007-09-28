@@ -317,7 +317,7 @@ class Sabel_Map_Candidate implements Iterator
     return $this->getElement()->isTypeOf(self::CONSTANT);
   }
   
-  public function isConstantToken($rawElement, $element)
+  public function isConstantToken($urlElement, $element)
   {
     if ($element->isTypeOf(self::CONSTANT)) {
       return $element->equalsTo($urlElement);
