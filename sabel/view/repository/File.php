@@ -18,16 +18,16 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
   
   private $destination = null;
   
-  private $locations = array();
+  private static $locations = array();
   
   public function __construct($destination)
   {
     $this->destination = $destination;
   }
   
-  public function addLocation($viewLocation)
+  public function addLocation(Sabel_View_Location $viewLocation)
   {
-    $this->locations[$viewLocation->getName()] = $viewLocation;
+    self::$locations[$viewLocation->getName()] = $viewLocation;
   }
   
   /**
