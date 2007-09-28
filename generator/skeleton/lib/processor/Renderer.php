@@ -30,7 +30,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     if (($resource = $repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);
-    } else {
+    } elseif (!$response->isSuccess()) {
       $resource = $repository->getResourceFromLocation("module", "notFound");
       $contents = $renderer->rendering($resource->fetch(), $responses);
     }
