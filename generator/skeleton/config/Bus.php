@@ -6,6 +6,7 @@ class Config_Bus extends Sabel_Bus_Config
   {
     $this->add(new Processor_Request("request"));
     $this->add(new Processor_Router("router"));
+    $this->add(new Processor_Location("location"));
     // $this->add(new Processor_I18n("i18n"));
     $this->add(new Processor_Helper("helper"));
     $this->add(new Processor_Creator("creator"));
