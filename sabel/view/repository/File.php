@@ -22,35 +22,12 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
   
   public function __construct($destination)
   {
-    $this->initialize($destination);
+    $this->destination = $destination;
   }
   
-  public function initialize($destination)
+  public function addLocation($viewLocation)
   {
-    $locations = array();
-    $this->destination = $destination;
-    
-    list ($module, $controller,) = $destination->toArray();
-    
-    $base = $this->getPathToBaseDirectory($module);
-    
-    // app/views/
-    $rootLocation = new Sabel_View_Location_File("root", $destination);
-    $rootLocation->setPath(RUN_BASE . self::APP_VIEW);
-    
-    // app/{module}/views/
-    $moduleLocation = new Sabel_View_Location_File("module", $destination);
-    $moduleLocation->setPath($base . self::VIEW_DIR);
-    
-    // app/{module}/views/{controller}/
-    $leafLocation = new Sabel_View_Location_File("leaf", $destination);
-    $leafLocation->setPath($base . self::VIEW_DIR . $controller . DIR_DIVIDER);
-    
-    $locations[$rootLocation->getName()]   = $rootLocation;
-    $locations[$moduleLocation->getName()] = $moduleLocation;
-    $locations[$leafLocation->getName()]   = $leafLocation;
-    
-    $this->locations = $locations;
+    $this->locations[$viewLocation->getName()] = $viewLocation;
   }
   
   /**
@@ -70,7 +47,7 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
       }
     }
     
-    return false;  
+    return false;
   }
   
   /**
@@ -152,8 +129,8 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
     return $destination;
   }
   
-  protected function getPathToBaseDirectory($module)
+  public function getPathToBaseDirectory($module)
   {
-    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DIR_DIVIDER;
+    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DS;
   }
 }

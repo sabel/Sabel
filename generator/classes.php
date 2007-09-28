@@ -54,7 +54,7 @@ class SabelDirectoryAndFileCreator
       } else {
         $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
         fwrite(fopen($element, 'w'), file_get_contents($child));
-        if ($element == "logs/sabel.log") {
+        if ($element === "logs/sabel.log" || $element === "config/connection.php") {
           chmod($element, 0777);
         }
       }

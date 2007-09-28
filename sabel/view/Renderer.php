@@ -12,7 +12,7 @@
  */
 abstract class Sabel_View_Renderer
 {
-  const COMPILE_DIR = '/data/compiled/';
+  const COMPILE_DIR = "/data/compile";
   
   protected $trim = true;
   

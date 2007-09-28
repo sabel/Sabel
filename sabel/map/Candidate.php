@@ -42,7 +42,7 @@ class Sabel_Map_Candidate implements Iterator
   public function route($uriRule)
   {
     $rules = explode("/", $uriRule);
-        
+    
     foreach ($rules as $element) {
       if (stripos($element, self::VARIABLE_MARK) === 0) {
         $name = ltrim($element, self::VARIABLE_MARK);
