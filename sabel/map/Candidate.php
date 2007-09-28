@@ -403,17 +403,13 @@ class Sabel_Map_Candidate implements Iterator
   public final function evalute($requests)
   {
     $constantEstablished = false;
-    $inArray = false;
     
     $uriElement = "";
-    
     $elements = array_values($this->getElements());
     
     for ($i = 0; $i < count($elements); ++$i) {
       $element = $elements[$i];
       $uriElement = current($requests);
-      
-      if (!is_string($uriElement)) break;
       
       if ($constantEstablished) {
         if ($this->compare($uriElement, $element)) {
@@ -444,7 +440,7 @@ class Sabel_Map_Candidate implements Iterator
           $element->addVariable($request);
           next($requests);
         }
-      } elseif ($this->compare($uriElement, $element)) {
+      } elseif (($uriElement = $this->compare($uriElement, $element)) !== false) {
         next($requests);
         $this->setVariableToElement($uriElement, $element);
       } else {
@@ -464,15 +460,15 @@ class Sabel_Map_Candidate implements Iterator
     }
     
     if ($element->isMatchAll()) {
-      $result = true;
+      $result = $uriElement;
     } elseif (empty($uriElement) && $element->omittable) {
-      $result = true;
+      $result = $uriElement;
     } elseif ($element->hasRequirement()) {
       $result = $element->compareWithRequirement($uriElement);
     } elseif ($element->isTypeOf(self::CONSTANT) && $uriElement !== $element->name) {
       $result = false;
     } else {
-      $result =(boolean) $uriElement;
+      $result = $uriElement;
     }
     
     return $result;
