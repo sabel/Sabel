@@ -44,10 +44,7 @@ class Sabel_Request_Object
     
   private
     $method = Sabel_Request::GET;
-    
-  private
-    $candidate = null;
-    
+  
   public function __construct($uri = null)
   {
     if ($uri !== null) {
@@ -251,14 +248,20 @@ class Sabel_Request_Object
     return $this->postValues;
   }
   
+  public function setParameterValue($key, $value)
+  {
+    $this->parameterValues[$key] = $value;
+    return $this;
+  }
+  
   public function setParameterValues($values)
   {
     $this->parameterValues = $values;
+    return $this;
   }
   
   public function fetchParameterValue($key)
   {
-    $this->initializeParameterValues();
     if (array_key_exists($key, $this->parameterValues)) {
       $value = $this->parameterValues[$key];
       return ($value === "") ? null : $value;
@@ -272,15 +275,6 @@ class Sabel_Request_Object
     $this->initializeParameterValues();
     if (count($this->parameterValues) === 0) return null;
     return $this->parameterValues;
-  }
-  
-  private function initializeParameterValues()
-  {
-    if (count($this->parameterValues) !== 0) return;
-    
-    if (is_object($this->candidate)) {
-      $this->parameterValues = $this->candidate->getElementVariables();
-    }
   }
   
   public function find($key)

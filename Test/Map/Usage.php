@@ -79,6 +79,7 @@ class Test_Map_Usage extends SabelTestCase
     
     $c = $default->getElementByName("controller");
     $this->assertEquals("cont", $c->variable);
+    $this->assertEquals("cont", $default->getController());
   }
   
   public function testConstantWithDefault()
@@ -93,6 +94,11 @@ class Test_Map_Usage extends SabelTestCase
     
     $c = $default->getElementByName("controller");
     $this->assertEquals("index", $c->variable);
+    $this->assertEquals("index", $default->getController());
+    
+    $a = $default->getElementByName("action");
+    $this->assertEquals("index", $a->variable);
+    $this->assertEquals("index", $default->getAction());
   }
   
   public function testArrayWithEndSpecificDirective()

@@ -2,6 +2,9 @@
 
 class Sabel_Router_Map implements Sabel_Router
 {
+  private $candidate   = null;
+  private $destination = null;
+  
   public function route($request)
   {
     $config = new Map();
@@ -33,7 +36,7 @@ class Sabel_Router_Map implements Sabel_Router
     foreach (Sabel_Map_Configurator::getCandidates() as $candidate) {
       if ($candidate->evalute($request->toArray())) {
         Sabel_Context::getContext()->setCandidate($candidate);
-        $request->setCandidate($candidate);
+        $this->candidate = $candidate;
         return $candidate->getDestination();
       }
     }
@@ -43,7 +46,13 @@ class Sabel_Router_Map implements Sabel_Router
     $candidate->setController("index");
     $candidate->setAction("index");
     Sabel_Context::getContext()->setCandidate($candidate);
-    $request->setCandidate($candidate);
+    $this->candidate = $candidate;
+    
     return $candidate->getDestination();
+  }
+  
+  public function getCandidate()
+  {
+    return $this->candidate;
   }
 }

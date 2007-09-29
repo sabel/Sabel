@@ -400,6 +400,11 @@ class Sabel_Map_Candidate implements Iterator
     return ($this->action !== "");
   }
   
+  /**
+   * evalute map rule between requested uri.
+   *
+   * @return boolean
+   */
   public final function evalute($requests)
   {
     $constantEstablished = false;
