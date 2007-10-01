@@ -272,7 +272,6 @@ class Sabel_Request_Object
   
   public function fetchParameterValues()
   {
-    $this->initializeParameterValues();
     if (count($this->parameterValues) === 0) return null;
     return $this->parameterValues;
   }
