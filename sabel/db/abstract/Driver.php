@@ -100,7 +100,16 @@ abstract class Sabel_DB_Abstract_Driver
     if (empty($bindParam)) {
       return $sql;
     } else {
-      return str_replace(array_keys($bindParam), $bindParam, $sql);
+      if (in_array(null, $bindParam, true)) {
+        foreach ($bindParam as $key => $val) {
+          $val = ($val === null) ? "NULL" : $val;
+          $sql = str_replace($key, $val, $sql);
+        }
+      } else {
+        $sql = str_replace(array_keys($bindParam), $bindParam, $sql);
+      }
+      
+      return $sql;
     }
   }
 }
