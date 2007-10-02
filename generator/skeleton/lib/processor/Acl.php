@@ -3,6 +3,7 @@
 /**
  * Processor_Acl
  *
+ * @version    1.0
  * @category   Processor
  * @package    lib.processor
  * @author     Mori Reo <mori.reo@gmail.com>
@@ -20,6 +21,14 @@ class Processor_Acl extends Sabel_Bus_Processor
   
   private $rule = null;
   private $user = null;
+  
+  private $controller = null;
+  private $destination = null;
+  
+  private $reflection = null;
+  
+  // private $privateActions = "aclPrivateActions";
+  // private $publicActions  = "aclPublicActions";
     
   public function __construct($name, $defualtRule = self::RULE_DENY)
   {
@@ -35,79 +44,121 @@ class Processor_Acl extends Sabel_Bus_Processor
    */
   public function execute($bus)
   {
-    $this->storage = $storage = $bus->get("storage");
+    $this->storage     = $bus->get("storage");
+    $this->controller  = $bus->get("controller");
+    $this->destination = $bus->get("destination");
     
-    $controller  = $bus->get("controller");
-    $destination = $bus->get("destination");
-    $this->user  = new Processor_Acl_User();
-    $action = $destination->getAction();
+    $action = $this->destination->getAction();
     
-    if ($storage->has("acl_user")) {
-      $this->user->restore($storage->read("acl_user"));
+    $this->user = new Processor_Acl_User();
+    
+    if ($this->storage->has("acl_user")) {
+      $this->user->restore($this->storage->read("acl_user"));
     }
     
-    $controller->user = $this->user;
-    $privateActions   = "aclPrivateActions";
-    $publicActions    = "aclPublicActions";
+    $this->controller->user = $this->user;
     
-    if ($this->rule === self::RULE_DENY) {
-      if (method_exists($controller, $privateActions)) {
-        throw new Sabel_Exception_Runtime("duplicate double deny");
-      }
-      
+    $this->reflection = new Sabel_Annotation_ReflectionClass($this->controller);
+    
+    if ($this->reflection->hasAnnotation("default")) {
+      $default = $this->reflection->getAnnotation("default");
+      $default = $default[0][0];
+    } else {
+      $default = self::RULE_DENY;
+    }
+    
+    if ($default === self::RULE_DENY) {
+      $this->processDefaultDeny($action);
+    } else {
+      $this->processDefaultAllow($action);
+    }
+    
+    return new Sabel_Bus_ProcessorCallback($this, "onAfterAction", "executer");
+  }
+  
+  private function processDefaultDeny($action)
+  {
+    if ($this->reflection->hasAnnotation("public")) {
+      $publicActions = $this->reflection->getAnnotation("public");
+      $publicActions = $publicActions[0];
+    } else {
+      $publicActions = array();
+    }
+    
+    if ($this->reflection->hasAnnotation("role")) {
+      $role = $this->reflection->getAnnotation("role");
+      $role = $role[0][0];
+    } else {
+      $role = "default";
+    }
+    
+    if ($role === "default") {
       if (!$this->user->isAuthenticated()) {
-        if (method_exists($controller, $publicActions)) {
-          $pubActions = $controller->$publicActions();
-          
-          if ($pubActions === self::DENY_ALL) {
-            throw new Sabel_Exception_Runtime("duplicate double deny");
-          }
-          
-          $found = false;
-          foreach ($pubActions as $publicAction) {
+        $found = false;
+
+        if (count($publicActions) !== 0) {
+          foreach ($publicActions as $publicAction) {
             if (fnmatch($publicAction, $action)) {
               $found = true;
               break;
             }
           }
-          
-          if (!$found && $controller->executable($action)) {
-            $destination->setAction(self::DENY_ACTION);
-          }
-        } else {
-          $destination->setAction(self::DENY_ACTION);
+        }
+
+        if (!$found && $this->controller->executable($action)) {
+          $this->destination->setAction(self::DENY_ACTION);
         }
       }
-    } elseif ($this->rule === self::RULE_ALLOW) {
-      if (method_exists($controller, $publicActions)) {
-        throw new Sabel_Exception_Runtime("duplicate double allow");
-      }
-      
-      if (method_exists($controller, $privateActions)) {
-        $priActions = $controller->$privateActions();
-        if ($priActions === self::DENY_ALL) {
-          $destination->setAction(self::DENY_ACTION);
-        } elseif ($priActions === self::ALLOW_ALL) {
-          throw new Sabel_Exception_Runtime("duplicate double allow");
-        }
-        
+    } else {
+      if (!$this->user->isAuthenticatedAs($role)) {
         $found = false;
-        foreach ($priActions as $privateAction) {
-          if (fnmatch($privateAction, $action)) {
-            $found = true;
-            break;
+
+        if (count($publicActions) !== 0) {
+          foreach ($publicActions as $publicAction) {
+            if (fnmatch($publicAction, $action)) {
+              $found = true;
+              break;
+            }
           }
         }
-        
-        if ($found) {
-          if (!$this->user->isAuthenticated()) {
-            $destination->setAction(self::DENY_ACTION);
-          }
+
+        if (!$found && $this->controller->executable($action)) {
+          $this->destination->setAction(self::DENY_ACTION);
         }
       }
     }
     
-    return new Sabel_Bus_ProcessorCallback($this, "onAfterAction", "executer");
+
+  }
+  
+  private function processDefaultAllow()
+  {
+    if (method_exists($controller, $publicActions)) {
+      throw new Sabel_Exception_Runtime("duplicate double allow");
+    }
+    
+    if (method_exists($controller, $privateActions)) {
+      $priActions = $controller->$privateActions();
+      if ($priActions === self::DENY_ALL) {
+        $destination->setAction(self::DENY_ACTION);
+      } elseif ($priActions === self::ALLOW_ALL) {
+        throw new Sabel_Exception_Runtime("duplicate double allow");
+      }
+      
+      $found = false;
+      foreach ($priActions as $privateAction) {
+        if (fnmatch($privateAction, $action)) {
+          $found = true;
+          break;
+        }
+      }
+      
+      if ($found) {
+        if (!$this->user->isAuthenticated()) {
+          $destination->setAction(self::DENY_ACTION);
+        }
+      }
+    }
   }
   
   public function onAfterAction()
