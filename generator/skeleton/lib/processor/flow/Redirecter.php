@@ -40,7 +40,12 @@ class Processor_Flow_Redirecter extends Sabel_Bus_Processor
       }
       
       $token = $controller->getAttribute("token");
-      $to = $redirect->getUrl() . "?token={$token}";
+      if ($redirect->hasParameters()) {
+        $to = $redirect->getUrl() . "&token={$token}";
+      } else {
+        $to = $redirect->getUrl() . "?token={$token}";
+      }
+      
       $bus->get("response")->location($host, $ignored . $to);
       
       return true;

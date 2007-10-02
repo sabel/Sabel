@@ -5,6 +5,7 @@ class Processor_Redirecter_Redirect
   private $bus = null;
   private $url = "";
   private $redirected = false;
+  private $parameters = array();
   
   const REDIRECTED = "SABEL_REDIRECTED";
   
@@ -21,7 +22,8 @@ class Processor_Redirecter_Redirect
   public function to($destinationUri, $parameters = null)
   {
     $this->redirected = true;
-    return $this->redirectTo($destinationUri, $parameters);
+    $this->parameters = $parameters;
+    return $this->redirectTo($destinationUri);
   }
   
   public function url($url)
@@ -35,6 +37,11 @@ class Processor_Redirecter_Redirect
     return $this->url;
   }
   
+  public function hasParameters()
+  {
+    return (count($this->parameters) >= 1);
+  }
+  
   /**
    * HTTP Redirect to another location.
    *
@@ -42,11 +49,11 @@ class Processor_Redirecter_Redirect
    * @param string $to /Module/Controller/Method
    * @return mixed self::REDIRECTED
    */
-  private function _redirect($to, $parameters = null)
+  private function _redirect($to)
   {
-    if ($parameters !== null) {
+    if ($this->hasParameters()){
       $buf = array();
-      foreach ($parameters as $key => $value) {
+      foreach ($this->parameters as $key => $value) {
         $buf[] = "{$key}={$value}";
       }
       $to .= "?" . join("&", $buf);
@@ -61,13 +68,13 @@ class Processor_Redirecter_Redirect
    *
    * @param string $params
    */
-  private function redirectTo($destination, $parameters = null)
+  private function redirectTo($destination)
   {
     $context = Sabel_Context::getContext();
     $candidate = $context->getCandidate();
     $uri = $candidate->uri($this->convertParams($destination));
     
-    return $this->_redirect($uri, $parameters);
+    return $this->_redirect($uri);
   }
   
   private function convertParams($param)
