@@ -208,6 +208,11 @@ class Sabel_Request_Object
     return (isset($this->getValues[$name]));
   }
   
+  public function isGetSet($name)
+  {
+    return (isset($this->getValues[$name]) && $this->getValues[$name] !== "");
+  }
+  
   public function fetchGetValue($key)
   {
     if (array_key_exists($key, $this->getValues)) {
@@ -224,7 +229,12 @@ class Sabel_Request_Object
   
   public function hasPostValue($name)
   {
-    return (isset($this->postValues[$name]));
+    return isset($this->postValues[$name]);
+  }
+  
+  public function isPostSet($name)
+  {
+    return (isset($this->postValues[$name]) && $this->postValues[$name] !== "");
   }
   
   public function fetchPostValue($key)

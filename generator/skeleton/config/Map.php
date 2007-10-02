@@ -6,10 +6,11 @@ class Map extends Sabel_Map_Config
   {
     if (ENVIRONMENT === DEVELOPMENT) {
       $this->route("admin")
-             ->uri("admin/:controller/:action")
+             ->uri("admin/:controller/:action/:param")
              ->module("admin")
              ->defaults(array(":controller" => "config",
-                              ":action"     => "file"));
+                              ":action"     => "file",
+                              ":param"      => null));
     }
     
     $this->route("default")

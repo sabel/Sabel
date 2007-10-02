@@ -207,6 +207,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public final function hasAttribute($name)
   {
+    return array_key_exists($name, $this->attributes);
+  }
+  
+  public final function isAttributeSet($name)
+  {
     return isset($this->attributes[$name]);
   }
   
