@@ -101,6 +101,26 @@ Sabel.Iterator.prototype = {
 	}
 };
 
+Sabel.String = {
+	format: function(string, obj)
+	{
+		console.log('format')
+		return string.replace(/#\{(\w+)\}/g, function(target, key) { return obj[key]; });
+	},
+
+	create: function(string)
+	{
+		if (typeof string !== "string") return string;
+
+		var f = function(str) {	this._str = str; };
+		f.prototype = new String();
+		var object  =  new f;
+		object.toString = function() { return string.toString.apply(string, arguments); };
+
+		return object;
+	}
+};
+
 Sabel.Array = {
 	has: function(array, value)
 	{
@@ -175,9 +195,9 @@ Sabel.Extends = function(child, parent, curry) {
 	// @todo rename method name.
 	function tmp(method) {
 		return function() {
-			var args = new Array(this);
+			var args = new Array(child);
 			args.push.apply(args, arguments);
-			return method.apply(this, args);
+			return method.apply(method, args);
 		}
 	}
 
@@ -508,7 +528,42 @@ Sabel.Ajax.prototype = {
 	}
 };
 
+Sabel.Util = {};
+
+Sabel.Util.Uri = function(uri)
+{
+  uri = uri || location.href;
+
+  function parse(query)
+  {
+    if (query === undefined) return {};
+    var querys = query.split("&"), parsed = {};
+
+    for (var i = 0, len = querys.length; i < len; i++) {
+      if (querys[i] == "") continue;
+      var q = querys[i].split("=");
+      parsed[q[0]] = q[1] || "";
+    }
+
+    return parsed;
+  }
+
+  var result = Sabel.Util.Uri.pattern.exec(uri);
+
+  for (var i = 0, len = result.length; i < len; i++) {
+    this[Sabel.Util.Uri.keyNames[i]] = result[i] || "";
+  }
+  this['parseQuery'] = parse(this.query);
+}
+
+Sabel.Util.Uri.pattern  = /^(\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
+Sabel.Util.Uri.keyNames = ['url', 'host', 'user', 'password', 'domain', 'port', 'directory', 'filename', 'query', 'hash'];
+
+Sabel.Util.Uri.prototype = {
+  has: function(key)
+  {
+    return (this.parseQuery[key] !== "undefined");
+  }
+}
+
 //Sabel.Effect = function() { this.initialize.apply(this, arguments) };
-
-
-
