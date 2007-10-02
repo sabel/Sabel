@@ -250,7 +250,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if (array_key_exists($name, $this->attributes)) {
       return $this->attributes[$name];
     } else {
-      return $this->request->find($name);
+      return null;
     }
   }
   

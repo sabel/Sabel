@@ -227,6 +227,11 @@ class Sabel_Request_Object
     $this->postValues = $values;
   }
   
+  public function fetchGetObject()
+  {
+    return (object) $this->fetchGetValues();
+  }
+  
   public function hasPostValue($name)
   {
     return isset($this->postValues[$name]);
@@ -256,6 +261,11 @@ class Sabel_Request_Object
     }
     
     return $this->postValues;
+  }
+  
+  public function fetchPostObject()
+  {
+    return (object) $this->fetchPostValues();
   }
   
   public function setParameterValue($key, $value)
