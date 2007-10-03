@@ -56,7 +56,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     if (defined("URI_IGNORE")) {
       $images = "jpg|gif|bmp|tiff|png|swf|jpeg|css|js";
       $quote = '"|\'';
-      $pat = "@(({$quote})/[\w-_/.]*([.]({$images}))?({$quote}))@";
+      $pat = "@(({$quote})/[\w-_/.]*(\.({$images}))({$quote}))@";
       $template = preg_replace($pat, '"<?= linkto($1) ?>"', $template);
     }
     

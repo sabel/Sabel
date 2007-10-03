@@ -98,7 +98,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     try {
       if ($this->request->isTypeOf("css")) {
         $this->response->setContentType("text/css");
-        $this->disableLayout();
       }
       
       $response = $this->response;

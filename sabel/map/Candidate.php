@@ -109,7 +109,7 @@ class Sabel_Map_Candidate implements Iterator
       foreach ($options["default"] as $key => $default) {
         $key = ltrim($key, self::VARIABLE_MARK);
         $this->setOmittable($key);
-        if ($default !== null) $this->setDefaultValue($key, $default);
+        $this->setDefaultValue($key, $default);
       }
     }
     
