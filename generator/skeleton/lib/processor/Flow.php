@@ -57,7 +57,7 @@ class Processor_Flow extends Sabel_Bus_Processor
     }
     
     if ($state->isInFlow()) {
-      $this->controller->setAttribute("flow", $state);
+      $this->controller->setAttribute("flow",  $state);
       $this->controller->setAttribute("token", $token);
       
       if (!$method->hasAnnotation("end")) {
@@ -135,7 +135,10 @@ class Processor_Flow extends Sabel_Bus_Processor
     $annot = $method->getAnnotation("next");
     $nextAction = $annot[0][0];
     
-    if ($state->isMatchToNext($this->action)) {
+    if ($this->action === $state->getCurrent()) {
+      $this->controller->setAttribute("flow", $state);
+      $response = $this->executeAction($bus);
+    } else if ($state->isMatchToNext($this->action)) {
       $this->controller->setAttribute("flow", $state);
       $response = $this->executeAction($bus);
       $next = $method->getAnnotation("next");
@@ -155,9 +158,9 @@ class Processor_Flow extends Sabel_Bus_Processor
       $response->forbidden();
       
       $bus->set("response", $response);
-      
-      return true;
     }
+    
+    return true;
   }
   
   private final function executeAction($bus)
