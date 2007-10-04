@@ -222,6 +222,11 @@ class Sabel_Request_Object
     }
   }
   
+  public function setPostValue($key, $value)
+  {
+    $this->postValues[$key] = $value;
+  }
+  
   public function setPostValues($values)
   {
     $this->postValues = $values;
