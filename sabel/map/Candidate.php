@@ -523,7 +523,7 @@ class Sabel_Map_Candidate implements Iterator
     
     foreach ($parameters as $key => $param) {
       switch ($key) {
-        
+        case "n":
         case "name":
         case "candidate":
           $candidate = Sabel_Map_Configurator::getCandidate($param);
@@ -553,7 +553,7 @@ class Sabel_Map_Candidate implements Iterator
     }
     
     $buffer = array();
-            
+    
     foreach ($elements as $element) {
       switch ($element->type) {
         case self::MODULE:
@@ -591,7 +591,6 @@ class Sabel_Map_Candidate implements Iterator
           break;
       }
     }
-
     
     return join("/", $buffer);
   }

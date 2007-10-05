@@ -110,6 +110,16 @@ class Processor_Flow_State
     $this->write($name, $value);
   }
   
+  public function getProperties()
+  {
+    return $this->properties;
+  }
+  
+  public function toArray()
+  {
+    return $this->properties;
+  }
+  
   public function getStateKey($key = "")
   {
     if ($key !== "") {

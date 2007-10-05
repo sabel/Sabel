@@ -72,6 +72,11 @@ class Sabel_Bus
     return $this;
   }
   
+  public function getProcessor($name)
+  {
+    return $this->list->find($name)->get();
+  }
+  
   public function addProcessorAndListener(Sabel_Bus_Processor $processor)
   {
     $this->addProcessor($processor);
