@@ -150,7 +150,6 @@ final class Sabel
     require ($SABEL . "Destination.php");
     require ($SABEL . "Container.php");
     require ($SABEL . "Response.php");
-    require ($SABEL . "Helper.php");
     
     $BUS        = $SABEL . "bus"        . DS;
     $CACHE      = $SABEL . "cache"      . DS;
