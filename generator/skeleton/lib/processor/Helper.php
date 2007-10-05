@@ -13,6 +13,23 @@ class Processor_Helper extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    Sabel_Helper::load($bus->get("request"), $bus->get("destination"));
+    list($m, $c, $a) = $bus->get("destination")->toArray();
+    
+    $appDir       = "app";
+    $helperDir    = "helpers";
+    $sharedHelper = "application";
+    $helperSuffix = "php";
+    
+    $pref = DS . $appDir . DS . $m . DS . $helperDir . DS;
+    
+    $helpers = array();
+    
+    $helpers[] = DS . $appDir . DS . $helperDir . DS . "{$sharedHelper}.{$helperSuffix}";
+    $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
+    $helpers[] = $pref . "{$c}.{$helperSuffix}";
+    
+    foreach ($helpers as $helper) {
+      Sabel::fileUsing(RUN_BASE . $helper, true);
+    }
   }
 }

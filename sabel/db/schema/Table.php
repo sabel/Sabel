@@ -53,6 +53,11 @@ class Sabel_DB_Schema_Table
     return array_keys($this->columns);
   }
 
+  public function hasColumn($name)
+  {
+    return isset($this->columns[$name]);
+  }
+
   public function getPrimaryKey()
   {
     return $this->primaryKey;

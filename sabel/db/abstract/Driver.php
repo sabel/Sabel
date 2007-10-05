@@ -45,9 +45,13 @@ abstract class Sabel_DB_Abstract_Driver
 
   public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    $binds = array();
-    $keys  = array_keys($stmt->getValues());
+    $binds  = array();
+    $values = $stmt->getValues();
+    foreach ($values as $key => $val) {
+      if ($val === null) unset($values[$key]);
+    }
 
+    $keys  = array_keys($values);
     foreach ($keys as $key) $binds[] = ":" . $key;
 
     $sql = array("INSERT INTO " . $stmt->getTable() . " (");
