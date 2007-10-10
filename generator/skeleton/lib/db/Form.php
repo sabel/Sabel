@@ -160,12 +160,16 @@ class Form extends Sabel_Object
     return $html;
   }
   
-  public function submit($value = "")
+  public function submit($value = "", $class = null, $id = null)
   {
+    $html = '<input type="submit" ';
+    $this->addIdAndClass($html, $id, $class);
     if ($value !== "") $value = 'value="' . $value. '" ';
-    return '<input type="submit" ' . $value . '/>';
+    $html .= $value . '/>';
+    
+    return $html;
   }
-
+  
   protected function createName($name)
   {
     return $this->mdlName . "::" . $name;

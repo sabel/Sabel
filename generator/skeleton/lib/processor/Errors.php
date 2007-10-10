@@ -28,16 +28,14 @@ class Processor_Errors extends Sabel_Bus_Processor
     
     if (is_array($errors)) {
       if ($current === $errors["submitUri"]) {
+        $mdlValues = $errors["values"];
+        $mdlNames  = $this->getModelNames($mdlValues);
+        
         $controller->setAttribute(self::ERROR_KEY, $errors["messages"]);
         $controller->setAttributes($errors["values"]);
         
-        $names = $this->getModelNames($errors["values"]);
-        if (is_object($modelForm) && !empty($names)) {
-          $models = array();
-          foreach ($names as $name) {
-            $models[$name] = $modelForm->createModel($name, $errors["values"]);
-          }
-          
+        if (is_object($modelForm) && !empty($mdlNames)) {
+          $models = $this->createModels($modelForm, $mdlNames, $mdlValues);
           foreach ($models as $mdlName => $model) {
             $mdlName{0} = strtolower($mdlName{0});
             $controller->setAttribute("{$mdlName}Form", new Form($model));
@@ -93,6 +91,16 @@ class Processor_Errors extends Sabel_Bus_Processor
     }
     
     return array_keys($names);
+  }
+  
+  protected function createModels($modelForm, $mdlNames, $mdlValues)
+  {
+    $models = array();
+    foreach ($mdlNames as $name) {
+      $models[$name] = $modelForm->createModel($name, null, $mdlValues);
+    }
+    
+    return $models;
   }
   
   public function resetErrors($storage)

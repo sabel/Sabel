@@ -50,7 +50,7 @@ class Sabel_DB_Join_Result
     return $results;
   }
 
-  private static function createModels($row, $tables, $objects)
+  private static function createModels(&$row, $tables, $objects)
   {
     $models = array();
     foreach ($tables as $tblName) {

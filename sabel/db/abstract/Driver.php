@@ -19,10 +19,10 @@ abstract class Sabel_DB_Abstract_Driver
   abstract public function getDriverId();
   abstract public function escape(array $values);
   abstract public function execute($sql, $bindParams = null);
-  abstract public function getLastInsertId();
   abstract public function begin();
   abstract public function commit();
   abstract public function rollback();
+  abstract public function getLastInsertId();
   abstract public function close($connection);
 
   public function __construct($connection)
@@ -47,11 +47,7 @@ abstract class Sabel_DB_Abstract_Driver
   {
     $binds  = array();
     $values = $stmt->getValues();
-    foreach ($values as $key => $val) {
-      if ($val === null) unset($values[$key]);
-    }
-
-    $keys  = array_keys($values);
+    $keys   = array_keys($values);
     foreach ($keys as $key) $binds[] = ":" . $key;
 
     $sql = array("INSERT INTO " . $stmt->getTable() . " (");

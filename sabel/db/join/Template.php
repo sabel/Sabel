@@ -65,7 +65,7 @@ class Sabel_DB_Join_Template
     $this->sourceName = $name;
   }
 
-  public function createModel($row)
+  public function createModel(&$row)
   {
     $name = $this->tblName;
 
@@ -86,6 +86,7 @@ class Sabel_DB_Join_Template
     foreach ($this->columns as $column) {
       $hash = Sabel_DB_Join_ColumnHash::getHash("pre_{$name}_{$column}");
       $props[$column] = $row[$hash];
+      unset($row[$hash]);
     }
 
     $model->setAttributes($props);

@@ -13,29 +13,28 @@ class Processor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $injector = Sabel_Container::injector(new Factory());
-    
-    $controller  = $bus->get("controller");
-    $request     = $bus->get("request");
-    $destination = $bus->get("destination");
-    $storage     = $bus->get("storage");
-    $action      = $destination->getAction();
+    $controller = $bus->get("controller");
+    $request    = $bus->get("request");
+    $action     = $bus->get("destination")->getAction();
     
     $controller->setAction($action);
     $controller->initialize();
+    $response = $controller->getResponse();
     
-    if (method_exists($controller, $action)) {
+    if ($response->isNotFound()) {
+      $bus->set("response", $response);
+    } elseif (method_exists($controller, $action)) {
       $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
       $method = $annotation->getMethod($action);
       $annot = $method->getAnnotation("post");
       if ($annot[0][0] === "only" && !$request->isPost()) {
         $bus->set("response", $controller->getResponse()->notFound());
-        return true;
+      } else {
+        $bus->set("response", $controller->execute($action));
       }
+    } else {
+      $bus->set("response", $controller->getResponse()->notFound());
     }
-    
-    $response = $controller->execute($action);
-    $bus->set("response", $response);
     
     return true;
   }

@@ -20,6 +20,19 @@ $lengthValidator = array("function"  => "validateLength",
 // Sabel_DB_Validate_Config::addValidator($passwdValidator);
 // Sabel_DB_Validate_Config::addValidator($lengthValidator);
 
+function checkEmailAddress($email)
+{
+  $regex = '/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/';
+  return (preg_match($regex, $email) !== 0);
+}
+
+function validateEmailAddress($model, $name, $localizedName)
+{
+  if ($model->$name !== null && !checkEmailAddress($model->$name)) {
+    return "メールアドレスの形式が不正です";
+  }
+}
+
 function validateEmailAddress($model, $name, $localizedName)
 {
   if ($model->$name !== null) {

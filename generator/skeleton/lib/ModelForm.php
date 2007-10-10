@@ -23,8 +23,7 @@ class ModelForm extends Sabel_Object
   
   public function validate($model, $ignores = null, $id = null)
   {
-    $values = $this->request->fetchPostValues();
-    $model  = $this->createModel($model, $values, $id);
+    $model  = $this->createModel($model, $id);
     $manip  = new Manipulator($model);
     $errors = $manip->validate($ignores);
     
@@ -42,8 +41,12 @@ class ModelForm extends Sabel_Object
     }
   }
   
-  public function createModel($model, $values, $id = null)
+  public function createModel($model, $id = null, $values = null)
   {
+    if ($values === null) {
+      $values = $this->request->fetchPostValues();
+    }
+    
     if (is_string($model)) {
       $model = MODEL($model);
     }
@@ -87,8 +90,7 @@ class ModelForm extends Sabel_Object
     }
     
     foreach ($model->getSchema()->getColumns() as $colName => $column) {
-      $key = $mdlName . "::" . $colName;
-      if ($column->isBool() && !isset($values[$key])) {
+      if ($column->isBool() && !isset($values["{$mdlName}::{$colName}"])) {
         $model->$colName = false;
       }
     }

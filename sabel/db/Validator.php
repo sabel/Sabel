@@ -175,7 +175,7 @@ class Sabel_DB_Validator
       $method = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
     }
 
-    return ($method($column->value) < $column->max);
+    return ($method($column->value) <= $column->max);
   }
 
   protected function maximum($column)
