@@ -31,6 +31,16 @@ class Form extends Sabel_Object
     return $this->model;
   }
   
+  public function set($key, $val)
+  {
+    $this->model->__set($key, $val);
+  }
+  
+  public function get($key)
+  {
+    return $this->model->__get($key);
+  }
+  
   public function create($uri, $id = null, $class = null, $submitText = "")
   {
     $html    = array();

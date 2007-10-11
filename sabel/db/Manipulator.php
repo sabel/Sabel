@@ -40,6 +40,16 @@ class Sabel_DB_Manipulator
     return $this;
   }
 
+  public function set($key, $val)
+  {
+    $this->model->__set($key, $val);
+  }
+
+  public function get($key)
+  {
+    return $this->model->__get($key);
+  }
+
   public function getModel()
   {
     return $this->model;
