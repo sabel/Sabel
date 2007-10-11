@@ -33,16 +33,6 @@ function validateEmailAddress($model, $name, $localizedName)
   }
 }
 
-function validateEmailAddress($model, $name, $localizedName)
-{
-  if ($model->$name !== null) {
-    $regex = '/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/';
-    if (preg_match($regex, $model->$name) === 0) {
-      return "invalid email address.";
-    }
-  }
-}
-
 function validatePasswords($model, $name, $localizedName, $retypeName)
 {
   if ($model->$name !== $model->$retypeName) {
