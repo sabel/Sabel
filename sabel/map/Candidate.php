@@ -43,35 +43,32 @@ class Sabel_Map_Candidate implements Iterator
   {
     $rules = explode("/", $uriRule);
     
+    // @todo createElement微妙じゃない？ by hamaco @ 07/10/11
     foreach ($rules as $element) {
       if (stripos($element, self::VARIABLE_MARK) === 0) {
         $name = ltrim($element, self::VARIABLE_MARK);
         switch ($name) {
           case self::MODULE:
-            $this->createElement($name, self::MODULE);
-            break;
           case self::CONTROLLER:
-            $this->createElement($name, self::CONTROLLER);
-            break;
-          case self::ACTION:
-            $this->createElement($name, self::ACTION);
+            $this->createElement($name, $name);
             break;
           case ($this->hasExtension($name)):
             list($left, $right) = $this->diviedByExtension($name);
             if ($left === self::ACTION) {
-              $element = new Sabel_Map_Element($name, self::ACTION);
-              $element->extension = $right;
-              $this->elements[$left] = $element;
+              $element = new Sabel_Map_Element($left, self::ACTION);
+            } else {
+              $element = new Sabel_Map_Element($left, self::VARIABLE);
             }
+            $element->extension = $right;
+            $this->elements[$left] = $element;
+            break;
+          case self::ACTION:
+            $this->createElement($name, $name);
             break;
           case ($this->isArrayElement($name)):
             $name = str_replace("[]", "", $name);
             $this->createElement($name, self::TYPE_ARRAY);
             break;
-          case ($this->hasExtension($name)):
-            list($left, $right) = $this->diviedByExtension($name);
-            $element = $this->createElement($left, self::VARIABLE);
-            $element->extension = $right;
           default:
             $this->createElement($name, self::VARIABLE);
             break;
@@ -146,9 +143,7 @@ class Sabel_Map_Candidate implements Iterator
   
   public function createElement($name, $type = null)
   {
-    if ($type === null) {
-      $type = self::VARIABLE;
-    }
+    if ($type === null) $type = self::VARIABLE;
     
     $element = new Sabel_Map_Element($name, $type);
     $this->elements[$name] = $element;
@@ -412,6 +407,7 @@ class Sabel_Map_Candidate implements Iterator
     $uriElement = "";
     $elements = array_values($this->getElements());
     
+    $extensionMatch = true;
     for ($i = 0; $i < count($elements); ++$i) {
       $element = $elements[$i];
       $uriElement = current($requests);
@@ -419,7 +415,7 @@ class Sabel_Map_Candidate implements Iterator
       if ($constantEstablished) {
         if (($uriElement = $this->compare($uriElement, $element)) !== false) {
           next($requests);
-          $this->setVariableToElement($uriElement, $element);
+          $extensionMatch = $this->setVariableToElement($uriElement, $element);
         }
         continue;
       }
@@ -428,7 +424,7 @@ class Sabel_Map_Candidate implements Iterator
         $constantEstablished = true;
         if ($this->compare($uriElement, $element)) {
           next($requests);
-          $this->setVariableToElement($uriElement, $element);
+          $extensionMatch = $this->setVariableToElement($uriElement, $element);
         }
       } elseif ($element->isTypeOf(self::TYPE_ARRAY)) {
         for ($rp = key($requests); $rp < count($requests); ++$rp) {
@@ -447,10 +443,12 @@ class Sabel_Map_Candidate implements Iterator
         }
       } elseif (($uriElement = $this->compare($uriElement, $element)) !== false) {
         next($requests);
-        $this->setVariableToElement($uriElement, $element);
+        $extensionMatch = $this->setVariableToElement($uriElement, $element);
       } else {
         return false;
       }
+      
+      if ($extensionMatch === false) return false;
     }
     
     return true;
@@ -485,11 +483,10 @@ class Sabel_Map_Candidate implements Iterator
       case self::VARIABLE:
         if ($this->hasExtension($uriElement)) {
           list($variable, $extension) = $this->diviedByExtension($uriElement);
-          $element->variable  = $variable;
+          if ($element->extension !== "" && $element->extension !== $extension) return false;
           $element->extension = $extension;
-        } else {
-          $element->variable = $uriElement;
         }
+        $element->variable = $uriElement;
         break;
       case self::MODULE:
         $this->setModule($uriElement);
@@ -499,14 +496,16 @@ class Sabel_Map_Candidate implements Iterator
         $this->setController($uriElement);
         $element->variable = $uriElement;
         break;
-      case self::ACTION;
-        $this->setAction($uriElement);
+      case self::ACTION:
         if ($this->hasExtension($uriElement)) {
           list($variable, $extension) = $this->diviedByExtension($uriElement);
+          if ($element->extension !== "" && $element->extension !== $extension) return false;
           $element->variable  = $variable;
           $element->extension = $extension;
+          $this->setAction($variable);
         } else {
           $element->variable = $uriElement;
+          $this->setAction($uriElement);
         }
         break;
       case self::TYPE_ARRAY:

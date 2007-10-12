@@ -51,12 +51,11 @@ class Sabel_Request_Uri
     $lastElement = array_pop($elements);
     
     if (strpos($lastElement, ".") !== false) {
-      list($lastElement, $this->type) = explode(".", $lastElement);
+      $tmp = explode(".", $lastElement);
+      $this->type = array_pop($tmp);
     }
     
-    if ($lastElement !== null) {
-      array_push($elements, $lastElement);
-    }
+    $elements[] = $lastElement;
     
     $this->parts = $elements;
     return $elements;

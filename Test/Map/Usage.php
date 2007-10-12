@@ -116,6 +116,46 @@ class Test_Map_Usage extends SabelTestCase
     $this->assertEquals("html", $a->extension);
   }
   
+  public function testEndSpecificDirective()
+  {
+    $default = new Sabel_Map_Candidate("default");
+    $default->route(":controller/:action.html/:variable.jpg");
+    
+    $default->evalute(explode("/", "ctrl/action.html/variable.jpg"));
+    
+    $a = $default->getElementByName("action");
+    $this->assertEquals("action", $a->variable);
+    $this->assertEquals("html", $a->extension);
+    
+    $v = $default->getElementByName("variable");
+    $this->assertEquals("variable.jpg", $v->variable);
+    $this->assertEquals("jpg", $v->extension);
+  }
+  
+  public function testNotEndSpecificDirective()
+  {
+    $default = new Sabel_Map_Candidate("default");
+    $default->route(":controller/:action/:variable");
+    
+    $resEvalute = $default->evalute(explode("/", "ctrl/action/variable.html"));
+    
+    $a = $default->getElementByName("action");
+    $this->assertEquals("action", $a->variable);
+    
+    $v = $default->getElementByName("variable");
+    $this->assertEquals("variable.html", $v->variable);
+    $this->assertEquals("html", $v->extension);
+  }
+  
+  public function testEndSpecificDirectiveFail()
+  {
+    $default = new Sabel_Map_Candidate("default");
+    $default->route(":controller/:action/:variable.jpg");
+    
+    $resEvalute = $default->evalute(explode("/", "ctrl/action/variable.html"));
+    $this->assertFalse($resEvalute);
+  }
+  
   public function testUseWildCard()
   {
     $c = new Sabel_Map_Candidate("wild");
