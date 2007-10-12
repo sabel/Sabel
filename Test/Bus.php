@@ -68,6 +68,7 @@ class Test_Bus_Processor extends Sabel_Bus_Processor
   }
 }
 
+/*
 class Controller extends Sabel_Bus_Controller
 {
   public $results = array();
@@ -78,6 +79,7 @@ class Controller extends Sabel_Bus_Controller
     return true;
   }
 }
+ */
 
 class RequestProcessor extends Sabel_Bus_Processor
 {
