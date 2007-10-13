@@ -23,8 +23,8 @@ abstract class Sabel_DB_Abstract_Statement
     $projection  = "*",
     $join        = "",
     $where       = "",
-    $constraints = array(),
     $values      = array(),
+    $constraints = array(),
     $seqColumn   = null;
 
   abstract public function getStatementType();
@@ -135,7 +135,7 @@ abstract class Sabel_DB_Abstract_Statement
 
   public function values(array $values)
   {
-    $this->values = $values;
+    $this->bindValues = $this->values = $values;
   }
 
   public function getValues()
@@ -161,13 +161,8 @@ abstract class Sabel_DB_Abstract_Statement
 
   public function execute()
   {
-    if ($this->hasSql()) {
-      $result = $this->driver->execute($this->sql);
-    } else {
-      $sql = $this->build();
-      $bindParams = $this->getBindParams();
-      $result = $this->driver->execute($sql, $bindParams);
-    }
+    $bindParams = $this->getBindParams();
+    $result = $this->driver->execute($this->getSql(), $bindParams);
 
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();

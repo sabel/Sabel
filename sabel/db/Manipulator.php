@@ -502,9 +502,8 @@ class Sabel_DB_Manipulator
   {
     $values = $this->chooseValues($data, "update");
 
-    $stmt->setBindValues($values, false);
-    $stmt->table($this->model->getTableName());
     $stmt->values($values);
+    $stmt->table($this->model->getTableName());
     $stmt->where($this->loadConditionManager()->build($stmt));
 
     return $stmt;
@@ -514,9 +513,8 @@ class Sabel_DB_Manipulator
   {
     $values = $this->chooseValues($data, "insert");
 
-    $stmt->setBindValues($values, false);
-    $stmt->table($this->model->getTableName());
     $stmt->values($values);
+    $stmt->table($this->model->getTableName());
     $stmt->sequenceColumn($this->model->getSequenceColumn());
 
     return $stmt;
