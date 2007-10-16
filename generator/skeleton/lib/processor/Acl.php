@@ -12,26 +12,14 @@
  */
 class Processor_Acl extends Sabel_Bus_Processor
 {
-  const ACL_LOGIN_KEY = "acl_login_id";
-  const DENY_ACTION   = "notFound";
-  const RULE_DENY     = "deny";
-  const RULE_ALLOW    = "allow";
-  const ALLOW_ALL     = "allow_all";
-  const DENY_ALL      = "deny_all";
+  const DENY_ACTION = "notFound";
+  const RULE_DENY   = "deny";
+  const RULE_ALLOW  = "allow";
   
-  private $rule = null;
-  private $user = null;
-  
-  private $controller = null;
+  private $user        = null;
+  private $controller  = null;
   private $destination = null;
-  
-  private $reflection = null;
-  
-  public function __construct($name, $defualtRule = self::RULE_DENY)
-  {
-    parent::__construct($name);
-    $this->rule = $defualtRule;
-  }
+  private $reflection  = null;
   
   /**
    * execute an action.
@@ -46,15 +34,13 @@ class Processor_Acl extends Sabel_Bus_Processor
     $this->destination = $bus->get("destination");
     
     $action = $this->destination->getAction();
-    
     $this->user = new Processor_Acl_User();
     
     if ($this->storage->has("acl_user")) {
       $this->user->restore($this->storage->read("acl_user"));
     }
     
-    $this->controller->user = $this->user;
-    
+    $this->controller->setAttribute("user", $this->user);
     $this->reflection = new Sabel_Annotation_ReflectionClass($this->controller);
     
     if ($this->reflection->hasAnnotation("default")) {
@@ -75,106 +61,22 @@ class Processor_Acl extends Sabel_Bus_Processor
   
   private function processDefaultDeny($controller, $action)
   {
-    if ($this->reflection->hasAnnotation("public")) {
-      $publicActions = $this->reflection->getAnnotation("public");
-      $publicActions = $publicActions[0];
-    } else {
-      $publicActions = array();
-    }
-    
-    if ($this->reflection->hasAnnotation("role")) {
-      $role = $this->reflection->getAnnotation("role");
-      $role = $role[0][0];
-    } else {
-      $role = "default";
-    }
-    
-    if ($role === "default") {
-      if (!$this->user->isAuthenticated()) {
-        $found = false;
-        
-        if (count($publicActions) !== 0) {
-          foreach ($publicActions as $publicAction) {
-            if (fnmatch($publicAction, $action)) {
-              $found = true;
-              break;
-            }
-          }
-        }
-        
-        if (!$found && $this->controller->executable($action)) {
-          $this->destination->setAction(self::DENY_ACTION);
-        }
-      }
-    } else {
-      if (!$this->user->isAuthenticatedAs($role)) {
-        $found = false;
-        
-        if (count($publicActions) !== 0) {
-          foreach ($publicActions as $publicAction) {
-            if (fnmatch($publicAction, $action)) {
-              $found = true;
-              break;
-            }
-          }
-        }
-        
-        if (!$found && $this->controller->executable($action)) {
-          $this->destination->setAction(self::DENY_ACTION);
-        }
+    if (!$this->user->isAuthenticated($this->getRole())) {
+      $publicActions = $this->getAclActions("public");
+      $found = $this->isActionFound($publicActions, $action);
+      
+      if (!$found && $this->controller->executable($action)) {
+        $this->destination->setAction(self::DENY_ACTION);
       }
     }
   }
   
   private function processDefaultAllow($controller, $action)
   {
-    if ($this->reflection->hasAnnotation("private")) {
-      $privateActions = $this->reflection->getAnnotation("private");
-      $privateActions = $privateActions[0];
-    } else {
-      $privateActions = array();
-    }
-    
-    if ($this->reflection->hasAnnotation("role")) {
-      $role = $this->reflection->getAnnotation("role");
-      $role = $role[0][0];
-    } else {
-      $role = "default";
-    }
-    
-    if ($role === "default") {
-      if (!$this->user->isAuthenticated()) {
-        $found = false;
-        
-        if (count($privateActions) !== 0) {
-          foreach ($privateActions as $privateAction) {
-            if (fnmatch($privateAction, $action)) {
-              $found = true;
-              break;
-            }
-          }
-        }
-        
-        if ($found) {
-          $this->destination->setAction(self::DENY_ACTION);
-        }
-      }
-    } else {
-      if (!$this->user->isAuthenticatedAs($role)) {
-        $found = false;
-        
-        if (count($publicActions) !== 0) {
-          foreach ($publicActions as $publicAction) {
-            if (fnmatch($publicAction, $action)) {
-              $found = true;
-              break;
-            }
-          }
-        }
-        
-        if ($found) {
-          $this->destination->setAction(self::DENY_ACTION);
-        }
+    if (!$this->user->isAuthenticated($this->getRole())) {
+      $privateActions = $this->getAclActions("private");
+      if ($this->isActionFound($privateActions, $action)) {
+        $this->destination->setAction(self::DENY_ACTION);
       }
     }
   }
@@ -182,5 +84,38 @@ class Processor_Acl extends Sabel_Bus_Processor
   public function onAfterAction()
   {
     $this->storage->write("acl_user", $this->user->toArray());
+  }
+  
+  private function getRole()
+  {
+    if ($this->reflection->hasAnnotation("role")) {
+      $role = $this->reflection->getAnnotation("role");
+      return $role[0][0];
+    } else {
+      return "default";
+    }
+  }
+  
+  private function getAclActions($type)
+  {
+    if ($this->reflection->hasAnnotation($type)) {
+      $actions = $this->reflection->getAnnotation($type);
+      return $actions[0];
+    } else {
+      return array();
+    }
+  }
+  
+  private function isActionFound($actions, $targetAction)
+  {
+    if (empty($actions)) return false;
+    
+    foreach ($actions as $action) {
+      if (fnmatch($action, $targetAction)) {
+        return true;
+      }
+    }
+    
+    return false;
   }
 }

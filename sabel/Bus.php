@@ -119,22 +119,20 @@ class Sabel_Bus
   
   public function callback($processor, $result)
   {
-    if (isset($this->callbacks[$processor->name])) {
-      if ($result === true) {
-        $callback = $this->callbacks[$processor->name];
-        if (is_array($callback)) {
-          foreach ($callback as $c) {
-            $result = $c->processor->{$c->method}($this);
-            if ($result === false) break;
-            foreach ($this->listeners as $listener) {
-              $listener->event($this, $c->processor, $c->method, $result);
-            }
-          }
-        } else {
-          $result = $callback->processor->{$callback->method}($this);
+    if (isset($this->callbacks[$processor->name]) && $result === true) {
+      $callback = $this->callbacks[$processor->name];
+      if (is_array($callback)) {
+        foreach ($callback as $c) {
+          $result = $c->processor->{$c->method}($this);
+          if ($result === false) break;
           foreach ($this->listeners as $listener) {
-            $listener->event($this, $callback->processor, $callback->method, $result);
+            $listener->event($this, $c->processor, $c->method, $result);
           }
+        }
+      } else {
+        $result = $callback->processor->{$callback->method}($this);
+        foreach ($this->listeners as $listener) {
+          $listener->event($this, $callback->processor, $callback->method, $result);
         }
       }
     }

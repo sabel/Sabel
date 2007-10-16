@@ -2,6 +2,8 @@
 
 class Processor_Acl_User
 {
+  const AUTHED_KEY = "authenticated";
+  
   private $attributes = array();
   
   public function __set($key, $value)
@@ -28,8 +30,12 @@ class Processor_Acl_User
     $this->attributes = $attributes;
   }
   
-  public function authenticate()
+  public function authenticate($role = null)
   {
+    if ($role !== null) {
+      $this->attributes[$role] = true;
+    }
+    
     $this->setAuthenticated(true);
   }
   
@@ -40,16 +46,27 @@ class Processor_Acl_User
   
   public function setAuthenticated($bool)
   {
-    $this->attributes["authenticated"] = $bool;
+    $this->attributes[self::AUTHED_KEY] = $bool;
   }
   
-  public function isAuthenticated()
+  public function isAuthenticated($role = null)
   {
-    if (isset($this->attributes["authenticated"])) {
-      return $this->attributes["authenticated"];
+    if ($role !== null) {
+      return $this->isAuthenticatedAs($role);
+    } elseif (isset($this->attributes[self::AUTHED_KEY])) {
+      return $this->attributes[self::AUTHED_KEY];
     } else {
       return false;
     }
+  }
+  
+  public function isAuthenticatedAs($role)
+  {
+    $attr = $this->attributes;
+    $key  = self::AUTHED_KEY;
+    
+    return (isset($attr[$key])  && $attr[$key]  === true &&
+            isset($attr[$role]) && $attr[$role] === true);
   }
   
   public function isTypeOf($compare)
