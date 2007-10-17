@@ -11,15 +11,11 @@
  */
 class Sabel_Bus
 {
-  private $bus  = array();
-  private $holder = array();
-  
+  private $bus        = array();
+  private $holder     = array();
   private $processors = array();
-  private $listeners  = array();
-  
-  private $callbacks = array();
-  
-  private $list = null;
+  private $callbacks  = array();
+  private $list       = null;
   
   public function __construct()
   {
@@ -37,19 +33,6 @@ class Sabel_Bus
     foreach ($data as $name => $value) {
       $this->set($name, $value);
     }
-    return $this;
-  }
-  
-  /**
-   * add processor as listener.
-   * 
-   * @param string $name
-   * @param Sabel_Bus_Processor $listener
-   * @return Sabel_Bus
-   */
-  public function addProcessorAsListener($processor)
-  {
-    $this->listeners[$processor->name] = $processor;
     return $this;
   }
   
@@ -77,12 +60,6 @@ class Sabel_Bus
     return $this->list->find($name)->get();
   }
   
-  public function addProcessorAndListener(Sabel_Bus_Processor $processor)
-  {
-    $this->addProcessor($processor);
-    $this->addProcessorAsListener($processor);
-  }
-  
   public function getList()
   {
     return $this->list;
@@ -99,9 +76,9 @@ class Sabel_Bus
     while ($processorList !== null) {
       $processor = $processorList->get();
       l("[bus] execute " . $processor->name);
-      $result = $processor->execute($this);
-      
-      $this->callback($processor, $result);
+      if (($result = $processor->execute($this)) === true) {
+        $this->callback($processor, $result);
+      }
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
         $this->callbacks[$result->when][] = $result;
@@ -116,33 +93,22 @@ class Sabel_Bus
       if ($processor->hasMethod("shutdown")) {
         $processor->shutdown($this);
       }
+      
       $processorList = $processorList->next();
     }
     
-    if ($this->has("result")) {
-      return $this->get("result");
-    } else {
-      return null;
-    }
+    return ($this->has("result")) ? $this->get("result") : null;
   }
   
-  public function callback($processor, $result)
+  public function callback($processor)
   {
-    if (isset($this->callbacks[$processor->name]) && $result === true) {
+    if (isset($this->callbacks[$processor->name])) {
       $callback = $this->callbacks[$processor->name];
-      if (is_array($callback)) {
-        foreach ($callback as $c) {
-          $result = $c->processor->{$c->method}($this);
-          if ($result === false) break;
-          foreach ($this->listeners as $listener) {
-            $listener->event($this, $c->processor, $c->method, $result);
-          }
-        }
-      } else {
-        $result = $callback->processor->{$callback->method}($this);
-        foreach ($this->listeners as $listener) {
-          $listener->event($this, $callback->processor, $callback->method, $result);
-        }
+      if (!is_array($callback)) $callback = array($callback);
+      
+      foreach ($callback as $c) {
+        $method = $c->method;
+        $c->processor->$method($this);
       }
     }
   }
