@@ -65,8 +65,16 @@ class Processor_Acl_User
     $attr = $this->attributes;
     $key  = self::AUTHED_KEY;
     
-    return (isset($attr[$key])  && $attr[$key]  === true &&
-            isset($attr[$role]) && $attr[$role] === true);
+    if (strpos($role, "|") === false) {
+      return (isset($attr[$key])  && $attr[$key]  === true &&
+              isset($attr[$role]) && $attr[$role] === true);
+    } else {
+      foreach (explode("|", $role) as $r) {
+        if ($this->isAuthenticatedAs($r)) return true;
+      }
+      
+      return false;
+    }
   }
   
   public function isTypeOf($compare)

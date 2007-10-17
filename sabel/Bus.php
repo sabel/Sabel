@@ -110,6 +110,15 @@ class Sabel_Bus
       $processorList = $processorList->next();
     }
     
+    $processorList = $this->list->getFirst();
+    while ($processorList !== null) {
+      $processor = $processorList->get();
+      if ($processor->hasMethod("shutdown")) {
+        $processor->shutdown($this);
+      }
+      $processorList = $processorList->next();
+    }
+    
     if ($this->has("result")) {
       return $this->get("result");
     } else {

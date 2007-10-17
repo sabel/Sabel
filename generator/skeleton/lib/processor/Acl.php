@@ -55,8 +55,6 @@ class Processor_Acl extends Sabel_Bus_Processor
     } else {
       $this->processDefaultAllow($this->controller, $action);
     }
-    
-    return new Sabel_Bus_ProcessorCallback($this, "onAfterAction", "executer");
   }
   
   private function processDefaultDeny($controller, $action)
@@ -81,7 +79,7 @@ class Processor_Acl extends Sabel_Bus_Processor
     }
   }
   
-  public function onAfterAction()
+  public function shutdown()
   {
     $this->storage->write("acl_user", $this->user->toArray());
   }
