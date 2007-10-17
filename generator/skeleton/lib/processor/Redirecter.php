@@ -15,7 +15,7 @@ class Processor_Redirecter extends Sabel_Bus_Processor
   {
     $controller = $bus->get("controller");
     
-    $redirect = new Redirect($bus);
+    $redirect = new Processor_Redirecter_Redirect($bus);
     $controller->setAttribute("redirect", $redirect);
     
     return new Sabel_Bus_ProcessorCallback($this, "onRedirect", "executer");

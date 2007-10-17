@@ -60,15 +60,18 @@ class Processor_Errors extends Sabel_Bus_Processor
     }
   }
   
-  public function event($bus, $processor, $method, $result)
+  public function shutdown($bus)
   {
-    if ($processor->name === "redirecter" && $method === "onRedirect") {
-      $storage = $bus->get("storage");
-      if (($messages = $bus->get("controller")->errors) === null) {
+    $storage    = $bus->get("storage");
+    $controller = $bus->get("controller");
+    $redirect   = $controller->getAttribute("redirect");
+    
+    if ($redirect->isRedirected()) {
+      if (($messages = $controller->errors) === null) {
         $this->resetErrors($storage);
       } else {
         $stack  = $storage->read(self::STACK_KEY);
-        $index  = count($stack) - 1;
+        $index  = count($stack) - 2;
         $values = $bus->get("request")->fetchPostValues();
         $errors = array("submitUri" => $stack[$index],
                         "messages"  => $messages,
