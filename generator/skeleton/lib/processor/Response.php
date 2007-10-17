@@ -16,10 +16,10 @@ class Processor_Response extends Sabel_Bus_Processor
     $response    = $bus->get("response");
     $destination = $bus->get("destination");
     $controller  = $bus->get("controller");
-    $request     = $bus->get("request");
-    $storage     = $bus->get("storage");
     
-    $response->setResponses($controller->getAttributes());
+    $responses  = $response->getResponses();
+    $attributes = $controller->getAttributes();
+    $response->setResponses(array_merge($responses, $attributes));
     
     $creator = new Sabel_Controller_Creator();
         

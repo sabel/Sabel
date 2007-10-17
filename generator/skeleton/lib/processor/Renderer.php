@@ -21,12 +21,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     $response->outputHeader();
     
     $responses = $response->getResponses();
-    
-    if (mb_detect_encoding(urldecode($destination->getAction())) === "UTF-8") {
-      $destination->setAction(urldecode($destination->getAction()));
-    }
-    
-    $renderer = new Sabel_View_Renderer_Class();
+    $renderer  = new Sabel_View_Renderer_Class();
     
     if (($resource = $repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);

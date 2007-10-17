@@ -15,8 +15,9 @@ class Sabel_Context
   
   private static $context = null;
   
-  private $candidate   = null;
-  private $bus = null;
+  private $bus       = null;
+  private $candidate = null;
+  private $exception = null;
   
   public static function setContext($context)
   {
@@ -52,6 +53,16 @@ class Sabel_Context
     return $this->bus;
   }
   
+  public function setException($exception)
+  {
+    $this->exception = $exception;
+  }
+  
+  public function getException()
+  {
+    return $this->exception;
+  }
+  
   public static function log($message)
   {
     static $log;
@@ -66,8 +77,8 @@ class Sabel_Context
   
   public static function getCache()
   {
-    $config = CachedConfigImpl::create()->get('Memcache');
-    return MemCacheImpl::create($config['server']);
+    $config = CachedConfigImpl::create()->get("Memcache");
+    return MemCacheImpl::create($config["server"]);
   }
   
   public static function addIncludePath($path)
