@@ -557,7 +557,7 @@ Sabel.Util.Uri = function(uri)
 }
 
 Sabel.Util.Uri.pattern  = /^(\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
-Sabel.Util.Uri.keyNames = ['url', 'host', 'user', 'password', 'domain', 'port', 'directory', 'filename', 'query', 'hash'];
+Sabel.Util.Uri.keyNames = ['url', 'protocol', 'user', 'password', 'domain', 'port', 'directory', 'filename', 'query', 'hash'];
 
 Sabel.Util.Uri.prototype = {
   has: function(key)
