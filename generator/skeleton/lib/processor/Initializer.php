@@ -13,23 +13,20 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $request     = $bus->get("request");
-    $storage     = $bus->get("storage");
-    $controller  = $bus->get("controller");
+    $request    = $bus->get("request");
+    $storage    = $bus->get("storage");
+    $controller = $bus->get("controller");
 
     $libDb = RUN_BASE . DS . "lib" . DS . "db" . DS;
     
     Sabel::fileUsing($libDb . "utility.php", true);
     Sabel::fileUsing($libDb . "validators.php", true);
-    Sabel::fileUsing($libDb . "Manipulator.php", true);
-    Sabel::fileUsing($libDb . "Form.php", true);
     
     Sabel_DB_Config::initialize();
 
     $storage->start();
     
-    $controller->setAttribute("pageTitle", "Sabel"); // default page title.
-    $controller->setAttribute("modelForm", new ModelForm($bus));
+    $controller->setAttribute("pageTitle", "Sabel");
 
     // $this->trim($request);
   }

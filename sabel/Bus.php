@@ -76,9 +76,8 @@ class Sabel_Bus
     while ($processorList !== null) {
       $processor = $processorList->get();
       l("[bus] execute " . $processor->name);
-      if (($result = $processor->execute($this)) === true) {
-        $this->callback($processor, $result);
-      }
+      $result = $processor->execute($this);
+      $this->callback($processor, $result);
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
         $this->callbacks[$result->when][] = $result;
@@ -90,6 +89,7 @@ class Sabel_Bus
     $processorList = $this->list->getFirst();
     while ($processorList !== null) {
       $processor = $processorList->get();
+      l("SHUTDOWN: " . $processor->name);
       if ($processor->hasMethod("shutdown")) {
         $processor->shutdown($this);
       }

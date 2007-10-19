@@ -18,14 +18,6 @@ class Processor_Executer extends Sabel_Bus_Processor
     $destination = $bus->get("destination");
     $response    = $controller->getResponse();
     
-    $mName = $destination->getModule();
-    $cName = $destination->getController();
-    
-    if ($cName !== "public" && !$controller->user->isAuthenticated($mName)) {
-      $bus->set("response", $response->notFound());
-      return true;
-    }
-    
     $action = $destination->getAction();
     $controller->setAction($action);
     $controller->initialize();

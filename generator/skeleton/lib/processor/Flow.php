@@ -71,7 +71,6 @@ class Processor_Flow extends Sabel_Bus_Processor
       }
       
       foreach ($state->getProperties() as $name => $val) {
-        l($name);
         $this->controller->getResponse()->setResponse($name, $val);
       }
     } else {
@@ -97,7 +96,6 @@ class Processor_Flow extends Sabel_Bus_Processor
         $state->save();
         
         foreach ($state->getProperties() as $name => $val) {
-          l($name);
           $this->controller->getResponse()->setResponse($name, $val);
         }
       } else {

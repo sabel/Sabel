@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Form
+ * Processor_Form_Object
  *
- * @category  DB
- * @package   org.sabel.db
+ * @category  Processor
+ * @package   lib.processor
  * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Form extends Sabel_Object
+class Processor_Form_Object extends Sabel_Object
 {
   protected $model   = null;
   protected $mdlName = "";
@@ -39,6 +39,44 @@ class Form extends Sabel_Object
   public function get($key)
   {
     return $this->model->__get($key);
+  }
+  
+  public function setErrors($errors)
+  {
+    $this->errors = $errors;
+  }
+  
+  public function getErrors()
+  {
+    return $this->errors;
+  }
+  
+  public function hasError()
+  {
+    return !empty($this->errors);
+  }
+  
+  public function unsetErrors()
+  {
+    $this->errors = array();
+  }
+  
+  public function validate($ignores = array())
+  {
+    $model = $this->model;
+    $validator = new Sabel_DB_Validator($model);
+    $annot = $model->getReflection()->getAnnotation("validate_ignores");
+    
+    if ($annot !== null) {
+      $ignores = array_merge($annot[0], $ignores);
+    }
+    
+    if ($errors = $validator->validate($ignores)) {
+      $this->errors = $errors;
+      return false;
+    } else {
+      return true;
+    }
   }
   
   public function create($uri, $id = null, $class = null, $submitText = "")
@@ -147,7 +185,7 @@ class Form extends Sabel_Object
   {
     $value = $this->getValue($name);
     $name  = $this->createName("datetime") . "[{$name}]";
-    $dtime = new FormDatetime($name, $value);
+    $dtime = new Processor_Form_Datetime($name, $value);
     return $dtime->datetime($yearRange, $withSecond);
   }
   
@@ -155,7 +193,7 @@ class Form extends Sabel_Object
   {
     $value = $this->getValue($name);
     $name  = $this->createName("date") . "[{$name}]";
-    $dtime = new FormDatetime($name, $value);
+    $dtime = new Processor_Form_Datetime($name, $value);
     return $dtime->date($yearRange);
   }
   
@@ -198,7 +236,7 @@ class Form extends Sabel_Object
   }
 }
 
-class FormDatetime
+class Processor_Form_Datetime
 {
   protected
     $name      = "",
