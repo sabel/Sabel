@@ -32,8 +32,13 @@ class Processor_Form extends Sabel_Bus_Processor
     $action = $bus->get("destination")->getAction();
     $controller = $this->controller = $bus->get("controller");
     $this->response = $controller->getResponse();
-
+    
     $controller->setAttribute("form", $this);
+    
+    if (!$controller->hasMethod($action)) {
+      return $this->delete();
+    }
+    
     $annot = $controller->getReflection()->getMethodAnnotation($action, "unity");
     
     if ($annot === null) {
