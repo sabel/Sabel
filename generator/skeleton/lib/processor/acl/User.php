@@ -88,4 +88,39 @@ class Processor_Acl_User
     $this->attributes = array();
     $this->attributes["authenticated"] = false;
   }
+  
+  public function login($user)
+  {
+    $role = strtolower($user->getType());
+    $this->authenticate($role);
+    $this->attributes["id"]   = $user->id;
+    $this->attributes["role"] = $role;
+    
+    if ($role === "admin") {
+      $this->attributes["creatable"] = $user->create_role;
+    }
+  }
+  
+  public function isAdmin()
+  {
+    $attr = $this->attributes;
+    return (isset($attr["role"]) && $attr["role"] === "admin");
+  }
+  
+  public function isAgency()
+  {
+    $attr = $this->attributes;
+    return (isset($attr["role"]) && $attr["role"] === "agency");
+  }
+  
+  public function isSupport()
+  {
+    $attr = $this->attributes;
+    return (isset($attr["role"]) && $attr["role"] === "support");
+  }
+  
+  public function logout()
+  {
+    $this->destroy();
+  }
 }

@@ -13,13 +13,22 @@ class Processor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $controller = $bus->get("controller");
-    $request    = $bus->get("request");
-    $action     = $bus->get("destination")->getAction();
+    $controller  = $bus->get("controller");
+    $request     = $bus->get("request");
+    $destination = $bus->get("destination");
+    $response    = $controller->getResponse();
     
+    $mName = $destination->getModule();
+    $cName = $destination->getController();
+    
+    if ($cName !== "public" && !$controller->user->isAuthenticated($mName)) {
+      $bus->set("response", $response->notFound());
+      return true;
+    }
+    
+    $action = $destination->getAction();
     $controller->setAction($action);
     $controller->initialize();
-    $response = $controller->getResponse();
     
     if ($response->isNotFound()) {
       $bus->set("response", $response);
@@ -28,12 +37,12 @@ class Processor_Executer extends Sabel_Bus_Processor
       $method = $annotation->getMethod($action);
       $annot = $method->getAnnotation("post");
       if ($annot[0][0] === "only" && !$request->isPost()) {
-        $bus->set("response", $controller->getResponse()->notFound());
+        $bus->set("response", $response->notFound());
       } else {
         $bus->set("response", $controller->execute($action));
       }
     } else {
-      $bus->set("response", $controller->getResponse()->notFound());
+      $bus->set("response", $response->notFound());
     }
     
     return true;

@@ -69,6 +69,11 @@ class Processor_Flow extends Sabel_Bus_Processor
         $this->executeAction($bus);
         $state->end($token);
       }
+      
+      foreach ($state->getProperties() as $name => $val) {
+        l($name);
+        $this->controller->getResponse()->setResponse($name, $val);
+      }
     } else {
       // start flow state      
       if ($this->isStartAction()) {
@@ -90,6 +95,11 @@ class Processor_Flow extends Sabel_Bus_Processor
         $this->controller->setAttribute("token", $token);
         $this->executeAction($bus);
         $state->save();
+        
+        foreach ($state->getProperties() as $name => $val) {
+          l($name);
+          $this->controller->getResponse()->setResponse($name, $val);
+        }
       } else {
         echo "[flow] your request was denied";exit;
       }

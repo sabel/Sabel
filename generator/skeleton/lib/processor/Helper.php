@@ -18,6 +18,7 @@ class Processor_Helper extends Sabel_Bus_Processor
     $appDir       = "app";
     $helperDir    = "helpers";
     $sharedHelper = "application";
+    $commonHelper = "common";
     $helperSuffix = "php";
     
     $pref = DS . $appDir . DS . $m . DS . $helperDir . DS;
@@ -25,6 +26,7 @@ class Processor_Helper extends Sabel_Bus_Processor
     $helpers = array();
     
     $helpers[] = DS . $appDir . DS . $helperDir . DS . "{$sharedHelper}.{$helperSuffix}";
+    $helpers[] = DS . $appDir . DS . $helperDir . DS . "{$commonHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
     $helpers[] = $pref . "{$c}.{$helperSuffix}";
     

@@ -41,20 +41,6 @@ class Processor_Acl extends Sabel_Bus_Processor
     }
     
     $this->controller->setAttribute("user", $this->user);
-    $this->reflection = new Sabel_Annotation_ReflectionClass($this->controller);
-    
-    if ($this->reflection->hasAnnotation("default")) {
-      $default = $this->reflection->getAnnotation("default");
-      $default = $default[0][0];
-    } else {
-      $default = self::RULE_DENY;
-    }
-    
-    if ($default === self::RULE_DENY) {
-      $this->processDefaultDeny($this->controller, $action);
-    } else {
-      $this->processDefaultAllow($this->controller, $action);
-    }
   }
   
   private function processDefaultDeny($controller, $action)

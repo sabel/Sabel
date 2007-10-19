@@ -108,6 +108,7 @@ class Processor_Errors extends Sabel_Bus_Processor
   
   public function resetErrors($storage)
   {
+    l("********** resetErrors() **********");
     $storage->delete(self::ERROR_KEY);
     $storage->delete(self::STACK_KEY);
   }

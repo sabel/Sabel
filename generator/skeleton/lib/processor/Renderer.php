@@ -13,12 +13,17 @@ class Processor_Renderer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $request     = $bus->get("request");
+    $controller  = $bus->get("controller");
     $response    = $bus->get("response");
     $destination = $bus->get("destination");
     $repository  = $bus->get("repository");
     
     $response->outputHeader();
+    
+    $redirector = $controller->getAttribute("redirect");
+    if ($redirector->isRedirected()) {
+      return true;
+    }
     
     $responses = $response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
@@ -29,13 +34,18 @@ class Processor_Renderer extends Sabel_Bus_Processor
       return true;
     } else {
       $resource = $repository->getResourceFromLocation("module", "notFound");
-      $contents = $renderer->rendering($resource->fetch(), $responses);
+      if (is_object($resource)) {
+        $contents = $renderer->rendering($resource->fetch(), $responses);
+      }
     }
+    
+    $layoutName = $controller->getAttribute("layout");
+    if ($layoutName === null) $layoutName = "layout";
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $bus->set("result", $contents);
     } elseif (isset($contents)) {
-      $layout = $repository->find("layout");
+      $layout = $repository->find($layoutName);
       $responses["contentForLayout"] = $contents;
       $result = $renderer->rendering($layout->fetch(), $responses);
       $bus->set("result", $result);

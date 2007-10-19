@@ -47,10 +47,6 @@ class Processor_Flow_Redirecter extends Sabel_Bus_Processor
       }
       
       $bus->get("response")->location($host, $ignored . $to);
-      
-      return true;
     }
-    
-    return false; 
   }
 }

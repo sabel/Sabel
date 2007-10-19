@@ -90,9 +90,18 @@ class Processor_Flow_State
     return $this->nexts;
   }
   
+  public function has($name)
+  {
+    return (isset($this->properties[$name]));
+  }
+  
   public function read($name)
   {
-    return $this->properties[$name];
+    if ($this->has($name)) {
+      return $this->properties[$name];
+    } else {
+      return null;
+    }
   }
   
   public function write($name, $value)
