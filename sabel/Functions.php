@@ -71,7 +71,7 @@ function request($uri, $destination = null, $request = null, $storage = null)
   $plugin->setDestination($destination);
   $context->setPlugin($plugin);
   
-  $injector = Sabel_Container::injector(new Factory());
+  $injector = Sabel_Container::injector(new Config_Factory());
   $context->setInjector($injector);
   $executer = $injector->newInstance(Sabel_Controller_Front::EXECUTER_INTERFACE);
   $executer->setContext($context);

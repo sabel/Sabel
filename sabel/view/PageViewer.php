@@ -6,7 +6,7 @@
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_View_PageViewer implements Iterator
+class Sabel_View_PageViewer extends Sabel_Object implements Iterator
 {
   const PRIORITY_PREVIOUS = 0;
   const PRIORITY_NEXT     = 1;

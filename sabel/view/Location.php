@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_View_Location
+abstract class Sabel_View_Location extends Sabel_Object
 {
   protected $name = "";
   protected $destination = null;

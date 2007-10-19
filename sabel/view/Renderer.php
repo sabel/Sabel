@@ -10,10 +10,8 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_View_Renderer
+abstract class Sabel_View_Renderer extends Sabel_Object
 {
-  const COMPILE_DIR = "/data/compiled/";
-  
   protected $trim = true;
   
   public function partial($name, $controller = null, $assign = array())

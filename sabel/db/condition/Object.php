@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Object
+class Sabel_DB_Condition_Object extends Sabel_Object
 {
   const ISNULL    = "CONDITION_NULL";
   const ISNOTNULL = "CONDITION_NOTNULL";

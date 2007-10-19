@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Http_Response
+class Sabel_Http_Response extends Sabel_Object
 {
   protected $header = null;
   protected $contents = array();

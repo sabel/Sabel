@@ -8,7 +8,6 @@ class Test_DB_Test extends SabelTestCase
 
   public function testClean()
   {
-    try {
     $tables   = self::$tables;
     $executer = new Manipulator("Member");
 
@@ -18,9 +17,6 @@ class Test_DB_Test extends SabelTestCase
 
     $executer->query("DELETE FROM tree WHERE id > 2");
     $executer->query("DELETE FROM tree");
-    } catch (Exception $e) {
-      var_dump($e->getMessage()); exit;
-    }
   }
 
   public function testInsert()

@@ -21,15 +21,15 @@ class Processor_Location extends Sabel_Bus_Processor
     
     // app/views/
     $rootLocation = new Sabel_View_Location_File("root", $destination);
-    $rootLocation->setPath(RUN_BASE . Sabel_View_Repository_File::APP_VIEW);
+    $rootLocation->setPath(RUN_BASE . DS . APP_VIEW);
     
     // app/{module}/views/
     $moduleLocation = new Sabel_View_Location_File("module", $destination);
-    $moduleLocation->setPath($base . Sabel_View_Repository_File::VIEW_DIR);
+    $moduleLocation->setPath($base . VIEW_DIR);
     
     // app/{module}/views/{controller}/
     $leafLocation = new Sabel_View_Location_File("leaf", $destination);
-    $leafLocation->setPath($base . Sabel_View_Repository_File::VIEW_DIR . $controller . DS);
+    $leafLocation->setPath($base . VIEW_DIR . $controller . DS);
     
     $repository->addLocation($rootLocation);
     $repository->addLocation($moduleLocation);

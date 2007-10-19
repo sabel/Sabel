@@ -9,13 +9,8 @@
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Repository_File implements Sabel_View_Repository
+class Sabel_View_Repository_File extends Sabel_Object implements Sabel_View_Repository
 {
-  const VIEW_DIR    = "views/";
-  const APP_VIEW    = "/app/views/";
-  const DEF_LAYOUT  = "layout.tpl";
-  const MODULES_DIR = "app";
-  
   private $destination = null;
   
   private static $locations = array();
@@ -131,6 +126,6 @@ class Sabel_View_Repository_File implements Sabel_View_Repository
   
   public function getPathToBaseDirectory($module)
   {
-    return RUN_BASE . DS . self::MODULES_DIR . DS . $module . DS;
+    return RUN_BASE . DS . MODULES_DIR . DS . $module . DS;
   }
 }

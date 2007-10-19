@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Base
+ * Sabel_DB_Abstract_Migration
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Migration
+abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 {
   protected
     $applyMode = "",

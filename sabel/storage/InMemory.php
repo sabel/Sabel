@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Storage_InMemory
+class Sabel_Storage_InMemory extends Sabel_Object
 {
   private static $instance = null;
   private $attributes = array();
@@ -41,23 +41,23 @@ class Sabel_Storage_InMemory
   {
     $ret = null;
     if (isset($this->attributes[$key])) {
-      $ret = $this->attributes[$key]['value'];
+      $ret = $this->attributes[$key]["value"];
     }
     return $ret;
   }
   
   public function write($key, $value, $timeout = 60)
   {
-    $this->attributes[$key] = array('value'   => $value, 
-                            'timeout' => $timeout,
-                            'count'   => 0);
+    $this->attributes[$key] = array("value"   => $value,
+                                    "timeout" => $timeout,
+                                    "count"   => 0);
   }
   
   public function delete($key)
   {
     $ret = null;
     if (isset($this->attributes[$key])) {
-      $ret =& $this->attributes[$key]['value'];
+      $ret =& $this->attributes[$key]["value"];
       unset($this->attributes[$key]);
     }
     return $ret;
@@ -66,7 +66,7 @@ class Sabel_Storage_InMemory
   public function timeout()
   {
     foreach ($this->attributes as $key => $value) {
-      if ($value['count'] > $value['timeout']) {
+      if ($value["count"] > $value["timeout"]) {
         unset($this->attributes[$key]);
       }
     }
@@ -75,7 +75,7 @@ class Sabel_Storage_InMemory
   public function countUp()
   {
     foreach ($this->attributes as $key => $value) {
-      $this->attributes[$key]['count'] += 1;
+      $this->attributes[$key]["count"] += 1;
     }
   }
 }

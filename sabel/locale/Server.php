@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Locale_Server
+class Sabel_Locale_Server extends Sabel_Object
 {
   protected $lcAll   = "";
   protected $locales = array();

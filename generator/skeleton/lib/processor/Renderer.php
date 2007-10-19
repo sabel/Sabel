@@ -21,9 +21,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     $response->outputHeader();
     
     $redirector = $controller->getAttribute("redirect");
-    if ($redirector->isRedirected()) {
-      return true;
-    }
+    if ($redirector->isRedirected()) return;
     
     $responses = $response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
@@ -40,7 +38,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     }
     
     $layoutName = $controller->getAttribute("layout");
-    if ($layoutName === null) $layoutName = "layout";
+    if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $bus->set("result", $contents);
@@ -50,7 +48,5 @@ class Processor_Renderer extends Sabel_Bus_Processor
       $result = $renderer->rendering($layout->fetch(), $responses);
       $bus->set("result", $result);
     }
-    
-    return true;
   }
 }

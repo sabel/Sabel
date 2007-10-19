@@ -101,12 +101,12 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private final function saveCompileFile($path, $name, $compiled)
   {
-    file_put_contents(RUN_BASE . self::COMPILE_DIR . $name, $compiled);
+    file_put_contents(RUN_BASE . DS . TPL_COMPILE_DIR . DS . $name, $compiled);
   }
   
   private final function getCompileFilePath($name)
   {
-    return RUN_BASE . self::COMPILE_DIR . $name;
+    return RUN_BASE . DS . TPL_COMPILE_DIR . DS . $name;
   }
 }
 

@@ -16,7 +16,7 @@ class Sabel_Router_Map implements Sabel_Router
   
   public function route($request)
   {
-    $config = new Map();
+    $config = new Config_Map();
     $config->configure();
     
     foreach($config->getRoutes() as $route) {

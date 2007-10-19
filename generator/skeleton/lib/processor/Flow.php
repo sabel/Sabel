@@ -158,7 +158,7 @@ class Processor_Flow extends Sabel_Bus_Processor
       $this->controller->setAction($this->action);
       $this->controller->initialize();
       
-      $injector = Sabel_Container::injector(new Factory());
+      $injector = Sabel_Container::injector(new Config_Factory());
       
       $state->setNextActions(array($state->getCurrent()));
       $this->controller->redirect->to("a: " . $state->getCurrent());

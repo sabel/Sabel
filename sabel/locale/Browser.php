@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Locale_Browser
+class Sabel_Locale_Browser extends Sabel_Object
 {
   protected
     $locale    = "",

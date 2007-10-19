@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Bus
+class Sabel_Bus extends Sabel_Object
 {
   private $bus        = array();
   private $holder     = array();
@@ -77,7 +77,7 @@ class Sabel_Bus
       $processor = $processorList->get();
       l("[bus] execute " . $processor->name);
       $result = $processor->execute($this);
-      $this->callback($processor, $result);
+      $this->callback($processor);
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
         $this->callbacks[$result->when][] = $result;

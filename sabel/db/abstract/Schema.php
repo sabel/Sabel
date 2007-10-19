@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Schema
+abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
 {
   protected $driver = null;
   protected $schemaName = "";

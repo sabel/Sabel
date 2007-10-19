@@ -6,7 +6,7 @@
  * @package org.sabel
  * @author Mori Reo <mori.reo@gmail.com>
  */
-class Sabel_View_Pager
+class Sabel_View_Pager extends Sabel_Object
 {
   private static $instance = null;
   

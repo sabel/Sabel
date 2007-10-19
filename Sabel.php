@@ -140,11 +140,11 @@ final class Sabel
     
     $SABEL = "sabel" . DS;
     
+    require ($SABEL . "Object.php");
     require ($SABEL . "Functions.php");
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
-    require ($SABEL . "Object.php");
     require ($SABEL . "Router.php");
     require ($SABEL . "Request.php");
     require ($SABEL . "Destination.php");

@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Creator
+class Sabel_Controller_Creator extends Sabel_Object
 {
   const CONTROLLERS_DIR    = "controllers";
   const DEFAULT_CONTROLLER = "index";

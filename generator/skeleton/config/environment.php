@@ -7,7 +7,7 @@ if (!defined("DEVELOPMENT")) define("DEVELOPMENT", 0x0A);
 /**
  * define sabel environment.
  */
-// if (!defined("ENVIRONMENT")) define("ENVIRONMENT", PRODUCTION);
+if (!defined("ENVIRONMENT")) define("ENVIRONMENT", PRODUCTION);
 // if (!defined("ENVIRONMENT")) define("ENVIRONMENT", TEST);
 if (!defined("ENVIRONMENT")) define("ENVIRONMENT", DEVELOPMENT);
 
@@ -22,7 +22,6 @@ if (ENVIRONMENT === DEVELOPMENT) {
 
 add_include_paths(array("app",
                         "lib",
-                        "config",
                         "app" . DS. "models",
                         "app" . DS. "helpers"));
 
