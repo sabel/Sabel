@@ -16,7 +16,7 @@ abstract class Sabel_View_Renderer
   
   protected $trim = true;
   
-  public function partial($name, $controller = null, $options = array())
+  public function partial($name, $controller = null, $assign = array())
   {
     $context = Sabel_Context::getContext();
     $destination = clone $context->getBus()->get("destination");
@@ -31,6 +31,6 @@ abstract class Sabel_View_Renderer
     $repository = new Sabel_View_Repository_File($destination);
     $renderer = new Sabel_View_Renderer_Class();
     $resource = $repository->find();
-    return $renderer->rendering($resource->fetch(), $responses);
+    return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
   }
 }
