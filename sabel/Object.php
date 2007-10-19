@@ -38,6 +38,11 @@ abstract class Sabel_Object
     return md5(serialize($this));
   }
   
+  public function getReflection()
+  {
+    return new Sabel_Reflection_Class($this);
+  }
+  
   /**
    * an alias for __toString()
    */

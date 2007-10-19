@@ -66,6 +66,7 @@ require_once('Test/View/Tests.php');
 require_once('Test/Processor/Tests.php');
 
 require_once('Test/VirtualInheritance.php');
+require_once('Test/Reflection.php');
 
 class SabelAllTests
 {
@@ -89,6 +90,7 @@ class SabelAllTests
     $suite->addTest(Test_Map_Tests::suite());
     // $suite->addTest(Test_Validate::suite());
     $suite->addTest(Test_Annotation::suite());
+    $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Pager::suite());
     $suite->addTest(Test_PageViewer::suite());
     $suite->addTest(Test_Request::suite());
