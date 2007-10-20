@@ -33,6 +33,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function __construct(Sabel_DB_Abstract_Model $model)
   {
     $this->model  = $model;
+    $this->table  = $model->getTableName();
     $this->driver = Sabel_DB_Driver::create($model->getConnectionName());
   }
 

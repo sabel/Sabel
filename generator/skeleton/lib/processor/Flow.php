@@ -41,7 +41,7 @@ class Processor_Flow extends Sabel_Bus_Processor
     
     l("[flow] token is " . $token);
     
-    if ($token !== null) {
+    if ($token !== null && !$this->isStartAction()) {
       $state = $state->restore($key, $token);
     }
     
@@ -56,7 +56,7 @@ class Processor_Flow extends Sabel_Bus_Processor
       return true;
     }
     
-    if ($state->isInFlow()) {
+    if ($state->isInFlow() && !$this->isStartAction()) {
       $this->controller->setAttribute("flow",  $state);
       $this->controller->setAttribute("token", $token);
       

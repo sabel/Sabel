@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Driver
 {
-  public static function create($connectionName)
+  public static function create($connectionName = "default")
   {
     $driverName = Sabel_DB_Config::getDriverName($connectionName);
 

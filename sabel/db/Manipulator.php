@@ -490,7 +490,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
       $projection = implode(", ", $this->model->getColumnNames());
     }
 
-    $stmt->table($model->getTableName());
     $stmt->projection($projection);
     $stmt->where($this->loadConditionManager()->build($stmt));
     $stmt->constraints($this->constraints);
@@ -503,7 +502,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $values = $this->chooseValues($data, "update");
 
     $stmt->values($values);
-    $stmt->table($this->model->getTableName());
     $stmt->where($this->loadConditionManager()->build($stmt));
 
     return $stmt;
@@ -514,7 +512,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $values = $this->chooseValues($data, "insert");
 
     $stmt->values($values);
-    $stmt->table($this->model->getTableName());
     $stmt->sequenceColumn($this->model->getSequenceColumn());
 
     return $stmt;
@@ -522,7 +519,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
   protected function prepareDelete($stmt)
   {
-    $stmt->table($this->model->getTableName());
     $stmt->where($this->loadConditionManager()->build($stmt));
 
     return $stmt;

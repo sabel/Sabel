@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Table
+class Sabel_DB_Schema_Table extends Sabel_Object
 {
   protected $tableName       = "";
   protected $columns         = array();
