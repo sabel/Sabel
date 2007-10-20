@@ -257,7 +257,8 @@ function MODEL($mdlName)
   }
   
   if (!$exists = class_exists($mdlName, false)) {
-    $exists = Sabel::fileUsing(MODELS_DIR . $mdlName . ".php");
+    $path = RUN_BASE . DS . MODELS_DIR . DS . $mdlName . PHP_SUFFIX;
+    $exists = Sabel::fileUsing($path);
   }
   
   $cache[$mdlName] = $exists;

@@ -1,7 +1,5 @@
 <?php
 
-define("MODELS_DIR", RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "models" . DIR_DIVIDER);
-
 Sabel::using("Sabel_DB_Join");
 Sabel::using("Sabel_DB_Join_Relation");
 Sabel::using("Sabel_DB_Condition_Object");
@@ -35,9 +33,4 @@ function trans_commit()
 function trans_rollback()
 {
   Sabel_DB_Transaction::rollback();
-}
-
-function modelbox($mdlName, $size = 1)
-{
-  return new Helpers_Form_Select_Model($mdlName, $size);
 }
