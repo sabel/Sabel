@@ -45,15 +45,15 @@ class Processor_Flow extends Sabel_Bus_Processor
       $state = $state->restore($key, $token);
     }
     
-    if ($state === null) {
-      echo "invalid token";exit;
-    }
-    
     $method = $this->reflection->getMethod($this->action);
     $methodAnnotation = $method->getAnnotation("flow");
     if ($methodAnnotation[0][0] === "ignore") {
       $this->executeAction($bus);
       return true;
+    }
+    
+    if ($state === null) {
+      echo "invalid token";exit;
     }
     
     if ($state->isInFlow() && !$this->isStartAction()) {
