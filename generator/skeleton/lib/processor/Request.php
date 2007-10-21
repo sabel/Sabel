@@ -22,14 +22,8 @@ class Processor_Request extends Sabel_Bus_Processor
       $bus->set("request", $request);
     }
     
-    $storage = $bus->get("storage");
-    
-    if ($storage === null) {
-      $storage = Sabel_Storage_Session::create();
-    } else {
-      $storage = $storage;
+    if ($bus->get("storage") === null) {
+      $bus->set("storage", Sabel_Storage_Session::create());
     }
-    
-    $bus->set("storage", $storage);
   }
 }

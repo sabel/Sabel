@@ -180,7 +180,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     $this->attributes[$key] = $value;
   }
   
-  public final function getAttribute($name)
+  public function getAttribute($name)
   {
     if (isset($this->attributes[$name])) {
       return $this->attributes[$name];
@@ -189,27 +189,27 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
   }
   
-  public final function setAttribute($name, $value)
+  public function setAttribute($name, $value)
   {
     $this->attributes[$name] = $value;
   }
   
-  public final function getAttributes()
+  public function getAttributes()
   {
     return $this->attributes;
   }
   
-  public final function setAttributes($attributes)
+  public function setAttributes($attributes)
   {
-    $this->attributes = array_merge($attributes, $this->attributes);
+    $this->attributes = array_merge($this->attributes, $attributes);
   }
   
-  public final function hasAttribute($name)
+  public function hasAttribute($name)
   {
     return array_key_exists($name, $this->attributes);
   }
   
-  public final function isAttributeSet($name)
+  public function isAttributeSet($name)
   {
     return isset($this->attributes[$name]);
   }

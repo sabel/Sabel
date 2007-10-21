@@ -14,39 +14,33 @@ class Sabel_Storage_Session extends Sabel_Object
   private static $instance = null;
   private static $started = false;
   
-  public static function create()
-  {
-    if (!self::$instance) self::$instance = new self();
-    return self::$instance;
-  }
-  
   public function __construct()
   {
-
+    
+  }
+  
+  public static function create()
+  {
+    if (self::$instance === null) {
+      self::$instance = new self();
+    }
+    
+    return self::$instance;
   }
   
   public function start()
   {
-    if (self::$started === false) {
+    if (!self::$started) {
       session_start();
       self::$started = true;
     }
-  }
-  
-  public function clear()
-  {
-    $deleted = array();
-    foreach ($_SESSION as $key => $sesval) {
-      $deleted[] = $sesval;
-      unset($_SESSION[$key]);
-    }
-    return $deleted;
   }
   
   public function destroy()
   {
     $deleted = $_SESSION;
     session_destroy();
+    
     return $deleted;
   }
   
@@ -57,36 +51,35 @@ class Sabel_Storage_Session extends Sabel_Object
   
   public function read($key)
   {
-    $ret = null;
     if (isset($_SESSION[$key])) {
-      $ret = $_SESSION[$key]["value"];
+      return $_SESSION[$key]["value"];
+    } else {
+      return null;
     }
-    return $ret;
   }
   
   public function write($key, $value, $timeout = 60)
   {
-    if (self::$started === false) $this->start();
-    
-    $_SESSION[$key] = array('value'   => $value, 
-                            'timeout' => $timeout,
-                            'count'   => 0);
+    $_SESSION[$key] = array("value"   => $value,
+                            "timeout" => $timeout,
+                            "count"   => 0);
   }
   
   public function delete($key)
   {
     $ret = null;
     if (isset($_SESSION[$key])) {
-      $ret =& $_SESSION[$key]['value'];
+      $ret = $_SESSION[$key]["value"];
       unset($_SESSION[$key]);
     }
+    
     return $ret;
   }
   
   public function timeout()
   {
     foreach ($_SESSION as $key => $value) {
-      if ($value['count'] > $value['timeout']) {
+      if ($value["count"] > $value["timeout"]) {
         unset($_SESSION[$key]);
       }
     }
@@ -95,7 +88,7 @@ class Sabel_Storage_Session extends Sabel_Object
   public function countUp()
   {
     foreach ($_SESSION as $key => $value) {
-      $_SESSION[$key]['count'] += 1;
+      $_SESSION[$key]["count"] += 1;
     }
   }
 }

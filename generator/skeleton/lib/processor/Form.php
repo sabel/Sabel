@@ -11,7 +11,7 @@
  */
 class Processor_Form extends Sabel_Bus_Processor
 {
-  const SESSION_KEY = "form";
+  const SESSION_KEY = "forms";
   
   private
     $forms  = array(),
@@ -39,7 +39,8 @@ class Processor_Form extends Sabel_Bus_Processor
       return $this->delete();
     }
     
-    $annot = $controller->getReflection()->getMethodAnnotation($action, "unity");
+    $reflection = $controller->getReflection();
+    $annot = $reflection->getMethodAnnotation($action, "unity");
     
     if ($annot === null) {
       $this->delete();
@@ -50,7 +51,6 @@ class Processor_Form extends Sabel_Bus_Processor
         if ($this->request->isPost()) {
           $this->postProcess();
         }
-        
         $this->restoreForms();
       }
       
@@ -60,12 +60,16 @@ class Processor_Form extends Sabel_Bus_Processor
     }
   }
   
-  public function create($model)
+  public function create($model, $as = null)
   {
-    if ($model instanceof Sabel_DB_Abstract_Model) {
+    if ($as !== null) {
+      $mdlName = $as;
+    } elseif ($model instanceof Sabel_DB_Abstract_Model) {
       $mdlName = $model->getName();
-    } else {
+    } elseif (is_string($model)) {
       $mdlName = $model;
+    } else {
+      throw new Exception("invalid argument type.");
     }
     
     $string = new Sabel_Util_String($mdlName);
@@ -82,17 +86,17 @@ class Processor_Form extends Sabel_Bus_Processor
     }
     
     $this->response->setResponse($name, $form);
+    $this->controller->setAttribute($name, $form);
+    
     return $form;
   }
   
-  public function getManipulator($formName)
+  public function getForms()
   {
-    $forms  = $this->forms;
     $formId = $this->formId;
     
-    if (isset($forms[$formId][$formName])) {
-      $form = $forms[$formId][$formName];
-      return new Manipulator($form->getModel());
+    if ($formId !== null && isset($this->forms[$formId])) {
+      return $this->forms[$formId];
     } else {
       return null;
     }
@@ -100,10 +104,12 @@ class Processor_Form extends Sabel_Bus_Processor
   
   public function delete($formId = null)
   {
-    if ($formId === null) {
-      $this->forms = array();
-    } else {
+    if ($formId !== null) {
       unset($this->forms[$formId]);
+    } elseif ($this->formId !== null) {
+      unset($this->forms[$this->formId]);
+    } else {
+      $this->forms = array();
     }
   }
   
@@ -118,15 +124,17 @@ class Processor_Form extends Sabel_Bus_Processor
     $forms  = $this->forms[$formId];
     
     foreach ($forms as $name => $form) {
-      $model = $this->createModel($form->getModel());
-      $forms[$name] = new Processor_Form_Object($model);
+      $form = $this->setPostValues($form);
+      $form->unsetErrors();
+      $forms[$name] = $form;
     }
     
     $this->forms[$formId] = $forms;
   }
   
-  private function createModel($model)
+  public function setPostValues($form)
   {
+    $model   = $form->getModel();
     $values  = $this->request->fetchPostValues();
     $mdlName = $model->getName();
     
@@ -137,23 +145,29 @@ class Processor_Form extends Sabel_Bus_Processor
       
       if ($colName === "datetime") {
         foreach ($value as $key => $date) {
-          if (!isset($date["second"])) {
-            $date["second"] = "00";
+          if ($this->isEmptyDateValues($date)) {
+            $model->$key = null;
+          } else {
+            if (!isset($date["second"])) {
+              $date["second"] = "00";
+            }
+            
+            $model->$key = $date["year"]   . "-"
+                         . $date["month"]  . "-"
+                         . $date["day"]    . " "
+                         . $date["hour"]   . ":"
+                         . $date["minute"] . ":"
+                         . $date["second"];
           }
-          
-          $datetime = $date["year"]   . "-"
-                    . $date["month"]  . "-"
-                    . $date["day"]    . " "
-                    . $date["hour"]   . ":"
-                    . $date["minute"] . ":"
-                    . $date["second"];
-                    
-          $model->$key = $datetime;
         }
       } elseif ($colName === "date") {
         foreach ($value as $key => $date) {
-          $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
-          $model->$key = $date;
+          if ($this->isEmptyDateValues($date, false)) {
+            $model->$key = null;
+          } else {
+            $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
+            $model->$key = $date;
+          }
         }
       } else {
         $model->$colName = $value;
@@ -161,12 +175,30 @@ class Processor_Form extends Sabel_Bus_Processor
     }
     
     foreach ($model->getSchema()->getColumns() as $colName => $column) {
-      if ($column->isBool() && !isset($values["{$mdlName}::{$colName}"])) {
+      if (!$column->isBool()) continue;
+      $key = "{$mdlName}::{$colName}";
+      if (isset($values[$key])) {
+        $model->$colName = ($values[$key] === "1");
+      } else {
         $model->$colName = false;
       }
     }
     
-    return $model;
+    return $form;
+  }
+  
+  private function isEmptyDateValues($values, $isDatetime = true)
+  {
+    $keys = array("year", "month", "day");
+    if ($isDatetime) {
+      $keys = array_merge($keys, array("hour", "minute", "second"));
+    }
+    
+    foreach ($keys as $key) {
+      if ($values[$key] !== "") return false;
+    }
+    
+    return true;
   }
   
   private function restoreForms()

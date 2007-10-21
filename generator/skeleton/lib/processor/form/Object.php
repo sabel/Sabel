@@ -14,6 +14,7 @@ class Processor_Form_Object extends Sabel_Object
   protected $model   = null;
   protected $mdlName = "";
   protected $columns = null;
+  protected $errors  = array();
   
   public function __construct($model)
   {
@@ -58,7 +59,10 @@ class Processor_Form_Object extends Sabel_Object
   
   public function unsetErrors()
   {
+    $errors = $this->errors;
     $this->errors = array();
+    
+    return $errors;
   }
   
   public function validate($ignores = array())
@@ -181,20 +185,57 @@ class Processor_Form_Object extends Sabel_Object
     return $html . ' />';
   }
   
-  public function datetime($name, $yearRange = null, $withSecond = false)
+  public function select($name, $values, $class = null, $id = null, $useKey = true)
+  {
+    $value  = $this->getValue($name);
+    $name   = $this->createName($name);
+    $select = new Processor_Form_Select();
+    
+    $contents = $select->getContents($values, $value, $useKey);
+    $html = '<select name="' . $name . '" ';
+    $this->addIdAndClass($html, $id, $class);
+    return $html . ">" . $contents . "\n</select>";
+  }
+  
+  public function datetime($name, $yearRange = null,
+                           $withSecond = false, $defaultNull = false)
   {
     $value = $this->getValue($name);
     $name  = $this->createName("datetime") . "[{$name}]";
     $dtime = new Processor_Form_Datetime($name, $value);
-    return $dtime->datetime($yearRange, $withSecond);
+    return $dtime->datetime($yearRange, $withSecond, $defaultNull);
   }
   
-  public function date($name, $yearRange = null)
+  public function date($name, $yearRange = null, $defaultNull = false)
   {
     $value = $this->getValue($name);
     $name  = $this->createName("date") . "[{$name}]";
     $dtime = new Processor_Form_Datetime($name, $value);
-    return $dtime->date($yearRange);
+    return $dtime->date($yearRange, $defaultNull);
+  }
+  
+  public function radio($name, $values, $class = null, $id = null, $isBool = false)
+  {
+    $value = $this->getValue($name);
+    $name  = $this->createName($name);
+    if ($isBool) $value = ($value) ? 1 : 0;
+    
+    $radios = array();
+    $count  = 0;
+    
+    foreach ($values as $v => $text) {
+      $radio = '<input type="radio" ';
+      $this->addIdAndClass($radio, $id, $class);
+      $radio .= 'name="' . $name . '" value="' . $v . '"';
+      if ($count === 0 && $value === null || $v === $value) {
+        $radio .= ' checked="checked"';
+      }
+
+      $radios[] = $radio . " />{$text}\n";
+      $count++;
+    }
+    
+    return implode("&nbsp;", $radios);
   }
   
   public function hidden($name, $class = null, $id = null)
@@ -236,6 +277,25 @@ class Processor_Form_Object extends Sabel_Object
   }
 }
 
+class Processor_Form_Select
+{
+  public function getContents($values, $selectedValue = null, $useKey = true)
+  {
+    $html = array();
+    foreach ($values as $key => $value) {
+      $k = ($useKey) ? $key : $value;
+      if ($selectedValue === $k) {
+        $html[] = '<option value="' . $k . '" selected="selected">';
+      } else {
+        $html[] = '<option value="' . $k . '">';
+      }
+      $html[] = $value . '</option>';
+    }
+    
+    return implode("\n", $html);
+  }
+}
+
 class Processor_Form_Datetime
 {
   protected
@@ -246,24 +306,22 @@ class Processor_Form_Datetime
   {
     $this->name = $name;
     
-    if ($datetime === null) {
-      $this->timestamp = time();
-    } else {
+    if ($datetime !== null) {
       $this->timestamp = strtotime($datetime);
     }
   }
   
-  public function datetime($yearRange = null, $withSecond = false)
+  public function datetime($yearRange = null, $withSecond = false, $defaultNull = false)
   {
     $name = $this->name;
     list ($first, $last) = $this->getYearRange($yearRange);
     
     $html   = array();
-    $html[] = $this->numSelect("year",   $name, $first, $last);
-    $html[] = $this->numSelect("month",  $name, 1, 12);
-    $html[] = $this->numSelect("day",    $name, 1, 31);
-    $html[] = $this->numSelect("hour",   $name, 0, 23);
-    $html[] = $this->numSelect("minute", $name, 0, 59);
+    $html[] = $this->numSelect("year",   $name, $first, $last, $defaultNull);
+    $html[] = $this->numSelect("month",  $name, 1, 12, $defaultNull);
+    $html[] = $this->numSelect("day",    $name, 1, 31, $defaultNull);
+    $html[] = $this->numSelect("hour",   $name, 0, 23, $defaultNull);
+    $html[] = $this->numSelect("minute", $name, 0, 59, $defaultNull);
     
     if ($withSecond) {
       $html[] = $this->numSelect("second", $name, 0, 59);
@@ -272,22 +330,27 @@ class Processor_Form_Datetime
     return implode("&nbsp;", $html);
   }
   
-  public function date($yearRange = null)
+  public function date($yearRange = null, $defaultNull = false)
   {
     $name = $this->name;
     list ($first, $last) = $this->getYearRange($yearRange);
     
     $html   = array();
-    $html[] = $this->numSelect("year",  $name, $first, $last);
-    $html[] = $this->numSelect("month", $name, 1, 12);
-    $html[] = $this->numSelect("day",   $name, 1, 31);
+    $html[] = $this->numSelect("year",  $name, $first, $last, $defaultNull);
+    $html[] = $this->numSelect("month", $name, 1, 12, $defaultNull);
+    $html[] = $this->numSelect("day",   $name, 1, 31, $defaultNull);
     
     return implode("&nbsp;", $html);
   }
   
-  protected function numSelect($type, $name, $start, $end)
+  protected function numSelect($type, $name, $start, $end, $defaultNull)
   {
     $html = array('<select name="' . $name . '[' . $type . ']">');
+    
+    if ($defaultNull) {
+      $html[] = '<option></option>';
+    }
+    
     $val  = (int)$this->selectedValue($type);
     
     for ($i = $start; $i <= $end; $i++) {
@@ -303,6 +366,10 @@ class Processor_Form_Datetime
   
   protected function selectedValue($type)
   {
+    if ($this->timestamp === null) {
+      return null;
+    }
+    
     switch ($type) {
       case "year":
         return date("Y", $this->timestamp);
