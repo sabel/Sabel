@@ -75,7 +75,9 @@ class Sabel_Bus extends Sabel_Object
     
     while ($processorList !== null) {
       $processor = $processorList->get();
-      l("[bus] execute " . $processor->name);
+      l("[bus] execute " . $processor->name, LOG_DEBUG);
+      // $processor->setHolder($this->holder);
+      $processor->setBus($this);
       $result = $processor->execute($this);
       $this->callback($processor);
       
@@ -89,7 +91,7 @@ class Sabel_Bus extends Sabel_Object
     $processorList = $this->list->getFirst();
     while ($processorList !== null) {
       $processor = $processorList->get();
-      l("SHUTDOWN: " . $processor->name);
+      l("[bus] shutdown: " . $processor->name, LOG_DEBUG);
       if ($processor->hasMethod("shutdown")) {
         $processor->shutdown($this);
       }
@@ -150,5 +152,10 @@ class Sabel_Bus extends Sabel_Object
     } else {
       return (array_key_exists($key, $this->holder));
     }
+  }
+  
+  public function &getHolder()
+  {
+    return $this->holder;
   }
 }

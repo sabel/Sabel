@@ -13,28 +13,25 @@ class Processor_Location extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $destination = $bus->get("destination");
-    $repository  = new Sabel_View_Repository_File($destination);
+    $this->repository = new Sabel_View_Repository_File($this->destination);
     
-    list ($module, $controller) = $destination->toArray();
-    $base = $repository->getPathToBaseDirectory($module);
+    list ($module, $controller) = $this->destination->toArray();
+    $base = $this->repository->getPathToBaseDirectory($module);
     
     // app/views/
-    $rootLocation = new Sabel_View_Location_File("root", $destination);
+    $rootLocation = new Sabel_View_Location_File("root", $this->destination);
     $rootLocation->setPath(RUN_BASE . DS . APP_VIEW);
     
     // app/{module}/views/
-    $moduleLocation = new Sabel_View_Location_File("module", $destination);
+    $moduleLocation = new Sabel_View_Location_File("module", $this->destination);
     $moduleLocation->setPath($base . VIEW_DIR);
     
     // app/{module}/views/{controller}/
-    $leafLocation = new Sabel_View_Location_File("leaf", $destination);
+    $leafLocation = new Sabel_View_Location_File("leaf", $this->destination);
     $leafLocation->setPath($base . VIEW_DIR . $controller . DS);
     
-    $repository->addLocation($rootLocation);
-    $repository->addLocation($moduleLocation);
-    $repository->addLocation($leafLocation);
-    
-    $bus->set("repository", $repository);
+    $this->repository->addLocation($rootLocation);
+    $this->repository->addLocation($moduleLocation);
+    $this->repository->addLocation($leafLocation);
   }
 }

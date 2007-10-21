@@ -16,26 +16,17 @@ class Processor_Form extends Sabel_Bus_Processor
   private
     $forms  = array(),
     $formId = null;
-    
-  private
-    $controller = null,
-    $response   = null,
-    $storage    = null;
   
   public function execute($bus)
   {
-    $this->storage = $bus->get("storage");
-    $this->request = $bus->get("request");
-    
     $this->forms = $this->storage->read(self::SESSION_KEY);
     
-    $action = $bus->get("destination")->getAction();
-    $controller = $this->controller = $bus->get("controller");
-    $this->response = $controller->getResponse();
+    $action = $this->destination->getAction();
+    $this->response = $this->controller->getResponse();
     
-    $controller->setAttribute("form", $this);
+    $this->controller->setAttribute("form", $this);
     
-    if (!$controller->hasMethod($action)) {
+    if (!$this->controller->hasMethod($action)) {
       return $this->delete();
     }
     

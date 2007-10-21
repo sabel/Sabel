@@ -11,24 +11,24 @@
  */
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
+  public 
+    $request  = null,
+    $response = null;
+  
+  protected
+    $executed = false;
+    
   protected
     $bus      = null,
-    $request  = null,
-    $response = null,
     $storage  = null;
-
+    
   protected
     $setup       = false,
     $hidden      = array(),
+    $reserved    = array(),
     $attributes  = array(),
     $assignments = array(),
     $destination = null;
-  
-  /**
-   * reserved name lists of methods(actions)
-   * @var array $reserved
-   */
-  private $reserved = array();
   
   /**
    * default constructer of page controller
@@ -36,7 +36,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public final function __construct()
   {
-    $reserved = get_class_methods("Sabel_Controller_Page");
+    $this->reserved = get_class_methods("Sabel_Controller_Page");
     
     $injector = Sabel_Container::injector(new Config_Factory());
     $this->response = $injector->newInstance("Sabel_Response");
@@ -95,75 +95,56 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       throw new Sabel_Exception_Runtime("invalid request object");
     }
     
+    if ($this->request->isTypeOf("css")) {
+      $this->response->setContentType("text/css");
+    }
+    
     try {
-      if ($this->request->isTypeOf("css")) {
-        $this->response->setContentType("text/css");
-      }
-      
-      $response = $this->response;
-      
-      if (in_array($action, $this->reserved)) {
-        return $response->notfound();
-      }
-      
-      $isExistance = create_function
-                       ('$self, $action',
-                        'return is_callable(array($self, $action));');
-                     
-      if (method_exists($this, $action)) {
-        $existance = $isExistance($this, $action);
-      } else {
-        $existance = false;
-      }
-      
-      $callable = (!in_array($action, $this->hidden));
-      
-      if ($existance && $callable) {
-        $response->success();
-        $response->result = $this->$action();
-        return $response;
-      } elseif($this->isTemplateFound() && $callable) {
-        return $response->success();
-      } else {
-        if (ENVIRONMENT === DEVELOPMENT) {
-          $this->assign("module",     $this->destination->getModule());
-          $this->assign("controller", $this->destination->getController());
-          $this->assign("action",     $this->destination->getAction());
+      if ($this->isReserved($action)) {
+        $this->response->notfound();
+      } elseif ($this->isCallable($action)) {
+        if ($this->isActionExists($action)) {
+          $this->response->result = $this->$action();
+          $this->response->success();
+          $this->executed = true;
+        } else {
+          $this->response->notfound();
         }
-        
-        return $response->notfound();
+      } else {
+        $this->response->notfound();
       }
+      
+      return $this;
     } catch (Exception $exception) {
       l($exception->getMessage());
       Sabel_Context::getContext()->setException($exception);
-      return $response->serverError();
+      $this->response->serverError();
+      return $this;
     }
   }
   
-  public function executable($action)
+  public function isExecuted()
   {
-    $isExistance = create_function
-                   (
-                     '$self, $action',
-                     'return is_callable(array($self, $action));'
-                   );
-                   
-    if (method_exists($this, $action)) {
-      $existance = $isExistance($this, $action);
-    } else {
-      $existance = false;
-    }
-    
-    $callable = (!in_array($action, $this->hidden));
-    
-    if ($callable) {
-      if ($existance) {
-        return true;
-      } elseif ($this->isTemplateFound()) {
-        return true;
-      } else {
-        return false;
-      }
+    return $this->executed;
+  }
+  
+  private function isReserved($action)
+  {
+    return in_array($action, $this->reserved);
+  }
+  
+  private function isCallable($action)
+  {
+    return (!in_array($action, $this->hidden));
+  }
+  
+  private function isActionExists($action)
+  {
+    if ($this->hasMethod($action)) {
+      $isExistance = create_function
+                       ('$self, $action',
+                        'return is_callable(array($self, $action));');
+      return $isExistance($this, $action);
     } else {
       return false;
     }
@@ -277,17 +258,5 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function isGet()
   {
     return ($this->request->isGet());
-  }
-  
-  protected final function isTemplateFound()
-  {
-    /*
-    $resource = Sabel_View_Locator_Factory::create()
-                                            ->make($this->destination)
-                                            ->locate($this->destination);
-    return (!$resource->isMissing());
-    */
-    
-    return true;
   }
 }

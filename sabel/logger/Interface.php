@@ -10,5 +10,5 @@
  */
 interface Sabel_Logger_Interface
 {
-  public function log($text);
+  public function log($text, $level = LOG_INFO);
 }

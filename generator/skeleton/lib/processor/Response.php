@@ -16,27 +16,14 @@ class Processor_Response extends Sabel_Bus_Processor
     $response    = $bus->get("response");
     $destination = $bus->get("destination");
     $controller  = $bus->get("controller");
+    $request     = $bus->get("request");
+    $storage     = $bus->get("storage");
     
-    $responses  = $response->getResponses();
-    $attributes = $controller->getAttributes();
-    $response->setResponses(array_merge($responses, $attributes));
-    
-    $creator = new Sabel_Controller_Creator();
-        
-    if ($response->isNotFound() || $response->isServerError()) {
-      if ($response->isNotFound()) {
-        $destination->setAction("notFound");
-      } elseif ($response->isServerError()) {
-        $destination->setAction("serverError");
-      }
-      
-      $response = $controller->execute($destination->getAction());
-      
-      if ($response->isNotFound()) {
-        $destination->setController("index");
-        $controller = $creator->create($destination);
-        $response = $controller->execute($destination->getAction());
-      }
+    if (!is_object($response)) {
+      $response = $controller->getResponse();
+      $response->notFound();
     }
+    
+    $response->setResponses($controller->getAttributes());
   }
 }

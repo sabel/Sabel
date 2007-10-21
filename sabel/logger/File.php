@@ -61,13 +61,8 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
     $this->fp = fopen($this->path, "a+");
   }
   
-  public function log($text)
+  public function log($text, $level = LOG_INFO)
   {
     fwrite($this->fp, date("Y-m-d H:i:s") ." ". $text . "\n");
-  }
-  
-  public function __destruct()
-  {
-
   }
 }

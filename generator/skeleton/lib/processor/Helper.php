@@ -13,7 +13,7 @@ class Processor_Helper extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    list($m, $c, $a) = $bus->get("destination")->toArray();
+    list($m, $c, $a) = $this->destination->toArray();
     
     $appDir       = "app";
     $helperDir    = "helpers";

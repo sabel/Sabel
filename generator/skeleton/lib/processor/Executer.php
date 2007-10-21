@@ -13,30 +13,23 @@ class Processor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $controller  = $bus->get("controller");
-    $request     = $bus->get("request");
-    $destination = $bus->get("destination");
-    $response    = $controller->getResponse();
+    $action = $this->destination->getAction();
     
-    $action = $destination->getAction();
-    $controller->setAction($action);
-    $controller->initialize();
+    $this->controller->setAction($action);
+    $this->controller->initialize();
     
-    if ($response->isNotFound()) {
-      $bus->set("response", $response);
-    } elseif (method_exists($controller, $action)) {
-      $annotation = new Sabel_Annotation_ReflectionClass(get_class($controller));
-      $method = $annotation->getMethod($action);
-      $annot = $method->getAnnotation("post");
-      if ($annot[0][0] === "only" && !$request->isPost()) {
-        $bus->set("response", $response->notFound());
-      } else {
-        $bus->set("response", $controller->execute($action));
+    $this->response = $this->controller->execute($action)->getResponse();
+    
+    if ($this->repository->find($action) !== false) {
+      $this->response->success();
+    } elseif (!$this->controller->isExecuted()) {
+      if ($this->response->isNotFound()) {
+        $this->destination->setAction("notFound");
+      } elseif ($this->response>isServerError()) {
+        $this->destination->setAction("serverError");
       }
-    } else {
-      $bus->set("response", $response->notFound());
+      
+      $this->response = $this->controller->execute($action)->getResponse();
     }
-    
-    return true;
   }
 }

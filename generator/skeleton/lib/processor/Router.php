@@ -13,18 +13,13 @@ class Processor_Router extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $router = new Sabel_Router_Map();
+    $this->router = new Sabel_Router_Map();
+    $this->destination = $this->router->route($this->request);
     
-    $request = $bus->get("request");
-    $destination = $router->route($request);
-    
-    $candidate = $router->getCandidate();
+    $candidate = $this->router->getCandidate();
     
     foreach ($candidate->getElements() as $element) {
-      $request->setParameterValue($element->name, $element->variable);
+      $this->request->setParameterValue($element->name, $element->variable);
     }
-    
-    $bus->set("router", $router);
-    $bus->set("destination", $destination);
   }
 }

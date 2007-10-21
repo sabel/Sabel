@@ -22,9 +22,9 @@ function load($className, $config)
   return Sabel_Container::injector($config)->newInstance($className);
 }
 
-function l($message)
+function l($message, $level = LOG_INFO)
 {
-  Sabel_Context::log($message);
+  Sabel_Context::log($message, $level);
 }
 
 function r($const)

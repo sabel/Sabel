@@ -4,6 +4,7 @@ define("RUN_BASE", realpath("."));
 require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 
 require (RUN_BASE . DS . "config" . DS . "environment.php");
+require (RUN_BASE . DS . "config" . DS . "defines.php");
 require (RUN_BASE . DS . "config" . DS . "Bus.php");
 require (RUN_BASE . DS . "config" . DS . "Factory.php");
 require (RUN_BASE . DS . "config" . DS . "connection.php");

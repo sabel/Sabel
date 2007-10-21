@@ -12,6 +12,8 @@
 abstract class Sabel_Bus_Processor extends Sabel_Object
 {
   public $name;
+  protected $holder = array();
+  protected $bus = null;
   
   public function __construct($name = null)
   {
@@ -22,5 +24,22 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
     $this->name = $name;
   }
   
+  public function setBus($bus)
+  {
+    $this->bus = $bus;
+    $this->holder =& $bus->getHolder();
+  }
+  
   abstract public function execute($bus);
+  
+  protected function __get($name)
+  {
+    return $this->holder[$name];
+  }
+  
+  protected function __set($name, $value)
+  {
+    $this->holder[$name] = $value;
+    $this->bus->set($name, $value);
+  }
 }

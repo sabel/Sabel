@@ -13,20 +13,13 @@ class Processor_Renderer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $controller  = $bus->get("controller");
-    $response    = $bus->get("response");
-    $destination = $bus->get("destination");
-    $repository  = $bus->get("repository");
-    
-    $response->outputHeader();
-    
-    $redirector = $controller->getAttribute("redirect");
+    $redirector = $this->controller->getAttribute("redirect");
     if ($redirector->isRedirected()) return;
     
-    $responses = $response->getResponses();
+    $responses = $this->response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
     
-    if (($resource = $repository->find())) {
+    if (($resource = $this->repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);
     } elseif ($response->isSuccess()) {
       return true;
@@ -37,16 +30,21 @@ class Processor_Renderer extends Sabel_Bus_Processor
       }
     }
     
-    $layoutName = $controller->getAttribute("layout");
+    $layoutName = $this->controller->getAttribute("layout");
     if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $bus->set("result", $contents);
     } elseif (isset($contents)) {
-      $layout = $repository->find($layoutName);
+      $layout = $this->repository->find($layoutName);
       $responses["contentForLayout"] = $contents;
       $result = $renderer->rendering($layout->fetch(), $responses);
       $bus->set("result", $result);
     }
+  }
+  
+  public function shutdown($bus)
+  {
+    $this->response->outputHeader();
   }
 }
