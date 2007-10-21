@@ -34,7 +34,11 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   
   protected function __get($name)
   {
-    return $this->holder[$name];
+    if (isset($this->holder[$name])) {
+      return $this->holder[$name];
+    } else {
+      return null;
+    }
   }
   
   protected function __set($name, $value)

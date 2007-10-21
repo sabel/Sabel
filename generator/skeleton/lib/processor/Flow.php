@@ -2,13 +2,6 @@
 
 class Processor_Flow extends Sabel_Bus_Processor
 {
-  private $reflection = null;
-  
-  private $request = null;
-  private $storage = null;
-  private $controller  = null;
-  private $destination = null;
-  
   private $action = "";
   
   private function initialize($bus)
@@ -16,9 +9,6 @@ class Processor_Flow extends Sabel_Bus_Processor
     $require = array("request", "storage", "controller", "destination");
     
     if ($bus->has($require)) {
-      foreach ($require as $r) {
-        $this->{$r} = $bus->get($r);
-      }
       $this->action = $this->destination->getAction();
     } else {
       $msg = "must need required bus data: " . join(", ", $require);
@@ -34,18 +24,34 @@ class Processor_Flow extends Sabel_Bus_Processor
                               $this->destination->getController()));
     
     $name = $this->controller->getName();
-    $this->reflection = new Sabel_Annotation_ReflectionClass($name);
     
     $state = new Processor_Flow_State($this->storage);
     $token = $this->request->getValueWithMethod("token");
     
     l("[flow] token is " . $token);
     
+    if (!$this->controller->hasMethod($this->action)) {
+      $this->response = $this->controller->execute($this->action)->getResponse();
+      
+      if ($this->repository->find($this->action) !== false) {
+        $this->response->success();
+      } elseif (!$this->controller->isExecuted()) {
+        if ($this->response->isNotFound()) {
+          $this->destination->setAction("notFound");
+        } elseif ($this->response>isServerError()) {
+          $this->destination->setAction("serverError");
+        }
+        
+        $this->response = $this->controller->execute($this->action)->getResponse();
+      }
+      return;
+    }
+    
     if ($token !== null && !$this->isStartAction()) {
       $state = $state->restore($key, $token);
     }
     
-    $method = $this->reflection->getMethod($this->action);
+    $method = $this->controller->getReflection()->getMethod($this->action);
     $methodAnnotation = $method->getAnnotation("flow");
     if ($methodAnnotation[0][0] === "ignore") {
       $this->executeAction($bus);
@@ -85,7 +91,7 @@ class Processor_Flow extends Sabel_Bus_Processor
           $state->setEndAction($endAction);
           $state->setNextActions(array($endAction));
         } else {
-          $method = $this->reflection->getMethod($this->action);
+          $method = $this->controller->getReflection()->getMethod($this->action);
           $next = $method->getAnnotation("next");
           $state->setNextActions($next[0]);
         }
@@ -99,18 +105,19 @@ class Processor_Flow extends Sabel_Bus_Processor
           $this->controller->getResponse()->setResponse($name, $val);
         }
       } else {
-        echo "[flow] your request was denied";exit;
+        l("[flow] your request was denied");
+        $this->response = $this->controller->getResponse()->notFound();
+        return;
       }
     }
     
     output_add_rewrite_var("token", $token);
-    
-    return true;
   }
   
   private function isStartAction()
   {
-    $method = $this->reflection->getMethod($this->action);
+    $method = $this->controller->getReflection()->getMethod($this->action);
+    
     if ($method->hasAnnotation("flow")) {
       $annot = $method->getAnnotation("flow");
       if ($annot[0][0] === "start" || $this->isOnce()) {
@@ -125,7 +132,8 @@ class Processor_Flow extends Sabel_Bus_Processor
   
   private function isOnce()
   {
-    $method = $this->reflection->getMethod($this->action);
+    $method = $this->controller->getReflection()->getMethod($this->action);
+    
     if ($method->hasAnnotation("flow")) {
       $annot = $method->getAnnotation("flow");
       if ($annot[0][0] === "once") {
@@ -176,10 +184,8 @@ class Processor_Flow extends Sabel_Bus_Processor
     $this->controller->setAction($this->action);
     $this->controller->initialize();
     
-    $response = $this->controller->execute($this->action);
-    $bus->set("response", $response);
-    
-    return $response;
+    $this->response = $this->controller->execute($this->action)->getResponse();
+    return $this->response;
   }
   
   private function createToken()
