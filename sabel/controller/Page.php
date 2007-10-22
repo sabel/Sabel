@@ -104,8 +104,8 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         $this->response->notfound();
       } elseif ($this->isCallable($action)) {
         if ($this->isActionExists($action)) {
-          $this->response->result = $this->$action();
           $this->response->success();
+          $this->response->result = $this->$action();
           $this->executed = true;
         } else {
           $this->response->notfound();
