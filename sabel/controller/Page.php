@@ -99,28 +99,21 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $this->response->setContentType("text/css");
     }
     
-    try {
-      if ($this->isReserved($action)) {
-        $this->response->notfound();
-      } elseif ($this->isCallable($action)) {
-        if ($this->isActionExists($action)) {
-          $this->response->success();
-          $this->response->result = $this->$action();
-          $this->executed = true;
-        } else {
-          $this->response->notfound();
-        }
-      } else {
-        $this->response->notfound();
-      }
-      
-      return $this;
-    } catch (Exception $exception) {
-      l($exception->getMessage());
-      Sabel_Context::getContext()->setException($exception);
-      $this->response->serverError();
-      return $this;
-    }
+     if ($this->isReserved($action)) {
+       $this->response->notfound();
+     } elseif ($this->isCallable($action)) {
+       if ($this->isActionExists($action)) {
+         $this->response->success();
+         $this->response->result = $this->$action();
+         $this->executed = true;
+       } else {
+         $this->response->notfound();
+       }
+     } else {
+       $this->response->notfound();
+     }
+     
+     return $this;
   }
   
   public function isExecuted()
