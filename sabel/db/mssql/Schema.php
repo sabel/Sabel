@@ -14,7 +14,7 @@ class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Schema
   public function getTableList()
   {
     $sql  = "SELECT table_name FROM information_schema.tables "
-          . "WHERE table_catalog = '{$this->schemaName}'",
+          . "WHERE table_catalog = '{$this->schemaName}'";
 
     $rows = $this->execute($sql);
     if (empty($rows)) return array();
