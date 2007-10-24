@@ -46,9 +46,9 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private final function makeCompileFile($template, $hash)
   {
-    if (ENVIRONMENT === PRODUCTION) {
-      if (is_readable($this->getCompileFilePath($hash))) return;
-    }
+    //if (ENVIRONMENT === PRODUCTION) {
+    //  if (is_readable($this->getCompileFilePath($hash))) return;
+    //}
     
     $r = '/<\?(=)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
