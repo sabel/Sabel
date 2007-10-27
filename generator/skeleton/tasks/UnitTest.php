@@ -2,31 +2,33 @@
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("tasks/environment.php");
+Sabel::fileUsing("tasks" . DS . "environment.php", true);
+Sabel::fileUsing("tasks" . DS . "Tests.php", true);
 
 /**
- * Migration
+ * UnitTest
  *
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class UnitTest extends Sakle
+class UnitTest extends Tests
 {
   public function run($arguments)
   {
-    if (!isset($arguments[1])) {
-      throw new Exception("model name must be specified");
-    }
+    $this->initialize($arguments);
     
-    if (isset($arguments[2])) {
-      define ("ENVIRONMENT", environment($arguments[2]));
+    $mRunner = Sabel_Test_ModelRunner::create();
+    if (count($this->arguments) === 1) {
+      foreach (scandir($mRunner->getTestsDirectory()) as $file) {
+        if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
+          $mRunner->start(str_replace(PHP_SUFFIX, "", $file));
+          echo "Complete: {$file}\n";
+        }
+      }
     } else {
-      define ("ENVIRONMENT", TEST);
+      $mRunner->start($arguments[1]);
+      echo "Complete: {$arguments[1]}\n";
     }
-    
-    Sabel::fileUsing("config/connection.php");
-    
-    Sabel_Test_ModelRunner::create()->start($arguments[1]);
   }
 }

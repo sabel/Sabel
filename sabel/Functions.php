@@ -170,7 +170,7 @@ function candidate($name, $uri, $options = null)
 
 function environment($string)
 {
-  switch ($string) {
+  switch (strtolower($string)) {
     case "production":  return PRODUCTION;
     case "test":        return TEST;
     case "development": return DEVELOPMENT;

@@ -27,7 +27,8 @@ class Sabel_Test_Model extends PHPUnit_Framework_TestCase
     $catchedException = NULL;
     
     $ref = new ReflectionClass($this);
-    $fixtureName = "Fixtures_" . array_pop(explode("_", $ref->getName()));
+    $exp = explode("_", $ref->getName());
+    $fixtureName = "Fixtures_" . $exp[0];
     
     try {
       if (class_exists($fixtureName)) {

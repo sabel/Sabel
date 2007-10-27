@@ -2,8 +2,7 @@
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("config" . DS . "environment.php");
-Sabel::fileUsing("config" . DS . "connection.php");
+Sabel::fileUsing("tasks" . DS . "environment.php");
 
 /**
  * Migration
@@ -30,10 +29,12 @@ class Migration extends Sabel_Sakle_Task
       throw new Exception("please specify the environment.");
     }
 
+    $this->arguments = $arguments;
+    $environment = $this->getEnvironment();
+    define("ENVIRONMENT", $environment);
+
     Sabel_DB_Config::initialize();
 
-    $this->arguments = $arguments;
-    $environment     = $this->getEnvironment();
     $connectionName  = $this->getConnectionName();
     $directory       = $this->getMigrationDirectory();
     $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
