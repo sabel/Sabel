@@ -1,6 +1,7 @@
 <?php
 
 require_once ("generator/skeleton/lib/processor/Flow.php");
+require_once ("generator/skeleton/lib/processor/flow/State.php");
 require_once ("Test/Processor/classes/Index.php");
 
 /**
@@ -25,11 +26,7 @@ class Test_Processor_Flow extends SabelTestCase
   {
     $bus = new Sabel_Bus();
     
-    // @todo "index/index" とかないときにえらるよ。
-    // Fatal error: Call to a member function getType() on a non-object in 
-    // /Users/morireo/Repository/sabel/sabel/request/Object.php on line 333
-    $request     = new Sabel_Request_Object("index/index");
-    
+    $request     = new Sabel_Request_Object("index/index");    
     $storage     = new Sabel_Storage_InMemory();
     $controller  = new Index();
     $destination = new Sabel_Destination("index", "index", "top");
@@ -47,6 +44,7 @@ class Test_Processor_Flow extends SabelTestCase
   public function testStandardFlow()
   {
     $processor = new Processor_Flow("flow");
+    $processor->setBus($this->bus);
     $processor->execute($this->bus);
   }
   
@@ -54,6 +52,7 @@ class Test_Processor_Flow extends SabelTestCase
   {
     $bus = new Sabel_Bus();
     $processor = new Processor_Flow("flow");
+    $processor->setBus($this->bus);
     
     try {
       $processor->execute($bus);
