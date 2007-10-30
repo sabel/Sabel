@@ -32,18 +32,6 @@ class Processor_Flow extends Sabel_Bus_Processor
     
     if (!$this->controller->hasMethod($this->action)) {
       $this->response = $this->controller->execute($this->action)->getResponse();
-      
-      if ($this->repository->find($this->action) !== false) {
-        $this->response->success();
-      } elseif (!$this->controller->isExecuted()) {
-        if ($this->response->isNotFound()) {
-          $this->destination->setAction("notFound");
-        } elseif ($this->response>isServerError()) {
-          $this->destination->setAction("serverError");
-        }
-        
-        $this->response = $this->controller->execute($this->action)->getResponse();
-      }
       return;
     }
     
@@ -59,7 +47,8 @@ class Processor_Flow extends Sabel_Bus_Processor
     }
     
     if ($state === null) {
-      echo "invalid token";exit;
+      $this->destination->setAction("notFound");
+      return;
     }
     
     if ($state->isInFlow() && !$this->isStartAction()) {
@@ -68,9 +57,6 @@ class Processor_Flow extends Sabel_Bus_Processor
       
       if (!$method->hasAnnotation("end")) {
         $this->executeInFlowAction($method, $state, $bus);
-      } elseif ($state->isEndAction($this->action)) {
-        $this->executeAction($bus);
-        $state->end($token);
       } else {
         $this->executeAction($bus);
         $state->end($token);
@@ -111,6 +97,7 @@ class Processor_Flow extends Sabel_Bus_Processor
       }
     }
     
+    ini_set("url_rewriter.tags", "input=src,fieldset=");
     output_add_rewrite_var("token", $token);
   }
   
@@ -181,11 +168,28 @@ class Processor_Flow extends Sabel_Bus_Processor
   
   private final function executeAction($bus)
   {
-    $this->controller->setAction($this->action);
-    $this->controller->initialize();
-    
-    $this->response = $this->controller->execute($this->action)->getResponse();
-    return $this->response;
+    try {
+      $this->controller->setAction($this->action);
+      $this->controller->initialize();
+      
+      $this->response = $this->controller->execute($this->action)->getResponse();
+      if ($this->response->isNotFound()) {
+        $this->destination->setAction("notFound");
+        return false;
+      }
+      
+      return $this->response;
+    } catch (Exception $e) {
+      l($e->getMessage());
+      $this->response->serverError();
+      if (ENVIRONMENT === PRODUCTION) {
+        $this->destination->setAction("invalid");
+      } else {
+        $this->destination->setAction("serverError");
+      }
+      
+      Sabel_Context::getContext()->setException($e);
+    }
   }
   
   private function createToken()

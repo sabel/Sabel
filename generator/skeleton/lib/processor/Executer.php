@@ -15,21 +15,20 @@ class Processor_Executer extends Sabel_Bus_Processor
   {
     $action = $this->destination->getAction();
     
-    $this->controller->setAction($action);
-    $this->controller->initialize();
-    
-    $this->response = $this->controller->execute($action)->getResponse();
-    
-    if ($this->repository->find($action) !== false) {
-      $this->response->success();
-    } elseif (!$this->controller->isExecuted()) {
-      if ($this->response->isNotFound()) {
-        $this->destination->setAction("notFound");
-      } elseif ($this->response>isServerError()) {
+    try {
+      $this->controller->setAction($action);
+      $this->controller->initialize();
+      $this->response = $this->controller->execute($action)->getResponse();
+    } catch (Exception $e) {
+      l($e->getMessage());
+      $this->response->serverError();
+      if (ENVIRONMENT === PRODUCTION) {
+        $this->destination->setAction("invalid");
+      } else {
         $this->destination->setAction("serverError");
       }
       
-      $this->response = $this->controller->execute($action)->getResponse();
+      Sabel_Context::getContext()->setException($e);
     }
   }
 }

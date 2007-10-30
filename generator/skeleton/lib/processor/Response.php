@@ -13,17 +13,12 @@ class Processor_Response extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $response    = $bus->get("response");
-    $destination = $bus->get("destination");
-    $controller  = $bus->get("controller");
-    $request     = $bus->get("request");
-    $storage     = $bus->get("storage");
+    $responses  = $this->response->getResponses();
+    $attributes = $this->controller->getAttributes();
+    $this->response->setResponses(array_merge($responses, $attributes));
     
-    if (!is_object($response)) {
-      $response = $controller->getResponse();
-      $response->notFound();
+    if ($this->response->isNotFound()) {
+      $this->destination->setAction("notFound");
     }
-    
-    $response->setResponses($controller->getAttributes());
   }
 }
