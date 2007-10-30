@@ -22,6 +22,6 @@ class Acl_Addon extends Sabel_Object
   public function eventCallback($bus)
   {
     $acl = new Acl_Processor("acl");
-    $bus->getList()->find("redirecter")->insertNext($acl);
+    $bus->getList()->find("redirecter")->insertNext("acl", $acl);
   }
 }

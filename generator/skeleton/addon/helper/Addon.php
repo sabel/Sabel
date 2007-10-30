@@ -16,12 +16,12 @@ class Helper_Addon extends Sabel_Object
   
   public function loadProcessor($bus)
   {
-    $bus->attachExecuteBeforeEvent("initializer", $this, "eventCallback");
+    $bus->attachExecuteEvent("router", $this, "eventCallback");
   }
   
   public function eventCallback($bus)
   {
     $helper = new Helper_Processor("helper");
-    $bus->getList()->find("initializer")->insertPrevious($helper);
+    $bus->getList()->find("router")->insertNext("helper", $helper);
   }
 }

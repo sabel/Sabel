@@ -21,8 +21,8 @@ class Form_Addon extends Sabel_Object
   
   public function eventCallback($bus)
   {
-    $form = new Flow_Processor("form");
+    $form = new Form_Processor("form");
     $bus->get("controller")->setAttribute("form", $form);
-    $bus->getList()->find("initialize")->insertNext($form);
+    $bus->getList()->find("initializer")->insertNext("form", $form);
   }
 }
