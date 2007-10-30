@@ -30,7 +30,7 @@ class Processor_Form extends Sabel_Bus_Processor
       return $this->delete();
     }
     
-    $reflection = $controller->getReflection();
+    $reflection = $this->controller->getReflection();
     $annot = $reflection->getMethodAnnotation($action, "unity");
     
     if ($annot === null) {

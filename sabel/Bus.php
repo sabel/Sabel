@@ -76,9 +76,9 @@ class Sabel_Bus extends Sabel_Object
     while ($processorList !== null) {
       $processor = $processorList->get();
       l("[bus] execute " . $processor->name, LOG_DEBUG);
-      // $processor->setHolder($this->holder);
       $processor->setBus($this);
       $result = $processor->execute($this);
+      $this->addonEvent($processor);
       $this->callback($processor);
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
@@ -100,6 +100,22 @@ class Sabel_Bus extends Sabel_Object
     }
     
     return ($this->has("result")) ? $this->get("result") : null;
+  }
+  
+  private $addonEvent = array();
+  public function attachExecuteEvent($processorName, $addon, $method)
+  {
+    $o = new StdClass();
+    $o->addon = $addon;
+    $o->method = $method;
+    $this->addonEvent[$processorName] = $o;
+  }
+  private function addonEvent($processor)
+  {
+    if (isset($this->addonEvent[$processor->name])) {
+      $o = $this->addonEvent[$processor->name];
+      $o->addon->{$o->method}($this);
+    }
   }
   
   public function callback($processor)

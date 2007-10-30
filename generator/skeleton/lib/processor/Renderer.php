@@ -21,8 +21,6 @@ class Processor_Renderer extends Sabel_Bus_Processor
     
     if (($resource = $this->repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);
-    } elseif ($this->response->isSuccess()) {
-      return true;
     } else {
       $resource = $this->repository->find("notFound");
       if (is_object($resource)) {
@@ -37,11 +35,15 @@ class Processor_Renderer extends Sabel_Bus_Processor
     if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      $bus->set("result", $contents);
+      $this->result = $contents;
     } elseif (isset($contents)) {
       $layout = $this->repository->find($layoutName);
-      $responses["contentForLayout"] = $contents;
-      $this->result = $renderer->rendering($layout->fetch(), $responses);
+      if (is_object($layout)) {
+        $responses["contentForLayout"] = $contents;
+        $this->result = $renderer->rendering($layout->fetch(), $responses);
+      } else {
+        $this->result = $contents;
+      }
     }
   }
   

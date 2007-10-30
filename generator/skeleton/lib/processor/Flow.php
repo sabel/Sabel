@@ -31,7 +31,7 @@ class Processor_Flow extends Sabel_Bus_Processor
     l("[flow] token is " . $token);
     
     if (!$this->controller->hasMethod($this->action)) {
-      $this->response = $this->controller->execute($this->action)->getResponse();
+      $this->response = $this->controller->getResponse();
       return;
     }
     

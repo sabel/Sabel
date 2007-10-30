@@ -16,9 +16,5 @@ class Processor_Response extends Sabel_Bus_Processor
     $responses  = $this->response->getResponses();
     $attributes = $this->controller->getAttributes();
     $this->response->setResponses(array_merge($responses, $attributes));
-    
-    if ($this->response->isNotFound()) {
-      $this->destination->setAction("notFound");
-    }
   }
 }

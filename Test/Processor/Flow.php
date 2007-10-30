@@ -2,7 +2,7 @@
 
 require_once ("generator/skeleton/lib/processor/Flow.php");
 require_once ("generator/skeleton/lib/processor/flow/State.php");
-require_once ("Test/Processor/classes/Index.php");
+require_once ("Test/Processor/classes/StandardFlow.php");
 
 /**
  * TestCase of Processor_Flow
@@ -28,7 +28,7 @@ class Test_Processor_Flow extends SabelTestCase
     
     $request     = new Sabel_Request_Object("index/index");    
     $storage     = new Sabel_Storage_InMemory();
-    $controller  = new Index();
+    $controller  = new StandardFlow();
     $destination = new Sabel_Destination("index", "index", "top");
     
     $controller->setup($request, $destination, $storage);
