@@ -101,7 +101,7 @@ class SabelAllTests
     $suite->addTest(Test_UtilMap::suite());
     
     // $suite->addTest(Test_View_Tests::suite());
-    // $suite->addTest(Test_Processor_Tests::suite());
+    $suite->addTest(Test_Processor_Tests::suite());
     
     $suite->addTest(Test_Experimental::suite());
     

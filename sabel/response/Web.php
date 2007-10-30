@@ -208,6 +208,7 @@ class Sabel_Response_Web implements Sabel_Response
   public function forbidden()
   {
     $this->status = self::FORBIDDEN;
+    return $this;
   }
   
   public function isForbidden()

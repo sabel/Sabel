@@ -41,8 +41,7 @@ class Processor_Renderer extends Sabel_Bus_Processor
     } elseif (isset($contents)) {
       $layout = $this->repository->find($layoutName);
       $responses["contentForLayout"] = $contents;
-      $result = $renderer->rendering($layout->fetch(), $responses);
-      $bus->set("result", $result);
+      $this->result = $renderer->rendering($layout->fetch(), $responses);
     }
   }
   

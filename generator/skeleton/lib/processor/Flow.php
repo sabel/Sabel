@@ -153,14 +153,9 @@ class Processor_Flow extends Sabel_Bus_Processor
       $this->controller->setAction($this->action);
       $this->controller->initialize();
       
-      $injector = Sabel_Container::injector(new Config_Factory());
-      
       $state->setNextActions(array($state->getCurrent()));
       $this->controller->redirect->to("a: " . $state->getCurrent());
-      $response = $injector->newInstance("Sabel_Response");
-      $response->forbidden();
-      
-      $bus->set("response", $response);
+      $this->response = $controller->getResponse()->forbidden();
     }
     
     return true;

@@ -12,19 +12,16 @@
 class Processor_Flow_Redirecter extends Sabel_Bus_Processor
 {
   public function execute($bus)
-  {
-    $controller = $bus->get("controller");
-    
+  {    
     $redirect = new Processor_Redirecter_Redirect($bus);
-    $controller->setAttribute("redirect", $redirect);
+    $this->controller->setAttribute("redirect", $redirect);
     
     return new Sabel_Bus_ProcessorCallback($this, "onRedirect", "executer");
   }
   
   public function onRedirect($bus)
   {
-    $controller = $bus->get("controller");
-    $redirect = $controller->getAttribute("redirect");
+    $redirect = $this->controller->getAttribute("redirect");
     
     if ($redirect->isRedirected()) {
       if (isset($_SERVER["HTTP_HOST"])) {
@@ -39,14 +36,14 @@ class Processor_Flow_Redirecter extends Sabel_Bus_Processor
         $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
       }
       
-      $token = $controller->getAttribute("token");
+      $token = $this->controller->getAttribute("token");
       if ($redirect->hasParameters()) {
         $to = $redirect->getUrl() . "&token={$token}";
       } else {
         $to = $redirect->getUrl() . "?token={$token}";
       }
       
-      $bus->get("response")->location($host, $ignored . $to);
+      $this->response->location($host, $ignored . $to);
     }
   }
 }

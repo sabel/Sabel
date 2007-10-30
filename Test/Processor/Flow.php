@@ -63,3 +63,12 @@ class Test_Processor_Flow extends SabelTestCase
     }
   }
 }
+
+class Config_Factory extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_Response")->to("Sabel_Response_Web");
+    $this->bind("Sabel_Locale")->to("Sabel_Locale_Null");
+  }
+}
