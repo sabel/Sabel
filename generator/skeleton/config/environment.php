@@ -23,6 +23,7 @@ if (ENVIRONMENT === DEVELOPMENT) {
 add_include_paths(array("app",
                         "lib",
                         "app" . DS. "models",
-                        "app" . DS. "helpers"));
+                        "app" . DS. "helpers",
+                        "addon"));
 
 set_include_path(Sabel::getPath() . ":" . get_include_path());
