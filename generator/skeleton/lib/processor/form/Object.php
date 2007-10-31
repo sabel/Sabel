@@ -83,6 +83,24 @@ class Processor_Form_Object extends Sabel_Object
     }
   }
   
+  public function mark($colName, $mark = "*", $tag = "em")
+  {
+    static $names = array();
+    $mdlName = $this->mdlName;
+    
+    if (empty($names[$mdlName])) {
+      $names[$mdlName] = Sabel_DB_Model_Localize::getColumnNames($mdlName);
+    }
+    
+    $name = (isset($names[$mdlName][$colName])) ? $names[$mdlName][$colName] : $colName;
+    
+    if (isset($this->columns[$colName]) && !$this->columns[$colName]->nullable) {
+      $name .= " <{$tag}>{$mark}</{$tag}>";
+    }
+    
+    return $name;
+  }
+  
   public function create($uri, $id = null, $class = null, $submitText = "")
   {
     $html    = array();
@@ -125,18 +143,18 @@ class Processor_Form_Object extends Sabel_Object
     return $start . "\n" . implode("<br/>\n", $html) . "\n";
   }
   
-  public function start($uri, $class = null, $id = null, $method = "POST", $name = null)
+  public function start($uri, $class = null, $id = null, $method = "post", $name = null)
   {
     $html = '<form action="' . uri($uri) . '" method="' . $method . '" ';
     $this->addIdAndClass($html, $id, $class);
     if ($name !== null) $html .= 'name="' . $name . '" ';
     
-    return $html . ">";
+    return $html . ">\n<fieldset class=\"formField\">\n";
   }
   
   public function end()
   {
-    return "</form>";
+    return "</fieldset>\n</form>\n";
   }
   
   public function text($name, $class = null, $id = null)
@@ -145,7 +163,7 @@ class Processor_Form_Object extends Sabel_Object
     $name  = $this->createName($name);
     $html  = '<input type="text" ';
     $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '">';
+    $html .= 'name="' . $name . '" value="' . $value . '" />';
     
     return $html;
   }
@@ -156,7 +174,7 @@ class Processor_Form_Object extends Sabel_Object
     $name  = $this->createName($name);
     $html  = '<input type="password" ';
     $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '">';
+    $html .= 'name="' . $name . '" value="' . $value . '" />';
     
     return $html;
   }
@@ -214,12 +232,14 @@ class Processor_Form_Object extends Sabel_Object
     return $dtime->date($yearRange, $defaultNull);
   }
   
-  public function radio($name, $values, $class = null, $id = null, $isBool = false)
+  public function radio($name, $values, $class = null, $id = null)
   {
     $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    if ($isBool) $value = ($value) ? 1 : 0;
+    if ($this->columns[$name]->isBool()) {
+      $value = ($value) ? 1 : 0;
+    }
     
+    $name   = $this->createName($name);
     $radios = array();
     $count  = 0;
     
@@ -244,7 +264,7 @@ class Processor_Form_Object extends Sabel_Object
     $name  = $this->createName($name);
     $html  = '<input type="hidden" ';
     $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '">';
+    $html .= 'name="' . $name . '" value="' . $value . '" />';
     
     return $html;
   }
