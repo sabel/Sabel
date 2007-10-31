@@ -48,7 +48,12 @@ class Sabel_Http_Response extends Sabel_Object
   
   public function getContents()
   {
-    return join('', $this->contents);
+    return join(PHP_EOL, $this->contents);
+  }
+  
+  public function getContentsByArray()
+  {
+    return $this->contents;
   }
   
   public function hasContents()
