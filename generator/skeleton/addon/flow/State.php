@@ -12,6 +12,8 @@ class Flow_State
   private $properties = array();
   private $nexts = array();
   
+  private $ends = array();
+  
   public function __construct($storage)
   {
     $this->storage = $storage;
@@ -22,6 +24,10 @@ class Flow_State
     $this->key = $key;
     $this->currentActivity = $activity;
     $this->token = $token;
+    
+    foreach ($this->ends as $end) {
+      $this->storage->delete($end);
+    }
   }
   
   public function setEndAction($endAction)
@@ -67,7 +73,12 @@ class Flow_State
   
   public function end()
   {
-    $this->storage->delete($this->getStateKey());
+    $this->ends[$this->getStateKey()] = $this->getStateKey();
+  }
+  
+  public function getEnds()
+  {
+    return $this->ends;
   }
   
   public function setNextActions($actions)
