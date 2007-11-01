@@ -126,10 +126,11 @@ class Form_Processor extends Sabel_Bus_Processor
   
   public function setPostValues($form)
   {
+    $values = $this->request->fetchPostValues();
+    if (empty($values)) return $form;
+    
     $model   = $form->getModel();
     $mdlName = $model->getName();
-    $values  = $this->request->fetchPostValues();
-    if (empty($values)) return;
     
     foreach ($values as $key => $value) {
       if (strpos($key, "::") === false) continue;

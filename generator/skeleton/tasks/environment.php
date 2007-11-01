@@ -1,17 +1,15 @@
 <?php
 
-if (!defined("PRODUCTION"))  define("PRODUCTION",  0x01);
-if (!defined("TEST"))        define("TEST",        0x05);
-if (!defined("DEVELOPMENT")) define("DEVELOPMENT", 0x0A);
+Sabel::fileUsing("config" . DS . "defines.php", true);
 
-add_include_paths(array("app",
+add_include_paths(array(MODULES_DIR,
                         "lib",
-                        "app" . DS. "models",
-                        "app" . DS. "helpers"));
+                        ADDON_DIR,
+                        MODELS_DIR,
+                        MODULES_DIR . DS. "helpers"));
 
 set_include_path(Sabel::getPath() . ":" . get_include_path());
 
-Sabel::fileUsing("config" . DS . "defines.php", true);
 Sabel::fileUsing("config" . DS . "Bus.php", true);
 Sabel::fileUsing("config" . DS . "Map.php", true);
 Sabel::fileUsing("config" . DS . "Factory.php", true);

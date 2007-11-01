@@ -12,23 +12,20 @@ class Processor_Addon extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $addons = array();
-    $addonDir = RUN_BASE . "/addon/";
+    $addonDir = RUN_BASE . DS . ADDON_DIR . DS;
     
     $this->getFiles($addonDir, $addons);
     
     foreach ($addons as $addonName) {
       $myAddonDir = $addonDir . $addonName;
-      require ($myAddonDir . "/Addon.php");
       $addonInitializeClassName = ucfirst($addonName) . "_Addon";
       if (class_exists($addonInitializeClassName)) {
         $addon = new $addonInitializeClassName();
-        $switch = $addon->load();
         
-        if ($switch) {
-          $addonLibDir = $myAddonDir . "/lib";
-          $processorClassFile = $myAddonDir . "/Processor.php";
-          if (is_readable($myAddonDir . "/Processor.php")) {
-            require ($processorClassFile);
+        if ($addon->load()) {
+          l("[addon] load addon " . $addonName);
+          $processorClassFile = $myAddonDir . DS . "Processor.php";
+          if (is_readable($processorClassFile)) {
             $addon->loadProcessor($bus);
           }
         }
