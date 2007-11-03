@@ -479,7 +479,9 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
   protected function createStatement($stmtType)
   {
-    return Sabel_DB_Statement::create($this->model, $stmtType);
+    $connectionName = $this->model->getConnectionName();
+    $stmt = Sabel_DB_Statement::create($connectionName, $stmtType);
+    return $stmt->table($this->model->getTableName());
   }
 
   protected function prepareSelect($stmt)
@@ -490,38 +492,26 @@ class Sabel_DB_Manipulator extends Sabel_Object
       $projection = implode(", ", $this->model->getColumnNames());
     }
 
-    $stmt->projection($projection);
-    $stmt->where($this->loadConditionManager()->build($stmt));
-    $stmt->constraints($this->constraints);
-
-    return $stmt;
+    return $stmt->projection($projection)
+                ->where($this->loadConditionManager()->build($stmt))
+                ->constraints($this->constraints);
   }
 
   protected function prepareUpdate($stmt, $data)
   {
     $values = $this->chooseValues($data, "update");
-
-    $stmt->values($values);
-    $stmt->where($this->loadConditionManager()->build($stmt));
-
-    return $stmt;
+    return $stmt->values($values)->where($this->loadConditionManager()->build($stmt));
   }
 
   protected function prepareInsert($stmt, $data)
   {
     $values = $this->chooseValues($data, "insert");
-
-    $stmt->values($values);
-    $stmt->sequenceColumn($this->model->getSequenceColumn());
-
-    return $stmt;
+    return $stmt->values($values)->sequenceColumn($this->model->getSequenceColumn());
   }
 
   protected function prepareDelete($stmt)
   {
-    $stmt->where($this->loadConditionManager()->build($stmt));
-
-    return $stmt;
+    return $stmt->where($this->loadConditionManager()->build($stmt));
   }
 
   protected function chooseValues($data, $method)

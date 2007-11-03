@@ -13,10 +13,8 @@ class Sabel_DB_Schema
 {
   private static $schemas = array();
 
-  public static function get($model)
+  public static function get($tblName, $connectionName)
   {
-    $tblName = $model->getTableName();
-
     if (isset(self::$schemas[$tblName])) {
       return self::$schemas[$tblName];
     }
@@ -40,8 +38,7 @@ class Sabel_DB_Schema
       $tblSchema->setUniques($properties["uniques"]);
       $tblSchema->setForeignKeys($properties["fkeys"]);
     } else {
-      $conName   = $model->getConnectionName();
-      $accessor  = new Sabel_DB_Schema_Accessor($conName);
+      $accessor  = new Sabel_DB_Schema_Accessor($connectionName);
       $tblSchema = $accessor->get($tblName);
     }
 

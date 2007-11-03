@@ -14,7 +14,6 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 {
   protected
     $sql        = "",
-    $model      = null,
     $driver     = null,
     $bindValues = array();
 
@@ -34,18 +33,11 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   abstract public function getStatementType();
   abstract public function build();
 
-  public function __construct(Sabel_DB_Abstract_Model $model)
+  public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
-    $this->model    = $model;
-    $this->table    = $model->getTableName();
-    $this->driver   = Sabel_DB_Driver::create($model->getConnectionName());
-    $this->phPrefix = $this->driver->getPrefixOfPlaceHelder();
-    $this->phSuffix = $this->driver->getSuffixOfPlaceHelder();
-  }
-
-  public function getModel()
-  {
-    return $this->model;
+    $this->driver   = $driver;
+    $this->phPrefix = $driver->getPrefixOfPlaceHelder();
+    $this->phSuffix = $driver->getSuffixOfPlaceHelder();
   }
 
   public function getDriver()
@@ -81,6 +73,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("table() argument should be a string.");
     }
+
+    return $this;
   }
 
   public function getTable()
@@ -95,6 +89,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("projection() argument should be a string.");
     }
+
+    return $this;
   }
 
   public function getProjection()
@@ -109,6 +105,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("join() argument should be a string.");
     }
+
+    return $this;
   }
 
   public function getJoin()
@@ -123,6 +121,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("where() argument should be a string.");
     }
+
+    return $this;
   }
 
   public function getWhere()
@@ -133,6 +133,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function constraints(array $constraints)
   {
     $this->constraints = $constraints;
+
+    return $this;
   }
 
   public function getConstraints()
@@ -150,6 +152,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       $key = $this->phPrefix . $key . $this->phSuffix;
       $this->bindValues[$key] = $value;
     }
+
+    return $this;
   }
 
   public function getValues()
@@ -166,6 +170,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("sequenceColumn() argument should be a string.");
     }
+
+    return $this;
   }
 
   public function getSequenceColumn()

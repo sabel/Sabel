@@ -14,7 +14,8 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
 {
   protected
     $autoCommit = true,
-    $connection = null;
+    $connection = null,
+    $connectionName = "";
 
   protected
     $placeHolderPrefix = "@",
@@ -29,14 +30,25 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   abstract public function getLastInsertId();
   abstract public function close($connection);
 
-  public function __construct($connection)
+  public function __construct($connectionName, $connection = null)
   {
-    $this->connection = $connection;
+    $this->connectionName = $connectionName;
+
+    if ($connection === null) {
+      $this->connection = Sabel_DB_Connection::get($connectionName);
+    } else {
+      $this->connection = $connection;
+    }
   }
 
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
+  }
+
+  public function getConnectionName()
+  {
+    return $this->connectionName;
   }
 
   public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)

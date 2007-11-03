@@ -96,7 +96,9 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   {
     static $nlsDateFormat = null;
 
-    foreach ($stmt->getModel()->getSchema()->getColumns() as $column) {
+    $schema = Sabel_DB_Schema::get($stmt->getTable(), $this->connectionName);
+
+    foreach ($schema->getColumns() as $column) {
       if ($column->isDatetime() && $nlsDateFormat !== "datetime") {
         $this->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
         $nlsDateFormat = "datetime";

@@ -34,8 +34,9 @@ class Sabel_DB_Transaction
     return (isset($ts[$connectionName]["conn"])) ? $ts[$connectionName]["conn"] : null;
   }
 
-  public static function begin($driver, $connectionName)
+  public static function begin($driver)
   {
+    $connectionName = $driver->getConnectionName();
     self::$transactions[$connectionName]["conn"]   = $driver->begin();
     self::$transactions[$connectionName]["driver"] = $driver;
 

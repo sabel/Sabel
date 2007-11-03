@@ -25,15 +25,14 @@ class Sabel_DB_Driver
     if (Sabel_DB_Transaction::isActive()) {
       $connection = Sabel_DB_Transaction::getConnection($connectionName);
       if ($connection === null) {
-        $driver = new $className(Sabel_DB_Connection::get($connectionName));
+        $driver = new $className($connectionName);
         Sabel_DB_Transaction::begin($driver, $connectionName);
       } else {
-        $driver = new $className($connection);
+        $driver = new $className($connectionName, $connection);
         $driver->autoCommit(false);
       }
     } else {
-      $connection = Sabel_DB_Connection::get($connectionName);
-      $driver = new $className($connection);
+      $driver = new $className($connectionName);
     }
 
     return $driver;
