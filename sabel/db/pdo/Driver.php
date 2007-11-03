@@ -12,6 +12,9 @@
  */
 abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
+  protected $placeHolderPrefix = ":";
+  protected $placeHolderSuffix = "";
+
   public function begin()
   {
     try {

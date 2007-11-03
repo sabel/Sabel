@@ -27,14 +27,20 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $constraints = array(),
     $seqColumn   = null;
 
+  protected
+    $phPrefix = ":",
+    $phSuffix = "";
+
   abstract public function getStatementType();
   abstract public function build();
 
   public function __construct(Sabel_DB_Abstract_Model $model)
   {
-    $this->model  = $model;
-    $this->table  = $model->getTableName();
-    $this->driver = Sabel_DB_Driver::create($model->getConnectionName());
+    $this->model    = $model;
+    $this->table    = $model->getTableName();
+    $this->driver   = Sabel_DB_Driver::create($model->getConnectionName());
+    $this->phPrefix = $this->driver->getPrefixOfPlaceHelder();
+    $this->phSuffix = $this->driver->getSuffixOfPlaceHelder();
   }
 
   public function getModel()
@@ -136,7 +142,14 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 
   public function values(array $values)
   {
-    $this->bindValues = $this->values = $values;
+    $this->values = array();
+    $this->bindValues = array();
+
+    foreach ($values as $key => $value) {
+      $this->values[$key] = $value;
+      $key = $this->phPrefix . $key . $this->phSuffix;
+      $this->bindValues[$key] = $value;
+    }
   }
 
   public function getValues()
@@ -162,8 +175,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 
   public function execute()
   {
-    $bindParams = $this->getBindParams();
-    $result = $this->driver->execute($this->getSql(), $bindParams);
+    $result = $this->driver->execute($this->getSql(), $this->bindValues);
 
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
@@ -172,28 +184,17 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     return $result;
   }
 
-  public function setBindValues(array $bindValues)
-  {
-    $this->bindValues = $bindValues;
-  }
-
   public function setBindValue($key, $val)
   {
+    $key = $this->phPrefix . $key . $this->phSuffix;
     $this->bindValues[$key] = $val;
+
+    return $key;
   }
 
-  public function getBindParams()
+  public function getBindValues()
   {
-    if (empty($this->bindValues)) {
-      return null;
-    }
-
-    $bindParams = array();
-    foreach ($this->bindValues as $key => $value) {
-      $bindParams[":{$key}"] = $value;
-    }
-
-    return $bindParams;
+    return $this->bindValues;
   }
 
   public function isSelect()

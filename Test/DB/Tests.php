@@ -1,7 +1,6 @@
 <?php
 
-define("MODELS_DIR", RUN_BASE . DIR_DIVIDER . "app" . DIR_DIVIDER . "models" . DIR_DIVIDER);
-
+define("MODELS_DIR_PATH", "/");
 require_once("Test/DB/Test.php");
 require_once("Test/DB/Mysql.php");
 require_once("Test/DB/Pgsql.php");
@@ -27,11 +26,11 @@ class Test_DB_Tests
     if (extension_loaded("mysql") && extension_loaded("pdo_mysql")) {
       $suite->addTest(Test_DB_Mysql::suite());
     }
-    /*
+
     if (extension_loaded("pgsql") && extension_loaded("pdo_pgsql")) {
       $suite->addTest(Test_DB_Pgsql::suite());
     }
-
+    /*
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_SQLite::suite());
     }

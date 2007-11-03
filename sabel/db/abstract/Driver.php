@@ -16,6 +16,10 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $autoCommit = true,
     $connection = null;
 
+  protected
+    $placeHolderPrefix = "@",
+    $placeHolderSuffix = "@";
+
   abstract public function getDriverId();
   abstract public function escape(array $values);
   abstract public function execute($sql, $bindParams = null);
@@ -48,7 +52,12 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $binds  = array();
     $values = $stmt->getValues();
     $keys   = array_keys($values);
-    foreach ($keys as $key) $binds[] = ":" . $key;
+    $prefix = $this->placeHolderPrefix;
+    $suffix = $this->placeHolderSuffix;
+
+    foreach ($keys as $key) {
+      $binds[] = $prefix . $key . $suffix;
+    }
 
     $sql = array("INSERT INTO " . $stmt->getTable() . " (");
     $sql[] = join(", ", $keys);
@@ -63,10 +72,12 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   {
     $tblName = $stmt->getTable();
     $where   = $stmt->getWhere();
+    $prefix = $this->placeHolderPrefix;
+    $suffix = $this->placeHolderSuffix;
 
     $updates = array();
     foreach ($stmt->getValues() as $column => $value) {
-      $updates[] = "$column = :{$column}";
+      $updates[] = "$column = {$prefix}{$column}{$suffix}";
     }
 
     return "UPDATE $tblName SET " . implode(", ", $updates) . $where;
@@ -95,21 +106,28 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     return $sql;
   }
 
+  public function getPrefixOfPlaceHelder()
+  {
+    return $this->placeHolderPrefix;
+  }
+
+  public function getSuffixOfPlaceHelder()
+  {
+    return $this->placeHolderSuffix;
+  }
+
   protected function bind($sql, $bindParam)
   {
-    if (empty($bindParam)) {
+    if (empty($bindParam)) return $sql;
+
+    if (in_array(null, $bindParam, true)) {
+      foreach ($bindParam as $key => $val) {
+        $val = ($val === null) ? "NULL" : $val;
+        $sql = str_replace($key, $val, $sql);
+      }
       return $sql;
     } else {
-      if (in_array(null, $bindParam, true)) {
-        foreach ($bindParam as $key => $val) {
-          $val = ($val === null) ? "NULL" : $val;
-          $sql = str_replace($key, $val, $sql);
-        }
-      } else {
-        $sql = str_replace(array_keys($bindParam), $bindParam, $sql);
-      }
-      
-      return $sql;
+      return str_replace(array_keys($bindParam), $bindParam, $sql);
     }
   }
 }

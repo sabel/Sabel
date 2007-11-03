@@ -109,9 +109,13 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 
   public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
   {
+    // @todo refactoring
+
     $binds   = array();
     $tblName = $stmt->getTable();
     $keys    = array_keys($stmt->getValues());
+    $prefix  = $this->placeHolderPrefix;
+    $suffix  = $this->placeHolderSuffix;
 
     if (($column = $stmt->getSequenceColumn()) !== null) {
       $keys[] = $column;
@@ -120,7 +124,9 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       $stmt->setBindValue($column, $this->lastInsertId);
     }
 
-    foreach ($keys as $key) $binds[] = ":" . $key;
+    foreach ($keys as $key) {
+      $binds[] = $prefix . $key . $suffix;
+    }
 
     $sql = array("INSERT INTO $tblName (");
     $sql[] = join(", ", $keys);

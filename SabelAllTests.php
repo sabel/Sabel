@@ -7,6 +7,7 @@ define("PRODUCTION",  0x01);
 define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 define("ENVIRONMENT", DEVELOPMENT);
+define("PHP_SUFFIX",  ".php");
 
 define("__TRUE__",  "true");
 define("__FALSE__", "false");
@@ -63,7 +64,7 @@ require_once('Test/DB/Tests.php');
 require_once('Test/Validate.php');
 require_once('Test/Map/Tests.php');
 require_once('Test/View/Tests.php');
-require_once('Test/Processor/Tests.php');
+//require_once('Test/Processor/Tests.php');
 
 require_once('Test/VirtualInheritance.php');
 require_once('Test/Reflection.php');
@@ -101,7 +102,7 @@ class SabelAllTests
     $suite->addTest(Test_UtilMap::suite());
     
     // $suite->addTest(Test_View_Tests::suite());
-    $suite->addTest(Test_Processor_Tests::suite());
+    // $suite->addTest(Test_Processor_Tests::suite());
     
     $suite->addTest(Test_Experimental::suite());
     

@@ -21,9 +21,9 @@ class Gettext extends Sabel_Sakle_Task
   public function run($arguments)
   {
     $dirs   = array();
-    $dirs[] = RUN_BASE . DS . "app";
-    $dirs[] = RUN_BASE . DS . "config";
-    $dirs[] = RUN_BASE . DS . "lib";
+    $dirs[] = MODULES_DIR_PATH;
+    $dirs[] = CONFIG_DIR_PATH;
+    $dirs[] = RUN_BASE . DS . LIB_DIR_NAME;
     $dirs[] = RUN_BASE . DS . "public";
     
     foreach ($dirs as $dir) {

@@ -932,7 +932,7 @@ class Manipulator extends Sabel_DB_Manipulator
       }
       
       $sql = $stmt->getSql();
-      if ($bindParams = $stmt->getBindParams()) {
+      if ($bindParams = $stmt->getBindValues()) {
         $bindParams = $stmt->getDriver()->escape($bindParams);
         $sql = str_replace(array_keys($bindParams), $bindParams, $sql);
       }

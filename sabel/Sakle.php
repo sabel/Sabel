@@ -1,20 +1,8 @@
 <?php
 
 require_once ("Sabel/Sabel.php");
-
-$args = $_SERVER["argv"];
-$pathToSabel = dirname(dirname($args[0]));
-$includePath = get_include_path();
-
-if (!in_array($pathToSabel, explode(":", $includePath))) {
-  set_include_path(get_include_path() . ":" . $pathToSabel);
-}
-
-if (isset($args[1])) {
-  Sakle::main($args[1]);
-} else {
-  Sakle::main(null);
-}
+define("RUN_BASE", getcwd());
+Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
 
 class Sakle
 {
@@ -25,8 +13,7 @@ class Sakle
   protected $messageHeaders = array(self::MSG_INFO => "[\x1b[1;32mSUCCESS\x1b[m]",
                                     self::MSG_WARN => "[\x1b[1;33mWARNING\x1b[m]",
                                     self::MSG_ERR  => "[\x1b[1;31mERROR\x1b[m]");
-  
-  protected $runningDirectory = "";
+                                    
   protected $arguments = array();
   
   public static function main($class)
@@ -43,7 +30,6 @@ class Sakle
   public function __construct()
   {
     // @todo compatibility for Windows
-    $this->runningDirectory = getcwd();
     $args = $_SERVER["argv"];
     array_shift($args);
     $this->arguments = $args;
@@ -51,7 +37,7 @@ class Sakle
   
   public function run($class)
   {
-    $pathToClass = $this->runningDirectory . DS . "tasks" . DS . $class . PHP_SUFFIX;
+    $pathToClass = RUN_BASE . DS . "tasks" . DS . $class . PHP_SUFFIX;
     
     if (is_readable($pathToClass)) {
       Sabel::fileUsing($pathToClass, true);
@@ -71,9 +57,8 @@ class Sakle
   
   public function allTestRun()
   {
-    $pathToClass = $this->runningDirectory . DIR_DIVIDER
-                 . "tasks" . DIR_DIVIDER . "TestSuite.php";
-                 
+    $pathToClass = RUN_BASE . DS . "tasks" . DS . "TestSuite.php";
+    
     if (is_readable($pathToClass)) {
       require ($pathToClass);
       $ins = new TestSuite();
@@ -86,3 +71,13 @@ class Sakle
     exit;
   }
 }
+
+$pathToSabel = Sabel::getPath();
+$includePath = get_include_path();
+
+if (!in_array($pathToSabel, explode(":", $includePath))) {
+  set_include_path($includePath . ":" . $pathToSabel);
+}
+
+isset($_SERVER["argv"][1]) ? Sakle::main($_SERVER["argv"][1]) : Sakle::main();
+

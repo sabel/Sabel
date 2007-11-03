@@ -16,7 +16,7 @@ define("HELPERS_DIR_NAME", "helpers");
 define("CONFIG_DIR_PATH",  RUN_BASE . DS . "config");
 define("MODULES_DIR_PATH", RUN_BASE . DS . MODULES_DIR_NAME);
 define("ADDON_DIR_PATH",   RUN_BASE . DS . ADDON_DIR_NAME);
-define("MODELS_DIR_PATH",  RUN_BASE . DS . MODULES_DIR_NAME . DS . "models");
+define("MODELS_DIR_PATH",  MODULES_DIR_PATH . DS . "models");
 define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
 define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
 

@@ -16,10 +16,7 @@ class Acl_Processor extends Sabel_Bus_Processor
   const RULE_DENY   = "deny";
   const RULE_ALLOW  = "allow";
   
-  private $user        = null;
-  private $controller  = null;
-  private $destination = null;
-  private $reflection  = null;
+  private $user = null;
   
   /**
    * execute an action.
@@ -29,10 +26,6 @@ class Acl_Processor extends Sabel_Bus_Processor
    */
   public function execute($bus)
   {
-    $this->storage     = $bus->get("storage");
-    $this->controller  = $bus->get("controller");
-    $this->destination = $bus->get("destination");
-    
     $action = $this->destination->getAction();
     $this->user = new Acl_User();
     

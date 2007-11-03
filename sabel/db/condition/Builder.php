@@ -11,13 +11,12 @@
  */
 class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
 {
-  protected $count = 1;
-  protected $stmt  = null;
+  private $count = 1;
+  private $stmt  = null;
 
   public function __construct(Sabel_DB_Abstract_Statement $stmt)
   {
-    $this->count = 1;
-    $this->stmt  = $stmt;
+    $this->stmt = $stmt;
   }
 
   public function build(Sabel_DB_Condition_Object $condition)
@@ -49,8 +48,8 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
   public function buildNormal(Sabel_DB_Condition_Object $condition)
   {
     $bindKey = "param" . $this->count++;
-    $this->stmt->setBindValue($bindKey, $condition->value);
-    return $this->getKey($condition) . " = :{$bindKey}";
+    $bindKey = $this->stmt->setBindValue($bindKey, $condition->value);
+    return $this->getKey($condition) . " = " . $bindKey;
   }
 
   public function buildIsNull($key)
@@ -95,10 +94,10 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
     $t   = $this->count++;
     $val = $condition->value;
 
-    $this->stmt->setBindValue("from{$f}", $val[0]);
-    $this->stmt->setBindValue("to{$t}",   $val[1]);
+    $fkey = $this->stmt->setBindValue("from{$f}", $val[0]);
+    $tkey = $this->stmt->setBindValue("to{$t}",   $val[1]);
 
-    return $this->getKey($condition) . " BETWEEN :from{$f} AND :to{$t}";
+    return $this->getKey($condition) . " BETWEEN $fkey AND $tkey";
   }
 
   public function buildCompare(Sabel_DB_Condition_Object $condition)
@@ -106,16 +105,16 @@ class Sabel_DB_Condition_Builder implements Sabel_DB_Condition_Builder_Interface
     $bindKey = "param" . $this->count++;
     list ($lg, $val) = $condition->value;
 
-    $this->stmt->setBindValue($bindKey, $val);
-    return $condition->key . " $lg :{$bindKey}";
+    $bindKey = $this->stmt->setBindValue($bindKey, $val);
+    return $condition->key . " $lg $bindKey";
   }
 
   protected function createLike($val, $condition, $esc = null)
   {
     $bindKey = "param" . $this->count++;
-    $this->stmt->setBindValue($bindKey, $val);
+    $bindKey = $this->stmt->setBindValue($bindKey, $val);
 
-    $query = $this->getKey($condition) . " LIKE :{$bindKey}";
+    $query = $this->getKey($condition) . " LIKE " . $bindKey;
     if (isset($esc)) $query .= " escape '{$esc}'";
 
     return $query;
