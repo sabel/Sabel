@@ -13,14 +13,13 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $libDb = RUN_BASE . DS . "lib" . DS . "db" . DS;
-    
-    Sabel::fileUsing($libDb . "utility.php", true);
-    Sabel::fileUsing($libDb . "validators.php", true);
-    
     Sabel_DB_Config::initialize();
+    
+    // creates or resumes session.
     $this->storage->start();
-    $this->controller->response->pageTitle = "Sabel";
+    
+    // default page title.
+    $this->controller->getResponse()->setResponse("pageTitle", "Sabel");
   }
 
   /**

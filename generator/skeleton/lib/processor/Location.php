@@ -18,17 +18,14 @@ class Processor_Location extends Sabel_Bus_Processor
     list ($module, $controller) = $this->destination->toArray();
     $base = $this->repository->getPathToBaseDirectory($module);
     
-    // app/views/
     $rootLocation = new Sabel_View_Location_File("root", $this->destination);
-    $rootLocation->setPath(RUN_BASE . DS . APP_VIEW);
+    $rootLocation->setPath(MODULES_DIR_PATH . DS . VIEW_DIR_NAME . DS);
     
-    // app/{module}/views/
     $moduleLocation = new Sabel_View_Location_File("module", $this->destination);
-    $moduleLocation->setPath($base . VIEW_DIR . DS);
+    $moduleLocation->setPath($base . VIEW_DIR_NAME . DS);
     
-    // app/{module}/views/{controller}/
     $leafLocation = new Sabel_View_Location_File("leaf", $this->destination);
-    $leafLocation->setPath($base . VIEW_DIR . DS . $controller . DS);
+    $leafLocation->setPath($base . VIEW_DIR_NAME . DS . $controller . DS);
     
     $this->repository->addLocation($rootLocation);
     $this->repository->addLocation($moduleLocation);

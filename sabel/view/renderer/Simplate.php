@@ -16,7 +16,7 @@ class Sabel_View_Renderer_Simplate extends Sabel_View_Renderer
   public function __construct()
   {
     $simplate = new simplate();
-    $simplate->compile_dir  = RUN_BASE . DS . TPL_COMPILE_DIR . DS;
+    $simplate->compile_dir  = COMPILE_DIR_PATH . DS;
     $simplate->lazy_check   = true;
     
     $this->simplate = $simplate;
@@ -27,7 +27,7 @@ class Sabel_View_Renderer_Simplate extends Sabel_View_Renderer
     $simplate = $this->simplate;
     
     $simplate->caching = true;
-    $simplate->cache_dir = RUN_BASE . DS . TPL_CACHE_DIR . DS;
+    $simplate->cache_dir = CACHE_DIR_PATH . DS;
     $simplate->cache_lifetime = 600;
   }
   

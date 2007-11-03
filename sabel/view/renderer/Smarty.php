@@ -16,7 +16,7 @@ class Sabel_View_Renderer_Smarty extends Sabel_View_Renderer
   public function __construct()
   {
     $this->smarty = new Smarty();
-    $this->smarty->compile_dir = RUN_BASE . DS . TPL_COMPILE_DIR . DS;
+    $this->smarty->compile_dir = COMPILE_DIR_PATH . DS;
   }
   
   public function enableCache()
@@ -24,7 +24,7 @@ class Sabel_View_Renderer_Smarty extends Sabel_View_Renderer
     $smarty = $this->smarty;
     
     $smarty->caching = true;
-    $smarty->cache_dir = RUN_BASE . DS . TPL_CACHE_DIR . DS;
+    $smarty->cache_dir = CACHE_DIR_PATH . DS;
     $smarty->cache_lifetime = 600;
   }
   

@@ -2,7 +2,7 @@
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("tasks" . DS . "environment.php");
+Sabel::fileUsing("config" . DS . "INIT.php", true);
 
 /**
  * Migration

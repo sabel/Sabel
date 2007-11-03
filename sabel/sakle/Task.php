@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Sakle_Task
+abstract class Sabel_Sakle_Task extends Sabel_Object
 {
   const MSG_INFO = 0x01;
   const MSG_WARN = 0x02;

@@ -1,10 +1,8 @@
 <?php
 
 if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-define("SCHEMA_DIR", "lib" . DIR_DIVIDER . "schema" . DIR_DIVIDER);
-
-Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
-Sabel::fileUsing("config" . DIR_DIVIDER . "connection.php");
+define("SCHEMA_DIR", "lib" . DS . "schema" . DS);
+Sabel::fileUsing("config" . DS . "INIT.php", true);
 
 /**
  * Schema

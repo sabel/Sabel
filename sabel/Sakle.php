@@ -51,15 +51,19 @@ class Sakle
   
   public function run($class)
   {
-    $pathToClass = $this->runningDirectory . DIR_DIVIDER
-                 . "tasks" . DIR_DIVIDER . $class . ".php";
-                 
+    $pathToClass = $this->runningDirectory . DS . "tasks" . DS . $class . PHP_SUFFIX;
+    
     if (is_readable($pathToClass)) {
-      require ($pathToClass);
+      Sabel::fileUsing($pathToClass, true);
       $ins = new $class();
+      
+      if ($ins->hasMethod("initialize")) {
+        $ins->initialize($this->arguments);
+      }
+      
       $ins->run($this->arguments);
       
-      if (method_exists($ins, "finalize")) {
+      if ($ins->hasMethod("finalize")) {
         $ins->finalize();
       }
     }

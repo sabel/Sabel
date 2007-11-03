@@ -95,8 +95,13 @@ final class Sabel
   
   private static function convertPath($className)
   {
+    static $suffix = null;
+    if ($suffix === null) {
+      $suffix = (defined("PHP_SUFFIX")) ? PHP_SUFFIX : ".php";
+    }
+    
     $prePath = str_replace("_", DS, $className);
-    $path = strtolower(dirname($prePath)) . DS . basename($prePath) . PHP_SUFFIX;
+    $path = strtolower(dirname($prePath)) . DS . basename($prePath) . $suffix;
     
     return str_replace("." . DS, "", $path);
   }
@@ -129,14 +134,11 @@ final class Sabel
   
   public static function main()
   {
-    self::$path = dirname(__FILE__);
-    
-    define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
-    define("DIR_DIVIDER", DIRECTORY_SEPARATOR);
     define("DS", DIRECTORY_SEPARATOR);
+    define("IS_WIN", (DS === '\\'));
+    define("DIR_DIVIDER", DS);
     
-    define("PHP_SUFFIX", ".php");
-    define("TPL_SUFFIX", ".tpl");
+    self::$path = dirname(__FILE__);
     
     $SABEL = "sabel" . DS;
     
@@ -215,3 +217,4 @@ final class Sabel
 }
 
 Sabel::main();
+

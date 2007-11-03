@@ -101,14 +101,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
      if ($this->isReserved($action)) {
        $this->response->notfound();
-     } elseif ($this->isCallable($action)) {
-       if ($this->isActionExists($action)) {
-         $this->response->success();
-         $this->response->result = $this->$action();
-         $this->executed = true;
-       } else {
-         $this->response->notfound();
-       }
+     } elseif ($this->isCallable($action) && $this->isActionExists($action)) {
+       $this->response->success();
+       $this->response->result = $this->$action();
+       $this->executed = true;
      } else {
        $this->response->notfound();
      }
@@ -134,10 +130,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   private function isActionExists($action)
   {
     if ($this->hasMethod($action)) {
-      $isExistance = create_function
-                       ('$self, $action',
-                        'return is_callable(array($self, $action));');
-      return $isExistance($this, $action);
+      return is_callable(array($this, $action));
     } else {
       return false;
     }

@@ -2,7 +2,7 @@
 
 if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("tasks" . DS . "environment.php", true);
+Sabel::fileUsing("config" . DS . "INIT.php", true);
 Sabel::fileUsing("tasks" . DS . "Tests.php", true);
 
 /**
@@ -16,8 +16,6 @@ class UnitTest extends Tests
 {
   public function run($arguments)
   {
-    $this->initialize($arguments);
-    
     $mRunner = Sabel_Test_ModelRunner::create();
     if (count($this->arguments) === 1) {
       foreach (scandir($mRunner->getTestsDirectory()) as $file) {

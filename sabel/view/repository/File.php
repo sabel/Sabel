@@ -126,6 +126,6 @@ class Sabel_View_Repository_File extends Sabel_Object implements Sabel_View_Repo
   
   public function getPathToBaseDirectory($module)
   {
-    return RUN_BASE . DS . MODULES_DIR . DS . $module . DS;
+    return MODULES_DIR_PATH . DS . $module . DS;
   }
 }

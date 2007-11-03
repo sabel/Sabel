@@ -12,7 +12,7 @@ class Processor_Addon extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $addons = array();
-    $addonDir = RUN_BASE . DS . ADDON_DIR . DS;
+    $addonDir = ADDON_DIR_PATH . DS;
     
     $this->getFiles($addonDir, $addons);
     

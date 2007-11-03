@@ -2,7 +2,7 @@
 
 if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
 
-Sabel::fileUsing("config" . DIR_DIVIDER . "environment.php");
+Sabel::fileUsing("config" . DS . "INIT.php", true);
 
 /**
  * Gettext
@@ -21,10 +21,10 @@ class Gettext extends Sabel_Sakle_Task
   public function run($arguments)
   {
     $dirs   = array();
-    $dirs[] = RUN_BASE . DIR_DIVIDER . "app";
-    $dirs[] = RUN_BASE . DIR_DIVIDER . "config";
-    $dirs[] = RUN_BASE . DIR_DIVIDER . "lib";
-    $dirs[] = RUN_BASE . DIR_DIVIDER . "public";
+    $dirs[] = RUN_BASE . DS . "app";
+    $dirs[] = RUN_BASE . DS . "config";
+    $dirs[] = RUN_BASE . DS . "lib";
+    $dirs[] = RUN_BASE . DS . "public";
     
     foreach ($dirs as $dir) {
       $this->addFiles($dir);
@@ -38,7 +38,7 @@ class Gettext extends Sabel_Sakle_Task
   {
     foreach (scandir($dir) as $item) {
       if ($item === "." || $item === "..") continue;
-      $item = $dir . DIR_DIVIDER . $item;
+      $item = $dir . DS . $item;
       if (is_dir($item)) {
         $this->addFiles($item);
       } else {
@@ -49,7 +49,7 @@ class Gettext extends Sabel_Sakle_Task
   
   private function createMessageFiles()
   {
-    $dir = RUN_BASE . DIR_DIVIDER . "locale" . DIR_DIVIDER;
+    $dir = RUN_BASE . DS . "locale" . DS;
     $locales = array();
     
     foreach (scandir($dir) as $item) {
@@ -69,9 +69,8 @@ class Gettext extends Sabel_Sakle_Task
       }
     }
     
-    $filePath = DIR_DIVIDER . "LC_MESSAGES" . DIR_DIVIDER
-              . $this->domain . ".php";
-              
+    $filePath = DS . "LC_MESSAGES" . DS . $this->domain . ".php";
+    
     foreach ($locales as $locale) {
       if (!empty($this->locales) && !in_array($locale, $this->locales)) continue;
       $isDefaultLocale = ($locale === $this->defaultLocale);

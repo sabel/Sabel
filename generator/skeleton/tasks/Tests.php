@@ -4,7 +4,7 @@ abstract class Tests extends Sabel_Sakle_Task
 {
   protected $arguments = array();
   
-  protected function initialize($arguments)
+  public function initialize($arguments)
   {
     $this->arguments = $arguments;
     $environment = $this->getEnvironment();

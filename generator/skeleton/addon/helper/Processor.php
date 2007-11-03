@@ -13,25 +13,21 @@ class Helper_Processor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    list($m, $c, $a) = $bus->get("destination")->toArray();
+    $moduleName = $this->destination->getModule();
+    $controllerName = $this->destination->getController();
     
-    $appDir       = "app";
-    $helperDir    = "helpers";
-    $sharedHelper = "application";
-    $commonHelper = "common";
-    $helperSuffix = "php";
-    
-    $pref = DS . $appDir . DS . $m . DS . $helperDir . DS;
+    $sharedHelper  = "application";
+    $commonHelpers = MODULES_DIR_PATH . DS . HELPERS_DIR_NAME;
+    $moduleHelpers = MODULES_DIR_PATH . DS . $moduleName . DS . HELPERS_DIR_NAME;
     
     $helpers = array();
     
-    $helpers[] = DS . $appDir . DS . $helperDir . DS . "{$sharedHelper}.{$helperSuffix}";
-    $helpers[] = DS . $appDir . DS . $helperDir . DS . "{$commonHelper}.{$helperSuffix}";
-    $helpers[] = $pref . "{$sharedHelper}.{$helperSuffix}";
-    $helpers[] = $pref . "{$c}.{$helperSuffix}";
+    $helpers[] = $commonHelpers . DS . $sharedHelper;
+    $helpers[] = $moduleHelpers . DS . $sharedHelper;
+    $helpers[] = $moduleHelpers . DS . $controllerName;
     
     foreach ($helpers as $helper) {
-      Sabel::fileUsing(RUN_BASE . $helper, true);
+      Sabel::fileUsing($helper . PHP_SUFFIX, true);
     }
   }
 }
