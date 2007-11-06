@@ -43,7 +43,7 @@ class Sabel_Http_Header
       if (isset($parts[2])) $this->returnMessage = $parts[2];
     } else {
       $parts = explode(':', $headerLine);
-       $this->headers[$parts[0]] = $parts[1];
+      $this->headers[$parts[0]] = $parts[1];
     }
   }
   

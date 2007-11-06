@@ -80,7 +80,6 @@ class Sabel_Http_Request extends Sabel_Object
     $headers[] = "X-Path: {$path}";
     if($this->userAgent) $headers[] = "User-Agent: {$this->userAgent}";
     
-    $this->requester->setBytesPerRead(10192);
     $this->requester->connect($host, $port);
     $data = join("\r\n", $headers) . "\r\n\r\n" . $request . "\r\n";
     $result = $this->requester->send($data);
@@ -92,21 +91,8 @@ class Sabel_Http_Request extends Sabel_Object
     $this->responseHeader = $responseHeader;
     $this->requestHeader  = new Sabel_Http_Header($headers);
     
-    $headerFlag = true;
-    foreach ($result as $line) {
-      if (!$headerFlag) {
-        $response->setContents($line);
-      } else {
-        $responseHeader->add($line);
-      }
-      
-      if ($headerFlag && trim($line) === "") {
-        $headerFlag = false;
-      } else {
-        continue;
-      }
-    }
-    
+    foreach ($result["header"] as $header) $responseHeader->add($header);
+    $response->setContents($result["contents"]);
     return $response;
   }
   
