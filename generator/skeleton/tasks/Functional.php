@@ -1,8 +1,5 @@
 <?php
 
-if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-
-Sabel::fileUsing("config" . DS . "INIT.php", true);
 Sabel::fileUsing("tasks" . DS . "Tests.php", true);
 
 /**
