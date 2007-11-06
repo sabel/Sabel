@@ -112,6 +112,16 @@ class Sabel_DB_Migration_Column
     if ($column->type === Sabel_DB_Type::STRING &&
         $column->max === null) $column->max = 255;
 
+    if ($column->type === Sabel_DB_Type::INT) {
+      if ($column->max === null) $column->max = INT_MAX;
+      if ($column->min === null) $column->min = INT_MIN;
+    }
+
+    if ($column->type === Sabel_DB_Type::SMALLINT) {
+      if ($column->max === null) $column->max = SMALLINT_MAX;
+      if ($column->min === null) $column->min = SMALLINT_MIN;
+    }
+
     return $this;
   }
 }
