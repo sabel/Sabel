@@ -2,7 +2,7 @@
 
 function add_include_path($path)
 {
-  set_include_path(RUN_BASE . "{$path}:" . get_include_path());
+  set_include_path(get_include_path() . ":" . RUN_BASE . $path);
 }
 
 function add_include_paths($paths)

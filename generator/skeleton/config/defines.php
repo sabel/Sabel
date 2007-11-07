@@ -19,5 +19,6 @@ define("ADDON_DIR_PATH",   RUN_BASE . DS . ADDON_DIR_NAME);
 define("MODELS_DIR_PATH",  MODULES_DIR_PATH . DS . "models");
 define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
 define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
+define("TEST_DIR_PATH",    RUN_BASE . DS . "tests");
 
 define("DEFAULT_LAYOUT_NAME", "layout");

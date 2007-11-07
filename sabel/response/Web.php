@@ -19,7 +19,8 @@ class Sabel_Response_Web implements Sabel_Response
   const SUCCESS      = 200;
   const REDIRECTED   = 300;
   const NOT_MODIFIED = 304;
-  const NOT_FOUND    = 400;
+  const BAD_REQUEST  = 400;
+  const NOT_FOUND    = 404;
   const FORBIDDEN    = 403;
   const SERVER_ERROR = 500;
   

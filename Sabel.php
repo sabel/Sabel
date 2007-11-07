@@ -113,10 +113,17 @@ final class Sabel
     } else {
       if (is_readable($path)) return true;
       
+      static $includePath = null;
       static $paths = null;
-
-      if ($paths === null) {
+      
+      if ($includePath === null) {
         $includePath = get_include_path();
+      } elseif ($includePath !== get_include_path()) {
+        $includePath = get_include_path();
+        $paths = null;
+      }
+      
+      if ($paths === null) {
         $paths = explode(":", $includePath);
       }
       
