@@ -21,6 +21,14 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return "oci";
   }
 
+  public function getSqlBuilder($stmt)
+  {
+    $sqlBuilder = new Sabel_DB_Oci_Sql($stmt);
+    $sqlBuilder->setDriver($this);
+
+    return $sqlBuilder;
+  }
+
   public function begin()
   {
     $this->autoCommit = false;
@@ -64,6 +72,21 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return $values;
   }
 
+  public function setLimit($limit)
+  {
+    $this->limit = $limit;
+  }
+
+  public function setOffset($offset)
+  {
+    $this->offset = $offset;
+  }
+
+  public function setLastInsertId($id)
+  {
+    $this->lastInsertId = $id;
+  }
+
   public function execute($sql, $bindParams = null)
   {
     if ($bindParams !== null) {
@@ -92,72 +115,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   public function getLastInsertId()
   {
     return $this->lastInsertId;
-  }
-
-  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    static $nlsDateFormat = null;
-
-    $schema = Sabel_DB_Schema::get($stmt->getTable(), $this->connectionName);
-
-    foreach ($schema->getColumns() as $column) {
-      if ($column->isDatetime() && $nlsDateFormat !== "datetime") {
-        $this->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
-        $nlsDateFormat = "datetime";
-        break;
-      } elseif ($column->isDate() && $nlsDateFormat !== "date") {
-        $this->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
-        $nlsDateFormat = "date";
-        break;
-      }
-    }
-
-    return parent::createSelectSql($stmt);
-  }
-
-  public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    // @todo refactoring
-
-    $binds   = array();
-    $tblName = $stmt->getTable();
-    $keys    = array_keys($stmt->getValues());
-    $prefix  = $this->placeHolderPrefix;
-    $suffix  = $this->placeHolderSuffix;
-
-    if (($column = $stmt->getSequenceColumn()) !== null) {
-      $keys[] = $column;
-      $seqName = strtoupper("{$tblName}_{$column}_seq");
-      $rows = $this->execute("SELECT {$seqName}.nextval AS id FROM dual");
-      $this->lastInsertId = $rows[0]["id"];
-      $stmt->setBindValue($column, $this->lastInsertId);
-    }
-
-    foreach ($keys as $key) {
-      $binds[] = $prefix . $key . $suffix;
-    }
-
-    $sql = array("INSERT INTO $tblName (");
-    $sql[] = join(", ", $keys);
-    $sql[] = ") VALUES(";
-    $sql[] = join(", ", $binds);
-    $sql[] = ")";
-
-    return implode("", $sql);
-  }
-
-  protected function createConstraintSql($constraints)
-  {
-    $sql = "";
-
-    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
-    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
-    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
-
-    $this->limit  = (isset($constraints["limit"]))  ? $constraints["limit"]  : null;
-    $this->offset = (isset($constraints["offset"])) ? $constraints["offset"] : null;
-
-    return $sql;
   }
 
   private function executeError($ociStmt)

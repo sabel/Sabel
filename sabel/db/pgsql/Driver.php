@@ -16,6 +16,11 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     return "pgsql";
   }
 
+  public function getSqlBuilder($stmt)
+  {
+    return new Sabel_DB_Pgsql_Sql($stmt);
+  }
+
   public function begin()
   {
     $connection = $this->getConnection();

@@ -16,6 +16,11 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return "mysql";
   }
 
+  public function getSqlBuilder($stmt)
+  {
+    return new Sabel_DB_Mysql_Sql($stmt);
+  }
+
   public function begin()
   {
     $connection = $this->getConnection();

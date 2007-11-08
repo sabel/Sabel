@@ -17,10 +17,6 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $connection = null,
     $connectionName = "";
 
-  protected
-    $placeHolderPrefix = "@",
-    $placeHolderSuffix = "@";
-
   abstract public function getDriverId();
   abstract public function escape(array $values);
   abstract public function execute($sql, $bindParams = null);
@@ -57,83 +53,6 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function getConnectionName()
   {
     return $this->connectionName;
-  }
-
-  public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    $sql = "SELECT " . $stmt->getProjection() . " FROM " . $stmt->getTable()
-         . $stmt->getJoin() . $stmt->getWhere();
-
-    return $sql . $this->createConstraintSql($stmt->getConstraints());
-  }
-
-  public function createInsertSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    $binds  = array();
-    $values = $stmt->getValues();
-    $keys   = array_keys($values);
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-
-    foreach ($keys as $key) {
-      $binds[] = $prefix . $key . $suffix;
-    }
-
-    $sql = array("INSERT INTO " . $stmt->getTable() . " (");
-    $sql[] = join(", ", $keys);
-    $sql[] = ") VALUES(";
-    $sql[] = join(", ", $binds);
-    $sql[] = ")";
-
-    return implode("", $sql);
-  }
-
-  public function createUpdateSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    $tblName = $stmt->getTable();
-    $where   = $stmt->getWhere();
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-
-    $updates = array();
-    foreach ($stmt->getValues() as $column => $value) {
-      $updates[] = "$column = {$prefix}{$column}{$suffix}";
-    }
-
-    return "UPDATE $tblName SET " . implode(", ", $updates) . $where;
-  }
-
-  public function createDeleteSql(Sabel_DB_Abstract_Statement $stmt)
-  {
-    return "DELETE FROM " . $stmt->getTable() . $stmt->getWhere();
-  }
-
-  protected function createConstraintSql($constraints)
-  {
-    $sql = "";
-
-    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
-    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
-    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
-
-    if (isset($constraints["offset"]) && !isset($constraints["limit"])) {
-      $sql .= " LIMIT 100 OFFSET " . $constraints["offset"];
-    } else {
-      if (isset($constraints["limit"]))  $sql .= " LIMIT "  . $constraints["limit"];
-      if (isset($constraints["offset"])) $sql .= " OFFSET " . $constraints["offset"];
-    }
-
-    return $sql;
-  }
-
-  public function getPrefixOfPlaceHelder()
-  {
-    return $this->placeHolderPrefix;
-  }
-
-  public function getSuffixOfPlaceHelder()
-  {
-    return $this->placeHolderSuffix;
   }
 
   protected function bind($sql, $bindParam)

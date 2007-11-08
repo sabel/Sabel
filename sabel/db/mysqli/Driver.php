@@ -16,16 +16,27 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return "mysqli";
   }
 
+  public function getSqlBuilder($stmt)
+  {
+    return new Sabel_DB_Mysqli_Sql($stmt);
+  }
+
+  public function autoCommit($bool)
+  {
+    $this->autoCommit = $bool;
+    mysqli_autocommit($this->getConnection(), $bool);
+  }
+
   public function begin()
   {
-    mysqli_autocommit($this->connection, false);
-    return $this->connection;
+    $this->autoCommit(false);
+    return $this->getConnection();
   }
 
   public function commit()
   {
-    if (mysqli_commit($this->connection)) {
-      mysqli_autocommit($this->connection, true);
+    if (mysqli_commit($this->getConnection())) {
+      $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Exception("mysqli driver commit failed.");
     }
@@ -33,8 +44,8 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function rollback()
   {
-    if (mysqli_rollback($this->connection)) {
-      mysqli_autocommit($this->connection, true);
+    if (mysqli_rollback($this->getConnection())) {
+      $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Exception("mysqli driver rollback failed.");
     }
@@ -48,7 +59,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape(array $values)
   {
-    $conn = $this->connection;
+    $conn = $this->getConnection();
 
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -67,7 +78,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $result = mysqli_query($this->connection, $sql);
+    $result = mysqli_query($this->getConnection(), $sql);
     if (!$result) $this->executeError($sql);
 
     $rows = array();
@@ -81,7 +92,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function getLastInsertId()
   {
-    return mysqli_insert_id($this->connection);
+    return mysqli_insert_id($this->getConnection());
   }
 
   private function executeError($sql)

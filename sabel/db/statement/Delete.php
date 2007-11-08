@@ -18,6 +18,6 @@ class Sabel_DB_Statement_Delete extends Sabel_DB_Abstract_Statement
 
   public function build()
   {
-    return $this->sql = $this->driver->createDeleteSql($this);
+    return $this->sql = $this->sqlBuilder->createDeleteSql();
   }
 }

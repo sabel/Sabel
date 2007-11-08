@@ -15,6 +15,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   protected
     $sql        = "",
     $driver     = null,
+    $sqlBuilder = null,
     $bindValues = array();
 
   protected
@@ -35,9 +36,10 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 
   public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
-    $this->driver   = $driver;
-    $this->phPrefix = $driver->getPrefixOfPlaceHelder();
-    $this->phSuffix = $driver->getSuffixOfPlaceHelder();
+    $this->driver     = $driver;
+    $this->sqlBuilder = $driver->getSqlBuilder($this);
+    $this->phPrefix   = $this->sqlBuilder->getPrefixOfPlaceHelder();
+    $this->phSuffix   = $this->sqlBuilder->getSuffixOfPlaceHelder();
   }
 
   public function getDriver()
