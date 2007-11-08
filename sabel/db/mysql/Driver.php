@@ -18,8 +18,9 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    if (mysql_query("START TRANSACTION", $this->connection)) {
-      return $this->connection;
+    $connection = $this->getConnection();
+    if (mysql_query("START TRANSACTION", $connection)) {
+      return $connection;
     } else {
       throw new Sabel_DB_Exception("mysql driver begin failed.");
     }
@@ -27,14 +28,14 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function commit()
   {
-    if (!mysql_query("COMMIT", $this->connection)) {
+    if (!mysql_query("COMMIT", $this->getConnection())) {
       throw new Sabel_DB_Exception("mysql driver commit failed.");
     }
   }
 
   public function rollback()
   {
-    if (!mysql_query("ROLLBACK", $this->connection)) {
+    if (!mysql_query("ROLLBACK", $this->getConnection())) {
       throw new Sabel_DB_Exception("mysql driver rollback failed.");
     }
   }
@@ -47,7 +48,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function escape(array $values)
   {
-    $conn = $this->connection;
+    $conn = $this->getConnection();
 
     foreach ($values as &$val) {
       if (is_bool($val)) {
@@ -66,7 +67,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
       $sql = $this->bind($sql, $this->escape($bindParams));
     }
 
-    $result = mysql_query($sql, $this->connection);
+    $result = mysql_query($sql, $this->getConnection());
     if (!$result) $this->executeError($sql);
 
     $rows = array();

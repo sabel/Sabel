@@ -206,7 +206,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
 
   private function setDefault($co, $default)
   {
-    if ($default === null || $co->isString() && $default === "") {
+    if ($default === null) {
       $co->default = null;
     } else {
       $this->setDefaultValue($co, $default);

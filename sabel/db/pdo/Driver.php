@@ -18,19 +18,20 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   public function begin()
   {
     try {
-      $this->connection->beginTransaction();
+      $connection = $this->getConnection();
+      $connection->beginTransaction();
     } catch (PDOException $e) {
       $message = $e->getMessage();
       throw new Sabel_DB_Exception("pdo driver begin failed. {$message}");
     }
 
-    return $this->connection;
+    return $connection;
   }
 
   public function commit()
   {
     try {
-      $this->connection->commit();
+      $this->getConnection()->commit();
     } catch (PDOException $e) {
       $message = $e->getMessage();
       throw new Sabel_DB_Exception("pdo driver commit failed. {$message}");
@@ -40,7 +41,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   public function rollback()
   {
     try {
-      $this->connection->rollback();
+      $this->getConnection()->rollback();
     } catch (PDOException $e) {
       $message = $e->getMessage();
       throw new Sabel_DB_Exception("pdo driver rollback failed. {$message}");
@@ -55,8 +56,9 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 
   public function execute($sql, $bindParams = null)
   {
-    if (!($pdoStmt = $this->connection->prepare($sql))) {
-      $error = $this->connection->errorInfo();
+    $connection = $this->getConnection();
+    if (!($pdoStmt = $connection->prepare($sql))) {
+      $error = $connection->errorInfo();
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
@@ -71,7 +73,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $pdoStmt->closeCursor();
       return (empty($rows)) ? null : $rows;
     } else {
-      $this->executeError($this->connection, $pdoStmt, $bindParams);
+      $this->executeError($connection, $pdoStmt, $bindParams);
     }
   }
 

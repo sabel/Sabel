@@ -30,14 +30,22 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   abstract public function getLastInsertId();
   abstract public function close($connection);
 
-  public function __construct($connectionName, $connection = null)
+  public function __construct($connectionName)
   {
     $this->connectionName = $connectionName;
+  }
 
-    if ($connection === null) {
-      $this->connection = Sabel_DB_Connection::get($connectionName);
+  public function setConnection($connection)
+  {
+    $this->connection = $connection;
+  }
+
+  public function getConnection()
+  {
+    if ($this->connection === null) {
+      return $this->connection = Sabel_DB_Connection::get($this->connectionName);
     } else {
-      $this->connection = $connection;
+      return $this->connection;
     }
   }
 

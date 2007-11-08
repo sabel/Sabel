@@ -58,12 +58,12 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
       switch ($column->type) {
         case Sabel_DB_Type::INT:
         case Sabel_DB_Type::SMALLINT:
-          $column->default = (int)$default;
+          $column->default = ($default === "") ? null : (int)$default;
           break;
 
         case Sabel_DB_Type::FLOAT:
         case Sabel_DB_Type::DOUBLE:
-          $column->default = (float)$default;
+          $column->default = ($default === "") ? null : (float)$default;
           break;
 
         case Sabel_DB_Type::BOOL:
@@ -75,11 +75,11 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
           break;
 
         case Sabel_DB_Type::BIGINT:
-          $column->default = (string)$default;
+          $column->default = ($default === "") ? null : (string)$default;
           break;
 
         default:
-          $column->default = $default;
+          $column->default = ($default === "") ? null : $default;
       }
     }
   }

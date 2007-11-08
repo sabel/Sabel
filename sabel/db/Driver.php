@@ -22,17 +22,16 @@ class Sabel_DB_Driver
       $className = "Sabel_DB_Pdo_Driver_" . ucfirst($db);
     }
 
+    $driver = new $className($connectionName);
+
     if (Sabel_DB_Transaction::isActive()) {
       $connection = Sabel_DB_Transaction::getConnection($connectionName);
       if ($connection === null) {
-        $driver = new $className($connectionName);
-        Sabel_DB_Transaction::begin($driver, $connectionName);
+        Sabel_DB_Transaction::begin($driver);
       } else {
-        $driver = new $className($connectionName, $connection);
+        $driver->setConnection($connection);
         $driver->autoCommit(false);
       }
-    } else {
-      $driver = new $className($connectionName);
     }
 
     return $driver;

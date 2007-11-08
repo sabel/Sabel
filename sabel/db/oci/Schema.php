@@ -217,11 +217,19 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
   {
     if (strcasecmp($default, "null") === 0) {
       $column->default = null;
-    } elseif ($column->isString()) {
-      $column->default = substr($default, 1, -1);
-    } else {
-      $this->setDefaultValue($column, $default);
+      return;
+    } elseif ($column->isString() || $column->isBigint()) {
+      if (($length = strlen($default)) >= 2) {
+        $first = $default{0};
+        $last  = $default{$length - 1};
+        if ($first === "'" && $last === "'") {
+          $column->default = substr($default, 1, -1);
+          return;
+        }
+      }
     }
+
+    $this->setDefaultValue($column, $default);
   }
 
   private function isDate($colName)
