@@ -46,6 +46,11 @@ class Sabel_Environment extends Sabel_Object
     $this->environments[$key] = $value;
   }
   
+  public function isHttps()
+  {
+    return (isset($_SERVER["HTTPS"]) && strtolower($_SERVER["HTTPS"]) == "on");
+  }
+  
   public function isMethod($expected)
   {
     return ($expected === $this->request_method);

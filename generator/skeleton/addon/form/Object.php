@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Processor_Form_Object
+ * Form_Object
  *
- * @category  Processor
- * @package   lib.processor
+ * @category  Addon
+ * @package   addon.form
  * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
@@ -39,7 +39,18 @@ class Form_Object extends Sabel_Object
   
   public function get($key)
   {
-    return $this->model->__get($key);
+    $result = $this->model->__get($key);
+    return (is_string($result)) ? htmlspecialchars($result) : $result;
+  }
+  
+  public function __set($key, $val)
+  {
+    $this->set($key, $val);
+  }
+  
+  public function __get($key)
+  {
+    return $this->get($key);
   }
   
   public function setErrors($errors)
@@ -83,7 +94,7 @@ class Form_Object extends Sabel_Object
     }
   }
   
-  public function mark($colName, $mark = "※", $tag = "em")
+  public function name($colName)
   {
     static $names = array();
     $mdlName = $this->mdlName;
@@ -92,7 +103,12 @@ class Form_Object extends Sabel_Object
       $names[$mdlName] = Sabel_DB_Model_Localize::getColumnNames($mdlName);
     }
     
-    $name = (isset($names[$mdlName][$colName])) ? $names[$mdlName][$colName] : $colName;
+    return (isset($names[$mdlName][$colName])) ? $names[$mdlName][$colName] : $colName;
+  }
+  
+  public function mark($colName, $mark = "*", $tag = "em")
+  {
+    $name = $this->name($colName);
     
     if (isset($this->columns[$colName]) && !$this->columns[$colName]->nullable) {
       $name .= " <{$tag}>{$mark}</{$tag}>";
@@ -101,182 +117,100 @@ class Form_Object extends Sabel_Object
     return $name;
   }
   
-  public function create($uri, $id = null, $class = null, $submitText = "")
+  public function start($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    $html    = array();
-    $columns = $this->columns;
-    $schema  = $this->model->getSchema();
-    $mdlName = $this->mdlName;
-    $names   = Sabel_DB_Model_Localize::getColumnNames($mdlName);
-    
-    foreach ($columns as $colName => $column) {
-      if ($column->increment || $column->primary) continue;
-      
-      if ($schema->isForeignKey($colName)) {
-        $html[] = $this->hidden($colName);
-        continue;
-      }
-      
-      if (isset($names[$colName])) {
-        $html[] = $names[$colName];
-      } else {
-        $html[] = $colName;
-      }
-      
-      if ($column->isBool()) {
-        $html[] = $this->checkbox($colName);
-      } elseif ($column->isText()) {
-        $html[] = $this->textarea($colName);
-      } elseif ($column->isDatetime()) {
-        $html[] = $this->datetime($colName);
-      } elseif ($column->isDate()) {
-        $html[] = $this->date($colName);
-      } else {
-        $html[] = $this->text($colName);
-      }
-    }
-    
-    $html[] = "<br/>" . $this->submit($submitText);
-    $html[] = $this->end();
-    $start  = $this->start($uri, $id, $class, "POST");
-    
-    return $start . "\n" . implode("<br/>\n", $html) . "\n";
-  }
-  
-  public function start($uri, $class = null, $id = null, $method = "post", $name = null)
-  {
-    $html = '<form action="' . uri($uri) . '" method="' . $method . '" ';
-    $this->addIdAndClass($html, $id, $class);
-    if ($name !== null) $html .= 'name="' . $name . '" ';
-    
-    return $html . ">\n<fieldset class=\"formField\">\n";
+    $form = Form_Element_Factory::create(Form_Element::FORM, $name);
+    $form->setId($id)->setClass($class);
+    return $form->toHtml(array("type" => "open", "uri" => $uri, "method" => $method));
   }
   
   public function end()
   {
-    return "</fieldset>\n</form>\n";
+    $form = Form_Element_Factory::create(Form_Element::FORM, "");
+    return $form->toHtml(array("type" => "close"));
+  }
+  
+  public function submit($value = null, $class = null, $id = null)
+  {
+    $form = Form_Element_Factory::create(Form_Element::FORM, "");
+    $form->setId($id)->setClass($class);
+    return $form->toHtml(array("type" => "submit", "text" => $value));
   }
   
   public function text($name, $class = null, $id = null)
   {
-    $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    $html  = '<input type="text" ';
-    $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '" />';
-    
-    return $html;
+    return $this->createSimpleElement(Form_Element::TEXT, $name, $id, $class);
   }
   
   public function password($name, $class = null, $id = null)
   {
-    $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    $html  = '<input type="password" ';
-    $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '" />';
-    
-    return $html;
+    return $this->createSimpleElement(Form_Element::PASSWORD, $name, $id, $class);
   }
   
   public function textarea($name, $class = null, $id = null)
   {
-    $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    $html  = '<textarea ';
-    $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '">' . $value . '</textarea>';
-    
-    return $html;
-  }
-  
-  public function checkbox($name, $class = null, $id = null)
-  {
-    $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    $html  = '<input type="checkbox" ';
-    $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="1"';
-    
-    if ($value === true) $html .= ' checked="checked"';
-    
-    return $html . ' />';
-  }
-  
-  public function select($name, $values, $class = null, $id = null, $useKey = true)
-  {
-    $value  = $this->getValue($name);
-    $name   = $this->createName($name);
-    $select = new Processor_Form_Select();
-    
-    $contents = $select->getContents($values, $value, $useKey);
-    $html = '<select name="' . $name . '" ';
-    $this->addIdAndClass($html, $id, $class);
-    return $html . ">" . $contents . "\n</select>";
-  }
-  
-  public function datetime($name, $yearRange = null,
-                           $withSecond = false, $defaultNull = false)
-  {
-    $value = $this->getValue($name);
-    $name  = $this->createName("datetime") . "[{$name}]";
-    $dtime = new Processor_Form_Datetime($name, $value);
-    return $dtime->datetime($yearRange, $withSecond, $defaultNull);
-  }
-  
-  public function date($name, $yearRange = null, $defaultNull = false)
-  {
-    $value = $this->getValue($name);
-    $name  = $this->createName("date") . "[{$name}]";
-    $dtime = new Processor_Form_Datetime($name, $value);
-    return $dtime->date($yearRange, $defaultNull);
-  }
-  
-  public function radio($name, $values, $class = null, $id = null)
-  {
-    $value = $this->getValue($name);
-    if ($this->columns[$name]->isBool()) {
-      $value = ($value) ? 1 : 0;
-    }
-    
-    $name   = $this->createName($name);
-    $radios = array();
-    $count  = 0;
-    
-    foreach ($values as $v => $text) {
-      $radio = '<input type="radio" ';
-      $this->addIdAndClass($radio, $id, $class);
-      $radio .= 'name="' . $name . '" value="' . $v . '"';
-      if ($count === 0 && $value === null || $v === $value) {
-        $radio .= ' checked="checked"';
-      }
-
-      $radios[] = $radio . " />{$text}\n";
-      $count++;
-    }
-    
-    return implode("&nbsp;", $radios);
+    return $this->createSimpleElement(Form_Element::TEXTAREA, $name, $id, $class);
   }
   
   public function hidden($name, $class = null, $id = null)
   {
-    $value = $this->getValue($name);
-    $name  = $this->createName($name);
-    $html  = '<input type="hidden" ';
-    $this->addIdAndClass($html, $id, $class);
-    $html .= 'name="' . $name . '" value="' . $value . '" />';
-    
-    return $html;
+    return $this->createSimpleElement(Form_Element::HIDDEN, $name, $id, $class);
   }
   
-  public function submit($value = "", $class = null, $id = null)
+  public function checkbox($name, $values, $class = null, $id = null)
   {
-    $html = '<input type="submit" ';
-    $this->addIdAndClass($html, $id, $class);
-    if ($value !== "") $value = 'value="' . $value. '" ';
-    $html .= $value . '/>';
+    $checkbox = Form_Element_Factory::create(Form_Element::CHECK, $this->createName($name));
+    $checkbox->setValue($this->getValue($name))->setData($values)->setId($id)->setClass($class);
+    return $checkbox->toHtml();
+  }
+  
+  public function select($name, $values, $class = null, $id = null, $useKey = true)
+  {
+    if (isset($this->columns[$name])) {
+      $isNullable = $this->columns[$name]->nullable;
+    } else {
+      $isNullable = true;
+    }
     
-    return $html;
+    $select = Form_Element_Factory::create(Form_Element::SELECT, $this->createName($name));
+    $select->setValue($this->getValue($name))->setData($values)->setId($id)->setClass($class);
+    return $select->toHtml(array("isNullable" => $isNullable, "useKey" => $useKey));
+  }
+  
+  public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
+  {
+    $name  = $this->createName("datetime") . "[{$name}]";
+    $dtime = Form_Element_Factory::create(Form_Element::DATETIME, $name);
+    $dtime->setValue($this->getValue($name));
+    return $dtime->toHtml(array("yearRange"   => $yearRange,
+                                "withSecond"  => $withSecond,
+                                "defaultNull" => $defaultNull));
+  }
+  
+  public function date($name, $yearRange = null, $defaultNull = false)
+  {
+    $name  = $this->createName("date") . "[{$name}]";
+    $dtime = Form_Element_Factory::create(Form_Element::DATE, $name);
+    $dtime->setValue($this->getValue($name));
+    return $dtime->toHtml(array("yearRange" => $yearRange, "defaultNull" => $defaultNull));
+  }
+  
+  public function radio($name, $values, $class = null, $id = null)
+  {
+    if (isset($this->columns[$name])) {
+      if ($this->columns[$name]->isBool()) {
+        $value = ($this->getValue($name)) ? 1 : 0;
+      }
+      
+      $isNullable = $this->columns[$name]->nullable;
+    } else {
+      $isNullable = true;
+      $value = $this->getValue($name);
+    }
+    
+    $radio = Form_Element_Factory::create(Form_Element::RADIO, $this->createName($name));
+    $radio->setValue($value)->setData($values)->setId($id)->setClass($class);
+    return $radio->toHtml(array("isNullable" => $isNullable));
   }
   
   protected function createName($name)
@@ -290,129 +224,10 @@ class Form_Object extends Sabel_Object
     return (is_string($value)) ? htmlspecialchars($value) : $value;
   }
   
-  protected function addIdAndClass(&$html, $id, $class)
+  private function createSimpleElement($elementType, $name, $id, $class)
   {
-    if ($id !== null)    $html .= 'id="' . $id . '" ';
-    if ($class !== null) $html .= 'class="' . $class . '" ';
-  }
-}
-
-class Processor_Form_Select
-{
-  public function getContents($values, $selectedValue = null, $useKey = true)
-  {
-    $html = array();
-    foreach ($values as $key => $value) {
-      $k = ($useKey) ? $key : $value;
-      if ($selectedValue === $k) {
-        $html[] = '<option value="' . $k . '" selected="selected">';
-      } else {
-        $html[] = '<option value="' . $k . '">';
-      }
-      $html[] = $value . '</option>';
-    }
-    
-    return implode("\n", $html);
-  }
-}
-
-class Processor_Form_Datetime
-{
-  protected
-    $name      = "",
-    $timestamp = null;
-  
-  public function __construct($name, $datetime = null)
-  {
-    $this->name = $name;
-    
-    if ($datetime !== null) {
-      $this->timestamp = strtotime($datetime);
-    }
-  }
-  
-  public function datetime($yearRange = null, $withSecond = false, $defaultNull = false)
-  {
-    $name = $this->name;
-    list ($first, $last) = $this->getYearRange($yearRange);
-    
-    $html   = array();
-    $html[] = $this->numSelect("year",   $name, $first, $last, $defaultNull);
-    $html[] = $this->numSelect("month",  $name, 1, 12, $defaultNull);
-    $html[] = $this->numSelect("day",    $name, 1, 31, $defaultNull);
-    $html[] = $this->numSelect("hour",   $name, 0, 23, $defaultNull);
-    $html[] = $this->numSelect("minute", $name, 0, 59, $defaultNull);
-    
-    if ($withSecond) {
-      $html[] = $this->numSelect("second", $name, 0, 59);
-    }
-    
-    return implode("&nbsp;", $html);
-  }
-  
-  public function date($yearRange = null, $defaultNull = false)
-  {
-    $name = $this->name;
-    list ($first, $last) = $this->getYearRange($yearRange);
-    
-    $html   = array();
-    $html[] = $this->numSelect("year",  $name, $first, $last, $defaultNull);
-    $html[] = $this->numSelect("month", $name, 1, 12, $defaultNull);
-    $html[] = $this->numSelect("day",   $name, 1, 31, $defaultNull);
-    
-    return implode("&nbsp;", $html);
-  }
-  
-  protected function numSelect($type, $name, $start, $end, $defaultNull)
-  {
-    $html = array('<select name="' . $name . '[' . $type . ']">');
-    
-    if ($defaultNull) {
-      $html[] = '<option></option>';
-    }
-    
-    $val  = (int)$this->selectedValue($type);
-    
-    for ($i = $start; $i <= $end; $i++) {
-      if ($i === $val) {
-        $html[] = '<option value="' . $i . '" selected="selected">' . $i . '</option>';
-      } else {
-        $html[] = '<option value="' . $i . '">' . $i . '</option>';
-      }
-    }
-    
-    return implode("\n", $html) . "\n</select>";
-  }
-  
-  protected function selectedValue($type)
-  {
-    if ($this->timestamp === null) {
-      return null;
-    }
-    
-    switch ($type) {
-      case "year":
-        return date("Y", $this->timestamp);
-
-      case "month":
-        return date("n", $this->timestamp);
-
-      case "day":
-        return date("j", $this->timestamp);
-
-      case "hour":
-        return date("G", $this->timestamp);
-
-      case "minute":
-        return date("i", $this->timestamp);
-
-      case "second":
-        return date("s", $this->timestamp);
-    }
-  }
-  
-  protected function getYearRange($yearRange)
-  {
-    return ($yearRange === null) ? array(1980, 2035) : $yearRange;
+    $element = Form_Element_Factory::create($elementType, $this->createName($name));
+    $element->setValue($this->getValue($name))->setId($id)->setClass($class);
+    return $element->toHtml();
   }
 }

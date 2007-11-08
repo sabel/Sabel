@@ -15,6 +15,7 @@ class Sabel_DB_Validate_Config
   protected static $dateRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/';
   protected static $messages  = array("length"   => "%s is too long.",
                                       "maximum"  => "%s is too large.",
+                                      "minimum"  => "%s is too small.",
                                       "nullable" => "please enter a %s.",
                                       "type"     => "wrong %s format.",
                                       "unique"   => "'%s' is unavailable.");

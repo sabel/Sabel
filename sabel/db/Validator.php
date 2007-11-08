@@ -115,9 +115,12 @@ class Sabel_DB_Validator extends Sabel_Object
         continue;
       }
 
-      if ($column->isNumeric() && !$this->maximum($column)) {
-        $this->errors[] = sprintf($this->messages["maximum"], $lName);
-        continue;
+      if ($column->isNumeric() && $column->value !== null) {
+        if (!$this->maximum($column)) {
+          $this->errors[] = sprintf($this->messages["maximum"], $lName);
+        } elseif (!$this->minimum($column)) {
+          $this->errors[] = sprintf($this->messages["minimum"], $lName);
+        }
       }
     }
 
@@ -180,7 +183,12 @@ class Sabel_DB_Validator extends Sabel_Object
 
   protected function maximum($column)
   {
-    return ($column->value < $column->max);
+    return ($column->value <= $column->max);
+  }
+
+  protected function minimum($column)
+  {
+    return ($column->value >= $column->min);
   }
 
   protected function customs($customs, $columns)
