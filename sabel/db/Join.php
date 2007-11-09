@@ -134,20 +134,20 @@ class Sabel_DB_Join extends Sabel_Object
     $model = $this->model;
 
     $connectionName = $model->getConnectionName();
-    $stmt = Sabel_DB_Statement::create($connectionName, Sabel_DB_Statement::SELECT);
+    $sql = Sabel_DB_Sql::create($connectionName, Sabel_DB_Sql::SELECT);
 
-    $stmt->table($model->getTableName())
-         ->join($join)
-         ->projection($projection)
-         ->where($manip->loadConditionManager()->build($stmt));
+    $sql->table($model->getTableName())
+        ->join($join)
+        ->projection($projection)
+        ->where($manip->loadConditionManager()->build($sql));
 
     if ($constraints === null) {
-      $stmt->constraints($manip->getConstraints());
+      $sql->constraints($manip->getConstraints());
     } else {
-      $stmt->constraints($constraints);
+      $sql->constraints($constraints);
     }
 
-    return $manip->executeStatement($stmt);
+    return $manip->executeSql($sql);
   }
 
   public function clear()

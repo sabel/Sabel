@@ -12,7 +12,7 @@ class Test_DB_Test extends SabelTestCase
     $executer = new Manipulator("Member");
 
     foreach ($tables as $table) {
-      $executer->query("DELETE FROM $table", false, Sabel_DB_Statement::DELETE);
+      $executer->query("DELETE FROM $table", false, Sabel_DB_Sql::DELETE);
     }
 
     $executer->query("DELETE FROM tree WHERE id > 2");
@@ -567,8 +567,8 @@ class Test_DB_Test extends SabelTestCase
     // or condition.
     $executer = new Manipulator("ConditionTest");
     $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object("point", 400));
-    $or->add(new Sabel_DB_Condition_Object("name", "name5"));
+    $or->add(Condition::create(EQUAL, "point", 400));
+    $or->add(Condition::create(EQUAL, "name", "name5"));
     $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
@@ -578,7 +578,7 @@ class Test_DB_Test extends SabelTestCase
 
     // between condition.
     $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("point", array(200, 400), Sabel_DB_Condition_Object::BETWEEN));
+    $executer->setCondition(Condition::create(BETWEEN, "point", array(200, 400)));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -588,7 +588,7 @@ class Test_DB_Test extends SabelTestCase
 
     // compare condition.
     $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("point", array("<", 400), Sabel_DB_Condition_Object::COMPARE));
+    $executer->setCondition(Condition::create(LESS_THAN, "point", 400));
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
     $this->assertEquals(count($models), 3);
@@ -599,8 +599,8 @@ class Test_DB_Test extends SabelTestCase
     // or compare condition.
     $executer = new Manipulator("ConditionTest");
     $or = new Sabel_DB_Condition_Or();
-    $or->add(new Sabel_DB_Condition_Object("point", array(">=", 400), Sabel_DB_Condition_Object::COMPARE));
-    $or->add(new Sabel_DB_Condition_Object("point", array("<=", 200), Sabel_DB_Condition_Object::COMPARE));
+    $or->add(Condition::create(GREATER_EQUAL, "point", 400));
+    $or->add(Condition::create(LESS_EQUAL, "point", 200));
     $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "point DESC");
     $models = $executer->select();
@@ -613,7 +613,8 @@ class Test_DB_Test extends SabelTestCase
 
     // like condition.
     $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("name_", false), Sabel_DB_Condition_Object::LIKE));
+    $likeCondition = Condition::create(LIKE, "name", "name_")->escape(false);
+    $executer->setCondition($likeCondition);
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);
@@ -623,12 +624,12 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($models[3]->name, "name%");
 
     $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", "name%", Sabel_DB_Condition_Object::LIKE));
+    $executer->setCondition(Condition::create(LIKE, "name", "name%"));
     $models = $executer->select();
     $this->assertEquals(count($models), 1);
 
     $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("name", array("nam%", false), Sabel_DB_Condition_Object::LIKE));
+    $executer->setCondition(Condition::create(LIKE, "name", "nam%")->escape(false));
     $executer->setConstraint("order", "id ASC");
     $models = $executer->select();
     $this->assertEquals(count($models), 4);
@@ -797,7 +798,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($results[0]->dt, "2007-01-03");
 
     $executer = new Manipulator("SchemaTest");
-    $executer->setCondition(new Sabel_DB_Condition_Object("dt", array("<=", "2007-01-04"), Sabel_DB_Condition_Object::COMPARE));
+    $executer->setCondition(Condition::create(LESS_EQUAL, "dt", "2007-01-04"));
     $executer->setConstraint("order", "id DESC");
     $results = $executer->select();
     $this->assertEquals(count($results), 4);
@@ -840,13 +841,6 @@ class Manipulator extends Sabel_DB_Manipulator
     $method = "before" . ucfirst($method);
     if (method_exists($this, $method)) {
       return $this->$method();
-    }
-  }
-  
-  public function after($method, $result)
-  {
-    if (ENVIRONMENT === DEVELOPMENT) {
-      $this->log();
     }
   }
   
@@ -901,43 +895,6 @@ class Manipulator extends Sabel_DB_Manipulator
     
     if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
       $this->arguments[0][self::UPDATED_TIME_COLUMN] = now();
-    }
-  }
-  
-  private function log()
-  {
-    static $selectLog = null;
-    static $insertLog = null;
-    static $updateLog = null;
-    static $deleteLog = null;
-    static $queryLog  = null;
-    
-    $stmt = $this->stmt;
-    if (is_object($stmt)) {
-      if ($stmt->isSelect()) {
-        $name = "select";
-      } elseif ($stmt->isInsert()) {
-        $name = "insert";
-      } elseif ($stmt->isUpdate()) {
-        $name = "update";
-      } elseif ($stmt->isDelete()) {
-        $name = "delete";
-      } else {
-        $name = "query";
-      }
-      
-      $logger = $name . "Log";
-      if ($$logger === null) {
-        $$logger = new Sabel_Logger_File($name . ".log");
-      }
-      
-      $sql = $stmt->getSql();
-      if ($bindParams = $stmt->getBindValues()) {
-        $bindParams = $stmt->getDriver()->escape($bindParams);
-        $sql = str_replace(array_keys($bindParams), $bindParams, $sql);
-      }
-      
-      $$logger->log($sql);
     }
   }
 }

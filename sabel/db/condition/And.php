@@ -13,18 +13,18 @@ class Sabel_DB_Condition_And extends Sabel_Object
 {
   protected $conditions = array();
 
-  public function add($condition)
+  public function add(Sabel_DB_Abstract_Condition $condition)
   {
     $this->conditions[] = $condition;
   }
 
-  public function build($builder)
+  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
   {
     $conditions = $this->conditions;
 
     $query = array();
     foreach ($conditions as $condition) {
-      $query[] = $condition->build($builder);
+      $query[] = $condition->build($sql, $counter);
     }
 
     $query = implode(" AND ", $query);

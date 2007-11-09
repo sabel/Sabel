@@ -20,13 +20,13 @@ class Sabel_Exception_Runtime extends Exception
     $traceRaw = $this->getTrace();
     
     for ($i = 0, $c = count($traceRaw); $i < $c; $i++) {
-      if (!isset($traceRaw[$i]['file'])) continue;
+      if (!isset($traceRaw[$i]["file"])) continue;
       
-      $stFile = $traceRaw[$i]['file'];
-      $stLine = $traceRaw[$i]['line'];
-      $stFunction = $traceRaw[$i]['function'];
+      $stFile = $traceRaw[$i]["file"];
+      $stLine = $traceRaw[$i]["line"];
+      $stFunction = $traceRaw[$i]["function"];
       
-      $trace[] = sprintf('at %s in [%s:%s]', $stFunction, $stFile, $stLine);
+      $trace[] = sprintf("at %s in [%s:%s]", $stFunction, $stFile, $stLine);
     }
     
     $format = 'Exception: %s from "%s" on "%s"' . "\n";
@@ -36,14 +36,14 @@ class Sabel_Exception_Runtime extends Exception
       $errorMsg .= $l . "\n";
     }
     
-    $time = date('D d H:i:s');
-    if (!$this->writeFile($time.': '.$errorMsg)) $this->writeSyslog($errorMsg);
+    $time = date("D d H:i:s");
+    if (!$this->writeFile($time . ": " . $errorMsg)) $this->writeSyslog($errorMsg);
     exit;
   }
   
   protected function writeFile($msg)
   {
-    if (!$fp = @fopen(SabelConst::EXCEPTION_LOG_FILE_NAME, 'a')) return false;
+    if (!$fp = @fopen(SabelConst::EXCEPTION_LOG_FILE_NAME, "a")) return false;
     fwrite($fp, $msg);
     fclose($fp);
     return true;
@@ -51,7 +51,7 @@ class Sabel_Exception_Runtime extends Exception
   
   protected function writeSyslog($msg)
   {
-    openlog('SabelErrorLog', LOG_PID | LOG_ERROR, LOG_LOCAL0);
+    openlog("SabelErrorLog", LOG_PID | LOG_ERROR, LOG_LOCAL0);
     syslog(LOG_WARNING, $msg);
     closelog();
   }
@@ -65,13 +65,13 @@ class Sabel_Exception_Runtime extends Exception
     $traceRaw = $this->getTrace();
     
     for ($i = 0, $c = count($traceRaw); $i < $c; $i++) {
-      if (!isset($traceRaw[$i]['file'])) continue;
+      if (!isset($traceRaw[$i]["file"])) continue;
       
-      $stFile = $traceRaw[$i]['file'];
-      $stLine = $traceRaw[$i]['line'];
+      $stFile = $traceRaw[$i]["file"];
+      $stLine = $traceRaw[$i]["line"];
       $stFunction = $traceRaw[$i]['function'];
       
-      $trace[] = sprintf('at %s in [%s:%s]', $stFunction, $stFile, $stLine);
+      $trace[] = sprintf("at %s in [%s:%s]", $stFunction, $stFile, $stLine);
     }
     
     $format = 'Exception: %s from "%s" on "%s"' . "<br/><br/>\n\n";

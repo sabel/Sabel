@@ -8,6 +8,21 @@ require_once("Test/DB/SQLite.php");
 require_once("Test/DB/Ibase.php");
 require_once("Test/DB/Oci.php");
 
+Sabel::using("Sabel_DB_Condition");
+class Condition extends Sabel_DB_Condition{}
+
+define("EQUAL",         Condition::EQUAL);
+define("ISNULL",        Condition::ISNULL);
+define("ISNOTNULL",     Condition::ISNOTNULL);
+define("IN",            Condition::IN);
+define("BETWEEN",       Condition::BETWEEN);
+define("LIKE",          Condition::LIKE);
+define("GREATER_EQUAL", Condition::GREATER_EQUAL);
+define("GREATER_THAN",  Condition::GREATER_THAN);
+define("LESS_EQUAL",    Condition::LESS_EQUAL);
+define("LESS_THAN",     Condition::LESS_THAN);
+define("DIRECT",        Condition::DIRECT);
+
 class Test_DB_Tests
 {
   public static function main()

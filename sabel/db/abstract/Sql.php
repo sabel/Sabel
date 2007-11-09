@@ -13,15 +13,168 @@
 abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
 {
   protected
-    $stmt = null;
+    $connectionName = "";
+
+  protected
+    $type       = Sabel_DB_Sql::QUERY,
+    $query      = "",
+    $driver     = null,
+    $bindValues = array();
+
+  protected
+    $table       = "",
+    $projection  = "*",
+    $join        = "",
+    $where       = "",
+    $values      = array(),
+    $constraints = array(),
+    $seqColumn   = null;
 
   protected
     $placeHolderPrefix = "@",
     $placeHolderSuffix = "@";
 
-  public function __construct(Sabel_DB_Abstract_Statement $stmt)
+  public function __construct($connectionName = "default", $type = Sabel_DB_Sql::QUERY)
   {
-    $this->stmt = $stmt;
+    $this->type   = $type;
+    $this->driver = Sabel_DB_Driver::create($connectionName);
+    $this->connectionName = $connectionName;
+  }
+
+  public function setQuery($query)
+  {
+    if (is_string($query)) {
+      $this->query = $query;
+    } else {
+      throw new Sabel_DB_Exception("setQuery() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getQuery()
+  {
+    return ($this->hasQuery()) ? $this->query : $this->build();
+  }
+
+  public function hasQuery()
+  {
+    return (is_string($this->query) && $this->query !== "");
+  }
+
+  public function table($table)
+  {
+    if (is_string($table)) {
+      $this->table = $table;
+    } else {
+      throw new Sabel_DB_Exception("table() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getTable()
+  {
+    return $this->table;
+  }
+
+  public function projection($projection)
+  {
+    if (is_string($projection)) {
+      $this->projection = $projection;
+    } else {
+      throw new Sabel_DB_Exception("projection() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getProjection()
+  {
+    return $this->projection;
+  }
+
+  public function join($join)
+  {
+    if (is_string($join)) {
+      $this->join = $join;
+    } else {
+      throw new Sabel_DB_Exception("join() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getJoin()
+  {
+    return $this->join;
+  }
+
+  public function where($where)
+  {
+    if (is_string($where)) {
+      $this->where = $where;
+    } else {
+      throw new Sabel_DB_Exception("where() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getWhere()
+  {
+    return $this->where;
+  }
+
+  public function constraints(array $constraints)
+  {
+    $this->constraints = $constraints;
+
+    return $this;
+  }
+
+  public function getConstraints()
+  {
+    return $this->constraints;
+  }
+
+  public function values(array $values)
+  {
+    $this->values = array();
+    $this->bindValues = array();
+    $prefix = $this->placeHolderPrefix;
+    $suffix = $this->placeHolderSuffix;
+
+    foreach ($values as $key => $value) {
+      $this->values[$key] = $value;
+      $key = $prefix . $key . $suffix;
+      $this->bindValues[$key] = $value;
+    }
+
+    return $this;
+  }
+
+  public function getValues()
+  {
+    return $this->values;
+  }
+
+  public function sequenceColumn($seqColumn)
+  {
+    if ($seqColumn === null) {
+      $this->seqColumn = null;
+    } elseif (is_string($seqColumn)) {
+      $this->seqColumn = $seqColumn;
+    } else {
+      throw new Sabel_DB_Exception("sequenceColumn() argument should be a string.");
+    }
+
+    return $this;
+  }
+
+  public function getSequenceColumn()
+  {
+    return $this->seqColumn;
   }
 
   public function getPrefixOfPlaceHelder()
@@ -34,22 +187,80 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     return $this->placeHolderSuffix;
   }
 
-  public function createSelectSql()
+  public function execute()
   {
-    $stmt = $this->stmt;
+    $result = $this->driver->execute($this->getQuery(), $this->bindValues);
 
-    $sql = "SELECT " . $stmt->getProjection() . " FROM " . $stmt->getTable()
-         . $stmt->getJoin() . $stmt->getWhere();
+    if ($this->isInsert() && $this->seqColumn !== null) {
+      return $this->driver->getLastInsertId();
+    }
 
-    return $sql . $this->createConstraintSql($stmt->getConstraints());
+    return $result;
   }
 
-  public function createInsertSql()
+  public function setBindValue($key, $val)
+  {
+    $key = $this->placeHolderPrefix . $key . $this->placeHolderSuffix;
+    $this->bindValues[$key] = $val;
+
+    return $key;
+  }
+
+  public function getBindValues()
+  {
+    return $this->bindValues;
+  }
+
+  public function isSelect()
+  {
+    return ($this->type === Sabel_DB_Sql::SELECT);
+  }
+
+  public function isInsert()
+  {
+    return ($this->type === Sabel_DB_Sql::INSERT);
+  }
+
+  public function isUpdate()
+  {
+    return ($this->type === Sabel_DB_Sql::UPDATE);
+  }
+
+  public function isDelete()
+  {
+    return ($this->type === Sabel_DB_Sql::DELETE);
+  }
+
+  public function build()
+  {
+    switch ($this->type) {
+      case Sabel_DB_Sql::SELECT:
+        return $this->createSelectSql();
+
+      case Sabel_DB_Sql::INSERT:
+        return $this->createInsertSql();
+
+      case Sabel_DB_Sql::UPDATE:
+        return $this->createUpdateSql();
+
+      case Sabel_DB_Sql::DELETE:
+        return $this->createDeleteSql();
+
+      case Sabel_DB_Sql::QUERY:
+        return $this->query;
+    }
+  }
+
+  protected function createSelectSql()
+  {
+    $sql = "SELECT {$this->projection} FROM {$this->table}" . $this->join . $this->where;
+    return $sql . $this->createConstraintSql($this->constraints);
+  }
+
+  protected function createInsertSql()
   {
     $binds  = array();
-    $stmt   = $this->stmt;
-    $values = $stmt->getValues();
-    $keys   = array_keys($values);
+    $keys   = array_keys($this->values);
     $prefix = $this->placeHolderPrefix;
     $suffix = $this->placeHolderSuffix;
 
@@ -57,7 +268,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
       $binds[] = $prefix . $key . $suffix;
     }
 
-    $sql = array("INSERT INTO " . $stmt->getTable() . " (");
+    $sql = array("INSERT INTO {$this->table} (");
     $sql[] = join(", ", $keys);
     $sql[] = ") VALUES(";
     $sql[] = join(", ", $binds);
@@ -66,25 +277,22 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     return implode("", $sql);
   }
 
-  public function createUpdateSql()
+  protected function createUpdateSql()
   {
-    $stmt    = $this->stmt;
-    $tblName = $stmt->getTable();
-    $where   = $stmt->getWhere();
-    $prefix  = $this->placeHolderPrefix;
-    $suffix  = $this->placeHolderSuffix;
+    $prefix = $this->placeHolderPrefix;
+    $suffix = $this->placeHolderSuffix;
 
     $updates = array();
-    foreach ($stmt->getValues() as $column => $value) {
+    foreach ($this->values as $column => $value) {
       $updates[] = "$column = {$prefix}{$column}{$suffix}";
     }
 
-    return "UPDATE $tblName SET " . implode(", ", $updates) . $where;
+    return "UPDATE {$this->table} SET " . implode(", ", $updates) . $this->where;
   }
 
-  public function createDeleteSql()
+  protected function createDeleteSql()
   {
-    return "DELETE FROM " . $this->stmt->getTable() . $this->stmt->getWhere();
+    return "DELETE FROM " . $this->table . $this->where;
   }
 
   protected function createConstraintSql($constraints)

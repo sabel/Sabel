@@ -11,19 +11,11 @@
  */
 class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
 {
-  private $driver = null;
-
-  public function setDriver(Sabel_DB_Oci_Driver $driver)
-  {
-    $this->driver = $driver;
-  }
-
   public function createSelectSql()
   {
     static $nlsDateFormat = null;
 
-    $connectionName = $this->driver->getConnectionName();
-    $schema = Sabel_DB_Schema::get($this->stmt->getTable(), $connectionName);
+    $schema = Sabel_DB_Schema::get($this->table, $this->connectionName);
 
     foreach ($schema->getColumns() as $column) {
       if ($column->isDatetime() && $nlsDateFormat !== "datetime") {
@@ -42,15 +34,12 @@ class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
 
   public function createInsertSql()
   {
-    $stmt = $this->stmt;
-
-    if (($column = $stmt->getSequenceColumn()) !== null) {
-      $tblName = $stmt->getTable();
-      $seqName = strtoupper("{$tblName}_{$column}_seq");
+    if (($column = $this->seqColumn) !== null) {
+      $seqName = strtoupper("{$this->table}_{$column}_seq");
       $rows = $this->driver->execute("SELECT {$seqName}.nextval AS id FROM dual");
       $id = $rows[0]["id"];
-      $values = array_merge($stmt->getValues(), array($column => $id));
-      $stmt->values($values);
+      $values = array_merge($this->values, array($column => $id));
+      $this->values($values);
       $this->driver->setLastInsertId($id);
     }
 

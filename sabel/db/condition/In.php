@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Statement_Query
+ * Sabel_DB_Condition_In
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,15 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Statement_Query extends Sabel_DB_Abstract_Statement
+class Sabel_DB_Condition_In extends Sabel_DB_Abstract_Condition
 {
-  public function getStatementType()
+  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
   {
-    return Sabel_DB_Statement::QUERY;
-  }
-
-  public function build()
-  {
-    return $this->sql;
+    // @todo escape or bind.
+    return $this->getColumnWithNot() . " IN (" . implode(", ", $this->value) . ")";
   }
 }

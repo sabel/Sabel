@@ -13,9 +13,9 @@
 abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 {
   protected
-    $sql        = "",
+    $query      = "",
     $driver     = null,
-    $sqlBuilder = null,
+    $sql        = null,
     $bindValues = array();
 
   protected
@@ -37,35 +37,30 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
     $this->driver     = $driver;
-    $this->sqlBuilder = $driver->getSqlBuilder($this);
-    $this->phPrefix   = $this->sqlBuilder->getPrefixOfPlaceHelder();
-    $this->phSuffix   = $this->sqlBuilder->getSuffixOfPlaceHelder();
+    $this->sql        = $driver->getSqlBuilder($this);
+    $this->phPrefix   = $this->sql->getPrefixOfPlaceHelder();
+    $this->phSuffix   = $this->sql->getSuffixOfPlaceHelder();
   }
 
-  public function getDriver()
+  public function setQuery($query)
   {
-    return $this->driver;
-  }
-
-  public function setSql($sql)
-  {
-    if (is_string($sql)) {
-      $this->sql = $sql;
+    if (is_string($query)) {
+      $this->query = $query;
     } else {
-      throw new Sabel_DB_Exception("setSql() argument should be a string.");
+      throw new Sabel_DB_Exception("setQuery() argument should be a string.");
     }
 
     return $this;
   }
 
-  public function getSql()
+  public function getQuery()
   {
-    return ($this->hasSql()) ? $this->sql : $this->build();
+    return ($this->hasQuery()) ? $this->query : $this->build();
   }
 
-  public function hasSql()
+  public function hasQuery()
   {
-    return (is_string($this->sql) && $this->sql !== "");
+    return (is_string($this->query) && $this->query !== "");
   }
 
   public function table($table)
@@ -183,7 +178,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 
   public function execute()
   {
-    $result = $this->driver->execute($this->getSql(), $this->bindValues);
+    $result = $this->driver->execute($this->getQuery(), $this->bindValues);
 
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();

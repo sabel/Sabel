@@ -16,15 +16,15 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   public function add($condition)
   {
     if ($this->isObject($condition)) {
-      $this->conditions[$condition->key] = $condition;
+      $this->conditions[$condition->column()] = $condition;
     } else {
       $this->conditions[] = $condition;
     }
   }
 
-  public function has($key)
+  public function has($column)
   {
-    return isset($this->conditions[$key]);
+    return isset($this->conditions[$column]);
   }
 
   public function getConditions()
@@ -38,16 +38,16 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
 
     if (is_array($key)) {
       foreach ($key as $column => $value) {
-        $this->add(new Sabel_DB_Condition_Object($column, $value));
+        $this->add(Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value));
       }
     } else {
-      $this->add(new Sabel_DB_Condition_Object($key, $val));
+      $this->add(Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val));
     }
   }
 
   public function isObject($condition)
   {
-    return ($condition instanceof Sabel_DB_Condition_Object);
+    return ($condition instanceof Sabel_DB_Abstract_Condition);
   }
 
   public function isEmpty()
@@ -63,16 +63,15 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     return $conditions;
   }
 
-  public function build(Sabel_DB_Abstract_Statement $stmt)
+  public function build(Sabel_DB_Abstract_Sql $sql)
   {
-    $builder = new Sabel_DB_Condition_Builder($stmt);
-
-    $set   = false;
-    $query = array();
+    $set     = false;
+    $counter = 0;
+    $query   = array();
 
     foreach ($this->conditions as $condition) {
       $query[] = ($set) ? " AND " : " WHERE ";
-      $query[] = $condition->build($builder);
+      $query[] = $condition->build($sql, $counter);
       $set = true;
     }
 
