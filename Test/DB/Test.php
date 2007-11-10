@@ -637,6 +637,38 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($models[1]->name, "name4");
     $this->assertEquals($models[2]->name, "name5");
     $this->assertEquals($models[3]->name, "name%");
+
+    // in condition.
+    $manip = new Manipulator("ConditionTest");
+    $manip->setCondition(Condition::create(IN, "point", array(200, 400, 600, 800)));
+    $manip->setConstraint("order", "point DESC");
+    $models = $manip->select();
+    $this->assertEquals(count($models), 3);
+    $this->assertEquals($models[0]->point, 600);
+    $this->assertEquals($models[1]->point, 400);
+    $this->assertEquals($models[2]->point, 200);
+
+    // in and compare condition.
+    $manip = new Manipulator("ConditionTest");
+    $and = new Sabel_DB_Condition_And();
+    $and->add(Condition::create(IN, "point", array(200, 300, 400, 600)));
+    $and->add(Condition::create(GREATER_THAN, "point", 200));
+    $manip->loadConditionManager()->add($and);
+    $manip->setConstraint("order", "point DESC");
+    $models = $manip->select();
+    $this->assertEquals(count($models), 3);
+    $this->assertEquals($models[0]->point, 600);
+    $this->assertEquals($models[1]->point, 400);
+    $this->assertEquals($models[2]->point, 300);
+
+    // is not null condition
+    $manip = new Manipulator("ConditionTest");
+    $models = $manip->select();
+    $this->assertEquals(count($models), 6);
+
+    $manip->setCondition(Condition::create(ISNOTNULL, "name"));
+    $models = $manip->select();
+    $this->assertEquals(count($models), 4);
   }
 
   public function testTransaction()
@@ -806,6 +838,39 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($results[1]->dt, "2007-01-03");
     $this->assertEquals($results[2]->dt, "2007-01-02");
     $this->assertEquals($results[3]->dt, "2007-01-01");
+  }
+
+  public function testInjection()
+  {
+    $st = MODEL("SchemaTest");
+    $st->id = 6;
+    $st->name = "injection'); DROP TABLE schema_test;";
+    $manip = new Manipulator($st);
+    $manip->save();
+
+    $manip = new Manipulator("SchemaTest");
+    $results = $manip->select("name", "injection'); DROP TABLE schema_test;");
+    $this->assertTrue(is_array($results));
+    $this->assertEquals(1, count($results));
+
+    $data = array("id" => 7, "name" => "injection'); DROP TABLE schema_test;");
+    $manip = new Manipulator("SchemaTest");
+    $manip->insert($data);
+
+    $manip = new Manipulator("SchemaTest");
+    $results = $manip->select("name", "injection'); DROP TABLE schema_test;");
+    $this->assertTrue(is_array($results));
+    $this->assertEquals(2, count($results));
+  }
+
+  public function testObjectColumn()
+  {
+    $manip = new Manipulator("SchemaTest");
+    $manip->setCondition("id", new Sabel_DB_Sql_Part("id")); // WHERE id = id
+
+    $results = $manip->select();
+    $this->assertTrue(is_array($results));
+    $this->assertEquals(7, count($results));
   }
 
   public function testTableList()

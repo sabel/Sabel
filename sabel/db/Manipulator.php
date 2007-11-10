@@ -17,7 +17,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $method = "";
 
   protected
-    $projection       = "*",
+    $projection       = array(),
     $arguments        = array(),
     $constraints      = array(),
     $conditionManager = null,
@@ -107,13 +107,13 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $this->unsetConditions(true);
 
     $this->method     = "";
-    $this->projection = "*";
+    $this->projection = array();
     $this->arguments  = array();
   }
 
-  public function setProjection($p)
+  public function setProjection(array $projection)
   {
-    $this->projection = (is_array($p)) ? join(", ", $p) : $p;
+    $this->projection = $projection;
   }
 
   public function loadConditionManager()
@@ -133,7 +133,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     if (is_array($arg1)) {
       $manager->create($arg1);
-    } elseif ($arg1 instanceof Sabel_DB_Abstract_Condition) {
+    } elseif ($manager->isIndividualCondition($arg1)) {
       $manager->add($arg1);
     } elseif ($arg2 === null) {
       $manager->create($this->model->getPrimaryKey(), $arg1);
@@ -194,7 +194,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     $projection  = $this->projection;
     $constraints = $this->constraints;
-    $this->projection  = "COUNT(*) AS cnt";
+    $this->projection  = array("COUNT(*) AS cnt");
     $this->constraints = array("limit" => 1);
 
     $sql  = $this->createSql(Sabel_DB_Sql::SELECT);
@@ -238,7 +238,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
       $conditions = $manager->getConditions();
 
       foreach ($conditions as $condition) {
-        if ($manager->isObject($condition)) {
+        if ($manager->isIndividualCondition($condition)) {
           $model->__set($condition->column(), $condition->value());
         }
       }
@@ -479,20 +479,14 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
   protected function createSql($type)
   {
-    $connectionName = $this->model->getConnectionName();
-    return Sabel_DB_Sql::create($connectionName, $type);
+    return Sabel_DB_Sql::create($this->model->getTableName(),
+                                $this->model->getConnectionName(),
+                                $type);
   }
 
   protected function prepareSelect($sql)
   {
-    $model = $this->model;
-
-    if (($projection = $this->projection) === "*") {
-      $projection = implode(", ", $this->model->getColumnNames());
-    }
-
-    return $sql->projection($projection)
-               ->table($model->getTableName())
+    return $sql->projection($this->projection)
                ->where($this->loadConditionManager()->build($sql))
                ->constraints($this->constraints);
   }
@@ -502,9 +496,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $tblName = $this->model->getTableName();
     $values  = $this->chooseValues($data, "update");
 
-    return $sql->table($tblName)
-               ->values($values)
-               ->where($this->loadConditionManager()->build($sql));
+    return $sql->values($values)->where($this->loadConditionManager()->build($sql));
   }
 
   protected function prepareInsert($sql, $data)
@@ -512,15 +504,12 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $tblName = $this->model->getTableName();
     $values  = $this->chooseValues($data, "insert");
 
-    return $sql->table($tblName)
-               ->values($values)
-               ->sequenceColumn($this->model->getSequenceColumn());
+    return $sql->values($values)->sequenceColumn($this->model->getSequenceColumn());
   }
 
   protected function prepareDelete($sql)
   {
-    $tblName = $this->model->getTableName();
-    return $sql->table($tblName)->where($this->loadConditionManager()->build($sql));
+    return $sql->where($this->loadConditionManager()->build($sql));
   }
 
   protected function chooseValues($data, $method)

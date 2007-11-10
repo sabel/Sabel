@@ -124,7 +124,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
       } elseif ($col->isBigint()) {
         return "bigserial";
       } else {
-        throw new Exception("invalid data type for sequence.");
+        throw new Sabel_DB_Exception("invalid data type for sequence.");
       }
     } elseif ($col->isString()) {
       return $this->types[$col->type] . "({$col->max})";

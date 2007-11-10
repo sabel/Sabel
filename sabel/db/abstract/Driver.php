@@ -18,7 +18,6 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $connectionName = "";
 
   abstract public function getDriverId();
-  abstract public function escape(array $values);
   abstract public function execute($sql, $bindParams = null);
   abstract public function begin();
   abstract public function commit();

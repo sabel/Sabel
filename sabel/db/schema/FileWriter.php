@@ -18,7 +18,7 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
     if (is_dir($schemaDir)) {
       $this->schemaDir = $schemaDir;
     } else {
-      throw new Exception("no such directory: '{$schemaDir}'");
+      throw new Sabel_DB_Exception("no such directory: '{$schemaDir}'");
     }
   }
   

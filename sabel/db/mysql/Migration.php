@@ -147,7 +147,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 
     if (($column->isBool() && !is_bool($default)) ||
         ($column->isNumeric() && !is_numeric($default))) {
-      throw new Exception("invalid value for default.");
+      throw new Sabel_DB_Exception("invalid value for default.");
     } else {
       return true;
     }

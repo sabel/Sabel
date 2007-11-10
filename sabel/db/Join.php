@@ -86,9 +86,11 @@ class Sabel_DB_Join extends Sabel_Object
       $query[] = $object->getJoinQuery($joinType);
     }
 
-    $rows = $this->execute("COUNT(*) AS cnt", implode("", $query), array("limit" => 1));
-    if ($clearState) $this->clear();
+    $rows = $this->execute(array("COUNT(*) AS cnt"),
+                           implode("", $query),
+                           array("limit" => 1));
 
+    if ($clearState) $this->clear();
     return (int)$rows[0]["cnt"];
   }
 
@@ -100,18 +102,15 @@ class Sabel_DB_Join extends Sabel_Object
 
     $projection = array();
     foreach ($this->objects as $object) {
-      $projection[] = $object->getProjection();
+      $projection = array_merge($projection, $object->getProjection());
     }
 
-    $cols    = array();
     $model   = $this->model;
     $tblName = $model->getTableName();
 
     foreach ($model->getColumnNames() as $column) {
-      $cols[] = $tblName . "." . $column;
+      $projection[] = $tblName . "." . $column;
     }
-
-    $projection = implode(", ", $cols) . ", " . implode(", ", $projection);
 
     $query = array();
     foreach ($this->objects as $object) {
@@ -133,11 +132,11 @@ class Sabel_DB_Join extends Sabel_Object
     $manip = $this->manip;
     $model = $this->model;
 
-    $connectionName = $model->getConnectionName();
-    $sql = Sabel_DB_Sql::create($connectionName, Sabel_DB_Sql::SELECT);
+    $sql = Sabel_DB_Sql::create($model->getTableName(),
+                                $model->getConnectionName(),
+                                Sabel_DB_Sql::SELECT);
 
-    $sql->table($model->getTableName())
-        ->join($join)
+    $sql->join($join)
         ->projection($projection)
         ->where($manip->loadConditionManager()->build($sql));
 

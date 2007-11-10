@@ -16,17 +16,6 @@ class Sabel_DB_Pdo_Driver_Mysql extends Sabel_DB_Pdo_Driver
     return "pdo-mysql";
   }
 
-  public function escape(array $values)
-  {
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? 1 : 0;
-      }
-    }
-
-    return $values;
-  }
-
   public function getLastInsertId()
   {
     return $this->connection->lastInsertId();

@@ -16,11 +16,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     return "pgsql";
   }
 
-  public function getSqlBuilder($stmt)
-  {
-    return new Sabel_DB_Pgsql_Sql($stmt);
-  }
-
   public function begin()
   {
     $connection = $this->getConnection();
@@ -51,27 +46,9 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape(array $values)
-  {
-    $conn = $this->getConnection();
-
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? "'t'" : "'f'";
-      } elseif (is_string($val)) {
-        $val = "'" . pg_escape_string($conn, $val) . "'";
-      }
-    }
-
-    return $values;
-  }
-
   public function execute($sql, $bindParams = null)
   {
-    if ($bindParams !== null) {
-      $sql = $this->bind($sql, $this->escape($bindParams));
-    }
-
+    $sql = $this->bind($sql, $bindParams);
     $result = pg_query($this->getConnection(), $sql);
     if (!$result) $this->executeError($result, $sql);
 

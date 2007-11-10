@@ -16,11 +16,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return "mysql";
   }
 
-  public function getSqlBuilder($stmt)
-  {
-    return new Sabel_DB_Mysql_Sql($stmt);
-  }
-
   public function begin()
   {
     $connection = $this->getConnection();
@@ -51,27 +46,9 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape(array $values)
-  {
-    $conn = $this->getConnection();
-
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? 1 : 0;
-      } elseif (is_string($val)) {
-        $val = "'" . mysql_real_escape_string($val, $conn) . "'";
-      }
-    }
-
-    return $values;
-  }
-
   public function execute($sql, $bindParams = null)
   {
-    if ($bindParams !== null) {
-      $sql = $this->bind($sql, $this->escape($bindParams));
-    }
-
+    $sql = $this->bind($sql, $bindParams);
     $result = mysql_query($sql, $this->getConnection());
     if (!$result) $this->executeError($sql);
 

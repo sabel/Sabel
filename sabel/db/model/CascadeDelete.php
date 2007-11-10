@@ -24,7 +24,7 @@ class Sabel_DB_Model_CascadeDelete
   public function execute($config)
   {
     if (!is_object($config)) {
-      throw new Exception("argument should be an object of cascade delete config.");
+      throw new Sabel_DB_Exception("argument should be an object of cascade delete config.");
     }
 
     $model      = $this->model;

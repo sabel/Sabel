@@ -15,7 +15,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
 
   public function add($condition)
   {
-    if ($this->isObject($condition)) {
+    if ($this->isIndividualCondition($condition)) {
       $this->conditions[$condition->column()] = $condition;
     } else {
       $this->conditions[] = $condition;
@@ -34,8 +34,6 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
 
   public function create($key, $val = null)
   {
-    if (empty($key)) return;
-
     if (is_array($key)) {
       foreach ($key as $column => $value) {
         $this->add(Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value));
@@ -45,7 +43,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     }
   }
 
-  public function isObject($condition)
+  public function isIndividualCondition($condition)
   {
     return ($condition instanceof Sabel_DB_Abstract_Condition);
   }

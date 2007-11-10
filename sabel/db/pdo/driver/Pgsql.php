@@ -16,17 +16,6 @@ class Sabel_DB_Pdo_Driver_Pgsql extends Sabel_DB_Pdo_Driver
     return "pdo-pgsql";
   }
 
-  public function escape(array $values)
-  {
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? "t" : "f";
-      }
-    }
-
-    return $values;
-  }
-
   public function getLastInsertId()
   {
     $rows = $this->execute("SELECT LASTVAL() AS id");

@@ -19,11 +19,12 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $type       = Sabel_DB_Sql::QUERY,
     $query      = "",
     $driver     = null,
+    $schema     = array(),
     $bindValues = array();
 
   protected
     $table       = "",
-    $projection  = "*",
+    $projection  = array(),
     $join        = "",
     $where       = "",
     $values      = array(),
@@ -34,11 +35,20 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $placeHolderPrefix = "@",
     $placeHolderSuffix = "@";
 
-  public function __construct($connectionName = "default", $type = Sabel_DB_Sql::QUERY)
+  public function __construct($table, Sabel_DB_Abstract_Driver $driver)
   {
-    $this->type   = $type;
-    $this->driver = Sabel_DB_Driver::create($connectionName);
-    $this->connectionName = $connectionName;
+    $this->table($table);
+
+    $this->driver = $driver;
+    $this->connectionName = $driver->getConnectionName();
+    $this->schema = Sabel_DB_Schema::create($table, $this->connectionName);
+  }
+
+  public function setType($type)
+  {
+    $this->type = $type;
+
+    return $this;
   }
 
   public function setQuery($query)
@@ -46,7 +56,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($query)) {
       $this->query = $query;
     } else {
-      throw new Sabel_DB_Exception("setQuery() argument should be a string.");
+      throw new Sabel_DB_Sql_Exception("setQuery() argument should be a string.");
     }
 
     return $this;
@@ -67,31 +77,17 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($table)) {
       $this->table = $table;
     } else {
-      throw new Sabel_DB_Exception("table() argument should be a string.");
+      throw new Sabel_DB_Sql_Exception("table() argument should be a string.");
     }
 
     return $this;
   }
 
-  public function getTable()
+  public function projection(array $projection)
   {
-    return $this->table;
-  }
-
-  public function projection($projection)
-  {
-    if (is_string($projection)) {
-      $this->projection = $projection;
-    } else {
-      throw new Sabel_DB_Exception("projection() argument should be a string.");
-    }
+    $this->projection = $projection;
 
     return $this;
-  }
-
-  public function getProjection()
-  {
-    return $this->projection;
   }
 
   public function join($join)
@@ -99,15 +95,10 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($join)) {
       $this->join = $join;
     } else {
-      throw new Sabel_DB_Exception("join() argument should be a string.");
+      throw new Sabel_DB_Sql_Exception("join() argument should be a string.");
     }
 
     return $this;
-  }
-
-  public function getJoin()
-  {
-    return $this->join;
   }
 
   public function where($where)
@@ -115,15 +106,10 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($where)) {
       $this->where = $where;
     } else {
-      throw new Sabel_DB_Exception("where() argument should be a string.");
+      throw new Sabel_DB_Sql_Exception("where() argument should be a string.");
     }
 
     return $this;
-  }
-
-  public function getWhere()
-  {
-    return $this->where;
   }
 
   public function constraints(array $constraints)
@@ -131,11 +117,6 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $this->constraints = $constraints;
 
     return $this;
-  }
-
-  public function getConstraints()
-  {
-    return $this->constraints;
   }
 
   public function values(array $values)
@@ -154,11 +135,6 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     return $this;
   }
 
-  public function getValues()
-  {
-    return $this->values;
-  }
-
   public function sequenceColumn($seqColumn)
   {
     if ($seqColumn === null) {
@@ -166,30 +142,32 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     } elseif (is_string($seqColumn)) {
       $this->seqColumn = $seqColumn;
     } else {
-      throw new Sabel_DB_Exception("sequenceColumn() argument should be a string.");
+      throw new Sabel_DB_Sql_Exception("sequenceColumn() argument should be a string.");
     }
 
     return $this;
   }
 
-  public function getSequenceColumn()
-  {
-    return $this->seqColumn;
-  }
-
-  public function getPrefixOfPlaceHelder()
+  public function getPlaceHolderPrefix()
   {
     return $this->placeHolderPrefix;
   }
 
-  public function getSuffixOfPlaceHelder()
+  public function getPlaceHolderSuffix()
   {
     return $this->placeHolderSuffix;
   }
 
   public function execute()
   {
-    $result = $this->driver->execute($this->getQuery(), $this->bindValues);
+    $query = $this->getQuery();
+
+    if (empty($this->bindValues)) {
+      $result = $this->driver->execute($query);
+    } else {
+      $bindValues = $this->escape($this->bindValues);
+      $result = $this->driver->execute($query, $bindValues);
+    }
 
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
@@ -253,8 +231,14 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
 
   protected function createSelectSql()
   {
-    $sql = "SELECT {$this->projection} FROM {$this->table}" . $this->join . $this->where;
-    return $sql . $this->createConstraintSql($this->constraints);
+    if (empty($this->projection)) {
+      $projection = implode(", ", $this->schema->getColumnNames());
+    } else {
+      $projection = implode(", ", $this->projection);
+    }
+
+    $sql = "SELECT $projection FROM {$this->table}" . $this->join . $this->where;
+    return $sql . $this->createConstraintSql();
   }
 
   protected function createInsertSql()
@@ -295,21 +279,31 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     return "DELETE FROM " . $this->table . $this->where;
   }
 
-  protected function createConstraintSql($constraints)
+  protected function createConstraintSql()
   {
     $sql = "";
+    $c = $this->constraints;
 
-    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
-    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
-    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+    if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
+    if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
+    if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
 
-    if (isset($constraints["offset"]) && !isset($constraints["limit"])) {
-      $sql .= " LIMIT 100 OFFSET " . $constraints["offset"];
+    if (isset($c["offset"]) && !isset($c["limit"])) {
+      $sql .= " LIMIT 100 OFFSET " . $c["offset"];
     } else {
-      if (isset($constraints["limit"]))  $sql .= " LIMIT "  . $constraints["limit"];
-      if (isset($constraints["offset"])) $sql .= " OFFSET " . $constraints["offset"];
+      if (isset($c["limit"]))  $sql .= " LIMIT "  . $c["limit"];
+      if (isset($c["offset"])) $sql .= " OFFSET " . $c["offset"];
     }
 
     return $sql;
+  }
+
+  protected function escapeObject($instance)
+  {
+    if ($instance instanceof Sabel_DB_Sql_Part_Interface) {
+      return $instance->getValue($this);
+    } else {
+      throw new Sabel_DB_Sql_Exception("cannot convert object to sql string");
+    }
   }
 }

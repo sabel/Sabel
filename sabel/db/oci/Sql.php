@@ -11,25 +11,19 @@
  */
 class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
 {
-  public function createSelectSql()
+  public function escape(array $values)
   {
-    static $nlsDateFormat = null;
-
-    $schema = Sabel_DB_Schema::get($this->table, $this->connectionName);
-
-    foreach ($schema->getColumns() as $column) {
-      if ($column->isDatetime() && $nlsDateFormat !== "datetime") {
-        $this->driver->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
-        $nlsDateFormat = "datetime";
-        break;
-      } elseif ($column->isDate() && $nlsDateFormat !== "date") {
-        $this->driver->execute("ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD'");
-        $nlsDateFormat = "date";
-        break;
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? 1 : 0;
+      } elseif (is_object($val)) {
+        $val = $this->escapeObject($val);
+      } elseif (is_string($val)) {
+        $val = "'" . str_replace("'", "''", $val) . "'";
       }
     }
 
-    return parent::createSelectSql();
+    return $values;
   }
 
   public function createInsertSql()
@@ -46,16 +40,17 @@ class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
     return parent::createInsertSql();
   }
 
-  protected function createConstraintSql($constraints)
+  protected function createConstraintSql()
   {
     $sql = "";
+    $c = $this->constraints;
 
-    if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
-    if (isset($constraints["having"])) $sql .= " HAVING "   . $constraints["having"];
-    if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
+    if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
+    if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
+    if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
 
-    $limit  = (isset($constraints["limit"]))  ? $constraints["limit"]  : null;
-    $offset = (isset($constraints["offset"])) ? $constraints["offset"] : null;
+    $limit  = (isset($c["limit"]))  ? $c["limit"]  : null;
+    $offset = (isset($c["offset"])) ? $c["offset"] : null;
 
     $this->driver->setLimit($limit);
     $this->driver->setOffset($offset);

@@ -63,4 +63,13 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   {
     return ($this->isNot) ? "NOT " . $this->column : $this->column;
   }
+  
+  protected function toQueryPart($instance, $sql)
+  {
+    if ($instance instanceof Sabel_DB_Sql_Part_Interface) {
+      return $instance->getValue($sql);
+    } else {
+      throw new Sabel_DB_Sql_Exception("cannot convert object to sql string");
+    }
+  }
 }

@@ -133,6 +133,12 @@ class Sabel_DB_Schema_Column extends Sabel_Object
 
         return $value;
 
+      case Sabel_DB_Type::DATETIME:
+        return date("Y-m-d H:i:s", strtotime($value));
+
+      case Sabel_DB_Type::DATE:
+        return date("Y-m-d", strtotime($value));
+
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:
         if (is_string($value) && $value === (string)(float)$value || is_int($value)) {

@@ -12,11 +12,6 @@
  */
 abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function getSqlBuilder($stmt)
-  {
-    return new Sabel_DB_Pdo_Sql($stmt);
-  }
-
   public function begin()
   {
     try {
@@ -62,12 +57,6 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     if (!($pdoStmt = $connection->prepare($sql))) {
       $error = $connection->errorInfo();
       throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
-    }
-
-    if ($bindParams === null) {
-      $bindParams = array();
-    } else {
-      $bindParams = $this->escape($bindParams);
     }
 
     if ($pdoStmt->execute($bindParams)) {

@@ -59,7 +59,7 @@ class Sabel_DB_Validator extends Sabel_Object
       foreach ($values as $name => $val) {
         if (isset($schemas[$name])) {
           $column = clone $schemas[$name];
-          $column->value = $column->cast($val);
+          $column->value  = $val;
           $columns[$name] = $column;
         }
       }
@@ -67,12 +67,7 @@ class Sabel_DB_Validator extends Sabel_Object
       $values = $model->toArray();
       foreach ($schemas as $name => $schema) {
         $column = clone $schema;
-        if (isset($values[$name])) {
-          $column->value = $column->cast($values[$name]);
-        } else {
-          $column->value = null;
-        }
-
+        $column->value  = (isset($values[$name])) ? $values[$name] : null;
         $columns[$name] = $column;
       }
     }
@@ -172,13 +167,13 @@ class Sabel_DB_Validator extends Sabel_Object
 
   protected function length($column)
   {
-    static $method = "";
+    static $func = "";
 
-    if ($method === "") {
-      $method = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
+    if ($func === "") {
+      $func = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
     }
 
-    return ($method($column->value) <= $column->max);
+    return ($func($column->value) <= $column->max);
   }
 
   protected function maximum($column)

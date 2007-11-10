@@ -31,7 +31,7 @@ class Sabel_DB_Migration_ForeignKey
       if ($column === "_id") {
         $column = "id";
       } else {
-        throw new Exception("invalid column name for foreign key.");
+        throw new Sabel_DB_Exception("invalid column name for foreign key.");
       }
 
       $this->refTable  = $table;

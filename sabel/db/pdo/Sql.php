@@ -13,4 +13,57 @@ class Sabel_DB_Pdo_Sql extends Sabel_DB_Abstract_Sql
 {
   protected $placeHolderPrefix = ":";
   protected $placeHolderSuffix = "";
+
+  public function escape(array $values)
+  {
+    switch ($this->driver->getDriverId()) {
+      case "pdo-mysql":
+        return $this->mysqlEscape($values);
+
+      case "pdo-pgsql":
+        return $this->pgsqlEscape($values);
+
+      case "pdo-sqlite":
+        return $this->sqliteEscape($values);
+    }
+  }
+  
+  protected function mysqlEscape($values)
+  {
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? 1 : 0;
+      } elseif (is_object($val)) {
+        $val = $this->escapeObject($val);
+      }
+    }
+
+    return $values;
+  }
+
+  protected function pgsqlEscape($values)
+  {
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? "t" : "f";
+      } elseif (is_object($val)) {
+        $val = $this->escapeObject($val);
+      }
+    }
+
+    return $values;
+  }
+
+  public function sqliteEscape($values)
+  {
+    foreach ($values as &$val) {
+      if (is_bool($val)) {
+        $val = ($val) ? "true" : "false";
+      } elseif (is_object($val)) {
+        $val = $this->escapeObject($val);
+      }
+    }
+
+    return $values;
+  }
 }

@@ -21,7 +21,7 @@ class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
       $projection[] = $name . '.' . $column . ' AS "' . $hash . '"';
     }
 
-    return implode(", ", $projection);
+    return $projection;
   }
 
   public function getJoinQuery($joinType)

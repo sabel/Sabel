@@ -44,7 +44,7 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
       $this->tableName = convert_to_tablename($mdlName);
     }
 
-    $this->schema = Sabel_DB_Schema::get($this->tableName, $this->connectionName);
+    $this->schema = Sabel_DB_Schema::create($this->tableName, $this->connectionName);
     $this->schemaCols = $this->schema->getColumns();
     $this->columns = array_keys($this->schemaCols);
   }
@@ -61,10 +61,14 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
 
   public function __set($key, $val)
   {
+    if (isset($this->schemaCols[$key])) {
+      $val = $this->schemaCols[$key]->cast($val);
+    }
+
     $this->values[$key] = $val;
     if ($this->selected) $this->updateValues[$key] = $val;
   }
-  
+
   public function unsetValue($key)
   {
     unset($this->values[$key]);
@@ -80,14 +84,11 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
 
   public function __get($key)
   {
-    if (!isset($this->values[$key])) return null;
-
-    $value = $this->values[$key];
-    if ($value === null) return null;
-
-    $columns = $this->schemaCols;
-    if (!isset($columns[$key])) return $value;
-    return $columns[$key]->cast($value);
+    if (isset($this->values[$key])) {
+      return $this->values[$key];
+    } else {
+      return null;
+    }
   }
 
   public function setTableName($tblName)
@@ -140,7 +141,7 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
     return $this->selected;
   }
 
-  public function setAttributes($row)
+  public function setAttributes($attributes)
   {
     $pkey = $this->schema->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
@@ -150,14 +151,21 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
     } else {
       $selected = true;
       foreach ($pkey as $key) {
-        if (!isset($row[$key])) {
+        if (!isset($attributes[$key])) {
           $selected = false;
           break;
         }
       }
     }
 
-    $this->values   = $row;
+    $columns = $this->schemaCols;
+    foreach ($attributes as $key => &$val) {
+      if (isset($columns[$key])) {
+        $val = $columns[$key]->cast($val);
+      }
+    }
+
+    $this->values   = $attributes;
     $this->selected = $selected;
   }
 }

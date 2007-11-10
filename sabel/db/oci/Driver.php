@@ -21,14 +21,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return "oci";
   }
 
-  public function getSqlBuilder($stmt)
-  {
-    $sqlBuilder = new Sabel_DB_Oci_Sql($stmt);
-    $sqlBuilder->setDriver($this);
-
-    return $sqlBuilder;
-  }
-
   public function begin()
   {
     $this->autoCommit = false;
@@ -59,19 +51,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
 
-  public function escape(array $values)
-  {
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? 1 : 0;
-      } elseif (is_string($val)) {
-        $val = "'" . oci_escape_string($val) . "'";
-      }
-    }
-
-    return $values;
-  }
-
   public function setLimit($limit)
   {
     $this->limit = $limit;
@@ -89,9 +68,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
 
   public function execute($sql, $bindParams = null)
   {
-    if ($bindParams !== null) {
-      $sql = $this->bind($sql, $this->escape($bindParams));
-    }
+    $sql = $this->bind($sql, $bindParams);
 
     $execMode   = ($this->autoCommit) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
     $connection = $this->getConnection();
@@ -123,9 +100,4 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     $message = "oci driver execute failed: " . $error["message"];
     throw new Sabel_DB_Exception($message);
   }
-}
-
-function oci_escape_string($val)
-{
-  return str_replace("'", "''", $val);
 }

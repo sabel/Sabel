@@ -45,15 +45,15 @@ class Sabel_DB_Transaction
 
   public static function commit()
   {
-    self::finish("commit");
+    self::release("commit");
   }
 
   public static function rollback()
   {
-    self::finish("rollback");
+    self::release("rollback");
   }
 
-  private static function finish($method)
+  private static function release($method)
   {
     if (self::$active) {
       foreach (self::$transactions as $trans) {

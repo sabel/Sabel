@@ -56,10 +56,8 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
       $projection[] = $name . '.' . $column . ' AS "' . $hash . '"';
     }
 
-    $projection = implode(", ", $projection);
-
     foreach ($this->objects as $object) {
-      $projection .= ", " . $object->getProjection();
+      $projection = array_merge($projection, $object->getProjection());
     }
 
     return $projection;

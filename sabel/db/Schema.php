@@ -13,7 +13,7 @@ class Sabel_DB_Schema
 {
   private static $schemas = array();
 
-  public static function get($tblName, $connectionName)
+  public static function create($tblName, $connectionName)
   {
     if (isset(self::$schemas[$tblName])) {
       return self::$schemas[$tblName];

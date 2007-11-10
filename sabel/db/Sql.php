@@ -17,7 +17,7 @@ class Sabel_DB_Sql
   const DELETE = 0x08;
   const QUERY  = 0x10;
   
-  public static function create($connectionName, $type = self::QUERY)
+  public static function create($tblName, $connectionName, $type = self::QUERY)
   {
     $driverName = Sabel_DB_Config::getDriverName($connectionName);
     
@@ -27,6 +27,7 @@ class Sabel_DB_Sql
       $className  = "Sabel_DB_" . ucfirst($driverName) . "_Sql";
     }
     
-    return new $className($connectionName, $type);
+    $sql = new $className($tblName, Sabel_DB_Driver::create($connectionName));
+    return $sql->setType($type);
   }
 }
