@@ -8,7 +8,7 @@ $emailValidator = array("function" => "validateEmailAddress",
 $passwdValidator = array("function"  => "validatePasswords",
                          "model"     => "MODEL_NAME",
                          "column"    => "COLUMN_NAME",
-                         "arguments" => "RETYPE_INPUT_NAME");
+                         "arguments" => "REINPUT");
 
 $lengthValidator = array("function"  => "validateLength",
                          "model"     => "MODEL_NAME",
@@ -29,16 +29,16 @@ function checkEmailAddress($email)
 function validateEmailAddress($model, $name, $localizedName)
 {
   if ($model->$name !== null && !checkEmailAddress($model->$name)) {
-    return "メールアドレスの形式が不正です";
+    return "invalid mail address format.";
   }
 }
 
-function validatePasswords($model, $name, $localizedName, $retypeName)
+function validatePasswords($model, $name, $localizedName, $reInput)
 {
-  if ($model->$name !== $model->$retypeName) {
+  if ($model->$name !== $model->$reInput) {
     return "passwords didn't match.";
   } else {
-    $model->unsetValue($retypeName);
+    $model->unsetValue($reInput);
   }
 }
 

@@ -863,10 +863,10 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(2, count($results));
   }
 
-  public function testObjectColumn()
+  public function testDirectCondition()
   {
     $manip = new Manipulator("SchemaTest");
-    $manip->setCondition("id", new Sabel_DB_Sql_Part("id")); // WHERE id = id
+    $manip->setCondition(Condition::create(DIRECT, "id = id"));
 
     $results = $manip->select();
     $this->assertTrue(is_array($results));

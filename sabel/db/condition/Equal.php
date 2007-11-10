@@ -13,12 +13,7 @@ class Sabel_DB_Condition_Equal extends Sabel_DB_Abstract_Condition
 {
   public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
   {
-    if (is_object($this->value)) {
-      $part = $this->toQueryPart($this->value, $sql);
-      return $this->getColumnWithNot() . " = " . $part;
-    } else {
-      $bindKey = $sql->setBindValue("param" . ++$counter, $this->value);
-      return $this->getColumnWithNot() . " = " . $bindKey;
-    }
+    $bindKey = $sql->setBindValue("param" . ++$counter, $this->value);
+    return $this->getColumnWithNot() . " = " . $bindKey;
   }
 }

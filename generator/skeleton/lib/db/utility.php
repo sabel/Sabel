@@ -1,21 +1,17 @@
 <?php
 
-Sabel::using("Sabel_DB_Join");
-Sabel::using("Sabel_DB_Join_Relation");
-Sabel::using("Sabel_DB_Condition_Object");
-Sabel::using("Sabel_DB_Condition_Or");
-Sabel::using("Sabel_DB_Condition_And");
+class Join      extends Sabel_DB_Join {}
+class Relation  extends Sabel_DB_Join_Relation {}
+class Condition extends Sabel_DB_Condition {}
 
-class Join         extends Sabel_DB_Join {}
-class Relation     extends Sabel_DB_Join_Relation {}
-class Condition    extends Sabel_DB_Condition_Object {}
-class OrCondition  extends Sabel_DB_Condition_Or {}
-class AndCondition extends Sabel_DB_Condition_And {}
-
-define("NOT",         Sabel_DB_Condition_Object::NOT);
-define("IS_NULL",     Sabel_DB_Condition_Object::ISNULL);
-define("IS_NOT_NULL", Sabel_DB_Condition_Object::ISNOTNULL);
-define("IN",          Sabel_DB_Condition_Object::IN);
-define("BETWEEN",     Sabel_DB_Condition_Object::BETWEEN);
-define("LIKE",        Sabel_DB_Condition_Object::LIKE);
-define("COMPARE",     Sabel_DB_Condition_Object::COMPARE);
+define("EQUAL",         Condition::EQUAL);
+define("ISNULL",        Condition::ISNULL);
+define("ISNOTNULL",     Condition::ISNOTNULL);
+define("IN",            Condition::IN);
+define("BETWEEN",       Condition::BETWEEN);
+define("LIKE",          Condition::LIKE);
+define("GREATER_EQUAL", Condition::GREATER_EQUAL);
+define("GREATER_THAN",  Condition::GREATER_THAN);
+define("LESS_EQUAL",    Condition::LESS_EQUAL);
+define("LESS_THAN",     Condition::LESS_THAN);
+define("DIRECT",        Condition::DIRECT);

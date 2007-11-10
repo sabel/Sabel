@@ -8,7 +8,6 @@ require_once("Test/DB/SQLite.php");
 require_once("Test/DB/Ibase.php");
 require_once("Test/DB/Oci.php");
 
-Sabel::using("Sabel_DB_Condition");
 class Condition extends Sabel_DB_Condition{}
 
 define("EQUAL",         Condition::EQUAL);
