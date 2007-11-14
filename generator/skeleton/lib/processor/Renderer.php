@@ -19,6 +19,14 @@ class Processor_Renderer extends Sabel_Bus_Processor
     $responses = $this->response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
     
+    if ($this->controller->hasAttribute("renderText")) {
+      $this->result = $renderer->rendering($this->controller->contents, $responses);
+      return;
+    } elseif ($this->controller->hasAttribute("renderImage")) {
+      $this->result = $this->controller->contents;
+      return;
+    }
+    
     if (($resource = $this->repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);
     } else {
@@ -26,9 +34,16 @@ class Processor_Renderer extends Sabel_Bus_Processor
       if (is_object($resource)) {
         $contents = $renderer->rendering($resource->fetch(), $responses);
       } else {
-        $resource = $this->repository->find("serverError");
-        $contents = $renderer->rendering($resource->fetch(), $responses);
+        $msg = "<h1>404 Not Found</h1>";
+        $msg .= "setup your notFound.tpl to module directory";
+        $contents = $msg;
       }
+    }
+    
+    $layoutName = $this->controller->getAttribute("layout");
+    if ($layoutName === "none") {
+      $this->result = $contents;
+      return;
     }
     
     $layoutName = $this->controller->getAttribute("layout");

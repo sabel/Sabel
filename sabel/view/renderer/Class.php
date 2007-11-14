@@ -63,7 +63,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     $template = str_replace('<?=', '<? echo', $template);
     $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
     
-    if (ENVIRONMENT !== DEVELOPMENT && $this->trim) {
+    if (ENVIRONMENT === PRODUCTION && $this->trim) {
       $template = $this->trimContents($template);
     }
     

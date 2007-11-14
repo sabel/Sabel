@@ -63,11 +63,11 @@ class Sabel_Context extends Sabel_Object
     return $this->exception;
   }
   
-  public static function log($message, $level = LOG_INFO)
+  public static function log($message, $level = LOG_INFO, $fileName)
   {
     static $log;
     if (!isset($log)) $log = Sabel_Logger_Factory::create();
-    $log->log($message, $level);
+    $log->log($message, $level, $fileName);
   }
   
   public static function getLogger()

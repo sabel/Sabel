@@ -13,7 +13,7 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   const DEFAULT_LOG_DIR  = "logs";
   const DEFAULT_LOG_FILE = "sabel.log";
   
-  private $fp = null;
+  private $handlers = array();
   private $messages = array();
   private $path = "";
   
@@ -39,30 +39,60 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
       if (!defined("ENVIRONMENT")) {
         $fileName = "test." . self::DEFAULT_LOG_FILE;
       } else {
-        switch (ENVIRONMENT) {
-          case PRODUCTION:
-            $env = "production";
-            break;
-          case TEST:
-            $env = "test";
-            break;
-          case DEVELOPMENT:
-            $env = "development";
-            break;
-        }
-        
-        $fileName = $env . "." . self::DEFAULT_LOG_FILE;
+        $fileName = $this->getEnv() . "." . self::DEFAULT_LOG_FILE;
       }
     }
     
-    $this->path = RUN_BASE . DIR_DIVIDER
-                . self::DEFAULT_LOG_DIR . DIR_DIVIDER . $fileName;
-                
-    $this->fp = fopen($this->path, "a+");
+    $this->open($fileName);
   }
   
-  public function log($text, $level = LOG_INFO)
+  private function open($fileName = null)
   {
-    fwrite($this->fp, date("Y-m-d H:i:s") ." ". $text . "\n");
+    $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
+    
+    if ($fileName === null) {
+      return $this->handlers[$this->getEnv() . "." . self::DEFAULT_LOG_FILE];
+    }
+    
+    if (!isset($this->handlers[$fileName]) || !is_resource($this->handlers[$fileName])) {
+      $this->handlers[$fileName] = fopen($base . $fileName, "a");
+    }
+      
+    return $this->handlers[$fileName];
+  }
+  
+  private function getEnv()
+  {
+    switch (ENVIRONMENT) {
+      case PRODUCTION:
+        return "production";
+      case TEST:
+        return "test";
+      case DEVELOPMENT:
+        return "development";
+    }
+  }
+  
+  public function log($text, $level = LOG_INFO, $fileName = null)
+  {
+    $fmt = '%s [%s] %s' . "\n";
+    
+    if ($fileName !== null) {
+      $handler = $this->open($fileName);
+      fwrite($handler, sprintf($fmt, date("Y-m-d H:i:s"), $this->defineToString($level), $text));
+    } else {
+      $handler = $this->open();
+      fwrite($handler, sprintf($fmt, date("Y-m-d H:i:s"), $this->defineToString($level), $text));
+    }
+  }
+  
+  private function defineToString($level)
+  {
+    switch ($level) {
+      case LOG_INFO:
+        return "info";
+      case LOG_DEBUG:
+        return "debug";
+    }
   }
 }
