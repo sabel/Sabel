@@ -52,7 +52,7 @@ class Sabel_DB_Validator extends Sabel_Object
   {
     $columns = array();
     $model   = $this->model;
-    $schemas = $model->getSchema()->getColumns();
+    $schemas = $model->getColumns();
 
     if ($model->isSelected()) {
       $values = $model->getUpdateValues();

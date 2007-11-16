@@ -309,33 +309,32 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
   protected function _save()
   {
+    $new = MODEL($this->model->getName());
+
     if ($this->model->isSelected()) {
-      $saveValues = $this->_saveUpdate();
+      return $new->setAttributes($this->_saveUpdate());
     } else {
-      $saveValues = $this->_saveInsert();
+      return $new->setAttributes($this->_saveInsert());
     }
-
-    $model = MODEL($this->model->getName());
-    $model->setAttributes($saveValues);
-
-    return $model;
   }
 
   protected function _saveInsert()
   {
     $model = $this->model;
+    $columns = $model->getColumns();
     $saveValues = $model->toArray();
-
-    foreach ($saveValues as $key => $val) {
-      $saveValues[$key] = $model->__get($key);
-    }
 
     $sql   = $this->createSql(Sabel_DB_Sql::INSERT);
     $newId = $this->_execute($this->prepareInsert($sql, $saveValues));
 
-    if ($newId !== null) {
-      $column = $model->getSequenceColumn();
+    if ($newId !== null && ($column = $model->getSequenceColumn()) !== null) {
       $saveValues[$column] = $newId;
+    }
+
+    foreach ($columns as $name => $column) {
+      if (!array_key_exists($name, $saveValues)) {
+        $saveValues[$name] = $column->default;
+      }
     }
 
     return $saveValues;
@@ -356,13 +355,8 @@ class Sabel_DB_Manipulator extends Sabel_Object
       }
     }
 
-    $saveValues = $model->getUpdateValues();
-
-    foreach ($saveValues as $key => $val) {
-      $saveValues[$key] = $model->__get($key);
-    }
-
     $sql = $this->createSql(Sabel_DB_Sql::UPDATE);
+    $saveValues = $model->getUpdateValues();
     $this->_execute($this->prepareUpdate($sql, $saveValues));
 
     return array_merge($model->toArray(), $saveValues);

@@ -806,6 +806,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($sint->default, 30000);
     $this->assertEquals($ft->default, 1.234);
     $this->assertEquals($dbl->default, 1.23456);
+    $this->assertFalse($bl->default);
 
     $this->assertFalse($id->nullable);
     $this->assertFalse($name->nullable);
@@ -838,9 +839,20 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($results[1]->dt, "2007-01-03");
     $this->assertEquals($results[2]->dt, "2007-01-02");
     $this->assertEquals($results[3]->dt, "2007-01-01");
+
+    $model = MODEL("SchemaTest");
+    $model->id   = 100;
+    $model->name = "hoge";
+    $manip = new Manipulator($model);
+    $saved = $manip->save();
+    $this->assertEquals("90000000000", $saved->bint);
+    $this->assertEquals(30000, $saved->sint);
+    $this->assertEquals(1.234, $saved->ft);
+    $this->assertEquals(1.23456, $saved->dbl);
+    $this->assertFalse($saved->bl);
   }
 
-  public function testInjection()
+  public function testSqlInjection()
   {
     $st = MODEL("SchemaTest");
     $st->id = 6;
@@ -870,7 +882,7 @@ class Test_DB_Test extends SabelTestCase
 
     $results = $manip->select();
     $this->assertTrue(is_array($results));
-    $this->assertEquals(7, count($results));
+    $this->assertEquals(8, count($results));
   }
 
   public function testTableList()

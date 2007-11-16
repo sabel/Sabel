@@ -116,6 +116,11 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
     return $this->schema;
   }
 
+  public function getColumns()
+  {
+    return $this->schemaCols;
+  }
+
   public function getPrimaryKey()
   {
     return $this->schema->getPrimaryKey();
@@ -167,5 +172,7 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
 
     $this->values   = $attributes;
     $this->selected = $selected;
+
+    return $this;
   }
 }
