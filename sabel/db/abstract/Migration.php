@@ -59,9 +59,8 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
   protected function create()
   {
-    $tblName  = convert_to_tablename($this->mdlName);
-    $accessor = Sabel_DB_Migration_Manager::getAccessor();
-    $tables   = $accessor->getTableList();
+    $tblName = convert_to_tablename($this->mdlName);
+    $tables  = $this->getAccessor()->getTableList();
 
     if ($this->applyMode === "upgrade") {
       if (in_array($tblName, $tables)) {
@@ -71,8 +70,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       }
     } else {
       if (in_array($tblName, $tables)) {
-        $driver = Sabel_DB_Migration_Manager::getDriver();
-        $driver->execute("DROP TABLE " . $tblName);
+        $this->getDriver()->execute("DROP TABLE " . $tblName);
       } else {
         Sabel_Sakle_Task::warning("unknown table '{$tblName}'. (SKIP)");
       }
@@ -85,12 +83,10 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
     if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
-      $driver   = Sabel_DB_Migration_Manager::getDriver();
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
-      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
-      $writer   = new Sabel_DB_Migration_Writer($restore);
+      $schema = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
+      $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeTable($schema);
-      $driver->execute("DROP TABLE " . $schema->getTableName());
+      $this->getDriver()->execute("DROP TABLE " . $schema->getTableName());
     } else {
       $this->createTable($restore);
     }
@@ -98,14 +94,13 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
   protected function addColumn()
   {
-    $reader  = new Sabel_DB_Migration_Reader($this->filePath);
-    $columns = $reader->readAddColumn()->getColumns();
+    $columns = $this->getReader()->readAddColumn()->getColumns();
 
     if ($this->applyMode === "upgrade") {
       $this->execAddColumn($columns);
     } else {
       $tblName = convert_to_tablename($this->mdlName);
-      $driver  = Sabel_DB_Migration_Manager::getDriver();
+      $driver  = $this->getDriver();
       foreach ($columns as $column) {
         $driver->execute("ALTER TABLE $tblName DROP COLUMN " . $column->name);
       }
@@ -114,17 +109,15 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
   protected function execAddColumn($columns)
   {
-    $tblName  = convert_to_tablename($this->mdlName);
-    $accessor = Sabel_DB_Migration_Manager::getAccessor();
-    $names    = $accessor->getColumnNames(convert_to_tablename($this->mdlName));
+    $tblName = convert_to_tablename($this->mdlName);
+    $names   = $this->getAccessor()->getColumnNames(convert_to_tablename($this->mdlName));
 
     foreach ($columns as $column) {
       if (in_array($column->name, $names)) {
         Sabel_Sakle_Task::warning("duplicate column '{$column->name}'. (SKIP)");
       } else {
         $line = $this->createColumnAttributes($column);
-        $driver = Sabel_DB_Migration_Manager::getDriver();
-        $driver->execute("ALTER TABLE $tblName ADD " . $line);
+        $this->getDriver()->execute("ALTER TABLE $tblName ADD " . $line);
       }
     }
   }
@@ -135,11 +128,9 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
     if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
-      $driver   = Sabel_DB_Migration_Manager::getDriver();
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
-      $reader   = new Sabel_DB_Migration_Reader($this->filePath);
-      $columns  = $reader->readDropColumn()->getColumns();
-      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
+
+      $columns  = $this->getReader()->readDropColumn()->getColumns();
+      $schema   = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
       $tblName  = $schema->getTableName();
       $colNames = $schema->getColumnNames();
 
@@ -147,6 +138,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       $writer->writeColumns($schema, $columns);
       $writer->close();
 
+      $driver = $this->getDriver();
       foreach ($columns as $column) {
         if (in_array($column, $colNames)) {
           $driver->execute("ALTER TABLE $tblName DROP COLUMN $column");
@@ -155,26 +147,22 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
         }
       }
     } else {
-      $reader  = new Sabel_DB_Migration_Reader($restore);
-      $columns = $reader->readAddColumn()->getColumns();
+      $columns = $this->getReader($restore)->readAddColumn()->getColumns();
       $this->execAddColumn($columns);
     }
   }
 
   protected function changeColumn()
   {
-    $accessor = Sabel_DB_Migration_Manager::getAccessor();
-    $schema   = $accessor->get(convert_to_tablename($this->mdlName));
-    $tblName  = $schema->getTableName();
-    $restore  = $this->getRestoreFileName();
+    $schema  = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
+    $tblName = $schema->getTableName();
+    $restore = $this->getRestoreFileName();
 
     if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
 
-      $reader  = new Sabel_DB_Migration_Reader($this->filePath);
-      $columns = $reader->readChangeColumn()->getColumns();
-
       $names = array();
+      $columns = $this->getReader()->readChangeColumn()->getColumns();
       foreach ($columns as $column) $names[] = $column->name;
 
       $writer = new Sabel_DB_Migration_Writer($restore);
@@ -183,8 +171,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
       $this->changeColumnUpgrade($columns, $schema);
     } else {
-      $reader  = new Sabel_DB_Migration_Reader($restore);
-      $columns = $reader->readChangeColumn()->getColumns();
+      $columns = $this->getReader($restore)->readChangeColumn()->getColumns();
       $this->changeColumnDowngrade($columns, $schema);
     }
   }
@@ -248,8 +235,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
   protected function query()
   {
-    $reader = new Sabel_DB_Migration_Reader($this->filePath);
-    $reader->readQuery()->execute();
+    $this->getReader()->readQuery()->execute();
   }
 
   protected function custom()
@@ -262,6 +248,22 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 
     $custom = new Sabel_DB_Migration_Custom();
     $custom->execute(get_class($this), $this->version, $file);
+  }
+
+  protected function getReader($filePath = null)
+  {
+    if ($filePath === null) $filePath = $this->filePath;
+    return new Sabel_DB_Migration_Reader($filePath);
+  }
+
+  protected function getDriver()
+  {
+    return Sabel_DB_Migration_Manager::getDriver();
+  }
+
+  protected function getAccessor()
+  {
+    return Sabel_DB_Migration_Manager::getAccessor();
   }
 
   protected function getDefaultValue($column)

@@ -24,26 +24,23 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
 
   protected function createTable($filePath)
   {
-    $reader  = new Sabel_DB_Migration_Reader($filePath);
-    $create  = $reader->readCreate();
+    $create  = $this->getReader($filePath)->readCreate();
     $columns = $create->getColumns();
     $pkeys   = $create->getPrimaryKeys();
     $uniques = $create->getUniques();
     $query   = $this->makeCreateSql($columns, $pkeys, $uniques);
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
-    $driver->execute($query);
+
+    $this->getDriver()->execute($query);
   }
 
   protected function addColumn()
   {
-    $reader  = new Sabel_DB_Migration_Reader($this->filePath);
-    $columns = $reader->readAddColumn()->getColumns();
+    $columns = $this->getReader()->readAddColumn()->getColumns();
 
     if ($this->applyMode === "upgrade") {
       $this->execAddColumn($columns);
     } else {
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
-      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
+      $schema   = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
       $tblName  = $schema->getTableName();
       $currents = $schema->getColumns();
 
@@ -62,11 +59,9 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
 
     if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
-      $driver   = Sabel_DB_Migration_Manager::getDriver();
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
-      $reader   = new Sabel_DB_Migration_Reader($this->filePath);
-      $columns  = $reader->readDropColumn()->getColumns();
-      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
+
+      $columns  = $this->getReader()->readDropColumn()->getColumns();
+      $schema   = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
       $tblName  = $schema->getTableName();
       $sColumns = $schema->getColumns();
       $colNames = $schema->getColumnNames();
@@ -86,8 +81,7 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
 
       $this->dropColumnsAndRemakeTable($sColumns, $schema);
     } else {
-      $reader  = new Sabel_DB_Migration_Reader($restore);
-      $columns = $reader->readAddColumn()->getColumns();
+      $columns = $this->getReader($restore)->readAddColumn()->getColumns();
       $this->execAddColumn($columns);
     }
   }
@@ -137,7 +131,7 @@ class Sabel_DB_Sqlite_Migration extends Sabel_DB_Abstract_Migration
 
   private function dropColumnsAndRemakeTable($columns, $schema)
   {
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver  = $this->getDriver();
     $tblName = $schema->getTableName();
     $pkeys   = $schema->getPrimaryKey();
     $uniques = $schema->getUniques();

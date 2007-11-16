@@ -24,9 +24,8 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
 
   protected function createTable($filePath)
   {
-    $reader = new Sabel_DB_Migration_Reader($filePath);
-    $query  = $this->getCreateSql($reader->readCreate());
-    Sabel_DB_Migration_Manager::getDriver()->execute($query);
+    $query = $this->getCreateSql($this->getReader($filePath)->readCreate());
+    $this->getDriver()->execute($query);
   }
 
   protected function changeColumnUpgrade($columns, $schema)
@@ -54,7 +53,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
   private function alterChange($columns, $schema)
   {
     $tblName = $schema->getTableName();
-    $driver = Sabel_DB_Migration_Manager::getDriver();
+    $driver = $this->getDriver();
     $driver->begin();
 
     foreach ($columns as $column) {

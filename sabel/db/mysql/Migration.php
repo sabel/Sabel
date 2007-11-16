@@ -24,8 +24,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 
   protected function createTable($filePath)
   {
-    $reader  = new Sabel_DB_Migration_Reader($filePath);
-    $create  = $reader->readCreate();
+    $create  = $this->getReader($filePath)->readCreate();
     $query   = $this->getCreateSql($create);
     $options = $create->getOptions();
 
@@ -33,7 +32,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
       $query .= " ENGINE=" . $options["engine"];
     }
 
-    Sabel_DB_Migration_Manager::getDriver()->execute($query);
+    $this->getDriver()->execute($query);
   }
 
   public function drop()
@@ -41,8 +40,8 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     if ($this->applyMode === "upgrade") {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
-      $driver   = Sabel_DB_Migration_Manager::getDriver();
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
+
+      $accessor = $this->getAccessor();
       $schema   = $accessor->get(convert_to_tablename($this->mdlName));
       $tblName  = $schema->getTableName();
       $engine   = $accessor->getTableEngine($tblName);
@@ -53,7 +52,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
       $writer->write("\n");
       $writer->close();
 
-      $driver->execute("DROP TABLE " . $tblName);
+      $this->getDriver()->execute("DROP TABLE " . $tblName);
     } else {
       $this->createTable($this->getRestoreFileName());
     }
@@ -61,7 +60,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 
   protected function changeColumnUpgrade($columns, $schema)
   {
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver  = $this->getDriver();
     $tblName = $schema->getTableName();
 
     foreach ($columns as $column) {
@@ -73,7 +72,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 
   protected function changeColumnDowngrade($columns, $schema)
   {
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver  = $this->getDriver();
     $tblName = $schema->getTableName();
 
     foreach ($columns as $column) {

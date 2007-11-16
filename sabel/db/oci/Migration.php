@@ -25,7 +25,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
   protected function create()
   {
     $tblName  = convert_to_tablename($this->mdlName);
-    $accessor = Sabel_DB_Migration_Manager::getAccessor();
+    $accessor = $this->getAccessor();
     $tables   = $accessor->getTableList();
 
     if ($this->applyMode === "upgrade") {
@@ -36,9 +36,8 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
       }
     } else {
       if (in_array($tblName, $tables)) {
-        $driver = Sabel_DB_Migration_Manager::getDriver();
         $this->dropSequence($accessor->get($tblName)->getSequenceColumn());
-        $driver->execute("DROP TABLE " . $tblName);
+        $this->getDriver()->execute("DROP TABLE " . $tblName);
       } else {
         Sabel_Sakle_Task::warning("unknown table '{$tblName}'. (SKIP)");
       }
@@ -47,9 +46,8 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
 
   protected function createTable($filePath)
   {
-    $driver = Sabel_DB_Migration_Manager::getDriver();
-    $reader = new Sabel_DB_Migration_Reader($filePath);
-    $create = $reader->readCreate();
+    $driver = $this->getDriver();
+    $create = $this->getReader($filePath)->readCreate();
     $driver->execute($this->getCreateSql($create));
 
     foreach ($create->getColumns() as $column) {
@@ -105,12 +103,11 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
 
     if ($this->applyMode === "upgrade") {
       if (is_file($restore)) unlink($restore);
-      $driver   = Sabel_DB_Migration_Manager::getDriver();
-      $accessor = Sabel_DB_Migration_Manager::getAccessor();
-      $schema   = $accessor->get(convert_to_tablename($this->mdlName));
-      $writer   = new Sabel_DB_Migration_Writer($restore);
+
+      $schema = $this->getAccessor()->get(convert_to_tablename($this->mdlName));
+      $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeTable($schema);
-      $driver->execute("DROP TABLE " . $schema->getTableName());
+      $this->getDriver()->execute("DROP TABLE " . $schema->getTableName());
       $this->dropSequence($schema->getSequenceColumn());
     } else {
       $this->createTable($restore);
@@ -128,7 +125,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
 
   protected function changeColumnUpgrade($columns, $schema)
   {
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver  = $this->getDriver();
     $tblName = $schema->getTableName();
 
     foreach ($columns as $column) {
@@ -140,7 +137,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
 
   protected function changeColumnDowngrade($columns, $schema)
   {
-    $driver  = Sabel_DB_Migration_Manager::getDriver();
+    $driver  = $this->getDriver();
     $tblName = $schema->getTableName();
 
     foreach ($columns as $column) {
