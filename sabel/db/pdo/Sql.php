@@ -14,6 +14,19 @@ class Sabel_DB_Pdo_Sql extends Sabel_DB_Abstract_Sql
   protected $placeHolderPrefix = ":";
   protected $placeHolderSuffix = "";
 
+  public function values(array $values)
+  {
+    if ($this->driver->getDriverId() === "pdo-mysql" && $this->isInsert()) {
+      foreach ($this->schema->getColumns() as $colName => $column) {
+        if (!isset($values[$colName]) && $this->isVarcharOfDefaultNull($column)) {
+          $values[$colName] = null;
+        }
+      }
+    }
+
+    return parent::values($values);
+  }
+
   public function escape(array $values)
   {
     switch ($this->driver->getDriverId()) {
@@ -65,5 +78,10 @@ class Sabel_DB_Pdo_Sql extends Sabel_DB_Abstract_Sql
     }
 
     return $values;
+  }
+
+  private function isVarcharOfDefaultNull($column)
+  {
+    return ($column->isString() && $column->default === null);
   }
 }

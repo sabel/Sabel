@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Oci_Sql
+ * Sabel_DB_Ibase_Sql
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
+class Sabel_DB_Ibase_Sql extends Sabel_DB_Abstract_Sql
 {
   public function escape(array $values)
   {
@@ -17,7 +17,7 @@ class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
       } elseif (is_string($val)) {
-        $val = "'" . str_replace("'", "''", $val) . "'";
+        $val = "'" . ibase_escape_string($val) . "'";
       } elseif (is_object($val)) {
         $val = $this->escapeObject($val);
       }
@@ -26,11 +26,34 @@ class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
     return $values;
   }
 
+  protected function createSelectSql()
+  {
+    $sql = "SELECT ";
+    $c = $this->constraints;
+
+    if (isset($c["limit"])) {
+      $query  = "FIRST {$c["limit"]} ";
+      $query .= (isset($c["offset"])) ? "SKIP " . $c["offset"] : "SKIP 0";
+      $sql   .= $query;
+    } elseif (isset($c["offset"])) {
+      $sql   .= "SKIP " . $c["offset"];
+    }
+
+    if (empty($this->projection)) {
+      $projection = implode(", ", $this->schema->getColumnNames());
+    } else {
+      $projection = implode(", ", $this->projection);
+    }
+
+    $sql .= " $projection FROM " . $this->table . $this->join . $this->where;
+    return $sql . $this->createConstraintSql();
+  }
+
   public function createInsertSql()
   {
     if (($column = $this->seqColumn) !== null) {
       $seqName = strtoupper("{$this->table}_{$column}_seq");
-      $rows = $this->driver->execute("SELECT {$seqName}.nextval AS id FROM dual");
+      $rows = $this->driver->execute("SELECT GEN_ID({$seqName}, 1) AS id FROM RDB\$DATABASE");
       $id = $rows[0]["id"];
       $values = array_merge($this->values, array($column => $id));
       $this->values($values);
@@ -49,12 +72,21 @@ class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
     if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
 
-    $limit  = (isset($c["limit"]))  ? $c["limit"]  : null;
-    $offset = (isset($c["offset"])) ? $c["offset"] : null;
-
-    $this->driver->setLimit($limit);
-    $this->driver->setOffset($offset);
-
     return $sql;
+  }
+}
+
+if (ini_get("magic_quotes_sybase") === "1")
+{
+  function ibase_escape_string($val)
+  {
+    return $val;
+  }
+}
+else
+{
+  function ibase_escape_string($val)
+  {
+    return str_replace("'", "''", $val);
   }
 }

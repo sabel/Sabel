@@ -85,7 +85,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
       Sabel_DB_Type_Setter::send($column, $type);
     }
 
-    $seq = "{$tblName}_{$fieldName}_GEN";
+    $seq = "{$tblName}_{$fieldName}_SEQ";
     $column->increment = (in_array($seq, $this->sequences));
     $column->primary   = (in_array($fieldName, $this->primaryKeys));
 
@@ -156,7 +156,8 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
     if (empty($rows)) return null;
 
     $uniques = array();
-    foreach (array_map("trim", $rows) as $row) {
+    foreach ($rows as $row) {
+      $row = array_map("trim", $row);
       $key = $row['rdb$index_name'];
       $uniques[$key][] = strtolower($row['rdb$field_name']);
     }

@@ -303,7 +303,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if ($instance instanceof Sabel_DB_Sql_Part_Interface) {
       return $instance->getValue($this);
     } else {
-      throw new Sabel_DB_Sql_Exception("cannot convert object to sql string");
+      throw new Sabel_DB_Sql_Exception("cannot convert object to sql string.");
     }
   }
 }

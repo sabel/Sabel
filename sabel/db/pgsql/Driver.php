@@ -16,27 +16,55 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     return "pgsql";
   }
 
+  public function connect(array $params)
+  {
+    $host = $params["host"];
+    $user = $params["user"];
+    $pass = $params["password"];
+    $dbs  = $params["database"];
+
+    $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
+    $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
+
+    if ($conn) {
+      if (isset($params["charset"])) {
+        pg_set_client_encoding($conn, $params["charset"]);
+      }
+
+      return $conn;
+    } else {
+      list (, $v) = explode(".", PHP_VERSION);
+
+      if ($v >= 2) {
+        $error = error_get_last();
+        return $error["message"];
+      } else {
+        return "cannot connect to PostgreSQL. please check your configuration.";
+      }
+    }
+  }
+
   public function begin()
   {
     $connection = $this->getConnection();
     if (pg_query($connection, "START TRANSACTION")) {
       return $connection;
     } else {
-      throw new Sabel_DB_Exception("pgsql driver begin failed.");
+      throw new Sabel_DB_Driver_Exception("pgsql driver begin failed.");
     }
   }
 
   public function commit()
   {
     if (!pg_query($this->getConnection(), "COMMIT")) {
-      throw new Sabel_DB_Exception("pgsql driver commit failed.");
+      throw new Sabel_DB_Driver_Exception("pgsql driver commit failed.");
     }
   }
 
   public function rollback()
   {
     if (!pg_query($this->getConnection(), "ROLLBACK")) {
-      throw new Sabel_DB_Exception("pgsql driver rollback failed.");
+      throw new Sabel_DB_Driver_Exception("pgsql driver rollback failed.");
     }
   }
 
@@ -71,6 +99,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   {
     $error = pg_result_error($result);
     $message = "pgsql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception($message);
+    throw new Sabel_DB_Driver_Exception($message);
   }
 }

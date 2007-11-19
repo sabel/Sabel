@@ -16,27 +16,53 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     return "mysql";
   }
 
+  public function connect(array $params)
+  {
+    $host = $params["host"];
+    $host = (isset($params["port"])) ? $host . ":" . $params["port"] : $host;
+    $conn = mysql_connect($host, $params["user"], $params["password"], true);
+
+    if ($conn) {
+      if (!mysql_select_db($params["database"], $conn)) {
+        return mysql_error();
+      }
+
+      if (isset($params["charset"])) {
+        list (,,$v) = explode(".", PHP_VERSION);
+        if ($v{0} >= 3) {
+          mysql_set_charset($params["charset"], $conn);
+        } else {
+          mysql_query("SET NAMES " . $params["charset"], $conn);
+        }
+      }
+
+      return $conn;
+    } else {
+      return mysql_error();
+    }
+  }
+
   public function begin()
   {
     $connection = $this->getConnection();
     if (mysql_query("START TRANSACTION", $connection)) {
       return $connection;
     } else {
-      throw new Sabel_DB_Exception("mysql driver begin failed.");
+      throw new Sabel_DB_Driver_Exception("mysql driver begin failed.");
     }
   }
 
   public function commit()
   {
     if (!mysql_query("COMMIT", $this->getConnection())) {
-      throw new Sabel_DB_Exception("mysql driver commit failed.");
+      throw new Sabel_DB_Driver_Exception("mysql driver commit failed.");
     }
   }
 
   public function rollback()
   {
     if (!mysql_query("ROLLBACK", $this->getConnection())) {
-      throw new Sabel_DB_Exception("mysql driver rollback failed.");
+      throw new Sabel_DB_Driver_Exception("mysql driver rollback failed.");
     }
   }
 
@@ -71,6 +97,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = mysql_error($this->connection);
     $message = "mysql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception($message);
+    throw new Sabel_DB_Driver_Exception($message);
   }
 }

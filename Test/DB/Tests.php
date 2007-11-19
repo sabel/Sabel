@@ -52,11 +52,11 @@ class Test_DB_Tests
     if (extension_loaded("oci8")) {
       $suite->addTest(Test_DB_Oci::suite());
     }
-    /*
+
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
-    */
+
     return $suite;
   }
 }

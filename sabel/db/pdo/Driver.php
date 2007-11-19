@@ -19,7 +19,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $connection->beginTransaction();
     } catch (PDOException $e) {
       $message = $e->getMessage();
-      throw new Sabel_DB_Exception("pdo driver begin failed. {$message}");
+      throw new Sabel_DB_Driver_Exception("pdo driver begin failed. {$message}");
     }
 
     return $connection;
@@ -31,7 +31,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $this->getConnection()->commit();
     } catch (PDOException $e) {
       $message = $e->getMessage();
-      throw new Sabel_DB_Exception("pdo driver commit failed. {$message}");
+      throw new Sabel_DB_Driver_Exception("pdo driver commit failed. {$message}");
     }
   }
 
@@ -41,7 +41,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $this->getConnection()->rollback();
     } catch (PDOException $e) {
       $message = $e->getMessage();
-      throw new Sabel_DB_Exception("pdo driver rollback failed. {$message}");
+      throw new Sabel_DB_Driver_Exception("pdo driver rollback failed. {$message}");
     }
   }
 
@@ -56,7 +56,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     $connection = $this->getConnection();
     if (!($pdoStmt = $connection->prepare($sql))) {
       $error = $connection->errorInfo();
-      throw new Sabel_DB_Exception("PdoStatement is invalid. {$error[2]}");
+      throw new Sabel_DB_Driver_Exception("PdoStatement is invalid. {$error[2]}");
     }
 
     if ($pdoStmt->execute($bindParams)) {
@@ -80,6 +80,6 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     $error = (isset($error[2])) ? $error[2] : print_r($error, true);
     $param = (empty($param)) ? null : $param;
 
-    throw new Sabel_DB_Exception("pdo driver execute failed: $error");
+    throw new Sabel_DB_Driver_Exception("pdo driver execute failed: $error");
   }
 }

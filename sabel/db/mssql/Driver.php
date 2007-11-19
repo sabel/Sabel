@@ -16,6 +16,20 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
     return "mssql";
   }
 
+  public function connect(array $params)
+  {
+    $host = $params["host"];
+    $host = (isset($params["port"])) ? $host . "," . $params["port"] : $host;
+    $conn = mssql_connect($host, $params["user"], $params["password"], true);
+
+    if ($conn) {
+      mssql_select_db($params["database"], $conn);
+      return $conn;
+    } else {
+      return mssql_get_last_message();
+    }
+  }
+
   public function begin($connectionName = null)
   {
     if ($connectionName === null) {

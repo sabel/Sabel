@@ -18,10 +18,11 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $connectionName = "";
 
   abstract public function getDriverId();
-  abstract public function execute($sql, $bindParams = null);
+  abstract public function connect(array $params);
   abstract public function begin();
   abstract public function commit();
   abstract public function rollback();
+  abstract public function execute($sql, $bindParams = null);
   abstract public function getLastInsertId();
   abstract public function close($connection);
 
@@ -38,7 +39,7 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function getConnection()
   {
     if ($this->connection === null) {
-      return $this->connection = Sabel_DB_Connection::get($this->connectionName);
+      return $this->connection = Sabel_DB_Connection::get($this);
     } else {
       return $this->connection;
     }

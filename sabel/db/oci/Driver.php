@@ -21,6 +21,23 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     return "oci";
   }
 
+  public function connect(array $params)
+  {
+    $database = "//" . $params["host"] . "/" . $params["database"];
+    $encoding = (isset($params["charset"])) ? $params["charset"] : null;
+
+    $conn = oci_connect($params["user"], $params["password"], $database, $encoding);
+
+    if ($conn) {
+      $stmt = oci_parse($conn, "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");
+      oci_execute($stmt, OCI_COMMIT_ON_SUCCESS);
+      return $conn;
+    } else {
+      $e = oci_error();
+      return $e["message"];
+    }
+  }
+
   public function begin()
   {
     $this->autoCommit = false;
@@ -32,7 +49,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_commit($this->getConnection())) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception("oci driver commit failed.");
+      throw new Sabel_DB_Driver_Exception("oci driver commit failed.");
     }
   }
 
@@ -41,7 +58,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_rollback($this->getConnection())) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception("oci driver rollback failed.");
+      throw new Sabel_DB_Driver_Exception("oci driver rollback failed.");
     }
   }
 
@@ -98,6 +115,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = oci_error($ociStmt);
     $message = "oci driver execute failed: " . $error["message"];
-    throw new Sabel_DB_Exception($message);
+    throw new Sabel_DB_Driver_Exception($message);
   }
 }

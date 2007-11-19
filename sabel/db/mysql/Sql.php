@@ -15,7 +15,7 @@ class Sabel_DB_Mysql_Sql extends Sabel_DB_Abstract_Sql
   {
     if ($this->isInsert()) {
       foreach ($this->schema->getColumns() as $colName => $column) {
-        if ($this->isNullableVarchar($column) && !isset($values[$colName])) {
+        if (!isset($values[$colName]) && $this->isVarcharOfDefaultNull($column)) {
           $values[$colName] = null;
         }
       }
@@ -31,17 +31,17 @@ class Sabel_DB_Mysql_Sql extends Sabel_DB_Abstract_Sql
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
-      } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
       } elseif (is_string($val)) {
         $val = "'" . mysql_real_escape_string($val, $conn) . "'";
+      } elseif (is_object($val)) {
+        $val = $this->escapeObject($val);
       }
     }
 
     return $values;
   }
 
-  private function isNullableVarchar($column)
+  private function isVarcharOfDefaultNull($column)
   {
     return ($column->isString() && $column->default === null);
   }

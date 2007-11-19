@@ -16,6 +16,30 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     return "mysqli";
   }
 
+  public function connect(array $params)
+  {
+    $h = $params["hoge"];
+    $u = $params["user"];
+    $p = $params["password"];
+    $d = $params["database"];
+
+    if (isset($params["port"])) {
+      $conn = mysqli_connect($h, $u, $p, $d, (int)$params["port"]);
+    } else {
+      $conn = mysqli_connect($h, $u, $p, $d);
+    }
+
+    if ($conn) {
+      if (isset($params["charset"])) {
+        mysqli_set_charset($conn, $params["charset"]);
+      }
+
+      return $conn;
+    } else {
+      return mysqli_connect_error();
+    }
+  }
+
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
@@ -33,7 +57,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (mysqli_commit($this->getConnection())) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Exception("mysqli driver commit failed.");
+      throw new Sabel_DB_Driver_Exception("mysqli driver commit failed.");
     }
   }
 
@@ -42,7 +66,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (mysqli_rollback($this->getConnection())) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Exception("mysqli driver rollback failed.");
+      throw new Sabel_DB_Driver_Exception("mysqli driver rollback failed.");
     }
   }
 
@@ -76,6 +100,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = mysqli_error($this->connection);
     $message = "mysqli driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception($message);
+    throw new Sabel_DB_Driver_Exception($message);
   }
 }

@@ -19,7 +19,7 @@ class Sabel_DB_Config
     if (self::$initialized) return;
 
     if ($configPath === "") {
-      $configPath = RUN_BASE . DIR_DIVIDER . "config" . DIR_DIVIDER . "connection.php";
+      $configPath = RUN_BASE . DS . "config" . DS . "connection.php";
     }
 
     Sabel::fileUsing($configPath, true);

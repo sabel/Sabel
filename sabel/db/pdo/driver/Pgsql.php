@@ -16,6 +16,23 @@ class Sabel_DB_Pdo_Driver_Pgsql extends Sabel_DB_Pdo_Driver
     return "pdo-pgsql";
   }
 
+  public function connect(array $params)
+  {
+    try {
+      $dsn = "pgsql:host={$params["host"]};dbname={$params["database"]}";
+      if (isset($params["port"])) $dsn .= ";port={$params["port"]}";
+      $conn = new PDO($dsn, $params["user"], $params["password"]);
+
+      if (isset($params["charset"])) {
+        $conn->exec("SET NAMES " . $params["charset"]);
+      }
+
+      return $conn;
+    } catch (PDOException $e) {
+      return $e->getMessage();
+    }
+  }
+
   public function getLastInsertId()
   {
     $rows = $this->execute("SELECT LASTVAL() AS id");

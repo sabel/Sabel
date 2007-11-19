@@ -16,6 +16,15 @@ class Sabel_DB_Pdo_Driver_Sqlite extends Sabel_DB_Pdo_Driver
     return "pdo-sqlite";
   }
 
+  public function connect(array $params)
+  {
+    try {
+      return new PDO("sqlite:" . $params["database"]);
+    } catch (PDOException $e) {
+      return $e->getMessage();
+    }
+  }
+
   public function getLastInsertId()
   {
     return $this->connection->lastInsertId();
