@@ -19,7 +19,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $type       = Sabel_DB_Sql::QUERY,
     $query      = "",
     $driver     = null,
-    $schema     = array(),
+    $schema     = null,
     $bindValues = array();
 
   protected
@@ -35,13 +35,10 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $placeHolderPrefix = "@",
     $placeHolderSuffix = "@";
 
-  public function __construct($table, Sabel_DB_Abstract_Driver $driver)
+  public function __construct($connectionName)
   {
-    $this->table($table);
-
-    $this->driver = $driver;
-    $this->connectionName = $driver->getConnectionName();
-    $this->schema = Sabel_DB_Schema::create($table, $this->connectionName);
+    $this->driver = Sabel_DB_Driver::create($connectionName);
+    $this->connectionName = $this->driver->getConnectionName();
   }
 
   public function setType($type)
@@ -75,7 +72,8 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
   public function table($table)
   {
     if (is_string($table)) {
-      $this->table = $table;
+      $this->table  = $table;
+      $this->schema = Sabel_DB_Schema::create($table, $this->connectionName);
     } else {
       throw new Sabel_DB_Sql_Exception("table() argument should be a string.");
     }
@@ -184,6 +182,17 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     return $key;
   }
 
+  public function setBindValues(array $values)
+  {
+    $prefix = $this->placeHolderPrefix;
+    $suffix = $this->placeHolderSuffix;
+    $binds =& $this->bindValues;
+
+    foreach ($values as $key => $val) {
+      $binds[$prefix . $key . $suffix] = $val;
+    }
+  }
+
   public function getBindValues()
   {
     return $this->bindValues;
@@ -211,6 +220,11 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
 
   public function build()
   {
+    if ($this->schema === null) {
+      $message = "can't build query. please call table() method.";
+      throw new Sabel_DB_Sql_Exception($message);
+    }
+
     switch ($this->type) {
       case Sabel_DB_Sql::SELECT:
         return $this->createSelectSql();

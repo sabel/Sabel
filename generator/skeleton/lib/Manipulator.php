@@ -15,7 +15,7 @@ class Manipulator extends Sabel_DB_Manipulator
   {
     /* example.
     $method = "before" . ucfirst($method);
-    if (method_exists($this, $method)) {
+    if ($this->hasMethod($method)) {
       return $this->$method();
     }
     */

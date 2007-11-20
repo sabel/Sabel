@@ -23,7 +23,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $conditionManager = null,
     $autoReinit       = true;
 
-  public function __construct($model = null)
+  public function __construct($model)
   {
     if (is_string($model)) {
       $model = MODEL($model);
@@ -432,19 +432,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $this->_execute($this->prepareDelete($sql));
   }
 
-  public function executeSql($sql)
-  {
-    $this->arguments = array($sql);
-    $this->method    = "executeSql";
-
-    return $this->execute();
-  }
-
-  protected function _executeSql()
-  {
-    return $this->_execute($this->arguments[0]);
-  }
-
   public function query($query, $assoc = false, $type = Sabel_DB_Sql::SELECT)
   {
     $this->method = "query";
@@ -471,7 +458,20 @@ class Sabel_DB_Manipulator extends Sabel_Object
     }
   }
 
-  protected function createSql($type)
+  public function executeSql($sql)
+  {
+    $this->arguments = array($sql);
+    $this->method    = "executeSql";
+
+    return $this->execute();
+  }
+
+  protected function _executeSql()
+  {
+    return $this->_execute($this->arguments[0]);
+  }
+
+  public function createSql($type)
   {
     return Sabel_DB_Sql::create($this->model->getTableName(),
                                 $this->model->getConnectionName(),

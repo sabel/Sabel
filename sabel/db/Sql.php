@@ -27,7 +27,7 @@ class Sabel_DB_Sql
       $className  = "Sabel_DB_" . ucfirst($driverName) . "_Sql";
     }
     
-    $sql = new $className($tblName, Sabel_DB_Driver::create($connectionName));
-    return $sql->setType($type);
+    $sql = new $className($connectionName);
+    return $sql->table($tblName)->setType($type);
   }
 }

@@ -130,11 +130,7 @@ class Sabel_DB_Join extends Sabel_Object
   protected function execute($projection, $join, $constraints = null)
   {
     $manip = $this->manip;
-    $model = $this->model;
-
-    $sql = Sabel_DB_Sql::create($model->getTableName(),
-                                $model->getConnectionName(),
-                                Sabel_DB_Sql::SELECT);
+    $sql   = $manip->createSql(Sabel_DB_Sql::SELECT);
 
     $sql->join($join)
         ->projection($projection)
