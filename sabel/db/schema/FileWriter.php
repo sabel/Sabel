@@ -139,18 +139,18 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
 
   private function writeForeignKeys(&$property, $schema)
   {
-    $fkeys = $schema->getForeignKeys();
+    $fkey = $schema->getForeignKey();
     
-    if ($fkeys === null) {
+    if ($fkey === null) {
       $property[] = '    $property' . "['fkeys'] = null;\n";
     } else {
       $space = "                                         ";
-      foreach ($fkeys as $column => $params) {
+      foreach ($fkey->toArray() as $column => $params) {
         $property[] = '    $property' . "['fkeys']['{$column}'] = ";
-        $property[] = "array('referenced_table'  => '{$params['referenced_table']}',\n";
-        $property[] = $space . "'referenced_column' => '{$params['referenced_column']}',\n";
-        $property[] = $space . "'on_delete'         => '{$params['on_delete']}',\n";
-        $property[] = $space . "'on_update'         => '{$params['on_update']}');\n";
+        $property[] = "array('referenced_table'  => '{$params->table}',\n";
+        $property[] = $space . "'referenced_column' => '{$params->column}',\n";
+        $property[] = $space . "'on_delete'         => '{$params->onDelete}',\n";
+        $property[] = $space . "'on_update'         => '{$params->onUpdate}');\n";
       }
     }
   }

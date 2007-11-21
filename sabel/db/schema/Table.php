@@ -70,12 +70,13 @@ class Sabel_DB_Schema_Table extends Sabel_Object
 
   public function setForeignKeys($fkeys)
   {
-    $this->foreignKeys = $fkeys;
+    if ($fkeys === null) return;
+    $this->foreignKey = new Sabel_DB_Schema_ForeignKey($fkeys);
   }
 
-  public function getForeignKeys()
+  public function getForeignKey()
   {
-    return $this->foreignKeys;
+    return $this->foreignKey;
   }
 
   public function isForeignKey($colName)

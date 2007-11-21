@@ -27,13 +27,11 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
 
     $structure->add($myName, $object->getName());
 
-    $name  = $object->getModel()->getTableName();
-    $fkeys = $this->model->getSchema()->getForeignKeys();
-
-    if (is_array($fkeys)) {
-      foreach ($fkeys as $colName => $fkey) {
-        if ($fkey["referenced_table"] === $name) {
-          $joinKey = array("id" => $fkey["referenced_column"], "fkey" => $colName);
+    $name = $object->getModel()->getTableName();
+    if ($fkey = $this->model->getSchema()->getForeignKey()) {
+      foreach ($fkey->toArray() as $colName => $fkey) {
+        if ($fkey->table === $name) {
+          $joinKey = array("id" => $fkey->column, "fkey" => $colName);
           break;
         }
       }

@@ -21,26 +21,17 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   public static function singleton($fileName = null)
   {
-    if (ENVIRONMENT === PRODUCTION) {
-      self::$instance = new Sabel_Logger_File();
+    if (self::$instance === null) {
+      self::$instance = new self($fileName);
     }
     
-    if (is_object(self::$instance)) {
-      return self::$instance;
-    } else {
-      self::$instance = new self($fileName);
-      return self::$instance;
-    }
+    return self::$instance;
   }
   
   public function __construct($fileName = null)
   {
     if ($fileName === null) {
-      if (!defined("ENVIRONMENT")) {
-        $fileName = "test." . self::DEFAULT_LOG_FILE;
-      } else {
-        $fileName = $this->getEnv() . "." . self::DEFAULT_LOG_FILE;
-      }
+      $fileName = $this->getLogFileName();
     }
     
     $this->open($fileName);
@@ -48,42 +39,45 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   private function open($fileName = null)
   {
-    $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
-    
     if ($fileName === null) {
-      return $this->handlers[$this->getEnv() . "." . self::DEFAULT_LOG_FILE];
+      $fileName = $this->getLogFileName();
     }
     
-    if (!isset($this->handlers[$fileName]) || !is_resource($this->handlers[$fileName])) {
-      $this->handlers[$fileName] = fopen($base . $fileName, "a");
-    }
-      
-    return $this->handlers[$fileName];
-  }
-  
-  private function getEnv()
-  {
-    switch (ENVIRONMENT) {
-      case PRODUCTION:
-        return "production";
-      case TEST:
-        return "test";
-      case DEVELOPMENT:
-        return "development";
+    $handlers =& $this->handlers;
+    
+    if (isset($handlers[$fileName]) && is_resource($handlers[$fileName])) {
+      return $handlers[$fileName];
+    } else {
+      $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
+      $handlers[$fileName] = fopen($base . $fileName, "a");
+      return $handlers[$fileName];
     }
   }
   
   public function log($text, $level = LOG_INFO, $fileName = null)
   {
     $fmt = '%s [%s] %s' . "\n";
-    
-    if ($fileName !== null) {
-      $handler = $this->open($fileName);
-      fwrite($handler, sprintf($fmt, date("Y-m-d H:i:s"), $this->defineToString($level), $text));
+    fwrite($this->open(), sprintf($fmt, now(), $this->defineToString($level), $text));
+  }
+  
+  private function getLogFileName()
+  {
+    if (!defined("ENVIRONMENT")) {
+      $name = "test";
     } else {
-      $handler = $this->open();
-      fwrite($handler, sprintf($fmt, date("Y-m-d H:i:s"), $this->defineToString($level), $text));
+      switch (ENVIRONMENT) {
+        case PRODUCTION:
+          $name = "production";
+          break;
+        case DEVELOPMENT:
+          $name = "development";
+          break;
+        default:
+          $name = "test";
+      }
     }
+    
+    return $name . "." . self::DEFAULT_LOG_FILE;
   }
   
   private function defineToString($level)

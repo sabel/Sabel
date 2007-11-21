@@ -1,8 +1,5 @@
 <?php
 
-define("SCHEMA_DIR", LIB_DIR_NAME . DS . "schema");
-Sabel::fileUsing("config" . DS . "INIT.php", true);
-
 /**
  * Schema
  *
@@ -36,7 +33,7 @@ class Schema extends Sabel_Sakle_Task
         $tblName = $schema->getTableName();
         
         if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
-          $writer = new Sabel_DB_Schema_FileWriter(SCHEMA_DIR);
+          $writer = new Sabel_DB_Schema_FileWriter(SCHEMA_DIR_PATH);
           $writer->write($schema);
           $this->printMessage("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
@@ -92,7 +89,7 @@ class TableList_Writer
   {
     $cn        = $connectionName;
     $fileName  = ucfirst($cn) . "TableList";
-    $target    = SCHEMA_DIR . "{$fileName}.php";
+    $target    = SCHEMA_DIR_PATH . DS . "{$fileName}.php";
     $className = "Schema_" . $fileName;
     
     Sabel_Sakle_Task::success("generate table list of $cn\n");

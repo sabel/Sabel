@@ -11,13 +11,16 @@
  */
 class Sabel_DB_Oci_Sql extends Sabel_DB_Abstract_Sql
 {
+  protected $placeHolderPrefix = ":";
+  protected $placeHolderSuffix = "";
+
   public function escape(array $values)
   {
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
       } elseif (is_string($val)) {
-        $val = "'" . str_replace("'", "''", $val) . "'";
+        $val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\\n\r") . "'";
       } elseif (is_object($val)) {
         $val = $this->escapeObject($val);
       }

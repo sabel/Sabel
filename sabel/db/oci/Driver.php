@@ -115,6 +115,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = oci_error($ociStmt);
     $message = "oci driver execute failed: " . $error["message"];
-    throw new Sabel_DB_Driver_Exception($message);
+    throw new Sabel_DB_Driver_Exception($message . " SQL:" . $error["sqltext"]);
   }
 }

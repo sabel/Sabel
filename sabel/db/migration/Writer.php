@@ -59,15 +59,13 @@ class Sabel_DB_Migration_Writer
       }
     }
 
-    $fkeys = $schema->getForeignKeys();
-
-    if ($fkeys) {
-      foreach ($fkeys as $colName => $param) {
+    if ($fkey = $schema->getForeignKey()) {
+      foreach ($fkey->toArray() as $colName => $param) {
         $line = '$create->fkey("' . $colName . '")->table("'
-              . $param["referenced_table"] . '")->column("'
-              . $param["referenced_column"] . '")->onDelete("'
-              . $param["on_delete"] . '")->onUpdate("'
-              . $param["on_update"] . '");';
+              . $param->table    . '")->column("'
+              . $param->column   . '")->onDelete("'
+              . $param->onDelete . '")->onUpdate("'
+              . $param->onUpdate . '");';
 
         fwrite($fp, $line . "\n");
       }
