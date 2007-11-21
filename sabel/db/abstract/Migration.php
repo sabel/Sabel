@@ -50,7 +50,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     clearstatcache();
 
     $command = $this->command;
-    if (method_exists($this, $command)) {
+    if ($this->hasMethod($command)) {
       $this->$command();
     } else {
       throw new Sabel_DB_Exception("command '$command' not found.");

@@ -84,15 +84,16 @@ class Sabel_Util_List extends Sabel_Object
   {
     $next = new self($name, $object);
     
-    $next->setPrevious($this);
+    $next->previous = $this;
     
     if ($this->isLast()) {
-      $next->setNext(null);
+      $next->next = null;
     } else {
-      $next->setNext($this->next);
+      $this->next->previous = $next;
+      $next->next = $this->next;
     }
     
-    $this->setNext($next);
+    $this->next = $next;
     
     return $next;
   }
