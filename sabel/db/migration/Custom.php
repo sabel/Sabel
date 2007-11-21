@@ -59,7 +59,7 @@ class Sabel_DB_Migration_Custom
       list ($num) = explode("_", $file);
       $upgradeFiles[$num] = $file;
 
-      file_put_contents($restoreDir . DS . "restore_{$num}", "\n");
+      file_put_contents($restoreDir . DS . "restore_{$num}" . PHP_SUFFIX, "\n");
 
       $path = $temporaryDir . DS . $file;
       $ins = new $migClassName($path, "upgrade");
@@ -81,9 +81,12 @@ class Sabel_DB_Migration_Custom
     fclose($fp);
 
     $this->isUpgrade = true;
-    list (, $num) = explode("_", basename($restoreFile));
+
+    $fileName  = basename($restoreFile);
+    $version   = $this->getVersionFromRestoreFileName($fileName);
     $directory = Sabel_DB_Migration_Manager::getDirectory();
-    $fp = fopen($directory . DS . "{$num}_mix.php", "r");
+
+    $fp = fopen($directory . DS . "{$version}_mix" . PHP_SUFFIX, "r");
     $this->splitFiles($fp);
     fclose($fp);
 
@@ -157,13 +160,13 @@ class Sabel_DB_Migration_Custom
     $tmpDir = $this->temporaryDir;
 
     if ($this->isUpgrade) {
-      $path = $tmpDir . DS . "{$num}_{$fName}";
+      $fileName = $tmpDir . DS . "{$num}_{$fName}" . PHP_SUFFIX;
     } else {
-      $dir  = $this->getTemporaryRestoresDir();
-      $path = $dir . DS . "restore_" . $num;
+      $dir = $this->getTemporaryRestoresDir();
+      $fileName = $dir . DS . "restore_" . $num . PHP_SUFFIX;
     }
 
-    file_put_contents($path, implode($lines, "\n"));
+    file_put_contents($fileName, "<?php\n\n" . implode($lines, "\n"));
   }
 
   private function createCustomRestoreFile($upgradeFiles, $version)
@@ -173,11 +176,8 @@ class Sabel_DB_Migration_Custom
     $files = array();
     foreach (scandir($restoreDir) as $file) {
       if (preg_match("/\.+$/", $file)) continue;
-      list (, $num) = explode("_", $file);
-
-      if (is_numeric($num)) {
-        $files[$num] = $restoreDir. DS . $file;
-      }
+      $index = $this->getVersionFromRestoreFileName($file);
+      $files[$index] = $restoreDir . DS . $file;
     }
 
     $files = array_reverse($files);
@@ -185,15 +185,13 @@ class Sabel_DB_Migration_Custom
     $dir = $directory . DS . "restores";
     if (!is_dir($dir)) mkdir($dir);
 
-    $restore = $dir . DS . "restore_{$version}";
+    $restore = $dir . DS . "restore_{$version}" . PHP_SUFFIX;
     $rfp     = fopen($restore, "w");
 
     foreach ($files as $file) {
-      $fp    = fopen($file, "r");
-      $fName = basename($file);
-
-      list (, $num) = explode("_", $fName);
-      list (, $mdlName, $command) = explode("_", $upgradeFiles[$num]);
+      $fp = fopen($file, "r");
+      $version = $this->getVersionFromRestoreFileName(basename($file));
+      list (, $mdlName, $command) = explode("_", $upgradeFiles[$version]);
 
       $command = $mdlName . "_" . $command;
       fwrite($rfp, "### $command ###\n");
@@ -209,6 +207,15 @@ class Sabel_DB_Migration_Custom
     }
 
     fclose($rfp);
+  }
+
+  private function getVersionFromRestoreFileName($fileName)
+  {
+    $under   = strpos($fileName, "_");
+    $dot     = strpos($fileName, ".");
+    $version = substr($fileName, ++$under, $dot - $under);
+
+    return $version;
   }
 
   private function getTemporaryRestoresDir()

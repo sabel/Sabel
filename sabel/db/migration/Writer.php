@@ -30,17 +30,15 @@ class Sabel_DB_Migration_Writer
 
   public function writeTable($schema)
   {
+    $fp = $this->fp;
     $columns = $schema->getColumns();
     $this->_writeColumns($columns, '$create');
-
-    $fp   = $this->fp;
     $pkey = $schema->getPrimarykey();
 
     if (is_array($pkey)) {
       $pkeys = array();
       foreach ($pkey as $key) $pkeys[] = '"' . $key .'"';
-      fwrite($fp, '$create->primary(array(' . implode(", ", $pkeys) . '));');
-      fwrite($fp, "\n");
+      $this->write('$create->primary(array(' . implode(", ", $pkeys) . '));' . "\n");
     }
 
     $uniques = $schema->getUniques();
@@ -48,14 +46,14 @@ class Sabel_DB_Migration_Writer
     if ($uniques) {
       foreach ($uniques as $unique) {
         if (count($unique) === 1) {
-          fwrite($fp, '$create->unique("' . $unique[0] . '");');
+          $this->write('$create->unique("' . $unique[0] . '");');
         } else {
           $us = array();
           foreach ($unique as $u) $us[] = '"' . $u . '"';
-          fwrite($fp, '$create->unique(array(' . implode(", ", $us) . '));');
+          $this->write('$create->unique(array(' . implode(", ", $us) . '));');
         }
 
-        fwrite($fp, "\n");
+        $this->write("\n");
       }
     }
 
@@ -67,7 +65,7 @@ class Sabel_DB_Migration_Writer
               . $param->onDelete . '")->onUpdate("'
               . $param->onUpdate . '");';
 
-        fwrite($fp, $line . "\n");
+        $this->write($line . "\n");
       }
     }
   }
@@ -103,15 +101,15 @@ class Sabel_DB_Migration_Writer
       $line[] = '->increment(' . $bool . ')';
 
       if ($column->default === null) {
-        $line[] = '->default(_NULL)';
+        $line[] = '->value(_NULL)';
       } else {
         if ($column->isNumeric()) {
-          $line[] = '->default(' . $column->default . ')';
+          $line[] = '->value(' . $column->default . ')';
         } elseif ($column->isBool()) {
           $bool = ($column->default) ? "true" : "false";
-          $line[] = '->default(' . $bool . ')';
+          $line[] = '->value(' . $bool . ')';
         } else {
-          $line[] = '->default("' . $column->default . '")';
+          $line[] = '->value("' . $column->default . '")';
         }
       }
 

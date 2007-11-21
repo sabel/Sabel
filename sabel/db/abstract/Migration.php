@@ -230,7 +230,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     $dir = $directory . DS . "restores";
     if (!is_dir($dir)) mkdir($dir);
 
-    return $dir . DS . "restore_" . $this->version;
+    return $dir . DS . "restore_" . $this->version . PHP_SUFFIX;
   }
 
   protected function query()

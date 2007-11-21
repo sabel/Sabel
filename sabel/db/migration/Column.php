@@ -59,7 +59,7 @@ class Sabel_DB_Migration_Column
     return $this;
   }
 
-  public function defaultValue($value)
+  public function value($value)
   {
     if ($this->column->isBool() && !is_bool($value)) {
       Sabel_Sakle_Task::error("default value for BOOL column should be a boolean.");

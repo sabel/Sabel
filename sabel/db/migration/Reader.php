@@ -21,42 +21,35 @@ class Sabel_DB_Migration_Reader
   public function readCreate()
   {
     $create = new Sabel_DB_Migration_Create();
-    eval ($this->parse());
+    include ($this->filePath);
     return $create->build();
   }
 
   public function readAddColumn()
   {
     $add = new Sabel_DB_Migration_AddColumn();
-    eval ($this->parse());
+    include ($this->filePath);
     return $add->build();
   }
 
   public function readDropColumn()
   {
     $drop = new Sabel_DB_Migration_DropColumn();
-    eval ($this->parse());
+    include ($this->filePath);
     return $drop;
   }
 
   public function readChangeColumn()
   {
     $change = new Sabel_DB_Migration_ChangeColumn();
-    eval ($this->parse());
+    include ($this->filePath);
     return $change;
   }
 
   public function readQuery()
   {
     $query = new Sabel_DB_Migration_Query();
-    eval ($this->parse());
+    include ($this->filePath);
     return $query;
-  }
-
-  public function parse()
-  {
-    $content = file_get_contents($this->filePath);
-    $content = str_replace("->default(", "->defaultValue(", $content);
-    return str_replace(array("<?php", "?>"), "", $content);
   }
 }
