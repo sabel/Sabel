@@ -38,7 +38,9 @@ class Sabel_DB_Join extends Sabel_Object
 
   public function add($object)
   {
-    if ($object instanceof Sabel_DB_Abstract_Model) {
+    if (is_string($object)) {
+      $object = new Sabel_DB_Join_Object(MODEL($object));
+    } elseif ($object instanceof Sabel_DB_Abstract_Model) {
       $object = new Sabel_DB_Join_Object($object);
     }
 

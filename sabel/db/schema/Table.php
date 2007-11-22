@@ -45,7 +45,7 @@ class Sabel_DB_Schema_Table extends Sabel_Object
 
   public function getColumnByName($name)
   {
-    return $this->columns[$name];
+    return $this->__get($name);
   }
 
   public function getColumnNames()
