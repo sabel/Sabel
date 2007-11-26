@@ -2,9 +2,28 @@
 
 class Test_Util extends SabelTestCase
 {
+  private $list = null;
+  
   public static function suite()
   {
     return self::createSuite("Test_Util");
+  }
+  
+  public function setUp()
+  {
+    $first = new StdClass();
+    $first->name = "first";
+    
+    $second = new StdClass();
+    $second->name = "second";
+    
+    $third = new StdClass();
+    $third->name = "third";
+    
+    $this->list = new Sabel_Util_List("first", $first);
+    
+    $this->list->insertNext("second", $second)
+               ->insertNext("third", $third);
   }
   
   public function testInsertPreviousAndNext()
@@ -39,5 +58,43 @@ class Test_Util extends SabelTestCase
     $this->assertEquals("test", $obj->getFirst()->name);
     $this->assertEquals("ebine", $obj->getFirst()->next->current->value);
     $this->assertEquals("test2", $obj->getFirst()->next->next->name);
+  }
+  
+  public function testUnlink()
+  {
+    $list = $this->list;
+    $list->getFirst()->next()->unlink();
+    $this->assertEquals("first", $list->getFirst()->name);
+    $this->assertEquals("third", $list->getFirst()->next()->name);
+  }
+  
+  public function testUnlinkWithFind()
+  {
+    $list = $this->list;
+    $list->find("second")->unlink();
+    $this->assertEquals("first", $list->getFirst()->name);
+    $this->assertEquals("third", $list->getFirst()->next()->name);
+  }
+  
+  public function testUnlinkAndInsert()
+  {
+    $list = $this->list;
+    
+    $list->find("second")->unlink();
+    $list->getFirst()->insertNext("second", new StdClass());
+    $this->assertEquals("second", $list->getFirst()->next()->name);
+  }
+  
+  public function testUnlinkLast()
+  {
+    $this->list->getLast()->unlink();
+    $this->assertEquals("second", $this->list->getLast()->name);
+  }
+  
+  public function testInsertNextPreviousPointer()
+  {
+    $list = $this->list;
+    $list->find("third")->insertNext("force", new StdClass());
+    $this->assertEquals("third", $list->getLast()->previous->name);
   }
 }

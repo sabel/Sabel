@@ -290,6 +290,8 @@ class Sabel_Request_Object extends Sabel_Object
     if (array_key_exists($key, $this->parameterValues)) {
       $value = $this->parameterValues[$key];
       return ($value === "") ? null : $value;
+    } elseif ($this->parameters->hasA($key)) {
+      return $this->parameters->get($key);
     } else {
       return null;
     }
