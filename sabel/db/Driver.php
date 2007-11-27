@@ -14,16 +14,16 @@ class Sabel_DB_Driver
   public static function create($connectionName = "default")
   {
     $driverName = Sabel_DB_Config::getDriverName($connectionName);
-
+    
     if (strpos($driverName, "pdo") === false) {
       $className = "Sabel_DB_" . ucfirst($driverName) . "_Driver";
     } else {
       list (, $db) = explode("-", $driverName);
       $className = "Sabel_DB_Pdo_Driver_" . ucfirst($db);
     }
-
+    
     $driver = new $className($connectionName);
-
+    
     if (Sabel_DB_Transaction::isActive()) {
       $connection = Sabel_DB_Transaction::getConnection($connectionName);
       if ($connection === null) {
@@ -33,7 +33,20 @@ class Sabel_DB_Driver
         $driver->autoCommit(false);
       }
     }
-
+    
     return $driver;
+  }
+  
+  public static function createStatement($connectionName = "default")
+  {
+    $driverName = Sabel_DB_Config::getDriverName($connectionName);
+    
+    if (substr($driverName, 0, 4) === "pdo-") {
+      $className = "Sabel_DB_Pdo_Statement";
+    } else {
+      $className  = "Sabel_DB_" . ucfirst($driverName) . "_Statement";
+    }
+    
+    return new $className(self::create($connectionName));
   }
 }

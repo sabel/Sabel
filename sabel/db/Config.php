@@ -69,7 +69,7 @@ class Sabel_DB_Config
 
     $config = self::getConfig($connectionName);
 
-    if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"))) {
+    if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"), true)) {
       return $config["database"];
     } elseif ($drvName === "oci") {
       return strtoupper($config["user"]);

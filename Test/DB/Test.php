@@ -8,15 +8,15 @@ class Test_DB_Test extends SabelTestCase
 
   public function testClean()
   {
-    $tables   = self::$tables;
-    $executer = new Manipulator("Member");
+    $tables = self::$tables;
+    $driver = Sabel_DB_Driver::create();
 
     foreach ($tables as $table) {
-      $executer->query("DELETE FROM $table", false, Sabel_DB_Sql::DELETE);
+      $driver->execute("DELETE FROM $table");
     }
 
-    $executer->query("DELETE FROM tree WHERE id > 2");
-    $executer->query("DELETE FROM tree");
+    $driver->execute("DELETE FROM tree WHERE id > 2");
+    $driver->execute("DELETE FROM tree");
   }
 
   public function testInsert()
@@ -433,48 +433,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals($count, 5);
   }
 
-  public function testValidate()
-  {
-    $member = MODEL("Member");
-    $member->name    = "test6";
-    $member->email   = "test6@example.com";
-    $member->is_temp = true;
-    $member->location_id = 1;
-    $member->member_sub_group_id = 1;
-
-    $executer = new Manipulator($member);
-    $result = $executer->validate();
-
-    $this->assertEquals(count($result), 1);
-    $this->assertEquals($result[0], "please enter a id.");
-
-    //==============================================
-
-    $member = MODEL("Member");
-    $member->email   = "test6@example.com";
-    $member->is_temp = true;
-    $member->location_id = 1;
-    $member->member_sub_group_id = 1;
-
-    $executer = new Manipulator($member);
-    $result = $executer->validate();
-
-    $this->assertEquals(count($result), 2);
-
-    //==============================================
-
-    $member = MODEL("Member");
-    $member->email   = "test6@example.com";
-    $member->is_temp = true;
-    $member->location_id = 1;
-    $member->member_sub_group_id = 1;
-
-    $executer = new Manipulator($member);
-    $result = $executer->validate("name");
-
-    $this->assertEquals(count($result), 1);
-  }
-
   public function testConditionTest()
   {
     $data = array("bool_flag" => true);
@@ -601,9 +559,8 @@ class Test_DB_Test extends SabelTestCase
     $or = new Sabel_DB_Condition_Or();
     $or->add(Condition::create(GREATER_EQUAL, "point", 400));
     $or->add(Condition::create(LESS_EQUAL, "point", 200));
-    $executer->loadConditionManager()->add($or);
     $executer->setConstraint("order", "point DESC");
-    $models = $executer->select();
+    $models = $executer->select($or);
     $this->assertEquals(count($models), 5);
     $this->assertEquals($models[0]->point, 600);
     $this->assertEquals($models[1]->point, 500);
@@ -903,11 +860,6 @@ class Manipulator extends Sabel_DB_Manipulator
     if (method_exists($this, $method)) {
       return $this->$method();
     }
-  }
-  
-  private function beforeValidate()
-  {
-    $this->setTimestamp();
   }
   
   private function beforeSave()

@@ -16,8 +16,8 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
     $column = "",
     $value  = null,
     $isNot  = false;
-
-  public abstract function build(Sabel_DB_Abstract_Sql $sql, &$counter);
+    
+  public abstract function build(Sabel_DB_Abstract_Statement $sql, &$counter);
   
   public function __construct($column)
   {

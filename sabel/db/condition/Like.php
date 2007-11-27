@@ -18,7 +18,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   private $type   = self::PREFIX;
   private $escape = true;
   
-  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
   {
     $value = $this->value;
     
@@ -42,7 +42,6 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
     }
     
     return $query;
-    
   }
   
   public function type($type)

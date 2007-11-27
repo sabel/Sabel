@@ -73,7 +73,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     return $this;
   }
 
-  public final function execute()
+  protected final function execute()
   {
     $method = $this->method;
     $result = $this->before($method);
@@ -91,7 +91,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     return $result;
   }
 
-  protected final function _execute(Sabel_DB_Abstract_Sql $sql)
+  protected final function _execute(Sabel_DB_Abstract_Statement $sql)
   {
     $this->sql = $sql;
     return $sql->execute();
@@ -133,7 +133,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     if (is_array($arg1)) {
       $manager->create($arg1);
-    } elseif ($manager->isIndividualCondition($arg1)) {
+    } elseif (is_object($arg1)) {
       $manager->add($arg1);
     } elseif ($arg2 === null) {
       $manager->create($this->model->getPrimaryKey(), $arg1);
@@ -197,7 +197,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $this->projection  = array("COUNT(*) AS cnt");
     $this->constraints = array("limit" => 1);
 
-    $sql  = $this->createSql(Sabel_DB_Sql::SELECT);
+    $sql  = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($sql));
 
     $this->projection  = $projection;
@@ -223,13 +223,10 @@ class Sabel_DB_Manipulator extends Sabel_Object
     }
 
     $this->setCondition($arg1, $arg2);
-    return $this->createModel($this->model);
-  }
 
-  protected function createModel($model)
-  {
-    $sql  = $this->createSql(Sabel_DB_Sql::SELECT);
-    $rows = $this->_execute($this->prepareSelect($sql));
+    $model = $this->model;
+    $sql   = $this->getStatement(Sabel_DB_Statement::SELECT);
+    $rows  = $this->_execute($this->prepareSelect($sql));
 
     if (isset($rows[0])) {
       $model->setAttributes($rows[0]);
@@ -260,7 +257,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     @list ($arg1, $arg2) = $this->arguments;
 
     $this->setCondition($arg1, $arg2);
-    $sql  = $this->createSql(Sabel_DB_Sql::SELECT);
+    $sql  = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($sql));
 
     if (empty($rows)) return false;
@@ -275,28 +272,6 @@ class Sabel_DB_Manipulator extends Sabel_Object
     }
 
     return $results;
-  }
-
-  public function validate($ignores = null)
-  {
-    $args = func_get_args();
-    $this->prepare("validate", $args);
-
-    return $this->execute();
-  }
-
-  public function _validate()
-  {
-    @list ($ignores) = $this->arguments;
-
-    if ($ignores === null) {
-      $ignores = array();
-    } elseif (is_string($ignores)) {
-      $ignores = array($ignores);
-    }
-
-    $validator = new Sabel_DB_Validator($this->model);
-    return $validator->validate($ignores);
   }
 
   public function save()
@@ -324,7 +299,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $columns = $model->getColumns();
     $saveValues = $model->toArray();
 
-    $sql   = $this->createSql(Sabel_DB_Sql::INSERT);
+    $sql   = $this->getStatement(Sabel_DB_Statement::INSERT);
     $newId = $this->_execute($this->prepareInsert($sql, $saveValues));
 
     if ($newId !== null && ($column = $model->getSequenceColumn()) !== null) {
@@ -355,7 +330,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
       }
     }
 
-    $sql = $this->createSql(Sabel_DB_Sql::UPDATE);
+    $sql = $this->getStatement(Sabel_DB_Statement::UPDATE);
     $saveValues = $model->getUpdateValues();
     $this->_execute($this->prepareUpdate($sql, $saveValues));
 
@@ -374,7 +349,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
   {
     @list ($data) = $this->arguments;
 
-    $sql = $this->createSql(Sabel_DB_Sql::INSERT);
+    $sql = $this->getStatement(Sabel_DB_Statement::INSERT);
     return $this->_execute($this->prepareInsert($sql, $data));
   }
 
@@ -389,7 +364,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
   protected function _update($data = null)
   {
     @list ($data) = $this->arguments;
-    $sql = $this->createSql(Sabel_DB_Sql::UPDATE);
+    $sql = $this->getStatement(Sabel_DB_Statement::UPDATE);
     $this->_execute($this->prepareUpdate($sql, $data));
   }
 
@@ -428,34 +403,8 @@ class Sabel_DB_Manipulator extends Sabel_Object
       }
     }
 
-    $sql = $this->createSql(Sabel_DB_Sql::DELETE);
+    $sql = $this->getStatement(Sabel_DB_Statement::DELETE);
     $this->_execute($this->prepareDelete($sql));
-  }
-
-  public function query($query, $assoc = false, $type = Sabel_DB_Sql::SELECT)
-  {
-    $this->method = "query";
-    $this->arguments = array($query, $assoc, $type);
-
-    return $this->execute();
-  }
-
-  protected function _query()
-  {
-    list ($query, $assoc, $type) = $this->arguments;
-
-    $sql  = $this->createSql($type);
-    $rows = $this->_execute($sql->setQuery($query));
-
-    if (empty($rows) || $assoc === null) {
-      return null;
-    } elseif ($assoc) {
-      return $rows;
-    } else {
-      $results = array();
-      foreach ($rows as $row) $results[] = (object)$row;
-      return $results;
-    }
   }
 
   public function executeSql($sql)
@@ -471,11 +420,11 @@ class Sabel_DB_Manipulator extends Sabel_Object
     return $this->_execute($this->arguments[0]);
   }
 
-  public function createSql($type)
+  public function getStatement($type)
   {
-    return Sabel_DB_Sql::create($this->model->getTableName(),
-                                $this->model->getConnectionName(),
-                                $type);
+    $model = $this->model;
+    $sql = Sabel_DB_Driver::createStatement($model->getConnectionName());
+    return $sql->table($model->getTableName())->setType($type);
   }
 
   protected function prepareSelect($sql)

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Condition_Direct
+ * Sabel_DB_Statement_Exception
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,10 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Direct extends Sabel_DB_Abstract_Condition
+class Sabel_DB_Statement_Exception extends Sabel_DB_Exception
 {
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
-  {
-    return $this->column;
-  }
+
 }

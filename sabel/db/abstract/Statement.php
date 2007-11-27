@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_Sql
+ * Sabel_DB_Abstract_Statement
  *
  * @abstract
  * @category   DB
@@ -10,13 +10,10 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
+abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 {
   protected
-    $connectionName = "";
-
-  protected
-    $type       = Sabel_DB_Sql::QUERY,
+    $type       = Sabel_DB_Statement::QUERY,
     $query      = "",
     $driver     = null,
     $schema     = null,
@@ -35,10 +32,9 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     $placeHolderPrefix = "@",
     $placeHolderSuffix = "@";
 
-  public function __construct($connectionName)
+  public function __construct(Sabel_DB_Abstract_Driver $driver)
   {
-    $this->driver = Sabel_DB_Driver::create($connectionName);
-    $this->connectionName = $this->driver->getConnectionName();
+    $this->driver = $driver;
   }
 
   public function setType($type)
@@ -53,7 +49,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($query)) {
       $this->query = $query;
     } else {
-      throw new Sabel_DB_Sql_Exception("setQuery() argument should be a string.");
+      throw new Sabel_DB_Statement_Exception("setQuery() argument must be a string.");
     }
 
     return $this;
@@ -73,9 +69,9 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
   {
     if (is_string($table)) {
       $this->table  = $table;
-      $this->schema = Sabel_DB_Schema::create($table, $this->connectionName);
+      $this->schema = Sabel_DB_Schema::create($table, $this->driver->getConnectionName());
     } else {
-      throw new Sabel_DB_Sql_Exception("table() argument should be a string.");
+      throw new Sabel_DB_Statement_Exception("table() argument must be a string.");
     }
 
     return $this;
@@ -93,7 +89,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($join)) {
       $this->join = $join;
     } else {
-      throw new Sabel_DB_Sql_Exception("join() argument should be a string.");
+      throw new Sabel_DB_Statement_Exception("join() argument must be a string.");
     }
 
     return $this;
@@ -104,7 +100,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if (is_string($where)) {
       $this->where = $where;
     } else {
-      throw new Sabel_DB_Sql_Exception("where() argument should be a string.");
+      throw new Sabel_DB_Statement_Exception("where() argument must be a string.");
     }
 
     return $this;
@@ -119,15 +115,17 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
 
   public function values(array $values)
   {
-    $this->values = array();
-    $this->bindValues = array();
+    $v  =& $this->values;
+    $bv =& $this->bindValues;
+
+    $v = $bv = array();
+
     $prefix = $this->placeHolderPrefix;
     $suffix = $this->placeHolderSuffix;
 
     foreach ($values as $key => $value) {
-      $this->values[$key] = $value;
-      $key = $prefix . $key . $suffix;
-      $this->bindValues[$key] = $value;
+      $v[$key] = $value;
+      $bv[$prefix . $key . $suffix] = $value;
     }
 
     return $this;
@@ -140,7 +138,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     } elseif (is_string($seqColumn)) {
       $this->seqColumn = $seqColumn;
     } else {
-      throw new Sabel_DB_Sql_Exception("sequenceColumn() argument should be a string.");
+      throw new Sabel_DB_Statement_Exception("sequenceColumn() argument must be a string.");
     }
 
     return $this;
@@ -200,46 +198,41 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
 
   public function isSelect()
   {
-    return ($this->type === Sabel_DB_Sql::SELECT);
+    return ($this->type === Sabel_DB_Statement::SELECT);
   }
 
   public function isInsert()
   {
-    return ($this->type === Sabel_DB_Sql::INSERT);
+    return ($this->type === Sabel_DB_Statement::INSERT);
   }
 
   public function isUpdate()
   {
-    return ($this->type === Sabel_DB_Sql::UPDATE);
+    return ($this->type === Sabel_DB_Statement::UPDATE);
   }
 
   public function isDelete()
   {
-    return ($this->type === Sabel_DB_Sql::DELETE);
+    return ($this->type === Sabel_DB_Statement::DELETE);
   }
 
   public function build()
   {
     if ($this->schema === null) {
       $message = "can't build query. please call table() method.";
-      throw new Sabel_DB_Sql_Exception($message);
+      throw new Sabel_DB_Statement_Exception($message);
     }
 
-    switch ($this->type) {
-      case Sabel_DB_Sql::SELECT:
-        return $this->createSelectSql();
-
-      case Sabel_DB_Sql::INSERT:
-        return $this->createInsertSql();
-
-      case Sabel_DB_Sql::UPDATE:
-        return $this->createUpdateSql();
-
-      case Sabel_DB_Sql::DELETE:
-        return $this->createDeleteSql();
-
-      case Sabel_DB_Sql::QUERY:
-        return $this->query;
+    if ($this->isSelect()) {
+      return $this->createSelectSql();
+    } elseif ($this->isInsert()) {
+      return $this->createInsertSql();
+    } elseif ($this->isUpdate()) {
+      return $this->createUpdateSql();
+    } elseif ($this->isDelete()) {
+      return $this->createDeleteSql();
+    } else {
+      return $this->query;
     }
   }
 
@@ -317,7 +310,7 @@ abstract class Sabel_DB_Abstract_Sql extends Sabel_Object
     if ($instance instanceof Sabel_DB_Sql_Part_Interface) {
       return $instance->getValue($this);
     } else {
-      throw new Sabel_DB_Sql_Exception("cannot convert object to sql string.");
+      throw new Sabel_DB_Statement_Exception("cannot convert object to sql string.");
     }
   }
 }

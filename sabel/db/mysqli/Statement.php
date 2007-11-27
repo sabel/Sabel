@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Mysqli_Sql
+ * Sabel_DB_Mysqli_Statement
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysqli_Sql extends Sabel_DB_Mysql_Sql
+class Sabel_DB_Mysqli_Statement extends Sabel_DB_Mysql_Statement
 {
   public function escape(array $values)
   {

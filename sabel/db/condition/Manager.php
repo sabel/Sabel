@@ -61,7 +61,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     return $conditions;
   }
 
-  public function build(Sabel_DB_Abstract_Sql $sql)
+  public function build(Sabel_DB_Abstract_Statement $sql)
   {
     $set     = false;
     $counter = 0;

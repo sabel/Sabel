@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Condition_In extends Sabel_DB_Abstract_Condition
 {
-  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
   {
     // @todo escape or bind.
     return $this->getColumnWithNot() . " IN (" . implode(", ", $this->value) . ")";

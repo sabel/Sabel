@@ -69,7 +69,7 @@ class Sabel_DB_Join extends Sabel_Object
   public function setParents(array $parents)
   {
     foreach ($parents as $parent) {
-      $this->add(MODEL($parent));
+      $this->add($parent);
     }
 
     return $this;
@@ -130,19 +130,14 @@ class Sabel_DB_Join extends Sabel_Object
   protected function execute($projection, $join, $constraints = null)
   {
     $manip = $this->manip;
-    $sql   = $manip->createSql(Sabel_DB_Sql::SELECT);
+    $sql   = $manip->getStatement(Sabel_DB_Statement::SELECT);
 
     $sql->join($join)
         ->projection($projection)
         ->where($manip->loadConditionManager()->build($sql));
 
-    if ($constraints === null) {
-      $sql->constraints($manip->getConstraints());
-    } else {
-      $sql->constraints($constraints);
-    }
-
-    return $manip->executeSql($sql);
+    if ($constraints === null) $constraints = $manip->getConstraints();
+    return $manip->executeSql($sql->constraints($constraints));
   }
 
   public function clear()

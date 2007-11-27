@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Condition_LessEqual extends Sabel_DB_Abstract_Condition
 {
-  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
   {
     $bindKey = $sql->setBindValue("param" . ++$counter, $this->value);
     return $this->column . " <= $bindKey";

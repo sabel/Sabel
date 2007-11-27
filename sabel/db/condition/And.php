@@ -18,7 +18,7 @@ class Sabel_DB_Condition_And extends Sabel_Object
     $this->conditions[] = $condition;
   }
 
-  public function build(Sabel_DB_Abstract_Sql $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
   {
     $conditions = $this->conditions;
 

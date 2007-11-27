@@ -52,18 +52,18 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
 
   protected function setDefaultValue($column, $default)
   {
-    if ($default === null) {
+    if ($default === null || $default === "") {
       $column->default = null;
     } else {
       switch ($column->type) {
         case Sabel_DB_Type::INT:
         case Sabel_DB_Type::SMALLINT:
-          $column->default = ($default === "") ? null : (int)$default;
+          $column->default = (int)$default;
           break;
 
         case Sabel_DB_Type::FLOAT:
         case Sabel_DB_Type::DOUBLE:
-          $column->default = ($default === "") ? null : (float)$default;
+          $column->default = (float)$default;
           break;
 
         case Sabel_DB_Type::BOOL:
@@ -75,11 +75,11 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
           break;
 
         case Sabel_DB_Type::BIGINT:
-          $column->default = ($default === "") ? null : (string)$default;
+          $column->default = (string)$default;
           break;
 
         default:
-          $column->default = ($default === "") ? null : $default;
+          $column->default = $default;
       }
     }
   }
