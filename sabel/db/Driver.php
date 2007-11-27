@@ -15,11 +15,11 @@ class Sabel_DB_Driver
   {
     $driverName = Sabel_DB_Config::getDriverName($connectionName);
     
-    if (strpos($driverName, "pdo") === false) {
-      $className = "Sabel_DB_" . ucfirst($driverName) . "_Driver";
-    } else {
+    if (substr($driverName, 0, 3) === "pdo") {
       list (, $db) = explode("-", $driverName);
       $className = "Sabel_DB_Pdo_Driver_" . ucfirst($db);
+    } else {
+      $className = "Sabel_DB_" . ucfirst($driverName) . "_Driver";
     }
     
     $driver = new $className($connectionName);
@@ -41,7 +41,7 @@ class Sabel_DB_Driver
   {
     $driverName = Sabel_DB_Config::getDriverName($connectionName);
     
-    if (substr($driverName, 0, 4) === "pdo-") {
+    if (substr($driverName, 0, 3) === "pdo") {
       $className = "Sabel_DB_Pdo_Statement";
     } else {
       $className  = "Sabel_DB_" . ucfirst($driverName) . "_Statement";

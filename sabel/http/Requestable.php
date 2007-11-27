@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * HTTP Request
+ *
+ * @interface
+ * @category   Http
+ * @package    org.sabel.http
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 interface Sabel_Http_Requestable
 {
   public function connect($host, $port);

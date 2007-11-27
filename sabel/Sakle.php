@@ -4,6 +4,15 @@ require_once ("Sabel/Sabel.php");
 define("RUN_BASE", getcwd());
 Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
 
+/**
+ * Sakle
+ *
+ * @category   Sakle
+ * @package    org.sabel.sakle
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Mori Reo <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sakle
 {
   protected $arguments = array();
@@ -81,5 +90,8 @@ if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
   set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
 }
 
-isset($_SERVER["argv"][1]) ? Sakle::main($_SERVER["argv"][1]) : Sakle::main();
-
+if (isset($_SERVER["argv"][1])) {
+  Sakle::main($_SERVER["argv"][1]);
+} else {
+  Sakle::main();
+}

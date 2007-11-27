@@ -4,8 +4,8 @@
  * Sabel Object
  *
  * @abstract
- * @category   core
- * @package    org.sabel.object
+ * @category   Core
+ * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@gmail.com>
  *             Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>

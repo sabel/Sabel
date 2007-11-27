@@ -3,6 +3,7 @@
 /**
  * Sabel_Logger_Factory
  *
+ * @category   Logger
  * @package    org.sabel.logger
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com

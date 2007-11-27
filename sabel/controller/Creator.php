@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Controller_Executer
+ * Sabel_Controller_Creator
  *
  * @category   Controller
  * @package    org.sabel.controller

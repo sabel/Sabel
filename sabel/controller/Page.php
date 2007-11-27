@@ -47,7 +47,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * execute ones before action execute.
    *
    */
-  public function initialize(){}
+  public function initialize()
+  {
+    
+  }
   
   /**
    * setup of PageController

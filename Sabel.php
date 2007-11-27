@@ -35,7 +35,7 @@ spl_autoload_register(array("Sabel", "autoload"));
  * Sabel
  *
  * @category   Sabel
- * @package    org.sabel
+ * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -96,6 +96,7 @@ final class Sabel
   private static function convertPath($className)
   {
     static $suffix = null;
+    
     if ($suffix === null) {
       $suffix = (defined("PHP_SUFFIX")) ? PHP_SUFFIX : ".php";
     }
@@ -124,7 +125,7 @@ final class Sabel
       }
       
       if ($paths === null) {
-        $paths = explode(":", $includePath);
+        $paths = explode(PATH_SEPARATOR, $includePath);
       }
       
       foreach ($paths as $p) {
@@ -202,7 +203,6 @@ final class Sabel
     require ($CONTAINER . "Injector.php");
     require ($CONTAINER . "Bind.php");
     require ($CONTAINER . "DI.php");
-    require ($CONTAINER . "ReflectionClass.php");
     require ($CONTAINER . "Injection.php");
     
     require ($VIEW . "Uri.php");

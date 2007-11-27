@@ -23,12 +23,12 @@ class Sabel_Addon_Loader extends Sabel_Object
     
     $myAddonDir = $addonDir . $addonName;
     
-    $pathToAddonClass = $myAddonDir . DS . "Addon.php";
+    $pathToAddonClass = $myAddonDir . DS . "Addon" . PHP_SUFFIX;
     
     if (is_readable($pathToAddonClass)) {
       
       $dirs = explode(DS, dirname($pathToAddonClass));
-      $dir = $dirs[count($dirs)-1];
+      $dir = $dirs[count($dirs) - 1];
       
       $includePathDefine = strtoupper($addonName) . "_ADDON_INCLUDE_PATH";
       $pathDefine = strtoupper($addonName) . "_ADDON_PATH";
@@ -54,6 +54,5 @@ class Sabel_Addon_Loader extends Sabel_Object
         $addon->loadProcessor($this->bus);
       }
     }
-    
   }
 }

@@ -3,7 +3,7 @@
 /**
  * Sabel_Locale_Browser
  *
- * @category   locale
+ * @category   Locale
  * @package    org.sabel.locale
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>

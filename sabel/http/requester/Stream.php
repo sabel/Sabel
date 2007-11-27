@@ -1,24 +1,27 @@
 <?php
 
-//Sabel::using("Sabel_Http_Requestable");
-
+/**
+ * Sabel_Http_Requester_Stream
+ *
+ * @category   Http
+ * @package    org.sabel.http
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Http_Requester_Stream implements Sabel_Http_Requestable
 {
-  const NO_INIT   = 0;
-  const CONNECTED = 5;
+  const NO_INIT      = 0;
+  const CONNECTED    = 5;
   const DISCONNECTED = 10;
   
   private $socket = null;
   private $state  = 0;
   
   protected $blockingMode = 1;
-  protected $protocol     = 'tcp';
+  protected $protocol     = "tcp";
   protected $timeout      = 30;
   protected $flag         = STREAM_CLIENT_CONNECT;
-  
-  public function __construct()
-  {
-  }
   
   public function setProtocol($protocol)
   {

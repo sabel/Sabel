@@ -32,8 +32,8 @@
   LC_ALL      : 6
 */
 
-Sabel::fileUsing(dirname(__FILE__) . DIR_DIVIDER . "streams.php");
-Sabel::fileUsing(dirname(__FILE__) . DIR_DIVIDER . "gettext.php");
+Sabel::fileUsing(dirname(__FILE__) . DS . "streams.php");
+Sabel::fileUsing(dirname(__FILE__) . DS . "gettext.php");
 
 global $text_domains, $default_domain, $LC_CATEGORIES, $EMULATEGETTEXT, $CURRENTLOCALE;
 
@@ -80,11 +80,11 @@ function _get_reader($domain = null, $category = 5, $enable_cache = true) {
     $locale = Sabel_I18n_Gettext::getInstance()->getBrowser()->getLocale();
     
     $path = $text_domains[$domain]->path;
-    $filePath = $path . $locale . DIR_DIVIDER . "LC_MESSAGES" . DIR_DIVIDER . "{$domain}.mo";
+    $filePath = $path . $locale . DS . "LC_MESSAGES" . DS . "{$domain}.mo";
     
     if (!is_file($filePath) && !IS_WIN && strpos($locale, "_") !== false) {
       list ($lang) = explode("_", $locale);
-      $filePath = $path . $lang . DIR_DIVIDER . "LC_MESSAGES" . DIR_DIVIDER . "{$domain}.mo";
+      $filePath = $path . $lang . DS . "LC_MESSAGES" . DS . "{$domain}.mo";
     }
     
     $input = (is_file($filePath)) ? new FileReader($filePath) : null;
@@ -137,7 +137,7 @@ function _bindtextdomain($domain, $path)
 {
   global $text_domains;
   
-  if (substr($path, -1, 1) !== DIR_DIVIDER) $path .= DIR_DIVIDER;
+  if (substr($path, -1, 1) !== DS) $path .= DS;
   
   if (isset($text_domains[$domain]) && is_object($text_domains[$domain])) {
     $text_domains[$domain]->path = $path;

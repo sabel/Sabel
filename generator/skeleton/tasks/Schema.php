@@ -3,6 +3,8 @@
 /**
  * Schema
  *
+ * @category  Sakle
+ * @package   org.sabel.sakle
  * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
@@ -25,7 +27,10 @@ class Schema extends Sabel_Sakle_Task
       $schemaAll = false;
     }
     
-    foreach (get_db_params($environment) as $connectionName => $params) {
+    define("ENVIRONMENT", $environment);
+    Sabel_DB_Config::initialize();
+    
+    foreach (get_db_params() as $connectionName => $params) {
       Sabel_DB_Config::regist($connectionName, $params);
       $accessor = new Sabel_DB_Schema_Accessor($connectionName);
       

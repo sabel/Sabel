@@ -3,8 +3,8 @@
 /**
  * Sabel Container Instance Builder
  *
- * @category   container
- * @package    org.sabel.core
+ * @category   Container
+ * @package    org.sabel.container
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -32,7 +32,7 @@ class Sabel_Container_DI
       throw new Sabel_Exception_Runtime($class . " does not exists");
     }
     
-    $reflectionClass = new Sabel_Container_ReflectionClass($class);
+    $reflectionClass = new Sabel_Reflection_Class($class);
     
     // push to Stack class name
     $this->dependStack[] = $reflectionClass;
@@ -48,7 +48,7 @@ class Sabel_Container_DI
           if ($this->isParameterDependOnClass($depend)) {
             $this->parseDependency($depend);
           } else {
-            $this->dependStack[] = new Sabel_Container_ReflectionClass($depend);
+            $this->dependStack[] = new Sabel_Reflection_Class($depend);
           }
         }
       }
@@ -76,7 +76,7 @@ class Sabel_Container_DI
     for ($i = 0; $i < $stackCount; ++$i) {
       $reflection = array_pop($this->dependStack);
       
-      if ($reflection->isImplementation()) {
+      if (!$reflection->isInterface() && !$reflection->isAbstract()) {
         $instance = $this->getInstance($reflection->getName(), $instance);
       } else {
         $instance = $this->getInstanceWithImplement($reflection->getName(), $instance);
