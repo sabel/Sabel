@@ -6,26 +6,7 @@ Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
 
 class Sakle
 {
-  const MSG_INFO = 0x01;
-  const MSG_WARN = 0x05;
-  const MSG_ERR  = 0x0A;
-  
-  protected $messageHeaders = array(self::MSG_INFO => "[\x1b[1;32mSUCCESS\x1b[m]",
-                                    self::MSG_WARN => "[\x1b[1;33mWARNING\x1b[m]",
-                                    self::MSG_ERR  => "[\x1b[1;31mERROR\x1b[m]");
-                                    
   protected $arguments = array();
-  
-  public static function main($class)
-  {
-    $instance = new self();
-    
-    if ($class === null) {
-      $instance->allTestRun();
-    } else {
-      $instance->run($class);
-    }
-  }
   
   public function __construct()
   {
@@ -41,17 +22,32 @@ class Sakle
     
     if (is_readable($pathToClass)) {
       Sabel::fileUsing($pathToClass, true);
-      $ins = new $class();
       
-      if ($ins->hasMethod("initialize")) {
-        $ins->initialize($this->arguments);
+      $ins  = new $class();
+      $args = $this->arguments;
+      
+      if (isset($args[1])) {
+        if ($args[1] === "-h" || $args[1] === "--help") {
+          $ins->usage();
+          exit;
+        }
       }
       
-      $ins->run($this->arguments);
-      
-      if ($ins->hasMethod("finalize")) {
-        $ins->finalize();
+      try {
+        if ($ins->hasMethod("initialize")) {
+          $ins->initialize($this->arguments);
+        }
+        
+        $ins->run($this->arguments);
+        
+        if ($ins->hasMethod("finalize")) {
+          $ins->finalize();
+        }
+      } catch (Exception $e) {
+        Sabel_Sakle_Task::error($e->getMessage());
       }
+    } else {
+      Sabel_Sakle_Task::error("such a task doesn't exist.");
     }
   }
   
@@ -66,17 +62,23 @@ class Sakle
     }
   }
   
-  protected function stop()
+  public static function main($class = null)
   {
-    exit;
+    $instance = new self();
+    
+    if ($class === null) {
+      $instance->allTestRun();
+    } else {
+      $instance->run($class);
+    }
   }
 }
 
 $pathToSabel = Sabel::getPath();
 $includePath = get_include_path();
 
-if (!in_array($pathToSabel, explode(":", $includePath))) {
-  set_include_path($includePath . ":" . $pathToSabel);
+if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
+  set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
 }
 
 isset($_SERVER["argv"][1]) ? Sakle::main($_SERVER["argv"][1]) : Sakle::main();

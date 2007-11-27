@@ -1,8 +1,8 @@
 <?php
 
-if (!defined("PRODUCTION"))  define("PRODUCTION",  0x01);
-if (!defined("TEST"))        define("TEST",        0x05);
-if (!defined("DEVELOPMENT")) define("DEVELOPMENT", 0x0A);
+define("PRODUCTION",  0x01);
+define("TEST",        0x05);
+define("DEVELOPMENT", 0x0A);
 
 define("PHP_SUFFIX", ".php");
 define("TPL_SUFFIX", ".tpl");

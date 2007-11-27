@@ -165,12 +165,12 @@ class Form_Object extends Sabel_Object
     return $this->createElement(Form_Element::CHECK, $name, $eName, $id, $class, $values);
   }
   
-  public function select($name, $values, $class = null, $id = null, $useKey = true)
+  public function select($name, $values, $class = null, $id = null, $isHash = true)
   {
     $isNullable = (isset($this->columns[$name])) ? $this->columns[$name]->nullable : true;
     
     $eName   = $this->createName($name);
-    $options = array("isNullable" => $isNullable, "useKey" => $useKey);
+    $options = array("isNullable" => $isNullable, "useKey" => $isHash);
     return $this->createElement(Form_Element::SELECT, $name, $eName, $id, $class, $values, $options);
   }
   

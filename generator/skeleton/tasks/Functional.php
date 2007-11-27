@@ -14,6 +14,7 @@ class Functional extends Tests
   public function run($arguments)
   {
     $fRunner = Sabel_Test_FunctionalRunner::create();
+    
     if (count($this->arguments) === 1) {
       foreach (scandir($fRunner->getTestsDirectory()) as $file) {
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
@@ -25,5 +26,10 @@ class Functional extends Tests
       $fRunner->start($arguments[1]);
       echo "Complete: {$arguments[1]}\n";
     }
+  }
+  
+  public function usage()
+  {
+    echo "Usage: sakle Functional";
   }
 }

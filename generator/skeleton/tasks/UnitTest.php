@@ -13,19 +13,24 @@ class UnitTest extends Tests
 {  
   public function run($arguments)
   {
-    $base = TEST_DIR_PATH . "/units";
+    $base = TEST_DIR_PATH . DS . "units";
     $mRunner = Sabel_Test_ModelRunner::create($base);
     
     if (count($this->arguments) === 1) {
       foreach (scandir($base) as $file) {
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
           $mRunner->start(str_replace(PHP_SUFFIX, "", $file), $base);
-          echo "Complete: {$file}\n";
+          $this->success("Complete: $file");
         }
       }
     } else {
       $mRunner->start($arguments[1], $base);
-      echo "Complete: {$arguments[1]}\n";
+      $this->success("Complete: {$arguments[1]}");
     }
+  }
+  
+  public function usage()
+  {
+    echo "Usage: sakle UnitTest";
   }
 }

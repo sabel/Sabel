@@ -2,13 +2,16 @@
 
 function add_include_path($path)
 {
-  set_include_path(get_include_path() . ":" . RUN_BASE . $path);
+  set_include_path(get_include_path() . PATH_SEPARATOR . RUN_BASE . $path);
 }
 
 function add_include_paths($paths)
 {
   $path = "";
-  foreach ($paths as $p) $path .= RUN_BASE . DS . $p . ":";
+  foreach ($paths as $p) {
+    $path .= RUN_BASE . DS . $p . PATH_SEPARATOR;
+  }
+  
   set_include_path($path . get_include_path());
 }
 
@@ -37,130 +40,75 @@ function redirected($const)
   return ($const === Redirect::REDIRECTED);
 }
 
-/**
- * internal request
- */
-function request($uri, $destination = null, $request = null, $storage = null)
+function reflection()
 {
-  $context = new Sabel_Context();
-  $previousContext = Sabel_Context::getContext();
-  Sabel_Context::setContext($context);
+  $args = func_get_args();
   
-  if ($request === null) {
-    $request = new Sabel_Request_Object();
-  }
-  
-  $builder = new Sabel_Request_Builder();
-  $builder->build($request, $uri);
-  
-  if ($destination === null) {
-    $router = new Sabel_Router_Map();
-    $destination = $router->route($request, $context);
-  }
-  $context->setDestination($destination);
-  
-  if ($storage === null) {
-    $storage = new Sabel_Storage_Session();
-  }
-  
-  $context->setStorage($storage);
-  
-  Sabel_Helper::load($request, $destination);
-    
-  $plugin = new Sabel_Plugin();
-  $plugin->setDestination($destination);
-  $context->setPlugin($plugin);
-  
-  $injector = Sabel_Container::injector(new Config_Factory());
-  $context->setInjector($injector);
-  $executer = $injector->newInstance(Sabel_Controller_Front::EXECUTER_INTERFACE);
-  $executer->setContext($context);
-  $executer->setDestination($destination);
-  
-  $controller = $executer->create();
-  $response = $executer->execute($request, $storage, false);
-  $response->setController($controller);
-  $response->setDestination($destination);
-  
-  $result = Sabel_View::renderNoLayout($response);
-  
-  Sabel_Context::setContext($previousContext);
-  
-  return $result;
-}
-
-/**
- * array create utility
- * __(a 10, b 20, c 20) === array("a" => "10", "b" => "20", "c" => "30")
- */
-function ___($text)
-{
-  // match (--- or array(---
-  preg_match_all('/
-    (?:[\s]+|\()
-    (?<!array)
-    (\((?:[^(]|array\()+\))
-    /xU', $text, $arraySource, PREG_SET_ORDER);
-  if (count($arraySource) > 0) {
-    foreach ($arraySource as $matches) {
-      $value = preg_replace('/([^(),\s\'"]+)(,|\))/', "'$1'$2", $matches[1]);
-      $text = str_replace($matches[1], 'array'.$value, $text);
+  if (empty($args)) {
+    return;
+  } elseif (count($args) === 1) {
+    $class = $args[0];
+  } else {
+    foreach ($args as $arg) {
+      reflection($arg);
     }
-    $text = __($text);
-    return $text;
+    return;
   }
-
-  // @todo refactoring this.
-  $text = preg_replace('/[\s]*,[\s]+/', ',', $text);
-  $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
-  $text = preg_replace('/(,|array\(|[\s]|^)([^()\s\'",]+)(,| |$)/U', "$1'$2'$3", $text);
-  $text = str_replace("' ", "'=>", $text);
-  eval('$array = array('.$text.');');
-  return $array;
-}
-
-
-function d($mixed)
-{
-  echo '<pre style="background: #fff; color: #333;border:1px solid #ccc; margen:2px;padding:3px;font-family:monospace;font-size:12px>"';
-  foreach (func_get_args() as $value) var_dump($value);
-  echo '</pre>';
-}
-
-function dump($mixed)
-{
-  echo '<pre>';
-  if (is_array($mixed)) {
-    foreach ($mixed as $value) {
-      if (is_object($value)) {
-        $ref = new ReflectionClass($value);
-        $methods = $ref->getMethods();
-        echo $ref->getName() . "\n";
-        foreach ($methods as $method) {
-          echo "\t" . $method->getName() . "\n";
-        }
-        var_dump($value);
+  
+  echo '<pre style="background: #FFF; color: #333; ' .
+       'border: 1px solid #ccc; margin: 5px; padding: 5px;">';
+       
+  static $files = array();
+  
+  $ref = new ReflectionClass($class);
+  $className = $ref->getName();
+  $filePath  = $ref->getFileName();
+  
+  if (!isset($files[$filePath])) {
+    $files[$filePath] = file($filePath);
+  }
+  
+  echo "<b><font size=\"+1\">{$className}</font></b>";
+  echo PHP_EOL . PHP_EOL;
+  
+  if ($methods = $ref->getMethods()) {
+    foreach ($methods as $method) {
+      $rm = new ReflectionMethod($className, $method->getName());
+      $path = $rm->getFileName();
+      if (isset($files[$path])) {
+        $lines = $files[$path];
+      } else {
+        $lines = $files[$path] = file($path);
       }
       
-      echo "<hr />\n";
-    }
-  } elseif (is_object($mixed)) {
-    $ref = new ReflectionClass($mixed);
-    $methods = $ref->getMethods();
-    echo $ref->getName() . "\n";
-    foreach ($methods as $method) {
-      echo "\t" . $method->getName() . "\n";
-      echo $method . "\n";
+      $start = $method->getStartLine();
+      $line  = trim($lines[$start - 1]);
+      
+      if (substr($line, -1, 1) === ",") {
+        $line = $line . " " . trim($lines[$start]);
+      }
+      
+      if ($rm->isPublic() && !$rm->isAbstract()) {
+        echo "\t<b>{$line}</b>" . PHP_EOL;
+      } else {
+        echo "\t$line" . PHP_EOL;
+      }
     }
   }
-  var_dump($mixed);
+  
   echo '</pre>';
 }
 
-function array_ndpop(&$array) {
-  $tmp = array_pop($array);
-  $array[] = $tmp;
-  return $tmp;
+function dump()
+{
+  echo '<pre style="background: #FFF; color: #333; ' .
+       'border: 1px solid #ccc; margin: 5px; padding: 5px;">';
+       
+  foreach (func_get_args() as $value) {
+    var_dump($value);
+  }
+  
+  echo '</pre>';
 }
 
 function candidate($name, $uri, $options = null)
@@ -177,40 +125,14 @@ function environment($string)
   }
 }
 
-function now()
-{
-  return date("Y-m-d H:i:s");
-}
-
 function _A($obj)
 {
   return new Sabel_Aspect_Proxy($obj);
 }
 
-function component($action, $args = null)
+function now()
 {
-  $context = Sabel_Context::getContext();
-  
-  $executer    = clone $context->getExecuter();
-  $destination = clone $context->getDestination();
-  
-  if (isset($args["controller"])) {
-    $destination->setController($args["controller"]);
-  }
-  
-  if (isset($args["module"])) {
-    $destination->setController($args["module"]);
-  }
-  
-  $destination->setAction($action);
-  
-  $executer->setDestination($destination);
-  $controller = $executer->create();
-  $response = $executer->execute($context->getRequest(), $context->getStorage());
-  $response->setController($controller);
-  $response->setDestination($destination);
-  
-  return Sabel_View::renderDefault($response, false);
+  return date("Y-m-d H:i:s");
 }
 
 /***   sabel.db functions   ***/
@@ -258,7 +180,7 @@ function MODEL($mdlName)
   
   if (!$exists = class_exists($mdlName, false)) {
     $path = MODELS_DIR_PATH . DS . $mdlName . PHP_SUFFIX;
-    $exists = Sabel::fileUsing($path);
+    $exists = Sabel::fileUsing($path, true);
   }
   
   $cache[$mdlName] = $exists;

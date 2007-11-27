@@ -35,7 +35,7 @@ class Schema extends Sabel_Sakle_Task
         if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
           $writer = new Sabel_DB_Schema_FileWriter(SCHEMA_DIR_PATH);
           $writer->write($schema);
-          $this->printMessage("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
+          $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
         
         TableList_Writer::add($connectionName, $tblName);
@@ -53,7 +53,7 @@ class Schema extends Sabel_Sakle_Task
       $key = array_search("-s", $input) + 1;
       for ($i = $key; $i < count($input); $i++) {
         $val = $input[$i];
-        if ($val === "-l" || $input[$i] === "-c") break;
+        if ($val === "-l") break;
         $inputSchemas[] = $val;
       }
     }
@@ -64,10 +64,17 @@ class Schema extends Sabel_Sakle_Task
   private function checkInputs($arguments)
   {
     if (count($arguments) < 3) {
-      sakle_schema_help(); exit;
+      $this->usage();
     } elseif ($arguments[2] === "--help" || $arguments[2] === "-h") {
-      sakle_schema_help(); exit;
+      $this->usage();
     }
+  }
+  
+  public function usage()
+  {
+    echo "Usage: sakle Schema ENVIRONMENT (-l) (-s TABLE1 TABLE2 ...)\n";
+    echo "       -l : create table list\n";
+    echo "       -s : create schema\n";
   }
 }
 
@@ -111,12 +118,4 @@ class TableList_Writer
     fwrite($fp, ");\n  }\n}\n");
     fclose($fp);
   }
-}
-
-function sakle_schema_help()
-{
-  echo "Usage: sakle Schema [environment] [-l] [-s ...]\n";
-  echo "       -l  create table list\n";
-  echo "       -s  create schema: table_name1, table_name2... , or all\n";
-  exit;
 }

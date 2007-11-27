@@ -23,10 +23,10 @@ class Migration extends Sabel_Sakle_Task
   {
     $this->arguments = $arguments;
     
-    if (count($arguments) < 3) {
-      $this->error("to few arguments.");
+    if ($this->isHelp()) {
       $this->usage();
-    } elseif ($this->isHelp()) {
+    } elseif (count($arguments) < 3) {
+      $this->error("to few arguments.");
       $this->usage();
     }
     
@@ -268,15 +268,18 @@ class Migration extends Sabel_Sakle_Task
   
   private function isHelp()
   {
-    $arg = $this->arguments[1];
-    return ($arg === "-h" || $arg === "--help");
+    if (isset($this->arguments[1])) {
+      $arg = $this->arguments[1];
+      return ($arg === "-h" || $arg === "--help");
+    } else {
+      return false;
+    }
   }
   
-  private function usage()
+  public function usage()
   {
     echo "Usage: sakle Migration ENVIRONMENT TO_VERSION (CONNECTION_NAME) " .
          "(-d DIRECTORY_OF_MIGRATION_FILES)\n";
-    exit;
   }
 }
 
