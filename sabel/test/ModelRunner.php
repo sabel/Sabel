@@ -1,25 +1,28 @@
 <?php
 
-define("UNIT_TEST", true);
-
-require_once("PHPUnit/TextUI/TestRunner.php");
-require_once("PHPUnit/Framework/TestCase.php");
+require ("PHPUnit/TextUI/TestRunner.php");
 
 class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
 {
+  private $classPrefix = "Units_";
+  
   public static function create()
   {
     return new self();
   }
-  
-  public function start($testName)
+    
+  public function start($testName, $base)
   {
-    $pathToTestCase = $this->getTestsDirectory() . DS . $testName . PHP_SUFFIX;
+    $pathToTestCase = $base . DS . $testName . PHP_SUFFIX;
     
     if (is_readable($pathToTestCase)) {
       try {
-        $testCaseName = "Units_" . $testName;
-        $this->doRun($this->getTest($testCaseName, $pathToTestCase));
+        $testCaseName = $this->classPrefix . $testName;
+        $testSuite = $this->getTest($testCaseName, $pathToTestCase);
+        
+        if ($testSuite instanceof PHPUnit_Framework_TestSuite) {
+          $this->doRun($testSuite);
+        }
       } catch (Exception $e) {
         throw new Exception("Could not run test suite: " . $e->getMessage());
       }
@@ -28,8 +31,8 @@ class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
     }
   }
   
-  public function getTestsDirectory()
+  public function setClassPrefix($prefix)
   {
-    return RUN_BASE . DS . "tests" . DS . "units";
+    $this->classPrefix = $prefix;
   }
 }
