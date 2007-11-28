@@ -5,7 +5,7 @@ if (!defined("GETTEXT_DEFAULT_DOMAIN")) {
 }
 
 if (!defined("GETTEXT_DEFAULT_DOMAIN_PATH")) {
-  define("GETTEXT_DEFAULT_DOMAIN_PATH", RUN_BASE . DIR_DIVIDER . "locale");
+  define("GETTEXT_DEFAULT_DOMAIN_PATH", RUN_BASE . DS . "locale");
 }
 
 /**
@@ -109,14 +109,14 @@ class Sabel_I18n_Gettext
     
     if (extension_loaded("gettext")) {
       $type   = self::GETTEXT;
-      $config = RUN_BASE . DIR_DIVIDER . "config" . DIR_DIVIDER . "locales.php";
-      Sabel::fileUsing($config);
+      $config = CONFIG_DIR_PATH . DS . "locales.php";
+      Sabel::fileUsing($config, true);
     } else {
-      $dir = dirname(__FILE__) . DIR_DIVIDER;
+      $dir = dirname(__FILE__) . DS;
       if ($type === self::SABEL) {
-        Sabel::fileUsing($dir . "sabel" . DIR_DIVIDER . "Gettext.php");
+        Sabel::fileUsing($dir . "sabel" . DS . "Gettext.php", true);
       } else {
-        Sabel::fileUsing($dir . "php-gettext" . DIR_DIVIDER . "gettext.inc");
+        Sabel::fileUsing($dir . "php-gettext" . DS . "gettext.inc", true);
       }
     }
     
@@ -186,7 +186,7 @@ class Sabel_I18n_Gettext
   private function getLocaleDirs()
   {
     if (ENVIRONMENT === PRODUCTION) {
-      $cache = RUN_BASE . DIR_DIVIDER . "cache" . DIR_DIVIDER . "ldirs.php";
+      $cache = CACHE_DIR_PATH . DS . "ldirs" . PHP_SUFFIX;
       if (is_file($cache)) {
         include ($cache);
         $dirs = $locales;
@@ -207,7 +207,7 @@ class Sabel_I18n_Gettext
   
   private function _getLocaleDirs()
   {
-    $dir  = RUN_BASE . DIR_DIVIDER . "locale" . DIR_DIVIDER;
+    $dir  = RUN_BASE . DS . "locale" . DS;
     $dirs = array();
     
     foreach (scandir($dir) as $item) {

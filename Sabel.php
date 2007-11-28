@@ -37,6 +37,7 @@ spl_autoload_register(array("Sabel", "autoload"));
  * @category   Sabel
  * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@gmail.com>
+ *             Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -60,7 +61,7 @@ final class Sabel
   static function autoload($className)
   {
     if (self::$cache === null) {
-      self::$cache = Sabel_Cache_Manager::create();
+      self::$cache = Sabel_Cache_Manager::getUsableCache();
     }
     
     if (isset(self::$required[$className])) return;
@@ -177,6 +178,7 @@ final class Sabel
     require ($BUS . "ProcessorCallback.php");
     
     require ($CACHE . "Manager.php");
+    require ($CACHE . "Interface.php");
     require ($CACHE . "Apc.php");
     require ($CACHE . "Null.php");
     
@@ -224,4 +226,3 @@ final class Sabel
 }
 
 Sabel::main();
-

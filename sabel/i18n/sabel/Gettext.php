@@ -56,7 +56,7 @@ class Sabel_I18n_Sabel_Gettext
   
   public static function setDomainPath($domain, $path)
   {
-    if (substr($path, -1, 1) !== DIR_DIVIDER) $path .= DIR_DIVIDER;
+    if (substr($path, -1, 1) !== DS) $path .= DS;
     self::$domainPath[$domain] = $path;
   }
   
@@ -78,8 +78,8 @@ class Sabel_I18n_Sabel_Gettext
     if (isset(self::$messages[$locale][$domain])) {
       return self::$messages[$locale][$domain];
     } else {
-      $filePath = $path . $locale . DIR_DIVIDER . "LC_MESSAGES"
-                . DIR_DIVIDER . $domain . ".php";
+      $filePath = $path . $locale . DS . "LC_MESSAGES"
+                . DS . $domain . PHP_SUFFIX;
                 
       if (is_readable($filePath)) {
         include ($filePath);
@@ -87,8 +87,8 @@ class Sabel_I18n_Sabel_Gettext
       } else {
         if (!IS_WIN && strpos($locale, "_") !== false) {
           list ($lang) = explode("_", $locale);
-          $filePath = $path . $lang . DIR_DIVIDER . "LC_MESSAGES"
-                    . DIR_DIVIDER . $domain . ".php";
+          $filePath = $path . $lang . DS . "LC_MESSAGES"
+                    . DS . $domain . PHP_SUFFIX;
                     
           if (is_readable($filePath)) {
             include ($filePath);

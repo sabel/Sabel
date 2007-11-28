@@ -61,7 +61,7 @@ class Form_Processor extends Sabel_Bus_Processor
     } elseif (is_string($model)) {
       $mdlName = $model;
     } else {
-      throw new Exception("invalid argument type.");
+      throw new Sabel_Exception_Runtime("invalid argument type.");
     }
     
     $string = new Sabel_Util_String($mdlName);
@@ -182,6 +182,7 @@ class Form_Processor extends Sabel_Bus_Processor
   private function isEmptyDateValues($values, $isDatetime = true)
   {
     $keys = array("year", "month", "day");
+    
     if ($isDatetime) {
       $keys = array_merge($keys, array("hour", "minute", "second"));
     }

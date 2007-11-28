@@ -3,7 +3,7 @@
 class Flow_Redirecter extends Sabel_Bus_Processor
 {
   public function execute($bus)
-  {    
+  {
     $redirect = new Processor_Redirecter_Redirect($bus);
     $this->controller->setAttribute("redirect", $redirect);
     

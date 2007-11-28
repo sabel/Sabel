@@ -10,7 +10,7 @@ Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
  * @category   Sakle
  * @package    org.sabel.sakle
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sakle

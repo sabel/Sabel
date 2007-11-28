@@ -9,47 +9,51 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Cache_Memcache implements Sabel_Cache_Cache
+class Sabel_Cache_Memcache implements Sabel_Cache_Interface
 {
-  private $memcache;
-  private static $instance;
-
-  protected function __construct($server)
+  private static $instance = null;
+  
+  private $memcache = null;
+  
+  private function __construct($server)
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
       $this->memcache->connect($server, 11211, true);
     }
   }
-
+  
   public static function create($server = "localhost")
   {
-    if (!isset(self::$instance)) {
-      if (is_null($server)) throw new Exception("server is null.");
+    if ($server === null) {
+      throw new Sabel_Exception_Runtime("server is null.");
+    }
+    
+    if (self::$instance === null) {
       self::$instance = new self($server);
     }
-
+    
     return self::$instance;
   }
-
-  public function get($key)
+  
+  public function read($key)
   {
     try {
       return $this->memcache->get($key);
     } catch (Exception $e) {
-      var_dump("EXCEPTION" . $e->getMessage());
+      // @todo
     }
   }
-
-  public function add($key, $value, $timeout = 600, $comp = false)
+  
+  public function write($key, $value, $timeout = 600, $comp = false)
   {
     try {
       $this->memcache->add($key, $value, $comp, $timeout);
     } catch (Exception $e) {
-      dump("EXCEPTION" . $e->getMessage());
+      // @todo
     }
   }
-
+  
   public function delete($key)
   {
     $this->memcache->delete($key);

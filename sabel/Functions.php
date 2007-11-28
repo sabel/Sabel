@@ -2,7 +2,8 @@
 
 function add_include_path($path)
 {
-  set_include_path(get_include_path() . PATH_SEPARATOR . RUN_BASE . $path);
+  $p = RUN_BASE . DS . $path;
+  set_include_path(get_include_path() . PATH_SEPARATOR . $p);
 }
 
 function add_include_paths($paths)
