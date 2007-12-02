@@ -88,7 +88,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * @param string $action action method name
    * @return mixed result of execute an action.
    */
-  public function execute($action)
+  public function execute($action, $params = array())
   {
     if (!$this->setup) {
       throw new Sabel_Exception_Runtime("page controller must be setup");
@@ -106,7 +106,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
        $this->response->notfound();
      } elseif ($this->isCallable($action) && $this->isActionExists($action)) {
        $this->response->success();
-       $this->response->result = $this->$action();
+       if (count($params) >= 1) {
+         call_user_func_array(array($this, $action), $params);
+       } else {
+         $this->$action();
+       }
+
        $this->executed = true;
      } else {
        $this->response->notfound();

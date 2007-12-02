@@ -33,12 +33,16 @@ function l($message, $level = LOG_INFO, $file = null)
 
 function r($const)
 {
-  return ($const === Redirect::REDIRECTED);
+  if (class_exists("Redirect")) {
+    return ($const === Redirect::REDIRECTED);
+  }
 }
 
 function redirected($const)
 {
-  return ($const === Redirect::REDIRECTED);
+  if (class_exists("Redirect")) {
+    return ($const === Redirect::REDIRECTED);
+  }
 }
 
 function reflection()
