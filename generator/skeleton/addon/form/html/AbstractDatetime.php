@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Form_Element_AbstractDatetime
+ * Form_Html_AbstractDatetime
  *
  * @abstract
  * @category  Addon
@@ -10,9 +10,18 @@
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-abstract class Form_Element_AbstractDatetime extends Form_Element
+abstract class Form_Html_AbstractDatetime extends Sabel_Object
 {
-  protected $timestamp = null;
+  protected
+    $name      = "",
+    $value     = null,
+    $timestamp = null;
+    
+  public function __construct($name, $value = null)
+  {
+    $this->name  = $name;
+    $this->value = $value;
+  }
   
   protected function numSelect($type, $name, $start, $end, $defaultNull)
   {
@@ -32,7 +41,7 @@ abstract class Form_Element_AbstractDatetime extends Form_Element
       }
     }
     
-    return implode("\n", $html) . "\n</select>";
+    return implode(PHP_EOL, $html) . PHP_EOL . "</select>";
   }
   
   protected function selectedValue($type)
@@ -44,19 +53,19 @@ abstract class Form_Element_AbstractDatetime extends Form_Element
     switch ($type) {
       case "year":
         return date("Y", $this->timestamp);
-
+        
       case "month":
         return date("n", $this->timestamp);
-
+        
       case "day":
         return date("j", $this->timestamp);
-
+        
       case "hour":
         return date("G", $this->timestamp);
-
+        
       case "minute":
         return date("i", $this->timestamp);
-
+        
       case "second":
         return date("s", $this->timestamp);
     }

@@ -49,7 +49,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
       $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeTable($schema);
       $writer->write('$create->options("engine", "' . $engine . '");');
-      $writer->write("\n");
+      $writer->write(PHP_EOL);
       $writer->close();
 
       $this->getDriver()->execute("DROP TABLE " . $tblName);

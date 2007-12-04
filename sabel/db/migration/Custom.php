@@ -59,7 +59,7 @@ class Sabel_DB_Migration_Custom
       list ($num) = explode("_", $file);
       $upgradeFiles[$num] = $file;
 
-      file_put_contents($restoreDir . DS . "restore_{$num}" . PHP_SUFFIX, "\n");
+      file_put_contents($restoreDir . DS . "restore_{$num}" . PHP_SUFFIX, PHP_EOL);
 
       $path = $temporaryDir . DS . $file;
       $ins = new $migClassName($path, "upgrade");
@@ -166,7 +166,8 @@ class Sabel_DB_Migration_Custom
       $fileName = $dir . DS . "restore_" . $num . PHP_SUFFIX;
     }
 
-    file_put_contents($fileName, "<?php\n\n" . implode($lines, "\n"));
+    $content = "<?php" . PHP_EOL . PHP_EOL . implode(PHP_EOL, $lines);
+    file_put_contents($fileName, $content);
   }
 
   private function createCustomRestoreFile($upgradeFiles, $version)
@@ -194,12 +195,12 @@ class Sabel_DB_Migration_Custom
       list (, $mdlName, $command) = explode("_", $upgradeFiles[$version]);
 
       $command = $mdlName . "_" . $command;
-      fwrite($rfp, "### $command ###\n");
+      fwrite($rfp, "##### $command #####" . PHP_EOL);
 
       while (!feof($fp)) {
         $line = trim(fgets($fp, 256));
         if ($line === "<?php" || $line === "?>") continue;
-        fwrite($rfp, $line . "\n");
+        fwrite($rfp, $line . PHP_EOL);
       }
 
       fclose($fp);

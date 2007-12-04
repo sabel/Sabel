@@ -1,8 +1,9 @@
 <?php
 
 /**
- * Sabel_DB_Sql
+ * Sabel_DB_Statement
  *
+ * @interface
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>

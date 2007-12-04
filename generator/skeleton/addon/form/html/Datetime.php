@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Form_Element_Datetime
+ * Form_Html_Datetime
  *
  * @category  Addon
  * @package   addon.form
@@ -9,19 +9,15 @@
  * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
-class Form_Element_Datetime extends Form_Element_AbstractDatetime
+class Form_Html_Datetime extends Form_Html_AbstractDatetime
 {
-  public function toHtml($options = array())
+  public function toHtml($yearRange, $withSecond, $defaultNull)
   {
     if ($this->value !== null) {
       $this->timestamp = strtotime($this->value);
     } else {
       $this->timestamp = time();
     }
-    
-    $yearRange   = (isset($options["yearRange"]))   ? $options["yearRange"]   : null;
-    $withSecond  = (isset($options["withSecond"]))  ? $options["withSecond"]  : false;
-    $defaultNull = (isset($options["defaultNull"])) ? $options["defaultNull"] : false;
     
     $name = $this->name;
     list ($first, $last) = $this->getYearRange($yearRange);

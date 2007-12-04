@@ -43,7 +43,7 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   
   public function write($key, $value, $timeout = 600, $comp = false)
   {
-    return apc_store($this->signature . $key, $value);
+    return apc_store($this->signature . $key, $value, $timeout);
   }
   
   public function delete($key)

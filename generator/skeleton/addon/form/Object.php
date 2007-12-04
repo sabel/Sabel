@@ -119,76 +119,47 @@ class Form_Object extends Sabel_Object
   
   public function start($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    $options = array("type" => "open", "uri" => $uri, "method" => $method);
-    return $this->createElement(Form_Element::FORM, "", $name, $id, $class, array(), $options);
+    return $this->createHtmlWriter("", $name, $id, $class)->open($uri, $method);
   }
   
   public function end()
   {
-    $options = array("type" => "close");
-    return $this->createElement(Form_Element::FORM, "", "", null, null, array(), $options);
+    return $this->createHtmlWriter("", "", null, null, array())->close();
   }
   
-  public function submit($value = null, $class = null, $id = null)
+  public function submit($text = null, $class = null, $id = null)
   {
-    $options = array("type" => "submit", "text" => $value);
-    return $this->createElement(Form_Element::FORM, "", "", $id, $class, array(), $options);
+    return $this->createHtmlWriter("", "", $id, $class, array())->submit($text);
   }
   
   public function text($name, $class = null, $id = null)
   {
     $eName = $this->createName($name);
-    return $this->createElement(Form_Element::TEXT, $name, $eName, $id, $class);
+    return $this->createHtmlWriter($name, $eName, $id, $class)->text();
   }
   
   public function password($name, $class = null, $id = null)
   {
     $eName = $this->createName($name);
-    return $this->createElement(Form_Element::PASSWORD, $name, $eName, $id, $class);
+    return $this->createHtmlWriter($name, $eName, $id, $class)->password();
   }
   
   public function textarea($name, $class = null, $id = null)
   {
     $eName = $this->createName($name);
-    return $this->createElement(Form_Element::TEXTAREA, $name, $eName, $id, $class);
+    return $this->createHtmlWriter($name, $eName, $id, $class)->textarea();
   }
   
   public function hidden($name, $class = null, $id = null)
   {
     $eName = $this->createName($name);
-    return $this->createElement(Form_Element::HIDDEN, $name, $eName, $id, $class);
+    return $this->createHtmlWriter($name, $eName, $id, $class)->hidden();
   }
   
   public function checkbox($name, $values, $class = null, $id = null)
   {
     $eName = $this->createName($name);
-    return $this->createElement(Form_Element::CHECK, $name, $eName, $id, $class, $values);
-  }
-  
-  public function select($name, $values, $class = null, $id = null, $isHash = true)
-  {
-    $isNullable = (isset($this->columns[$name])) ? $this->columns[$name]->nullable : true;
-    
-    $eName   = $this->createName($name);
-    $options = array("isNullable" => $isNullable, "useKey" => $isHash);
-    return $this->createElement(Form_Element::SELECT, $name, $eName, $id, $class, $values, $options);
-  }
-  
-  public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
-  {
-    $eName   = $this->createName("datetime") . "[{$name}]";
-    $options = array("yearRange"   => $yearRange,
-                     "withSecond"  => $withSecond,
-                     "defaultNull" => $defaultNull);
-                     
-    return $this->createElement(Form_Element::DATETIME, $name, $eName, null, null, array(), $options);
-  }
-  
-  public function date($name, $yearRange = null, $defaultNull = false)
-  {
-    $eName   = $this->createName("date") . "[{$name}]";
-    $options = array("yearRange" => $yearRange, "defaultNull" => $defaultNull);
-    return $this->createElement(Form_Element::DATE, $name, $eName, null, null, array(), $options);
+    return $this->createHtmlWriter($name, $eName, $id, $class)->checkbox($values);
   }
   
   public function radio($name, $values, $class = null, $id = null)
@@ -205,9 +176,32 @@ class Form_Object extends Sabel_Object
       $isNullable = true;
     }
     
-    $eName   = $this->createName($name);
-    $options = array("isNullable" => $isNullable);
-    return $this->createElement(Form_Element::RADIO, $name, $eName, $id, $class, $values, $options);
+    $eName  = $this->createName($name);
+    $writer = $this->createHtmlWriter($name, $eName, $id, $class);
+    return $writer->radio($values, $isNullable);
+  }
+  
+  public function select($name, $values, $class = null, $id = null, $isHash = true)
+  {
+    $isNullable = (isset($this->columns[$name])) ? $this->columns[$name]->nullable : true;
+    
+    $eName  = $this->createName($name);
+    $writer = $this->createHtmlWriter($name, $eName, $id, $class);
+    return $writer->select($values, $isNullable, $isHash);
+  }
+  
+  public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
+  {
+    $eName  = $this->createName("datetime") . "[{$name}]";
+    $writer = $this->createHtmlWriter($name, $eName, null, null);
+    return $writer->datetime($yearRange, $withSecond, $defaultNull);
+  }
+  
+  public function date($name, $yearRange = null, $defaultNull = false)
+  {
+    $eName  = $this->createName("date") . "[{$name}]";
+    $writer = $this->createHtmlWriter($name, $eName, null, null);
+    return $writer->date($yearRange, $defaultNull);
   }
   
   protected function createName($name)
@@ -215,11 +209,11 @@ class Form_Object extends Sabel_Object
     return $this->mdlName . "::" . $name;
   }
   
-  private function createElement($elementType, $name, $elementName, $id, $class,
-                                 $data = array(), $options = array())
+  private function createHtmlWriter($name, $elementName, $id, $class, $data = array())
   {
-    $element = Form_Element_Factory::create($elementType, $elementName);
-    $element->setValue($this->get($name))->setId($id)->setClass($class)->setData($data);
-    return $element->toHtml($options);
+    $html = new Form_Html($elementName);
+    $html->setValue($this->get($name))->setId($id)->setClass($class)->setData($data);
+    
+    return $html;
   }
 }
