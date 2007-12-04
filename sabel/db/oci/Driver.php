@@ -41,12 +41,12 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   public function begin()
   {
     $this->autoCommit = false;
-    return $this->getConnection();
+    return $this->connection;
   }
 
   public function commit()
   {
-    if (oci_commit($this->getConnection())) {
+    if (oci_commit($this->connection)) {
       $this->autoCommit = true;
     } else {
       throw new Sabel_DB_Driver_Exception("oci driver commit failed.");
@@ -55,7 +55,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
 
   public function rollback()
   {
-    if (oci_rollback($this->getConnection())) {
+    if (oci_rollback($this->connection)) {
       $this->autoCommit = true;
     } else {
       throw new Sabel_DB_Driver_Exception("oci driver rollback failed.");
@@ -88,7 +88,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     $sql = $this->bind($sql, $bindParams);
 
     $execMode   = ($this->autoCommit) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
-    $connection = $this->getConnection();
+    $connection = $this->connection;
     $ociStmt    = oci_parse($connection, $sql);
     $result     = oci_execute($ociStmt, $execMode);
 

@@ -16,7 +16,7 @@ class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
   public function getTableList()
   {
     $sql  = "SELECT name FROM sqlite_master WHERE type = 'table'";
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $tables = array();
@@ -187,7 +187,7 @@ class Sabel_DB_Sqlite_Schema extends Sabel_DB_Abstract_Schema
   private function getCreateSql($tblName)
   {
     $sql  = "SELECT sql FROM sqlite_master WHERE name = '{$tblName}'";
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     return $rows[0]["sql"];
   }
 }

@@ -44,7 +44,7 @@ abstract class Sabel_DB_Abstract_Model extends Sabel_Object
       $this->tableName = convert_to_tablename($mdlName);
     }
 
-    $this->schema = Sabel_DB_Schema::create($this->tableName, $this->connectionName);
+    $this->schema = Sabel_DB_Schema::getTableSchema($this->tableName, $this->connectionName);
     $this->schemaCols = $this->schema->getColumns();
     $this->columns = array_keys($this->schemaCols);
   }

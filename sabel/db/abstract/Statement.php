@@ -68,8 +68,9 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function table($table)
   {
     if (is_string($table)) {
-      $this->table  = $table;
-      $this->schema = Sabel_DB_Schema::create($table, $this->driver->getConnectionName());
+      $this->table    = $table;
+      $connectionName = $this->driver->getConnectionName();
+      $this->schema   = Sabel_DB_Schema::getTableSchema($table, $connectionName);
     } else {
       throw new Sabel_DB_Statement_Exception("table() argument must be a string.");
     }

@@ -29,11 +29,11 @@ class Sabel_Exception_Runtime extends Exception
       $trace[] = sprintf("at %s in [%s:%s]", $stFunction, $stFile, $stLine);
     }
     
-    $format = 'Exception: %s from "%s" on "%s"' . "\n";
+    $format = 'Exception: %s from "%s" on "%s"' . PHP_EOL;
     $errorMsg = sprintf($format, $msg, $file, $line);
     
     foreach ($trace as $l) {
-      $errorMsg .= $l . "\n";
+      $errorMsg .= $l . PHP_EOL;
     }
     
     $time = date("D d H:i:s");
@@ -74,11 +74,11 @@ class Sabel_Exception_Runtime extends Exception
       $trace[] = sprintf("at %s in [%s:%s]", $stFunction, $stFile, $stLine);
     }
     
-    $format = 'Exception: %s from "%s" on "%s"' . "<br/><br/>\n\n";
+    $format = 'Exception: %s from "%s" on "%s"' . "<br/><br/>" . PHP_EOL . PHP_EOL;
     $errorMsg = sprintf($format, $msg, $file, $line);
     
     foreach ($trace as $l) {
-      $errorMsg .= $l . "<br/>\n";
+      $errorMsg .= $l . "<br/>" . PHP_EOL;
     }
     
     print $errorMsg;

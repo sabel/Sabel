@@ -31,7 +31,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
   public function getTableList()
   {
     $sql  = 'SELECT RDB$RELATION_NAME FROM RDB$RELATIONS WHERE RDB$SYSTEM_FLAG = 0';
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $tables = array();
@@ -53,7 +53,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
          . 'AND rf.RDB$RELATION_NAME = \'' . $tblName . '\' '
          . 'ORDER BY rf.RDB$FIELD_POSITION ASC';
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $this->createGenerators();
@@ -126,7 +126,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
          . 'WHERE rc.RDB$CONSTRAINT_TYPE = \'FOREIGN KEY\' '
          . 'AND rc.RDB$RELATION_NAME = \'' . $tn . '\'';
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $columns = array();
@@ -152,7 +152,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
          . 'WHERE rc.RDB$RELATION_NAME = \'' . $tn . '\' AND '
          . 'rc.RDB$CONSTRAINT_TYPE = \'UNIQUE\'';
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $uniques = array();
@@ -173,7 +173,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
          . 'WHERE RDB$SYSTEM_FLAG = 0 OR RDB$SYSTEM_FLAG IS NULL';
 
     $gens =& $this->sequences;
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (!$rows) return;
 
     foreach ($rows as $row) {
@@ -192,7 +192,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
          . 'rel.RDB$CONSTRAINT_TYPE = \'PRIMARY KEY\'';
 
     $keys =& $this->primaryKeys;
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (!$rows) return;
 
     foreach ($rows as $row) {

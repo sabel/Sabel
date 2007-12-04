@@ -39,7 +39,7 @@ class Migration extends Sabel_Sakle_Task
     
     $connectionName  = $this->getConnectionName();
     $directory       = $this->defineMigrationDirectory();
-    $this->accessor  = new Sabel_DB_Schema_Accessor($connectionName);
+    $this->accessor  = Sabel_DB_Driver::createSchema($connectionName);
     $this->initDbConfig($environment);
     
     if ($arguments[2] === "export") {
@@ -291,60 +291,62 @@ class MigrationExport
   private $path     = "";
   private $schemas  = array();
   private $exported = array();
-
+  
   public function __construct($accessor, $connectionName)
   {
     $this->schemas = $accessor->getAll();
     $this->path = RUN_BASE . DS . "migration" . DS . $connectionName;
   }
-
+  
   public function export()
   {
     if (empty($this->schemas)) return;
-
+    
     foreach ($this->schemas as $tblName => $schema) {
-      $foreignKeys = $schema->getForeignKeys();
-      if ($foreignKeys === null) {
+      $fkey = $schema->getForeignKey();
+      if ($fkey === null) {
         $this->doExport($schema);
         $this->exported[$tblName] = true;
         unset($this->schemas[$tblName]);
         continue;
       }
-
+      
       $enable = true;
-      foreach ($foreignKeys as $key) {
-        $parent = $key["referenced_table"];
+      foreach ($fkey->toArray() as $key) {
+        $parent = $key->table;
         if ($parent === $tblName) continue;
         if (!isset($this->exported[$parent])) {
           $enable = false;
           break;
         }
       }
-
+      
       if ($enable) {
         $this->doExport($schema);
         $this->exported[$tblName] = true;
         unset($this->schemas[$tblName]);
       }
     }
-
+    
     $this->export();
   }
-
-  public function doExport($schema)
+  
+  public function doExport($tblSchema)
   {
-    $tblName = $schema->getTableName();
+    $tblName = $tblSchema->getTableName();
     if ($tblName === "sversion") return;
-    $filePath = $this->path . DS . $this->fileNum . "_"
-              . convert_to_modelname($tblName) . "_create.php";
-
+    
+    $fileName = $this->fileNum . "_" . convert_to_modelname($tblName) . "_create" . PHP_SUFFIX;
+    $filePath = $this->path . DS . $fileName;
+    
+    Sabel_Sakle_Task::success("$fileName");
+    
     $writer = new Sabel_DB_Migration_Writer($filePath);
-    $writer->writeTable($schema);
-    $fp =& $writer->getFilePointer();
-
-    // @todo table engine.
-    fwrite($fp, '$create->options("engine", "InnoDB");');
+    $writer->writeTable($tblSchema);
+    // @todo...
+    $writer->write('$create->options("engine", "InnoDB");');
     $writer->close();
+    
     $this->fileNum++;
   }
 }

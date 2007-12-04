@@ -19,7 +19,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
   public function getTableList()
   {
     $sql  = "SELECT table_name FROM all_tables WHERE owner = '{$this->schemaName}'";
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $tables = array();
@@ -40,7 +40,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
          . "WHERE owner = '{$this->schemaName}' "
          . "AND table_name = '{$tblName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $this->createSequences();
@@ -124,7 +124,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
          . "AND ac.constraint_type = 'R' "
          . "AND ac.table_name = '{$tblName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $columns = array();
@@ -150,7 +150,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
          . "where ac.owner = '{$this->schemaName}' "
          . "AND ac.constraint_type = 'U' AND acc.table_name = '{$tblName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $uniques = array();
@@ -170,7 +170,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
          . "WHERE sequence_owner = '{$this->schemaName}'";
 
     $seqs =& $this->sequences;
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return;
 
     foreach ($rows as $row) {
@@ -190,7 +190,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
          . "AND acc.table_name = '{$tblName}'";
 
     $keys =& $this->primaryKeys;
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return;
 
     foreach ($rows as $row) {
@@ -203,7 +203,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
     $sql = "SELECT column_name, comments FROM all_col_comments "
          . "WHERE owner = '{$this->schemaName}' AND table_name = '{$tblName}'";
 
-    if ($rows = $this->execute($sql)) {
+    if ($rows = $this->driver->execute($sql)) {
       foreach ($rows as $row) {
         if (($comment = $row["comments"]) !== null) {
           $colName = strtolower($row["column_name"]);

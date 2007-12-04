@@ -24,7 +24,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
     $sql = "SELECT table_name FROM information_schema.tables "
          . "WHERE table_schema = '{$this->schemaName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $tables = array();
@@ -45,7 +45,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
          . "WHERE table_schema = '{$this->schemaName}' "
          . "AND table_name = '{$tblName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $columns = array();
@@ -107,7 +107,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
          . "AND tc.table_name='{$tblName}' AND kcu.table_name='{$tblName}' "
          . "AND tc.constraint_schema = '{$schema}' AND tc.constraint_type='UNIQUE'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $uniques = array();
@@ -121,23 +121,19 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
 
   public function getTableEngine($tblName)
   {
-    $row = $this->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
+    $row = $this->driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
     return $row[0]["Engine"];
   }
 
-  // @todo
   protected function getMysqlVersion()
   {
-    $result  = $this->execute("SELECT VERSION() AS version");
-    $version = $result[0]["version"];
-
-    return $version;
+    return mysql_get_server_info($this->driver->getConnection());
   }
 
   private function getForeignKeys50($tblName)
   {
     $schemaName = $this->schemaName;
-    $result     = $this->execute("SHOW CREATE TABLE $tblName");
+    $result     = $this->driver->execute("SHOW CREATE TABLE $tblName");
     $createSql  = $result[0]["Create Table"];
 
     preg_match_all("/CONSTRAINT .+ FOREIGN KEY (.+)/", $createSql, $matches);

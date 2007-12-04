@@ -55,7 +55,9 @@ final class Sabel
   
   public static function using($className)
   {
-    if (!class_exists($className, false)) self::autoload($className);
+    if (!class_exists($className, false)) {
+      self::autoload($className);
+    }
   }
   
   static function autoload($className)
@@ -166,7 +168,6 @@ final class Sabel
     $CACHE      = $SABEL . "cache"      . DS;
     $MAP        = $SABEL . "map"        . DS;
     $REQUEST    = $SABEL . "request"    . DS;
-    $RESPONSE   = $SABEL . "response"   . DS;
     $VIEW       = $SABEL . "view"       . DS;
     $CONTAINER  = $SABEL . "container"  . DS;
     $CONTROLLER = $SABEL . "controller" . DS;
@@ -183,6 +184,7 @@ final class Sabel
     require ($CACHE . "Null.php");
     
     require ($MAP . "Candidate.php");
+    require ($MAP . "Element.php");
     require ($MAP . "Config.php");
     require ($MAP . "Configurator.php");
     require ($MAP . "config" . DS . "Route.php");
@@ -200,8 +202,6 @@ final class Sabel
     require ($CONTROLLER . "Creator.php");
     require ($CONTROLLER . "Page.php");
     
-    require ($RESPONSE . "Web.php");
-    
     require ($CONTAINER . "Injector.php");
     require ($CONTAINER . "Bind.php");
     require ($CONTAINER . "DI.php");
@@ -210,6 +210,7 @@ final class Sabel
     require ($VIEW . "Uri.php");
     require ($VIEW . "Resource.php");
     require ($VIEW . "Renderer.php");
+    require ($VIEW . "Location.php");
     require ($VIEW . "renderer" . DS . "Class.php");
     require ($VIEW . "resource" . DS . "File.php");
     require ($VIEW . "resource" . DS . "Template.php");
@@ -221,6 +222,7 @@ final class Sabel
     
     require ($SABEL . "storage"   . DS . "Session.php");
     require ($SABEL . "router"    . DS . "Map.php");
+    require ($SABEL . "response"  . DS . "Web.php");
     require ($SABEL . "exception" . DS . "Runtime.php");
   }
 }

@@ -34,15 +34,14 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   public function begin()
   {
     $this->autoCommit(false);
-    $connection = $this->getConnection();
-    $this->connection = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $connection);
+    $this->connection = ibase_trans(IBASE_COMMITTED|IBASE_REC_NO_VERSION, $this->connection);
 
     return $this->connection;
   }
 
   public function commit()
   {
-    if (ibase_commit($this->getConnection())) {
+    if (ibase_commit($this->connection)) {
       $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Driver_Exception("ibase driver commit failed.");
@@ -51,7 +50,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 
   public function rollback()
   {
-    if (ibase_rollback($this->getConnection())) {
+    if (ibase_rollback($this->connection)) {
       $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Driver_Exception("ibase driver rollback failed.");
@@ -72,10 +71,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   public function execute($sql, $bindParams = null)
   {
     $sql = $this->bind($sql, $bindParams);
-    if (defined("HOGE")) {
-      var_dump($sql);
-    }
-    $connection = $this->getConnection();
+    $connection = $this->connection;
     $result = ibase_query($connection, $sql);
     if (!$result) $this->executeError($sql);
 

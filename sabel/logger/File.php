@@ -57,7 +57,7 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   
   public function log($text, $level = LOG_INFO, $fileName = null)
   {
-    $fmt = '%s [%s] %s' . "\n";
+    $fmt = '%s [%s] %s' . PHP_EOL;
     fwrite($this->open(), sprintf($fmt, now(), $this->defineToString($level), $text));
   }
   

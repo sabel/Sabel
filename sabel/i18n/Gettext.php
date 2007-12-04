@@ -192,7 +192,7 @@ class Sabel_I18n_Gettext
         $dirs = $locales;
       } else {
         $dirs = $this->_getLocaleDirs();
-        $code = array("<?php\n" . '$locales = array(');
+        $code = array("<?php" . PHP_EOL . PHP_EOL . '$locales = array(');
         foreach (array_keys($dirs) as $dir) {
           $code[] = '"' . $dir . '" => 1,';
         }

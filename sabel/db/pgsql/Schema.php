@@ -20,7 +20,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
     $sql = "SELECT table_name FROM information_schema.tables "
          . "WHERE table_schema = '{$this->schemaName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $tables = array();
@@ -40,7 +40,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
          . "WHERE table_schema = '{$this->schemaName}' "
          . "AND table_name = '{$tblName}'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
 
     $this->createSequences();
@@ -87,7 +87,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
          . "WHERE tc.table_schema = '{$this->schemaName}' "
          . "AND tc.table_name = '{$tblName}' AND tc.constraint_type = 'FOREIGN KEY'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $columns = array();
@@ -113,7 +113,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
          . "AND tc.table_name = '{$tblName}' "
          . "AND tc.constraint_type = 'UNIQUE'";
 
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
 
     $uniques = array();
@@ -131,7 +131,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
 
     $seqs =& $this->sequences;
     $sql  = "SELECT relname FROM pg_statio_user_sequences";
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (!$rows) return;
 
     foreach ($rows as $row) $seqs[] = $row["relname"];
@@ -146,7 +146,7 @@ class Sabel_DB_Pgsql_Schema extends Sabel_DB_Abstract_Schema
          . "AND table_name = '{$tblName}' AND constraint_name LIKE '%\_pkey'";
 
     $keys =& $this->primaryKeys;
-    $rows = $this->execute($sql);
+    $rows = $this->driver->execute($sql);
     if (!$rows) return;
 
     foreach ($rows as $row) $keys[] = $row["column_name"];

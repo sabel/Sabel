@@ -32,14 +32,14 @@ class Schema extends Sabel_Sakle_Task
     
     foreach (get_db_params() as $connectionName => $params) {
       Sabel_DB_Config::regist($connectionName, $params);
-      $accessor = new Sabel_DB_Schema_Accessor($connectionName);
+      $schema = Sabel_DB_Driver::createSchema($connectionName);
       
-      foreach ($accessor->getAll() as $schema) {
-        $tblName = $schema->getTableName();
+      foreach ($schema->getTableList() as $tblName) {
+        $tblSchema = $schema->getTable($tblName);
         
         if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
           $writer = new Sabel_DB_Schema_FileWriter(SCHEMA_DIR_PATH);
-          $writer->write($schema);
+          $writer->write($tblSchema);
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
         

@@ -13,24 +13,23 @@ class Sabel_DB_Connection
 {
   private static $connections = array();
 
-  public static function get(Sabel_DB_Abstract_Driver $connector)
+  public static function connect(Sabel_DB_Abstract_Driver $driver)
   {
-    $connectionName = $connector->getConnectionName();
+    $connectionName = $driver->getConnectionName();
 
     if (!isset(self::$connections[$connectionName])) {
       $currentLevel = error_reporting(0);
-      $result = $connector->connect(Sabel_DB_Config::get($connectionName));
+      $result = $driver->connect(Sabel_DB_Config::get($connectionName));
       error_reporting($currentLevel);
 
       if (is_string($result)) {
         throw new Sabel_DB_Connection_Exception($result);
       } else {
-        return self::$connections[$connectionName] = $result;
+        self::$connections[$connectionName] = $result;
       }
-
-      self::$connections[$connectionName] = $result;
     }
 
+    $driver->setConnection(self::$connections[$connectionName]);
     return self::$connections[$connectionName];
   }
 

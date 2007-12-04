@@ -46,9 +46,8 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    $connection = $this->getConnection();
-    if (pg_query($connection, "START TRANSACTION")) {
-      return $connection;
+    if (pg_query($this->connection, "START TRANSACTION")) {
+      return $this->connection;
     } else {
       throw new Sabel_DB_Driver_Exception("pgsql driver begin failed.");
     }
@@ -56,14 +55,14 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 
   public function commit()
   {
-    if (!pg_query($this->getConnection(), "COMMIT")) {
+    if (!pg_query($this->connection, "COMMIT")) {
       throw new Sabel_DB_Driver_Exception("pgsql driver commit failed.");
     }
   }
 
   public function rollback()
   {
-    if (!pg_query($this->getConnection(), "ROLLBACK")) {
+    if (!pg_query($this->connection, "ROLLBACK")) {
       throw new Sabel_DB_Driver_Exception("pgsql driver rollback failed.");
     }
   }
@@ -77,7 +76,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   public function execute($sql, $bindParams = null)
   {
     $sql = $this->bind($sql, $bindParams);
-    $result = pg_query($this->getConnection(), $sql);
+    $result = pg_query($this->connection, $sql);
     if (!$result) $this->executeError($result, $sql);
 
     $rows = array();

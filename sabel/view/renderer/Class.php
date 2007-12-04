@@ -46,6 +46,7 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private final function makeCompileFile($template, $hash)
   {
+    // @todo
     //if (ENVIRONMENT === PRODUCTION) {
     //  if (is_readable($this->getCompileFilePath($hash))) return;
     //}
@@ -67,13 +68,13 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
       $template = $this->trimContents($template);
     }
     
-    $this->saveCompileFile(RUN_BASE . "/data/compile/", $hash, $template);
+    $this->saveCompileFile($hash, $template);
   }
   
   private final function checkAndTrimContents($contents)
   {
-    if (strpos($contents, '<script') === false) {
-      $contents = explode("\n",     $contents);
+    if (strpos($contents, "<script") === false) {
+      $contents = explode(PHP_EOL,  $contents);
       $contents = array_map('trim', $contents);
       $contents = implode('',       $contents);
     } else {
@@ -94,12 +95,12 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
       $script = $contents[2];
       $foot   = $this->checkAndTrimContents($contents[3]);
       
-      $contents = $head . "\n" . $script . "\n" . $foot;
+      $contents = $head . PHP_EOL . $script . PHP_EOL . $foot;
     }
     return $contents;
   }
   
-  private final function saveCompileFile($path, $name, $compiled)
+  private final function saveCompileFile($name, $compiled)
   {
     file_put_contents(COMPILE_DIR_PATH . DS . $name, $compiled);
   }
@@ -116,26 +117,26 @@ function _sbl_tpl_pipe_to_func($matches)
   $values = explode(" ", $matches[2]);
   
   foreach ($values as &$value) {
-    if ($value === '||') continue;
-    if (strpos($value, '|') !== false) {
-      $functions = explode('|', $value);
+    if ($value === "||") continue;
+    if (strpos($value, "|") !== false) {
+      $functions = explode("|", $value);
       $value = array_shift($functions);
       $lamdaBody = 'return (is_string($val)) ? "\"".$val."\"" : $val;';
       $lamda = create_function('$val', $lamdaBody);
       foreach ($functions as $function) {
-        $params = '';
-        if (strpos($function, ':') !== false) {
-          $params   = explode(':', $function);
+        $params = "";
+        if (strpos($function, ":") !== false) {
+          $params   = explode(":", $function);
           $function = array_shift($params);
           $params   = array_map($lamda, $params);
-          $params   = ', ' . implode(', ', $params);
+          $params   = ", " . implode(", ", $params);
         }
         $value = "$function($value$params)";
       }
     }
   }
   
-  $value = implode(' ', $values);
+  $value = implode(" ", $values);
   return "<?${pre} ${value} ?>";
 }
 

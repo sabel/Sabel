@@ -13,29 +13,29 @@ class Sabel_DB_Config
 {
   private static $initialized = false;
   private static $configs = array();
-
+  
   public static function initialize($configPath = "")
   {
     if (self::$initialized) return;
-
+    
     if ($configPath === "") {
       $configPath = CONFIG_DIR_PATH . DS . "connection.php";
     }
-
+    
     Sabel::fileUsing($configPath, true);
-
+    
     foreach (get_db_params() as $connectionName => $params) {
       self::regist($connectionName, $params);
     }
-
+    
     self::$initialized = true;
   }
-
+  
   public static function regist($connectionName, $params)
   {
     self::$configs[$connectionName] = $params;
   }
-
+  
   public static function get($connectionName = null)
   {
     if ($connectionName === null) {
@@ -44,16 +44,11 @@ class Sabel_DB_Config
       return self::getConfig($connectionName);
     }
   }
-
-  public static function getDB($connectionName)
-  {
-    return str_replace("pdo-", "", self::getDriverName($connectionName));
-  }
-
+  
   public static function getDriverName($connectionName)
   {
     $config = self::getConfig($connectionName);
-
+    
     if (isset($config["driver"])) {
       return $config["driver"];
     } else {
@@ -61,14 +56,14 @@ class Sabel_DB_Config
       throw new Sabel_DB_Exception($message);
     }
   }
-
+  
   public static function getSchemaName($connectionName)
   {
     $drvName = self::getDriverName($connectionName);
     if (in_array($drvName, array("pdo-sqlite", "ibase"))) return null;
-
+    
     $config = self::getConfig($connectionName);
-
+    
     if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"), true)) {
       return $config["database"];
     } elseif ($drvName === "oci") {
@@ -82,7 +77,7 @@ class Sabel_DB_Config
       throw new Sabel_DB_Exception($message);
     }
   }
-
+  
   private static function getConfig($connectionName)
   {
     if (isset(self::$configs[$connectionName])) {

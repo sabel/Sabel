@@ -31,27 +31,27 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   
   protected function printMessage($msg, $type = self::MSG_INFO)
   {
-    echo self::getHeader($type) . ": {$msg}\n";
+    echo self::getHeader($type) . ": $msg" . PHP_EOL;
   }
   
   public static function success($msg)
   {
-    echo self::getHeader(self::MSG_INFO) . ": {$msg}\n";
+    echo self::getHeader(self::MSG_INFO) . ": $msg" . PHP_EOL;
   }
   
   public static function warning($msg)
   {
-    echo self::getHeader(self::MSG_WARN) . ": {$msg}\n";
+    echo self::getHeader(self::MSG_WARN) . ": $msg" . PHP_EOL;
   }
   
   public static function message($msg)
   {
-    echo self::getHeader(self::MSG_MSG) . ": {$msg}\n";
+    echo self::getHeader(self::MSG_MSG) . ": $msg" . PHP_EOL;
   }
   
   public static function error($msg)
   {
-    echo self::getHeader(self::MSG_ERR) . ": {$msg}\n";
+    echo self::getHeader(self::MSG_ERR) . ": $msg" . PHP_EOL;
   }
   
   private static function getHeader($type)

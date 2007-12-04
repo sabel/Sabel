@@ -30,29 +30,38 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
     
     if (file_exists($target)) unlink($target);
     
-    $fp = fopen($target, "w");
-    
-    fwrite($fp, "<?php\n\n");
-    fwrite($fp, "class {$className}\n{\n");
-    fwrite($fp, "  public static function get()\n  {\n");
-    fwrite($fp, '    $cols = array();');
-    fwrite($fp, "\n\n");
+    $lines   = array();
+    $lines[] = "<?php" . PHP_EOL;
+    $lines[] = "class $className";
+    $lines[] = "{";
+    $lines[] = "  public static function get()";
+    $lines[] = "  {";
+    $lines[] = '    $cols = array();' . PHP_EOL;
     
     $colLines = $this->createColumnLines($schema);
-    foreach ($colLines as $line) fwrite($fp, "    " . $line);
+    foreach ($colLines as $line) {
+      $lines[] = "    " . $line;
+    }
     
-    fwrite($fp, "\n    return " . '$cols;' . "\n  }\n");
+    $lines[] = PHP_EOL;
+    $lines[] = '    return $cols;';
+    $lines[] = "  }" . PHP_EOL;
     
-    $property   = array();
-    $property[] = '$property = array();' . "\n\n";
+    $lines[] = "  public function getProperty()";
+    $lines[] = "  {";
+    $lines[] = '    $property = array();' . PHP_EOL;
     
-    $this->writeEngine($property, $schema);
-    $this->writeUniques($property, $schema);
-    $this->writeForeignKeys($property, $schema);
+    $this->writeEngine($lines, $schema);
+    $this->writeUniques($lines, $schema);
+    $this->writeForeignKeys($lines, $schema);
     
-    fwrite($fp, "\n  public function getProperty()\n  {\n");
-    fwrite($fp, "    " . join("", $property));
-    fwrite($fp, "    " . 'return $property;' . "\n  }\n}\n");
+    $lines[] = PHP_EOL;
+    $lines[] = "    return \$property;";
+    $lines[] = "  }";
+    $lines[] = "}";
+    
+    $fp = fopen($target, "w");
+    fwrite($fp, implode(PHP_EOL, $lines));
     fclose($fp);
   }
   
@@ -81,7 +90,7 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
       $this->setConstraints($line, $col);
       
       $line[] = "'default' => " . $this->getDefault($isNum, $col);
-      $lines[$col->name] = join("", $line) . ");\n";
+      $lines[$col->name] = join("", $line) . ");";
     }
     
     return $lines;
@@ -115,42 +124,43 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
     return $str;
   }
   
-  private function writeEngine(&$property, $schema)
+  private function writeEngine(&$lines, $schema)
   {
     $engine = $schema->getTableEngine();
-    $property[] = '    $property' . "['tableEngine'] = '{$engine}';\n";
+    $lines[] = "    \$property['tableEngine'] = '{$engine}';";
   }
   
-  private function writeUniques(&$property, $schema)
+  private function writeUniques(&$lines, $schema)
   {
     $uniques = $schema->getUniques();
     
     if ($uniques === null) {
-      $property[] = '    $property' . "['uniques'] = null;\n";
+      $lines[] = "    \$property['uniques'] = null;";
     } else {
       foreach ($uniques as $unique) {
         $us = array();
         foreach ($unique as $u) $us[] = "'" . $u . "'";
         $us = implode(", ", $us);
-        $property[] = '    $property' . "['uniques'][] = array({$us});\n";
+        $lines[] = "    \$property['uniques'][] = array({$us});";
       }
     }
   }
 
-  private function writeForeignKeys(&$property, $schema)
+  private function writeForeignKeys(&$lines, $schema)
   {
     $fkey = $schema->getForeignKey();
     
     if ($fkey === null) {
-      $property[] = '    $property' . "['fkeys'] = null;\n";
+      $lines[] = "    \$property['fkeys'] = null;";
     } else {
       $space = "                                         ";
       foreach ($fkey->toArray() as $column => $params) {
-        $property[] = '    $property' . "['fkeys']['{$column}'] = ";
-        $property[] = "array('referenced_table'  => '{$params->table}',\n";
-        $property[] = $space . "'referenced_column' => '{$params->column}',\n";
-        $property[] = $space . "'on_delete'         => '{$params->onDelete}',\n";
-        $property[] = $space . "'on_update'         => '{$params->onUpdate}');\n";
+        $lines[] = "    \$property['fkeys']['{$column}'] = "
+                 . "array('referenced_table'  => '{$params->table}',";
+                 
+        $lines[] = $space . "'referenced_column' => '{$params->column}',";
+        $lines[] = $space . "'on_delete'         => '{$params->onDelete}',";
+        $lines[] = $space . "'on_update'         => '{$params->onUpdate}');";
       }
     }
   }

@@ -38,11 +38,7 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
 
   public function getConnection()
   {
-    if ($this->connection === null) {
-      return $this->connection = Sabel_DB_Connection::get($this);
-    } else {
-      return $this->connection;
-    }
+    return $this->connection;
   }
 
   public function autoCommit($bool)

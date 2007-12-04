@@ -14,42 +14,37 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
 {
   protected $driver = null;
   protected $schemaName = "";
-
+  
   abstract public function getTableList();
   abstract public function getForeignKeys($tblName);
   abstract public function getUniques($tblName);
-
-  public function __construct($connectionName, $schemaName)
+  
+  public function __construct(Sabel_DB_Abstract_Driver $driver, $schemaName)
   {
-    $this->driver = Sabel_DB_Driver::create($connectionName);
+    $this->driver = $driver;
     $this->schemaName = $schemaName;
   }
-
+  
   public function getAll()
   {
     $tables = array();
     foreach ($this->getTableList() as $tblName) {
       $tables[$tblName] = $this->getTable($tblName);
     }
-
+    
     return $tables;
   }
-
+  
   public function getTable($tblName)
   {
     $columns = $this->createColumns($tblName);
     $schema  = new Sabel_DB_Schema_Table($tblName, $columns);
     $schema->setForeignKeys($this->getForeignKeys($tblName));
     $schema->setUniques($this->getUniques($tblName));
-
+    
     return $schema;
   }
-
-  protected function execute($sql)
-  {
-    return $this->driver->execute($sql);
-  }
-
+  
   protected function setDefaultValue($column, $default)
   {
     if ($default === null || $default === "") {
@@ -60,12 +55,12 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
         case Sabel_DB_Type::SMALLINT:
           $column->default = (int)$default;
           break;
-
+          
         case Sabel_DB_Type::FLOAT:
         case Sabel_DB_Type::DOUBLE:
           $column->default = (float)$default;
           break;
-
+          
         case Sabel_DB_Type::BOOL:
           if (is_bool($default)) {
             $column->default = $default;
@@ -73,17 +68,17 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
             $column->default = in_array($default, array("1", "t", "true"));
           }
           break;
-
+          
         case Sabel_DB_Type::BIGINT:
           $column->default = (string)$default;
           break;
-
+          
         default:
           $column->default = $default;
       }
     }
   }
-
+  
   public function getTableEngine($tblName)
   {
     return null;

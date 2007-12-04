@@ -28,7 +28,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
       }
 
       if (isset($params["charset"])) {
-        list (,,$v) = explode(".", PHP_VERSION);
+        list (, , $v) = explode(".", PHP_VERSION);
         if ($v{0} >= 3) {
           mysql_set_charset($params["charset"], $conn);
         } else {
@@ -44,9 +44,8 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function begin()
   {
-    $connection = $this->getConnection();
-    if (mysql_query("START TRANSACTION", $connection)) {
-      return $connection;
+    if (mysql_query("START TRANSACTION", $this->connection)) {
+      return $this->connection;
     } else {
       throw new Sabel_DB_Driver_Exception("mysql driver begin failed.");
     }
@@ -54,14 +53,14 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function commit()
   {
-    if (!mysql_query("COMMIT", $this->getConnection())) {
+    if (!mysql_query("COMMIT", $this->connection)) {
       throw new Sabel_DB_Driver_Exception("mysql driver commit failed.");
     }
   }
 
   public function rollback()
   {
-    if (!mysql_query("ROLLBACK", $this->getConnection())) {
+    if (!mysql_query("ROLLBACK", $this->connection)) {
       throw new Sabel_DB_Driver_Exception("mysql driver rollback failed.");
     }
   }
@@ -75,7 +74,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
   public function execute($sql, $bindParams = null)
   {
     $sql = $this->bind($sql, $bindParams);
-    $result = mysql_query($sql, $this->getConnection());
+    $result = mysql_query($sql, $this->connection);
     if (!$result) $this->executeError($sql);
 
     $rows = array();
@@ -89,8 +88,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
 
   public function getLastInsertId()
   {
-    $rows = $this->execute("SELECT LAST_INSERT_ID() AS id");
-    return $rows[0]["id"];
+    return mysql_insert_id($this->connection);
   }
 
   private function executeError($sql)

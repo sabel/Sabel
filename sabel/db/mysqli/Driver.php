@@ -43,18 +43,18 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
-    mysqli_autocommit($this->getConnection(), $bool);
+    mysqli_autocommit($this->connection, $bool);
   }
 
   public function begin()
   {
     $this->autoCommit(false);
-    return $this->getConnection();
+    return $this->connection;
   }
 
   public function commit()
   {
-    if (mysqli_commit($this->getConnection())) {
+    if (mysqli_commit($this->connection)) {
       $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Driver_Exception("mysqli driver commit failed.");
@@ -63,7 +63,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function rollback()
   {
-    if (mysqli_rollback($this->getConnection())) {
+    if (mysqli_rollback($this->connection)) {
       $this->autoCommit(true);
     } else {
       throw new Sabel_DB_Driver_Exception("mysqli driver rollback failed.");
@@ -79,7 +79,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   public function execute($sql, $bindParams = null)
   {
     $sql = $this->bind($sql, $bindParams);
-    $result = mysqli_query($this->getConnection(), $sql);
+    $result = mysqli_query($this->connection, $sql);
     if (!$result) $this->executeError($sql);
 
     $rows = array();
@@ -93,7 +93,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 
   public function getLastInsertId()
   {
-    return mysqli_insert_id($this->getConnection());
+    return mysqli_insert_id($this->connection);
   }
 
   private function executeError($sql)
