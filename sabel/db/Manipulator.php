@@ -224,7 +224,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     $this->setCondition($arg1, $arg2);
 
-    $model = $this->model;
+    $model = clone $this->model;
     $sql   = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows  = $this->_execute($this->prepareSelect($sql));
 
