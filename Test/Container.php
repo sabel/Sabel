@@ -18,42 +18,42 @@ class Test_Container extends SabelTestCase
   
   public function testInjection()
   {
-    $injector = Sabel_Container::injector(new Config());
+    $injector = Sabel_Container::create(new Config());
     $person = $injector->newInstance("Person");
     $this->assertEquals(10, $person->calc());
   }
   
   public function testConstructorInjection()
   {
-    $injector = Sabel_Container::injector(new ConstructConfig());
+    $injector = Sabel_Container::create(new ConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertTrue(is_object($car->getEngine()));
   }
   
   public function testStrLiteralConstructorInjection()
   {
-    $injector = Sabel_Container::injector(new StrLiteralConstructConfig());
+    $injector = Sabel_Container::create(new StrLiteralConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertEquals("this is engine", $car->getEngine());
   }
   
   public function testNumLiteralConstructorInjection()
   {
-    $injector = Sabel_Container::injector(new NumLiteralConstructConfig());
+    $injector = Sabel_Container::create(new NumLiteralConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertEquals(123, $car->getEngine());
   }
   
   public function testBoolLiteralConstructorInjection()
   {
-    $injector = Sabel_Container::injector(new BoolLiteralConstructConfig());
+    $injector = Sabel_Container::create(new BoolLiteralConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertTrue($car->getEngine());
   }
   
   public function testWrongInjectionConfig()
   {
-    $injector = Sabel_Container::injector(new WrongClassNameConfig());
+    $injector = Sabel_Container::create(new WrongClassNameConfig());
     
     try {
       $person = $injector->newInstance("Person");
@@ -66,7 +66,7 @@ class Test_Container extends SabelTestCase
   public function testNoInjectionConfigToConstructer()
   {
     try {
-      $injector = Sabel_Container::injector(new StdClass());
+      $injector = Sabel_Container::create(new StdClass());
       $this->fail();
     } catch (Sabel_Exception_Runtime $e) {
       $msg = "must be Sabel_Container_Injection";
@@ -76,7 +76,7 @@ class Test_Container extends SabelTestCase
   
   public function testMultipleConstructerInjection()
   {
-    $injector = Sabel_Container::injector(new MultipleConstructConfig());
+    $injector = Sabel_Container::create(new MultipleConstructConfig());
     
     $oil    = new EngineOil("normal");
     $engine = new MultiEngine($oil);
@@ -89,7 +89,7 @@ class Test_Container extends SabelTestCase
   
   public function testSpecificSetter()
   {
-    $injector = Sabel_Container::injector(new SpecificSetterConfig());
+    $injector = Sabel_Container::create(new SpecificSetterConfig());
     $instance = $injector->newInstance("SpecificSetter");
     
     $engineOil = new EngineOil("specific");
@@ -104,7 +104,7 @@ class Test_Container extends SabelTestCase
     $trace = new Trace();
     $aspectConfig = new AspectConfig($trace);
     
-    $injector = Sabel_Container::injector($aspectConfig);
+    $injector = Sabel_Container::create($aspectConfig);
     $instance = $injector->newInstance("AspectTarget");
     $instance->run("test");
     

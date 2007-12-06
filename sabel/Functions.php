@@ -23,7 +23,7 @@ function load($className, $config)
     throw new Sabel_Exception_Runtime($msg);
   }
   
-  return Sabel_Container::injector($config)->newInstance($className);
+  return Sabel_Container::create($config)->newInstance($className);
 }
 
 function l($message, $level = LOG_INFO, $file = null)

@@ -13,7 +13,7 @@ class Processor_Creator extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $injector = Sabel_Container::injector(new Config_Factory());
+    $injector = Sabel_Container::create(new Config_Factory());
     
     $request     = $bus->get("request");
     $destination = $bus->get("destination");

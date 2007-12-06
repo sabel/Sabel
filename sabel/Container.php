@@ -13,7 +13,7 @@ class Sabel_Container
 {
   private static $components = array();
   
-  public static function injector($component)
+  public static function create($component)
   {
     $name = get_class($component);
     if (isset(self::$components[$name])) {

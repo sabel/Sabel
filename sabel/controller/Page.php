@@ -38,7 +38,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   {
     $this->reserved = get_class_methods("Sabel_Controller_Page");
     
-    $injector = Sabel_Container::injector(new Config_Factory());
+    $injector = Sabel_Container::create(new Config_Factory());
     $this->response = $injector->newInstance("Sabel_Response");
   }
   
