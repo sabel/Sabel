@@ -458,13 +458,13 @@ class Sabel_Map_Candidate implements Iterator
   {
     $result = false;
     
-    if (empty($uriElement) && $element->hasDefault()) {
+    if (realempty($uriElement) && $element->hasDefault()) {
       $uriElement = $element->default;
     }
     
     if ($element->isMatchAll()) {
       $result = $uriElement;
-    } elseif (empty($uriElement) && $element->omittable) {
+    } elseif (realempty($uriElement) && $element->omittable) {
       $result = $uriElement;
     } elseif ($element->hasRequirement()) {
       $result = $element->compareWithRequirement($uriElement);

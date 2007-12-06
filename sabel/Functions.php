@@ -45,6 +45,11 @@ function redirected($const)
   }
 }
 
+function realempty($value)
+{
+  return ($value === null || $value === array() || $value === "");
+}
+
 function reflection()
 {
   $args = func_get_args();

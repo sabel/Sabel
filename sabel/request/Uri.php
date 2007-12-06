@@ -40,6 +40,7 @@ class Sabel_Request_Uri
   public function parse($uri)
   {
     static $filter = null;
+    
     if ($filter === null) {
       $filter = create_function('$value',
                                 'return ($value !== "") ? $value : null;');
@@ -47,7 +48,11 @@ class Sabel_Request_Uri
     
     $this->uri = $uri;
     $elements = explode("/", $uri);
-    $elements = array_values(array_filter($elements, $filter));
+    
+    foreach ($elements as &$element) {
+      if ($element === "") $element = null;
+    }
+    
     $lastElement = array_pop($elements);
     
     if (strpos($lastElement, ".") !== false) {
