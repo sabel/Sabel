@@ -145,7 +145,7 @@ class Sabel_Util_String extends Sabel_Object
   {
     if ($this->isEmpty()) return "";
     
-    $this->string{0} = strtolower($this->string{0});
+    $this->string = lcfirst($this->string);
     return $this;
   }
   

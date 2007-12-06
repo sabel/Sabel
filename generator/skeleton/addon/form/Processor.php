@@ -64,8 +64,7 @@ class Form_Processor extends Sabel_Bus_Processor
       throw new Sabel_Exception_Runtime("invalid argument type.");
     }
     
-    $string = new Sabel_Util_String($mdlName);
-    $name   = $string->lcfirst($mdlName) . "Form";
+    $name = lcfirst($mdlName) . "Form";
     $formId = $this->formId;
     
     if ($formId === null) {

@@ -50,6 +50,16 @@ function realempty($value)
   return ($value === null || $value === array() || $value === "");
 }
 
+function lcfirst($string)
+{
+  if (realempty($string) || !is_string($string)) {
+    return "";
+  } else {
+    $string{0} = strtolower($string{0});
+    return $string;
+  }
+}
+
 function reflection()
 {
   $args = func_get_args();
