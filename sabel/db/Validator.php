@@ -93,28 +93,35 @@ class Sabel_DB_Validator extends Sabel_Object
         throw new Sabel_DB_Exception($message);
       }
 
-      $lName = $this->getLocalizedName($name);
-
       if (!$this->nullable($column)) {
-        $this->errors[] = sprintf($this->messages["nullable"], $lName);
+        $this->errors[] = $this->errorMessage($name, "nullable");
         continue;
       }
 
       if (!$this->type($column)) {
-        $this->errors[] = sprintf($this->messages["type"], $lName);
+        if ($column->isNumeric()) {
+          $this->errors[] = $this->errorMessage($name, "numeric");
+        } else {
+          $this->errors[] = $this->errorMessage($name, "type");
+        }
         continue;
       }
 
       if ($column->isString() && !$this->length($column)) {
-        $this->errors[] = sprintf($this->messages["length"], $lName);
+        $message = $this->errorMessage($name, "maxlength");
+        $this->errors[] = str_replace("%MAX%", $column->max, $message);
         continue;
       }
 
+      // @todo minlength
+
       if ($column->isNumeric() && $column->value !== null) {
         if (!$this->maximum($column)) {
-          $this->errors[] = sprintf($this->messages["maximum"], $lName);
+          $message = $this->errorMessage($name, "maximum");
+          $this->errors[] = str_replace("%MAX%", $column->max, $message);
         } elseif (!$this->minimum($column)) {
-          $this->errors[] = sprintf($this->messages["minimum"], $lName);
+          $message = $this->errorMessage($name, "minimum");
+          $this->errors[] = str_replace("%MIN%", $column->min, $message);
         }
       }
     }
@@ -128,6 +135,12 @@ class Sabel_DB_Validator extends Sabel_Object
     }
 
     return $this->errors;
+  }
+  
+  protected function errorMessage($colName, $msgKey)
+  {
+    $lName = $this->getLocalizedName($colName);
+    return str_replace("%NAME%", $lName, $this->messages[$msgKey]);
   }
 
   protected function nullable($column)
@@ -261,14 +274,16 @@ class Sabel_DB_Validator extends Sabel_Object
 
   protected function unique($model, $uniques)
   {
-    $manip = new Manipulator($model->getName());
-    $pkey  = $model->getPrimaryKey();
+    $lNames = array();
+    $manip  = new Manipulator($model->getName());
 
+    $pkey = $model->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
 
     foreach ($uniques as $unique) {
       $values = array();
       foreach ($unique as $uni) {
+        $lNames[] = $this->getLocalizedName($uni);
         $val = $model->$uni;
         $manip->setCondition($uni, $val);
         $values[] = $val;
@@ -290,8 +305,9 @@ class Sabel_DB_Validator extends Sabel_Object
       }
 
       if ($invalid) {
-        $values = implode(", ", $values);
-        $this->errors[] = sprintf($this->messages["unique"], $values);
+        $message = str_replace("%VALUE%", implode(", ", $values), $this->messages["unique"]);
+        $message = str_replace("%NAME%", implode(", ", $lNames), $message);
+        $this->errors[] = $message;
       }
     }
   }

@@ -181,7 +181,6 @@ final class Sabel
     
     require ($CACHE . "Manager.php");
     require ($CACHE . "Interface.php");
-    require ($CACHE . "Apc.php");
     require ($CACHE . "Null.php");
     
     require ($MAP . "Candidate.php");
@@ -222,9 +221,7 @@ final class Sabel
     require ($LOG . "Null.php");
     
     require ($DB . "Config.php");
-    require ($DB . "Connection.php");
     require ($DB . "Type.php");
-    require ($DB . "Statement.php");
     
     require ($SABEL . "storage"   . DS . "Session.php");
     require ($SABEL . "router"    . DS . "Map.php");

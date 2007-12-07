@@ -13,12 +13,15 @@ class Sabel_DB_Validate_Config
 {
   protected static $datetimeRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01]) ((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/';
   protected static $dateRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/';
-  protected static $messages  = array("length"   => "%s is too long.",
-                                      "maximum"  => "%s is too large.",
-                                      "minimum"  => "%s is too small.",
-                                      "nullable" => "please enter a %s.",
-                                      "type"     => "wrong %s format.",
-                                      "unique"   => "'%s' is unavailable.");
+  
+  protected static $messages  = array("maxlength" => "%NAME% should be %MAX% characters or less.",
+                                      "minlength" => "%NAME% should be %MIN% characters or more.",
+                                      "maximum"   => "%NAME% should be %MAX% or less.",
+                                      "minimum"   => "%NAME% should be %MIN% or more.",
+                                      "nullable"  => "should input the %NAME%.",
+                                      "numeric"   => "%NAME% should be a numeric.",
+                                      "type"      => "wrong %NAME% format.",
+                                      "unique"    => "'%VALUE%'(%NAME%) is unavailable.");
 
   protected static $customValidators = array();
 

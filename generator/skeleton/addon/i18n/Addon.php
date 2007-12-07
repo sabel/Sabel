@@ -11,7 +11,7 @@ class I18n_Addon extends Sabel_Object
   
   public function load()
   {
-    return true;
+    return false;
   }
   
   public function loadProcessor($bus)
