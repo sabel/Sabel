@@ -14,6 +14,11 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
   protected $placeHolderPrefix = ":";
   protected $placeHolderSuffix = "";
 
+  public function __construct(Sabel_DB_Oci_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
+
   public function escape(array $values)
   {
     foreach ($values as &$val) {

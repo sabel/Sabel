@@ -1,9 +1,5 @@
 <?php
 
-if (!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-
-Sabel::fileUsing("config" . DS . "INIT.php", true);
-
 /**
  * Gettext
  *
@@ -63,13 +59,13 @@ class Gettext extends Sabel_Sakle_Task
     $messages = array();
     foreach ($this->files as $file) {
       $contents = file_get_contents($file);
-      preg_match_all("/_\(('|\")(?>[^'\"]+)\\1\)/", $contents, $matches);
-      if (!empty($matches[2])) {
-        $messages = array_merge($messages, $matches[2]);
+      preg_match_all("/_\((.*)\)/", $contents, $matches);
+      if (!empty($matches[1])) {
+        $messages = array_merge($messages, $this->trims($matches[1]));
       }
     }
     
-    $filePath = DS . "LC_MESSAGES" . DS . $this->domain . ".php";
+    $filePath = DS . "LC_MESSAGES" . DS . $this->domain . PHP_SUFFIX;
     
     foreach ($locales as $locale) {
       if (!empty($this->locales) && !in_array($locale, $this->locales)) continue;
@@ -81,14 +77,14 @@ class Gettext extends Sabel_Sakle_Task
         continue;
       }
       
-      $code = array("<?php\n\n");
-      $code[] = '$messages = array(' . "\n";
+      $code = array("<?php" . PHP_EOL . PHP_EOL);
+      $code[] = '$messages = array(' . PHP_EOL;
       
       foreach ($messages as $message) {
         if ($isDefaultLocale) {
-          $code[] = '"' . $message . '" => "' . $message . '",' . "\n";
+          $code[] = '"' . $message . '" => "' . $message . '",' . PHP_EOL;
         } else {
-          $code[] = '"' . $message . '" => "",' . "\n";
+          $code[] = '"' . $message . '" => "",' . PHP_EOL;
         }
       }
       
@@ -111,11 +107,11 @@ class Gettext extends Sabel_Sakle_Task
       }
     }
     
-    $code = array("<?php\n\n");
-    $code[] = '$messages = array(' . "\n";
+    $code = array("<?php" . PHP_EOL . PHP_EOL);
+    $code[] = '$messages = array(' . PHP_EOL;
     
     foreach ($messages as $msgid => $message) {
-      $code[] = '"' . $msgid . '" => "' . $message . '",' . "\n";
+      $code[] = '"' . $msgid . '" => "' . $message . '",' . PHP_EOL;
     }
     
     $code[] = ");";
@@ -150,5 +146,14 @@ class Gettext extends Sabel_Sakle_Task
         }
       }
     }
+  }
+  
+  private function trims($messages)
+  {
+    foreach ($messages as &$message) {
+      $message = substr($message, 1, -1);
+    }
+    
+    return $messages;
   }
 }

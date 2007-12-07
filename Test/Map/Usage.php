@@ -39,7 +39,7 @@ class Test_Map_Usage extends SabelTestCase
   public function testStandard()
   {
     // :controller/:action/:id
-    $default = new Sabel_Map_Candidate("defualt");
+    $default = new Sabel_Map_Candidate("default");
     $default->route(":controller/:action/:id");
     $default->setOmittable("id");
     
@@ -58,7 +58,7 @@ class Test_Map_Usage extends SabelTestCase
   
   public function testArray()
   {
-    $default = new Sabel_Map_Candidate("defualt");
+    $default = new Sabel_Map_Candidate("default");
     $default->route(":directories[]/:action");
     
     $default->evalute(explode("/", "a/b/c/d"));
@@ -69,7 +69,7 @@ class Test_Map_Usage extends SabelTestCase
   
   public function testConstant()
   {
-    $default = new Sabel_Map_Candidate("defualt");
+    $default = new Sabel_Map_Candidate("default");
     $default->route("const/:controller/:action");
     $opt = array("default"=>array(":controller" => "index",
                                   ":action"     => "index"));
@@ -84,7 +84,7 @@ class Test_Map_Usage extends SabelTestCase
   
   public function testConstantWithDefault()
   {
-    $default = new Sabel_Map_Candidate("defualt");
+    $default = new Sabel_Map_Candidate("default");
     $default->route("const/:controller/:action");
     $opt = array("default"=>array(":controller" => "index",
                                   ":action"     => "index"));
@@ -103,7 +103,7 @@ class Test_Map_Usage extends SabelTestCase
   
   public function testArrayWithEndSpecificDirective()
   {
-    $default = new Sabel_Map_Candidate("defualt");
+    $default = new Sabel_Map_Candidate("default");
     $default->route(":directories[]/:action.html");
     
     $default->evalute(explode("/", "a/b/c/d.html"));

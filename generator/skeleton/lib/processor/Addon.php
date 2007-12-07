@@ -3,37 +3,37 @@
 /**
  * Processor_Addon
  *
- * @category Processor
- * @package  lib.processor
- * @version  1.0
+ * @category   Processor
+ * @package    lib.processor
+ * @version    1.0
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Processor_Addon extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $addons = array();
-    $addonDir = RUN_BASE . "/addon/";
+    $addonDir = ADDON_DIR_PATH;
+    $files = $this->getFiles($addonDir);
     
-    $this->getFiles($addonDir, $addons);
-    
-    foreach ($addons as $addonName) {
+    foreach ($this->getFiles($addonDir) as $addonName) {
       $loader = new Sabel_Addon_Loader($addonDir, $addonName, $bus);
       $loader->load($addonDir, $addonName);
     }
   }
   
-  private function getFiles($dir, &$files)
+  private function getFiles($dir)
   {
+    $files = array();
     $iterator = new DirectoryIterator($dir);
+    
     foreach ($iterator as $file) {
       $filename = $file->getFilename();
-      
-      if ($file->isDot() ||
-         $filename === ".svn" || $filename === ".cvs") {
-         continue;
-      }
-         
+      if ($filename{0} === ".") continue;
       $files[] = $filename;
     }
+    
+    return $files;
   }
 }

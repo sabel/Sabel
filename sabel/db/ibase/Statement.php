@@ -11,6 +11,11 @@
  */
 class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
 {
+  public function __construct(Sabel_DB_Ibase_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
+
   public function escape(array $values)
   {
     foreach ($values as &$val) {

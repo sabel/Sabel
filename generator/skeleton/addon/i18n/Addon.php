@@ -11,15 +11,12 @@ class I18n_Addon extends Sabel_Object
   
   public function load()
   {
-    return false;
+    return true;
   }
   
   public function loadProcessor($bus)
   {
-    $type = Sabel_I18n_Gettext::SABEL;
-
-    // $type = Sabel_I18n_Gettext::GETTEXT;
-    // $type = Sabel_I18n_Gettext::PHP_GETTEXT;
-    Sabel_I18n_Gettext::getInstance()->init($type);
+    $i18n = new I18n_Processor("i18n");
+    $bus->getList()->find("request")->insertNext("i18n", $i18n);
   }
 }

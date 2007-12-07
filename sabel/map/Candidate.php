@@ -430,9 +430,9 @@ class Sabel_Map_Candidate implements Iterator
         for ($rp = key($requests); $rp < count($requests); ++$rp) {
           $request = $requests[$rp];
           if ($this->hasExtension($request)) {
-            if (isset($elements[$i+1]) && $elements[$i+1]->hasExtension()) {
+            if (isset($elements[$i + 1]) && $elements[$i + 1]->hasExtension()) {
               list(, $request_extension) = $this->diviedByExtension($request);
-              if ($request_extension === $elements[$i+1]->extension) {
+              if ($request_extension === $elements[$i + 1]->extension) {
                 break;
               }
             }
@@ -458,13 +458,13 @@ class Sabel_Map_Candidate implements Iterator
   {
     $result = false;
     
-    if (realempty($uriElement) && $element->hasDefault()) {
+    if (($uriElement === null || $uriElement === false) && $element->hasDefault()) {
       $uriElement = $element->default;
     }
     
     if ($element->isMatchAll()) {
       $result = $uriElement;
-    } elseif (realempty($uriElement) && $element->omittable) {
+    } elseif (($uriElement === null || $uriElement === false) && $element->omittable) {
       $result = $uriElement;
     } elseif ($element->hasRequirement()) {
       $result = $element->compareWithRequirement($uriElement);

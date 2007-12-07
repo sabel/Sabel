@@ -18,15 +18,12 @@ class Sabel_Addon_Loader extends Sabel_Object
   
   public function load($dir = null, $name = null)
   {
-    $addonDir = ($dir !== null) ? $dir : $this->dir;
-    $addonName = ($name !== null) ? $name : $this->name;
-    
-    $myAddonDir = $addonDir . $addonName;
-    
+    $addonDir   = ($dir  !== null) ? $dir  : $this->dir;
+    $addonName  = ($name !== null) ? $name : $this->name;
+    $myAddonDir = $addonDir . DS . $addonName;
     $pathToAddonClass = $myAddonDir . DS . "Addon" . PHP_SUFFIX;
     
     if (is_readable($pathToAddonClass)) {
-      
       $dirs = explode(DS, dirname($pathToAddonClass));
       $dir = $dirs[count($dirs) - 1];
       
@@ -47,9 +44,8 @@ class Sabel_Addon_Loader extends Sabel_Object
     }
     
     if ($switch && $this->bus !== null) {
-      $addonLibDir = $myAddonDir . DS . "lib";
-      $processorClassFile = $myAddonDir . DS . "Processor.php";
-      if (is_readable($myAddonDir . DS . "Processor.php")) {
+      $processorClassFile = $myAddonDir . DS . "Processor" . PHP_SUFFIX;
+      if (is_readable($processorClassFile)) {
         require ($processorClassFile);
         $addon->loadProcessor($this->bus);
       }

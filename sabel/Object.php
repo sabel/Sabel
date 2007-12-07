@@ -35,7 +35,7 @@ abstract class Sabel_Object
   
   public function hashCode()
   {
-    return md5(serialize($this));
+    return sha1(serialize($this));
   }
   
   public function getReflection()

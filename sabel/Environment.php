@@ -16,7 +16,10 @@ class Sabel_Environment extends Sabel_Object
   
   public static function create()
   {
-    if (!is_object(self::$instance)) self::$instance = new self();
+    if (self::$instance === null) {
+      self::$instance = new self();
+    }
+    
     return self::$instance;
   }
   

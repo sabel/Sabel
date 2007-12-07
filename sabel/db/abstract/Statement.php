@@ -32,11 +32,6 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $placeHolderPrefix = "@",
     $placeHolderSuffix = "@";
 
-  public function __construct(Sabel_DB_Abstract_Driver $driver)
-  {
-    $this->driver = $driver;
-  }
-
   public function setType($type)
   {
     $this->type = $type;

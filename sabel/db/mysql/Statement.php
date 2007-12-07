@@ -11,6 +11,11 @@
  */
 class Sabel_DB_Mysql_Statement extends Sabel_DB_Abstract_Statement
 {
+  public function __construct(Sabel_DB_Mysql_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
+
   public function values(array $values)
   {
     if ($this->isInsert()) {

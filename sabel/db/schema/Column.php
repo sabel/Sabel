@@ -106,10 +106,10 @@ class Sabel_DB_Schema_Column extends Sabel_Object
 
     switch ($this->type) {
       case Sabel_DB_Type::INT:
-        return _int_cast_func($value, INT_MAX);
+        return $this->toInteger($value, INT_MAX);
 
       case Sabel_DB_Type::SMALLINT:
-        return _int_cast_func($value, SMALLINT_MAX);
+        return $this->toInteger($value, SMALLINT_MAX);
 
       case Sabel_DB_Type::STRING:
       case Sabel_DB_Type::TEXT:
@@ -151,21 +151,21 @@ class Sabel_DB_Schema_Column extends Sabel_Object
         return $value;
     }
   }
-}
 
-function _int_cast_func($value, $max)
-{
-  if (is_string($value) && is_numeric($value) && $value <= $max) {
-    if (($pos = strpos($value, ".")) === false || $value === "0") {
-      return (int)$value;
-    } elseif (substr_count($value, ".") === 1 && preg_match("/0+$/", substr($value, ++$pos))) {
+  private function toInteger($value, $max)
+  {
+    if (is_string($value) && is_numeric($value) && $value <= $max) {
+      if (($pos = strpos($value, ".")) === false || $value === "0") {
+        return (int)$value;
+      } elseif (substr_count($value, ".") === 1 && preg_match("/0+$/", substr($value, ++$pos))) {
+        return (int)$value;
+      } else {
+        return $value;
+      }
+    } elseif (is_float($value) && fmod($value, 1.0) === 0.0 && $value <= $max) {
       return (int)$value;
     } else {
       return $value;
     }
-  } elseif (is_float($value) && fmod($value, 1.0) === 0.0 && $value <= $max) {
-    return (int)$value;
-  } else {
-    return $value;
   }
 }

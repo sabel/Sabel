@@ -14,6 +14,11 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
   protected $placeHolderPrefix = ":";
   protected $placeHolderSuffix = "";
 
+  public function __construct(Sabel_DB_Pdo_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
+
   public function values(array $values)
   {
     if ($this->driver->getDriverId() === "pdo-mysql" && $this->isInsert()) {

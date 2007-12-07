@@ -173,6 +173,7 @@ final class Sabel
     $CONTROLLER = $SABEL . "controller" . DS;
     $ANNOTATION = $SABEL . "annotation" . DS;
     $LOG        = $SABEL . "logger"     . DS;
+    $DB         = $SABEL . "db"         . DS;
     
     require ($BUS . "Config.php");
     require ($BUS . "Processor.php");
@@ -219,6 +220,11 @@ final class Sabel
     require ($LOG . "Interface.php");
     require ($LOG . "File.php");
     require ($LOG . "Null.php");
+    
+    require ($DB . "Config.php");
+    require ($DB . "Connection.php");
+    require ($DB . "Type.php");
+    require ($DB . "Statement.php");
     
     require ($SABEL . "storage"   . DS . "Session.php");
     require ($SABEL . "router"    . DS . "Map.php");

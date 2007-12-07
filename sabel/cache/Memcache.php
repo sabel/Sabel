@@ -20,15 +20,13 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
       $this->memcache->connect($server, 11211, true);
+    } else {
+      throw new Sabel_Exception_Runtime("memcache extension not loaded");
     }
   }
   
   public static function create($server = "localhost")
   {
-    if ($server === null) {
-      throw new Sabel_Exception_Runtime("server is null.");
-    }
-    
     if (self::$instance === null) {
       self::$instance = new self($server);
     }
@@ -38,20 +36,13 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
   
   public function read($key)
   {
-    try {
-      return $this->memcache->get($key);
-    } catch (Exception $e) {
-      // @todo
-    }
+    $result = $this->memcache->get($key);
+    return ($result === false) ? null : $result;
   }
   
   public function write($key, $value, $timeout = 600, $comp = false)
   {
-    try {
-      $this->memcache->add($key, $value, $comp, $timeout);
-    } catch (Exception $e) {
-      // @todo
-    }
+    $this->memcache->add($key, $value, $comp, $timeout);
   }
   
   public function delete($key)
