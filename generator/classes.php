@@ -31,9 +31,9 @@ class SabelDirectoryAndFileCreator
     
     if ($type === Sabel_Util_DirectoryTraverser::TYPE_DIR) {
       if (is_dir($element)) {
-        $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] ${element} already exists.");
+        Sabel_Sakle_Task::error("{$element} already exists.");
       } else {
-        $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
+        Sabel_Sakle_Task::success("create: {$element}");
         mkdir($element);
         $targets = array(RUN_BASE . DS . "data",
                          RUN_BASE . DS . "cache",
@@ -42,17 +42,17 @@ class SabelDirectoryAndFileCreator
                          
         if (in_array($element, $targets)) {
           if (chmod($element, 0777)) {
-            $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] chmod {$element}");
+            Sabel_Sakle_Task::success("chmod: {$element}");
           } else {
-            $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] chmod {$element}");
+            Sabel_Sakle_Task::error("chmod: {$element}");
           }
         }
       }
     } elseif ($type === Sabel_Util_DirectoryTraverser::TYPE_FILE) {
       if (!$this->overwrite && is_file($element)) {
-        $this->printMessage("[\x1b[1;31mFAILURE\x1b[m] ${element} already exists.");
+        Sabel_Sakle_Task::error("{$element} already exists.");
       } else {
-        $this->printMessage("[\x1b[1;32mSUCCESS\x1b[m] create: ${element}");
+        Sabel_Sakle_Task::success("create: {$element}");
         fwrite(fopen($element, "w"), file_get_contents($child));
         if ($element == RUN_BASE . DS . "logs/sabel.log" ||
             $element == RUN_BASE . DS . "config/connection.php") {
@@ -69,7 +69,7 @@ class SabelDirectoryAndFileCreator
   
   protected function printMessage($msg)
   {
-    if (!defined('TEST_CASE')) echo $msg."\n";
+    if (!defined("TEST_CASE")) echo $msg . PHP_EOL;
   }
 }
 

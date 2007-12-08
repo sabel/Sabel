@@ -1,13 +1,12 @@
 <?php
 
-require_once ("Sabel/Sabel.php");
 require_once ("classes.php");
 
 $args = $_SERVER["argv"];
 
 if (isset($args[1])) {
   if (strpos($args[1], "-") === false) {
-    $dir = getcwd() . DIR_DIVIDER . $args[1];
+    $dir = getcwd() . DS . $args[1];
   }
 } else {
   $dir = getcwd();
@@ -21,10 +20,9 @@ if (!is_dir(RUN_BASE)) {
   mkdir(RUN_BASE);
 }
 
-$pathToSabel = dirname(dirname($args[0]));
-$includePath = get_include_path();
-if (!in_array($pathToSabel, explode(":", $includePath))) {
-  set_include_path(get_include_path().":".$pathToSabel);
+$pathToSabel = Sabel::getPath();
+if (!in_array($pathToSabel, explode(PATH_SEPARATOR, get_include_path()))) {
+  set_include_path(get_include_path() . PATH_SEPARATOR . $pathToSabel);
 }
 
 $dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . "/skeleton");

@@ -20,12 +20,12 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   private static $headers = array(self::MSG_INFO => "[\x1b[1;32mSUCCESS\x1b[m]",
                                   self::MSG_WARN => "[\x1b[1;35mWARNING\x1b[m]",
                                   self::MSG_MSG  => "[\x1b[1;34mMESSAGE\x1b[m]",
-                                  self::MSG_ERR  => "[\x1b[1;31mERROR\x1b[m]");
+                                  self::MSG_ERR  => "[\x1b[1;31mFAILURE\x1b[m]");
                                   
   private static $winHeaders = array(self::MSG_INFO => "[SUCCESS]",
                                      self::MSG_WARN => "[WARNING]",
                                      self::MSG_MSG  => "[MESSAGE]",
-                                     self::MSG_ERR  => "[ERROR]");
+                                     self::MSG_ERR  => "[FAILURE]");
                                      
   abstract public function run($arguments);
   
