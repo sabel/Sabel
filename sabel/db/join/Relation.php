@@ -13,10 +13,12 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
 {
   protected $objects = array();
 
-  public function add($object)
+  public function add($object, $alias = "", $joinKey = array())
   {
-    if ($object instanceof Sabel_DB_Abstract_Model) {
-      $object = new Sabel_DB_Join_Object($object);
+    if (is_string($object)) {
+      $object = new Sabel_DB_Join_Object(MODEL($object), $alias, $joinKey);
+    } elseif ($object instanceof Sabel_DB_Abstract_Model) {
+      $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
     }
 
     $structure = Sabel_DB_Join_Structure::getInstance();
@@ -26,6 +28,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     $this->objects[] = $object;
 
     $structure->add($myName, $object->getName());
+    if (!empty($joinKey)) return $this;
 
     $name = $object->getModel()->getTableName();
     if ($fkey = $this->model->getSchema()->getForeignKey()) {

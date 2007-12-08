@@ -19,8 +19,12 @@ class Sabel_DB_Join_TemplateMethod extends Sabel_Object
     $aliasName  = "",
     $sourceName = "";
 
-  public function __construct($model, $columns = array(), $alias = "", $joinKey = array())
+  public function __construct($model, $alias = "", $joinKey = array())
   {
+    if (is_string($model)) {
+      $model = MODEL($model);
+    }
+
     $this->model   = $model;
     $this->tblName = $model->getTableName();
 
@@ -55,9 +59,7 @@ class Sabel_DB_Join_TemplateMethod extends Sabel_Object
 
   public function setJoinKey($joinKey)
   {
-    if (empty($this->joinKey)) {
-      $this->joinKey = $joinKey;
-    }
+    $this->joinKey = $joinKey;
   }
 
   public function setSourceName($name)

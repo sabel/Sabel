@@ -338,8 +338,8 @@ class Test_DB_Test extends SabelTestCase
     $executer->setConstraint("order", "Member.id ASC");
 
     $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"), null, "Msg");
-    $relation->add(new Sabel_DB_Join_Object(MODEL("MemberGroup"), null, "MemGrp"));
+    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"), "Msg");
+    $relation->add(new Sabel_DB_Join_Object(MODEL("MemberGroup"), "MemGrp"));
     $members = $join->add($relation)->join();
     $member1 = $members[0];
     $member2 = $members[1];
@@ -707,7 +707,7 @@ class Test_DB_Test extends SabelTestCase
     $executer = new Manipulator("Tree");
     $executer->setConstraint("order", "Tree.id ASC");
     $join = new Sabel_DB_Join($executer);
-    $join->add(new Sabel_DB_Join_Object(MODEL("Tree"), null, "Root"));
+    $join->add(new Sabel_DB_Join_Object(MODEL("Tree"), "Root"));
     $result = $join->join("LEFT");
 
     $this->assertEquals($result[0]->id, 1);

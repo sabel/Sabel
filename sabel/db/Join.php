@@ -36,18 +36,20 @@ class Sabel_DB_Join extends Sabel_Object
     $this->joinType = $joinType;
   }
 
-  public function add($object)
+  public function add($object, $alias = "", $joinKey = array())
   {
     if (is_string($object)) {
-      $object = new Sabel_DB_Join_Object(MODEL($object));
+      $object = new Sabel_DB_Join_Object(MODEL($object), $alias, $joinKey);
     } elseif ($object instanceof Sabel_DB_Abstract_Model) {
-      $object = new Sabel_DB_Join_Object($object);
+      $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
     }
 
     $object->setSourceName($this->tblName);
     $this->objects[] = $object;
     $this->structure->addJoinObject($object);
     $this->structure->add($this->tblName, $object->getName());
+
+    if (!empty($joinKey)) return $this;
 
     $name = $object->getModel()->getTableName();
     if ($fkey = $this->model->getSchema()->getForeignKey()) {
@@ -100,16 +102,20 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
 
-    $projection = array();
-    foreach ($this->objects as $object) {
-      $projection = array_merge($projection, $object->getProjection());
-    }
+    $projection = $this->manip->getProjection();
 
-    $model   = $this->model;
-    $tblName = $model->getTableName();
+    if (empty($projection)) {
+      $projection = array();
+      foreach ($this->objects as $object) {
+        $projection = array_merge($projection, $object->getProjection());
+      }
 
-    foreach ($model->getColumnNames() as $column) {
-      $projection[] = $tblName . "." . $column;
+      $model   = $this->model;
+      $tblName = $model->getTableName();
+
+      foreach ($model->getColumnNames() as $column) {
+        $projection[] = $tblName . "." . $column;
+      }
     }
 
     $query = array();

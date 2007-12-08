@@ -116,6 +116,11 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $this->projection = $projection;
   }
 
+  public function getProjection()
+  {
+    return $this->projection;
+  }
+
   public function loadConditionManager()
   {
     if ($this->conditionManager === null) {
