@@ -1,8 +1,9 @@
 <?php
 
-require ("PHPUnit/TextUI/TestRunner.php");
+require_once ("PHPUnit/TextUI/TestRunner.php");
+require_once ("PHPUnit/Framework/TestCase.php");
 
-class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
+class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
 {
   private $classPrefix = "Units_";
   
@@ -11,23 +12,21 @@ class Sabel_Test_ModelRunner extends PHPUnit_TextUI_TestRunner
     return new self();
   }
     
-  public function start($testName, $base)
+  public function start($testName, $testFilePath)
   {
-    $pathToTestCase = $base . DS . $testName . PHP_SUFFIX;
-    
-    if (is_readable($pathToTestCase)) {
+    if (is_readable($testFilePath)) {
       try {
         $testCaseName = $this->classPrefix . $testName;
-        $testSuite = $this->getTest($testCaseName, $pathToTestCase);
+        $testSuite = $this->getTest($testCaseName, $testFilePath);
         
         if ($testSuite instanceof PHPUnit_Framework_TestSuite) {
           $this->doRun($testSuite);
         }
       } catch (Exception $e) {
-        throw new Exception("Could not run test suite: " . $e->getMessage());
+        Sabel_Cli::error("could not run test suite: " . $e->getMessage());
       }
     } else {
-      throw new Exception($pathToTestCase . " not found");
+      Sabel_Cli::error($testFilePath . " not found");
     }
   }
   

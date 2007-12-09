@@ -24,13 +24,15 @@ abstract class Tests extends Sabel_Sakle_Task
   
   protected function getEnvironment()
   {
-    $index = array_search("-e", $this->arguments, true);
+    $args  = $this->arguments;
+    $index = array_search("-e", $args, true);
     if ($index === false) return TEST;
     
-    if (isset($this->arguments[$index + 1])) {
-      $environment = environment($this->arguments[$index + 1]);
-      unset($this->arguments[$index]);
-      unset($this->arguments[$index + 1]);
+    if (isset($args[$index + 1])) {
+      $environment = environment($args[$index + 1]);
+      unset($args[$index]);
+      unset($args[$index + 1]);
+      $this->arguments = array_values($args);
       return $environment;
     }
   }

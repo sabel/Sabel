@@ -50,7 +50,7 @@ class Generator extends Sabel_Sakle_Task
         $lines[] = "  array(";
         
         foreach ($columns as $column) {
-          $lines[] = "    \"{$column}\" => \"\",";
+          $lines[] = "    \"{$column}\" => \"{$column}\",";
         }
         
         $lines[] = "  )";

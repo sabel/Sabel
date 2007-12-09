@@ -1,32 +1,51 @@
 <?php
 
-if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-
-Sabel::fileUsing("config" . DS . "INIT.php", true);
 Sabel::fileUsing("tasks" . DS . "Tests.php", true);
 
 /**
- * UnitTest
+ * AddonTest
  *
+ * @category   Sakle
+ * @package    org.sabel.sakle
  * @author     Mori Reo <mori.reo@gmail.com>
+ *             Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class AddonTest extends Tests
-{  
+{
   public function run($arguments)
   {
-    $addonName = strtolower($arguments[1]);
-    $testName = $arguments[2];
-    $base = ADDON_DIR_PATH . DS . $addonName . DS . "tests";
+    if (count($this->arguments) === 1) {
+      $this->usage();
+      exit;
+    }
     
-    $loader = new Sabel_Addon_Loader(ADDON_DIR_PATH.DS, $addonName);
+    $addonName = strtolower($this->arguments[1]);
+    $runner = Sabel_Test_Runner::create();
+    $runner->setClassPrefix($addonName . "_Tests_");
+    
+    $testsDir = ADDON_DIR_PATH . DS . $addonName . DS . "tests";
+    $loader = new Sabel_Addon_Loader(ADDON_DIR_PATH, $addonName);
     $loader->load();
     
-    $mRunner = Sabel_Test_ModelRunner::create($base);
-    $mRunner->setClassPrefix("Css_Tests_");
-    
-    $mRunner->start($testName, $base);
-    echo "Complete: {$arguments[1]}\n";
+    if (count($this->arguments) === 2) {
+      foreach (scandir($testsDir) as $file) {
+        if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
+          $testName = str_replace(PHP_SUFFIX, "", $file);
+          $runner->start($testName, $testsDir . DS . $file);
+          $this->success("Complete: $testName");
+        }
+      }
+    } else {
+      $testName = $this->arguments[1];
+      $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
+      $this->success("Complete: $testName");
+    }
+  }
+  
+  public function usage()
+  {
+    echo "Usage: sakle AddonTest ADDON_NAME TEST_NAME" . PHP_EOL;
   }
 }

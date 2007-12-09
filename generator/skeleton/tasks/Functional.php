@@ -16,18 +16,23 @@ class Functional extends Tests
 {
   public function run($arguments)
   {
-    $fRunner = Sabel_Test_FunctionalRunner::create();
+    $runner = Sabel_Test_Runner::create();
+    $runner->setClassPrefix("Functional_");
+    
+    $testsDir = RUN_BASE . DS . "tests" . DS . "functional";
     
     if (count($this->arguments) === 1) {
-      foreach (scandir($fRunner->getTestsDirectory()) as $file) {
+      foreach (scandir($testsDir) as $file) {
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
-          $fRunner->start(str_replace(PHP_SUFFIX, "", $file));
-          $this->success("Complete: $file");
+          $testName = str_replace(PHP_SUFFIX, "", $file);
+          $runner->start($testName, $testsDir . DS . $file);
+          $this->success("Complete: $testName");
         }
       }
     } else {
-      $fRunner->start($arguments[1]);
-      $this->success("Complete: {$arguments[1]}");
+      $testName = $this->arguments[1];
+      $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
+      $this->success("Complete: {$testName}");
     }
   }
   

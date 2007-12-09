@@ -13,21 +13,26 @@ Sabel::fileUsing("tasks" . DS . "Tests.php", true);
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class UnitTest extends Tests
-{  
+{
   public function run($arguments)
   {
-    $mRunner = Sabel_Test_ModelRunner::create();
+    $runner = Sabel_Test_Runner::create();
+    $runner->setClassPrefix("Units_");
+    
+    $testsDir = RUN_BASE . DS . "tests" . DS . "units";
     
     if (count($this->arguments) === 1) {
-      foreach (scandir($mRunner->getTestsDirectory()) as $file) {
+      foreach (scandir($testsDir) as $file) {
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
-          $mRunner->start(str_replace(PHP_SUFFIX, "", $file));
-          $this->success("Complete: $file");
+          $testName = str_replace(PHP_SUFFIX, "", $file);
+          $runner->start($testName, $testsDir . DS . $file);
+          $this->success("Complete: $testName");
         }
       }
     } else {
-      $mRunner->start($arguments[1]);
-      $this->success("Complete: {$arguments[1]}");
+      $testName = $this->arguments[1];
+      $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
+      $this->success("Complete: $testName");
     }
   }
   

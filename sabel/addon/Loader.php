@@ -40,7 +40,7 @@ class Sabel_Addon_Loader extends Sabel_Object
         $switch = $addon->load();
       }
     } else {
-      throw new Exception($pathToAddonClass . " not readable");
+      throw new Sabel_Exception_Runtime($pathToAddonClass . " not readable");
     }
     
     if ($switch && $this->bus !== null) {
