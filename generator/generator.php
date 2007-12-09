@@ -1,7 +1,7 @@
 <?php
 
-require_once ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
-require_once ("classes.php");
+require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
+require ("classes.php");
 
 $args = $_SERVER["argv"];
 

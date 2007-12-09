@@ -1,4 +1,0 @@
-<?php
-
-require("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
-require("Sabel" . DIRECTORY_SEPARATOR . "generator" . DIRECTORY_SEPARATOR . "generator.php");
