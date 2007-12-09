@@ -1,5 +1,6 @@
 <?php
 
+require_once ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 require_once ("classes.php");
 
 $args = $_SERVER["argv"];
@@ -21,11 +22,13 @@ if (!is_dir(RUN_BASE)) {
 }
 
 $pathToSabel = Sabel::getPath();
-if (!in_array($pathToSabel, explode(PATH_SEPARATOR, get_include_path()))) {
-  set_include_path(get_include_path() . PATH_SEPARATOR . $pathToSabel);
+$includePath = get_include_path();
+
+if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
+  set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
 }
 
-$dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . "/skeleton");
+$dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . DIRECTORY_SEPARATOR . "skeleton");
 $aCreator = new SabelDirectoryAndFileCreator();
 
 for ($i = 0, $count = count($args); $i < $count; ++$i) {

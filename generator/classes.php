@@ -31,9 +31,9 @@ class SabelDirectoryAndFileCreator
     
     if ($type === Sabel_Util_DirectoryTraverser::TYPE_DIR) {
       if (is_dir($element)) {
-        Sabel_Sakle_Task::error("{$element} already exists.");
+        Sabel_Cli::error("{$element} already exists.");
       } else {
-        Sabel_Sakle_Task::success("create: {$element}");
+        Sabel_Cli::success("create: {$element}");
         mkdir($element);
         $targets = array(RUN_BASE . DS . "data",
                          RUN_BASE . DS . "cache",
@@ -42,17 +42,17 @@ class SabelDirectoryAndFileCreator
                          
         if (in_array($element, $targets)) {
           if (chmod($element, 0777)) {
-            Sabel_Sakle_Task::success("chmod: {$element}");
+            Sabel_Cli::success("chmod: {$element}");
           } else {
-            Sabel_Sakle_Task::error("chmod: {$element}");
+            Sabel_Cli::error("chmod: {$element}");
           }
         }
       }
     } elseif ($type === Sabel_Util_DirectoryTraverser::TYPE_FILE) {
       if (!$this->overwrite && is_file($element)) {
-        Sabel_Sakle_Task::error("{$element} already exists.");
+        Sabel_Cli::error("{$element} already exists.");
       } else {
-        Sabel_Sakle_Task::success("create: {$element}");
+        Sabel_Cli::success("create: {$element}");
         fwrite(fopen($element, "w"), file_get_contents($child));
         if ($element == RUN_BASE . DS . "logs/sabel.log" ||
             $element == RUN_BASE . DS . "config/connection.php") {

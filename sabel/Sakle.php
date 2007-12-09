@@ -1,6 +1,6 @@
 <?php
 
-require_once ("Sabel/Sabel.php");
+require_once ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 define("RUN_BASE", getcwd());
 Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
 
@@ -53,10 +53,10 @@ class Sakle
           $ins->finalize();
         }
       } catch (Exception $e) {
-        Sabel_Sakle_Task::error($e->getMessage());
+        Sabel_Cli::error($e->getMessage());
       }
     } else {
-      Sabel_Sakle_Task::error("such a task doesn't exist.");
+      Sabel_Cli::error("such a task doesn't exist.");
     }
   }
   

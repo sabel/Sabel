@@ -27,9 +27,11 @@ class Migration extends Sabel_Sakle_Task
     
     if ($this->isHelp()) {
       $this->usage();
+      exit;
     } elseif (count($arguments) < 3) {
       $this->error("to few arguments.");
       $this->usage();
+      exit;
     }
     
     $environment = $this->getEnvironment();
