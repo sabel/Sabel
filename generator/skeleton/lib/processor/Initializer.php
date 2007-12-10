@@ -13,6 +13,13 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
+    $libdb = RUN_BASE . DS . LIB_DIR_NAME . DS . "db";
+    $files = array("utility", "validators", "maxmin");
+    
+    foreach ($files as $file) {
+      Sabel::fileUsing($libdb . DS . $file . PHP_SUFFIX, true);
+    }
+    
     Sabel_DB_Config::initialize();
     
     // creates or resumes session.

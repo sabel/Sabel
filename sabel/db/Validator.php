@@ -107,13 +107,17 @@ class Sabel_DB_Validator extends Sabel_Object
         continue;
       }
 
-      if ($column->isString() && !$this->length($column)) {
-        $message = $this->errorMessage($name, "maxlength");
-        $this->errors[] = str_replace("%MAX%", $column->max, $message);
-        continue;
+      if ($column->isString()) {
+        if (!$this->length($column, "max")) {
+          $message = $this->errorMessage($name, "maxlength");
+          $this->errors[] = str_replace("%MAX%", $column->max, $message);
+          continue;
+        } elseif (!$this->length($column, "min")) {
+          $message = $this->errorMessage($name, "minlength");
+          $this->errors[] = str_replace("%MIN%", $column->min, $message);
+          continue;
+        }
       }
-
-      // @todo minlength
 
       if ($column->isNumeric() && $column->value !== null) {
         if (!$this->maximum($column)) {
@@ -178,7 +182,7 @@ class Sabel_DB_Validator extends Sabel_Object
     }
   }
 
-  protected function length($column)
+  protected function length($column, $max_or_min)
   {
     static $func = "";
 
@@ -186,7 +190,11 @@ class Sabel_DB_Validator extends Sabel_Object
       $func = (extension_loaded("mbstring")) ? "mb_strlen" : "strlen";
     }
 
-    return ($func($column->value) <= $column->max);
+    if ($max_or_min === "max") {
+      return ($func($column->value) <= $column->max);
+    } else {
+      return ($func($column->value) >= $column->min);
+    }
   }
 
   protected function maximum($column)
