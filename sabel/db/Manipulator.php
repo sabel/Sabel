@@ -463,7 +463,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
   protected function chooseValues($data, $method)
   {
     if (isset($data) && !is_array($data)) {
-      throw new Sabel_DB_Exception("{$method}() argument should be an array.");
+      throw new Sabel_Exception_InvalidArgument("argument should be an array.");
     } else {
       $data = ($data === null) ? $this->model->toArray() : $data;
 

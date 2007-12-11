@@ -3,6 +3,7 @@
 /**
  * Sabel_Bus_Processor
  *
+ * @abstract
  * @category   Bus
  * @package    org.sabel.bus
  * @author     Mori Reo <mori.reo@gmail.com>
@@ -14,10 +15,12 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   public $name;
   protected $bus = null;
   
+  abstract public function execute($bus);
+  
   public function __construct($name = null)
   {
     if ($name === null || $name === "") {
-      throw new Sabel_Exception_Runtime("name must be set");
+      throw new Sabel_Exception_InvalidArgument("name must be set.");
     }
     
     $this->name = $name;
@@ -27,8 +30,6 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   {
     $this->bus = $bus;
   }
-  
-  abstract public function execute($bus);
   
   protected function __get($name)
   {

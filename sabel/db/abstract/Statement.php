@@ -44,7 +44,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($query)) {
       $this->query = $query;
     } else {
-      throw new Sabel_DB_Statement_Exception("setQuery() argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
 
     return $this;
@@ -67,7 +67,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       $connectionName = $this->driver->getConnectionName();
       $this->schema   = Sabel_DB_Schema::getTableSchema($table, $connectionName);
     } else {
-      throw new Sabel_DB_Statement_Exception("table() argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
 
     return $this;
@@ -85,7 +85,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($join)) {
       $this->join = $join;
     } else {
-      throw new Sabel_DB_Statement_Exception("join() argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
 
     return $this;
@@ -96,7 +96,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($where)) {
       $this->where = $where;
     } else {
-      throw new Sabel_DB_Statement_Exception("where() argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
 
     return $this;
@@ -134,7 +134,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } elseif (is_string($seqColumn)) {
       $this->seqColumn = $seqColumn;
     } else {
-      throw new Sabel_DB_Statement_Exception("sequenceColumn() argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
 
     return $this;

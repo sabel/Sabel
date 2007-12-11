@@ -25,7 +25,7 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
         $this->array = $array;
         $this->count = count($array);
       } else {
-        throw new Sabel_Exception_Runtime("invalid argument.");
+        throw new Sabel_Exception_InvalidArgument("invalid argument.");
       }
     }
   }

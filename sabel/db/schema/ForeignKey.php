@@ -20,7 +20,7 @@ class Sabel_DB_Schema_ForeignKey extends Sabel_Object
     if (is_array($fkeys)) {
       $this->fkeys = $fkeys;
     } else {
-      throw new Sabel_DB_Exception("argument must be an array.");
+      throw new Sabel_Exception_InvalidArgument("argument must be an array.");
     }
   }
   

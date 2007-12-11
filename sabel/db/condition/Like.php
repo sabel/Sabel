@@ -49,7 +49,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
     if ($type >= 1 && $type <= 3) {
       $this->type = $type;
     } else {
-      throw new Sabel_DB_Exception("invalid type.");
+      throw new Sabel_Exception_InvalidArgument("invalid type.");
     }
     
     return $this;
@@ -60,7 +60,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
     if (is_bool($bool)) {
       $this->escape = $bool;
     } else {
-      throw new Sabel_DB_Exception("argument must be a string.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a boolean.");
     }
     
     return $this;
