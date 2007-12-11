@@ -3,6 +3,7 @@
 /**
  * Sabel_Response
  *
+ * @interface
  * @category   Response
  * @package    org.sabel.response
  * @author     Mori Reo <mori.reo@gmail.com>

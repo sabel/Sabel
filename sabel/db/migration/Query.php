@@ -14,35 +14,37 @@ class Sabel_DB_Migration_Query
   private
     $upgradeQueries   = array(),
     $downgradeQueries = array();
-
+    
   public function upgrade($query)
   {
     if (is_string($query)) {
       $this->upgradeQueries[] = $query;
     } else {
-      Sabel_Sakle_Task::error("query should be a string.");
+      Sabel_Cli::error("query should be a string.");
       exit;
     }
   }
-
+  
   public function downgrade($query)
   {
     if (is_string($query)) {
       $this->downgradeQueries[] = $query;
     } else {
-      Sabel_Sakle_Task::error("query should be a string.");
+      Sabel_Cli::error("query should be a string.");
       exit;
     }
   }
-
+  
   public function execute()
   {
-    $mode   = Sabel_DB_Migration_Manager::getApplyMode();
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+      $queries = $this->upgradeQueries;
+    } else {
+      $queries = $this->downgradeQueries;
+    }
+    
     $driver = Sabel_DB_Migration_Manager::getDriver();
-
-    $queries = ($mode === "upgrade") ? $this->upgradeQueries
-                                     : $this->downgradeQueries;
-
+    
     foreach ($queries as $query) {
       $driver->execute($query);
     }

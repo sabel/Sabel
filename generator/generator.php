@@ -1,5 +1,7 @@
 <?php
 
+if (!defined("TEST_CASE")) {
+
 require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 require ("classes.php");
 
@@ -28,6 +30,7 @@ if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
   set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
 }
 
+
 $dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . DIRECTORY_SEPARATOR . "skeleton");
 $aCreator = new SabelDirectoryAndFileCreator();
 
@@ -55,3 +58,5 @@ for ($i = 0, $count = count($args); $i < $count; ++$i) {
 
 $dt->visit($aCreator);
 $dt->traverse();
+
+}

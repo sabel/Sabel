@@ -3,6 +3,7 @@
 /**
  * Sabel_Router
  *
+ * @interface
  * @category   Router
  * @package    org.sabel.router
  * @author     Mori Reo <mori.reo@gmail.com>

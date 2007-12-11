@@ -28,22 +28,22 @@ class Sabel_Cli
                                      
   public static function success($msg)
   {
-    echo self::getHeader(self::MSG_INFO) . ": $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_INFO) . " $msg" . PHP_EOL;
   }
   
   public static function warning($msg)
   {
-    echo self::getHeader(self::MSG_WARN) . ": $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_WARN) . " $msg" . PHP_EOL;
   }
   
   public static function message($msg)
   {
-    echo self::getHeader(self::MSG_MSG) . ": $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_MSG) . " $msg" . PHP_EOL;
   }
   
   public static function error($msg)
   {
-    echo self::getHeader(self::MSG_ERR) . ": $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_ERR) . " $msg" . PHP_EOL;
   }
   
   private static function getHeader($type)

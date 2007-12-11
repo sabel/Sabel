@@ -10,12 +10,7 @@ class Test_VirtualInheritance extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_VirtualInheritance");
-  }
-  
-  public function __construct()
-  {
-    
+    return self::createSuite("Test_VirtualInheritance");
   }
   
   public function testVirtualInheritance()

@@ -25,9 +25,7 @@ class Sabel_DB_Migration_Custom
 
   public function execute($migClassName, $version, $file)
   {
-    $type = Sabel_DB_Migration_Manager::getApplyMode();
-
-    if ($type === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       $this->prepareUpgrade($file);
       $this->doUpgrade($migClassName, $version);
     } else {

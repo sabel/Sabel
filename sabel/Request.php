@@ -3,6 +3,7 @@
 /**
  * Sabel_Request
  *
+ * @interface
  * @category   Request
  * @package    org.sabel.request
  * @author     Mori Reo <mori.reo@gmail.com>
@@ -14,7 +15,7 @@ interface Sabel_Request
   const GET    = "GET";
   const POST   = "POST";
   const PUT    = "PUT";
-  const delete = "DELETE";
+  const DELETE = "DELETE";
   
   public function getParameters();
   public function getPostRequests();
