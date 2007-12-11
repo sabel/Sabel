@@ -63,11 +63,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function setup($request, $destination, $storage = null)
   {
     if (!$request instanceof Sabel_Request_Object) {
-      throw new Sabel_Exception_Runtime("invalid request object");
+      throw new Sabel_Exception_InvalidArgument("invalid request object");
     }
     
     if (!$destination instanceof Sabel_Destination) {
-      throw new Sabel_Exception_Runtime("invalid destination object");
+      throw new Sabel_Exception_InvalidArgument("invalid destination object");
     }
     
     $this->request     = $request;

@@ -29,26 +29,27 @@ class Sabel_View_Pager extends Sabel_Object
   
   public function __set($key, $value)
   {
-    $method = 'set' . ucfirst($key);
+    $method = "set" . ucfirst($key);
     if (method_exists($this, $method)) $this->$method($value);
   }
   
   public function __get($key)
   {
-    $method = 'get' . ucfirst($key);
+    $method = "get" . ucfirst($key);
     if (method_exists($this, $method)) return $this->$method();
   }
   
   public function __call($key, $args)
   {
-    $method = 'set' . ucfirst($key);
+    $method = "set" . ucfirst($key);
     if (method_exists($this, $method)) $this->$method($args[0]);
   }
   
   public function setNumberOfItem($item)
   {
-    if ($item < 0 || !is_numeric($item))
-      throw new Sabel_Exception_Runtime('invalid number of item : ' . $item);
+    if ($item < 0 || !is_numeric($item)) {
+      throw new Sabel_Exception_InvalidArgument("invalid number of item: " . $item);
+    }
     
     $this->numberOfItem =(int) $item;
   }

@@ -61,7 +61,10 @@ class Form_Processor extends Sabel_Bus_Processor
     } elseif (is_string($model)) {
       $mdlName = $model;
     } else {
-      throw new Sabel_Exception_Runtime("invalid argument type.");
+      $message = "invalid argument(1) type. "
+               . "must be a string or instance of Sabel_DB_Abstract_Model.";
+               
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
     $name = lcfirst($mdlName) . "Form";

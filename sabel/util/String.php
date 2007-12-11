@@ -23,7 +23,7 @@ class Sabel_Util_String extends Sabel_Object
       $this->string = $string;
       $this->length = strlen($string);
     } else {
-      throw new Sabel_Exception_Runtime("invalid argument.");
+      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
   }
   
