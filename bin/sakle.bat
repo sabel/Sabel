@@ -2,7 +2,6 @@
 
 if "%OS%"=="Windows_NT" @setlocal
 
-set SCRIPT_DIR=%~dp0
 set SABEL=c:\php\includes\Sabel
 
 goto init
