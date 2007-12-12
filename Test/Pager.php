@@ -71,12 +71,12 @@ class Test_Pager extends SabelTestCase
     try {
       $pager->setNumberOfItem(-1);
       $this->fail('set number of item method not thrown.');
-    } catch (Sabel_Exception_Runtime $e) {}
+    } catch (Sabel_Exception_InvalidArgument $e) {}
     
     try {
       $pager->setNumberOfItem('a');
       $this->fail('set number of item method not thrown.');
-    } catch (Sabel_Exception_Runtime $e) {}
+    } catch (Sabel_Exception_InvalidArgument $e) {}
     
     $pager->setLimit('a');
     $pager->setPageNumber('a');

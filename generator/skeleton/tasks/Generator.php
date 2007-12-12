@@ -60,11 +60,111 @@ class Generator extends Sabel_Sakle_Task
         $lines[] = "  ";
         $lines[] = "}";
         
+        $this->success("create model {$mdlName}");
         $fp = fopen($filePath, "w");
         fwrite($fp, implode(PHP_EOL, $lines));
         fclose($fp);
       }
     }
+  }
+  
+  private function generateController()
+  {
+    $argc = count($this->arguments);
+    
+    if ($argc === 3) {
+      $module = "Index";
+      $method = "create";
+      $controller = $this->arguments[2];
+    } elseif ($argc === 4) {
+      $module = $this->arguments[2];
+      $controller = $this->arguments[3];
+      $method = "create";
+    } elseif ($argc === 5) {
+      $module = $this->arguments[2];
+      $controller = $this->arguments[3];
+      $method = $this->arguments[4];
+    } else {
+      $this->error("too many arguments");
+      $this->usage();
+      exit;
+    }
+    
+    $clsName = ucfirst($module) . "_Controllers_" . $controller;
+    
+    $mPath = MODULES_DIR_PATH . DS . lcfirst($module);
+    if (!is_dir($mPath)) mkdir($mPath);
+    
+    $cPath = $mPath . DS . "controllers";
+    if (!is_dir($cPath)) mkdir($cPath);
+    
+    $vPath = $mPath . DS . VIEW_DIR_NAME;
+    if (!is_dir($vPath)) mkdir($vPath);
+    
+    $filePath = $cPath . DS . $controller . PHP_SUFFIX;
+    if (is_file($filePath)) {
+      $this->error("controller $controller already exists.");
+      exit;
+    }
+    
+    $prefixes = array(""         => "create",
+                      "correct"  => "confirm",
+                      "confirm"  => "do",
+                      "do"       => "complete",
+                      "complete" => "");
+                      
+    $code = array();
+    $code[] = "<?php";
+    $code[] = "";
+    $code[] = "/**";
+    $code[] = " * @executer flow";
+    $code[] = " */";
+    $code[] = "class $clsName extends Flow_Page";
+    $code[] = "{";
+    
+    $i = 0;
+    $last = count($prefixes) - 1;
+    $tpls = array();
+    
+    foreach ($prefixes as $m => $next) {
+      $name = ($m === "") ? $method : $m . ucfirst($method);
+      $tpls[] = $name;
+      $code[] = "  /**";
+      
+      if ($next === "") {
+        $code[] = "   * @end flow";
+        $code[] = "   */";
+        $code[] = "  public function $name()";
+        $code[] = "  {";
+        $code[] = "  }";
+        $code[] = "}";
+      } else {
+        if ($m === "") {
+          $code[] = "   * @flow start";
+        }
+        
+        $code[] = "   * @next {$next}" . ucfirst($method);
+        $code[] = "   */";
+        $code[] = "  public function {$name}()";
+        $code[] = "  {";
+        $code[] = "  }";
+        $code[] = "  ";
+      }
+      
+      $i++;
+    }
+    
+    $tplDir = $vPath . DS . lcfirst($controller);
+    if (!is_dir($tplDir)) mkdir ($tplDir);
+    
+    foreach ($tpls as $tpl) {
+      $tplPath = $tplDir . DS . $tpl . TPL_SUFFIX;
+      file_put_contents($tplPath, PHP_EOL);
+      $this->success("create template $tpl" . TPL_SUFFIX);
+    }
+    
+    file_put_contents($filePath, implode(PHP_EOL, $code));
+    $this->success("create controller $clsName");
   }
   
   private function getEnvironment($arguments)

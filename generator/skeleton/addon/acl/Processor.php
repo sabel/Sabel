@@ -82,7 +82,7 @@ class Acl_Processor extends Sabel_Bus_Processor
       $role = $this->reflection->getAnnotation("role");
       return $role[0][0];
     } else {
-      return "default";
+      return null;
     }
   }
   

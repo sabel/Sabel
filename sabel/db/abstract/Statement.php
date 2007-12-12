@@ -185,6 +185,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     foreach ($values as $key => $val) {
       $binds[$prefix . $key . $suffix] = $val;
     }
+
+    return $this;
   }
 
   public function getBindValues()
