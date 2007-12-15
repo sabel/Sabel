@@ -102,22 +102,22 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $this->response->setContentType("text/css");
     }
     
-     if ($this->isReserved($action)) {
-       $this->response->notfound();
-     } elseif ($this->isCallable($action) && $this->isActionExists($action)) {
-       $this->response->success();
-       if (count($params) >= 1) {
-         call_user_func_array(array($this, $action), $params);
-       } else {
-         $this->$action();
-       }
-
-       $this->executed = true;
-     } else {
-       $this->response->notfound();
-     }
-     
-     return $this;
+    if ($this->isReserved($action)) {
+      $this->response->notfound();
+    } elseif ($this->isHiddenAction($action)) {
+      $this->response->notfound();
+    } elseif ($this->isActionExists($action)) {
+      $this->response->success();
+      if (count($params) >= 1) {
+        call_user_func_array(array($this, $action), $params);
+      } else {
+        $this->$action();
+      }
+      
+      $this->executed = true;
+    }
+    
+    return $this;
   }
   
   public function isExecuted()
@@ -130,18 +130,14 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return in_array($action, $this->reserved);
   }
   
-  private function isCallable($action)
+  private function isHiddenAction($action)
   {
-    return (!in_array($action, $this->hidden));
+    return in_array($action, $this->hidden);
   }
   
   private function isActionExists($action)
   {
-    if ($this->hasMethod($action)) {
-      return is_callable(array($this, $action));
-    } else {
-      return false;
-    }
+    return ($this->hasMethod($action) && is_callable(array($this, $action)));
   }
   
   /**

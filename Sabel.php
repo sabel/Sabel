@@ -181,6 +181,7 @@ final class Sabel
     
     require ($CACHE . "Manager.php");
     require ($CACHE . "Interface.php");
+    require ($CACHE . "Apc.php");
     require ($CACHE . "Null.php");
     
     require ($MAP . "Candidate.php");

@@ -15,11 +15,11 @@ class Processor_Exception extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $this->response = $bus->get("response");
+    $this->response = $this->controller->getResponse();
     
     if ($this->response->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();
-      if (!is_object($exception)) return true;
+      if (!is_object($exception)) return;
       
       $eol = $this->getEol();
       $msg = "ERROR: " . $exception->getMessage() . $eol . $eol
@@ -27,8 +27,6 @@ class Processor_Exception extends Sabel_Bus_Processor
            
       $this->exception($msg);
     }
-    
-    return true;
   }
   
   protected function getReadableTrace($traces, $eol)

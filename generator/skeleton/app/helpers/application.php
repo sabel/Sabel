@@ -46,6 +46,22 @@ function css($file)
   }
 }
 
+function form_start($uri, $class = null, $id = null, $name = null)
+{
+  $html = '<form action="' . uri($uri) . '" method="post" ';
+  
+  if ($id    !== null) $html .= 'id="'    . $id    . '" ';
+  if ($class !== null) $html .= 'class="' . $class . '" ';
+  if ($name  !== null) $html .= 'name="'  . $name  . '" ';
+  
+  return $html . '><fieldset class="formField">' . PHP_EOL;
+}
+
+function form_end()
+{
+  return "</fieldset></form>";
+}
+
 function h($content)
 {
   return htmlspecialchars($content);

@@ -22,12 +22,7 @@ class Processor_Executer extends Sabel_Bus_Processor
     } catch (Exception $e) {
       l($e->getMessage());
       $this->response->serverError();
-      if (ENVIRONMENT === PRODUCTION) {
-        $this->destination->setAction("invalid");
-      } else {
-        $this->destination->setAction("serverError");
-      }
-      
+      $this->destination->setAction("serverError");
       Sabel_Context::getContext()->setException($e);
     }
   }

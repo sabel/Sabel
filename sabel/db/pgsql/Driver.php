@@ -77,7 +77,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   {
     $sql = $this->bind($sql, $bindParams);
     $result = pg_query($this->connection, $sql);
-    if (!$result) $this->executeError($result, $sql);
+    if (!$result) $this->executeError($sql);
 
     $rows = array();
     if (is_resource($result)) {
@@ -94,9 +94,9 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     return $rows[0]["id"];
   }
 
-  private function executeError($result, $sql)
+  private function executeError($sql)
   {
-    $error = pg_result_error($result);
+    $error = pg_last_error($this->connection);
     $message = "pgsql driver execute failed: $error, SQL: $sql";
     throw new Sabel_DB_Driver_Exception($message);
   }

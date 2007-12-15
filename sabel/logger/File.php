@@ -88,6 +88,8 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
         return "info";
       case LOG_DEBUG:
         return "debug";
+      case LOG_ERR:
+        return "error";
     }
   }
 }

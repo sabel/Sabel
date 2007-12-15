@@ -13,51 +13,56 @@ class Processor_Renderer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $redirector = $this->controller->getAttribute("redirect");
+    $controller = $this->controller;
+    $redirector = $controller->getAttribute("redirect");
     if ($redirector->isRedirected()) return;
     
     $responses = $this->response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
     
-    if ($this->controller->hasAttribute("renderText")) {
-      $this->result = $renderer->rendering($this->controller->contents, $responses);
+    if ($controller->hasAttribute("renderText")) {
+      $this->result = $renderer->rendering($controller->contents, $responses);
       return;
-    } elseif ($this->controller->hasAttribute("renderImage")) {
-      $this->result = $this->controller->contents;
+    } elseif ($controller->hasAttribute("renderImage")) {
+      $this->result = $controller->contents;
       return;
+    }
+    
+    if ($this->response->isNotFound()) {
+      $this->destination->setAction("notFound");
+    } elseif ($this->response->isServerError()) {
+      $this->destination->setAction("serverError");
     }
     
     if (($resource = $this->repository->find())) {
       $contents = $renderer->rendering($resource->fetch(), $responses);
+    } elseif ($controller->isExecuted()) {
+      $contents = $controller->contents;
+      if ($contents === null) $contents = "";
     } else {
       $resource = $this->repository->find("notFound");
       if (is_object($resource)) {
         $contents = $renderer->rendering($resource->fetch(), $responses);
       } else {
-        $msg = "<h1>404 Not Found</h1>";
-        $msg .= "setup your notFound.tpl to module directory";
-        $contents = $msg;
+        $contents = "<h1>404 Not Found</h1>"
+                  . "setup your notFound.tpl to module directory.";
       }
     }
     
-    $layoutName = $this->controller->getAttribute("layout");
-    if ($layoutName === "none") {
-      $this->result = $contents;
-      return;
-    }
+    $layoutName = $controller->getAttribute("layout");
     
-    $layoutName = $this->controller->getAttribute("layout");
-    if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
-    
-    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      $this->result = $contents;
-    } elseif (isset($contents)) {
-      $layout = $this->repository->find($layoutName);
-      if (is_object($layout)) {
-        $responses["contentForLayout"] = $contents;
-        $this->result = $renderer->rendering($layout->fetch(), $responses);
-      } else {
+    if (isset($contents)) {
+      if ($layoutName === "none" || isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
         $this->result = $contents;
+      } else {
+        if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
+        $layout = $this->repository->find($layoutName);
+        if (is_object($layout)) {
+          $responses["contentForLayout"] = $contents;
+          $this->result = $renderer->rendering($layout->fetch(), $responses);
+        } else {
+          $this->result = $contents;
+        }
       }
     }
   }
