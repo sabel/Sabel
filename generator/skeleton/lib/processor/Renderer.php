@@ -20,10 +20,10 @@ class Processor_Renderer extends Sabel_Bus_Processor
     $responses = $this->response->getResponses();
     $renderer  = new Sabel_View_Renderer_Class();
     
-    if ($controller->hasAttribute("renderText")) {
+    if ($controller->renderText) {
       $this->result = $renderer->rendering($controller->contents, $responses);
       return;
-    } elseif ($controller->hasAttribute("renderImage")) {
+    } elseif ($controller->renderImage) {
       $this->result = $controller->contents;
       return;
     }

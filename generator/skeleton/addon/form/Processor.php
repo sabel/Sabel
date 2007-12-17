@@ -11,11 +11,12 @@
  */
 class Form_Processor extends Sabel_Bus_Processor
 {
-  const SESSION_KEY = "forms";
+  const SESSION_KEY = "sbl_forms";
   
   private
-    $forms  = array(),
-    $formId = null;
+    $forms   = array(),
+    $token   = null,
+    $unityId = null;
   
   public function execute($bus)
   {
@@ -25,30 +26,21 @@ class Form_Processor extends Sabel_Bus_Processor
     $this->response = $controller->getResponse();
     $controller->setAttribute("form", $this);
     
-    if (!$controller->hasMethod($action)) {
-      return $this->delete();
-    }
+    if (!$controller->hasMethod($action)) return;
     
     $reflection = $controller->getReflection();
     $annot = $reflection->getMethodAnnotation($action, "unity");
     
-    if ($annot === null) {
-      $this->delete();
-    } else {
-      $formId = $annot[0][0];
-      $this->formId = $formId;
-      if (isset($this->forms[$formId])) {
-        if ($this->request->isPost()) {
-          $this->postProcess();
-        }
-        $this->restoreForms();
-      }
-      
-      if (isset($this->forms)) {
-        foreach (array_keys($this->forms) as $key) {
-          if ($formId !== $key) $this->delete($key);
-        }
-      }
+    if ($annot === null || !isset($annot[0][0])) return;
+    
+    $this->unityId = $unityId = $annot[0][0];
+    $this->token = $token = $this->request->getToken()->getValue();
+    if (realempty($token)) return;
+    
+    if (isset($this->forms[$unityId][$token])) {
+      $form = $this->forms[$unityId][$token];
+      $this->applyPostValues($form);
+      $controller->setAttribute($form->getName(), $form);
     }
   }
   
@@ -56,54 +48,36 @@ class Form_Processor extends Sabel_Bus_Processor
   {
     if ($as !== null) {
       $mdlName = $as;
-    } elseif ($model instanceof Sabel_DB_Abstract_Model) {
+    } elseif (is_model($model)) {
       $mdlName = $model->getName();
     } elseif (is_string($model)) {
       $mdlName = $model;
     } else {
       $message = "invalid argument(1) type. "
-               . "must be a string or instance of Sabel_DB_Abstract_Model.";
+               . "must be a string or instance of model.";
                
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    $name = lcfirst($mdlName) . "Form";
-    $formId = $this->formId;
-    
-    if ($formId === null) {
+    if ($this->unityId === null) {
       $form = new Form_Object($model);
-    } elseif (isset($this->forms[$formId][$name])) {
-      $form = $this->forms[$formId][$name];
+      $this->controller->setAttribute($form->getName(), $form);
     } else {
-      $form = new Form_Object($model);
-      $this->forms[$formId][$name] = $form;
+      $token = $this->request->getToken()->createValue();
+      $form = new Form_Object($model, $token);
+      $this->forms[$this->unityId][$token] = $form;
+      $this->controller->setAttribute($form->getName(), $form);
     }
-    
-    $this->response->setResponse($name, $form);
-    $this->controller->setAttribute($name, $form);
     
     return $form;
   }
   
-  public function getForms()
+  public function clear()
   {
-    $formId = $this->formId;
-    
-    if ($formId !== null && isset($this->forms[$formId])) {
-      return $this->forms[$formId];
-    } else {
-      return null;
-    }
-  }
-  
-  public function delete($formId = null)
-  {
-    if ($formId !== null) {
-      unset($this->forms[$formId]);
-    } elseif ($this->formId !== null) {
-      unset($this->forms[$this->formId]);
-    } else {
-      $this->forms = array();
+    $unityId = $this->unityId;
+    $token = $this->request->getToken()->getValue();
+    if ($unityId !== null || !realempty($token)) {
+      unset($this->forms[$unityId][$token]);
     }
   }
   
@@ -112,21 +86,7 @@ class Form_Processor extends Sabel_Bus_Processor
     $this->storage->write(self::SESSION_KEY, $this->forms);
   }
   
-  private function postProcess()
-  {
-    $formId = $this->formId;
-    $forms  = $this->forms[$formId];
-    
-    foreach ($forms as $name => $form) {
-      $form = $this->setPostValues($form);
-      $form->unsetErrors();
-      $forms[$name] = $form;
-    }
-    
-    $this->forms[$formId] = $forms;
-  }
-  
-  public function setPostValues($form)
+  public function applyPostValues($form)
   {
     $values = $this->request->fetchPostValues();
     if (empty($values)) return $form;
@@ -181,6 +141,11 @@ class Form_Processor extends Sabel_Bus_Processor
     return $form;
   }
   
+  public function setPostValues($form)
+  {
+    return $this->applyPostValues($form);
+  }
+  
   private function isEmptyDateValues($values, $isDatetime = true)
   {
     $keys = array("year", "month", "day");
@@ -194,19 +159,5 @@ class Form_Processor extends Sabel_Bus_Processor
     }
     
     return true;
-  }
-  
-  private function restoreForms()
-  {
-    $forms = $this->forms[$this->formId];
-    foreach ($forms as $name => $form) {
-      $this->controller->setAttribute($name, $form);
-      $this->setResponse($form, $name);
-    }
-  }
-  
-  private function setResponse($form, $name)
-  {
-    $this->response->setResponse($name, $form);
   }
 }

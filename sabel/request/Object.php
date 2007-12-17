@@ -19,13 +19,17 @@ class Sabel_Request_Object extends Sabel_Object
   const ST_SET_PARAM = 4;
   
   private $status = self::ST_NO_INIT;
-  
   private $variableHolder = array();
   
   /**
    * @var Sabel_Request_Uri
    */
   private $uri = null;
+  
+  /**
+   * @var Sabel_Request_Token
+   */
+  private $token = null;
   
   /**
    * @var Sabel_Request_Parameters
@@ -323,6 +327,22 @@ class Sabel_Request_Object extends Sabel_Object
     }
     
     return ($result === "") ? null : $result;
+  }
+  
+  public function setToken(Sabel_Request_Token $token)
+  {
+    $this->token = $token;
+  }
+  
+  public function getToken()
+  {
+    if (is_object($this->token)) {
+      return $this->token;
+    } else {
+      $this->token = new Sabel_Request_Token();
+      $this->token->setValue($this->getValueWithMethod("token"));
+      return $this->token;
+    }
   }
   
   public function isPost()

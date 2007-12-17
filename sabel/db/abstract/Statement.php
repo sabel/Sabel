@@ -305,8 +305,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 
   protected function escapeObject($instance)
   {
-    if ($instance instanceof Sabel_DB_Sql_Part_Interface) {
-      return $instance->getValue($this);
+    if ($instance instanceof Sabel_Object) {
+      return $instance->toString($this);
     } else {
       throw new Sabel_DB_Statement_Exception("cannot convert object to sql string.");
     }

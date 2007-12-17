@@ -186,6 +186,11 @@ function convert_to_modelname($tblName)
   }
 }
 
+function is_model($model)
+{
+  return ($model instanceof Sabel_DB_Abstract_Model);
+}
+
 function MODEL($mdlName)
 {
   static $cache = array();

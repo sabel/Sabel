@@ -121,13 +121,14 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
 
   public function getTableEngine($tblName)
   {
-    $row = $this->driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
-    return $row[0]["Engine"];
+    $rows = $this->driver->execute("SHOW TABLE STATUS WHERE Name='{$tblName}'");
+    return $rows[0]["Engine"];
   }
 
   protected function getMysqlVersion()
   {
-    return mysql_get_server_info($this->driver->getConnection());
+    $rows = $this->driver->execute("SELECT VERSION() AS version");
+    return $rows[0]["version"];
   }
 
   private function getForeignKeys50($tblName)

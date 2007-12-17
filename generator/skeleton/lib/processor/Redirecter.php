@@ -34,7 +34,16 @@ class Processor_Redirecter extends Sabel_Bus_Processor
         $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
       }
       
-      $to = $redirect->getUrl();
+      $token = $this->request->getToken()->getValue();
+      
+      if (realempty($token)) {
+        $to = $redirect->getUrl();
+      } elseif ($redirect->hasParameters()) {
+        $to = $redirect->getUrl() . "&token={$token}";
+      } else {
+        $to = $redirect->getUrl() . "?token={$token}";
+      }
+      
       $this->response->location($host, $ignored . $to);
     }
   }

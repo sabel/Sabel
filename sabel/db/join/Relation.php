@@ -17,7 +17,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
   {
     if (is_string($object)) {
       $object = new Sabel_DB_Join_Object(MODEL($object), $alias, $joinKey);
-    } elseif ($object instanceof Sabel_DB_Abstract_Model) {
+    } elseif (is_model($object)) {
       $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
     }
 

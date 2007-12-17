@@ -11,20 +11,32 @@
  */
 class Form_Object extends Sabel_Object
 {
+  protected $token   = null;
   protected $model   = null;
   protected $mdlName = "";
   protected $columns = null;
   protected $errors  = array();
   
-  public function __construct($model)
+  public function __construct($model, $token = null)
   {
     if (is_string($model)) {
       $model = MODEL($model);
     }
     
+    $this->token   = $token;
     $this->model   = $model;
     $this->mdlName = $model->getName();
     $this->columns = $model->getSchema()->getColumns();
+  }
+  
+  public function getToken()
+  {
+    return $this->token;
+  }
+  
+  public function getName()
+  {
+    return lcfirst($this->mdlName) . "Form";
   }
   
   public function getModel()
@@ -50,7 +62,7 @@ class Form_Object extends Sabel_Object
   
   public function __get($key)
   {
-    return $this->get($key);
+    return $this->model->__get($key);
   }
   
   public function setErrors($errors)
@@ -78,6 +90,10 @@ class Form_Object extends Sabel_Object
   
   public function validate($ignores = array())
   {
+    if (is_string($ignores)) {
+      $ignores = array($ignores);
+    }
+    
     $model = $this->model;
     $validator = new Sabel_DB_Validator($model);
     $annot = $model->getReflection()->getAnnotation("validate_ignores");
@@ -119,17 +135,36 @@ class Form_Object extends Sabel_Object
   
   public function start($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    return $this->createHtmlWriter("", $name, $id, $class)->open($uri, $method);
+    $html = $this->createHtmlWriter("", $name, $id, $class)->open($uri, $method);
+    
+    if ($this->token === null) {
+      return $html;
+    } else {
+      return $html . '<input type="hidden" name="token" value="' . $this->token . '"/>';
+    }
   }
   
   public function end()
   {
-    return $this->createHtmlWriter("", "", null, null, array())->close();
+    return $this->createHtmlWriter("", "")->close();
   }
   
   public function submit($text = null, $class = null, $id = null)
   {
-    return $this->createHtmlWriter("", "", $id, $class, array())->submit($text);
+    return $this->createHtmlWriter("", "", $id, $class)->submit($text);
+  }
+  
+  public function button($uri, $text, $class = null, $id = null)
+  {
+    $fmt = '<input %s%stype="button" value="%s" '
+         . 'onclick="window.location.href=\'http://%s%s%s\'" />';
+       
+    $id    = ($id === null)    ? "" : 'id="' . $id . '" ';
+    $class = ($class === null) ? "" : 'class="' . $class . '" ';
+    $token = ($this->token === null) ? "" : "?token={$this->token}";
+    
+    $domain = Sabel_Environment::get("http_host");
+    return sprintf($fmt, $id, $class, $text, $domain, uri($uri), $token);
   }
   
   public function text($name, $class = null, $id = null)
@@ -193,14 +228,15 @@ class Form_Object extends Sabel_Object
   public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
   {
     $eName  = $this->createName("datetime") . "[{$name}]";
-    $writer = $this->createHtmlWriter($name, $eName, null, null);
+    $writer = $this->createHtmlWriter($name, $eName);
+
     return $writer->datetime($yearRange, $withSecond, $defaultNull);
   }
   
   public function date($name, $yearRange = null, $defaultNull = false)
   {
     $eName  = $this->createName("date") . "[{$name}]";
-    $writer = $this->createHtmlWriter($name, $eName, null, null);
+    $writer = $this->createHtmlWriter($name, $eName);
     return $writer->date($yearRange, $defaultNull);
   }
   
@@ -209,7 +245,7 @@ class Form_Object extends Sabel_Object
     return $this->mdlName . "::" . $name;
   }
   
-  private function createHtmlWriter($name, $elementName, $id, $class, $data = array())
+  private function createHtmlWriter($name, $elementName, $id = null, $class = null, $data = array())
   {
     $html = new Form_Html($elementName);
     $html->setValue($this->get($name))->setId($id)->setClass($class)->setData($data);
