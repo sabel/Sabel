@@ -12,31 +12,14 @@
 </head>
 <body>
 
-<div class="content">
-  <div id="top">
-    <h1>Sabel</h1>
-    <h2>Welcome to Sabel have fun!</h2>
-  </div>
+<div id="header">
+  <h1>Sabel</h1>
+  <h2>Welcome to Sabel have fun!</h2>
 </div>
 
-<!--
-<div id="prec">
-  <div id="wrap">
-    <div id="menu">
-      <?= $menu ?>
-    </div>
-  </div>
-</div>
--->
-
 <div class="content">
-  <div id="ad">
-  </div>
-  
-  <div id="main">
-    <div id="contents">
-      <?= $contentForLayout ?>
-    </div>
+  <div id="contents">
+    <?= $contentForLayout ?>
   </div>
   
   <div id="footer">

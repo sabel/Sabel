@@ -22,7 +22,7 @@ final class Sabel_Container_Aspect
   
   public function apply($aspect)
   {
-    $this->aspects[] = $aspect;    
+    $this->aspects[] = $aspect;
     return $this;
   }
   

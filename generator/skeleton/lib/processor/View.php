@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Processor_Renderer
+ * Processor_View
  *
  * @category   Processor
  * @package    lib.processor
@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Renderer extends Sabel_Bus_Processor
+class Processor_View extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
@@ -19,10 +19,9 @@ class Processor_Renderer extends Sabel_Bus_Processor
     if ($redirector->isRedirected()) return;
     
     $responses = $this->response->getResponses();
-    $renderer  = new Sabel_View_Renderer_Class();
     
     if ($controller->renderText) {
-      $this->result = $renderer->rendering($controller->contents, $responses);
+      return $this->result = $this->rendering($controller->contents, $responses);
       return;
     } elseif ($controller->renderImage) {
       $this->result = $controller->contents;
@@ -35,19 +34,16 @@ class Processor_Renderer extends Sabel_Bus_Processor
       $this->destination->setAction("serverError");
     }
     
-    if (($resource = $this->repository->find())) {
-      $contents = $renderer->rendering($resource->fetch(), $responses);
+    if ($resource = $this->repository->find()) {
+      $contents = $this->rendering($resource, $responses);
     } elseif ($controller->isExecuted()) {
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
+    } elseif ($resource = $this->repository->find("notFound")) {
+      $contents = $this->rendering($resource, $responses);
     } else {
-      $resource = $this->repository->find("notFound");
-      if (is_object($resource)) {
-        $contents = $renderer->rendering($resource->fetch(), $responses);
-      } else {
-        $contents = "<h1>404 Not Found</h1>"
-                  . "setup your notFound.tpl to module directory.";
-      }
+      $contents = "<h1>404 Not Found</h1>"
+                . "setup your notFound.tpl to module directory.";
     }
     
     $layoutName = $controller->getAttribute("layout");
@@ -57,14 +53,31 @@ class Processor_Renderer extends Sabel_Bus_Processor
         $this->result = $contents;
       } else {
         if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
-        $layout = $this->repository->find($layoutName);
-        if (is_object($layout)) {
+        if ($layout = $this->repository->find($layoutName)) {
           $responses["contentForLayout"] = $contents;
-          $this->result = $renderer->rendering($layout->fetch(), $responses);
+          $this->result = $this->rendering($layout, $responses);
         } else {
           $this->result = $contents;
         }
       }
+    }
+  }
+  
+  private function rendering($resource, $responses)
+  {
+    if (is_object($resource)) {
+      $contents = $resource->fetch();
+      $path = $resource->getFullpath();
+    } else {
+      $contents = $resource;
+      $path = null;
+    }
+    
+    if (is_object($this->renderer)) {
+      return $this->renderer->rendering($contents, $responses, $path);
+    } else {
+      $renderer = new Processor_View_DefaultRenderer();
+      return $renderer->rendering($contents, $responses, $path);
     }
   }
   

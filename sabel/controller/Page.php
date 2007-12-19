@@ -95,7 +95,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     }
     
     if (!$this->request instanceof Sabel_Request_Object) {
-      throw new Sabel_Exception_Runtime("invalid request object");
+      throw new Sabel_Exception_InvalidArgument("invalid request object.");
     }
     
     if ($this->request->isTypeOf("css")) {
@@ -115,9 +115,12 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         }
         
         $this->executed = true;
+        if (!$this->response->isFailure()) {
+          $this->response->success();
+        }
+      } else {
+        $this->response->success();
       }
-      
-      $this->response->success();
     }
     
     return $this;

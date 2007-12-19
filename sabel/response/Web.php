@@ -216,4 +216,13 @@ class Sabel_Response_Web implements Sabel_Response
   {
     return ($this->status === self::FORBIDDEN);
   }
+  
+  public function isFailure()
+  {
+    $status = $this->status;
+    
+    return ($status === self::NOT_FOUND ||
+            $status === self::FORBIDDEN ||
+            $status === self::SERVER_ERROR);
+  }
 }

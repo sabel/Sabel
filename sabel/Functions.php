@@ -31,20 +31,6 @@ function l($message, $level = LOG_INFO, $fileName = null)
   Sabel_Context::log($message, $level, $fileName);
 }
 
-function r($const)
-{
-  if (class_exists("Redirect")) {
-    return ($const === Redirect::REDIRECTED);
-  }
-}
-
-function redirected($const)
-{
-  if (class_exists("Redirect")) {
-    return ($const === Redirect::REDIRECTED);
-  }
-}
-
 function realempty($value)
 {
   return ($value === null || $value === array() || $value === "");

@@ -1,30 +1,24 @@
 <?php
 
 /**
- * Sabel_View_Renerer_Class
+ * Renderer_Sabel
  *
- * @category   Template
- * @package    org.sabel.template.engine
+ * @category   Processor
+ * @package    lib.processor
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
- *             Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
+class Renderer_Sabel extends Sabel_View_Renderer
 {
-  public function rendering($sbl_template, $sbl_tpl_values)
+  public function rendering($sbl_template, $sbl_tpl_values, $sbl_tpl_path = null)
   {
-    $hash = md5(substr($sbl_template, 0, 256));
+    $hash = $this->createHash($sbl_template);
     $this->makeCompileFile($sbl_template, $hash);
     
     $this->initializeValues($hash, $sbl_tpl_values);
-    if (is_array($sbl_tpl_values)) {
-      foreach ($sbl_tpl_values as $_sbl_tpl_values) {
-        extract($sbl_tpl_values, EXTR_OVERWRITE);
-      }
-    } else {
-      extract($sbl_tpl_values, EXTR_OVERWRITE);
-    }
+    extract($sbl_tpl_values, EXTR_OVERWRITE);
     
     ob_start();
     include ($this->getCompileFilePath($hash));
@@ -46,10 +40,9 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
   
   private final function makeCompileFile($template, $hash)
   {
-    // @todo
-    //if (ENVIRONMENT === PRODUCTION) {
-    //  if (is_readable($this->getCompileFilePath($hash))) return;
-    //}
+    if (ENVIRONMENT === PRODUCTION) {
+      if (is_readable($this->getCompileFilePath($hash))) return;
+    }
     
     $r = '/<\?(=)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
@@ -68,15 +61,15 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
       $template = $this->trimContents($template);
     }
     
-    $this->saveCompileFile($hash, $template);
+    file_put_contents(COMPILE_DIR_PATH . DS . $hash, $template);
   }
   
   private final function checkAndTrimContents($contents)
   {
     if (strpos($contents, "<script") === false) {
       $contents = explode(PHP_EOL,  $contents);
-      $contents = array_map('trim', $contents);
-      $contents = implode('',       $contents);
+      $contents = array_map("trim", $contents);
+      $contents = implode("",       $contents);
     } else {
       $pat = '@(.*)(<script [^>]+>.*</script>)(.*)@si';
       $callback = array($this, 'trimContents');
@@ -100,11 +93,6 @@ final class Sabel_View_Renderer_Class extends Sabel_View_Renderer
     return $contents;
   }
   
-  private final function saveCompileFile($name, $compiled)
-  {
-    file_put_contents(COMPILE_DIR_PATH . DS . $name, $compiled);
-  }
-  
   private final function getCompileFilePath($name)
   {
     return COMPILE_DIR_PATH . DS . $name;
@@ -123,6 +111,7 @@ function _sbl_tpl_pipe_to_func($matches)
       $value = array_shift($functions);
       $lamdaBody = 'return (is_string($val)) ? "\"".$val."\"" : $val;';
       $lamda = create_function('$val', $lamdaBody);
+      
       foreach ($functions as $function) {
         $params = "";
         if (strpos($function, ":") !== false) {
@@ -131,6 +120,7 @@ function _sbl_tpl_pipe_to_func($matches)
           $params   = array_map($lamda, $params);
           $params   = ", " . implode(", ", $params);
         }
+        
         $value = "$function($value$params)";
       }
     }

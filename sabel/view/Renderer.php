@@ -12,7 +12,10 @@
  */
 abstract class Sabel_View_Renderer extends Sabel_Object
 {
+  // @todo
   protected $trim = true;
+  
+  abstract public function rendering($_tpl_string, $_tpl_values, $_tpl_path = null);
   
   public function partial($name, $controller = null, $assign = array())
   {
@@ -30,5 +33,10 @@ abstract class Sabel_View_Renderer extends Sabel_Object
     $renderer = new Sabel_View_Renderer_Class();
     $resource = $repository->find();
     return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
+  }
+  
+  protected function createHash($template)
+  {
+    return md5($template);
   }
 }

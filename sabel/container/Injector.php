@@ -38,7 +38,7 @@ class Sabel_Container_Injector
   {
     $reflect = new ReflectionClass($className);
     
-    if ($reflect->isInterface()) {
+    if ($reflect->isInterface() || $reflect->isAbstract()) {
       foreach ($this->injection->getBinds() as $name => $bind) {
         if ($name === $className) {
           $implClassName = $bind->getImplementation();
