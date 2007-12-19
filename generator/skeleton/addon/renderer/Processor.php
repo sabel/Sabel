@@ -3,11 +3,10 @@
 /**
  * Renderer_Processor
  *
- * @version    1.0
- * @category   Processor
- * @package    lib.processor
+ * @category   Addon
+ * @package    addon.renderer
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Renderer_Processor extends Sabel_Bus_Processor

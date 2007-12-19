@@ -15,13 +15,30 @@ abstract class Sabel_View_Renderer extends Sabel_Object
   // @todo
   protected $trim = true;
   
+  protected $preprocessor = null;
+  
   abstract public function rendering($_tpl_string, $_tpl_values, $_tpl_path = null);
+  
+  public function __construct()
+  {
+    $this->preprocessor = new Sabel_View_Preprocessor_Default();
+  }
+  
+  public function setPreprocessor(Sabel_View_Preprocessor_Interface $p)
+  {
+    $this->preprocessor = $p;
+  }
+  
+  public function preprocess($contents)
+  {
+    return $this->preprocessor->execute($contents);
+  }
   
   public function partial($name, $controller = null, $assign = array())
   {
-    $context = Sabel_Context::getContext();
-    $destination = clone $context->getBus()->get("destination");
-    $responses   = $context->getBus()->get("response")->getResponses();
+    $bus = Sabel_Context::getContext()->getBus();
+    $destination = clone $bus->get("destination");
+    $responses   = $bus->get("response")->getResponses();
     
     if ($controller !== null) {
       $destination->setController($controller);
@@ -30,9 +47,14 @@ abstract class Sabel_View_Renderer extends Sabel_Object
     $destination->setAction($name);
     
     $repository = new Sabel_View_Repository_File($destination);
-    $renderer = new Sabel_View_Renderer_Class();
-    $resource = $repository->find();
-    return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
+    $renderer = $bus->get("renderer");
+    
+    if (is_object($renderer)) {
+      $resource = $repository->find();
+      return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
+    } else {
+      throw new Sabel_Exception_Runtime("partial() renderer not found.");
+    }
   }
   
   protected function createHash($template)

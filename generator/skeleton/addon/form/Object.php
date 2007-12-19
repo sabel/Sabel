@@ -156,6 +156,8 @@ class Form_Object extends Sabel_Object
   
   public function button($uri, $text, $class = null, $id = null)
   {
+    // @todo
+    
     $fmt = '<input %s%stype="button" value="%s" '
          . 'onclick="window.location.href=\'http://%s%s%s\'" />';
        

@@ -18,6 +18,10 @@ class Processor_View extends Sabel_Bus_Processor
     $redirector = $controller->getAttribute("redirect");
     if ($redirector->isRedirected()) return;
     
+    if (!is_object($this->renderer)) {
+      $this->renderer = new Processor_View_DefaultRenderer();
+    }
+    
     $responses = $this->response->getResponses();
     
     if ($controller->renderText) {
@@ -73,12 +77,7 @@ class Processor_View extends Sabel_Bus_Processor
       $path = null;
     }
     
-    if (is_object($this->renderer)) {
-      return $this->renderer->rendering($contents, $responses, $path);
-    } else {
-      $renderer = new Processor_View_DefaultRenderer();
-      return $renderer->rendering($contents, $responses, $path);
-    }
+    return $this->renderer->rendering($contents, $responses, $path);
   }
   
   public function shutdown($bus)

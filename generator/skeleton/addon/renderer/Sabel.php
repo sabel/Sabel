@@ -3,8 +3,8 @@
 /**
  * Renderer_Sabel
  *
- * @category   Processor
- * @package    lib.processor
+ * @category   Addon
+ * @package    addon.renderer
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
@@ -43,6 +43,8 @@ class Renderer_Sabel extends Sabel_View_Renderer
     if (ENVIRONMENT === PRODUCTION) {
       if (is_readable($this->getCompileFilePath($hash))) return;
     }
+    
+    $template = $this->preprocess($template);
     
     $r = '/<\?(=)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
