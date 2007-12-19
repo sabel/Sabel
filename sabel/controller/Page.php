@@ -106,15 +106,18 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $this->response->notfound();
     } elseif ($this->isHiddenAction($action)) {
       $this->response->notfound();
-    } elseif ($this->isActionExists($action)) {
-      $this->response->success();
-      if (count($params) >= 1) {
-        call_user_func_array(array($this, $action), $params);
-      } else {
-        $this->$action();
+    } else {
+      if ($this->isActionExists($action)) {
+        if (count($params) >= 1) {
+          call_user_func_array(array($this, $action), $params);
+        } else {
+          $this->$action();
+        }
+        
+        $this->executed = true;
       }
       
-      $this->executed = true;
+      $this->response->success();
     }
     
     return $this;

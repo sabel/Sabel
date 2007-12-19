@@ -16,7 +16,11 @@ class I18n_Addon extends Sabel_Object
   
   public function loadProcessor($bus)
   {
-    $i18n = new I18n_Processor("i18n");
-    $bus->getList()->find("request")->insertNext("i18n", $i18n);
+    $request = $bus->getList()->find("request");
+    
+    if (is_object($request)) {
+      $i18n = new I18n_Processor("i18n");
+      $request->insertNext("i18n", $i18n);
+    }
   }
 }

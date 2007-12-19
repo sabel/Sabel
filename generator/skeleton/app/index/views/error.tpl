@@ -1,8 +1,17 @@
 <? if (isset($errors)) : ?>
-  <div style="border: 4px solid red; padding: 10px; background-color: #FFF5F5;">
-  <? foreach ($errors as $error) : ?>
-    <?= $error ?><br/>
-  <? endforeach ?>
+  <div class="errmsg">
+    <ul>
+      <? foreach ($errors as $error) : ?>
+        <li><?= $error ?></li>
+      <? endforeach ?>
+    </ul>
   </div>
-  <br/>
+<? endif ?>
+
+<? if (isset($errmsg) && $errmsg !== "") : ?>
+  <div class="errmsg">
+    <ul>
+      <li><?= $errmsg ?></li>
+    </ul>
+  </div>
 <? endif ?>

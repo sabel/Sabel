@@ -16,21 +16,12 @@ class Flow_Addon extends Sabel_Object
   
   public function loadProcessor($bus)
   {
-    $bus->attachExecuteEvent("creator", $this, "eventCallback");
-  }
-  
-  public function eventCallback($bus)
-  {
-    $controller = $bus->get("controller");
-    $reflection = $controller->getReflection();
+    $executer = $bus->getList()->find("executer");
     
-    $annot = $reflection->getAnnotation("executer");
-    if ($annot === null || $annot[0][0] !== "flow") return true;
-    
-    $flow       = new Flow_Processor("executer");
-    $redirecter = new Flow_Redirecter("redirecter");
-    
-    $bus->getList()->find("executer")->replace($flow);
-    $bus->getList()->find("redirecter")->replace($redirecter);
+    if (is_object($executer)) {
+      $flowProcessor = new Flow_Processor("flow");
+      $executer->insertPrevious("flow", $flowProcessor);
+      $bus->attachExecuteAfterEvent("executer", $flowProcessor, "afterExecute");
+    }
   }
 }

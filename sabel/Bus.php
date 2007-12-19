@@ -11,12 +11,17 @@
  */
 class Sabel_Bus extends Sabel_Object
 {
-  private $bus        = array();
-  private $holder     = array();
-  private $processors = array();
-  private $callbacks  = array();
-  private $list       = null;
-  
+  private
+    $bus        = array(),
+    $holder     = array(),
+    $processors = array(),
+    $callbacks  = array(),
+    $list       = null;
+    
+  private
+    $beforeEvent = array(),
+    $afterEvent  = array();
+    
   public function __construct()
   {
     Sabel_Context::getContext()->setBus($this);
@@ -77,9 +82,9 @@ class Sabel_Bus extends Sabel_Object
       $processor = $processorList->get();
       l("[bus] execute " . $processor->name, LOG_DEBUG);
       $processor->setBus($this);
-      $this->addonBeforeEvent($processor);
+      $this->beforeEvent($processor);
       $result = $processor->execute($this);
-      $this->addonEvent($processor);
+      $this->afterEvent($processor);
       $this->callback($processor);
       
       if ($result instanceof Sabel_Bus_ProcessorCallback) {
@@ -103,34 +108,40 @@ class Sabel_Bus extends Sabel_Object
     return ($this->has("result")) ? $this->get("result") : null;
   }
   
-  private $addonEvent = array();
-  private $addonBeforeEvent = array();
-  public function attachExecuteEvent($processorName, $addon, $method)
+  public function attachExecuteBeforeEvent($processorName, $object, $method)
   {
-    $o = new StdClass();
-    $o->addon = $addon;
-    $o->method = $method;
-    $this->addonEvent[$processorName] = $o;
+    $evt = new stdClass();
+    $evt->object = $object;
+    $evt->method = $method;
+    $this->beforeEvent[$processorName] = $evt;
   }
-  public function attachExecuteBeforeEvent($processorName, $addon, $method)
+  
+  public function attachExecuteAfterEvent($processorName, $object, $method)
   {
-    $o = new StdClass();
-    $o->addon = $addon;
-    $o->method = $method;
-    $this->addonBeforeEvent[$processorName] = $o;
+    $evt = new stdClass();
+    $evt->object = $object;
+    $evt->method = $method;
+    $this->afterEvent[$processorName] = $evt;
   }
-  private function addonEvent($processor)
+  
+  public function attachExecuteEvent($processorName, $object, $method)
   {
-    if (isset($this->addonEvent[$processor->name])) {
-      $o = $this->addonEvent[$processor->name];
-      $o->addon->{$o->method}($this);
+    $this->attachExecuteAfterEvent($processorName, $object, $method);
+  }
+  
+  private function beforeEvent($processor)
+  {
+    if (isset($this->beforeEvent[$processor->name])) {
+      $evt = $this->beforeEvent[$processor->name];
+      $evt->object->{$evt->method}($this);
     }
   }
-  private function addonBeforeEvent($processor)
+  
+  private function afterEvent($processor)
   {
-    if (isset($this->addonBeforeEvent[$processor->name])) {
-      $o = $this->addonBeforeEvent[$processor->name];
-      $o->addon->{$o->method}($this);
+    if (isset($this->afterEvent[$processor->name])) {
+      $evt = $this->afterEvent[$processor->name];
+      $evt->object->{$evt->method}($this);
     }
   }
   

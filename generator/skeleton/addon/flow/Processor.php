@@ -2,8 +2,10 @@
 
 class Flow_Processor extends Sabel_Bus_Processor
 {
-  private $action = "";
+  private $action    = "";
+  private $isTransit = false;
   private $refMethod = null;
+  private $state     = null;
   
   private function initialize($bus)
   {
@@ -16,16 +18,19 @@ class Flow_Processor extends Sabel_Bus_Processor
       throw new Sabel_Exception_Runtime($msg);
     }
   }
-    
+  
   public function execute($bus)
   {
     $this->initialize($bus);
+    
+    if (!$this->controller instanceof Flow_Page) return;
     $controller = $this->controller;
+    $response = $controller->getResponse();
     
     $key = implode("_", array($this->destination->getModule(),
                               $this->destination->getController()));
                               
-    $state = new Flow_State($this->storage);
+    $this->state = $state = new Flow_State($this->storage);
     $token = $this->request->getToken()->getValue();
     
     l("[flow] token is '{$token}'");
@@ -38,31 +43,34 @@ class Flow_Processor extends Sabel_Bus_Processor
     }
     
     if ($this->isIgnoreAction()) {
-      return $this->executeAction($bus);
+      $this->transit(false);
     } elseif ($state === null) {
       l("[flow] invalid token '{$token}'.");
-      return $this->destination->setAction("notFound");
+      $response->notFound();
+      $bus->getList()->find("executer")->unlink();
+      $this->transit(false);
     } elseif ($state->isInFlow() && !$this->isStartAction()) {
       $controller->setAttribute("flow",  $state);
       $controller->setAttribute("token", $token);
       
       if ($this->refMethod->hasAnnotation("end")) {
-        $this->executeAction($bus);
+        $this->transit(false);
         $state->end();
       } else {
-        $this->executeInFlowAction($state, $bus);
+        $this->executeInFlowAction($state);
         $state->clearEndFlow();
       }
       
       $response = $controller->getResponse();
       if (($warning = $state->warning) !== null) {
-        $response->setResponse("_message_", $warning);
+        // @todo
+        $response->setResponse("errmsg", $warning);
       }
       
       foreach ($state->getProperties() as $name => $val) {
         $response->setResponse($name, $val);
       }
-    } elseif ($this->isStartAction()) { // start flow state.
+    } elseif ($this->isStartAction()) {
       $token = $this->request->getToken()->createValue();
       $state->start($key, $this->action, $token);
       $state->clearEndFlow();
@@ -70,8 +78,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       l("[flow] start state with " . $token);
       
       if (($endAction = $this->isOnce()) === false) {
-        $method = $controller->getReflection()->getMethod($this->action);
-        $next = $method->getAnnotation("next");
+        $next = $this->refMethod->getAnnotation("next");
         $state->setNextActions($next[0]);
       } else {
         $state->setNextActions(array($endAction));
@@ -79,19 +86,26 @@ class Flow_Processor extends Sabel_Bus_Processor
       
       $controller->setAttribute("flow", $state);
       $controller->setAttribute("token", $token);
-      $this->executeAction($bus);
-      $state->save();
+      $this->transit(true);
       
       foreach ($state->getProperties() as $name => $val) {
-        $controller->getResponse()->setResponse($name, $val);
+        $response->setResponse($name, $val);
       }
     } else {
-      l("[flow] your request was denied");
-      return $controller->getResponse()->notFound();
+      l("[flow] your request was denied.");
+      $bus->getList()->find("executer")->unlink();
+      $response->notFound();
     }
     
     ini_set("url_rewriter.tags", "input=src,fieldset=");
     output_add_rewrite_var("token", $token);
+  }
+  
+  public function afterExecute($bus)
+  {
+    if ($this->isTransit() && $this->controller->getResponse()->isSuccess()) {
+      $this->state->save();
+    }
   }
   
   private function isStartAction()
@@ -116,20 +130,17 @@ class Flow_Processor extends Sabel_Bus_Processor
     return ($annot[0][0] === "once") ? $annot[0][1] : false;
   }
   
-  private function executeInFlowAction($state, $bus)
+  private function executeInFlowAction($state)
   {
     $controller = $this->controller;
     if ($this->action === $state->getCurrent()) {
-      $controller->setAttribute("flow", $state);
-      $this->executeAction($bus);
+      $this->transit(false);
     } elseif ($state->isMatchToNext($this->action)) {
-      $controller->setAttribute("flow", $state);
-      $this->executeAction($bus);
       $next = $this->refMethod->getAnnotation("next");
       $state->setNextActions($next[0]);
       $state->transit($this->action);
       $state->warning = null;
-      $state->save();
+      $this->transit(true);
     } else {
       if ($state->isPreviousAction($this->action)) {
         $message = "It is possible to move to the previous page "
@@ -144,17 +155,13 @@ class Flow_Processor extends Sabel_Bus_Processor
     }
   }
   
-  private final function executeAction($bus)
+  private function transit($bool)
   {
-    try {
-      $this->controller->setAction($this->action);
-      $this->controller->initialize();
-      $this->controller->execute($this->action)->getResponse();
-    } catch (Exception $e) {
-      l($e->getMessage());
-      $this->response->serverError();
-      $this->destination->setAction("serverError");
-      Sabel_Context::getContext()->setException($e);
-    }
+    $this->isTransit = $bool;
+  }
+  
+  private function isTransit()
+  {
+    return $this->isTransit;
   }
 }
