@@ -15,7 +15,6 @@ class Sabel_Bus extends Sabel_Object
     $bus        = array(),
     $holder     = array(),
     $processors = array(),
-    $callbacks  = array(),
     $list       = null;
     
   private
@@ -79,16 +78,16 @@ class Sabel_Bus extends Sabel_Object
     $processorList = $this->list->getFirst();
     
     while ($processorList !== null) {
+      $s = microtime();
       $processor = $processorList->get();
-      l("[bus] execute " . $processor->name, LOG_DEBUG);
       $processor->setBus($this);
-      $this->beforeEvent($processor);
+      $this->beforeEvent($processor->name);
       $result = $processor->execute($this);
-      $this->afterEvent($processor);
-      $this->callback($processor);
+      $this->afterEvent($processor->name);
       
-      if ($result instanceof Sabel_Bus_ProcessorCallback) {
-        $this->callbacks[$result->when][] = $result;
+      if (ENVIRONMENT !== PRODUCTION) {
+        $time = (microtime() - $s);
+        l("[bus] execute " . $processor->name . " (time: {$time})", LOG_DEBUG);
       }
       
       $processorList = $processorList->next();
@@ -110,18 +109,12 @@ class Sabel_Bus extends Sabel_Object
   
   public function attachExecuteBeforeEvent($processorName, $object, $method)
   {
-    $evt = new stdClass();
-    $evt->object = $object;
-    $evt->method = $method;
-    $this->beforeEvent[$processorName] = $evt;
+    $this->attachEvent($processorName, $object, $method, "before");
   }
   
   public function attachExecuteAfterEvent($processorName, $object, $method)
   {
-    $evt = new stdClass();
-    $evt->object = $object;
-    $evt->method = $method;
-    $this->afterEvent[$processorName] = $evt;
+    $this->attachEvent($processorName, $object, $method, "after");
   }
   
   public function attachExecuteEvent($processorName, $object, $method)
@@ -129,31 +122,35 @@ class Sabel_Bus extends Sabel_Object
     $this->attachExecuteAfterEvent($processorName, $object, $method);
   }
   
-  private function beforeEvent($processor)
+  private function attachEvent($processorName, $object, $method, $when)
   {
-    if (isset($this->beforeEvent[$processor->name])) {
-      $evt = $this->beforeEvent[$processor->name];
-      $evt->object->{$evt->method}($this);
+    $evt = new stdClass();
+    $evt->object = $object;
+    $evt->method = $method;
+    
+    $var = $when . "Event";
+    $events =& $this->$var;
+    if (isset($events[$processorName])) {
+      $events[$processorName][] = $evt;
+    } else {
+      $events[$processorName] = array($evt);
     }
   }
   
-  private function afterEvent($processor)
+  private function beforeEvent($processorName)
   {
-    if (isset($this->afterEvent[$processor->name])) {
-      $evt = $this->afterEvent[$processor->name];
-      $evt->object->{$evt->method}($this);
+    if (isset($this->beforeEvent[$processorName])) {
+      foreach ($this->beforeEvent[$processorName] as $event) {
+        $event->object->{$event->method}($this);
+      }
     }
   }
   
-  public function callback($processor)
+  private function afterEvent($processorName)
   {
-    if (isset($this->callbacks[$processor->name])) {
-      $callback = $this->callbacks[$processor->name];
-      if (!is_array($callback)) $callback = array($callback);
-      
-      foreach ($callback as $c) {
-        $method = $c->method;
-        $c->processor->$method($this);
+    if (isset($this->afterEvent[$processorName])) {
+      foreach ($this->afterEvent[$processorName] as $event) {
+        $event->object->{$event->method}($this);
       }
     }
   }

@@ -46,21 +46,26 @@ class Flow_Processor extends Sabel_Bus_Processor
     
     l("[flow] token is '{$token}'");
     
-    if (!$controller->hasMethod($this->action)) return;
+    if (!$controller->hasMethod($this->action)) {
+      $bus->getList()->find("executer")->unlink();
+      return $response->notFound();
+    }
+    
     $this->refMethod = $controller->getReflection()->getMethod($this->action);
     
     if ($token !== null && !$this->isStartAction()) {
       $state = $state->restore($key, $token);
     }
     
-    if ($this->isIgnoreAction()) {
-      $this->transit(false);
-    } elseif ($state === null) {
+    if ($this->isIgnoreAction()) return;
+    
+    if ($state === null) {
       l("[flow] invalid token '{$token}'.");
-      $response->notFound();
       $bus->getList()->find("executer")->unlink();
-      $this->transit(false);
-    } elseif ($state->isInFlow() && !$this->isStartAction()) {
+      return $response->notFound();
+    }
+    
+    if ($state->isInFlow() && !$this->isStartAction()) {
       $controller->setAttribute("flow",  $state);
       $controller->setAttribute("token", $token);
       
@@ -105,7 +110,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     } else {
       l("[flow] your request was denied.");
       $bus->getList()->find("executer")->unlink();
-      $response->notFound();
+      return $response->notFound();
     }
     
     ini_set("url_rewriter.tags", "input=src,fieldset=");
