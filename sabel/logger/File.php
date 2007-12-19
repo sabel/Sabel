@@ -6,10 +6,11 @@
  * @category   Logger
  * @package    org.sabel.logger
  * @author     Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Logger_File implements Sabel_Logger_Interface
+class Sabel_Logger_File extends Sabel_Object
 {
   const DEFAULT_LOG_DIR  = "logs";
   const DEFAULT_LOG_FILE = "sabel.log";
@@ -51,6 +52,8 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
     } else {
       $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
       $handlers[$fileName] = fopen($base . $fileName, "a");
+      $sep = "============================================================";
+      fwrite($handlers[$fileName], PHP_EOL . $sep . PHP_EOL . PHP_EOL);
       return $handlers[$fileName];
     }
   }
@@ -58,7 +61,10 @@ class Sabel_Logger_File implements Sabel_Logger_Interface
   public function log($text, $level = LOG_INFO, $fileName = null)
   {
     $fmt = '%s [%s] %s' . PHP_EOL;
-    fwrite($this->open(), sprintf($fmt, now(), $this->defineToString($level), $text));
+    $fp  = $this->open($fileName);
+    
+    if (ENVIRONMENT === PRODUCTION && $level !== LOG_ERR) return;
+    fwrite($fp, sprintf($fmt, now(), $this->defineToString($level), $text));
   }
   
   private function getLogFileName()

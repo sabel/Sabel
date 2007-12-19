@@ -37,7 +37,7 @@ spl_autoload_register(array("Sabel", "autoload"));
  * @category   Sabel
  * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@gmail.com>
- *             Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -172,7 +172,6 @@ final class Sabel
     $CONTAINER  = $SABEL . "container"  . DS;
     $CONTROLLER = $SABEL . "controller" . DS;
     $ANNOTATION = $SABEL . "annotation" . DS;
-    $LOG        = $SABEL . "logger"     . DS;
     $DB         = $SABEL . "db"         . DS;
     
     require ($BUS . "Config.php");
@@ -216,11 +215,6 @@ final class Sabel
     require ($VIEW . "resource" . DS . "File.php");
     require ($VIEW . "resource" . DS . "Template.php");
     
-    require ($LOG . "Factory.php");
-    require ($LOG . "Interface.php");
-    require ($LOG . "File.php");
-    require ($LOG . "Null.php");
-    
     require ($DB . "Config.php");
     require ($DB . "Type.php");
     
@@ -228,6 +222,7 @@ final class Sabel
     require ($SABEL . "router"    . DS . "Map.php");
     require ($SABEL . "response"  . DS . "Web.php");
     require ($SABEL . "exception" . DS . "Runtime.php");
+    require ($SABEL . "logger"    . DS . "File.php");
   }
 }
 

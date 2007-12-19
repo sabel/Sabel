@@ -11,13 +11,12 @@
  */
 class Sabel_Context extends Sabel_Object
 {
-  private static $includePath = array();
-  
   private static $context = null;
   
-  private $bus       = null;
-  private $candidate = null;
-  private $exception = null;
+  private
+    $bus       = null,
+    $candidate = null,
+    $exception = null;
   
   public static function setContext($context)
   {
@@ -65,31 +64,14 @@ class Sabel_Context extends Sabel_Object
   
   public static function log($message, $level = LOG_INFO, $fileName)
   {
-    static $log;
-    if (!isset($log)) $log = Sabel_Logger_Factory::create();
+    static $log = null;
+    
+    if ($log === null) $log = self::getLogger();
     $log->log($message, $level, $fileName);
   }
   
   public static function getLogger()
   {
     return Sabel_Logger_File::singleton();
-  }
-  
-  public static function getCache()
-  {
-    $config = CachedConfigImpl::create()->get("Memcache");
-    return MemCacheImpl::create($config["server"]);
-  }
-  
-  public static function addIncludePath($path)
-  {
-    if (!in_array($path, self::$includePath)) {
-      self::$includePath[] = $path;
-    }
-  }
-  
-  public static function getIncludePath()
-  {
-    return self::$includePath;
   }
 }

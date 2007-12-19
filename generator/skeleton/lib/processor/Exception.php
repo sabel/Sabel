@@ -11,8 +11,6 @@
  */
 class Processor_Exception extends Sabel_Bus_Processor
 {
-  private $response = null;
-  
   public function execute($bus)
   {
     $this->response = $this->controller->getResponse();
@@ -31,6 +29,8 @@ class Processor_Exception extends Sabel_Bus_Processor
   
   protected function getReadableTrace($traces, $eol)
   {
+    // @todo improvement
+    
     $result = array();
     
     foreach ($traces as $line) {

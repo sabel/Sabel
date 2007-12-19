@@ -7,7 +7,7 @@ require_once('PHPUnit/TextUI/TestRunner.php');
 require_once('PHPUnit/Framework/TestCase.php');
 
 /**
- * functional test for Sabel Application
+ * unit test for Sabel Application
  *
  * @category   Test
  * @package    org.sabel.test

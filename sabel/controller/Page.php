@@ -11,10 +11,10 @@
  */
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
-  public 
+  public
     $request  = null,
     $response = null;
-  
+    
   protected
     $executed = false;
     

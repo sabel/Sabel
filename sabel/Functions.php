@@ -26,9 +26,9 @@ function load($className, $config)
   return Sabel_Container::create($config)->newInstance($className);
 }
 
-function l($message, $level = LOG_INFO, $file = null)
+function l($message, $level = LOG_INFO, $fileName = null)
 {
-  Sabel_Context::log($message, $level, $file);
+  Sabel_Context::log($message, $level, $fileName);
 }
 
 function r($const)

@@ -3,6 +3,16 @@
 require_once ("PHPUnit/TextUI/TestRunner.php");
 require_once ("PHPUnit/Framework/TestCase.php");
 
+/**
+ * Test Runner
+ *
+ * @category   Test
+ * @package    org.sabel.test
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
 {
   private $classPrefix = "Units_";
