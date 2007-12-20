@@ -12,15 +12,20 @@
 class Form_Processor extends Sabel_Bus_Processor
 {
   const SESSION_KEY = "sbl_forms";
+  const TIMEOUT_KEY = "sbl_forms_timeout";
+  const TIMEOUT_CNT = 15;
   
   private
     $forms   = array(),
     $token   = null,
-    $unityId = null;
-  
+    $unityId = null,
+    $counts  = array();
+    
   public function execute($bus)
   {
-    $this->forms = $this->storage->read(self::SESSION_KEY);
+    $this->forms  = $this->storage->read(self::SESSION_KEY);
+    $this->counts = $this->storage->read(self::TIMEOUT_KEY);
+    
     $action = $this->destination->getAction();
     $controller = $this->controller;
     $this->response = $controller->getResponse();
@@ -35,11 +40,17 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $this->unityId = $unityId = $annot[0][0];
     $this->token = $token = $this->request->getToken()->getValue();
+    
+    $this->countUp();
     if (realempty($token)) return;
     
-    if (isset($this->forms[$unityId][$token])) {
-      $form = $this->forms[$unityId][$token];
-      $this->applyPostValues($form);
+    $sesKey = $unityId . "_" . $token;
+    if (isset($this->forms[$sesKey])) {
+      $form = $this->forms[$sesKey];
+      $this->counts[$sesKey] = 0;
+      if ($this->request->isPost()) {
+        $this->applyPostValues($form)->unsetErrors();
+      }
       $controller->setAttribute($form->getName(), $form);
     }
   }
@@ -65,7 +76,8 @@ class Form_Processor extends Sabel_Bus_Processor
     } else {
       $token = $this->request->getToken()->createValue();
       $form = new Form_Object($model, $token);
-      $this->forms[$this->unityId][$token] = $form;
+      $this->forms[$this->unityId . "_" . $token]  = $form;
+      $this->counts[$this->unityId . "_" . $token] = 0;
       $this->controller->setAttribute($form->getName(), $form);
     }
     
@@ -76,14 +88,50 @@ class Form_Processor extends Sabel_Bus_Processor
   {
     $unityId = $this->unityId;
     $token = $this->request->getToken()->getValue();
+    
     if ($unityId !== null || !realempty($token)) {
-      unset($this->forms[$unityId][$token]);
+      unset($this->forms[$unityId . "_" . $token]);
+      unset($this->counts[$unityId . "_" . $token]);
     }
+  }
+  
+  private function countUp()
+  {
+    if (!empty($this->counts)) {
+      array_walk($this->counts, create_function('&$val', '++$val;'));
+    }
+    
+    return $this->counts;
+  }
+  
+  private function countDown()
+  {
+    if (!empty($this->counts)) {
+      $func = create_function('&$val', 'if ($val > 0) --$val;');
+      array_walk($this->counts, $func);
+    }
+    
+    return $this->counts;
   }
   
   public function shutdown($bus)
   {
-    $this->storage->write(self::SESSION_KEY, $this->forms);
+    $forms  = $this->forms;
+    $counts = $this->counts;
+    
+    if ($bus->get("controller")->redirect->isRedirected()) {
+      $counts = $this->countDown();
+    } else {
+      foreach ($counts as $k => $v) {
+        if ($v >= self::TIMEOUT_CNT) {
+          unset($forms[$k]);
+          unset($counts[$k]);
+        }
+      }
+    }
+    
+    $this->storage->write(self::SESSION_KEY, $forms);
+    $this->storage->write(self::TIMEOUT_KEY, $counts);
   }
   
   public function applyPostValues($form)
