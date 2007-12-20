@@ -34,15 +34,8 @@ class Renderer_Util_Element
   {
     if ($this->name !== null) return $this->name;
     
-    $tag  = $this->tag;
-    $name = array();
-    for ($i = 1, $size = strlen($tag); $i < $size; $i++) {
-      $char = substr($tag, $i, 1);
-      if ($char === ">" || $char === " " || $char === "/") break;
-      $name[] = $char;
-    }
-    
-    return $this->name = implode("", $name);
+    preg_match('/<([^ \/>]*)/', $this->tag, $matches);
+    return $this->name = $matches[1];
   }
   
   public function __get($key)
@@ -64,15 +57,12 @@ class Renderer_Util_Element
   {
     if ($this->attributes !== null) return $this->attributes;
     
-    $tag = trim(str_replace("<{$this->name()}", "", $this->tag));
-    if (mb_strpos($tag, "=") === false) return null;
-    
     $keys   = array();
     $values = array();
     $attributes = array();
     
-    if (preg_match_all('/(.*?)=("(.*?)"|\'(.*?)\')/m', $tag, $matches)) {
-      $keys = array_map("trim", $matches[1]);
+    if (preg_match_all('/([^ ]*?)=("([^"]*)"|\'([^\']*)\')/', $this->tag, $matches)) {
+      $keys = $matches[1];
       
       if (!empty($matches[3])) {
         $values = $matches[3];
