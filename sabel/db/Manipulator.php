@@ -265,9 +265,9 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $sql  = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->_execute($this->prepareSelect($sql));
 
-    if (empty($rows)) return false;
-
     $results = array();
+    if (empty($rows)) return $results;
+
     $source  = MODEL($this->model->getName());
 
     foreach ($rows as $row) {

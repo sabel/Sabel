@@ -68,11 +68,11 @@ class Paginate extends Sabel_Object
     
     $pager = Sabel_View_Pager::create($count, $limit);
     $pager->setPageNumber($page);
-    $attributes["pager"] = $pager;
+    $attributes["viewer"] = new Sabel_View_PageViewer($pager);
     
     if ($count === 0) {
       $attributes["offset"]  = 0;
-      $attributes["results"] = false;
+      $attributes["results"] = array();
     } else {
       $offset = $pager->getSqlOffset();
       
