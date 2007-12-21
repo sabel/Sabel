@@ -23,8 +23,10 @@ class Form_Processor extends Sabel_Bus_Processor
     
   public function execute($bus)
   {
-    $this->forms  = $this->storage->read(self::SESSION_KEY);
+    $this->forms = $this->storage->read(self::SESSION_KEY);
+    if ($this->form === null) $this->form = array();
     $this->counts = $this->storage->read(self::TIMEOUT_KEY);
+    if ($this->counts === null) $this->counts = array();
     
     $action = $this->destination->getAction();
     $controller = $this->controller;

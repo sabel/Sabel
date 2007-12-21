@@ -14,12 +14,9 @@ class Processor_Creator extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $injector = Sabel_Container::create(new Config_Factory());
+    $destination = $this->destination;
+    $creator = new Sabel_Controller_Creator();
     
-    $request     = $bus->get("request");
-    $destination = $bus->get("destination");
-    $storage     = $bus->get("storage");
-    
-    $creator = new Sabel_Controller_Creator(); 
     try {
       $controller = $creator->create($destination);
     } catch (Exception $e) {
@@ -38,10 +35,8 @@ class Processor_Creator extends Sabel_Bus_Processor
       }
     }
     
-    $controller->setup($request, $destination, $storage);
-    
+    $controller->setup($this->request, $destination, $this->storage);
     $controller->setBus($bus);
-    
     $bus->set("controller", $controller);
   }
 }

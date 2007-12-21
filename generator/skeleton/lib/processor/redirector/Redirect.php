@@ -1,6 +1,6 @@
 <?php
 
-class Processor_Redirecter_Redirect
+class Processor_Redirector_Redirect
 {
   private $bus = null;
   private $url = "";

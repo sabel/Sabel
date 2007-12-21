@@ -176,7 +176,6 @@ final class Sabel
     
     require ($BUS . "Config.php");
     require ($BUS . "Processor.php");
-    require ($BUS . "ProcessorCallback.php");
     
     require ($CACHE . "Manager.php");
     require ($CACHE . "Interface.php");
@@ -210,18 +209,23 @@ final class Sabel
     require ($VIEW . "Uri.php");
     require ($VIEW . "Resource.php");
     require ($VIEW . "Renderer.php");
+    require ($VIEW . "Repository.php");
     require ($VIEW . "Location.php");
-    require ($VIEW . "resource" . DS . "File.php");
-    require ($VIEW . "resource" . DS . "Template.php");
+    require ($VIEW . "resource"   . DS . "File.php");
+    require ($VIEW . "resource"   . DS . "Template.php");
+    require ($VIEW . "repository" . DS . "File.php");
+    require ($VIEW . "location"   . DS . "File.php");
     
     require ($DB . "Config.php");
     require ($DB . "Type.php");
     
+    require ($SABEL . "addon"     . DS . "Loader.php");
     require ($SABEL . "storage"   . DS . "Session.php");
     require ($SABEL . "router"    . DS . "Map.php");
     require ($SABEL . "response"  . DS . "Web.php");
     require ($SABEL . "exception" . DS . "Runtime.php");
     require ($SABEL . "logger"    . DS . "File.php");
+    require ($SABEL . "util"      . DS . "List.php");
   }
 }
 

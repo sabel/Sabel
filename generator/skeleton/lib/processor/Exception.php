@@ -20,28 +20,52 @@ class Processor_Exception extends Sabel_Bus_Processor
       if (!is_object($exception)) return;
       
       $eol = $this->getEol();
-      $msg = "ERROR: " . $exception->getMessage() . $eol . $eol
+      $msg = "Exception Message: " . $exception->getMessage() . $eol
+           . "At: " . date("r") . $eol . $eol
            . $this->getReadableTrace($exception->getTrace(), $eol);
            
-      $this->exception($msg);
+      $this->exception($exception, $msg);
     }
   }
   
   protected function getReadableTrace($traces, $eol)
   {
-    // @todo improvement
-    
     $result = array();
     
     foreach ($traces as $line) {
       $trace = array();
-      $trace[] = "FILE: {$line["file"]}({$line["line"]})";
+      
+      if (isset($line["file"])) {
+        $trace[] = "FILE: {$line["file"]}({$line["line"]})";
+      } else {
+        $trace[] = "FILE: Unknown";
+      }
+      
+      $args = array();
+      if (isset($line["args"]) && !empty($line["args"])) {
+        foreach ($line["args"] as $arg) {
+          if (is_object($arg)) {
+            $args[] = "(Object)" . get_class($arg);
+          } elseif (is_bool($arg)) {
+            $str = ($arg) ? "true" : "false";
+            $args[] = "(Boolean)" . $str;
+          } elseif (is_resource($arg)) {
+            $args[] = "(Resource)" . get_resource_type($arg);
+          } elseif ($arg === null) {
+            $args[] = "null";
+          } else {
+            $args[] = "(" . ucfirst(gettype($arg)) . ")" . $arg;
+          }
+        }
+      }
+      
+      $args = implode(", ", $args);
       
       if (isset($line["class"])) {
         $trace[] = "CALL: " . $line["class"]
-                 . $line["type"] . $line["function"] . "()";
+                 . $line["type"] . $line["function"] . "({$args})";
       } else {
-        $trace[] = "FUNCTION: " . $line["function"] . "()";
+        $trace[] = "FUNCTION: " . $line["function"] . "({$args})";
       }
       
       $result[] = implode($eol, $trace);
@@ -50,9 +74,14 @@ class Processor_Exception extends Sabel_Bus_Processor
     return implode($eol . $eol, $result);
   }
   
-  private function exception($message)
+  private function exception($exception, $message)
   {
     if (ENVIRONMENT === PRODUCTION) {
+      if ($exception instanceof Sabel_Exception_Runtime) {
+        $exception->writeSyslog($message);
+      }
+      
+      // send mail. etc.
       
     } else {
       $this->response->setResponse("exception_message", $message);
@@ -61,6 +90,6 @@ class Processor_Exception extends Sabel_Bus_Processor
   
   private function getEol()
   {
-    return (ENVIRONMENT === DEVELOPMENT) ? "<br/>" : "\n";
+    return (ENVIRONMENT === DEVELOPMENT) ? "<br/>" : "\r\n";
   }
 }

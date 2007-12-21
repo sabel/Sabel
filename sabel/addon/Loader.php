@@ -1,14 +1,24 @@
 <?php
 
+/**
+ * Addon Loader
+ *
+ * @category   Addon
+ * @package    org.sabel.addon
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Addon_Loader extends Sabel_Object
 {
-  private $dir = "";
-  private $name = "";
-  private $bus = null;
+  private
+    $dir  = "",
+    $name = "",
+    $bus  = null;
   
   public function __construct($dir, $name, $bus = null)
   {
-    $this->dir = $dir;
+    $this->dir  = $dir;
     $this->name = $name;
     
     if ($bus !== null) {

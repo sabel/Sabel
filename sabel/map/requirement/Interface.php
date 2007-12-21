@@ -3,6 +3,7 @@
 /**
  * Interface for requirement
  *
+ * @interface
  * @category   Map
  * @package    org.sabel.map.requirement
  * @author     Mori Reo <mori.reo@gmail.com>

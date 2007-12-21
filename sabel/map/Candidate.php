@@ -213,7 +213,7 @@ class Sabel_Map_Candidate implements Iterator
   {
     if ($this->elements[$name]->isTypeOf(self::CONSTANT)) {
       $msg = "could't apply requirement to constant elements";
-      throw new Sabel_Map_Candidate_IllegalSetting($msg);
+      throw new Sabel_Exception_Runtime($msg);
     }
     
     if (isset($this->elements[$name])) {
@@ -325,7 +325,7 @@ class Sabel_Map_Candidate implements Iterator
   {
     if ($this->hasRequirement()) {
       $msg = "could't change to constant elements. it's has a requirement";
-      throw new Sabel_Map_Candidate_IllegalSetting($msg);
+      throw new Sabel_Exception_Runtime($msg);
     }
     
     if (isset($this->elements[$name])) {
@@ -620,6 +620,3 @@ class Sabel_Map_Candidate implements Iterator
     $this->size = count($this->elements);
   }
 }
-
-class Sabel_Map_Candidate_IllegalSetting extends Exception {}
-class Sabel_Map_Candidate_NotFound extends Exception {}

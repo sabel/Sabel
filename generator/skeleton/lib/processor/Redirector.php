@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Processor_Redirecter
+ * Processor_Redirector
  *
  * @category   Processor
  * @package    lib.processor
@@ -9,11 +9,11 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Redirecter extends Sabel_Bus_Processor
+class Processor_Redirector extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $redirect = new Processor_Redirecter_Redirect($bus);
+    $redirect = new Processor_Redirector_Redirect($bus);
     $this->controller->setAttribute("redirect", $redirect);
   }
   

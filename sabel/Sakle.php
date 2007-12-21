@@ -19,7 +19,6 @@ class Sakle
   
   public function __construct()
   {
-    // @todo compatibility for Windows
     $args = $_SERVER["argv"];
     array_shift($args);
     $this->arguments = $args;
@@ -60,26 +59,10 @@ class Sakle
     }
   }
   
-  public function allTestRun()
-  {
-    $pathToClass = RUN_BASE . DS . "tasks" . DS . "TestSuite.php";
-    
-    if (is_readable($pathToClass)) {
-      require ($pathToClass);
-      $ins = new TestSuite();
-      $ins->run($this->arguments);
-    }
-  }
-  
-  public static function main($class = null)
+  public static function main($class)
   {
     $instance = new self();
-    
-    if ($class === null) {
-      $instance->allTestRun();
-    } else {
-      $instance->run($class);
-    }
+    $instance->run($class);
   }
 }
 
@@ -93,5 +76,5 @@ if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
 if (isset($_SERVER["argv"][1])) {
   Sakle::main($_SERVER["argv"][1]);
 } else {
-  Sakle::main();
+  echo "@todo error";
 }

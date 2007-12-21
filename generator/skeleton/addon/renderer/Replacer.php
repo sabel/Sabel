@@ -32,7 +32,7 @@ class Renderer_Replacer extends Sabel_Object
     return $contents;
   }
   
-  public function simpleReplace($contents)
+  protected function simpleReplace($contents)
   {
     $search  = array("</if>", "<else/>", "<else />", "</foreach>");
     $replace = array("<? endif ?>", "<? else : ?>", "<? else : ?>", "<? endforeach ?>");
@@ -40,7 +40,7 @@ class Renderer_Replacer extends Sabel_Object
     return str_replace($search, $replace, $contents);
   }
   
-  public function if_replace($element, $if = "if")
+  protected function if_replace($element, $if = "if")
   {
     if (($equal = $element->equal) !== null) {
       $params = array_map("trim", explode(",", $equal));
@@ -64,17 +64,17 @@ class Renderer_Replacer extends Sabel_Object
     throw new Sabel_Exception_Runtime("if parameter is empty.");
   }
   
-  public function elseif_replace($element)
+  protected function elseif_replace($element)
   {
     return $this->if_replace($element, "elseif");
   }
   
-  public function elif_replace($element)
+  protected function elif_replace($element)
   {
     return $this->elseif_replace($element);
   }
   
-  public function foreach_replace($element)
+  protected function foreach_replace($element)
   {
     if (($args = $element->args) === null) {
       throw new Sabel_Exception_Runtime("foreach parameter is empty.");
@@ -94,7 +94,7 @@ class Renderer_Replacer extends Sabel_Object
     }
   }
   
-  public function partial_replace($element)
+  protected function partial_replace($element)
   {
     if (($name = $element->name) === null) {
       throw new Sabel_Exception_Runtime("template name is null.");
@@ -127,7 +127,7 @@ class Renderer_Replacer extends Sabel_Object
     }
   }
   
-  public function formerr_replace($element)
+  protected function formerr_replace($element)
   {
     if (($form = $element->form) === null) {
       throw new Sabel_Exception_Runtime("form name is null.");
@@ -140,5 +140,19 @@ class Renderer_Replacer extends Sabel_Object
          . '<? endif ?>';
          
     return sprintf($fmt, $form);
+  }
+  
+  protected function echo_replace($element)
+  {
+    if (($arg = $element->arg) === null) {
+      throw new Sabel_Exception_Runtime("empty argument.");
+    }
+    
+    return "<?= $arg ?>";
+  }
+  
+  protected function e_replace($element)
+  {
+    return $this->echo_replace($element);
   }
 }
