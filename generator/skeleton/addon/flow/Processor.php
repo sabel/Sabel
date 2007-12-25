@@ -18,23 +18,12 @@ class Flow_Processor extends Sabel_Bus_Processor
   private $refMethod = null;
   private $state     = null;
   
-  private function initialize($bus)
-  {
-    $require = array("request", "storage", "controller", "destination");
-    
-    if ($bus->has($require)) {
-      $this->action = $this->destination->getAction();
-    } else {
-      $msg = "must need required bus data: " . join(", ", $require);
-      throw new Sabel_Exception_Runtime($msg);
-    }
-  }
-  
   public function execute($bus)
   {
-    $this->initialize($bus);
+    if ($this->response->isFailure() ||
+        !$this->controller instanceof Flow_Page) return;
     
-    if (!$this->controller instanceof Flow_Page) return;
+    $this->action = $this->destination->getAction();
     
     $controller = $this->controller;
     $response = $this->response;
@@ -48,7 +37,6 @@ class Flow_Processor extends Sabel_Bus_Processor
     l("[flow] token is '{$token}'");
     
     if (!$controller->hasMethod($this->action)) {
-      $bus->getList()->find("executer")->unlink();
       return $response->notFound();
     }
     
@@ -62,7 +50,6 @@ class Flow_Processor extends Sabel_Bus_Processor
     
     if ($state === null) {
       l("[flow] invalid token '{$token}'.");
-      $bus->getList()->find("executer")->unlink();
       return $response->notFound();
     }
     
@@ -109,7 +96,6 @@ class Flow_Processor extends Sabel_Bus_Processor
       }
     } else {
       l("[flow] your request was denied.");
-      $bus->getList()->find("executer")->unlink();
       return $response->notFound();
     }
     

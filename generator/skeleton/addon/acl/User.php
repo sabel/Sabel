@@ -41,51 +41,43 @@ class Acl_User
     $this->attributes = $attributes;
   }
   
-  public function authenticate($role = null)
+  public function authenticate($role)
   {
-    if ($role !== null) {
-      $this->attributes[$role] = true;
-    }
-    
-    $this->setAuthenticated(true);
+    $this->attributes[self::AUTHED_KEY] = true;
+    $this->addRole($role);
   }
   
   public function deAuthenticate()
   {
-    $this->setAuthenticated(false);
+    $this->destroy();
   }
   
-  public function setAuthenticated($bool)
+  public function addRole($add)
   {
-    $this->attributes[self::AUTHED_KEY] = $bool;
-  }
-  
-  public function isAuthenticated($role = null)
-  {
-    if ($role !== null) {
-      return $this->isAuthenticatedAs($role);
-    } elseif (isset($this->attributes[self::AUTHED_KEY])) {
-      return $this->attributes[self::AUTHED_KEY];
-    } else {
-      return false;
+    $role = $this->__get("role");
+    
+    if ($role === null) {
+      $this->attributes["role"] = array($add);
+    } elseif (!in_array($add, $role)) {
+      $role[] = $add;
+      $this->attributes["role"] = $role;
     }
   }
   
-  public function isAuthenticatedAs($role)
+  public function removeRole($remove)
+  {
+    $role = $this->__get("role");
+    
+    if (is_array($role)) {
+      unset($role[$remove]);
+      $this->attributes["role"] = $role;
+    }
+  }
+  
+  public function isAuthenticated()
   {
     $attr = $this->attributes;
-    $key  = self::AUTHED_KEY;
-    
-    if (strpos($role, "|") === false) {
-      return (isset($attr[$key])  && $attr[$key]  === true &&
-              isset($attr[$role]) && $attr[$role] === true);
-    } else {
-      foreach (explode("|", $role) as $r) {
-        if ($this->isAuthenticatedAs($r)) return true;
-      }
-      
-      return false;
-    }
+    return (isset($attr[self::AUTHED_KEY]) && $attr[self::AUTHED_KEY]);
   }
   
   public function isTypeOf($compare)
@@ -97,6 +89,6 @@ class Acl_User
   public function destroy()
   {
     $this->attributes = array();
-    $this->attributes["authenticated"] = false;
+    $this->attributes[self::AUTHED_KEY] = false;
   }
 }

@@ -13,21 +13,19 @@
  */
 class Acl_Processor extends Sabel_Bus_Processor
 {
-  const DENY_ACTION = "notFound";
-  const RULE_DENY   = "deny";
-  const RULE_ALLOW  = "allow";
+  const DENY_ACTION = "forbidden";
   
-  private $user = null;
-  
-  /**
-   * execute an action.
-   * overwrite parent executeAction method.
-   *
-   * @param string $action
-   */
+  private
+    $user    = null,
+    $configs = array();
+    
   public function execute($bus)
   {
-    $action = $this->destination->getAction();
+    $config = new Acl_Config();
+    $this->configs = $config->configure();
+    
+    $destination = $this->destination;
+    $action = $destination->getAction();
     $this->user = new Acl_User();
     
     if ($this->storage->has("acl_user")) {
@@ -35,19 +33,26 @@ class Acl_Processor extends Sabel_Bus_Processor
     }
     
     $this->controller->setAttribute("user", $this->user);
-    $this->reflection = new Sabel_Annotation_ReflectionClass($this->controller);
     
-    if ($this->reflection->hasAnnotation("default")) {
-      $default = $this->reflection->getAnnotation("default");
-      $default = $default[0][0];
-    } else {
-      $default = self::RULE_DENY;
-    }
+    $module = $destination->getModule();
+    $controller = $destination->getController();
     
-    if ($default === self::RULE_DENY) {
-      $this->processDefaultDeny($this->controller, $action);
+    if (isset($this->configs[$module])) {
+      $mConfig = $this->configs[$module];
+      $cConfig = $mConfig->getController($controller);
+      
+      if ($cConfig === null) {
+        if ($this->isAllow($mConfig)) return;
+        $authUri = $mConfig->authUri();
+      } else {
+        if ($this->isAllow($cConfig)) return;
+        $authUri = $cConfig->authUri();
+        if ($authUri === null) $authUri = $mConfig->authUri();
+      }
+      
+      $this->forbidden($authUri);
     } else {
-      $this->processDefaultAllow($this->controller, $action);
+      $this->forbidden();
     }
   }
   
@@ -56,56 +61,24 @@ class Acl_Processor extends Sabel_Bus_Processor
     $this->storage->write("acl_user", $this->user->toArray());
   }
   
-  private function processDefaultDeny($controller, $action)
+  private function isAllow($config)
   {
-    if (!$this->user->isAuthenticated($this->getRole())) {
-      $publicActions = $this->getAclActions("public");
-      if (!$this->isActionFound($publicActions, $action)) {
-        $this->destination->setAction(self::DENY_ACTION);
-      }
-    }
-  }
-  
-  private function processDefaultAllow($controller, $action)
-  {
-    if (!$this->user->isAuthenticated($this->getRole())) {
-      $privateActions = $this->getAclActions("private");
-      if ($this->isActionFound($privateActions, $action)) {
-        $this->destination->setAction(self::DENY_ACTION);
-      }
-    }
-  }
-  
-  private function getRole()
-  {
-    if ($this->reflection->hasAnnotation("role")) {
-      $role = $this->reflection->getAnnotation("role");
-      return $role[0][0];
+    if ($config->isPublic()) {
+      return true;
+    } elseif ($this->user->isAuthenticated()) {
+      return $config->isAllow($this->user->role);
     } else {
-      return null;
+      return false;
     }
   }
   
-  private function getAclActions($type)
+  private function forbidden($authUri = null)
   {
-    if ($this->reflection->hasAnnotation($type)) {
-      $actions = $this->reflection->getAnnotation($type);
-      return $actions[0];
+    if (($redirector = $this->controller->redirect) && $authUri !== null) {
+      $redirector->to($authUri);
     } else {
-      return array();
+      $this->response->forbidden();
+      $this->destination->setAction(self::DENY_ACTION);
     }
-  }
-  
-  private function isActionFound($actions, $targetAction)
-  {
-    if (empty($actions)) return false;
-    
-    foreach ($actions as $action) {
-      if (fnmatch($action, $targetAction)) {
-        return true;
-      }
-    }
-    
-    return false;
   }
 }

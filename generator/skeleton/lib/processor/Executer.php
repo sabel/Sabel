@@ -13,6 +13,8 @@ class Processor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
+    if ($this->response->isFailure()) return;
+    
     $action = $this->destination->getAction();
     
     try {
