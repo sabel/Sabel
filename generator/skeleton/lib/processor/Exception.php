@@ -13,8 +13,6 @@ class Processor_Exception extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $this->response = $this->controller->getResponse();
-    
     if ($this->response->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();
       if (!is_object($exception)) return;

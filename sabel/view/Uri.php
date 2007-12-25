@@ -13,11 +13,6 @@ class Sabel_View_Uri
 {
   private static $instance = null;
   
-  public function __construct()
-  {
-
-  }
-  
   public function hyperlink($params, $anchor = null)
   {
     if (is_object($anchor)) $anchor = $anchor->__toString();
@@ -29,17 +24,17 @@ class Sabel_View_Uri
   public function uri($param, $absolute = false, $secure = false)
   {
     $params = $this->convert($param);
+    
     if (isset($_SERVER["SERVER_NAME"])) {
       $httphost = $_SERVER["SERVER_NAME"];
     } else {
       $httphost = "localhost";
     }
     
-    $protocol = ($secure) ? 'https' : 'http';
+    $protocol = ($secure) ? "https" : "http";
     
-    $uriPrefix = ($absolute) ? $protocol . '://' . $httphost : '';
-    $context = Sabel_Context::getContext();
-    $uri = $context->getCandidate()->uri($params);
+    $uriPrefix = ($absolute) ? $protocol . "://" . $httphost : "";
+    $uri = Sabel_Context::getContext()->getCandidate()->uri($params);
     
     return $uriPrefix . "/" . $uri;
   }
@@ -49,6 +44,7 @@ class Sabel_View_Uri
     $buf = array();
     $params = explode(",", $param);
     $reserved = ";";
+    
     foreach ($params as $part) {
       $line     = array_map("trim", explode(":", $part));
       $reserved = ($line[0] === "n") ? "candidate" : $line[0];

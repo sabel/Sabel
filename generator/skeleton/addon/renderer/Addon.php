@@ -34,7 +34,6 @@ class Renderer_Addon extends Sabel_Object
     }
     
     $processor->setRenderer($renderer);
-    $renderer->setPreprocessor(new Renderer_Replacer());
     $bus->getList()->find("view")->insertPrevious("renderer", $processor);
   }
 }

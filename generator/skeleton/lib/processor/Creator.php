@@ -11,17 +11,21 @@
  */
 class Processor_Creator extends Sabel_Bus_Processor
 {
+  const CONTROLLERS_DIR    = "controllers";
+  const DEFAULT_CONTROLLER = "index";
+  
   public function execute($bus)
   {
-    $injector = Sabel_Container::create(new Config_Factory());
     $destination = $this->destination;
-    $creator = new Sabel_Controller_Creator();
     
     try {
-      $controller = $creator->create($destination);
+      // create response object.
+      $this->response = new Sabel_Response_Web();
+      $controller = $this->createController($this->response);
     } catch (Exception $e) {
       $module = $destination->getModule();
       l("can't create controller use default {$module}/index/index");
+      
       $destination->setModule($module);
       $destination->setController("index");
       $destination->setAction("notFound");
@@ -37,6 +41,28 @@ class Processor_Creator extends Sabel_Bus_Processor
     
     $controller->setup($this->request, $destination, $this->storage);
     $controller->setBus($bus);
+    
     $bus->set("controller", $controller);
+  }
+  
+  protected function createController($response)
+  {
+    list($module, $controller,) = $this->destination->toArray();
+    $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR);
+    
+    if ($controller !== "") {
+      $class .= "_" . ucfirst($controller);
+    } else {
+      $class .= "_" . ucfirst(self::DEFAULT_CONTROLLER);
+    }
+    
+    Sabel::using($class);
+    
+    if (class_exists($class, false)) {
+      l("instanciate " . $class);
+      return new $class($response);
+    } else {
+      throw new Sabel_Exception_Runtime("controller not found.");
+    }
   }
 }

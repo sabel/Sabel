@@ -35,8 +35,9 @@ class Flow_Processor extends Sabel_Bus_Processor
     $this->initialize($bus);
     
     if (!$this->controller instanceof Flow_Page) return;
+    
     $controller = $this->controller;
-    $response = $controller->getResponse();
+    $response = $this->response;
     
     $key = implode("_", array($this->destination->getModule(),
                               $this->destination->getController()));
@@ -77,7 +78,6 @@ class Flow_Processor extends Sabel_Bus_Processor
         $state->clearEndFlow();
       }
       
-      $response = $controller->getResponse();
       if (($warning = $state->warning) !== null) {
         // @todo
         $response->setResponse("errmsg", $warning);
@@ -119,7 +119,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function afterExecute($bus)
   {
-    if ($this->isTransit() && $this->controller->getResponse()->isSuccess()) {
+    if ($this->isTransit() && $this->response->isSuccess()) {
       $this->state->save();
     }
   }

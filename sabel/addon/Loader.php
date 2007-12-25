@@ -15,7 +15,7 @@ class Sabel_Addon_Loader extends Sabel_Object
     $dir  = "",
     $name = "",
     $bus  = null;
-  
+    
   public function __construct($dir, $name, $bus = null)
   {
     $this->dir  = $dir;
@@ -33,7 +33,7 @@ class Sabel_Addon_Loader extends Sabel_Object
     $myAddonDir = $addonDir . DS . $addonName;
     $pathToAddonClass = $myAddonDir . DS . "Addon" . PHP_SUFFIX;
     
-    if (is_readable($pathToAddonClass)) {
+    if (is_file($pathToAddonClass)) {
       $dirs = explode(DS, dirname($pathToAddonClass));
       $dir = $dirs[count($dirs) - 1];
       
@@ -50,14 +50,17 @@ class Sabel_Addon_Loader extends Sabel_Object
         $switch = $addon->load();
       }
     } else {
-      throw new Sabel_Exception_Runtime($pathToAddonClass . " not readable");
+      throw new Sabel_Exception_FileNotFound($pathToAddonClass);
     }
     
     if ($switch && $this->bus !== null) {
       $processorClassFile = $myAddonDir . DS . "Processor" . PHP_SUFFIX;
+      
       if (is_readable($processorClassFile)) {
         require ($processorClassFile);
         $addon->loadProcessor($this->bus);
+      } else {
+        throw new Sabel_Exception_FileNotFound($processorClassFile);
       }
     }
   }

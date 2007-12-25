@@ -55,8 +55,7 @@ class SabelDirectoryAndFileCreator
       } else {
         Sabel_Cli::success("create: {$name}");
         fwrite(fopen($element, "w"), file_get_contents($child));
-        if ($element == RUN_BASE . DS . "logs/sabel.log" ||
-            $element == RUN_BASE . DS . "config/connection.php") {
+        if ($element == RUN_BASE . DS . "logs/sabel.log") {
           chmod($element, 0777);
         }
       }

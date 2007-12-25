@@ -12,6 +12,11 @@
  */
 class Renderer_Sabel extends Sabel_View_Renderer
 {
+  public function initialize()
+  {
+    $this->setPreprocessor(new Renderer_Replacer());
+  }
+  
   public function rendering($sbl_template, $sbl_tpl_values, $sbl_tpl_path = null)
   {
     $hash = $this->createHash($sbl_template);

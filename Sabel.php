@@ -158,6 +158,7 @@ final class Sabel
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
+    require ($SABEL . "Environment.php");
     require ($SABEL . "Router.php");
     require ($SABEL . "Request.php");
     require ($SABEL . "Destination.php");
@@ -170,7 +171,6 @@ final class Sabel
     $REQUEST    = $SABEL . "request"    . DS;
     $VIEW       = $SABEL . "view"       . DS;
     $CONTAINER  = $SABEL . "container"  . DS;
-    $CONTROLLER = $SABEL . "controller" . DS;
     $ANNOTATION = $SABEL . "annotation" . DS;
     $DB         = $SABEL . "db"         . DS;
     
@@ -198,9 +198,6 @@ final class Sabel
     require ($ANNOTATION . "ReflectionClass.php");
     require ($ANNOTATION . "ReflectionMethod.php");
     
-    require ($CONTROLLER . "Creator.php");
-    require ($CONTROLLER . "Page.php");
-    
     require ($CONTAINER . "Injector.php");
     require ($CONTAINER . "Bind.php");
     require ($CONTAINER . "DI.php");
@@ -219,13 +216,14 @@ final class Sabel
     require ($DB . "Config.php");
     require ($DB . "Type.php");
     
-    require ($SABEL . "addon"     . DS . "Loader.php");
-    require ($SABEL . "storage"   . DS . "Session.php");
-    require ($SABEL . "router"    . DS . "Map.php");
-    require ($SABEL . "response"  . DS . "Web.php");
-    require ($SABEL . "exception" . DS . "Runtime.php");
-    require ($SABEL . "logger"    . DS . "File.php");
-    require ($SABEL . "util"      . DS . "List.php");
+    require ($SABEL . "storage"    . DS . "Session.php");
+    require ($SABEL . "router"     . DS . "Map.php");
+    require ($SABEL . "controller" . DS . "Page.php");
+    require ($SABEL . "response"   . DS . "Web.php");
+    require ($SABEL . "exception"  . DS . "Runtime.php");
+    require ($SABEL . "logger"     . DS . "File.php");
+    require ($SABEL . "util"       . DS . "List.php");
+    require ($SABEL . "addon"      . DS . "Loader.php");
   }
 }
 

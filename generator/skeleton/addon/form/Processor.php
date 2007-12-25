@@ -30,7 +30,6 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $action = $this->destination->getAction();
     $controller = $this->controller;
-    $this->response = $controller->getResponse();
     $controller->setAttribute("form", $this);
     
     if (!$controller->hasMethod($action)) return;

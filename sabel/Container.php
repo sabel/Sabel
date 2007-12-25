@@ -11,18 +11,22 @@
  */
 class Sabel_Container
 {
-  private static $components = array();
+  private static $configs = array();
   
-  public static function create($component)
+  public static function create($config)
   {
-    $name = get_class($component);
-    if (isset(self::$components[$name])) {
-      return self::$components[$name];
+    if (!$config instanceof Sabel_Container_Injection) {
+      $message = var_export($config, 1) . " is not Sabel_Container_Injection.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    $injector = new Sabel_Container_Injector($component);
-    self::$components[$name] = $injector;
+    $name = get_class($config);
     
-    return $injector;
+    if (isset(self::$configs[$name])) {
+      return self::$configs[$name];
+    }
+    
+    $injector = new Sabel_Container_Injector($config);
+    return self::$configs[$name] = $injector;
   }
 }

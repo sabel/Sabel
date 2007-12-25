@@ -19,11 +19,6 @@ abstract class Sabel_View_Renderer extends Sabel_Object
   
   abstract public function rendering($_tpl_string, $_tpl_values, $_tpl_path = null);
   
-  public function __construct()
-  {
-    $this->preprocessor = new Sabel_View_Preprocessor_Default();
-  }
-  
   public function setPreprocessor(Sabel_View_Preprocessor_Interface $p)
   {
     $this->preprocessor = $p;
@@ -31,7 +26,11 @@ abstract class Sabel_View_Renderer extends Sabel_Object
   
   public function preprocess($contents)
   {
-    return $this->preprocessor->execute($contents);
+    if (is_object($this->preprocessor)) {
+      return $this->preprocessor->execute($contents);
+    } else {
+      return $contents;
+    }
   }
   
   public function partial($name, $controller = null, $assign = array())
@@ -53,7 +52,7 @@ abstract class Sabel_View_Renderer extends Sabel_Object
       $resource = $repository->find();
       return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
     } else {
-      throw new Sabel_Exception_Runtime("partial() renderer not found.");
+      throw new Sabel_Exception_Runtime("renderer object is not found.");
     }
   }
   

@@ -35,10 +35,11 @@ class Sabel_Environment extends Sabel_Object
     }
     
     $key = strtoupper($key);
-    if ($key === "HTTP_HOST" && !isset($_SERVER[$key])) {
+    
+    if ($key === "HTTP_HOST" && !isset($_SERVER["HTTP_HOST"])) {
       return "localhost";
-    } else if ($key === "SERVER_PORT" && !isset($_SERVER[$key])) {
-      return 80;
+    } elseif ($key === "SERVER_PORT" && !isset($_SERVER["SERVER_PORT"])) {
+      return "80";
     }
     
     return (isset($_SERVER[$key])) ? $_SERVER[$key] : null;

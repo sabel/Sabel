@@ -20,7 +20,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
       Sabel::fileUsing($libdb . DS . $file . PHP_SUFFIX, true);
     }
     
-    Sabel_DB_Config::initialize();
+    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     // creates or resumes session.
     $this->storage->start();

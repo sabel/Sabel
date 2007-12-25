@@ -18,11 +18,7 @@ function add_include_paths($paths)
 
 function load($className, $config)
 {
-  if (!$config instanceof Sabel_Container_Injection) {
-    $msg = var_export($config, 1) . " is not Sabel_Container_Injection";
-    throw new Sabel_Exception_Runtime($msg);
-  }
-  
+  if (is_string($config)) $config = new $config();
   return Sabel_Container::create($config)->newInstance($className);
 }
 

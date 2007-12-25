@@ -22,7 +22,7 @@ class Flow_Addon extends Sabel_Object
   
   public function load()
   {
-    return false;
+    return true;
   }
   
   public function loadProcessor($bus)

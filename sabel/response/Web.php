@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Response_Web implements Sabel_Response
+class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
 {
   private $location = "";
   private $locationUri = "";

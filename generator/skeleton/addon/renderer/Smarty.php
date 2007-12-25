@@ -21,8 +21,9 @@ class Renderer_Smarty extends Sabel_View_Renderer
     $smarty->compile_dir = COMPILE_DIR_PATH . DS;
     
     if (ENVIRONMENT === PRODUCTION) {
-      $smarty->caching = true;
+      $smarty->caching   = true;
       $smarty->cache_dir = CACHE_DIR_PATH . DS;
+      $simplate->cache_lifetime = 600;
     }
     
     $this->smarty = $smarty;

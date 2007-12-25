@@ -34,12 +34,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * default constructer of page controller
    *
    */
-  public final function __construct()
+  public final function __construct(Sabel_Response $response)
   {
     $this->reserved = get_class_methods("Sabel_Controller_Page");
-    
-    $injector = Sabel_Container::create(new Config_Factory());
-    $this->response = $injector->newInstance("Sabel_Response");
+    $this->response = $response;
   }
   
   /**
@@ -88,7 +86,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    * @param string $action action method name
    * @return mixed result of execute an action.
    */
-  public function execute($action, $params = array())
+  public function execute($action = null, $params = array())
   {
     if (!$this->setup) {
       throw new Sabel_Exception_Runtime("page controller must be setup");
@@ -101,6 +99,8 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if ($this->request->isTypeOf("css")) {
       $this->response->setContentType("text/css");
     }
+    
+    if ($action === null) $action = $this->action;
     
     if ($this->isReserved($action)) {
       $this->response->notfound();

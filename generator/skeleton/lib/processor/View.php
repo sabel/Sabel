@@ -26,14 +26,14 @@ class Processor_View extends Sabel_Bus_Processor
     
     if ($controller->renderText) {
       return $this->result = $this->rendering($controller->contents, $responses);
-      return;
     } elseif ($controller->renderImage) {
-      $this->result = $controller->contents;
-      return;
+      return $this->result = $controller->contents;
     }
     
     if ($this->response->isNotFound()) {
       $this->destination->setAction("notFound");
+    } elseif ($this->response->isForbidden()) {
+      $this->destination->setAction("forbidden");
     } elseif ($this->response->isServerError()) {
       $this->destination->setAction("serverError");
     }

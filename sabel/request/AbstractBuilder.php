@@ -36,8 +36,8 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   protected function divideUriAndParameter($uri = null)
   {
     if ($uri === null) {
-      $host = $_SERVER["HTTP_HOST"];
-      $uri  = "http://" . $host . "/" . $_SERVER["REQUEST_URI"];
+      $serverName = Sabel_Environment::get("SERVER_NAME");
+      $uri  = "http://" . $serverName . "/" . $_SERVER["REQUEST_URI"];
     }
     
     if ($uri === "/") {

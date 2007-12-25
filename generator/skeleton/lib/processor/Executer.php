@@ -18,7 +18,9 @@ class Processor_Executer extends Sabel_Bus_Processor
     try {
       $this->controller->setAction($action);
       $this->controller->initialize();
-      $this->response = $this->controller->execute($action)->getResponse();
+      if (!$this->response->isFailure()) {
+        $this->controller->execute();
+      }
     } catch (Exception $e) {
       l($e->getMessage());
       $this->response->serverError();

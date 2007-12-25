@@ -1,7 +1,7 @@
-<h2>サーバーでエラーが発生しました</h2>
+<h2>500 Internal Server Error</h2>
 
 <p>
-  ページを表示できません(500 Internal Server Error)
+  ページを表示できません
 </p>
 
 <? if (isset($exception_message)) : ?>

@@ -22,16 +22,10 @@ class Processor_Redirector extends Sabel_Bus_Processor
     $redirect = $this->controller->getAttribute("redirect");
     
     if ($redirect->isRedirected()) {
-      if (isset($_SERVER["HTTP_HOST"])) {
-        $host = $_SERVER["HTTP_HOST"];
-      } else {
-        $host = "localhost";
-      }
-      
-      $ignored = "";
-      
       if (defined("URI_IGNORE")) {
         $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+      } else {
+        $ignored = "";
       }
       
       $token = $this->request->getToken()->getValue();
@@ -44,7 +38,8 @@ class Processor_Redirector extends Sabel_Bus_Processor
         $to = $redirect->getUrl() . "?token={$token}";
       }
       
-      $this->response->location($host, $ignored . $to);
+      $serverName = Sabel_Environment::get("SERVER_NAME");
+      $this->response->location($serverName, $ignored . $to);
     }
   }
 }
