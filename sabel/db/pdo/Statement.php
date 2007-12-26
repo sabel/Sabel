@@ -3,22 +3,25 @@
 /**
  * Sabel_DB_Pdo_Statement
  *
+ * @abstract
  * @category   DB
- * @package    org.sabel.db
+ * @package    org.sabel.db.pdo
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
+abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
 {
   protected $placeHolderPrefix = ":";
   protected $placeHolderSuffix = "";
-
+  
+  abstract public function escape(array $values);
+  
   public function __construct(Sabel_DB_Pdo_Driver $driver)
   {
     $this->driver = $driver;
   }
-
+  /*
   public function values(array $values)
   {
     if ($this->driver->getDriverId() === "pdo-mysql" && $this->isInsert()) {
@@ -28,7 +31,7 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
         }
       }
     }
-
+    
     return parent::values($values);
   }
 
@@ -84,8 +87,8 @@ class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
 
     return $values;
   }
-
-  private function isVarcharOfDefaultNull($column)
+  */
+  protected function isVarcharOfDefaultNull($column)
   {
     return ($column->isString() && $column->default === null);
   }

@@ -2,7 +2,7 @@
 
 class Test_DB_Oci extends Test_DB_Test
 {
-  private static $params1 = array("driver"   => "oci",
+  private static $params1 = array("package"   => "sabel.db.oci",
                                   "host"     => "127.0.0.1",
                                   "user"     => "develop",
                                   "password" => "develop",
@@ -35,9 +35,7 @@ class Test_DB_Oci extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Config::regist("default",  self::$params1);
-    //Sabel_DB_Config::regist("default2", self::$params2);
-
+    Sabel_DB_Config::add("default",  self::$params1);
     Test_DB_Test::$db = "ORACLE";
   }
 }

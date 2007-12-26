@@ -47,35 +47,39 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
   
   protected function setDefaultValue($column, $default)
   {
-    if ($default === null || $default === "") {
-      $column->default = null;
-    } else {
-      switch ($column->type) {
-        case Sabel_DB_Type::INT:
-        case Sabel_DB_Type::SMALLINT:
-          $column->default = (int)$default;
-          break;
-          
-        case Sabel_DB_Type::FLOAT:
-        case Sabel_DB_Type::DOUBLE:
-          $column->default = (float)$default;
-          break;
-          
-        case Sabel_DB_Type::BOOL:
-          if (is_bool($default)) {
-            $column->default = $default;
-          } else {
-            $column->default = in_array($default, array("1", "t", "true"));
-          }
-          break;
-          
-        case Sabel_DB_Type::BIGINT:
-          $column->default = (string)$default;
-          break;
-          
-        default:
+    if ($default === null ||
+        (is_string($default) &&
+        ($default === "" || strtolower($default) === "null"))
+       ) {
+       $column->default = null;
+       return;
+    }
+    
+    switch ($column->type) {
+      case Sabel_DB_Type::INT:
+      case Sabel_DB_Type::SMALLINT:
+        $column->default = (int)$default;
+        break;
+        
+      case Sabel_DB_Type::FLOAT:
+      case Sabel_DB_Type::DOUBLE:
+        $column->default = (float)$default;
+        break;
+        
+      case Sabel_DB_Type::BOOL:
+        if (is_bool($default)) {
           $column->default = $default;
-      }
+        } else {
+          $column->default = in_array($default, array("1", "t", "true"));
+        }
+        break;
+        
+      case Sabel_DB_Type::BIGINT:
+        $column->default = (string)$default;
+        break;
+        
+      default:
+        $column->default = $default;
     }
   }
   

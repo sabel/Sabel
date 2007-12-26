@@ -2,17 +2,11 @@
 
 class Test_DB_Ibase extends Test_DB_Test
 {
-  private static $params1 = array("driver"   => "ibase",
+  private static $params1 = array("package"  => "sabel.db.ibase",
                                   "host"     => "localhost",
                                   "user"     => "develop",
                                   "password" => "develop",
                                   "database" => "/home/firebird/sdb_test.fdb");
-
-  private static $params2 = array("driver"   => "ibase",
-                                  "host"     => "localhost",
-                                  "user"     => "develop",
-                                  "password" => "develop",
-                                  "database" => "/home/firebird/sdb_test2.fdb");
 
   public static function main()
   {
@@ -41,9 +35,7 @@ class Test_DB_Ibase extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Config::regist("default",  self::$params1);
-    //Sabel_DB_Config::regist("default2", self::$params2);
-
+    Sabel_DB_Config::add("default",  self::$params1);
     Test_DB_Test::$db = "IBASE";
   }
 }

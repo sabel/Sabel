@@ -2,17 +2,11 @@
 
 class Test_DB_Pgsql extends Test_DB_Test
 {
-  private static $params1 = array("driver"   => "pgsql",
+  private static $params1 = array("package"  => "sabel.db.pgsql",
                                   "host"     => "localhost",
                                   "user"     => "pgsql",
                                   "password" => "pgsql",
                                   "database" => "sdb_test");
-
-  private static $params2 = array("driver"   => "pgsql",
-                                  "host"     => "localhost",
-                                  "user"     => "pgsql",
-                                  "password" => "pgsql",
-                                  "database" => "sdb_test2");
 
   public static function main()
   {
@@ -41,9 +35,7 @@ class Test_DB_Pgsql extends Test_DB_Test
 
   public function testInit()
   {
-    Sabel_DB_Config::regist("default",  self::$params1);
-    //Sabel_DB_Config::regist("default2", self::$params2);
-
+    Sabel_DB_Config::add("default",  self::$params1);
     Test_DB_Test::$db = "PGSQL";
   }
 }

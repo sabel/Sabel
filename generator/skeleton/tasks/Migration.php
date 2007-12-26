@@ -37,7 +37,7 @@ class Migration extends Sabel_Sakle_Task
     $environment = $this->getEnvironment();
     define("ENVIRONMENT", $environment);
     
-    Sabel_DB_Config::initialize();
+    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     $connectionName  = $this->getConnectionName();
     $directory       = $this->defineMigrationDirectory();
@@ -219,21 +219,14 @@ class Migration extends Sabel_Sakle_Task
     $params = get_db_params($environment);
     
     foreach ($params as $connectionName => $param) {
-      Sabel_DB_Config::regist($connectionName, $param);
+      Sabel_DB_Config::add($connectionName, $param);
     }
   }
 
   protected function getMigrationClass($type, $verNum)
   {
-    $driverName = Sabel_DB_Config::getDriverName($this->connectionName);
-    
-    if (strpos($driverName, "pdo") !== false) {
-      $driverName = str_replace("pdo-", "", $driverName);
-    } elseif ($driverName === "mysqli") {
-      $driverName = "mysql";
-    }
-    
-    $className = "Sabel_DB_" . ucfirst($driverName) . "_Migration";
+    $dirs = explode(".", Sabel_DB_Config::getPackage($this->connectionName));
+    $className = implode("_", array_map("ucfirst", $dirs)) . "_Migration";
     $directory = Sabel_DB_Migration_Manager::getDirectory();
     return new $className($directory . DS . $this->files[$verNum], $type);
   }

@@ -28,7 +28,7 @@ class Schema extends Sabel_Sakle_Task
     }
     
     define("ENVIRONMENT", $environment);
-    Sabel_DB_Config::initialize();
+    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     foreach (get_db_params() as $connectionName => $params) {
       Sabel_DB_Config::regist($connectionName, $params);

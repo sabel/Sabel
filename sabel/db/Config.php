@@ -43,37 +43,42 @@ class Sabel_DB_Config
     }
   }
   
-  public static function getDriverName($connectionName)
+  public static function getPackage($connectionName)
   {
     $config = self::getConfig($connectionName);
     
-    if (isset($config["driver"])) {
-      return $config["driver"];
+    if (isset($config["package"])) {
+      return $config["package"];
     } else {
-      $message = "getDriverName() 'driver' not found in config.";
+      $message = "'package' not found in config.";
       throw new Sabel_DB_Exception($message);
     }
   }
   
   public static function getSchemaName($connectionName)
   {
-    $drvName = self::getDriverName($connectionName);
-    if (in_array($drvName, array("pdo-sqlite", "ibase"))) return null;
+    $package = self::getPackage($connectionName);
+    $ignores = array("sabel.db.pdo.sqlite" => 1, "sabel.db.ibase" => 1);
+    if (isset($ignores[$package])) return null;
     
-    $config = self::getConfig($connectionName);
-    
-    if (in_array($drvName, array("mysql", "mysqli", "pdo-mysql", "mssql"), true)) {
+    $config  = self::getConfig($connectionName);
+    $ignores = array("sabel.db.mysql"     => 1,
+                     "sabel.db.mysqli"    => 1,
+                     "sabel.db.pdo.mysql" => 1,
+                     "sabel.db.mssql"     => 1);
+                     
+    if (isset($ignores[$package])) {
       return $config["database"];
-    } elseif ($drvName === "oci") {
+    } elseif ($package === "sabel.db.oci") {
       return strtoupper($config["user"]);
     } elseif (isset($config["schema"])) {
       return $config["schema"];
-    } elseif ($drvName === "pgsql" || $drvName === "pdo-pgsql") {
+    } elseif ($package === "sabel.db.pgsql" || $package === "sabel.db.pdo.pgsql") {
       return "public";
-    } else {
-      $message = "getSchemaName() 'schema' not found in config.";
-      throw new Sabel_DB_Exception($message);
     }
+    
+    $message = "getSchemaName() 'schema' not found in config.";
+    throw new Sabel_DB_Exception($message);
   }
   
   private static function getConfig($connectionName)
