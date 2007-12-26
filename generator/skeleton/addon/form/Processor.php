@@ -12,22 +12,19 @@
 class Form_Processor extends Sabel_Bus_Processor
 {
   const SESSION_KEY = "sbl_forms";
-  const TIMEOUT_KEY = "sbl_forms_timeout";
-  const TIMEOUT_CNT = 15;
+  const SES_TIMEOUT = 300;
   
   private
     $forms   = array(),
     $token   = null,
-    $unityId = null,
-    $counts  = array();
+    $unityId = null;
     
   public function execute($bus)
   {
-    $this->forms = $this->storage->read(self::SESSION_KEY);
-    if ($this->form === null) $this->form = array();
-    $this->counts = $this->storage->read(self::TIMEOUT_KEY);
-    if ($this->counts === null) $this->counts = array();
+    $forms = $this->storage->read(self::SESSION_KEY);
+    if ($forms === null) $forms = array();
     
+    $this->forms = $forms;
     $action = $this->destination->getAction();
     $controller = $this->controller;
     $controller->setAttribute("form", $this);
@@ -41,19 +38,28 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $this->unityId = $unityId = $annot[0][0];
     $this->token = $token = $this->request->getToken()->getValue();
+    $timeouts = $this->storage->getTimeouts();
     
-    $this->countUp();
-    if (realempty($token)) return;
-    
-    $sesKey = $unityId . "_" . $token;
-    if (isset($this->forms[$sesKey])) {
-      $form = $this->forms[$sesKey];
-      $this->counts[$sesKey] = 0;
-      if ($this->request->isPost()) {
-        $this->applyPostValues($form)->unsetErrors();
+    if (!realempty($token)) {
+      $seskey = $unityId . "_" . $token;
+      if (isset($forms[$seskey])) {
+        $form = $forms[$seskey];
+        $this->storage->write($seskey, "", self::SES_TIMEOUT);
+        if ($this->request->isPost()) {
+          $this->applyPostValues($form)->unsetErrors();
+        }
+        
+        $controller->setAttribute($form->getFormName(), $form);
       }
-      $controller->setAttribute($form->getFormName(), $form);
+      
+      unset($timeouts[$seskey]);
     }
+    
+    foreach ($timeouts as $k => $v) {
+      unset($forms[$k]);
+    }
+    
+    $this->forms = $forms;
   }
   
   public function create($model, $as = null)
@@ -79,8 +85,9 @@ class Form_Processor extends Sabel_Bus_Processor
     } else {
       $token = $this->request->getToken()->createValue();
       $form = new Form_Object($model, $name, $token);
-      $this->forms[$this->unityId . "_" . $token]  = $form;
-      $this->counts[$this->unityId . "_" . $token] = 0;
+      $seskey = $this->unityId . "_" . $token;
+      $this->forms[$seskey] = $form;
+      $this->storage->write($seskey, "", self::SES_TIMEOUT);
       $this->controller->setAttribute($name, $form);
     }
     
@@ -94,47 +101,12 @@ class Form_Processor extends Sabel_Bus_Processor
     
     if ($unityId !== null || !realempty($token)) {
       unset($this->forms[$unityId . "_" . $token]);
-      unset($this->counts[$unityId . "_" . $token]);
     }
-  }
-  
-  private function countUp()
-  {
-    if (!empty($this->counts)) {
-      array_walk($this->counts, create_function('&$val', '++$val;'));
-    }
-    
-    return $this->counts;
-  }
-  
-  private function countDown()
-  {
-    if (!empty($this->counts)) {
-      $func = create_function('&$val', 'if ($val > 0) --$val;');
-      array_walk($this->counts, $func);
-    }
-    
-    return $this->counts;
   }
   
   public function shutdown($bus)
   {
-    $forms  = $this->forms;
-    $counts = $this->counts;
-    
-    if ($bus->get("controller")->redirect->isRedirected()) {
-      $counts = $this->countDown();
-    } else {
-      foreach ($counts as $k => $v) {
-        if ($v >= self::TIMEOUT_CNT) {
-          unset($forms[$k]);
-          unset($counts[$k]);
-        }
-      }
-    }
-    
-    $this->storage->write(self::SESSION_KEY, $forms);
-    $this->storage->write(self::TIMEOUT_KEY, $counts);
+    $this->storage->write(self::SESSION_KEY, $this->forms);
   }
   
   public function applyPostValues($form)

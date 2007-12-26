@@ -1,81 +1,40 @@
 <?php
 
-class Sabel_Storage_InMemory extends Sabel_Object
+/**
+ * Storage of session
+ *
+ * @category   Storage
+ * @package    org.sabel.storage
+ * @author     Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Storage_InMemory extends Sabel_Storage_Abstract
 {
   private static $instance = null;
-  private $attributes = array();
   
   public static function create()
   {
-    if (!self::$instance) self::$instance = new self();
+    if (self::$instance === null) {
+      self::$instance = new self();
+    }
+    
     return self::$instance;
   }
   
   public function start()
   {
+    if ($this->started) return;
     
-  }
-  
-  public function clear()
-  {
-    $deleted = array();
-    foreach ($this->attributes as $key => $sesval) {
-      $deleted[] = $sesval;
-      unset($this->attributes[$key]);
-    }
-    return $deleted;
+    $this->started = true;
+    $this->initialize();
   }
   
   public function destroy()
   {
+    $attributes = $this->attributes;
     $this->attributes = array();
-    return $this->attributes;
-  }
-  
-  public function has($key)
-  {
-    return isset($this->attributes[$key]);
-  }
-  
-  public function read($key)
-  {
-    $ret = null;
-    if (isset($this->attributes[$key])) {
-      $ret = $this->attributes[$key]["value"];
-    }
-    return $ret;
-  }
-  
-  public function write($key, $value, $timeout = 60)
-  {
-    $this->attributes[$key] = array("value"   => $value,
-                                    "timeout" => $timeout,
-                                    "count"   => 0);
-  }
-  
-  public function delete($key)
-  {
-    $ret = null;
-    if (isset($this->attributes[$key])) {
-      $ret =& $this->attributes[$key]["value"];
-      unset($this->attributes[$key]);
-    }
-    return $ret;
-  }
-  
-  public function timeout()
-  {
-    foreach ($this->attributes as $key => $value) {
-      if ($value["count"] > $value["timeout"]) {
-        unset($this->attributes[$key]);
-      }
-    }
-  }
-  
-  public function countUp()
-  {
-    foreach ($this->attributes as $key => $value) {
-      $this->attributes[$key]["count"] += 1;
-    }
+    return $attributes;
   }
 }

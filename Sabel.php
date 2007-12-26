@@ -169,6 +169,7 @@ final class Sabel
     $CACHE      = $SABEL . "cache"      . DS;
     $MAP        = $SABEL . "map"        . DS;
     $REQUEST    = $SABEL . "request"    . DS;
+    $STORAGE    = $SABEL . "storage"    . DS;
     $VIEW       = $SABEL . "view"       . DS;
     $CONTAINER  = $SABEL . "container"  . DS;
     $ANNOTATION = $SABEL . "annotation" . DS;
@@ -194,6 +195,10 @@ final class Sabel
     require ($REQUEST . "AbstractBuilder.php");
     require ($REQUEST . "Builder.php");
     
+    require ($STORAGE . "Interface.php");
+    require ($STORAGE . "Abstract.php");
+    require ($STORAGE . "Session.php");
+    
     require ($ANNOTATION . "Reader.php");
     require ($ANNOTATION . "ReflectionClass.php");
     require ($ANNOTATION . "ReflectionMethod.php");
@@ -216,7 +221,6 @@ final class Sabel
     require ($DB . "Config.php");
     require ($DB . "Type.php");
     
-    require ($SABEL . "storage"    . DS . "Session.php");
     require ($SABEL . "router"     . DS . "Map.php");
     require ($SABEL . "controller" . DS . "Page.php");
     require ($SABEL . "response"   . DS . "Web.php");

@@ -6,18 +6,13 @@
  * @category   Storage
  * @package    org.sabel.storage
  * @author     Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Storage_Session extends Sabel_Object
+class Sabel_Storage_Session extends Sabel_Storage_Abstract
 {
   private static $instance = null;
-  private static $started = false;
-  
-  public function __construct()
-  {
-    
-  }
   
   public static function create()
   {
@@ -30,65 +25,20 @@ class Sabel_Storage_Session extends Sabel_Object
   
   public function start()
   {
-    if (!self::$started) {
-      session_start();
-      self::$started = true;
-    }
+    if ($this->started) return;
+    
+    session_start();
+    
+    $this->started = true;
+    $this->attributes =& $_SESSION;
+    $this->initialize();
   }
   
   public function destroy()
   {
-    $deleted = $_SESSION;
+    $attributes = $this->attributes;
     session_destroy();
     
-    return $deleted;
-  }
-  
-  public function has($key)
-  {
-    return isset($_SESSION[$key]);
-  }
-  
-  public function read($key)
-  {
-    if (isset($_SESSION[$key])) {
-      return $_SESSION[$key]["value"];
-    } else {
-      return null;
-    }
-  }
-  
-  public function write($key, $value, $timeout = 60)
-  {
-    $_SESSION[$key] = array("value"   => $value,
-                            "timeout" => $timeout,
-                            "count"   => 0);
-  }
-  
-  public function delete($key)
-  {
-    $ret = null;
-    if (isset($_SESSION[$key])) {
-      $ret = $_SESSION[$key]["value"];
-      unset($_SESSION[$key]);
-    }
-    
-    return $ret;
-  }
-  
-  public function timeout()
-  {
-    foreach ($_SESSION as $key => $value) {
-      if ($value["count"] > $value["timeout"]) {
-        unset($_SESSION[$key]);
-      }
-    }
-  }
-  
-  public function countUp()
-  {
-    foreach ($_SESSION as $key => $value) {
-      $_SESSION[$key]["count"] += 1;
-    }
+    return $attributes;
   }
 }
