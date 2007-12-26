@@ -52,18 +52,18 @@ class Form_Processor extends Sabel_Bus_Processor
       if ($this->request->isPost()) {
         $this->applyPostValues($form)->unsetErrors();
       }
-      $controller->setAttribute($form->getName(), $form);
+      $controller->setAttribute($form->getFormName(), $form);
     }
   }
   
   public function create($model, $as = null)
   {
     if ($as !== null) {
-      $mdlName = $as;
+      $name = $as;
     } elseif (is_model($model)) {
-      $mdlName = $model->getName();
+      $name = $model->getName();
     } elseif (is_string($model)) {
-      $mdlName = $model;
+      $name = $model;
     } else {
       $message = "invalid argument(1) type. "
                . "must be a string or instance of model.";
@@ -71,15 +71,17 @@ class Form_Processor extends Sabel_Bus_Processor
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
+    $name = lcfirst($name) . "Form";
+    
     if ($this->unityId === null) {
-      $form = new Form_Object($model);
-      $this->controller->setAttribute($form->getName(), $form);
+      $form = new Form_Object($model, $name);
+      $this->controller->setAttribute($name, $form);
     } else {
       $token = $this->request->getToken()->createValue();
-      $form = new Form_Object($model, $token);
+      $form = new Form_Object($model, $name, $token);
       $this->forms[$this->unityId . "_" . $token]  = $form;
       $this->counts[$this->unityId . "_" . $token] = 0;
-      $this->controller->setAttribute($form->getName(), $form);
+      $this->controller->setAttribute($name, $form);
     }
     
     return $form;

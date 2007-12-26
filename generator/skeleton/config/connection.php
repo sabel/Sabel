@@ -7,7 +7,7 @@ function get_db_params($env = null)
   switch ($env) {
     case PRODUCTION:
       $params = array("default" => array(
-                        "driver"   => "mysql",
+                        "package"  => "sabel.db.mysql",
                         "host"     => "localhost",
                         "database" => "default",
                         "user"     => "root",
@@ -17,7 +17,7 @@ function get_db_params($env = null)
 
     case TEST:
       $params = array("default" => array(
-                        "driver"   => "mysql",
+                        "package"  => "sabel.db.mysql",
                         "host"     => "localhost",
                         "database" => "default",
                         "user"     => "root",
@@ -27,7 +27,7 @@ function get_db_params($env = null)
 
     case DEVELOPMENT:
       $params = array("default" => array(
-                        "driver"   => "mysql",
+                        "package"  => "sabel.db.mysql",
                         "host"     => "localhost",
                         "database" => "default",
                         "user"     => "root",

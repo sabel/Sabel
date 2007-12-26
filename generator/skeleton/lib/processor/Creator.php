@@ -17,11 +17,10 @@ class Processor_Creator extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $destination = $this->destination;
+    $this->response = new Sabel_Response_Web();
     
     try {
-      // create response object.
-      $this->response = new Sabel_Response_Web();
-      $controller = $this->createController($this->response);
+      $controller = $this->createController();
     } catch (Exception $e) {
       $module = $destination->getModule();
       l("can't create controller use default {$module}/index/index");
@@ -29,13 +28,14 @@ class Processor_Creator extends Sabel_Bus_Processor
       $destination->setModule($module);
       $destination->setController("index");
       $destination->setAction("notFound");
+      
       try {
-        $controller = $creator->create($destination);
+        $controller = $this->createController();
       } catch (Exception $e) {
         $destination->setModule("index");
         $destination->setController("index");
         $destination->setAction("notFound");
-        $controller = $creator->create($destination);
+        $controller = $this->createController();
       }
     }
     
@@ -45,7 +45,7 @@ class Processor_Creator extends Sabel_Bus_Processor
     $bus->set("controller", $controller);
   }
   
-  protected function createController($response)
+  protected function createController()
   {
     list($module, $controller,) = $this->destination->toArray();
     $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR);
@@ -60,7 +60,7 @@ class Processor_Creator extends Sabel_Bus_Processor
     
     if (class_exists($class, false)) {
       l("instanciate " . $class);
-      return new $class($response);
+      return new $class($this->response);
     } else {
       throw new Sabel_Exception_Runtime("controller not found.");
     }

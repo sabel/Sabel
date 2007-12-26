@@ -11,22 +11,25 @@
  */
 class Form_Object extends Sabel_Object
 {
-  protected $token   = null;
-  protected $model   = null;
-  protected $mdlName = "";
-  protected $columns = null;
-  protected $errors  = array();
-  
-  public function __construct($model, $token = null)
+  protected
+    $token    = null,
+    $model    = null,
+    $mdlName  = "",
+    $formName = "",
+    $columns  = null,
+    $errors   = array();
+    
+  public function __construct($model, $fName, $token = null)
   {
     if (is_string($model)) {
       $model = MODEL($model);
     }
     
-    $this->token   = $token;
-    $this->model   = $model;
-    $this->mdlName = $model->getName();
-    $this->columns = $model->getSchema()->getColumns();
+    $this->token    = $token;
+    $this->model    = $model;
+    $this->formName = $fName;
+    $this->mdlName  = $model->getName();
+    $this->columns  = $model->getSchema()->getColumns();
   }
   
   public function getToken()
@@ -34,9 +37,9 @@ class Form_Object extends Sabel_Object
     return $this->token;
   }
   
-  public function getName()
+  public function getFormName()
   {
-    return lcfirst($this->mdlName) . "Form";
+    return $this->formName;
   }
   
   public function getModel()
