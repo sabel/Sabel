@@ -59,10 +59,7 @@ abstract class Sabel_Storage_Abstract
     }
     
     if ($timeout !== 0) $timeout = time() + $timeout;
-    
-    $this->attributes[$key] = array("value"   => $value,
-                                    "timeout" => $timeout,
-                                    "count"   => 0);
+    $this->attributes[$key] = array("value" => $value, "timeout" => $timeout);
   }
   
   public function delete($key)

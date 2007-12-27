@@ -13,6 +13,8 @@
  */
 class Flow_Processor extends Sabel_Bus_Processor
 {
+  const END_FLOW_SESKEY = "sbl_end_flows";
+  
   private $action    = "";
   private $isTransit = false;
   private $refMethod = null;
@@ -20,8 +22,8 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    if ($this->response->isFailure() ||
-        !$this->controller instanceof Flow_Page) return;
+    if (!$this->controller instanceof Flow_Page ||
+        $this->response->isFailure()) return;
     
     $this->action = $this->destination->getAction();
     
@@ -31,20 +33,22 @@ class Flow_Processor extends Sabel_Bus_Processor
     $key = implode("_", array($this->destination->getModule(),
                               $this->destination->getController()));
                               
-    $this->state = $state = new Flow_State($this->storage);
-    $token = $this->request->getToken()->getValue();
-    
-    l("[flow] token is '{$token}'");
-    
     if (!$controller->hasMethod($this->action)) {
       return $response->notFound();
     }
     
     $this->refMethod = $controller->getReflection()->getMethod($this->action);
     
+    $token = $this->request->getToken()->getValue();
+    $state = new Flow_State($token);
+    
+    l("[flow] token is '{$token}'");
+    
     if ($token !== null && !$this->isStartAction()) {
-      $state = $state->restore($key, $token);
+      $state = $state->restore($this->storage, $key);
     }
+    
+    $this->state = $state;
     
     if ($this->isIgnoreAction()) return;
     
@@ -59,10 +63,10 @@ class Flow_Processor extends Sabel_Bus_Processor
       
       if ($this->refMethod->hasAnnotation("end")) {
         $this->transit(false);
-        $state->end();
+        $this->addEndFlow($state);
       } else {
         $this->executeInFlowAction($state);
-        $state->clearEndFlow();
+        $this->clearEndFlow($state);
       }
       
       if (($warning = $state->warning) !== null) {
@@ -76,7 +80,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     } elseif ($this->isStartAction()) {
       $token = $this->request->getToken()->createValue();
       $state->start($key, $this->action, $token);
-      $state->clearEndFlow();
+      $this->clearEndFlow($state);
       
       l("[flow] start state with " . $token);
       
@@ -106,7 +110,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   public function afterExecute($bus)
   {
     if ($this->isTransit() && $this->response->isSuccess()) {
-      $this->state->save();
+      $this->state->save($this->storage);
     }
   }
   
@@ -135,6 +139,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   private function executeInFlowAction($state)
   {
     $controller = $this->controller;
+    l("go back");
     if ($this->action === $state->getCurrent()) {
       $this->transit(false);
     } elseif ($state->isMatchToNext($this->action)) {
@@ -165,5 +170,25 @@ class Flow_Processor extends Sabel_Bus_Processor
   private function isTransit()
   {
     return $this->isTransit;
+  }
+  
+  public function addEndFlow($state)
+  {
+    if (($ends = $this->storage->read(self::END_FLOW_SESKEY)) === null) {
+      $ends = array($state->getStateKey());
+    } else {
+      $ends[] = $state->getStateKey();
+    }
+    
+    $this->storage->write(self::END_FLOW_SESKEY, $ends);
+  }
+  
+  public function clearEndFlow()
+  {
+    $storage = $this->storage;
+    $ends = $storage->delete(self::END_FLOW_SESKEY);
+    if ($ends === null) return;
+    
+    foreach ($ends as $seskey) $storage->delete($seskey);
   }
 }

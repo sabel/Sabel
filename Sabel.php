@@ -43,6 +43,7 @@ spl_autoload_register(array("Sabel", "autoload"));
  */
 final class Sabel
 {
+  private static $version   = 10032;
   private static $required  = array();
   private static $fileUsing = array();
   private static $cache     = null;
@@ -140,6 +141,37 @@ final class Sabel
       }
       
       return false;
+    }
+  }
+  
+  public static function compareVersion($version)
+  {
+    @list ($v, $r) = explode("-", $version);
+    list ($j, $i, $s) = explode(".", $v);
+    
+    if ($r === null) {
+      $r = 99;
+    } else {
+      $r = strtolower($r);
+      if (strpos($r, "rc") !== false) {
+        $r = 30 + (int)str_replace("rc", "", $r);
+      } elseif (strpos($r, "beta") !== false) {
+        $r = 20 + (int)str_replace("beta", "", $r);
+      } elseif (strpos($r, "alpha") !== false) {
+        $r = 10 + (int)str_replace("alpha", "", $r);
+      } else {
+        return false;
+      }
+    }
+    
+    $versionNum = (int)$j . $i . $s . $r;
+    
+    if (self::$version === $versionNum) {
+      return 0;
+    } elseif (self::$version > $versionNum) {
+      return -1;
+    } else {
+      return 1;
     }
   }
   

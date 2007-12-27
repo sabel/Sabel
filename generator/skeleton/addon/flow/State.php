@@ -13,24 +13,13 @@
  */
 class Flow_State
 {
-  const END_FLOW_SESKEY = "sbl_end_flows";
+  const SES_TIMEOUT = 900;
   
-  private
-    $key   = "",
-    $token = "";
+  private $properties = array();
   
-  private
-    $storage    = null,
-    $properties = array(),
-    $nexts      = array();
-    
-  private
-    $previousActivity = "",
-    $currentActivity  = "";
-    
-  public function __construct($storage)
+  public function __construct($token)
   {
-    $this->storage = $storage;
+    $this->properties["token"] = $token;
   }
   
   public function read($name)
@@ -67,95 +56,73 @@ class Flow_State
     return $this->properties;
   }
   
-  public function toArray()
-  {
-    return $this->getProperties();
-  }
-  
   public function start($key, $activity, $token)
   {
-    $this->key = $key;
-    $this->currentActivity = $activity;
-    $this->token = $token;
+    $p =& $this->properties;
+    
+    $p["key"]   = $key;
+    $p["token"] = $token;
+    $p["currentActivity"] = $activity;
   }
   
   public function isInFlow()
   {
-    return ($this->token !== "");
-  }
-  
-  public function getToken()
-  {
-    return $this->token;
+    return ($this->properties["token"] !== "");
   }
   
   public function transit($action)
   {
-    $this->previousActivity = $this->currentActivity;
-    $this->currentActivity  = $action;
+    $p =& $this->properties;
+    
+    $p["previousActivity"] = $p["currentActivity"];
+    $p["currentActivity"]  = $action;
   }
   
   public function getCurrent()
   {
-    return $this->currentActivity;
+    return $this->properties["currentActivity"];
   }
   
-  public function restore($key, $token)
+  public function restore($storage, $key)
   {
-    $this->token = $token;
-    return $this->storage->read($this->getStateKey($key));
+    $properties = $storage->read($this->getStateKey($key));
+    
+    if ($properties === null) {
+      return null;
+    } else {
+      $this->properties = $properties;
+      return $this;
+    }
   }
   
-  public function save()
+  public function save($storage)
   {
-    $this->storage->write($this->getStateKey(), $this);
+    $storage->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
   }
   
   public function setNextActions($actions)
   {
-    $this->nexts = $actions;
+    $this->properties["nexts"] = $actions;
   }
   
   public function isMatchToNext($currentAction)
   {
-    return (in_array($currentAction, $this->nexts));
+    return (in_array($currentAction, $this->properties["nexts"]));
   }
   
   public function isPreviousAction($action)
   {
-    return ($this->previousActivity === $action);
-  }
-  
-  public function end()
-  {
-    $storage = $this->storage;
-    if (($ends = $storage->read(self::END_FLOW_SESKEY)) === null) {
-      $ends = array($this->getStateKey());
-    } else {
-      $ends[] = $this->getStateKey();
-    }
-    
-    $this->storage->write(self::END_FLOW_SESKEY, $ends);
-  }
-  
-  public function clearEndFlow()
-  {
-    $ends = $this->storage->read(self::END_FLOW_SESKEY);
-    if ($ends === null) return;
-    
-    foreach ($ends as $seskey) {
-      $this->storage->delete($seskey);
-    }
-    
-    $this->storage->delete(self::END_FLOW_SESKEY);
+    return ($this->properties["previousActivity"] === $action);
   }
   
   public function getStateKey($key = "")
   {
+    $token = $this->properties["token"];
+    
     if ($key !== "") {
-      return $key . "_flow_state_" . $this->token;
+      return $key . "_flow_state_" . $token;
     } else {
-      return $this->key . "_flow_state_" . $this->token;
+      return $this->key . "_flow_state_" . $token;
     }
   }
 }

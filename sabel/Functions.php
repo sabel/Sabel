@@ -42,65 +42,6 @@ function lcfirst($string)
   }
 }
 
-function reflection()
-{
-  $args = func_get_args();
-  
-  if (empty($args)) {
-    return;
-  } elseif (count($args) === 1) {
-    $class = $args[0];
-  } else {
-    foreach ($args as $arg) {
-      reflection($arg);
-    }
-    return;
-  }
-  
-  echo '<pre style="background: #FFF; color: #333; ' .
-       'border: 1px solid #ccc; margin: 5px; padding: 5px;">';
-       
-  static $files = array();
-  
-  $ref = new ReflectionClass($class);
-  $className = $ref->getName();
-  $filePath  = $ref->getFileName();
-  
-  if (!isset($files[$filePath])) {
-    $files[$filePath] = file($filePath);
-  }
-  
-  echo "<b><font size=\"+1\">{$className}</font></b>";
-  echo PHP_EOL . PHP_EOL;
-  
-  if ($methods = $ref->getMethods()) {
-    foreach ($methods as $method) {
-      $rm = new ReflectionMethod($className, $method->getName());
-      $path = $rm->getFileName();
-      if (isset($files[$path])) {
-        $lines = $files[$path];
-      } else {
-        $lines = $files[$path] = file($path);
-      }
-      
-      $start = $method->getStartLine();
-      $line  = trim($lines[$start - 1]);
-      
-      if (substr($line, -1, 1) === ",") {
-        $line = $line . " " . trim($lines[$start]);
-      }
-      
-      if ($rm->isPublic() && !$rm->isAbstract()) {
-        echo "\t<b>{$line}</b>" . PHP_EOL;
-      } else {
-        echo "\t$line" . PHP_EOL;
-      }
-    }
-  }
-  
-  echo '</pre>';
-}
-
 function dump()
 {
   echo '<pre style="background: #FFF; color: #333; ' .
@@ -137,7 +78,29 @@ function now()
   return date("Y-m-d H:i:s");
 }
 
+function _new($className)
+{
+  $args = func_get_args();
+  unset($args[0]);
+  
+  if (($c = count($args)) === 0) {
+    return new $className();
+  } else {
+    $code = array();
+    for ($i = 1, ++$c; $i < $c; $i++) {
+      $code[] = '$args[' . $i. ']';
+    }
+    eval('$instance = new ' . $className . '(' . implode(", ", $code) . ');');
+    return $instance;
+  }
+}
+
 /***   sabel.db functions   ***/
+
+function is_model($model)
+{
+  return ($model instanceof Sabel_DB_Abstract_Model);
+}
 
 function convert_to_tablename($mdlName)
 {
@@ -166,11 +129,6 @@ function convert_to_modelname($tblName)
     $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));
     return $cache[$tblName] = $mdlName;
   }
-}
-
-function is_model($model)
-{
-  return ($model instanceof Sabel_DB_Abstract_Model);
 }
 
 function MODEL($mdlName)

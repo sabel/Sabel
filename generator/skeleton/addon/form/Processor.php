@@ -164,11 +164,6 @@ class Form_Processor extends Sabel_Bus_Processor
     return $form;
   }
   
-  public function setPostValues($form)
-  {
-    return $this->applyPostValues($form);
-  }
-  
   private function isEmptyDateValues($values, $isDatetime = true)
   {
     $keys = array("year", "month", "day");
