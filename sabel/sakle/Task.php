@@ -16,21 +16,21 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   
   public function success($msg)
   {
-    echo Sabel_Cli::success($msg);
+    echo Sabel_Command::success($msg);
   }
   
   public function warning($msg)
   {
-    echo Sabel_Cli::warning($msg);
+    echo Sabel_Command::warning($msg);
   }
   
   public function message($msg)
   {
-    echo Sabel_Cli::message($msg);
+    echo Sabel_Command::message($msg);
   }
   
   public function error($msg)
   {
-    echo Sabel_Cli::error($msg);
+    echo Sabel_Command::error($msg);
   }
 }

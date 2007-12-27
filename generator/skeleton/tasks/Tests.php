@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Sakle TestCase
+ *
+ * @abstract
+ * @category   Sakle
+ * @package    org.sabel.sakle
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 abstract class Tests extends Sabel_Sakle_Task
 {
   protected $arguments = array();
@@ -24,16 +34,11 @@ abstract class Tests extends Sabel_Sakle_Task
   
   protected function getEnvironment()
   {
-    $args  = $this->arguments;
-    $index = array_search("-e", $args, true);
-    if ($index === false) return TEST;
-    
-    if (isset($args[$index + 1])) {
-      $environment = environment($args[$index + 1]);
-      unset($args[$index]);
-      unset($args[$index + 1]);
-      $this->arguments = array_values($args);
-      return $environment;
+    if (Sabel_Command::hasOption("e", $this->arguments)) {
+      $env = Sabel_Command::getOption("e", $this->arguments, true);
+      return environment($env);
+    } else {
+      return TEST;
     }
   }
 }

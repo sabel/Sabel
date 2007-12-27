@@ -20,7 +20,7 @@ class Sabel_DB_Migration_Query
     if (is_string($query)) {
       $this->upgradeQueries[] = $query;
     } else {
-      Sabel_Cli::error("query should be a string.");
+      Sabel_Command::error("query should be a string.");
       exit;
     }
   }
@@ -30,7 +30,7 @@ class Sabel_DB_Migration_Query
     if (is_string($query)) {
       $this->downgradeQueries[] = $query;
     } else {
-      Sabel_Cli::error("query should be a string.");
+      Sabel_Command::error("query should be a string.");
       exit;
     }
   }

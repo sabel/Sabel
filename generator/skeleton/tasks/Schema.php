@@ -31,7 +31,7 @@ class Schema extends Sabel_Sakle_Task
     Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     foreach (get_db_params() as $connectionName => $params) {
-      Sabel_DB_Config::regist($connectionName, $params);
+      Sabel_DB_Config::add($connectionName, $params);
       $schema = Sabel_DB_Driver::createSchema($connectionName);
       
       foreach ($schema->getTableList() as $tblName) {
@@ -46,7 +46,9 @@ class Schema extends Sabel_Sakle_Task
         TableList_Writer::add($connectionName, $tblName);
       }
       
-      if (in_array("-l", $arguments)) TableList_Writer::write($connectionName);
+      if (Sabel_Command::hasOption("l", $arguments)) {
+        TableList_Writer::write($connectionName);
+      }
     }
   }
   

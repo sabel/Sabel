@@ -8,7 +8,7 @@ Sabel::fileUsing("tasks" . DS . "Tests.php", true);
  * @category   Sakle
  * @package    org.sabel.sakle
  * @author     Mori Reo <mori.reo@gmail.com>
- *             Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -38,6 +38,6 @@ class Functional extends Tests
   
   public function usage()
   {
-    echo "Usage: sakle Functional";
+    echo "Usage: sakle Functional TESTCASE_NAME" . PHP_EOL;
   }
 }

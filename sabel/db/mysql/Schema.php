@@ -88,7 +88,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
   {
     $exp = explode(".", $this->getMysqlVersion());
 
-    if ($exp[1] === "0") {
+    if (isset($exp[1]) && $exp[1] === "0") {
       return $this->getForeignKeys50($tblName);
     } else {
       return $this->getForeignKeys51($tblName);

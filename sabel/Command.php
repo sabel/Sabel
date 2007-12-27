@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_Cli
+ * Sabel_Command
  *
- * @category   Cli
- * @package    org.sabel.cli
+ * @category   Sakle
+ * @package    org.sabel.sakle
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Cli
+class Sabel_Command
 {
   const MSG_INFO = 0x01;
   const MSG_WARN = 0x02;
@@ -44,6 +44,29 @@ class Sabel_Cli
   public static function error($msg)
   {
     echo self::getHeader(self::MSG_ERR) . " $msg" . PHP_EOL;
+  }
+  
+  public static function hasOption($opt, $arguments)
+  {
+    return in_array("-" . $opt, $arguments, true);
+  }
+  
+  public static function getOption($opt, &$arguments, $unset = true)
+  {
+    if (self::hasOption($opt, $arguments)) {
+      $index  = array_search("-" . $opt, $arguments, true);
+      $optVal = $arguments[$index + 1];
+      
+      if ($unset) {
+        unset($arguments[$index]);
+        unset($arguments[$index + 1]);
+        $arguments = array_values($arguments);
+      }
+      
+      return $optVal;
+    } else {
+      return null;
+    }
   }
   
   private static function getHeader($type)

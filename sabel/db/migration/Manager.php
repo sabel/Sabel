@@ -99,7 +99,7 @@ class Sabel_DB_Migration_Manager
     if ($dirPath === null) $dirPath = self::$directory;
     
     if (!is_dir($dirPath)) {
-      Sabel_Cli::error("no such dirctory. '{$dirPath}'");
+      Sabel_Command::error("no such dirctory. '{$dirPath}'");
       exit;
     }
     
@@ -109,7 +109,7 @@ class Sabel_DB_Migration_Manager
       if (!is_numeric($num)) continue;
       
       if (isset($files[$num])) {
-        Sabel_Cli::error("the same version({$num}) files exists.");
+        Sabel_Command::error("the same version({$num}) files exists.");
         exit;
       } else {
         $files[$num] = $file;

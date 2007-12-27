@@ -32,9 +32,9 @@ class SabelDirectoryAndFileCreator
     
     if ($type === Sabel_Util_DirectoryTraverser::TYPE_DIR) {
       if (is_dir($element)) {
-        Sabel_Cli::error("{$name} already exists.");
+        Sabel_Command::error("{$name} already exists.");
       } else {
-        Sabel_Cli::success("create: {$name}");
+        Sabel_Command::success("create: {$name}");
         mkdir($element);
         $targets = array(RUN_BASE . DS . "data",
                          RUN_BASE . DS . "cache",
@@ -43,17 +43,17 @@ class SabelDirectoryAndFileCreator
                          
         if (in_array($element, $targets)) {
           if (chmod($element, 0777)) {
-            Sabel_Cli::success("chmod:  {$name}");
+            Sabel_Command::success("chmod:  {$name}");
           } else {
-            Sabel_Cli::error("chmod:  {$name}");
+            Sabel_Command::error("chmod:  {$name}");
           }
         }
       }
     } elseif ($type === Sabel_Util_DirectoryTraverser::TYPE_FILE) {
       if (!$this->overwrite && is_file($element)) {
-        Sabel_Cli::error("{$name} already exists.");
+        Sabel_Command::error("{$name} already exists.");
       } else {
-        Sabel_Cli::success("create: {$name}");
+        Sabel_Command::success("create: {$name}");
         fwrite(fopen($element, "w"), file_get_contents($child));
         if ($element == RUN_BASE . DS . "logs/sabel.log") {
           chmod($element, 0777);

@@ -33,10 +33,10 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
           $this->doRun($testSuite);
         }
       } catch (Exception $e) {
-        Sabel_Cli::error("could not run test suite: " . $e->getMessage());
+        Sabel_Command::error("could not run test suite: " . $e->getMessage());
       }
     } else {
-      Sabel_Cli::error($testFilePath . " not found");
+      Sabel_Command::error($testFilePath . " not found");
     }
   }
   

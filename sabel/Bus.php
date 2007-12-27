@@ -69,12 +69,8 @@ class Sabel_Bus extends Sabel_Object
     return $this->list;
   }
   
-  public function run($data = null)
+  public function run()
   {
-    if ($data !== null) {
-      $through = $data;
-    }
-    
     $processorList = $this->list->getFirst();
     
     while ($processorList !== null) {
