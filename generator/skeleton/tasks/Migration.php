@@ -13,6 +13,7 @@ class Migration extends Sabel_Sakle_Task
 {
   private static $execFinalize = true;
   
+  protected $stmt      = null;
   protected $files     = array();
   protected $arguments = array();
   protected $migrateTo = 0;
@@ -77,9 +78,9 @@ class Migration extends Sabel_Sakle_Task
   protected function getCurrentVersion()
   {
     $connectionName = $this->connectionName;
-    $this->driver = Sabel_DB_Driver::create($connectionName);
-    Sabel_DB_Migration_Manager::setDriver($this->driver);
-    Sabel_DB_Migration_Manager::setAccessor($this->accessor);
+    $this->stmt = Sabel_DB_Driver::createStatement($connectionName);
+    Sabel_DB_Migration_Manager::setStatement($this->stmt);
+    Sabel_DB_Migration_Manager::setSchema($this->accessor);
     
     try {
       if (!in_array("sversion", $this->accessor->getTableList())) {
@@ -208,7 +209,9 @@ class Migration extends Sabel_Sakle_Task
 
   protected function incrementVersion($num)
   {
-    $this->driver->execute("UPDATE sversion SET version = $num");
+    $sversion = $this->stmt->quoteIdentifier("sversion");
+    $version  = $this->stmt->quoteIdentifier("version");
+    $this->stmt->setQuery("UPDATE $sversion SET $version = $num")->execute();
   }
 
   protected function initDbConfig($environment)
@@ -238,19 +241,29 @@ class Migration extends Sabel_Sakle_Task
   
   protected function createVersionManageTable()
   {
-    $create = "CREATE TABLE sversion("
-            . "id INTEGER NOT NULL PRIMARY KEY, "
-            . "version INTEGER NOT NULL)";
-            
-    $insert = "INSERT INTO sversion values(1, 0)";
+    $stmt = $this->stmt;
+    $sversion = $stmt->quoteIdentifier("sversion");
+    $id = $stmt->quoteIdentifier("id");
+    $version = $stmt->quoteIdentifier("version");
     
-    $this->driver->execute($create);
-    $this->driver->execute($insert);
+    $create = "CREATE TABLE $sversion ("
+            . "$id INTEGER NOT NULL PRIMARY KEY, "
+            . "$version INTEGER NOT NULL)";
+            
+    $insert = "INSERT INTO $sversion values(1, 0)";
+    
+    $stmt->setQuery($create)->execute();
+    $stmt->setQuery($insert)->execute();
   }
   
   protected function getVersion()
   {
-    $rows = $this->driver->execute("SELECT version FROM sversion WHERE id = 1");
+    $stmt = $this->stmt;
+    $sversion = $stmt->quoteIdentifier("sversion");
+    $id = $stmt->quoteIdentifier("id");
+    $version = $stmt->quoteIdentifier("version");
+    
+    $rows = $stmt->setQuery("SELECT $version FROM $sversion WHERE $id = 1")->execute();
     return $rows[0]["version"];
   }
   
