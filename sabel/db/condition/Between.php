@@ -11,14 +11,15 @@
  */
 class Sabel_DB_Condition_Between extends Sabel_DB_Abstract_Condition
 {
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
-    $f    = ++$counter;
-    $t    = ++$counter;
-    $val  = $this->value;
-    $fkey = $sql->setBindValue("param{$f}", $val[0]);
-    $tkey = $sql->setBindValue("param{$t}", $val[1]);
+    $f   = ++$counter;
+    $t   = ++$counter;
+    $val = $this->value;
     
-    return $this->getColumnWithNot() . " BETWEEN $fkey AND $tkey";
+    $stmt->setBindValue("param{$f}", $val[0]);
+    $stmt->setBindValue("param{$t}", $val[1]);
+    
+    return $this->conditionColumn($stmt) . " BETWEEN @param{$f}@ AND @param{$t}@";
   }
 }

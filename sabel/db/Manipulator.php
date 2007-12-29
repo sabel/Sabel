@@ -199,7 +199,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     $projection  = $this->projection;
     $constraints = $this->constraints;
-    $this->projection  = array("COUNT(*) AS cnt");
+    $this->projection  = array(Sabel_DB_Sql_Part::create("COUNT(*) AS cnt"));
     $this->constraints = array("limit" => 1);
 
     $sql  = $this->getStatement(Sabel_DB_Statement::SELECT);
@@ -412,15 +412,15 @@ class Sabel_DB_Manipulator extends Sabel_Object
     $this->_execute($this->prepareDelete($sql));
   }
 
-  public function executeSql($sql)
+  public function executeStatement($stmt)
   {
-    $this->arguments = array($sql);
-    $this->method    = "executeSql";
+    $this->arguments = array($stmt);
+    $this->method    = "executeStatement";
 
     return $this->execute();
   }
 
-  protected function _executeSql()
+  protected function _executeStatement()
   {
     return $this->_execute($this->arguments[0]);
   }
@@ -429,7 +429,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
   {
     $model = $this->model;
     $sql = Sabel_DB_Driver::createStatement($model->getConnectionName());
-    return $sql->table($model->getTableName())->setType($type);
+    return $sql->table($model->getTableName())->type($type);
   }
 
   protected function prepareSelect($sql)

@@ -65,13 +65,16 @@ class Test_Container extends SabelTestCase
   
   public function testNoInjectionConfigToConstructer()
   {
+    $threw = false;
+    
     try {
       $injector = Sabel_Container::create(new StdClass());
       $this->fail();
-    } catch (Sabel_Exception_Runtime $e) {
-      $msg = "must be Sabel_Container_Injection";
-      $this->assertEquals($msg, $e->getMessage());
+    } catch (Sabel_Exception_InvalidArgument $e) {
+      $threw = true;
     }
+    
+    $this->assertTrue($threw);
   }
   
   public function testMultipleConstructerInjection()

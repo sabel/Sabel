@@ -63,4 +63,16 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   {
     return ($this->isNot) ? "NOT " . $this->column : $this->column;
   }
+  
+  protected function conditionColumn(Sabel_DB_Abstract_Statement $stmt)
+  {
+    if (strpos($this->column, ".") === false) {
+      $column = $stmt->quoteIdentifier($this->column);
+    } else {
+      list ($tbl, $col) = explode(".", $this->column);
+      $column = $stmt->quoteIdentifier($tbl) . "." . $stmt->quoteIdentifier($col);
+    }
+    
+    return ($this->isNot) ? "NOT $column" : $column;
+  }
 }

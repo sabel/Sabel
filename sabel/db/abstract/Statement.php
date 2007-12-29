@@ -18,7 +18,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $driver     = null,
     $schema     = null,
     $bindValues = array();
-
+    
   protected
     $table       = "",
     $projection  = array(),
@@ -27,18 +27,22 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $values      = array(),
     $constraints = array(),
     $seqColumn   = null;
-
-  protected
-    $placeHolderPrefix = "@",
-    $placeHolderSuffix = "@";
-
-  public function setType($type)
+    
+  public function getDriver()
   {
-    $this->type = $type;
-
-    return $this;
+    return $this->driver;
   }
-
+  
+  public function type($type = null)
+  {
+    if ($type === null) {
+      return $this->type;
+    } else {
+      $this->type = $type;
+      return $this;
+    }
+  }
+  
   public function setQuery($query)
   {
     if (is_string($query)) {
@@ -46,20 +50,20 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
-
+    
     return $this;
   }
-
+  
   public function getQuery()
   {
     return ($this->hasQuery()) ? $this->query : $this->build();
   }
-
+  
   public function hasQuery()
   {
     return (is_string($this->query) && $this->query !== "");
   }
-
+  
   public function table($table)
   {
     if (is_string($table)) {
@@ -69,17 +73,17 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
-
+    
     return $this;
   }
-
+  
   public function projection(array $projection)
   {
     $this->projection = $projection;
-
+    
     return $this;
   }
-
+  
   public function join($join)
   {
     if (is_string($join)) {
@@ -87,10 +91,10 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
-
+    
     return $this;
   }
-
+  
   public function where($where)
   {
     if (is_string($where)) {
@@ -98,35 +102,24 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
-
+    
     return $this;
   }
-
+  
   public function constraints(array $constraints)
   {
     $this->constraints = $constraints;
-
+    
     return $this;
   }
-
+  
   public function values(array $values)
   {
-    $v  =& $this->values;
-    $bv =& $this->bindValues;
-
-    $v = $bv = array();
-
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-
-    foreach ($values as $key => $value) {
-      $v[$key] = $value;
-      $bv[$prefix . $key . $suffix] = $value;
-    }
-
+    $this->values = $this->bindValues = $values;
+    
     return $this;
   }
-
+  
   public function sequenceColumn($seqColumn)
   {
     if ($seqColumn === null) {
@@ -136,91 +129,94 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
-
+    
     return $this;
   }
-
-  public function getPlaceHolderPrefix()
-  {
-    return $this->placeHolderPrefix;
-  }
-
-  public function getPlaceHolderSuffix()
-  {
-    return $this->placeHolderSuffix;
-  }
-
+  
   public function execute()
   {
     $query = $this->getQuery();
-
+    
     if (empty($this->bindValues)) {
       $result = $this->driver->execute($query);
     } else {
       $bindValues = $this->escape($this->bindValues);
+      foreach ($bindValues as $k => $v) {
+        $bindValues["@{$k}@"] = $v;
+        unset($bindValues[$k]);
+      }
+      
       $result = $this->driver->execute($query, $bindValues);
     }
-
+    
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
     }
-
+    
     return $result;
   }
-
+  
   public function setBindValue($key, $val)
   {
-    $key = $this->placeHolderPrefix . $key . $this->placeHolderSuffix;
     $this->bindValues[$key] = $val;
-
-    return $key;
-  }
-
-  public function setBindValues(array $values)
-  {
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-    $binds =& $this->bindValues;
-
-    foreach ($values as $key => $val) {
-      $binds[$prefix . $key . $suffix] = $val;
-    }
-
+    
     return $this;
   }
-
+  
+  public function setBindValues(array $values)
+  {
+    $this->bindValues = $values;
+    
+    return $this;
+  }
+  
   public function getBindValues()
   {
     return $this->bindValues;
   }
-
+  
   public function isSelect()
   {
     return ($this->type === Sabel_DB_Statement::SELECT);
   }
-
+  
   public function isInsert()
   {
     return ($this->type === Sabel_DB_Statement::INSERT);
   }
-
+  
   public function isUpdate()
   {
     return ($this->type === Sabel_DB_Statement::UPDATE);
   }
-
+  
   public function isDelete()
   {
     return ($this->type === Sabel_DB_Statement::DELETE);
   }
-
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '"' . $v . '"';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '"' . $arg . '"';
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   public function build()
   {
     if ($this->schema === null) {
       $message = "can't build query. please call table() method.";
       throw new Sabel_DB_Statement_Exception($message);
     }
-
+    
     if ($this->isSelect()) {
       return $this->createSelectSql();
     } elseif ($this->isInsert()) {
@@ -233,82 +229,85 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       return $this->query;
     }
   }
-
+  
   protected function createSelectSql()
   {
-    if (empty($this->projection)) {
-      $projection = implode(", ", $this->schema->getColumnNames());
-    } else {
-      $projection = implode(", ", $this->projection);
-    }
-
-    $sql = "SELECT $projection FROM {$this->table}" . $this->join . $this->where;
+    $tblName = $this->quoteIdentifier($this->table);
+    $projection = $this->getProjection();
+    $sql = "SELECT $projection FROM $tblName" . $this->join . $this->where;
     return $sql . $this->createConstraintSql();
   }
-
+  
   protected function createInsertSql()
   {
-    $binds  = array();
-    $keys   = array_keys($this->values);
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-
-    foreach ($keys as $key) {
-      $binds[] = $prefix . $key . $suffix;
-    }
-
-    $sql = array("INSERT INTO {$this->table} (");
-    $sql[] = join(", ", $keys);
-    $sql[] = ") VALUES(";
-    $sql[] = join(", ", $binds);
-    $sql[] = ")";
-
-    return implode("", $sql);
+    $sql  = "INSERT INTO {$this->quoteIdentifier($this->table)} (";
+    $cols = array_keys($this->values);
+    $hlds = array();
+    
+    foreach ($cols as $c) $hlds[] = "@{$c}@";
+    
+    $cols = $this->quoteIdentifier($cols);
+    $sql .= implode(", ", $cols) . ") VALUES(" . implode(", ", $hlds) . ")";
+    return $sql;
   }
-
+  
   protected function createUpdateSql()
   {
-    $prefix = $this->placeHolderPrefix;
-    $suffix = $this->placeHolderSuffix;
-
     $updates = array();
     foreach ($this->values as $column => $value) {
-      $updates[] = "$column = {$prefix}{$column}{$suffix}";
+      $updates[] = $this->quoteIdentifier($column) . " = @{$column}@";
     }
-
-    return "UPDATE {$this->table} SET " . implode(", ", $updates) . $this->where;
+    
+    $tblName = $this->quoteIdentifier($this->table);
+    return "UPDATE $tblName SET " . implode(", ", $updates) . $this->where;
   }
-
+  
   protected function createDeleteSql()
   {
-    return "DELETE FROM " . $this->table . $this->where;
+    $tblName = $this->quoteIdentifier($this->table);
+    return "DELETE FROM $tblName" . $this->where;
   }
-
+  
   protected function createConstraintSql()
   {
     $sql = "";
     $c = $this->constraints;
-
+    
     if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
     if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
-
+    
     if (isset($c["offset"]) && !isset($c["limit"])) {
       $sql .= " LIMIT 100 OFFSET " . $c["offset"];
     } else {
       if (isset($c["limit"]))  $sql .= " LIMIT "  . $c["limit"];
       if (isset($c["offset"])) $sql .= " OFFSET " . $c["offset"];
     }
-
+    
     return $sql;
   }
-
-  protected function escapeObject($instance)
+  
+  protected function getProjection()
   {
-    if ($instance instanceof Sabel_Object) {
-      return $instance->toString($this);
+    if (empty($this->projection)) {
+      $colNames = $this->quoteIdentifier($this->schema->getColumnNames());
+      return implode(", ", $colNames);
     } else {
-      throw new Sabel_DB_Statement_Exception("cannot convert object to sql string.");
+      $ps = array();
+      foreach ($this->projection as $p) {
+        if (is_object($p)) {
+          $ps[] = $this->toSqlValue($p);
+        } else {
+          $ps[] = $p;
+        }
+      }
+      
+      return implode(", ", $ps);
     }
+  }
+  
+  protected function toSqlValue($object)
+  {
+    return $object->getSqlValue($this);
   }
 }

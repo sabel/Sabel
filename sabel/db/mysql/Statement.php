@@ -15,7 +15,7 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Abstract_Statement
   {
     $this->driver = $driver;
   }
-
+  
   public function values(array $values)
   {
     if ($this->isInsert()) {
@@ -25,27 +25,42 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Abstract_Statement
         }
       }
     }
-
+    
     return parent::values($values);
   }
-
+  
   public function escape(array $values)
   {
     $conn = $this->driver->getConnection();
-
+    
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
       } elseif (is_string($val)) {
         $val = "'" . mysql_real_escape_string($val, $conn) . "'";
       } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
+        $val = $this->toSqlValue($val);
       }
     }
-
+    
     return $values;
   }
-
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '`' . $v . '`';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '`' . $arg . '`';
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   private function isVarcharOfDefaultNull($column)
   {
     return ($column->isString() && $column->default === null);

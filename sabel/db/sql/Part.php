@@ -11,15 +11,67 @@
  */
 class Sabel_DB_Sql_Part extends Sabel_Object
 {
-  protected $part = null;
-  
-  public function __construct($part)
+  protected
+    $fmt    = null,
+    $values = array(),
+    $quote  = false,
+    $escape = false;
+    
+  public static function create($fmt)
   {
-    $this->part = $part;
+    $instance = new self();
+    
+    $args = func_get_args();
+    if (count($args) > 1) {
+      unset($args[0]);
+      $instance->values = $args;
+    }
+    
+    $instance->fmt = $fmt;
+    
+    return $instance;
   }
   
-  public function __toString()
+  public function quote($bool)
   {
-    return $this->part;
+    if (is_bool($bool)) {
+      $this->quote = $bool;
+    } else {
+      $message = "argument must be a boolean.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+    
+    return $this;
+  }
+  
+  public function escape($bool)
+  {
+    if (is_bool($bool)) {
+      $this->escape = $bool;
+    } else {
+      $message = "argument must be a boolean.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+    
+    return $this;
+  }
+  
+  public function getSqlValue(Sabel_DB_Abstract_Statement $stmt)
+  {
+    if (empty($this->values)) {
+      return $this->fmt;
+    } else {
+      $values = $this->values;
+      
+      if ($this->quote) {
+        $values = $stmt->quoteIdentifier($values);
+      }
+      
+      if ($this->escape) {
+        $values = $stmt->escape($values);
+      }
+      
+      return vsprintf($this->fmt, $values);
+    }
   }
 }

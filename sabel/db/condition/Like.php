@@ -18,7 +18,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   private $type   = self::PREFIX;
   private $escape = true;
   
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     $value = $this->value;
     
@@ -30,15 +30,17 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
         if (strpos($value, $esc) === false) {
           $value = preg_replace("/([%_])/", $esc . '$1', $value);
           $value = $this->addSpecialCharacter($value);
-          $bindKey = $sql->setBindValue("param" . ++$counter, $value);
-          $query = $this->getColumnWithNot() . " LIKE " . $bindKey . " escape '{$esc}'";
+          $num   = ++$counter;
+          $stmt->setBindValue("param{$num}", $value);
+          $query = $this->conditionColumn($stmt) . " LIKE @param{$num}@ escape '{$esc}'";
           break;
         }
       }
     } else {
-      $value   = $this->addSpecialCharacter($value);
-      $bindKey = $sql->setBindValue("param" . ++$counter, $value);
-      $query   = $this->getColumnWithNot() . " LIKE " . $bindKey;
+      $value = $this->addSpecialCharacter($value);
+      $num = ++$counter;
+      $stmt->setBindValue("param{$num}", $value);
+      $query = $this->conditionColumn($stmt) . " LIKE @param{$num}@";
     }
     
     return $query;

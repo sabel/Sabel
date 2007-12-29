@@ -11,33 +11,39 @@
  */
 class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
 {
-  public function getProjection()
+  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->tblName;
-
+    
     foreach ($this->columns as $column) {
-      $hash = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
-      $projection[] = $name . '.' . $column . ' AS "' . $hash . '"';
+      $as = "pre_{$name}_{$column}";
+      
+      if (strlen($as) > 30) {
+        $as = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
+      }
+      
+      $projection[] = Sabel_DB_Sql_Part::create("%s.%s AS $as", $name, $column)->quote(true);
     }
-
+    
     return $projection;
   }
-
-  public function getJoinQuery($joinType)
+  
+  public function getJoinQuery(Sabel_DB_Abstract_Statement $stmt, $joinType)
   {
-    $name  = $this->tblName;
+    $name  = $stmt->quoteIdentifier($this->tblName);
     $keys  = $this->joinKey;
     $query = array(" $joinType JOIN $name ");
-
+    
     if ($this->hasAlias()) {
-      $name = strtolower($this->aliasName);
+      $name = $stmt->quoteIdentifier(strtolower($this->aliasName));
       $query[] = $name . " ";
     }
-
-    $lower   = strtolower($this->sourceName);
-    $query[] = "ON {$lower}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
-
+    
+    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->sourceName)) . "."
+             . $stmt->quoteIdentifier($keys["fkey"]) . " = {$name}."
+             . $stmt->quoteIdentifier($keys["id"]);
+             
     return implode("", $query);
   }
 }

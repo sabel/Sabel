@@ -18,68 +18,68 @@ class Sabel_DB_Migration_Create
     $fkeys    = array(),
     $uniques  = array(),
     $options  = array();
-
+    
   public function column($name)
   {
     $mcolumn = new Sabel_DB_Migration_Column($name);
     return $this->mcolumns[$name] = $mcolumn;
   }
-
+  
   public function build()
   {
     $columns = array();
-
+    
     foreach ($this->mcolumns as $column) {
       $columns[] = $column->arrange()->getColumn();
     }
-
+    
     $pkeys =& $this->pkeys;
     foreach ($columns as $column) {
       if ($column->primary) $pkeys[] = $column->name;
     }
-
+    
     $this->columns = $columns;
-
+    
     return $this;
   }
-
+  
   public function getColumns()
   {
     return $this->columns;
   }
-
+  
   public function getPrimaryKeys()
   {
     return $this->pkeys;
   }
-
+  
   public function getForeignKeys()
   {
     return $this->fkeys;
   }
-
+  
   public function getUniques()
   {
     return $this->uniques;
   }
-
+  
   public function getOptions()
   {
     return $this->options;
   }
-
+  
   public function primary($columnNames)
   {
     if (is_string($columnNames)) {
-      $this->pkeys = (array)$columnNames;
+      $this->pkeys = array($columnNames);
     } elseif (is_array($columnNames)) {
       $this->pkeys = $columnNames;
     } else {
-      Sabel_Sakle_Task::error("argument for primary() should be a string or an array.");
+      Sabel_Command::error("argument for primary() should be a string or an array.");
       exit;
     }
   }
-
+  
   public function unique($columnNames)
   {
     if (is_string($columnNames)) {
@@ -87,17 +87,17 @@ class Sabel_DB_Migration_Create
     } elseif (is_array($columnNames)) {
       $this->uniques[] = $columnNames;
     } else {
-      Sabel_Sakle_Task::error("argument for unique() should be a string or an array.");
+      Sabel_Command::error("argument for unique() should be a string or an array.");
       exit;
     }
   }
-
+  
   public function fkey($colName)
   {
     $fKey = new Sabel_DB_Migration_ForeignKey($colName);
     return $this->fkeys[$colName] = $fKey;
   }
-
+  
   public function options($key, $val)
   {
     $this->options[$key] = $val;

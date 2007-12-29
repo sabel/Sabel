@@ -15,21 +15,21 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Abstract_Statement
   {
     $this->driver = $driver;
   }
-
+  
   public function escape(array $values)
   {
     $conn = $this->driver->getConnection();
-
+    
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? "'t'" : "'f'";
       } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
+        $val = $this->toSqlValue($val);
       } elseif (is_string($val)) {
         $val = "'" . pg_escape_string($conn, $val) . "'";
       }
     }
-
+    
     return $values;
   }
 }

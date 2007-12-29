@@ -16,7 +16,7 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     $autoCommit = true,
     $connection = null,
     $connectionName = "";
-
+    
   abstract public function getDriverId();
   abstract public function connect(array $params);
   abstract public function begin();
@@ -25,36 +25,36 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   abstract public function execute($sql, $bindParams = null);
   abstract public function getLastInsertId();
   abstract public function close($connection);
-
+  
   public function __construct($connectionName)
   {
     $this->connectionName = $connectionName;
   }
-
+  
   public function setConnection($connection)
   {
     $this->connection = $connection;
   }
-
+  
   public function getConnection()
   {
     return $this->connection;
   }
-
+  
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
   }
-
+  
   public function getConnectionName()
   {
     return $this->connectionName;
   }
-
+  
   protected function bind($sql, $bindParam)
   {
     if (empty($bindParam)) return $sql;
-
+    
     if (in_array(null, $bindParam, true)) {
       foreach ($bindParam as $key => $val) {
         $val = ($val === null) ? "NULL" : $val;

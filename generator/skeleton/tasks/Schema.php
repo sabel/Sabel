@@ -106,7 +106,7 @@ class TableList_Writer
     $target    = SCHEMA_DIR_PATH . DS . "{$fileName}.php";
     $className = "Schema_" . $fileName;
     
-    Sabel_Sakle_Task::success("generate table list of $cn\n");
+    Sabel_Command::success("generate table list of $cn\n");
     
     $fp = fopen($target, "w");
     

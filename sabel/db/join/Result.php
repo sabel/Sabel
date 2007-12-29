@@ -15,18 +15,18 @@ class Sabel_DB_Join_Result
   {
     $objects = $structure->getJoinObjects();
     $structure = $structure->getStructure();
-
+    
     $tables = array();
     foreach ($structure as $joinTables) {
       $tables = array_merge($tables, $joinTables);
     }
-
+    
     $results = array();
     $selfObj = MODEL($source->getName());
-
+    
     foreach ($rows as $row) {
       $models = self::createModels($row, $tables, $objects);
-
+      
       foreach ($tables as $tblName) {
         if (!isset($structure[$tblName])) continue;
         foreach ($structure[$tblName] as $parent) {
@@ -34,22 +34,22 @@ class Sabel_DB_Join_Result
           $models[$tblName]->__set($name, $models[$parent]);
         }
       }
-
+      
       $self = clone $selfObj;
       $self->setAttributes($row);
-
+      
       $tblName = $source->getTableName();
       foreach ($structure[$tblName] as $parent) {
         $name = convert_to_modelname($parent);
         $self->__set($name, $models[$parent]);
       }
-
+      
       $results[] = $self;
     }
-
+    
     return $results;
   }
-
+  
   private static function createModels(&$row, $tables, $objects)
   {
     $models = array();
@@ -58,7 +58,7 @@ class Sabel_DB_Join_Result
       $model  = $object->createModel($row);
       $models[$tblName] = $model;
     }
-
+    
     return $models;
   }
 }

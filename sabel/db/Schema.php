@@ -55,7 +55,7 @@ class Sabel_DB_Schema
       $sc = new $clsName();
       return $sc->get();
     } else {
-      return Sabel_DB_Driver::createSchema()->getTableList();
+      return Sabel_DB_Driver::createSchema($connectionName)->getTableList();
     }
   }
   

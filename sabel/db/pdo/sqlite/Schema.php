@@ -30,12 +30,12 @@ class Sabel_DB_Pdo_Sqlite_Schema extends Sabel_DB_Abstract_Schema
   public function getUniques($tblName)
   {
     $createSql = $this->getCreateSql($tblName);
-    preg_match_all("/UNIQUE ?(\([^)]+\))/i", $createSql, $matches);
+    preg_match_all("/UNIQUE ?(\(([^)]+)\))/i", $createSql, $matches);
     if (empty($matches[1])) return null;
     
     $uniques = array();
-    foreach ($matches[1] as $unique) {
-      $unique = trim(str_replace(array("(", ")"), "", $unique));
+    foreach ($matches[2] as $unique) {
+      $unique = str_replace(array('"'), "", $unique);
       $exp = array_map("trim", explode(",", $unique));
       $uniques[] = $exp;
     }

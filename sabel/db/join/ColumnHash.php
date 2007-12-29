@@ -12,22 +12,18 @@
 class Sabel_DB_Join_ColumnHash
 {
   private static $columns = array();
-
+  
   public static function toHash($as)
   {
-    $hash = substr(md5($as), 0, 24);
+    $hash = "a" . substr(md5($as), 0, 24);
     return self::$columns[$as] = $hash;
   }
-
+  
   public static function getHash($as)
   {
-    if (isset(self::$columns[$as])) {
-      return self::$columns[$as];
-    } else {
-      return "";
-    }
+    return (isset(self::$columns[$as])) ? self::$columns[$as] : $as;
   }
-
+  
   public static function clear()
   {
     self::$columns = array();

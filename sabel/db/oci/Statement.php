@@ -11,14 +11,11 @@
  */
 class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
 {
-  protected $placeHolderPrefix = ":";
-  protected $placeHolderSuffix = "";
-
   public function __construct(Sabel_DB_Oci_Driver $driver)
   {
     $this->driver = $driver;
   }
-
+  
   public function escape(array $values)
   {
     foreach ($values as &$val) {
@@ -27,42 +24,57 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
       } elseif (is_string($val)) {
         $val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\\n\r") . "'";
       } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
+        $val = $this->toSqlValue($val);
       }
     }
-
+    
     return $values;
   }
-
+  
   public function createInsertSql()
   {
     if (($column = $this->seqColumn) !== null) {
       $seqName = strtoupper("{$this->table}_{$column}_seq");
-      $rows = $this->driver->execute("SELECT {$seqName}.nextval AS id FROM dual");
+      $rows = $this->driver->execute("SELECT {$seqName}.NEXTVAL AS id FROM DUAL");
       $id = $rows[0]["id"];
       $values = array_merge($this->values, array($column => $id));
       $this->values($values);
       $this->driver->setLastInsertId($id);
     }
-
+    
     return parent::createInsertSql();
   }
-
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '"' . strtoupper($v) . '"';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '"' . strtoupper($arg) . '"';
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   protected function createConstraintSql()
   {
     $sql = "";
     $c = $this->constraints;
-
+    
     if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
     if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
-
+    
     $limit  = (isset($c["limit"]))  ? $c["limit"]  : null;
     $offset = (isset($c["offset"])) ? $c["offset"] : null;
-
+    
     $this->driver->setLimit($limit);
     $this->driver->setOffset($offset);
-
+    
     return $sql;
   }
 }

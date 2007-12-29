@@ -83,9 +83,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
       ibase_free_result($result);
     }
 
-    if (defined("HOGE")) {
-      var_dump($this->connection);
-    }
     if ($this->autoCommit) ibase_commit($connection);
     return (empty($rows)) ? null : $rows;
   }

@@ -12,7 +12,7 @@
 class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
 {
   protected $objects = array();
-
+  
   public function add($object, $alias = "", $joinKey = array())
   {
     if (is_string($object)) {
@@ -20,16 +20,16 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     } elseif (is_model($object)) {
       $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
     }
-
+    
     $structure = Sabel_DB_Join_Structure::getInstance();
     $structure->addJoinObject($object);
     $myName = $this->getName();
     $object->setSourceName($myName);
     $this->objects[] = $object;
-
+    
     $structure->add($myName, $object->getName());
     if (!empty($joinKey)) return $this;
-
+    
     $name = $object->getModel()->getTableName();
     if ($fkey = $this->model->getSchema()->getForeignKey()) {
       foreach ($fkey->toArray() as $colName => $fkey) {
@@ -41,47 +41,53 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     } else {
       $joinKey = array("id" => "id", "fkey" => $name . "_id");
     }
-
+    
     $object->setJoinKey($joinKey);
-
+    
     return $this;
   }
-
-  public function getProjection()
+  
+  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->getName(false);
-
+    
     foreach ($this->columns as $column) {
-      $hash = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
-      $projection[] = $name . '.' . $column . ' AS "' . $hash . '"';
+      $as = "pre_{$name}_{$column}";
+      
+      if (strlen($as) > 30) {
+        $as = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
+      }
+      
+      $projection[] = Sabel_DB_Sql_Part::create("%s.%s AS $as", $name, $column)->quote(true);
     }
-
+    
     foreach ($this->objects as $object) {
-      $projection = array_merge($projection, $object->getProjection());
+      $projection = array_merge($projection, $object->getProjection($stmt));
     }
-
+    
     return $projection;
   }
-
-  public function getJoinQuery($joinType)
+  
+  public function getJoinQuery(Sabel_DB_Abstract_Statement $stmt, $joinType)
   {
-    $name  = $this->tblName;
+    $name  = $stmt->quoteIdentifier($this->tblName);
     $keys  = $this->joinKey;
     $query = array(" $joinType JOIN $name ");
-
+    
     if ($this->hasAlias()) {
-      $name = strtolower($this->aliasName);
+      $name = $stmt->quoteIdentifier(strtolower($this->aliasName));
       $query[] = $name . " ";
     }
-
-    $lower   = strtolower($this->sourceName);
-    $query[] = "ON {$lower}.{$keys["fkey"]} = {$name}.{$keys["id"]} ";
-
+    
+    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->sourceName)) . "."
+             . $stmt->quoteIdentifier($keys["fkey"]) . " = {$name}."
+             . $stmt->quoteIdentifier($keys["id"]);
+             
     foreach ($this->objects as $object) {
-      $query[] = $object->getJoinQuery($joinType);
+      $query[] = $object->getJoinQuery($stmt, $joinType);
     }
-
+    
     return implode("", $query);
   }
 }

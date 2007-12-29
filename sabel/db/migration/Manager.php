@@ -24,8 +24,8 @@ define("_NULL",     "SDB_NULL_VALUE");
  */
 class Sabel_DB_Migration_Manager
 {
-  private static $accessor  = null;
-  private static $driver    = null;
+  private static $schema    = null;
+  private static $stmt      = null;
   private static $directory = "";
   private static $applyMode = "";
   private static $start     = null;
@@ -46,24 +46,24 @@ class Sabel_DB_Migration_Manager
     self::$start = null;
   }
   
-  public static function setAccessor($accessor)
+  public static function setSchema($schema)
   {
-    self::$accessor = $accessor;
+    self::$schema = $schema;
   }
   
-  public static function getAccessor()
+  public static function getSchema()
   {
-    return self::$accessor;
+    return self::$schema;
   }
   
-  public static function setDriver($driver)
+  public static function setStatement($stmt)
   {
-    self::$driver = $driver;
+    self::$stmt = $stmt;
   }
   
-  public static function getDriver()
+  public static function getStatement()
   {
-    return self::$driver;
+    return self::$stmt;
   }
   
   public static function setApplyMode($type)

@@ -32,7 +32,7 @@ class Sabel_DB_Migration_Column
     $const = @constant($type);
 
     if ($const === null) {
-      Sabel_Sakle_Task::error("datatype '{$type}' is not supported.");
+      Sabel_Command::error("datatype '{$type}' is not supported.");
       exit;
     } else {
       $this->column->type = $const;
@@ -62,7 +62,7 @@ class Sabel_DB_Migration_Column
   public function value($value)
   {
     if ($this->column->isBool() && !is_bool($value)) {
-      Sabel_Sakle_Task::error("default value for BOOL column should be a boolean.");
+      Sabel_Command::error("default value for BOOL column should be a boolean.");
       exit;
     } else {
       $this->column->default = $value;
@@ -76,7 +76,7 @@ class Sabel_DB_Migration_Column
       $this->column->max = $length;
       return $this;
     } else {
-      Sabel_Sakle_Task::error("length() for _STRING column.");
+      Sabel_Command::error("length() for _STRING column.");
       exit;
     }
   }
@@ -86,7 +86,7 @@ class Sabel_DB_Migration_Column
     if (is_bool($bool)) {
       $this->column->$key = $bool;
     } else {
-      Sabel_Sakle_Task::error("argument for {$key}() should be a boolean.");
+      Sabel_Command::error("argument for {$key}() should be a boolean.");
       exit;
     }
   }

@@ -21,87 +21,92 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "timestamp",
                            Sabel_DB_Type::DATE     => "date");
-
+                           
   protected function createTable($filePath)
   {
     $query = $this->getCreateSql($this->getReader($filePath)->readCreate());
-    $this->getDriver()->execute($query);
+    $this->executeQuery($query);
   }
-
+  
   protected function changeColumnUpgrade($columns, $schema)
   {
     $this->alterChange($columns, $schema);
   }
-
+  
   protected function changeColumnDowngrade($columns, $schema)
   {
     $this->alterChange($columns, $schema);
   }
-
+  
   protected function createColumnAttributes($column)
   {
     $line   = array();
-    $line[] = $column->name;
+    $line[] = $this->quoteIdentifier($column->name);
     $line[] = $this->getDataType($column);
-
+    
     if ($column->nullable === false) $line[] = "NOT NULL";
     $line[] = $this->getDefaultValue($column);
-
+    
     return implode(" ", $line);
   }
-
+  
   private function alterChange($columns, $schema)
   {
-    $tblName = $schema->getTableName();
-    $driver = $this->getDriver();
-    $driver->begin();
-
+    $tblName = $this->quoteIdentifier($schema->getTableName());
+    $stmt = $this->getStatement();
+    $stmt->getDriver()->begin();
+    
     foreach ($columns as $column) {
       $current = $schema->getColumnByName($column->name);
       if ($column->type !== null || ($current->isString() && $column->max !== null)) {
-        $this->changeType($current, $column, $tblName, $driver);
+        $this->changeType($current, $column, $tblName);
       }
-
+      
       if ($column->nullable !== null) {
-        $this->changeNullable($current, $column, $tblName, $driver);
+        $this->changeNullable($current, $column, $tblName);
       }
-
+      
       if ($column->default !== $current->default) {
-        $this->changeDefault($current, $column, $tblName, $driver);
+        $this->changeDefault($column, $tblName);
       }
     }
-
-    $driver->commit();
+    
+    $stmt->getDriver()->commit();
   }
-
-  private function changeType($current, $column, $tblName, $driver)
+  
+  private function changeType($current, $column, $tblName)
   {
+    $colName = $this->quoteIdentifier($column->name);
+    
     if ($current->type !== $column->type && $column->type !== null) {
       $type = $this->getDataType($column);
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
     } elseif ($current->isString() && $current->max !== $column->max) {
       $column->type = $current->type;
       if ($column->max === null) $column->max = 255;
       $type = $this->getDataType($column);
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} TYPE $type");
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
     }
   }
-
-  private function changeNullable($current, $column, $tblName, $driver)
+  
+  private function changeNullable($current, $column, $tblName)
   {
     if ($current->nullable === $column->nullable) return;
-
+    $colName = $this->quoteIdentifier($column->name);
+    
     if ($column->nullable) {
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} DROP NOT NULL");
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName DROP NOT NULL");
     } else {
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} SET NOT NULL");
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName SET NOT NULL");
     }
   }
-
-  private function changeDefault($current, $column, $tblName, $driver)
+  
+  private function changeDefault($column, $tblName)
   {
+    $colName = $this->quoteIdentifier($column->name);
+    
     if ($column->default === _NULL) {
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} DROP DEFAULT");
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName DROP DEFAULT");
     } else {
       if ($column->isBool()) {
         $default = ($column->default) ? "true" : "false";
@@ -110,11 +115,11 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
       } else {
         $default = "'{$column->default}'";
       }
-
-      $driver->execute("ALTER TABLE $tblName ALTER {$column->name} SET DEFAULT $default");
+      
+      $this->executeQuery("ALTER TABLE $tblName ALTER $colName SET DEFAULT $default");
     }
   }
-
+  
   private function getDataType($col)
   {
     if ($col->increment) {
@@ -131,7 +136,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
       return $this->types[$col->type];
     }
   }
-
+  
   protected function getBooleanAttr($value)
   {
     $v = ($value === true) ? "true" : "false";

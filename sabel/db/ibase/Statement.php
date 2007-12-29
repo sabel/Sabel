@@ -15,7 +15,7 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
   {
     $this->driver = $driver;
   }
-
+  
   public function escape(array $values)
   {
     foreach ($values as &$val) {
@@ -24,18 +24,18 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
       } elseif (is_string($val)) {
         $val = "'" . ibase_escape_string($val) . "'";
       } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
+        $val = $this->toSqlValue($val);
       }
     }
-
+    
     return $values;
   }
-
+  
   protected function createSelectSql()
   {
     $sql = "SELECT ";
     $c = $this->constraints;
-
+    
     if (isset($c["limit"])) {
       $query  = "FIRST {$c["limit"]} ";
       $query .= (isset($c["offset"])) ? "SKIP " . $c["offset"] : "SKIP 0";
@@ -43,17 +43,13 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
     } elseif (isset($c["offset"])) {
       $sql   .= "SKIP " . $c["offset"];
     }
-
-    if (empty($this->projection)) {
-      $projection = implode(", ", $this->schema->getColumnNames());
-    } else {
-      $projection = implode(", ", $this->projection);
-    }
-
-    $sql .= " $projection FROM " . $this->table . $this->join . $this->where;
+    
+    $tblName = $this->quoteIdentifier($this->table);
+    $projection = $this->getProjection();
+    $sql .= " $projection FROM $tblName" . $this->join . $this->where;
     return $sql . $this->createConstraintSql();
   }
-
+  
   public function createInsertSql()
   {
     if (($column = $this->seqColumn) !== null) {
@@ -64,19 +60,34 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
       $this->values($values);
       $this->driver->setLastInsertId($id);
     }
-
+    
     return parent::createInsertSql();
   }
-
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '"' . strtoupper($v) . '"';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '"' . strtoupper($arg) . '"';
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   protected function createConstraintSql()
   {
     $sql = "";
     $c = $this->constraints;
-
+    
     if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
     if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
     if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
-
+    
     return $sql;
   }
 }
