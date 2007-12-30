@@ -69,7 +69,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($table)) {
       $this->table    = $table;
       $connectionName = $this->driver->getConnectionName();
-      $this->schema   = Sabel_DB_Schema::getTableSchema($table, $connectionName);
+      $this->schema   = Sabel_DB_Schema::getTableInfo($table, $connectionName);
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
@@ -242,8 +242,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   {
     $sql  = "INSERT INTO {$this->quoteIdentifier($this->table)} (";
     $cols = array_keys($this->values);
-    $hlds = array();
     
+    $hlds = array();
     foreach ($cols as $c) $hlds[] = "@{$c}@";
     
     $cols = $this->quoteIdentifier($cols);
@@ -298,7 +298,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
         if (is_object($p)) {
           $ps[] = $p->getSqlValue($this);
         } else {
-          $ps[] = $p;
+          $ps[] = $this->quoteIdentifier($p);
         }
       }
       

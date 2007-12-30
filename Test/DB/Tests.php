@@ -40,7 +40,7 @@ class Test_DB_Tests
     if (extension_loaded("mysql") && extension_loaded("pdo_mysql")) {
       $suite->addTest(Test_DB_Mysql::suite());
     }
-    /*
+
     if (extension_loaded("pgsql") && extension_loaded("pdo_pgsql")) {
       $suite->addTest(Test_DB_Pgsql::suite());
     }
@@ -56,7 +56,7 @@ class Test_DB_Tests
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
-    */
+
     return $suite;
   }
 }

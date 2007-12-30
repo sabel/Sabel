@@ -13,7 +13,7 @@ class Sabel_DB_Schema
 {
   private static $schemas = array();
   
-  public static function getTableSchema($tblName, $connectionName = "default")
+  public static function getTableInfo($tblName, $connectionName = "default")
   {
     if (isset(self::$schemas[$tblName])) {
       return self::$schemas[$tblName];
