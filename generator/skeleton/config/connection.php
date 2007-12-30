@@ -3,7 +3,7 @@
 function get_db_params($env = null)
 {
   $env = ($env === null) ? ENVIRONMENT : $env;
-
+  
   switch ($env) {
     case PRODUCTION:
       $params = array("default" => array(
@@ -14,7 +14,7 @@ function get_db_params($env = null)
                         "password" => "")
                      );
       break;
-
+      
     case TEST:
       $params = array("default" => array(
                         "package"  => "sabel.db.mysql",
@@ -24,7 +24,7 @@ function get_db_params($env = null)
                         "password" => "")
                      );
       break;
-
+      
     case DEVELOPMENT:
       $params = array("default" => array(
                         "package"  => "sabel.db.mysql",
@@ -35,6 +35,6 @@ function get_db_params($env = null)
                      );
       break;
   }
-
+  
   return $params;
 }

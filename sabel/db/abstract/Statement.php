@@ -296,7 +296,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       $ps = array();
       foreach ($this->projection as $p) {
         if (is_object($p)) {
-          $ps[] = $this->toSqlValue($p);
+          $ps[] = $p->getSqlValue($this);
         } else {
           $ps[] = $p;
         }
@@ -304,10 +304,5 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       
       return implode(", ", $ps);
     }
-  }
-  
-  protected function toSqlValue($object)
-  {
-    return $object->getSqlValue($this);
   }
 }

@@ -174,16 +174,4 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     $value = ($value === true) ? "1" : "0";
     return "DEFAULT " . $value;
   }
-  
-  protected function quoteIdentifier($arg)
-  {
-    if (is_array($arg)) {
-      foreach ($arg as &$v) {
-        $v = '`' . $v . '`';
-      }
-      return $arg;
-    } elseif (is_string($arg)) {
-      return '`' . $arg . '`';
-    }
-  }
 }

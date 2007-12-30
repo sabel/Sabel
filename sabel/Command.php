@@ -16,34 +16,34 @@ class Sabel_Command
   const MSG_MSG  = 0x04;
   const MSG_ERR  = 0x08;
   
-  private static $headers = array(self::MSG_INFO => "[\x1b[1;32mSUCCESS\x1b[m]",
-                                  self::MSG_WARN => "[\x1b[1;35mWARNING\x1b[m]",
-                                  self::MSG_MSG  => "[\x1b[1;34mMESSAGE\x1b[m]",
-                                  self::MSG_ERR  => "[\x1b[1;31mFAILURE\x1b[m]");
+  private static $headers = array(self::MSG_INFO => "[\x1b[1;32m%s\x1b[m]",
+                                  self::MSG_WARN => "[\x1b[1;35m%s\x1b[m]",
+                                  self::MSG_MSG  => "[\x1b[1;34m%s\x1b[m]",
+                                  self::MSG_ERR  => "[\x1b[1;31m%s\x1b[m]");
                                   
-  private static $winHeaders = array(self::MSG_INFO => "[SUCCESS]",
-                                     self::MSG_WARN => "[WARNING]",
-                                     self::MSG_MSG  => "[MESSAGE]",
-                                     self::MSG_ERR  => "[FAILURE]");
+  private static $winHeaders = array(self::MSG_INFO => "[%s]",
+                                     self::MSG_WARN => "[%s]",
+                                     self::MSG_MSG  => "[%s]",
+                                     self::MSG_ERR  => "[%s]");
                                      
   public static function success($msg)
   {
-    echo self::getHeader(self::MSG_INFO) . " $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_INFO, "SUCCESS") . " $msg" . PHP_EOL;
   }
   
   public static function warning($msg)
   {
-    echo self::getHeader(self::MSG_WARN) . " $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_WARN, "WARNING") . " $msg" . PHP_EOL;
   }
   
   public static function message($msg)
   {
-    echo self::getHeader(self::MSG_MSG) . " $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_MSG, "MESSAGE") . " $msg" . PHP_EOL;
   }
   
   public static function error($msg)
   {
-    echo self::getHeader(self::MSG_ERR) . " $msg" . PHP_EOL;
+    echo self::getHeader(self::MSG_ERR, "FAILURE") . " $msg" . PHP_EOL;
   }
   
   public static function hasOption($opt, $arguments)
@@ -69,12 +69,12 @@ class Sabel_Command
     }
   }
   
-  private static function getHeader($type)
+  public static function getHeader($type, $headMsg)
   {
     if (!defined("IS_WIN") || IS_WIN) {
-      return self::$winHeaders[$type];
+      return sprintf(self::$winHeaders[$type], $headMsg);
     } else {
-      return self::$headers[$type];
+      return sprintf(self::$headers[$type], $headMsg);
     }
   }
 }

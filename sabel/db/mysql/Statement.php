@@ -39,7 +39,7 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Abstract_Statement
       } elseif (is_string($val)) {
         $val = "'" . mysql_real_escape_string($val, $conn) . "'";
       } elseif (is_object($val)) {
-        $val = $this->toSqlValue($val);
+        $val = $val->getSqlValue($this);
       }
     }
     

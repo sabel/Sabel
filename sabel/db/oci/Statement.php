@@ -24,7 +24,7 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
       } elseif (is_string($val)) {
         $val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\\n\r") . "'";
       } elseif (is_object($val)) {
-        $val = $this->toSqlValue($val);
+        $val = $val->getSqlValue($this);
       }
     }
     

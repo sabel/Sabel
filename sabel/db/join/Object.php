@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
 {
-  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
+  public function getProjection()
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->tblName;

@@ -26,13 +26,11 @@ class UnitTest extends Tests
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
           $testName = str_replace(PHP_SUFFIX, "", $file);
           $runner->start($testName, $testsDir . DS . $file);
-          $this->success("Complete: $testName");
         }
       }
     } else {
       $testName = $this->arguments[1];
       $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
-      $this->success("Complete: $testName");
     }
   }
   

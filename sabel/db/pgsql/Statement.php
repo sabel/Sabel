@@ -23,10 +23,10 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Abstract_Statement
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? "'t'" : "'f'";
-      } elseif (is_object($val)) {
-        $val = $this->toSqlValue($val);
       } elseif (is_string($val)) {
         $val = "'" . pg_escape_string($conn, $val) . "'";
+      } elseif (is_object($val)) {
+        $val = $val->getSqlValue($this);
       }
     }
     

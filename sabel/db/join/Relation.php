@@ -47,7 +47,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $this;
   }
   
-  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
+  public function getProjection()
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->getName(false);
@@ -63,7 +63,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     }
     
     foreach ($this->objects as $object) {
-      $projection = array_merge($projection, $object->getProjection($stmt));
+      $projection = array_merge($projection, $object->getProjection());
     }
     
     return $projection;

@@ -32,7 +32,7 @@ class Sabel_Cache_Manager
     
     $instance = null;
     
-    if (ENVIRONMENT !== PRODUCTION) {
+    if (!defined("ENVIRONMENT") || ENVIRONMENT !== PRODUCTION) {
       $instance = Sabel_Cache_Null::create();
     } elseif (self::$support["apc"]) {
       $instance = Sabel_Cache_Apc::create();

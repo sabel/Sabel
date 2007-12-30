@@ -91,7 +91,7 @@ class Sabel_DB_Join extends Sabel_Object
     }
     
     $rows = $this->execute($stmt,
-                           array("COUNT(*) AS cnt"),
+                           array(Sabel_DB_Sql_Part::create("COUNT(*) AS cnt")),
                            implode("", $query),
                            array("limit" => 1));
                            
@@ -111,15 +111,14 @@ class Sabel_DB_Join extends Sabel_Object
     if (empty($projection)) {
       $projection = array();
       foreach ($this->objects as $object) {
-        $projection = array_merge($projection, $object->getProjection($stmt));
+        $projection = array_merge($projection, $object->getProjection());
       }
       
       $model   = $this->model;
       $tblName = $model->getTableName();
       
       foreach ($model->getColumnNames() as $column) {
-        $projection[] = $stmt->quoteIdentifier($tblName) . "."
-                      . $stmt->quoteIdentifier($column);
+        $projection[] = Sabel_DB_Sql_Part::create("%s.%s", $tblName, $column)->quote(true);
       }
     }
     
