@@ -47,7 +47,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $this;
   }
   
-  public function getProjection()
+  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->getName(false);
@@ -59,11 +59,12 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
         $as = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
       }
       
-      $projection[] = Sabel_DB_Sql_Part::create("%s.%s AS $as", $name, $column)->quote(true);
+      $p = $stmt->quoteIdentifier($name) . "." . $stmt->quoteIdentifier($column);
+      $projection[] = $p . " AS " . $as;
     }
     
     foreach ($this->objects as $object) {
-      $projection = array_merge($projection, $object->getProjection());
+      $projection = array_merge($projection, $object->getProjection($stmt));
     }
     
     return $projection;

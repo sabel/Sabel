@@ -199,7 +199,7 @@ class Sabel_DB_Manipulator extends Sabel_Object
 
     $projection  = $this->projection;
     $constraints = $this->constraints;
-    $this->projection  = array(Sabel_DB_Sql_Part::create("COUNT(*) AS cnt"));
+    $this->projection  = "COUNT(*) AS cnt";
     $this->constraints = array("limit" => 1);
 
     $sql  = $this->getStatement(Sabel_DB_Statement::SELECT);

@@ -77,9 +77,14 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     return $this;
   }
   
-  public function projection(array $projection)
+  public function projection($projection)
   {
-    $this->projection = $projection;
+    if (is_array($projection) || is_string($projection)) {
+      $this->projection = $projection;
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
     
     return $this;
   }
@@ -292,6 +297,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (empty($this->projection)) {
       $colNames = $this->quoteIdentifier($this->schema->getColumnNames());
       return implode(", ", $colNames);
+    } elseif (is_string($this->projection)) {
+      return $this->projection;
     } else {
       $ps = array();
       foreach ($this->projection as $p) {

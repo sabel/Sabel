@@ -83,7 +83,7 @@ class SabelAllTests
       $suite = new PHPUnit_Framework_TestSuite();
     }
     
-    //$suite->addTest(Test_DB_Tests::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Bus::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Annotation::suite());

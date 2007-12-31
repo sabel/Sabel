@@ -91,7 +91,7 @@ class Sabel_DB_Join extends Sabel_Object
     }
     
     $rows = $this->execute($stmt,
-                           array(Sabel_DB_Sql_Part::create("COUNT(*) AS cnt")),
+                           "COUNT(*) AS cnt",
                            implode("", $query),
                            array("limit" => 1));
                            
@@ -111,15 +111,15 @@ class Sabel_DB_Join extends Sabel_Object
     if (empty($projection)) {
       $projection = array();
       foreach ($this->objects as $object) {
-        $projection = array_merge($projection, $object->getProjection());
+        $projection = array_merge($projection, $object->getProjection($stmt));
       }
       
-      $model   = $this->model;
-      $tblName = $model->getTableName();
-      
-      foreach ($model->getColumnNames() as $column) {
-        $projection[] = Sabel_DB_Sql_Part::create("%s.%s", $tblName, $column)->quote(true);
+      $quotedTblName = $stmt->quoteIdentifier($this->tblName);
+      foreach ($this->model->getColumnNames() as $column) {
+        $projection[] = $quotedTblName . "." . $stmt->quoteIdentifier($column);
       }
+      
+      $projection = implode(", ", $projection);
     }
     
     $query = array();
@@ -128,7 +128,7 @@ class Sabel_DB_Join extends Sabel_Object
     }
     
     if ($rows = $this->execute($stmt, $projection, implode("", $query))) {
-      $results = Sabel_DB_Join_Result::build($model, $this->structure, $rows);
+      $results = Sabel_DB_Join_Result::build($this->model, $this->structure, $rows);
     } else {
       $results = false;
     }
@@ -144,7 +144,7 @@ class Sabel_DB_Join extends Sabel_Object
     $stmt->join($join)
          ->projection($projection)
          ->where($manip->loadConditionManager()->build($stmt));
-        
+         
     if ($constraints === null) $constraints = $manip->getConstraints();
     return $manip->executeStatement($stmt->constraints($constraints));
   }
