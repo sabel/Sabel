@@ -45,8 +45,11 @@ class Processor_Exception extends Sabel_Bus_Processor
           if (is_object($arg)) {
             $args[] = "(Object)" . get_class($arg);
           } elseif (is_bool($arg)) {
-            $str = ($arg) ? "true" : "false";
-            $args[] = "(Boolean)" . $str;
+            $args[] = ($arg) ? "true" : "false";
+          } elseif (is_string($arg)) {
+            $args[] = '"' . $arg . '"';
+          } elseif (is_int($arg) || is_float($arg)) {
+            $args[] = $arg;
           } elseif (is_resource($arg)) {
             $args[] = "(Resource)" . get_resource_type($arg);
           } elseif ($arg === null) {
@@ -75,19 +78,19 @@ class Processor_Exception extends Sabel_Bus_Processor
   private function exception($exception, $message)
   {
     if (ENVIRONMENT === PRODUCTION) {
-      if ($exception instanceof Sabel_Exception_Runtime) {
-        $exception->writeSyslog($message);
-      }
-      
-      // send mail. etc.
-      
+      // if ($exception instanceof Sabel_Exception_Runtime) {
+      //   $exception->writeSyslog($message);
+      // }
     } else {
       $this->response->setResponse("exception_message", $message);
+      $message = str_replace("<br/>", PHP_EOL, $message);
     }
+    
+    l($message, LOG_ERR);
   }
   
   private function getEol()
   {
-    return (ENVIRONMENT === DEVELOPMENT) ? "<br/>" : "\r\n";
+    return (ENVIRONMENT === DEVELOPMENT) ? "<br/>" : PHP_EOL;
   }
 }

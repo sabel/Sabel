@@ -83,7 +83,7 @@ class Sabel_Bus extends Sabel_Object
       
       if (ENVIRONMENT !== PRODUCTION) {
         $time = (microtime() - $s);
-        l("[bus] execute " . $processor->name . " (time: {$time})", LOG_DEBUG);
+        l("execute " . $processor->name . " (time: {$time})", LOG_DEBUG);
       }
       
       $processorList = $processorList->next();
@@ -92,8 +92,8 @@ class Sabel_Bus extends Sabel_Object
     $processorList = $this->list->getFirst();
     while ($processorList !== null) {
       $processor = $processorList->get();
-      l("[bus] shutdown: " . $processor->name, LOG_DEBUG);
       if ($processor->hasMethod("shutdown")) {
+        l("shutdown " . $processor->name, LOG_DEBUG);
         $processor->shutdown($this);
       }
       

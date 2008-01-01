@@ -67,7 +67,7 @@ class Sabel_DB_Schema
     return $schemas;
   }
   
-  private static function setMaxmin($tblSchema)
+  public static function setMaxmin($tblSchema)
   {
     if (class_exists("ColumnMaxmin", false)) {
       $tblName = $tblSchema->getTableName();
