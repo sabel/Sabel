@@ -11,16 +11,16 @@
  */
 class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "integer",
-                           Sabel_DB_Type::BIGINT   => "bigint",
-                           Sabel_DB_Type::SMALLINT => "smallint",
-                           Sabel_DB_Type::FLOAT    => "float",
-                           Sabel_DB_Type::DOUBLE   => "double",
-                           Sabel_DB_Type::BOOL     => "tinyint(1)",
-                           Sabel_DB_Type::STRING   => "varchar",
-                           Sabel_DB_Type::TEXT     => "text",
-                           Sabel_DB_Type::DATETIME => "datetime",
-                           Sabel_DB_Type::DATE     => "date");
+  protected $types = array(Sabel_DB_Type::INT      => "INTEGER",
+                           Sabel_DB_Type::BIGINT   => "BIGINT",
+                           Sabel_DB_Type::SMALLINT => "SMALLINT",
+                           Sabel_DB_Type::FLOAT    => "FLOAT",
+                           Sabel_DB_Type::DOUBLE   => "DOUBLE",
+                           Sabel_DB_Type::BOOL     => "TINYINT(1)",
+                           Sabel_DB_Type::STRING   => "VARCHAR",
+                           Sabel_DB_Type::TEXT     => "TEXT",
+                           Sabel_DB_Type::DATETIME => "DATETIME",
+                           Sabel_DB_Type::DATE     => "DATE");
                            
   protected function createTable($filePath)
   {
@@ -33,11 +33,28 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     }
     
     $this->executeQuery($query);
+    
+    if ($indexes = $create->getIndexes()) {
+      $this->createIndex($indexes);
+    }
+  }
+  
+  protected function dropIndex(array $idxColumns, $tblName = null)
+  {
+    if ($tblName === null) {
+      $tblName = convert_to_tablename($this->mdlName);
+    }
+    
+    $quotedTblName = $this->quoteIdentifier($tblName);
+    foreach ($idxColumns as $colName) {
+      $idxName = $tblName . "_" . $colName . "_idx";
+      $this->executeQuery("DROP INDEX {$tblName}_{$colName}_idx ON $quotedTblName");
+    }
   }
   
   public function drop()
   {
-    if ($this->applyMode === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
       

@@ -17,6 +17,7 @@ class Sabel_DB_Migration_Create
     $pkeys    = array(),
     $fkeys    = array(),
     $uniques  = array(),
+    $indexes  = array(),
     $options  = array();
     
   public function column($name)
@@ -63,6 +64,11 @@ class Sabel_DB_Migration_Create
     return $this->uniques;
   }
   
+  public function getIndexes()
+  {
+    return $this->indexes;
+  }
+  
   public function getOptions()
   {
     return $this->options;
@@ -75,7 +81,7 @@ class Sabel_DB_Migration_Create
     } elseif (is_array($columnNames)) {
       $this->pkeys = $columnNames;
     } else {
-      Sabel_Command::error("argument for primary() should be a string or an array.");
+      Sabel_Command::error("primary() argument must be a string or an array.");
       exit;
     }
   }
@@ -87,7 +93,7 @@ class Sabel_DB_Migration_Create
     } elseif (is_array($columnNames)) {
       $this->uniques[] = $columnNames;
     } else {
-      Sabel_Command::error("argument for unique() should be a string or an array.");
+      Sabel_Command::error("unique() argument should be a string or an array.");
       exit;
     }
   }
@@ -96,6 +102,11 @@ class Sabel_DB_Migration_Create
   {
     $fKey = new Sabel_DB_Migration_ForeignKey($colName);
     return $this->fkeys[$colName] = $fKey;
+  }
+  
+  public function index($colName)
+  {
+    $this->indexes[] = $colName;
   }
   
   public function options($key, $val)

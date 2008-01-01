@@ -73,17 +73,11 @@ class Generator extends Sabel_Sakle_Task
     $argc = count($this->arguments);
     
     if ($argc === 3) {
-      $module = "Index";
-      $method = "create";
+      $module = "index";
       $controller = $this->arguments[2];
     } elseif ($argc === 4) {
       $module = $this->arguments[2];
       $controller = $this->arguments[3];
-      $method = "create";
-    } elseif ($argc === 5) {
-      $module = $this->arguments[2];
-      $controller = $this->arguments[3];
-      $method = $this->arguments[4];
     } else {
       $this->error("too many arguments");
       $this->usage();
@@ -107,64 +101,47 @@ class Generator extends Sabel_Sakle_Task
       exit;
     }
     
-    $prefixes = array(""         => "create",
-                      "correct"  => "confirm",
-                      "confirm"  => "do",
-                      "do"       => "complete",
-                      "complete" => "");
-                      
-    $code = array();
-    $code[] = "<?php";
-    $code[] = "";
-    $code[] = "/**";
-    $code[] = " * @executer flow";
-    $code[] = " */";
-    $code[] = "class $clsName extends Flow_Page";
+    $actions = array();
+    
+    $cli = new Sabel_Command();
+    
+    while (true) {
+      $input = $cli->read("action");
+      if ($input === false) break;
+      if (!in_array($input, $actions, true)) {
+        $actions[] = $input;
+      }
+    }
+    
+    $code = array("<?php" . PHP_EOL);
+    $code[] = "class $clsName extends Sabel_Controller_Page";
     $code[] = "{";
     
-    $i = 0;
-    $last = count($prefixes) - 1;
-    $tpls = array();
-    
-    foreach ($prefixes as $m => $next) {
-      $name = ($m === "") ? $method : $m . ucfirst($method);
-      $tpls[] = $name;
-      $code[] = "  /**";
-      
-      if ($next === "") {
-        $code[] = "   * @end flow";
-        $code[] = "   */";
-        $code[] = "  public function $name()";
+    if ($actions) {
+      foreach ($actions as $action) {
+        $code[] = "  public function $action()";
         $code[] = "  {";
-        $code[] = "  }";
-        $code[] = "}";
-      } else {
-        if ($m === "") {
-          $code[] = "   * @flow start";
-        }
-        
-        $code[] = "   * @next {$next}" . ucfirst($method);
-        $code[] = "   */";
-        $code[] = "  public function {$name}()";
-        $code[] = "  {";
+        $code[] = "    ";
         $code[] = "  }";
         $code[] = "  ";
       }
-      
-      $i++;
     }
+    
+    $code[] = "}";
+    
+    file_put_contents($filePath, implode(PHP_EOL, $code));
+    $this->success("create controller $clsName");
     
     $tplDir = $vPath . DS . lcfirst($controller);
     if (!is_dir($tplDir)) mkdir ($tplDir);
     
-    foreach ($tpls as $tpl) {
-      $tplPath = $tplDir . DS . $tpl . TPL_SUFFIX;
-      file_put_contents($tplPath, PHP_EOL);
-      $this->success("create template $tpl" . TPL_SUFFIX);
-    }
+    if (empty($actions)) return;
     
-    file_put_contents($filePath, implode(PHP_EOL, $code));
-    $this->success("create controller $clsName");
+    foreach ($actions as $action) {
+      $tplPath = $tplDir . DS . $action. TPL_SUFFIX;
+      file_put_contents($tplPath, PHP_EOL);
+      $this->success("create template $action" . TPL_SUFFIX);
+    }
   }
   
   private function getEnvironment($arguments)

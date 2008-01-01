@@ -16,6 +16,10 @@ class Sabel_Command
   const MSG_MSG  = 0x04;
   const MSG_ERR  = 0x08;
   
+  private
+    $stdin = null,
+    $ends  = array("exit", "quit", "\q");
+    
   private static $headers = array(self::MSG_INFO => "[\x1b[1;32m%s\x1b[m]",
                                   self::MSG_WARN => "[\x1b[1;35m%s\x1b[m]",
                                   self::MSG_MSG  => "[\x1b[1;34m%s\x1b[m]",
@@ -76,5 +80,40 @@ class Sabel_Command
     } else {
       return sprintf(self::$headers[$type], $headMsg);
     }
+  }
+  
+  public function __construct($ends = null)
+  {
+    if ($ends !== null) {
+      if (is_array($ends)) {
+        $this->ends = $ends;
+      } else {
+        $message = "argument must be an array.";
+        throw new Sabel_Exception_InvalidArgument($message);
+      }
+    }
+    
+    $this->stdin = fopen("php://stdin", "r");
+    $endCommands = implode(" or ", $this->ends);
+    echo "please input $endCommands to finish." . PHP_EOL . PHP_EOL;
+  }
+  
+  public function read($message, $trim = true)
+  {
+    echo $message . ": ";
+    
+    $input = fgets($this->stdin);
+    $input = ($trim) ? trim($input) : $input;
+    
+    if (in_array($input, $this->ends, true)) {
+      return false;
+    } else {
+      return $input;
+    }
+  }
+  
+  public function quit()
+  {
+    fclose($this->stdin);
   }
 }
