@@ -12,25 +12,25 @@
 class Paginate extends Sabel_Object
 {
   protected
-    $manipulator = null,
-    $isJoin      = false,
-    $attributes  = array(),
-    $method      = "select";
-  
-  public function __construct($manipulator)
+    $model      = null,
+    $isJoin     = false,
+    $attributes = array(),
+    $method     = "select";
+    
+  public function __construct($model)
   {
-    if ($manipulator instanceof Sabel_DB_Manipulator) {
-      $manipulator->autoReinit(false);
+    if (is_model($model)) {
+      $model->autoReinit(false);
       $this->method = "select";
-    } elseif ($manipulator instanceof Sabel_DB_Join) {
-      $manipulator->getManipulator()->autoReinit(false);
+    } elseif ($model instanceof Sabel_DB_Join) {
+      $model->getModel()->autoReinit(false);
       $this->method = "join";
       $this->isJoin = true;
     } else {
       throw new Exception("Paginate::__construct() invalid instance.");
     }
     
-    $this->manipulator = $manipulator;
+    $this->model = $model;
   }
   
   public function __get($key)
@@ -42,9 +42,25 @@ class Paginate extends Sabel_Object
     }
   }
   
+  public function setCondition($arg1, $arg2 = null)
+  {
+    $this->model->setCondition($arg1, $arg2);
+    
+    return $this;
+  }
+  
+  public function setOrderBy($orderBy)
+  {
+    $this->model->setOrderBy($orderBy);
+    
+    return $this;
+  }
+  
   public function setMethod($method)
   {
     $this->method = $method;
+    
+    return $this;
   }
   
   public function build($limit, $page)
@@ -53,13 +69,13 @@ class Paginate extends Sabel_Object
       $page = 1;
     }
     
+    $model = $this->model;
     $attributes =& $this->attributes;
-    $manipulator = $this->manipulator;
     
     if ($this->isJoin) {
-      $count = $manipulator->getCount(null, false);
+      $count = $model->getCount(null, false);
     } else {
-      $count = $manipulator->getCount();
+      $count = $model->getCount();
     }
     
     $attributes["count"] = $count;
@@ -77,16 +93,15 @@ class Paginate extends Sabel_Object
       $offset = $pager->getSqlOffset();
       
       if ($this->isJoin) {
-        $manip = $manipulator->getManipulator();
-        $manip->setConstraint("limit",  $limit);
-        $manip->setConstraint("offset", $offset);
+        $model->getModel()->setLimit($limit);
+        $model->getModel()->setOffset($offset);
       } else {
-        $manipulator->setConstraint("limit",  $limit);
-        $manipulator->setConstraint("offset", $offset);
+        $model->setLimit($limit);
+        $model->setOffset($offset);
       }
       
       $attributes["offset"]  = $offset;
-      $attributes["results"] = $manipulator->{$this->method}();
+      $attributes["results"] = $model->{$this->method}();
     }
     
     return $this;

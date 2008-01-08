@@ -12,28 +12,43 @@
 class Sabel_DB_Join extends Sabel_Object
 {
   private
-    $manip    = null,
     $model    = null,
     $objects  = array(),
     $joinType = "INNER",
     $tblName  = "";
     
-  public function __construct(Sabel_DB_Manipulator $manip)
+  public function __construct($model)
   {
-    $this->manip     = $manip;
-    $this->model     = $manip->getModel();
-    $this->tblName   = $this->model->getTableName();
+    if (is_string($model)) {
+      $model = MODEL($model);
+    } elseif (!is_model($model)) {
+      $message = "argument must be a string or instance of model.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+    
+    $this->model     = $model;
+    $this->tblName   = $model->getTableName();
     $this->structure = Sabel_DB_Join_Structure::getInstance();
   }
   
-  public function getManipulator()
+  public function getModel()
   {
-    return $this->manip;
+    return $this->model;
   }
   
   public function setJoinType($joinType)
   {
     $this->joinType = $joinType;
+  }
+  
+  public function setCondition($arg1, $arg2 = null)
+  {
+    $this->model->setCondition($arg1, $arg2);
+  }
+  
+  public function setOrderBy($orderBy)
+  {
+    $this->model->setOrderBy($orderBy);
   }
   
   public function add($object, $alias = "", $joinKey = array())
@@ -44,7 +59,7 @@ class Sabel_DB_Join extends Sabel_Object
       $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
     }
     
-    $object->setSourceName($this->tblName);
+    $object->setChildName($this->tblName);
     $this->objects[] = $object;
     $this->structure->addJoinObject($object);
     $this->structure->add($this->tblName, $object->getName());
@@ -52,18 +67,7 @@ class Sabel_DB_Join extends Sabel_Object
     if (!empty($joinKey)) return $this;
     
     $name = $object->getModel()->getTableName();
-    if ($fkey = $this->model->getSchema()->getForeignKey()) {
-      foreach ($fkey->toArray() as $colName => $fkey) {
-        if ($fkey->table === $name) {
-          $joinKey = array("id" => $fkey->column, "fkey" => $colName);
-          break;
-        }
-      }
-    } else {
-      $joinKey = array("id" => "id", "fkey" => $name . "_id");
-    }
-    
-    $object->setJoinKey($joinKey);
+    $object->setJoinKey(create_join_key($this->model, $name));
     
     return $this;
   }
@@ -83,7 +87,7 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->manip->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->model->getStatement(Sabel_DB_Statement::SELECT);
     
     $query = array();
     foreach ($this->objects as $object) {
@@ -105,8 +109,8 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->manip->getStatement(Sabel_DB_Statement::SELECT);
-    $projection = $this->manip->getProjection();
+    $stmt = $this->model->getStatement(Sabel_DB_Statement::SELECT);
+    $projection = $this->model->getProjection();
     
     if (empty($projection)) {
       $projection = array();
@@ -139,14 +143,12 @@ class Sabel_DB_Join extends Sabel_Object
   
   protected function execute($stmt, $projection, $join, $constraints = null)
   {
-    $manip = $this->manip;
-    
     $stmt->join($join)
          ->projection($projection)
-         ->where($manip->loadConditionManager()->build($stmt));
+         ->where($this->model->getCondition()->build($stmt));
          
-    if ($constraints === null) $constraints = $manip->getConstraints();
-    return $manip->executeStatement($stmt->constraints($constraints));
+    if ($constraints === null) $constraints = $this->model->getConstraints();
+    return $stmt->constraints($constraints)->execute();
   }
   
   public function clear()

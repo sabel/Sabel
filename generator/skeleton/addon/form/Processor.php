@@ -114,19 +114,18 @@ class Form_Processor extends Sabel_Bus_Processor
     $values = $this->request->fetchPostValues();
     if (empty($values)) return $form;
     
-    $model   = $form->getModel();
-    $mdlName = $model->getName();
+    $model     = $form->getModel();
+    $mdlName   = $model->getName();
+    $allowCols = $form->getAllowColumns();
     
     foreach ($values as $key => $value) {
       if (strpos($key, "::") === false) continue;
       list ($name, $colName) = explode("::", $key);
-      if ($name !== $mdlName) continue;
+      if ($name !== $mdlName || !in_array($colName, $allowCols)) continue;
       
       if ($colName === "datetime") {
         foreach ($value as $key => $date) {
-          if ($this->isEmptyDateValues($date)) {
-            $model->$key = null;
-          } else {
+          if ($this->isCompleteDateValues($date)) {
             if (!isset($date["second"])) {
               $date["second"] = "00";
             }
@@ -137,15 +136,17 @@ class Form_Processor extends Sabel_Bus_Processor
                          . $date["hour"]   . ":"
                          . $date["minute"] . ":"
                          . $date["second"];
+          } else {
+            $model->$key = null;
           }
         }
       } elseif ($colName === "date") {
         foreach ($value as $key => $date) {
-          if ($this->isEmptyDateValues($date, false)) {
-            $model->$key = null;
-          } else {
+          if ($this->isCompleteDateValues($date, false)) {
             $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
             $model->$key = $date;
+          } else {
+            $model->$key = null;
           }
         }
       } else {
@@ -153,7 +154,7 @@ class Form_Processor extends Sabel_Bus_Processor
       }
     }
     
-    foreach ($model->getSchema()->getColumns() as $colName => $column) {
+    foreach ($model->getColumns() as $colName => $column) {
       if (!$column->isBool()) continue;
       $key = "{$mdlName}::{$colName}";
       if (isset($values[$key])) {
@@ -164,7 +165,7 @@ class Form_Processor extends Sabel_Bus_Processor
     return $form;
   }
   
-  private function isEmptyDateValues($values, $isDatetime = true)
+  private function isCompleteDateValues($values, $isDatetime = true)
   {
     $keys = array("year", "month", "day");
     
@@ -173,7 +174,7 @@ class Form_Processor extends Sabel_Bus_Processor
     }
     
     foreach ($keys as $key) {
-      if ($values[$key] !== "") return false;
+      if ($values[$key] === "") return false;
     }
     
     return true;

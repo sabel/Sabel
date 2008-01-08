@@ -3,9 +3,11 @@
 class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";
-  public static $tables = array("member", "member_sub_group", "member_group",
-                                "super_group", "location", "condition_test", "schema_test");
-
+  public static $tables = array("schema_test", "grandchildren", "children",
+                                "parents", "grandparents");
+                                
+  protected static $lastStId = null;
+  
   public function testClean()
   {
     $tables = self::$tables;
@@ -14,900 +16,423 @@ class Test_DB_Test extends SabelTestCase
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");
     }
-
-    $driver->execute("DELETE FROM tree WHERE id > 2");
-    $driver->execute("DELETE FROM tree");
   }
-
+  
   public function testInsert()
   {
-    $data = array("id"   => 1,
-                  "name" => "us");
-
-    $executer = new Manipulator("Location");
-    $executer->insert($data);
-
-    $data = array("id"   => 2,
-                  "name" => "ja");
-
-    $executer->insert($data);
-
-    $data = array("id"   => 3,
-                  "name" => "fr");
-
-    $executer->insert($data);
-
-    //=============================================
-
-    $data = array("id"   => 1,
-                  "name" => "sgroup1");
-
-    $executer = new Manipulator("SuperGroup");
-    $executer->insert($data);
-
-    $data = array("id"   => 2,
-                  "name" => "sgroup2");
-
-    $executer->insert($data);
-
-    //=============================================
-
-    $data = array("id"   => 1,
-                  "name" => "group1",
-                  "super_group_id" => 2);
-
-    $executer = new Manipulator("MemberGroup");
-    $executer->insert($data);
-
-    $data = array("id"   => 2,
-                  "name" => "group2",
-                  "super_group_id" => 1);
-
-    $executer->insert($data);
-
-    //=============================================
-
-    $data = array("id"   => 1,
-                  "name" => "sub_group1",
-                  "member_group_id" => 2);
-
-    $executer = new Manipulator("MemberSubGroup");
-    $executer->insert($data);
-
-    $data = array("id"   => 2,
-                  "name" => "sub_group2",
-                  "member_group_id" => 1);
-
-    $executer->insert($data);
-
-    //=============================================
-
-    $data = array("id"      => 1,
-                  "name"    => "test1",
-                  "email"   => "test1@example.com",
-                  "is_temp" => true,
-                  "location_id" => 1,
-                  "member_sub_group_id" => 2);
-
-    $executer = new Manipulator("Member");
-    $executer->insert($data);
-
-    $threw = false;
-
-    try {
-      $executer->insert();
-    } catch (Exception $e) {
-      $threw = true;
-    }
-
-    $this->assertTrue($threw);
-
-    $count = $executer->getCount();
-    $this->assertEquals($count, 1);
+    $st = MODEL("SchemaTest");
+    $st->email = "test1@example.com";
+    $st->bl = true;
+    $generatedId = $st->insert();
+    
+    $this->assertTrue(is_int($generatedId));
   }
-
-  public function testSaveInsert()
-  {
-    $member = MODEL("Member");
-
-    $member->id      = 2;
-    $member->name    = "test2";
-    $member->email   = "test2@example.com";
-    $member->is_temp = true;
-    $member->location_id = 2;
-    $member->member_sub_group_id = 1;
-
-    $executer = new Manipulator($member);
-    $executer->save();
-
-    $count = $executer->getCount();
-    $this->assertEquals($count, 2);
-  }
-
-  public function testSelect()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "id ASC");
-    $members  = $executer->select();
-
-    $this->assertEquals(count($members), 2);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->id, 1);
-    $this->assertEquals($member1->name, "test1");
-    $this->assertEquals($member1->email, "test1@example.com");
-    $this->assertEquals($member1->is_temp, true);
-    $this->assertEquals($member1->location_id, 1);
-
-    $this->assertEquals($member2->id, 2);
-    $this->assertEquals($member2->name, "test2");
-    $this->assertEquals($member2->email, "test2@example.com");
-    $this->assertEquals($member2->is_temp, true);
-    $this->assertEquals($member2->location_id, 2);
-
-    $executer->setCondition(1);
-    $members = $executer->select();
-
-    $this->assertEquals(count($members), 1);
-    $this->assertEquals($members[0]->name, "test1");
-
-    $executer->setCondition(2);
-    $members = $executer->select();
-
-    $this->assertEquals(count($members), 1);
-    $this->assertEquals($members[0]->name, "test2");
-  }
-
-  public function testSelectOrder()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "id DESC");
-    $members  = $executer->select();
-
-    $this->assertEquals(count($members), 2);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->id, 2);
-    $this->assertEquals($member1->name, "test2");
-    $this->assertEquals($member1->email, "test2@example.com");
-    $this->assertEquals($member1->is_temp, true);
-    $this->assertEquals($member1->location_id, 2);
-
-    $this->assertEquals($member2->id, 1);
-    $this->assertEquals($member2->name, "test1");
-    $this->assertEquals($member2->email, "test1@example.com");
-    $this->assertEquals($member2->is_temp, true);
-    $this->assertEquals($member2->location_id, 1);
-  }
-
-  public function testSelectOne()
-  {
-    $executer = new Manipulator("Member");
-    $member1 = $executer->selectOne(1);
-    $this->assertTrue($member1->isSelected());
-
-    $executer = new Manipulator("Member");
-    $member2 = $executer->selectOne(2);
-    $this->assertTrue($member2->isSelected());
-
-    $executer = new Manipulator("Member");
-    $member3 = $executer->selectOne(3);
-    $this->assertFalse($member3->isSelected());
-
-    $this->assertEquals($member2->id, 2);
-    $this->assertEquals($member2->name, "test2");
-  }
-
-  public function testUpdate()
-  {
-    $data = array("is_temp" => false);
-
-    $executer = new Manipulator("Member");
-    $executer->setCondition(1);
-    $executer->update($data);
-
-    $executer = new Manipulator("Member");
-
-    $threw = false;
-
-    try {
-      $executer->update();
-    } catch (Exception $e) {
-      $threw = true;
-    }
-
-    $this->assertTrue($threw);
-
-    $executer = new Manipulator("Member");
-    $member1 = $executer->selectOne(1);
-    $this->assertFalse($member1->is_temp);
-
-    $executer = new Manipulator("Member");
-    $member2 = $executer->selectOne(2);
-    $this->assertTrue($member2->is_temp);
-  }
-
-  public function testSaveUpdate()
-  {
-    $executer = new Manipulator("Member");
-    $member2 = $executer->selectOne(2);
-    $member2->is_temp = false;
-
-    $executer->setModel($member2);
-    $executer->save();
-
-    $executer = new Manipulator("Member");
-    $member2 = $executer->selectOne(2);
-    $this->assertFalse($member2->is_temp);
-  }
-
-  public function testParents()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "Member.id ASC");
-    $join = new Sabel_DB_Join($executer);
-    $members = $join->setParents(array("MemberSubGroup"))->join();
-
-    $this->assertEquals(count($members), 2);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->id, 1);
-    $this->assertEquals($member2->id, 2);
-
-    $this->assertEquals($member1->MemberSubGroup->id, 2);
-    $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
-    $this->assertEquals($member2->MemberSubGroup->id, 1);
-    $this->assertEquals($member2->MemberSubGroup->name, "sub_group1");
-  }
-
-  public function testJoin()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "Member.id ASC");
-
-    $join = new Sabel_DB_Join($executer);
-    $members = $join->add(MODEL("MemberSubGroup"))->join();
-
-    $this->assertEquals(count($members), 2);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->id, 1);
-    $this->assertEquals($member2->id, 2);
-
-    $this->assertEquals($member1->MemberSubGroup->id, 2);
-    $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
-    $this->assertEquals($member2->MemberSubGroup->id, 1);
-    $this->assertEquals($member2->MemberSubGroup->name, "sub_group1");
-
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "Member.id ASC");
-
-    $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
-    $relation->add(MODEL("MemberGroup"));
-    $members = $join->add($relation)->join();
-
-    $this->assertEquals(count($members), 2);
-
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->MemberSubGroup->id, 2);
-    $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->id, 1);
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->name, "group1");
-    $this->assertEquals($member2->MemberSubGroup->id, 1);
-    $this->assertEquals($member2->MemberSubGroup->name, "sub_group1");
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->id, 2);
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->name, "group2");
-  }
-
-  public function testJoinCount()
-  {
-    $executer = new Manipulator("Member");
-
-    $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
-    $relation->add(MODEL("MemberGroup"));
-    $count = $join->add($relation)->getCount();
-
-    $this->assertEquals($count, 2);
-
-    $executer = new Manipulator("Member");
-    $executer->setCondition("MemberGroup.name", "group1");
-
-    $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
-    $relation->add(MODEL("MemberGroup"));
-    $count = $join->add($relation)->getCount();
-
-    $this->assertEquals($count, 1);
-  }
-
-  public function testJoinAlias()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "Member.id ASC");
-
-    $join = new Sabel_DB_Join($executer);
-    $relation = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"), "Msg");
-    $relation->add(new Sabel_DB_Join_Object(MODEL("MemberGroup"), "MemGrp"));
-    $members = $join->add($relation)->join();
-    $member1 = $members[0];
-    $member2 = $members[1];
-
-    $this->assertEquals($member1->Msg->id, 2);
-    $this->assertEquals($member1->Msg->MemGrp->id, 1);
-    $this->assertEquals($member1->Msg->MemGrp->name, "group1");
-    $this->assertEquals($member2->Msg->id, 1);
-    $this->assertEquals($member2->Msg->MemGrp->id, 2);
-    $this->assertEquals($member2->Msg->MemGrp->name, "group2");
-  }
-
-  public function testJoinAlias2()
-  {
-    // @todo mail example.
-    // use alias for sender, recipient.
-  }
-
-  public function testParentParentParent()
-  {
-    $executer = new Manipulator("Member");
-    $executer->setConstraint("order", "Member.id ASC");
-
-    $join = new Sabel_DB_Join($executer);
-    $memberGroup = new Sabel_DB_Join_Relation(MODEL("MemberGroup"));
-    $memberGroup->add(MODEL("SuperGroup"));
-    $memberSubGroup = new Sabel_DB_Join_Relation(MODEL("MemberSubGroup"));
-    $memberSubGroup->add($memberGroup);
-    $result = $join->add($memberSubGroup)->join();
-
-    $member1 = $result[0];
-    $member2 = $result[1];
-
-    $this->assertEquals($member1->id, 1);
-    $this->assertEquals($member1->name, "test1");
-    $this->assertEquals($member1->MemberSubGroup->id, 2);
-    $this->assertEquals($member1->MemberSubGroup->name, "sub_group2");
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->id, 1);
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->name, "group1");
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->SuperGroup->id, 2);
-    $this->assertEquals($member1->MemberSubGroup->MemberGroup->SuperGroup->name, "sgroup2");
-
-    $this->assertEquals($member2->id, 2);
-    $this->assertEquals($member2->name, "test2");
-    $this->assertEquals($member2->MemberSubGroup->id, 1);
-    $this->assertEquals($member2->MemberSubGroup->name, "sub_group1");
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->id, 2);
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->name, "group2");
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->SuperGroup->id, 1);
-    $this->assertEquals($member2->MemberSubGroup->MemberGroup->SuperGroup->name, "sgroup1");
-  }
-
-  public function testInserts()
-  {
-    $data = array();
-
-    $data[] = array("id"      => 3,
-                    "name"    => "test3",
-                    "email"   => "test3@example.com",
-                    "is_temp" => true,
-                    "location_id" => 1,
-                    "member_sub_group_id" => 2,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $data[] = array("id"      => 4,
-                    "name"    => "test4",
-                    "email"   => "test4@example.com",
-                    "is_temp" => true,
-                    "location_id" => 2,
-                    "member_sub_group_id" => 1,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $data[] = array("id"      => 5,
-                    "name"    => "test5",
-                    "email"   => "test5@example.com",
-                    "is_temp" => true,
-                    "location_id" => 3,
-                    "member_sub_group_id" => 1,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $executer = new Manipulator("Member");
-
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    $count = $executer->getCount();
-    $this->assertEquals($count, 5);
-  }
-
-  public function testConditionTest()
-  {
-    $data = array("bool_flag" => true);
-
-    $executer = new Manipulator("ConditionTest");
-    $newId = $executer->insert($data);
-    $this->assertTrue(is_numeric($newId));
-
-    //==============================================
-
-    $data = array("point"     => 200,
-                  "bool_flag" => false);
-
-    $executer->insert($data);
-
-    //==============================================
-
-    $data = array("name"      => "name3",
-                  "point"     => 300,
-                  "bool_flag" => true);
-
-    $executer->insert($data);
-
-    //==============================================
-
-    $data = array("name"      => "name4",
-                  "point"     => 400,
-                  "bool_flag" => false);
-
-    $executer->insert($data);
-
-    //==============================================
-
-    $model = MODEL("ConditionTest");
-    $model->name  = "name5";
-    $model->point = 500;
-    $model->bool_flag = false;
-
-    $executer = new Manipulator($model);
-    $saved = $executer->save();
-
-    // new sequence id.
-    $this->assertTrue(is_int($saved->id));
-
-    //==============================================
-
-    $data = array("name"      => "name%",
-                  "point"     => 600,
-                  "bool_flag" => false);
-
-    $executer->insert($data);
-
-    //==============================================
-
-    // boolean condition.
-    $executer = new Manipulator("ConditionTest");
-    $models = $executer->select("bool_flag", false);
-    $this->assertEquals(count($models), 4);
-
-    $count = $executer->getCount("bool_flag", true);
-    $this->assertEquals($count, 2);
-
-    // normal condition.
-    $executer = new Manipulator("ConditionTest");
-    $model = $executer->selectOne("point", 400);
-    $this->assertTrue($model->isSelected());
-    $this->assertEquals($model->point, 400);
-
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition("point", 400);
-    $model = $executer->selectOne();
-    $this->assertTrue($model->isSelected());
-    $this->assertEquals($model->point, 400);
-
-    // and condition.
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition("point", 400);
-    $executer->setCondition("name", "name4");
-    $model = $executer->selectOne();
-    $this->assertTrue($model->isSelected());
-    $this->assertEquals($model->point, 400);
-    $this->assertEquals($model->name, "name4");
-
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition("point", 400);
-    $executer->setCondition("name", "name5");
-    $model = $executer->selectOne();
-    $this->assertFalse($model->isSelected());
-
-    // or condition.
-    $executer = new Manipulator("ConditionTest");
-    $or = new Sabel_DB_Condition_Or();
-    $or->add(Condition::create(EQUAL, "point", 400));
-    $or->add(Condition::create(EQUAL, "name", "name5"));
-    $executer->loadConditionManager()->add($or);
-    $executer->setConstraint("order", "id ASC");
-    $models = $executer->select();
-    $this->assertEquals(count($models), 2);
-    $this->assertEquals($models[0]->point, 400);
-    $this->assertEquals($models[1]->name, "name5");
-
-    // between condition.
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(Condition::create(BETWEEN, "point", array(200, 400)));
-    $executer->setConstraint("order", "point DESC");
-    $models = $executer->select();
-    $this->assertEquals(count($models), 3);
-    $this->assertEquals($models[0]->point, 400);
-    $this->assertEquals($models[1]->point, 300);
-    $this->assertEquals($models[2]->point, 200);
-
-    // compare condition.
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(Condition::create(LESS_THAN, "point", 400));
-    $executer->setConstraint("order", "point DESC");
-    $models = $executer->select();
-    $this->assertEquals(count($models), 3);
-    $this->assertEquals($models[0]->point, 300);
-    $this->assertEquals($models[1]->point, 200);
-    $this->assertEquals($models[2]->point, 100);
-
-    // or compare condition.
-    $executer = new Manipulator("ConditionTest");
-    $or = new Sabel_DB_Condition_Or();
-    $or->add(Condition::create(GREATER_EQUAL, "point", 400));
-    $or->add(Condition::create(LESS_EQUAL, "point", 200));
-    $executer->setConstraint("order", "point DESC");
-    $models = $executer->select($or);
-    $this->assertEquals(count($models), 5);
-    $this->assertEquals($models[0]->point, 600);
-    $this->assertEquals($models[1]->point, 500);
-    $this->assertEquals($models[2]->point, 400);
-    $this->assertEquals($models[3]->point, 200);
-    $this->assertEquals($models[4]->point, 100);
-
-    // like condition.
-    $executer = new Manipulator("ConditionTest");
-    $likeCondition = Condition::create(LIKE, "name", "name_")->escape(false);
-    $executer->setCondition($likeCondition);
-    $executer->setConstraint("order", "id ASC");
-    $models = $executer->select();
-    $this->assertEquals(count($models), 4);
-    $this->assertEquals($models[0]->name, "name3");
-    $this->assertEquals($models[1]->name, "name4");
-    $this->assertEquals($models[2]->name, "name5");
-    $this->assertEquals($models[3]->name, "name%");
-
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(Condition::create(LIKE, "name", "name%"));
-    $models = $executer->select();
-    $this->assertEquals(count($models), 1);
-
-    $executer = new Manipulator("ConditionTest");
-    $executer->setCondition(Condition::create(LIKE, "name", "nam%")->escape(false));
-    $executer->setConstraint("order", "id ASC");
-    $models = $executer->select();
-    $this->assertEquals(count($models), 4);
-    $this->assertEquals($models[0]->name, "name3");
-    $this->assertEquals($models[1]->name, "name4");
-    $this->assertEquals($models[2]->name, "name5");
-    $this->assertEquals($models[3]->name, "name%");
-
-    // in condition.
-    $manip = new Manipulator("ConditionTest");
-    $manip->setCondition(Condition::create(IN, "point", array(200, 400, 600, 800)));
-    $manip->setConstraint("order", "point DESC");
-    $models = $manip->select();
-    $this->assertEquals(count($models), 3);
-    $this->assertEquals($models[0]->point, 600);
-    $this->assertEquals($models[1]->point, 400);
-    $this->assertEquals($models[2]->point, 200);
-
-    // in and compare condition.
-    $manip = new Manipulator("ConditionTest");
-    $and = new Sabel_DB_Condition_And();
-    $and->add(Condition::create(IN, "point", array(200, 300, 400, 600)));
-    $and->add(Condition::create(GREATER_THAN, "point", 200));
-    $manip->loadConditionManager()->add($and);
-    $manip->setConstraint("order", "point DESC");
-    $models = $manip->select();
-    $this->assertEquals(count($models), 3);
-    $this->assertEquals($models[0]->point, 600);
-    $this->assertEquals($models[1]->point, 400);
-    $this->assertEquals($models[2]->point, 300);
-
-    // is not null condition
-    $manip = new Manipulator("ConditionTest");
-    $models = $manip->select();
-    $this->assertEquals(count($models), 6);
-
-    $manip->setCondition(Condition::create(ISNOTNULL, "name"));
-    $models = $manip->select();
-    $this->assertEquals(count($models), 4);
-  }
-
-  public function testTransaction()
-  {
-    Sabel_DB_Transaction::activate();
-
-    $data = array();
-
-    $data[] = array("id"      => 6,
-                    "name"    => "test6",
-                    "email"   => "test6@example.com",
-                    "is_temp" => true,
-                    "location_id" => 1,
-                    "member_sub_group_id" => 2,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $data[] = array("id"      => 7,
-                    "name"    => "test7",
-                    "email"   => "test7@example.com",
-                    "is_temp" => true,
-                    "location_id" => 2,
-                    "member_sub_group_id" => 1,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $data[] = array("id"      => 8,
-                    "name"    => "test8",
-                    "email"   => "test8@example.com",
-                    "is_temp" => true,
-                    "location_id" => 3,
-                    "member_sub_group_id" => 1,
-                    "updated_at" => "2007-01-01 00:00:00",
-                    "created_at" => "2007-01-01 00:00:00");
-
-    $executer = new Manipulator("Member");
-
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    Sabel_DB_Transaction::rollback();
-
-    $count = $executer->getCount();
-    $this->assertEquals($count, 5);
-
-    Sabel_DB_Transaction::activate();
-
-    $executer = new Manipulator("Member");
-
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    Sabel_DB_Transaction::commit();
-
-    $count = $executer->getCount();
-    $this->assertEquals($count, 8);
-  }
-
-  public function testSelfJoin()
-  {
-    $data   = array();
-    $data[] = array("id" => 1, "name" => "root1");
-    $data[] = array("id" => 2, "name" => "root2");
-    $data[] = array("id" => 3, "name" => "node1", "tree_id" => 2);
-    $data[] = array("id" => 4, "name" => "node2", "tree_id" => 2);
-    $data[] = array("id" => 5, "name" => "node3", "tree_id" => 1);
-    $data[] = array("id" => 6, "name" => "node4", "tree_id" => 1);
-    $data[] = array("id" => 7, "name" => "node5", "tree_id" => 1);
-
-    $executer = new Manipulator("Tree");
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    if (self::$db === "IBASE") return;
-
-    $executer = new Manipulator("Tree");
-    $executer->setConstraint("order", "Tree.id ASC");
-    $join = new Sabel_DB_Join($executer);
-    $join->add(new Sabel_DB_Join_Object(MODEL("Tree"), "Root"));
-    $result = $join->join("LEFT");
-
-    $this->assertEquals($result[0]->id, 1);
-    $this->assertEquals($result[1]->id, 2);
-
-    $node1 = $result[2];
-    $node2 = $result[3];
-    $node3 = $result[4];
-
-    $this->assertEquals($node1->name, "node1");
-    $this->assertEquals($node1->tree_id, 2);
-    $this->assertEquals($node1->Root->id, 2);
-    $this->assertEquals($node1->Root->name, "root2");
-
-    $this->assertEquals($node2->name, "node2");
-    $this->assertEquals($node2->tree_id, 2);
-    $this->assertEquals($node2->Root->id, 2);
-    $this->assertEquals($node2->Root->name, "root2");
-
-    $this->assertEquals($node3->name, "node3");
-    $this->assertEquals($node3->tree_id, 1);
-    $this->assertEquals($node3->Root->id, 1);
-    $this->assertEquals($node3->Root->name, "root1");
-  }
-
-  public function testSchema()
-  {
-    $test   = MODEL("SchemaTest");
-    $schema = $test->getSchema();
-    $id     = $schema->id;
-    $name   = $schema->name;
-    $bint   = $schema->bint;
-    $sint   = $schema->sint;
-    $txt    = $schema->txt;
-    $bl     = $schema->bl;
-    $ft     = $schema->ft;
-    $dbl    = $schema->dbl;
-    $dt     = $schema->dt;
-
-    $this->assertTrue($id->isInt(true));
-    $this->assertTrue($name->isString());
-    $this->assertTrue($bint->isBigint());
-    $this->assertTrue($sint->isSmallint());
-    $this->assertTrue($txt->isText());
-    $this->assertTrue($bl->isBool());
-    $this->assertTrue($ft->isFloat());
-    $this->assertTrue($dbl->isDouble());
-    $this->assertTrue($dt->isDate());
-
-    $this->assertEquals($name->default, "hoge");
-    $this->assertEquals($name->max, 128);
-    $this->assertEquals($bint->default, "90000000000");
-    $this->assertEquals($sint->default, 30000);
-    $this->assertEquals($ft->default, 1.234);
-    $this->assertEquals($dbl->default, 1.23456);
-    $this->assertFalse($bl->default);
-
-    $this->assertFalse($id->nullable);
-
-    $data = array();
-    $data[] = array("id" => 1, "name" => "test1", "dt" => "2007-01-01");
-    $data[] = array("id" => 2, "name" => "test2", "dt" => "2007-01-02");
-    $data[] = array("id" => 3, "name" => "test3", "dt" => "2007-01-03");
-    $data[] = array("id" => 4, "name" => "test4", "dt" => "2007-01-04");
-    $data[] = array("id" => 5, "name" => "test5", "dt" => "2007-01-05");
-
-    $executer = new Manipulator($test);
-    foreach ($data as $values) {
-      $executer->insert($values);
-    }
-
-    $executer = new Manipulator("SchemaTest");
-    $results = $executer->select("dt", "2007-01-03");
-    $this->assertEquals(count($results), 1);
-    $this->assertEquals($results[0]->id, 3);
-    $this->assertEquals($results[0]->name, "test3");
-    $this->assertEquals($results[0]->dt, "2007-01-03");
-
-    $executer = new Manipulator("SchemaTest");
-    $executer->setCondition(Condition::create(LESS_EQUAL, "dt", "2007-01-04"));
-    $executer->setConstraint("order", "id DESC");
-    $results = $executer->select();
-    $this->assertEquals(count($results), 4);
-    $this->assertEquals($results[0]->dt, "2007-01-04");
-    $this->assertEquals($results[1]->dt, "2007-01-03");
-    $this->assertEquals($results[2]->dt, "2007-01-02");
-    $this->assertEquals($results[3]->dt, "2007-01-01");
-
-    $model = MODEL("SchemaTest");
-    $model->id   = 100;
-    $model->name = "hoge";
-    $manip = new Manipulator($model);
-    $saved = $manip->save();
-    $this->assertEquals("90000000000", $saved->bint);
-    $this->assertEquals(30000, $saved->sint);
-    $this->assertEquals(1.234, $saved->ft);
-    $this->assertEquals(1.23456, $saved->dbl);
-    $this->assertFalse($saved->bl);
-  }
-
-  public function testSqlInjection()
+  
+  public function testInsertBySave()
   {
     $st = MODEL("SchemaTest");
-    $st->id = 6;
-    $st->name = "injection'); DROP TABLE schema_test;";
-    $manip = new Manipulator($st);
-    $manip->save();
-
-    $manip = new Manipulator("SchemaTest");
-    $results = $manip->select("name", "injection'); DROP TABLE schema_test;");
-    $this->assertTrue(is_array($results));
+    $st->email = "test2@example.com";
+    $st->bl = false;
+    
+    $saved = $st->save();
+    
+    // default values.
+    $this->assertEquals("default name", $saved->name);
+    $this->assertEquals("90000000000",  $saved->bint);
+    $this->assertEquals(30000,    $saved->sint);
+    $this->assertEquals(10.234,   $saved->ft);
+    $this->assertEquals(10.23456, $saved->dbl);
+    
+    self::$lastStId = $saved->id;
+  }
+  
+  public function testSelectOne()
+  {
+    $st = MODEL("SchemaTest");
+    $st = $st->selectOne(self::$lastStId);
+    
+    $this->assertTrue($st->isSelected());
+    $this->assertEquals("test2@example.com", $st->email);
+    $this->assertEquals(false, $st->bl);
+  }
+  
+  public function testInitSelect()
+  {
+    $st = MODEL("SchemaTest", self::$lastStId);
+    $this->assertTrue($st->isSelected());
+    $this->assertEquals("test2@example.com", $st->email);
+    $this->assertEquals(false, $st->bl);
+  }
+  
+  public function testUpdate()
+  {
+    $st = MODEL("SchemaTest");
+    $st->setCondition(self::$lastStId);
+    $st->update(array("bl" => true));
+    
+    $st = MODEL("SchemaTest", self::$lastStId);
+    $this->assertEquals("test2@example.com", $st->email);
+    $this->assertEquals(true, $st->bl);
+  }
+  
+  public function testUpdateBySave()
+  {
+    $st = MODEL("SchemaTest", self::$lastStId);
+    $st->email = "test2@updated.com";
+    $st->bl = false;
+    $st->save();
+    
+    $st = MODEL("SchemaTest", self::$lastStId);
+    $this->assertEquals("test2@updated.com", $st->email);
+    $this->assertEquals(false, $st->bl);
+  }
+  
+  public function testCount()
+  {
+    $st = MODEL("SchemaTest");
+    $this->assertEquals(2, $st->getCount());
+    
+    $st->setCondition(self::$lastStId);
+    $this->assertEquals(1, $st->getCount());
+    
+    $this->assertEquals(1, $st->getCount("email", "test2@updated.com"));
+  }
+  
+  public function testDelete()
+  {
+    $st = MODEL("SchemaTest");
+    $st->setCondition(self::$lastStId);
+    $st->delete();
+    
+    $this->assertEquals(1, $st->getCount());
+    $st->delete("email", "test1@example.com");
+    $this->assertEquals(0, $st->getCount());
+    
+    $this->insertTestData();
+  }
+  
+  public function testJoin1()
+  {
+    $this->insertJoinTableData();
+    $join = new Sabel_DB_Join("Grandchildren");
+    $join->setOrderBy("Grandchildren.id ASC");
+    $results = $join->add("Children")->join();
+    
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("grandchildren1", $results[0]->value);
+    $this->assertEquals("grandchildren2", $results[1]->value);
+    $this->assertEquals("children2", $results[0]->Children->value);
+    $this->assertEquals("children1", $results[1]->Children->value);
+  }
+  
+  public function testJoin2()
+  {
+    $join = new Sabel_DB_Join("Grandchildren");
+    $join->setOrderBy("Grandchildren.id ASC");
+    $chilren = new Sabel_DB_Join_Relation("Children");
+    $results = $join->add($chilren->add("Parents"))->join();
+    
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("children2", $results[0]->Children->value);
+    $this->assertEquals("children1", $results[1]->Children->value);
+    $this->assertEquals("parents1", $results[0]->Children->Parents->value);
+    $this->assertEquals("parents2", $results[1]->Children->Parents->value);
+  }
+  
+  public function testJoin3()
+  {
+    $join = new Sabel_DB_Join("Grandchildren");
+    $join->setOrderBy("Grandchildren.id ASC");
+    $children = new Sabel_DB_Join_Relation("Children");
+    $parents = new Sabel_DB_Join_Relation("Parents");
+    $results = $join->add($children->add($parents->add("Grandparents")))->join();
+    
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("children2", $results[0]->Children->value);
+    $this->assertEquals("children1", $results[1]->Children->value);
+    $this->assertEquals("parents1", $results[0]->Children->Parents->value);
+    $this->assertEquals("parents2", $results[1]->Children->Parents->value);
+    $this->assertEquals("grandparents2", $results[0]->Children->Parents->Grandparents->value);
+    $this->assertEquals("grandparents1", $results[1]->Children->Parents->Grandparents->value);
+  }
+  
+  public function testJoinCondition()
+  {
+    $join = new Sabel_DB_Join("Grandchildren");
+    $join->setCondition("Grandparents.value", "grandparents2");
+    $children = new Sabel_DB_Join_Relation("Children");
+    $parents = new Sabel_DB_Join_Relation("Parents");
+    
+    $results = $join->add($children->add($parents->add("Grandparents")))->join();
     $this->assertEquals(1, count($results));
-
-    $data = array("id" => 7, "name" => "injection'); DROP TABLE schema_test;");
-    $manip = new Manipulator("SchemaTest");
-    $manip->insert($data);
-
-    $manip = new Manipulator("SchemaTest");
-    $results = $manip->select("name", "injection'); DROP TABLE schema_test;");
-    $this->assertTrue(is_array($results));
+    $this->assertEquals("children2", $results[0]->Children->value);
+    $this->assertEquals("parents1", $results[0]->Children->Parents->value);
+    $this->assertEquals("grandparents2", $results[0]->Children->Parents->Grandparents->value);
+  }
+  
+  public function testEqualCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->select("sint", 200);
+    $this->assertEquals(2, count($results));
+    
+    $results = $st->select(Condition::create(EQUAL, "sint", 200));
+    $this->assertEquals(2, count($results));
+    
+    $st->setCondition("sint", 100);
+    $st->setCondition("name", "name2");
+    $results = $st->select();
+    $this->assertEquals(1, count($results));
+    $this->assertEquals("test2@example.com", $results[0]->email);
+    
+    $st->setCondition("sint", 100);
+    $st->setCondition("name", "name5");
+    $this->assertEquals(0, count($st->select()));
+  }
+  
+  public function testBetweenCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $between = array("2008-01-06", "2008-01-10");
+    $results = $st->select(Condition::create(BETWEEN, "dt", $between));
+    $this->assertEquals(5, count($results));
+    
+    $st->setCondition("bl", true);
+    $st->setCondition(Condition::create(BETWEEN, "dt", $between));
+    $this->assertEquals(4, count($st->select()));
+  }
+  
+  public function testGreaterCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->select(Condition::create(GREATER_THAN, "sint", 300));
+    $this->assertEquals(4, count($results));
+    
+    $results = $st->select(Condition::create(GREATER_EQUAL, "sint", 300));
+    $this->assertEquals(6, count($results));
+    
+    $st->setCondition(Condition::create(GREATER_EQUAL, "sint", 300));
+    $st->setCondition("bl", false);
+    $this->assertEquals(1, count($st->select()));
+  }
+  
+  public function testLessCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->select(Condition::create(LESS_THAN, "sint", 300));
+    $this->assertEquals(4, count($results));
+    
+    $results = $st->select(Condition::create(LESS_EQUAL, "sint", 300));
+    $this->assertEquals(6, count($results));
+    
+    $st->setCondition(Condition::create(LESS_EQUAL, "sint", 300));
+    $st->setCondition("bl", false);
+    $this->assertEquals(3, count($st->select()));
+  }
+  
+  public function testIsNullCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->select(Condition::create(ISNULL, "txt"));
+    $this->assertEquals(8, count($results));
+    
+    $this->assertEquals(4, count($st->select("bl", false)));
+    
+    $st->setCondition(Condition::create(ISNULL, "txt"));
+    $st->setCondition("bl", false);
+    $this->assertEquals(3, count($st->select()));
+  }
+  
+  public function testIsNotNullCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->select(Condition::create(ISNOTNULL, "txt"));
     $this->assertEquals(2, count($results));
   }
-
-  public function testDirectCondition()
+  
+  public function testLikeCondition()
   {
-    $manip = new Manipulator("SchemaTest");
-    $manip->setCondition(Condition::create(DIRECT, "id = id"));
-
-    $results = $manip->select();
-    $this->assertTrue(is_array($results));
-    $this->assertEquals(8, count($results));
+    $st = MODEL("SchemaTest");
+    $results = $st->select(Condition::create(LIKE, "name", "name"));
+    $this->assertEquals(10, count($results));
+    
+    $like = Condition::create(LIKE, "name", "name_")->escape(false)->type(LIKE_FIXED);
+    $this->assertEquals(9, count($st->select($like)));
+    
+    $like = Condition::create(LIKE, "name", "name_")->type(LIKE_FIXED);
+    $this->assertEquals(1, count($st->select($like)));
+    
+    $like = Condition::create(LIKE, "name", "0")->type(LIKE_ENDS_WITH);
+    $this->assertEquals(1, count($st->select($like)));
+    
+    $like = Condition::create(LIKE, "name", "a")->type(LIKE_ENDS_WITH);
+    $this->assertEquals(0, count($st->select($like)));
   }
-
+  
+  public function testOrderBy()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->setOrderBy("dt")->select();
+    $this->assertEquals("2008-01-01", $results[0]->dt);
+    $this->assertEquals("2008-01-10", $results[9]->dt);
+    
+    $results = $st->setOrderBy("dt DESC")->select();
+    $this->assertEquals("2008-01-10", $results[0]->dt);
+    $this->assertEquals("2008-01-01", $results[9]->dt);
+    
+    $results = $st->setOrderBy("SchemaTest.dt DESC")->select();
+    $this->assertEquals("2008-01-10", $results[0]->dt);
+    $this->assertEquals("2008-01-01", $results[9]->dt);
+  }
+  
+  public function testSelectByQuery()
+  {
+    $st = MODEL("SchemaTest");
+    $results = $st->selectByQuery("WHERE sint = 100");
+    $this->assertEquals(2, count($results));
+    
+    $results = $st->selectByQuery("WHERE sint = @param@", array("param" => 100));
+    $this->assertEquals(2, count($results));
+    
+    $results = $st->selectByQuery("ORDER BY schema_test.dt DESC");
+    $this->assertEquals("2008-01-10", $results[0]->dt);
+    $this->assertEquals("2008-01-01", $results[9]->dt);
+    
+    $results = $st->selectByQuery("GROUP BY sint");
+    $this->assertEquals(5, count($results));
+  }
+  
+  public function testModelCondition()
+  {
+    $child = MODEL("Children")->selectOne(1);
+    $gChildren = MODEL("Grandchildren")->select($child);
+    $this->assertEquals(1, count($gChildren));
+    
+    $gc = $gChildren[0];
+    $this->assertEquals(2, $gc->id);
+    $this->assertEquals(1, $gc->children_id);
+    $this->assertEquals("grandchildren2", $gc->value);
+  }
+  
+  public function testRollback()
+  {
+    Sabel_DB_Transaction::activate();
+    
+    $gp = MODEL("Grandparents");
+    $gp->insert(array("id" => 3, "value" => "grandparents3"));
+    $gp->insert(array("id" => 4, "value" => "grandparents4"));
+    
+    Sabel_DB_Transaction::rollback();
+    $this->assertEquals(2, $gp->getCount());
+  }
+  
+  public function testCommit()
+  {
+    Sabel_DB_Transaction::activate();
+    
+    $gp = MODEL("Grandparents");
+    $gp->insert(array("id" => 3, "value" => "grandparents3"));
+    $gp->insert(array("id" => 4, "value" => "grandparents4"));
+    
+    Sabel_DB_Transaction::commit();
+    $this->assertEquals(4, $gp->getCount());
+  }
+  
+  /**
+   * information(schema) of table
+   */
+  public function testTableInfo()
+  {
+    $schema = MODEL("SchemaTest")->getSchema();
+    $this->assertEquals("schema_test", $schema->getTableName());
+    $this->assertEquals("id", $schema->getPrimaryKey());
+    $this->assertEquals("id", $schema->getSequenceColumn());
+    
+    $this->assertTrue($schema->id->isInt(true));
+    $this->assertTrue($schema->id->primary);
+    $this->assertTrue($schema->id->increment);
+    $this->assertFalse($schema->name->primary);
+    $this->assertFalse($schema->name->increment);
+    
+    $this->assertTrue($schema->bint->isBigint());
+    $this->assertTrue($schema->sint->isSmallint());
+    $this->assertTrue($schema->bint->isInt());
+    $this->assertTrue($schema->sint->isInt());
+    $this->assertFalse($schema->bint->isInt(true));  // strict mode
+    $this->assertFalse($schema->sint->isInt(true));  // strict mode
+    
+    $this->assertTrue($schema->name->isString());
+    $this->assertEquals(128, $schema->name->max);
+    $this->assertTrue($schema->email->isString());
+    $this->assertEquals(255, $schema->email->max);
+    
+    $this->assertTrue($schema->bl->isBool());
+    $this->assertEquals(false, $schema->bl->default);
+    $this->assertTrue($schema->ft->isFloat());
+    $this->assertEquals(10.234, $schema->ft->default);
+    $this->assertTrue($schema->dbl->isDouble());
+    $this->assertEquals(10.23456, $schema->dbl->default);
+    $this->assertTrue($schema->txt->isText());
+    $this->assertTrue($schema->dt->isDate());
+    
+    $uniques = $schema->getUniques();
+    $this->assertTrue(is_array($uniques));
+    $this->assertEquals(1, count($uniques));
+    $this->assertEquals(1, count($uniques[0]));
+    $this->assertEquals("email", $uniques[0][0]);
+    $this->assertTrue($schema->isUnique("email"));
+  }
+  
   public function testClear()
   {
     Sabel_DB_Schema::clear();
     Sabel_DB_Connection::closeAll();
   }
-}
-
-class Manipulator extends Sabel_DB_Manipulator
-{
-  const CREATED_TIME_COLUMN = "created_at";
-  const UPDATED_TIME_COLUMN = "updated_at";
-  const DELETED_TIME_COLUMN = "deleted_at";
   
-  public function before($method)
+  protected function insertTestData()
   {
-    $method = "before" . ucfirst($method);
-    if (method_exists($this, $method)) {
-      return $this->$method();
+    $data = array();
+    $data[] = array("name" => "name1", "email" => "test1@example.com", "sint" => 100, "bl" => false, "ft" => 1.234, "dt" => "2008-01-01");
+    $data[] = array("name" => "name2", "email" => "test2@example.com", "sint" => 100, "bl" => false, "ft" => 2.234, "dt" => "2008-01-02");
+    $data[] = array("name" => "name3", "email" => "test3@example.com", "sint" => 200, "bl" => true, "ft" => 3.234, "dt" => "2008-01-03");
+    $data[] = array("name" => "name4", "email" => "test4@example.com", "sint" => 200, "bl" => false, "ft" => 4.234, "txt" => "body", "dt" => "2008-01-04");
+    $data[] = array("name" => "name5", "email" => "test5@example.com", "sint" => 300, "bl" => true, "ft" => 5.234, "dt" => "2008-01-05");
+    $data[] = array("name" => "name6", "email" => "test6@example.com", "sint" => 300, "bl" => true, "ft" => 6.234, "txt" => "body", "dt" => "2008-01-06");
+    $data[] = array("name" => "name7", "email" => "test7@example.com", "sint" => 400, "bl" => false, "ft" => 7.234, "dt" => "2008-01-07");
+    $data[] = array("name" => "name8", "email" => "test8@example.com", "sint" => 400, "bl" => true, "ft" => 8.234, "dt" => "2008-01-08");
+    $data[] = array("name" => "name_", "email" => "test9@example.com", "sint" => 500, "bl" => true, "ft" => 9.234, "dt" => "2008-01-09");
+    $data[] = array("name" => "name10", "email" => "test10@example.com", "sint" => 500, "bl" => true, "ft" => 10.234, "dt" => "2008-01-10");
+    
+    $st = MODEL("SchemaTest");
+    foreach ($data as $values) {
+      $st->insert($values);
     }
   }
   
-  private function beforeSave()
+  protected function insertJoinTableData()
   {
-    $this->setTimestamp();
-  }
-  
-  private function setTimestamp()
-  {
-    $model    = $this->model;
-    $columns  = $model->getColumnNames();
-    $datetime = now();
+    $data = array();
+    $data[] = array("id" => 1, "value" => "grandparents1");
+    $data[] = array("id" => 2, "value" => "grandparents2");
+    $gp = MODEL("Grandparents");
+    foreach ($data as $values) $gp->insert($values);
     
-    if ($model->{self::UPDATED_TIME_COLUMN} === null) {
-      if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-        $model->{self::UPDATED_TIME_COLUMN} = $datetime;
-      }
-    }
+    $data = array();
+    $data[] = array("id" => 1, "grandparents_id" => 2, "value" => "parents1");
+    $data[] = array("id" => 2, "grandparents_id" => 1, "value" => "parents2");
+    $p = MODEL("Parents");
+    foreach ($data as $values) $p->insert($values);
     
-    if (!$model->isSelected() && $model->{self::CREATED_TIME_COLUMN} === null) {
-      if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
-        $model->{self::CREATED_TIME_COLUMN} = $datetime;
-      }
-    }
-  }
-
-  private function beforeInsert()
-  {
-    if (!isset($this->arguments[0])) return;
-    $columns  = $this->model->getColumnNames();
-    $datetime = now();
+    $data = array();
+    $data[] = array("id" => 1, "parents_id" => 2, "value" => "children1");
+    $data[] = array("id" => 2, "parents_id" => 1, "value" => "children2");
+    $c = MODEL("Children");
+    foreach ($data as $values) $c->insert($values);
     
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_TIME_COLUMN] = $datetime;
-    }
-    
-    if (in_array(self::CREATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::CREATED_TIME_COLUMN] = $datetime;
-    }
-  }
-  
-  private function beforeUpdate()
-  {
-    if (!isset($this->arguments[0])) return;
-    $columns = $this->model->getColumnNames();
-    
-    if (in_array(self::UPDATED_TIME_COLUMN, $columns)) {
-      $this->arguments[0][self::UPDATED_TIME_COLUMN] = now();
-    }
+    $data = array();
+    $data[] = array("id" => 1, "children_id" => 2, "value" => "grandchildren1");
+    $data[] = array("id" => 2, "children_id" => 1, "value" => "grandchildren2");
+    $gc = MODEL("Grandchildren");
+    foreach ($data as $values) $gc->insert($values);
   }
 }

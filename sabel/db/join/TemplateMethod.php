@@ -12,28 +12,18 @@
 class Sabel_DB_Join_TemplateMethod extends Sabel_Object
 {
   protected
-    $model      = null,
-    $columns    = array(),
-    $joinKey    = array(),
-    $tblName    = "",
-    $aliasName  = "",
-    $sourceName = "";
+    $model     = null,
+    $columns   = array(),
+    $joinKey   = array(),
+    $tblName   = "",
+    $aliasName = "",
+    $childName = "";
     
   public function __construct($model, $alias = "", $joinKey = array())
   {
-    if (is_string($model)) {
-      $model = MODEL($model);
-    }
-    
-    $this->model   = $model;
-    $this->tblName = $model->getTableName();
-    
-    if (empty($columns)) {
-      $this->columns = $model->getColumnNames();
-    } else {
-      $this->columns = $columns;
-    }
-    
+    $this->model     = (is_string($model)) ? MODEL($model) : $model;
+    $this->tblName   = $this->model->getTableName();
+    $this->columns   = $this->model->getColumnNames();
     $this->aliasName = $alias;
     $this->joinKey   = $joinKey;
   }
@@ -62,9 +52,9 @@ class Sabel_DB_Join_TemplateMethod extends Sabel_Object
     $this->joinKey = $joinKey;
   }
   
-  public function setSourceName($name)
+  public function setChildName($name)
   {
-    $this->sourceName = $name;
+    $this->childName = $name;
   }
   
   public function createModel(&$row)
@@ -91,7 +81,7 @@ class Sabel_DB_Join_TemplateMethod extends Sabel_Object
       unset($row[$hash]);
     }
     
-    $model->setAttributes($props);
+    $model->setProperties($props);
     return $model;
   }
 }

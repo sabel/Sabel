@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Join_Result
 {
-  public static function build(Sabel_DB_Abstract_Model $source, Sabel_DB_Join_Structure $structure, $rows)
+  public static function build(Sabel_DB_Model $source, Sabel_DB_Join_Structure $structure, $rows)
   {
     $objects = $structure->getJoinObjects();
     $structure = $structure->getStructure();
@@ -36,7 +36,7 @@ class Sabel_DB_Join_Result
       }
       
       $self = clone $selfObj;
-      $self->setAttributes($row);
+      $self->setProperties($row);
       
       $tblName = $source->getTableName();
       foreach ($structure[$tblName] as $parent) {

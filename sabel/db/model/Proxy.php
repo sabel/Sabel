@@ -9,10 +9,11 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Model_Proxy extends Sabel_DB_Abstract_Model
+class Sabel_DB_Model_Proxy extends Sabel_DB_Model
 {
-  public function __construct($mdlName)
+  public function __construct($mdlName, $id)
   {
     $this->initialize($mdlName);
+    if ($id !== null) $this->initSelectOne($id);
   }
 }

@@ -24,25 +24,14 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     $structure = Sabel_DB_Join_Structure::getInstance();
     $structure->addJoinObject($object);
     $myName = $this->getName();
-    $object->setSourceName($myName);
+    $object->setChildName($myName);
     $this->objects[] = $object;
     
     $structure->add($myName, $object->getName());
     if (!empty($joinKey)) return $this;
     
     $name = $object->getModel()->getTableName();
-    if ($fkey = $this->model->getSchema()->getForeignKey()) {
-      foreach ($fkey->toArray() as $colName => $fkey) {
-        if ($fkey->table === $name) {
-          $joinKey = array("id" => $fkey->column, "fkey" => $colName);
-          break;
-        }
-      }
-    } else {
-      $joinKey = array("id" => "id", "fkey" => $name . "_id");
-    }
-    
-    $object->setJoinKey($joinKey);
+    $object->setJoinKey(create_join_key($this->model, $name));
     
     return $this;
   }
@@ -81,7 +70,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
       $query[] = $name . " ";
     }
     
-    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->sourceName)) . "."
+    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->childName)) . "."
              . $stmt->quoteIdentifier($keys["fkey"]) . " = {$name}."
              . $stmt->quoteIdentifier($keys["id"]);
              

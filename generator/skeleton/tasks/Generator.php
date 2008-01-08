@@ -28,7 +28,7 @@ class Generator extends Sabel_Sakle_Task
   private function generateModel($environment)
   {
     define("ENVIRONMENT", $environment);
-    Sabel_DB_Config::initialize();
+    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     $models = array();
     $args = $this->arguments;
@@ -55,7 +55,7 @@ class Generator extends Sabel_Sakle_Task
         
         $lines[] = "  )";
         $lines[] = ");" . PHP_EOL;
-        $lines[] = "class {$mdlName} extends Sabel_DB_Abstract_Model";
+        $lines[] = "class {$mdlName} extends Db_Model";
         $lines[] = "{";
         $lines[] = "  ";
         $lines[] = "}";

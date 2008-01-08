@@ -83,7 +83,9 @@ class SabelAllTests
       $suite = new PHPUnit_Framework_TestSuite();
     }
     
-    // $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_Validate::suite());
+    
     $suite->addTest(Test_Bus::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Annotation::suite());
@@ -98,12 +100,10 @@ class SabelAllTests
     $suite->addTest(Test_UtilMap::suite());
     $suite->addTest(Test_Experimental::suite());
     
-    // $suite->addTest(Test_View_Tests::suite());
     // $suite->addTest(Test_Processor_Tests::suite());
     // $suite->addTest(Test_VirtualInheritance::suite());
     // $suite->addTest(Test_Sabel::suite());
     // $suite->addTest(Test_Aspect::suite());
-    // $suite->addTest(Test_Validate::suite());
     
     return $suite;
   }

@@ -278,9 +278,9 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $sql = "";
     $c = $this->constraints;
     
-    if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
-    if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
-    if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
+    if (isset($c["order"])) {
+      $sql .= " ORDER BY " . $this->quoteIdentifierOfOrderBy($c["order"]);
+    }
     
     if (isset($c["offset"]) && !isset($c["limit"])) {
       $sql .= " LIMIT 100 OFFSET " . $c["offset"];
@@ -311,5 +311,26 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
       
       return implode(", ", $ps);
     }
+  }
+  
+  protected function quoteIdentifierOfOrderBy($orderBy)
+  {
+    $results = array();
+    $orders  = array_map("trim", explode(", ", $orderBy));
+    
+    foreach ($orders as $order) {
+      @list ($col, $sort) = explode(" ", $order);
+      if ($sort === null) $sort = "ASC";
+      if (($pos = strpos($col, ".")) !== false) {
+        $tbl = convert_to_tablename(substr($col, 0, $pos));
+        $results[] = $this->quoteIdentifier($tbl) . "."
+                   . $this->quoteIdentifier(substr($col, $pos + 1))
+                   . " " . $sort;
+      } else {
+        $results[] = $this->quoteIdentifier($col) . " " . $sort;
+      }
+    }
+    
+    return implode(", ", $results);
   }
 }

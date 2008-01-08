@@ -11,12 +11,12 @@
  */
 class Form_Html extends Sabel_Object
 {
-  protected $name  = "";
-  protected $value = null;
-  protected $id    = "";
-  protected $class = "";
-  protected $data  = array();
-  
+  protected
+    $name  = "",
+    $value = null,
+    $id    = "",
+    $class = "";
+    
   public function __construct($name)
   {
     if (is_string($name)) {
@@ -59,24 +59,13 @@ class Form_Html extends Sabel_Object
     return $this;
   }
   
-  public function setData($data)
-  {
-    if (is_array($data)) {
-      $this->data = $data;
-    } else {
-      throw new Exception("data must be an array.");
-    }
-    
-    return $this;
-  }
-  
   public function open($uri = "", $method = "post")
   {
     $html = '<form action="' . uri($uri) . '" method="' . $method . '" ';
     $this->addIdAndClass($html);
     if ($this->name !== "") $html .= 'name="' . $this->name . '" ';
     
-    return $html . ">" . PHP_EOL . "<fieldset class=\"formField\">" . PHP_EOL;
+    return $html . '>' . PHP_EOL . '<fieldset class="formField">' . PHP_EOL;
   }
   
   public function close()

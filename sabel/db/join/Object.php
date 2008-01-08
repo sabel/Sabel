@@ -41,7 +41,7 @@ class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
       $query[] = $name . " ";
     }
     
-    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->sourceName)) . "."
+    $query[] = "ON " . $stmt->quoteIdentifier(strtolower($this->childName)) . "."
              . $stmt->quoteIdentifier($keys["fkey"]) . " = {$name}."
              . $stmt->quoteIdentifier($keys["id"]);
              

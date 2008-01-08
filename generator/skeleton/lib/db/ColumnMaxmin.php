@@ -1,6 +1,6 @@
 <?php
 
-class ColumnMaxmin extends Sabel_Object
+class Db_ColumnMaxmin extends Sabel_Object
 {
   private static $instance = null;
   

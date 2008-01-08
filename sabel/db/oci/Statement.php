@@ -65,9 +65,9 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
     $sql = "";
     $c = $this->constraints;
     
-    if (isset($c["group"]))  $sql .= " GROUP BY " . $c["group"];
-    if (isset($c["having"])) $sql .= " HAVING "   . $c["having"];
-    if (isset($c["order"]))  $sql .= " ORDER BY " . $c["order"];
+    if (isset($c["order"])) {
+      $sql .= " ORDER BY " . $this->quoteIdentifierOfOrderBy($c["order"]);
+    }
     
     $limit  = (isset($c["limit"]))  ? $c["limit"]  : null;
     $offset = (isset($c["offset"])) ? $c["offset"] : null;

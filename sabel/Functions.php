@@ -99,7 +99,7 @@ function _new($className)
 
 function is_model($model)
 {
-  return ($model instanceof Sabel_DB_Abstract_Model);
+  return ($model instanceof Sabel_DB_Model);
 }
 
 function convert_to_tablename($mdlName)
@@ -131,15 +131,15 @@ function convert_to_modelname($tblName)
   }
 }
 
-function MODEL($mdlName)
+function MODEL($mdlName, $id = null)
 {
   static $cache = array();
   
   if (isset($cache[$mdlName])) {
     if ($cache[$mdlName]) {
-      return new $mdlName();
+      return new $mdlName($id);
     } else {
-      return new Sabel_DB_Model_Proxy($mdlName);
+      return new Sabel_DB_Model_Proxy($mdlName, $id);
     }
   }
   
@@ -151,8 +151,22 @@ function MODEL($mdlName)
   $cache[$mdlName] = $exists;
   
   if ($exists) {
-    return new $mdlName();
+    return new $mdlName($id);
   } else {
-    return new Sabel_DB_Model_Proxy($mdlName);
+    return new Sabel_DB_Model_Proxy($mdlName, $id);
   }
 }
+
+function create_join_key(Sabel_DB_Model $childModel, $parentName)
+{
+  if ($fkey = $childModel->getSchema()->getForeignKey()) {
+    foreach ($fkey->toArray() as $colName => $fkey) {
+      if ($fkey->table === $parentName) {
+        return array("id" => $fkey->column, "fkey" => $colName);
+      }
+    }
+  }
+  
+  return array("id" => "id", "fkey" => $parentName . "_id");
+}
+

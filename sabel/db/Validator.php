@@ -25,7 +25,7 @@ class Sabel_DB_Validator extends Sabel_Object
     $errors  = array(),
     $ignores = array();
     
-  public function __construct(Sabel_DB_Abstract_Model $model)
+  public function __construct(Sabel_DB_Model $model)
   {
     $this->model   = $model;
     $this->mdlName = $model->getName();
@@ -216,7 +216,7 @@ class Sabel_DB_Validator extends Sabel_Object
       $this->customValidate($customs[$this->mdlName], $columns);
     }
     
-    if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Abstract_Model") {
+    if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Model") {
       if (isset($customs[$parent])) {
         $this->customValidate($customs[$parent], $columns);
       }

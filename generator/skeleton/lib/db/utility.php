@@ -1,7 +1,5 @@
 <?php
 
-class Join      extends Sabel_DB_Join {}
-class Relation  extends Sabel_DB_Join_Relation {}
 class Condition extends Sabel_DB_Condition {}
 class SqlPart   extends Sabel_DB_Sql_Part {}
 
@@ -16,3 +14,8 @@ define("GREATER_THAN",  Condition::GREATER_THAN);
 define("LESS_EQUAL",    Condition::LESS_EQUAL);
 define("LESS_THAN",     Condition::LESS_THAN);
 define("DIRECT",        Condition::DIRECT);
+
+define("LIKE_BEGINS_WITH", Sabel_DB_Condition_Like::BEGINS_WITH);
+define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
+define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
+define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);

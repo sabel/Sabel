@@ -11,5 +11,5 @@
  */
 class Sabel_DB_Exception extends Sabel_Exception_Runtime
 {
-
+  
 }

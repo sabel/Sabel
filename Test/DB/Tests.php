@@ -14,13 +14,18 @@ define("EQUAL",         Condition::EQUAL);
 define("ISNULL",        Condition::ISNULL);
 define("ISNOTNULL",     Condition::ISNOTNULL);
 define("IN",            Condition::IN);
-define("BETWEEN",       Condition::BETWEEN);
 define("LIKE",          Condition::LIKE);
+define("BETWEEN",       Condition::BETWEEN);
 define("GREATER_EQUAL", Condition::GREATER_EQUAL);
 define("GREATER_THAN",  Condition::GREATER_THAN);
 define("LESS_EQUAL",    Condition::LESS_EQUAL);
 define("LESS_THAN",     Condition::LESS_THAN);
 define("DIRECT",        Condition::DIRECT);
+
+define("LIKE_BEGINS_WITH", Sabel_DB_Condition_Like::BEGINS_WITH);
+define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
+define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
+define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);
 
 class Test_DB_Tests
 {
@@ -40,7 +45,7 @@ class Test_DB_Tests
     if (extension_loaded("mysql") && extension_loaded("pdo_mysql")) {
       $suite->addTest(Test_DB_Mysql::suite());
     }
-
+    /*
     if (extension_loaded("pgsql") && extension_loaded("pdo_pgsql")) {
       $suite->addTest(Test_DB_Pgsql::suite());
     }
@@ -56,7 +61,7 @@ class Test_DB_Tests
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
-
+    */
     return $suite;
   }
 }

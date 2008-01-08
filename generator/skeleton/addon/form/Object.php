@@ -12,12 +12,13 @@
 class Form_Object extends Sabel_Object
 {
   protected
-    $token    = null,
-    $model    = null,
-    $mdlName  = "",
-    $formName = "",
-    $columns  = null,
-    $errors   = array();
+    $token     = null,
+    $model     = null,
+    $mdlName   = "",
+    $formName  = "",
+    $columns   = null,
+    $errors    = array(),
+    $allowCols = array();
     
   public function __construct($model, $fName, $token = null)
   {
@@ -68,6 +69,16 @@ class Form_Object extends Sabel_Object
     return $this->model->__get($key);
   }
   
+  public function setAllowColumns(array $allowCols)
+  {
+    $this->allowCols = $allowCols;
+  }
+  
+  public function getAllowColumns()
+  {
+    return $this->allowCols;
+  }
+  
   public function setErrors($errors)
   {
     $this->errors = $errors;
@@ -99,7 +110,7 @@ class Form_Object extends Sabel_Object
     
     $model = $this->model;
     $validator = new Sabel_DB_Validator($model);
-    $annot = $model->getReflection()->getAnnotation("validate_ignores");
+    $annot = $model->getReflection()->getAnnotation("validateIgnores");
     
     if ($annot !== null) {
       $ignores = array_merge($annot[0], $ignores);
@@ -138,23 +149,23 @@ class Form_Object extends Sabel_Object
   
   public function start($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    $html = $this->createHtmlWriter("", $name, $id, $class)->open($uri, $method);
+    $html = $this->getHtmlWriter("", $name, $id, $class)->open($uri, $method);
     
     if ($this->token === null) {
       return $html;
     } else {
-      return $html . '<input type="hidden" name="token" value="' . $this->token . '"/>';
+      return $html . '<input type="hidden" name="token" value="' . $this->token . '"/>' . PHP_EOL;
     }
   }
   
   public function end()
   {
-    return $this->createHtmlWriter("", "")->close();
+    return $this->getHtmlWriter("", "")->close();
   }
   
   public function submit($text = null, $class = null, $id = null)
   {
-    return $this->createHtmlWriter("", "", $id, $class)->submit($text);
+    return $this->getHtmlWriter("", "", $id, $class)->submit($text);
   }
   
   public function button($uri, $text, $class = null, $id = null)
@@ -163,7 +174,7 @@ class Form_Object extends Sabel_Object
     
     $fmt = '<input %s%stype="button" value="%s" '
          . 'onclick="window.location.href=\'http://%s%s%s\'" />';
-       
+         
     $id    = ($id === null)    ? "" : 'id="' . $id . '" ';
     $class = ($class === null) ? "" : 'class="' . $class . '" ';
     $token = ($this->token === null) ? "" : "?token={$this->token}";
@@ -174,32 +185,32 @@ class Form_Object extends Sabel_Object
   
   public function text($name, $class = null, $id = null)
   {
-    $eName = $this->createName($name);
-    return $this->createHtmlWriter($name, $eName, $id, $class)->text();
+    $eName = $this->createInputName($name);
+    return $this->getHtmlWriter($name, $eName, $id, $class)->text();
   }
   
   public function password($name, $class = null, $id = null)
   {
-    $eName = $this->createName($name);
-    return $this->createHtmlWriter($name, $eName, $id, $class)->password();
+    $eName = $this->createInputName($name);
+    return $this->getHtmlWriter($name, $eName, $id, $class)->password();
   }
   
   public function textarea($name, $class = null, $id = null)
   {
-    $eName = $this->createName($name);
-    return $this->createHtmlWriter($name, $eName, $id, $class)->textarea();
+    $eName = $this->createInputName($name);
+    return $this->getHtmlWriter($name, $eName, $id, $class)->textarea();
   }
   
   public function hidden($name, $class = null, $id = null)
   {
-    $eName = $this->createName($name);
-    return $this->createHtmlWriter($name, $eName, $id, $class)->hidden();
+    $eName = $this->createInputName($name);
+    return $this->getHtmlWriter($name, $eName, $id, $class)->hidden();
   }
   
   public function checkbox($name, $values, $class = null, $id = null)
   {
-    $eName = $this->createName($name);
-    return $this->createHtmlWriter($name, $eName, $id, $class)->checkbox($values);
+    $eName = $this->createInputName($name);
+    return $this->getHtmlWriter($name, $eName, $id, $class)->checkbox($values);
   }
   
   public function radio($name, $values, $class = null, $id = null)
@@ -216,8 +227,8 @@ class Form_Object extends Sabel_Object
       $isNullable = true;
     }
     
-    $eName  = $this->createName($name);
-    $writer = $this->createHtmlWriter($name, $eName, $id, $class);
+    $eName  = $this->createInputName($name);
+    $writer = $this->getHtmlWriter($name, $eName, $id, $class);
     return $writer->radio($values, $isNullable);
   }
   
@@ -225,36 +236,36 @@ class Form_Object extends Sabel_Object
   {
     $isNullable = (isset($this->columns[$name])) ? $this->columns[$name]->nullable : true;
     
-    $eName  = $this->createName($name);
-    $writer = $this->createHtmlWriter($name, $eName, $id, $class);
+    $eName  = $this->createInputName($name);
+    $writer = $this->getHtmlWriter($name, $eName, $id, $class);
     return $writer->select($values, $isNullable, $isHash);
   }
   
   public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
   {
-    $eName  = $this->createName("datetime") . "[{$name}]";
-    $writer = $this->createHtmlWriter($name, $eName);
-
+    $eName  = $this->createInputName("datetime") . "[{$name}]";
+    $writer = $this->getHtmlWriter($name, $eName);
+    
     return $writer->datetime($yearRange, $withSecond, $defaultNull);
   }
   
   public function date($name, $yearRange = null, $defaultNull = false)
   {
-    $eName  = $this->createName("date") . "[{$name}]";
-    $writer = $this->createHtmlWriter($name, $eName);
+    $eName  = $this->createInputName("date") . "[{$name}]";
+    $writer = $this->getHtmlWriter($name, $eName);
     return $writer->date($yearRange, $defaultNull);
   }
   
-  protected function createName($name)
+  protected function createInputName($name)
   {
     return $this->mdlName . "::" . $name;
   }
   
-  private function createHtmlWriter($name, $elementName, $id = null, $class = null, $data = array())
+  private function getHtmlWriter($name, $inputName, $id = null, $class = null)
   {
-    $html = new Form_Html($elementName);
-    $html->setValue($this->get($name))->setId($id)->setClass($class)->setData($data);
+    if ($name !== "") $this->allowCols[] = $name;
     
-    return $html;
+    $html = new Form_Html($inputName);
+    return $html->setValue($this->get($name))->setId($id)->setClass($class);
   }
 }
