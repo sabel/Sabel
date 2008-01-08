@@ -100,6 +100,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  public function getUpdateValues()
+  {
+    return $this->updateValues;
+  }
+  
   public function setTableName($tblName)
   {
     $this->tableName = $tblName;
