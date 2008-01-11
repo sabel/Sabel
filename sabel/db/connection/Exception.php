@@ -11,5 +11,5 @@
  */
 class Sabel_DB_Connection_Exception extends Sabel_DB_Exception
 {
-
+  
 }
