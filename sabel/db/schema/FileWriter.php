@@ -84,6 +84,8 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
         $line[] = "'min' => {$col->min}, ";
         $isNum = true;
       } elseif ($col->isString()) {
+        if ($col->min === null) $col->min = 0;
+        $line[] = "'min' => {$col->min}, ";
         $line[] = "'max' => {$col->max}, ";
       }
       

@@ -183,7 +183,7 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
          . "refc.constraint_name = tc.constraint_name "
          . "INNER JOIN information_schema.key_column_usage kcu ON "
          . "kcu.constraint_name = tc.constraint_name "
-         . "WHERE tc.constraint_schema = '{$schema}' AND tc.table_name = '{$tblName}'"
+         . "WHERE tc.constraint_schema = '{$schema}' AND tc.table_name = '{$tblName}' "
          . "AND tc.constraint_type = 'FOREIGN KEY'";
 
     $rows = $driver->execute($sql);

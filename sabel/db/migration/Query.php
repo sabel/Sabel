@@ -20,7 +20,7 @@ class Sabel_DB_Migration_Query
     if (is_string($query)) {
       $this->upgradeQueries[] = $query;
     } else {
-      Sabel_Command::error("query should be a string.");
+      Sabel_Command::error("argument must be a string.");
       exit;
     }
   }
@@ -30,7 +30,7 @@ class Sabel_DB_Migration_Query
     if (is_string($query)) {
       $this->downgradeQueries[] = $query;
     } else {
-      Sabel_Command::error("query should be a string.");
+      Sabel_Command::error("argument must be a string.");
       exit;
     }
   }
@@ -43,10 +43,7 @@ class Sabel_DB_Migration_Query
       $queries = $this->downgradeQueries;
     }
     
-    $driver = Sabel_DB_Migration_Manager::getDriver();
-    
-    foreach ($queries as $query) {
-      $driver->execute($query);
-    }
+    $stmt = Sabel_DB_Migration_Manager::getStatement();
+    foreach ($queries as $query) $stmt->setQuery($query)->execute();
   }
 }
