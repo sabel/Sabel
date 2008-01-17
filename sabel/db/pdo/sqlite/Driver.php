@@ -25,8 +25,24 @@ class Sabel_DB_Pdo_Sqlite_Driver extends Sabel_DB_Pdo_Driver
     }
   }
   
+  public function begin($isolationLevel = null)
+  {
+    try {
+      $this->connection->beginTransaction();
+      return $this->connection;
+    } catch (PDOException $e) {
+      $message = $e->getMessage();
+      throw new Sabel_DB_Driver_Exception("pdo driver begin failed. {$message}");
+    }
+  }
+  
   public function getLastInsertId()
   {
     return $this->connection->lastInsertId();
+  }
+  
+  public function setTransactionIsolationLevel($level)
+  {
+    
   }
 }

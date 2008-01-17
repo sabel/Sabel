@@ -219,7 +219,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   {
     if ($this->schema === null) {
       $message = "can't build query. please call table() method.";
-      throw new Sabel_DB_Statement_Exception($message);
+      throw new Sabel_Exception_Runtime($message);
     }
     
     if ($this->isSelect()) {

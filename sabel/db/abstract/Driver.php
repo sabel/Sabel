@@ -12,6 +12,11 @@
  */
 abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
 {
+  const TRANS_ISOLATION_READ_UNCOMMITTED = 1;
+  const TRANS_ISOLATION_READ_COMMITTED   = 2;
+  const TRANS_ISOLATION_REPEATABLE_READ  = 3;
+  const TRANS_ISOLATION_SERIALIZABLE     = 4;
+  
   protected
     $autoCommit = true,
     $connection = null,
@@ -19,7 +24,7 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
     
   abstract public function getDriverId();
   abstract public function connect(array $params);
-  abstract public function begin();
+  abstract public function begin($isolationLevel = null);
   abstract public function commit();
   abstract public function rollback();
   abstract public function execute($sql, $bindParams = null);
@@ -49,6 +54,28 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function getConnectionName()
   {
     return $this->connectionName;
+  }
+  
+  public function setTransactionIsolationLevel($level)
+  {
+    switch ($level) {
+      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
+        $query = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
+        break;
+      case self::TRANS_ISOLATION_READ_COMMITTED:
+        $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
+        break;
+      case self::TRANS_ISOLATION_REPEATABLE_READ:
+        $query = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ";
+        break;
+      case self::TRANS_ISOLATION_SERIALIZABLE:
+        $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
+        break;
+      default:
+        throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+    }
+    
+    $this->execute($query);
   }
   
   protected function bind($sql, $bindParam)

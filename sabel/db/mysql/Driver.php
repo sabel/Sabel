@@ -42,8 +42,12 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     }
   }
   
-  public function begin()
+  public function begin($isolationLevel = null)
   {
+    if ($isolationLevel !== null) {
+      $this->setTransactionIsolationLevel($isolationLevel);
+    }
+    
     if (mysql_query("START TRANSACTION", $this->connection)) {
       return $this->connection;
     } else {

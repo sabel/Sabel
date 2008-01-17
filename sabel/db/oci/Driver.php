@@ -38,8 +38,13 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     }
   }
   
-  public function begin()
+  
+  public function begin($isolationLevel = null)
   {
+    if ($isolationLevel !== null) {
+      $this->setTransactionIsolationLevel($isolationLevel);
+    }
+    
     $this->autoCommit = false;
     return $this->connection;
   }
@@ -109,6 +114,24 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   public function getLastInsertId()
   {
     return $this->lastInsertId;
+  }
+  
+  public function setTransactionIsolationLevel($level)
+  {
+    switch ($level) {
+      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
+      case self::TRANS_ISOLATION_READ_COMMITTED:
+        $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
+        break;
+      case self::TRANS_ISOLATION_REPEATABLE_READ:
+      case self::TRANS_ISOLATION_SERIALIZABLE:
+        $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
+        break;
+      default:
+        throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+    }
+    
+    $this->execute($query);
   }
   
   private function executeError($ociStmt)

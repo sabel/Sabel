@@ -36,4 +36,19 @@ class Sabel_DB_Pdo_Mysql_Statement extends Sabel_DB_Pdo_Statement
     
     return $values;
   }
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '`' . $v . '`';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '`' . $arg . '`';
+    } else {
+      $message = "argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
 }

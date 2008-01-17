@@ -11,10 +11,15 @@
  */
 class Sabel_DB_Mysqli_Statement extends Sabel_DB_Mysql_Statement
 {
+  public function __construct(Sabel_DB_Mysqli_Driver $driver)
+  {
+    $this->driver = $driver;
+  }
+  
   public function escape(array $values)
   {
     $conn = $this->driver->getConnection();
-
+    
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
@@ -24,7 +29,7 @@ class Sabel_DB_Mysqli_Statement extends Sabel_DB_Mysql_Statement
         $val = "'" . mysqli_real_escape_string($conn, $val) . "'";
       }
     }
-
+    
     return $values;
   }
 }

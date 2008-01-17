@@ -11,12 +11,25 @@
  */
 class Sabel_DB_Transaction
 {
-  private static $active = false;
-  private static $transactions = array();
+  const READ_UNCOMMITTED = 1;
+  const READ_COMMITTED   = 2;
+  const REPEATABLE_READ  = 3;
+  const SERIALIZABLE     = 4;
   
-  public static function activate()
+  private static $active         = false;
+  private static $transactions   = array();
+  private static $isolationLevel = null;
+  
+  public static function activate($isolationLevel = null)
   {
     self::$active = true;
+    if ($isolationLevel === null) return;
+    
+    if (is_numeric($isolationLevel) || $isolationLevel >= 1 && $isolationLevel <= 4) {
+      self::$isolationLevel = $isolationLevel;
+    } else {
+      throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+    }
   }
   
   public static function isActive($connectionName = null)
@@ -30,14 +43,34 @@ class Sabel_DB_Transaction
   
   public static function getConnection($connectionName)
   {
-    $ts = self::$transactions;
-    return (isset($ts[$connectionName]["conn"])) ? $ts[$connectionName]["conn"] : null;
+    if (isset(self::$transactions[$connectionName]["conn"])) {
+      return self::$transactions[$connectionName]["conn"];
+    } else {
+      return null;
+    }
   }
   
   public static function begin(Sabel_DB_Abstract_Driver $driver)
   {
+    switch (self::$isolationLevel) {
+      case self::READ_UNCOMMITTED:
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_READ_UNCOMMITTED;
+        break;
+      case self::READ_COMMITTED:
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_READ_COMMITTED;
+        break;
+      case self::REPEATABLE_READ:
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_REPEATABLE_READ;
+        break;
+      case self::SERIALIZABLE:
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_SERIALIZABLE;
+        break;
+      default:
+        $iLevel = null;
+    }
+    
     $connectionName = $driver->getConnectionName();
-    self::$transactions[$connectionName]["conn"]   = $driver->begin();
+    self::$transactions[$connectionName]["conn"]   = $driver->begin($iLevel);
     self::$transactions[$connectionName]["driver"] = $driver;
     
     self::$active = true;
@@ -68,5 +101,6 @@ class Sabel_DB_Transaction
   {
     self::$active = false;
     self::$transactions = array();
+    self::$isolationLevel = null;
   }
 }

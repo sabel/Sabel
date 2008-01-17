@@ -12,8 +12,12 @@
  */
 abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function begin()
+  public function begin($isolationLevel = null)
   {
+    if ($isolationLevel !== null) {
+      $this->setTransactionIsolationLevel($isolationLevel);
+    }
+    
     try {
       $this->connection->beginTransaction();
       return $this->connection;
@@ -22,7 +26,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       throw new Sabel_DB_Driver_Exception("pdo driver begin failed. {$message}");
     }
   }
-
+  
   public function commit()
   {
     try {
@@ -32,7 +36,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       throw new Sabel_DB_Driver_Exception("pdo driver commit failed. {$message}");
     }
   }
-
+  
   public function rollback()
   {
     try {
@@ -42,13 +46,13 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       throw new Sabel_DB_Driver_Exception("pdo driver rollback failed. {$message}");
     }
   }
-
+  
   public function close($connection)
   {
     unset($connection);
     unset($this->connection);
   }
-
+  
   public function execute($sql, $bindParams = null)
   {
     $connection = $this->connection;
@@ -56,7 +60,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $error = $connection->errorInfo();
       throw new Sabel_DB_Driver_Exception("PdoStatement is invalid. {$error[2]}");
     }
-
+    
     if ($pdoStmt->execute($bindParams)) {
       $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
       $pdoStmt->closeCursor();
@@ -65,7 +69,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $this->executeError($connection, $pdoStmt, $bindParams);
     }
   }
-
+  
   private function executeError($conn, $pdoStmt, $bindParam)
   {
     if (is_object($pdoStmt)) {
@@ -74,10 +78,10 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     } else {
       $error = $conn->errorInfo();
     }
-
+    
     $error = (isset($error[2])) ? $error[2] : print_r($error, true);
     $param = (empty($param)) ? null : $param;
-
+    
     throw new Sabel_DB_Driver_Exception("pdo driver execute failed: $error");
   }
 }

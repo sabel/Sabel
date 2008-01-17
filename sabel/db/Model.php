@@ -175,16 +175,6 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this;
   }
   
-  public function before($method)
-  {
-    return;
-  }
-  
-  public function after($method, $result)
-  {
-    return;
-  }
-  
   protected function prepare($method, $args)
   {
     $this->arguments = $args;
@@ -195,16 +185,25 @@ abstract class Sabel_DB_Model extends Sabel_Object
   
   protected final function execute()
   {
+    $result = null;
     $method = $this->method;
-    $result = $this->before($method);
+    
+    $beforeMethod = "before" . ucfirst($method);
+    $afterMethod  = "after"  . ucfirst($method);
+    
+    if ($this->hasMethod($beforeMethod)) {
+      $result = $this->$beforeMethod();
+    }
     
     if ($result === null) {
       $execMethod = "_" . $method;
       $result = $this->$execMethod();
     }
     
-    $afterResult = $this->after($method, $result);
-    if ($afterResult !== null) $result = $afterResult;
+    if ($this->hasMethod($afterMethod)) {
+      $afterResult = $this->$afterMethod();
+      if ($afterResult !== null) $result = $afterResult;
+    }
     
     if ($this->autoReinit) $this->initState();
     

@@ -38,4 +38,11 @@ class Test_DB_Ibase extends Test_DB_Test
     Sabel_DB_Config::add("default",  self::$params1);
     Test_DB_Test::$db = "IBASE";
   }
+  
+  public function testDefinedValue()
+  {
+    $this->assertEquals(8, IBASE_COMMITTED);
+    $this->assertEquals(32, IBASE_REC_NO_VERSION);
+    $this->assertEquals(40, IBASE_COMMITTED|IBASE_REC_NO_VERSION);
+  }
 }

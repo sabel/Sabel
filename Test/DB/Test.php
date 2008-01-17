@@ -25,7 +25,7 @@ class Test_DB_Test extends SabelTestCase
     $st->bl = true;
     $generatedId = $st->insert();
     
-    $this->assertTrue(is_int($generatedId));
+    $this->assertTrue(is_numeric($generatedId));
   }
   
   public function testInsertBySave()
@@ -298,6 +298,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("2008-01-10", $results[0]->dt);
     $this->assertEquals("2008-01-01", $results[9]->dt);
     
+    $st->setProjection(array("sint"));
     $results = $st->selectByQuery("GROUP BY sint");
     $this->assertEquals(5, count($results));
   }
@@ -316,7 +317,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testRollback()
   {
-    Sabel_DB_Transaction::activate();
+    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::SERIALIZABLE);
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));
@@ -328,7 +329,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testCommit()
   {
-    Sabel_DB_Transaction::activate();
+    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::READ_COMMITTED);
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));
