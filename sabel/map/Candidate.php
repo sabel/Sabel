@@ -44,6 +44,7 @@ class Sabel_Map_Candidate implements Iterator
     $rules = explode("/", $uriRule);
     
     // @todo createElement微妙じゃない？ by hamaco @ 07/10/11
+    // 第二引数要らない気がします。
     foreach ($rules as $element) {
       if (stripos($element, self::VARIABLE_MARK) === 0) {
         $name = ltrim($element, self::VARIABLE_MARK);
