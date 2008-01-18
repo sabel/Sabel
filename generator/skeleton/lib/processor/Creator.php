@@ -42,7 +42,7 @@ class Processor_Creator extends Sabel_Bus_Processor
     $controller->setup($this->request, $destination, $this->storage);
     $controller->setBus($bus);
     
-    $bus->set("controller", $controller);
+    $this->controller = $controller;
   }
   
   protected function createController()

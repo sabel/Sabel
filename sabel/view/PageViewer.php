@@ -23,13 +23,10 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   protected $position = null;
   
-  public function __construct($pager)
+  public function __construct(Sabel_View_Pager $pager)
   {
-    if (!$pager instanceof Sabel_View_Pager)
-      throw new Sabel_Exception_Runtime('pager is not instaceof sabel_view_pager.');
-      
     $this->pager   = clone $pager;
-    $this->current =(int) $pager->pageNumber;
+    $this->current = (int)$pager->pageNumber;
   }
   
   public function getCurrent()
@@ -39,12 +36,12 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function getNext()
   {
-    return (int) min($this->pager->getTotalPageNumber(), $this->current + 1);
+    return (int)min($this->pager->getTotalPageNumber(), $this->current + 1);
   }
   
   public function getPrevious()
   {
-    return (int) max(1, $this->current - 1);
+    return (int)max(1, $this->current - 1);
   }
   
   public function getFirst()
@@ -57,7 +54,8 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
     return $this->pager->getTotalPageNumber();
   }
   
-  public function getPage($offset) {
+  public function getPage($offset)
+  {
     return $offset;
   }
   
@@ -88,7 +86,7 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function setWindow($size)
   {
-    $this->window =(int) $size;
+    $this->window = (int)$size;
   }
   
   public function setPriorityPrevious()
@@ -118,6 +116,7 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function key()
   {
+    
   }
   
   public function next()
@@ -129,21 +128,24 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   {
     $this->position = clone $this;
     $plus = ($this->priority === self::PRIORITY_PREVIOUS) ? 0 : 1;
-    $this->start =(int) $this->current - floor(($this->window - $plus) / 2);
-    $this->end   =(int) $this->start + $this->window;
+    $this->start = (int)$this->current - floor(($this->window - $plus) / 2);
+    $this->end   = (int)$this->start + $this->window;
+    
     if (!$this->igEmpty) {
       if ($this->start < 1) $this->start = 1;
       if (($start = $this->pager->getTotalPageNumber() - $this->end + 1) < 0) {
-        $this->start =(int) $this->start + $start;
+        $this->start = (int)$this->start + $start;
       }
-      $this->end   =(int) $this->start + $this->window;
+      
+      $this->end = (int)$this->start + $this->window;
     }
-    $this->position->current =(int) max(1, $this->start);
+    
+    $this->position->current = (int)max(1, $this->start);
   }
   
   public function valid()
   {
-    $endPageNum =(int) min($this->pager->getTotalPageNumber() + 1, $this->end);
+    $endPageNum = (int)min($this->pager->getTotalPageNumber() + 1, $this->end);
     return ($this->position->current < $endPageNum);
   }
 }

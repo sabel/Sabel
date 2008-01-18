@@ -62,7 +62,6 @@ require_once('Test/UtilMap.php');
 require_once('Test/DB/Tests.php');
 require_once('Test/Validate.php');
 require_once('Test/Map/Tests.php');
-require_once('Test/View/Tests.php');
 //require_once('Test/Processor/Tests.php');
 
 require_once('Test/VirtualInheritance.php');

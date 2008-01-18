@@ -3,78 +3,56 @@
 /**
  * Sabel_View_Resource_Template
  *
- * @category   Template
- * @package    org.sabel.template
+ * @category   View
+ * @package    org.sabel.view
  * @author     Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Resource_Template implements Sabel_View_Resource_File
+class Sabel_View_Resource_Template
+  extends Sabel_Object implements Sabel_View_Resource_Interface
 {
-  private $path     = "";
-  private $name     = "";
-  private $missing  = false;
+  private $path = "";
+  private $locationName = "";
   
-  public final function setPath($path)
+  public function __construct($locationName, $path)
   {
-    if (is_string($path)) {
-      $this->path = $path;
-    } else {
-      throw new Exception("path must be string");
-    }
+    $this->path = $path;
+    $this->locationName = $locationName;
   }
   
-  public final function getPath()
+  public function getPath()
   {
     return $this->path;
   }
   
-  public final function setName($name)
+  public function getLocationName()
   {
-    if (is_string($name)) {
-      $this->name = $name;
-    } else {
-      throw new Exception("name must be string");
-    }
-  }
-  
-  public final function getName()
-  {
-    return $this->name;
-  }
-  
-  public final function setFullPath($path, $name)
-  {
-    $this->setPath($path);
-    $this->setName($name);
-  }
-  
-  public final function getFullpath()
-  {
-    return $this->path . $this->name;
+    return $this->locationName;
   }
   
   public function fetch()
   {
     if ($this->isValid()) {
-      return file_get_contents($this->path . $this->name);
+      return file_get_contents($this->path);
     } else {
       return false;
     }
   }
-    
+  
   public function isValid()
   {
-    return (is_readable($this->path.$this->name));
+    return (is_file($this->path) && is_readable($this->path));
   }
   
-  public function missing()
+  public function create($contents)
   {
-    $this->missing = true;
+    file_put_contents($this->path, $contents);
   }
   
-  public function isMissing()
+  public function delete()
   {
-    return $this->missing;
+    unlink($this->path);
   }
 }

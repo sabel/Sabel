@@ -33,23 +33,16 @@ abstract class Sabel_View_Renderer extends Sabel_Object
     }
   }
   
-  public function partial($name, $controller = null, $assign = array())
+  public function partial($name, $assign = array())
   {
     $bus = Sabel_Context::getContext()->getBus();
-    $destination = clone $bus->get("destination");
-    $responses   = $bus->get("response")->getResponses();
     
-    if ($controller !== null) {
-      $destination->setController($controller);
-    }
-    
-    $destination->setAction($name);
-    
-    $repository = new Sabel_View_Repository_File($destination);
+    $repository = $bus->get("repository");
     $renderer = $bus->get("renderer");
     
     if (is_object($renderer)) {
-      $resource = $repository->find();
+      $resource  = $repository->find($name);
+      $responses = $bus->get("response")->getResponses();
       return $renderer->rendering($resource->fetch(), array_merge($responses, $assign));
     } else {
       throw new Sabel_Exception_Runtime("renderer object is not found.");

@@ -209,14 +209,12 @@ final class Sabel
     require ($CONTAINER . "Injection.php");
     
     require ($VIEW . "Uri.php");
-    require ($VIEW . "Resource.php");
     require ($VIEW . "Renderer.php");
-    require ($VIEW . "Location.php");
-    require ($VIEW . "resource"   . DS . "File.php");
-    require ($VIEW . "resource"   . DS . "Template.php");
-    require ($VIEW . "repository" . DS . "Interface.php");
-    require ($VIEW . "repository" . DS . "File.php");
-    require ($VIEW . "location"   . DS . "File.php");
+    require ($VIEW . "Repository.php");
+    require ($VIEW . "Template.php");
+    require ($VIEW . "resource" . DS . "Interface.php");
+    require ($VIEW . "resource" . DS . "Template.php");
+    require ($VIEW . "template" . DS . "File.php");
     
     require ($DB . "Config.php");
     require ($DB . "Type.php");
