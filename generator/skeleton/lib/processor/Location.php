@@ -15,14 +15,19 @@ class Processor_Location extends Sabel_Bus_Processor
   {
     list ($module, $controller) = $this->destination->toArray();
     
-    $template = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
-    $template->addPath("controller", $module . DS . VIEW_DIR_NAME . DS . $controller . DS);
-    $template->addPath("module", $module . DS . VIEW_DIR_NAME . DS);
+    $controller = new Sabel_View_Template_File($module . DS . VIEW_DIR_NAME . DS . $controller . DS);
+    $repository = new Sabel_View_Repository("controller", $controller);
     
-    $this->repository = new Sabel_View_Repository($template);
+    $module = new Sabel_View_Template_File($module . DS . VIEW_DIR_NAME . DS);
+    $repository->addTemplate("module", $module);
+    
+    $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
+    $repository->addTemplate("app", $app);
+    
+    $this->repository = $repository;
     
     if ($this->controller instanceof Sabel_Controller_Page) {
-      $this->controller->repository = $this->repository;
+      $this->controller->repository = $repository;
     }
   }
 }

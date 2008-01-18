@@ -212,8 +212,6 @@ final class Sabel
     require ($VIEW . "Renderer.php");
     require ($VIEW . "Repository.php");
     require ($VIEW . "Template.php");
-    require ($VIEW . "resource" . DS . "Interface.php");
-    require ($VIEW . "resource" . DS . "File.php");
     require ($VIEW . "template" . DS . "File.php");
     
     require ($DB . "Config.php");

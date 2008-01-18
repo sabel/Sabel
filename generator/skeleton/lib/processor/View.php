@@ -35,13 +35,13 @@ class Processor_View extends Sabel_Bus_Processor
     
     $repository = $this->getRepository();
     
-    if ($resource = $repository->find()) {
-      $contents = $this->rendering($resource, $responses);
+    if ($template = $repository->getValidTemplate()) {
+      $contents = $this->rendering($template, $responses);
     } elseif ($controller->isExecuted()) {
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
-    } elseif ($resource = $repository->find("notFound")) {
-      $contents = $this->rendering($resource, $responses);
+    } elseif ($template = $repository->getValidTemplate("notFound")) {
+      $contents = $this->rendering($template, $responses);
     } else {
       $contents = "<h1>404 Not Found</h1>"
                 . "setup your notFound.tpl to module directory.";
@@ -53,9 +53,9 @@ class Processor_View extends Sabel_Bus_Processor
       $this->result = $contents;
     } else {
       if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
-      if ($layout = $repository->find($layoutName)) {
+      if ($template = $repository->getValidTemplate($layoutName)) {
         $responses["contentForLayout"] = $contents;
-        $this->result = $this->rendering($layout, $responses);
+        $this->result = $this->rendering($template, $responses);
       } else {
         $this->result = $contents;
       }
@@ -67,13 +67,13 @@ class Processor_View extends Sabel_Bus_Processor
     $this->response->outputHeader();
   }
   
-  private function rendering($resource, $responses)
+  private function rendering($template, $responses)
   {
-    if (is_object($resource)) {
-      $contents = $resource->fetch();
-      $path = $resource->getPath();
+    if (is_object($template)) {
+      $contents = $template->getContents();
+      $path = $template->getPath();
     } else {
-      $contents = $resource;
+      $contents = $template;
       $path = null;
     }
     

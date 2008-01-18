@@ -12,29 +12,35 @@
  */
 abstract class Sabel_View_Template extends Sabel_Object
 {
-  protected $defaultPath = "";
-  protected $paths = array();
+  protected $baseDir = "";
+  protected $name    = "";
   
-  abstract public function find($tplPath);
-  abstract public function create($locationName, $tplPath, $body = "");
-  abstract public function delete($locationName, $tplPath);
-  abstract public function isValid($locationName, $tplPath);
-  abstract public function getResource($locationName, $tplPath);
+  abstract public function isValid();
+  abstract public function getContents();
+  abstract public function create($body = "");
+  abstract public function delete();
   
-  public function __construct($defaultPath)
+  public function __construct($baseDir)
   {
-    $this->paths[] = array("name" => "default",
-                           "path" =>  MODULES_DIR_PATH . DS . $defaultPath);
+    $this->baseDir = MODULES_DIR_PATH . DS . $baseDir;
   }
   
-  public function addPath($name, $path)
+  public function name($name = null)
   {
-    $param = array("name" => $name, "path" => MODULES_DIR_PATH . DS . $path);
-    array_unshift($this->paths, $param);
+    if ($name === null) {
+      return $this->name;
+    } else {
+      $this->name = $name . TPL_SUFFIX;
+    }
   }
   
-  public function getPaths()
+  public function getBaseDir()
   {
-    return $this->paths;
+    return $this->baseDir;
+  }
+  
+  public function getPath()
+  {
+    return $this->baseDir . $this->name;
   }
 }

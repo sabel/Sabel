@@ -12,12 +12,36 @@
 class Sabel_View_Repository extends Sabel_Object
 {
   protected
-    $template = null,
-    $tplName  = null;
+    $templates = array(),
+    $tplName   = null;
     
-  public function __construct(Sabel_View_Template $template)
+  public function __construct($name, Sabel_View_Template $template)
   {
-    $this->template = $template;
+    $this->addTemplate($name, $template);
+  }
+  
+  public function addTemplate($name, Sabel_View_Template $template)
+  {
+    if (is_string($name) && $name !== "") {
+      $this->templates[$name] = $template;
+    } else {
+      $message = "argument(1) must be a string.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
+  public function getTemplate($name)
+  {
+    if (isset($this->templates[$name])) {
+      return $this->templates[$name];
+    } else {
+      return null;
+    }
+  }
+  
+  public function getTemplates()
+  {
+    return $this->templates;
   }
   
   public function setTemplateName($tplName)
@@ -30,29 +54,54 @@ class Sabel_View_Repository extends Sabel_Object
     return $this->tplName;
   }
   
-  public function find($tplPath = null)
+  public function getValidTemplate($tplPath = null)
   {
     if ($tplPath === null && $this->tplName === null) {
       throw new Sabel_Exception_Runtime("template name is null.");
-    } elseif ($tplPath === null) {
-      return $this->template->find($this->tplName);
     } else {
-      return $this->template->find($tplPath);
+      if ($tplPath === null) $tplPath = $this->tplName;
+      foreach ($this->templates as $template) {
+        $template->name($tplPath);
+        if ($template->isValid()) return $template;
+      }
+    }
+    
+    return null;
+  }
+  
+  public function getContents($tplPath = null)
+  {
+    $template = $this->getValidTemplate($tplPath);
+    return ($template !== null) ? $template->getContents() : "";
+  }
+  
+  public function create($name, $tplPath, $contents = "")
+  {
+    if ($template = $this->getTemplate($name)) {
+      $template->name($tplPath);
+      return $template->create($contents);
+    } else {
+      throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }
   }
   
-  public function create($locationName, $tplPath, $body = "")
+  public function delete($name, $tplPath)
   {
-    return $this->template->create($locationName, $tplPath, $body);
+    if ($template = $this->getTemplate($name)) {
+      $template->name($tplPath);
+      return $template->delete();
+    } else {
+      throw new Sabel_Exception_Runtime("such a location name is not registered.");
+    }
   }
   
-  public function delete($locationName, $tplPath)
+  public function isValid($name, $tplPath)
   {
-    return $this->template->delete($locationName, $tplPath);
-  }
-  
-  public function isValid($locationName, $tplPath)
-  {
-    return $this->template->isValid($locationName, $tplPath);
+    if ($template = $this->getTemplate($name)) {
+      $template->name($tplPath);
+      return $template->isValid();
+    } else {
+      throw new Sabel_Exception_Runtime("such a location name is not registered.");
+    }
   }
 }
