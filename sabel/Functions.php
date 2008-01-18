@@ -24,7 +24,7 @@ function load($className, $config)
 
 function l($message, $level = LOG_INFO, $fileName = null)
 {
-  Sabel_Context::log($message, $level, $fileName);
+  Sabel_Logger_File::singleton()->write($message, $level, $fileName);
 }
 
 function realempty($value)

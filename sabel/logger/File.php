@@ -15,11 +15,10 @@ class Sabel_Logger_File extends Sabel_Object
   const DEFAULT_LOG_DIR  = "logs";
   const DEFAULT_LOG_FILE = "sabel.log";
   
-  private $handlers = array();
-  private $messages = array();
-  private $path = "";
-  
   private static $instance = null;
+  
+  private $fileName = "";
+  private $handlers = array();
   
   public static function singleton($fileName = null)
   {
@@ -33,32 +32,15 @@ class Sabel_Logger_File extends Sabel_Object
   public function __construct($fileName = null)
   {
     if ($fileName === null) {
-      $fileName = $this->getLogFileName();
-    }
-    
-    $this->open($fileName);
-  }
-  
-  private function open($fileName = null)
-  {
-    if ($fileName === null) {
-      $fileName = $this->getLogFileName();
-    }
-    
-    $handlers =& $this->handlers;
-    
-    if (isset($handlers[$fileName]) && is_resource($handlers[$fileName])) {
-      return $handlers[$fileName];
+      $this->fileName = $this->getLogFileName();
     } else {
-      $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
-      $handlers[$fileName] = fopen($base . $fileName, "a");
-      $sep = "============================================================";
-      fwrite($handlers[$fileName], PHP_EOL . $sep . PHP_EOL . PHP_EOL);
-      return $handlers[$fileName];
+      $this->fileName = $fileName;
     }
+    
+    $this->open($this->fileName);
   }
   
-  public function log($text, $level = LOG_INFO, $fileName = null)
+  public function write($text, $level = LOG_INFO, $fileName = null)
   {
     $fmt = '%s [%s] %s' . PHP_EOL;
     $fp  = $this->open($fileName);
@@ -67,8 +49,52 @@ class Sabel_Logger_File extends Sabel_Object
     fwrite($fp, sprintf($fmt, now(), $this->defineToString($level), $text));
   }
   
+  public function log($text, $level = LOG_INFO, $fileName = null)
+  {
+    $this->write($text, $level, $fileName);
+  }
+  
+  public function close($fileName = null)
+  {
+    if ($fileName === null) {
+      $fileName = $this->getLogFileName();
+    }
+    
+    if ($this->isOpend($fileName)) {
+      fclose($this->handlers[$fileName]);
+      unset($this->handlers[$fileName]);
+    }
+  }
+  
+  public function isOpend($fileName)
+  {
+    $h = $this->handlers;
+    return (isset($h[$fileName]) && is_resource($h[$fileName]));
+  }
+  
+  public function open($fileName = null)
+  {
+    if ($fileName === null) {
+      $fileName = $this->getLogFileName();
+    }
+    
+    if ($this->isOpend($fileName)) {
+      return $this->handlers[$fileName];
+    } else {
+      $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
+      $this->handlers[$fileName] = fopen($base . $fileName, "a");
+      $sep = "============================================================";
+      fwrite($this->handlers[$fileName], PHP_EOL . $sep . PHP_EOL . PHP_EOL);
+      return $this->handlers[$fileName];
+    }
+  }
+  
   private function getLogFileName()
   {
+    if ($this->fileName !== "") {
+      return $this->fileName;
+    }
+    
     if (!defined("ENVIRONMENT")) {
       $name = "test";
     } else {

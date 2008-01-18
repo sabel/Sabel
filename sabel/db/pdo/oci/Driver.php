@@ -54,4 +54,22 @@ class Sabel_DB_Pdo_Oci_Driver extends Sabel_DB_Pdo_Driver
   {
     return $this->lastInsertId;
   }
+  
+  public function setTransactionIsolationLevel($level)
+  {
+    switch ($level) {
+      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
+      case self::TRANS_ISOLATION_READ_COMMITTED:
+        $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
+        break;
+      case self::TRANS_ISOLATION_REPEATABLE_READ:
+      case self::TRANS_ISOLATION_SERIALIZABLE:
+        $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
+        break;
+      default:
+        throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+    }
+    
+    $this->execute($query);
+  }
 }

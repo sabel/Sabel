@@ -61,17 +61,4 @@ class Sabel_Context extends Sabel_Object
   {
     return $this->exception;
   }
-  
-  public static function log($message, $level = LOG_INFO, $fileName)
-  {
-    static $log = null;
-    
-    if ($log === null) $log = self::getLogger();
-    $log->log($message, $level, $fileName);
-  }
-  
-  public static function getLogger()
-  {
-    return Sabel_Logger_File::singleton();
-  }
 }
