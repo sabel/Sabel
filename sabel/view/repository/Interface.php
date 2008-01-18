@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Sabel_View_Repository
+ * Sabel_View_Repository_Interface
  *
+ * @interface
  * @category   View
- * @package    org.sabel.view.repository
+ * @package    org.sabel.view
  * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
+ * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_View_Repository
+interface Sabel_View_Repository_Interface
 {
   /**
    * find resource from locations

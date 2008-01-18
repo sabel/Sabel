@@ -43,15 +43,13 @@ class Sabel_Map_Candidate implements Iterator
   {
     $rules = explode("/", $uriRule);
     
-    // @todo createElement微妙じゃない？ by hamaco @ 07/10/11
-    // 第二引数要らない気がします。
     foreach ($rules as $element) {
       if (stripos($element, self::VARIABLE_MARK) === 0) {
         $name = ltrim($element, self::VARIABLE_MARK);
         switch ($name) {
           case self::MODULE:
           case self::CONTROLLER:
-            $this->createElement($name, $name);
+            $this->createElement($name);
             break;
           case ($this->hasExtension($name)):
             list($left, $right) = $this->diviedByExtension($name);
@@ -64,7 +62,7 @@ class Sabel_Map_Candidate implements Iterator
             $this->elements[$left] = $element;
             break;
           case self::ACTION:
-            $this->createElement($name, $name);
+            $this->createElement($name);
             break;
           case ($this->isArrayElement($name)):
             $name = str_replace("[]", "", $name);
@@ -144,7 +142,7 @@ class Sabel_Map_Candidate implements Iterator
   
   public function createElement($name, $type = null)
   {
-    if ($type === null) $type = self::VARIABLE;
+    if ($type === null) $type = $name;
     
     $element = new Sabel_Map_Element($name, $type);
     $this->elements[$name] = $element;

@@ -17,7 +17,7 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   
   abstract public function execute($bus);
   
-  public function __construct($name = null)
+  public function __construct($name)
   {
     if ($name === null || $name === "") {
       throw new Sabel_Exception_InvalidArgument("name must be set.");

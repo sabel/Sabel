@@ -9,7 +9,8 @@
  * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Repository_File extends Sabel_Object implements Sabel_View_Repository
+class Sabel_View_Repository_File
+  extends Sabel_Object implements Sabel_View_Repository_Interface
 {
   private $destination = null;
   

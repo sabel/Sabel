@@ -211,10 +211,10 @@ final class Sabel
     require ($VIEW . "Uri.php");
     require ($VIEW . "Resource.php");
     require ($VIEW . "Renderer.php");
-    require ($VIEW . "Repository.php");
     require ($VIEW . "Location.php");
     require ($VIEW . "resource"   . DS . "File.php");
     require ($VIEW . "resource"   . DS . "Template.php");
+    require ($VIEW . "repository" . DS . "Interface.php");
     require ($VIEW . "repository" . DS . "File.php");
     require ($VIEW . "location"   . DS . "File.php");
     

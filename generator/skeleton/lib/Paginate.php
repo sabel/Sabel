@@ -19,6 +19,10 @@ class Paginate extends Sabel_Object
     
   public function __construct($model)
   {
+    if (is_string($model)) {
+      $model = MODEL($model);
+    }
+    
     if (is_model($model)) {
       $model->autoReinit(false);
       $this->method = "select";
