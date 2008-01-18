@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Sqlite_Driver
+ * Driver for PDO_SQLITE
  *
  * @category   DB
  * @package    org.sabel.db

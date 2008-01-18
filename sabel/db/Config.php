@@ -67,9 +67,11 @@ class Sabel_DB_Config
                      "sabel.db.pdo.mysql" => 1,
                      "sabel.db.mssql"     => 1);
                      
+    // @todo improvement
+    
     if (isset($ignores[$package])) {
       return $config["database"];
-    } elseif ($package === "sabel.db.oci") {
+    } elseif ($package === "sabel.db.oci" || $package === "sabel.db.pdo.oci") {
       return strtoupper($config["user"]);
     } elseif (isset($config["schema"])) {
       return $config["schema"];

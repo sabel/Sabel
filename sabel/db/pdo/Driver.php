@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Driver
+ * Abstract Driver for PDO
  *
  * @abstract
  * @category   DB
@@ -70,17 +70,22 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     }
   }
   
-  private function executeError($conn, $pdoStmt, $bindParam)
+  private function executeError($conn, $pdoStmt, $bindParams)
   {
     if (is_object($pdoStmt)) {
       $error = $pdoStmt->errorInfo();
       $sql   = $pdoStmt->queryString;
     } else {
       $error = $conn->errorInfo();
+      $sql   = null;
     }
     
     $error = (isset($error[2])) ? $error[2] : print_r($error, true);
-    $param = (empty($param)) ? null : $param;
+    if ($sql !== null) $error .= ", SQL: $sql";
+    
+    if (!empty($bindParams)) {
+      $error .= PHP_EOL . "BIND_PARAMS: " . print_r($bindParams, true);
+    }
     
     throw new Sabel_DB_Driver_Exception("pdo driver execute failed: $error");
   }

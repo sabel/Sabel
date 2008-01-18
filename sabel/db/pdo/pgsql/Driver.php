@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Pgsql_Driver
+ * Driver for PDO_PGSQL
  *
  * @category   DB
  * @package    org.sabel.db.pdo

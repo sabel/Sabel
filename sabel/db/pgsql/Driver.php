@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pgsql_Driver
+ * Driver for PostgreSQL
  *
  * @category   DB
  * @package    org.sabel.db

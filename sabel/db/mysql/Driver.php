@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Mysql_Driver
+ * Driver for MySQL
  *
  * @category   DB
  * @package    org.sabel.db

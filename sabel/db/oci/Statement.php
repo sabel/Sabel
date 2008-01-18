@@ -37,8 +37,7 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
       $seqName = strtoupper("{$this->table}_{$column}_seq");
       $rows = $this->driver->execute("SELECT {$seqName}.NEXTVAL AS id FROM DUAL");
       $id = $rows[0]["id"];
-      $values = array_merge($this->values, array($column => $id));
-      $this->values($values);
+      $this->values(array_merge($this->values, array($column => $id)));
       $this->driver->setLastInsertId($id);
     }
     

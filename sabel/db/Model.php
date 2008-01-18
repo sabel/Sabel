@@ -328,16 +328,13 @@ abstract class Sabel_DB_Model extends Sabel_Object
     @list ($arg1, $arg2) = $this->arguments;
     $this->setCondition($arg1, $arg2);
     
-    $projection  = $this->projection;
-    $constraints = $this->constraints;
+    $projection = $this->projection;
     $this->projection  = "COUNT(*) AS cnt";
-    $this->constraints = array("limit" => 1);
     
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
     
     $this->projection  = $projection;
-    $this->constraints = $constraints;
     
     return (int)$rows[0]["cnt"];
   }

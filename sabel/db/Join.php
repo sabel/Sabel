@@ -94,11 +94,7 @@ class Sabel_DB_Join extends Sabel_Object
       $query[] = $object->getJoinQuery($stmt, $joinType);
     }
     
-    $rows = $this->execute($stmt,
-                           "COUNT(*) AS cnt",
-                           implode("", $query),
-                           array("limit" => 1));
-                           
+    $rows = $this->execute($stmt, "COUNT(*) AS cnt", implode("", $query));
     if ($clearState) $this->clear();
     return (int)$rows[0]["cnt"];
   }
@@ -141,13 +137,13 @@ class Sabel_DB_Join extends Sabel_Object
     return $results;
   }
   
-  protected function execute($stmt, $projection, $join, $constraints = null)
+  protected function execute($stmt, $projection, $join)
   {
     $stmt->join($join)
          ->projection($projection)
          ->where($this->model->getCondition()->build($stmt));
          
-    if ($constraints === null) $constraints = $this->model->getConstraints();
+    $constraints = $this->model->getConstraints();
     return $stmt->constraints($constraints)->execute();
   }
   

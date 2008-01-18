@@ -285,6 +285,28 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("2008-01-01", $results[9]->dt);
   }
   
+  public function testLimitOffset()
+  {
+    $st = MODEL("SchemaTest");
+    $st->setLimit(2)->setOrderBy("id DESC");
+    $results = $st->select();
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("name10", $results[0]->name);
+    $this->assertEquals("name_", $results[1]->name);
+    
+    $st->setLimit(2)->setOffset(2)->setOrderBy("id DESC");
+    $results = $st->select();
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("name8", $results[0]->name);
+    $this->assertEquals("name7", $results[1]->name);
+    
+    $st->setLimit(2)->setOffset(4)->setOrderBy("id DESC");
+    $results = $st->select();
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("name6", $results[0]->name);
+    $this->assertEquals("name5", $results[1]->name);
+  }
+  
   public function testSelectByQuery()
   {
     $st = MODEL("SchemaTest");

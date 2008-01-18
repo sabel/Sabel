@@ -42,9 +42,4 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
     
     return $result;
   }
-  
-  protected function isVarcharOfDefaultNull($column)
-  {
-    return ($column->isString() && $column->default === null);
-  }
 }

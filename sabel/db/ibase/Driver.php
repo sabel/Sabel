@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Ibase_Driver
+ * Driver for Firebird
  *
  * @category   DB
  * @package    org.sabel.db

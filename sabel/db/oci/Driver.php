@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Oci_Driver
+ * Driver for Oracle
  *
  * @category   DB
  * @package    org.sabel.db

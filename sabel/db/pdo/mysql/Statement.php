@@ -51,4 +51,9 @@ class Sabel_DB_Pdo_Mysql_Statement extends Sabel_DB_Pdo_Statement
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }
+  
+  private function isVarcharOfDefaultNull($column)
+  {
+    return ($column->isString() && $column->default === null);
+  }
 }
