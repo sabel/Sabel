@@ -54,6 +54,7 @@ require_once('Test/Parameters.php');
 require_once('Test/Request.php');
 require_once('Test/Resolver.php');
 require_once('Test/Experimental.php');
+require_once('Test/View/TemplateFile.php');
 
 require_once('Test/Util.php');
 require_once('Test/String.php');
@@ -94,6 +95,7 @@ class SabelAllTests
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_Container::suite());
+    $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_Util::suite());
     $suite->addTest(Test_String::suite());
     $suite->addTest(Test_UtilMap::suite());

@@ -68,19 +68,6 @@ class Test_Bus_Processor extends Sabel_Bus_Processor
   }
 }
 
-/*
-class Controller extends Sabel_Bus_Controller
-{
-  public $results = array();
-  
-  public function execute($processor, $bus)
-  {
-    $this->results[] = $processor->name;
-    return true;
-  }
-}
- */
-
 class RequestProcessor extends Sabel_Bus_Processor
 {
   public function execute($bus)
