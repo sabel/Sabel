@@ -100,29 +100,24 @@ class Renderer_Replacer extends Sabel_Object
       throw new Sabel_Exception_Runtime("template name is null.");
     }
     
-    if (($controller = $element->controller) === null) {
-      $controller = "null";
-    } else {
-      $controller = '"' . $controller . '"';
-    }
-    
     if (($assign = $element->assign) === null) {
-      $fmt = '<?= $this->partial("%s", %s) ?>';
-      return sprintf($fmt, $name, $controller);
+      $fmt = '<?= $this->partial("%s") ?>';
+      return sprintf($fmt, $name);
     } else {
-      $fmt = '<?= $this->partial("%s", %s, %s) ?>';
+      $fmt = '<?= $this->partial("%s", %s) ?>';
       
       $assigns = explode(",", $assign);
       if (strpos($assigns[0], ":") === false) {
-        return sprintf($fmt, $name, $controller, $assigns[0]);
+        return sprintf($fmt, $name, $assigns[0]);
       } else {
         $buf = "";
         foreach ($assigns as $hash) {
           list ($key, $val) = explode(":", $hash);
-          $buf[] = "'{$key}' => {$val}";
+          $buf[] = "'" . trim($key) . "' => {$val}";
         }
+        
         $assign = "array(" . implode(", ", $buf) . ")";
-        return sprintf($fmt, $name, $controller, $assign);
+        return sprintf($fmt, $name, $assign);
       }
     }
   }

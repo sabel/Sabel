@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_View_Resource_Template
+ * Sabel_View_Resource_File
  *
  * @category   View
  * @package    org.sabel.view
@@ -10,7 +10,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Resource_Template
+class Sabel_View_Resource_File
   extends Sabel_Object implements Sabel_View_Resource_Interface
 {
   private $path = "";

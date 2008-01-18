@@ -19,6 +19,7 @@ abstract class Sabel_View_Template extends Sabel_Object
   abstract public function create($locationName, $tplPath, $body = "");
   abstract public function delete($locationName, $tplPath);
   abstract public function isValid($locationName, $tplPath);
+  abstract public function getResource($locationName, $tplPath);
   
   public function __construct($defaultPath)
   {
@@ -35,18 +36,5 @@ abstract class Sabel_View_Template extends Sabel_Object
   public function getPaths()
   {
     return $this->paths;
-  }
-  
-  public function getResource($locationName, $tplPath)
-  {
-    foreach ($this->getPaths() as $p) {
-      if ($p["name"] === $locationName) {
-        $filePath = $p["path"] . $tplPath . TPL_SUFFIX;
-        return new Sabel_View_Resource_Template($locationName, $filePath);
-      }
-    }
-    
-    $message = "such a location name is not registered.";
-    throw new Sabel_Exception_Runtime($message);
   }
 }

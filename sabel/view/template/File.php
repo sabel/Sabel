@@ -20,7 +20,7 @@ class Sabel_View_Template_File extends Sabel_View_Template
   {
     foreach ($this->getPaths() as $p) {
       $filePath = $p["path"] . $tplPath . TPL_SUFFIX;
-      $resourse = new Sabel_View_Resource_Template($p["name"], $filePath);
+      $resourse = new Sabel_View_Resource_File($p["name"], $filePath);
       if ($resourse->isValid()) return $resourse;
     }
     
@@ -40,5 +40,18 @@ class Sabel_View_Template_File extends Sabel_View_Template
   public function isValid($locationName, $tplPath)
   {
     return $this->getResource($locationName, $tplPath)->isValid();
+  }
+  
+  public function getResource($locationName, $tplPath)
+  {
+    foreach ($this->getPaths() as $p) {
+      if ($p["name"] === $locationName) {
+        $filePath = $p["path"] . $tplPath . TPL_SUFFIX;
+        return new Sabel_View_Resource_Template($locationName, $filePath);
+      }
+    }
+    
+    $message = "such a location name is not registered.";
+    throw new Sabel_Exception_Runtime($message);
   }
 }
