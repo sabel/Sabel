@@ -1,12 +1,12 @@
 <?php
 
-class Test_Util extends SabelTestCase
+class Test_Util_List extends SabelTestCase
 {
   private $list = null;
   
   public static function suite()
   {
-    return self::createSuite("Test_Util");
+    return self::createSuite("Test_Util_List");
   }
   
   public function setUp()

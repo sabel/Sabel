@@ -43,12 +43,12 @@ class Sabel_Cache_Xcache implements Sabel_Cache_Interface
   
   public function write($key, $value, $timeout = 600, $comp = false)
   {
-    return xcache_set($this->signature . $key, $value);
+    xcache_set($this->signature . $key, $value);
   }
   
   public function delete($key)
   {
-    return xcache_delete($this->signature . $key);
+    xcache_delete($this->signature . $key);
   }
   
   public function isReadable($key)

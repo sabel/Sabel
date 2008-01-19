@@ -11,42 +11,45 @@
  */
 class Sabel_Aspect_VirtualInheritProxy extends Sabel_Aspect_Proxy
 {
-  private $parents   = array();
+  private $parents = array();
   
   public function inherit($parent)
   {
-    $parentInstance = Container::create()->load($parent);
-    $this->parents[] = $parentInstance;
+    $this->parents[] = new $parent();
     return $this;
   }
   
-  protected function hasParent()
+  public function hasParent()
   {
     return (count($this->parents) > 0);
   }
   
-  protected function isParentMethod($method)
+  public function getParentByMethod($method)
   {
-    $result = false;
-    $parents = $this->parents;
-    foreach ($parents as $parent) {
-      if ($parent->hasMethod($method)) {
-        $result = true;
-        break;
+    foreach ($this->parents as $parent) {
+      if (method_exists($parent, $method)) {
+        return $parent;
       }
     }
     
-    if ($result) {
-      return $parent;
-    } else {
-      return $result;
-    }
+    return null;
   }
   
-  protected function beforeCallBefore($method, $arg)
+  protected function isParentMethod($method)
   {
-    if (($parent = $this->isParentMethod($method))) {
-      return $parent->$method($arg);
+    foreach ($this->parents as $parent) {
+      if ($parent->hasMethod($method)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }
+  
+  protected function beforeCallBefore($method, $args)
+  {
+    if (($parent = $this->getParentByMethod($method))) {
+      return call_user_func_array(array($parent, $method), $args);
     }
   }
 }

@@ -25,7 +25,6 @@ require_once("PHPUnit/Framework/IncompleteTestError.php");
 require_once('Sabel.php');
 require_once('Test/SabelTestCase.php');
 require_once('Test/SabelTestSuite.php');
-require_once('Test/Sabel.php');
 require_once('Test/Bus.php');
 require_once('Test/Object.php');
 require_once('Test/Annotation.php');
@@ -39,10 +38,11 @@ require_once('Test/Destination.php');
 require_once('Test/View/TemplateFile.php');
 require_once('Test/Logger/File.php');
 require_once('Test/Storage/InMemory.php');
+require_once('Test/Cache/Tests.php');
 
-require_once('Test/Util.php');
-require_once('Test/String.php');
-require_once('Test/UtilMap.php');
+require_once('Test/Util/String.php');
+require_once('Test/Util/List.php');
+require_once('Test/Util/Map.php');
 
 require_once('Test/DB/Tests.php');
 require_once('Test/Validate.php');
@@ -79,14 +79,14 @@ class SabelAllTests
     $suite->addTest(Test_Destination::suite());
     $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_Logger_File::suite());
-    $suite->addTest(Test_Util::suite());
-    $suite->addTest(Test_String::suite());
-    $suite->addTest(Test_UtilMap::suite());
+    $suite->addTest(Test_Util_String::suite());
+    $suite->addTest(Test_Util_List::suite());
+    $suite->addTest(Test_Util_Map::suite());
     $suite->addTest(Test_Storage_InMemory::suite());
+    $suite->addTest(Test_Cache_Tests::suite());
     
     // $suite->addTest(Test_Processor_Tests::suite());
-    // $suite->addTest(Test_VirtualInheritance::suite());
-    // $suite->addTest(Test_Sabel::suite());
+    $suite->addTest(Test_VirtualInheritance::suite());
     // $suite->addTest(Test_Aspect::suite());
     
     return $suite;

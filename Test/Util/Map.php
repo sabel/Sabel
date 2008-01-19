@@ -2,26 +2,11 @@
 
 class UtilMap extends Sabel_Util_Map {}
 
-class Test_UtilMap extends SabelTestCase
+class Test_Util_Map extends SabelTestCase
 {
   public static function suite()
   {
-    return self::createSuite("Test_UtilMap");
-  }
-  
-  public function __construct()
-  {
-    
-  }
-  
-  public function setUp()
-  {
-    
-  }
-  
-  public function tearDown()
-  {
-    
+    return self::createSuite("Test_Util_Map");
   }
   
   public function testIsEmpty()

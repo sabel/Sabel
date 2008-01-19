@@ -38,17 +38,18 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   
   public function read($key)
   {
-    return apc_fetch($this->signature . $key);
+    $result = apc_fetch($this->signature . $key);
+    return ($result === false) ? null : $result;
   }
   
   public function write($key, $value, $timeout = 600, $comp = false)
   {
-    return apc_store($this->signature . $key, $value, $timeout);
+    apc_store($this->signature . $key, $value, $timeout);
   }
   
   public function delete($key)
   {
-    return apc_delete($this->signature . $key);
+    apc_delete($this->signature . $key);
   }
   
   public function isReadable($key)

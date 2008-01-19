@@ -17,12 +17,7 @@ class Processor_View extends Sabel_Bus_Processor
     $controller = $this->controller;
     $redirector = $controller->getAttribute("redirect");
     
-    if ($redirector->isRedirected()) return;
-    
-    if (!is_object($this->renderer)) {
-      $this->renderer = new Processor_View_DefaultRenderer();
-    }
-    
+    if (is_object($redirector) && $redirector->isRedirected()) return;
     $responses = $this->response->getResponses();
     
     if ($controller->renderText) {
@@ -43,8 +38,10 @@ class Processor_View extends Sabel_Bus_Processor
     } elseif ($template = $repository->getValidTemplate("notFound")) {
       $contents = $this->rendering($template, $responses);
     } else {
-      $contents = "<h1>404 Not Found</h1>"
-                . "setup your notFound.tpl to module directory.";
+      $contents = "<h1>404 Not Found</h1>";
+      if (DEVELOPMENT === DEVELOPMENT) {
+        $contents .= "setup your notFound.tpl to module directory.";
+      }
     }
     
     $layoutName = $controller->getAttribute("layout");
@@ -62,13 +59,12 @@ class Processor_View extends Sabel_Bus_Processor
     }
   }
   
-  public function shutdown($bus)
-  {
-    $this->response->outputHeader();
-  }
-  
   private function rendering($template, $responses)
   {
+    if (!is_object($this->renderer)) {
+      $this->renderer = new Sabel_View_Renderer();
+    }
+    
     if (is_object($template)) {
       $contents = $template->getContents();
       $path = $template->getPath();

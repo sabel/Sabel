@@ -1,8 +1,5 @@
 <?php
 
-require ("annotation/Class.php");
-require ("annotation/Duplicate.php");
-
 /**
  * Test_Annotation
  *
@@ -14,67 +11,86 @@ require ("annotation/Duplicate.php");
  */
 class Test_Annotation extends SabelTestCase
 {
+  private $reader = null;
+  
   public static function suite()
   {
-    return new PHPUnit_Framework_TestSuite("Test_Annotation");
+    return self::createSuite("Test_Annotation");
   }
   
   public function setUp()
   {
+    $this->reader = new Sabel_Annotation_Reader();
   }
   
-  public function tearDown()
+  public function testClassAnnotation()
   {
+    $annotations = $this->reader->read("Test_Annotation_Class");
+    $this->assertEquals("class", $annotations["annotation"][0][0]);
   }
   
-  public function testAnnotationReader()
+  public function testNormalValue()
   {
-    $reader = new Sabel_Annotation_Reader();
-    $annotation = $reader->read("Test_Annotation_Class");
-    $expected = array("annotation" => array(array("class")));
-    $this->assertEquals($expected, $annotation);
-    
-    $annotations = $reader->readMethods("Test_Annotation_Class");
-    $method = $annotations["testMethod"];
-    $this->assertEquals(array(array("test1")), $method["normal"]);
-    $this->assertEquals(array(array("test2")), $method["ignoreSpace"]);
-    
-    $this->assertEquals("test4", $method["array"][0][0]);
-    $this->assertEquals("elem1", $method["array"][0][1]);
-    $this->assertEquals("a: index", $method["array"][0][2]);
+    $annotations = $this->reader->readMethods("Test_Annotation_Class");
+    $annotation  = $annotations["testMethod"];
+    $this->assertEquals("value", $annotation["param"][0][0]);
   }
   
-  public function testDuplicateEntry()
+  public function testMultiValue()
   {
-    $reader = new Sabel_Annotation_Reader();
-    
-    $annotations = $reader->read("Test_Annotation_Dupulicate");
-    
-    $expected = array("annotation" => array(
-                                        array("dupOne"),
-                                        array("dupTwo", "two"),
-                                        array("dupThree")
-                                      ));
-    $this->assertEquals($expected, $annotations);
+    $annotations = $this->reader->readMethods("Test_Annotation_Class");
+    $annotation  = $annotations["testMethod"];
+    $this->assertEquals("hoge", $annotation["array"][0][0]);
+    $this->assertEquals("fuga", $annotation["array"][0][1]);
   }
   
-  public function testAnnotationReflectionClass()
+  public function testIgnoreSpace()
   {
-    $reflect = new Sabel_Annotation_ReflectionClass("Test_Annotation_Class");
-    $annot = $reflect->getAnnotation("annotation");
-    $this->assertEquals(array(array("class")), $annot);
+    $annotations = $this->reader->readMethods("Test_Annotation_Class");
+    $annotation  = $annotations["testMethod2"];
+    $this->assertEquals("value", $annotation["ignoreSpace"][0][0]);
   }
   
-  public function testAnnotationReflectionMethod()
+  public function testQuotedValue()
   {
-    $reflect = new Sabel_Annotation_ReflectionClass("Test_Annotation_Class");
-    $methods = $reflect->getMethodsAsAssoc();
+    $annotations = $this->reader->readMethods("Test_Annotation_Class");
+    $annotation  = $annotations["testMethod2"];
+    $this->assertEquals("hoge", $annotation["array"][0][0]);
+    $this->assertEquals('  test"a"  ', $annotation["array"][0][1]);
+    $this->assertEquals("a: index", $annotation["array"][0][2]);
+    $this->assertEquals("fuga", $annotation["array"][1][0]);
+    $this->assertEquals("  test'a'  ", $annotation["array"][1][1]);
+    $this->assertEquals("c: index, a: index", $annotation["array"][1][2]);
+  }
+}
+
+/**
+ * class annotation
+ *
+ * @annotation class
+ */
+class Test_Annotation_Class
+{
+  /**
+   * this is annotation test
+   *
+   * @param value
+   * @array hoge fuga
+   */
+  public function testMethod($test, $test = null)
+  {
     
-    $this->assertTrue(is_array($methods));
+  }
+  
+  /**
+   * this is annotation test
+   *
+   * @ignoreSpace       value
+   * @array hoge '  test"a"  ' "a: index"
+   * @array fuga "  test'a'  " 'c: index, a: index'
+   */
+  public function testMethod2()
+  {
     
-    $testMethod = $methods["testMethod"];
-    $this->assertEquals(2, $testMethod->getNumberOfParameters());
-    $this->assertEquals(array(array("test1")), $testMethod->getAnnotation("normal"));
-    $this->assertTrue(is_array($testMethod->getAnnotation("array")));
   }
 }

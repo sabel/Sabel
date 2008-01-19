@@ -2,26 +2,11 @@
 
 class String extends Sabel_Util_String {}
 
-class Test_String extends SabelTestCase
+class Test_Util_String extends SabelTestCase
 {
   public static function suite()
   {
-    return self::createSuite("Test_String");
-  }
-  
-  public function __construct()
-  {
-    
-  }
-  
-  public function setUp()
-  {
-    
-  }
-  
-  public function tearDown()
-  {
-    
+    return self::createSuite("Test_Util_String");
   }
   
   public function testIsEmpty()

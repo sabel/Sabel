@@ -15,42 +15,35 @@ class Test_VirtualInheritance extends SabelTestCase
   
   public function testVirtualInheritance()
   {
-    $c = Container::create();
-    $c->regist('test.InheritedClass',        'InheritedClass');
-    $c->regist('test.VirtualParentClass',    'VirtualParentClass');
-    $c->regist('test.VirtualParentClassTwo', 'VirtualParentClassTwo');
-    
     $inherited = new Sabel_Aspect_VirtualInheritProxy(new InheritedClass());
+    $inherited->inherit("VirtualParentClass")->inherit("VirtualParentClassTwo");
     
-    $inherited->inherit('test.VirtualParentClass')
-              ->inherit('test.VirtualParentClassTwo');
-    
-    $this->assertEquals('test.Inherited',             $inherited->doSomething());
-    $this->assertEquals('test.VirtualParentClass',    $inherited->parentMethod());
-    $this->assertEquals('test.VirtualParentClassTwo', $inherited->parentMethodTwo());
-  }
-}
-
-class VirtualParentClass
-{
-  public function parentMethod()
-  {
-    return 'test.VirtualParentClass';
-  }
-}
-
-class VirtualParentClassTwo
-{
-  public function parentMethodTwo()
-  {
-    return 'test.VirtualParentClassTwo';
+    $this->assertEquals("method",          $inherited->method());
+    $this->assertEquals("parentMethod 1",    $inherited->parentMethod(1));
+    $this->assertEquals("parentMethodTwo 1 2", $inherited->parentMethodTwo(1, 2));
   }
 }
 
 class InheritedClass
 {
-  public function doSomething()
+  public function method()
   {
-    return 'test.Inherited';
+    return "method";
+  }
+}
+
+class VirtualParentClass
+{
+  public function parentMethod($arg)
+  {
+    return "parentMethod $arg";
+  }
+}
+
+class VirtualParentClassTwo
+{
+  public function parentMethodTwo($arg1, $arg2)
+  {
+    return "parentMethodTwo $arg1 $arg2";
   }
 }

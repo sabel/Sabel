@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Processor_Creator
+ * Processor_Controller
  *
  * @category   Processor
  * @package    lib.processor
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Creator extends Sabel_Bus_Processor
+class Processor_Controller extends Sabel_Bus_Processor
 {
   const CONTROLLERS_DIR    = "controllers";
   const DEFAULT_CONTROLLER = "index";

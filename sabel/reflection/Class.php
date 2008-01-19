@@ -11,32 +11,28 @@
  */
 class Sabel_Reflection_Class extends ReflectionClass
 {
-  private $source = null;
-  
-  public function __construct($class)
-  {
-    parent::__construct($class);
-    $reader = new Sabel_Annotation_Reader();
-    $this->annotations = $reader->read($class);
-  }
+  protected $annotations = false;
   
   public function getAnnotation($name)
   {
-    if ($this->hasAnnotation($name)) {
-      return $this->annotations[$name];
-    } else {
-      return null;
-    }
+    $annotations = $this->getAnnotations();
+    return ($annotations[$name]) ? $annotations[$name] : null;
   }
   
   public function getAnnotations()
   {
+    if ($this->annotations === false) {
+      $reader = new Sabel_Annotation_Reader();
+      $this->annotations = $reader->read($this->getName());
+    }
+    
     return $this->annotations;
   }
   
   public function hasAnnotation($name)
   {
-    return (isset($this->annotations[$name]));
+    $annotations = $this->getAnnotations();
+    return isset($annotations[$name]);
   }
 
   public function getMethodAnnotation($name, $annotationName)
