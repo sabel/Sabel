@@ -25,42 +25,46 @@ class Test_Annotation extends SabelTestCase
   
   public function testClassAnnotation()
   {
-    $annotations = $this->reader->read("Test_Annotation_Class");
+    $annotations = $this->reader->readClassAnnotation("TestAnnotation");
     $this->assertEquals("class", $annotations["annotation"][0][0]);
   }
   
   public function testNormalValue()
   {
-    $annotations = $this->reader->readMethods("Test_Annotation_Class");
-    $annotation  = $annotations["testMethod"];
+    $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod");
     $this->assertEquals("value", $annotation["param"][0][0]);
   }
   
   public function testMultiValue()
   {
-    $annotations = $this->reader->readMethods("Test_Annotation_Class");
-    $annotation  = $annotations["testMethod"];
+    $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod");
     $this->assertEquals("hoge", $annotation["array"][0][0]);
     $this->assertEquals("fuga", $annotation["array"][0][1]);
   }
   
   public function testIgnoreSpace()
   {
-    $annotations = $this->reader->readMethods("Test_Annotation_Class");
-    $annotation  = $annotations["testMethod2"];
+    $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod2");
     $this->assertEquals("value", $annotation["ignoreSpace"][0][0]);
   }
   
   public function testQuotedValue()
   {
-    $annotations = $this->reader->readMethods("Test_Annotation_Class");
-    $annotation  = $annotations["testMethod2"];
+    $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod2");
+    
     $this->assertEquals("hoge", $annotation["array"][0][0]);
     $this->assertEquals('  test"a"  ', $annotation["array"][0][1]);
     $this->assertEquals("a: index", $annotation["array"][0][2]);
     $this->assertEquals("fuga", $annotation["array"][1][0]);
     $this->assertEquals("  test'a'  ", $annotation["array"][1][1]);
     $this->assertEquals("c: index, a: index", $annotation["array"][1][2]);
+  }
+  
+  public function testEmptyValue()
+  {
+    $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod3");
+    $this->assertTrue(isset($annotation["emptyValue"]));
+    $this->assertNull($annotation["emptyValue"][0]);
   }
 }
 
@@ -69,7 +73,7 @@ class Test_Annotation extends SabelTestCase
  *
  * @annotation class
  */
-class Test_Annotation_Class
+class TestAnnotation
 {
   /**
    * this is annotation test
@@ -90,6 +94,14 @@ class Test_Annotation_Class
    * @array fuga "  test'a'  " 'c: index, a: index'
    */
   public function testMethod2()
+  {
+    
+  }
+  
+  /**
+   * @emptyValue
+   */
+  public function testMethod3()
   {
     
   }

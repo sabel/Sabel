@@ -16,14 +16,14 @@ class Sabel_Reflection_Class extends ReflectionClass
   public function getAnnotation($name)
   {
     $annotations = $this->getAnnotations();
-    return ($annotations[$name]) ? $annotations[$name] : null;
+    return (isset($annotations[$name])) ? $annotations[$name] : null;
   }
   
   public function getAnnotations()
   {
     if ($this->annotations === false) {
       $reader = new Sabel_Annotation_Reader();
-      $this->annotations = $reader->read($this->getName());
+      $this->annotations = $reader->readClassAnnotation($this->getName());
     }
     
     return $this->annotations;
@@ -40,8 +40,8 @@ class Sabel_Reflection_Class extends ReflectionClass
     return $this->getMethod($name)->getAnnotation($annotationName);
   }
   
-  public function getMethod($name)
+  public function getMethod($method)
   {
-    return new Sabel_Reflection_Method($this->getName(), $name);
+    return new Sabel_Reflection_Method($this->name, $method);
   }
 }

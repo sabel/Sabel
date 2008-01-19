@@ -14,31 +14,47 @@ class Test_Reflection extends SabelTestCase
     
   public function testReflection()
   {
-    $p = new Vircle();
-    $r = $p->getReflection();
-    $an = $r->getAnnotation("test");
-    $this->assertEquals(array(array("test")), $an);
+    $o = new Vircle();
+    $reflection = $o->getReflection();
+    
+    $this->assertTrue($reflection->hasAnnotation("hoge"));
+    $this->assertTrue($reflection->hasAnnotation("class"));
+    
+    $annotation = $reflection->getAnnotation("class");
+    $this->assertEquals("value", $annotation[0][0]);
   }
   
   public function testReflectionMethod()
   {
-    $p = new Vircle();
-    $r = $p->getReflection();
-    $method = $r->getMethod("getName");
-    $an = $method->getAnnotation("test");
-    $this->assertEquals(array(array("test")), $an);
+    $o = new Vircle();
+    $reflection = $o->getReflection()->getMethod("fooMethod");
+    
+    $this->assertTrue($reflection->hasAnnotation("fuga"));
+    $this->assertTrue($reflection->hasAnnotation("method"));
+    
+    $annotation = $reflection->getAnnotation("method");
+    $this->assertEquals("value", $annotation[0][0]);
+  }
+  
+  public function testMethodAnnotation()
+  {
+    $o = new Vircle();
+    $annotation = $o->getReflection()->getMethodAnnotation("fooMethod", "method");
+    $this->assertEquals("value", $annotation[0][0]);
   }
 }
 
 /**
- * @test test
+ * @hoge
+ * @class value
  */
 class Vircle extends Sabel_Object
 {
   /**
-   * @test test
+   * @fuga
+   * @method value
    */
-  public function getName()
+  public function fooMethod()
   {
     
   }

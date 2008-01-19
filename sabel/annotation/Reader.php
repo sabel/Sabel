@@ -23,22 +23,16 @@ class Sabel_Annotation_Reader extends Sabel_Object
     return self::$instance;
   }
   
-  public function read($class)
+  public function readClassAnnotation($class)
   {
     $reflection = new Sabel_Reflection_Class($class);
     return $this->process($reflection->getDocComment());
   }
   
-  public function readMethods($className)
+  public function readMethodAnnotation($class, $method)
   {
-    $methods = array();
-    $reflection = new Sabel_Reflection_Class($className);
-    
-    foreach ($reflection->getMethods() as $method) {
-      $methods[$method->getName()] = $this->process($method->getDocComment());
-    }
-    
-    return $methods;
+    $reflection = new Sabel_Reflection_Method($class, $method);
+    return $this->process($reflection->getDocComment());
   }
   
   public function process($comment)

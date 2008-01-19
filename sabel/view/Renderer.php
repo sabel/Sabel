@@ -48,16 +48,14 @@ class Sabel_View_Renderer extends Sabel_Object
   public function partial($name, $assign = array())
   {
     $bus = Sabel_Context::getContext()->getBus();
-    
     $repository = $bus->get("repository");
-    $renderer = $bus->get("renderer");
     
-    if (is_object($renderer) && ($template = $repository->getValidTemplate($name)) !== null) {
+    if (($template = $repository->getValidTemplate($name)) !== null) {
       $responses = array_merge($bus->get("response")->getResponses(), $assign);
       $contents  = $template->getContents();
-      return $renderer->rendering($contents, $responses, $template->getPath());
+      return $this->rendering($contents, $responses, $template->getPath());
     } else {
-      throw new Sabel_Exception_Runtime("renderer object is not found.");
+      throw new Sabel_Exception_Runtime("template is not found.");
     }
   }
   

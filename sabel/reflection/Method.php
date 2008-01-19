@@ -11,31 +11,27 @@
  */
 class Sabel_Reflection_Method extends ReflectionMethod
 {
-  private $annotations = array();
-  
-  public function __construct($class_or_method, $name = "")
-  {
-    parent::__construct($class_or_method, $name);
-    $reader = new Sabel_Annotation_Reader();
-    $this->annotations = $reader->process($this->getDocComment());
-  }
+  private $annotations = false;
   
   public function getAnnotation($name)
   {
-    if ($this->hasAnnotation($name)) {
-      return $this->annotations[$name];
-    } else {
-      return null;
-    }
-  }
-  
-  public function hasAnnotation($name)
-  {
-    return (isset($this->annotations[$name]));
+    $annotations = $this->getAnnotations();
+    return (isset($annotations[$name])) ? $annotations[$name] : null;
   }
   
   public function getAnnotations()
   {
+    if ($this->annotations === false) {
+      $reader = new Sabel_Annotation_Reader();
+      $this->annotations = $reader->readMethodAnnotation($this->class, $this->name);
+    }
+    
     return $this->annotations;
+  }
+  
+  public function hasAnnotation($name)
+  {
+    $annotations = $this->getAnnotations();
+    return isset($annotations[$name]);
   }
 }
