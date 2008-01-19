@@ -27,6 +27,7 @@ require_once('Test/SabelTestCase.php');
 require_once('Test/SabelTestSuite.php');
 require_once('Test/Sabel.php');
 require_once('Test/Bus.php');
+require_once('Test/Object.php');
 require_once('Test/Annotation.php');
 require_once('Test/Aspect.php');
 require_once('Test/Container.php');
@@ -34,8 +35,10 @@ require_once('Test/Pager.php');
 require_once('Test/PageViewer.php');
 require_once('Test/Parameters.php');
 require_once('Test/Request.php');
+require_once('Test/Destination.php');
 require_once('Test/View/TemplateFile.php');
 require_once('Test/Logger/File.php');
+require_once('Test/Storage/InMemory.php');
 
 require_once('Test/Util.php');
 require_once('Test/String.php');
@@ -60,10 +63,11 @@ class SabelAllTests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    $suite->addTest(Test_DB_Tests::suite());
+    //$suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_Validate::suite());
     
     $suite->addTest(Test_Bus::suite());
+    $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
@@ -72,11 +76,13 @@ class SabelAllTests
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Parameters::suite());
     $suite->addTest(Test_Container::suite());
+    $suite->addTest(Test_Destination::suite());
     $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_Logger_File::suite());
     $suite->addTest(Test_Util::suite());
     $suite->addTest(Test_String::suite());
     $suite->addTest(Test_UtilMap::suite());
+    $suite->addTest(Test_Storage_InMemory::suite());
     
     // $suite->addTest(Test_Processor_Tests::suite());
     // $suite->addTest(Test_VirtualInheritance::suite());

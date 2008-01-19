@@ -37,6 +37,7 @@ class Sabel_Bus extends Sabel_Object
     foreach ($data as $name => $value) {
       $this->set($name, $value);
     }
+    
     return $this;
   }
   

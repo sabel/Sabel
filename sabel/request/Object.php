@@ -122,6 +122,7 @@ class Sabel_Request_Object extends Sabel_Object
   public function method($method)
   {
     $this->method = $method;
+    
     return $this;
   }
   

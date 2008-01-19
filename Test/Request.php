@@ -38,7 +38,7 @@ class Test_Request extends SabelTestCase
   public function testValuesGet()
   {
     $request = new Sabel_Request_Object();
-    $request->method("GET");
+    $request->method(Sabel_Request::GET);
     $values = array("test" => "test");
     $request->values($values);
     $this->assertEquals($values, $request->fetchGetValues());
@@ -47,7 +47,7 @@ class Test_Request extends SabelTestCase
   public function testValuesPost()
   {
     $request = new Sabel_Request_Object();
-    $request->method("POST");
+    $request->method(Sabel_Request::POST);
     $values = array("test" => "test");
     $request->values($values);
     $this->assertNotEquals($values, $request->fetchGetValues());

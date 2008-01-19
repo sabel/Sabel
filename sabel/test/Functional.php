@@ -37,6 +37,7 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     $bus->set("request", $request);
     $bus->set("storage", $storage);
     $bus->run();
+    
     return $bus->get("response");
   }
   
@@ -55,9 +56,9 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
   
   protected function assertAssigned($uri, $key, $value, $storage = null)
   {
-    $response = $this->request($uri, $storage);
-    
+    $response  = $this->request($uri, $storage);
     $attributs = $response->getAttributes();
+    
     if (isset($attributs[$key])) {
       $this->assertEquals($attributs[$key], $value);
     } else {

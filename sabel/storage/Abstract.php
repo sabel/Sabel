@@ -20,7 +20,7 @@ abstract class Sabel_Storage_Abstract
     
   protected function initialize()
   {
-    if (realempty($this->attributes)) return;
+    if (empty($this->attributes)) return;
     
     $time = time();
     foreach ($this->attributes as $k => $values) {

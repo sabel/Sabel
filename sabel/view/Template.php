@@ -29,8 +29,11 @@ abstract class Sabel_View_Template extends Sabel_Object
   {
     if ($name === null) {
       return $this->name;
-    } else {
+    } elseif (is_string($name)) {
       $this->name = $name . TPL_SUFFIX;
+    } else {
+      $message = "argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   

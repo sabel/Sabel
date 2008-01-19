@@ -39,10 +39,13 @@ class Sabel_Addon_Loader extends Sabel_Object
       
       $includePathDefine = strtoupper($addonName) . "_ADDON_INCLUDE_PATH";
       $pathDefine = strtoupper($addonName) . "_ADDON_PATH";
-      define($includePathDefine, DS . ADDON_DIR_NAME . DS . $dir);
-      define($pathDefine, RUN_BASE . constant($includePathDefine));
       
-      require ($pathToAddonClass);
+      if (!defined($includePathDefine)) {
+        define($includePathDefine, DS . ADDON_DIR_NAME . DS . $dir);
+        define($pathDefine, RUN_BASE . constant($includePathDefine));
+      }
+      
+      Sabel::fileUsing($pathToAddonClass, true);
       $addonInitializeClassName = ucfirst($addonName) . "_Addon";
       
       if (class_exists($addonInitializeClassName)) {
@@ -57,7 +60,7 @@ class Sabel_Addon_Loader extends Sabel_Object
       $processorClassFile = $myAddonDir . DS . "Processor" . PHP_SUFFIX;
       
       if (is_readable($processorClassFile)) {
-        require ($processorClassFile);
+        Sabel::fileUsing($processorClassFile, true);
         $addon->loadProcessor($this->bus);
       } else {
         throw new Sabel_Exception_FileNotFound($processorClassFile);
