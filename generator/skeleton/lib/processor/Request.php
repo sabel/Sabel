@@ -13,15 +13,17 @@ class Processor_Request extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    if ($this->request === null) {
+    if (!$bus->has("request")) {
       $builder = new Sabel_Request_Builder();
       $request = new Sabel_Request_Object();
       $builder->build($request);
-      $this->request = $request;
+      $bus->set("request", $request);
     }
     
-    if ($this->storage === null) {
-      $this->storage = Sabel_Storage_Session::create();
+    if (!$bus->has("storage")) {
+      $bus->set("storage", Sabel_Storage_Session::create());
     }
+    
+    $bus->get("storage")->start();
   }
 }

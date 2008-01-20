@@ -24,7 +24,7 @@ class Processor_Location extends Sabel_Bus_Processor
     $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
     $repository->addTemplate("app", $app);
     
-    $this->repository = $repository;
+    $bus->set("repository", $repository);
     
     if ($this->controller instanceof Sabel_Controller_Page) {
       $this->controller->repository = $repository;

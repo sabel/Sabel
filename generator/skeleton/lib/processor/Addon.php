@@ -14,9 +14,9 @@ class Processor_Addon extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
+    $loader = new Sabel_Addon_Loader(ADDON_DIR_PATH);
     foreach ($this->getFiles(ADDON_DIR_PATH) as $addonName) {
-      $loader = new Sabel_Addon_Loader($bus);
-      $loader->load(ADDON_DIR_PATH, $addonName);
+      $loader->load($addonName, $bus);
     }
   }
   

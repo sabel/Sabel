@@ -12,16 +12,16 @@
  */
 class Sabel_Addon_Loader extends Sabel_Object
 {
-  private $bus = null;
+  private $addonDir = "";
   
-  public function __construct(Sabel_Bus $bus = null)
+  public function __construct($addonDir)
   {
-    $this->bus = $bus;
+    $this->addonDir = $addonDir;
   }
   
-  public function load($addonDir, $addonName)
+  public function load($addonName, $bus = null)
   {
-    $myAddonDir = $addonDir . DS . $addonName;
+    $myAddonDir = $this->addonDir . DS . $addonName;
     $pathToAddonClass = $myAddonDir . DS . "Addon" . PHP_SUFFIX;
     
     if (Sabel::fileUsing($pathToAddonClass, true)) {
@@ -31,11 +31,11 @@ class Sabel_Addon_Loader extends Sabel_Object
       throw new Sabel_Exception_FileNotFound($pathToAddonClass);
     }
     
-    if ($addon->load() && $this->bus !== null) {
+    if ($addon->load() && $bus !== null) {
       $processorClassFile = $myAddonDir . DS . "Processor" . PHP_SUFFIX;
       
       if (Sabel::fileUsing($processorClassFile, true)) {
-        $addon->loadProcessor($this->bus);
+        $addon->loadProcessor($bus);
       }
     }
   }
