@@ -64,21 +64,6 @@ class Test_Bus_Processor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $bus->set("test", "test");
-  }
-}
-
-class RequestProcessor extends Sabel_Bus_Processor
-{
-  public function execute($bus)
-  {
-    //
-  }
-}
-class RequestProcessorTwo extends Sabel_Bus_Processor
-{
-  public function execute($bus)
-  {
-    //
+    $bus->test = "test";
   }
 }

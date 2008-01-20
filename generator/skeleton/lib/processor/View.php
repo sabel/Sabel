@@ -22,11 +22,11 @@ class Processor_View extends Sabel_Bus_Processor
     
     if ($controller->renderText) {
       $this->result = $this->rendering($controller->contents, $responses);
+      return;
     } elseif ($controller->renderImage) {
       $this->result = $controller->contents;
+      return;
     }
-    
-    if ($bus->has("result")) return;
     
     $repository = $this->getRepository();
     

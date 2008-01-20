@@ -12,10 +12,8 @@
 class Sabel_Bus extends Sabel_Object
 {
   private
-    $bus        = array(),
-    $holder     = array(),
-    $processors = array(),
-    $list       = null;
+    $holder = array(),
+    $list   = null;
     
   private
     $beforeEvent = array(),
@@ -39,6 +37,30 @@ class Sabel_Bus extends Sabel_Object
     }
     
     return $this;
+  }
+  
+  public function set($key, $value)
+  {
+    $this->holder[$key] = $value;
+  }
+  
+  public function get($key)
+  {
+    if ($this->has($key)) {
+      return $this->holder[$key];
+    } else {
+      return null;
+    }
+  }
+  
+  public function __set($key, $value)
+  {
+    $this->set($key, $value);
+  }
+  
+  public function __get($key)
+  {
+    return $this->get($key);
   }
   
   /**
@@ -152,25 +174,6 @@ class Sabel_Bus extends Sabel_Object
     }
   }
   
-  public function addBus($name, $bus)
-  {
-    $this->bus[$name] = $bus;
-  }
-  
-  public function set($key, $value)
-  {
-    $this->holder[$key] = $value;
-  }
-  
-  public function get($key)
-  {
-    if ($this->has($key)) {
-      return $this->holder[$key];
-    } else {
-      return null;
-    }
-  }
-  
   /**
    * check bus has a data
    * 
@@ -180,19 +183,13 @@ class Sabel_Bus extends Sabel_Object
   public function has($key)
   {
     if (is_array($key)) {
-      $result = true;
       foreach ($key as $k) {
-        $result = $this->has($k);
-        if (!$result) return false;
+        if (!$this->has($k)) return false;
       }
-      return $result;
+      
+      return true;
     } else {
-      return (array_key_exists($key, $this->holder));
+      return array_key_exists($key, $this->holder);
     }
-  }
-  
-  public function &getHolder()
-  {
-    return $this->holder;
   }
 }

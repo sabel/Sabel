@@ -2,17 +2,11 @@
 
 class Processor_Redirector_Redirect
 {
-  private $bus = null;
   private $url = "";
   private $redirected = false;
   private $parameters = array();
   
   const REDIRECTED = "SABEL_REDIRECTED";
-  
-  public function __construct($bus)
-  {
-    $this->bus = $bus;
-  }
   
   public function isRedirected()
   {
@@ -70,8 +64,7 @@ class Processor_Redirector_Redirect
    */
   private function redirectTo($destination)
   {
-    $context = Sabel_Context::getContext();
-    $candidate = $context->getCandidate();
+    $candidate = Sabel_Context::getContext()->getCandidate();
     $uri = $candidate->uri($this->convertParams($destination));
     
     return $this->_redirect($uri);

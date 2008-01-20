@@ -16,7 +16,6 @@ abstract class Sabel_Bus_Config implements Sabel_Config
   public function __construct()
   {
     $this->bus = new Sabel_Bus();
-    $this->bus->init(array("storage" => null, "request" => null));
   }
   
   public function add($processor)

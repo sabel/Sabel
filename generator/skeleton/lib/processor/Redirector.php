@@ -13,7 +13,7 @@ class Processor_Redirector extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $redirect = new Processor_Redirector_Redirect($bus);
+    $redirect = new Processor_Redirector_Redirect();
     $this->controller->setAttribute("redirect", $redirect);
   }
   
