@@ -13,7 +13,7 @@ class Sabel_Bus extends Sabel_Object
 {
   private
     $holder = array(),
-    $list   = null;
+    $processorList = null;
     
   private
     $beforeEvent = array(),
@@ -21,6 +21,7 @@ class Sabel_Bus extends Sabel_Object
     
   public function __construct()
   {
+    $this->processorList = new Sabel_Util_HashList();
     Sabel_Context::getContext()->setBus($this);
   }
   
@@ -46,7 +47,7 @@ class Sabel_Bus extends Sabel_Object
   
   public function get($key)
   {
-    if ($this->has($key)) {
+    if (array_key_exists($key, $this->holder)) {
       return $this->holder[$key];
     } else {
       return null;
@@ -72,55 +73,41 @@ class Sabel_Bus extends Sabel_Object
    */
   public function addProcessor(Sabel_Bus_Processor $processor)
   {
-    if ($this->list === null) {
-      $this->list = new Sabel_Util_List($processor->name, $processor);
-    } else {
-      $this->list->insertNext($processor->name, $processor);
-      $this->list = $this->list->getLast();
-    }
+    $this->processorList->add($processor->name, $processor);
     
     return $this;
   }
   
   public function getProcessor($name)
   {
-    return $this->list->find($name)->get();
+    return $this->processorList->get($name);
   }
   
-  public function getList()
+  public function getProcessorList()
   {
-    return $this->list;
+    return $this->processorList;
   }
   
   public function run()
   {
-    $processorList = $this->list->getFirst();
+    $processorList = $this->processorList;
     
-    while ($processorList !== null) {
-      $s = microtime();
-      $processor = $processorList->get();
+    while ($processor = $processorList->next()) {
       $processor->setBus($this);
       $this->beforeEvent($processor->name);
       $result = $processor->execute($this);
       $this->afterEvent($processor->name);
       
       if (ENVIRONMENT !== PRODUCTION) {
-        $time = (microtime() - $s);
-        l("execute " . $processor->name . " (time: {$time})", LOG_DEBUG);
+        l("execute " . $processor->name, LOG_DEBUG);
       }
-      
-      $processorList = $processorList->next();
     }
     
-    $processorList = $this->list->getFirst();
-    while ($processorList !== null) {
-      $processor = $processorList->get();
+    while ($processor = $processorList->next()) {
       if ($processor->hasMethod("shutdown")) {
         l("shutdown " . $processor->name, LOG_DEBUG);
         $processor->shutdown($this);
       }
-      
-      $processorList = $processorList->next();
     }
     
     return ($this->has("result")) ? $this->get("result") : null;

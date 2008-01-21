@@ -12,22 +12,16 @@
 abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
 {
   abstract protected function setUri($request, $uri);
-  abstract protected function setParameters($request, $parameters);
   abstract protected function setGetValues($request);
   abstract protected function setPostValues($request);
-  abstract protected function setParameterValues($request);
   abstract protected function setHeaders($request);
   
   public final function build($request, $uri = null)
   {
-    list($uri, $params) = $this->divideUriAndParameter($uri);
-    
     $this->setMethod($request);
-    $this->setUri($request, $uri);
-    $this->setParameters($request, $params);
+    $this->setUri($request, $this->createUri($uri));
     $this->setGetValues($request);
     $this->setPostValues($request);
-    $this->setParameterValues($request);
     $this->setHeaders($request);
     
     return $request;
@@ -40,22 +34,15 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
     }
   }
   
-  protected function divideUriAndParameter($uri = null)
+  protected function createUri($uri = null)
   {
     if ($uri === null) {
-      $serverName = Sabel_Environment::get("SERVER_NAME");
-      $uri = "http://" . $serverName . "/" . $_SERVER["REQUEST_URI"];
+      $url = "http://localhost" . Sabel_Environment::get("REQUEST_URI");
+    } else {
+      $url = "http://localhost/";
     }
     
-    if ($uri === "/") {
-      return array(null, null);
-    }
-    
-    $parsedUri = parse_url($uri);
-    
-    $uri    = ltrim($parsedUri["path"], "/");
-    $params = (isset($parsedUri["query"])) ? $parsedUri["query"] : "";
-    
-    return array($uri, $params);
+    $parsedUrl = parse_url($url);
+    return ltrim($parsedUrl["path"], "/");
   }
 }

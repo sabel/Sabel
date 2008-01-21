@@ -13,7 +13,7 @@ class Processor_Router extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $request = $this->request;
+    $request = $bus->get("request");
     $router = new Sabel_Router_Map();
     
     $bus->set("destination", $router->route($request));

@@ -16,11 +16,6 @@ class Sabel_Request_Builder extends Sabel_Request_AbstractBuilder
     $request->to($uri);
   }
   
-  protected function setParameters($request, $parameters)
-  {
-    $request->parameter($parameters);
-  }
-  
   protected function setGetValues($request)
   {
     $request->setGetValues($_GET);
@@ -31,28 +26,24 @@ class Sabel_Request_Builder extends Sabel_Request_AbstractBuilder
     $request->setPostValues($_POST);
   }
   
-  protected function setParameterValues($request)
-  {
-    
-  }
-  
   protected function setHeaders($request)
   {
+    $headers = array();
     foreach ($_SERVER as $key => $value) {
       if (strpos($key, "HTTP_") !== false) {
-        if (strpos($key, "_") !== false) {
-          $buf = array();
-          $heads = explode("_", $key);
-          foreach ($heads as $head) {
-            if ($head !== "HTTP") {
-              $buf[] = ucfirst(strtolower($head));
-            }
-          }
-          $request->setHeader(join("-", $buf), $value);
+        $exp = explode("_", substr($key, 5));
+        if (count($exp) === 1) {
+          $headers[ucfirst(strtolower($exp[0]))] = $value;
         } else {
-          $request->setHeader(ucfirst(strtolower($key)), $value);
+          $name = array();
+          foreach ($exp as $part) {
+            $name[] = ucfirst(strtolower($part));
+          }
+          $headers[implode("-", $name)] = $value;
         }
       }
     }
+    
+    $request->setHeaders($headers);
   }
 }

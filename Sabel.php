@@ -62,24 +62,16 @@ final class Sabel
   
   static function autoload($className)
   {
-    if (self::$cache === null) {
-      self::$cache = Sabel_Cache_Manager::getUsableCache();
-    }
-    
     if (isset(self::$required[$className])) return;
 
-    if (!($path = self::$cache->read($className))) {
+    $cache = self::getCache();
+    if (!($path = $cache->read($className))) {
       $path = self::convertPath($className);
-      self::$cache->write($className, $path);
+      $cache->write($className, $path);
     }
     
-    if (($p = self::isReadable($path)) !== false) {
-      if ($p === true) {
-        require (self::$path . DS . $path);
-      } else {
-        require ($p . DS . $path);
-      }
-      
+    if ((self::isReadable($path)) !== false) {
+      require ($path);
       self::$required[$className] = 1;
     }
   }
@@ -88,7 +80,7 @@ final class Sabel
   {
     if ($once && isset(self::$fileUsing[$path])) return true;
     
-    if (is_readable($path)) {
+    if (self::isReadable($path)) {
       ($once) ? require_once ($path) : require ($path);
       return self::$fileUsing[$path] = true;
     } else {
@@ -112,10 +104,14 @@ final class Sabel
   
   private static function isReadable($path)
   {
-    if ($p = self::$cache->read($path)) {
+    $cache = self::getCache();
+    if ($p = $cache->read($path)) {
       return $p;
     } else {
-      if (is_readable($path)) return true;
+      if (is_readable($path)) {
+        $cache->write($path, $path);
+        return $path;
+      }
       
       static $includePath = null;
       static $paths = null;
@@ -134,13 +130,22 @@ final class Sabel
       foreach ($paths as $p) {
         $fpath = $p . DS . $path;
         if (is_readable($fpath)) {
-          self::$cache->write($path, $p);
+          $cache->write($path, $p);
           return $p;
         }
       }
       
       return false;
     }
+  }
+  
+  private static function getCache()
+  {
+    if (self::$cache === null) {
+      self::$cache = Sabel_Cache_Manager::getUsableCache();
+    }
+    
+    return self::$cache;
   }
   
   public static function main()
@@ -160,9 +165,8 @@ final class Sabel
     require ($SABEL . "Context.php");
     require ($SABEL . "Environment.php");
     require ($SABEL . "Router.php");
-    require ($SABEL . "Request.php");
     require ($SABEL . "Destination.php");
-    require ($SABEL . "Container.php");
+    require ($SABEL . "Request.php");
     require ($SABEL . "Response.php");
     
     $BUS     = $SABEL . "bus"        . DS;
@@ -189,7 +193,6 @@ final class Sabel
     
     require ($REQUEST . "Object.php");
     require ($REQUEST . "Uri.php");
-    require ($REQUEST . "Parameters.php");
     require ($REQUEST . "AbstractBuilder.php");
     require ($REQUEST . "Builder.php");
     
@@ -211,7 +214,7 @@ final class Sabel
     require ($SABEL . "response"   . DS . "Web.php");
     require ($SABEL . "exception"  . DS . "Runtime.php");
     require ($SABEL . "logger"     . DS . "File.php");
-    require ($SABEL . "util"       . DS . "List.php");
+    require ($SABEL . "util"       . DS . "HashList.php");
     require ($SABEL . "addon"      . DS . "Loader.php");
   }
 }

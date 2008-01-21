@@ -14,12 +14,12 @@ class Processor_Redirector extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $redirect = new Processor_Redirector_Redirect();
-    $this->controller->setAttribute("redirect", $redirect);
+    $bus->get("controller")->setAttribute("redirect", $redirect);
   }
   
   public function shutdown($bus)
   {
-    $redirect = $this->controller->getAttribute("redirect");
+    $redirect = $bus->get("controller")->getAttribute("redirect");
     
     if ($redirect->isRedirected()) {
       if (defined("URI_IGNORE")) {
@@ -28,7 +28,7 @@ class Processor_Redirector extends Sabel_Bus_Processor
         $ignored = "";
       }
       
-      $token = $this->request->getToken()->getValue();
+      $token = $bus->get("request")->getToken()->getValue();
       
       if (realempty($token)) {
         $to = $redirect->getUrl();
@@ -39,7 +39,7 @@ class Processor_Redirector extends Sabel_Bus_Processor
       }
       
       $serverName = Sabel_Environment::get("SERVER_NAME");
-      $this->response->location($serverName, $ignored . $to);
+      $bus->get("response")->location($serverName, $ignored . $to);
     }
   }
 }

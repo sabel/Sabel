@@ -27,13 +27,7 @@ class Form_Addon extends Sabel_Object
   
   public function loadProcessor($bus)
   {
-    $bus->attachExecuteEvent("initializer", $this, "eventCallback");
-  }
-  
-  public function eventCallback($bus)
-  {
     $form = new Form_Processor("form");
-    $bus->get("controller")->setAttribute("form", $form);
-    $bus->getList()->find("initializer")->insertNext("form", $form);
+    $bus->getProcessorList()->insertNext("controller", "form", $form);
   }
 }

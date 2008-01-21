@@ -27,6 +27,6 @@ class Helper_Addon extends Sabel_Object
   public function loadProcessor($bus)
   {
     $helper = new Helper_Processor("helper");
-    $bus->getList()->find("router")->insertNext("helper", $helper);
+    $bus->getProcessorList()->insertNext("router", "helper", $helper);
   }
 }

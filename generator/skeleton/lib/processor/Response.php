@@ -13,14 +13,15 @@ class Processor_Response extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $responses = array_merge($this->response->getResponses(),
-                             $this->controller->getAttributes());
+    $response  = $bus->get("response");
+    $responses = array_merge($response->getResponses(),
+                             $bus->get("controller")->getAttributes());
                             
-    $this->response->setResponses($responses);
+    $response->setResponses($responses);
   }
   
   public function shutdown($bus)
   {
-    $this->response->outputHeader();
+    $bus->get("response")->outputHeader();
   }
 }

@@ -13,22 +13,23 @@ class Processor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    if ($this->response->isFailure()) return;
+    $response = $bus->get("response");
+    if ($response->isFailure()) return;
     
-    $action = $this->destination->getAction();
-    $controller = $this->controller;
+    $action = $bus->get("destination")->getAction();
+    $controller = $bus->get("controller");
     
     try {
       $controller->setAction($action);
       $controller->initialize();
       
-      if (!$this->response->isFailure()) {
+      if (!$response->isFailure()) {
         l("execute action '{$action}'");
         $controller->execute();
       }
     } catch (Exception $e) {
-      $this->response->serverError();
-      $this->destination->setAction("serverError");
+      $response->serverError();
+      $bus->get("destination")->setAction("serverError");
       Sabel_Context::getContext()->setException($e);
     }
   }

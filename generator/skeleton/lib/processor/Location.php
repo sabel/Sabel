@@ -13,7 +13,7 @@ class Processor_Location extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    list ($module, $controller) = $this->destination->toArray();
+    list ($module, $controller) = $bus->get("destination")->toArray();
     
     $controller = new Sabel_View_Template_File($module . DS . VIEW_DIR_NAME . DS . $controller . DS);
     $repository = new Sabel_View_Repository("controller", $controller);
@@ -25,9 +25,6 @@ class Processor_Location extends Sabel_Bus_Processor
     $repository->addTemplate("app", $app);
     
     $bus->set("repository", $repository);
-    
-    if ($this->controller instanceof Sabel_Controller_Page) {
-      $this->controller->repository = $repository;
-    }
+    $bus->get("controller")->setAttribute("repository", $repository);
   }
 }

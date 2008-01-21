@@ -1,5 +1,9 @@
 <?php
 
+define("PRODUCTION",  0x01);
+define("TEST",        0x05);
+define("DEVELOPMENT", 0x0A);
+
 /**
  * define sabel environment.
  */

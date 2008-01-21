@@ -11,14 +11,6 @@
  */
 class Sabel_Request_Object extends Sabel_Object
 {
-  /**
-   * @var status
-   */
-  const ST_NO_INIT   = 0;
-  const ST_SET_URI   = 2;
-  const ST_SET_PARAM = 4;
-  
-  private $status = self::ST_NO_INIT;
   private $variableHolder = array();
   
   /**
@@ -30,11 +22,6 @@ class Sabel_Request_Object extends Sabel_Object
    * @var Sabel_Request_Token
    */
   private $token = null;
-  
-  /**
-   * @var Sabel_Request_Parameters
-   */
-  private $parameters = null;
   
   /**
    * @var headers
@@ -60,21 +47,7 @@ class Sabel_Request_Object extends Sabel_Object
   
   public function to($uri)
   {
-    $this->uri    = new Sabel_Request_Uri($uri);
-    $this->status = self::ST_SET_URI;
-    
-    return $this;
-  }
-  
-  public function parameter($parameters)
-  {
-    $this->parameters = new Sabel_Request_Parameters($parameters);
-    
-    if (self::ST_SET_URI & $this->status) {
-      $this->status = self::ST_SET_URI + self::ST_SET_PARAM;
-    } else {
-      $this->status = self::ST_SET_PARAM;
-    }
+    $this->uri = new Sabel_Request_Uri($uri);
     
     return $this;
   }
@@ -295,8 +268,6 @@ class Sabel_Request_Object extends Sabel_Object
     if (array_key_exists($key, $this->parameterValues)) {
       $value = $this->parameterValues[$key];
       return ($value === "") ? null : $value;
-    } elseif ($this->parameters->hasA($key)) {
-      return $this->parameters->get($key);
     } else {
       return null;
     }
@@ -394,6 +365,7 @@ class Sabel_Request_Object extends Sabel_Object
       $uri = $this->uri->__toString();
     }
     
+    // @todo remove $this->parameters
     if (is_object($this->parameters)) {
       if ($this->parameters->size() === 0) {
         return $uri;
@@ -406,11 +378,7 @@ class Sabel_Request_Object extends Sabel_Object
   
   public function toArray()
   {
-    if ($this->status & self::ST_SET_URI) {
-      return $this->uri->toArray();
-    } else {
-      return null;
-    }
+    return $this->uri->toArray();
   }
   
   public function setVariable($key, $value)
@@ -430,7 +398,7 @@ class Sabel_Request_Object extends Sabel_Object
   
   public function hasHeader($name)
   {
-    return (array_key_exists($name, $this->headers));
+    return array_key_exists($name, $this->headers);
   }
   
   public function getHeader($name)
@@ -440,6 +408,11 @@ class Sabel_Request_Object extends Sabel_Object
     } else {
       return null;
     }
+  }
+  
+  public function setHeaders(array $headers)
+  {
+    $this->headers = $headers;
   }
   
   public function getHeaders()

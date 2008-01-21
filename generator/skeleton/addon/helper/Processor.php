@@ -13,8 +13,9 @@ class Helper_Processor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $moduleName = $this->destination->getModule();
-    $controllerName = $this->destination->getController();
+    $destination    = $bus->get("destination");
+    $moduleName     = $destination->getModule();
+    $controllerName = $destination->getController();
     
     $sharedHelper  = "application";
     $commonHelpers = MODULES_DIR_PATH . DS . HELPERS_DIR_NAME;

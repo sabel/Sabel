@@ -20,6 +20,6 @@ class Renderer_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $this->renderer = $this->viewRenderer;
+    $bus->set("renderer", $this->viewRenderer);
   }
 }

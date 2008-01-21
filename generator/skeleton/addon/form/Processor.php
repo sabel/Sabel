@@ -21,14 +21,16 @@ class Form_Processor extends Sabel_Bus_Processor
     
   public function execute($bus)
   {
-    $forms = $this->storage->read(self::SESSION_KEY);
+    $action = $bus->get("destination")->getAction();
+    $storage = $bus->get("storage");
+    $controller = $bus->get("controller");
+    $controller->setAttribute("form", $controller); // @todo
+    
+    $forms = $storage->read(self::SESSION_KEY);
     if ($forms === null) $forms = array();
-    
     $this->forms = $forms;
-    $action = $this->destination->getAction();
-    $controller = $this->controller;
-    $controller->setAttribute("form", $this);
     
+    $controller->setAttribute("form", $this);
     if (!$controller->hasMethod($action)) return;
     
     $reflection = $controller->getReflection();
@@ -38,13 +40,13 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $this->unityId = $unityId = $annot[0][0];
     $this->token = $token = $this->request->getToken()->getValue();
-    $timeouts = $this->storage->getTimeouts();
+    $timeouts = $storage->getTimeouts();
     
     if (!realempty($token)) {
       $seskey = $unityId . "_" . $token;
       if (isset($forms[$seskey])) {
         $form = $forms[$seskey];
-        $this->storage->write($seskey, "", self::SES_TIMEOUT);
+        $storage->write($seskey, "", self::SES_TIMEOUT);
         if ($this->request->isPost()) {
           $this->applyPostValues($form)->unsetErrors();
         }
@@ -106,7 +108,7 @@ class Form_Processor extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
-    $this->storage->write(self::SESSION_KEY, $this->forms);
+    $bus->get("storage")->write(self::SESSION_KEY, $this->forms);
   }
   
   public function applyPostValues($form)

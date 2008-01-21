@@ -13,7 +13,8 @@ class Processor_Exception extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    if ($this->response->isServerError()) {
+    $response = $bus->get("response");
+    if ($response->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();
       if (!is_object($exception)) return;
       
@@ -22,7 +23,7 @@ class Processor_Exception extends Sabel_Bus_Processor
            . "At: " . date("r") . $eol . $eol
            . $this->getReadableTrace($exception->getTrace(), $eol);
            
-      $this->exception($exception, $msg);
+      $this->exception($response, $exception, $msg);
     }
   }
   
@@ -75,14 +76,14 @@ class Processor_Exception extends Sabel_Bus_Processor
     return implode($eol . $eol, $result);
   }
   
-  private function exception($exception, $message)
+  private function exception($response, $exception, $message)
   {
     if (ENVIRONMENT === PRODUCTION) {
       // if ($exception instanceof Sabel_Exception_Runtime) {
       //   $exception->writeSyslog($message);
       // }
     } else {
-      $this->response->setResponse("exception_message", $message);
+      $response->setResponse("exception_message", $message);
       $message = str_replace("<br/>", PHP_EOL, $message);
     }
     

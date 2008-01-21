@@ -16,11 +16,11 @@ class Processor_Controller extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $destination = $this->destination;
-    $this->response = new Sabel_Response_Web();
+    $destination = $bus->get("destination");
+    $response = new Sabel_Response_Web();
     
     try {
-      $controller = $this->createController();
+      $controller = $this->createController($response, $destination);
     } catch (Exception $e) {
       $module = $destination->getModule();
       l("can't create controller use default {$module}/index/index");
@@ -30,24 +30,25 @@ class Processor_Controller extends Sabel_Bus_Processor
       $destination->setAction("notFound");
       
       try {
-        $controller = $this->createController();
+        $controller = $this->createController($response, $destination);
       } catch (Exception $e) {
         $destination->setModule("index");
         $destination->setController("index");
         $destination->setAction("notFound");
-        $controller = $this->createController();
+        $controller = $this->createController($response, $destination);
       }
     }
     
-    $controller->setup($this->request, $destination, $this->storage);
+    $controller->setup($bus->get("request"), $destination, $bus->get("storage"));
     $controller->setBus($bus);
     
-    $this->controller = $controller;
+    $bus->set("response",   $response);
+    $bus->set("controller", $controller);
   }
   
-  protected function createController()
+  protected function createController($response, $destination)
   {
-    list($module, $controller,) = $this->destination->toArray();
+    list($module, $controller,) = $destination->toArray();
     $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR);
     
     if ($controller !== "") {
@@ -59,8 +60,8 @@ class Processor_Controller extends Sabel_Bus_Processor
     Sabel::using($class);
     
     if (class_exists($class, false)) {
-      l("instanciate " . $class);
-      return new $class($this->response);
+      l("create controller '{$class}'");
+      return new $class($response);
     } else {
       throw new Sabel_Exception_Runtime("controller not found.");
     }

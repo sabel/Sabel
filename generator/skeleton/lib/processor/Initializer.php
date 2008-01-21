@@ -19,11 +19,8 @@ class Processor_Initializer extends Sabel_Bus_Processor
     
     Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
-    // creates or resumes session.
-    $this->storage->start();
-    
     // default page title.
-    $this->controller->getResponse()->setResponse("pageTitle", "Sabel");
+    $bus->get("response")->setResponse("pageTitle", "Sabel");
     
     // $this->trim();
   }
