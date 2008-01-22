@@ -20,18 +20,13 @@ class Flow_Addon extends Sabel_Object
     return self::VERSION;
   }
   
-  public function load()
+  public function execute($bus)
   {
-    return false;
-  }
-  
-  public function loadProcessor($bus)
-  {
-    $executer = $bus->getList()->find("executer");
+    $executer = $bus->getProcessorList()->get("executer");
     
     if (is_object($executer)) {
       $flowProcessor = new Flow_Processor("flow");
-      $executer->insertPrevious("flow", $flowProcessor);
+      $bus->getProcessorList()->insertPrevious("executer", "flow", $flowProcessor);
       $bus->attachExecuteAfterEvent("executer", $flowProcessor, "afterExecute");
     }
   }

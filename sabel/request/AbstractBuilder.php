@@ -41,6 +41,10 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
     }
     
     $parsedUrl = parse_url($url);
-    return ltrim($parsedUrl["path"], "/");
+    if (isset($parsedUrl["path"])) {
+      return ltrim($parsedUrl["path"], "/");
+    } else {
+      return "";
+    }
   }
 }
