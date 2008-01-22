@@ -148,4 +148,9 @@ class Sabel_Util_HashList extends Sabel_Object
       return null;
     }
   }
+  
+  public function rewind()
+  {
+    $this->index = 0;
+  }
 }

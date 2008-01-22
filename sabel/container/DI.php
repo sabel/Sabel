@@ -24,6 +24,11 @@ class Sabel_Container_DI
     return $this->constructInstance();
   }
   
+  /**
+   * resolve dependency chain
+   * 
+   * @throws Sabel_Exception_Runtime when class does not exists
+   */
   private final function parseDependency($class)
   {
     $method = "__construct";

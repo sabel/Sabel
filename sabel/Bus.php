@@ -103,6 +103,7 @@ class Sabel_Bus extends Sabel_Object
       }
     }
     
+    $processorList->rewind();
     while ($processor = $processorList->next()) {
       if ($processor->hasMethod("shutdown")) {
         l("shutdown " . $processor->name, LOG_DEBUG);
