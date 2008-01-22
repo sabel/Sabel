@@ -70,8 +70,8 @@ final class Sabel
       $cache->write($className, $path);
     }
     
-    if ((self::isReadable($path)) !== false) {
-      require ($path);
+    if ($fullPath = self::isReadable($path)) {
+      require ($fullPath);
       self::$required[$className] = 1;
     }
   }
@@ -80,7 +80,17 @@ final class Sabel
   {
     if ($once && isset(self::$fileUsing[$path])) return true;
     
-    if (self::isReadable($path)) {
+    $readable = false;
+    $cache = self::getCache();
+    
+    if ($cache->read($path)) {
+      $readable = true;
+    } elseif (is_readable($path)) {
+      $cache->write($path, true);
+      $readable = true;
+    }
+    
+    if ($readable) {
       ($once) ? require_once ($path) : require ($path);
       return self::$fileUsing[$path] = true;
     } else {
@@ -105,21 +115,16 @@ final class Sabel
   private static function isReadable($path)
   {
     $cache = self::getCache();
-    if ($p = $cache->read($path)) {
-      return $p;
+    if ($fullPath = $cache->read($path)) {
+      return $fullPath;
     } else {
-      if (is_readable($path)) {
-        $cache->write($path, $path);
-        return $path;
-      }
-      
       static $includePath = null;
       static $paths = null;
       
       if ($includePath === null) {
         $includePath = get_include_path();
-      } elseif ($includePath !== get_include_path()) {
-        $includePath = get_include_path();
+      } elseif (($incPath = get_include_path()) !== $includePath) {
+        $includePath = $incPath;
         $paths = null;
       }
       
@@ -128,10 +133,10 @@ final class Sabel
       }
       
       foreach ($paths as $p) {
-        $fpath = $p . DS . $path;
-        if (is_readable($fpath)) {
-          $cache->write($path, $p);
-          return $p;
+        $fullPath = $p . DS . $path;
+        if (is_readable($fullPath)) {
+          $cache->write($path, $fullPath);
+          return $fullPath;
         }
       }
       
