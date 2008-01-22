@@ -1,5 +1,7 @@
 <?php
 
+Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Addon" . PHP_SUFFIX);
+
 /**
  * Processor_Addon
  *
@@ -14,23 +16,13 @@ class Processor_Addon extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $loader = new Sabel_Addon_Loader(ADDON_DIR_PATH);
-    foreach ($this->getFiles(ADDON_DIR_PATH) as $addonName) {
-      $loader->load($addonName, $bus);
-    }
-  }
-  
-  private function getFiles($dir)
-  {
-    $files = array();
-    $iterator = new DirectoryIterator($dir);
+    $config = new Config_Addon();
+    $addons = $config->configure();
     
-    foreach ($iterator as $file) {
-      $filename = $file->getFilename();
-      if ($filename{0} === ".") continue;
-      $files[] = $filename;
+    foreach ($addons as $addon) {
+      $className = ucfirst($addon) . "_Addon";
+      $instance = new $className();
+      $instance->execute($bus);
     }
-    
-    return $files;
   }
 }

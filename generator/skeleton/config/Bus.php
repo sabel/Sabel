@@ -2,20 +2,21 @@
 
 class Config_Bus extends Sabel_Bus_Config
 {
-  public function configure()
+  public function initialize()
   {
-    $processors = array("addon", "request", "router",
-                        "controller", "location", "initializer",
-                        "redirector", "executer", "exception",
-                        "response", "view");
+    $processors = array("request", "router", "addon",
+                        "controller", "location", "helper",
+                        "initializer", "redirector", "executer",
+                        "exception", "response", "view");
                         
+    $bus = $this->bus;
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;
     
     foreach ($processors as $name) {
       $processor = ucfirst($name);
       Sabel::fileUsing($baseDir . $processor. PHP_SUFFIX, true);
       $className = "Processor_" . $processor;
-      $this->add(new $className($name));
+      $bus->addProcessor(new $className($name));
     }
     
     return $this;

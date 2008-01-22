@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Helper_Processor extends Sabel_Bus_Processor
+class Processor_Helper extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {

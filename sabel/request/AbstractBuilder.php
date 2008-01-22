@@ -14,7 +14,6 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   abstract protected function setUri($request, $uri);
   abstract protected function setGetValues($request);
   abstract protected function setPostValues($request);
-  abstract protected function setHeaders($request);
   
   public final function build($request, $uri = null)
   {
@@ -22,7 +21,6 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
     $this->setUri($request, $this->createUri($uri));
     $this->setGetValues($request);
     $this->setPostValues($request);
-    $this->setHeaders($request);
     
     return $request;
   }

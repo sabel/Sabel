@@ -1,7 +1,13 @@
 <?php
 
+define("PRODUCTION",  0x01);
+define("TEST",        0x05);
+define("DEVELOPMENT", 0x0A);
+
 define("PHP_SUFFIX", ".php");
 define("TPL_SUFFIX", ".tpl");
+define("DS", DIRECTORY_SEPARATOR);
+define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
 
 define("MODULES_DIR_NAME", "app");
 define("ADDON_DIR_NAME",   "addon");

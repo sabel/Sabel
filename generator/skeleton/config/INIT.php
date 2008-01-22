@@ -1,7 +1,5 @@
 <?php
 
-Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "defines.php", true);
-
 add_include_paths(array(MODULES_DIR_NAME,
                         LIB_DIR_NAME,
                         MODULES_DIR_NAME . DS . "models",

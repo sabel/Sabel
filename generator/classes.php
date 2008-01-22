@@ -1,5 +1,9 @@
 <?php
 
+if (!defined("DS")) {
+  define("DS", DIRECTORY_SEPARATOR);
+}
+
 class SabelDirectoryAndFileCreator
 {
   protected $overwrite = false;

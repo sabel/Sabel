@@ -35,7 +35,7 @@ class Sabel_Util_DirectoryTraverser
     
     foreach ($element as $e) {
       $child = $e->getPathName();
-      $entry = ltrim(str_replace($this->dir, "", $child), DIR_DIVIDER);
+      $entry = ltrim(str_replace($this->dir, "", $child), DIRECTORY_SEPARATOR);
       
       if ($this->isValidDirectory($e)) {
         foreach ($this->visitors as $visitor) {

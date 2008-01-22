@@ -9,23 +9,13 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Bus_Config implements Sabel_Config
+abstract class Sabel_Bus_Config
 {
   protected $bus = null;
   
   public function __construct()
   {
     $this->bus = new Sabel_Bus();
-  }
-  
-  public function add($processor)
-  {
-    $this->bus->addProcessor($processor);
-  }
-  
-  public function get($name)
-  {
-    return $this->bus->getProcessor($name);
   }
   
   public function getBus()
