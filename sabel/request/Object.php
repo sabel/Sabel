@@ -9,7 +9,8 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Request_Object extends Sabel_Object
+class Sabel_Request_Object
+  extends Sabel_Object implements Sabel_Request
 {
   private $variableHolder = array();
   
@@ -94,6 +95,31 @@ class Sabel_Request_Object extends Sabel_Object
     return $this;
   }
   
+  public function isPost()
+  {
+    return ($this->method === Sabel_Request::POST);
+  }
+  
+  public function isGet()
+  {
+    return ($this->method === Sabel_Request::GET);
+  }
+  
+  public function isPut()
+  {
+    return ($this->method === Sabel_Request::PUT);
+  }
+  
+  public function isDelete()
+  {
+    return ($this->method === Sabel_Request::DELETE);
+  }
+  
+  public function getMethod()
+  {
+    return $this->method;
+  }
+  
   public function value($key, $value)
   {
     switch ($this->method) {
@@ -108,29 +134,15 @@ class Sabel_Request_Object extends Sabel_Object
     return $this;
   }
   
-  public function values($lists)
+  public function values(array $lists)
   {
-    switch ($this->method) {
-      case (Sabel_Request::GET):
-        $this->setGetValues(array_merge($lists, $this->getValues));
-        break;
-      case (Sabel_Request::POST):
-        $this->setPostValues(array_merge($lists, $this->postValues));
-        break;
-      default:
-        $this->setGetValues(array_merge($lists, $this->getValues));
+    if ($this->isPost()) {
+      $this->setPostValues(array_merge($this->postValues, $lists));
+    } else {
+      $this->setGetValues(array_merge($this->getValues, $lists));
     }
     
     return $this;
-  }
-  
-  public function getValue($name)
-  {
-    if (isset($this->values[$name])) {
-      $this->values[$name];
-    } else {
-      null;
-    }
   }
   
   public function hasValueWithMethod($name)
@@ -160,7 +172,7 @@ class Sabel_Request_Object extends Sabel_Object
     $this->getValues[$key] = $value;
   }
   
-  public function setGetValues($values)
+  public function setGetValues(array $values)
   {
     $this->getValues = $values;
   }
@@ -200,14 +212,14 @@ class Sabel_Request_Object extends Sabel_Object
     $this->postValues[$key] = $value;
   }
   
-  public function setPostValues($values)
+  public function setPostValues(array $values)
   {
     $this->postValues = $values;
   }
   
   public function fetchGetObject()
   {
-    return (object) $this->fetchGetValues();
+    return (object)$this->fetchGetValues();
   }
   
   public function hasPostValue($name)
@@ -243,18 +255,20 @@ class Sabel_Request_Object extends Sabel_Object
   
   public function fetchPostObject()
   {
-    return (object) $this->fetchPostValues();
+    return (object)$this->fetchPostValues();
   }
   
   public function setParameterValue($key, $value)
   {
     $this->parameterValues[$key] = $value;
+    
     return $this;
   }
   
-  public function setParameterValues($values)
+  public function setParameterValues(array $values)
   {
     $this->parameterValues = $values;
+    
     return $this;
   }
   
@@ -276,10 +290,11 @@ class Sabel_Request_Object extends Sabel_Object
   
   public function find($key)
   {
-    $result = null;
+    $result = "";
     $values = array($this->fetchPostValues(),
                     $this->fetchGetValues(),
                     $this->fetchParameterValues());
+                    
     $found = false;
     
     foreach ($values as $value) {
@@ -289,6 +304,7 @@ class Sabel_Request_Object extends Sabel_Object
         } else {
           $result = $value[$key];
         }
+        
         $found = true;
       }
     }
@@ -312,31 +328,6 @@ class Sabel_Request_Object extends Sabel_Object
     }
   }
   
-  public function isPost()
-  {
-    return ($this->method === Sabel_Request::POST);
-  }
-  
-  public function isGet()
-  {
-    return ($this->method === Sabel_Request::GET);
-  }
-  
-  public function isPut()
-  {
-    return ($this->method === Sabel_Request::PUT);
-  }
-  
-  public function isDelete()
-  {
-    return ($this->method === Sabel_Request::DELETE);
-  }
-  
-  public function getMethod()
-  {
-    return $this->method;
-  }
-  
   public function getUri()
   {
     return $this->uri;
@@ -347,27 +338,12 @@ class Sabel_Request_Object extends Sabel_Object
     return ($this->uri->getType() === $type);
   }
   
-  public function setCandidate($candidate)
-  {
-    $this->candidate = $candidate;
-  }
-  
   public function __toString()
   {
     if ($this->uri->size() === 0) {
-      $uri = "/";
+      return "";
     } else {
-      $uri = $this->uri->__toString();
-    }
-    
-    // @todo remove $this->parameters
-    if (is_object($this->parameters)) {
-      if ($this->parameters->size() === 0) {
-        return $uri;
-      }
-      return $uri . "?" . $this->parameters->__toString();
-    } else {
-      return $uri;
+      return $this->uri->toString();
     }
   }
   

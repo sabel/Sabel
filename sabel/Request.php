@@ -17,10 +17,24 @@ interface Sabel_Request
   const PUT    = "PUT";
   const DELETE = "DELETE";
   
-  public function getParameters();
-  public function getPostRequests();
-  public function hasParameter($name);
-  public function getParameter($name);
-  public function __toString();
-  public function toArray();
+  public function getUri();
+  
+  public function get($uri);
+  public function post($uri);
+  public function put($uri);
+  public function delete($uri);
+  
+  public function isGet();
+  public function isPost();
+  public function isPut();
+  public function isDelete();
+  
+  public function setGetValue($name, $value);
+  public function fetchGetValue($name);
+  
+  public function setPostValue($name, $value);
+  public function fetchPostValue($name);
+  
+  public function setParameterValue($name, $value);
+  public function fetchParameterValue($name);
 }

@@ -16,6 +16,9 @@ class Sabel_Request_Internal extends Sabel_Object
     $method = Sabel_Request::GET,
     $values = array();
     
+  protected
+    $response = array();
+    
   public function __construct($method = Sabel_Request::GET)
   {
     $this->method = $method;
@@ -65,7 +68,9 @@ class Sabel_Request_Internal extends Sabel_Object
     Sabel_Context::setContext($context);
     
     $bus->run();
-    $this->bus = $bus;
+    
+    $this->response["response"] = $bus->get("response");
+    $this->response["html"] = $bus->get("result");
     
     Sabel_Context::setContext($currentContext);
     
@@ -74,8 +79,8 @@ class Sabel_Request_Internal extends Sabel_Object
   
   public function getResponse()
   {
-    if (is_object($this->bus)) {
-      return $this->bus->get("response");
+    if (isset($this->response["response"])) {
+      return $this->response["response"];
     } else {
       return null;
     }
@@ -83,8 +88,8 @@ class Sabel_Request_Internal extends Sabel_Object
   
   public function getHtml()
   {
-    if (is_object($this->bus)) {
-      return $this->bus->get("result");
+    if (isset($this->response["html"])) {
+      return $this->response["html"];
     } else {
       return "";
     }

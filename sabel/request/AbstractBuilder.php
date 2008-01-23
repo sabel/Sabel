@@ -15,7 +15,7 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   abstract protected function setGetValues($request);
   abstract protected function setPostValues($request);
   
-  public final function build($request, $uri = null)
+  public final function build(Sabel_Request $request, $uri = null)
   {
     $this->setMethod($request);
     $this->setUri($request, $this->createUri($uri));

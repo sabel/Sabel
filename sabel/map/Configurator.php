@@ -14,7 +14,7 @@ class Sabel_Map_Configurator
 {
   protected static $candidates = array();
   
-  public static function addCandidate($name, $uri, $options = null)
+  public static function addCandidate($name, $uri, $options = array())
   {
     $candidate = new Sabel_Map_Candidate($name);
     self::$candidates[$name] = $candidate;

@@ -3,6 +3,10 @@
 define("VIEW_DIR_NAME", "views");
 define("TPL_SUFFIX", ".tpl");
 
+if (!defined("DS")) {
+  define("DS", DIRECTORY_SEPARATOR);
+}
+
 class Test_View_TemplateFile extends SabelTestCase
 {
   private static $repository = null;

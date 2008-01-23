@@ -25,18 +25,17 @@ class Sabel_Map_Candidate implements Iterator
   protected $elements = array();
   
   protected
-    $module     = "",
-    $controller = "",
-    $action     = "";
-  
-  protected $size     = 0;
-  protected $position = 0;
+    $uriParameter = array("module" => "", "controller" => "", "action" => "");
+    
+  protected
+    $size     = 0,
+    $position = 0;
   
   private $candidate = null;
   
   public function __construct($name = "")
   {
-    $this->setName($name);
+    $this->name = $name;
   }
   
   public function route($uriRule)
@@ -99,7 +98,7 @@ class Sabel_Map_Candidate implements Iterator
     return $matches;
   }
   
-  public function setOptions($options)
+  public function setOptions(array $options)
   {
     if (isset($options["default"])) {
       foreach ($options["default"] as $key => $default) {
@@ -120,14 +119,16 @@ class Sabel_Map_Candidate implements Iterator
       $this->setCache($options["cache"]);
     }
     
-    if (isset($options["module"]))     $this->setModule($options["module"]);
-    if (isset($options["controller"])) $this->setController($options["controller"]);
-    if (isset($options["action"]))     $this->setAction($options["action"]);
+    $p =& $this->uriParameter;
+    if (isset($options["module"]))     $p["module"] = $options["module"];
+    if (isset($options["controller"])) $p["controller"] = $options["controller"];
+    if (isset($options["action"]))     $p["action"] = $options["action"];
   }
   
   public function getDestination()
   {
-    return new Sabel_Destination($this->module, $this->controller, $this->action);
+    $p = $this->uriParameter;
+    return new Sabel_Destination($p["module"], $p["controller"], $p["action"]);
   }
   
   public function setName($name)
@@ -276,8 +277,9 @@ class Sabel_Map_Candidate implements Iterator
   {
     if (isset($this->elements[$name])) {
       if ($name === "action") {
-        $this->setAction($value);
+        $this->uriParameter["action"] = $value;
       }
+      
       $this->elements[$name]->default = $value;
     }
   }
@@ -349,57 +351,12 @@ class Sabel_Map_Candidate implements Iterator
     return $this->getElement()->isMatchAll();
   }
   
-  public function setModule($module)
-  {
-    $this->module = $module;
-  }
-  
-  public function getModule()
-  {
-    return $this->module;
-  }
-  
-  public function hasModule()
-  {
-    return ($this->module !== "");
-  }
-  
-  public function setController($controller)
-  {
-    $this->controller = $controller;
-  }
-  
-  public function getController()
-  {
-    return $this->controller;
-  }
-  
-  public function hasController()
-  {
-    return ($this->controller !== "");
-  }
-  
-  public function setAction($action)
-  {
-    $this->action = $action;
-  }
-  
-  public function getAction()
-  {
-    return $this->action;
-  }
-  
-  public function hasAction()
-  {
-    return ($this->action !== "");
-  }
-  
   /**
    * evalute map rule between requested uri.
    *
    * @return boolean
    */
-  public final function evalute($requests)
+  public final function evalute(array $requests)
   {
     $constantEstablished = false;
     
@@ -488,11 +445,11 @@ class Sabel_Map_Candidate implements Iterator
         $element->variable = $uriElement;
         break;
       case self::MODULE:
-        $this->setModule($uriElement);
+        $this->uriParameter["module"] = $uriElement;
         $element->variable = $uriElement;
         break;
       case self::CONTROLLER:
-        $this->setController($uriElement);
+        $this->uriParameter["controller"] = $uriElement;
         $element->variable = $uriElement;
         break;
       case self::ACTION:
@@ -501,10 +458,10 @@ class Sabel_Map_Candidate implements Iterator
           if ($element->extension !== "" && $element->extension !== $extension) return false;
           $element->variable  = $variable;
           $element->extension = $extension;
-          $this->setAction($variable);
+          $this->uriParameter["action"] = $variable;
         } else {
           $element->variable = $uriElement;
-          $this->setAction($uriElement);
+          $this->uriParameter["action"] = $uriElement;
         }
         break;
       case self::TYPE_ARRAY:

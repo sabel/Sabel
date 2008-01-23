@@ -16,14 +16,6 @@ class Test_Map_Candidate extends SabelTestCase
     return self::createSuite("Test_Map_Candidate");
   }
   
-  public function setUp()
-  {
-  }
- 
-  public function tearDown()
-  {
-  }
-  
   public function testUri()
   {
     $defc = new Sabel_Map_Candidate("default");

@@ -67,7 +67,6 @@ class Sabel_Bus extends Sabel_Object
   /**
    * add processor to bus.
    *
-   * @param string $name
    * @param Sabel_Bus_Processor $processor
    * @return Sabel_Bus
    */

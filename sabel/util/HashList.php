@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Mori Reo <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Util_HashList extends Sabel_Object implements Countable
+class Sabel_Util_HashList extends Sabel_Object
 {
   const FIRST = "INDEX_FIRST";
   const LAST  = "INDEX_LAST";
@@ -20,6 +20,7 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
     $iterating = false;
     
   private
+    $size   = 0,
     $names  = array(),
     $values = array();
     
@@ -28,9 +29,10 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
     if ($this->has($name)) {
       throw new Sabel_Exception_Runtime("'{$name}' already set.");
     } else {
-      $index = $this->count();
-      $this->names[$name]   = $index;
-      $this->values[$index] = $value;
+      $size =& $this->size;
+      $this->names[$name]  = $size;
+      $this->values[$size] = $value;
+      $size++;
     }
   }
   
@@ -81,6 +83,7 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
       
       $values[$p] = $insertValue;
       $this->values = $values;
+      $this->size++;
       
       if ($this->iterating && $p <= $this->index) {
         $this->index++;
@@ -111,6 +114,7 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
       
       $values[$p + 1] = $insertValue;
       $this->values = $values;
+      $this->size++;
       
       if ($this->iterating && ($p + 1) < $this->index) {
         $this->index++;
@@ -123,20 +127,25 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
   public function remove($target)
   {
     if ($this->has($target)) {
+      $values = $this->values;
       $p = $this->names[$target];
       unset($this->names[$target]);
-      unset($this->values[$p]);
+      $removed = $values[$p];
+      unset($values[$p]);
+      
       foreach ($this->names as &$pointer) {
         if ($pointer > $p) $pointer--;
       }
       
-      ksort($this->values);
-      $this->values = array_values($this->values);
+      ksort($values);
+      $this->values = array_values($values);
+      $this->size--;
       
       if ($this->iterating && $p <= $this->index) {
         $this->index--;
       }
-      if ($this->iterating) $this->removedIndex = $p;
+      
+      return $removed;
     } else {
       throw new Sabel_Exception_Runtime("'{$target}' not found.");
     }
@@ -154,7 +163,7 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
   
   public function count()
   {
-    return count($this->names);
+    return $this->size;
   }
   
   public function next()
@@ -173,7 +182,7 @@ class Sabel_Util_HashList extends Sabel_Object implements Countable
   public function previous()
   {
     if ($this->index === null) return null;
-    $i = ($this->index === self::LAST) ? $this->count() - 1 : $this->index - 1;
+    $i = ($this->index === self::LAST) ? $this->size - 1 : $this->index - 1;
     
     if (isset($this->values[$i])) {
       $this->iterating = true;

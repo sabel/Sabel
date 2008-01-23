@@ -146,7 +146,6 @@ final class Sabel
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
     require ($SABEL . "Environment.php");
-    require ($SABEL . "Router.php");
     require ($SABEL . "Destination.php");
     require ($SABEL . "Request.php");
     require ($SABEL . "Response.php");

@@ -15,7 +15,6 @@ class Test_Util_HashList extends SabelTestCase
     $list->add("c", "3");
     
     $this->assertEquals(3, $list->count());
-    $this->assertEquals(3, count($list));
     
     $threw = false;
     
@@ -37,7 +36,9 @@ class Test_Util_HashList extends SabelTestCase
     
     $this->assertEquals(3, $list->count());
     
-    $list->remove("b");
+    $removed = $list->remove("b");
+    $this->assertEquals("2", $removed);
+    
     $this->assertEquals(2, $list->count());
     $this->assertEquals("1", $list->get("a"));
     $this->assertNull($list->get("b"));

@@ -60,9 +60,9 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     return $this->responses;
   }
   
-  public function setResponses($array)
+  public function setResponses(array $responses)
   {
-    $this->responses = $array;
+    $this->responses = $responses;
   }
   
   public function toArray()

@@ -39,6 +39,8 @@ class Sabel_Request_Uri extends Sabel_Object
   
   public function parse($uri)
   {
+    if ($uri === "" || $uri === null) return;
+    
     static $filter = null;
     
     if ($filter === null) {
@@ -61,9 +63,7 @@ class Sabel_Request_Uri extends Sabel_Object
     }
     
     $elements[] = $lastElement;
-    
-    $this->parts = $elements;
-    return $elements;
+    return $this->parts = $elements;
   }
   
   public function getType()
