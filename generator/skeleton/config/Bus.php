@@ -2,7 +2,7 @@
 
 class Config_Bus extends Sabel_Bus_Config
 {
-  public function initialize()
+  public function configure()
   {
     $processors = array("request", "router", "addon",
                         "controller", "location", "helper",
