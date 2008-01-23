@@ -1,8 +1,11 @@
 <?php
 
-require_once ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 define("RUN_BASE", getcwd());
-Sabel::fileUsing(RUN_BASE . DS . "config" . DS . "INIT.php", true);
+
+require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "defines.php");
+require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "environment.php");
+require_once ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
+require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
 
 /**
  * Sakle

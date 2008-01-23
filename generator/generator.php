@@ -2,12 +2,8 @@
 
 if (!defined("TEST_CASE")) {
 
-require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
-require ("classes.php");
-
-if (!defined("IS_WIN")) {
-  define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
-}
+if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
+if (!defined("IS_WIN")) define("IS_WIN", (DS === '\\'));
 
 $args = $_SERVER["argv"];
 
@@ -23,9 +19,11 @@ if (!defined("RUN_BASE")) {
   define("RUN_BASE", $dir);
 }
 
-if (!is_dir(RUN_BASE)) {
-  mkdir(RUN_BASE);
-}
+if (!is_dir(RUN_BASE)) mkdir(RUN_BASE);
+define("ENVIRONMENT", 0x0A);
+
+require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
+require ("classes.php");
 
 $pathToSabel = Sabel::getPath();
 $includePath = get_include_path();
@@ -33,7 +31,6 @@ $includePath = get_include_path();
 if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
   set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
 }
-
 
 $dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . DIRECTORY_SEPARATOR . "skeleton");
 $aCreator = new SabelDirectoryAndFileCreator();
