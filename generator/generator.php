@@ -5,6 +5,10 @@ if (!defined("TEST_CASE")) {
 require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
 require ("classes.php");
 
+if (!defined("IS_WIN")) {
+  define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
+}
+
 $args = $_SERVER["argv"];
 
 if (isset($args[1])) {
@@ -59,4 +63,4 @@ for ($i = 0, $count = count($args); $i < $count; ++$i) {
 $dt->visit($aCreator);
 $dt->traverse();
 
-}
+} // end of !defined("TEST_CASE")

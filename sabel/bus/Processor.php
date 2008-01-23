@@ -40,4 +40,9 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   {
     $this->bus->set($name, $value);
   }
+  
+  public function shutdown($bus)
+  {
+    
+  }
 }

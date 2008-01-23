@@ -104,13 +104,14 @@ class Sabel_Bus extends Sabel_Object
     
     $processorList->first();
     while ($processor = $processorList->next()) {
-      if ($processor->hasMethod("shutdown")) {
+      if (ENVIRONMENT !== PRODUCTION) {
         l("shutdown " . $processor->name, LOG_DEBUG);
-        $processor->shutdown($this);
       }
+      
+      $processor->shutdown($this);
     }
     
-    return ($this->has("result")) ? $this->get("result") : null;
+    return $this->get("result");
   }
   
   public function attachExecuteBeforeEvent($processorName, $object, $method)

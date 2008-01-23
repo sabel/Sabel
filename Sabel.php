@@ -137,6 +137,11 @@ final class Sabel
   
   public static function main()
   {
+    if (!defined("ENVIRONMENT")) {
+      echo "SABEL FATAL ERROR: must define ENVIRONMENT";
+      exit;
+    }
+    
     self::$path = dirname(__FILE__);
     $SABEL = "sabel" . DIRECTORY_SEPARATOR;
     
