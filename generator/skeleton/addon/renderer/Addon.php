@@ -19,12 +19,7 @@ class Renderer_Addon extends Sabel_Object
     return self::VERSION;
   }
   
-  public function load()
-  {
-    return true;
-  }
-  
-  public function loadProcessor($bus)
+  public function execute($bus)
   {
     $processor = new Renderer_Processor("renderer");
     $renderer  = new Renderer_Sabel();

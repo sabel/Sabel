@@ -33,7 +33,7 @@ class Renderer_Smarty extends Sabel_View_Renderer
   {
     $smarty = $this->smarty;
     
-    if ($_tpl_path === null) {
+    if ($_tpl_path === null || !is_file($_tpl_path)) {
       $hash = $this->createHash($_tpl_contents);
       $_tpl_path = COMPILE_DIR_PATH . DS . $hash;
       file_put_contents($_tpl_path, $_tpl_contents);

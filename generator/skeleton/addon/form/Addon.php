@@ -20,12 +20,7 @@ class Form_Addon extends Sabel_Object
     return self::VERSION;
   }
   
-  public function load()
-  {
-    return true;
-  }
-  
-  public function loadProcessor($bus)
+  public function execute($bus)
   {
     $form = new Form_Processor("form");
     $bus->getProcessorList()->insertNext("controller", "form", $form);

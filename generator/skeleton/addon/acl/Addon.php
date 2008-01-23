@@ -19,12 +19,7 @@ class Acl_Addon extends Sabel_Object
     return self::VERSION;
   }
   
-  public function load()
-  {
-    return false;
-  }
-  
-  public function loadProcessor($bus)
+  public function execute($bus)
   {
     $acl = new Acl_Processor("acl");
     $bus->getProcessorList()->insertNext("controller", "acl", $acl);

@@ -37,11 +37,6 @@ abstract class Sabel_View_Template extends Sabel_Object
     }
   }
   
-  public function getBaseDir()
-  {
-    return $this->baseDir;
-  }
-  
   public function getPath()
   {
     return $this->baseDir . $this->name;

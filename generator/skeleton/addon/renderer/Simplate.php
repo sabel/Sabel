@@ -31,6 +31,13 @@ class Renderer_Simplate extends Sabel_View_Renderer
   public function rendering($_tpl_contents, $_tpl_values, $_tpl_path = null)
   {
     $simplate = $this->simplate;
+    
+    if ($_tpl_path === null || !is_file($_tpl_path)) {
+      $hash = $this->createHash($_tpl_contents);
+      $_tpl_path = COMPILE_DIR_PATH . DS . $hash;
+      file_put_contents($_tpl_path, $_tpl_contents);
+    }
+    
     $simplate->template_dir = dirname($_tpl_path);
     
     foreach ($_tpl_values as $k => $v) {

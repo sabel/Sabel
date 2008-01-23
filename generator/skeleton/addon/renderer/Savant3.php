@@ -25,7 +25,7 @@ class Renderer_Savant3 extends Sabel_View_Renderer
   {
     $savant = $this->savant;
     
-    if ($_tpl_path === null) {
+    if ($_tpl_path === null || !is_file($_tpl_path)) {
       $hash = $this->createHash($_tpl_contents);
       $_tpl_path = COMPILE_DIR_PATH . DS . $hash;
       file_put_contents($_tpl_path, $_tpl_contents);
