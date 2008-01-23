@@ -56,9 +56,9 @@ class Acl_Processor extends Sabel_Bus_Processor
     }
   }
   
-  public function shutdown()
+  public function shutdown($bus)
   {
-    $this->storage->write("acl_user", $this->user->toArray());
+    $bus->get("storage")->write("acl_user", $this->user->toArray());
   }
   
   private function isAllow($config)
