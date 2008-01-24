@@ -137,11 +137,6 @@ final class Sabel
   
   public static function main()
   {
-    if (!defined("ENVIRONMENT")) {
-      echo "SABEL FATAL ERROR: must define ENVIRONMENT";
-      exit;
-    }
-    
     self::$path = dirname(__FILE__);
     $SABEL = "sabel" . DIRECTORY_SEPARATOR;
     
@@ -199,7 +194,10 @@ final class Sabel
     require ($SABEL . "exception"  . DIRECTORY_SEPARATOR . "Runtime.php");
     require ($SABEL . "logger"     . DIRECTORY_SEPARATOR . "File.php");
     require ($SABEL . "util"       . DIRECTORY_SEPARATOR . "HashList.php");
-    
+  }
+  
+  public static function init()
+  {
     if (ENVIRONMENT === PRODUCTION) {
       self::$readableFiles = Sabel_Cache_File::create()->read("readable_files");
     }

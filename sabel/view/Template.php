@@ -12,17 +12,17 @@
  */
 abstract class Sabel_View_Template extends Sabel_Object
 {
-  protected $baseDir = "";
-  protected $name    = "";
+  protected $viewDirPath = "";
+  protected $name        = "";
   
   abstract public function isValid();
   abstract public function getContents();
   abstract public function create($body = "");
   abstract public function delete();
   
-  public function __construct($baseDir)
+  public function __construct($viewDirPath)
   {
-    $this->baseDir = MODULES_DIR_PATH . DS . $baseDir;
+    $this->viewDirPath = $viewDirPath;
   }
   
   public function name($name = null)
@@ -39,6 +39,6 @@ abstract class Sabel_View_Template extends Sabel_Object
   
   public function getPath()
   {
-    return $this->baseDir . $this->name;
+    return MODULES_DIR_PATH . DS . $this->viewDirPath . $this->name;
   }
 }

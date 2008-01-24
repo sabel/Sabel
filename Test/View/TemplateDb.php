@@ -7,7 +7,7 @@ class Test_View_TemplateDb extends Test_View_Tests
     $base = dirname(__FILE__) . DS . "templates";
     if (!defined("MODULES_DIR_PATH")) define("MODULES_DIR_PATH", $base);
     
-    if (self::initTable($base)) {
+    if (self::initTable()) {
       return self::createSuite("Test_View_TemplateDb");
     } else {
       return self::createSuite("");
@@ -39,7 +39,7 @@ class Test_View_TemplateDb extends Test_View_Tests
     return self::$repository = $repository;
   }
   
-  private static function initTable($base)
+  private static function initTable()
   {
     if (extension_loaded("mysql")) {
       $params = array("package"  => "sabel.db.mysql",
@@ -64,24 +64,27 @@ class Test_View_TemplateDb extends Test_View_Tests
     Sabel_DB_Config::add("default", $params);
     $stmt = Sabel_DB_Driver::createStatement();
     $tblName = $stmt->quoteIdentifier("templates");
+    $nCol    = $stmt->quoteIdentifier("name");
+    $nsCol   = $stmt->quoteIdentifier("namespace");
+    $cCol    = $stmt->quoteIdentifier("contents");
     $stmt->setQuery("DELETE FROM $tblName")->execute();
     
     $data = array();
-    $data[0]["path"] = $base . DS . "views" . DS . "serverError" . TPL_SUFFIX;
+    $data[0]["path"] = "views" . DS . "serverError" . TPL_SUFFIX;
     $data[0]["cont"] = "";
-    $data[1]["path"] = $base . DS . "index" . DS . "views" . DS . "error" . TPL_SUFFIX;
+    $data[1]["path"] = "index" . DS . "views" . DS . "error" . TPL_SUFFIX;
     $data[1]["cont"] = "";
-    $data[2]["path"] = $base . DS . "index" . DS . "views" . DS . "hoge" . DS . "index" . TPL_SUFFIX;
+    $data[2]["path"] = "index" . DS . "views" . DS . "hoge" . DS . "index" . TPL_SUFFIX;
     $data[2]["cont"] = "hoge/index.tpl";
-    $data[3]["path"] = $base . DS . "index" . DS . "views" . DS . "hoge" . DS . "hoge" . TPL_SUFFIX;
+    $data[3]["path"] = "index" . DS . "views" . DS . "hoge" . DS . "hoge" . TPL_SUFFIX;
     $data[3]["cont"] = "hoge/hoge.tpl";
-    $data[4]["path"] = $base . DS . "index" . DS . "views" . DS . "fuga" . DS . "index" . TPL_SUFFIX;
+    $data[4]["path"] = "index" . DS . "views" . DS . "fuga" . DS . "index" . TPL_SUFFIX;
     $data[4]["cont"] = "fuga/index.tpl";
-    $data[5]["path"] = $base . DS . "index" . DS . "views" . DS . "fuga" . DS . "fuga" . TPL_SUFFIX;
+    $data[5]["path"] = "index" . DS . "views" . DS . "fuga" . DS . "fuga" . TPL_SUFFIX;
     $data[5]["cont"] = "fuga/fuga.tpl";
     
     foreach ($data as $d) {
-      $query = "INSERT INTO $tblName VALUES('{$d["path"]}', '{$d["cont"]}')";
+      $query = "INSERT INTO {$tblName}({$nCol}, {$nsCol}, {$cCol}) VALUES('{$d["path"]}', '', '{$d["cont"]}')";
       $stmt->setQuery($query)->execute();
     }
     
