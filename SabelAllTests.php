@@ -83,7 +83,7 @@ class SabelAllTests
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
-    // $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_DB_Tests::suite());
     // $suite->addTest(Test_Validate::suite());
     
     // $suite->addTest(Test_Processor_Tests::suite());

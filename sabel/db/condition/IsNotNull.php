@@ -11,8 +11,8 @@
  */
 class Sabel_DB_Condition_IsNotNull extends Sabel_DB_Abstract_Condition
 {
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
-    return $this->column . " IS NOT NULL";
+    return $stmt->quoteIdentifier($this->column) . " IS NOT NULL";
   }
 }

@@ -4,7 +4,7 @@ class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";
   public static $tables = array("schema_test", "grandchildren", "children",
-                                "parents", "grandparents");
+                                "parents", "grandparents", "student_course", "student", "course");
                                 
   protected static $lastStId = null;
   
@@ -406,6 +406,52 @@ class Test_DB_Test extends SabelTestCase
     $this->assertTrue($schema->isUnique("email"));
   }
   
+  public function testBridge()
+  {
+    $join = new Sabel_DB_Join("StudentCourse");
+    $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
+    $r = $join->setParents(array("Student", "Course"))->join();
+    
+    $this->assertEquals(7, count($r));
+    $this->assertEquals("yamada",      $r[0]->Student->name);
+    $this->assertEquals("Mathematics", $r[0]->Course->name);
+    $this->assertEquals("yamada",      $r[1]->Student->name);
+    $this->assertEquals("Physics",     $r[1]->Course->name);
+    $this->assertEquals("tanaka",      $r[2]->Student->name);
+    $this->assertEquals("Mathematics", $r[2]->Course->name);
+    $this->assertEquals("tanaka",      $r[3]->Student->name);
+    $this->assertEquals("Science",     $r[3]->Course->name);
+    $this->assertEquals("suzuki",      $r[4]->Student->name);
+    $this->assertEquals("Mathematics", $r[4]->Course->name);
+    $this->assertEquals("suzuki",      $r[5]->Student->name);
+    $this->assertEquals("Physics",     $r[5]->Course->name);
+    $this->assertEquals("suzuki",      $r[6]->Student->name);
+    $this->assertEquals("Science",     $r[6]->Course->name);
+  }
+  
+  public function testBridgeWithCondition()
+  {
+    $join = new Sabel_DB_Join("StudentCourse");
+    $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
+    $join->setCondition("Student.id", 1);
+    $r = $join->setParents(array("Student", "Course"))->join();
+    
+    $this->assertEquals(2, count($r));
+    $this->assertEquals("yamada",      $r[0]->Student->name);
+    $this->assertEquals("Mathematics", $r[0]->Course->name);
+    $this->assertEquals("yamada",      $r[1]->Student->name);
+    $this->assertEquals("Physics",     $r[1]->Course->name);
+  }
+  
+  public function testBridgeCount()
+  {
+    $join = new Sabel_DB_Join("StudentCourse");
+    $join->setCondition("Student.id", 3);
+    $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
+  }
+  
+  // @todo more tests
+  
   public function testClear()
   {
     Sabel_DB_Schema::clear();
@@ -427,9 +473,35 @@ class Test_DB_Test extends SabelTestCase
     $data[] = array("name" => "name10", "email" => "test10@example.com", "sint" => 500, "bl" => true, "ft" => 10.234, "dt" => "2008-01-10");
     
     $st = MODEL("SchemaTest");
-    foreach ($data as $values) {
-      $st->insert($values);
-    }
+    foreach ($data as $values) $st->insert($values);
+    
+    $data = array();
+    $data[] = array("id" => 1, "name" => "yamada");
+    $data[] = array("id" => 2, "name" => "tanaka");
+    $data[] = array("id" => 3, "name" => "suzuki");
+    
+    $student = MODEL("Student");
+    foreach ($data as $values) $student->insert($values);
+    
+    $data = array();
+    $data[] = array("id" => 1, "name" => "Mathematics");
+    $data[] = array("id" => 2, "name" => "Physics");
+    $data[] = array("id" => 3, "name" => "Science");
+    
+    $course = MODEL("Course");
+    foreach ($data as $values) $course->insert($values);
+    
+    $data = array();
+    $data[] = array("student_id" => 1, "course_id" => 1,"val" => "val1");
+    $data[] = array("student_id" => 1, "course_id" => 2,"val" => "val2");
+    $data[] = array("student_id" => 2, "course_id" => 1,"val" => "val3");
+    $data[] = array("student_id" => 2, "course_id" => 3,"val" => "val4");
+    $data[] = array("student_id" => 3, "course_id" => 1,"val" => "val5");
+    $data[] = array("student_id" => 3, "course_id" => 2,"val" => "val6");
+    $data[] = array("student_id" => 3, "course_id" => 3,"val" => "val7");
+    
+    $sc = MODEL("StudentCourse");
+    foreach ($data as $values) $sc->insert($values);
   }
   
   protected function insertJoinTableData()

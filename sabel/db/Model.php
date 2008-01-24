@@ -145,7 +145,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this->selected;
   }
   
-  public function setProperties($attributes)
+  public function setProperties(array $properties)
   {
     $pkey = $this->schema->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
@@ -155,7 +155,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     } else {
       $selected = true;
       foreach ($pkey as $key) {
-        if (!isset($attributes[$key])) {
+        if (!isset($properties[$key])) {
           $selected = false;
           break;
         }
@@ -163,13 +163,13 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     $columns = $this->schemaCols;
-    foreach ($attributes as $key => &$val) {
+    foreach ($properties as $key => &$val) {
       if (isset($columns[$key])) {
         $val = $columns[$key]->cast($val);
       }
     }
     
-    $this->values   = $attributes;
+    $this->values   = $properties;
     $this->selected = $selected;
     
     return $this;
@@ -415,7 +415,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected function _selectByQuery()
   {
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
-    $stmt->projection($this->projection)->where(" " . $this->arguments[0]);
+    $stmt->projection($this->projection)->where($this->arguments[0]);
     
     if (isset($this->arguments[1])) {
       $stmt->setBindValues($this->arguments[1]);
@@ -565,26 +565,26 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $stmt->table($this->tableName)->type($type);
   }
   
-  protected function prepareSelect($stmt)
+  protected function prepareSelect(Sabel_DB_Abstract_Statement $stmt)
   {
     return $stmt->projection($this->projection)
                 ->where($this->getCondition()->build($stmt))
                 ->constraints($this->constraints);
   }
   
-  protected function prepareUpdate($stmt, $data)
+  protected function prepareUpdate(Sabel_DB_Abstract_Statement $stmt, $data)
   {
     $values = $this->chooseValues($data, "update");
     return $stmt->values($values)->where($this->getCondition()->build($stmt));
   }
   
-  protected function prepareInsert($stmt, $data)
+  protected function prepareInsert(Sabel_DB_Abstract_Statement $stmt, $data)
   {
     $values = $this->chooseValues($data, "insert");
     return $stmt->values($values)->sequenceColumn($this->schema->getSequenceColumn());
   }
   
-  protected function prepareDelete($stmt)
+  protected function prepareDelete(Sabel_DB_Abstract_Statement $stmt)
   {
     return $stmt->where($this->getCondition()->build($stmt));
   }
