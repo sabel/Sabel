@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  I18n
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Util_HashList extends SabelTestCase
 {
   public static function suite()

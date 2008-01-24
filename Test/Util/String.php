@@ -2,6 +2,10 @@
 
 class String extends Sabel_Util_String {}
 
+/**
+ * @category  Util
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Util_String extends SabelTestCase
 {
   public static function suite()

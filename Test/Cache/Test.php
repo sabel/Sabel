@@ -2,6 +2,9 @@
 
 /**
  * test case for Cache/Apc, Cache/Memcache, Cache/File
+ *
+ * @category  Cache
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  */
 class Test_Cache_Test extends SabelTestCase
 {

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  Core
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Object extends SabelTestCase
 {
   public static function suite()

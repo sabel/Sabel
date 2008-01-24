@@ -2,6 +2,10 @@
 
 class UtilMap extends Sabel_Util_Map {}
 
+/**
+ * @category  Util
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Util_Map extends SabelTestCase
 {
   public static function suite()

@@ -14,6 +14,11 @@ class Sabel_Environment extends Sabel_Object
   private static $instance = null;
   private $environments = array();
   
+  private function __construct()
+  {
+    
+  }
+  
   public static function create()
   {
     if (self::$instance === null) {

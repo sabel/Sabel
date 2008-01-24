@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  Cache
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Cache_Memcache extends Test_Cache_Test
 {
   public static function suite()

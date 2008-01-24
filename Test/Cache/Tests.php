@@ -5,6 +5,10 @@ require_once("Test/Cache/Apc.php");
 require_once("Test/Cache/Memcache.php");
 require_once("Test/Cache/File.php");
 
+/**
+ * @category  Cache
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Cache_Tests
 {
   public static function main()

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  Router
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Destination extends SabelTestCase
 {
   public static function suite()

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  Storage
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_Storage_InMemory extends SabelTestCase
 {
   private $storage = null;

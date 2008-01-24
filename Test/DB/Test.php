@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  DB
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_DB_Test extends SabelTestCase
 {
   public static $db = "";

@@ -11,7 +11,7 @@ if (!defined("GETTEXT_DEFAULT_DOMAIN_PATH")) {
 /**
  * Sabel_I18n_Gettext
  *
- * @category   i18n
+ * @category   I18n
  * @package    org.sabel.i18n
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
@@ -32,7 +32,10 @@ class Sabel_I18n_Gettext
   protected $codeset     = array();
   protected $initialized = false;
   
-  private function __construct() {}
+  private function __construct()
+  {
+    
+  }
   
   public static function getInstance()
   {
@@ -57,12 +60,13 @@ class Sabel_I18n_Gettext
     }
     
     if ($this->initialized) {
+      $path = $this->domainPath[$domain];
       if (self::$type === self::SABEL) {
-        $path = $this->domainPath[$domain];
         Sabel_I18n_Sabel_Gettext::setDomain($domain);
         Sabel_I18n_Sabel_Gettext::setDomainPath($domain, $path);
       } else {
         textdomain($domain);
+        bindtextdomain($domain, $path);
       }
     }
     
@@ -101,23 +105,19 @@ class Sabel_I18n_Gettext
     return $this;
   }
   
-  public function init($type = self::SABEL)
+  public function init($type = self::SABEL, $force = false)
   {
-    if ($this->initialized) return;
-
+    if ($this->initialized && !$force) return;
+    
     $browser = new Sabel_Locale_Browser();
     
     if (extension_loaded("gettext")) {
       $type   = self::GETTEXT;
       $config = CONFIG_DIR_PATH . DS . "locales.php";
       Sabel::fileUsing($config, true);
-    } else {
+    } elseif ($type === self::PHP_GETTEXT) {
       $dir = dirname(__FILE__) . DS;
-      if ($type === self::SABEL) {
-        Sabel::fileUsing($dir . "sabel" . DS . "Gettext.php", true);
-      } else {
-        Sabel::fileUsing($dir . "php-gettext" . DS . "gettext.inc", true);
-      }
+      Sabel::fileUsing($dir . "php-gettext" . DS . "gettext.inc", true);
     }
     
     self::$type = $type;
@@ -187,6 +187,7 @@ class Sabel_I18n_Gettext
   {
     if (ENVIRONMENT === PRODUCTION) {
       $cache = CACHE_DIR_PATH . DS . "ldirs" . PHP_SUFFIX;
+      
       if (is_file($cache)) {
         include ($cache);
         $dirs = $locales;
@@ -207,7 +208,7 @@ class Sabel_I18n_Gettext
   
   private function _getLocaleDirs()
   {
-    $dir  = RUN_BASE . DS . "locale" . DS;
+    $dir  = GETTEXT_DEFAULT_DOMAIN_PATH . DS;
     $dirs = array();
     
     foreach (scandir($dir) as $item) {

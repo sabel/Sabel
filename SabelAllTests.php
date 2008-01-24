@@ -8,6 +8,7 @@ define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 define("ENVIRONMENT", TEST);
 define("PHP_SUFFIX",  ".php");
+define("IS_WIN",      DIRECTORY_SEPARATOR === '\\');
 
 error_reporting(E_ALL|E_STRICT);
 
@@ -22,36 +23,38 @@ require_once("PHPUnit/Framework/TestCase.php");
 require_once("PHPUnit/Framework/TestSuite.php");
 require_once("PHPUnit/Framework/IncompleteTestError.php");
 
-require_once('Sabel.php');
-require_once('Test/SabelTestCase.php');
-require_once('Test/SabelTestSuite.php');
-require_once('Test/Bus.php');
-require_once('Test/Object.php');
-require_once('Test/Annotation.php');
-require_once('Test/Aspect.php');
-require_once('Test/Container.php');
-require_once('Test/Pager.php');
-require_once('Test/PageViewer.php');
-require_once('Test/Request.php');
-require_once('Test/Destination.php');
-require_once('Test/View/Tests.php');
-require_once('Test/View/TemplateFile.php');
-require_once('Test/View/TemplateDb.php');
-require_once('Test/Storage/InMemory.php');
-require_once('Test/Cache/Tests.php');
+require_once("Sabel.php");
+require_once("Test/SabelTestCase.php");
+require_once("Test/SabelTestSuite.php");
+require_once("Test/Bus.php");
+require_once("Test/Object.php");
+require_once("Test/Annotation.php");
+require_once("Test/Aspect.php");
+require_once("Test/Container.php");
+require_once("Test/Pager.php");
+require_once("Test/PageViewer.php");
+require_once("Test/Request.php");
+require_once("Test/Destination.php");
+require_once("Test/Reflection.php");
+require_once("Test/View/Tests.php");
+require_once("Test/View/TemplateFile.php");
+require_once("Test/View/TemplateDb.php");
+require_once("Test/Storage/InMemory.php");
+require_once("Test/Cache/Tests.php");
+require_once("Test/Util/String.php");
+require_once("Test/Util/Map.php");
+require_once("Test/Util/List.php");
+require_once("Test/Util/HashList.php");
+require_once("Test/DB/Tests.php");
+require_once("Test/Validate.php");
+require_once("Test/Map/Tests.php");
+require_once("Test/VirtualInheritance.php");
+require_once("Test/Locale/Browser.php");
+require_once("Test/Locale/Server.php");
+require_once("Test/I18n/Sabel.php");
+require_once("Test/I18n/PhpGettext.php");
 
-require_once('Test/Util/String.php');
-require_once('Test/Util/Map.php');
-require_once('Test/Util/List.php');
-require_once('Test/Util/HashList.php');
-
-require_once('Test/DB/Tests.php');
-require_once('Test/Validate.php');
-require_once('Test/Map/Tests.php');
-//require_once('Test/Processor/Tests.php');
-
-require_once('Test/VirtualInheritance.php');
-require_once('Test/Reflection.php');
+//require_once('Test/Processor/Tests.php");
 
 class SabelAllTests
 {
@@ -83,6 +86,10 @@ class SabelAllTests
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
+    $suite->addTest(Test_Locale_Browser::suite());
+    $suite->addTest(Test_Locale_Server::suite());
+    $suite->addTest(Test_I18n_Sabel::suite());
+    $suite->addTest(Test_I18n_PhpGettext::suite());
     $suite->addTest(Test_DB_Tests::suite());
     // $suite->addTest(Test_Validate::suite());
     

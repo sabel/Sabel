@@ -49,24 +49,16 @@ $LC_CATEGORIES  = array("LC_CTYPE",
                         "LC_MESSAGES",
                         "LC_ALL");
 
-function _($msgid)
-{
-  return _encode(_get_reader()->translate($msgid));
-}
-
-function gettext($msgid)
-{
-  return _($msgid);
-}
-
-function __($msgid)
-{
-  return _($msgid);
-}
-
-function _gettext($msgid)
-{
-  return _($msgid);
+if (function_exists("_")) {
+  function __($msgid)
+  {
+    return _encode(_get_reader()->translate($msgid));
+  }
+} else {
+  function _($msgid)
+  {
+    return _encode(_get_reader()->translate($msgid));
+  }
 }
 
 /**

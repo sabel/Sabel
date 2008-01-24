@@ -3,7 +3,7 @@
 /**
  * Sabel_I18n_Sabel_Gettext
  *
- * @category   i18n
+ * @category   I18n
  * @package    org.sabel.i18n
  * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
@@ -58,6 +58,7 @@ class Sabel_I18n_Sabel_Gettext
   {
     if (substr($path, -1, 1) !== DS) $path .= DS;
     self::$domainPath[$domain] = $path;
+    unset(self::$messages[self::$locale][$domain]);
   }
   
   public static function setCodeset($domain, $codeSet)

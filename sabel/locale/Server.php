@@ -23,7 +23,7 @@ class Sabel_Locale_Server extends Sabel_Object
       list ($key, $val) = explode("=", $locale);
       $locales[$key] = $val;
     }
-
+    
     $this->lcAll   = $lcAll;
     $this->locales = $locales;
   }
@@ -31,6 +31,7 @@ class Sabel_Locale_Server extends Sabel_Object
   public function __get($key)
   {
     $key = "LC_" . strtoupper($key);
+    
     if (isset($this->locales[$key])) {
       return $this->locales[$key];
     } else {

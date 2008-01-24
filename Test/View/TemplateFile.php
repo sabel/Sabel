@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  View
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_View_TemplateFile extends Test_View_Tests
 {
   public static function suite()

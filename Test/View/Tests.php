@@ -4,6 +4,10 @@ if (!defined("VIEW_DIR_NAME")) define("VIEW_DIR_NAME", "views");
 if (!defined("TPL_SUFFIX")) define("TPL_SUFFIX", ".tpl");
 if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
 
+/**
+ * @category  View
+ * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ */
 class Test_View_Tests extends SabelTestCase
 {
   protected static $repository = null;
