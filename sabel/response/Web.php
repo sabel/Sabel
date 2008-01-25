@@ -11,36 +11,18 @@
  */
 class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
 {
-  private $location = "";
-  private $locationUri = "";
-  
-  private $status = 200;
-  
-  const SUCCESS      = 200;
-  const REDIRECTED   = 300;
-  const NOT_MODIFIED = 304;
-  const BAD_REQUEST  = 400;
-  const NOT_FOUND    = 404;
-  const FORBIDDEN    = 403;
-  const SERVER_ERROR = 500;
-  
-  private $contentType = "";
-  
-  private $headers = array();
-  private $responses = array();
-  
-  protected $parameters = array();
-  
-  public function __get($key)
-  {
-    return $this->parameters[$key];
-  }
-  
-  public function __set($key, $value)
-  {
-    $this->parameters[$key] = $value;
-  }
-  
+  protected
+    $location    = "",
+    $locationUri = "";
+    
+  protected
+    $status      = 200,
+    $contentType = "";
+    
+  protected
+    $headers   = array(),
+    $responses = array();
+    
   public function getResponse($key)
   {
     if (isset($this->responses[$key])) {
@@ -65,11 +47,6 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     $this->responses = $responses;
   }
   
-  public function toArray()
-  {
-    return $this->responses;
-  }
-  
   public function setContentType($type)
   {
     $this->contentType = $type;
@@ -84,11 +61,10 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
   {
     return ($this->contentType !== "");
   }
-   
-  public function notFound()
+  
+  public function setHeader($message, $value)
   {
-    $this->status = self::NOT_FOUND;
-    return $this;
+    $this->headers[$message] = $value;
   }
   
   public function getHeaders()
@@ -112,16 +88,6 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     $header->output($this);
   }
   
-  public function outputHeaderIfRedirected()
-  {
-    if ($this->isRedirected()) {
-      $this->outputHeader();
-      return true;
-    } else {
-      return false;
-    }
-  }
-  
   public function expiredCache($expire = 31536000)
   {
     $this->setHeader("Expires",       date(DATE_RFC822, time() + $expire) . " GMT");
@@ -136,22 +102,70 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     $this->setHeader("Etag", '"' . $value . '"');
   }
   
-  public function outputHeaderIfRedirectedThenExit()
+  public function success()
   {
-    if ($this->outputHeaderIfRedirected()) exit;
+    $this->status = Sabel_Response::SUCCESS;
+    return $this;
+  }
+  
+  public function isSuccess()
+  {
+    return ($this->status === Sabel_Response::SUCCESS);
+  }
+  
+  public function isFailure()
+  {
+    $status = $this->status;
+    
+    return ($status === Sabel_Response::NOT_FOUND ||
+            $status === Sabel_Response::FORBIDDEN ||
+            $status === Sabel_Response::SERVER_ERROR);
+  }
+  
+  public function notFound()
+  {
+    $this->status = Sabel_Response::NOT_FOUND;
+    
+    return $this;
   }
   
   public function isNotFound()
   {
-    return ($this->status === self::NOT_FOUND);
+    return ($this->status === Sabel_Response::NOT_FOUND);
   }
   
-  public function location($host, $to)
+  public function serverError()
   {
-    $this->location = "http://" . $host . "/" . $to;
-    $this->locationUri = $to;
-    $this->status = self::REDIRECTED;
+    $this->status = Sabel_Response::SERVER_ERROR;
+    
     return $this;
+  }
+  
+  public function isServerError()
+  {
+    return ($this->status === Sabel_Response::SERVER_ERROR);
+  }
+  
+  public function forbidden()
+  {
+    $this->status = Sabel_Response::FORBIDDEN;
+    
+    return $this;
+  }
+  
+  public function isForbidden()
+  {
+    return ($this->status === Sabel_Response::FORBIDDEN);
+  }
+  
+  public function notModified()
+  {
+    $this->status = Sabel_Response::NOT_MODIFIED;
+  }
+  
+  public function isNotModified()
+  {
+    return $this->status === Sabel_Response::NOT_MODIFIED;
   }
   
   public function getLocation()
@@ -164,65 +178,17 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     return $this->locationUri;
   }
   
+  public function location($host, $to)
+  {
+    $this->location    = "http://" . $host . "/" . $to;
+    $this->locationUri = $to;
+    $this->status      = Sabel_Response::REDIRECTED;
+    
+    return $this;
+  }
+  
   public function isRedirected()
   {
-    return ($this->status === self::REDIRECTED);
-  }
-  
-  public function notModified()
-  {
-    $this->status = self::NOT_MODIFIED;
-  }
-  
-  public function isNotModified()
-  {
-    return $this->status === self::NOT_MODIFIED;
-  }
-  
-  public function success()
-  {
-    $this->status = self::SUCCESS;
-    return $this;
-  }
-  
-  public function isSuccess()
-  {
-    return ($this->status === self::SUCCESS);
-  }
-  
-  public function serverError()
-  {
-    $this->status = self::SERVER_ERROR;
-    return $this;
-  }
-  
-  public function isServerError()
-  {
-    return ($this->status === self::SERVER_ERROR);
-  }
-  
-  public function setHeader($message, $value)
-  {
-    $this->headers[$message] = $value;
-  }
-  
-  public function forbidden()
-  {
-    $this->status = self::FORBIDDEN;
-    return $this;
-  }
-  
-  public function isForbidden()
-  {
-    return ($this->status === self::FORBIDDEN);
-  }
-  
-  public function isFailure()
-  {
-    $status = $this->status;
-    
-    return ($status === self::NOT_FOUND ||
-            $status === self::FORBIDDEN ||
-            $status === self::SERVER_ERROR);
+    return ($this->status === Sabel_Response::REDIRECTED);
   }
 }

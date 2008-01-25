@@ -11,16 +11,16 @@
  */
 class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "integer",
-                           Sabel_DB_Type::BIGINT   => "bigint",
-                           Sabel_DB_Type::SMALLINT => "smallint",
-                           Sabel_DB_Type::FLOAT    => "real",
-                           Sabel_DB_Type::DOUBLE   => "double precision",
-                           Sabel_DB_Type::BOOL     => "boolean",
-                           Sabel_DB_Type::STRING   => "varchar",
-                           Sabel_DB_Type::TEXT     => "text",
-                           Sabel_DB_Type::DATETIME => "timestamp",
-                           Sabel_DB_Type::DATE     => "date");
+  protected $types = array(Sabel_DB_Type::INT      => "INTEGER",
+                           Sabel_DB_Type::BIGINT   => "BIGINT",
+                           Sabel_DB_Type::SMALLINT => "SMALLINT",
+                           Sabel_DB_Type::FLOAT    => "REAL",
+                           Sabel_DB_Type::DOUBLE   => "DOUBLE PRECISION",
+                           Sabel_DB_Type::BOOL     => "BOOLEAN",
+                           Sabel_DB_Type::STRING   => "VARCHAR",
+                           Sabel_DB_Type::TEXT     => "TEXT",
+                           Sabel_DB_Type::DATETIME => "TIMESTAMP",
+                           Sabel_DB_Type::DATE     => "DATE");
                            
   protected function createTable($filePath)
   {

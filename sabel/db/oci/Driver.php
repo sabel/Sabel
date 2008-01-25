@@ -26,7 +26,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     $database = "//" . $params["host"] . "/" . $params["database"];
     $encoding = (isset($params["charset"])) ? $params["charset"] : null;
     
-    $conn = oci_connect($params["user"], $params["password"], $database, $encoding);
+    $conn = oci_new_connect($params["user"], $params["password"], $database, $encoding);
     
     if ($conn) {
       $stmt = oci_parse($conn, "ALTER SESSION SET NLS_DATE_FORMAT = 'YYYY-MM-DD HH24:MI:SS'");

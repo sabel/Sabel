@@ -24,7 +24,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     $dbs  = $params["database"];
     
     $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
-    $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}");
+    $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}", PGSQL_CONNECT_FORCE_NEW);
     
     if ($conn) {
       if (isset($params["charset"])) {

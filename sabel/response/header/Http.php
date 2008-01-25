@@ -24,7 +24,7 @@ class Sabel_Response_Header_Http
     }
     
     if ($response->getLocation()) {
-      l("[Core] Header location: " . var_export($response->getLocation(), 1));
+      l("redirect: " . var_export($response->getLocation(), 1), LOG_DEBUG);
     }
     
     if ($response->isForbidden()) {
