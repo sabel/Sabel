@@ -14,7 +14,7 @@ class Schema_Example
                              'primary'   => true,
                              'default'   => null);
 
-    $cols['column2'] = array('type'       => Sabel_DB_Type::STRING,
+    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => false,

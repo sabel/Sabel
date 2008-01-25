@@ -46,13 +46,6 @@ class Sabel_DB_Migration_Reader extends Sabel_Object
     return $change;
   }
   
-  public function readIndex()
-  {
-    $index = new Sabel_DB_Migration_Index();
-    include ($this->filePath);
-    return $index;
-  }
-  
   public function readQuery()
   {
     $query = new Sabel_DB_Migration_Query();

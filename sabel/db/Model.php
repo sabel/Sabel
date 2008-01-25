@@ -70,10 +70,6 @@ abstract class Sabel_DB_Model extends Sabel_Object
   
   public function __set($key, $val)
   {
-    if (isset($this->schemaCols[$key])) {
-      $val = $this->schemaCols[$key]->cast($val);
-    }
-    
     $this->values[$key] = $val;
     if ($this->selected) $this->updateValues[$key] = $val;
   }
@@ -94,7 +90,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   public function __get($key)
   {
     if (isset($this->values[$key])) {
-      return $this->values[$key];
+      $value = $this->values[$key];
+      if (isset($this->schemaCols[$key])) {
+        return $this->schemaCols[$key]->cast($value);
+      } else {
+        return $value;
+      }
     } else {
       return null;
     }
@@ -159,13 +160,6 @@ abstract class Sabel_DB_Model extends Sabel_Object
           $selected = false;
           break;
         }
-      }
-    }
-    
-    $columns = $this->schemaCols;
-    foreach ($properties as $key => &$val) {
-      if (isset($columns[$key])) {
-        $val = $columns[$key]->cast($val);
       }
     }
     

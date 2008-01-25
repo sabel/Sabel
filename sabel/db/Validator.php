@@ -59,7 +59,7 @@ class Sabel_DB_Validator extends Sabel_Object
       foreach ($values as $name => $val) {
         if (isset($schemas[$name])) {
           $column = clone $schemas[$name];
-          $column->value  = $val;
+          $column->setValue($val);
           $columns[$name] = $column;
         }
       }
@@ -67,7 +67,7 @@ class Sabel_DB_Validator extends Sabel_Object
       $values = $model->toArray();
       foreach ($schemas as $name => $schema) {
         $column = clone $schema;
-        $column->value  = (isset($values[$name])) ? $values[$name] : null;
+        if (isset($values[$name])) $column->setValue($values[$name]);
         $columns[$name] = $column;
       }
     }
@@ -195,6 +195,8 @@ class Sabel_DB_Validator extends Sabel_Object
     
     if ($max_or_min === "max") {
       return ($func($column->value) <= $column->max);
+    } elseif ($column->value === null) {
+      return true;
     } else {
       return ($func($column->value) >= $column->min);
     }
@@ -285,15 +287,8 @@ class Sabel_DB_Validator extends Sabel_Object
   
   protected function unique($model, $uniques)
   {
-    Sabel::using("Manipulator");
-    if (class_exists("Manipulator", false)) {
-      $manip = new Manipulator($model->getName());
-    } else {
-      $manip = new Sabel_DB_Manipulator($model->getName());
-    }
-    
     $lNames = array();
-    $pkey = $model->getPrimaryKey();
+    $pkey = $model->getSchema()->getPrimaryKey();
     if (is_string($pkey)) $pkey = array($pkey);
     
     foreach ($uniques as $unique) {
@@ -301,11 +296,11 @@ class Sabel_DB_Validator extends Sabel_Object
       foreach ($unique as $uni) {
         $lNames[] = $this->getLocalizedName($uni);
         $val = $model->$uni;
-        $manip->setCondition($uni, $val);
+        $model->setCondition($uni, $val);
         $values[] = $val;
       }
       
-      $result = $manip->selectOne();
+      $result = $model->selectOne();
       if (!$result->isSelected()) continue;
       
       if ($model->isSelected()) {

@@ -19,6 +19,7 @@ class Sabel_DB_Schema_Column extends Sabel_Object
   public $increment = null;
   public $max       = null;
   public $min       = null;
+  public $value     = null;
   
   public function isInt($strict = false)
   {
@@ -143,7 +144,7 @@ class Sabel_DB_Schema_Column extends Sabel_Object
         
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:
-        if (is_string($value) && $value === (string)(float)$value || is_int($value)) {
+        if ((is_string($value) && $value === (string)(float)$value) || is_int($value)) {
           return (float)$value;
         } else {
           return $value;
@@ -152,6 +153,11 @@ class Sabel_DB_Schema_Column extends Sabel_Object
       default:
         return $value;
     }
+  }
+  
+  public function setValue($value)
+  {
+    $this->value = $this->cast($value);
   }
   
   private function toInteger($value, $max)

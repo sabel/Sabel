@@ -42,7 +42,6 @@ class Sabel_DB_Schema
       $tblSchema = $schemaObj->getTable($tblName);
     }
     
-    self::setMaxmin($tblSchema);
     return self::$schemas[$tblName] = $tblSchema;
   }
   
@@ -65,28 +64,5 @@ class Sabel_DB_Schema
     self::$schemas = array();
     
     return $schemas;
-  }
-  
-  // @todo
-  public static function setMaxmin($tblSchema)
-  {
-    Sabel::using("Db_ColumnMaxmin");
-    
-    if (class_exists("Db_ColumnMaxmin", false)) {
-      $tblName = $tblSchema->getTableName();
-      $maxmin  = Db_ColumnMaxmin::create();
-      if (!$maxmin->hasMethod($tblName)) return;
-      
-      if (($columns = $maxmin->$tblName()) !== null) {
-        foreach ($columns as $name => $param) {
-          if (isset($param["min"]) && $tblSchema->hasColumn($name)) {
-            $tblSchema->$name->min = $param["min"];
-          }
-          if (isset($param["max"]) && $tblSchema->hasColumn($name)) {
-            $tblSchema->$name->max = $param["max"];
-          }
-        }
-      }
-    }
   }
 }

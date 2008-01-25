@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Table
+ * Sabel_DB_Schema_ForeignKey
  *
  * @category   DB
  * @package    org.sabel.db
@@ -37,12 +37,12 @@ class Sabel_DB_Schema_ForeignKey extends Sabel_Object
       } else {
         $fkey = $this->fkeys[$key];
         $stdClass = new stdClass();
-        $stdClass->table    = $fkey["referenced_table"];
-        $stdClass->column   = $fkey["referenced_column"];
-        $stdClass->onDelete = $fkey["on_delete"];
-        $stdClass->onUpdate = $fkey["on_update"];
-        $this->objects[$key] = $stdClass;
-        return $stdClass;
+        $stdClass->table     = $fkey["referenced_table"];
+        $stdClass->column    = $fkey["referenced_column"];
+        $stdClass->onDelete  = $fkey["on_delete"];
+        $stdClass->onUpdate  = $fkey["on_update"];
+        
+        return $this->objects[$key] = $stdClass;
       }
     } else {
       return null;

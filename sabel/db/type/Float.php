@@ -29,8 +29,8 @@ class Sabel_DB_Type_Float implements Sabel_DB_Type_Interface
 
     if (in_array($type, $types)) {
       $co->type = $this->getType();
-      $co->max  =  3.4028235E38;
-      $co->min  = -3.4028235E38;
+      $co->max  =  3.4028235E+38;
+      $co->min  = -3.4028235E+38;
     } else {
       $this->next->send($co, $type);
     }

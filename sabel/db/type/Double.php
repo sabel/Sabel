@@ -29,8 +29,8 @@ class Sabel_DB_Type_Double implements Sabel_DB_Type_Interface
 
     if (in_array($type, $types)) {
       $co->type = $this->getType();
-      $co->max  =  1.79769E308;
-      $co->min  = -1.79769E308;
+      $co->max  =  1.79769E+308;
+      $co->min  = -1.79769E+308;
     } else {
       $this->next->send($co, $type);
     }

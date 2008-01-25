@@ -236,52 +236,6 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     return $dir . DS . "restore_" . $this->version . PHP_SUFFIX;
   }
   
-  public function index()
-  {
-    $index = $this->getReader()->readIndex();
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
-      if ($createIndexes = $index->getCreateIndexes()) {
-        $this->createIndex($createIndexes);
-      }
-      if ($dropIndexes = $index->getDropIndexes()) {
-        $this->dropIndex($dropIndexes);
-      }
-    } else {
-      if ($createIndexes = $index->getCreateIndexes()) {
-        $this->dropIndex($createIndexes);
-      }
-      if ($dropIndexes = $index->getDropIndexes()) {
-        $this->createIndex($dropIndexes);
-      }
-    }
-  }
-  
-  protected function createIndex(array $idxColumns, $tblName = null)
-  {
-    if ($tblName === null) {
-      $tblName = convert_to_tablename($this->mdlName);
-    }
-    
-    $quotedTblName = $this->quoteIdentifier($tblName);
-    foreach ($idxColumns as $colName) {
-      $idxName = $tblName . "_" . $colName . "_idx";
-      $colName = $this->quoteIdentifier($colName);
-      $this->executeQuery("CREATE INDEX $idxName ON {$quotedTblName}({$colName})");
-    }
-  }
-  
-  protected function dropIndex(array $idxColumns, $tblName = null)
-  {
-    if ($tblName === null) {
-      $tblName = convert_to_tablename($this->mdlName);
-    }
-    
-    foreach ($idxColumns as $colName) {
-      $idxName = $tblName . "_" . $colName . "_idx";
-      $this->executeQuery("DROP INDEX {$tblName}_{$colName}_idx");
-    }
-  }
-  
   protected function query()
   {
     $this->getReader()->readQuery()->execute();
