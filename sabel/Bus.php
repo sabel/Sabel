@@ -92,14 +92,13 @@ class Sabel_Bus extends Sabel_Object
     $processorList = $this->processorList;
     
     while ($processor = $processorList->next()) {
-      $s = microtime();
       $processor->setBus($this);
       $this->beforeEvent($processor->name);
       $result = $processor->execute($this);
       $this->afterEvent($processor->name);
       
       if (ENVIRONMENT !== PRODUCTION) {
-        l("execute " . (microtime() - $s) . " " . $processor->name, LOG_DEBUG);
+        l("execute " . $processor->name, LOG_DEBUG);
       }
     }
     
