@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_Reflection_Method
+ * Sabel_Reflection_Property
  *
  * @category   Reflection
  * @package    org.sabel.reflection
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Reflection_Method extends ReflectionMethod
+class Sabel_Reflection_Property extends ReflectionProperty
 {
   private $annotations = false;
   

@@ -35,6 +35,12 @@ class Sabel_Annotation_Reader extends Sabel_Object
     return $this->process($reflection->getDocComment());
   }
   
+  public function readPropertyAnnotation($class, $property)
+  {
+    $reflection = new Sabel_Reflection_Property($class, $property);
+    return $this->process($reflection->getDocComment());
+  }
+  
   public function process($comment)
   {
     $annotations = array();

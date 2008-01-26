@@ -42,6 +42,30 @@ class Test_Reflection extends SabelTestCase
     $annotation = $o->getReflection()->getMethodAnnotation("fooMethod", "method");
     $this->assertEquals("value", $annotation[0][0]);
   }
+  
+  public function testGetMethods()
+  {
+    $o = new Vircle();
+    $methods = $o->getReflection()->getMethods();
+    $annotations = $methods["fooMethod"]->getAnnotations();
+    $this->assertEquals("value", $annotations["method"][0][0]);
+  }
+  
+  public function testProperty()
+  {
+    $o = new Vircle();
+    $hoge = $o->getReflection()->getProperty("hoge");
+    $annotation = $hoge->getAnnotation("var");
+    $this->assertEquals("string", $annotation[0][0]);
+  }
+  
+  public function testGetProperties()
+  {
+    $o = new Vircle();
+    $props = $o->getReflection()->getProperties();
+    $annotations = $props["fuga"]->getAnnotations();
+    $this->assertEquals("array", $annotations["var"][0][0]);
+  }
 }
 
 /**
@@ -50,6 +74,16 @@ class Test_Reflection extends SabelTestCase
  */
 class Vircle extends Sabel_Object
 {
+  /**
+   * @var string
+   */
+  protected $hoge = "";
+  
+  /**
+   * @var array
+   */
+  protected $fuga = array();
+  
   /**
    * @fuga
    * @method value

@@ -12,30 +12,76 @@
  */
 abstract class Sabel_DB_Model extends Sabel_Object
 {
-  protected
-    $connectionName = "default";
-    
-  protected
-    $method    = "",
-    $arguments = array();
-    
-  protected
-    $tableName  = "",
-    $modelName  = "",
-    $schema     = null,
-    $schemaCols = array(),
-    $projection = array(),
-    $selected   = false;
-    
-  protected
-    $constraints = array(),
-    $condition   = null,
-    $autoReinit  = true;
-    
-  protected
-    $values       = array(),
-    $updateValues = array();
-    
+  /**
+   * @var string
+   */
+  protected $connectionName = "default";
+  
+  /**
+   * @var string
+   */
+  protected $method = "";
+  
+  /**
+   * @var array
+   */
+  protected $arguments = array();
+  
+  /**
+   * @var string
+   */
+  protected $tableName = "";
+  
+  /**
+   * @var string
+   */
+  protected $modelName = "";
+  
+  /**
+   * @var Sabel_DB_Schema_Table
+   */
+  protected $schema = null;
+  
+  /**
+   * @var array
+   */
+  protected $schemaCols = array();
+  
+  /**
+   * @var array
+   */
+  protected $projection = array();
+  
+  /**
+   * @var boolean
+   */
+  protected $selected = false;
+  
+  /**
+   * @var array
+   */
+  protected $constraints = array();
+  
+  /**
+   * @var Sabel_DB_Condition_Manager
+   */
+  protected $condition = null;
+  
+  /**
+   * @var boolean
+   */
+  protected $autoReinit = true;
+  
+  /**
+   * @var array
+   */
+  protected $values = array();
+  
+  /**
+   * @var array
+   */
+  protected $updateValues = array();
+  
   public function __construct($id = null)
   {
     $this->initialize();
