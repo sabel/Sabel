@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Destination
+ * Sabel_Router_Destination
  *
  * @category   Router
  * @package    org.sabel.router
@@ -9,18 +9,18 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Destination extends Sabel_Object
+class Sabel_Router_Destination extends Sabel_Object
 {
   private
     $module     = "",
     $controller = "",
     $action     = "";
-  
-  public function __construct($module, $controller, $action)
+    
+  public function __construct($destination)
   {
-    $this->module     = $module;
-    $this->controller = $controller;
-    $this->action     = $action;
+    $this->module     = $destination["module"];
+    $this->controller = $destination["controller"];
+    $this->action     = $destination["action"];
   }
   
   public function hasModule()

@@ -142,11 +142,10 @@ final class Sabel
     
     require ($SABEL . "Object.php");
     require ($SABEL . "Functions.php");
+    require ($SABEL . "Environment.php");
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
-    require ($SABEL . "Environment.php");
-    require ($SABEL . "Destination.php");
     require ($SABEL . "Request.php");
     require ($SABEL . "Response.php");
     
@@ -189,6 +188,7 @@ final class Sabel
     require ($DB . "Type.php");
     
     require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Map.php");
+    require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Destination.php");
     require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Page.php");
     require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Web.php");
     require ($SABEL . "exception"  . DIRECTORY_SEPARATOR . "Runtime.php");

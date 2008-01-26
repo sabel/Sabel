@@ -42,6 +42,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     if ($id !== null) $this->initSelectOne($id);
   }
 
+  /**
+   * @param string $mdlName
+   *
+   * @return void
+   */
   protected function initialize($mdlName = null)
   {
     if ($mdlName === null) {
@@ -58,35 +63,66 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $this->schemaCols = $this->schema->getColumns();
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return void
+   */
   public function setConnectionName($connectionName)
   {
     $this->connectionName = $connectionName;
   }
   
+  /**
+   * @return string
+   */
   public function getConnectionName()
   {
     return $this->connectionName;
   }
   
+  /**
+   * @param string $key
+   * @param mixed  $val
+   *
+   * @return void
+   */
   public function __set($key, $val)
   {
     $this->values[$key] = $val;
     if ($this->selected) $this->updateValues[$key] = $val;
   }
   
+  /**
+   * @param string $key
+   *
+   * @return void
+   */
   public function unsetValue($key)
   {
     unset($this->values[$key]);
     unset($this->updateValues[$key]);
   }
   
+  /**
+   * @param array $values
+   *
+   * @return Sabel_DB_Model
+   */
   public function setValues(array $values)
   {
     foreach ($values as $key => $val) {
       $this->__set($key, $val);
     }
+    
+    return $this;
   }
   
+  /**
+   * @param string $key
+   *
+   * @return mixed
+   */
   public function __get($key)
   {
     if (isset($this->values[$key])) {
@@ -101,51 +137,85 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   public function getUpdateValues()
   {
     return $this->updateValues;
   }
   
+  /**
+   * @param string $tblName
+   *
+   * @return void
+   */
   public function setTableName($tblName)
   {
     $this->tableName = $tblName;
   }
   
+  /**
+   * @return string
+   */
   public function getTableName()
   {
     return $this->tableName;
   }
   
+  /**
+   * @return string
+   */
   public function getName()
   {
     return $this->modelName;
   }
   
+  /**
+   * @return array
+   */
   public function getColumnNames()
   {
     return array_keys($this->schemaCols);
   }
   
+  /**
+   * @return Sabel_DB_Schema_Table
+   */
   public function getSchema()
   {
     return $this->schema;
   }
   
+  /**
+   * @return Sabel_DB_Schema_Column[]
+   */
   public function getColumns()
   {
     return $this->schemaCols;
   }
   
+  /**
+   * @return array
+   */
   public function toArray()
   {
     return $this->values;
   }
   
+  /**
+   * @return boolean
+   */
   public function isSelected()
   {
     return $this->selected;
   }
   
+  /**
+   * @param array $properties
+   *
+   * @return Sabel_DB_Model
+   */
   public function setProperties(array $properties)
   {
     $pkey = $this->schema->getPrimaryKey();
@@ -169,6 +239,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this;
   }
   
+  /**
+   * @param string $method
+   * @param array  $args
+   *
+   * @return Sabel_DB_Model
+   */
   protected function prepare($method, $args)
   {
     $this->arguments = $args;
@@ -177,6 +253,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this;
   }
   
+  /**
+   * @return mixed
+   */
   protected final function execute()
   {
     $result = null;
@@ -204,11 +283,19 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $result;
   }
   
+  /**
+   * @param boolean $bool
+   *
+   * @return void
+   */
   public function autoReinit($bool)
   {
     $this->autoReinit = $bool;
   }
   
+  /**
+   * @return void
+   */
   public function initState()
   {
     $this->clearCondition(true);
@@ -218,16 +305,29 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $this->arguments  = array();
   }
   
+  /**
+   * @param mixed $projection
+   *
+   * @return Sabel_DB_Model
+   */
   public function setProjection($projection)
   {
     $this->projection = $projection;
+    
+    return $this;
   }
   
+  /**
+   * @return mixed
+   */
   public function getProjection()
   {
     return $this->projection;
   }
   
+  /**
+   * @return Sabel_DB_Condition_Manager
+   */
   public function getCondition()
   {
     if ($this->condition === null) {
@@ -237,6 +337,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this->condition;
   }
   
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return void
+   */
   public function setCondition($arg1, $arg2 = null)
   {
     if (empty($arg1)) return;
@@ -259,6 +365,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @param string $orderBy
+   *
+   * @return Sabel_DB_Model
+   */
   public function setOrderBy($orderBy)
   {
     if (is_string($orderBy)) {
@@ -270,6 +381,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @param int $limit
+   *
+   * @return Sabel_DB_Model
+   */
   public function setLimit($limit)
   {
     if (is_numeric($limit)) {
@@ -281,6 +397,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @param int $offset
+   *
+   * @return Sabel_DB_Model
+   */
   public function setOffset($offset)
   {
     if (is_numeric($offset)) {
@@ -292,11 +413,19 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   public function getConstraints()
   {
     return $this->constraints;
   }
   
+  /**
+   * @param boolean $andConstraints
+   *
+   * @return void
+   */
   public function clearCondition($andConstraints = false)
   {
     if ($this->condition !== null) {
@@ -306,17 +435,29 @@ abstract class Sabel_DB_Model extends Sabel_Object
     if ($andConstraints) $this->unsetConstraints();
   }
   
+  /**
+   * @return void
+   */
   public function unsetConstraints()
   {
     $this->constraints = array();
   }
   
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return int
+   */
   public function getCount($arg1 = null, $arg2 = null)
   {
     $args = func_get_args();
     return $this->prepare("getCount", $args)->execute();
   }
   
+  /**
+   * @return int
+   */
   protected function _getCount()
   {
     @list ($arg1, $arg2) = $this->arguments;
@@ -333,12 +474,21 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return (int)$rows[0]["cnt"];
   }
   
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return Sabel_DB_Model
+   */
   public function selectOne($arg1 = null, $arg2 = null)
   {
     $args = func_get_args();
     return $this->prepare("selectOne", $args)->execute();
   }
   
+  /**
+   * @return Sabel_DB_Model
+   */
   protected function _selectOne()
   {
     @list ($arg1, $arg2) = $this->arguments;
@@ -354,12 +504,22 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $model;
   }
   
+  /**
+   * @param mixed $id
+   *
+   * @return void
+   */
   protected function initSelectOne($id)
   {
     $this->setCondition($id);
     $this->_doSelectOne($this);
   }
   
+  /**
+   * @param Sabel_DB_Model $model
+   *
+   * @return void
+   */
   protected function _doSelectOne(Sabel_DB_Model $model)
   {
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
@@ -379,12 +539,21 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return array
+   */
   public function select($arg1 = null, $arg2 = null)
   {
     $args = func_get_args();
     return $this->prepare("select", $args)->execute();
   }
   
+  /**
+   * @return array
+   */
   protected function _select()
   {
     @list ($arg1, $arg2) = $this->arguments;
@@ -392,9 +561,16 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $this->setCondition($arg1, $arg2);
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
+    
     return (empty($rows)) ? array() : $this->toModels($rows);
   }
   
+  /**
+   * @param string $query
+   * @param array  $bindValues
+   *
+   * @return array
+   */
   public function selectByQuery($query, $bindValues = array())
   {
     if (is_string($query)) {
@@ -406,6 +582,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   protected function _selectByQuery()
   {
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
@@ -419,6 +598,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return (empty($rows)) ? array() : $this->toModels($rows);
   }
   
+  /**
+   * @param array $rows
+   *
+   * @return Sabel_DB_Model[]
+   */
   protected function toModels(array $rows)
   {
     $results = array();
@@ -433,12 +617,18 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $results;
   }
   
+  /**
+   * @return Sabel_DB_Model
+   */
   public function save()
   {
     $args = func_get_args();
     return $this->prepare("save", $args)->execute();
   }
   
+  /**
+   * @return Sabel_DB_Model
+   */
   protected function _save()
   {
     $new = MODEL($this->modelName);
@@ -450,6 +640,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   protected function _saveInsert()
   {
     $columns = $this->getColumns();
@@ -471,6 +664,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $saveValues;
   }
   
+  /**
+   * @return array
+   */
   protected function _saveUpdate()
   {
     if (($pkey = $this->schema->getPrimaryKey()) === null) {
@@ -491,12 +687,20 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return array_merge($this->values, $saveValues);
   }
   
-  public function insert($data = null)
+  /**
+   * @param array $values
+   *
+   * @return mixed
+   */
+  public function insert(array $values = null)
   {
     $args = func_get_args();
     return $this->prepare("insert", $args)->execute();
   }
   
+  /**
+   * @return mixed
+   */
   protected function _insert()
   {
     @list ($data) = $this->arguments;
@@ -505,25 +709,42 @@ abstract class Sabel_DB_Model extends Sabel_Object
     return $this->prepareInsert($stmt, $data)->execute();
   }
   
-  public function update($data = null)
+  /**
+   * @param array $values
+   *
+   * @return void
+   */
+  public function update(array $values = null)
   {
     $args = func_get_args();
-    return $this->prepare("update", $args)->execute();
+    $this->prepare("update", $args)->execute();
   }
   
-  protected function _update($data = null)
+  /**
+   * @return void
+   */
+  protected function _update()
   {
     @list ($data) = $this->arguments;
     $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
     $this->prepareUpdate($stmt, $data)->execute();
   }
   
+  /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return void
+   */
   public function delete($arg1 = null, $arg2 = null)
   {
     $args = func_get_args();
-    return $this->prepare("delete", $args)->execute();
+    $this->prepare("delete", $args)->execute();
   }
   
+  /**
+   * @return void
+   */
   protected function _delete()
   {
     $condition = $this->getCondition();
@@ -553,12 +774,22 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $this->prepareDelete($stmt)->execute();
   }
   
+  /**
+   * @param int $type
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
   public function getStatement($type)
   {
     $stmt = Sabel_DB_Driver::createStatement($this->connectionName);
     return $stmt->table($this->tableName)->type($type);
   }
   
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
   protected function prepareSelect(Sabel_DB_Abstract_Statement $stmt)
   {
     return $stmt->projection($this->projection)
@@ -566,35 +797,37 @@ abstract class Sabel_DB_Model extends Sabel_Object
                 ->constraints($this->constraints);
   }
   
-  protected function prepareUpdate(Sabel_DB_Abstract_Statement $stmt, $data)
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param array $values
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
+  protected function prepareUpdate(Sabel_DB_Abstract_Statement $stmt, $values = null)
   {
-    $values = $this->chooseValues($data, "update");
+    if ($values === null) $values = $this->values;
     return $stmt->values($values)->where($this->getCondition()->build($stmt));
   }
   
-  protected function prepareInsert(Sabel_DB_Abstract_Statement $stmt, $data)
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param array $values
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
+  protected function prepareInsert(Sabel_DB_Abstract_Statement $stmt, $values = null)
   {
-    $values = $this->chooseValues($data, "insert");
+    if ($values === null) $values = $this->values;
     return $stmt->values($values)->sequenceColumn($this->schema->getSequenceColumn());
   }
   
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
   protected function prepareDelete(Sabel_DB_Abstract_Statement $stmt)
   {
     return $stmt->where($this->getCondition()->build($stmt));
-  }
-  
-  protected function chooseValues($data, $method)
-  {
-    if (isset($data) && !is_array($data)) {
-      throw new Sabel_Exception_InvalidArgument("argument should be an array.");
-    } else {
-      $data = ($data === null) ? $this->values : $data;
-      
-      if (empty($data)) {
-        throw new Sabel_DB_Exception("empty $method values.");
-      } else {
-        return $data;
-      }
-    }
   }
 }

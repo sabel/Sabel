@@ -12,23 +12,21 @@
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
   public
-    $request  = null,
-    $response = null;
+    $request  = null;
     
   protected
     $executed = false;
     
   protected
     $bus      = null,
+    $response = null,
     $storage  = null;
     
   protected
     $setup       = false,
     $hidden      = array(),
     $reserved    = array(),
-    $attributes  = array(),
-    $assignments = array(),
-    $destination = null;
+    $attributes  = array();
   
   /**
    * default constructer of page controller
@@ -53,25 +51,16 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * setup of PageController
    *
-   * @access public
    * @param Sabel_Request $request
    * @param Sabel_Storage $storage
+   *
    * @return void
    */
-  public function setup($request, $destination, $storage = null)
+  public function setup(Sabel_Request $request, $storage = null)
   {
-    if (!$request instanceof Sabel_Request_Object) {
-      throw new Sabel_Exception_InvalidArgument("invalid request object");
-    }
-    
-    if (!$destination instanceof Sabel_Destination) {
-      throw new Sabel_Exception_InvalidArgument("invalid destination object");
-    }
-    
-    $this->request     = $request;
-    $this->destination = $destination;
-    $this->storage     = $storage;
-    $this->setup = true;
+    $this->request = $request;
+    $this->storage = $storage;
+    $this->setup   = true;
   }
   
   public function setBus($bus)
@@ -90,10 +79,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   {
     if (!$this->setup) {
       throw new Sabel_Exception_Runtime("page controller must be setup");
-    }
-    
-    if (!$this->request instanceof Sabel_Request_Object) {
-      throw new Sabel_Exception_InvalidArgument("invalid request object.");
     }
     
     if ($this->request->isTypeOf("css")) {
@@ -146,17 +131,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return ($this->hasMethod($action) && is_callable(array($this, $action)));
   }
   
-  /**
-   * assign value to template.
-   *
-   * @param mixed $key search key
-   * @param mixed $value value
-   */
-  protected function assign($key, $value)
-  {
-    $this->attributes[$key] = $value;
-  }
-  
   public function getAttribute($name)
   {
     if (isset($this->attributes[$name])) {
@@ -206,19 +180,9 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return $this->storage;
   }
   
-  public final function getRequests()
-  {
-    return $this->request->fetchPostValues();
-  }
-  
   public function getResponse()
   {
     return $this->response;
-  }
-  
-  public final function getAssignments()
-  {
-    return $this->assignments;
   }
   
   protected function __get($name)
@@ -233,26 +197,5 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected function __set($name, $value)
   {
     $this->attributes[$name] = $value;
-  }
-  
-  /**
-   * get parameter value of URI Query String
-   *
-   * @param string parameters key
-   * @return mixed
-   */
-  protected function getParameter($key)
-  {
-    return $this->request->getParameters()->get($key);
-  }
-  
-  protected function isPost()
-  {
-    return ($this->request->isPost());
-  }
-  
-  protected function isGet()
-  {
-    return ($this->request->isGet());
   }
 }

@@ -25,7 +25,7 @@ class Sabel_Map_Candidate implements Iterator
   protected $elements = array();
   
   protected
-    $uriParameter = array("module" => "", "controller" => "", "action" => "");
+    $destination = array("module" => "", "controller" => "", "action" => "");
     
   protected
     $size     = 0,
@@ -119,16 +119,15 @@ class Sabel_Map_Candidate implements Iterator
       $this->setCache($options["cache"]);
     }
     
-    $p =& $this->uriParameter;
-    if (isset($options["module"]))     $p["module"] = $options["module"];
-    if (isset($options["controller"])) $p["controller"] = $options["controller"];
-    if (isset($options["action"]))     $p["action"] = $options["action"];
+    $d =& $this->destination;
+    if (isset($options["module"]))     $d["module"]     = $options["module"];
+    if (isset($options["controller"])) $d["controller"] = $options["controller"];
+    if (isset($options["action"]))     $d["action"]     = $options["action"];
   }
   
   public function getDestination()
   {
-    $p = $this->uriParameter;
-    return new Sabel_Destination($p["module"], $p["controller"], $p["action"]);
+    return $this->destination;
   }
   
   public function setName($name)
@@ -277,7 +276,7 @@ class Sabel_Map_Candidate implements Iterator
   {
     if (isset($this->elements[$name])) {
       if ($name === "action") {
-        $this->uriParameter["action"] = $value;
+        $this->destination["action"] = $value;
       }
       
       $this->elements[$name]->default = $value;
@@ -359,11 +358,11 @@ class Sabel_Map_Candidate implements Iterator
   public final function evalute(array $requests)
   {
     $constantEstablished = false;
+    $extensionMatch = true;
     
     $uriElement = "";
     $elements = array_values($this->getElements());
     
-    $extensionMatch = true;
     for ($i = 0; $i < count($elements); ++$i) {
       $element = $elements[$i];
       $uriElement = current($requests);
@@ -445,11 +444,11 @@ class Sabel_Map_Candidate implements Iterator
         $element->variable = $uriElement;
         break;
       case self::MODULE:
-        $this->uriParameter["module"] = $uriElement;
+        $this->destination["module"] = $uriElement;
         $element->variable = $uriElement;
         break;
       case self::CONTROLLER:
-        $this->uriParameter["controller"] = $uriElement;
+        $this->destination["controller"] = $uriElement;
         $element->variable = $uriElement;
         break;
       case self::ACTION:
@@ -458,10 +457,10 @@ class Sabel_Map_Candidate implements Iterator
           if ($element->extension !== "" && $element->extension !== $extension) return false;
           $element->variable  = $variable;
           $element->extension = $extension;
-          $this->uriParameter["action"] = $variable;
+          $this->destination["action"] = $variable;
         } else {
           $element->variable = $uriElement;
-          $this->uriParameter["action"] = $uriElement;
+          $this->destination["action"] = $uriElement;
         }
         break;
       case self::TYPE_ARRAY:

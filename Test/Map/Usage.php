@@ -45,7 +45,7 @@ class Test_Map_Usage extends SabelTestCase
     $this->assertFalse($a->hasExtension());
     
     $destination = $default->getDestination();
-    $this->assertTrue($destination->hasAction());
+    $this->assertTrue(isset($destination["action"]));
   }
   
   public function testArray()
@@ -71,7 +71,7 @@ class Test_Map_Usage extends SabelTestCase
     $c = $default->getElementByName("controller");
     $this->assertEquals("cont", $c->variable);
     $destination = $default->getDestination();
-    $this->assertEquals("cont", $destination->getController());
+    $this->assertEquals("cont", $destination["controller"]);
   }
   
   public function testConstantWithDefault()
@@ -90,8 +90,8 @@ class Test_Map_Usage extends SabelTestCase
     $this->assertEquals("index", $a->variable);
     
     $destination = $default->getDestination();
-    $this->assertEquals("index", $destination->getController());
-    $this->assertEquals("index", $destination->getAction());
+    $this->assertEquals("index", $destination["controller"]);
+    $this->assertEquals("index", $destination["action"]);
   }
   
   public function testArrayWithEndSpecificDirective()

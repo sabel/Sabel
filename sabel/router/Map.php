@@ -11,12 +11,10 @@
  */
 class Sabel_Router_Map extends Sabel_Object
 {
-  private $candidate   = null;
-  private $destination = null;
+  private $candidate = null;
   
-  public function route($request)
+  public function route(Sabel_Request $request, Sabel_Config $config)
   {
-    $config = new Config_Map();
     $config->configure();
     
     foreach($config->getRoutes() as $route) {
@@ -46,22 +44,30 @@ class Sabel_Router_Map extends Sabel_Object
       if ($candidate->evalute($request->toArray())) {
         Sabel_Context::getContext()->setCandidate($candidate);
         $this->candidate = $candidate;
-        return $candidate->getDestination();
+        return new Sabel_Router_Destination($candidate->getDestination());
       }
     }
     
-    $candidate = Sabel_Map_Configurator::getCandidate("default");
-    $candidate->setModule("index");
-    $candidate->setController("index");
-    $candidate->setAction("index");
-    Sabel_Context::getContext()->setCandidate($candidate);
-    $this->candidate = $candidate;
-    
-    return $candidate->getDestination();
+    return $this->createDeaultDestination();
   }
   
   public function getCandidate()
   {
     return $this->candidate;
+  }
+  
+  private function createDefaultDestination()
+  {
+    $candidate = Sabel_Map_Configurator::getCandidate("default");
+    
+    if ($candidate) {
+      $destination = array("module" => "index", "controller" => "index", "action" => "index");
+      $candidate->evalute($destination);
+      Sabel_Context::getContext()->setCandidate($candidate);
+      $this->candidate = $candidate;
+      return new Sabel_Router_Destination($destination);
+    } else {
+      throw new Sabel_Exception_Runtime("no routing configuration of default.");
+    }
   }
 }

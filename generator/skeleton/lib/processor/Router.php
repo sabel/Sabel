@@ -16,7 +16,7 @@ class Processor_Router extends Sabel_Bus_Processor
     $request = $bus->get("request");
     $router = new Sabel_Router_Map();
     
-    $bus->set("destination", $router->route($request));
+    $bus->set("destination", $router->route($request, new Config_Map()));
     foreach ($router->getCandidate()->getElements() as $element) {
       $request->setParameterValue($element->name, $element->variable);
     }

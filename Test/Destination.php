@@ -13,7 +13,8 @@ class Test_Destination extends SabelTestCase
   
   public function testDestination()
   {
-    $destination = new Sabel_Destination("module", "controller", "action");
+    $param = array("module" => "module", "controller" => "controller", "action" => "action");
+    $destination = new Sabel_Router_Destination($param);
     $this->assertEquals("module", $destination->getModule());
     $this->assertEquals("controller", $destination->getController());
     $this->assertEquals("action", $destination->getAction());
@@ -21,7 +22,8 @@ class Test_Destination extends SabelTestCase
   
   public function testModule()
   {
-    $destination = new Sabel_Destination("module", "controller", "action");
+    $param = array("module" => "module", "controller" => "controller", "action" => "action");
+    $destination = new Sabel_Router_Destination($param);
     $this->assertTrue($destination->hasModule());
     $destination->setModule("admin");
     $this->assertEquals("admin", $destination->getModule());
@@ -29,7 +31,8 @@ class Test_Destination extends SabelTestCase
   
   public function testController()
   {
-    $destination = new Sabel_Destination("module", "controller", "action");
+    $param = array("module" => "module", "controller" => "controller", "action" => "action");
+    $destination = new Sabel_Router_Destination($param);
     $this->assertTrue($destination->hasController());
     $destination->setController("main");
     $this->assertEquals("main", $destination->getController());
@@ -37,7 +40,8 @@ class Test_Destination extends SabelTestCase
   
   public function testAction()
   {
-    $destination = new Sabel_Destination("module", "controller", "action");
+    $param = array("module" => "module", "controller" => "controller", "action" => "action");
+    $destination = new Sabel_Router_Destination($param);
     $this->assertTrue($destination->hasAction());
     $destination->setAction("index");
     $this->assertEquals("index", $destination->getAction());
@@ -45,7 +49,8 @@ class Test_Destination extends SabelTestCase
   
   public function testToArray()
   {
-    $destination = new Sabel_Destination("module", "controller", "action");
+    $param = array("module" => "module", "controller" => "controller", "action" => "action");
+    $destination = new Sabel_Router_Destination($param);
     list ($m, $c, $a) = $destination->toArray();
     $this->assertEquals("module", $m);
     $this->assertEquals("controller", $c);

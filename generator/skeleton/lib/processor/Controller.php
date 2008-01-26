@@ -39,7 +39,7 @@ class Processor_Controller extends Sabel_Bus_Processor
       }
     }
     
-    $controller->setup($bus->get("request"), $destination, $bus->get("storage"));
+    $controller->setup($bus->get("request"), $bus->get("storage"));
     $controller->setBus($bus);
     
     $bus->set("response",   $response);
