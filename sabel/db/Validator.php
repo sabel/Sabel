@@ -257,15 +257,15 @@ class Sabel_DB_Validator extends Sabel_Object
     $lName = $this->getLocalizedName($name);
     
     foreach ($functions as $function) {
-      $code = '$function($this->model, $name, $lName';
+      $arguments = array($this->model, $name, $lName);
       
       if (is_array($function)) {
         list ($function, $args) = $function;
-        if (!is_array($args)) $args = (array)$args;
-        $code .= ", " . $this->createEvalString($args);
+        if (!is_array($args)) $args = array($args);
+        $arguments = array_merge($arguments, $args);
       }
       
-      eval ('$result = ' . $code . ');');
+      $result = call_user_func_array($function, $arguments);
       if ($result) $this->errors[] = $result;
     }
   }
@@ -274,15 +274,6 @@ class Sabel_DB_Validator extends Sabel_Object
   {
     $lNames = $this->localizedNames;
     return (isset($lNames[$colName])) ? $lNames[$colName] : $colName;
-  }
-  
-  protected function createEvalString(&$arguments)
-  {
-    for ($i = 0; $i < count($arguments); $i++) {
-      $args[] = '$args[' . $i . ']';
-    }
-    
-    return implode(",", $args);
   }
   
   protected function unique($model, $uniques)

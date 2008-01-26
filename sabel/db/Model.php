@@ -692,7 +692,15 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected function _saveInsert()
   {
     $columns = $this->getColumns();
-    $saveValues = $this->values;
+    
+    $saveValues = array();
+    foreach ($this->values as $k => $v) {
+      if (isset($columns[$k])) {
+        $saveValues[$k] = $columns[$k]->cast($v);
+      } else {
+        $saveValues[$k] = $v;
+      }
+    }
     
     $stmt  = $this->getStatement(Sabel_DB_Statement::INSERT);
     $newId = $this->prepareInsert($stmt, $saveValues)->execute();
@@ -716,7 +724,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected function _saveUpdate()
   {
     if (($pkey = $this->schema->getPrimaryKey()) === null) {
-      $message = "save() cannot update model(there is not primary key).";
+      $message = "cannot update a model(there is not primary key).";
       throw new Sabel_DB_Exception($message);
     } else {
       if (is_string($pkey)) $pkey = array($pkey);
@@ -727,9 +735,17 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
-    $saveValues = $this->updateValues;
-    $this->prepareUpdate($stmt, $saveValues)->execute();
     
+    $saveValues = array();
+    foreach ($this->updateValues as $k => $v) {
+      if (isset($columns[$k])) {
+        $saveValues[$k] = $columns[$k]->cast($v);
+      } else {
+        $saveValues[$k] = $v;
+      }
+    }
+    
+    $this->prepareUpdate($stmt, $saveValues)->execute();
     return array_merge($this->values, $saveValues);
   }
   

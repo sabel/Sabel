@@ -206,6 +206,170 @@ class Test_DB_Validate extends SabelTestCase
     
     $this->assertEquals("'validate.test@example.com'(email) is unavailable.", $errors[0]);
   }
+  
+  public function testCustomEmailValidator()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function" => "emailAddressValidator",
+            "model"    => "Example2",
+            "column"   => "column2")
+    );
+    
+    $ex2 = MODEL("Example2");
+    $ex2->column1 = 1;
+    $ex2->column2 = "hoge";
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    
+    $this->assertEquals("invalid email address.", $errors[0]);
+    
+    $ex2->column2 = "a@a.a";
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    $this->assertTrue(empty($errors));
+  }
+  
+  public function testMultipleCustomValidator()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function"  => "minLengthValidator",
+            "model"     => "Example2",
+            "column"    => "column2",
+            "arguments" => 8)
+    );
+    
+    $ex2 = MODEL("Example2");
+    $ex2->column1 = 1;
+    $ex2->column2 = "hoge";
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    
+    $this->assertEquals("invalid email address.", $errors[0]);
+    
+    $ex2->column2 = "a@a.a";
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    
+    $this->assertEquals("column2 must be 8 characters or more.", $errors[0]);
+  }
+  
+  public function testCustomValidatorArguments()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function"  => "maxminValidator",
+            "model"     => "Example2",
+            "column"    => "column1",
+            "arguments" => array(10, 100))
+    );
+    
+    $ex2 = MODEL("Example2");
+    $ex2->column1 = 1;
+    $ex2->column2 = "hoge@example.com";
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    $this->assertEquals("column1 must be 10 or more.", $errors[0]);
+    
+    $ex2->column1 = 120;
+    
+    $validator = new Sabel_DB_Validator($ex2);
+    $errors = $validator->validate();
+    $this->assertEquals("column1 must be 100 or less.", $errors[0]);
+  }
+  
+  public function testCustomValidatorArguments2()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function"  => "maxminValidator",
+            "model"     => "Example3",
+            "column"    => "column1",
+            "arguments" => array(20, 80))
+    );
+    
+    $ex3 = MODEL("Example3");
+    $ex3->column1 = 10;
+    $ex3->column2 = "hoge@example.com";
+    
+    $validator = new Sabel_DB_Validator($ex3);
+    $errors = $validator->validate();
+    $this->assertEquals("column1 must be 20 or more.", $errors[0]);
+    
+    $ex3->column1 = 90;
+    
+    $validator = new Sabel_DB_Validator($ex3);
+    $errors = $validator->validate();
+    $this->assertEquals("column1 must be 80 or less.", $errors[0]);
+  }
+  
+  public function testRetypeValidator()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function"  => "retypeValidator",
+            "model"     => "Example3",
+            "column"    => "column3",
+            "arguments" => "retype")
+    );
+    
+    $ex3 = MODEL("Example3");
+    $ex3->column1 = 50;
+    $ex3->column2 = "hoge@example.com";
+    $ex3->column3 = "1p2a3s4s5w6o7r8d";
+    $ex3->retype  = "abcde";
+    
+    $validator = new Sabel_DB_Validator($ex3);
+    $errors = $validator->validate();
+    $this->assertEquals("input values didn't match.", $errors[0]);
+    
+    $ex3->retype = "1p2a3s4s5w6o7r8d";
+    
+    $validator = new Sabel_DB_Validator($ex3);
+    $errors = $validator->validate();
+    $this->assertTrue(empty($errors));
+  }
+}
+
+function emailAddressValidator($model, $name, $localizedName)
+{
+  if ($model->$name !== null) {
+    $regex = '/^[\w.\-_]+@([\w\-_]+\.)+[a-zA-Z]+$/';
+    if (preg_match($regex, $model->$name) === 0) {
+      return "invalid email address.";
+    }
+  }
+}
+
+function maxminValidator($model, $name, $localizedName, $min, $max)
+{
+  if ($model->$name !== null) {
+    $value = $model->$name;
+    if ($value < $min) {
+      return "$name must be $min or more.";
+    } elseif ($value > $max) {
+      return "$name must be $max or less.";
+    }
+  }
+}
+
+function minLengthValidator($model, $name, $localizedName, $min)
+{
+  if ($model->$name !== null) {
+    if (strlen($model->$name) < $min) {
+      return "$name must be $min characters or more.";
+    }
+  }
+}
+
+function retypeValidator($model, $name, $localizedName, $reInput)
+{
+  if ($model->$name !== $model->$reInput) {
+    return "input values didn't match.";
+  } else {
+    $model->unsetValue($reInput);
+  }
 }
 
 class Schema_Example
@@ -213,9 +377,123 @@ class Schema_Example
   public static function get()
   {
     $cols = array();
+    
+    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+                             'min'       => -(PHP_INT_MAX - 1),
+                             'max'       => PHP_INT_MAX,
+                             'increment' => false,
+                             'nullable'  => false,
+                             'primary'   => true,
+                             'default'   => null);
+                             
+    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => false,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column3'] = array('type'      => Sabel_DB_Type::STRING,
+                             'min'       => 4,
+                             'max'       => 8,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column4'] = array('type'      => Sabel_DB_Type::INT,
+                             'min'       => 18,
+                             'max'       => 120,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column5'] = array('type'      => Sabel_DB_Type::FLOAT,
+                             'min'       => -3.4028235E+38,
+                             'max'       => 3.4028235E+38,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column6'] = array('type'      => Sabel_DB_Type::DATE,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column7'] = array('type'      => Sabel_DB_Type::DATETIME,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['column8'] = array('type'      => Sabel_DB_Type::BOOL,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => false);
+                             
+    return $cols;
+  }
+
+  public function getProperty()
+  {
+    $property = array();
+
+    $property["tableEngine"] = null;
+    $property["uniques"]     = null;
+    $property["fkeys"]       = null;
+
+    return $property;
+  }
+}
+
+class Schema_Example2
+{
+  public static function get()
+  {
+    $cols = array();
 
     $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
-                             'min'       => 0,
+                             'min'       => -(PHP_INT_MAX - 1),
+                             'max'       => PHP_INT_MAX,
+                             'increment' => false,
+                             'nullable'  => false,
+                             'primary'   => true,
+                             'default'   => null);
+
+    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => false,
+                             'primary'   => false,
+                             'default'   => null);
+
+    return $cols;
+  }
+
+  public function getProperty()
+  {
+    $property = array();
+
+    $property["tableEngine"] = null;
+    $property["uniques"]     = null;
+    $property["fkeys"]       = null;
+
+    return $property;
+  }
+}
+
+class Schema_Example3
+{
+  public static function get()
+  {
+    $cols = array();
+
+    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+                             'min'       => -(PHP_INT_MAX - 1),
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
                              'nullable'  => false,
@@ -230,46 +508,11 @@ class Schema_Example
                              'default'   => null);
 
     $cols['column3'] = array('type'      => Sabel_DB_Type::STRING,
-                             'min'       => 4,
-                             'max'       => 8,
+                             'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
-
-    $cols['column4'] = array('type'      => Sabel_DB_Type::INT,
-                             'min'       => 18,
-                             'max'       => 120,
-                             'increment' => false,
-                             'nullable'  => true,
-                             'primary'   => false,
-                             'default'   => null);
-
-    $cols['column5'] = array('type'      => Sabel_DB_Type::FLOAT,
-                             'min'       => -3.4028235E+38,
-                             'max'       => 3.4028235E+38,
-                             'increment' => false,
-                             'nullable'  => true,
-                             'primary'   => false,
-                             'default'   => null);
-
-    $cols['column6'] = array('type'      => Sabel_DB_Type::DATE,
-                             'increment' => false,
-                             'nullable'  => true,
-                             'primary'   => false,
-                             'default'   => null);
-
-    $cols['column7'] = array('type'      => Sabel_DB_Type::DATETIME,
-                             'increment' => false,
-                             'nullable'  => true,
-                             'primary'   => false,
-                             'default'   => null);
-
-    $cols['column8'] = array('type'      => Sabel_DB_Type::BOOL,
-                             'increment' => false,
-                             'nullable'  => true,
-                             'primary'   => false,
-                             'default'   => false);
 
     return $cols;
   }
