@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * sabel.db functional test(using databases).
+ *
  * @category  DB
  * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
  */

@@ -11,8 +11,16 @@
  */
 class Sabel_DB_Connection
 {
+  /**
+   * @var array
+   */
   private static $connections = array();
   
+  /**
+   * @param Sabel_DB_Abstract_Driver $driver
+   *
+   * @return resource
+   */
   public static function connect(Sabel_DB_Abstract_Driver $driver)
   {
     $connectionName = $driver->getConnectionName();
@@ -33,6 +41,11 @@ class Sabel_DB_Connection
     return self::$connections[$connectionName];
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return void
+   */
   public static function close($connectionName)
   {
     if (!isset(self::$connections[$connectionName])) return;
@@ -44,6 +57,9 @@ class Sabel_DB_Connection
     unset(self::$connections[$connectionName]);
   }
   
+  /**
+   * @return void
+   */
   public static function closeAll()
   {
     foreach (Sabel_DB_Config::get() as $connectionName => $config) {

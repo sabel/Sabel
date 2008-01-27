@@ -330,6 +330,46 @@ class Test_DB_Validate extends SabelTestCase
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
   }
+  
+  public function testRegexColumn()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function" => "testValidator",
+            "model"    => "Example4",
+            "column"   => "col_*")
+    );
+    
+    $ex4 = MODEL("Example4");
+    $validator = new Sabel_DB_Validator($ex4);
+    $errors = $validator->validate();
+    $this->assertEquals(2, count($errors));
+    $this->assertTrue(in_array("col_abc", $errors, true));
+    $this->assertTrue(in_array("col_xyz", $errors, true));
+    $this->assertFalse(in_array("abc_col", $errors, true));
+    $this->assertFalse(in_array("xyz_col", $errors, true));
+    
+    Sabel_DB_Validate_Config::clearValidators();
+  }
+  
+  public function testRegexColumn2()
+  {
+    Sabel_DB_Validate_Config::addValidator(
+      array("function" => "testValidator",
+            "model"    => "Example4",
+            "column"   => "*_col")
+    );
+    
+    $ex4 = MODEL("Example4");
+    $validator = new Sabel_DB_Validator($ex4);
+    $errors = $validator->validate();
+    $this->assertEquals(2, count($errors));
+    $this->assertFalse(in_array("col_abc", $errors, true));
+    $this->assertFalse(in_array("col_xyz", $errors, true));
+    $this->assertTrue(in_array("abc_col", $errors, true));
+    $this->assertTrue(in_array("xyz_col", $errors, true));
+    
+    Sabel_DB_Validate_Config::clearValidators();
+  }
 }
 
 function emailAddressValidator($model, $name, $localizedName)
@@ -372,6 +412,11 @@ function retypeValidator($model, $name, $localizedName, $reInput)
   }
 }
 
+function testValidator($model, $name, $localizedName)
+{
+  return $name;
+}
+
 class Schema_Example
 {
   public static function get()
@@ -379,7 +424,7 @@ class Schema_Example
     $cols = array();
     
     $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
-                             'min'       => -(PHP_INT_MAX - 1),
+                             'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
                              'nullable'  => false,
@@ -457,7 +502,7 @@ class Schema_Example2
     $cols = array();
 
     $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
-                             'min'       => -(PHP_INT_MAX - 1),
+                             'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
                              'nullable'  => false,
@@ -493,7 +538,7 @@ class Schema_Example3
     $cols = array();
 
     $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
-                             'min'       => -(PHP_INT_MAX - 1),
+                             'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
                              'nullable'  => false,
@@ -525,6 +570,55 @@ class Schema_Example3
     $property["uniques"]     = null;
     $property["fkeys"]       = null;
 
+    return $property;
+  }
+}
+
+class Schema_Example4
+{
+  public static function get()
+  {
+    $cols = array();
+    
+    $cols['col_abc'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['col_xyz'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['abc_col'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    $cols['xyz_col'] = array('type'      => Sabel_DB_Type::STRING,
+                             'max'       => 255,
+                             'increment' => false,
+                             'nullable'  => true,
+                             'primary'   => false,
+                             'default'   => null);
+                             
+    return $cols;
+  }
+
+  public function getProperty()
+  {
+    $property = array();
+    
+    $property["tableEngine"] = null;
+    $property["uniques"]     = null;
+    $property["fkeys"]       = null;
+    
     return $property;
   }
 }

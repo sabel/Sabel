@@ -233,7 +233,7 @@ class Sabel_DB_Validator extends Sabel_Object
   {
     foreach ($validations as $colName => $functions) {
       if (strpos($colName, "*") !== false) {
-        $regex = str_replace("*", ".*", $colName);
+        $regex = "^" . str_replace("*", ".*", $colName);
         $cols  = array();
         foreach (array_keys($schemas) as $name) {
           if (preg_match("/{$regex}/", $name)) $cols[] = $name;

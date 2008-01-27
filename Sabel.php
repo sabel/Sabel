@@ -149,13 +149,12 @@ final class Sabel
     require ($SABEL . "Request.php");
     require ($SABEL . "Response.php");
     
-    $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
-    $CACHE   = $SABEL . "cache"      . DIRECTORY_SEPARATOR;
-    $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
-    $REQUEST = $SABEL . "request"    . DIRECTORY_SEPARATOR;
-    $STORAGE = $SABEL . "storage"    . DIRECTORY_SEPARATOR;
-    $VIEW    = $SABEL . "view"       . DIRECTORY_SEPARATOR;
-    $DB      = $SABEL . "db"         . DIRECTORY_SEPARATOR;
+    $BUS     = $SABEL . "bus"     . DIRECTORY_SEPARATOR;
+    $CACHE   = $SABEL . "cache"   . DIRECTORY_SEPARATOR;
+    $MAP     = $SABEL . "map"     . DIRECTORY_SEPARATOR;
+    $REQUEST = $SABEL . "request" . DIRECTORY_SEPARATOR;
+    $STORAGE = $SABEL . "storage" . DIRECTORY_SEPARATOR;
+    $VIEW    = $SABEL . "view"    . DIRECTORY_SEPARATOR;
     
     require ($BUS . "Config.php");
     require ($BUS . "Processor.php");
@@ -183,9 +182,6 @@ final class Sabel
     require ($VIEW . "Repository.php");
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
-    
-    require ($DB . "Config.php");
-    require ($DB . "Type.php");
     
     require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Map.php");
     require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Destination.php");

@@ -9,6 +9,11 @@ define("TPL_SUFFIX", ".tpl");
 define("DS", DIRECTORY_SEPARATOR);
 define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
 
+define("INT_MAX", PHP_INT_MAX);
+define("INT_MIN", -PHP_INT_MAX - 1);
+define("SMALLINT_MAX", 32767);
+define("SMALLINT_MIN", -32768);
+
 define("MODULES_DIR_NAME", "app");
 define("ADDON_DIR_NAME",   "addon");
 define("VIEW_DIR_NAME",    "views");

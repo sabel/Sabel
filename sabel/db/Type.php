@@ -1,10 +1,5 @@
 <?php
 
-define("INT_MAX", PHP_INT_MAX);
-define("INT_MIN", -PHP_INT_MAX - 1);
-define("SMALLINT_MAX", pow(2, 15) - 1);
-define("SMALLINT_MIN", -SMALLINT_MAX - 1);
-
 /**
  * Sabel_DB_Type
  *
