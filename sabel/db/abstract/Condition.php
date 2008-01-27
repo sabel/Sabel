@@ -12,13 +12,31 @@
  */
 abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
 {
-  protected
-    $column = "",
-    $value  = null,
-    $isNot  = false;
-    
-  public abstract function build(Sabel_DB_Abstract_Statement $sql, &$counter);
+  /**
+   * @var int
+   */
+  protected $type;
   
+  /**
+   * @var string
+   */
+  protected $column = "";
+  
+  /**
+   * @var mixed
+   */
+  protected $value = null;
+  
+  /**
+   * @var boolean
+   */
+  protected $isNot = false;
+  
+  public abstract function build(Sabel_DB_Abstract_Statement $stmt, &$counter);
+  
+  /**
+   * @param string $column
+   */
   public function __construct($column)
   {
     if (strpos($column, ".") === false) {
@@ -29,16 +47,35 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
     }
   }
   
+  /**
+   * @return int
+   */
+  public function getType()
+  {
+    return $this->type;
+  }
+  
+  /**
+   * @return string
+   */
   public function column()
   {
     return $this->column;
   }
   
+  /**
+   * @return mixed
+   */
   public function value()
   {
     return $this->value;
   }
   
+  /**
+   * @param mixed $value
+   *
+   * @return Sabel_DB_Abstract_Condition
+   */
   public function setValue($value)
   {
     $this->value = $value;
@@ -46,6 +83,11 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
     return $this;
   }
   
+  /**
+   * @param boolean $bool
+   *
+   * @return bool
+   */
   public function isNot($bool = null)
   {
     if ($bool === null) {
@@ -55,15 +97,13 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
     } else {
       throw new Sabel_DB_Exception("argument must be a string.");
     }
-    
-    return $this;
   }
   
-  protected function getColumnWithNot()
-  {
-    return ($this->isNot) ? "NOT " . $this->column : $this->column;
-  }
-  
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   *
+   * @return string
+   */
   protected function conditionColumn(Sabel_DB_Abstract_Statement $stmt)
   {
     if (strpos($this->column, ".") === false) {

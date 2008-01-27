@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Condition_LessEqual extends Sabel_DB_Abstract_Condition
 {
+  protected $type = Sabel_DB_Condition::LESS_EQUAL;
+  
   public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     $num = ++$counter;

@@ -570,19 +570,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
-    
-    if (isset($rows[0])) {
-      $model->setProperties($rows[0]);
-    } else {
-      $condition  = $this->getCondition();
-      $conditions = $condition->getConditions();
-      
-      foreach ($conditions as $c) {
-        if ($condition->isIndividualCondition($c)) {
-          $model->__set($c->column(), $c->value());
-        }
-      }
-    }
+    if (isset($rows[0])) $model->setProperties($rows[0]);
   }
   
   /**

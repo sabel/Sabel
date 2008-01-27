@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Condition_Equal extends Sabel_DB_Abstract_Condition
 {
+  protected $type = Sabel_DB_Condition::EQUAL;
+  
   public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     $num = ++$counter;

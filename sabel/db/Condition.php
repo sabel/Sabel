@@ -74,6 +74,8 @@ class Sabel_DB_Condition
         throw new Sabel_DB_Exception("invalid condition type.");
     }
     
-    return $condition->setValue($value)->isNot($not);
+    $condition->setValue($value)->isNot($not);
+    
+    return $condition;
   }
 }

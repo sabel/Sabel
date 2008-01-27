@@ -16,7 +16,19 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   const ENDS_WITH   = 3;
   const FIXED       = 4;
   
-  private $type   = self::BEGINS_WITH;
+  /**
+   * @var int
+   */
+  protected $type = Sabel_DB_Condition::LIKE;
+  
+  /**
+   * @var int
+   */
+  private $likeType = self::BEGINS_WITH;
+  
+  /**
+   * @var boolean
+   */
   private $escape = true;
   
   public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
@@ -50,7 +62,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   public function type($type)
   {
     if ($type >= 1 && $type <= 4) {
-      $this->type = $type;
+      $this->likeType = $type;
     } else {
       throw new Sabel_Exception_InvalidArgument("invalid type.");
     }
@@ -71,14 +83,15 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   
   private function addSpecialCharacter($value)
   {
-    if ($this->type === self::BEGINS_WITH) {
-      return $value . "%";
-    } elseif ($this->type === self::ENDS_WITH) {
-      return "%" . $value;
-    } elseif ($this->type === self::CONTAINS) {
-      return "%" . $value . "%";
-    } else {
-      return $value;
+    switch ($this->likeType) {
+      case self::BEGINS_WITH:
+        return $value . "%";
+      case self::ENDS_WITH:
+        return "%" . $value;
+      case self::CONTAINS:
+        return "%" . $value . "%";
+      default:
+        return $value;
     }
   }
 }

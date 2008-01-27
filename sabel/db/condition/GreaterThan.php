@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Condition_GreaterThan extends Sabel_DB_Abstract_Condition
 {
+  protected $type = Sabel_DB_Condition::GREATER_THAN;
+  
   public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     $num = ++$counter;

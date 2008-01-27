@@ -11,7 +11,9 @@
  */
 class Sabel_DB_Condition_Direct extends Sabel_DB_Abstract_Condition
 {
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
+  protected $type = Sabel_DB_Condition::DIRECT;
+  
+  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     return $this->column;
   }

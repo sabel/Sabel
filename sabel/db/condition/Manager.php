@@ -36,10 +36,12 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   {
     if (is_array($key)) {
       foreach ($key as $column => $value) {
-        $this->add(Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value));
+        $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value);
+        $this->conditions[$c->column()] = $c;
       }
     } else {
-      $this->add(Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val));
+      $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val);
+      $this->conditions[$c->column()] = $c;
     }
   }
   
@@ -61,7 +63,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     return $conditions;
   }
   
-  public function build(Sabel_DB_Abstract_Statement $sql)
+  public function build(Sabel_DB_Abstract_Statement $stmt)
   {
     $counter = 0;
     
@@ -70,7 +72,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     } else {
       $query = array();
       foreach ($this->conditions as $condition) {
-        $query[] = $condition->build($sql, $counter);
+        $query[] = $condition->build($stmt, $counter);
       }
       
       return "WHERE " . implode(" AND ", $query);

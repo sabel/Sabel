@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Condition_In extends Sabel_DB_Abstract_Condition
 {
+  protected $type = Sabel_DB_Condition::IN;
+  
   public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
   {
     // @todo escape or bind.
