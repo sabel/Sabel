@@ -54,9 +54,10 @@ class Sabel_Logger_File extends Sabel_Object
   public function __destruct()
   {
     $base = RUN_BASE . DS . self::DEFAULT_LOG_DIR . DS;
-    $fp = fopen($base . $this->fileName, "a");
-    $sep = "============================================================";
-    fwrite($fp, PHP_EOL . $sep . PHP_EOL . PHP_EOL);
+    $fp   = fopen($base . $this->fileName, "a");
+    $sep  = "============================================================" . PHP_EOL;
+    
+    fwrite($fp, PHP_EOL . $sep . PHP_EOL);
     fwrite($fp, implode(PHP_EOL, $this->contents) . PHP_EOL);
   }
   

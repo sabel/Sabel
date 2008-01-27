@@ -3,17 +3,14 @@
 /**
  * test case for SabelPager
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category  View
+ * @author    Mori Reo <mori.reo@gmail.com>
  */
-class Test_PageViewer extends SabelTestCase
+class Test_View_PageViewer extends SabelTestCase
 {
   public static function suite()
   {
-    return self::createSuite("Test_PageViewer");
-  }
-  
-  public function setUp()
-  {
+    return self::createSuite("Test_View_PageViewer");
   }
   
   public function testStandardUse()

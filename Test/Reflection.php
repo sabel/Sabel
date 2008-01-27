@@ -1,9 +1,8 @@
 <?php
 
 /**
- * TestCase for Sabel Aplication
- *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category Reflection
+ * @author   Mori Reo <mori.reo@gmail.com>
  */
 class Test_Reflection extends SabelTestCase
 {

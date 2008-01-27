@@ -25,19 +25,19 @@ class Sabel_Annotation_Reader extends Sabel_Object
   
   public function readClassAnnotation($class)
   {
-    $reflection = new Sabel_Reflection_Class($class);
+    $reflection = new ReflectionClass($class);
     return $this->process($reflection->getDocComment());
   }
   
   public function readMethodAnnotation($class, $method)
   {
-    $reflection = new Sabel_Reflection_Method($class, $method);
+    $reflection = new ReflectionMethod($class, $method);
     return $this->process($reflection->getDocComment());
   }
   
   public function readPropertyAnnotation($class, $property)
   {
-    $reflection = new Sabel_Reflection_Property($class, $property);
+    $reflection = new ReflectionProperty($class, $property);
     return $this->process($reflection->getDocComment());
   }
   

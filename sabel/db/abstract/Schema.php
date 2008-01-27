@@ -51,8 +51,8 @@ abstract class Sabel_DB_Abstract_Schema extends Sabel_Object
         (is_string($default) &&
         ($default === "" || strtolower($default) === "null"))
        ) {
-       $column->default = null;
-       return;
+      $column->default = null;
+      return;
     }
     
     switch ($column->type) {

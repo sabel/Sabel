@@ -695,11 +695,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     
     $saveValues = array();
     foreach ($this->values as $k => $v) {
-      if (isset($columns[$k])) {
-        $saveValues[$k] = $columns[$k]->cast($v);
-      } else {
-        $saveValues[$k] = $v;
-      }
+      $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
     }
     
     $stmt  = $this->getStatement(Sabel_DB_Statement::INSERT);
@@ -734,17 +730,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
       }
     }
     
-    $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
-    
     $saveValues = array();
     foreach ($this->updateValues as $k => $v) {
-      if (isset($columns[$k])) {
-        $saveValues[$k] = $columns[$k]->cast($v);
-      } else {
-        $saveValues[$k] = $v;
-      }
+      $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
     }
     
+    $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
     $this->prepareUpdate($stmt, $saveValues)->execute();
     return array_merge($this->values, $saveValues);
   }

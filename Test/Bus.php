@@ -3,7 +3,8 @@
 /**
  * a test case of Sabel Bus
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category  Bus
+ * @author    Mori Reo <mori.reo@gmail.com>
  */
 class Test_Bus extends SabelTestCase
 {

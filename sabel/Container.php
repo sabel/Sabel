@@ -3,7 +3,7 @@
 /**
  * Sabel Container
  *
- * @category   container
+ * @category   Container
  * @package    org.sabel.container
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>

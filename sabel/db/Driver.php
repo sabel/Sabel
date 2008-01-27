@@ -11,6 +11,11 @@
  */
 class Sabel_DB_Driver
 {
+  /**
+   * @param string $connectionName
+   *
+   * @return Sabel_DB_Abstract_Driver
+   */
   public static function create($connectionName = "default")
   {
     $className = self::classPrefix($connectionName) . "Driver";
@@ -32,12 +37,22 @@ class Sabel_DB_Driver
     return $driver;
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return Sabel_DB_Abstract_Statement
+   */
   public static function createStatement($connectionName = "default")
   {
     $className = self::classPrefix($connectionName) . "Statement";
     return new $className(self::create($connectionName));
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return Sabel_DB_Abstract_Schema
+   */
   public static function createSchema($connectionName = "default")
   {
     $className  = self::classPrefix($connectionName) . "Schema";
@@ -45,6 +60,11 @@ class Sabel_DB_Driver
     return new $className(self::create($connectionName), $schemaName);
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return string
+   */
   private static function classPrefix($connectionName)
   {
     $dirs = explode(".", Sabel_DB_Config::getPackage($connectionName));

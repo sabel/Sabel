@@ -8,16 +8,16 @@
  */
 class Sabel_View_TagPageViewer extends Sabel_View_PageViewer
 {
-  protected $tag = '';
+  protected $tag = "";
   
   public function __construct($pager)
   {
     parent::__construct($pager);
-
-    if (isset($_SERVER['HTTP_HOST'])) {
-      $this->tag = '<a href="' . uri('') . '">%d</a>';
+    
+    if (isset($_SERVER["HTTP_HOST"])) {
+      $this->tag = '<a href="' . uri("") . '">%d</a>';
     } else {
-      $this->tag = '<a href="' . uri('', false) . '">%d</a>';
+      $this->tag = '<a href="' . uri("", false) . '">%d</a>';
     }
   }
   
@@ -28,13 +28,13 @@ class Sabel_View_TagPageViewer extends Sabel_View_PageViewer
   
   public function getNext()
   {
-    $next = (int) min($this->pager->getTotalPageNumber(), $this->current + 1);
+    $next = (int)min($this->pager->getTotalPageNumber(), $this->current + 1);
     return sprintf($this->tag, $next);
   }
   
   public function getPrevious()
   {
-    $previous = (int) max(1, $this->current - 1);
+    $previous = (int)max(1, $this->current - 1);
     return sprintf($this->tag, $previous);
   }
   

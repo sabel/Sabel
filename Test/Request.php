@@ -2,9 +2,9 @@
 
 /**
  * Test_Request
- * 
- * @package org.sabel.Test
- * @author Mori Reo <mori.reo@gmail.com>
+ *
+ * @category Request
+ * @author   Mori Reo <mori.reo@gmail.com>
  */
 class Test_Request extends SabelTestCase
 {

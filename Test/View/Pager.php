@@ -3,15 +3,16 @@
 /**
  * test case for SabelPager
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @category  View
+ * @author    Mori Reo <mori.reo@gmail.com>
  */
-class Test_Pager extends SabelTestCase
+class Test_View_Pager extends SabelTestCase
 {
   private $pager = null;
   
   public static function suite()
   {
-    return self::createSuite("Test_Pager");
+    return self::createSuite("Test_View_Pager");
   }
   
   public function setUp()
