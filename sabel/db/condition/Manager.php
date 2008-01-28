@@ -15,8 +15,8 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   
   public function add($condition)
   {
-    if ($this->isIndividualCondition($condition)) {
-      $this->conditions[$condition->column()] = $condition;
+    if ($condition instanceof Sabel_DB_Abstract_Condition) {
+      $this->conditions[$condition->getColumn()] = $condition;
     } else {
       $this->conditions[] = $condition;
     }
@@ -25,6 +25,11 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   public function has($column)
   {
     return isset($this->conditions[$column]);
+  }
+  
+  public function isEmpty()
+  {
+    return empty($this->conditions);
   }
   
   public function getConditions()
@@ -37,22 +42,12 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     if (is_array($key)) {
       foreach ($key as $column => $value) {
         $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value);
-        $this->conditions[$c->column()] = $c;
+        $this->conditions[$c->getColumn()] = $c;
       }
     } else {
       $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val);
-      $this->conditions[$c->column()] = $c;
+      $this->conditions[$c->getColumn()] = $c;
     }
-  }
-  
-  public function isIndividualCondition($condition)
-  {
-    return ($condition instanceof Sabel_DB_Abstract_Condition);
-  }
-  
-  public function isEmpty()
-  {
-    return empty($this->conditions);
   }
   
   public function clear()
@@ -65,17 +60,15 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   
   public function build(Sabel_DB_Abstract_Statement $stmt)
   {
-    $counter = 0;
+    if (empty($this->conditions)) return "";
     
-    if (count($this->conditions) === 0) {
-      return "";
-    } else {
-      $query = array();
-      foreach ($this->conditions as $condition) {
-        $query[] = $condition->build($stmt, $counter);
-      }
-      
-      return "WHERE " . implode(" AND ", $query);
+    $counter = 0;
+    $query = array();
+    
+    foreach ($this->conditions as $condition) {
+      $query[] = $condition->build($stmt, $counter);
     }
+    
+    return "WHERE " . implode(" AND ", $query);
   }
 }

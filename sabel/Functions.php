@@ -2,15 +2,19 @@
 
 function add_include_path($path)
 {
-  $p = RUN_BASE . DS . $path;
-  set_include_path(get_include_path() . PATH_SEPARATOR . $p);
+  set_include_path(get_include_path() . PATH_SEPARATOR . $path);
 }
 
-function add_include_paths($paths)
+function unshift_include_path($path)
+{
+  set_include_path($path . PATH_SEPARATOR . get_include_path());
+}
+
+function unshift_include_paths($paths, $prefix = "")
 {
   $path = "";
   foreach ($paths as $p) {
-    $path .= RUN_BASE . DS . $p . PATH_SEPARATOR;
+    $path .= $prefix . $p . PATH_SEPARATOR;
   }
   
   set_include_path($path . get_include_path());
@@ -86,12 +90,8 @@ function _new($className)
   if (($c = count($args)) === 0) {
     return new $className();
   } else {
-    $code = array();
-    for ($i = 1, ++$c; $i < $c; $i++) {
-      $code[] = '$args[' . $i. ']';
-    }
-    eval('$instance = new ' . $className . '(' . implode(", ", $code) . ');');
-    return $instance;
+    $reflection = new ReflectionClass($className);
+    return $reflection->newInstanceArgs($args);
   }
 }
 

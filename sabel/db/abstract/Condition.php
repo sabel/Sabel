@@ -58,7 +58,7 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   /**
    * @return string
    */
-  public function column()
+  public function getColumn()
   {
     return $this->column;
   }
@@ -66,7 +66,7 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   /**
    * @return mixed
    */
-  public function value()
+  public function getValue()
   {
     return $this->value;
   }

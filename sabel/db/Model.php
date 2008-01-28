@@ -414,6 +414,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param string $orderBy
    *
+   * @throws Sabel_Exception_InvalidArgument
    * @return Sabel_DB_Model
    */
   public function setOrderBy($orderBy)
@@ -430,6 +431,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param int $limit
    *
+   * @throws Sabel_Exception_InvalidArgument
    * @return Sabel_DB_Model
    */
   public function setLimit($limit)
@@ -446,6 +448,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param int $offset
    *
+   * @throws Sabel_Exception_InvalidArgument
    * @return Sabel_DB_Model
    */
   public function setOffset($offset)
@@ -533,6 +536,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
+   * @throws Sabel_DB_Exception
    * @return Sabel_DB_Model
    */
   protected function _selectOne()
@@ -603,6 +607,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param string $query
    * @param array  $bindValues
    *
+   * @throws Sabel_Exception_InvalidArgument
    * @return array
    */
   public function selectByQuery($query, $bindValues = array())
@@ -703,6 +708,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
+   * @throws Sabel_DB_Exception
    * @return array
    */
   protected function _saveUpdate()
@@ -784,6 +790,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
+   * @throws Sabel_DB_Exception
    * @return void
    */
   protected function _delete()

@@ -19,6 +19,7 @@ class Sabel_DB_Connection
   /**
    * @param Sabel_DB_Abstract_Driver $driver
    *
+   * @throws Sabel_DB_Connection_Exception
    * @return resource
    */
   public static function connect(Sabel_DB_Abstract_Driver $driver)
