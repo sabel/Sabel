@@ -27,8 +27,8 @@ class Sabel_DB_Type_Smallint implements Sabel_DB_Type_Interface
   {
     if ($type === "smallint") {
       $co->type = $this->getType();
-      $co->max  = SMALLINT_MAX;
-      $co->min  = SMALLINT_MIN;
+      $co->max  = 32767;
+      $co->min  = -32768;
     } else {
       $this->next->send($co, $type);
     }

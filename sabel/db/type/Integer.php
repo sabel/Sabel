@@ -27,13 +27,12 @@ class Sabel_DB_Type_Integer implements Sabel_DB_Type_Interface
   {
     $types = array("integer", "int", "int4", "serial", "tinyint");
 
-    if (!in_array($type, $types)) {
+    if (in_array($type, $types)) {
+      $co->type = $this->getType();
+      $co->max  = PHP_INT_MAX;
+      $co->min  = -PHP_INT_MAX - 1;
+    } else {
       $this->next->send($co, $type);
-      return;
     }
-
-    $co->type = $this->getType();
-    $co->max  = INT_MAX;
-    $co->min  = INT_MIN;
   }
 }

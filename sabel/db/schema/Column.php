@@ -107,10 +107,10 @@ class Sabel_DB_Schema_Column extends Sabel_Object
     
     switch ($this->type) {
       case Sabel_DB_Type::INT:
-        return $this->toInteger($value, INT_MAX);
+        return (is_int($value)) ? $value : $this->toInteger($value, PHP_INT_MAX, -PHP_INT_MAX - 1);
         
       case Sabel_DB_Type::SMALLINT:
-        return $this->toInteger($value, SMALLINT_MAX);
+        return $this->toInteger($value, 32767, -32768);
         
       case Sabel_DB_Type::STRING:
       case Sabel_DB_Type::TEXT:
@@ -130,9 +130,9 @@ class Sabel_DB_Schema_Column extends Sabel_Object
           } elseif ($value === 0) {
             return false;
           }
+        } else {
+          return $value;
         }
-        
-        return $value;
         
       case Sabel_DB_Type::DATETIME:
         $result = strtotime($value);
@@ -160,15 +160,13 @@ class Sabel_DB_Schema_Column extends Sabel_Object
     $this->value = $this->cast($value);
   }
   
-  private function toInteger($value, $max)
+  private function toInteger($value, $max, $min)
   {
-    if (is_string($value) && is_numeric($value) && $value <= $max) {
-      if (($pos = strpos($value, ".")) === false || $value === "0") {
-        return (int)$value;
-      } elseif (substr_count($value, ".") === 1 && preg_match("/0+$/", substr($value, ++$pos))) {
-        return (int)$value;
-      } else {
+    if (is_string($value)) {
+      if (preg_match('/^[+|-]?[0-9]+(\.?[0-9]+)?$/', $value) === 0) {
         return $value;
+      } else {
+        return ($value >= $min && $value <= $max) ? (int)$value : $value;
       }
     } elseif (is_float($value) && fmod($value, 1.0) === 0.0 && $value <= $max) {
       return (int)$value;

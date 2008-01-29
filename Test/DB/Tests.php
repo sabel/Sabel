@@ -31,11 +31,6 @@ define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
 define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
 define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);
 
-if (!defined("INT_MAX"))      define("INT_MAX", PHP_INT_MAX);
-if (!defined("INT_MIN"))      define("INT_MIN", -PHP_INT_MAX - 1);
-if (!defined("SMALLINT_MAX")) define("SMALLINT_MAX", 32767);
-if (!defined("SMALLINT_MIN")) define("SMALLINT_MIN", -32768);
-
 class Test_DB_Tests
 {
   public static function main()

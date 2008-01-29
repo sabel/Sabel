@@ -50,6 +50,7 @@ require_once("Test/Map/Tests.php");
 require_once("Test/VirtualInheritance.php");
 require_once("Test/DB/Tests.php");
 require_once("Test/DB/Validate.php");
+require_once("Test/DB/SchemaColumn.php");
 require_once("Test/Locale/Browser.php");
 require_once("Test/Locale/Server.php");
 require_once("Test/I18n/Sabel.php");
@@ -94,6 +95,7 @@ class SabelAllTests
     $suite->addTest(Test_I18n_PhpGettext::suite());
     $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_DB_Validate::suite());
+    $suite->addTest(Test_DB_SchemaColumn::suite());
     
     // $suite->addTest(Test_Processor_Tests::suite());
     // $suite->addTest(Test_Aspect::suite());
