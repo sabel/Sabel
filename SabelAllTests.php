@@ -84,7 +84,7 @@ class SabelAllTests
     $suite->addTest(Test_View_TagPageViewer::suite());
     $suite->addTest(Test_Util_String::suite());
     $suite->addTest(Test_Util_Map::suite());
-    $suite->addTest(Test_Util_List::suite());
+    $suite->addTest(Test_Util_LinkedList::suite());
     $suite->addTest(Test_Util_HashList::suite());
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());
@@ -93,7 +93,7 @@ class SabelAllTests
     $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Sabel::suite());
     $suite->addTest(Test_I18n_PhpGettext::suite());
-//    $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_DB_Validate::suite());
     $suite->addTest(Test_DB_SchemaColumn::suite());
     

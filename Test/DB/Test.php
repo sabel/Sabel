@@ -275,6 +275,59 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(0, count($st->select($like)));
   }
   
+  public function testOrCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(Condition::create(EQUAL, "sint",  200));
+    $or->add(Condition::create(EQUAL, "email", "test9@example.com"));
+    $st->setOrderBy("id ASC");
+    $results = $st->select($or);
+    
+    $this->assertEquals(3, count($results));
+    $this->assertEquals("test3@example.com", $results[0]->email);
+    $this->assertEquals("test4@example.com", $results[1]->email);
+    $this->assertEquals("test9@example.com", $results[2]->email);
+  }
+  
+  public function testOrCondition2()
+  {
+    $st = MODEL("SchemaTest");
+    $or = new Sabel_DB_Condition_Or();
+    $or->add(Condition::create(EQUAL, "sint",  100));
+    $or->add(Condition::create(BETWEEN, "dt", array("2008-01-07", "2008-01-09")));
+    $st->setOrderBy("id ASC");
+    $results = $st->select($or);
+    
+    $this->assertEquals(5, count($results));
+    $this->assertEquals("test1@example.com", $results[0]->email);
+    $this->assertEquals("test2@example.com", $results[1]->email);
+    $this->assertEquals("test7@example.com", $results[2]->email);
+    $this->assertEquals("test8@example.com", $results[3]->email);
+    $this->assertEquals("test9@example.com", $results[4]->email);
+  }
+  
+  public function testOrAndOrCondition()
+  {
+    $st = MODEL("SchemaTest");
+    $or1 = new Sabel_DB_Condition_Or();
+    $or1->add(Condition::create(EQUAL, "sint", 100));
+    $or1->add(Condition::create(EQUAL, "sint", 300));
+    $or2 = new Sabel_DB_Condition_Or();
+    $or2->add(Condition::create(EQUAL, "sint", 300));
+    $or2->add(Condition::create(EQUAL, "sint", 500));
+    $st->setOrderBy("id ASC");
+    
+    $st->setCondition($or1);
+    $st->setCondition($or2);
+    
+    $results = $st->select();
+    
+    $this->assertEquals(2, count($results));
+    $this->assertEquals("test5@example.com", $results[0]->email);
+    $this->assertEquals("test6@example.com", $results[1]->email);
+  }
+  
   public function testOrderBy()
   {
     $st = MODEL("SchemaTest");

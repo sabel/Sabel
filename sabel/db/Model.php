@@ -43,7 +43,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $schema = null;
   
   /**
-   * @var array
+   * @var Sabel_DB_Schema_Column[]
    */
   protected $schemaCols = array();
   
@@ -397,12 +397,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
     
     if (is_array($arg1)) {
       $condition->create($arg1);
-    } elseif ($arg1 instanceof Sabel_DB_Abstract_Condition) {
-      $condition->add($arg1);
     } elseif (is_model($arg1)) {
       $joinkey = create_join_key($this, $arg1->getTableName());
       $colName = $this->getName() . "." . $joinkey["fkey"];
       $condition->create($colName, $arg1->$joinkey["id"]);
+    } elseif (is_object($arg1)) {
+      $condition->add($arg1);
     } elseif ($arg2 === null) {
       $colName = $this->getName() . "." . $this->schema->getPrimaryKey();
       $condition->create($colName, $arg1);
@@ -823,7 +823,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param int $type
+   * @param const $type Sabel_DB_Abstract_Statement
    *
    * @return Sabel_DB_Abstract_Statement
    */

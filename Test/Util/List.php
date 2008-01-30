@@ -1,12 +1,12 @@
 <?php
 
-class Test_Util_List extends SabelTestCase
+class Test_Util_LinkedList extends SabelTestCase
 {
   private $list = null;
   
   public static function suite()
   {
-    return self::createSuite("Test_Util_List");
+    return self::createSuite("Test_Util_LinkedList");
   }
   
   public function setUp()
@@ -20,7 +20,7 @@ class Test_Util_List extends SabelTestCase
     $third = new StdClass();
     $third->name = "third";
     
-    $this->list = new Sabel_Util_List("first", $first);
+    $this->list = new Sabel_Util_LinkedList("first", $first);
     
     $this->list->insertNext("second", $second)
                ->insertNext("third", $third);
@@ -28,7 +28,7 @@ class Test_Util_List extends SabelTestCase
   
   public function testInsertPreviousAndNext()
   {
-    $list = new Sabel_Util_List("test", new StdClass());
+    $list = new Sabel_Util_LinkedList("test", new StdClass());
     
     for ($i=0; $i < 299; $i++) {
       $list->insertNext("test{$i}", new StdClass());
@@ -43,7 +43,7 @@ class Test_Util_List extends SabelTestCase
   
   public function testFindByName()
   {
-    $list = new Sabel_Util_list("test", new StdClass());
+    $list = new Sabel_Util_LinkedList("test", new StdClass());
     
     $target = new StdClass();
     $target->value = "ebine";
@@ -52,7 +52,7 @@ class Test_Util_List extends SabelTestCase
     
     $obj = $list->find("target");
     
-    $this->assertTrue(($obj instanceof Sabel_Util_List));
+    $this->assertTrue(($obj instanceof Sabel_Util_LinkedList));
     $this->assertTrue(is_object($obj));
     $this->assertEquals("ebine", $obj->current->value);
     $this->assertEquals("test", $obj->getFirst()->name);

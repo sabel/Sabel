@@ -169,4 +169,3 @@ function create_join_key(Sabel_DB_Model $childModel, $parentName)
   
   return array("id" => "id", "fkey" => $parentName . "_id");
 }
-

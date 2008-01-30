@@ -23,6 +23,14 @@ class Sabel_DB_Condition
   const LESS_THAN     = 10;
   const DIRECT        = 11;
   
+  /**
+   * @param const   $type   self
+   * @param string  $column
+   * @param mixed   $value
+   * @param boolean $not
+   *
+   * @return Sabel_DB_Abstract_Condition
+   */
   public static function create($type, $column, $value = null, $not = false)
   {
     switch ($type) {

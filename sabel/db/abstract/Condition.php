@@ -13,7 +13,7 @@
 abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
 {
   /**
-   * @var int
+   * @var const Sabel_DB_Condition
    */
   protected $type;
   
@@ -32,6 +32,12 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
    */
   protected $isNot = false;
   
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param int $counter
+   *
+   * @return string
+   */
   public abstract function build(Sabel_DB_Abstract_Statement $stmt, &$counter);
   
   /**
@@ -74,7 +80,7 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   /**
    * @param mixed $value
    *
-   * @return Sabel_DB_Abstract_Condition
+   * @return self
    */
   public function setValue($value)
   {

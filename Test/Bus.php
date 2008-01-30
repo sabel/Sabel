@@ -39,7 +39,7 @@ class Test_Bus extends SabelTestCase
   
   public function testListSize()
   {
-    $list = new Sabel_Util_List("r1", new Test_Bus_Processor("r1"));
+    $list = new Sabel_Util_LinkedList("r1", new Test_Bus_Processor("r1"));
     
     $last = $list->insertNext("r2", new Test_Bus_Processor("r2"));
     $this->assertEquals(2, $list->size());
@@ -53,7 +53,7 @@ class Test_Bus extends SabelTestCase
   
   public function testInsertPrevious()
   {
-    $list = new Sabel_Util_List("r1", new Test_Bus_Processor("r1"));
+    $list = new Sabel_Util_LinkedList("r1", new Test_Bus_Processor("r1"));
     $list->insertPrevious("r2", new Test_Bus_Processor("r2"));
     $this->assertEquals(2, $list->size());
     $list->insertPrevious("r2", new Test_Bus_Processor("r2"));

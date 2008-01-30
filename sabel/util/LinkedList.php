@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Util_List
+ * Sabel_Util_LinkedList
  *
  * @category   Util
  * @package    org.sabel.util
@@ -9,9 +9,9 @@
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Util_List extends Sabel_Object
+class Sabel_Util_LinkedList extends Sabel_Object
 {
-  public $name     = "";
+  public $name = "";
   
   public $previous = null;
   public $current  = null;

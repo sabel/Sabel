@@ -50,9 +50,9 @@ class Acl_Processor extends Sabel_Bus_Processor
         if ($authUri === null) $authUri = $mConfig->authUri();
       }
       
-      $this->forbidden($authUri);
+      $this->forbidden($bus, $authUri);
     } else {
-      $this->forbidden();
+      $this->forbidden($bus);
     }
   }
   
@@ -72,13 +72,17 @@ class Acl_Processor extends Sabel_Bus_Processor
     }
   }
   
-  private function forbidden($authUri = null)
+  private function forbidden($bus, $authUri = null)
   {
-    if (($redirector = $this->controller->redirect) && $authUri !== null) {
+    $redirector = $bus->get("controller")->getAttribute("redirect");
+    
+    if (is_object($redirector) && $authUri !== null) {
       $redirector->to($authUri);
     } else {
-      $this->response->forbidden();
-      $this->destination->setAction(self::DENY_ACTION);
+      $bus->get("response")->forbidden();
+      $bus->get("destination")->setAction(self::DENY_ACTION);
     }
+    
+    $bus->getProcessorList()->remove("executer");
   }
 }

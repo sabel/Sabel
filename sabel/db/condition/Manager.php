@@ -11,32 +11,62 @@
  */
 class Sabel_DB_Condition_Manager extends Sabel_Object
 {
+  /**
+   * @var array
+   */
   protected $conditions = array();
   
+  /**
+   * @param mixed $condition
+   *
+   * @throws Sabel_Exception_InvalidArgument
+   * @return void
+   */
   public function add($condition)
   {
     if ($condition instanceof Sabel_DB_Abstract_Condition) {
       $this->conditions[$condition->getColumn()] = $condition;
-    } else {
+    } elseif ($condition instanceof Sabel_DB_Condition_Or ||
+              $condition instanceof Sabel_DB_Condition_And) {
       $this->conditions[] = $condition;
+    } else {
+      $message = "invalid condition object.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
+  /**
+   * @param string $column
+   *
+   * @return booelan
+   */
   public function has($column)
   {
     return isset($this->conditions[$column]);
   }
   
+  /**
+   * @return booelan
+   */
   public function isEmpty()
   {
     return empty($this->conditions);
   }
   
+  /**
+   * @return array
+   */
   public function getConditions()
   {
     return $this->conditions;
   }
   
+  /**
+   * @param mixed $key
+   * @param mixed $val
+   *
+   * @return void
+   */
   public function create($key, $val = null)
   {
     if (is_array($key)) {
@@ -50,6 +80,9 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   public function clear()
   {
     $conditions = $this->conditions;
@@ -58,6 +91,11 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
     return $conditions;
   }
   
+  /**
+   * @param Sabel_DB_Abstract_Statement $stmt
+   *
+   * @return string
+   */
   public function build(Sabel_DB_Abstract_Statement $stmt)
   {
     if (empty($this->conditions)) return "";
