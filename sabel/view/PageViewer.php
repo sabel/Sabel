@@ -16,7 +16,6 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   protected $window   = 10;
   protected $priority = self::PRIORITY_PREVIOUS;
   protected $igEmpty  = true;
-  protected $isStatic = false;
   
   protected $start = 0;
   protected $end   = 0;
@@ -52,11 +51,6 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   public function getLast()
   {
     return $this->pager->getTotalPageNumber();
-  }
-  
-  public function getPage($offset)
-  {
-    return $offset;
   }
   
   public function isCurrent()
@@ -102,11 +96,6 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   public function setIgnoreEmpty($flag)
   {
     $this->igEmpty = $flag;
-  }
-  
-  public function setStatic($flag)
-  {
-    $this->isStatic = $flag;
   }
   
   public function current()

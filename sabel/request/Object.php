@@ -178,7 +178,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchGetValues()
   {
-    if (count($this->getValues) === 0) return null;
+    if (count($this->getValues) === 0) return array();
     
     foreach ($this->getValues as &$value) {
       if ($value === "") $value = null;
@@ -243,7 +243,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchPostValues()
   {
-    if (count($this->postValues) === 0) return null;
+    if (count($this->postValues) === 0) return array();
     
     foreach ($this->postValues as &$value) {
       if ($value === "") $value = null;

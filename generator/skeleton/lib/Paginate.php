@@ -15,7 +15,8 @@ class Paginate extends Sabel_Object
     $model      = null,
     $isJoin     = false,
     $attributes = array(),
-    $method     = "select";
+    $method     = "select",
+    $parameters = array();
     
   public function __construct($model)
   {
@@ -46,6 +47,18 @@ class Paginate extends Sabel_Object
     }
   }
   
+  public function getQueryString($page)
+  {
+    unset($this->parameters["page"]);
+    $queryString = array("page={$page}");
+    
+    foreach ($this->parameters as $key => $val) {
+      $queryString[] = "{$key}={$val}";
+    }
+    
+    return "?" . implode("&", $queryString);
+  }
+  
   public function setCondition($arg1, $arg2 = null)
   {
     $this->model->setCondition($arg1, $arg2);
@@ -58,6 +71,16 @@ class Paginate extends Sabel_Object
     $this->model->setOrderBy($orderBy);
     
     return $this;
+  }
+  
+  public function setParameters(array $parameters)
+  {
+    $this->parameters = $parameters;
+  }
+  
+  public function addParameter($key, $val)
+  {
+    $this->parameters[$key] = $val;
   }
   
   public function setMethod($method)
