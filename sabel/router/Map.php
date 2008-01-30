@@ -48,7 +48,7 @@ class Sabel_Router_Map extends Sabel_Object
       }
     }
     
-    return $this->createDeaultDestination();
+    return $this->createDefaultDestination();
   }
   
   public function getCandidate()

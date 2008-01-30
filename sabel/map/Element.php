@@ -67,7 +67,7 @@ class Sabel_Map_Element
   
   public function compareWithRequirement($value)
   {
-    $this->requirement->isMatch($value);
+    return $this->requirement->isMatch($value);
   }
   
   public function hasExtension()

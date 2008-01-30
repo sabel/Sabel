@@ -108,8 +108,8 @@ class Sabel_Map_Candidate implements Iterator
       }
     }
     
-    if (isset($options["requirements"])) {
-      foreach ($options["requirements"] as $key => $value) {
+    if (isset($options["requirement"])) {
+      foreach ($options["requirement"] as $key => $value) {
         $key = ltrim($key, self::VARIABLE_MARK);
         $this->setRequirement($key, new Sabel_Map_Requirement_Regex($value));
       }
@@ -422,7 +422,7 @@ class Sabel_Map_Candidate implements Iterator
     } elseif (($uriElement === null || $uriElement === false) && $element->omittable) {
       $result = $uriElement;
     } elseif ($element->hasRequirement()) {
-      $result = $element->compareWithRequirement($uriElement);
+      $result = ($element->compareWithRequirement($uriElement)) ? $uriElement : false;
     } elseif ($element->isTypeOf(self::CONSTANT) && $uriElement !== $element->name) {
       $result = false;
     } else {

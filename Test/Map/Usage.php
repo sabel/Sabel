@@ -22,7 +22,7 @@ class Test_Map_Usage extends SabelTestCase
     // :action/:year/:month/:day
     $blog = new Sabel_Map_Candidate("blog");
     $blog->route(":action/:year/:month/:day");
-    $blog->setRequirement("year", new Sabel_Map_Requirement_Regex("/20[0-9]/"));
+    $blog->setRequirement("year", new Sabel_Map_Requirement_Regex("20[0-9]"));
     $blog->setOmittables(array("year", "month", "day"));
     
     $this->assertFalse($blog->evalute(explode("/", "test/test/1")));

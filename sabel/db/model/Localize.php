@@ -11,19 +11,43 @@
  */
 class Sabel_DB_Model_Localize
 {
+  /**
+   * @var array
+   */
   protected static $modelNames  = array();
+  
+  /**
+   * @var array
+   */
   protected static $columnNames = array();
   
+  /**
+   * @param string $mdlName
+   * @param string $name
+   *
+   * @return void
+   */
   public static function setName($mdlName, $name)
   {
     self::$modelNames[$mdlName] = $name;
   }
   
-  public static function setColumnNames($mdlName, $names)
+  /**
+   * @param string $mdlName
+   * @param array  $names
+   *
+   * @return void
+   */
+  public static function setColumnNames($mdlName, array $names)
   {
     self::$columnNames[$mdlName] = $names;
   }
   
+  /**
+   * @param string $mdlName
+   *
+   * @return string
+   */
   public static function getName($mdlName)
   {
     if (isset(self::$modelNames[$mdlName])) {
@@ -33,6 +57,11 @@ class Sabel_DB_Model_Localize
     }
   }
   
+  /**
+   * @param string $mdlName
+   *
+   * @return array
+   */
   public static function getColumnNames($mdlName)
   {
     if (isset(self::$columnNames[$mdlName])) {

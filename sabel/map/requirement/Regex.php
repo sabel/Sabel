@@ -11,7 +11,7 @@
  */
 class Sabel_Map_Requirement_Regex implements Sabel_Map_Requirement_Interface
 {
-  protected $regex = '';
+  protected $regex = "";
   
   public function __construct($regex)
   {
@@ -20,6 +20,6 @@ class Sabel_Map_Requirement_Regex implements Sabel_Map_Requirement_Interface
   
   public function isMatch($value)
   {
-    return (boolean) preg_match($this->regex, $value);
+    return (boolean)preg_match("/" . $this->regex . "/", $value);
   }
 }

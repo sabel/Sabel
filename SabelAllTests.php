@@ -93,7 +93,7 @@ class SabelAllTests
     $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Sabel::suite());
     $suite->addTest(Test_I18n_PhpGettext::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+//    $suite->addTest(Test_DB_Tests::suite());
     $suite->addTest(Test_DB_Validate::suite());
     $suite->addTest(Test_DB_SchemaColumn::suite());
     

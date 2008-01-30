@@ -153,7 +153,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param array $values
    *
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setValues(array $values)
   {
@@ -260,7 +260,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param array $properties
    *
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setProperties(array $properties)
   {
@@ -289,7 +289,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param string $method
    * @param array  $args
    *
-   * @return Sabel_DB_Model
+   * @return self
    */
   protected function prepare($method, $args)
   {
@@ -354,7 +354,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param mixed $projection
    *
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setProjection($projection)
   {
@@ -415,7 +415,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param string $orderBy
    *
    * @throws Sabel_Exception_InvalidArgument
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setOrderBy($orderBy)
   {
@@ -432,7 +432,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param int $limit
    *
    * @throws Sabel_Exception_InvalidArgument
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setLimit($limit)
   {
@@ -449,7 +449,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param int $offset
    *
    * @throws Sabel_Exception_InvalidArgument
-   * @return Sabel_DB_Model
+   * @return self
    */
   public function setOffset($offset)
   {
