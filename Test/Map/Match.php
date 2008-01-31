@@ -116,7 +116,7 @@ class Test_Map_Match extends SabelTestCase
          ->uri(":controller/:action/:param")
          ->module("index")
          ->requirements(array(":param" => "/[0-9]+$/"));
-    
+
     $candidate = $this->routing("test/test/1000");
     
     $this->assertEquals("default", $candidate->getName());
@@ -389,11 +389,17 @@ class Test_Map_Match extends SabelTestCase
   
   protected function routing($uri)
   {
+    $validCandidate = null;
+    
     foreach ($this->config->build() as $candidate) {
       if ($candidate->evaluate($this->request($uri))) {
         $validCandidate = $candidate;    
         break;
       }
+    }
+    
+    if ($validCandidate === null) {
+      throw new Sabel_Exception_Runtime("");
     }
     
     return $validCandidate;

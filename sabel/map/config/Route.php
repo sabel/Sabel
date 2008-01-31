@@ -108,4 +108,23 @@ class Sabel_Map_Config_Route
   {
     return $this->defaults;
   }
+  
+  public function createDestination()
+  {
+    $destination = array();
+    
+    if ($this->module !== "") {
+      $destination["module"] = $this->module;
+    }
+    
+    if ($this->controller !== "") {
+      $destination["controller"] = $this->controller;
+    }
+    
+    if ($this->action !== "") {
+      $destination["action"] = $this->action;
+    }
+    
+    return $destination;
+  }
 }

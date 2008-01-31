@@ -3,10 +3,50 @@
 class Sabel_Map_Elements extends Sabel_Object implements Countable
 {
   protected $components = array();
+  protected $namedComponents = array();
   
-  public function __construct(array $elements)
+  public function add(Sabel_Map_Element $element)
   {
-    $this->components = $elements;
+    $this->components[] = $element;
+    $this->namedComponents[$element->name] = $element;
+  }
+  
+  public function has($name)
+  {
+    return (isset($this->namedComponents[$name]));
+  }
+  
+  public function hasAt($index)
+  {
+    return (isset($this->components[$index]));
+  }
+  
+  public function getElement($name)
+  {
+    if (isset($this->namedComponents[$name])) {
+      return $this->namedComponents[$name];
+    } else {
+      return null;
+    }
+  }  
+  
+  public function getElementAt($index)
+  {
+    if (isset($this->components[$index])) {
+      return $this->components[$index];
+    } else {
+      return null;
+    }
+  }
+  
+  public function getNamedElements()
+  {
+    return $this->namedComponents;
+  }
+  
+  public function toArray()
+  {
+    return $this->components;
   }
   
   public function hasDefaults()
@@ -64,14 +104,5 @@ class Sabel_Map_Elements extends Sabel_Object implements Countable
   public function count()
   {
     return count($this->components);
-  }
-  
-  public function get($index)
-  {
-    if (isset($this->components[$index])) {
-      return $this->components[$index];
-    } else {
-      return null;
-    }
   }
 }

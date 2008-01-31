@@ -14,9 +14,10 @@ class Sabel_Context extends Sabel_Object
   private static $context = null;
   
   private
-    $bus       = null,
-    $candidate = null,
-    $exception = null;
+    $bus        = null,
+    $candidate  = null,
+    $candidates = array(),
+    $exception  = null;
     
   public static function setContext($context)
   {
@@ -40,6 +41,25 @@ class Sabel_Context extends Sabel_Object
   public function getCandidate()
   {
     return self::$context->candidate;
+  }
+  
+  public function setCandidates($candidates)
+  {
+    self::$context->candidates = $candidates;
+  }
+  
+  public function getCandidates()
+  {
+    return self::$context->candidates;
+  }
+  
+  public function getCandidateByName($name)
+  {
+    if (isset(self::$context->candidates[$name])) {
+      return self::$context->candidates[$name];
+    } else {
+      return null;
+    }
   }
   
   public function setBus($bus)

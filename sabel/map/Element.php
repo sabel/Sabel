@@ -11,26 +11,54 @@
  */
 class Sabel_Map_Element
 {
+  const VARIABLE_MARK = ":";
+    
   const VARIABLE   = "variable";
   const CONSTANT   = "constant";
   const TYPE_ARRAY = "array";
   
   public $name = "";
   public $type = "";
-  
-  public $default  = "";
   public $variable = "";
+
+  public $extension = "";
+  public $matchAll  = false;
   
-  public $cache       = "";
+  public $default     = "";
   public $omittable   = false;
-  public $extension   = "";
-  public $matchAll    = false;
+  
   public $requirement = null;
   
-  public function __construct($name, $type)
+  public $constant = false;
+  public $isArray  = false;
+  
+  public function __construct($name, $options)
   {
+    if (stripos($name, self::VARIABLE_MARK) === 0) {
+      $name = ltrim($name, self::VARIABLE_MARK);
+      if (strpos($name, "[]") !== false) {
+        $this->isArray = true;
+        $name = str_replace("[]", "", $name);
+        $this->type = self::TYPE_ARRAY;
+      } else {
+        switch ($name) {
+          case Sabel_Map_Candidate::MODULE:
+          case Sabel_Map_Candidate::CONTROLLER:
+          case Sabel_Map_Candidate::ACTION:
+            $this->type = $name;
+            break;
+          default:
+            $this->type = Sabel_Map_Element::VARIABLE;
+            break;
+        }
+      }
+    } else {
+      $this->constant = true;
+      $this->type = self::CONSTANT;
+    }
+    
     $this->name = $name;
-    $this->type = $type;
+    $this->setOptions($options);
   }
   
   public function equalsTo($name)
@@ -45,12 +73,12 @@ class Sabel_Map_Element
   
   public function isArray()
   {
-    return ($this->type === self::TYPE_ARRAY);
+    return $this->isArray;
   }
   
   public function isConstant()
   {
-    return ($this->type === self::CONSTANT);
+    return $this->constant;
   }
   
   public function hasVariable()
@@ -81,5 +109,18 @@ class Sabel_Map_Element
   public function hasExtension()
   {
     return ($this->extension !== "");
+  }
+  
+  public function setOptions($options)
+  {
+    $key = self::VARIABLE_MARK . $this->name;
+    if (isset($options["defaults"][$key])) {
+      $this->default = $options["defaults"][$key];
+      $this->omittable = true;
+    }
+    
+    if (isset($options["requirements"][$key])) {
+      $this->requirement = new Sabel_Map_Requirement_Regex($options["requirements"][$key]);
+    }   
   }
 }

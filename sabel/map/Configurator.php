@@ -23,55 +23,17 @@ abstract class Sabel_Map_Configurator implements Sabel_Config
   
   public function build()
   {
+    $candidates = array();
     foreach ($this->routes as $route) {
       $name = $route->getName();
       $candidate = new Sabel_Map_Candidate($name);
-      $candidate->route($route->getUri())->setOptions($this->buildOptions($route));
-      $this->candidates[$name] = $candidate;
+      $candidate->route($route);
+      $candidates[$name] = $candidate;
     }
     
-    return $this->candidates;
-  }
-  
-  public function buildOptions(Sabel_Map_Config_Route $route)
-  {
-    $options = array();
+    Sabel_Context::getContext()->setCandidates($candidates);
     
-    if ($route->hasModule()) {
-      $options["module"] = $route->getModule();
-    }
-    
-    if ($route->hasController()) {
-      $options["controller"] = $route->getController();
-    }
-    
-    if ($route->hasAction()) {
-      $options["action"] = $route->getAction();
-    }
-    
-    $options["default"]     = $route->getDefaults();
-    $options["requirement"] = $route->getRequirements();
-    
-    return $options;
-  }
-  
-  public function getCandidate($name)
-  {
-    if (isset($this->candidates[$name])) {
-      return $this->candidates[$name];
-    } else {
-      return false;
-    }
-  }
-  
-  public function getCandidates()
-  {
-    return $this->candidates;
-  }
-  
-  public function setCandidates($candidates)
-  {
-    $this->candidates = $candidates;
+    return $candidates;
   }
   
   public function reset()
