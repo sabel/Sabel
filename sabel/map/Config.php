@@ -22,8 +22,12 @@ abstract class Sabel_Map_Config implements Sabel_Config
     return $route;
   }
   
-  public function getRoutes()
+  public function build()
   {
-    return $this->routes;
+    $this->configure();
+    
+    foreach($this->routes as $route) {
+      Sabel_Map_Configurator::addCandidate($route);
+    }
   }
 }

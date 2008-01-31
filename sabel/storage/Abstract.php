@@ -10,13 +10,15 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Storage_Abstract
-  extends Sabel_Object implements Sabel_Storage_Interface
+abstract class Sabel_Storage_Abstract extends Sabel_Object
 {
   protected
     $attributes = array(),
     $started    = false,
     $timeouts   = array();
+    
+  abstract public function start();
+  abstract public function destroy();
     
   protected function initialize()
   {

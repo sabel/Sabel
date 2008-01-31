@@ -4,39 +4,78 @@
  * Map Configurator
  * useful interface of Sabel_Map_Candidate
  *
+ * @abstract
  * @category   Map
  * @package    org.sabel.map
  * @author     Mori Reo <mori.reo@gmail.com>
  * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Map_Configurator
+abstract class Sabel_Map_Configurator implements Sabel_Config
 {
-  protected static $candidates = array();
+  protected $routes = array();
+  protected $candidates = array();
   
-  public static function addCandidate($name, $uri, $options = array())
+  public function route($name)
   {
-    $candidate = new Sabel_Map_Candidate($name);
-    self::$candidates[$name] = $candidate;
-    $candidate->route($uri)->setOptions($options);
+    return $this->routes[] = new Sabel_Map_Config_Route($name);
   }
   
-  public static function getCandidate($name)
+  public function build()
   {
-    if (isset(self::$candidates[$name])) {
-      return self::$candidates[$name];
+    foreach ($this->routes as $route) {
+      $name = $route->getName();
+      $candidate = new Sabel_Map_Candidate($name);
+      $candidate->route($route->getUri())->setOptions($this->buildOptions($route));
+      $this->candidates[$name] = $candidate;
+    }
+    
+    return $this->candidates;
+  }
+  
+  public function buildOptions(Sabel_Map_Config_Route $route)
+  {
+    $options = array();
+    
+    if ($route->hasModule()) {
+      $options["module"] = $route->getModule();
+    }
+    
+    if ($route->hasController()) {
+      $options["controller"] = $route->getController();
+    }
+    
+    if ($route->hasAction()) {
+      $options["action"] = $route->getAction();
+    }
+    
+    $options["default"]     = $route->getDefaults();
+    $options["requirement"] = $route->getRequirements();
+    
+    return $options;
+  }
+  
+  public function getCandidate($name)
+  {
+    if (isset($this->candidates[$name])) {
+      return $this->candidates[$name];
     } else {
       return false;
     }
   }
   
-  public static function getCandidates()
+  public function getCandidates()
   {
-    return self::$candidates;
+    return $this->candidates;
   }
   
-  public static function setCandidates($candidates)
+  public function setCandidates($candidates)
   {
-    self::$candidates = $candidates;
+    $this->candidates = $candidates;
+  }
+  
+  public function reset()
+  {
+    $this->candidates = array();
   }
 }

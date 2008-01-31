@@ -163,8 +163,8 @@ final class Sabel
     require ($CACHE . "File.php");
     
     require ($MAP . "Candidate.php");
+    require ($MAP . "Elements.php");
     require ($MAP . "Element.php");
-    require ($MAP . "Config.php");
     require ($MAP . "Configurator.php");
     require ($MAP . "config" . DIRECTORY_SEPARATOR . "Route.php");
     
@@ -173,7 +173,6 @@ final class Sabel
     require ($REQUEST . "AbstractBuilder.php");
     require ($REQUEST . "Builder.php");
     
-    require ($STORAGE . "Interface.php");
     require ($STORAGE . "Abstract.php");
     require ($STORAGE . "Session.php");
     
@@ -183,7 +182,6 @@ final class Sabel
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
     
-    require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Map.php");
     require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Destination.php");
     require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Page.php");
     require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Web.php");

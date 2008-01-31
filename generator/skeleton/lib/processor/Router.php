@@ -13,11 +13,27 @@ class Processor_Router extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $request = $bus->get("request");
-    $router = new Sabel_Router_Map();
+    $request = $bus->get("request");    
+    $validCandidate = null;
     
-    $bus->set("destination", $router->route($request, new Config_Map()));
-    foreach ($router->getCandidate()->getElements() as $element) {
+    $config = new Config_Map();
+    $config->configure();
+    
+    foreach ($config->build() as $candidate) {
+      if ($candidate->evaluate($request)) {
+        $validCandidate = $candidate;    
+        break;
+      }
+    }
+    
+    if ($validCandidate === null) {
+      throw new Sabel_Exception_Runtime("map not match");
+    }
+    
+    Sabel_Context::getContext()->setCandidate($validCandidate);
+    $bus->set("destination", new Sabel_Router_Destination($validCandidate->getDestination()));
+    
+    foreach ($validCandidate->getElements() as $element) {
       $request->setParameterValue($element->name, $element->variable);
     }
   }

@@ -18,7 +18,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   
   public function connect(array $params)
   {
-    $h = $params["hoge"];
+    $h = $params["host"];
     $u = $params["user"];
     $p = $params["password"];
     $d = $params["database"];

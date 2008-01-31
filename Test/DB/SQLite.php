@@ -2,9 +2,14 @@
 
 class Test_DB_SQLite extends Test_DB_Test
 {
-  private static $params1 = array("package"  => "sabel.db.pdo.sqlite",
-                                  "database" => "/usr/local/lib/php/Sabel/Test/data/sdb_test.sq3");
-
+  private static $params1 = null;
+  
+  public function __construct()
+  {
+    self::$params1 = array("package"  => "sabel.db.pdo.sqlite",
+                           "database" => SABEL_BASE . "/Test/data/sdb_test.sq3");
+  }
+  
   public static function main()
   {
     require_once "PHPUnit/TextUI/TestRunner.php";
@@ -17,11 +22,7 @@ class Test_DB_SQLite extends Test_DB_Test
   {
     return self::createSuite("Test_DB_SQLite");
   }
-
-  public function __construct()
-  {
-  }
-
+  
   protected function setUp()
   {
   }

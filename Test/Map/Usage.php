@@ -17,7 +17,7 @@ class Test_Map_Usage extends SabelTestCase
     return self::createSuite("Test_Map_Usage");
   }
   
-  public function testEvaluteFail()
+  public function testevaluateFail()
   {
     // :action/:year/:month/:day
     $blog = new Sabel_Map_Candidate("blog");
@@ -25,7 +25,7 @@ class Test_Map_Usage extends SabelTestCase
     $blog->setRequirement("year", new Sabel_Map_Requirement_Regex("20[0-9]"));
     $blog->setOmittables(array("year", "month", "day"));
     
-    $this->assertFalse($blog->evalute(explode("/", "test/test/1")));
+    $this->assertFalse($blog->evaluate(explode("/", "test/test/1")));
   }
   
   public function testStandard()
@@ -35,7 +35,7 @@ class Test_Map_Usage extends SabelTestCase
     $default->route(":controller/:action/:id");
     $default->setOmittable("id");
     
-    $default->evalute(explode("/", "index/toppage"));
+    $default->evaluate(explode("/", "index/toppage"));
     
     $c = $default->getElementByName("controller");
     $this->assertEquals("index", $c->variable);
@@ -53,7 +53,7 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("default");
     $default->route(":directories[]/:action");
     
-    $default->evalute(explode("/", "a/b/c/d"));
+    $default->evaluate(explode("/", "a/b/c/d"));
     
     $d = $default->getElementByName("directories");
     $this->assertEquals(array("a", "b", "c", "d"), $d->variable);
@@ -66,7 +66,7 @@ class Test_Map_Usage extends SabelTestCase
     $opt = array("default"=>array(":controller" => "index",
                                   ":action"     => "index"));
     $default->setOptions($opt);
-    $default->evalute(explode("/", "const/cont/act"));
+    $default->evaluate(explode("/", "const/cont/act"));
     
     $c = $default->getElementByName("controller");
     $this->assertEquals("cont", $c->variable);
@@ -81,7 +81,7 @@ class Test_Map_Usage extends SabelTestCase
     $opt = array("default"=>array(":controller" => "index",
                                   ":action"     => "index"));
     $default->setOptions($opt);
-    $default->evalute(explode("/", "const"));
+    $default->evaluate(explode("/", "const"));
     
     $c = $default->getElementByName("controller");
     $this->assertEquals("index", $c->variable);
@@ -99,7 +99,7 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("default");
     $default->route(":directories[]/:action.html");
     
-    $default->evalute(explode("/", "a/b/c/d.html"));
+    $default->evaluate(explode("/", "a/b/c/d.html"));
     
     $d = $default->getElementByName("directories");
     $this->assertEquals(array("a", "b", "c"), $d->variable);
@@ -114,7 +114,7 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("default");
     $default->route(":controller/:action.html/:variable.jpg");
     
-    $default->evalute(explode("/", "ctrl/action.html/variable.jpg"));
+    $default->evaluate(explode("/", "ctrl/action.html/variable.jpg"));
     
     $a = $default->getElementByName("action");
     $this->assertEquals("action", $a->variable);
@@ -130,7 +130,7 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("default");
     $default->route(":controller/:action/:variable");
     
-    $resEvalute = $default->evalute(explode("/", "ctrl/action/variable.html"));
+    $resevaluate = $default->evaluate(explode("/", "ctrl/action/variable.html"));
     
     $a = $default->getElementByName("action");
     $this->assertEquals("action", $a->variable);
@@ -145,8 +145,8 @@ class Test_Map_Usage extends SabelTestCase
     $default = new Sabel_Map_Candidate("default");
     $default->route(":controller/:action/:variable.jpg");
     
-    $resEvalute = $default->evalute(explode("/", "ctrl/action/variable.html"));
-    $this->assertFalse($resEvalute);
+    $resevaluate = $default->evaluate(explode("/", "ctrl/action/variable.html"));
+    $this->assertFalse($resevaluate);
   }
   
   public function testUseWildCard()

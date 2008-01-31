@@ -40,14 +40,7 @@ class Sabel_Request_Uri extends Sabel_Object
   public function parse($uri)
   {
     if ($uri === "" || $uri === null) return;
-    
-    static $filter = null;
-    
-    if ($filter === null) {
-      $filter = create_function('$value',
-                                'return ($value !== "") ? $value : null;');
-    }
-    
+        
     $this->uri = $uri;
     $elements = explode("/", $uri);
     

@@ -34,12 +34,14 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   
   protected function createUri($uri = null)
   {
+    $host = Sabel_Environment::get("HTTP_HOST");
+
     if ($uri === null) {
-      $url = "http://localhost" . Sabel_Environment::get("REQUEST_URI");
+      $url = "http://{$host}/" . Sabel_Environment::get("REQUEST_URI");
     } else {
-      $url = "http://localhost/";
+      $url = "http://{$host}/" . $uri;
     }
-    
+
     $parsedUrl = parse_url($url);
     if (isset($parsedUrl["path"])) {
       return ltrim($parsedUrl["path"], "/");

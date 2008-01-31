@@ -33,8 +33,6 @@ class Test_View_PageViewer extends SabelTestCase
     $this->assertEquals(11, $pv->getNext());
     $this->assertEquals(9, $pv->getPrevious());
     
-    $this->assertEquals(5, $pv->getPage(5));
-    
     $this->assertEquals(20, $pv->getLast());
     $this->assertEquals(1,  $pv->getFirst());
   }

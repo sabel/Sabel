@@ -11,6 +11,10 @@
  */
 class Sabel_Map_Element
 {
+  const VARIABLE   = "variable";
+  const CONSTANT   = "constant";
+  const TYPE_ARRAY = "array";
+  
   public $name = "";
   public $type = "";
   
@@ -39,6 +43,16 @@ class Sabel_Map_Element
     return ($this->type === $type);
   }
   
+  public function isArray()
+  {
+    return ($this->type === self::TYPE_ARRAY);
+  }
+  
+  public function isConstant()
+  {
+    return ($this->type === self::CONSTANT);
+  }
+  
   public function hasVariable()
   {
     return ($this->variable !== "");
@@ -46,7 +60,7 @@ class Sabel_Map_Element
   
   public function hasRequirement()
   {
-    return (is_object($this->requirement));
+    return is_object($this->requirement);
   }
   
   public function isMatchAll()
@@ -58,13 +72,7 @@ class Sabel_Map_Element
   {
     return ($this->default !== "");
   }
-  
-  public function addVariable($variable)
-  {
-    if ($this->variable === "") $this->variable = array();
-    $this->variable[] = $variable;
-  }
-  
+    
   public function compareWithRequirement($value)
   {
     return $this->requirement->isMatch($value);
