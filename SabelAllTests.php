@@ -29,22 +29,18 @@ require_once("PHPUnit/Framework/IncompleteTestError.php");
 require_once("Sabel.php");
 require_once("Test/SabelTestCase.php");
 require_once("Test/SabelTestSuite.php");
-require_once("Test/Bus.php");
 require_once("Test/Object.php");
 require_once("Test/Annotation.php");
 require_once("Test/Aspect.php");
 require_once("Test/Container.php");
+require_once("Test/Exception.php");
+require_once("Test/Bus/Tests.php");
 require_once("Test/Request/Tests.php");
 require_once("Test/Response/Tests.php");
 require_once("Test/Controller/Tests.php");
 require_once("Test/Util/Tests.php");
-require_once("Test/Reflection.php");
 require_once("Test/View/Tests.php");
-require_once("Test/View/TemplateFile.php");
-require_once("Test/View/TemplateDb.php");
-require_once("Test/View/Pager.php");
-require_once("Test/View/PageViewer.php");
-require_once("Test/View/TagPageViewer.php");
+require_once("Test/Reflection.php");
 require_once("Test/Storage/InMemory.php");
 require_once("Test/Cache/Tests.php");
 require_once("Test/Map/Tests.php");
@@ -68,24 +64,19 @@ class SabelAllTests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    $suite->addTest(Test_Bus::suite());
     $suite->addTest(Test_Object::suite());
-    
+    $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Request_Tests::suite());
     $suite->addTest(Test_Response_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Util_Tests::suite());
+    $suite->addTest(Test_View_Tests::suite());
     
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Container::suite());
-    
-    $suite->addTest(Test_View_TemplateFile::suite());
-    $suite->addTest(Test_View_TemplateDb::suite());
-    $suite->addTest(Test_View_Pager::suite());
-    $suite->addTest(Test_View_PageViewer::suite());
-    $suite->addTest(Test_View_TagPageViewer::suite());
+    $suite->addTest(Test_Exception::suite());
     
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());

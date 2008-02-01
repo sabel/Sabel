@@ -191,11 +191,25 @@ class Sabel_Map_Candidate
     }
   }
   
-  public function uri($parameters = null)
+  public function uri($uriParameter = "")
   {
-    $candidate = null;
+    if ($uriParameter === null) $uriParameter = "";
     
-    if ($parameters === null) $parameters = array();
+    if (!is_string($uriParameter)) {
+      $message = "uri parameter must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+    
+    $parameters = array();
+    if ($uriParameter !== "") {
+      foreach (explode(",", $uriParameter) as $param) {
+        list ($key, $val) = array_map("trim", explode(":", $param));
+        if ($key === "n") $key = "candidate";
+        $parameters[$key] = $val;
+      }
+    }
+    
+    $candidate = null;
     
     foreach ($parameters as $key => $param) {
       switch ($key) {

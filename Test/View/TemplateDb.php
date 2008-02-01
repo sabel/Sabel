@@ -1,10 +1,13 @@
 <?php
 
 /**
+ * testcase for sabel.view.template.Database, sabel.view.Repository
+ * using database (mysql or pgsql, sqlite)
+ *
  * @category  View
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
-class Test_View_TemplateDb extends Test_View_Tests
+class Test_View_TemplateDb extends Test_View_Template
 {
   public static function suite()
   {
@@ -59,7 +62,7 @@ class Test_View_TemplateDb extends Test_View_Tests
                       "database" => "sdb_test");
     } elseif (extension_loaded("pdo_sqlite")) {
       $params = array("package"  => "sabel.db.pdo.sqlite",
-                      "database" => "/usr/local/lib/php/Sabel/Test/data/sdb_test.sq3");
+                      "database" => SABEL_BASE . "/Test/data/sdb_test.sq3");
     } else {
       Sabel_Command::message("skipped 'TemplateDb'.");
       return false;

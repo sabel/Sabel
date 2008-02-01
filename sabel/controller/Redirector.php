@@ -76,23 +76,9 @@ class Sabel_Controller_Redirector
    *
    * @param string $destination
    */
-  protected function redirectTo($destination)
+  protected function redirectTo($uriParameter)
   {
     $candidate = Sabel_Context::getContext()->getCandidate();
-    return $this->_redirect($candidate->uri($this->convertParams($destination)));
-  }
-  
-  private function convertParams($params)
-  {
-    $buffer   = array();
-    $reserved = ";";
-    
-    foreach (explode(",", $params) as $param) {
-      list ($key, $val) = array_map("trim", explode(":", $param));
-      if ($key === "n") $key = "candidate";
-      $buffer[$key] = $val;
-    }
-    
-    return $buffer;
+    return $this->_redirect($candidate->uri($uriParameter));
   }
 }

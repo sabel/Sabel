@@ -1,8 +1,10 @@
 <?php
 
 /**
+ * testcase for sabel.Object
+ *
  * @category  Core
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Object extends SabelTestCase
 {

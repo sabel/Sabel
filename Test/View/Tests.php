@@ -4,115 +4,33 @@ if (!defined("VIEW_DIR_NAME")) define("VIEW_DIR_NAME", "views");
 if (!defined("TPL_SUFFIX")) define("TPL_SUFFIX", ".tpl");
 if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
 
+define ("COMPILE_DIR_PATH", SABEL_BASE . "/Test/data/application/data/compiled");
+
+require_once ("Test/View/Template.php");
+require_once ("Test/View/TemplateFile.php");
+require_once ("Test/View/TemplateDb.php");
+require_once ("Test/View/Renderer.php");
+require_once ("Test/View/Pager.php");
+require_once ("Test/View/PageViewer.php");
+
 /**
- * @category  View
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * load tests for sabel.view
  */
-class Test_View_Tests extends SabelTestCase
+class Test_View_Tests extends SabelTestSuite
 {
-  protected static $repository = null;
-  
-  public function testValidTemplate()
+  public static function suite()
   {
-    $template = self::$repository->getValidTemplate("index");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "hoge" . DS . "index" . TPL_SUFFIX, $template->getPath());
+    $base = dirname(__FILE__) . DS . "templates";
+    if (!defined("MODULES_DIR_PATH")) define("MODULES_DIR_PATH", $base);
     
-    $template = self::$repository->getValidTemplate("hoge");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "hoge" . DS . "hoge" . TPL_SUFFIX, $template->getPath());
+    $suite = self::createSuite();
     
-    $template = self::$repository->getValidTemplate("error");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "error" . TPL_SUFFIX, $template->getPath());
-  }
-  
-  public function testInvalidTemplate()
-  {
-    $template = self::$repository->getValidTemplate("fuga");
-    $this->assertNull($template);
+    $suite->addTest(Test_View_TemplateFile::suite());
+    $suite->addTest(Test_View_TemplateDb::suite());
+    $suite->addTest(Test_View_Renderer::suite());
+    $suite->addTest(Test_View_Pager::suite());
+    $suite->addTest(Test_View_PageViewer::suite());
     
-    $template = self::$repository->getValidTemplate("abcdef");
-    $this->assertNull($template);
-  }
-  
-  public function testSetup2()
-  {
-    $repository = $this->createRepository("fuga");
-    
-    $this->assertEquals(3, count($repository->getTemplates()));
-    $this->assertTrue($repository->getTemplate("controller") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("module") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("app") instanceof Sabel_View_Template);
-    $this->assertNull($repository->getTemplate("fuga"));
-  }
-  
-  public function testValidTemplate2()
-  {
-    $template = self::$repository->getValidTemplate("index");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "fuga" . DS . "index" . TPL_SUFFIX, $template->getPath());
-    
-    $template = self::$repository->getValidTemplate("fuga");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "fuga" . DS . "fuga" . TPL_SUFFIX, $template->getPath());
-    
-    $template = self::$repository->getValidTemplate("error");
-    $this->assertTrue($template instanceof Sabel_View_Template);
-    $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "error" . TPL_SUFFIX, $template->getPath());
-  }
-  
-  public function testInvalidTemplate2()
-  {
-    $template = self::$repository->getValidTemplate("hoge");
-    $this->assertNull($template);
-    
-    $template = self::$repository->getValidTemplate("abcdef");
-    $this->assertNull($template);
-  }
-  
-  public function testGetContents()
-  {
-    $template = self::$repository->getValidTemplate("index");
-    $contents = $template->getContents();
-    $this->assertEquals("fuga/index.tpl", rtrim($contents));
-    
-    $template = self::$repository->getValidTemplate("fuga");
-    $contents = $template->getContents();
-    $this->assertEquals("fuga/fuga.tpl", rtrim($contents));
-  }
-  
-  public function testIsValid()
-  {
-    $this->assertTrue(self::$repository->isValid("controller", "index"));
-    $this->assertTrue(self::$repository->isValid("controller", "fuga"));
-    
-    $this->assertTrue(self::$repository->isValid("module", "error"));
-    $this->assertFalse(self::$repository->isValid("module", "fuga"));
-    
-    $this->assertTrue(self::$repository->isValid("app", "serverError"));
-    $this->assertFalse(self::$repository->isValid("app", "error"));
-    $this->assertFalse(self::$repository->isValid("app", "index"));
-    
-    try {
-      self::$repository->isValid("hoge", "index");
-    } catch (Exception $e) {
-      return;
-    }
-    
-    $this->fail();
-  }
-  
-  public function testCreate()
-  {
-    $time = microtime();
-    self::$repository->create("controller", "new", $time);
-    $this->assertEquals($time, trim(self::$repository->getContents("new")));
-  }
-  
-  public function testDelete()
-  {
-    self::$repository->delete("controller", "new");
-    $this->assertNull(self::$repository->getValidTemplate("new"));
+    return $suite;
   }
 }

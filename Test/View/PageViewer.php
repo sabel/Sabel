@@ -1,10 +1,10 @@
 <?php
 
 /**
- * test case for SabelPager
+ * testcase for sabel.view.Pager, sabel.view.PageViewer
  *
  * @category  View
- * @author    Mori Reo <mori.reo@gmail.com>
+ * @author    Mori Reo <mori.reo@sabel.jp>
  */
 class Test_View_PageViewer extends SabelTestCase
 {

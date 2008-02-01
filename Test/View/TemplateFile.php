@@ -1,10 +1,12 @@
 <?php
 
 /**
+ * testcase for sabel.view.template.File, sabel.view.Repository
+ *
  * @category  View
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
-class Test_View_TemplateFile extends Test_View_Tests
+class Test_View_TemplateFile extends Test_View_Template
 {
   public static function suite()
   {
@@ -13,9 +15,6 @@ class Test_View_TemplateFile extends Test_View_Tests
   
   public function testSetup()
   {
-    $base = dirname(__FILE__) . DS . "templates";
-    if (!defined("MODULES_DIR_PATH")) define("MODULES_DIR_PATH", $base);
-    
     $repository = $this->createRepository("hoge");
     
     $this->assertEquals(3, count($repository->getTemplates()));

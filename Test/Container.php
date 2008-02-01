@@ -4,7 +4,7 @@
  * TestCase of sabel container
  *
  * @category  Container
- * @author    Mori Reo <mori.reo@gmail.com>
+ * @author    Mori Reo <mori.reo@sabel.jp>
  */
 class Test_Container extends SabelTestCase
 {

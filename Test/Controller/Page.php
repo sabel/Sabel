@@ -30,9 +30,19 @@ class Test_Controller_Page extends SabelTestCase
     $this->assertTrue($c instanceof TestController);
   }
   
+  public function testObjects()
+  {
+    $c = $this->setUpController($this->createController());
+    $this->assertTrue($c->getResponse()   instanceof Sabel_Response);
+    $this->assertTrue($c->getRequest()    instanceof Sabel_Request);
+    $this->assertTrue($c->getRedirector() instanceof Sabel_Controller_Redirector);
+    $this->assertNull($c->getStorage());
+  }
+  
   public function testIndexAction()
   {
     $c = $this->setUpController($this->createController());
+    $c->initialize();
     $c->setAction("index");
     $c->execute();
     

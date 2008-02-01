@@ -14,14 +14,22 @@ function ah($param, $anchor)
   return a($param, htmlspecialchars($anchor));
 }
 
-function uri($param)
+function uri($uriParameter, $absolute = false, $secure = false)
 {
-  $aCreator = new Sabel_View_Uri();
-  $ignored = "";
+  $ignored   = "";
+  $uriPrefix = "";
+
+  if ($absolute) {
+    $protocol  = ($secure) ? "https" : "http";
+    $uriPrefix = $protocol . "://" . Sabel_Environment::get("SERVER_NAME");
+  }
+  
   if (defined("URI_IGNORE")) {
     $ignored = $_SERVER["SCRIPT_NAME"];
   }
-  return $ignored . $aCreator->uri($param);
+  
+  $uri = Sabel_Context::getContext()->getCandidate()->uri($uriParameter);
+  return $ignored . $uriPrefix . "/" . $uri;
 }
 
 function linkto($file)

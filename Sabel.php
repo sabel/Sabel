@@ -177,7 +177,6 @@ final class Sabel
     require ($STORAGE . "Abstract.php");
     require ($STORAGE . "Session.php");
     
-    require ($VIEW . "Uri.php");
     require ($VIEW . "Renderer.php");
     require ($VIEW . "Repository.php");
     require ($VIEW . "Template.php");
