@@ -110,7 +110,7 @@ class Sabel_Map_Candidate
       }
       
       return true;
-    } elseif ($elements->hasArray()) {
+    } elseif ($elements->hasArray() && count($requests) >= $elementsCount) {
       $last = $elementsCount - 1;
       $elements->getElementAt($last)->variable = array_slice($requests, $last);
       

@@ -375,6 +375,39 @@ class Test_Map_Match extends SabelTestCase
     $this->assertEquals($expected, $candidate->getElementByName("array")->variable);
   }
   
+  public function testArrayPriority()
+  {
+    $this->route("array")
+         ->uri(":controller/:action/:array[]")
+         ->module("admin");
+         
+    $this->route("default")
+         ->uri(":controller/:action")
+         ->defaults(array(":action" => "test"))
+         ->module("admin");
+         
+    $candidate = $this->routing("index/test");
+    $this->assertEquals("default", $candidate->getName());
+    
+    $candidate = $this->routing("index");
+    $this->assertEquals("default", $candidate->getName());
+  }
+  
+  public function testArrayPriorityWithDefault()
+  {
+    $this->route("array")
+         ->uri(":controller/:action/:array[]")
+         ->defaults(array(":array" => array(0, 1)))
+         ->module("admin");
+         
+    $this->route("default")
+         ->uri(":controller/:action")
+         ->module("admin");
+         
+    $candidate = $this->routing("index/test");
+    $this->assertEquals("array", $candidate->getName());
+  }
+  
   protected function route($name)
   {
     return $this->config->route($name);
