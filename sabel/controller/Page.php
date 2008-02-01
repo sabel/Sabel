@@ -11,26 +11,58 @@
  */
 abstract class Sabel_Controller_Page extends Sabel_Object
 {
-  public
-    $request  = null;
-    
-  protected
-    $executed = false;
-    
-  protected
-    $bus      = null,
-    $response = null,
-    $storage  = null;
-    
-  protected
-    $setup       = false,
-    $hidden      = array(),
-    $reserved    = array(),
-    $attributes  = array();
+  /**
+   * @var Sabel_Request
+   */
+  protected $request = null;
+  
+  /**
+   * @var Sabel_Response
+   */
+  protected $response = null;
+  
+  /**
+   * @var Sabel_Controller_Redirector
+   */
+  protected $redirect = null;
+  
+  /**
+   * @var Sabel_Storage_Abstract
+   */
+  protected $storage = null;
+  
+  /**
+   * @var Sabel_Bus
+   */
+  protected $bus = null;
+  
+  /**
+   * @var boolean
+   */
+  protected $executed = false;
+  
+  /**
+   * @var boolean
+   */
+  protected $setup = false;
+  
+  /**
+   * @var array
+   */
+  protected $hidden = array();
+  
+  /**
+   * @var array
+   */
+  protected $reserved = array();
+  
+  /**
+   * @var array
+   */
+  protected $attributes = array();
   
   /**
    * default constructer of page controller
-   *
    */
   public final function __construct(Sabel_Response $response)
   {
@@ -39,33 +71,56 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   }
   
   /**
+   * setup of PageController
+   *
+   * @param Sabel_Request               $request
+   * @param Sabel_Controller_Redirector $redirector
+   * @param Sabel_Storage_Abstract      $storage
+   *
+   * @return void
+   */
+  public function setup(Sabel_Request               $request,
+                        Sabel_Controller_Redirector $redirector,
+                        Sabel_Storage_Abstract      $storage = null)
+  {
+    $this->request  = $request;
+    $this->redirect = $redirector;
+    $this->storage  = $storage;
+    $this->setup    = true;
+  }
+  
+  /**
    * initialize a controller.
    * execute ones before action execute.
-   *
    */
   public function initialize()
   {
     
   }
   
-  /**
-   * setup of PageController
-   *
-   * @param Sabel_Request $request
-   * @param Sabel_Storage $storage
-   *
-   * @return void
-   */
-  public function setup(Sabel_Request $request, $storage = null)
-  {
-    $this->request = $request;
-    $this->storage = $storage;
-    $this->setup   = true;
-  }
-  
-  public function setBus($bus)
+  public function setBus(Sabel_Bus $bus)
   {
     $this->bus = $bus;
+  }
+  
+  public function getResponse()
+  {
+    return $this->response;
+  }
+  
+  public function getRequest()
+  {
+    return $this->request;
+  }
+  
+  public function getStorage()
+  {
+    return $this->storage;
+  }
+  
+  public function getRedirector()
+  {
+    return $this->redirect;
   }
   
   /**
@@ -114,6 +169,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function isExecuted()
   {
     return $this->executed;
+  }
+  
+  public function isRedirected()
+  {
+    return $this->redirect->isRedirected();
   }
   
   private function isReserved($action)
@@ -173,16 +233,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public final function getAction()
   {
     return $this->action;
-  }
-  
-  public final function getStorage()
-  {
-    return $this->storage;
-  }
-  
-  public function getResponse()
-  {
-    return $this->response;
   }
   
   protected function __get($name)

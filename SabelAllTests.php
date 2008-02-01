@@ -32,7 +32,6 @@ require_once("Test/Annotation.php");
 require_once("Test/Aspect.php");
 require_once("Test/Container.php");
 require_once("Test/Request.php");
-require_once("Test/Destination.php");
 require_once("Test/Reflection.php");
 require_once("Test/View/Tests.php");
 require_once("Test/View/TemplateFile.php");
@@ -76,7 +75,6 @@ class SabelAllTests
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Container::suite());
-    $suite->addTest(Test_Destination::suite());
     $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_View_TemplateDb::suite());
     $suite->addTest(Test_View_Pager::suite());

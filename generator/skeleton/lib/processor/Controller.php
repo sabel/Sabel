@@ -11,35 +11,19 @@
  */
 class Processor_Controller extends Sabel_Bus_Processor
 {
-  const CONTROLLERS_DIR    = "controllers";
-  const DEFAULT_CONTROLLER = "index";
+  const CONTROLLERS_DIR = "controllers";
   
   public function execute($bus)
   {
     $destination = $bus->get("destination");
-    $response = new Sabel_Response_Web();
+    $redirector  = new Sabel_Controller_Redirector();
+    $response    = new Sabel_Response_Web();
     
-    try {
-      $controller = $this->createController($response, $destination);
-    } catch (Exception $e) {
-      $module = $destination->getModule();
-      l("can't create controller use default {$module}/index/index");
-      
-      $destination->setModule($module);
-      $destination->setController("index");
-      $destination->setAction("notFound");
-      
-      try {
-        $controller = $this->createController($response, $destination);
-      } catch (Exception $e) {
-        $destination->setModule("index");
-        $destination->setController("index");
-        $destination->setAction("notFound");
-        $controller = $this->createController($response, $destination);
-      }
+    if (($controller = $this->createController($response, $destination)) === null) {
+      $controller = $this->createDefaultController($response);
     }
     
-    $controller->setup($bus->get("request"), $bus->get("storage"));
+    $controller->setup($bus->get("request"), $redirector, $bus->get("storage"));
     $controller->setBus($bus);
     
     $bus->set("response",   $response);
@@ -48,14 +32,8 @@ class Processor_Controller extends Sabel_Bus_Processor
   
   protected function createController($response, $destination)
   {
-    list($module, $controller,) = $destination->toArray();
-    $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR);
-    
-    if ($controller !== "") {
-      $class .= "_" . ucfirst($controller);
-    } else {
-      $class .= "_" . ucfirst(self::DEFAULT_CONTROLLER);
-    }
+    list ($module, $controller,) = $destination->toArray();
+    $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR) . "_" . ucfirst($controller);
     
     Sabel::using($class);
     
@@ -63,7 +41,47 @@ class Processor_Controller extends Sabel_Bus_Processor
       l("create controller '{$class}'");
       return new $class($response);
     } else {
-      throw new Sabel_Exception_Runtime("controller not found.");
+      return null;
+    }
+  }
+  
+  protected function createDefaultController($response)
+  {
+    $class = "Index_" . ucfirst(self::CONTROLLERS_DIR) . "_Index";
+    Sabel::using($class);
+    
+    if (class_exists($class, false)) {
+      l("create default controller '{$class}'");
+      return new $class($response);
+    } else {
+      throw new Sabel_Exception_Runtime("default controller not found.");
+    }
+  }
+  
+  public function shutdown($bus)
+  {
+    $controller = $bus->get("controller");
+    
+    if ($controller->isRedirected()) {
+      if (defined("URI_IGNORE")) {
+        $ignored = ltrim(Sabel_Environment::get("SCRIPT_NAME"), "/") . "/";
+      } else {
+        $ignored = "";
+      }
+      
+      $token = $controller->getRequest()->getToken()->getValue();
+      $redirector = $controller->getRedirector();
+      
+      if (empty($token)) {
+        $to = $redirector->getUrl();
+      } elseif ($redirect->hasParameters()) {
+        $to = $redirector->getUrl() . "&token={$token}";
+      } else {
+        $to = $redirector->getUrl() . "?token={$token}";
+      }
+      
+      $serverName = Sabel_Environment::get("SERVER_NAME");
+      $bus->get("response")->location($serverName, $ignored . $to);
     }
   }
 }

@@ -19,7 +19,7 @@ abstract class Sabel_Storage_Abstract extends Sabel_Object
     
   abstract public function start();
   abstract public function destroy();
-    
+  
   protected function initialize()
   {
     if (empty($this->attributes)) return;

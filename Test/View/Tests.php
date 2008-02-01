@@ -94,14 +94,13 @@ class Test_View_Tests extends SabelTestCase
     $this->assertFalse(self::$repository->isValid("app", "error"));
     $this->assertFalse(self::$repository->isValid("app", "index"));
     
-    $threw = false;
     try {
       self::$repository->isValid("hoge", "index");
     } catch (Exception $e) {
-      $threw = true;
+      return;
     }
     
-    $this->assertTrue($threw);
+    $this->fail();
   }
   
   public function testCreate()

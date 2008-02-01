@@ -4,10 +4,10 @@ class Config_Bus extends Sabel_Bus_Config
 {
   public function configure()
   {
-    $processors = array("request",    "router",      "addon",
-                        "controller", "redirector",  "location",
-                        "helper",     "initializer", "executer",
-                        "exception",  "response",    "view");
+    $processors = array("request",     "router",   "addon",
+                        "controller",  "location", "helper",
+                        "initializer", "executer", "exception",
+                        "response",    "view");
                         
     $bus = $this->bus;
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;

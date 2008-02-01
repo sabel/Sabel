@@ -33,7 +33,7 @@ class Test_Map_Match extends SabelTestCase
          ->uri(":controller/:action")
          ->module("index");
     
-    $c = $this->routing("test/test");    
+    $c = $this->routing("test/test");
     $this->assertEquals("default", $c->getName());
   }
   
@@ -93,7 +93,7 @@ class Test_Map_Match extends SabelTestCase
     $destination = $candidate->getDestination();
     
     $this->assertEquals("default", $candidate->getName());
-    $this->assertEquals("index", $destination["action"]);
+    $this->assertEquals("index", $destination->getAction());
   }
   
   public function testMatchWithDefaultPriority()
@@ -107,7 +107,7 @@ class Test_Map_Match extends SabelTestCase
     $destination = $candidate->getDestination();
     
     $this->assertEquals("default", $candidate->getName());
-    $this->assertEquals("test", $destination["action"]);
+    $this->assertEquals("test", $destination->getAction());
   }
   
   public function testMatchWithParameter()
@@ -393,7 +393,7 @@ class Test_Map_Match extends SabelTestCase
     
     foreach ($this->config->build() as $candidate) {
       if ($candidate->evaluate($this->request($uri))) {
-        $validCandidate = $candidate;    
+        $validCandidate = $candidate;
         break;
       }
     }

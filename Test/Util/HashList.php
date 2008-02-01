@@ -20,15 +20,13 @@ class Test_Util_HashList extends SabelTestCase
     
     $this->assertEquals(3, $list->count());
     
-    $threw = false;
-    
     try {
       $list->add("a", "hoge");
     } catch (Exception $e) {
-      $threw = true;
+      return;
     }
     
-    $this->assertTrue($threw);
+    $this->fail();
   }
   
   public function testRemove()

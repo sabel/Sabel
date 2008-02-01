@@ -162,10 +162,11 @@ final class Sabel
     require ($CACHE . "Interface.php");
     require ($CACHE . "File.php");
     
+    require ($MAP . "Configurator.php");
     require ($MAP . "Candidate.php");
     require ($MAP . "Elements.php");
     require ($MAP . "Element.php");
-    require ($MAP . "Configurator.php");
+    require ($MAP . "Destination.php");
     require ($MAP . "config" . DIRECTORY_SEPARATOR . "Route.php");
     
     require ($REQUEST . "Object.php");
@@ -182,8 +183,8 @@ final class Sabel
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
     
-    require ($SABEL . "router"     . DIRECTORY_SEPARATOR . "Destination.php");
     require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Page.php");
+    require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Redirector.php");
     require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Web.php");
     require ($SABEL . "exception"  . DIRECTORY_SEPARATOR . "Runtime.php");
     require ($SABEL . "logger"     . DIRECTORY_SEPARATOR . "File.php");

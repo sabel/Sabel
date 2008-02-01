@@ -31,7 +31,7 @@ class Processor_Router extends Sabel_Bus_Processor
     }
     
     Sabel_Context::getContext()->setCandidate($validCandidate);
-    $bus->set("destination", new Sabel_Router_Destination($validCandidate->getDestination()));
+    $bus->set("destination", $validCandidate->getDestination());
     
     foreach ($validCandidate->getElements() as $element) {
       $request->setParameterValue($element->name, $element->variable);

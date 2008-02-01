@@ -15,10 +15,20 @@ class Sabel_Map_Candidate
   const CONTROLLER = "controller";
   const ACTION     = "action";
   
-  protected
-    $name        = "",
-    $elements    = null,
-    $destination = array("module" => "", "controller" => "", "action" => "");
+  /**
+   * @var string
+   */
+  protected $name = "";
+  
+  /**
+   * @var Sabel_Map_Elements
+   */
+  protected $elements = null;
+  
+  /**
+   * @var array
+   */
+  protected $destination = array("module" => "", "controller" => "", "action" => "");
   
   public function __construct($name)
   {
@@ -54,7 +64,7 @@ class Sabel_Map_Candidate
   
   public function getDestination()
   {
-    return $this->destination;
+    return new Sabel_Map_Destination($this->destination);
   }
   
   public function setName($name)

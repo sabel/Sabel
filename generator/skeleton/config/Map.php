@@ -1,6 +1,6 @@
 <?php
 
-class Config_Map extends Sabel_Map_Config
+class Config_Map extends Sabel_Map_Configurator
 {
   public function configure()
   {
