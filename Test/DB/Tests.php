@@ -11,6 +11,8 @@ require_once("Test/DB/SQLite.php");
 require_once("Test/DB/Ibase.php");
 require_once("Test/DB/Oci.php");
 require_once("Test/DB/PdoOci.php");
+require_once("Test/DB/SchemaColumn.php");
+require_once("Test/DB/Validate.php");
 
 class Condition extends Sabel_DB_Condition{}
 
@@ -77,6 +79,9 @@ class Test_DB_Tests
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
+    
+    $suite->addTest(Test_DB_SchemaColumn::suite());
+    $suite->addTest(Test_DB_Validate::suite());
     
     return $suite;
   }

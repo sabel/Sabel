@@ -17,7 +17,7 @@ class Processor_Controller extends Sabel_Bus_Processor
   {
     $destination = $bus->get("destination");
     $redirector  = new Sabel_Controller_Redirector();
-    $response    = new Sabel_Response_Web();
+    $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
       $controller = $this->createDefaultController($response);

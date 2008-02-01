@@ -5,18 +5,14 @@
  *
  * @category   Response
  * @package    org.sabel.response
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Response_Header_Http
 {
   public function output($response)
   {
-    if ($response->hasContentType()) {
-      header("Content-Type: " . $response->getContentType());
-    }
-    
     if ($response->hasHeaders()) {
       foreach ($response->getHeaders() as $message => $value) {
         header(ucfirst($message) . ": " . $value);

@@ -1,37 +1,28 @@
 <?php
 
 /**
- * Sabel_Response_Web
+ * Sabel_Response_Object
  *
  * @category   Response
  * @package    org.sabel.response
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
+class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
   protected
     $location    = "",
     $locationUri = "";
     
   protected
-    $status      = 200,
+    $status      = Sabel_Response::SUCCESS,
     $contentType = "";
     
   protected
     $headers   = array(),
     $responses = array();
     
-  public function getResponse($key)
-  {
-    if (isset($this->responses[$key])) {
-      return $this->responses[$key];
-    } else {
-      return null;
-    }
-  }
-  
   public function setResponse($key, $value)
   {
     $this->responses[$key] = $value;
@@ -42,29 +33,32 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
     return $this->responses;
   }
   
+  public function getResponse($key)
+  {
+    if (isset($this->responses[$key])) {
+      return $this->responses[$key];
+    } else {
+      return null;
+    }
+  }
+  
   public function setResponses(array $responses)
   {
     $this->responses = $responses;
   }
   
-  public function setContentType($type)
+  public function setHeader($key, $value)
   {
-    $this->contentType = $type;
+    $this->headers[$key] = $value;
   }
   
-  public function getContentType()
+  public function getHeader($key)
   {
-    return $this->contentType;
-  }
-  
-  public function hasContentType()
-  {
-    return ($this->contentType !== "");
-  }
-  
-  public function setHeader($message, $value)
-  {
-    $this->headers[$message] = $value;
+    if (isset($this->headers[$key])) {
+      return $this->headers[$key];
+    } else {
+      return null;
+    }
   }
   
   public function getHeaders()
@@ -92,7 +86,6 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
   {
     $this->setHeader("Expires",       date(DATE_RFC822, time() + $expire) . " GMT");
     $this->setHeader("Last-Modified", date(DATE_RFC822, time() - $expire) . " GMT" );
-           
     $this->setHeader("Cache-Control", "max-age={$expire}");
     $this->setHeader("Pragma", "");
   }
@@ -105,6 +98,7 @@ class Sabel_Response_Web extends Sabel_Object implements Sabel_Response
   public function success()
   {
     $this->status = Sabel_Response::SUCCESS;
+    
     return $this;
   }
   

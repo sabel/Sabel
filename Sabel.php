@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Sabel - rapid web application development framework
+ * Sabel - Rapid Web Application Development Framework
  *
- * Copyright (c) 2006 Mori Reo <mori.reo@gmail.com>
+ * Copyright (c) 2006 Mori Reo <mori.reo@sabel.jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,9 @@ spl_autoload_register(array("Sabel", "autoload"));
  *
  * @category   Sabel
  * @package    org.sabel.core
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 final class Sabel
@@ -185,7 +185,7 @@ final class Sabel
     
     require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Page.php");
     require ($SABEL . "controller" . DIRECTORY_SEPARATOR . "Redirector.php");
-    require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Web.php");
+    require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "exception"  . DIRECTORY_SEPARATOR . "Runtime.php");
     require ($SABEL . "logger"     . DIRECTORY_SEPARATOR . "File.php");
     require ($SABEL . "util"       . DIRECTORY_SEPARATOR . "HashList.php");

@@ -5,9 +5,8 @@
  *
  * @category   Processor
  * @package    lib.processor
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Processor_View extends Sabel_Bus_Processor
@@ -15,9 +14,7 @@ class Processor_View extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $controller = $bus->get("controller");
-    $redirector = $controller->getAttribute("redirect");
-    
-    if (is_object($redirector) && $redirector->isRedirected()) return;
+    if ($controller->isRedirected()) return;
     
     $responses = $bus->get("response")->getResponses();
     $renderer = $bus->get("renderer");
@@ -28,10 +25,10 @@ class Processor_View extends Sabel_Bus_Processor
     }
     
     if ($controller->renderText) {
-      $this->result = $this->rendering($renderer, $controller->contents, $responses);
+      $bus->set("result", $this->rendering($renderer, $controller->contents, $responses));
       return;
     } elseif ($controller->renderImage) {
-      $this->result = $controller->contents;
+      $bus->set("result", $controller->contents);
       return;
     }
     
@@ -54,14 +51,14 @@ class Processor_View extends Sabel_Bus_Processor
     $layoutName = $controller->getAttribute("layout");
     
     if ($layoutName === "none" || isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      $this->result = $contents;
+      $bus->set("result", $contents);
     } else {
       if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
       if ($template = $repository->getValidTemplate($layoutName)) {
         $responses["contentForLayout"] = $contents;
-        $this->result = $this->rendering($renderer, $template, $responses);
+        $bus->set("result", $this->rendering($renderer, $template, $responses));
       } else {
-        $this->result = $contents;
+        $bus->set("result", $contents);
       }
     }
   }

@@ -66,7 +66,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public final function __construct(Sabel_Response $response)
   {
-    $this->reserved = get_class_methods("Sabel_Controller_Page");
+    $this->reserved = get_class_methods(__CLASS__);
     $this->response = $response;
   }
   
@@ -136,10 +136,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       throw new Sabel_Exception_Runtime("page controller must be setup");
     }
     
-    if ($this->request->isTypeOf("css")) {
-      $this->response->setContentType("text/css");
-    }
-    
     if ($action === null) $action = $this->action;
     
     if ($this->isReserved($action)) {
@@ -147,7 +143,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     } elseif ($this->isHiddenAction($action)) {
       $this->response->notfound();
     } else {
-      if ($this->isActionExists($action)) {
+      if ($this->isValidAction($action)) {
         if (count($params) >= 1) {
           call_user_func_array(array($this, $action), $params);
         } else {
@@ -178,17 +174,20 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   private function isReserved($action)
   {
-    return in_array($action, $this->reserved);
+    return in_array($action, $this->reserved, true);
   }
   
   private function isHiddenAction($action)
   {
-    return in_array($action, $this->hidden);
+    return in_array($action, $this->hidden, true);
   }
   
-  private function isActionExists($action)
+  private function isValidAction($action)
   {
-    return ($this->hasMethod($action) && is_callable(array($this, $action)));
+    if (!$this->hasMethod($action)) return false;
+    
+    $method = new ReflectionMethod($this->getName(), $action);
+    return $method->isPublic();
   }
   
   public function getAttribute($name)

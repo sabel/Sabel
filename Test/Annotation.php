@@ -2,7 +2,8 @@
 
 /**
  * @category  Annotation
- * @author    Mori Reo <mori.reo@gmail.com>
+ * @author    Mori Reo <mori.reo@sabel.jp>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Annotation extends SabelTestCase
 {
@@ -24,13 +25,13 @@ class Test_Annotation extends SabelTestCase
     $this->assertEquals("class", $annotations["annotation"][0][0]);
   }
   
-  public function testNormalValue()
+  public function testBasic()
   {
     $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod");
     $this->assertEquals("value", $annotation["param"][0][0]);
   }
   
-  public function testMultiValue()
+  public function testMultipleValue()
   {
     $annotation = $this->reader->readMethodAnnotation("TestAnnotation", "testMethod");
     $this->assertEquals("hoge", $annotation["array"][0][0]);
@@ -61,6 +62,12 @@ class Test_Annotation extends SabelTestCase
     $this->assertTrue(isset($annotation["emptyValue"]));
     $this->assertNull($annotation["emptyValue"][0]);
   }
+  
+  public function testPropertyAnnotation()
+  {
+    $annotations = $this->reader->readPropertyAnnotation("TestAnnotation", "var");
+    $this->assertEquals("int", $annotations["var"][0][0]);
+  }
 }
 
 /**
@@ -70,6 +77,11 @@ class Test_Annotation extends SabelTestCase
  */
 class TestAnnotation
 {
+  /**
+   * @var int
+   */
+  protected $var = 10;
+  
   /**
    * this is annotation test
    *

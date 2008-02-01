@@ -28,8 +28,10 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     $postValues      = array(),
     $parameterValues = array();
     
-  private
-    $method = Sabel_Request::GET;
+  /**
+   * @var const Sabel_Request
+   */
+  private $method = Sabel_Request::GET;
   
   public function __construct($uri = null)
   {
@@ -189,7 +191,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function hasGetValue($name)
   {
-    return (isset($this->getValues[$name]));
+    return isset($this->getValues[$name]);
   }
   
   public function isGetSet($name)
@@ -214,11 +216,6 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   public function setPostValues(array $values)
   {
     $this->postValues = $values;
-  }
-  
-  public function fetchGetObject()
-  {
-    return (object)$this->fetchGetValues();
   }
   
   public function hasPostValue($name)
@@ -252,11 +249,6 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     return $this->postValues;
   }
   
-  public function fetchPostObject()
-  {
-    return (object)$this->fetchPostValues();
-  }
-  
   public function setParameterValue($key, $value)
   {
     $this->parameterValues[$key] = $value;
@@ -283,28 +275,31 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchParameterValues()
   {
-    if (count($this->parameterValues) === 0) return null;
+    if (count($this->parameterValues) === 0) return array();
+    
+    foreach ($this->parameterValues as &$value) {
+      if ($value === "") $value = null;
+    }
+    
     return $this->parameterValues;
   }
   
   public function find($key)
   {
-    $result = "";
+    if (empty($key)) return null;
+    
+    $result = null;
     $values = array($this->fetchPostValues(),
                     $this->fetchGetValues(),
                     $this->fetchParameterValues());
                     
-    $found = false;
-    
     foreach ($values as $value) {
       if (isset($value[$key])) {
-        if ($found) {
-          throw new Sabel_Exception_SecurityWarning("duplicate request key");
+        if ($result !== null) {
+          throw new Sabel_Exception_Runtime("duplicate request key.");
         } else {
           $result = $value[$key];
         }
-        
-        $found = true;
       }
     }
     
@@ -334,7 +329,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function isTypeOf($type)
   {
-    return ($this->uri->getType() === $type);
+    return ($this->uri->type() === $type);
   }
   
   public function __toString()

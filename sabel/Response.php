@@ -41,10 +41,6 @@ interface Sabel_Response
   public function setResponses(array $responses);
   public function getResponses();
   
-  public function setContentType($type);
-  public function getContentType();
-  public function hasContentType();
-  
   public function setHeader($message, $value);
   public function getHeaders();
   public function hasHeaders();

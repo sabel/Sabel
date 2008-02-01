@@ -50,16 +50,15 @@ class Sabel_Request_Uri extends Sabel_Object
     
     $lastElement = array_pop($elements);
     
-    if (strpos($lastElement, ".") !== false) {
-      $tmp = explode(".", $lastElement);
-      $this->type = array_pop($tmp);
+    if (($pos = strpos($lastElement, ".")) !== false) {
+      $this->type = substr($lastElement, $pos + 1);
     }
     
     $elements[] = $lastElement;
     return $this->parts = $elements;
   }
   
-  public function getType()
+  public function type()
   {
     return $this->type;
   }

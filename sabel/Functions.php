@@ -48,14 +48,23 @@ function lcfirst($string)
 
 function dump()
 {
-  echo '<pre style="background: #FFF; color: #333; ' .
-       'border: 1px solid #ccc; margin: 5px; padding: 5px;">';
-       
+  if (PHP_SAPI === "cli") {
+    echo PHP_EOL;
+    echo "================================================" . PHP_EOL;
+  } else {
+    echo '<pre style="background: #FFF; color: #333; ' .
+         'border: 1px solid #ccc; margin: 5px; padding: 5px;">';
+  }
+  
   foreach (func_get_args() as $value) {
     var_dump($value);
   }
   
-  echo '</pre>';
+  if (PHP_SAPI === "cli") {
+    echo "================================================" . PHP_EOL;
+  } else {
+    echo '</pre>';
+  }
 }
 
 function candidate($name, $uri, $options = null)

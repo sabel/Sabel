@@ -200,7 +200,7 @@ class Sabel_Map_Candidate
     foreach ($parameters as $key => $param) {
       switch ($key) {
         case "n": case "name": case "candidate":
-          $candidate = Sabel_Context::getContext()->getCandidatesByName($param);
+          $candidate = Sabel_Context::getContext()->getCandidateByName($param);
           break;
         case "m": case "module":
           $parameters[":module"] = $param;

@@ -1,6 +1,9 @@
 <?php
 
 define("SABEL_BASE",  dirname(realpath(__FILE__)));
+PHPUnit_Util_Filter::addDirectoryToFilter(SABEL_BASE . "/Test");
+PHPUnit_Util_Filter::addFileToFilter(SABEL_BASE . "/SabelAllTests.php");
+
 define("RUN_BASE",    SABEL_BASE . "/Test/data/application");
 define("TEST_CASE",   true);
 define("PRODUCTION",  0x01);
@@ -31,7 +34,9 @@ require_once("Test/Object.php");
 require_once("Test/Annotation.php");
 require_once("Test/Aspect.php");
 require_once("Test/Container.php");
-require_once("Test/Request.php");
+require_once("Test/Request/Tests.php");
+require_once("Test/Response/Tests.php");
+require_once("Test/Controller/Tests.php");
 require_once("Test/Reflection.php");
 require_once("Test/View/Tests.php");
 require_once("Test/View/TemplateFile.php");
@@ -48,8 +53,6 @@ require_once("Test/Util/HashList.php");
 require_once("Test/Map/Tests.php");
 require_once("Test/VirtualInheritance.php");
 require_once("Test/DB/Tests.php");
-require_once("Test/DB/Validate.php");
-require_once("Test/DB/SchemaColumn.php");
 require_once("Test/Locale/Browser.php");
 require_once("Test/Locale/Server.php");
 require_once("Test/I18n/Sabel.php");
@@ -70,30 +73,35 @@ class SabelAllTests
     
     $suite->addTest(Test_Bus::suite());
     $suite->addTest(Test_Object::suite());
+    
     $suite->addTest(Test_Map_Tests::suite());
+    $suite->addTest(Test_Request_Tests::suite());
+    $suite->addTest(Test_Response_Tests::suite());
+    $suite->addTest(Test_Controller_Tests::suite());
+    
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
-    $suite->addTest(Test_Request::suite());
     $suite->addTest(Test_Container::suite());
+    
     $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_View_TemplateDb::suite());
     $suite->addTest(Test_View_Pager::suite());
     $suite->addTest(Test_View_PageViewer::suite());
     $suite->addTest(Test_View_TagPageViewer::suite());
+    
     $suite->addTest(Test_Util_String::suite());
     $suite->addTest(Test_Util_Map::suite());
     $suite->addTest(Test_Util_LinkedList::suite());
     $suite->addTest(Test_Util_HashList::suite());
+    
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
     $suite->addTest(Test_Locale_Browser::suite());
-    //$suite->addTest(Test_Locale_Server::suite());
+    // $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Sabel::suite());
     $suite->addTest(Test_I18n_PhpGettext::suite());
-    $suite->addTest(Test_DB_Tests::suite());
-    $suite->addTest(Test_DB_Validate::suite());
-    $suite->addTest(Test_DB_SchemaColumn::suite());
+    // $suite->addTest(Test_DB_Tests::suite());
     
     // $suite->addTest(Test_Processor_Tests::suite());
     // $suite->addTest(Test_Aspect::suite());

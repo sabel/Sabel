@@ -6,7 +6,7 @@ if (!defined("GETTEXT_DEFAULT_DOMAIN_PATH")) {
 
 /**
  * @category  I18n
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_I18n_Sabel extends SabelTestCase
 {
