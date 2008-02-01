@@ -37,6 +37,7 @@ require_once("Test/Container.php");
 require_once("Test/Request/Tests.php");
 require_once("Test/Response/Tests.php");
 require_once("Test/Controller/Tests.php");
+require_once("Test/Util/Tests.php");
 require_once("Test/Reflection.php");
 require_once("Test/View/Tests.php");
 require_once("Test/View/TemplateFile.php");
@@ -46,10 +47,6 @@ require_once("Test/View/PageViewer.php");
 require_once("Test/View/TagPageViewer.php");
 require_once("Test/Storage/InMemory.php");
 require_once("Test/Cache/Tests.php");
-require_once("Test/Util/String.php");
-require_once("Test/Util/Map.php");
-require_once("Test/Util/List.php");
-require_once("Test/Util/HashList.php");
 require_once("Test/Map/Tests.php");
 require_once("Test/VirtualInheritance.php");
 require_once("Test/DB/Tests.php");
@@ -78,6 +75,7 @@ class SabelAllTests
     $suite->addTest(Test_Request_Tests::suite());
     $suite->addTest(Test_Response_Tests::suite());
     $suite->addTest(Test_Controller_Tests::suite());
+    $suite->addTest(Test_Util_Tests::suite());
     
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
@@ -88,11 +86,6 @@ class SabelAllTests
     $suite->addTest(Test_View_Pager::suite());
     $suite->addTest(Test_View_PageViewer::suite());
     $suite->addTest(Test_View_TagPageViewer::suite());
-    
-    $suite->addTest(Test_Util_String::suite());
-    $suite->addTest(Test_Util_Map::suite());
-    $suite->addTest(Test_Util_LinkedList::suite());
-    $suite->addTest(Test_Util_HashList::suite());
     
     $suite->addTest(Test_Storage_InMemory::suite());
     $suite->addTest(Test_Cache_Tests::suite());

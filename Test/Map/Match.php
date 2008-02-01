@@ -23,10 +23,6 @@ class Test_Map_Match extends SabelTestCase
     $this->config = new ConfigMap();
   }
   
-  public function tearDown()
-  {
-  }
-  
   public function testSimple()
   {
     $this->route("default")

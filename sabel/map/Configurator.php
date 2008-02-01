@@ -7,14 +7,15 @@
  * @abstract
  * @category   Map
  * @package    org.sabel.map
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_Map_Configurator implements Sabel_Config
 {
+  protected static $candidates = array();
+  
   protected $routes = array();
-  protected $candidates = array();
   
   public function route($name)
   {
@@ -24,6 +25,7 @@ abstract class Sabel_Map_Configurator implements Sabel_Config
   public function build()
   {
     $candidates = array();
+    
     foreach ($this->routes as $route) {
       $name = $route->getName();
       $candidate = new Sabel_Map_Candidate($name);
@@ -31,13 +33,23 @@ abstract class Sabel_Map_Configurator implements Sabel_Config
       $candidates[$name] = $candidate;
     }
     
-    Sabel_Context::getContext()->setCandidates($candidates);
-    
-    return $candidates;
+    return self::$candidates = $candidates;
   }
   
-  public function reset()
+  public static function getCandidateByName($name)
   {
-    $this->candidates = array();
+    if (isset(self::$candidates[$name])) {
+      return self::$candidates[$name];
+    } else {
+      return null;
+    }
+  }
+  
+  public function clearCandidates()
+  {
+    $candidates = self::$candidates;
+    self::$candidates = array();
+    
+    return $candidates;
   }
 }

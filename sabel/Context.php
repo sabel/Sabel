@@ -5,8 +5,8 @@
  *
  * @category   Core
  * @package    org.sabel.core
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Context extends Sabel_Object
@@ -16,7 +16,6 @@ class Sabel_Context extends Sabel_Object
   private
     $bus        = null,
     $candidate  = null,
-    $candidates = array(),
     $exception  = null;
     
   public static function setContext($context)
@@ -41,25 +40,6 @@ class Sabel_Context extends Sabel_Object
   public function getCandidate()
   {
     return self::$context->candidate;
-  }
-  
-  public function setCandidates($candidates)
-  {
-    self::$context->candidates = $candidates;
-  }
-  
-  public function getCandidates()
-  {
-    return self::$context->candidates;
-  }
-  
-  public function getCandidateByName($name)
-  {
-    if (isset(self::$context->candidates[$name])) {
-      return self::$context->candidates[$name];
-    } else {
-      return null;
-    }
   }
   
   public function setBus($bus)
