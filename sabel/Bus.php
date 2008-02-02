@@ -12,7 +12,8 @@
 class Sabel_Bus extends Sabel_Object
 {
   private
-    $holder = array(),
+    $holder  = array(),
+    $configs = array(),
     $processorList = null;
     
   private
@@ -54,14 +55,18 @@ class Sabel_Bus extends Sabel_Object
     }
   }
   
-  public function __set($key, $value)
+  public function setConfig($name, Sabel_Config $config)
   {
-    $this->set($key, $value);
+    $this->configs[$name] = $config;
   }
   
-  public function __get($key)
+  public function getConfig($name)
   {
-    return $this->get($key);
+    if (isset($this->configs[$name])) {
+      return $this->configs[$name];
+    } else {
+      return null;
+    }
   }
   
   /**
@@ -90,21 +95,22 @@ class Sabel_Bus extends Sabel_Object
   public function run()
   {
     $processorList = $this->processorList;
+    $isProduction  = (ENVIRONMENT === PRODUCTION);
     
     while ($processor = $processorList->next()) {
       $processor->setBus($this);
       $this->beforeEvent($processor->name);
-      $result = $processor->execute($this);
+      $processor->execute($this);
       $this->afterEvent($processor->name);
       
-      if (ENVIRONMENT !== PRODUCTION) {
+      if (!$isProduction) {
         l("execute " . $processor->name, LOG_DEBUG);
       }
     }
     
     $processorList->first();
     while ($processor = $processorList->next()) {
-      if (ENVIRONMENT !== PRODUCTION) {
+      if (!$isProduction) {
         l("shutdown " . $processor->name, LOG_DEBUG);
       }
       

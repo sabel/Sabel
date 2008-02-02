@@ -5,8 +5,8 @@
  *
  * @category   Processor
  * @package    lib.processor
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Processor_Router extends Sabel_Bus_Processor
@@ -16,7 +16,7 @@ class Processor_Router extends Sabel_Bus_Processor
     $request = $bus->get("request");
     $validCandidate = null;
     
-    $config = new Config_Map();
+    $config = $bus->getConfig("map");
     $config->configure();
     
     foreach ($config->build() as $candidate) {

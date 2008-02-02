@@ -75,7 +75,7 @@ class Sabel_Command
   
   public static function getHeader($type, $headMsg)
   {
-    if (!defined("IS_WIN") || IS_WIN) {
+    if (Sabel_Environment::create()->isWin()) {
       return sprintf(self::$winHeaders[$type], $headMsg);
     } else {
       return sprintf(self::$headers[$type], $headMsg);

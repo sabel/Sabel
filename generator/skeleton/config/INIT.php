@@ -10,7 +10,8 @@ unshift_include_paths(array(MODULES_DIR_NAME,
 set_include_path(Sabel::getPath() . PATH_SEPARATOR . get_include_path());
 
 /**
- * include config files.
+ * including config files.
  */
-Sabel::fileUsing(CONFIG_DIR_PATH . DIRECTORY_SEPARATOR . "Bus.php", true);
-Sabel::fileUsing(CONFIG_DIR_PATH . DIRECTORY_SEPARATOR . "Map.php", true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DIRECTORY_SEPARATOR . "Bus.php",   true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DIRECTORY_SEPARATOR . "Map.php",   true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DIRECTORY_SEPARATOR . "Addon.php", true);

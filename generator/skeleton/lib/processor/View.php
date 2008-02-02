@@ -16,31 +16,25 @@ class Processor_View extends Sabel_Bus_Processor
     $controller = $bus->get("controller");
     if ($controller->isRedirected()) return;
     
-    $responses = $bus->get("response")->getResponses();
-    $renderer = $bus->get("renderer");
+    $this->prepare($bus);
     
-    if (!is_object($renderer)) {
-      $renderer = new Sabel_View_Renderer();
-      $bus->set("renderer", $renderer);
-    }
+    $responses  = $this->response->getResponses();
+    $repository = $this->getRepository($bus->get("destination"));
     
     if ($controller->renderText) {
-      $bus->set("result", $this->rendering($renderer, $controller->contents, $responses));
-      return;
+      $result = $this->renderer->rendering($controller->contents, $responses);
+      return $bus->set("result", $result);
     } elseif ($controller->renderImage) {
-      $bus->set("result", $controller->contents);
-      return;
+      return $bus->set("result", $controller->contents);
     }
     
-    $repository = $this->getRepository($bus);
-    
     if ($template = $repository->getValidTemplate()) {
-      $contents = $this->rendering($renderer, $template, $responses);
+      $contents = $this->rendering($template, $responses);
     } elseif ($controller->isExecuted()) {
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
     } elseif ($template = $repository->getValidTemplate("notFound")) {
-      $contents = $this->rendering($renderer, $template, $responses);
+      $contents = $this->rendering($template, $responses);
     } else {
       $contents = "<h1>404 Not Found</h1>";
       if (DEVELOPMENT === DEVELOPMENT) {
@@ -56,41 +50,44 @@ class Processor_View extends Sabel_Bus_Processor
       if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
       if ($template = $repository->getValidTemplate($layoutName)) {
         $responses["contentForLayout"] = $contents;
-        $bus->set("result", $this->rendering($renderer, $template, $responses));
+        $bus->set("result", $this->rendering($template, $responses));
       } else {
         $bus->set("result", $contents);
       }
     }
   }
   
-  private function rendering(Sabel_View_Renderer $renderer, $template, $responses)
+  private function rendering($template, $responses)
   {
-    if (is_object($template)) {
-      $contents = $template->getContents();
-      $path = $template->getPath();
-    } else {
-      $contents = $template;
-      $path = null;
-    }
-    
-    return $renderer->rendering($contents, $responses, $path);
+    return $this->renderer->rendering($template->getContents(),
+                                      $responses,
+                                      $template->getPath());
   }
   
-  private function getRepository($bus)
+  protected function prepare($bus)
   {
-    $response   = $bus->get("response");
-    $repository = $bus->get("repository");
+    $this->extract("response", "repository", "renderer");
+    
+    if ($this->renderer === null) {
+      $this->renderer = new Sabel_View_Renderer();
+      $bus->set("renderer", $this->renderer);
+    }
+  }
+  
+  private function getRepository($destination)
+  {
+    $response = $this->response;
     
     if ($response->isNotFound()) {
-      $repository->setTemplateName("notFound");
+      $this->repository->setTemplateName("notFound");
     } elseif ($response->isForbidden()) {
-      $repository->setTemplateName("forbidden");
+      $this->repository->setTemplateName("forbidden");
     } elseif ($response->isServerError()) {
-      $repository->setTemplateName("serverError");
-    } elseif ($repository->getTemplateName() === null) {
-      $repository->setTemplateName($bus->get("destination")->getAction());
+      $this->repository->setTemplateName("serverError");
+    } elseif ($this->repository->getTemplateName() === null) {
+      $this->repository->setTemplateName($destination->getAction());
     }
     
-    return $repository;
+    return $this->repository;
   }
 }

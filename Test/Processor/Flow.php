@@ -1,8 +1,8 @@
 <?php
 
-require_once ("generator/skeleton/addon/flow/Processor.php");
-require_once ("generator/skeleton/addon/flow/State.php");
-require_once ("Test/Processor/classes/StandardFlow.php");
+// require_once ("generator/skeleton/addon/flow/Processor.php");
+// require_once ("generator/skeleton/addon/flow/State.php");
+// require_once ("Test/Processor/classes/StandardFlow.php");
 
 /**
  * TestCase of Processor_Flow

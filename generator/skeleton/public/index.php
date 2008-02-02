@@ -22,7 +22,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
 }
 
 $config = new Config_Bus();
-echo $config->configure()->getBus()->run();
+echo $config->configure()->run();
 
 Sabel::shutdown();
 

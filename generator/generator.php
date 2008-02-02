@@ -1,63 +1,124 @@
 <?php
 
-if (!defined("TEST_CASE")) {
-
-if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
-if (!defined("IS_WIN")) define("IS_WIN", (DS === '\\'));
-
-$args = $_SERVER["argv"];
-
-if (isset($args[1])) {
-  if (strpos($args[1], "-") === false) {
-    $dir = getcwd() . DS . $args[1];
+/**
+ * scaffold creator
+ *
+ * @category   Task
+ * @package    org.sabel.task
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class SabelScaffold
+{
+  protected $ignores   = array();
+  protected $overwrite = array();
+  
+  protected $targetDir     = "";
+  protected $skeletonDir   = "";
+  protected $dirnameLength = "";
+  
+  public function __construct($args, $skeletonDir)
+  {
+    $this->targetDir = $this->getTargetDir($args);
+    $this->readOptions($args);
+    
+    $this->skeletonDir   = $skeletonDir;
+    $this->dirnameLength = strlen($skeletonDir);
   }
-} else {
-  $dir = getcwd();
-}
-
-if (!defined("RUN_BASE")) {
-  define("RUN_BASE", $dir);
-}
-
-if (!is_dir(RUN_BASE)) mkdir(RUN_BASE);
-define("ENVIRONMENT", 0x0A);
-
-require ("Sabel" . DIRECTORY_SEPARATOR . "Sabel.php");
-require ("classes.php");
-
-$pathToSabel = Sabel::getPath();
-$includePath = get_include_path();
-
-if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
-  set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
-}
-
-$dt = new Sabel_Util_DirectoryTraverser(dirname(__FILE__) . DIRECTORY_SEPARATOR . "skeleton");
-$aCreator = new SabelDirectoryAndFileCreator();
-
-for ($i = 0, $count = count($args); $i < $count; ++$i) {
-  if ($args[$i] === "--overwrite") {
-    $aCreator->setOverwrite(true);
-  } elseif ($args[$i] === "--ignore") {
-    $fwArg = $args[$i+1];
-    if (isset($fwArg) && stripos($fwArg, "--") === false) {
-      if (stripos($fwArg, ",") !== false) {
-        $ignores = explode(",", $fwArg);
-        foreach ($ignores as $ignore) {
-          $aCreator->addIgnore($ignore);
+  
+  public function scaffold($dir = null)
+  {
+    if ($dir === null) $dir = $this->skeletonDir;
+    
+    foreach (scandir($dir) as $item) {
+      if ($item{0} === "." && $item !== ".htaccess") continue;
+      
+      $fullPath   = $dir . DS . $item;
+      $targetItem = substr($fullPath, $this->dirnameLength + 1);
+      $targetPath = $this->targetDir . DS . $targetItem;
+      
+      if (is_dir($fullPath)) {
+        if (isset($this->ignore[$targetItem])) {
+          Sabel_Command::message("ignore '{$targetItem}'.");
+        } else {
+          if (is_dir($targetPath)) {
+            Sabel_Command::warning("'{$targetItem}' already exists.");
+          } else {
+            Sabel_Command::success("create $targetItem");
+            mkdir ($targetPath);
+          }
+          
+          $this->scaffold($fullPath);
         }
       } else {
-        $aCreator->addIgnore($fwArg);
+        if (isset($this->ignore[$targetItem])) {
+          Sabel_Command::message("ignore '{$targetItem}'.");
+        } elseif (is_file($targetPath) && !isset($this->overwrite[$targetItem])) {
+          Sabel_Command::warning("'{$targetItem}' already exists.");
+        } else {
+          if (isset($this->overwrite[$targetItem])) {
+            Sabel_Command::message("overwrite '{$targetItem}'");
+            unlink($targetPath);
+          }
+          
+          Sabel_Command::success("create $targetItem");
+          copy($fullPath, $targetPath);
+        }
       }
-      ++$i;
+    }
+  }
+  
+  public function chmod()
+  {
+    $dirs = array("cache", "data", "data" . DS . "compiled", "logs");
+    
+    foreach ($dirs as $dir) {
+      chmod($this->targetDir . DS . $dir, 0777);
+    }
+  }
+  
+  protected function getTargetDir($args)
+  {
+    if (in_array("-d", $args, true)) {
+      $dir = $args[array_search("-d", $args) + 1];
     } else {
-      echo "must specify ignore directory when using --ignore option\n";
-      exit;
+      $dir = getcwd();
+    }
+    
+    if (!is_dir($dir)) mkdir($dir);
+    return $dir;
+  }
+  
+  protected function readOptions($args)
+  {
+    if (in_array("--overwrite", $args, true)) {
+      $index = array_search("--overwrite", $args) + 1;
+      for ($i = $index, $c = count($args); $i < $c; $i++) {
+        if (substr($args[$i], 0, 2) === "--") break;
+        $this->overwrite[$args[$i]] = 1;
+      }
+    }
+    
+    if (in_array("--ignore", $args, true)) {
+      $index = array_search("--ignore", $args) + 1;
+      for ($i = $index, $c = count($args); $i < $c; $i++) {
+        if (substr($args[$i], 0, 2) === "--") break;
+        $this->ignore[$args[$i]] = 1;
+      }
     }
   }
 }
 
-$dt->visit($aCreator);
-$dt->traverse();
-
-} // end of !defined("TEST_CASE")
+if (!defined("TEST_CASE")) {
+  if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
+  $sabel = dirname(__FILE__) . DS . ".." . DS . "sabel";
+  require ($sabel . DS . "Object.php");
+  require ($sabel . DS . "Command.php");
+  require ($sabel . DS . "Environment.php");
+  
+  $scaffold = new SabelScaffold($_SERVER["argv"], dirname(__FILE__) . DS . "skeleton");
+  $scaffold->scaffold();
+  $scaffold->chmod();
+}

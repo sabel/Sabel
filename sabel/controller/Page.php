@@ -1,11 +1,12 @@
 <?php
 
 /**
- * Abstract Page Controller
+ * abstract controller
  *
  * @category   Controller
  * @package    org.sabel.controller
  * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -42,11 +43,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $executed = false;
   
   /**
-   * @var boolean
-   */
-  protected $setup = false;
-  
-  /**
    * @var array
    */
   protected $hidden = array();
@@ -71,25 +67,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   }
   
   /**
-   * setup of PageController
-   *
-   * @param Sabel_Request               $request
-   * @param Sabel_Controller_Redirector $redirector
-   * @param Sabel_Storage_Abstract      $storage
-   *
-   * @return void
-   */
-  public function setup(Sabel_Request               $request,
-                        Sabel_Controller_Redirector $redirector,
-                        Sabel_Storage_Abstract      $storage = null)
-  {
-    $this->request  = $request;
-    $this->redirect = $redirector;
-    $this->storage  = $storage;
-    $this->setup    = true;
-  }
-  
-  /**
    * initialize a controller.
    * execute ones before action execute.
    */
@@ -98,26 +75,83 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
   }
   
+  /**
+   * @param Sabel_Bus $bus
+   *
+   * @return void
+   */
   public function setBus(Sabel_Bus $bus)
   {
     $this->bus = $bus;
   }
   
-  public function getResponse()
+  /**
+   * @param Sabel_Request $request
+   *
+   * @return void
+   */
+  public function setRequest(Sabel_Request $request)
   {
-    return $this->response;
+    $this->request = $request;
   }
   
+  /**
+   * @return Sabel_Request
+   */
   public function getRequest()
   {
     return $this->request;
   }
   
+  /**
+   * @param Sabel_Response $response
+   *
+   * @return void
+   */
+  public function setResponse(Sabel_Response $response)
+  {
+    $this->response = $response;
+  }
+  
+  /**
+   * @return Sabel_Response
+   */
+  public function getResponse()
+  {
+    return $this->response;
+  }
+  
+  /**
+   * @param Sabel_Storage_Abstract $storage
+   *
+   * @return void
+   */
+  public function setStorage(Sabel_Storage_Abstract $storage)
+  {
+    $this->storage = $storage;
+  }
+  
+  /**
+   * @return Sabel_Storage_Abstract
+   */
   public function getStorage()
   {
     return $this->storage;
   }
   
+  /**
+   * @param Sabel_Controller_Redirector $redirector
+   *
+   * @return void
+   */
+  public function setRedirector(Sabel_Controller_Redirector $redirector)
+  {
+    $this->redirect = $redirector;
+  }
+  
+  /**
+   * @return Sabel_Controller_Redirector
+   */
   public function getRedirector()
   {
     return $this->redirect;
@@ -132,10 +166,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action = null, $params = array())
   {
-    if (!$this->setup) {
-      throw new Sabel_Exception_Runtime("page controller must be setup");
-    }
-    
     if ($action === null) $action = $this->action;
     
     if ($this->isReserved($action)) {
@@ -172,16 +202,31 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return $this->redirect->isRedirected();
   }
   
+  /**
+   * @param string $action
+   *
+   * @return boolean
+   */
   private function isReserved($action)
   {
     return in_array($action, $this->reserved, true);
   }
   
+  /**
+   * @param string $action
+   *
+   * @return boolean
+   */
   private function isHiddenAction($action)
   {
     return in_array($action, $this->hidden, true);
   }
   
+  /**
+   * @param string $action
+   *
+   * @return boolean
+   */
   private function isValidAction($action)
   {
     if (!$this->hasMethod($action)) return false;

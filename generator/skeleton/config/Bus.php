@@ -1,6 +1,6 @@
 <?php
 
-class Config_Bus extends Sabel_Bus_Config
+class Config_Bus implements Sabel_Config
 {
   public function configure()
   {
@@ -9,16 +9,19 @@ class Config_Bus extends Sabel_Bus_Config
                         "initializer", "executer", "exception",
                         "response",    "view");
                         
-    $bus = $this->bus;
+    $bus = new Sabel_Bus();
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;
     
     foreach ($processors as $name) {
       $processor = ucfirst($name);
-      Sabel::fileUsing($baseDir . $processor. PHP_SUFFIX, true);
+      Sabel::fileUsing($baseDir . $processor . PHP_SUFFIX, true);
       $className = "Processor_" . $processor;
       $bus->addProcessor(new $className($name));
     }
     
-    return $this;
+    $bus->setConfig("map",   new Config_Map());
+    $bus->setConfig("addon", new Config_Addon());
+    
+    return $bus;
   }
 }

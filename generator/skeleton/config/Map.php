@@ -4,12 +4,12 @@ class Config_Map extends Sabel_Map_Configurator
 {
   public function configure()
   {
-    if (ENVIRONMENT === DEVELOPMENT) {
-      $this->route("admin")
-             ->uri("admin/:controller/:action/:param")
-             ->module("admin")
-             ->defaults(array(":controller" => "config",
-                              ":action"     => "file",
+    if (ENVIRONMENT !== PRODUCTION) {
+      $this->route("devel")
+             ->uri("devel/:controller/:action/:param")
+             ->module("devel")
+             ->defaults(array(":controller" => "main",
+                              ":action"     => "index",
                               ":param"      => null));
     }
     

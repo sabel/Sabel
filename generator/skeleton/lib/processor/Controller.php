@@ -5,8 +5,8 @@
  *
  * @category   Processor
  * @package    lib.processor
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Processor_Controller extends Sabel_Bus_Processor
@@ -23,8 +23,16 @@ class Processor_Controller extends Sabel_Bus_Processor
       $controller = $this->createDefaultController($response);
     }
     
-    $controller->setup($bus->get("request"), $redirector, $bus->get("storage"));
     $controller->setBus($bus);
+    $controller->setRedirector(new Sabel_Controller_Redirector());
+    
+    if (($request = $bus->get("request")) !== null) {
+      $controller->setRequest($request);
+    }
+    
+    if (($storage = $bus->get("storage")) !== null) {
+      $controller->setStorage($storage);
+    }
     
     $bus->set("response",   $response);
     $bus->set("controller", $controller);

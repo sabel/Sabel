@@ -1,22 +1,20 @@
 <?php
 
-Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Addon" . PHP_SUFFIX);
-
 /**
  * Processor_Addon
  *
  * @category   Processor
  * @package    lib.processor
  * @version    1.0
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Processor_Addon extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $config = new Config_Addon();
+    $config = $bus->getConfig("addon");
     $addons = $config->configure();
     
     foreach ($addons as $addon) {

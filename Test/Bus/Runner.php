@@ -16,14 +16,13 @@ class Test_Bus_Runner extends SabelTestCase
   public function testInstanceOf()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
-    $this->assertTrue($bus instanceof Sabel_Bus);
+    $this->assertTrue($config->configure() instanceof Sabel_Bus);
   }
   
   public function testConfigure()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $list = $bus->getProcessorList();
     $this->assertTrue($list->has("hoge"));
     $this->assertTrue($list->has("fuga"));
@@ -34,7 +33,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testBusInit()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $bus->init(array("null"   => null,
                      "int"    => 10,
                      "string" => "test",
@@ -49,7 +48,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testRun()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $bus->run();
     
     $this->assertEquals("10", $bus->get("a"));
@@ -60,7 +59,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testAttatchExecuteBeforeEvent()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $bus->attachExecuteBeforeEvent("foo", new TestEvent(), "beforeMethod");
     $bus->run();
     
@@ -70,7 +69,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testAttatchExecuteAfterEvent()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $bus->attachExecuteAfterEvent("hoge", new TestEvent(), "afterMethod");
     $bus->run();
     
@@ -80,7 +79,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testHasMethod()
   {
     $config = new TestBusConfig();
-    $bus = $config->configure()->getBus();
+    $bus = $config->configure();
     $bus->set("a", "10");
     $bus->set("b", "20");
     $bus->set("c", "30");
@@ -106,20 +105,20 @@ class TestEvent
   }
 }
 
-class TestBusConfig extends Sabel_Bus_Config
+class TestBusConfig implements Sabel_Config
 {
   public function configure()
   {
     $processors = array("hoge", "fuga", "foo");
     
-    $bus = $this->bus;
+    $bus = new Sabel_Bus();
     foreach ($processors as $name) {
       $processor = ucfirst($name);
       $className = "Processor_" . $processor;
       $bus->addProcessor(new $className($name));
     }
     
-    return $this;
+    return $bus;
   }
 }
 
