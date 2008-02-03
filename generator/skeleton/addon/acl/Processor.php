@@ -6,53 +6,55 @@
  * @version    1.0
  * @category   Addon
  * @package    addon.acl
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Acl_Processor extends Sabel_Bus_Processor
 {
   const DENY_ACTION = "forbidden";
   
-  private
-    $user    = null,
-    $configs = array();
-    
+  /**
+   * @var Acl_User
+   */
+  private $user = null;
+  
   public function execute($bus)
   {
-    $config = new Acl_Config();
-    $this->configs = $config->configure();
-    
-    $destination = $this->destination;
-    $action = $destination->getAction();
+    $config     = new Acl_Config();
+    $configs    = $config->configure();
     $this->user = new Acl_User();
     
-    if ($this->storage->has("acl_user")) {
-      $this->user->restore($this->storage->read("acl_user"));
+    if ($aclUser = $bus->get("storage")->read("acl_user")) {
+      $this->user->restore($aclUser);
     }
     
-    $this->controller->setAttribute("user", $this->user);
+    $bus->get("controller")->setAttribute("user", $this->user);
     
-    $module = $destination->getModule();
-    $controller = $destination->getController();
+    $destination = $bus->get("destination");
+    $module      = $destination->getModule();
+    $controller  = $destination->getController();
     
-    if (isset($this->configs[$module])) {
-      $mConfig = $this->configs[$module];
-      $cConfig = $mConfig->getController($controller);
+    if (isset($configs[$module])) {
+      $modConfig  = $configs[$module];
+      $ctrlConfig = $modConfig->getController($controller);
       
-      if ($cConfig === null) {
-        if ($this->isAllow($mConfig)) return;
-        $authUri = $mConfig->authUri();
+      if ($ctrlConfig === null) {
+        if ($this->isAllow($modConfig)) return;
+        $authUri = $modConfig->authUri();
       } else {
-        if ($this->isAllow($cConfig)) return;
-        $authUri = $cConfig->authUri();
-        if ($authUri === null) $authUri = $mConfig->authUri();
+        if ($this->isAllow($ctrlConfig)) return;
+        $authUri = $ctrlConfig->authUri();
+        if ($authUri === null) $authUri = $modConfig->authUri();
       }
       
-      $this->forbidden($bus, $authUri);
+      if ($authUri === null) {
+        $bus->get("response")->forbidden();
+      } else {
+        $bus->get("controller")->getRedirector()->to($authUri);
+      }
     } else {
-      $this->forbidden($bus);
+      $bus->get("response")->forbidden();
     }
   }
   
@@ -70,19 +72,5 @@ class Acl_Processor extends Sabel_Bus_Processor
     } else {
       return false;
     }
-  }
-  
-  private function forbidden($bus, $authUri = null)
-  {
-    $redirector = $bus->get("controller")->getAttribute("redirect");
-    
-    if (is_object($redirector) && $authUri !== null) {
-      $redirector->to($authUri);
-    } else {
-      $bus->get("response")->forbidden();
-      $bus->get("destination")->setAction(self::DENY_ACTION);
-    }
-    
-    $bus->getProcessorList()->remove("executer");
   }
 }

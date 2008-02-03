@@ -59,8 +59,8 @@ class Sabel_Map_Elements extends Sabel_Object implements Countable
   
   public function appendToRequests(&$requests)
   {
-    foreach ($this->components as $element) {
-      if ($element->hasDefault()) {
+    foreach ($this->components as $i => $element) {
+      if ($element->hasDefault() && !isset($requests[$i])) {
         $requests[] = $element->default;
       }
     }

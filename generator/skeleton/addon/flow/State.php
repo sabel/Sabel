@@ -6,9 +6,9 @@
  * @version    1.0
  * @category   Addon
  * @package    addon.flow
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Flow_State
@@ -38,7 +38,7 @@ class Flow_State
   
   public function has($name)
   {
-    return (isset($this->properties[$name]));
+    return isset($this->properties[$name]);
   }
   
   public function __get($name)
@@ -112,7 +112,11 @@ class Flow_State
   
   public function isPreviousAction($action)
   {
-    return ($this->properties["previousActivity"] === $action);
+    if ($this->has("previousActivity")) {
+      return ($this->properties["previousActivity"] === $action);
+    } else {
+      return false;
+    }
   }
   
   public function getStateKey($key = "")

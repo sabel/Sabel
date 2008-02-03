@@ -5,49 +5,90 @@
  *
  * @category  Addon
  * @package   addon.form
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class Form_Object extends Sabel_Object
 {
-  protected
-    $token     = null,
-    $model     = null,
-    $mdlName   = "",
-    $formName  = "",
-    $columns   = null,
-    $errors    = array(),
-    $allowCols = array();
-    
+  /**
+   * @var Sabel_DB_Model
+   */
+  protected $model = null;
+  
+  /**
+   * @var string
+   */
+  protected $mdlName = "";
+  
+  /**
+   * @var string
+   */
+  protected $formName = "";
+  
+  /**
+   * @var string
+   */
+  protected $token = null;
+  
+  /**
+   * @var Sabel_DB_Schema_Column[]
+   */
+  protected $columns = array();
+  
+  /**
+   * @var array
+   */
+  protected $errors = array();
+  
+  /**
+   * @var array
+   */
+  protected $allowCols = array();
+  
   public function __construct($model, $fName, $token = null)
   {
     if (is_string($model)) {
       $model = MODEL($model);
     }
     
-    $this->token    = $token;
     $this->model    = $model;
     $this->formName = $fName;
+    $this->token    = $token;
     $this->mdlName  = $model->getName();
     $this->columns  = $model->getSchema()->getColumns();
   }
   
+  /**
+   * @return string
+   */
   public function getToken()
   {
     return $this->token;
   }
   
+  /**
+   * @return string
+   */
   public function getFormName()
   {
     return $this->formName;
   }
   
+  /**
+   * @return Sabel_DB_Model
+   */
   public function getModel()
   {
     return $this->model;
   }
   
+  /**
+   * @param string $key
+   * @param mixed  $val
+   *
+   * @return void
+   */
   public function set($key, $val)
   {
     $this->model->__set($key, $val);
@@ -69,39 +110,63 @@ class Form_Object extends Sabel_Object
     return $this->model->__get($key);
   }
   
+  /**
+   * @param array $allowCols
+   *
+   * @return void
+   */
   public function setAllowColumns(array $allowCols)
   {
     $this->allowCols = $allowCols;
   }
   
+  /**
+   * @return array
+   */
   public function getAllowColumns()
   {
     return $this->allowCols;
   }
   
+  /**
+   * @param array $errors
+   *
+   * @return void
+   */
   public function setErrors($errors)
   {
     $this->errors = $errors;
   }
   
+  /**
+   * @return array
+   */
   public function getErrors()
   {
     return $this->errors;
   }
   
+  /**
+   * @return boolean
+   */
   public function hasError()
   {
     return !empty($this->errors);
   }
   
+  /**
+   * @return void
+   */
   public function unsetErrors()
   {
-    $errors = $this->errors;
     $this->errors = array();
-    
-    return $errors;
   }
   
+  /**
+   * @param array $ignores
+   *
+   * @return boolean
+   */
   public function validate($ignores = array())
   {
     if (is_string($ignores)) {
@@ -124,6 +189,11 @@ class Form_Object extends Sabel_Object
     }
   }
   
+  /**
+   * @param string $colName
+   *
+   * @return string
+   */
   public function name($colName)
   {
     static $names = array();
@@ -136,6 +206,13 @@ class Form_Object extends Sabel_Object
     return (isset($names[$mdlName][$colName])) ? $names[$mdlName][$colName] : $colName;
   }
   
+  /**
+   * @param string $colName
+   * @param string $mark
+   * @param string $tag
+   *
+   * @return string
+   */
   public function mark($colName, $mark = "*", $tag = "em")
   {
     $name = $this->name($colName);

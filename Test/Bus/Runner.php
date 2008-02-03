@@ -13,16 +13,13 @@ class Test_Bus_Runner extends SabelTestCase
     return self::createSuite("Test_Bus_Runner");
   }
   
-  public function testInstanceOf()
+  public function testProcessorList()
   {
-    $config = new TestBusConfig();
-    $this->assertTrue($config->configure() instanceof Sabel_Bus);
-  }
-  
-  public function testConfigure()
-  {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
+    $bus = new Sabel_Bus();
+    $bus->addProcessor(new HogeProcessor("hoge"));
+    $bus->addProcessor(new FugaProcessor("fuga"));
+    $bus->addProcessor(new FooProcessor("foo"));
+    
     $list = $bus->getProcessorList();
     $this->assertTrue($list->has("hoge"));
     $this->assertTrue($list->has("fuga"));
@@ -32,8 +29,7 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testBusInit()
   {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
+    $bus = new Sabel_Bus();
     $bus->init(array("null"   => null,
                      "int"    => 10,
                      "string" => "test",
@@ -47,9 +43,8 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testRun()
   {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
-    $bus->run();
+    $bus = new Sabel_Bus();
+    $bus->run(new TestBusConfig());
     
     $this->assertEquals("10", $bus->get("a"));
     $this->assertEquals("20", $bus->get("b"));
@@ -58,28 +53,25 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testAttatchExecuteBeforeEvent()
   {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
+    $bus = new Sabel_Bus();
     $bus->attachExecuteBeforeEvent("foo", new TestEvent(), "beforeMethod");
-    $bus->run();
+    $bus->run(new TestBusConfig());
     
     $this->assertEquals("before: fuga_result", $bus->get("beforeResult"));
   }
   
   public function testAttatchExecuteAfterEvent()
   {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
+    $bus = new Sabel_Bus();
     $bus->attachExecuteAfterEvent("hoge", new TestEvent(), "afterMethod");
-    $bus->run();
+    $bus->run(new TestBusConfig());
     
     $this->assertEquals("after: hoge_result", $bus->get("afterResult"));
   }
   
   public function testHasMethod()
   {
-    $config = new TestBusConfig();
-    $bus = $config->configure();
+    $bus = new Sabel_Bus();
     $bus->set("a", "10");
     $bus->set("b", "20");
     $bus->set("c", "30");
@@ -105,24 +97,14 @@ class TestEvent
   }
 }
 
-class TestBusConfig implements Sabel_Config
+class TestBusConfig extends Sabel_Bus_Config
 {
-  public function configure()
-  {
-    $processors = array("hoge", "fuga", "foo");
-    
-    $bus = new Sabel_Bus();
-    foreach ($processors as $name) {
-      $processor = ucfirst($name);
-      $className = "Processor_" . $processor;
-      $bus->addProcessor(new $className($name));
-    }
-    
-    return $bus;
-  }
+  protected $processors = array("hoge" => "HogeProcessor",
+                                "fuga" => "FugaProcessor",
+                                "foo"  => "FooProcessor");
 }
 
-class Processor_Hoge extends Sabel_Bus_Processor
+class HogeProcessor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
@@ -131,7 +113,7 @@ class Processor_Hoge extends Sabel_Bus_Processor
   }
 }
 
-class Processor_Fuga extends Sabel_Bus_Processor
+class FugaProcessor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
@@ -140,7 +122,7 @@ class Processor_Fuga extends Sabel_Bus_Processor
   }
 }
 
-class Processor_Foo extends Sabel_Bus_Processor
+class FooProcessor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {

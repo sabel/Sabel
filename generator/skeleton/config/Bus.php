@@ -1,27 +1,30 @@
 <?php
 
-class Config_Bus implements Sabel_Config
+class Config_Bus extends Sabel_Bus_Config
 {
-  public function configure()
+  protected $processors = array("request"     => "Processor_Request",
+                                "router"      => "Processor_Router",
+                                "addon"       => "Processor_Addon",
+                                "controller"  => "Processor_Controller",
+                                "location"    => "Processor_Location",
+                                "helper"      => "Processor_Helper",
+                                "initializer" => "Processor_Initializer",
+                                "executer"    => "Processor_Executer",
+                                "exception"   => "Processor_Exception",
+                                "response"    => "Processor_Response",
+                                "view"        => "Processor_View");
+                                
+  protected $configs = array("map"   => "Config_Map",
+                             "addon" => "Config_Addon");
+                             
+  public function getProcessors()
   {
-    $processors = array("request",     "router",   "addon",
-                        "controller",  "location", "helper",
-                        "initializer", "executer", "exception",
-                        "response",    "view");
-                        
-    $bus = new Sabel_Bus();
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;
     
-    foreach ($processors as $name) {
-      $processor = ucfirst($name);
-      Sabel::fileUsing($baseDir . $processor . PHP_SUFFIX, true);
-      $className = "Processor_" . $processor;
-      $bus->addProcessor(new $className($name));
+    foreach (array_keys($this->processors) as $name) {
+      Sabel::fileUsing($baseDir . ucfirst($name) . PHP_SUFFIX, true);
     }
     
-    $bus->setConfig("map",   new Config_Map());
-    $bus->setConfig("addon", new Config_Addon());
-    
-    return $bus;
+    return $this->processors;
   }
 }

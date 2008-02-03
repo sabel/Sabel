@@ -6,15 +6,16 @@
  * @version    1.0
  * @category   Addon
  * @package    addon.flow
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Flow_Processor extends Sabel_Bus_Processor
 {
   const END_FLOW_SESKEY = "sbl_end_flows";
   
+  private $storage   = null;
   private $action    = "";
   private $isTransit = false;
   private $refMethod = null;
@@ -22,34 +23,35 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    if (!$this->controller instanceof Flow_Page ||
-        $this->response->isFailure()) return;
+    $response    = $bus->get("response");
+    $controller  = $bus->get("controller");
     
-    $this->action = $this->destination->getAction();
+    if (!$controller instanceof Flow_Page || $response->isFailure()) return;
     
-    $controller = $this->controller;
-    $response = $this->response;
+    $destination  = $bus->get("destination");
+    $this->action = $action = $destination->getAction();
     
-    $key = implode("_", array($this->destination->getModule(),
-                              $this->destination->getController()));
-                              
-    if (!$controller->hasMethod($this->action)) {
+    if (!$controller->hasMethod($action)) {
       return $response->notFound();
     }
     
-    $this->refMethod = $controller->getReflection()->getMethod($this->action);
+    $this->storage = $bus->get("storage");
+    $request = $bus->get("request");
+    $this->refMethod = $controller->getReflection()->getMethod($action);
     
-    $token = $this->request->getToken()->getValue();
+    $token = $request->getToken()->getValue();
     $state = new Flow_State($token);
     
     l("[flow] token is '{$token}'");
     
+    $key = implode("_", array($destination->getModule(),
+                              $destination->getController()));
+                              
     if ($token !== null && !$this->isStartAction()) {
       $state = $state->restore($this->storage, $key);
     }
     
     $this->state = $state;
-    
     if ($this->isIgnoreAction()) return;
     
     if ($state === null) {
@@ -65,7 +67,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $this->transit(false);
         $this->addEndFlow($state);
       } else {
-        $this->executeInFlowAction($state);
+        $this->executeInFlowAction($state, $controller);
         $this->clearEndFlow($state);
       }
       
@@ -78,7 +80,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $response->setResponse($name, $val);
       }
     } elseif ($this->isStartAction()) {
-      $token = $this->request->getToken()->createValue();
+      $token = $request->getToken()->createValue();
       $state->start($key, $this->action, $token);
       $this->clearEndFlow($state);
       
@@ -109,7 +111,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function afterExecute($bus)
   {
-    if ($this->isTransit() && $this->response->isSuccess()) {
+    if ($this->isTransit() && $bus->get("response")->isSuccess()) {
       $this->state->save($this->storage);
     }
   }
@@ -136,10 +138,8 @@ class Flow_Processor extends Sabel_Bus_Processor
     return ($annot[0][0] === "once") ? $annot[0][1] : false;
   }
   
-  private function executeInFlowAction($state)
+  private function executeInFlowAction($state, $controller)
   {
-    $controller = $this->controller;
-    l("go back");
     if ($this->action === $state->getCurrent()) {
       $this->transit(false);
     } elseif ($state->isMatchToNext($this->action)) {
@@ -158,7 +158,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         l("[flow] invalid sequence.");
       }
       
-      $controller->redirect->to("a: " . $state->getCurrent());
+      $controller->getRedirector()->to("a: " . $state->getCurrent());
     }
   }
   

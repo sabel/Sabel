@@ -28,7 +28,7 @@ class SabelScaffold
     $this->dirnameLength = strlen($skeletonDir);
   }
   
-  public function scaffold($dir = null)
+  public function create($dir = null)
   {
     if ($dir === null) $dir = $this->skeletonDir;
     
@@ -50,7 +50,7 @@ class SabelScaffold
             mkdir ($targetPath);
           }
           
-          $this->scaffold($fullPath);
+          $this->create($fullPath);
         }
       } else {
         if (isset($this->ignore[$targetItem])) {
@@ -119,6 +119,6 @@ if (!defined("TEST_CASE")) {
   require ($sabel . DS . "Environment.php");
   
   $scaffold = new SabelScaffold($_SERVER["argv"], dirname(__FILE__) . DS . "skeleton");
-  $scaffold->scaffold();
+  $scaffold->create();
   $scaffold->chmod();
 }

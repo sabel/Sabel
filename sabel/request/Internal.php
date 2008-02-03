@@ -5,8 +5,8 @@
  *
  * @category   Request
  * @package    org.sabel.request
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Request_Internal extends Sabel_Object
@@ -38,7 +38,7 @@ class Sabel_Request_Internal extends Sabel_Object
     return $this;
   }
   
-  public function request($uri)
+  public function request($uri, Sabel_Bus_Config $config = null)
   {
     $values = $this->values;
     
@@ -53,25 +53,30 @@ class Sabel_Request_Internal extends Sabel_Object
     }
     
     $currentContext = Sabel_Context::getContext();
+    $currentBus = $currentContext->getBus();
     
     $request = new Sabel_Request_Object(ltrim($parsedUri["path"], "/"));
     $request->method($this->method);
     $request->values($values);
     
-    $config = new Config_Bus();
-    $bus = $config->configure()->getBus();
+    $bus = new Sabel_Bus();
     $bus->set("request", $request);
-    $bus->set("storage", $currentContext->getBus()->get("storage"));
+    $bus->set("storage", $currentBus->get("storage"));
     
     $context = new Sabel_Context();
     $context->setBus($bus);
     Sabel_Context::setContext($context);
     
-    $bus->run();
+    if ($config === null) {
+      $config = new Config_Bus();
+    }
+    
+    $bus->run($config);
     
     $this->response["response"] = $bus->get("response");
-    $this->response["html"] = $bus->get("result");
+    $this->response["result"]   = $bus->get("result");
     
+    $currentContext->setBus($currentBus);
     Sabel_Context::setContext($currentContext);
     
     return $this;
@@ -86,12 +91,12 @@ class Sabel_Request_Internal extends Sabel_Object
     }
   }
   
-  public function getHtml()
+  public function getResult()
   {
-    if (isset($this->response["html"])) {
-      return $this->response["html"];
+    if (isset($this->response["result"])) {
+      return $this->response["result"];
     } else {
-      return "";
+      return null;
     }
   }
 }

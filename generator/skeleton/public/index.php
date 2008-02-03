@@ -21,8 +21,7 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
   $_SERVER["REQUEST_URI"] = ltrim($ignore, "/");
 }
 
-$config = new Config_Bus();
-echo $config->configure()->run();
+echo Sabel_Bus::create()->run(new Config_Bus());
 
 Sabel::shutdown();
 

@@ -82,7 +82,7 @@ class Processor_Controller extends Sabel_Bus_Processor
       
       if (empty($token)) {
         $to = $redirector->getUrl();
-      } elseif ($redirect->hasParameters()) {
+      } elseif ($redirector->hasParameters()) {
         $to = $redirector->getUrl() . "&token={$token}";
       } else {
         $to = $redirector->getUrl() . "?token={$token}";

@@ -83,7 +83,7 @@ class Test_Map_Match extends SabelTestCase
     $this->route("default")
          ->uri(":controller/:action")
          ->module("index")
-         ->defaults(array(":action" => "index"));
+         ->defaults(array(":controller" => "index", ":action" => "index"));
     
     $candidate = $this->routing("test");
     $destination = $candidate->getDestination();

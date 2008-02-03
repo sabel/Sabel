@@ -37,7 +37,7 @@ class Sabel_Map_Candidate
   }
   
   public function route(Sabel_Map_Config_Route $route)
-  { 
+  {
     $options = array();
     $options["defaults"]     = $route->getDefaults();
     $options["requirements"] = $route->getRequirements();

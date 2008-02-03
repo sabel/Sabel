@@ -61,7 +61,8 @@ abstract class Acl_Config_Abstract extends Sabel_Object
     } elseif (is_string($role)) {
       $this->isAllow = $role;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = "argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
     return $this;

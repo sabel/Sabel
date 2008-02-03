@@ -5,8 +5,8 @@
  *
  * @category   Addon
  * @package    addon.acl
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Acl_Config implements Sabel_Config
@@ -15,7 +15,8 @@ class Acl_Config implements Sabel_Config
   
   public function configure()
   {
-    // $this->module("index")->allow();
+    $index = $this->module("index");
+    $index->allow();
     
     return $this->configs;
   }

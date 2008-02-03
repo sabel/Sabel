@@ -26,6 +26,17 @@ class Sabel_Bus extends Sabel_Object
     Sabel_Context::getContext()->setBus($this);
   }
   
+  public static function create(array $data = array())
+  {
+    if (empty($data)) {
+      return new self();
+    } else {
+      $bus = new self();
+      $bus->init($data);
+      return $bus;
+    }
+  }
+  
   /**
    * initialize bus data
    *
@@ -92,20 +103,29 @@ class Sabel_Bus extends Sabel_Object
     return $this->processorList;
   }
   
-  public function run()
+  public function run(Sabel_Bus_Config $config)
   {
+    foreach ($config->getProcessors() as $name => $className) {
+      $this->addProcessor(new $className($name));
+    }
+    
+    foreach ($config->getConfigs() as $name => $className) {
+      $this->setConfig($name, new $className());
+    }
+    
     $processorList = $this->processorList;
     $isProduction  = (ENVIRONMENT === PRODUCTION);
     
     while ($processor = $processorList->next()) {
       $processor->setBus($this);
       $this->beforeEvent($processor->name);
-      $processor->execute($this);
-      $this->afterEvent($processor->name);
       
       if (!$isProduction) {
         l("execute " . $processor->name, LOG_DEBUG);
       }
+      
+      $processor->execute($this);
+      $this->afterEvent($processor->name);
     }
     
     $processorList->first();
