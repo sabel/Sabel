@@ -5,14 +5,20 @@
  *
  * @category   Sakle
  * @package    org.sabel.sakle
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_Sakle_Task extends Sabel_Object
 {
-  abstract public function run($arguments);
+  protected $arguments = array();
+  
+  abstract public function run();
+  
+  public function setArguments($arguments)
+  {
+    $this->arguments = $arguments;
+  }
   
   public function success($msg)
   {

@@ -11,11 +11,9 @@
  */
 class Generator extends Sabel_Sakle_Task
 {
-  protected $arguments = array();
-  
-  public function run($arguments)
+  public function run()
   {
-    $environment = $this->getEnvironment($arguments);
+    $environment = $this->getEnvironment();
     $target = $this->checkArguments();
     
     if ($target === "model") {
@@ -31,12 +29,9 @@ class Generator extends Sabel_Sakle_Task
     Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     $models = array();
-    $args = $this->arguments;
+    array_shift($this->arguments);
     
-    unset($args[0]);
-    unset($args[1]);
-    
-    foreach ($args as $mdlName) {
+    foreach ($this->arguments as $mdlName) {
       $filePath = MODELS_DIR_PATH . DS . $mdlName . PHP_SUFFIX;
       if (file_exists($filePath)) {
         $classFile = $mdlName . PHP_SUFFIX;
@@ -70,21 +65,22 @@ class Generator extends Sabel_Sakle_Task
   
   private function generateController()
   {
+    array_shift($this->arguments);
     $argc = count($this->arguments);
     
-    if ($argc === 3) {
+    if ($argc === 1) {
       $module = "index";
-      $controller = $this->arguments[2];
-    } elseif ($argc === 4) {
-      $module = $this->arguments[2];
-      $controller = $this->arguments[3];
+      $controller = $this->arguments[0];
+    } elseif ($argc === 2) {
+      $module = $this->arguments[0];
+      $controller = $this->arguments[1];
     } else {
       $this->error("too many arguments");
       $this->usage();
       exit;
     }
     
-    $clsName = ucfirst($module) . "_Controllers_" . $controller;
+    $clsName = ucfirst($module) . "_Controllers_" . ucfirst($controller);
     
     $mPath = MODULES_DIR_PATH . DS . lcfirst($module);
     if (!is_dir($mPath)) mkdir($mPath);
@@ -144,21 +140,12 @@ class Generator extends Sabel_Sakle_Task
     }
   }
   
-  private function getEnvironment($arguments)
+  private function getEnvironment()
   {
-    $index = array_search("-e", $arguments, true);
-    
-    if ($index === false) {
-      $this->arguments = $arguments;
+    if (Sabel_Command::hasOption("e", $this->arguments)) {
+      return environment(Sabel_Command::getOption("e", $this->arguments));
+    } else {
       return DEVELOPMENT;
-    }
-    
-    if (isset($arguments[$index + 1])) {
-      $environment = environment($arguments[$index + 1]);
-      unset($arguments[$index]);
-      unset($arguments[$index + 1]);
-      $this->arguments = array_values($arguments);
-      return $environment;
     }
   }
   
@@ -166,12 +153,12 @@ class Generator extends Sabel_Sakle_Task
   {
     $arguments = $this->arguments;
     
-    if (count($arguments) <= 2) {
+    if (count($arguments) < 2) {
       $this->usage();
       exit;
     }
     
-    $target = $arguments[1];
+    $target = $arguments[0];
     
     if (!in_array($target, array("model", "controller"), true)) {
       $this->usage();

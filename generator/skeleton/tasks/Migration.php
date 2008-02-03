@@ -15,18 +15,15 @@ class Migration extends Sabel_Sakle_Task
   
   protected $stmt      = null;
   protected $files     = array();
-  protected $arguments = array();
   protected $migrateTo = 0;
   protected $accessor  = null;
   
   protected $connectionName = "";
   protected $currentVersion = 0;
   
-  public function run($arguments)
+  public function run()
   {
-    $this->arguments = $arguments;
-    
-    if (count($arguments) < 3) {
+    if (count($this->arguments) < 2) {
       $this->error("to few arguments.");
       $this->usage();
       exit;
@@ -97,7 +94,7 @@ class Migration extends Sabel_Sakle_Task
   
   protected function showCurrentVersion()
   {
-    $to = $this->arguments[2];
+    $to = $this->arguments[1];
     
     if ($to === "version" || $to === "-v" || $to === "--version") {
       $this->success("CURRENT VERSION: {$this->currentVersion}");
@@ -122,7 +119,7 @@ class Migration extends Sabel_Sakle_Task
   
   protected function getEnvironment()
   {
-    $inputEnv = $this->arguments[1];
+    $inputEnv = $this->arguments[0];
     if (($env = environment($inputEnv)) === null) {
       $this->error("environment '{$inputEnv}' is not supported. " .
                    "use 'development' or 'test' or 'production'.");

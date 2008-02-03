@@ -5,8 +5,8 @@
  *
  * @category   Util
  * @package    org.sabel.util
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Util_DirectoryTraverser
@@ -14,7 +14,7 @@ class Sabel_Util_DirectoryTraverser
   const TYPE_DIR  = "dir";
   const TYPE_FILE = "file";
   
-  protected $dir         = '';
+  protected $dir         = "";
   protected $directories = null;
   protected $visitors    = array();
   

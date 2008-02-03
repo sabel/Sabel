@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Sabel_Map_Config
+ * Sabel_Map_Element
  *
  * @category   Map
  * @package    org.sabel.map
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Map_Element
@@ -114,13 +114,13 @@ class Sabel_Map_Element
   public function setOptions($options)
   {
     $key = self::VARIABLE_MARK . $this->name;
-    if (isset($options["defaults"][$key])) {
+    if (array_key_exists($key, $options["defaults"])) {
       $this->default = $options["defaults"][$key];
       $this->omittable = true;
     }
     
     if (isset($options["requirements"][$key])) {
       $this->requirement = new Sabel_Map_Requirement_Regex($options["requirements"][$key]);
-    }   
+    }
   }
 }

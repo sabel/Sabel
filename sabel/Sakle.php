@@ -10,44 +10,37 @@ require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . 
  *
  * @category   Sakle
  * @package    org.sabel.sakle
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sakle
 {
-  protected $arguments = array();
-  
-  public function __construct()
+  public static function run($class)
   {
     $args = $_SERVER["argv"];
     array_shift($args);
-    $this->arguments = $args;
-  }
-  
-  public function run($class)
-  {
+    $class = array_shift($args);
+    
     $pathToClass = RUN_BASE . DS . "tasks" . DS . $class . PHP_SUFFIX;
     
     if (is_readable($pathToClass)) {
       Sabel::fileUsing($pathToClass, true);
       
-      $ins  = new $class();
-      $args = $this->arguments;
+      $ins = new $class();
+      $ins->setArguments($args);
       
-      if (isset($args[1])) {
-        if ($args[1] === "-h" || $args[1] === "--help") {
-          $ins->usage();
-          exit;
-        }
+      if ($args[0] === "-h" || $args[0] === "--help") {
+        $ins->usage();
+        exit;
       }
       
       try {
         if ($ins->hasMethod("initialize")) {
-          $ins->initialize($this->arguments);
+          $ins->initialize();
         }
         
-        $ins->run($this->arguments);
+        $ins->run();
         
         if ($ins->hasMethod("finalize")) {
           $ins->finalize();
@@ -59,12 +52,6 @@ class Sakle
       Sabel_Command::error("such a task doesn't exist.");
     }
   }
-  
-  public static function main($class)
-  {
-    $instance = new self();
-    $instance->run($class);
-  }
 }
 
 $pathToSabel = Sabel::getPath();
@@ -75,7 +62,7 @@ if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
 }
 
 if (isset($_SERVER["argv"][1])) {
-  Sakle::main($_SERVER["argv"][1]);
+  Sakle::run($_SERVER["argv"][1]);
 } else {
   echo "@todo error";
 }

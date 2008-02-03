@@ -5,10 +5,9 @@
  *
  * @category   Util
  * @package    org.sabel.util
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Util_String extends Sabel_Object
@@ -23,7 +22,8 @@ class Sabel_Util_String extends Sabel_Object
       $this->string = $string;
       $this->length = strlen($string);
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = "argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
@@ -185,12 +185,12 @@ class Sabel_Util_String extends Sabel_Object
   
   public function sha1()
   {
-    return sha1($this->string);
+    return new self(sha1($this->string));
   }
   
   public function md5()
   {
-    return md5($this->string);
+    return new self(md5($this->string));
   }
   
   public function cloning()

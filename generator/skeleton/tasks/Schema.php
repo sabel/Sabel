@@ -11,17 +11,17 @@
  */
 class Schema extends Sabel_Sakle_Task
 {
-  public function run($arguments)
+  public function run()
   {
-    $this->checkInputs($arguments);
+    $this->checkInputs();
     
     clearstatcache();
     
-    $environment  = environment(strtolower($arguments[1]));
-    $inputSchemas = $this->getWriteSchemas($arguments);
-    $schemaWrite  = (!empty($inputSchemas));
+    $environment  = environment(strtolower($this->arguments[0]));
+    $inputSchemas = $this->getWriteSchemas();
+    $schemaWrite  = !empty($inputSchemas);
     
-    if (isset($inputSchemas[0]) && $inputSchemas[0] === "all") {
+    if ($schemaWrite && $inputSchemas[0] === "all") {
       $schemaAll = (count($inputSchemas) === 1);
     } else {
       $schemaAll = false;
@@ -46,34 +46,38 @@ class Schema extends Sabel_Sakle_Task
         TableList_Writer::add($connectionName, $tblName);
       }
       
-      if (Sabel_Command::hasOption("l", $arguments)) {
+      if (Sabel_Command::hasOption("l", $this->arguments)) {
         TableList_Writer::write($connectionName);
       }
     }
   }
   
-  private function getWriteSchemas($input)
+  private function getWriteSchemas()
   {
-    $inputSchemas = array();
+    $schemas = array();
+    $input = $this->arguments;
     
-    if (in_array("-s", $input)) {
+    if (Sabel_Command::hasOption("s", $this->arguments)) {
       $key = array_search("-s", $input) + 1;
-      for ($i = $key; $i < count($input); $i++) {
-        $val = $input[$i];
+      for ($i = $key, $c = count($input); $i < $c; $i++) {
         if ($val === "-l") break;
-        $inputSchemas[] = $val;
+        $schemas[] = $input[$i];
       }
     }
     
-    return $inputSchemas;
+    return $schemas;
   }
   
-  private function checkInputs($arguments)
+  private function checkInputs()
   {
-    if (count($arguments) < 3) {
+    $args = $this->arguments;
+    
+    if (count($args) < 2) {
       $this->usage();
-    } elseif ($arguments[2] === "--help" || $arguments[2] === "-h") {
+      exit;
+    } elseif ($args[2] === "--help" || $args[2] === "-h") {
       $this->usage();
+      exit;
     }
   }
   

@@ -14,14 +14,14 @@ Sabel::fileUsing("tasks" . DS . "Tests.php", true);
  */
 class Functional extends Tests
 {
-  public function run($arguments)
+  public function run()
   {
     $runner = Sabel_Test_Runner::create();
     $runner->setClassPrefix("Functional_");
     
     $testsDir = RUN_BASE . DS . "tests" . DS . "functional";
     
-    if (count($this->arguments) === 1) {
+    if (count($this->arguments) === 0) {
       foreach (scandir($testsDir) as $file) {
         if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
           $testName = str_replace(PHP_SUFFIX, "", $file);
@@ -29,7 +29,7 @@ class Functional extends Tests
         }
       }
     } else {
-      $testName = $this->arguments[1];
+      $testName = $this->arguments[0];
       $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
     }
   }
