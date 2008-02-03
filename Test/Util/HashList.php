@@ -1,8 +1,8 @@
 <?php
 
 /**
- * @category  I18n
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @category  Util
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Util_HashList extends SabelTestCase
 {

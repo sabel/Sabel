@@ -1,8 +1,10 @@
 <?php
 
 /**
+ * testcase for sabel.storage.InMemory
+ *
  * @category  Storage
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Storage_InMemory extends SabelTestCase
 {

@@ -3,11 +3,8 @@
 /**
  * TestCase of Sabel_Map_Match
  *
- * @category   Test
- * @package    test
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ * @category  Map
+ * @author    Mori Reo <mori.reo@sabel.jp>
  */
 class Test_Map_Match extends SabelTestCase
 {

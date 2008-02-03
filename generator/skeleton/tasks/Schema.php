@@ -5,8 +5,8 @@
  *
  * @category  Sakle
  * @package   org.sabel.sakle
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class Schema extends Sabel_Sakle_Task

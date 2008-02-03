@@ -4,7 +4,7 @@ class String extends Sabel_Util_String {}
 
 /**
  * @category  Util
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Util_String extends SabelTestCase
 {
@@ -126,13 +126,13 @@ class Test_Util_String extends SabelTestCase
   public function testSha1()
   {
     $string = new String("hoge");
-    $this->assertEquals($string->sha1(), sha1("hoge"));
+    $this->assertEquals($string->sha1()->toString(), sha1("hoge"));
   }
   
   public function testMd5()
   {
     $string = new String("hoge");
-    $this->assertEquals($string->md5(), md5("hoge"));
+    $this->assertEquals($string->md5()->toString(), md5("hoge"));
   }
   
   public function testSucc()

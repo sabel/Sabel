@@ -166,11 +166,8 @@ class Sabel_Map_Candidate
         }
         break;
       case self::MODULE:
-        $this->destination["module"] = $partOfUri;
-        $element->variable = $partOfUri;
-        break;
       case self::CONTROLLER:
-        $this->destination["controller"] = $partOfUri;
+        $this->destination[$element->type] = $partOfUri;
         $element->variable = $partOfUri;
         break;
       case self::ACTION:
@@ -179,10 +176,10 @@ class Sabel_Map_Candidate
           if ($element->extension !== "" && $element->extension !== $extension) return false;
           $element->variable  = $variable;
           $element->extension = $extension;
-          $this->destination["action"] = $variable;
+          $this->destination[self::ACTION] = $variable;
         } else {
           $element->variable = $partOfUri;
-          $this->destination["action"] = $partOfUri;
+          $this->destination[self::ACTION] = $partOfUri;
         }
         break;
       case Sabel_Map_Element::TYPE_ARRAY:
@@ -242,33 +239,19 @@ class Sabel_Map_Candidate
     foreach ($elements as $element) {
       switch ($element->type) {
         case self::MODULE:
-          if (isset($parameters[":module"])) {
-            $buffer[] = $parameters[":module"];
-          } else {
-            $buffer[] = $element->variable;
-          }
-          break;
         case self::CONTROLLER:
-          if (isset($parameters[":controller"])) {
-            $buffer[] = $parameters[":controller"];
-          } else {
-            if ($element->hasVariable()) {
-              $buffer[] = $element->variable;
-            }
-          }
-          break;
         case self::ACTION:
-          if (isset($parameters[":action"])) {
-            $buffer[] = $parameters[":action"];
+          $index = ":" . $element->type;
+          if (isset($parameters[$index])) {
+            $buffer[] = $parameters[$index];
           } else {
             $buffer[] = $element->variable;
           }
-          break;
-        case (array_key_exists($element->name, $parameters)):
-          $buffer[] = $parameters[$element->name];
           break;
         default:
-          if (isset($parameters[$element->name]) || !$element->omittable) {
+          if (isset($parameters[$element->name])) {
+            $buffer[] = $parameters[$element->name];
+          } elseif (!$element->omittable) {
             $buffer[] = $element->name;
           }
           break;

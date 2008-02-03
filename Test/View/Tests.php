@@ -15,6 +15,9 @@ require_once ("Test/View/PageViewer.php");
 
 /**
  * load tests for sabel.view
+ *
+ * @category  View
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_View_Tests extends SabelTestSuite
 {

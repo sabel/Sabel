@@ -33,6 +33,12 @@ define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
 define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
 define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);
 
+/**
+ * load tests for sabel.db.*
+ *
+ * @category  DB
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ */
 class Test_DB_Tests
 {
   public static function main()

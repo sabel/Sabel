@@ -3,8 +3,8 @@
 /**
  * Test_VirtualInheritance
  * 
- * @package org.sabel
- * @author Mori Reo <mori.reo@gmail.com>
+ * @package Aspect
+ * @author  Mori Reo <mori.reo@sabel.jp>
  */
 class Test_VirtualInheritance extends SabelTestCase
 {

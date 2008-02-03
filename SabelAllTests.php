@@ -76,6 +76,7 @@ class SabelAllTests
     $suite->addTest(Test_Controller_Tests::suite());
     $suite->addTest(Test_Util_Tests::suite());
     $suite->addTest(Test_View_Tests::suite());
+    $suite->addTest(Test_Cache_Tests::suite());
     $suite->addTest(Test_Processor_Tests::suite());
     
     $suite->addTest(Test_Annotation::suite());
@@ -84,7 +85,6 @@ class SabelAllTests
     $suite->addTest(Test_Exception::suite());
     
     $suite->addTest(Test_Storage_InMemory::suite());
-    $suite->addTest(Test_Cache_Tests::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
     $suite->addTest(Test_Locale_Browser::suite());
     $suite->addTest(Test_Locale_Server::suite());

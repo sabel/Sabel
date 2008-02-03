@@ -5,8 +5,8 @@
  *
  * @category   Addon
  * @package    addon.renderer
- * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
- * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@gmail.com>
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Renderer_Simplate extends Sabel_View_Renderer

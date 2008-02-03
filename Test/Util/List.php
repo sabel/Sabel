@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * @category  Util
+ * @author    Mori Reo <mori.reo@sabel.jp>
+ */
 class Test_Util_LinkedList extends SabelTestCase
 {
   private $list = null;

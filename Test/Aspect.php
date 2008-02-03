@@ -3,7 +3,7 @@
 /**
  * TestCase of sabel.aspect.*
  *
- * @author Mori Reo <mori.reo@gmail.com>
+ * @author Mori Reo <mori.reo@sabel.jp>
  */
 class Test_Aspect extends SabelTestCase
 {

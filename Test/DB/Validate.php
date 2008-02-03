@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * testcase for sabel.db.Validator
+ *
+ * @category  DB
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ */
 class Test_DB_Validate extends SabelTestCase
 {
   public static function suite()

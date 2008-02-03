@@ -4,7 +4,7 @@
  * sabel.db functional test(using databases).
  *
  * @category  DB
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_DB_Test extends SabelTestCase
 {

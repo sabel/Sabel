@@ -8,9 +8,9 @@ require_once ("PHPUnit/Framework/TestCase.php");
  *
  * @category   Test
  * @package    org.sabel.test
- * @author     Mori Reo <mori.reo@gmail.com>
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
@@ -21,7 +21,7 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
   {
     return new self();
   }
-    
+  
   public function start($testName, $testFilePath)
   {
     if (is_readable($testFilePath)) {

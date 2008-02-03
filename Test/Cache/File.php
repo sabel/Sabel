@@ -2,7 +2,7 @@
 
 /**
  * @category  Cache
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Cache_File extends Test_Cache_Test
 {

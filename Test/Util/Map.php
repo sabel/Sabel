@@ -4,7 +4,7 @@ class UtilMap extends Sabel_Util_Map {}
 
 /**
  * @category  Util
- * @author    Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Util_Map extends SabelTestCase
 {

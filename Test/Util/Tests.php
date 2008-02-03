@@ -5,6 +5,10 @@ require_once ("Test/Util/Map.php");
 require_once ("Test/Util/List.php");
 require_once ("Test/Util/HashList.php");
 
+/**
+ * @category  Util
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ */
 class Test_Util_Tests extends SabelTestSuite
 {
   public static function suite()
