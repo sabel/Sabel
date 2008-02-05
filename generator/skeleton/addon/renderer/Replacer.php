@@ -42,23 +42,25 @@ class Renderer_Replacer extends Sabel_Object
   
   protected function if_replace($element, $if = "if")
   {
-    if (($equal = $element->equal) !== null) {
+    if (($equal = $element->equals) !== null) {
       $params = array_map("trim", explode(",", $equal));
       if (count($params) < 2) {
         throw new Sabel_Exception_Runtime("too few parameters.");
       }
       
-      $fmt = "<? {$if} (%s === %s) : ?>";
+      $fmt = "<? $if (%s === %s) : ?>";
       return sprintf($fmt, $params[0], $params[1]);
     } elseif (($expr = $element->expr) !== null) {
-      return "<? {$if} ({$expr}) : ?>";
-    } elseif (($nemp = $element->notempty) !== null) {
-      return "<? {$if} (!realempty({$nemp})) : ?>";
+      return "<? $if ({$expr}) : ?>";
+    } elseif (($empty = $element->isset) !== null) {
+      return "<? $if (isset({$empty})) : ?>";
     } elseif (($empty = $element->empty) !== null) {
-      return "<? {$if} (realempty({$empty})) : ?>";
+      return "<? $if (realempty({$empty})) : ?>";
+    } elseif (($nemp = $element->notempty) !== null) {
+      return "<? $if (!realempty({$nemp})) : ?>";
     } elseif (($attrs = $element->getAttributes()) !== null) {
       list ($func, $arg) = each($attrs);
-      return "<? {$if} ({$func}({$arg})) : ?>";
+      return "<? $if ({$func}({$arg})) : ?>";
     }
     
     throw new Sabel_Exception_Runtime("if parameter is empty.");
@@ -76,21 +78,44 @@ class Renderer_Replacer extends Sabel_Object
   
   protected function foreach_replace($element)
   {
-    if (($args = $element->args) === null) {
-      throw new Sabel_Exception_Runtime("foreach parameter is empty.");
+    $params = array();
+    
+    if (($from = $element->from) !== null) {
+      $params["from"] = $from;
+      if ($element->key !== null) $params["key"] = $element->key;
+      $params["value"] = $element->value;
+    } else {
+      $args = $element->args;
+      if ($args === null) $args = $element->params;
+      
+      if ($args === null) {
+        $message = "foreach parameter is null.";
+        throw new Sabel_Exception_InvalidArgument($message);
+      } else {
+        $exp  = array_map("trim", explode(",", $args));
+        $argc = count($exp);
+        if ($argc === 2) {
+          $params["from"]  = $exp[0];
+          $params["value"] = $exp[1];
+        } elseif ($argc === 3) {
+          $params["from"]  = $exp[0];
+          $params["key"]   = $exp[1];
+          $params["value"] = $exp[2];
+        } else {
+          $message = "wrong parameter count for foreach.";
+          throw new Sabel_Exception_InvalidArgument($message);
+        }
+      }
     }
     
-    $params = explode(",", $args);
     $argc = count($params);
     
-    if ($argc < 2) {
-      throw new Sabel_Exception_Runtime("too few parameters.");
-    } elseif ($argc === 2) {
+    if ($argc === 2) {
       $fmt = "<? foreach (%s as %s) : ?>";
-      return sprintf($fmt, $params[0], $params[1]);
+      return sprintf($fmt, $params["from"], $params["value"]);
     } else {
       $fmt = "<? foreach (%s as %s => %s) : ?>";
-      return sprintf($fmt, $params[0], $params[1], $params[2]);
+      return sprintf($fmt, $params["from"], $params["key"], $params["value"]);
     }
   }
   

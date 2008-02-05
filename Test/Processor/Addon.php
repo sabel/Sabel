@@ -19,7 +19,6 @@ class Test_Processor_Addon extends Test_Processor_Abstract
     $bus = $this->bus;
     
     $processor = new Processor_Addon("addon");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $this->assertEquals(1, $bus->get("hogeAddon"));

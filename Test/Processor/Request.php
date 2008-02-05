@@ -22,7 +22,6 @@ class Test_Processor_Request extends Test_Processor_Abstract
     $this->assertFalse($bus->get("storage")->isStarted());
     
     $processor = new Processor_Request("request");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $this->assertTrue($bus->get("request") instanceof Sabel_Request);
@@ -38,7 +37,6 @@ class Test_Processor_Request extends Test_Processor_Abstract
     $bus->set("request", $request);
     
     $processor = new Processor_Request("request");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $this->assertEquals("1", $bus->get("request")->fetchPostValue("hoge"));

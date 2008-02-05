@@ -12,23 +12,14 @@
  */
 class Renderer_Addon extends Sabel_Object
 {
-  const VERSION = 1;
-  
-  public function version()
-  {
-    return self::VERSION;
-  }
-  
   public function execute($bus)
   {
-    $processor = new Renderer_Processor("renderer");
-    $renderer  = new Renderer_Sabel();
+    $renderer = new Renderer_Sabel();
     
     if ($renderer->hasMethod("initialize")) {
       $renderer->initialize();
     }
     
-    $processor->setRenderer($renderer);
-    $bus->getProcessorList()->insertPrevious("view", "renderer", $processor);
+    $bus->set("renderer", $renderer);
   }
 }

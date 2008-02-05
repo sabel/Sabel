@@ -21,7 +21,6 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     $bus->set("destination", $this->getDestination("Hoge"));
     
     $processor = new Processor_Controller("controller");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $this->assertTrue($bus->get("controller") instanceof Test_Controllers_Hoge);
@@ -34,7 +33,6 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     $bus->set("destination", $this->getDestination("Fuga"));
     
     $processor = new Processor_Controller("controller");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $this->assertTrue($bus->get("controller") instanceof Test_Controllers_Fuga);
@@ -46,7 +44,6 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     $bus->set("destination", $this->getDestination("Abcde"));
     
     $processor = new Processor_Controller("controller");
-    $processor->setBus($bus);
     
     try {
       $processor->execute($bus);

@@ -117,7 +117,6 @@ class Sabel_Bus extends Sabel_Object
     $isProduction  = (ENVIRONMENT === PRODUCTION);
     
     while ($processor = $processorList->next()) {
-      $processor->setBus($this);
       $this->beforeEvent($processor->name);
       
       if (!$isProduction) {

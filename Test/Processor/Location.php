@@ -25,7 +25,6 @@ class Test_Processor_Location extends Test_Processor_Abstract
     $bus->set("controller", new TestIndexController(new Sabel_Response_Object()));
     
     $processor = new Processor_Location("location");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $repository = $bus->get("repository");

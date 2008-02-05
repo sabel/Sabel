@@ -30,7 +30,6 @@ class Test_Processor_Response extends Test_Processor_Abstract
     $bus->set("response", $response);
     
     $processor = new Processor_Response("response");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $responses = $bus->get("response")->getResponses();

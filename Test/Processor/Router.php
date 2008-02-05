@@ -21,7 +21,6 @@ class Test_Processor_Router extends Test_Processor_Abstract
     $bus->set("request", new Sabel_Request_Object("index/test"));
     
     $processor = new Processor_Router("router");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $candidate = Sabel_Context::getContext()->getCandidate();
@@ -35,7 +34,6 @@ class Test_Processor_Router extends Test_Processor_Abstract
     $bus->set("request", new Sabel_Request_Object("devel/main/index/db"));
     
     $processor = new Processor_Router("router");
-    $processor->setBus($bus);
     $processor->execute($bus);
     
     $candidate = Sabel_Context::getContext()->getCandidate();

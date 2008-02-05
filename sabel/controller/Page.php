@@ -33,11 +33,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $storage = null;
   
   /**
-   * @var Sabel_Bus
-   */
-  protected $bus = null;
-  
-  /**
    * @var boolean
    */
   protected $executed = false;
@@ -73,16 +68,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function initialize()
   {
     
-  }
-  
-  /**
-   * @param Sabel_Bus $bus
-   *
-   * @return void
-   */
-  public function setBus(Sabel_Bus $bus)
-  {
-    $this->bus = $bus;
   }
   
   /**

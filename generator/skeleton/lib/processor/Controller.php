@@ -23,7 +23,6 @@ class Processor_Controller extends Sabel_Bus_Processor
       $controller = $this->createDefaultController($response);
     }
     
-    $controller->setBus($bus);
     $controller->setRedirector(new Sabel_Controller_Redirector());
     
     if (($request = $bus->get("request")) !== null) {
