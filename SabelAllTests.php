@@ -9,10 +9,11 @@ PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "S
 PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
 
 define("TEST_APP_DIR", SABEL_BASE . DS . "Test" . DS . "data" . DS . "application");
+define("MODULES_DIR_NAME", "app");
+define("VIEW_DIR_NAME",    "views");
 define("LOG_DIR_PATH",     TEST_APP_DIR . DS . "logs");
 define("MODULES_DIR_PATH", TEST_APP_DIR . DS . "app");
 define("COMPILE_DIR_PATH", TEST_APP_DIR . DS . "data" . DS . "compiled");
-define("VIEW_DIR_NAME",    "views");
 
 define("PRODUCTION",  0x01);
 define("TEST",        0x05);
@@ -98,7 +99,7 @@ class SabelAllTests
     $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Sabel::suite());
     $suite->addTest(Test_I18n_PhpGettext::suite());
-//    $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_DB_Tests::suite());
     
     // $suite->addTest(Test_Aspect::suite());
     

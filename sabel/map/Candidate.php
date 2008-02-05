@@ -111,13 +111,20 @@ class Sabel_Map_Candidate
       
       return true;
     } elseif ($elements->hasArray() && count($requests) >= $elementsCount) {
-      $last = $elementsCount - 1;
-      $elements->getElementAt($last)->variable = array_slice($requests, $last);
-      
-      for ($i = 0; $i < $last; ++$i) {
-        $partOfUri = (isset($requests[$i])) ? $requests[$i] : null;
-        $this->setVariableToElement($partOfUri, $elements->getElementAt($i));
+      if (($last = $elementsCount - 1) === 0) {
+        if (is_array($requests[0])) {
+          $elements->getElementAt($last)->variable = $requests[0];
+        } else {
+          $elements->getElementAt($last)->variable = $requests;
+        }
+      } else {
+        $elements->getElementAt($last)->variable = array_slice($requests, $last);
+        for ($i = 0; $i < $last; ++$i) {
+          $partOfUri = (isset($requests[$i])) ? $requests[$i] : null;
+          $this->setVariableToElement($partOfUri, $elements->getElementAt($i));
+        }
       }
+      
       return true;
     } elseif ($elementsCount < count($requests)) {
       return false;

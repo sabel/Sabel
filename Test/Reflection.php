@@ -58,6 +58,7 @@ class Test_Reflection extends SabelTestCase
   {
     $o = new Vircle();
     $hoge = $o->getReflection()->getProperty("hoge");
+    $this->assertTrue($hoge->hasAnnotation("var"));
     $annotation = $hoge->getAnnotation("var");
     $this->assertEquals("string", $annotation[0][0]);
   }

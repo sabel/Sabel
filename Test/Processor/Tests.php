@@ -39,7 +39,7 @@ class TestMapConfig extends Sabel_Map_Configurator
            ->defaults(array(":controller" => "main",
                             ":action"     => "index",
                             ":param"      => null));
-                            
+    
     $this->route("default")
            ->uri(":controller/:action")
            ->module("index")
@@ -59,4 +59,3 @@ class TestAddonConfig implements Sabel_Config
     return $addons;
   }
 }
-

@@ -47,6 +47,7 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     
     try {
       $processor->execute($bus);
+      exit;
     } catch (Sabel_Exception_Runtime $e) {
       return;
     }

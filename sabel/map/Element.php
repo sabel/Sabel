@@ -115,7 +115,7 @@ class Sabel_Map_Element
   {
     $key = self::VARIABLE_MARK . $this->name;
     if (array_key_exists($key, $options["defaults"])) {
-      $this->default = $options["defaults"][$key];
+      $this->default   = $options["defaults"][$key];
       $this->omittable = true;
     }
     

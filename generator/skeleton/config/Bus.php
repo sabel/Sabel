@@ -13,10 +13,10 @@ class Config_Bus extends Sabel_Bus_Config
                                 "exception"   => "Processor_Exception",
                                 "response"    => "Processor_Response",
                                 "view"        => "Processor_View");
-                                
+  
   protected $configs = array("map"   => "Config_Map",
                              "addon" => "Config_Addon");
-                             
+  
   public function getProcessors()
   {
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;

@@ -79,7 +79,7 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
       $header = new Sabel_Response_Header_Http();
     }
     
-    $header->output($this);
+    return $header->output($this);
   }
   
   public function expiredCache($expire = 31536000)
