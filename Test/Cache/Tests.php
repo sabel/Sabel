@@ -4,6 +4,7 @@ require_once("Test/Cache/Test.php");
 require_once("Test/Cache/Apc.php");
 require_once("Test/Cache/Memcache.php");
 require_once("Test/Cache/File.php");
+require_once("Test/Cache/Null.php");
 
 /**
  * @category  Cache
@@ -29,6 +30,7 @@ class Test_Cache_Tests
     }
     
     $suite->addTest(Test_Cache_File::suite());
+    $suite->addTest(Test_Cache_Null::suite());
     
     return $suite;
   }

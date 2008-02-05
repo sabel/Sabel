@@ -11,7 +11,7 @@
  */
 class Sabel_Response_Header_Http
 {
-  public function output($response)
+  public function output(Sabel_Response $response)
   {
     if ($response->hasHeaders()) {
       foreach ($response->getHeaders() as $message => $value) {

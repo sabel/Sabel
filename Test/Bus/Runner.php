@@ -126,6 +126,11 @@ class FooProcessor extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
+    $this->extract("a", "b");
+    
+    if ($this->a !== "10") throw new Exception("test error");
+    if ($this->b !== "20") throw new Exception("test error");
+    
     $bus->set("result", "foo_result");
   }
 }

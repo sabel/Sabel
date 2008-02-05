@@ -9,6 +9,10 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
+
+// @todo implementation
+
+/*
 class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Schema
 {
   public function getTableList()
@@ -73,7 +77,6 @@ class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Schema
     return $column;
   }
 
-  /* @todo
   protected function setIncrement($co, $row)
   {
     $sql = "SELECT * from sys.objects obj, sys.identity_columns ident "
@@ -99,7 +102,6 @@ class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Schema
       $co->primary = ($rows[0]["type"] === "PK");
     }
   }
-  */
 
   private function setDefault($column, $default)
   {
@@ -111,3 +113,4 @@ class Sabel_DB_Mssql_Schema extends Sabel_DB_Abstract_Schema
     }
   }
 }
+*/

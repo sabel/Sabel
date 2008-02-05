@@ -8,7 +8,10 @@ class Test_Cache_File extends Test_Cache_Test
 {
   public static function suite()
   {
-    define("CACHE_DIR_PATH", RUN_BASE . DIRECTORY_SEPARATOR . "cache");
+    $dir = SABEL_BASE . DIRECTORY_SEPARATOR . "Test" . DIRECTORY_SEPARATOR
+         . "data" . DIRECTORY_SEPARATOR . "application" . DIRECTORY_SEPARATOR . "cache";
+    
+    define("CACHE_DIR_PATH", $dir);
     return self::createSuite("Test_Cache_File");
   }
   

@@ -1,9 +1,23 @@
 <?php
 
-define("RUN_BASE", getcwd());
-
-require_once ("Sabel"  . DIRECTORY_SEPARATOR . "Sabel.php");
-require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
+if (!defined("TEST_CASE")) {
+  define("RUN_BASE", getcwd());
+  require_once ("Sabel"  . DIRECTORY_SEPARATOR . "Sabel.php");
+  require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
+  
+  $pathToSabel = Sabel::getPath();
+  $includePath = get_include_path();
+  
+  if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
+    set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
+  }
+  
+  if (isset($_SERVER["argv"][1])) {
+    Sakle::run($_SERVER["argv"][1]);
+  } else {
+    echo "@todo error";
+  }
+}
 
 /**
  * Sakle
@@ -52,17 +66,4 @@ class Sakle
       Sabel_Command::error("such a task doesn't exist.");
     }
   }
-}
-
-$pathToSabel = Sabel::getPath();
-$includePath = get_include_path();
-
-if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
-  set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
-}
-
-if (isset($_SERVER["argv"][1])) {
-  Sakle::run($_SERVER["argv"][1]);
-} else {
-  echo "@todo error";
 }

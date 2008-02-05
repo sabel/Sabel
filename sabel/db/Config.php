@@ -61,22 +61,18 @@ class Sabel_DB_Config
     $ignores = array("sabel.db.pdo.sqlite" => 1, "sabel.db.ibase" => 1);
     if (isset($ignores[$package])) return null;
     
-    $config  = self::getConfig($connectionName);
-    $ignores = array("sabel.db.mysql"     => 1,
-                     "sabel.db.mysqli"    => 1,
-                     "sabel.db.pdo.mysql" => 1,
-                     "sabel.db.mssql"     => 1);
-                     
-    // @todo improvement
+    $config = self::getConfig($connectionName);
     
-    if (isset($ignores[$package])) {
-      return $config["database"];
-    } elseif ($package === "sabel.db.oci" || $package === "sabel.db.pdo.oci") {
-      return strtoupper($config["user"]);
-    } elseif (isset($config["schema"])) {
+    // @todo more improvement
+    
+    if (isset($config["schema"])) {
       return $config["schema"];
-    } elseif ($package === "sabel.db.pgsql" || $package === "sabel.db.pdo.pgsql") {
+    } elseif (strpos($package, "mysql") !== false || $package === "sabel.db.mssql") {
+      return $config["database"];
+    } elseif (strpos($package, "pgsql") !== false) {
       return "public";
+    } elseif (strpos($package, "oci") !== false) {
+      return strtoupper($config["user"]);
     }
     
     $message = "getSchemaName() 'schema' not found in config.";

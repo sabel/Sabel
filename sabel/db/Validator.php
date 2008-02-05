@@ -5,21 +5,29 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Validator extends Sabel_Object
 {
+  /**
+   * @var string
+   */
+  protected $datetimeRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01]) ((0?|1)[\d]|2[0-3]):(0?[\d]|[1-5][\d]):(0?[\d]|[1-5][\d])$/';
+  
+  /**
+   * @var string
+   */
+  protected $dateRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/';
+  
   protected
     $model   = null,
     $mdlName = null;
     
   protected
     $messages      = array(),
-    $displayNames  = array(),
-    $datetimeRegex = "",
-    $dateRegex     = "";
+    $displayNames  = array();
     
   protected
     $errors  = array(),
@@ -27,14 +35,9 @@ class Sabel_DB_Validator extends Sabel_Object
     
   public function __construct(Sabel_DB_Model $model)
   {
-    $this->model   = $model;
-    $this->mdlName = $model->getName();
-    
-    $configs = Sabel_DB_Validate_Config::getConfigs();
-    
-    $this->messages       = $configs["messages"];
-    $this->datetimeRegex  = $configs["datetimeRegex"];
-    $this->dateRegex      = $configs["dateRegex"];
+    $this->model    = $model;
+    $this->mdlName  = $model->getName();
+    $this->messages = Sabel_DB_Validate_Config::getMessages();
     $this->localizedNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
   }
   

@@ -33,14 +33,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
       
       return $conn;
     } else {
-      list (, $v) = explode(".", PHP_VERSION);
-      
-      if ($v >= 2) {
-        $error = error_get_last();
-        return $error["message"];
-      } else {
-        return "cannot connect to PostgreSQL. please check your configuration.";
-      }
+      return "cannot connect to PostgreSQL. please check your configuration.";
     }
   }
   

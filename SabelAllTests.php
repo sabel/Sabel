@@ -1,26 +1,31 @@
 <?php
 
+define("TEST_CASE", true);
 define("SABEL_BASE", dirname(realpath(__FILE__)));
 define("DS", DIRECTORY_SEPARATOR);
-define("RUN_BASE", SABEL_BASE . DS . "Test" . DS . "data" . DS . "application");
 
-PHPUnit_Util_Filter::addDirectoryToFilter(SABEL_BASE . DS . "Test");
-PHPUnit_Util_Filter::addFileToFilter(SABEL_BASE . DS . "SabelAllTests.php");
+PHPUnit_Util_Filter::addDirectoryToWhitelist(SABEL_BASE . DS . "sabel");
+PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "Sakle.php");
+PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
 
-define("TEST_CASE",   true);
+define("TEST_APP_DIR", SABEL_BASE . DS . "Test" . DS . "data" . DS . "application");
+define("LOG_DIR_PATH",     TEST_APP_DIR . DS . "logs");
+define("MODULES_DIR_PATH", TEST_APP_DIR . DS . "app");
+define("COMPILE_DIR_PATH", TEST_APP_DIR . DS . "data" . DS . "compiled");
+define("VIEW_DIR_NAME",    "views");
+
 define("PRODUCTION",  0x01);
 define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 define("ENVIRONMENT", TEST);
-
 define("PHP_SUFFIX", ".php");
-define("IS_WIN", DIRECTORY_SEPARATOR === '\\');
-
-error_reporting(E_ALL|E_STRICT);
+define("TPL_SUFFIX", ".tpl");
 
 if (!defined("PHPUnit_MAIN_METHOD")) {
   define("PHPUnit_MAIN_METHOD", "SabelAllTests::main");
 }
+
+error_reporting(E_ALL|E_STRICT);
 
 require_once ("PHPUnit/Framework/Test.php");
 require_once ("PHPUnit/Framework/Warning.php");
@@ -32,8 +37,10 @@ require_once ("PHPUnit/Framework/IncompleteTestError.php");
 require_once ("Sabel.php");
 require_once ("Test/SabelTestCase.php");
 require_once ("Test/SabelTestSuite.php");
+require_once ("Test/Application.php");
 require_once ("Test/Object.php");
 require_once ("Test/Environment.php");
+require_once ("Test/Command.php");
 require_once ("Test/Annotation.php");
 require_once ("Test/Aspect.php");
 require_once ("Test/Container.php");
@@ -69,6 +76,7 @@ class SabelAllTests
     
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Environment::suite());
+    $suite->addTest(Test_Command::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Request_Tests::suite());
@@ -90,9 +98,11 @@ class SabelAllTests
     $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Sabel::suite());
     $suite->addTest(Test_I18n_PhpGettext::suite());
-    // $suite->addTest(Test_DB_Tests::suite());
+//    $suite->addTest(Test_DB_Tests::suite());
     
     // $suite->addTest(Test_Aspect::suite());
+    
+    $suite->addTest(Test_Application::suite());
     
     return $suite;
   }

@@ -1,18 +1,20 @@
 <?php
 
 define("MODELS_DIR_PATH", "/");
-require_once("Test/DB/Test.php");
-require_once("Test/DB/Mysql.php");
-require_once("Test/DB/PdoMysql.php");
-require_once("Test/DB/Mysqli.php");
-require_once("Test/DB/Pgsql.php");
-require_once("Test/DB/PdoPgsql.php");
-require_once("Test/DB/SQLite.php");
-require_once("Test/DB/Ibase.php");
-require_once("Test/DB/Oci.php");
-require_once("Test/DB/PdoOci.php");
-require_once("Test/DB/SchemaColumn.php");
-require_once("Test/DB/Validate.php");
+
+require_once ("Test/DB/Test.php");
+require_once ("Test/DB/Mysql.php");
+require_once ("Test/DB/PdoMysql.php");
+require_once ("Test/DB/Mysqli.php");
+require_once ("Test/DB/Pgsql.php");
+require_once ("Test/DB/PdoPgsql.php");
+require_once ("Test/DB/SQLite.php");
+require_once ("Test/DB/Ibase.php");
+require_once ("Test/DB/Oci.php");
+require_once ("Test/DB/PdoOci.php");
+require_once ("Test/DB/SchemaColumn.php");
+require_once ("Test/DB/Validate.php");
+require_once ("Test/DB/Config.php");
 
 class Condition extends Sabel_DB_Condition{}
 
@@ -34,7 +36,7 @@ define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
 define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);
 
 /**
- * load tests for sabel.db.*
+ * load tests of sabel.db.*
  *
  * @category  DB
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
@@ -88,6 +90,7 @@ class Test_DB_Tests
     
     $suite->addTest(Test_DB_SchemaColumn::suite());
     $suite->addTest(Test_DB_Validate::suite());
+    $suite->addTest(Test_DB_Config::suite());
     
     return $suite;
   }

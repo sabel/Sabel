@@ -52,7 +52,11 @@ class Sabel_Command
   
   public static function hasOption($opt, $arguments)
   {
-    return in_array("-" . $opt, $arguments, true);
+    foreach ($arguments as $arg) {
+      if (preg_match('/^-.*' . $opt . '.*$/', $arg)) return true;
+    }
+    
+    return false;
   }
   
   public static function getOption($opt, &$arguments, $unset = true)

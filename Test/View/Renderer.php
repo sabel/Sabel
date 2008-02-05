@@ -13,7 +13,7 @@ class Test_View_Renderer extends SabelTestCase
     return self::createSuite("Test_View_Renderer");
   }
   
-  public function testRenderingFormString()
+  public function testRenderingFromString()
   {
     $renderer = new Sabel_View_Renderer();
     $contents = 'name: <?php echo $name ?>';
@@ -21,10 +21,10 @@ class Test_View_Renderer extends SabelTestCase
     $this->assertEquals("name: hoge", $result);
   }
   
-  public function testRenderingFormFile()
+  public function testRenderingFromFile()
   {
     $renderer = new Sabel_View_Renderer();
-    $path = dirname(__FILE__) . "/templates/test.tpl";
+    $path   = MODULES_DIR_PATH . "/views/test.tpl";
     $result = $renderer->rendering(null, array("a" => "10", "b" => "20"), $path);
     
     $expected = <<<CONTENTS

@@ -7,7 +7,6 @@ define("DEVELOPMENT", 0x0A);
 define("PHP_SUFFIX", ".php");
 define("TPL_SUFFIX", ".tpl");
 define("DS", DIRECTORY_SEPARATOR);
-define("IS_WIN", (DIRECTORY_SEPARATOR === '\\'));
 
 define("MODULES_DIR_NAME", "app");
 define("ADDON_DIR_NAME",   "addon");
@@ -21,6 +20,7 @@ define("ADDON_DIR_PATH",   RUN_BASE . DS . ADDON_DIR_NAME);
 define("MODELS_DIR_PATH",  MODULES_DIR_PATH . DS . "models");
 define("SCHEMA_DIR_PATH",  RUN_BASE . DS . LIB_DIR_NAME . DS . "schema");
 define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
+define("LOG_DIR_PATH",     RUN_BASE . DS . "logs");
 define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
 define("TEST_DIR_PATH",    RUN_BASE . DS . "tests");
 

@@ -9,6 +9,10 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
+
+// @todo implementation
+
+/*
 class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
 {
   public function getDriverId()
@@ -109,9 +113,6 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
 
   public function createSelectSql(Sabel_DB_Abstract_Statement $stmt)
   {
-    echo '@todo mssql createSelectSql()';
-    exit;
-    /* @todo
     $c = $constraints;
     $skipOrder = false;
 
@@ -137,14 +138,13 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
     }
 
     return $sql;
-    */
   }
 
   protected function createConstraintSql($constraints)
   {
     echo '@todo mssql createConstraintSql()';
     exit;
-    /* @todo
+    
     $sql = "";
 
     if (isset($constraints["group"]))  $sql .= " GROUP BY " . $constraints["group"];
@@ -152,7 +152,6 @@ class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
     if (isset($constraints["order"]))  $sql .= " ORDER BY " . $constraints["order"];
 
     return $sql;
-    */
   }
 
   private function executeError($sql)
@@ -167,3 +166,4 @@ function mssql_escape_string($val)
 {
   return str_replace("'", "''", $val);
 }
+*/

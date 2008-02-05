@@ -1,29 +1,47 @@
 <?php
 
+/**
+ * testcase for sabel.db.oci.*
+ *
+ * @category  DB
+ * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
+ */
 class Test_DB_Oci extends Test_DB_Test
 {
-  private static $params1 = array("package"  => "sabel.db.oci",
-                                  "host"     => "127.0.0.1",
-                                  "user"     => "develop",
-                                  "password" => "develop",
-                                  "database" => "xe");
-
-  public static function main()
-  {
-    require_once "PHPUnit/TextUI/TestRunner.php";
-    
-    $suite  = new PHPUnit_Framework_TestSuite("Test_DB_Oci");
-    $result = PHPUnit_TextUI_TestRunner::run($suite);
-  }
-  
   public static function suite()
   {
     return self::createSuite("Test_DB_Oci");
   }
   
+  public function testConnectionRefused()
+  {
+    $params = array("package"  => "sabel.db.oci",
+                    "host"     => "127.0.0.1",
+                    "user"     => "hogehoge",
+                    "password" => "fugafuga",
+                    "database" => "xe");
+    
+    Sabel_DB_Config::add("conrefused", $params);
+    $driver = new Sabel_DB_Oci_Driver("conrefused");
+    
+    try {
+      $resource = Sabel_DB_Connection::connect($driver);
+    } catch (Sabel_DB_Connection_Exception $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testInit()
   {
-    Sabel_DB_Config::add("default",  self::$params1);
+    $params = array("package"  => "sabel.db.oci",
+                    "host"     => "127.0.0.1",
+                    "user"     => "develop",
+                    "password" => "develop",
+                    "database" => "xe");
+    
+    Sabel_DB_Config::add("default", $params);
     Test_DB_Test::$db = "ORACLE";
   }
 }

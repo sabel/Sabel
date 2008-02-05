@@ -509,6 +509,19 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
   }
   
+  public function testInvalidQuery()
+  {
+    $st = MODEL("SchemaTest");
+
+    try {
+      @$st->selectByQuery("a b c d e f g h i j k l m n");
+    } catch (Sabel_DB_Driver_Exception $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   // @todo more tests
   
   public function testClear()
