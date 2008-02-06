@@ -32,7 +32,7 @@ class Schema extends Sabel_Sakle_Task
     
     foreach (get_db_params() as $connectionName => $params) {
       Sabel_DB_Config::add($connectionName, $params);
-      $schema = Sabel_DB_Driver::createSchema($connectionName);
+      $schema = Sabel_DB_Package::getSchema($connectionName);
       
       foreach ($schema->getTableList() as $tblName) {
         $tblSchema = $schema->getTable($tblName);

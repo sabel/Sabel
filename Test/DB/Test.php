@@ -17,7 +17,7 @@ class Test_DB_Test extends SabelTestCase
   public function testClean()
   {
     $tables = self::$tables;
-    $driver = Sabel_DB_Driver::create();
+    $driver = Sabel_DB_Package::getDriver();
 
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");

@@ -18,7 +18,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $driver     = null,
     $schema     = null,
     $bindValues = array();
-    
+  
   protected
     $table       = "",
     $projection  = array(),
@@ -27,10 +27,19 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $values      = array(),
     $constraints = array(),
     $seqColumn   = null;
-    
-  public function getDriver()
+  
+  public abstract function setDriver($driver);
+  
+  public function clear()
   {
-    return $this->driver;
+    $this->query       = "";
+    $this->bindValues  = array();
+    $this->projection  = array();
+    $this->join        = "";
+    $this->where       = "";
+    $this->values      = array();
+    $this->constraints = array();
+    $this->seqColumn   = null;
   }
   
   public function type($type = null)

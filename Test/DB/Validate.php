@@ -199,7 +199,7 @@ class Test_DB_Validate extends SabelTestCase
     }
     
     Sabel_DB_Config::add("default", $params);
-    $driver = Sabel_DB_Driver::create("default");
+    $driver = Sabel_DB_Package::getDriver("default");
     $driver->execute("DELETE FROM schema_test");
     $driver->execute("INSERT INTO schema_test(name, email) VALUES('hoge', 'validate.test@example.com')");
     

@@ -38,6 +38,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $modelName = "";
   
   /**
+   * @var Sabel_DB_Abstract_Statement
+   */
+  protected $statement = null;
+  
+  /**
    * @var Sabel_DB_Schema_Table
    */
   protected $schema = null;
@@ -266,17 +271,17 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $pkey = $this->schema->getPrimaryKey();
     if (is_string($pkey)) $pkey = (array)$pkey;
+    $selected = false;
     
-    if (empty($pkey)) {
-      $selected = false;
-    } else {
-      $selected = true;
+    if (!empty($pkey)) {
       foreach ($pkey as $key) {
         if (!isset($properties[$key])) {
           $selected = false;
           break;
         }
       }
+      
+      $selected = true;
     }
     
     $this->values   = $properties;
@@ -829,8 +834,16 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function getStatement($type)
   {
-    $stmt = Sabel_DB_Driver::createStatement($this->connectionName);
-    return $stmt->table($this->tableName)->type($type);
+    if ($this->statement === null) {
+      $stmt = Sabel_DB_Package::getStatement($this->connectionName);
+      $stmt->table($this->tableName)->type($type);
+      return $this->statement = $stmt;
+    } else {
+      $stmt = $this->statement;
+      $stmt->clear();
+      $stmt->setDriver(Sabel_DB_Package::getDriver($this->connectionName));
+      return $stmt->type($type);
+    }
   }
   
   /**

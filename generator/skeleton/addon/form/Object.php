@@ -56,7 +56,7 @@ class Form_Object extends Sabel_Object
     $this->formName = $fName;
     $this->token    = $token;
     $this->mdlName  = $model->getName();
-    $this->columns  = $model->getSchema()->getColumns();
+    $this->columns  = $model->getColumns();
   }
   
   /**
@@ -344,5 +344,22 @@ class Form_Object extends Sabel_Object
     
     $html = new Form_Html($inputName);
     return $html->setValue($this->get($name))->setId($id)->setClass($class);
+  }
+  
+  public function __sleep()
+  {
+    $this->model   = $this->model->toArray();
+    $this->columns = array();
+    
+    return array_keys(get_object_vars($this));
+  }
+  
+  public function __wakeup()
+  {
+    $model = MODEL($this->mdlName);
+    $model->setProperties($this->model);
+    
+    $this->model   = $model;
+    $this->columns = $model->getColumns();
   }
 }

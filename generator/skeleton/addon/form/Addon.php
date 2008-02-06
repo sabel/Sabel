@@ -14,7 +14,7 @@ class Form_Addon extends Sabel_Object
 {
   public function execute($bus)
   {
-    $form = new Form_Processor("form");
-    $bus->getProcessorList()->insertNext("controller", "form", $form);
+    $bus->getProcessorList()
+        ->insertNext("initializer", "form", new Form_Processor("form"));
   }
 }

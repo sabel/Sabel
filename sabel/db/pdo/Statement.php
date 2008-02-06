@@ -14,9 +14,14 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
 {
   abstract public function escape(array $values);
   
-  public function __construct(Sabel_DB_Pdo_Driver $driver)
+  public function setDriver($driver)
   {
-    $this->driver = $driver;
+    if ($driver instanceof Sabel_DB_Pdo_Driver) {
+      $this->driver = $driver;
+    } else {
+      $message = "driver should be an instance of Sabel_DB_Pdo_Driver";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function execute()

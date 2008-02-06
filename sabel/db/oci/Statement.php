@@ -11,9 +11,14 @@
  */
 class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
 {
-  public function __construct(Sabel_DB_Oci_Driver $driver)
+  public function setDriver($driver)
   {
-    $this->driver = $driver;
+    if ($driver instanceof Sabel_DB_Oci_Driver) {
+      $this->driver = $driver;
+    } else {
+      $message = "driver should be an instance of Sabel_DB_Oci_Driver";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function escape(array $values)

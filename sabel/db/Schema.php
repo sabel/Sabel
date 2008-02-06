@@ -38,7 +38,7 @@ class Sabel_DB_Schema
       $tblSchema->setUniques($properties["uniques"]);
       $tblSchema->setForeignKeys($properties["fkeys"]);
     } else {
-      $schemaObj = Sabel_DB_Driver::createSchema($connectionName);
+      $schemaObj = Sabel_DB_Package::getSchema($connectionName);
       $tblSchema = $schemaObj->getTable($tblName);
     }
     
@@ -54,7 +54,7 @@ class Sabel_DB_Schema
       $sc = new $clsName();
       return $sc->get();
     } else {
-      return Sabel_DB_Driver::createSchema($connectionName)->getTableList();
+      return Sabel_DB_Package::getSchema($connectionName)->getTableList();
     }
   }
   

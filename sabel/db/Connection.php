@@ -52,7 +52,7 @@ class Sabel_DB_Connection
     if (!isset(self::$connections[$connectionName])) return;
     
     $conn   = self::$connections[$connectionName];
-    $driver = Sabel_DB_Driver::create($connectionName);
+    $driver = Sabel_DB_Package::getDriver($connectionName);
     $driver->close($conn);
     
     unset(self::$connections[$connectionName]);
