@@ -38,6 +38,14 @@ class Test_Controller_Redirector extends SabelTestCase
     $this->assertEquals("index/test", $redirector->getUrl());
   }
   
+  public function testRedirectByUrl()
+  {
+    $redirector = new Sabel_Controller_Redirector();
+    $redirector->url("index/test");
+    $this->assertTrue($redirector->isRedirected());
+    $this->assertEquals("index/test", $redirector->getUrl());
+  }
+  
   public function testRedirectWithParameters()
   {
     $redirector = new Sabel_Controller_Redirector();

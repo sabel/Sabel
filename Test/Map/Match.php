@@ -1,7 +1,7 @@
 <?php
 
 /**
- * TestCase of Sabel_Map_Match
+ * TestCase for sabel.map.*
  *
  * @category  Map
  * @author    Mori Reo <mori.reo@sabel.jp>
@@ -18,6 +18,11 @@ class Test_Map_Match extends SabelTestCase
   public function setUp()
   {
     $this->config = new ConfigMap();
+  }
+  
+  public function tearDown()
+  {
+    $this->config->clearCandidates();
   }
   
   public function testSimple()
@@ -87,6 +92,9 @@ class Test_Map_Match extends SabelTestCase
     
     $this->assertEquals("default", $candidate->getName());
     $this->assertEquals("index", $destination->getAction());
+    
+    $this->assertTrue($candidate->getElementByName("action")->hasVariable());
+    $this->assertEquals("index", $candidate->getElementByName("action")->variable);
   }
   
   public function testMatchWithDefaultPriority()
@@ -338,6 +346,7 @@ class Test_Map_Match extends SabelTestCase
     $this->assertEquals("test", $candidate->getElementByName("action")->variable);
     
     $candidate = $this->routing("index/test.tar.gz");
+    $this->assertTrue($candidate->getElementByName("action")->hasExtension());
     $this->assertEquals("tar.gz", $candidate->getElementByName("action")->extension);
     $this->assertEquals("test", $candidate->getElementByName("action")->variable);
   }

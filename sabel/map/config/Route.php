@@ -64,36 +64,6 @@ class Sabel_Map_Config_Route
     return $this->name;
   }
   
-  public function getModule()
-  {
-    return $this->module;
-  }
-  
-  public function hasModule()
-  {
-    return ($this->module !== "");
-  }
-  
-  public function getController()
-  {
-    return $this->controller;
-  }
-  
-  public function hasController()
-  {
-    return ($this->controller !== "");
-  }
-  
-  public function getAction()
-  {
-    return $this->action;
-  }
-  
-  public function hasAction()
-  {
-    return ($this->action !== "");
-  }
-  
   public function getUri()
   {
     return $this->uri;

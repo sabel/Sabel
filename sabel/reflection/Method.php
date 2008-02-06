@@ -22,7 +22,7 @@ class Sabel_Reflection_Method extends ReflectionMethod
   public function getAnnotations()
   {
     if ($this->annotations === false) {
-      $reader = new Sabel_Annotation_Reader();
+      $reader = Sabel_Annotation_Reader::create();
       $this->annotations = $reader->process($this->getDocComment());
     }
     

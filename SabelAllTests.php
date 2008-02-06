@@ -4,9 +4,16 @@ define("TEST_CASE", true);
 define("SABEL_BASE", dirname(realpath(__FILE__)));
 define("DS", DIRECTORY_SEPARATOR);
 
-PHPUnit_Util_Filter::addDirectoryToWhitelist(SABEL_BASE . DS . "sabel");
-PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "Sakle.php");
-PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
+if (in_array("-db", $_SERVER["argv"], true)) {
+  PHPUnit_Util_Filter::addDirectoryToWhitelist(SABEL_BASE . DS . "sabel" . DS . "db");
+} else {
+  PHPUnit_Util_Filter::addDirectoryToWhitelist(SABEL_BASE . DS . "sabel");
+  PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "Sakle.php");
+  PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "db");
+  PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "sakle");
+  PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "test");
+  PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
+}
 
 define("TEST_APP_DIR", SABEL_BASE . DS . "Test" . DS . "data" . DS . "application");
 define("MODULES_DIR_NAME", "app");
@@ -61,8 +68,7 @@ require_once ("Test/VirtualInheritance.php");
 require_once ("Test/DB/Tests.php");
 require_once ("Test/Locale/Browser.php");
 require_once ("Test/Locale/Server.php");
-require_once ("Test/I18n/Sabel.php");
-require_once ("Test/I18n/PhpGettext.php");
+require_once ("Test/I18n/Gettext.php");
 
 class SabelAllTests
 {
@@ -74,6 +80,11 @@ class SabelAllTests
   public static function suite()
   {
     $suite = new PHPUnit_Framework_TestSuite();
+    
+    if (in_array("-db", $_SERVER["argv"], true)) {
+      $suite->addTest(Test_DB_Tests::suite());
+      return $suite;
+    }
     
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Environment::suite());
@@ -97,9 +108,7 @@ class SabelAllTests
     $suite->addTest(Test_VirtualInheritance::suite());
     $suite->addTest(Test_Locale_Browser::suite());
     $suite->addTest(Test_Locale_Server::suite());
-    $suite->addTest(Test_I18n_Sabel::suite());
-    $suite->addTest(Test_I18n_PhpGettext::suite());
-    $suite->addTest(Test_DB_Tests::suite());
+    $suite->addTest(Test_I18n_Gettext::suite());
     
     // $suite->addTest(Test_Aspect::suite());
     

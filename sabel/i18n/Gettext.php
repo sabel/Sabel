@@ -4,37 +4,37 @@ if (!defined("GETTEXT_DEFAULT_DOMAIN")) {
   define("GETTEXT_DEFAULT_DOMAIN", "messages");
 }
 
-if (!defined("GETTEXT_DEFAULT_DOMAIN_PATH")) {
-  define("GETTEXT_DEFAULT_DOMAIN_PATH", RUN_BASE . DS . "locale");
-}
-
 /**
  * Sabel_I18n_Gettext
  *
  * @category   I18n
  * @package    org.sabel.i18n
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_I18n_Gettext
 {
-  const GETTEXT     = 1;
-  const PHP_GETTEXT = 2;
-  const SABEL       = 3;
-  
   protected static $ins  = null;
-  protected static $type = null;
   
   protected $browser     = null;
-  protected $domain      = GETTEXT_DEFAULT_DOMAIN;
-  protected $domainPath  = array(GETTEXT_DEFAULT_DOMAIN => GETTEXT_DEFAULT_DOMAIN_PATH);
+  protected $fileName    = "";
+  protected $localesDir  = "";
   protected $codeset     = array();
   protected $initialized = false;
   
   private function __construct()
   {
+    if (defined("LOCALE_DIR_PATH")) {
+      $this->localesDir = LOCALE_DIR_PATH;
+    } else {
+      $this->localesDir = RUN_BASE . DS . "locale";
+    }
     
+    $fileName = "messages";
+    if (defined("PHP_SUFFIX")) $fileName .= PHP_SUFFIX;
+    
+    $this->fileName = $fileName;
   }
   
   public static function getInstance()
@@ -51,135 +51,81 @@ class Sabel_I18n_Gettext
     return $this->initialized;
   }
   
-  public function setDomain($domain)
+  public function setMessagesFileName($name, $suffix = PHP_SUFFIX)
   {
-    $this->domain = $domain;
-    
-    if (!isset($this->domainPath[$domain])) {
-      $this->domainPath[$domain] = GETTEXT_DEFAULT_DOMAIN_PATH;
-    }
+    $this->fileName = $name . $suffix;
     
     if ($this->initialized) {
-      $path = $this->domainPath[$domain];
-      if (self::$type === self::SABEL) {
-        Sabel_I18n_Sabel_Gettext::setDomain($domain);
-        Sabel_I18n_Sabel_Gettext::setDomainPath($domain, $path);
-      } else {
-        textdomain($domain);
-        bindtextdomain($domain, $path);
-      }
+      Sabel_I18n_Sabel_Gettext::setMessagesFileName($this->fileName);
     }
     
     return $this;
   }
   
-  public function setDomainPath($path, $domain = null)
+  public function setLocalesDir($path)
   {
-    if ($domain === null) $domain = $this->domain;
-    $this->domainPath[$domain] = $path;
+    $this->localesDir = $path;
     
     if ($this->initialized) {
-      if (self::$type === self::SABEL) {
-        Sabel_I18n_Sabel_Gettext::setDomainPath($domain, $path);
-      } else {
-        bindtextdomain($domain, $path);
-      }
+      Sabel_I18n_Sabel_Gettext::setLocalesDir($path);
     }
     
     return $this;
   }
   
-  public function setCodeset($codeset, $domain = null)
+  public function setCodeset($codeset, $fileName = null, $suffix = PHP_SUFFIX)
   {
-    if ($domain === null) $domain = $this->domain;
-    $this->codeset[$domain] = $codeset;
+    if ($fileName === null) {
+      $fileName = $this->fileName;
+    } else {
+      $fileName = $fileName . $suffix;
+    }
+    
+    $this->codeset[$fileName] = $codeset;
     
     if ($this->initialized) {
-      if (self::$type === self::SABEL) {
-        Sabel_I18n_Sabel_Gettext::setCodeset($domain, $codeset);
-      } else {
-        bind_textdomain_codeset($domain, $codeset);
-      }
+      Sabel_I18n_Sabel_Gettext::setCodeset($fileName, $codeset);
     }
     
     return $this;
   }
   
-  public function init($type = self::SABEL, $force = false)
+  public function init($force = false)
   {
     if ($this->initialized && !$force) return;
     
-    $browser = new Sabel_Locale_Browser();
-    
-    if (extension_loaded("gettext")) {
-      $type   = self::GETTEXT;
-      $config = CONFIG_DIR_PATH . DS . "locales.php";
-      Sabel::fileUsing($config, true);
-    } elseif ($type === self::PHP_GETTEXT) {
-      $dir = dirname(__FILE__) . DS;
-      Sabel::fileUsing($dir . "php-gettext" . DS . "gettext.inc", true);
-    }
-    
-    self::$type = $type;
-    
-    if (($languages = $browser->getLanguages()) !== null) {
-      if (self::$type === self::GETTEXT) {
-        $this->gettextInit($languages);
-      } else {
-        $dirs   = $this->getLocaleDirs();
-        $locale = null;
-        foreach ($languages as $language) {
-          if (strpos($language, "-") !== false) {
-            list ($ll, $cc) = explode("-", $language);
-            $language = $ll . "_" . strtoupper($cc);
-          } else {
-            $ll = "";
-          }
-          
-          if (isset($dirs[$language])) {
-            $locale = $language;
-            break;
-          } elseif (isset($dirs[$ll])) {
-            $locale = $ll;
-            break;
-          }
-        }
-        
-        if (self::$type === self::SABEL) {
-          $this->sabelInit($locale);
-        } else {
-          if ($locale !== null) $this->phpGettextInit();
-        }
-        
-        $browser->setLocale($locale);
-      }
-    }
-    
-    $this->browser = $browser;
+    $this->browser = new Sabel_Locale_Browser();
     $this->initialized = true;
-  }
-  
-  private function sabelInit($locale)
-  {
-    $domain  = $this->domain;
-    $path    = $this->domainPath[$domain];
-    $codeset = null;
     
-    if (isset($this->codeset[$domain])) {
-      $codeset = $this->codeset[$domain];
-    }
-    
-    Sabel_I18n_Sabel_Gettext::initialize($domain, $path, $codeset, $locale);
-  }
-  
-  private function phpGettextInit()
-  {
-    $domain = $this->domain;
-    bindtextdomain($domain, $this->domainPath[$domain]);
-    textdomain($domain);
-    
-    if (!empty($this->codeset)) {
-      bind_textdomain_codeset($domain, $this->codeset[$domain]);
+    if (($languages = $this->browser->getLanguages()) !== null) {
+      $dirs   = $this->getLocaleDirs();
+      $locale = null;
+      foreach ($languages as $language) {
+        if (strpos($language, "-") !== false) {
+          list ($ll, $cc) = explode("-", $language);
+          $language = $ll . "_" . strtoupper($cc);
+        } else {
+          $ll = "";
+        }
+        
+        if (isset($dirs[$language])) {
+          $locale = $language;
+          break;
+        } elseif (isset($dirs[$ll])) {
+          $locale = $ll;
+          break;
+        }
+      }
+      
+      $this->browser->setLocale($locale);
+      
+      if (isset($this->codeset[$this->fileName])) {
+        $codeset = $this->codeset[$this->fileName];
+      } else {
+        $codeset = null;
+      }
+      
+      Sabel_I18n_Sabel_Gettext::initialize($this->fileName, $this->localesDir, $codeset, $locale);
     }
   }
   
@@ -197,6 +143,7 @@ class Sabel_I18n_Gettext
         foreach (array_keys($dirs) as $dir) {
           $code[] = '"' . $dir . '" => 1,';
         }
+        
         file_put_contents($cache, implode("", $code) . ");");
       }
     } else {
@@ -208,7 +155,7 @@ class Sabel_I18n_Gettext
   
   private function _getLocaleDirs()
   {
-    $dir  = GETTEXT_DEFAULT_DOMAIN_PATH . DS;
+    $dir  = $this->localesDir . DS;
     $dirs = array();
     
     foreach (scandir($dir) as $item) {
@@ -219,28 +166,6 @@ class Sabel_I18n_Gettext
     return $dirs;
   }
   
-  private function gettextInit($languages)
-  {
-    $domain = $this->domain;
-    
-    foreach ($languages as $language) {
-      $locale = locales($language);
-      
-      if ($locale === "" || $locale === null) continue;
-      if (setlocale(LC_ALL, $locale) === false) continue;
-      
-      bindtextdomain($domain, $this->domainPath[$domain]);
-      textdomain($domain);
-      
-      if (!empty($this->codeset)) {
-        bind_textdomain_codeset($domain, $this->codeset[$domain]);
-      }
-      
-      $this->browser->setLocale($locale);
-      break;
-    }
-  }
-  
   public function setBrowser($browser)
   {
     $this->browser = $browser;
@@ -249,20 +174,5 @@ class Sabel_I18n_Gettext
   public function getBrowser()
   {
     return $this->browser;
-  }
-  
-  public function isGettext()
-  {
-    return (self::$type === self::GETTEXT);
-  }
-  
-  public function isPhpGettext()
-  {
-    return (self::$type === self::PHP_GETTEXT);
-  }
-  
-  public function isSabel()
-  {
-    return (self::$type === self::SABEL);
   }
 }

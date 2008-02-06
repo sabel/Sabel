@@ -23,8 +23,10 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     $processor = new Processor_Controller("controller");
     $processor->execute($bus);
     
-    $this->assertTrue($bus->get("controller") instanceof Test_Controllers_Hoge);
+    $controller = $bus->get("controller");
+    $this->assertTrue($controller instanceof Test_Controllers_Hoge);
     $this->assertTrue($bus->get("response") instanceof Sabel_Response);
+    $this->assertTrue($controller->getStorage() instanceof Sabel_Storage_Abstract);
   }
   
   public function testFugaController()

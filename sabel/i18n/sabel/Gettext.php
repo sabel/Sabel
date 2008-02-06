@@ -11,19 +11,18 @@
  */
 class Sabel_I18n_Sabel_Gettext
 {
-  private static $domain     = "";
+  private static $fileName   = "";
   private static $locale     = null;
-  private static $domainPath = array();
+  private static $localesDir = array();
   private static $codeSet    = array();
   private static $messages   = array();
   
-  public static function initialize($domain, $path, $codeSet, $locale)
+  public static function initialize($fileName, $localesDir, $codeSet, $locale)
   {
-    self::$domain = $domain;
-    self::$locale = $locale;
-    self::$codeSet[$domain] = $codeSet;
-    
-    self::setDomainPath($domain, $path);
+    self::$fileName   = $fileName;
+    self::$localesDir = $localesDir;
+    self::$locale     = $locale;
+    self::$codeSet[$fileName] = $codeSet;
   }
   
   public static function _($msgid)
@@ -31,8 +30,8 @@ class Sabel_I18n_Sabel_Gettext
     if (self::$locale === null) {
       return $msgid;
     } else {
-      $domain   = self::$domain;
-      $messages = self::getMessages(self::$domainPath[$domain]);
+      $fileName = self::$fileName;
+      $messages = self::getMessages($fileName);
       
       if (isset($messages[$msgid])) {
         $message = ($messages[$msgid] === "") ? $msgid : $messages[$msgid];
@@ -40,30 +39,28 @@ class Sabel_I18n_Sabel_Gettext
         $message = $msgid;
       }
       
-      if (isset(self::$codeSet[$domain])) {
+      if (isset(self::$codeSet[$fileName])) {
         $from = self::getInternalEncoding();
-        return mb_convert_encoding($message, self::$codeSet[$domain], $from);
+        return mb_convert_encoding($message, self::$codeSet[$fileName], $from);
       } else {
         return $message;
       }
     }
   }
   
-  public static function setDomain($domain)
+  public static function setMessagesFileName($fileName)
   {
-    self::$domain = $domain;
+    self::$fileName = $fileName;
   }
   
-  public static function setDomainPath($domain, $path)
+  public static function setLocalesDir($path)
   {
-    if (substr($path, -1, 1) !== DS) $path .= DS;
-    self::$domainPath[$domain] = $path;
-    unset(self::$messages[self::$locale][$domain]);
+    self::$localesDir = $path;
   }
   
-  public static function setCodeset($domain, $codeSet)
+  public static function setCodeset($fileName, $codeSet)
   {
-    self::$codeSet[$domain] = $codeSet;
+    self::$codeSet[$fileName] = $codeSet;
   }
   
   public static function setLocale($locale)
@@ -73,33 +70,29 @@ class Sabel_I18n_Sabel_Gettext
   
   private static function getMessages($path)
   {
-    $locale = self::$locale;
-    $domain = self::$domain;
+    $locale   = self::$locale;
+    $fileName = self::$fileName;
     
-    if (isset(self::$messages[$locale][$domain])) {
-      return self::$messages[$locale][$domain];
+    if (isset(self::$messages[$locale][$fileName])) {
+      return self::$messages[$locale][$fileName];
     } else {
-      $filePath = $path . $locale . DS . "LC_MESSAGES"
-                . DS . $domain . PHP_SUFFIX;
-                
+      $filePath = self::$localesDir . DS . $locale . DS . $fileName;
+      
       if (is_readable($filePath)) {
         include ($filePath);
-        return self::$messages[$locale][$domain] = $messages;
-      } else {
-        if (!IS_WIN && strpos($locale, "_") !== false) {
-          list ($lang) = explode("_", $locale);
-          $filePath = $path . $lang . DS . "LC_MESSAGES"
-                    . DS . $domain . PHP_SUFFIX;
-                    
-          if (is_readable($filePath)) {
-            include ($filePath);
-            return self::$messages[$locale][$domain] = $messages;
-          }
-        }
+        return self::$messages[$locale][$fileName] = $messages;
+      } elseif (strpos($locale, "_") !== false) {
+        list ($lang) = explode("_", $locale);
+        $filePath = self::$localesDir . DS . $lang . DS . $fileName;
         
-        return self::$messages[$locale][$domain] = false;
+        if (is_readable($filePath)) {
+          include ($filePath);
+          return self::$messages[$locale][$fileName] = $messages;
+        }
       }
     }
+    
+    return self::$messages[$locale][$fileName] = false;
   }
   
   private static function getInternalEncoding()

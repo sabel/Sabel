@@ -11,7 +11,14 @@
  */
 class Sabel_Map_Elements extends Sabel_Object
 {
+  /**
+   * @var array
+   */
   protected $components = array();
+  
+  /**
+   * @var array
+   */
   protected $namedComponents = array();
   
   public function add(Sabel_Map_Element $element)
@@ -20,16 +27,31 @@ class Sabel_Map_Elements extends Sabel_Object
     $this->namedComponents[$element->name] = $element;
   }
   
+  /**
+   * @param string $name
+   *
+   * @return boolean
+   */
   public function has($name)
   {
-    return (isset($this->namedComponents[$name]));
+    return isset($this->namedComponents[$name]);
   }
   
+  /**
+   * @param int $index
+   *
+   * @return boolean
+   */
   public function hasAt($index)
   {
-    return (isset($this->components[$index]));
+    return isset($this->components[$index]);
   }
   
+  /**
+   * @param string $name
+   *
+   * @return Sabel_Map_Element
+   */
   public function getElement($name)
   {
     if (isset($this->namedComponents[$name])) {
@@ -37,8 +59,13 @@ class Sabel_Map_Elements extends Sabel_Object
     } else {
       return null;
     }
-  }  
+  }
   
+  /**
+   * @param int $index
+   *
+   * @return Sabel_Map_Element
+   */
   public function getElementAt($index)
   {
     if (isset($this->components[$index])) {
@@ -48,24 +75,39 @@ class Sabel_Map_Elements extends Sabel_Object
     }
   }
   
+  /**
+   * @return array
+   */
   public function getNamedElements()
   {
     return $this->namedComponents;
   }
   
+  /**
+   * @return array
+   */
   public function toArray()
   {
     return $this->components;
   }
   
+  /**
+   * @return boolean
+   */
   public function hasDefaults()
   {
     foreach ($this->components as $element) {
       if ($element->hasDefault()) return true;
     }
+    
     return false;
   }
   
+  /**
+   * @param array $requests
+   *
+   * @return void
+   */
   public function appendToRequests(&$requests)
   {
     foreach ($this->components as $i => $element) {
@@ -75,11 +117,17 @@ class Sabel_Map_Elements extends Sabel_Object
     }
   }
   
+  /**
+   * @return boolean
+   */
   public function hasConstant()
   {
     return $this->components[0]->isConstant();
   }
   
+  /**
+   * @return boolean
+   */
   public function matchToConstants($requests)
   {
     for ($i = 0, $c = $this->count(); $i < $c; ++$i) {
@@ -94,22 +142,17 @@ class Sabel_Map_Elements extends Sabel_Object
     return true;
   }
   
-  public function getNext()
-  {
-    $next = key($this->components) + 1;
-    
-    if (isset($this->components[$next])) {
-      return $this->components[$next];
-    } else {
-      return null;
-    }
-  }
-  
+  /**
+   * @return boolean
+   */
   public function hasArray()
   {
     return $this->components[$this->count() - 1]->isArray();
   }
-    
+  
+  /**
+   * @return int
+   */
   public function count()
   {
     return count($this->components);

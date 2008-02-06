@@ -17,20 +17,55 @@ class Sabel_Map_Element
   const CONSTANT   = "constant";
   const TYPE_ARRAY = "array";
   
+  /**
+   * @var string
+   */
   public $name = "";
+  
+  /**
+   * @var const Sabel_Map_Element
+   */
   public $type = "";
+  
+  /**
+   * @var mixed
+   */
   public $variable = "";
 
+  /**
+   * @var string
+   */
   public $extension = "";
+  
+  /**
+   * @var boolean
+   */
   public $matchAll  = false;
   
-  public $default     = "";
-  public $omittable   = false;
+  /**
+   * @var mixed
+   */
+  public $default = "";
   
+  /**
+   * @var boolean
+   */
+  public $omittable = false;
+  
+  /**
+   * @var Sabel_Map_Requirement_Regex
+   */
   public $requirement = null;
   
-  public $constant = false;
-  public $isArray  = false;
+  /**
+   * @var boolean
+   */
+  public $isConstant = false;
+  
+  /**
+   * @var boolean
+   */
+  public $isArray = false;
   
   public function __construct($name, $options)
   {
@@ -53,7 +88,7 @@ class Sabel_Map_Element
         }
       }
     } else {
-      $this->constant = true;
+      $this->isConstant = true;
       $this->type = self::CONSTANT;
     }
     
@@ -78,7 +113,7 @@ class Sabel_Map_Element
   
   public function isConstant()
   {
-    return $this->constant;
+    return $this->isConstant;
   }
   
   public function hasVariable()

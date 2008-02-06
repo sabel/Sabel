@@ -13,6 +13,18 @@ class Test_Bus_Runner extends SabelTestCase
     return self::createSuite("Test_Bus_Runner");
   }
   
+  public function testEmptyNameProcessor()
+  {
+    try {
+      $bus = new Sabel_Bus();
+      $bus->addProcessor(new HogeProcessor(""));
+    } catch (Sabel_Exception_InvalidArgument $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testProcessorList()
   {
     $bus = new Sabel_Bus();

@@ -67,11 +67,6 @@ class Sabel_Map_Candidate
     return new Sabel_Map_Destination($this->destination);
   }
   
-  public function setName($name)
-  {
-    $this->name = $name;
-  }
-  
   public function getName()
   {
     return $this->name;

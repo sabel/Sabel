@@ -25,6 +25,15 @@ class Test_Controller_Page extends SabelTestCase
     $this->assertEquals("index", $c->getAttribute("actionResult"));
   }
   
+  public function testFugaAction()
+  {
+    $c = $this->createController();
+    $c->initialize();
+    $c->execute("fuga", array("10", "20", "30"));
+    
+    $this->assertEquals("10 20 30", $c->getAttribute("actionResult"));
+  }
+  
   public function testReservedAction()
   {
     $c = $this->createController();
@@ -57,6 +66,7 @@ class Test_Controller_Page extends SabelTestCase
   public function testAttribute()
   {
     $c = $this->createController();
+    $c->setResponse(new MyResponse());
     $c->setAttribute("a", "10");
     $c->setAttribute("b", "20");
     $this->assertEquals("10", $c->getAttribute("a"));
@@ -121,6 +131,13 @@ class TestController extends Sabel_Controller_Page
     $this->actionResult = "index";
   }
   
+  public function fuga($a, $b, $c)
+  {
+    $this->actionResult = "$a $b $c";
+  }
+  
   public function hiddenAction() {}
   protected function hoge() {}
 }
+
+class MyResponse extends Sabel_Response_Object {}
