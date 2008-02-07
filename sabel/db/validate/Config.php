@@ -9,8 +9,13 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Validate_Config
+abstract class Sabel_DB_Validate_Config implements Sabel_Config
 {
+  /**
+   * @var Sabel_DB_Validate_Config_Model[]
+   */
+  private $models = array();
+  
   /**
    * @var array
    */
@@ -22,11 +27,6 @@ class Sabel_DB_Validate_Config
                                       "numeric"   => "%NAME% must be a numeric.",
                                       "type"      => "wrong %NAME% format.",
                                       "unique"    => "'%VALUE%'(%NAME%) is unavailable.");
-  
-  /**
-   * @var array
-   */
-  protected static $customValidators = array();
   
   /**
    * @param array $messages
@@ -47,48 +47,40 @@ class Sabel_DB_Validate_Config
   }
   
   /**
-   * @param array $setting
+   * @param string $mdlName
    *
-   * @return void
+   * @return Sabel_DB_Validate_Config_Model
    */
-  public static function addValidator($setting)
+  public function model($mdlName)
   {
-    $cvs =& self::$customValidators;
-    
-    $colName = $setting["column"];
-    $models  = $setting["model"];
-    if (is_string($models)) $models = (array)$models;
-    
-    $arguments = null;
-    if (isset($setting["arguments"])) {
-      $arguments = $setting["arguments"];
+    if (!isset($this->models[$mdlName])) {
+      $this->models[$mdlName] = new Sabel_DB_Validate_Config_Model();
     }
     
-    foreach ($models as $mdlName) {
-      if ($arguments) {
-        $cvs[$mdlName][$colName][] = array($setting["function"], $arguments);
-      } else {
-        $cvs[$mdlName][$colName][] = $setting["function"];
-      }
-    }
+    return $this->models[$mdlName];
   }
   
   /**
-   * @return array
+   * @param string $mdlName
+   *
+   * @return boolean
    */
-  public static function getValidators()
+  public function has($mdlName)
   {
-    return self::$customValidators;
+    return isset($this->models[$mdlName]);
   }
   
   /**
-   * @return array
+   * @param string $mdlName
+   *
+   * @return Sabel_DB_Validate_Config_Model
    */
-  public static function clearValidators()
+  public function get($mdlName)
   {
-    $validators = self::$customValidators;
-    self::$customValidators = array();
-    
-    return $validators;
+    if ($this->has($mdlName)) {
+      return $this->models[$mdlName];
+    } else {
+      return null;
+    }
   }
 }

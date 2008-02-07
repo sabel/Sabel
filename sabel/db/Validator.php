@@ -24,21 +24,29 @@ class Sabel_DB_Validator extends Sabel_Object
   protected
     $model   = null,
     $mdlName = null;
-    
+  
+  protected
+    $validateConfig = null;
+  
   protected
     $messages      = array(),
     $displayNames  = array();
-    
+  
   protected
     $errors  = array(),
     $ignores = array();
-    
+  
   public function __construct(Sabel_DB_Model $model)
   {
     $this->model    = $model;
     $this->mdlName  = $model->getName();
     $this->messages = Sabel_DB_Validate_Config::getMessages();
     $this->localizedNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+  }
+  
+  public function setValidateConfig(Sabel_DB_Validate_Config $config)
+  {
+    $this->validateConfig = $config;
   }
   
   public function getErrors()
@@ -49,33 +57,6 @@ class Sabel_DB_Validator extends Sabel_Object
   public function hasError()
   {
     return !(empty($this->errors));
-  }
-  
-  protected function getColumns()
-  {
-    $columns = array();
-    $model   = $this->model;
-    $schemas = $model->getColumns();
-    
-    if ($model->isSelected()) {
-      $values = $model->getUpdateValues();
-      foreach ($values as $name => $val) {
-        if (isset($schemas[$name])) {
-          $column = clone $schemas[$name];
-          $column->setValue($val);
-          $columns[$name] = $column;
-        }
-      }
-    } else {
-      $values = $model->toArray();
-      foreach ($schemas as $name => $schema) {
-        $column = clone $schema;
-        if (isset($values[$name])) $column->setValue($values[$name]);
-        $columns[$name] = $column;
-      }
-    }
-    
-    return $columns;
   }
   
   public function validate($ignores = array())
@@ -139,11 +120,54 @@ class Sabel_DB_Validator extends Sabel_Object
       $this->unique($model, $uniques);
     }
     
-    if ($customs = Sabel_DB_Validate_Config::getValidators()) {
-      $this->customs($customs, $columns);
+    Sabel::using("Db_Validate_Config");
+    if ($this->validateConfig === null && !class_exists("Db_Validate_Config", false)) {
+      return $this->errors;
+    }
+  
+    if ($this->validateConfig !== null) {
+      $config = $this->validateConfig;
+    } else {
+      $config = new Db_Validate_Config();
     }
     
+    $config->configure();
+    $this->doCustomValidate($config, $columns);
+    
     return $this->errors;
+  }
+  
+  protected function getColumns()
+  {
+    $columns = array();
+    $model   = $this->model;
+    $schemas = $model->getColumns();
+    
+    if ($model->isSelected()) {
+      $values = $model->getUpdateValues();
+      foreach ($values as $name => $val) {
+        if (isset($schemas[$name])) {
+          $column = clone $schemas[$name];
+          $column->setValue($val);
+          $columns[$name] = $column;
+        }
+      }
+    } else {
+      $values = $model->toArray();
+      foreach ($schemas as $name => $schema) {
+        $column = clone $schema;
+        if (isset($values[$name])) $column->setValue($values[$name]);
+        $columns[$name] = $column;
+      }
+    }
+    
+    return $columns;
+  }
+  
+  protected function getLocalizedName($colName)
+  {
+    $lNames = $this->localizedNames;
+    return (isset($lNames[$colName])) ? $lNames[$colName] : $colName;
   }
   
   protected function errorMessage($colName, $value, $msgKey)
@@ -215,68 +239,43 @@ class Sabel_DB_Validator extends Sabel_Object
     return ($column->value >= $column->min);
   }
   
-  protected function customs($customs, $columns)
+  protected function doCustomValidate(Sabel_DB_Validate_Config $config, $columns, $mdlName = null)
   {
-    if (isset($customs[$this->mdlName])) {
-      $this->customValidate($customs[$this->mdlName], $columns);
-    }
+    if ($mdlName === null) $mdlName = $this->mdlName;
     
-    if (($parent = get_parent_class($this->model)) !== "Sabel_DB_Model") {
-      if (isset($customs[$parent])) {
-        $this->customValidate($customs[$parent], $columns);
-      }
-    }
-    
-    if (isset($customs["all"])) {
-      $this->customValidate($customs["all"], $columns);
-    }
-  }
-  
-  protected function customValidate($validations, $schemas)
-  {
-    foreach ($validations as $colName => $functions) {
-      if (strpos($colName, "*") !== false) {
-        $regex = "^" . str_replace("*", ".*", $colName);
-        $cols  = array();
-        foreach (array_keys($schemas) as $name) {
-          if (preg_match("/{$regex}/", $name)) $cols[] = $name;
-        }
-        
-        if (empty($cols)) continue;
-        
-        foreach ($cols as $name) {
-          $value = $schemas[$name]->value;
-          $this->execCustomValidation($functions, $name);
-        }
-      } elseif (isset($schemas[$colName])) {
-        $value = $schemas[$colName]->value;
-        $this->execCustomValidation($functions, $colName);
-      }
-    }
-  }
-  
-  protected function execCustomValidation($functions, $name)
-  {
-    $lName = $this->getLocalizedName($name);
-    
-    foreach ($functions as $function) {
-      $arguments = array($this->model, $name, $lName);
+    if ($config->has($mdlName)) {
+      $columnConfigs = $config->get($mdlName)->getColumns();
       
-      if (is_array($function)) {
-        list ($function, $args) = $function;
-        if (!is_array($args)) $args = array($args);
-        $arguments = array_merge($arguments, $args);
+      foreach ($columnConfigs as $key => $columnConfig) {
+        if (strpos($key, "*") !== false) {
+          $regex = "^" . str_replace("*", ".*", $key);
+          foreach (array_keys($columns) as $colName) {
+            if (preg_match("/{$regex}/", $colName)) {
+              foreach ($columnConfig->getValidators() as $validator) {
+                $this->_doCustomValidate($config, $colName, $validator);
+              }
+            }
+          }
+        } elseif (isset($columns[$key])) {
+          foreach ($columnConfig->getValidators() as $validator) {
+            $this->_doCustomValidate($config, $key, $validator);
+          }
+        }
       }
-      
-      $result = call_user_func_array($function, $arguments);
-      if ($result) $this->errors[] = $result;
+    }
+    
+    $parent = get_parent_class($mdlName);
+    if ($parent !== false && $parent !== "Sabel_DB_Model") {
+      $this->doCustomValidate($config, $columns, $parent);
     }
   }
   
-  protected function getLocalizedName($colName)
+  protected function _doCustomValidate($config, $colName, $validator)
   {
-    $lNames = $this->localizedNames;
-    return (isset($lNames[$colName])) ? $lNames[$colName] : $colName;
+    $lName  = $this->getLocalizedName($colName);
+    $params = array_merge(array($this->model, $colName, $lName), $validator->arguments);
+    $errMsg = call_user_func_array(array($config, $validator->name), $params);
+    if ($errMsg !== null) $this->errors[] = $errMsg;
   }
   
   protected function unique($model, $uniques)

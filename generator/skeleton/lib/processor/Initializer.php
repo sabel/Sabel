@@ -13,10 +13,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    //$libdb = RUN_BASE . DS . LIB_DIR_NAME . DS . "db";
-    //Sabel::fileUsing($libdb . DS . "utility"    . PHP_SUFFIX, true);
-    //Sabel::fileUsing($libdb . DS . "validators" . PHP_SUFFIX, true);
-    
+    //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility" . PHP_SUFFIX, true);
     Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
     
     // default page title.
