@@ -31,13 +31,11 @@ class Migration extends Sabel_Sakle_Task
     
     $environment = $this->getEnvironment();
     define("ENVIRONMENT", $environment);
-    
-    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
+    $this->initDbConfig();
     
     $connectionName  = $this->getConnectionName();
     $directory       = $this->defineMigrationDirectory();
-    $this->accessor  = Sabel_DB_Package::getSchema($connectionName);
-    $this->initDbConfig($environment);
+    $this->accessor  = Sabel_DB::createMetadata($connectionName);
     
     if ($arguments[2] === "export") {
       $this->export();
@@ -75,7 +73,7 @@ class Migration extends Sabel_Sakle_Task
   protected function getCurrentVersion()
   {
     $connectionName = $this->connectionName;
-    $this->stmt = Sabel_DB_Package::getStatement($connectionName);
+    $this->stmt = Sabel_DB::createStatement($connectionName);
     Sabel_DB_Migration_Manager::setStatement($this->stmt);
     Sabel_DB_Migration_Manager::setSchema($this->accessor);
     
@@ -160,7 +158,8 @@ class Migration extends Sabel_Sakle_Task
   protected function execNextMigration()
   {
     $instance = new self();
-    $instance->run($this->arguments);
+    $instance->setArguments($this->arguments);
+    $instance->run();
   }
   
   protected function toVersionNumber($to)
@@ -211,13 +210,9 @@ class Migration extends Sabel_Sakle_Task
     $this->stmt->setQuery("UPDATE $sversion SET $version = $num")->execute();
   }
 
-  protected function initDbConfig($environment)
+  protected function initDbConfig()
   {
-    $params = get_db_params($environment);
-    
-    foreach ($params as $connectionName => $param) {
-      Sabel_DB_Config::add($connectionName, $param);
-    }
+    Sabel_DB_Config::initialize(new Config_Database());
   }
 
   protected function getMigrationClass($type, $verNum)

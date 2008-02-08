@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Sqlite_Schema
+ * Sabel_DB_Pdo_Sqlite_Metadata
  *
  * @category   DB
  * @package    org.sabel.db.pdo
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Sqlite_Schema extends Sabel_DB_Abstract_Schema
+class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
 {
   public function getTableList()
   {
@@ -49,7 +49,7 @@ class Sabel_DB_Pdo_Sqlite_Schema extends Sabel_DB_Abstract_Schema
     
     $columns = array();
     foreach ($rows as $row) {
-      $co = new Sabel_DB_Schema_Column();
+      $co = new Sabel_DB_Metadata_Column();
       $co->name = $row["name"];
       
       if ($row["pk"] === "1") {
@@ -65,7 +65,7 @@ class Sabel_DB_Pdo_Sqlite_Schema extends Sabel_DB_Abstract_Schema
       if ($this->isBoolean($row["type"])) {
         $co->type = Sabel_DB_Type::BOOL;
       } elseif (!$this->isString($co, $row["type"])) {
-        Sabel_DB_Type_Setter::send($co, $row["type"]);
+        Sabel_DB_Type_Manager::create()->applyType($co, $row["type"]);
       }
       
       $this->setDefaultValue($co, $row["dflt_value"]);

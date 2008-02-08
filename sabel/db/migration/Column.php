@@ -12,7 +12,7 @@
 class Sabel_DB_Migration_Column
 {
   /**
-   * @var Sabel_DB_Schema_Column
+   * @var Sabel_DB_Metadata_Column
    */
   private $column = null;
   
@@ -23,7 +23,7 @@ class Sabel_DB_Migration_Column
   
   public function __construct($name, $isChange = false)
   {
-    $this->column = new Sabel_DB_Schema_Column();
+    $this->column = new Sabel_DB_Metadata_Column();
     $this->column->name = $name;
     $this->isChange = $isChange;
   }

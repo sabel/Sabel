@@ -14,7 +14,6 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   const BEGINS_WITH = 1;
   const CONTAINS    = 2;
   const ENDS_WITH   = 3;
-  const FIXED       = 4;
   
   /**
    * @var int
@@ -61,7 +60,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   
   public function type($type)
   {
-    if ($type >= 1 && $type <= 4) {
+    if ($type >= 1 && $type <= 3) {
       $this->likeType = $type;
     } else {
       throw new Sabel_Exception_InvalidArgument("invalid type.");
@@ -84,14 +83,12 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   private function addSpecialCharacter($value)
   {
     switch ($this->likeType) {
-      case self::BEGINS_WITH:
-        return $value . "%";
       case self::ENDS_WITH:
         return "%" . $value;
       case self::CONTAINS:
         return "%" . $value . "%";
       default:
-        return $value;
+        return $value . "%";
     }
   }
 }

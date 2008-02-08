@@ -69,7 +69,7 @@ class Test_View_TemplateDb extends Test_View_Template
     }
     
     Sabel_DB_Config::add("default", $params);
-    $stmt = Sabel_DB_Package::getStatement();
+    $stmt = Sabel_DB::createStatement();
     $tblName = $stmt->quoteIdentifier("templates");
     $nCol    = $stmt->quoteIdentifier("name");
     $nsCol   = $stmt->quoteIdentifier("namespace");

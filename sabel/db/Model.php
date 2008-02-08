@@ -6,8 +6,8 @@
  * @abstract
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_DB_Model extends Sabel_Object
@@ -43,12 +43,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $statement = null;
   
   /**
-   * @var Sabel_DB_Schema_Table
+   * @var Sabel_DB_Metadata_Table
    */
   protected $schema = null;
   
   /**
-   * @var Sabel_DB_Schema_Column[]
+   * @var Sabel_DB_Metadata_Column[]
    */
   protected $schemaCols = array();
   
@@ -110,7 +110,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $this->tableName = convert_to_tablename($mdlName);
     }
     
-    $this->schema = Sabel_DB_Schema::getTableInfo($this->tableName, $this->connectionName);
+    $this->schema = Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName);
     $this->schemaCols = $this->schema->getColumns();
   }
   
@@ -231,7 +231,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Schema_Table
+   * @return Sabel_DB_Metadata_Table
    */
   public function getSchema()
   {
@@ -239,7 +239,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Schema_Column[]
+   * @return Sabel_DB_Metadata_Column[]
    */
   public function getColumns()
   {
@@ -835,13 +835,13 @@ abstract class Sabel_DB_Model extends Sabel_Object
   public function getStatement($type)
   {
     if ($this->statement === null) {
-      $stmt = Sabel_DB_Package::getStatement($this->connectionName);
+      $stmt = Sabel_DB::createStatement($this->connectionName);
       $stmt->table($this->tableName)->type($type);
       return $this->statement = $stmt;
     } else {
       $stmt = $this->statement;
       $stmt->clear();
-      $stmt->setDriver(Sabel_DB_Package::getDriver($this->connectionName));
+      $stmt->setDriver(Sabel_DB::createDriver($this->connectionName));
       return $stmt->type($type);
     }
   }

@@ -35,7 +35,7 @@ class Migration extends Sabel_Sakle_Task
     
     $connectionName  = $this->getConnectionName();
     $directory       = $this->defineMigrationDirectory();
-    $this->accessor  = Sabel_DB_Package::getSchema($connectionName);
+    $this->accessor  = Sabel_DB::createMetadata($connectionName);
     
     if ($arguments[2] === "export") {
       $this->export();
@@ -73,7 +73,7 @@ class Migration extends Sabel_Sakle_Task
   protected function getCurrentVersion()
   {
     $connectionName = $this->connectionName;
-    $this->stmt = Sabel_DB_Package::getStatement($connectionName);
+    $this->stmt = Sabel_DB::createStatement($connectionName);
     Sabel_DB_Migration_Manager::setStatement($this->stmt);
     Sabel_DB_Migration_Manager::setSchema($this->accessor);
     

@@ -17,7 +17,7 @@ class Test_DB_Test extends SabelTestCase
   public function testClean()
   {
     $tables = self::$tables;
-    $driver = Sabel_DB_Package::getDriver();
+    $driver = Sabel_DB::createDriver();
 
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");
@@ -261,12 +261,6 @@ class Test_DB_Test extends SabelTestCase
     $st = MODEL("SchemaTest");
     $results = $st->select(Condition::create(LIKE, "name", "name"));
     $this->assertEquals(10, count($results));
-    
-    $like = Condition::create(LIKE, "name", "name_")->escape(false)->type(LIKE_FIXED);
-    $this->assertEquals(9, count($st->select($like)));
-    
-    $like = Condition::create(LIKE, "name", "name_")->type(LIKE_FIXED);
-    $this->assertEquals(1, count($st->select($like)));
     
     $like = Condition::create(LIKE, "name", "0")->type(LIKE_ENDS_WITH);
     $this->assertEquals(1, count($st->select($like)));
@@ -526,7 +520,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testClear()
   {
-    Sabel_DB_Schema::clear();
+    Sabel_DB_Metadata::clear();
     Sabel_DB_Connection::closeAll();
   }
   

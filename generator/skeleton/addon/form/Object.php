@@ -32,7 +32,7 @@ class Form_Object extends Sabel_Object
   protected $token = null;
   
   /**
-   * @var Sabel_DB_Schema_Column[]
+   * @var Sabel_DB_Metadata_Column[]
    */
   protected $columns = array();
   

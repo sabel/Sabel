@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Oci_Schema
+ * Sabel_DB_Oci_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
+class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
 {
   private
     $comments    = array(),
@@ -58,7 +58,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
   
   protected function createColumn($row)
   {
-    $column = new Sabel_DB_Schema_Column();
+    $column = new Sabel_DB_Metadata_Column();
     $column->name = strtolower($row["column_name"]);
     $column->nullable = ($row["nullable"] !== "N");
     
@@ -87,7 +87,7 @@ class Sabel_DB_Oci_Schema extends Sabel_DB_Abstract_Schema
         $type = "datetime";
       }
       
-      Sabel_DB_Type_Setter::send($column, $type);
+      Sabel_DB_Type_Manager::create()->applyType($column, $type);
     }
     
     $this->setDefault($column, $default);

@@ -12,21 +12,10 @@ class Test_DB_Config extends SabelTestCase
   {
     return self::createSuite("Test_DB_Config");
   }
-
-  public function testConfigNotFound()
-  {
-    try {
-      Sabel_DB_Config::initialize("/tmp/sdbconfig.php");
-    } catch (Sabel_Exception_FileNotFound $notFound) {
-      return;
-    }
-    
-    $this->fail();
-  }
   
   public function testInitialize()
   {
-    Sabel_DB_Config::initialize(__FILE__);
+    Sabel_DB_Config::initialize(new TestDatabaseConfig());
     $config = Sabel_DB_Config::get("configtest");
     $this->assertEquals("localhost", $config["host"]);
     $this->assertEquals("mydb", $config["database"]);
@@ -109,15 +98,18 @@ class Test_DB_Config extends SabelTestCase
   }
 }
 
-function get_db_params($env = null)
+class TestDatabaseConfig implements Sabel_Config
 {
-  $params = array("configtest" => array(
-                    "package"  => "sabel.db.mysql",
-                    "host"     => "localhost",
-                    "database" => "mydb",
-                    "user"     => "root",
-                    "password" => "")
-                 );
-  
-  return $params;
+  public function configure()
+  {
+    $params = array("configtest" => array(
+                      "package"  => "sabel.db.mysql",
+                      "host"     => "localhost",
+                      "database" => "mydb",
+                      "user"     => "root",
+                      "password" => "")
+                   );
+    
+    return $params;
+  }
 }

@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Ibase_Schema
+ * Sabel_DB_Ibase_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
+class Sabel_DB_Ibase_Metadata extends Sabel_DB_Abstract_Metadata
 {
   private
     $sequences   = array(),
@@ -72,7 +72,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
   {
     $fieldName = trim($row['rdb$field_name']);
 
-    $column = new Sabel_DB_Schema_Column();
+    $column = new Sabel_DB_Metadata_Column();
     $column->name = strtolower($fieldName);
     $column->nullable = ($row['rdb$null_flag'] === null);
     $type = $this->types[$row['rdb$field_type']];
@@ -82,7 +82,7 @@ class Sabel_DB_Ibase_Schema extends Sabel_DB_Abstract_Schema
     } elseif ($type === "char" && $row['rdb$character_length'] === 1) {
       $column->type = Sabel_DB_Type::BOOL;
     } else {
-      Sabel_DB_Type_Setter::send($column, $type);
+      Sabel_DB_Type_Manager::create()->applyType($column, $type);
     }
 
     $seq = "{$tblName}_{$fieldName}_SEQ";

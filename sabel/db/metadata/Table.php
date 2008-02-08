@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Schema_Table
+ * Sabel_DB_Metadata_Table
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_Table extends Sabel_Object
+class Sabel_DB_Metadata_Table extends Sabel_Object
 {
   protected $tableName       = "";
   protected $columns         = array();
@@ -28,7 +28,7 @@ class Sabel_DB_Schema_Table extends Sabel_Object
     $this->setSequenceColumn();
   }
   
-  public function setColumn(Sabel_DB_Schema_Column $column)
+  public function setColumn(Sabel_DB_Metadata_Column $column)
   {
     $this->columns[$column->name] = $column;
   }
@@ -76,7 +76,7 @@ class Sabel_DB_Schema_Table extends Sabel_Object
   public function setForeignKeys($fkeys)
   {
     if ($fkeys === null) return;
-    $this->foreignKey = new Sabel_DB_Schema_ForeignKey($fkeys);
+    $this->foreignKey = new Sabel_DB_Metadata_ForeignKey($fkeys);
   }
   
   public function getForeignKey()

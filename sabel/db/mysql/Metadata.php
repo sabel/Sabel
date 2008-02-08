@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Mysql_Schema
+ * Sabel_DB_Mysql_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
+class Sabel_DB_Mysql_Metadata extends Sabel_DB_Abstract_Metadata
 {
   public function getTable($tblName)
   {
@@ -59,14 +59,14 @@ class Sabel_DB_Mysql_Schema extends Sabel_DB_Abstract_Schema
 
   protected function createColumn($row)
   {
-    $column = new Sabel_DB_Schema_Column();
+    $column = new Sabel_DB_Metadata_Column();
     $column->name = $row["column_name"];
     $column->nullable = ($row["is_nullable"] !== "NO");
 
     if ($row["column_type"] === "tinyint(1)") {
       $column->type = Sabel_DB_Type::BOOL;
     } else {
-      Sabel_DB_Type_Setter::send($column, $row["data_type"]);
+      Sabel_DB_Type_Manager::create()->applyType($column, $row["data_type"]);
     }
 
     $this->setDefault($column, $row["column_default"]);

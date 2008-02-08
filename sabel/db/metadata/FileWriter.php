@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Schema_FileWriter
+ * Sabel_DB_Metadata_FileWriter
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Schema_FileWriter extends Sabel_Object
+class Sabel_DB_Metadata_FileWriter extends Sabel_Object
 {
   private $schemaDir = "";
   
@@ -22,7 +22,7 @@ class Sabel_DB_Schema_FileWriter extends Sabel_Object
     }
   }
   
-  public function write(Sabel_DB_Schema_Table $schema)
+  public function write(Sabel_DB_Metadata_Table $schema)
   {
     $mdlName   = convert_to_modelname($schema->getTableName());
     $className = "Schema_" . $mdlName;

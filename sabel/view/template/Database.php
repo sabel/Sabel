@@ -53,7 +53,7 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   public function create($contents = "")
   {
     $path = $this->_getPath();
-    $stmt = Sabel_DB_Package::getStatement($this->connectionName);
+    $stmt = Sabel_DB::createStatement($this->connectionName);
     
     $tblName = $stmt->quoteIdentifier($this->tableName);
     $nCol    = $stmt->quoteIdentifier("name");
@@ -71,7 +71,7 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   public function delete()
   {
     $path = $this->_getPath();
-    $stmt = Sabel_DB_Package::getStatement($this->connectionName);
+    $stmt = Sabel_DB::createStatement($this->connectionName);
     
     $tblName = $stmt->quoteIdentifier($this->tableName);
     $nCol    = $stmt->quoteIdentifier("name");
@@ -97,7 +97,7 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   private function _getContents()
   {
     $path = $this->_getPath();
-    $stmt = Sabel_DB_Package::getStatement($this->connectionName);
+    $stmt = Sabel_DB::createStatement($this->connectionName);
     
     $tblName = $stmt->quoteIdentifier($this->tableName);
     $nCol    = $stmt->quoteIdentifier("name");

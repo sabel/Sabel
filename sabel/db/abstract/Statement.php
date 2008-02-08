@@ -78,7 +78,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($table)) {
       $this->table    = $table;
       $connectionName = $this->driver->getConnectionName();
-      $this->schema   = Sabel_DB_Schema::getTableInfo($table, $connectionName);
+      $this->schema   = Sabel_DB_Metadata::getTableInfo($table, $connectionName);
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }

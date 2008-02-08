@@ -32,13 +32,13 @@ class Schema extends Sabel_Sakle_Task
     
     foreach (Sabel_DB_Config::get() as $connectionName => $params) {
       Sabel_DB_Config::add($connectionName, $params);
-      $schema = Sabel_DB_Package::getSchema($connectionName);
+      $schema = Sabel_DB::createMetadata($connectionName);
       
       foreach ($schema->getTableList() as $tblName) {
         $tblSchema = $schema->getTable($tblName);
         
         if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
-          $writer = new Sabel_DB_Schema_FileWriter(SCHEMA_DIR_PATH);
+          $writer = new Sabel_DB_Metadata_FileWriter(SCHEMA_DIR_PATH);
           $writer->write($tblSchema);
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }

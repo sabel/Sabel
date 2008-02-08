@@ -33,7 +33,6 @@ define("DIRECT",        Condition::DIRECT);
 define("LIKE_BEGINS_WITH", Sabel_DB_Condition_Like::BEGINS_WITH);
 define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
 define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
-define("LIKE_FIXED",       Sabel_DB_Condition_Like::FIXED);
 
 /**
  * load tests of sabel.db.*

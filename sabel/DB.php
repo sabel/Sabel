@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Package Manager for sabel.db
+ * Sabel_DB
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,14 +9,14 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Package
+class Sabel_DB
 {
   /**
    * @param string $connectionName
    *
    * @return Sabel_DB_Abstract_Driver
    */
-  public static function getDriver($connectionName = "default")
+  public static function createDriver($connectionName = "default")
   {
     $className = self::classPrefix($connectionName) . "Driver";
     $driver = new $className($connectionName);
@@ -42,11 +42,11 @@ class Sabel_DB_Package
    *
    * @return Sabel_DB_Abstract_Statement
    */
-  public static function getStatement($connectionName = "default")
+  public static function createStatement($connectionName = "default")
   {
     $className = self::classPrefix($connectionName) . "Statement";
     $statement = new $className();
-    $statement->setDriver(self::getDriver($connectionName));
+    $statement->setDriver(self::createDriver($connectionName));
     
     return $statement;
   }
@@ -54,13 +54,13 @@ class Sabel_DB_Package
   /**
    * @param string $connectionName
    *
-   * @return Sabel_DB_Abstract_Schema
+   * @return Sabel_DB_Abstract_Metadata
    */
-  public static function getSchema($connectionName = "default")
+  public static function createMetadata($connectionName = "default")
   {
-    $className  = self::classPrefix($connectionName) . "Schema";
+    $className  = self::classPrefix($connectionName) . "Metadata";
     $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
-    return new $className(self::getDriver($connectionName), $schemaName);
+    return new $className(self::createDriver($connectionName), $schemaName);
   }
   
   /**
