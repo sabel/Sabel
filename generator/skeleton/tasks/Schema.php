@@ -17,7 +17,10 @@ class Schema extends Sabel_Sakle_Task
     
     clearstatcache();
     
-    $environment  = environment(strtolower($this->arguments[0]));
+    $environment = environment(strtolower($this->arguments[0]));
+    define("ENVIRONMENT", $environment);
+    Sabel_DB_Config::initialize(new Config_Database());
+    
     $inputSchemas = $this->getWriteSchemas();
     $schemaWrite  = !empty($inputSchemas);
     
@@ -27,10 +30,7 @@ class Schema extends Sabel_Sakle_Task
       $schemaAll = false;
     }
     
-    define("ENVIRONMENT", $environment);
-    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
-    
-    foreach (get_db_params() as $connectionName => $params) {
+    foreach (Sabel_DB_Config::get() as $connectionName => $params) {
       Sabel_DB_Config::add($connectionName, $params);
       $schema = Sabel_DB_Package::getSchema($connectionName);
       

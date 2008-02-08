@@ -14,19 +14,15 @@ class Sabel_DB_Config
   private static $initialized = false;
   private static $configs = array();
   
-  public static function initialize($configPath)
+  public static function initialize(Sabel_Config $config)
   {
     if (self::$initialized) return;
     
-    if (is_file($configPath)) {
-      Sabel::fileUsing($configPath, true);
-      foreach (get_db_params() as $connectionName => $params) {
-        self::add($connectionName, $params);
-      }
-      self::$initialized = true;
-    } else {
-      throw new Sabel_Exception_FileNotFound($configPath);
+    foreach ($config->configure() as $connectionName => $params) {
+      self::$configs[$connectionName] = $params;
     }
+    
+    self::$initialized = true;
   }
   
   public static function add($connectionName, $params)

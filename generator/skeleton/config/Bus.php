@@ -14,8 +14,9 @@ class Config_Bus extends Sabel_Bus_Config
                                 "response"    => "Processor_Response",
                                 "view"        => "Processor_View");
   
-  protected $configs = array("map"   => "Config_Map",
-                             "addon" => "Config_Addon");
+  protected $configs = array("map"      => "Config_Map",
+                             "addon"    => "Config_Addon",
+                             "database" => "Config_Database");
   
   public function getProcessors()
   {

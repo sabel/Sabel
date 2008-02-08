@@ -51,7 +51,7 @@ class Test_DB_Tests
   public static function suite()
   {
     $suite = new PHPUnit_Framework_TestSuite();
-    /*
+    
     if (extension_loaded("mysql")) {
       $suite->addTest(Test_DB_Mysql::suite());
     }
@@ -87,7 +87,7 @@ class Test_DB_Tests
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
     }
-    */
+    
     $suite->addTest(Test_DB_SchemaColumn::suite());
     $suite->addTest(Test_DB_Validate::suite());
     $suite->addTest(Test_DB_Config::suite());
