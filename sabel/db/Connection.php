@@ -19,7 +19,7 @@ class Sabel_DB_Connection
   /**
    * @param Sabel_DB_Abstract_Driver $driver
    *
-   * @throws Sabel_DB_Connection_Exception
+   * @throws Sabel_DB_Exception_Connection
    * @return resource
    */
   public static function connect(Sabel_DB_Abstract_Driver $driver)
@@ -32,7 +32,7 @@ class Sabel_DB_Connection
       error_reporting($currentLevel);
       
       if (is_string($result)) {
-        throw new Sabel_DB_Connection_Exception($result);
+        throw new Sabel_DB_Exception_Connection($result);
       } else {
         self::$connections[$connectionName] = $result;
       }

@@ -326,7 +326,7 @@ class MigrationExport
     $fileName = $this->fileNum . "_" . convert_to_modelname($tblName) . "_create" . PHP_SUFFIX;
     $filePath = $this->path . DS . $fileName;
     
-    Sabel_Command::success("$fileName");
+    Sabel_Console::success("$fileName");
     
     $writer = new Sabel_DB_Migration_Writer($filePath);
     $writer->writeTable($tblSchema);

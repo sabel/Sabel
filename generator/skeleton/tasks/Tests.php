@@ -31,8 +31,8 @@ abstract class Tests extends Sabel_Sakle_Task
   
   protected function getEnvironment()
   {
-    if (Sabel_Command::hasOption("e", $this->arguments)) {
-      $env = Sabel_Command::getOption("e", $this->arguments, true);
+    if (Sabel_Console::hasOption("e", $this->arguments)) {
+      $env = Sabel_Console::getOption("e", $this->arguments, true);
       return environment($env);
     } else {
       return TEST;

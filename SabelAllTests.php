@@ -48,7 +48,7 @@ require_once ("Test/SabelTestSuite.php");
 require_once ("Test/Application.php");
 require_once ("Test/Object.php");
 require_once ("Test/Environment.php");
-require_once ("Test/Command.php");
+require_once ("Test/Console.php");
 require_once ("Test/Annotation.php");
 require_once ("Test/Aspect.php");
 require_once ("Test/Container.php");
@@ -88,7 +88,7 @@ class SabelAllTests
     
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Environment::suite());
-    $suite->addTest(Test_Command::suite());
+    $suite->addTest(Test_Console::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Request_Tests::suite());

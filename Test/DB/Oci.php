@@ -26,7 +26,7 @@ class Test_DB_Oci extends Test_DB_Test
     
     try {
       $resource = Sabel_DB_Connection::connect($driver);
-    } catch (Sabel_DB_Connection_Exception $e) {
+    } catch (Sabel_DB_Exception_Connection $e) {
       return;
     }
     

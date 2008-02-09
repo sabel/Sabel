@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
@@ -49,7 +49,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     if (ibase_commit($this->connection)) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Driver_Exception("ibase driver commit failed.");
+      throw new Sabel_DB_Exception_Driver("ibase driver commit failed.");
     }
   }
   
@@ -58,7 +58,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
     if (ibase_rollback($this->connection)) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Driver_Exception("ibase driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver("ibase driver rollback failed.");
     }
   }
   
@@ -121,6 +121,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = ibase_errmsg();
     $message = "ibase driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Driver_Exception($message);
+    throw new Sabel_DB_Exception_Driver($message);
   }
 }

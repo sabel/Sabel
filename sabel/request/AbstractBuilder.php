@@ -37,9 +37,9 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
     $host = Sabel_Environment::get("SERVER_NAME");
     
     if ($uri === null) {
-      $url = "http://{$host}/" . Sabel_Environment::get("REQUEST_URI");
+      $url = "http://{$host}/" . ltrim(Sabel_Environment::get("REQUEST_URI"), "/");
     } else {
-      $url = "http://{$host}/" . $uri;
+      $url = "http://{$host}/" . ltrim($uri, "/");
     }
     
     $parsedUrl = parse_url($url);

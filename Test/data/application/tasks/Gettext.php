@@ -12,16 +12,20 @@
  */
 class Gettext extends Sabel_Sakle_Task
 {
-  private $files  = array();
-  private $domain = "messages";
+  private $files    = array();
+  private $fileName = "";
   private $defaultLocale = "en";
   private $locales = array();
   
-  public function run($arguments)
+  public function initialize()
+  {
+    $this->fileName = "messages" . PHP_SUFFIX;
+  }
+  
+  public function run()
   {
     $dirs   = array();
     $dirs[] = MODULES_DIR_PATH;
-    $dirs[] = CONFIG_DIR_PATH;
     $dirs[] = RUN_BASE . DS . LIB_DIR_NAME;
     $dirs[] = RUN_BASE . DS . "public";
     
@@ -29,7 +33,7 @@ class Gettext extends Sabel_Sakle_Task
       $this->addFiles($dir);
     }
     
-    $this->createOptions($arguments);
+    $this->createOptions();
     $this->createMessageFiles();
   }
 
@@ -62,13 +66,28 @@ class Gettext extends Sabel_Sakle_Task
     $messages = array();
     foreach ($this->files as $file) {
       $contents = file_get_contents($file);
-      preg_match_all("/_\((.*)\)/", $contents, $matches);
+      $regex = '/_\(("(.+[^\\\\])"|\'(.+[^\\\\])\')\)/U';
+      preg_match_all($regex, $contents, $matches);
       if (!empty($matches[1])) {
-        $messages = array_merge($messages, $this->trims($matches[1]));
+        $temp = array();
+        
+        if (!empty($matches[2])) {
+          $temp = $matches[2];
+        }
+        
+        if (!empty($matches[3])) {
+          foreach ($matches[3] as $k => $v) {
+            $v = str_replace("\\'", "'", $v);
+            if ($v !== "") $temp[$k] = $v;
+          }
+        }
+        
+        $messages = array_merge($messages, $temp);
       }
     }
     
-    $filePath = DS . "LC_MESSAGES" . DS . $this->domain . PHP_SUFFIX;
+    $messages = array_unique($messages);
+    $filePath = DS . $this->fileName;
     
     foreach ($locales as $locale) {
       if (!empty($this->locales) && !in_array($locale, $this->locales)) continue;
@@ -121,12 +140,14 @@ class Gettext extends Sabel_Sakle_Task
     file_put_contents($filePath, implode("", $code));
   }
   
-  private function createOptions($arguments)
+  private function createOptions()
   {
-    if (in_array("-d", $arguments)) {
-      $index = array_search("-d", $arguments) + 1;
+    $arguments = $this->arguments;
+    
+    if (in_array("-f", $arguments)) {
+      $index = array_search("-f", $arguments) + 1;
       if (isset($arguments[$index])) {
-        $this->domain = $arguments[$index];
+        $this->fileName = $arguments[$index];
       }
     }
     
@@ -149,14 +170,5 @@ class Gettext extends Sabel_Sakle_Task
         }
       }
     }
-  }
-  
-  private function trims($messages)
-  {
-    foreach ($messages as &$message) {
-      $message = substr($message, 1, -1);
-    }
-    
-    return $messages;
   }
 }

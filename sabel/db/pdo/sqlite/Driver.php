@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Pdo_Sqlite_Driver extends Sabel_DB_Pdo_Driver
@@ -32,7 +32,7 @@ class Sabel_DB_Pdo_Sqlite_Driver extends Sabel_DB_Pdo_Driver
       return $this->connection;
     } catch (PDOException $e) {
       $message = $e->getMessage();
-      throw new Sabel_DB_Driver_Exception("pdo driver begin failed. {$message}");
+      throw new Sabel_DB_Exception_Driver("pdo driver begin failed. {$message}");
     }
   }
   

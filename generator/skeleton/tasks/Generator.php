@@ -98,11 +98,10 @@ class Generator extends Sabel_Sakle_Task
     }
     
     $actions = array();
-    
-    $cli = new Sabel_Command();
+    $console = new Sabel_Console();
     
     while (true) {
-      $input = $cli->read("action");
+      $input = $console->read("action");
       if ($input === false) break;
       if (!in_array($input, $actions, true)) {
         $actions[] = $input;
@@ -142,8 +141,8 @@ class Generator extends Sabel_Sakle_Task
   
   private function getEnvironment()
   {
-    if (Sabel_Command::hasOption("e", $this->arguments)) {
-      return environment(Sabel_Command::getOption("e", $this->arguments));
+    if (Sabel_Console::hasOption("e", $this->arguments)) {
+      return environment(Sabel_Console::getOption("e", $this->arguments));
     } else {
       return DEVELOPMENT;
     }

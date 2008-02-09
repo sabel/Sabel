@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Command
+ * Sabel_Console
  *
  * @category   Sakle
  * @package    org.sabel.sakle
@@ -9,7 +9,7 @@
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Command
+class Sabel_Console
 {
   const MSG_INFO = 0x01;
   const MSG_WARN = 0x02;

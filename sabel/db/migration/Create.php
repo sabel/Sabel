@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Migration_Create
@@ -81,7 +81,7 @@ class Sabel_DB_Migration_Create
     } elseif (is_array($columnNames)) {
       $this->pkeys = $columnNames;
     } else {
-      Sabel_Command::error("primary() argument must be a string or an array.");
+      Sabel_Console::error("primary() argument must be a string or an array.");
       exit;
     }
   }
@@ -93,7 +93,7 @@ class Sabel_DB_Migration_Create
     } elseif (is_array($columnNames)) {
       $this->uniques[] = $columnNames;
     } else {
-      Sabel_Command::error("unique() argument should be a string or an array.");
+      Sabel_Console::error("unique() argument should be a string or an array.");
       exit;
     }
   }

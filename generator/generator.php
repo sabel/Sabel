@@ -41,12 +41,12 @@ class SabelScaffold
       
       if (is_dir($fullPath)) {
         if (isset($this->ignore[$targetItem])) {
-          Sabel_Command::message("ignore '{$targetItem}'.");
+          Sabel_Console::message("ignore '{$targetItem}'.");
         } else {
           if (is_dir($targetPath)) {
-            Sabel_Command::warning("'{$targetItem}' already exists.");
+            Sabel_Console::warning("'{$targetItem}' already exists.");
           } else {
-            Sabel_Command::success("create $targetItem");
+            Sabel_Console::success("create $targetItem");
             mkdir ($targetPath);
           }
           
@@ -54,16 +54,16 @@ class SabelScaffold
         }
       } else {
         if (isset($this->ignore[$targetItem])) {
-          Sabel_Command::message("ignore '{$targetItem}'.");
+          Sabel_Console::message("ignore '{$targetItem}'.");
         } elseif (is_file($targetPath) && !isset($this->overwrite[$targetItem])) {
-          Sabel_Command::warning("'{$targetItem}' already exists.");
+          Sabel_Console::warning("'{$targetItem}' already exists.");
         } else {
           if (isset($this->overwrite[$targetItem])) {
-            Sabel_Command::message("overwrite '{$targetItem}'");
+            Sabel_Console::message("overwrite '{$targetItem}'");
             unlink($targetPath);
           }
           
-          Sabel_Command::success("create $targetItem");
+          Sabel_Console::success("create $targetItem");
           copy($fullPath, $targetPath);
         }
       }

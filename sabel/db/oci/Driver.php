@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
@@ -54,7 +54,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_commit($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Driver_Exception("oci driver commit failed.");
+      throw new Sabel_DB_Exception_Driver("oci driver commit failed.");
     }
   }
   
@@ -63,7 +63,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_rollback($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Driver_Exception("oci driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver("oci driver rollback failed.");
     }
   }
   
@@ -138,6 +138,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = oci_error($ociStmt);
     $message = "oci driver execute failed: " . $error["message"];
-    throw new Sabel_DB_Driver_Exception($message . " SQL:" . $error["sqltext"]);
+    throw new Sabel_DB_Exception_Driver($message . " SQL:" . $error["sqltext"]);
   }
 }

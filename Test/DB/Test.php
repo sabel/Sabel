@@ -18,7 +18,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $tables = self::$tables;
     $driver = Sabel_DB::createDriver();
-
+    
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");
     }
@@ -509,7 +509,7 @@ class Test_DB_Test extends SabelTestCase
 
     try {
       @$st->selectByQuery("a b c d e f g h i j k l m n");
-    } catch (Sabel_DB_Driver_Exception $e) {
+    } catch (Sabel_DB_Exception_Driver $e) {
       return;
     }
     

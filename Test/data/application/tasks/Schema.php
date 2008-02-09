@@ -46,7 +46,7 @@ class Schema extends Sabel_Sakle_Task
         TableList_Writer::add($connectionName, $tblName);
       }
       
-      if (Sabel_Command::hasOption("l", $this->arguments)) {
+      if (Sabel_Console::hasOption("l", $this->arguments)) {
         TableList_Writer::write($connectionName);
       }
     }
@@ -57,7 +57,7 @@ class Schema extends Sabel_Sakle_Task
     $schemas = array();
     $input = $this->arguments;
     
-    if (Sabel_Command::hasOption("s", $this->arguments)) {
+    if (Sabel_Console::hasOption("s", $this->arguments)) {
       $key = array_search("-s", $input) + 1;
       for ($i = $key, $c = count($input); $i < $c; $i++) {
         if ($val === "-l") break;
@@ -110,7 +110,7 @@ class TableList_Writer
     $target    = SCHEMA_DIR_PATH . DS . "{$fileName}.php";
     $className = "Schema_" . $fileName;
     
-    Sabel_Command::success("generate table list of $cn\n");
+    Sabel_Console::success("generate table list of $cn\n");
     
     $fp = fopen($target, "w");
     

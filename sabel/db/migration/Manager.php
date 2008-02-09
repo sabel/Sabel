@@ -18,8 +18,8 @@ define("_NULL",     "SDB_NULL_VALUE");
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Migration_Manager
@@ -99,7 +99,7 @@ class Sabel_DB_Migration_Manager
     if ($dirPath === null) $dirPath = self::$directory;
     
     if (!is_dir($dirPath)) {
-      Sabel_Command::error("no such dirctory. '{$dirPath}'");
+      Sabel_Console::error("no such dirctory. '{$dirPath}'");
       exit;
     }
     
@@ -109,7 +109,7 @@ class Sabel_DB_Migration_Manager
       if (!is_numeric($num)) continue;
       
       if (isset($files[$num])) {
-        Sabel_Command::error("the same version({$num}) files exists.");
+        Sabel_Console::error("the same version({$num}) files exists.");
         exit;
       } else {
         $files[$num] = $file;

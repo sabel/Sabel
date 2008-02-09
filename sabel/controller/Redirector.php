@@ -24,30 +24,53 @@ class Sabel_Controller_Redirector
    */
   protected $parameters = array();
   
+  /**
+   * @return boolean
+   */
   public function isRedirected()
   {
     return $this->redirected;
   }
   
-  public function to($destinationUri, $parameters = array())
+  /**
+   * HTTP Redirect to another location with uri.
+   *
+   * @param string $uriParameter
+   * @param array  $parameters
+   *
+   * @return void
+   */
+  public function to($uriParameter, $parameters = array())
   {
     $this->redirected = true;
     $this->parameters = $parameters;
     
-    return $this->redirectTo($destinationUri);
+    $candidate = Sabel_Context::getContext()->getCandidate();
+    $this->_redirect($candidate->uri($uriParameter));
   }
   
+  /**
+   * @param string $url
+   *
+   * @return void
+   */
   public function url($url)
   {
     $this->url = $url;
     $this->redirected = true;
   }
   
+  /**
+   * @return string
+   */
   public function getUrl()
   {
     return $this->url;
   }
   
+  /**
+   * @return boolean
+   */
   public function hasParameters()
   {
     return (count($this->parameters) > 0);
@@ -56,7 +79,7 @@ class Sabel_Controller_Redirector
   /**
    * HTTP Redirect to another location.
    *
-   * @param string $to /Module/Controller/Method
+   * @param string $to
    *
    * @return void
    */
@@ -69,16 +92,5 @@ class Sabel_Controller_Redirector
     } else {
       $this->url = $to;
     }
-  }
-  
-  /**
-   * HTTP Redirect to another location with uri.
-   *
-   * @param string $destination
-   */
-  protected function redirectTo($uriParameter)
-  {
-    $candidate = Sabel_Context::getContext()->getCandidate();
-    return $this->_redirect($candidate->uri($uriParameter));
   }
 }

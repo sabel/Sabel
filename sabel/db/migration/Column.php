@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Migration_Column
@@ -38,7 +38,7 @@ class Sabel_DB_Migration_Column
     $const = @constant($type);
     
     if ($const === null) {
-      Sabel_Command::error("datatype '{$type}' is not supported.");
+      Sabel_Console::error("datatype '{$type}' is not supported.");
       exit;
     } else {
       $this->column->type = $const;
@@ -68,7 +68,7 @@ class Sabel_DB_Migration_Column
   public function value($value)
   {
     if ($this->column->isBool() && !is_bool($value)) {
-      Sabel_Command::error("default value for BOOL column should be a boolean.");
+      Sabel_Console::error("default value for BOOL column should be a boolean.");
       exit;
     } else {
       $this->column->default = $value;
@@ -82,7 +82,7 @@ class Sabel_DB_Migration_Column
       $this->column->max = $length;
       return $this;
     } else {
-      Sabel_Command::error("length() for _STRING column.");
+      Sabel_Console::error("length() for _STRING column.");
       exit;
     }
   }
@@ -92,7 +92,7 @@ class Sabel_DB_Migration_Column
     if (is_bool($bool)) {
       $this->column->$key = $bool;
     } else {
-      Sabel_Command::error("argument for {$key}() should be a boolean.");
+      Sabel_Console::error("argument for {$key}() should be a boolean.");
       exit;
     }
   }

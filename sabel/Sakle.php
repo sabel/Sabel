@@ -60,10 +60,10 @@ class Sakle
           $ins->finalize();
         }
       } catch (Exception $e) {
-        Sabel_Command::error($e->getMessage());
+        Sabel_Console::error($e->getMessage());
       }
     } else {
-      Sabel_Command::error("such a task doesn't exist.");
+      Sabel_Console::error("such a task doesn't exist.");
     }
   }
 }

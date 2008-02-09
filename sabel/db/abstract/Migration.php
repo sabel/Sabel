@@ -6,8 +6,8 @@
  * @abstract
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
@@ -64,7 +64,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (in_array($tblName, $tables)) {
-        Sabel_Command::warning("table '{$tblName}' already exists. (SKIP)");
+        Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
       } else {
         $this->createTable($this->filePath);
       }
@@ -73,7 +73,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
         $tblName = $this->quoteIdentifier($tblName);
         $this->executeQuery("DROP TABLE $tblName");
       } else {
-        Sabel_Command::warning("unknown table '{$tblName}'. (SKIP)");
+        Sabel_Console::warning("unknown table '{$tblName}'. (SKIP)");
       }
     }
   }
@@ -117,7 +117,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     
     foreach ($columns as $column) {
       if (in_array($column->name, $names)) {
-        Sabel_Command::warning("duplicate column '{$column->name}'. (SKIP)");
+        Sabel_Console::warning("duplicate column '{$column->name}'. (SKIP)");
       } else {
         $line = $this->createColumnAttributes($column);
         $this->executeQuery("ALTER TABLE $quotedTblName ADD $line");
@@ -148,7 +148,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
           $colName = $this->quoteIdentifier($column);
           $this->executeQuery("ALTER TABLE $quotedTblName DROP COLUMN $colName");
         } else {
-          Sabel_Command::warning("column '{$column}' does not exist. (SKIP)");
+          Sabel_Console::warning("column '{$column}' does not exist. (SKIP)");
         }
       }
     } else {

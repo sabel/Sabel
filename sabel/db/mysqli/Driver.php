@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
@@ -61,7 +61,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (mysqli_commit($this->connection)) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Driver_Exception("mysqli driver commit failed.");
+      throw new Sabel_DB_Exception_Driver("mysqli driver commit failed.");
     }
   }
   
@@ -70,7 +70,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (mysqli_rollback($this->connection)) {
       $this->autoCommit(true);
     } else {
-      throw new Sabel_DB_Driver_Exception("mysqli driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver("mysqli driver rollback failed.");
     }
   }
   
@@ -104,6 +104,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = mysqli_error($this->connection);
     $message = "mysqli driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Driver_Exception($message);
+    throw new Sabel_DB_Exception_Driver($message);
   }
 }

@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
@@ -51,21 +51,21 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
     if (mysql_query("START TRANSACTION", $this->connection)) {
       return $this->connection;
     } else {
-      throw new Sabel_DB_Driver_Exception("mysql driver begin failed.");
+      throw new Sabel_DB_Exception_Driver("mysql driver begin failed.");
     }
   }
   
   public function commit()
   {
     if (!mysql_query("COMMIT", $this->connection)) {
-      throw new Sabel_DB_Driver_Exception("mysql driver commit failed.");
+      throw new Sabel_DB_Exception_Driver("mysql driver commit failed.");
     }
   }
   
   public function rollback()
   {
     if (!mysql_query("ROLLBACK", $this->connection)) {
-      throw new Sabel_DB_Driver_Exception("mysql driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver("mysql driver rollback failed.");
     }
   }
   
@@ -99,6 +99,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
   {
     $error   = mysql_error($this->connection);
     $message = "mysql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Driver_Exception($message);
+    throw new Sabel_DB_Exception_Driver($message);
   }
 }

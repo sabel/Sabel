@@ -28,11 +28,6 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     $this->responses[$key] = $value;
   }
   
-  public function getResponses()
-  {
-    return $this->responses;
-  }
-  
   public function getResponse($key)
   {
     if (isset($this->responses[$key])) {
@@ -45,6 +40,11 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   public function setResponses(array $responses)
   {
     $this->responses = $responses;
+  }
+  
+  public function getResponses()
+  {
+    return $this->responses;
   }
   
   public function setHeader($key, $value)

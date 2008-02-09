@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
@@ -30,7 +30,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     
     if ($this->applyMode === "upgrade") {
       if (in_array($tblName, $tables)) {
-        Sabel_Command::warning("table '{$tblName}' already exists. (SKIP)");
+        Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
       } else {
         $this->createTable($this->filePath);
       }
@@ -39,7 +39,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
         $this->dropSequence($schema->getTable($tblName)->getSequenceColumn());
         $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($tblName));
       } else {
-        Sabel_Command::warning("unknown table '{$tblName}'. (SKIP)");
+        Sabel_Console::warning("unknown table '{$tblName}'. (SKIP)");
       }
     }
   }
@@ -167,7 +167,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     $line[] = $column->name;
     
     if ($current->isText() && $column->type !== null && !$column->isText()) {
-      Sabel_Command::warning("cannot modify lob column '{$current->name}'. (SKIP)");
+      Sabel_Console::warning("cannot modify lob column '{$current->name}'. (SKIP)");
     } elseif (!$current->isText()) {
       $col  = ($column->type === null) ? $current : $column;
       $type = $this->getTypeString($col, false);

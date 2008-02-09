@@ -5,8 +5,8 @@
  *
  * @category   DB
  * @package    org.sabel.db
- * @author     Ebine Yutaka <ebine.yutaka@gmail.com>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@gmail.com>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
@@ -46,21 +46,21 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     if (pg_query($this->connection, "START TRANSACTION")) {
       return $this->connection;
     } else {
-      throw new Sabel_DB_Driver_Exception("pgsql driver begin failed.");
+      throw new Sabel_DB_Exception_Driver("pgsql driver begin failed.");
     }
   }
   
   public function commit()
   {
     if (!pg_query($this->connection, "COMMIT")) {
-      throw new Sabel_DB_Driver_Exception("pgsql driver commit failed.");
+      throw new Sabel_DB_Exception_Driver("pgsql driver commit failed.");
     }
   }
   
   public function rollback()
   {
     if (!pg_query($this->connection, "ROLLBACK")) {
-      throw new Sabel_DB_Driver_Exception("pgsql driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver("pgsql driver rollback failed.");
     }
   }
   
@@ -95,6 +95,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   {
     $error = pg_last_error($this->connection);
     $message = "pgsql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Driver_Exception($message);
+    throw new Sabel_DB_Exception_Driver($message);
   }
 }

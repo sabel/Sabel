@@ -64,7 +64,7 @@ class Test_View_TemplateDb extends Test_View_Template
       $params = array("package"  => "sabel.db.pdo.sqlite",
                       "database" => SABEL_BASE . "/Test/data/sdb_test.sq3");
     } else {
-      Sabel_Command::message("skipped 'TemplateDb'.");
+      Sabel_Console::message("skipped 'TemplateDb'.");
       return false;
     }
     

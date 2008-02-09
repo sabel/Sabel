@@ -23,14 +23,14 @@ class Sabel_Response_Header_Http
       l("redirect: " . var_export($response->getLocation(), 1), LOG_DEBUG);
     }
     
-    if ($response->isForbidden()) {
-      header("HTTP/1.0 403 Forbidden");
+    if ($response->isRedirected()) {
+      header("Location: " . $response->getLocation());
     } elseif ($response->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
+    } elseif ($response->isForbidden()) {
+      header("HTTP/1.0 403 Forbidden");
     } elseif ($response->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
-    } elseif ($response->isRedirected()) {
-      header("Location: " . $response->getLocation());
     } elseif ($response->isNotModified()) {
       header("HTTP/1.0 304 Not Modified");
       exit;
