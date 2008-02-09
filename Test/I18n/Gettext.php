@@ -47,3 +47,8 @@ class Test_I18n_Gettext extends SabelTestCase
     $this->assertEquals(mb_convert_encoding("じゅうしょ", "EUC-JP", "UTF-8"), _("address"));
   }
 }
+
+function _($msgid)
+{
+  return Sabel_I18n_Sabel_Gettext::_($msgid);
+}

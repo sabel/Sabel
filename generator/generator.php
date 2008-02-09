@@ -115,7 +115,7 @@ if (!defined("TEST_CASE")) {
   if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
   $sabel = dirname(__FILE__) . DS . ".." . DS . "sabel";
   require ($sabel . DS . "Object.php");
-  require ($sabel . DS . "Command.php");
+  require ($sabel . DS . "Console.php");
   require ($sabel . DS . "Environment.php");
   
   $scaffold = new SabelScaffold($_SERVER["argv"], dirname(__FILE__) . DS . "skeleton");
