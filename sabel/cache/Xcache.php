@@ -11,19 +11,12 @@
   */
 class Sabel_Cache_Xcache implements Sabel_Cache_Interface
 {
-  private $signature = "";
   private static $instance = null;
   
-  public function __construct()
+  private function __construct()
   {
     if (!extension_loaded("xcache")) {
-      throw new Sabel_Exception_Runtime("xcache extension not loaded");
-    }
-    
-    if (isset($_SERVER["SERVER_NAME"])) {
-      $this->signature = $_SERVER["SERVER_NAME"];
-    } else {
-      $this->signature = PHP_VERSION;
+      throw new Sabel_Exception_Runtime("xcache extension not loaded.");
     }
   }
   
@@ -38,21 +31,21 @@ class Sabel_Cache_Xcache implements Sabel_Cache_Interface
   
   public function read($key)
   {
-    return xcache_get($this->signature . $key);
+    return xcache_get($key);
   }
   
-  public function write($key, $value, $timeout = 600, $comp = false)
+  public function write($key, $value, $timeout = 0)
   {
-    xcache_set($this->signature . $key, $value);
+    xcache_set($key, $value);
   }
   
   public function delete($key)
   {
-    xcache_delete($this->signature . $key);
+    xcache_delete($key);
   }
   
   public function isReadable($key)
   {
-    return xcache_isset($this->signature . $key);
+    return xcache_isset($key);
   }
 }

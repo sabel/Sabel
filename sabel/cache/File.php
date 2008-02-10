@@ -13,6 +13,11 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
 {
   private static $instance = null;
   
+  private function __construct()
+  {
+    
+  }
+  
   public static function create()
   {
     if (self::$instance === null) {
@@ -27,15 +32,29 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
     $path = $this->getPath($key);
     
     if (is_readable($path)) {
-      return unserialize(file_get_contents($path));
+      $data = unserialize(file_get_contents($path));
+      
+      if ($data["timeout"] !== 0 && time() >= $data["timeout"]) {
+        $this->delete($key);
+      } else {
+        return $data["value"];
+      }
     } else {
       return null;
     }
   }
   
-  public function write($key, $value, $timeout = 600, $comp = false)
+  public function write($key, $value, $timeout = 0)
   {
-    file_put_contents($this->getPath($key), serialize($value));
+    $data = array("value" => $value);
+    
+    if ($timeout !== 0) {
+      $timeout = time() + $timeout;
+    }
+    
+    $data["timeout"] = $timeout;
+    
+    file_put_contents($this->getPath($key), serialize($data));
   }
   
   public function delete($key)

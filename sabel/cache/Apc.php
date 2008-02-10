@@ -11,19 +11,12 @@
  */
 class Sabel_Cache_Apc implements Sabel_Cache_Interface
 {
-  private $signature = "";
   private static $instance = null;
   
-  public function __construct()
+  private function __construct()
   {
     if (!extension_loaded("apc")) {
-      throw new Sabel_Exception_Runtime("apc extension not loaded");
-    }
-    
-    if (isset($_SERVER["SERVER_NAME"])) {
-      $this->signature = $_SERVER["SERVER_NAME"];
-    } else {
-      $this->signature = PHP_VERSION;
+      throw new Sabel_Exception_Runtime("apc extension not loaded.");
     }
   }
   
@@ -38,23 +31,22 @@ class Sabel_Cache_Apc implements Sabel_Cache_Interface
   
   public function read($key)
   {
-    $result = apc_fetch($this->signature . $key);
+    $result = apc_fetch($key);
     return ($result === false) ? null : $result;
   }
   
-  public function write($key, $value, $timeout = 600, $comp = false)
+  public function write($key, $value, $timeout = 0)
   {
-    apc_store($this->signature . $key, $value, $timeout);
+    apc_store($key, $value, $timeout);
   }
   
   public function delete($key)
   {
-    apc_delete($this->signature . $key);
+    apc_delete($key);
   }
   
   public function isReadable($key)
   {
-    $result = $this->read($this->signature . $key);
-    return ($result !== false);
+    return ($this->read($key) !== null);
   }
 }

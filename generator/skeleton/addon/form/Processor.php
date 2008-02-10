@@ -12,13 +12,12 @@
 class Form_Processor extends Sabel_Bus_Processor
 {
   const SESSION_KEY = "sbl_forms";
-  const SES_TIMEOUT = 10;
+  const SES_TIMEOUT = 300;
   
   private
     $forms   = array(),
-    $token   = null,
-    $unityId = null;
-    
+    $unityId = "";
+  
   public function execute($bus)
   {
     $this->extract("request", "storage", "controller");
@@ -33,25 +32,26 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $annot = $controller->getReflection()->getMethodAnnotation($action, "unity");
     if (!isset($annot[0][0])) return;
-    $this->unityId = $annot[0][0];
     
-    $this->token = $token = $this->request->getToken()->getValue();
+    $this->unityId = $annot[0][0];
+    $token = $this->request->getToken()->getValue();
     $timeouts = $this->storage->getTimeouts();
     
     if (!empty($token)) {
-      if (isset($forms[$token])) {
-        $form = unserialize($forms[$token]);
-        $this->storage->write($token, "", self::SES_TIMEOUT);
+      $seskey = $this->unityId . "_" . $token;
+      if (isset($forms[$seskey])) {
+        $form = unserialize($forms[$seskey]);
+        $this->storage->write($seskey, "", self::SES_TIMEOUT);
         
         if ($this->request->isPost()) {
           $this->applyPostValues($form)->unsetErrors();
         }
         
-        $forms[$token] = $form;
+        $forms[$seskey] = $form;
         $controller->setAttribute($form->getFormName(), $form);
       }
       
-      unset($timeouts[$token]);
+      unset($timeouts[$seskey]);
     }
     
     foreach (array_keys($timeouts) as $k) unset($forms[$k]);
@@ -75,14 +75,15 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $name = lcfirst($name) . "Form";
     
-    if ($this->unityId === null) {
+    if ($this->unityId === "") {
       $form = new Form_Object($model, $name);
       $this->controller->setAttribute($name, $form);
     } else {
       $token = $this->request->getToken()->createValue();
       $form = new Form_Object($model, $name, $token);
-      $this->forms[$token] = $form;
-      $this->storage->write($token, "", self::SES_TIMEOUT);
+      $seskey = $this->unityId . "_" . $token;
+      $this->forms[$seskey] = $form;
+      $this->storage->write($seskey, "", self::SES_TIMEOUT);
       $this->controller->setAttribute($name, $form);
     }
     
@@ -92,18 +93,23 @@ class Form_Processor extends Sabel_Bus_Processor
   public function clear()
   {
     $token = $this->request->getToken()->getValue();
-    if (!empty($token)) unset($this->forms[$token]);
+    
+    if (!empty($token)) {
+      $seskey = $this->unityId . "_" . $token;
+      $this->storage->delete($seskey);
+      unset($this->forms[$seskey]);
+    }
   }
   
   public function shutdown($bus)
   {
-    foreach ($this->forms as $token => &$form) {
+    foreach ($this->forms as $seskey => &$form) {
       if ($form instanceof Form_Object) {
         $form = serialize($form);
       }
     }
     
-    $bus->get("storage")->write(self::SESSION_KEY, $this->forms);
+    $this->storage->write(self::SESSION_KEY, $this->forms);
   }
   
   public function applyPostValues($form)

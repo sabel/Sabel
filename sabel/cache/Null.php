@@ -27,7 +27,7 @@ class Sabel_Cache_Null implements Sabel_Cache_Interface
     return null;
   }
   
-  public function write($key, $value, $timeout = 600, $comp = false)
+  public function write($key, $value, $timeout = 0)
   {
     
   }

@@ -19,9 +19,10 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
-      $this->memcache->connect($server, 11211, true);
+      $port = (defined("MEMCACHED_PORT")) ? MEMCACHED_PORT : 11211;
+      $this->memcache->connect($server, $port, true);
     } else {
-      throw new Sabel_Exception_Runtime("memcache extension not loaded");
+      throw new Sabel_Exception_Runtime("memcache extension not loaded.");
     }
   }
   
@@ -40,9 +41,9 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
     return ($result === false) ? null : $result;
   }
   
-  public function write($key, $value, $timeout = 600, $comp = false)
+  public function write($key, $value, $timeout = 0, $comp = false)
   {
-    $this->memcache->add($key, $value, $comp, $timeout);
+    $this->memcache->set($key, $value, $comp, $timeout);
   }
   
   public function delete($key)

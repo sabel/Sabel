@@ -13,6 +13,6 @@
 interface Sabel_Cache_Interface
 {
   public function read($key);
-  public function write($key, $value, $timeout = 600, $comp = false);
+  public function write($key, $value, $timeout = 0);
   public function delete($key);
 }
