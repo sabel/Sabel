@@ -3,7 +3,6 @@
 /**
  * Acl_Processor
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.acl
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
@@ -23,13 +22,10 @@ class Acl_Processor extends Sabel_Bus_Processor
   {
     $config     = new Acl_Config();
     $configs    = $config->configure();
-    $this->user = new Acl_User();
+    $this->user = new Acl_User($bus->get("session"));
+    $this->user->restore();
     
-    if ($aclUser = $bus->get("storage")->read("acl_user")) {
-      $this->user->restore($aclUser);
-    }
-    
-    $bus->get("controller")->setAttribute("user", $this->user);
+    $bus->get("controller")->setAttribute("aclUser", $this->user);
     
     $destination = $bus->get("destination");
     $module      = $destination->getModule();
@@ -60,7 +56,7 @@ class Acl_Processor extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
-    $bus->get("storage")->write("acl_user", $this->user->toArray());
+    $this->user->save();
   }
   
   private function isAllow($config)

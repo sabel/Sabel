@@ -1,29 +1,23 @@
 <?php
 
 /**
- * testcase for sabel.storage.InMemory
+ * testcase for sabel.storage.Memory
  *
  * @category  Storage
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
-class Test_Storage_InMemory extends SabelTestCase
+class Test_Storage_Memory extends SabelTestCase
 {
   private $storage = null;
   
   public static function suite()
   {
-    return self::createSuite("Test_Storage_InMemory");
+    return self::createSuite("Test_Storage_Memory");
   }
   
   public function setUp()
   {
-    $this->storage = Sabel_Storage_InMemory::create();
-    $this->storage->start();
-  }
-  
-  public function testIsStarted()
-  {
-    $this->assertTrue($this->storage->isStarted());
+    $this->storage = Sabel_Storage_Memory::create();
   }
   
   public function testRead()
@@ -48,8 +42,8 @@ class Test_Storage_InMemory extends SabelTestCase
   {
     $this->storage->write("hoge", "123");
     $this->storage->write("fuga", "987");
-    $values = $this->storage->destroy();
-    $this->assertEquals("123", $values["hoge"]["value"]);
-    $this->assertEquals("987", $values["fuga"]["value"]);
+    $values = $this->storage->clear();
+    $this->assertEquals("123", $values["hoge"]);
+    $this->assertEquals("987", $values["fuga"]);
   }
 }

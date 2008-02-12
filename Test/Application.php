@@ -164,7 +164,7 @@ class Test_Application extends SabelTestCase
   {
     $bus = new Sabel_Bus();
     $bus->set("request", new Sabel_Request_Object($uri));
-    $bus->set("storage", Sabel_Storage_InMemory::create());
+    $bus->set("session", Sabel_Session_InMemory::create());
     return $bus;
   }
 }
@@ -183,8 +183,9 @@ class AppBusConfig extends Sabel_Bus_Config
                                 "response"    => "TestProcessor_Response",
                                 "view"        => "TestProcessor_View");
   
-  protected $configs = array("map"   => "AppTestMapConfig",
-                             "addon" => "AppTestAddonConfig");
+  protected $configs = array("map"      => "AppTestMapConfig",
+                             "addon"    => "AppTestAddonConfig",
+                             "database" => "AppTestDbConfig");
 }
 
 class AppTestMapConfig extends Sabel_Map_Configurator
@@ -209,8 +210,9 @@ class AppTestMapConfig extends Sabel_Map_Configurator
 
 class AppBusConfig2 extends AppBusConfig
 {
-  protected $configs = array("map"   => "AppTestMapConfig2",
-                             "addon" => "AppTestAddonConfig");
+  protected $configs = array("map"      => "AppTestMapConfig2",
+                             "addon"    => "AppTestAddonConfig",
+                             "database" => "AppTestDbConfig");
 }
 
 class AppTestMapConfig2 extends Sabel_Map_Configurator
@@ -228,10 +230,10 @@ class AppTestMapConfig2 extends Sabel_Map_Configurator
 
 class AppTestAddonConfig implements Sabel_Config
 {
-  public function configure()
-  {
-    $addons = array();
-    
-    return $addons;
-  }
+  public function configure() { return array(); }
+}
+
+class AppTestDbConfig implements Sabel_Config
+{
+  public function configure() { return array(); }
 }

@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Processor_Request
+ *
+ * @category   Processor
+ * @package    lib.processor
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class TestProcessor_Request extends Sabel_Bus_Processor
 {
   public function execute($bus)
@@ -11,10 +20,10 @@ class TestProcessor_Request extends Sabel_Bus_Processor
       $bus->set("request", $request);
     }
     
-    if (!$bus->has("storage")) {
-      $bus->set("storage", Sabel_Storage_Session::create());
+    if (!$bus->has("session")) {
+      $bus->set("session", Sabel_Session_PHP::create());
     }
     
-    $bus->get("storage")->start();
+    $bus->get("session")->start();
   }
 }

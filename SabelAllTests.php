@@ -61,7 +61,7 @@ require_once ("Test/Util/Tests.php");
 require_once ("Test/View/Tests.php");
 require_once ("Test/Processor/Tests.php");
 require_once ("Test/Reflection.php");
-require_once ("Test/Storage/InMemory.php");
+require_once ("Test/Storage/Memory.php");
 require_once ("Test/Cache/Tests.php");
 require_once ("Test/Map/Tests.php");
 require_once ("Test/VirtualInheritance.php");
@@ -104,7 +104,7 @@ class SabelAllTests
     $suite->addTest(Test_Container::suite());
     $suite->addTest(Test_Exception::suite());
     
-    $suite->addTest(Test_Storage_InMemory::suite());
+    $suite->addTest(Test_Storage_Memory::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
     $suite->addTest(Test_Locale_Browser::suite());
     $suite->addTest(Test_Locale_Server::suite());

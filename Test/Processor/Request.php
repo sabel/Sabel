@@ -19,14 +19,14 @@ class Test_Processor_Request extends Test_Processor_Abstract
   {
     $bus = $this->bus;
     
-    $this->assertFalse($bus->get("storage")->isStarted());
+    $this->assertFalse($bus->get("session")->isStarted());
     
     $processor = new Processor_Request("request");
     $processor->execute($bus);
     
     $this->assertTrue($bus->get("request") instanceof Sabel_Request);
     $this->assertNull($bus->get("request")->fetchPostValue("hoge"));
-    $this->assertTrue($bus->get("storage")->isStarted());
+    $this->assertTrue($bus->get("session")->isStarted());
   }
   
   public function testSetRequestObject()

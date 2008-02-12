@@ -28,9 +28,9 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $redirect = null;
   
   /**
-   * @var Sabel_Storage_Abstract
+   * @var Sabel_Session_Abstract
    */
-  protected $storage = null;
+  protected $session = null;
   
   /**
    * @var boolean
@@ -107,21 +107,21 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   }
   
   /**
-   * @param Sabel_Storage_Abstract $storage
+   * @param Sabel_Session_Abstract $session
    *
    * @return void
    */
-  public function setStorage(Sabel_Storage_Abstract $storage)
+  public function setSession(Sabel_Session_Abstract $session)
   {
-    $this->storage = $storage;
+    $this->session = $session;
   }
   
   /**
-   * @return Sabel_Storage_Abstract
+   * @return Sabel_Session_Abstract
    */
-  public function getStorage()
+  public function getSession()
   {
-    return $this->storage;
+    return $this->session;
   }
   
   /**

@@ -29,8 +29,8 @@ class Processor_Controller extends Sabel_Bus_Processor
       $controller->setRequest($request);
     }
     
-    if (($storage = $bus->get("storage")) !== null) {
-      $controller->setStorage($storage);
+    if (($session = $bus->get("session")) !== null) {
+      $controller->setSession($session);
     }
     
     $bus->set("response",   $response);

@@ -154,7 +154,7 @@ final class Sabel
     $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
     $REQUEST = $SABEL . "request"    . DIRECTORY_SEPARATOR;
     $CTRL    = $SABEL . "controller" . DIRECTORY_SEPARATOR;
-    $STORAGE = $SABEL . "storage"    . DIRECTORY_SEPARATOR;
+    $SESSION = $SABEL . "session"    . DIRECTORY_SEPARATOR;
     $VIEW    = $SABEL . "view"       . DIRECTORY_SEPARATOR;
     
     require ($BUS  . "Config.php");
@@ -178,8 +178,8 @@ final class Sabel
     require ($CTRL . "Page.php");
     require ($CTRL . "Redirector.php");
     
-    require ($STORAGE . "Abstract.php");
-    require ($STORAGE . "Session.php");
+    require ($SESSION . "Abstract.php");
+    require ($SESSION . "PHP.php");
     
     require ($VIEW . "Renderer.php");
     require ($VIEW . "Repository.php");

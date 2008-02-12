@@ -20,10 +20,10 @@ class Processor_Request extends Sabel_Bus_Processor
       $bus->set("request", $request);
     }
     
-    if (!$bus->has("storage")) {
-      $bus->set("storage", Sabel_Storage_Session::create());
+    if (!$bus->has("session")) {
+      $bus->set("session", Sabel_Session_PHP::create());
     }
     
-    $bus->get("storage")->start();
+    $bus->get("session")->start();
   }
 }

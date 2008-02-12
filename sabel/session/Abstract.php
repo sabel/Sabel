@@ -1,27 +1,32 @@
 <?php
 
 /**
- * Storage of session
+ * Sabel_Session_Abstract
  *
  * @abstract
- * @category   Storage
- * @package    org.sabel.storage
+ * @category   Session
+ * @package    org.sabel.session
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_Storage_Abstract extends Sabel_Object
+abstract class Sabel_Session_Abstract extends Sabel_Object
 {
   protected
-    $attributes = array(),
+    $sessionId  = "",
     $started    = false,
+    $attributes = array(),
     $timeouts   = array();
-    
+  
   abstract public function start();
+  abstract public function setId($id);
+  abstract public function getId();
   abstract public function destroy();
   
   protected function initialize()
   {
+    $this->started = true;
+    
     if (empty($this->attributes)) return;
     
     $time = time();

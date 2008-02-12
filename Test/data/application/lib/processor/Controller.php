@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Processor_Controller
+ *
+ * @category   Processor
+ * @package    lib.processor
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class TestProcessor_Controller extends Sabel_Bus_Processor
 {
   const CONTROLLERS_DIR = "controllers";
@@ -20,8 +29,8 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
       $controller->setRequest($request);
     }
     
-    if (($storage = $bus->get("storage")) !== null) {
-      $controller->setStorage($storage);
+    if (($session = $bus->get("session")) !== null) {
+      $controller->setSession($session);
     }
     
     $bus->set("response",   $response);
