@@ -87,8 +87,8 @@ class Processor_Controller extends Sabel_Bus_Processor
         $to = $redirector->getUrl() . "?token={$token}";
       }
       
-      $serverName = Sabel_Environment::get("SERVER_NAME");
-      $bus->get("response")->location($serverName, $ignored . $to);
+      $host = Sabel_Environment::get("HTTP_HOST");
+      $bus->get("response")->location($host, $ignored . $to);
     }
   }
 }

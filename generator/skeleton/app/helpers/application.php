@@ -21,7 +21,7 @@ function uri($uriParameter, $absolute = false, $secure = false)
 
   if ($absolute) {
     $protocol  = ($secure) ? "https" : "http";
-    $uriPrefix = $protocol . "://" . Sabel_Environment::get("SERVER_NAME");
+    $uriPrefix = $protocol . "://" . Sabel_Environment::get("HTTP_HOST");
   }
   
   if (defined("URI_IGNORE")) {

@@ -67,8 +67,6 @@ class Sabel_Session_PHP extends Sabel_Session_Abstract
   public function destroy()
   {
     if ($this->started) {
-      // @todo process for the cookie.
-      
       $attributes = $this->attributes;
       session_destroy();
       return $attributes;

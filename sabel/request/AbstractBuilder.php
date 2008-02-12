@@ -34,7 +34,7 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   
   protected function createUri($uri = null)
   {
-    $host = Sabel_Environment::get("SERVER_NAME");
+    $host = Sabel_Environment::get("HTTP_HOST");
     
     if ($uri === null) {
       $url = "http://{$host}/" . ltrim(Sabel_Environment::get("REQUEST_URI"), "/");
