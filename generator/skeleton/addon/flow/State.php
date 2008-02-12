@@ -83,9 +83,9 @@ class Flow_State
     return $this->properties["currentActivity"];
   }
   
-  public function restore($storage, $key)
+  public function restore($session, $key)
   {
-    $properties = $storage->read($this->getStateKey($key));
+    $properties = $session->read($this->getStateKey($key));
     
     if ($properties === null) {
       return null;
@@ -95,9 +95,9 @@ class Flow_State
     }
   }
   
-  public function save($storage)
+  public function save($session)
   {
-    $storage->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
+    $session->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
   }
   
   public function setNextActions($actions)

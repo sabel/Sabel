@@ -15,7 +15,7 @@ class Flow_Processor extends Sabel_Bus_Processor
 {
   const END_FLOW_SESKEY = "sbl_end_flows";
   
-  private $storage   = null;
+  private $session   = null;
   private $action    = "";
   private $isTransit = false;
   private $refMethod = null;
@@ -35,7 +35,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       return $response->notFound();
     }
     
-    $this->storage = $bus->get("storage");
+    $this->session = $bus->get("session");
     $request = $bus->get("request");
     $this->refMethod = $controller->getReflection()->getMethod($action);
     
@@ -48,7 +48,7 @@ class Flow_Processor extends Sabel_Bus_Processor
                               $destination->getController()));
                               
     if ($token !== null && !$this->isStartAction()) {
-      $state = $state->restore($this->storage, $key);
+      $state = $state->restore($this->session, $key);
     }
     
     $this->state = $state;
@@ -112,7 +112,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   public function afterExecute($bus)
   {
     if ($this->isTransit() && $bus->get("response")->isSuccess()) {
-      $this->state->save($this->storage);
+      $this->state->save($this->session);
     }
   }
   
@@ -174,21 +174,21 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function addEndFlow($state)
   {
-    if (($ends = $this->storage->read(self::END_FLOW_SESKEY)) === null) {
+    if (($ends = $this->session->read(self::END_FLOW_SESKEY)) === null) {
       $ends = array($state->getStateKey());
     } else {
       $ends[] = $state->getStateKey();
     }
     
-    $this->storage->write(self::END_FLOW_SESKEY, $ends);
+    $this->session->write(self::END_FLOW_SESKEY, $ends);
   }
   
   public function clearEndFlow()
   {
-    $storage = $this->storage;
-    $ends = $storage->delete(self::END_FLOW_SESKEY);
+    $session = $this->session;
+    $ends = $session->delete(self::END_FLOW_SESKEY);
     if ($ends === null) return;
     
-    foreach ($ends as $seskey) $storage->delete($seskey);
+    foreach ($ends as $seskey) $session->delete($seskey);
   }
 }
