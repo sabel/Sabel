@@ -19,8 +19,6 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   public function setConnectionName($name)
   {
     $this->connectionName = $name;
-    
-    return $this;
   }
   
   public function setTableName($tblName)

@@ -28,7 +28,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $constraints = array(),
     $seqColumn   = null;
   
-  public abstract function setDriver($driver);
+  abstract public function setDriver($driver);
   
   public function clear()
   {

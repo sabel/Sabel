@@ -11,6 +11,22 @@
  */
 class Sabel_Cookie_Http extends Sabel_Object
 {
+  private static $instance = null;
+  
+  private function __construct()
+  {
+    
+  }
+  
+  public static function create()
+  {
+    if (self::$instance === null) {
+      self::$instance = new self();
+    }
+    
+    return self::$instance;
+  }
+  
   public function set($key, $value, $options = array())
   {
     $options = $this->createOptions($options);

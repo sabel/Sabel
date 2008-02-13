@@ -38,7 +38,7 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
    *
    * @return string
    */
-  public abstract function build(Sabel_DB_Abstract_Statement $stmt, &$counter);
+  abstract public function build(Sabel_DB_Abstract_Statement $stmt, &$counter);
   
   /**
    * @param string $column

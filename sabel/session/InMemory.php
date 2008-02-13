@@ -71,9 +71,4 @@ class Sabel_Session_InMemory extends Sabel_Session_Abstract
       throw new Sabel_Exception_Runtime($message);
     }
   }
-  
-  protected function createSessionId()
-  {
-    return md5(uniqid(mt_rand(), true));
-  }
 }
