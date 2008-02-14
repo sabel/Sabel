@@ -11,6 +11,9 @@
  */
 class Sabel_Session_PHP extends Sabel_Session_Abstract
 {
+  /**
+   * @var self
+   */
   private static $instance = null;
   
   private function __construct()

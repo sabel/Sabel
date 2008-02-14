@@ -12,48 +12,50 @@
  */
 abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
 {
-  protected
-    $applyMode = "",
-    $filePath  = "",
-    $mdlName   = "",
-    $command   = "",
-    $version   = 0;
-    
+  /**
+   * @var string
+   */
+  protected $filePath = "";
+  
+  /**
+   * @var string
+   */
+  protected $mdlName  = "";
+  
+  /**
+   * @var int
+   */
+  protected $version  = 0;
+  
   abstract protected function getBooleanAttr($value);
   
-  public function __construct($filePath, $applyMode)
-  {
-    $this->filePath  = $filePath;
-    $this->applyMode = $applyMode;
-    
-    $file = basename($filePath);
-    @list ($num, $mdlName, $command) = explode("_", $file);
-    
-    $this->version = $num;
-    $this->mdlName = $mdlName;
-    
-    if ($mdlName === "mix.php") {
-      $this->command = "custom";
-    } elseif ($mdlName === "query.php") {
-      $this->command = "query";
-    } elseif (($pos = strpos($command, ".")) !== false) {
-      $this->command = substr($command, 0, $pos);
-    } else {
-      $this->command = $command;
-    }
-    
-    Sabel_DB_Migration_Manager::setApplyMode($applyMode);
-  }
-  
-  public function execute()
+  public function execute($filePath)
   {
     clearstatcache();
     
-    $command = $this->command;
-    if ($this->hasMethod($command)) {
-      $this->$command();
+    if (is_file($filePath)) {
+      $this->filePath = $filePath;
+      
+      $file = basename($filePath);
+      @list ($num, $mdlName, $command) = explode("_", $file);
+      
+      $this->version = $num;
+      $this->mdlName = $mdlName;
+      
+      if ($mdlName === "query" . PHP_SUFFIX) {
+        $command = "query";
+      } else {
+        $command = substr($command, 0, strpos($command, "."));
+      }
+      
+      if ($this->hasMethod($command)) {
+        $this->$command();
+      } else {
+        throw new Sabel_DB_Exception("command '$command' not found.");
+      }
     } else {
-      throw new Sabel_DB_Exception("command '$command' not found.");
+      $message = "no such file or directory.";
+      throw new Sabel_Exception_FileNotFound($message);
     }
   }
   
@@ -239,18 +241,6 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   protected function query()
   {
     $this->getReader()->readQuery()->execute();
-  }
-  
-  protected function custom()
-  {
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
-      $file = $this->filePath;
-    } else {
-      $file = $this->getRestoreFileName();
-    }
-    
-    $custom = new Sabel_DB_Migration_Custom();
-    $custom->execute(get_class($this), $this->version, $file);
   }
   
   protected function getReader($filePath = null)

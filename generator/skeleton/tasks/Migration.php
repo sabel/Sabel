@@ -121,7 +121,7 @@ class Migration extends Sabel_Sakle_Task
     if (($env = environment($inputEnv)) === null) {
       $this->error("environment '{$inputEnv}' is not supported. " .
                    "use 'development' or 'test' or 'production'.");
-
+      
       exit;
     }
     
@@ -139,17 +139,23 @@ class Migration extends Sabel_Sakle_Task
     if ($version < $to) {
       $next   = $version + 1;
       $num    = $next;
-      $type   = "upgrade";
+      $mode   = "upgrade";
       $doNext = ($next < $to);
     } else {
       $next   = $version - 1;
       $num    = $version;
-      $type   = "downgrade";
+      $mode   = "downgrade";
       $doNext = ($next > $to);
     }
     
-    $migration = $this->getMigrationClass($type, $num);
-    $migration->execute();
+    Sabel_DB_Migration_Manager::setApplyMode($mode);
+    
+    $dirs = explode(".", Sabel_DB_Config::getPackage($this->connectionName));
+    $className = implode("_", array_map("ucfirst", $dirs)) . "_Migration";
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    
+    $instance = new $className();
+    $instance->execute($directory . DS . $this->files[$num]);
     $this->incrementVersion($next);
     
     return $doNext;
@@ -202,25 +208,17 @@ class Migration extends Sabel_Sakle_Task
         exit;
     }
   }
-
+  
   protected function incrementVersion($num)
   {
     $sversion = $this->stmt->quoteIdentifier("sversion");
     $version  = $this->stmt->quoteIdentifier("version");
     $this->stmt->setQuery("UPDATE $sversion SET $version = $num")->execute();
   }
-
+  
   protected function initDbConfig()
   {
     Sabel_DB_Config::initialize(new Config_Database());
-  }
-
-  protected function getMigrationClass($type, $verNum)
-  {
-    $dirs = explode(".", Sabel_DB_Config::getPackage($this->connectionName));
-    $className = implode("_", array_map("ucfirst", $dirs)) . "_Migration";
-    $directory = Sabel_DB_Migration_Manager::getDirectory();
-    return new $className($directory . DS . $this->files[$verNum], $type);
   }
   
   protected function getConnectionName()

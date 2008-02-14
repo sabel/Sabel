@@ -11,32 +11,70 @@
  */
 class Sabel_View_Template_Database extends Sabel_View_Template
 {
+  /**
+   * @var string
+   */
   protected $connectionName = "default";
+  
+  /**
+   * @var string
+   */
   protected $tableName = "templates";
+  
+  /**
+   * @var string
+   */
   protected $namespace = "";
+  
+  /**
+   * @var string
+   */
   protected $contents  = "";
   
+  /**
+   * @param string $name
+   *
+   * @return void
+   */
   public function setConnectionName($name)
   {
     $this->connectionName = $name;
   }
   
+  /**
+   * @param string $tblName
+   *
+   * @return void
+   */
   public function setTableName($tblName)
   {
     $this->tableName = $tblName;
   }
   
+  /**
+   * @param string $namespace
+   *
+   * @return void
+   */
   public function setNameSpace($namespace)
   {
     $this->namespace = $namespace;
   }
   
+  /**
+   * @param string $name
+   *
+   * @return string
+   */
   public function name($name = null)
   {
     if ($name !== null) $this->contents = false;
     return parent::name($name);
   }
   
+  /**
+   * @return string
+   */
   public function getContents()
   {
     if ($this->contents === false) {
@@ -50,34 +88,23 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   
   public function create($contents = "")
   {
-    $path = $this->_getPath();
     $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->table($this->tableName)->type(Sabel_DB_Statement::INSERT);
+    $stmt->values(array("name"      => $this->_getPath(),
+                        "namespace" => $this->namespace,
+                        "contents"  => $contents));
     
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $nCol    = $stmt->quoteIdentifier("name");
-    $nsCol   = $stmt->quoteIdentifier("namespace");
-    $cCol    = $stmt->quoteIdentifier("contents");
-    $escaped = $stmt->escape(array($path, $this->namespace, $contents));
-    
-    $query = "INSERT INTO {$tblName}({$nCol}, {$nsCol}, {$cCol}) "
-           . "VALUES({$escaped[0]}, {$escaped[1]}, {$escaped[2]})";
-           
-    $stmt->setQuery($query)->execute();
+    $stmt->execute();
     $this->contents = $contents;
   }
   
   public function delete()
   {
-    $path = $this->_getPath();
     $stmt = Sabel_DB::createStatement($this->connectionName);
-    
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $nCol    = $stmt->quoteIdentifier("name");
-    $cCol    = $stmt->quoteIdentifier("contents");
-    $escaped = $stmt->escape(array($path));
-    
-    $query = "DELETE FROM $tblName WHERE $nCol = {$escaped[0]}";
-    $stmt->setQuery($query)->execute();
+    $stmt->table($this->tableName)->type(Sabel_DB_Statement::DELETE);
+    $stmt->where("WHERE " . $stmt->quoteIdentifier("name") . " = @name@");
+    $stmt->setBindValue("name", $this->_getPath());
+    $stmt->execute();
     $this->contents = "";
   }
   
@@ -94,19 +121,15 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   
   private function _getContents()
   {
-    $path = $this->_getPath();
     $stmt = Sabel_DB::createStatement($this->connectionName);
-    
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $nCol    = $stmt->quoteIdentifier("name");
-    $nsCol   = $stmt->quoteIdentifier("namespace");
-    $cCol    = $stmt->quoteIdentifier("contents");
-    $escaped = $stmt->escape(array($path, $this->namespace));
-    
-    $query = "SELECT $cCol FROM $tblName "
-           . "WHERE $nCol = {$escaped[0]} AND $nsCol = {$escaped[1]}";
-            
-    $result = $stmt->setQuery($query)->execute();
+    $stmt->table($this->tableName)->type(Sabel_DB_Statement::SELECT);
+    $stmt->projection(array("contents"));
+    $nCol  = $stmt->quoteIdentifier("name");
+    $nsCol = $stmt->quoteIdentifier("namespace");
+    $stmt->where("WHERE $nCol = @name@ AND $nsCol = @namespace@");
+    $result = $stmt->setBindValue("name", $this->_getPath())
+                   ->setBindValue("namespace", $this->namespace)
+                   ->execute();
     
     return ($result === null) ? null : $result[0]["contents"];
   }

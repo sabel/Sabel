@@ -11,9 +11,19 @@
  */
 class Sabel_Session_Memcache extends Sabel_Session_Ext
 {
+  /**
+   * @var self
+   */
   private static $instance = null;
   
+  /**
+   * @var Memcache
+   */
   protected $memcache = null;
+  
+  /**
+   * @var boolean
+   */
   protected $newSession = false;
   
   private function __construct($server)
@@ -28,8 +38,6 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
   }
   
-  public function getMemcache() { return $this->memcache; }
-  
   public static function create($server = "localhost")
   {
     if (self::$instance === null) {
@@ -37,25 +45,6 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
     
     return self::$instance;
-  }
-  
-  public function start()
-  {
-    if ($this->started) return;
-    
-    if (($sessionId = $this->getSessionId()) === "") {
-      $sessionId = $this->createSessionId();
-    }
-    
-    if ($this->sessionId === "") {
-      $this->sessionId  = $sessionId;
-      $this->attributes = $this->getSessionData($this->sessionId);
-    } else {
-      $this->attributes = $this->getSessionData($sessionId);
-    }
-    
-    $this->setSessionIdToCookie();
-    $this->initialize();
   }
   
   public function setId($id)
@@ -80,7 +69,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
       $this->memcache->delete($this->sessionId);
       $this->memcache->set($newId, $this->attributes, 0, $this->maxLifetime);
       $this->sessionId = $newId;
-      $this->setSessionIdToCookie();
+      $this->setSessionIdToCookie($newId);
     } else {
       $message = "must start the session with start()";
       throw new Sabel_Exception_Runtime($message);

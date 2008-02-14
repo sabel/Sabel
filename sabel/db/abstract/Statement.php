@@ -12,24 +12,84 @@
  */
 abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
 {
-  protected
-    $type       = Sabel_DB_Statement::QUERY,
-    $query      = "",
-    $driver     = null,
-    $schema     = null,
-    $bindValues = array();
+  /**
+   * @var const Sabel_DB_Statement
+   */
+  protected $type = Sabel_DB_Statement::QUERY;
   
-  protected
-    $table       = "",
-    $projection  = array(),
-    $join        = "",
-    $where       = "",
-    $values      = array(),
-    $constraints = array(),
-    $seqColumn   = null;
+  /**
+   * @var string
+   */
+  protected $query = "";
   
+  /**
+   * @var Sabel_DB_Abstract_Driver
+   */
+  protected $driver = null;
+  
+  /**
+   * @var Sabel_DB_Metadata_Table
+   */
+  protected $schema = null;
+  
+  /**
+   * @var array
+   */
+  protected $bindValues = array();
+  
+  /**
+   * @var string
+   */
+  protected $table = "";
+  
+  /**
+   * @var mixed
+   */
+  protected $projection = array();
+  
+  /**
+   * @var string
+   */
+  protected $join = "";
+  
+  /**
+   * @var string
+   */
+  protected $where = "";
+  
+  /**
+   * @var array
+   */
+  protected $values = array();
+  
+  /**
+   * @var array
+   */
+  protected $constraints = array();
+  
+  /**
+   * @var string
+   */
+  protected $seqColumn = null;
+  
+  /**
+   * @param Sabel_DB_Abstract_Driver $driver
+   *
+   * @return void
+   */
   abstract public function setDriver($driver);
   
+  /**
+   * @return Sabel_DB_Abstract_Driver
+   */
+  public function getDriver()
+  {
+    return $this->driver;
+  }
+  
+  /**
+   * @return void
+   */
   public function clear()
   {
     $this->query       = "";

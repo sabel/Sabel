@@ -16,8 +16,26 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
     $sessionName    = "",
     $maxLifetime    = 0,
     $useOnlyCookies = false,
-    $useCookies     = false,
-    $hashFunction   = "md5";
+    $useCookies     = false;
+  
+  public function start()
+  {
+    if ($this->started) return false;
+    
+    $sessionId = $this->initSession();
+    if ($sessionId === false) return false;
+    
+    if ($this->sessionId === "") {
+      $this->sessionId  = $sessionId;
+      $this->attributes = $this->getSessionData($this->sessionId);
+    } else {
+      $this->attributes = $this->getSessionData($sessionId);
+    }
+    
+    $this->initialize();
+    
+    return true;
+  }
   
   protected function readSessionSettings()
   {
@@ -26,56 +44,48 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
     $this->sessionName    = ini_get("session.name");
     $this->useOnlyCookies = (ini_get("session.use_only_cookies") === "1");
     $this->useCookies     = (ini_get("session.use_cookies")   === "1");
-    $this->hashFunction   = (ini_get("session.hash_function") === "1") ? "sha1" : "md5";
   }
   
-  protected function createSessionId()
-  {
-    $func = $this->hashFunction;
-    return $func(uniqid(mt_rand(), true));
-  }
-  
-  protected function getSessionId()
+  protected function initSession()
   {
     $sesName = $this->sessionName;
     
     if ($this->useOnlyCookies) {
-      return (isset($_COOKIE[$sesName])) ? $_COOKIE[$sesName] : "";
+      if (isset($_COOKIE[$sesName])) {
+        return $_COOKIE[$sesName];
+      } else {
+        $sessionId = $this->createSessionId();
+        $this->setSessionIdToCookie($sessionId);
+        return $sessionId;
+      }
     }
     
     if ($this->useCookies && isset($_COOKIE[$sesName])) {
       return $_COOKIE[$sesName];
     }
     
-    if (isset($_SERVER["REQUEST_METHOD"])) {
-      switch (strtolower($_SERVER["REQUEST_METHOD"])) {
-        case "post":
-          $sessionId = (isset($_POST[$sesName])) ? $_POST[$sesName] : "";
-          break;
-          
-        case "get":
-          $sessionId = (isset($_GET[$sesName])) ? $_GET[$sesName] : "";
-          break;
-          
-        default:
-          $sessionId = "";
-          break;
-      }
-      
-      if ($sessionId !== "") {
-        define("SID", $sesName . "=" . $sessionId);
-      }
-      
-      return $sessionId;
-    } else {
-      return "";
+    $method = strtolower(Sabel_Environment::get("REQUEST_METHOD"));
+    if ($method !== "get" && $method !== "post") return false;
+    
+    $_VARS = ($method === "get") ? $_GET : $_POST;
+    $sessionId = (isset($_VARS[$sesName])) ? $_VARS[$sesName] : $this->createSessionId();
+    
+    if ($this->useCookies) {
+      $this->setSessionIdToCookie($sessionId);
     }
+    
+    // @todo
+    // if ($sessionId !== "") {
+    //   define("SID", $sesName . "=" . $sessionId);
+    // }
+    
+    return $sessionId;
   }
   
-  protected function setSessionIdToCookie()
+  protected function setSessionIdToCookie($sessionId)
   {
     if ($this->useOnlyCookies || $this->useCookies) {
-      setcookie($this->sessionName, $this->sessionId, 0, "/");
+      setcookie($this->sessionName, $sessionId, 0, "/");
     }
   }
 }

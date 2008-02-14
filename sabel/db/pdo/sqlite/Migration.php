@@ -37,7 +37,7 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
   {
     $columns = $this->getReader()->readAddColumn()->getColumns();
     
-    if ($this->applyMode === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       $this->execAddColumn($columns);
     } else {
       $tblName  = convert_to_tablename($this->mdlName);
@@ -57,7 +57,7 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
   {
     $restore = $this->getRestoreFileName();
     
-    if ($this->applyMode === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $columns  = $this->getReader()->readDropColumn()->getColumns();

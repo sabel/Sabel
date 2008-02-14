@@ -84,4 +84,10 @@ abstract class Sabel_Session_Abstract extends Sabel_Object
   {
     return $this->timeouts;
   }
+  
+  protected function createSessionId()
+  {
+    $func = (ini_get("session.hash_function") === "1") ? "sha1" : "md5";
+    return $func(uniqid(mt_rand(), true));
+  }
 }

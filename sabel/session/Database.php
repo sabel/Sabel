@@ -11,10 +11,24 @@
  */
 class Sabel_Session_Database extends Sabel_Session_Ext
 {
+  /**
+   * @var self
+   */
   private static $instance = null;
   
+  /**
+   * @var string
+   */
   protected $connectionName = "";
+  
+  /**
+   * @var string
+   */
   protected $tableName = "session";
+  
+  /**
+   * @var boolean
+   */
   protected $newSession = false;
   
   private function __construct($connectionName)
@@ -44,22 +58,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   public function start()
   {
-    if ($this->started) return;
-    
-    if (($sessionId = $this->getSessionId()) === "") {
-      $sessionId = $this->createSessionId();
-    }
-    
-    if ($this->sessionId === "") {
-      $this->sessionId  = $sessionId;
-      $this->attributes = $this->getSessionData($this->sessionId);
-    } else {
-      $this->attributes = $this->getSessionData($sessionId);
-    }
-    
-    $this->setSessionIdToCookie();
-    $this->initialize();
-    $this->gc();
+    if (parent::start()) $this->gc();
   }
   
   public function setId($id)
@@ -89,7 +88,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
       $stmt->setQuery($query)->execute();
       
       $this->sessionId = $newId;
-      $this->setSessionIdToCookie();
+      $this->setSessionIdToCookie($newId);
     } else {
       $message = "must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
@@ -152,7 +151,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     if ($probability === "") $probability = 1;
     if ($divisor     === "") $divisor     = 100;
     
-    if (rand(0, $divisor) <= $probability) {
+    if (rand(1, $divisor) <= $probability) {
       $stmt    = Sabel_DB::createStatement($this->connectionName);
       $tblName = $stmt->quoteIdentifier($this->tableName);
       $sid     = $stmt->quoteIdentifier("sid");

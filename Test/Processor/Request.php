@@ -26,7 +26,7 @@ class Test_Processor_Request extends Test_Processor_Abstract
     
     $this->assertTrue($bus->get("request") instanceof Sabel_Request);
     $this->assertNull($bus->get("request")->fetchPostValue("hoge"));
-    $this->assertTrue($bus->get("session")->isStarted());
+    $this->assertFalse($bus->get("session")->isStarted());
   }
   
   public function testSetRequestObject()

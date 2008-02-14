@@ -28,7 +28,7 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
     $schema  = $this->getSchema();
     $tables  = $schema->getTableList();
     
-    if ($this->applyMode === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (in_array($tblName, $tables)) {
         Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
       } else {
@@ -62,7 +62,7 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
   {
     $restore = $this->getRestoreFileName();
     
-    if ($this->applyMode === "upgrade") {
+    if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $schema = $this->getSchema()->getTable(convert_to_tablename($this->mdlName));
