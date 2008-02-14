@@ -3,7 +3,6 @@
 /**
  * Flow_State
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.flow
  * @author     Mori Reo <mori.reo@sabel.jp>
@@ -107,7 +106,7 @@ class Flow_State
   
   public function isMatchToNext($currentAction)
   {
-    return (in_array($currentAction, $this->properties["nexts"]));
+    return in_array($currentAction, $this->properties["nexts"]);
   }
   
   public function isPreviousAction($action)

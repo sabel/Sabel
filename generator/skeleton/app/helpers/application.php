@@ -1,11 +1,11 @@
 <?php
 
-function a($uri, $anchor, $param = null)
+function a($uri, $anchor, $queryString = "")
 {
-  if ($param === null) {
-    return '<a href="' . uri($uri) . '">' . $anchor . '</a>';
+  if ($queryString === "") {
+    return sprintf('<a href="%s">%s</a>', uri($uri), $anchor);
   } else {
-    return '<a href="' . uri($uri) . $param . '">' . $anchor . '</a>';
+    return sprintf('<a href="%s?%s">%s</a>', uri($uri), $queryString, $anchor);
   }
 }
 

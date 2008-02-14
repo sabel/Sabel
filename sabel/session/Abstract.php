@@ -12,11 +12,30 @@
  */
 abstract class Sabel_Session_Abstract extends Sabel_Object
 {
-  protected
-    $sessionId  = "",
-    $started    = false,
-    $attributes = array(),
-    $timeouts   = array();
+  /**
+   * @var string
+   */
+  protected $sessionId = "";
+  
+  /**
+   * @var boolean
+   */
+  protected $started = false;
+  
+  /**
+   * @var boolean
+   */
+  protected $cookieEnabled = false;
+  
+  /**
+   * @var array
+   */
+  protected $attributes = array();
+  
+  /**
+   * @var array
+   */
+  protected $timeouts = array();
   
   abstract public function start();
   abstract public function setId($id);
@@ -26,6 +45,7 @@ abstract class Sabel_Session_Abstract extends Sabel_Object
   protected function initialize()
   {
     $this->started = true;
+    $this->cookieEnabled = isset($_COOKIE[session_name()]);
     
     if (empty($this->attributes)) return;
     
@@ -42,6 +62,11 @@ abstract class Sabel_Session_Abstract extends Sabel_Object
   public function isStarted()
   {
     return $this->started;
+  }
+  
+  public function isCookieEnabled()
+  {
+    return $this->cookieEnabled;
   }
   
   public function has($key)

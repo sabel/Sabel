@@ -40,37 +40,35 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     }
   }
   
-  public function autoCommit($bool)
-  {
-    $this->autoCommit = $bool;
-    mysqli_autocommit($this->connection, $bool);
-  }
-  
   public function begin($isolationLevel = null)
   {
     if ($isolationLevel !== null) {
       $this->setTransactionIsolationLevel($isolationLevel);
     }
     
-    $this->autoCommit(false);
-    return $this->connection;
+    if (mysqli_autocommit($this->connection, false)) {
+      $this->autoCommit = false;
+      return $this->connection;
+    } else {
+      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
+    }
   }
   
   public function commit()
   {
     if (mysqli_commit($this->connection)) {
-      $this->autoCommit(true);
+      $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("mysqli driver commit failed.");
+      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
     }
   }
   
   public function rollback()
   {
     if (mysqli_rollback($this->connection)) {
-      $this->autoCommit(true);
+      $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("mysqli driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
     }
   }
   
@@ -102,8 +100,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   
   private function executeError($sql)
   {
-    $error   = mysqli_error($this->connection);
-    $message = "mysqli driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception_Driver($message);
+    $error = mysqli_error($this->connection);
+    throw new Sabel_DB_Exception_Driver("{$error}, SQL: $sql");
   }
 }

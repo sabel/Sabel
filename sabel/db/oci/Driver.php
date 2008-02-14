@@ -11,11 +11,21 @@
  */
 class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
 {
-  private
-    $limit        = null,
-    $offset       = null,
-    $lastInsertId = null;
-    
+  /**
+   * @var int
+   */
+  private $limit = null;
+  
+  /**
+   * @var int
+   */
+  private $offset = null;
+  
+  /**
+   * @var int
+   */
+  private $lastInsertId = null;
+  
   public function getDriverId()
   {
     return "oci";
@@ -54,7 +64,8 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_commit($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("oci driver commit failed.");
+      $e = oci_error($this->connection);
+      throw new Sabel_DB_Exception_Driver($e["message"]);
     }
   }
   
@@ -63,7 +74,8 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     if (oci_rollback($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("oci driver rollback failed.");
+      $e = oci_error($this->connection);
+      throw new Sabel_DB_Exception_Driver($e["message"]);
     }
   }
   
@@ -119,12 +131,12 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   public function setTransactionIsolationLevel($level)
   {
     switch ($level) {
-      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
-      case self::TRANS_ISOLATION_READ_COMMITTED:
+      case self::TRANS_READ_UNCOMMITTED:
+      case self::TRANS_READ_COMMITTED:
         $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
         break;
-      case self::TRANS_ISOLATION_REPEATABLE_READ:
-      case self::TRANS_ISOLATION_SERIALIZABLE:
+      case self::TRANS_REPEATABLE_READ:
+      case self::TRANS_SERIALIZABLE:
         $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
         break;
       default:
@@ -136,8 +148,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
   
   private function executeError($ociStmt)
   {
-    $error   = oci_error($ociStmt);
-    $message = "oci driver execute failed: " . $error["message"];
-    throw new Sabel_DB_Exception_Driver($message . " SQL:" . $error["sqltext"]);
+    $e = oci_error($ociStmt);
+    throw new Sabel_DB_Exception_Driver($e["message"] . ", SQL:" . $e["sqltext"]);
   }
 }

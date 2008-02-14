@@ -24,7 +24,8 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
     $dbs  = $params["database"];
     
     $host = (isset($params["port"])) ? $host . " port=" . $params["port"] : $host;
-    $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}", PGSQL_CONNECT_FORCE_NEW);
+    $conn = pg_connect("host={$host} dbname={$dbs} user={$user} password={$pass}",
+                       PGSQL_CONNECT_FORCE_NEW);
     
     if ($conn) {
       if (isset($params["charset"])) {
@@ -43,25 +44,21 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
       $this->setTransactionIsolationLevel($isolationLevel);
     }
     
-    if (pg_query($this->connection, "START TRANSACTION")) {
-      return $this->connection;
-    } else {
-      throw new Sabel_DB_Exception_Driver("pgsql driver begin failed.");
-    }
+    $this->execute("START TRANSACTION");
+    $this->autoCommit = false;
+    return $this->connection;
   }
   
   public function commit()
   {
-    if (!pg_query($this->connection, "COMMIT")) {
-      throw new Sabel_DB_Exception_Driver("pgsql driver commit failed.");
-    }
+    $this->execute("COMMIT");
+    $this->autoCommit = true;
   }
   
   public function rollback()
   {
-    if (!pg_query($this->connection, "ROLLBACK")) {
-      throw new Sabel_DB_Exception_Driver("pgsql driver rollback failed.");
-    }
+    $this->execute("ROLLBACK");
+    $this->autoCommit = true;
   }
   
   public function close($connection)
@@ -94,7 +91,6 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   private function executeError($sql)
   {
     $error = pg_last_error($this->connection);
-    $message = "pgsql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception_Driver($message);
+    throw new Sabel_DB_Exception_Driver("{$error}, SQL: $sql");
   }
 }

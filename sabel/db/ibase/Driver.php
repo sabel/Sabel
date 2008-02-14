@@ -12,7 +12,7 @@
 class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
 {
   private $lastInsertId   = null;
-  private $isolationLevel = 40;
+  private $isolationLevel = 0;
   
   public function getDriverId()
   {
@@ -34,31 +34,32 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   
   public function begin($isolationLevel = null)
   {
-    if ($isolationLevel !== null) {
+    if ($isolationLevel === null) {
+      $this->isolationLevel = IBASE_WRITE|IBASE_COMMITTED|IBASE_REC_NO_VERSION|IBASE_WAIT;
+    } else {
       $this->setTransactionIsolationLevel($isolationLevel);
     }
     
-    $this->autoCommit(false);
+    $this->autoCommit = false;
     $this->connection = ibase_trans($this->isolationLevel, $this->connection);
-    
     return $this->connection;
   }
   
   public function commit()
   {
     if (ibase_commit($this->connection)) {
-      $this->autoCommit(true);
+      $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("ibase driver commit failed.");
+      throw new Sabel_DB_Exception_Driver(ibase_errmsg());
     }
   }
   
   public function rollback()
   {
     if (ibase_rollback($this->connection)) {
-      $this->autoCommit(true);
+      $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver("ibase driver rollback failed.");
+      throw new Sabel_DB_Exception_Driver(ibase_errmsg());
     }
   }
   
@@ -100,17 +101,17 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   public function setTransactionIsolationLevel($level)
   {
     switch ($level) {
-      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
-        $this->isolationLevel = IBASE_COMMITTED|IBASE_REC_VERSION;
+      case self::TRANS_READ_UNCOMMITTED:
+        $this->isolationLevel = IBASE_WRITE|IBASE_COMMITTED|IBASE_REC_VERSION|IBASE_WAIT;
         break;
-      case self::TRANS_ISOLATION_READ_COMMITTED:
-        $this->isolationLevel = IBASE_COMMITTED|IBASE_REC_NO_VERSION;
+      case self::TRANS_READ_COMMITTED:
+        $this->isolationLevel = IBASE_WRITE|IBASE_COMMITTED|IBASE_REC_NO_VERSION|IBASE_WAIT;
         break;
-      case self::TRANS_ISOLATION_REPEATABLE_READ:
-        $this->isolationLevel = IBASE_CONCURRENCY;
+      case self::TRANS_REPEATABLE_READ:
+        $this->isolationLevel = IBASE_WRITE|IBASE_CONCURRENCY|IBASE_WAIT;
         break;
-      case self::TRANS_ISOLATION_SERIALIZABLE:
-        $this->isolationLevel = IBASE_CONSISTENCY;
+      case self::TRANS_SERIALIZABLE:
+        $this->isolationLevel = IBASE_WRITE|IBASE_CONSISTENCY|IBASE_WAIT;
         break;
       default:
         throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
@@ -119,8 +120,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   
   private function executeError($sql)
   {
-    $error   = ibase_errmsg();
-    $message = "ibase driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception_Driver($message);
+    throw new Sabel_DB_Exception_Driver(ibase_errmsg() . ", SQL: " . $sql);
   }
 }

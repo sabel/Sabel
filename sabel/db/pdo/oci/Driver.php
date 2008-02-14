@@ -58,12 +58,12 @@ class Sabel_DB_Pdo_Oci_Driver extends Sabel_DB_Pdo_Driver
   public function setTransactionIsolationLevel($level)
   {
     switch ($level) {
-      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
-      case self::TRANS_ISOLATION_READ_COMMITTED:
+      case self::TRANS_READ_UNCOMMITTED:
+      case self::TRANS_READ_COMMITTED:
         $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
         break;
-      case self::TRANS_ISOLATION_REPEATABLE_READ:
-      case self::TRANS_ISOLATION_SERIALIZABLE:
+      case self::TRANS_REPEATABLE_READ:
+      case self::TRANS_SERIALIZABLE:
         $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
         break;
       default:

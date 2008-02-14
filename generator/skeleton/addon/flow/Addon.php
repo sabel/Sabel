@@ -3,7 +3,6 @@
 /**
  * Flow_Addon
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.flow
  * @author     Mori Reo <mori.reo@sabel.jp>

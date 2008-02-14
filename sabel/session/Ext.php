@@ -74,11 +74,6 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
       $this->setSessionIdToCookie($sessionId);
     }
     
-    // @todo
-    // if ($sessionId !== "") {
-    //   define("SID", $sesName . "=" . $sessionId);
-    // }
-    
     return $sessionId;
   }
   

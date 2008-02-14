@@ -48,25 +48,21 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
       $this->setTransactionIsolationLevel($isolationLevel);
     }
     
-    if (mysql_query("START TRANSACTION", $this->connection)) {
-      return $this->connection;
-    } else {
-      throw new Sabel_DB_Exception_Driver("mysql driver begin failed.");
-    }
+    $this->execute("START TRANSACTION");
+    $this->autoCommit = false;
+    return $this->connection;
   }
   
   public function commit()
   {
-    if (!mysql_query("COMMIT", $this->connection)) {
-      throw new Sabel_DB_Exception_Driver("mysql driver commit failed.");
-    }
+    $this->execute("COMMIT");
+    $this->autoCommit = true;
   }
   
   public function rollback()
   {
-    if (!mysql_query("ROLLBACK", $this->connection)) {
-      throw new Sabel_DB_Exception_Driver("mysql driver rollback failed.");
-    }
+    $this->execute("ROLLBACK");
+    $this->autoCommit = true;
   }
   
   public function close($connection)
@@ -97,8 +93,7 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Abstract_Driver
   
   private function executeError($sql)
   {
-    $error   = mysql_error($this->connection);
-    $message = "mysql driver execute failed: $error, SQL: $sql";
-    throw new Sabel_DB_Exception_Driver($message);
+    $error = mysql_error($this->connection);
+    throw new Sabel_DB_Exception_Driver("{$error}, SQL: $sql");
   }
 }

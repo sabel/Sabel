@@ -54,16 +54,16 @@ class Sabel_DB_Transaction
   {
     switch (self::$isolationLevel) {
       case self::READ_UNCOMMITTED:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_READ_UNCOMMITTED;
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_READ_UNCOMMITTED;
         break;
       case self::READ_COMMITTED:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_READ_COMMITTED;
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_READ_COMMITTED;
         break;
       case self::REPEATABLE_READ:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_REPEATABLE_READ;
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_REPEATABLE_READ;
         break;
       case self::SERIALIZABLE:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_ISOLATION_SERIALIZABLE;
+        $iLevel = Sabel_DB_Abstract_Driver::TRANS_SERIALIZABLE;
         break;
       default:
         $iLevel = null;
@@ -76,16 +76,35 @@ class Sabel_DB_Transaction
     self::$active = true;
   }
   
+  /**
+   * @throws Sabel_DB_Exception_Transaction
+   * @return void
+   */
   public static function commit()
   {
-    self::release("commit");
+    try {
+      self::release("commit");
+    } catch (Exception $e) {
+      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+    }
   }
   
+  /**
+   * @throws Sabel_DB_Exception_Transaction
+   * @return void
+   */
   public static function rollback()
   {
-    self::release("rollback");
+    try {
+      self::release("rollback");
+    } catch (Exception $e) {
+      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+    }
   }
   
+  /**
+   * @return void
+   */
   private static function release($method)
   {
     if (self::$active) {
@@ -97,10 +116,13 @@ class Sabel_DB_Transaction
     }
   }
   
+  /**
+   * @return void
+   */
   public static function clear()
   {
     self::$active = false;
-    self::$transactions = array();
+    self::$transactions   = array();
     self::$isolationLevel = null;
   }
 }

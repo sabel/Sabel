@@ -3,7 +3,6 @@
 /**
  * Flow_Processor
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.flow
  * @author     Mori Reo <mori.reo@sabel.jp>
@@ -105,7 +104,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       return $response->notFound();
     }
     
-    ini_set("url_rewriter.tags", "input=src,fieldset=");
+    $this->setRewriteTags();
     output_add_rewrite_var("token", $token);
   }
   
@@ -190,5 +189,30 @@ class Flow_Processor extends Sabel_Bus_Processor
     if ($ends === null) return;
     
     foreach ($ends as $seskey) $session->delete($seskey);
+  }
+  
+  protected function setRewriteTags()
+  {
+    $tags = array_map("trim", explode(",", ini_get("url_rewriter.tags")));
+    
+    $writeTags = array();
+    foreach ($tags as $tag) {
+      list ($k, $v) = explode("=", $tag);
+      $writeTags[$k] = $v;
+    }
+    
+    if ($this->session->isCookieEnabled()) {
+      unset($writeTags["a"]);
+    }
+    
+    unset($writeTags["form"]);
+    $writeTags["fieldset"] = "";
+    
+    $rewriterTags = array();
+    foreach ($writeTags as $k => $v) {
+      $rewriterTags[] = $k . "=" . $v;
+    }
+    
+    ini_set("url_rewriter.tags", implode(",", $rewriterTags));
   }
 }

@@ -20,10 +20,10 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     
     try {
       $this->connection->beginTransaction();
+      $this->autoCommit = false;
       return $this->connection;
     } catch (PDOException $e) {
-      $message = $e->getMessage();
-      throw new Sabel_DB_Exception_Driver("pdo driver begin failed. {$message}");
+      throw new Sabel_DB_Exception_Driver($e->getMessage());
     }
   }
   
@@ -31,9 +31,9 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   {
     try {
       $this->connection->commit();
+      $this->autoCommit = true;
     } catch (PDOException $e) {
-      $message = $e->getMessage();
-      throw new Sabel_DB_Exception_Driver("pdo driver commit failed. {$message}");
+      throw new Sabel_DB_Exception_Driver($e->getMessage());
     }
   }
   
@@ -41,9 +41,9 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
   {
     try {
       $this->connection->rollback();
+      $this->autoCommit = true;
     } catch (PDOException $e) {
-      $message = $e->getMessage();
-      throw new Sabel_DB_Exception_Driver("pdo driver rollback failed. {$message}");
+      throw new Sabel_DB_Exception_Driver($e->getMessage());
     }
   }
   
@@ -87,6 +87,6 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
       $error .= PHP_EOL . "BIND_PARAMS: " . print_r($bindParams, true);
     }
     
-    throw new Sabel_DB_Exception_Driver("pdo driver execute failed: $error");
+    throw new Sabel_DB_Exception_Driver($error);
   }
 }

@@ -12,10 +12,10 @@
  */
 abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
 {
-  const TRANS_ISOLATION_READ_UNCOMMITTED = 1;
-  const TRANS_ISOLATION_READ_COMMITTED   = 2;
-  const TRANS_ISOLATION_REPEATABLE_READ  = 3;
-  const TRANS_ISOLATION_SERIALIZABLE     = 4;
+  const TRANS_READ_UNCOMMITTED = 1;
+  const TRANS_READ_COMMITTED   = 2;
+  const TRANS_REPEATABLE_READ  = 3;
+  const TRANS_SERIALIZABLE     = 4;
   
   protected
     $autoCommit = true,
@@ -59,16 +59,16 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function setTransactionIsolationLevel($level)
   {
     switch ($level) {
-      case self::TRANS_ISOLATION_READ_UNCOMMITTED:
+      case self::TRANS_READ_UNCOMMITTED:
         $query = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
         break;
-      case self::TRANS_ISOLATION_READ_COMMITTED:
+      case self::TRANS_READ_COMMITTED:
         $query = "SET TRANSACTION ISOLATION LEVEL READ COMMITTED";
         break;
-      case self::TRANS_ISOLATION_REPEATABLE_READ:
+      case self::TRANS_REPEATABLE_READ:
         $query = "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ";
         break;
-      case self::TRANS_ISOLATION_SERIALIZABLE:
+      case self::TRANS_SERIALIZABLE:
         $query = "SET TRANSACTION ISOLATION LEVEL SERIALIZABLE";
         break;
       default:

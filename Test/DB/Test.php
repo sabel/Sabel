@@ -392,7 +392,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testRollback()
   {
-    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::SERIALIZABLE);
+    Sabel_DB_Transaction::activate();
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));
@@ -404,7 +404,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testCommit()
   {
-    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::READ_COMMITTED);
+    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::SERIALIZABLE);
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));

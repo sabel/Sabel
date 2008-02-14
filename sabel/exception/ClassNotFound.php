@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Pgsql_Metadata
+ * Sabel_Exception_ClassNotFound
  *
- * @category   DB
- * @package    org.sabel.db.pdo
+ * @category   Exception
+ * @package    org.sabel.exception
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Pgsql_Metadata extends Sabel_DB_Pgsql_Metadata
+class Sabel_Exception_ClassNotFound extends Sabel_Exception_Runtime
 {
   
 }
