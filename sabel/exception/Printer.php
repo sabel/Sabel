@@ -1,37 +1,21 @@
 <?php
 
 /**
- * Processor_Exeception
+ * Sabel_Exception_ClassNotFound
  *
- * @category   Processor
- * @package    lib.processor
+ * @category   Exception
+ * @package    org.sabel.exception
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Exception extends Sabel_Bus_Processor
+class Sabel_Exception_Printer
 {
-  public function execute($bus)
-  {
-    $response = $bus->get("response");
-    if ($response->isServerError()) {
-      $exception = Sabel_Context::getContext()->getException();
-      if (!is_object($exception)) return;
-      
-      $eol = $this->getEol();
-      $msg = "Exception Message: " . $exception->getMessage() . $eol
-           . "At: " . date("r") . $eol . $eol
-           . $this->getReadableTrace($exception->getTrace(), $eol);
-           
-      $this->exception($response, $exception, $msg);
-    }
-  }
-  
-  protected function getReadableTrace($traces, $eol)
+  public static function printTrace(Exception $exception, $eol = PHP_EOL, $return = false)
   {
     $result = array();
     
-    foreach ($traces as $line) {
+    foreach ($exception->getTrace() as $line) {
       $trace = array();
       
       if (isset($line["file"])) {
@@ -74,24 +58,5 @@ class Processor_Exception extends Sabel_Bus_Processor
     }
     
     return implode($eol . $eol, $result);
-  }
-  
-  private function exception($response, $exception, $message)
-  {
-    if (ENVIRONMENT === PRODUCTION) {
-      // if ($exception instanceof Sabel_Exception_Runtime) {
-      //   $exception->writeSyslog($message);
-      // }
-    } else {
-      $response->setResponse("exception_message", $message);
-      $message = str_replace("<br/>", PHP_EOL, $message);
-    }
-    
-    l($message, LOG_ERR);
-  }
-  
-  private function getEol()
-  {
-    return (ENVIRONMENT === DEVELOPMENT) ? "<br/>" : PHP_EOL;
   }
 }

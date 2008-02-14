@@ -13,7 +13,6 @@
 abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
 {
   protected
-    $sessionName    = "",
     $maxLifetime    = 0,
     $useOnlyCookies = false,
     $useCookies     = false;
@@ -41,14 +40,13 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
   {
     $maxLifetime = ini_get("session.gc_maxlifetime");
     $this->maxLifetime    = ($maxLifetime === "") ? 0 : (int)$maxLifetime;
-    $this->sessionName    = ini_get("session.name");
     $this->useOnlyCookies = (ini_get("session.use_only_cookies") === "1");
     $this->useCookies     = (ini_get("session.use_cookies")   === "1");
   }
   
   protected function initSession()
   {
-    $sesName = $this->sessionName;
+    $sesName = session_name();
     
     if ($this->useOnlyCookies) {
       if (isset($_COOKIE[$sesName])) {
@@ -80,7 +78,7 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
   protected function setSessionIdToCookie($sessionId)
   {
     if ($this->useOnlyCookies || $this->useCookies) {
-      setcookie($this->sessionName, $sessionId, 0, "/");
+      setcookie(session_name(), $sessionId, 0, "/");
     }
   }
 }

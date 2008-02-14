@@ -19,9 +19,5 @@ class Processor_Request extends Sabel_Bus_Processor
       $builder->build($request);
       $bus->set("request", $request);
     }
-    
-    if (!$bus->has("session")) {
-      $bus->set("session", Sabel_Session_PHP::create());
-    }
   }
 }

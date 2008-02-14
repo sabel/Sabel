@@ -9,9 +9,9 @@ function a($uri, $anchor, $queryString = "")
   }
 }
 
-function ah($param, $anchor)
+function ah($param, $anchor, $queryString = "")
 {
-  return a($param, htmlspecialchars($anchor));
+  return a($param, h($anchor), $queryString);
 }
 
 function uri($uriParameter, $absolute = false, $secure = false)
@@ -72,7 +72,7 @@ function form_end()
 
 function h($content)
 {
-  return htmlspecialchars($content);
+  return htmlspecialchars($content, ENT_QUOTES);
 }
 
 function mb_trim($string)

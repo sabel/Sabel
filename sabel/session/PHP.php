@@ -51,11 +51,6 @@ class Sabel_Session_PHP extends Sabel_Session_Abstract
     }
   }
   
-  public function getId()
-  {
-    return $this->sessionId;
-  }
-  
   public function regenerateId()
   {
     if ($this->started) {

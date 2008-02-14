@@ -42,11 +42,6 @@ class Sabel_Controller_Redirector
    */
   public function to($uriParameter, $parameters = array())
   {
-    if (defined("SID") && SID !== "") {
-      list ($sesName, $sesId) = explode("=", SID);
-      $parameters[$sesName] = $sesId;
-    }
-    
     $this->redirected = true;
     $this->parameters = $parameters;
     

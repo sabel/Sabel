@@ -76,15 +76,22 @@ class Processor_Controller extends Sabel_Bus_Processor
         $ignored = "";
       }
       
-      $token = $controller->getRequest()->getToken()->getValue();
+      $session    = $bus->get("session");
+      $token      = $controller->getRequest()->getToken()->getValue();
+      $hasToken   = !empty($token);
       $redirector = $controller->getRedirector();
       
-      if (empty($token)) {
+      if (!$hasToken) {
         $to = $redirector->getUrl();
       } elseif ($redirector->hasParameters()) {
         $to = $redirector->getUrl() . "&token={$token}";
       } else {
         $to = $redirector->getUrl() . "?token={$token}";
+      }
+      
+      if (!$session->isCookieEnabled()) {
+        $glue = ($hasToken) ? "&" : "?";
+        $to  .= $glue . $session->getName() . "=" . $session->getId();
       }
       
       $host = Sabel_Environment::get("HTTP_HOST");

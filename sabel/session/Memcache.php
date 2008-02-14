@@ -57,11 +57,6 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
   }
   
-  public function getId()
-  {
-    return $this->sessionId;
-  }
-  
   public function regenerateId()
   {
     if ($this->started) {
@@ -80,7 +75,9 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   {
     if ($this->started) {
       $this->memcache->delete($this->sessionId);
-      return $this->attributes;
+      $attributes = $this->attributes;
+      $this->attributes = array();
+      return $attributes;
     } else {
       $message = "must start the session with start()";
       throw new Sabel_Exception_Runtime($message);

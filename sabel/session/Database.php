@@ -71,21 +71,17 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     }
   }
   
-  public function getId()
-  {
-    return $this->sessionId;
-  }
-  
   public function regenerateId()
   {
     if ($this->started) {
-      $newId   = $this->createSessionId();
-      $stmt    = Sabel_DB::createStatement($this->connectionName);
-      $tblName = $stmt->quoteIdentifier($this->tableName);
-      $sid     = $stmt->quoteIdentifier("sid");
-      $escaped = $stmt->escape(array($this->sessionId, $newId));
-      $query   = "UPDATE $tblName SET $sid = {$escaped[1]} WHERE $sid = {$escaped[0]}";
-      $stmt->setQuery($query)->execute();
+      $newId = $this->createSessionId();
+      $stmt = Sabel_DB::createStatement($this->connectionName);
+      $stmt->table($this->tableName)
+           ->type(Sabel_DB_Statement::UPDATE)
+           ->values(array("sid" => $newId))
+           ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @currentId@")
+           ->setBindValue("currentId", $this->sessionId)
+           ->execute();
       
       $this->sessionId = $newId;
       $this->setSessionIdToCookie($newId);
@@ -98,13 +94,13 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   public function destroy()
   {
     if ($this->started) {
-      $stmt    = Sabel_DB::createStatement($this->connectionName);
-      $tblName = $stmt->quoteIdentifier($this->tableName);
-      $sid     = $stmt->quoteIdentifier("sid");
-      $escaped = $stmt->escape(array($this->sessionId));
-      $query   = "DELETE FROM $tblName WHERE $sid = {$escaped[0]}";
-      $stmt->setQuery($query)->execute();
-      return $this->attributes;
+      $stmt = Sabel_DB::createStatement($this->connectionName);
+      $stmt->table($this->tableName)->type(Sabel_DB_Statement::DELETE);
+      $stmt->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@");
+      $stmt->setBindValue("sid", $this->sessionId)->execute();
+      $attributes = $this->attributes;
+      $this->attributes = array();
+      return $attributes;
     } else {
       $message = "must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
@@ -113,17 +109,11 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   protected function getSessionData($sessionId)
   {
-    $stmt    = Sabel_DB::createStatement($this->connectionName);
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $sid     = $stmt->quoteIdentifier("sid");
-    $sdata   = $stmt->quoteIdentifier("sdata");
-    $timeout = $stmt->quoteIdentifier("timeout");
-    $escaped = $stmt->escape(array($sessionId));
-    
-    $query = "SELECT {$sdata}, {$timeout} "
-           . "FROM $tblName WHERE $sid = {$escaped[0]}";
-    
-    $result = $stmt->setQuery($query)->execute();
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->table($this->tableName)->type(Sabel_DB_Statement::SELECT);
+    $stmt->projection(array("sdata", "timeout"));
+    $stmt->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@");
+    $result = $stmt->setBindValue("sid", $sessionId)->execute();
     
     if ($result === null) {
       $this->newSession = true;
@@ -133,15 +123,13 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     }
   }
   
-  protected function sessionIdExists($id)
+  protected function sessionIdExists($sessionId)
   {
-    $stmt    = Sabel_DB::createStatement($this->connectionName);
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $sid     = $stmt->quoteIdentifier("sid");
-    $escaped = $stmt->escape(array($id));
-    $query   = "SELECT $sid FROM $tblName WHERE $sid = {$escaped[0]}";
-    
-    return ($stmt->setQuery($query)->execute() !== null);
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->table($this->tableName)->type(Sabel_DB_Statement::SELECT);
+    $stmt->projection(array("sid"));
+    $stmt->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@");
+    return ($stmt->setBindValue("sid", $sessionId)->execute() !== null);
   }
   
   protected function gc()
@@ -152,12 +140,10 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     if ($divisor     === "") $divisor     = 100;
     
     if (rand(1, $divisor) <= $probability) {
-      $stmt    = Sabel_DB::createStatement($this->connectionName);
-      $tblName = $stmt->quoteIdentifier($this->tableName);
-      $sid     = $stmt->quoteIdentifier("sid");
-      $timeout = $stmt->quoteIdentifier("timeout");
-      $query   = "DELETE FROM $tblName WHERE $timeout <= " . time();
-      $stmt->setQuery($query)->execute();
+      $stmt = Sabel_DB::createStatement($this->connectionName);
+      $stmt->table($this->tableName)->type(Sabel_DB_Statement::DELETE);
+      $stmt->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@");
+      $stmt->setBindValue("timeout", time())->execute();
     }
   }
   
@@ -165,23 +151,25 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   {
     if ($this->newSession && empty($this->attributes)) return;
     
-    $stmt    = Sabel_DB::createStatement($this->connectionName);
-    $tblName = $stmt->quoteIdentifier($this->tableName);
-    $sid     = $stmt->quoteIdentifier("sid");
-    $sdata   = $stmt->quoteIdentifier("sdata");
-    $timeout = $stmt->quoteIdentifier("timeout");
-    $escaped = $stmt->escape(array($this->sessionId, serialize($this->attributes)));
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->table($this->tableName);
     
     $timeoutValue = time() + $this->maxLifetime;
     
     if ($this->sessionIdExists($this->sessionId)) {
-      $query = "UPDATE $tblName SET $sdata = {$escaped[1]}, "
-             . "$timeout = $timeoutValue WHERE $sid = {$escaped[0]}";
+      $stmt->type(Sabel_DB_Statement::UPDATE);
+      $stmt->values(array("sdata"   => serialize($this->attributes),
+                          "timeout" => $timeoutValue));
+      
+      $stmt->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@");
+      $stmt->setBindValue("sid", $this->sessionId);
     } else {
-      $query = "INSERT INTO {$tblName}({$sid}, {$sdata}, {$timeout}) VALUES("
-             . "{$escaped[0]}, {$escaped[1]}, {$timeoutValue})";
+      $stmt->type(Sabel_DB_Statement::INSERT);
+      $stmt->values(array("sid"     => $this->sessionId,
+                          "sdata"   => serialize($this->attributes),
+                          "timeout" => $timeoutValue));
     }
     
-    $stmt->setQuery($query)->execute();
+    $stmt->execute();
   }
 }

@@ -39,7 +39,6 @@ abstract class Sabel_Session_Abstract extends Sabel_Object
   
   abstract public function start();
   abstract public function setId($id);
-  abstract public function getId();
   abstract public function destroy();
   
   protected function initialize()
@@ -62,6 +61,16 @@ abstract class Sabel_Session_Abstract extends Sabel_Object
   public function isStarted()
   {
     return $this->started;
+  }
+  
+  public function getName()
+  {
+    return session_name();
+  }
+  
+  public function getId()
+  {
+    return $this->sessionId;
   }
   
   public function isCookieEnabled()

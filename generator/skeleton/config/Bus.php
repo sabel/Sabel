@@ -3,6 +3,7 @@
 class Config_Bus extends Sabel_Bus_Config
 {
   protected $processors = array("request"     => "Processor_Request",
+                                "session"     => "Processor_Session",
                                 "router"      => "Processor_Router",
                                 "addon"       => "Processor_Addon",
                                 "controller"  => "Processor_Controller",
@@ -10,7 +11,6 @@ class Config_Bus extends Sabel_Bus_Config
                                 "helper"      => "Processor_Helper",
                                 "initializer" => "Processor_Initializer",
                                 "executer"    => "Processor_Executer",
-                                "exception"   => "Processor_Exception",
                                 "response"    => "Processor_Response",
                                 "view"        => "Processor_View");
   
