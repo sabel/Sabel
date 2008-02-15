@@ -140,19 +140,18 @@ class Sabel_Map_Candidate
   
   private function compare($partOfUri, $element)
   {
-    $result = false;
-    
     if ($element->isMatchAll()) {
-      $result = $partOfUri;
-    } elseif ($element->hasRequirement()) {
-      $result = ($element->compareWithRequirement($partOfUri)) ? $partOfUri : false;
+      return $partOfUri;
+    } elseif ($element->omittable && $partOfUri === null) {
+      return null;
     } elseif ($element->isConstant() && $partOfUri !== $element->name) {
-      $result = false;
+      return false;
+    } elseif (($partOfUri === null && !$element->omittable) ||
+              ($element->hasRequirement() && !$element->compareWithRequirement($partOfUri))) {
+      return false;
     } else {
-      $result = $partOfUri;
+      return $partOfUri;
     }
-    
-    return ($result === null) ? false : $result;
   }
   
   private function setVariableToElement($partOfUri, $element)
