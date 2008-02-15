@@ -27,7 +27,7 @@ class Test_Application extends SabelTestCase
     $dir = TEST_APP_DIR . DS . LIB_DIR_NAME . DS . "processor" . DS;
     
     Sabel::fileUsing($dir . "Addon.php", true);
-    Sabel::fileUsing($dir . "Exception.php", true);
+    Sabel::fileUsing($dir . "Session.php", true);
     Sabel::fileUsing($dir . "Executer.php", true);
     Sabel::fileUsing($dir . "Helper.php", true);
     Sabel::fileUsing($dir . "Initializer.php", true);
@@ -172,6 +172,7 @@ class Test_Application extends SabelTestCase
 class AppBusConfig extends Sabel_Bus_Config
 {
   protected $processors = array("request"     => "TestProcessor_Request",
+                                "session"     => "TestProcessor_Session",
                                 "router"      => "TestProcessor_Router",
                                 "addon"       => "TestProcessor_Addon",
                                 "controller"  => "TestProcessor_Controller",
@@ -179,7 +180,6 @@ class AppBusConfig extends Sabel_Bus_Config
                                 "helper"      => "TestProcessor_Helper",
                                 "initializer" => "TestProcessor_Initializer",
                                 "executer"    => "TestProcessor_Executer",
-                                "exception"   => "TestProcessor_Exception",
                                 "response"    => "TestProcessor_Response",
                                 "view"        => "TestProcessor_View");
   

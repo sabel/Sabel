@@ -5,16 +5,22 @@
  *
  * @category   Util
  * @package    org.sabel.util
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
- * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Util_String extends Sabel_Object
 {
-  protected
-    $string = "",
-    $length = 0;
+  /**
+   * @var string
+   */
+  protected $string = "";
+  
+  /**
+   * @var int
+   */
+  protected $length = 0;
   
   public function __construct($string = "")
   {
@@ -207,19 +213,19 @@ class Sabel_Util_String extends Sabel_Object
     
     for ($i = $this->length; $i > 0; $i--) {
       $p = $i - 1;
-      if ($string[$p] == 9) {
-        $string[$p] = 0;
+      if ($string{$p} == 9) {
+        $string{$p} = 0;
         $str        = 1;
-      } elseif ($string[$p] === "z") {
-        $string[$p] = "a";
+      } elseif ($string{$p} === "z") {
+        $string{$p} = "a";
         $str        = "a";
-      } elseif ($string[$p] === "Z") {
-        $string[$p] = "A";
+      } elseif ($string{$p} === "Z") {
+        $string{$p} = "A";
         $str        = "A";
-      } elseif (preg_match("/[^a-zA-Z0-9]/", $string[$p])) {
+      } elseif (preg_match("/[^a-zA-Z0-9]/", $string{$p})) {
         break;
       } else {
-        $string[$p] = chr(ord($string[$p]) + 1);
+        $string{$p} = chr(ord($string{$p}) + 1);
         break;
       }
       if ($p === 0) {

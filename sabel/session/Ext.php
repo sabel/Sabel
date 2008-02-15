@@ -7,7 +7,7 @@
  * @category   Session
  * @package    org.sabel.session
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_Session_Ext extends Sabel_Session_Abstract

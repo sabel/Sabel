@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * Sabel_Controller_Redirector
+ *
  * @category   Controller
  * @package    org.sabel.controller
  * @author     Mori Reo <mori.reo@sabel.jp>

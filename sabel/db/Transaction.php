@@ -6,7 +6,7 @@
  * @category   DB
  * @package    org.sabel.db
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_DB_Transaction
@@ -16,10 +16,27 @@ class Sabel_DB_Transaction
   const REPEATABLE_READ  = 3;
   const SERIALIZABLE     = 4;
   
-  private static $active         = false;
-  private static $transactions   = array();
+  /**
+   * @var boolean
+   */
+  private static $active = false;
+  
+  /**
+   * @var resource[]
+   */
+  private static $transactions = array();
+  
+  /**
+   * @var int
+   */
   private static $isolationLevel = null;
   
+  /**
+   * @param int $isolationLevel
+   *
+   * @throws Sabel_Exception_InvalidArgument
+   * @return void
+   */
   public static function activate($isolationLevel = null)
   {
     self::$active = true;
@@ -32,15 +49,25 @@ class Sabel_DB_Transaction
     }
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return boolean
+   */
   public static function isActive($connectionName = null)
   {
     if ($connectionName === null) {
       return self::$active;
     } else {
-      return (isset(self::$transactions[$connectionName]));
+      return isset(self::$transactions[$connectionName]);
     }
   }
   
+  /**
+   * @param string $connectionName
+   *
+   * @return resource
+   */
   public static function getConnection($connectionName)
   {
     if (isset(self::$transactions[$connectionName]["conn"])) {
@@ -50,6 +77,12 @@ class Sabel_DB_Transaction
     }
   }
   
+  /**
+   * @param Sabel_DB_Abstract_Driver $driver
+   *
+   * @throws Sabel_DB_Exception_Transaction
+   * @return void
+   */
   public static function begin(Sabel_DB_Abstract_Driver $driver)
   {
     switch (self::$isolationLevel) {
@@ -70,10 +103,14 @@ class Sabel_DB_Transaction
     }
     
     $connectionName = $driver->getConnectionName();
-    self::$transactions[$connectionName]["conn"]   = $driver->begin($iLevel);
-    self::$transactions[$connectionName]["driver"] = $driver;
     
-    self::$active = true;
+    try {
+      self::$transactions[$connectionName]["conn"]   = $driver->begin($iLevel);
+      self::$transactions[$connectionName]["driver"] = $driver;
+      self::$active = true;
+    } catch (Exception $e) {
+      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+    }
   }
   
   /**

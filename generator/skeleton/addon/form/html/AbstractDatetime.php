@@ -4,11 +4,11 @@
  * Form_Html_AbstractDatetime
  *
  * @abstract
- * @category  Addon
- * @package   addon.form
- * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
+ * @category   Addon
+ * @package    addon.form
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 abstract class Form_Html_AbstractDatetime extends Sabel_Object
 {

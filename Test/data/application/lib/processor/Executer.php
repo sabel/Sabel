@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Processor_Executer
- *
- * @category   Processor
- * @package    lib.processor
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
 class TestProcessor_Executer extends Sabel_Bus_Processor
 {
   public function execute($bus)

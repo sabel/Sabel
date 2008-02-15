@@ -1,21 +1,14 @@
 <?php
 
-/**
- * Processor_Initializer
- *
- * @category   Processor
- * @package    lib.processor
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
 class TestProcessor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
+    Sabel_DB_Config::initialize($bus->getConfig("database"));
     //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility" . PHP_SUFFIX, true);
     
-    Sabel_DB_Config::initialize($bus->getConfig("database"));
+    // start session.
+    $bus->get("session")->start();
     
     // default page title.
     $bus->get("response")->setResponse("pageTitle", "Sabel");

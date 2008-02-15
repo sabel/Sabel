@@ -10,7 +10,7 @@ if (!defined("GETTEXT_DEFAULT_DOMAIN")) {
  * @category   I18n
  * @package    org.sabel.i18n
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_I18n_Gettext

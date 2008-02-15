@@ -1,14 +1,5 @@
 <?php
 
-/**
- * Processor_View
- *
- * @category   Processor
- * @package    lib.processor
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
 class TestProcessor_View extends Sabel_Bus_Processor
 {
   public function execute($bus)

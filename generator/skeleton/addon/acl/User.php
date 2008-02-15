@@ -15,7 +15,14 @@ class Acl_User
   const AUTHED_KEY  = "authenticated";
   const SESSION_KEY = "sbl_acl_user";
   
+  /**
+   * @var Sabel_Session_Abstract
+   */
   private $session = null;
+  
+  /**
+   * @var array
+   */
   private $attributes = array();
   
   public function __construct(Sabel_Session_Abstract $session)
