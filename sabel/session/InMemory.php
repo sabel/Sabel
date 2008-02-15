@@ -6,7 +6,7 @@
  * @category   Session
  * @package    org.sabel.session
  * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_Session_InMemory extends Sabel_Session_Abstract

@@ -6,7 +6,7 @@
  * @category   I18n
  * @package    org.sabel.i18n
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_I18n_Sabel_Gettext

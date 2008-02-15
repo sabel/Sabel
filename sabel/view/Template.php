@@ -7,7 +7,7 @@
  * @category   View
  * @package    org.sabel.view
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 abstract class Sabel_View_Template extends Sabel_Object

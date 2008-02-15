@@ -6,7 +6,7 @@
  * @category   Template
  * @package    org.sabel.template
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
- * @copyright  2002-2006 Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @copyright  2004-2008 Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_View_Pager extends Sabel_Object
