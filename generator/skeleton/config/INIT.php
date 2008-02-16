@@ -22,7 +22,6 @@ define("SCHEMA_DIR_PATH",  RUN_BASE . DS . LIB_DIR_NAME . DS . "schema");
 define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
 define("LOG_DIR_PATH",     RUN_BASE . DS . "logs");
 define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
-define("TEST_DIR_PATH",    RUN_BASE . DS . "tests");
 
 define("DEFAULT_LAYOUT_NAME", "layout");
 

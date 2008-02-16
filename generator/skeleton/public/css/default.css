@@ -56,7 +56,7 @@ div.content {
   width: 800px;
 }
 
-fieldset {
+fieldset.formField {
   border: none;
 }
 

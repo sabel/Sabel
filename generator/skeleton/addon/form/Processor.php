@@ -47,6 +47,7 @@ class Form_Processor extends Sabel_Bus_Processor
       $seskey = $this->unityId . "_" . $token;
       if (isset($forms[$seskey])) {
         $form = unserialize($forms[$seskey]);
+        $form->setToken($token);
         $this->session->write($seskey, "", self::SES_TIMEOUT);
         
         if ($this->request->isPost()) {

@@ -31,6 +31,23 @@ function l($message, $level = LOG_INFO, $fileName = null)
   Sabel_Logger_File::singleton()->write($message, $level, $fileName);
 }
 
+function uri($uriParameter, $secure = false, $absolute = false)
+{
+  if ($secure || $absolute) {
+    $protocol  = ($secure) ? "https" : "http";
+    $uriPrefix = $protocol . "://" . Sabel_Environment::get("HTTP_HOST");
+  } else {
+    $uriPrefix = "";
+  }
+  
+  if (defined("URI_IGNORE")) {
+    $uriPrefix .= $_SERVER["SCRIPT_NAME"];
+  }
+  
+  $uri = Sabel_Context::getContext()->getCandidate()->uri($uriParameter);
+  return $uriPrefix . "/" . $uri;
+}
+
 function realempty($value)
 {
   return ($value === null || $value === array() || $value === "");
@@ -67,11 +84,6 @@ function dump()
   }
 }
 
-function candidate($name, $uri, $options = null)
-{
-  Sabel_Map_Configurator::addCandidate($name, $uri, $options);
-}
-
 function environment($string)
 {
   switch (strtolower($string)) {
@@ -81,26 +93,32 @@ function environment($string)
   }
 }
 
-function _A($obj)
-{
-  return new Sabel_Aspect_Proxy($obj);
-}
-
 function now()
 {
   return date("Y-m-d H:i:s");
 }
 
-function _new($className)
+function htmlescape($string, $charset = null)
 {
-  $args = func_get_args();
-  unset($args[0]);
+  if ($charset !== null) {
+    return htmlentities($string, ENT_QUOTES, $charset);
+  }
   
-  if (($c = count($args)) === 0) {
-    return new $className();
+  static $internalEncoding = null;
+  
+  if ($internalEncoding === null) {
+    if (extension_loaded("mbstring")) {
+      $internalEncoding = ini_get("mbstring.internal_encoding");
+      if ($internalEncoding === "") $internalEncoding = false;
+    } else {
+      $internalEncoding = false;
+    }
+  }
+  
+  if ($internalEncoding) {
+    return htmlentities($string, ENT_QUOTES, $internalEncoding);
   } else {
-    $reflection = new ReflectionClass($className);
-    return $reflection->newInstanceArgs($args);
+    return htmlentities($string, ENT_QUOTES);
   }
 }
 

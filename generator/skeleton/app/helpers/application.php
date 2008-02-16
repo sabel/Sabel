@@ -14,31 +14,13 @@ function ah($param, $anchor, $queryString = "")
   return a($param, h($anchor), $queryString);
 }
 
-function uri($uriParameter, $absolute = false, $secure = false)
-{
-  $ignored   = "";
-  $uriPrefix = "";
-
-  if ($absolute) {
-    $protocol  = ($secure) ? "https" : "http";
-    $uriPrefix = $protocol . "://" . Sabel_Environment::get("HTTP_HOST");
-  }
-  
-  if (defined("URI_IGNORE")) {
-    $ignored = $_SERVER["SCRIPT_NAME"];
-  }
-  
-  $uri = Sabel_Context::getContext()->getCandidate()->uri($uriParameter);
-  return $ignored . $uriPrefix . "/" . $uri;
-}
-
 function linkto($file)
 {
-  $ignored = "";
   if (defined("URI_IGNORE")) {
-    $ignored = dirname($_SERVER["SCRIPT_NAME"]);
+    return dirname($_SERVER["SCRIPT_NAME"]) . "/" . $file;
+  } else {
+    return "/" . $file;
   }
-  return $ignored . "/" . $file;
 }
 
 function css($file)
@@ -52,6 +34,16 @@ function css($file)
     $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
     return sprintf($fmt, "/css/{$file}.css");
   }
+}
+
+function h($string, $charset = null)
+{
+  return htmlescape($string, $charset);
+}
+
+function mb_trim($string)
+{
+  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
 }
 
 function form_start($uri, $class = null, $id = null, $name = null)
@@ -68,16 +60,6 @@ function form_start($uri, $class = null, $id = null, $name = null)
 function form_end()
 {
   return "</fieldset></form>";
-}
-
-function h($content)
-{
-  return htmlspecialchars($content, ENT_QUOTES);
-}
-
-function mb_trim($string)
-{
-  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
 }
 
 function to_date($date, $format)
