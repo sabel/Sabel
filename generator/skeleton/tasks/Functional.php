@@ -9,7 +9,7 @@ Sabel::fileUsing("tasks" . DS . "Tests.php", true);
  * @package    org.sabel.sakle
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Functional extends Tests

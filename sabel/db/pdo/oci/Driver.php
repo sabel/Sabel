@@ -13,11 +13,6 @@ class Sabel_DB_Pdo_Oci_Driver extends Sabel_DB_Pdo_Driver
 {
   private $lastInsertId = null;
   
-  public function getDriverId()
-  {
-    return "pdooci";
-  }
-  
   public function connect(array $params)
   {
     try {

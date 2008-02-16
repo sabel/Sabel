@@ -3,17 +3,16 @@
 /**
  * Flow_State
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.flow
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Flow_State
 {
-  const SES_TIMEOUT = 900;
+  const SES_TIMEOUT = 600;
   
   private $properties = array();
   
@@ -38,17 +37,17 @@ class Flow_State
   
   public function has($name)
   {
-    return isset($this->properties[$name]);
-  }
-  
-  public function __get($name)
-  {
-    return $this->read($name);
+    return array_key_exists($name, $this->properties);
   }
   
   public function __set($name, $value)
   {
     $this->write($name, $value);
+  }
+  
+  public function __get($name)
+  {
+    return $this->read($name);
   }
   
   public function getProperties()
@@ -83,9 +82,9 @@ class Flow_State
     return $this->properties["currentActivity"];
   }
   
-  public function restore($storage, $key)
+  public function restore($session, $key)
   {
-    $properties = $storage->read($this->getStateKey($key));
+    $properties = $session->read($this->getStateKey($key));
     
     if ($properties === null) {
       return null;
@@ -95,9 +94,9 @@ class Flow_State
     }
   }
   
-  public function save($storage)
+  public function save($session)
   {
-    $storage->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
+    $session->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
   }
   
   public function setNextActions($actions)
@@ -107,7 +106,7 @@ class Flow_State
   
   public function isMatchToNext($currentAction)
   {
-    return (in_array($currentAction, $this->properties["nexts"]));
+    return in_array($currentAction, $this->properties["nexts"]);
   }
   
   public function isPreviousAction($action)
@@ -124,9 +123,9 @@ class Flow_State
     $token = $this->properties["token"];
     
     if ($key !== "") {
-      return $key . "_flow_state_" . $token;
+      return $key . "_flow_" . $token;
     } else {
-      return $this->key . "_flow_state_" . $token;
+      return $this->key . "_flow_" . $token;
     }
   }
 }

@@ -1,44 +1,26 @@
 <?php
 
-function a($uri, $anchor, $param = null)
+function a($uri, $anchor, $queryString = "")
 {
-  if ($param === null) {
-    return '<a href="' . uri($uri) . '">' . $anchor . '</a>';
+  if ($queryString === "") {
+    return sprintf('<a href="%s">%s</a>', uri($uri), $anchor);
   } else {
-    return '<a href="' . uri($uri) . $param . '">' . $anchor . '</a>';
+    return sprintf('<a href="%s?%s">%s</a>', uri($uri), $queryString, $anchor);
   }
 }
 
-function ah($param, $anchor)
+function ah($param, $anchor, $queryString = "")
 {
-  return a($param, htmlspecialchars($anchor));
-}
-
-function uri($uriParameter, $absolute = false, $secure = false)
-{
-  $ignored   = "";
-  $uriPrefix = "";
-
-  if ($absolute) {
-    $protocol  = ($secure) ? "https" : "http";
-    $uriPrefix = $protocol . "://" . Sabel_Environment::get("HTTP_HOST");
-  }
-  
-  if (defined("URI_IGNORE")) {
-    $ignored = $_SERVER["SCRIPT_NAME"];
-  }
-  
-  $uri = Sabel_Context::getContext()->getCandidate()->uri($uriParameter);
-  return $ignored . $uriPrefix . "/" . $uri;
+  return a($param, h($anchor), $queryString);
 }
 
 function linkto($file)
 {
-  $ignored = "";
   if (defined("URI_IGNORE")) {
-    $ignored = dirname($_SERVER["SCRIPT_NAME"]);
+    return dirname($_SERVER["SCRIPT_NAME"]) . "/" . $file;
+  } else {
+    return "/" . $file;
   }
-  return $ignored . "/" . $file;
 }
 
 function css($file)
@@ -52,6 +34,16 @@ function css($file)
     $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
     return sprintf($fmt, "/css/{$file}.css");
   }
+}
+
+function h($string, $charset = null)
+{
+  return htmlescape($string, $charset);
+}
+
+function mb_trim($string)
+{
+  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
 }
 
 function form_start($uri, $class = null, $id = null, $name = null)
@@ -68,16 +60,6 @@ function form_start($uri, $class = null, $id = null, $name = null)
 function form_end()
 {
   return "</fieldset></form>";
-}
-
-function h($content)
-{
-  return htmlspecialchars($content);
-}
-
-function mb_trim($string)
-{
-  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
 }
 
 function to_date($date, $format)

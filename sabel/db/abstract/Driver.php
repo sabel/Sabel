@@ -32,7 +32,6 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
    */
   protected $connection = null;
   
-  abstract public function getDriverId();
   abstract public function connect(array $params);
   abstract public function begin($isolationLevel = null);
   abstract public function commit();
@@ -44,6 +43,11 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function __construct($connectionName)
   {
     $this->connectionName = $connectionName;
+  }
+  
+  public function getConnectionName()
+  {
+    return $this->connectionName;
   }
   
   public function setConnection($connection)
@@ -59,11 +63,6 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
-  }
-  
-  public function getConnectionName()
-  {
-    return $this->connectionName;
   }
   
   public function setTransactionIsolationLevel($level)
@@ -97,6 +96,7 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
         $val = ($val === null) ? "NULL" : $val;
         $sql = str_replace($key, $val, $sql);
       }
+      
       return $sql;
     } else {
       return str_replace(array_keys($bindParam), $bindParam, $sql);

@@ -14,11 +14,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
   private $lastInsertId   = null;
   private $isolationLevel = 0;
   
-  public function getDriverId()
-  {
-    return "ibase";
-  }
-  
   public function connect(array $params)
   {
     $host = $params["host"]. ":" . $params["database"];

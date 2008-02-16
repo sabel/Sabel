@@ -3,19 +3,32 @@
 /**
  * Acl_User
  *
- * @version    1.0
  * @category   Addon
  * @package    addon.acl
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Acl_User
 {
-  const AUTHED_KEY = "authenticated";
+  const AUTHED_KEY  = "authenticated";
+  const SESSION_KEY = "sbl_acl_user";
   
+  /**
+   * @var Sabel_Session_Abstract
+   */
+  private $session = null;
+  
+  /**
+   * @var array
+   */
   private $attributes = array();
+  
+  public function __construct(Sabel_Session_Abstract $session)
+  {
+    $this->session = $session;
+  }
   
   public function __set($key, $value)
   {
@@ -31,25 +44,47 @@ class Acl_User
     }
   }
   
+  public function getSessionId()
+  {
+    return $this->session->getId();
+  }
+  
   public function toArray()
   {
     return $this->attributes;
   }
   
-  public function restore($attributes)
+  public function restore()
   {
-    $this->attributes = $attributes;
+    if ($attributes = $this->session->read(self::SESSION_KEY)) {
+      $this->attributes = $attributes;
+    }
   }
   
-  public function authenticate($role)
+  public function save()
+  {
+    $this->session->write(self::SESSION_KEY, $this->attributes);
+  }
+  
+  public function isAuthenticated()
+  {
+    $attr = $this->attributes;
+    return (isset($attr[self::AUTHED_KEY]) && $attr[self::AUTHED_KEY]);
+  }
+  
+  public function authenticate($role, $regenerateId = true)
   {
     $this->attributes[self::AUTHED_KEY] = true;
     $this->addRole($role);
+    
+    if ($regenerateId) {
+      $this->session->regenerateId(true);
+    }
   }
   
   public function deAuthenticate()
   {
-    $this->destroy();
+    $this->attributes = array(self::AUTHED_KEY => false);
   }
   
   public function addRole($add)
@@ -58,7 +93,7 @@ class Acl_User
     
     if ($role === null) {
       $this->attributes["role"] = array($add);
-    } elseif (!in_array($add, $role)) {
+    } elseif (!in_array($add, $role, true)) {
       $role[] = $add;
       $this->attributes["role"] = $role;
     }
@@ -72,23 +107,5 @@ class Acl_User
       unset($role[$remove]);
       $this->attributes["role"] = $role;
     }
-  }
-  
-  public function isAuthenticated()
-  {
-    $attr = $this->attributes;
-    return (isset($attr[self::AUTHED_KEY]) && $attr[self::AUTHED_KEY]);
-  }
-  
-  public function isTypeOf($compare)
-  {
-    if (!isset($this->attributes["type"])) return false;
-    return ($this->attributes["type"] === $compare);
-  }
-  
-  public function destroy()
-  {
-    $this->attributes = array();
-    $this->attributes[self::AUTHED_KEY] = false;
   }
 }

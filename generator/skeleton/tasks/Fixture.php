@@ -7,8 +7,10 @@ Sabel::fileUsing("tasks/environment.php");
 /**
  * Fixture
  *
- * @author     Mori Reo <mori.reo@gmail.com>
- * @copyright  2002-2006 Mori Reo <mori.reo@gmail.com>
+ * @category   Sakle
+ * @package    org.sabel.sakle
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Fixture extends Sabel_Sakle_Task

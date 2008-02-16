@@ -11,11 +11,6 @@
  */
 class Sabel_DB_Pdo_Pgsql_Driver extends Sabel_DB_Pdo_Driver
 {
-  public function getDriverId()
-  {
-    return "pdopgsql";
-  }
-  
   public function connect(array $params)
   {
     try {

@@ -11,11 +11,6 @@
  */
 class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function getDriverId()
-  {
-    return "pgsql";
-  }
-  
   public function connect(array $params)
   {
     $host = $params["host"];

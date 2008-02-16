@@ -3,11 +3,11 @@
 /**
  * Migration
  *
- * @category  Sakle
- * @package   org.sabel.sakle
- * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
+ * @category   Sakle
+ * @package    org.sabel.sakle
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class Migration extends Sabel_Sakle_Task
 {

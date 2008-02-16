@@ -26,11 +26,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
    */
   private $lastInsertId = null;
   
-  public function getDriverId()
-  {
-    return "oci";
-  }
-  
   public function connect(array $params)
   {
     $database = "//" . $params["host"] . "/" . $params["database"];

@@ -11,11 +11,21 @@
  */
 class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
 {
-  private
-    $comments    = array(),
-    $sequences   = array(),
-    $primaryKeys = array();
-    
+  /**
+   * @var array
+   */
+  private $comments = array();
+  
+  /**
+   * @var array
+   */
+  private $sequences = array();
+  
+  /**
+   * @var array
+   */
+  private $primaryKeys = array();
+  
   public function getTableList()
   {
     $sql  = "SELECT table_name FROM all_tables WHERE owner = '{$this->schemaName}'";
@@ -34,12 +44,14 @@ class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
   {
     $tblName = strtoupper($tblName);
     
-    $sql = "SELECT table_name, column_name, data_type, "
-         . "data_precision, nullable, data_default, "
-         . "char_length FROM all_tab_columns "
-         . "WHERE owner = '{$this->schemaName}' "
-         . "AND table_name = '{$tblName}'";
-         
+    $sql = <<<SQL
+SELECT
+  table_name, column_name, data_type, data_precision,
+  nullable, data_default, char_length
+  FROM all_tab_columns
+  WHERE owner = '{$this->schemaName}' AND table_name = '{$tblName}'
+SQL;
+    
     $rows = $this->driver->execute($sql);
     if (empty($rows)) return array();
     
@@ -111,19 +123,22 @@ class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
   {
     $tblName = strtoupper($tblName);
     
-    $sql = "SELECT acc.column_name, ac2.table_name AS ref_table, "
-         . "acc2.column_name AS ref_column, ac.delete_rule "
-         . "FROM all_constraints ac "
-         . "INNER JOIN all_cons_columns acc "
-         . "ON acc.constraint_name = ac.constraint_name "
-         . "INNER JOIN all_constraints ac2 "
-         . "ON ac2.constraint_name = ac.r_constraint_name "
-         . "INNER JOIN all_cons_columns acc2 "
-         . "ON acc2.constraint_name = ac2.constraint_name "
-         . "WHERE ac.owner = '{$this->schemaName}' "
-         . "AND ac.constraint_type = 'R' "
-         . "AND ac.table_name = '{$tblName}'";
-         
+    $sql = <<<SQL
+SELECT
+  acc.column_name, ac2.table_name AS ref_table,
+  acc2.column_name AS ref_column, ac.delete_rule
+  FROM all_constraints ac
+  INNER JOIN all_cons_columns acc
+    ON acc.constraint_name = ac.constraint_name
+  INNER JOIN all_constraints ac2
+    ON ac2.constraint_name = ac.r_constraint_name
+  INNER JOIN all_cons_columns acc2
+    ON acc2.constraint_name = ac2.constraint_name
+  WHERE ac.owner = '{$this->schemaName}'
+    AND ac.constraint_type = 'R'
+    AND ac.table_name = '{$tblName}'
+SQL;
+    
     $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
     
@@ -142,14 +157,18 @@ class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
   public function getUniques($tblName)
   {
     $tblName = strtoupper($tblName);
-
-    $sql = "SELECT acc.constraint_name, acc.column_name "
-         . "FROM all_cons_columns acc "
-         . "INNER JOIN all_constraints ac "
-         . "ON ac.constraint_name = acc.constraint_name "
-         . "where ac.owner = '{$this->schemaName}' "
-         . "AND ac.constraint_type = 'U' AND acc.table_name = '{$tblName}'";
-         
+    
+    $sql = <<<SQL
+SELECT
+  acc.constraint_name, acc.column_name
+  FROM all_cons_columns acc
+  INNER JOIN all_constraints ac
+    ON ac.constraint_name = acc.constraint_name
+  WHERE ac.owner = '{$this->schemaName}'
+    AND ac.constraint_type = 'U'
+    AND acc.table_name = '{$tblName}'
+SQL;
+    
     $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
     
@@ -182,13 +201,17 @@ class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
   {
     if (!empty($this->primaryKeys)) return;
     
-    $sql = "SELECT acc.column_name FROM all_cons_columns acc "
-         . "INNER JOIN all_constraints ac "
-         . "ON ac.constraint_name = acc.constraint_name "
-         . "WHERE ac.owner = '{$this->schemaName}' "
-         . "AND ac.constraint_type = 'P' "
-         . "AND acc.table_name = '{$tblName}'";
-         
+    $sql = <<<SQL
+SELECT
+  acc.column_name
+  FROM all_cons_columns acc
+  INNER JOIN all_constraints ac
+    ON ac.constraint_name = acc.constraint_name
+  WHERE ac.owner = '{$this->schemaName}'
+    AND ac.constraint_type = 'P'
+    AND acc.table_name = '{$tblName}'
+SQL;
+    
     $keys =& $this->primaryKeys;
     $rows = $this->driver->execute($sql);
     if (empty($rows)) return;

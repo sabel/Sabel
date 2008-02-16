@@ -3,7 +3,7 @@
 /**
  * Sabel - Rapid Web Application Development Framework
  *
- * Copyright (c) 2005-2008 Mori Reo <mori.reo@sabel.jp>
+ * Copyright (c) 2004-2008 Mori Reo <mori.reo@sabel.jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,7 @@ spl_autoload_register(array("Sabel", "autoload"));
  * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2005-2008 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 final class Sabel

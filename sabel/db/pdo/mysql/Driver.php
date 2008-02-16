@@ -11,11 +11,6 @@
  */
 class Sabel_DB_Pdo_Mysql_Driver extends Sabel_DB_Pdo_Driver
 {
-  public function getDriverId()
-  {
-    return "pdomysql";
-  }
-  
   public function connect(array $params)
   {
     try {

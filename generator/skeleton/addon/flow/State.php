@@ -12,7 +12,7 @@
  */
 class Flow_State
 {
-  const SES_TIMEOUT = 900;
+  const SES_TIMEOUT = 600;
   
   private $properties = array();
   

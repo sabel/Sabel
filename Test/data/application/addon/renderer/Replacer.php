@@ -6,7 +6,7 @@
  * @category   Addon
  * @package    addon.renderer
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Renderer_Replacer extends Sabel_Object
@@ -156,7 +156,7 @@ class Renderer_Replacer extends Sabel_Object
     if ($form{0} !== '$') $form = '$' . $form . "Form";
     
     $fmt = '<? if (%1$s->hasError()) : ?>' . PHP_EOL
-         . '  <?= $this->partial("error", null, array("errors" => %1$s->getErrors())) ?>' . PHP_EOL
+         . '  <?= $this->partial("error", array("errors" => %1$s->getErrors())) ?>' . PHP_EOL
          . '<? endif ?>';
          
     return sprintf($fmt, $form);

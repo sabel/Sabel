@@ -3,29 +3,56 @@
 /**
  * Form_Html
  *
- * @category  Addon
- * @package   addon.form
- * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
+ * @category   Addon
+ * @package    addon.form
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class Form_Html extends Sabel_Object
 {
-  protected
-    $name  = "",
-    $value = null,
-    $id    = "",
-    $class = "";
-    
-  public function __construct($name)
+  /**
+   * @var string
+   */
+  protected $name = "";
+  
+  /**
+   * @var string
+   */
+  protected $value = null;
+  
+  /**
+   * @var string
+   */
+  protected $id = "";
+  
+  /**
+   * @var string
+   */
+  protected $class = "";
+  
+  /**
+   * @param string $name
+   *
+   * @throws Sabel_Exception_InvalidArgument
+   * @return self
+   */
+  public function setName($name)
   {
     if (is_string($name)) {
       $this->name = $name;
     } else {
-      throw new Exception("name must be a string.");
+      throw new Sabel_Exception_InvalidArgument("name must be a string.");
     }
+    
+    return $this;
   }
   
+  /**
+   * @param mixed $value
+   *
+   * @return self
+   */
   public function setValue($value)
   {
     $this->value = $value;
@@ -33,34 +60,61 @@ class Form_Html extends Sabel_Object
     return $this;
   }
   
+  /**
+   * @param string $id
+   *
+   * @throws Sabel_Exception_InvalidArgument
+   * @return self
+   */
   public function setId($id)
   {
     if ($id !== null) {
       if (is_string($id)) {
         $this->id = $id;
       } else {
-        throw new Exception("id must be a string.");
+        throw new Sabel_Exception_InvalidArgument("id must be a string.");
       }
     }
     
     return $this;
   }
   
+  /**
+   * @param string $id
+   *
+   * @throws Sabel_Exception_InvalidArgument
+   * @return self
+   */
   public function setClass($class)
   {
     if ($class !== null) {
       if (is_string($class)) {
         $this->class = $class;
       } else {
-        throw new Exception("class must be a string.");
+        throw new Sabel_Exception_InvalidArgument("class must be a string.");
       }
     }
     
     return $this;
   }
   
+  /**
+   * @return self
+   */
+  public function clear()
+  {
+    $this->name  = "";
+    $this->id    = "";
+    $this->class = "";
+    $this->vlaue = null;
+    
+    return $this;
+  }
+  
   public function open($uri = "", $method = "post")
   {
+    // @todo absolute path, https
+    
     $html = '<form action="' . uri($uri) . '" method="' . $method . '" ';
     $this->addIdAndClass($html);
     if ($this->name !== "") $html .= 'name="' . $this->name . '" ';
@@ -78,6 +132,20 @@ class Form_Html extends Sabel_Object
     $html = '<input type="submit" ';
     $this->addIdAndClass($html);
     $html .= 'value="' . $text . '" />';
+    
+    return $html . PHP_EOL;
+  }
+  
+  public function link($uri, $text, $token = "")
+  {
+    // @todo https
+    
+    $url = "http://" . Sabel_Environment::get("HTTP_HOST") . uri($uri);
+    if ($token !== "") $url .= "?token={$token}";
+    
+    $html = '<a href="' . $url . '" ';
+    $this->addIdAndClass($html);
+    $html .= '>' . $text . '</a>';
     
     return $html . PHP_EOL;
   }

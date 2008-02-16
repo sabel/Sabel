@@ -11,11 +11,6 @@
  */
 class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
 {
-  public function getDriverId()
-  {
-    return "mysqli";
-  }
-  
   public function connect(array $params)
   {
     $h = $params["host"];

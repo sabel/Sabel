@@ -3,24 +3,14 @@
 /**
  * Form_Object
  *
- * @category  Addon
- * @package   addon.form
- * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright 2002-2006 Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @license   http://www.opensource.org/licenses/bsd-license.php BSD License
+ * @category   Addon
+ * @package    addon.form
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 class Form_Object extends Sabel_Object
 {
-  /**
-   * @var Sabel_DB_Model
-   */
-  protected $model = null;
-  
-  /**
-   * @var string
-   */
-  protected $mdlName = "";
-  
   /**
    * @var string
    */
@@ -32,7 +22,22 @@ class Form_Object extends Sabel_Object
   protected $token = null;
   
   /**
-   * @var Sabel_DB_Schema_Column[]
+   * @var Form_Html
+   */
+  protected $htmlWriter = null;
+  
+  /**
+   * @var Sabel_DB_Model
+   */
+  protected $model = null;
+  
+  /**
+   * @var string
+   */
+  protected $mdlName = "";
+  
+  /**
+   * @var Sabel_DB_Metadata_Column[]
    */
   protected $columns = array();
   
@@ -52,19 +57,12 @@ class Form_Object extends Sabel_Object
       $model = MODEL($model);
     }
     
-    $this->model    = $model;
-    $this->formName = $fName;
-    $this->token    = $token;
-    $this->mdlName  = $model->getName();
-    $this->columns  = $model->getSchema()->getColumns();
-  }
-  
-  /**
-   * @return string
-   */
-  public function getToken()
-  {
-    return $this->token;
+    $this->model      = $model;
+    $this->formName   = $fName;
+    $this->htmlWriter = new Form_Html();
+    $this->token      = $token;
+    $this->mdlName    = $model->getName();
+    $this->columns    = $model->getColumns();
   }
   
   /**
@@ -73,6 +71,24 @@ class Form_Object extends Sabel_Object
   public function getFormName()
   {
     return $this->formName;
+  }
+  
+  /**
+   * @param string $token
+   *
+   * @return void
+   */
+  public function setToken($token)
+  {
+    $this->token = $token;
+  }
+  
+  /**
+   * @return string
+   */
+  public function getToken()
+  {
+    return $this->token;
   }
   
   /**
@@ -97,7 +113,7 @@ class Form_Object extends Sabel_Object
   public function get($key)
   {
     $result = $this->model->__get($key);
-    return (is_string($result)) ? htmlspecialchars($result) : $result;
+    return (is_string($result)) ? htmlescape($result) : $result;
   }
   
   public function __set($key, $val)
@@ -245,19 +261,9 @@ class Form_Object extends Sabel_Object
     return $this->getHtmlWriter("", "", $id, $class)->submit($text);
   }
   
-  public function button($uri, $text, $class = null, $id = null)
+  public function link($uri, $text, $class = null, $id = null)
   {
-    // @todo
-    
-    $fmt = '<input %s%stype="button" value="%s" '
-         . 'onclick="window.location.href=\'http://%s%s%s\'" />';
-         
-    $id    = ($id === null)    ? "" : 'id="' . $id . '" ';
-    $class = ($class === null) ? "" : 'class="' . $class . '" ';
-    $token = ($this->token === null) ? "" : "?token={$this->token}";
-    
-    $domain = Sabel_Environment::get("http_host");
-    return sprintf($fmt, $id, $class, $text, $domain, uri($uri), $token);
+    return $this->getHtmlWriter("", "", $id, $class)->link($uri, $text, $this->token);
   }
   
   public function text($name, $class = null, $id = null)
@@ -330,6 +336,7 @@ class Form_Object extends Sabel_Object
   {
     $eName  = $this->createInputName("date") . "[{$name}]";
     $writer = $this->getHtmlWriter($name, $eName);
+    
     return $writer->date($yearRange, $defaultNull);
   }
   
@@ -340,9 +347,31 @@ class Form_Object extends Sabel_Object
   
   private function getHtmlWriter($name, $inputName, $id = null, $class = null)
   {
-    if ($name !== "") $this->allowCols[] = $name;
+    if ($name !== "" && !in_array($name, $this->allowCols, true)) {
+      $this->allowCols[] = $name;
+    }
     
-    $html = new Form_Html($inputName);
-    return $html->setValue($this->get($name))->setId($id)->setClass($class);
+    $writer = $this->htmlWriter->clear();
+    
+    return $writer->setName($inputName)
+                  ->setValue($this->get($name))
+                  ->setId($id)
+                  ->setClass($class);
+  }
+  
+  public function __sleep()
+  {
+    $this->model = $this->model->toArray();
+    return array("model", "mdlName", "formName", "errors", "allowCols");
+  }
+  
+  public function __wakeup()
+  {
+    $model = MODEL($this->mdlName);
+    $model->setProperties($this->model);
+    
+    $this->model      = $model;
+    $this->columns    = $model->getColumns();
+    $this->htmlWriter = new Form_Html();
   }
 }
