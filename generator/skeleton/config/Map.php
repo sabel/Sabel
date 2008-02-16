@@ -18,5 +18,11 @@ class Config_Map extends Sabel_Map_Configurator
            ->module("index")
            ->defaults(array(":controller" => "index",
                             ":action"     => "index"));
+    
+    $this->route("notfound")
+           ->uri("*")
+           ->module("index")
+           ->controller("index")
+           ->action("notFound");
   }
 }

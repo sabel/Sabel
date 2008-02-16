@@ -14,9 +14,15 @@ class Form_Processor extends Sabel_Bus_Processor
   const SESSION_KEY = "sbl_forms";
   const SES_TIMEOUT = 300;
   
-  private
-    $forms   = array(),
-    $unityId = "";
+  /**
+   * @var Form_Object[]
+   */
+  private $forms = array();
+  
+  /**
+   * @var string
+   */
+  private $unityId = "";
   
   public function execute($bus)
   {

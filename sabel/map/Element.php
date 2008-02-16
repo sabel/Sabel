@@ -38,11 +38,6 @@ class Sabel_Map_Element
   public $extension = "";
   
   /**
-   * @var boolean
-   */
-  public $matchAll  = false;
-  
-  /**
    * @var mixed
    */
   public $default = "";
@@ -50,22 +45,22 @@ class Sabel_Map_Element
   /**
    * @var boolean
    */
-  public $omittable = false;
+  protected $omittable = false;
   
   /**
    * @var Sabel_Map_Requirement_Regex
    */
-  public $requirement = null;
+  protected $requirement = null;
   
   /**
    * @var boolean
    */
-  public $isConstant = false;
+  protected $isConstant = false;
   
   /**
    * @var boolean
    */
-  public $isArray = false;
+  protected $isArray = false;
   
   public function __construct($name, $options)
   {
@@ -126,9 +121,9 @@ class Sabel_Map_Element
     return is_object($this->requirement);
   }
   
-  public function isMatchAll()
+  public function isOmittable()
   {
-    return $this->matchAll;
+    return $this->omittable;
   }
   
   public function hasDefault()

@@ -12,29 +12,20 @@
  */
 abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
 {
-  protected
-    $maxLifetime    = 0,
-    $useOnlyCookies = false,
-    $useCookies     = false;
+  /**
+   * @var int
+   */
+  protected $maxLifetime = 0;
   
-  public function start()
-  {
-    if ($this->started) return false;
-    
-    $sessionId = $this->initSession();
-    if ($sessionId === false) return false;
-    
-    if ($this->sessionId === "") {
-      $this->sessionId  = $sessionId;
-      $this->attributes = $this->getSessionData($this->sessionId);
-    } else {
-      $this->attributes = $this->getSessionData($sessionId);
-    }
-    
-    $this->initialize();
-    
-    return true;
-  }
+  /**
+   * @var boolean
+   */
+  protected $useOnlyCookies = false;
+  
+  /**
+   * @var boolean
+   */
+  protected $useCookies = false;
   
   protected function readSessionSettings()
   {

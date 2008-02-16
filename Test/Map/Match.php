@@ -175,7 +175,7 @@ class Test_Map_Match extends SabelTestCase
          ->uri(":controller/:action/:param/:param2")
          ->module("index")
          ->requirements(array(":param" => "/^[0-9]{1}$/", ":param2" => "/^[a-z]+$/"));
-         
+    
     try {
       $candidate = $this->routing("test/test/100/abc");
     } catch (Exception $e) {
@@ -193,11 +193,11 @@ class Test_Map_Match extends SabelTestCase
          ->requirements(array(":year"  => "/^[1-3][0-9]{3}$/",
                               ":month" => "/^[0-2][0-9]$/",
                               ":day"   => "/^[0-3][0-9]$/"));
-         
+    
     $this->route("default")
          ->uri(":controller/:action")
          ->module("index");
-      
+    
     $candidate = $this->routing("blog/article/2008/01/20");
     $this->assertEquals("article", $candidate->getName());
     
@@ -222,11 +222,11 @@ class Test_Map_Match extends SabelTestCase
                               ":month" => "/^[0-2][0-9]$/",
                               ":day"   => "/^[0-3][0-9]$/"))
          ->defaults(array(":day" => "01"));
-         
+    
     $this->route("default")
          ->uri(":controller/:action")
          ->module("index");
-      
+    
     $candidate = $this->routing("blog/article/2008/01");
     
     $this->assertEquals("article", $candidate->getName());
@@ -254,19 +254,19 @@ class Test_Map_Match extends SabelTestCase
          ->requirements(array(":year"  => "/^[1-3][0-9]{3}$/",
                               ":month" => "/^[0-2][0-9]$/",
                               ":day"   => "/^[0-3][0-9]$/"))
-         ->defaults(array(":year" => "2008", ":month" => "01", ":day" => "01"));
-         
+         ->defaults(array(":year" => "2008", ":month" => "01", ":day" => null));
+    
     $this->route("default")
          ->uri(":controller/:action")
          ->module("index")
          ->defaults(array(":action" => "test"));
-      
+    
     $candidate = $this->routing("blog/article");
     
     $this->assertEquals("article", $candidate->getName());
     $this->assertEquals("2008", $candidate->getElementByName("year")->variable);
     $this->assertEquals("01", $candidate->getElementByName("month")->variable);
-    $this->assertEquals("01", $candidate->getElementByName("day")->variable);
+    $this->assertEquals(null, $candidate->getElementByName("day")->variable);
     
     $candidate = $this->routing("test");
     $this->assertEquals("default", $candidate->getName());
@@ -285,11 +285,11 @@ class Test_Map_Match extends SabelTestCase
     $this->route("admin")
          ->uri("admin/:controller/:action")
          ->module("admin");
-         
+    
     $this->route("manage")
          ->uri("manage/:controller/:action")
          ->module("manage");
-        
+    
     $candidate = $this->routing("admin/test/test");
     $this->assertEquals("admin", $candidate->getName());
     
@@ -302,11 +302,11 @@ class Test_Map_Match extends SabelTestCase
     $this->route("admin")
          ->uri("admin/:controller/:action")
          ->module("admin");
-         
+    
     $this->route("manage")
          ->uri("manage/:controller/:action")
          ->module("manage");
-        
+    
     $candidate = $this->routing("admin/test/test/test/test");
     $this->assertEquals("admin", $candidate->getName());
     
@@ -320,11 +320,11 @@ class Test_Map_Match extends SabelTestCase
          ->uri("admin/:controller/:action/:param")
          ->module("admin")
          ->defaults(array(":param" => "param"));
-         
+    
     $this->route("manage")
          ->uri("manage/:controller/:action")
          ->module("manage");
-        
+    
     $candidate = $this->routing("admin/test/test");
     $this->assertEquals("admin", $candidate->getName());
     $this->assertEquals("test", $candidate->getElementByName("controller")->variable);
@@ -340,7 +340,7 @@ class Test_Map_Match extends SabelTestCase
     $this->route("default")
          ->uri(":controller/:action")
          ->module("admin");
-         
+    
     $candidate = $this->routing("index/test.html");
     $this->assertEquals("html", $candidate->getElementByName("action")->extension);
     $this->assertEquals("test", $candidate->getElementByName("action")->variable);
@@ -356,7 +356,7 @@ class Test_Map_Match extends SabelTestCase
     $this->route("default")
          ->uri(":controller/:action/:param")
          ->module("admin");
-         
+    
     $candidate = $this->routing("index/test.html/param.html");
     $this->assertEquals("html", $candidate->getElementByName("action")->extension);
     $this->assertEquals("test", $candidate->getElementByName("action")->variable);
@@ -370,7 +370,7 @@ class Test_Map_Match extends SabelTestCase
     $this->route("default")
          ->uri(":controller/:action/:array[]")
          ->module("admin");
-         
+    
     $candidate = $this->routing("index/test/param/value/value");
     
     $expected = array("param", "value", "value");
@@ -382,12 +382,12 @@ class Test_Map_Match extends SabelTestCase
     $this->route("array")
          ->uri(":controller/:action/:array[]")
          ->module("admin");
-         
+    
     $this->route("default")
          ->uri(":controller/:action")
          ->defaults(array(":action" => "test"))
          ->module("admin");
-         
+    
     $candidate = $this->routing("index/test");
     $this->assertEquals("default", $candidate->getName());
     
@@ -401,13 +401,34 @@ class Test_Map_Match extends SabelTestCase
          ->uri(":controller/:action/:array[]")
          ->defaults(array(":array" => array(0, 1)))
          ->module("admin");
-         
+    
     $this->route("default")
          ->uri(":controller/:action")
          ->module("admin");
-         
+    
     $candidate = $this->routing("index/test");
     $this->assertEquals("array", $candidate->getName());
+  }
+  
+  public function testMatchAll()
+  {
+    $this->route("default")
+         ->uri(":controller/:action")
+         ->module("admin");
+    
+    $this->route("matchall")
+         ->uri("*")
+         ->module("module")
+         ->controller("controller")
+         ->action("action");
+    
+    $candidate = $this->routing("hoge/fuga/foo/bar/baz");
+    $this->assertEquals("matchall", $candidate->getName());
+    
+    $destination = $candidate->getDestination();
+    $this->assertEquals("module",     $destination->getModule());
+    $this->assertEquals("controller", $destination->getController());
+    $this->assertEquals("action",     $destination->getAction());
   }
   
   protected function route($name)
@@ -443,7 +464,5 @@ class Test_Map_Match extends SabelTestCase
 
 class ConfigMap extends Sabel_Map_Configurator
 {
-  public function configure()
-  {
-  }
+  public function configure() {}
 }

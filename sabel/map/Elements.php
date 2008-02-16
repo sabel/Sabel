@@ -120,6 +120,14 @@ class Sabel_Map_Elements extends Sabel_Object
   /**
    * @return boolean
    */
+  public function isMatchAll()
+  {
+    return (count($this->components) === 1 && $this->components[0]->name === "*");
+  }
+  
+  /**
+   * @return boolean
+   */
   public function hasConstant()
   {
     return $this->components[0]->isConstant();

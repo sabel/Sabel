@@ -330,6 +330,7 @@ class Form_Object extends Sabel_Object
   {
     $eName  = $this->createInputName("date") . "[{$name}]";
     $writer = $this->getHtmlWriter($name, $eName);
+    
     return $writer->date($yearRange, $defaultNull);
   }
   

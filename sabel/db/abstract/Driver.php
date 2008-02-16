@@ -17,11 +17,21 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   const TRANS_REPEATABLE_READ  = 3;
   const TRANS_SERIALIZABLE     = 4;
   
-  protected
-    $autoCommit = true,
-    $connection = null,
-    $connectionName = "";
-    
+  /**
+   * @var string
+   */
+  protected $connectionName = "";
+  
+  /**
+   * @var boolean
+   */
+  protected $autoCommit = true;
+  
+  /**
+   * @var resource
+   */
+  protected $connection = null;
+  
   abstract public function getDriverId();
   abstract public function connect(array $params);
   abstract public function begin($isolationLevel = null);

@@ -11,9 +11,15 @@
  */
 class Sabel_Locale_Browser extends Sabel_Object
 {
-  protected
-    $locale    = "",
-    $languages = array();
+  /**
+   * @var string
+   */
+  protected $locale = "";
+  
+  /**
+   * @var array
+   */
+  protected $languages = array();
   
   public function __construct($acceptLanguage = null)
   {
@@ -37,6 +43,7 @@ class Sabel_Locale_Browser extends Sabel_Object
       }
       
       krsort($languages, SORT_NUMERIC);
+      
       $this->languages = array_values($languages);
       $this->locale    = $this->languages[0];
     }

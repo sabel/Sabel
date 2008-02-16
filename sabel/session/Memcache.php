@@ -47,6 +47,21 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     return self::$instance;
   }
   
+  public function start()
+  {
+    if ($this->started) return;
+    if (!$sessionId = $this->initSession()) return;
+    
+    if ($this->sessionId === "") {
+      $this->sessionId  = $sessionId;
+      $this->attributes = $this->getSessionData($this->sessionId);
+    } else {
+      $this->attributes = $this->getSessionData($sessionId);
+    }
+    
+    $this->initialize();
+  }
+  
   public function setId($id)
   {
     if ($this->started) {

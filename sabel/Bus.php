@@ -11,15 +11,31 @@
  */
 class Sabel_Bus extends Sabel_Object
 {
-  private
-    $holder  = array(),
-    $configs = array(),
-    $processorList = null;
-    
-  private
-    $beforeEvent = array(),
-    $afterEvent  = array();
-    
+  /**
+   * @var Sabel_Config[]
+   */
+  protected $configs = array();
+  
+  /**
+   * @var Sabel_Util_HashList
+   */
+  protected $processorList = null;
+  
+  /**
+   * @var array
+   */
+  protected $holder  = array();
+  
+  /**
+   * @var object[]
+   */
+  protected $beforeEvent = array();
+  
+  /**
+   * @var object[]
+   */
+  protected $afterEvent  = array();
+  
   public function __construct()
   {
     $this->processorList = new Sabel_Util_HashList();
@@ -28,28 +44,10 @@ class Sabel_Bus extends Sabel_Object
   
   public static function create(array $data = array())
   {
-    if (empty($data)) {
-      return new self();
-    } else {
-      $bus = new self();
-      $bus->init($data);
-      return $bus;
-    }
-  }
-  
-  /**
-   * initialize bus data
-   *
-   * @param array $data
-   * @return Sabel_Bus
-   */
-  public function init($data)
-  {
-    foreach ($data as $name => $value) {
-      $this->set($name, $value);
-    }
+    $bus = new self();
+    if (!empty($data)) $bus->holder = $data;
     
-    return $this;
+    return $bus;
   }
   
   public function set($key, $value)

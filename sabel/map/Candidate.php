@@ -89,6 +89,8 @@ class Sabel_Map_Candidate
    */
   public final function evaluate(Sabel_Request $request)
   {
+    if ($this->elements->isMatchAll()) return true;
+    
     $requests = $request->toArray();
     $elements = $this->elements;
     $elementsCount = $elements->count();
@@ -128,30 +130,19 @@ class Sabel_Map_Candidate
     for ($i = 0; $i < $elementsCount; ++$i) {
       $element = $elements->getElementAt($i);
       $partOfUri = (isset($requests[$i])) ? $requests[$i] : null;
-      if (($partOfUri = $this->compare($partOfUri, $element)) !== false) {
-        $this->setVariableToElement($partOfUri, $element);
-      } else {
+      
+      if ($element->isOmittable() && $partOfUri === null) {
+        // ignore
+      } elseif (($element->isConstant()     && $partOfUri !== $element->name) ||
+                ($partOfUri === null        && !$element->isOmittable())      ||
+                ($element->hasRequirement() && !$element->compareWithRequirement($partOfUri))) {
         return false;
       }
+      
+      $this->setVariableToElement($partOfUri, $element);
     }
     
     return true;
-  }
-  
-  private function compare($partOfUri, $element)
-  {
-    if ($element->isMatchAll()) {
-      return $partOfUri;
-    } elseif ($element->omittable && $partOfUri === null) {
-      return null;
-    } elseif ($element->isConstant() && $partOfUri !== $element->name) {
-      return false;
-    } elseif (($partOfUri === null && !$element->omittable) ||
-              ($element->hasRequirement() && !$element->compareWithRequirement($partOfUri))) {
-      return false;
-    } else {
-      return $partOfUri;
-    }
   }
   
   private function setVariableToElement($partOfUri, $element)
@@ -252,7 +243,7 @@ class Sabel_Map_Candidate
         default:
           if (isset($parameters[$element->name])) {
             $buffer[] = $parameters[$element->name];
-          } elseif (!$element->omittable) {
+          } elseif (!$element->isOmittable()) {
             $buffer[] = $element->name;
           }
           break;

@@ -19,6 +19,8 @@ class Sabel_Locale_Server extends Sabel_Object
     $lcAll   = setlocale(LC_ALL, 0);
     $locales = array();
     
+    // @todo compatible with the mac.
+    
     foreach (explode(";", $lcAll) as $locale) {
       list ($key, $val) = explode("=", $locale);
       $locales[$key] = $val;

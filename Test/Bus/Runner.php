@@ -16,7 +16,7 @@ class Test_Bus_Runner extends SabelTestCase
   public function testEmptyNameProcessor()
   {
     try {
-      $bus = new Sabel_Bus();
+      $bus = Sabel_Bus::create();
       $bus->addProcessor(new HogeProcessor(""));
     } catch (Sabel_Exception_InvalidArgument $e) {
       return;
@@ -27,7 +27,7 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testProcessorList()
   {
-    $bus = new Sabel_Bus();
+    $bus = Sabel_Bus::create();
     $bus->addProcessor(new HogeProcessor("hoge"));
     $bus->addProcessor(new FugaProcessor("fuga"));
     $bus->addProcessor(new FooProcessor("foo"));
@@ -41,11 +41,10 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testBusInit()
   {
-    $bus = new Sabel_Bus();
-    $bus->init(array("null"   => null,
-                     "int"    => 10,
-                     "string" => "test",
-                     "bool"   => false));
+    $bus = Sabel_Bus::create(array("null"   => null,
+                                   "int"    => 10,
+                                   "string" => "test",
+                                   "bool"   => false));
     
     $this->assertEquals(null,   $bus->get("null"));
     $this->assertEquals(10,     $bus->get("int"));
@@ -55,7 +54,7 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testRun()
   {
-    $bus = new Sabel_Bus();
+    $bus = Sabel_Bus::create();
     $bus->run(new TestBusConfig());
     
     $this->assertEquals("10", $bus->get("a"));
@@ -65,7 +64,7 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testAttatchExecuteBeforeEvent()
   {
-    $bus = new Sabel_Bus();
+    $bus = Sabel_Bus::create();
     $bus->attachExecuteBeforeEvent("foo", new TestEvent(), "beforeMethod");
     $bus->run(new TestBusConfig());
     
@@ -74,16 +73,16 @@ class Test_Bus_Runner extends SabelTestCase
   
   public function testAttatchExecuteAfterEvent()
   {
-    $bus = new Sabel_Bus();
+    $bus = Sabel_Bus::create();
     $bus->attachExecuteAfterEvent("hoge", new TestEvent(), "afterMethod");
     $bus->run(new TestBusConfig());
     
     $this->assertEquals("after: hoge_result", $bus->get("afterResult"));
   }
   
-  public function testHasMethod()
+  public function testHas()
   {
-    $bus = new Sabel_Bus();
+    $bus = Sabel_Bus::create();
     $bus->set("a", "10");
     $bus->set("b", "20");
     $bus->set("c", "30");

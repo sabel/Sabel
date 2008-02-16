@@ -46,8 +46,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
       $this->setTransactionIsolationLevel($isolationLevel);
     }
     
-    if (mysqli_autocommit($this->connection, false)) {
-      $this->autoCommit = false;
+    if (mysqli_autocommit($this->connection, $this->autoCommit = false)) {
       return $this->connection;
     } else {
       throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
@@ -57,7 +56,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   public function commit()
   {
     if (mysqli_commit($this->connection)) {
-      $this->autoCommit = true;
+      mysqli_autocommit($this->connection, $this->autoCommit = true);
     } else {
       throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
     }
@@ -66,7 +65,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
   public function rollback()
   {
     if (mysqli_rollback($this->connection)) {
-      $this->autoCommit = true;
+      mysqli_autocommit($this->connection, $this->autoCommit = true);
     } else {
       throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
     }
