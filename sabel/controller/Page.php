@@ -33,6 +33,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $session = null;
   
   /**
+   * @var string
+   */
+  protected $action = "";
+  
+  /**
    * @var boolean
    */
   protected $executed = false;
@@ -222,7 +227,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   
   public function getAttribute($name)
   {
-    if (isset($this->attributes[$name])) {
+    if (array_key_exists($name, $this->attributes)) {
       return $this->attributes[$name];
     } else {
       return null;
@@ -232,6 +237,16 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function setAttribute($name, $value)
   {
     $this->attributes[$name] = $value;
+  }
+  
+  protected function __get($name)
+  {
+    return $this->getAttribute($name);
+  }
+  
+  protected function __set($name, $value)
+  {
+    $this->setAttribute($name, $value);
   }
   
   public function getAttributes()
@@ -254,27 +269,23 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     return isset($this->attributes[$name]);
   }
   
+  public function assign($name, $value)
+  {
+    $this->response->setResponse($name, $value);
+  }
+  
   public final function setAction($action)
   {
-    $this->action = $action;
+    if (is_string($action)) {
+      $this->action = $action;
+    } else {
+      $message = "action name must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public final function getAction()
   {
     return $this->action;
-  }
-  
-  protected function __get($name)
-  {
-    if (array_key_exists($name, $this->attributes)) {
-      return $this->attributes[$name];
-    } else {
-      return null;
-    }
-  }
-  
-  protected function __set($name, $value)
-  {
-    $this->attributes[$name] = $value;
   }
 }

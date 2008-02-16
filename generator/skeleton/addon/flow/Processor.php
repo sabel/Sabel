@@ -173,10 +173,11 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function addEndFlow($state)
   {
+    $stateKey = $state->getStateKey();
     if (($ends = $this->session->read(self::END_FLOW_SESKEY)) === null) {
-      $ends = array($state->getStateKey());
-    } else {
-      $ends[] = $state->getStateKey();
+      $ends = array($stateKey);
+    } elseif (!in_array($stateKey, $ends, true)) {
+      $ends[] = $stateKey;
     }
     
     $this->session->write(self::END_FLOW_SESKEY, $ends);

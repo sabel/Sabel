@@ -37,17 +37,17 @@ class Flow_State
   
   public function has($name)
   {
-    return isset($this->properties[$name]);
-  }
-  
-  public function __get($name)
-  {
-    return $this->read($name);
+    return array_key_exists($name, $this->properties);
   }
   
   public function __set($name, $value)
   {
     $this->write($name, $value);
+  }
+  
+  public function __get($name)
+  {
+    return $this->read($name);
   }
   
   public function getProperties()
@@ -123,9 +123,9 @@ class Flow_State
     $token = $this->properties["token"];
     
     if ($key !== "") {
-      return $key . "_flow_state_" . $token;
+      return $key . "_flow_" . $token;
     } else {
-      return $this->key . "_flow_state_" . $token;
+      return $this->key . "_flow_" . $token;
     }
   }
 }

@@ -16,9 +16,9 @@ abstract class Flow_Page extends Sabel_Controller_Page
   {
     if (isset($this->attributes["flow"])) {
       $value = $this->attributes["flow"]->read($name);
-      return ($value === null) ? parent::__get($name) : $value;
+      return ($value === null) ? parent::getAttribute($name) : $value;
     } else {
-      return parent::__get($name);
+      return parent::getAttribute($name);
     }
   }
   
@@ -28,7 +28,7 @@ abstract class Flow_Page extends Sabel_Controller_Page
       $this->attributes["flow"]->write($name, $value);
     }
     
-    parent::__set($name, $value);
+    parent::setAttribute($name, $value);
   }
   
   public function setAttribute($name, $value)
