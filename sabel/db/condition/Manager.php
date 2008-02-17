@@ -62,22 +62,15 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   }
   
   /**
-   * @param mixed $key
-   * @param mixed $val
+   * @param string $key
+   * @param mixed  $val
    *
    * @return void
    */
-  public function create($key, $val = null)
+  public function create($key, $val)
   {
-    if (is_array($key)) {
-      foreach ($key as $column => $value) {
-        $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $column, $value);
-        $this->conditions[$c->getColumn()] = $c;
-      }
-    } else {
-      $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val);
-      $this->conditions[$c->getColumn()] = $c;
-    }
+    $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val);
+    $this->conditions[$c->getColumn()] = $c;
   }
   
   /**

@@ -27,10 +27,7 @@ class Test_DB_Test extends SabelTestCase
   public function testInsert()
   {
     $st = MODEL("SchemaTest");
-    $st->email = "test1@example.com";
-    $st->bl = true;
-    $generatedId = $st->insert();
-    
+    $generatedId = $st->insert(array("email" => "test1@example.com", "bl" => true));
     $this->assertTrue(is_numeric($generatedId));
   }
   

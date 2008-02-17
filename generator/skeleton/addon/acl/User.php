@@ -77,9 +77,7 @@ class Acl_User
     $this->attributes[self::AUTHED_KEY] = true;
     $this->addRole($role);
     
-    if ($regenerateId) {
-      $this->session->regenerateId(true);
-    }
+    if ($regenerateId) $this->session->regenerateId();
   }
   
   public function deAuthenticate()

@@ -13,7 +13,7 @@ class Acl_Addon extends Sabel_Object
 {
   public function execute($bus)
   {
-    $acl = new Acl_Processor("acl");
-    $bus->getProcessorList()->insertPrevious("initializer", "acl", $acl);
+    $bus->getProcessorList()
+        ->insertNext("initializer", "acl", new Acl_Processor("acl"));
   }
 }

@@ -30,7 +30,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   /**
    * @var Sabel_DB_Metadata_Table
    */
-  protected $schema = null;
+  protected $metadata = null;
   
   /**
    * @var array
@@ -88,7 +88,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   }
   
   /**
-   * @return void
+   * @return self
    */
   public function clear()
   {
@@ -100,6 +100,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $this->values      = array();
     $this->constraints = array();
     $this->seqColumn   = null;
+    
+    return $this;
   }
   
   public function type($type = null)
@@ -138,7 +140,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($table)) {
       $this->table    = $table;
       $connectionName = $this->driver->getConnectionName();
-      $this->schema   = Sabel_DB_Metadata::getTableInfo($table, $connectionName);
+      $this->metadata = Sabel_DB_Metadata::getTableInfo($table, $connectionName);
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }
@@ -286,7 +288,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   
   public function build()
   {
-    if ($this->schema === null) {
+    if ($this->metadata === null) {
       $message = "can't build query. please call table() method.";
       throw new Sabel_Exception_Runtime($message);
     }
@@ -364,7 +366,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   protected function getProjection()
   {
     if (empty($this->projection)) {
-      $colNames = $this->quoteIdentifier($this->schema->getColumnNames());
+      $colNames = $this->quoteIdentifier($this->metadata->getColumnNames());
       return implode(", ", $colNames);
     } elseif (is_string($this->projection)) {
       return $this->projection;

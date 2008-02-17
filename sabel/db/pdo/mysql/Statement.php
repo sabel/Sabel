@@ -14,7 +14,7 @@ class Sabel_DB_Pdo_Mysql_Statement extends Sabel_DB_Pdo_Statement
   public function values(array $values)
   {
     if ($this->isInsert()) {
-      foreach ($this->schema->getColumns() as $colName => $column) {
+      foreach ($this->metadata->getColumns() as $colName => $column) {
         if (!isset($values[$colName]) && $this->isVarcharOfDefaultNull($column)) {
           $values[$colName] = null;
         }

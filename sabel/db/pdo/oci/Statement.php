@@ -76,8 +76,8 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
       if (isset($c["order"])) {
         $order = $c["order"];
       } else {
-        $order = convert_to_modelname($this->schema->getTableName()) . "."
-               . $this->schema->getPrimaryKey() . " ASC";
+        $order = convert_to_modelname($this->metadata->getTableName()) . "."
+               . $this->metadata->getPrimaryKey() . " ASC";
       }
       
       $orderBy = " ORDER BY " . $this->quoteIdentifierOfOrderBy($order);
