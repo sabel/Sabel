@@ -44,18 +44,32 @@ class Test_Console extends SabelTestCase
     $this->assertTrue(Sabel_Console::hasOption("r", $args));
      
     $args = array("rm", "-r", "-f");
+    $this->assertTrue(Sabel_Console::hasOption("r", $args));
     $this->assertTrue(Sabel_Console::hasOption("f", $args));
      
     $args = array("rm", "-rf");
+    $this->assertTrue(Sabel_Console::hasOption("r", $args));
     $this->assertTrue(Sabel_Console::hasOption("f", $args));
+  }
+  
+  public function testHasOption2()
+  {
+    $args = array("configure", "--foo");
+    $this->assertTrue(Sabel_Console::hasOption("foo", $args));
   }
   
   public function testGetOption()
   {
-    $args = array("cmd", "-d", "/var/tmp");
+    $args = array("cmd", "-d", "/var/tmp", "-f", "/tmp/test.txt");
     $this->assertTrue(Sabel_Console::hasOption("d", $args));
+    $this->assertTrue(Sabel_Console::hasOption("f", $args));
     
-    $this->assertEquals("/var/tmp", Sabel_Console::getOption("d", $args));
+    $opts = Sabel_Console::getOption("d", $args);
+    $this->assertEquals("/var/tmp", $opts[0]);
+    $this->assertEquals(array("cmd", "-f", "/tmp/test.txt"), $args);
+    
+    $opts = Sabel_Console::getOption("f", $args);
+    $this->assertEquals("/tmp/test.txt", $opts[0]);
     $this->assertEquals(array("cmd"), $args);
   }
 }

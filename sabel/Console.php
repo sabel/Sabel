@@ -52,8 +52,12 @@ class Sabel_Console
   
   public static function hasOption($opt, $arguments)
   {
+    if (in_array("--" . $opt, $arguments, true)) {
+      return true;
+    }
+    
     foreach ($arguments as $arg) {
-      if (preg_match('/^-.*' . $opt . '.*$/', $arg)) return true;
+      if (preg_match('/^-[a-zA-Z]*' . $opt . '[a-zA-Z]*$/', $arg)) return true;
     }
     
     return false;
@@ -61,20 +65,22 @@ class Sabel_Console
   
   public static function getOption($opt, &$arguments, $unset = true)
   {
-    if (self::hasOption($opt, $arguments)) {
-      $index  = array_search("-" . $opt, $arguments, true);
-      $optVal = $arguments[$index + 1];
-      
-      if ($unset) {
-        unset($arguments[$index]);
-        unset($arguments[$index + 1]);
-        $arguments = array_values($arguments);
-      }
-      
-      return $optVal;
-    } else {
-      return null;
+    if (!$index = array_search("-" . $opt, $arguments, true)) {
+      $index = array_search("--" . $opt, $arguments, true);
     }
+    
+    if (!$index) return null;
+    
+    $opts = array();
+    for ($i = $index + 1, $size = count($arguments); $i < $size; $i++) {
+      if ($arguments[$i]{0} === "-") break;
+      $opts[] = $arguments[$i];
+      if ($unset) unset($arguments[$i]);
+    }
+    
+    if ($unset) unset($arguments[$index]);
+    $arguments = array_values($arguments);
+    return $opts;
   }
   
   public static function getHeader($type, $headMsg)

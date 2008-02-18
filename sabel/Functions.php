@@ -87,9 +87,14 @@ function dump()
 function environment($string)
 {
   switch (strtolower($string)) {
-    case "production":  return PRODUCTION;
-    case "test":        return TEST;
-    case "development": return DEVELOPMENT;
+    case "production":
+      return PRODUCTION;
+    case "test":
+      return TEST;
+    case "development":
+      return DEVELOPMENT;
+    default:
+      return null;
   }
 }
 

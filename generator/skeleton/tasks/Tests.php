@@ -14,13 +14,7 @@ abstract class Tests extends Sabel_Sakle_Task
 {
   public function initialize()
   {
-    $environment = $this->getEnvironment();
-    
-    if ($environment === null) {
-      throw new Exception("environment must be specified.");
-    } else {
-      define ("ENVIRONMENT", $environment);
-    }
+    define("ENVIRONMENT", $this->getEnvironment());
     
     if (ENVIRONMENT === PRODUCTION) {
       error_reporting(0);
@@ -32,8 +26,13 @@ abstract class Tests extends Sabel_Sakle_Task
   protected function getEnvironment()
   {
     if (Sabel_Console::hasOption("e", $this->arguments)) {
-      $env = Sabel_Console::getOption("e", $this->arguments, true);
-      return environment($env);
+      $opts = Sabel_Console::getOption("e", $this->arguments);
+      if (($env = environment($opts[0])) === null) {
+        $this->error("invalid environment.");
+        exit;
+      } else {
+        return $env;
+      }
     } else {
       return TEST;
     }

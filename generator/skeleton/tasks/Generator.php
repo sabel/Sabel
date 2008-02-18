@@ -142,7 +142,13 @@ class Generator extends Sabel_Sakle_Task
   private function getEnvironment()
   {
     if (Sabel_Console::hasOption("e", $this->arguments)) {
-      return environment(Sabel_Console::getOption("e", $this->arguments));
+      $opts = Sabel_Console::getOption("e", $this->arguments);
+      if (($env = environment($opts[0])) === null) {
+        $this->error("invalid environment.");
+        exit;
+      } else {
+        return $env;
+      }
     } else {
       return DEVELOPMENT;
     }
