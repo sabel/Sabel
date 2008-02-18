@@ -368,7 +368,7 @@ class Form_Object extends Sabel_Object
   public function __sleep()
   {
     $this->model = $this->model->toArray();
-    return array("model", "mdlName", "formName", "errors", "allowCols");
+    return array("model", "mdlName", "isSelected", "formName", "errors", "allowCols");
   }
   
   public function __wakeup()
