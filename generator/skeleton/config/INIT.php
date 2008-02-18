@@ -16,11 +16,10 @@ define("HELPERS_DIR_NAME", "helpers");
 
 define("CONFIG_DIR_PATH",  RUN_BASE . DS . "config");
 define("MODULES_DIR_PATH", RUN_BASE . DS . MODULES_DIR_NAME);
-define("ADDON_DIR_PATH",   RUN_BASE . DS . ADDON_DIR_NAME);
 define("MODELS_DIR_PATH",  MODULES_DIR_PATH . DS . "models");
 define("SCHEMA_DIR_PATH",  RUN_BASE . DS . LIB_DIR_NAME . DS . "schema");
-define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
 define("LOG_DIR_PATH",     RUN_BASE . DS . "logs");
+define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
 define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
 
 define("DEFAULT_LAYOUT_NAME", "layout");

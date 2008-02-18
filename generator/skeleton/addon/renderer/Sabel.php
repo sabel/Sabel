@@ -14,7 +14,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
 {
   public function initialize()
   {
-    $baseDir = ADDON_DIR_PATH . DS . "renderer" . DS;
+    $baseDir = dirname(__FILE__) . DS;
     Sabel::fileUsing($baseDir . "Replacer.php", true);
     Sabel::fileUsing($baseDir . "util" . DS . "Parser.php", true);
     Sabel::fileUsing($baseDir . "util" . DS . "Element.php", true);

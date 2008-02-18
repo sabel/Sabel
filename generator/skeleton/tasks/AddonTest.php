@@ -25,7 +25,7 @@ class AddonTest extends Tests
     $runner = Sabel_Test_Runner::create();
     $runner->setClassPrefix($addonName . "_Tests_");
     
-    $testsDir = ADDON_DIR_PATH . DS . $addonName . DS . "tests";
+    $testsDir = RUN_BASE . DS . ADDON_DIR_NAME. DS . $addonName . DS . "tests";
     
     if (count($this->arguments) === 1) {
       foreach (scandir($testsDir) as $file) {
