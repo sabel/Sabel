@@ -139,9 +139,13 @@ class Form_Html extends Sabel_Object
   public function link($uri, $text, $token = "")
   {
     // @todo https
+    // if (isHttps) {
     
-    $url = "http://" . Sabel_Environment::get("HTTP_HOST") . uri($uri);
-    if ($token !== "") $url .= "?token={$token}";
+    if ($token === "") {
+      $url = uri($uri);
+    } else {
+      $url = uri($uri) . "?token={$token}";
+    }
     
     $html = '<a href="' . $url . '" ';
     $this->addIdAndClass($html);

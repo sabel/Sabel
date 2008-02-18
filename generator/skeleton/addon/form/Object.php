@@ -32,6 +32,11 @@ class Form_Object extends Sabel_Object
   protected $model = null;
   
   /**
+   * @var boolean
+   */
+  protected $isSelected = false;
+  
+  /**
    * @var string
    */
   protected $mdlName = "";
@@ -58,11 +63,12 @@ class Form_Object extends Sabel_Object
     }
     
     $this->model      = $model;
-    $this->formName   = $fName;
-    $this->htmlWriter = new Form_Html();
-    $this->token      = $token;
     $this->mdlName    = $model->getName();
     $this->columns    = $model->getColumns();
+    $this->isSelected = $model->isSelected();
+    $this->formName   = $fName;
+    $this->token      = $token;
+    $this->htmlWriter = new Form_Html();
   }
   
   /**
@@ -368,7 +374,12 @@ class Form_Object extends Sabel_Object
   public function __wakeup()
   {
     $model = MODEL($this->mdlName);
-    $model->setProperties($this->model);
+    
+    if ($this->isSelected) {
+      $model->setProperties($this->model);
+    } else {
+      $model->setValues($this->model);
+    }
     
     $this->model      = $model;
     $this->columns    = $model->getColumns();

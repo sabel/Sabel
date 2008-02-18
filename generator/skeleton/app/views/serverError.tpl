@@ -1,7 +1,7 @@
 <h2>500 Internal Server Error</h2>
 
 <p>
-  ページを表示できません
+  The server encountered an internal error and was unable to complete your request.
 </p>
 
 <? if (isset($exception_message)) : ?>
