@@ -88,6 +88,19 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   }
   
   /**
+   * @param Sabel_DB_Metadata_Table $metadata
+   *
+   * @return self
+   */
+  public function setMetadata(Sabel_DB_Metadata_Table $metadata)
+  {
+    $this->table    = $metadata->getTableName();
+    $this->metadata = $metadata;
+    
+    return $this;
+  }
+  
+  /**
    * @return self
    */
   public function clear()
@@ -133,19 +146,6 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function hasQuery()
   {
     return (is_string($this->query) && $this->query !== "");
-  }
-  
-  public function table($table)
-  {
-    if (is_string($table)) {
-      $this->table    = $table;
-      $connectionName = $this->driver->getConnectionName();
-      $this->metadata = Sabel_DB_Metadata::getTableInfo($table, $connectionName);
-    } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
-    }
-    
-    return $this;
   }
   
   public function projection($projection)
@@ -289,7 +289,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function build()
   {
     if ($this->metadata === null) {
-      $message = "can't build query. please call table() method.";
+      $message = "can't build sql query. must set the metadata with setMetadata().";
       throw new Sabel_Exception_Runtime($message);
     }
     

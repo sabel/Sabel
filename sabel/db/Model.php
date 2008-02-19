@@ -835,7 +835,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     if ($this->statement === null) {
       $stmt = Sabel_DB::createStatement($this->connectionName);
-      $this->statement = $stmt->type($type)->table($this->tableName);
+      $this->statement = $stmt->type($type)->setMetadata($this->metadata);
     } else {
       $this->statement->clear()->type($type)
            ->setDriver(Sabel_DB::createDriver($this->connectionName));

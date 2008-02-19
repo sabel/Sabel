@@ -88,9 +88,9 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   
   public function create($contents = "")
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->table($this->tableName)->type(Sabel_DB_Statement::INSERT);
-    $stmt->values(array("name"      => $this->_getPath(),
+    $stmt = $this->createStatement();
+    $stmt->type(Sabel_DB_Statement::INSERT)
+         ->values(array("name"      => $this->_getPath(),
                         "namespace" => $this->namespace,
                         "contents"  => $contents));
     
@@ -100,11 +100,12 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   
   public function delete()
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->table($this->tableName)->type(Sabel_DB_Statement::DELETE);
-    $stmt->where("WHERE " . $stmt->quoteIdentifier("name") . " = @name@");
-    $stmt->setBindValue("name", $this->_getPath());
-    $stmt->execute();
+    $stmt = $this->createStatement();
+    $stmt->type(Sabel_DB_Statement::DELETE)
+         ->where("WHERE " . $stmt->quoteIdentifier("name") . " = @name@")
+         ->setBindValue("name", $this->_getPath())
+         ->execute();
+    
     $this->contents = "";
   }
   
@@ -121,21 +122,29 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   
   private function _getContents()
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->table($this->tableName)->type(Sabel_DB_Statement::SELECT);
-    $stmt->projection(array("contents"));
+    $stmt  = $this->createStatement();
     $nCol  = $stmt->quoteIdentifier("name");
     $nsCol = $stmt->quoteIdentifier("namespace");
-    $stmt->where("WHERE $nCol = @name@ AND $nsCol = @namespace@");
-    $result = $stmt->setBindValue("name", $this->_getPath())
-                   ->setBindValue("namespace", $this->namespace)
-                   ->execute();
     
+    $stmt->type(Sabel_DB_Statement::SELECT)
+         ->projection(array("contents"))
+         ->where("WHERE $nCol = @name@ AND $nsCol = @namespace@")
+         ->setBindValue("name", $this->_getPath())
+         ->setBindValue("namespace", $this->namespace);
+
+    $result = $stmt->execute();
     return ($result === null) ? null : $result[0]["contents"];
   }
   
   public function _getPath()
   {
     return $this->viewDirPath . $this->name;
+  }
+  
+  private function createStatement()
+  {
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));
+    return $stmt;
   }
 }

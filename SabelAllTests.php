@@ -59,11 +59,12 @@ require_once ("Test/Response/Tests.php");
 require_once ("Test/Controller/Tests.php");
 require_once ("Test/Util/Tests.php");
 require_once ("Test/View/Tests.php");
+require_once ("Test/Map/Tests.php");
 require_once ("Test/Processor/Tests.php");
 require_once ("Test/Reflection.php");
-require_once ("Test/Storage/Memory.php");
 require_once ("Test/Cache/Tests.php");
-require_once ("Test/Map/Tests.php");
+require_once ("Test/Session/Tests.php");
+require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
 require_once ("Test/DB/Tests.php");
 require_once ("Test/Locale/Browser.php");
@@ -97,6 +98,7 @@ class SabelAllTests
     $suite->addTest(Test_Util_Tests::suite());
     $suite->addTest(Test_View_Tests::suite());
     $suite->addTest(Test_Cache_Tests::suite());
+    $suite->addTest(Test_Session_Tests::suite());
     $suite->addTest(Test_Processor_Tests::suite());
     
     $suite->addTest(Test_Annotation::suite());

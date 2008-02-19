@@ -86,9 +86,9 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   {
     if ($this->started) {
       $newId = $this->createSessionId();
-      $stmt = Sabel_DB::createStatement($this->connectionName);
-      $stmt->table($this->tableName)
-           ->type(Sabel_DB_Statement::UPDATE)
+      $stmt  = $this->createStatement();
+      
+      $stmt->type(Sabel_DB_Statement::UPDATE)
            ->values(array("sid" => $newId))
            ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @currentId@")
            ->setBindValue("currentId", $this->sessionId)
@@ -105,9 +105,8 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   public function destroy()
   {
     if ($this->started) {
-      $stmt = Sabel_DB::createStatement($this->connectionName);
-      $stmt->table($this->tableName)
-           ->type(Sabel_DB_Statement::DELETE)
+      $stmt = $this->createStatement();
+      $stmt->type(Sabel_DB_Statement::DELETE)
            ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
            ->setBindValue("sid", $this->sessionId)
            ->execute();
@@ -123,15 +122,13 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   protected function getSessionData($sessionId)
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $result = $stmt->table($this->tableName)
-                   ->type(Sabel_DB_Statement::SELECT)
-                   ->projection(array("sdata", "timeout"))
-                   ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-                   ->setBindValue("sid", $sessionId)
-                   ->execute();
+    $stmt = $this->createStatement();
+    $stmt->type(Sabel_DB_Statement::SELECT)
+         ->projection(array("sdata", "timeout"))
+         ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
+         ->setBindValue("sid", $sessionId);
     
-    if ($result === null) {
+    if (($result = $stmt->execute()) === null) {
       $this->newSession = true;
       return array();
     } elseif ($result[0]["timeout"] <= time()) {
@@ -143,14 +140,14 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   protected function sessionIdExists($sessionId)
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->table($this->tableName)
-         ->type(Sabel_DB_Statement::SELECT)
-         ->projection(array("sid"))
-         ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-         ->setBindValue("sid", $sessionId);
+    $stmt   = $this->createStatement();
+    $result = $stmt->type(Sabel_DB_Statement::SELECT)
+                   ->projection("COUNT(*) AS cnt")
+                   ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
+                   ->setBindValue("sid", $sessionId)
+                   ->execute();
     
-    return ($stmt->execute() !== null);
+    return ((int)$result[0]["cnt"] !== 0);
   }
   
   protected function gc()
@@ -162,20 +159,26 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     if ($divisor     === "") $divisor     = 100;
     
     if (rand(1, $divisor) <= $probability) {
-      $stmt = Sabel_DB::createStatement($this->connectionName);
-      $stmt->table($this->tableName)->type(Sabel_DB_Statement::DELETE);
-      $stmt->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@");
-      $stmt->setBindValue("timeout", time())->execute();
+      $stmt = $this->createStatement();
+      $stmt->type(Sabel_DB_Statement::DELETE)
+           ->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@")
+           ->setBindValue("timeout", time())
+           ->execute();
     }
+  }
+  
+  private function createStatement()
+  {
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));
+    return $stmt;
   }
   
   public function __destruct()
   {
     if ($this->newSession && empty($this->attributes)) return;
     
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->table($this->tableName);
-    
+    $stmt = $this->createStatement();
     $timeoutValue = time() + $this->maxLifetime;
     
     if ($this->sessionIdExists($this->sessionId)) {
