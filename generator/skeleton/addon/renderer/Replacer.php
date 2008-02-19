@@ -34,8 +34,8 @@ class Renderer_Replacer extends Sabel_Object
   
   protected function simpleReplace($contents)
   {
-    $search  = array("</if>", "<else/>", "<else />", "</foreach>");
-    $replace = array("<? endif ?>", "<? else : ?>", "<? else : ?>", "<? endforeach ?>");
+    $search  = array("</if>", "<else/>", "<else />", "</foreach>", "</hlink>");
+    $replace = array("<? endif ?>", "<? else : ?>", "<? else : ?>", "<? endforeach ?>", "</a>");
     
     return str_replace($search, $replace, $contents);
   }
@@ -92,9 +92,8 @@ class Renderer_Replacer extends Sabel_Object
         $message = "foreach parameter is null.";
         throw new Sabel_Exception_InvalidArgument($message);
       } else {
-        $exp  = array_map("trim", explode(",", $args));
-        $argc = count($exp);
-        if ($argc === 2) {
+        $exp = array_map("trim", explode(",", $args));
+        if (($c = count($exp)) === 2) {
           $params["from"]  = $exp[0];
           $params["value"] = $exp[1];
         } elseif ($argc === 3) {
@@ -108,15 +107,49 @@ class Renderer_Replacer extends Sabel_Object
       }
     }
     
-    $argc = count($params);
-    
-    if ($argc === 2) {
+    if (count($params) === 2) {
       $fmt = "<? foreach (%s as %s) : ?>";
       return sprintf($fmt, $params["from"], $params["value"]);
     } else {
       $fmt = "<? foreach (%s as %s => %s) : ?>";
       return sprintf($fmt, $params["from"], $params["key"], $params["value"]);
     }
+  }
+  
+  protected function hlink_replace($element)
+  {
+    $html = "<a";
+    if (($id = $element->id) !== null) {
+      $html .= ' id="' . $id . '"';
+    }
+    
+    if (($class = $element->class) !== null) {
+      $html .= ' class="' . $class . '"';
+    }
+    
+    if (($name = $element->name) !== null) {
+      $html .= ' name="' . $name . '"';
+    }
+    
+    $uri = $element->uri;
+    if ($uri === null) return $html . ">";
+    
+    if (($params = $element->params) !== null) {
+      $parameters = explode(",", $params);
+      if (strpos($parameters[0], ":") === false) {
+        $url = uri($uri) . "?" . $parameters[0];
+      } else {
+        $buffer = array();
+        foreach ($parameters as $hash) {
+          list ($key, $val) = explode(":", $hash);
+          $buffer[] = trim($key) . "=<?= " . $val . " ?>";
+        }
+        
+        $url = uri($uri) . "?" . implode("&", $buffer);
+      }
+    }
+    
+    return $html . ' href="' . $url . '">';
   }
   
   protected function partial_replace($element)

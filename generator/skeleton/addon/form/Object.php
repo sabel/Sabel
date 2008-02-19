@@ -267,11 +267,6 @@ class Form_Object extends Sabel_Object
     return $this->getHtmlWriter("", "", $id, $class)->submit($text);
   }
   
-  public function link($uri, $text, $class = null, $id = null)
-  {
-    return $this->getHtmlWriter("", "", $id, $class)->link($uri, $text, $this->token);
-  }
-  
   public function text($name, $class = null, $id = null)
   {
     $eName = $this->createInputName($name);
@@ -368,21 +363,23 @@ class Form_Object extends Sabel_Object
   public function __sleep()
   {
     $this->model = $this->model->toArray();
-    return array("model", "mdlName", "isSelected", "formName", "errors", "allowCols");
+    
+    return array("model",  "mdlName",  "isSelected",
+                 "errors", "formName", "allowCols");
   }
   
   public function __wakeup()
   {
     $model = MODEL($this->mdlName);
-    
     if ($this->isSelected) {
       $model->setProperties($this->model);
     } else {
       $model->setValues($this->model);
     }
     
-    $this->model      = $model;
-    $this->columns    = $model->getColumns();
+    $this->model   = $model;
+    $this->columns = $model->getColumns();
+    
     $this->htmlWriter = new Form_Html();
   }
 }

@@ -176,7 +176,9 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   public function __destruct()
   {
-    if ($this->newSession && empty($this->attributes)) return;
+    static $ran = false;
+    
+    if ($ran || $this->newSession && empty($this->attributes)) return;
     
     $stmt = $this->createStatement();
     $timeoutValue = time() + $this->maxLifetime;
@@ -194,5 +196,6 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     }
     
     $stmt->execute();
+    $ran = true;
   }
 }

@@ -79,9 +79,9 @@ class Test_DB_Tests
       $suite->addTest(Test_DB_Oci::suite());
     }
     
-    //if (extension_loaded("pdo_oci")) {
-    //  $suite->addTest(Test_DB_PdoOci::suite());
-    //}
+    if (extension_loaded("pdo_oci")) {
+      $suite->addTest(Test_DB_PdoOci::suite());
+    }
     
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());

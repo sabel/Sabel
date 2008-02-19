@@ -20,7 +20,7 @@ class Sabel_Cache_Memcache implements Sabel_Cache_Interface
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
       $port = (defined("MEMCACHED_PORT")) ? MEMCACHED_PORT : 11211;
-      $this->memcache->connect($server, $port, true);
+      $this->memcache->connect($server, $port);
     } else {
       throw new Sabel_Exception_Runtime("memcache extension not loaded.");
     }

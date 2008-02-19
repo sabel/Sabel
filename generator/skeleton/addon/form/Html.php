@@ -136,24 +136,6 @@ class Form_Html extends Sabel_Object
     return $html . PHP_EOL;
   }
   
-  public function link($uri, $text, $token = "")
-  {
-    // @todo https
-    // if (isHttps) {
-    
-    if ($token === "") {
-      $url = uri($uri);
-    } else {
-      $url = uri($uri) . "?token={$token}";
-    }
-    
-    $html = '<a href="' . $url . '" ';
-    $this->addIdAndClass($html);
-    $html .= '>' . $text . '</a>';
-    
-    return $html . PHP_EOL;
-  }
-  
   public function text()
   {
     $html  = '<input type="text" ';

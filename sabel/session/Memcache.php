@@ -31,7 +31,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
       $port = (defined("MEMCACHED_PORT")) ? MEMCACHED_PORT : 11211;
-      $this->memcache->connect($server, $port, true);
+      $this->memcache->connect($server, $port);
       $this->readSessionSettings();
     } else {
       throw new Sabel_Exception_Runtime("memcache extension not loaded.");
@@ -113,8 +113,12 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   
   public function __destruct()
   {
-    if (!$this->newSession || !empty($this->attributes)) {
+    static $ran = false;
+    
+    if (!$ran && (!$this->newSession || !empty($this->attributes))) {
       $this->memcache->set($this->sessionId, $this->attributes, 0, $this->maxLifetime);
     }
+    
+    $ran = true;
   }
 }
