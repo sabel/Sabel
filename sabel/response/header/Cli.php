@@ -35,7 +35,6 @@ class Sabel_Response_Header_Cli
       $headers[] = "HTTP/1.0 500 Internal Server Error";
     } elseif ($response->isNotModified()) {
       $headers[] = "HTTP/1.0 304 Not Modified";
-      exit;
     }
     
     return $headers;

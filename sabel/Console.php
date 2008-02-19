@@ -104,7 +104,7 @@ class Sabel_Console
     }
     
     $this->stdin = fopen("php://stdin", "r");
-    $endCommands = implode(" or ", $this->ends);
+    $endCommands = implode("|", $this->ends);
     echo "please input $endCommands to finish." . PHP_EOL . PHP_EOL;
   }
   

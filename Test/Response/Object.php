@@ -45,6 +45,7 @@ class Test_Response_Object extends SabelTestCase
     $this->assertEquals("image/gif", $response->getHeader("Content-Type"));
     $this->assertEquals("4096", $response->getHeader("Content-Length"));
     $this->assertEquals(array("Content-Type" => "image/gif", "Content-Length" => "4096"), $response->getHeaders());
+    $this->assertEquals(null, $response->getHeader("Foo-Bar"));
   }
   
   public function testExpiredCacheHeaders()

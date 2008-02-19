@@ -32,6 +32,7 @@ class Test_Object extends SabelTestCase
     $obj = new TestObject();
     $hc  = "ca3a664fbcf20ac679384e974cf3d052ffd64695";
     $this->assertEquals($hc, $obj->hashCode());
+    $this->assertEquals($hc, $obj->__toString());
   }
   
   public function testEquals()

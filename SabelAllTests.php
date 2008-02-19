@@ -12,6 +12,7 @@ if (in_array("-db", $_SERVER["argv"], true)) {
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "db");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "sakle");
   PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "test");
+  PHPUnit_Util_Filter::removeDirectoryFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "cookie");
   PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
 }
 

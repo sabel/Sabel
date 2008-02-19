@@ -14,15 +14,15 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   protected
     $location    = "",
     $locationUri = "";
-    
+  
   protected
     $status      = Sabel_Response::SUCCESS,
     $contentType = "";
-    
+  
   protected
     $headers   = array(),
     $responses = array();
-    
+  
   public function setResponse($key, $value)
   {
     $this->responses[$key] = $value;
@@ -88,11 +88,6 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     $this->setHeader("Last-Modified", date(DATE_RFC822, time() - $expire) . " GMT" );
     $this->setHeader("Cache-Control", "max-age={$expire}");
     $this->setHeader("Pragma", "");
-  }
-  
-  public function etag($value)
-  {
-    $this->setHeader("Etag", '"' . $value . '"');
   }
   
   public function success()

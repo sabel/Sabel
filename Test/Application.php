@@ -154,6 +154,13 @@ class Test_Application extends SabelTestCase
     $this->assertEquals("HTTP/1.0 500 Internal Server Error", $headers[0]);
   }
   
+  public function testInternalRequest()
+  {
+    $bus = $this->getBus("main/foo");
+    $bus->run(new AppBusConfig());
+    $this->assertEquals("foo bar", $bus->get("response")->getResponse("bar"));
+  }
+  
   protected function toHtmlLines($result)
   {
     $html = str_replace(array("\r\n", "\r"), "\n", trim($result));

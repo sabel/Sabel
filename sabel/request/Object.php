@@ -11,8 +11,6 @@
  */
 class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
 {
-  private $variableHolder = array();
-  
   /**
    * @var Sabel_Request_Uri
    */
@@ -344,24 +342,5 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   public function toArray()
   {
     return $this->uri->toArray();
-  }
-  
-  public function setVariable($key, $value)
-  {
-    $this->variableHolder[$key] = $value;
-  }
-  
-  public function clearVariable()
-  {
-    $this->variableHolder = array();
-  }
-  
-  public function __get($key)
-  {
-    if (array_key_exists($key, $this->variableHolder)) {
-      return $this->variableHolder[$key];
-    } else {
-      return null;
-    }
   }
 }

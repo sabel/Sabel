@@ -24,20 +24,20 @@ class Test_Util_Map extends SabelTestCase
     $map = new UtilMap();
     $this->assertEquals($map->count(), 0);
     
-    $map->set(array("test1" => "hoge", "test2" => "huga", "test3" => "foo"));
+    $map->set(array("test1" => "hoge", "test2" => "fuga", "test3" => "foo"));
     $this->assertEquals($map->count(), 3);
   }
   
   public function testForeach()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     
     $through = false;
     foreach ($map as $key => $value) {
       if ($through) {
         $this->assertEquals($key, "test2");
-        $this->assertTrue($value->equals("huga"));
+        $this->assertTrue($value->equals("fuga"));
       } else {
         $this->assertEquals($key, "test1");
         $this->assertTrue($value->equals("hoge"));
@@ -50,13 +50,13 @@ class Test_Util_Map extends SabelTestCase
   
   public function testIterator()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     
     $through = false;
     while ($map->valid()) {
       if ($through) {
-        $this->assertTrue($map->current()->equals("huga"));
+        $this->assertTrue($map->current()->equals("fuga"));
       } else {
         $this->assertTrue($map->current()->equals("hoge"));
       }
@@ -75,13 +75,13 @@ class Test_Util_Map extends SabelTestCase
    */
   public function testIterator2()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     
     $through = false;
     while ($map->hasMoreElements()) {
       if ($through) {
-        $this->assertTrue($map->nextElement()->equals("huga"));
+        $this->assertTrue($map->nextElement()->equals("fuga"));
       } else {
         $this->assertTrue($map->nextElement()->equals("hoge"));
       }
@@ -93,17 +93,17 @@ class Test_Util_Map extends SabelTestCase
   
   public function testValues()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     $values = $map->values();
     $this->assertEquals(count($values), 2);
     $this->assertTrue($values[0]->equals("hoge"));
-    $this->assertTrue($values[1]->equals("huga"));
+    $this->assertTrue($values[1]->equals("fuga"));
   }
   
   public function testKeys()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     $keys = $map->keys();
     $this->assertEquals(count($keys), 2);
@@ -113,44 +113,69 @@ class Test_Util_Map extends SabelTestCase
   
   public function testImplode()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
-    $this->assertTrue($map->implode()->equals("hoge, huga"));
-    $this->assertTrue($map->implode(".")->equals("hoge.huga"));
+    $this->assertTrue($map->implode()->equals("hoge, fuga"));
+    $this->assertTrue($map->implode(".")->equals("hoge.fuga"));
   }
   
   public function testPut()
   {
     $map = new UtilMap();
     $map->put("test1", "hoge")
-        ->put("test2", "huga");
+        ->put("test2", "fuga");
         
     $this->assertEquals($map->count(), 2);
     $this->assertTrue($map->get("test1")->equals("hoge"));
-    $this->assertTrue($map->get("test2")->equals("huga"));
+    $this->assertTrue($map->get("test2")->equals("fuga"));
     $this->assertNull($map->get("test3"));
   }
   
   public function testPush()
   {
-    $huga = new String("huga");
+    $fuga = new String("fuga");
     $um   = new UtilMap(array("test" => "foo"));
     
     $map = new UtilMap();
-    $map->push("hoge")->push($huga)->push($um);
+    $map->push("hoge")->push($fuga)->push($um);
     $this->assertEquals($map->count(), 3);
     
     $this->assertTrue($map->get(0)->equals("hoge"));
-    $this->assertTrue($map->get(1)->equals("huga"));
-    $this->assertTrue($map->get(1)->equals($huga));
+    $this->assertTrue($map->get(1)->equals("fuga"));
+    $this->assertTrue($map->get(1)->equals($fuga));
     $this->assertTrue($map->get(2)->equals($um));
     $this->assertNull($map->get(3));
+  }
+  
+  public function testRemove()
+  {
+    $map = new UtilMap();
+    $map->put("test", "hoge")
+        ->put(new UtilMap(array(1)), "fuga");
+    
+    $this->assertEquals(2, $map->count());
+    
+    $map->remove("test");
+    $this->assertEquals(1, $map->count());
+    $this->assertNull($map->get("test"));
+    
+    $map->remove(new UtilMap());
+    $this->assertEquals(1, $map->count());
+    $map->remove(new UtilMap(array(2)));
+    $this->assertEquals(1, $map->count());
+    
+    $this->assertTrue($map->get(new UtilMap(array(1)))->equals("fuga"));
+    
+    $map->remove(new UtilMap(array(1)));
+    $this->assertEquals(0, $map->count());
+    
+    $this->assertNull($map->get(new UtilMap(array(1))));
   }
   
   public function testClear()
   {
     $map = new UtilMap();
-    $map->push("hoge")->push("huga");
+    $map->push("hoge")->push("fuga");
     $this->assertEquals($map->count(), 2);
     
     $array = $map->clear();
@@ -158,17 +183,30 @@ class Test_Util_Map extends SabelTestCase
     $this->assertTrue(is_array($array));
   }
   
+  public function testCannotConvertToString()
+  {
+    $map = new UtilMap();
+    
+    try {
+      $map->put(new stdClass(), "hoge");
+    } catch (Sabel_Exception_Runtime $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testGet()
   {
     $map = new UtilMap();
     $map->put("test1", "hoge")
-        ->put("test2", new String("huga"))
+        ->put("test2", new String("fuga"))
         ->put(new String("test3"), "foo")
         ->put(new UtilMap(array(1)), "bar")
         ->put(new UtilMap(array(1, 2)), new UtilMap(array(3, 4)));
         
     $this->assertTrue($map->get("test1")->equals("hoge"));
-    $this->assertTrue($map->get("test2")->equals("huga"));
+    $this->assertTrue($map->get("test2")->equals("fuga"));
     $this->assertTrue($map->get("test3")->equals("foo"));
     $this->assertTrue($map->get(new String("test3"))->equals("foo"));
     $this->assertTrue($map->get(new UtilMap(array(1)))->equals("bar"));
@@ -218,7 +256,7 @@ class Test_Util_Map extends SabelTestCase
   
   public function testMerge()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     $this->assertEquals($map->count(), 2);
     
@@ -229,7 +267,7 @@ class Test_Util_Map extends SabelTestCase
     $values = $map->values();
     
     $this->assertTrue($values[0]->equals("hoge"));
-    $this->assertTrue($values[1]->equals("huga"));
+    $this->assertTrue($values[1]->equals("fuga"));
     $this->assertTrue($values[2]->equals("foo"));
     $this->assertTrue($values[3]->equals("bar"));
     
@@ -240,7 +278,7 @@ class Test_Util_Map extends SabelTestCase
     $values = $map->values();
     
     $this->assertTrue($values[0]->equals("hoge"));
-    $this->assertTrue($values[1]->equals("huga"));
+    $this->assertTrue($values[1]->equals("fuga"));
     $this->assertTrue($values[2]->equals("foo"));
     $this->assertTrue($values[3]->equals("bar"));
     $this->assertTrue($values[4]->equals("biz"));
@@ -249,11 +287,11 @@ class Test_Util_Map extends SabelTestCase
   
   public function testUnique()
   {
-    $data = array("test1" => "hoge", "test2" => "huga");
+    $data = array("test1" => "hoge", "test2" => "fuga");
     $map = new UtilMap($data);
     $map->put("test4", "foo")
         ->put("test5", "hoge")
-        ->put("test6", "huga");
+        ->put("test6", "fuga");
         
     $this->assertEquals($map->count(), 5);
     $this->assertEquals($map->unique()->count(), 3);
@@ -274,7 +312,7 @@ class Test_Util_Map extends SabelTestCase
     $map = new UtilMap();
     $map->put("test1", "hoge")
         ->put("test2", null)
-        ->put(new UtilMap(), "huga");
+        ->put(new UtilMap(), "fuga");
         
     $this->assertTrue($map->has("test1"));
     $this->assertTrue($map->has("test2"));
@@ -288,12 +326,12 @@ class Test_Util_Map extends SabelTestCase
   {
     $map = new UtilMap();
     $map->put("test1", "hoge")
-        ->put("test2", "huga");
+        ->put("test2", "fuga");
         
     $this->assertTrue($map->has("test1"));
     $this->assertTrue($map->has("test2"));
     
-    $this->assertTrue($map->pop()->equals("huga"));
+    $this->assertTrue($map->pop()->equals("fuga"));
     $this->assertTrue($map->has("test1"));
     $this->assertFalse($map->has("test2"));
     $this->assertEquals($map->count(), 1);
@@ -303,7 +341,7 @@ class Test_Util_Map extends SabelTestCase
   {
     $map = new UtilMap();
     $map->put("test1", "hoge")
-        ->put("test2", "huga");
+        ->put("test2", "fuga");
         
     $this->assertTrue($map->has("test1"));
     $this->assertTrue($map->has("test2"));

@@ -110,6 +110,8 @@ class Form_Processor extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
+    if ($this->unityId === "") return;
+    
     foreach ($this->forms as $seskey => &$form) {
       if ($form instanceof Form_Object) {
         $form = serialize($form);

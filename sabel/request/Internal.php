@@ -61,7 +61,7 @@ class Sabel_Request_Internal extends Sabel_Object
     
     $bus = new Sabel_Bus();
     $bus->set("request", $request);
-    $bus->set("storage", $currentBus->get("storage"));
+    $bus->set("session", $currentBus->get("session"));
     
     $context = new Sabel_Context();
     $context->setBus($bus);

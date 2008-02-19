@@ -19,43 +19,67 @@ class Test_Util_String extends SabelTestCase
     $this->assertTrue($string->isEmpty());
   }
   
+  public function testNotString()
+  {
+    try {
+      $string = new String(10000);
+    } catch (Sabel_Exception_InvalidArgument $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testCharAt()
   {
     $string = new String("test");
-    $this->assertEquals($string->charAt(0),  "t");
-    $this->assertEquals($string->charAt(1),  "e");
-    $this->assertEquals($string->charAt(3),  "t");
-    $this->assertEquals($string->charAt(4),  null);
-    $this->assertEquals($string->charAt(-1), null);
+    $this->assertEquals("t",  $string->charAt(0));
+    $this->assertEquals("e",  $string->charAt(1));
+    $this->assertEquals("t",  $string->charAt(3));
+    $this->assertEquals(null, $string->charAt(4));
+    $this->assertEquals(null, $string->charAt(-1));
   }
   
   public function testIndexOf()
   {
     $string = new String("Hello World");
-    $this->assertEquals($string->indexOf("W"), 6);
-    $this->assertEquals($string->indexOf("o"), 4);
-    $this->assertEquals($string->indexOf("o", 5), 7);
+    $this->assertEquals(6, $string->indexOf("W"));
+    $this->assertEquals(4, $string->indexOf("o"));
+    $this->assertEquals(7, $string->indexOf("o", 5));
+  }
+  
+  public function testLastChar()
+  {
+    $string = new String("Hello World");
+    $this->assertEquals("d", $string->last());
+    
+    $string = new String();
+    $this->assertEquals("", $string->last());
   }
   
   public function testTrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->trim()->equals("Hello World"));
-    $this->assertEquals($string->length(), 11);
+    $this->assertEquals(11, $string->length());
+    
+    $string = new String("///Hello World///");
+    $this->assertTrue($string->trim("/")->equals("Hello World"));
+    $this->assertEquals(11, $string->length());
   }
   
   public function testRtrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->rtrim()->equals("  Hello World"));
-    $this->assertEquals($string->length(), 13);
+    $this->assertEquals(13, $string->length());
   }
   
   public function testLtrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->ltrim()->equals("Hello World  "));
-    $this->assertEquals($string->length(), 13);
+    $this->assertEquals(13, $string->length());
   }
   
   public function testToUpperCase()
@@ -126,13 +150,13 @@ class Test_Util_String extends SabelTestCase
   public function testSha1()
   {
     $string = new String("hoge");
-    $this->assertEquals($string->sha1()->toString(), sha1("hoge"));
+    $this->assertEquals(sha1("hoge"), $string->sha1()->toString());
   }
   
   public function testMd5()
   {
     $string = new String("hoge");
-    $this->assertEquals($string->md5()->toString(), md5("hoge"));
+    $this->assertEquals(md5("hoge"), $string->md5()->toString());
   }
   
   public function testSucc()
@@ -209,5 +233,13 @@ class Test_Util_String extends SabelTestCase
     $string = new String("Hello World");
     $string->insert(0, "PHP. ");
     $this->assertTrue($string->equals("PHP. Hello World"));
+  }
+  
+  public function testClone()
+  {
+    $string = new String("Hello World");
+    $cloned = $string->cloning();
+    $this->assertTrue($string == $cloned);
+    $this->assertFalse($string === $cloned);
   }
 }

@@ -17,7 +17,7 @@ class Sabel_Context extends Sabel_Object
     $bus        = null,
     $candidate  = null,
     $exception  = null;
-    
+  
   public static function setContext($context)
   {
     self::$context = $context;
@@ -34,31 +34,31 @@ class Sabel_Context extends Sabel_Object
   
   public function setCandidate($candidate)
   {
-    self::$context->candidate = $candidate;
+    $this->candidate = $candidate;
   }
   
   public function getCandidate()
   {
-    return self::$context->candidate;
+    return $this->candidate;
   }
   
   public function setBus($bus)
   {
-    self::$context->bus = $bus;
+    $this->bus = $bus;
   }
   
   public function getBus()
   {
-    return self::$context->bus;
+    return $this->bus;
   }
   
   public function setException($exception)
   {
-    self::$context->exception = $exception;
+    $this->exception = $exception;
   }
   
   public function getException()
   {
-    return self::$context->exception;
+    return $this->exception;
   }
 }

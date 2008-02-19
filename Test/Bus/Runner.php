@@ -32,11 +32,28 @@ class Test_Bus_Runner extends SabelTestCase
     $bus->addProcessor(new FugaProcessor("fuga"));
     $bus->addProcessor(new FooProcessor("foo"));
     
+    $ins = $bus->getProcessor("hoge");
+    $this->assertTrue($ins instanceof HogeProcessor);
+    $this->assertNull($bus->getProcessor("test"));
+    
     $list = $bus->getProcessorList();
     $this->assertTrue($list->has("hoge"));
     $this->assertTrue($list->has("fuga"));
     $this->assertTrue($list->has("foo"));
     $this->assertFalse($list->has("bar"));
+  }
+  
+  public function testConfigs()
+  {
+    $bus = Sabel_Bus::create();
+    eval ("class TemporaryConfig implements Sabel_Config
+           {
+             public function configure() {}
+           }");
+    
+    $bus->setConfig("tmp", new TemporaryConfig());
+    $this->assertTrue($bus->getConfig("tmp") instanceof Sabel_Config);
+    $this->assertNull($bus->getConfig("hoge"));
   }
   
   public function testBusInit()
@@ -80,6 +97,17 @@ class Test_Bus_Runner extends SabelTestCase
     $this->assertEquals("after: hoge_result", $bus->get("afterResult"));
   }
   
+  public function testAttatchExecuteEvent()
+  {
+    $bus = Sabel_Bus::create();
+    $bus->attachExecuteEvent("hoge", new TestEvent(),  "afterMethod");
+    $bus->attachExecuteEvent("hoge", new TestEvent2(), "afterMethod");
+    $bus->run(new TestBusConfig());
+    
+    $this->assertEquals("after: hoge_result", $bus->get("afterResult"));
+    $this->assertEquals("after: hoge_result", $bus->get("afterResult2"));
+  }
+  
   public function testHas()
   {
     $bus = Sabel_Bus::create();
@@ -105,6 +133,14 @@ class TestEvent
   public function afterMethod($bus)
   {
     $bus->set("afterResult", "after: " . $bus->get("result"));
+  }
+}
+
+class TestEvent2
+{
+  public function afterMethod($bus)
+  {
+    $bus->set("afterResult2", "after: " . $bus->get("result"));
   }
 }
 

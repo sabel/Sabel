@@ -50,6 +50,19 @@ class Test_Map_Match extends SabelTestCase
     $this->fail();
   }
   
+  public function testGetCandidateByName()
+  {
+    $this->route("one")->uri(":controller/:action")->module("index");
+    $this->route("two")->uri(":controller/:action/:param")->module("index");
+    $this->routing("cont/act/1");
+    
+    $one = Sabel_Map_Configurator::getCandidateByName("one");
+    $this->assertTrue($one instanceof Sabel_Map_Candidate);
+    $two = Sabel_Map_Configurator::getCandidateByName("two");
+    $this->assertTrue($two instanceof Sabel_Map_Candidate);
+    $this->assertNull(Sabel_Map_Configurator::getCandidateByName("three"));
+  }
+  
   public function testFailMismatchUriAndElement()
   {
     $this->route("default")

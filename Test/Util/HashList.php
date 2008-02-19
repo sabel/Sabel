@@ -50,6 +50,31 @@ class Test_Util_HashList extends SabelTestCase
     $this->assertEquals("3", $list->next());
   }
   
+  public function testReplace()
+  {
+    $list = new Sabel_Util_HashList();
+    $list->add("a", "1");
+    $list->add("b", "2");
+    $list->add("c", "3");
+    
+    $list->replace("b", "d", "4");
+    
+    $this->assertEquals(3, $list->count());
+    
+    $this->assertEquals("1", $list->get("a"));
+    $this->assertNull($list->get("b"));
+    $this->assertEquals("3", $list->get("c"));
+    $this->assertEquals("4", $list->get("d"));
+    
+    try {
+      $list->replace("z", "e", "5");
+    } catch (Sabel_Exception_Runtime $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testInsertPrevious()
   {
     $list = new Sabel_Util_HashList();
@@ -80,6 +105,24 @@ class Test_Util_HashList extends SabelTestCase
     $this->assertEquals("4", $list->next());
     $this->assertEquals("2", $list->next());
     $this->assertEquals("3", $list->next());
+  }
+  
+  public function testToArray()
+  {
+    $list = new Sabel_Util_HashList();
+    $list->add("a", "1");
+    $list->add("b", "2");
+    $list->add("c", "3");
+    
+    $list->insertNext("a", "d", "4");
+    $list->insertPrevious("c", "e", "5");
+    
+    $array = $list->toArray();
+    $this->assertEquals("1", $array["a"]);
+    $this->assertEquals("2", $array["b"]);
+    $this->assertEquals("3", $array["c"]);
+    $this->assertEquals("4", $array["d"]);
+    $this->assertEquals("5", $array["e"]);
   }
   
   public function testFirst()

@@ -85,8 +85,7 @@ class Sabel_Util_String extends Sabel_Object
   
   public function last()
   {
-    $pos = $this->length - 1;
-    return $this->string{$pos};
+    return $this->charAt($this->length - 1);
   }
   
   public function indexOf($needle, $offset = 0)

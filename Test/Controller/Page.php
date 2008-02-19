@@ -13,6 +13,18 @@ class Test_Controller_Page extends SabelTestCase
     return self::createSuite("Test_Controller_Page");
   }
   
+  public function testSetInvalidAction()
+  {
+    $c = $this->createController();
+    try {
+      $c->setAction(10000);
+    } catch (Sabel_Exception_InvalidArgument $e) {
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testIndexAction()
   {
     $c = $this->createController();
@@ -63,15 +75,18 @@ class Test_Controller_Page extends SabelTestCase
     $this->assertFalse($c->isExecuted());
   }
   
-  public function testAttribute()
+  public function testAttributesAndResponses()
   {
     $c = $this->createController();
     $c->setResponse(new MyResponse());
     $c->setAttribute("a", "10");
     $c->setAttribute("b", "20");
+    $c->assign("c", "30");
+    
     $this->assertEquals("10", $c->getAttribute("a"));
     $this->assertEquals("20", $c->getAttribute("b"));
     $this->assertEquals(null, $c->getAttribute("c"));
+    $this->assertEquals("30", $c->getResponse()->getResponse("c"));
   }
   
   public function testAttributes()

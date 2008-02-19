@@ -72,4 +72,12 @@ class Test_Console extends SabelTestCase
     $this->assertEquals("/tmp/test.txt", $opts[0]);
     $this->assertEquals(array("cmd"), $args);
   }
+  
+  public function testConstructor()
+  {
+    ob_start();
+    $console = new Sabel_Console();
+    $line = ob_get_clean();
+    $this->assertEquals("please input exit|quit|\q to finish.", trim($line));
+  }
 }

@@ -35,6 +35,8 @@ class Test_Storage_Memory extends SabelTestCase
   {
     $deleted = $this->storage->delete("hoge");
     $this->assertEquals("abcde", $deleted);
+    
+    $this->assertNull($this->storage->delete("abcde"));
     $this->assertNull($this->storage->read("hoge"));
   }
   
