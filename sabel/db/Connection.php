@@ -12,7 +12,7 @@
 class Sabel_DB_Connection
 {
   /**
-   * @var array
+   * @var resource[]
    */
   private static $connections = array();
   
@@ -25,11 +25,17 @@ class Sabel_DB_Connection
   public static function connect(Sabel_DB_Abstract_Driver $driver)
   {
     $connectionName = $driver->getConnectionName();
+    $names = Sabel_DB_Config::getConnectionNamesOfSameSetting($connectionName);
+    
+    foreach ($names as $name) {
+      if (isset(self::$connections[$name])) {
+        $driver->setConnection(self::$connections[$name]);
+        return self::$connections[$name];
+      }
+    }
     
     if (!isset(self::$connections[$connectionName])) {
-      $currentLevel = error_reporting(0);
       $result = $driver->connect(Sabel_DB_Config::get($connectionName));
-      error_reporting($currentLevel);
       
       if (is_string($result)) {
         throw new Sabel_DB_Exception_Connection($result);

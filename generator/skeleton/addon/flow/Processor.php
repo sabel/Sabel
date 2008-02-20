@@ -15,6 +15,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   const END_FLOW_SESKEY = "sbl_end_flows";
   
   private $session   = null;
+  private $storage   = null;
   private $action    = "";
   private $isTransit = false;
   private $refMethod = null;
@@ -22,8 +23,8 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $response    = $bus->get("response");
-    $controller  = $bus->get("controller");
+    $response   = $bus->get("response");
+    $controller = $bus->get("controller");
     
     if (!$controller instanceof Flow_Page || $response->isFailure()) return;
     
@@ -38,19 +39,26 @@ class Flow_Processor extends Sabel_Bus_Processor
     $request = $bus->get("request");
     $this->refMethod = $controller->getReflection()->getMethod($action);
     
-    $token = $request->getToken()->getValue();
+    $token = $request->getValueWithMethod("token");
     $state = new Flow_State($token);
     
     l("[flow] token is '{$token}'");
     
     $key = implode("_", array($destination->getModule(),
                               $destination->getController()));
-                              
+    
+    $namespace = $this->session->getId() . "_" . $key;
+    $this->storage = new Sabel_Token_Storage_Database($namespace);
+    echo "<PRE>";
+    print_r($this->storage->fetch($token));
+    exit;
+    
     if ($token !== null && !$this->isStartAction()) {
       $state = $state->restore($this->session, $key);
     }
     
     $this->state = $state;
+    
     if ($this->isIgnoreAction()) return;
     
     if ($state === null) {
@@ -79,9 +87,9 @@ class Flow_Processor extends Sabel_Bus_Processor
         $response->setResponse($name, $val);
       }
     } elseif ($this->isStartAction()) {
-      $token = $request->getToken()->createValue();
+      $token = md5(uniqid(mt_rand(), true));
       $state->start($key, $this->action, $token);
-      $this->clearEndFlow($state);
+      // @todo $this->clearEndFlow($state);
       
       l("[flow] start state with " . $token);
       
@@ -111,7 +119,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   public function afterExecute($bus)
   {
     if ($this->isTransit() && $bus->get("response")->isSuccess()) {
-      $this->state->save($this->session);
+      $this->state->save($this->storage);
     }
   }
   

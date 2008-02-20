@@ -56,7 +56,7 @@ class Form_Object extends Sabel_Object
    */
   protected $allowCols = array();
   
-  public function __construct($model, $fName, $token = null)
+  public function __construct($model, $fName)
   {
     if (is_string($model)) {
       $model = MODEL($model);
@@ -67,7 +67,6 @@ class Form_Object extends Sabel_Object
     $this->columns    = $model->getColumns();
     $this->isSelected = $model->isSelected();
     $this->formName   = $fName;
-    $this->token      = $token;
     $this->htmlWriter = new Form_Html();
   }
   
@@ -77,24 +76,6 @@ class Form_Object extends Sabel_Object
   public function getFormName()
   {
     return $this->formName;
-  }
-  
-  /**
-   * @param string $token
-   *
-   * @return void
-   */
-  public function setToken($token)
-  {
-    $this->token = $token;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getToken()
-  {
-    return $this->token;
   }
   
   /**
@@ -248,13 +229,7 @@ class Form_Object extends Sabel_Object
   
   public function start($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    $html = $this->getHtmlWriter("", $name, $id, $class)->open($uri, $method);
-    
-    if ($this->token === null) {
-      return $html;
-    } else {
-      return $html . '<input type="hidden" name="token" value="' . $this->token . '"/>' . PHP_EOL;
-    }
+    return $this->getHtmlWriter("", $name, $id, $class)->open($uri, $method);
   }
   
   public function end()

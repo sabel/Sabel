@@ -9,7 +9,8 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Storage_Memory implements Sabel_Storage_Interface
+class Sabel_Storage_Memory
+  extends Sabel_Object implements Sabel_Storage_Interface
 {
   /**
    * @var self

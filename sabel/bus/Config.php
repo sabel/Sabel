@@ -12,16 +12,42 @@
  */
 abstract class Sabel_Bus_Config extends Sabel_Object
 {
+  /**
+   * @var Sabel_Bus_Processor[]
+   */
   protected $processors = array();
-  protected $configs    = array();
   
+  /**
+   * @var Sabel_Config[]
+   */
+  protected $configs = array();
+  
+  /**
+   * @var string[]
+   */
+  protected $interfaces = array();
+  
+  /**
+   * @return Sabel_Bus_Processor[]
+   */
   public function getProcessors()
   {
     return $this->processors;
   }
   
+  /**
+   * @return Sabel_Config[]
+   */
   public function getConfigs()
   {
     return $this->configs;
+  }
+  
+  /**
+   * @return string[]
+   */
+  public function getInterfaces()
+  {
+    return $this->interfaces;
   }
 }

@@ -25,7 +25,9 @@ class Test_DB_Ibase extends Test_DB_Test
     $driver = new Sabel_DB_Ibase_Driver("conrefused");
     
     try {
+      $c = error_reporting(0);
       $resource = Sabel_DB_Connection::connect($driver);
+      error_reporting($c);
     } catch (Sabel_DB_Exception_Connection $e) {
       return;
     }

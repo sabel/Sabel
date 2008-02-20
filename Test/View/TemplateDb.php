@@ -35,12 +35,15 @@ class Test_View_TemplateDb extends Test_View_Template
   protected function createRepository($controllerName)
   {
     $controller = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS . $controllerName . DS);
+    $controller->setTableName("templates");
     $repository = new Sabel_View_Repository("controller", $controller);
     
     $module = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS);
+    $module->setTableName("templates");
     $repository->addTemplate("module", $module);
     
     $app = new Sabel_View_Template_Database(VIEW_DIR_NAME . DS);
+    $app->setTableName("templates");
     $repository->addTemplate("app", $app);
     
     return self::$repository = $repository;

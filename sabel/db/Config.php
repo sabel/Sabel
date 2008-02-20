@@ -53,13 +53,13 @@ class Sabel_DB_Config
   
   public static function getSchemaName($connectionName)
   {
+    // @todo more improvement
+    
     $package = self::getPackage($connectionName);
     $ignores = array("sabel.db.pdo.sqlite" => 1, "sabel.db.ibase" => 1);
     if (isset($ignores[$package])) return null;
     
     $config = self::getConfig($connectionName);
-    
-    // @todo more improvement
     
     if (isset($config["schema"])) {
       return $config["schema"];
@@ -73,6 +73,17 @@ class Sabel_DB_Config
     
     $message = "getSchemaName() 'schema' not found in config.";
     throw new Sabel_DB_Exception($message);
+  }
+  
+  public static function getConnectionNamesOfSameSetting($connectionName)
+  {
+    $names = array();
+    foreach (self::$configs as $name => $setting) {
+      if ($name === $connectionName) continue;
+      if ($setting == self::$configs[$connectionName]) $names[] = $name;
+    }
+    
+    return $names;
   }
   
   private static function getConfig($connectionName)

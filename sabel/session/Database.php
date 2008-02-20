@@ -24,7 +24,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   /**
    * @var string
    */
-  protected $tableName = "session";
+  protected $tableName = "sbl_session";
   
   /**
    * @var boolean

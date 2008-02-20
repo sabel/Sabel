@@ -22,6 +22,11 @@ class Sabel_Bus extends Sabel_Object
   protected $processorList = null;
   
   /**
+   * @var string[]
+   */
+  protected $interfaces = array();
+  
+  /**
    * @var array
    */
   protected $holder  = array();
@@ -52,6 +57,13 @@ class Sabel_Bus extends Sabel_Object
   
   public function set($key, $value)
   {
+    if (isset($this->interfaces[$key]) && !$value instanceof $this->interfaces[$key]) {
+      $message = "Sabel_Bus::set() '{$key}' must be an instance of "
+               . $this->interfaces[$key];
+      
+      throw new Sabel_Exception_Runtime($message);
+    }
+    
     $this->holder[$key] = $value;
   }
   
@@ -110,6 +122,8 @@ class Sabel_Bus extends Sabel_Object
     foreach ($config->getConfigs() as $name => $className) {
       $this->setConfig($name, new $className());
     }
+    
+    $this->interfaces = $config->getInterfaces();
     
     $processorList = $this->processorList;
     $isProduction  = (ENVIRONMENT === PRODUCTION);

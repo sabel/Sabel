@@ -11,25 +11,31 @@
  */
 class Form_Processor extends Sabel_Bus_Processor
 {
-  const SESSION_KEY = "sbl_forms";
-  const SES_TIMEOUT = 300;
+  const SES_TIMEOUT = 1200;
   
   /**
-   * @var Form_Object[]
+   * @var Form_Object
    */
-  private $forms = array();
+  private $form = null;
+  
+  /**
+   * @var Sabel_Token_Storage
+   */
+  private $storage = null;
   
   /**
    * @var string
    */
   private $unityId = "";
   
+  /**
+   * @var string
+   */
+  private $token = "";
+  
   public function execute($bus)
   {
-    $this->extract("request", "session", "controller");
-    
-    $forms = $this->session->read(self::SESSION_KEY);
-    if ($forms === null) $forms = array();
+    $this->extract("request", "controller");
     
     $controller = $this->controller;
     $controller->setAttribute("form", $this);
@@ -40,29 +46,26 @@ class Form_Processor extends Sabel_Bus_Processor
     if (!isset($annot[0][0])) return;
     
     $this->unityId = $annot[0][0];
-    $token = $this->request->getToken()->getValue();
-    $timeouts = $this->session->getTimeouts();
+    $token = $this->request->getValueWithMethod("token");
     
-    if ($token !== "") {
-      $seskey = $this->unityId . "_" . $token;
-      if (isset($forms[$seskey])) {
-        $form = unserialize($forms[$seskey]);
-        $form->setToken($token);
-        $this->session->write($seskey, "", self::SES_TIMEOUT);
-        
-        if ($this->request->isPost()) {
-          $this->applyPostValues($form)->unsetErrors();
-        }
-        
-        $forms[$seskey] = $form;
-        $controller->setAttribute($form->getFormName(), $form);
+    $sid = $bus->get("session")->getId();
+    $this->storage = new Sabel_Token_Storage_Database($sid . "_" . $this->unityId);
+    
+    if ($token === null) return;
+    
+    if ($form = $this->storage->fetch($token)) {
+      if ($this->request->isPost()) {
+        $this->applyPostValues($form)->unsetErrors();
       }
       
-      unset($timeouts[$seskey]);
+      $this->form  = $form;
+      $this->token = $token;
+      
+      $controller->setAttribute($form->getFormName(), $form);
+      $controller->setAttribute("token", $token);
+    } else {
+      $bus->get("response")->notFound();
     }
-    
-    foreach (array_keys($timeouts) as $k) unset($forms[$k]);
-    $this->forms = $forms;
   }
   
   public function create($model, $as = null)
@@ -76,7 +79,7 @@ class Form_Processor extends Sabel_Bus_Processor
     } else {
       $message = "invalid argument(1) type. "
                . "must be a string or instance of model.";
-               
+      
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
@@ -85,40 +88,30 @@ class Form_Processor extends Sabel_Bus_Processor
     if ($this->unityId === "") {
       $form = new Form_Object($model, $name);
       $this->controller->setAttribute($name, $form);
+      return $form;
     } else {
-      $token = $this->request->getToken()->createValue();
-      $form = new Form_Object($model, $name, $token);
-      $seskey = $this->unityId . "_" . $token;
-      $this->forms[$seskey] = $form;
-      $this->session->write($seskey, "", self::SES_TIMEOUT);
-      $this->controller->setAttribute($name, $form);
+      $this->token = md5(uniqid(mt_rand(), true));
+      $this->form  = new Form_Object($model, $name);
+      $this->controller->setAttribute($name, $this->form);
+      $this->controller->setAttribute("token", $this->token);
+      return $this->form;
     }
-    
-    return $form;
   }
   
   public function clear()
   {
-    $token = $this->request->getToken()->getValue();
-    
-    if (!empty($token)) {
-      $seskey = $this->unityId . "_" . $token;
-      $this->session->delete($seskey);
-      unset($this->forms[$seskey]);
+    if ($this->token !== "" && $this->unityId !== "") {
+      $this->storage->clear($this->token);
     }
   }
   
   public function shutdown($bus)
   {
-    if ($this->unityId === "") return;
-    
-    foreach ($this->forms as $seskey => &$form) {
-      if ($form instanceof Form_Object) {
-        $form = serialize($form);
-      }
+    if ($this->form !== null && $this->token !== "") {
+      $this->storage->store($this->token, $this->form, self::SES_TIMEOUT);
     }
     
-    $this->session->write(self::SESSION_KEY, $this->forms);
+    $this->properties = array();
   }
   
   public function applyPostValues($form)

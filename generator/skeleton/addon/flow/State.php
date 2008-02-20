@@ -12,7 +12,7 @@
  */
 class Flow_State
 {
-  const SES_TIMEOUT = 600;
+  const SES_TIMEOUT = 1200;
   
   private $properties = array();
   
@@ -82,8 +82,11 @@ class Flow_State
     return $this->properties["currentActivity"];
   }
   
-  public function restore($session, $key)
+  public function restore(Sabel_Token_Storage $storage, $key)
   {
+    
+    echo "todo restore";
+    exit;
     $properties = $session->read($this->getStateKey($key));
     
     if ($properties === null) {
@@ -94,9 +97,9 @@ class Flow_State
     }
   }
   
-  public function save($session)
+  public function save(Sabel_Token_Storage $storage)
   {
-    $session->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
+    $storage->store($this->properties["token"], $this->properties, self::SES_TIMEOUT);
   }
   
   public function setNextActions($actions)

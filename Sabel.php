@@ -147,6 +147,7 @@ final class Sabel
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
     require ($SABEL . "Request.php");
+    require ($SABEL . "Session.php");
     require ($SABEL . "Response.php");
     
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
@@ -186,10 +187,10 @@ final class Sabel
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
     
-    require ($SABEL . "response"   . DIRECTORY_SEPARATOR . "Object.php");
-    require ($SABEL . "exception"  . DIRECTORY_SEPARATOR . "Runtime.php");
-    require ($SABEL . "logger"     . DIRECTORY_SEPARATOR . "File.php");
-    require ($SABEL . "util"       . DIRECTORY_SEPARATOR . "HashList.php");
+    require ($SABEL . "response"  . DIRECTORY_SEPARATOR . "Object.php");
+    require ($SABEL . "exception" . DIRECTORY_SEPARATOR . "Runtime.php");
+    require ($SABEL . "logger"    . DIRECTORY_SEPARATOR . "File.php");
+    require ($SABEL . "util"      . DIRECTORY_SEPARATOR . "HashList.php");
   }
   
   public static function init()

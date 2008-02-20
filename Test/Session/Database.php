@@ -28,6 +28,7 @@ class Test_Session_Database extends SabelTestCase
   {
     Sabel_Environment::create()->set("REQUEST_METHOD", "GET");
     $this->session = Sabel_Session_Database::create();
+    $this->session->setTableName("session");
     $_GET[session_name()] = self::$sid;
     $this->session->start();
   }

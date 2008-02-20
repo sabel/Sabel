@@ -17,15 +17,20 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   private $uri = null;
   
   /**
-   * @var Sabel_Request_Token
+   * @var array
    */
-  private $token = null;
+  private $getValues = array();
   
-  private
-    $getValues       = array(),
-    $postValues      = array(),
-    $parameterValues = array();
-    
+  /**
+   * @var array
+   */
+  private $postValues = array();
+  
+  /**
+   * @var array
+   */
+  private $parameterValues = array();
+  
   /**
    * @var const Sabel_Request
    */
@@ -290,7 +295,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     $values = array($this->fetchPostValues(),
                     $this->fetchGetValues(),
                     $this->fetchParameterValues());
-                    
+    
     foreach ($values as $value) {
       if (isset($value[$key])) {
         if ($result !== null) {
@@ -302,22 +307,6 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     }
     
     return ($result === "") ? null : $result;
-  }
-  
-  public function setToken(Sabel_Request_Token $token)
-  {
-    $this->token = $token;
-  }
-  
-  public function getToken()
-  {
-    if (is_object($this->token)) {
-      return $this->token;
-    } else {
-      $this->token = new Sabel_Request_Token();
-      $this->token->setValue($this->getValueWithMethod("token"));
-      return $this->token;
-    }
   }
   
   public function getUri()

@@ -19,7 +19,7 @@ class Sabel_View_Template_Database extends Sabel_View_Template
   /**
    * @var string
    */
-  protected $tableName = "templates";
+  protected $tableName = "sbl_template";
   
   /**
    * @var string
