@@ -31,10 +31,13 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
    */
   protected $namespace = "";
   
-  public function __construct($namespace = "")
+  public function __construct($namespace = "", $gcProbability = 5)
   {
     $this->namespace = $namespace;
-    $this->gc();
+    
+    if (rand(1, 100) <= $gcProbability) {
+      $this->gc();
+    }
   }
   
   public function setConnectionName($name)
@@ -115,7 +118,11 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
   
   protected function gc()
   {
-    // @todo
+    $stmt = $this->createStatement();
+    $stmt->type(Sabel_DB_Statement::DELETE)
+         ->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@")
+         ->setBindValue("timeout", time())
+         ->execute();
   }
   
   private function createStatement()

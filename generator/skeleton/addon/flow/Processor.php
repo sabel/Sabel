@@ -12,104 +12,60 @@
  */
 class Flow_Processor extends Sabel_Bus_Processor
 {
-  const END_FLOW_SESKEY = "sbl_end_flows";
-  
-  private $session   = null;
-  private $storage   = null;
-  private $action    = "";
-  private $isTransit = false;
-  private $refMethod = null;
-  private $state     = null;
+  private $storage    = null;
+  private $action     = "";
+  private $isTransit  = false;
+  private $annotation = null;
+  private $state      = null;
   
   public function execute($bus)
   {
-    $response   = $bus->get("response");
-    $controller = $bus->get("controller");
+    $this->extract("session", "response", "controller");
     
-    if (!$controller instanceof Flow_Page || $response->isFailure()) return;
-    
+    $controller   = $this->controller;
     $destination  = $bus->get("destination");
-    $this->action = $action = $destination->getAction();
+    $this->action = $destination->getAction();
     
-    if (!$controller->hasMethod($action)) {
-      return $response->notFound();
+    if (!$controller->hasMethod($this->action)) return;
+    
+    $annotation = $controller->getReflection()
+                             ->getMethod($this->action)
+                             ->getAnnotation("flow");
+    
+    if ($annotation === null || !isset($annotation[0][0])) {
+      return;
+    } else {
+      $this->annotation = $annotation;
     }
     
-    $this->session = $bus->get("session");
-    $request = $bus->get("request");
-    $this->refMethod = $controller->getReflection()->getMethod($action);
+    $token = $bus->get("request")->getValueWithMethod("token");
+    $this->state = $state = $this->getFlowState($token, $destination);
+    if (!$state) return;
     
-    $token = $request->getValueWithMethod("token");
-    $state = new Flow_State($token);
+    $controller->setAttribute("flow",  $state);
+    $controller->setAttribute("token", $state->token);
     
-    l("[flow] token is '{$token}'");
-    
-    $key = implode("_", array($destination->getModule(),
-                              $destination->getController()));
-    
-    $namespace = $this->session->getId() . "_" . $key;
-    $this->storage = new Sabel_Token_Storage_Database($namespace);
-    echo "<PRE>";
-    print_r($this->storage->fetch($token));
-    exit;
-    
-    if ($token !== null && !$this->isStartAction()) {
-      $state = $state->restore($this->session, $key);
-    }
-    
-    $this->state = $state;
-    
-    if ($this->isIgnoreAction()) return;
-    
-    if ($state === null) {
-      l("[flow] invalid token '{$token}'.");
-      return $response->notFound();
-    }
-    
-    if ($state->isInFlow() && !$this->isStartAction()) {
-      $controller->setAttribute("flow",  $state);
-      $controller->setAttribute("token", $token);
+    if ($this->isStartAction()) {
+      l("[flow] start flow state with: '{$state->token}'");
       
-      if ($this->refMethod->hasAnnotation("end")) {
-        $this->transit(false);
-        $this->addEndFlow($state);
+      $state->setCurrentActivity($this->action);
+      
+      if ($nexts = $this->getNextActions()) {
+        $state->setNextActions($nexts);
+        $this->isTransit = true;
       } else {
-        $this->executeInFlowAction($state, $controller);
-        $this->clearEndFlow($state);
-      }
-      
-      if (($warning = $state->warning) !== null) {
-        // @todo
-        $response->setResponse("errmsg", $warning);
-      }
-      
-      foreach ($state->getProperties() as $name => $val) {
-        $response->setResponse($name, $val);
-      }
-    } elseif ($this->isStartAction()) {
-      $token = md5(uniqid(mt_rand(), true));
-      $state->start($key, $this->action, $token);
-      // @todo $this->clearEndFlow($state);
-      
-      l("[flow] start state with " . $token);
-      
-      if (($endAction = $this->isOnce()) === false) {
-        $next = $this->refMethod->getAnnotation("next");
-        $state->setNextActions($next[0]);
-      } else {
-        $state->setNextActions(array($endAction));
-      }
-      
-      $controller->setAttribute("flow", $state);
-      $controller->setAttribute("token", $token);
-      $this->transit(true);
-      
-      foreach ($state->getProperties() as $name => $val) {
-        $response->setResponse($name, $val);
+        $message = "no next actions.";
+        throw new Sabel_Exception_Runtime($message);
       }
     } else {
-      l("[flow] your request was denied.");
-      return $response->notFound();
+      l("[flow] restore flow state with: '{$state->token}'");
+      
+      $this->executeInFlowAction();
+      
+      $vars = $this->getContinuationVariables();
+      foreach ($vars as $var) {
+        $controller->$var = $state->$var;
+      }
     }
     
     $this->setRewriteTags();
@@ -118,86 +74,131 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function afterExecute($bus)
   {
-    if ($this->isTransit() && $bus->get("response")->isSuccess()) {
-      $this->state->save($this->storage);
+    if ($this->isTransit && $bus->get("response")->isSuccess()) {
+      $state = $this->state;
+      $controller = $this->controller;
+      $vars = $this->getContinuationVariables();
+      
+      foreach ($vars as $var) {
+        $state->$var = $controller->$var;
+      }
+      
+      $state->save($this->storage);
     }
   }
   
   private function isStartAction()
   {
-    $annot = $this->refMethod->getAnnotation("flow");
-    if (!isset($annot[0][0])) return false;
+    $bool = false;
+    foreach ($this->annotation as $annot) {
+      if ($annot[0] === "start") {
+        $bool = true;
+        break;
+      }
+    }
     
-    return ($annot[0][0] === "start" || $this->isOnce());
+    return ($bool || $this->isOnce());
   }
   
-  private function isIgnoreAction()
+  private function isEndAction()
   {
-    $annot = $this->refMethod->getAnnotation("flow");
-    return (isset($annot[0][0]) && $annot[0][0] === "ignore");
+    foreach ($this->annotation as $annot) {
+      if ($annot[0] === "end") {
+        return true;
+      }
+    }
+    
+    return false;
   }
   
   private function isOnce()
   {
-    $annot = $this->refMethod->getAnnotation("flow");
-    if (!isset($annot[0][0])) return false;
+    foreach ($this->annotation as $annot) {
+      if ($annot[0] === "once") {
+        return true;
+      }
+    }
     
-    return ($annot[0][0] === "once") ? $annot[0][1] : false;
+    return false;
   }
   
-  private function executeInFlowAction($state, $controller)
+  private function getNextActions()
   {
-    if ($this->action === $state->getCurrent()) {
-      $this->transit(false);
-    } elseif ($state->isMatchToNext($this->action)) {
-      $next = $this->refMethod->getAnnotation("next");
-      $state->setNextActions($next[0]);
-      $state->transit($this->action);
-      $state->warning = null;
-      $this->transit(true);
+    foreach ($this->annotation as $annot) {
+      if ($annot[0] === "next" && isset($annot[1])) {
+        unset($annot[0]);
+        return $annot;
+      }
+    }
+    
+    return null;
+  }
+  
+  private function getFlowState($token, $destination)
+  {
+    $key = implode("_", array($destination->getModule(),
+                              $destination->getController()));
+    
+    $namespace = $this->session->getId() . "_" . $key;
+    $this->storage = new Sabel_Token_Storage_Database($namespace);
+    
+    if ($this->isStartAction()) {
+      $state = new Flow_State(md5(uniqid(mt_rand(), true)));
+    } elseif ($token === null) {
+      l("[flow] token is null");
+      $this->response->notFound();
+      return false;
+    } else {
+      if ($data = $this->storage->fetch($token)) {
+        $state = new Flow_State($token);
+        $state->restore($data);
+      } else {
+        l("[flow] invalid token");
+        $this->response->notFound();
+        return false;
+      }
+    }
+    
+    return $state;
+  }
+  
+  private function executeInFlowAction()
+  {
+    $state = $this->state;
+    $currentActivity = $state->getCurrentActivity();
+    if ($this->action === $currentActivity) return;
+    
+    if ($state->isMatchToNext($this->action)) {
+      if ($this->isEndAction()) {
+        $state->transit($this->action);
+        $state->warning = null;
+        $this->state->save($this->storage, 60);
+      } elseif ($nexts = $this->getNextActions()) {
+        $state->setNextActions($nexts);
+        $state->transit($this->action);
+        $state->warning  = null;
+        $this->isTransit = true;
+      } else {
+        $message = "no next actions.";
+        throw new Sabel_Exception_Runtime($message);
+      }
     } else {
       if ($state->isPreviousAction($this->action)) {
         $message = "It is possible to move to the previous page "
                  . "with browser's back button.";
-                 
+        
         $state->warning = $message;
-      } else {
-        l("[flow] invalid sequence.");
       }
       
-      $controller->getRedirector()->to("a: " . $state->getCurrent());
+      l("[flow] invalid sequence.");
+      $this->controller->getRedirector()->to("a: " . $currentActivity);
     }
   }
   
-  private function transit($bool)
+  private function getContinuationVariables()
   {
-    $this->isTransit = $bool;
-  }
-  
-  private function isTransit()
-  {
-    return $this->isTransit;
-  }
-  
-  public function addEndFlow($state)
-  {
-    $stateKey = $state->getStateKey();
-    if (($ends = $this->session->read(self::END_FLOW_SESKEY)) === null) {
-      $ends = array($stateKey);
-    } elseif (!in_array($stateKey, $ends, true)) {
-      $ends[] = $stateKey;
-    }
-    
-    $this->session->write(self::END_FLOW_SESKEY, $ends);
-  }
-  
-  public function clearEndFlow()
-  {
-    $session = $this->session;
-    $ends = $session->delete(self::END_FLOW_SESKEY);
-    if ($ends === null) return;
-    
-    foreach ($ends as $seskey) $session->delete($seskey);
+    $vars = $this->controller->getReflection()->getAnnotation("continuation");
+    return ($vars === null) ? array() : $vars[0];
   }
   
   protected function setRewriteTags()

@@ -68,7 +68,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
       }
       
       $session    = $bus->get("session");
-      $token      = $controller->getRequest()->getToken()->getValue();
+      $token      = $controller->getRequest()->getValueWithMethod("token");
       $hasToken   = !empty($token);
       $redirector = $controller->getRedirector();
       
