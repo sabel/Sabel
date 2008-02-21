@@ -84,24 +84,23 @@ class Form_Processor extends Sabel_Bus_Processor
     }
     
     $name = lcfirst($name) . "Form";
+    $form = new Form_Object($model, $name);
+    $this->controller->setAttribute($name, $form);
     
-    if ($this->unityId === "") {
-      $form = new Form_Object($model, $name);
-      $this->controller->setAttribute($name, $form);
-      return $form;
-    } else {
+    if ($this->unityId !== "") {
+      $this->form  = $form;
       $this->token = md5(uniqid(mt_rand(), true));
-      $this->form  = new Form_Object($model, $name);
-      $this->controller->setAttribute($name, $this->form);
       $this->controller->setAttribute("token", $this->token);
-      return $this->form;
     }
+    
+    return $form;
   }
   
   public function clear()
   {
     if ($this->token !== "" && $this->unityId !== "") {
       $this->storage->clear($this->token);
+      $this->form = null;
     }
   }
   
@@ -110,8 +109,6 @@ class Form_Processor extends Sabel_Bus_Processor
     if ($this->form !== null && $this->token !== "") {
       $this->storage->store($this->token, $this->form, self::SES_TIMEOUT);
     }
-    
-    $this->properties = array();
   }
   
   public function applyPostValues($form)

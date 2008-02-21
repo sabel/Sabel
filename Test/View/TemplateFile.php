@@ -1,7 +1,7 @@
 <?php
 
 /**
- * testcase for sabel.view.template.File, sabel.view.Repository
+ * testcase for sabel.view.template.File, sabel.view.Object
  *
  * @category  View
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
@@ -27,14 +27,14 @@ class Test_View_TemplateFile extends Test_View_Template
   protected function createRepository($controllerName)
   {
     $controller = new Sabel_View_Template_File("index" . DS . VIEW_DIR_NAME . DS . $controllerName . DS);
-    $repository = new Sabel_View_Repository("controller", $controller);
+    $view = new Sabel_View_Object("controller", $controller);
     
     $module = new Sabel_View_Template_File("index" . DS . VIEW_DIR_NAME . DS);
-    $repository->addTemplate("module", $module);
+    $view->addTemplate("module", $module);
     
     $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
-    $repository->addTemplate("app", $app);
+    $view->addTemplate("app", $app);
     
-    return self::$repository = $repository;
+    return self::$view = $view;
   }
 }

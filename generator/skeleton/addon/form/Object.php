@@ -17,16 +17,6 @@ class Form_Object extends Sabel_Object
   protected $formName = "";
   
   /**
-   * @var string
-   */
-  protected $token = null;
-  
-  /**
-   * @var Form_Html
-   */
-  protected $htmlWriter = null;
-  
-  /**
    * @var Sabel_DB_Model
    */
   protected $model = null;
@@ -67,7 +57,6 @@ class Form_Object extends Sabel_Object
     $this->columns    = $model->getColumns();
     $this->isSelected = $model->isSelected();
     $this->formName   = $fName;
-    $this->htmlWriter = new Form_Html();
   }
   
   /**
@@ -327,25 +316,31 @@ class Form_Object extends Sabel_Object
       $this->allowCols[] = $name;
     }
     
-    $writer = $this->htmlWriter->clear();
+    static $htmlWriter = null;
     
-    return $writer->setName($inputName)
-                  ->setValue($this->get($name))
-                  ->setId($id)
-                  ->setClass($class);
+    if ($htmlWriter === null) {
+      return $htmlWriter = new Form_Html();
+    } else {
+      return $htmlWriter->clear()
+                        ->setName($inputName)
+                        ->setValue($this->get($name))
+                        ->setId($id)
+                        ->setClass($class);
+    }
   }
   
   public function __sleep()
   {
-    $this->model = $this->model->toArray();
+    $this->model   = $this->model->toArray();
+    $this->columns = array();
     
-    return array("model",  "mdlName",  "isSelected",
-                 "errors", "formName", "allowCols");
+    return array_keys(get_object_vars($this));
   }
   
   public function __wakeup()
   {
     $model = MODEL($this->mdlName);
+    
     if ($this->isSelected) {
       $model->setProperties($this->model);
     } else {
@@ -354,7 +349,5 @@ class Form_Object extends Sabel_Object
     
     $this->model   = $model;
     $this->columns = $model->getColumns();
-    
-    $this->htmlWriter = new Form_Html();
   }
 }

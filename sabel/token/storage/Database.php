@@ -31,7 +31,7 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
    */
   protected $namespace = "";
   
-  public function __construct($namespace = "", $gcProbability = 5)
+  public function __construct($namespace = "", $gcProbability = 2)
   {
     $this->namespace = $namespace;
     
@@ -40,14 +40,34 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
     }
   }
   
+  /**
+   * @param string
+   *
+   * @return void
+   */
   public function setConnectionName($name)
   {
     $this->connectionName = $name;
   }
   
+  /**
+   * @param string
+   *
+   * @return void
+   */
   public function setTableName($tblName)
   {
     $this->tableName = $tblName;
+  }
+  
+  /**
+   * @param string
+   *
+   * @return void
+   */
+  public function setNamespace($namespace)
+  {
+    $this->namespace = $namespace;
   }
   
   public function fetch($token)

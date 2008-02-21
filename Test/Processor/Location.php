@@ -27,11 +27,11 @@ class Test_Processor_Location extends Test_Processor_Abstract
     $processor = new Processor_Location("location");
     $processor->execute($bus);
     
-    $repository = $bus->get("repository");
-    $this->assertTrue($repository->getTemplate("app") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("module") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("controller") instanceof Sabel_View_Template);
-    $this->assertNull($repository->getTemplate("hoge"));
+    $view = $bus->get("view");
+    $this->assertTrue($view->getTemplate("app") instanceof Sabel_View_Template);
+    $this->assertTrue($view->getTemplate("module") instanceof Sabel_View_Template);
+    $this->assertTrue($view->getTemplate("controller") instanceof Sabel_View_Template);
+    $this->assertNull($view->getTemplate("hoge"));
   }
   
   protected function getDestination()

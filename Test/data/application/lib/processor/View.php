@@ -8,9 +8,10 @@ class TestProcessor_View extends Sabel_Bus_Processor
     if ($controller->isRedirected()) return;
     
     $this->prepare($bus);
+    if ($this->view === null) return;
     
-    $responses  = $this->response->getResponses();
-    $repository = $this->getRepository($bus->get("destination"));
+    $responses = $this->response->getResponses();
+    $view = $this->getView($bus->get("destination"));
     
     if ($controller->renderText) {
       $result = $this->renderer->rendering($controller->contents, $responses);
@@ -19,13 +20,13 @@ class TestProcessor_View extends Sabel_Bus_Processor
       return $bus->set("result", $controller->contents);
     }
     
-    if ($template = $repository->getValidTemplate()) {
+    if ($template = $view->getValidTemplate()) {
       $contents = $this->rendering($template, $responses);
     } elseif ($controller->isExecuted()) {
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
     } else {
-      if ($template = $repository->getValidTemplate("notFound")) {
+      if ($template = $view->getValidTemplate("notFound")) {
         $contents = $this->rendering($template, $responses);
       } else {
         $contents = "<h1>404 Not Found</h1>";
@@ -43,7 +44,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
       $bus->set("result", $contents);
     } else {
       if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
-      if ($template = $repository->getValidTemplate($layoutName)) {
+      if ($template = $view->getValidTemplate($layoutName)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $this->rendering($template, $responses));
       } else {
@@ -61,7 +62,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
   
   protected function prepare($bus)
   {
-    $this->extract("response", "repository", "renderer");
+    $this->extract("response", "view", "renderer");
     
     if ($this->renderer === null) {
       $this->renderer = new Sabel_View_Renderer();
@@ -69,20 +70,20 @@ class TestProcessor_View extends Sabel_Bus_Processor
     }
   }
   
-  private function getRepository($destination)
+  private function getView($destination)
   {
     $response = $this->response;
     
     if ($response->isNotFound()) {
-      $this->repository->setTemplateName("notFound");
+      $this->view->setName("notFound");
     } elseif ($response->isForbidden()) {
-      $this->repository->setTemplateName("forbidden");
+      $this->view->setName("forbidden");
     } elseif ($response->isServerError()) {
-      $this->repository->setTemplateName("serverError");
-    } elseif ($this->repository->getTemplateName() === null) {
-      $this->repository->setTemplateName($destination->getAction());
+      $this->view->setName("serverError");
+    } elseif ($this->view->getName() === "") {
+      $this->view->setName($destination->getAction());
     }
     
-    return $this->repository;
+    return $this->view;
   }
 }

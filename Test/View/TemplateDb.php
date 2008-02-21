@@ -1,7 +1,7 @@
 <?php
 
 /**
- * testcase for sabel.view.template.Database, sabel.view.Repository
+ * testcase for sabel.view.template.Database, sabel.view.Object
  * using database (mysql or pgsql, sqlite)
  *
  * @category  View
@@ -36,17 +36,17 @@ class Test_View_TemplateDb extends Test_View_Template
   {
     $controller = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS . $controllerName . DS);
     $controller->setTableName("templates");
-    $repository = new Sabel_View_Repository("controller", $controller);
+    $view = new Sabel_View_Object("controller", $controller);
     
     $module = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS);
     $module->setTableName("templates");
-    $repository->addTemplate("module", $module);
+    $view->addTemplate("module", $module);
     
     $app = new Sabel_View_Template_Database(VIEW_DIR_NAME . DS);
     $app->setTableName("templates");
-    $repository->addTemplate("app", $app);
+    $view->addTemplate("app", $app);
     
-    return self::$repository = $repository;
+    return self::$view = $view;
   }
   
   private static function initTable()

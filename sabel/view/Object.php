@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_View_Repository
+ * Sabel_View_Object
  *
  * @category   View
  * @package    org.sabel.view
@@ -9,12 +9,18 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Repository extends Sabel_Object
+class Sabel_View_Object extends Sabel_Object implements Sabel_View
 {
-  protected
-    $templates = array(),
-    $tplName   = null;
-    
+  /**
+   * @var Sabel_View_Template[]
+   */
+  protected $templates = array();
+  
+  /**
+   * @var string
+   */
+  protected $tplName = "";
+  
   public function __construct($name, Sabel_View_Template $template)
   {
     $this->addTemplate($name, $template);
@@ -44,19 +50,19 @@ class Sabel_View_Repository extends Sabel_Object
     return $this->templates;
   }
   
-  public function setTemplateName($tplName)
+  public function setName($tplName)
   {
     $this->tplName = $tplName;
   }
   
-  public function getTemplateName()
+  public function getName()
   {
     return $this->tplName;
   }
   
   public function getValidTemplate($tplPath = null)
   {
-    if ($tplPath === null && $this->tplName === null) {
+    if ($tplPath === null && $this->tplName === "") {
       throw new Sabel_Exception_Runtime("template name is null.");
     } else {
       if ($tplPath === null) $tplPath = $this->tplName;
@@ -79,7 +85,7 @@ class Sabel_View_Repository extends Sabel_Object
   {
     if ($template = $this->getTemplate($name)) {
       $template->name($tplPath);
-      return $template->create($contents);
+      $template->create($contents);
     } else {
       throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }
@@ -89,7 +95,7 @@ class Sabel_View_Repository extends Sabel_Object
   {
     if ($template = $this->getTemplate($name)) {
       $template->name($tplPath);
-      return $template->delete();
+      $template->delete();
     } else {
       throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }

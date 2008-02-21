@@ -7,15 +7,15 @@ class TestProcessor_Location extends Sabel_Bus_Processor
     list ($module, $controller) = $bus->get("destination")->toArray();
     
     $controller = new Sabel_View_Template_File($module . DS . VIEW_DIR_NAME . DS . $controller . DS);
-    $repository = new Sabel_View_Repository("controller", $controller);
+    $view = new Sabel_View_Object("controller", $controller);
     
     $module = new Sabel_View_Template_File($module . DS . VIEW_DIR_NAME . DS);
-    $repository->addTemplate("module", $module);
+    $view->addTemplate("module", $module);
     
     $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
-    $repository->addTemplate("app", $app);
+    $view->addTemplate("app", $app);
     
-    $bus->set("repository", $repository);
-    $bus->get("controller")->setAttribute("repository", $repository);
+    $bus->set("view", $view);
+    $bus->get("controller")->setAttribute("view", $view);
   }
 }

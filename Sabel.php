@@ -149,6 +149,7 @@ final class Sabel
     require ($SABEL . "Request.php");
     require ($SABEL . "Session.php");
     require ($SABEL . "Response.php");
+    require ($SABEL . "View.php");
     
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
     $CACHE   = $SABEL . "cache"      . DIRECTORY_SEPARATOR;
@@ -183,7 +184,7 @@ final class Sabel
     require ($SESSION . "PHP.php");
     
     require ($VIEW . "Renderer.php");
-    require ($VIEW . "Repository.php");
+    require ($VIEW . "Object.php");
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
     
