@@ -8,7 +8,7 @@ class TestProcessor_Router extends Sabel_Bus_Processor
     $config = $bus->getConfig("map");
     $config->configure();
     
-    if ($candidate = $config->getValidCandidate($request)) {
+    if ($candidate = $config->getValidCandidate($request->getUri())) {
       Sabel_Context::getContext()->setCandidate($candidate);
       $bus->set("destination", $candidate->getDestination());
       

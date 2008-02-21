@@ -12,9 +12,9 @@
 class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
 {
   /**
-   * @var Sabel_Request_Uri
+   * @var string
    */
-  private $uri = null;
+  private $uri = "";
   
   /**
    * @var array
@@ -36,20 +36,21 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
    */
   private $method = Sabel_Request::GET;
   
-  public function __construct($uri = null)
+  public function __construct($uri = "")
   {
-    if ($uri !== null) {
-      $this->to($uri);
-    } else {
-      $this->uri = new Sabel_Request_Uri("");
-    }
+    $this->uri = $uri;
   }
   
-  public function to($uri)
+  public function setUri($uri)
   {
-    $this->uri = new Sabel_Request_Uri($uri);
+    $this->uri = $uri;
     
     return $this;
+  }
+  
+  public function getUri()
+  {
+    return $this->uri;
   }
   
   /**
@@ -59,7 +60,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
    */
   public function get($uri)
   {
-    return $this->method(Sabel_Request::GET)->to($uri);
+    return $this->method(Sabel_Request::GET)->setUri($uri);
   }
   
   /**
@@ -69,7 +70,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
    */
   public function post($uri)
   {
-    return $this->method(Sabel_Request::POST)->to($uri);
+    return $this->method(Sabel_Request::POST)->setUri($uri);
   }
   
   /**
@@ -79,7 +80,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
    */
   public function put($uri)
   {
-    return $this->method(Sabel_Request::PUT)->to($uri);
+    return $this->method(Sabel_Request::PUT)->setUri($uri);
   }
   
   /**
@@ -89,7 +90,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
    */
   public function delete($uri)
   {
-    return $this->method(Sabel_Request::DELETE)->to($uri);
+    return $this->method(Sabel_Request::DELETE)->setUri($uri);
   }
   
   public function method($method)
@@ -309,27 +310,15 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     return ($result === "") ? null : $result;
   }
   
-  public function getUri()
+  public function getExtension()
   {
-    return $this->uri;
-  }
-  
-  public function isTypeOf($type)
-  {
-    return ($this->uri->type() === $type);
-  }
-  
-  public function __toString()
-  {
-    if ($this->uri->size() === 0) {
+    $parts = explode("/", $this->uri);
+    $lastPart = array_pop($parts);
+    
+    if (($pos = strpos($lastPart, ".")) === false) {
       return "";
     } else {
-      return $this->uri->toString();
+      return substr($lastPart, $pos + 1);
     }
-  }
-  
-  public function toArray()
-  {
-    return $this->uri->toArray();
   }
 }

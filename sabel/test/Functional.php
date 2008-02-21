@@ -18,25 +18,23 @@ require_once("PHPUnit/Framework/TestCase.php");
  */
 class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
 {
-  protected function request(Sabel_Request $request, $storage = null)
+  protected function request(Sabel_Request $request, $session = null)
   {
-    $request = new Sabel_Request_Object($request);
-    
-    if ($storage === null) {
-      $storage = new Sabel_Storage_InMemory();
+    if ($session === null) {
+      $session = Sabel_Session_InMemory::create();
     }
     
     $bus = new Sabel_Bus();
     $bus->set("request", $request);
-    $bus->set("storage", $storage);
+    $bus->set("session", $session);
     $bus->run(new Config_Bus());
     
     return $bus->get("response");
   }
   
-  protected function assertRedirect($uri, $toUri, $storage = null)
+  protected function assertRedirect($uri, $toUri, $session = null)
   {
-    $response = $this->request($uri, $storage);
+    $response = $this->request($uri, $session);
     
     if ($response->isRedirected()) {
       $this->assertEquals($toUri, $response->getLocationUri());

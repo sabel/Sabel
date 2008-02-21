@@ -17,8 +17,8 @@ interface Sabel_Request
   const PUT    = "PUT";
   const DELETE = "DELETE";
   
+  public function setUri($uri);
   public function getUri();
-  public function toArray();
   
   public function get($uri);
   public function post($uri);

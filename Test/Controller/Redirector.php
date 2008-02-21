@@ -70,7 +70,7 @@ class Test_Controller_Redirector extends SabelTestCase
     $builder->build($request, "index/index");
     
     $config->configure();
-    $candidate = $config->getValidCandidate($request);
+    $candidate = $config->getValidCandidate($request->getUri());
     Sabel_Context::getContext()->setCandidate($candidate);
   }
 }

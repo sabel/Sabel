@@ -372,7 +372,7 @@ class Test_Map_Match extends SabelTestCase
     $this->config->configure();
     
     $this->request = $request = $this->request($uri);
-    if (!$candidate = $this->config->getValidCandidate($request)) {
+    if (!$candidate = $this->config->getValidCandidate($request->getUri())) {
       throw new Sabel_Exception_Runtime("map not match.");
     }
     

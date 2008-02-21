@@ -170,10 +170,8 @@ final class Sabel
     require ($MAP . "Destination.php");
     require ($MAP . "config" . DIRECTORY_SEPARATOR . "Route.php");
     
-    require ($REQUEST . "Object.php");
-    require ($REQUEST . "Uri.php");
-    require ($REQUEST . "AbstractBuilder.php");
     require ($REQUEST . "Builder.php");
+    require ($REQUEST . "Object.php");
     
     require ($CTRL . "Page.php");
     require ($CTRL . "Redirector.php");
