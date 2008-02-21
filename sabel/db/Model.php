@@ -679,10 +679,10 @@ abstract class Sabel_DB_Model extends Sabel_Object
     @list ($additionalValues) = $this->arguments;
     
     if ($this->isSelected()) {
-      $this->updateValues += $additionalValues;
+      $this->updateValues = array_merge($this->updateValues, $additionalValues);
       return $new->setProperties($this->_saveUpdate());
     } else {
-      $this->values += $additionalValues;
+      $this->values = array_merge($this->values, $additionalValues);
       return $new->setProperties($this->_saveInsert());
     }
   }

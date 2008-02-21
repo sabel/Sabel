@@ -26,36 +26,42 @@ class Sabel_Map_Config_Route
   public function uri($uri)
   {
     $this->uri = $uri;
+    
     return $this;
   }
   
   public function requirements($requirements)
   {
     $this->requirements = $requirements;
+    
     return $this;
   }
   
   public function defaults($defaults)
   {
     $this->defaults = $defaults;
+    
     return $this;
   }
   
   public function module($module)
   {
     $this->module = $module;
+    
     return $this;
   }
   
   public function controller($controller)
   {
     $this->controller = $controller;
+    
     return $this;
   }
   
   public function action($action)
   {
     $this->action = $action;
+    
     return $this;
   }
   
@@ -79,7 +85,7 @@ class Sabel_Map_Config_Route
     return $this->defaults;
   }
   
-  public function createDestination()
+  public function getDestination()
   {
     $destination = array();
     
@@ -96,5 +102,59 @@ class Sabel_Map_Config_Route
     }
     
     return $destination;
+  }
+  
+  public function createUrl($params, $currentUris = array())
+  {
+    $parts = explode("/", $this->uri);
+    $firstIndex = null;
+    
+    foreach ($params as $key => $param) {
+      switch ($key) {
+        case "m":
+          $params["module"] = $param;
+          $key = "module";
+          unset($params["m"]);
+          break;
+        
+        case "c":
+          $params["controller"] = $param;
+          $key = "controller";
+          unset($params["c"]);
+          break;
+        
+        case "a":
+          $params["action"] = $param;
+          $key = "action";
+          unset($params["a"]);
+          break;
+      }
+      
+      if ($firstIndex === null) {
+        $firstIndex = array_search(":" . $key, $parts, true);
+      }
+    }
+    
+    $i = 0;
+    $url = array();
+    
+    foreach ($parts as $name) {
+      if ($name{0} !== ":") {
+        $url[] = $name;
+      } else {
+        $key = ltrim($name, ":");
+        if (isset($params[$key])) {
+          $url[] = $params[$key];
+        } elseif ($firstIndex !== false && $i >= $firstIndex) {
+          if (isset($this->defaults[$name])) $url[] = $this->defaults[$name];
+        } elseif (isset($currentUris[$key])) {
+          $url[] = $currentUris[$key];
+        }
+        
+        $i++;
+      }
+    }
+    
+    return implode("/", $url);
   }
 }

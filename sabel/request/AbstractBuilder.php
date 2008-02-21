@@ -27,9 +27,7 @@ abstract class Sabel_Request_AbstractBuilder extends Sabel_Object
   
   protected function setMethod($request)
   {
-    if (isset($_SERVER["REQUEST_METHOD"])) {
-      $request->method($_SERVER["REQUEST_METHOD"]);
-    }
+    $request->method(Sabel_Environment::get("REQUEST_METHOD"));
   }
   
   protected function createUri($uri = null)

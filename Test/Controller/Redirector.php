@@ -67,13 +67,11 @@ class Test_Controller_Redirector extends SabelTestCase
   {
     $builder = new Sabel_Request_Builder();
     $request = new Sabel_Request_Object();
+    $builder->build($request, "index/index");
     
-    foreach ($config->build() as $candidate) {
-      if ($candidate->evaluate($builder->build($request, "index/index"))) {
-        Sabel_Context::getContext()->setCandidate($candidate);
-        break;
-      }
-    }
+    $config->configure();
+    $candidate = $config->getValidCandidate($request);
+    Sabel_Context::getContext()->setCandidate($candidate);
   }
 }
 

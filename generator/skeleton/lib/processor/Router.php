@@ -14,27 +14,18 @@ class Processor_Router extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $request = $bus->get("request");
-    $validCandidate = null;
-    
     $config = $bus->getConfig("map");
     $config->configure();
     
-    foreach ($config->build() as $candidate) {
-      if ($candidate->evaluate($request)) {
-        $validCandidate = $candidate;
-        break;
-      }
-    }
-    
-    if ($validCandidate === null) {
-      throw new Sabel_Exception_Runtime("map not match.");
-    } else {
-      Sabel_Context::getContext()->setCandidate($validCandidate);
-      $bus->set("destination", $validCandidate->getDestination());
+    if ($candidate = $config->getValidCandidate($request)) {
+      Sabel_Context::getContext()->setCandidate($candidate);
+      $bus->set("destination", $candidate->getDestination());
       
-      foreach ($validCandidate->getElements() as $element) {
-        $request->setParameterValue($element->name, $element->variable);
+      foreach ($candidate->getUriParameters() as $name => $value) {
+        $request->setParameterValue($name, $value);
       }
+    } else {
+      throw new Sabel_Exception_Runtime("map not match.");
     }
   }
 }

@@ -108,20 +108,6 @@ class Test_Application extends SabelTestCase
     $this->assertEquals("<p>param2: 200</p>", $lines[4]);
   }
   
-  public function testArrayUri()
-  {
-    $bus = $this->getBus("hoge/fuga/foo/bar/baz");
-    $bus->run(new AppBusConfig2());
-    
-    $expected = array("hoge", "fuga", "foo", "bar", "baz");
-    $this->assertEquals($expected, $bus->get("request")->fetchParameterValue("uri"));
-    
-    $bus = $this->getBus("");
-    $bus->run(new AppBusConfig2());
-    
-    $this->assertEquals(array(), $bus->get("request")->fetchParameterValue("uri"));
-  }
-  
   public function testRedirect()
   {
     $bus = $this->getBus("manage/index/index/abcde/2");

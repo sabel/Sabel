@@ -167,8 +167,6 @@ final class Sabel
     
     require ($MAP . "Configurator.php");
     require ($MAP . "Candidate.php");
-    require ($MAP . "Elements.php");
-    require ($MAP . "Element.php");
     require ($MAP . "Destination.php");
     require ($MAP . "config" . DIRECTORY_SEPARATOR . "Route.php");
     
