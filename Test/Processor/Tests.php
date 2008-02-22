@@ -6,7 +6,6 @@ require_once ("Test/Processor/Request.php");
 require_once ("Test/Processor/Router.php");
 require_once ("Test/Processor/Addon.php");
 require_once ("Test/Processor/Controller.php");
-require_once ("Test/Processor/Location.php");
 require_once ("Test/Processor/Response.php");
 
 define("PROCESSORS_DIR", "generator" . DS . "skeleton" . DS . "lib" . DS . "processor");
@@ -21,7 +20,6 @@ class Test_Processor_Tests extends SabelTestSuite
     $suite->addTest(Test_Processor_Router::suite());
     $suite->addTest(Test_Processor_Addon::suite());
     $suite->addTest(Test_Processor_Controller::suite());
-    $suite->addTest(Test_Processor_Location::suite());
     $suite->addTest(Test_Processor_Response::suite());
     //$suite->addTest(Test_Processor_Flow::suite());
     

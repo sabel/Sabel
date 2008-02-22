@@ -97,11 +97,11 @@ class Test_Bus_Runner extends SabelTestCase
     $this->assertEquals("after: hoge_result", $bus->get("afterResult"));
   }
   
-  public function testAttatchExecuteEvent()
+  public function testAttatchExecuteAfterEvent2()
   {
     $bus = Sabel_Bus::create();
-    $bus->attachExecuteEvent("hoge", new TestEvent(),  "afterMethod");
-    $bus->attachExecuteEvent("hoge", new TestEvent2(), "afterMethod");
+    $bus->attachExecuteAfterEvent("hoge", new TestEvent(),  "afterMethod");
+    $bus->attachExecuteAfterEvent("hoge", new TestEvent2(), "afterMethod");
     $bus->run(new TestBusConfig());
     
     $this->assertEquals("after: hoge_result", $bus->get("afterResult"));

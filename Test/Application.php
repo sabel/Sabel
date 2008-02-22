@@ -35,7 +35,6 @@ class Test_Application extends SabelTestCase
     Sabel::fileUsing($dir . "Response.php", true);
     Sabel::fileUsing($dir . "Request.php", true);
     Sabel::fileUsing($dir . "Router.php", true);
-    Sabel::fileUsing($dir . "Location.php", true);
     Sabel::fileUsing($dir . "View.php", true);
 
     unshift_include_paths(array(MODULES_DIR_NAME,
@@ -169,7 +168,6 @@ class AppBusConfig extends Sabel_Bus_Config
                                 "router"      => "TestProcessor_Router",
                                 "addon"       => "TestProcessor_Addon",
                                 "controller"  => "TestProcessor_Controller",
-                                "location"    => "TestProcessor_Location",
                                 "helper"      => "TestProcessor_Helper",
                                 "initializer" => "TestProcessor_Initializer",
                                 "executer"    => "TestProcessor_Executer",

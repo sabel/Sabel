@@ -161,11 +161,6 @@ class Sabel_Bus extends Sabel_Object
     $this->attachEvent($processorName, $object, $method, "after");
   }
   
-  public function attachExecuteEvent($processorName, $object, $method)
-  {
-    $this->attachExecuteAfterEvent($processorName, $object, $method);
-  }
-  
   private function attachEvent($processorName, $object, $method, $when)
   {
     $evt = new stdClass();

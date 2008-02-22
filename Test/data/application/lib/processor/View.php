@@ -2,16 +2,26 @@
 
 class TestProcessor_View extends Sabel_Bus_Processor
 {
+  protected $beforeEvents = array("initializer" => "createLocations");
+  
+  private $view     = null;
+  private $renderer = null;
+  
   public function execute($bus)
   {
     $controller = $bus->get("controller");
     if ($controller->isRedirected()) return;
     
-    $this->prepare($bus);
-    if ($this->view === null) return;
+    if (($renderer = $bus->get("renderer")) === null) {
+      $renderer = new Sabel_View_Renderer();
+      $bus->set("renderer", $renderer);
+    }
     
-    $responses = $this->response->getResponses();
-    $view = $this->getView($bus->get("destination"));
+    $this->renderer = $renderer;
+    
+    $response  = $bus->get("response");
+    $responses = $response->getResponses();
+    $view = $this->getView($response, $bus->get("destination")->getAction());
     
     if ($controller->renderText) {
       $result = $this->renderer->rendering($controller->contents, $responses);
@@ -35,16 +45,16 @@ class TestProcessor_View extends Sabel_Bus_Processor
         }
       }
       
-      $this->response->notFound();
+      $response->notFound();
     }
     
-    $layoutName = $controller->getAttribute("layout");
+    $layout = $controller->getAttribute("layout");
     
-    if ($layoutName === "none" || isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+    if ($layout === false || isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
       $bus->set("result", $contents);
     } else {
-      if ($layoutName === null) $layoutName = DEFAULT_LAYOUT_NAME;
-      if ($template = $view->getValidTemplate($layoutName)) {
+      if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;
+      if ($template = $view->getValidTemplate($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $this->rendering($template, $responses));
       } else {
@@ -53,27 +63,34 @@ class TestProcessor_View extends Sabel_Bus_Processor
     }
   }
   
-  private function rendering($template, $responses)
+  public function createLocations($bus)
+  {
+    list ($m, $c, $a) = $bus->get("destination")->toArray();
+    
+    $controller = new Sabel_View_Template_File($m . DS . VIEW_DIR_NAME . DS . $c . DS);
+    $view = new Sabel_View_Object("controller", $controller);
+    
+    $module = new Sabel_View_Template_File($m . DS . VIEW_DIR_NAME . DS);
+    $view->addTemplate("module", $module);
+    
+    $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
+    $view->addTemplate("app", $app);
+    
+    $this->view = $view;
+    
+    $bus->set("view", $view);
+    $bus->get("controller")->setAttribute("view", $view);
+  }
+  
+  protected function rendering($template, $responses)
   {
     return $this->renderer->rendering($template->getContents(),
                                       $responses,
                                       $template->getPath());
   }
   
-  protected function prepare($bus)
+  protected function getView($response, $action)
   {
-    $this->extract("response", "view", "renderer");
-    
-    if ($this->renderer === null) {
-      $this->renderer = new Sabel_View_Renderer();
-      $bus->set("renderer", $this->renderer);
-    }
-  }
-  
-  private function getView($destination)
-  {
-    $response = $this->response;
-    
     if ($response->isNotFound()) {
       $this->view->setName("notFound");
     } elseif ($response->isForbidden()) {
@@ -81,7 +98,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
     } elseif ($response->isServerError()) {
       $this->view->setName("serverError");
     } elseif ($this->view->getName() === "") {
-      $this->view->setName($destination->getAction());
+      $this->view->setName($action);
     }
     
     return $this->view;

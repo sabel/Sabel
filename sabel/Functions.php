@@ -191,7 +191,7 @@ function MODEL($mdlName, $id = null)
 
 function create_join_key(Sabel_DB_Model $childModel, $parentName)
 {
-  if ($fkey = $childModel->getSchema()->getForeignKey()) {
+  if ($fkey = $childModel->getMetadata()->getForeignKey()) {
     foreach ($fkey->toArray() as $colName => $fkey) {
       if ($fkey->table === $parentName) {
         return array("id" => $fkey->column, "fkey" => $colName);

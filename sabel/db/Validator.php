@@ -116,7 +116,7 @@ class Sabel_DB_Validator extends Sabel_Object
       }
     }
     
-    if ($uniques = $model->getSchema()->getUniques()) {
+    if ($uniques = $model->getMetadata()->getUniques()) {
       $this->unique($model, $uniques);
     }
     
@@ -281,7 +281,7 @@ class Sabel_DB_Validator extends Sabel_Object
   protected function unique($model, $uniques)
   {
     $lNames = array();
-    $pkey = $model->getSchema()->getPrimaryKey();
+    $pkey = $model->getMetadata()->getPrimaryKey();
     if (is_string($pkey)) $pkey = array($pkey);
     
     foreach ($uniques as $unique) {

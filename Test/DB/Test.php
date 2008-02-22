@@ -416,7 +416,7 @@ class Test_DB_Test extends SabelTestCase
    */
   public function testTableInfo()
   {
-    $schema = MODEL("SchemaTest")->getSchema();
+    $schema = MODEL("SchemaTest")->getMetadata();
     $this->assertEquals("schema_test", $schema->getTableName());
     $this->assertEquals("id", $schema->getPrimaryKey());
     $this->assertEquals("id", $schema->getSequenceColumn());

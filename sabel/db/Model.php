@@ -233,7 +233,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @return Sabel_DB_Metadata_Table
    */
-  public function getSchema()
+  public function getMetadata()
   {
     return $this->metadata;
   }
