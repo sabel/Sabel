@@ -127,10 +127,6 @@ class Renderer_Replacer extends Sabel_Object
       $html .= ' class="' . $class . '"';
     }
     
-    if (($name = $element->name) !== null) {
-      $html .= ' name="' . $name . '"';
-    }
-    
     $uri = $element->uri;
     if ($uri === null) return $html . ">";
     
@@ -178,6 +174,15 @@ class Renderer_Replacer extends Sabel_Object
         return sprintf($fmt, $name, $assign);
       }
     }
+  }
+  
+  protected function token_replace($element)
+  {
+    if (($value = $element->value) === null) {
+      throw new Sabel_Exception_Runtime("token value is null.");
+    }
+    
+    return sprintf('<input type="hidden" name="token" value="%s" />', $value);
   }
   
   protected function formerr_replace($element)

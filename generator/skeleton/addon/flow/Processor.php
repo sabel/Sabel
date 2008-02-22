@@ -67,14 +67,11 @@ class Flow_Processor extends Sabel_Bus_Processor
         $controller->$var = $state->$var;
       }
     }
-    
-    $this->setRewriteTags();
-    output_add_rewrite_var("token", $token);
   }
   
-  public function afterExecute($bus)
+  public function shutdown($bus)
   {
-    if ($this->isTransit && $bus->get("response")->isSuccess()) {
+    if ($this->isTransit && !$bus->get("response")->isFailure()) {
       $state = $this->state;
       $controller = $this->controller;
       $vars = $this->getContinuationVariables();
@@ -190,7 +187,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $state->warning = $message;
       }
       
-      l("[flow] invalid sequence.");
+      l("[flow] invalid sequence. redirect...");
       $this->controller->getRedirector()->to("a: " . $currentActivity);
     }
   }
@@ -199,30 +196,5 @@ class Flow_Processor extends Sabel_Bus_Processor
   {
     $vars = $this->controller->getReflection()->getAnnotation("continuation");
     return ($vars === null) ? array() : $vars[0];
-  }
-  
-  protected function setRewriteTags()
-  {
-    $tags = array_map("trim", explode(",", ini_get("url_rewriter.tags")));
-    
-    $writeTags = array();
-    foreach ($tags as $tag) {
-      list ($k, $v) = explode("=", $tag);
-      $writeTags[$k] = $v;
-    }
-    
-    if ($this->session->isCookieEnabled()) {
-      unset($writeTags["a"]);
-    }
-    
-    unset($writeTags["form"]);
-    $writeTags["fieldset"] = "";
-    
-    $rewriterTags = array();
-    foreach ($writeTags as $k => $v) {
-      $rewriterTags[] = $k . "=" . $v;
-    }
-    
-    ini_set("url_rewriter.tags", implode(",", $rewriterTags));
   }
 }
