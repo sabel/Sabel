@@ -20,7 +20,7 @@ class Processor_Controller extends Sabel_Bus_Processor
     $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
-      $controller = $this->createDefaultController($response);
+      $controller = $this->createVirtualController($response);
     }
     
     $controller->setRedirector(new Sabel_Controller_Redirector());
@@ -52,17 +52,17 @@ class Processor_Controller extends Sabel_Bus_Processor
     }
   }
   
-  protected function createDefaultController($response)
+  protected function createVirtualController($response)
   {
-    $class = "Index_" . ucfirst(self::CONTROLLERS_DIR) . "_Index";
-    Sabel::using($class);
+    $className = "SabelVirtualController";
     
-    if (class_exists($class, false)) {
-      l("create default controller '{$class}'");
-      return new $class($response);
-    } else {
-      throw new Sabel_Exception_Runtime("default controller not found.");
+    l("create virtual controller '{$className}'");
+    
+    if (!class_exists($className, false)) {
+      eval ("class $className extends Sabel_Controller_Page {}");
     }
+    
+    return new $className($response);
   }
   
   public function shutdown($bus)

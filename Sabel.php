@@ -28,7 +28,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* regist autoload static method */
+/* register autoload static method */
 spl_autoload_register(array("Sabel", "autoload"));
 
 /**
@@ -43,14 +43,26 @@ spl_autoload_register(array("Sabel", "autoload"));
  */
 final class Sabel
 {
+  /**
+   * @var array
+   */
   private static $readableFiles = array();
-  private static $required  = array();
+  
+  private static $readableFileCount = 0;
+  
+  /**
+   * @var array
+   */
+  private static $required = array();
+  
+  /**
+   * @var array
+   */
   private static $fileUsing = array();
-  private static $path      = "";
   
   public static function getPath()
   {
-    return self::$path;
+    return dirname(__FILE__);
   }
   
   public static function using($className)
@@ -137,7 +149,6 @@ final class Sabel
   
   public static function main()
   {
-    self::$path = dirname(__FILE__);
     $SABEL = "sabel" . DIRECTORY_SEPARATOR;
     
     require ($SABEL . "Object.php");
@@ -154,10 +165,10 @@ final class Sabel
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
     $CACHE   = $SABEL . "cache"      . DIRECTORY_SEPARATOR;
     $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
-    $REQUEST = $SABEL . "request"    . DIRECTORY_SEPARATOR;
     $CTRL    = $SABEL . "controller" . DIRECTORY_SEPARATOR;
     $SESSION = $SABEL . "session"    . DIRECTORY_SEPARATOR;
     $VIEW    = $SABEL . "view"       . DIRECTORY_SEPARATOR;
+    $UTIL    = $SABEL . "util"       . DIRECTORY_SEPARATOR;
     
     require ($BUS  . "Config.php");
     require ($BUS  . "Processor.php");
@@ -170,9 +181,6 @@ final class Sabel
     require ($MAP . "Destination.php");
     require ($MAP . "config" . DIRECTORY_SEPARATOR . "Route.php");
     
-    require ($REQUEST . "Builder.php");
-    require ($REQUEST . "Object.php");
-    
     require ($CTRL . "Page.php");
     require ($CTRL . "Redirector.php");
     
@@ -184,23 +192,32 @@ final class Sabel
     require ($VIEW . "Template.php");
     require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
     
+    require ($UTIL . "HashList.php");
+    require ($UTIL . "VariableCache.php");
+    
+    require ($SABEL . "request"   . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "response"  . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "exception" . DIRECTORY_SEPARATOR . "Runtime.php");
     require ($SABEL . "logger"    . DIRECTORY_SEPARATOR . "File.php");
-    require ($SABEL . "util"      . DIRECTORY_SEPARATOR . "HashList.php");
   }
   
   public static function init()
   {
-    if (ENVIRONMENT === PRODUCTION) {
-      self::$readableFiles = Sabel_Cache_File::create()->read("readable_files");
+    $path  = "sabel" . DIRECTORY_SEPARATOR . "Sabel";
+    $cache = Sabel_Util_VariableCache::create($path);
+    if ($files = $cache->read("readableFiles")) {
+      self::$readableFiles = $files;
+      self::$readableFileCount = count($files);
     }
   }
   
   public static function shutdown()
   {
-    if (ENVIRONMENT === PRODUCTION) {
-      Sabel_Cache_File::create()->write("readable_files", self::$readableFiles);
+    if (self::$readableFileCount !== count(self::$readableFiles)) {
+      $path  = "sabel" . DIRECTORY_SEPARATOR . "Sabel";
+      $cache = Sabel_Util_VariableCache::create($path);
+      $cache->write("readableFiles", self::$readableFiles);
+      $cache->save();
     }
   }
 }

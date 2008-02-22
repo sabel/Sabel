@@ -53,7 +53,6 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
     }
     
     $data["timeout"] = $timeout;
-    
     file_put_contents($this->getPath($key), serialize($data));
   }
   
