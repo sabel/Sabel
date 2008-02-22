@@ -295,23 +295,6 @@ class Test_Map_Match extends SabelTestCase
     $candidate = $this->routing("manage/test/test");
     $this->assertEquals("manage", $candidate->getName());
   }
-  /*
-  public function testWithConstantWithUnmatchedUri()
-  {
-    $this->route("admin")
-         ->uri("admin/:controller/:action")
-         ->module("admin");
-    
-    $this->route("manage")
-         ->uri("manage/:controller/:action")
-         ->module("manage");
-    
-    $candidate = $this->routing("admin/test/test/test/test");
-    $this->assertEquals("admin", $candidate->getName());
-    
-    $candidate = $this->routing("manage/test/test/test/test/test/test");
-    $this->assertEquals("manage", $candidate->getName());
-  }
   
   public function testWithConstantWithDefaults()
   {
@@ -326,14 +309,14 @@ class Test_Map_Match extends SabelTestCase
     
     $candidate = $this->routing("admin/test/test");
     $this->assertEquals("admin", $candidate->getName());
-    $this->assertEquals("test", $candidate->getElementByName("controller")->variable);
-    $this->assertEquals("test", $candidate->getElementByName("action")->variable);
-    $this->assertEquals("param", $candidate->getElementByName("param")->variable);
+    $this->assertEquals("test",  $this->request->fetchParameterValue("controller"));
+    $this->assertEquals("test",  $this->request->fetchParameterValue("action"));
+    $this->assertEquals("param", $this->request->fetchParameterValue("param"));
     
-    $candidate = $this->routing("manage/test/test/test/test/test/test");
+    $candidate = $this->routing("manage/test/test");
     $this->assertEquals("manage", $candidate->getName());
   }
-  */
+  
   public function testMatchAll()
   {
     $this->route("default")
