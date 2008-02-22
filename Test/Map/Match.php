@@ -362,9 +362,7 @@ class Test_Map_Match extends SabelTestCase
   
   protected function request($uri)
   {
-    $builder = new Sabel_Request_Builder();
-    $request = new Sabel_Request_Object();
-    return $builder->build($request, $uri);
+    return $request = new Sabel_Request_Object($uri);
   }
   
   protected function routing($uri)

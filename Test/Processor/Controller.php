@@ -46,15 +46,9 @@ class Test_Processor_Controller extends Test_Processor_Abstract
     $bus->set("destination", $this->getDestination("Abcde"));
     
     $processor = new Processor_Controller("controller");
+    $processor->execute($bus);
     
-    try {
-      $processor->execute($bus);
-      exit;
-    } catch (Sabel_Exception_Runtime $e) {
-      return;
-    }
-    
-    $this->fail();
+    $this->assertTrue($bus->get("controller") instanceof SabelVirtualController);
   }
   
   protected function getDestination($name)

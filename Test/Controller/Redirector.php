@@ -65,9 +65,7 @@ class Test_Controller_Redirector extends SabelTestCase
   
   protected function routing($config)
   {
-    $builder = new Sabel_Request_Builder();
-    $request = new Sabel_Request_Object();
-    $builder->build($request, "index/index");
+    $request = new Sabel_Request_Object("index/index");
     
     $config->configure();
     $candidate = $config->getValidCandidate($request->getUri());
