@@ -7,7 +7,6 @@ class Config_Bus extends Sabel_Bus_Config
                                 "session"     => "Processor_Session",
                                 "addon"       => "Processor_Addon",
                                 "controller"  => "Processor_Controller",
-                                "location"    => "Processor_Location",
                                 "helper"      => "Processor_Helper",
                                 "initializer" => "Processor_Initializer",
                                 "executer"    => "Processor_Executer",
@@ -17,8 +16,8 @@ class Config_Bus extends Sabel_Bus_Config
   protected $interfaces = array("request"     => "Sabel_Request",
                                 "session"     => "Sabel_Session",
                                 "response"    => "Sabel_Response",
-                                "controller"  => "Sabel_Controller_Page",
-                                "repository"  => "Sabel_View_Repository");
+                                "view"        => "Sabel_View",
+                                "controller"  => "Sabel_Controller_Page");
   
   protected $configs    = array("map"         => "Config_Map",
                                 "addon"       => "Config_Addon",

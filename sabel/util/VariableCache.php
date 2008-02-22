@@ -23,23 +23,26 @@ class Sabel_Util_VariableCache
   
   public static function create($_filePath)
   {
+    error_reporting(E_ALL|E_NOTICE);
     if (isset(self::$instances[$_filePath])) {
       return self::$instances[$_filePath];
     }
     
-    $instance = new self();
-    $instance->filePath = $_filePath;
-    $_path = $instance->getPath($_filePath);
+    $_path = self::getPath($_filePath);
     
     if (is_readable($_path)) {
       include ($_path);
       $vars = get_defined_vars();
       unset($vars["_path"]);
       unset($vars["_filePath"]);
-      $instance->data = $vars;
+      $vars = $vars;
     } else {
-      $instance->data = array();
+      $vars = array();
     }
+    
+    $instance = new self();
+    $instance->filePath = $_filePath;
+    $instance->data = $vars;
     
     self::$instances[$_filePath] = $instance;
     return $instance;
@@ -62,11 +65,6 @@ class Sabel_Util_VariableCache
   public function delete($key)
   {
     unset($this->data[$key]);
-  }
-  
-  protected function getPath($key)
-  {
-    return CACHE_DIR_PATH . DS . $key . PHP_SUFFIX;
   }
   
   public function save()
@@ -103,5 +101,10 @@ class Sabel_Util_VariableCache
     }
     
     return "array(" . implode(",", $array) . ")";
+  }
+  
+  private static function getPath($key)
+  {
+    return CACHE_DIR_PATH . DS . $key . PHP_SUFFIX;
   }
 }

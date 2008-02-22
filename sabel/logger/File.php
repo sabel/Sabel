@@ -62,11 +62,16 @@ class Sabel_Logger_File extends Sabel_Object
   
   public function __destruct()
   {
+    static $ran = false;
+    if (empty($this->contents) || $ran) return;
+    
     $fp  = fopen($this->filePath, "a");
     $sep = "============================================================" . PHP_EOL;
     
     fwrite($fp, PHP_EOL . $sep . PHP_EOL);
     fwrite($fp, implode(PHP_EOL, $this->contents) . PHP_EOL);
+    
+    $ran = true;
   }
   
   private function defineToString($level)
