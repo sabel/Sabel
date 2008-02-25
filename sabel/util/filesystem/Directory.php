@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Util_FileSystem_Directory extends Sabel_Object
+class Sabel_Util_FileSystem_Directory extends Sabel_Util_FileSystem_Base
 {
   protected $path = "";
   
@@ -52,60 +52,55 @@ class Sabel_Util_FileSystem_Directory extends Sabel_Object
     return $files;
   }
   
-  public function mkdir($directory, $permission = 0755)
+  public function mkdir($directory, $permission = 0744)
   {
-    clearstatcache();
+    if (!$this->isAbsolutePath($directory)) {
+      $directory = $this->path . DS . $directory;
+    }
     
-    $directory = $this->_getPath($directory);
-    
-    if (is_dir($directory) || is_file($directory)) {
+    if ($this->isDir($directory) || $this->isFile($directory)) {
       $message = "cannot create directory '{$directory}': "
                . "file or directory exists.";
       
       throw new Sabel_Exception_Runtime($message);
     } else {
-      mkdir($directory);
-      chmod($directory, $permission);
+      $this->_mkdir($directory, $permission);
+      return new Sabel_Util_FileSystem_Directory($directory);
     }
   }
   
-  public function mkfile($file, $permission = 0755)
+  public function mkfile($file, $permission = 0744)
   {
-    clearstatcache();
+    if (!$this->isAbsolutePath($file)) {
+      $file = $this->path . DS . $file;
+    }
     
-    $file = $this->_getPath($file);
-    
-    if (is_dir($file) || is_file($file)) {
+    if ($this->isDir($file) || $this->isFile($file)) {
       $message = "cannot create directory '{$file}': "
                . "file or directory exists.";
       
       throw new Sabel_Exception_Runtime($message);
     } else {
-      file_put_contents($file, "");
-      chmod($file, $permission);
+      $this->_mkfile($file, $permission);
+      return new Sabel_Util_FileSystem_File($file);
     }
   }
   
-  public function remove($path = null)
+  public function rmdir($directory = null)
   {
-    if ($path === null) {
-      rmdir($this->path);
+    if ($directory === null) {
+      $directory = $this->path;
+    } elseif (!$this->isAbsolutePath($directory)) {
+      $directory = $this->path . DS . $directory;
+    }
+    
+    if (!$this->isDir($directory)) {
+      trigger_error("no such file or directory.", E_USER_WARNING);
+    } elseif ($this->isFile($directory)) {
+      trigger_error("'{$directory}': not a directory.", E_USER_WARNING);
     } else {
-      clearstatcache();
-      $path = $this->_getPath($path);
-      
-      if (is_file($path)) {
-        unlink($path);
-      } elseif (is_dir($path)) {
-        rmdir($path);
-      } else {
-        trigger_error("no such file or directory.", E_USER_WARNING);
-      }
+      $this->_rmdir($directory);
+      rmdir($directory);
     }
-  }
-  
-  protected function _getPath($path)
-  {
-    return $this->path . DS . $path;
   }
 }
