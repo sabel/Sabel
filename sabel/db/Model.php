@@ -522,7 +522,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $projection = $this->projection;
     $this->projection = "COUNT(*) AS cnt";
     
-    $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
     
     $this->projection = $projection;
@@ -578,7 +578,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   protected function _doSelectOne(Sabel_DB_Model $model)
   {
-    $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
     if (isset($rows[0])) $model->setProperties($rows[0]);
   }
@@ -602,7 +602,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     @list ($arg1, $arg2) = $this->arguments;
     
     $this->setCondition($arg1, $arg2);
-    $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
     
     return (empty($rows)) ? array() : $this->toModels($rows);
@@ -630,7 +630,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   protected function _selectByQuery()
   {
-    $stmt = $this->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
     $stmt->projection($this->projection)->where($this->arguments[0]);
     
     if (isset($this->arguments[1])) {
@@ -699,7 +699,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
     }
     
-    $stmt  = $this->getStatement(Sabel_DB_Statement::INSERT);
+    $stmt  = $this->prepareStatement(Sabel_DB_Statement::INSERT);
     $newId = $this->prepareInsert($stmt, $saveValues)->execute();
     
     if ($newId !== null && ($column = $this->metadata->getSequenceColumn()) !== null) {
@@ -737,7 +737,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
     }
     
-    $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
     $this->prepareUpdate($stmt, $saveValues)->execute();
     return array_merge($this->values, $saveValues);
   }
@@ -758,7 +758,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected function _insert()
   {
     @list ($values) = $this->arguments;
-    $stmt = $this->getStatement(Sabel_DB_Statement::INSERT);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::INSERT);
     return $this->prepareInsert($stmt, $values)->execute();
   }
   
@@ -778,7 +778,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected function _update()
   {
     @list ($values) = $this->arguments;
-    $stmt = $this->getStatement(Sabel_DB_Statement::UPDATE);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
     $this->prepareUpdate($stmt, $values)->execute();
   }
   
@@ -822,7 +822,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       }
     }
     
-    $stmt = $this->getStatement(Sabel_DB_Statement::DELETE);
+    $stmt = $this->prepareStatement(Sabel_DB_Statement::DELETE);
     $this->prepareDelete($stmt)->execute();
   }
   
@@ -831,7 +831,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    *
    * @return Sabel_DB_Abstract_Statement
    */
-  public function getStatement($type)
+  public function prepareStatement($type)
   {
     if ($this->statement === null) {
       $stmt = Sabel_DB::createStatement($this->connectionName);

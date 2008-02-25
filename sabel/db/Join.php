@@ -87,7 +87,7 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->model->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->model->prepareStatement(Sabel_DB_Statement::SELECT);
     
     $query = array();
     foreach ($this->objects as $object) {
@@ -105,7 +105,7 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->model->getStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->model->prepareStatement(Sabel_DB_Statement::SELECT);
     $projection = $this->model->getProjection();
     
     if (empty($projection)) {
@@ -142,7 +142,7 @@ class Sabel_DB_Join extends Sabel_Object
     $stmt->join($join)
          ->projection($projection)
          ->where($this->model->getCondition()->build($stmt));
-         
+    
     $constraints = $this->model->getConstraints();
     return $stmt->constraints($constraints)->execute();
   }

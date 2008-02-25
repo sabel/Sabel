@@ -184,10 +184,10 @@ class Migration extends Sabel_Sakle_Task
         break;
         
       case "rehead":
-        $this->arguments[2] = 0;
+        $this->arguments[1] = 0;
         $this->execNextMigration();
         $this->success("DOWNGRADE FROM {$this->currentVersion} TO 0");
-        $this->arguments[2] = "head";
+        $this->arguments[1] = "head";
         $this->execNextMigration();
         $version = $this->getCurrentVersion();
         $this->success("UPGRADE FROM 0 TO $version");
@@ -195,10 +195,10 @@ class Migration extends Sabel_Sakle_Task
         
       case "reset":
         $version = $this->currentVersion;
-        $this->arguments[2] = 0;
+        $this->arguments[1] = 0;
         $this->execNextMigration();
         $this->success("DOWNGRADE FROM $version TO 0");
-        $this->arguments[2] = $version;
+        $this->arguments[1] = $version;
         $this->execNextMigration();
         $this->success("UPGRADE FROM 0 TO $version");
         return self::$execFinalize = false;
