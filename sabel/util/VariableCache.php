@@ -23,7 +23,6 @@ class Sabel_Util_VariableCache
   
   public static function create($_filePath)
   {
-    error_reporting(E_ALL|E_NOTICE);
     if (isset(self::$instances[$_filePath])) {
       return self::$instances[$_filePath];
     }

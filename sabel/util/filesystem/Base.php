@@ -11,24 +11,41 @@
  */
 abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
 {
-  public function isDir($directory)
+  public function isDir($directory = null)
   {
-    if (!$this->isAbsolutePath($directory)) {
+    clearstatcache();
+    
+    if ($directory === null) {
+      return is_dir($this->path);
+    } elseif (!$this->isAbsolutePath($directory)) {
       $directory = $this->path . DS . $directory;
     }
     
-    clearstatcache();
     return is_dir($directory);
   }
   
-  public function isFile($file)
+  public function isFile($file = null)
   {
-    if (!$this->isAbsolutePath($file)) {
+    clearstatcache();
+    
+    if ($file === null) {
+      return is_file($this->path);
+    } elseif (!$this->isAbsolutePath($file)) {
       $file = $this->path . DS . $file;
     }
     
-    clearstatcache();
     return is_file($file);
+  }
+  
+  public function getPermission()
+  {
+    clearstatcache();
+    return intval(substr(sprintf("%o", fileperms($this->path)), -4), 8);
+  }
+  
+  public function chmod($permission)
+  {
+    chmod($this->path, $permission);
   }
   
   protected function isAbsolutePath($path)

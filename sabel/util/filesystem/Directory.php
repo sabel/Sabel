@@ -86,6 +86,20 @@ class Sabel_Util_FileSystem_Directory extends Sabel_Util_FileSystem_Base
     }
   }
   
+  public function getList()
+  {
+    $items = array();
+    foreach (scandir($this->path) as $item) {
+      if ($item === "." || $item === "..") continue;
+      $path = $this->path . DS . $item;
+      if (is_file($path)) {
+        $items[] = new Sabel_Util_FileSystem_File($path);
+      } else {
+        $items[] = new Sabel_Util_FileSystem_Directory($path);
+      }
+    }
+  }
+  
   public function rmdir($directory = null)
   {
     if ($directory === null) {

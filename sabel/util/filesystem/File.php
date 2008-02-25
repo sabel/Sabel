@@ -35,12 +35,6 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     return filesize($this->path);
   }
   
-  public function getPermission()
-  {
-    clearstatcache();
-    return fileperms($this->path);
-  }
-  
   public function isReadable()
   {
     clearstatcache();
@@ -135,10 +129,5 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     $this->path = $dest;
     
     return new self($dest);
-  }
-  
-  public function chmod($permission)
-  {
-    chmod($this->path, $permission);
   }
 }
