@@ -306,6 +306,11 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     }
   }
   
+  public function __toString()
+  {
+    return $this->build();
+  }
+  
   protected function createSelectSql()
   {
     $tblName = $this->quoteIdentifier($this->table);

@@ -93,11 +93,11 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   {
     if (empty($this->conditions)) return "";
     
-    $counter = 0;
-    $query = array();
+    Sabel_DB_Abstract_Condition::rewind();
     
+    $query = array();
     foreach ($this->conditions as $condition) {
-      $query[] = $condition->build($stmt, $counter);
+      $query[] = $condition->build($stmt);
     }
     
     return "WHERE " . implode(" AND ", $query);

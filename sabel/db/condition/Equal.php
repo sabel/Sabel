@@ -13,10 +13,14 @@ class Sabel_DB_Condition_Equal extends Sabel_DB_Abstract_Condition
 {
   protected $type = Sabel_DB_Condition::EQUAL;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $stmt)
   {
-    $num = ++$counter;
+    $num = ++self::$counter;
     $stmt->setBindValue("param{$num}", $this->value);
-    return $this->conditionColumn($stmt) . " = @param{$num}@";
+    
+    $column = $this->getQuotedColumn($stmt);
+    if ($this->isNot) $column = "NOT " . $column;
+    
+    return $column . " = @param{$num}@";
   }
 }

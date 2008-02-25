@@ -13,15 +13,18 @@ class Sabel_DB_Condition_Between extends Sabel_DB_Abstract_Condition
 {
   protected $type = Sabel_DB_Condition::BETWEEN;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $stmt)
   {
-    $f   = ++$counter;
-    $t   = ++$counter;
+    $f   = ++self::$counter;
+    $t   = ++self::$counter;
     $val = $this->value;
     
     $stmt->setBindValue("param{$f}", $val[0]);
     $stmt->setBindValue("param{$t}", $val[1]);
     
-    return $this->conditionColumn($stmt) . " BETWEEN @param{$f}@ AND @param{$t}@";
+    $column = $this->getQuotedColumn($stmt);
+    if ($this->isNot) $column = "NOT " . $column;
+    
+    return $column . " BETWEEN @param{$f}@ AND @param{$t}@";
   }
 }

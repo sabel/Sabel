@@ -12,6 +12,8 @@
  */
 abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
 {
+  protected static $counter = 0;
+  
   /**
    * @var const Sabel_DB_Condition
    */
@@ -38,7 +40,15 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
    *
    * @return string
    */
-  abstract public function build(Sabel_DB_Abstract_Statement $stmt, &$counter);
+  abstract public function build(Sabel_DB_Abstract_Statement $stmt);
+  
+  /**
+   * @return void
+   */
+  public static function rewind()
+  {
+    self::$counter = 0;
+  }
   
   /**
    * @param string $column
@@ -110,15 +120,13 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
    *
    * @return string
    */
-  protected function conditionColumn(Sabel_DB_Abstract_Statement $stmt)
+  protected function getQuotedColumn($stmt)
   {
     if (strpos($this->column, ".") === false) {
-      $column = $stmt->quoteIdentifier($this->column);
+      return $stmt->quoteIdentifier($this->column);
     } else {
       list ($tbl, $col) = explode(".", $this->column);
-      $column = $stmt->quoteIdentifier($tbl) . "." . $stmt->quoteIdentifier($col);
+      return $stmt->quoteIdentifier($tbl) . "." . $stmt->quoteIdentifier($col);
     }
-    
-    return ($this->isNot) ? "NOT $column" : $column;
   }
 }

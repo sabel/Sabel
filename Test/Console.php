@@ -73,6 +73,23 @@ class Test_Console extends SabelTestCase
     $this->assertEquals(array("cmd"), $args);
   }
   
+  public function testMultipleOptionValues()
+  {
+    $args = array("cmd", "-a", "hoge", "fuga", "foo", "-b", "test");
+    $this->assertTrue(Sabel_Console::hasOption("a", $args));
+    $this->assertTrue(Sabel_Console::hasOption("b", $args));
+    $this->assertFalse(Sabel_Console::hasOption("c", $args));
+    
+    $opts = Sabel_Console::getOption("a", $args);
+    $expected = array("hoge", "fuga", "foo");
+    $this->assertEquals($expected, $opts);
+    $expected = array("cmd", "-b", "test");
+    $this->assertEquals($expected, $args);
+    
+    $opts = Sabel_Console::getOption("b", $args);
+    $this->assertEquals("test", $opts[0]);
+  }
+  
   public function testConstructor()
   {
     ob_start();

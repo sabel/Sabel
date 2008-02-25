@@ -18,11 +18,11 @@ class Sabel_DB_Condition_Or extends Sabel_Object
     $this->conditions[] = $condition;
   }
   
-  public function build(Sabel_DB_Abstract_Statement $sql, &$counter)
+  public function build(Sabel_DB_Abstract_Statement $sql)
   {
     $query = array();
     foreach ($this->conditions as $condition) {
-      $query[] = $condition->build($sql, $counter);
+      $query[] = $condition->build($sql);
     }
     
     return "(" . implode(" OR ", $query) . ")";

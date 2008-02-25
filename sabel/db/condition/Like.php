@@ -30,34 +30,6 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
    */
   private $escape = true;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt, &$counter)
-  {
-    $value = $this->value;
-    
-    if ($this->escape && (strpos($value, "%") !== false || strpos($value, "_") !== false)) {
-      $escapeChars = "ZQXJKVBWYGFPMUCDzqxjkvbwygfpmu";
-      
-      for ($i = 0; $i < 30; $i++) {
-        $esc = $escapeChars{$i};
-        if (strpos($value, $esc) === false) {
-          $value = preg_replace("/([%_])/", $esc . '$1', $value);
-          $value = $this->addSpecialCharacter($value);
-          $num   = ++$counter;
-          $stmt->setBindValue("param{$num}", $value);
-          $query = $this->conditionColumn($stmt) . " LIKE @param{$num}@ escape '{$esc}'";
-          break;
-        }
-      }
-    } else {
-      $value = $this->addSpecialCharacter($value);
-      $num = ++$counter;
-      $stmt->setBindValue("param{$num}", $value);
-      $query = $this->conditionColumn($stmt) . " LIKE @param{$num}@";
-    }
-    
-    return $query;
-  }
-  
   public function type($type)
   {
     if ($type >= 1 && $type <= 3) {
@@ -78,6 +50,40 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
     }
     
     return $this;
+  }
+  
+  public function build(Sabel_DB_Abstract_Statement $stmt)
+  {
+    $value = $this->value;
+    
+    if ($this->escape && (strpos($value, "%") !== false || strpos($value, "_") !== false)) {
+      $escapeChars = "ZQXJKVBWYGFPMUCDzqxjkvbwygfpmu";
+      
+      for ($i = 0; $i < 30; $i++) {
+        $esc = $escapeChars{$i};
+        if (strpos($value, $esc) === false) {
+          $value = preg_replace("/([%_])/", $esc . '$1', $value);
+          $like  = "LIKE @param%d@ escape '{$esc}'";
+          break;
+        }
+      }
+    } else {
+      $like = "LIKE @param%d@";
+    }
+    
+    return $this->createQuery($stmt, $value, $like);
+  }
+  
+  private function createQuery($stmt, $value, $part)
+  {
+    $value = $this->addSpecialCharacter($value);
+    $num = ++self::$counter;
+    $stmt->setBindValue("param{$num}", $value);
+    
+    $column = $this->getQuotedColumn($stmt);
+    if ($this->isNot) $column = "NOT " . $column;
+    
+    return $column . " " . sprintf($part, $num);
   }
   
   private function addSpecialCharacter($value)
