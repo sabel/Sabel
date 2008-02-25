@@ -61,7 +61,7 @@ class Sabel_Environment extends Sabel_Object
   
   public function isWin()
   {
-    $os = $this->__get("os");
+    $os = $this->__get("OS");
     
     if ($os === null) {
       return (DIRECTORY_SEPARATOR === '\\');
