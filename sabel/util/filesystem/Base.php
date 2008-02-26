@@ -11,6 +11,13 @@
  */
 abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
 {
+  protected $path = "";
+  
+  public function getPath()
+  {
+    return $this->path;
+  }
+  
   public function isDir($directory = null)
   {
     clearstatcache();

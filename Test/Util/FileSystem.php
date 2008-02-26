@@ -28,7 +28,10 @@ class Test_Util_FileSystem extends SabelTestCase
   public function testMakedir()
   {
     $fs = new Sabel_Util_FileSystem($this->basedir);
-    $fs->mkdir("test");
+    
+    $dir = $fs->mkdir("test");
+    $this->assertEquals($this->basedir . DS . "test", $dir->pwd());
+    
     $this->assertTrue($fs->isDir("test"));
     $this->assertTrue($fs->isDir($this->basedir . DS . "test"));
     $this->assertTrue(is_dir($this->basedir . DS . "test"));
@@ -36,12 +39,15 @@ class Test_Util_FileSystem extends SabelTestCase
   
   public function testRecursiveMakedir()
   {
-    $dir = "hoge" . DS . "fuga" . DS . "foo";
+    $path = "hoge" . DS . "fuga" . DS . "foo";
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
-    $fs->mkdir($dir);
-    $this->assertTrue($fs->isDir($dir));
-    $this->assertTrue($fs->isDir($this->basedir . DS . "test" . DS . $dir));
-    $this->assertTrue(is_dir($this->basedir . DS . "test" . DS . $dir));
+    
+    $dir = $fs->mkdir($path);
+    $this->assertEquals($this->basedir . DS . "test" . DS . $path, $dir->pwd());
+    
+    $this->assertTrue($fs->isDir($path));
+    $this->assertTrue($fs->isDir($this->basedir . DS . "test" . DS . $path));
+    $this->assertTrue(is_dir($this->basedir . DS . "test" . DS . $path));
   }
   
   public function testChangeDirectory()
@@ -205,6 +211,34 @@ class Test_Util_FileSystem extends SabelTestCase
     $this->assertEquals("", $file->getContents());
   }
   
+  public function testFileCopy()
+  {
+    $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test" . DS . "hoge" . DS . "fuga");
+    $file = $fs->getFile("foo.txt");
+    $file->copy(".." . DS . "test" . DS . "foo2.txt", true);
+    
+    $fs->cd(".." . DS . "test");
+    $this->assertTrue($fs->isFile("foo2.txt"));
+    
+    $file->copy(".." . DS . "test");
+    $this->assertTrue($fs->isFile("foo.txt"));
+  }
+  
+  public function testFileMove()
+  {
+    $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
+    $file = $fs->getFile("hoge" . DS . "test" . DS . "foo2.txt");
+    $moved = $file->move(".." . DS . "test2");
+    
+    $fs->cd(".." . DS . "test" . DS . "hoge");
+    $this->assertTrue($fs->isFile("test2" . DS . "foo2.txt"));
+    $this->assertFalse($fs->isFile("hoge" . DS . "foo2.txt"));
+    
+    $moved->move("foo3.txt", true);
+    $this->assertTrue($fs->isFile("test2" . DS . "foo3.txt"));
+    $this->assertFalse($fs->isFile("test2" . DS . "foo2.txt"));
+  }
+  
   public function testRemoveFile()
   {
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
@@ -215,14 +249,40 @@ class Test_Util_FileSystem extends SabelTestCase
     $this->assertFalse(is_file($this->basedir . DS . "test" . DS . "hoge.txt"));
   }
   
+  public function testRemoveDir()
+  {
+    $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test" . DS . "hoge");
+    $this->assertTrue(in_array("test2", $fs->ls(), true));
+    $fs->cd("test2");
+    $fs->rmdir();
+    
+    $fs->cd($this->basedir . DS . "test" . DS . "hoge");
+    $this->assertFalse(in_array("test2", $fs->ls(), true));
+  }
+  
   public function testDirectoryCopy()
   {
-    // @todo
+    $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
+    $this->assertFalse($fs->isDir("moved"));
+    
+    $fs->copy("moved");
+    $fs->cd("..");
+    $this->assertTrue($fs->isDir("moved"));
+    $fs->cd("moved");
+    $this->assertTrue($fs->isDir("hoge"));
+    $fs->cd("hoge");
+    $this->assertTrue($fs->isDir("fuga"));
+    $this->assertTrue($fs->isDir("test"));
+    $fs->cd("fuga");
+    $this->assertTrue($fs->isFile("foo.txt"));
+    $fs->cd(".." . DS . "test");
+    $this->assertTrue($fs->isFile("foo.txt"));
   }
   
   public function testCleanup()
   {
     $fs = new Sabel_Util_FileSystem($this->basedir);
     $fs->rmdir("test");
+    $fs->rmdir("moved");
   }
 }

@@ -9,16 +9,14 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Directory
+class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
 {
-  protected $path = "";
-  
   public function __construct($base = "")
   {
     if ($base === "") {
       $this->path = (Sabel_Environment::create()->isWin()) ? "C:\\" : "/";
     } else {
-      $this->path = $base;
+      $this->path = realpath($base);
     }
   }
   
@@ -68,7 +66,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Directory
     }
     
     if ($this->isDir($path)) {
-      return new Sabel_Util_FileSystem_Directory($path);
+      return new self($path);
     } else {
       $message = "'{$path}': no such file or directory.";
       throw new Sabel_Exception_Runtime($message);
@@ -86,6 +84,126 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Directory
     } else {
       $message = "'{$path}': no such file or directory.";
       throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
+  public function getDirectoryNames()
+  {
+    clearstatcache();
+    
+    $dirs = array();
+    $path = $this->path;
+    
+    foreach (scandir($path) as $item) {
+      if ($item === "." || $item === "..") continue;
+      if (is_dir($path . DS . $item)) $dirs[] = $item;
+    }
+    
+    return $dirs;
+  }
+  
+  public function getFileNames()
+  {
+    clearstatcache();
+    
+    $files = array();
+    $path  = $this->path;
+    
+    foreach (scandir($path) as $item) {
+      if (is_file($path . DS . $item)) $files[] = $item;
+    }
+    
+    return $files;
+  }
+  
+  public function mkdir($directory, $permission = 0744)
+  {
+    if (!$this->isAbsolutePath($directory)) {
+      $directory = $this->path . DS . $directory;
+    }
+    
+    if ($this->isDir($directory) || $this->isFile($directory)) {
+      $message = "cannot create directory '{$directory}': "
+               . "file or directory exists.";
+      
+      throw new Sabel_Exception_Runtime($message);
+    } else {
+      $this->_mkdir($directory, $permission);
+      return new self($directory);
+    }
+  }
+  
+  public function mkfile($file, $permission = 0744)
+  {
+    if (!$this->isAbsolutePath($file)) {
+      $file = $this->path . DS . $file;
+    }
+    
+    if ($this->isDir($file) || $this->isFile($file)) {
+      $message = "cannot create directory '{$file}': "
+               . "file or directory exists.";
+      
+      throw new Sabel_Exception_Runtime($message);
+    } else {
+      $this->_mkfile($file, $permission);
+      return new Sabel_Util_FileSystem_File($file);
+    }
+  }
+  
+  public function getList()
+  {
+    $items = array();
+    foreach (scandir($this->path) as $item) {
+      if ($item === "." || $item === "..") continue;
+      $path = $this->path . DS . $item;
+      if (is_file($path)) {
+        $items[] = new Sabel_Util_FileSystem_File($path);
+      } else {
+        $items[] = new self($path);
+      }
+    }
+    
+    return $items;
+  }
+  
+  public function rmdir($directory = null)
+  {
+    if ($directory === null) {
+      $directory = $this->path;
+    } elseif (!$this->isAbsolutePath($directory)) {
+      $directory = $this->path . DS . $directory;
+    }
+    
+    if (!$this->isDir($directory)) {
+      trigger_error("no such file or directory.", E_USER_WARNING);
+    } elseif ($this->isFile($directory)) {
+      trigger_error("'{$directory}': not a directory.", E_USER_WARNING);
+    } else {
+      $this->_rmdir($directory);
+      rmdir($directory);
+    }
+  }
+  
+  public function copy($dest, $src = null)
+  {
+    if ($src === null) $src = $this->path;
+    
+    if (!$this->isAbsolutePath($dest)) {
+      $dest = dirname($this->path) . DS . $dest;
+    }
+    
+    $dir = new self($src);
+    $this->_mkdir($dest, $dir->getPermission());
+    
+    if ($items = $dir->getList()) {
+      foreach ($items as $item) {
+        $destination = $dest . DS . basename($item->getPath());
+        if ($item->isFile()) {
+          $item->copy($destination, true);
+        } else {
+          $this->copy($destination, $item->pwd());
+        }
+      }
     }
   }
 }

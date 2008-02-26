@@ -11,17 +11,11 @@
  */
 class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
 {
-  protected $path = "";
   protected $contents = array();
   
   public function __construct($path)
   {
-    $this->path = $path;
-  }
-  
-  public function getPath()
-  {
-    return $this->path;
+    $this->path = realpath($path);
   }
   
   public function getFileName()
@@ -108,11 +102,13 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     unlink($this->path);
   }
   
-  public function copy($dest)
+  public function copy($dest, $changeName = false)
   {
     if (!$this->isAbsolutePath($dest)) {
       $dest = dirname($this->path) . DS . $dest;
     }
+    
+    if (!$changeName) $dest .= DS . basename($this->path);
     
     $permission = $this->getPermission();
     $this->_mkdir(dirname($dest), $permission);
@@ -122,9 +118,15 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     return new self($dest);
   }
   
-  public function move($dest)
+  public function move($dest, $changeName = false)
   {
-    $this->copy($dest);
+    if (!$this->isAbsolutePath($dest)) {
+      $dest = dirname($this->path) . DS . $dest;
+    }
+    
+    if (!$changeName) $dest .= DS . basename($this->path);
+    
+    $this->copy($dest, true);
     $this->remove();
     $this->path = $dest;
     
