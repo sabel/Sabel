@@ -66,7 +66,7 @@ abstract class Sabel_Map_Configurator implements Sabel_Config
     $pattern = strrev($pattern);
     for ($i = 0, $c = count($defaults); $i < $c; $i++) {
       $pattern = "?)" . $pattern;
-      $pattern = preg_replace("/(\/)([^(])/", '$1($2', $pattern, 1, &$count);
+      $pattern = preg_replace("/(\/)([^(])/", '$1($2', $pattern, 1, $count);
       if ($count === 0) $pattern .= "(";
     }
     
