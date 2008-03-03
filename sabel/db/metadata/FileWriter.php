@@ -22,9 +22,9 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     }
   }
   
-  public function write(Sabel_DB_Metadata_Table $schema)
+  public function write(Sabel_DB_Metadata_Table $metadata)
   {
-    $mdlName   = convert_to_modelname($schema->getTableName());
+    $mdlName   = convert_to_modelname($metadata->getTableName());
     $className = "Schema_" . $mdlName;
     $target    = $this->schemaDir . DS . $mdlName . PHP_SUFFIX;
     
@@ -38,7 +38,7 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     $lines[] = "  {";
     $lines[] = '    $cols = array();' . PHP_EOL;
     
-    $colLines = $this->createColumnLines($schema);
+    $colLines = $this->createColumnLines($metadata);
     foreach ($colLines as $line) {
       $lines[] = "    " . $line;
     }
@@ -51,9 +51,9 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     $lines[] = "  {";
     $lines[] = '    $property = array();' . PHP_EOL;
     
-    $this->writeEngine($lines, $schema);
-    $this->writeUniques($lines, $schema);
-    $this->writeForeignKeys($lines, $schema);
+    $this->writeEngine($lines, $metadata);
+    $this->writeUniques($lines, $metadata);
+    $this->writeForeignKeys($lines, $metadata);
     
     $lines[] = PHP_EOL;
     $lines[] = "    return \$property;";
@@ -65,10 +65,10 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     fclose($fp);
   }
   
-  private function createColumnLines($schema)
+  private function createColumnLines($metadata)
   {
     $lines   = array();
-    $columns = $schema->getColumns();
+    $columns = $metadata->getColumns();
     
     foreach ($columns as $col) {
       $line  = array();
@@ -126,15 +126,15 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     return $str;
   }
   
-  private function writeEngine(&$lines, $schema)
+  private function writeEngine(&$lines, $metadata)
   {
-    $engine = $schema->getTableEngine();
+    $engine = $metadata->getTableEngine();
     $lines[] = "    \$property['tableEngine'] = '{$engine}';";
   }
   
-  private function writeUniques(&$lines, $schema)
+  private function writeUniques(&$lines, $metadata)
   {
-    $uniques = $schema->getUniques();
+    $uniques = $metadata->getUniques();
     
     if ($uniques === null) {
       $lines[] = "    \$property['uniques'] = null;";
@@ -148,9 +148,9 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     }
   }
 
-  private function writeForeignKeys(&$lines, $schema)
+  private function writeForeignKeys(&$lines, $metadata)
   {
-    $fkey = $schema->getForeignKey();
+    $fkey = $metadata->getForeignKey();
     
     if ($fkey === null) {
       $lines[] = "    \$property['fkeys'] = null;";

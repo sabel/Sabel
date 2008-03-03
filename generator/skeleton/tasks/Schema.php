@@ -13,33 +13,35 @@ class Schema extends Sabel_Sakle_Task
 {
   public function run()
   {
+    clearstatcache();
     $this->checkInputs();
     
-    clearstatcache();
-    
     $environment = environment(strtolower($this->arguments[0]));
+    
+    if ($environment === null) {
+      $this->error("invalid environment.");
+      $this->usage();
+      exit;
+    }
+    
     define("ENVIRONMENT", $environment);
     Sabel_DB_Config::initialize(new Config_Database());
     
-    $inputSchemas = $this->getWriteSchemas();
-    $schemaWrite  = !empty($inputSchemas);
-    
-    if ($schemaWrite && $inputSchemas[0] === "all") {
-      $schemaAll = (count($inputSchemas) === 1);
+    $opTables = $this->getOutputTables();
+    if (isset($opTables[0]) && $opTables[0] === "all") {
+      $writeAll = (count($opTables) === 1);
     } else {
-      $schemaAll = false;
+      $writeAll = false;
     }
     
     foreach (Sabel_DB_Config::get() as $connectionName => $params) {
       Sabel_DB_Config::add($connectionName, $params);
-      $schema = Sabel_DB::createMetadata($connectionName);
+      $db = Sabel_DB::createMetadata($connectionName);
       
-      foreach ($schema->getTableList() as $tblName) {
-        $tblSchema = $schema->getTable($tblName);
-        
-        if ($schemaAll || $schemaWrite && in_array($tblName, $inputSchemas)) {
+      foreach ($db->getTableList() as $tblName) {
+        if ($writeAll || in_array($tblName, $opTables, true)) {
           $writer = new Sabel_DB_Metadata_FileWriter(SCHEMA_DIR_PATH);
-          $writer->write($tblSchema);
+          $writer->write($db->getTable($tblName));
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
         
@@ -52,20 +54,13 @@ class Schema extends Sabel_Sakle_Task
     }
   }
   
-  private function getWriteSchemas()
+  private function getOutputTables()
   {
-    $schemas = array();
-    $input = $this->arguments;
-    
-    if (Sabel_Console::hasOption("s", $this->arguments)) {
-      $key = array_search("-s", $input) + 1;
-      for ($i = $key, $c = count($input); $i < $c; $i++) {
-        if ($val === "-l") break;
-        $schemas[] = $input[$i];
-      }
+    if (Sabel_Console::hasOption("t", $this->arguments)) {
+      return Sabel_Console::getOption("t", $this->arguments);
+    } else {
+      return array();
     }
-    
-    return $schemas;
   }
   
   private function checkInputs()
@@ -75,7 +70,7 @@ class Schema extends Sabel_Sakle_Task
     if (count($args) < 2) {
       $this->usage();
       exit;
-    } elseif ($args[2] === "--help" || $args[2] === "-h") {
+    } elseif ($args[0] === "--help" || $args[0] === "-h") {
       $this->usage();
       exit;
     }
@@ -110,7 +105,7 @@ class TableList_Writer
     $target    = SCHEMA_DIR_PATH . DS . "{$fileName}.php";
     $className = "Schema_" . $fileName;
     
-    Sabel_Console::success("generate table list of $cn\n");
+    Sabel_Console::success("generate tablelist of '{$cn}'");
     
     $fp = fopen($target, "w");
     

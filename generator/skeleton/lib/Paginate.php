@@ -17,7 +17,7 @@ class Paginate extends Sabel_Object
     $attributes = array(),
     $method     = "select",
     $parameters = array();
-    
+  
   public function __construct($model)
   {
     if (is_string($model)) {
@@ -56,7 +56,7 @@ class Paginate extends Sabel_Object
       $queryString[] = "{$key}={$val}";
     }
     
-    return "?" . implode("&", $queryString);
+    return implode("&", $queryString);
   }
   
   public function setCondition($arg1, $arg2 = null)
