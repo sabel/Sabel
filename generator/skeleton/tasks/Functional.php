@@ -30,12 +30,17 @@ class Functional extends Tests
       }
     } else {
       $testName = $this->arguments[0];
-      $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
+      $runner->start($testName, $testsDir . DS . $testName . PHP_SUFFIX);
     }
   }
   
   public function usage()
   {
-    echo "Usage: sakle Functional TESTCASE_NAME" . PHP_EOL;
+    echo "Usage: sakle Functional [TESTCASE_NAME]" . PHP_EOL;
+    echo PHP_EOL;
+    echo "  TESTCASE_NAME: all run the functional tests, if omit a testcase name" . PHP_EOL;
+    echo PHP_EOL;
+    echo "Example: sakle Functional MyTest" . PHP_EOL;
+    echo PHP_EOL;
   }
 }

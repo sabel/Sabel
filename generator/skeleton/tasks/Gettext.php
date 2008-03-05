@@ -142,33 +142,34 @@ class Gettext extends Sabel_Sakle_Task
   
   private function createOptions()
   {
-    $arguments = $this->arguments;
+    $args = $this->arguments;
     
-    if (in_array("-f", $arguments)) {
-      $index = array_search("-f", $arguments) + 1;
-      if (isset($arguments[$index])) {
-        $this->fileName = $arguments[$index];
-      }
+    if (Sabel_Console::hasOption("f", $args)) {
+      $opts = Sabel_Console::getOption("f", $args);
+      $this->fileName = $opts[0];
     }
     
-    if (in_array("-dl", $arguments)) {
-      $index = array_search("-dl", $arguments) + 1;
-      if (isset($arguments[$index])) {
-        $this->defaultLocale = $arguments[$index];
-      }
+    if (Sabel_Console::hasOption("dl", $args)) {
+      $opts = Sabel_Console::getOption("dl", $args);
+      $this->defaultLocale = $opts[0];
     }
     
-    if (in_array("-l", $arguments)) {
-      $index = array_search("-l", $arguments) + 1;
-      $size  = count($arguments);
-      for ($i = $index; $i < $size; $i++) {
-        if (isset($arguments[$i])) {
-          $locale = $arguments[$i];
-          if ($locale{0} !== "-") {
-            $this->locales[] = $arguments[$i];
-          }
-        }
-      }
+    if (Sabel_Console::hasOption("l", $args)) {
+      $this->locales = Sabel_Console::getOption("l", $args);
     }
+    
+    $this->arguments = $args;
+  }
+  
+  public function usage()
+  {
+    echo "Usage: sakle Gettext [-f FILE_NAME] [-dl DEFAULT_LOCALE] [-l LOCALES]" . PHP_EOL;
+    echo PHP_EOL;
+    echo "  -f   messages filename (default: messages.php)\n";
+    echo "  -dl  default locale (default: en)\n";
+    echo "  -l   locales (default: locales/*)\n";
+    echo PHP_EOL;
+    echo "Example: sakle Gettext -f foo.php -dl en -l en fr de" . PHP_EOL;
+    echo PHP_EOL;
   }
 }

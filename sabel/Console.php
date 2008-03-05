@@ -65,11 +65,12 @@ class Sabel_Console
   
   public static function getOption($opt, &$arguments, $unset = true)
   {
-    if (!$index = array_search("-" . $opt, $arguments, true)) {
-      $index = array_search("--" . $opt, $arguments, true);
-    }
+    $index = array_search("-" . $opt, $arguments, true);
     
-    if (!$index) return null;
+    if ($index === false) {
+      $index = array_search("--" . $opt, $arguments, true);
+      if ($index === false) return null;
+    }
     
     $opts = array();
     for ($i = $index + 1, $size = count($arguments); $i < $size; $i++) {

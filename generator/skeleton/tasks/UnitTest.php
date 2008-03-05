@@ -36,6 +36,11 @@ class UnitTest extends Tests
   
   public function usage()
   {
-    echo "Usage: sakle UnitTest";
+    echo "Usage: sakle UnitTest [TESTCASE_NAME]" . PHP_EOL;
+    echo PHP_EOL;
+    echo "  TESTCASE_NAME: all run the unit tests, if omit a testcase name" . PHP_EOL;
+    echo PHP_EOL;
+    echo "Example: sakle UnitTest MyTest" . PHP_EOL;
+    echo PHP_EOL;
   }
 }

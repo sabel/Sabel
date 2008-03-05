@@ -78,9 +78,15 @@ class Schema extends Sabel_Sakle_Task
   
   public function usage()
   {
-    echo "Usage: sakle Schema ENVIRONMENT (-l) (-s TABLE1 TABLE2 ...)\n";
-    echo "       -l : create table list\n";
-    echo "       -s : create schema\n";
+    echo "Usage: sakle Schema ENVIRONMENT [-l] -t TABLE1 TABLE2..." . PHP_EOL;
+    echo PHP_EOL;
+    echo "  ENVIRONMENT: production | test | development" . PHP_EOL;
+    echo PHP_EOL;
+    echo "  -l  output table list\n";
+    echo "  -t  output metadata of table\n";
+    echo PHP_EOL;
+    echo "Example: sakle Schema production -l -t foo bar baz" . PHP_EOL;
+    echo PHP_EOL;
   }
 }
 

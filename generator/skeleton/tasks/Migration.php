@@ -265,8 +265,14 @@ class Migration extends Sabel_Sakle_Task
   
   public function usage()
   {
-    echo "Usage: sakle Migration ENVIRONMENT TO_VERSION (CONNECTION_NAME) " .
-         "(-d DIRECTORY_OF_MIGRATION_FILES)" . PHP_EOL;
+    echo "Usage: sakle Migration ENVIRONMENT TO_VERSION [CONNECTION_NAME] " . PHP_EOL;
+    echo PHP_EOL;
+    echo "  ENVIRONMENT: production | test | development" . PHP_EOL;
+    echo "  TO_VERSION:  number of target version | head | rehead | reset | foot" . PHP_EOL;
+    echo "  CONNECTION_NAME: " . PHP_EOL;
+    echo PHP_EOL;
+    echo "Example: sakle Migration development head userdb" . PHP_EOL;
+    echo PHP_EOL;
   }
 }
 
