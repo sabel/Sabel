@@ -23,14 +23,14 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $response = null;
   
   /**
+   * @var Sabel_Session
+   */
+  protected $session = null;
+  
+  /**
    * @var Sabel_Controller_Redirector
    */
   protected $redirect = null;
-  
-  /**
-   * @var Sabel_Session_Abstract
-   */
-  protected $session = null;
   
   /**
    * @var string

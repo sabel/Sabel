@@ -14,6 +14,14 @@ class Test_Request_Object extends SabelTestCase
     return self::createSuite("Test_Request_Object");
   }
   
+  public function testUri()
+  {
+    $path = "foo/bar";
+    $request = new Sabel_Request_Object("");
+    $request->get($path);
+    $this->assertEquals($path, $request->getUri());
+  }
+  
   public function testGetValue()
   {
     $request = new Sabel_Request_Object("");
@@ -140,7 +148,7 @@ class Test_Request_Object extends SabelTestCase
     $this->assertEquals("30", $request->find("c"));
   }
   
-  public function testFindForDuplicateValues()
+  public function testFindDuplicateValues()
   {
     $request = new Sabel_Request_Object("");
     $request->setGetValue("a", "10");

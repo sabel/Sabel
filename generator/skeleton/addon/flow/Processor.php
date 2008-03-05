@@ -194,7 +194,14 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   private function getContinuationVariables()
   {
-    $vars = $this->controller->getReflection()->getAnnotation("continuation");
-    return ($vars === null) ? array() : $vars[0];
+    $annotations = $this->controller->getReflection()->getAnnotation("flow");
+    foreach ($annotations as $annotation) {
+      if ($annotation[0] === "continuation") {
+        unset($annotation[0]);
+        return array_values($annotation);
+      }
+    }
+    
+    return array();
   }
 }
