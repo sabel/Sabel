@@ -12,9 +12,6 @@
  */
 class Sabel_View_Renderer extends Sabel_Object
 {
-  // @todo
-  protected $trim = true;
-  
   protected $preprocessor = null;
   
   public function setPreprocessor(Sabel_View_Preprocessor_Interface $p)
