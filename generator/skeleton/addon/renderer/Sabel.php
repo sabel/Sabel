@@ -69,40 +69,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
     $template = str_replace('<?=', '<? echo', $template);
     $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
     
-    if (ENVIRONMENT === PRODUCTION && $this->trim) {
-      $template = $this->trimContents($template);
-    }
-    
     file_put_contents(COMPILE_DIR_PATH . DS . $hash, $template);
-  }
-  
-  private final function checkAndTrimContents($contents)
-  {
-    if (strpos($contents, "<script") === false) {
-      $contents = explode(PHP_EOL,  $contents);
-      $contents = array_map("trim", $contents);
-      $contents = implode("",       $contents);
-    } else {
-      $pat = '@(.*)(<script [^>]+>.*</script>)(.*)@si';
-      $callback = array($this, 'trimContents');
-      $contents = preg_replace_callback($pat, $callback, $contents);
-    }
-    
-    return $contents;
-  }
-  
-  private final function trimContents($contents)
-  {
-    if (is_string($contents)) {
-      $contents = $this->checkAndTrimContents($contents);
-    } elseif (is_array($contents)) {
-      $head   = $this->checkAndTrimContents($contents[1]);
-      $script = $contents[2];
-      $foot   = $this->checkAndTrimContents($contents[3]);
-      
-      $contents = $head . PHP_EOL . $script . PHP_EOL . $foot;
-    }
-    return $contents;
   }
   
   private final function getCompileFilePath($name)
