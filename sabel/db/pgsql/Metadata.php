@@ -83,6 +83,7 @@ SQL;
   
   public function getForeignKeys($tblName)
   {
+    /*
     $sql = <<<SQL
 SELECT
   kcu.column_name, ccu.table_name AS ref_table,
@@ -101,14 +102,45 @@ SQL;
     
     $rows = $this->driver->execute($sql);
     if (empty($rows)) return null;
+    */
+    
+    $sql = <<<SQL
+SELECT
+  constraint_name
+  FROM information_schema.table_constraints
+  WHERE table_schema = '{$this->schemaName}'
+    AND table_name = '{$tblName}'
+    AND constraint_type = 'FOREIGN KEY'
+SQL;
+    
+    $cnames = $this->driver->execute($sql);
+    if (empty($cnames)) return null;
+    
+    $fmt = <<<SQL
+SELECT * FROM
+  (SELECT
+     column_name
+     FROM information_schema.key_column_usage
+     WHERE constraint_name = '%1\$s') AS kcu,
+  (SELECT
+     table_name AS ref_table, column_name AS ref_column
+     FROM information_schema.constraint_column_usage
+     WHERE constraint_name = '%1\$s') AS ccu,
+  (SELECT
+     delete_rule, update_rule
+     FROM information_schema.referential_constraints
+     WHERE constraint_name = '%1\$s') AS rc
+SQL;
     
     $columns = array();
-    foreach ($rows as $row) {
-      $column = $row["column_name"];
-      $columns[$column]["referenced_table"]  = $row["ref_table"];
-      $columns[$column]["referenced_column"] = $row["ref_column"];
-      $columns[$column]["on_delete"]         = $row["delete_rule"];
-      $columns[$column]["on_update"]         = $row["update_rule"];
+    foreach ($cnames as $cname) {
+      foreach ($this->driver->execute(sprintf($fmt, $cname["constraint_name"])) as $row) {
+        $column = $row["column_name"];
+        $columns[$column]["referenced_table"]  = $row["ref_table"];
+        $columns[$column]["referenced_column"] = $row["ref_column"];
+        $columns[$column]["on_delete"]         = $row["delete_rule"];
+        $columns[$column]["on_update"]         = $row["update_rule"];
+      }
     }
     
     return $columns;

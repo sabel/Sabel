@@ -26,7 +26,7 @@ class Generator extends Sabel_Sakle_Task
   private function generateModel($environment)
   {
     define("ENVIRONMENT", $environment);
-    Sabel_DB_Config::initialize(CONFIG_DIR_PATH . DS . "connection" . PHP_SUFFIX);
+    Sabel_DB_Config::initialize(new Config_Database());
     
     $models = array();
     array_shift($this->arguments);

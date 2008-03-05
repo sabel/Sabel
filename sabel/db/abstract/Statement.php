@@ -378,11 +378,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } else {
       $ps = array();
       foreach ($this->projection as $p) {
-        if (is_object($p)) {
-          $ps[] = $p->getSqlValue($this);
-        } else {
-          $ps[] = $this->quoteIdentifier($p);
-        }
+        $ps[] = $this->quoteIdentifier($p);
       }
       
       return implode(", ", $ps);

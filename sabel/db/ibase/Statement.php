@@ -28,8 +28,6 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
         $val = ($val) ? 1 : 0;
       } elseif (is_string($val)) {
         $val = "'" . ibase_escape_string($val) . "'";
-      } elseif (is_object($val)) {
-        $val = $val->getSqlValue($this);
       }
     }
     

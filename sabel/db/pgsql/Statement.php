@@ -30,8 +30,6 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Abstract_Statement
         $val = ($val) ? "'t'" : "'f'";
       } elseif (is_string($val)) {
         $val = "'" . pg_escape_string($conn, $val) . "'";
-      } elseif (is_object($val)) {
-        $val = $val->getSqlValue($this);
       }
     }
     

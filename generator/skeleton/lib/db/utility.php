@@ -1,7 +1,6 @@
 <?php
 
 class Condition extends Sabel_DB_Condition {}
-// class SqlPart   extends Sabel_DB_Sql_Part {}
 
 define("EQUAL",         Condition::EQUAL);
 define("ISNULL",        Condition::ISNULL);

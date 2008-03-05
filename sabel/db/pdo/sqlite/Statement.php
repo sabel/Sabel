@@ -16,8 +16,6 @@ class Sabel_DB_Pdo_Sqlite_Statement extends Sabel_DB_Pdo_Statement
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? "true" : "false";
-      } elseif (is_object($val)) {
-        $val = $val->getSqlValue($this);
       }
     }
     
