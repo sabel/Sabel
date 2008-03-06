@@ -18,7 +18,7 @@ class Sabel_I18n_Gettext
   protected static $ins  = null;
   
   protected $browser     = null;
-  protected $fileName    = "";
+  protected $fileName    = "messages.php";
   protected $localesDir  = "";
   protected $codeset     = array();
   protected $initialized = false;
@@ -30,11 +30,6 @@ class Sabel_I18n_Gettext
     } else {
       $this->localesDir = RUN_BASE . DS . "locale";
     }
-    
-    $fileName = "messages";
-    if (defined("PHP_SUFFIX")) $fileName .= PHP_SUFFIX;
-    
-    $this->fileName = $fileName;
   }
   
   public static function getInstance()
@@ -51,9 +46,9 @@ class Sabel_I18n_Gettext
     return $this->initialized;
   }
   
-  public function setMessagesFileName($name, $suffix = PHP_SUFFIX)
+  public function setMessagesFileName($fileName)
   {
-    $this->fileName = $name . $suffix;
+    $this->fileName = $fileName;
     
     if ($this->initialized) {
       Sabel_I18n_Sabel_Gettext::setMessagesFileName($this->fileName);
@@ -73,12 +68,10 @@ class Sabel_I18n_Gettext
     return $this;
   }
   
-  public function setCodeset($codeset, $fileName = null, $suffix = PHP_SUFFIX)
+  public function setCodeset($codeset, $fileName = "")
   {
-    if ($fileName === null) {
+    if ($fileName === "") {
       $fileName = $this->fileName;
-    } else {
-      $fileName = $fileName . $suffix;
     }
     
     $this->codeset[$fileName] = $codeset;
@@ -132,7 +125,7 @@ class Sabel_I18n_Gettext
   private function getLocaleDirs()
   {
     if (ENVIRONMENT === PRODUCTION) {
-      $cache = CACHE_DIR_PATH . DS . "ldirs" . PHP_SUFFIX;
+      $cache = CACHE_DIR_PATH . DS . "ldirs.php";
       
       if (is_file($cache)) {
         include ($cache);

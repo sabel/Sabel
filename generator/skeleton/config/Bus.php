@@ -2,6 +2,8 @@
 
 class Config_Bus extends Sabel_Bus_Config
 {
+  protected $logging    = false;
+  
   protected $processors = array("request"     => "Processor_Request",
                                 "router"      => "Processor_Router",
                                 "session"     => "Processor_Session",
@@ -28,7 +30,7 @@ class Config_Bus extends Sabel_Bus_Config
     $baseDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "processor" . DS;
     
     foreach (array_keys($this->processors) as $name) {
-      Sabel::fileUsing($baseDir . ucfirst($name) . PHP_SUFFIX, true);
+      Sabel::fileUsing($baseDir . ucfirst($name) . ".php", true);
     }
     
     return $this->processors;

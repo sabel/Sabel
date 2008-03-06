@@ -20,15 +20,17 @@ function unshift_include_paths($paths, $prefix = "")
   set_include_path($path . get_include_path());
 }
 
+/*
 function load($className, $config)
 {
   if (is_string($config)) $config = new $config();
   return Sabel_Container::create($config)->newInstance($className);
 }
+*/
 
-function l($message, $level = LOG_INFO, $fileName = null)
+function l($message, $level = SBL_LOG_INFO, $fileName = null)
 {
-  Sabel_Logger_File::singleton()->write($message, $level, $fileName);
+  Sabel_Logger::create()->write($message, $level, $fileName);
 }
 
 function uri($uriParameter, $secure = false, $absolute = false)
@@ -176,7 +178,7 @@ function MODEL($mdlName, $id = null)
   }
   
   if (!$exists = class_exists($mdlName, false)) {
-    $path = MODELS_DIR_PATH . DS . $mdlName . PHP_SUFFIX;
+    $path = MODELS_DIR_PATH . DS . $mdlName . ".php";
     $exists = Sabel::fileUsing($path, true);
   }
   

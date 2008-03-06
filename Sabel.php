@@ -110,22 +110,17 @@ final class Sabel
   
   private static function getFilePath($className)
   {
-    static $suffix = null;
     static $includePath = null;
     static $paths = null;
-    
-    if ($suffix === null) {
-      $suffix = (defined("PHP_SUFFIX")) ? PHP_SUFFIX : ".php";
-    }
     
     $exp = explode("_", $className);
     
     if (count($exp) === 1) {
-      $path = $exp[0] . $suffix;
+      $path = $exp[0] . ".php";
     } else {
       $class = array_pop($exp);
       $prePath = implode("/", array_map("strtolower", $exp));
-      $path = $prePath . DIRECTORY_SEPARATOR . $class . $suffix;
+      $path = $prePath . DIRECTORY_SEPARATOR . $class . ".php";
     }
     
     if ($includePath === null) {
@@ -154,6 +149,7 @@ final class Sabel
     require ($SABEL . "Object.php");
     require ($SABEL . "Functions.php");
     require ($SABEL . "Environment.php");
+    require ($SABEL . "Logger.php");
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");
     require ($SABEL . "Context.php");
@@ -198,7 +194,7 @@ final class Sabel
     require ($SABEL . "request"   . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "response"  . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "exception" . DIRECTORY_SEPARATOR . "Runtime.php");
-    require ($SABEL . "logger"    . DIRECTORY_SEPARATOR . "File.php");
+    require ($SABEL . "logger"    . DIRECTORY_SEPARATOR . "Interface.php");
   }
   
   public static function init()

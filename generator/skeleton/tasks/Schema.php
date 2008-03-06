@@ -16,6 +16,7 @@ class Schema extends Sabel_Sakle_Task
     clearstatcache();
     $this->checkInputs();
     
+    $outputDir   = RUN_BASE . DS . LIB_DIR_NAME . DS . "schema";
     $environment = environment(strtolower($this->arguments[0]));
     
     if ($environment === null) {
@@ -34,22 +35,23 @@ class Schema extends Sabel_Sakle_Task
       $writeAll = false;
     }
     
+    $tList = new TableListWriter($outputDir);
     foreach (Sabel_DB_Config::get() as $connectionName => $params) {
       Sabel_DB_Config::add($connectionName, $params);
       $db = Sabel_DB::createMetadata($connectionName);
       
       foreach ($db->getTableList() as $tblName) {
         if ($writeAll || in_array($tblName, $opTables, true)) {
-          $writer = new Sabel_DB_Metadata_FileWriter(SCHEMA_DIR_PATH);
+          $writer = new Sabel_DB_Metadata_FileWriter($outputDir);
           $writer->write($db->getTable($tblName));
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }
         
-        TableList_Writer::add($connectionName, $tblName);
+        $tList->add($connectionName, $tblName);
       }
       
       if (Sabel_Console::hasOption("l", $this->arguments)) {
-        TableList_Writer::write($connectionName);
+        $tList->write($connectionName);
       }
     }
   }
@@ -90,44 +92,54 @@ class Schema extends Sabel_Sakle_Task
   }
 }
 
-class TableList_Writer
+class TableListWriter
 {
-  private static $tableList = array();
+  private $tables = array();
+  private $outputDir = "";
   
-  public static function add($connectionName, $tblName)
+  public function __construct($outputDir)
   {
-    self::$tableList[$connectionName][] = $tblName;
+    if (is_dir($outputDir)) {
+      $this->outputDir = $outputDir;
+    } else {
+      $message = "no such file or directory.";
+      throw new Sabel_Exception_Runtime($message);
+    }
   }
   
-  public static function get($connectionName)
+  public function add($connectionName, $tblName)
   {
-    return self::$tableList[$connectionName];
+    $this->tables[$connectionName][] = $tblName;
   }
   
-  public static function write($connectionName)
+  public function get($connectionName)
+  {
+    return $this->tables[$connectionName];
+  }
+  
+  public function write($connectionName)
   {
     $cn        = $connectionName;
     $fileName  = ucfirst($cn) . "TableList";
-    $target    = SCHEMA_DIR_PATH . DS . "{$fileName}.php";
     $className = "Schema_" . $fileName;
     
     Sabel_Console::success("generate tablelist of '{$cn}'");
     
-    $fp = fopen($target, "w");
+    $contents = array();
+    $contents[] = "<?php" . PHP_EOL;
+    $contents[] = "class $className";
+    $contents[] = "{";
+    $contents[] = "  public function get()";
+    $contents[] = "  {";
     
-    fwrite($fp, "<?php\n\n");
-    fwrite($fp, "class {$className}\n{\n");
-    fwrite($fp, "  public function get()\n  {\n");
-    fwrite($fp, "    return array(");
+    $tables = array_map(create_function('$v', 'return \'"\' . $v . \'"\';'), $this->tables[$cn]);
     
-    $tableList = self::$tableList[$cn];
-    fwrite($fp, '"' . $tableList[0] . '"');
+    $contents[] = "    return array(" . implode(", ", $tables) . ");";
+    $contents[] = "  }";
+    $contents[] = "}";
     
-    for ($i = 1; $i < count($tableList); $i++) {
-      fwrite($fp, ', "' . $tableList[$i] . '"');
-    }
-    
-    fwrite($fp, ");\n  }\n}\n");
+    $fp = fopen($this->outputDir . DS . $fileName . ".php", "w");
+    fwrite($fp, implode(PHP_EOL, $contents));
     fclose($fp);
   }
 }

@@ -22,7 +22,7 @@ class Sabel_Response_Header_Cli
     }
     
     if ($response->getLocation()) {
-      l("redirect: " . var_export($response->getLocation(), 1), LOG_DEBUG);
+      l("redirect: " . var_export($response->getLocation(), 1));
     }
     
     if ($response->isRedirected()) {

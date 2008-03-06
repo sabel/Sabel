@@ -12,14 +12,14 @@
 class Sabel_Bus extends Sabel_Object
 {
   /**
-   * @var Sabel_Config[]
-   */
-  protected $configs = array();
-  
-  /**
    * @var Sabel_Util_HashList
    */
   protected $processorList = null;
+  
+  /**
+   * @var Sabel_Config[]
+   */
+  protected $configs = array();
   
   /**
    * @var string[]
@@ -40,6 +40,11 @@ class Sabel_Bus extends Sabel_Object
    * @var object[]
    */
   protected $afterEvent  = array();
+  
+  /**
+   * @var boolean
+   */
+  protected $logging = false;
   
   public function __construct()
   {
@@ -124,16 +129,13 @@ class Sabel_Bus extends Sabel_Object
     }
     
     $this->interfaces = $config->getInterfaces();
-    
     $processorList = $this->processorList;
-    $isProduction  = (ENVIRONMENT === PRODUCTION);
+    $logging = $this->logging = $config->isLogging();
     
     while ($processor = $processorList->next()) {
       $this->beforeEvent($processor->name);
       
-      if (!$isProduction) {
-        l("execute " . $processor->name, LOG_DEBUG);
-      }
+      if ($logging) l("Bus: execute " . $processor->name);
       
       $processor->execute($this);
       $this->afterEvent($processor->name);
@@ -141,10 +143,7 @@ class Sabel_Bus extends Sabel_Object
     
     $processorList->first();
     while ($processor = $processorList->next()) {
-      if (!$isProduction) {
-        l("shutdown " . $processor->name, LOG_DEBUG);
-      }
-      
+      if ($logging) l("Bus: shutdown " . $processor->name);
       $processor->shutdown($this);
     }
     
@@ -180,6 +179,10 @@ class Sabel_Bus extends Sabel_Object
   {
     if (isset($this->beforeEvent[$processorName])) {
       foreach ($this->beforeEvent[$processorName] as $event) {
+        if ($this->logging) {
+          l("Bus: beforeEvent {$event->object->getName()}::{$event->method}()");
+        }
+        
         $event->object->{$event->method}($this);
       }
     }
@@ -189,6 +192,10 @@ class Sabel_Bus extends Sabel_Object
   {
     if (isset($this->afterEvent[$processorName])) {
       foreach ($this->afterEvent[$processorName] as $event) {
+        if ($this->logging) {
+          l("Bus: afterEvent {$event->object->getName()}::{$event->method}()");
+        }
+        
         $event->object->{$event->method}($this);
       }
     }

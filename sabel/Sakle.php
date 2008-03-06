@@ -36,7 +36,7 @@ class Sakle
     array_shift($args);
     $class = array_shift($args);
     
-    $pathToClass = RUN_BASE . DS . "tasks" . DS . $class . PHP_SUFFIX;
+    $pathToClass = RUN_BASE . DS . "tasks" . DS . $class . ".php";
     
     if (is_readable($pathToClass)) {
       Sabel::fileUsing($pathToClass, true);

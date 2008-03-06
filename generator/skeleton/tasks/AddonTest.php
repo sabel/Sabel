@@ -29,14 +29,14 @@ class AddonTest extends Tests
     
     if (count($this->arguments) === 1) {
       foreach (scandir($testsDir) as $file) {
-        if (preg_match("/^[A-Z].+" . PHP_SUFFIX . "/", $file)) {
-          $testName = str_replace(PHP_SUFFIX, "", $file);
+        if (preg_match("/^[A-Z].+\.php$/", $file)) {
+          $testName = str_replace(".php", "", $file);
           $runner->start($testName, $testsDir . DS . $file);
         }
       }
     } else {
       $testName = $this->arguments[1];
-      $runner->start($testName, $testsDir . DS . $testName. PHP_SUFFIX);
+      $runner->start($testName, $testsDir . DS . $testName . ".php");
     }
   }
   

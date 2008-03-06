@@ -19,7 +19,7 @@ class TestProcessor_Helper extends Sabel_Bus_Processor
     $helpers[] = $moduleHelpers . DS . $controllerName;
     
     foreach ($helpers as $helper) {
-      Sabel::fileUsing($helper . PHP_SUFFIX, true);
+      Sabel::fileUsing($helper . ".php", true);
     }
   }
 }

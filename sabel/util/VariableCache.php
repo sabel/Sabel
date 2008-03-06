@@ -104,6 +104,6 @@ class Sabel_Util_VariableCache
   
   private static function getPath($key)
   {
-    return CACHE_DIR_PATH . DS . $key . PHP_SUFFIX;
+    return CACHE_DIR_PATH . DS . $key . ".php";
   }
 }

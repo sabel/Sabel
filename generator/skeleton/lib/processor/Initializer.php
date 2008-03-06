@@ -14,7 +14,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
   public function execute($bus)
   {
     Sabel_DB_Config::initialize($bus->getConfig("database"));
-    //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility" . PHP_SUFFIX, true);
+    //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility.php", true);
     
     // start session.
     $bus->get("session")->start();

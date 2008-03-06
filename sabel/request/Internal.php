@@ -11,14 +11,11 @@
  */
 class Sabel_Request_Internal extends Sabel_Object
 {
-  protected
-    $bus    = null,
-    $method = Sabel_Request::GET,
-    $values = array();
-    
-  protected
-    $response = array();
-    
+  protected $bus      = null;
+  protected $method   = Sabel_Request::GET;
+  protected $values   = array();
+  protected $response = array();
+  
   public function __construct($method = Sabel_Request::GET)
   {
     $this->method = $method;
@@ -40,6 +37,8 @@ class Sabel_Request_Internal extends Sabel_Object
   
   public function request($uri, Sabel_Bus_Config $config = null)
   {
+    if (strpos($uri, ":")) $uri = uri($uri);
+    
     $values = $this->values;
     
     $uri = "http://localhost/{$uri}";

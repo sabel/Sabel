@@ -27,8 +27,7 @@ define("PRODUCTION",  0x01);
 define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 define("ENVIRONMENT", TEST);
-define("PHP_SUFFIX", ".php");
-define("TPL_SUFFIX", ".tpl");
+define("TPL_SUFFIX",  ".tpl");
 
 if (!defined("PHPUnit_MAIN_METHOD")) {
   define("PHPUnit_MAIN_METHOD", "SabelAllTests::main");

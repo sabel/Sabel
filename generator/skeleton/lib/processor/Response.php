@@ -35,7 +35,7 @@ class Processor_Response extends Sabel_Bus_Processor
         $response->setResponse("exception_message", $msg);
       }
       
-      l(preg_replace('/<br ?\/?>/', PHP_EOL, $msg), LOG_ERR);
+      l(preg_replace('/<br ?\/?>/', PHP_EOL, $msg), SBL_LOG_ERR);
     }
   }
   

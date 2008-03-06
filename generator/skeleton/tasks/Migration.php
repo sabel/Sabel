@@ -327,13 +327,14 @@ class MigrationExport
     $tblName = $tblSchema->getTableName();
     if ($tblName === "sversion") return;
     
-    $fileName = $this->fileNum . "_" . convert_to_modelname($tblName) . "_create" . PHP_SUFFIX;
+    $fileName = $this->fileNum . "_" . convert_to_modelname($tblName) . "_create.php";
     $filePath = $this->path . DS . $fileName;
     
     Sabel_Console::success("$fileName");
     
     $writer = new Sabel_DB_Migration_Writer($filePath);
     $writer->writeTable($tblSchema);
+    
     // @todo...
     $writer->write('$create->options("engine", "InnoDB");');
     $writer->close();

@@ -28,6 +28,11 @@ abstract class Sabel_Bus_Config extends Sabel_Object
   protected $interfaces = array();
   
   /**
+   * @var boolean
+   */
+  protected $logging = false;
+  
+  /**
    * @return Sabel_Bus_Processor[]
    */
   public function getProcessors()
@@ -49,5 +54,13 @@ abstract class Sabel_Bus_Config extends Sabel_Object
   public function getInterfaces()
   {
     return $this->interfaces;
+  }
+  
+  /**
+   * @return boolean
+   */
+  public function isLogging()
+  {
+    return $this->logging;
   }
 }

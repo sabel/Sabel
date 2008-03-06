@@ -30,6 +30,16 @@ class Sabel_Environment extends Sabel_Object
     return self::create()->__get($key);
   }
   
+  public function set($key, $value)
+  {
+    $this->environments[$key] = $value;
+  }
+  
+  public function __set($key, $value)
+  {
+    $this->set($key, $value);
+  }
+  
   public function __get($key)
   {
     if (isset($this->environments[$key])) {
@@ -47,11 +57,6 @@ class Sabel_Environment extends Sabel_Object
     }
     
     return (isset($_SERVER[$key])) ? $_SERVER[$key] : null;
-  }
-  
-  public function set($key, $value)
-  {
-    $this->environments[$key] = $value;
   }
   
   public function isHttps()

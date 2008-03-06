@@ -12,6 +12,8 @@ if (!defined("ENVIRONMENT")) define("ENVIRONMENT", DEVELOPMENT);
  */
 if (ENVIRONMENT === DEVELOPMENT) {
   error_reporting(E_ALL|E_STRICT);
+  define("SBL_LOG_LEVEL", SBL_LOG_ALL);
 } else {
   error_reporting(0);
+  define("SBL_LOG_LEVEL", SBL_LOG_ERR);
 }

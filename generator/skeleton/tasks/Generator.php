@@ -32,9 +32,9 @@ class Generator extends Sabel_Sakle_Task
     array_shift($this->arguments);
     
     foreach ($this->arguments as $mdlName) {
-      $filePath = MODELS_DIR_PATH . DS . $mdlName . PHP_SUFFIX;
+      $filePath = MODELS_DIR_PATH . DS . $mdlName . ".php";
       if (file_exists($filePath)) {
-        $classFile = $mdlName . PHP_SUFFIX;
+        $classFile = $mdlName . ".php";
         $this->warning("model '{$classFile}' already exists. (SKIP)");
       } else {
         $columns = MODEL($mdlName)->getColumnNames();
@@ -50,7 +50,7 @@ class Generator extends Sabel_Sakle_Task
         
         $lines[] = "  )";
         $lines[] = ");" . PHP_EOL;
-        $lines[] = "class {$mdlName} extends Db_Model";
+        $lines[] = "class {$mdlName} extends Sabel_DB_Model";
         $lines[] = "{";
         $lines[] = "  ";
         $lines[] = "}";
@@ -91,7 +91,7 @@ class Generator extends Sabel_Sakle_Task
     $vPath = $mPath . DS . VIEW_DIR_NAME;
     if (!is_dir($vPath)) mkdir($vPath);
     
-    $filePath = $cPath . DS . $controller . PHP_SUFFIX;
+    $filePath = $cPath . DS . $controller . ".php";
     if (is_file($filePath)) {
       $this->error("controller $controller already exists.");
       exit;

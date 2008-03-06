@@ -46,23 +46,26 @@ function mb_trim($string)
   return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
 }
 
-function form_start($uri, $class = null, $id = null, $name = null)
-{
-  $html = '<form action="' . uri($uri) . '" method="post" ';
-  
-  if ($id    !== null) $html .= 'id="'    . $id    . '" ';
-  if ($class !== null) $html .= 'class="' . $class . '" ';
-  if ($name  !== null) $html .= 'name="'  . $name  . '" ';
-  
-  return $html . '><fieldset class="formField">' . PHP_EOL;
-}
-
-function form_end()
-{
-  return "</fieldset></form>";
-}
-
 function to_date($date, $format)
 {
   return Helpers_Date::format($date, constant("Helpers_Date::" . $format));
+}
+
+function __log()
+{
+  return implode("<br/>", Sabel_Logger::create()->getMessages());
+}
+
+function __include($uri, $values = array(), $method = Sabel_Request::GET)
+{
+  $env = Sabel_Environment::create();
+  $isAjax = $env->ajaxRequest;
+  if (!$isAjax) $env->set("ajaxRequest", true);
+  
+  $requester = new Sabel_Request_Internal($method);
+  $html = $requester->values($values)->request($uri)->getResult();
+  
+  if (!$isAjax) $env->set("ajaxRequest", false);
+  
+  return $html;
 }

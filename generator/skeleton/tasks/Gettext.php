@@ -13,14 +13,9 @@
 class Gettext extends Sabel_Sakle_Task
 {
   private $files    = array();
-  private $fileName = "";
+  private $fileName = "messages.php";
   private $defaultLocale = "en";
   private $locales = array();
-  
-  public function initialize()
-  {
-    $this->fileName = "messages" . PHP_SUFFIX;
-  }
   
   public function run()
   {

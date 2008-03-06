@@ -42,7 +42,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       $this->version = $num;
       $this->mdlName = $mdlName;
       
-      if ($mdlName === "query" . PHP_SUFFIX) {
+      if ($mdlName === "query.php") {
         $command = "query";
       } else {
         $command = substr($command, 0, strpos($command, "."));
@@ -235,7 +235,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     $dir = $directory . DS . "restores";
     if (!is_dir($dir)) mkdir($dir);
     
-    return $dir . DS . "restore_" . $this->version . PHP_SUFFIX;
+    return $dir . DS . "restore_" . $this->version . ".php";
   }
   
   protected function query()

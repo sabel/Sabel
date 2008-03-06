@@ -26,7 +26,7 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
   {
     $mdlName   = convert_to_modelname($metadata->getTableName());
     $className = "Schema_" . $mdlName;
-    $target    = $this->schemaDir . DS . $mdlName . PHP_SUFFIX;
+    $target    = $this->schemaDir . DS . $mdlName . ".php";
     
     if (file_exists($target)) unlink($target);
     
