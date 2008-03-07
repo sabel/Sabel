@@ -12,14 +12,9 @@
 class Sabel_Token_Storage_Database implements Sabel_Token_Storage
 {
   /**
-   * @var self
-   */
-  private static $instance = null;
-  
-  /**
    * @var string
    */
-  protected $connectionName = "sbl_token";
+  protected $connectionName = "default";
   
   /**
    * @var string
@@ -31,13 +26,27 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
    */
   protected $namespace = "";
   
-  public function __construct($namespace = "", $gcProbability = 2)
+  public function __construct($config = array())
   {
-    $this->namespace = $namespace;
-    
-    if (rand(1, 100) <= $gcProbability) {
-      $this->gc();
+    if (isset($config["namespace"])) {
+      $this->namespace = $config["namespace"];
     }
+    
+    if (isset($config["tableName"])) {
+      $this->tableName = $config["tableName"];
+    }
+    
+    if (isset($config["connectionName"])) {
+      $this->connectionName = $config["connectionName"];
+    }
+    
+    if (isset($config["gcProbability"])) {
+      $gcProbability = $config["gcProbability"];
+    } else {
+      $gcProbability = 2;
+    }
+    
+    if (rand(1, 100) <= $gcProbability) $this->gc();
   }
   
   /**

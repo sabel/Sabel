@@ -11,7 +11,7 @@
  */
 class Form_Processor extends Sabel_Bus_Processor
 {
-  const SES_TIMEOUT = 1200;
+  const MAX_LIFETIME = 1200;
   
   /**
    * @var Form_Object
@@ -33,6 +33,12 @@ class Form_Processor extends Sabel_Bus_Processor
    */
   private $token = "";
   
+  protected function createStorage($namespace)
+  {
+    $config = array("namespace" => $namespace);
+    return new Sabel_Token_Storage_Database($config);
+  }
+  
   public function execute($bus)
   {
     $this->extract("request", "controller");
@@ -47,9 +53,8 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $this->unityId = $annot[0][0];
     $token = $this->request->getValueWithMethod("token");
-    
     $sid = $bus->get("session")->getId();
-    $this->storage = new Sabel_Token_Storage_Database($sid . "_" . $this->unityId);
+    $this->storage = $this->createStorage($sid . "_" . $this->unityId);
     
     if ($token === null) return;
     
@@ -107,7 +112,7 @@ class Form_Processor extends Sabel_Bus_Processor
   public function shutdown($bus)
   {
     if ($this->form !== null && $this->token !== "") {
-      $this->storage->store($this->token, $this->form, self::SES_TIMEOUT);
+      $this->storage->store($this->token, $this->form, self::MAX_LIFETIME);
     }
   }
   

@@ -12,7 +12,7 @@
  */
 class Flow_State
 {
-  const SES_TIMEOUT = 1200;
+  const MAX_LIFETIME = 1200;
   
   private $properties = array();
   
@@ -80,7 +80,7 @@ class Flow_State
   
   public function save(Sabel_Token_Storage $storage, $timeout = null)
   {
-    if ($timeout === null) $timeout = self::SES_TIMEOUT;
+    if ($timeout === null) $timeout = self::MAX_LIFETIME;
     $storage->store($this->properties["token"], $this->properties, $timeout);
   }
   

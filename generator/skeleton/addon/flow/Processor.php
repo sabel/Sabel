@@ -18,6 +18,12 @@ class Flow_Processor extends Sabel_Bus_Processor
   private $annotation = null;
   private $state      = null;
   
+  protected function createStorage($namespace)
+  {
+    $config = array("namespace" => $namespace);
+    return new Sabel_Token_Storage_Database($config);
+  }
+  
   public function execute($bus)
   {
     $this->extract("session", "response", "controller");
@@ -136,8 +142,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     $key = implode("_", array($destination->getModule(),
                               $destination->getController()));
     
-    $namespace = $this->session->getId() . "_" . $key;
-    $this->storage = new Sabel_Token_Storage_Database($namespace);
+    $this->storage = $this->createStorage($this->session->getId() . "_{$key}");
     
     if ($this->isStartAction()) {
       $state = new Flow_State(md5(uniqid(mt_rand(), true)));
@@ -195,6 +200,8 @@ class Flow_Processor extends Sabel_Bus_Processor
   private function getContinuationVariables()
   {
     $annotations = $this->controller->getReflection()->getAnnotation("flow");
+    if ($annotations === null) return array();
+    
     foreach ($annotations as $annotation) {
       if ($annotation[0] === "continuation") {
         unset($annotation[0]);

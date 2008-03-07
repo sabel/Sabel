@@ -19,7 +19,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   /**
    * @var string
    */
-  protected $connectionName = "sbl_session";
+  protected $connectionName = "default";
   
   /**
    * @var string
@@ -37,7 +37,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     $this->connectionName = $connectionName;
   }
   
-  public static function create($connectionName = "sbl_session")
+  public static function create($connectionName = "default")
   {
     if (self::$instance === null) {
       self::$instance = new self($connectionName);
