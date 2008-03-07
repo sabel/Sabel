@@ -4,6 +4,13 @@ define("TEST_CASE", true);
 define("SABEL_BASE", dirname(realpath(__FILE__)));
 define("DS", DIRECTORY_SEPARATOR);
 
+define("SBL_LOG_INFO",  0x01);
+define("SBL_LOG_DEBUG", 0x02);
+define("SBL_LOG_WARN",  0x03);
+define("SBL_LOG_ERR",   0x04);
+define("SBL_LOG_ALL",   0xFF);
+define("SBL_LOG_LEVEL", SBL_LOG_ALL);
+
 if (in_array("-db", $_SERVER["argv"], true)) {
   PHPUnit_Util_Filter::addDirectoryToWhitelist(SABEL_BASE . DS . "sabel" . DS . "db");
 } else {

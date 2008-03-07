@@ -13,10 +13,9 @@
 interface Sabel_Logger_Interface
 {
   /**
-   * @param string $filePath
-   * @param array  $messages
+   * @param array $messages
    *
    * @return void
    */
-  public function output($filePath, $messages);
+  public function output($messages);
 }

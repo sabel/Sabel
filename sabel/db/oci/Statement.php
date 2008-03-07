@@ -27,7 +27,8 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
       } elseif (is_string($val)) {
-        $val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\\n\r") . "'";
+        //$val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\\n\r") . "'";
+        $val = "'" . str_replace("'", "''", $val) . "'";
       }
     }
     

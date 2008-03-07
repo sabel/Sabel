@@ -19,7 +19,7 @@ class Sabel_Token_Storage_Database implements Sabel_Token_Storage
   /**
    * @var string
    */
-  protected $connectionName = "sbl_token_storage";
+  protected $connectionName = "sbl_token";
   
   /**
    * @var string

@@ -28,9 +28,9 @@ function load($className, $config)
 }
 */
 
-function l($message, $level = SBL_LOG_INFO, $fileName = null)
+function l($message, $level = SBL_LOG_INFO, $identifier = "default")
 {
-  Sabel_Logger::create()->write($message, $level, $fileName);
+  Sabel_Logger::create()->write($message, $level, $identifier);
 }
 
 function uri($uriParameter, $secure = false, $absolute = false)

@@ -59,7 +59,7 @@ class Processor_View extends Sabel_Bus_Processor
     
     $layout = $controller->getAttribute("layout");
     
-    if ($layout === false || Sabel_Environment::create()->get("ajaxRequest")) {
+    if ($layout === false || Sabel_Environment::create()->isAjaxRequest) {
       $bus->set("result", $contents);
     } else {
       if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;

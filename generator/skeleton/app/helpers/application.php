@@ -51,21 +51,16 @@ function to_date($date, $format)
   return Helpers_Date::format($date, constant("Helpers_Date::" . $format));
 }
 
-function __log()
-{
-  return implode("<br/>", Sabel_Logger::create()->getMessages());
-}
-
 function __include($uri, $values = array(), $method = Sabel_Request::GET)
 {
   $env = Sabel_Environment::create();
-  $isAjax = $env->ajaxRequest;
-  if (!$isAjax) $env->set("ajaxRequest", true);
+  $isAjax = $env->isAjaxRequest;
+  if (!$isAjax) $env->isAjaxRequest = true;
   
   $requester = new Sabel_Request_Internal($method);
   $html = $requester->values($values)->request($uri)->getResult();
   
-  if (!$isAjax) $env->set("ajaxRequest", false);
+  if (!$isAjax) $env->isAjaxRequest = false;
   
   return $html;
 }

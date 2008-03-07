@@ -27,7 +27,7 @@ class Test_Session_Database extends SabelTestCase
   public function setUp()
   {
     Sabel_Environment::create()->set("REQUEST_METHOD", "GET");
-    $this->session = Sabel_Session_Database::create();
+    $this->session = Sabel_Session_Database::create("default");
     $this->session->setTableName("session");
     $_GET[session_name()] = self::$sid;
     $this->session->start();
@@ -41,7 +41,7 @@ class Test_Session_Database extends SabelTestCase
     $this->assertNull($this->session->read("b"));
     
     $this->session->write("a", "10");
-    $this->session->__destruct();
+    $this->session->shutdown();
   }
   
   public function testWrite()
@@ -51,14 +51,14 @@ class Test_Session_Database extends SabelTestCase
     
     $this->session->write("b", "20");
     $this->session->delete("a");
-    $this->session->__destruct();
+    $this->session->shutdown();
   }
   
   public function testDelete()
   {
     $this->assertNull($this->session->read("a"));
     $this->assertEquals("20", $this->session->read("b"));
-    $this->session->__destruct();
+    $this->session->shutdown();
   }
   
   public function testRegeneratedId()
@@ -70,7 +70,7 @@ class Test_Session_Database extends SabelTestCase
     $this->assertEquals("20", $this->session->read("b"));
     
     self::$sid = $newId;
-    $this->session->__destruct();
+    $this->session->shutdown();
   }
   
   public function testDestroy()
@@ -79,7 +79,7 @@ class Test_Session_Database extends SabelTestCase
     $this->session->destroy();
     
     $this->assertNull($this->session->read("b"));
-    $this->session->__destruct();
+    $this->session->shutdown();
   }
   
   private static function initTable()

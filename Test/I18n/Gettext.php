@@ -18,7 +18,7 @@ class Test_I18n_Gettext extends SabelTestCase
     $env->set("HTTP_ACCEPT_LANGUAGE", "ja,en-us;q=0.7,en;q=0.3");
     
     $gettext = Sabel_I18n_Gettext::getInstance();
-    $gettext->setMessagesFileName("messages");
+    $gettext->setMessagesFileName("messages.php");
     $gettext->init();
     
     $this->assertTrue($gettext->isInitialized());
@@ -33,7 +33,7 @@ class Test_I18n_Gettext extends SabelTestCase
     $this->assertEquals("名前", _("name"));
     $this->assertEquals("住所", _("address"));
     
-    Sabel_I18n_Gettext::getInstance()->setMessagesFileName("hiragana");
+    Sabel_I18n_Gettext::getInstance()->setMessagesFileName("hiragana.php");
     $this->assertEquals("なまえ", _("name"));
     $this->assertEquals("じゅうしょ", _("address"));
   }

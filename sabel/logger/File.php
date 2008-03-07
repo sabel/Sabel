@@ -11,15 +11,63 @@
  */
 class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
 {
-  public function output($filePath, $messages)
+  const DEFAULT_LOG_FILE = "sabel.log";
+  
+  public function output($allMessages)
   {
-    if (empty($messages)) return;
+    if (empty($allMessages)) return;
     
-    $fp  = fopen($filePath, "a");
-    $sep = "============================================================" . PHP_EOL;
-    
-    fwrite($fp, PHP_EOL . $sep . PHP_EOL);
-    fwrite($fp, implode(PHP_EOL, $messages) . PHP_EOL);
-    fclose($fp);
+    foreach ($allMessages as $identifier => $messages) {
+      $fp  = fopen($this->getLogFilePath($identifier), "a");
+      $sep = "============================================================" . PHP_EOL;
+      fwrite($fp, PHP_EOL . $sep . PHP_EOL);
+      $msgs = array();
+      foreach ($messages as $message) {
+        $msgs[] = $message["time"]
+                . " [" . $this->defineToString($message["level"])
+                . "] " . $message["message"];
+      }
+      
+      fwrite($fp, implode(PHP_EOL, $msgs) . PHP_EOL);
+      fclose($fp);
+    }
+  }
+  
+  protected function defineToString($level)
+  {
+    switch ($level) {
+      case SBL_LOG_INFO:
+        return "info";
+      case SBL_LOG_DEBUG:
+        return "debug";
+      case SBL_LOG_WARN:
+        return "warning";
+      case SBL_LOG_ERR:
+        return "error";
+    }
+  }
+  
+  protected function getLogFilePath($identifier)
+  {
+    if ($identifier === "default") {
+      if (!defined("ENVIRONMENT")) {
+        $name = "test";
+      } else {
+        switch (ENVIRONMENT) {
+          case PRODUCTION:
+            $name = "production";
+            break;
+          case DEVELOPMENT:
+            $name = "development";
+            break;
+          default:
+            $name = "test";
+        }
+      }
+      
+      return LOG_DIR_PATH . DS . $name . "." . self::DEFAULT_LOG_FILE;
+    } else {
+      return LOG_DIR_PATH . DS . $identifier . ".log";
+    }
   }
 }

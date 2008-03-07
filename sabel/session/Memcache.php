@@ -42,6 +42,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   {
     if (self::$instance === null) {
       self::$instance = new self($server);
+      register_shutdown_function(array(self::$instance, "shutdown"));
     }
     
     return self::$instance;
@@ -111,14 +112,10 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
   }
   
-  public function __destruct()
+  public function shutdown()
   {
-    static $ran = false;
-    
-    if (!$ran && (!$this->newSession || !empty($this->attributes))) {
+    if (!$this->newSession || !empty($this->attributes)) {
       $this->memcache->set($this->sessionId, $this->attributes, 0, $this->maxLifetime);
     }
-    
-    $ran = true;
   }
 }

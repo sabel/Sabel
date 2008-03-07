@@ -1,9 +1,5 @@
 <?php
 
-if (!defined("GETTEXT_DEFAULT_DOMAIN")) {
-  define("GETTEXT_DEFAULT_DOMAIN", "messages");
-}
-
 /**
  * Sabel_I18n_Gettext
  *

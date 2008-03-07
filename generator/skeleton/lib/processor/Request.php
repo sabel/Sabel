@@ -18,7 +18,7 @@ class Processor_Request extends Sabel_Bus_Processor
     }
     
     if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      Sabel_Environment::create()->set("ajaxRequest", true);
+      Sabel_Environment::create()->isAjaxRequest = true;
     }
   }
   
