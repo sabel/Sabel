@@ -20,6 +20,7 @@ class Processor_Controller extends Sabel_Bus_Processor
     $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
+      $response->notFound();
       $controller = $this->createVirtualController($response);
     }
     
