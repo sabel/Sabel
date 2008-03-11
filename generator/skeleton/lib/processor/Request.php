@@ -13,31 +13,38 @@ class Processor_Request extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    if (!$bus->has("request")) {
-      $bus->set("request", $this->createRequestObject());
-    }
+    if ($bus->has("request")) return;
     
-    if (isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
-      Sabel_Environment::create()->isAjaxRequest = true;
-    }
-  }
-  
-  protected function createRequestObject()
-  {
-    $request = new Sabel_Request_Object();
-    
-    $uri = Sabel_Environment::get("REQUEST_URI");
-    $uri = trim(preg_replace("/\/{2,}/", "/", $uri), "/");
-    $parsedUrl = parse_url("http://localhost/{$uri}");
-    
-    if (isset($parsedUrl["path"])) {
-      $request->setUri(ltrim($parsedUrl["path"], "/"));
-    }
-    
+    $request = new Sabel_Request_Object($this->getUri());
     $request->setGetValues($_GET);
     $request->setPostValues($_POST);
-    $request->method(Sabel_Environment::get("REQUEST_METHOD"));
     
-    return $request;
+    if (isset($_SERVER["REQUEST_METHOD"])) {
+      $request->method($_SERVER["REQUEST_METHOD"]);
+    }
+    
+    $httpHeaders = array();
+    foreach ($_SERVER as $key => $val) {
+      if (strpos($key, "HTTP") === 0) {
+        $httpHeaders[$key] = $val;
+      }
+    }
+    
+    $request->setHttpHeaders($httpHeaders);
+    $bus->set("request", $request);
+  }
+  
+  protected function getUri()
+  {
+    if (isset($_SERVER["REQUEST_URI"])) {
+      $uri = trim(preg_replace("/\/{2,}/", "/", $_SERVER["REQUEST_URI"]), "/");
+      $parsedUrl = parse_url("http://localhost/{$uri}");
+      
+      if (isset($parsedUrl["path"])) {
+        return ltrim($parsedUrl["path"], "/");
+      }
+    }
+    
+    return "";
   }
 }

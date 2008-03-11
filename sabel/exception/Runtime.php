@@ -13,7 +13,7 @@ class Sabel_Exception_Runtime extends Exception
 {
   public function writeSyslog($message)
   {
-    if (Sabel_Environment::create()->isWin()) {
+    if (DIRECTORY_SEPARATOR === '\\') {
       openlog("sabel-exception", LOG_PID, LOG_USER);
     } else {
       openlog("sabel-exception", LOG_PID, LOG_LOCAL0);

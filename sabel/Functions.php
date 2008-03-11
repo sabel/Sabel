@@ -35,9 +35,11 @@ function l($message, $level = SBL_LOG_INFO, $identifier = "default")
 
 function uri($uriParameter, $secure = false, $absolute = false)
 {
+  $context = Sabel_Context::getContext();
+  
   if ($secure || $absolute) {
     $protocol  = ($secure) ? "https" : "http";
-    $uriPrefix = $protocol . "://" . Sabel_Environment::get("HTTP_HOST");
+    $uriPrefix = $protocol . "://" . $context->getBus()->get("request")->getHttpHeader("host");
   } else {
     $uriPrefix = "";
   }
@@ -46,8 +48,7 @@ function uri($uriParameter, $secure = false, $absolute = false)
     $uriPrefix .= $_SERVER["SCRIPT_NAME"];
   }
   
-  $uri = Sabel_Context::getContext()->getCandidate()->uri($uriParameter);
-  return $uriPrefix . "/" . $uri;
+  return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
 }
 
 function realempty($value)

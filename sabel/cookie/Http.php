@@ -13,10 +13,7 @@ class Sabel_Cookie_Http extends Sabel_Object
 {
   private static $instance = null;
   
-  private function __construct()
-  {
-    
-  }
+  private function __construct() {}
   
   public static function create()
   {
@@ -70,17 +67,13 @@ class Sabel_Cookie_Http extends Sabel_Object
   
   protected function createOptions(array $options)
   {
-    $expire   = time() + 86400;
-    $path     = "/";
-    $domain   = Sabel_Environment::get("HTTP_HOST");
-    $secure   = false;
-    $httpOnly = false;
+    $domain = (isset($_SERVER["HTTP_HOST"])) ? $_SERVER["HTTP_HOST"] : "localhost";
     
-    if (!isset($options["expire"]))   $options["expire"]   = $expire;
-    if (!isset($options["path"]))     $options["path"]     = $path;
+    if (!isset($options["expire"]))   $options["expire"]   = time() + 86400;
+    if (!isset($options["path"]))     $options["path"]     = "/";
     if (!isset($options["domain"]))   $options["domain"]   = $domain;
-    if (!isset($options["secure"]))   $options["secure"]   = $secure;
-    if (!isset($options["httpOnly"])) $options["httpOnly"] = $httpOnly;
+    if (!isset($options["secure"]))   $options["secure"]   = false;
+    if (!isset($options["httpOnly"])) $options["httpOnly"] = false;
     
     return $options;
   }

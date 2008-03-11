@@ -15,7 +15,7 @@ class Test_Console extends SabelTestCase
   
   public function testMessage()
   {
-    Sabel_Environment::create()->set("os", "WINNT");
+    $_SERVER["IS_WINDOWS"] = true;
     
     ob_start();
     Sabel_Console::success("success");

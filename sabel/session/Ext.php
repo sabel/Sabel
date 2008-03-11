@@ -32,7 +32,7 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
     $maxLifetime = ini_get("session.gc_maxlifetime");
     $this->maxLifetime    = ($maxLifetime === "") ? 0 : (int)$maxLifetime;
     $this->useOnlyCookies = (ini_get("session.use_only_cookies") === "1");
-    $this->useCookies     = (ini_get("session.use_cookies")   === "1");
+    $this->useCookies     = (ini_get("session.use_cookies") === "1");
   }
   
   protected function initSession()
@@ -53,10 +53,10 @@ abstract class Sabel_Session_Ext extends Sabel_Session_Abstract
       return $_COOKIE[$sesName];
     }
     
-    $method = strtolower(Sabel_Environment::get("REQUEST_METHOD"));
-    if ($method !== "get" && $method !== "post") return false;
+    $method = (isset($_SERVER["REQUEST_METHOD"])) ? $_SERVER["REQUEST_METHOD"] : "";
+    if ($method !== "GET" && $method !== "POST") return false;
     
-    $_VARS = ($method === "get") ? $_GET : $_POST;
+    $_VARS = ($method === "GET") ? $_GET : $_POST;
     $sessionId = (isset($_VARS[$sesName])) ? $_VARS[$sesName] : $this->createSessionId();
     
     if ($this->useCookies) {

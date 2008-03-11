@@ -11,10 +11,25 @@
  */
 class Sabel_Request_Internal extends Sabel_Object
 {
-  protected $bus      = null;
-  protected $method   = Sabel_Request::GET;
-  protected $values   = array();
+  /**
+   * @var const Sabel_Request
+   */
+  protected $method = Sabel_Request::GET;
+  
+  /**
+   * @var array
+   */
+  protected $values = array();
+  
+  /**
+   * @var array
+   */
   protected $response = array();
+  
+  /**
+   * @var boolean
+   */
+  protected $withLayout = false;
   
   public function __construct($method = Sabel_Request::GET)
   {
@@ -31,6 +46,13 @@ class Sabel_Request_Internal extends Sabel_Object
   public function method($method)
   {
     $this->method = $method;
+    
+    return $this;
+  }
+  
+  public function withLayout($bool)
+  {
+    $this->withLayout = $bool;
     
     return $this;
   }
@@ -57,6 +79,13 @@ class Sabel_Request_Internal extends Sabel_Object
     $request = new Sabel_Request_Object(ltrim($parsedUri["path"], "/"));
     $request->method($this->method);
     $request->values($values);
+    
+    $headers = $currentBus->get("request")->getHttpHeaders();
+    if (!$this->withLayout) {
+      $headers["HTTP_X_REQUESTED_WITH"] = "XMLHttpRequest";
+    }
+    
+    $request->setHttpHeaders($headers);
     
     $bus = new Sabel_Bus();
     $bus->set("request", $request);

@@ -12,12 +12,10 @@ class TestProcessor_View extends Sabel_Bus_Processor
     $controller = $bus->get("controller");
     if ($controller->isRedirected()) return;
     
-    if (($renderer = $bus->get("renderer")) === null) {
-      $renderer = new Sabel_View_Renderer();
-      $bus->set("renderer", $renderer);
+    if (($this->renderer = $bus->get("renderer")) === null) {
+      $this->renderer = new Sabel_View_Renderer();
+      $bus->set("renderer", $this->renderer);
     }
-    
-    $this->renderer = $renderer;
     
     $response  = $bus->get("response");
     $responses = $response->getResponses();
@@ -50,7 +48,8 @@ class TestProcessor_View extends Sabel_Bus_Processor
     
     $layout = $controller->getAttribute("layout");
     
-    if ($layout === false || isset($_SERVER["HTTP_X_REQUESTED_WITH"])) {
+    if ($layout === false ||
+        $bus->get("request")->getHttpHeader("x-requested-with") === "XMLHttpRequest") {
       $bus->set("result", $contents);
     } else {
       if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;

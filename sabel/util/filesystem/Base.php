@@ -25,7 +25,7 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     if ($directory === null) {
       return is_dir($this->path);
     } elseif (!$this->isAbsolutePath($directory)) {
-      $directory = $this->path . DS . $directory;
+      $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
     }
     
     return is_dir($directory);
@@ -38,7 +38,7 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     if ($file === null) {
       return is_file($this->path);
     } elseif (!$this->isAbsolutePath($file)) {
-      $file = $this->path . DS . $file;
+      $file = $this->path . DIRECTORY_SEPARATOR . $file;
     }
     
     return is_file($file);
@@ -60,7 +60,7 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     static $isWin = null;
     
     if ($isWin === null) {
-      $isWin = Sabel_Environment::create()->isWin();
+      $isWin = (DIRECTORY_SEPARATOR === '\\');
     }
     
     if ($isWin) {
@@ -75,11 +75,11 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     clearstatcache();
     
     $path  = "";
-    $parts = explode(DS, $directory);
+    $parts = explode(DIRECTORY_SEPARATOR, $directory);
     
     foreach ($parts as $part) {
       if ($part === "") continue;
-      $path .= DS . $part;
+      $path .= DIRECTORY_SEPARATOR . $part;
       
       if (!is_dir($path)) {
         mkdir($path);
@@ -105,7 +105,8 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     
     foreach (scandir($directory) as $item) {
       if ($item === "." || $item === "..") continue;
-      $path = $directory . DS . $item;
+      $path = $directory . DIRECTORY_SEPARATOR . $item;
+      
       if (is_file($path)) {
         unlink($path);
       } elseif (is_dir($path)) {

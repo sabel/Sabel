@@ -11,6 +11,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
     $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
+      $response->notFound();
       $controller = $this->createVirtualController($response);
     }
     
@@ -62,13 +63,14 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
     
     if ($controller->isRedirected()) {
       if (defined("URI_IGNORE")) {
-        $ignored = ltrim(Sabel_Environment::get("SCRIPT_NAME"), "/") . "/";
+        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
       } else {
         $ignored = "";
       }
       
-      $session    = $bus->get("session");
-      $token      = $controller->getRequest()->getValueWithMethod("token");
+      $session    = $controller->getSession();
+      $request    = $controller->getRequest();
+      $token      = $request->getValueWithMethod("token");
       $hasToken   = !empty($token);
       $redirector = $controller->getRedirector();
       
@@ -85,8 +87,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
         $to  .= $glue . $session->getName() . "=" . $session->getId();
       }
       
-      $host = Sabel_Environment::get("HTTP_HOST");
-      $bus->get("response")->location($host, $ignored . $to);
+      $bus->get("response")->location($request->getHttpHeader("host"), $ignored . $to);
     }
   }
 }

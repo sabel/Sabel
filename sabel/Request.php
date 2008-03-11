@@ -32,6 +32,7 @@ interface Sabel_Request
   
   public function setGetValues(array $values);
   public function setPostValues(array $values);
+  public function setHttpHeaders(array $headers);
   
   public function setGetValue($name, $value);
   public function setPostValue($name, $value);
@@ -40,4 +41,7 @@ interface Sabel_Request
   public function fetchGetValue($name);
   public function fetchPostValue($name);
   public function fetchParameterValue($name);
+  
+  public function getHttpHeader($name);
+  public function getHttpHeaders();
 }

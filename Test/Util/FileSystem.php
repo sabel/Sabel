@@ -15,13 +15,6 @@ class Test_Util_FileSystem extends SabelTestCase
   
   public function setUp()
   {
-    static $set = false;
-    
-    if (!$set) {
-      Sabel_Environment::create()->set("os", "linux");
-      $set = true;
-    }
-    
     $this->basedir = SABEL_BASE . DS . "Test" . DS . "data" . DS . "application" . DS . "data";
   }
   

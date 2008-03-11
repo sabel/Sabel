@@ -148,7 +148,6 @@ final class Sabel
     
     require ($SABEL . "Object.php");
     require ($SABEL . "Functions.php");
-    require ($SABEL . "Environment.php");
     require ($SABEL . "Logger.php");
     require ($SABEL . "Bus.php");
     require ($SABEL . "Config.php");

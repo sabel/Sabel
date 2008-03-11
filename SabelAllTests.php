@@ -54,7 +54,6 @@ require_once ("Test/SabelTestCase.php");
 require_once ("Test/SabelTestSuite.php");
 require_once ("Test/Application.php");
 require_once ("Test/Object.php");
-require_once ("Test/Environment.php");
 require_once ("Test/Console.php");
 require_once ("Test/Annotation.php");
 require_once ("Test/Aspect.php");
@@ -74,8 +73,6 @@ require_once ("Test/Session/Tests.php");
 require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
 require_once ("Test/DB/Tests.php");
-require_once ("Test/Locale/Browser.php");
-require_once ("Test/Locale/Server.php");
 require_once ("Test/I18n/Gettext.php");
 
 class SabelAllTests
@@ -95,7 +92,6 @@ class SabelAllTests
     }
     
     $suite->addTest(Test_Object::suite());
-    $suite->addTest(Test_Environment::suite());
     $suite->addTest(Test_Console::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
@@ -115,8 +111,6 @@ class SabelAllTests
     
     $suite->addTest(Test_Storage_Memory::suite());
     $suite->addTest(Test_VirtualInheritance::suite());
-    $suite->addTest(Test_Locale_Browser::suite());
-    $suite->addTest(Test_Locale_Server::suite());
     $suite->addTest(Test_I18n_Gettext::suite());
     
     // $suite->addTest(Test_Aspect::suite());

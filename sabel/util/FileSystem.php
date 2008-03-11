@@ -14,7 +14,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function __construct($base = "")
   {
     if ($base === "") {
-      $this->path = (Sabel_Environment::create()->isWin()) ? "C:\\" : "/";
+      $this->path = (DIRECTORY_SEPARATOR === '\\') ? "C:\\" : "/";
     } else {
       $this->path = realpath($base);
     }
@@ -30,7 +30,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     clearstatcache();
     
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DS . $path;
+      $path = $this->path . DIRECTORY_SEPARATOR . $path;
     }
     
     if (is_dir($path)) {
@@ -47,7 +47,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     if ($path === null) {
       $path = $this->path;
     } elseif (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DS . $path;
+      $path = $this->path . DIRECTORY_SEPARATOR . $path;
     }
     
     $items = array();
@@ -62,7 +62,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function getDirectory($path)
   {
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DS . $path;
+      $path = $this->path . DIRECTORY_SEPARATOR . $path;
     }
     
     if ($this->isDir($path)) {
@@ -76,7 +76,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function getFile($path)
   {
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DS . $path;
+      $path = $this->path . DIRECTORY_SEPARATOR . $path;
     }
     
     if ($this->isFile($path)) {
@@ -96,7 +96,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     
     foreach (scandir($path) as $item) {
       if ($item === "." || $item === "..") continue;
-      if (is_dir($path . DS . $item)) $dirs[] = $item;
+      if (is_dir($path . DIRECTORY_SEPARATOR . $item)) $dirs[] = $item;
     }
     
     return $dirs;
@@ -110,7 +110,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     $path  = $this->path;
     
     foreach (scandir($path) as $item) {
-      if (is_file($path . DS . $item)) $files[] = $item;
+      if (is_file($path . DIRECTORY_SEPARATOR . $item)) $files[] = $item;
     }
     
     return $files;
@@ -119,7 +119,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function mkdir($directory, $permission = 0744)
   {
     if (!$this->isAbsolutePath($directory)) {
-      $directory = $this->path . DS . $directory;
+      $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
     }
     
     if ($this->isDir($directory) || $this->isFile($directory)) {
@@ -136,7 +136,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function mkfile($file, $permission = 0744)
   {
     if (!$this->isAbsolutePath($file)) {
-      $file = $this->path . DS . $file;
+      $file = $this->path . DIRECTORY_SEPARATOR . $file;
     }
     
     if ($this->isDir($file) || $this->isFile($file)) {
@@ -155,7 +155,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     $items = array();
     foreach (scandir($this->path) as $item) {
       if ($item === "." || $item === "..") continue;
-      $path = $this->path . DS . $item;
+      $path = $this->path . DIRECTORY_SEPARATOR . $item;
       if (is_file($path)) {
         $items[] = new Sabel_Util_FileSystem_File($path);
       } else {
@@ -171,7 +171,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     if ($directory === null) {
       $directory = $this->path;
     } elseif (!$this->isAbsolutePath($directory)) {
-      $directory = $this->path . DS . $directory;
+      $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
     }
     
     if (!$this->isDir($directory)) {
@@ -189,7 +189,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     if ($src === null) $src = $this->path;
     
     if (!$this->isAbsolutePath($dest)) {
-      $dest = dirname($this->path) . DS . $dest;
+      $dest = dirname($this->path) . DIRECTORY_SEPARATOR . $dest;
     }
     
     $dir = new self($src);
@@ -197,7 +197,8 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     
     if ($items = $dir->getList()) {
       foreach ($items as $item) {
-        $destination = $dest . DS . basename($item->getPath());
+        $destination = $dest . DIRECTORY_SEPARATOR . basename($item->getPath());
+        
         if ($item->isFile()) {
           $item->copy($destination, true);
         } else {

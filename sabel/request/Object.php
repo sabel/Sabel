@@ -17,6 +17,11 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   private $uri = "";
   
   /**
+   * @var const Sabel_Request
+   */
+  private $method = Sabel_Request::GET;
+  
+  /**
    * @var array
    */
   private $getValues = array();
@@ -32,9 +37,9 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   private $parameterValues = array();
   
   /**
-   * @var const Sabel_Request
+   * @var array
    */
-  private $method = Sabel_Request::GET;
+  private $httpHeaders = array();
   
   public function __construct($uri = "")
   {
@@ -308,6 +313,22 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     }
     
     return ($result === "") ? null : $result;
+  }
+  
+  public function setHttpHeaders(array $headers)
+  {
+    $this->httpHeaders = $headers;
+  }
+  
+  public function getHttpHeader($name)
+  {
+    $key = strtoupper("http_" . str_replace("-", "_", $name));
+    return (isset($this->httpHeaders[$key])) ? $this->httpHeaders[$key] : null;
+  }
+  
+  public function getHttpHeaders()
+  {
+    return $this->httpHeaders;
   }
   
   public function getExtension()

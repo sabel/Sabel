@@ -86,7 +86,8 @@ class Sabel_Console
   
   public static function getHeader($type, $headMsg)
   {
-    if (Sabel_Environment::create()->isWin()) {
+    if ((isset($_SERVER["IS_WINDOWS"]) && $_SERVER["IS_WINDOWS"]) ||
+        DIRECTORY_SEPARATOR === '\\') {
       return sprintf(self::$winHeaders[$type], $headMsg);
     } else {
       return sprintf(self::$headers[$type], $headMsg);

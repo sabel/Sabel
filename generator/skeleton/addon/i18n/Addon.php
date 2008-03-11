@@ -13,7 +13,8 @@ class I18n_Addon extends Sabel_Object
 {
   public function execute($bus)
   {
-    Sabel_I18n_Gettext::getInstance()->init();
+    $languages = $bus->get("request")->getHttpHeader("accept-language");
+    Sabel_I18n_Gettext::getInstance()->init($languages);
   }
 }
 

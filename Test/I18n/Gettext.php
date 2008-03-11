@@ -14,15 +14,11 @@ class Test_I18n_Gettext extends SabelTestCase
   
   public function testI18n()
   {
-    $env = Sabel_Environment::create();
-    $env->set("HTTP_ACCEPT_LANGUAGE", "ja,en-us;q=0.7,en;q=0.3");
-    
     $gettext = Sabel_I18n_Gettext::getInstance();
     $gettext->setMessagesFileName("messages.php");
-    $gettext->init();
+    $gettext->init("ja,en-us;q=0.7,en;q=0.3");
     
     $this->assertTrue($gettext->isInitialized());
-    $this->assertEquals("ja", $gettext->getBrowser()->getLocale());
     
     $this->assertEquals("名前", _("name"));
     $this->assertEquals("住所", _("address"));

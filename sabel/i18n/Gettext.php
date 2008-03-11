@@ -11,9 +11,8 @@
  */
 class Sabel_I18n_Gettext
 {
-  protected static $ins  = null;
+  protected static $instance = null;
   
-  protected $browser     = null;
   protected $fileName    = "messages.php";
   protected $localesDir  = "";
   protected $codeset     = array();
@@ -30,11 +29,11 @@ class Sabel_I18n_Gettext
   
   public static function getInstance()
   {
-    if (self::$ins === null) {
-      self::$ins = new self();
+    if (self::$instance === null) {
+      self::$instance = new self();
     }
     
-    return self::$ins;
+    return self::$instance;
   }
   
   public function isInitialized()
@@ -79,14 +78,11 @@ class Sabel_I18n_Gettext
     return $this;
   }
   
-  public function init($force = false)
+  public function init($acceptLanguage = null)
   {
-    if ($this->initialized && !$force) return;
+    if ($this->initialized) return;
     
-    $this->browser = new Sabel_Locale_Browser();
-    $this->initialized = true;
-    
-    if (($languages = $this->browser->getLanguages()) !== null) {
+    if ($languages = $this->getAcceptLanguages($acceptLanguage)) {
       $dirs   = $this->getLocaleDirs();
       $locale = null;
       foreach ($languages as $language) {
@@ -106,8 +102,6 @@ class Sabel_I18n_Gettext
         }
       }
       
-      $this->browser->setLocale($locale);
-      
       if (isset($this->codeset[$this->fileName])) {
         $codeset = $this->codeset[$this->fileName];
       } else {
@@ -116,12 +110,46 @@ class Sabel_I18n_Gettext
       
       Sabel_I18n_Sabel_Gettext::initialize($this->fileName, $this->localesDir, $codeset, $locale);
     }
+    
+    $this->initialized = true;
+  }
+  
+  protected function getAcceptLanguages($acceptLanguage)
+  {
+    $languages = array();
+    
+    if ($acceptLanguage === null) {
+      if (isset($_SERVER["HTTP_ACCEPT_LANGUAGE"])) {
+        $acceptLanguage = $_SERVER["HTTP_ACCEPT_LANGUAGE"];
+        dump($acceptLanguage);
+      } else {
+        return $languages;
+      }
+    }
+    
+    if ($acceptLanguage !== "" && $acceptLanguage !== null) {
+      foreach (explode(",", $acceptLanguage) as $lang) {
+        if (strpos($lang, ";") === false) {
+          $q = "1.0";
+        } else {
+          list ($lang, $q) = explode(";", $lang);
+          $q = str_replace("q=", "", $q);
+        }
+        
+        $languages[$q] = $lang;
+      }
+      
+      krsort($languages, SORT_NUMERIC);
+      $languages = array_values($languages);
+    }
+    
+    return $languages;
   }
   
   private function getLocaleDirs()
   {
     if (ENVIRONMENT === PRODUCTION) {
-      $cache = CACHE_DIR_PATH . DS . "ldirs.php";
+      $cache = CACHE_DIR_PATH . DS . "sabel" . DS . "locale_dirs.php";
       
       if (is_file($cache)) {
         include ($cache);
@@ -153,15 +181,5 @@ class Sabel_I18n_Gettext
     }
     
     return $dirs;
-  }
-  
-  public function setBrowser($browser)
-  {
-    $this->browser = $browser;
-  }
-  
-  public function getBrowser()
-  {
-    return $this->browser;
   }
 }
