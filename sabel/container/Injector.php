@@ -70,7 +70,7 @@ class Sabel_Container_Injector
       
       $reflect = new ReflectionClass($className);
       $instance = $reflect->newInstanceArgs($constructArguments);
-    } elseif (count($args) > 1) {
+    } elseif ($args !== null) {
       $reflect = new ReflectionClass($className);
       $instance = $reflect->newInstanceArgs($args);
     } else {
