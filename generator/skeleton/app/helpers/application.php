@@ -25,15 +25,13 @@ function linkto($file)
 
 function css($file)
 {
-  $ignored = "";
+  $path = "/css/{$file}.css";
+  
   if (defined("URI_IGNORE")) {
-    $ignored = dirname($_SERVER["SCRIPT_NAME"]);
-    $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
-    return sprintf($fmt, $ignored . "/css/" . $file . ".css");;
-  } else {
-    $fmt = '  <link rel="stylesheet" href="%s" type="text/css" />';
-    return sprintf($fmt, "/css/{$file}.css");
+    $path = dirname($_SERVER["SCRIPT_NAME"]) . $path;
   }
+  
+  return '  <link rel="stylesheet" href="' . $path . '" type="text/css" />';
 }
 
 function h($string, $charset = null)
