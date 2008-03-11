@@ -16,7 +16,6 @@ class Processor_Controller extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $destination = $bus->get("destination");
-    $redirector  = new Sabel_Controller_Redirector();
     $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
@@ -79,9 +78,9 @@ class Processor_Controller extends Sabel_Bus_Processor
       
       $session    = $controller->getSession();
       $request    = $controller->getRequest();
+      $redirector = $controller->getRedirector();
       $token      = $request->getValueWithMethod("token");
       $hasToken   = !empty($token);
-      $redirector = $controller->getRedirector();
       
       if (!$hasToken) {
         $to = $redirector->getUrl();
