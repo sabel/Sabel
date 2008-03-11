@@ -36,13 +36,21 @@ class Sabel_Container_Injector
    */
   public function newInstance($className)
   {
+    $args = null;
+    $numberOfArgs = func_num_args();
+    
+    if ($numberOfArgs > 1) {
+      $args = func_get_args();
+      array_shift($args);
+    }
+    
     $reflect = new ReflectionClass($className);
     
     if ($reflect->isInterface() || $reflect->isAbstract()) {
       foreach ($this->injection->getBinds() as $name => $bind) {
         if ($name === $className) {
           $implClassName = $bind->getImplementation();
-          return $this->newInstance($implClassName);
+          return $this->newInstance($implClassName, $args);
         }
       }
     }
@@ -62,6 +70,9 @@ class Sabel_Container_Injector
       
       $reflect = new ReflectionClass($className);
       $instance = $reflect->newInstanceArgs($constructArguments);
+    } elseif (count($args) > 1) {
+      $reflect = new ReflectionClass($className);
+      $instance = $reflect->newInstanceArgs($args);
     } else {
       $dependencyResolver = new Sabel_Container_DI();
       $instance = $dependencyResolver->load($className);
