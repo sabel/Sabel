@@ -158,7 +158,6 @@ final class Sabel
     require ($SABEL . "View.php");
     
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
-    $CACHE   = $SABEL . "cache"      . DIRECTORY_SEPARATOR;
     $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
     $CTRL    = $SABEL . "controller" . DIRECTORY_SEPARATOR;
     $SESSION = $SABEL . "session"    . DIRECTORY_SEPARATOR;
@@ -167,9 +166,6 @@ final class Sabel
     
     require ($BUS  . "Config.php");
     require ($BUS  . "Processor.php");
-    
-    require ($CACHE . "Interface.php");
-    require ($CACHE . "File.php");
     
     require ($MAP . "Configurator.php");
     require ($MAP . "Candidate.php");

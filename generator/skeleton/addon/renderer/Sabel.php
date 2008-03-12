@@ -12,14 +12,16 @@
  */
 class Renderer_Sabel extends Sabel_View_Renderer
 {
+  protected $replacer = null;
+  
   public function initialize()
   {
-    $baseDir = dirname(__FILE__) . DS;
+    $baseDir = dirname(__FILE__) . DS . "sabel" . DS;
     Sabel::fileUsing($baseDir . "Replacer.php", true);
-    Sabel::fileUsing($baseDir . "util" . DS . "Parser.php", true);
-    Sabel::fileUsing($baseDir . "util" . DS . "Element.php", true);
+    Sabel::fileUsing($baseDir . "Parser.php", true);
+    Sabel::fileUsing($baseDir . "Element.php", true);
     
-    $this->setPreprocessor(new Renderer_Replacer());
+    $this->replacer = new Renderer_Sabel_Replacer();
   }
   
   public function rendering($sbl_template, $sbl_tpl_values, $sbl_tpl_path = null)
@@ -38,12 +40,14 @@ class Renderer_Sabel extends Sabel_View_Renderer
   private final function initializeValues($hash, &$sbl_tpl_values)
   {
     $buf = file_get_contents($this->getCompileFilePath($hash));
+    
     if (preg_match_all('/\$([\w]+)/', $buf, $matches)) {
       $buf = array();
       $filtered = array_filter($matches[1], '_sbl_internal_remove_this');
       foreach ($filtered as $key => $val) {
         $buf[$val] = null;
       }
+      
       $sbl_tpl_values = array_merge($buf, $sbl_tpl_values);
     }
   }
@@ -54,7 +58,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
       if (is_readable($this->getCompileFilePath($hash))) return;
     }
     
-    $template = $this->preprocess($template);
+    $template = $this->replacer->execute($template);
     
     $r = '/<\?(=)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);

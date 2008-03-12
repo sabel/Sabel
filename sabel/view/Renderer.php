@@ -12,22 +12,6 @@
  */
 class Sabel_View_Renderer extends Sabel_Object
 {
-  protected $preprocessor = null;
-  
-  public function setPreprocessor(Sabel_View_Preprocessor_Interface $p)
-  {
-    $this->preprocessor = $p;
-  }
-  
-  public function preprocess($contents)
-  {
-    if (is_object($this->preprocessor)) {
-      return $this->preprocessor->execute($contents);
-    } else {
-      return $contents;
-    }
-  }
-  
   public function rendering($_tpl_contents, $_tpl_values, $_tpl_path = null)
   {
     if ($_tpl_path === null || !is_file($_tpl_path)) {

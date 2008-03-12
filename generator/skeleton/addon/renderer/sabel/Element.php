@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Renderer_Util_Element
+ * Renderer_Sabel_Element
  *
  * @category   Addon
  * @package    addon.renderer
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Renderer_Util_Element
+class Renderer_Sabel_Element
 {
   private $tag  = "";
   private $name = null;

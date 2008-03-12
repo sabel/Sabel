@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Renderer_Replacer
+ * Renderer_Sabel_Replacer
  *
  * @category   Addon
  * @package    addon.renderer
@@ -9,12 +9,11 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Renderer_Replacer extends Sabel_Object
-  implements Sabel_View_Preprocessor_Interface
+class Renderer_Sabel_Replacer extends Sabel_Object
 {
   public function execute($contents)
   {
-    $parser = new Renderer_Util_Parser();
+    $parser = new Renderer_Sabel_Parser();
     $elements = $parser->getElements($contents);
     if (empty($elements)) return $contents;
     
@@ -23,9 +22,8 @@ class Renderer_Replacer extends Sabel_Object
     foreach ($elements as $element) {
       $method = $element->name() . "_replace";
       if ($this->hasMethod($method)) {
-        $tag = $element->tag();
         $rep = $this->$method($element);
-        $contents = str_replace($tag, $rep, $contents);
+        $contents = str_replace($element->tag(), $rep, $contents);
       }
     }
     
@@ -34,8 +32,8 @@ class Renderer_Replacer extends Sabel_Object
   
   protected function simpleReplace($contents)
   {
-    $search  = array("</if>", "<else/>", "<else />", "</foreach>", "</hlink>");
-    $replace = array("<? endif ?>", "<? else : ?>", "<? else : ?>", "<? endforeach ?>", "</a>");
+    $search  = array("</if>", "<else />", "</foreach>", "</hlink>");
+    $replace = array("<? endif ?>", "<? else : ?>", "<? endforeach ?>", "</a>");
     
     return str_replace($search, $replace, $contents);
   }

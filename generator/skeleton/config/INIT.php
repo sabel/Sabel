@@ -20,10 +20,10 @@ define("TPL_SUFFIX", ".tpl");
 define("DS", DIRECTORY_SEPARATOR);
 
 define("MODULES_DIR_NAME", "app");
-define("ADDON_DIR_NAME",   "addon");
 define("VIEW_DIR_NAME",    "views");
-define("LIB_DIR_NAME",     "lib");
 define("HELPERS_DIR_NAME", "helpers");
+define("LIB_DIR_NAME",     "lib");
+define("ADDON_DIR_NAME",   "addon");
 
 define("CONFIG_DIR_PATH",  RUN_BASE . DS . "config");
 define("MODULES_DIR_PATH", RUN_BASE . DS . MODULES_DIR_NAME);
@@ -49,4 +49,3 @@ Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Bus.php",      true);
 Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Map.php",      true);
 Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Addon.php",    true);
 Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Database.php", true);
-
