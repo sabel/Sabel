@@ -1,16 +1,16 @@
 <?php
 
 /**
- * Sabel_Token_Storage
+ * Sabel_Storage
  *
  * @interface
- * @category   Token
- * @package    org.sabel.token
+ * @category   Storage
+ * @package    org.sabel.storage
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_Token_Storage
+interface Sabel_Storage
 {
   /**
    * @param string $key

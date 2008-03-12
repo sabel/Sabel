@@ -21,7 +21,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   protected function createStorage($namespace)
   {
     $config = array("namespace" => $namespace);
-    return new Sabel_Token_Storage_Database($config);
+    return new Sabel_Storage_Database($config);
   }
   
   public function execute($bus)

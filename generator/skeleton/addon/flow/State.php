@@ -78,7 +78,7 @@ class Flow_State
     return $this->properties["currentActivity"];
   }
   
-  public function save(Sabel_Token_Storage $storage, $timeout = null)
+  public function save(Sabel_Storage $storage, $timeout = null)
   {
     if ($timeout === null) $timeout = self::MAX_LIFETIME;
     $storage->store($this->properties["token"], $this->properties, $timeout);

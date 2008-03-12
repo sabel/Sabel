@@ -9,8 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Storage_Memory
-  extends Sabel_Object implements Sabel_Storage_Interface
+class Sabel_Storage_Memory extends Sabel_Object implements Sabel_Storage
 {
   /**
    * @var self
@@ -44,7 +43,7 @@ class Sabel_Storage_Memory
    *
    * @return mixed
    */
-  public function read($key)
+  public function fetch($key)
   {
     if ($this->has($key)) {
       return $this->attributes[$key];
@@ -59,7 +58,7 @@ class Sabel_Storage_Memory
    *
    * @return void
    */
-  public function write($key, $value)
+  public function store($key, $value)
   {
     $this->attributes[$key] = $value;
   }
@@ -67,17 +66,11 @@ class Sabel_Storage_Memory
   /**
    * @param string $key
    *
-   * @return mixed
+   * @return void
    */
-  public function delete($key)
+  public function clear($key)
   {
-    if ($this->has($key)) {
-      $value = $this->attributes[$key];
-      unset($this->attributes[$key]);
-      return $value;
-    } else {
-      return null;
-    }
+    unset($this->attributes[$key]);
   }
   
   /**
@@ -88,15 +81,5 @@ class Sabel_Storage_Memory
   public function has($key)
   {
     return array_key_exists($key, $this->attributes);
-  }
-  
-  /**
-   * @return array
-   */
-  public function clear()
-  {
-    $attributes = $this->attributes;
-    $this->attributes = array();
-    return $attributes;
   }
 }
