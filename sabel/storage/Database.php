@@ -19,7 +19,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   /**
    * @var string
    */
-  protected $tableName = "sbl_token";
+  protected $tableName = "sbl_storage";
   
   /**
    * @var string
@@ -79,13 +79,13 @@ class Sabel_Storage_Database implements Sabel_Storage
     $this->namespace = $namespace;
   }
   
-  public function fetch($token)
+  public function fetch($key)
   {
     $stmt = $this->createStatement();
     $stmt->type(Sabel_DB_Statement::SELECT)
          ->projection(array("data", "timeout"))
          ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-         ->setBindValue("id", $this->getKey($token));
+         ->setBindValue("id", $this->getKey($key));
     
     $result = $stmt->execute();
     
@@ -96,7 +96,7 @@ class Sabel_Storage_Database implements Sabel_Storage
     }
   }
   
-  public function store($token, $value, $timeout = null)
+  public function store($key, $value, $timeout = null)
   {
     if ($timeout === null) {
       $timeout = time() + ini_get("session.gc_maxlifetime");
@@ -109,14 +109,14 @@ class Sabel_Storage_Database implements Sabel_Storage
     
     $stmt = $this->createStatement();
     
-    if ($this->has($token)) {
+    if ($this->has($key)) {
       $stmt->type(Sabel_DB_Statement::UPDATE)
            ->values(array("data" => serialize($value), "timeout" => $timeout))
            ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-           ->setBindValue("id", $this->getKey($token));
+           ->setBindValue("id", $this->getKey($key));
     } else {
       $stmt->type(Sabel_DB_Statement::INSERT)
-           ->values(array("id"      => $this->getKey($token),
+           ->values(array("id"      => $this->getKey($key),
                           "data"    => serialize($value),
                           "timeout" => $timeout));
     }
@@ -124,24 +124,24 @@ class Sabel_Storage_Database implements Sabel_Storage
     $stmt->execute();
   }
   
-  public function has($token)
+  public function has($key)
   {
     $stmt   = $this->createStatement();
     $result = $stmt->type(Sabel_DB_Statement::SELECT)
                    ->projection("COUNT(*) AS cnt")
                    ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-                   ->setBindValue("id", $this->getKey($token))
+                   ->setBindValue("id", $this->getKey($key))
                    ->execute();
     
     return ((int)$result[0]["cnt"] !== 0);
   }
   
-  public function clear($token)
+  public function clear($key)
   {
     $stmt = $this->createStatement();
     $stmt->type(Sabel_DB_Statement::DELETE)
          ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-         ->setBindValue("id", $this->getKey($token))
+         ->setBindValue("id", $this->getKey($key))
          ->execute();
   }
   
@@ -161,12 +161,12 @@ class Sabel_Storage_Database implements Sabel_Storage
     return $stmt;
   }
   
-  private function getKey($token)
+  private function getKey($key)
   {
     if ($this->namespace === "") {
-      return $token;
+      return $key;
     } else {
-      return $this->namespace . "_" . $token;
+      return $this->namespace . "_" . $key;
     }
   }
 }
