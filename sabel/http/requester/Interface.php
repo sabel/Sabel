@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_Http_Requestable
+interface Sabel_Http_Requester_Interface
 {
   public function connect($host, $port);
   public function send($data);

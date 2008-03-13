@@ -31,7 +31,7 @@ function css($file)
     $path = dirname($_SERVER["SCRIPT_NAME"]) . $path;
   }
   
-  return '  <link rel="stylesheet" href="' . $path . '" type="text/css" />';
+  return '<link rel="stylesheet" href="' . $path . '" type="text/css" />';
 }
 
 function h($string, $charset = null)

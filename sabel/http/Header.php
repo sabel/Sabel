@@ -16,33 +16,29 @@ class Sabel_Http_Header
   protected $returnHttp    = '';
   protected $returnMessage = '';
   
-  public function __construct($headers = null)
+  public function __construct($headers = array())
   {
-    if (is_array($headers)) {
-      foreach ($headers as $header) $this->add($header);
-    }
-  }
-  
-  public function __get($name)
-  {
-    return $this->get($name);
+    foreach ($headers as $header) $this->add($header);
   }
   
   public function get($name)
   {
-    $headers = $this->headers;
-    return (isset($headers[$name])) ? $headers[$name] : false;
+    if (isset($this->headers[$name])) {
+      return $this->headers[$name];
+    } else {
+      return null;
+    }
   }
   
   public function add($headerLine)
   {
-    if (stripos($headerLine, ':') === false) {
-      $parts = explode(' ', $headerLine);
-      if (isset($parts[0])) $this->returnHttp = $parts[0];
-      if (isset($parts[1])) $this->returnCode =(int) $parts[1];
-      if (isset($parts[2])) $this->returnMessage = $parts[2];
+    if (substr($headerLine, 0, 5) === "HTTP/") {
+      $parts = explode(" ", $headerLine);
+      $this->returnHttp    = $parts[0];
+      $this->returnCode    = (int)$parts[1];
+      $this->returnMessage = $parts[2];
     } else {
-      $parts = explode(':', $headerLine);
+      $parts = array_map("trim", explode(":", $headerLine));
       $this->headers[$parts[0]] = $parts[1];
     }
   }

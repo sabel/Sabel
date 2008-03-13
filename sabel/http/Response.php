@@ -14,21 +14,17 @@ class Sabel_Http_Response extends Sabel_Object
   protected $header = null;
   protected $contents = array();
   
-  public function __get($name)
-  {
-    return ($name === 'header') ? $this->header : null;
-  }
-  
   /**
    * set header object
    *
    */
   public function setHeader($header)
   {
-    if (!$header instanceof Sabel_Http_Header)
+    if ($header instanceof Sabel_Http_Header) {
+      $this->header = $header;
+    } else {
       throw new Sabel_Exception_Runtime($header . " is not Sabel_Http_Header");
-      
-    $this->header = $header;
+    }
   }
   
   /**
@@ -58,7 +54,7 @@ class Sabel_Http_Response extends Sabel_Object
   
   public function hasContents()
   {
-    return (empty($this->contents));
+    return empty($this->contents);
   }
   
   /**
