@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * testcase of sabel.util.HashList
+ *
  * @category  Util
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */

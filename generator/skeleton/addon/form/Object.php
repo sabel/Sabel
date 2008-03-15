@@ -12,11 +12,6 @@
 class Form_Object extends Sabel_Object
 {
   /**
-   * @var string
-   */
-  protected $formName = "";
-  
-  /**
    * @var Sabel_DB_Model
    */
   protected $model = null;
@@ -46,7 +41,7 @@ class Form_Object extends Sabel_Object
    */
   protected $allowCols = array();
   
-  public function __construct($model, $fName)
+  public function __construct($model)
   {
     if (is_string($model)) {
       $model = MODEL($model);
@@ -56,15 +51,6 @@ class Form_Object extends Sabel_Object
     $this->mdlName    = $model->getName();
     $this->columns    = $model->getColumns();
     $this->isSelected = $model->isSelected();
-    $this->formName   = $fName;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getFormName()
-  {
-    return $this->formName;
   }
   
   /**

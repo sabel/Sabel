@@ -1,9 +1,10 @@
 <?php
 
 /**
+ * testcase of sabel.annotation.Reader
+ *
  * @category  Annotation
  * @author    Mori Reo <mori.reo@sabel.jp>
- * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Annotation extends SabelTestCase
 {

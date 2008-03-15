@@ -1,6 +1,8 @@
 <?php
 
 /**
+ * testcase of sabel.util.LinkedList
+ *
  * @category  Util
  * @author    Mori Reo <mori.reo@sabel.jp>
  */

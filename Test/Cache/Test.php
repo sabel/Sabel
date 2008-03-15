@@ -35,8 +35,8 @@ class Test_Cache_Test extends SabelTestCase
     $array = $this->cache->read("hoge");
     $this->assertTrue(is_array($array));
     $this->assertEquals("value", $array["k1"]);
-    $this->assertEquals(10, $array["k2"]);
-    $this->assertEquals(true, $array["k3"]);
+    $this->assertEquals(10,      $array["k2"]);
+    $this->assertEquals(true,    $array["k3"]);
   }
   
   public function testObject()

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * test for sabel.request.Object
+ * testcase of sabel.request.Object
  *
  * @category Request
  * @author   Mori Reo <mori.reo@sabel.jp>

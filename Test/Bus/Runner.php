@@ -1,7 +1,7 @@
 <?php
  
 /**
- * a test case of sabel.Bus, sabel.bus.*
+ * testcase of sabel.Bus, sabel.bus.*
  *
  * @category  Bus
  * @author    Mori Reo <mori.reo@sabel.jp>

@@ -3,6 +3,8 @@
 class String extends Sabel_Util_String {}
 
 /**
+ * testcase of sabel.util.String
+ *
  * @category  Util
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */

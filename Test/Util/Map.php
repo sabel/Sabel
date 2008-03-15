@@ -3,6 +3,8 @@
 class UtilMap extends Sabel_Util_Map {}
 
 /**
+ * testcase of sabel.util.Map
+ *
  * @category  Util
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
@@ -67,12 +69,6 @@ class Test_Util_Map extends SabelTestCase
     $this->assertTrue($through);
   }
   
-  /**
-   * java like.
-   * while ($map->hasMoreElements()) {
-   *   $value = $map->nextElement();
-   * }
-   */
   public function testIterator2()
   {
     $data = array("test1" => "hoge", "test2" => "fuga");

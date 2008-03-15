@@ -26,17 +26,12 @@ class Form_Processor extends Sabel_Bus_Processor
   /**
    * @var string
    */
-  private $unityId = "";
-  
-  /**
-   * @var string
-   */
   private $token = "";
   
-  protected function createStorage($namespace)
+  protected function createStorage($sessionId)
   {
-    $config = array("namespace" => $namespace);
-    return new Sabel_Storage_Database($config);
+    $config = array("namespace" => $sessionId);
+    $this->storage = new Sabel_Storage_Database($config);
   }
   
   public function execute($bus)
@@ -44,69 +39,61 @@ class Form_Processor extends Sabel_Bus_Processor
     $this->extract("request", "controller");
     
     $controller = $this->controller;
+    $this->createStorage($bus->get("session")->getId());
     $controller->setAttribute("form", $this);
+    
     $action = $bus->get("destination")->getAction();
-    if (!$controller->hasMethod($action)) return;
+    $reflection  = $controller->getReflection();
+    $annotation  = $reflection->getMethodAnnotation($action, "form");
+    $this->token = $this->request->getValueWithMethod("token");
     
-    $annot = $controller->getReflection()->getMethodAnnotation($action, "unity");
-    if (!isset($annot[0][0])) return;
-    
-    $this->unityId = $annot[0][0];
-    $token = $this->request->getValueWithMethod("token");
-    $sid = $bus->get("session")->getId();
-    $this->storage = $this->createStorage($sid . "_" . $this->unityId);
-    
-    if ($token === null) return;
-    
-    if ($form = $this->storage->fetch($token)) {
-      if ($this->request->isPost()) {
-        $this->applyPostValues($form)->unsetErrors();
+    if (isset($annotation[0][0])) {
+      if ($this->token === null || ($form = $this->get()) === null) {
+        $bus->get("response")->notFound();
+      } else {
+        $controller->setAttribute($annotation[0][0], $form);
       }
-      
-      $this->form  = $form;
-      $this->token = $token;
-      
-      $controller->setAttribute($form->getFormName(), $form);
-      $controller->setAttribute("token", $token);
-    } else {
-      $bus->get("response")->notFound();
     }
   }
   
-  public function create($model, $as = null)
+  public function create($model)
   {
-    if ($as !== null) {
-      $name = $as;
-    } elseif (is_model($model)) {
-      $name = $model->getName();
-    } elseif (is_string($model)) {
-      $name = $model;
-    } else {
-      $message = "invalid argument(1) type. "
-               . "must be a string or instance of model.";
-      
-      throw new Sabel_Exception_InvalidArgument($message);
+    if (is_string($model)) {
+      $model = MODEL($model);
     }
     
-    $name = lcfirst($name) . "Form";
-    $form = new Form_Object($model, $name);
-    $this->controller->setAttribute($name, $form);
+    $this->form  = $form = new Form_Object($model);
+    $this->token = md5(uniqid(mt_rand(), true));
+    $this->controller->setAttribute("token", $this->token);
     
-    if ($this->unityId !== "") {
+    return $form;
+  }
+  
+  public function get($token = null)
+  {
+    if ($token === null) {
+      $token = $this->token;
+    }
+    
+    $form = $this->storage->fetch($token);
+    $this->controller->setAttribute("token", $token);
+    
+    if ($form !== null) {
       $this->form  = $form;
-      $this->token = md5(uniqid(mt_rand(), true));
-      $this->controller->setAttribute("token", $this->token);
+      $this->token = $token;
     }
     
     return $form;
   }
   
-  public function clear()
+  public function clear($token = null)
   {
-    if ($this->token !== "" && $this->unityId !== "") {
-      $this->storage->clear($this->token);
-      $this->form = null;
+    if ($token === null) {
+      $token = $this->token;
     }
+    
+    $this->storage->clear($token);
+    $this->form = null;
   }
   
   public function shutdown($bus)

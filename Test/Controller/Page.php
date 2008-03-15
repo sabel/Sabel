@@ -1,7 +1,7 @@
 <?php
 
 /**
- * test for sabel.controller.Page
+ * testcase of sabel.controller.Page
  *
  * @category Controller
  * @author   Ebine Yutaka <ebine.yutaka@sabel.jp>
@@ -78,7 +78,6 @@ class Test_Controller_Page extends SabelTestCase
   public function testAttributesAndResponses()
   {
     $c = $this->createController();
-    $c->setResponse(new MyResponse());
     $c->setAttribute("a", "10");
     $c->setAttribute("b", "20");
     $c->assign("c", "30");
@@ -154,5 +153,3 @@ class TestController extends Sabel_Controller_Page
   public function hiddenAction() {}
   protected function hoge() {}
 }
-
-class MyResponse extends Sabel_Response_Object {}

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * test for sabel.response.Object
+ * testcase of sabel.response.Object
  *
  * @category Response
  * @author   Ebine Yutaka <ebine.yutaka@sabel.jp>

@@ -2,11 +2,10 @@
 
 /**
  * testcase for sabel.reflection.*
- * using classes: sabel.annotation.Reader
+ *   & sabel.annotation.Reader
  *
  * @category Reflection
  * @author   Mori Reo <mori.reo@sabel.jp>
- * @author   Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
 class Test_Reflection extends SabelTestCase
 {
