@@ -193,7 +193,7 @@ class Form_Html extends Sabel_Object
     return implode("&nbsp;", $checks);
   }
   
-  public function radio($data, $isNullable)
+  public function radio($data)
   {
     $count  = 0;
     $radios = array();
@@ -204,7 +204,7 @@ class Form_Html extends Sabel_Object
       $radio = '<input type="radio" ';
       $this->addIdAndClass($radio);
       $radio .= 'name="' . $name . '" value="' . $v . '"';
-      if ($count === 0 && $value === null && !$isNullable || $v === $value) {
+      if ($count === 0 && $value === null || $v === $value) {
         $radio .= ' checked="checked"';
       }
       
@@ -215,11 +215,10 @@ class Form_Html extends Sabel_Object
     return implode("&nbsp;", $radios);
   }
   
-  public function select($data, $isNullable, $isHash = true)
+  public function select($data, $isHash = true)
   {
     $options = array();
     $selectedValue = $this->value;
-    if ($isNullable) $options[] = '<option value=""></option>';
     
     foreach ($data as $key => $value) {
       $k = ($isHash) ? $key : $value;

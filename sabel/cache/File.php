@@ -13,15 +13,17 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
 {
   private static $instance = null;
   
-  private function __construct()
+  protected $dir = "";
+  
+  private function __construct($dir)
   {
-    
+    $this->dir = ($dir === "") ? CACHE_DIR_PATH : $dir;
   }
   
-  public static function create()
+  public static function create($dir = "")
   {
     if (self::$instance === null) {
-      self::$instance = new self();
+      self::$instance = new self($dir);
     }
     
     return self::$instance;
@@ -64,6 +66,6 @@ class Sabel_Cache_File implements Sabel_Cache_Interface
   
   protected function getPath($key)
   {
-    return CACHE_DIR_PATH . DS . $key;
+    return $this->dir . DS . $key;
   }
 }

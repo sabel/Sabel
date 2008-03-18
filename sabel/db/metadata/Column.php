@@ -108,15 +108,15 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
     switch ($this->type) {
       case Sabel_DB_Type::INT:
         return (is_int($value)) ? $value : $this->toInteger($value, PHP_INT_MAX, -PHP_INT_MAX - 1);
-        
+      
       case Sabel_DB_Type::SMALLINT:
         return $this->toInteger($value, 32767, -32768);
-        
+      
       case Sabel_DB_Type::STRING:
       case Sabel_DB_Type::TEXT:
       case Sabel_DB_Type::BIGINT:
         return (string)$value;
-        
+      
       case Sabel_DB_Type::BOOL:
         if (is_string($value)) {
           if ($value === "1" || $value === "t" || $value === "true") {
@@ -133,15 +133,15 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
         } else {
           return $value;
         }
-        
+      
       case Sabel_DB_Type::DATETIME:
         $result = strtotime($value);
         return ($result === false) ? $value : date("Y-m-d H:i:s", $result);
-        
+      
       case Sabel_DB_Type::DATE:
         $result = strtotime($value);
         return ($result === false) ? $value : date("Y-m-d", $result);
-        
+      
       case Sabel_DB_Type::FLOAT:
       case Sabel_DB_Type::DOUBLE:
         if ((is_string($value) && $value === (string)(float)$value) || is_int($value)) {
@@ -149,7 +149,7 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
         } else {
           return $value;
         }
-        
+      
       default:
         return $value;
     }

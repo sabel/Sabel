@@ -108,9 +108,8 @@ class Form_Processor extends Sabel_Bus_Processor
     $values = $this->request->fetchPostValues();
     if (empty($values)) return $form;
     
-    $model     = $form->getModel();
     $allowCols = $form->getAllowColumns();
-    $mdlName   = $model->getName();
+    $mdlName   = $form->getModel()->getName();
     
     foreach ($values as $key => $value) {
       if (strpos($key, "::") === false) continue;
@@ -124,35 +123,27 @@ class Form_Processor extends Sabel_Bus_Processor
               $date["second"] = "00";
             }
             
-            $model->$key = $date["year"]   . "-"
-                         . $date["month"]  . "-"
-                         . $date["day"]    . " "
-                         . $date["hour"]   . ":"
-                         . $date["minute"] . ":"
-                         . $date["second"];
+            $form->set($key, $date["year"]   . "-" .
+                             $date["month"]  . "-" .
+                             $date["day"]    . " " .
+                             $date["hour"]   . ":" .
+                             $date["minute"] . ":" .
+                             $date["second"]);
           } else {
-            $model->$key = null;
+            $form->set($key, null);
           }
         }
       } elseif ($colName === "date") {
         foreach ($value as $key => $date) {
           if ($this->isCompleteDateValues($date, false)) {
             $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
-            $model->$key = $date;
+            $form->set($key, $date);
           } else {
-            $model->$key = null;
+            $form->set($key, null);
           }
         }
       } else {
-        $model->$colName = $value;
-      }
-    }
-    
-    foreach ($model->getColumns() as $colName => $column) {
-      if (!$column->isBool()) continue;
-      $key = "{$mdlName}::{$colName}";
-      if (isset($values[$key])) {
-        $model->$colName = ($values[$key] === "1");
+        $form->set($colName, $value);
       }
     }
     
