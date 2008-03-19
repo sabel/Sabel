@@ -180,8 +180,8 @@ final class Sabel
     
     require ($VIEW . "Renderer.php");
     require ($VIEW . "Object.php");
-    require ($VIEW . "Template.php");
-    require ($VIEW . "template" . DIRECTORY_SEPARATOR . "File.php");
+    require ($VIEW . "Location.php");
+    require ($VIEW . "location" . DIRECTORY_SEPARATOR . "File.php");
     
     require ($UTIL . "HashList.php");
     require ($UTIL . "VariableCache.php");

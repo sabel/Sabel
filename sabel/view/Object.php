@@ -12,7 +12,7 @@
 class Sabel_View_Object extends Sabel_Object implements Sabel_View
 {
   /**
-   * @var Sabel_View_Template[]
+   * @var Sabel_View_Location[]
    */
   protected $templates = array();
   
@@ -21,12 +21,12 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
    */
   protected $tplName = "";
   
-  public function __construct($name, Sabel_View_Template $template)
+  public function __construct($name, Sabel_View_Location $template)
   {
-    $this->addTemplate($name, $template);
+    $this->addLocation($name, $template);
   }
   
-  public function addTemplate($name, Sabel_View_Template $template)
+  public function addLocation($name, Sabel_View_Location $template)
   {
     if (is_string($name) && $name !== "") {
       $this->templates[$name] = $template;
@@ -36,7 +36,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
     }
   }
   
-  public function getTemplate($name)
+  public function getLocation($name)
   {
     if (isset($this->templates[$name])) {
       return $this->templates[$name];
@@ -45,7 +45,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
     }
   }
   
-  public function getTemplates()
+  public function getLocations()
   {
     return $this->templates;
   }
@@ -60,7 +60,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
     return $this->tplName;
   }
   
-  public function getValidTemplate($tplPath = null)
+  public function getValidLocation($tplPath = null)
   {
     if ($tplPath === null && $this->tplName === "") {
       throw new Sabel_Exception_Runtime("template name is null.");
@@ -77,13 +77,13 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function getContents($tplPath = null)
   {
-    $template = $this->getValidTemplate($tplPath);
+    $template = $this->getValidLocation($tplPath);
     return ($template !== null) ? $template->getContents() : "";
   }
   
   public function create($name, $tplPath, $contents = "")
   {
-    if ($template = $this->getTemplate($name)) {
+    if ($template = $this->getLocation($name)) {
       $template->name($tplPath);
       $template->create($contents);
     } else {
@@ -93,7 +93,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function delete($name, $tplPath)
   {
-    if ($template = $this->getTemplate($name)) {
+    if ($template = $this->getLocation($name)) {
       $template->name($tplPath);
       $template->delete();
     } else {
@@ -103,7 +103,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function isValid($name, $tplPath)
   {
-    if ($template = $this->getTemplate($name)) {
+    if ($template = $this->getLocation($name)) {
       $template->name($tplPath);
       return $template->isValid();
     } else {

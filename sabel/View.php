@@ -14,23 +14,23 @@ interface Sabel_View
 {
   /**
    * @param string $name
-   * @param Sabel_View_Template $template
+   * @param Sabel_View_Location $template
    *
    * @return void
    */
-  public function addTemplate($name, Sabel_View_Template $template);
+  public function addLocation($name, Sabel_View_Location $template);
   
   /**
    * @param string $name
    *
-   * @return Sabel_View_Template $template
+   * @return Sabel_View_Location $template
    */
-  public function getTemplate($name);
+  public function getLocation($name);
   
   /**
-   * @return Sabel_View_Template[]
+   * @return Sabel_View_Loation[]
    */
-  public function getTemplates();
+  public function getLocations();
   
   /**
    * @param string $tplName
@@ -47,9 +47,9 @@ interface Sabel_View
   /**
    * @param string $tplPath
    *
-   * @return Sabel_View_Template
+   * @return Sabel_View_Location
    */
-  public function getValidTemplate($tplPath = null);
+  public function getValidLocation($tplPath = null);
   
   /**
    * @param string $tplPath

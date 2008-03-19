@@ -11,7 +11,7 @@ class Config_Bus extends Sabel_Bus_Config
                                 "controller"  => "Processor_Controller",
                                 "helper"      => "Processor_Helper",
                                 "initializer" => "Processor_Initializer",
-                                "executer"    => "Processor_Executer",
+                                "action"      => "Processor_Action",
                                 "response"    => "Processor_Response",
                                 "view"        => "Processor_View");
   

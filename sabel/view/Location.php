@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_View_Template
+ * Sabel_View_Location
  *
  * @abstract
  * @category   View
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_View_Template extends Sabel_Object
+abstract class Sabel_View_Location extends Sabel_Object
 {
   protected $viewDirPath = "";
   protected $name        = "";

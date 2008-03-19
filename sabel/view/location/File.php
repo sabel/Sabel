@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_View_Template_File
+ * Sabel_View_Location_File
  *
  * @category   View
  * @package    org.sabel.view
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_View_Template_File extends Sabel_View_Template
+class Sabel_View_Location_File extends Sabel_View_Location
 {
   public function getContents()
   {

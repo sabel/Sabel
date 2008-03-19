@@ -2,7 +2,7 @@
 
 class TestProcessor_View extends Sabel_Bus_Processor
 {
-  protected $beforeEvents = array("initializer" => "createLocations");
+  protected $beforeEvents = array("initializer" => "initViewObject");
   
   private $view     = null;
   private $renderer = null;
@@ -28,13 +28,13 @@ class TestProcessor_View extends Sabel_Bus_Processor
       return $bus->set("result", $controller->contents);
     }
     
-    if ($template = $view->getValidTemplate()) {
+    if ($template = $view->getValidLocation()) {
       $contents = $this->rendering($template, $responses);
     } elseif ($controller->isExecuted()) {
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
     } else {
-      if ($template = $view->getValidTemplate("notFound")) {
+      if ($template = $view->getValidLocation("notFound")) {
         $contents = $this->rendering($template, $responses);
       } else {
         $contents = "<h1>404 Not Found</h1>";
@@ -53,7 +53,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
       $bus->set("result", $contents);
     } else {
       if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;
-      if ($template = $view->getValidTemplate($layout)) {
+      if ($template = $view->getValidLocation($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $this->rendering($template, $responses));
       } else {
@@ -62,18 +62,18 @@ class TestProcessor_View extends Sabel_Bus_Processor
     }
   }
   
-  public function createLocations($bus)
+  public function initViewObject($bus)
   {
     list ($m, $c, $a) = $bus->get("destination")->toArray();
     
-    $controller = new Sabel_View_Template_File($m . DS . VIEW_DIR_NAME . DS . $c . DS);
+    $controller = new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS . $c . DS);
     $view = new Sabel_View_Object("controller", $controller);
     
-    $module = new Sabel_View_Template_File($m . DS . VIEW_DIR_NAME . DS);
-    $view->addTemplate("module", $module);
+    $module = new Sabel_View_Location_File($m . DS . VIEW_DIR_NAME . DS);
+    $view->addLocation("module", $module);
     
-    $app = new Sabel_View_Template_File(VIEW_DIR_NAME . DS);
-    $view->addTemplate("app", $app);
+    $app = new Sabel_View_Location_File(VIEW_DIR_NAME . DS);
+    $view->addLocation("app", $app);
     
     $this->view = $view;
     

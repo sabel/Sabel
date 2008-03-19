@@ -10,25 +10,25 @@ abstract class Test_View_Template extends SabelTestCase
   
   public function testValidTemplate()
   {
-    $template = self::$view->getValidTemplate("index");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("index");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "hoge" . DS . "index" . TPL_SUFFIX, $template->getPath());
     
-    $template = self::$view->getValidTemplate("hoge");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("hoge");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "hoge" . DS . "hoge" . TPL_SUFFIX, $template->getPath());
     
-    $template = self::$view->getValidTemplate("error");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("error");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "error" . TPL_SUFFIX, $template->getPath());
   }
   
   public function testInvalidTemplate()
   {
-    $template = self::$view->getValidTemplate("fuga");
+    $template = self::$view->getValidLocation("fuga");
     $this->assertNull($template);
     
-    $template = self::$view->getValidTemplate("abcdef");
+    $template = self::$view->getValidLocation("abcdef");
     $this->assertNull($template);
   }
   
@@ -36,44 +36,44 @@ abstract class Test_View_Template extends SabelTestCase
   {
     $repository = $this->createRepository("fuga");
     
-    $this->assertEquals(3, count($repository->getTemplates()));
-    $this->assertTrue($repository->getTemplate("controller") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("module") instanceof Sabel_View_Template);
-    $this->assertTrue($repository->getTemplate("app") instanceof Sabel_View_Template);
-    $this->assertNull($repository->getTemplate("fuga"));
+    $this->assertEquals(3, count($repository->getLocations()));
+    $this->assertTrue($repository->getLocation("controller") instanceof Sabel_View_Location);
+    $this->assertTrue($repository->getLocation("module") instanceof Sabel_View_Location);
+    $this->assertTrue($repository->getLocation("app") instanceof Sabel_View_Location);
+    $this->assertNull($repository->getLocation("fuga"));
   }
   
   public function testValidTemplate2()
   {
-    $template = self::$view->getValidTemplate("index");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("index");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "fuga" . DS . "index" . TPL_SUFFIX, $template->getPath());
     
-    $template = self::$view->getValidTemplate("fuga");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("fuga");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "fuga" . DS . "fuga" . TPL_SUFFIX, $template->getPath());
     
-    $template = self::$view->getValidTemplate("error");
-    $this->assertTrue($template instanceof Sabel_View_Template);
+    $template = self::$view->getValidLocation("error");
+    $this->assertTrue($template instanceof Sabel_View_Location);
     $this->assertEquals(MODULES_DIR_PATH . DS . "index" . DS . VIEW_DIR_NAME . DS . "error" . TPL_SUFFIX, $template->getPath());
   }
   
   public function testInvalidTemplate2()
   {
-    $template = self::$view->getValidTemplate("hoge");
+    $template = self::$view->getValidLocation("hoge");
     $this->assertNull($template);
     
-    $template = self::$view->getValidTemplate("abcdef");
+    $template = self::$view->getValidLocation("abcdef");
     $this->assertNull($template);
   }
   
   public function testGetContents()
   {
-    $template = self::$view->getValidTemplate("index");
+    $template = self::$view->getValidLocation("index");
     $contents = $template->getContents();
     $this->assertEquals("fuga/index.tpl", rtrim($contents));
     
-    $template = self::$view->getValidTemplate("fuga");
+    $template = self::$view->getValidLocation("fuga");
     $contents = $template->getContents();
     $this->assertEquals("fuga/fuga.tpl", rtrim($contents));
   }
@@ -109,6 +109,6 @@ abstract class Test_View_Template extends SabelTestCase
   public function testDelete()
   {
     self::$view->delete("controller", "new");
-    $this->assertNull(self::$view->getValidTemplate("new"));
+    $this->assertNull(self::$view->getValidLocation("new"));
   }
 }

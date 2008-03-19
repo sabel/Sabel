@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Processor_Executer
+ * Processor_Action
  *
  * @category   Processor
  * @package    lib.processor
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Processor_Executer extends Sabel_Bus_Processor
+class Processor_Action extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
