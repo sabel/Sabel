@@ -14,22 +14,22 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   /**
    * @var Sabel_View_Location[]
    */
-  protected $templates = array();
+  protected $locations = array();
   
   /**
    * @var string
    */
   protected $tplName = "";
   
-  public function __construct($name, Sabel_View_Location $template)
+  public function __construct($name, Sabel_View_Location $location)
   {
-    $this->addLocation($name, $template);
+    $this->addLocation($name, $location);
   }
   
-  public function addLocation($name, Sabel_View_Location $template)
+  public function addLocation($name, Sabel_View_Location $location)
   {
     if (is_string($name) && $name !== "") {
-      $this->templates[$name] = $template;
+      $this->locations[$name] = $location;
     } else {
       $message = "argument(1) must be a string.";
       throw new Sabel_Exception_Runtime($message);
@@ -38,8 +38,8 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function getLocation($name)
   {
-    if (isset($this->templates[$name])) {
-      return $this->templates[$name];
+    if (isset($this->locations[$name])) {
+      return $this->locations[$name];
     } else {
       return null;
     }
@@ -47,7 +47,7 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function getLocations()
   {
-    return $this->templates;
+    return $this->locations;
   }
   
   public function setName($tplName)
@@ -66,9 +66,9 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
       throw new Sabel_Exception_Runtime("template name is null.");
     } else {
       if ($tplPath === null) $tplPath = $this->tplName;
-      foreach ($this->templates as $template) {
-        $template->name($tplPath);
-        if ($template->isValid()) return $template;
+      foreach ($this->locations as $location) {
+        $location->name($tplPath);
+        if ($location->isValid()) return $location;
       }
     }
     
@@ -77,15 +77,15 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function getContents($tplPath = null)
   {
-    $template = $this->getValidLocation($tplPath);
-    return ($template !== null) ? $template->getContents() : "";
+    $location = $this->getValidLocation($tplPath);
+    return ($location !== null) ? $location->getContents() : "";
   }
   
   public function create($name, $tplPath, $contents = "")
   {
-    if ($template = $this->getLocation($name)) {
-      $template->name($tplPath);
-      $template->create($contents);
+    if ($location = $this->getLocation($name)) {
+      $location->name($tplPath);
+      $location->create($contents);
     } else {
       throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }
@@ -93,9 +93,9 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function delete($name, $tplPath)
   {
-    if ($template = $this->getLocation($name)) {
-      $template->name($tplPath);
-      $template->delete();
+    if ($location = $this->getLocation($name)) {
+      $location->name($tplPath);
+      $location->delete();
     } else {
       throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }
@@ -103,9 +103,9 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   
   public function isValid($name, $tplPath)
   {
-    if ($template = $this->getLocation($name)) {
-      $template->name($tplPath);
-      return $template->isValid();
+    if ($location = $this->getLocation($name)) {
+      $location->name($tplPath);
+      return $location->isValid();
     } else {
       throw new Sabel_Exception_Runtime("such a location name is not registered.");
     }

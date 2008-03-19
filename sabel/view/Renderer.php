@@ -31,7 +31,7 @@ class Sabel_View_Renderer extends Sabel_Object
     $bus  = Sabel_Context::getContext()->getBus();
     $view = $bus->get("view");
     
-    if (($template = $view->getValidTemplate($name)) !== null) {
+    if (($template = $view->getValidLocation($name)) !== null) {
       $responses = array_merge($bus->get("response")->getResponses(), $assign);
       $contents  = $template->getContents();
       return $this->rendering($contents, $responses, $template->getPath());
