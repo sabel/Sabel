@@ -251,7 +251,14 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function toArray()
   {
-    return $this->values;
+    $columns = $this->metaCols;
+    
+    $retValues = array();
+    foreach ($this->values as $k => $v) {
+      $retValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
+    }
+    
+    return $retValues;;
   }
   
   /**
@@ -831,8 +838,10 @@ abstract class Sabel_DB_Model extends Sabel_Object
    *
    * @return Sabel_DB_Abstract_Statement
    */
-  public function prepareStatement($type)
+  public function prepareStatement($type = null)
   {
+    if ($type === null) $type = Sabel_DB_Statement::QUERY;
+    
     if ($this->statement === null) {
       $stmt = Sabel_DB::createStatement($this->connectionName);
       $this->statement = $stmt->type($type)->setMetadata($this->metadata);

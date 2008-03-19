@@ -1,9 +1,5 @@
 <?php
 
-if(!defined("RUN_BASE")) define("RUN_BASE", getcwd());
-
-Sabel::fileUsing("tasks/environment.php");
-
 /**
  * Fixture
  *
@@ -15,95 +11,130 @@ Sabel::fileUsing("tasks/environment.php");
  */
 class Fixture extends Sabel_Sakle_Task
 {
-  public function run($arguments)
+  protected $fixturesDir = "";
+  
+  public function initialize()
   {
-    if (!defined("ENVIRONMENT")) {
-      if (isset($arguments[1])) {
-        define ("ENVIRONMENT", constant(strtoupper($arguments[1])));
-      } else {
-        define ("ENVIRONMENT", TEST);
-      }
+    $this->fixturesDir = RUN_BASE . DS . "tests" . DS . "fixture";
+  }
+  
+  public function run()
+  {
+    if (count($this->arguments) < 2) {
+      $this->usage();
+      exit;
     }
     
-    Sabel::fileUsing(RUN_BASE . "/config/connection.php");
+    $isExport = false;
+    if (Sabel_Console::hasOption("export", $this->arguments)) {
+      $index = array_search("--export", $this->arguments, true);
+      unset($this->arguments[$index]);
+      $this->arguments = array_values($this->arguments);
+      $isExport = true;
+    }
     
-    if (isset($arguments[2]) && $arguments[2] === "run") {
-      $fixtureName = "Fixtures_" . $arguments[3];
+    $this->defineEnvironment();
+    Sabel_DB_Config::initialize(new Config_Database());
+    
+    if ($isExport) {
+      $this->export();
+    } else {
+      $fixtureName = $this->arguments[1];
       
-      try {
-        $this->printMessage("up fixture");
-        if (class_exists($fixtureName)) eval("{$fixtureName}::upFixture();");
-      } catch (Exception $e) {
-        $this->printMessage($e->getMessage());
-      }
-    } elseif (isset($arguments[2]) && $arguments[2] === "import") {
-      $this->printMessage("import");
-      
-      if (isset($arguments[3]) && $arguments[3] === "all") {
-        $this->printMessage("create all fixtures");
-        $name = array_keys(get_db_params());
-        $sa = new Sabel_DB_Schema_Accessor($name[0]);
-        
-        foreach ($sa->getTableList() as $table) {
-          if ($table == "sversion") continue;
-          $this->createModelFixture(convert_to_modelname($table));
+      if ($fixtureName === "all") {
+        foreach (scandir($this->fixturesDir) as $item) {
+          if ($item === "." || $item === "..") continue;
+          Sabel::fileUsing($this->fixturesDir . DS . $item, true);
+          $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
+          $instance  = new $className();
+          $instance->upFixture();
         }
-        
       } else {
-        $modelName = $arguments[3];
-        $this->createModelFixture($modelName);
+        $filePath = $this->fixturesDir . DS . $fixtureName . ".php";
+        if (Sabel::fileUsing($filePath, true)) {
+          $className = "Fixture_" . $fixtureName;
+          $instance  = new $className();
+          $instance->upFixture();
+        } else {
+          $this->error("no such fixture file. '{$filePath}'");
+        }
       }
     }
   }
   
-  /**
-   * create fixture class from template with schema
-   *
-   * @param string $modelName
-   */
-  protected function createModelFixture($modelName)
+  protected function defineEnvironment()
   {
-    $model = MODEL($modelName);
-    $instancies = $model->select();
-    
-    $lines = array();
-    
-    if ($instancies) {
-      foreach ($instancies as $instance) {
-        $lines[] = '$model = ' . 'new ' . $modelName . "();\n";
-        foreach ($instance->getColumnNames() as $column) {
-          $line = '$model->' . $column . " = ";
-          
-          if ($column == "") {
-            $line .= 0;
-          } elseif (is_numeric($instance->$column)) {
-            $line .= $instance->$column . ";";
-          } else {
-            $line .= "'" . addslashes($instance->$column) . "';";
-          }
-          
-          $lines[] = $line . "\n";
-        }
-        $lines[] = 'if(!$model->save()) {' . "\n";
-        $lines[] = '  dump($model->getErrors());' . "\n";
-        $lines[] = "}\n";
-        
-        $tblName = convert_to_tablename($modelName);
-        ob_start();
-        include RUN_BASE . "/tests/fixtures/Template.tphp";
-        $fixtureFile = ob_get_clean();
-        $fixtureFile = str_replace("#?php", "?php", $fixtureFile);
-        $path = RUN_BASE . "/tests/fixtures/".$modelName.".php";
-        $result = file_put_contents($path, $fixtureFile);
-        if ($result) {
-          $this->printMessage("create " . $modelName);
-        } else {
-          $this->printMessage("fail " . $modelName);
-        }
+    if (!defined("ENVIRONMENT")) {
+      if (($env = environment($this->arguments[0])) === null) {
+        $this->error("invalid environment. use 'development' or 'test', 'production'.");
+      } else {
+        define("ENVIRONMENT", $env);
       }
-    } else {
-      $this->printMessage("no instance found in " . $modelName);
     }
   }
-
+  
+  public function usage()
+  {
+    echo "Usage: sakle Fixture ENVIRONMENT FIXTURE_NAME " . PHP_EOL;
+    echo PHP_EOL;
+    echo "  ENVIRONMENT:  production | test | development" . PHP_EOL;
+    echo "  FIXTURE_NAME: fixture name or 'all'" . PHP_EOL;
+    echo PHP_EOL;
+    echo "Example: sakle Fixture development User" . PHP_EOL;
+    echo PHP_EOL;
+  }
+  
+  protected function export()
+  {
+    unset($this->arguments[0]);
+    
+    foreach ($this->arguments as $mdlName) {
+      $lines  = array();
+      $models = MODEL($mdlName)->select();
+      foreach ($models as $model) {
+        $data = $this->createLine($model->toArray());
+        $lines[] = '$model->insert(' . $data . ');';
+      }
+      
+      $code = array("<?php" . PHP_EOL);
+      $code[] = "class Fixture_{$mdlName}";
+      $code[] = "{";
+      $code[] = "  public function upFixture()";
+      $code[] = "  {";
+      $code[] = '    $model = MODEL("' . $mdlName . '");';
+      
+      foreach ($lines as $line) {
+        $code[] = "    $line";
+      }
+      
+      $code[] = "  }" . PHP_EOL;
+      $code[] = "  public function downFixture()";
+      $code[] = "  {";
+      $code[] = '    $stmt = MODEL("' . $mdlName . '")->prepareStatement();';
+      $code[] = '    $stmt->setQuery("DELETE FROM ' . convert_to_tablename($mdlName) . '")->execute();';
+      $code[] = "  }";
+      $code[] = "}";
+      
+      $path = $this->fixturesDir . DS . $mdlName . ".php";
+      file_put_contents($path, implode(PHP_EOL, $code));
+    }
+  }
+  
+  protected function createLine($row)
+  {
+    $line = array();
+    foreach ($row as $col => $val) {
+      if (is_string($val)) {
+        $val = "'{$val}'";
+      } elseif (is_bool($val)) {
+        $val = ($val) ? "true" : "false";
+      } elseif (is_null($val)) {
+        $val = "null";
+      }
+      
+      $line[] = "'{$col}' => $val";
+    }
+    
+    return "array(" . implode(", ", $line) . ")";
+  }
 }

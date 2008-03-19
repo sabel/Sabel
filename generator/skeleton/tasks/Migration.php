@@ -119,9 +119,7 @@ class Migration extends Sabel_Sakle_Task
   {
     $inputEnv = $this->arguments[0];
     if (($env = environment($inputEnv)) === null) {
-      $this->error("environment '{$inputEnv}' is not supported. " .
-                   "use 'development' or 'test' or 'production'.");
-      
+      $this->error("invalid environment. use 'development' or 'test', 'production'.");
       exit;
     }
     

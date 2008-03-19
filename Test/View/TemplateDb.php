@@ -35,15 +35,12 @@ class Test_View_TemplateDb extends Test_View_Template
   protected function createRepository($controllerName)
   {
     $controller = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS . $controllerName . DS);
-    $controller->setTableName("templates");
     $view = new Sabel_View_Object("controller", $controller);
     
     $module = new Sabel_View_Template_Database("index" . DS . VIEW_DIR_NAME . DS);
-    $module->setTableName("templates");
     $view->addTemplate("module", $module);
     
     $app = new Sabel_View_Template_Database(VIEW_DIR_NAME . DS);
-    $app->setTableName("templates");
     $view->addTemplate("app", $app);
     
     return self::$view = $view;
@@ -73,7 +70,7 @@ class Test_View_TemplateDb extends Test_View_Template
     
     Sabel_DB_Config::add("default", $params);
     $stmt = Sabel_DB::createStatement();
-    $tblName = $stmt->quoteIdentifier("templates");
+    $tblName = $stmt->quoteIdentifier("sbl_template");
     $nCol    = $stmt->quoteIdentifier("name");
     $nsCol   = $stmt->quoteIdentifier("namespace");
     $cCol    = $stmt->quoteIdentifier("contents");
