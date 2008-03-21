@@ -11,7 +11,16 @@
  */
 class Sabel_Container_DI
 {
+  private $injection = null;
+  private $injector = null;
+  
   private $dependStack = array();
+  
+  public function __construct(Sabel_Container_Injection $injection, Sabel_Container_Injector $injector)
+  {
+    $this->injection = $injection;
+    $this->injector = $injector;
+  }
   
   /**
    * load instance of $className;
@@ -81,10 +90,16 @@ class Sabel_Container_DI
     for ($i = 0; $i < $stackCount; ++$i) {
       $reflection = array_pop($this->dependStack);
       
-      if (!$reflection->isInterface() && !$reflection->isAbstract()) {
-        $instance = $this->getInstance($reflection->getName(), $instance);
+      $className = $reflection->getName();
+      
+      if ($this->injection->hasConstruct($className)) {
+        $instance = $this->injector->newInstance($className);
       } else {
-        $instance = $this->getInstanceWithImplement($reflection->getName(), $instance);
+        if (!$reflection->isInterface() && !$reflection->isAbstract()) {
+          $instance = $this->getInstance($className, $instance);
+        } else {
+          $instance = $this->getInstanceWithImplement($className, $instance);
+        }
       }
       
       unset($reflection);

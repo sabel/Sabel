@@ -71,7 +71,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
   
   public function hasConstruct($className)
   {
-    return (isset($this->constructs[$className]));
+    return array_key_exists($className, $this->constructs);
   }
   
   public function getConstruct($className)

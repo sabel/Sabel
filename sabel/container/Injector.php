@@ -71,10 +71,22 @@ class Sabel_Container_Injector
       $reflect = new ReflectionClass($className);
       $instance = $reflect->newInstanceArgs($constructArguments);
     } elseif ($args !== null) {
+      
+      $tmp = array();
+      foreach ($args as $arg) {
+        if (is_object($arg)) {
+          $tmp[] = $arg;
+        } elseif (is_string($arg) && class_exists($arg)) {
+          $tmp[] = $this->newInstance($arg);
+        } else {
+          $tmp[] = $arg;
+        }
+      }
+      
       $reflect = new ReflectionClass($className);
-      $instance = $reflect->newInstanceArgs($args);
+      $instance = $reflect->newInstanceArgs($tmp);
     } else {
-      $dependencyResolver = new Sabel_Container_DI();
+      $dependencyResolver = new Sabel_Container_DI($this->injection, $this);
       $instance = $dependencyResolver->load($className);
       $instance = $this->applyAspect($instance);
     }

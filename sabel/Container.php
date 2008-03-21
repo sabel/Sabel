@@ -29,4 +29,13 @@ class Sabel_Container
     $injector = new Sabel_Container_Injector($config);
     return self::$configs[$name] = $injector;
   }
+  
+  /**
+   * create new instance with injection config
+   */
+  public static function load($className, $config)
+  {
+    
+    return self::create($config)->newInstance($className);
+  }
 }
