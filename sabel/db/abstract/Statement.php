@@ -174,7 +174,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   public function where($where)
   {
     if (is_string($where)) {
-      if ($where !== "") $this->where = " " . $where;
+      $this->where = ($where === "") ? "" : " " . $where;
     } else {
       throw new Sabel_Exception_InvalidArgument("argument must be a string.");
     }

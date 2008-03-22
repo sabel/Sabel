@@ -594,7 +594,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
-   * @return array
+   * @return Sabel_DB_Model[]
    */
   public function select($arg1 = null, $arg2 = null)
   {
@@ -602,7 +602,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return array
+   * @return Sabel_DB_Model[]
    */
   protected function _select()
   {
@@ -616,11 +616,69 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
+   * @param mixed $arg1
+   * @param mixed $arg2
+   *
+   * @return Sabel_DB_Model[]
+   */
+  public function selectWithChildren($child, $orderBy = "")
+  {
+    return $this->prepare("selectWithChildren", array($child, $orderBy))->execute();
+  }
+  
+  /**
+   * @return Sabel_DB_Model[]
+   */
+  protected function _selectWithChildren()
+  {
+    @list ($child, $orderBy) = $this->arguments;
+    $this->arguments = array();
+    
+    $ids     = array();
+    $models  = array();
+    $pkey    = $this->metadata->getPrimaryKey();
+    $results = $this->_select();
+    
+    foreach ($results as $result) {
+      $ids[] = $id = $result->$pkey;
+      $models[$id] = $result;
+    }
+    
+    unset($results);
+    
+    $childModel = (is_string($child)) ? MODEL($child) : $child;
+    $childName  = $childModel->getName();
+    
+    if ($orderBy !== "") {
+      $childModel->setOrderBy($orderBy);
+    }
+    
+    $joinkey = create_join_key($childModel, $this->tableName);
+    $fkey = $joinkey["fkey"];
+    $in = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, $fkey, $ids);
+    $childModel->setCondition($in);
+    $results = $childModel->_select();
+    
+    foreach ($results as $result) {
+      $key = $result->$fkey;
+      if ($models[$key]->$childName === null) {
+        $models[$key]->$childName = array($result);
+      } else {
+        $tmp = $models[$key]->$childName;
+        $tmp[] = $result;
+        $models[$key]->$childName = $tmp;
+      }
+    }
+    
+    return $models;
+  }
+  
+  /**
    * @param string $query
    * @param array  $bindValues
    *
    * @throws Sabel_Exception_InvalidArgument
-   * @return array
+   * @return Sabel_DB_Model[]
    */
   public function selectByQuery($query, $bindValues = array())
   {
@@ -633,7 +691,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return array
+   * @return Sabel_DB_Model[]
    */
   protected function _selectByQuery()
   {
