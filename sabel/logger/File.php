@@ -18,9 +18,10 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
     if (empty($allMessages)) return;
     
     foreach ($allMessages as $identifier => $messages) {
-      $fp  = fopen($this->getLogFilePath($identifier), "a");
+      $fp  = fopen($this->getFilePath($identifier), "a");
       $sep = "============================================================" . PHP_EOL;
       fwrite($fp, PHP_EOL . $sep . PHP_EOL);
+      
       $msgs = array();
       foreach ($messages as $message) {
         $msgs[] = $message["time"]
@@ -47,7 +48,7 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
     }
   }
   
-  protected function getLogFilePath($identifier)
+  protected function getFilePath($identifier)
   {
     if ($identifier === "default") {
       if (!defined("ENVIRONMENT")) {
