@@ -43,7 +43,9 @@ abstract class Sabel_Session_Abstract
     $this->started = true;
     $this->cookieEnabled = isset($_COOKIE[session_name()]);
     
-    if (empty($this->attributes)) return;
+    if (!isset($this->attributes["client_id"])) {
+      $this->write("client_id", $this->createClientId());
+    }
     
     $time = time();
     foreach ($this->attributes as $k => $values) {
@@ -120,5 +122,20 @@ abstract class Sabel_Session_Abstract
   {
     $func = (ini_get("session.hash_function") === "1") ? "sha1" : "md5";
     return $func(uniqid(mt_rand(), true));
+  }
+  
+  protected function createClientId()
+  {
+    if (defined("SESSION_CLIENT_ID_HASH_FUNC")) {
+      $func = strtolower(SESSION_CLIENT_ID_HASH_FUNC);
+    } else {
+      $func = "md5";
+    }
+    
+    if ($func === "sha256") {
+      return bin2hex(mhash(MHASH_SHA256, uniqid(mt_rand(), true)));
+    } else {
+      return $func(uniqid(mt_rand(), true));
+    }
   }
 }

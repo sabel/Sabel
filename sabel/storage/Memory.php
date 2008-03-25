@@ -12,30 +12,13 @@
 class Sabel_Storage_Memory extends Sabel_Object implements Sabel_Storage
 {
   /**
-   * @var self
-   */
-  private static $instance = null;
-  
-  /**
    * @var array
    */
   protected $attributes = array();
   
-  private function __construct()
+  public function __construct($config = array())
   {
     
-  }
-  
-  /**
-   * @return self
-   */
-  public static function create()
-  {
-    if (self::$instance === null) {
-      self::$instance = new self();
-    }
-    
-    return self::$instance;
   }
   
   /**

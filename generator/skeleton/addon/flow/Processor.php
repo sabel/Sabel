@@ -139,10 +139,11 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   private function getFlowState($token, $destination)
   {
-    $key = implode("_", array($destination->getModule(),
-                              $destination->getController()));
+    $namespace = $this->session->read("client_id")
+               . $destination->getModule()
+               . $destination->getController();
     
-    $this->storage = $this->createStorage($this->session->getId() . "_{$key}");
+    $this->storage = $this->createStorage(md5($namespace));
     
     if ($this->isStartAction()) {
       $state = new Flow_State(md5(uniqid(mt_rand(), true)));

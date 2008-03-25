@@ -29,7 +29,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   public function __construct($config = array())
   {
     if (isset($config["namespace"])) {
-      $this->namespace = $config["namespace"];
+      $this->setNamespace($config["namespace"]);
     }
     
     if (isset($config["tableName"])) {
@@ -76,7 +76,12 @@ class Sabel_Storage_Database implements Sabel_Storage
    */
   public function setNamespace($namespace)
   {
-    $this->namespace = $namespace;
+    if (is_string($namespace)) {
+      $this->namespace = $namespace;
+    } else {
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function fetch($key)
@@ -163,10 +168,6 @@ class Sabel_Storage_Database implements Sabel_Storage
   
   private function getKey($key)
   {
-    if ($this->namespace === "") {
-      return $key;
-    } else {
-      return $this->namespace . "_" . $key;
-    }
+    return $this->namespace . $key;
   }
 }

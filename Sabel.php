@@ -34,7 +34,7 @@ spl_autoload_register(array("Sabel", "autoload"));
 /**
  * Sabel
  *
- * @category   Sabel
+ * @category   Core
  * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>

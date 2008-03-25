@@ -13,10 +13,9 @@ class Sabel_Context extends Sabel_Object
 {
   private static $context = null;
   
-  private
-    $bus        = null,
-    $candidate  = null,
-    $exception  = null;
+  private $bus       = null;
+  private $candidate = null;
+  private $exception = null;
   
   public static function setContext($context)
   {

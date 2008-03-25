@@ -12,6 +12,11 @@
 class Sabel_View_Object extends Sabel_Object implements Sabel_View
 {
   /**
+   * @var Sabel_View_Renderer
+   */
+  protected $renderer = null;
+  
+  /**
    * @var Sabel_View_Location[]
    */
   protected $locations = array();
@@ -58,6 +63,23 @@ class Sabel_View_Object extends Sabel_Object implements Sabel_View
   public function getName()
   {
     return $this->tplName;
+  }
+  
+  public function setRenderer(Sabel_View_Renderer $renderer)
+  {
+    $this->renderer = $renderer;
+  }
+  
+  public function getRenderer()
+  {
+    return $this->renderer;
+  }
+  
+  public function rendering(Sabel_View_Location $location, array $assigns = array())
+  {
+    return $this->renderer->rendering($location->getContents(),
+                                      $assigns,
+                                      $location->getPath());
   }
   
   public function getValidLocation($tplPath = null)
