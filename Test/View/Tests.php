@@ -13,12 +13,11 @@ require_once ("Test/View/PageViewer.php");
  * @category  View
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  */
-class Test_View_Tests extends SabelTestSuite
+class Test_View_Tests
 {
   public static function suite()
   {
-    $suite = self::createSuite();
-    
+    $suite = new PHPUnit_Framework_TestSuite();
     $suite->addTest(Test_View_TemplateFile::suite());
     $suite->addTest(Test_View_TemplateDb::suite());
     $suite->addTest(Test_View_Renderer::suite());

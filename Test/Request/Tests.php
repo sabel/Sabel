@@ -2,12 +2,11 @@
 
 require_once ("Test/Request/Object.php");
 
-class Test_Request_Tests extends SabelTestSuite
+class Test_Request_Tests
 {
   public static function suite()
   {
-    $suite = self::createSuite();
-    
+    $suite = new PHPUnit_Framework_TestSuite();
     $suite->addTest(Test_Request_Object::suite());
     
     return $suite;

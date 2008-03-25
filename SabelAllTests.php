@@ -51,7 +51,6 @@ require_once ("PHPUnit/Framework/IncompleteTestError.php");
 
 require_once ("Sabel.php");
 require_once ("Test/SabelTestCase.php");
-require_once ("Test/SabelTestSuite.php");
 require_once ("Test/Application.php");
 require_once ("Test/Object.php");
 require_once ("Test/Console.php");
