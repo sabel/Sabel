@@ -27,13 +27,9 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
     if (is_readable($testFilePath)) {
       try {
         $testCaseName = $this->classPrefix . $testName;
-        $testSuite = $this->getTest($testCaseName, $testFilePath);
-        
-        if ($testSuite instanceof PHPUnit_Framework_TestSuite) {
-          $this->doRun($testSuite);
-        }
+        $this->doRun($this->getTest($testCaseName, $testFilePath));
       } catch (Exception $e) {
-        Sabel_Console::error("could not run test suite: " . $e->getMessage());
+        Sabel_Console::error("couldn't run the TestSuite: " . $e->getMessage());
       }
     } else {
       Sabel_Console::error($testFilePath . " not found");
@@ -43,5 +39,32 @@ class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
   public function setClassPrefix($prefix)
   {
     $this->classPrefix = $prefix;
+  }
+  
+  public function getTest($suiteClassName, $suiteClassFile = "", $syntaxCheck = true)
+  {
+    Sabel::fileUsing($suiteClassFile, true);
+    $testClass = new ReflectionClass($suiteClassName);
+
+    if ($testClass->hasMethod(self::SUITE_METHODNAME)) {
+      $suiteMethod = $testClass->getMethod(self::SUITE_METHODNAME);
+
+      if (!$suiteMethod->isStatic()) {
+        throw new Sabel_Exception_Runtime("suite() method must be static.");
+      }
+
+      try {
+        $test = $suiteMethod->invoke(NULL, $testClass->getName());
+      } catch (ReflectionException $e) {
+        $message = sprintf("Failed to invoke suite() method.\n%s", $e->getMessage());
+        throw new Sabel_Exception_Runtime($message);
+      }
+    } else {
+      $test = new Sabel_Test_TestSuite($testClass);
+    }
+
+    $this->clearStatus();
+
+    return $test;
   }
 }

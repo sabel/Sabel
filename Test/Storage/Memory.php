@@ -17,7 +17,7 @@ class Test_Storage_Memory extends SabelTestCase
   
   public function setUp()
   {
-    $this->storage = Sabel_Storage_Memory::create();
+    $this->storage = new Sabel_Storage_Memory();
   }
   
   public function testFetch()

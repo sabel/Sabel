@@ -33,6 +33,8 @@ class Fixture extends Sabel_Sakle_Task
       $isExport = true;
     }
     
+    $method = $this->getFixtureMethod();
+    
     $this->defineEnvironment();
     Sabel_DB_Config::initialize(new Config_Database());
     
@@ -47,14 +49,14 @@ class Fixture extends Sabel_Sakle_Task
           Sabel::fileUsing($this->fixturesDir . DS . $item, true);
           $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
           $instance  = new $className();
-          $instance->upFixture();
+          $instance->$method();
         }
       } else {
         $filePath = $this->fixturesDir . DS . $fixtureName . ".php";
         if (Sabel::fileUsing($filePath, true)) {
           $className = "Fixture_" . $fixtureName;
           $instance  = new $className();
-          $instance->upFixture();
+          $instance->$method();
         } else {
           $this->error("no such fixture file. '{$filePath}'");
         }
@@ -73,12 +75,38 @@ class Fixture extends Sabel_Sakle_Task
     }
   }
   
+  protected function getFixtureMethod()
+  {
+    $method = "upFixture";
+    $arguments = $this->arguments;
+    
+    if (Sabel_Console::hasOption("up", $arguments)) {
+      $index = array_search("--up", $arguments, true);
+      unset($arguments[$index]);
+      $arguments = array_values($arguments);
+    }
+    
+    if (Sabel_Console::hasOption("down", $arguments)) {
+      $index = array_search("--down", $arguments, true);
+      unset($arguments[$index]);
+      $arguments = array_values($arguments);
+      $method = "downFixture";
+    }
+    
+    $this->arguments = $arguments;
+    return $method;
+  }
+  
   public function usage()
   {
-    echo "Usage: sakle Fixture ENVIRONMENT FIXTURE_NAME " . PHP_EOL;
+    echo "Usage: sakle Fixture [OPTION] ENVIRONMENT FIXTURE_NAME " . PHP_EOL;
     echo PHP_EOL;
     echo "  ENVIRONMENT:  production | test | development" . PHP_EOL;
     echo "  FIXTURE_NAME: fixture name or 'all'" . PHP_EOL;
+    echo PHP_EOL;
+    echo "  OPTION:" . PHP_EOL;
+    echo "    --up      up fixture(default)" . PHP_EOL;
+    echo "    --down    down fixture" . PHP_EOL;
     echo PHP_EOL;
     echo "Example: sakle Fixture development User" . PHP_EOL;
     echo PHP_EOL;
