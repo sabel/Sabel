@@ -19,9 +19,9 @@ class UnitTest extends Tests
     Sabel_DB_Config::initialize(new Config_Database());
     
     $runner = Sabel_Test_Runner::create();
-    $runner->setClassPrefix("Units_");
+    $runner->setClassPrefix("Unit_");
     
-    $testsDir = RUN_BASE . DS . "tests" . DS . "units";
+    $testsDir = RUN_BASE . DS . "tests" . DS . "unit";
     
     if (count($this->arguments) === 0) {
       foreach (scandir($testsDir) as $file) {

@@ -14,7 +14,7 @@ require_once ("PHPUnit/TextUI/TestRunner.php");
  */
 class Sabel_Test_Runner extends PHPUnit_TextUI_TestRunner
 {
-  private $classPrefix = "Units_";
+  private $classPrefix = "Unit_";
   
   public static function create()
   {

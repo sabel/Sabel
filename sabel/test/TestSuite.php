@@ -30,11 +30,19 @@ class Sabel_Test_TestSuite extends PHPUnit_Framework_TestSuite
     $annotation = $reflection->getAnnotation("fixture");
     
     if (isset($annotation[0])) {
-      foreach ($annotation[0] as $fixtureName) {
-        Sabel::fileUsing($fixtureDir . DS . $fixtureName . ".php", true);
-        $className = "Fixture_" . $fixtureName;
-        $fixture = new $className();
-        $fixture->$method();
+      try {
+        foreach ($annotation[0] as $fixtureName) {
+          Sabel::fileUsing($fixtureDir . DS . $fixtureName . ".php", true);
+          $className = "Fixture_" . $fixtureName;
+          $fixture = new $className();
+          $fixture->$method();
+        }
+      } catch (Exception $e) {
+        if ($reflection->hasMethod($method . "Exception")) {
+          $reflection->getMethod($method . "Exception")->invoke(null, $e);
+        } else {
+          throw $e;
+        }
       }
     }
   }

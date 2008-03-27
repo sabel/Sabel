@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Exception_ClassNotFound
+ * Sabel_Exception_Printer
  *
  * @category   Exception
  * @package    org.sabel.exception
@@ -35,6 +35,8 @@ class Sabel_Exception_Printer
             $args[] = '"' . $arg . '"';
           } elseif (is_int($arg) || is_float($arg)) {
             $args[] = $arg;
+          } elseif (is_array($arg)) {
+            $args[] = self::arrayToString($arg);
           } elseif (is_resource($arg)) {
             $args[] = "(Resource)" . get_resource_type($arg);
           } elseif ($arg === null) {
@@ -57,6 +59,40 @@ class Sabel_Exception_Printer
       $result[] = implode($eol, $trace);
     }
     
-    return implode($eol . $eol, $result);
+    $contents = implode($eol . $eol, $result);
+    
+    if ($return) {
+      return $contents;
+    } else {
+      echo $contents;
+    }
+  }
+  
+  protected static function arrayToString($array)
+  {
+    $ret = array();
+    foreach ($array as $k => $v) {
+      $k = '"' . $k . '"';
+      if (is_object($v)) {
+        $ret[] = $k . " => (Object)" . get_class($v);
+      } elseif (is_bool($v)) {
+        $str = ($v) ? "true" : "false";
+        $ret[] = $k . " => " . $str;
+      } elseif (is_string($v)) {
+        $ret[] = $k . ' => "' . $v . '"';
+      } elseif (is_int($v) || is_float($v)) {
+        $ret[] = $k . " => " . $v;
+      } elseif (is_array($v)) {
+        $ret[] = $k . " => array(...)";
+      } elseif (is_resource($v)) {
+        $ret[] = $k . " => (Resource)" . get_resource_type($v);
+      } elseif ($v === null) {
+        $ret[] = $k . " => null";
+      } else {
+        $ret[] = $k . " => (" . ucfirst(gettype($v)) . ")" . $v;
+      }
+    }
+    
+    return "array(" . implode(", ", $ret) . ")";
   }
 }

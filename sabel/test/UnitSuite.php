@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Test_UnitsSuite
+ * Sabel_Test_UnitSuite
  *
  * @category   Test
  * @package    org.sabel.test
@@ -9,11 +9,11 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Test_UnitsSuite extends Sabel_Test_TestSuite
+class Sabel_Test_UnitSuite extends Sabel_Test_TestSuite
 {
   public function add($testName)
   {
-    $dir = RUN_BASE . DS . "tests" . DS . "units" . DS;
+    $dir = RUN_BASE . DS . "tests" . DS . "unit" . DS;
     
     $parts = explode("_", $testName);
     $last = array_pop($parts);
@@ -22,7 +22,7 @@ class Sabel_Test_UnitsSuite extends Sabel_Test_TestSuite
       $dir .= strtolower(implode(DS, $parts)) . DS;
     }
     
-    $className = "Units_" . $testName;
+    $className = "Unit_" . $testName;
     Sabel::fileUsing($dir . $last . ".php", true);
     
     $reflection = new ReflectionClass($className);
