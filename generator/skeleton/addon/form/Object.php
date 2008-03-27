@@ -11,6 +11,8 @@
  */
 class Form_Object extends Sabel_Object
 {
+  const NAME_SEPARATOR = ":";
+  
   /**
    * @var Sabel_DB_Model
    */
@@ -267,7 +269,7 @@ class Form_Object extends Sabel_Object
   
   protected function createInputName($name)
   {
-    return $this->mdlName . "::" . $name;
+    return $this->mdlName . self::NAME_SEPARATOR . $name;
   }
   
   private function getHtmlWriter($name, $inputName, $id = null, $class = null)

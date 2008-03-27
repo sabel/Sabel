@@ -1,6 +1,5 @@
 <?php
 
-require_once ("PHPUnit/TextUI/TestRunner.php");
 require_once ("PHPUnit/Framework/TestCase.php");
 
 /**
@@ -12,7 +11,7 @@ require_once ("PHPUnit/Framework/TestCase.php");
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
+class Sabel_Test_Functional extends Sabel_Test_TestCase
 {
   protected function request(Sabel_Request $request, $session = null)
   {
@@ -39,16 +38,6 @@ class Sabel_Test_Functional extends PHPUnit_Framework_TestCase
     }
     
     return $response;
-  }
-  
-  public function eq($from, $to)
-  {
-    $this->assertEquals($from, $to);
-  }
-  
-  public function neq($from, $to)
-  {
-    $this->assertNotEquals($from, $to);
   }
   
   protected function assertHtmlElementEquals($expect, $id, $html)

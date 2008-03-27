@@ -110,10 +110,11 @@ class Form_Processor extends Sabel_Bus_Processor
     
     $allowCols = $form->getAllowColumns();
     $mdlName   = $form->getModel()->getName();
+    $separator = Form_Object::NAME_SEPARATOR;
     
     foreach ($values as $key => $value) {
-      if (strpos($key, "::") === false) continue;
-      list ($name, $colName) = explode("::", $key);
+      if (strpos($key, $separator) === false) continue;
+      list ($name, $colName) = explode($separator, $key);
       if ($name !== $mdlName || !in_array($colName, $allowCols)) continue;
       
       if ($colName === "datetime") {

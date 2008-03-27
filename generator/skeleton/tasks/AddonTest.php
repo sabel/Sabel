@@ -8,7 +8,6 @@ Sabel::fileUsing("tasks" . DS . "Tests.php", true);
  * @category   Sakle
  * @package    org.sabel.sakle
  * @author     Mori Reo <mori.reo@sabel.jp>
- * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
@@ -42,6 +41,6 @@ class AddonTest extends Tests
   
   public function usage()
   {
-    echo "Usage: sakle AddonTest ADDON_NAME TEST_NAME" . PHP_EOL;
+    echo "Usage: sakle AddonTest ADDON_NAME [TEST_NAME]" . PHP_EOL;
   }
 }
