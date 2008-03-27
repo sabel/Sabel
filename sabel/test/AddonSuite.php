@@ -32,7 +32,7 @@ class Sabel_Test_AddonSuite extends Sabel_Test_TestSuite
     if ($reflection->isSubClassOf("Sabel_Test_TestSuite")) {
       $this->addTest($reflection->getMethod("suite")->invoke(null));
     } else {
-      $this->addTest(new PHPUnit_Framework_TestSuite($className));
+      $this->addTest(new self($className));
     }
   }
 }
