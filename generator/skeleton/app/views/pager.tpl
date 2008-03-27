@@ -1,3 +1,4 @@
+<div class="sbl_pager">
 <? if ($paginate->count > $paginate->limit) : ?>
   <?= a($paginate->uri, "&lt;&lt;", $paginate->getQueryString($paginate->viewer->getFirst())) ?>
   <? foreach ($paginate->viewer as $v) : ?>
@@ -9,3 +10,4 @@
   <? endforeach ?>
   <?= a($paginate->uri, "&gt;&gt;", $paginate->getQueryString($paginate->viewer->getLast())) ?>
 <? endif ?>
+</div>

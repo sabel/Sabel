@@ -18,6 +18,11 @@ class Processor_View extends Sabel_Bus_Processor
    */
   private $view = null;
   
+  /**
+   * @var boolean
+   */
+  private $isAjax = false;
+  
   public function execute($bus)
   {
     $controller = $bus->get("controller");
@@ -25,6 +30,8 @@ class Processor_View extends Sabel_Bus_Processor
     
     $response  = $bus->get("response");
     $responses = $response->getResponses();
+    
+    $this->isAjax = ($bus->get("request")->getHttpHeader("X-Requested-With") === "XMLHttpRequest");
     $view = $this->getView($response, $bus->get("destination")->getAction());
     
     if ($controller->renderText) {
@@ -50,8 +57,7 @@ class Processor_View extends Sabel_Bus_Processor
     
     $layout = $controller->getAttribute("layout");
     
-    if ($layout === false ||
-        $bus->get("request")->getHttpHeader("X-Requested-With") === "XMLHttpRequest") {
+    if ($layout === false || $this->isAjax) {
       $bus->set("result", $contents);
     } else {
       if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;
@@ -99,7 +105,11 @@ class Processor_View extends Sabel_Bus_Processor
     } elseif ($response->isServerError()) {
       $this->view->setName("serverError");
     } elseif ($this->view->getName() === "") {
-      $this->view->setName($action);
+      if ($this->isAjax) {
+        $this->view->setName($action . ".ajax");
+      } else {
+        $this->view->setName($action);
+      }
     }
     
     return $this->view;
