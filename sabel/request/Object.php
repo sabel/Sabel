@@ -210,8 +210,9 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchGetValue($key)
   {
-    if (array_key_exists($key, $this->getValues)) {
-      return $this->getValues[$key];
+    if (isset($this->getValues[$key])) {
+      $value = $this->getValues[$key];
+      return ($value === "") ? null : $value;
     } else {
       return null;
     }
@@ -274,7 +275,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchParameterValue($key)
   {
-    if (array_key_exists($key, $this->parameterValues)) {
+    if (isset($this->parameterValues[$key])) {
       $value = $this->parameterValues[$key];
       return ($value === "") ? null : $value;
     } else {
