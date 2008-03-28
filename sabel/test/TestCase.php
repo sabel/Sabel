@@ -37,4 +37,9 @@ class Sabel_Test_TestCase extends PHPUnit_Framework_TestCase
   {
     $this->assertNull($null);
   }
+  
+  public function isNotNull($null)
+  {
+    $this->assertNotNull($null);
+  }
 }

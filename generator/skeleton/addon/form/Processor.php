@@ -39,11 +39,13 @@ class Form_Processor extends Sabel_Bus_Processor
     $this->extract("request", "controller");
     
     $controller = $this->controller;
+    $action = $bus->get("destination")->getAction();
+    if (!$controller->hasMethod($action)) return;
+    
     $this->createStorage($bus->get("session")->getId());
     $controller->setAttribute("form", $this);
     
-    $action = $bus->get("destination")->getAction();
-    $reflection  = $controller->getReflection();
+    $reflection = $controller->getReflection();
     $annotation  = $reflection->getMethodAnnotation($action, "form");
     $this->token = $this->request->getValueWithMethod("token");
     
