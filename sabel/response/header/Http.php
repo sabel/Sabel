@@ -19,16 +19,18 @@ class Sabel_Response_Header_Http
       }
     }
     
-    if ($response->getLocation()) {
-      l("redirect: " . var_export($response->getLocation(), 1));
-    }
+    if ($response->isSuccess()) return;
     
     if ($response->isRedirected()) {
-      header("Location: " . $response->getLocation());
+      $location = $response->getLocation();
+      header("Location: $location");
+      l("redirect: $location");
     } elseif ($response->isNotFound()) {
       header("HTTP/1.0 404 Not Found");
     } elseif ($response->isForbidden()) {
       header("HTTP/1.0 403 Forbidden");
+    } elseif ($response->isBadRequest()) {
+      header("HTTP/1.0 400 Bad Request");
     } elseif ($response->isServerError()) {
       header("HTTP/1.0 500 Internal Server Error");
     } elseif ($response->isNotModified()) {

@@ -4,19 +4,37 @@
  * Paginate
  *
  * @category   DB
- * @package    lib.db
+ * @package    lib
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Paginate extends Sabel_Object
 {
-  protected
-    $model      = null,
-    $isJoin     = false,
-    $attributes = array(),
-    $method     = "select",
-    $parameters = array();
+  /**
+   * @var object Sabel_DB_Model or Sabel_DB_Join
+   */
+  protected $model = null;
+  
+  /**
+   * @var boolean
+   */
+  protected $isJoin = false;
+  
+  /**
+   * @var array
+   */
+  protected $attributes = array();
+  
+  /**
+   * @var string
+   */
+  protected $method = "select";
+  
+  /**
+   * @var array
+   */
+  protected $parameters = array();
   
   public function __construct($model)
   {
@@ -32,7 +50,8 @@ class Paginate extends Sabel_Object
       $this->method = "join";
       $this->isJoin = true;
     } else {
-      throw new Exception("Paginate::__construct() invalid instance.");
+      $message = __METHOD__ . "() invalid instance.";
+      throw new Sabel_Exception_Runtime($message);
     }
     
     $this->model = $model;
@@ -47,7 +66,7 @@ class Paginate extends Sabel_Object
     }
   }
   
-  public function getQueryString($page)
+  public function getUriQuery($page)
   {
     unset($this->parameters["page"]);
     $queryString = array("page={$page}");

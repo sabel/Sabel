@@ -106,8 +106,9 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   {
     $status = $this->status;
     
-    return ($status === Sabel_Response::NOT_FOUND ||
-            $status === Sabel_Response::FORBIDDEN ||
+    return ($status === Sabel_Response::NOT_FOUND   ||
+            $status === Sabel_Response::FORBIDDEN   ||
+            $status === Sabel_Response::BAD_REQUEST ||
             $status === Sabel_Response::SERVER_ERROR);
   }
   
@@ -145,6 +146,18 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   public function isForbidden()
   {
     return ($this->status === Sabel_Response::FORBIDDEN);
+  }
+  
+  public function badRequest()
+  {
+    $this->status = Sabel_Response::BAD_REQUEST;
+    
+    return $this;
+  }
+  
+  public function isBadRequest()
+  {
+    return ($this->status === Sabel_Response::BAD_REQUEST);
   }
   
   public function notModified()
