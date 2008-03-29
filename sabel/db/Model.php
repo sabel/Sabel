@@ -634,76 +634,43 @@ abstract class Sabel_DB_Model extends Sabel_Object
     @list ($child, $orderBy) = $this->arguments;
     $this->arguments = array();
     
-    $ids     = array();
-    $models  = array();
-    $pkey    = $this->metadata->getPrimaryKey();
-    $results = $this->_select();
+    $ids    = array();
+    $pkey   = $this->metadata->getPrimaryKey();
+    $models = $this->_select();
     
-    foreach ($results as $result) {
-      $ids[] = $id = $result->$pkey;
-      $models[$id] = $result;
+    if (empty($models)) return array();
+    
+    foreach ($models as $model) {
+      $ids[] = $model->$pkey;
     }
-    
-    unset($results);
     
     $childModel = (is_string($child)) ? MODEL($child) : $child;
-    $childName  = $childModel->getName();
-    
-    if ($orderBy !== "") {
-      $childModel->setOrderBy($orderBy);
-    }
+    if ($orderBy !== "") $childModel->setOrderBy($orderBy);
     
     $joinkey = create_join_key($childModel, $this->tableName);
     $fkey = $joinkey["fkey"];
+    
     $in = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, $fkey, $ids);
     $childModel->setCondition($in);
     $results = $childModel->_select();
     
+    $children = array();
     foreach ($results as $result) {
-      $key = $result->$fkey;
-      if ($models[$key]->$childName === null) {
-        $models[$key]->$childName = array($result);
+      $children[$result->$fkey][] = $result;
+    }
+    
+    unset($results);
+    
+    $childName = $childModel->getName();
+    foreach ($models as $model) {
+      if (isset($children[$model->$pkey])) {
+        $model->$childName = $children[$model->$pkey];
       } else {
-        $tmp = $models[$key]->$childName;
-        $tmp[] = $result;
-        $models[$key]->$childName = $tmp;
+        $model->$childName = array();
       }
     }
     
     return $models;
-  }
-  
-  /**
-   * @param string $query
-   * @param array  $bindValues
-   *
-   * @throws Sabel_Exception_InvalidArgument
-   * @return Sabel_DB_Model[]
-   */
-  public function selectByQuery($query, $bindValues = array())
-  {
-    if (is_string($query)) {
-      return $this->prepare("selectByQuery", array($query, $bindValues))->execute();
-    } else {
-      $message = "argument must be a string.";
-      throw new Sabel_Exception_InvalidArgument($message);
-    }
-  }
-  
-  /**
-   * @return Sabel_DB_Model[]
-   */
-  protected function _selectByQuery()
-  {
-    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
-    $stmt->projection($this->projection)->where($this->arguments[0]);
-    
-    if (isset($this->arguments[1])) {
-      $stmt->setBindValues($this->arguments[1]);
-    }
-    
-    $rows = $stmt->execute();
-    return (empty($rows)) ? array() : $this->toModels($rows);
   }
   
   /**
@@ -728,7 +695,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param array $additionalValues
    *
-   * @return Sabel_DB_Model
+   * @return int
    */
   public function save(array $additionalValues = array())
   {
@@ -740,15 +707,14 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   protected function _save()
   {
-    $new = MODEL($this->modelName);
     @list ($additionalValues) = $this->arguments;
     
     if ($this->isSelected()) {
       $this->updateValues = array_merge($this->updateValues, $additionalValues);
-      return $new->setProperties($this->_saveUpdate());
+      return $this->_saveUpdate();
     } else {
       $this->values = array_merge($this->values, $additionalValues);
-      return $new->setProperties($this->_saveInsert());
+      $this->_saveInsert();
     }
   }
   
@@ -767,17 +733,15 @@ abstract class Sabel_DB_Model extends Sabel_Object
     $stmt  = $this->prepareStatement(Sabel_DB_Statement::INSERT);
     $newId = $this->prepareInsert($stmt, $saveValues)->execute();
     
-    if ($newId !== null && ($column = $this->metadata->getSequenceColumn()) !== null) {
-      $saveValues[$column] = $newId;
-    }
-    
     foreach ($columns as $name => $column) {
       if (!array_key_exists($name, $saveValues)) {
-        $saveValues[$name] = $column->default;
+        $this->$name = $column->default;
       }
     }
     
-    return $saveValues;
+    if ($newId !== null && ($field = $this->metadata->getSequenceColumn()) !== null) {
+      $this->$field = $newId;
+    }
   }
   
   /**
@@ -790,9 +754,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $message = "cannot update a model(there is not primary key).";
       throw new Sabel_DB_Exception($message);
     } else {
-      if (is_string($pkey)) $pkey = array($pkey);
-      
-      foreach ($pkey as $key) {
+      foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
         $this->setCondition($key, $this->__get($key));
       }
     }
@@ -802,9 +764,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
     }
     
+    $this->updateValues = array();
     $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
-    $this->prepareUpdate($stmt, $saveValues)->execute();
-    return array_merge($this->values, $saveValues);
+    return $this->prepareUpdate($stmt, $saveValues)->execute();
   }
   
   /**
@@ -851,16 +813,16 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
-   * @return void
+   * @return int
    */
   public function delete($arg1 = null, $arg2 = null)
   {
-    $this->prepare("delete", array($arg1, $arg2))->execute();
+    return $this->prepare("delete", array($arg1, $arg2))->execute();
   }
   
   /**
    * @throws Sabel_DB_Exception
-   * @return void
+   * @return int
    */
   protected function _delete()
   {
@@ -868,8 +830,8 @@ abstract class Sabel_DB_Model extends Sabel_Object
     @list ($arg1, $arg2) = $this->arguments;
     
     if (!$this->isSelected() && $arg1 === null && $condition->isEmpty()) {
-      $message = "delete() must set the condition.";
-      throw new Sabel_DB_Exception($message);
+      $stmt = $this->prepareStatement(Sabel_DB_Statement::DELETE);
+      return $this->prepareDelete($stmt)->execute();
     }
     
     if ($arg1 !== null) {
@@ -879,16 +841,14 @@ abstract class Sabel_DB_Model extends Sabel_Object
         $message = "delete() cannot delete model(there is not primary key).";
         throw new Sabel_DB_Exception($message);
       } else {
-        if (is_string($pkey)) $pkey = (array)$pkey;
-        
-        foreach ($pkey as $key) {
+        foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
           $this->setCondition($key, $this->__get($key));
         }
       }
     }
     
     $stmt = $this->prepareStatement(Sabel_DB_Statement::DELETE);
-    $this->prepareDelete($stmt)->execute();
+    return $this->prepareDelete($stmt)->execute();
   }
   
   /**

@@ -132,7 +132,8 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     if (is_string($query)) {
       $this->query = $query;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
     return $this;
@@ -227,9 +228,11 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
+    } elseif ($this->isUpdate() || $this->isDelete()) {
+      return $this->driver->getAffectedRows();
+    } else {
+      return $result;
     }
-    
-    return $result;
   }
   
   public function setBindValue($key, $val)
@@ -355,7 +358,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $c = $this->constraints;
     
     if (isset($c["order"])) {
-      $sql .= " ORDER BY " . $this->quoteIdentifierOfOrderBy($c["order"]);
+      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
     }
     
     if (isset($c["offset"]) && !isset($c["limit"])) {
@@ -385,7 +388,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     }
   }
   
-  protected function quoteIdentifierOfOrderBy($orderBy)
+  protected function quoteIdentifierForOrderString($orderBy)
   {
     $results = array();
     $orders  = array_map("trim", explode(", ", $orderBy));

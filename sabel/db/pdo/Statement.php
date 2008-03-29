@@ -43,8 +43,10 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
     
     if ($this->isInsert() && $this->seqColumn !== null) {
       return $this->driver->getLastInsertId();
+    } elseif ($this->isUpdate() || $this->isDelete()) {
+      return $this->driver->getAffectedRows();
+    } else {
+      return $result;
     }
-    
-    return $result;
   }
 }

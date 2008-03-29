@@ -106,15 +106,15 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Abstract_Driver
     
     if (!$result) $this->executeError($ociStmt);
     
+    $rows = array();
     if (oci_statement_type($ociStmt) === "SELECT") {
       oci_fetch_all($ociStmt, $rows, $this->offset, $this->limit, OCI_ASSOC|OCI_FETCHSTATEMENT_BY_ROW);
       $rows = array_map("array_change_key_case", $rows);
     } else {
-      $rows = array();
+      $this->affectedRows = oci_num_rows($ociStmt);
     }
     
     oci_free_statement($ociStmt);
-    
     return (empty($rows)) ? null : $rows;
   }
   

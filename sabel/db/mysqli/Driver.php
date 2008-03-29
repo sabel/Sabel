@@ -82,6 +82,9 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Abstract_Driver
     if (is_object($result)) {
       while ($row = mysqli_fetch_assoc($result)) $rows[] = $row;
       mysqli_free_result($result);
+      $this->affectedRows = 0;
+    } else {
+      $this->affectedRows = mysqli_affected_rows($this->connection);
     }
     
     return (empty($rows)) ? null : $rows;

@@ -65,16 +65,15 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Abstract_Driver
   public function execute($sql, $bindParams = null)
   {
     $sql = $this->bind($sql, $bindParams);
-    $result = pg_query($this->connection, $sql);
-    if (!$result) $this->executeError($sql);
     
-    $rows = array();
-    if (is_resource($result)) {
+    if ($result = pg_query($this->connection, $sql)) {
       $rows = pg_fetch_all($result);
+      $this->affectedRows = pg_affected_rows($result);
       pg_free_result($result);
+      return (empty($rows)) ? null : $rows;
+    } else {
+      $this->executeError($sql);
     }
-    
-    return (empty($rows)) ? null : $rows;
   }
   
   public function getLastInsertId()

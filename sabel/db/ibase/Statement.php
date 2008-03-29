@@ -42,14 +42,14 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
     if (isset($c["limit"])) {
       $query  = "FIRST {$c["limit"]} ";
       $query .= (isset($c["offset"])) ? "SKIP " . $c["offset"] : "SKIP 0";
-      $sql   .= $query;
+      $sql   .= $query . " ";
     } elseif (isset($c["offset"])) {
-      $sql   .= "SKIP " . $c["offset"];
+      $sql   .= "SKIP " . $c["offset"] . " ";
     }
     
     $tblName = $this->quoteIdentifier($this->table);
     $projection = $this->getProjection();
-    $sql .= " $projection FROM $tblName" . $this->join . $this->where;
+    $sql .= "$projection FROM $tblName" . $this->join . $this->where;
     return $sql . $this->createConstraintSql();
   }
   
@@ -88,22 +88,20 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
     $c = $this->constraints;
     
     if (isset($c["order"])) {
-      $sql .= " ORDER BY " . $this->quoteIdentifierOfOrderBy($c["order"]);
+      $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
     }
     
     return $sql;
   }
 }
 
-if (ini_get("magic_quotes_sybase") === "1")
-{
+if (ini_get("magic_quotes_sybase") === "1") {
   function ibase_escape_string($val)
   {
     return $val;
   }
 }
-else
-{
+else {
   function ibase_escape_string($val)
   {
     return str_replace("'", "''", $val);

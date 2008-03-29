@@ -32,6 +32,11 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
    */
   protected $connection = null;
   
+  /**
+   * @var int
+   */
+  protected $affectedRows = 0;
+  
   abstract public function connect(array $params);
   abstract public function begin($isolationLevel = null);
   abstract public function commit();
@@ -63,6 +68,11 @@ abstract class Sabel_DB_Abstract_Driver extends Sabel_Object
   public function autoCommit($bool)
   {
     $this->autoCommit = $bool;
+  }
+  
+  public function getAffectedRows()
+  {
+    return $this->affectedRows;
   }
   
   public function setTransactionIsolationLevel($level)

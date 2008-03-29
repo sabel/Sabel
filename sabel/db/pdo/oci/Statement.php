@@ -78,7 +78,7 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
                . $this->metadata->getPrimaryKey() . " ASC";
       }
       
-      $orderBy = " ORDER BY " . $this->quoteIdentifierOfOrderBy($order);
+      $orderBy = " ORDER BY " . $this->quoteIdentifierForOrderString($order);
       $sql = "SELECT * FROM (SELECT ROW_NUMBER() OVER({$orderBy}) \"SDB_RN\", $projection "
            . "FROM $tblName" . $this->join . $this->where . $orderBy . ") "
            . "WHERE \"SDB_RN\" BETWEEN " . ($offset + 1) . " AND " . ($offset + $limit);
@@ -86,7 +86,7 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
       $sql = "SELECT $projection FROM $tblName" . $this->join . $this->where;
       
       if (isset($c["order"])) {
-        $sql .= " ORDER BY " . $this->quoteIdentifierOfOrderBy($c["order"]);
+        $sql .= " ORDER BY " . $this->quoteIdentifierForOrderString($c["order"]);
       }
     }
     

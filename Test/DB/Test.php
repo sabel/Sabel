@@ -11,13 +11,13 @@ class Test_DB_Test extends SabelTestCase
   public static $db = "";
   public static $tables = array("schema_test", "grandchildren", "children",
                                 "parents", "grandparents", "student_course", "student", "course");
-                                
+  
   protected static $lastStId = null;
   
   public function testClean()
   {
     $tables = self::$tables;
-    $driver = Sabel_DB::createDriver();
+    $driver = Sabel_DB::createDriver("default");
     
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");
@@ -37,16 +37,16 @@ class Test_DB_Test extends SabelTestCase
     $st->email = "test2@example.com";
     $st->bl = false;
     
-    $saved = $st->save();
+    $st->save();
     
     // default values.
-    $this->assertEquals("default name", $saved->name);
-    $this->assertEquals("90000000000",  $saved->bint);
-    $this->assertEquals(30000,    $saved->sint);
-    $this->assertEquals(10.234,   $saved->ft);
-    $this->assertEquals(10.23456, $saved->dbl);
+    $this->assertEquals("default name", $st->name);
+    $this->assertEquals("90000000000",  $st->bint);
+    $this->assertEquals(30000,    $st->sint);
+    $this->assertEquals(10.234,   $st->ft);
+    $this->assertEquals(10.23456, $st->dbl);
     
-    self::$lastStId = $saved->id;
+    self::$lastStId = $st->id;
   }
   
   public function testSelectOne()
@@ -83,7 +83,9 @@ class Test_DB_Test extends SabelTestCase
     $st = MODEL("SchemaTest", self::$lastStId);
     $st->email = "test2@updated.com";
     $st->bl = false;
-    $st->save();
+    $affectedRows = $st->save();  # update
+    
+    $this->assertEquals(1, $affectedRows);
     
     $st = MODEL("SchemaTest", self::$lastStId);
     $this->assertEquals("test2@updated.com", $st->email);
@@ -108,9 +110,9 @@ class Test_DB_Test extends SabelTestCase
     $st->delete();
     
     $this->assertEquals(1, $st->getCount());
-    $st->delete("email", "test1@example.com");
+    $affectedRows = $st->delete("email", "test1@example.com");
+    $this->assertEquals(1, $affectedRows);
     $this->assertEquals(0, $st->getCount());
-    
     $this->insertTestData();
   }
   
@@ -357,24 +359,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("name5", $results[1]->name);
   }
   
-  public function testSelectByQuery()
-  {
-    $st = MODEL("SchemaTest");
-    $results = $st->selectByQuery("WHERE sint = 100");
-    $this->assertEquals(2, count($results));
-    
-    $results = $st->selectByQuery("WHERE sint = @param@", array("param" => 100));
-    $this->assertEquals(2, count($results));
-    
-    $results = $st->selectByQuery("ORDER BY schema_test.dt DESC");
-    $this->assertEquals("2008-01-10", $results[0]->dt);
-    $this->assertEquals("2008-01-01", $results[9]->dt);
-    
-    $st->setProjection(array("sint"));
-    $results = $st->selectByQuery("GROUP BY sint");
-    $this->assertEquals(5, count($results));
-  }
-  
   public function testModelCondition()
   {
     $child = MODEL("Children")->selectOne(1);
@@ -409,51 +393,6 @@ class Test_DB_Test extends SabelTestCase
     
     Sabel_DB_Transaction::commit();
     $this->assertEquals(4, $gp->getCount());
-  }
-  
-  /**
-   * information(schema) of table
-   */
-  public function testTableInfo()
-  {
-    $schema = MODEL("SchemaTest")->getMetadata();
-    $this->assertEquals("schema_test", $schema->getTableName());
-    $this->assertEquals("id", $schema->getPrimaryKey());
-    $this->assertEquals("id", $schema->getSequenceColumn());
-    
-    $this->assertTrue($schema->id->isInt(true));
-    $this->assertTrue($schema->id->primary);
-    $this->assertTrue($schema->id->increment);
-    $this->assertFalse($schema->name->primary);
-    $this->assertFalse($schema->name->increment);
-    
-    $this->assertTrue($schema->bint->isBigint());
-    $this->assertTrue($schema->sint->isSmallint());
-    $this->assertTrue($schema->bint->isInt());
-    $this->assertTrue($schema->sint->isInt());
-    $this->assertFalse($schema->bint->isInt(true));  // strict mode
-    $this->assertFalse($schema->sint->isInt(true));  // strict mode
-    
-    $this->assertTrue($schema->name->isString());
-    $this->assertEquals(128, $schema->name->max);
-    $this->assertTrue($schema->email->isString());
-    $this->assertEquals(255, $schema->email->max);
-    
-    $this->assertTrue($schema->bl->isBool());
-    $this->assertEquals(false, $schema->bl->default);
-    $this->assertTrue($schema->ft->isFloat());
-    $this->assertEquals(10.234, $schema->ft->default);
-    $this->assertTrue($schema->dbl->isDouble());
-    $this->assertEquals(10.23456, $schema->dbl->default);
-    $this->assertTrue($schema->txt->isText());
-    $this->assertTrue($schema->dt->isDate());
-    
-    $uniques = $schema->getUniques();
-    $this->assertTrue(is_array($uniques));
-    $this->assertEquals(1, count($uniques));
-    $this->assertEquals(1, count($uniques[0]));
-    $this->assertEquals("email", $uniques[0][0]);
-    $this->assertTrue($schema->isUnique("email"));
   }
   
   public function testBridge()
@@ -500,17 +439,102 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
   }
   
-  public function testInvalidQuery()
+  public function testSelectWithChildren()
   {
-    $st = MODEL("SchemaTest");
-
-    try {
-      @$st->selectByQuery("a b c d e f g h i j k l m n");
-    } catch (Sabel_DB_Exception_Driver $e) {
-      return;
-    }
+    MODEL("Grandchildren")->delete();
+    MODEL("Children")->delete();
+    MODEL("Parents")->delete();
     
-    $this->fail();
+    $data = array();
+    $data[] = array("id" => 1, "grandparents_id" => 2, "value" => "parents1");
+    $data[] = array("id" => 2, "grandparents_id" => 1, "value" => "parents2");
+    $data[] = array("id" => 3, "grandparents_id" => 1, "value" => "parents3");
+    $p = MODEL("Parents");
+    foreach ($data as $values) $p->insert($values);
+    
+    $data = array();
+    $data[] = array("id" => 1, "parents_id" => 2, "value" => "children1");
+    $data[] = array("id" => 2, "parents_id" => 1, "value" => "children2");
+    $data[] = array("id" => 3, "parents_id" => 2, "value" => "children3");
+    $data[] = array("id" => 4, "parents_id" => 1, "value" => "children4");
+    $data[] = array("id" => 5, "parents_id" => 2, "value" => "children5");
+    $data[] = array("id" => 6, "parents_id" => 3, "value" => "children6");
+    $c = MODEL("Children");
+    foreach ($data as $values) $c->insert($values);
+    
+    $parent = MODEL("Parents");
+    $parent->setOrderBy("id ASC");
+    $parents = $parent->selectWithChildren("Children", "id DESC");
+    $this->assertEquals(3, count($parents));
+    
+    $p1 = $parents[0];
+    $p2 = $parents[1];
+    $p3 = $parents[2];
+    $this->assertEquals(2, count($p1->Children));
+    $this->assertEquals(3, count($p2->Children));
+    $this->assertEquals(1, count($p3->Children));
+    $this->assertEquals("children4", $p1->Children[0]->value);
+    $this->assertEquals("children2", $p1->Children[1]->value);
+    $this->assertEquals("children5", $p2->Children[0]->value);
+    $this->assertEquals("children3", $p2->Children[1]->value);
+    $this->assertEquals("children1", $p2->Children[2]->value);
+    $this->assertEquals("children6", $p3->Children[0]->value);
+    
+    $parent = MODEL("Parents");
+    $parent->setCondition(2);
+    $parent->setOrderBy("id ASC");
+    $parents = $parent->selectWithChildren("Children", "id ASC");
+    $this->assertEquals(1, count($parents));
+    
+    $p2 = $parents[0];
+    $this->assertEquals("children1", $p2->Children[0]->value);
+    $this->assertEquals("children3", $p2->Children[1]->value);
+    $this->assertEquals("children5", $p2->Children[2]->value);
+  }
+  
+  /**
+   * information(schema) of table
+   */
+  public function testTableInfo()
+  {
+    $schema = MODEL("SchemaTest")->getMetadata();
+    $this->assertEquals("schema_test", $schema->getTableName());
+    $this->assertEquals("id", $schema->getPrimaryKey());
+    $this->assertEquals("id", $schema->getSequenceColumn());
+    
+    $this->assertTrue($schema->id->isInt(true));
+    $this->assertTrue($schema->id->primary);
+    $this->assertTrue($schema->id->increment);
+    $this->assertFalse($schema->name->primary);
+    $this->assertFalse($schema->name->increment);
+    
+    $this->assertTrue($schema->bint->isBigint());
+    $this->assertTrue($schema->sint->isSmallint());
+    $this->assertTrue($schema->bint->isInt());
+    $this->assertTrue($schema->sint->isInt());
+    $this->assertFalse($schema->bint->isInt(true));  // strict mode
+    $this->assertFalse($schema->sint->isInt(true));  // strict mode
+    
+    $this->assertTrue($schema->name->isString());
+    $this->assertEquals(128, $schema->name->max);
+    $this->assertTrue($schema->email->isString());
+    $this->assertEquals(255, $schema->email->max);
+    
+    $this->assertTrue($schema->bl->isBool());
+    $this->assertEquals(false, $schema->bl->default);
+    $this->assertTrue($schema->ft->isFloat());
+    $this->assertEquals(10.234, $schema->ft->default);
+    $this->assertTrue($schema->dbl->isDouble());
+    $this->assertEquals(10.23456, $schema->dbl->default);
+    $this->assertTrue($schema->txt->isText());
+    $this->assertTrue($schema->dt->isDate());
+    
+    $uniques = $schema->getUniques();
+    $this->assertTrue(is_array($uniques));
+    $this->assertEquals(1, count($uniques));
+    $this->assertEquals(1, count($uniques[0]));
+    $this->assertEquals("email", $uniques[0][0]);
+    $this->assertTrue($schema->isUnique("email"));
   }
   
   // @todo more tests

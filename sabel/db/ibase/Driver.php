@@ -82,6 +82,8 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
         $rows[] = array_change_key_case($row);
       }
       ibase_free_result($result);
+    } else {
+      $this->affectedRows = ($result === true) ? 0 : $result;
     }
     
     if ($this->autoCommit) ibase_commit($connection);
