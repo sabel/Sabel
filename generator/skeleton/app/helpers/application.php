@@ -1,17 +1,17 @@
 <?php
 
-function a($uri, $anchor, $queryString = "")
+function a($uri, $anchor, $uriQuery = "")
 {
-  if ($queryString === "") {
+  if ($uriQuery === "") {
     return sprintf('<a href="%s">%s</a>', uri($uri), $anchor);
   } else {
-    return sprintf('<a href="%s?%s">%s</a>', uri($uri), $queryString, $anchor);
+    return sprintf('<a href="%s?%s">%s</a>', uri($uri), $uriQuery, $anchor);
   }
 }
 
-function ah($param, $anchor, $queryString = "")
+function ah($param, $anchor, $uriQuery = "")
 {
-  return a($param, h($anchor), $queryString);
+  return a($param, h($anchor), $uriQuery);
 }
 
 function linkto($file)
