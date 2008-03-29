@@ -13,6 +13,8 @@ if (!defined("ENVIRONMENT")) {
   exit;
 }
 
+define("SBL_BATCH", true);
+
 $_SERVER["HTTP_HOST"] = "localhost";
 $_SERVER["REQUEST_URI"] = $_SERVER["argv"][1];
 

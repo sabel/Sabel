@@ -5,6 +5,7 @@ if (!defined("TEST_CASE")) {
   require_once ("Sabel"  . DIRECTORY_SEPARATOR . "Sabel.php");
   require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
   
+  error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
   
   $pathToSabel = Sabel::getPath();

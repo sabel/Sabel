@@ -16,7 +16,7 @@ class Migration extends Sabel_Sakle_Task
   protected $stmt      = null;
   protected $files     = array();
   protected $migrateTo = 0;
-  protected $accessor  = null;
+  protected $metadata  = null;
   
   protected $connectionName = "";
   protected $currentVersion = 0;
@@ -33,22 +33,22 @@ class Migration extends Sabel_Sakle_Task
     define("ENVIRONMENT", $environment);
     $this->initDbConfig();
     
-    $connectionName  = $this->getConnectionName();
-    $directory       = $this->defineMigrationDirectory();
-    $this->accessor  = Sabel_DB::createMetadata($connectionName);
+    $connectionName = $this->getConnectionName();
+    $directory      = $this->defineMigrationDirectory();
+    $this->metadata = Sabel_DB::createMetadata($connectionName);
     
-    if ($arguments[2] === "export") {
+    if ($this->arguments[1] === "export") {
       $this->export();
       self::$execFinalize = false;
     } else {
       $this->currentVersion = $this->getCurrentVersion();
       Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
       
-      $to = $this->showCurrentVersion($arguments);
+      $to = $this->showCurrentVersion($this->arguments);
       $this->files = Sabel_DB_Migration_Manager::getFiles();
       
       if (empty($this->files)) {
-        $this->error("No migration files is Found.");
+        $this->error("no migration files is Found.");
         exit;
       }
       
@@ -75,10 +75,10 @@ class Migration extends Sabel_Sakle_Task
     $connectionName = $this->connectionName;
     $this->stmt = Sabel_DB::createStatement($connectionName);
     Sabel_DB_Migration_Manager::setStatement($this->stmt);
-    Sabel_DB_Migration_Manager::setSchema($this->accessor);
+    Sabel_DB_Migration_Manager::setSchema($this->metadata);
     
     try {
-      if (!in_array("sversion", $this->accessor->getTableList())) {
+      if (!in_array("sversion", $this->metadata->getTableList())) {
         $this->createVersionManageTable();
         return 0;
       } else {
@@ -176,11 +176,11 @@ class Migration extends Sabel_Sakle_Task
       case "head":
         $this->migrateTo = max(array_keys($this->files));
         break;
-        
+      
       case "foot":
         $this->migrateTo = 0;
         break;
-        
+      
       case "rehead":
         $this->arguments[1] = 0;
         $this->execNextMigration();
@@ -190,7 +190,7 @@ class Migration extends Sabel_Sakle_Task
         $version = $this->getCurrentVersion();
         $this->success("UPGRADE FROM 0 TO $version");
         return self::$execFinalize = false;
-        
+      
       case "reset":
         $version = $this->currentVersion;
         $this->arguments[1] = 0;
@@ -200,7 +200,7 @@ class Migration extends Sabel_Sakle_Task
         $this->execNextMigration();
         $this->success("UPGRADE FROM 0 TO $version");
         return self::$execFinalize = false;
-        
+      
       default:
         $this->error("version '{$to}' is not supported.");
         exit;
@@ -237,7 +237,7 @@ class Migration extends Sabel_Sakle_Task
     $create = "CREATE TABLE $sversion ("
             . "$id INTEGER NOT NULL PRIMARY KEY, "
             . "$version INTEGER NOT NULL)";
-            
+    
     $insert = "INSERT INTO $sversion values(1, 0)";
     
     $stmt->setQuery($create)->execute();
@@ -257,7 +257,7 @@ class Migration extends Sabel_Sakle_Task
   
   protected function export()
   {
-    $exporter = new MigrationExport($this->accessor, $this->connectionName);
+    $exporter = new MigrationExport($this->metadata, $this->connectionName);
     $exporter->export();
   }
   
