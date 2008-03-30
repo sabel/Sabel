@@ -102,7 +102,7 @@ class Test_Request_Object extends SabelTestCase
     $this->assertFalse($request->hasGetValue("a"));
     $request->setGetValues(array("a" => "1", "b" => ""));
     $this->assertTrue($request->hasGetValue("a"));
-    $this->assertTrue($request->hasGetValue("b"));
+    $this->assertFalse($request->hasGetValue("b"));
   }
   
   public function testIsGetSet()
@@ -110,8 +110,12 @@ class Test_Request_Object extends SabelTestCase
     $request = new Sabel_Request_Object("");
     $this->assertFalse($request->hasGetValue("a"));
     $request->setGetValues(array("a" => "1", "b" => ""));
+    
+    $this->assertTrue($request->hasGetValue("a"));
+    $this->assertFalse($request->hasGetValue("b"));
+    
     $this->assertTrue($request->isGetSet("a"));
-    $this->assertFalse($request->isGetSet("b"));
+    $this->assertTrue($request->isGetSet("b"));
   }
   
   public function testHasPostValue()
@@ -122,7 +126,7 @@ class Test_Request_Object extends SabelTestCase
     $this->assertFalse($request->hasPostValue("a"));
     $request->setPostValues(array("a" => "1", "b" => ""));
     $this->assertTrue($request->hasPostValue("a"));
-    $this->assertTrue($request->hasPostValue("b"));
+    $this->assertFalse($request->hasPostValue("b"));
   }
   
   public function testIsPostSet()
@@ -132,8 +136,12 @@ class Test_Request_Object extends SabelTestCase
     
     $this->assertFalse($request->hasPostValue("a"));
     $request->setPostValues(array("a" => "1", "b" => ""));
+    
+    $this->assertTrue($request->hasPostValue("a"));
+    $this->assertFalse($request->hasPostValue("b"));
+    
     $this->assertTrue($request->isPostSet("a"));
-    $this->assertFalse($request->isPostSet("b"));
+    $this->assertTrue($request->isPostSet("b"));
   }
   
   public function testFind()

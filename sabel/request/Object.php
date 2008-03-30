@@ -200,12 +200,12 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function hasGetValue($name)
   {
-    return isset($this->getValues[$name]);
+    return ($this->fetchGetValue($name) !== null);
   }
   
   public function isGetSet($name)
   {
-    return (isset($this->getValues[$name]) && $this->getValues[$name] !== "");
+    return array_key_exists($name, $this->getValues);
   }
   
   public function fetchGetValue($key)
@@ -230,12 +230,12 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function hasPostValue($name)
   {
-    return isset($this->postValues[$name]);
+    return ($this->fetchPostValue($name) !== null);
   }
   
   public function isPostSet($name)
   {
-    return (isset($this->postValues[$name]) && $this->postValues[$name] !== "");
+    return array_key_exists($name, $this->postValues);
   }
   
   public function fetchPostValue($key)
