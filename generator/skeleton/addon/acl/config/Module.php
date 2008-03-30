@@ -9,11 +9,10 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Acl_Config_Module extends Acl_Config_Abstract
+class Acl_Config_Module extends Acl_Config_Controller
 {
-  protected
-    $controllers = array();
-    
+  protected $controllers = array();
+  
   public function controller($controller)
   {
     return $this->controllers[$controller] = new Acl_Config_Controller();
