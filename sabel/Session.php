@@ -74,6 +74,11 @@ interface Sabel_Session
   public function destroy();
   
   /**
+   * @return string
+   */
+  public function getClientId();
+  
+  /**
    * @return boolean
    */
   public function isCookieEnabled();

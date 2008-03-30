@@ -13,6 +13,8 @@
 abstract class Sabel_Session_Abstract
   extends Sabel_Object implements Sabel_Session
 {
+  const CLIENT_ID_KEY = "sbl_client_id";
+  
   /**
    * @var string
    */
@@ -43,8 +45,8 @@ abstract class Sabel_Session_Abstract
     $this->started = true;
     $this->cookieEnabled = isset($_COOKIE[session_name()]);
     
-    if (!isset($this->attributes["client_id"])) {
-      $this->write("client_id", $this->createClientId());
+    if (!isset($this->attributes[self::CLIENT_ID_KEY])) {
+      $this->write(self::CLIENT_ID_KEY, $this->createClientId());
     }
     
     $time = time();
@@ -70,6 +72,11 @@ abstract class Sabel_Session_Abstract
   public function getId()
   {
     return $this->sessionId;
+  }
+  
+  public function getClientId()
+  {
+    return $this->read(self::CLIENT_ID_KEY);
   }
   
   public function isCookieEnabled()

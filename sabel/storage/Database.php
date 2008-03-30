@@ -43,7 +43,7 @@ class Sabel_Storage_Database implements Sabel_Storage
     if (isset($config["gcProbability"])) {
       $gcProbability = $config["gcProbability"];
     } else {
-      $gcProbability = 2;
+      $gcProbability = 5;
     }
     
     if (rand(1, 100) <= $gcProbability) $this->gc();

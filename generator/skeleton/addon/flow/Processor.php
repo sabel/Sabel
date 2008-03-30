@@ -139,7 +139,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   private function getFlowState($token, $destination)
   {
-    $namespace = $this->session->read("client_id")
+    $namespace = $this->session->getClientId()
                . $destination->getModule()
                . $destination->getController();
     

@@ -28,9 +28,9 @@ class Form_Processor extends Sabel_Bus_Processor
    */
   private $token = "";
   
-  protected function createStorage($sessionId)
+  protected function createStorage($clientId)
   {
-    $config = array("namespace" => $sessionId);
+    $config = array("namespace" => $clientId);
     $this->storage = new Sabel_Storage_Database($config);
   }
   
@@ -42,7 +42,7 @@ class Form_Processor extends Sabel_Bus_Processor
     $action = $bus->get("destination")->getAction();
     if (!$controller->hasMethod($action)) return;
     
-    $this->createStorage($bus->get("session")->getId());
+    $this->createStorage($bus->get("session")->getClientId());
     $controller->setAttribute("form", $this);
     
     $reflection = $controller->getReflection();
