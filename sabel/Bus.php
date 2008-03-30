@@ -132,22 +132,31 @@ class Sabel_Bus extends Sabel_Object
     $processorList = $this->processorList;
     $logging = $this->logging = $config->isLogging();
     
-    while ($processor = $processorList->next()) {
-      $this->beforeEvent($processor->name);
+    try {
+      while ($processor = $processorList->next()) {
+        $this->beforeEvent($processor->name);
+        
+        if ($logging) l("Bus: execute " . $processor->name);
+        
+        $processor->execute($this);
+        $this->afterEvent($processor->name);
+      }
       
-      if ($logging) l("Bus: execute " . $processor->name);
+      $processorList->first();
+      while ($processor = $processorList->next()) {
+        if ($logging) l("Bus: shutdown " . $processor->name);
+        $processor->shutdown($this);
+      }
       
-      $processor->execute($this);
-      $this->afterEvent($processor->name);
+      return $this->get("result");
+    } catch (Exception $e) {
+      $msg = "Exception: (" . get_class($e) . ") "
+           . $e->getMessage()   . PHP_EOL
+           . "At: " . date("r") . PHP_EOL . PHP_EOL
+           . Sabel_Exception_Printer::printTrace($e, PHP_EOL, true);
+      
+      l($msg, SBL_LOG_ERR);
     }
-    
-    $processorList->first();
-    while ($processor = $processorList->next()) {
-      if ($logging) l("Bus: shutdown " . $processor->name);
-      $processor->shutdown($this);
-    }
-    
-    return $this->get("result");
   }
   
   public function attachExecuteBeforeEvent($processorName, $object, $method)

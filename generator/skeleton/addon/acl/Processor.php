@@ -41,8 +41,13 @@ class Acl_Processor extends Sabel_Bus_Processor
       } else {
         if ($this->isAllow($ctrlConfig)) return;
         $authUri = $ctrlConfig->authUri();
-        if ($authUri === null) $authUri = $modConfig->authUri();
+        
+        if ($authUri === null) {
+          $authUri = $modConfig->authUri();
+        }
       }
+      
+      l("acl: access denied.", SBL_LOG_INFO);
       
       if ($authUri === null) {
         $bus->get("response")->forbidden();
@@ -50,6 +55,7 @@ class Acl_Processor extends Sabel_Bus_Processor
         $bus->get("controller")->getRedirector()->to($authUri);
       }
     } else {
+      l("acl: access denied. (no module settings for '{$module}')", SBL_LOG_INFO);
       $bus->get("response")->forbidden();
     }
   }
