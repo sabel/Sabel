@@ -47,7 +47,7 @@ class Sakle
       $ins = new $class();
       $ins->setArguments($args);
       
-      if ($args[0] === "-h" || $args[0] === "--help") {
+      if (isset($args[0]) && ($args[0] === "-h" || $args[0] === "--help")) {
         $ins->usage();
         exit;
       }

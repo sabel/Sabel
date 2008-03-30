@@ -29,8 +29,10 @@ class Migration extends Sabel_Sakle_Task
       exit;
     }
     
-    $environment = $this->getEnvironment();
-    define("ENVIRONMENT", $environment);
+    if (!defined("ENVIRONMENT")) {
+      define("ENVIRONMENT", $this->getEnvironment());
+    }
+    
     $this->initDbConfig();
     
     $connectionName = $this->getConnectionName();
