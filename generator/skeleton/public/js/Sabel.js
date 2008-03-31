@@ -7,52 +7,52 @@
 
 window.Sabel = {};
 
-Sabel.Window = {};
+Sabel.PHP = {};
+Sabel.Window = {
 
-Sabel.Window.getWidth = function() {
-	if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
-		// 後方互換モード
-		return document.body.clientWidth;
-	} else if (Sabel.UserAgent.isSafari) {
-		// Safari 2.0.4 / Safari 3.0.4b (@todo Safari3は他のブラウザと同じにする)
-		return window.innerWidth;
-	} else {
-		// 標準準拠モード
-		return document.documentElement.clientWidth;
-	}
-};
+	getWidth: function() {
+		if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
+			// 後方互換モード
+			return document.body.clientWidth;
+		} else if (Sabel.UserAgent.isSafari) {
+			return window.innerWidth;
+		} else {
+			// 標準準拠モード
+			return document.documentElement.clientWidth;
+		}
+	},
 
-Sabel.Window.getHeight = function() {
-	if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
-		// 後方互換モード
-		return document.body.clientHeight;
-	} else if (Sabel.UserAgent.isSafari) {
-		// Safari 2.0.4 / Safari 3.0.4b (@todo Safari3は他のブラウザと同じにする)
-		return window.innerHeight;
-	} else {
-		// 標準準拠モード
-		return document.documentElement.clientHeight;
-	}
-};
+	getHeight: function() {
+		if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
+			// 後方互換モード
+			return document.body.clientHeight;
+		} else if (Sabel.UserAgent.isSafari) {
+			return window.innerHeight;
+		} else {
+			// 標準準拠モード
+			return document.documentElement.clientHeight;
+		}
+	},
 
-Sabel.Window.getScrollWidth = function() {
-	if (document.compatMode === "CSS1Compat") {
-		var width = document.documentElement.scrollWidth;
-	} else {
-		var width = document.body.scrollWidth;
-	}
-	var clientWidth = Sabel.Window.getWidth();
-	return (clientWidth > width) ? clientWidth : width;
-};
+	getScrollWidth: function() {
+		if (document.compatMode === "CSS1Compat") {
+			var width = document.documentElement.scrollWidth;
+		} else {
+			var width = document.body.scrollWidth;
+		}
+		var clientWidth = getWidth();
+		return (clientWidth > width) ? clientWidth : width;
+	},
 
-Sabel.Window.getScrollHeight = function() {
-	if (document.compatMode === "CSS1Compat") {
-		var height = document.documentElement.scrollHeight;
-	} else {
-		var height = document.body.scrollHeight;
+	getScrollHeight: function() {
+		if (document.compatMode === "CSS1Compat") {
+			var height = document.documentElement.scrollHeight;
+		} else {
+			var height = document.body.scrollHeight;
+		}
+		var clientHeight = getHeight();
+		return (clientHeight > height) ? clientHeight : height;
 	}
-	var clientHeight = Sabel.Window.getHeight();
-	return (clientHeight > height) ? clientHeight : height;
 };
 
 
@@ -110,11 +110,12 @@ Sabel.UserAgent = new function() {
 	this.isBSD     = /BSD/.test(ua);
 };
 
+Sabel.Window.lineFeedCode = (Sabel.UserAgent.isIE) ? "\r" : "\n";
+
 
 Sabel.Object = {
 	_cache: new Array(),
 
-	// @todo curry / ignoreMethods などのオプションつけたい
 	create: function(object, parent) {
 		if (typeof object === "undefined") return {};
 
@@ -163,60 +164,60 @@ Sabel.Object = {
 };
 
 
-Sabel.Object.Methods = {};
+Sabel.Object.Methods = {
 
-Sabel.Object.Methods.isAtomic = function(object) {
-	switch (object.constructor) {
+	isAtomic: function(object) {
+		switch (object.constructor) {
 		case String:
 		case Number:
 		case Boolean:
 			return true;
 		default:
 			return false;
+		}
+	},
+
+	isString: function(object) {
+		return object.constructor === String;
+	},
+
+	isNumber: function(object) {
+		return object.constructor === Number;
+	},
+
+	isBoolean: function(object) {
+		return object.constructor === Boolean;
+	},
+
+	isArray: function(object) {
+		return object.constructor === Array;
+	},
+
+	isFunction: function(object) {
+		return object.constructor === Function;
+	},
+
+	clone: function(object) {
+		return Sabel.Object.create(object);
+	},
+
+	getName: function(object) {
+		return object.constructor;
+	},
+
+	hasMethod: function(object, method) {
+		return (object[method] !== undefined);
 	}
 };
 
-Sabel.Object.Methods.isString = function(object) {
-	return object.constructor === String;
-};
-
-Sabel.Object.Methods.isNumber = function(object) {
-	return object.constructor === Number;
-};
-
-Sabel.Object.Methods.isBoolean = function(object) {
-	return object.constructor === Boolean;
-};
-
-Sabel.Object.Methods.isArray = function(object) {
-  return object.constructor === Array;
-};
-
-Sabel.Object.Methods.isFunction = function(object) {
-	return object.constructor === Function;
-};
-
-Sabel.Object.Methods.clone = function(object) {
-	return Sabel.Object.create(object);
-};
-
-Sabel.Object.Methods.getName = function(object) {
-	return object.constructor;
-};
-
-Sabel.Object.Methods.hasMethod = function(object, method) {
-	return (object[method] !== undefined);
-};
-
 Sabel.Object.extend(Sabel.Object, Sabel.Object.Methods);
-
-
 Sabel.String = function(string) {
 	return Sabel.Object.create(string, Sabel.String);
 };
 
 Sabel.String.format = function(string, obj) {
-	return string.replace(/#\{(\w+)\}/g, function(target, key) { return obj[key]; });
+	string = string.replace(/%(\w+)%/g, function(target, key) { return obj[key] || ""; });
+	return string.replace(/#\{(\w+)\}/g, function(target, key) { return obj[key] || ""; });
 };
 
 Sabel.String.capitalize = function(string) {
@@ -277,13 +278,11 @@ Sabel.Array = function(iterable) {
 	} else if (iterable.toArray) {
 		iterable = iterable.toArray();
 	} else {
-		//var iterable = Sabel.Array.map(
 		var buf = new Array();
 		Sabel.Array.each(iterable, function(v) { buf[buf.length] = v; });
 		iterable = buf;
 	}
 
-	//return Sabel.Object.create(iterable, Sabel.Array, true);
 	return Sabel.Object.extend(iterable, Sabel.Array, true);
 };
 
@@ -301,6 +300,26 @@ Sabel.Array.map = function(array, callback) {
 	}
 	return results;
 };
+
+Sabel.Array.concat = function(array, iterable) {
+	if (iterable.length === undefined) return array;
+
+	if (iterable.toArray) iterable = iterable.toArray();
+
+	Sabel.Array.each(iterable, function(data) {
+		array[array.length] = data;
+	});
+	return array;
+};
+
+Sabel.Array.inject = function(array, method) {
+	var buf = new Array();
+	Sabel.Array.each(array, function(data) {
+		if (method(data) === true) buf[buf.length] = data;
+	});
+	return buf;
+};
+
 
 Sabel.Array.callmap = function(array, method) {
 	for (var i = 0, len = array. length; i < len; i++) {
@@ -324,10 +343,7 @@ Sabel.Array.sum = function(array) {
 	return result;
 };
 
-Sabel.Object.extend(Sabel.Array, Sabel.Object.Methods);
-
-
-Sabel.Function = function(method) {
+Sabel.Object.extend(Sabel.Array, Sabel.Object.Methods);Sabel.Function = function(method) {
 	return Sabel.Object.create(method, Sabel.Function);
 };
 
@@ -380,7 +396,7 @@ Sabel.Function.restraint = function(method, obj) {
 		}
 		method.apply(method, args);
 	}
-}
+};
 
 Sabel.Function.getArgumentNames = function(method) {
 	var str = method.toString();
@@ -392,42 +408,413 @@ Sabel.Function.getArgumentNames = function(method) {
 Sabel.Object.extend(Sabel.Function, Sabel.Object.Methods);
 
 
-Sabel.Dom = {};
+Sabel.Dom = {
 
-Sabel.Dom.getElementById = function(element, extend) {
-	if (typeof element === "string") {
-		element = document.getElementById(element);
-	}
+	getElementById: function(element, extend) {
+		if (typeof element === "string") {
+			element = document.getElementById(element);
+		}
 
-	return (element) ? (extend === false) ? element : Sabel.Element(element) : null;
-};
+		return (element) ? (extend === false) ? element : Sabel.Element(element) : null;
+	},
 
-Sabel.Dom.getElementsByClassName = function(className, element, ext) {
-	element = (element) ? Sabel.get(element, false) : document;
+	getElementsByClassName: function(className, element, ext) {
+		element = (element) ? Sabel.get(element, false) : document;
 
-	if (element.getElementsByClassNam) {
-		return element.getElementsByClassName(className);
-	} else {
-		var elms = element.getElementsByTagName("*");
-		var pat = new RegExp("(?:^|\\s)" + className + "(?:\\s|$)");
+		if (element.getElementsByClassNam) {
+			return element.getElementsByClassName(className);
+		} else {
+			var elms = element.getElementsByTagName("*");
+			var pat = new RegExp("(?:^|\\s)" + className + "(?:\\s|$)");
 
-		var buf = (ext) ? Sabel.Elements() : new Array();
-		Sabel.Array.each(elms, function(elm) {
-			if (pat.test(elm.className)) buf.push((ext) ? new Sabel.Element(elm) : elm);
+			var buf = (ext) ? Sabel.Elements() : new Array();
+			Sabel.Array.each(elms, function(elm) {
+				if (pat.test(elm.className)) buf.push((ext) ? new Sabel.Element(elm) : elm);
+			});
+			return buf;
+		}
+	},
+
+	getElementsBySelector: function(selector) {
+		if (document.querySelectorAll) {
+			try {
+				var elms = [];
+				Sabel.Array.each(document.querySelectorAll(selector), function(el) {
+					elms.push(el);
+				});
+				return Sabel.Elements(elms);
+			} catch (e) {}
+		}
+		var s = Sabel.Dom.Selector;
+		var selectors = selector.split(",");
+		var elms = [];
+		Sabel.Array.each(selectors, function(query) {
+			var method = s._cache[query] || (s._cache[query] = s.convertToJSCode(query));
+			elms = elms.concat(method([document]));
 		});
-		return buf;
+		return Sabel.Elements(Sabel.Elements.unique(elms));
 	}
-};
-
-Sabel.Dom.getElementsByXPath = function(xpath, context) {
-	
 };
 
 Sabel.get   = Sabel.Dom.getElementById;
-Sabel.find  = Sabel.Dom.getElementsByClassName;
-Sabel.xpath = Sabel.Dom.getElementsByXPath;
+Sabel.find  = Sabel.Dom.getElementsBySelector;
 
 
+
+
+Sabel.Dom.Selector = {
+	patterns: {
+		tagName: /^(\*|\w+)/,
+		combinator: /^\s*(>|\+|~)\s*/,
+		id: /^#(\w+)/,
+		className: /^\.(\w+)/,
+		pseudo: /^:([\w\-]+)(?:\(([^)˘]+)\))?/,
+		attr: /^\[(\w+)([!~^$*|]?=)?([\'\"])?([^\'\"\]]+)?\3\]/,
+		space: /^\s+/
+	},
+
+	cs: {
+		xpath: {
+		},
+
+		base: {
+			tagName: 'nodes = h.tagName(nodes, "#{1}", f); f = true;',
+			combinator: 'nodes = h.combinator(nodes, "#{1}"); f = true;',
+			id: 'nodes = h.id(nodes, "#{1}", f); f = false;',
+			className: 'nodes = h.className(nodes, "#{1}", f); f = false;',
+			pseudo: 'nodes = h.pseudo["#{1}"](nodes, "#{2}"); f = false;',
+			attr: 'nodes = h.attr(nodes, "#{1}", "#{2}", "#{4}");',
+			space: 'f = false;'
+		}
+	},
+
+	handlers: {
+		tagName: function(nodes, tagName, f) {
+			var buf = [];
+			if (f === true) {
+				buf = Sabel.Array.inject(nodes, function(node) {
+					if (node.tagName === tagName.toUpperCase()) return true;
+				});
+			} else {
+				Sabel.Array.each(nodes, function(node) {
+					buf = Sabel.Array.concat(buf, node.getElementsByTagName(tagName));
+				});
+			}
+			return Sabel.Elements.unique(buf);
+		},
+
+		combinator: function(nodes, combName) {
+			var buf = [];
+			switch(combName) {
+			case ">":
+				Sabel.Array.each(nodes, function(node) {
+					buf = Sabel.Array.concat(buf, Sabel.Element.getChildElements(node));
+				});
+				break;
+			case "~":
+				Sabel.Array.each(nodes, function(node) {
+					if (node.__searched === true) return;
+					while (node = node.nextSibling) {
+						if (node.nodeType === 1) {
+							buf.push(node);	
+							node.__searched = true;
+						}
+					}
+				});
+				Sabel.Array.each(buf, function(node) {
+					node.__searched = false;
+				});
+				break;
+			case "+":
+				Sabel.Array.each(nodes, function(node) {
+					if (el = Sabel.Element.getNextSibling(node)) buf[buf.length] = el;
+				});
+				break;
+			}
+			return Sabel.Elements.unique(buf);
+		},
+
+		id: function(nodes, id, f) {
+			if (f === true) {
+				var buf = Sabel.Array.inject(nodes, function(node) {
+					if (node.id === id) return true;
+				});
+				return Sabel.Elements.unique(buf);
+			} else {
+				var el = document.getElementById(id);
+				for (var i = 0; i < nodes.length; i++) {
+					if (Sabel.Element.contains(nodes[i], el)) return [el];
+				}
+				return [];
+			}
+		},
+
+		className: function(nodes, className, f) {
+			if (f === true) {
+				var buf = Sabel.Array.inject(nodes, function(node) {
+					if (Sabel.Element.hasClass(node, className)) return true;
+				});
+			} else {
+				var buf = [];
+				Sabel.Array.each(nodes, function(node) {
+					buf = Sabel.Array.concat(buf, Sabel.Dom.getElementsByClassName(className, node, false));
+				});
+			}
+			return Sabel.Elements.unique(buf);
+		},
+
+		pseudo: {
+			root: function(nodes) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					if (node.parentNode === document) buf[buf.length] = node;
+				});
+				return buf;
+			},
+
+			"first-child": function(nodes) {
+				var buf = [];
+				Sabel.Array.each(nodes, function(node) {
+					if (!Sabel.Element.getPreviousSibling(node)) buf[buf.length] = node;
+				});
+				return buf;
+			},
+
+			"last-child": function(nodes) {
+				var buf = [];
+				Sabel.Array.each(nodes, function(node) {
+					if (!Sabel.Element.getNextSibling(node)) buf.push(node);
+				});
+				return buf;
+			},
+
+			"nth-child": function(nodes, pos) {
+				if (pos === "odd") pos = "2n+1";
+				else if (pos === "even") pos = "2n";
+
+				var buf = new Array();
+				if (ms = pos.match(/^(0n\+)?(\d+)$/)) {
+					Sabel.Array.each(nodes, function(node) {
+						var el = node.parentNode.firstChild, i = 0;
+						while (el && i < ms[2]) {
+							el = el.nextSibling;
+							if (el.nodeType == 1) i++;
+						}
+						if (el == node) buf.push(node);
+					});
+					return buf;
+				} else if (ms = pos.match(/^([+-])?(\d*)n([+-]\d+)?$/)) {
+					var a = ms[2] || 1, b = Sabel.String.toInt(ms[3] || 0);
+
+					Sabel.Array.each(nodes, function(node) {
+						var p = Sabel.Element.getNodeIndex(node);
+						var i = p - b;
+						if (ms[1] === "-") i = i * -1;
+						if (i >= 0 && (i % a) === 0) buf.push(node);
+					});
+					return buf;
+				}
+			},
+
+			"nth-last-child": function(nodes, pos) {
+				return this.nth(nodes, pos, true);
+			},
+
+			"first-of-type": function(nodes) {
+				return this.nth(nodes, "1", false, true);
+			},
+
+			"last-of-type": function(nodes) {
+				return this.nth(nodes, "1", true, true);
+			},
+
+			"nth-of-type": function(nodes, pos) {
+				return this.nth(nodes, pos, false, true);
+			},
+
+			"nth-last-of-type": function(nodes, pos) {
+				return this.nth(nodes, pos, true, true);
+			},
+
+			"nth": function(nodes, pos, reverse, ofType) {
+				if (pos === "odd") pos = "2n+1";
+				else if (pos === "even") pos = "2n";
+
+				var buf = new Array();
+				if (ms = pos.match(/^(0n\+)?(\d+)$/)) {
+					Sabel.Array.each(nodes, function(node) {
+						var p = Sabel.Element.getNodeIndex(node, reverse, ofType);
+
+						if (p == ms[2]) buf.push(node);
+					});
+				} else if (ms = pos.match(/^([+-])?(\d*)n([+-]\d+)?$/)) {
+					var a = ms[2] || 1, b = Sabel.String.toInt(ms[3] || 0);
+
+					Sabel.Array.each(nodes, function(node) {
+						var p = Sabel.Element.getNodeIndex(node, reverse, ofType);
+						var i = p - b;
+						if (ms[1] === "-") i = i * -1;
+						if (i >= 0 && (i % a) === 0) buf.push(node);
+					});
+				}
+				return buf;
+			},
+
+
+			"only-child": function(nodes) {
+				var buf = new Array();
+
+				Sabel.Array.each(nodes, function(node) {
+					if (!Sabel.Element.getPreviousSibling(node) && !Sabel.Element.getNextSibling(node)) {
+						buf.push(node);
+					}
+				});
+
+				return buf;
+			},
+
+			"only-of-type": function(nodes) {
+				var buf = new Array();
+
+				Sabel.Array.each(nodes, function(node) {
+					var elms = node.parentNode.childNodes, i = 0, elm, f = 0;
+					while (elm = elms[i++]) {
+						if (elm.tagName === node.tagName) f++;
+						if (f > 1) return false;
+					}
+					buf.push(node);
+					return;
+					var elms = Sabel.Element.getChildElements(node.parentNode, node.tagName);
+
+					if (elms.length === 1) buf.push(node);
+				});
+
+				return buf;
+			},
+
+			contains: function(nodes, text) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					var t = node.textContent || node.innerText || "";
+
+					if (t.indexOf(text) >= 0) buf.push(node);
+				});
+
+				return buf;
+			},
+
+			empty: function(nodes) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					if (node.childNodes.length === 0) buf.push(node);
+				});
+				return buf;
+			},
+
+			"not": function(nodes, selector) {
+				var elms = Sabel.Dom.Selector.convertToJSCode(selector, true)(nodes), buf=[];
+				
+				for (var i = 0, len = elms.length, elm; elm = elms[i]; i++) {
+					elm._marked = true;
+				}
+				for (var i = 0, len = nodes.length, elm; elm = nodes[i]; i++){
+					if (!elm._marked) buf.push(elm);
+					elm._marked = false;
+				}
+				return buf;
+			},
+
+			lang: function(nodes, lang) {
+				var buf = new Array();
+				var pattern = new RegExp("^" + lang + "(-|$)");
+
+				Sabel.Array.each(nodes, function(node) {
+					var nodeLang = node.getAttribute("lang");
+					if (nodeLang && pattern.test(nodeLang)) buf.push(node);
+				});
+
+				return buf;
+			},
+
+			enabled: function(nodes) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					if (node.disabled === false) buf.push(node);
+				});
+				return buf;
+			},
+
+			disabled: function(nodes) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					if (node.disabled === true) buf.push(node);
+				});
+				return buf;
+			},
+
+			checked: function(nodes) {
+				var buf = new Array();
+				Sabel.Array.each(nodes, function(node) {
+					if (node.checked === true) buf.push(node);
+				});
+				return buf;
+			}
+		},
+
+		attr: function(nodes, key, op, value) {
+			var self = this;
+			var buf = new Array();
+			if (op) {
+				Sabel.Array.each(nodes, function(node) {
+					if (self.operators[op](node.getAttribute(key)||"", value) === true) buf.push(node);
+				});
+			} else {
+				Sabel.Array.each(nodes, function(node) {
+					if (Sabel.Element.hasAttribute(node, key) === true) buf.push(node);
+				});
+			}
+			return buf;
+		},
+
+		operators: {
+			"default": function(a) { return a !== null; },
+			"=":  function(a, b) { return a === b; },
+			"!=": function(a, b) { return a !== b; },
+			"~=": function(a, b) { return (" "+a+" ").indexOf(" "+b+" ") >= 0; },
+			"^=": function(a, b) { return a.indexOf(b) === 0; },
+			"$=": function(a, b) { return a.indexOf(b) === (a.length - b.length); },
+			"*=": function(a, b) { return a.indexOf(b) >= 0; },
+			"|=": function(a, b) { return (a+"-").toLowerCase().indexOf((b+"-").toLowerCase()) === 0; }
+		}
+	}
+};
+
+Sabel.Dom.Selector.convertToJSCode = function(selector, force) {
+	var patterns = Sabel.Dom.Selector.patterns;
+	var cs = Sabel.Dom.Selector.cs.base;
+	var prev, pattern, m;
+  // @todo bug fix;
+	var buf = ['sbl_func = function(nodes) { var h = Sabel.Dom.Selector.handlers, f = '+(force||'false')+';'];
+
+	while (selector && selector !== prev) {
+		prev = selector;
+
+		for (var prop in patterns) {
+			pattern = patterns[prop];
+
+			if (m = selector.match(pattern)) {
+				buf.push(Sabel.String.format(cs[prop], m));
+				selector = selector.replace(m[0], "");
+				break;
+			}
+		}
+	}
+	buf.push("return nodes; }");
+
+	return eval(buf.join(""));
+};
+
+Sabel.Dom.Selector._cache = {};
 Sabel.Element = function(element) {
 	if (typeof element === "string") {
 		element = document.createElement(element);
@@ -467,6 +854,13 @@ Sabel.Element.hasClass = function(element, className) {
 	return pattern.test(element.className);
 };
 
+Sabel.Element.hasAttribute = function(element, attribute) {
+	element = Sabel.get(element, false);
+	if (element.hasAttribute) return element.hasAttribute(attribute);
+	var node = element.getAttributeNode(attribute);
+	return node && node.specified;
+};
+
 Sabel.Element.getStyle = function(element, property) {
 	element = Sabel.get(element, false);
 
@@ -474,7 +868,6 @@ Sabel.Element.getStyle = function(element, property) {
 	return style[property];
 };
 
-// @todo remake this.
 Sabel.Element.setStyle = function(element, styles) {
 	element = Sabel.get(element, false);
 
@@ -494,10 +887,34 @@ Sabel.Element.setStyle = function(element, styles) {
 	return element;
 };
 
-Sabel.Element.setHeight = function(element, value) {
-	//return Sabel.get(element, false).style.height = value + "px";
+Sabel.Element.deleteStyle = function(element, styles) {
 	element = Sabel.get(element, false);
-	element.style.height = value + "px";
+
+	if (typeof styles === "string") {
+		element.style[styles] = "";
+	} else {
+		for (var i = 0, key; key = styles[i]; i++) {
+			element.style[key] = "";
+		}
+	}
+
+	return element;
+};
+
+Sabel.Element.insertAfter = function(element, newChild, refChild) {
+	elemenet = Sabel.get(element, false);
+	if (element.lastChild == refChild) {
+		element.appendChild(newChild);
+	} else {
+		element.insertBefore(newChild, refChild.nextSibling);
+	}
+	return element;
+};
+
+Sabel.Element.setHeight = function(element, value) {
+	element = Sabel.get(element, false);
+	if (value !== "" && typeof value === "number") value = value + "px";
+	element.style.height = value;
 	return element;
 };
 
@@ -590,7 +1007,7 @@ Sabel.Element.getDimensions = function(element) {
 	var style = element.style;
 
 	if (style.display != 'none') {
-		return {width: element.clientWidth, height: element.clientHeight};
+		return {width: element.offsetWidth, height: element.offsetHeight};
 	}
 
 	var oldV = style.visibility;
@@ -602,8 +1019,8 @@ Sabel.Element.getDimensions = function(element) {
 	style.display    = "block";
 
 	var dimensions = {
-		width:  element.clientWidth,
-		height: element.clientHeight
+		width:  element.offsetWidth,
+		height: element.offsetHeight
 	};
 
 	style.visibility = oldV;
@@ -626,7 +1043,6 @@ Sabel.Element.remove = function(element) {
 	element.parentNode.removeChild(element);
 };
 
-// @todo remake this.
 Sabel.Element.update = function(element, contents) {
 	element = Sabel.get(element, false);
 
@@ -641,6 +1057,7 @@ Sabel.Element.update = function(element, contents) {
 };
 
 Sabel.Element.observe = function(element, eventName, handler) {
+	element = Sabel.get(element, false);
 	if (element._events === undefined) element._events = {};
 	if (element._events[eventName] === undefined) element._events[eventName] = new Array();
 
@@ -651,8 +1068,8 @@ Sabel.Element.observe = function(element, eventName, handler) {
 	//return element;
 };
 
-// @todo STOPしたイベントをどうする？
 Sabel.Element.stopObserve = function(element, eventName, handler) {
+	element = Sabel.get(element, false);
 	var events = (element._events) ? element._events[eventName] : null;
 	if (events.constructor === Array) {
 		if (typeof handler === "function") {
@@ -665,7 +1082,6 @@ Sabel.Element.stopObserve = function(element, eventName, handler) {
 	return element;
 };
 
-// @todo refactoring.
 Sabel.Element.analyze = function(element) {
 	var as = Sabel.get(element, false).attributes;
 
@@ -691,16 +1107,34 @@ Sabel.Element.analyze = function(element) {
 	return buf.join(" ");
 };
 
-Sabel.Element.getChildElements = function(element) {
-	var buf = new Array();
+Sabel.Element.getChildElements = function(element, tagName) {
+	var buf = new Array(), element = Sabel.get(element, false);
 	Sabel.Array.each(element.childNodes, function(elm) {
-		if (elm.nodeType === 1) buf[buf.length] = elm;
+		if (elm.nodeType === 1) {
+			if (tagName === undefined || tagName === elm.tagName) buf[buf.length] = elm;
+		}
 	});
 	return buf;
 };
 
+Sabel.Element.getFirstChild = function(element) {
+	return Sabel.Element.getChildElements(element)[0];
+};
+
+Sabel.Element.getLastChild = function(element) {
+	var elms = Sabel.Element.getChildElements(element);
+	return elms[elms.length - 1];
+};
+
 Sabel.Element.getNextSibling = function(element) {
 	while (element = element.nextSibling) {
+		if (element.nodeType === 1) return element;
+	}
+	return null;
+};
+
+Sabel.Element.getPreviousSibling = function(element) {
+	while (element = element.previousSibling) {
 		if (element.nodeType === 1) return element;
 	}
 	return null;
@@ -722,6 +1156,75 @@ Sabel.Element.getNextSiblings = function(element) {
 	return buf;
 };
 
+Sabel.Element.getNodeIndex = function(element, reverse, ofType) {
+	if (ofType === true) {
+		return Sabel.Element._getOfTypeNodeIndex(element, reverse);
+	} else{
+		return Sabel.Element._getNodeIndex(element,reverse);
+	};
+};
+
+Sabel.Element._getNodeIndex = function(element, reverse) {
+	var parentNode = element.parentNode;
+
+	var childNodes = parentNode.childNodes;
+	var propName = (reverse === true) ? "__cachedLastIdx"
+	                                  : "__cachedIdx";
+	if (parentNode.__cachedLength === childNodes.length) {
+		if (element[propName]) {
+			return element[propName];
+		}
+	}
+
+	if (reverse === true) {
+		childNodes = new Sabel.Array(childNodes).reverse();
+	}
+
+	parentNode.__cachedLength = childNodes.length;
+	for (var i = 0, idx = 1, child; child = childNodes[i]; i++) {
+		if (child.nodeType == 1) child[propName] = idx++;
+	}
+
+	return element[propName];
+};
+
+Sabel.Element._getOfTypeNodeIndex = function(element, reverse) {
+	var parentNode = element.parentNode;
+	var childNodes = parentNode.childNodes;
+	var propName   = (reverse === true) ? "__cachedOfTypeIdx"
+	                                    : "__cachedLastOfTypeIdx";
+	
+	if (parentNode.__cachedLength === childNodes.length) {
+		if (element[propName]) {
+			return element[propName];
+		}
+	}
+
+	if (reverse === true) {
+		childNodes = new Sabel.Array(childNodes).reverse();
+	}
+	
+	parentNode.__cachedLength = childNodes.length;
+	for (var i = 0, idx = 1, child; child = childNodes[i]; i++) {
+		if (child.tagName === element.tagName && child.nodeType === 1) {
+			child[propName] = idx++;
+		}
+	}
+	
+	return element[propName];
+};
+
+Sabel.Element.contains = function(element, other) {
+	if (element === document) element = document.body;
+	if (element.contains) {
+		// IE, Opera, Safari
+		return element.contains(other);
+	} else {
+		// Firefox
+		return !!(element.compareDocumentPosition(other) & element.DOCUMENT_POSITION_CONTAINED_BY);
+	}
+};
+
 Sabel.Object.extend(Sabel.Element, Sabel.Object.Methods);
 
 
@@ -730,11 +1233,7 @@ Sabel.Elements = function(elements) {
 		elements = new Sabel.Array();
 	} else if (elements._extended === true) {
 		return elements;
-		// @todo nodelistとかのチェックが必要
 	} else if (elements.constructor !== Array) {
-		// @todo どうする？
-		// @todo stringやElementだとSabel.Element返す？
-		// @todo それともthrow Exception?
 		return null;
 	} else {
 		elements = new Sabel.Array(elements);
@@ -743,8 +1242,10 @@ Sabel.Elements = function(elements) {
 	return Sabel.Object.extend(elements, Sabel.Elements, true);
 };
 
+Sabel.Elements._extended = true;
+
 Sabel.Elements.add = function(elements, element) {
-	elements.push(element);
+	elements[elements.length] = element;
 };
 
 Sabel.Elements.item = function(elements, pos) {
@@ -753,7 +1254,7 @@ Sabel.Elements.item = function(elements, pos) {
 
 Sabel.Elements.observe = function(elements, eventName, handler) {
 	Sabel.Array.each(elements, function(elm) {
-		Sabel.Element.observe(elm, eventName, handler);
+		Sabel.Element.observe(elm, eventName, Sabel.Function.bind(handler, elm));
 	});
 };
 
@@ -763,7 +1264,16 @@ Sabel.Elements.stopObserve = function(elements, eventName, handler) {
 	});
 };
 
-Sabel.Elements._extended = true;
+Sabel.Elements.unique = function(elements) {
+	var finds = Sabel.Array.inject(elements, function(elm) {
+		if (elm._searched === true) return false;
+		elm._searched = true;
+		return true;
+	});
+
+	Sabel.Array.each(finds, function(elm) { elm._searched = false; });
+	return finds;
+};
 
 Sabel.Object.extend(Sabel.Elements, Sabel.Object.Methods);
 
@@ -773,26 +1283,31 @@ Sabel.Iterator = function(iterable) {
 	this.index = 0;
 };
 
-Sabel.Iterator.prototype.hasNext = function() {
-	return this.index < this.items.length-1;
-};
+Sabel.Iterator.prototype = {
+	hasNext: function() {
+		return this.index < this.items.length-1;
+	},
 
-Sabel.Iterator.prototype.next = function() {
-	return this.items[this.index++];
+	next: function() {
+		return this.items[this.index++];
+	}
 };
 
 
 if (typeof window.XMLHttpRequest === "undefined") {
 	window.XMLHttpRequest = function() {
-		var objects = ["Msxml2.XMLHTTP.6.0", "Msxml2.XMLHTTP.3.0", "Msxml2.XMLHTTP", "Microsoft.XMLHTTP"], http;
-		for (var i = 0, len = object.length; i < len; i++) {
+		var http;
+		var objects = ["Msxml2.XMLHTTP.6.0", "Msxml2.XMLHTTP.3.0", "Msxml2.XMLHTTP", "Microsoft.XMLHTTP"];
+		for (var i = 0, obj; obj = objects[i]; i++) {
 			try {
-				http = new ActiveXObject(objects[i]);
+				http = new ActiveXObject(obj);
 				window.XMLHttpRequest = function() {
-					return new ActiveXOjbect(objects[i]);
+					return new ActiveXObject(obj);
 				}
+				break;
 			} catch (e) {}
 		}
+		return http;
 	}
 };
 
@@ -800,210 +1315,306 @@ Sabel.Ajax = function() {
 	this.init.apply(this, arguments);
 };
 
-Sabel.Ajax.prototype.init = function() {
-	this.xmlhttp   = new XMLHttpRequest();
-	this.completed = false;
-};
+Sabel.Ajax.prototype = {
+	init: function() {
+		this.xmlhttp   = new XMLHttpRequest();
+		this.completed = false;
+	},
+	
+	request: function(url, options) {
+		var xmlhttp = this.xmlhttp;
+		var options = this.setOptions(options);
 
-Sabel.Ajax.prototype.request = function(url, options) {
-	var xmlhttp = this.xmlhttp;
-	var options = this.setOptions(options);
+		xmlhttp.onreadystatechange = Sabel.Function.bind(this.onStateChange, this);
 
-	xmlhttp.onreadystatechange = Sabel.Function.bind(this.onStateChange, this);
-
-	if (options.method === "get") {
-		url += ((url.indexOf("?") !== -1) ? "&" : "?") + options.params;
-	}
-
-	xmlhttp.open(options.method, url, options.async);
-	this.setRequestHeaders();
-	xmlhttp.send((options.method === "post") ? options.params : "");
-};
-
-Sabel.Ajax.prototype.updater = function(element, url, options) {
-	var onComplete = options.onComplete || function() {};
-	options.onComplete = function(response) {
-		// @todo use sabel.element.update method
-		Sabel.get(element).innerHTML = response.responseText;
-		onComplete(response);
-	}
-
-	this.request(url, options);
-};
-
-Sabel.Ajax.prototype.setOptions = function(options) {
-	if (options === undefined) options = {};
-
-	var defaultOptions = {
-		method: "post",
-		params: "",
-		contentType: "application/x-www-form-urlencoded",
-		charset: "UTF-8",
-		onComplete: function(){},
-		onSuccess: function(){},
-		onFailure: function(){},
-		async: true
-	};
-	Sabel.Object.extend(options, defaultOptions);
-	options.method = options.method.toLowerCase();
-	return (this.options = options);
-};
-
-Sabel.Ajax.prototype.setRequestHeaders = function() {
-	// @todo */* どうする？
-	var headers = {
-		"X-Requested-With": "XMLHttpRequest",
-		"Accept": "text/javascript, text/html, application/xml, text/xml, */*"
-	};
-	var xmlhttp = this.xmlhttp;
-	var options = this.options;
-
-	if (options.method === "post") {
-		headers["Content-Type"] = options.contentType + "; charset=" + options.charset;
-	}
-
-	if (typeof options.headers === "object") {
-		headers = Sabel.Object.extend(options.headers, headers);
-	}
-
-	for (var key in headers) {
-		xmlhttp.setRequestHeader(key, headers[key]);
-	}
-};
-
-Sabel.Ajax.prototype.onStateChange = function() {
-	if (this.completed === true) return;
-
-	if (this.xmlhttp.readyState === 4) {
-		this.completed = true;
-
-		var response = this.getResponses();
-		this.options["on" + (this.isSuccess() ? "Success" : "Failure")](response);
-		this.options.onComplete(response);
-	}
-};
-
-Sabel.Ajax.prototype.getResponses = function() {
-	var xmlhttp  = this.xmlhttp;
-	var response = new Object();
-	response.responseXML  = xmlhttp.responseXML;
-	response.responseText = this.responseFilter(xmlhttp.responseText);
-	response.status = xmlhttp.status;
-	response.statusText = xmlhttp.statusText;
-	return response;
-};
-
-Sabel.Ajax.prototype.isSuccess = function() {
-	var status = this.xmlhttp.status;
-	return (status && (status >= 200 && status < 300));
-};
-
-Sabel.Ajax.prototype.responseFilter = function(text) {
-	if (Sabel.UserAgent.isKHTML) {
-		var esc = escape(text);
-		if (esc.indexOf("%u") < 0 && esc.indexOf("%") > -1) {
-			text = decodeURIComponent(esc);
+		if (options.method === "get") {
+			url += ((url.indexOf("?") !== -1) ? "&" : "?") + options.params;
 		}
+
+		xmlhttp.open(options.method, url, options.async);
+		this.setRequestHeaders();
+		xmlhttp.send((options.method === "post") ? options.params : "");
+	},
+
+	updater: function(element, url, options) {
+		options = options || {};
+
+		var onComplete = options.onComplete || function() {};
+		options.onComplete = function(response) {
+			Sabel.get(element).innerHTML = response.responseText;
+			onComplete(response);
+		}
+
+		this.request(url, options);
+	},
+
+	setOptions: function(options) {
+		if (options === undefined) options = {};
+
+		var defaultOptions = {
+			method: "post",
+			params: "",
+			contentType: "application/x-www-form-urlencoded",
+			charset: "UTF-8",
+			onComplete: function(){},
+			onSuccess: function(){},
+			onFailure: function(){},
+			async: true
+		};
+		Sabel.Object.extend(options, defaultOptions);
+		options.method = options.method.toLowerCase();
+		return (this.options = options);
+	},
+
+	setRequestHeaders: function() {
+		var headers = {
+			"X-Requested-With": "XMLHttpRequest",
+			"Accept": "text/javascript, text/html, application/xml, text/xml, */*"
+		};
+		var xmlhttp = this.xmlhttp;
+		var options = this.options;
+
+		if (options.method === "post") {
+			headers["Content-Type"] = options.contentType + "; charset=" + options.charset;
+		}
+
+		if (typeof options.headers === "object") {
+			headers = Sabel.Object.extend(options.headers, headers);
+		}
+
+		for (var key in headers) {
+			xmlhttp.setRequestHeader(key, headers[key]);
+		}
+	},
+
+	onStateChange: function() {
+		if (this.completed === true) return;
+
+		if (this.xmlhttp.readyState === 4) {
+			this.completed = true;
+
+			var response = this.getResponses();
+			this.options["on" + (this.isSuccess() ? "Success" : "Failure")](response);
+			this.options.onComplete(response);
+		}
+	},
+
+	getResponses: function() {
+		var xmlhttp  = this.xmlhttp;
+		var response = new Object();
+		response.responseXML  = xmlhttp.responseXML;
+		response.responseText = this.responseFilter(xmlhttp.responseText);
+		response.status = xmlhttp.status;
+		response.statusText = xmlhttp.statusText;
+		return response;
+	},
+
+	isSuccess: function() {
+		var status = this.xmlhttp.status;
+		return (status && (status >= 200 && status < 300));
+	},
+
+	responseFilter: function(text) {
+		if (Sabel.UserAgent.isKHTML) {
+			var esc = escape(text);
+			if (esc.indexOf("%u") < 0 && esc.indexOf("%") > -1) {
+				text = decodeURIComponent(esc);
+			}
+		}
+		return text;
 	}
-	return text;
+};
+Sabel.History = function() {
+	this.init.apply(this, arguments);
 };
 
+Sabel.History.prototype = {
+	currentHash: "",
+	callback: null,
+	timer: null,
+
+	init: function(callback) {
+		this.callback = callback || function() {}
+		var hash = this._getHash(document);
+
+		if (hash !== "") this.callback(hash);
+
+		this.timer = setInterval(Sabel.Function.bind(this._check, this), 300);
+	},
+
+	load: function(hash) {
+		this._setHash(hash.replace(/^#/, ""), true);
+	},
+
+	_check: function() {
+		var hash = this._getHash(document);
+
+		if (hash !== this.currentHash) {
+			this._setHash(hash);
+		}
+	},
+
+	_setHash: function(hash, isUpdate) {
+		if (isUpdate === true) location.hash = "#" + hash;
+		this.currentHash = hash;
+		if (hash !== "") this.callback(hash);
+	},
+
+	_getHash: function(target) {
+		return new Sabel.Util.Uri(target.location.href).hash.replace(/^[^#]*#/, "");
+	}
+};
+
+if (Sabel.UserAgent.isIE) {
+	Sabel.History.prototype.init = function(callback) {
+		this.callback = callback || function() {}
+		var hash = this._getHash(document);
+
+		this.iframe = document.createElement('<iframe id="sbl_history_frame" style="display: none;">');
+		document.body.appendChild(this.iframe);
+		var doc = this.iframe.contentWindow.document;
+		doc.open();
+		doc.close();
+		this._setHash(doc, hash, false);
+
+		this.timer = setInterval(Sabel.Function.bind(this._check, this), 300);
+	};
+
+	Sabel.History.prototype.load = function(hash) {
+		var doc = this._getIframe();
+		hash = hash.replace(/^#/, "");
+
+		this._setHash(document, hash);
+		doc.open();
+		doc.close();
+		this._setHash(doc, hash);
+
+		this.callback(hash);
+	};
+
+	Sabel.History.prototype._check = function() {
+		var hash = this._getHash(this._getIframe());
+
+		if (hash !== this.currentHash) {
+			this._setHash(document, hash);
+			if (hash !== "") this.callback(hash);
+		}
+	};
+
+	Sabel.History.prototype._setHash = function(target, hash, isUpdate) {
+		target.location.hash = "#" + hash;
+		if (isUpdate !== false) this.currentHash = hash;
+	};
+
+	Sabel.History.prototype._getIframe = function() {
+		return this.iframe.contentWindow.document;
+	};
+}
 
 Sabel.Form = function(form) {
-	this.form = Sabel.get(form);
+	this.form = Sabel.get(form, false);
 
 	var elms = this.form.getElementsByTagName("*");
 	var buf = {};
-	Sabel.Array.each(elms, function(e) {
-		var method = Sabel.Form.Elements[e.tagName.toLowerCase()], value;
-		if (method && (value = method(e)) !== null) {
-			if (buf[e.name]) {
-				if (!Sabel.Object.isArray(buf[e.name])) {
-					buf[e.name] = [buf[e.name]];
+	Sabel.Array.each(elms, function(el) {
+		var method = Sabel.Form.Elements[el.tagName.toLowerCase()], value;
+		if (method && (value = method(el)) !== null) {
+			if (buf[el.name]) {
+				if (!Sabel.Object.isArray(buf[el.name])) {
+					buf[el.name] = [buf[el.name]];
 				}
-				buf[e.name].push(value);
+				buf[el.name].push(value);
 			} else {
-				buf[e.name] = value;
+				buf[el.name] = value;
 			}
 		}
 	});
 
-	//this.data = buf;
 	this.queryObj = new Sabel.Util.QueryObject(buf);
-}
-
-Sabel.Form.prototype.getQueryObj = function() {
-	return this.queryObj;
 };
 
-Sabel.Form.prototype.has = function(key) {
-	return this.queryObj.has(key);
-	//return !!(this.data[key] !== undefined);
-};
+Sabel.Form.prototype = {
+	getQueryObj: function() {
+		return this.queryObj;
+	},
 
-Sabel.Form.prototype.get = function(key) {
-	return this.queryObj.get(key);
-	return this.data[key] || null;
-};
+	has: function(key) {
+		return this.queryObj.has(key);
+	},
 
-Sabel.Form.prototype.set = function(key, val) {
-	return this.queryObj.set(key, val);
-	this.data[key] = val;
-};
+	get: function(key) {
+		return this.queryObj.get(key);
+	},
 
-Sabel.Form.prototype.serialize = function() {
-	return this.queryObj.serialize();
-	/*
-	var data = this.data, buf = new Array();
-	for (var key in data) {
-		if (Sabel.Object.isArray(data[key])) {
-			Sabel.Array.each(data[key], function(val) {
-				buf[buf.length] = key + "=" + encodeURIComponent(val);
-			});
-		} else {
-			buf[buf.length] = key + "=" + encodeURIComponent(data[key]);
-		}
+	set: function(key, val) {
+		return this.queryObj.set(key, val);
+	},
+
+	serialize: function() {
+		return this.queryObj.serialize();
 	}
-
-	return buf.join("&");
-	*/
 };
 
 Sabel.Object.extend(Sabel.Form, Sabel.Object.Methods);
 
-Sabel.Form.Elements = {
-	input: function(element) {
-		switch(element.type.toLowerCase()) {
-		case "radio":
-		case "checkbox":
-			return (element.checked) ? element.value : null;
-		case "submit":
-		case "reset":
-		case "button":
-		case "image":
-			return null;
-		default:
-			return element.value;
+Sabel.Validator = function(formElm, errField) {
+	this.errField = Sabel.get(errField||"sbl_errmsg", false);
+	this.validators = new Object();
+
+	Sabel.Element.observe(formElm, "submit", Sabel.Function.bindWithEvent(this.validate, this));
+};
+
+Sabel.Validator.prototype = {
+	add: function(elm, func, errMsg) {
+		elm = Sabel.get(elm, false);
+		var name = elm.name;
+		var validators = this.validators;
+
+		if (validators[name] === undefined) {
+			validators[name] = new Sabel.Validator.Element(elm);
 		}
+
+		validators[name].add(func, errMsg);
 	},
 
-	select: function(element) {
-		switch (element.type) {
-		case "select-multiple":
-			var buf = [];
-			Sabel.Array.each(element.options, function(el) {
-				if (el.selected) buf[buf.length] = el.value;
-			});
-			return buf;
-		default:
-			return element.value;
+	validate: function(e) {
+		var validators = this.validators;
+		var errors = [], v;
+		for (var name in validators) {
+			v = validators[name];
+			if (v.validate() === false) errors.push(v.errMsg);
 		}
+
+		var status = !(errors.length);
+		if (status === false) {
+			this.insertMessage(errors);
+			Sabel.Event.preventDefault(e);
+    } else {
+      this.clearMessageField();
+    }
 	},
 
-	textarea: function(element) {
-		return element.value;
+	insertMessage: function(errors) {
+		this.clearMessageField();
+
+		this.errField.appendChild(this.getErrorMessage(errors));
+	},
+
+	clearMessageField: function() {
+		this.errField.innerHTML = "";
+	},
+
+	getErrorMessage: function(errors) {
+		var ul = document.createElement("ul");
+		Sabel.Array.each(errors, function(err) {
+			var li = document.createElement("li");
+			li.appendChild(document.createTextNode(err));
+			ul.appendChild(li);
+		});
+		return ul;
 	}
 };
+
 Sabel.Event = function(element, eventName, handler) {
 	element = Sabel.get(element, false);
 
@@ -1016,73 +1627,75 @@ Sabel.Event = function(element, eventName, handler) {
 	this.start();
 };
 
-Sabel.Event.prototype.start = function() {
-	if (this.isActive === false) {
-		var element = this.element;
+Sabel.Event.prototype = {
+	start: function() {
+		if (this.isActive === false) {
+			var element = this.element;
 
-		if (element.addEventListener) {
-			element.addEventListener(this.eventName, this.handler, false);
-		} else if (element.attachEvent) {
-			element.attachEvent("on" + this.eventName, this.handler);
+			if (element.addEventListener) {
+				element.addEventListener(this.eventName, this.handler, false);
+			} else if (element.attachEvent) {
+				element.attachEvent("on" + this.eventName, this.handler);
+			}
+			this.isActive = true;
 		}
-		this.isActive = true;
-	}
-};
+	},
 
-Sabel.Event.prototype.stop = function() {
-	if (this.isActive === true) {
-		var element = this.element;
+	stop: function() {
+		if (this.isActive === true) {
+			var element = this.element;
 
-		if (element.removeEventListener) {
-			element.removeEventListener(this.eventName, this.handler, false);
-		} else if (element.detachEvent) {
-			element.detachEvent("on" + this.eventName, this.handler);
+			if (element.removeEventListener) {
+				element.removeEventListener(this.eventName, this.handler, false);
+			} else if (element.detachEvent) {
+				element.detachEvent("on" + this.eventName, this.handler);
+			}
+			this.isActive = false;
 		}
-		this.isActive = false;
-	}
-};
+	},
 
-Sabel.Event.prototype.getHandler = function() {
-	return this.handler;
+	getHandler: function() {
+		return this.handler;
+	}
 };
 
 Sabel.Event.stopPropagation = function(evt) {
-  evt.stopPropagation();
+	evt.stopPropagation();
 };
 
 Sabel.Event.preventDefault = function(evt) {
-  evt.preventDefault();
+	evt.preventDefault();
 };
 
 if (Sabel.UserAgent.isIE) {
-  Sabel.Event.stopPropagetion = function(evt) {
-    (evt || window.event).cancelBubble = true;
-  };
-
-  Sabel.Event.preventDefault = function(evt) {
-    (evt || window.event).preventDefault = true;
-  };
+	Sabel.Event.stopPropagation = function(evt) {
+		(evt || window.event).cancelBubble = true;
+	};
+	
+	Sabel.Event.preventDefault = function(evt) {
+		(evt || window.event).returnValue = false;
+	};
 }
+Sabel.Events = {
 
-Sabel.Events = {};
+	_events: new Array(),
 
-Sabel.Events._events = new Array();
+	add: function(evtObj) {
+		var len = Sabel.Events._events.length;
+		Sabel.Events._events[len] = evtObj;
 
-Sabel.Events.add = function(evtObj) {
-	var len = Sabel.Events._events.length;
-	Sabel.Events._events[len] = evtObj;
+		return len;
+	},
 
-	return len;
-};
+	stop: function(eventId) {
+		Sabel.Events._events[eventId].stop();
+	},
 
-Sabel.Events.stop = function(eventId) {
-	Sabel.Events._events[eventId].stop();
-};
+	stopAll: function() {
+		var events = Sabel.Events._events;
 
-Sabel.Events.stopAll = function() {
-	var events = Sabel.Events._events;
-
-	Sabel.Array.callmap(events, "stop");
+		Sabel.Array.callmap(events, "stop");
+	}
 };
 
 
@@ -1106,6 +1719,7 @@ Sabel.Effect.prototype = {
 	add: function(effect , reverse) {
 		reverse = reverse || false;
 		this.effects.push({func: effect, reverse: reverse});
+		return this;
 	},
 
 	play: function(force) {
@@ -1118,7 +1732,8 @@ Sabel.Effect.prototype = {
 		}
 	},
 
-	reverse: function(force) {
+	reverse: function(force, c) {
+    if (c) this.callback = c;
 		if (this.state === 0 || this.state === 1) {
 			this.set(1, 0);
 			this._run();
@@ -1134,13 +1749,31 @@ Sabel.Effect.prototype = {
 	},
 
 	show: function() {
+    var state = this.state;
 		this.set(1, 1);
+    /*
+    this.effects.each(function(ef) {
+			ef.func.start((ef.reverse === true) ? 1 - state : state);
+    });
+    */
 		this.execEffects();
+    this.effects.each(function(ef) {
+			ef.func.end((ef.reverse === true) ? 1 - state : state);
+    });
 	},
 
 	hide: function() {
+    var state = this.state;
 		this.set(0, 0);
+    /*
+    this.effects.each(function(ef) {
+			ef.func.start(0);
+    });
 		this.execEffects();
+    */
+    this.effects.each(function(ef) {
+			ef.func.end(0);
+    });
 	},
 
 	set: function(from, to) {
@@ -1152,11 +1785,15 @@ Sabel.Effect.prototype = {
 	execEffects: function() {
 		var state = this.state;
 		this.effects.each(function(ef) {
-			ef.func((ef.reverse === true) ? 1 - state : state);
+			ef.func.exec((ef.reverse === true) ? 1 - state : state);
 		});
 	},
 
 	_run: function() {
+    var state = this.state;
+    this.effects.each(function(ef) {
+			ef.func.start((ef.reverse === true) ? 1 - state : state);
+    });
 		this.timer = setInterval(Sabel.Function.bind(this._exec, this), this.interval);
 	},
 
@@ -1168,6 +1805,17 @@ Sabel.Effect.prototype = {
 		}
 
 		this.execEffects();
+
+		if (this.state == 1 || this.state == 0) {
+			var state = this.state;
+			this.effects.each(function(ef) {
+				ef.func.end((ef.reverse === true) ? 1 - state : state);
+			});
+			if (this.callback) {
+				this.callback();
+				this.callback = null;
+			}
+		}
 	},
 
 	_clear: function() {
@@ -1218,69 +1866,72 @@ Sabel.dump = function(element, limit, output)
 			return buf.join(br);
 		}
 	})(element, 1)));
-}
-
-
-Sabel.Effect.Fade = function(element) {
-	element = Sabel.get(element, false);
-
-	return function(state) {
-		Sabel.Element.setOpacity(element, state);
-	}
 };
 
-
-Sabel.Effect.Slide = function(element) {
-	element = Sabel.get(element);
-	var maxHeight = element.getHeight();
-
-	return function(state) {
-		var height = state * maxHeight;
-
-		element.setStyle({height: height});
-
-		if (height === 0) {
-			if (element.getStyle("visibility") !== "hidden") {
-				element.setStyle({visibility: "hidden"});
-			}
-		} else {
-			if (element.getStyle("visibility") !== "visible") {
-				element.setStyle({visibility: "visible"});
-			}
+Sabel.Form.Elements = {
+	input: function(element) {
+		switch(element.type.toLowerCase()) {
+		case "radio":
+		case "checkbox":
+			return (element.checked) ? element.value : null;
+		case "submit":
+		case "reset":
+		case "button":
+		case "image":
+			return null;
+		default:
+			return element.value;
 		}
+	},
+
+	select: function(element) {
+		switch (element.type) {
+		case "select-multiple":
+			var buf = [];
+			Sabel.Array.each(element.options, function(el) {
+				if (el.selected) buf[buf.length] = el.value;
+			});
+			return buf;
+		default:
+			return element.value;
+		}
+	},
+
+	textarea: function(element) {
+		return element.value;
 	}
 };
-
-
 Sabel.Util.QueryObject = function(object) {
 	this.data = object;
 };
 
-Sabel.Util.QueryObject.prototype.has = function(key) {
-	return !!(this.data[key] !== undefined);
-};
+Sabel.Util.QueryObject.prototype = {
+	has: function(key) {
+		return !!(this.data[key] !== undefined);
+	},
 
-Sabel.Util.QueryObject.prototype.get = function(key) {
-	return this.data[key] || null;
-};
+	get: function(key) {
+		return this.data[key] || null;
+	},
 
-Sabel.Util.QueryObject.prototype.set = function(key, val) {
-	this.data[key] = val;
-};
+	set: function(key, val) {
+		this.data[key] = val;
+	},
 
-Sabel.Util.QueryObject.prototype.serialize = function() {
-	var data = this.data, buf = new Array();
-	for (var key in data) {
-		if (Sabel.Object.isArray(data[key])) {
-			Sabel.Array.each(data[key], function(val) {
-				buf[buf.length] = key + "=" + encodeURIComponent(val);
-			});
-		} else {
-			buf[buf.length] = key + "=" + encodeURIComponent(data[key]);
+	serialize: function() {
+		var data = this.data, buf = new Array();
+		for (var key in data) {
+			if (Sabel.Object.isArray(data[key])) {
+				Sabel.Array.each(data[key], function(val) {
+					buf[buf.length] = key + "=" + encodeURIComponent(val);
+				});
+			} else {
+				buf[buf.length] = key + "=" + encodeURIComponent(data[key]);
+			}
 		}
-	}
 
-	return buf.join("&");
+		return buf.join("&");
+	}
 };
 
 Sabel.Util.Uri = function(uri)
@@ -1307,13 +1958,12 @@ Sabel.Util.Uri = function(uri)
 		this[Sabel.Util.Uri.keyNames[i]] = result[i] || "";
 	}
 	this['parseQuery'] = parse(this.query);
-}
+};
 
-Sabel.Util.Uri.pattern  = /^(\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
-Sabel.Util.Uri.keyNames = ['url', 'protocol', 'user', 'password', 'domain', 'port', 'directory', 'filename', 'query', 'hash'];
+Sabel.Util.Uri.pattern  = /^((\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?)(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
+Sabel.Util.Uri.keyNames = ['uri', 'url', 'protocol', 'user', 'password', 'domain', 'port', 'path', 'filename', 'query', 'hash'];
 
 Sabel.Util.Uri.prototype = {
-	// @todo remove ?
 	has: function(key)
 	{
 		return this.parseQuery.has(key);
@@ -1321,152 +1971,281 @@ Sabel.Util.Uri.prototype = {
 
 	getQueryObj: function() {
 		return this.parseQuery;
-	}
-}
+	},
 
+	toString: function() {
+		return this.url + this.path + "/" + this.filename + "?" + this.parseQuery.serialize();
+	}
+};
+
+Sabel.Validator.Int = function(option) {
+	option = option || {};
+	return function(value) {
+		if (option.min && value && value < option.min) return false;
+		if (option.max && value && value > option.max) return false;
+
+		// 8進数が動かない。
+		if (value == "" || parseInt(value) == value) return true;
+
+		return false;
+	};
+};
+
+Sabel.Validator.Float = function(option) {
+	option = option || {};
+	return function(value) {
+		if (option.min && value && value < option.min) return false;
+		if (option.max && value && value > option.max) return false;
+
+		if (value == "" || parseFloat(value) == value) return true;
+		return false;
+	};
+};
+
+Sabel.Validator.String = function(option) {
+	return function(value) {
+		if (option.min && value.length < option.min) return false;
+		if (option.max && value.length > option.max) return false;
+
+		return true;
+	};
+};
+
+Sabel.Validator.Must = function() {
+	return function(value) {
+		if (value === "") return false;
+		return true;
+	};
+};
+
+Sabel.Validator.Regex = function(pattern) {
+	return function(value) {
+		if (value.search(pattern) !== -1) return false;
+		return true;
+	};
+};
+Sabel.Validator.Element = function(element) {
+	this.validations = new Array();
+	this.element = Sabel.get(element, false);
+	this.errMsg = "";
+};
+Sabel.Validator.Element.prototype = {
+	add: function(func, errMsg) {
+		this.validations.push({
+			func: func,
+			errMsg: errMsg
+		});
+
+		return this;
+	},
+
+	validate: function() {
+		var validations = this.validations;
+		for (var i = 0, v; v = validations[i]; i++) {
+			if (v.func(this.element.value) === false) {
+				this.errMsg = v.errMsg;
+				return false;
+			}
+		}
+		return true;
+	}
+};
+
+Sabel.Effect.Fade = function(element) {
+	element = Sabel.get(element, false);
+
+	return function(state) {
+		Sabel.Element.setOpacity(element, state);
+	}
+};
+
+
+Sabel.Effect.Slide = function() {
+	this.init.apply(this, arguments);
+};
+
+Sabel.Effect.Slide.prototype = {
+	init: function(element) {
+		this.element = Sabel.get(element, false);
+	},
+
+	start: function(state) {
+		var elm = this.element;
+
+		this.elementHeight   = Sabel.Element.getHeight(elm);
+		this.defaultPosition = Sabel.Element.getStyle(elm, "position");
+		this.defaultOverflow = Sabel.Element.getStyle(elm, "overflow");
+
+		var height = state * this.elementHeight;
+		var style = {
+			overflow: "hidden",
+			display:  "",
+			height: height
+		};
+		if (this.defaultPosition !== "absolute") style.position = "relative";
+		Sabel.Element.setStyle(elm, style);
+
+    this.exec(state);
+	},
+	end: function(state) {
+		var style = {
+			position: this.defaultPosition,
+			overflow: this.defaultOverflow,
+			height: ""
+		};
+		if (state === 0) style.display = "none";
+		Sabel.Element.setStyle(this.element, style);
+		Sabel.Element.deleteStyle(this.element, "height");
+	},
+
+	exec: function(state) {
+		var element = this.element;
+		var height = state * this.elementHeight;
+		Sabel.Element.setStyle(element, {height: height});
+	}
+};
 Sabel.DragAndDrop = function() { this.initialize.apply(this, arguments); };
 
 Sabel.DragAndDrop.prototype = {
-  initialize: function(element, options)
-  {
-    options = options || {};
-    element = Sabel.get(element, false);
+	initialize: function(element, options)
+	{
+		options = options || {};
+		element = Sabel.get(element, false);
 
-    element.style.cursor = options.cursor || "move";
-    //element.style.position = "absolute";
+		element.style.cursor = options.cursor || "move";
+		//element.style.position = "absolute";
 
-    this.element  = element;
-    this.observes = new Array();
-    this.initPos  = Sabel.Element.getOffsetPositions(element);
-    this.setOptions(options || {});
-
-    var self = this;
-    this.observe(element, "mousedown", function(e) { self.mouseDown(e) });
-  },
-
-  setOptions: function(o)
-  {
-    this.options = {
-      startCallback: o.startCallback ? o.startCallback : null,
-      endCallback:   o.endCallback   ? o.endCallback   : null,
-      moveCallback:  o.moveCallback  ? o.moveCallback  : null,
-      rangeX: null, rangeY: null
-    }
-    if (o.x) this.setXConst(o.x);
-    if (o.y) this.setYConst(o.y);
-  },
-
-  setXConst: function(range)
-  {
-    if (range.length < 2) return null; // @todo exception
-
-    var startX = this.initPos.left;
-    this.options.rangeX = {min: startX - range[0], max: startX + range[1]};
-    if (range[2] !== undefined) this.options.gridX = range[2];
-    return this;
-  },
-
-  setYConst: function(range)
-  {
-    if (range.length < 2) return null; // @todo exception
-
-    var startY = this.initPos.top;
-    this.options.rangeY = {min: startY - range[0], max: startY + range[1]};
-    if (range[2] !== undefined) this.options.gridY = range[2];
-    return this;
-  },
-
-  setGrid: function(grid)
-  {
-    this.options.gridX = grid[0];
-    this.options.gridY = grid[1];
-  },
-  
-  observe: function(element, handler, func, useCapture)
-  {
-    if (this.observes[handler]) return;
-
-    if (element.addEventListener) {
-      element.addEventListener(handler, func, useCapture || false);
-    } else if (element.attachEvent) {
-      element.attachEvent("on" + handler, func);
-    }
-    this.observes[handler] = func;
-  },
-  
-  stopObserve: function(element, handler)
-  {
-    if (element.removeEventListener) {
-      element.removeEventListener(handler, this.observes[handler], false);
-    } else if (element.detachEvent) {
-      element.detachEvent("on" + handler, this.observes[handler]);
-    }
-    delete this.observes[handler];
-  },
-  
-  mouseDown: function(e)
-  {
-		e = e || window.event;
-    if (Sabel.UserAgent.isIE) {
-      e.returnValue = false;  // IE Hack.
-    } else {
-      e.preventDefault(); // Opera & Fx Hack.
-    }
-
-    this.startPos = Sabel.Element.getOffsetPositions(this.element);
-    this.startX   = e.clientX;
-    this.startY   = e.clientY;
-    
-    this.element.style.zIndex = "10000";
+		this.element  = element;
+		this.observes = new Array();
+		this.initPos  = Sabel.Element.getOffsetPositions(element);
+		this.setOptions(options || {});
 
 		var self = this;
-    this.observe(document, "mousemove", function(e) { self.mouseMove(e) });
-    this.observe(document, "mouseup", function(e) { self.mouseUp(e) });
+		this.observe(element, "mousedown", function(e) { self.mouseDown(e) });
+	},
 
-    if (this.options.startCallback !== null) this.options.startCallback(this.element, e);
-  },
+	setOptions: function(o)
+	{
+		this.options = {
+			startCallback: o.startCallback ? o.startCallback : null,
+			endCallback:   o.endCallback   ? o.endCallback   : null,
+			moveCallback:  o.moveCallback  ? o.moveCallback  : null,
+			rangeX: null, rangeY: null
+		}
+		if (o.x) this.setXConst(o.x);
+		if (o.y) this.setYConst(o.y);
+	},
 
-  mouseUp: function(e)
-  {
+	setXConst: function(range)
+	{
+		if (range.length < 2) return null;
+
+		var startX = this.initPos.left;
+		this.options.rangeX = {min: startX - range[0], max: startX + range[1]};
+		if (range[2] !== undefined) this.options.gridX = range[2];
+		return this;
+	},
+
+	setYConst: function(range)
+	{
+		if (range.length < 2) return null;
+
+		var startY = this.initPos.top;
+		this.options.rangeY = {min: startY - range[0], max: startY + range[1]};
+		if (range[2] !== undefined) this.options.gridY = range[2];
+		return this;
+	},
+
+	setGrid: function(grid)
+	{
+		this.options.gridX = grid[0];
+		this.options.gridY = grid[1];
+	},
+	
+	observe: function(element, handler, func, useCapture)
+	{
+		if (this.observes[handler]) return;
+
+		if (element.addEventListener) {
+			element.addEventListener(handler, func, useCapture || false);
+		} else if (element.attachEvent) {
+			element.attachEvent("on" + handler, func);
+		}
+		this.observes[handler] = func;
+	},
+	
+	stopObserve: function(element, handler)
+	{
+		if (element.removeEventListener) {
+			element.removeEventListener(handler, this.observes[handler], false);
+		} else if (element.detachEvent) {
+			element.detachEvent("on" + handler, this.observes[handler]);
+		}
+		delete this.observes[handler];
+	},
+	
+	mouseDown: function(e)
+	{
 		e = e || window.event;
-    this.element.style.zIndex = "1";
-    this.stopObserve(document, "mousemove");
-    this.stopObserve(document, "mouseup");
+		if (Sabel.UserAgent.isIE) {
+			e.returnValue = false;  // IE Hack.
+		} else {
+			e.preventDefault(); // Opera & Fx Hack.
+		}
 
-    if (this.options.endCallback !== null) this.options.endCallback(this.element, e);
-    return false;
-  },
+		this.startPos = Sabel.Element.getOffsetPositions(this.element);
+		this.startX   = e.clientX;
+		this.startY   = e.clientY;
+		
+		this.element.style.zIndex = "10000";
 
-  mouseMove: function(e)
-  {
+		var self = this;
+		this.observe(document, "mousemove", function(e) { self.mouseMove(e) });
+		this.observe(document, "mouseup", function(e) { self.mouseUp(e) });
+
+		if (this.options.startCallback !== null) this.options.startCallback(this.element, e);
+	},
+
+	mouseUp: function(e)
+	{
 		e = e || window.event;
-    if (Sabel.UserAgent.isIE) {
-      e.returnValue = false; // IE Hack.
-    } else {
-      e.preventDefault(); // Opera & Fx Hack.
-    }
+		this.element.style.zIndex = "1";
+		this.stopObserve(document, "mousemove");
+		this.stopObserve(document, "mouseup");
 
-    var options = this.options;
-    var element = this.element;
-    var moveX = e.clientX - this.startX;
-    var moveY = e.clientY - this.startY;
-    if (options.gridX) moveX -= (moveX % options.gridX);
-    if (options.gridY) moveY -= (moveY % options.gridY);
+		if (this.options.endCallback !== null) this.options.endCallback(this.element, e);
+		return false;
+	},
 
-    var xPos = this.startPos.left + moveX;
-    var yPos = this.startPos.top  + moveY;
+	mouseMove: function(e)
+	{
+		e = e || window.event;
+		if (Sabel.UserAgent.isIE) {
+			e.returnValue = false; // IE Hack.
+		} else {
+			e.preventDefault(); // Opera & Fx Hack.
+		}
 
-    if (options.rangeX !== null) xPos = Math.max(options.rangeX.min, Math.min(options.rangeX.max, xPos));
-    if (options.rangeY !== null) yPos = Math.max(options.rangeY.min, Math.min(options.rangeY.max, yPos));
+		var options = this.options;
+		var element = this.element;
+		var moveX = e.clientX - this.startX;
+		var moveY = e.clientY - this.startY;
+		if (options.gridX) moveX -= (moveX % options.gridX);
+		if (options.gridY) moveY -= (moveY % options.gridY);
 
-    element.style.top  = yPos + "px";
-    element.style.left = xPos + "px";
+		var xPos = this.startPos.left + moveX;
+		var yPos = this.startPos.top  + moveY;
 
-    if (this.options.moveCallback !== null) this.options.moveCallback(this.element, e);
-    return false;
-  }
+		if (options.rangeX !== null) xPos = Math.max(options.rangeX.min, Math.min(options.rangeX.max, xPos));
+		if (options.rangeY !== null) yPos = Math.max(options.rangeY.min, Math.min(options.rangeY.max, yPos));
+
+		element.style.top  = yPos + "px";
+		element.style.left = xPos + "px";
+
+		if (this.options.moveCallback !== null) this.options.moveCallback(this.element, e);
+		return false;
+	}
 };
-
 
 Sabel.widget = {};
 
