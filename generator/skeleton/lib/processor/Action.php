@@ -63,7 +63,7 @@ class Processor_Action extends Sabel_Bus_Processor
   
   protected function validateRequests($request, $checks)
   {
-    $validator = new Sabel_Request_Validator();
+    $validator = new Validator();
     foreach ($checks as $check) {
       $validator->set($check[0], $check[1]);
     }
