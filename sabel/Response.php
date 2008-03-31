@@ -22,9 +22,6 @@ interface Sabel_Response
   
   public function success();
   public function isSuccess();
-  public function isFailure();
-  public function isRedirected();
-  
   public function badRequest();
   public function isBadRequest();
   public function forbidden();
@@ -33,6 +30,9 @@ interface Sabel_Response
   public function isNotFound();
   public function serverError();
   public function isServerError();
+  
+  public function isFailure();
+  public function isRedirected();
   
   public function getLocation();
   public function getLocationUri();

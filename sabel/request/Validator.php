@@ -13,6 +13,7 @@ class Sabel_Request_Validator extends Sabel_Object
 {
   protected $validators = array();
   protected $suites = array();
+  protected $values = array();
   protected $errors = array();
   
   public function set($name, $checker)
@@ -30,13 +31,19 @@ class Sabel_Request_Validator extends Sabel_Object
     return $this->errors;
   }
   
+  public function getSuites()
+  {
+    return $this->suites;
+  }
+  
   public function validate($values)
   {
+    $this->values = $values;
     $validators = $this->validators;
     $validator = new Validator();
     
     $errors = array();
-    $suites = $validator->suites;
+    $suites = $validator->getSuites();
     
     foreach ($values as $name => $value) {
       if (isset($validators[$name])) {
