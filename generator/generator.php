@@ -7,7 +7,7 @@
  * @package    org.sabel.task
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
- * @copyright  2002-2006 Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class SabelScaffold
@@ -55,14 +55,9 @@ class SabelScaffold
       } else {
         if (isset($this->ignore[$targetItem])) {
           Sabel_Console::message("ignore '{$targetItem}'.");
-        } elseif (is_file($targetPath) && !isset($this->overwrite[$targetItem])) {
+        } elseif (is_file($targetPath)) {
           Sabel_Console::warning("'{$targetItem}' already exists.");
         } else {
-          if (isset($this->overwrite[$targetItem])) {
-            Sabel_Console::message("overwrite '{$targetItem}'");
-            unlink($targetPath);
-          }
-          
           Sabel_Console::success("create $targetItem");
           copy($fullPath, $targetPath);
         }
@@ -99,7 +94,13 @@ class SabelScaffold
       $index = array_search("--overwrite", $args) + 1;
       for ($i = $index, $c = count($args); $i < $c; $i++) {
         if (substr($args[$i], 0, 2) === "--") break;
-        $this->overwrite[$args[$i]] = 1;
+        $path = $this->targetDir . DS . $args[$i];
+        if (is_file($path)) {
+          unlink($path);
+        } elseif (is_dir($path)) {
+          $fs = new Sabel_Util_FileSystem($path);
+          $fs->rmdir();
+        }
       }
     }
     
@@ -115,9 +116,11 @@ class SabelScaffold
 
 if (!defined("TEST_CASE")) {
   if (!defined("DS")) define("DS", DIRECTORY_SEPARATOR);
-  $sabel = dirname(__FILE__) . DS . ".." . DS . "sabel";
-  require ($sabel . DS . "Object.php");
-  require ($sabel . DS . "Console.php");
+  $sabel = realpath(dirname(__FILE__) . DS . ".." . DS . "sabel");
+  require_once ($sabel . DS . "Object.php");
+  require_once ($sabel . DS . "Console.php");
+  require_once ($sabel . DS . "util" . DS . "filesystem" . DS . "Base.php");
+  require_once ($sabel . DS . "util" . DS . "FileSystem.php");
   
   $scaffold = new SabelScaffold($_SERVER["argv"], dirname(__FILE__) . DS . "skeleton");
   $scaffold->create();
