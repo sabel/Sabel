@@ -12,9 +12,10 @@
  */
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
-  private $binds      = array();
-  private $aspects    = array();
-  private $constructs = array();
+  private
+    $binds,
+    $aspects,
+    $constructs = array();
   
   /**
    * bind interface to implementation
@@ -25,7 +26,8 @@ abstract class Sabel_Container_Injection implements Sabel_Config
   public function bind($interface)
   {
     $bind = new Sabel_Container_Bind($interface);
-    $this->binds[$interface] = $bind;
+    $this->binds[$interface][] = $bind;
+    
     return $bind;
   }
   
@@ -39,6 +41,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
   {
     $construct = new Sabel_Container_Construct($className);
     $this->constructs[$className] = $construct;
+    
     return $construct;
   }
   
@@ -52,6 +55,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
   {
     $aspect = new Sabel_Container_Aspect($className);
     $this->aspects[$className] = $aspect;
+    
     return $aspect;
   }
   

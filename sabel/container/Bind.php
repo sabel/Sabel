@@ -11,9 +11,10 @@
  */
 final class Sabel_Container_Bind
 {
-  private $interface = "";
-  private $implementation = "";
-  private $setter = "";
+  private
+    $interface,
+    $setter,
+    $implementation = "";
     
   public function __construct($interface)
   {
@@ -30,6 +31,7 @@ final class Sabel_Container_Bind
   public function setter($methodName)
   {
     $this->setter = $methodName;
+    
     return $this;
   }
   

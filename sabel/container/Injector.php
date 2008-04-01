@@ -91,16 +91,20 @@ class Sabel_Container_Injector
       $instance = $this->applyAspect($instance);
     }
     
-    foreach ($this->injection->getBinds() as $name => $bind) {
-      if ($bind->hasSetter()) {
-        $injectionMethod = $bind->getSetter();
-      } else {
-        $injectionMethod = "set" . ucfirst($name);
-      }
-      $implClassName = $bind->getImplementation();
-      $reflect = new ReflectionClass($instance);
-      if ($reflect->hasMethod($injectionMethod)) {
-        $instance->$injectionMethod($this->newInstance($implClassName));
+    foreach ($this->injection->getBinds() as $name => $binds) {
+      foreach ($binds as $bind) {
+        if ($bind->hasSetter()) {
+          $injectionMethod = $bind->getSetter();
+        } else {
+          $injectionMethod = "set" . ucfirst($name);
+        }
+        
+        $implClassName = $bind->getImplementation();
+        $reflect = new ReflectionClass($instance);
+        
+        if ($reflect->hasMethod($injectionMethod)) {
+          $instance->$injectionMethod($this->newInstance($implClassName));
+        }
       }
     }
     
