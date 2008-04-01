@@ -6,7 +6,7 @@ Sabel.PHP.FormValidator = function(columns) {
 
   var elms = this.form.elements;
   for (var i = 0, el; el = elms[i]; i++) {
-    if (el.tagName == "INPUT") {
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
       if (el.name.indexOf(":") > -1) {
         var n = el.name.substr(el.name.indexOf(":")+1);
 

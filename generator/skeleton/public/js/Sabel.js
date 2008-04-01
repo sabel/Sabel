@@ -1589,9 +1589,9 @@ Sabel.Validator.prototype = {
 		if (status === false) {
 			this.insertMessage(errors);
 			Sabel.Event.preventDefault(e);
-    } else {
-      this.clearMessageField();
-    }
+		} else {
+			this.clearMessageField();
+		}
 	},
 
 	insertMessage: function(errors) {
@@ -1599,6 +1599,9 @@ Sabel.Validator.prototype = {
 
 		this.errField.appendChild(this.getErrorMessage(errors));
 		Sabel.Element.setStyle(this.errField, "display", "inline");
+
+		var yPos = Sabel.Element.getCumulativeTop(this.errField) - 20;
+		window.scroll(0, yPos);
 	},
 
 	clearMessageField: function() {
