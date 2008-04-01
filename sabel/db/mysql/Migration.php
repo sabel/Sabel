@@ -21,7 +21,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "TEXT",
                            Sabel_DB_Type::DATETIME => "DATETIME",
                            Sabel_DB_Type::DATE     => "DATE");
-                           
+  
   protected function createTable($filePath)
   {
     $create  = $this->getReader($filePath)->readCreate();

@@ -21,7 +21,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "CLOB",
                            Sabel_DB_Type::DATETIME => "DATE",
                            Sabel_DB_Type::DATE     => "DATE");
-                           
+  
   protected function create()
   {
     $tblName = convert_to_tablename($this->mdlName);

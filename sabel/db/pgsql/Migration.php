@@ -21,7 +21,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "TEXT",
                            Sabel_DB_Type::DATETIME => "TIMESTAMP",
                            Sabel_DB_Type::DATE     => "DATE");
-                           
+  
   protected function createTable($filePath)
   {
     $query = $this->getCreateSql($this->getReader($filePath)->readCreate());

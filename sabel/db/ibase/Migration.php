@@ -21,7 +21,7 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "BLOB SUB_TYPE TEXT",
                            Sabel_DB_Type::DATETIME => "TIMESTAMP",
                            Sabel_DB_Type::DATE     => "DATE");
-                           
+  
   protected function create()
   {
     $tblName = convert_to_tablename($this->mdlName);

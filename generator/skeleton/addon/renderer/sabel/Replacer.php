@@ -32,8 +32,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   
   protected function simpleReplace($contents)
   {
-    $search  = array("</if>", "<else />", "</foreach>", "</hlink>");
-    $replace = array("<? endif ?>", "<? else : ?>", "<? endforeach ?>", "</a>");
+    $search  = array("</if>", "<else/>", "<else />", "</foreach>", "</hlink>");
+    $replace = array("<? endif ?>", "<? else : ?>", "<? else : ?>", "<? endforeach ?>", "</a>");
     
     return str_replace($search, $replace, $contents);
   }
@@ -191,10 +191,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
     
     if ($form{0} !== '$') $form = '$' . $form . "Form";
     
-    $fmt = '<? if (%1$s->hasError()) : ?>' . PHP_EOL
-         . '  <?= $this->partial("error", array("errors" => %1$s->getErrors())) ?>' . PHP_EOL
-         . '<? endif ?>';
-         
+    $fmt = '  <?= $this->partial("error", array("errors" => %1$s->getErrors())) ?>' . PHP_EOL;
     return sprintf($fmt, $form);
   }
   

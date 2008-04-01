@@ -21,7 +21,7 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime",
                            Sabel_DB_Type::DATE     => "date");
-                           
+  
   protected function createTable($filePath)
   {
     $create  = $this->getReader($filePath)->readCreate();
