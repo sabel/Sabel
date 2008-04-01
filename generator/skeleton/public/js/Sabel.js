@@ -1598,9 +1598,11 @@ Sabel.Validator.prototype = {
 		this.clearMessageField();
 
 		this.errField.appendChild(this.getErrorMessage(errors));
+		Sabel.Element.setStyle(this.errField, "display", "inline");
 	},
 
 	clearMessageField: function() {
+		Sabel.Element.setStyle(this.errField, "display", "none");
 		this.errField.innerHTML = "";
 	},
 
