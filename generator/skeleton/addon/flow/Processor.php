@@ -12,6 +12,7 @@
  */
 class Flow_Processor extends Sabel_Bus_Processor
 {
+  private $lifetime   = null;
   private $storage    = null;
   private $action     = "";
   private $isTransit  = false;
@@ -86,7 +87,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $state->$var = $controller->$var;
       }
       
-      $state->save($this->storage);
+      $state->save($this->storage, $this->lifetime);
     }
   }
   
@@ -175,7 +176,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       if ($this->isEndAction()) {
         $state->transit($this->action);
         $state->warning = null;
-        $this->state->save($this->storage, 60);
+        $this->lifetime = 60;
       } elseif ($nexts = $this->getNextActions()) {
         $state->setNextActions($nexts);
         $state->transit($this->action);

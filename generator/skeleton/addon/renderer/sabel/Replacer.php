@@ -94,7 +94,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
         if (($c = count($exp)) === 2) {
           $params["from"]  = $exp[0];
           $params["value"] = $exp[1];
-        } elseif ($argc === 3) {
+        } elseif ($c === 3) {
           $params["from"]  = $exp[0];
           $params["key"]   = $exp[1];
           $params["value"] = $exp[2];
