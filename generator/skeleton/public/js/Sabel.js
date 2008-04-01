@@ -1598,14 +1598,14 @@ Sabel.Validator.prototype = {
 		this.clearMessageField();
 
 		this.errField.appendChild(this.getErrorMessage(errors));
-		Sabel.Element.setStyle(this.errField, "display", "inline");
+		Sabel.Element.setStyle(this.errField, {display: "inline"});
 
 		var yPos = Sabel.Element.getCumulativeTop(this.errField) - 20;
 		window.scroll(0, yPos);
 	},
 
 	clearMessageField: function() {
-		Sabel.Element.setStyle(this.errField, "display", "none");
+		Sabel.Element.setStyle(this.errField, {display: "none"});
 		this.errField.innerHTML = "";
 	},
 
