@@ -40,7 +40,7 @@ Sabel.Window = {
 		} else {
 			var width = document.body.scrollWidth;
 		}
-		var clientWidth = getWidth();
+		var clientWidth = Sabel.Window.getWidth();
 		return (clientWidth > width) ? clientWidth : width;
 	},
 
@@ -50,7 +50,7 @@ Sabel.Window = {
 		} else {
 			var height = document.body.scrollHeight;
 		}
-		var clientHeight = getHeight();
+		var clientHeight = Sabel.Window.getHeight();
 		return (clientHeight > height) ? clientHeight : height;
 	}
 };
@@ -861,12 +861,25 @@ Sabel.Element.hasAttribute = function(element, attribute) {
 	return node && node.specified;
 };
 
-Sabel.Element.getStyle = function(element, property) {
-	element = Sabel.get(element, false);
+if (Sabel.UserAgent.isIE) {
+	Sabel.Element.getStyle = function(element, property) {
+		element = Sabel.get(element, false);
+		property = (property === "float") ? "styleFloat" : Sabel.String.camelize(property);
 
-	var style = element.currentStyle || document.defaultView.getComputedStyle(element, "");
-	return style[property];
-};
+		var style = element.currentStyle;
+		return style[property];
+	};
+} else {
+	Sabel.Element.getStyle = function(element, property) {
+		element = Sabel.get(element, false);
+		// Operaでelementがwindowだった時の対策
+		if (element.nodeType === undefined) return null;
+		property = (property === "float") ? "cssFloat" : Sabel.String.camelize(property);
+
+		var css = document.defaultView.getComputedStyle(element, "")
+		return css[property];
+	};
+}
 
 Sabel.Element.setStyle = function(element, styles) {
 	element = Sabel.get(element, false);
@@ -946,6 +959,42 @@ Sabel.Element.getCumulativeTop = function(element) {
 				var padding = parseInt(Sabel.Element.getStyle(parent, "paddingTop"));
 				if (padding > 0) {
 					position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
+				}
+			} else if (Sabel.UserAgent.isMozilla) {
+				var of = Sabel.Element.getStyle(parent, "overflow");
+				if (!Sabel.Array.include(["visible", "inherit"], of)) {
+					position += border;
+				}
+			}
+		}
+
+		element = parent;
+		if (element) {
+			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) break;
+		}
+	} while (element);
+
+	return position;
+};
+
+Sabel.Element.getCumulativeLeft = function(element) {
+	element = Sabel.get(element, false);
+
+	var position = 0;
+	var parent   = null;
+
+	do {
+		position += element.offsetLeft;
+		parent = element.offsetParent;
+
+		if (Sabel.UserAgent.isIE || Sabel.UserAgent.isMozilla) {
+			var border = parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
+			position += border || 0;
+
+			if (Sabel.UserAgent.isIE) {
+				var padding = parseInt(Sabel.Element.getStyle(parent, "paddingLeft"));
+				if (padding > 0) {
+					position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
 				}
 			} else if (Sabel.UserAgent.isMozilla) {
 				var of = Sabel.Element.getStyle(parent, "overflow");
@@ -1249,7 +1298,9 @@ Sabel.Elements.add = function(elements, element) {
 };
 
 Sabel.Elements.item = function(elements, pos) {
-	return new Sabel.Element(elements[pos]);
+	var elm = elements[pos];
+
+	return (elm) ? new Sabel.Element(elements[pos]) : null;
 };
 
 Sabel.Elements.observe = function(elements, eventName, handler) {
@@ -1276,7 +1327,6 @@ Sabel.Elements.unique = function(elements) {
 };
 
 Sabel.Object.extend(Sabel.Elements, Sabel.Object.Methods);
-
 
 Sabel.Iterator = function(iterable) {
 	this.items = Sabel.Array(iterable);
