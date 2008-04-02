@@ -14,12 +14,12 @@ class Renderer_Sabel extends Sabel_View_Renderer
 {
   protected $replacer = null;
   
-  public function initialize()
+  public function __construct()
   {
     $baseDir = dirname(__FILE__) . DS . "sabel" . DS;
     Sabel::fileUsing($baseDir . "Replacer.php", true);
-    Sabel::fileUsing($baseDir . "Parser.php", true);
-    Sabel::fileUsing($baseDir . "Element.php", true);
+    Sabel::fileUsing($baseDir . "Parser.php",   true);
+    Sabel::fileUsing($baseDir . "Element.php",  true);
     
     $this->replacer = new Renderer_Sabel_Replacer();
   }
@@ -40,14 +40,12 @@ class Renderer_Sabel extends Sabel_View_Renderer
   private final function initializeValues($hash, &$sbl_tpl_values)
   {
     $buf = file_get_contents($this->getCompileFilePath($hash));
-    
     if (preg_match_all('/\$([\w]+)/', $buf, $matches)) {
       $buf = array();
       $filtered = array_filter($matches[1], '_sbl_internal_remove_this');
       foreach ($filtered as $key => $val) {
         $buf[$val] = null;
       }
-      
       $sbl_tpl_values = array_merge($buf, $sbl_tpl_values);
     }
   }
@@ -72,6 +70,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
     
     $template = str_replace('<?=', '<? echo', $template);
     $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
+    $template = str_replace('<?xml', '<<?php echo "?" ?>xml', $template);
     
     file_put_contents(COMPILE_DIR_PATH . DS . $hash, $template);
   }

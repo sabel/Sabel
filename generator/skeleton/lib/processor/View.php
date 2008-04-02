@@ -100,6 +100,8 @@ class Processor_View extends Sabel_Bus_Processor
   {
     if ($response->isNotFound()) {
       $this->view->setName("notFound");
+    } elseif ($response->isBadRequest()) {
+      $this->view->setName("badRequest");
     } elseif ($response->isForbidden()) {
       $this->view->setName("forbidden");
     } elseif ($response->isServerError()) {
