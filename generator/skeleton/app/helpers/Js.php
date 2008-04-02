@@ -12,7 +12,8 @@ class Helpers_Js
     $buf[] = "\n";
     
     $buf[] = '<script type="text/javascript">';
-    $buf[] = sprintf('window.onload = function() { new Sabel.PHP.AjaxPager("%s", "%s"); };', $replaceId, $pagerClass);
+    //$buf[] = sprintf('window.onload = function() { new Sabel.PHP.AjaxPager("%s", "%s"); };', $replaceId, $pagerClass);
+    $buf[] = sprintf('new Sabel.Event(window, "load", function() { new Sabel.PHP.AjaxPager("%s", "%s"); });', $replaceId, $pagerClass);
     $buf[] = '</script>';
     
     return join($buf, "")."\n";
