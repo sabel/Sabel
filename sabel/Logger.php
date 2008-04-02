@@ -11,24 +11,35 @@
  */
 class Sabel_Logger extends Sabel_Object
 {
+  /**
+   * @var self
+   */
   private static $instance = null;
   
-  protected $logger   = null;
+  /**
+   * @var Sabel_Logger_Interface[]
+   */
+  protected $loggers  = array();
+  
+  /**
+   * @var array
+   */
   protected $messages = array();
   
   public static function create()
   {
     if (self::$instance === null) {
       self::$instance = new self();
+      self::$instance->addLogger(new Sabel_Logger_File());
       register_shutdown_function(array(self::$instance, "output"));
     }
     
     return self::$instance;
   }
   
-  public function setLogger(Sabel_Logger_Interface $logger)
+  public function addLogger(Sabel_Logger_Interface $logger)
   {
-    $this->logger = $logger;
+    $this->loggers[] = $logger;
   }
   
   public function write($text, $level = SBL_LOG_INFO, $identifier = "default")
@@ -51,7 +62,8 @@ class Sabel_Logger extends Sabel_Object
   
   public function output()
   {
-    $logger = ($this->logger === null) ? new Sabel_Logger_File() : $this->logger;
-    $logger->output($this->messages);
+    foreach ($this->loggers as $logger) {
+      $logger->output($this->messages);
+    }
   }
 }
