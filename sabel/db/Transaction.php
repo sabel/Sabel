@@ -45,7 +45,8 @@ class Sabel_DB_Transaction
     if (is_numeric($isolationLevel) || $isolationLevel >= 1 && $isolationLevel <= 4) {
       self::$isolationLevel = $isolationLevel;
     } else {
-      throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+      $message = __METHOD__ . "() invalid isolation level.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   

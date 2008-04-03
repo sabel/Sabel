@@ -111,7 +111,8 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Abstract_Driver
         $this->isolationLevel = IBASE_WRITE|IBASE_CONSISTENCY|IBASE_WAIT;
         break;
       default:
-        throw new Sabel_Exception_InvalidArgument("invalid isolation level.");
+        $message = __METHOD__ . "() invalid isolation level.";
+        throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
