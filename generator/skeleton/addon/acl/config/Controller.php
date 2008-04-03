@@ -19,37 +19,56 @@ class Acl_Config_Controller extends Sabel_Object
     return ($this->isAllow === true);
   }
   
-  public function isAllow($role = null)
+  public function isAllow($roles = null)
   {
-    if ($this->isPublic()) {
-      return true;
-    } else {
-      $ar  = $this->isAllow;
-      $or  = (strpos($ar, "|") !== false);
-      $and = (strpos($ar, "&") !== false);
+    if ($this->isPublic()) return true;
+    
+    $spec   = array("(", ")", "&", "|");
+    $buf    = array();
+    $rule   = $this->isAllow;
+    $length = strlen($rule);
+    
+    $prev = "";
+    $next = "";
+    
+    for ($i = 0; $i < $length; $i++) {
+      $next = (isset($rule{$i + 1})) ? $rule{$i + 1} : "";
+      $cur  = $rule{$i};
       
-      if ($or && $and) {
-        throw new Sabel_Exception_Runtime("invalid acl config.");
-      }
-      
-      if ($or) {
-        $ors = explode("|", $ar);
-        foreach ($ors as $r) {
-          if (in_array($r, $role)) return true;
+      if ($i === 0) {
+        if ($cur === "(") {
+          $buf[] = "(";
+        } else {
+          $buf[] = '"' . $cur;
         }
-        
-        return false;
-      } elseif ($and) {
-        $ands = explode("&", $ar);
-        foreach ($ands as $r) {
-          if (!in_array($r, $role)) return false;
-        }
-        
-        return true;
+      } elseif (in_array($prev, $spec) &&
+                !in_array($cur, $spec)) {
+        $buf[] = '"' . $cur;
+      } elseif (in_array($next, $spec) &&
+                !in_array($cur, $spec)) {
+        $buf[] = $rule{$i} . '"';
       } else {
-        return in_array($ar, $role);
+        $buf[] = $rule{$i};
       }
+      
+      $prev = $rule{$i};
     }
+    
+    $rule = implode("", $buf);
+    $length = strlen($rule);
+    if ($rule{$length - 1} !== ")") {
+      $rule .= '"';
+    }
+    
+    foreach ($roles as $role) {
+      $rule = str_replace('"' . $role . '"', "true", $rule);
+    }
+    
+    $rule = preg_replace('/"[a-z]+"/', 'false', $rule);
+    $rule = str_replace(array("|", "&"), array("||", "&&"), $rule);
+    eval ('$match = ' . $rule . ';');
+    
+    return $match;
   }
   
   public function allow($role = null)

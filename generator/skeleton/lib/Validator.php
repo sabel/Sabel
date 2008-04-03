@@ -25,4 +25,11 @@ class Validator extends Sabel_Request_Validator
       return $this->displayNames[$name] . " is required.";
     }
   }
+  
+  public function numeric($name, $value)
+  {
+    if ($value !== null || !is_numeric($value)) {
+      return $this->displayNames[$name] . " must be a numeric.";
+    }
+  }
 }

@@ -293,7 +293,7 @@ class Form_Object extends Sabel_Object
   
   public function __sleep()
   {
-    l("serialize form object", SBL_LOG_INFO);
+    l("serialize form object", SBL_LOG_DEBUG);
     
     $this->model   = $this->model->toArray();
     $this->columns = array();
@@ -303,7 +303,7 @@ class Form_Object extends Sabel_Object
   
   public function __wakeup()
   {
-    l("unserialize form object", SBL_LOG_INFO);
+    l("unserialize form object", SBL_LOG_DEBUG);
     
     $model = MODEL($this->mdlName);
     
