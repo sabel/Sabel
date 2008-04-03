@@ -250,7 +250,6 @@ Sabel.String.decamelize = function(string) {
 
 Sabel.String.truncate = function(string, length, truncation) {
 	truncation = truncation || "";
-	length = length - truncation.length;
 
 	return string.substring(0, length) + truncation;
 };
