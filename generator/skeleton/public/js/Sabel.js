@@ -1300,7 +1300,7 @@ Sabel.Elements.add = function(elements, element) {
 Sabel.Elements.item = function(elements, pos) {
 	var elm = elements[pos];
 
-	return (elm) ? new Sabel.Element(elements[pos]) : null;
+	return (elm) ? new Sabel.Element(elm) : null;
 };
 
 Sabel.Elements.observe = function(elements, eventName, handler) {
@@ -1879,7 +1879,7 @@ Sabel.Effect.prototype = {
 };
 Sabel.Util = {};
 
-Sabel.dump = function(element, limit, output)
+Sabel.dump = function(element, limit)
 {
 	var br = (Sabel.UserAgent.isIE) ? "\r" : "\n";
 	limit  = limit || 1;
@@ -1891,12 +1891,13 @@ Sabel.dump = function(element, limit, output)
 		output.style.background = "#fff";
 		output.style.margin = "5px";
 		output.style.padding = "5px";
-		document.body.appendChild(output);
 	}
 
 	output.appendChild(document.createTextNode((function(element, ind) {
 		var indent = Sabel.String.times("  ", ind);
-		if (Sabel.Element.isString(element)) {
+		if (typeof element === "undefined") {
+			return "undefined";
+		} else if (Sabel.Element.isString(element)) {
 			return "string(" + element.length + ') "' + element + '"';
 		} else if (Sabel.Element.isNumber(element)) {
 			return "int(" + element + ")";
@@ -1921,6 +1922,8 @@ Sabel.dump = function(element, limit, output)
 			return buf.join(br);
 		}
 	})(element, 1)));
+
+	document.body.appendChild(output);
 };
 
 Sabel.Form.Elements = {
@@ -1971,6 +1974,7 @@ Sabel.Util.QueryObject.prototype = {
 
 	set: function(key, val) {
 		this.data[key] = val;
+		return this;
 	},
 
 	serialize: function() {
@@ -2022,6 +2026,17 @@ Sabel.Util.Uri.prototype = {
 	has: function(key)
 	{
 		return this.parseQuery.has(key);
+	},
+
+	get: function(key)
+	{
+		return this.parseQuery.get(key);
+	},
+
+	set: function(key, value)
+	{
+		this.parseQuery.set(key, value);
+		return this;
 	},
 
 	getQueryObj: function() {
@@ -2305,12 +2320,13 @@ Sabel.DragAndDrop.prototype = {
 Sabel.widget = {};
 
 Sabel.widget.Overlay = function(option) {
-	this.div = document.createElement("div");
-	this.div.setAttribute("id", option.id);
-	this.div.style.cssText += "; background-color: #000; position: absolute; top: 0px; left: 0px; opacity: 0.70; -moz-opacity: 0.70; filter: alpha(opacity=70); z-index: 100;";
+	var div = document.createElement("div");
+	if (option.id) div.setAttribute("id", option.id);
+	div.style.cssText += "; background-color: #000; position: absolute; top: 0px; left: 0px; opacity: 0.70; -moz-opacity: 0.70; filter: alpha(opacity=70); z-index: 100;";
 
+	this.div = div;
 	this.setStyle();
-	document.body.appendChild(this.div);
+	document.body.appendChild(div);
 };
 
 Sabel.widget.Overlay.prototype = {
@@ -2319,32 +2335,9 @@ Sabel.widget.Overlay.prototype = {
 	setStyle: function() {
 		var height = Sabel.Window.getScrollHeight();
 		var width  = Sabel.Window.getScrollWidth();
-		/*
-		if (window.innerHeight != undefined && window.scrollMaxY != undefined) { // Fx
-			var height = window.innerHeight + window.scrollMaxY;
-			var width  = window.innerWidth  + window.scrollMaxX;
-		} else {
-			if (document.compatMode == "CSS1Compat") {
-			} else {
-			}
-			if (document.body.clientHeight > document.body.scrollHeight) { // IE Strict
-				var height = document.body.clientHeight;
-			} else if (document.body.offsetHeight > document.body.scrollHeight) {
-				var height = document.body.offsetHeight;
-			} else if (document.documentElement.clientHeight > document.body.scrollHeight) { // Opera, Safari
-				var height = document.documentElement.clientHeight;
-			} else {
-				var height = document.body.scrollHeight;
-			}
-			var width = document.body.scrollWidth;
-		}
-		*/
+
 		this.div.style.width  = width  + "px";
 		this.div.style.height = height + "px";
-		/*
-		alert(document.body.scrollWidth);
-		alert(document.documentElement.scrollWidth);
-		*/
 	}
 };
 
