@@ -47,10 +47,17 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Abstract_Statement
       $sql   .= "SKIP " . $c["offset"] . " ";
     }
     
-    $tblName = $this->quoteIdentifier($this->table);
     $projection = $this->getProjection();
-    $sql .= "$projection FROM $tblName" . $this->join . $this->where;
-    return $sql . $this->createConstraintSql();
+    $sql .= "$projection FROM "
+          . $this->quoteIdentifier($this->table)
+          . $this->join . $this->where
+          . $this->createConstraintSql();
+    
+    if ($this->forUpdate) {
+      $sql .= " FOR UPDATE";
+    }
+    
+    return $sql;
   }
   
   public function createInsertSql()

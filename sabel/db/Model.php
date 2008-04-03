@@ -90,7 +90,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
   public function __construct($id = null)
   {
     $this->initialize();
-    if ($id !== null) $this->initSelectOne($id);
+    
+    if ($id !== null) {
+      $this->setCondition($id);
+      $this->_doSelectOne($this);
+    }
   }
 
   /**
@@ -568,17 +572,6 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param mixed $id
-   *
-   * @return void
-   */
-  protected function initSelectOne($id)
-  {
-    $this->setCondition($id);
-    $this->_doSelectOne($this);
-  }
-  
-  /**
    * @param Sabel_DB_Model $model
    *
    * @return void
@@ -755,7 +748,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       throw new Sabel_DB_Exception($message);
     } else {
       foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
-        $this->setCondition($key, $this->__get($key));
+        $this->setCondition($this->modelName . "." . $key, $this->__get($key));
       }
     }
     
@@ -842,7 +835,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
         throw new Sabel_DB_Exception($message);
       } else {
         foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
-          $this->setCondition($key, $this->__get($key));
+          $this->setCondition($this->modelName . "." . $key, $this->__get($key));
         }
       }
     }
@@ -856,10 +849,8 @@ abstract class Sabel_DB_Model extends Sabel_Object
    *
    * @return Sabel_DB_Abstract_Statement
    */
-  public function prepareStatement($type = null)
+  public function prepareStatement($type = Sabel_DB_Statement::QUERY)
   {
-    if ($type === null) $type = Sabel_DB_Statement::QUERY;
-    
     if ($this->statement === null) {
       $stmt = Sabel_DB::createStatement($this->connectionName);
       $this->statement = $stmt->type($type)->setMetadata($this->metadata);

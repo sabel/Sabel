@@ -66,11 +66,12 @@ class Sabel_DB
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Statement")) {
       $statement = new $baseClass();
     } else {
-      $message = "Class '{$className}' not Found.";
+      $message = __METHOD__ . "() Class '{$className}' not Found.";
       throw new Sabel_Exception_ClassNotFound($message);
     }
     
     $statement->setDriver(self::createDriver($connectionName));
+    
     return $statement;
   }
   
@@ -92,7 +93,7 @@ class Sabel_DB
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Metadata")) {
       return new $baseClass(self::createDriver($connectionName), $schemaName);
     } else {
-      $message = "Class '{$className}' not Found.";
+      $message = __METHOD__ . "() Class '{$className}' not Found.";
       throw new Sabel_Exception_ClassNotFound($message);
     }
   }

@@ -73,6 +73,11 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   protected $seqColumn = null;
   
   /**
+   * @var boolean
+   */
+  protected $forUpdate = false;
+  
+  /**
    * @param Sabel_DB_Abstract_Driver $driver
    *
    * @return void
@@ -113,6 +118,7 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     $this->values      = array();
     $this->constraints = array();
     $this->seqColumn   = null;
+    $this->forUpdate   = false;
     
     return $this;
   }
@@ -204,10 +210,21 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
     } elseif (is_string($seqColumn)) {
       $this->seqColumn = $seqColumn;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
     return $this;
+  }
+  
+  public function forUpdate($bool)
+  {
+    if (is_bool($bool)) {
+      $this->forUpdate = $bool;
+    } else {
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function execute()
@@ -318,8 +335,15 @@ abstract class Sabel_DB_Abstract_Statement extends Sabel_Object
   {
     $tblName = $this->quoteIdentifier($this->table);
     $projection = $this->getProjection();
-    $sql = "SELECT $projection FROM $tblName" . $this->join . $this->where;
-    return $sql . $this->createConstraintSql();
+    
+    $sql = "SELECT $projection FROM "
+         . $this->quoteIdentifier($this->table)
+         . $this->join . $this->where
+         . $this->createConstraintSql();
+    
+    if ($this->forUpdate) $sql .= " FOR UPDATE";
+    
+    return $sql;
   }
   
   protected function createInsertSql()

@@ -90,6 +90,10 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
       }
     }
     
+    if ($this->forUpdate) {
+      $sql .= " FOR UPDATE";
+    }
+    
     return $sql;
   }
 }

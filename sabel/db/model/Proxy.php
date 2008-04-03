@@ -14,6 +14,10 @@ class Sabel_DB_Model_Proxy extends Sabel_DB_Model
   public function __construct($mdlName, $id)
   {
     $this->initialize($mdlName);
-    if ($id !== null) $this->initSelectOne($id);
+    
+    if ($id !== null) {
+      $this->setCondition($id);
+      $this->_doSelectOne($this);
+    }
   }
 }

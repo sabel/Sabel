@@ -1,4 +1,4 @@
-<h1>400 Bad Request</h1>
+<h2>400 Bad Request</h2>
 
 <p>
   The request contains bad syntax or cannot be fulfilled.

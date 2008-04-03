@@ -11,17 +11,17 @@
  */
 class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
-  protected
-    $location    = "",
-    $locationUri = "";
+  protected $location    = "";
+  protected $locationUri = "";
+  protected $status      = Sabel_Response::SUCCESS;
+  protected $contentType = "";
+  protected $headers   = array();
+  protected $responses = array();
   
-  protected
-    $status      = Sabel_Response::SUCCESS,
-    $contentType = "";
-  
-  protected
-    $headers   = array(),
-    $responses = array();
+  public function getStatus()
+  {
+    return $this->status;
+  }
   
   public function setResponse($key, $value)
   {

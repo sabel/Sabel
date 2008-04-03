@@ -12,13 +12,15 @@
  */
 interface Sabel_Response
 {
-  const SUCCESS      = 200;
-  const REDIRECTED   = 300;
-  const NOT_MODIFIED = 304;
-  const BAD_REQUEST  = 400;
-  const FORBIDDEN    = 403;
-  const NOT_FOUND    = 404;
-  const SERVER_ERROR = 500;
+  const SUCCESS      = "Success";
+  const REDIRECTED   = "Redirected";
+  const NOT_MODIFIED = "NotModified";
+  const BAD_REQUEST  = "BadRequest";
+  const FORBIDDEN    = "Forbidden";
+  const NOT_FOUND    = "NotFound";
+  const SERVER_ERROR = "ServerError";
+  
+  public function getStatus();
   
   public function success();
   public function isSuccess();
