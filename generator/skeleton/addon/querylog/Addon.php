@@ -44,8 +44,12 @@ class QueryLog_Addon extends Sabel_Object
       }
     }
     
-    ob_start();
-    @include (dirname(__FILE__) . DIRECTORY_SEPARATOR . "html.tpl");
-    $bus->get("response")->setResponse("addon_querylog",  ob_get_clean());
+    if (ENVIRONMENT === PRODUCTION) {
+      $bus->get("response")->setResponse("addon_querylog", "");
+    } else {
+      ob_start();
+      @include (dirname(__FILE__) . DIRECTORY_SEPARATOR . "html.tpl");
+      $bus->get("response")->setResponse("addon_querylog", ob_get_clean());
+    }
   }
 }
