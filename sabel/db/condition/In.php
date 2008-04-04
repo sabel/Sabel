@@ -18,7 +18,13 @@ class Sabel_DB_Condition_In extends Sabel_DB_Abstract_Condition
     $column = $this->getQuotedColumn($stmt);
     if ($this->isNot) $column = "NOT " . $column;
     
-    // @todo escape or bind.
-    return $column . " IN (" . implode(", ", $this->value) . ")";
+    $prepared = array();
+    foreach ($this->value as $v) {
+      $n = ++self::$counter;
+      $stmt->setBindValue("param{$n}", $v);
+      $prepared[] = "@param{$n}@";
+    }
+    
+    return $column . " IN (" . implode(", ", $prepared) . ")";
   }
 }

@@ -24,6 +24,6 @@ class Test_DB_PdoOci extends Test_DB_Test
   public function testInit()
   {
     Sabel_DB_Config::add("default",  self::$params1);
-    Test_DB_Test::$db = "ORACLE";
+    Test_DB_Test::$db = "PDO_ORACLE";
   }
 }

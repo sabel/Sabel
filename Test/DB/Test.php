@@ -268,6 +268,22 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(0, count($st->select($like)));
   }
   
+  public function testInCondition()
+  {
+    // Segfault...
+    if (self::$db === "PDO_ORACLE") return;
+    
+    $st = MODEL("SchemaTest");
+    $st->setCondition(Condition::create(IN, "name", array("name1", "name3", "name5")));
+    $st->setOrderBy("id ASC");
+    $results = $st->select();
+    
+    $this->assertEquals(3, count($results));
+    $this->assertEquals("name1", $results[0]->name);
+    $this->assertEquals("name3", $results[1]->name);
+    $this->assertEquals("name5", $results[2]->name);
+  }
+  
   public function testOrCondition()
   {
     $st = MODEL("SchemaTest");
@@ -337,7 +353,7 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("2008-01-01", $results[9]->dt);
   }
   
-  public function testLimitOffset()
+  public function testLimitation()
   {
     $st = MODEL("SchemaTest");
     $st->setLimit(2)->setOrderBy("id DESC");
@@ -535,6 +551,19 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(1, count($uniques[0]));
     $this->assertEquals("email", $uniques[0][0]);
     $this->assertTrue($schema->isUnique("email"));
+  }
+  
+  public function testForeignKeyInfo()
+  {
+    if (self::$db === "SQLITE") return;
+    
+    $schema = MODEL("Children")->getMetadata();
+    $fkey = $schema->getForeignKey();
+    $this->assertFalse($fkey->has("foo"));
+    $this->assertTrue($fkey->has("parents_id"));
+    
+    $this->assertEquals("parents", $fkey->parents_id->table);
+    $this->assertEquals("id", $fkey->parents_id->column);
   }
   
   // @todo more tests

@@ -12,7 +12,7 @@
  */
 class Flow_State
 {
-  const SES_TIMEOUT = 600;
+  const MAX_LIFETIME = 1200;
   
   private $properties = array();
   
@@ -55,18 +55,9 @@ class Flow_State
     return $this->properties;
   }
   
-  public function start($key, $activity, $token)
+  public function restore($properties)
   {
-    $p =& $this->properties;
-    
-    $p["key"]   = $key;
-    $p["token"] = $token;
-    $p["currentActivity"] = $activity;
-  }
-  
-  public function isInFlow()
-  {
-    return ($this->properties["token"] !== "");
+    $this->properties = $properties;
   }
   
   public function transit($action)
@@ -77,26 +68,20 @@ class Flow_State
     $p["currentActivity"]  = $action;
   }
   
-  public function getCurrent()
+  public function setCurrentActivity($activity)
+  {
+    $this->properties["currentActivity"] = $activity;
+  }
+  
+  public function getCurrentActivity()
   {
     return $this->properties["currentActivity"];
   }
   
-  public function restore($session, $key)
+  public function save(Sabel_Storage $storage, $timeout = null)
   {
-    $properties = $session->read($this->getStateKey($key));
-    
-    if ($properties === null) {
-      return null;
-    } else {
-      $this->properties = $properties;
-      return $this;
-    }
-  }
-  
-  public function save($session)
-  {
-    $session->write($this->getStateKey(), $this->properties, self::SES_TIMEOUT);
+    if ($timeout === null) $timeout = self::MAX_LIFETIME;
+    $storage->store($this->properties["token"], $this->properties, $timeout);
   }
   
   public function setNextActions($actions)
@@ -106,7 +91,7 @@ class Flow_State
   
   public function isMatchToNext($currentAction)
   {
-    return in_array($currentAction, $this->properties["nexts"]);
+    return in_array($currentAction, $this->properties["nexts"], true);
   }
   
   public function isPreviousAction($action)
@@ -115,17 +100,6 @@ class Flow_State
       return ($this->properties["previousActivity"] === $action);
     } else {
       return false;
-    }
-  }
-  
-  public function getStateKey($key = "")
-  {
-    $token = $this->properties["token"];
-    
-    if ($key !== "") {
-      return $key . "_flow_" . $token;
-    } else {
-      return $this->key . "_flow_" . $token;
     }
   }
 }

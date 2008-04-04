@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Cookie_Http extends Sabel_Object
+class Sabel_Cookie_Http extends Sabel_Cookie_Abstract
 {
   private static $instance = null;
   
@@ -57,24 +57,5 @@ class Sabel_Cookie_Http extends Sabel_Object
     } else {
       return null;
     }
-  }
-  
-  public function delete($key, $options = array())
-  {
-    $options["expire"] = time() - 3600;
-    $this->set($key, "", $options);
-  }
-  
-  protected function createOptions(array $options)
-  {
-    $domain = (isset($_SERVER["HTTP_HOST"])) ? $_SERVER["HTTP_HOST"] : "localhost";
-    
-    if (!isset($options["expire"]))   $options["expire"]   = time() + 86400;
-    if (!isset($options["path"]))     $options["path"]     = "/";
-    if (!isset($options["domain"]))   $options["domain"]   = $domain;
-    if (!isset($options["secure"]))   $options["secure"]   = false;
-    if (!isset($options["httpOnly"])) $options["httpOnly"] = false;
-    
-    return $options;
   }
 }

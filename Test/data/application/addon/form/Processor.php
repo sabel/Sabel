@@ -11,112 +11,98 @@
  */
 class Form_Processor extends Sabel_Bus_Processor
 {
-  const SESSION_KEY = "sbl_forms";
-  const SES_TIMEOUT = 300;
+  const MAX_LIFETIME = 1200;
   
   /**
-   * @var Form_Object[]
+   * @var Form_Object
    */
-  private $forms = array();
+  private $form = null;
+  
+  /**
+   * @var Sabel_Storage
+   */
+  private $storage = null;
   
   /**
    * @var string
    */
-  private $unityId = "";
+  private $token = "";
+  
+  protected function createStorage($clientId)
+  {
+    $config = array("namespace" => $clientId);
+    $this->storage = new Sabel_Storage_Database($config);
+  }
   
   public function execute($bus)
   {
-    $this->extract("request", "session", "controller");
-    
-    $forms = $this->session->read(self::SESSION_KEY);
-    if ($forms === null) $forms = array();
+    $this->extract("request", "controller");
     
     $controller = $this->controller;
-    $controller->setAttribute("form", $this);
     $action = $bus->get("destination")->getAction();
     if (!$controller->hasMethod($action)) return;
     
-    $annot = $controller->getReflection()->getMethodAnnotation($action, "unity");
-    if (!isset($annot[0][0])) return;
+    $this->createStorage($bus->get("session")->getClientId());
+    $controller->setAttribute("form", $this);
     
-    $this->unityId = $annot[0][0];
-    $token = $this->request->getToken()->getValue();
-    $timeouts = $this->session->getTimeouts();
+    $reflection = $controller->getReflection();
+    $annotation  = $reflection->getMethodAnnotation($action, "form");
+    $this->token = $this->request->getValueWithMethod("token");
     
-    if (!empty($token)) {
-      $seskey = $this->unityId . "_" . $token;
-      if (isset($forms[$seskey])) {
-        $form = unserialize($forms[$seskey]);
-        $form->setToken($token);
-        $this->session->write($seskey, "", self::SES_TIMEOUT);
-        
-        if ($this->request->isPost()) {
-          $this->applyPostValues($form)->unsetErrors();
-        }
-        
-        $forms[$seskey] = $form;
-        $controller->setAttribute($form->getFormName(), $form);
+    if (isset($annotation[0][0])) {
+      if ($this->token === null || ($form = $this->get()) === null) {
+        $bus->get("response")->notFound();
+      } else {
+        $controller->setAttribute($annotation[0][0], $form);
       }
-      
-      unset($timeouts[$seskey]);
     }
-    
-    foreach (array_keys($timeouts) as $k) unset($forms[$k]);
-    $this->forms = $forms;
   }
   
-  public function create($model, $as = null)
+  public function create($model)
   {
-    if ($as !== null) {
-      $name = $as;
-    } elseif (is_model($model)) {
-      $name = $model->getName();
-    } elseif (is_string($model)) {
-      $name = $model;
-    } else {
-      $message = "invalid argument(1) type. "
-               . "must be a string or instance of model.";
-               
-      throw new Sabel_Exception_InvalidArgument($message);
+    if (is_string($model)) {
+      $model = MODEL($model);
     }
     
-    $name = lcfirst($name) . "Form";
+    $this->form  = $form = new Form_Object($model);
+    $this->token = md5(uniqid(mt_rand(), true));
+    $this->controller->setAttribute("token", $this->token);
     
-    if ($this->unityId === "") {
-      $form = new Form_Object($model, $name);
-      $this->controller->setAttribute($name, $form);
-    } else {
-      $token = $this->request->getToken()->createValue();
-      $form = new Form_Object($model, $name, $token);
-      $seskey = $this->unityId . "_" . $token;
-      $this->forms[$seskey] = $form;
-      $this->session->write($seskey, "", self::SES_TIMEOUT);
-      $this->controller->setAttribute($name, $form);
+    return $form;
+  }
+  
+  public function get($token = null)
+  {
+    if ($token === null) {
+      $token = $this->token;
+    }
+    
+    $form = $this->storage->fetch($token);
+    $this->controller->setAttribute("token", $token);
+    
+    if ($form !== null) {
+      $this->form  = $form;
+      $this->token = $token;
     }
     
     return $form;
   }
   
-  public function clear()
+  public function clear($token = null)
   {
-    $token = $this->request->getToken()->getValue();
-    
-    if (!empty($token)) {
-      $seskey = $this->unityId . "_" . $token;
-      $this->session->delete($seskey);
-      unset($this->forms[$seskey]);
+    if ($token === null) {
+      $token = $this->token;
     }
+    
+    $this->storage->clear($token);
+    $this->form = null;
   }
   
   public function shutdown($bus)
   {
-    foreach ($this->forms as $seskey => &$form) {
-      if ($form instanceof Form_Object) {
-        $form = serialize($form);
-      }
+    if ($this->form !== null && $this->token !== "") {
+      $this->storage->store($this->token, $this->form, self::MAX_LIFETIME);
     }
-    
-    $this->session->write(self::SESSION_KEY, $this->forms);
   }
   
   public function applyPostValues($form)
@@ -124,13 +110,13 @@ class Form_Processor extends Sabel_Bus_Processor
     $values = $this->request->fetchPostValues();
     if (empty($values)) return $form;
     
-    $model     = $form->getModel();
     $allowCols = $form->getAllowColumns();
-    $mdlName   = $model->getName();
+    $mdlName   = $form->getModel()->getName();
+    $separator = Form_Object::NAME_SEPARATOR;
     
     foreach ($values as $key => $value) {
-      if (strpos($key, "::") === false) continue;
-      list ($name, $colName) = explode("::", $key);
+      if (strpos($key, $separator) === false) continue;
+      list ($name, $colName) = explode($separator, $key);
       if ($name !== $mdlName || !in_array($colName, $allowCols)) continue;
       
       if ($colName === "datetime") {
@@ -140,35 +126,27 @@ class Form_Processor extends Sabel_Bus_Processor
               $date["second"] = "00";
             }
             
-            $model->$key = $date["year"]   . "-"
-                         . $date["month"]  . "-"
-                         . $date["day"]    . " "
-                         . $date["hour"]   . ":"
-                         . $date["minute"] . ":"
-                         . $date["second"];
+            $form->set($key, $date["year"]   . "-" .
+                             $date["month"]  . "-" .
+                             $date["day"]    . " " .
+                             $date["hour"]   . ":" .
+                             $date["minute"] . ":" .
+                             $date["second"]);
           } else {
-            $model->$key = null;
+            $form->set($key, null);
           }
         }
       } elseif ($colName === "date") {
         foreach ($value as $key => $date) {
           if ($this->isCompleteDateValues($date, false)) {
             $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
-            $model->$key = $date;
+            $form->set($key, $date);
           } else {
-            $model->$key = null;
+            $form->set($key, null);
           }
         }
       } else {
-        $model->$colName = $value;
-      }
-    }
-    
-    foreach ($model->getColumns() as $colName => $column) {
-      if (!$column->isBool()) continue;
-      $key = "{$mdlName}::{$colName}";
-      if (isset($values[$key])) {
-        $model->$colName = ($values[$key] === "1");
+        $form->set($colName, $value);
       }
     }
     

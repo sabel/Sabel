@@ -24,7 +24,7 @@ class Sabel_DB_Condition
   const DIRECT        = 11;
   
   /**
-   * @param const   $type   self
+   * @param const   $type   Sabel_DB_Condition
    * @param string  $column
    * @param mixed   $value
    * @param boolean $not
@@ -79,7 +79,8 @@ class Sabel_DB_Condition
         break;
         
       default:
-        throw new Sabel_DB_Exception("invalid condition type.");
+        $message = __METHOD__ . "() invalid condition type.";
+        throw new Sabel_Exception_InvalidArgument($message);
     }
     
     $condition->setValue($value)->isNot($not);

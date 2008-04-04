@@ -53,7 +53,7 @@ class Sabel_DB_Config
   
   public static function getSchemaName($connectionName)
   {
-    // @todo more improvement
+    // @todo improvement
     
     $package = self::getPackage($connectionName);
     $ignores = array("sabel.db.pdo.sqlite" => 1, "sabel.db.ibase" => 1);

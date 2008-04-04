@@ -11,25 +11,17 @@
  */
 class Form_Object extends Sabel_Object
 {
-  /**
-   * @var string
-   */
-  protected $formName = "";
-  
-  /**
-   * @var string
-   */
-  protected $token = null;
-  
-  /**
-   * @var Form_Html
-   */
-  protected $htmlWriter = null;
+  const NAME_SEPARATOR = ":";
   
   /**
    * @var Sabel_DB_Model
    */
   protected $model = null;
+  
+  /**
+   * @var boolean
+   */
+  protected $isSelected = false;
   
   /**
    * @var string
@@ -51,44 +43,16 @@ class Form_Object extends Sabel_Object
    */
   protected $allowCols = array();
   
-  public function __construct($model, $fName, $token = null)
+  public function __construct($model)
   {
     if (is_string($model)) {
       $model = MODEL($model);
     }
     
     $this->model      = $model;
-    $this->formName   = $fName;
-    $this->htmlWriter = new Form_Html();
-    $this->token      = $token;
     $this->mdlName    = $model->getName();
     $this->columns    = $model->getColumns();
-  }
-  
-  /**
-   * @return string
-   */
-  public function getFormName()
-  {
-    return $this->formName;
-  }
-  
-  /**
-   * @param string $token
-   *
-   * @return void
-   */
-  public function setToken($token)
-  {
-    $this->token = $token;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getToken()
-  {
-    return $this->token;
+    $this->isSelected = $model->isSelected();
   }
   
   /**
@@ -189,20 +153,9 @@ class Form_Object extends Sabel_Object
       $ignores = array($ignores);
     }
     
-    $model = $this->model;
-    $validator = new Sabel_DB_Validator($model);
-    $annot = $model->getReflection()->getAnnotation("validateIgnores");
-    
-    if ($annot !== null) {
-      $ignores = array_merge($annot[0], $ignores);
-    }
-    
-    if ($errors = $validator->validate($ignores)) {
-      $this->errors = $errors;
-      return false;
-    } else {
-      return true;
-    }
+    $validator = new Sabel_DB_Validator($this->model);
+    $this->errors = $validator->validate($ignores);
+    return empty($this->errors);
   }
   
   /**
@@ -212,14 +165,13 @@ class Form_Object extends Sabel_Object
    */
   public function name($colName)
   {
-    static $names = array();
-    $mdlName = $this->mdlName;
+    static $names = null;
     
-    if (empty($names[$mdlName])) {
-      $names[$mdlName] = Sabel_DB_Model_Localize::getColumnNames($mdlName);
+    if ($names === null) {
+      $names = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
     }
     
-    return (isset($names[$mdlName][$colName])) ? $names[$mdlName][$colName] : $colName;
+    return (isset($names[$colName])) ? $names[$colName] : $colName;
   }
   
   /**
@@ -240,18 +192,12 @@ class Form_Object extends Sabel_Object
     return $name;
   }
   
-  public function start($uri, $class = null, $id = null, $method = "post", $name = "")
+  public function open($uri, $class = null, $id = null, $method = "post", $name = "")
   {
-    $html = $this->getHtmlWriter("", $name, $id, $class)->open($uri, $method);
-    
-    if ($this->token === null) {
-      return $html;
-    } else {
-      return $html . '<input type="hidden" name="token" value="' . $this->token . '"/>' . PHP_EOL;
-    }
+    return $this->getHtmlWriter("", $name, $id, $class)->open($uri, $method);
   }
   
-  public function end()
+  public function close()
   {
     return $this->getHtmlWriter("", "")->close();
   }
@@ -259,11 +205,6 @@ class Form_Object extends Sabel_Object
   public function submit($text = null, $class = null, $id = null)
   {
     return $this->getHtmlWriter("", "", $id, $class)->submit($text);
-  }
-  
-  public function link($uri, $text, $class = null, $id = null)
-  {
-    return $this->getHtmlWriter("", "", $id, $class)->link($uri, $text, $this->token);
   }
   
   public function text($name, $class = null, $id = null)
@@ -298,30 +239,16 @@ class Form_Object extends Sabel_Object
   
   public function radio($name, $values, $class = null, $id = null)
   {
-    $value = $this->get($name);
-    
-    if (isset($this->columns[$name])) {
-      if ($this->columns[$name]->isBool()) {
-        $value = ($this->get($name)) ? 1 : 0;
-      }
-      
-      $isNullable = $this->columns[$name]->nullable;
-    } else {
-      $isNullable = true;
-    }
-    
     $eName  = $this->createInputName($name);
     $writer = $this->getHtmlWriter($name, $eName, $id, $class);
-    return $writer->radio($values, $isNullable);
+    return $writer->radio($values);
   }
   
   public function select($name, $values, $class = null, $id = null, $isHash = true)
   {
-    $isNullable = (isset($this->columns[$name])) ? $this->columns[$name]->nullable : true;
-    
     $eName  = $this->createInputName($name);
     $writer = $this->getHtmlWriter($name, $eName, $id, $class);
-    return $writer->select($values, $isNullable, $isHash);
+    return $writer->select($values, $isHash);
   }
   
   public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
@@ -342,7 +269,7 @@ class Form_Object extends Sabel_Object
   
   protected function createInputName($name)
   {
-    return $this->mdlName . "::" . $name;
+    return $this->mdlName . self::NAME_SEPARATOR . $name;
   }
   
   private function getHtmlWriter($name, $inputName, $id = null, $class = null)
@@ -351,27 +278,42 @@ class Form_Object extends Sabel_Object
       $this->allowCols[] = $name;
     }
     
-    $writer = $this->htmlWriter->clear();
+    static $htmlWriter = null;
     
-    return $writer->setName($inputName)
-                  ->setValue($this->get($name))
-                  ->setId($id)
-                  ->setClass($class);
+    if ($htmlWriter === null) {
+      return $htmlWriter = new Form_Html();
+    } else {
+      return $htmlWriter->clear()
+                        ->setName($inputName)
+                        ->setValue($this->get($name))
+                        ->setId($id)
+                        ->setClass($class);
+    }
   }
   
   public function __sleep()
   {
-    $this->model = $this->model->toArray();
-    return array("model", "mdlName", "formName", "errors", "allowCols");
+    l("serialize form object", SBL_LOG_DEBUG);
+    
+    $this->model   = $this->model->toArray();
+    $this->columns = array();
+    
+    return array_keys(get_object_vars($this));
   }
   
   public function __wakeup()
   {
-    $model = MODEL($this->mdlName);
-    $model->setProperties($this->model);
+    l("unserialize form object", SBL_LOG_DEBUG);
     
-    $this->model      = $model;
-    $this->columns    = $model->getColumns();
-    $this->htmlWriter = new Form_Html();
+    $model = MODEL($this->mdlName);
+    
+    if ($this->isSelected) {
+      $model->setProperties($this->model);
+    } else {
+      $model->setValues($this->model);
+    }
+    
+    $this->model   = $model;
+    $this->columns = $model->getColumns();
   }
 }

@@ -11,16 +11,23 @@
  */
 class Sabel_DB_Metadata_ForeignKey extends Sabel_Object
 {
-  private
-    $fkeys   = array(),
-    $objects = array();
-    
+  /**
+   * @var array
+   */
+  private $fkeys = array();
+  
+  /**
+   * @var array
+   */
+  private $objects = array();
+  
   public function __construct($fkeys)
   {
     if (is_array($fkeys)) {
       $this->fkeys = $fkeys;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be an array.");
+      $message = __METHOD__ . "() argument must be an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
