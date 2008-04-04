@@ -22,26 +22,25 @@ class Processor_Initializer extends Sabel_Bus_Processor
     // default page title.
     $bus->get("response")->setResponse("pageTitle", "Sabel");
     
-    // $this->trim();
+    // $request = $bus->get("request");
+    // if ($request->isPost()) $this->trim($request);
   }
 
   /**
    * strip whitespace from post values.
    */
-  private function trim()
+  private function trim($request)
   {
-    if (!$this->request->isPost()) return;
-    
     $func = (extension_loaded("mbstring")) ? "mb_trim" : "trim";
     
-    if ($values = $this->request->fetchPostValues()) {
+    if ($values = $request->fetchPostValues()) {
       foreach ($values as &$value) {
         if ($value === null || is_array($value)) continue;
         $result = $func($value);
         $value  = ($result === "") ? null : $result;
       }
       
-      $this->request->setPostValues($values);
+      $request->setPostValues($values);
     }
   }
 }
