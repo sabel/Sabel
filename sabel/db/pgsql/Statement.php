@@ -9,14 +9,14 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Statement extends Sabel_DB_Abstract_Statement
+class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
 {
   public function setDriver($driver)
   {
     if ($driver instanceof Sabel_DB_Pgsql_Driver) {
       $this->driver = $driver;
     } else {
-      $message = "driver should be an instance of Sabel_DB_Pgsql_Driver";
+      $message = __METHOD__ . '() $driver should be an instance of Sabel_DB_Pgsql_Driver';
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }

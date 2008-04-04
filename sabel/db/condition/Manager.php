@@ -85,11 +85,11 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    *
    * @return string
    */
-  public function build(Sabel_DB_Abstract_Statement $stmt)
+  public function build(Sabel_DB_Statement $stmt)
   {
     if (empty($this->conditions)) return "";
     

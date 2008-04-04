@@ -53,7 +53,7 @@ class Sabel_DB
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
   public static function createStatement($connectionName = "default")
   {

@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
+abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Statement
 {
   abstract public function escape(array $values);
   
@@ -24,29 +24,23 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Abstract_Statement
     }
   }
   
-  public function execute()
+  public function execute($bindValues = array())
   {
     $query = $this->getQuery();
+    $this->query = preg_replace('/@(.+?)@/', ':$1', $this->getQuery());
     
-    if (empty($this->bindValues)) {
-      $result = $this->driver->execute($query);
-    } else {
-      $bindValues = $this->escape($this->bindValues);
-      foreach ($bindValues as $k => $v) {
-        $bindValues[":{$k}"] = $v;
-        unset($bindValues[$k]);
+    if (empty($bindValues)) {
+      if (empty($this->bindValues)) {
+        $bindValues = array();
+      } else {
+        $bindValues = $this->escape($this->bindValues);
+        foreach ($bindValues as $k => $v) {
+          $bindValues[":{$k}"] = $v;
+          unset($bindValues[$k]);
+        }
       }
-      
-      $query  = preg_replace('/@(.+?)@/', ':$1', $query);
-      $result = $this->driver->execute($query, $bindValues);
     }
     
-    if ($this->isInsert() && $this->seqColumn !== null) {
-      return $this->driver->getLastInsertId();
-    } elseif ($this->isUpdate() || $this->isDelete()) {
-      return $this->driver->getAffectedRows();
-    } else {
-      return $result;
-    }
+    return parent::execute($bindValues);
   }
 }

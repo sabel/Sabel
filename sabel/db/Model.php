@@ -38,7 +38,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $modelName = "";
   
   /**
-   * @var Sabel_DB_Abstract_Statement
+   * @var Sabel_DB_Statement
    */
   protected $statement = null;
   
@@ -845,9 +845,9 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param const $type Sabel_DB_Abstract_Statement
+   * @param const $type Sabel_DB_Statement
    *
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
   public function prepareStatement($type = Sabel_DB_Statement::QUERY)
   {
@@ -863,11 +863,11 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    *
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
-  protected function prepareSelect(Sabel_DB_Abstract_Statement $stmt)
+  protected function prepareSelect(Sabel_DB_Statement $stmt)
   {
     return $stmt->projection($this->projection)
                 ->where($this->getCondition()->build($stmt))
@@ -875,35 +875,35 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    * @param array $values
    *
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
-  protected function prepareUpdate(Sabel_DB_Abstract_Statement $stmt, array $values = array())
+  protected function prepareUpdate(Sabel_DB_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->where($this->getCondition()->build($stmt));
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    * @param array $values
    *
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
-  protected function prepareInsert(Sabel_DB_Abstract_Statement $stmt, array $values = array())
+  protected function prepareInsert(Sabel_DB_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->sequenceColumn($this->metadata->getSequenceColumn());
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    *
-   * @return Sabel_DB_Abstract_Statement
+   * @return Sabel_DB_Statement
    */
-  protected function prepareDelete(Sabel_DB_Abstract_Statement $stmt)
+  protected function prepareDelete(Sabel_DB_Statement $stmt)
   {
     return $stmt->where($this->getCondition()->build($stmt));
   }

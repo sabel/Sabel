@@ -13,7 +13,7 @@ class Sabel_DB_Condition_Between extends Sabel_DB_Abstract_Condition
 {
   protected $type = Sabel_DB_Condition::BETWEEN;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt)
+  public function build(Sabel_DB_Statement $stmt)
   {
     $f   = ++self::$counter;
     $t   = ++self::$counter;

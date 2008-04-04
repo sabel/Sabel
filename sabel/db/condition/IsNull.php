@@ -13,7 +13,7 @@ class Sabel_DB_Condition_IsNull extends Sabel_DB_Abstract_Condition
 {
   protected $type = Sabel_DB_Condition::ISNULL;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt)
+  public function build(Sabel_DB_Statement $stmt)
   {
     return $this->getQuotedColumn($stmt) . " IS NULL";
   }

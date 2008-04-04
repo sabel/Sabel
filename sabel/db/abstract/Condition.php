@@ -35,12 +35,12 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   protected $isNot = false;
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    * @param int $counter
    *
    * @return string
    */
-  abstract public function build(Sabel_DB_Abstract_Statement $stmt);
+  abstract public function build(Sabel_DB_Statement $stmt);
   
   /**
    * @return void
@@ -116,7 +116,7 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Abstract_Statement $stmt
+   * @param Sabel_DB_Statement $stmt
    *
    * @return string
    */

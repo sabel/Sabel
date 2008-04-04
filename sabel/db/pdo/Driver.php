@@ -53,7 +53,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
     unset($this->connection);
   }
   
-  public function execute($sql, $bindParams = null)
+  public function execute($sql, $bindParams = array())
   {
     $connection = $this->connection;
     if (!($pdoStmt = $connection->prepare($sql))) {

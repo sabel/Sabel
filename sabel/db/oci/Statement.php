@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Statement extends Sabel_DB_Abstract_Statement
+class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
 {
   public function setDriver($driver)
   {

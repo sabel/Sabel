@@ -13,7 +13,7 @@ class Sabel_DB_Condition_LessEqual extends Sabel_DB_Abstract_Condition
 {
   protected $type = Sabel_DB_Condition::LESS_EQUAL;
   
-  public function build(Sabel_DB_Abstract_Statement $stmt)
+  public function build(Sabel_DB_Statement $stmt)
   {
     $num = ++self::$counter;
     $stmt->setBindValue("param{$num}", $this->value);

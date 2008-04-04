@@ -36,7 +36,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $this;
   }
   
-  public function getProjection(Sabel_DB_Abstract_Statement $stmt)
+  public function getProjection(Sabel_DB_Statement $stmt)
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->getName(false);
@@ -59,7 +59,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $projection;
   }
   
-  public function getJoinQuery(Sabel_DB_Abstract_Statement $stmt, $joinType)
+  public function getJoinQuery(Sabel_DB_Statement $stmt, $joinType)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
     $keys  = $this->joinKey;
