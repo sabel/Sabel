@@ -42,8 +42,10 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   {
     if (($equal = $element->equals) !== null) {
       $params = array_map("trim", explode(",", $equal));
+      
       if (count($params) < 2) {
-        throw new Sabel_Exception_Runtime("too few parameters.");
+        $message = __METHOD__ . "() too few parameters.";
+        throw new Sabel_Exception_Runtime($message);
       }
       
       $fmt = "<? $if (%s === %s) : ?>";
@@ -61,7 +63,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
       return "<? $if ({$func}({$arg})) : ?>";
     }
     
-    throw new Sabel_Exception_Runtime("if parameter is empty.");
+    throw new Sabel_Exception_Runtime(__METHOD__ . "() if parameter is empty.");
   }
   
   protected function elseif_replace($element)
@@ -87,8 +89,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
       if ($args === null) $args = $element->params;
       
       if ($args === null) {
-        $message = "foreach parameter is null.";
-        throw new Sabel_Exception_InvalidArgument($message);
+        $message = __METHOD__ . "() foreach parameter is null.";
+        throw new Sabel_Exception_Runtime($message);
       } else {
         $exp = array_map("trim", explode(",", $args));
         if (($c = count($exp)) === 2) {
@@ -99,8 +101,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
           $params["key"]   = $exp[1];
           $params["value"] = $exp[2];
         } else {
-          $message = "wrong parameter count for foreach.";
-          throw new Sabel_Exception_InvalidArgument($message);
+          $message = __METHOD__ . "() wrong parameter count for foreach.";
+          throw new Sabel_Exception_Runtime($message);
         }
       }
     }
@@ -149,7 +151,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   protected function partial_replace($element)
   {
     if (($name = $element->name) === null) {
-      throw new Sabel_Exception_Runtime("template name is null.");
+      $message = __METHOD__ . "() template name is null.";
+      throw new Sabel_Exception_Runtime($message);
     }
     
     if (($assign = $element->assign) === null) {
@@ -177,7 +180,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   protected function token_replace($element)
   {
     if (($value = $element->value) === null) {
-      throw new Sabel_Exception_Runtime("token value is null.");
+      $message = __METHOD__ . "() token value is null.";
+      throw new Sabel_Exception_Runtime($message);
     }
     
     return sprintf('<input type="hidden" name="token" value="%s" />', $value);
@@ -186,7 +190,8 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   protected function formerr_replace($element)
   {
     if (($form = $element->form) === null) {
-      throw new Sabel_Exception_Runtime("form name is null.");
+      $message = __METHOD__ . "() form name is null.";
+      throw new Sabel_Exception_Runtime($message);
     }
     
     if ($form{0} !== '$') $form = '$' . $form . "Form";
@@ -198,7 +203,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
   protected function echo_replace($element)
   {
     if (($arg = $element->arg) === null) {
-      throw new Sabel_Exception_Runtime("empty argument.");
+      throw new Sabel_Exception_Runtime(__METHOD__ . "() empty argument.");
     }
     
     return "<?= $arg ?>";
