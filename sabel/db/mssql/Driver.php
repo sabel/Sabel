@@ -13,7 +13,7 @@
 // @todo implementation
 
 /*
-class Sabel_DB_Mssql_Driver extends Sabel_DB_Abstract_Driver
+class Sabel_DB_Mssql_Driver extends Sabel_DB_Driver
 {
   public function connect(array $params)
   {

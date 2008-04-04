@@ -19,7 +19,7 @@ abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
   abstract public function getForeignKeys($tblName);
   abstract public function getUniques($tblName);
   
-  public function __construct(Sabel_DB_Abstract_Driver $driver, $schemaName)
+  public function __construct(Sabel_DB_Driver $driver, $schemaName)
   {
     $this->driver = $driver;
     $this->schemaName = $schemaName;

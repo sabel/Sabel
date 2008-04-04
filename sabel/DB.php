@@ -15,7 +15,7 @@ class Sabel_DB
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Abstract_Driver
+   * @return Sabel_DB_Driver
    */
   public static function createDriver($connectionName = "default")
   {

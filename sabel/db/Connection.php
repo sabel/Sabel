@@ -17,12 +17,12 @@ class Sabel_DB_Connection
   private static $connections = array();
   
   /**
-   * @param Sabel_DB_Abstract_Driver $driver
+   * @param Sabel_DB_Driver $driver
    *
    * @throws Sabel_DB_Exception_Connection
    * @return resource
    */
-  public static function connect(Sabel_DB_Abstract_Driver $driver)
+  public static function connect(Sabel_DB_Driver $driver)
   {
     $connectionName = $driver->getConnectionName();
     $names = Sabel_DB_Config::getConnectionNamesOfSameSetting($connectionName);

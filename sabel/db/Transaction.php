@@ -79,25 +79,25 @@ class Sabel_DB_Transaction
   }
   
   /**
-   * @param Sabel_DB_Abstract_Driver $driver
+   * @param Sabel_DB_Driver $driver
    *
    * @throws Sabel_DB_Exception_Transaction
    * @return void
    */
-  public static function begin(Sabel_DB_Abstract_Driver $driver)
+  public static function begin(Sabel_DB_Driver $driver)
   {
     switch (self::$isolationLevel) {
       case self::READ_UNCOMMITTED:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_READ_UNCOMMITTED;
+        $iLevel = Sabel_DB_Driver::TRANS_READ_UNCOMMITTED;
         break;
       case self::READ_COMMITTED:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_READ_COMMITTED;
+        $iLevel = Sabel_DB_Driver::TRANS_READ_COMMITTED;
         break;
       case self::REPEATABLE_READ:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_REPEATABLE_READ;
+        $iLevel = Sabel_DB_Driver::TRANS_REPEATABLE_READ;
         break;
       case self::SERIALIZABLE:
-        $iLevel = Sabel_DB_Abstract_Driver::TRANS_SERIALIZABLE;
+        $iLevel = Sabel_DB_Driver::TRANS_SERIALIZABLE;
         break;
       default:
         $iLevel = null;

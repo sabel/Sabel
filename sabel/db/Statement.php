@@ -34,7 +34,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   protected $query = "";
   
   /**
-   * @var Sabel_DB_Abstract_Driver
+   * @var Sabel_DB_Driver
    */
   protected $driver = null;
   
@@ -89,7 +89,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   protected $forUpdate = false;
   
   /**
-   * @param Sabel_DB_Abstract_Driver $driver
+   * @param Sabel_DB_Driver $driver
    *
    * @return void
    */
@@ -101,7 +101,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Abstract_Driver
+   * @return Sabel_DB_Driver
    */
   public function getDriver()
   {

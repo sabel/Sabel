@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Abstract_Driver
+abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
 {
   public function begin($isolationLevel = null)
   {
