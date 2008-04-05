@@ -48,7 +48,7 @@ class Sabel_Annotation_Reader extends Sabel_Object
     if (empty($comments[1])) return $annotations;
     
     foreach ($comments[1] as $line) {
-      list ($name, $values) = $this->extract($line);
+      list ($name, $values) = $this->extract(trim($line));
       $annotations[$name][] = $values;
     }
     

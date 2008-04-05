@@ -72,6 +72,7 @@ require_once ("Test/Session/Tests.php");
 require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
 require_once ("Test/DB/Statement/Tests.php");
+require_once ("Test/DB/Storage/Tests.php");
 require_once ("Test/DB/Tests.php");
 require_once ("Test/I18n/Gettext.php");
 
@@ -88,6 +89,7 @@ class SabelAllTests
     
     if (in_array("-db", $_SERVER["argv"], true)) {
       $suite->addTest(Test_DB_Statement_Tests::suite());
+      $suite->addTest(Test_DB_Storage_Tests::suite());
       $suite->addTest(Test_DB_Tests::suite());
       return $suite;
     }

@@ -28,13 +28,22 @@ class Sabel_DB_Mysqli_Statement extends Sabel_DB_Mysql_Statement
     foreach ($values as &$val) {
       if (is_bool($val)) {
         $val = ($val) ? 1 : 0;
-      } elseif (is_object($val)) {
-        $val = $this->escapeObject($val);
       } elseif (is_string($val)) {
         $val = "'" . mysqli_real_escape_string($conn, $val) . "'";
       }
     }
     
     return $values;
+  }
+  
+  public function escapeBinary($string)
+  {
+    $conn = $this->driver->getConnection();
+    return "'" . mysqli_real_escape_string($conn, $string) . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return $byte;
   }
 }

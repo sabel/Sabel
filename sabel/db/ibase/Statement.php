@@ -34,6 +34,17 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Statement
     return $values;
   }
   
+  public function escapeBinary($string)
+  {
+    $escaped = $this->escape(array($string));
+    return addcslashes($escaped[0], "\000\032\\\r\n");
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return stripcslashes($byte);
+  }
+  
   protected function createSelectSql()
   {
     $sql = "SELECT ";

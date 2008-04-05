@@ -97,7 +97,7 @@ class Sabel_Storage_Database implements Sabel_Storage
     if ($result === null || $result[0]["timeout"] <= time()) {
       return null;
     } else {
-      return unserialize($result[0]["data"]);
+      return unserialize($stmt->unescapeBinary($result[0]["data"]));
     }
   }
   
@@ -106,27 +106,29 @@ class Sabel_Storage_Database implements Sabel_Storage
     if ($timeout === null) {
       $timeout = time() + ini_get("session.gc_maxlifetime");
     } elseif (!is_numeric($timeout) || $timeout < 1) {
-      $message = "invalid timeout value.";
+      $message = __METHOD__ . "() invalid timeout value.";
       throw new Sabel_Exception_InvalidArgument($message);
     } else {
       $timeout += time();
     }
     
-    $stmt = $this->createStatement();
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $data = $stmt->escapeBinary(serialize($value));
+    
+    $table   = $stmt->quoteIdentifier($this->tableName);
+    $idCol   = $stmt->quoteIdentifier("id");
+    $dataCol = $stmt->quoteIdentifier("data");
+    $toutCol = $stmt->quoteIdentifier("timeout");
     
     if ($this->has($key)) {
-      $stmt->type(Sabel_DB_Statement::UPDATE)
-           ->values(array("data" => serialize($value), "timeout" => $timeout))
-           ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
-           ->setBindValue("id", $this->getKey($key));
+      $query = "UPDATE $table SET $dataCol = $data, $toutCol = $timeout "
+             . "WHERE $idCol = '" . $this->getKey($key) . "'";
     } else {
-      $stmt->type(Sabel_DB_Statement::INSERT)
-           ->values(array("id"      => $this->getKey($key),
-                          "data"    => serialize($value),
-                          "timeout" => $timeout));
+      $query = "INSERT INTO $table ({$idCol}, {$dataCol}, {$toutCol}) "
+             . "VALUES ('" . $this->getKey($key) . "', {$data}, {$timeout})";
     }
     
-    $stmt->execute();
+    $stmt->setQuery($query)->execute();
   }
   
   public function has($key)
@@ -159,7 +161,7 @@ class Sabel_Storage_Database implements Sabel_Storage
          ->execute();
   }
   
-  private function createStatement()
+  protected function createStatement()
   {
     $stmt = Sabel_DB::createStatement($this->connectionName);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));

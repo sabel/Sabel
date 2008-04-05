@@ -60,18 +60,18 @@ fieldset.formField {
   border: none;
 }
 
-div.errmsg {
+div.sbl_error {
   margin-bottom: 15px;
   padding: 10px 10px 10px 15px;
   background-color: #ffe8e8;
   border: 3px solid #cc5555;
 }
 
-div.errmsg ul {
+div.sbl_error ul {
   margin: 0 0 0 10px;
 }
 
-div.errmsg ul li {
+div.sbl_error ul li {
   padding-left: 5px;
   line-height: 1.4;
 }

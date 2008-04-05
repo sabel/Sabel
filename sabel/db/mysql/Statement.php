@@ -49,6 +49,17 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Statement
     return $values;
   }
   
+  public function escapeBinary($string)
+  {
+    $conn = $this->driver->getConnection();
+    return "'" . mysql_real_escape_string($string, $conn) . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return $byte;
+  }
+  
   public function quoteIdentifier($arg)
   {
     if (is_array($arg)) {

@@ -94,7 +94,7 @@ class Sabel_DB_Type_Manager
   
   protected function _text($column, $type)
   {
-    $types = array("text", "clob", "mediumtext", "tinytext");
+    $types = array("text", "clob", "mediumtext", "tinytext", "nclob");
     
     if (in_array($type, $types, true)) {
       $column->type = Sabel_DB_Type::TEXT;

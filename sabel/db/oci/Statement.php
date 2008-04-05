@@ -35,6 +35,17 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
     return $values;
   }
   
+  public function escapeBinary($string)
+  {
+    $escaped = $this->escape(array($string));
+    return addcslashes($escaped[0], "\000\032\\\r\n");
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return stripcslashes($byte);
+  }
+  
   public function createInsertSql()
   {
     if (($column = $this->seqColumn) !== null) {

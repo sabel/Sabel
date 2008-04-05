@@ -21,4 +21,15 @@ class Sabel_DB_Pdo_Pgsql_Statement extends Sabel_DB_Pdo_Statement
     
     return $values;
   }
+  
+  public function escapeBinary($string)
+  {
+    $tmp = addcslashes(str_replace("'", "''", $string), "\000\032\\\r\n");
+    return "'" . str_replace(array("\\r", "\\n", "\\"), array("\\015", "\\012", "\\\\"), $tmp) . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return stripcslashes($byte);
+  }
 }

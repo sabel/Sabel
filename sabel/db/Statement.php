@@ -95,6 +95,9 @@ abstract class Sabel_DB_Statement extends Sabel_Object
    */
   abstract public function setDriver($driver);
   
+  abstract public function escapeBinary($string);
+  abstract public function unescapeBinary($byte);
+  
   public static function getExecutedQueries()
   {
     return self::$queries;

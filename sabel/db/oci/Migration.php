@@ -17,7 +17,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::FLOAT    => "FLOAT(24)",
                            Sabel_DB_Type::DOUBLE   => "FLOAT(53)",
                            Sabel_DB_Type::BOOL     => "NUMBER(1)",
-                           Sabel_DB_Type::STRING   => "VARCHAR",
+                           Sabel_DB_Type::STRING   => "VARCHAR2",
                            Sabel_DB_Type::TEXT     => "CLOB",
                            Sabel_DB_Type::DATETIME => "DATE",
                            Sabel_DB_Type::DATE     => "DATE");

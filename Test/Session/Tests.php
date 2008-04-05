@@ -17,7 +17,7 @@ class Test_Session_Tests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    $suite->addTest(Test_Session_Database::suite());
+    //$suite->addTest(Test_Session_Database::suite());
     
     return $suite;
   }

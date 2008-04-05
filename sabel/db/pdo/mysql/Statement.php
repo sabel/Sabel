@@ -35,6 +35,27 @@ class Sabel_DB_Pdo_Mysql_Statement extends Sabel_DB_Pdo_Statement
     return $values;
   }
   
+  public function escapeBinary($byte)
+  {
+    $name = get_class($this);
+    trigger_error("{$name}::escapeBinary() and {$name}::unescapeBinary() is broken. " .
+                  "Don't use these methods.", E_USER_ERROR);
+    
+    return "'" . $byte . "'";
+    
+    // Fuckin' Shit...
+    // return "'" . addcslashes($byte, "\x00\x1a\\\r\n\047") . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    $name = get_class($this);
+    trigger_error("{$name}::escapeBinary() and {$name}::unescapeBinary() is broken. " .
+                  "Don't use these methods.", E_USER_ERROR);
+    
+    return $byte;
+  }
+  
   public function quoteIdentifier($arg)
   {
     if (is_array($arg)) {

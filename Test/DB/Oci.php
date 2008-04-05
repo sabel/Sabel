@@ -19,7 +19,8 @@ class Test_DB_Oci extends Test_DB_Test
                     "host"     => "127.0.0.1",
                     "user"     => "hogehoge",
                     "password" => "fugafuga",
-                    "database" => "xe");
+                    "database" => "XE",
+                    "charset"  => "UTF-8");
     
     Sabel_DB_Config::add("conrefused", $params);
     $driver = new Sabel_DB_Oci_Driver("conrefused");
@@ -41,7 +42,8 @@ class Test_DB_Oci extends Test_DB_Test
                     "host"     => "127.0.0.1",
                     "user"     => "develop",
                     "password" => "develop",
-                    "database" => "xe");
+                    "database" => "XE",
+                    "charset"  => "UTF-8");
     
     Sabel_DB_Config::add("default", $params);
     Test_DB_Test::$db = "ORACLE";

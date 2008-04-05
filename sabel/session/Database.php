@@ -41,7 +41,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   {
     if (self::$instance === null) {
       self::$instance = new self($connectionName);
-      register_shutdown_function(array(self::$instance, "shutdown"));
+      register_shutdown_function(array(self::$instance, "destruct"));
     }
     
     return self::$instance;
@@ -76,7 +76,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   public function setId($id)
   {
     if ($this->started) {
-      $message = "the session has already been started.";
+      $message = __METHOD__ . "() the session has already been started.";
       throw new Sabel_Exception_Runtime($message);
     } else {
       $this->sessionId = $id;
@@ -90,15 +90,15 @@ class Sabel_Session_Database extends Sabel_Session_Ext
       $stmt  = $this->createStatement();
       
       $stmt->type(Sabel_DB_Statement::UPDATE)
-           ->values(array("sid" => $newId))
-           ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @currentId@")
+           ->values(array("id" => $newId))
+           ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @currentId@")
            ->setBindValue("currentId", $this->sessionId)
            ->execute();
       
       $this->sessionId = $newId;
       $this->setSessionIdToCookie($newId);
     } else {
-      $message = "must start the session with start()";
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
   }
@@ -108,15 +108,15 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     if ($this->started) {
       $stmt = $this->createStatement();
       $stmt->type(Sabel_DB_Statement::DELETE)
-           ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-           ->setBindValue("sid", $this->sessionId)
+           ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
+           ->setBindValue("id", $this->sessionId)
            ->execute();
       
       $attributes = $this->attributes;
       $this->attributes = array();
       return $attributes;
     } else {
-      $message = "must start the session with start()";
+      $message = __METHOD__ . "() must start the session with start()";
       throw new Sabel_Exception_Runtime($message);
     }
   }
@@ -126,8 +126,8 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     $stmt = $this->createStatement();
     $stmt->type(Sabel_DB_Statement::SELECT)
          ->projection(array("data", "timeout"))
-         ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-         ->setBindValue("sid", $sessionId);
+         ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
+         ->setBindValue("id", $sessionId);
     
     if (($result = $stmt->execute()) === null) {
       $this->newSession = true;
@@ -135,7 +135,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     } elseif ($result[0]["timeout"] <= time()) {
       return array();
     } else {
-      return unserialize($result[0]["data"]);
+      return unserialize($stmt->unescapeBinary($result[0]["data"]));
     }
   }
   
@@ -144,8 +144,8 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     $stmt   = $this->createStatement();
     $result = $stmt->type(Sabel_DB_Statement::SELECT)
                    ->projection("COUNT(*) AS cnt")
-                   ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-                   ->setBindValue("sid", $sessionId)
+                   ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
+                   ->setBindValue("id", $sessionId)
                    ->execute();
     
     return ((int)$result[0]["cnt"] !== 0);
@@ -175,25 +175,26 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     return $stmt;
   }
   
-  public function shutdown()
+  public function destruct()
   {
     if ($this->newSession && empty($this->attributes)) return;
     
-    $stmt = $this->createStatement();
-    $timeoutValue = time() + $this->maxLifetime;
+    $stmt    = Sabel_DB::createStatement($this->connectionName);
+    $data    = $stmt->escapeBinary(serialize($this->attributes));
+    $timeout = time() + $this->maxLifetime;
+    $table   = $stmt->quoteIdentifier($this->tableName);
+    $idCol   = $stmt->quoteIdentifier("id");
+    $dataCol = $stmt->quoteIdentifier("data");
+    $toutCol = $stmt->quoteIdentifier("timeout");
     
     if ($this->sessionIdExists($this->sessionId)) {
-      $stmt->type(Sabel_DB_Statement::UPDATE)
-           ->values(array("data" => serialize($this->attributes), "timeout" => $timeoutValue))
-           ->where("WHERE " . $stmt->quoteIdentifier("sid") . " = @sid@")
-           ->setBindValue("sid", $this->sessionId);
+      $query = "UPDATE $table SET $dataCol = $data, $toutCol = $timeout "
+             . "WHERE $idCol = '{$this->sessionId}'";
     } else {
-      $stmt->type(Sabel_DB_Statement::INSERT)
-           ->values(array("sid"     => $this->sessionId,
-                          "data"    => serialize($this->attributes),
-                          "timeout" => $timeoutValue));
+      $query = "INSERT INTO $table ({$idCol}, {$dataCol}, {$toutCol}) "
+             . "VALUES ('{$this->sessionId}', {$data}, {$timeout})";
     }
     
-    $stmt->execute();
+    $stmt->setQuery($query)->execute();
   }
 }

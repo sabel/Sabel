@@ -21,4 +21,14 @@ class Sabel_DB_Pdo_Sqlite_Statement extends Sabel_DB_Pdo_Statement
     
     return $values;
   }
+  
+  public function escapeBinary($string)
+  {
+    return "'" . addcslashes(str_replace("'", "''", $string), "\000\032\\\r\n") . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return stripcslashes($byte);
+  }
 }

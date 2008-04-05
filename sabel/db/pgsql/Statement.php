@@ -35,4 +35,15 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
     
     return $values;
   }
+  
+  public function escapeBinary($string)
+  {
+    $conn = $this->driver->getConnection();
+    return "'" . pg_escape_bytea($conn, $string) . "'";
+  }
+  
+  public function unescapeBinary($byte)
+  {
+    return pg_unescape_bytea($byte);
+  }
 }
