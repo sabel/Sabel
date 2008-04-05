@@ -281,14 +281,12 @@ class Sabel_DB_Validator extends Sabel_Object
   protected function unique($model, $uniques)
   {
     $lNames = array();
-    $pkey = $model->getMetadata()->getPrimaryKey();
-    if (is_string($pkey)) $pkey = array($pkey);
     
     foreach ($uniques as $unique) {
       $values = array();
       foreach ($unique as $uni) {
         $lNames[] = $this->getLocalizedName($uni);
-        $val = $model->$uni;
+        if (($val = $model->$uni) === null) break 2;
         $model->setCondition($uni, $val);
         $values[] = $val;
       }
@@ -298,7 +296,9 @@ class Sabel_DB_Validator extends Sabel_Object
       
       if ($model->isSelected()) {
         $duplicate = false;
-        foreach ($pkey as $key) {
+        $pkey = $model->getMetadata()->getPrimaryKey();
+        
+        foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
           if ($model->$key !== $result->$key) {
             $duplicate = true;
             break;
