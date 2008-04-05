@@ -261,11 +261,11 @@ abstract class Sabel_DB_Statement extends Sabel_Object
       }
     }
     
-    $start  = time() + microtime();
+    $start  = microtime(true);
     $result = $this->driver->execute($query, $bindValues);
     
     self::$queries[] = array("sql"   => $query,
-                             "time"  => sprintf("%.3f", ((time() + microtime()) - $start) * 1000),
+                             "time"  => microtime(true) - $start,
                              "binds" => $bindValues);
     
     if ($this->isInsert() && $this->seqColumn !== null) {

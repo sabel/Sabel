@@ -21,25 +21,26 @@ class QueryLog_Addon extends Sabel_Object
     $queries = Sabel_DB_Statement::getExecutedQueries();
     if (empty($queries)) return;
     
-    $buf = array();
+    $rows = array();
     for ($i = 0, $c = count($queries); $i < $c; $i++) {
       $query = $queries[$i];
-      $sql = '<em style="font-weight: bold;">SQL:</em> ' . $query["sql"];
       
+      $binds = "";
       if (!empty($query["binds"])) {
-        $binds = array();
+        $buf = array();
         foreach ($query["binds"] as $k => $v) {
-          $binds[] = "$k => $v";
+          $buf[] = "$k => $v";
         }
         
-        $sql .= '<br /><em style="font-weight: bold;">Bind Values:</em> '
-              . implode(", ", $binds);
+        $binds = implode(", ", $buf);
       }
       
-      $buf[$i]["sql"]  = $sql;
-      $buf[$i]["time"] = $query["time"];
+      $rows[$i]["sql"]   = $query["sql"];
+      $rows[$i]["binds"] = $binds;
+      $rows[$i]["time"]  = sprintf("%.3f", $query["time"] * 1000);
       
       if ($query["time"] > 2000) {
+        // Slow Query
         // e.g send mail to admin.
       }
     }
