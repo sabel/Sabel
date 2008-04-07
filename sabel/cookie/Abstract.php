@@ -20,11 +20,9 @@ abstract class Sabel_Cookie_Abstract extends Sabel_Object
   
   protected function createOptions(array $options)
   {
-    $domain = (isset($_SERVER["HTTP_HOST"])) ? $_SERVER["HTTP_HOST"] : "localhost";
-    
     if (!isset($options["expire"]))   $options["expire"]   = time() + 86400;
     if (!isset($options["path"]))     $options["path"]     = "/";
-    if (!isset($options["domain"]))   $options["domain"]   = $domain;
+    if (!isset($options["domain"]))   $options["domain"]   = "";
     if (!isset($options["secure"]))   $options["secure"]   = false;
     if (!isset($options["httpOnly"])) $options["httpOnly"] = false;
     

@@ -38,8 +38,7 @@ class Processor_Action extends Sabel_Bus_Processor
         }
         
         if ($request->isPost() && isset($annotations["check"])) {
-          $validator = $this->validateRequests($request, $annotations["check"]);
-          $controller->setAttribute("validator", $validator);
+          $this->validateRequests($controller, $request, $annotations["check"]);
         }
         
         l("execute action '{$action}'");
@@ -61,7 +60,7 @@ class Processor_Action extends Sabel_Bus_Processor
     return $result;
   }
   
-  protected function validateRequests($request, $checks)
+  protected function validateRequests($controller, $request, $checks)
   {
     $validator = new Validator();
     foreach ($checks as $check) {
@@ -69,6 +68,10 @@ class Processor_Action extends Sabel_Bus_Processor
     }
     
     $validator->validate($request->fetchPostValues());
-    return $validator;
+    if ($validator->hasError()) {
+      $controller->setAttribute("errors", $validator->getErrors());
+    }
+    
+    $controller->setAttribute("validator", $validator);
   }
 }
