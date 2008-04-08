@@ -271,8 +271,8 @@ abstract class Sabel_DB_Statement extends Sabel_Object
                              "time"  => microtime(true) - $start,
                              "binds" => $bindValues);
     
-    if ($this->isInsert() && $this->seqColumn !== null) {
-      return $this->driver->getLastInsertId();
+    if ($this->isInsert()) {
+      return ($this->seqColumn === null) ? null : $this->driver->getLastInsertId();
     } elseif ($this->isUpdate() || $this->isDelete()) {
       return $this->driver->getAffectedRows();
     } else {

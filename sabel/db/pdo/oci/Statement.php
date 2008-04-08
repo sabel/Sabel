@@ -11,6 +11,31 @@
  */
 class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
 {
+  public function execute($bindValues = array())
+  {
+    $result = parent::execute($bindValues);
+    if (!$this->isSelect() || empty($result)) return $result;
+    
+    // PDO_OCI CLOB HACK
+    
+    $textColumns = array();
+    foreach ($this->metadata->getColumns() as $column) {
+      if ($column->isText()) $textColumns[] = $column->name;
+    }
+    
+    if (!empty($textColumns)) {
+      foreach ($result as &$row) {
+        foreach ($textColumns as $colName) {
+          if (isset($row[$colName])) {
+            $row[$colName] = stream_get_contents($row[$colName]);
+          }
+        }
+      }
+    }
+    
+    return $result;
+  }
+  
   public function escape(array $values)
   {
     foreach ($values as &$val) {
@@ -29,7 +54,11 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
   
   public function unescapeBinary($byte)
   {
-    return stripcslashes(stream_get_contents($byte));
+    if (is_resource($byte)) {
+      $byte = stream_get_contents($byte);
+    }
+    
+    return stripcslashes($byte);
   }
   
   public function quoteIdentifier($arg)
