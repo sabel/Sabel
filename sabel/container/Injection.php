@@ -92,6 +92,11 @@ abstract class Sabel_Container_Injection implements Sabel_Config
     return $this->binds;
   }
   
+  public function hasBinds()
+  {
+    return (count($this->binds) >= 1);
+  }
+  
   public function hasBind($className)
   {
     return isset($this->binds[$className]);

@@ -14,6 +14,12 @@ class Sabel_Reflection_Class extends ReflectionClass
 {
   protected $annotations = false;
   
+  /**
+   * get annotation of class
+   *
+   * @param string $name annotation name
+   * @return string
+   */
   public function getAnnotation($name)
   {
     $annotations = $this->getAnnotations();

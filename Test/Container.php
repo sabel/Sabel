@@ -13,10 +13,16 @@ class Test_Container extends SabelTestCase
     return self::createSuite("Test_Container");
   }
   
-  public function testInjection()
+  /**
+   * simple injection
+   * 
+   * @test
+   */
+  public function injection()
   {
     $injector = Sabel_Container::create(new Config());
-    $person = $injector->newInstance("Person");
+    $person   = $injector->newInstance("Person");
+    
     $this->assertEquals(10, $person->calc());
   }
   

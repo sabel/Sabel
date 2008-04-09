@@ -43,7 +43,7 @@ class Sabel_Container_Injector
       $args = func_get_args();
       array_shift($args);
     }
-    
+        
     $reflect = new ReflectionClass($className);
     
     if ($reflect->isInterface() || $reflect->isAbstract()) {
@@ -91,19 +91,21 @@ class Sabel_Container_Injector
       $instance = $this->applyAspect($instance);
     }
     
-    foreach ($this->injection->getBinds() as $name => $binds) {
-      foreach ($binds as $bind) {
-        if ($bind->hasSetter()) {
-          $injectionMethod = $bind->getSetter();
-        } else {
-          $injectionMethod = "set" . ucfirst($name);
-        }
-        
-        $implClassName = $bind->getImplementation();
-        $reflect = new ReflectionClass($instance);
-        
-        if ($reflect->hasMethod($injectionMethod)) {
-          $instance->$injectionMethod($this->newInstance($implClassName));
+    if ($this->injection->hasBinds()) {
+      foreach ($this->injection->getBinds() as $name => $binds) {
+        foreach ($binds as $bind) {
+          if ($bind->hasSetter()) {
+            $injectionMethod = $bind->getSetter();
+          } else {
+            $injectionMethod = "set" . ucfirst($name);
+          }
+          
+          $implClassName = $bind->getImplementation();
+          $reflect = new ReflectionClass($instance);
+          
+          if ($reflect->hasMethod($injectionMethod)) {
+            $instance->$injectionMethod($this->newInstance($implClassName));
+          }
         }
       }
     }
@@ -137,7 +139,13 @@ class Sabel_Container_Injector
     if ($reflect->isInterface()) {
       if ($this->injection->hasBind($dependClassName)) {
         $bind = $this->injection->getBind($dependClassName);
-        $implClassName = $bind->getImplementation();
+        
+        if (is_array($bind)) {
+          $implClassName = $bind[0]->getImplementation();  
+        } else {
+          $implClassName = $bind->getImplementation();  
+        }
+        
         return $this->newInstance($implClassName);
       }
     } else {

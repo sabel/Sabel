@@ -30,14 +30,14 @@ final class Sabel_Container_Bind
   
   public function setter($methodName)
   {
-    $this->setter = $methodName;
+    $this->setter = trim($methodName);
     
     return $this;
   }
   
   public function hasSetter()
   {
-    return ($this->setter !== "");
+    return (!empty($this->setter));
   }
   
   public function getSetter()

@@ -8,6 +8,7 @@ class Test_I18n_Gettext extends SabelTestCase
 {
   public static function suite()
   {
+    ini_set("mbstring.internal_encoding", "UTF-8");
     define("LOCALE_DIR_PATH", dirname(__FILE__) . DIRECTORY_SEPARATOR . "locale");
     return self::createSuite("Test_I18n_Gettext");
   }

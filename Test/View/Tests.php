@@ -19,7 +19,7 @@ class Test_View_Tests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     $suite->addTest(Test_View_TemplateFile::suite());
-    $suite->addTest(Test_View_TemplateDb::suite());
+    // $suite->addTest(Test_View_TemplateDb::suite());
     $suite->addTest(Test_View_Renderer::suite());
     $suite->addTest(Test_View_Pager::suite());
     $suite->addTest(Test_View_PageViewer::suite());
