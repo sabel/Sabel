@@ -13,7 +13,7 @@ class Sabel_Cookie_InMemory extends Sabel_Cookie_Abstract
 {
   private static $instance = null;
   
-  protected function $cookies = array();
+  protected $cookies = array();
   
   private function __construct() {}
   
@@ -53,10 +53,42 @@ class Sabel_Cookie_InMemory extends Sabel_Cookie_Abstract
   public function get($key)
   {
     if (array_key_exists($key, $this->cookies)) {
-      // @todo check
-      return $this->cookies[$key]["value"];
-    } else {
-      return null;
+      $cookie = $this->cookies[$key];
+      
+      if ($cookie["expire"] < time()) {
+        return null;
+      }
+      
+      $path = $cookie["path"];
+      if ($path === "/") return $cookie["value"];
+      
+      $uri = $this->getRequestUri();
+      if (strpos($uri, $path) === 0) {
+        return $cookie["value"];
+      }
     }
+    
+    return null;
+  }
+  
+  protected function getRequestUri()
+  {
+    if (class_exists("Sabel_Context", false)) {
+      $bus = Sabel_Context::getContext()->getBus();
+      if (is_object($bus) && ($request = $bus->get("request"))) {
+        return "/" . $request->getUri();
+      }
+    }
+    
+    if (isset($_SERVER["REQUEST_URI"])) {
+      $uri = trim(preg_replace("/\/{2,}/", "/", $_SERVER["REQUEST_URI"]), "/");
+      $parsedUrl = parse_url("http://localhost/{$uri}");
+      
+      if (isset($parsedUrl["path"])) {
+        return $parsedUrl["path"];
+      }
+    }
+    
+    return "/";
   }
 }
