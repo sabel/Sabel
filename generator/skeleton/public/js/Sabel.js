@@ -954,12 +954,7 @@ Sabel.Element.getCumulativeTop = function(element) {
 			var border = parseInt(Sabel.Element.getStyle(parent, "borderTopWidth"));
 			position += border || 0;
 
-			if (Sabel.UserAgent.isIE) {
-				var padding = parseInt(Sabel.Element.getStyle(parent, "paddingTop"));
-				if (padding > 0) {
-					position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
-				}
-			} else if (Sabel.UserAgent.isMozilla) {
+			if (Sabel.UserAgent.isMozilla) {
 				var of = Sabel.Element.getStyle(parent, "overflow");
 				if (!Sabel.Array.include(["visible", "inherit"], of)) {
 					position += border;
@@ -969,7 +964,12 @@ Sabel.Element.getCumulativeTop = function(element) {
 
 		element = parent;
 		if (element) {
-			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) break;
+			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
+				if (Sabel.UserAgent.isIE) {
+					position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
+				}
+				break;
+			}
 		}
 	} while (element);
 
@@ -990,12 +990,7 @@ Sabel.Element.getCumulativeLeft = function(element) {
 			var border = parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
 			position += border || 0;
 
-			if (Sabel.UserAgent.isIE) {
-				var padding = parseInt(Sabel.Element.getStyle(parent, "paddingLeft"));
-				if (padding > 0) {
-					position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
-				}
-			} else if (Sabel.UserAgent.isMozilla) {
+			if (Sabel.UserAgent.isMozilla) {
 				var of = Sabel.Element.getStyle(parent, "overflow");
 				if (!Sabel.Array.include(["visible", "inherit"], of)) {
 					position += border;
@@ -1005,7 +1000,12 @@ Sabel.Element.getCumulativeLeft = function(element) {
 
 		element = parent;
 		if (element) {
-			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) break;
+			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
+				if (Sabel.UserAgent.isIE) {
+					position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
+				}
+				break;
+			}
 		}
 	} while (element);
 
@@ -1051,6 +1051,7 @@ Sabel.Element.getOffsetPositions = function(element) {
 
 Sabel.Element.getDimensions = function(element) {
 	element = Sabel.get(element, false);
+	if (element.nodeType !== 1) return {};
 
 	var style = element.style;
 
