@@ -51,6 +51,13 @@ function uri($uriParameter, $secure = false, $absolute = false)
   return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
 }
 
+function normalize_uri($uri)
+{
+  $uri = trim(preg_replace("/\/{2,}/", "/", $uri), "/");
+  $parsedUrl = parse_url("http://localhost/{$uri}");
+  return ltrim($parsedUrl["path"], "/");
+}
+
 function realempty($value)
 {
   return ($value === null || $value === array() || $value === "");

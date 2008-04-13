@@ -81,14 +81,9 @@ class Sabel_Cookie_InMemory extends Sabel_Cookie_Abstract
     }
     
     if (isset($_SERVER["REQUEST_URI"])) {
-      $uri = trim(preg_replace("/\/{2,}/", "/", $_SERVER["REQUEST_URI"]), "/");
-      $parsedUrl = parse_url("http://localhost/{$uri}");
-      
-      if (isset($parsedUrl["path"])) {
-        return $parsedUrl["path"];
-      }
+      return "/" . normalize_uri($_SERVER["REQUEST_URI"]);
+    } else {
+      return "/";
     }
-    
-    return "/";
   }
 }

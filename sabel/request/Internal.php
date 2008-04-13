@@ -59,26 +59,28 @@ class Sabel_Request_Internal extends Sabel_Object
   
   public function request($uri, Sabel_Bus_Config $config = null)
   {
-    if (strpos($uri, ":")) $uri = uri($uri);
-    
-    $values = $this->values;
+    if (strpos($uri, ":")) {
+      $uri = uri($uri);
+    }
     
     $uri = "http://localhost/{$uri}";
     $parsedUri = parse_url($uri);
+    $request = new Sabel_Request_Object(ltrim($parsedUri["path"], "/"));
     
     if (isset($parsedUri["query"])) {
-      foreach (explode("&", $parsedUri["query"]) as $param) {
-        list ($k, $v) = explode("=", $param);
-        $values[$k] = $v;
+      parse_str($parsedUri["query"], $get);
+      if ($this->method === Sabel_Request::GET) {
+        $this->values = array_merge($this->values, $get);
+      } else {
+        $request->setGetValues($get);
       }
     }
     
     $currentContext = Sabel_Context::getContext();
     $currentBus = $currentContext->getBus();
     
-    $request = new Sabel_Request_Object(ltrim($parsedUri["path"], "/"));
     $request->method($this->method);
-    $request->values($values);
+    $request->values($this->values);
     
     $headers = $currentBus->get("request")->getHttpHeaders();
     if (!$this->withLayout) {
