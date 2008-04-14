@@ -168,7 +168,7 @@ function convert_to_modelname($tblName)
   if (isset($cache[$tblName])) {
     return $cache[$tblName];
   } else {
-    $mdlName = join("", array_map("ucfirst", explode("_", $tblName)));
+    $mdlName = implode("", array_map("ucfirst", explode("_", $tblName)));
     return $cache[$tblName] = $mdlName;
   }
 }

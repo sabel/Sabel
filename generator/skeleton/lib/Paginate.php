@@ -22,11 +22,6 @@ class Paginate extends Sabel_Object
   protected $isJoin = false;
   
   /**
-   * @var array
-   */
-  protected $attributes = array();
-  
-  /**
    * @var string
    */
   protected $method = "select";
@@ -34,7 +29,7 @@ class Paginate extends Sabel_Object
   /**
    * @var array
    */
-  protected $parameters = array();
+  protected $attributes = array();
   
   public function __construct($model)
   {
@@ -44,10 +39,8 @@ class Paginate extends Sabel_Object
     
     if (is_model($model)) {
       $model->autoReinit(false);
-      $this->method = "select";
     } elseif ($model instanceof Sabel_DB_Join) {
       $model->getModel()->autoReinit(false);
-      $this->method = "join";
       $this->isJoin = true;
     } else {
       $message = __METHOD__ . "() invalid instance.";
@@ -68,14 +61,16 @@ class Paginate extends Sabel_Object
   
   public function getUriQuery($page)
   {
-    unset($this->parameters["page"]);
-    $queryString = array("page={$page}");
-    
-    foreach ($this->parameters as $key => $val) {
-      $queryString[] = "{$key}={$val}";
+    if (!isset($this->attributes["uriQuery"])) {
+      return "page={$page}";
+    } else {
+      $query = $this->attributes["uriQuery"];
+      if ($query === "") {
+        return "page={$page}";
+      } else {
+        return $query . "&page=" . $page;
+      }
     }
-    
-    return implode("&", $queryString);
   }
   
   public function setCondition($arg1, $arg2 = null)
@@ -92,16 +87,6 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
-  public function setParameters(array $parameters)
-  {
-    $this->parameters = $parameters;
-  }
-  
-  public function addParameter($key, $val)
-  {
-    $this->parameters[$key] = $val;
-  }
-  
   public function setMethod($method)
   {
     $this->method = $method;
@@ -109,14 +94,25 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
-  public function build($limit, $page)
+  public function build($limit, array $getValues = array())
   {
-    if (!is_numeric($page) || $page < 1) {
+    if (isset($getValues["page"])) {
+      $page = $getValues["page"];
+      if (!is_numeric($page) || $page < 1) $page = 1;
+    } else {
       $page = 1;
     }
     
     $model = $this->model;
     $attributes =& $this->attributes;
+    
+    $uriQuery = array();
+    foreach ($getValues as $key => $val) {
+      if ($key === "page") continue;
+      $uriQuery[] = "{$key}=" . urlencode($val);
+    }
+    
+    $attributes["uriQuery"] = implode("&", $uriQuery);
     
     if ($this->isJoin) {
       $count = $model->getCount(null, false);

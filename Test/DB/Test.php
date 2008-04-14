@@ -121,7 +121,7 @@ class Test_DB_Test extends SabelTestCase
     $this->insertJoinTableData();
     $join = new Sabel_DB_Join("Grandchildren");
     $join->setOrderBy("Grandchildren.id ASC");
-    $results = $join->add("Children")->join();
+    $results = $join->add("Children")->select();
     
     $this->assertEquals(2, count($results));
     $this->assertEquals("grandchildren1", $results[0]->value);
@@ -135,7 +135,7 @@ class Test_DB_Test extends SabelTestCase
     $join = new Sabel_DB_Join("Grandchildren");
     $join->setOrderBy("Grandchildren.id ASC");
     $chilren = new Sabel_DB_Join_Relation("Children");
-    $results = $join->add($chilren->add("Parents"))->join();
+    $results = $join->add($chilren->add("Parents"))->select();
     
     $this->assertEquals(2, count($results));
     $this->assertEquals("children2", $results[0]->Children->value);
@@ -150,7 +150,7 @@ class Test_DB_Test extends SabelTestCase
     $join->setOrderBy("Grandchildren.id ASC");
     $children = new Sabel_DB_Join_Relation("Children");
     $parents = new Sabel_DB_Join_Relation("Parents");
-    $results = $join->add($children->add($parents->add("Grandparents")))->join();
+    $results = $join->add($children->add($parents->add("Grandparents")))->select();
     
     $this->assertEquals(2, count($results));
     $this->assertEquals("children2", $results[0]->Children->value);
@@ -168,7 +168,7 @@ class Test_DB_Test extends SabelTestCase
     $children = new Sabel_DB_Join_Relation("Children");
     $parents = new Sabel_DB_Join_Relation("Parents");
     
-    $results = $join->add($children->add($parents->add("Grandparents")))->join();
+    $results = $join->add($children->add($parents->add("Grandparents")))->select();
     $this->assertEquals(1, count($results));
     $this->assertEquals("children2", $results[0]->Children->value);
     $this->assertEquals("parents1", $results[0]->Children->Parents->value);
@@ -415,7 +415,7 @@ class Test_DB_Test extends SabelTestCase
   {
     $join = new Sabel_DB_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
-    $r = $join->setParents(array("Student", "Course"))->join();
+    $r = $join->setParents(array("Student", "Course"))->select();
     
     $this->assertEquals(7, count($r));
     $this->assertEquals("yamada",      $r[0]->Student->name);
@@ -439,7 +439,7 @@ class Test_DB_Test extends SabelTestCase
     $join = new Sabel_DB_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
     $join->setCondition("Student.id", 1);
-    $r = $join->setParents(array("Student", "Course"))->join();
+    $r = $join->setParents(array("Student", "Course"))->select();
     
     $this->assertEquals(2, count($r));
     $this->assertEquals("yamada",      $r[0]->Student->name);

@@ -92,7 +92,7 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
       $this->setConstraints($line, $col);
       
       $line[] = "'default' => " . $this->getDefault($isNum, $col);
-      $lines[$col->name] = join("", $line) . ");";
+      $lines[$col->name] = implode("", $line) . ");";
     }
     
     return $lines;

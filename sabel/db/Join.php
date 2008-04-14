@@ -99,7 +99,7 @@ class Sabel_DB_Join extends Sabel_Object
     return (int)$rows[0]["cnt"];
   }
   
-  public function join($joinType = null)
+  public function select($joinType = null)
   {
     if ($joinType === null) {
       $joinType = $this->joinType;
@@ -139,9 +139,9 @@ class Sabel_DB_Join extends Sabel_Object
   
   protected function execute($stmt, $projection, $join)
   {
-    $stmt->join($join)
-         ->projection($projection)
-         ->where($this->model->getCondition()->build($stmt));
+    $stmt->projection($projection)
+         ->where($this->model->getCondition()->build($stmt))
+         ->join($join);
     
     $constraints = $this->model->getConstraints();
     return $stmt->constraints($constraints)->execute();
