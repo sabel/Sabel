@@ -19,15 +19,28 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Statement
     if ($driver instanceof Sabel_DB_Pdo_Driver) {
       $this->driver = $driver;
     } else {
-      $message = "driver should be an instance of Sabel_DB_Pdo_Driver";
+      $message = __METHOD__ . "() driver should be an instance of Sabel_DB_Pdo_Driver";
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
-  public function execute($bindValues = array())
+  public function values(array $values)
   {
-    $query = $this->getQuery();
-    $this->query = preg_replace('/@(.+?)@/', ':$1', $this->getQuery());
+    $columns = $this->metadata->getColumns();
+    foreach ($values as $k => &$v) {
+      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
+        $v = $this->createBlob($v);
+      }
+    }
+    
+    $this->values = $this->bindValues = $values;
+    
+    return $this;
+  }
+  
+  public function execute($bindValues = array(), $additionalParameters = array())
+  {
+    $this->query = preg_replace('/@([a-zA-Z0-9_]+)@/', ':$1', $this->getQuery());
     
     if (empty($bindValues)) {
       if (empty($this->bindValues)) {
@@ -41,6 +54,11 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Statement
       }
     }
     
-    return parent::execute($bindValues);
+    return parent::execute($bindValues, $additionalParameters);
+  }
+  
+  public function createBlob($binary)
+  {
+    return new Sabel_DB_Pdo_Blob($binary);
   }
 }

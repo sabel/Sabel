@@ -63,16 +63,18 @@ class Sabel_DB_Config
     
     if (isset($config["schema"])) {
       return $config["schema"];
-    } elseif (strpos($package, "mysql") !== false || $package === "sabel.db.mssql") {
+    } elseif (strpos($package, "mysql") !== false) {
       return $config["database"];
     } elseif (strpos($package, "pgsql") !== false) {
       return "public";
-    } elseif (strpos($package, "oci") !== false) {
+    } elseif (strpos($package, "oci")   !== false) {
       return strtoupper($config["user"]);
+    } elseif (strpos($package, "mssql") !== false) {
+      return "dbo";
+    } else {
+      $message = __METHOD__ . "() 'schema' not found in config.";
+      throw new Sabel_DB_Exception($message);
     }
-    
-    $message = "getSchemaName() 'schema' not found in config.";
-    throw new Sabel_DB_Exception($message);
   }
   
   public static function getConnectionNamesOfSameSetting($connectionName)

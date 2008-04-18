@@ -21,6 +21,29 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
     }
   }
   
+  public function execute($bindValues = array())
+  {
+    $result = parent::execute($bindValues);
+    if (!$this->isSelect() || empty($result)) return $result;
+    
+    $binaryColumns = array();
+    foreach ($this->metadata->getColumns() as $column) {
+      if ($column->isBinary()) $binaryColumns[] = $column->name;
+    }
+    
+    if (!empty($binaryColumns)) {
+      foreach ($result as &$row) {
+        foreach ($binaryColumns as $colName) {
+          if (isset($row[$colName])) {
+            $row[$colName] = pg_unescape_bytea($row[$colName]);
+          }
+        }
+      }
+    }
+    
+    return $result;
+  }
+  
   public function escape(array $values)
   {
     $conn = $this->driver->getConnection();
@@ -36,14 +59,9 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
     return $values;
   }
   
-  public function escapeBinary($string)
+  public function createBlob($binary)
   {
     $conn = $this->driver->getConnection();
-    return "'" . pg_escape_bytea($conn, $string) . "'";
-  }
-  
-  public function unescapeBinary($byte)
-  {
-    return pg_unescape_bytea($byte);
+    return new Sabel_DB_Pgsql_Blob($conn, $binary);
   }
 }

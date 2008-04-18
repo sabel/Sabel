@@ -53,7 +53,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
     unset($this->connection);
   }
   
-  public function execute($sql, $bindParams = array())
+  public function execute($sql, $bindParams = array(), $additionalParameters = array())
   {
     $connection = $this->connection;
     if (!($pdoStmt = $connection->prepare($sql))) {
@@ -61,14 +61,33 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
       throw new Sabel_DB_Exception_Driver("PdoStatement is invalid. {$error[2]}");
     }
     
-    if ($pdoStmt->execute($bindParams)) {
-      $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
-      $this->affectedRows = $pdoStmt->rowCount();
-      $pdoStmt->closeCursor();
-      return (empty($rows)) ? null : $rows;
-    } else {
+    $hasBlob = false;
+    foreach ($bindParams as $name => $value) {
+      if ($value instanceof Sabel_DB_Pdo_Blob) {
+        $hasBlob = true;
+        $pdoStmt->bindValue($name, $value->getEscapedContents(), PDO::PARAM_LOB);
+      } else {
+        $pdoStmt->bindValue($name, $value);
+      }
+    }
+    
+    if ($hasBlob && $this->autoCommit) {
+      $connection->beginTransaction();
+    }
+    
+    if (!$result = $pdoStmt->execute()) {
       $this->executeError($connection, $pdoStmt, $bindParams);
     }
+    
+    $rows = $pdoStmt->fetchAll(PDO::FETCH_ASSOC);
+    $this->affectedRows = $pdoStmt->rowCount();
+    $pdoStmt->closeCursor();
+    
+    if ($hasBlob && $this->autoCommit) {
+      $connection->commit();
+    }
+    
+    return (empty($rows)) ? null : $rows;
   }
   
   private function executeError($conn, $pdoStmt, $bindParams)

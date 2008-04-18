@@ -11,6 +11,8 @@
  */
 class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
 {
+  protected $blobs = array();
+  
   public function setDriver($driver)
   {
     if ($driver instanceof Sabel_DB_Oci_Driver) {
@@ -21,29 +23,80 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
     }
   }
   
+  public function values(array $values)
+  {
+    $columns = $this->metadata->getColumns();
+    foreach ($values as $k => &$v) {
+      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
+        $this->blobs[$k] = $this->createBlob($v);
+        $v = new Sabel_DB_Statement_Expression($this, "EMPTY_BLOB()");
+      }
+    }
+    
+    $this->values = $this->bindValues = $values;
+    
+    return $this;
+  }
+  
+  public function clear()
+  {
+    $this->blobs = array();
+    return parent::clear();
+  }
+  
+  public function execute($bindValues = array(), $additionalParameters = array())
+  {
+    $query = $this->getQuery();
+    $blobs = $this->blobs;
+    
+    if (!empty($blobs)) {
+      $cols = array();
+      $hlds = array();
+      foreach (array_keys($blobs) as $column) {
+        $cols[] = $column;
+        $hlds[] = ":" . $column;
+      }
+      
+      $query .= " RETURNING " . implode(", ", $cols) . " INTO " . implode(", ", $hlds);
+    }
+    
+    $this->query = $query;
+    $additionalParameters["blob"] = $blobs;
+    return parent::execute($bindValues, $additionalParameters);
+  }
+  
   public function escape(array $values)
   {
-    foreach ($values as &$val) {
-      if (is_bool($val)) {
-        $val = ($val) ? 1 : 0;
-      } elseif (is_string($val)) {
-        //$val = "'" . addcslashes(str_replace("'", "''", $val), "\000\032\\") . "'";
-        $val = "'" . str_replace("'", "''", $val) . "'";
+    if (extension_loaded("mbstring")) {
+      $currentRegexEnc = mb_regex_encoding();
+      mb_regex_encoding(mb_internal_encoding());
+      
+      foreach ($values as $k => &$val) {
+        if (is_bool($val)) {
+          $val = ($val) ? 1 : 0;
+        } elseif (is_string($val)) {
+          $val = "'" . mb_ereg_replace("'", "''", $val) . "'";
+        }
+      }
+      
+      mb_regex_encoding($currentRegexEnc);
+    } else {
+      foreach ($values as &$val) {
+        if (is_bool($val)) {
+          $val = ($val) ? 1 : 0;
+        } elseif (is_string($val)) {
+          $val = "'" . str_replace("'", "''", $val) . "'";
+        }
       }
     }
     
     return $values;
   }
   
-  public function escapeBinary($string)
+  public function createBlob($binary)
   {
-    $escaped = $this->escape(array($string));
-    return addcslashes($escaped[0], "\000\032\\\r\n");
-  }
-  
-  public function unescapeBinary($byte)
-  {
-    return stripcslashes($byte);
+    $conn = $this->driver->getConnection();
+    return new Sabel_DB_Oci_Blob($conn, $binary);
   }
   
   public function createInsertSql()

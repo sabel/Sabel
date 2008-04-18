@@ -41,7 +41,7 @@ abstract class Sabel_DB_Driver extends Sabel_Object
   abstract public function begin($isolationLevel = null);
   abstract public function commit();
   abstract public function rollback();
-  abstract public function execute($sql, $bindParams = array());
+  abstract public function execute($sql, $bindParams = array(), $additionalParameters = array());
   abstract public function getLastInsertId();
   abstract public function close($connection);
   

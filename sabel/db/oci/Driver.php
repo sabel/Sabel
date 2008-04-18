@@ -95,14 +95,28 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
     $this->lastInsertId = $id;
   }
   
-  public function execute($sql, $bindParams = null)
+  public function execute($sql, $bindParams = array(), $additionalParameters = array())
   {
+    $connection = $this->connection;
     $sql = $this->bind($sql, $bindParams);
     
-    $execMode   = ($this->autoCommit) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
-    $connection = $this->connection;
-    $ociStmt    = oci_parse($connection, $sql);
-    $result     = oci_execute($ociStmt, $execMode);
+    // array $blobs Sabel_DB_Oci_Blob[]
+    $blobs = (isset($additionalParameters["blob"])) ? $additionalParameters["blob"] : array();
+    
+    if (empty($blobs)) {
+      $execMode = ($this->autoCommit) ? OCI_COMMIT_ON_SUCCESS : OCI_DEFAULT;
+      $ociStmt  = oci_parse($connection, $sql);
+      $result   = oci_execute($ociStmt, $execMode);
+    } else {
+      $ociStmt = oci_parse($connection, $sql);
+      foreach ($blobs as $column => $blob) {
+        $lob = $blob->getLob();
+        oci_bind_by_name($ociStmt, ":" . $column, $lob, -1, SQLT_BLOB);
+      }
+      
+      $result = oci_execute($ociStmt, OCI_DEFAULT);
+      foreach ($blobs as $blob) $blob->save();
+    }
     
     if (!$result) $this->executeError($ociStmt);
     
@@ -112,6 +126,10 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
       $rows = array_map("array_change_key_case", $rows);
     } else {
       $this->affectedRows = oci_num_rows($ociStmt);
+    }
+    
+    if (!empty($blobs) && $this->autoCommit) {
+      $this->commit();
     }
     
     oci_free_statement($ociStmt);

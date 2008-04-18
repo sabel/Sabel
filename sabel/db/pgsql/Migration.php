@@ -20,7 +20,8 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::STRING   => "VARCHAR",
                            Sabel_DB_Type::TEXT     => "TEXT",
                            Sabel_DB_Type::DATETIME => "TIMESTAMP",
-                           Sabel_DB_Type::DATE     => "DATE");
+                           Sabel_DB_Type::DATE     => "DATE",
+                           Sabel_DB_Type::BINARY   => "BITEA");
   
   protected function createTable($filePath)
   {

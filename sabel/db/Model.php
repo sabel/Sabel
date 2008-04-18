@@ -785,21 +785,21 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param array $values
    *
-   * @return void
+   * @return int
    */
   public function update(array $values = array())
   {
-    $this->prepare("update", array($values))->execute();
+    return $this->prepare("update", array($values))->execute();
   }
   
   /**
-   * @return void
+   * @return int
    */
   protected function _update()
   {
     @list ($values) = $this->arguments;
     $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
-    $this->prepareUpdate($stmt, $values)->execute();
+    return $this->prepareUpdate($stmt, $values)->execute();
   }
   
   /**

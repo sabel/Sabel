@@ -31,7 +31,7 @@ class Sabel_DB_Pdo_Oci_Driver extends Sabel_DB_Pdo_Driver
     }
   }
   
-  public function execute($sql, $bindParams = null)
+  public function execute($sql, $bindParams = array(), $additionalParameters = array())
   {
     if (($result = parent::execute($sql, $bindParams)) === null) {
       return null;

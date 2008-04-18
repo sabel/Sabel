@@ -62,7 +62,7 @@ class Sabel_DB_Pgsql_Driver extends Sabel_DB_Driver
     unset($this->connection);
   }
   
-  public function execute($sql, $bindParams = null)
+  public function execute($sql, $bindParams = array(), $additionalParameters = array())
   {
     $sql = $this->bind($sql, $bindParams);
     

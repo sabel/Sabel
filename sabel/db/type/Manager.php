@@ -29,7 +29,7 @@ class Sabel_DB_Type_Manager
     $methods = array("_int",      "_bigint", "_smallint",
                      "_string",   "_text",   "_boolean",
                      "_datetime", "_date",   "_double",
-                     "_float",    "_byte");
+                     "_float",    "_binary");
     
     foreach ($methods as $method) {
       if ($this->$method($column, $type)) return;
@@ -165,13 +165,14 @@ class Sabel_DB_Type_Manager
     }
   }
   
-  protected function _byte($column, $type)
+  protected function _binary($column, $type)
   {
     $type  = strtolower($type);
-    $types = array("blob", "bytea", "longblob", "mediumblob");
+    $types = array("blob",  "longblob", "mediumblob",
+                   "bytea", "varbinary", "binary");
     
     if (in_array($type, $types, true)) {
-      $column->type = Sabel_DB_Type::BYTE;
+      $column->type = Sabel_DB_Type::BINARY;
       return true;
     } else {
       return false;

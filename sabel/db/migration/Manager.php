@@ -10,7 +10,7 @@ define("_TEXT",     Sabel_DB_Type::TEXT);
 define("_DATETIME", Sabel_DB_Type::DATETIME);
 define("_DATE",     Sabel_DB_Type::DATE);
 define("_BOOL",     Sabel_DB_Type::BOOL);
-define("_BYTE",     Sabel_DB_Type::BYTE);
+define("_BINARY",   Sabel_DB_Type::BINARY);
 define("_NULL",     "SDB_NULL_VALUE");
 
 /**

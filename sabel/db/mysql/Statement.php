@@ -16,7 +16,7 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Statement
     if ($driver instanceof Sabel_DB_Mysql_Driver) {
       $this->driver = $driver;
     } else {
-      $message = "driver should be an instance of Sabel_DB_Mysql_Driver";
+      $message = __METHOD__ . "() driver should be an instance of Sabel_DB_Mysql_Driver";
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }
@@ -49,15 +49,10 @@ class Sabel_DB_Mysql_Statement extends Sabel_DB_Statement
     return $values;
   }
   
-  public function escapeBinary($string)
+  public function createBlob($binary)
   {
     $conn = $this->driver->getConnection();
-    return "'" . mysql_real_escape_string($string, $conn) . "'";
-  }
-  
-  public function unescapeBinary($byte)
-  {
-    return $byte;
+    return new Sabel_DB_Mysql_Blob($conn, $binary);
   }
   
   public function quoteIdentifier($arg)

@@ -11,6 +11,31 @@
  */
 class Sabel_DB_Pdo_Pgsql_Statement extends Sabel_DB_Pdo_Statement
 {
+  public function execute($bindValues = array(), $additionalParameters = array())
+  {
+    $result = parent::execute($bindValues, $additionalParameters);
+    if (!$this->isSelect() || empty($result)) return $result;
+    
+    // PDO_PGSQL BYTEA HACK
+    
+    $binColumns = array();
+    foreach ($this->metadata->getColumns() as $column) {
+      if ($column->isBinary()) $binColumns[] = $column->name;
+    }
+    
+    if (!empty($binColumns)) {
+      foreach ($result as &$row) {
+        foreach ($binColumns as $colName) {
+          if (isset($row[$colName])) {
+            $row[$colName] = stream_get_contents($row[$colName]);
+          }
+        }
+      }
+    }
+    
+    return $result;
+  }
+  
   public function escape(array $values)
   {
     foreach ($values as &$val) {
@@ -20,16 +45,5 @@ class Sabel_DB_Pdo_Pgsql_Statement extends Sabel_DB_Pdo_Statement
     }
     
     return $values;
-  }
-  
-  public function escapeBinary($string)
-  {
-    $tmp = addcslashes(str_replace("'", "''", $string), "\000\032\\\r\n");
-    return "'" . str_replace(array("\\r", "\\n", "\\"), array("\\015", "\\012", "\\\\"), $tmp) . "'";
-  }
-  
-  public function unescapeBinary($byte)
-  {
-    return stripcslashes($byte);
   }
 }

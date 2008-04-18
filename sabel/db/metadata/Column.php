@@ -82,9 +82,9 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
     return ($this->type === Sabel_DB_Type::BOOL);
   }
   
-  public function isByte()
+  public function isBinary()
   {
-    return ($this->type === Sabel_DB_Type::BYTE);
+    return ($this->type === Sabel_DB_Type::BINARY);
   }
   
   public function isNumeric()

@@ -11,21 +11,62 @@
  */
 class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
 {
-  public function execute($bindValues = array())
+  protected $blobs = array();
+  
+  public function values(array $values)
   {
-    $result = parent::execute($bindValues);
-    if (!$this->isSelect() || empty($result)) return $result;
-    
-    // PDO_OCI CLOB HACK
-    
-    $textColumns = array();
-    foreach ($this->metadata->getColumns() as $column) {
-      if ($column->isText()) $textColumns[] = $column->name;
+    $columns = $this->metadata->getColumns();
+    foreach ($values as $k => &$v) {
+      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
+        $this->blobs[$k] = $this->createBlob($v);
+        $v = new Sabel_DB_Statement_Expression($this, "EMPTY_BLOB()");
+      }
     }
     
-    if (!empty($textColumns)) {
+    $this->values = $this->bindValues = $values;
+    
+    return $this;
+  }
+  
+  public function clear()
+  {
+    $this->blobs = array();
+    return parent::clear();
+  }
+  
+  public function execute($bindValues = array(), $additionalParameters = array())
+  {
+    $query = $this->getQuery();
+    $blobs = $this->blobs;
+    
+    if (!empty($blobs)) {
+      $cols = array();
+      $hlds = array();
+      foreach ($blobs as $column => $blob) {
+        $cols[] = $column;
+        $hlds[] = ":" . $column;
+        $this->bindValues[$column] = $blob;
+      }
+      
+      $query .= " RETURNING " . implode(", ", $cols) . " INTO " . implode(", ", $hlds);
+    }
+    
+    $this->query = $query;
+    $result = parent::execute($bindValues, $additionalParameters);
+    if (!$this->isSelect() || empty($result)) return $result;
+    
+    // FETCH LOB CONTENTS
+    
+    $lobColumns = array();
+    foreach ($this->metadata->getColumns() as $column) {
+      if ($column->isText() || $column->isBinary()) {
+        $lobColumns[] = $column->name;
+      }
+    }
+    
+    if (!empty($lobColumns)) {
       foreach ($result as &$row) {
-        foreach ($textColumns as $colName) {
+        foreach ($lobColumns as $colName) {
           if (isset($row[$colName])) {
             $row[$colName] = stream_get_contents($row[$colName]);
           }
@@ -47,18 +88,9 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
     return $values;
   }
   
-  public function escapeBinary($string)
+  public function createBlob($binary)
   {
-    return "'" . addcslashes(str_replace("'", "''", $string), "\000\032\\\r\n") . "'";
-  }
-  
-  public function unescapeBinary($byte)
-  {
-    if (is_resource($byte)) {
-      $byte = stream_get_contents($byte);
-    }
-    
-    return stripcslashes($byte);
+    return new Sabel_DB_Pdo_Oci_Blob($binary);
   }
   
   public function quoteIdentifier($arg)

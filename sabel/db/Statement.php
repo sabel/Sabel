@@ -18,6 +18,8 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   const DELETE = 0x08;
   const QUERY  = 0x10;
   
+  const BINARY_IDENTIFIER = "__BINARY";
+  
   /**
    * @var array
    */
@@ -47,6 +49,11 @@ abstract class Sabel_DB_Statement extends Sabel_Object
    * @var array
    */
   protected $bindValues = array();
+  
+  /**
+   * @var array
+   */
+  protected $binaries = array();
   
   /**
    * @var string
@@ -95,9 +102,16 @@ abstract class Sabel_DB_Statement extends Sabel_Object
    */
   abstract public function setDriver($driver);
   
-  abstract public function escapeBinary($string);
-  abstract public function unescapeBinary($byte);
+  /**
+   * @param string $binaryData
+   *
+   * @return Sabel_DB_Abstract_Blob
+   */
+  abstract public function createBlob($binaryData);
   
+  /**
+   * @return array
+   */
   public static function getExecutedQueries()
   {
     return self::$queries;
@@ -131,6 +145,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   {
     $this->query       = "";
     $this->bindValues  = array();
+    $this->binaries    = array();
     $this->projection  = array();
     $this->join        = "";
     $this->where       = "";
@@ -219,6 +234,14 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   
   public function values(array $values)
   {
+    $columns = $this->metadata->getColumns();
+    foreach ($values as $k => &$v) {
+      if (isset($columns[$k]) && $columns[$k]->isBinary()) {
+        list ($num, ) = $this->addBinary($v);
+        $v = new Sabel_DB_Statement_Expression($this, self::BINARY_IDENTIFIER . $num);
+      }
+    }
+    
     $this->values = $this->bindValues = $values;
     
     return $this;
@@ -248,7 +271,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     }
   }
   
-  public function execute($bindValues = array())
+  public function execute($bindValues = array(), $additionalParameters = array())
   {
     $query = $this->getQuery();
     
@@ -264,8 +287,16 @@ abstract class Sabel_DB_Statement extends Sabel_Object
       }
     }
     
+    if (!empty($this->binaries)) {
+      for ($i = 0, $c = count($this->binaries); $i < $c; $i++) {
+        $query = str_replace(self::BINARY_IDENTIFIER . ($i + 1),
+                             $this->binaries[$i]->getEscapedContents(),
+                             $query);
+      }
+    }
+    
     $start  = microtime(true);
-    $result = $this->driver->execute($query, $bindValues);
+    $result = $this->driver->execute($query, $bindValues, $additionalParameters);
     
     self::$queries[] = array("sql"   => $query,
                              "time"  => microtime(true) - $start,
@@ -299,6 +330,12 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     return $this->bindValues;
   }
   
+  public function addBinary($binaryData)
+  {
+    $this->binaries[] = $bin = $this->createBlob($binaryData);
+    return array(count($this->binaries), $bin);
+  }
+  
   public function isSelect()
   {
     return ($this->type === Sabel_DB_Statement::SELECT);
@@ -317,21 +354,6 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   public function isDelete()
   {
     return ($this->type === Sabel_DB_Statement::DELETE);
-  }
-  
-  public function quoteIdentifier($arg)
-  {
-    if (is_array($arg)) {
-      foreach ($arg as &$v) {
-        $v = '"' . $v . '"';
-      }
-      return $arg;
-    } elseif (is_string($arg)) {
-      return '"' . $arg . '"';
-    } else {
-      $message = "argument must be a string or an array.";
-      throw new Sabel_Exception_InvalidArgument($message);
-    }
   }
   
   public function build()
@@ -376,13 +398,21 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   
   protected function createInsertSql()
   {
-    $sql  = "INSERT INTO {$this->quoteIdentifier($this->table)} (";
-    $cols = array_keys($this->values);
-    
+    $sql  = "INSERT INTO " . $this->quoteIdentifier($this->table) . " (";
+    $cols = array();
     $hlds = array();
-    foreach ($cols as $c) $hlds[] = "@{$c}@";
     
-    $cols = $this->quoteIdentifier($cols);
+    foreach ($this->values as $column => $value) {
+      $cols[] = $this->quoteIdentifier($column);
+      
+      if ($value instanceof Sabel_DB_Statement_Expression) {
+        unset($this->bindValues[$column]);
+        $hlds[] = $value->getExpression();
+      } else {
+        $hlds[] = "@{$column}@";
+      }
+    }
+    
     $sql .= implode(", ", $cols) . ") VALUES(" . implode(", ", $hlds) . ")";
     return $sql;
   }
@@ -391,7 +421,12 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   {
     $updates = array();
     foreach ($this->values as $column => $value) {
-      $updates[] = $this->quoteIdentifier($column) . " = @{$column}@";
+      if ($value instanceof Sabel_DB_Statement_Expression) {
+        unset($this->bindValues[$column]);
+        $updates[] = $this->quoteIdentifier($column) . " = " . $value->getExpression();
+      } else {
+        $updates[] = $this->quoteIdentifier($column) . " = @{$column}@";
+      }
     }
     
     $tblName = $this->quoteIdentifier($this->table);
@@ -437,6 +472,32 @@ abstract class Sabel_DB_Statement extends Sabel_Object
       }
       
       return implode(", ", $ps);
+    }
+  }
+  
+  /**
+   * @param string $str
+   *
+   * @return string
+   */
+  public function escapeString($str)
+  {
+    $escaped = $this->escape($str);
+    return $escaped[0];
+  }
+  
+  public function quoteIdentifier($arg)
+  {
+    if (is_array($arg)) {
+      foreach ($arg as &$v) {
+        $v = '"' . $v . '"';
+      }
+      return $arg;
+    } elseif (is_string($arg)) {
+      return '"' . $arg . '"';
+    } else {
+      $message = __METHOD__ . "() argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   

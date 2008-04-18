@@ -20,11 +20,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
     $enc  = (isset($params["charset"])) ? $params["charset"] : null;
     $conn = ibase_connect($host, $params["user"], $params["password"], $enc);
     
-    if ($conn) {
-      return $conn;
-    } else {
-      return ibase_errmsg();
-    }
+    return ($conn) ? $conn : ibase_errmsg();
   }
   
   public function begin($isolationLevel = null)
@@ -69,11 +65,23 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
     $this->lastInsertId = $id;
   }
   
-  public function execute($sql, $bindParams = null)
+  public function execute($sql, $bindParams = array(), $additionalParameters = array())
   {
-    $sql = $this->bind($sql, $bindParams);
     $connection = $this->connection;
-    $result = ibase_query($connection, $sql);
+    
+    if (empty($bindParams)) {
+      $result = ibase_query($connection, $sql);
+    } else {
+      $holderRegex = "/@[a-zA-Z0-9_]+@/";
+      preg_match_all($holderRegex, $sql, $matches);
+      $args = array($connection, preg_replace($holderRegex, "?", $sql));
+      foreach ($matches[0] as $holder) {
+        $args[] = $bindParams[$holder];
+      }
+      
+      $result = call_user_func_array("ibase_query", $args);
+    }
+    
     if (!$result) $this->executeError($sql);
     
     $rows = array();
