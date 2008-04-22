@@ -26,7 +26,7 @@ class Sabel_Storage_Database implements Sabel_Storage
    */
   protected $namespace = "";
   
-  public function __construct($config = array())
+  public function __construct(array $config = array())
   {
     if (isset($config["namespace"])) {
       $this->setNamespace($config["namespace"]);
