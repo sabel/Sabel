@@ -135,7 +135,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     } elseif ($result[0]["timeout"] <= time()) {
       return array();
     } else {
-      return unserialize($stmt->unescapeBinary($result[0]["data"]));
+      return unserialize(str_replace("\\000", "\000", $result[0]["data"]));
     }
   }
   
