@@ -10,4 +10,5 @@ $create->column("bl")->type(_BOOL);
 $create->column("ft")->type(_FLOAT)->value(10.234);
 $create->column("dbl")->type(_DOUBLE)->value(10.23456);
 $create->column("dt")->type(_DATE);
+$create->column("idata")->type(_BINARY);
 $create->unique("email");

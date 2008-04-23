@@ -23,7 +23,8 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
       }
     }
     
-    $this->values = $this->bindValues = $values;
+    $this->values = $values;
+    $this->appendBindValues($values);
     
     return $this;
   }
@@ -113,8 +114,8 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
     if (($column = $this->seqColumn) !== null) {
       $seqName = strtoupper("{$this->table}_{$column}_seq");
       $rows = $this->driver->execute("SELECT {$seqName}.NEXTVAL AS id FROM DUAL");
-      $id = $rows[0]["id"];
-      $this->values(array_merge($this->values, array($column => $id)));
+      $this->values[$column] = $id = $rows[0]["id"];
+      $this->appendBindValues(array($column => $id));
       $this->driver->setLastInsertId($id);
     }
     

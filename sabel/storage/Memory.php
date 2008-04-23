@@ -16,7 +16,7 @@ class Sabel_Storage_Memory extends Sabel_Object implements Sabel_Storage
    */
   protected $attributes = array();
   
-  public function __construct($config = array())
+  public function __construct(array $config = array())
   {
     
   }

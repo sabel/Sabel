@@ -508,6 +508,19 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals("children5", $p2->Children[2]->value);
   }
   
+  public function testBinaryData()
+  {
+    $image = file_get_contents(SABEL_BASE . DS . "Test" . DS . "data" . DS . "php.gif");
+    $st = MODEL("SchemaTest");
+    $st->email = "test@example.com";
+    $st->idata = $image;
+    $st->save();
+    
+    if (self::$db === "IBASE") return;
+    $s = MODEL("SchemaTest", $st->id);
+    $this->assertEquals(0, strcmp($image, $s->idata));
+  }
+  
   /**
    * information(schema) of table
    */

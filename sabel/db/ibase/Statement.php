@@ -26,11 +26,12 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Statement
     $columns = $this->metadata->getColumns();
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
-        $v = $this->createBinary($v);
+        $v = $this->createBlob($v);
       }
     }
     
-    $this->values = $this->bindValues = $values;
+    $this->values = $values;
+    $this->appendBindValues($values);
     
     return $this;
   }
@@ -80,9 +81,8 @@ class Sabel_DB_Ibase_Statement extends Sabel_DB_Statement
     if (($column = $this->seqColumn) !== null) {
       $seqName = strtoupper("{$this->table}_{$column}_seq");
       $rows = $this->driver->execute("SELECT GEN_ID({$seqName}, 1) AS id FROM RDB\$DATABASE");
-      $id = $rows[0]["id"];
-      $values = array_merge($this->values, array($column => $id));
-      $this->values($values);
+      $this->values[$column] = $id = $rows[0]["id"];
+      $this->appendBindValues(array($column => $id));
       $this->driver->setLastInsertId($id);
     }
     

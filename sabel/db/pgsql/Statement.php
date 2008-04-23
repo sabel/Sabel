@@ -21,9 +21,9 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
     }
   }
   
-  public function execute($bindValues = array())
+  public function execute($bindValues = array(), $additionalParameters = array())
   {
-    $result = parent::execute($bindValues);
+    $result = parent::execute($bindValues, $additionalParameters);
     if (!$this->isSelect() || empty($result)) return $result;
     
     $binaryColumns = array();

@@ -20,7 +20,8 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::STRING   => "varchar",
                            Sabel_DB_Type::TEXT     => "text",
                            Sabel_DB_Type::DATETIME => "datetime",
-                           Sabel_DB_Type::DATE     => "date");
+                           Sabel_DB_Type::DATE     => "date",
+                           Sabel_DB_Type::BINARY   => "binary");
   
   protected function createTable($filePath)
   {

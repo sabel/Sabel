@@ -20,7 +20,8 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::STRING   => "VARCHAR",
                            Sabel_DB_Type::TEXT     => "BLOB SUB_TYPE TEXT",
                            Sabel_DB_Type::DATETIME => "TIMESTAMP",
-                           Sabel_DB_Type::DATE     => "DATE");
+                           Sabel_DB_Type::DATE     => "DATE",
+                           Sabel_DB_Type::BINARY   => "BLOB SUB_TYPE 2");
   
   protected function create()
   {

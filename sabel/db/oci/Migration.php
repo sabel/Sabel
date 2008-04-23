@@ -20,7 +20,8 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
                            Sabel_DB_Type::STRING   => "VARCHAR2",
                            Sabel_DB_Type::TEXT     => "CLOB",
                            Sabel_DB_Type::DATETIME => "DATE",
-                           Sabel_DB_Type::DATE     => "DATE");
+                           Sabel_DB_Type::DATE     => "DATE",
+                           Sabel_DB_Type::BINARY   => "BLOB");
   
   protected function create()
   {

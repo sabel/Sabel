@@ -21,7 +21,7 @@ class Sabel_Storage_Memcache implements Sabel_Storage
    */
   protected $namespace = "";
   
-  public function __construct($config = array())
+  public function __construct(array $config = array())
   {
     if (!extension_loaded("memcache")) {
       throw new Sabel_Exception_Runtime("memcache extension not loaded.");

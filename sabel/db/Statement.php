@@ -237,12 +237,13 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     $columns = $this->metadata->getColumns();
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
-        list ($num, ) = $this->addBinary($v);
-        $v = new Sabel_DB_Statement_Expression($this, self::BINARY_IDENTIFIER . $num);
+        $this->binaries[] = $this->createBlob($v);
+        $v = new Sabel_DB_Statement_Expression($this, self::BINARY_IDENTIFIER . count($this->binaries));
       }
     }
     
-    $this->values = $this->bindValues = $values;
+    $this->values = $values;
+    $this->appendBindValues($values);
     
     return $this;
   }
@@ -318,22 +319,11 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     return $this;
   }
   
-  public function setBindValues(array $values)
+  public function appendBindValues(array $values)
   {
-    $this->bindValues = $values;
+    $this->bindValues = array_merge($this->bindValues, $values);
     
     return $this;
-  }
-  
-  public function getBindValues()
-  {
-    return $this->bindValues;
-  }
-  
-  public function addBinary($binaryData)
-  {
-    $this->binaries[] = $bin = $this->createBlob($binaryData);
-    return array(count($this->binaries), $bin);
   }
   
   public function isSelect()

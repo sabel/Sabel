@@ -30,6 +30,7 @@ class Sabel_DB_Pdo_Mysql_Driver extends Sabel_DB_Pdo_Driver
   
   public function getLastInsertId()
   {
-    return $this->connection->lastInsertId();
+    $rows = $this->execute("SELECT LAST_INSERT_ID() as `id`");
+    return (isset($rows[0]["id"])) ? $rows[0]["id"] : 0;
   }
 }
