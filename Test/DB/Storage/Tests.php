@@ -7,6 +7,7 @@ require_once ("Test/DB/Storage/Pgsql.php");
 require_once ("Test/DB/Storage/Oci.php");
 require_once ("Test/DB/Storage/Ibase.php");
 require_once ("Test/DB/Storage/PdoSqlite.php");
+require_once ("Test/DB/Storage/PdoMysql.php");
 require_once ("Test/DB/Storage/PdoPgsql.php");
 require_once ("Test/DB/Storage/PdoOci.php");
 
@@ -53,6 +54,10 @@ class Test_DB_Storage_Tests
     
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_Storage_PdoSqlite::suite());
+    }
+    
+    if (extension_loaded("pdo_mysql")) {
+      $suite->addTest(Test_DB_Storage_PdoMysql::suite());
     }
     
     if (extension_loaded("pdo_pgsql")) {
