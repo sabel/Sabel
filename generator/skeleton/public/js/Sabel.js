@@ -1330,16 +1330,24 @@ Sabel.Object.extend(Sabel.Elements, Sabel.Object.Methods);
 
 Sabel.Iterator = function(iterable) {
 	this.items = Sabel.Array(iterable);
-	this.index = 0;
+	this.index = -1;
 };
 
 Sabel.Iterator.prototype = {
+	hasPrev: function() {
+		return this.index > 0;
+	},
+
 	hasNext: function() {
 		return this.index < this.items.length-1;
 	},
 
+	prev: function() {
+		return this.index > -1 ? this.items[--this.index] || null : null;
+	},
+
 	next: function() {
-		return this.items[this.index++];
+		return this.hasNext() ? this.items[++this.index] || null : null;
 	}
 };
 
@@ -1762,6 +1770,7 @@ Sabel.Effect.prototype = {
 	init: function(options) {
 		options = options || {};
 
+		this.callback = options.callback || function() {};
 		this.interval = options.interval || 20;
 		this.duration = options.duration || 1000;
 		this.step = this.interval / this.duration;
@@ -1787,8 +1796,7 @@ Sabel.Effect.prototype = {
 		}
 	},
 
-	reverse: function(force, c) {
-    if (c) this.callback = c;
+	reverse: function(force) {
 		if (this.state === 0 || this.state === 1) {
 			this.set(1, 0);
 			this._run();
@@ -1804,31 +1812,20 @@ Sabel.Effect.prototype = {
 	},
 
 	show: function() {
-    var state = this.state;
+		var state = this.state;
 		this.set(1, 1);
-    /*
-    this.effects.each(function(ef) {
-			ef.func.start((ef.reverse === true) ? 1 - state : state);
-    });
-    */
 		this.execEffects();
-    this.effects.each(function(ef) {
+		this.effects.each(function(ef) {
 			ef.func.end((ef.reverse === true) ? 1 - state : state);
-    });
+		});
 	},
 
 	hide: function() {
-    var state = this.state;
+		var state = this.state;
 		this.set(0, 0);
-    /*
-    this.effects.each(function(ef) {
-			ef.func.start(0);
-    });
-		this.execEffects();
-    */
-    this.effects.each(function(ef) {
+		this.effects.each(function(ef) {
 			ef.func.end(0);
-    });
+		});
 	},
 
 	set: function(from, to) {
@@ -1845,10 +1842,12 @@ Sabel.Effect.prototype = {
 	},
 
 	_run: function() {
-    var state = this.state;
-    this.effects.each(function(ef) {
-			ef.func.start((ef.reverse === true) ? 1 - state : state);
-    });
+		var state = this.state;
+		if (state == 1 || state == 0) {
+			this.effects.each(function(ef) {
+				ef.func.start((ef.reverse === true) ? 1 - state : state);
+			});
+		}
 		this.timer = setInterval(Sabel.Function.bind(this._exec, this), this.interval);
 	},
 
@@ -1866,10 +1865,7 @@ Sabel.Effect.prototype = {
 			this.effects.each(function(ef) {
 				ef.func.end((ef.reverse === true) ? 1 - state : state);
 			});
-			if (this.callback) {
-				this.callback();
-				this.callback = null;
-			}
+			this.callback(!this.state);
 		}
 	},
 
@@ -1884,14 +1880,12 @@ Sabel.dump = function(element, limit)
 	var br = (Sabel.UserAgent.isIE) ? "\r" : "\n";
 	limit  = limit || 1;
 
-	if (!output) {
-		output = document.createElement("pre");
-		output.style.border = "1px solid #ccc";
-		output.style.color  = "#333";
-		output.style.background = "#fff";
-		output.style.margin = "5px";
-		output.style.padding = "5px";
-	}
+	output = document.createElement("pre");
+	output.style.border = "1px solid #ccc";
+	output.style.color  = "#333";
+	output.style.background = "#fff";
+	output.style.margin = "5px";
+	output.style.padding = "5px";
 
 	output.appendChild(document.createTextNode((function(element, ind) {
 		var indent = Sabel.String.times("  ", ind);
@@ -2121,11 +2115,19 @@ Sabel.Validator.Element.prototype = {
 	}
 };
 
-Sabel.Effect.Fade = function(element) {
-	element = Sabel.get(element, false);
+Sabel.Effect.Fade = function() {
+	this.init.apply(this, arguments);
+};
+Sabel.Effect.Fade.prototype = {
+	init: function(element) {
+		this.element = Sabel.get(element, false);
+	},
 
-	return function(state) {
-		Sabel.Element.setOpacity(element, state);
+	start: function(state) {},
+	end: function(state) {},
+
+	exec: function(state) {
+		Sabel.Element.setOpacity(this.element, state);
 	}
 };
 
@@ -2143,6 +2145,8 @@ Sabel.Effect.Slide.prototype = {
 		var elm = this.element;
 
 		this.elementHeight   = Sabel.Element.getHeight(elm);
+
+		this.styleHeight     = elm.style.height || "";
 		this.defaultPosition = Sabel.Element.getStyle(elm, "position");
 		this.defaultOverflow = Sabel.Element.getStyle(elm, "overflow");
 
@@ -2155,17 +2159,17 @@ Sabel.Effect.Slide.prototype = {
 		if (this.defaultPosition !== "absolute") style.position = "relative";
 		Sabel.Element.setStyle(elm, style);
 
-    this.exec(state);
+		this.exec(state);
 	},
 	end: function(state) {
 		var style = {
 			position: this.defaultPosition,
 			overflow: this.defaultOverflow,
-			height: ""
+			height: this.styleHeight
 		};
+
 		if (state === 0) style.display = "none";
 		Sabel.Element.setStyle(this.element, style);
-		Sabel.Element.deleteStyle(this.element, "height");
 	},
 
 	exec: function(state) {
