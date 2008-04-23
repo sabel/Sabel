@@ -180,7 +180,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     if ($this->newSession && empty($this->attributes)) return;
     
     $stmt    = Sabel_DB::createStatement($this->connectionName);
-    $data    = $stmt->escapeBinary(serialize($this->attributes));
+    $value   = str_replace("\000", "\\000", serialize($this->attributes));
     $timeout = time() + $this->maxLifetime;
     $table   = $stmt->quoteIdentifier($this->tableName);
     $idCol   = $stmt->quoteIdentifier("id");
@@ -188,13 +188,15 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     $toutCol = $stmt->quoteIdentifier("timeout");
     
     if ($this->sessionIdExists($this->sessionId)) {
-      $query = "UPDATE $table SET $dataCol = $data, $toutCol = $timeout "
+      $query = "UPDATE $table SET $dataCol = @data@, $toutCol = $timeout "
              . "WHERE $idCol = '{$this->sessionId}'";
     } else {
       $query = "INSERT INTO $table ({$idCol}, {$dataCol}, {$toutCol}) "
-             . "VALUES ('{$this->sessionId}', {$data}, {$timeout})";
+             . "VALUES ('{$this->sessionId}', @data@, {$timeout})";
     }
     
-    $stmt->setQuery($query)->execute();
+    $stmt->setQuery($query)
+         ->setBindValue("data", $value)
+         ->execute();
   }
 }

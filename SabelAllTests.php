@@ -90,7 +90,7 @@ class SabelAllTests
     
     if (in_array("-db", $_SERVER["argv"], true)) {
       //$suite->addTest(Test_DB_Statement_Tests::suite());
-      //$suite->addTest(Test_DB_Storage_Tests::suite());
+      $suite->addTest(Test_DB_Storage_Tests::suite());
       $suite->addTest(Test_DB_Tests::suite());
       return $suite;
     }

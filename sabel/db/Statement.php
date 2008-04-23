@@ -472,7 +472,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
    */
   public function escapeString($str)
   {
-    $escaped = $this->escape($str);
+    $escaped = $this->escape(array($str));
     return $escaped[0];
   }
   

@@ -47,9 +47,9 @@ class Test_DB_Storage_Tests
       $suite->addTest(Test_DB_Storage_Ibase::suite());
     }
     
-    //if (extension_loaded("mysqli")) {
-    //  $suite->addTest(Test_DB_Mysqli::suite());
-    //}
+    if (extension_loaded("mysqli")) {
+      $suite->addTest(Test_DB_Mysqli::suite());
+    }
     
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_Storage_PdoSqlite::suite());
@@ -64,26 +64,5 @@ class Test_DB_Storage_Tests
     }
     
     return $suite;
-  }
-}
-
-class SerializeTest
-{
-  protected $foo = null;
-  protected $bar = null;
-  
-  public function __get($key)
-  {
-    return $this->$key;
-  }
-  
-  public function foo($arg)
-  {
-    $this->foo = $arg;
-  }
-  
-  public function bar($arg)
-  {
-    $this->bar = $arg;
   }
 }

@@ -97,7 +97,7 @@ class Sabel_Storage_Database implements Sabel_Storage
     if ($result === null || $result[0]["timeout"] <= time()) {
       return null;
     } else {
-      return unserialize($stmt->unescapeBinary($result[0]["data"]));
+      return unserialize(str_replace("\\000", "\000", $result[0]["data"]));
     }
   }
   
@@ -112,8 +112,8 @@ class Sabel_Storage_Database implements Sabel_Storage
       $timeout += time();
     }
     
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $data = $stmt->escapeBinary(serialize($value));
+    $stmt  = Sabel_DB::createStatement($this->connectionName);
+    $value = str_replace("\000", "\\000", serialize($value));
     
     $table   = $stmt->quoteIdentifier($this->tableName);
     $idCol   = $stmt->quoteIdentifier("id");
@@ -121,14 +121,16 @@ class Sabel_Storage_Database implements Sabel_Storage
     $toutCol = $stmt->quoteIdentifier("timeout");
     
     if ($this->has($key)) {
-      $query = "UPDATE $table SET $dataCol = $data, $toutCol = $timeout "
+      $query = "UPDATE $table SET $dataCol = @data@, $toutCol = $timeout "
              . "WHERE $idCol = '" . $this->getKey($key) . "'";
     } else {
       $query = "INSERT INTO $table ({$idCol}, {$dataCol}, {$toutCol}) "
-             . "VALUES ('" . $this->getKey($key) . "', {$data}, {$timeout})";
+             . "VALUES ('" . $this->getKey($key) . "', @data@, {$timeout})";
     }
     
-    $stmt->setQuery($query)->execute();
+    $stmt->setQuery($query)
+         ->setBindValue("data", $value)
+         ->execute();
   }
   
   public function has($key)

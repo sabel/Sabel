@@ -6,26 +6,32 @@
  */
 class Test_DB_Storage_Test extends SabelTestCase
 {
-  protected $chars = "a'あいうb\"c\r能\nd\\e表\000申\032わをんg";
-  
   public function testStore()
   {
-    $s = new SerializeTest();
-    $s->foo($this->chars);
-    $data = array("obj" => $s, "int" => 10, "bool" => true);
+    $obj = new SblStorageTestObj();
+    $obj->hoge = array("int" => 10, "bool" => true);
+    
+    $stdClass = new stdClass();
+    $stdClass->int  = 20;
+    $stdClass->bool = false;
+    $obj->fuga = $stdClass;
     
     $storage = new Sabel_Storage_Database();
-    $storage->store("hashkey", $data, 60);
+    $storage->store("hashkey", $obj, 60);
   }
   
   public function testFetch()
   {
     $storage = new Sabel_Storage_Database();
-    $data = $storage->fetch("hashkey");
+    $obj = $storage->fetch("hashkey");
     
-    $this->assertEquals(10, $data["int"]);
-    $this->assertEquals(true, $data["bool"]);
-    $this->assertEquals($this->chars, $data["obj"]->foo);
+    $hoge = $obj->hoge;
+    $fuga = $obj->fuga;
+    
+    $this->assertEquals(10,    $hoge["int"]);
+    $this->assertEquals(true,  $hoge["bool"]);
+    $this->assertEquals(20,    $fuga->int);
+    $this->assertEquals(false, $fuga->bool);
   }
   
   public function testClose()
@@ -33,4 +39,20 @@ class Test_DB_Storage_Test extends SabelTestCase
     Sabel_DB_Metadata::clear();
     Sabel_DB_Connection::closeAll();
   }
+}
+
+class SblStorageTestObj extends Sabel_Object
+{
+  const FOO = "FOO";
+  
+  private $foo = null;
+  protected $bar = 0;
+  public $baz = false;
+  
+  public $hoge = null;
+  public $fuga = null;
+  
+  private function foo() {}
+  protected function bar() {}
+  public function baz() {}
 }
