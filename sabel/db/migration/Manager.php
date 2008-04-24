@@ -28,23 +28,6 @@ class Sabel_DB_Migration_Manager
   private static $stmt      = null;
   private static $directory = "";
   private static $applyMode = "";
-  private static $start     = null;
-  
-  public static function setStartVersion($version)
-  {
-    // @todo
-    if (self::$start === null) self::$start = $version;
-  }
-  
-  public static function getStartVersion()
-  {
-    return self::$start;
-  }
-  
-  public static function clearStartVersion()
-  {
-    self::$start = null;
-  }
   
   public static function setSchema($schema)
   {
@@ -83,20 +66,21 @@ class Sabel_DB_Migration_Manager
   
   public static function setDirectory($dirPath)
   {
-    $current = self::$directory;
     self::$directory = $dirPath;
-
-    return $current;
   }
   
-  public static function getDirectory()
+  public static function getDirectory($tblName = null)
   {
-    return self::$directory;
+    if ($tblName === null) {
+      return self::$directory;
+    } else {
+      return self::$directory . DS . $tblName;
+    }
   }
   
-  public static function getFiles($dirPath = null)
+  public static function getFiles($tblName)
   {
-    if ($dirPath === null) $dirPath = self::$directory;
+    $dirPath = self::$directory . DS . $tblName;
     
     if (!is_dir($dirPath)) {
       Sabel_Console::error("no such dirctory. '{$dirPath}'");

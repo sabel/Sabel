@@ -831,7 +831,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $this->setCondition($arg1, $arg2);
     } elseif ($this->isSelected()) {
       if (($pkey = $this->metadata->getPrimaryKey()) === null) {
-        $message = "delete() cannot delete model(there is not primary key).";
+        $message = __METHOD__ . "() cannot delete model(there is not primary key).";
         throw new Sabel_DB_Exception($message);
       } else {
         foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
@@ -851,15 +851,8 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function prepareStatement($type = Sabel_DB_Statement::QUERY)
   {
-    if ($this->statement === null) {
-      $stmt = Sabel_DB::createStatement($this->connectionName);
-      $this->statement = $stmt->type($type)->setMetadata($this->metadata);
-    } else {
-      $this->statement->clear()->type($type)
-           ->setDriver(Sabel_DB::createDriver($this->connectionName));
-    }
-    
-    return $this->statement;
+    $stmt = Sabel_DB::createStatement($this->connectionName);
+    return $stmt->setMetadata($this->metadata)->type($type);
   }
   
   /**

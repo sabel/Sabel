@@ -20,32 +20,23 @@ class Sabel_DB_Connection
    * @param Sabel_DB_Driver $driver
    *
    * @throws Sabel_DB_Exception_Connection
-   * @return resource
+   * @return void
    */
   public static function connect(Sabel_DB_Driver $driver)
   {
-    $connectionName = $driver->getConnectionName();
-    $names = Sabel_DB_Config::getConnectionNamesOfSameSetting($connectionName);
-    
-    foreach ($names as $name) {
-      if (isset(self::$connections[$name])) {
-        $driver->setConnection(self::$connections[$name]);
-        return self::$connections[$name];
-      }
-    }
-    
-    if (!isset(self::$connections[$connectionName])) {
-      $result = $driver->connect(Sabel_DB_Config::get($connectionName));
-      
-      if (is_string($result)) {
-        throw new Sabel_DB_Exception_Connection($result);
+    if (Sabel_DB_Transaction::isActive()) {
+      $connectionName = $driver->getConnectionName();
+      if ($connection = Sabel_DB_Transaction::getConnection($connectionName)) {
+        $driver->setConnection($connection);
       } else {
-        self::$connections[$connectionName] = $result;
+        self::_connect($driver);
+        Sabel_DB_Transaction::begin($driver);
       }
+      
+      $driver->autoCommit(false);
+    } else {
+      self::_connect($driver);
     }
-    
-    $driver->setConnection(self::$connections[$connectionName]);
-    return self::$connections[$connectionName];
   }
   
   /**
@@ -74,5 +65,37 @@ class Sabel_DB_Connection
     }
     
     self::$connections = array();
+  }
+  
+  /**
+   * @param Sabel_DB_Driver $driver
+   *
+   * @throws Sabel_DB_Exception_Connection
+   * @return resource
+   */
+  protected static function _connect(Sabel_DB_Driver $driver)
+  {
+    $connectionName = $driver->getConnectionName();
+    $names = Sabel_DB_Config::getConnectionNamesOfSameSetting($connectionName);
+    
+    foreach ($names as $name) {
+      if (isset(self::$connections[$name])) {
+        $driver->setConnection(self::$connections[$name]);
+        return self::$connections[$name];
+      }
+    }
+    
+    if (!isset(self::$connections[$connectionName])) {
+      $result = $driver->connect(Sabel_DB_Config::get($connectionName));
+      
+      if (is_string($result)) {
+        throw new Sabel_DB_Exception_Connection($result);
+      } else {
+        self::$connections[$connectionName] = $result;
+      }
+    }
+    
+    $driver->setConnection(self::$connections[$connectionName]);
+    return self::$connections[$connectionName];
   }
 }

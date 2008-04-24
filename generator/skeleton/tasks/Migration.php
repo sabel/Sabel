@@ -11,6 +11,7 @@
  */
 class Migration extends Sabel_Sakle_Task
 {
+  protected static $versions = array();
   private static $execFinalize = true;
   
   protected $stmt      = null;
@@ -33,31 +34,62 @@ class Migration extends Sabel_Sakle_Task
       define("ENVIRONMENT", $this->getEnvironment());
     }
     
-    $this->initDbConfig();
+    Sabel_DB_Config::initialize(new Config_Database());
     
     $connectionName = $this->getConnectionName();
-    $directory      = $this->defineMigrationDirectory();
+    $this->stmt     = Sabel_DB::createStatement($connectionName);
     $this->metadata = Sabel_DB::createMetadata($connectionName);
+    $directory = $this->defineMigrationDirectory();
     
+    /* @todo
     if ($this->arguments[1] === "export") {
       $this->export();
       self::$execFinalize = false;
     } else {
-      $this->currentVersion = $this->getCurrentVersion();
-      Sabel_DB_Migration_Manager::setStartVersion($this->currentVersion);
-      
-      $to = $this->showCurrentVersion($this->arguments);
-      $this->files = Sabel_DB_Migration_Manager::getFiles();
-      
-      if (empty($this->files)) {
-        $this->error("no migration files is Found.");
-        exit;
+    */
+      $tables  = array();
+      $tblName = $this->arguments[1];
+      if (strtolower($tblName) === "all") {
+        $enableCommands = array("head", "foot", "rehead");
+        if (!in_array($this->arguments[2], $enableCommands, true)) {
+          $this->error("invalid command for 'all'.");
+          exit;
+        }
+        
+        foreach (scandir($directory) as $item) {
+          if ($item{0} === ".") continue;
+          $tables[] = $item;
+        }
+      } else {
+        $tables[] = $tblName;
       }
       
-      if ($this->toVersionNumber($to) !== false) {
-        $doNext = $this->execMigration();
-        if ($doNext) $this->execNextMigration();
+      foreach ($tables as $table) {
+        $this->execMigration($table);
       }
+    //}
+  }
+  
+  protected function execMigration($tblName)
+  {
+    $this->arguments[1]   = $tblName;
+    $this->currentVersion = $this->getCurrentVersion($tblName);
+    
+    if (!isset(self::$versions[$tblName]["start"])) {
+      self::$versions[$tblName]["start"] = $this->currentVersion;
+    }
+    
+    $to = $this->showCurrentVersion();
+    $this->files = Sabel_DB_Migration_Manager::getFiles($tblName);
+    
+    if (empty($this->files)) {
+      $this->error("No migration files is found.");
+      exit;
+    }
+    
+    if ($this->toVersionNumber($to, $tblName) !== false) {
+      $doNext = $this->_execMigration($tblName);
+      if ($doNext) $this->execNextMigration();
     }
   }
   
@@ -65,26 +97,29 @@ class Migration extends Sabel_Sakle_Task
   {
     if (!self::$execFinalize) return;
     
-    $start = Sabel_DB_Migration_Manager::getStartVersion();
-    $end   = $this->getCurrentVersion();
-    
-    $type = ($start < $end) ? "UPGRADE" : "DOWNGRADE";
-    $this->success("$type FROM $start TO $end");
+    foreach (self::$versions as $tblName => $version) {
+      $start = $version["start"];
+      if (isset($version["end"])) {
+        $end  = $version["end"];
+        $mode = ($start < $end) ? "UPGRADE" : "DOWNGRADE";
+        $this->success("({$tblName}) $mode FROM $start TO $end");
+      } else {
+        $this->message("({$tblName}) NO CHANGES FROM $start");
+      }
+    }
   }
   
-  protected function getCurrentVersion()
+  protected function getCurrentVersion($tblName)
   {
-    $connectionName = $this->connectionName;
-    $this->stmt = Sabel_DB::createStatement($connectionName);
     Sabel_DB_Migration_Manager::setStatement($this->stmt);
     Sabel_DB_Migration_Manager::setSchema($this->metadata);
     
     try {
-      if (!in_array("sversion", $this->metadata->getTableList())) {
-        $this->createVersionManageTable();
+      if (!in_array("sbl_version", $this->metadata->getTableList())) {
+        $this->createVersioningTable();
         return 0;
       } else {
-        return $this->getVersion();
+        return $this->getVersion($tblName);
       }
     } catch (Exception $e) {
       $this->error($e->getMessage());
@@ -94,11 +129,24 @@ class Migration extends Sabel_Sakle_Task
   
   protected function showCurrentVersion()
   {
-    $to = $this->arguments[1];
+    $opts = array("-v", "--version");
     
-    if ($to === "version" || $to === "-v" || $to === "--version") {
-      $this->success("CURRENT VERSION: {$this->currentVersion}");
-      exit;
+    if (isset($this->arguments[2])) {
+      $to = $this->arguments[2];
+      if (in_array($to, $opts, true)) {
+        $this->success("CURRENT VERSION: {$this->currentVersion}");
+        exit;
+      }
+    } else {
+      $to = $this->arguments[1];
+      if (in_array($to, $opts, true)) {
+        $tblName = $this->stmt->quoteIdentifier("sbl_version");
+        $rows = $this->stmt->setQuery("SELECT * FROM $tblName")->execute();
+        foreach ($rows as $row) {
+          $this->success("({$row["tblname"]}) CURRENT VERSION: {$row["version"]}");
+        }
+        exit;
+      }
     }
     
     return $to;
@@ -114,6 +162,7 @@ class Migration extends Sabel_Sakle_Task
     }
     
     Sabel_DB_Migration_Manager::setDirectory($dir);
+    
     return $dir;
   }
   
@@ -128,7 +177,7 @@ class Migration extends Sabel_Sakle_Task
     return $env;
   }
   
-  protected function execMigration()
+  protected function _execMigration($tblName)
   {
     $version = $this->currentVersion;
     
@@ -150,13 +199,10 @@ class Migration extends Sabel_Sakle_Task
     
     Sabel_DB_Migration_Manager::setApplyMode($mode);
     
-    $dirs = explode(".", Sabel_DB_Config::getPackage($this->connectionName));
-    $className = implode("_", array_map("ucfirst", $dirs)) . "_Migration";
-    $directory = Sabel_DB_Migration_Manager::getDirectory();
-    
-    $instance = new $className();
-    $instance->execute($directory . DS . $this->files[$num]);
-    $this->incrementVersion($next);
+    $instance  = Sabel_DB::createMigration($this->connectionName);
+    $directory = Sabel_DB_Migration_Manager::getDirectory($tblName);
+    $instance->execute($tblName, $directory . DS . $this->files[$num]);
+    $this->updateVersionNumber($tblName, $next);
     
     return $doNext;
   }
@@ -168,7 +214,7 @@ class Migration extends Sabel_Sakle_Task
     $instance->run();
   }
   
-  protected function toVersionNumber($to)
+  protected function toVersionNumber($to, $tblName)
   {
     if (is_numeric($to)) {
       return $this->migrateTo = $to;
@@ -184,23 +230,14 @@ class Migration extends Sabel_Sakle_Task
         break;
       
       case "rehead":
-        $this->arguments[1] = 0;
+        $this->arguments[2] = 0;
         $this->execNextMigration();
-        $this->success("DOWNGRADE FROM {$this->currentVersion} TO 0");
-        $this->arguments[1] = "head";
+        $this->success("({$tblName}) DOWNGRADE FROM {$this->currentVersion} TO 0");
+        $this->arguments[2] = "head";
         $this->execNextMigration();
-        $version = $this->getCurrentVersion();
-        $this->success("UPGRADE FROM 0 TO $version");
-        return self::$execFinalize = false;
-      
-      case "reset":
-        $version = $this->currentVersion;
-        $this->arguments[1] = 0;
-        $this->execNextMigration();
-        $this->success("DOWNGRADE FROM $version TO 0");
-        $this->arguments[1] = $version;
-        $this->execNextMigration();
-        $this->success("UPGRADE FROM 0 TO $version");
+        $version = $this->getCurrentVersion($tblName);
+        $this->success("({$tblName}) UPGRADE FROM 0 TO $version");
+        $this->arguments[2] = "rehead";
         return self::$execFinalize = false;
       
       default:
@@ -209,16 +246,24 @@ class Migration extends Sabel_Sakle_Task
     }
   }
   
-  protected function incrementVersion($num)
+  protected function updateVersionNumber($tblName, $num)
   {
-    $sversion = $this->stmt->quoteIdentifier("sversion");
-    $version  = $this->stmt->quoteIdentifier("version");
-    $this->stmt->setQuery("UPDATE $sversion SET $version = $num")->execute();
-  }
-  
-  protected function initDbConfig()
-  {
-    Sabel_DB_Config::initialize(new Config_Database());
+    $stmt    = $this->stmt;
+    $table   = $stmt->quoteIdentifier("sbl_version");
+    $tn      = $stmt->quoteIdentifier("tblname");
+    $version = $stmt->quoteIdentifier("version");
+    
+    $query = "SELECT COUNT(*) AS cnt FROM $table WHERE $tn = @tblname@";
+    $rows = $stmt->setQuery($query)->setBindValue("tblname", $tblName)->execute();
+    
+    if ((int)$rows[0]["cnt"] === 0) {
+      $query = "INSERT INTO $table VALUES(@tblname@, 1)";
+    } else {
+      $query = "UPDATE $table SET $version = $num WHERE $tn = @tblname@";
+    }
+    
+    $stmt->setQuery($query)->setBindValue("tblname", $tblName)->execute();
+    self::$versions[$tblName]["end"] = $num;
   }
   
   protected function getConnectionName()
@@ -229,32 +274,36 @@ class Migration extends Sabel_Sakle_Task
     return $this->connectionName = $name;
   }
   
-  protected function createVersionManageTable()
+  protected function createVersioningTable()
   {
-    $stmt = $this->stmt;
-    $sversion = $stmt->quoteIdentifier("sversion");
-    $id = $stmt->quoteIdentifier("id");
-    $version = $stmt->quoteIdentifier("version");
+    $stmt     = $this->stmt;
+    $sversion = $stmt->quoteIdentifier("sbl_version");
+    $tblname  = $stmt->quoteIdentifier("tblname");
+    $version  = $stmt->quoteIdentifier("version");
     
-    $create = "CREATE TABLE $sversion ("
-            . "$id INTEGER NOT NULL PRIMARY KEY, "
-            . "$version INTEGER NOT NULL)";
-    
-    $insert = "INSERT INTO $sversion values(1, 0)";
+    $create = <<<SQL
+CREATE TABLE $sversion
+(
+  $tblname VARCHAR(64) NOT NULL PRIMARY KEY,
+  $version INTEGER NOT NULL
+)
+SQL;
     
     $stmt->setQuery($create)->execute();
-    $stmt->setQuery($insert)->execute();
   }
   
-  protected function getVersion()
+  protected function getVersion($tblName)
   {
-    $stmt = $this->stmt;
-    $sversion = $stmt->quoteIdentifier("sversion");
-    $id = $stmt->quoteIdentifier("id");
+    $stmt    = $this->stmt;
+    $table   = $stmt->quoteIdentifier("sbl_version");
     $version = $stmt->quoteIdentifier("version");
+    $query   = "SELECT $version FROM $table WHERE tblname = @tblname@";
     
-    $rows = $stmt->setQuery("SELECT $version FROM $sversion WHERE $id = 1")->execute();
-    return $rows[0]["version"];
+    $rows = $stmt->setQuery($query)
+                 ->setBindValue("tblname", $tblName)
+                 ->execute();
+    
+    return (isset($rows[0]["version"])) ? $rows[0]["version"] : 0;
   }
   
   protected function export()
@@ -268,7 +317,7 @@ class Migration extends Sabel_Sakle_Task
     echo "Usage: sakle Migration ENVIRONMENT TO_VERSION [CONNECTION_NAME] " . PHP_EOL;
     echo PHP_EOL;
     echo "  ENVIRONMENT: production | test | development" . PHP_EOL;
-    echo "  TO_VERSION:  number of target version | head | rehead | reset | foot" . PHP_EOL;
+    echo "  TO_VERSION:  number of target version | head | foot | rehead" . PHP_EOL;
     echo "  CONNECTION_NAME: " . PHP_EOL;
     echo PHP_EOL;
     echo "Example: sakle Migration development head userdb" . PHP_EOL;
@@ -276,6 +325,7 @@ class Migration extends Sabel_Sakle_Task
   }
 }
 
+/*
 class MigrationExport
 {
   private $fileNum  = 1;
@@ -335,10 +385,11 @@ class MigrationExport
     $writer = new Sabel_DB_Migration_Writer($filePath);
     $writer->writeTable($tblSchema);
     
-    // @todo...
+    // @todo
     $writer->write('$create->options("engine", "InnoDB");');
     $writer->close();
     
     $this->fileNum++;
   }
 }
+*/

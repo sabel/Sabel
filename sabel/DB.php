@@ -28,23 +28,11 @@ class Sabel_DB
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Driver")) {
       $driver = new $baseClass($connectionName);
     } else {
-      $message = "Class '{$className}' not Found.";
+      $message = __METHOD__ . "() Class '{$className}' not Found.";
       throw new Sabel_Exception_ClassNotFound($message);
     }
     
-    if (Sabel_DB_Transaction::isActive()) {
-      $connection = Sabel_DB_Transaction::getConnection($connectionName);
-      if ($connection === null) {
-        Sabel_DB_Connection::connect($driver);
-        Sabel_DB_Transaction::begin($driver);
-      } else {
-        $driver->setConnection($connection);
-      }
-      
-      $driver->autoCommit(false);
-    } else {
-      Sabel_DB_Connection::connect($driver);
-    }
+    Sabel_DB_Connection::connect($driver);
     
     return $driver;
   }
@@ -58,19 +46,18 @@ class Sabel_DB
   public static function createStatement($connectionName = "default")
   {
     $className = self::classPrefix($connectionName) . "Statement";
-    
+    $driver = self::createDriver($connectionName);
+
     Sabel::using($className);
     
     if (class_exists($className, false)) {
-      $statement = new $className();
+      $statement = new $className($driver);
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Statement")) {
-      $statement = new $baseClass();
+      $statement = new $baseClass($driver);
     } else {
       $message = __METHOD__ . "() Class '{$className}' not Found.";
       throw new Sabel_Exception_ClassNotFound($message);
     }
-    
-    $statement->setDriver(self::createDriver($connectionName));
     
     return $statement;
   }
@@ -92,6 +79,28 @@ class Sabel_DB
       return new $className(self::createDriver($connectionName), $schemaName);
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Metadata")) {
       return new $baseClass(self::createDriver($connectionName), $schemaName);
+    } else {
+      $message = __METHOD__ . "() Class '{$className}' not Found.";
+      throw new Sabel_Exception_ClassNotFound($message);
+    }
+  }
+  
+  /**
+   * @param string $connectionName
+   *
+   * @throws Sabel_Exception_ClassNotFound
+   * @return Sabel_DB_Abstract_Migration
+   */
+  public static function createMigration($connectionName = "default")
+  {
+    $className = self::classPrefix($connectionName) . "Migration";
+    
+    Sabel::using($className);
+    
+    if (class_exists($className, false)) {
+      return new $className();
+    } elseif ($baseClass = self::getBaseClassName($connectionName, "Migration")) {
+      return new $baseClass();
     } else {
       $message = __METHOD__ . "() Class '{$className}' not Found.";
       throw new Sabel_Exception_ClassNotFound($message);

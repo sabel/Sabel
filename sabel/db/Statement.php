@@ -96,13 +96,6 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   protected $forUpdate = false;
   
   /**
-   * @param Sabel_DB_Driver $driver
-   *
-   * @return void
-   */
-  abstract public function setDriver($driver);
-  
-  /**
    * @param string $binaryData
    *
    * @return Sabel_DB_Abstract_Blob
@@ -157,14 +150,11 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     return $this;
   }
   
-  public function type($type = null)
+  public function type($type)
   {
-    if ($type === null) {
-      return $this->type;
-    } else {
-      $this->type = $type;
-      return $this;
-    }
+    $this->type = $type;
+    
+    return $this;
   }
   
   public function setQuery($query)

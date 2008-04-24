@@ -11,14 +11,9 @@
  */
 class Sabel_DB_Mysql_Statement extends Sabel_DB_Statement
 {
-  public function setDriver($driver)
+  public function __construct(Sabel_DB_Mysql_Driver $driver)
   {
-    if ($driver instanceof Sabel_DB_Mysql_Driver) {
-      $this->driver = $driver;
-    } else {
-      $message = __METHOD__ . "() driver should be an instance of Sabel_DB_Mysql_Driver";
-      throw new Sabel_Exception_InvalidArgument($message);
-    }
+    $this->driver = $driver;
   }
   
   public function values(array $values)

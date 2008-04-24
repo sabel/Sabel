@@ -26,7 +26,7 @@ class Test_DB_Statement_Oci extends SabelTestCase
   
   public function testQuoteIdentifier()
   {
-    $stmt = new Sabel_DB_Oci_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $this->assertEquals('"FOO"', $stmt->quoteIdentifier("foo"));
     $this->assertEquals('"BAR"', $stmt->quoteIdentifier("bar"));
   }

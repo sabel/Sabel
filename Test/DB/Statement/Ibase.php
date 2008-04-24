@@ -26,14 +26,14 @@ class Test_DB_Statement_Ibase extends SabelTestCase
   
   public function testQuoteIdentifier()
   {
-    $stmt = new Sabel_DB_Ibase_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $this->assertEquals('"FOO"', $stmt->quoteIdentifier("foo"));
     $this->assertEquals('"BAR"', $stmt->quoteIdentifier("bar"));
   }
   
   public function testBuildSelectQuery()
   {
-    $stmt = new Sabel_DB_Ibase_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $expected = 'SELECT "ID", "NAME" FROM "STUDENT"';
@@ -42,7 +42,7 @@ class Test_DB_Statement_Ibase extends SabelTestCase
   
   public function testBuildSelectWhereQuery()
   {
-    $stmt = new Sabel_DB_Ibase_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $stmt->where('WHERE "ID" = 1');

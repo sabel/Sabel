@@ -38,7 +38,6 @@ INC;
     $buf   = array();
     $buf[] = sprintf($include, linkTo("js/helpers/EffectUpdater.js"));
     $buf[] = sprintf($include, linkTo("js/helpers/AjaxUpdater.js"));
-
     $buf[] = "\n";
     $buf[] = '<script type="text/javascript">';
     $buf[] = sprintf('new Sabel.Event(window, "load", function() { new Sabel.PHP.AjaxPager("%s", "%s"); });', $replaceId, $pagerClass);
@@ -61,15 +60,15 @@ INC;
     $data = array("data" => array(), "errors" => $errMsgs);
     foreach ($columns as $c) {
       $name = $c->name;
-      $c->name = $lNames[$c->name];
+      if (isset($lNames[$c->name])) {
+        $c->name = $lNames[$c->name];
+      }
       $data["data"][$name] = array_change_key_case((array) $c, CASE_UPPER);
     }
 
     $buf   = array();
     $buf[] = sprintf($include, linkTo("js/helpers/FormValidator.js"));
-
     $buf[] = "\n";
-
     $buf[] = '<script type="text/javascript">';
     $buf[] = 'new Sabel.PHP.FormValidator('.json_encode($data).');';
     $buf[] = '</script>';

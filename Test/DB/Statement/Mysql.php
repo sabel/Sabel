@@ -26,14 +26,14 @@ class Test_DB_Statement_Mysql extends SabelTestCase
   
   public function testQuoteIdentifier()
   {
-    $stmt = new Sabel_DB_Mysql_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $this->assertEquals("`foo`", $stmt->quoteIdentifier("foo"));
     $this->assertEquals("`bar`", $stmt->quoteIdentifier("bar"));
   }
   
   public function testBuildSelectQuery()
   {
-    $stmt = new Sabel_DB_Mysql_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $expected = "SELECT `id`, `name` FROM `student`";
@@ -42,7 +42,7 @@ class Test_DB_Statement_Mysql extends SabelTestCase
   
   public function testBuildSelectWhereQuery()
   {
-    $stmt = new Sabel_DB_Mysql_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $stmt->where("WHERE `id` = 1");
@@ -52,7 +52,7 @@ class Test_DB_Statement_Mysql extends SabelTestCase
   
   public function testBuildSelectOrderByQuery()
   {
-    $stmt = new Sabel_DB_Mysql_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $stmt->constraints(array("order" => "id DESC"));
@@ -62,7 +62,7 @@ class Test_DB_Statement_Mysql extends SabelTestCase
   
   public function testBuildSelectOrderByQuery2()
   {
-    $stmt = new Sabel_DB_Mysql_Statement();
+    $stmt = Sabel_DB::createStatement("default");
     $stmt->type(Sabel_DB_Statement::SELECT);
     $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo("student"));
     $stmt->constraints(array("order" => "id DESC, name ASC"));
