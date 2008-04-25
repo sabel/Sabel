@@ -105,27 +105,34 @@ class Form_Processor extends Sabel_Bus_Processor
     }
   }
   
-  public function applyPostValues($form)
+  public function applyPostValues(Form_Object $form, array $allowCols = array())
   {
     $values = $this->request->fetchPostValues();
     if (empty($values)) return $form;
     
-    $allowCols = $form->getAllowColumns();
-    $mdlName   = $form->getModel()->getName();
+    if (empty($allowCols)) {
+      $allowCols = $form->getAllowColumns();
+    }
+    
+    $mdlName = $form->getModel()->getName();
     $separator = Form_Object::NAME_SEPARATOR;
     
     foreach ($values as $key => $value) {
       if (strpos($key, $separator) === false) continue;
       list ($name, $colName) = explode($separator, $key);
-      if ($name !== $mdlName || !in_array($colName, $allowCols)) continue;
+      if ($name !== $mdlName) continue;
       
-      if ($colName === "datetime") {
+      if ($colName === "sbl_datetime" || $colName === "sbl_date") {
+        list ($k, ) = each($value);
+        if (!in_array($k, $allowCols, true)) continue;
+      } elseif (!in_array($colName, $allowCols, true)) {
+        continue;
+      }
+      
+      if ($colName === "sbl_datetime") {
         foreach ($value as $key => $date) {
+          if (!isset($date["second"])) $date["second"] = "00";
           if ($this->isCompleteDateValues($date)) {
-            if (!isset($date["second"])) {
-              $date["second"] = "00";
-            }
-            
             $form->set($key, $date["year"]   . "-" .
                              $date["month"]  . "-" .
                              $date["day"]    . " " .
@@ -136,7 +143,7 @@ class Form_Processor extends Sabel_Bus_Processor
             $form->set($key, null);
           }
         }
-      } elseif ($colName === "date") {
+      } elseif ($colName === "sbl_date") {
         foreach ($value as $key => $date) {
           if ($this->isCompleteDateValues($date, false)) {
             $date = "{$date["year"]}-{$date["month"]}-{$date["day"]}";
@@ -162,7 +169,7 @@ class Form_Processor extends Sabel_Bus_Processor
     }
     
     foreach ($keys as $key) {
-      if ($values[$key] === "") return false;
+      if (!isset($values[$key]) || $values[$key] === "") return false;
     }
     
     return true;

@@ -150,12 +150,16 @@ class Sabel_Bus extends Sabel_Object
       
       return $this->get("result");
     } catch (Exception $e) {
-      $msg = "Exception: (" . get_class($e) . ") "
+      $msg = get_class($e) . ": "
            . $e->getMessage()   . PHP_EOL
            . "At: " . date("r") . PHP_EOL . PHP_EOL
            . Sabel_Exception_Printer::printTrace($e, PHP_EOL, true);
       
-      l($msg, SBL_LOG_ERR);
+      l(PHP_EOL . $msg, SBL_LOG_ERR);
+      
+      if (ENVIRONMENT === DEVELOPMENT) {
+        echo nl2br($msg);
+      }
     }
   }
   
