@@ -31,6 +31,11 @@ class Paginate extends Sabel_Object
    */
   protected $attributes = array();
   
+  /**
+   * @array
+   */
+  protected $orderColumns = array();
+  
   public function __construct($model)
   {
     if (is_string($model)) {
@@ -87,6 +92,11 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
+  public function setOrderColumn(array $columns)
+  {
+    $this->orderColumns = $columns;
+  }
+  
   public function setMethod($method)
   {
     $this->method = $method;
@@ -109,7 +119,7 @@ class Paginate extends Sabel_Object
     $uriQuery = array();
     foreach ($getValues as $key => $val) {
       if ($key === "page") continue;
-      $uriQuery[] = "{$key}=" . urlencode($val);
+      $uriQuery[] = urlencode($key) . "=" . urlencode($val);
     }
     
     $attributes["uriQuery"] = implode("&", $uriQuery);
@@ -133,6 +143,7 @@ class Paginate extends Sabel_Object
       $attributes["results"] = array();
     } else {
       $offset = $pager->getSqlOffset();
+      $this->_setOrderBy($model, $getValues);
       
       if ($this->isJoin) {
         $model->getModel()->setLimit($limit);
@@ -147,5 +158,25 @@ class Paginate extends Sabel_Object
     }
     
     return $this;
+  }
+  
+  protected function _setOrderBy($model, $getValues)
+  {
+    if (empty($this->orderColumns)) return;
+    
+    foreach ($this->orderColumns as $column) {
+      if (isset($getValues[$column])) {
+        $order = $getValues[$column];
+        if ($order !== "asc" && $order !== "desc") {
+          $order = "asc";
+        }
+        
+        if (strpos($column, ":") !== false) {
+          $column = str_replace(":", ".", $column);
+        }
+        
+        $model->setOrderBy($column . " " . strtoupper($order));
+      }
+    }
   }
 }
