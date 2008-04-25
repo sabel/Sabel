@@ -56,6 +56,21 @@ div.content {
   width: 770px;
 }
 
+#contents table.sbl_basicTable {
+  border-collapse: collapse;
+  width: 90%;
+}
+
+#contents table.sbl_basicTable th {
+  background-color: #e8efff;
+  border: 1px solid #ccc;
+}
+
+#contents table.sbl_basicTable td {
+  border: 1px solid #ccc;
+  padding: 0 5px;
+}
+
 fieldset.formField {
   border: none;
 }
