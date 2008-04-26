@@ -204,7 +204,7 @@ class Form_Html extends Sabel_Object
       $radio = '<input type="radio" ';
       $this->addIdAndClass($radio);
       $radio .= 'name="' . $name . '" value="' . $v . '"';
-      if ($count === 0 && $value === null || $v === $value) {
+      if ($count === 0 && $value === null || $v == $value) {
         $radio .= ' checked="checked"';
       }
       
