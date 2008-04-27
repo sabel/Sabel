@@ -147,7 +147,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     $this->storage = $this->createStorage(md5($namespace));
     
     if ($this->isStartAction()) {
-      $state = new Flow_State(md5(uniqid(mt_rand(), true)));
+      $state = new Flow_State(md5hash());
     } elseif ($token === null) {
       l("[flow] token is null", SBL_LOG_DEBUG);
       $this->response->badRequest();

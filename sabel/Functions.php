@@ -20,13 +20,83 @@ function unshift_include_paths($paths, $prefix = "")
   set_include_path($path . get_include_path());
 }
 
-/*
+function htmlescape($str, $charset = null)
+{
+  if ($charset !== null) {
+    return htmlentities($str, ENT_QUOTES, $charset);
+  }
+  
+  static $internalEncoding = null;
+  
+  if ($internalEncoding === null) {
+    if (extension_loaded("mbstring")) {
+      $internalEncoding = ini_get("mbstring.internal_encoding");
+      if ($internalEncoding === "") $internalEncoding = false;
+    } else {
+      $internalEncoding = false;
+    }
+  }
+  
+  if ($internalEncoding) {
+    return htmlentities($str, ENT_QUOTES, $internalEncoding);
+  } else {
+    return htmlentities($str, ENT_QUOTES);
+  }
+}
+
+function get_temp_dir()
+{
+  static $exists = null;
+  if ($exists === null) {
+    $exists = function_exists("sys_get_temp_dir");
+  }
+  
+  if ($exists) {
+    return sys_get_temp_dir();
+  } elseif (isset($_ENV["TMP"])) {
+    return realpath($_ENV["TMP"]);
+  } elseif (isset($_ENV["TMPDIR"])) {
+    return realpath($_ENV["TMPDIR"]);
+  } elseif (isset($_ENV["TEMP"])) {
+    return realpath($_ENV["TEMP"]);
+  } else {
+    if ($tmpFile = tempnam(md5hash(), "sbl_")) {
+      $dirName = realpath(dirname($tmpFile));
+      unlink($tmpFile);
+      return $dirName;
+    } else {
+      return null;
+    }
+  }
+}
+
+if (!function_exists("lcfirst")) {
+  function lcfirst($str)
+  {
+    if (!is_string($str) || $str === "") {
+      return "";
+    } else {
+      $str{0} = strtolower($str{0});
+      return $str;
+    }
+  }
+}
+
+function now()
+{
+  return date("Y-m-d H:i:s");
+}
+
+function md5hash()
+{
+  return md5(uniqid(mt_rand(), true));
+}
+
 function load($className, $config)
 {
   if (is_string($config)) $config = new $config();
   return Sabel_Container::create($config)->newInstance($className);
 }
-*/
 
 function l($message, $level = SBL_LOG_INFO, $identifier = "default")
 {
@@ -63,16 +133,6 @@ function realempty($value)
   return ($value === null || $value === array() || $value === "");
 }
 
-function lcfirst($string)
-{
-  if (realempty($string) || !is_string($string)) {
-    return "";
-  } else {
-    $string{0} = strtolower($string{0});
-    return $string;
-  }
-}
-
 function dump()
 {
   if (PHP_SAPI === "cli") {
@@ -94,9 +154,9 @@ function dump()
   }
 }
 
-function environment($string)
+function environment($str)
 {
-  switch (strtolower($string)) {
+  switch (strtolower($str)) {
     case "production":
       return PRODUCTION;
     case "test":
@@ -105,35 +165,6 @@ function environment($string)
       return DEVELOPMENT;
     default:
       return null;
-  }
-}
-
-function now()
-{
-  return date("Y-m-d H:i:s");
-}
-
-function htmlescape($string, $charset = null)
-{
-  if ($charset !== null) {
-    return htmlentities($string, ENT_QUOTES, $charset);
-  }
-  
-  static $internalEncoding = null;
-  
-  if ($internalEncoding === null) {
-    if (extension_loaded("mbstring")) {
-      $internalEncoding = ini_get("mbstring.internal_encoding");
-      if ($internalEncoding === "") $internalEncoding = false;
-    } else {
-      $internalEncoding = false;
-    }
-  }
-  
-  if ($internalEncoding) {
-    return htmlentities($string, ENT_QUOTES, $internalEncoding);
-  } else {
-    return htmlentities($string, ENT_QUOTES);
   }
 }
 

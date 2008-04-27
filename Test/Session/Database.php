@@ -16,7 +16,7 @@ class Test_Session_Database extends SabelTestCase
   public static function suite()
   {
     if (self::initTable()) {
-      self::$sid = md5(uniqid(mt_rand(), true));
+      self::$sid = md5hash();
       ini_set("session.use_cookies", "0");
       return self::createSuite("Test_Session_Database");
     } else {

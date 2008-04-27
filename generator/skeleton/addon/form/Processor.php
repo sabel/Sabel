@@ -65,7 +65,7 @@ class Form_Processor extends Sabel_Bus_Processor
     }
     
     $this->form  = $form = new Form_Object($model);
-    $this->token = md5(uniqid(mt_rand(), true));
+    $this->token = md5hash();
     $this->controller->setAttribute("token", $this->token);
     
     return $form;

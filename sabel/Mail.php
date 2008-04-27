@@ -77,7 +77,7 @@ class Sabel_Mail extends Sabel_Object
   public function getBoundary()
   {
     if ($this->boundary === "") {
-      return $this->boundary = md5(uniqid(mt_rand(), true));
+      return $this->boundary = md5hash();
     } else {
       return $this->boundary;
     }

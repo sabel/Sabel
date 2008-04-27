@@ -27,7 +27,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $this->extract("session", "response", "controller");
+    $this->extract("session", "response", "controller", "request");
     
     $controller   = $this->controller;
     $destination  = $bus->get("destination");
@@ -45,7 +45,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       $this->annotation = $annotation;
     }
     
-    $token = $bus->get("request")->getValueWithMethod("token");
+    $token = $this->request->getValueWithMethod("token");
     $this->state = $state = $this->getFlowState($token, $destination);
     if (!$state) return;
     
@@ -53,7 +53,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     $controller->setAttribute("token", $state->token);
     
     if ($this->isStartAction()) {
-      l("[flow] start flow state with: '{$state->token}'");
+      l("[flow] start flow state with: '{$state->token}'", SBL_LOG_DEBUG);
       
       $state->setCurrentActivity($this->action);
       
@@ -65,7 +65,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         throw new Sabel_Exception_Runtime($message);
       }
     } else {
-      l("[flow] restore flow state with: '{$state->token}'");
+      l("[flow] restore flow state with: '{$state->token}'", SBL_LOG_DEBUG);
       
       $this->executeInFlowAction();
       
@@ -147,18 +147,18 @@ class Flow_Processor extends Sabel_Bus_Processor
     $this->storage = $this->createStorage(md5($namespace));
     
     if ($this->isStartAction()) {
-      $state = new Flow_State(md5(uniqid(mt_rand(), true)));
+      $state = new Flow_State(md5hash());
     } elseif ($token === null) {
-      l("[flow] token is null");
-      $this->response->notFound();
+      l("[flow] token is null", SBL_LOG_DEBUG);
+      $this->response->badRequest();
       return false;
     } else {
       if ($data = $this->storage->fetch($token)) {
         $state = new Flow_State($token);
         $state->restore($data);
       } else {
-        l("[flow] invalid token");
-        $this->response->notFound();
+        l("[flow] invalid token", SBL_LOG_DEBUG);
+        $this->response->badRequest();
         return false;
       }
     }
@@ -170,22 +170,24 @@ class Flow_Processor extends Sabel_Bus_Processor
   {
     $state = $this->state;
     $currentActivity = $state->getCurrentActivity();
-    if ($this->action === $currentActivity) return;
+    if ($this->action === $currentActivity) {
+      $this->isTransit = $this->request->isPost();
+      return;
+    }
     
     if ($state->isMatchToNext($this->action)) {
       if ($this->isEndAction()) {
-        $state->transit($this->action);
-        $state->warning = null;
         $this->lifetime = 60;
       } elseif ($nexts = $this->getNextActions()) {
         $state->setNextActions($nexts);
-        $state->transit($this->action);
-        $state->warning  = null;
-        $this->isTransit = true;
       } else {
-        $message = "no next actions.";
+        $message = __METHOD__ . "() no next actions.";
         throw new Sabel_Exception_Runtime($message);
       }
+      
+      $state->warning = null;
+      $state->transit($this->action);
+      $this->isTransit = true;
     } else {
       if ($state->isPreviousAction($this->action)) {
         $message = "It is possible to move to the previous page "
@@ -194,7 +196,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $state->warning = $message;
       }
       
-      l("[flow] invalid sequence. redirect...");
+      l("[flow] invalid sequence. redirect...", SBL_LOG_DEBUG);
       $this->controller->getRedirector()->to("a: " . $currentActivity);
     }
   }

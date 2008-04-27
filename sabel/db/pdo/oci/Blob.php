@@ -18,7 +18,7 @@ class Sabel_DB_Pdo_Oci_Blob extends Sabel_DB_Pdo_Blob
   
   public function getEscapedContents()
   {
-    $filePath = sys_get_temp_dir() . DS . md5(uniqid(mt_rand(), true));
+    $filePath = get_temp_dir() . DS . md5hash();
     file_put_contents($filePath, $this->binary);
     return fopen($filePath, "rb");
   }

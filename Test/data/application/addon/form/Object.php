@@ -253,7 +253,7 @@ class Form_Object extends Sabel_Object
   
   public function datetime($name, $yearRange = null, $withSecond = false, $defaultNull = false)
   {
-    $eName  = $this->createInputName("datetime") . "[{$name}]";
+    $eName  = $this->createInputName("sbl_datetime") . "[{$name}]";
     $writer = $this->getHtmlWriter($name, $eName);
     
     return $writer->datetime($yearRange, $withSecond, $defaultNull);
@@ -261,7 +261,7 @@ class Form_Object extends Sabel_Object
   
   public function date($name, $yearRange = null, $defaultNull = false)
   {
-    $eName  = $this->createInputName("date") . "[{$name}]";
+    $eName  = $this->createInputName("sbl_date") . "[{$name}]";
     $writer = $this->getHtmlWriter($name, $eName);
     
     return $writer->date($yearRange, $defaultNull);
@@ -293,7 +293,7 @@ class Form_Object extends Sabel_Object
   
   public function __sleep()
   {
-    l("serialize form object", SBL_LOG_DEBUG);
+    l("[form] serialize form object", SBL_LOG_DEBUG);
     
     $this->model   = $this->model->toArray();
     $this->columns = array();
@@ -303,7 +303,7 @@ class Form_Object extends Sabel_Object
   
   public function __wakeup()
   {
-    l("unserialize form object", SBL_LOG_DEBUG);
+    l("[form] unserialize form object", SBL_LOG_DEBUG);
     
     $model = MODEL($this->mdlName);
     
