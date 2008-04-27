@@ -13,21 +13,20 @@ class Generator extends Sabel_Sakle_Task
 {
   public function run()
   {
-    $environment = $this->getEnvironment();
+    define("ENVIRONMENT", $this->getEnvironment());
+    Sabel_DB_Config::initialize(new Config_Database());
+    
     $target = $this->checkArguments();
     
     if ($target === "model") {
-      $this->generateModel($environment);
-    } elseif ($target === "controller") {
-      $this->generateController();
+      $this->generateModel();
+    } elseif ($target === "flowcontroller") {
+      $this->generateFlowController();
     }
   }
   
-  private function generateModel($environment)
+  private function generateModel()
   {
-    define("ENVIRONMENT", $environment);
-    Sabel_DB_Config::initialize(new Config_Database());
-    
     $models = array();
     array_shift($this->arguments);
     
@@ -63,79 +62,44 @@ class Generator extends Sabel_Sakle_Task
     }
   }
   
-  private function generateController()
+  private function generateFlowController()
   {
     array_shift($this->arguments);
-    $argc = count($this->arguments);
     
-    if ($argc === 1) {
-      $module = "index";
-      $controller = $this->arguments[0];
-    } elseif ($argc === 2) {
-      $module = $this->arguments[0];
-      $controller = $this->arguments[1];
-    } else {
-      $this->error("too many arguments");
-      $this->usage();
-      exit;
-    }
+    $mdlName  = $this->arguments[0];
+    $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
+    $formName = lcfirst($mdlName) . "Form";
+    $skelDir  = dirname(__FILE__) . DS . "generator";
     
-    $clsName = ucfirst($module) . "_Controllers_" . ucfirst($controller);
+    $controllerName = ucfirst($module) . "_Controllers_" . $mdlName;
     
-    $mPath = MODULES_DIR_PATH . DS . lcfirst($module);
-    if (!is_dir($mPath)) mkdir($mPath);
-    
-    $cPath = $mPath . DS . "controllers";
-    if (!is_dir($cPath)) mkdir($cPath);
-    
-    $vPath = $mPath . DS . VIEW_DIR_NAME;
-    if (!is_dir($vPath)) mkdir($vPath);
-    
-    $filePath = $cPath . DS . $controller . ".php";
-    if (is_file($filePath)) {
-      $this->error("controller $controller already exists.");
-      exit;
-    }
-    
-    $actions = array();
-    $console = new Sabel_Console();
-    
-    while (true) {
-      $input = $console->read("action");
-      if ($input === false) break;
-      if (!in_array($input, $actions, true)) {
-        $actions[] = $input;
+    $orderColumns = array();
+    $columns = MODEL($mdlName)->getColumns();
+    foreach ($columns as $column) {
+      if ($column->isNumeric() || $column->isDatetime() || $column->isDate()) {
+        $orderColumns[] = '"' . $column->name . '"';
       }
     }
     
-    $code = array("<?php" . PHP_EOL);
-    $code[] = "class $clsName extends Sabel_Controller_Page";
-    $code[] = "{";
+    $orderColumns = "array(" . implode(", ", $orderColumns) . ")";
     
-    if ($actions) {
-      foreach ($actions as $action) {
-        $code[] = "  public function $action()";
-        $code[] = "  {";
-        $code[] = "    ";
-        $code[] = "  }";
-        $code[] = "  ";
-      }
-    }
+    ob_start();
+    include ($skelDir . DS . "FlowController.php");
+    $contents = str_replace("<#", "<?", ob_get_clean());
     
-    $code[] = "}";
+    $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
+    $file = $fs->mkfile($module . DS . "controllers" . DS . $mdlName . ".php");
+    $file->write($contents)->save();
     
-    file_put_contents($filePath, implode(PHP_EOL, $code));
-    $this->success("create controller $clsName");
+    $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
+    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir, 0775);
     
-    $tplDir = $vPath . DS . lcfirst($controller);
-    if (!is_dir($tplDir)) mkdir ($tplDir);
-    
-    if (empty($actions)) return;
-    
-    foreach ($actions as $action) {
-      $tplPath = $tplDir . DS . $action. TPL_SUFFIX;
-      file_put_contents($tplPath, PHP_EOL);
-      $this->success("create template $action" . TPL_SUFFIX);
+    foreach (scandir($skelDir . DS . "flowControllerTemplates") as $item) {
+      if ($item{0} === ".") continue;
+      ob_start();
+      include ($skelDir . DS . "flowControllerTemplates" . DS . $item);
+      $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
+      file_put_contents($tplDir . DS . $item, $contents);
     }
   }
   
@@ -163,9 +127,9 @@ class Generator extends Sabel_Sakle_Task
       exit;
     }
     
-    $target = $arguments[0];
+    $target = strtolower($arguments[0]);
     
-    if (!in_array($target, array("model", "controller"), true)) {
+    if (!in_array($target, array("model", "flowcontroller"), true)) {
       $this->usage();
       exit;
     }
@@ -175,6 +139,8 @@ class Generator extends Sabel_Sakle_Task
   
   public function usage()
   {
-    echo "Usage: sakle Generator\n";
+    echo "Usage: sakle Generator Model MODEL_NAME\n";
+    echo "Usage: sakle Generator FlowController MODEL_NAME [MODULE_NAME]\n";
+    echo "\n";
   }
 }
