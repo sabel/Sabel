@@ -12,14 +12,9 @@
 class Sabel_Mail extends Sabel_Object
 {
   /**
-   * @var array
+   * @var Sabel_Mail_Sender_Interface
    */
-  protected $recipients = array();
-  
-  /**
-   * @var string
-   */
-  protected $subject = "";
+  protected $sender = null;
   
   /**
    * @var Sabel_Mail_Body
@@ -56,6 +51,11 @@ class Sabel_Mail extends Sabel_Object
     return $this->charset;
   }
   
+  public function setSender(Sabel_Mail_Sender_Interface $sender)
+  {
+    $this->sender = $sender;
+  }
+  
   public function setFrom($from, $name = "")
   {
     if ($name === "") {
@@ -83,39 +83,42 @@ class Sabel_Mail extends Sabel_Object
     }
   }
   
-  public function addRecipient($recipient, $name = "")
+  public function addTo($to, $name = "")
   {
-    if ($name === "") {
-      $this->recipients[] = $recipient;
+    if ($name !== "") {
+      $to = $this->encodeHeader($name) . " <{$to}>";
+    }
+    
+    if (isset($this->headers["To"])) {
+      $this->headers["To"][] = $to;
     } else {
-      $this->recipients[] = $this->encodeHeader($name) . " <{$recipient}>";
+      $this->headers["To"] = array($to);
     }
     
     return $this;
-  }
-  
-  public function getRecipients()
-  {
-    return $this->recipients;
   }
   
   public function addCc($to, $name = "")
   {
-    if ($name === "") {
-      $this->headers["Cc"] = $to;
+    if ($name !== "") {
+      $to = $this->encodeHeader($name) . " <{$to}>";
+    }
+    
+    if (isset($this->headers["Cc"])) {
+      $this->headers["Cc"][] = $to;
     } else {
-      $this->headers["Cc"] = $this->encodeHeader($name) . " <{$to}>";
+      $this->headers["Cc"] = array($to);
     }
     
     return $this;
   }
   
-  public function addBcc($to, $name = "")
+  public function addBcc($to)
   {
-    if ($name === "") {
-      $this->headers["Bcc"] = $to;
+    if (isset($this->headers["Bcc"])) {
+      $this->headers["Bcc"][] = $to;
     } else {
-      $this->headers["Bcc"] = $this->encodeHeader($name) . " <{$to}>";
+      $this->headers["Bcc"] = array($to);
     }
     
     return $this;
@@ -123,14 +126,9 @@ class Sabel_Mail extends Sabel_Object
   
   public function setSubject($subject)
   {
-    $this->subject = $subject;
+    $this->headers["Subject"] = $this->encodeHeader($subject);
     
     return $this;
-  }
-  
-  public function getSubject()
-  {
-    return $this->subject;
   }
   
   public function setBodyText($text, $encoding = "7bit", $disposition = "inline")
@@ -161,7 +159,7 @@ class Sabel_Mail extends Sabel_Object
     return $this->bodyHtml;
   }
   
-  public function attach($fileName, $data, $mimeType, $encoding = "base64", $disposition = "inline")
+  public function attach($fileName, $data, $mimeType, $encoding = "base64", $disposition = "attachment")
   {
     $file = new Sabel_Mail_File($fileName, $data, $mimeType);
     $file->setEncoding($encoding);
@@ -203,33 +201,14 @@ class Sabel_Mail extends Sabel_Object
     }
   }
   
-  public function send($parameters = "")
+  public function send(array $options = array())
   {
+    if ($this->sender === null) {
+      $this->sender = new Sabel_Mail_Sender_PHP();
+    }
+    
     $bodyText = $this->createBodyText();
-    $subject  = $this->encodeHeader($this->getSubject());
-    $headers  = $this->createHeader();
-    
-    $to = implode(", ", $this->recipients);
-    return mail($to, $subject, $bodyText, $headers, $parameters);
-  }
-  
-  protected function createHeader()
-  {
-    $headers = array();
-    $hasMimeVersion = false;
-    
-    foreach ($this->headers as $name => $header) {
-      $lowered = strtolower($name);
-      if ($lowered === "mime-version") $hasMimeVersion = true;
-      
-      $headers[] = $name . ": " . $header;
-    }
-    
-    if (!$hasMimeVersion) {
-      $headers[] = "MIME-Version: 1.0";
-    }
-    
-    return implode("\r\n", $headers);
+    return $this->sender->send($this->headers, $bodyText, $options);
   }
   
   protected function createBodyText()
@@ -298,7 +277,7 @@ class Sabel_Mail extends Sabel_Object
         $encoding = strtolower($file->getEncoding());
         
         if ($encoding === "base64") {
-          $lineLength = 72; // @todo to constant value
+          $lineLength = 74; // @todo to constant value
           $data = rtrim(chunk_split(base64_encode($data), $lineLength, "\r\n"));
         }
         
