@@ -200,6 +200,10 @@ class Form_Html extends Sabel_Object
     $name   = $this->name;
     $value  = $this->value;
     
+    if (is_bool($value)) {
+      $value = ($value) ? 1 : 0;
+    }
+    
     foreach ($data as $v => $text) {
       $radio = '<input type="radio" ';
       $this->addIdAndClass($radio);

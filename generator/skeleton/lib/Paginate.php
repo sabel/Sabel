@@ -34,6 +34,11 @@ class Paginate extends Sabel_Object
   /**
    * @array
    */
+  protected $defaultOrder = array();
+  
+  /**
+   * @array
+   */
   protected $orderColumns = array();
   
   public function __construct($model)
@@ -85,9 +90,9 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
-  public function setOrderBy($orderBy)
+  public function setDefaultOrder($column, $mode)
   {
-    $this->model->setOrderBy($orderBy);
+    $this->defaultOrder[$column] = $mode;
     
     return $this;
   }
@@ -155,6 +160,11 @@ class Paginate extends Sabel_Object
       
       $attributes["offset"]  = $offset;
       $attributes["results"] = $model->{$this->method}();
+      
+      if ($this->uri === null) {
+        $candidate = Sabel_Context::getContext()->getCandidate();
+        $attributes["uri"] = "a: " . $candidate->getDestination()->getAction();
+      }
     }
     
     return $this;
@@ -163,10 +173,11 @@ class Paginate extends Sabel_Object
   protected function _setOrderBy($model, $getValues)
   {
     if (empty($this->orderColumns)) return;
+    $getValues = array_merge($this->defaultOrder, $getValues);
     
     foreach ($this->orderColumns as $column) {
       if (isset($getValues[$column])) {
-        $order = $getValues[$column];
+        $order = strtolower($getValues[$column]);
         if ($order !== "asc" && $order !== "desc") {
           $order = "asc";
         }
