@@ -40,7 +40,7 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
     $query = $this->getQuery();
     $blobs = $this->blobs;
     
-    if (!empty($blobs)) {
+    if (!empty($blobs) && ($this->isInsert() || $this->isUpdate())) {
       $cols = array();
       $hlds = array();
       foreach ($blobs as $column => $blob) {
@@ -54,6 +54,11 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
     
     $this->query = $query;
     $result = parent::execute($bindValues, $additionalParameters);
+    
+    if (!empty($blobs) && ($this->isInsert() || $this->isUpdate())) {
+      foreach ($blobs as $blob) $blob->unlink();
+    }
+    
     if (!$this->isSelect() || empty($result)) return $result;
     
     // FETCH LOB CONTENTS

@@ -11,15 +11,24 @@
  */
 class Sabel_DB_Pdo_Oci_Blob extends Sabel_DB_Pdo_Blob
 {
+  protected $filePath = "";
+  
   public function __construct($binary)
   {
     $this->binary = $binary;
+    $this->filePath = get_temp_dir() . DS . "sbl_" . md5hash();
   }
   
   public function getEscapedContents()
   {
-    $filePath = get_temp_dir() . DS . md5hash();
-    file_put_contents($filePath, $this->binary);
-    return fopen($filePath, "rb");
+    file_put_contents($this->filePath, $this->binary);
+    return fopen($this->filePath, "rb");
+  }
+  
+  public function unlink()
+  {
+    if (is_file($this->filePath)) {
+      unlink($this->filePath);
+    }
   }
 }
