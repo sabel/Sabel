@@ -269,6 +269,21 @@ Sabel.String.toInt = function(string) {
 Sabel.Object.extend(Sabel.String, Sabel.Object.Methods);
 
 
+Sabel.Number = function(number) {
+	return Sabel.Object.create(number, Sabel.Number)
+};
+
+Sabel.Number._units = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+Sabel.Number.toHumanReadable= function(number, unit, ext) {
+	var i = 0;
+
+	while (number > unit) {
+		i++;
+		number = number / unit;
+	}
+
+	return number.toFixed(1) + Sabel.Number._units[i];
+};
 Sabel.Array = function(iterable) {
 	if (typeof iterable === "undefined") {
 		iterable = new Array();
@@ -1380,6 +1395,8 @@ Sabel.Ajax.prototype = {
 	},
 	
 	request: function(url, options) {
+		this.completed = false;
+
 		var xmlhttp = this.xmlhttp;
 		var options = this.setOptions(options);
 
@@ -1392,6 +1409,15 @@ Sabel.Ajax.prototype = {
 		xmlhttp.open(options.method, url, options.async);
 		this.setRequestHeaders();
 		xmlhttp.send((options.method === "post") ? options.params : "");
+		if (options.timeout) this.timer = setTimeout(Sabel.Function.bind(this.abort, this), options.timeout);
+	},
+
+	abort: function() {
+		switch (this.xmlhttp.readyState) {
+			case 1: case 2: case 3:
+			this.xmlhttp.abort();
+			this.options.onTimeout();
+		}
 	},
 
 	updater: function(element, url, options) {
@@ -1417,6 +1443,7 @@ Sabel.Ajax.prototype = {
 			onComplete: function(){},
 			onSuccess: function(){},
 			onFailure: function(){},
+			onTimeout: function(){},
 			async: true
 		};
 		Sabel.Object.extend(options, defaultOptions);
@@ -1994,11 +2021,11 @@ Sabel.Util.Uri = function(uri)
 	function parse(query)
 	{
 		if (query === undefined) return {};
-		var querys = query.split("&"), parsed = {};
+		var queries = query.split("&"), parsed = {};
 
-		for (var i = 0, len = querys.length; i < len; i++) {
-			if (querys[i] == "") continue;
-			var q = querys[i].split("=");
+		for (var i = 0, len = queries.length; i < len; i++) {
+			if (queries[i] == "") continue;
+			var q = queries[i].split("=");
 			parsed[q[0]] = q[1] || "";
 		}
 

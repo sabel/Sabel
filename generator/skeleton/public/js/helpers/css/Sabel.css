@@ -1,0 +1,33 @@
+/**
+ * Sabel Progress bar
+ */
+.sbl_progress_border {
+	height: 20px;
+	border: 1px solid red;
+
+	position: relative;
+	width: 500px;
+}  	
+
+.sbl_progress_bar {
+	position: relative;
+	height: 100%;
+	background-color: #369;
+	overflow: hidden;
+	width: 0;
+}
+
+.sbl_progress_text {
+	position: absolute;
+	text-align: center;
+	width: 500px;
+}
+
+.sbl_progress_bar .sbl_progress_text {
+	color: white;
+}
+
+.sbl_progress_status {
+	position: relative;
+	text-align: right;
+}
