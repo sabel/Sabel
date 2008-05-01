@@ -16,13 +16,8 @@ class Generator extends Sabel_Sakle_Task
     define("ENVIRONMENT", $this->getEnvironment());
     Sabel_DB_Config::initialize(new Config_Database());
     
-    $target = $this->checkArguments();
-    
-    if ($target === "model") {
-      $this->generateModel();
-    } elseif ($target === "flowcontroller") {
-      $this->generateFlowController();
-    }
+    $method = "generate" . $this->checkArguments();
+    $this->$method();
   }
   
   private function generateModel()
@@ -103,6 +98,35 @@ class Generator extends Sabel_Sakle_Task
     }
   }
   
+  private function generateUploadController()
+  {
+    array_shift($this->arguments);
+    
+    $ctrlName = ucfirst($this->arguments[0]);
+    $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
+    $skelDir  = dirname(__FILE__) . DS . "generator";
+    
+    $controllerName = ucfirst($module) . "_Controllers_" . $ctrlName;
+    
+    ob_start();
+    include ($skelDir . DS . "UploadController.php");
+    $contents = str_replace("<#", "<?", ob_get_clean());
+    
+    $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
+    $file = $fs->mkfile($module . DS . "controllers" . DS . $ctrlName . ".php");
+    $file->write($contents)->save();
+    
+    $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($ctrlName);
+    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir, 0775);
+    
+    $tplName  = "upload" . TPL_SUFFIX;
+    
+    ob_start();
+    include ($skelDir . DS . "uploadControllerTemplates" . DS . $tplName);
+    $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
+    file_put_contents($tplDir . DS . $tplName, $contents);
+  }
+  
   private function getEnvironment()
   {
     if (Sabel_Console::hasOption("e", $this->arguments)) {
@@ -128,8 +152,9 @@ class Generator extends Sabel_Sakle_Task
     }
     
     $target = strtolower($arguments[0]);
+    $types  = array("model", "flowcontroller", "uploadcontroller");
     
-    if (!in_array($target, array("model", "flowcontroller"), true)) {
+    if (!in_array($target, $types, true)) {
       $this->usage();
       exit;
     }
@@ -141,6 +166,7 @@ class Generator extends Sabel_Sakle_Task
   {
     echo "Usage: sakle Generator Model MODEL_NAME\n";
     echo "Usage: sakle Generator FlowController MODEL_NAME [MODULE_NAME]\n";
+    echo "Usage: sakle Generator UploadController CONTROLLER_NAME [MODULE_NAME]\n";
     echo "\n";
   }
 }

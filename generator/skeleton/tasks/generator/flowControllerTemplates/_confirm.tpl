@@ -4,6 +4,8 @@
   <dt><#= $<?php echo $formName ?>->name("<?php echo $column->name ?>") #></dt>
 <?php if ($column->isText()) : ?>
   <dd><#= nl2br($<?php echo $formName ?>->get("<?php echo $column->name ?>")) #></dd>
+<?php elseif ($column->isBool()) : ?>
+  <dd><# echo ($<?php echo $formName ?>->get("<?php echo $column->name ?>")) ? "on" : "off" #></dd>
 <?php else : ?>
   <dd><#= $<?php echo $formName ?>->get("<?php echo $column->name ?>") #></dd>
 <?php endif ?>

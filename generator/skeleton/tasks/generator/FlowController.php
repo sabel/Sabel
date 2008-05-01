@@ -3,7 +3,7 @@
 /**
  * @flow continuation <?php echo $formName ?> 
  */
-class <?= $controllerName ?> extends Sabel_Controller_Page
+class <?php echo $controllerName ?> extends Sabel_Controller_Page
 {
   public function index()
   {
@@ -13,9 +13,8 @@ class <?= $controllerName ?> extends Sabel_Controller_Page
   
   public function lists()
   {
-    $this->paginate = new Paginate("<?= $mdlName ?>");
-    $this->paginate->uri = "a: lists";
-    $this->paginate->setOrderColumn(<?= $orderColumns ?>);
+    $this->paginate = new Paginate("<?php echo $mdlName ?>");
+    $this->paginate->setOrderColumn(<?php echo $orderColumns ?>);
     $this->paginate->build(10, $this->request->fetchGetValues());
   }
   
@@ -37,6 +36,7 @@ class <?= $controllerName ?> extends Sabel_Controller_Page
   }
   
   /**
+   * @httpMethod post
    * @flow next correctCreate create
    */
   public function confirmCreate()
@@ -59,7 +59,11 @@ class <?= $controllerName ?> extends Sabel_Controller_Page
   public function prepareEdit()
   {
     $model = MODEL("<?= $mdlName ?>", $this->request->fetchGetValue("id"));
-    $this-><?php echo $formName ?> = new Form_Object($model);
+    if ($model->isSelected()) {
+      $this-><?php echo $formName ?> = new Form_Object($model);
+    } else {
+      $this->response->notFound();
+    }
   }
   
   /**
@@ -71,6 +75,7 @@ class <?= $controllerName ?> extends Sabel_Controller_Page
   }
   
   /**
+   * @httpMethod post
    * @flow next correctEdit edit
    */
   public function confirmEdit()
@@ -86,17 +91,49 @@ class <?= $controllerName ?> extends Sabel_Controller_Page
     $this->_save();
   }
   
+  /**
+   * @httpMethod post
+   */
+  public function confirmDelete()
+  {
+    $this->ids = $ids = $this->request->fetchPostValue("ids");
+    
+    if (!is_array($ids) || empty($ids)) {
+      $this->redirect->to("a: lists");
+    } else {
+      $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
+      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "id", $ids);
+      $this->deleteItems = $<?php echo lcfirst($mdlName) ?>->select($inCondition);
+    }
+  }
+  
+  /**
+   * @httpMethod post
+   */
+  public function doDelete()
+  {
+    $ids = $this->request->fetchPostValue("ids");
+    
+    if (is_array($ids) && !empty($ids)) {
+      $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
+      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "id", $ids);
+      $<?php echo lcfirst($mdlName) ?>->delete($inCondition);
+    }
+    
+    $this->redirect->to("a: lists");
+  }
+  
   protected function _confirm($tplName)
   {
     $this->form->applyPostValues($this-><?php echo $formName ?>);
-    if (!$this-><?= $formName ?>->validate()) {
+    if (!$this-><?php echo $formName ?>->validate()) {
       $this->view->setName($tplName);
     }
   }
   
   protected function _save()
   {
-    $this-><?= $formName ?>->getModel()->save();
+    $this-><?php echo $formName ?>->getModel()->save();
     $this->request->setGetValue("token", null);
     $this->redirect->to("a: lists");
   }

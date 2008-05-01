@@ -12,7 +12,7 @@
 <?php elseif ($column->isText()) : ?>
     <dd><#= $<?php echo $formName ?>->textarea("<?php echo $column->name ?>") #></dd>
 <?php elseif ($column->isBool()) : ?>
-    <dd><#= $<?php echo $formName ?>->radio("<?php echo $column->name ?>", array(0 => "on", 1 => "off")) #></dd>
+    <dd><#= $<?php echo $formName ?>->radio("<?php echo $column->name ?>", array(1 => "on", 0 => "off")) #></dd>
 <?php else : ?>
     <dd><#= $<?php echo $formName ?>->text("<?php echo $column->name ?>") #></dd>
 <?php endif ?>
