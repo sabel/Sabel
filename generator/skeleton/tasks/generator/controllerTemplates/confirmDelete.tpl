@@ -25,6 +25,9 @@
     <# endforeach #>
   </table>
   <div style="margin-top: 6px;">
+    <# foreach ($ids as $id) : #>
+      <input type="hidden" name="ids[]" value="<#= $id #>" />
+    <# endforeach #>
     <token value="<#= $token #>" />
     <input style="width: 120px;" type="submit" value="delete" />
   </div>

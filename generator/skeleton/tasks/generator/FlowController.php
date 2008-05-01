@@ -1,7 +1,7 @@
 <#php
 
 /**
- * @flow continuation <?php echo $formName ?> 
+ * @flow continuation <?php echo $formName ?> deleteIds
  */
 class <?php echo $controllerName ?> extends Sabel_Controller_Page
 {
@@ -58,9 +58,9 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
    */
   public function prepareEdit()
   {
-    $model = MODEL("<?= $mdlName ?>", $this->request->fetchGetValue("id"));
-    if ($model->isSelected()) {
-      $this-><?php echo $formName ?> = new Form_Object($model);
+    $<?php echo lcfirst($mdlName) ?> = MODEL("<?= $mdlName ?>", $this->request->fetchGetValue("<?php echo $primaryColumn ?>"));
+    if ($<?php echo lcfirst($mdlName) ?>->isSelected()) {
+      $this-><?php echo $formName ?> = new Form_Object($<?php echo lcfirst($mdlName) ?>);
     } else {
       $this->response->notFound();
     }
@@ -93,33 +93,36 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   
   /**
    * @httpMethod post
+   *
+   * @flow start
+   * @flow next doDelete
    */
   public function confirmDelete()
   {
-    $this->ids = $ids = $this->request->fetchPostValue("ids");
+    $ids = $this->request->fetchPostValue("ids");
     
     if (!is_array($ids) || empty($ids)) {
       $this->redirect->to("a: lists");
     } else {
+      $this->deleteIds = $ids;
       $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "id", $ids);
+      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
       $this->deleteItems = $<?php echo lcfirst($mdlName) ?>->select($inCondition);
     }
   }
   
   /**
    * @httpMethod post
+   *
+   * @flow end
    */
   public function doDelete()
   {
-    $ids = $this->request->fetchPostValue("ids");
+    $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
+    $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $this->deleteIds);
+    $<?php echo lcfirst($mdlName) ?>->delete($inCondition);
     
-    if (is_array($ids) && !empty($ids)) {
-      $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "id", $ids);
-      $<?php echo lcfirst($mdlName) ?>->delete($inCondition);
-    }
-    
+    $this->request->setPostValue("token", null);
     $this->redirect->to("a: lists");
   }
   

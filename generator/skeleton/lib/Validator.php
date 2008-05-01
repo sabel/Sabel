@@ -22,14 +22,23 @@ class Validator extends Sabel_Request_Validator
   public function required($name, $value)
   {
     if ($value === null) {
-      return $this->displayNames[$name] . " is required.";
+      return $this->getDisplayName($name) . " is required.";
     }
   }
   
   public function numeric($name, $value)
   {
     if ($value !== null || !is_numeric($value)) {
-      return $this->displayNames[$name] . " must be a numeric.";
+      return $this->getDisplayName($name) . " must be a numeric.";
+    }
+  }
+  
+  protected function getDisplayName($name)
+  {
+    if (isset($this->displayNames[$name])) {
+      return $this->displayNames[$name];
+    } else {
+      return $name;
     }
   }
 }
