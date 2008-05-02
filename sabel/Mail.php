@@ -11,6 +11,8 @@
  */
 class Sabel_Mail extends Sabel_Object
 {
+  const LINELENGTH = 74;
+  
   /**
    * @var Sabel_Mail_Sender_Interface
    */
@@ -39,11 +41,17 @@ class Sabel_Mail extends Sabel_Object
   /**
    * @var array
    */
-  protected $files = array();
+  protected $attachments = array();
+  
+  /**
+   * @var boolean
+   */
+  protected $isMbstringLoaded = false;
   
   public function __construct($charset = "ISO-8859-1")
   {
     $this->charset = $charset;
+    $this->isMbstringLoaded = extension_loaded("mbstring");
   }
   
   public function getCharset()
@@ -59,9 +67,9 @@ class Sabel_Mail extends Sabel_Object
   public function setFrom($from, $name = "")
   {
     if ($name === "") {
-      $this->headers["From"] = $from;
+      $this->headers["From"] = array("address" => $from, "name" => "");
     } else {
-      $this->headers["From"] = $this->encodeHeader($name) . " <{$from}>";
+      $this->headers["From"] = array("address" => $from, "name" => $this->encodeHeader($name));
     }
     
     return $this;
@@ -85,8 +93,10 @@ class Sabel_Mail extends Sabel_Object
   
   public function addTo($to, $name = "")
   {
-    if ($name !== "") {
-      $to = $this->encodeHeader($name) . " <{$to}>";
+    if ($name === "") {
+      $to = array("address" => $to, "name" => "");
+    } else {
+      $to = array("address" => $to, "name" => $this->encodeHeader($name));
     }
     
     if (isset($this->headers["To"])) {
@@ -140,11 +150,6 @@ class Sabel_Mail extends Sabel_Object
     return $this;
   }
   
-  public function getBodyText()
-  {
-    return $this->bodyText;
-  }
-  
   public function setBodyHtml($html, $encoding = "7bit", $disposition = "inline")
   {
     $this->bodyHtml = new Sabel_Mail_Body($html, Sabel_Mail_Body::HTML);
@@ -154,18 +159,13 @@ class Sabel_Mail extends Sabel_Object
     return $this;
   }
   
-  public function getBodyHtml()
-  {
-    return $this->bodyHtml;
-  }
-  
   public function attach($fileName, $data, $mimeType, $encoding = "base64", $disposition = "attachment")
   {
-    $file = new Sabel_Mail_File($fileName, $data, $mimeType);
-    $file->setEncoding($encoding);
-    $file->setDisposition($disposition);
-    
-    $this->files[] = $file;
+    // @todo RFC2231
+    $attachment = new Sabel_Mail_File($this->encodeHeader($fileName), $data, $mimeType);
+    $attachment->setEncoding($encoding);
+    $attachment->setDisposition($disposition);
+    $this->attachments[] = $attachment;
     
     return $this;
   }
@@ -193,11 +193,12 @@ class Sabel_Mail extends Sabel_Object
   
   public function encodeHeader($header)
   {
-    if (extension_loaded("mbstring")) {
+    if ($this->isMbstringLoaded) {
       return mb_encode_mimeheader($header, $this->charset);
     } else {
-      // @todo
-      return $header;
+      $quoted = Sabel_Mail_QuotedPrintable::encode($header, self::LINELENGTH, "\r\n");
+      $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
+      return "=?{$this->charset}?Q?{$quoted}?=";
     }
   }
   
@@ -213,7 +214,6 @@ class Sabel_Mail extends Sabel_Object
   
   protected function createBodyText()
   {
-    $mbstringLoaded = extension_loaded("mbstring");
     $boundary = $this->getBoundary();
     
     if ($this->bodyText !== null && $this->bodyHtml !== null) {
@@ -221,7 +221,7 @@ class Sabel_Mail extends Sabel_Object
       $text = $this->bodyText->getText();
       $html = $this->bodyHtml->getText();
       
-      if ($mbstringLoaded) {
+      if ($this->isMbstringLoaded) {
         $text = mb_convert_encoding($text, $this->charset);
         $html = mb_convert_encoding($html, $this->charset);
       }
@@ -253,11 +253,11 @@ class Sabel_Mail extends Sabel_Object
       $bodyObj = $this->bodyHtml;
     }
     
-    if ($mbstringLoaded) {
+    if ($this->isMbstringLoaded) {
       $bodyObj->setText(mb_convert_encoding($bodyObj->getText(), $this->charset));
     }
     
-    if (count($this->files) === 0) {
+    if (count($this->attachments) === 0) {
       $this->headers["Content-Type"] = $bodyObj->getType() . "; charset=" . $this->charset;
       return $bodyObj->getText();
     } else {
@@ -271,20 +271,23 @@ class Sabel_Mail extends Sabel_Object
             . $bodyObj->getText()
             . "\r\n\r\n";
       
-      foreach ($this->files as $file) {
-        $name = $file->getName();
-        $data = $file->getData();
-        $encoding = strtolower($file->getEncoding());
+      foreach ($this->attachments as $attachment) {
+        $name = $attachment->getName();
+        $data = $attachment->getData();
+        $encoding = strtolower($attachment->getEncoding());
         
         if ($encoding === "base64") {
-          $lineLength = 74; // @todo to constant value
-          $data = rtrim(chunk_split(base64_encode($data), $lineLength, "\r\n"));
+          $data = rtrim(chunk_split(base64_encode($data), self::LINELENGTH, "\r\n"));
+        } elseif (preg_match('/^quoted-?printable$/', $encoding) === 1) {
+          $quoted = Sabel_Mail_QuotedPrintable::encode($data, self::LINELENGTH, "\r\n");
+          $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
+          $data   = "=?{$this->charset}?Q?{$quoted}?=";
         }
         
         $body .= "--{$boundary}\r\n"
-               . "Content-Disposition: " . $file->getDisposition() . "; filename=\"{$name}\"\r\n"
+               . "Content-Disposition: " . $attachment->getDisposition() . "; filename=\"{$name}\"\r\n"
                . "Content-Transfer-Encoding: {$encoding}\r\n"
-               . "Content-Type: " . $file->getType() . "; name=\"{$name}\"\r\n"
+               . "Content-Type: " . $attachment->getType() . "; name=\"{$name}\"\r\n"
                . "\r\n"
                . $data
                . "\r\n\r\n";

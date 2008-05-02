@@ -14,22 +14,8 @@ class Sabel_Mail_Sender_PHP
 {
   public function send(array $headers, $body, $options = array())
   {
-    $recipients = array();
-    if (isset($headers["To"])) {
-      $to = $headers["To"];
-      unset($headers["To"]);
-      foreach ($to as $recipient) {
-        $recipients[] = $recipient;
-      }
-    }
-    
-    $subject = "";
-    if (isset($headers["Subject"])) {
-      $subject = $headers["Subject"];
-      unset($headers["Subject"]);
-    }
-    
-    $recipients  = implode(", ", $recipients);
+    $recipients  = $this->getRecipients($headers);
+    $subject     = $this->getSubject($headers);
     $headersText = implode("\r\n", $this->createHeaderText($headers));
     
     if (isset($options["parameters"])) {
@@ -48,7 +34,13 @@ class Sabel_Mail_Sender_PHP
       $lowered = strtolower($name);
       if ($lowered === "mime-version") $hasMimeVersion = true;
       
-      if (is_array($header)) {
+      if ($name === "From") {
+        if ($header["name"] === "") {
+          $headers[] = "From: <{$header["address"]}>";
+        } else {
+          $headers[] = "From: {$header["name"]} <{$header["address"]}>";
+        }
+      } elseif (is_array($header)) {
         foreach ($header as $value) {
           $headers[] = $name . ": " . $value;
         }
@@ -62,5 +54,37 @@ class Sabel_Mail_Sender_PHP
     }
     
     return $headers;
+  }
+  
+  protected function getRecipients(&$headers)
+  {
+    $recipients = array();
+    if (isset($headers["To"])) {
+      $to = $headers["To"];
+      unset($headers["To"]);
+      foreach ($to as $recipient) {
+        if ($recipient["name"] === "") {
+          $recipients[] = $recipient["address"];
+        } else {
+          $recipients[] = $recipient["name"] . " <{$recipient["address"]}>";
+        }
+      }
+      
+      return implode(", ", $recipients);
+    } else {
+      $message = __METHOD__ . "() empty recipients.";
+      throw new Sabel_Mail_Exception($message);
+    }
+  }
+  
+  protected function getSubject(&$headers)
+  {
+    $subject = "";
+    if (isset($headers["Subject"])) {
+      $subject = $headers["Subject"];
+      unset($headers["Subject"]);
+    }
+    
+    return $subject;
   }
 }
