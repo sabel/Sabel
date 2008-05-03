@@ -130,10 +130,11 @@ class Renderer_Sabel_Replacer extends Sabel_Object
     $uri = $element->uri;
     if ($uri === null) return $html . ">";
     
+    $uri = '<?= uri("' . $uri . '") ?>';
     if (($params = $element->params) !== null) {
       $parameters = explode(",", $params);
       if (strpos($parameters[0], ":") === false) {
-        $url = uri($uri) . "?" . $parameters[0];
+        $uri .= "?" . $parameters[0];
       } else {
         $buffer = array();
         foreach ($parameters as $hash) {
@@ -141,11 +142,11 @@ class Renderer_Sabel_Replacer extends Sabel_Object
           $buffer[] = trim($key) . "=<?= " . $val . " ?>";
         }
         
-        $url = uri($uri) . "?" . implode("&", $buffer);
+        $uri .= "?" . implode("&", $buffer);
       }
     }
     
-    return $html . ' href="' . $url . '">';
+    return $html . ' href="' . $uri . '">';
   }
   
   protected function partial_replace($element)

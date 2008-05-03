@@ -1,9 +1,9 @@
-/**
- * SabelJS @VERSION
- * Header
+/* Sabel JS - %VERSION%
  *
- *
- */
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @copyright  2004-2008 Hamanaka Kazuhiro <Hamanaka.kazuhiro@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
+/*---------------------------------------------------------------------------*/
 
 window.Sabel = {};
 
@@ -2371,5 +2371,4 @@ Sabel.widget.Overlay.prototype = {
 		this.div.style.height = height + "px";
 	}
 };
-
 
