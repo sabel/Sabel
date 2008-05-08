@@ -71,6 +71,7 @@ require_once ("Test/Cache/Tests.php");
 require_once ("Test/Session/Tests.php");
 require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
+require_once ("Test/DB/TestConfig.php");
 require_once ("Test/DB/Statement/Tests.php");
 require_once ("Test/DB/Storage/Tests.php");
 require_once ("Test/DB/Tests.php");

@@ -15,13 +15,7 @@ class Test_DB_Statement_Oci extends SabelTestCase
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.oci",
-                    "host"     => "127.0.0.1",
-                    "user"     => "develop",
-                    "password" => "develop",
-                    "database" => "xe");
-    
-    Sabel_DB_Config::add("default", $params);
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getOciConfig());
   }
   
   public function testQuoteIdentifier()

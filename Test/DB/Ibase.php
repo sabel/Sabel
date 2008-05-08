@@ -37,13 +37,7 @@ class Test_DB_Ibase extends Test_DB_Test
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.ibase",
-                    "host"     => "localhost",
-                    "user"     => "develop",
-                    "password" => "develop",
-                    "database" => "/home/firebird/sdb_test.fdb");
-    
-    Sabel_DB_Config::add("default", $params);
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
     Test_DB_Test::$db = "IBASE";
   }
   

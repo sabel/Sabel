@@ -40,19 +40,6 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     }
   }
   
-  protected function dropIndex(array $idxColumns, $tblName = null)
-  {
-    if ($tblName === null) {
-      $tblName = convert_to_tablename($this->mdlName);
-    }
-    
-    $quotedTblName = $this->quoteIdentifier($tblName);
-    foreach ($idxColumns as $colName) {
-      $idxName = $tblName . "_" . $colName . "_idx";
-      $this->executeQuery("DROP INDEX {$tblName}_{$colName}_idx ON $quotedTblName");
-    }
-  }
-  
   public function drop()
   {
     if (Sabel_DB_Migration_Manager::isUpgrade()) {

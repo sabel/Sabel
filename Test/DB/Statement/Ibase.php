@@ -15,13 +15,7 @@ class Test_DB_Statement_Ibase extends SabelTestCase
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.ibase",
-                    "host"     => "localhost",
-                    "user"     => "develop",
-                    "password" => "develop",
-                    "database" => "/home/firebird/sdb_test.fdb");
-    
-    Sabel_DB_Config::add("default", $params);
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
   }
   
   public function testQuoteIdentifier()

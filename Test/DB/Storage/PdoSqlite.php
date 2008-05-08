@@ -13,11 +13,7 @@ class Test_DB_Storage_PdoSqlite extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.pdo.sqlite",
-                    "database" => SABEL_BASE . "/Test/data/sdb_test.sq3");
-    
-    Sabel_DB_Config::add("default", $params);
-    
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getPdoSqliteConfig());
     MODEL("SblStorage")->delete();
   }
 }

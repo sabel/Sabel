@@ -49,7 +49,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
         throw new Sabel_DB_Exception("command '$command' not found.");
       }
     } else {
-      $message = "no such file or directory.";
+      $message = __METHOD__ . "() no such file or directory.";
       throw new Sabel_Exception_FileNotFound($message);
     }
   }
@@ -247,7 +247,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   protected function getSchema()
   {
-    return Sabel_DB_Migration_Manager::getSchema();
+    return Sabel_DB_Migration_Manager::getMetadata();
   }
   
   protected function getStatement()
@@ -272,7 +272,8 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     if ($column->isBool()) {
       return $this->getBooleanAttr($d);
     } elseif ($d === null || $d === _NULL) {
-      return ($column->nullable === true) ? "DEFAULT NULL" : "";
+      return "";
+      //return ($column->nullable === true) ? "DEFAULT NULL" : "";
     } elseif ($column->isBigint()) {
       return "DEFAULT '{$d}'";
     } elseif ($column->isNumeric()) {

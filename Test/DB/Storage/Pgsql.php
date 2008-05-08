@@ -13,14 +13,7 @@ class Test_DB_Storage_Pgsql extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.pgsql",
-                    "host"     => "localhost",
-                    "user"     => "pgsql",
-                    "password" => "pgsql",
-                    "database" => "sdb_test");
-    
-    Sabel_DB_Config::add("default", $params);
-    
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
     MODEL("SblStorage")->delete();
   }
 }

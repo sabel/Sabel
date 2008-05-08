@@ -24,28 +24,29 @@ define("_NULL",     "SDB_NULL_VALUE");
  */
 class Sabel_DB_Migration_Manager
 {
-  private static $schema    = null;
+  private static $metadata  = null;
   private static $stmt      = null;
   private static $directory = "";
   private static $applyMode = "";
   
-  public static function setSchema($schema)
+  public static function setMetadata(Sabel_DB_Abstract_Metadata $metadata)
   {
-    self::$schema = $schema;
+    self::$metadata = $metadata;
   }
   
-  public static function getSchema()
+  public static function getMetadata()
   {
-    return self::$schema;
+    return self::$metadata;
   }
   
-  public static function setStatement($stmt)
+  public static function setStatement(Sabel_DB_Statement $stmt)
   {
     self::$stmt = $stmt;
   }
   
   public static function getStatement()
   {
+    self::$stmt->clear();
     return self::$stmt;
   }
   
@@ -74,13 +75,13 @@ class Sabel_DB_Migration_Manager
     if ($tblName === null) {
       return self::$directory;
     } else {
-      return self::$directory . DS . $tblName;
+      return self::$directory . DIRECTORY_SEPARATOR . $tblName;
     }
   }
   
   public static function getFiles($tblName)
   {
-    $dirPath = self::$directory . DS . $tblName;
+    $dirPath = self::$directory . DIRECTORY_SEPARATOR . $tblName;
     
     if (!is_dir($dirPath)) {
       Sabel_Console::error("no such dirctory. '{$dirPath}'");

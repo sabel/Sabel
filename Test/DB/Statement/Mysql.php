@@ -15,13 +15,7 @@ class Test_DB_Statement_Mysql extends SabelTestCase
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.mysql",
-                    "host"     => "127.0.0.1",
-                    "user"     => "root",
-                    "password" => "",
-                    "database" => "sdb_test");
-    
-    Sabel_DB_Config::add("default", $params);
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getMysqlConfig());
   }
   
   public function testQuoteIdentifier()

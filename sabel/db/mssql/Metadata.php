@@ -85,8 +85,8 @@ SQL;
   {
     $sql = <<<SQL
 SELECT
-  kcu.column_name, kcu2.table_name AS referenced_table,
-  kcu2.column_name AS referenced_column,
+  kcu.column_name, kcu2.table_name AS ref_table,
+  kcu2.column_name AS ref_column,
   rc.update_rule, rc.delete_rule
   FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS tc
   INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
@@ -105,14 +105,12 @@ SQL;
     if (empty($rows)) return null;
     
     $columns = array();
-    foreach ($cnames as $cname) {
-      foreach ($this->driver->execute(sprintf($fmt, $cname["constraint_name"])) as $row) {
-        $column = $row["column_name"];
-        $columns[$column]["referenced_table"]  = $row["ref_table"];
-        $columns[$column]["referenced_column"] = $row["ref_column"];
-        $columns[$column]["on_delete"]         = $row["delete_rule"];
-        $columns[$column]["on_update"]         = $row["update_rule"];
-      }
+    foreach ($rows as $row) {
+      $column = $row["column_name"];
+      $columns[$column]["referenced_table"]  = $row["ref_table"];
+      $columns[$column]["referenced_column"] = $row["ref_column"];
+      $columns[$column]["on_delete"]         = $row["delete_rule"];
+      $columns[$column]["on_update"]         = $row["update_rule"];
     }
     
     return $columns;

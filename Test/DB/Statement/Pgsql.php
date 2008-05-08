@@ -15,13 +15,7 @@ class Test_DB_Statement_Pgsql extends SabelTestCase
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.pgsql",
-                    "host"     => "localhost",
-                    "user"     => "pgsql",
-                    "password" => "pgsql",
-                    "database" => "sdb_test");
-    
-    Sabel_DB_Config::add("default", $params);
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
   }
   
   public function testQuoteIdentifier()

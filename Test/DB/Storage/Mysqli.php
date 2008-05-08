@@ -13,14 +13,7 @@ class Test_DB_Storage_Mysqli extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.mysqli",
-                    "host"     => "127.0.0.1",
-                    "user"     => "root",
-                    "password" => "",
-                    "database" => "sdb_test");
-    
-    Sabel_DB_Config::add("default", $params);
-    
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getMysqliConfig());
     MODEL("SblStorage")->delete();
   }
 }

@@ -48,10 +48,6 @@ class Test_DB_Storage_Tests
       $suite->addTest(Test_DB_Storage_Ibase::suite());
     }
     
-    if (extension_loaded("mysqli")) {
-      $suite->addTest(Test_DB_Mysqli::suite());
-    }
-    
     if (extension_loaded("pdo_sqlite")) {
       $suite->addTest(Test_DB_Storage_PdoSqlite::suite());
     }

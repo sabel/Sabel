@@ -50,22 +50,20 @@ class Migration extends Sabel_Sakle_Task
       $tables  = array();
       $tblName = $this->arguments[1];
       if (strtolower($tblName) === "all") {
-        $enableCommands = array("head", "foot", "rehead");
-        if (!in_array($this->arguments[2], $enableCommands, true)) {
-          $this->error("invalid command for 'all'.");
-          exit;
-        }
-        
         foreach (scandir($directory) as $item) {
-          if ($item{0} === ".") continue;
+          if ($item{0} === "." || is_file($directory . DS . $item)) continue;
           $tables[] = $item;
         }
       } else {
         $tables[] = $tblName;
       }
       
-      foreach ($tables as $table) {
-        $this->execMigration($table);
+      if (in_array($this->arguments[2], array("-v", "--version"), true)) {
+        $this->showCurrentVersion($tables);
+      } else {
+        foreach ($tables as $table) {
+          $this->execMigration($table);
+        }
       }
     //}
   }
@@ -79,7 +77,6 @@ class Migration extends Sabel_Sakle_Task
       self::$versions[$tblName]["start"] = $this->currentVersion;
     }
     
-    $to = $this->showCurrentVersion();
     $this->files = Sabel_DB_Migration_Manager::getFiles($tblName);
     
     if (empty($this->files)) {
@@ -87,7 +84,7 @@ class Migration extends Sabel_Sakle_Task
       exit;
     }
     
-    if ($this->toVersionNumber($to, $tblName) !== false) {
+    if ($this->toVersionNumber($this->arguments[2], $tblName) !== false) {
       $doNext = $this->_execMigration($tblName);
       if ($doNext) $this->execNextMigration();
     }
@@ -112,7 +109,7 @@ class Migration extends Sabel_Sakle_Task
   protected function getCurrentVersion($tblName)
   {
     Sabel_DB_Migration_Manager::setStatement($this->stmt);
-    Sabel_DB_Migration_Manager::setSchema($this->metadata);
+    Sabel_DB_Migration_Manager::setMetadata($this->metadata);
     
     try {
       if (!in_array("sbl_version", $this->metadata->getTableList())) {
@@ -127,29 +124,15 @@ class Migration extends Sabel_Sakle_Task
     }
   }
   
-  protected function showCurrentVersion()
+  protected function showCurrentVersion($tables)
   {
-    $opts = array("-v", "--version");
-    
-    if (isset($this->arguments[2])) {
-      $to = $this->arguments[2];
-      if (in_array($to, $opts, true)) {
-        $this->success("CURRENT VERSION: {$this->currentVersion}");
-        exit;
-      }
-    } else {
-      $to = $this->arguments[1];
-      if (in_array($to, $opts, true)) {
-        $tblName = $this->stmt->quoteIdentifier("sbl_version");
-        $rows = $this->stmt->setQuery("SELECT * FROM $tblName")->execute();
-        foreach ($rows as $row) {
-          $this->success("({$row["tblname"]}) CURRENT VERSION: {$row["version"]}");
-        }
-        exit;
+    $tblName = $this->stmt->quoteIdentifier("sbl_version");
+    $rows = $this->stmt->setQuery("SELECT * FROM $tblName")->execute();
+    foreach ($rows as $row) {
+      if (in_array($row["tblname"], $tables, true)) {
+        $this->success("({$row["tblname"]}) CURRENT VERSION: {$row["version"]}");
       }
     }
-    
-    return $to;
   }
   
   protected function defineMigrationDirectory()

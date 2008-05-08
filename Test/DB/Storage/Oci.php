@@ -13,15 +13,7 @@ class Test_DB_Storage_Oci extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    $params = array("package"  => "sabel.db.oci",
-                    "host"     => "127.0.0.1",
-                    "user"     => "develop",
-                    "password" => "develop",
-                    "database" => "xe",
-                    "charset"  => "UTF8");
-    
-    Sabel_DB_Config::add("default", $params);
-    
+    Sabel_DB_Config::add("default", Test_DB_TestConfig::getOciConfig());
     MODEL("SblStorage")->delete();
   }
 }
