@@ -455,59 +455,6 @@ class Test_DB_Test extends SabelTestCase
     $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
   }
   
-  public function testSelectWithChildren()
-  {
-    MODEL("Grandchildren")->delete();
-    MODEL("Children")->delete();
-    MODEL("Parents")->delete();
-    
-    $data = array();
-    $data[] = array("id" => 1, "grandparents_id" => 2, "value" => "parents1");
-    $data[] = array("id" => 2, "grandparents_id" => 1, "value" => "parents2");
-    $data[] = array("id" => 3, "grandparents_id" => 1, "value" => "parents3");
-    $p = MODEL("Parents");
-    foreach ($data as $values) $p->insert($values);
-    
-    $data = array();
-    $data[] = array("id" => 1, "parents_id" => 2, "value" => "children1");
-    $data[] = array("id" => 2, "parents_id" => 1, "value" => "children2");
-    $data[] = array("id" => 3, "parents_id" => 2, "value" => "children3");
-    $data[] = array("id" => 4, "parents_id" => 1, "value" => "children4");
-    $data[] = array("id" => 5, "parents_id" => 2, "value" => "children5");
-    $data[] = array("id" => 6, "parents_id" => 3, "value" => "children6");
-    $c = MODEL("Children");
-    foreach ($data as $values) $c->insert($values);
-    
-    $parent = MODEL("Parents");
-    $parent->setOrderBy("id ASC");
-    $parents = $parent->selectWithChildren("Children", "id DESC");
-    $this->assertEquals(3, count($parents));
-    
-    $p1 = $parents[0];
-    $p2 = $parents[1];
-    $p3 = $parents[2];
-    $this->assertEquals(2, count($p1->Children));
-    $this->assertEquals(3, count($p2->Children));
-    $this->assertEquals(1, count($p3->Children));
-    $this->assertEquals("children4", $p1->Children[0]->value);
-    $this->assertEquals("children2", $p1->Children[1]->value);
-    $this->assertEquals("children5", $p2->Children[0]->value);
-    $this->assertEquals("children3", $p2->Children[1]->value);
-    $this->assertEquals("children1", $p2->Children[2]->value);
-    $this->assertEquals("children6", $p3->Children[0]->value);
-    
-    $parent = MODEL("Parents");
-    $parent->setCondition(2);
-    $parent->setOrderBy("id ASC");
-    $parents = $parent->selectWithChildren("Children", "id ASC");
-    $this->assertEquals(1, count($parents));
-    
-    $p2 = $parents[0];
-    $this->assertEquals("children1", $p2->Children[0]->value);
-    $this->assertEquals("children3", $p2->Children[1]->value);
-    $this->assertEquals("children5", $p2->Children[2]->value);
-  }
-  
   public function testBinaryData()
   {
     $image = file_get_contents(SABEL_BASE . DS . "Test" . DS . "data" . DS . "php.gif");
