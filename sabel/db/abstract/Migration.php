@@ -20,12 +20,17 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   /**
    * @var string
    */
+  protected $tblName = "";
+  
+  /**
+   * @var string
+   */
   protected $mdlName = "";
   
   /**
    * @var int
    */
-  protected $version  = 0;
+  protected $version = 0;
   
   abstract protected function getBooleanAttr($value);
   
@@ -33,45 +38,42 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   {
     clearstatcache();
     
-    if (is_file($filePath)) {
-      $this->filePath = $filePath;
-      
-      $file = basename($filePath);
-      @list ($num, $command) = explode("_", $file);
-      
-      $this->version = $num;
-      $this->mdlName = convert_to_modelname($tblName);
-      $command = str_replace(".php", "", $command);
-      
-      if ($this->hasMethod($command)) {
-        $this->$command();
-      } else {
-        throw new Sabel_DB_Exception("command '$command' not found.");
-      }
-    } else {
+    if (!is_file($filePath)) {
       $message = __METHOD__ . "() no such file or directory.";
       throw new Sabel_Exception_FileNotFound($message);
+    }
+    
+    $this->filePath = $filePath;
+    $file = basename($filePath);
+    @list ($num, $command) = explode("_", $file);
+    $command = str_replace(".php", "", $command);
+    
+    $this->version = $num;
+    $this->tblName = $tblName;
+    $this->mdlName = convert_to_modelname($tblName);
+    
+    if ($this->hasMethod($command)) {
+      $this->$command();
+    } else {
+      $message = __METHOD__ . "() command '{$command}' not found.";
+      throw new Sabel_DB_Exception($message);
     }
   }
   
   protected function create()
   {
-    $tblName = convert_to_tablename($this->mdlName);
-    $tables  = $this->getSchema()->getTableList();
+    $tables = $this->getSchema()->getTableList();
     
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
-      if (in_array($tblName, $tables)) {
-        Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
+      if (in_array($this->tblName, $tables)) {
+        Sabel_Console::warning("table '{$this->tblName}' already exists. (SKIP)");
       } else {
         $this->createTable($this->filePath);
       }
+    } elseif (in_array($this->tblName, $tables, true)) {
+      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
     } else {
-      if (in_array($tblName, $tables)) {
-        $tblName = $this->quoteIdentifier($tblName);
-        $this->executeQuery("DROP TABLE $tblName");
-      } else {
-        Sabel_Console::warning("unknown table '{$tblName}'. (SKIP)");
-      }
+      Sabel_Console::warning("unknown table '{$this->tblName}'. (SKIP)");
     }
   }
   
@@ -81,11 +83,10 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
-      $tblName = convert_to_tablename($this->mdlName);
-      $schema  = $this->getSchema()->getTable($tblName);
-      $writer  = new Sabel_DB_Migration_Writer($restore);
+      $schema = $this->getSchema()->getTable($this->tblName);
+      $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeTable($schema);
-      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($tblName));
+      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
     } else {
       $this->createTable($restore);
     }
@@ -98,19 +99,18 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
       $this->execAddColumn($columns);
     } else {
-      $tblName = $this->quoteIdentifier(convert_to_tablename($this->mdlName));
+      $quotedTblName = $this->quoteIdentifier($this->tblName);
       foreach ($columns as $column) {
         $colName = $this->quoteIdentifier($column->name);
-        $this->executeQuery("ALTER TABLE $tblName DROP COLUMN $colName");
+        $this->executeQuery("ALTER TABLE $quotedTblName DROP COLUMN $colName");
       }
     }
   }
   
   protected function execAddColumn($columns)
   {
-    $tblName = convert_to_tablename($this->mdlName);
-    $quotedTblName = $this->quoteIdentifier($tblName);
-    $names = $this->getSchema()->getTable($tblName)->getColumnNames();
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
+    $names = $this->getSchema()->getTable($this->tblName)->getColumnNames();
     
     foreach ($columns as $column) {
       if (in_array($column->name, $names)) {
@@ -130,15 +130,12 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       if (is_file($restore)) unlink($restore);
       
       $columns  = $this->getReader()->readDropColumn()->getColumns();
-      $tblName  = convert_to_tablename($this->mdlName);
-      $schema   = $this->getSchema()->getTable($tblName);
+      $schema   = $this->getSchema()->getTable($this->tblName);
       $colNames = $schema->getColumnNames();
       
       $writer = new Sabel_DB_Migration_Writer($restore);
-      $writer->writeColumns($schema, $columns);
-      $writer->close();
-      
-      $quotedTblName = $this->quoteIdentifier($tblName);
+      $writer->writeColumns($schema, $columns)->close();
+      $quotedTblName = $this->quoteIdentifier($this->tblName);
       
       foreach ($columns as $column) {
         if (in_array($column, $colNames)) {
@@ -156,8 +153,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   protected function changeColumn()
   {
-    $tblName = convert_to_tablename($this->mdlName);
-    $schema  = $this->getSchema()->getTable($tblName);
+    $schema  = $this->getSchema()->getTable($this->tblName);
     $restore = $this->getRestoreFileName();
     
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
@@ -168,9 +164,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       foreach ($columns as $column) $names[] = $column->name;
       
       $writer = new Sabel_DB_Migration_Writer($restore);
-      $writer->writeColumns($schema, $names, '$change');
-      $writer->close();
-      
+      $writer->writeColumns($schema, $names, '$change')->close();
       $this->changeColumnUpgrade($columns, $schema);
     } else {
       $columns = $this->getReader($restore)->readChangeColumn()->getColumns();
@@ -203,8 +197,8 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       }
     }
     
-    $tblName = $this->quoteIdentifier(convert_to_tablename($this->mdlName));
-    return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
+    return "CREATE TABLE $quotedTblName (" . implode(", ", $query) . ")";
   }
   
   protected function createForeignKey($object)
@@ -212,7 +206,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     $query = "FOREIGN KEY ({$this->quoteIdentifier($object->column)}) "
            . "REFERENCES {$this->quoteIdentifier($object->refTable)}"
            . "({$this->quoteIdentifier($object->refColumn)})";
-           
+    
     if ($object->onDelete !== null) {
       $query .= " ON DELETE " . $object->onDelete;
     }
@@ -226,12 +220,11 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   protected function getRestoreFileName()
   {
-    $tblName = convert_to_tablename($this->mdlName);
-    $directory = Sabel_DB_Migration_Manager::getDirectory($tblName);
-    $dir = $directory . DS . "restores";
+    $directory = Sabel_DB_Migration_Manager::getDirectory($this->tblName);
+    $dir = $directory . DIRECTORY_SEPARATOR . "restores";
     if (!is_dir($dir)) mkdir($dir);
     
-    return $dir . DS . "restore_" . $this->version . ".php";
+    return $dir . DIRECTORY_SEPARATOR . "restore_" . $this->version . ".php";
   }
   
   protected function query()
@@ -273,10 +266,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       return $this->getBooleanAttr($d);
     } elseif ($d === null || $d === _NULL) {
       return "";
-      //return ($column->nullable === true) ? "DEFAULT NULL" : "";
-    } elseif ($column->isBigint()) {
-      return "DEFAULT '{$d}'";
-    } elseif ($column->isNumeric()) {
+    } elseif ($column->isNumeric() && !$column->isBigint()) {
       return "DEFAULT $d";
     } else {
       return "DEFAULT '{$d}'";

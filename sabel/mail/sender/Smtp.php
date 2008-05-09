@@ -33,14 +33,6 @@ class Sabel_Mail_Sender_Smtp
   
   public function send(array $headers, $body, $options = array())
   {
-    $rcptTo = "";
-    if (isset($headers["To"])) {
-      $rcptTo = $headers["To"][0];
-    } else {
-      $message = __METHOD__ . "() empty recipients.";
-      throw new Sabel_Mail_Exception($message);
-    }
-    
     if (!isset($headers["Mime-Version"])) {
       $headers["Mime-Version"] = "1.0";
     }
@@ -58,15 +50,7 @@ class Sabel_Mail_Sender_Smtp
     }
     
     $this->command("MAIL FROM:<{$headers["From"]["address"]}>", "250");
-    
-    try {
-      $this->command("RCPT TO:<{$rcptTo["address"]}>", "250");
-    } catch (Sabel_Mail_Smtp_Exception $e) {
-      $exception = new Sabel_Mail_Smtp_Exception_RecipientRefused($e->getMessage());
-      $exception->setResponseCode($e->getResponseCode());
-      throw $exception;
-    }
-    
+    $this->sendRcptTo($headers);
     $this->command("DATA", "354");
     $this->sendHeaders($headers);
     $this->command("\r\n$body");
@@ -110,6 +94,30 @@ class Sabel_Mail_Sender_Smtp
     }
   }
   
+  protected function sendRcptTo($headers)
+  {
+    if (empty($headers["To"])) {
+      $message = __METHOD__ . "() empty recipients.";
+      throw new Sabel_Mail_Exception($message);
+    }
+    
+    try {
+      foreach ($headers["To"] as $rcpt) {
+        $this->command("RCPT TO:<{$rcpt["address"]}>", "250");
+      }
+      
+      if (isset($headers["Cc"])) {
+        foreach ($headers["Cc"] as $rcpt) {
+          $this->command("RCPT TO:<{$rcpt["address"]}>", "250");
+        }
+      }
+    } catch (Sabel_Mail_Smtp_Exception $e) {
+      $exception = new Sabel_Mail_Smtp_Exception_RecipientRefused($e->getMessage());
+      $exception->setResponseCode($e->getResponseCode());
+      throw $exception;
+    }
+  }
+  
   protected function sendHeaders($headers)
   {
     foreach ($headers as $name => $header) {
@@ -119,14 +127,17 @@ class Sabel_Mail_Sender_Smtp
         } else {
           $this->command("From: {$header["name"]} <{$header["address"]}>");
         }
-      } elseif ($name === "To") {
-        foreach ($header as $to) {
-          if ($to["name"] === "") {
-            $this->command("To: <{$to["address"]}>");
+      } elseif ($name === "To" || $name === "Cc") {
+        $value = array();
+        foreach ($header as $rcpt) {
+          if ($rcpt["name"] === "") {
+            $value[] = "<{$rcpt["address"]}>";
           } else {
-            $this->command("To: {$to["name"]} <{$to["address"]}>");
+            $value[] = "{$rcpt["name"]} <{$rcpt["address"]}>";
           }
         }
+        
+        $this->command($name . ": " . implode(", ", $value));
       } elseif (is_array($header)) {
         foreach ($header as $value) {
           $this->command("{$name}: {$value}");

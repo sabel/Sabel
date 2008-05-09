@@ -41,8 +41,7 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
       $this->execAddColumn($columns);
     } else {
-      $tblName  = convert_to_tablename($this->mdlName);
-      $schema   = $this->getSchema()->getTable($tblName);
+      $schema = $this->getSchema()->getTable($this->tblName);
       $currents = $schema->getColumns();
       
       foreach ($columns as $column) {
@@ -62,10 +61,8 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
       if (is_file($restore)) unlink($restore);
       
       $columns  = $this->getReader()->readDropColumn()->getColumns();
-      $tblName  = convert_to_tablename($this->mdlName);
-      $schema   = $this->getSchema()->getTable($tblName);
+      $schema   = $this->getSchema()->getTable($this->tblName);
       $sColumns = $schema->getColumns();
-      $colNames = $schema->getColumnNames();
       
       $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeColumns($schema, $columns);
@@ -133,13 +130,12 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
   private function dropColumnsAndRemakeTable($columns, $schema)
   {
     $stmt    = $this->getStatement();
-    $tblName = $schema->getTableName();
     $pkeys   = $schema->getPrimaryKey();
     $uniques = $schema->getUniques();
     $query   = $this->makeCreateSql($columns, $pkeys, $uniques);
     
-    $quotedTblName = $stmt->quoteIdentifier($tblName);
-    $tmpTblName = "sbl_tmp_{$tblName}";
+    $quotedTblName = $stmt->quoteIdentifier($this->tblName);
+    $tmpTblName = "sbl_tmp_{$this->tblName}";
     $query = str_replace(" TABLE $quotedTblName", " TABLE $tmpTblName", $query);
     
     $stmt->getDriver()->begin();
@@ -202,8 +198,8 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
       }
     }
     
-    $tblName = $this->quoteIdentifier(convert_to_tablename($this->mdlName));
-    return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
+    return "CREATE TABLE $quotedTblName (" . implode(", ", $query) . ")";
   }
   
   protected function getBooleanAttr($value)

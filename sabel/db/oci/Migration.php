@@ -25,23 +25,20 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
   
   protected function create()
   {
-    $tblName = convert_to_tablename($this->mdlName);
-    $schema  = $this->getSchema();
-    $tables  = $schema->getTableList();
+    $schema = $this->getSchema();
+    $tables = $schema->getTableList();
     
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
-      if (in_array($tblName, $tables)) {
-        Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
+      if (in_array($this->tblName, $tables, true)) {
+        Sabel_Console::warning("table '{$this->tblName}' already exists. (SKIP)");
       } else {
         $this->createTable($this->filePath);
       }
+    } elseif (in_array($this->tblName, $tables, true)) {
+      $this->dropSequence($schema->getTable($this->tblName)->getSequenceColumn());
+      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
     } else {
-      if (in_array($tblName, $tables)) {
-        $this->dropSequence($schema->getTable($tblName)->getSequenceColumn());
-        $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($tblName));
-      } else {
-        Sabel_Console::warning("unknown table '{$tblName}'. (SKIP)");
-      }
+      Sabel_Console::warning("unknown table '{$this->tblName}'. (SKIP)");
     }
   }
   
@@ -52,11 +49,10 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     
     foreach ($create->getColumns() as $column) {
       if ($column->increment) {
-        $tblName = convert_to_tablename($this->mdlName);
-        $seqName = strtoupper($tblName) . "_" . strtoupper($column->name) . "_SEQ";
+        $seqName = strtoupper($this->tblName) . "_" . strtoupper($column->name) . "_SEQ";
         $this->executeQuery("CREATE SEQUENCE " . $seqName);
       } elseif ($column->isDate()) {
-        $tblName = $this->quoteIdentifier(convert_to_tablename($this->mdlName));
+        $tblName = $this->quoteIdentifier($this->tblName);
         $colName = $this->quoteIdentifier($column->name);
         $this->executeQuery("COMMENT ON COLUMN {$tblName}.{$colName} IS 'date'");
       }
@@ -95,8 +91,8 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
       }
     }
     
-    $tblName = $this->quoteIdentifier(convert_to_tablename($this->mdlName));
-    return "CREATE TABLE $tblName (" . implode(", ", $query) . ")";
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
+    return "CREATE TABLE $quotedTblName (" . implode(", ", $query) . ")";
   }
   
   protected function drop()
@@ -106,11 +102,11 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     if (Sabel_DB_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
-      $schema = $this->getSchema()->getTable(convert_to_tablename($this->mdlName));
+      $schema = $this->getSchema()->getTable($this->tblName);
       $writer = new Sabel_DB_Migration_Writer($restore);
-      $writer->writeTable($schema);
-      $tblName = $this->quoteIdentifier($schema->getTableName());
-      $this->executeQuery("DROP TABLE $tblName");
+      $writer->writeTable($schema)->close();
+      
+      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
       $this->dropSequence($schema->getSequenceColumn());
     } else {
       $this->createTable($restore);
@@ -120,42 +116,29 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
   private function dropSequence($incCol)
   {
     if ($incCol !== null) {
-      $tblName = convert_to_tablename($this->mdlName);
-      $seqName = strtoupper($tblName) . "_" . strtoupper($incCol) . "_SEQ";
+      $seqName = strtoupper($this->tblName) . "_" . strtoupper($incCol) . "_SEQ";
       $this->executeQuery("DROP SEQUENCE " . $seqName);
     }
   }
   
   protected function changeColumnUpgrade($columns, $schema)
   {
-    $tblName = $this->quoteIdentifier($schema->getTableName());
-    
-    foreach ($columns as $column) {
-      $current = $schema->getColumnByName($column->name);
-      $line = $this->alterChange($column, $current);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
-    }
+    $this->_changeColumn($columns, $schema);
   }
   
   protected function changeColumnDowngrade($columns, $schema)
   {
-    $tblName = $this->quoteIdentifier($schema->getTableName());
-    
-    foreach ($columns as $column) {
-      $current = $schema->getColumnByName($column->name);
-      $line = $this->alterChange($column, $current);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
-    }
+    $this->_changeColumn($columns, $schema);
   }
   
   protected function createColumnAttributes($col)
   {
     $line   = array();
     $line[] = $this->quoteIdentifier($col->name);
-    $line[] = $this->getTypeString($col);
+    $line[] = $this->getTypeDefinition($col);
     $line[] = $this->getDefaultValue($col);
     
-    if (($nullable = $this->getNullableString($col)) !== "") {
+    if (($nullable = $this->getNullableDefinition($col)) !== "") {
       $line[] = $nullable;
     }
     
@@ -171,7 +154,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
       Sabel_Console::warning("cannot modify lob column '{$current->name}'. (SKIP)");
     } elseif (!$current->isText()) {
       $col  = ($column->type === null) ? $current : $column;
-      $type = $this->getTypeString($col, false);
+      $type = $this->getTypeDefinition($col, false);
       
       if ($col->isString()) {
         $max = ($column->max === null) ? $current->max : $column->max;
@@ -203,7 +186,7 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     return implode(" ", $line);
   }
   
-  private function getTypeString($col, $withLength = true)
+  protected function getTypeDefinition($col, $withLength = true)
   {
     if ($col->isString() && $withLength) {
       return $this->types[$col->type] . "({$col->max})";
@@ -212,9 +195,26 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     }
   }
   
-  private function getNullableString($column)
+  protected function getNullableDefinition($column)
   {
     return ($column->nullable === false) ? "NOT NULL" : "";
+  }
+  
+  protected function getBooleanAttr($value)
+  {
+    $v = ($value === true) ? "1" : "0";
+    return "DEFAULT " . $v;
+  }
+  
+  private function _changeColumn($columns, $schema)
+  {
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
+    
+    foreach ($columns as $column) {
+      $current = $schema->getColumnByName($column->name);
+      $line = $this->alterChange($column, $current);
+      $this->executeQuery("ALTER TABLE $quotedTblName MODIFY $line");
+    }
   }
   
   private function valueCheck($column, $default)
@@ -223,15 +223,10 @@ class Sabel_DB_Oci_Migration extends Sabel_DB_Abstract_Migration
     
     if (($column->isBool() && !is_bool($default)) ||
         ($column->isNumeric() && !is_numeric($default))) {
-      throw new Sabel_DB_Exception("invalid default value.");
+      $message = __METHOD__ . "() invalid default value for '{$column->name}'.";
+      throw new Sabel_DB_Exception($message);
     } else {
       return true;
     }
-  }
-  
-  protected function getBooleanAttr($value)
-  {
-    $v = ($value === true) ? "1" : "0";
-    return "DEFAULT " . $v;
   }
 }

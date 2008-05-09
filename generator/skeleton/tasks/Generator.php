@@ -11,6 +11,13 @@
  */
 class Generator extends Sabel_Sakle_Task
 {
+  protected $skeletonDir = "";
+  
+  public function initialize()
+  {
+    $this->skeletonDir = RUN_BASE . DS . "tasks" . DS . "skeleton";
+  }
+  
   public function run()
   {
     define("ENVIRONMENT", $this->getEnvironment());
@@ -64,7 +71,6 @@ class Generator extends Sabel_Sakle_Task
     $mdlName  = $this->arguments[0];
     $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
     $formName = lcfirst($mdlName) . "Form";
-    $skelDir  = dirname(__FILE__) . DS . "generator";
     
     $controllerName = ucfirst($module) . "_Controllers_" . $mdlName;
     
@@ -88,7 +94,7 @@ class Generator extends Sabel_Sakle_Task
     $allowColumns  = implode(", ", $allowColumns);
     
     ob_start();
-    include ($skelDir . DS . "Controller.php");
+    include ($this->skeletonDir . DS . "controllers" . DS . "Controller.php");
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
@@ -98,10 +104,12 @@ class Generator extends Sabel_Sakle_Task
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir, 0775);
     
-    foreach (scandir($skelDir . DS . "controllerTemplates") as $item) {
+    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "general";
+    foreach (scandir($templatesDir) as $item) {
       if ($item{0} === ".") continue;
+      
       ob_start();
-      include ($skelDir . DS . "controllerTemplates" . DS . $item);
+      include ($templatesDir . DS . $item);
       $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
       file_put_contents($tplDir . DS . $item, $contents);
     }
@@ -114,7 +122,6 @@ class Generator extends Sabel_Sakle_Task
     $mdlName  = $this->arguments[0];
     $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
     $formName = lcfirst($mdlName) . "Form";
-    $skelDir  = dirname(__FILE__) . DS . "generator";
     
     $controllerName = ucfirst($module) . "_Controllers_" . $mdlName;
     
@@ -132,7 +139,7 @@ class Generator extends Sabel_Sakle_Task
     $orderColumns  = "array(" . implode(", ", $orderColumns) . ")";
     
     ob_start();
-    include ($skelDir . DS . "FlowController.php");
+    include ($this->skeletonDir . DS . "controllers" . DS . "FlowController.php");
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
@@ -142,10 +149,12 @@ class Generator extends Sabel_Sakle_Task
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir, 0775);
     
-    foreach (scandir($skelDir . DS . "flowControllerTemplates") as $item) {
+    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "flow";
+    foreach (scandir($templatesDir) as $item) {
       if ($item{0} === ".") continue;
+      
       ob_start();
-      include ($skelDir . DS . "flowControllerTemplates" . DS . $item);
+      include ($templatesDir . DS . $item);
       $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
       file_put_contents($tplDir . DS . $item, $contents);
     }
@@ -155,9 +164,8 @@ class Generator extends Sabel_Sakle_Task
   {
     array_shift($this->arguments);
     
-    $mdlName  = $this->arguments[0];
-    $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
-    $skelDir  = dirname(__FILE__) . DS . "generator";
+    $mdlName = $this->arguments[0];
+    $module  = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
     
     $controllerName = ucfirst($module) . "_Controllers_Login";
     $emailColumns = array("email", "mail_address", "mailaddress");
@@ -174,7 +182,7 @@ class Generator extends Sabel_Sakle_Task
     $primaryColumn = $metadata->getPrimaryKey();
     
     ob_start();
-    include ($skelDir . DS . "LoginController.php");
+    include ($this->skeletonDir . DS . "controllers" . DS . "LoginController.php");
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
@@ -184,10 +192,12 @@ class Generator extends Sabel_Sakle_Task
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . "login";
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir, 0775);
     
-    foreach (scandir($skelDir . DS . "loginControllerTemplates") as $item) {
+    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "login";
+    foreach (scandir($templatesDir) as $item) {
       if ($item{0} === ".") continue;
+      
       ob_start();
-      include ($skelDir . DS . "loginControllerTemplates" . DS . $item);
+      include ($templatesDir . DS . $item);
       $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
       file_put_contents($tplDir . DS . $item, $contents);
     }
@@ -199,12 +209,11 @@ class Generator extends Sabel_Sakle_Task
     
     $ctrlName = ucfirst($this->arguments[0]);
     $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
-    $skelDir  = dirname(__FILE__) . DS . "generator";
     
     $controllerName = ucfirst($module) . "_Controllers_" . $ctrlName;
     
     ob_start();
-    include ($skelDir . DS . "UploadController.php");
+    include ($this->skeletonDir . DS . "controllers" . DS . "UploadController.php");
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
@@ -217,7 +226,7 @@ class Generator extends Sabel_Sakle_Task
     $tplName  = "upload" . TPL_SUFFIX;
     
     ob_start();
-    include ($skelDir . DS . "uploadControllerTemplates" . DS . $tplName);
+    include ($this->skeletonDir . DS . "templates" . DS . "uploader" . DS . $tplName);
     $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
     file_put_contents($tplDir . DS . $tplName, $contents);
   }
@@ -261,10 +270,10 @@ class Generator extends Sabel_Sakle_Task
   public function usage()
   {
     echo "Usage: sakle Generator Model MODEL_NAME\n";
-    echo "Usage: sakle Generator Controller MODEL_NAME [MODULE_NAME]\n";
-    echo "Usage: sakle Generator FlowController MODEL_NAME [MODULE_NAME]\n";
-    echo "Usage: sakle Generator LoginController MODEL_NAME [MODULE_NAME]\n";
-    echo "Usage: sakle Generator UploadController CONTROLLER_NAME [MODULE_NAME]\n";
+    echo "       sakle Generator Controller MODEL_NAME [MODULE_NAME]\n";
+    echo "       sakle Generator FlowController MODEL_NAME [MODULE_NAME]\n";
+    echo "       sakle Generator LoginController MODEL_NAME [MODULE_NAME]\n";
+    echo "       sakle Generator UploadController CONTROLLER_NAME [MODULE_NAME]\n";
     echo "\n";
   }
 }

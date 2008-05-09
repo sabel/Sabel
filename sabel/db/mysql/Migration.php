@@ -47,17 +47,15 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
       if (is_file($restore)) unlink($restore);
       
       $schema    = $this->getSchema();
-      $tblName   = convert_to_tablename($this->mdlName);
-      $tblSchema = $schema->getTable($tblName);
-      $engine    = $schema->getTableEngine($tblName);
+      $tblSchema = $schema->getTable($this->tblName);
+      $engine    = $schema->getTableEngine($this->tblName);
       
       $writer = new Sabel_DB_Migration_Writer($restore);
       $writer->writeTable($tblSchema);
       $writer->write('$create->options("engine", "' . $engine . '");');
-      $writer->write(PHP_EOL);
-      $writer->close();
+      $writer->write(PHP_EOL)->close();
       
-      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($tblName));
+      $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
     } else {
       $this->createTable($this->getRestoreFileName());
     }
@@ -65,22 +63,22 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
   
   protected function changeColumnUpgrade($columns, $schema)
   {
-    $tblName = $this->quoteIdentifier($schema->getTableName());
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
     
     foreach ($columns as $column) {
       $current = $schema->getColumnByName($column->name);
       $line = $this->alterChange($column, $current);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+      $this->executeQuery("ALTER TABLE $quotedTblName MODIFY $line");
     }
   }
   
   protected function changeColumnDowngrade($columns, $schema)
   {
-    $tblName = $this->quoteIdentifier($schema->getTableName());
+    $quotedTblName = $this->quoteIdentifier($this->tblName);
     
     foreach ($columns as $column) {
       $line = $this->createColumnAttributes($column);
-      $this->executeQuery("ALTER TABLE $tblName MODIFY $line");
+      $this->executeQuery("ALTER TABLE $quotedTblName MODIFY $line");
     }
   }
   
@@ -88,8 +86,8 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
   {
     $line   = array();
     $line[] = $this->quoteIdentifier($col->name);
-    $line[] = $this->getTypeString($col);
-    $line[] = $this->getNullableString($col);
+    $line[] = $this->getTypeDefinition($col);
+    $line[] = $this->getNullableDefinition($col);
     $line[] = $this->getDefaultValue($col);
     
     if ($col->increment) $line[] = "AUTO_INCREMENT";
@@ -102,7 +100,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     $line[] = $this->quoteIdentifier($column->name);
     
     $c = ($column->type === null) ? $current : $column;
-    $line[] = $this->getTypeString($c, false);
+    $line[] = $this->getTypeDefinition($c, false);
     
     if ($c->isString()) {
       $max = ($column->max === null) ? $current->max : $column->max;
@@ -110,7 +108,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     }
     
     $c = ($column->nullable === null) ? $current : $column;
-    $line[] = $this->getNullableString($c);
+    $line[] = $this->getNullableDefinition($c);
     
     if (($d = $column->default) !== _NULL) {
       $cd = $current->default;
@@ -127,7 +125,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     return implode(" ", $line);
   }
   
-  private function getTypeString($col, $withLength = true)
+  protected function getTypeDefinition($col, $withLength = true)
   {
     if (!$withLength) return $this->types[$col->type];
     
@@ -138,21 +136,9 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     }
   }
   
-  private function getNullableString($column)
+  protected function getNullableDefinition($column)
   {
     return ($column->nullable === false) ? "NOT NULL" : "";
-  }
-  
-  private function valueCheck($column, $default)
-  {
-    if ($default === null) return true;
-    
-    if (($column->isBool() && !is_bool($default)) ||
-        ($column->isNumeric() && !is_numeric($default))) {
-      throw new Sabel_DB_Exception("invalid default value.");
-    } else {
-      return true;
-    }
   }
   
   protected function getDefaultValue($column)
@@ -178,5 +164,18 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
   {
     $value = ($value === true) ? "1" : "0";
     return "DEFAULT " . $value;
+  }
+  
+  private function valueCheck($column, $default)
+  {
+    if ($default === null) return true;
+    
+    if (($column->isBool() && !is_bool($default)) ||
+        ($column->isNumeric() && !is_numeric($default))) {
+      $message = __METHOD__ . "() invalid default value for '{$column->name}'.";
+      throw new Sabel_DB_Exception($message);
+    } else {
+      return true;
+    }
   }
 }

@@ -282,13 +282,17 @@ class Form_Object extends Sabel_Object
     
     if ($htmlWriter === null) {
       return $htmlWriter = new Form_Html();
-    } else {
-      return $htmlWriter->clear()
-                        ->setName($inputName)
-                        ->setValue($this->get($name))
-                        ->setId($id)
-                        ->setClass($class);
     }
+    
+    if (isset($this->columns[$name]) && $this->columns[$name]->isBool()) {
+      $value = $this->get($name);
+      if ($value !== null) $value = ($value) ? 1 : 0;
+    } else {
+      $value = $this->get($name);
+    }
+    
+    $htmlWriter->clear();
+    return $htmlWriter->setName($inputName)->setValue($value)->setId($id)->setClass($class);
   }
   
   public function __sleep()

@@ -43,7 +43,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
   {
     $line   = array();
     $line[] = $this->quoteIdentifier($column->name);
-    $line[] = $this->getDataType($column);
+    $line[] = $this->getTypeDefinition($column);
     
     if ($column->nullable === false) $line[] = "NOT NULL";
     $line[] = $this->getDefaultValue($column);
@@ -80,12 +80,12 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
     $colName = $this->quoteIdentifier($column->name);
     
     if ($current->type !== $column->type && $column->type !== null) {
-      $type = $this->getDataType($column);
+      $type = $this->getTypeDefinition($column);
       $this->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
     } elseif ($current->isString() && $current->max !== $column->max) {
       $column->type = $current->type;
       if ($column->max === null) $column->max = 255;
-      $type = $this->getDataType($column);
+      $type = $this->getTypeDefinition($column);
       $this->executeQuery("ALTER TABLE $tblName ALTER $colName TYPE $type");
     }
   }
@@ -121,7 +121,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
     }
   }
   
-  private function getDataType($col)
+  private function getTypeDefinition($col)
   {
     if ($col->increment) {
       if ($col->isInt()) {

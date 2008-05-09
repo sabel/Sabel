@@ -21,6 +21,8 @@ class Sabel_DB_Migration_Writer
   public function write($line)
   {
     fwrite($this->fp, $line);
+    
+    return $this;
   }
   
   public function close()
@@ -64,10 +66,12 @@ class Sabel_DB_Migration_Writer
               . $param->column   . '")->onDelete("'
               . $param->onDelete . '")->onUpdate("'
               . $param->onUpdate . '");';
-              
+        
         $this->write($line . PHP_EOL);
       }
     }
+    
+    return $this;
   }
   
   public function writeColumns($schema, $alterCols, $variable = '$add')
@@ -79,6 +83,8 @@ class Sabel_DB_Migration_Writer
     }
     
     $this->_writeColumns($columns, $variable);
+    
+    return $this;
   }
   
   private function _writeColumns($columns, $variable)
