@@ -44,7 +44,7 @@ class Sabel_Response_Status extends Sabel_Object
   
   public function __toString()
   {
-    return $this->statusCode . " " . $this->getStatusAsString();
+    return $this->statusCode . " " . $this->getReason();
   }
   
   public function getCode()
@@ -57,7 +57,7 @@ class Sabel_Response_Status extends Sabel_Object
     $this->statusCode = $statusCode;
   }
   
-  public function getStatusAsString()
+  public function getReason()
   {
     if (isset($this->statuses[$this->statusCode])) {
       return $this->statuses[$this->statusCode];
