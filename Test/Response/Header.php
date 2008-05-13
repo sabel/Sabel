@@ -22,8 +22,8 @@ class Test_Response_Header extends SabelTestCase
     
     $header = new Sabel_Response_Header_Cli();
     $headers = $header->output($response);
-    $this->assertEquals("Content-Type: text/html; charset=UTF-8", $headers[0]);
-    $this->assertEquals("Content-Length: 4096", $headers[1]);
+    $this->assertEquals("Content-Type: text/html; charset=UTF-8", $headers[1]);
+    $this->assertEquals("Content-Length: 4096", $headers[2]);
   }
   
   public function testOutputStatus()

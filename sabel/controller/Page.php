@@ -171,11 +171,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
         }
         
         $this->executed = true;
-        if (!$this->response->isFailure()) {
-          $this->response->success();
-        }
-      } else {
-        $this->response->success();
       }
     }
     

@@ -65,31 +65,25 @@ class Sabel_DB_Migration_Manager
     return (self::$applyMode === "downgrade");
   }
   
-  public static function setDirectory($dirPath)
+  public static function setDirectory($directory)
   {
-    self::$directory = $dirPath;
+    self::$directory = $directory;
   }
   
-  public static function getDirectory($tblName = null)
+  public static function getDirectory()
   {
-    if ($tblName === null) {
-      return self::$directory;
-    } else {
-      return self::$directory . DIRECTORY_SEPARATOR . $tblName;
-    }
+    return self::$directory;
   }
   
-  public static function getFiles($tblName)
+  public static function getFiles()
   {
-    $dirPath = self::$directory . DIRECTORY_SEPARATOR . $tblName;
-    
-    if (!is_dir($dirPath)) {
-      Sabel_Console::error("no such dirctory. '{$dirPath}'");
+    if (!is_dir(self::$directory)) {
+      Sabel_Console::error("no such dirctory. '" . self::$directory . "'");
       exit;
     }
     
     $files = array();
-    foreach (scandir($dirPath) as $file) {
+    foreach (scandir(self::$directory) as $file) {
       $num = substr($file, 0, strpos($file, "_"));
       if (!is_numeric($num)) continue;
       

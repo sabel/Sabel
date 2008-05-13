@@ -457,11 +457,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function getCount($arg1 = null, $arg2 = null)
   {
+    $result = null;
     if ($this->hasMethod("beforeSelect")) {
       $result = $this->beforeSelect();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $this->setCondition($arg1, $arg2);
       $projection = $this->projection;
       $this->projection = "COUNT(*) AS cnt";
@@ -491,11 +492,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function selectOne($arg1 = null, $arg2 = null)
   {
+    $result = null;
     if ($this->hasMethod("beforeSelect")) {
       $result = $this->beforeSelect();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       if ($arg1 === null && $this->condition === null) {
         $message = __METHOD__ . "() must set the condition.";
         throw new Sabel_DB_Exception($message);
@@ -525,11 +527,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function select($arg1 = null, $arg2 = null)
   {
+    $result = null;
     if ($this->hasMethod("beforeSelect")) {
       $result = $this->beforeSelect();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $this->setCondition($arg1, $arg2);
       $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
       $rows = $this->prepareSelect($stmt)->execute();
@@ -555,10 +558,10 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     if ($this->isSelected()) {
       $this->updateValues = array_merge($this->updateValues, $additionalValues);
-      $result = $this->_saveUpdate();
+      $result = $this->saveUpdate();
     } else {
       $this->values = array_merge($this->values, $additionalValues);
-      $result = $this->_saveInsert();
+      $result = $this->saveInsert();
     }
     
     if ($this->autoReinit) $this->initState();
@@ -569,13 +572,14 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @return array
    */
-  protected function _saveInsert()
+  protected function saveInsert()
   {
+    $result = null;
     if ($this->hasMethod("beforeInsert")) {
       $result = $this->beforeInsert();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $columns = $this->getColumns();
       $saveValues = array();
       
@@ -611,20 +615,21 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @throws Sabel_DB_Exception
    * @return array
    */
-  protected function _saveUpdate()
+  protected function saveUpdate()
   {
+    $result = null;
     if ($this->hasMethod("beforeUpdate")) {
       $result = $this->beforeUpdate();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       if (($pkey = $this->metadata->getPrimaryKey()) === null) {
-        $message = "cannot update a model(there is not primary key).";
+        $message = __METHOD__ . "() cannot update a model(there is not primary key).";
         throw new Sabel_DB_Exception($message);
-      } else {
-        foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
-          $this->setCondition($this->modelName . "." . $key, $this->__get($key));
-        }
+      }
+      
+      foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
+        $this->setCondition("{$this->modelName}.{$key}", $this->__get($key));
       }
       
       $saveValues = array();
@@ -632,9 +637,19 @@ abstract class Sabel_DB_Model extends Sabel_Object
         $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
       }
       
+      if (isset($this->metaCols["version"])) {
+        $currentVersion = $this->__get("version");
+        $saveValues["version"] = $currentVersion + 1;
+        $this->setCondition("{$this->modelName}.version", $currentVersion);
+      }
+      
       $this->updateValues = array();
       $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
       $result = $this->prepareUpdate($stmt, $saveValues)->execute();
+      
+      if (isset($this->metaCols["version"]) && $result < 1) {
+        // @todo exception?
+      }
     }
     
     if ($this->hasMethod("afterUpdate")) {
@@ -652,11 +667,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function insert(array $values = array())
   {
+    $result = null;
     if ($this->hasMethod("beforeInsert")) {
       $result = $this->beforeInsert();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $stmt   = $this->prepareStatement(Sabel_DB_Statement::INSERT);
       $result = $this->prepareInsert($stmt, $values)->execute();
     }
@@ -678,11 +694,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function update(array $values = array())
   {
+    $result = null;
     if ($this->hasMethod("beforeUpdate")) {
       $result = $this->beforeUpdate();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $stmt   = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
       $result = $this->prepareUpdate($stmt, $values)->execute();
     }
@@ -705,11 +722,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
    */
   public function delete($arg1 = null, $arg2 = null)
   {
+    $result = null;
     if ($this->hasMethod("beforeDelete")) {
       $result = $this->beforeDelete();
     }
     
-    if (!isset($result)) {
+    if ($result === null) {
       $condition = $this->getCondition();
       if (!$this->isSelected() && $arg1 === null && $condition->isEmpty()) {
         $stmt   = $this->prepareStatement(Sabel_DB_Statement::DELETE);

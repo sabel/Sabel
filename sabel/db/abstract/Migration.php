@@ -34,7 +34,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   abstract protected function getBooleanAttr($value);
   
-  public function execute($tblName, $filePath)
+  public function execute($filePath)
   {
     clearstatcache();
     
@@ -45,12 +45,17 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     
     $this->filePath = $filePath;
     $file = basename($filePath);
-    @list ($num, $command) = explode("_", $file);
-    $command = str_replace(".php", "", $command);
+    @list ($num, $mdlName, $command) = explode("_", $file);
+    
+    if ($mdlName === "query.php") {
+      $command = "query";
+    } else {
+      $command = str_replace(".php", "", $command);
+    }
     
     $this->version = $num;
-    $this->tblName = $tblName;
-    $this->mdlName = convert_to_modelname($tblName);
+    $this->mdlName = $mdlName;
+    $this->tblName = convert_to_tablename($mdlName);
     
     if ($this->hasMethod($command)) {
       $this->$command();
@@ -220,7 +225,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   protected function getRestoreFileName()
   {
-    $directory = Sabel_DB_Migration_Manager::getDirectory($this->tblName);
+    $directory = Sabel_DB_Migration_Manager::getDirectory();
     $dir = $directory . DIRECTORY_SEPARATOR . "restores";
     if (!is_dir($dir)) mkdir($dir);
     

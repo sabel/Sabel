@@ -74,8 +74,20 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
   {
     clearstatcache();
     
+    static $isWin = null;
+    
+    if ($isWin === null) {
+      $isWin = (DIRECTORY_SEPARATOR === '\\');
+    }
+    
     $path  = "";
     $parts = explode(DIRECTORY_SEPARATOR, $directory);
+    
+    if ($isWin) {
+      $path = $parts[0] . DIRECTORY_SEPARATOR . $parts[1];
+      unset($parts[0]);
+      unset($parts[1]);
+    }
     
     foreach ($parts as $part) {
       if ($part === "") continue;

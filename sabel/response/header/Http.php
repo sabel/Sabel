@@ -13,29 +13,20 @@ class Sabel_Response_Header_Http
 {
   public function output(Sabel_Response $response)
   {
+    $httpVersion = "HTTP/1.0";
+    
+    header($httpVersion . " " . $response->getStatus()->toString());
+    
     if ($response->hasHeaders()) {
       foreach ($response->getHeaders() as $message => $value) {
         header(ucfirst($message) . ": " . $value);
       }
     }
     
-    if ($response->isSuccess()) return;
-    
     if ($response->isRedirected()) {
       $location = $response->getLocation();
-      header("Location: $location");
       l("redirect: $location");
-    } elseif ($response->isNotFound()) {
-      header("HTTP/1.0 404 Not Found");
-    } elseif ($response->isForbidden()) {
-      header("HTTP/1.0 403 Forbidden");
-    } elseif ($response->isBadRequest()) {
-      header("HTTP/1.0 400 Bad Request");
-    } elseif ($response->isServerError()) {
-      header("HTTP/1.0 500 Internal Server Error");
-    } elseif ($response->isNotModified()) {
-      header("HTTP/1.0 304 Not Modified");
-      exit;
+      header("Location: $location");
     }
   }
 }

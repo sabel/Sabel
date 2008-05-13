@@ -11,12 +11,17 @@
  */
 class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
+  protected $status      = null;
   protected $location    = "";
   protected $locationUri = "";
-  protected $status      = Sabel_Response::SUCCESS;
   protected $contentType = "";
   protected $headers   = array();
   protected $responses = array();
+  
+  public function __construct()
+  {
+    $this->status = new Sabel_Response_Status();
+  }
   
   public function getStatus()
   {
@@ -92,82 +97,77 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   
   public function success()
   {
-    $this->status = Sabel_Response::SUCCESS;
+    $this->status->setCode(Sabel_Response_Status::OK);
     
     return $this;
   }
   
   public function isSuccess()
   {
-    return ($this->status === Sabel_Response::SUCCESS);
+    return ($this->status->getCode() === Sabel_Response_Status::OK);
   }
   
   public function isFailure()
   {
-    $status = $this->status;
-    
-    return ($status === Sabel_Response::NOT_FOUND   ||
-            $status === Sabel_Response::FORBIDDEN   ||
-            $status === Sabel_Response::BAD_REQUEST ||
-            $status === Sabel_Response::SERVER_ERROR);
+    return $this->status->isFailure();
   }
   
   public function notFound()
   {
-    $this->status = Sabel_Response::NOT_FOUND;
+    $this->status->setCode(Sabel_Response_Status::NOT_FOUND);
     
     return $this;
   }
   
   public function isNotFound()
   {
-    return ($this->status === Sabel_Response::NOT_FOUND);
+    return ($this->status->getCode() === Sabel_Response_Status::NOT_FOUND);
   }
   
   public function serverError()
   {
-    $this->status = Sabel_Response::SERVER_ERROR;
+    $this->status->setCode(Sabel_Response_Status::INTERNAL_SERVER_ERROR);
     
     return $this;
   }
   
   public function isServerError()
   {
-    return ($this->status === Sabel_Response::SERVER_ERROR);
+    return ($this->status->getCode() === Sabel_Response_Status::INTERNAL_SERVER_ERROR);
   }
   
   public function forbidden()
   {
-    $this->status = Sabel_Response::FORBIDDEN;
+    $this->status->setCode(Sabel_Response_Status::FORBIDDEN);
     
     return $this;
   }
   
   public function isForbidden()
   {
-    return ($this->status === Sabel_Response::FORBIDDEN);
+    return ($this->status->getCode() === Sabel_Response_Status::FORBIDDEN);
   }
   
   public function badRequest()
   {
-    $this->status = Sabel_Response::BAD_REQUEST;
+    $this->status->setCode(Sabel_Response_Status::BAD_REQUEST);
     
     return $this;
   }
   
   public function isBadRequest()
   {
-    return ($this->status === Sabel_Response::BAD_REQUEST);
+    return ($this->status->getCode() === Sabel_Response_Status::BAD_REQUEST);
   }
   
   public function notModified()
   {
-    $this->status = Sabel_Response::NOT_MODIFIED;
+    $this->status->setCode(Sabel_Response_Status::NOT_MODIFIED);
   }
   
   public function isNotModified()
   {
-    return $this->status === Sabel_Response::NOT_MODIFIED;
+    return ($this->status->getCode() === Sabel_Response_Status::NOT_MODIFIED);
   }
   
   public function getLocation()
@@ -182,15 +182,16 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   
   public function location($host, $to)
   {
-    $this->location    = "http://" . $host . "/" . $to;
+    $this->location = "http://" . $host . "/" . $to;
     $this->locationUri = $to;
-    $this->status      = Sabel_Response::REDIRECTED;
+    
+    $this->status->setCode(Sabel_Response_Status::FOUND);
     
     return $this;
   }
   
   public function isRedirected()
   {
-    return ($this->status === Sabel_Response::REDIRECTED);
+    return ($this->status->getCode() === Sabel_Response_Status::FOUND);
   }
 }
