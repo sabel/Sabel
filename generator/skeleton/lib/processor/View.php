@@ -99,7 +99,8 @@ class Processor_View extends Sabel_Bus_Processor
   protected function getView($response, $action)
   {
     if (!$response->isSuccess()) {
-      $this->view->setName(lcfirst($response->getStatus()->getReason()));
+      $reason = $response->getStatus()->getReason();
+      $this->view->setName(lcfirst(str_replace(" ", "", $reason)));
     } elseif ($this->view->getName() === "") {
       if ($this->isAjax) {
         $this->view->setName($action . ".ajax");

@@ -24,7 +24,7 @@ class Processor_Response extends Sabel_Bus_Processor
       if (!is_object($exception)) return;
       
       $eol = (ENVIRONMENT === DEVELOPMENT) ? "<br />" : PHP_EOL;
-      $msg = "Exception: (" . get_class($exception) . ") "
+      $msg = get_class($exception) . ": "
            . $exception->getMessage()  . $eol
            . "At: " . date("r") . $eol . $eol
            . Sabel_Exception_Printer::printTrace($exception, $eol, true);

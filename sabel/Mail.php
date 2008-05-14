@@ -48,10 +48,32 @@ class Sabel_Mail extends Sabel_Object
    */
   protected $isMbstringLoaded = false;
   
-  public function __construct($charset = "ISO-8859-1")
+  /**
+   * @var string
+   */
+  protected static $EOL = "\r\n";
+  
+  public function __construct($charset = "ISO-8859-1", $eol = "\r\n")
   {
+    self::$EOL = $eol;
+    
     $this->charset = $charset;
     $this->isMbstringLoaded = extension_loaded("mbstring");
+  }
+  
+  public static function setEol($eol)
+  {
+    self::$EOL = $eol;
+  }
+  
+  public static function getEol()
+  {
+    return self::$EOL;
+  }
+  
+  public function setCharset($charset)
+  {
+    $this->charset = $charset;
   }
   
   public function getCharset()
@@ -106,6 +128,24 @@ class Sabel_Mail extends Sabel_Object
     }
     
     return $this;
+  }
+  
+  public function setTo($to)
+  {
+    if (isset($this->headers["To"])) {
+      $this->headers["To"] = array();
+    }
+    
+    if (is_string($to)) {
+      $this->headers["To"] = array(array("address" => $to, "name" => ""));
+    } elseif (is_array($to)) {
+      foreach ($to as $recipient) {
+        $this->headers["To"][] = array("address" => $recipient, "name" => "");
+      }
+    } else {
+      $message = __METHOD__ . "() argument must be a string or an array.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function addCc($to, $name = "")
@@ -198,7 +238,7 @@ class Sabel_Mail extends Sabel_Object
     if ($this->isMbstringLoaded) {
       return mb_encode_mimeheader($header, $this->charset);
     } else {
-      $quoted = Sabel_Mail_QuotedPrintable::encode($header, self::LINELENGTH, "\r\n");
+      $quoted = Sabel_Mail_QuotedPrintable::encode($header, self::LINELENGTH, self::$EOL);
       $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
       return "=?{$this->charset}?Q?{$quoted}?=";
     }
@@ -228,19 +268,16 @@ class Sabel_Mail extends Sabel_Object
         $html = mb_convert_encoding($html, $this->charset);
       }
       
-      $body = "--{$boundary}\r\n"
-            . $this->createBodyHeader($this->bodyText) . "\r\n"
-            . "\r\n"
-            . $text
-            . "\r\n\r\n"
-            . "--{$boundary}\r\n"
-            . $this->createBodyHeader($this->bodyHtml) . "\r\n"
-            . "\r\n"
-            . $html
-            . "\r\n\r\n"
-            . "--{$boundary}--";
+      $body   = array();
+      $body[] = "--{$boundary}";
+      $body[] = $this->createBodyHeader($this->bodyText) . self::$EOL;
+      $body[] = $text . self::$EOL;
+      $body[] = "--{$boundary}";
+      $body[] = $this->createBodyHeader($this->bodyHtml) . self::$EOL;
+      $body[] = $html . self::$EOL;
+      $body[] = "--{$boundary}--";
       
-      return $body;
+      return implode(self::$EOL, $body);
     }
     
     if ($this->bodyText === null && $this->bodyHtml === null) {
@@ -261,11 +298,10 @@ class Sabel_Mail extends Sabel_Object
     } else {
       $this->headers["Content-Type"] = 'multipart/mixed; boundary="' . $boundary . '"';
       
-      $body = "--{$boundary}\r\n"
-            . $this->createBodyHeader($bodyObj) . "\r\n"
-            . "\r\n"
-            . $bodyObj->getText()
-            . "\r\n\r\n";
+      $body   = array();
+      $body[] = "--{$boundary}";
+      $body[] = $this->createBodyHeader($bodyObj) . self::$EOL;
+      $body[] = $bodyObj->getText() . self::$EOL;
       
       foreach ($this->attachments as $attachment) {
         $name = $attachment->getName();
@@ -273,9 +309,9 @@ class Sabel_Mail extends Sabel_Object
         $encoding = strtolower($attachment->getEncoding());
         
         if ($encoding === "base64") {
-          $data = rtrim(chunk_split(base64_encode($data), self::LINELENGTH, "\r\n"));
+          $data = rtrim(chunk_split(base64_encode($data), self::LINELENGTH, self::$EOL));
         } elseif ($encoding === "quoted-printable") {
-          $quoted = Sabel_Mail_QuotedPrintable::encode($data, self::LINELENGTH, "\r\n");
+          $quoted = Sabel_Mail_QuotedPrintable::encode($data, self::LINELENGTH, self::$EOL);
           $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
           $data   = "=?{$this->charset}?Q?{$quoted}?=";
         } else {
@@ -283,23 +319,22 @@ class Sabel_Mail extends Sabel_Object
           throw new Sabel_Mail_Exception($message);
         }
         
-        $body .= "--{$boundary}\r\n"
-               . "Content-Disposition: " . $attachment->getDisposition() . "; filename=\"{$name}\"\r\n"
-               . "Content-Transfer-Encoding: {$encoding}\r\n"
-               . "Content-Type: " . $attachment->getType() . "; name=\"{$name}\"\r\n"
-               . "\r\n"
-               . $data
-               . "\r\n\r\n";
+        $body[] = "--{$boundary}";
+        $body[] = "Content-Disposition: " . $attachment->getDisposition() . "; filename=\"{$name}\"";
+        $body[] = "Content-Transfer-Encoding: {$encoding}";
+        $body[] = "Content-Type: " . $attachment->getType() . "; name=\"{$name}\"" . self::$EOL;
+        $body[] = $data . self::$EOL;
       }
       
-      return $body . "--{$boundary}--";
+      $body[] = "--{$boundary}--";
+      return implode(self::$EOL, $body);
     }
   }
   
   protected function createBodyHeader($body)
   {
-    return "Content-Disposition: " . $body->getDisposition()    . "\r\n"
-         . "Content-Transfer-Encoding: " . $body->getEncoding() . "\r\n"
+    return "Content-Disposition: " . $body->getDisposition()    . self::$EOL
+         . "Content-Transfer-Encoding: " . $body->getEncoding() . self::$EOL
          . "Content-Type: " . $body->getType() . "; charset=" . $this->charset;
   }
 }

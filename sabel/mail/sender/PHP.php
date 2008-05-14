@@ -16,7 +16,7 @@ class Sabel_Mail_Sender_PHP
   {
     $recipients  = $this->getRecipients($headers);
     $subject     = $this->getSubject($headers);
-    $headersText = implode("\r\n", $this->createHeaderText($headers));
+    $headersText = implode(Sabel_Mail::getEol(), $this->createHeaderText($headers));
     
     if (isset($options["parameters"])) {
       return mail($recipients, $subject, $body, $headersText, $options["parameters"]);
@@ -40,6 +40,14 @@ class Sabel_Mail_Sender_PHP
         } else {
           $headers[] = "From: {$header["name"]} <{$header["address"]}>";
         }
+      } elseif ($name === "Cc") {
+        foreach ($header as $value) {
+          if ($value["name"] === "") {
+            $headers[] = "Cc: <{$value["address"]}>";
+          } else {
+            $headers[] = "Cc: {$value["name"]} <{$value["address"]}>";
+          }
+        }
       } elseif (is_array($header)) {
         foreach ($header as $value) {
           $headers[] = $name . ": " . $value;
@@ -50,7 +58,7 @@ class Sabel_Mail_Sender_PHP
     }
     
     if (!$hasMimeVersion) {
-      $headers[] = "MIME-Version: 1.0";
+      $headers[] = "Mime-Version: 1.0";
     }
     
     return $headers;
@@ -60,9 +68,7 @@ class Sabel_Mail_Sender_PHP
   {
     $recipients = array();
     if (isset($headers["To"])) {
-      $to = $headers["To"];
-      unset($headers["To"]);
-      foreach ($to as $recipient) {
+      foreach ($headers["To"] as $recipient) {
         if ($recipient["name"] === "") {
           $recipients[] = $recipient["address"];
         } else {
@@ -70,6 +76,7 @@ class Sabel_Mail_Sender_PHP
         }
       }
       
+      unset($headers["To"]);
       return implode(", ", $recipients);
     } else {
       $message = __METHOD__ . "() empty recipients.";

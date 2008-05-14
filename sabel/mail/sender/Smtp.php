@@ -12,6 +12,8 @@
 class Sabel_Mail_Sender_Smtp
   extends Sabel_Object implements Sabel_Mail_Sender_Interface
 {
+  const EOL = "\r\n";
+  
   /**
    * @var array
    */
@@ -29,34 +31,24 @@ class Sabel_Mail_Sender_Smtp
     }
     
     $this->config = $config;
+    $this->connect();
+  }
+  
+  public function disconnect()
+  {
+    if (is_resource($this->smtp)) {
+      fclose($this->smtp);
+    }
   }
   
   public function send(array $headers, $body, $options = array())
   {
-    if (!isset($headers["Mime-Version"])) {
-      $headers["Mime-Version"] = "1.0";
-    }
-    
-    $this->connect();
-    
-    if (isset($this->config["auth"])) {
-      try {
-        $this->_auth($this->config["auth"]);
-      } catch (Sabel_Mail_Smtp_Exception $e) {
-        $exception = new Sabel_Mail_Smtp_Exception_AuthFailure($e->getMessage());
-        $exception->setResponseCode($e->getResponseCode());
-        throw $exception;
-      }
-    }
-    
     $this->command("MAIL FROM:<{$headers["From"]["address"]}>", "250");
     $this->sendRcptTo($headers);
     $this->command("DATA", "354");
     $this->sendHeaders($headers);
-    $this->command("\r\n$body");
-    $this->command("\r\n.", "250");
-    
-    fclose($this->smtp);
+    $this->command(self::EOL . $body);
+    $this->command(self::EOL . ".", "250");
   }
   
   protected function connect()
@@ -66,7 +58,7 @@ class Sabel_Mail_Sender_Smtp
     if (isset($this->config["port"])) {
       $port = $this->config["port"];
     } else {
-      $_tmp = substr($server, 0, 6);
+      $_tmp = strtolower(substr($server, 0, 6));
       $port = ($_tmp === "ssl://" || $_tmp === "tls://") ? "465" : "25";
     }
     
@@ -81,6 +73,7 @@ class Sabel_Mail_Sender_Smtp
     
     $this->smtp = $smtp;
     $this->command("EHLO {$server}");
+    
     while ($result = trim(fgets($this->smtp))) {
       if (strpos($result, "250 ") === 0) break;
       
@@ -89,6 +82,16 @@ class Sabel_Mail_Sender_Smtp
         $message = "got unexpected response code '{$matches[0]}'.";
         $exception = new Sabel_Mail_Smtp_Exception($message);
         $exception->setResponseCode($matches[0]);
+        throw $exception;
+      }
+    }
+    
+    if (isset($this->config["auth"])) {
+      try {
+        $this->_auth($this->config["auth"]);
+      } catch (Sabel_Mail_Smtp_Exception $e) {
+        $exception = new Sabel_Mail_Smtp_Exception_AuthFailure($e->getMessage());
+        $exception->setResponseCode($e->getResponseCode());
         throw $exception;
       }
     }
@@ -120,7 +123,11 @@ class Sabel_Mail_Sender_Smtp
   
   protected function sendHeaders($headers)
   {
+    $hasMimeVersion = false;
     foreach ($headers as $name => $header) {
+      $lowered = strtolower($name);
+      if ($lowered === "mime-version") $hasMimeVersion = true;
+      
       if ($name === "From") {
         if ($header["name"] === "") {
           $this->command("From: <{$header["address"]}>");
@@ -145,6 +152,10 @@ class Sabel_Mail_Sender_Smtp
       } else {
         $this->command("{$name}: {$header}");
       }
+    }
+    
+    if (!$hasMimeVersion) {
+      $this->command("Mime-Version: 1.0");
     }
   }
   
@@ -181,7 +192,7 @@ class Sabel_Mail_Sender_Smtp
   
   protected function command($command, $expectedStatus = null)
   {
-    fputs($this->smtp, $command . "\r\n");
+    fputs($this->smtp, $command . self::EOL);
     
     if ($expectedStatus === null) {
       return true;
