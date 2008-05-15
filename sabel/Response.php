@@ -29,8 +29,7 @@ interface Sabel_Response
   public function isRedirected();
   
   public function getLocation();
-  public function getLocationUri();
-  public function location($host, $to);
+  public function setLocation($to, $host = null);
   
   public function setResponse($name, $value);
   public function getResponse($name);

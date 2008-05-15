@@ -13,7 +13,6 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
   protected $status      = null;
   protected $location    = "";
-  protected $locationUri = "";
   protected $contentType = "";
   protected $headers   = array();
   protected $responses = array();
@@ -170,24 +169,22 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     return ($this->status->getCode() === Sabel_Response_Status::NOT_MODIFIED);
   }
   
-  public function getLocation()
+  public function setLocation($to, $host = null)
   {
-    return $this->location;
-  }
-  
-  public function getLocationUri()
-  {
-    return $this->locationUri;
-  }
-  
-  public function location($host, $to)
-  {
-    $this->location = "http://" . $host . "/" . $to;
-    $this->locationUri = $to;
+    if ($host === null) {
+      $this->location = $to;
+    } else {
+      $this->location = "http://" . $host . "/" . $to;
+    }
     
     $this->status->setCode(Sabel_Response_Status::FOUND);
     
     return $this;
+  }
+  
+  public function getLocation()
+  {
+    return $this->location;
   }
   
   public function isRedirected()

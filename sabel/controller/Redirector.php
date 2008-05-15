@@ -17,6 +17,11 @@ class Sabel_Controller_Redirector
   protected $url = "";
   
   /**
+   * @var string
+   */
+  protected $uri = "";
+  
+  /**
    * @var boolean
    */
   protected $redirected = false;
@@ -48,7 +53,7 @@ class Sabel_Controller_Redirector
     $this->parameters = $parameters;
     
     $candidate = Sabel_Context::getContext()->getCandidate();
-    $this->_redirect($candidate->uri($uriParameter));
+    $this->uri($candidate->uri($uriParameter));
   }
   
   /**
@@ -71,28 +76,33 @@ class Sabel_Controller_Redirector
   }
   
   /**
+   * @param string $uri
+   *
+   * @return void
+   */
+  public function uri($uri)
+  {
+    if ($this->hasParameters()){
+      $buffer = array();
+      foreach ($this->parameters as $k => $v) $buffer[] = "{$k}={$v}";
+      $this->uri = $uri . "?" . implode("&", $buffer);
+    } else {
+      $this->uri = $uri;
+    }
+    
+    $this->redirected = true;
+  }
+  
+  public function getUri()
+  {
+    return $this->uri;
+  }
+  
+  /**
    * @return boolean
    */
   public function hasParameters()
   {
     return (count($this->parameters) > 0);
-  }
-  
-  /**
-   * HTTP Redirect to another location.
-   *
-   * @param string $to
-   *
-   * @return void
-   */
-  private function _redirect($to)
-  {
-    if ($this->hasParameters()){
-      $buffer = array();
-      foreach ($this->parameters as $k => $v) $buffer[] = "{$k}={$v}";
-      $this->url = $to . "?" . implode("&", $buffer);
-    } else {
-      $this->url = $to;
-    }
   }
 }
