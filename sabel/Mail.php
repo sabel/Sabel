@@ -250,6 +250,24 @@ class Sabel_Mail extends Sabel_Object
       $this->sender = new Sabel_Mail_Sender_PHP();
     }
     
+    $hasMessageId  = false;
+    $hasMimeHeader = false;
+    
+    foreach ($this->headers as $name => $header) {
+      $lowered = strtolower($name);
+      if ($lowered === "message-id")   $hasMessageId  = true;
+      if ($lowered === "mime-version") $hasMimeHeader = true;
+    }
+    
+    if (!$hasMessageId) {
+      list (, $host) = explode("@", $this->headers["From"]["address"]);
+      $this->headers["Message-Id"] = "<" . md5hash() . "@{$host}>";
+    }
+    
+    if (!$hasMimeHeader) {
+      $this->headers["Mime-Version"] = "1.0";
+    }
+    
     $bodyText = $this->createBodyText();
     return $this->sender->send($this->headers, $bodyText, $options);
   }

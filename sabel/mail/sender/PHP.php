@@ -28,12 +28,8 @@ class Sabel_Mail_Sender_PHP
   protected function createHeaderText($headersArray)
   {
     $headers = array();
-    $hasMimeVersion = false;
     
     foreach ($headersArray as $name => $header) {
-      $lowered = strtolower($name);
-      if ($lowered === "mime-version") $hasMimeVersion = true;
-      
       if ($name === "From") {
         if ($header["name"] === "") {
           $headers[] = "From: <{$header["address"]}>";
@@ -55,10 +51,6 @@ class Sabel_Mail_Sender_PHP
       } else {
         $headers[] = $name . ": " . $header;
       }
-    }
-    
-    if (!$hasMimeVersion) {
-      $headers[] = "Mime-Version: 1.0";
     }
     
     return $headers;

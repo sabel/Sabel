@@ -123,11 +123,7 @@ class Sabel_Mail_Sender_Smtp
   
   protected function sendHeaders($headers)
   {
-    $hasMimeVersion = false;
     foreach ($headers as $name => $header) {
-      $lowered = strtolower($name);
-      if ($lowered === "mime-version") $hasMimeVersion = true;
-      
       if ($name === "From") {
         if ($header["name"] === "") {
           $this->command("From: <{$header["address"]}>");
@@ -152,10 +148,6 @@ class Sabel_Mail_Sender_Smtp
       } else {
         $this->command("{$name}: {$header}");
       }
-    }
-    
-    if (!$hasMimeVersion) {
-      $this->command("Mime-Version: 1.0");
     }
   }
   
@@ -192,7 +184,7 @@ class Sabel_Mail_Sender_Smtp
   
   protected function command($command, $expectedStatus = null)
   {
-    fputs($this->smtp, $command . self::EOL);
+    fwrite($this->smtp, $command . self::EOL);
     
     if ($expectedStatus === null) {
       return true;
