@@ -4,7 +4,7 @@
  * Sabel_Http_Response
  *
  * @category   Mail
- * @package    org.sabel.request
+ * @package    org.sabel.http
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -43,15 +43,9 @@ class Sabel_Http_Response extends Sabel_Object
     // @todo chunked
     
     preg_match("/(\r\n|\n|\r)/", $responseText, $matches);
-    
-    if (!isset($matches[0])) {
-      $this->headers  = array();
-      $this->contents = "";
-      return;
-    }
+    if (!isset($matches[0])) return;
     
     $eol = $matches[0];
-    
     $headers = array();
     $_tmp = explode($eol, $responseText);
     
@@ -63,11 +57,21 @@ class Sabel_Http_Response extends Sabel_Object
         $this->statusCode = (int)$exp[1];
         $this->statusReason = $exp[2];
       } else {
-        $exp = explode(":", $line, 2);
-        $headers[$exp[0]] = ltrim($exp[1]);
+        list ($key, $value) = explode(":", $line, 2);
+        $value = ltrim($value);
+        if (isset($headers[$key])) {
+          if (is_array($headers[$key])) {
+            $headers[$key][] = $value;
+          } else {
+            $headers[$key] = array($headers[$key], $value);
+          }
+        } else {
+          $headers[$key] = $value;
+        }
       }
     }
     
+    dump($headers);
     $this->headers  = $headers;
     $this->contents = implode($eol, $_tmp);
     

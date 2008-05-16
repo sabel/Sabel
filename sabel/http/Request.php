@@ -4,7 +4,7 @@
  * Sabel_Http_Request
  *
  * @category   Mail
- * @package    org.sabel.request
+ * @package    org.sabel.http
  * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -16,14 +16,26 @@ class Sabel_Http_Request extends Sabel_Object
   protected $auth = null;
   protected $socket = null;
   
+  protected $cookies = array();
+  
   protected $getValues = array();
   protected $postValues = array();
   
   protected $config = array(
     "maxRedirects" => 5,
-    "timeout"      => 10,
+    "timeout"      => 100,
+    "useCookie"    => true,
+    "useProxy"     => false,
     "keepAlive"    => false,
     "httpVersion"  => "1.0",  // @todo 1.0 -> 1.1
+  );
+  
+  protected $proxyConfig = array(
+    "host"      => "",
+    "port"      => 8080,
+    "transport" => "tcp",
+    "user"      => "",
+    "password"  => ""
   );
   
   protected $headers = array(
@@ -42,14 +54,23 @@ class Sabel_Http_Request extends Sabel_Object
     $this->method = $method;
   }
   
-  public function setConfig(array $config)
+  public function setUri($uri)
   {
-    $this->config = array_merge($this->config, $config);
+    $this->uri = $uri;
+    
+    return $this;
   }
   
   public function setMethod($method)
   {
     $this->method = $method;
+    
+    return $this;
+  }
+  
+  public function setConfig(array $config)
+  {
+    $this->config = array_merge($this->config, $config);
   }
   
   public function setHeader($name, $value)
@@ -88,7 +109,41 @@ class Sabel_Http_Request extends Sabel_Object
       }
     }
     
-    $this->files[$name] = array("formName" => $formName, "contentType" => $contentType, "data" => $data);
+    $this->files[] = array("name"        => $name,
+                           "formName"    => $formName,
+                           "contentType" => $contentType,
+                           "data"        => $data);
+  }
+  
+  public function cookie($key, $value, $expire = null, $path = "/", $domain = null, $secure = false)
+  {
+    $cookie = array("name" => $key, "value" => $value, "path" => $path, "secure" => $secure);
+    if ($expire !== null) $cookie["expires"] = $expire;
+    
+    if ($domain === null) {
+      $parsed = parse_url($this->uri);
+      $cookie["domain"] = $parsed["host"];
+    } else {
+      $cookie["domain"] = $domain;
+    }
+    
+    $this->cookies[] = $cookie;
+  }
+  
+  public function deleteCookie($name, $path = "/", $domain = null)
+  {
+    if ($domain === null) {
+      $parsed = parse_url($this->uri);
+      $domain = $parsed["host"];
+    }
+    
+    foreach ($this->cookies as $i => $cookie) {
+      if ($cookie["name"]   === $name   &&
+          $cookie["domain"] === $domain &&
+          $cookie["path"]   === $path) {
+        unset($this->cookies[$i]);
+      }
+    }
   }
   
   public function setAuth($user, $password)
@@ -100,11 +155,36 @@ class Sabel_Http_Request extends Sabel_Object
     }
   }
   
-  public function connect($host, $port, $transport = "tcp")
+  public function setProxy($config)
+  {
+    if ($config === false) {
+      $this->proxyConfig = array("host"      => "",
+                                 "port"      => 8080,
+                                 "transport" => "tcp",
+                                 "user"      => "",
+                                 "password"  => "");
+      
+      $this->config["useProxy"] = false;
+    } elseif (is_array($config)) {
+      $this->proxyConfig = array_merge($this->proxyConfig, $config);
+      $this->config["useProxy"] = true;
+    } else {
+      $message = __METHOD__ . "() argument must be an array or false.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
+  public function connect(Sabel_Http_Uri $uri)
   {
     if ($this->socket === null) {
-      $host = $transport . "://{$host}";
-      $this->socket = fsockopen($host, $port, $errno, $errstr, $this->config["timeout"]);
+      if ($this->config["useProxy"]) {
+        $conf = $this->proxyConfig;
+        $host = $conf["transport"] . "://" . $conf["host"];
+        $this->socket = fsockopen($host, $conf["port"], $errno, $errstr, $this->config["timeout"]);
+      } else {
+        $host = $uri->transport . "://" . $uri->host;
+        $this->socket = fsockopen($host, $uri->port, $errno, $errstr, $this->config["timeout"]);
+      }
       
       if (!$this->socket) {
         $message = __METHOD__ . "() {$errno}: {$errstr}";
@@ -125,8 +205,8 @@ class Sabel_Http_Request extends Sabel_Object
   
   public function request()
   {
-    list ($host, $port, $path, $transport) = $this->getRequestInfo($this->uri);
-    $response = $this->_request($host, $port, $path, $transport);
+    $uri = new Sabel_Http_Uri($this->uri);
+    $response = $this->_request($uri);
     
     if ($this->config["maxRedirects"] > 0 && (int)floor($response->getStatusCode() / 100) === 3) {
       // @todo RFC2616
@@ -136,17 +216,17 @@ class Sabel_Http_Request extends Sabel_Object
       for ($i = 0; $i < $this->config["maxRedirects"]; $i++) {
         $location = $response->getHeader("Location");
         if (preg_match("@^https?://@", $location) === 1) {
-          list ($host, $port, $path, $transport) = $this->getRequestInfo($location);
+          $uri = new Sabel_Http_Uri($location);
         } elseif (strpos($location, "/") === 0) {
-          $path = $location;
+          $uri->setPath($location);
         } else {
-          $exp = explode("/", $path);
+          $exp = explode("/", $uri->path);
           array_pop($exp);
           $exp[] = $location;
-          $path = implode("/", $exp);
+          $uri->setPath(implode("/", $exp));
         }
         
-        $response = $this->_request($host, $port, $path, $transport);
+        $response = $this->_request($uri);
         if ((int)floor($response->getStatusCode() / 100) !== 3) break;
       }
     }
@@ -154,45 +234,13 @@ class Sabel_Http_Request extends Sabel_Object
     return $response;
   }
   
-  protected function prepareRequest($host, $path)
-  {
-    if (!empty($this->getValues)) {
-      $path .= "?" . http_build_query($this->getValues, "", "&");
-    }
-    
-    $httpVer   = $this->config["httpVersion"];
-    $request   = array();
-    $request[] = strtoupper($this->method) . " {$path} HTTP/{$httpVer}";
-    $request[] = "Host: $host";
-    
-    if ($this->config["keepAlive"]) {
-      $this->headers["Connection"] = "keep-alive";
-    } else {
-      unset($this->headers["Keep-Alive"]);
-    }
-    
-    $body = $this->buildBody();
-    
-    foreach ($this->headers as $key => $value) {
-      $request[] = $key . ": " . $value;
-    }
-    
-    if ($this->auth !== null) {
-      $auth = $this->auth["user"] . ":" . $this->auth["password"];
-      $request[] = "Authorization: Basic " . base64_encode($auth);
-    }
-    
-    $request = implode("\r\n", $request) . "\r\n\r\n";
-    if ($body !== "") $request .= $body;
-    
-    return $request;
-  }
-  
   protected function buildBody()
   {
     $body = "";
     
-    if ($this->method !== "POST") {
+    if ($this->method === "GET") {
+      unset($this->headers["Content-Type"]);
+      unset($this->headers["Content-Length"]);
       return $body;
     }
     
@@ -207,8 +255,10 @@ class Sabel_Http_Request extends Sabel_Object
       }
       
       foreach ($this->files as $name => $file) {
+        $name   = $file["name"];
+        $input  = $file["formName"];
         $body[] = "--" . $boundary;
-        $body[] = "Content-Disposition: form-data; name=\"{$file["formName"]}\"; filename=\"{$name}\"";
+        $body[] = "Content-Disposition: form-data; name=\"{$input}\"; filename=\"{$name}\"";
         $body[] = "Content-Type: " . $file["contentType"] . "\r\n";
         $body[] = $file["data"];
       }
@@ -226,11 +276,12 @@ class Sabel_Http_Request extends Sabel_Object
     return $body;
   }
   
-  protected function _request($host, $port, $path, $transport = "tcp")
+  protected function _request(Sabel_Http_Uri $uri)
   {
-    $request = $this->prepareRequest($host, $path);
-    $socket  = $this->connect($host, $port, $transport);
+    $request = $this->prepareRequest($uri);
+    $socket  = $this->connect($uri);
     
+    dump($request);
     if (fwrite($socket, $request) === false) {
       $message = __METHOD__ . "() request failed.";
       throw new Sabel_Exception_Runtime($message);
@@ -244,6 +295,11 @@ class Sabel_Http_Request extends Sabel_Object
     }
     
     $response = new Sabel_Http_Response(implode("", $responseText));
+    
+    if ($this->config["useCookie"]) {
+      $this->_setCookie($response, $uri->host);
+    }
+    
     if ($response->getHeader("Connection") === "close") {
       $this->disconnect();
     }
@@ -251,24 +307,127 @@ class Sabel_Http_Request extends Sabel_Object
     return $response;
   }
   
-  protected function getRequestInfo($uri)
+  protected function prepareRequest(Sabel_Http_Uri $uri)
   {
-    $transport = "tcp";
-    $parsed    = parse_url($uri);
-    $host      = $parsed["host"];
-    $path      = $parsed["path"];
+    $path  = $uri->path;
+    $query = $uri->query;
     
-    if (isset($parsed["query"])) {
-      $path .= "?" . $parsed["query"];
+    if ($query) $path .= "?" . $query;
+    
+    if (!empty($this->getValues)) {
+      $uriQuery = http_build_query($this->getValues, "", "&");
+      if ($query) {
+        $path .= "?" . $uriQuery;
+      } else {
+        $path .= "&" . $uriQuery;
+      }
     }
     
-    if ($parsed["scheme"] === "http") {
-      $port = (isset($parsed["port"])) ? $parsed["port"] : "80";
-    } elseif ($parsed["scheme"] === "https") {
-      $transport = "ssl";
-      $port = (isset($parsed["port"])) ? $parsed["port"] : "443";
+    $httpVer = $this->config["httpVersion"];
+    $request = array();
+    
+    if ($this->config["useProxy"]) {
+      $request[] = strtoupper($this->method)
+                 . " {$uri->scheme}://{$uri->host}:{$uri->port}{$path} "
+                 . "HTTP/{$httpVer}";
+      
+      $request[] = "Host: " . $uri->host;
+    } else {
+      $request[] = strtoupper($this->method) . " {$path} HTTP/{$httpVer}";
+      $request[] = "Host: " . $uri->host;
     }
     
-    return array($host, $port, $path, $transport);
+    $body = $this->buildBody();
+    
+    if ($this->config["keepAlive"]) {
+      $this->headers["Connection"] = "keep-alive";
+    } else {
+      unset($this->headers["Keep-Alive"]);
+    }
+    
+    foreach ($this->headers as $key => $value) {
+      $request[] = $key . ": " . $value;
+    }
+    
+    if ($this->config["useCookie"]) {
+      if (($cookie = $this->createCookieHeader($uri)) !== null) {
+        $request[] = $cookie;
+      }
+    }
+    
+    if ($this->auth !== null) {
+      $auth = $this->auth["user"] . ":" . $this->auth["password"];
+      $request[] = "Authorization: Basic " . base64_encode($auth);
+    }
+    
+    $request = implode("\r\n", $request) . "\r\n\r\n";
+    if ($body !== "") $request .= $body;
+    
+    return $request;
+  }
+  
+  protected function createCookieHeader(Sabel_Http_Uri $uri)
+  {
+    if (empty($this->cookies)) return null;
+    
+    $cookies = array();
+    $host = $uri->host;
+    $path = $uri->path;
+    
+    foreach ($this->cookies as $cookie) {
+      $domain = $cookie["domain"];
+      if ($domain{0} === ".") {
+        $regex = ".+" . str_replace(".", "\\.", $domain);
+        if (preg_match("/{$regex}/", $host) === 0) continue;
+      } else {
+        if ($domain !== $host) continue;
+      }
+      
+      if (strpos($path, $cookie["path"]) !== 0) continue;
+      if (isset($cookie["expires"]) && $cookie["expires"] < time()) continue;
+      
+      $cookies[] = $cookie["name"] . "=" . urlencode($cookie["value"]);
+    }
+    
+    if (empty($cookies)) {
+      return null;
+    } else {
+      return "Cookie: " . implode("; ", $cookies);
+    }
+  }
+  
+  protected function _setCookie(Sabel_Http_Response $response, $host)
+  {
+    $cookies = $response->getHeader("Set-Cookie");
+    if ($cookies === "") return;
+    
+    foreach ((is_string($cookies)) ? array($cookies) : $cookies as $cookie) {
+      $parts = array_map("trim", explode(";", $cookie));
+      $first = array_shift($parts);
+      list ($key, $value) = explode("=", $first);
+      $values = array("name" => $key, "value" => urldecode($value));
+      
+      foreach ($parts as $part) {
+        if ($part === "secure") {
+          $values["secure"] = true;
+        } else {
+          list ($name, $val) = explode("=", $part);
+          if ($name === "expires") {
+            $values[$name] = strtotime($val);
+          } else {
+            $values[$name] = $val;
+          }
+        }
+      }
+      
+      if (!isset($values["domain"])) $values["domain"] = $host;
+      if (!isset($values["path"]))   $values["path"]   = "/";
+      
+      if (isset($values["expires"]) && $values["expires"] < time()) {
+        $this->deleteCookie($values["name"], $values["path"], $values["domain"]);
+      } else {
+        $this->cookies[] = $values;
+      }
+    }
   }
 }
