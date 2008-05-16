@@ -1,5 +1,86 @@
 <?php
 
+class Sabel_CTest_Controller
+{
+  public $model = null;
+  
+  public function setModel(Sabel_CTest_Model $model)
+  {
+    $this->model = $model;
+  }
+}
+
+class Sabel_CTest_Controller_WithConstruct
+{
+  public $model = null;
+
+  public function __construct(Sabel_CTest_Model $model)
+  {
+    $this->model = $model;
+  }
+}
+
+interface Sabel_CTest_Model
+{
+  public function getData();
+}
+
+interface Sabel_CTest_Result
+{
+}
+
+class Sabel_CTest_Result_Implement implements Sabel_CTest_Result
+{
+}
+
+class Sabel_CTest_Model_Implement implements Sabel_CTest_Model
+{
+  // @inject Sabel_CTest_Model
+  public function getData()
+  {
+  }
+}
+
+class Sabel_CTest_Config extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_CTest_Model")
+         ->to("Sabel_CTest_Model_Implement")->setter("setModel");
+  }
+}
+class Sabel_CTest_Config_WithoutSetter extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_CTest_Model")
+         ->to("Sabel_CTest_Model_Implement");
+  }
+}
+class Sabel_CTest_Config_Construct extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller_WithConstruct")->with("Sabel_CTest_Model_Implement");
+  }
+}
+
+class Sabel_CTest_Config_ConstructWithInvalidImplement extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
+  }
+}
+
+class Sabel_CTest_Config_ConstructWithInterface extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
+  }
+}
+
 /**
  * TestCase of sabel container
  *
@@ -14,10 +95,56 @@ class Test_Container extends SabelTestCase
   }
   
   /**
+   * @test
+   */
+  public function injectionWithSetter()
+  {
+    $container  = Sabel_Container::create(new Sabel_CTest_Config());
+    $controller = $container->newInstance("Sabel_CTest_Controller");
+    $this->assertTrue($controller->model instanceof Sabel_CTest_Model);
+  }
+  
+  /**
+   * @test
+   */
+  public function injectionInvalidClass()
+  {
+    $container  = Sabel_Container::create(new Sabel_CTest_Config());
+    try {
+      $controller = $container->newInstance("Sabel_CTest_WillNotFoundClass");
+    } catch (Exception $e) {
+      $this->assertTrue(true);
+      return;
+    }
+    
+    $this->fail();
+  }
+  
+  /**
+   * @test
+   */
+  public function injectionWithoutSetterConfig()
+  {
+  }
+  
+  public function injectionNestedDependency()
+  {
+  }
+  
+  /**
+   * @test
+   */
+  public function injectionWithConstructor()
+  {
+    $container  = Sabel_Container::create(new Sabel_CTest_Config_Construct());
+    $controller = $container->newInstance("Sabel_CTest_Controller_WithConstruct");
+    $this->assertTrue($controller->model instanceof Sabel_CTest_Model);
+  }
+  
+  /**
    * simple injection
    * 
    * @test
-   */
   public function injection()
   {
     $injector = Sabel_Container::create(new Config());
@@ -25,13 +152,16 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals(10, $person->calc());
   }
+  */
   
+  /*
   public function testConstructorInjection()
   {
     $injector = Sabel_Container::create(new ConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertTrue(is_object($car->getEngine()));
   }
+  */
   
   public function testStrLiteralConstructorInjection()
   {

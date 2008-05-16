@@ -35,7 +35,6 @@ class Sabel_Container
    */
   public static function load($className, $config)
   {
-    
     return self::create($config)->newInstance($className);
   }
 }

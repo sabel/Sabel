@@ -87,4 +87,9 @@ class Sabel_Reflection_Class extends ReflectionClass
     
     return $properties;
   }
+  
+  public function isInstanciatable()
+  {
+    return (!$this->isInterface() && !$this->isAbstract());
+  }
 }
