@@ -150,7 +150,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       $state = new Flow_State(md5hash());
     } elseif ($token === null) {
       l("[flow] token is null", SBL_LOG_DEBUG);
-      $this->response->badRequest();
+      $this->response->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
       return false;
     } else {
       if ($data = $this->storage->fetch($token)) {
@@ -158,7 +158,7 @@ class Flow_Processor extends Sabel_Bus_Processor
         $state->restore($data);
       } else {
         l("[flow] invalid token", SBL_LOG_DEBUG);
-        $this->response->badRequest();
+        $this->response->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
         return false;
       }
     }

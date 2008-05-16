@@ -7,7 +7,6 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $destination = $bus->get("destination");
-    $redirector  = new Sabel_Controller_Redirector();
     $response    = new Sabel_Response_Object();
     
     if (($controller = $this->createController($response, $destination)) === null) {
@@ -40,6 +39,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
       l("create controller '{$class}'");
       return new $class($response);
     } else {
+      l("controller '{$class}' not found");
       return null;
     }
   }
@@ -62,32 +62,38 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
     $controller = $bus->get("controller");
     
     if ($controller->isRedirected()) {
-      if (defined("URI_IGNORE")) {
-        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
-      } else {
-        $ignored = "";
+      $redirector = $controller->getRedirector();
+      $request = $controller->getRequest();
+      $host = $request->getHttpHeader("host");
+      
+      if (($url = $redirector->getUrl()) !== "") {
+        return $bus->get("response")->setLocation($url);
       }
       
-      $session    = $controller->getSession();
-      $request    = $controller->getRequest();
-      $token      = $request->getValueWithMethod("token");
-      $hasToken   = !empty($token);
-      $redirector = $controller->getRedirector();
+      $session   = $controller->getSession();
+      $token     = $request->getValueWithMethod("token");
+      $hasToken  = !empty($token);
+      $hasParams = $redirector->hasParameters();
       
       if (!$hasToken) {
-        $to = $redirector->getUrl();
-      } elseif ($redirector->hasParameters()) {
-        $to = $redirector->getUrl() . "&token={$token}";
+        $to = $redirector->getUri();
+      } elseif ($hasParams) {
+        $to = $redirector->getUri() . "&token={$token}";
       } else {
-        $to = $redirector->getUrl() . "?token={$token}";
+        $to = $redirector->getUri() . "?token={$token}";
       }
       
       if (!$session->isCookieEnabled()) {
-        $glue = ($hasToken) ? "&" : "?";
+        $glue = ($hasToken || $hasParams) ? "&" : "?";
         $to  .= $glue . $session->getName() . "=" . $session->getId();
       }
       
-      $bus->get("response")->location($request->getHttpHeader("host"), $ignored . $to);
+      $ignored = "";
+      if (defined("URI_IGNORE")) {
+        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+      }
+      
+      $bus->get("response")->setLocation($ignored . $to, $host);
     }
   }
 }

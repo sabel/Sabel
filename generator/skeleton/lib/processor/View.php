@@ -32,7 +32,7 @@ class Processor_View extends Sabel_Bus_Processor
     $responses = $response->getResponses();
     
     $this->isAjax = ($bus->get("request")->getHttpHeader("X-Requested-With") === "XMLHttpRequest");
-    $view = $this->getView($response, $bus->get("destination")->getAction());
+    $view = $this->getView($response->getStatus(), $bus->get("destination")->getAction());
     
     if ($controller->renderText) {
       $renderer = $view->getRenderer();
@@ -47,7 +47,7 @@ class Processor_View extends Sabel_Bus_Processor
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
     } else {
-      $response->notFound();
+      $response->getStatus()->setCode(404);
       if ($location = $view->getValidLocation("notFound")) {
         $contents = $view->rendering($location, $responses);
       } else {
@@ -96,17 +96,19 @@ class Processor_View extends Sabel_Bus_Processor
     $bus->get("controller")->setAttribute("view", $view);
   }
   
-  protected function getView($response, $action)
+  protected function getView($status, $action)
   {
-    if (!$response->isSuccess()) {
-      $reason = $response->getStatus()->getReason();
-      $this->view->setName(lcfirst(str_replace(" ", "", $reason)));
-    } elseif ($this->view->getName() === "") {
-      if ($this->isAjax) {
-        $this->view->setName($action . ".ajax");
+    if ($status->isFailure()) {
+      $tplName = lcfirst(str_replace(" ", "", $status->getReason()));
+      if ($location = $this->view->getValidLocation($tplName)) {
+        $this->view->setName($tplName);
+      } elseif ($status->isClientError()) {
+        $this->view->setName("clientError");
       } else {
-        $this->view->setName($action);
+        $this->view->setName("serverError");
       }
+    } elseif ($this->view->getName() === "") {
+      $this->view->setName(($this->isAjax) ? "{$action}.ajax" : $action);
     }
     
     return $this->view;

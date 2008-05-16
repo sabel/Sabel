@@ -51,7 +51,7 @@ class Form_Processor extends Sabel_Bus_Processor
     
     if (isset($annotation[0][0])) {
       if ($this->token === null || ($form = $this->get()) === null) {
-        $bus->get("response")->badRequest();
+        $bus->get("response")->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
       } else {
         $controller->setAttribute($annotation[0][0], $form);
       }

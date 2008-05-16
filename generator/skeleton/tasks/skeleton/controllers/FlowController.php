@@ -62,7 +62,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
     if ($<?php echo lcfirst($mdlName) ?>->isSelected()) {
       $this-><?php echo $formName ?> = new Form_Object($<?php echo lcfirst($mdlName) ?>);
     } else {
-      $this->response->notFound();
+      $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
     }
   }
   

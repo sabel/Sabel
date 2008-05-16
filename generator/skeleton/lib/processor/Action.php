@@ -33,7 +33,7 @@ class Processor_Action extends Sabel_Bus_Processor
         
         if (isset($annotations["httpMethod"])) {
           if (!$this->checkRequestMethod($request, $annotations["httpMethod"][0])) {
-            return $response->badRequest();
+            return $response->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
           }
         }
         
@@ -45,7 +45,7 @@ class Processor_Action extends Sabel_Bus_Processor
         $controller->execute();
       }
     } catch (Exception $e) {
-      $response->serverError();
+      $response->getStatus()->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
     }
   }

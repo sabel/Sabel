@@ -100,9 +100,8 @@ class Test_Response_Object extends SabelTestCase
   public function testHeaderLocation()
   {
     $response = new Sabel_Response_Object();
-    $response->location("localhost", "index/index");
+    $response->setLocation("index/index", "localhost");
     $this->assertTrue($response->isRedirected());
-    $this->assertEquals("index/index", $response->getLocationUri());
     $this->assertEquals("http://localhost/index/index", $response->getLocation());
   }
 }

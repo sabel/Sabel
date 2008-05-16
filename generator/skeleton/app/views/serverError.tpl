@@ -1,4 +1,4 @@
-<h2>500 Internal Server Error</h2>
+<h2>5xx Server Error</h2>
 
 <p>
   The server encountered an internal error and was unable to complete your request.

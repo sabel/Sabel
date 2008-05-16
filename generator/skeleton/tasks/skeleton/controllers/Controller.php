@@ -34,7 +34,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
       $this-><?php echo $formName ?> = new Form_Object($<?php echo lcfirst($mdlName) ?>);
       $this->token = $this->session->getClientId();
     } else {
-      $this->response->notFound();
+      $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
     }
   }
   
@@ -74,7 +74,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   {
     $this->token = $this->session->getClientId();
     if ($this->request->fetchPostValue("token") !== $this->token) {
-      return $this->response->badRequest();
+      return $this->response->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
     }
     
     if ($isCreate) {
@@ -85,7 +85,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
       if ($<?php echo lcfirst($mdlName) ?>->isSelected()) {
         $<?php echo $formName ?> = new Form_Object($<?php echo lcfirst($mdlName) ?>);
       } else {
-        return $this->response->notFound();
+        return $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
       }
     }
     

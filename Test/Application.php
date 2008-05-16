@@ -114,7 +114,7 @@ class Test_Application extends SabelTestCase
     
     $controller = $bus->get("controller");
     $this->assertTrue($controller->isRedirected());
-    $this->assertEquals("manage/login/prepare", $controller->getRedirector()->getUrl());
+    $this->assertEquals("manage/login/prepare", $controller->getRedirector()->getUri());
   }
   
   public function testNotFound()
