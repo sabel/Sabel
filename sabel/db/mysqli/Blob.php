@@ -11,7 +11,7 @@
  */
 class Sabel_DB_Mysqli_Blob extends Sabel_DB_Mysql_Blob
 {
-  public function getEscapedContents()
+  public function getData()
   {
     return "'" . mysqli_real_escape_string($this->conn, $this->binary) . "'";
   }

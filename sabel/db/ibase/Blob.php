@@ -16,7 +16,7 @@ class Sabel_DB_Ibase_Blob extends Sabel_DB_Abstract_Blob
     $this->binary = $binary;
   }
   
-  public function getEscapedContents()
+  public function getData()
   {
     $blobId = ibase_blob_create();
     ibase_blob_add($blobId, $this->binary);

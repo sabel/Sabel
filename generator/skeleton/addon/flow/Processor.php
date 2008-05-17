@@ -78,7 +78,7 @@ class Flow_Processor extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
-    if ($this->isTransit && !$bus->get("response")->isFailure()) {
+    if ($this->isTransit && !$bus->get("response")->getStatus()->isFailure()) {
       $state = $this->state;
       $controller = $this->controller;
       $vars = $this->getContinuationVariables();

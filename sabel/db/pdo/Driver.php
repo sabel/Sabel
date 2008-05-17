@@ -65,7 +65,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
     foreach ($bindParams as $name => $value) {
       if ($value instanceof Sabel_DB_Pdo_Blob) {
         $hasBlob = true;
-        $pdoStmt->bindValue($name, $value->getEscapedContents(), PDO::PARAM_LOB);
+        $pdoStmt->bindValue($name, $value->getData(), PDO::PARAM_LOB);
       } else {
         $pdoStmt->bindValue($name, $value);
       }

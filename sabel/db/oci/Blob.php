@@ -21,7 +21,7 @@ class Sabel_DB_Oci_Blob extends Sabel_DB_Abstract_Blob
     $this->lob    = oci_new_descriptor($conn, OCI_D_LOB);
   }
   
-  public function getEscapedContents()
+  public function getData()
   {
     return $this->binary;
   }
@@ -33,6 +33,6 @@ class Sabel_DB_Oci_Blob extends Sabel_DB_Abstract_Blob
   
   public function save()
   {
-    $this->lob->save($this->getEscapedContents());
+    $this->lob->save($this->getData());
   }
 }

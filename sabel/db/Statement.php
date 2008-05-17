@@ -18,7 +18,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   const DELETE = 0x08;
   const QUERY  = 0x10;
   
-  const BINARY_IDENTIFIER = "__BINARY";
+  const BINARY_IDENTIFIER = "__SBL_BINARY";
   
   /**
    * @var array
@@ -281,7 +281,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     if (!empty($this->binaries)) {
       for ($i = 0, $c = count($this->binaries); $i < $c; $i++) {
         $query = str_replace(self::BINARY_IDENTIFIER . ($i + 1),
-                             $this->binaries[$i]->getEscapedContents(),
+                             $this->binaries[$i]->getData(),
                              $query);
       }
     }

@@ -19,7 +19,7 @@ class Sabel_DB_Mysql_Blob extends Sabel_DB_Abstract_Blob
     $this->binary = $binary;
   }
   
-  public function getEscapedContents()
+  public function getData()
   {
     return "'" . mysql_real_escape_string($this->binary, $this->conn) . "'";
   }

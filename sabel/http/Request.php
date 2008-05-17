@@ -281,7 +281,6 @@ class Sabel_Http_Request extends Sabel_Object
     $request = $this->prepareRequest($uri);
     $socket  = $this->connect($uri);
     
-    dump($request);
     if (fwrite($socket, $request) === false) {
       $message = __METHOD__ . "() request failed.";
       throw new Sabel_Exception_Runtime($message);

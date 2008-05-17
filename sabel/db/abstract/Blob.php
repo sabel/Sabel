@@ -14,10 +14,15 @@ abstract class Sabel_DB_Abstract_Blob extends Sabel_Object
 {
   protected $binary = "";
   
-  abstract public function getEscapedContents();
+  abstract public function getData();
   
   public function __toString()
   {
-    return $this->getEscapedContents();
+    return $this->getData();
+  }
+  
+  public function getRawData()
+  {
+    return $this->binary;
   }
 }

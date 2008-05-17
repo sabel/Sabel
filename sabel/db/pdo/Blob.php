@@ -16,7 +16,7 @@ class Sabel_DB_Pdo_Blob extends Sabel_DB_Abstract_Blob
     $this->binary = $binary;
   }
   
-  public function getEscapedContents()
+  public function getData()
   {
     return $this->binary;
   }

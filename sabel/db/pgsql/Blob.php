@@ -19,7 +19,7 @@ class Sabel_DB_Pgsql_Blob extends Sabel_DB_Abstract_Blob
     $this->binary = $binary;
   }
   
-  public function getEscapedContents()
+  public function getData()
   {
     return "'" . pg_escape_bytea($this->conn, $this->binary) . "'";
   }

@@ -46,6 +46,7 @@ class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
   protected function createColumns($tblName)
   {
     $rows = $this->driver->execute("PRAGMA table_info('{$tblName}')");
+    if (!$rows) return array();
     
     $columns = array();
     foreach ($rows as $row) {

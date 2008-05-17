@@ -19,7 +19,7 @@ class Processor_Response extends Sabel_Bus_Processor
     
     $response->setResponses($responses);
     
-    if ($response->isServerError()) {
+    if ($response->getStatus()->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();
       if (!is_object($exception)) return;
       
