@@ -274,7 +274,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     if (is_string($action)) {
       $this->action = $action;
     } else {
-      $message = "action name must be a string.";
+      $message = __METHOD__ . "() action name must be a string.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
   }

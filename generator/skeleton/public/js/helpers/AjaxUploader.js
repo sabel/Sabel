@@ -1,3 +1,11 @@
+/* Sabel JS - %VERSION%
+ *
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @author     Ebine yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Hamanaka Kazuhiro <Hamanaka.kazuhiro@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
+/*---------------------------------------------------------------------------*/
+
 Sabel.PHP.AjaxUploader = function() {
 	this.init.apply(this, arguments)
 };
@@ -5,6 +13,7 @@ Sabel.PHP.AjaxUploader = function() {
 Sabel.PHP.AjaxUploader.prototype = {
 	IFRAME_NAME: "sbl_uploader_target_iframe",
 	message: "preparing transfer...",
+	updateInterval: 200,  // msec
 
 	incrementValue: 0,
 	totalSize:      0,
@@ -12,9 +21,13 @@ Sabel.PHP.AjaxUploader.prototype = {
 	uploadedSize:   0,
 	currentPercent: 0.0,
 
-	interval: 750,
-	intervalIncr: 150,
+	interval: 700,
+	intervalIncr: 100,
 	lastTime: null,
+
+	reqCount: 0,
+	ajaxReqTime: 0,
+	totalReqTime: 0,
 
 	_bindedGetProgress: null,
 	_bindedShowProgress: null,
@@ -24,7 +37,7 @@ Sabel.PHP.AjaxUploader.prototype = {
 
 		this.timer    = null;
 		this.tTimer   = null;
-		this.interval = 750;
+		this.interval = 700;
 
 		this.uri  = uri;
 		this.ajax = new Sabel.Ajax();
@@ -49,7 +62,7 @@ Sabel.PHP.AjaxUploader.prototype = {
 	startProgress: function() {
 		this.progressTexts[0].innerHTML = this.message;
 		this.lastTime = new Date().getTime();
-		this.tTimer = setTimeout(this._bindedGetProgress, 100);
+		this.tTimer = setTimeout(this._bindedGetProgress, this.updateInterval);
 	},
 
 	endProgress: function() {
@@ -61,9 +74,10 @@ Sabel.PHP.AjaxUploader.prototype = {
 	},
 
 	getProgress: function() {
+		this.ajaxReqTime = new Date().getTime();
 		this.ajax.request(this.uri,
 		                  { method: 'get',
-		                    timeout: 500,
+		                    //timeout: 1000,
 		                    headers: { "If-Modified-Since": new Date(0) },
 		                    onSuccess: this._bindedShowProgress,
 		                    onTimeout: this._bindedShowProgress
@@ -72,35 +86,39 @@ Sabel.PHP.AjaxUploader.prototype = {
 
 	showProgress: function(res) {
 		if (res) {
-			eval("var json = " + res.responseText);
+			this.reqCount++;
+			this.totalReqTime += (new Date().getTime() - this.ajaxReqTime);
 
+			eval("var json = " + res.responseText);
 			if (json.done == 1) return this.endProgress();
 
 			if (this.currentPercent == 0.0) {  // first response
 				this.progressTexts[0].innerHTML = "";
 				this.totalSize = json.total;
-				this.timer = setInterval(Sabel.Function.bind(this.progress, this), 100);
+				this.timer = setInterval(Sabel.Function.bind(this.progress, this), this.updateInterval);
 			}
 
 			var uploaded = json.current - this.uploadedSize;
 			this.uploadedSize = json.current;
-
 			var percent = this.uploadedSize / this.totalSize * 100;
+
 			var time = new Date().getTime();
 			var reqTime = time - this.lastTime;
 			this.lastTime = time;
 
-			var rate = (100 * reqTime) / (uploaded / this.totalSize * 100);
-
-			this.incrementValue = 10000 / rate + ((percent - this.currentPercent) / 100);
+			var rate = reqTime / (uploaded / this.totalSize);
+			var refreshNum = Math.round(((this.totalReqTime / this.reqCount) + this.interval) / this.updateInterval);
+			this.incrementValue = (this.updateInterval * 100 / rate) + ((percent - this.currentPercent) / refreshNum);
+			if (this.incrementValue < 0) this.incrementValue = 0.01;
+			
 			this.interval = Math.min(2000, this.interval + this.intervalIncr)
 		}
+		
 		this.tTimer = setTimeout(this._bindedGetProgress, this.interval);
 	},
 
 	progress: function() {
 		this.currentPercent = Math.min(99.9, this.currentPercent + this.incrementValue);
-
 		this._exec();
 	},
 
@@ -138,7 +156,7 @@ Sabel.PHP.AjaxUploader.prototype = {
 		return div;
 	},
 
-  _createIframe: function() {
+	_createIframe: function() {
 		try {
 			var iframe = document.createElement('<iframe name="' + this.IFRAME_NAME + '">')
 		} catch (e) {

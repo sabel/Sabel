@@ -211,6 +211,7 @@ class Generator extends Sabel_Sakle_Task
     $module   = (isset($this->arguments[1])) ? $this->arguments[1] : "index";
     
     $controllerName = ucfirst($module) . "_Controllers_" . $ctrlName;
+    $rfc1867_prefix = ini_get("apc.rfc1867_prefix");
     
     ob_start();
     include ($this->skeletonDir . DS . "controllers" . DS . "UploadController.php");
