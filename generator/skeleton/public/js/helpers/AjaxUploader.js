@@ -106,9 +106,9 @@ Sabel.PHP.AjaxUploader.prototype = {
 			var reqTime = time - this.lastTime;
 			this.lastTime = time;
 
-			var rate = reqTime / (uploaded / this.totalSize);
-			var refreshNum = Math.round(((this.totalReqTime / this.reqCount) + this.interval) / this.updateInterval);
-			this.incrementValue = (this.updateInterval * 100 / rate) + ((percent - this.currentPercent) / refreshNum);
+			var totalTime = reqTime / (uploaded / this.totalSize);
+			var refreshNum = ((this.totalReqTime / this.reqCount) + this.interval) / this.updateInterval;
+			this.incrementValue = (this.updateInterval * 100 / totalTime) + ((percent - this.currentPercent) / refreshNum);
 			if (this.incrementValue < 0) this.incrementValue = 0.01;
 			
 			this.interval = Math.min(2000, this.interval + this.intervalIncr)
