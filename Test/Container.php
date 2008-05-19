@@ -216,7 +216,7 @@ class Test_Container extends SabelTestCase
       $person = $injector->newInstance("Person");
       $this->fail();
     } catch (Exception $e) {
-      $this->assertEquals("Class WrongCalculator does not exist", $e->getMessage());
+      $this->assertEquals("WrongCalculator does't exist", $e->getMessage());
     }
   }
   
@@ -304,7 +304,13 @@ class AspectTarget
     return $parameter;
   }
 }
-class Trace
+
+class BaseAspect
+{
+  public function after($joinpoint){}
+  public function before($joinpoint){}
+}
+class Trace extends BaseAspect
 {
   private $argument = "";
   
