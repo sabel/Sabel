@@ -62,7 +62,7 @@ class Sabel_Reflection_Class extends ReflectionClass
     
     return $methods;
   }
-
+  
   public function getMethodAnnotation($name, $annotationName)
   {
     return $this->getMethod($name)->getAnnotation($annotationName);

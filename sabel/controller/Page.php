@@ -60,10 +60,10 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * default constructer of page controller
    */
-  public final function __construct(Sabel_Response $response)
+  public final function __construct()
   {
     $this->reserved = get_class_methods(__CLASS__);
-    $this->response = $response;
+    $this->redirect = new Sabel_Controller_Redirector();
   }
   
   /**

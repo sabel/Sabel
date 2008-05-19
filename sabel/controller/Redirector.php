@@ -82,10 +82,8 @@ class Sabel_Controller_Redirector
    */
   public function uri($uri)
   {
-    if ($this->hasParameters()){
-      $buffer = array();
-      foreach ($this->parameters as $k => $v) $buffer[] = "{$k}={$v}";
-      $this->uri = $uri . "?" . implode("&", $buffer);
+    if ($this->hasParameters()) {
+      $this->uri = $uri . "?" . http_build_query($this->parameters, "", "&");
     } else {
       $this->uri = $uri;
     }

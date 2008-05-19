@@ -41,6 +41,8 @@ class Sabel_Container_Injector
     $injection->configure();
   }
   
+  private $reflection = null;
+  
   /**
    * get new class instance from class name
    *
@@ -49,26 +51,52 @@ class Sabel_Container_Injector
    */
   public function newInstance($className)
   {
-    $args = null;
-    $numberOfArgs = func_num_args();
-    
-    if ($numberOfArgs > 1) {
-      $args = func_get_args();
-      array_shift($args);
-    }
-    
     $reflect = $this->getReflection($className);
     
     if ($reflect->isInterface() || $reflect->isAbstract()) {
-      foreach ($this->injection->getBinds() as $name => $bind) {
-        if ($name === $className) {
-          $implClassName = $bind->getImplementation();
-          return $this->newInstance($implClassName, $args);
+      $binds = $this->injection->getBind($className);
+      $bind  = (is_array($binds)) ? $binds[0] : $binds;
+      
+      $implementation = $bind->getImplementation();
+      
+      if ($this->injection->hasConstruct($className)) {
+        $instance = $this->newInstanceWithConstructInAbstract($reflect, $className, $implementation);
+      } else {
+        $instance = $this->newInstance($implementation);
+      }
+    } else {
+      $instance = $this->newInstanceWithConstruct($reflect, $className);
+    }
+    
+    return $this->applyAspect($this->injectToSetter($reflect, $instance));
+  }
+  
+  protected function injectToSetter($reflect, $instance)
+  {
+    if (!$this->injection->hasBinds()) return $instance;
+    
+    foreach ($this->injection->getBinds() as $name => $binds) {
+      foreach ($binds as $bind) {
+        if ($bind->hasSetter()) {
+          $injectionMethod = $bind->getSetter();
+        } else {
+          $injectionMethod = "set" . ucfirst($name);
+        }
+        $implClassName = $bind->getImplementation();
+        
+        if (in_array($injectionMethod, get_class_methods($instance))) {
+          $argumentInstance = $this->newInstanceWithConstruct($reflect, $implClassName);
+          $instance->$injectionMethod($argumentInstance);
         }
       }
     }
     
-    if ($this->injection->hasConstruct($className)) {
+    return $instance;
+  }
+  
+  protected function newInstanceWithConstruct($reflect, $className)
+  {
+    if ($this->injection->hasConstruct($reflect->getName())) {
       $construct = $this->injection->getConstruct($className);
       $constructArguments = array();
       
@@ -81,44 +109,37 @@ class Sabel_Container_Injector
         }
       }
       
-      $instance = $this->applyAspect($reflect->newInstanceArgs($constructArguments));
-    } elseif ($args !== null) {
-      
-      $tmp = array();
-      foreach ($args as $arg) {
-        if (is_object($arg)) {
-          $tmp[] = $arg;
-        } elseif (is_string($arg) && class_exists($arg)) {
-          $tmp[] = $this->newInstance($arg);
-        } else {
-          $tmp[] = $arg;
-        }
-      }
-      
-      $instance = $this->applyAspect($reflect->newInstanceArgs($tmp));
+      $instance = $reflect->newInstanceArgs($constructArguments);
     } else {
-      $instance = $this->applyAspect($this->newInstanceWithConstructDependency($className));
-    }
-    
-    if ($this->injection->hasBinds()) {
-      foreach ($this->injection->getBinds() as $name => $binds) {
-        foreach ($binds as $bind) {
-          if ($bind->hasSetter()) {
-            $injectionMethod = $bind->getSetter();
-          } else {
-            $injectionMethod = "set" . ucfirst($name);
-          }
-          
-          $implClassName = $bind->getImplementation();
-          
-          if (in_array($injectionMethod, get_class_methods($instance))) {
-            $instance->$injectionMethod($this->newInstance($implClassName));
-          }
-        }
-      }
+      $instance = $this->newInstanceWithConstructDependency($className);
     }
     
     return $instance;
+  }
+  
+  protected function newInstanceWithConstructInAbstract($reflect, $className, $implClass)
+  {
+    if ($this->injection->hasConstruct($className)) {
+      $construct = $this->injection->getConstruct($className);
+      $constructArguments = array();
+      
+      foreach ($construct->getConstructs() as $constructValue) {
+        if ($this->exists($constructValue)) {
+          // @todo test this condition
+          $instance = $this->constructInstance($constructValue);
+          $constructArguments[] = $this->applyAspect($instance);
+        } else {
+          $constructArguments[] = $constructValue;
+        }
+      }
+      
+      $reflect  = $this->getReflection($implClass);
+      $instance = $this->applyAspect($reflect->newInstanceArgs($constructArguments));
+      
+      return $instance;
+    } else {
+      return $this->applyAspect($this->newInstanceWithConstructDependency($className));
+    }
   }
   
   protected function applyAspect($instance)
@@ -129,19 +150,19 @@ class Sabel_Container_Injector
     
     $className = get_class($instance);
     
-    if ($this->injection->hasAspect($className)) {
-      $aspect = $this->injection->getAspect($className);
-      foreach ($aspect->getAspects() as $appliedAspect) {
-        $pointcut = Sabel_Aspect_Pointcut::create($appliedAspect);
-        foreach ($aspect->getMethods() as $method) {
-          $pointcut->addMethod($method);
-        }
-        Sabel_Aspect_Aspects::singleton()->addPointcut($pointcut);
+    if (!$this->injection->hasAspect($className)) return $instance;
+    
+    $aspect = $this->injection->getAspect($className);
+    
+    foreach ($aspect->getAspects() as $appliedAspect) {
+      $pointcut = Sabel_Aspect_Pointcut::create($appliedAspect);
+      foreach ($aspect->getMethods() as $method) {
+        $pointcut->addMethod($method);
       }
-      return new Sabel_Aspect_Proxy($instance);
-    } else {
-      return $instance;
+      Sabel_Aspect_Aspects::singleton()->addPointcut($pointcut);
     }
+    
+    return new Sabel_Aspect_Proxy($instance);
   }
   
   /**
@@ -155,7 +176,8 @@ class Sabel_Container_Injector
     $instance = $this->buildInstance();
     unset($this->dependency);
     $this->dependency = array();
-    return $instance;
+    
+    return $this->applyAspect($instance);
   }
   
   protected function constructInstance($className)
@@ -173,6 +195,8 @@ class Sabel_Container_Injector
         }
         
         return $this->newInstance($implement);
+      } else {
+        throw new Sabel_Exception_Runtime("any '{$className}' implementation can't find");
       }
     } else {
       return $this->newInstance($className);
@@ -196,7 +220,7 @@ class Sabel_Container_Injector
     $constructerMethod = "__construct";
     
     if (!class_exists($className)) {
-      throw new Sabel_Exception_Runtime("{$className} doen't exist");
+      throw new Sabel_Exception_Runtime("{$className} does't exist");
     }
     
     $reflection = $this->getReflection($className);
@@ -256,16 +280,17 @@ class Sabel_Container_Injector
     
     for ($i = 0; $i < $stackCount; ++$i) {
       $reflection = array_pop($this->dependency);
-      
-      $className = $reflection->getName();
-      
-      if ($this->injection->hasConstruct($className)) {
-        $instance = $this->newInstance($className);
-      } else {
-        if ($reflection->isInstanciatable()) {
-          $instance = $this->getInstance($className, $instance);
-        } else {
+      if ($reflection !== null) {
+        $className = $reflection->getName();
+        
+        if ($this->injection->hasConstruct($className)) {
           $instance = $this->newInstance($className);
+        } else {
+          if ($reflection->isInstanciatable()) {
+            $instance = $this->getInstance($className, $instance);
+          } else {
+            $instance = $this->newInstance($className);
+          }
         }
       }
     }
@@ -289,6 +314,10 @@ class Sabel_Container_Injector
     }
   }
   
+  /**
+   * get reflection class
+   *
+   */
   protected function getReflection($className)
   {
     if (!isset($this->reflectionCache[$className])) {

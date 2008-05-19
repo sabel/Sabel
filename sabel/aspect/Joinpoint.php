@@ -3,43 +3,19 @@
 class Sabel_Aspect_Joinpoint
 {
   protected $target    = null;
-  protected $source    = null;
   protected $arguments = array();
-  protected $method    = '';
+  protected $method    = "";
   protected $result    = null;
   protected $exception = null;
   
-  public function __construct($target, $source, $arg, $method)
+  public function __construct($target)
   {
-    $this->target    = $target;
-    $this->source    = $source;
+    $this->target = $target;
+  }
+  
+  public function setArguments($arg)
+  {
     $this->arguments = $arg;
-    $this->method    = $method;
-  }
-  
-  public function getTarget()
-  {
-    return $this->target;
-  }
-  
-  public function getSource()
-  {
-    return $this->source;
-  }
-  
-  public function getReflection()
-  {
-    return new ReflectionClass($this->target);
-  }
-  
-  public function getMethodReflection()
-  {
-    return $this->getReflection()->getMethod($this->getMethod());
-  }
-  
-  public function getClassName()
-  {
-    return $this->getReflection()->getName();
   }
   
   public function getArguments()
@@ -53,6 +29,11 @@ class Sabel_Aspect_Joinpoint
     if (isset($arguments[$index])) {
       return $this->arguments[$index];
     }
+  }
+  
+  public function setMethod($method)
+  {
+    $this->method = $method;
   }
   
   public function getMethod()

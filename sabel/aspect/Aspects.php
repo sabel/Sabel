@@ -19,7 +19,7 @@ class Sabel_Aspect_Aspects
   
   protected function __construct()
   {
-    self::$matcher = new Sabel_Aspect_Matcher();
+    //self::$matcher = new Sabel_Aspect_Matcher();
   }
   
   public static function singleton()
@@ -30,57 +30,56 @@ class Sabel_Aspect_Aspects
   
   public function addPointcut($pointcut)
   {
-    self::$matcher->add($pointcut);
+    // self::$matcher->add($pointcut);
     $this->pointcuts[] = $pointcut;
     $className = $pointcut->getName();
-    $this->aspects[] = new $className();
+    $this->aspects[] = $pointcut->getAspect();
   }
   
   public function add($aspect)
   {
     $this->aspects[] = $aspect;
-    self::$matcher->add($aspect->pointcut());
+    // self::$matcher->add($aspect->pointcut());
   }
   
   public function findMatch($conditions)
   {
     $pointcuts = $this->pointcuts;
-    $matches = new Sabel_Aspect_Matches();
+    $matches   = array();
     
-    $class     = $conditions['class'];
-    $method    = $conditions['method'];
+    $class  = $conditions["class"];
+    $method = $conditions["method"];
     
     foreach ($pointcuts as $p) {
-      $match = false;
+      $match = true;
+      
       switch ($p) {
         case ($p->hasToAll()):
-          $match = true;
-          break;
-        case ($p->hasClass() && $p->hasMethod() &&
-              $p->getClass() === $class && $p->getMethod() === $method):
-          $match = true;
-          break;
-        case ($p->hasClass() && $p->getClass() === $class):
-          $match = true;
-          break;
-        case ($p->hasClassRegex() && preg_match('/'.$p->getClassRegex().'/', $class)):
-          $match = true;
           break;
         case ($p->hasMethod() && $p->getMethod() === $method):
-          $match = true;
           break;
         case ($p->hasMethods()):
           foreach ($p->getMethods() as $pcMethod) {
             if ($pcMethod === $method) {
-              $matches->add($p->getName(), $p->getAspect());
+              $matches[$p->getName()] = $p->getAspect();
             }
           }
           break;
-        case ($p->hasMethodRegex() && preg_match('/'.$p->getMethodRegex().'/', $method)):
-          $match = true;
+        case ($p->hasClass() && $p->hasMethod() &&
+              $p->getClass() === $class && $p->getMethod() === $method):
+          break;
+        case ($p->hasClass() && $p->getClass() === $class):
+          break;
+        case ($p->hasClassRegex() && preg_match("/" . $p->getClassRegex() . "/", $class)):
+          break;
+        case ($p->hasMethodRegex() && preg_match("/" . $p->getMethodRegex() . "/" , $method)):
+          break;
+        default:
+          $match = false;
           break;
       }
-      if ($match) $matches->add($p->getName(), $p->getAspect());
+      
+      if ($match) $matches[$p->getName()] = $p->getAspect();
     }
     
     return $matches;
@@ -89,9 +88,9 @@ class Sabel_Aspect_Aspects
   public function findExceptionMatch($conditions)
   {
     $pointcuts = $this->pointcuts;
-    $matches = new Sabel_Aspect_Matches();
+    $matches = array();
     
-    $class = $conditions['class'];
+    $class = $conditions["class"];
     
     foreach ($pointcuts as $p) {
       $match = false;
@@ -104,7 +103,7 @@ class Sabel_Aspect_Aspects
           $match = true;
           break;
         case ($p->hasExceptionClassRegex()
-              && preg_match('/'.$p->getExceptionClassRegex().'/', $class)):
+              && preg_match("/".$p->getExceptionClassRegex()."/", $class)):
           $match = true;
           break;
       }

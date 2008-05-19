@@ -11,19 +11,25 @@
  */
 class Sabel_Aspect_Proxy
 {
-  protected $target = null;
-  protected $source = null;
-
-  protected $afterResults = array();
-  protected $beforeResults = array();
+  private $target = null;
+  private $targetClassName = null;
   
-  const TYPE_BEFORE   = 0;
-  const TYPE_AFTER    = 5;
-  const TYPE_THROWING = 10;
+  private $source = null;
   
-  public function __construct($taget)
+  private $aspects = null;
+  private $matchesCache   = array();
+  private $joinpointCache = array();
+  private $targetReflectionCache = null;
+  
+  const TYPE_AROUND    = "around";
+  const TYPE_BEFORE    = "before";
+  const TYPE_AFTER     = "after";
+  const TYPE_EXCEPTION = "exception";
+  
+  public function __construct($target)
   {
-    $this->target = $taget;
+    $this->target = $target;
+    $this->targetClassName = get_class($target);
     
     $trace = debug_backtrace();
     
@@ -35,39 +41,34 @@ class Sabel_Aspect_Proxy
     }
   }
   
-  public function setSourceClass($source)
+  public function __setSourceClass__($source)
   {
     $this->source = $source;
   }
   
-  public function getSourceClass()
+  public function __getSourceClass__()
   {
     return $this->source;
   }
   
-  public function setTargetClass($target)
+  public function __setTarget__($target)
   {
     $this->target = $target;
   }
   
-  public function getTargetClass()
+  public function __getTarget__()
   {
     return $this->target;
   }
   
-  public function getReflection()
+  public function __getReflection__()
   {
-    return new ReflectionClass($this->target);
+    return new Sabel_Reflection_Class($this->target);
   }
   
-  public function hasMethod($method)
+  public function __hasMethod__($method)
   {
     return $this->getReflection()->hasMethod($method);
-  }
-  
-  public function assignToView()
-  {
-    Sabel_Template_Engine::setAttribute(strtolower($this->getReflection()->getName()), $this->target);
   }
   
   public function __set($key, $value)
@@ -84,59 +85,95 @@ class Sabel_Aspect_Proxy
   {
     $target = $this->target;
     $source = $this->source;
-    $reflection = new ReflectionClass($this->target);
+    
+    $reflection = $this->getTargetReflection();
     
     $bcbResult = $this->beforeCallBefore($method, $arg);
     if ($bcbResult !== null) return $bcbResult;
     
-    $joinpoint = new Sabel_Aspect_Joinpoint($target, $source, $arg, $method);
-    
-    $aspects = Sabel_Aspect_Aspects::singleton();
-    $matches = $aspects->findMatch(array('method' => $method,
-                                         'class'  => $reflection->getName()));
-    
-    $hasMethod = false;
-    try {
-      $refMethod = $reflection->getMethod($method);
-      $hasMethod = true;
-    } catch (Exception $e) {
-      $hasMethod = false;
-    }
+    $joinpoint = $this->getJoinpoint($method, $arg);
+    $matches   = $this->getMatches($method, $reflection);
     
     $proceed = true;
     try {
-      $result = null;
-      $proceed = $this->callAspect($joinpoint, $matches, 'around');
+      $result  = null;
+      $proceed = $this->callAspect($joinpoint, $matches, self::TYPE_BEFORE);
       
-      if ($proceed) {
-        $beforeResult = $this->callBefore($joinpoint, $matches);
-        
-        if ($beforeResult !== false) {
-          return $beforeResult;
-        }
-        
-        if ($hasMethod) {
-          eval('$result = $target->$method('.$this->makeArgumentsString($arg).');');
-        } elseif ($this->hasMethodOverload()) {
-          eval('$result = $target->$method('.$this->makeArgumentsString($arg).');');
-        }
+      if ($proceed !== false) {
+        $reflection->getMethod($method)->invokeArgs($target, $arg);
         
         $joinpoint->setResult($result);
-        $this->callAspect($joinpoint, $matches, 'after');
+        $this->callAspect($joinpoint, $matches, self::TYPE_AFTER);
         
         return $result;
       }
     } catch (Exception $e) {
       $joinpoint->setException($e);
-      $eref = new ReflectionClass($e);
-      $matches = $aspects->findExceptionMatch(array('class' => $eref->getName()));
+      $exceptionReflection = new Sabel_Reflection_Class($e);
+      $matches = $this->aspects->findExceptionMatch(array("class" => $exceptionReflection->getName()));
       
-      if ($matches->hasMatch()) {
-        $this->callAspect($joinpoint, $matches, 'throwing');
-      } else {
-        throw $e;
-      }
+      $this->callAspect($joinpoint, $matches, self::TYPE_EXCEPTION);
+      throw $e;
     }
+  }
+  
+  protected function getTargetReflection()
+  {
+    if ($this->targetReflectionCache === null) {
+      $this->targetReflectionCache = new Sabel_Reflection_Class($this->target);
+    }
+    
+    return $this->targetReflectionCache;
+  }
+  
+  protected function getMatches($method)
+  {
+    if ($this->aspects === null) {
+      $this->aspects = Sabel_Aspect_Aspects::singleton();
+    }
+    $name = $this->targetClassName;
+    $key  = $name . "::" . $method;
+    
+    if (!isset($this->matchesCache[$key])) {
+      $matches = $this->aspects->findMatch(array("method" => $method,
+                                                 "class"  => $name));
+      $this->matchesCache[$key] = $matches;
+      
+      return $matches;
+    }
+    
+    return $this->matchesCache[$key];
+  }
+  
+  protected function getJoinpoint($method, $arg)
+  {
+    if (!isset($this->joinpointCache[$method])) {
+      $this->joinpointCache[$method] = new Sabel_Aspect_Joinpoint($this->target);
+    }
+    
+    $joinpoint = $this->joinpointCache[$method];
+    $joinpoint->setMethod($method);
+    $joinpoint->setArguments($arg);
+    
+    return $joinpoint;
+  }
+  
+  protected function callAspect($joinpoint, $matches, $position)
+  {
+    $called = false;
+    $result = false;
+    
+    foreach ($matches as $aspect) {
+      $called = true;
+      $result = $aspect->$position($joinpoint);
+    }
+    
+    return ($called) ? $result : true;
+  }
+  
+  public function __getSource__()
+  {
+    return $this->source;
   }
   
   protected function beforeCallBefore($method, $arg)
@@ -153,75 +190,6 @@ class Sabel_Aspect_Proxy
       $argStrBuf[] = '$arg[' . $i . ']';
     }
     return join(', ', $argStrBuf);
-  }
-  
-  protected function callBefore($joinpoint, $matches)
-  {
-    $result = false;
-    
-    $ref = new ReflectionClass($this->target);
-    foreach ($matches as $aspect) {
-      $aspectReflect = new ReflectionClass($aspect);
-      if ($aspectReflect->hasMethod("before")) {
-        $result = $aspect->before($joinpoint);
-      }
-      unset($aspectReflect);
-    }
-    
-    if ($result === null) return false;
-    
-    if ($result !== false) {
-      return $result;
-    } else {
-      return false;      
-    }
-  }
-  
-  protected function callAspect($joinpoint, $matches, $type)
-  {
-    $called = false;
-    $result = false;
-    
-    $ref = new ReflectionClass($this->target);
-    foreach ($matches as $aspect) {
-      $aspectReflect = new ReflectionClass($aspect);
-      if ($aspectReflect->hasMethod($type)) {
-        $called = true;
-        $result = $aspect->$type($joinpoint);
-        switch ($type) {
-          case "before":
-            $this->beforeResults[$ref->getName()] = $result;
-            break;
-          case "after":
-            $this->afterResults[$ref->getName()] = $result;
-            break;
-        }
-        
-      }
-      unset($aspectReflect);
-    }
-    
-    return ($called) ? $result : true;
-  }
-  
-  public function getBeforeResults()
-  {
-    return $this->beforeResults;
-  }
-  
-  public function getBeforeResult($name)
-  {
-    return $this->beforeResults[$name];
-  }
-
-  public function getAfterResults()
-  {
-    return $this->afterResults;
-  }
-
-  public function getAfterResult($name)
-  {
-    return $this->afterResults[$name];
   }
   
   /**
@@ -242,5 +210,77 @@ class Sabel_Aspect_Proxy
     }
     
     return $has;
+  }
+}
+
+class Sabel_Aspect_Joinpoint
+{
+  protected $target    = null;
+  protected $arguments = array();
+  protected $method    = "";
+  protected $result    = null;
+  protected $exception = null;
+  
+  public function __construct($target)
+  {
+    $this->target    = $target;
+  }
+  
+  public function setArguments($arg)
+  {
+    $this->arguments = $arg;
+  }
+  
+  public function getArguments()
+  {
+    return $this->arguments;
+  }
+  
+  public function getArgument($index)
+  {
+    $arguments = $this->arguments;
+    if (isset($arguments[$index])) {
+      return $this->arguments[$index];
+    }
+  }
+  
+  public function setMethod($method)
+  {
+    $this->method = $method;
+  }
+  
+  public function getMethod()
+  {
+    return $this->method;
+  }
+  
+  public function setResult($result)
+  {
+    $this->result = $result;
+  }
+  
+  public function hasResult()
+  {
+    return ($this->result === null) ? false : $this->result;
+  }
+  
+  public function getResult()
+  {
+    return $this->result;
+  }
+  
+  public function setException($e)
+  {
+    $this->exception = $e;
+  }
+  
+  public function hasException()
+  {
+    return ($this->exception === null) ? false : true ;
+  }
+  
+  public function getException()
+  {
+    return $this->exception;
   }
 }

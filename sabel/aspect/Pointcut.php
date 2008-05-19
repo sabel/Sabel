@@ -30,27 +30,28 @@ class Sabel_Aspect_Pointcut
   protected $exceptionClassRegex = "";
   protected $hasExceptionClassRegex = false;
   
-  protected $class      = "";
-  protected $method     = "";
-  protected $methods    = array();
-  protected $package    = "";
-  protected $hasClass   = false;
-  protected $hasMethod  = false;
-  protected $hasMethods = false;
-  protected $hasPackage = false;
+  protected
+    $class      = "",
+    $method     = "",
+    $methods    = array(),
+    $package    = "",
+    $hasClass   = false,
+    $hasMethod  = false,
+    $hasMethods = false,
+    $hasPackage = false;
   
-  protected $classRegex      = "";
-  protected $methodRegex     = "";
-  protected $packageRegex    = "";
-  protected $hasClassRegex   = false;
-  protected $hasMethodRegex  = false;
-  protected $hasPackageRegex = false;
+  protected
+    $classRegex      = "",
+    $methodRegex     = "",
+    $packageRegex    = "",
+    $hasClassRegex   = false,
+    $hasMethodRegex  = false,
+    $hasPackageRegex = false;
   
   public function __construct($aspect)
   {
     if (is_object($aspect)) {
-      $reflect = new ReflectionClass($aspect);
-      $this->name = $reflect->getName();
+      $this->name = get_class($aspect);
       $this->aspect = $aspect;
     } else {
       $this->name   = $aspect;
