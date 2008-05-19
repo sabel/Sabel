@@ -329,3 +329,143 @@ class Sabel_Container_Injector
     return $this->reflectionCache[$className];
   }
 }
+
+/**
+ * Sabel Container
+ *
+ * @category   Container
+ * @package    org.sabel.container
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+final class Sabel_Container_Bind
+{
+  private
+    $interface,
+    $setter,
+    $implementation = "";
+    
+  public function __construct($interface)
+  {
+    $this->interface = $interface;
+  }
+  
+  public function to($implementation)
+  {
+    $this->implementation = $implementation;
+    
+    return $this;
+  }
+  
+  public function setter($methodName)
+  {
+    $this->setter = trim($methodName);
+    
+    return $this;
+  }
+  
+  public function hasSetter()
+  {
+    return (!empty($this->setter));
+  }
+  
+  public function getSetter()
+  {
+    return $this->setter;
+  }
+  
+  public function getImplementation()
+  {
+    return $this->implementation;
+  }
+}
+
+/**
+ * Sabel Container
+ *
+ * @category   Container
+ * @package    org.sabel.container
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Container_Construct
+{
+  private $constructs = array();
+  private $source = "";
+  
+  public function __construct($className)
+  {
+    $this->source = $className;
+  }
+  
+  public function with($className)
+  {
+    $this->constructs[] = $className;
+    return $this;
+  }
+  
+  public function hasConstruct()
+  {
+    return (count($this->constructs) >= 1);
+  }
+  
+  public function getConstructs()
+  {
+    return $this->constructs;
+  }
+  
+  public function isClass()
+  {
+    return (class_exists($this->construct));
+  }
+  
+  public function isLiteral()
+  {
+    if (is_string($this->construct)) {
+      return true;
+    } elseif (is_numeric($this->construct)) {
+      return true;
+    } elseif (is_bool($this->construct)) {
+      return false;
+    }
+  }
+}
+
+/**
+ * Sabel Container
+ *
+ * @category   Container
+ * @package    org.sabel.container
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+final class Sabel_Container_Aspect
+{
+  private $methods = array();
+  private $aspects = array();
+  
+  public function apply($aspect)
+  {
+    $this->aspects[] = $aspect;
+    return $this;
+  }
+  
+  public function to($method)
+  {
+    $this->methods[] = $method;
+    return $this;
+  }
+  
+  public function getAspects()
+  {
+    return $this->aspects;
+  }
+  
+  public function getMethods()
+  {
+    return $this->methods;
+  }
+}
