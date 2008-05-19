@@ -132,7 +132,9 @@ class Test_Controller_Page extends SabelTestCase
   
   protected function createController()
   {
-    return new TestController(new Sabel_Response_Object());
+    $testController = new TestController();
+    $testController->setResponse(new Sabel_Response_Object());
+    return $testController;
   }
 }
 

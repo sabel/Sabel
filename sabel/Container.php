@@ -20,14 +20,7 @@ class Sabel_Container
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    $name = get_class($config);
-    
-    if (isset(self::$configs[$name])) {
-      return self::$configs[$name];
-    }
-    
-    $injector = new Sabel_Container_Injector($config);
-    return self::$configs[$name] = $injector;
+    return new Sabel_Container_Injector($config);
   }
   
   /**

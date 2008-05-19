@@ -115,7 +115,6 @@ class SabelAllTests
     $suite->addTest(Test_Exception::suite());
     
     $suite->addTest(Test_Storage_Memory::suite());
-    $suite->addTest(Test_VirtualInheritance::suite());
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
     
