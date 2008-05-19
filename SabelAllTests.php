@@ -89,7 +89,6 @@ class SabelAllTests
   {
     $suite = new PHPUnit_Framework_TestSuite();
     
-    /*
     if (in_array("-db", $_SERVER["argv"], true)) {
       $suite->addTest(Test_DB_Statement_Tests::suite());
       $suite->addTest(Test_DB_Storage_Tests::suite());
@@ -120,12 +119,10 @@ class SabelAllTests
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
     
-    */
-    
     $suite->addTest(Test_Container::suite());
     // $suite->addTest(Test_Aspect::suite());
     
-    //$suite->addTest(Test_Application::suite());
+    $suite->addTest(Test_Application::suite());
     
     return $suite;
   }
