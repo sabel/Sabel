@@ -150,6 +150,14 @@ class Test_Container extends SabelTestCase
   }
   
   /**
+<<<<<<< .mine
+   * @test
+   */
+  public function SetterInjection()
+  {
+  }
+  
+  /**
    * @test
    */
   public function constructorWithBind()
@@ -163,6 +171,7 @@ class Test_Container extends SabelTestCase
    * simple injection
    * 
    * @test
+   */
   public function injection()
   {
     $injector = Sabel_Container::create(new Config());
@@ -170,16 +179,13 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals(10, $person->calc());
   }
-  */
   
-  /*
   public function testConstructorInjection()
   {
     $injector = Sabel_Container::create(new ConstructConfig());
     $car = $injector->newInstance("Car");
     $this->assertTrue(is_object($car->getEngine()));
   }
-  */
   
   public function testStrLiteralConstructorInjection()
   {
@@ -261,6 +267,16 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals("test", $trace->getArgument());
   }
+  
+  /**
+   * @test
+   */
+  public function aspectWithClassName()
+  {
+    $injector = Sabel_Container::create(new AspectConfigWith);
+    $instance = $injector->newInstance("AspectTarget");
+    $instance->run("test");
+  }
 }
 
 class AspectConfig extends Sabel_Container_Injection
@@ -273,7 +289,7 @@ class AspectConfig extends Sabel_Container_Injection
   }
   public function configure()
   {
-    $this->aspect("AspectTarget")->apply($this->trace)->method("run");
+    $this->aspect("AspectTarget")->apply($this->trace)->to("run");
   }
   
   public function getTrace()
@@ -300,6 +316,14 @@ class Trace
   public function getArgument()
   {
     return $this->argument;
+  }
+}
+
+class AspectConfigWith extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply("Trace")->to("run");
   }
 }
 

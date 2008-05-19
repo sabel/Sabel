@@ -131,9 +131,9 @@ class Sabel_Container_Injector
     
     if ($this->injection->hasAspect($className)) {
       $aspect = $this->injection->getAspect($className);
-      foreach ($aspect->getAppliedAspects() as $appliedAspect) {
+      foreach ($aspect->getAspects() as $appliedAspect) {
         $pointcut = Sabel_Aspect_Pointcut::create($appliedAspect);
-        foreach ($aspect->getAppliedMethods() as $method) {
+        foreach ($aspect->getMethods() as $method) {
           $pointcut->addMethod($method);
         }
         Sabel_Aspect_Aspects::singleton()->addPointcut($pointcut);

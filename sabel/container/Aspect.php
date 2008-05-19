@@ -14,24 +14,24 @@ final class Sabel_Container_Aspect
   private $methods = array();
   private $aspects = array();
   
-  public function method($method)
-  {
-    $this->methods[] = $method;
-    return $this;
-  }
-  
   public function apply($aspect)
   {
     $this->aspects[] = $aspect;
     return $this;
   }
   
-  public function getAppliedAspects()
+  public function to($method)
+  {
+    $this->methods[] = $method;
+    return $this;
+  }
+  
+  public function getAspects()
   {
     return $this->aspects;
   }
   
-  public function getAppliedMethods()
+  public function getMethods()
   {
     return $this->methods;
   }
