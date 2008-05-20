@@ -89,6 +89,49 @@ class Sabel_CTest_Config_ConstructWithInterface extends Sabel_Container_Injectio
   }
 }
 
+
+class ReflectionCacheTargetBase{}
+interface ReflectionCacheTargetInterfaceOne{}
+interface ReflectionCacheTargetInterfaceTwo{}
+class ReflectionCacheTarget extends ReflectionCacheTargetBase
+                            implements ReflectionCacheTargetInterfaceOne, ReflectionCacheTargetInterfaceTwo
+{
+  const TEST  = "a";
+  const TEST2 = "b";
+  
+  public $publicProperty;
+  protected $protectedProperty;
+  private $privateProperty;
+  
+  /**
+   * @access public publicMethod
+   * @return void
+   */
+  public function publicMethod($a, $b, $c = "test")
+  {
+  }
+  
+  /**
+   * @access protected protectedMethod
+   */
+  protected function protedtedMethod(StdClass $a, Array $b)
+  {
+  }
+  
+  /**
+   * @access private privateMethod
+   */
+  private function privateMethod()
+  {
+  }
+}
+
+class ReflectionCacheTarget2 extends ReflectionCacheTarget{}
+
+if (!defined("RUN_BASE")) {
+  define("RUN_BASE", TEST_DATA_DIR);
+}
+
 /**
  * TestCase of sabel container
  *
@@ -103,26 +146,77 @@ class Test_Container extends SabelTestCase
   }
   
   /**
-   * @test
+   *
    */
-  public function injectionWithSetter()
+  public function benchmarkReflectionCache()
   {
-    $container  = Sabel_Container::create(new Sabel_CTest_Config());
-    $controller = $container->newInstance("Sabel_CTest_Controller");
-    $this->assertTrue($controller->model instanceof Sabel_CTest_Model);
+    echo "\n\n";
+    
+    for ($z = 10; $z < 30; $z += 10) {
+      echo "when: " . $z . "\n";
+      
+      $s = microtime();
+      for ($i = 0; $i < $z; ++$i) {
+      $cr = new Sabel_Reflection_Cache_Class("ReflectionCacheTarget");
+      $methods = $cr->getMethods();
+      }
+      echo "\t     cached: ";
+      echo microtime() - $s;
+      echo "\n";
+      
+      $s = microtime();
+      for ($i = 0; $i < $z; ++$i) {
+      $cr = new Sabel_Reflection_Class("ReflectionCacheTarget");
+      $methods = $cr->getMethods();
+      }
+      echo "\t not cached: ";
+      echo microtime() - $s;
+      
+      echo "\n";
+      echo "\n";
+    }
+    
+    echo "\n\n";
   }
   
   /**
    * @test
    */
-  public function injectionInvalidClass()
+  public function createContainer()
   {
-    $container  = Sabel_Container::create(new Sabel_CTest_Config());
+    $container = Sabel_Container::create(new Sabel_CTest_Config());
+  }
+  
+  /**
+   * @test
+   */
+  public function createContainerWithInvalidConfiguration()
+  {
     try {
-      $controller = $container->newInstance("Sabel_CTest_WillNotFoundClass");
-    } catch (Exception $e) {
+      $container = Sabel_Container::create(new StdClass());
+    } catch (Sabel_Container_Exception_InvalidConfiguration $e) {
       $this->assertTrue(true);
       return;
+    }
+    
+    $this->fail();
+  }
+  
+  /**
+   * @test
+   */
+  public function instanciateUndefinedClass()
+  {
+    $container = Sabel_Container::create(new Sabel_CTest_Config());
+    
+    try {
+      $controller = $container->newInstance("Sabel_CTest_WillNotFoundClass");
+    } catch (Sabel_Container_Exception_UndefinedClass $une) {
+      $this->assertTrue(true);
+      return;
+    } catch (Exception $e) {
+      echo $e->getMessage();
+      $this->fail();
     }
     
     $this->fail();
@@ -150,11 +244,13 @@ class Test_Container extends SabelTestCase
   }
   
   /**
-<<<<<<< .mine
    * @test
    */
   public function SetterInjection()
   {
+    $container  = Sabel_Container::create(new Sabel_CTest_Config());
+    $controller = $container->newInstance("Sabel_CTest_Controller");
+    $this->assertTrue($controller->model instanceof Sabel_CTest_Model);
   }
   
   /**
@@ -218,17 +314,6 @@ class Test_Container extends SabelTestCase
     } catch (Exception $e) {
       $this->assertEquals("WrongCalculator does't exist", $e->getMessage());
     }
-  }
-  
-  public function testNoInjectionConfigToConstructer()
-  {
-    try {
-      $injector = Sabel_Container::create(new StdClass());
-    } catch (Sabel_Exception_InvalidArgument $e) {
-      return;
-    }
-    
-    $this->fail();
   }
   
   public function testMultipleConstructerInjection()

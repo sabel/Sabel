@@ -23,7 +23,8 @@ if (in_array("-db", $_SERVER["argv"], true)) {
   PHPUnit_Util_Filter::removeFileFromWhitelist(SABEL_BASE . DS . "sabel" . DS . "response" . DS . "header" . DS . "Http.php");
 }
 
-define("TEST_APP_DIR", SABEL_BASE . DS . "Test" . DS . "data" . DS . "application");
+define("TEST_DATA_DIR", SABEL_BASE . DS . "Test" . DS . "data");
+define("TEST_APP_DIR", TEST_DATA_DIR . DS . "application");
 define("MODULES_DIR_NAME", "app");
 define("VIEW_DIR_NAME",    "views");
 define("LOG_DIR_PATH",     TEST_APP_DIR . DS . "logs");
