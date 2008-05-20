@@ -67,22 +67,28 @@ final class Sabel
   
   public static function using($className)
   {
-    if (!class_exists($className, false)) {
-      self::autoload($className);
+    if (class_exists($className, false)) {
+      return true;
+    } else {
+      return self::autoload($className);
     }
   }
   
   public static function autoload($className)
   {
-    if (isset(self::$required[$className])) return;
+    if (isset(self::$required[$className])) return true;
     
     if (isset(self::$readableFiles[$className])) {
       require (self::$readableFiles[$className]);
       self::$required[$className] = 1;
+      return true;
     } elseif ($path = self::getFilePath($className)) {
       require ($path);
       self::$required[$className] = 1;
       self::$readableFiles[$className] = $path;
+      return true;
+    } else {
+      return false;
     }
   }
   

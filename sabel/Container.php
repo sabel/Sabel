@@ -230,7 +230,7 @@ class Sabel_Container
   
   protected function exists($className)
   {
-    return (class_exists($className) || interface_exists($className));
+    return (Sabel::using($className) || interface_exists($className));
   }
   
   /**
@@ -434,6 +434,7 @@ class Sabel_Container_Construct
   public function with($className)
   {
     $this->constructs[] = $className;
+    
     return $this;
   }
   
@@ -445,22 +446,6 @@ class Sabel_Container_Construct
   public function getConstructs()
   {
     return $this->constructs;
-  }
-  
-  public function isClass()
-  {
-    return (class_exists($this->construct));
-  }
-  
-  public function isLiteral()
-  {
-    if (is_string($this->construct)) {
-      return true;
-    } elseif (is_numeric($this->construct)) {
-      return true;
-    } elseif (is_bool($this->construct)) {
-      return false;
-    }
   }
 }
 
