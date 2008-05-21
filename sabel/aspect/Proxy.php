@@ -41,36 +41,6 @@ class Sabel_Aspect_Proxy
     }
   }
   
-  public function __setSourceClass__($source)
-  {
-    $this->source = $source;
-  }
-  
-  public function __getSourceClass__()
-  {
-    return $this->source;
-  }
-  
-  public function __setTarget__($target)
-  {
-    $this->target = $target;
-  }
-  
-  public function __getTarget__()
-  {
-    return $this->target;
-  }
-  
-  public function __getReflection__()
-  {
-    return new Sabel_Reflection_Class($this->target);
-  }
-  
-  public function __hasMethod__($method)
-  {
-    return $this->getReflection()->hasMethod($method);
-  }
-  
   public function __set($key, $value)
   {
     $this->target->$key = $value;
@@ -117,6 +87,54 @@ class Sabel_Aspect_Proxy
     }
   }
   
+  public function __getSource__()
+  {
+    return $this->source;
+  }
+
+  public function __setSourceClass__($source)
+  {
+    $this->source = $source;
+  }
+  
+  public function __getSourceClass__()
+  {
+    return $this->source;
+  }
+  
+  public function __setTarget__($target)
+  {
+    $this->target = $target;
+  }
+  
+  public function __getTarget__()
+  {
+    return $this->target;
+  }
+  
+  public function __getReflection__()
+  {
+    return new Sabel_Reflection_Class($this->target);
+  }
+  
+  public function __hasMethod__($method)
+  {
+    return $this->getReflection()->hasMethod($method);
+  }
+  
+  protected function callAspect($joinpoint, $matches, $position)
+  {
+    $called = false;
+    $result = false;
+    
+    foreach ($matches as $aspect) {
+      $called = true;
+      $result = $aspect->$position($joinpoint);
+    }
+    
+    return ($called) ? $result : true;
+  }
+  
   protected function getTargetReflection()
   {
     if ($this->targetReflectionCache === null) {
@@ -131,6 +149,7 @@ class Sabel_Aspect_Proxy
     if ($this->aspects === null) {
       $this->aspects = Sabel_Aspect_Aspects::singleton();
     }
+    
     $name = $this->targetClassName;
     $key  = $name . "::" . $method;
     
@@ -156,24 +175,6 @@ class Sabel_Aspect_Proxy
     $joinpoint->setArguments($arg);
     
     return $joinpoint;
-  }
-  
-  protected function callAspect($joinpoint, $matches, $position)
-  {
-    $called = false;
-    $result = false;
-    
-    foreach ($matches as $aspect) {
-      $called = true;
-      $result = $aspect->$position($joinpoint);
-    }
-    
-    return ($called) ? $result : true;
-  }
-  
-  public function __getSource__()
-  {
-    return $this->source;
   }
   
   protected function beforeCallBefore($method, $arg)

@@ -13,23 +13,125 @@ class Sabel_Container
 {
   private static $configs = array();
   
+  /**
+   *
+   * @param mixed $config object | string
+   */
   public static function create($config)
   {
-    return new self($config);
+    if (is_object($config) && $config instanceof Sabel_Container_Injection) {
+      return new self($config);
+    } elseif (is_string($config)) {
+      if (isset(self::$configs[$config])) {
+        return new self(self::$configs[$config]);
+      } elseif (isset(self::$configs["default"])) {
+        return new self(self::$configs["default"]);
+      } else {
+        throw new Sabel_Container_Exception_InvalidConfiguration("{$config} not registered");
+      }
+    } else {
+      throw new Sabel_Container_Exception_InvalidConfiguration();
+    }
   }
   
   /**
    * create new instance with injection config
+   *
+   * @param string $className
+   * @param mixed $config object | string
    */
-  public static function load($className, $config)
+  public static function load($className, $config = null)
   {
-    return self::create($config)->newInstance($className);
+    if (is_object($config) && $config instanceof Sabel_Container_Injection) {
+      return self::create($config)->newInstance($className);
+    } elseif (is_string($config)) {
+      if (self::hasConfig($config)) {
+        return self::create($config)->newInstance($className);
+      } else {
+        return self::load($className, "default");
+      }
+    } elseif ($config === null) {
+      $config = "default";
+      return self::load($className, $config);
+    } else {
+      throw new Sabel_Container_Exception_InvalidConfiguration("configuration not found");
+    }
+  }
+  
+  /**
+   * addConfig 
+   * 
+   * @param string $name 
+   * @param Sabel_Container_Injection $config
+   * @static
+   * @access public
+   * @return void
+   * @throws Sabel_Container_Exception_InvalidConfiguration
+   */
+  public static function addConfig($name, Sabel_Container_Injection $config)
+  {
+    if (!$config instanceof Sabel_Container_Injection) {
+      $msg = "object type must be Sabel_Container_Injection";
+      throw new Sabel_Container_Exception_InvalidConfiguration($msg);
+    }
+    
+    if (isset(self::$configs[$name])) {
+      throw new Sabel_Container_Exception_InvalidConfiguration("duplicate {$name} entry");
+    } else {
+      self::$configs[$name] = $config;
+    }
+    
+    if (!isset(self::$configs[$name])) {
+      $msg = "unknown exception";
+      throw new Sabel_Container_Exception_InvalidConfiguration($msg);
+    }
+  }
+  
+  public static function hasConfig($name)
+  {
+    return self::$configs[$name];
+  }
+  
+  public static function getConfig($name)
+  {
+    if (self::hasConfig($name)) {
+      return self::$configs[$name];
+    } else {
+      throw new Sabel_Container_Exception_InvalidConfiguration("{$config} not registered");
+    }
+  }
+  
+  /**
+   * clearConfig 
+   * 
+   * @param string $name 
+   * @static
+   * @access public
+   * @return boolean
+   */
+  public static function clearConfig($name)
+  {
+    if (!is_string($name)) {
+      throw new Sabel_Exception_Runtiem("name must be string givin: " . var_export($name, true));
+    }
+    
+    if (self::hasConfig($name)) {
+      unset(self::$configs[$name]);
+      return true;
+    } else {
+      return false;
+    }
+  }
+  
+  public static function clearAllConfigs()
+  {
+    self::$configs = array();
   }
   
   /**
    * @var Sabel_Container_Injection
    */
-  protected $injection = null;
+  protected $config = null;
   
   /**
    * @var array reflection cache
@@ -51,14 +153,15 @@ class Sabel_Container
    *
    * @param Sabel_Container_Injection $injection
    */
-  public function __construct($injection)
+  public function __construct($config)
   {
-    if (!$injection instanceof Sabel_Container_Injection) {
-      throw new Sabel_Container_Exception_InvalidConfiguration("object type must be Sabel_Container_Injection");
+    if (!$config instanceof Sabel_Container_Injection) {
+      $msg = "object type must be Sabel_Container_Injection";
+      throw new Sabel_Container_Exception_InvalidConfiguration($msg);
     }
     
-    $injection->configure();
-    $this->injection = $injection;
+    $config->configure();
+    $this->config = $config;
   }
   
   /**
@@ -67,20 +170,30 @@ class Sabel_Container
    * @param string $className
    * @return object
    */
-  public function newInstance($className)
+  public function newInstance($className, $arguments = null)
   {
     $reflection = $this->getReflection($className);
     
     if ($reflection->isInstanciatable()) {
-      $instance = $this->newInstanceWithConstruct($reflection, $className);
+      if (is_array($arguments)) {
+        $instance = $reflection->newInstanceArgs($constructArguments);
+      } elseif (is_string($arguments)) {
+        $instance = $reflection->newInstance($arguments);
+      } else {
+        $instance = $this->newInstanceWithConstruct($reflection, $className);
+      }
     } else {
-      $binds = $this->injection->getBind($className);
+      $binds = $this->config->getBind($className);
       $bind  = (is_array($binds)) ? $binds[0] : $binds;
       
       $implementation = $bind->getImplementation();
       
-      if ($this->injection->hasConstruct($className)) {
+      if ($this->config->hasConstruct($className)) {
         $instance = $this->newInstanceWithConstructInAbstract($className, $implementation);
+      } elseif (is_array($arguments)) {
+        $instance = $reflection->newInstanceArgs($constructArguments);
+      } elseif (is_string($arguments)) {
+        $instance = $reflection->newInstance($arguments);
       } else {
         $instance = $this->newInstance($implementation);
       }
@@ -97,9 +210,9 @@ class Sabel_Container
    */
   protected function injectToSetter($reflection, $instance)
   {
-    if (!$this->injection->hasBinds()) return $instance;
+    if (!$this->config->hasBinds()) return $instance;
     
-    foreach ($this->injection->getBinds() as $name => $binds) {
+    foreach ($this->config->getBinds() as $name => $binds) {
       foreach ($binds as $bind) {
         if ($bind->hasSetter()) {
           $injectionMethod = $bind->getSetter();
@@ -121,8 +234,8 @@ class Sabel_Container
   
   protected function newInstanceWithConstruct($reflection, $className)
   {
-    if ($this->injection->hasConstruct($reflection->getName())) {
-      $construct = $this->injection->getConstruct($className);
+    if ($this->config->hasConstruct($reflection->getName())) {
+      $construct = $this->config->getConstruct($className);
       $constructArguments = array();
       
       foreach ($construct->getConstructs() as $constructValue) {
@@ -144,8 +257,8 @@ class Sabel_Container
   
   protected function newInstanceWithConstructInAbstract($className, $implClass)
   {
-    if ($this->injection->hasConstruct($className)) {
-      $construct = $this->injection->getConstruct($className);
+    if ($this->config->hasConstruct($className)) {
+      $construct = $this->config->getConstruct($className);
       $constructArguments = array();
       
       foreach ($construct->getConstructs() as $constructValue) {
@@ -175,17 +288,7 @@ class Sabel_Container
     
     $className = get_class($instance);
     
-    if (!$this->injection->hasAspect($className)) return $instance;
-    
-    $aspect = $this->injection->getAspect($className);
-    
-    foreach ($aspect->getAspects() as $appliedAspect) {
-      $pointcut = Sabel_Aspect_Pointcut::create($appliedAspect);
-      foreach ($aspect->getMethods() as $method) {
-        $pointcut->addMethod($method);
-      }
-      Sabel_Aspect_Aspects::singleton()->addPointcut($pointcut);
-    }
+    if (!$this->config->hasAspect($className)) return $instance;
     
     return new Sabel_Aspect_Proxy($instance);
   }
@@ -210,8 +313,8 @@ class Sabel_Container
     $reflect = $this->getReflection($className);
     
     if ($reflect->isInterface()) {
-      if ($this->injection->hasBind($className)) {
-        $bind = $this->injection->getBind($className);
+      if ($this->config->hasBind($className)) {
+        $bind = $this->config->getBind($className);
         
         if (is_array($bind)) {
           $implement = $bind[0]->getImplementation();  
@@ -310,7 +413,7 @@ class Sabel_Container
       
       $className = $reflection->getName();
       
-      if ($this->injection->hasConstruct($className)) {
+      if ($this->config->hasConstruct($className)) {
         $instance = $this->newInstance($className);
       } else {
         if ($reflection->isInstanciatable()) {
@@ -460,28 +563,40 @@ class Sabel_Container_Construct
  */
 final class Sabel_Container_Aspect
 {
-  private $methods = array();
-  private $aspects = array();
+  private $targetClassName = "";
+  
+  private $aspect = null;
+  private $pointcut = null;
+  
+  public function __construct($targetClassName)
+  {
+    $this->targetClassName = $targetClassName;
+    $this->aspect = Sabel_Aspect_Aspects::singleton();
+  }
   
   public function apply($aspect)
   {
-    $this->aspects[] = $aspect;
+    $this->pointcut = Sabel_Aspect_Pointcut::create($aspect);
+    $this->aspect->addPointcut($this->pointcut);
+    
     return $this;
   }
   
   public function to($method)
   {
-    $this->methods[] = $method;
+    $this->pointcut->addMethod($method);
     return $this;
   }
   
-  public function getAspects()
+  public function toMethodRegex($pattern)
   {
-    return $this->aspects;
+    $this->pointcut->setMethodRegex($pattern);
+    return $this;
   }
   
-  public function getMethods()
+  public function toEveryMethods()
   {
-    return $this->methods;
+    $this->pointcut->toAll();
+    return $this;
   }
 }

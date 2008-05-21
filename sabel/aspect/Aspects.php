@@ -30,16 +30,15 @@ class Sabel_Aspect_Aspects
   
   public function addPointcut($pointcut)
   {
-    // self::$matcher->add($pointcut);
-    $this->pointcuts[] = $pointcut;
     $className = $pointcut->getName();
-    $this->aspects[] = $pointcut->getAspect();
+    
+    $this->pointcuts[$className] = $pointcut;
+    $this->aspects[$className]   = $pointcut->getAspect();
   }
   
-  public function add($aspect)
+  public function getPointCut($name)
   {
-    $this->aspects[] = $aspect;
-    // self::$matcher->add($aspect->pointcut());
+    return $this->aspects[$name];
   }
   
   public function findMatch($conditions)
@@ -65,14 +64,14 @@ class Sabel_Aspect_Aspects
             }
           }
           break;
+        case ($p->hasMethodRegex() && preg_match("/" . $p->getMethodRegex() . "/" , $method)):
+          break;
         case ($p->hasClass() && $p->hasMethod() &&
               $p->getClass() === $class && $p->getMethod() === $method):
           break;
         case ($p->hasClass() && $p->getClass() === $class):
           break;
         case ($p->hasClassRegex() && preg_match("/" . $p->getClassRegex() . "/", $class)):
-          break;
-        case ($p->hasMethodRegex() && preg_match("/" . $p->getMethodRegex() . "/" , $method)):
           break;
         default:
           $match = false;

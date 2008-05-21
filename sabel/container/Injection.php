@@ -12,6 +12,7 @@
  */
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
+  private $pointcut = null;
   private
     $binds,
     $aspects,

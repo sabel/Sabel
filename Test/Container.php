@@ -1,136 +1,5 @@
 <?php
 
-class Sabel_CTest_Controller
-{
-  public $model = null;
-  
-  public function setModel(Sabel_CTest_Model $model)
-  {
-    $this->model = $model;
-  }
-}
-
-class Sabel_CTest_Controller_WithConstruct
-{
-  public $model = null;
-
-  public function __construct(Sabel_CTest_Model $model)
-  {
-    $this->model = $model;
-  }
-}
-
-interface Sabel_CTest_Model
-{
-  public function getData();
-}
-
-interface Sabel_CTest_Result
-{
-}
-
-class Sabel_CTest_Result_Implement implements Sabel_CTest_Result
-{
-}
-
-class Sabel_CTest_Model_Implement implements Sabel_CTest_Model
-{
-  // @inject Sabel_CTest_Model
-  public function getData()
-  {
-  }
-}
-
-class Sabel_CTest_Config extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->bind("Sabel_CTest_Model")
-         ->to("Sabel_CTest_Model_Implement")->setter("setModel");
-  }
-}
-class Sabel_CTest_Config_WithoutSetter extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->bind("Sabel_CTest_Model")
-         ->to("Sabel_CTest_Model_Implement");
-  }
-}
-class Sabel_CTest_Config_Construct extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("Sabel_CTest_Controller_WithConstruct")->with("Sabel_CTest_Model_Implement");
-  }
-}
-class Sabel_CTest_Config_ConstructWithBind extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->bind("Sabel_CTest_Model")->to("Sabel_CTest_Model_Implement");
-    $this->construct("Sabel_CTest_Controller_WithConstruct")->with("Sabel_CTest_Model");
-  }
-}
-
-class Sabel_CTest_Config_ConstructWithInvalidImplement extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
-  }
-}
-
-class Sabel_CTest_Config_ConstructWithInterface extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
-  }
-}
-
-
-class ReflectionCacheTargetBase{}
-interface ReflectionCacheTargetInterfaceOne{}
-interface ReflectionCacheTargetInterfaceTwo{}
-class ReflectionCacheTarget extends ReflectionCacheTargetBase
-                            implements ReflectionCacheTargetInterfaceOne, ReflectionCacheTargetInterfaceTwo
-{
-  const TEST  = "a";
-  const TEST2 = "b";
-  
-  public $publicProperty;
-  protected $protectedProperty;
-  private $privateProperty;
-  
-  /**
-   * @access public publicMethod
-   * @return void
-   */
-  public function publicMethod($a, $b, $c = "test")
-  {
-  }
-  
-  /**
-   * @access protected protectedMethod
-   */
-  protected function protedtedMethod(StdClass $a, Array $b)
-  {
-  }
-  
-  /**
-   * @access private privateMethod
-   */
-  private function privateMethod()
-  {
-  }
-}
-
-class ReflectionCacheTarget2 extends ReflectionCacheTarget{}
-
-if (!defined("RUN_BASE")) {
-  define("RUN_BASE", TEST_DATA_DIR);
-}
 
 /**
  * TestCase of sabel container
@@ -146,11 +15,46 @@ class Test_Container extends SabelTestCase
   }
   
   /**
+   * setUp 
+   * 
+   * @access public
+   * @return void
+   */
+  public function setUp()
+  {
+    Sabel_Container::clearAllConfigs();
+  }
+  
+  /**
    * @test
    */
   public function createContainer()
   {
     $container = Sabel_Container::create(new Sabel_CTest_Config());
+  }
+  
+  /**
+   * createContainerWithName
+   *
+   * @test
+   */
+  public function createContainerWithName()
+  {
+    Sabel_Container::addConfig("ctest", new Sabel_CTest_Config());
+    $instance = Sabel_Container::load("Sabel_CTest_Controller", "ctest");
+    $this->assertTrue($instance instanceof Sabel_CTest_Controller_Interface);
+  }
+  
+  /**
+   * createContainerWithDefault 
+   *
+   * @test
+   */
+  public function createContainerWithDefault()
+  {
+    Sabel_Container::addConfig("default", new Sabel_CTest_Config());
+    $instance = Sabel_Container::load("Sabel_CTest_Controller");
+    $this->assertTrue($instance instanceof Sabel_CTest_Controller_Interface);
   }
   
   /**
@@ -322,195 +226,74 @@ class Test_Container extends SabelTestCase
   /**
    * @test
    */
-  public function aspectWithClassName()
+  public function weavingToMethod()
   {
-    $injector = Sabel_Container::create(new AspectConfigWith);
-    $instance = $injector->newInstance("AspectTarget");
+    $instance = Sabel_Container::load("AspectTarget", new AspectToMethod);
     $instance->run("test");
-  }
-}
-
-class AspectConfig extends Sabel_Container_Injection
-{
-  private $trace = null;
-  
-  public function __construct($trace)
-  {
-    $this->trace = $trace;
-  }
-  public function configure()
-  {
-    $this->aspect("AspectTarget")->apply($this->trace)->to("run");
+    $instance->runrun("test");
   }
   
-  public function getTrace()
+  /**
+   * @test
+   */
+  public function weavingToEvenryMethod()
   {
-    return $this->trace;
-  }
-}
-class AspectTarget
-{
-  public function run($parameter)
-  {
-    return $parameter;
-  }
-}
-
-class BaseAspect
-{
-  public function after($joinpoint){}
-  public function before($joinpoint){}
-}
-class Trace extends BaseAspect
-{
-  private $argument = "";
-  
-  public function after($joinpoint)
-  {
-    $this->argument = $joinpoint->getArgument(0);
+    $instance = Sabel_Container::load("AspectTarget", new AspectToEveryMethods());
+    $instance->run("test");
+    $instance->runrun("test");
   }
   
-  public function getArgument()
+  /**
+   * @test
+   */
+  public function weavingToMethodRegex()
   {
-    return $this->argument;
+    $instance = Sabel_Container::load("AspectTarget", new AspectToMethodRegex());
+    $instance->run("test");
+    $instance->runrun("test");
   }
 }
 
-class AspectConfigWith extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->aspect("AspectTarget")->apply("Trace")->to("run");
-  }
-}
+/** test classes **/
 
-class SpecificSetter
+interface Sabel_CTest_Controller_Interface
 {
-  private $oil = null;
-  public function setSpecificSetter(Oil $oil)
-  {
-    $this->oil = $oil;
-  }
 }
-class SpecificSetterConfig extends Sabel_Container_Injection
+class Sabel_CTest_Controller implements Sabel_CTest_Controller_Interface
 {
-  public function configure()
-  {
-    $this->construct("EngineOil")->with("specific");
-    $this->bind("Oil")->to("EngineOil")->setter("setSpecificSetter");
-  }
-}
-
-class MultipleConstructConfig extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("MultiCar")->with("MultiEngine")
-                                ->with("multiple");
-                                    
-    $this->construct("MultiEngine")->with("Oil");
-    $this->construct("EngineOil")->with("normal");
-    
-    $this->bind("Oil")->to("EngineOil");
-  }
-}
-class MultiCar
-{
-  private $engine = null;
-  private $shaft  = null;
+  public $model = null;
   
-  public function __construct($engine, $shaft)
+  public function setModel(Sabel_CTest_Model $model)
   {
-    $this->engine = $engine;
-    $this->shaft  = $shaft;
+    $this->model = $model;
   }
 }
-class MultiEngine
+class Sabel_CTest_Controller_WithConstruct
 {
-  private $oil = null;
-  
-  public function __construct($oil)
-  {
-    $this->oil = $oil;
-  }
-}
-interface Oil
-{
-}
-class EngineOil implements Oil
-{
-  private $type = "";
-  public function __construct($type)
-  {
-    $this->type = $type;
-  }
-}
+  public $model = null;
 
-class ConstructConfig extends Sabel_Container_Injection
-{
-  public function configure()
+  public function __construct(Sabel_CTest_Model $model)
   {
-    $this->construct("Car")->with("Engine");
+    $this->model = $model;
   }
 }
-class StrLiteralConstructConfig extends Sabel_Container_Injection
+interface Sabel_CTest_Model
 {
-  public function configure()
+  public function getData();
+}
+interface Sabel_CTest_Result
+{
+}
+class Sabel_CTest_Result_Implement implements Sabel_CTest_Result
+{
+}
+class Sabel_CTest_Model_Implement implements Sabel_CTest_Model
+{
+  // @inject Sabel_CTest_Model
+  public function getData()
   {
-    $this->construct("Car")->with("this is engine");
   }
 }
-class NumLiteralConstructConfig extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("Car")->with(123);
-  }
-}
-class BoolLiteralConstructConfig extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->construct("Car")->with(true);
-  }
-}
-class Car
-{
-  private $engine = null;
-  
-  public function __construct($engine)
-  {
-    $this->engine = $engine;
-  }
-  
-  public function getEngine()
-  {
-    return $this->engine;
-  }
-}
-class Engine
-{
-  public function run(){}
-}
-
-class Config extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->bind("Calculator")->to("FrastrationCalculator");
-  }
-}
-
-class WrongClassNameConfig extends Sabel_Container_Injection
-{
-  public function configure()
-  {
-    $this->bind("Calculator")->to("WrongCalculator");
-  }
-}
-
-/****************************************************************************/
-
 class Person
 {
   protected $age  = null;
@@ -545,7 +328,6 @@ class Person
     return $this->calc->calc($this);
   }
 }
-
 class Integer
 {
   private $self = 0;
@@ -560,12 +342,10 @@ class Integer
     return $this->self + $num;
   }
 }
-
 interface Calculator
 {
   public function calc($obj);
 }
-
 class FrastrationCalculator implements Calculator
 {
   private $int = null;
@@ -582,7 +362,6 @@ class FrastrationCalculator implements Calculator
     return 10;
   }
 }
-
 class Age
 {
   protected $age = 15;
@@ -599,5 +378,240 @@ class Age
   public function setAge($age = 0)
   {
     $this->age = $age;
+  }
+}
+class AspectConfig extends Sabel_Container_Injection
+{
+  private $trace = null;
+  
+  public function __construct($trace)
+  {
+    $this->trace = $trace;
+  }
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply($this->trace)->to("run");
+  }
+  
+  public function getTrace()
+  {
+    return $this->trace;
+  }
+}
+class AspectTarget
+{
+  public function run($parameter)
+  {
+    return $parameter;
+  }
+  
+  public function runrun($parameter)
+  {
+    return $parameter;
+  }
+}
+class BaseAspect
+{
+  public function after($joinpoint){}
+  public function before($joinpoint){}
+}
+class Trace extends BaseAspect
+{
+  private $argument = "";
+  
+  public function after($joinpoint)
+  {
+    $this->argument = $joinpoint->getArgument(0);
+  }
+  
+  public function getArgument()
+  {
+    return $this->argument;
+  }
+}
+class SpecificSetter
+{
+  private $oil = null;
+  public function setSpecificSetter(Oil $oil)
+  {
+    $this->oil = $oil;
+  }
+}
+class MultiCar
+{
+  private $engine = null;
+  private $shaft  = null;
+  
+  public function __construct($engine, $shaft)
+  {
+    $this->engine = $engine;
+    $this->shaft  = $shaft;
+  }
+}
+class MultiEngine
+{
+  private $oil = null;
+  
+  public function __construct($oil)
+  {
+    $this->oil = $oil;
+  }
+}
+interface Oil
+{
+}
+class EngineOil implements Oil
+{
+  private $type = "";
+  public function __construct($type)
+  {
+    $this->type = $type;
+  }
+}
+class Car
+{
+  private $engine = null;
+  
+  public function __construct($engine)
+  {
+    $this->engine = $engine;
+  }
+  
+  public function getEngine()
+  {
+    return $this->engine;
+  }
+}
+class Engine
+{
+  public function run(){}
+}
+class Config extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Calculator")->to("FrastrationCalculator");
+  }
+}
+class WrongClassNameConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Calculator")->to("WrongCalculator");
+  }
+}
+class AspectToMethod extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply("Trace")->to("run");
+  }
+}
+class AspectToEveryMethods extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply("Trace")->toEveryMethods();
+  }
+}
+class AspectToMethodRegex extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply("Trace")->toMethodRegex("run.+");
+  }
+}
+class ConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Car")->with("Engine");
+  }
+}
+class StrLiteralConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Car")->with("this is engine");
+  }
+}
+class NumLiteralConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Car")->with(123);
+  }
+}
+class BoolLiteralConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Car")->with(true);
+  }
+}
+class SpecificSetterConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("EngineOil")->with("specific");
+    $this->bind("Oil")->to("EngineOil")->setter("setSpecificSetter");
+  }
+}
+class MultipleConstructConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("MultiCar")->with("MultiEngine")
+                                ->with("multiple");
+                                    
+    $this->construct("MultiEngine")->with("Oil");
+    $this->construct("EngineOil")->with("normal");
+    
+    $this->bind("Oil")->to("EngineOil");
+  }
+}
+class Sabel_CTest_Config extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_CTest_Model")
+         ->to("Sabel_CTest_Model_Implement")->setter("setModel");
+  }
+}
+class Sabel_CTest_Config_WithoutSetter extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_CTest_Model")
+         ->to("Sabel_CTest_Model_Implement");
+  }
+}
+class Sabel_CTest_Config_Construct extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller_WithConstruct")->with("Sabel_CTest_Model_Implement");
+  }
+}
+class Sabel_CTest_Config_ConstructWithBind extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->bind("Sabel_CTest_Model")->to("Sabel_CTest_Model_Implement");
+    $this->construct("Sabel_CTest_Controller_WithConstruct")->with("Sabel_CTest_Model");
+  }
+}
+class Sabel_CTest_Config_ConstructWithInvalidImplement extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
+  }
+}
+class Sabel_CTest_Config_ConstructWithInterface extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $this->construct("Sabel_CTest_Controller")->with("Sabel_CTest_Model");
   }
 }
