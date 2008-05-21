@@ -146,40 +146,6 @@ class Test_Container extends SabelTestCase
   }
   
   /**
-   *
-   */
-  public function benchmarkReflectionCache()
-  {
-    echo "\n\n";
-    
-    for ($z = 10; $z < 30; $z += 10) {
-      echo "when: " . $z . "\n";
-      
-      $s = microtime();
-      for ($i = 0; $i < $z; ++$i) {
-      $cr = new Sabel_Reflection_Cache_Class("ReflectionCacheTarget");
-      $methods = $cr->getMethods();
-      }
-      echo "\t     cached: ";
-      echo microtime() - $s;
-      echo "\n";
-      
-      $s = microtime();
-      for ($i = 0; $i < $z; ++$i) {
-      $cr = new Sabel_Reflection_Class("ReflectionCacheTarget");
-      $methods = $cr->getMethods();
-      }
-      echo "\t not cached: ";
-      echo microtime() - $s;
-      
-      echo "\n";
-      echo "\n";
-    }
-    
-    echo "\n\n";
-  }
-  
-  /**
    * @test
    */
   public function createContainer()

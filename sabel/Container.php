@@ -80,7 +80,7 @@ class Sabel_Container
       $implementation = $bind->getImplementation();
       
       if ($this->injection->hasConstruct($className)) {
-        $instance = $this->newInstanceWithConstructInAbstract($reflection, $className, $implementation);
+        $instance = $this->newInstanceWithConstructInAbstract($className, $implementation);
       } else {
         $instance = $this->newInstance($implementation);
       }
@@ -142,7 +142,7 @@ class Sabel_Container
     return $instance;
   }
   
-  protected function newInstanceWithConstructInAbstract($reflect, $className, $implClass)
+  protected function newInstanceWithConstructInAbstract($className, $implClass)
   {
     if ($this->injection->hasConstruct($className)) {
       $construct = $this->injection->getConstruct($className);
