@@ -22,7 +22,7 @@ class Processor_Session extends Sabel_Bus_Processor
   {
     $session = $bus->get("session");
     
-    if (!$session->isCookieEnabled() && !$session instanceof Sabel_Session_PHP) {
+    if (!$session->isCookieEnabled() && ini_get("session.use_trans_sid") === "0") {
       output_add_rewrite_var($session->getName(), $session->getId());
     }
   }

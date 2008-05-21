@@ -17,14 +17,14 @@ class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->tblName;
     
     foreach ($this->columns as $column) {
-      $as = "pre_{$name}_{$column}";
+      $as = "{$name}.{$column}";
       
       if (strlen($as) > 30) {
-        $as = Sabel_DB_Join_ColumnHash::toHash("pre_{$name}_{$column}");
+        $as = Sabel_DB_Join_ColumnHash::toHash("{$name}.{$column}");
       }
       
       $p = $stmt->quoteIdentifier($name) . "." . $stmt->quoteIdentifier($column);
-      $projection[] = $p . " AS " . $as;
+      $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
     }
     
     return $projection;

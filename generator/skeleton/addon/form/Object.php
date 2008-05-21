@@ -19,14 +19,19 @@ class Form_Object extends Sabel_Object
   protected $model = null;
   
   /**
+   * @var string
+   */
+  protected $mdlName = "";
+  
+  /**
    * @var boolean
    */
   protected $isSelected = false;
   
   /**
-   * @var string
+   * @var array
    */
-  protected $mdlName = "";
+  protected $updateValues = array();
   
   /**
    * @var Sabel_DB_Metadata_Column[]
@@ -299,7 +304,13 @@ class Form_Object extends Sabel_Object
   {
     l("[form] serialize form object", SBL_LOG_DEBUG);
     
-    $this->model   = $this->model->toArray();
+    $model = $this->model;
+    $this->model = $model->toArray();
+    
+    if ($this->isSelected) {
+      $this->updateValues = $model->getUpdateValues();
+    }
+    
     $this->columns = array();
     
     return array_keys(get_object_vars($this));
@@ -309,15 +320,16 @@ class Form_Object extends Sabel_Object
   {
     l("[form] unserialize form object", SBL_LOG_DEBUG);
     
-    $model = MODEL($this->mdlName);
+    $values = $this->model;
+    $this->model = MODEL($this->mdlName);
     
     if ($this->isSelected) {
-      $model->setProperties($this->model);
+      $this->model->setProperties($values);
+      $this->model->setUpdateValues($this->updateValues);
     } else {
-      $model->setValues($this->model);
+      $this->model->setValues($values);
     }
     
-    $this->model   = $model;
-    $this->columns = $model->getColumns();
+    $this->columns = $this->model->getColumns();
   }
 }

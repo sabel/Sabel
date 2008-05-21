@@ -1,13 +1,16 @@
-/* Sabel JS - %VERSION%
+/**
+ * SabelJS 
+ * Header
  *
- * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
- * @copyright  2004-2008 Hamanaka Kazuhiro <Hamanaka.kazuhiro@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
-/*---------------------------------------------------------------------------*/
+ *
+ */
 
 window.Sabel = {};
 
 Sabel.PHP = {};
+
+Sabel.emptyFunc = function() {};
+
 Sabel.Window = {
 
 	getWidth: function() {
@@ -119,7 +122,6 @@ Sabel.Object = {
 	create: function(object, parent) {
 		if (typeof object === "undefined") return {};
 
-		//object = (function() { return this; }).apply(object);
 		object = Object(object);
 
 		switch (typeof object) {
@@ -211,70 +213,246 @@ Sabel.Object.Methods = {
 };
 
 Sabel.Object.extend(Sabel.Object, Sabel.Object.Methods);
-Sabel.String = function(string) {
-	return Sabel.Object.create(string, Sabel.String);
-};
-
-Sabel.String.format = function(string, obj) {
-	string = string.replace(/%(\w+)%/g, function(target, key) { return obj[key] || ""; });
-	return string.replace(/#\{(\w+)\}/g, function(target, key) { return obj[key] || ""; });
-};
-
-Sabel.String.capitalize = function(string) {
-	return Sabel.String.ucfirst(string.toLowerCase());
-};
-
-Sabel.String.ucfirst = function(string) {
-	return string.charAt(0).toUpperCase() + string.substring(1);
-};
-
-Sabel.String.lcfirst = function(string) {
-	return string.charAt(0).toLowerCase() + string.substring(1);
-};
-
-Sabel.String.trim = function(string) {
-	return string.replace(/(^\s+|\s+$)/g, "");
-};
-
-Sabel.String.camelize = function(string) {
-	return string.replace(/-([a-z])/g, function(str, match) {
-		return match.toUpperCase()
-	});
-};
-
-Sabel.String.decamelize = function(string) {
-	return string.replace(/\w[A-Z]/g, function(match) {
-		return match.charAt(0) + "-" + match.charAt(1).toLowerCase();
-	});
-};
-
-Sabel.String.truncate = function(string, length, truncation) {
-	truncation = truncation || "";
-
-	return string.substring(0, length) + truncation;
-};
-
-Sabel.String.times = function(string, count) {
-	var tmp = "";
-	for (var i = 0; i < count; i++) {
-		tmp += string;
+Sabel.Class = function() {
+	if (typeof arguments[0] === "function") {
+		var superKlass = arguments[0];
+	} else {
+		var superKlass = function() {};
 	}
-	return tmp;
+	var methods = Array.prototype.pop.call(arguments) || Sabel.Object;
+
+	var tmpKlass = function() {};
+	tmpKlass.prototype = superKlass.prototype;
+
+	var subKlass = function() {
+		this.__super__ = superKlass;
+		if (typeof methods.init === "function") {
+			methods.init.apply(this, arguments);
+		} else {
+			this.__super__.apply(this, arguments);
+		}
+		delete this.__super__;
+	}
+
+	subKlass.prototype = new tmpKlass;
+	switch (subKlass.prototype.constructor) {
+	case String: case Number: case Boolean:
+		subKlass.prototype.toString = function() {
+			return superKlass.toString.apply(superKlass, arguments);
+		};
+		subKlass.prototype.valueOf  = function() {
+			return superKlass.valueOf.apply(superKlass, arguments);
+		};
+	}
+
+	if (methods) {
+		for (var name in methods) subKlass.prototype[name] = methods[name];
+
+		var ms = ["toString", "valueOf"];
+		for (var i = 0, len = ms.length; i < len; i++) {
+			if (methods.hasOwnProperty(ms[i]))
+				subKlass.prototype[ms[i]] = methods[ms[i]];
+		}
+
+		subKlass.prototype.constructor = subKlass;
+		return subKlass;
+	}
 };
 
-Sabel.String.toInt = function(string) {
-	return parseInt(string, 10);
+Sabel.String = new Sabel.Class(String, {
+	init: function(string) {
+		this._string = string;
+	},
+
+	toString: function() {
+		return this._string;
+	},
+
+	valueOf: function() {
+		return this._string;
+	},
+
+	_set: function(string) {
+		return this._string = string;
+	},
+
+	chr: function() {
+		return this._set(String.fromCharCode.apply(String, this._string.split(',')));
+	},
+
+	explode: function(delimiter) {
+		return this._string.split(delimiter);
+	},
+
+	lcfirst: function() {
+		var str = this._string;
+		return this._set(str.charAt(0).toLowerCase() + str.substring(1));
+	},
+
+	ltrim: function() {
+		return this._set(this._string.replace(/^\s+/, ""));
+	},
+
+	nl2br: function() {
+		return this._set(this._string.replace(/(\r?\n)/g, "<br/>$1"));
+	},
+
+	ord: function() {
+		return this._set(this._string.charCodeAt(0));
+	},
+
+	rtrim: function() {
+		return this._set(this._string.replace(/\s+$/, ""));
+	},
+
+	repeat: function(multiplier) {
+		var tmp = "";
+		for (var i = 0; i < multiplier; i++) {
+			tmp += this._string;
+		}
+		return this._set(tmp);
+	},
+
+	shuffle: function() {
+		var tmp = this._string.split("");
+		var i = tmp.length;
+
+		while (i) {
+			var j = Math.floor(Math.random() * i);
+			var t = tmp[--i];
+			tmp[i] = tmp[j];
+			tmp[j] = t;
+		}
+		return tmp.join("");
+	},
+
+	sprintf: function(/* mixed args */) {
+		var args = arguments;
+
+		var i = 0, v, o;
+
+		var pattern = /(^|[^%])%(?:([0-9]+)\$)?(-)?([0]|\'.)?([0-9]*)(?:\.([0-9]+))?([bcdfFosxX])/g
+		var replaced = this.replace(pattern, function(all, pre, key, sign, padding, alignment, precision, match) {
+			v = (key) ? args[--key] : args[i++];
+
+			if (precision) precision = parseInt(precision);
+			switch (match) {
+			case "b":
+				v = v.toString(2);
+				break;
+			case "c":
+				v = String.fromCharCode(v);
+				break;
+			case "f": case "F":
+				if (precision) v = parseFloat(v).toFixed(precision);
+				break;
+			case "o":
+				v = v.toString(8);
+				break;
+			case "s":
+				v = v.substring(0, precision || v.length);
+				break;
+			case "x":
+				v = v.toString(16);
+				break;
+			case "X":
+				v = v.toString(16).toUpperCase();
+				break;
+			}
+
+			if (alignment) {
+				var len = alignment - v.toString().length;
+				var t = new Sabel.String(padding.charAt(padding.length - 1) || " ").repeat(len);
+
+				v = (sign === "-") ? v + t : t + v;
+			}
+
+			return pre + v;
+		});
+
+		return replaced;
+	},
+
+	trim: function() {
+		var str = this._string;
+		return this._set(str.replace(/(^\s+|\s+$)/g, ""));
+	},
+
+	format: function(obj) {
+		var pat = /(?:#\{(\w+)\}|%(\w+)%)/g;
+		return this._string.replace(pat, function(target, key) { return obj[key] || ""; });
+	},
+
+	ucfirst: function() {
+		var str = this._string;
+		return this._set(str.charAt(0).toUpperCase() + str.substring(1));
+	},
+
+
+	capitalize: function() {
+		var str = this._string;
+		return this.ucfirst(str.toLowerCase());
+	},
+
+	camelize: function() {
+		var str = this._string;
+		return this._set(str.replace(/-([a-z])/g, function(dummy, match) {
+			return match.toUpperCase();
+		}));
+	},
+
+	decamelize: function() {
+		return this._set(this._string.replace(/\w[A-Z]/g, function(match) {
+			return match.charAt(0) + "-" + match.charAt(1).toLowerCase();
+		}));
+	},
+
+	truncate: function(length, truncation) {
+		truncation = truncation || "";
+
+		return this._set(this._string.substring(0, length) + truncation);
+	},
+
+	clean: function() {
+		return this._set(this._string.replace(/\s{2,}/g, " "));
+	},
+
+	toInt: function() {
+		return parseInt(this._string, 10);
+	},
+
+	toFloat: function() {
+		return parseFloat(this._string);
+	}
+});
+
+Sabel.String.prototype.chop = Sabel.String.prototype.rtrim;
+Sabel.String.prototype.times = Sabel.String.prototype.repeat;
+
+var methods = [
+	"anchor", "big", "blink", "bold", "charAt", "charCodeAt", "concat",
+	"decodeURI", "decodeURI_Component", "encodeURI", "encodeURI_Component",
+	"enumerate", "escape", "fixed", "fontcolor", "fontsize", "fromCharCode",
+	"getProperty", "indexOf", "italics", "lastIndexOf", "link", "localeCompare",
+	"match", "replace", "resolve", "search", "slice", "small", "split", "strike",
+	"sub", "substr", "substring", "sup", "toLocaleLowerCase", "toLocaleUpperCase",
+	"toLowerCase", "toSource", "toUpperCase", "unescape", "uneval"
+];
+for (var i = 0, len = methods.length; i < len; i++) {
+	var method = methods[i];
+	Sabel.String.prototype[method] = (function(method) {
+		return function() {
+			return this._set(method.apply(this, arguments));
+		}
+	})(String.prototype[method]);
 };
-
-Sabel.Object.extend(Sabel.String, Sabel.Object.Methods);
-
-
 Sabel.Number = function(number) {
 	return Sabel.Object.create(number, Sabel.Number)
 };
 
 Sabel.Number._units = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
 Sabel.Number.toHumanReadable= function(number, unit, ext) {
+	if (typeof number !== "number") throw "number is not Number object.";
 	var i = 0;
 
 	while (number > unit) {
@@ -302,7 +480,7 @@ Sabel.Array = function(iterable) {
 
 Sabel.Array.each = function(array, callback) {
 	for (var i = 0, len = array.length; i < len; i++) {
-		callback(array[i]);
+		callback(array[i], i);
 	}
 	return array;
 };
@@ -357,7 +535,8 @@ Sabel.Array.sum = function(array) {
 	return result;
 };
 
-Sabel.Object.extend(Sabel.Array, Sabel.Object.Methods);Sabel.Function = function(method) {
+Sabel.Object.extend(Sabel.Array, Sabel.Object.Methods);
+Sabel.Function = function(method) {
 	return Sabel.Object.create(method, Sabel.Function);
 };
 
@@ -415,7 +594,9 @@ Sabel.Function.restraint = function(method, obj) {
 Sabel.Function.getArgumentNames = function(method) {
 	var str = method.toString();
 	argNames = str.match(/^[\s]*function[\s\w]*\((.*)\)/)[1].split(",");
-	Sabel.Array.map(argNames, Sabel.String.trim);
+	for (var i = 0, len = argNames.length; i < len; i++) {
+		new Sabel.String(argNames[i]).trim();
+	}
 	return (argNames[0] === "") ? new Array() : argNames;
 };
 
@@ -482,7 +663,7 @@ Sabel.Dom.Selector = {
 		combinator: /^\s*(>|\+|~)\s*/,
 		id: /^#(\w+)/,
 		className: /^\.(\w+)/,
-		pseudo: /^:([\w\-]+)(?:\(([^)˘]+)\))?/,
+		pseudo: /^:([\w\-]+)(?:\(([^)]+)\))?/,
 		attr: /^\[(\w+)([!~^$*|]?=)?([\'\"])?([^\'\"\]]+)?\3\]/,
 		space: /^\s+/
 	},
@@ -618,7 +799,7 @@ Sabel.Dom.Selector = {
 					});
 					return buf;
 				} else if (ms = pos.match(/^([+-])?(\d*)n([+-]\d+)?$/)) {
-					var a = ms[2] || 1, b = Sabel.String.toInt(ms[3] || 0);
+					var a = ms[2] || 1, b = new Sabel.String(ms[3] || 0).toInt();
 
 					Sabel.Array.each(nodes, function(node) {
 						var p = Sabel.Element.getNodeIndex(node);
@@ -662,7 +843,7 @@ Sabel.Dom.Selector = {
 						if (p == ms[2]) buf.push(node);
 					});
 				} else if (ms = pos.match(/^([+-])?(\d*)n([+-]\d+)?$/)) {
-					var a = ms[2] || 1, b = Sabel.String.toInt(ms[3] || 0);
+					var a = ms[2] || 1, b = new Sabel.String(ms[3] || 0).toInt();
 
 					Sabel.Array.each(nodes, function(node) {
 						var p = Sabel.Element.getNodeIndex(node, reverse, ofType);
@@ -817,7 +998,7 @@ Sabel.Dom.Selector.convertToJSCode = function(selector, force) {
 			pattern = patterns[prop];
 
 			if (m = selector.match(pattern)) {
-				buf.push(Sabel.String.format(cs[prop], m));
+				buf.push(new Sabel.String(cs[prop]).format(m));
 				selector = selector.replace(m[0], "");
 				break;
 			}
@@ -864,8 +1045,24 @@ Sabel.Element.hide = function(element) {
 Sabel.Element.hasClass = function(element, className) {
 	element = Sabel.get(element, false);
 
-	var pattern = new RegExp("(?:^|\\s)" + className + "(?:\\s|$)");
+	var pattern = new RegExp("(?:^|\\s+)" + className + "(?:\\s+|$)");
 	return pattern.test(element.className);
+};
+
+Sabel.Element.addClass = function(element, className) {
+	if (Sabel.Element.hasClass(element, className)) return element;
+
+	element = Sabel.get(element, false);
+	element.className = element.className + " " + className;
+};
+
+Sabel.Element.removeClass = function(element, className) {
+	element = Sabel.get(element, false);
+	element.className = element.className.replace(
+		new RegExp("(?:^|\\s+)" + className + "(?:\\s+|$)"), " "
+	);
+
+	return element;
 };
 
 Sabel.Element.hasAttribute = function(element, attribute) {
@@ -878,7 +1075,7 @@ Sabel.Element.hasAttribute = function(element, attribute) {
 if (Sabel.UserAgent.isIE) {
 	Sabel.Element.getStyle = function(element, property) {
 		element = Sabel.get(element, false);
-		property = (property === "float") ? "styleFloat" : Sabel.String.camelize(property);
+		property = (property === "float") ? "styleFloat" : new Sabel.String(property).camelize();
 
 		var style = element.currentStyle;
 		return style[property];
@@ -888,7 +1085,7 @@ if (Sabel.UserAgent.isIE) {
 		element = Sabel.get(element, false);
 		// Operaでelementがwindowだった時の対策
 		if (element.nodeType === undefined) return null;
-		property = (property === "float") ? "cssFloat" : Sabel.String.camelize(property);
+		property = (property === "float") ? "cssFloat" : new Sabel.String(property).camelize();
 
 		var css = document.defaultView.getComputedStyle(element, "")
 		return css[property];
@@ -902,7 +1099,7 @@ Sabel.Element.setStyle = function(element, styles) {
 		element.style.cssText += ";" + styles;
 	} else {
 		for (var prop in styles) {
-			var method = "set" + Sabel.String(prop).ucfirst();
+			var method = "set" + new Sabel.String(prop).ucfirst();
 			if (typeof Sabel.Element[method] !== "undefined") {
 				Sabel.Element[method](element, styles[prop]);
 			} else {
@@ -1395,29 +1592,37 @@ Sabel.Ajax.prototype = {
 	},
 	
 	request: function(url, options) {
-		this.completed = false;
-
 		var xmlhttp = this.xmlhttp;
 		var options = this.setOptions(options);
 
-		xmlhttp.onreadystatechange = Sabel.Function.bind(this.onStateChange, this);
+		this.completed = false;
+		this._abort();
 
 		if (options.method === "get") {
 			url += ((url.indexOf("?") !== -1) ? "&" : "?") + options.params;
 		}
 
 		xmlhttp.open(options.method, url, options.async);
+		xmlhttp.onreadystatechange = Sabel.Function.bind(this.onStateChange, this);
+
 		this.setRequestHeaders();
 		xmlhttp.send((options.method === "post") ? options.params : "");
 		if (options.timeout) this.timer = setTimeout(Sabel.Function.bind(this.abort, this), options.timeout);
 	},
 
 	abort: function() {
-		switch (this.xmlhttp.readyState) {
-			case 1: case 2: case 3:
-			this.xmlhttp.abort();
-			this.options.onTimeout();
+		if (this._abort()) this.options.onTimeout.apply(this.options.scope);
+	},
+
+	_abort: function() {
+		var xmlhttp = this.xmlhttp;
+		if (xmlhttp.readyState !== 4) {
+			xmlhttp.onreadystatechange = Sabel.emptyFunc;
+			xmlhttp.abort();
+
+			return true;
 		}
+		return false;
 	},
 
 	updater: function(element, url, options) {
@@ -1444,6 +1649,7 @@ Sabel.Ajax.prototype = {
 			onSuccess: function(){},
 			onFailure: function(){},
 			onTimeout: function(){},
+			scope: null,
 			async: true
 		};
 		Sabel.Object.extend(options, defaultOptions);
@@ -1477,10 +1683,14 @@ Sabel.Ajax.prototype = {
 
 		if (this.xmlhttp.readyState === 4) {
 			this.completed = true;
+			clearTimeout(this.timer);
 
+			var options  = this.options;
 			var response = this.getResponses();
-			this.options["on" + (this.isSuccess() ? "Success" : "Failure")](response);
-			this.options.onComplete(response);
+			options["on" + (this.isSuccess() ? "Success" : "Failure")].call(options.scope, response);
+			options.onComplete.call(options.scope, response);
+
+			this.xmlhttp.onreadystatechange = Sabel.emptyFunc;
 		}
 	},
 
@@ -1915,7 +2125,8 @@ Sabel.dump = function(element, limit)
 	output.style.padding = "5px";
 
 	output.appendChild(document.createTextNode((function(element, ind) {
-		var indent = Sabel.String.times("  ", ind);
+		var space = new Sabel.String("  ");
+		var indent = space.times(ind);
 		if (typeof element === "undefined") {
 			return "undefined";
 		} else if (Sabel.Element.isString(element)) {
@@ -1925,7 +2136,7 @@ Sabel.dump = function(element, limit)
 		} else if (Sabel.Element.isBoolean(element)) {
 			return "bool(" + element + ")";
 		} else if (Sabel.Element.isFunction(element)) {
-			return element.toString().replace(/(\n)/g, br + Sabel.String.times("  ", ind-1));
+			return element.toString().replace(/(\n)/g, br + space.times(ind - 1));
 		} else if (Sabel.Element.isAtomic(element)) {
 			return element;
 		} else {
@@ -1939,7 +2150,7 @@ Sabel.dump = function(element, limit)
 					indent + arguments.callee(element[key], ind+1);
 				} catch (e) {}
 			}
-			buf[buf.length] = Sabel.String.times("  ", ind-1)+ "}";
+			buf[buf.length] = space.times(ind - 1)+ "}";
 			return buf.join(br);
 		}
 	})(element, 1)));
@@ -2371,4 +2582,5 @@ Sabel.widget.Overlay.prototype = {
 		this.div.style.height = height + "px";
 	}
 };
+
 

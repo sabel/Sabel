@@ -119,7 +119,7 @@ class Test_Util_FileSystem extends SabelTestCase
     $file = "hoge" . DS . "fuga" . DS . "foo.txt";
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $file = $fs->getFile($file);
-    $this->assertEquals(0744, $file->getPermission());
+    $this->assertEquals(0755, $file->getPermission());
     $file->chmod(0777);
     $this->assertEquals(0777, $file->getPermission());
   }
@@ -156,9 +156,9 @@ class Test_Util_FileSystem extends SabelTestCase
   {
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $dir = $fs->getDirectory("hoge" . DS . "fuga");
-    $this->assertEquals(0744, $dir->getPermission());
-    $dir->chmod(0755);
     $this->assertEquals(0755, $dir->getPermission());
+    $dir->chmod(0777);
+    $this->assertEquals(0777, $dir->getPermission());
   }
   
   public function testFileSize()

@@ -15,7 +15,7 @@ class Sabel_DB_Join_ColumnHash
   
   public static function toHash($as)
   {
-    $hash = "a" . substr(md5($as), 0, 24);
+    $hash = "a" . substr(md5($as), 0, 23);
     return self::$columns[$as] = $hash;
   }
   

@@ -57,6 +57,7 @@ class Fixture extends Sabel_Sakle_Task
           $className = "Fixture_" . $fixtureName;
           $instance  = new $className();
           $instance->$method();
+          $this->success(strtoupper($method) . " " . $fixtureName);
         } else {
           $this->error("no such fixture file. '{$filePath}'");
         }

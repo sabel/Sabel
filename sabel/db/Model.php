@@ -164,6 +164,18 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
+   * @param array $values
+   *
+   * @return self
+   */
+  public function setUpdateValues(array $values)
+  {
+    $this->updateValues = $values;
+    
+    return $this;
+  }
+  
+  /**
    * @param string $key
    *
    * @return mixed

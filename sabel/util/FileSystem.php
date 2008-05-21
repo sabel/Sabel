@@ -116,7 +116,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     return $files;
   }
   
-  public function mkdir($directory, $permission = 0744)
+  public function mkdir($directory, $permission = 0755)
   {
     if (!$this->isAbsolutePath($directory)) {
       $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
@@ -133,7 +133,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     }
   }
   
-  public function mkfile($file, $permission = 0744)
+  public function mkfile($file, $permission = 0755)
   {
     if (!$this->isAbsolutePath($file)) {
       $file = $this->path . DIRECTORY_SEPARATOR . $file;

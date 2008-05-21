@@ -102,10 +102,9 @@ class Config_Controller extends Sabel_Container_Injection
     
     $this->bind("Sabel_Controller_Page")
          ->to($this->className);
-          
+    
     $this->bind("Sabel_Response")
          ->to("Sabel_Response_Object")
          ->setter("setResponse");
   }
 }
-
