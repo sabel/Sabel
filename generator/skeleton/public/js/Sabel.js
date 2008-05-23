@@ -2,7 +2,9 @@
  * SabelJS 
  * Header
  *
- *
+ * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @copyright  2004-2008 Hamanaka Kazuhiro <Hamanaka.kazuhiro@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php BSD License
  */
 
 window.Sabel = {};
@@ -11,28 +13,135 @@ Sabel.PHP = {};
 
 Sabel.emptyFunc = function() {};
 
-Sabel.Window = {
+Sabel.QueryObject = function(object) {
+	this.data = object;
+};
 
+Sabel.QueryObject.prototype = {
+	has: function(key) {
+		return !!(this.data[key] !== undefined);
+	},
+
+	get: function(key) {
+		return this.data[key] || null;
+	},
+
+	set: function(key, val) {
+		this.data[key] = val;
+		return this;
+	},
+
+	serialize: function() {
+		var data = this.data, buf = new Array();
+		for (var key in data) {
+			if (Sabel.Object.isArray(data[key])) {
+				Sabel.Array.each(data[key], function(val) {
+					buf[buf.length] = key + "=" + encodeURIComponent(val);
+				});
+			} else {
+				buf[buf.length] = key + "=" + encodeURIComponent(data[key]);
+			}
+		}
+
+		return buf.join("&");
+	}
+};
+Sabel.Uri = function(uri)
+{
+	uri = uri || location.href;
+
+	function parse(query)
+	{
+		if (query === undefined) return {};
+		var queries = query.split("&"), parsed = {};
+
+		for (var i = 0, len = queries.length; i < len; i++) {
+			if (queries[i] == "") continue;
+			var q = queries[i].split("=");
+			parsed[q[0]] = q[1] || "";
+		}
+
+		return new Sabel.QueryObject(parsed);
+	}
+
+	var result = Sabel.Uri.pattern.exec(uri);
+
+	for (var i = 0, len = result.length; i < len; i++) {
+		this[Sabel.Uri.keyNames[i]] = result[i] || "";
+	}
+	this['parseQuery'] = parse(this.query);
+};
+
+Sabel.Uri.pattern  = /^((\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?)(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
+Sabel.Uri.keyNames = ['uri', 'url', 'protocol', 'user', 'password', 'domain', 'port', 'path', 'filename', 'query', 'hash'];
+
+Sabel.Uri.prototype = {
+	has: function(key)
+	{
+		return this.parseQuery.has(key);
+	},
+
+	get: function(key)
+	{
+		return this.parseQuery.get(key);
+	},
+
+	set: function(key, value)
+	{
+		this.parseQuery.set(key, value);
+		return this;
+	},
+
+	getQueryObj: function() {
+		return this.parseQuery;
+	},
+
+	toString: function() {
+		return this.url + this.path + "/" + this.filename + "?" + this.parseQuery.serialize();
+	}
+};
+
+Sabel.Environment = (function() {
+	var scripts = document.getElementsByTagName("script");
+	var uri = new Sabel.Uri(scripts[scripts.length - 1].src);
+
+	this._env = parseInt(uri.get("ENVIRONMENT"));
+
+	return this;
+})();
+Sabel.Environment.PRODUCTION  = 10;
+Sabel.Environment.TEST        = 5;
+Sabel.Environment.DEVELOPMENT = 1;
+
+Sabel.Environment.isDevelopment = function() {
+	return this._env === Sabel.Environment.DEVELOPMENT;
+};
+
+Sabel.Environment.isTest = function() {
+	return this._env === Sabel.Environment.TEST;
+};
+
+Sabel.Environment.isProduction = function() {
+	return this._env === Sabel.Environment.PRODUCTION;
+};
+
+Sabel.Window = {
 	getWidth: function() {
 		if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
-			// 後方互換モード
 			return document.body.clientWidth;
 		} else if (Sabel.UserAgent.isSafari) {
 			return window.innerWidth;
 		} else {
-			// 標準準拠モード
 			return document.documentElement.clientWidth;
 		}
 	},
 
 	getHeight: function() {
 		if (document.compatMode === "BackCompat" || (Sabel.UserAgent.isOpera && Sabel.UserAgent.version < 9.5)) {
-			// 後方互換モード
 			return document.body.clientHeight;
 		} else if (Sabel.UserAgent.isSafari) {
 			return window.innerHeight;
 		} else {
-			// 標準準拠モード
 			return document.documentElement.clientHeight;
 		}
 	},
@@ -55,9 +164,25 @@ Sabel.Window = {
 		}
 		var clientHeight = Sabel.Window.getHeight();
 		return (clientHeight > height) ? clientHeight : height;
+	},
+
+	getScrollLeft: function() {
+		if (document.compatMode === "CSS1Compat") {
+			return document.documentElement.scrollLeft;
+		} else {
+			return document.body.scrollLeft;
+
+		}
+	},
+
+	getScrollTop: function() {
+		if (document.compatMode === "CSS1Compat") {
+			return document.documentElement.scrollTop;
+		} else {
+			return document.body.scrollTop;
+		}
 	}
 };
-
 
 Sabel.UserAgent = new function() {
 	var ua = navigator.userAgent;
@@ -451,7 +576,7 @@ Sabel.Number = function(number) {
 };
 
 Sabel.Number._units = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-Sabel.Number.toHumanReadable= function(number, unit, ext) {
+Sabel.Number.toHumanReadable = function(number, unit, ext) {
 	if (typeof number !== "number") throw "number is not Number object.";
 	var i = 0;
 
@@ -461,6 +586,10 @@ Sabel.Number.toHumanReadable= function(number, unit, ext) {
 	}
 
 	return number.toFixed(1) + Sabel.Number._units[i];
+};
+
+Sabel.Number.between = function(number, min, max) {
+	return number >= min && number <= max;
 };
 Sabel.Array = function(iterable) {
 	if (typeof iterable === "undefined") {
@@ -1267,13 +1396,13 @@ Sabel.Element.getDimensions = function(element) {
 
 	var style = element.style;
 
-	if (style.display != 'none') {
+	if (Sabel.Element.getStyle(element, "display") !== "none") {
 		return {width: element.offsetWidth, height: element.offsetHeight};
 	}
 
 	var oldV = style.visibility;
 	var oldP = style.positions;
-	var oldD = style.display;
+	var oldD = "none";
 
 	style.visibility = "hidden";
 	style.positions  = "absolute";
@@ -1317,12 +1446,12 @@ Sabel.Element.update = function(element, contents) {
 	return Sabel.get(newEl);
 };
 
-Sabel.Element.observe = function(element, eventName, handler) {
+Sabel.Element.observe = function(element, eventName, handler, useCapture, scope) {
 	element = Sabel.get(element, false);
 	if (element._events === undefined) element._events = {};
 	if (element._events[eventName] === undefined) element._events[eventName] = new Array();
 
-	var evt = new Sabel.Event(element, eventName, handler);
+	var evt = new Sabel.Event(element, eventName, handler, useCapture, scope);
 	element._events[eventName].push(evt);
 
 	return evt;
@@ -1488,7 +1617,6 @@ Sabel.Element.contains = function(element, other) {
 
 Sabel.Object.extend(Sabel.Element, Sabel.Object.Methods);
 
-
 Sabel.Elements = function(elements) {
 	if (typeof elements === "undefined") {
 		elements = new Sabel.Array();
@@ -1515,9 +1643,9 @@ Sabel.Elements.item = function(elements, pos) {
 	return (elm) ? new Sabel.Element(elm) : null;
 };
 
-Sabel.Elements.observe = function(elements, eventName, handler) {
+Sabel.Elements.observe = function(elements, eventName, handler, useCapture, scope) {
 	Sabel.Array.each(elements, function(elm) {
-		Sabel.Element.observe(elm, eventName, Sabel.Function.bind(handler, elm));
+		Sabel.Element.observe(elm, eventName, handler, useCapture, scope);
 	});
 };
 
@@ -1756,7 +1884,7 @@ Sabel.History.prototype = {
 	},
 
 	_getHash: function(target) {
-		return new Sabel.Util.Uri(target.location.href).hash.replace(/^[^#]*#/, "");
+		return new Sabel.Uri(target.location.href).hash.replace(/^[^#]*#/, "");
 	}
 };
 
@@ -1825,7 +1953,7 @@ Sabel.Form = function(form) {
 		}
 	});
 
-	this.queryObj = new Sabel.Util.QueryObject(buf);
+	this.queryObj = new Sabel.QueryObject(buf);
 };
 
 Sabel.Form.prototype = {
@@ -1915,14 +2043,17 @@ Sabel.Validator.prototype = {
 	}
 };
 
-Sabel.Event = function(element, eventName, handler) {
+Sabel.Event = function(element, eventName, handler, useCapture, scope) {
 	element = Sabel.get(element, false);
 
-	this.element   = element;
-	this.eventName = eventName;
-	this.handler   = handler;
-	this.isActive  = false;
-	this.eventId   = Sabel.Events.add(this);
+	this.element    = element;
+	this.eventName  = eventName;
+	this.handler    = function(evt) {
+		handler.call(scope || this, evt || window.event);
+	};
+	this.useCapture = useCapture;
+	this.isActive   = false;
+	this.eventId    = Sabel.Events.add(this);
 
 	this.start();
 };
@@ -1933,7 +2064,7 @@ Sabel.Event.prototype = {
 			var element = this.element;
 
 			if (element.addEventListener) {
-				element.addEventListener(this.eventName, this.handler, false);
+				element.addEventListener(this.eventName, this.handler, this.useCapture);
 			} else if (element.attachEvent) {
 				element.attachEvent("on" + this.eventName, this.handler);
 			}
@@ -1946,7 +2077,7 @@ Sabel.Event.prototype = {
 			var element = this.element;
 
 			if (element.removeEventListener) {
-				element.removeEventListener(this.eventName, this.handler, false);
+				element.removeEventListener(this.eventName, this.handler, this.useCapture);
 			} else if (element.detachEvent) {
 				element.detachEvent("on" + this.eventName, this.handler);
 			}
@@ -1999,6 +2130,98 @@ Sabel.Events = {
 };
 
 
+Sabel.KeyEvent = new Sabel.Class({
+	_lists: {},
+
+	init: function(element) {
+		element = this.element = Sabel.get(element) || document;
+
+		new Sabel.Event(element, "keydown", this.keyDownHandler, false, this);
+	},
+
+	add: function(key, func, scope) {
+		key = this.createCharCode(key);		
+		this._lists[key] = Sabel.Function.bind(func, scope || this.element);
+
+		return this;
+	},
+
+	remove: function(key) {
+		key = this.createCharCode(key);
+		delete this._lists[key];
+
+		return this;
+	},
+
+	keyDownHandler: function(e) {
+		var key  = this.getCharCode(e);
+		var func = this._lists[key];
+		if (func) {
+			func(e);
+			Sabel.Event.preventDefault(e);
+		}
+	},
+
+	createCharCode: function(key) {
+		if (typeof key === 'string') {
+			switch (key.length) {
+			case 1:
+				key = key.charCodeAt(0);
+				break;
+			case 3:
+				key = key.charCodeAt(2) + Sabel.KeyEvent._CTRL_CODE;
+				break;
+			default:
+				// @todo throw exception?
+			}
+		}
+		return key;
+	},
+
+	getCharCode: function(e) {
+		if (e.type === "keydown") {
+			var kc = e.keyCode;
+			if (Sabel.Number.between(kc, 65, 90)) {
+				if (e.shiftKey === false)
+					kc += 32;
+			}
+			if (kc !== 17 && e.ctrlKey === true) kc += Sabel.KeyEvent._CTRL_CODE;
+			return kc;
+		}
+
+		return null;
+	}
+});
+
+Sabel.KeyEvent._CTRL_CODE    = 1000;
+Sabel.KeyEvent.KEY_BACKSPACE = 8;
+Sabel.KeyEvent.KEY_TAB       = 9;
+Sabel.KeyEvent.KEY_ENTER     = 13;
+Sabel.KeyEvent.KEY_ESC       = 27;
+Sabel.KeyEvent.KEY_SPACE     = 32;
+Sabel.KeyEvent.KEY_PAGEUP    = 33;
+Sabel.KeyEvent.KEY_PAGEDOWN  = 34;
+Sabel.KeyEvent.KEY_END       = 35;
+Sabel.KeyEvent.KEY_HOME      = 36;
+Sabel.KeyEvent.KEY_LEFT      = 37;
+Sabel.KeyEvent.KEY_UP        = 38;
+Sabel.KeyEvent.KEY_RIGHT     = 39;
+Sabel.KeyEvent.KEY_DOWN      = 40;
+Sabel.KeyEvent.KEY_INSERT    = 45;
+Sabel.KeyEvent.KEY_DELETE    = 46;
+Sabel.KeyEvent.KEY_F1        = 112;
+Sabel.KeyEvent.KEY_F2        = 113;
+Sabel.KeyEvent.KEY_F3        = 114;
+Sabel.KeyEvent.KEY_F4        = 115;
+Sabel.KeyEvent.KEY_F5        = 116;
+Sabel.KeyEvent.KEY_F6        = 117;
+Sabel.KeyEvent.KEY_F7        = 118;
+Sabel.KeyEvent.KEY_F8        = 119;
+Sabel.KeyEvent.KEY_F9        = 120;
+Sabel.KeyEvent.KEY_F10       = 121;
+Sabel.KeyEvent.KEY_F11       = 122;
+Sabel.KeyEvent.KEY_F12       = 123;
+
 Sabel.Effect = function() {
 	this.init.apply(this, arguments);
 };
@@ -2011,7 +2234,7 @@ Sabel.Effect.prototype = {
 		this.interval = options.interval || 20;
 		this.duration = options.duration || 1000;
 		this.step = this.interval / this.duration;
-		this.state  = 0;
+		this.state  = null;
 		this.target = 0;
 		this.timer  = null;
 		this.effects = Sabel.Array();
@@ -2024,45 +2247,74 @@ Sabel.Effect.prototype = {
 	},
 
 	play: function(force) {
-		if (this.state === 0 || this.state === 1) {
+		if (this.state === 1 && force !== true) {
+			return this;
+		} else if (this.state === 0 || this.state === null) {
 			this.set(0, 1);
 			this._run();
 		} else if (force === true) {
+			var state = (this.state === 1) ? 0 : this.state;
+			this.set(state, 1)
+			this._run();
+		} else if (this.timer === null) {
 			this.set(this.state, 1);
 			this._run();
 		}
+		return this;
 	},
 
 	reverse: function(force) {
-		if (this.state === 0 || this.state === 1) {
+		if (this.state === 0 && force !== true) {
+			return this;
+		} else if (this.state === 1 || this.state === null) {
 			this.set(1, 0);
 			this._run();
 		} else if (force === true) {
+			var state = (this.state === 0) ? 1 : this.state;
+			this.set(state, 0)
+			this._run();
+		} else if (this.timer === null) {
 			this.set(this.state, 0);
 			this._run();
 		}
+		return this;
 	},
 
 	toggle: function() {
 		this.set(this.state, 1 - this.target);
 		this._run();
+		return this;
+	},
+
+	pause: function() {
+		this._clear();
+		return this;
+	},
+
+	resume: function() {
+		this._run();
+		return this;
 	},
 
 	show: function() {
-		var state = this.state;
 		this.set(1, 1);
 		this.execEffects();
+		var state = this.state;
 		this.effects.each(function(ef) {
 			ef.func.end((ef.reverse === true) ? 1 - state : state);
 		});
+
+		return this;
 	},
 
 	hide: function() {
-		var state = this.state;
 		this.set(0, 0);
+		var state = this.state;
 		this.effects.each(function(ef) {
 			ef.func.end(0);
 		});
+
+		return this;
 	},
 
 	set: function(from, to) {
@@ -2108,8 +2360,10 @@ Sabel.Effect.prototype = {
 
 	_clear: function() {
 		clearInterval(this.timer);
+		this.timer = null;
 	}
 };
+
 Sabel.Util = {};
 
 Sabel.dump = function(element, limit)
@@ -2191,95 +2445,6 @@ Sabel.Form.Elements = {
 		return element.value;
 	}
 };
-Sabel.Util.QueryObject = function(object) {
-	this.data = object;
-};
-
-Sabel.Util.QueryObject.prototype = {
-	has: function(key) {
-		return !!(this.data[key] !== undefined);
-	},
-
-	get: function(key) {
-		return this.data[key] || null;
-	},
-
-	set: function(key, val) {
-		this.data[key] = val;
-		return this;
-	},
-
-	serialize: function() {
-		var data = this.data, buf = new Array();
-		for (var key in data) {
-			if (Sabel.Object.isArray(data[key])) {
-				Sabel.Array.each(data[key], function(val) {
-					buf[buf.length] = key + "=" + encodeURIComponent(val);
-				});
-			} else {
-				buf[buf.length] = key + "=" + encodeURIComponent(data[key]);
-			}
-		}
-
-		return buf.join("&");
-	}
-};
-
-Sabel.Util.Uri = function(uri)
-{
-	uri = uri || location.href;
-
-	function parse(query)
-	{
-		if (query === undefined) return {};
-		var queries = query.split("&"), parsed = {};
-
-		for (var i = 0, len = queries.length; i < len; i++) {
-			if (queries[i] == "") continue;
-			var q = queries[i].split("=");
-			parsed[q[0]] = q[1] || "";
-		}
-
-		return new Sabel.Util.QueryObject(parsed);
-	}
-
-	var result = Sabel.Util.Uri.pattern.exec(uri);
-
-	for (var i = 0, len = result.length; i < len; i++) {
-		this[Sabel.Util.Uri.keyNames[i]] = result[i] || "";
-	}
-	this['parseQuery'] = parse(this.query);
-};
-
-Sabel.Util.Uri.pattern  = /^((\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?)(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
-Sabel.Util.Uri.keyNames = ['uri', 'url', 'protocol', 'user', 'password', 'domain', 'port', 'path', 'filename', 'query', 'hash'];
-
-Sabel.Util.Uri.prototype = {
-	has: function(key)
-	{
-		return this.parseQuery.has(key);
-	},
-
-	get: function(key)
-	{
-		return this.parseQuery.get(key);
-	},
-
-	set: function(key, value)
-	{
-		this.parseQuery.set(key, value);
-		return this;
-	},
-
-	getQueryObj: function() {
-		return this.parseQuery;
-	},
-
-	toString: function() {
-		return this.url + this.path + "/" + this.filename + "?" + this.parseQuery.serialize();
-	}
-};
-
 Sabel.Validator.Int = function(option) {
 	option = option || {};
 	return function(value) {
@@ -2358,11 +2523,27 @@ Sabel.Effect.Fade = function() {
 };
 Sabel.Effect.Fade.prototype = {
 	init: function(element) {
+/*
+		if (Sabel.Environment.isDevelopment &&
+			Sabel.Element.getStyle(element, "display") === "none") {
+			alert("CSSでdisplayがnoneにセットされています。\nこのままだと正常に動作しないので、削除して下さい。");
+		}
+*/
+
 		this.element = Sabel.get(element, false);
 	},
 
-	start: function(state) {},
-	end: function(state) {},
+	start: function(state) {
+		this.exec(state);
+		Sabel.Element.show(this.element);
+	},
+
+	end: function(state) {
+		if (state === 0) {
+			this.exec(1);
+			Sabel.Element.hide(this.element);
+		}
+	},
 
 	exec: function(state) {
 		Sabel.Element.setOpacity(this.element, state);
@@ -2376,6 +2557,13 @@ Sabel.Effect.Slide = function() {
 
 Sabel.Effect.Slide.prototype = {
 	init: function(element) {
+/*
+		if (Sabel.Environment.isDevelopment &&
+			Sabel.Element.getStyle(element, "display") === "none") {
+			alert("CSSでdisplayがnoneにセットされています。\nこのままだと正常に動作しないので、削除して下さい。");
+		}
+*/
+
 		this.element = Sabel.get(element, false);
 	},
 
@@ -2391,7 +2579,7 @@ Sabel.Effect.Slide.prototype = {
 		var height = state * this.elementHeight;
 		var style = {
 			overflow: "hidden",
-			display:  "",
+			display: "",
 			height: height
 		};
 		if (this.defaultPosition !== "absolute") style.position = "relative";
@@ -2559,20 +2747,31 @@ Sabel.DragAndDrop.prototype = {
 	}
 };
 
-Sabel.widget = {};
+Sabel.Widget = {};
 
-Sabel.widget.Overlay = function(option) {
+Sabel.Widget.Overlay = function(option) {
+	option = option || {};
 	var div = document.createElement("div");
 	if (option.id) div.setAttribute("id", option.id);
+
 	div.style.cssText += "; background-color: #000; position: absolute; top: 0px; left: 0px; opacity: 0.70; -moz-opacity: 0.70; filter: alpha(opacity=70); z-index: 100;";
 
-	this.div = div;
-	this.setStyle();
+	this.div = Sabel.Element(div);;
 	document.body.appendChild(div);
+	this.show();
 };
 
-Sabel.widget.Overlay.prototype = {
+Sabel.Widget.Overlay.prototype = {
 	div: null,
+
+	show: function() {
+		this.setStyle();
+		this.div.show();
+	},
+
+	hide: function() {
+		this.div.hide();
+	},
 
 	setStyle: function() {
 		var height = Sabel.Window.getScrollHeight();

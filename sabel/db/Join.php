@@ -11,18 +11,37 @@
  */
 class Sabel_DB_Join extends Sabel_Object
 {
-  private
-    $model    = null,
-    $objects  = array(),
-    $joinType = "INNER",
-    $tblName  = "";
-    
+  /**
+   * @var string
+   */
+  protected $joinType = "INNER";
+  
+  /**
+   * @var Sabel_DB_Model
+   */
+  protected $model = null;
+  
+  /**
+   * @var object[]
+   */
+  protected $objects = array();
+  
+  /**
+   * @var array
+   */
+  protected $projection = array();
+  
+  /**
+   * @var string
+   */
+  protected $tblName = "";
+  
   public function __construct($model)
   {
     if (is_string($model)) {
       $model = MODEL($model);
     } elseif (!is_model($model)) {
-      $message = "argument must be a string or instance of model.";
+      $message = __METHOD__ . "() argument must be a string or an instance of model.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
@@ -39,6 +58,20 @@ class Sabel_DB_Join extends Sabel_Object
   public function setJoinType($joinType)
   {
     $this->joinType = $joinType;
+  }
+  
+  public function clear()
+  {
+    if (is_object($this->structure)) {
+      $this->structure->clear();
+    }
+    
+    Sabel_DB_Join_ColumnHash::clear();
+  }
+  
+  public function setProjection(array $projections)
+  {
+    $this->projection = $projections;
   }
   
   public function setCondition($arg1, $arg2 = null)
@@ -106,21 +139,7 @@ class Sabel_DB_Join extends Sabel_Object
     }
     
     $stmt = $this->model->prepareStatement(Sabel_DB_Statement::SELECT);
-    $projection = $this->model->getProjection();
-    
-    if (empty($projection)) {
-      $projection = array();
-      foreach ($this->objects as $object) {
-        $projection = array_merge($projection, $object->getProjection($stmt));
-      }
-      
-      $quotedTblName = $stmt->quoteIdentifier($this->tblName);
-      foreach ($this->model->getColumnNames() as $column) {
-        $projection[] = $quotedTblName . "." . $stmt->quoteIdentifier($column);
-      }
-      
-      $projection = implode(", ", $projection);
-    }
+    $projection = $this->createProjection($stmt);
     
     $query = array();
     foreach ($this->objects as $object) {
@@ -147,9 +166,45 @@ class Sabel_DB_Join extends Sabel_Object
     return $stmt->constraints($constraints)->execute();
   }
   
-  public function clear()
+  protected function createProjection(Sabel_DB_Statement $stmt)
   {
-    $this->structure->clear();
-    Sabel_DB_Join_ColumnHash::clear();
+    if (empty($this->projection)) {
+      $projection = array();
+      foreach ($this->objects as $object) {
+        $projection = array_merge($projection, $object->getProjection($stmt));
+      }
+      
+      $quotedTblName = $stmt->quoteIdentifier($this->tblName);
+      foreach ($this->model->getColumnNames() as $column) {
+        $projection[] = $quotedTblName . "." . $stmt->quoteIdentifier($column);
+      }
+    } else {
+      $projection = array();
+      foreach ($this->projection as $name => $proj) {
+        $tblName = convert_to_tablename($name);
+        
+        if (is_string($proj)) {
+          $proj = array_map("trim", explode(",", $proj));
+        }
+        
+        if ($tblName === $this->tblName) {
+          foreach ($proj as $column) {
+            $projection[] = $stmt->quoteIdentifier($tblName) . "." . $stmt->quoteIdentifier($column);
+          }
+        } else {
+          foreach ($proj as $column) {
+            $as = "{$tblName}.{$column}";
+            if (strlen($as) > 30) {
+              $as = Sabel_DB_Join_ColumnHash::toHash($as);
+            }
+            
+            $p = $stmt->quoteIdentifier($tblName) . "." . $stmt->quoteIdentifier($column);
+            $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
+          }
+        }
+      }
+    }
+    
+    return implode(", ", $projection);
   }
 }
