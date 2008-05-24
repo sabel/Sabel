@@ -44,17 +44,25 @@ class Sabel_Request_Validator extends Sabel_Object
     $errors = array();
     $suites = $this->getSuites();
     
+    foreach (array_keys($validators) as $inputName) {
+      if (!isset($values[$inputName])) $values[$inputName] = null;
+    }
+    
     foreach ($values as $name => $value) {
       if (isset($validators[$name])) {
         $checker = $validators[$name];
-        if (isset($suites[$checker])) {
-          foreach ($suites[$checker] as $check) {
-            $message = $this->$check($name, $value);
+        if (is_string($checker)) $checker = array($checker);
+        
+        foreach ($checker as $method) {
+          if (isset($suites[$method])) {
+            foreach ($suites[$method] as $check) {
+              $message = $this->$check($name, $value);
+              if ($message !== null) $errors[] = $message;
+            }
+          } else {
+            $message = $this->$method($name, $value);
             if ($message !== null) $errors[] = $message;
           }
-        } else {
-          $message = $this->$checker($name, $value);
-          if ($message !== null) $errors[] = $message;
         }
       }
     }

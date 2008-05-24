@@ -50,30 +50,30 @@ Sabel.Uri = function(uri)
 {
 	uri = uri || location.href;
 
-	function parse(query)
-	{
-		if (query === undefined) return {};
-		var queries = query.split("&"), parsed = {};
-
-		for (var i = 0, len = queries.length; i < len; i++) {
-			if (queries[i] == "") continue;
-			var q = queries[i].split("=");
-			parsed[q[0]] = q[1] || "";
-		}
-
-		return new Sabel.QueryObject(parsed);
-	}
-
 	var result = Sabel.Uri.pattern.exec(uri);
 
 	for (var i = 0, len = result.length; i < len; i++) {
 		this[Sabel.Uri.keyNames[i]] = result[i] || "";
 	}
-	this['parseQuery'] = parse(this.query);
+	this['parseQuery'] = Sabel.Uri.parseQuery(this.query);
 };
 
 Sabel.Uri.pattern  = /^((\w+):\/\/(?:(\w+)(?::(\w+))?@)?([^:\/]*)(?::(\d+))?)(?:([^?#]+?)(?:\/(\w+\.\w+))?)?(?:\?((?:[^&#]+)(?:&[^&#]*)*))?(?:#([^#]+))?$/;
 Sabel.Uri.keyNames = ['uri', 'url', 'protocol', 'user', 'password', 'domain', 'port', 'path', 'filename', 'query', 'hash'];
+
+Sabel.Uri.parseQuery = function(query)
+{
+	if (query === undefined) return {};
+	var queries = query.split("&"), parsed = {};
+
+	for (var i = 0, len = queries.length; i < len; i++) {
+		if (queries[i] == "") continue;
+		var q = queries[i].split("=");
+		parsed[q[0]] = q[1] || "";
+	}
+
+	return new Sabel.QueryObject(parsed);
+};
 
 Sabel.Uri.prototype = {
 	has: function(key)
@@ -103,9 +103,9 @@ Sabel.Uri.prototype = {
 
 Sabel.Environment = (function() {
 	var scripts = document.getElementsByTagName("script");
-	var uri = new Sabel.Uri(scripts[scripts.length - 1].src);
+	var uri = scripts[scripts.length - 1].src;
 
-	this._env = parseInt(uri.get("ENVIRONMENT"));
+	this._env = parseInt(Sabel.Uri.parseQuery(uri.substring(uri.indexOf("?") + 1)));
 
 	return this;
 })();
@@ -2048,6 +2048,7 @@ Sabel.Event = function(element, eventName, handler, useCapture, scope) {
 
 	this.element    = element;
 	this.eventName  = eventName;
+	this.defHandler = handler;
 	this.handler    = function(evt) {
 		handler.call(scope || this, evt || window.event);
 	};
@@ -2064,7 +2065,13 @@ Sabel.Event.prototype = {
 			var element = this.element;
 
 			if (element.addEventListener) {
-				element.addEventListener(this.eventName, this.handler, this.useCapture);
+				var eventName = this.eventName, obj;
+				if (Sabel.Event._events[eventName] &&
+					(obj = Sabel.Event._events[eventName](this.handler, this.element))) {
+					element.addEventListener(obj.eventName, obj.handler, this.useCapture);
+				} else {
+					element.addEventListener(this.eventName, this.handler, this.useCapture);
+				}
 			} else if (element.attachEvent) {
 				element.attachEvent("on" + this.eventName, this.handler);
 			}
@@ -2086,7 +2093,7 @@ Sabel.Event.prototype = {
 	},
 
 	getHandler: function() {
-		return this.handler;
+		return this.defHandler;
 	}
 };
 
@@ -2096,6 +2103,36 @@ Sabel.Event.stopPropagation = function(evt) {
 
 Sabel.Event.preventDefault = function(evt) {
 	evt.preventDefault();
+};
+
+Sabel.Event._isChildEvent = function(event, el) {
+	var p = event.relatedTarget;
+	while (p && p !== el)
+		p = p.parentNode;
+
+	return p === el;
+};
+
+Sabel.Event._events = {
+	mouseenter: function(handler, el) {
+		if (Sabel.UserAgent.isIE) return handler;
+
+		return {eventName: "mouseover", handler: function(event) {
+			if (Sabel.Event._isChildEvent(event, el)) return false;
+
+			return handler(event);
+		}};
+	},
+
+	mouseleave: function(handler, el) {
+		if (Sabel.UserAgent.isIE) return handler;
+
+		return {eventName: "mouseout", handler: function(event) {
+			if (Sabel.Event._isChildEvent(event, el)) return false;
+
+			return handler(event);
+		}};
+	}
 };
 
 if (Sabel.UserAgent.isIE) {

@@ -11,31 +11,29 @@
  */
 class Sabel_DB_Join_Structure
 {
-  private static $ins  = null;
-  private $structure   = array();
+  private static $instance = null;
+  
+  private $structure = array();
   private $joinObjects = array();
-
+  
   private function __construct() {}
-
+  
   public static function getInstance()
   {
-    if (self::$ins === null) {
-      self::$ins = new self();
+    if (self::$instance === null) {
+      self::$instance = new self();
     }
-
-    return self::$ins;
+    
+    return self::$instance;
   }
-
-  public function add($source, $name)
+  
+  public function addJoinObject($child, $parentObj)
   {
-    $this->structure[$source][] = $name;
+    $parent = $parentObj->getName();
+    $this->joinObjects[$parent] = $parentObj;
+    $this->structure[$child][]  = $parent;
   }
-
-  public function addJoinObject($object)
-  {
-    $this->joinObjects[$object->getName()] = $object;
-  }
-
+  
   public function getStructure($unset = true)
   {
     if ($unset) {
@@ -46,7 +44,7 @@ class Sabel_DB_Join_Structure
       return $this->structure;
     }
   }
-
+  
   public function getJoinObjects($unset = true)
   {
     if ($unset) {
@@ -57,22 +55,22 @@ class Sabel_DB_Join_Structure
       return $this->joinObjects;
     }
   }
-
+  
   public function setAlias($source, $alias)
   {
     $structure =& $this->structure;
-
+    
     if (isset($structure[$source])) {
       $structure[$alias] = $structure[$source];
       unset($structure[$source]);
     }
   }
-
+  
   public function clear()
   {
     $this->structure   = array();
     $this->joinObjects = array();
-
-    self::$ins = null;
+    
+    self::$instance = null;
   }
 }

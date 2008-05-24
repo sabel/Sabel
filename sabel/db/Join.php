@@ -93,14 +93,13 @@ class Sabel_DB_Join extends Sabel_Object
     }
     
     $object->setChildName($this->tblName);
+    $this->structure->addJoinObject($this->tblName, $object);
     $this->objects[] = $object;
-    $this->structure->addJoinObject($object);
-    $this->structure->add($this->tblName, $object->getName());
     
-    if (!empty($joinKey)) return $this;
-    
-    $name = $object->getModel()->getTableName();
-    $object->setJoinKey(create_join_key($this->model, $name));
+    if (empty($joinKey)) {
+      $name = $object->getModel()->getTableName();
+      $object->setJoinKey(create_join_key($this->model, $name));
+    }
     
     return $this;
   }

@@ -18,11 +18,7 @@ class Sabel_DB_Join_Object extends Sabel_DB_Join_TemplateMethod
     
     foreach ($this->columns as $column) {
       $as = "{$name}.{$column}";
-      
-      if (strlen($as) > 30) {
-        $as = Sabel_DB_Join_ColumnHash::toHash("{$name}.{$column}");
-      }
-      
+      if (strlen($as) > 30) $as = Sabel_DB_Join_ColumnHash::toHash($as);
       $p = $stmt->quoteIdentifier($name) . "." . $stmt->quoteIdentifier($column);
       $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
     }

@@ -26,9 +26,16 @@ class Validator extends Sabel_Request_Validator
     }
   }
   
+  public function integer($name, $value)
+  {
+    if ($value !== null && preg_match('/^[1-9][0-9]*$/', $value) === 0) {
+      return $this->getDisplayName($name) . " must be an integer.";
+    }
+  }
+  
   public function numeric($name, $value)
   {
-    if ($value !== null || !is_numeric($value)) {
+    if ($value !== null && !is_numeric($value)) {
       return $this->getDisplayName($name) . " must be a numeric.";
     }
   }

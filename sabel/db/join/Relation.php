@@ -22,16 +22,14 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     }
     
     $structure = Sabel_DB_Join_Structure::getInstance();
-    $structure->addJoinObject($object);
-    $myName = $this->getName();
-    $object->setChildName($myName);
+    $structure->addJoinObject($this->getName(), $object);
+    $object->setChildName($this->getName());
     $this->objects[] = $object;
     
-    $structure->add($myName, $object->getName());
-    if (!empty($joinKey)) return $this;
-    
-    $name = $object->getModel()->getTableName();
-    $object->setJoinKey(create_join_key($this->model, $name));
+    if (empty($joinKey)) {
+      $name = $object->getModel()->getTableName();
+      $object->setJoinKey(create_join_key($this->model, $name));
+    }
     
     return $this;
   }
@@ -43,11 +41,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     
     foreach ($this->columns as $column) {
       $as = "{$name}.{$column}";
-      
-      if (strlen($as) > 30) {
-        $as = Sabel_DB_Join_ColumnHash::toHash("{$name}.{$column}");
-      }
-      
+      if (strlen($as) > 30) $as = Sabel_DB_Join_ColumnHash::toHash($as);
       $p = $stmt->quoteIdentifier($name) . "." . $stmt->quoteIdentifier($column);
       $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
     }

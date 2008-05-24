@@ -46,8 +46,8 @@ class Processor_Action extends Sabel_Bus_Processor
         }
       }
       
-      if ($request->isPost() && isset($annotations["check"])) {
-        $this->validateRequests($controller, $request, $annotations["check"]);
+      if (isset($annotations["check"])) {
+        $this->validateRequests($controller, $request, $status, $annotations["check"]);
       }
       
       l("execute action '{$action}'");
@@ -68,18 +68,25 @@ class Processor_Action extends Sabel_Bus_Processor
     return $result;
   }
   
-  protected function validateRequests($controller, $request, $checks)
+  protected function validateRequests($controller, $request, $status, $checks)
   {
     $validator = new Validator();
+    
     foreach ($checks as $check) {
-      $validator->set($check[0], $check[1]);
+      $name = array_shift($check);
+      $validator->set($name, $check);
     }
     
-    $validator->validate($request->fetchPostValues());
-    if ($validator->hasError()) {
-      $controller->setAttribute("errors", $validator->getErrors());
-    }
-    
+    $method = "fetch" . ucfirst(strtolower($request->getMethod())) . "Values";
+    $validator->validate($request->$method());
     $controller->setAttribute("validator", $validator);
+    
+    if ($validator->hasError()) {
+      if ($request->isPost()) {
+        $controller->setAttribute("errors", $validator->getErrors());
+      } else {
+        $status->setCode(Sabel_Response::BAD_REQUEST);
+      }
+    }
   }
 }

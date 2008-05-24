@@ -71,7 +71,6 @@ class Sabel_Http_Response extends Sabel_Object
       }
     }
     
-    dump($headers);
     $this->headers  = $headers;
     $this->contents = implode($eol, $_tmp);
     

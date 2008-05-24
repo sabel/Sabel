@@ -97,6 +97,17 @@ class Acl_User
     }
   }
   
+  public function hasRole($role)
+  {
+    $roles = $this->__get("role");
+    
+    if (is_array($roles)) {
+      return in_array($role, $roles, true);
+    } else {
+      return false;
+    }
+  }
+  
   public function removeRole($remove)
   {
     $role = $this->__get("role");

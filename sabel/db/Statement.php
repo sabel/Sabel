@@ -309,6 +309,13 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     return $this;
   }
   
+  public function setBindValues(array $values)
+  {
+    $this->bindValues = $values;
+    
+    return $this;
+  }
+  
   public function appendBindValues(array $values)
   {
     $this->bindValues = array_merge($this->bindValues, $values);
@@ -339,7 +346,9 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   public function build()
   {
     if ($this->metadata === null) {
-      $message = "can't build sql query. must set the metadata with setMetadata().";
+      $message = __METHOD__ . "() can't build sql query. "
+               . "must set the metadata with setMetadata().";
+      
       throw new Sabel_Exception_Runtime($message);
     }
     

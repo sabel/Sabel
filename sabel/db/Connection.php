@@ -29,8 +29,7 @@ class Sabel_DB_Connection
       if ($connection = Sabel_DB_Transaction::getConnection($connectionName)) {
         $driver->setConnection($connection);
       } else {
-        self::_connect($driver);
-        Sabel_DB_Transaction::begin($driver);
+        Sabel_DB_Transaction::begin(self::_connect($driver));
       }
       
       $driver->autoCommit(false);
@@ -48,9 +47,8 @@ class Sabel_DB_Connection
   {
     if (!isset(self::$connections[$connectionName])) return;
     
-    $conn   = self::$connections[$connectionName];
-    $driver = Sabel_DB::createDriver($connectionName);
-    $driver->close($conn);
+    $conn = self::$connections[$connectionName];
+    Sabel_DB::createDriver($connectionName)->close($conn);
     
     unset(self::$connections[$connectionName]);
   }
@@ -71,7 +69,7 @@ class Sabel_DB_Connection
    * @param Sabel_DB_Driver $driver
    *
    * @throws Sabel_DB_Exception_Connection
-   * @return resource
+   * @return Sabel_DB_Driver
    */
   protected static function _connect(Sabel_DB_Driver $driver)
   {
@@ -81,7 +79,7 @@ class Sabel_DB_Connection
     foreach ($names as $name) {
       if (isset(self::$connections[$name])) {
         $driver->setConnection(self::$connections[$name]);
-        return self::$connections[$name];
+        return $driver;
       }
     }
     
@@ -96,6 +94,7 @@ class Sabel_DB_Connection
     }
     
     $driver->setConnection(self::$connections[$connectionName]);
-    return self::$connections[$connectionName];
+    
+    return $driver;
   }
 }
