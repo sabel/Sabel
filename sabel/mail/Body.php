@@ -65,4 +65,44 @@ class Sabel_Mail_Body extends Sabel_Mail_Part
   {
     return $this->text;
   }
+  
+  /**
+   * @return string
+   */
+  public function toMailPart()
+  {
+    $part = array();
+    $eol  = Sabel_Mail::getEol();
+    
+    $part[] = "Content-Disposition: " . $this->disposition;
+    $part[] = "Content-Transfer-Encoding: " . $this->encoding;
+    $part[] = "Content-Type: {$this->type}; charset=" . $this->charset . $eol;
+    $part[] = $this->getEncodedText() . $eol;
+    
+    return implode($eol, $part);
+  }
+  
+  /**
+   * @return string
+   */
+  public function getEncodedText()
+  {
+    $text = $this->text;
+    if (extension_loaded("mbstring")) {
+      $text = mb_convert_encoding($text, $this->charset);
+    }
+    
+    $eol = Sabel_Mail::getEol();
+    switch (strtolower($this->encoding)) {
+      case "base64":
+        $text = rtrim(chunk_split(base64_encode($text), Sabel_Mail::LINELENGTH, $eol));
+        break;
+      case "quoted-printable":
+        $quoted = Sabel_Mail_QuotedPrintable::encode($text, Sabel_Mail::LINELENGTH, $eol);
+        $text   = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
+        break;
+    }
+    
+    return $text;
+  }
 }

@@ -315,7 +315,7 @@ class Sabel_Http_Request extends Sabel_Object
     
     if (!empty($this->getValues)) {
       $uriQuery = http_build_query($this->getValues, "", "&");
-      if ($query) {
+      if ($query === "") {
         $path .= "?" . $uriQuery;
       } else {
         $path .= "&" . $uriQuery;

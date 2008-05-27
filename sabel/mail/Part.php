@@ -15,6 +15,11 @@ abstract class Sabel_Mail_Part extends Sabel_Object
   /**
    * @var string
    */
+  protected $charset = "ISO-8859-1";
+  
+  /**
+   * @var string
+   */
   protected $encoding = "7bit";
   
   /**
@@ -23,13 +28,31 @@ abstract class Sabel_Mail_Part extends Sabel_Object
   protected $disposition = "inline";
   
   /**
+   * @param string $charset
+   *
+   * @return void
+   */
+  public function setCharset($charset)
+  {
+    $this->charset = $charset;
+  }
+  
+  /**
+   * @return string
+   */
+  public function getCharset()
+  {
+    return $this->charset;
+  }
+  
+  /**
    * @param string $encoding
    *
    * @return void
    */
   public function setEncoding($encoding)
   {
-    $this->encoding = $encoding;
+    $this->encoding = strtolower($encoding);
   }
   
   /**
@@ -47,7 +70,7 @@ abstract class Sabel_Mail_Part extends Sabel_Object
    */
   public function setDisposition($disposition)
   {
-    $this->disposition = $disposition;
+    $this->disposition = strtolower($disposition);
   }
   
   /**

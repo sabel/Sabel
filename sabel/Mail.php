@@ -46,6 +46,11 @@ class Sabel_Mail extends Sabel_Object
   /**
    * @var boolean
    */
+  protected $headerEncoding = "base64";
+  
+  /**
+   * @var boolean
+   */
   protected $isMbstringLoaded = false;
   
   /**
@@ -84,6 +89,11 @@ class Sabel_Mail extends Sabel_Object
   public function setSender(Sabel_Mail_Sender_Interface $sender)
   {
     $this->sender = $sender;
+  }
+  
+  public function setHeaderEncoding($encoding)
+  {
+    $this->headerEncoding = strtolower($encoding);
   }
   
   public function setFrom($from, $name = "")
@@ -186,6 +196,7 @@ class Sabel_Mail extends Sabel_Object
   public function setBodyText($text, $encoding = "7bit", $disposition = "inline")
   {
     $this->bodyText = new Sabel_Mail_Body($text, Sabel_Mail_Body::TEXT);
+    $this->bodyText->setCharset($this->charset);
     $this->bodyText->setEncoding($encoding);
     $this->bodyText->setDisposition($disposition);
     
@@ -197,19 +208,28 @@ class Sabel_Mail extends Sabel_Object
     $this->bodyHtml = new Sabel_Mail_Body($html, Sabel_Mail_Body::HTML);
     $this->bodyHtml->setEncoding($encoding);
     $this->bodyHtml->setDisposition($disposition);
+    $this->bodyHtml->setCharset($this->charset);
     
     return $this;
   }
   
-  public function attach($fileName, $data, $mimeType, $encoding = "base64", $disposition = "attachment")
+  public function attach($fileName, $data, $mimeType,
+                         $encoding = "base64", $disposition = "attachment", $followRFC2231 = false)
   {
-    // @todo RFC2231
-    $attachment = new Sabel_Mail_File($this->encodeHeader($fileName), $data, $mimeType);
+    $attachment = new Sabel_Mail_File($fileName, $data, $mimeType, $followRFC2231);
     $attachment->setEncoding($encoding);
     $attachment->setDisposition($disposition);
+    $attachment->setCharset($this->charset);
+    
     $this->attachments[] = $attachment;
     
     return $this;
+  }
+  
+  public function generateContentId()
+  {
+    list (, $host) = explode("@", $this->headers["From"]["address"]);
+    return md5hash() . "@" . $host;
   }
   
   public function addHeader($name, $value)
@@ -236,7 +256,10 @@ class Sabel_Mail extends Sabel_Object
   public function encodeHeader($header)
   {
     if ($this->isMbstringLoaded) {
-      return mb_encode_mimeheader($header, $this->charset);
+      $enc = ($this->headerEncoding === "base64") ? "B" : "Q";
+      return mb_encode_mimeheader($header, $this->charset, $enc);
+    } elseif ($this->headerEncoding === "base64") {
+      return "=?{$this->charset}?B?" . base64_encode($header) . "?=";
     } else {
       $quoted = Sabel_Mail_QuotedPrintable::encode($header, self::LINELENGTH, self::$EOL);
       $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
@@ -274,85 +297,132 @@ class Sabel_Mail extends Sabel_Object
   
   protected function createBodyText()
   {
-    $boundary = $this->getBoundary();
-    
-    if ($this->bodyText !== null && $this->bodyHtml !== null) {
-      $this->headers["Content-Type"] = 'multipart/alternative; boundary="' . $boundary . '"';
-      $text = $this->bodyText->getText();
-      $html = $this->bodyHtml->getText();
-      
-      if ($this->isMbstringLoaded) {
-        $text = mb_convert_encoding($text, $this->charset);
-        $html = mb_convert_encoding($html, $this->charset);
-      }
-      
-      $body   = array();
-      $body[] = "--{$boundary}";
-      $body[] = $this->createBodyHeader($this->bodyText) . self::$EOL;
-      $body[] = $text . self::$EOL;
-      $body[] = "--{$boundary}";
-      $body[] = $this->createBodyHeader($this->bodyHtml) . self::$EOL;
-      $body[] = $html . self::$EOL;
-      $body[] = "--{$boundary}--";
-      
-      return implode(self::$EOL, $body);
-    }
-    
+    // empty body.
     if ($this->bodyText === null && $this->bodyHtml === null) {
-      $bodyObj = new Sabel_Mail_Body("", Sabel_Mail_Body::TEXT);
-    } elseif ($this->bodyText !== null) {
-      $bodyObj = $this->bodyText;
-    } else {
-      $bodyObj = $this->bodyHtml;
+      $message = __METHOD__ . "() empty body.";
+      throw new Sabel_Mail_Exception($message);
     }
     
-    if ($this->isMbstringLoaded) {
-      $bodyObj->setText(mb_convert_encoding($bodyObj->getText(), $this->charset));
-    }
+    $boundary  = $this->getBoundary();
+    $boundary2 = md5hash();
+    $body = array("--{$boundary}");
     
-    if (count($this->attachments) === 0) {
-      $this->headers["Content-Type"] = $bodyObj->getType() . "; charset=" . $this->charset;
-      return $bodyObj->getText();
-    } else {
-      $this->headers["Content-Type"] = 'multipart/mixed; boundary="' . $boundary . '"';
+    list ($hasAttachment, $hasInlineContent) = $this->_setContentType($boundary);
+    
+    if ($this->bodyText !== null && $this->bodyHtml !== null) {  // plain & html texts.
       
-      $body   = array();
-      $body[] = "--{$boundary}";
-      $body[] = $this->createBodyHeader($bodyObj) . self::$EOL;
-      $body[] = $bodyObj->getText() . self::$EOL;
-      
-      foreach ($this->attachments as $attachment) {
-        $name = $attachment->getName();
-        $data = $attachment->getData();
-        $encoding = strtolower($attachment->getEncoding());
-        
-        if ($encoding === "base64") {
-          $data = rtrim(chunk_split(base64_encode($data), self::LINELENGTH, self::$EOL));
-        } elseif ($encoding === "quoted-printable") {
-          $quoted = Sabel_Mail_QuotedPrintable::encode($data, self::LINELENGTH, self::$EOL);
-          $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
-          $data   = "=?{$this->charset}?Q?{$quoted}?=";
-        } else {
-          $message = __METHOD__ . "() invalid encoding";
-          throw new Sabel_Mail_Exception($message);
-        }
-        
+      if ($hasAttachment && $hasInlineContent) {
+        $boundary3 = md5hash();
+        $body[] = 'Content-Type: multipart/alternative; boundary="' . $boundary2 . '"' . self::$EOL;
+        $body[] = "--{$boundary2}";
+        $body[] = $this->bodyText->toMailPart();
+        $body[] = "--{$boundary2}";
+        $body[] = 'Content-Type: multipart/related; boundary="' . $boundary3 . '"' . self::$EOL;
+        $body[] = "--{$boundary3}";
+        $body[] = $this->bodyHtml->toMailPart();
+        $body[] = $this->createAttachmentText($boundary3, "inline");
+        $body[] = "--{$boundary3}--" . self::$EOL;
+        $body[] = "--{$boundary2}--" . self::$EOL;
+        $body[] = $this->createAttachmentText($boundary, "attachment");
+      } elseif ($hasInlineContent) {
+        $body[] = $this->bodyText->toMailPart();
         $body[] = "--{$boundary}";
-        $body[] = "Content-Disposition: " . $attachment->getDisposition() . "; filename=\"{$name}\"";
-        $body[] = "Content-Transfer-Encoding: {$encoding}";
-        $body[] = "Content-Type: " . $attachment->getType() . "; name=\"{$name}\"" . self::$EOL;
-        $body[] = $data . self::$EOL;
+        $body[] = 'Content-Type: multipart/related; boundary="' . $boundary2 . '"' . self::$EOL;
+        $body[] = "--{$boundary2}";
+        $body[] = $this->bodyHtml->toMailPart();
+        $body[] = $this->createAttachmentText($boundary2, "inline");
+        $body[] = "--{$boundary2}--" . self::$EOL;
+      } elseif ($hasAttachment) {
+        $body[] = 'Content-Type: multipart/alternative; boundary="' . $boundary2 . '"' . self::$EOL;
+        $body[] = "--{$boundary2}";
+        $body[] = $this->bodyText->toMailPart();
+        $body[] = "--{$boundary2}";
+        $body[] = $this->bodyHtml->toMailPart();
+        $body[] = "--{$boundary2}--" . self::$EOL;
+        $body[] = $this->createAttachmentText($boundary, "attachment");
+      } else {
+        $body[] = $this->bodyText->toMailPart();
+        $body[] = "--{$boundary}";
+        $body[] = $this->bodyHtml->toMailPart();
       }
       
       $body[] = "--{$boundary}--";
       return implode(self::$EOL, $body);
+    } elseif ($this->bodyHtml !== null) {  // only html text.
+      if ($hasAttachment && $hasInlineContent) {
+        $body[] = 'Content-Type: multipart/related; boundary="' . $boundary2 . '"' . self::$EOL;
+        $body[] = "--{$boundary2}";
+        $body[] = $this->bodyHtml->toMailPart();
+        $body[] = $this->createAttachmentText($boundary2, "inline");
+        $body[] = "--{$boundary2}--" . self::$EOL;
+        $body[] = $this->createAttachmentText($boundary, "attachment");
+      } else {
+        $body[] = $this->bodyHtml->toMailPart();
+        
+        if ($hasInlineContent) {
+          $body[] = $this->createAttachmentText($boundary, "inline");
+        } elseif ($hasAttachment) {
+          $body[] = $this->createAttachmentText($boundary, "attachment");
+        }
+      }
+      
+      $body[] = "--{$boundary}--";
+      return implode(self::$EOL, $body);
+    } else {  // only plain text.
+      if ($hasAttachment) {
+        $body   = array("--{$boundary}");
+        $body[] = $this->bodyText->toMailPart();
+        $body[] = $this->createAttachmentText($boundary, "attachment");
+        $body[] = "--{$boundary}--";
+        
+        return implode(self::$EOL, $body);
+      } else {
+        $this->headers["Content-Transfer-Encoding"] = $this->bodyText->getEncoding();
+        return $this->bodyText->getEncodedText();
+      }
     }
   }
   
-  protected function createBodyHeader($body)
+  protected function _setContentType($boundary)
   {
-    return "Content-Disposition: " . $body->getDisposition()    . self::$EOL
-         . "Content-Transfer-Encoding: " . $body->getEncoding() . self::$EOL
-         . "Content-Type: " . $body->getType() . "; charset=" . $this->charset;
+    $hasAttachment = false;
+    $hasInlineContent = false;
+    
+    if (count($this->attachments) > 0) {
+      foreach ($this->attachments as $attachment) {
+        $disposition = $attachment->getDisposition();
+        if ($disposition === "attachment") {
+          $hasAttachment = true;
+        } elseif ($disposition === "inline") {
+          $hasInlineContent = true;
+        }
+      }
+    }
+    
+    if ($hasAttachment) {
+      $this->headers["Content-Type"] = 'multipart/mixed; boundary="' . $boundary . '"';
+    } elseif ($this->bodyText !== null && $this->bodyHtml !== null) {
+      $this->headers["Content-Type"] = 'multipart/alternative; boundary="' . $boundary . '"';
+    } elseif ($this->bodyHtml !== null && $hasInlineContent) {
+      $this->headers["Content-Type"] = 'multipart/related; boundary="' . $boundary . '"';
+    } else {
+      $body = ($this->bodyText !== null) ? $this->bodyText : $this->bodyHtml;
+      $this->headers["Content-Type"] = $body->getType() . "; charset=" . $this->charset;
+    }
+    
+    return array($hasAttachment, $hasInlineContent);
+  }
+  
+  protected function createAttachmentText($boundary, $disposition = "attachment")
+  {
+    $texts = array();
+    foreach ($this->attachments as $attachment) {
+      if ($attachment->getDisposition() === $disposition) {
+        $texts[] = "--{$boundary}";
+        $texts[] = $attachment->toMailPart();
+      }
+    }
+    
+    return implode(self::$EOL, $texts);
   }
 }

@@ -2401,6 +2401,50 @@ Sabel.Effect.prototype = {
 	}
 };
 
+Sabel.Cookie = {
+	set: function(key, value, option)
+	{
+		var cookie = key + "=" + escape(value);
+
+		if (typeof option !== "object") option = { expire: option };
+
+		if (option.expire) {
+			var date = new Date();
+			date.setTime(date.getTime() + option.expire * 1000);
+			cookie += "; expires=" + date.toGMTString();
+		}
+		if (option.domain) cookie += "; domain=" + option.domain;
+		if (option.path)   cookie += "; path="   + options.path;
+		if (option.secure) cookie += "; secure";
+
+		document.cookie = cookie;
+	},
+
+	get: function(key)
+	{
+		key = key + "=";
+		var cs = document.cookie.split(";");
+		for (var i = 0; i < cs.length; i++) {
+			var c = cs[i].replace(/ /g, "");
+			if (c.indexOf(key) === 0) return unescape(c.substring(key.length));
+		}
+
+		return null;
+	},
+
+	unset: function(key)
+	{
+		this.set(key, "", -1);
+	},
+
+	clear: function()
+	{
+		var cs = document.cookie.split(";");
+		for (var i = 0, len = cs.length; i < len; i++) {
+			Sabel.Cookie.unset(cs[i].match(/\w+/));
+		}
+	}
+};
 Sabel.Util = {};
 
 Sabel.dump = function(element, limit)

@@ -4,7 +4,7 @@
  * Sabel_Mail_Mime
  *
  * @category  Mail
- * @package   org.sabel.core
+ * @package   org.sabel.mail
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright 2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
@@ -276,14 +276,10 @@ class Sabel_Mail_Mime extends Sabel_Object
    */
   protected function splitByBoundary($body, $boundary)
   {
-    $parts = array();
-    
     preg_match("/(\r\n|\n|\r)/", $body, $matches);
-    $tmp = explode("--" . $boundary . $matches[0], $body);
-    
-    for ($i = 1; $i < count($tmp); $i++) {
-      $parts[] = $tmp[$i];
-    }
+    $parts = array_map("ltrim", explode("--" . $boundary, $body));
+    array_shift($parts);
+    array_pop($parts);
     
     return $parts;
   }
