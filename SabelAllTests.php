@@ -36,6 +36,7 @@ define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 define("ENVIRONMENT", TEST);
 define("TPL_SUFFIX",  ".tpl");
+define("SBL_SECURE_MODE", true);
 
 if (!defined("PHPUnit_MAIN_METHOD")) {
   define("PHPUnit_MAIN_METHOD", "SabelAllTests::main");

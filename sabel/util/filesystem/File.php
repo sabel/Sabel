@@ -102,13 +102,11 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     unlink($this->path);
   }
   
-  public function copy($dest, $changeName = false)
+  public function copyTo($dest)
   {
     if (!$this->isAbsolutePath($dest)) {
       $dest = dirname($this->path) . DS . $dest;
     }
-    
-    if (!$changeName) $dest .= DS . basename($this->path);
     
     $permission = $this->getPermission();
     $this->_mkdir(dirname($dest), $permission);
@@ -118,15 +116,13 @@ class Sabel_Util_FileSystem_File extends Sabel_Util_FileSystem_Base
     return new self($dest);
   }
   
-  public function move($dest, $changeName = false)
+  public function moveTo($dest)
   {
     if (!$this->isAbsolutePath($dest)) {
       $dest = dirname($this->path) . DS . $dest;
     }
     
-    if (!$changeName) $dest .= DS . basename($this->path);
-    
-    $this->copy($dest, true);
+    $this->copyTo($dest);
     $this->remove();
     $this->path = $dest;
     

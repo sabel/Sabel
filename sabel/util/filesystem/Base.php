@@ -110,21 +110,4 @@ abstract class Sabel_Util_FileSystem_Base extends Sabel_Object
     file_put_contents($filePath, "");
     chmod($filePath, $permission);
   }
-  
-  protected function _rmdir($directory)
-  {
-    clearstatcache();
-    
-    foreach (scandir($directory) as $item) {
-      if ($item === "." || $item === "..") continue;
-      $path = $directory . DIRECTORY_SEPARATOR . $item;
-      
-      if (is_file($path)) {
-        unlink($path);
-      } elseif (is_dir($path)) {
-        $this->_rmdir($path);
-        rmdir($path);
-      }
-    }
-  }
 }

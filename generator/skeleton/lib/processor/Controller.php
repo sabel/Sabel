@@ -18,12 +18,12 @@ class Processor_Controller extends Sabel_Bus_Processor
     $destination = $bus->get("destination");
     $response    = new Sabel_Response_Object();
     
-    if (($controller = $this->createController($response, $destination)) === null) {
+    if (($controller = $this->createController($destination)) === null) {
       $response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
-      $controller = $this->createVirtualController($response);
+      $controller = $this->createVirtualController();
     }
     
-    $controller->setRedirector(new Sabel_Controller_Redirector());
+    $controller->setResponse($response);
     
     if (($request = $bus->get("request")) !== null) {
       $controller->setRequest($request);
@@ -37,33 +37,31 @@ class Processor_Controller extends Sabel_Bus_Processor
     $bus->set("controller", $controller);
   }
   
-  protected function createController($response, $destination)
+  protected function createController($destination)
   {
     list ($module, $controller,) = $destination->toArray();
     $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR) . "_" . ucfirst($controller);
     
-    Sabel::using($class);
-    
-    if (class_exists($class, false)) {
+    if (Sabel::using($class)) {
       l("create controller '{$class}'");
-      return new $class($response);
+      return new $class();
     } else {
       l("controller '{$class}' not found");
       return null;
     }
   }
   
-  protected function createVirtualController($response)
+  protected function createVirtualController()
   {
     $className = "SabelVirtualController";
-    
-    l("create virtual controller '{$className}'");
     
     if (!class_exists($className, false)) {
       eval ("class $className extends Sabel_Controller_Page {}");
     }
     
-    return new $className($response);
+    l("create virtual controller '{$className}'");
+    
+    return new $className();
   }
   
   public function shutdown($bus)

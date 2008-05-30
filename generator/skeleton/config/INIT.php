@@ -6,6 +6,10 @@ define("PRODUCTION",  0x01);
 define("TEST",        0x05);
 define("DEVELOPMENT", 0x0A);
 
+###################### SECURE MODE ########################
+
+define("SBL_SECURE_MODE", true);
+
 ################### SABEL LOG LEVELS ######################
 
 define("SBL_LOG_INFO",  0x01);

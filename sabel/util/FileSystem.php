@@ -14,7 +14,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function __construct($base = "")
   {
     if ($base === "") {
-      $this->path = (DIRECTORY_SEPARATOR === '\\') ? "C:\\" : "/";
+      $this->path = (DS === '\\') ? "C:\\" : "/";
     } else {
       $this->path = realpath($base);
     }
@@ -30,7 +30,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     clearstatcache();
     
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DIRECTORY_SEPARATOR . $path;
+      $path = $this->path . DS . $path;
     }
     
     if (is_dir($path)) {
@@ -47,7 +47,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     if ($path === null) {
       $path = $this->path;
     } elseif (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DIRECTORY_SEPARATOR . $path;
+      $path = $this->path . DS . $path;
     }
     
     $items = array();
@@ -62,7 +62,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function getDirectory($path)
   {
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DIRECTORY_SEPARATOR . $path;
+      $path = $this->path . DS . $path;
     }
     
     if ($this->isDir($path)) {
@@ -76,7 +76,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function getFile($path)
   {
     if (!$this->isAbsolutePath($path)) {
-      $path = $this->path . DIRECTORY_SEPARATOR . $path;
+      $path = $this->path . DS . $path;
     }
     
     if ($this->isFile($path)) {
@@ -96,7 +96,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     
     foreach (scandir($path) as $item) {
       if ($item === "." || $item === "..") continue;
-      if (is_dir($path . DIRECTORY_SEPARATOR . $item)) $dirs[] = $item;
+      if (is_dir($path . DS . $item)) $dirs[] = $item;
     }
     
     return $dirs;
@@ -110,7 +110,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     $path  = $this->path;
     
     foreach (scandir($path) as $item) {
-      if (is_file($path . DIRECTORY_SEPARATOR . $item)) $files[] = $item;
+      if (is_file($path . DS . $item)) $files[] = $item;
     }
     
     return $files;
@@ -119,7 +119,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function mkdir($directory, $permission = 0755)
   {
     if (!$this->isAbsolutePath($directory)) {
-      $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
+      $directory = $this->path . DS . $directory;
     }
     
     if ($this->isDir($directory) || $this->isFile($directory)) {
@@ -136,7 +136,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   public function mkfile($file, $permission = 0755)
   {
     if (!$this->isAbsolutePath($file)) {
-      $file = $this->path . DIRECTORY_SEPARATOR . $file;
+      $file = $this->path . DS . $file;
     }
     
     if ($this->isDir($file) || $this->isFile($file)) {
@@ -155,7 +155,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     $items = array();
     foreach (scandir($this->path) as $item) {
       if ($item === "." || $item === "..") continue;
-      $path = $this->path . DIRECTORY_SEPARATOR . $item;
+      $path = $this->path . DS . $item;
       if (is_file($path)) {
         $items[] = new Sabel_Util_FileSystem_File($path);
       } else {
@@ -171,7 +171,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     if ($directory === null) {
       $directory = $this->path;
     } elseif (!$this->isAbsolutePath($directory)) {
-      $directory = $this->path . DIRECTORY_SEPARATOR . $directory;
+      $directory = $this->path . DS . $directory;
     }
     
     if (!$this->isDir($directory)) {
@@ -184,26 +184,83 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     }
   }
   
-  public function copy($dest, $src = null)
+  public function copy($src, $dest)
   {
-    if ($src === null) $src = $this->path;
-    
-    if (!$this->isAbsolutePath($dest)) {
-      $dest = dirname($this->path) . DIRECTORY_SEPARATOR . $dest;
-    }
+    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    if (!$this->isAbsolutePath($src))  $src  = $this->path . DS . $src;
     
     $dir = new self($src);
     $this->_mkdir($dest, $dir->getPermission());
     
     if ($items = $dir->getList()) {
       foreach ($items as $item) {
-        $destination = $dest . DIRECTORY_SEPARATOR . basename($item->getPath());
+        $destination = $dest . DS . basename($item->getPath());
         
         if ($item->isFile()) {
-          $item->copy($destination, true);
+          $item->copyTo($destination);
         } else {
-          $this->copy($destination, $item->pwd());
+          $this->copy($item->pwd(), $destination);
         }
+      }
+    }
+  }
+  
+  public function copyTo($dest)
+  {
+    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    $this->copy($this->path, $dest);
+  }
+  
+  public function move($src, $dest)
+  {
+    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    if (!$this->isAbsolutePath($src))  $src  = $this->path . DS . $src;
+    
+    $this->copy($src, $dest);
+    $this->rmdir($src);
+  }
+  
+  public function moveTo($dest)
+  {
+    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    $this->move($this->path, $dest);
+  }
+  
+  public function getSize($target = null)
+  {
+    if ($target === null) {
+      $target = $this->path;
+    } elseif (!$this->isAbsolutePath($target)) {
+      $target = $this->path . DS . $target;
+    }
+    
+    $size = 0;  // bytes
+    foreach (scandir($target) as $item) {
+      if ($item === "." || $item === "..") continue;
+      $path = $target . DS . $item;
+      if (is_file($path)) {
+        $size += filesize($path);
+      } else {
+        $size += $this->getSize($path);
+      }
+    }
+    
+    return $size;
+  }
+  
+  protected function _rmdir($directory)
+  {
+    clearstatcache();
+    
+    foreach (scandir($directory) as $item) {
+      if ($item === "." || $item === "..") continue;
+      $path = $directory . DS . $item;
+      
+      if (is_file($path)) {
+        unlink($path);
+      } elseif (is_dir($path)) {
+        $this->_rmdir($path);
+        rmdir($path);
       }
     }
   }

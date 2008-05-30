@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_Mail_File
+ * Sabel_Mail_Mime_File
  *
  * @category   Mail
  * @package    org.sabel.mail
@@ -9,17 +9,12 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Mail_File extends Sabel_Mail_Part
+class Sabel_Mail_Mime_File extends Sabel_Mail_Mime_Abstract
 {
   /**
    * @var string
    */
   protected $name = "";
-  
-  /**
-   * @var string
-   */
-  protected $data = "";
   
   /**
    * @var string
@@ -31,11 +26,12 @@ class Sabel_Mail_File extends Sabel_Mail_Part
    */
   protected $followRFC2231 = false;
   
-  public function __construct($name, $data, $type, $followRFC2231 = false)
+  public function __construct($name, $content, $type, $followRFC2231 = false)
   {
     $this->name = $name;
-    $this->data = $data;
     $this->type = $type;
+    
+    $this->content = $content;
     $this->followRFC2231 = $followRFC2231;
   }
   
@@ -46,7 +42,7 @@ class Sabel_Mail_File extends Sabel_Mail_Part
    */
   public function setName($name)
   {
-    $this->name= $name;
+    $this->name = $name;
   }
   
   /**
@@ -58,81 +54,28 @@ class Sabel_Mail_File extends Sabel_Mail_Part
   }
   
   /**
-   * @param string $type
-   *
-   * @return void
-   */
-  public function setType($type)
-  {
-    $this->type = $type;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getType()
-  {
-    return $this->type;
-  }
-  
-  /**
-   * @param string $data
-   *
-   * @return void
-   */
-  public function setData($data)
-  {
-    $this->data = $data;
-  }
-  
-  /**
-   * @return string
-   */
-  public function getData()
-  {
-    return $this->data;
-  }
-  
-  /**
    * @return string
    */
   public function toMailPart()
   {
-    $name = $this->name;
-    $data = $this->data;
-    $eol  = Sabel_Mail::getEol();
-    
+    $eol = Sabel_Mail::getEol();
     $encoding = $this->encoding;
     $disposition = $this->disposition;
-    
-    if ($encoding === "base64") {
-      $data = rtrim(chunk_split(base64_encode($data), Sabel_Mail::LINELENGTH, $eol));
-    } elseif ($encoding === "quoted-printable") {
-      $quoted = Sabel_Mail_QuotedPrintable::encode($data, Sabel_Mail::LINELENGTH, $eol);
-      $data   = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
-    } else {
-      $message = __METHOD__ . "() invalid encoding.";
-      throw new Sabel_Mail_Exception($message);
-    }
+    $data = $this->encode($this->content, $encoding, $eol);
     
     $part = array();
     
-    if ($disposition === "inline") {
-      $part[] = "Content-Type: {$this->type}";
-      $part[] = "Content-Transfer-Encoding: {$encoding}";
-      $part[] = "Content-Id: <{$name}>";
-      $part[] = $eol . $data . $eol;
-    } elseif ($this->followRFC2231) {
+    if ($this->followRFC2231) {
       $part[] = "Content-Type: " . $this->type;
       $part[] = "Content-Disposition: " . $this->disposition . ";";
-      $part[] = $this->toRFC2231($name, $eol);
+      $part[] = $this->toRFC2231($this->name, $eol);
       $part[] = "Content-Transfer-Encoding: {$encoding}";
       $part[] = $eol . $data . $eol;
     } else {
       if (extension_loaded("mbstring")) {
-        $name = mb_encode_mimeheader($name, $this->charset);
+        $name = mb_encode_mimeheader($this->name, $this->charset);
       } else {
-        $name = "=?{$this->charset}?B?" . base64_encode($name) . "?=";
+        $name = "=?{$this->charset}?B?" . base64_encode($this->name) . "?=";
       }
       
       $part[] = "Content-Type: " . $this->type . "; name=\"{$name}\"";
@@ -148,6 +91,10 @@ class Sabel_Mail_File extends Sabel_Mail_Part
   {
     if (extension_loaded("mbstring")) {
       $name = mb_convert_encoding($name, $this->charset);
+    }
+    
+    if (preg_match('/^[a-zA-Z0-9_\.]+$/', $name) === 1) {
+      return " filename*0={$this->charset}''{$name}";
     }
     
     $exploded = explode("%", urlencode($name));

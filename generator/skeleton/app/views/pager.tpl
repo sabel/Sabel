@@ -1,13 +1,13 @@
 <div class="sbl_pager">
-<? if ($paginate->count > $paginate->limit) : ?>
-  <?= a($paginate->uri, "&lt;&lt;", $paginate->getUriQuery($paginate->viewer->getFirst())) ?>
-  <? foreach ($paginate->viewer as $v) : ?>
-    <? if ($v->isCurrent()) : ?>
+<?php if ($paginate->count > $paginate->limit) : ?>
+  <?php echo a($paginate->uri, "&lt;&lt;", $paginate->getUriQuery($paginate->viewer->getFirst())) ?>
+  <?php foreach ($paginate->viewer as $v) : ?>
+    <?php if ($v->isCurrent()) : ?>
       <?= $v->getCurrent() ?>
-    <? else : ?>
+    <?php else : ?>
       <?= a($paginate->uri, $v->getCurrent(), $paginate->getUriQuery($v->getCurrent())) ?>
-    <? endif ?>
-  <? endforeach ?>
-  <?= a($paginate->uri, "&gt;&gt;", $paginate->getUriQuery($paginate->viewer->getLast())) ?>
-<? endif ?>
+    <?php endif ?>
+  <?php endforeach ?>
+  <?php echo a($paginate->uri, "&gt;&gt;", $paginate->getUriQuery($paginate->viewer->getLast())) ?>
+<?php endif ?>
 </div>

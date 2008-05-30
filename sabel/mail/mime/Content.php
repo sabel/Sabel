@@ -15,6 +15,7 @@ class Sabel_Mail_Mime_Content extends Sabel_Object
   protected $charset = "";
   protected $name = "";
   protected $boundary = "";
+  protected $encoding = "";
   protected $disposition = "";
   
   public function setType($type)
@@ -57,9 +58,19 @@ class Sabel_Mail_Mime_Content extends Sabel_Object
     return $this->boundary;
   }
   
+  public function setEncoding($encoding)
+  {
+    $this->encoding = strtolower($encoding);
+  }
+  
+  public function getEncoding()
+  {
+    return $this->encoding;
+  }
+  
   public function setDisposition($disposition)
   {
-    $this->disposition = $disposition;
+    $this->disposition = strtolower($disposition);
   }
   
   public function getDisposition()

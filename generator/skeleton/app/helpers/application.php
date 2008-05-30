@@ -23,17 +23,6 @@ function linkto($file)
   }
 }
 
-function css($file)
-{
-  $path = "/css/{$file}.css";
-  
-  if (defined("URI_IGNORE")) {
-    $path = dirname($_SERVER["SCRIPT_NAME"]) . $path;
-  }
-  
-  return '<link rel="stylesheet" href="' . $path . '" type="text/css" />';
-}
-
 function h($string, $charset = null)
 {
   return htmlescape($string, $charset);

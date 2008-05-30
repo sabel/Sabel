@@ -11,10 +11,8 @@
     <tr>
 <?php foreach ($columns as $column) : ?>
 <?php $mdlcol = '$item->' . $column->name ?>
-<?php if ($column->isString()) : ?>
-      <td><#= <?php echo $mdlcol ?>|h #></td>
-<?php elseif ($column->isText()) : ?>
-      <td><#= <?php echo $mdlcol ?>|h|nl2br #></td>
+<?php if ($column->isText()) : ?>
+      <td><#n <?php echo $mdlcol ?> #></td>
 <?php elseif ($column->isBool()) : ?>
       <td><# echo (<?php echo $mdlcol ?>) ? "on" : "off" #></td>
 <?php else : ?>
@@ -25,9 +23,6 @@
     <# endforeach #>
   </table>
   <div style="margin-top: 6px;">
-    <# foreach ($ids as $id) : #>
-      <input type="hidden" name="ids[]" value="<#= $id #>" />
-    <# endforeach #>
     <token value="<#= $token #>" />
     <input style="width: 120px;" type="submit" value="delete" />
   </div>

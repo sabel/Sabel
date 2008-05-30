@@ -21,9 +21,7 @@ class Sabel_DB
   {
     $className = self::classPrefix($connectionName) . "Driver";
     
-    Sabel::using($className);
-    
-    if (class_exists($className, false)) {
+    if (Sabel::using($className)) {
       $driver = new $className($connectionName);
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Driver")) {
       $driver = new $baseClass($connectionName);
@@ -47,10 +45,8 @@ class Sabel_DB
   {
     $className = self::classPrefix($connectionName) . "Statement";
     $driver = self::createDriver($connectionName);
-
-    Sabel::using($className);
     
-    if (class_exists($className, false)) {
+    if (Sabel::using($className)) {
       $statement = new $className($driver);
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Statement")) {
       $statement = new $baseClass($driver);
@@ -73,9 +69,7 @@ class Sabel_DB
     $className  = self::classPrefix($connectionName) . "Metadata";
     $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
     
-    Sabel::using($className);
-    
-    if (class_exists($className, false)) {
+    if (Sabel::using($className)) {
       return new $className(self::createDriver($connectionName), $schemaName);
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Metadata")) {
       return new $baseClass(self::createDriver($connectionName), $schemaName);
@@ -95,9 +89,7 @@ class Sabel_DB
   {
     $className = self::classPrefix($connectionName) . "Migration";
     
-    Sabel::using($className);
-    
-    if (class_exists($className, false)) {
+    if (Sabel::using($className)) {
       return new $className();
     } elseif ($baseClass = self::getBaseClassName($connectionName, "Migration")) {
       return new $baseClass();

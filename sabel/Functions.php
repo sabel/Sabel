@@ -44,6 +44,21 @@ function htmlescape($str, $charset = null)
   }
 }
 
+function remove_nullbyte($arg)
+{
+  if (is_string($arg)) {
+    return str_replace("\000", "", $arg);
+  } elseif (is_array($arg)) {
+    foreach ($arg as &$v) {
+      $v = str_replace("\000", "", $v);
+    }
+    
+    return $arg;
+  } else {
+    return $arg;
+  }
+}
+
 function get_temp_dir()
 {
   static $exists = null;

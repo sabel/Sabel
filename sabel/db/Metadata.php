@@ -20,9 +20,8 @@ class Sabel_DB_Metadata
     }
     
     $className = "Schema_" . convert_to_modelname($tblName);
-    Sabel::using($className);
     
-    if (class_exists($className, false)) {
+    if (Sabel::using($className)) {
       $cols = array();
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {
@@ -47,11 +46,10 @@ class Sabel_DB_Metadata
   
   public static function getTableList($connectionName = "default")
   {
-    $clsName = "Schema_" . ucfirst($connectionName) . "TableList";
-    Sabel::using($clsName);
+    $className = "Schema_" . ucfirst($connectionName) . "TableList";
     
-    if (class_exists($clsName, false)) {
-      $sc = new $clsName();
+    if (Sabel::using($className)) {
+      $sc = new $className();
       return $sc->get();
     } else {
       return Sabel_DB::createMetadata($connectionName)->getTableList();

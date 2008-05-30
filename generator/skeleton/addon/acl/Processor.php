@@ -11,8 +11,6 @@
  */
 class Acl_Processor extends Sabel_Bus_Processor
 {
-  const DENY_ACTION = "forbidden";
-  
   /**
    * @var Acl_User
    */

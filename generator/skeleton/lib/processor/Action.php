@@ -21,33 +21,37 @@ class Processor_Action extends Sabel_Bus_Processor
     if ($status->isFailure() || $controller->isRedirected()) return;
     
     try {
-      $action  = $bus->get("destination")->getAction();
-      $request = $bus->get("request");
+      $action    = $bus->get("destination")->getAction();
+      $hasAction = $controller->hasMethod($action);
+      $request   = $bus->get("request");
       
-      if ($request->isPostSet("SBL_CLIENT_ID")) {
-        if ($request->fetchPostValue("SBL_CLIENT_ID") !== $controller->getSession()->getClientId()) {
-          return $status->setCode(Sabel_Response::BAD_REQUEST);
+      if ($hasAction) {
+        $reader = Sabel_Annotation_Reader::create();
+        $annotations = $reader->readMethodAnnotation($controller, $action);
+        
+        if (isset($annotations["checkClientId"])) {
+          if ($request->fetchPostValue("SBL_CLIENT_ID") !== $controller->getSession()->getClientId()) {
+            return $status->setCode(Sabel_Response::BAD_REQUEST);
+          }
+        }
+        
+        if (isset($annotations["httpMethod"])) {
+          $allows = $annotations["httpMethod"][0];
+          if (!$this->isMethodAllowed($request, $allows)) {
+            $response->setHeader("Allow", implode(",", array_map("strtoupper", $allows)));
+            return $status->setCode(Sabel_Response::METHOD_NOT_ALLOWED);
+          }
         }
       }
       
       $controller->setAction($action);
       $controller->initialize();
       
-      if ($status->isFailure() || $controller->isRedirected() || !$controller->hasMethod($action)) return;
-      
-      $reader = Sabel_Annotation_Reader::create();
-      $annotations = $reader->readMethodAnnotation($controller, $action);
-      
-      if (isset($annotations["httpMethod"])) {
-        $allows = $annotations["httpMethod"][0];
-        if (!$this->isMethodAllowed($request, $allows)) {
-          $response->setHeader("Allow", implode(",", array_map("strtoupper", $allows)));
-          return $status->setCode(Sabel_Response::METHOD_NOT_ALLOWED);
-        }
-      }
+      if ($status->isFailure() || $controller->isRedirected() || !$hasAction) return;
       
       if (isset($annotations["check"])) {
-        $this->validateRequests($controller, $request, $status, $annotations["check"]);
+        $result = $this->validateRequests($controller, $request, $annotations["check"]);
+        if ($result === false) return $status->setCode(Sabel_Response::BAD_REQUEST);
       }
       
       l("execute action '{$action}'");
@@ -68,7 +72,7 @@ class Processor_Action extends Sabel_Bus_Processor
     return $result;
   }
   
-  protected function validateRequests($controller, $request, $status, $checks)
+  protected function validateRequests($controller, $request, $checks)
   {
     $validator = new Validator();
     
@@ -85,7 +89,7 @@ class Processor_Action extends Sabel_Bus_Processor
       if ($request->isPost()) {
         $controller->setAttribute("errors", $validator->getErrors());
       } else {
-        $status->setCode(Sabel_Response::BAD_REQUEST);
+        return false;
       }
     }
   }

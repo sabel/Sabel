@@ -42,6 +42,7 @@ class Renderer_Smarty extends Sabel_View_Renderer
     }
     
     if (!$smarty->is_cached($_tpl_path)) {
+      $_tpl_values["renderer"] = $this;
       $smarty->assign($_tpl_values);
     }
     

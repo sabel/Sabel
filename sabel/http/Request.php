@@ -216,6 +216,8 @@ class Sabel_Http_Request extends Sabel_Object
       for ($i = 0; $i < $this->config["maxRedirects"]; $i++) {
         $location = $response->getHeader("Location");
         if (preg_match("@^https?://@", $location) === 1) {
+          $parsed = parse_url($location);
+          if ($uri->host !== $parsed["host"]) $this->disconnect();
           $uri = new Sabel_Http_Uri($location);
         } elseif (strpos($location, "/") === 0) {
           $uri->setPath($location);

@@ -98,21 +98,15 @@ class Generator extends Sabel_Sakle_Task
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $file = $fs->mkfile($module . DS . "controllers" . DS . $mdlName . ".php");
-    $file->write($contents)->save();
+    $path = $module . DS . "controllers" . DS . $mdlName . ".php";
+    $fs->mkfile($path)->write($contents)->save();
+    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
-    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "general";
-    foreach (scandir($templatesDir) as $item) {
-      if ($item{0} === ".") continue;
-      
-      ob_start();
-      include ($templatesDir . DS . $item);
-      $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
-      file_put_contents($tplDir . DS . $item, $contents);
-    }
+    $vars = get_defined_vars();
+    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "general");
   }
   
   private function generateFlowController()
@@ -144,25 +138,14 @@ class Generator extends Sabel_Sakle_Task
     
     $fs   = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
     $path = $module . DS . "controllers" . DS . $mdlName . ".php";
-    $file = $fs->mkfile($path);
-    $file->write($contents)->save();
+    $fs->mkfile($path)->write($contents)->save();
     $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
-    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "flow";
-    foreach (scandir($templatesDir) as $item) {
-      if ($item{0} === ".") continue;
-      
-      ob_start();
-      include ($templatesDir . DS . $item);
-      $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
-      file_put_contents($tplDir . DS . $item, $contents);
-      
-      $relativePath = substr($tplDir . DS . $item, strlen(MODULES_DIR_PATH) + 1);
-      $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
-    }
+    $vars = get_defined_vars();
+    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "flow");
   }
   
   private function generateLoginController()
@@ -192,25 +175,14 @@ class Generator extends Sabel_Sakle_Task
     
     $fs   = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
     $path = $module . DS . "controllers" . DS . "Login.php";
-    $file = $fs->mkfile($path);
-    $file->write($contents)->save();
+    $fs->mkfile($path)->write($contents)->save();
     $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . "login";
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
-    $templatesDir = $this->skeletonDir . DS . "templates" . DS . "login";
-    foreach (scandir($templatesDir) as $item) {
-      if ($item{0} === ".") continue;
-      
-      ob_start();
-      include ($templatesDir . DS . $item);
-      $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
-      file_put_contents($tplDir . DS . $item, $contents);
-      
-      $relativePath = substr($tplDir . DS . $item, strlen(MODULES_DIR_PATH) + 1);
-      $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
-    }
+    $vars = get_defined_vars();
+    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "login");
   }
   
   private function generateUploadController()
@@ -228,8 +200,9 @@ class Generator extends Sabel_Sakle_Task
     $contents = str_replace("<#", "<?", ob_get_clean());
     
     $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $file = $fs->mkfile($module . DS . "controllers" . DS . $ctrlName . ".php");
-    $file->write($contents)->save();
+    $path = $module . DS . "controllers" . DS . $ctrlName . ".php";
+    $fs->mkfile($path)->write($contents)->save();
+    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($ctrlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
@@ -240,6 +213,26 @@ class Generator extends Sabel_Sakle_Task
     include ($this->skeletonDir . DS . "templates" . DS . "uploader" . DS . $tplName);
     $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
     file_put_contents($tplDir . DS . $tplName, $contents);
+    
+    $relativePath = substr($tplDir . DS . $tplName, strlen(MODULES_DIR_PATH) + 1);
+    $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
+  }
+  
+  private function _generateTemplates($vars, $targetDir, $templatesDir)
+  {
+    extract($vars, EXTR_OVERWRITE);
+    
+    foreach (scandir($templatesDir) as $item) {
+      if ($item{0} === ".") continue;
+      
+      ob_start();
+      include ($templatesDir . DS . $item);
+      $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
+      file_put_contents($targetDir . DS . $item, $contents);
+      
+      $relativePath = substr($targetDir . DS . $item, strlen(MODULES_DIR_PATH) + 1);
+      $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
+    }
   }
   
   private function getEnvironment()

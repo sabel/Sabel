@@ -208,12 +208,12 @@ class Test_Util_FileSystem extends SabelTestCase
   {
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test" . DS . "hoge" . DS . "fuga");
     $file = $fs->getFile("foo.txt");
-    $file->copy(".." . DS . "test" . DS . "foo2.txt", true);
+    $file->copyTo(".." . DS . "test" . DS . "foo2.txt");
     
     $fs->cd(".." . DS . "test");
     $this->assertTrue($fs->isFile("foo2.txt"));
     
-    $file->copy(".." . DS . "test");
+    $file->copyTo(".." . DS . "test" . DS . "foo.txt");
     $this->assertTrue($fs->isFile("foo.txt"));
   }
   
@@ -221,13 +221,13 @@ class Test_Util_FileSystem extends SabelTestCase
   {
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $file = $fs->getFile("hoge" . DS . "test" . DS . "foo2.txt");
-    $moved = $file->move(".." . DS . "test2");
+    $moved = $file->moveTo(".." . DS . "test2" . DS . "foo2.txt");
     
     $fs->cd(".." . DS . "test" . DS . "hoge");
     $this->assertTrue($fs->isFile("test2" . DS . "foo2.txt"));
     $this->assertFalse($fs->isFile("hoge" . DS . "foo2.txt"));
     
-    $moved->move("foo3.txt", true);
+    $moved->moveTo("foo3.txt");
     $this->assertTrue($fs->isFile("test2" . DS . "foo3.txt"));
     $this->assertFalse($fs->isFile("test2" . DS . "foo2.txt"));
   }
@@ -258,7 +258,7 @@ class Test_Util_FileSystem extends SabelTestCase
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $this->assertFalse($fs->isDir("moved"));
     
-    $fs->copy("moved");
+    $fs->copyTo(".." . DS . "moved");
     $fs->cd("..");
     $this->assertTrue($fs->isDir("moved"));
     $fs->cd("moved");

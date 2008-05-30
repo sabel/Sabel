@@ -1,11 +1,11 @@
-<? if (!empty($errors)) : ?>
+<?php if (!empty($errors)) : ?>
 <div id="sbl_errmsg" class="sbl_error">
   <ul>
-    <? foreach ($errors as $error) : ?>
-      <li><?= $error ?></li>
-    <? endforeach ?>
+    <?php foreach ($errors as $error) : ?>
+      <li><?php echo $error ?></li>
+    <?php endforeach ?>
   </ul>
-<? else : ?>
+<?php else : ?>
 <div id="sbl_errmsg" class="sbl_error" style="display: none;">
-<? endif ?>
+<?php endif ?>
 </div>

@@ -80,7 +80,7 @@ class Form_Html extends Sabel_Object
   }
   
   /**
-   * @param string $id
+   * @param string $class
    *
    * @throws Sabel_Exception_InvalidArgument
    * @return self

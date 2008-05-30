@@ -17,6 +17,12 @@ class Processor_Request extends Sabel_Bus_Processor
     
     $uri = (isset($_SERVER["REQUEST_URI"])) ? normalize_uri($_SERVER["REQUEST_URI"]) : "";
     $request = new Sabel_Request_Object($uri);
+    
+    if (SBL_SECURE_MODE) {
+      $_GET  = remove_nullbyte($_GET);
+      $_POST = remove_nullbyte($_POST);
+    }
+    
     $request->setGetValues($_GET);
     $request->setPostValues($_POST);
     

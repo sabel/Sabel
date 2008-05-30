@@ -23,14 +23,8 @@
   <tr>
 <?php foreach ($columns as $column) : ?>
 <?php $mdlcol = '$' . lcfirst($mdlName) . '->' . $column->name ?>
-<?php if ($column->isString()) : ?>
-<?php if ($column->primary) : ?>
-    <td><a href="<#= uri("a: prepareEdit") #>?<?php echo $column->name ?>=<#= <?php echo $mdlcol ?>|h #>"><#= <?php echo $mdlcol ?>|h #></a></td>
-<?php else : ?>
-    <td><#= <?php echo $mdlcol ?>|h #></td>
-<?php endif ?>
-<?php elseif ($column->isText()) : ?>
-    <td><#= <?php echo $mdlcol ?>|h|nl2br #></td>
+<?php if ($column->isText()) : ?>
+    <td><#n <?php echo $mdlcol ?> #></td>
 <?php elseif ($column->isBool()) : ?>
     <td><# echo (<?php echo $mdlcol ?>) ? "on" : "off" #></td>
 <?php else : ?>

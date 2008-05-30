@@ -79,20 +79,31 @@ class Form_Object extends Sabel_Object
     $this->model->__set($key, $val);
   }
   
+  /**
+   * @return mixed
+   */
   public function get($key)
   {
-    $result = $this->model->__get($key);
-    return (is_string($result)) ? htmlescape($result) : $result;
+    return $this->model->__get($key);
   }
   
+  /**
+   * @param string $key
+   * @param mixed  $val
+   *
+   * @return void
+   */
   public function __set($key, $val)
   {
     $this->set($key, $val);
   }
   
+  /**
+   * @return mixed
+   */
   public function __get($key)
   {
-    return $this->model->__get($key);
+    return $this->get($key);
   }
   
   /**
@@ -285,19 +296,24 @@ class Form_Object extends Sabel_Object
     
     static $htmlWriter = null;
     
+    $value = null;
     if ($htmlWriter === null) {
-      return $htmlWriter = new Form_Html();
-    }
-    
-    if (isset($this->columns[$name]) && $this->columns[$name]->isBool()) {
-      $value = $this->get($name);
-      if ($value !== null) $value = ($value) ? 1 : 0;
+      $htmlWriter = new Form_Html();
     } else {
       $value = $this->get($name);
+      if (isset($this->columns[$name]) && $this->columns[$name]->isBool()) {
+        if ($value !== null) $value = ($value) ? 1 : 0;
+      } elseif (is_string($value)) {
+        $value = htmlescape($value);
+      }
+      
+      $htmlWriter->clear();
     }
     
-    $htmlWriter->clear();
-    return $htmlWriter->setName($inputName)->setValue($value)->setId($id)->setClass($class);
+    return $htmlWriter->setName($inputName)
+                      ->setValue($value)
+                      ->setId($id)
+                      ->setClass($class);
   }
   
   public function __sleep()

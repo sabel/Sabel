@@ -114,6 +114,12 @@ class Sabel_Mail_Sender_Smtp
           $this->command("RCPT TO:<{$rcpt["address"]}>", "250");
         }
       }
+      
+      if (isset($headers["Bcc"])) {
+        foreach ($headers["Bcc"] as $rcpt) {
+          $this->command("RCPT TO:<{$rcpt}>", "250");
+        }
+      }
     } catch (Sabel_Mail_Smtp_Exception $e) {
       $exception = new Sabel_Mail_Smtp_Exception_RecipientRefused($e->getMessage());
       $exception->setResponseCode($e->getResponseCode());

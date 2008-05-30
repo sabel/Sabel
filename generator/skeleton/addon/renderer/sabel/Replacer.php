@@ -128,6 +128,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
     }
     
     $uri = $element->uri;
+    if ($uri === null) $uri = $element->href;
     if ($uri === null) return $html . ">";
     
     $uri = '<?= uri("' . $uri . '") ?>';
@@ -157,10 +158,10 @@ class Renderer_Sabel_Replacer extends Sabel_Object
     }
     
     if (($assign = $element->assign) === null) {
-      $fmt = '<?= $this->partial("%s") ?>';
+      $fmt = '<?php echo $this->partial("%s") ?>';
       return sprintf($fmt, $name);
     } else {
-      $fmt = '<?= $this->partial("%s", %s) ?>';
+      $fmt = '<?php echo $this->partial("%s", %s) ?>';
       
       $assigns = explode(",", $assign);
       if (strpos($assigns[0], ":") === false) {
@@ -197,7 +198,7 @@ class Renderer_Sabel_Replacer extends Sabel_Object
     
     if ($form{0} !== '$') $form = '$' . $form . "Form";
     
-    $fmt = '  <?= $this->partial("error", array("errors" => %1$s->getErrors())) ?>' . PHP_EOL;
+    $fmt = '  <?php echo $this->partial("error", array("errors" => %1$s->getErrors())) ?>' . PHP_EOL;
     return sprintf($fmt, $form);
   }
   

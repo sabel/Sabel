@@ -18,6 +18,19 @@ class Acl_Config_Module extends Acl_Config_Controller
     return $this->controllers[$controller] = new Acl_Config_Controller();
   }
   
+  public function controllers(/* args */)
+  {
+    $args = func_get_args();
+    $controllers = array();
+    
+    foreach ($args as $c) {
+      $controllers[$c] = new Acl_Config_Controller();
+    }
+    
+    $this->controllers = array_merge($this->controllers, $controllers);
+    return new Acl_Config_Controllers($controllers);
+  }
+  
   public function getController($controller)
   {
     if (isset($this->controllers[$controller])) {

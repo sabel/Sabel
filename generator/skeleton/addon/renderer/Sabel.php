@@ -58,7 +58,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
     
     $template = $this->replacer->execute($template);
     
-    $r = '/<\?(=)?\s(.+)\s\?>/U';
+    $r = '/<\?(.)?\s(.+)\s\?>/U';
     $template = preg_replace_callback($r, '_sbl_tpl_pipe_to_func', $template);
     
     if (defined("URI_IGNORE")) {
@@ -69,7 +69,7 @@ class Renderer_Sabel extends Sabel_View_Renderer
     }
     
     $template = str_replace('<?=', '<? echo', $template);
-    $template = preg_replace('/<\?(?!xml)/', '<?php', $template);
+    $template = preg_replace('/<\?(?!xml|php)/', '<?php', $template);
     $template = str_replace('<?xml', '<<?php echo "?" ?>xml', $template);
     
     file_put_contents(COMPILE_DIR_PATH . DS . $hash, $template);
@@ -109,7 +109,17 @@ function _sbl_tpl_pipe_to_func($matches)
   }
   
   $value = implode(" ", $values);
-  return "<?${pre} ${value} ?>";
+  
+  switch ($pre) {
+    case "=":
+      return "<?= h({$value}) ?>";
+    case "n":
+      return "<?= nl2br(h({$value})) ?>";
+    case "e":
+      return "<?php echo {$value} ?>";
+    default:
+      return "<?{$pre} {$value} ?>";
+  }
 }
 
 function _sbl_internal_remove_this($arg)
