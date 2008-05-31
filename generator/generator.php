@@ -12,31 +12,35 @@
  */
 class SabelScaffold
 {
-  protected $ignores   = array();
-  protected $overwrite = array();
+  const DEFAULT_LANGUAGE = "en";
   
-  protected $targetDir     = "";
-  protected $skeletonDir   = "";
-  protected $dirnameLength = "";
+  protected $ignores = array();
+  protected $overwrite = array();
+  protected $lang = "en";
+  
+  protected $targetDir = "";
+  protected $skeletonDir = "";
+  protected $basedirNameLength = "";
   
   public function __construct($args, $skeletonDir)
   {
+    $this->skeletonDir = $skeletonDir;
+    $this->basedirNameLength = strlen($skeletonDir) + 3;
     $this->targetDir = $this->getTargetDir($args);
     $this->readOptions($args);
-    
-    $this->skeletonDir   = $skeletonDir;
-    $this->dirnameLength = strlen($skeletonDir);
   }
   
   public function create($dir = null)
   {
-    if ($dir === null) $dir = $this->skeletonDir;
+    if ($dir === null) {
+      $dir = $this->skeletonDir . DS . self::DEFAULT_LANGUAGE;
+    }
     
     foreach (scandir($dir) as $item) {
       if ($item{0} === "." && $item !== ".htaccess") continue;
       
       $fullPath   = $dir . DS . $item;
-      $targetItem = substr($fullPath, $this->dirnameLength + 1);
+      $targetItem = substr($fullPath, $this->basedirNameLength + 1);
       $targetPath = $this->targetDir . DS . $targetItem;
       
       if (is_dir($fullPath)) {
@@ -47,12 +51,20 @@ class SabelScaffold
             Sabel_Console::warning("'{$targetItem}' already exists.");
           } else {
             Sabel_Console::success("create $targetItem");
-            mkdir ($targetPath);
+            mkdir($targetPath);
           }
           
           $this->create($fullPath);
         }
       } else {
+        if ($this->lang !== self::DEFAULT_LANGUAGE) {
+          $_target = substr($fullPath, strlen($this->skeletonDir) + 4);  // DS(1) + lang(2) + DS(1)
+          $_target = $this->skeletonDir . DS . $this->lang . DS . $_target;
+          if (is_dir($_target) || is_file($_target)) {
+            $fullPath = $_target;
+          }
+        }
+        
         if (isset($this->ignore[$targetItem])) {
           Sabel_Console::message("ignore '{$targetItem}'.");
         } elseif (is_file($targetPath)) {
@@ -109,6 +121,13 @@ class SabelScaffold
       for ($i = $index, $c = count($args); $i < $c; $i++) {
         if (substr($args[$i], 0, 2) === "--") break;
         $this->ignore[$args[$i]] = 1;
+      }
+    }
+    
+    if (Sabel_Console::hasOption("l", $args)) {
+      $opts = Sabel_Console::getOption("l", $args);
+      if (isset($opts[0]) && is_dir($this->skeletonDir . DS . $opts[0])) {
+        $this->lang = $opts[0];
       }
     }
   }

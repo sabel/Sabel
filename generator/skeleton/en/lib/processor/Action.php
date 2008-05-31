@@ -20,11 +20,11 @@ class Processor_Action extends Sabel_Bus_Processor
     
     if ($status->isFailure() || $controller->isRedirected()) return;
     
+    $action    = $bus->get("destination")->getAction();
+    $hasAction = $controller->hasMethod($action);
+    $request   = $bus->get("request");
+    
     try {
-      $action    = $bus->get("destination")->getAction();
-      $hasAction = $controller->hasMethod($action);
-      $request   = $bus->get("request");
-      
       if ($hasAction) {
         $reader = Sabel_Annotation_Reader::create();
         $annotations = $reader->readMethodAnnotation($controller, $action);
