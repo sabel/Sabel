@@ -84,6 +84,16 @@ class Sabel_DB_Join extends Sabel_Object
     $this->model->setOrderBy($orderBy);
   }
   
+  public function setLimit($limit)
+  {
+    $this->model->setLimit($limit);
+  }
+  
+  public function setOffset($offset)
+  {
+    $this->model->setOffset($offset);
+  }
+  
   public function add($object, $alias = "", $joinKey = array())
   {
     if (is_string($object)) {
@@ -131,6 +141,12 @@ class Sabel_DB_Join extends Sabel_Object
     return (int)$rows[0]["cnt"];
   }
   
+  public function selectOne($joinType = null)
+  {
+    $results = $this->select($joinType);
+    return (isset($results[0])) ? $results[0] : null;
+  }
+  
   public function select($joinType = null)
   {
     if ($joinType === null) {
@@ -145,10 +161,9 @@ class Sabel_DB_Join extends Sabel_Object
       $query[] = $object->getJoinQuery($stmt, $joinType);
     }
     
+    $results = array();
     if ($rows = $this->execute($stmt, $projection, implode("", $query))) {
       $results = Sabel_DB_Join_Result::build($this->model, $this->structure, $rows);
-    } else {
-      $results = false;
     }
     
     $this->clear();
@@ -193,10 +208,7 @@ class Sabel_DB_Join extends Sabel_Object
         } else {
           foreach ($proj as $column) {
             $as = "{$tblName}.{$column}";
-            if (strlen($as) > 30) {
-              $as = Sabel_DB_Join_ColumnHash::toHash($as);
-            }
-            
+            if (strlen($as) > 30) $as = Sabel_DB_Join_ColumnHash::toHash($as);
             $p = $stmt->quoteIdentifier($tblName) . "." . $stmt->quoteIdentifier($column);
             $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
           }

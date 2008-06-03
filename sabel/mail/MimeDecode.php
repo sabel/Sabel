@@ -34,14 +34,14 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $headers = $this->createHeaders($headerText);
     $content = $this->createContentInfo($headers);
     
-    $retObj = new stdClass();
+    $mail = new stdClass();
     
-    $retObj->content     = $content;
-    $retObj->headers     = $headers;
-    $retObj->body        = null;
-    $retObj->html        = null;
-    $retObj->attachments = array();
-    $retObj->mails       = array();  // multipart/digest
+    $mail->content     = $content;
+    $mail->headers     = $headers;
+    $mail->body        = null;
+    $mail->html        = null;
+    $mail->attachments = array();
+    $mail->mails       = array();  // multipart/digest
     
     switch (strtolower($content->getType())) {
       /*
@@ -53,34 +53,38 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         
       case "multipart/mixed":
         $mixed = $this->_decodeMixedPart($content, $body);
-        $retObj->body = $mixed["body"];
-        $retObj->html = $mixed["html"];
-        $retObj->attachments = $mixed["attachments"];
-        $retObj->mails = $mixed["mails"];
+        $mail->body = $mixed["body"];
+        $mail->html = $mixed["html"];
+        $mail->attachments = $mixed["attachments"];
+        $mail->mails = $mixed["mails"];
         break;
         
       case "multipart/alternative":
         $alter = $this->_decodeAlternativePart($content, $body);
-        $retObj->body = $alter["body"];
-        $retObj->html = $alter["html"];
+        $mail->body = $alter["body"];
+        $mail->html = $alter["html"];
         break;
         
       case "multipart/related":
         $related = $this->_decodeRelatedPart($content, $body);
-        $retObj->body = $related["body"];
-        $retObj->html = $related["html"];
+        $mail->body = $related["body"];
+        $mail->html = $related["html"];
         break;
         
       case "multipart/digest":
-        $retObj->mails = $this->_decodeDigestPart($content, $body);
+        $mail->mails = $this->_decodeDigestPart($content, $body);
         break;
         
       default:  // simple mail.
-        $retObj->body = $this->createMimeObject($content, $body);
+        $part          = new stdClass();
+        $part->body    = $body;
+        $part->content = $content;
+        $part->type    = $content->getType();
+        $mail->body    = $this->createMimeObject($part);
         break;
     }
     
-    return $retObj;
+    return $mail;
   }
   
   protected function _decodeMixedPart(Sabel_Mail_Mime_Content $content, $body)
@@ -94,46 +98,44 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $mixed = array("body" => null, "html" => null, "attachments" => array(), "mails" => array());
     $notBodyPart = false;
     
-    foreach ($parts as $messagePart) {
-      $part     = $this->toHeadersAndBody($messagePart);
-      $headers  = $this->createHeaders($part["header"]);
-      $_content = $this->createContentInfo($headers);
-      $ctype    = $_content->getType();
+    foreach ($parts as $partOfMessage) {
+      $part = $this->createPart($partOfMessage);
       
-      switch ($ctype) {
+      switch ($part->type) {
         case "multipart/alternative":
-          $alter = $this->_decodeAlternativePart($_content, $part["body"]);
+          $alter = $this->_decodeAlternativePart($part->content, $part->body);
           $mixed["body"] = $alter["body"];
           $mixed["html"] = $alter["html"];
           $notBodyPart = true;
           break;
           
         case "multipart/related":
-          $related = $this->_decodeRelatedPart($_content, $part["body"]);
+          $related = $this->_decodeRelatedPart($part->content, $part->body);
           if ($related["body"] !== null) $mixed["body"] = $related["body"];
           $mixed["html"] = $related["html"];
           $notBodyPart = true;
           break;
           
         case "multipart/digest":
-          $mixed["mails"] = $this->_decodeDigestPart($_content, $part["body"]);
+          $mixed["mails"] = $this->_decodeDigestPart($part->content, $part->body);
           $notBodyPart = true;
           break;
           
         case "text/plain":
           if (!$notBodyPart) {
-            $mixed["body"] = $this->createMimeObject($_content, $part["body"]);
+            $mixed["body"] = $this->createMimeObject($part);
             break;
           }
           
         default:
-          $enc  = $_content->getEncoding();
-          $cset = $_content->getCharset();
-          $data = $this->decodeString($part["body"], $enc, $cset);
-          $file = new Sabel_Mail_Mime_File($_content->getName(), $data, $ctype);
+          $enc  = $part->content->getEncoding();
+          $cset = $part->content->getCharset();
+          $data = $this->decodeString($part->body, $enc, $cset);
+          $file = new Sabel_Mail_Mime_File($part->content->getName(), $data, $part->type);
           $file->setCharset($cset);
           $file->setEncoding($enc);
-          $file->setDisposition($_content->getDisposition());
+          $file->setDisposition($part->content->getDisposition());
+          $file->setHeaders($part->headers);
           $mixed["attachments"][] = $file;
       }
     }
@@ -151,29 +153,26 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $parts = $this->splitByBoundary($body, $boundary);
     $alter = array("body" => null, "html" => null);
     
-    foreach ($parts as $messagePart) {
-      $part     = $this->toHeadersAndBody($messagePart);
-      $headers  = $this->createHeaders($part["header"]);
-      $_content = $this->createContentInfo($headers);
-      $ctype    = $_content->getType();
+    foreach ($parts as $partOfMessage) {
+      $part = $this->createPart($partOfMessage);
       
-      switch ($ctype) {
+      switch ($part->type) {
         case "text/plain":
-          $alter["body"] = $this->createMimeObject($_content, $part["body"]);
+          $alter["body"] = $this->createMimeObject($part);
           break;
           
         case "text/html":
-          $alter["html"] = $this->createMimeObject($_content, $part["body"]);
+          $alter["html"] = $this->createMimeObject($part);
           break;
           
         case "multipart/related":
-          $related = $this->_decodeRelatedPart($_content, $part["body"]);
+          $related = $this->_decodeRelatedPart($part->content, $part->body);
           if ($related["body"] !== null) $alter["body"] = $related["body"];
           $alter["html"] = $related["html"];
           break;
           
         default:
-          $message = __METHOD__ . "() $ctype is not supported now.";
+          $message = __METHOD__ . "() {$part->type} is not supported in multipart/alternative.";
           throw new Sabel_Mail_Mime_Exception($message);
       }
     }
@@ -191,23 +190,20 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $parts   = $this->splitByBoundary($body, $boundary);
     $related = array("body" => null, "html" => null);
     
-    foreach ($parts as $messagePart) {
-      $part     = $this->toHeadersAndBody($messagePart);
-      $headers  = $this->createHeaders($part["header"]);
-      $_content = $this->createContentInfo($headers);
-      $ctype    = $_content->getType();
+    foreach ($parts as $partOfMessage) {
+      $part = $this->createPart($partOfMessage);
       
-      if ($ctype === "text/html") {
-        $related["html"] = $this->createMimeObject($_content, $part["body"]);
-      } elseif ($ctype === "multipart/alternative") {
-        $alter = $this->_decodeAlternativePart($_content, $part["body"]);
+      if ($part->type === "text/html") {
+        $related["html"] = $this->createMimeObject($part);
+      } elseif ($part->type === "multipart/alternative") {
+        $alter = $this->_decodeAlternativePart($part->content, $part->body);
         $related["body"] = $alter["body"];
         $related["html"] = $alter["html"];
       } else {  // inline images.
-        $enc  = $_content->getEncoding();
-        $body = $this->decodeString($part["body"], $enc, $_content->getCharset());
-        $cid  = (isset($headers["content-id"])) ? $headers["content-id"] : "";
-        $related["html"]->addImage($cid, $body, $ctype, $enc);
+        $enc  = $part->content->getEncoding();
+        $body = $this->decodeString($part->body, $enc, $part->content->getCharset());
+        $cid  = (isset($part->headers["content-id"])) ? $part->headers["content-id"] : "";
+        $related["html"]->addImage($cid, $body, $part->type, $enc);
       }
     }
     
@@ -224,14 +220,13 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $parts = $this->splitByBoundary($body, $boundary);
     $mails = array();
     
-    foreach ($parts as $messagePart) {
-      $part = $this->toHeadersAndBody($messagePart);
-      $headers = $this->createHeaders($part["header"]);
-      if ($this->createContentInfo($headers)->getType() === "message/rfc822") {
-        $part = $this->toHeadersAndBody($part["body"]);
-        $mails[] = $this->_decode($part["header"], $part["body"]);
+    foreach ($parts as $partOfMessage) {
+      $part = $this->createPart($partOfMessage);
+      if ($part->type === "message/rfc822") {
+        $_part   = $this->toHeadersAndBody($part->body);
+        $mails[] = $this->_decode($_part["header"], $_part["body"]);
       } else {
-        $message = __METHOD__ . "() $ctype is not supported in multipart/digest.";
+        $message = __METHOD__ . "() {$part->type} is not supported in multipart/digest.";
         throw new Sabel_Mail_Mime_Exception($message);
       }
     }
@@ -239,22 +234,42 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     return $mails;
   }
   
-  protected function createMimeObject(Sabel_Mail_Mime_Content $content, $body)
+  protected function createMimeObject(stdClass $part)
   {
-    $ctype = $content->getType();
+    $body    = $part->body;
+    $content = $part->content;
+    $ctype   = $part->type;
+    $headers = (isset($part->headers)) ? $part->headers : array();
+    
     if ($ctype === "text/plain" || $ctype === "text/html") {
       $cset = $content->getCharset();
       $enc  = $content->getEncoding();
       $body = $this->decodeString($body, $enc, $cset);
       $mime = ($ctype === "text/plain") ? new Sabel_Mail_Mime_Plain($body) : new Sabel_Mail_Mime_Html($body);
+      $mime->setHeaders($headers);
       $mime->setCharset($cset);
       $mime->setEncoding($enc);
       $mime->setDisposition($content->getDisposition());
+      
       return $mime;
     } else {
       $message = __METHOD__ . "() $ctype is not supported now.";
       throw new Sabel_Mail_Mime_Exception($message);
     }
+  }
+  
+  protected function createPart($partOfMessage)
+  {
+    $part = new stdClass();
+    $_tmp = $this->toHeadersAndBody($partOfMessage);
+    
+    $part->header  = $_tmp["header"];
+    $part->body    = $_tmp["body"];
+    $part->headers = $this->createHeaders($_tmp["header"]);
+    $part->content = $this->createContentInfo($part->headers);
+    $part->type    = $part->content->getType();
+    
+    return $part;
   }
   
   protected function createContentInfo($headers)

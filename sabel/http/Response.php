@@ -17,6 +17,11 @@ class Sabel_Http_Response extends Sabel_Object
   protected $responseText = "";
   
   /**
+   * @var Sabel_Http_Uri
+   */
+  protected $uri = null;
+  
+  /**
    * @var array
    */
   protected $headers = array();
@@ -34,11 +39,11 @@ class Sabel_Http_Response extends Sabel_Object
   /**
    * @var string
    */
-  protected $contents = "";
+  protected $content = "";
   
   public function __construct($responseText)
   {
-    $this->responseText = $responseText;
+    $this->responseText = $this->content = $responseText;
     
     // @todo chunked
     
@@ -46,11 +51,15 @@ class Sabel_Http_Response extends Sabel_Object
     if (!isset($matches[0])) return;
     
     $eol = $matches[0];
-    $headers = array();
-    $_tmp = explode($eol, $responseText);
+    if (preg_match("/^(.+?)({$eol}{$eol})(.+)/s", $responseText, $matches) === 1) {
+      $header = $matches[1];
+      $this->content = $matches[3];
+    } else {
+      return;
+    }
     
-    foreach ($_tmp as $i => $line) {
-      unset($_tmp[$i]);
+    $headers = array();
+    foreach (explode($eol, $responseText) as $i => $line) {
       if ($line === "") break;
       if (strpos($line, "HTTP") === 0) {
         $exp = explode(" ", $line, 3);
@@ -71,12 +80,16 @@ class Sabel_Http_Response extends Sabel_Object
       }
     }
     
-    $this->headers  = $headers;
-    $this->contents = implode($eol, $_tmp);
+    $this->headers = array_change_key_case($headers);
     
-    if (isset($headers["Content-Encoding"]) && $headers["Content-Encoding"] === "gzip") {
-      $this->contents = gzinflate(substr($this->contents, 10));
+    if ($this->getHeader("Content-Encoding") === "gzip") {
+      $this->content = gzinflate(substr($this->content, 10));
     }
+  }
+  
+  public function __toString()
+  {
+    return $this->responseText;
   }
   
   public function getStatusCode()
@@ -89,22 +102,43 @@ class Sabel_Http_Response extends Sabel_Object
     return $this->statusReason;
   }
   
+  public function setUri(Sabel_Http_Uri $uri)
+  {
+    $this->uri = $uri;
+  }
+  
+  public function getUri()
+  {
+    return $this->uri;
+  }
+  
   public function getHeaders()
   {
     return $this->headers;
   }
   
+  public function addHeader($name, $value)
+  {
+    $this->headers[strtolower($name)] = $value;
+  }
+  
   public function getHeader($name)
   {
-    if (isset($this->headers[$name])) {
-      return $this->headers[$name];
+    $lowered = strtolower($name);
+    if (isset($this->headers[$lowered])) {
+      return $this->headers[$lowered];
     } else {
       return "";
     }
   }
   
-  public function getContents()
+  public function setContent($content)
   {
-    return $this->contents;
+    $this->content = $content;
+  }
+  
+  public function getContent()
+  {
+    return $this->content;
   }
 }

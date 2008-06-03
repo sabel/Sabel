@@ -2,6 +2,11 @@
 
 class <?php echo $controllerName ?> extends Sabel_Controller_Page
 {
+  public function initialize()
+  {
+    $this->token = $this->session->getClientId();
+  }
+  
   public function index()
   {
     $this->lists();
@@ -18,9 +23,12 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   public function prepareCreate()
   {
     $this-><?php echo $formName ?> = new Form_Object("<?= $mdlName ?>");
-    $this->token = $this->session->getClientId();
   }
   
+  /**
+   * @checkClientId
+   * @httpMethod post
+   */
   public function create()
   {
     $this->_save("prepareCreate", true);
@@ -32,12 +40,15 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
     $<?php echo lcfirst($mdlName) ?> = MODEL("<?= $mdlName ?>", $this-><?php echo $primaryColumn ?>);
     if ($<?php echo lcfirst($mdlName) ?>->isSelected()) {
       $this-><?php echo $formName ?> = new Form_Object($<?php echo lcfirst($mdlName) ?>);
-      $this->token = $this->session->getClientId();
     } else {
       $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
     }
   }
   
+  /**
+   * @checkClientId
+   * @httpMethod post
+   */
   public function edit()
   {
     $this->_save("prepareEdit", false);
@@ -72,11 +83,6 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   
   protected function _save($tplName, $isCreate = true)
   {
-    $this->token = $this->session->getClientId();
-    if ($this->request->fetchPostValue("token") !== $this->token) {
-      return $this->response->getStatus()->setCode(Sabel_Response::BAD_REQUEST);
-    }
-    
     if ($isCreate) {
       $<?php echo $formName ?> = new Form_Object("<?php echo $mdlName ?>");
     } else {

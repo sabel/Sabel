@@ -45,7 +45,7 @@ INC;
     
     $buf   = array();
     $buf[] = sprintf($include, linkto("js/helpers/EffectUpdater.js"));
-    $buf[] = sprintf($include, linkto("js/helpers/AjaxUpdater.js"));
+    $buf[] = sprintf($include, linkto("js/helpers/AjaxPager.js"));
     $buf[] = "\n";
     $buf[] = '<script type="text/javascript">';
     $buf[] = sprintf('new Sabel.Event(window, "load", function() { new Sabel.PHP.AjaxPager("%s", "%s"); });', $replaceId, $pagerClass);

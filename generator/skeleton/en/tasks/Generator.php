@@ -11,6 +11,7 @@
  */
 class Generator extends Sabel_Sakle_Task
 {
+  protected $renderer = "php";
   protected $skeletonDir = "";
   
   public function initialize()
@@ -106,7 +107,7 @@ class Generator extends Sabel_Sakle_Task
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
-    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "general");
+    $this->_generateTemplates($vars, $tplDir, "general");
   }
   
   private function generateFlowController()
@@ -145,7 +146,7 @@ class Generator extends Sabel_Sakle_Task
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
-    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "flow");
+    $this->_generateTemplates($vars, $tplDir, "flow");
   }
   
   private function generateLoginController()
@@ -182,7 +183,7 @@ class Generator extends Sabel_Sakle_Task
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
-    $this->_generateTemplates($vars, $tplDir, $this->skeletonDir . DS . "templates" . DS . "login");
+    $this->_generateTemplates($vars, $tplDir, "login");
   }
   
   private function generateUploadController()
@@ -218,9 +219,11 @@ class Generator extends Sabel_Sakle_Task
     $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
   }
   
-  private function _generateTemplates($vars, $targetDir, $templatesDir)
+  private function _generateTemplates($vars, $targetDir, $type)
   {
     extract($vars, EXTR_OVERWRITE);
+    
+    $templatesDir = $this->skeletonDir . DS . "templates" . DS . $this->renderer . DS . $type;
     
     foreach (scandir($templatesDir) as $item) {
       if ($item{0} === ".") continue;
@@ -259,6 +262,18 @@ class Generator extends Sabel_Sakle_Task
       exit;
     }
     
+    $renderers = array("sabel", "smarty");
+    
+    if (Sabel_Console::hasOption("r", $arguments)) {
+      $opts = Sabel_Console::getOption("r", $arguments);
+      if (isset($opts[0])) {
+        $renderer = strtolower($opts[0]);
+        if (in_array($renderer, $renderers, true)) {
+          $this->renderer = $renderer;
+        }
+      }
+    }
+    
     $target = strtolower($arguments[0]);
     $types  = array("model", "controller", "flowcontroller",
                     "logincontroller", "uploadcontroller");
@@ -267,6 +282,8 @@ class Generator extends Sabel_Sakle_Task
       $this->usage();
       exit;
     }
+    
+    $this->arguments = $arguments;
     
     return $target;
   }

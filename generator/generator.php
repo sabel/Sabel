@@ -126,8 +126,11 @@ class SabelScaffold
     
     if (Sabel_Console::hasOption("l", $args)) {
       $opts = Sabel_Console::getOption("l", $args);
-      if (isset($opts[0]) && is_dir($this->skeletonDir . DS . $opts[0])) {
-        $this->lang = $opts[0];
+      if (isset($opts[0])) {
+        $lang = strtolower($opts[0]);
+        if (is_dir($this->skeletonDir . DS . $lang)) {
+          $this->lang = $lang;
+        }
       }
     }
   }

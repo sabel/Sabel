@@ -111,11 +111,10 @@ class Paginate extends Sabel_Object
   
   public function build($limit, array $getValues = array())
   {
+    $page = 1;
     if (isset($getValues["page"])) {
       $page = $getValues["page"];
       if (!is_numeric($page) || $page < 1) $page = 1;
-    } else {
-      $page = 1;
     }
     
     $model = $this->model;
@@ -128,12 +127,7 @@ class Paginate extends Sabel_Object
     }
     
     $attributes["uriQuery"] = implode("&", $uriQuery);
-    
-    if ($this->isJoin) {
-      $count = $model->getCount(null, false);
-    } else {
-      $count = $model->getCount();
-    }
+    $count = ($this->isJoin) ? $model->getCount(null, false) : $model->getCount();
     
     $attributes["count"] = $count;
     $attributes["limit"] = $limit;
@@ -149,14 +143,8 @@ class Paginate extends Sabel_Object
     } else {
       $offset = $pager->getSqlOffset();
       $this->_setOrderBy($model, $getValues);
-      
-      if ($this->isJoin) {
-        $model->getModel()->setLimit($limit);
-        $model->getModel()->setOffset($offset);
-      } else {
-        $model->setLimit($limit);
-        $model->setOffset($offset);
-      }
+      $model->setLimit($limit);
+      $model->setOffset($offset);
       
       $attributes["offset"]  = $offset;
       $attributes["results"] = $model->{$this->method}();

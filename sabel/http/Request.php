@@ -215,9 +215,12 @@ class Sabel_Http_Request extends Sabel_Object
       
       for ($i = 0; $i < $this->config["maxRedirects"]; $i++) {
         $location = $response->getHeader("Location");
-        if (preg_match("@^https?://@", $location) === 1) {
+        if (preg_match("@^(https?|ftp)://@", $location) === 1) {
           $parsed = parse_url($location);
-          if ($uri->host !== $parsed["host"]) $this->disconnect();
+          if ($uri->host !== $parsed["host"] || $uri->scheme !== $parsed["scheme"]) {
+            $this->disconnect();
+          }
+          
           $uri = new Sabel_Http_Uri($location);
         } elseif (strpos($location, "/") === 0) {
           $uri->setPath($location);
@@ -280,28 +283,32 @@ class Sabel_Http_Request extends Sabel_Object
   
   protected function _request(Sabel_Http_Uri $uri)
   {
-    $request = $this->prepareRequest($uri);
-    $socket  = $this->connect($uri);
-    
-    if (fwrite($socket, $request) === false) {
-      $message = __METHOD__ . "() request failed.";
-      throw new Sabel_Exception_Runtime($message);
+    if ($uri->scheme === "ftp") {  // ftp
+      $responseText = file_get_contents("ftp://{$uri->host}{$uri->path}");
+    } else {  // http | https
+      $socket = $this->connect($uri);
+      if (fwrite($socket, $this->prepareRequest($uri)) === false) {
+        $message = __METHOD__ . "() request failed.";
+        throw new Sabel_Exception_Runtime($message);
+      }
+      
+      $texts = array();
+      while (true) {
+        if (($content = fread($socket, 8192)) === "") break;
+        $texts[] = $content;
+      }
+      
+      $responseText = implode("", $texts);
     }
     
-    $responseText = array();
-    
-    while (true) {
-      if (($content = fread($socket, 8192)) === "") break;
-      $responseText[] = $content;
-    }
-    
-    $response = new Sabel_Http_Response(implode("", $responseText));
+    $response = new Sabel_Http_Response($responseText);
+    $response->setUri($uri);
     
     if ($this->config["useCookie"]) {
       $this->_setCookie($response, $uri->host);
     }
     
-    if ($response->getHeader("Connection") === "close") {
+    if (strtolower($response->getHeader("Connection")) === "close") {
       $this->disconnect();
     }
     
@@ -317,10 +324,10 @@ class Sabel_Http_Request extends Sabel_Object
     
     if (!empty($this->getValues)) {
       $uriQuery = http_build_query($this->getValues, "", "&");
-      if ($query === "") {
-        $path .= "?" . $uriQuery;
-      } else {
+      if ($query) {
         $path .= "&" . $uriQuery;
+      } else {
+        $path .= "?" . $uriQuery;
       }
     }
     

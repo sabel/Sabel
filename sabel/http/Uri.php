@@ -33,6 +33,9 @@ class Sabel_Http_Uri extends Sabel_Object
     } elseif ($scheme === "https") {
       $this->transport = "ssl";
       $this->port = (isset($parsed["port"])) ? $parsed["port"] : 443;
+    } elseif ($scheme === "ftp") {
+      $this->transport = "ftp";
+      $this->port = (isset($parsed["port"])) ? $parsed["port"] : 21;
     } else {
       // @todo
     }

@@ -18,6 +18,11 @@ abstract class Sabel_Mail_Mime_Abstract
   const JPEG  = "image/jpeg";
   
   /**
+   * @var array
+   */
+  protected $headers = array();
+  
+  /**
    * @var string
    */
   protected $charset = "ISO-8859-1";
@@ -36,6 +41,31 @@ abstract class Sabel_Mail_Mime_Abstract
    * @var string
    */
   protected $disposition = "inline";
+  
+  /**
+   * @param array $headers
+   *
+   * @return void
+   */
+  public function setHeaders(array $headers)
+  {
+    $this->headers = $headers;
+  }
+  
+  /**
+   * @param string $name
+   *
+   * @return string
+   */
+  public function getHeader($name)
+  {
+    $lowered = strtolower($name);
+    if (isset($this->headers[$lowered])) {
+      return $this->headers[$lowered];
+    } else {
+      return "";
+    }
+  }
   
   /**
    * @return const Sabel_Mail_Mime_Abstract
@@ -115,30 +145,6 @@ abstract class Sabel_Mail_Mime_Abstract
   public function getDisposition()
   {
     return $this->disposition;
-  }
-  
-  /**
-   * @return boolean
-   */
-  public function isPlain()
-  {
-    return ($this->type === self::PLAIN);
-  }
-  
-  /**
-   * @return boolean
-   */
-  public function isHtml()
-  {
-    return ($this->type === self::HTML);
-  }
-  
-  /**
-   * @return boolean
-   */
-  public function isFile()
-  {
-    return (!$this->isPlain() && !$this->isHtml());
   }
   
   protected function encode($str, $encoding, $eol = "\r\n", $length = Sabel_Mail::LINELENGTH)
