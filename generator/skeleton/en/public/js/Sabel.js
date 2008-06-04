@@ -97,7 +97,11 @@ Sabel.Uri.prototype = {
 	},
 
 	toString: function() {
-		return this.url + this.path + "/" + this.filename + "?" + this.parseQuery.serialize();
+		var uri   = this.url + this.path;
+
+		if (this.filename !== "") uri += "/" + this.filename;
+		if (query = this.parseQuery.serialize()) uri += "?" + query;
+		return uri;
 	}
 };
 
@@ -2832,10 +2836,19 @@ Sabel.Widget = {};
 
 Sabel.Widget.Overlay = function(option) {
 	option = option || {};
+
+	if (!option.backgroundColor) option.backgroundColor = "#000";
+	if (!option.opacity) option.opacity = 70;
+	if (!option.zIndex)  option.zIndex  = 100;
+
 	var div = document.createElement("div");
 	if (option.id) div.setAttribute("id", option.id);
 
-	div.style.cssText += "; background-color: #000; position: absolute; top: 0px; left: 0px; opacity: 0.70; -moz-opacity: 0.70; filter: alpha(opacity=70); z-index: 100;";
+	div.style.cssText += "; background-color: " + option.backgroundColor
+										 + "; position: absolute; top: 0px; left: 0px; opacity: "
+										 + (option.opacity / 100) + "; -moz-opacity: "
+										 + (option.opacity / 100) + "; filter: alpha(opacity="
+										 + option.opacity + "); z-index: " + option.zIndex + ";";
 
 	this.div = Sabel.Element(div);;
 	document.body.appendChild(div);

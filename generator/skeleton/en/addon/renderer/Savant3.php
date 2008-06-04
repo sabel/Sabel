@@ -32,6 +32,7 @@ class Renderer_Savant3 extends Sabel_View_Renderer
     }
     
     $savant->setPath("template", dirname($_tpl_path));
+    $_tpl_values["renderer"] = $this;
     $savant->assign($_tpl_values);
     
     return $savant->fetch(basename($_tpl_path));
