@@ -49,33 +49,22 @@ class Sabel_Aspect_Aspects
     $class  = $conditions["class"];
     $method = $conditions["method"];
     
-    foreach ($pointcuts as $p) {
-      $match = true;
+    foreach ($pointcuts as $pointcut) {
+      $match = false;
       
-      switch ($p) {
-        case ($p->hasToAll()):
-          break;
-        case ($p->hasMethod() && $p->getMethod() === $method):
-          break;
-        case ($p->hasMethods()):
-          foreach ($p->getMethods() as $pcMethod) {
-            if ($pcMethod === $method) {
-              $matches[$p->getName()] = $p->getAspect();
-            }
+      if ($pointcut->hasToAll() ||
+          ($postcut->hasMethod() && $pointcut->hasMethod() === $method)) {
+        $match = true;
+      } elseif ($pointcut->hasMethods()) {
+        foreach ($pointcut->getMethods() as $pointcutMethod) {
+          if ($pointcutMethod === $method) {
+            $matches[$pointcut->getName()] = $pointcut->getAspect();
           }
-          break;
-        case ($p->hasMethodRegex() && preg_match("/" . $p->getMethodRegex() . "/" , $method)):
-          break;
-        case ($p->hasClass() && $p->hasMethod() &&
-              $p->getClass() === $class && $p->getMethod() === $method):
-          break;
-        case ($p->hasClass() && $p->getClass() === $class):
-          break;
-        case ($p->hasClassRegex() && preg_match("/" . $p->getClassRegex() . "/", $class)):
-          break;
-        default:
-          $match = false;
-          break;
+        }
+        $match = true;
+      } elseif ($pointcut->hasMethodRegex() &&
+                preg_match("/" . $pointcut->getMethodRegex() . "/", $method) {
+        $match = true;
       }
       
       if ($match) $matches[$p->getName()] = $p->getAspect();
