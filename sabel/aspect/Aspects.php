@@ -53,7 +53,7 @@ class Sabel_Aspect_Aspects
       $match = false;
       
       if ($pointcut->hasToAll() ||
-          ($postcut->hasMethod() && $pointcut->hasMethod() === $method)) {
+          ($pointcut->hasMethod() && $pointcut->hasMethod() === $method)) {
         $match = true;
       } elseif ($pointcut->hasMethods()) {
         foreach ($pointcut->getMethods() as $pointcutMethod) {
@@ -63,11 +63,11 @@ class Sabel_Aspect_Aspects
         }
         $match = true;
       } elseif ($pointcut->hasMethodRegex() &&
-                preg_match("/" . $pointcut->getMethodRegex() . "/", $method) {
+                preg_match("/" . $pointcut->getMethodRegex() . "/", $method)) {
         $match = true;
       }
       
-      if ($match) $matches[$p->getName()] = $p->getAspect();
+      if ($match) $matches[$pointcut->getName()] = $pointcut->getAspect();
     }
     
     return $matches;

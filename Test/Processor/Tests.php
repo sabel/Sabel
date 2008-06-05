@@ -7,7 +7,7 @@ require_once ("Test/Processor/Addon.php");
 require_once ("Test/Processor/Controller.php");
 require_once ("Test/Processor/Response.php");
 
-define("PROCESSORS_DIR", "generator" . DS . "skeleton" . DS . "lib" . DS . "processor");
+define("PROCESSORS_DIR", "generator" . DS . "skeleton" . DS . "en" . DS . "lib" . DS . "processor");
 
 class Test_Processor_Tests
 {

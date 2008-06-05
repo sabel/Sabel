@@ -64,14 +64,22 @@ class Sabel_Annotation_Reader extends Sabel_Object
     $key = substr($line, 0, $pos);
     $values = ltrim(substr($line, $pos));
     
-    $regex = '/"([^"]+)"|\'([^\']+)\'|([^ ]+)/';
+    $regex = '/(".+[^\\\\]")|(\'.+[^\\\\]\')|([^ ]+?)/U';
     preg_match_all($regex, $values, $matches);
     
     $annotValues = array();
     foreach ($matches as $index => $match) {
       if ($index === 0) continue;
       foreach ($match as $k => $v) {
-        if ($v !== "") $annotValues[$k] = $v;
+        if ($v === "") continue;
+        
+        $quote = $v{0};
+        if (($quote === '"' || $quote === "'") &&
+            $quote === $v{strlen($v) - 1}) {
+          $annotValues[$k] = substr(str_replace("\\{$quote}", $quote, $v), 1, -1);;
+        } else {
+          $annotValues[$k] = $v;
+        }
       }
     }
     

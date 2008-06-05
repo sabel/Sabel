@@ -300,14 +300,14 @@ class Form_Object extends Sabel_Object
     if ($htmlWriter === null) {
       $htmlWriter = new Form_Html();
     } else {
-      $value = $this->get($name);
-      if (isset($this->columns[$name]) && $this->columns[$name]->isBool()) {
-        if ($value !== null) $value = ($value) ? 1 : 0;
-      } elseif (is_string($value)) {
-        $value = htmlescape($value);
-      }
-      
       $htmlWriter->clear();
+    }
+    
+    $value = $this->get($name);
+    if (isset($this->columns[$name]) && $this->columns[$name]->isBool()) {
+      if ($value !== null) $value = ($value) ? 1 : 0;
+    } elseif (is_string($value)) {
+      $value = htmlescape($value);
     }
     
     return $htmlWriter->setName($inputName)
