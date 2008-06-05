@@ -180,6 +180,8 @@ class Sabel_Container
     
     $config->configure();
     $this->config = $config;
+    
+    register_shutdown_function(array($this, "storeLifecycle"));
   }
   
   /**
@@ -533,11 +535,6 @@ class Sabel_Container
         }
       }
     }
-  }
-  
-  public function __destruct()
-  {
-    $this->storeLifecycle();
   }
   
   private function getProperties($instance, $reflection)
