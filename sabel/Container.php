@@ -14,6 +14,26 @@ class Sabel_Container
   private static $configs = array();
   
   /**
+   * @var Sabel_Container_Injection
+   */
+  protected $config = null;
+  
+  /**
+   * @var array reflection cache
+   */
+  protected $reflection = null;
+  
+  /**
+   * @var array of dependency
+   */
+  protected $dependency = array();
+  
+  /**
+   * @var array reflection cache
+   */
+  protected $reflectionCache = array();
+  
+  /**
    *
    * @param mixed $config object | string
    */
@@ -87,11 +107,24 @@ class Sabel_Container
     }
   }
   
+  /**
+   * hasConfig
+   *
+   * @param string $name
+   * @return boolean
+   */
   public static function hasConfig($name)
   {
-    return self::$configs[$name];
+    return isset(self::$configs[$name]);
   }
   
+  /**
+   * getConfig
+   *
+   * @param string $name
+   * @return Sabel_Container_Injection
+   * @throws Sabel_Container_Exception_InvalidConfiguration
+   */
   public static function getConfig($name)
   {
     if (self::hasConfig($name)) {
@@ -123,30 +156,13 @@ class Sabel_Container
     }
   }
   
+  /**
+   * clear all injection configs
+   */
   public static function clearAllConfigs()
   {
     self::$configs = array();
   }
-  
-  /**
-   * @var Sabel_Container_Injection
-   */
-  protected $config = null;
-  
-  /**
-   * @var array reflection cache
-   */
-  protected $reflection = null;
-  
-  /**
-   * @var array of dependency
-   */
-  protected $dependency = array();
-  
-  /**
-   * @var array reflection cache
-   */
-  protected $reflectionCache = array();
   
   /**
    * default constructer
@@ -199,18 +215,28 @@ class Sabel_Container
       }
     }
     
-    return $this->applyAspect($this->injectToSetter($reflection, $instance));
+    $instance = $this->injectToSetter($reflection, $instance);
+    $instance = $this->applyAspect($instance);
+    
+    return $instance;
+  }
+  
+  /**
+   *
+   */
+  public function recoverInstance($class)
+  {
   }
   
   /**
    * inject to setter
    *
    * @param Sabel_Reflection_Class $reflection
-   * @param Object $instance
+   * @param Object $sourceInstance
    */
-  protected function injectToSetter($reflection, $instance)
+  protected function injectToSetter($reflection, $sourceInstance)
   {
-    if (!$this->config->hasBinds()) return $instance;
+    if (!$this->config->hasBinds()) return $sourceInstance;
     
     foreach ($this->config->getBinds() as $name => $binds) {
       foreach ($binds as $bind) {
@@ -222,14 +248,14 @@ class Sabel_Container
         
         $implClassName = $bind->getImplementation();
         
-        if (in_array($injectionMethod, get_class_methods($instance))) {
+        if (in_array($injectionMethod, get_class_methods($sourceInstance))) {
           $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
-          $instance->$injectionMethod($argumentInstance);
+          $sourceInstance->$injectionMethod($argumentInstance);
         }
       }
     }
     
-    return $instance;
+    return $sourceInstance;
   }
   
   protected function newInstanceWithConstruct($reflection, $className)
@@ -465,7 +491,7 @@ class Sabel_Container
 }
 
 /**
- * Sabel Container
+ * Sabel Container Bind
  *
  * @category   Container
  * @package    org.sabel.container
@@ -516,7 +542,7 @@ final class Sabel_Container_Bind
 }
 
 /**
- * Sabel Container
+ * Sabel Container Construct
  *
  * @category   Container
  * @package    org.sabel.container
@@ -553,7 +579,7 @@ class Sabel_Container_Construct
 }
 
 /**
- * Sabel Container
+ * Sabel Container Aspect
  *
  * @category   Container
  * @package    org.sabel.container

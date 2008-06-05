@@ -13,9 +13,11 @@
 abstract class Sabel_Container_Injection implements Sabel_Config
 {
   private $pointcut = null;
+  
   private
     $binds,
     $aspects,
+    $lifecycle,
     $constructs = array();
   
   /**
@@ -110,5 +112,42 @@ abstract class Sabel_Container_Injection implements Sabel_Config
     } else {
       return false;
     }
+  }
+  
+  public function life($className)
+  {
+    $lifecycle = new Sabel_Container_LifeCycle();
+    $this->lifecycle[$className] = $lifecycle;
+    
+    return $lifecycle;
+  }
+  
+  public function getLifecycle($className)
+  {
+    return $this->lifecycle[$className];
+  }
+  
+  public function hasLifeCycle($className)
+  {
+    return isset($this->lifecycle[$className]);
+  }
+}
+
+class Sabel_Container_LifeCycle
+{
+  private $lifecycle = "";
+  private $datastore = "";
+  
+  public function in($lifecycle)
+  {
+    // @todo check everything. is_string, supported type
+    $this->lifecycle = $lifecycle;
+    return $this;
+  }
+  
+  public function datastore($name)
+  {
+    $this->datastore = $name;
+    return $this;
   }
 }
