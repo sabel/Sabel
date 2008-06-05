@@ -33,6 +33,8 @@ class Sabel_Container
    */
   protected $reflectionCache = array();
   
+  protected $instance = array();
+  
   /**
    *
    * @param mixed $config object | string
@@ -215,17 +217,17 @@ class Sabel_Container
       }
     }
     
+    if ($reflection->hasMethod("setContainerContext")) {
+      $instance->setContainerContext($this);
+    }
+    
     $instance = $this->injectToSetter($reflection, $instance);
+    $instance = $this->recover($reflection, $instance);
     $instance = $this->applyAspect($instance);
     
+    $this->instance[] = $instance;
+    
     return $instance;
-  }
-  
-  /**
-   *
-   */
-  public function recoverInstance($class)
-  {
   }
   
   /**
@@ -256,6 +258,38 @@ class Sabel_Container
     }
     
     return $sourceInstance;
+  }
+  
+  protected function recover($reflection, $instance)
+  {
+    $className = get_class($instance);
+    
+    if ($this->config->hasLifecycle($className)) {
+      $lifecycleConfig = $this->config->getLifecycle($className);
+      
+      if ($lifecycleConfig->isApplication()) {
+        $backend = $lifecycleConfig->getBackend("Application");
+        
+        if ($backend->isStored($className)) {
+          $backend->fetch($className, $instance, $reflection, $reflection->getProperties());
+        }
+      }
+    }
+    
+    return $instance;
+  }
+  
+  protected function applyAspect($instance)
+  {
+    if ($instance === null) {
+      throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
+    }
+    
+    $className = get_class($instance);
+    
+    if (!$this->config->hasAspect($className)) return $instance;
+    
+    return new Sabel_Aspect_Proxy($instance);
   }
   
   protected function newInstanceWithConstruct($reflection, $className)
@@ -304,19 +338,6 @@ class Sabel_Container
     } else {
       return $this->applyAspect($this->newInstanceWithConstructDependency($className));
     }
-  }
-  
-  protected function applyAspect($instance)
-  {
-    if ($instance === null) {
-      throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
-    }
-    
-    $className = get_class($instance);
-    
-    if (!$this->config->hasAspect($className)) return $instance;
-    
-    return new Sabel_Aspect_Proxy($instance);
   }
   
   /**
@@ -487,6 +508,54 @@ class Sabel_Container
     }
     
     return $this->reflectionCache[$className];
+  }
+  
+  public function storeLifecycle()
+  {
+    $config = $this->config;
+    
+    foreach ($this->instance as $i) {
+      $className = get_class($i);
+      
+      $reflection = $this->getReflection($className);
+      
+      if ($config->hasLifecycle($className)) {
+        $lifecycleConfig = $config->getLifecycle($className);
+        
+        if ($lifecycleConfig->isApplication()) {
+          $backend = $lifecycleConfig->getBackend("Application");
+          
+          if (!$backend->isStored($className)) {
+            $values = $this->getProperties($i, $reflection);
+            
+            $backend->store($className, $values);
+          }
+        }
+      }
+    }
+  }
+  
+  public function __destruct()
+  {
+    $this->storeLifecycle();
+  }
+  
+  private function getProperties($instance, $reflection)
+  {
+    $values = array();
+    $properties = $reflection->getProperties();
+    
+    foreach ($properties as $property) {
+      $pname = $property->getName();
+      $getterMethod = "get" . ucfirst($pname);
+      
+      if ($reflection->hasMethod($getterMethod)) {
+        $value = $instance->$getterMethod();
+        $values[$pname] = $value;
+      }
+    }
+    
+    return $values;
   }
 }
 

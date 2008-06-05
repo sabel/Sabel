@@ -114,7 +114,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
     }
   }
   
-  public function life($className)
+  public function lifecycle($className)
   {
     $lifecycle = new Sabel_Container_LifeCycle();
     $this->lifecycle[$className] = $lifecycle;
@@ -136,7 +136,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
 class Sabel_Container_LifeCycle
 {
   private $lifecycle = "";
-  private $datastore = "";
+  private $backend   = "";
   
   public function in($lifecycle)
   {
@@ -145,9 +145,20 @@ class Sabel_Container_LifeCycle
     return $this;
   }
   
-  public function datastore($name)
+  public function backend($name)
   {
-    $this->datastore = $name;
+    $this->backend = $name;
     return $this;
+  }
+  
+  public function isApplication()
+  {
+    return ($this->lifecycle === "Application");
+  }
+  
+  public function getBackend($type)
+  {
+    $className = $this->backend;
+    return new $className($type);
   }
 }
