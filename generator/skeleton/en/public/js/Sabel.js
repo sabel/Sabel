@@ -97,7 +97,7 @@ Sabel.Uri.prototype = {
 	},
 
 	toString: function() {
-		var uri   = this.url + this.path;
+		var uri = this.url + this.path;
 
 		if (this.filename !== "") uri += "/" + this.filename;
 		if (query = this.parseQuery.serialize()) uri += "?" + query;
@@ -1259,7 +1259,7 @@ Sabel.Element.deleteStyle = function(element, styles) {
 };
 
 Sabel.Element.insertAfter = function(element, newChild, refChild) {
-	elemenet = Sabel.get(element, false);
+	element = Sabel.get(element, false);
 	if (element.lastChild == refChild) {
 		element.appendChild(newChild);
 	} else {
@@ -2111,8 +2111,13 @@ Sabel.Event.preventDefault = function(evt) {
 
 Sabel.Event._isChildEvent = function(event, el) {
 	var p = event.relatedTarget;
-	while (p && p !== el)
-		p = p.parentNode;
+
+	try {
+		while (p && p !== el) {
+			p = p.parentNode;
+		}
+	} catch (e) {
+	}
 
 	return p === el;
 };

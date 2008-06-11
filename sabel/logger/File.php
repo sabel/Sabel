@@ -18,7 +18,14 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
     if (empty($allMessages)) return;
     
     foreach ($allMessages as $identifier => $messages) {
-      $fp  = fopen($this->getFilePath($identifier), "a");
+      $filePath = $this->getFilePath($identifier);
+      
+      if (!is_file($filePath)) {
+        touch($filePath);
+        chmod($filePath, 0777);
+      }
+      
+      $fp  = fopen($filePath, "a");
       $sep = "============================================================" . PHP_EOL;
       fwrite($fp, PHP_EOL . $sep . PHP_EOL);
       

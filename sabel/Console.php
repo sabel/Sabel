@@ -16,20 +16,19 @@ class Sabel_Console
   const MSG_MSG  = 0x04;
   const MSG_ERR  = 0x08;
   
-  private
-    $stdin = null,
-    $ends  = array("exit", "quit", "\q");
-    
+  private $stdin = null;
+  private $ends = array("exit", "quit", "\q");
+  
   private static $headers = array(self::MSG_INFO => "[\x1b[1;32m%s\x1b[m]",
                                   self::MSG_WARN => "[\x1b[1;35m%s\x1b[m]",
                                   self::MSG_MSG  => "[\x1b[1;34m%s\x1b[m]",
                                   self::MSG_ERR  => "[\x1b[1;31m%s\x1b[m]");
-                                  
+  
   private static $winHeaders = array(self::MSG_INFO => "[%s]",
                                      self::MSG_WARN => "[%s]",
                                      self::MSG_MSG  => "[%s]",
                                      self::MSG_ERR  => "[%s]");
-                                     
+  
   public static function success($msg)
   {
     echo self::getHeader(self::MSG_INFO, "SUCCESS") . " $msg" . PHP_EOL;
@@ -100,22 +99,28 @@ class Sabel_Console
       if (is_array($ends)) {
         $this->ends = $ends;
       } else {
-        $message = "argument must be an array.";
+        $message = __METHOD__ . "() argument must be an array.";
         throw new Sabel_Exception_InvalidArgument($message);
       }
     }
     
     $this->stdin = fopen("php://stdin", "r");
-    $endCommands = implode("|", $this->ends);
-    echo "please input $endCommands to finish." . PHP_EOL . PHP_EOL;
   }
   
-  public function read($message, $trim = true)
+  public function read($message, $default = null, $trim = true)
   {
-    echo $message . ": ";
+    if ($default === null) {
+      echo $message . "> ";
+    } else {
+      echo $message . " [{$default}]> ";
+    }
     
     $input = fgets($this->stdin);
     $input = ($trim) ? trim($input) : $input;
+    
+    if ($input === "" && $default !== null) {
+      $input = $default;
+    }
     
     if (in_array($input, $this->ends, true)) {
       return false;
@@ -126,6 +131,8 @@ class Sabel_Console
   
   public function quit()
   {
-    fclose($this->stdin);
+    if (is_resource($this->stdin)) {
+      fclose($this->stdin);
+    }
   }
 }

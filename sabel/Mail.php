@@ -288,26 +288,10 @@ class Sabel_Mail extends Sabel_Object
       $this->sender = new Sabel_Mail_Sender_PHP();
     }
     
-    $hasMessageId  = false;
-    $hasMimeHeader = false;
-    
-    foreach ($this->headers as $name => $header) {
-      $lowered = strtolower($name);
-      if ($lowered === "message-id")   $hasMessageId  = true;
-      if ($lowered === "mime-version") $hasMimeHeader = true;
-    }
-    
-    if (!$hasMessageId) {
-      list (, $host) = explode("@", $this->headers["From"]["address"]);
-      $this->headers["Message-Id"] = "<" . md5hash() . "@{$host}>";
-    }
-    
-    if (!$hasMimeHeader) {
-      $this->headers["Mime-Version"] = "1.0";
-    }
-    
     $bodyText = $this->createBodyText();
-    return $this->sender->send($this->headers, $bodyText, $options);
+    $headers  = $this->_setBasicHeaders($this->headers);
+    
+    return $this->sender->send($headers, $bodyText, $options);
   }
   
   protected function createBodyText()
@@ -391,6 +375,39 @@ class Sabel_Mail extends Sabel_Object
         return $this->body->getEncodedContent();
       }
     }
+  }
+  
+  protected function _setBasicHeaders(array $headers)
+  {
+    $hasMessageId  = false;
+    $hasMimeHeader = false;
+    $hasDate       = false;
+    
+    foreach ($headers as $name => $header) {
+      $lowered = strtolower($name);
+      if ($lowered === "message-id") {
+        $hasMessageId = true;
+      } elseif ($lowered === "mime-version") {
+        $hasMimeHeader = true;
+      } elseif ($lowered === "date") {
+        $hasDate = true;
+      }
+    }
+    
+    if (!$hasMessageId) {
+      list (, $host) = explode("@", $headers["From"]["address"]);
+      $headers["Message-ID"] = "<" . md5hash() . "@{$host}>";
+    }
+    
+    if (!$hasMimeHeader) {
+      $headers["Mime-Version"] = "1.0";
+    }
+    
+    if (!$hasDate) {
+      $headers["Date"] = date("r");
+    }
+    
+    return $headers;
   }
   
   protected function _setContentType($boundary)

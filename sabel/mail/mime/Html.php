@@ -70,7 +70,7 @@ class Sabel_Mail_Mime_Html extends Sabel_Mail_Mime_Abstract
         $part[] = "--{$boundary}";
         $part[] = "Content-Type: {$image["mimetype"]}";
         $part[] = "Content-Transfer-Encoding: $enc";
-        $part[] = "Content-Id: <{$image["cid"]}>";
+        $part[] = "Content-ID: <{$image["cid"]}>";
         $part[] = $eol . $this->encode($image["data"], $enc, $eol) . $eol;
       }
     }

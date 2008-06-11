@@ -89,12 +89,4 @@ class Test_Console extends SabelTestCase
     $opts = Sabel_Console::getOption("b", $args);
     $this->assertEquals("test", $opts[0]);
   }
-  
-  public function testConstructor()
-  {
-    ob_start();
-    $console = new Sabel_Console();
-    $line = ob_get_clean();
-    $this->assertEquals("please input exit|quit|\q to finish.", trim($line));
-  }
 }

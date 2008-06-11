@@ -34,7 +34,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     $headers = $this->createHeaders($headerText);
     $content = $this->createContentInfo($headers);
     
-    $mail = new stdClass();
+    $mail = new Sabel_Mail_Mime_Decoded();
     
     $mail->content     = $content;
     $mail->headers     = $headers;
@@ -80,7 +80,12 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         $part->body    = $body;
         $part->content = $content;
         $part->type    = $content->getType();
-        $mail->body    = $this->createMimeObject($part);
+        
+        if ($part->type === "text/html") {
+          $mail->html = $this->createMimeObject($part);
+        } else {
+          $mail->body = $this->createMimeObject($part);
+        }
         break;
     }
     
@@ -120,6 +125,12 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
           $mixed["mails"] = $this->_decodeDigestPart($part->content, $part->body);
           $notBodyPart = true;
           break;
+          
+        case "text/html":
+          if (!$notBodyPart) {
+            $mixed["html"] = $this->createMimeObject($part);
+            break;
+          }
           
         case "text/plain":
           if (!$notBodyPart) {

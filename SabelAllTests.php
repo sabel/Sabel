@@ -70,6 +70,7 @@ require_once ("Test/Map/Tests.php");
 require_once ("Test/Processor/Tests.php");
 require_once ("Test/Reflection.php");
 require_once ("Test/Cache/Tests.php");
+require_once ("Test/Mail/Tests.php");
 require_once ("Test/Session/Tests.php");
 require_once ("Test/Storage/Memory.php");
 require_once ("Test/VirtualInheritance.php");
@@ -120,6 +121,7 @@ class SabelAllTests
     $suite->addTest(Test_Storage_Memory::suite());
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
+    $suite->addTest(Test_Mail_Tests::suite());
     
     $suite->addTest(Test_Application::suite());
     
