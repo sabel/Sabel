@@ -176,7 +176,7 @@ class Sabel_Http_Request extends Sabel_Object
   
   public function connect(Sabel_Http_Uri $uri)
   {
-    if ($this->socket === null) {
+    if (!$this->socket) {
       if ($this->config["useProxy"]) {
         $conf = $this->proxyConfig;
         $host = $conf["transport"] . "://" . $conf["host"];

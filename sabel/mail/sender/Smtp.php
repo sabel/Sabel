@@ -26,8 +26,8 @@ class Sabel_Mail_Sender_Smtp
   
   public function __construct(array $config = array())
   {
-    if (!isset($config["server"])) {
-      $config["server"] = "localhost";
+    if (!isset($config["host"])) {
+      $config["host"] = "localhost";
     }
     
     $this->config = $config;
@@ -53,7 +53,7 @@ class Sabel_Mail_Sender_Smtp
   
   protected function connect()
   {
-    $server = $this->config["server"];
+    $server = $this->config["host"];
     
     if (isset($this->config["port"])) {
       $port = $this->config["port"];

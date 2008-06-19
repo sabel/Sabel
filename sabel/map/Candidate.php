@@ -23,7 +23,7 @@ class Sabel_Map_Candidate
   /**
    * @var array
    */
-  protected $uriParameters = "";
+  protected $uriParameters = array();
   
   /**
    * @var array
@@ -59,10 +59,10 @@ class Sabel_Map_Candidate
   
   public function uri($param = "")
   {
-    if ($param === null) $param = "";
-    
-    if (!is_string($param)) {
-      $message = "uri parameter must be a string.";
+    if ($param === null) {
+      $param = "";
+    } elseif (!is_string($param)) {
+      $message = __METHOD__ . "() argument must be a string.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
     

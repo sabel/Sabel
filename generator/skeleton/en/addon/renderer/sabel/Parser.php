@@ -13,7 +13,7 @@ class Renderer_Sabel_Parser extends Sabel_Object
 {
   public function getElements($template)
   {
-    $regex = '/<[^\/!?]("[^"]*"|\'[^\']*\'|[^\'">])*>/';
+    $regex = '/<[^\/!?]("[^"]*"|\'[^\']*\'|[^\'">])*>/U';
     
     if (preg_match_all($regex, $template, $matches)) {
       $elements = array();

@@ -97,7 +97,8 @@ class Sabel_Map_Destination extends Sabel_Object
     if (is_string($module)) {
       $this->module = $module;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
@@ -112,7 +113,8 @@ class Sabel_Map_Destination extends Sabel_Object
     if (is_string($controller)) {
       $this->controller = $controller;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   
@@ -127,7 +129,8 @@ class Sabel_Map_Destination extends Sabel_Object
     if (is_string($action)) {
       $this->action = $action;
     } else {
-      throw new Sabel_Exception_InvalidArgument("argument must be a string.");
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
   }
   

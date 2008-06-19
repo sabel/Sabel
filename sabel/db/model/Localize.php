@@ -64,6 +64,10 @@ class Sabel_DB_Model_Localize
    */
   public static function getColumnNames($mdlName)
   {
+    if (defined("MODELS_DIR_PATH")) {
+      Sabel::fileUsing(MODELS_DIR_PATH . DS . $mdlName . ".php", true);
+    }
+    
     if (isset(self::$columnNames[$mdlName])) {
       return self::$columnNames[$mdlName];
     } else {

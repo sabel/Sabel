@@ -413,6 +413,19 @@ Sabel.String = new Sabel.Class(String, {
 		return this._string.split(delimiter);
 	},
 
+	htmlspecialchars: function(quote_style) {
+		var string = this._string.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+		switch (quote_style) {
+		case 3: case "ENT_QUOTES":
+			string = string.replace(/'/g, "&#039;");
+		case 2: case "ENT_COMPAT":
+			string = string.replace(/"/g, "&quot;");
+		case 0: case "ENT_NOQUOTES":
+		}
+		return this._set(string);
+	},
+
 	lcfirst: function() {
 		var str = this._string;
 		return this._set(str.charAt(0).toLowerCase() + str.substring(1));

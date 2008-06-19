@@ -51,7 +51,7 @@ class Sabel_Http_Response extends Sabel_Object
     if (!isset($matches[0])) return;
     
     $eol = $matches[0];
-    if (preg_match("/^(.+?)({$eol}{$eol})(.+)/s", $responseText, $matches) === 1) {
+    if (preg_match("/^(.+?)({$eol}{$eol})(.*)/s", $responseText, $matches) === 1) {
       $header = $matches[1];
       $this->content = $matches[3];
     } else {

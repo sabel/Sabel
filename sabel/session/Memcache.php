@@ -26,11 +26,10 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
    */
   protected $newSession = false;
   
-  private function __construct($server)
+  private function __construct($server, $port)
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
-      $port = (defined("MEMCACHED_PORT")) ? MEMCACHED_PORT : 11211;
       $this->memcache->connect($server, $port);
       $this->readSessionSettings();
     } else {
@@ -38,10 +37,10 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
   }
   
-  public static function create($server = "localhost")
+  public static function create($server = "localhost", $port = 11211)
   {
     if (self::$instance === null) {
-      self::$instance = new self($server);
+      self::$instance = new self($server, $port);
       register_shutdown_function(array(self::$instance, "destruct"));
     }
     
