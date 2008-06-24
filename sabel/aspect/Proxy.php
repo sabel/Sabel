@@ -11,12 +11,13 @@
  */
 class Sabel_Aspect_Proxy
 {
+  private static $aspects = null;
+  
   private $target = null;
   private $targetClassName = null;
   
   private $source = null;
   
-  private $aspects = null;
   private $matchesCache   = array();
   private $joinpointCache = array();
   private $targetReflectionCache = null;
@@ -39,6 +40,10 @@ class Sabel_Aspect_Proxy
         break;
       }
     }
+    
+    if (self::$aspects === null) {
+      self::$aspects = Sabel_Aspect_Aspects::create();
+    }
   }
   
   public function __set($key, $value)
@@ -56,24 +61,20 @@ class Sabel_Aspect_Proxy
     $target = $this->target;
     $source = $this->source;
     
-    $reflection = $this->getTargetReflection();
-    
-    $bcbResult = $this->beforeCallBefore($method, $arg);
-    if ($bcbResult !== null) return $bcbResult;
-    
-    $joinpoint = $this->getJoinpoint($method, $arg);
-    $matches   = $this->getMatches($method, $reflection);
+    $reflection = $this->__getTargetReflection__();
+    $joinpoint  = $this->__getJoinpoint__($method, $arg);
+    $matches    = $this->__getMatches__($method, $reflection);
     
     $proceed = true;
     try {
       $result  = null;
-      $proceed = $this->callAspect($joinpoint, $matches, self::TYPE_BEFORE);
+      $proceed = $this->__callAspect__($joinpoint, $matches, self::TYPE_BEFORE);
       
       if ($proceed !== false) {
         $reflection->getMethod($method)->invokeArgs($target, $arg);
         
         $joinpoint->setResult($result);
-        $this->callAspect($joinpoint, $matches, self::TYPE_AFTER);
+        $this->__callAspect__($joinpoint, $matches, self::TYPE_AFTER);
         
         return $result;
       }
@@ -82,7 +83,7 @@ class Sabel_Aspect_Proxy
       $exceptionReflection = new Sabel_Reflection_Class($e);
       $matches = $this->aspects->findExceptionMatch(array("class" => $exceptionReflection->getName()));
       
-      $this->callAspect($joinpoint, $matches, self::TYPE_EXCEPTION);
+      $this->__callAspect__($joinpoint, $matches, self::TYPE_EXCEPTION);
       throw $e;
     }
   }
@@ -122,7 +123,7 @@ class Sabel_Aspect_Proxy
     return $this->getReflection()->hasMethod($method);
   }
   
-  protected function callAspect($joinpoint, $matches, $position)
+  protected function __callAspect__($joinpoint, $matches, $position)
   {
     $called = false;
     $result = false;
@@ -135,7 +136,12 @@ class Sabel_Aspect_Proxy
     return ($called) ? $result : true;
   }
   
-  protected function getTargetReflection()
+  protected function __getAspects__()
+  {
+    
+  }
+  
+  protected function __getTargetReflection__()
   {
     if ($this->targetReflectionCache === null) {
       $this->targetReflectionCache = new Sabel_Reflection_Class($this->target);
@@ -144,18 +150,20 @@ class Sabel_Aspect_Proxy
     return $this->targetReflectionCache;
   }
   
-  protected function getMatches($method)
+  /**
+   * get matches
+   *
+   * @return array
+   */
+  protected function __getMatches__($method)
   {
-    if ($this->aspects === null) {
-      $this->aspects = Sabel_Aspect_Aspects::singleton();
-    }
-    
     $name = $this->targetClassName;
     $key  = $name . "::" . $method;
     
     if (!isset($this->matchesCache[$key])) {
-      $matches = $this->aspects->findMatch(array("method" => $method,
-                                                 "class"  => $name));
+      $matches = self::$aspects->findMatch($name, array("method" => $method,
+                                                        "class"  => $name));
+      
       $this->matchesCache[$key] = $matches;
       
       return $matches;
@@ -164,7 +172,7 @@ class Sabel_Aspect_Proxy
     return $this->matchesCache[$key];
   }
   
-  protected function getJoinpoint($method, $arg)
+  protected function __getJoinpoint__($method, $arg)
   {
     if (!isset($this->joinpointCache[$method])) {
       $this->joinpointCache[$method] = new Sabel_Aspect_Joinpoint($this->target);
@@ -177,29 +185,13 @@ class Sabel_Aspect_Proxy
     return $joinpoint;
   }
   
-  protected function beforeCallBefore($method, $arg)
-  {
-    
-  }
-  
-  protected function makeArgumentsString($arg)
-  {
-    if (count($arg) === 0) return '';
-    
-    $argStrBuf = array();
-    for ($i = 0; $i < count($arg); $i++) {
-      $argStrBuf[] = '$arg[' . $i . ']';
-    }
-    return join(', ', $argStrBuf);
-  }
-  
   /**
    * check target method has a overload method such as __call
    * 
    * @param void
    * @return boolean
    */
-  protected function hasMethodOverload()
+  protected function __hasMethodOverload__()
   {
     $has = true;
     $reflection = new ReflectionClass($this->target);

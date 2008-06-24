@@ -11,64 +11,53 @@
  */
 class Sabel_Aspect_Aspects
 {
+  protected static $instance = null;
+  
   protected $aspects   = array();
   protected $pointcuts = array();
   
-  protected static $matcher  = null;
-  protected static $instance = null;
-  
-  protected function __construct()
+  private function __construct()
   {
-    //self::$matcher = new Sabel_Aspect_Matcher();
   }
   
-  public static function singleton()
+  public static function create()
   {
     if (!self::$instance) self::$instance = new self();
     return self::$instance;
   }
   
-  public function addPointcut($pointcut)
+  public function addPointcut($targetClassName, $pointcut)
   {
-    $className = $pointcut->getName();
-    
-    $this->pointcuts[$className] = $pointcut;
-    $this->aspects[$className]   = $pointcut->getAspect();
+    $this->pointcuts[$targetClassName] = $pointcut;
   }
   
-  public function getPointCut($name)
+  public function findMatch($targetClassName, $conditions)
   {
-    return $this->aspects[$name];
-  }
-  
-  public function findMatch($conditions)
-  {
-    $pointcuts = $this->pointcuts;
     $matches   = array();
     
     $class  = $conditions["class"];
     $method = $conditions["method"];
     
-    foreach ($pointcuts as $pointcut) {
-      $match = false;
-      
-      if ($pointcut->hasToAll() ||
-          ($pointcut->hasMethod() && $pointcut->hasMethod() === $method)) {
-        $match = true;
-      } elseif ($pointcut->hasMethods()) {
-        foreach ($pointcut->getMethods() as $pointcutMethod) {
-          if ($pointcutMethod === $method) {
-            $matches[$pointcut->getName()] = $pointcut->getAspect();
-          }
+    $pointcut = $this->pointcuts[$targetClassName];
+    
+    $match = false;
+    
+    if ($pointcut->hasToAll() ||
+        ($pointcut->hasMethod() && $pointcut->hasMethod() === $method)) {
+      $match = true;
+    } elseif ($pointcut->hasMethods()) {
+      foreach ($pointcut->getMethods() as $pointcutMethod) {
+        if ($pointcutMethod === $method) {
+          $matches[$pointcut->getName()] = $pointcut->getAspect();
         }
-        $match = true;
-      } elseif ($pointcut->hasMethodRegex() &&
-                preg_match("/" . $pointcut->getMethodRegex() . "/", $method)) {
-        $match = true;
       }
-      
-      if ($match) $matches[$pointcut->getName()] = $pointcut->getAspect();
+      $match = true;
+    } elseif ($pointcut->hasMethodRegex() &&
+              preg_match("/" . $pointcut->getMethodRegex() . "/", $method)) {
+      $match = true;
     }
+    
+    if ($match) $matches[$pointcut->getName()] = $pointcut->getAspect();
     
     return $matches;
   }

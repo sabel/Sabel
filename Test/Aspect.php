@@ -9,305 +9,260 @@ class Test_Aspect extends SabelTestCase
 {
   public static function suite()
   {
-    return new PHPUnit2_Framework_TestSuite("Test_Aspect");
+    return self::createSuite("Test_Aspect");
   }
   
-  /*
-  public function testDynamicProxy()
+  public function testPointcuts()
   {
-    $before = create_function('$target, $method', 'return $method->getName();');
-    $after  = create_function('$target, $method, $result', 'return $result;');
-    $both   = create_function('$target, $method, $result', 'return null;');
+    $pointcuts = new Pointcuts();
+    $target = new Target();
+    $match = $pointcuts->matches(new StaticPointcut(), "setX", $target);
     
-    $customer = new Sabel_Aspect_Proxy(new Test_Aspect_Customers());
-    $customer->beforeAspect('before', $before);
-    $customer->afterAspect('after', $after);
-    $customer->bothAspect('both', $both);
-    $customer->getOrder();
-    
-    $this->assertEquals($customer->beforeResult('before'), 'getOrder');
-    $this->assertEquals($customer->afterResult('after'), 'order');
-    $this->assertEquals($customer->bothResult('both'), null);
+    $this->assertTrue($match);
   }
   
-  public function testNestedOverloads()
+  public function testAOP()
   {
-    $arg     = '$target, $method, $result';
-    $routine = 'return $result;';
+    $weaver = new Weaver(new Target());
     
-    $ol = new Sabel_Aspect_Proxy(new Test_Aspect_Overloads());
-    $ol->afterAspect('after', create_function($arg, $routine));
-    $ol->callOverloads('test');
-    $this->assertEquals('callOverloads', $ol->afterResult('after'));
+    $interceptor = new DebugInterceptor();
     
-    $ol->callOverloadsTwo('test');
-    $this->assertEquals('callOverloadsTwo', $ol->afterResult('after'));
-  }
-  */
-  
-  public function testIntertypeDeclaration()
-  {
-    $obj = new Test_Aspect_IntertypeDeclarator(new Test_Aspect_IntertypeTarget());
-    $this->assertEquals("test",   $obj->added());
-    $this->assertEquals("exists", $obj->exists());
-  }
-  
-  public function testPointcut()
-  {
-    $aspect    = new Test_AspectOne();
-    $aspectTwo = new Test_AspectTwo();
+    $advisor = new StaticMethodMatcherPointcutAdvisor();
+    $advisor->setMethod("setX");
+    $advisor->setAdvice($interceptor);
     
-    $matcher = new Sabel_Aspect_Matcher();
-    $matcher->add($aspect->pointcut());
-    $matcher->add($aspectTwo->pointcut());
+    $weaver->addAdvisor($advisor);
     
-    $matches = $matcher->findMatch(array("class"=>"Target", "method"=>"doSomething"));
-    $this->assertTrue($matches->matched("Test_AspectOne"));
-    $this->assertTrue($matches->matched("Test_AspectTwo"));
+    $target = $weaver->getProxy();
     
-    $matches = $matcher->findMatch(array("class"=>"Target", "method"=>"doWhat"));
-    $this->assertTrue($matches->matched("Test_AspectOne"));
-  }
-  
-  public function testAspectsContainer()
-  {
-    $aspects = Sabel_Aspect_Aspects::singleton();
-    $aspects->add(new Test_AspectOne());
-    $aspects->add(new Test_AspectTwo());
-    $maches = $aspects->findMatch(array("method" => "doSome"));
-    $this->assertTrue($maches->matched("Test_AspectOne"));
-  }
-  
-  public function testAspect()
-  {
-    $aRackClient = new Sabel_Aspect_Proxy(new RackClient());
-    $result = $aRackClient->main();
-    
-    $this->assertTrue($result[0]);
-    $this->assertEquals('rack space full', $result[1]);
-    $this->assertEquals(1, ServerStock::getNumberOfStock());
-    $this->assertEquals('Opteron', ServerStock::pop()->getName());
-    
-    $aNotification = new Notification();
-    $notifications = $aNotification->fetch();
-    $this->assertEquals('added XEON',    $notifications[0]);
-    $this->assertEquals('added Opteron', $notifications[1]);
+    $target->getX();
   }
 }
-
-// test classes for testAspectAfterThrowing
-{
-  class RackClient
-  {
-    public function main()
-    {
-      $rack = $this->getRack();
-      
-      $firstMount  = $rack->mount(new Server('XEON'));
-      $secondMount = $rack->mount(new Server('Opteron'));
-      
-      return array($firstMount, $secondMount);
-    }
-    
-    protected function getRack()
-    {
-      $aspects = Sabel_Aspect_Aspects::singleton();
-      
-      $aspects->addPointcut(Sabel_Aspect_Pointcut::create('RackmountFailMonitor')
-                            ->setExceptionClass('NoRackSpaceException'));
-      
-      $aspects->addPointcut(Sabel_Aspect_Pointcut::create('Notifier')
-                            ->setMethodRegex('.*'));
-      
-      return new Sabel_Aspect_Proxy(new Rack());
-    }
-  }
-  
-  class NoRackSpaceException extends Exception { }
-  
-  class Rack
-  {
-    protected $space   = 41;
-    protected $servers = array();
-    
-    public function mount($server)
-    {
-      if ($this->space >= 42) {
-        throw new NoRackSpaceException('rack space full');
-      }
-      
-      $this->servers = $server;
-      $this->space++;
-      return true;
-    }
-  }
-  
-  class ServerStock
-  {
-    protected static $counter = 0;
-    protected static $stock = array();
-    
-    public static function add($server)
-    {
-      self::$counter++;
-      self::$stock[] = $server;
-    }
-    
-    public static function getNumberOfStock()
-    {
-      return self::$counter;
-    }
-    
-    public static function pop()
-    {
-      return array_pop(self::$stock);
-    }
-  }
-  
-  class Server
-  {
-    protected $name = '';
-    
-    public function __construct($name)
-    {
-      $this->name = $name;
-    }
-    
-    public function getName()
-    {
-      return $this->name;
-    }
-  }
-  
-  class Notification
-  {
-    public static $statuses = array();
-    
-    public function add($status)
-    {
-      self::$statuses[] = $status;
-    }
-    
-    public function fetch()
-    {
-      return self::$statuses;
-    }
-  }
-  
-  // here is Aspects
-  {
-    class RackmountFailMonitor
-    {
-      public function throwing($joinpoint) {
-        ServerStock::add($joinpoint->getArgument(0));
-        return $joinpoint->getException()->getMessage();
-      }
-    }
-    
-    class Notifier
-    {
-      public function around($joinpoint)
-      {
-        return true;
-      }
-      
-      public function before($joinpoint)
-      {
-        $aNotification = new Notification();
-        $server = $joinpoint->getArgument(0);
-        if (is_object($server)) {
-          $aNotification->add('added ' . $server->getName());
-        }
-      }
-    }
-  }
-}
-
 
 class Target
 {
-  public function doSomething()
+  public function getX()
+  {
+    return "X";
+  }
+  
+  public function setX($arg)
+  {
+    return $arg;
+  }
+  
+  public function setY()
+  {
+    
+  }
+  
+  public function getY()
+  {
+    return "Y";
+  }
+}
+
+class StaticMethodMatcherPointcutAdvisor implements PointcutAdvisor
+{
+  private $method = "";
+  
+  private $advice = null;
+  
+  public function setAdvice(Advice $interceptor)
+  {
+    $this->advice = $interceptor;
+  }
+  
+  public function setMethod($method)
+  {
+    $this->method = $method;
+  }
+  
+  public function getPointcut()
   {
     
   }
 }
 
-class Test_AspectOne
+class Weaver
 {
-  public function pointcut()
+  private $target = null;
+  
+  private $advisor = array();
+  
+  public function __construct($target)
   {
-    return Sabel_Aspect_Pointcut::create('Test_AspectOne', $this)->setMethodRegex('do.*')
-                                                                 ->asAfter();
+    $this->target = $target;
   }
   
-  public function around()
+  public function addAdvisor($advisor)
   {
-    
+    $this->advisor[] = $advisor;
   }
   
-  public function before()
+  public function getProxy()
   {
-    
-  }
-  
-  public function after()
-  {
-    
+    return new Proxy($this->target);
   }
 }
 
-class Test_AspectTwo
+class Proxy
 {
-  public function pointcut()
+  private $target = null;
+  
+  private $aspects = array();
+  
+  public function __construct($targetObject)
   {
-    return Sabel_Aspect_Pointcut::create('Test_AspectTwo', $this)->setMethodRegex('doS.*')
-                                                                 ->asBefore();
+    $this->target = $targetObject;
   }
   
-  public function around()
-  {
-    
-  }
-  
-  public function before()
-  {
-    
-  }
-  
-  public function after()
-  {
-    
-  }
-}
-
-class Test_Aspect_IntertypeDeclarator extends Sabel_Aspect_Proxy
-{
-  public function added()
-  {
-    return 'test';
-  }
-}
-
-class Test_Aspect_IntertypeTarget
-{
-  public function exists()
-  {
-    return 'exists';
-  }
-}
-
-class Test_Aspect_Customers
-{
-  public function getOrder()
-  {
-    return 'order';
-  }
-}
-
-class Test_Aspect_Overloads
-{
   public function __call($method, $arg)
   {
-    return $method;
+    $reflection = new Sabel_Reflection_Class($this->target);
+    $reflection->getMethod($method)->invokeArgs($this->target, $arg);
   }
+}
+
+interface Joinpoint
+{
+  public function getStaticPart();
+  public function getThis();
+  public function proceed();
+}
+
+interface Interceptor extends Advice
+{
+}
+
+interface Invocation extends Joinpoint
+{
+  public function getArguments();
+}
+
+interface MethodInvocation extends Invocation
+{
+  public function getMethod();
+}
+
+interface MethodInterceptor extends Interceptor
+{
+  public function invoke(MethodInvocation $invocation);
+}
+
+class DebugInterceptor implements MethodInterceptor
+{
+  public function invoke(MethodInvocation $invocation)
+  {
+    $invocation->proceed();
+  }
+}
+
+interface Pointcut
+{
+  /**
+   * @return ClassMatcher
+   */
+  public function getClassMatcher();
+  
+  /**
+   * @return MethodMatcher
+   */
+  public function getMethodMatcher();
+}
+
+class Pointcuts
+{
+  public function matches(Pointcut $pointcut, $method, $class)
+  {
+    $reflection = new Sabel_Reflection_Class($class);
+    
+    $classMatcher  = $pointcut->getClassMatcher();
+    $methodMatcher = $pointcut->getMethodMatcher();
+    
+    $classMatch  = $classMatcher->matches($reflection);
+    $methodMatch = $methodMatcher->matches($method, $reflection);
+    
+    return ($classMatch && $methodMatch);
+  }
+}
+
+class StaticPointcut implements Pointcut
+{
+  public function getClassMatcher()
+  {
+    return new StaticClassNameMatcher();
+  }
+  
+  public function getMethodMatcher()
+  {
+    return new StaticMethodMatcher();
+  }
+}
+
+class StaticClassNameMatcher implements ClassMatcher
+{
+  public function matches($class)
+  {
+    return ($class->getName() === "Target");
+  }
+}
+
+class StaticMethodMatcher implements MethodMatcher
+{
+  public function matches($method, $class)
+  {
+    return ($method === "setX");
+  }
+}
+
+class StaticMethodMatcherPointcut extends StaticMethodMatcher
+{
+  
+}
+
+interface ClassMatcher
+{
+  public function matches($class);
+}
+
+interface MethodMatcher
+{
+  public function matches($method, $class);
+}
+
+interface Advice
+{
+  
+}
+
+interface Advisor
+{
+  public function getAdvice(Advice $interceptor);
+  public function isPerInstance();
+}
+
+interface PointcutAdvisor
+{
+  public function getPointcut();
+}
+
+interface AroundAdvice extends Advice
+{
+  
+}
+
+interface BeforeAdvice extends Advice
+{
+  
+}
+
+interface AfterAdvice extends Advice
+{
+  
+}
+
+interface ThrowsAdvice extends Advice
+{
+  
 }

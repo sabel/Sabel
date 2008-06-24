@@ -228,7 +228,7 @@ class Test_Container extends SabelTestCase
    */
   public function weavingToMethod()
   {
-    $instance = Sabel_Container::load("AspectTarget", new AspectToMethod);
+    $instance = Sabel_Container::load("AspectTarget", new AspectToMethod());
     $instance->run("test");
     $instance->runrun("test");
   }
@@ -252,7 +252,18 @@ class Test_Container extends SabelTestCase
     $instance->run("test");
     $instance->runrun("test");
   }
+  
+  /**
+   * @test
+   */
+  public function applyMultipleAspect()
+  {
+    $instance = Sabel_Container::load("AspectTarget", new MultipleAspectConfig());
+    $instance->run("test");
+  }
 }
+
+
 
 /** test classes **/
 
@@ -380,55 +391,6 @@ class Age
     $this->age = $age;
   }
 }
-class AspectConfig extends Sabel_Container_Injection
-{
-  private $trace = null;
-  
-  public function __construct($trace)
-  {
-    $this->trace = $trace;
-  }
-  public function configure()
-  {
-    $this->aspect("AspectTarget")->apply($this->trace)->to("run");
-  }
-  
-  public function getTrace()
-  {
-    return $this->trace;
-  }
-}
-class AspectTarget
-{
-  public function run($parameter)
-  {
-    return $parameter;
-  }
-  
-  public function runrun($parameter)
-  {
-    return $parameter;
-  }
-}
-class BaseAspect
-{
-  public function after($joinpoint){}
-  public function before($joinpoint){}
-}
-class Trace extends BaseAspect
-{
-  private $argument = "";
-  
-  public function after($joinpoint)
-  {
-    $this->argument = $joinpoint->getArgument(0);
-  }
-  
-  public function getArgument()
-  {
-    return $this->argument;
-  }
-}
 class SpecificSetter
 {
   private $oil = null;
@@ -486,6 +448,71 @@ class Engine
 {
   public function run(){}
 }
+
+class AspectConfig extends Sabel_Container_Injection
+{
+  private $trace = null;
+  
+  public function __construct($trace)
+  {
+    $this->trace = $trace;
+  }
+  
+  public function configure()
+  {
+    $this->aspect("AspectTarget")->apply($this->trace)->to("run");
+  }
+  
+  public function getTrace()
+  {
+    return $this->trace;
+  }
+}
+
+class MultipleAspectConfig extends Sabel_Container_Injection
+{
+  public function configure()
+  {
+    $trace = new Trace();
+    $this->aspect("AspectTarget")->apply($trace)->to("run");
+    $this->aspect("AspectTarget")->apply($trace)->to("run");
+  }
+}
+
+class AspectTarget
+{
+  public function run($parameter)
+  {
+    return $parameter;
+  }
+  
+  public function runrun($parameter)
+  {
+    return $parameter;
+  }
+}
+
+class BaseAspect
+{
+  public function after($joinpoint){}
+  public function before($joinpoint){}
+}
+
+class Trace extends BaseAspect
+{
+  private $argument = "";
+  
+  public function after($joinpoint)
+  {
+    $this->argument = $joinpoint->getArgument(0);
+  }
+  
+  public function getArgument()
+  {
+    return $this->argument;
+  }
+}
+
 class Config extends Sabel_Container_Injection
 {
   public function configure()

@@ -48,20 +48,20 @@ class Sabel_Aspect_Pointcut
     $hasMethodRegex  = false,
     $hasPackageRegex = false;
   
-  public function __construct($aspect)
+  public function __construct($aspectClass)
   {
-    if (is_object($aspect)) {
-      $this->name = get_class($aspect);
-      $this->aspect = $aspect;
+    if (is_object($aspectClass)) {
+      $this->name = get_class($aspectClass);
+      $this->aspect = $aspectClass;
     } else {
-      $this->name   = $aspect;
-      $this->aspect = new $aspect();
+      $this->name   = $aspectClass;
+      $this->aspect = new $aspectClass();
     }
   }
   
-  public static function create($name)
+  public static function create($aspectClass)
   {
-    return new self($name);
+    return new self($aspectClass);
   }
   
   public function getName()

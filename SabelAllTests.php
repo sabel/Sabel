@@ -115,7 +115,7 @@ class SabelAllTests
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Container::suite());
-    // $suite->addTest(Test_Aspect::suite());
+    $suite->addTest(Test_Aspect::suite());
     $suite->addTest(Test_Exception::suite());
     
     $suite->addTest(Test_Storage_Memory::suite());

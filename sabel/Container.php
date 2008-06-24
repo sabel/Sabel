@@ -359,24 +359,24 @@ class Sabel_Container
   
   protected function constructInstance($className)
   {
-    $reflect = $this->getReflection($className);
+    $reflection = $this->getReflection($className);
     
-    if ($reflect->isInterface()) {
-      if ($this->config->hasBind($className)) {
-        $bind = $this->config->getBind($className);
-        
-        if (is_array($bind)) {
-          $implement = $bind[0]->getImplementation();  
-        } else {
-          $implement = $bind->getImplementation();  
-        }
-        
-        return $this->newInstance($implement);
-      } else {
-        throw new Sabel_Exception_Runtime("any '{$className}' implementation not found");
-      }
-    } else {
+    if (!$reflection->isInterface()) {
       return $this->newInstance($className);
+    }
+    
+    if ($this->config->hasBind($className)) {
+      $bind = $this->config->getBind($className);
+      
+      if (is_array($bind)) {
+        $implement = $bind[0]->getImplementation();
+      } else {
+        $implement = $bind->getImplementation();
+      }
+      
+      return $this->newInstance($implement);
+    } else {
+      throw new Sabel_Exception_Runtime("any '{$className}' implementation not found");
     }
   }
   
@@ -663,13 +663,13 @@ final class Sabel_Container_Aspect
   public function __construct($targetClassName)
   {
     $this->targetClassName = $targetClassName;
-    $this->aspect = Sabel_Aspect_Aspects::singleton();
+    $this->aspect = Sabel_Aspect_Aspects::create();
   }
   
-  public function apply($aspect)
+  public function apply($aspectClassName)
   {
-    $this->pointcut = Sabel_Aspect_Pointcut::create($aspect);
-    $this->aspect->addPointcut($this->pointcut);
+    $this->pointcut = Sabel_Aspect_Pointcut::create($aspectClassName);
+    $this->aspect->addPointcut($this->targetClassName, $this->pointcut);
     
     return $this;
   }
