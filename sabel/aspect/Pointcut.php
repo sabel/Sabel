@@ -1,14 +1,6 @@
 <?php
 
-/**
- * Sabel_Aspect_Pointcut
- *
- * @category   Aspect
- * @package    org.sabel.aspect
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
+/*
 class Sabel_Aspect_Pointcut
 {
   const AROUND =  0;
@@ -248,3 +240,5 @@ class Sabel_Aspect_Pointcut
     return $this;
   }
 }
+
+*/

@@ -291,7 +291,8 @@ class Sabel_Container
     
     if (!$this->config->hasAspect($className)) return $instance;
     
-    return new Sabel_Aspect_Proxy($instance);
+    return $instance;
+    //return new Sabel_Aspect_Proxy($instance);
   }
   
   protected function newInstanceWithConstruct($reflection, $className)

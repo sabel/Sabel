@@ -211,6 +211,7 @@ class Test_Container extends SabelTestCase
     $this->assertEquals($instance, $specific);
   }
   
+  /*
   public function testApplyAspect()
   {
     $trace = new Trace();
@@ -222,48 +223,8 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals("test", $trace->getArgument());
   }
-  
-  /**
-   * @test
-   */
-  public function weavingToMethod()
-  {
-    $instance = Sabel_Container::load("AspectTarget", new AspectToMethod());
-    $instance->run("test");
-    $instance->runrun("test");
-  }
-  
-  /**
-   * @test
-   */
-  public function weavingToEvenryMethod()
-  {
-    $instance = Sabel_Container::load("AspectTarget", new AspectToEveryMethods());
-    $instance->run("test");
-    $instance->runrun("test");
-  }
-  
-  /**
-   * @test
-   */
-  public function weavingToMethodRegex()
-  {
-    $instance = Sabel_Container::load("AspectTarget", new AspectToMethodRegex());
-    $instance->run("test");
-    $instance->runrun("test");
-  }
-  
-  /**
-   * @test
-   */
-  public function applyMultipleAspect()
-  {
-    $instance = Sabel_Container::load("AspectTarget", new MultipleAspectConfig());
-    $instance->run("test");
-  }
+  */
 }
-
-
 
 /** test classes **/
 

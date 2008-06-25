@@ -1,5 +1,6 @@
 <?php
 
+/*
 class Sabel_Aspect_Joinpoint
 {
   protected $target    = null;
@@ -71,3 +72,4 @@ class Sabel_Aspect_Joinpoint
     return $this->exception;
   }
 }
+*/

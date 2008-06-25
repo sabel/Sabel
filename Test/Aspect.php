@@ -1,5 +1,11 @@
 <?php
 
+Sabel::fileUsing("sabel/aspect/Interfaces.php");
+Sabel::fileUsing("sabel/aspect/Matchers.php");
+Sabel::fileUsing("sabel/aspect/Advisors.php");
+
+Sabel::fileUsing("sabel/aspect/Interceptors.php");
+
 /**
  * TestCase of sabel.aspect.*
  *
@@ -14,32 +20,93 @@ class Test_Aspect extends SabelTestCase
   
   public function testPointcuts()
   {
-    $pointcuts = new Pointcuts();
-    $target = new Target();
+    $pointcuts = new DefaultPointcuts();
+    $target = new Sabel_Tests_Aspect_TargetClass();
     $match = $pointcuts->matches(new StaticPointcut(), "setX", $target);
     
     $this->assertTrue($match);
   }
   
-  public function testAOP()
+  public function testRegexMethodMatcher()
   {
-    $weaver = new Weaver(new Target());
+    $matcher = new Sabel_Aspect_RegexMethodMatcher();
+    $matcher->setPattern("/set+/");
+    $this->assertTrue($matcher->matches("setX", ""));
+  }
+  
+  public function testRegexClassMatcher()
+  {
+    $matcher = new Sabel_Aspect_RegexClassMatcher();
+    $matcher->setPattern("/Sabel_+/");
+    $this->assertTrue($matcher->matches("Sabel_Test", ""));
+    
+    $matcher->setPattern("/Sabel_+/");
+    $this->assertFalse($matcher->matches("Test_Test", ""));
+  }
+  
+  public function testRegexMatcherPointcuts()
+  {
+    $pointcuts = new DefaultPointcuts();
+    $target = new Sabel_Tests_Aspect_TargetClass();
+    
+    $pointcut = new Sabel_Aspect_RegexPointcut();
+    $pointcut->setClassPattern("/Sabel+/");
+    $pointcut->setMethodPattern("/set+/");
+    
+    $match = $pointcuts->matches($pointcut, "setX", $target);
+    $this->assertTrue($match);
+    
+    $match = $pointcuts->matches($pointcut, "setY", $target);
+    $this->assertTrue($match);
+    
+    $match = $pointcuts->matches($pointcut, "getY", $target);
+    $this->assertFalse($match);
+  }
+  
+  public function testWeaverWithInterceptor()
+  {
+    $weaver = new Sabel_Aspect_Weaver(new Sabel_Tests_Aspect_TargetClass());
     
     $interceptor = new DebugInterceptor();
+    $advisor = new MyStaticMethodMatcherPointcutAdvisor();
+    $advisor->setAdvice($interceptor);
     
-    $advisor = new StaticMethodMatcherPointcutAdvisor();
-    $advisor->setMethod("setX");
+    $weaver->addAdvisor($advisor);
+    
+    $interceptor = new SimpleTraceInterceptor();
+    $advisor = new MyStaticMethodMatcherPointcutAdvisor();
     $advisor->setAdvice($interceptor);
     
     $weaver->addAdvisor($advisor);
     
     $target = $weaver->getProxy();
     
-    $target->getX();
+    $result = $target->getX("arg", "arg2");
+    $this->assertEquals("X", $result);
+    
+    $result = $target->getY("arg", "arg2");
+    $this->assertEquals("Y", $result);
+  }
+  
+  public function testAopWeaverWithoutInterceptors()
+  {
+    $weaver = new Sabel_Aspect_Weaver(new Sabel_Tests_Aspect_TargetClass());
+    
+    $target = $weaver->getProxy();
+    
+    $result = $target->getX("arg", "arg2");
+    $this->assertEquals("X", $result);
+    
+    $result = $target->getY("arg", "arg2");
+    $this->assertEquals("Y", $result);
   }
 }
 
-class Target
+class DefaultPointcuts extends Sabel_Aspect_Pointcuts
+{
+}
+
+class Sabel_Tests_Aspect_TargetClass
 {
   public function getX()
   {
@@ -60,155 +127,34 @@ class Target
   {
     return "Y";
   }
-}
-
-class StaticMethodMatcherPointcutAdvisor implements PointcutAdvisor
-{
-  private $method = "";
   
-  private $advice = null;
-  
-  public function setAdvice(Advice $interceptor)
+  public function getName()
   {
-    $this->advice = $interceptor;
-  }
-  
-  public function setMethod($method)
-  {
-    $this->method = $method;
-  }
-  
-  public function getPointcut()
-  {
-    
   }
 }
 
-class Weaver
-{
-  private $target = null;
-  
-  private $advisor = array();
-  
-  public function __construct($target)
-  {
-    $this->target = $target;
-  }
-  
-  public function addAdvisor($advisor)
-  {
-    $this->advisor[] = $advisor;
-  }
-  
-  public function getProxy()
-  {
-    return new Proxy($this->target);
-  }
-}
-
-class Proxy
-{
-  private $target = null;
-  
-  private $aspects = array();
-  
-  public function __construct($targetObject)
-  {
-    $this->target = $targetObject;
-  }
-  
-  public function __call($method, $arg)
-  {
-    $reflection = new Sabel_Reflection_Class($this->target);
-    $reflection->getMethod($method)->invokeArgs($this->target, $arg);
-  }
-}
-
-interface Joinpoint
-{
-  public function getStaticPart();
-  public function getThis();
-  public function proceed();
-}
-
-interface Interceptor extends Advice
-{
-}
-
-interface Invocation extends Joinpoint
-{
-  public function getArguments();
-}
-
-interface MethodInvocation extends Invocation
-{
-  public function getMethod();
-}
-
-interface MethodInterceptor extends Interceptor
-{
-  public function invoke(MethodInvocation $invocation);
-}
-
-class DebugInterceptor implements MethodInterceptor
-{
-  public function invoke(MethodInvocation $invocation)
-  {
-    $invocation->proceed();
-  }
-}
-
-interface Pointcut
-{
-  /**
-   * @return ClassMatcher
-   */
-  public function getClassMatcher();
-  
-  /**
-   * @return MethodMatcher
-   */
-  public function getMethodMatcher();
-}
-
-class Pointcuts
-{
-  public function matches(Pointcut $pointcut, $method, $class)
-  {
-    $reflection = new Sabel_Reflection_Class($class);
-    
-    $classMatcher  = $pointcut->getClassMatcher();
-    $methodMatcher = $pointcut->getMethodMatcher();
-    
-    $classMatch  = $classMatcher->matches($reflection);
-    $methodMatch = $methodMatcher->matches($method, $reflection);
-    
-    return ($classMatch && $methodMatch);
-  }
-}
-
-class StaticPointcut implements Pointcut
+class StaticPointcut implements Sabel_Aspect_Pointcut
 {
   public function getClassMatcher()
   {
-    return new StaticClassNameMatcher();
+    return new MyStaticClassNameMatcher();
   }
   
   public function getMethodMatcher()
   {
-    return new StaticMethodMatcher();
+    return new MyMethodMatcher();
   }
 }
 
-class StaticClassNameMatcher implements ClassMatcher
+class MyStaticClassNameMatcher extends Sabel_Aspect_StaticClassNameMatcher
 {
   public function matches($class)
   {
-    return ($class->getName() === "Target");
+    return ($class->getName() === "Sabel_Tests_Aspect_TargetClass");
   }
 }
 
-class StaticMethodMatcher implements MethodMatcher
+class MyMethodMatcher extends Sabel_Aspect_StaticMethodMatcher
 {
   public function matches($method, $class)
   {
@@ -216,53 +162,26 @@ class StaticMethodMatcher implements MethodMatcher
   }
 }
 
-class StaticMethodMatcherPointcut extends StaticMethodMatcher
+class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
 {
+  public function __construct()
+  {
+    if (!class_exists("MyClassMatcher")) {
+      eval('
+        class MyClassMatcher implements Sabel_Aspect_ClassMatcher {
+          public function matches($class)
+          {
+            return true;
+          }
+        }
+      ');
+    }
+    
+    $this->setClassMatcher(new MyClassMatcher());
+  }
   
-}
-
-interface ClassMatcher
-{
-  public function matches($class);
-}
-
-interface MethodMatcher
-{
-  public function matches($method, $class);
-}
-
-interface Advice
-{
-  
-}
-
-interface Advisor
-{
-  public function getAdvice(Advice $interceptor);
-  public function isPerInstance();
-}
-
-interface PointcutAdvisor
-{
-  public function getPointcut();
-}
-
-interface AroundAdvice extends Advice
-{
-  
-}
-
-interface BeforeAdvice extends Advice
-{
-  
-}
-
-interface AfterAdvice extends Advice
-{
-  
-}
-
-interface ThrowsAdvice extends Advice
-{
-  
+  public function matches($method, $class)
+  {
+    return preg_match("/get+/", $method);
+  }
 }
