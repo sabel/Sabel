@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Weaver
+class Sabel_Aspect_DynamicWeaver implements Sabel_Aspect_Weaver
 {
   private $target = null;
   

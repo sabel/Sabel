@@ -135,13 +135,6 @@ abstract class Sabel_Aspect_AbstractPointcut implements Sabel_Aspect_Pointcut
   }
 }
 
-/*
-interface Sabel_Aspect_Weaver
-{
-  
-}
-*/
-
 abstract class Sabel_Aspect_AbstractProxy
 {
   protected $target = null;
@@ -154,6 +147,10 @@ abstract class Sabel_Aspect_AbstractProxy
   {
     $this->target = $targetObject;
     $this->setupInvocation();
+    
+    if (!$this->invocation instanceof Sabel_Aspect_MethodInvocation) {
+      throw new Sabel_Exception_Runtime("invocation must be setup");
+    }
   }
   
   abstract protected function setupInvocation();
@@ -167,4 +164,14 @@ abstract class Sabel_Aspect_AbstractProxy
   {
     $this->advisor = $advisor;
   }
+  
+  public function getClassName()
+  {
+    return get_class($this->target);
+  }
+}
+
+interface Sabel_Aspect_Weaver
+{
+  public function getProxy();
 }

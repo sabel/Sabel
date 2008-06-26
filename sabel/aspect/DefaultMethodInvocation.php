@@ -21,7 +21,7 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
     $this->class = $class;
     $this->reflection = new Sabel_Reflection_Class($class);
     
-    if ($method !== null) $this->method = $method;
+    if ($method   !== null) $this->method   = $method;
     if ($argument !== null) $this->argument = $argument;
   }
   

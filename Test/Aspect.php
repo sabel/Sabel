@@ -4,6 +4,7 @@ Sabel::fileUsing("sabel/aspect/Interfaces.php");
 Sabel::fileUsing("sabel/aspect/Matchers.php");
 Sabel::fileUsing("sabel/aspect/Pointcuts.php");
 Sabel::fileUsing("sabel/aspect/Advisors.php");
+Sabel::fileUsing("sabel/aspect/Weaver.php");
 
 Sabel::fileUsing("sabel/aspect/Interceptors.php");
 
@@ -19,7 +20,7 @@ class Test_Aspect extends SabelTestCase
     return self::createSuite("Test_Aspect");
   }
   
-  public function TestPointcuts()
+  public function testPointcuts()
   {
     $pointcuts = new Sabel_Aspect_DefaultPointcuts();
     $target = new Sabel_Tests_Aspect_TargetClass();
@@ -66,7 +67,7 @@ class Test_Aspect extends SabelTestCase
   
   public function testWeaverWithInterceptor()
   {
-    $weaver = new Sabel_Aspect_Weaver(new Sabel_Tests_Aspect_TargetClass());
+    $weaver = new Sabel_Aspect_DynamicWeaver(new Sabel_Tests_Aspect_TargetClass());
     
     $interceptor = new Sabel_Aspect_DebugInterceptor();
     $advisor = new MyStaticMethodMatcherPointcutAdvisor();
@@ -91,7 +92,7 @@ class Test_Aspect extends SabelTestCase
   
   public function testAopWeaverWithoutInterceptors()
   {
-    $weaver = new Sabel_Aspect_Weaver(new Sabel_Tests_Aspect_TargetClass());
+    $weaver = new Sabel_Aspect_DynamicWeaver(new Sabel_Tests_Aspect_TargetClass());
     
     $target = $weaver->getProxy();
     
@@ -100,7 +101,6 @@ class Test_Aspect extends SabelTestCase
     
     $result = $target->getY("arg", "arg2");
     $this->assertEquals("Y", $result);
-    
   }
   
   public function testStaticWeave()
@@ -126,10 +126,20 @@ class Test_Aspect extends SabelTestCase
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     
     $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
-    $advisor->setClassMatchPattern("/*/");
+    $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
     
-    $advisor->setAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    defineClass("ResultInterceptor", '
+      class %s implements Sabel_Aspect_Interceptor
+      {
+        public function invoke(Sabel_Aspect_Invocation $invocation)
+        {
+          $result = $invocation->proceed();
+          return "adviced " . $result;
+        }
+      }
+    ');
+    $advisor->addAdvice(new ResultInterceptor());
     
     $weaver->addAdvisor($advisor);
     
@@ -137,17 +147,106 @@ class Test_Aspect extends SabelTestCase
     
     // match
     $this->assertEquals("Sabel_Aspect_StaticProxy", get_class($target));
+    
+    $result = $target->getX();
+    $this->assertEquals("adviced X", $result);
+    
+    $advisor->addAdvice(new ResultInterceptor());
+    $target = $weaver->getProxy();
+    $result = $target->getX();
+    $this->assertEquals("adviced adviced X", $result);
   }
   
-  public function testDynamicMatch()
+  public function testSiwtchProxy()
   {
-    $weaver = new Sabel_Aspect_Weaver();
+    defineClass("ResultInterceptor", '
+      class %s implements Sabel_Aspect_Interceptor
+      {
+        public function invoke(Sabel_Aspect_Invocation $invocation)
+        {
+          $result = $invocation->proceed();
+          return "adviced " . $result;
+        }
+      }
+    ');
+    
+    $this->innerTestMultipleAdvice(new Sabel_Aspect_StaticWeaver());
+    $this->innerTestMultipleAdvice(new Sabel_Aspect_DynamicWeaver());
+  }
+  
+  private function innerTestMultipleAdvice($weaver)
+  {
+    $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
+    
+    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor->setClassMatchPattern("/.+/U");
+    $advisor->setMethodMatchPattern("/get+/");
+    
+    $advisor->addAdvice(new ResultInterceptor());
+    
+    $weaver->addAdvisor($advisor);
+    
+    $target = $weaver->getProxy();
+    
+    $result = $target->getX();
+    $this->assertEquals("adviced X", $result);
+    
+    $advisor->addAdvice(new ResultInterceptor());
+    $target = $weaver->getProxy();
+    $result = $target->getX();
+    $this->assertEquals("adviced adviced X", $result);
+  }
+  
+  public function testStaticWeaveNotMatch()
+  {
+    $weaver = new Sabel_Aspect_StaticWeaver();
+    $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
+    
+    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor->setClassMatchPattern("/.+/U");
+    $advisor->setMethodMatchPattern("/fetch+/");
+    
+    $advisor->setAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    
+    $weaver->addAdvisor($advisor);
+    
+    $target = $weaver->getProxy();
+    
+    // not match
+    $this->assertEquals("Sabel_Tests_Aspect_TargetClass", get_class($target));
+    
+    $result = $target->getX();
+    $this->assertEquals("X", $result);
+  }
+  
+  public function testDynamicWeaveGetClassName()
+  {
+    $weaver = new Sabel_Aspect_DynamicWeaver();
     $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
     $target = $weaver->getProxy();
     
     $this->assertEquals($target->getClassName(), "Sabel_Tests_Aspect_TargetClass");
   }
+  
+  public function testDynamicWeaveClass()
+  {
+    $weaver = new Sabel_Aspect_DynamicWeaver();
+    $weaver->setTarget("Sabel_Tests_Aspect_TargetClass");
+    $target = $weaver->getProxy();
+    
+    $this->assertEquals(get_class($target), "Sabel_Aspect_DefaultProxy");
+  }
+  
+  public function testWeaveMultipleAdvice()
+  {
+    $traceInterceptor = new Sabel_Aspect_SimpleTraceInterceptor();
+  }
+  
+  public function testWeaveMultipleAdviceWithDontCallProceed()
+  {
+  }
 }
+
 
 class DefaultPointcuts extends Sabel_Aspect_Pointcuts
 {
@@ -213,16 +312,15 @@ class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatc
 {
   public function __construct()
   {
-    if (!class_exists("MyClassMatcher")) {
-      eval('
-        class MyClassMatcher implements Sabel_Aspect_ClassMatcher {
-          public function matches($class)
-          {
-            return true;
-          }
+    defineClass("MyClassMatcher", '
+      class %s implements Sabel_Aspect_ClassMatcher
+      {
+        public function matches($class)
+        {
+          return true;
         }
-      ');
-    }
+      }
+    ');
     
     $this->setClassMatcher(new MyClassMatcher());
   }
@@ -239,16 +337,15 @@ class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatch
   
   public function __construct()
   {
-    if (!class_exists("MyClassMatcher")) {
-      eval('
-        class MyClassMatcher implements Sabel_Aspect_ClassMatcher {
-          public function matches($class)
-          {
-            return true;
-          }
+    defineClass("MyClassMatcher", '
+      class %s implements Sabel_Aspect_ClassMatcher
+      {
+        public function matches($class)
+        {
+          return true;
         }
-      ');
-    }
+      }
+    ');
     
     $this->setClassMatcher(new MyClassMatcher());
   }
@@ -261,5 +358,12 @@ class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatch
   public function matches($method, $class)
   {
     return preg_match($this->pattern, $method);
+  }
+}
+
+function defineClass($className, $class)
+{
+  if (!class_exists($className)) {
+    eval(sprintf($class, $className));
   }
 }
