@@ -35,8 +35,11 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
     $this->argument = $argument;
   }
   
-  public function reset()
+  public function reset($method, $argument)
   {
+    $this->method   = $method;
+    $this->argument = $argument;
+    
     $this->currentAdviceIndex = -1;
   }
   

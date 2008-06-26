@@ -75,6 +75,12 @@ interface Sabel_Aspect_MethodMatcher
   public function matches($method, $class);
 }
 
+
+interface Sabel_Aspect_RegexMatcher
+{
+  public function setPattern($pattern);
+}
+
 /**
  * pointcut interface
  */
@@ -89,6 +95,12 @@ interface Sabel_Aspect_Pointcut
    * @return MethodMatcher
    */
   public function getMethodMatcher();
+}
+
+interface Sabel_Aspect_RegexPointcut extends Sabel_Aspect_Pointcut
+{
+  public function setClassMatchPattern($pattern);
+  public function setMethodMatchPattern($pattern);
 }
 
 abstract class Sabel_Aspect_Pointcuts
@@ -120,5 +132,39 @@ abstract class Sabel_Aspect_AbstractPointcut implements Sabel_Aspect_Pointcut
   public function setMethodMatcher(Sabel_Aspect_MethodMatcher $matcher)
   {
     $this->methodMatcher = $matcher;
+  }
+}
+
+/*
+interface Sabel_Aspect_Weaver
+{
+  
+}
+*/
+
+abstract class Sabel_Aspect_AbstractProxy
+{
+  protected $target = null;
+  
+  protected $advisor = array();
+  
+  protected $invocation = null;
+  
+  public function __construct($targetObject)
+  {
+    $this->target = $targetObject;
+    $this->setupInvocation();
+  }
+  
+  abstract protected function setupInvocation();
+  
+  public function __getTarget()
+  {
+    return $this->target;
+  }
+  
+  public function __setAdvisor($advisor)
+  {
+    $this->advisor = $advisor;
   }
 }

@@ -1,34 +1,15 @@
 <?php
 
-class Sabel_Aspect_DefaultProxy
+class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
 {
-  private $target = null;
-  
-  private $advisor = array();
-  
-  private $invocation = null;
-  
-  public function __construct($targetObject)
+  protected function setupInvocation()
   {
-    $this->target = $targetObject;
     $this->invocation = new Sabel_Aspect_DefaultMethodInvocation($this, $this->target);
-  }
-  
-  public function __getTarget()
-  {
-    return $this->target;
-  }
-  
-  public function __setAdvisor($advisor)
-  {
-    $this->advisor = $advisor;
   }
   
   public function __call($method, $arg)
   {
-    $this->invocation->reset();
-    $this->invocation->setMethod($method);
-    $this->invocation->setArgument($arg);
+    $this->invocation->reset($method, $arg);
     
     $match = false;
     
@@ -39,7 +20,7 @@ class Sabel_Aspect_DefaultProxy
       
       if (!$pointcut instanceof Sabel_Aspect_Pointcut) continue;
       
-      $pointcuts = new DefaultPointcuts();
+      $pointcuts = new Sabel_Aspect_DefaultPointcuts();
       $match = $pointcuts->matches($pointcut, $method, $this->target);
       
       if ($match) {
@@ -52,5 +33,10 @@ class Sabel_Aspect_DefaultProxy
     }
     
     return $this->invocation->proceed();
+  }
+  
+  public function getClassName()
+  {
+    return get_class($this->target);
   }
 }

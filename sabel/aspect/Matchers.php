@@ -1,21 +1,17 @@
 <?php
 
-class Sabel_Aspect_RegexMethodMatcher implements Sabel_Aspect_MethodMatcher
+abstract class Sabel_Aspect_StaticMethodMatcher implements Sabel_Aspect_MethodMatcher
 {
-  private $pattern = "";
-  
-  public function setPattern($pattern)
-  {
-    $this->pattern = $pattern;
-  }
-  
-  public function matches($method, $class)
-  {
-    return (boolean) preg_match($this->pattern, $method);
-  }
+  public function matches($method, $class){}
 }
 
-class Sabel_Aspect_RegexClassMatcher implements Sabel_Aspect_ClassMatcher
+abstract class Sabel_Aspect_StaticClassNameMatcher implements Sabel_Aspect_ClassMatcher
+{
+  public function matches($class) {}
+}
+
+class Sabel_Aspect_RegexClassMatcher implements Sabel_Aspect_ClassMatcher,
+                                                Sabel_Aspect_RegexMatcher
 {
   private $pattern = "";
   
@@ -30,40 +26,18 @@ class Sabel_Aspect_RegexClassMatcher implements Sabel_Aspect_ClassMatcher
   }
 }
 
-abstract class Sabel_Aspect_StaticMethodMatcher implements Sabel_Aspect_MethodMatcher
+class Sabel_Aspect_RegexMethodMatcher implements Sabel_Aspect_MethodMatcher,
+                                                 Sabel_Aspect_RegexMatcher
 {
-  public function matches($method, $class){}
-}
-
-abstract class Sabel_Aspect_StaticMethodMatcherPointcut
-             extends Sabel_Aspect_StaticMethodMatcher
-               implements Sabel_Aspect_Pointcut
-{
-  private $classMatcher = null;
+  private $pattern = "";
   
-  public function setClassMatcher(Sabel_Aspect_ClassMatcher $matcher)
+  public function setPattern($pattern)
   {
-    $this->classMatcher = $matcher;
+    $this->pattern = $pattern;
   }
   
-  /**
-   * implements from Pointcut interface
-   */
-  public function getClassMatcher()
+  public function matches($method, $class)
   {
-    return $this->classMatcher;
+    return (boolean) preg_match($this->pattern, $method);
   }
-  
-  /**
-   * implements from Pointcut interface
-   */
-  public function getMethodMatcher()
-  {
-    return $this;
-  }
-}
-
-abstract class Sabel_Aspect_StaticClassNameMatcher implements Sabel_Aspect_ClassMatcher
-{
-  public function matches($class) {}
 }

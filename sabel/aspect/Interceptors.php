@@ -8,7 +8,7 @@ class Logger
   }
 }
 
-abstract class AbstractTraceInterceptor implements Sabel_Aspect_MethodInterceptor
+abstract class Sabel_Aspect_AbstractTraceInterceptor implements Sabel_Aspect_MethodInterceptor
 {
   public function invoke(Sabel_Aspect_MethodInvocation $invocation)
   {
@@ -19,7 +19,7 @@ abstract class AbstractTraceInterceptor implements Sabel_Aspect_MethodIntercepto
   abstract protected function invokeUnderTrace(Sabel_Aspect_MethodInvocation $invocation, $logger);
 }
 
-class SimpleTraceInterceptor extends AbstractTraceInterceptor
+class Sabel_Aspect_SimpleTraceInterceptor extends Sabel_Aspect_AbstractTraceInterceptor
 {
   protected function invokeUnderTrace(Sabel_Aspect_MethodInvocation $invocation, $logger) {
 		$invocationDescription = $this->getInvocationDescription($invocation);
@@ -43,7 +43,7 @@ class SimpleTraceInterceptor extends AbstractTraceInterceptor
 	}
 }
 
-class DebugInterceptor extends SimpleTraceInterceptor
+class Sabel_Aspect_DebugInterceptor extends Sabel_Aspect_SimpleTraceInterceptor
 {
   public function invoke(Sabel_Aspect_MethodInvocation $invocation)
   {

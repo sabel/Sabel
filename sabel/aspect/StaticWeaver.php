@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Weaver
+class Sabel_Aspect_StaticWeaver
 {
   private $target = null;
   
@@ -39,9 +39,28 @@ class Sabel_Aspect_Weaver
       }
     }
     
-    $proxy = new Sabel_Aspect_DefaultProxy($this->target);
-    $proxy->__setAdvisor($this->advisor);
+    $reflection = new Sabel_Reflection_Class($this->target);
     
-    return $proxy;
+    $matchedMethods = array();
+    
+    foreach ($this->advisor as $advisor) {
+      $pointcut = $advisor->getPointcut();
+      $methodMatcher = $pointcut->getMethodMatcher();
+      
+      foreach ($reflection->getMethods() as $method) {
+        $match = $methodMatcher->matches($method->getName(), $this->target);
+        
+        if ($match) {
+          $matchedMethods[] = array("method" => $method->getName(),
+                                    "advice" => $advisor->getAdvice());
+        }
+      }
+    }
+    
+    if (count($matchedMethods) >= 1) {
+      return new Sabel_Aspect_StaticProxy($this->target);
+    } else {
+      return $this->target;  
+    }
   }
 }
