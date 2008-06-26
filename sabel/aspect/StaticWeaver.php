@@ -39,6 +39,7 @@ class Sabel_Aspect_StaticWeaver implements Sabel_Aspect_Weaver
       }
     }
     
+    $adviced    = new Sabel_Aspect_Adviced();
     $reflection = new Sabel_Reflection_Class($this->target);
     
     foreach ($this->advisor as $advisor) {
@@ -48,8 +49,6 @@ class Sabel_Aspect_StaticWeaver implements Sabel_Aspect_Weaver
         throw new Sabel_Exception_Runtime("pointcut must be Sabel_Aspect_Pointcut");
       
       $pointcuts = new Sabel_Aspect_DefaultPointcuts();
-      
-      $adviced = new Sabel_Aspect_Adviced();
       
       foreach ($reflection->getMethods() as $method) {
         if ($pointcuts->matches($pointcut, $method->getName(), $this->target)) {

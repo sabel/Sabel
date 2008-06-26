@@ -46,6 +46,10 @@ interface Sabel_Aspect_Interceptor extends Sabel_Aspect_Advice
 {
 }
 
+interface Sabel_Aspect_BeforeAdvice extends Sabel_Aspect_Advice
+{
+}
+
 /**
  * @see org.aopalliance.aop.MethodInterceptor
  */
@@ -58,6 +62,12 @@ interface Sabel_Aspect_Advisor
 {
   public function getAdvice();
   public function isPerInstance();
+}
+
+
+interface Sabel_Aspect_MethodBeforeAdvice extends Sabel_Aspect_BeforeAdvice
+{
+  public function before($method, $arguments, $target);
 }
 
 interface Sabel_Aspect_PointcutAdvisor extends Sabel_Aspect_Advisor

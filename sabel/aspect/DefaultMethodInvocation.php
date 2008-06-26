@@ -81,7 +81,14 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
     }
     
     if (isset($this->advices[++$this->currentAdviceIndex])) {
-      return $this->advices[$this->currentAdviceIndex]->invoke($this);
+      $advice = $this->advices[$this->currentAdviceIndex];
+      
+      if ($advice instanceof Sabel_Aspect_MethodInterceptor) {
+        return $advice->invoke($this);  
+      } elseif ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
+        $advice->before($this->method, $this->argument, $this->class);
+        $this->proceed();
+      }
     }
   }
 }
