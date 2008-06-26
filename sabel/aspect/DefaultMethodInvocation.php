@@ -87,7 +87,7 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
         return $advice->invoke($this);  
       } elseif ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
         $advice->before($this->method, $this->argument, $this->class);
-        $this->proceed();
+        return $this->proceed();
       }
     }
   }
