@@ -82,16 +82,10 @@ class Sabel_Request_Internal extends Sabel_Object
     $request->method($this->method);
     $request->values($this->values);
     
-    $headers = $currentBus->get("request")->getHttpHeaders();
-    if (!$this->withLayout) {
-      $headers["HTTP_X_REQUESTED_WITH"] = "XMLHttpRequest";
-    }
-    
-    $request->setHttpHeaders($headers);
-    
     $bus = new Sabel_Bus();
-    $bus->set("request", $request);
-    $bus->set("session", $currentBus->get("session"));
+    $bus->set("request",  $request);
+    $bus->set("session",  $currentBus->get("session"));
+    $bus->set("noLayout", !$this->withLayout);
     
     $context = new Sabel_Context();
     $context->setBus($bus);

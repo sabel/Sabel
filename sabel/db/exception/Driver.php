@@ -11,5 +11,5 @@
  */
 class Sabel_DB_Exception_Driver extends Sabel_DB_Exception
 {
-
+  
 }

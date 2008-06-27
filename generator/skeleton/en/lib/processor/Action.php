@@ -50,12 +50,14 @@ class Processor_Action extends Sabel_Bus_Processor
       if ($status->isFailure() || $controller->isRedirected() || !$hasAction) return;
       
       if (isset($annotations["check"])) {
-        $result = $this->validateRequests($controller, $request, $annotations["check"]);
-        if ($result === false) return $status->setCode(Sabel_Response::BAD_REQUEST);
+        if (!$result = $this->validateRequests($controller, $request, $annotations["check"])) {
+          return $status->setCode(Sabel_Response::BAD_REQUEST);
+        }
       }
       
       l("execute action '{$action}'");
       $controller->execute();
+      $bus->set("noLayout", ($controller->layout === false));
     } catch (Exception $e) {
       $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
@@ -74,6 +76,23 @@ class Processor_Action extends Sabel_Bus_Processor
   
   protected function validateRequests($controller, $request, $checks)
   {
+    $values = array();
+    $method = strtoupper($request->getMethod());
+    
+    if ($request->isGet()) {
+      $gets   = $request->fetchGetValues();
+      $params = $request->fetchParameterValues();
+      $values = array_merge($gets, $params);
+      if (count($values) !== (count($gets) + count($params))) {
+        $message = __METHOD__ . "() duplicate request key.";
+        throw new Sabel_Exception_Runtime($message);
+      }
+    } elseif ($request->isPost()) {
+      $values = array_merge($gets, $params);
+    } else {
+      return true;
+    }
+    
     $validator = new Validator();
     
     foreach ($checks as $check) {
@@ -81,16 +100,18 @@ class Processor_Action extends Sabel_Bus_Processor
       $validator->set($name, $check);
     }
     
-    $method = "fetch" . ucfirst(strtolower($request->getMethod())) . "Values";
-    $validator->validate($request->$method());
+    $validator->validate($values);
     $controller->setAttribute("validator", $validator);
     
-    if ($validator->hasError()) {
+    $result = true;
+    if (!$validator->validate($values)) {
       if ($request->isPost()) {
         $controller->setAttribute("errors", $validator->getErrors());
       } else {
-        return false;
+        $result = false;
       }
     }
+    
+    return $result;
   }
 }

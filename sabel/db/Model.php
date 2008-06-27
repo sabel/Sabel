@@ -70,12 +70,22 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @var array
    */
+  protected $primaryKeyValues = array();
+  
+  /**
+   * @var array
+   */
   protected $values = array();
   
   /**
    * @var array
    */
   protected $updateValues = array();
+  
+  /**
+   * @var string
+   */
+  protected $versionColumn = "";
   
   public function __construct($id = null)
   {
@@ -283,22 +293,25 @@ abstract class Sabel_DB_Model extends Sabel_Object
   public function setProperties(array $properties)
   {
     $pkey = $this->metadata->getPrimaryKey();
-    if (is_string($pkey)) $pkey = (array)$pkey;
-    $selected = false;
+    $this->values = $properties;
     
-    if (!empty($pkey)) {
-      foreach ($pkey as $key) {
-        if (!isset($properties[$key])) {
-          $selected = false;
-          break;
-        }
+    if (empty($pkey)) return;
+    
+    $this->selected = true;
+    if (is_string($pkey)) $pkey = (array)$pkey;
+    
+    foreach ($pkey as $key) {
+      if (!isset($properties[$key])) {
+        $this->selected = false;
+        break;
       }
-      
-      $selected = true;
     }
     
-    $this->values   = $properties;
-    $this->selected = $selected;
+    if ($this->selected) {
+      foreach ($pkey as $key) {
+        $this->primaryKeyValues[$key] = $this->$key;
+      }
+    }
     
     return $this;
   }
@@ -636,12 +649,17 @@ abstract class Sabel_DB_Model extends Sabel_Object
     
     if ($result === null) {
       if (($pkey = $this->metadata->getPrimaryKey()) === null) {
-        $message = __METHOD__ . "() cannot update a model(there is not primary key).";
+        $message = __METHOD__ . "() can't update a model(there is not primary key).";
         throw new Sabel_DB_Exception($message);
       }
       
       foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
-        $this->setCondition("{$this->modelName}.{$key}", $this->__get($key));
+        if ($this->primaryKeyValues[$key] === $this->$key) {
+          $this->setCondition("{$this->modelName}.{$key}", $this->__get($key));
+        } else {
+          $message = __METHOD__ . "() can't update the primary key value.";
+          throw new Sabel_DB_Exception($message);
+        }
       }
       
       $saveValues = array();
@@ -649,18 +667,30 @@ abstract class Sabel_DB_Model extends Sabel_Object
         $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
       }
       
-      if (isset($this->metaCols["version"])) {
-        $currentVersion = $this->__get("version");
-        $saveValues["version"] = $currentVersion + 1;
-        $this->setCondition("{$this->modelName}.version", $currentVersion);
+      $vColumn = ($this->versionColumn === "") ? "version" : $this->versionColumn;
+      
+      if (isset($this->metaCols[$vColumn])) {
+        $_column = $this->metaCols[$vColumn];
+        $currentVersion = $this->__get($vColumn);
+        $this->setCondition("{$this->modelName}.{$vColumn}", $currentVersion);
+        
+        if ($_column->isInt()) {
+          $saveValues[$vColumn] = $currentVersion + 1;
+        } elseif ($_column->isDatetime()) {
+          $saveValues[$vColumn] = now();
+        } else {
+          $message = __METHOD__ . "() version column must be DATETIME or INT.";
+          throw new Sabel_DB_Exception($message);
+        }
       }
       
       $this->updateValues = array();
       $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
       $result = $this->prepareUpdate($stmt, $saveValues)->execute();
       
-      if (isset($this->metaCols["version"]) && $result < 1) {
-        // @todo exception?
+      if (isset($this->metaCols[$vColumn]) && $result < 1) {
+        $message = __METHOD__ . "() this model has already been changed by other transactions.";
+        throw new Sabel_DB_Exception_StaleModel($message);
       }
     }
     

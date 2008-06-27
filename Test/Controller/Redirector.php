@@ -20,7 +20,7 @@ class Test_Controller_Redirector extends SabelTestCase
     $config->route("default")
            ->uri(":controller/:action")
            ->module("index");
-           
+    
     $this->routing($config);
   }
   

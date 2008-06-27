@@ -33,13 +33,16 @@ class Sabel_Map_Candidate
   public function __construct($name, $uriParameters)
   {
     $this->name = $name;
-    $this->uriParameters = $uriParameters;
     
+    $reserved = array("module", "controller", "action");
     foreach ($uriParameters as $name => $value) {
-      if (in_array($name, array("module", "controller", "action"), true)) {
+      if (in_array($name, $reserved, true)) {
         $this->destination[$name] = $value;
+        unset($uriParameters[$name]);
       }
     }
+    
+    $this->uriParameters = $uriParameters;
   }
   
   public function getUriParameters()
@@ -77,6 +80,6 @@ class Sabel_Map_Candidate
     
     $name = (isset($parameters["name"])) ? $parameters["name"] : $this->name;
     $route = Sabel_Map_Configurator::getRoute($name);
-    return $route->createUrl($parameters, $this->uriParameters);
+    return $route->createUrl($parameters, array_merge($this->destination, $this->uriParameters));
   }
 }

@@ -21,7 +21,7 @@ class Generator extends Sabel_Sakle_Task
   
   public function run()
   {
-    define("ENVIRONMENT", $this->getEnvironment());
+    $this->defineEnvironmentByOption();
     Sabel_DB_Config::initialize(new Config_Database());
     
     $method = "generate" . $this->checkArguments();
@@ -208,15 +208,8 @@ class Generator extends Sabel_Sakle_Task
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($ctrlName);
     if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
     
-    $tplName  = "upload" . TPL_SUFFIX;
-    
-    ob_start();
-    include ($this->skeletonDir . DS . "templates" . DS . "uploader" . DS . $tplName);
-    $contents = str_replace(array("<#", "#>"), array("<?", "?>"), ob_get_clean());
-    file_put_contents($tplDir . DS . $tplName, $contents);
-    
-    $relativePath = substr($tplDir . DS . $tplName, strlen(MODULES_DIR_PATH) + 1);
-    $this->success("Generate Template " . MODULES_DIR_NAME . DS . $relativePath);
+    $vars = get_defined_vars();
+    $this->_generateTemplates($vars, $tplDir, "uploader");
   }
   
   private function _generateTemplates($vars, $targetDir, $type)

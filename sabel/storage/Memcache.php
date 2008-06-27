@@ -35,7 +35,12 @@ class Sabel_Storage_Memcache implements Sabel_Storage
     }
     
     $this->memcache = new Memcache();
-    $this->memcache->connect($server, $port);
+    $this->addServer($server, $port);
+  }
+  
+  public function addServer($server, $port = 11211, $weight = 1)
+  {
+    $this->memcache->addServer($server, $port, true, $weight);
   }
   
   public function setNamespace($namespace)

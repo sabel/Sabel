@@ -13,6 +13,7 @@ if (!defined("ENVIRONMENT")) {
 }
 
 $_SERVER["HTTP_HOST"]   = "localhost";
+$_SERVER["SERVER_NAME"] = "localhost";
 $_SERVER["REQUEST_URI"] = $_SERVER["argv"][1];
 
 if (ENVIRONMENT === PRODUCTION) Sabel::init();

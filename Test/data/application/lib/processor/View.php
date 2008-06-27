@@ -9,11 +9,6 @@ class TestProcessor_View extends Sabel_Bus_Processor
    */
   private $view = null;
   
-  /**
-   * @var boolean
-   */
-  private $isAjax = false;
-  
   public function execute($bus)
   {
     $controller = $bus->get("controller");
@@ -22,8 +17,9 @@ class TestProcessor_View extends Sabel_Bus_Processor
     $response  = $bus->get("response");
     $responses = $response->getResponses();
     
-    $this->isAjax = ($bus->get("request")->getHttpHeader("X-Requested-With") === "XMLHttpRequest");
-    $view = $this->getView($response, $bus->get("destination")->getAction());
+    $view = $this->getView($response->getStatus(),
+                           $bus->get("destination")->getAction(),
+                           $bus->get("isAjaxRequest") === true);
     
     if ($controller->renderText) {
       $renderer = $view->getRenderer();
@@ -38,7 +34,7 @@ class TestProcessor_View extends Sabel_Bus_Processor
       $contents = $controller->contents;
       if ($contents === null) $contents = "";
     } else {
-      $response->notFound();
+      $response->getStatus()->setCode(404);
       if ($location = $view->getValidLocation("notFound")) {
         $contents = $view->rendering($location, $responses);
       } else {
@@ -48,10 +44,13 @@ class TestProcessor_View extends Sabel_Bus_Processor
     
     $layout = $controller->getAttribute("layout");
     
-    if ($layout === false || $this->isAjax) {
+    if ($bus->get("noLayout")) {
       $bus->set("result", $contents);
     } else {
-      if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;
+      if (($layout = $controller->getAttribute("layout")) === null) {
+        $layout = DEFAULT_LAYOUT_NAME;
+      }
+      
       if ($location = $view->getValidLocation($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $view->rendering($location, $responses));
@@ -87,16 +86,19 @@ class TestProcessor_View extends Sabel_Bus_Processor
     $bus->get("controller")->setAttribute("view", $view);
   }
   
-  protected function getView($response, $action)
+  protected function getView($status, $action, $isAjax = false)
   {
-    if (!$response->isSuccess()) {
-      $this->view->setName(lcfirst($response->getStatus()));
-    } elseif ($this->view->getName() === "") {
-      if ($this->isAjax) {
-        $this->view->setName($action . ".ajax");
+    if ($status->isFailure()) {
+      $tplName = lcfirst(str_replace(" ", "", $status->getReason()));
+      if ($location = $this->view->getValidLocation($tplName)) {
+        $this->view->setName($tplName);
+      } elseif ($status->isClientError()) {
+        $this->view->setName("clientError");
       } else {
-        $this->view->setName($action);
+        $this->view->setName("serverError");
       }
+    } elseif ($this->view->getName() === "") {
+      $this->view->setName(($isAjax) ? "{$action}.ajax" : $action);
     }
     
     return $this->view;

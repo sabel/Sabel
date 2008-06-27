@@ -30,7 +30,7 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
   {
     if (extension_loaded("memcache")) {
       $this->memcache = new Memcache();
-      $this->memcache->connect($server, $port);
+      $this->addServer($server, $port);
       $this->readSessionSettings();
     } else {
       throw new Sabel_Exception_Runtime("memcache extension not loaded.");
@@ -45,6 +45,11 @@ class Sabel_Session_Memcache extends Sabel_Session_Ext
     }
     
     return self::$instance;
+  }
+  
+  public function addServer($server, $port = 11211, $weight = 1)
+  {
+    $this->memcache->addServer($server, $port, true, $weight);
   }
   
   public function start()

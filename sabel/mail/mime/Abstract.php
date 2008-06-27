@@ -147,16 +147,28 @@ abstract class Sabel_Mail_Mime_Abstract
     return $this->disposition;
   }
   
+  /**
+   * @return string
+   */
+  public function getEncodedContent()
+  {
+    $content = $this->content;
+    if (extension_loaded("mbstring")) {
+      $content = mb_convert_encoding($content, $this->charset);
+    }
+    
+    return $this->encode($content, $this->encoding, Sabel_Mail::getEol());
+  }
+  
   protected function encode($str, $encoding, $eol = "\r\n", $length = Sabel_Mail::LINELENGTH)
   {
-    if ($encoding === "base64") {
-      return rtrim(chunk_split(base64_encode($str), $length, $eol));
-    } elseif ($encoding === "quoted-printable") {
-      $quoted = Sabel_Mail_QuotedPrintable::encode($str, $length, $eol);
-      return str_replace(array("?", " "), array("=3F", "=20"), $quoted);
-    } else {
-      $message = __METHOD__ . "() invalid encoding.";
-      throw new Sabel_Mail_Exception($message);
+    switch (strtolower($encoding)) {
+      case "base64":
+        return rtrim(chunk_split(base64_encode($str), $length, $eol));
+      case "quoted-printable":
+        return Sabel_Mail_QuotedPrintable::encode($str, $length, $eol);
+      default:
+        return $str;
     }
   }
 }

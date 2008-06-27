@@ -41,7 +41,7 @@ class Paginate extends Sabel_Object
    */
   protected $orderColumns = array();
   
-  public function __construct($model)
+  public function __construct($model, $pageKey = "page")
   {
     if (is_string($model)) {
       $model = MODEL($model);
@@ -58,6 +58,7 @@ class Paginate extends Sabel_Object
     }
     
     $this->model = $model;
+    $this->attributes["pageKey"] = $pageKey;
   }
   
   public function __get($key)
@@ -71,14 +72,14 @@ class Paginate extends Sabel_Object
   
   public function getUriQuery($page)
   {
+    $pageKey = $this->attributes["pageKey"];
     if (!isset($this->attributes["uriQuery"])) {
-      return "page={$page}";
+      return "{$pageKey}={$page}";
     } else {
-      $query = $this->attributes["uriQuery"];
-      if ($query === "") {
-        return "page={$page}";
+      if (($query = $this->attributes["uriQuery"]) === "") {
+        return "{$pageKey}={$page}";
       } else {
-        return $query . "&page=" . $page;
+        return $query . "&{$pageKey}=" . $page;
       }
     }
   }
@@ -97,7 +98,7 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
-  public function setOrderColumn(array $columns)
+  public function setOrderColumns($columns)
   {
     $this->orderColumns = $columns;
   }
@@ -112,8 +113,10 @@ class Paginate extends Sabel_Object
   public function build($limit, array $getValues = array())
   {
     $page = 1;
-    if (isset($getValues["page"])) {
-      $page = $getValues["page"];
+    $pageKey = $this->attributes["pageKey"];
+    
+    if (isset($getValues[$pageKey])) {
+      $page = $getValues[$pageKey];
       if (!is_numeric($page) || $page < 1) $page = 1;
     }
     
@@ -122,8 +125,11 @@ class Paginate extends Sabel_Object
     
     $uriQuery = array();
     foreach ($getValues as $key => $val) {
-      if ($key === "page") continue;
-      $uriQuery[] = urlencode($key) . "=" . urlencode($val);
+      if ($key === $pageKey) {
+        unset($getValues[$key]);
+      } else {
+        $uriQuery[] = urlencode($key) . "=" . urlencode($val);
+      }
     }
     
     $attributes["uriQuery"] = implode("&", $uriQuery);
@@ -133,7 +139,7 @@ class Paginate extends Sabel_Object
     $attributes["limit"] = $limit;
     $attributes["page"]  = $page;
     
-    $pager = Sabel_View_Pager::create($count, $limit);
+    $pager = new Sabel_View_Pager($count, $limit);
     $pager->setPageNumber($page);
     $attributes["viewer"] = new Sabel_View_PageViewer($pager);
     
@@ -142,7 +148,7 @@ class Paginate extends Sabel_Object
       $attributes["results"] = array();
     } else {
       $offset = $pager->getSqlOffset();
-      $this->_setOrderBy($model, $getValues);
+      $this->_setOrderBy($getValues);
       $model->setLimit($limit);
       $model->setOffset($offset);
       
@@ -158,24 +164,57 @@ class Paginate extends Sabel_Object
     return $this;
   }
   
-  protected function _setOrderBy($model, $getValues)
+  protected function _setOrderBy($getValues)
   {
-    if (empty($this->orderColumns)) return;
-    $getValues = array_merge($this->defaultOrder, $getValues);
+    $orderColumns = $this->orderColumns;
+    if ($orderColumns === false) return;
     
-    foreach ($this->orderColumns as $column) {
-      if (isset($getValues[$column])) {
-        $order = strtolower($getValues[$column]);
-        if ($order !== "asc" && $order !== "desc") {
-          $order = "asc";
-        }
-        
-        if (strpos($column, ":") !== false) {
-          $column = str_replace(":", ".", $column);
-        }
-        
-        $model->setOrderBy($column . " " . strtoupper($order));
+    $oColNum = count($orderColumns);
+    $columns = $this->model->getColumnNames();
+    $pageKey = $this->attributes["pageKey"];
+    $orderValues = array();
+    
+    foreach ($getValues as $key => $val) {
+      if (preg_match('/^[A-Z]/', $key{0}) === 1 && strpos($key, "_") !== false) {
+        list ($mname, $cname) = explode("_", $key, 2);
+        $key = $mname . "." . $cname;
+      } else {
+        if (!in_array($key, $columns, true)) continue;
       }
+      
+      if ($oColNum === 0 || in_array($key, $orderColumns, true)) {
+        $orderValues[$key] = $val;
+      }
+    }
+    
+    if (empty($orderValues)) {
+      if (empty($this->defaultOrder)) {
+        return;
+      } else {
+        $orderValues = $this->defaultOrder;
+      }
+    }
+    
+    $orders = array();
+    
+    if (empty($orderColumns)) {
+      foreach ($orderValues as $column => $order) {
+        $order = strtolower($order);
+        if ($order !== "asc" && $order !== "desc") $order = "asc";
+        $orders[] = $column . " " . strtoupper($order);
+      }
+    } else {
+      foreach ($orderColumns as $column) {
+        if (!isset($orderValues[$column])) continue;
+        
+        $order = strtolower($orderValues[$column]);
+        if ($order !== "asc" && $order !== "desc") $order = "asc";
+        $orders[] = $column . " " . strtoupper($order);
+      }
+    }
+    
+    if (!empty($orders)) {
+      $this->model->setOrderBy(implode(", ", $orders));
     }
   }
 }

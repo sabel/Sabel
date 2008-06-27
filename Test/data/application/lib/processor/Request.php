@@ -6,7 +6,14 @@ class TestProcessor_Request extends Sabel_Bus_Processor
   {
     if ($bus->has("request")) return;
     
-    $request = new Sabel_Request_Object($this->getUri());
+    $uri = (isset($_SERVER["REQUEST_URI"])) ? normalize_uri($_SERVER["REQUEST_URI"]) : "";
+    $request = new Sabel_Request_Object($uri);
+    
+    if (SBL_SECURE_MODE) {
+      $_GET  = remove_nullbyte($_GET);
+      $_POST = remove_nullbyte($_POST);
+    }
+    
     $request->setGetValues($_GET);
     $request->setPostValues($_POST);
     
@@ -23,19 +30,10 @@ class TestProcessor_Request extends Sabel_Bus_Processor
     
     $request->setHttpHeaders($httpHeaders);
     $bus->set("request", $request);
-  }
-  
-  protected function getUri()
-  {
-    if (isset($_SERVER["REQUEST_URI"])) {
-      $uri = trim(preg_replace("/\/{2,}/", "/", $_SERVER["REQUEST_URI"]), "/");
-      $parsedUrl = parse_url("http://localhost/{$uri}");
-      
-      if (isset($parsedUrl["path"])) {
-        return ltrim($parsedUrl["path"], "/");
-      }
-    }
     
-    return "";
+    if ($request->getHttpHeader("X-Requested-With") === "XMLHttpRequest") {
+      $bus->set("noLayout",      true);
+      $bus->set("isAjaxRequest", true);
+    }
   }
 }

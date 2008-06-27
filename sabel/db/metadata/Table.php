@@ -123,17 +123,24 @@ class Sabel_DB_Metadata_Table extends Sabel_Object
   
   private function setPrimaryKey()
   {
-    $pKey = array();
+    $pkey = array();
     foreach ($this->columns as $column) {
-      if ($column->primary) $pKey[] = $column->name;
+      if ($column->primary) $pkey[] = $column->name;
     }
     
-    if (empty($pKey)) {
-      $this->primaryKey = null;
-    } elseif (count($pKey) === 1) {
-      $this->primaryKey = $pKey[0];
-    } else {
-      $this->primaryKey = $pKey;
+    switch (count($pkey)) {
+      case 0:
+        $this->primaryKey = null;
+        break;
+      
+      case 1:
+        $this->primaryKey = $pkey[0];
+        break;
+      
+      default:
+        $this->primaryKey = $pkey;
+        break;
+      
     }
   }
   

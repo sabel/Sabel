@@ -17,6 +17,13 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   
   public function uploaded()
   {
+    $file = $_FILES["upfile"];
+    $path = RUN_BASE . DS . "data" . DS . basename($file["name"]);
+    if (!move_uploaded_file($file["tmp_name"], $path)) {
+      // upload error.
+    }
     
+    echo "uploaded";
+    exit;
   }
 }

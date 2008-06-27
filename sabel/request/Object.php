@@ -179,22 +179,20 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function setGetValue($key, $value)
   {
-    $this->getValues[$key] = $value;
+    $this->getValues[$key] = ($value === "") ? null : $value;
   }
   
   public function setGetValues(array $values)
   {
+    foreach ($values as $key => $value) {
+      $values[$key] = ($value === "") ? null : $value;
+    }
+    
     $this->getValues = $values;
   }
   
   public function fetchGetValues()
   {
-    if (count($this->getValues) === 0) return array();
-    
-    foreach ($this->getValues as &$value) {
-      if ($value === "") $value = null;
-    }
-    
     return $this->getValues;
   }
   
@@ -210,21 +208,20 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchGetValue($key)
   {
-    if (isset($this->getValues[$key])) {
-      $value = $this->getValues[$key];
-      return ($value === "") ? null : $value;
-    } else {
-      return null;
-    }
+    return (isset($this->getValues[$key])) ? $this->getValues[$key] : null;
   }
   
   public function setPostValue($key, $value)
   {
-    $this->postValues[$key] = $value;
+    $this->postValues[$key] = ($value === "") ? null : $value;
   }
   
   public function setPostValues(array $values)
   {
+    foreach ($values as $key => $value) {
+      $values[$key] = ($value === "") ? null : $value;
+    }
+    
     $this->postValues = $values;
   }
   
@@ -240,57 +237,35 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function fetchPostValue($key)
   {
-    if (array_key_exists($key, $this->postValues)) {
-      $value = $this->postValues[$key];
-      return ($value === "") ? null : $value;
-    } else {
-      return null;
-    }
+    return (isset($this->postValues[$key])) ? $this->postValues[$key] : null;
   }
   
   public function fetchPostValues()
   {
-    if (count($this->postValues) === 0) return array();
-    
-    foreach ($this->postValues as &$value) {
-      if ($value === "") $value = null;
-    }
-    
     return $this->postValues;
   }
   
   public function setParameterValue($key, $value)
   {
-    $this->parameterValues[$key] = $value;
-    
-    return $this;
+    $this->parameterValues[$key] = ($value === "") ? null : $value;
   }
   
   public function setParameterValues(array $values)
   {
-    $this->parameterValues = $values;
+    foreach ($values as $key => $value) {
+      $values[$key] = ($value === "") ? null : $value;
+    }
     
-    return $this;
+    $this->parameterValues = $values;
   }
   
   public function fetchParameterValue($key)
   {
-    if (isset($this->parameterValues[$key])) {
-      $value = $this->parameterValues[$key];
-      return ($value === "") ? null : $value;
-    } else {
-      return null;
-    }
+    return (isset($this->parameterValues[$key])) ? $this->parameterValues[$key] : null;
   }
   
   public function fetchParameterValues()
   {
-    if (count($this->parameterValues) === 0) return array();
-    
-    foreach ($this->parameterValues as &$value) {
-      if ($value === "") $value = null;
-    }
-    
     return $this->parameterValues;
   }
   
@@ -306,7 +281,8 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     foreach ($values as $value) {
       if (isset($value[$key])) {
         if ($result !== null) {
-          throw new Sabel_Exception_Runtime("duplicate request key.");
+          $message = __METHOD__ . "() duplicate request key.";
+          throw new Sabel_Exception_Runtime($message);
         } else {
           $result = $value[$key];
         }
@@ -323,7 +299,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
   
   public function getHttpHeader($name)
   {
-    $key = strtoupper("http_" . str_replace("-", "_", $name));
+    $key = "HTTP_" . strtoupper(str_replace("-", "_", $name));
     return (isset($this->httpHeaders[$key])) ? $this->httpHeaders[$key] : null;
   }
   

@@ -14,11 +14,17 @@ class Sabel_Request_Validator extends Sabel_Object
   protected $validators = array();
   protected $suites = array();
   protected $values = array();
+  protected $failed = false;
   protected $errors = array();
   
   public function set($name, $checker)
   {
     $this->validators[$name] = $checker;
+  }
+  
+  public function isFailed()
+  {
+    return $this->failed;
   }
   
   public function hasError()
@@ -49,24 +55,41 @@ class Sabel_Request_Validator extends Sabel_Object
     }
     
     foreach ($values as $name => $value) {
-      if (isset($validators[$name])) {
-        $checker = $validators[$name];
-        if (is_string($checker)) $checker = array($checker);
-        
-        foreach ($checker as $method) {
-          if (isset($suites[$method])) {
-            foreach ($suites[$method] as $check) {
-              $message = $this->$check($name, $value);
-              if ($message !== null) $errors[] = $message;
-            }
-          } else {
-            $message = $this->$method($name, $value);
+      if (!isset($validators[$name])) continue;
+      
+      $checker = $validators[$name];
+      if (is_string($checker)) $checker = array($checker);
+      
+      foreach ($checker as $method) {
+        if (strpos($method, "::") !== false) {
+          list ($name, $exp) = explode("::", $method);
+          switch (strtolower($name)) {
+            case "regex":
+            case "regexp":
+              if (preg_match($exp, $value) === 0) {
+                $this->failed = true;
+              }
+              break;
+            
+            default:
+              $message = __METHOD__ . "() validation by $name is not supported.";
+              throw new Sabel_Exception_Runtime($message);
+          }
+        } elseif (isset($suites[$method])) {
+          foreach ($suites[$method] as $check) {
+            $message = $this->$check($name, $value);
             if ($message !== null) $errors[] = $message;
           }
+        } else {
+          $message = $this->$method($name, $value);
+          if ($message !== null) $errors[] = $message;
         }
       }
     }
     
-    return $this->errors = $errors;
+    $this->errors = $errors;
+    if (!empty($errors)) $this->failed = true;
+    
+    return !$this->failed;
   }
 }

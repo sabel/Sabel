@@ -69,7 +69,6 @@ class Processor_Controller extends Sabel_Bus_Processor
     if ($controller->isRedirected()) {
       $redirector = $controller->getRedirector();
       $request = $controller->getRequest();
-      $host = $request->getHttpHeader("host");
       
       if (($url = $redirector->getUrl()) !== "") {
         return $bus->get("response")->setLocation($url);
@@ -98,7 +97,7 @@ class Processor_Controller extends Sabel_Bus_Processor
         $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
       }
       
-      $bus->get("response")->setLocation($ignored . $to, $host);
+      $bus->get("response")->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
     }
   }
 }

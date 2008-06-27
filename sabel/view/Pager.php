@@ -6,55 +6,35 @@
  * @category   Template
  * @package    org.sabel.template
  * @author     Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
  * @copyright  2004-2008 Hamanaka Kazuhiro <hamanaka.kazuhiro@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 class Sabel_View_Pager extends Sabel_Object
 {
-  private static $instance = null;
-  
   private $pageItem     = 25;
-  private $pageNumber   = 0;
   private $numberOfItem = 0;
+  private $pageNumber   = 0;
+  private $totalPageNumber = 0;
   
-  private function __construct($count, $limit)
+  public function __construct($count, $limit)
   {
-    if (isset($count)) $this->setNumberOfItem($count);
-    if (isset($limit)) $this->setLimit($limit);
+    $this->setNumberOfItem($count);
+    $this->setLimit($limit);
+    
+    $this->totalPageNumber = (int)ceil(max($this->numberOfItem / $this->pageItem, 1));
   }
   
-  public static function create($count = null, $limit = null)
+  public function setNumberOfItem($num)
   {
-    if (self::$instance === null || isset($count, $limit))
-      self::$instance = new self($count, $limit);
-    return self::$instance;
-  }
-  
-  public function __set($key, $value)
-  {
-    $method = "set" . ucfirst($key);
-    if (method_exists($this, $method)) $this->$method($value);
-  }
-  
-  public function __get($key)
-  {
-    $method = "get" . ucfirst($key);
-    if (method_exists($this, $method)) return $this->$method();
-  }
-  
-  public function __call($key, $args)
-  {
-    $method = "set" . ucfirst($key);
-    if (method_exists($this, $method)) $this->$method($args[0]);
-  }
-  
-  public function setNumberOfItem($item)
-  {
-    if ($item < 0 || !is_numeric($item)) {
-      throw new Sabel_Exception_InvalidArgument("invalid number of item: " . $item);
+    if ($num < 0 || !is_numeric($num)) {
+      $message = __METHOD__ . "() invalid number of item: $num";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    $this->numberOfItem =(int) $item;
+    $this->numberOfItem = (int)$num;
+    
+    return $this;
   }
   
   public function getNumberOfItem()
@@ -64,7 +44,9 @@ class Sabel_View_Pager extends Sabel_Object
   
   public function setLimit($limit)
   {
-    $this->pageItem =(int) max($limit, 1);
+    $this->pageItem = (int)max($limit, 1);
+    
+    return $this;
   }
   
   public function getLimit()
@@ -74,21 +56,27 @@ class Sabel_View_Pager extends Sabel_Object
   
   public function setPageNumber($page)
   {
-    $this->pageNumber =(int) max($page, 1);
+    if ($page > $this->totalPageNumber) {
+      $this->pageNumber = $this->totalPageNumber;
+    } else {
+      $this->pageNumber = (int)max($page, 1);
+    }
+    
+    return $this;
   }
   
   public function getPageNumber()
   {
-    return (int) max(min($this->getTotalPageNumber(), $this->pageNumber), 1);
+    return $this->pageNumber;
   }
   
   public function getTotalPageNumber()
   {
-    return (int) ceil(max($this->numberOfItem / $this->pageItem, 1));
+    return $this->totalPageNumber;
   }
   
   public function getSqlOffset()
   {
-    return (int) floor($this->pageItem * ($this->getPageNumber() - 1));
+    return (int)floor($this->pageItem * ($this->getPageNumber() - 1));
   }
 }

@@ -1,16 +1,127 @@
-body {
-  padding: 0;
-  margin: 0;
-  font: .8em Arial, sans-serif;
-  line-height: 1.5em;
-  background: #fff url("images/top.jpg") repeat-x top;
-  color: #454545;
+/** --------------------
+ * 余白
+ */
+blockquote,
+body,
+code,
+samp,
+dd,
+dir,
+div,
+dl,
+dt,
+fieldset,
+form,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+li,
+legend,
+marquee,
+menu,
+ol,
+p,
+pre,
+td,
+th,
+ul {
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
 }
 
+/** --------------------
+ * 外枠
+ */
+fieldset,
+frame,
+frameset,
 img {
-  border: 0;
+  border-width: 0px 0px 0px 0px;
+  border-style: none none none none;
 }
 
+/** --------------------
+ * IE6,7用 文字の大きさを補正
+ */
+code,
+kbd,
+pre,
+samp,
+tt {
+  font-size: 100%;
+}
+
+/** --------------------
+ * 見出し
+ */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: normal;
+}
+
+/** --------------------
+ * 文書作成者やサイト運営者の連絡先、文書に関する情報
+ */
+address {
+  font-style: normal;
+}
+
+/** --------------------
+ *  テーブル
+ */
+table {
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+table,
+th,
+td {
+  border: 1px solid;
+}
+
+caption {
+  text-align: center;
+  caption-side: top;
+}
+
+th {
+  vertical-align: top;
+  font-weight: normal;
+  text-align: left;
+  empty-cells: show;
+}
+
+td {
+  vertical-align: top;
+  text-align: left;
+  empty-cells: show;
+}
+
+/** --------------------
+ * 整形済みテキスト
+ */
+pre {
+  white-space: pre;
+}
+
+/**
+ * IE6,7用 letter-spacingを指定した要素内で連続したbr要素の偶数個目が無視されるバグの回避
+ */
+br {
+  letter-spacing: normal;
+}
+
+/**
+ * 水平線
+ */
 hr {
   height: 1px;
   border-style: none;
@@ -19,45 +130,46 @@ hr {
   margin: 10px 0;
 }
 
-/* header */
-#header {
-  padding-top: 20px;
-  background: transparent;
-  height: 101px;
-  margin-left: 50px;
+/** --------------------
+ * body
+ */
+body {
+  line-height: 1.1;
+  color: #444;
+  background: #fff url("images/headerBg.gif") repeat-x 0 0;
+  font-family: メイリオ,Meiryo,"ヒラギノ角ゴ Pro W3","Hiragino Kaku Gothic Pro",Osaka−等幅,Osaka-Mono,"ＭＳ Ｐゴシック","MS PGothic",Sans-Serif;
+  font-size: small;
 }
 
-#header h1 {
-  font: bold 1.8em Arial, Sans-Serif;
-  padding: 4px 0;
-  margin: 0;
-  letter-spacing: 1px;
-  color: #FFF;
+/** --------------------
+ * header
+ */
+div#header {
+  margin-bottom: 5px;
+  padding-bottom: 14px;
 }
 
-#header h2 {
-  font: bold 1.2em Arial, Sans-Serif;
-  letter-spacing: 0px;
-  color: #FFF;
-  margin: 0;
-  padding: 0;
+div#header h1 {
+  height: 80px;
+  background: url("images/headerLogo.gif") no-repeat 0 0;
+  text-indent: -9999px;
 }
 
-/* main area */
-
-div.content {
-  margin: 0px auto;
+/** --------------------
+ * contents
+ */
+div#contents {
+  margin: 0 auto;
   width: 770px;
+  line-height: 1.6;
+  min-height: 350px;
 }
 
-#contents {
-  background: #FFF;
-  margin-bottom: 10px;
-  width: 770px;
+.ie_6 div#contents {
+  height: 350px;
 }
 
 #contents table.sbl_basicTable {
-  border-collapse: collapse;
   width: 90%;
 }
 
@@ -75,34 +187,97 @@ fieldset.formField {
   border: none;
 }
 
+/** --------------------
+ * error
+ */
 div.sbl_error {
-  margin-bottom: 15px;
-  padding: 10px 10px 10px 15px;
-  background-color: #ffe8e8;
-  border: 3px solid #cc5555;
+  margin: 5px 40px;
+  padding: 10px;
+  border: 2px solid #cc6655;
+  background-color: #feeae6;
 }
 
 div.sbl_error ul {
-  margin: 0 0 0 10px;
+  list-style-type: none;
 }
 
 div.sbl_error ul li {
-  padding-left: 5px;
-  line-height: 1.4;
+  padding-left: 13px;
+  background: url("images/icon_1.gif") no-repeat 0 50%;
 }
 
-/* footer */
-#footer {
+
+/** --------------------
+ * pager
+ */
+div.sbl_pager {
+  margin: 10px 0;
+}
+
+div.sbl_pager::after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0px;
+  font-size: 0;
+  line-height: 0;
   clear: both;
-  border-top: 1px solid #DCDCDC;
-  margin: 0 0 3em 0;
-  color: #777;
-  background: #fff;
 }
 
-#footer .right {
-  float: right;
-  margin-top: 10px;
-  text-align: right;
-  background: #FFF;
+.ie_6 div.sbl_pager,
+.ie_7 div.sbl_pager {
+  zoom: 1;
+}
+
+div.sbl_pager span,
+div.sbl_pager a {
+  margin-right: 5px;
+  padding: 1px 7px;
+  border: 1px solid #999;
+  display: block;
+  float: left;
+  color: #999;
+  text-decoration: none;
+}
+
+div.sbl_pager span {
+  background-color: #eee;
+  font-weight: bold;
+}
+
+div.sbl_pager a {
+  text-decoration: none;
+}
+
+div.sbl_pager a.prev,
+div.sbl_pager a.next {
+  background: #fbfbfb url("images/pagerBg.gif") repeat-x 0 100%;
+}
+
+div.sbl_pager a.prev {
+  margin-right: 10px;
+}
+
+div.sbl_pager a.next {
+  margin-right: 0px;
+  margin-left: 5px;
+}
+
+div.sbl_pager a:hover {
+  color: #fff;
+  background: #999;
+}
+
+/** --------------------
+ * footer
+ */
+div#footer {
+  margin-top: 5px;
+  padding: 12px 20px;
+  background: #fff url("images/footerBg.gif") repeat-x 0 0;
+  text-align: center;
+}
+
+div#footer p {
+  margin-top: 5px;
 }

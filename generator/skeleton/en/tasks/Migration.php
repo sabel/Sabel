@@ -31,9 +31,7 @@ class Migration extends Sabel_Sakle_Task
       exit;
     }
     
-    if (!defined("ENVIRONMENT")) {
-      define("ENVIRONMENT", $this->getEnvironment());
-    }
+    $this->defineEnvironment($this->arguments[0]);
     
     Sabel_DB_Config::initialize(new Config_Database());
     $directory = $this->defineMigrationDirectory();
@@ -122,17 +120,6 @@ class Migration extends Sabel_Sakle_Task
     Sabel_DB_Migration_Manager::setDirectory($dir);
     
     return $dir;
-  }
-  
-  protected function getEnvironment()
-  {
-    $inputEnv = $this->arguments[0];
-    if (($env = environment($inputEnv)) === null) {
-      $this->error("invalid environment. use 'development' or 'test', 'production'.");
-      exit;
-    }
-    
-    return $env;
   }
   
   protected function _execMigration()

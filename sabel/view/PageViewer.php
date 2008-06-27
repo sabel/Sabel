@@ -11,24 +11,23 @@
  */
 class Sabel_View_PageViewer extends Sabel_Object implements Iterator
 {
-  const PRIORITY_PREVIOUS = 0;
-  const PRIORITY_NEXT     = 1;
-  
   protected $pager    = null;
   protected $current  = 1;
+  protected $lastPage = 1;
   protected $window   = 10;
-  protected $priority = self::PRIORITY_PREVIOUS;
-  protected $igEmpty  = true;
-  
-  protected $start = 0;
-  protected $end   = 0;
-  
+  protected $start    = 0;
+  protected $end      = 0;
   protected $position = null;
   
-  public function __construct(Sabel_View_Pager $pager)
+  public function __construct(Sabel_View_Pager $pager, $window = null)
   {
-    $this->pager   = clone $pager;
-    $this->current = (int)$pager->pageNumber;
+    $this->pager    = clone $pager;
+    $this->current  = $pager->getPageNumber();
+    $this->lastPage = $pager->getTotalPageNumber();
+    
+    if (is_numeric($window)) {
+      $this->window = $window;
+    }
   }
   
   public function getCurrent()
@@ -38,7 +37,7 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function getNext()
   {
-    return (int)min($this->pager->getTotalPageNumber(), $this->current + 1);
+    return (int)min($this->lastPage, $this->current + 1);
   }
   
   public function getPrevious()
@@ -53,12 +52,12 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function getLast()
   {
-    return $this->pager->getTotalPageNumber();
+    return $this->lastPage;
   }
   
   public function isCurrent()
   {
-    return ($this->current === $this->pager->pageNumber);
+    return ($this->current === $this->pager->getPageNumber());
   }
   
   public function isFirst()
@@ -68,7 +67,7 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   
   public function isLast()
   {
-    return ($this->current === $this->pager->getTotalPageNumber());
+    return ($this->current === $this->lastPage);
   }
   
   public function hasNext()
@@ -84,21 +83,6 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   public function setWindow($size)
   {
     $this->window = (int)$size;
-  }
-  
-  public function setPriorityPrevious()
-  {
-    $this->priority = self::PRIORITY_PREVIOUS;
-  }
-  
-  public function setPriorityNext()
-  {
-    $this->priority = self::PRIORITY_NEXT;
-  }
-  
-  public function setIgnoreEmpty($flag)
-  {
-    $this->igEmpty = $flag;
   }
   
   public function current()
@@ -119,25 +103,22 @@ class Sabel_View_PageViewer extends Sabel_Object implements Iterator
   public function rewind()
   {
     $this->position = clone $this;
-    $plus = ($this->priority === self::PRIORITY_PREVIOUS) ? 0 : 1;
-    $this->start = (int)$this->current - floor(($this->window - $plus) / 2);
+    
+    $this->start = (int)$this->current - floor($this->window / 2);
     $this->end   = (int)$this->start + $this->window;
     
-    if (!$this->igEmpty) {
-      if ($this->start < 1) $this->start = 1;
-      if (($start = $this->pager->getTotalPageNumber() - $this->end + 1) < 0) {
-        $this->start = (int)$this->start + $start;
-      }
-      
-      $this->end = (int)$this->start + $this->window;
+    if ($this->start < 1) $this->start = 1;
+    
+    if (($start = $this->lastPage - $this->end + 1) < 0) {
+      $this->start = (int)$this->start + $start;
     }
     
+    $this->end = (int)$this->start + $this->window;
     $this->position->current = (int)max(1, $this->start);
   }
   
   public function valid()
   {
-    $endPageNum = (int)min($this->pager->getTotalPageNumber() + 1, $this->end);
-    return ($this->position->current < $endPageNum);
+    return ($this->position->current < (int)min($this->lastPage + 1, $this->end));
   }
 }

@@ -142,9 +142,7 @@ class Sabel_Mail extends Sabel_Object
   
   public function setTo($to)
   {
-    if (isset($this->headers["To"])) {
-      $this->headers["To"] = array();
-    }
+    $this->headers["To"] = array();
     
     if (is_string($to)) {
       $this->headers["To"] = array(array("address" => $to, "name" => ""));
@@ -272,12 +270,11 @@ class Sabel_Mail extends Sabel_Object
   {
     if ($this->isMbstringLoaded) {
       $enc = ($this->headerEncoding === "base64") ? "B" : "Q";
-      return mb_encode_mimeheader($header, $this->charset, $enc);
+      return mb_encode_mimeheader($header, $this->charset, $enc, self::$EOL);
     } elseif ($this->headerEncoding === "base64") {
       return "=?{$this->charset}?B?" . base64_encode($header) . "?=";
     } else {
       $quoted = Sabel_Mail_QuotedPrintable::encode($header, self::LINELENGTH, self::$EOL);
-      $quoted = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
       return "=?{$this->charset}?Q?{$quoted}?=";
     }
   }

@@ -1,33 +1,46 @@
 /**
  * Sabel Progress bar
  */
+.sbl_progress {
+  margin: 10px auto;
+  width: 500px;
+}
+
+.sbl_progress_border_frame {
+  padding: 0px 3px 4px 0px;
+  background: url("images/progressBarBg.gif") no-repeat 100% 100%;
+}
+
 .sbl_progress_border {
-	height: 20px;
-	border: 1px solid #336699;
-	position: relative;
-	width: 500px;
+  border: 1px solid #103058;
+  position: relative;
+  height: 24px;
+  background-color: #d8f2ff;
 }
 
 .sbl_progress_bar {
-	position: relative;
-	height: 100%;
-	background-color: #6699ff;
-	overflow: hidden;
-	width: 0;
+  position: relative;
+  height: 100%;
+  background: url("images/progressBar.gif") repeat-x 0 100%;
+  overflow: hidden;
+  width: 0;
 }
 
 .sbl_progress_text {
-	position: absolute;
-	text-align: center;
-	font-weight: bold;
-	width: 500px;
+  display: block;
+  position: absolute;
+  width: 495px;
+  color: #103058;
+  font-weight: bold;
+  text-align: center;
+  line-height: 24px;
 }
 
 .sbl_progress_bar .sbl_progress_text {
-	color: white;
+  color: #fff;
 }
 
 .sbl_progress_status {
-	position: relative;
-	text-align: right;
+  font-size: x-small;
+  text-align: right;
 }

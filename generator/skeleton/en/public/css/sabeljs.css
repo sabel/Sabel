@@ -1,0 +1,102 @@
+.sbl_calendar {
+  border: solid #444;
+  border-width: 1px 0 0 1px;
+  width: 287px;
+}
+
+.sbl_calendar .sbl_cal_header {
+  padding: 2px;
+  border: solid #444;
+  border-width: 0 1px 1px 0;
+  position: relative;
+  color: #835e4c;
+  font-weight: bold;
+  text-align: center;
+}
+
+* html .sbl_calendar .sbl_cal_header,
+* html .sbl_calendar .sbl_cal_weekdays,
+* html .sbl_calendar .sbl_cal_days {
+  zoom: 1;
+}
+
+*+html .sbl_calendar .sbl_cal_header,
+*+html .sbl_calendar .sbl_cal_weekdays,
+*+html .sbl_calendar .sbl_cal_days {
+  zoom: 1;
+}
+
+.sbl_calendar .sbl_cal_header::after,
+.sbl_calendar .sbl_cal_weekdays::after,
+.sbl_calendar .sbl_cal_days::after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0px;
+  font-size: 0;
+  line-height: 0;
+  clear: both;
+}
+
+.sbl_calendar .sbl_cal_header a.sbl_page_l {
+  position: absolute;
+  width: 60px;
+  height: 15px;
+  top: 4px;
+  left: 4px;
+  background: url("/images/js/calL.gif") no-repeat 0 0;
+  cursor: pointer;
+}
+
+.sbl_calendar .sbl_cal_header a.sbl_page_r {
+  position: absolute;
+  width: 60px;
+  height: 15px;
+  top: 4px;
+  right: 4px;
+  background: url("/images/js/calR.gif") no-repeat 100% 0;
+  cursor: pointer;
+}
+
+.sbl_calendar .selected {
+  background-color: #b99068;
+}
+
+.sbl_calendar .hover {
+  background-color: #decebe;
+}
+
+.sbl_calendar .sbl_cal_weekdays div,
+.sbl_calendar div.selectable,
+.sbl_calendar div.nonselectable {
+  padding: 0px 2px;
+  float: left;
+  width: 36px;
+  border: solid #444;
+  border-width: 0 1px 1px 0;
+  overflow: hidden;
+}
+
+.sbl_calendar div.selectable,
+.sbl_calendar div.nonselectable {
+  text-align: right;
+}
+
+.sbl_calendar .sbl_cal_weekdays div {
+  color: #835e4c;
+  background-color: #fbf6e0;
+  font-weight: bold;
+  text-align: center;
+}
+
+.sbl_calendar div.nonselectable {
+  color: #bbb;
+}
+
+#calendarB .sbl_calendar div.saturday {
+  background-color: #e0e8fb;
+}
+
+#calendarB .sbl_calendar div.sunday {
+  background-color: #fbe3e0;
+}

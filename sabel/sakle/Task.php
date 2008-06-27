@@ -39,4 +39,26 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   {
     echo Sabel_Console::error($msg);
   }
+  
+  protected function defineEnvironment($strenv)
+  {
+    if (($env = environment($strenv)) === null) {
+      $message = __METHOD__ . "() $strenv is not valid environment. "
+               . "Use development, test or production.";
+      
+      throw new Sabel_Sakle_Exception($message);
+    } elseif (!defined("ENVIRONMENT")) {
+      define("ENVIRONMENT", $env);
+    }
+  }
+  
+  protected function defineEnvironmentByOption($opt = "e", $default = DEVELOPMENT)
+  {
+    if (Sabel_Console::hasOption($opt, $this->arguments)) {
+      $opts = Sabel_Console::getOption($opt, $this->arguments);
+      $this->defineEnvironment($opts[0]);
+    } elseif (!defined("ENVIRONMENT")) {
+      define("ENVIRONMENT", $default);
+    }
+  }
 }

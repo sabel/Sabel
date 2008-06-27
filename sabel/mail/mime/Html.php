@@ -77,28 +77,4 @@ class Sabel_Mail_Mime_Html extends Sabel_Mail_Mime_Abstract
     
     return implode($eol, $part);
   }
-  
-  /**
-   * @return string
-   */
-  public function getEncodedContent()
-  {
-    $content = $this->content;
-    if (extension_loaded("mbstring")) {
-      $content = mb_convert_encoding($content, $this->charset);
-    }
-    
-    $eol = Sabel_Mail::getEol();
-    switch (strtolower($this->encoding)) {
-      case "base64":
-        $content = rtrim(chunk_split(base64_encode($content), Sabel_Mail::LINELENGTH, $eol));
-        break;
-      case "quoted-printable":
-        $quoted  = Sabel_Mail_QuotedPrintable::encode($content, Sabel_Mail::LINELENGTH, $eol);
-        $content = str_replace(array("?", " "), array("=3F", "=20"), $quoted);
-        break;
-    }
-    
-    return $content;
-  }
 }

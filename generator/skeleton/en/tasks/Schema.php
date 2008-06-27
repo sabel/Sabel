@@ -16,16 +16,8 @@ class Schema extends Sabel_Sakle_Task
     clearstatcache();
     $this->checkInputs();
     
-    $outputDir   = RUN_BASE . DS . LIB_DIR_NAME . DS . "schema";
-    $environment = environment(strtolower($this->arguments[0]));
-    
-    if ($environment === null) {
-      $this->error("invalid environment.");
-      $this->usage();
-      exit;
-    }
-    
-    define("ENVIRONMENT", $environment);
+    $outputDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "schema";
+    $this->defineEnvironment($this->arguments[0]);
     Sabel_DB_Config::initialize(new Config_Database());
     
     $opTables = $this->getOutputTables();

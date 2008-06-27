@@ -18,11 +18,6 @@ class Processor_View extends Sabel_Bus_Processor
    */
   private $view = null;
   
-  /**
-   * @var boolean
-   */
-  private $isAjax = false;
-  
   public function execute($bus)
   {
     $controller = $bus->get("controller");
@@ -31,8 +26,9 @@ class Processor_View extends Sabel_Bus_Processor
     $response  = $bus->get("response");
     $responses = $response->getResponses();
     
-    $this->isAjax = ($bus->get("request")->getHttpHeader("X-Requested-With") === "XMLHttpRequest");
-    $view = $this->getView($response->getStatus(), $bus->get("destination")->getAction());
+    $view = $this->getView($response->getStatus(),
+                           $bus->get("destination")->getAction(),
+                           $bus->get("isAjaxRequest") === true);
     
     if ($controller->renderText) {
       $renderer = $view->getRenderer();
@@ -57,10 +53,13 @@ class Processor_View extends Sabel_Bus_Processor
     
     $layout = $controller->getAttribute("layout");
     
-    if ($layout === false || $this->isAjax) {
+    if ($bus->get("noLayout")) {
       $bus->set("result", $contents);
     } else {
-      if ($layout === null) $layout = DEFAULT_LAYOUT_NAME;
+      if (($layout = $controller->getAttribute("layout")) === null) {
+        $layout = DEFAULT_LAYOUT_NAME;
+      }
+      
       if ($location = $view->getValidLocation($layout)) {
         $responses["contentForLayout"] = $contents;
         $bus->set("result", $view->rendering($location, $responses));
@@ -96,7 +95,7 @@ class Processor_View extends Sabel_Bus_Processor
     $bus->get("controller")->setAttribute("view", $view);
   }
   
-  protected function getView($status, $action)
+  protected function getView($status, $action, $isAjax = false)
   {
     if ($status->isFailure()) {
       $tplName = lcfirst(str_replace(" ", "", $status->getReason()));
@@ -108,7 +107,7 @@ class Processor_View extends Sabel_Bus_Processor
         $this->view->setName("serverError");
       }
     } elseif ($this->view->getName() === "") {
-      $this->view->setName(($this->isAjax) ? "{$action}.ajax" : $action);
+      $this->view->setName(($isAjax) ? "{$action}.ajax" : $action);
     }
     
     return $this->view;

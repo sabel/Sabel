@@ -46,11 +46,25 @@ Sabel.QueryObject.prototype = {
 		return buf.join("&");
 	}
 };
+
+
 Sabel.Uri = function(uri)
 {
 	uri = uri || location.href;
 
 	var result = Sabel.Uri.pattern.exec(uri);
+
+	if (result === null) {
+		var urlPrefix = location.protocol + "//" + location.hostname;
+
+		if (uri[0] === "/") {
+			var uri = urlPrefix + uri;
+		} else {
+			var currentPath = location.pathname.substr(0, location.pathname.lastIndexOf("/")+1);
+			var uri = urlPrefix + currentPath + uri;
+		}
+		var result = Sabel.Uri.pattern.exec(uri);
+	}
 
 	for (var i = 0, len = result.length; i < len; i++) {
 		this[Sabel.Uri.keyNames[i]] = result[i] || "";
@@ -212,6 +226,7 @@ Sabel.UserAgent = new function() {
 		this.version = getVersion();
 	@else @*/
 	if (this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua)) {
+		this.isMozilla = true;
 		this.version = parseFloat(RegExp.$1);
 	} else if (this.isSafari = /Safari\/([\d.]+)/.test(ua)) {
 		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
@@ -522,7 +537,9 @@ Sabel.String = new Sabel.Class(String, {
 
 	format: function(obj) {
 		var pat = /(?:#\{(\w+)\}|%(\w+)%)/g;
-		return this._string.replace(pat, function(target, key) { return obj[key] || ""; });
+		return this._string.replace(pat, function(target, key) {
+			return (obj[key] !== undefined) ? obj[key] : "";
+		});
 	},
 
 	ucfirst: function() {
@@ -1211,6 +1228,15 @@ Sabel.Element.removeClass = function(element, className) {
 	return element;
 };
 
+Sabel.Element.replaceClass = function(element, oldClassName, newClassName) {
+	element = Sabel.get(element, false);
+	element.className = element.className.replace(
+		new RegExp("(^|\\s+)" + oldClassName + "(\\s+|$)"), "$1"+newClassName+"$2"
+	);
+
+	return element;
+};
+
 Sabel.Element.hasAttribute = function(element, attribute) {
 	element = Sabel.get(element, false);
 	if (element.hasAttribute) return element.hasAttribute(attribute);
@@ -1323,8 +1349,16 @@ Sabel.Element.getCumulativeTop = function(element) {
 		element = parent;
 		if (element) {
 			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (Sabel.UserAgent.isIE) {
-					position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
+				if (Sabel.UserAgent.isOpera) break;
+
+				if (document.compatMode === "CSS1Compat") {
+					var html = Sabel.find('html')[0];
+					position += parseInt(Sabel.Element.getStyle(html, "marginTop")) || 0;
+
+					if (Sabel.UserAgent.isIE) {
+						position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
+						position += parseInt(Sabel.Element.getStyle(html, "borderTopWidth")) || 0;
+					}
 				}
 				break;
 			}
@@ -1344,7 +1378,7 @@ Sabel.Element.getCumulativeLeft = function(element) {
 		position += element.offsetLeft;
 		parent = element.offsetParent;
 
-		if (Sabel.UserAgent.isIE || Sabel.UserAgent.isMozilla) {
+		if (Sabel.UserAgent.isOpera === false) {
 			var border = parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
 			position += border || 0;
 
@@ -1359,8 +1393,16 @@ Sabel.Element.getCumulativeLeft = function(element) {
 		element = parent;
 		if (element) {
 			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (Sabel.UserAgent.isIE) {
-					position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
+				if (Sabel.UserAgent.isOpera) break;
+
+				if (document.compatMode === "CSS1Compat") {
+					var html = Sabel.find('html')[0];
+					position += parseInt(Sabel.Element.getStyle(html, "marginLeft"));
+
+					if (Sabel.UserAgent.isIE) {
+						position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
+						position += parseInt(Sabel.Element.getStyle(html, "borderLeftWidth"));
+					}
 				}
 				break;
 			}
@@ -1443,6 +1485,27 @@ Sabel.Element.getWidth = function(element) {
 
 Sabel.Element.getHeight = function(element) {
 	return Sabel.Element.getDimensions(element).height;
+};
+
+Sabel.Element.getRegion = function(element) {
+	element = Sabel.get(element, false);
+	if (element.parentNode === null || element.offsetParent === null) {
+		return false;
+	}
+
+	var wh = Sabel.Element.getDimensions(element);
+
+	var top    = Sabel.Element.getCumulativeTop(element);
+	var left   = Sabel.Element.getCumulativeLeft(element);
+	var bottom = top + wh.height;
+	var right  = left + wh.width;
+
+	return {
+		top: top, right: right, bottom: bottom, left: left,
+		toString: function() {
+			return new Sabel.String("{top: #{top}, right: #{right}, bottom: #{bottom}, left: #{left}}").format(this);
+		}
+	};
 };
 
 Sabel.Element.remove = function(element) {
@@ -2114,6 +2177,10 @@ Sabel.Event.prototype = {
 	}
 };
 
+Sabel.Event.getTarget = function(evt) {
+	return evt.srcElement || evt.target;
+};
+
 Sabel.Event.stopPropagation = function(evt) {
 	evt.stopPropagation();
 };
@@ -2467,7 +2534,6 @@ Sabel.Cookie = {
 		}
 	}
 };
-Sabel.Util = {};
 
 Sabel.dump = function(element, limit)
 {
@@ -2895,3 +2961,133 @@ Sabel.Widget.Overlay.prototype = {
 };
 
 
+Sabel.Widget.Calendar = function() {
+	this.initialize.apply(this, arguments);
+};
+
+Sabel.Widget.Calendar.prototype = {
+	OneDay: (1000 * 60 * 60 * 24),
+	WeekDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+
+	date:        null,
+	rootElement: null,
+	options:     null,
+
+	initialize: function(rootElement, options)
+	{
+		this.date = new Date();
+		this.rootElement = Sabel.get(rootElement);
+		this.options = options || {};
+	},
+
+	prevMonth: function()
+	{
+		this.date.setMonth(this.date.getMonth() - 1);
+		this.render();
+	},
+
+	nextMonth: function()
+	{
+		this.date.setMonth(this.date.getMonth() + 1);
+		this.render();
+	},
+
+	mouseOver: function(target)
+	{
+		Sabel.Element.addClass(target, "hover");
+	},
+
+	mouseOut: function(target)
+	{
+		Sabel.Element.removeClass(target, "hover");
+	},
+
+	mouseDown: function(target)
+	{
+		var opt = this.options; // alias
+
+		if (opt.callback) {
+			var d = this.date; // alias
+			var cN = target.className.split(' ')[0];
+			opt.callback([d.getFullYear(), d.getMonth()+1, cN.substr(3)]);
+		}
+
+		var selected = Sabel.Dom.getElementsByClassName("selected", this.rootElement, true);
+		if (selected.length > 0)
+		Sabel.Element.removeClass(selected[0], "selected");
+
+		Sabel.Element.addClass(target, "selected");
+
+		this.rootElement.hide();
+	},
+
+	render: function(year, month, day)
+	{
+		year  = year || this.date.getFullYear();
+		month = (month > 0) ? month - 1 : this.date.getMonth();
+		var date = this.date = new Date(year, month, 1);
+
+		var tmpDate = new Date();
+		tmpDate.setTime(date.getTime() - (this.OneDay * date.getDay()));
+
+		var time = tmpDate.getTime();
+		var html = [];
+
+		html.push('<div class="sbl_calendar">');
+		html.push('  <div class="sbl_cal_header">');
+		html.push('    <a class="sbl_page_l">&#160;</a>');
+		html.push('    <span>&#160;' + year + '年' + (month+1) + '月&#160;</span>');
+		html.push('    <a class="sbl_page_r">&#160;</a>');
+		html.push('  </div>');
+		html.push('  <div class="sbl_cal_weekdays">');
+		for (var i=0; i<this.WeekDays.length; i++) {
+			html.push('<div>'+this.WeekDays[i]+'</div>');
+		}
+		html.push('  </div>');
+
+		html.push('  <div class="sbl_cal_days">');
+		for (var i=0; i<42; i++) {
+			tmpDate.setTime(time + (this.OneDay * i));
+			var cDate = tmpDate.getDate();
+
+			if (tmpDate.getMonth() === month) {
+				html.push("<div class='day" + cDate + " selectable'>" + cDate + "</div>");
+			} else {
+				html.push("<div class='nonselectable'>" + cDate + "</div>");
+			}
+		}
+		html.push('  </div>');
+		html.push('</div>');
+
+		this.rootElement.innerHTML = html.join("\n");
+		this.rootElement.show();
+
+		var find = Sabel.Dom.getElementsByClassName;
+
+		var l = find("sbl_page_l", this.rootElement, true).item(0);
+		l.observe("click", this.prevMonth, false, this);
+
+		var r = find("sbl_page_r", this.rootElement, true).item(0);
+		r.observe("click", this.nextMonth, false, this);
+
+		var es = find("selectable", this.rootElement, true);
+		for (var k=0; k<es.length; k++) {
+			var el = es[k];
+			Sabel.Element.observe(el, "mouseover", Sabel.Function.curry(this.mouseOver, el));
+			Sabel.Element.observe(el, "mouseout",  Sabel.Function.curry(this.mouseOut, el));
+			Sabel.Element.observe(el, "mousedown", Sabel.Function.bind(this.mouseDown, this, el));
+		}
+
+		if (day > 0) this.mouseDown(find("day"+day, this.rootElement)[0]);
+	},
+
+	show: function()
+	{
+		this.rootElement.show();
+	},
+
+	hide: function()
+	{
+		this.rootElement.hide();
+	}
+}

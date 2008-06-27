@@ -34,8 +34,7 @@ class Fixture extends Sabel_Sakle_Task
     }
     
     $method = $this->getFixtureMethod();
-    
-    $this->defineEnvironment();
+    $this->defineEnvironment($this->arguments[0]);
     Sabel_DB_Config::initialize(new Config_Database());
     
     if ($isExport) {
@@ -57,21 +56,10 @@ class Fixture extends Sabel_Sakle_Task
           $className = "Fixture_" . $fixtureName;
           $instance  = new $className();
           $instance->$method();
-          $this->success(strtoupper($method) . " " . $fixtureName);
+          $this->success(ucfirst($method) . " " . $fixtureName);
         } else {
           $this->error("no such fixture file. '{$filePath}'");
         }
-      }
-    }
-  }
-  
-  protected function defineEnvironment()
-  {
-    if (!defined("ENVIRONMENT")) {
-      if (($env = environment($this->arguments[0])) === null) {
-        $this->error("invalid environment. use 'development' or 'test', 'production'.");
-      } else {
-        define("ENVIRONMENT", $env);
       }
     }
   }
@@ -119,33 +107,29 @@ class Fixture extends Sabel_Sakle_Task
     
     foreach ($this->arguments as $mdlName) {
       $lines  = array();
-      $models = MODEL($mdlName)->select();
-      foreach ($models as $model) {
-        $data = $this->createLine($model->toArray());
-        $lines[] = '$model->insert(' . $data . ');';
-      }
       
       $code = array("<?php" . PHP_EOL);
-      $code[] = "class Fixture_{$mdlName}";
+      $code[] = "class Fixture_{$mdlName} extends Sabel_Test_Fixture";
       $code[] = "{";
       $code[] = "  public function upFixture()";
       $code[] = "  {";
-      $code[] = '    $model = MODEL("' . $mdlName . '");';
       
-      foreach ($lines as $line) {
-        $code[] = "    $line";
+      $models = MODEL($mdlName)->select();
+      foreach ($models as $model) {
+        $code[] = '    $this->insert(' . $this->createLine($model->toArray()) . ');';
       }
       
       $code[] = "  }" . PHP_EOL;
       $code[] = "  public function downFixture()";
       $code[] = "  {";
-      $code[] = '    $stmt = MODEL("' . $mdlName . '")->prepareStatement();';
-      $code[] = '    $stmt->setQuery("DELETE FROM ' . convert_to_tablename($mdlName) . '")->execute();';
+      $code[] = '    $this->deleteAll();';
       $code[] = "  }";
       $code[] = "}";
       
       $path = $this->fixturesDir . DS . $mdlName . ".php";
       file_put_contents($path, implode(PHP_EOL, $code));
+      
+      $this->success("export $mdlName Records to '" . substr($path, strlen(RUN_BASE) + 1) . "'");
     }
   }
   
@@ -154,7 +138,7 @@ class Fixture extends Sabel_Sakle_Task
     $line = array();
     foreach ($row as $col => $val) {
       if (is_string($val)) {
-        $val = "'{$val}'";
+        $val = '"' . str_replace('"', '\\"', $val) . '"';
       } elseif (is_bool($val)) {
         $val = ($val) ? "true" : "false";
       } elseif (is_null($val)) {

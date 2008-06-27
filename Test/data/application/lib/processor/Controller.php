@@ -2,8 +2,6 @@
 
 class TestProcessor_Controller extends Sabel_Bus_Processor
 {
-  const CONTROLLERS_DIR = "controllers";
-  
   public function execute($bus)
   {
     $destination = $bus->get("destination");
@@ -31,7 +29,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
   protected function createController($destination)
   {
     list ($module, $controller,) = $destination->toArray();
-    $class = ucfirst($module) . "_" . ucfirst(self::CONTROLLERS_DIR) . "_" . ucfirst($controller);
+    $class = ucfirst($module) . "_Controllers_" . ucfirst($controller);
     
     if (Sabel::using($class)) {
       l("create controller '{$class}'");
@@ -62,7 +60,7 @@ class TestProcessor_Controller extends Sabel_Bus_Processor
     if ($controller->isRedirected()) {
       $redirector = $controller->getRedirector();
       $request = $controller->getRequest();
-      $host = $request->getHttpHeader("host");
+      $host = $request->getHttpHeader("Server-Name");
       
       if (($url = $redirector->getUrl()) !== "") {
         return $bus->get("response")->setLocation($url);

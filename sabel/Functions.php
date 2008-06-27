@@ -62,6 +62,7 @@ function remove_nullbyte($arg)
 function get_temp_dir()
 {
   static $exists = null;
+  
   if ($exists === null) {
     $exists = function_exists("sys_get_temp_dir");
   }
@@ -121,12 +122,10 @@ function l($message, $level = SBL_LOG_INFO, $identifier = "default")
 function uri($uriParameter, $secure = false, $absolute = false)
 {
   $context = Sabel_Context::getContext();
+  $uriPrefix = "";
   
   if ($secure || $absolute) {
-    $protocol  = ($secure) ? "https" : "http";
-    $uriPrefix = $protocol . "://" . $context->getBus()->get("request")->getHttpHeader("host");
-  } else {
-    $uriPrefix = "";
+    $uriPrefix = (($secure) ? "https" : "http") . "://" . $_SERVER["SERVER_NAME"];
   }
   
   if (defined("URI_IGNORE")) {

@@ -12,8 +12,6 @@
 class Sabel_Mail_Sender_Smtp
   extends Sabel_Object implements Sabel_Mail_Sender_Interface
 {
-  const EOL = "\r\n";
-  
   /**
    * @var array
    */
@@ -24,10 +22,19 @@ class Sabel_Mail_Sender_Smtp
    */
   protected $smtp = null;
   
+  /**
+   * @var string
+   */
+  protected $eol = "\r\n";
+  
   public function __construct(array $config = array())
   {
     if (!isset($config["host"])) {
       $config["host"] = "localhost";
+    }
+    
+    if (isset($config["eol"])) {
+      $this->eol = $config["eol"];
     }
     
     $this->config = $config;
@@ -47,8 +54,8 @@ class Sabel_Mail_Sender_Smtp
     $this->sendRcptTo($headers);
     $this->command("DATA", "354");
     $this->sendHeaders($headers);
-    $this->command(self::EOL . $body);
-    $this->command(self::EOL . ".", "250");
+    $this->command($this->eol . $body);
+    $this->command($this->eol . ".", "250");
   }
   
   protected function connect()
@@ -190,7 +197,7 @@ class Sabel_Mail_Sender_Smtp
   
   protected function command($command, $expectedStatus = null)
   {
-    fwrite($this->smtp, $command . self::EOL);
+    fwrite($this->smtp, $command . $this->eol);
     
     if ($expectedStatus === null) {
       return true;

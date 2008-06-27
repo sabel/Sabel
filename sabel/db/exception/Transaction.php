@@ -11,5 +11,5 @@
  */
 class Sabel_DB_Exception_Transaction extends Sabel_DB_Exception
 {
-
+  
 }

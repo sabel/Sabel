@@ -111,19 +111,16 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
           $alter = $this->_decodeAlternativePart($part->content, $part->body);
           $mixed["body"] = $alter["body"];
           $mixed["html"] = $alter["html"];
-          $notBodyPart = true;
           break;
           
         case "multipart/related":
           $related = $this->_decodeRelatedPart($part->content, $part->body);
           if ($related["body"] !== null) $mixed["body"] = $related["body"];
           $mixed["html"] = $related["html"];
-          $notBodyPart = true;
           break;
           
         case "multipart/digest":
           $mixed["mails"] = $this->_decodeDigestPart($part->content, $part->body);
-          $notBodyPart = true;
           break;
           
         case "text/html":
@@ -141,7 +138,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         default:
           $enc  = $part->content->getEncoding();
           $cset = $part->content->getCharset();
-          $data = $this->decodeString($part->body, $enc, $cset);
+          $data = $this->decodeString($part->body, $enc, $cset, false);
           $file = new Sabel_Mail_Mime_File($part->content->getName(), $data, $part->type);
           $file->setCharset($cset);
           $file->setEncoding($enc);
@@ -149,6 +146,8 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
           $file->setHeaders($part->headers);
           $mixed["attachments"][] = $file;
       }
+      
+      $notBodyPart = true;
     }
     
     return $mixed;
@@ -212,7 +211,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         $related["html"] = $alter["html"];
       } else {  // inline images.
         $enc  = $part->content->getEncoding();
-        $body = $this->decodeString($part->body, $enc, $part->content->getCharset());
+        $body = $this->decodeString($part->body, $enc, $part->content->getCharset(), false);
         $cid  = (isset($part->headers["content-id"])) ? $part->headers["content-id"] : "";
         $related["html"]->addImage($cid, $body, $part->type, $enc);
       }
@@ -255,7 +254,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
     if ($ctype === "text/plain" || $ctype === "text/html") {
       $cset = $content->getCharset();
       $enc  = $content->getEncoding();
-      $body = $this->decodeString($body, $enc, $cset);
+      $body = $this->decodeString($body, $enc, $cset, false);
       $mime = ($ctype === "text/plain") ? new Sabel_Mail_Mime_Plain($body) : new Sabel_Mail_Mime_Html($body);
       $mime->setHeaders($headers);
       $mime->setCharset($cset);
@@ -303,7 +302,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
           $filename = null;
           if (isset($values["filename"])) {
             $filename = $values["filename"];
-          } elseif (isset($values["filename*0*"]) || isset($values["filename*0"])) {
+          } elseif (isset($values["filename*"]) || isset($values["filename*0*"]) || isset($values["filename*0"])) {
             $buffer = array();
             foreach ($values as $k => $v) {
               if (strpos($k, "filename*") !== false) {
@@ -493,7 +492,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
    *
    * @return string
    */
-  public function decodeString($str, $encoding, $charset)
+  public function decodeString($str, $encoding, $charset, $isHeader = true)
   {
     switch (strtolower($encoding)) {
       case "base64":
@@ -501,7 +500,7 @@ class Sabel_Mail_MimeDecode extends Sabel_Object
         break;
         
       case "quoted-printable":
-        $str = quoted_printable_decode($str);
+        $str = Sabel_Mail_QuotedPrintable::decode($str, $isHeader);
         break;
     }
     

@@ -39,5 +39,10 @@ class Processor_Request extends Sabel_Bus_Processor
     
     $request->setHttpHeaders($httpHeaders);
     $bus->set("request", $request);
+    
+    if ($request->getHttpHeader("X-Requested-With") === "XMLHttpRequest") {
+      $bus->set("noLayout",      true);
+      $bus->set("isAjaxRequest", true);
+    }
   }
 }

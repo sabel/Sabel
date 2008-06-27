@@ -93,7 +93,6 @@ class Test_Map_Match extends SabelTestCase
     
     $this->assertEquals("default", $candidate->getName());
     $this->assertEquals("index", $destination->getAction());
-    $this->assertEquals("index", $this->request->fetchParameterValue("action"));
   }
   
   public function testMatchWithDefaultPriority()
@@ -308,9 +307,10 @@ class Test_Map_Match extends SabelTestCase
          ->module("manage");
     
     $candidate = $this->routing("admin/test/test");
+    $destination = $candidate->getDestination();
     $this->assertEquals("admin", $candidate->getName());
-    $this->assertEquals("test",  $this->request->fetchParameterValue("controller"));
-    $this->assertEquals("test",  $this->request->fetchParameterValue("action"));
+    $this->assertEquals("test",  $destination->getController());
+    $this->assertEquals("test",  $destination->getAction());
     $this->assertEquals("param", $this->request->fetchParameterValue("param"));
     
     $candidate = $this->routing("manage/test/test");
@@ -357,9 +357,7 @@ class Test_Map_Match extends SabelTestCase
       throw new Sabel_Exception_Runtime("map not match.");
     }
     
-    foreach ($candidate->getUriParameters() as $name => $value) {
-      $request->setParameterValue($name, $value);
-    }
+    $request->setParameterValues($candidate->getUriParameters());
     
     return $candidate;
   }
