@@ -13,6 +13,8 @@ require_once ("Test/Aspect/StaticProxy.php");
 require_once ("Test/Aspect/Pointcuts.php");
 require_once ("Test/Aspect/Matcher.php");
 
+require_once ("Test/Aspect/classes/All.php");
+
 /**
  *
  * @category  Aspect
