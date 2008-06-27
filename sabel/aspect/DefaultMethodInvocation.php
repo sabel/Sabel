@@ -71,7 +71,11 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
    */
   public function getMethod()
   {
-    return $this->reflection->getMethod($this->method);
+    try {
+      return $this->reflection->getMethod($this->method);
+    } catch (ReflectionException $e) {
+      return new Sabel_Reflection_DummyMethod($this->method);
+    }
   }
   
   /**
@@ -95,9 +99,18 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
   public function proceed()
   {
     if ($this->lastAdviceIndex === -1 || $this->currentAdviceIndex === $this->lastAdviceIndex - 1) {
-      return $this->reflection
-                  ->getMethod($this->method)
-                  ->invokeArgs($this->class, $this->argument);
+      
+      try {
+        $method = $this->reflection->getMethod($this->method);
+        return $method->invokeArgs($this->class, $this->argument);
+      } catch (ReflectionException $e) {
+        $method = $this->method;
+        foreach ($this->advices as $advice) {
+          if ($advice instanceof Sabel_Aspect_IntroductionInterceptor) {
+            $advice->$method();
+          }
+        }
+      }
     }
     
     if (isset($this->advices[++$this->currentAdviceIndex])) {
@@ -109,5 +122,19 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
         throw new Sabel_Exception_Runtime("advice must be Sabel_Aspect_MethodInterceptor");
       }
     }
+  }
+}
+
+class Sabel_Reflection_DummyMethod
+{
+  private $name = "";
+  public function __construct($name)
+  {
+    $this->name = $name;
+  }
+  
+  public function getName()
+  {
+    return $this->name;
   }
 }
