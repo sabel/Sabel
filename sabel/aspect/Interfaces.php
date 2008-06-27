@@ -50,6 +50,14 @@ interface Sabel_Aspect_BeforeAdvice extends Sabel_Aspect_Advice
 {
 }
 
+interface Sabel_Aspect_AfterAdvice extends Sabel_Aspect_Advice
+{
+}
+
+interface Sabel_Aspect_ThrowsAdvice extends Sabel_Aspect_Advice
+{
+}
+
 /**
  * @see org.aopalliance.aop.MethodInterceptor
  */
@@ -64,10 +72,19 @@ interface Sabel_Aspect_Advisor
   public function isPerInstance();
 }
 
-
 interface Sabel_Aspect_MethodBeforeAdvice extends Sabel_Aspect_BeforeAdvice
 {
   public function before($method, $arguments, $target);
+}
+
+interface Sabel_Aspect_MethodAfterReturningAdvice extends Sabel_Aspect_BeforeAdvice
+{
+  public function after($method, $arguments, $target, $returnValue);
+}
+
+interface Sabel_Aspect_MethodThrowsAdvice extends Sabel_Aspect_ThrowsAdvice
+{
+  public function throws($method, $arguments, $target, $exception);
 }
 
 interface Sabel_Aspect_PointcutAdvisor extends Sabel_Aspect_Advisor
@@ -131,7 +148,7 @@ abstract class Sabel_Aspect_Pointcuts
 
 abstract class Sabel_Aspect_AbstractPointcut implements Sabel_Aspect_Pointcut
 {
-  protected $classMatcher = null;
+  protected $classMatcher  = null;
   protected $methodMatcher = null;
   
   public function setClassMatcher(Sabel_Aspect_ClassMatcher $matcher)
@@ -156,14 +173,14 @@ abstract class Sabel_Aspect_AbstractProxy
   public function __construct($targetObject)
   {
     $this->target = $targetObject;
-    $this->setupInvocation();
+    $this->__setupInvocation();
     
     if (!$this->invocation instanceof Sabel_Aspect_MethodInvocation) {
       throw new Sabel_Exception_Runtime("invocation must be setup");
     }
   }
   
-  abstract protected function setupInvocation();
+  abstract protected function __setupInvocation();
   
   public function __getTarget()
   {

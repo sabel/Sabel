@@ -2,7 +2,7 @@
 
 class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
 {
-  protected function setupInvocation()
+  protected function __setupInvocation()
   {
     $this->invocation = new Sabel_Aspect_DefaultMethodInvocation($this, $this->target);
   }

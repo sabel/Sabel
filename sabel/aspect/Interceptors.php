@@ -1,5 +1,69 @@
 <?php
 
+class Sabel_Aspect_MethodBeforeAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
+{
+  private $interceptor = null;
+  
+  public function __construct(Sabel_Aspect_MethodBeforeAdvice $interceptor)
+  {
+    $this->interceptor = $interceptor;
+  }
+  
+  /**
+   * implements Sabel_Aspect_MethodInterceptor
+   */
+  public function invoke(Sabel_Aspect_MethodInvocation $i)
+  {
+    $this->interceptor->before($i->getMethod(), $i->getArguments(), $i->getThis());
+    return $i->proceed();
+  }
+}
+
+class Sabel_Aspect_MethodAfterReturningAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
+{
+  private $interceptor = null;
+  
+  public function __construct(Sabel_Aspect_MethodAfterReturingAdvice $interceptor)
+  {
+    $this->interceptor = $interceptor;
+  }
+  
+  /**
+   * implements Sabel_Aspect_MethodInterceptor
+   */
+  public function invoke(Sabel_Aspect_MethodInvocation $i)
+  {
+    $return = $i->proceed();
+    
+    $this->interceptor->after($i->getMethod(), $i->getArguments(), $i->getThis(), $return);
+    
+    return $return;
+  }
+}
+
+class Sabel_Aspect_MethodThrowsAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
+{
+  private $interceptor = null;
+  
+  public function __construct(Sabel_Aspect_MethodThrowsAdvice $interceptor)
+  {
+    $this->interceptor = $interceptor;
+  }
+  
+  /**
+   * implements Sabel_Aspect_MethodInterceptor
+   */
+  public function invoke(Sabel_Aspect_MethodInvocation $i)
+  {
+    try {
+      return $i->proceed();
+    } catch (Exception $e) {
+      $this->interceptor->throws($i->getMethod(), $i->getArguments(), $i->getThis(), $e);
+    }
+  }
+}
+
+
 class Logger
 {
   public function trace($msg)

@@ -219,12 +219,13 @@ class Test_Aspect extends SabelTestCase
   
   public function testSimpleBeforeAdvice()
   {
-    $weaver = new Sabel_Aspect_StaticWeaver("Sabel_Tests_Aspect_TargetClass");
+    $weaver = new Sabel_Aspect_StaticWeaver("Sabel_Tests_Aspect_TargetClass2");
     $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
     $advisor->setClassMatchPattern("/.+/U");
     $advisor->setMethodMatchPattern("/get+/");
     
     $beforeAdvice = new Sabel_Tests_Aspect_SimpleBeforeAdvice();
+    $advisor->addAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
     $advisor->addAdvice($beforeAdvice);
     
     $weaver->addAdvisor($advisor);
@@ -235,6 +236,17 @@ class Test_Aspect extends SabelTestCase
     $target->getY();
     
     $this->assertEquals(array("getX", "getY"), $beforeAdvice->getCalledMethods());
+  }
+  
+  public function testAdvices()
+  {
+    $advices = new Sabel_Aspect_Advices();
+    $advices->addAdvice(new Sabel_Aspect_SimpleTraceInterceptor());
+    $advices->addAdvice(new Sabel_Tests_Aspect_SimpleBeforeAdvice());
+    
+    foreach ($advices->toArray() as $advice) {
+      $this->assertTrue($advice instanceof Sabel_Aspect_Advice);
+    }
   }
   
   public function testSimpleIntroduce()
@@ -287,6 +299,10 @@ class Sabel_Tests_Aspect_TargetClass
   public function getName()
   {
   }
+}
+
+class Sabel_Tests_Aspect_TargetClass2 extends Sabel_Tests_Aspect_TargetClass
+{
 }
 
 class StaticPointcut implements Sabel_Aspect_Pointcut

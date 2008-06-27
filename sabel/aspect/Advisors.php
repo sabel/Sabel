@@ -26,6 +26,41 @@ class Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
   }
 }
 
+class Sabel_Aspect_Advices
+{
+  private $advices = array();
+  
+  public function addAdvice(Sabel_Aspect_Advice $advice)
+  {
+    if ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
+      $this->advices[] = new Sabel_Aspect_MethodBeforeAdviceInterceptor($advice);
+    } elseif ($advice instanceof Sabel_Aspect_MethodInterceptor) {
+      $this->advices[] = $advice;
+    }
+  }
+  
+  public function getAdvices()
+  {
+    return $this->advices;
+  }
+  
+  public function toArray()
+  {
+    return $this->advices;
+  }
+  
+  public function __toString()
+  {
+    $buffer = array();
+    
+    foreach ($this->advices as $advice) {
+      $buffer[] =(string) $advice;
+    }
+    
+    return join("\n", $buffer);
+  }
+}
+
 class Sabel_Aspect_RegexMatcherPointcutAdvisor
     implements Sabel_Aspect_PointcutAdvisor
 {
@@ -54,9 +89,13 @@ class Sabel_Aspect_RegexMatcherPointcutAdvisor
     $this->pointcut->getMethodMatcher()->setPattern($pattern);
   }
   
-  public function setAdvice(Sabel_Aspect_Advice $advice)
+  public function setAdvice($advice)
   {
-    $this->advice = array($advice);
+    if (is_array($advice)) {
+      $this->advice = $advice;
+    } else {
+      $this->advice = array($advice);
+    }
   }
   
   public function addAdvice(Sabel_Aspect_Advice $advice)
