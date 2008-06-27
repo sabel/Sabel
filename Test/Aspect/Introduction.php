@@ -12,11 +12,20 @@ class Test_Aspect_Introduction extends SabelTestCase
     return self::createSuite("Test_Aspect_Introduction");
   }
   
+  private $weaver = null;
+  
+  public function setUp()
+  {
+    $this->weaver = new Sabel_Aspect_DynamicWeaver("Sabel_Test_Aspect_Person");
+  }
+  
   public function testIntroduceLockable()
   {
-    $weaver = new Sabel_Aspect_DynamicWeaver("Sabel_Test_Aspect_Person");
-    $weaver->addAdvisor(new Sabel_Test_Aspect_LockMixinAdvisor(new Sabel_Test_Aspect_LockMixin()));
-    $person = $weaver->getProxy();
+    $mixin = new Sabel_Test_Aspect_LockMixin();
+    
+    $this->weaver->addAdvisor(new Sabel_Test_Aspect_LockMixinAdvisor($mixin));
+    
+    $person = $this->weaver->getProxy();
     
     $person->lock();
     
@@ -86,12 +95,10 @@ class Sabel_Test_Aspect_LockMixin extends Sabel_Aspect_DelegatingIntroductionInt
     if (preg_match("/set+/", $invocation->getMethod()->getName())) {
       if ($this->locked()) {
         throw new Sabel_Test_Aspect_LockedException("locked");
-      } else {
-        return parent::invoke($invocation);
       }
-    } else {
-      return parent::invoke($invocation);
     }
+    
+    return parent::invoke($invocation);
   }
 }
 

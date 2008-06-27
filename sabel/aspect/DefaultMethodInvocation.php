@@ -54,8 +54,13 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
   
   public function setAdvices($advices)
   {
-    $this->advices = $advices;
-    $this->lastAdviceIndex = count($advices);
+    if (is_array($advices)) {
+      $this->advices = $advices;
+    } else {
+      $this->advices = array($advices);
+    }
+    
+    $this->lastAdviceIndex = count($this->advices);
   }
   
   /**
