@@ -14,6 +14,7 @@ require_once ("Test/Aspect/Pointcuts.php");
 require_once ("Test/Aspect/Matcher.php");
 
 require_once ("Test/Aspect/classes/All.php");
+require_once ("Test/Aspect/classes/Interceptors.php");
 
 /**
  *
