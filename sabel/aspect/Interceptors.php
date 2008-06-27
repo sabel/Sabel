@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Interceptors
+ *
+ * @category   aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+
 class Sabel_Aspect_MethodBeforeAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
 {
   private $interceptor = null;
@@ -23,7 +33,7 @@ class Sabel_Aspect_MethodAfterReturningAdviceInterceptor implements Sabel_Aspect
 {
   private $interceptor = null;
   
-  public function __construct(Sabel_Aspect_MethodAfterReturingAdvice $interceptor)
+  public function __construct(Sabel_Aspect_MethodAfterReturningAdvice $interceptor)
   {
     $this->interceptor = $interceptor;
   }

@@ -1,13 +1,22 @@
 <?php
 
+/**
+ * Static Proxy
+ *
+ * @category   aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Aspect_StaticProxy extends Sabel_Aspect_AbstractProxy
 {
+  private $adviced = null;
+  
   protected function __setupInvocation()
   {
     $this->invocation = new Sabel_Aspect_DefaultMethodInvocation($this, $this->target);
   }
-  
-  private $adviced = null;
   
   public function setAdviced($adviced)
   {

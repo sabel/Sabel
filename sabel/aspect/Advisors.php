@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Advisors
+ *
+ * @category   aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
     extends Sabel_Aspect_StaticMethodMatcherPointcut
       implements Sabel_Aspect_PointcutAdvisor
@@ -26,41 +35,6 @@ class Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
   }
 }
 
-class Sabel_Aspect_Advices
-{
-  private $advices = array();
-  
-  public function addAdvice(Sabel_Aspect_Advice $advice)
-  {
-    if ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
-      $this->advices[] = new Sabel_Aspect_MethodBeforeAdviceInterceptor($advice);
-    } elseif ($advice instanceof Sabel_Aspect_MethodInterceptor) {
-      $this->advices[] = $advice;
-    }
-  }
-  
-  public function getAdvices()
-  {
-    return $this->advices;
-  }
-  
-  public function toArray()
-  {
-    return $this->advices;
-  }
-  
-  public function __toString()
-  {
-    $buffer = array();
-    
-    foreach ($this->advices as $advice) {
-      $buffer[] =(string) $advice;
-    }
-    
-    return join("\n", $buffer);
-  }
-}
-
 class Sabel_Aspect_RegexMatcherPointcutAdvisor
     implements Sabel_Aspect_PointcutAdvisor
 {
@@ -72,11 +46,13 @@ class Sabel_Aspect_RegexMatcherPointcutAdvisor
   /**
    * @var Sabel_Aspect_Advice
    */
-  private $advices = array();
+  // private $advices = array();
+  private $advices = null;
   
   public function __construct()
   {
     $this->pointcut = new Sabel_Aspect_DefaultRegexPointcut();
+    $this->advices  = new Sabel_Aspect_Advices();
   }
   
   public function setClassMatchPattern($pattern)
@@ -89,18 +65,9 @@ class Sabel_Aspect_RegexMatcherPointcutAdvisor
     $this->pointcut->getMethodMatcher()->setPattern($pattern);
   }
   
-  public function setAdvice($advice)
-  {
-    if (is_array($advice)) {
-      $this->advice = $advice;
-    } else {
-      $this->advice = array($advice);
-    }
-  }
-  
   public function addAdvice(Sabel_Aspect_Advice $advice)
   {
-    $this->advice[] = $advice;
+    $this->advices->addAdvice($advice);
   }
   
   /**
@@ -108,7 +75,7 @@ class Sabel_Aspect_RegexMatcherPointcutAdvisor
    */
   public function getAdvice()
   {
-    return $this->advice;
+    return $this->advices->toArray();
   }
   
   /**

@@ -57,7 +57,7 @@ require_once ("Test/Application.php");
 require_once ("Test/Object.php");
 require_once ("Test/Console.php");
 require_once ("Test/Annotation.php");
-require_once ("Test/Aspect.php");
+require_once ("Test/Aspect/Tests.php");
 require_once ("Test/Container.php");
 require_once ("Test/Exception.php");
 require_once ("Test/Bus/Tests.php");
@@ -115,7 +115,7 @@ class SabelAllTests
     $suite->addTest(Test_Annotation::suite());
     $suite->addTest(Test_Reflection::suite());
     $suite->addTest(Test_Container::suite());
-    $suite->addTest(Test_Aspect::suite());
+    $suite->addTest(Test_Aspect_Tests::suite());
     $suite->addTest(Test_Exception::suite());
     
     $suite->addTest(Test_Storage_Memory::suite());

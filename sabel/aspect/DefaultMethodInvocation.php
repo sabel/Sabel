@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * MethodInvocation
+ *
+ * @category   aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
 class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocation
 {
   private $proxy = null;
@@ -95,11 +104,9 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
       $advice = $this->advices[$this->currentAdviceIndex];
       
       if ($advice instanceof Sabel_Aspect_MethodInterceptor) {
-        return $advice->invoke($this);  
-      } elseif ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
-        // @todo wrap Sabel_Aspect_MethodBeforeAdvice to Sabel_Aspect_MethodInterceptor
-        $advice->before($this->method, $this->argument, $this->class);
-        return $this->proceed();
+        return $advice->invoke($this);
+      } else {
+        throw new Sabel_Exception_Runtime("advice must be Sabel_Aspect_MethodInterceptor");
       }
     }
   }
