@@ -39,8 +39,10 @@ class Sabel_Container
    *
    * @param mixed $config object | string
    */
-  public static function create($config)
+  public static function create($config = null)
   {
+    if ($config === null) return new self();
+    
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
       return new self($config);
     } elseif (is_string($config)) {
@@ -171,15 +173,19 @@ class Sabel_Container
    *
    * @param Sabel_Container_Injection $injection
    */
-  public function __construct($config)
+  public function __construct($config = null)
   {
+    /*
     if (!$config instanceof Sabel_Container_Injection) {
       $msg = "object type must be Sabel_Container_Injection";
       throw new Sabel_Container_Exception_InvalidConfiguration($msg);
     }
+    */
     
-    $config->configure();
-    $this->config = $config;
+    if ($config !== null) {
+      $config->configure();
+      $this->config = $config;
+    }
     
     register_shutdown_function(array($this, "storeLifecycle"));
   }
@@ -291,8 +297,14 @@ class Sabel_Container
     
     if (!$this->config->hasAspect($className)) return $instance;
     
-    return $instance;
-    //return new Sabel_Aspect_Proxy($instance);
+    $aspectSetting = $this->config->getAspect($className);
+    
+    $adviceClass = $aspectSetting->getAdvice();
+    
+    $factory = new Sabel_Aspect_Factory();
+    $weaver = $factory->build("Sabel_Aspect_DynamicWeaver", $instance, $adviceClass);
+    
+    return $weaver->getProxy();
   }
   
   protected function newInstanceWithConstruct($reflection, $className)
@@ -656,40 +668,22 @@ class Sabel_Container_Construct
  */
 final class Sabel_Container_Aspect
 {
-  private $targetClassName = "";
+  private $className = "";
+  private $adviceClass = "";
   
-  private $aspect = null;
-  private $pointcut = null;
-  
-  public function __construct($targetClassName)
+  public function __construct($className)
   {
-    $this->targetClassName = $targetClassName;
-    $this->aspect = Sabel_Aspect_Aspects::create();
+    $this->className = $className;
   }
   
-  public function apply($aspectClassName)
+  public function advice($adviceClass)
   {
-    $this->pointcut = Sabel_Aspect_Pointcut::create($aspectClassName);
-    $this->aspect->addPointcut($this->targetClassName, $this->pointcut);
-    
+    $this->adviceClass = $adviceClass;
     return $this;
   }
   
-  public function to($method)
+  public function getAdvice()
   {
-    $this->pointcut->addMethod($method);
-    return $this;
-  }
-  
-  public function toMethodRegex($pattern)
-  {
-    $this->pointcut->setMethodRegex($pattern);
-    return $this;
-  }
-  
-  public function toEveryMethods()
-  {
-    $this->pointcut->toAll();
-    return $this;
+    return $this->adviceClass;
   }
 }

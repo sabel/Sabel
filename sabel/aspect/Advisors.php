@@ -46,7 +46,6 @@ class Sabel_Aspect_RegexMatcherPointcutAdvisor
   /**
    * @var Sabel_Aspect_Advice
    */
-  // private $advices = array();
   private $advices = null;
   
   public function __construct()

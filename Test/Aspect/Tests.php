@@ -13,6 +13,7 @@ require_once ("Test/Aspect/StaticProxy.php");
 require_once ("Test/Aspect/Pointcuts.php");
 require_once ("Test/Aspect/Matcher.php");
 require_once ("Test/Aspect/Introduction.php");
+// require_once ("Test/Aspect/Config.php");
 
 require_once ("Test/Aspect/classes/All.php");
 require_once ("Test/Aspect/classes/Interceptors.php");
@@ -38,6 +39,7 @@ class Test_Aspect_Tests
     $suite->addTest(Test_Aspect_Pointcuts::suite());
     $suite->addTest(Test_Aspect_Matcher::suite());
     $suite->addTest(Test_Aspect_Introduction::suite());
+    // $suite->addTest(Test_Aspect_Config::suite());
     
     return $suite;
   }

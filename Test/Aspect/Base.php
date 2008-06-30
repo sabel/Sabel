@@ -211,7 +211,134 @@ class Test_Aspect_Base extends SabelTestCase
     }
   }
   
-  public function testSimpleIntroduce()
+  public function testPlainObjectAdvice()
   {
+    $weaver = $this->weaver;
+    
+    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor->setClassMatchPattern("/.+/");
+    $advisor->setMethodMatchPattern("/get+/");
+    
+    $throwAdvisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $throwAdvisor->setClassMatchPattern("/.+/");
+    $throwAdvisor->setMethodMatchPattern("/will+/");
+    
+    $poAdvice = new Sabel_Tests_Aspect_PlainObject_Advice();
+    $plainObjectInterceptor = new Sabel_Aspect_PlainObjectAdviceInterceptor($poAdvice);
+    $plainObjectInterceptor->setBeforeAdviceMethod("before");
+    $plainObjectInterceptor->setAfterAdviceMethod("after");
+    $plainObjectInterceptor->setAroundAdviceMethod("around");
+    $plainObjectInterceptor->setThrowsAdviceMethod("throws");
+    
+    $advisor->addAdvice($plainObjectInterceptor);
+    $throwAdvisor->addAdvice($plainObjectInterceptor);
+    
+    $weaver->addAdvisor($advisor);
+    $weaver->addAdvisor($throwAdvisor);
+    
+    $target = $weaver->getProxy();
+    
+    $target->getX();
+    
+    $this->assertEquals("getX", $poAdvice->before);
+    $this->assertEquals("X", $poAdvice->after);
+    
+    $target->willThrowException();
+    $this->assertEquals("throws", $poAdvice->throws);
+  }
+  
+  public function testPlainObjectPreventBefore()
+  {
+    $weaver = $this->weaver;
+    
+    $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+    $advisor->setClassMatchPattern("/.+/");
+    $advisor->setMethodMatchPattern("/get+/");
+    
+    $poAdvice = new Sabel_Tests_Aspect_PlainObject_PreventBeforeAdvice();
+    $plainObjectInterceptor = new Sabel_Aspect_PlainObjectAdviceInterceptor($poAdvice);
+    $plainObjectInterceptor->setBeforeAdviceMethod("before");
+    
+    $advisor->addAdvice($plainObjectInterceptor);
+    
+    $weaver->addAdvisor($advisor);
+    
+    $target = $weaver->getProxy();
+    
+    $result = $target->getX();
+    
+    $this->assertEquals("Y", $result);
+  }
+  
+  public function testAnnotationPlainObjectAdvice()
+  {
+    $factory = new Sabel_Aspect_Factory();
+    $weaver = $factory->build(get_class($this->weaver),
+                              "Sabel_Tests_Aspect_TargetClass",
+                              "Sabel_Tests_Aspect_PlainObject_Advice");
+    
+    $advice = $factory->getAdvice();
+    
+    $target = $weaver->getProxy();
+    
+    $target->getX();
+    $this->assertEquals("getX", $advice->before);
+    
+    $target->setX("x");
+    $this->assertEquals("setX", $advice->before);
+  }
+}
+
+/**
+ * @classMatch Sabel+
+ *
+ * @advisor Sabel_Aspect_RegexMatcherPointcutAdvisor
+ * @interceptor Sabel_Aspect_PlainObjectAdviceInterceptor
+ */
+class Sabel_Tests_Aspect_PlainObject_Advice
+{
+  public
+    $before,
+    $after,
+    $throws = "";
+  
+  /**
+   * @before get+
+   */
+  public function before($method, $arguments, $target)
+  {
+    $this->before = $method->getName();
+  }
+  
+  /**
+   * @before set+
+   */
+  public function beforeSet($method, $arguments, $target)
+  {
+    $this->before = $method->getName();
+  }
+  
+  public function after($method, $arguments, $target, $result)
+  {
+    $this->after = $result;
+  }
+  
+  public function around($invocation)
+  {
+    $result = $invocation->proceed();
+    return $result;
+  }
+  
+  public function throws($method, $arguments, $target, $exception)
+  {
+    $this->throws = $exception->getMessage();
+  }
+}
+
+class Sabel_Tests_Aspect_PlainObject_PreventBeforeAdvice
+{
+  public function before($method, $arguments, $target)
+  {
+    return "Y";
   }
 }

@@ -11,9 +11,9 @@ class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
   {
     $this->invocation->reset($method, $arg);
     
-    $match = false;
-    
     $advices = array();
+    
+    $pointcuts = new Sabel_Aspect_DefaultPointcuts();
     
     foreach ($this->advisor as $advisor) {
       $pointcut = $advisor->getPointcut();
@@ -21,11 +21,9 @@ class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
       if (!$pointcut instanceof Sabel_Aspect_Pointcut)
         throw new Sabel_Exception_Runtime("pointcut must be Sabel_Aspect_Pointcut");
       
-      $pointcuts = new Sabel_Aspect_DefaultPointcuts();
-      
-      if ($match = $pointcuts->matches($pointcut, $method, $this->target)) {
-        
+      if ($pointcuts->matches($pointcut, $method, $this->target)) {
         $advice = $advisor->getAdvice();
+        
         if (is_array($advice)) {
           $advices = array_merge($advice, $advices);
         } else {
@@ -34,7 +32,7 @@ class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
       }
     }
     
-    if ($match) {
+    if (count($advices) >= 1) {
       $this->invocation->setAdvices($advices);
     }
     
