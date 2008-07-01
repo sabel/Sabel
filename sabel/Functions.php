@@ -108,10 +108,20 @@ function md5hash()
   return md5(uniqid(mt_rand(), true));
 }
 
-function load($className, $config)
+function load($class, $config = null)
 {
-  if (is_string($config)) $config = new $config();
-  return Sabel_Container::create($config)->newInstance($className);
+  static $container = null;
+  
+  if ($container === null) {
+    $container = Sabel_Container::create();
+  }
+  
+  if ($config === null) {
+    return $container->load($class);
+  } else {
+    if (is_string($config)) $config = new $config();
+    return $container->load($class, $config);
+  }
 }
 
 function l($message, $level = SBL_LOG_INFO, $identifier = "default")

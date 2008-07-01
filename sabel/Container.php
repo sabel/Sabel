@@ -64,19 +64,30 @@ class Sabel_Container
    * @param string $className
    * @param mixed $config object | string
    */
-  public static function load($className, $config = null)
+  public static function load($class, $config = null)
   {
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
-      return self::create($config)->newInstance($className);
+      return self::create($config)->newInstance($class);
     } elseif (is_string($config)) {
       if (self::hasConfig($config)) {
-        return self::create($config)->newInstance($className);
+        return self::create($config)->newInstance($class);
       } else {
-        return self::load($className, "default");
+        if (self::hasConfig("default")) {
+          return self::load($className, "default");  
+        } else {
+          self::addConfig("default", new Sabel_Container_DefaultInjection());
+        }
       }
     } elseif ($config === null) {
       $config = "default";
-      return self::load($className, $config);
+      
+      if (self::hasConfig($config)) {
+        return self::load($class, $config);  
+      } else {
+        self::addConfig($config, new Sabel_Container_DefaultInjection());
+      }
+      
+      return self::load($class, $config);
     } else {
       throw new Sabel_Container_Exception_InvalidConfiguration("configuration not found");
     }
@@ -175,13 +186,6 @@ class Sabel_Container
    */
   public function __construct($config = null)
   {
-    /*
-    if (!$config instanceof Sabel_Container_Injection) {
-      $msg = "object type must be Sabel_Container_Injection";
-      throw new Sabel_Container_Exception_InvalidConfiguration($msg);
-    }
-    */
-    
     if ($config !== null) {
       $config->configure();
       $this->config = $config;
@@ -196,32 +200,38 @@ class Sabel_Container
    * @param string $className
    * @return object
    */
-  public function newInstance($className, $arguments = null)
+  public function newInstance($class, $arguments = null)
   {
-    $reflection = $this->getReflection($className);
+    $reflection = $this->getReflection($class);
     
-    if ($reflection->isInstanciatable()) {
-      if (is_array($arguments)) {
-        $instance = $reflection->newInstanceArgs($constructArguments);
-      } elseif (is_string($arguments)) {
-        $instance = $reflection->newInstance($arguments);
-      } else {
-        $instance = $this->newInstanceWithConstruct($reflection, $className);
-      }
+    if (is_object($class)) {
+      $instance = $class;
     } else {
-      $binds = $this->config->getBind($className);
-      $bind  = (is_array($binds)) ? $binds[0] : $binds;
+      $className = $class;
       
-      $implementation = $bind->getImplementation();
-      
-      if ($this->config->hasConstruct($className)) {
-        $instance = $this->newInstanceWithConstructInAbstract($className, $implementation);
-      } elseif (is_array($arguments)) {
-        $instance = $reflection->newInstanceArgs($constructArguments);
-      } elseif (is_string($arguments)) {
-        $instance = $reflection->newInstance($arguments);
+      if ($reflection->isInstanciatable()) {
+        if (is_array($arguments)) {
+          $instance = $reflection->newInstanceArgs($constructArguments);
+        } elseif (is_string($arguments)) {
+          $instance = $reflection->newInstance($arguments);
+        } else {
+          $instance = $this->newInstanceWithConstruct($reflection, $className);
+        }
       } else {
-        $instance = $this->newInstance($implementation);
+        $binds = $this->config->getBind($className);
+        $bind  = (is_array($binds)) ? $binds[0] : $binds;
+
+        $implementation = $bind->getImplementation();
+
+        if ($this->config->hasConstruct($className)) {
+          $instance = $this->newInstanceWithConstructInAbstract($className, $implementation);
+        } elseif (is_array($arguments)) {
+          $instance = $reflection->newInstanceArgs($constructArguments);
+        } elseif (is_string($arguments)) {
+          $instance = $reflection->newInstance($arguments);
+        } else {
+          $instance = $this->newInstance($implementation);
+        }
       }
     }
     
@@ -293,18 +303,50 @@ class Sabel_Container
       throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
     }
     
+    $weaverClass = $this->config->getWeaver();
+    
     $className = get_class($instance);
     
-    if (!$this->config->hasAspect($className)) return $instance;
+    $interfaces = $this->getReflection($instance)->getInterfaces();
     
-    $aspectSetting = $this->config->getAspect($className);
-    
-    $adviceClass = $aspectSetting->getAdvice();
-    
-    $factory = new Sabel_Aspect_Factory();
-    $weaver = $factory->build("Sabel_Aspect_DynamicWeaver", $instance, $adviceClass);
-    
-    return $weaver->getProxy();
+    if (count($interfaces) >= 1) {
+      $adviceClasses = array();
+      
+      $aspects = $this->config->getAspects();
+      foreach ($aspects as $aspect) {
+        foreach ($interfaces as $implementInterface) {
+          $implementName = $implementInterface->name;
+          
+          $parent = $aspect->getName();
+          if ($implementName instanceof $parent || $aspect->getName() === $implementName) {
+            $adviceClasses[] = $aspect->getAdvice();
+          }
+        }
+      }
+      
+      $factory = new Sabel_Aspect_Factory();
+      $weaver = $factory->build($weaverClass, $instance, $adviceClasses);
+
+      return $weaver->getProxy();
+    } else {
+      foreach ($this->config->getAspects() as $aspect) {
+        $parent = $aspect->getName();
+        if ($instance instanceof $parent) {
+          $className = $aspect->getName();
+        }
+      }
+      
+      if (!$this->config->hasAspect($className)) return $instance;
+      
+      $aspectSetting = $this->config->getAspect($className);
+
+      $adviceClass = $aspectSetting->getAdvice();
+
+      $factory = new Sabel_Aspect_Factory();
+      $weaver = $factory->build($weaverClass, $instance, $adviceClass);
+
+      return $weaver->getProxy();
+    }
   }
   
   protected function newInstanceWithConstruct($reflection, $className)
@@ -509,14 +551,20 @@ class Sabel_Container
    * get reflection class
    *
    */
-  protected function getReflection($className)
+  protected function getReflection($class)
   {
+    if (is_object($class)) {
+      $className = get_class($class);
+    } else {
+      $className = $class;
+    }
+    
     if (!isset($this->reflectionCache[$className])) {
       if (!$this->exists($className)) {
         throw new Sabel_Container_Exception_UndefinedClass("Class {$className} deos not exist");
       }
       
-      $reflection = new Sabel_Reflection_Class($className);
+      $reflection = new Sabel_Reflection_Class($class);
       $this->reflectionCache[$className] = $reflection;
       
       return $reflection;
@@ -674,6 +722,11 @@ final class Sabel_Container_Aspect
   public function __construct($className)
   {
     $this->className = $className;
+  }
+  
+  public function getName()
+  {
+    return $this->className;
   }
   
   public function advice($adviceClass)

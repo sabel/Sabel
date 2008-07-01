@@ -95,7 +95,7 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
    */
   public function getThis()
   {
-    return $this->reflection;
+    return $this->class;
   }
   
   /**
@@ -133,6 +133,7 @@ class Sabel_Aspect_DefaultMethodInvocation implements Sabel_Aspect_MethodInvocat
 class Sabel_Reflection_DummyMethod
 {
   private $name = "";
+  
   public function __construct($name)
   {
     $this->name = $name;

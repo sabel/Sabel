@@ -74,6 +74,8 @@ class Sabel_Aspect_PlainObjectAdviceInterceptor implements Sabel_Aspect_MethodIn
     $hasThrows = isset($methods["throws"]);
     
     try {
+      $result = null;
+      
       if ($hasBefore) {
         $beforeMethod = $methods["before"];
         $result = $advice->$beforeMethod($method, $arguments, $target);
