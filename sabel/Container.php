@@ -47,7 +47,13 @@ class Sabel_Container
       return new self($config);
     } elseif (is_string($config)) {
       if (isset(self::$configs[$config])) {
-        return new self(self::$configs[$config]);
+        $config = self::$configs[$config];
+        
+        if (!is_object($config)) {
+          $config = new $config();
+        }
+        
+        return new self($config);  
       } elseif (isset(self::$configs["default"])) {
         return new self(self::$configs["default"]);
       } else {
@@ -73,9 +79,10 @@ class Sabel_Container
         return self::create($config)->newInstance($class);
       } else {
         if (self::hasConfig("default")) {
-          return self::load($className, "default");  
+          return self::load($class, "default");  
         } else {
           self::addConfig("default", new Sabel_Container_DefaultInjection());
+          return self::load($class);
         }
       }
     } elseif ($config === null) {

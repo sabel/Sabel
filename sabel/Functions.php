@@ -119,7 +119,6 @@ function load($class, $config = null)
   if ($config === null) {
     return $container->load($class);
   } else {
-    if (is_string($config)) $config = new $config();
     return $container->load($class, $config);
   }
 }

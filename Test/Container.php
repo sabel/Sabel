@@ -210,20 +210,6 @@ class Test_Container extends SabelTestCase
     
     $this->assertEquals($instance, $specific);
   }
-  
-  /*
-  public function testApplyAspect()
-  {
-    $trace = new Trace();
-    $aspectConfig = new AspectConfig($trace);
-    
-    $injector = Sabel_Container::create($aspectConfig);
-    $instance = $injector->newInstance("AspectTarget");
-    $instance->run("test");
-    
-    $this->assertEquals("test", $trace->getArgument());
-  }
-  */
 }
 
 /** test classes **/
