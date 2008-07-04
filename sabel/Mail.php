@@ -350,11 +350,12 @@ class Sabel_Mail extends Sabel_Object
         $body[] = $this->createAttachmentText($boundary);
       } elseif ($hasInlineImage) {
         $body[] = $this->html->toMailPart($boundary);
-      } else {
+      } elseif ($hasAttachment) {
         $body[] = $this->html->toMailPart();
-        if ($hasAttachment) {
-          $body[] = $this->createAttachmentText($boundary);
-        }
+        $body[] = $this->createAttachmentText($boundary);
+      } else {
+        $this->headers["Content-Transfer-Encoding"] = $this->html->getEncoding();
+        return $this->html->toMailPart();
       }
       
       $body[] = "--{$boundary}--";

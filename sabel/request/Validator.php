@@ -61,8 +61,8 @@ class Sabel_Request_Validator extends Sabel_Object
       if (is_string($checker)) $checker = array($checker);
       
       foreach ($checker as $method) {
-        if (strpos($method, "::") !== false) {
-          list ($name, $exp) = explode("::", $method);
+        if (strpos($method, ":") !== false) {
+          list ($name, $exp) = explode(":", $method, 2);
           switch (strtolower($name)) {
             case "regex":
             case "regexp":

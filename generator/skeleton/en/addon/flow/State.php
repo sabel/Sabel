@@ -80,8 +80,12 @@ class Flow_State
   
   public function save(Sabel_Storage $storage, $timeout = null)
   {
-    if ($timeout === null) $timeout = self::MAX_LIFETIME;
-    $storage->store($this->properties["token"], $this->properties, $timeout);
+    if ($timeout === 0) {
+      $storage->clear($this->properties["token"]);
+    } else {
+      if ($timeout === null) $timeout = self::MAX_LIFETIME;
+      $storage->store($this->properties["token"], $this->properties, $timeout);
+    }
   }
   
   public function setNextActions($actions)

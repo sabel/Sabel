@@ -119,7 +119,7 @@ class Form_Html extends Sabel_Object
     $this->addIdAndClass($html);
     if ($this->name !== "") $html .= 'name="' . $this->name . '" ';
     
-    return $html . '>' . PHP_EOL . '<fieldset class="formField">' . PHP_EOL;
+    return $html . '>' . PHP_EOL . '<fieldset>' . PHP_EOL;
   }
   
   public function close()

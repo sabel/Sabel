@@ -18,58 +18,6 @@ class Processor_View extends Sabel_Bus_Processor
    */
   private $view = null;
   
-  public function execute($bus)
-  {
-    $controller = $bus->get("controller");
-    if ($controller->isRedirected()) return;
-    
-    $response  = $bus->get("response");
-    $responses = $response->getResponses();
-    
-    $view = $this->getView($response->getStatus(),
-                           $bus->get("destination")->getAction(),
-                           $bus->get("isAjaxRequest") === true);
-    
-    if ($controller->renderText) {
-      $renderer = $view->getRenderer();
-      return $bus->set("result", $renderer->rendering($controller->contents, $responses));
-    } elseif ($controller->renderImage) {
-      return $bus->set("result", $controller->contents);
-    }
-    
-    if ($location = $view->getValidLocation()) {
-      $contents = $view->rendering($location, $responses);
-    } elseif ($controller->isExecuted()) {
-      $contents = $controller->contents;
-      if ($contents === null) $contents = "";
-    } else {
-      $response->getStatus()->setCode(404);
-      if ($location = $view->getValidLocation("notFound")) {
-        $contents = $view->rendering($location, $responses);
-      } else {
-        $contents = "<h1>404 Not Found</h1>";
-      }
-    }
-    
-    $layout = $controller->getAttribute("layout");
-    
-    if ($bus->get("noLayout")) {
-      $bus->set("result", $contents);
-    } else {
-      if (($layout = $controller->getAttribute("layout")) === null) {
-        $layout = DEFAULT_LAYOUT_NAME;
-      }
-      
-      if ($location = $view->getValidLocation($layout)) {
-        $responses["contentForLayout"] = $contents;
-        $bus->set("result", $view->rendering($location, $responses));
-      } else {
-        // no layout.
-        $bus->set("result", $contents);
-      }
-    }
-  }
-  
   public function initViewObject($bus)
   {
     list ($m, $c, $a) = $bus->get("destination")->toArray();
@@ -93,6 +41,48 @@ class Processor_View extends Sabel_Bus_Processor
     
     $bus->set("view", $view);
     $bus->get("controller")->setAttribute("view", $view);
+  }
+  
+  public function execute($bus)
+  {
+    $controller = $bus->get("controller");
+    if ($controller->isRedirected()) return;
+    
+    $response  = $bus->get("response");
+    $responses = $response->getResponses();
+    $contents  = (isset($responses["contents"])) ? $responses["contents"] : "";
+    
+    $view = $this->getView($response->getStatus(),
+                           $bus->get("destination")->getAction(),
+                           $bus->get("isAjaxRequest") === true);
+    
+    if (isset($responses["renderText"]) && $responses["renderText"]) {
+      $renderer = $view->getRenderer();
+      return $bus->set("result", $renderer->rendering($contents, $responses));
+    }
+    
+    if ($location = $view->getValidLocation()) {
+      $contents = $view->rendering($location, $responses);
+    } elseif (!$controller->isExecuted()) {
+      $response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
+      if ($location = $view->getValidLocation("notFound")) {
+        $contents = $view->rendering($location, $responses);
+      } else {
+        $contents = "<h1>404 Not Found</h1>";
+      }
+    }
+    
+    if ($bus->get("noLayout")) {
+      $bus->set("result", $contents);
+    } else {
+      $layout = (isset($responses["layout"])) ? $responses["layout"] : DEFAULT_LAYOUT_NAME;
+      if ($location = $view->getValidLocation($layout)) {
+        $responses["contentForLayout"] = $contents;
+        $bus->set("result", $view->rendering($location, $responses));
+      } else { // no layout.
+        $bus->set("result", $contents);
+      }
+    }
   }
   
   protected function getView($status, $action, $isAjax = false)

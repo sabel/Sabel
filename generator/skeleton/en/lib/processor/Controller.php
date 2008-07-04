@@ -14,14 +14,12 @@ class Processor_Controller extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $destination = $bus->get("destination");
-    $response    = new Sabel_Response_Object();
+    $response    = $bus->get("response");
     
     if (($controller = $this->createController($destination)) === null) {
       $response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
       $controller = $this->createVirtualController();
     }
-    
-    $controller->setResponse($response);
     
     if (($request = $bus->get("request")) !== null) {
       $controller->setRequest($request);
@@ -31,7 +29,7 @@ class Processor_Controller extends Sabel_Bus_Processor
       $controller->setSession($session);
     }
     
-    $bus->set("response",   $response);
+    $controller->setResponse($response);
     $bus->set("controller", $controller);
   }
   
@@ -51,7 +49,7 @@ class Processor_Controller extends Sabel_Bus_Processor
   
   protected function createVirtualController()
   {
-    $className = "SabelVirtualController";
+    $className = "Sabel_Virtual_Controller";
     
     if (!class_exists($className, false)) {
       eval ("class $className extends Sabel_Controller_Page {}");

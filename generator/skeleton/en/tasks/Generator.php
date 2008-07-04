@@ -11,11 +11,13 @@
  */
 class Generator extends Sabel_Sakle_Task
 {
+  protected $fs = null;
   protected $renderer = "php";
   protected $skeletonDir = "";
   
   public function initialize()
   {
+    $this->fs = new Sabel_Util_FileSystem();
     $this->skeletonDir = RUN_BASE . DS . "tasks" . DS . "skeleton";
   }
   
@@ -76,8 +78,10 @@ class Generator extends Sabel_Sakle_Task
     $controllerName = ucfirst($module) . "_Controllers_" . $mdlName;
     
     $orderColumns = array();
-    $metadata = MODEL($mdlName)->getMetadata();
-    $columns  = $metadata->getColumns();
+    $_model = MODEL($mdlName);
+    $metadata = $_model->getMetadata();
+    $versionColumn = $_model->getVersionColumn();
+    $columns = $metadata->getColumns();
     
     $allowColumns = array();
     foreach ($columns as $column) {
@@ -94,17 +98,11 @@ class Generator extends Sabel_Sakle_Task
     $orderColumns  = "array(" . implode(", ", $orderColumns) . ")";
     $allowColumns  = implode(", ", $allowColumns);
     
-    ob_start();
-    include ($this->skeletonDir . DS . "controllers" . DS . "Controller.php");
-    $contents = str_replace("<#", "<?", ob_get_clean());
-    
-    $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $path = $module . DS . "controllers" . DS . $mdlName . ".php";
-    $fs->mkfile($path)->write($contents)->save();
-    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
+    $vars = get_defined_vars();
+    $this->_generateController($vars, "", $module . DS . "controllers" . DS . $mdlName . ".php");
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
-    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
+    if (!$this->fs->isDir($tplDir)) $this->fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
     $this->_generateTemplates($vars, $tplDir, "general");
@@ -121,8 +119,10 @@ class Generator extends Sabel_Sakle_Task
     $controllerName = ucfirst($module) . "_Controllers_" . $mdlName;
     
     $orderColumns = array();
-    $metadata = MODEL($mdlName)->getMetadata();
-    $columns  = $metadata->getColumns();
+    $_model = MODEL($mdlName);
+    $metadata = $_model->getMetadata();
+    $versionColumn = $_model->getVersionColumn();
+    $columns = $metadata->getColumns();
     
     foreach ($columns as $column) {
       if ($column->isNumeric() || $column->isDatetime() || $column->isDate()) {
@@ -133,17 +133,11 @@ class Generator extends Sabel_Sakle_Task
     $primaryColumn = $metadata->getPrimaryKey();
     $orderColumns  = "array(" . implode(", ", $orderColumns) . ")";
     
-    ob_start();
-    include ($this->skeletonDir . DS . "controllers" . DS . "FlowController.php");
-    $contents = str_replace("<#", "<?", ob_get_clean());
-    
-    $fs   = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $path = $module . DS . "controllers" . DS . $mdlName . ".php";
-    $fs->mkfile($path)->write($contents)->save();
-    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
+    $vars = get_defined_vars();
+    $this->_generateController($vars, "Flow", $module . DS . "controllers" . DS . $mdlName . ".php");
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($mdlName);
-    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
+    if (!$this->fs->isDir($tplDir)) $this->fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
     $this->_generateTemplates($vars, $tplDir, "flow");
@@ -170,17 +164,11 @@ class Generator extends Sabel_Sakle_Task
     
     $primaryColumn = $metadata->getPrimaryKey();
     
-    ob_start();
-    include ($this->skeletonDir . DS . "controllers" . DS . "LoginController.php");
-    $contents = str_replace("<#", "<?", ob_get_clean());
-    
-    $fs   = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $path = $module . DS . "controllers" . DS . "Login.php";
-    $fs->mkfile($path)->write($contents)->save();
-    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
+    $vars = get_defined_vars();
+    $this->_generateController($vars, "Login", $module . DS . "controllers" . DS . "Login.php");
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . "login";
-    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
+    if (!$this->fs->isDir($tplDir)) $this->fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
     $this->_generateTemplates($vars, $tplDir, "login");
@@ -196,20 +184,27 @@ class Generator extends Sabel_Sakle_Task
     $controllerName = ucfirst($module) . "_Controllers_" . $ctrlName;
     $rfc1867_prefix = ini_get("apc.rfc1867_prefix");
     
-    ob_start();
-    include ($this->skeletonDir . DS . "controllers" . DS . "UploadController.php");
-    $contents = str_replace("<#", "<?", ob_get_clean());
-    
-    $fs = new Sabel_Util_FileSystem(MODULES_DIR_PATH);
-    $path = $module . DS . "controllers" . DS . $ctrlName . ".php";
-    $fs->mkfile($path)->write($contents)->save();
-    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
+    $vars = get_defined_vars();
+    $this->_generateController($vars, "Upload", $module . DS . "controllers" . DS . $ctrlName . ".php");
     
     $tplDir = MODULES_DIR_PATH . DS . $module . DS . VIEW_DIR_NAME . DS . lcfirst($ctrlName);
-    if (!$fs->isDir($tplDir)) $fs->mkdir($tplDir);
+    if (!$this->fs->isDir($tplDir)) $this->fs->mkdir($tplDir);
     
     $vars = get_defined_vars();
     $this->_generateTemplates($vars, $tplDir, "uploader");
+  }
+  
+  private function _generateController($vars, $name, $path)
+  {
+    extract($vars, EXTR_OVERWRITE);
+    
+    ob_start();
+    include ($this->skeletonDir . DS . "controllers" . DS . $name . "Controller.php");
+    $contents = str_replace("<#", "<?", ob_get_clean());
+    
+    $this->fs->cd(MODULES_DIR_PATH);
+    $this->fs->mkfile($path)->write($contents)->save();
+    $this->success("Generate Controller " . MODULES_DIR_NAME . DS . $path);
   }
   
   private function _generateTemplates($vars, $targetDir, $type)
@@ -255,7 +250,7 @@ class Generator extends Sabel_Sakle_Task
       exit;
     }
     
-    $renderers = array("sabel", "smarty");
+    $renderers = array("sabel", "smarty", "savant");
     
     if (Sabel_Console::hasOption("r", $arguments)) {
       $opts = Sabel_Console::getOption("r", $arguments);

@@ -30,7 +30,8 @@ function h($string, $charset = null)
 
 function mb_trim($string)
 {
-  return preg_replace('/^[\s　]*(.*?)[\s　]*$/u', '$1', $string);
+  $string = new Sabel_Util_String($string);
+  return $string->trim()->toString();
 }
 
 function to_date($date, $format)

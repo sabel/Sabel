@@ -57,7 +57,10 @@ class Processor_Action extends Sabel_Bus_Processor
       
       l("execute action '{$action}'");
       $controller->execute();
-      $bus->set("noLayout", ($controller->layout === false));
+      
+      if ($controller->layout === false) {
+        $bus->set("noLayout", true);
+      }
     } catch (Exception $e) {
       $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
@@ -88,7 +91,7 @@ class Processor_Action extends Sabel_Bus_Processor
         throw new Sabel_Exception_Runtime($message);
       }
     } elseif ($request->isPost()) {
-      $values = array_merge($gets, $params);
+      $values = $request->fetchPostValues();
     } else {
       return true;
     }

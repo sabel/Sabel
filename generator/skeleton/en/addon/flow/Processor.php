@@ -67,7 +67,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     } else {
       l("[flow] restore flow state with: '{$state->token}'", SBL_LOG_DEBUG);
       
-      $this->executeInFlowAction();
+      $this->executeNextAction();
       
       $vars = $this->getContinuationVariables();
       foreach ($vars as $var) {
@@ -166,10 +166,11 @@ class Flow_Processor extends Sabel_Bus_Processor
     return $state;
   }
   
-  private function executeInFlowAction()
+  private function executeNextAction()
   {
     $state = $this->state;
     $currentActivity = $state->getCurrentActivity();
+    
     if ($this->action === $currentActivity) {
       $this->isTransit = $this->request->isPost();
       return;
@@ -177,7 +178,7 @@ class Flow_Processor extends Sabel_Bus_Processor
     
     if ($state->isMatchToNext($this->action)) {
       if ($this->isEndAction()) {
-        $this->lifetime = 60;
+        $this->lifetime = 0;
       } elseif ($nexts = $this->getNextActions()) {
         $state->setNextActions($nexts);
       } else {

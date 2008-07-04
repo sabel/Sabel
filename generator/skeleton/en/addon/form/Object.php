@@ -215,7 +215,12 @@ class Form_Object extends Sabel_Object
   
   public function close()
   {
-    return $this->getHtmlWriter("", "")->close();
+    $hidden = "";
+    if ($this->isSelected && ($vColumn = $this->model->getVersionColumn()) !== null) {
+      $hidden = $this->hidden($vColumn);
+    }
+    
+    return $hidden . $this->getHtmlWriter("", "")->close();
   }
   
   public function submit($text = null, $class = null, $id = null)

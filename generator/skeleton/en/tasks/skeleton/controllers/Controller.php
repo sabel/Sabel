@@ -16,7 +16,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   public function lists()
   {
     $this->paginate = new Paginate("<?php echo $mdlName ?>");
-    $this->paginate->setOrderColumn(<?php echo $orderColumns ?>);
+    $this->paginate->setOrderColumns(<?php echo $orderColumns ?>);
     $this->paginate->build(10, $this->request->fetchGetValues());
   }
   

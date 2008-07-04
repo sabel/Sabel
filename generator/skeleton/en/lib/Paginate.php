@@ -169,10 +169,15 @@ class Paginate extends Sabel_Object
     $orderColumns = $this->orderColumns;
     if ($orderColumns === false) return;
     
-    $oColNum = count($orderColumns);
-    $columns = $this->model->getColumnNames();
-    $pageKey = $this->attributes["pageKey"];
     $orderValues = array();
+    $oColNum = count($orderColumns);
+    $pageKey = $this->attributes["pageKey"];
+    
+    if ($this->isJoin) {
+      $columns = $this->model->getModel()->getColumnNames();
+    } else {
+      $columns = $this->model->getColumnNames();
+    }
     
     foreach ($getValues as $key => $val) {
       if (preg_match('/^[A-Z]/', $key{0}) === 1 && strpos($key, "_") !== false) {

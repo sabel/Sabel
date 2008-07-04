@@ -14,16 +14,36 @@ class Sabel_Util_HashList extends Sabel_Object
   const FIRST = "INDEX_FIRST";
   const LAST  = "INDEX_LAST";
   
-  private
-    $index     = self::FIRST,
-    $hashList  = array(),
-    $iterating = false;
-    
-  private
-    $size   = 0,
-    $names  = array(),
-    $values = array();
-    
+  /**
+   * @var const self
+   */
+  private $index = self::FIRST;
+  
+  /**
+   * @var array
+   */
+  private $hashList = array();
+  
+  /**
+   * @var boolean
+   */
+  private $iterating = false;
+  
+  /**
+   * @var int
+   */
+  private $size = 0;
+  
+  /**
+   * @var array
+   */
+  private $names = array();
+  
+  /**
+   * @var array
+   */
+  private $values = array();
+  
   public function add($name, $value)
   {
     if ($this->has($name)) {
@@ -181,7 +201,6 @@ class Sabel_Util_HashList extends Sabel_Object
   
   public function previous()
   {
-    if ($this->index === null) return null;
     $i = ($this->index === self::LAST) ? $this->size - 1 : $this->index - 1;
     
     if (isset($this->values[$i])) {

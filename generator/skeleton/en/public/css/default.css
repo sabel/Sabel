@@ -1,33 +1,33 @@
 /** --------------------
  * 余白
  */
-blockquote,
-body,
-code,
-samp,
-dd,
-dir,
-div,
-dl,
-dt,
-fieldset,
-form,
 h1,
 h2,
 h3,
 h4,
 h5,
 h6,
+ul,
+ol,
 li,
+dl,
+dt,
+dd,
+form,
+fieldset,
+p,
+div,
+pre,
+code,
+body,
+blockquote,
+samp,
+dir,
 legend,
 marquee,
 menu,
-ol,
-p,
-pre,
 td,
-th,
-ul {
+th {
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
 }
@@ -181,10 +181,6 @@ div#contents {
 #contents table.sbl_basicTable td {
   border: 1px solid #ccc;
   padding: 0 5px;
-}
-
-fieldset.formField {
-  border: none;
 }
 
 /** --------------------

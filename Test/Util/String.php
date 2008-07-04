@@ -35,11 +35,16 @@ class Test_Util_String extends SabelTestCase
   public function testCharAt()
   {
     $string = new String("test");
-    $this->assertEquals("t",  $string->charAt(0));
-    $this->assertEquals("e",  $string->charAt(1));
-    $this->assertEquals("t",  $string->charAt(3));
+    $this->assertEquals("t",  $string->charAt(0)->toString());
+    $this->assertEquals("e",  $string->charAt(1)->toString());
+    $this->assertEquals("t",  $string->charAt(3)->toString());
     $this->assertEquals(null, $string->charAt(4));
     $this->assertEquals(null, $string->charAt(-1));
+    
+    $string = new String("あいうえお");
+    $this->assertEquals("い",  $string->charAt(1)->toString());
+    $this->assertEquals("え",  $string->charAt(3)->toString());
+    $this->assertEquals(null,  $string->charAt(5));
   }
   
   public function testIndexOf()
@@ -48,40 +53,83 @@ class Test_Util_String extends SabelTestCase
     $this->assertEquals(6, $string->indexOf("W"));
     $this->assertEquals(4, $string->indexOf("o"));
     $this->assertEquals(7, $string->indexOf("o", 5));
+    
+    $string = new String("あいうえお あいうえお");
+    $this->assertEquals(2, $string->indexOf("う"));
+    $this->assertEquals(5, $string->indexOf(" "));
+    $this->assertEquals(8, $string->indexOf("う", 5));
   }
   
   public function testLastChar()
   {
     $string = new String("Hello World");
-    $this->assertEquals("d", $string->last());
+    $this->assertEquals("d", $string->last()->toString());
     
     $string = new String();
-    $this->assertEquals("", $string->last());
+    $this->assertEquals(null, $string->last());
+    
+    $string = new String("あいうえお");
+    $this->assertEquals("お", $string->last()->toString());
   }
   
   public function testTrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->trim()->equals("Hello World"));
-    $this->assertEquals(11, $string->length());
     
-    $string = new String("///Hello World///");
-    $this->assertTrue($string->trim("/")->equals("Hello World"));
-    $this->assertEquals(11, $string->length());
+    $string = new String("/*/*/Hello World/*/*/");
+    $this->assertTrue($string->trim("/*")->equals("Hello World"));
+    
+    $str = <<<STR
+  
+  aiueo
+  
+
+  
+STR;
+    
+    $string = new String($str);
+    $this->assertTrue($string->trim()->equals("aiueo"));
+    
+    // multibyte
+    
+    $string = new String("　　あいうえお　　");
+    $this->assertTrue($string->trim()->equals("あいうえお"));
+    
+    $string = new String("表能申あいうえお申能表");
+    $this->assertTrue($string->trim("表能申")->equals("あいうえお"));
+    
+    $str = <<<STR
+ 　 　
+ 　あいうえお　 
+　  　
+
+
+　　 　
+
+　
+STR;
+    
+    $string = new String($str);
+    $this->assertTrue($string->trim()->equals("あいうえお"));
   }
   
   public function testRtrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->rtrim()->equals("  Hello World"));
-    $this->assertEquals(13, $string->length());
+    
+    $string = new String("　　あいうえお　　");
+    $this->assertTrue($string->rtrim()->equals("　　あいうえお"));
   }
   
   public function testLtrim()
   {
     $string = new String("  Hello World  ");
     $this->assertTrue($string->ltrim()->equals("Hello World  "));
-    $this->assertEquals(13, $string->length());
+    
+    $string = new String("　　あいうえお　　");
+    $this->assertTrue($string->ltrim()->equals("あいうえお　　"));
   }
   
   public function testToUpperCase()
@@ -108,15 +156,54 @@ class Test_Util_String extends SabelTestCase
     $this->assertTrue($string->lcfirst()->equals("aBCDE"));
   }
   
+  public function testExplode()
+  {
+    $string = new String("hoge:fuga:foo:bar");
+    $array  = $string->explode(":");
+    $this->assertEquals("hoge", $array[0]);
+    $this->assertEquals("fuga", $array[1]);
+    $this->assertEquals("foo",  $array[2]);
+    $this->assertEquals("bar",  $array[3]);
+    
+    $string = new String("hoge:fuga:foo:bar");
+    $array  = $string->explode(":", 3);
+    $this->assertEquals("hoge", $array[0]);
+    $this->assertEquals("fuga", $array[1]);
+    $this->assertEquals("foo:bar", $array[2]);
+  }
+  
   public function testSplit()
   {
-    $string = new String("hoge:huga:foo:bar");
-    $array  = $string->split(":");
-    $values = $array->values();
-    $this->assertTrue($values[0]->equals("hoge"));
-    $this->assertTrue($values[1]->equals("huga"));
-    $this->assertTrue($values[2]->equals("foo"));
-    $this->assertTrue($values[3]->equals("bar"));
+    $string = new String("hoge.fuga.foo.bar");
+    $array  = $string->split();
+    $this->assertEquals("h", $array[0]);
+    $this->assertEquals("f", $array[5]);
+    $this->assertEquals("f", $array[10]);
+    $this->assertEquals("b", $array[14]);
+    
+    $array  = $string->split(3);
+    $this->assertEquals("hog", $array[0]);
+    $this->assertEquals("e.f", $array[1]);
+    $this->assertEquals("uga", $array[2]);
+    $this->assertEquals(".fo", $array[3]);
+    $this->assertEquals("o.b", $array[4]);
+    $this->assertEquals("ar",  $array[5]);
+    
+    // multibyte
+    
+    $string = new String("あいうえおかきくけこ");
+    $array  = $string->split();
+    $this->assertEquals("あ", $array[0]);
+    $this->assertEquals("う", $array[2]);
+    $this->assertEquals("お", $array[4]);
+    $this->assertEquals("き", $array[6]);
+    $this->assertEquals("け", $array[8]);
+    
+    $array  = $string->split(3);
+    $this->assertEquals("あいう", $array[0]);
+    $this->assertEquals("えおか", $array[1]);
+    $this->assertEquals("きくけ", $array[2]);
+    $this->assertEquals("こ",     $array[3]);
   }
   
   public function testReplace()
@@ -224,6 +311,17 @@ class Test_Util_String extends SabelTestCase
     
     $str = $string->substring(1, -1);
     $this->assertTrue($str->equals("ello Worl"));
+    
+    $string = new String("あいうえおかきくけこ");
+    
+    $str = $string->substring(5);
+    $this->assertTrue($str->equals("かきくけこ"));
+    
+    $str = $string->substring(6, 3);
+    $this->assertTrue($str->equals("きくけ"));
+    
+    $str = $string->substring(1, -1);
+    $this->assertTrue($str->equals("いうえおかきくけ"));
   }
   
   public function testInsert()
@@ -231,10 +329,73 @@ class Test_Util_String extends SabelTestCase
     $string = new String("Hello World");
     $string->insert(6, "PHP ");
     $this->assertTrue($string->equals("Hello PHP World"));
-
+    
     $string = new String("Hello World");
     $string->insert(0, "PHP. ");
     $this->assertTrue($string->equals("PHP. Hello World"));
+    
+    $string = new String("あいうえお　さしすせそ");
+    $string->insert(6, "かきくけこ　");
+    $this->assertTrue($string->equals("あいうえお　かきくけこ　さしすせそ"));
+  }
+  
+  public function testPad()
+  {
+    $string = new String("1");
+    $this->assertEquals("   1", $string->pad(" ", 4)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("1   ", $string->pad(" ", 4, STR_PAD_RIGHT)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("=.=.1", $string->pad("=.", 5)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("1=.=.", $string->pad("=.", 5, STR_PAD_RIGHT)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("=.=1", $string->pad("=.", 4)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("_1_", $string->pad("_", 3, STR_PAD_BOTH)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("_1__", $string->pad("_", 4, STR_PAD_BOTH)->toString());
+    
+    $string = new String("1");
+    $this->assertEquals("__1__", $string->pad("_", 5, STR_PAD_BOTH)->toString());
+    
+    $string = new String("123");
+    $this->assertEquals("aba123abab", $string->pad("ab", 10, STR_PAD_BOTH)->toString());
+    
+    // multibyte
+    
+    $string = new String("あ");
+    $this->assertEquals("いいいあ", $string->pad("い", 4)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("あいいい", $string->pad("い", 4, STR_PAD_RIGHT)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("いういうあ", $string->pad("いう", 5)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("あいういう", $string->pad("いう", 5, STR_PAD_RIGHT)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("いういあ", $string->pad("いう", 4)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("いあい", $string->pad("い", 3, STR_PAD_BOTH)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("いあいい", $string->pad("い", 4, STR_PAD_BOTH)->toString());
+    
+    $string = new String("あ");
+    $this->assertEquals("いいあいい", $string->pad("い", 5, STR_PAD_BOTH)->toString());
+    
+    $string = new String("あいう");
+    $this->assertEquals("えおえあいうえおえお", $string->pad("えお", 10, STR_PAD_BOTH)->toString());
   }
   
   public function testClone()

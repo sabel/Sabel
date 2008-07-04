@@ -2,7 +2,7 @@
 
 /**
  * testcase for lib.processor.Controller
- * using classes: sabel.map.Destination, sabel.controller.Page
+ * using classes: sabel.response.Object, sabel.map.Destination, sabel.controller.Page
  *
  * @category  Processor
  * @author    Ebine Yutaka <ebine.yutaka@sabel.jp>
@@ -18,6 +18,7 @@ class Test_Processor_Controller extends Test_Processor_Abstract
   public function testHogeController()
   {
     $bus = $this->bus;
+    $bus->set("response", new Sabel_Response_Object());
     $bus->set("destination", $this->getDestination("Hoge"));
     
     $processor = new Processor_Controller("controller");
@@ -32,23 +33,13 @@ class Test_Processor_Controller extends Test_Processor_Abstract
   public function testFugaController()
   {
     $bus = $this->bus;
+    $bus->set("response", new Sabel_Response_Object());
     $bus->set("destination", $this->getDestination("Fuga"));
     
     $processor = new Processor_Controller("controller");
     $processor->execute($bus);
     
     $this->assertTrue($bus->get("controller") instanceof Test_Controllers_Fuga);
-  }
-  
-  public function testCannotCreateController()
-  {
-    $bus = $this->bus;
-    $bus->set("destination", $this->getDestination("Abcde"));
-    
-    $processor = new Processor_Controller("controller");
-    $processor->execute($bus);
-    
-    $this->assertTrue($bus->get("controller") instanceof SabelVirtualController);
   }
   
   protected function getDestination($name)

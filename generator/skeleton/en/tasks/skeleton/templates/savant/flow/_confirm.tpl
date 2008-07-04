@@ -1,6 +1,6 @@
 <dl>
 <?php foreach ($columns as $column) : ?>
-<?php if ($column->increment) continue ?>
+<?php if ($column->increment || $column->name === $versionColumn) continue ?>
   <dt><#php echo $<?php echo $formName ?>->name("<?php echo $column->name ?>") #></dt>
 <?php if ($column->isText()) : ?>
   <dd><#php nl2br(h($<?php echo $formName ?>-><?php echo $column->name ?>)) #></dd>

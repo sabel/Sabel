@@ -36,11 +36,6 @@ class Sabel_Util_Map extends Sabel_Object implements Iterator
     $this->count = count($array);
   }
   
-  public function __toString()
-  {
-    return $this->hashCode();
-  }
-  
   public function isEmpty()
   {
     return empty($this->array);

@@ -5,7 +5,7 @@
 <#e $<?php echo $formName ?>->open("a: create") #>
   <dl>
 <?php foreach ($columns as $column) : ?>
-<?php if ($column->increment) continue ?>
+<?php if ($column->increment || $column->name === $versionColumn) continue ?>
     <dt><#e $<?php echo $formName ?>->mark("<?php echo $column->name ?>") #></dt>
 <?php if ($column->isDatetime()) : ?>
     <dd><#e $<?php echo $formName ?>->datetime("<?php echo $column->name ?>") #></dd>

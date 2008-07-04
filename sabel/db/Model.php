@@ -239,14 +239,6 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return array
-   */
-  public function getColumnNames()
-  {
-    return array_keys($this->metaCols);
-  }
-  
-  /**
    * @return Sabel_DB_Metadata_Table
    */
   public function getMetadata()
@@ -260,6 +252,29 @@ abstract class Sabel_DB_Model extends Sabel_Object
   public function getColumns()
   {
     return $this->metaCols;
+  }
+  
+  /**
+   * @return array
+   */
+  public function getColumnNames()
+  {
+    return array_keys($this->metaCols);
+  }
+  
+  /**
+   * @return string
+   */
+  public function getVersionColumn()
+  {
+    $name = null;
+    if ($this->versionColumn !== "") {
+      $name = $this->versionColumn;
+    } elseif (isset($this->metaCols["version"])) {
+      $name = "version";
+    }
+    
+    return $name;
   }
   
   /**
@@ -403,11 +418,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     if (is_string($orderBy)) {
       $this->constraints["order"] = $orderBy;
-      return $this;
     } else {
-      $message = "argument must be a string.";
+      $message = __METHOD__ . "() argument must be a string.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
+    
+    return $this;
   }
   
   /**
@@ -420,11 +436,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     if (is_numeric($limit)) {
       $this->constraints["limit"] = $limit;
-      return $this;
     } else {
-      $message = "argument must be an integer.";
+      $message = __METHOD__ . "() argument must be an integer.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
+    
+    return $this;
   }
   
   /**
@@ -437,11 +454,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     if (is_numeric($offset)) {
       $this->constraints["offset"] = $offset;
-      return $this;
     } else {
-      $message = "argument must be an integer.";
+      $message = __METHOD__ . "() argument must be an integer.";
       throw new Sabel_Exception_InvalidArgument($message);
     }
+    
+    return $this;
   }
   
   /**

@@ -643,7 +643,8 @@ Sabel.Array = function(iterable) {
 
 Sabel.Array.each = function(array, callback) {
 	for (var i = 0, len = array.length; i < len; i++) {
-		callback(array[i], i);
+		var r = callback(array[i], i);
+		if (r === "BREAK") break;
 	}
 	return array;
 };
@@ -767,7 +768,6 @@ Sabel.Object.extend(Sabel.Function, Sabel.Object.Methods);
 
 
 Sabel.Dom = {
-
 	getElementById: function(element, extend) {
 		if (typeof element === "string") {
 			element = document.getElementById(element);
@@ -1397,11 +1397,11 @@ Sabel.Element.getCumulativeLeft = function(element) {
 
 				if (document.compatMode === "CSS1Compat") {
 					var html = Sabel.find('html')[0];
-					position += parseInt(Sabel.Element.getStyle(html, "marginLeft"));
+					position += parseInt(Sabel.Element.getStyle(html, "marginLeft")) || 0;
 
 					if (Sabel.UserAgent.isIE) {
 						position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
-						position += parseInt(Sabel.Element.getStyle(html, "borderLeftWidth"));
+						position += parseInt(Sabel.Element.getStyle(html, "borderLeftWidth")) || 0;
 					}
 				}
 				break;
@@ -1449,32 +1449,42 @@ Sabel.Element.getOffsetPositions = function(element) {
 	};
 };
 
-Sabel.Element.getDimensions = function(element) {
+Sabel.Element.getDimensions = function(element, ignoreBorder) {
 	element = Sabel.get(element, false);
 	if (element.nodeType !== 1) return {};
 
 	var style = element.style;
 
 	if (Sabel.Element.getStyle(element, "display") !== "none") {
-		return {width: element.offsetWidth, height: element.offsetHeight};
+		var dimensions = {
+			width: element.offsetWidth,
+			height: element.offsetHeight
+		};
+	} else {
+		var oldV = style.visibility;
+		var oldP = style.positions;
+		var oldD = "none";
+
+		style.visibility = "hidden";
+		style.positions  = "absolute";
+		style.display    = "block";
+
+		var dimensions = {
+			width:  element.offsetWidth,
+			height: element.offsetHeight
+		};
+
+		style.visibility = oldV;
+		style.positions  = oldP;
+		style.display    = oldD;
 	}
 
-	var oldV = style.visibility;
-	var oldP = style.positions;
-	var oldD = "none";
-
-	style.visibility = "hidden";
-	style.positions  = "absolute";
-	style.display    = "block";
-
-	var dimensions = {
-		width:  element.offsetWidth,
-		height: element.offsetHeight
-	};
-
-	style.visibility = oldV;
-	style.positions  = oldP;
-	style.display    = oldD;
+	if (ignoreBorder == true) {
+		dimensions.width -= parseInt(Sabel.Element.getStyle(element, "borderLeftWidth"))
+		                  + parseInt(Sabel.Element.getStyle(element, "borderRightWidth"));
+		dimensions.height -= parseInt(Sabel.Element.getStyle(element, "borderTopWidth"))
+		                   + parseInt(Sabel.Element.getStyle(element, "borderBottomWidth"));
+	}
 
 	return dimensions;
 };
@@ -1540,7 +1550,7 @@ Sabel.Element.observe = function(element, eventName, handler, useCapture, scope)
 
 Sabel.Element.stopObserve = function(element, eventName, handler) {
 	element = Sabel.get(element, false);
-	var events = (element._events) ? element._events[eventName] : null;
+	var events = (element._events) ? element._events[eventName] : "";
 	if (events.constructor === Array) {
 		if (typeof handler === "function") {
 			Sabel.Array.each(events, function(e) { if (e.getHandler() === handler) e.stop(); });
@@ -2692,12 +2702,6 @@ Sabel.Effect.Fade = function() {
 };
 Sabel.Effect.Fade.prototype = {
 	init: function(element) {
-/*
-		if (Sabel.Environment.isDevelopment &&
-			Sabel.Element.getStyle(element, "display") === "none") {
-			alert("CSSでdisplayがnoneにセットされています。\nこのままだと正常に動作しないので、削除して下さい。");
-		}
-*/
 
 		this.element = Sabel.get(element, false);
 	},
@@ -2726,13 +2730,6 @@ Sabel.Effect.Slide = function() {
 
 Sabel.Effect.Slide.prototype = {
 	init: function(element) {
-/*
-		if (Sabel.Environment.isDevelopment &&
-			Sabel.Element.getStyle(element, "display") === "none") {
-			alert("CSSでdisplayがnoneにセットされています。\nこのままだと正常に動作しないので、削除して下さい。");
-		}
-*/
-
 		this.element = Sabel.get(element, false);
 	},
 
@@ -2779,10 +2776,10 @@ Sabel.DragAndDrop.prototype = {
 	initialize: function(element, options)
 	{
 		options = options || {};
-		element = Sabel.get(element, false);
+		element = Sabel.get(element);
+		var handle = options.handle ? Sabel.get(options.handle) : element;
 
-		element.style.cursor = options.cursor || "move";
-		//element.style.position = "absolute";
+		handle.style.cursor = options.cursor || "move";
 
 		this.element  = element;
 		this.observes = new Array();
@@ -2790,7 +2787,7 @@ Sabel.DragAndDrop.prototype = {
 		this.setOptions(options || {});
 
 		var self = this;
-		this.observe(element, "mousedown", function(e) { self.mouseDown(e) });
+		this.observe(handle, "mousedown", function(e) { self.mouseDown(e) });
 	},
 
 	setOptions: function(o)
@@ -2799,6 +2796,7 @@ Sabel.DragAndDrop.prototype = {
 			startCallback: o.startCallback ? o.startCallback : null,
 			endCallback:   o.endCallback   ? o.endCallback   : null,
 			moveCallback:  o.moveCallback  ? o.moveCallback  : null,
+			bsc: o.bsc ? o.bsc : null,
 			rangeX: null, rangeY: null
 		}
 		if (o.x) this.setXConst(o.x);
@@ -2835,44 +2833,44 @@ Sabel.DragAndDrop.prototype = {
 	{
 		if (this.observes[handler]) return;
 
-		if (element.addEventListener) {
-			element.addEventListener(handler, func, useCapture || false);
-		} else if (element.attachEvent) {
-			element.attachEvent("on" + handler, func);
-		}
+		Sabel.Element.observe(element, handler, func);
 		this.observes[handler] = func;
 	},
 	
 	stopObserve: function(element, handler)
 	{
-		if (element.removeEventListener) {
-			element.removeEventListener(handler, this.observes[handler], false);
-		} else if (element.detachEvent) {
-			element.detachEvent("on" + handler, this.observes[handler]);
-		}
+		Sabel.Element.stopObserve(element, handler, this.observes[handler]);
 		delete this.observes[handler];
 	},
 	
 	mouseDown: function(e)
 	{
-		e = e || window.event;
-		if (Sabel.UserAgent.isIE) {
-			e.returnValue = false;  // IE Hack.
-		} else {
-			e.preventDefault(); // Opera & Fx Hack.
+		Sabel.Event.preventDefault(e);
+
+		var element = this.element;
+		if (this.options.startCallback !== null) this.options.startCallback(element, e);
+
+		if (element.getStyle("position") !== "absolute") {
+			element.style.top = element.getOffsetTop() + "px";
+			element.style.left = element.getOffsetLeft() + "px";
+			var dimensions = element.getDimensions(true);
+			element.style.height = dimensions.height + "px";
+			element.style.width  = dimensions.width  + "px";
+			element.style.position = "absolute";
 		}
 
-		this.startPos = Sabel.Element.getOffsetPositions(this.element);
+		this.startPos = Sabel.Element.getOffsetPositions(element);
 		this.startX   = e.clientX;
 		this.startY   = e.clientY;
-		
-		this.element.style.zIndex = "10000";
+
+		element.style.zIndex = "10000";
 
 		var self = this;
 		this.observe(document, "mousemove", function(e) { self.mouseMove(e) });
 		this.observe(document, "mouseup", function(e) { self.mouseUp(e) });
 
-		if (this.options.startCallback !== null) this.options.startCallback(this.element, e);
+		//if (this.options.startCallback !== null) this.options.startCallback(element, e);
+		if (this.options.bsc !== null) this.options.bsc(element, e);
 	},
 
 	mouseUp: function(e)
@@ -2888,12 +2886,7 @@ Sabel.DragAndDrop.prototype = {
 
 	mouseMove: function(e)
 	{
-		e = e || window.event;
-		if (Sabel.UserAgent.isIE) {
-			e.returnValue = false; // IE Hack.
-		} else {
-			e.preventDefault(); // Opera & Fx Hack.
-		}
+		Sabel.Event.preventDefault(e);
 
 		var options = this.options;
 		var element = this.element;
@@ -3033,19 +3026,20 @@ Sabel.Widget.Calendar.prototype = {
 		var time = tmpDate.getTime();
 		var html = [];
 
-		html.push('<div class="sbl_calendar">');
-		html.push('  <div class="sbl_cal_header">');
-		html.push('    <a class="sbl_page_l">&#160;</a>');
-		html.push('    <span>&#160;' + year + '年' + (month+1) + '月&#160;</span>');
-		html.push('    <a class="sbl_page_r">&#160;</a>');
-		html.push('  </div>');
-		html.push('  <div class="sbl_cal_weekdays">');
+		html.push('<div class="sbl_calendarFrame">');
+		html.push('  <div class="sbl_calendar">');
+		html.push('    <div class="sbl_cal_header">');
+		html.push('      <a class="sbl_page_l">&#160;</a>');
+		html.push('      <span>&#160;' + year + '年' + (month+1) + '月&#160;</span>');
+		html.push('      <a class="sbl_page_r">&#160;</a>');
+		html.push('    </div>');
+		html.push('    <div class="sbl_cal_weekdays">');
 		for (var i=0; i<this.WeekDays.length; i++) {
 			html.push('<div>'+this.WeekDays[i]+'</div>');
 		}
-		html.push('  </div>');
+		html.push('</div>');
 
-		html.push('  <div class="sbl_cal_days">');
+		html.push('<div class="sbl_cal_days">');
 		for (var i=0; i<42; i++) {
 			tmpDate.setTime(time + (this.OneDay * i));
 			var cDate = tmpDate.getDate();
@@ -3056,13 +3050,18 @@ Sabel.Widget.Calendar.prototype = {
 				html.push("<div class='nonselectable'>" + cDate + "</div>");
 			}
 		}
+		html.push('    </div>');
 		html.push('  </div>');
+		html.push('  <a class="sbl_cal_close">Close</a>');
 		html.push('</div>');
 
 		this.rootElement.innerHTML = html.join("\n");
 		this.rootElement.show();
 
 		var find = Sabel.Dom.getElementsByClassName;
+
+		var close = find("sbl_cal_close", this.rootElement, true).item(0);
+		close.observe("click", this.hide, false, this);
 
 		var l = find("sbl_page_l", this.rootElement, true).item(0);
 		l.observe("click", this.prevMonth, false, this);
@@ -3079,6 +3078,7 @@ Sabel.Widget.Calendar.prototype = {
 		}
 
 		if (day > 0) this.mouseDown(find("day"+day, this.rootElement)[0]);
+		this.show();
 	},
 
 	show: function()

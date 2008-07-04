@@ -1,7 +1,27 @@
+.sbl_calendarFrame {
+  padding: 16px 1px 1px 1px;
+  border: 1px solid #444;
+  background: #999 url("../images/js/calendarFrameBg.gif") repeat-x 0 0;
+  position: relative;
+  width: 218px;
+  line-height: 1.5;
+}
+
+.sbl_calendarFrame a.sbl_cal_close {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: url("../images/js/calendarClose.gif") no-repeat 0 0;
+  text-indent: -9999px;
+  cursor: pointer;
+}
+
 .sbl_calendar {
   border: solid #444;
   border-width: 1px 0 0 1px;
-  width: 287px;
+  background-color: #fff;
 }
 
 .sbl_calendar .sbl_cal_header {
@@ -40,21 +60,21 @@
 
 .sbl_calendar .sbl_cal_header a.sbl_page_l {
   position: absolute;
-  width: 60px;
+  width: 30px;
   height: 15px;
   top: 4px;
   left: 4px;
-  background: url("/images/js/calL.gif") no-repeat 0 0;
+  background: url("../images/js/calendarLeftArrow.gif") no-repeat 0 0;
   cursor: pointer;
 }
 
 .sbl_calendar .sbl_cal_header a.sbl_page_r {
   position: absolute;
-  width: 60px;
+  width: 30px;
   height: 15px;
   top: 4px;
   right: 4px;
-  background: url("/images/js/calR.gif") no-repeat 100% 0;
+  background: url("../images/js/calendarRightArrow.gif") no-repeat 100% 0;
   cursor: pointer;
 }
 
@@ -71,7 +91,7 @@
 .sbl_calendar div.nonselectable {
   padding: 0px 2px;
   float: left;
-  width: 36px;
+  width: 26px;
   border: solid #444;
   border-width: 0 1px 1px 0;
   overflow: hidden;
