@@ -44,10 +44,15 @@ class Sabel_Util_HashList extends Sabel_Object
    */
   private $values = array();
   
-  public function add($name, $value)
+  public function add($name, $value, $force = false)
   {
-    if ($this->has($name)) {
-      throw new Sabel_Exception_Runtime("'{$name}' already set.");
+    $set = $this->has($name);
+    
+    if (!$force && $set) {
+      $message = __METHOD__ . "() '{$name}' already set.";
+      throw new Sabel_Exception_Runtime($message);
+    } elseif ($set) {
+      $this->values[$this->names[$name]] = $value;
     } else {
       $size =& $this->size;
       $this->names[$name]  = $size;
