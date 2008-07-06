@@ -69,7 +69,8 @@ class Sabel_Util_HashList extends Sabel_Object
       $this->values[$p] = $value;
       $this->names[$name] = $p;
     } else {
-      throw new Sabel_Exception_Runtime("'{$target}' not found.");
+      $message = __METHOD__ . "() '{$target}' not found.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   
@@ -114,7 +115,8 @@ class Sabel_Util_HashList extends Sabel_Object
         $this->index++;
       }
     } else {
-      throw new Sabel_Exception_Runtime("'{$target}' not found.");
+      $message = __METHOD__ . "() '{$target}' not found.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   
@@ -145,7 +147,8 @@ class Sabel_Util_HashList extends Sabel_Object
         $this->index++;
       }
     } else {
-      throw new Sabel_Exception_Runtime("'{$target}' not found.");
+      $message = __METHOD__ . "() '{$target}' not found.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   
@@ -172,7 +175,8 @@ class Sabel_Util_HashList extends Sabel_Object
       
       return $removed;
     } else {
-      throw new Sabel_Exception_Runtime("'{$target}' not found.");
+      $message = __METHOD__ . "() '{$target}' not found.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
   

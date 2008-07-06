@@ -502,7 +502,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeSelect")) {
-      $result = $this->beforeSelect();
+      $result = $this->beforeSelect("getCount");
     }
     
     if ($result === null) {
@@ -518,7 +518,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterSelect")) {
-      $afterResult = $this->afterSelect($result);
+      $afterResult = $this->afterSelect($result, "getCount");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -537,7 +537,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeSelect")) {
-      $result = $this->beforeSelect();
+      $result = $this->beforeSelect("selectOne");
     }
     
     if ($result === null) {
@@ -553,7 +553,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterSelect")) {
-      $afterResult = $this->afterSelect($result);
+      $afterResult = $this->afterSelect($result, "selectOne");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -572,7 +572,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeSelect")) {
-      $result = $this->beforeSelect();
+      $result = $this->beforeSelect("select");
     }
     
     if ($result === null) {
@@ -583,7 +583,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterSelect")) {
-      $afterResult = $this->afterSelect($result);
+      $afterResult = $this->afterSelect($result, "select");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -619,7 +619,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeInsert")) {
-      $result = $this->beforeInsert();
+      $result = $this->beforeInsert("save");
     }
     
     if ($result === null) {
@@ -647,7 +647,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterInsert")) {
-      $afterResult = $this->afterInsert($result);
+      $afterResult = $this->afterInsert($result, "save");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -662,7 +662,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeUpdate")) {
-      $result = $this->beforeUpdate();
+      $result = $this->beforeUpdate("save");
     }
     
     if ($result === null) {
@@ -713,7 +713,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterUpdate")) {
-      $afterResult = $this->afterUpdate($result);
+      $afterResult = $this->afterUpdate($result, "save");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -729,7 +729,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeInsert")) {
-      $result = $this->beforeInsert();
+      $result = $this->beforeInsert("insert");
     }
     
     if ($result === null) {
@@ -738,7 +738,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterInsert")) {
-      $afterResult = $this->afterInsert($result);
+      $afterResult = $this->afterInsert($result, "insert");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -756,7 +756,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeUpdate")) {
-      $result = $this->beforeUpdate();
+      $result = $this->beforeUpdate("update");
     }
     
     if ($result === null) {
@@ -765,7 +765,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterUpdate")) {
-      $afterResult = $this->afterUpdate($result);
+      $afterResult = $this->afterUpdate($result, "update");
       if ($afterResult !== null) $result = $afterResult;
     }
     
@@ -784,7 +784,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   {
     $result = null;
     if ($this->hasMethod("beforeDelete")) {
-      $result = $this->beforeDelete();
+      $result = $this->beforeDelete("delete");
     }
     
     if ($result === null) {
@@ -812,7 +812,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($this->hasMethod("afterDelete")) {
-      $afterResult = $this->afterDelete($result);
+      $afterResult = $this->afterDelete($result, "delete");
       if ($afterResult !== null) $result = $afterResult;
     }
     
