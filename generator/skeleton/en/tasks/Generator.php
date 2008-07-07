@@ -226,21 +226,6 @@ class Generator extends Sabel_Sakle_Task
     }
   }
   
-  private function getEnvironment()
-  {
-    if (Sabel_Console::hasOption("e", $this->arguments)) {
-      $opts = Sabel_Console::getOption("e", $this->arguments);
-      if (($env = environment($opts[0])) === null) {
-        $this->error("invalid environment.");
-        exit;
-      } else {
-        return $env;
-      }
-    } else {
-      return DEVELOPMENT;
-    }
-  }
-  
   private function checkArguments()
   {
     $arguments = $this->arguments;
@@ -253,9 +238,8 @@ class Generator extends Sabel_Sakle_Task
     $renderers = array("sabel", "smarty", "savant");
     
     if (Sabel_Console::hasOption("r", $arguments)) {
-      $opts = Sabel_Console::getOption("r", $arguments);
-      if (isset($opts[0])) {
-        $renderer = strtolower($opts[0]);
+      if (($renderer = Sabel_Console::getOption("r", $arguments)) !== null) {
+        $renderer = strtolower($renderer);
         if (in_array($renderer, $renderers, true)) {
           $this->renderer = $renderer;
         }

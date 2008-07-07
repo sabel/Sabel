@@ -140,17 +140,21 @@ class Gettext extends Sabel_Sakle_Task
     $args = $this->arguments;
     
     if (Sabel_Console::hasOption("f", $args)) {
-      $opts = Sabel_Console::getOption("f", $args);
-      $this->fileName = $opts[0];
+      $this->fileName = Sabel_Console::getOption("f", $args);
     }
     
+    /*
     if (Sabel_Console::hasOption("dl", $args)) {
-      $opts = Sabel_Console::getOption("dl", $args);
-      $this->defaultLocale = $opts[0];
+      $this->defaultLocale = Sabel_Console::getOption("dl", $args);
     }
+    */
     
     if (Sabel_Console::hasOption("l", $args)) {
-      $this->locales = Sabel_Console::getOption("l", $args);
+      $idx = array_search("-l", $args, true);
+      for ($i = ++$idx, $c = count($args); $i < $c; $i++) {
+        if ($args[$i]{0} === "-") break;
+        $this->locales[] = $args[$i];
+      }
     }
     
     $this->arguments = $args;
@@ -160,11 +164,11 @@ class Gettext extends Sabel_Sakle_Task
   {
     echo "Usage: sakle Gettext [-f FILE_NAME] [-dl DEFAULT_LOCALE] [-l LOCALES]" . PHP_EOL;
     echo PHP_EOL;
-    echo "  -f   messages filename (default: messages.php)\n";
-    echo "  -dl  default locale (default: en)\n";
+    echo "  -f   message filename (default: messages.php)\n";
+    //echo "  -dl  default locale (default: en)\n";
     echo "  -l   locales (default: locales/*)\n";
     echo PHP_EOL;
-    echo "Example: sakle Gettext -f foo.php -dl en -l en fr de" . PHP_EOL;
+    echo "Example: sakle Gettext -f foo.php -l en fr de" . PHP_EOL;
     echo PHP_EOL;
   }
 }

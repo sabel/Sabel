@@ -54,7 +54,10 @@ class Test_Console extends SabelTestCase
   
   public function testHasOption2()
   {
-    $args = array("configure", "--foo");
+    $args = array("cmd", "--foo");
+    $this->assertTrue(Sabel_Console::hasOption("foo", $args));
+    
+    $args = array("cmd", "--foo=bar");
     $this->assertTrue(Sabel_Console::hasOption("foo", $args));
   }
   
@@ -64,29 +67,23 @@ class Test_Console extends SabelTestCase
     $this->assertTrue(Sabel_Console::hasOption("d", $args));
     $this->assertTrue(Sabel_Console::hasOption("f", $args));
     
-    $opts = Sabel_Console::getOption("d", $args);
-    $this->assertEquals("/var/tmp", $opts[0]);
+    $args = array("cmd", "-d", "/var/tmp", "-f", "/tmp/test.txt");
+    $this->assertEquals("/var/tmp", Sabel_Console::getOption("d", $args));
     $this->assertEquals(array("cmd", "-f", "/tmp/test.txt"), $args);
     
-    $opts = Sabel_Console::getOption("f", $args);
-    $this->assertEquals("/tmp/test.txt", $opts[0]);
-    $this->assertEquals(array("cmd"), $args);
+    $args = array("cmd", "-d", "/var/tmp", "-f", "/tmp/test.txt");
+    $this->assertEquals("/tmp/test.txt", Sabel_Console::getOption("f", $args));
+    $this->assertEquals(array("cmd", "-d", "/var/tmp"), $args);
   }
   
-  public function testMultipleOptionValues()
+  public function testGetOption2()
   {
-    $args = array("cmd", "-a", "hoge", "fuga", "foo", "-b", "test");
-    $this->assertTrue(Sabel_Console::hasOption("a", $args));
-    $this->assertTrue(Sabel_Console::hasOption("b", $args));
-    $this->assertFalse(Sabel_Console::hasOption("c", $args));
+    $args = array("cmd", "--dir=/var/tmp", "--file=/tmp/test.txt");
+    $this->assertEquals("/var/tmp", Sabel_Console::getOption("dir", $args));
+    $this->assertEquals(array("cmd", "--file=/tmp/test.txt"), $args);
     
-    $opts = Sabel_Console::getOption("a", $args);
-    $expected = array("hoge", "fuga", "foo");
-    $this->assertEquals($expected, $opts);
-    $expected = array("cmd", "-b", "test");
-    $this->assertEquals($expected, $args);
-    
-    $opts = Sabel_Console::getOption("b", $args);
-    $this->assertEquals("test", $opts[0]);
+    $args = array("cmd", "--dir=/var/tmp", "--file=/tmp/test.txt");
+    $this->assertEquals("/tmp/test.txt", Sabel_Console::getOption("file", $args));
+    $this->assertEquals(array("cmd", "--dir=/var/tmp"), $args);
   }
 }

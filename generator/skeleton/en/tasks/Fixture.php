@@ -103,7 +103,18 @@ class Fixture extends Sabel_Sakle_Task
   
   protected function export()
   {
+    dump($this->arguments);
+    exit;
     unset($this->arguments[0]);
+    
+    $fp = fopen(RUN_BASE . "/test.csv", "w+");
+    $models = MODEL("Foo")->select();
+    foreach ($models as $model) {
+      fputcsv($fp, $model->toArray());
+    }
+    
+    fclose($fp);
+    exit;
     
     foreach ($this->arguments as $mdlName) {
       $lines  = array();

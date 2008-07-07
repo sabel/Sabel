@@ -107,14 +107,14 @@ class Migration extends Sabel_Sakle_Task
   protected function defineMigrationDirectory()
   {
     if (Sabel_Console::hasOption("d", $this->arguments)) {
-      $opts = Sabel_Console::getOption("d", $this->arguments);
-      $dir  = $opts[0];
+      $dir = Sabel_Console::getOption("d", $this->arguments);
     } else {
       $dir = RUN_BASE . DS . "migration" . DS . $this->getConnectionName();
     }
     
     if (!is_dir($dir)) {
       $this->error("no such directory '{$dir}'.");
+      exit;
     }
     
     Sabel_DB_Migration_Manager::setDirectory($dir);

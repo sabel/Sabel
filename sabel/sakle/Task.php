@@ -55,8 +55,7 @@ abstract class Sabel_Sakle_Task extends Sabel_Object
   protected function defineEnvironmentByOption($opt = "e", $default = DEVELOPMENT)
   {
     if (Sabel_Console::hasOption($opt, $this->arguments)) {
-      $opts = Sabel_Console::getOption($opt, $this->arguments);
-      $this->defineEnvironment($opts[0]);
+      $this->defineEnvironment(Sabel_Console::getOption($opt, $this->arguments));
     } elseif (!defined("ENVIRONMENT")) {
       define("ENVIRONMENT", $default);
     }

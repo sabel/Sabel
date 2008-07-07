@@ -51,12 +51,14 @@ class Sabel_Console
   
   public static function hasOption($opt, $arguments)
   {
-    if (in_array("--" . $opt, $arguments, true)) {
-      return true;
-    }
-    
-    foreach ($arguments as $arg) {
-      if (preg_match('/^-[a-zA-Z]*' . $opt . '[a-zA-Z]*$/', $arg)) return true;
+    if (strlen($opt) === 1) {
+      foreach ($arguments as $argument) {
+        if (preg_match('/^-[a-zA-Z]*' . $opt . '[a-zA-Z]*$/', $argument)) return true;
+      }
+    } else {
+      foreach ($arguments as $argument) {
+        if (preg_match("/^--{$opt}(=.*)?$/", $argument)) return true;
+      }
     }
     
     return false;
@@ -64,23 +66,33 @@ class Sabel_Console
   
   public static function getOption($opt, &$arguments, $unset = true)
   {
-    $index = array_search("-" . $opt, $arguments, true);
+    $value = null;
     
-    if ($index === false) {
-      $index = array_search("--" . $opt, $arguments, true);
-      if ($index === false) return null;
+    if (strlen($opt) === 1) {
+      $index = array_search("-" . $opt, $arguments, true);
+      if ($index !== false && isset($arguments[$index + 1])) {
+        $value = $arguments[$index + 1];
+        if ($unset) {
+          unset($arguments[$index]);
+          unset($arguments[$index + 1]);
+          $arguments = array_values($arguments);
+        }
+      }
+    } else {
+      foreach ($arguments as $idx => $argument) {
+        if (preg_match("/^--{$opt}=(.+)$/", $argument, $matches)) {
+          $value = $matches[1];
+          if ($unset) {
+            unset($arguments[$idx]);
+            $arguments = array_values($arguments);
+          }
+          
+          break;
+        }
+      }
     }
     
-    $opts = array();
-    for ($i = $index + 1, $size = count($arguments); $i < $size; $i++) {
-      if ($arguments[$i]{0} === "-") break;
-      $opts[] = $arguments[$i];
-      if ($unset) unset($arguments[$i]);
-    }
-    
-    if ($unset) unset($arguments[$index]);
-    $arguments = array_values($arguments);
-    return $opts;
+    return $value;
   }
   
   public static function getHeader($type, $headMsg)

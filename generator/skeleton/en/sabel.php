@@ -14,7 +14,27 @@ if (!defined("ENVIRONMENT")) {
 
 $_SERVER["HTTP_HOST"]   = "localhost";
 $_SERVER["SERVER_NAME"] = "localhost";
-$_SERVER["REQUEST_URI"] = $_SERVER["argv"][1];
+
+if (isset($_SERVER["argv"][2])) {
+  $_SERVER["REQUEST_METHOD"] = strtoupper($_SERVER["argv"][2]);
+} else {
+  $_SERVER["REQUEST_METHOD"] = "GET";
+}
+
+if (isset($_SERVER["argv"][1])) {
+  $parsed = parse_url("http://localhost/" . $_SERVER["argv"][1]);
+  $_SERVER["REQUEST_URI"] = $parsed["path"];
+  
+  if (isset($parsed["query"])) {
+    if ($_SERVER["REQUEST_METHOD"] === "POST") {
+      parse_str($parsed["query"], $_POST);
+    } else {
+      parse_str($parsed["query"], $_GET);
+    }
+  }
+} else {
+  $_SERVER["REQUEST_URI"] = "/";
+}
 
 if (ENVIRONMENT === PRODUCTION) Sabel::init();
 

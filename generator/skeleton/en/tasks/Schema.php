@@ -20,11 +20,10 @@ class Schema extends Sabel_Sakle_Task
     $this->defineEnvironment($this->arguments[0]);
     Sabel_DB_Config::initialize(new Config_Database());
     
-    $opTables = $this->getOutputTables();
-    if (isset($opTables[0]) && $opTables[0] === "all") {
-      $writeAll = (count($opTables) === 1);
-    } else {
-      $writeAll = false;
+    $isAll = false;
+    $tables = $this->getOutputTables();
+    if (isset($tables[0]) && strtolower($tables[0]) === "all") {
+      $isAll = (count($tables) === 1);
     }
     
     $tList = new TableListWriter($outputDir);
@@ -33,7 +32,7 @@ class Schema extends Sabel_Sakle_Task
       $db = Sabel_DB::createMetadata($connectionName);
       
       foreach ($db->getTableList() as $tblName) {
-        if ($writeAll || in_array($tblName, $opTables, true)) {
+        if ($isAll || in_array($tblName, $tables, true)) {
           $writer = new Sabel_DB_Metadata_FileWriter($outputDir);
           $writer->write($db->getTable($tblName));
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
@@ -50,8 +49,16 @@ class Schema extends Sabel_Sakle_Task
   
   private function getOutputTables()
   {
-    if (Sabel_Console::hasOption("t", $this->arguments)) {
-      return Sabel_Console::getOption("t", $this->arguments);
+    $args = $this->arguments;
+    if (Sabel_Console::hasOption("t", $args)) {
+      $tables = array();
+      $idx = array_search("-t", $args, true);
+      for ($i = ++$idx, $c = count($args); $i < $c; $i++) {
+        if ($args[$i]{0} === "-") break;
+        $tables[] = $args[$i];
+      }
+      
+      return $tables;
     } else {
       return array();
     }
