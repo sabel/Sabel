@@ -128,6 +128,8 @@ class Sabel_Http_Request extends Sabel_Object
     }
     
     $this->cookies[] = $cookie;
+    
+    return $this;
   }
   
   public function deleteCookie($name, $path = "/", $domain = null)
