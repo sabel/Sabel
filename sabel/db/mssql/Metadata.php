@@ -68,7 +68,12 @@ SQL;
     $column->name = $row["column_name"];
     $column->nullable = ($row["is_nullable"] !== "NO");
     
-    if ($row["data_type"] === "float") $row["data_type"] = "double";
+    if ($row["data_type"] === "varchar" && $row["character_maximum_length"] === -1) {
+      $row["data_type"] = "text";
+    } elseif ($row["data_type"] === "float") {
+      $row["data_type"] = "double";
+    }
+    
     Sabel_DB_Type_Manager::create()->applyType($column, $row["data_type"]);
     $this->setDefault($column, $row["column_default"]);
     

@@ -116,6 +116,9 @@ class Test_Util_FileSystem extends SabelTestCase
   
   public function testFilePermission()
   {
+    // win
+    if (DIRECTORY_SEPARATOR === "\\") return;
+    
     $file = "hoge" . DS . "fuga" . DS . "foo.txt";
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $file = $fs->getFile($file);
@@ -126,6 +129,9 @@ class Test_Util_FileSystem extends SabelTestCase
   
   public function testFilePermission2()
   {
+    // win
+    if (DIRECTORY_SEPARATOR === "\\") return;
+    
     chmod($this->basedir . DS . "readable.txt", 0444);
     chmod($this->basedir . DS . "writable.txt", 0222);
     chmod($this->basedir . DS . "executable.txt", 0111);
@@ -154,6 +160,9 @@ class Test_Util_FileSystem extends SabelTestCase
   
   public function testDirectoryPermission()
   {
+    // win
+    if (DIRECTORY_SEPARATOR === "\\") return;
+    
     $fs = new Sabel_Util_FileSystem($this->basedir . DS . "test");
     $dir = $fs->getDirectory("hoge" . DS . "fuga");
     $this->assertEquals(0755, $dir->getPermission());

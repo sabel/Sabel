@@ -4,6 +4,7 @@ define("MODELS_DIR_PATH", "/");
 
 require_once ("Test/DB/Test.php");
 require_once ("Test/DB/Mysql.php");
+require_once ("Test/DB/Mssql.php");
 require_once ("Test/DB/PdoMysql.php");
 require_once ("Test/DB/Mysqli.php");
 require_once ("Test/DB/Pgsql.php");
@@ -69,6 +70,10 @@ class Test_DB_Tests
     
     if (extension_loaded("interbase")) {
       $suite->addTest(Test_DB_Ibase::suite());
+    }
+    
+    if (extension_loaded("mssql")) {
+      $suite->addTest(Test_DB_Mssql::suite());
     }
     
     if (extension_loaded("oci8")) {

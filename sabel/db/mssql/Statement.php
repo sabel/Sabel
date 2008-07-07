@@ -104,9 +104,10 @@ class Sabel_DB_Mssql_Statement extends Sabel_DB_Statement
       }
       
       $orderBy = " ORDER BY " . $this->quoteIdentifierForOrderString($order);
-      $sql = "SELECT * FROM (SELECT ROW_NUMBER() OVER({$orderBy}) AS [SDB_RN], $projection "
-           . "FROM $tblName" . $this->join . $this->where . $orderBy . ") "
-           . "WHERE [SDB_RN] BETWEEN " . ($offset + 1) . " AND " . ($offset + $limit);
+      $sql = "SELECT * FROM (SELECT ROW_NUMBER() OVER({$orderBy}) AS [SBL_RN], $projection "
+           . "FROM $tblName" . $this->join . $this->where . ") AS [SBL_TMP] "
+           . "WHERE [SBL_RN] BETWEEN " . ($offset + 1) . " AND "
+           . ($offset + $limit) . " " . $orderBy;
     } else {
       $sql = "SELECT $projection FROM $tblName" . $this->join . $this->where;
       
