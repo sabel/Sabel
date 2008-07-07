@@ -177,9 +177,11 @@ class Test_Aspect_Base extends SabelTestCase
     
     $this->assertEquals("", $advice->getThrowsMessage());
     
-    $target->willThrowException();
-    
-    $this->assertEquals("throws", $advice->getThrowsMessage());
+    try {
+      $target->willThrowException();
+    } catch (Exception $e) {
+      $this->assertEquals("throws", $advice->getThrowsMessage());
+    }
   }
   
   public function testSimpleThrowsAndReturnAdvice()
@@ -204,11 +206,13 @@ class Test_Aspect_Base extends SabelTestCase
     
     $this->assertEquals("", $throwsAdvice->getThrowsMessage());
     
-    $target->willThrowException();
-    
-    $this->assertEquals("throws", $throwsAdvice->getThrowsMessage());
-    $this->assertEquals(array(), $returningAdvice->getResults());
-    $this->assertEquals(array("willThrowException"), $beforeAdvice->getCalledMethods());
+    try {
+      $target->willThrowException();
+    } catch (Exception $e) {
+      $this->assertEquals("throws", $throwsAdvice->getThrowsMessage());
+      $this->assertEquals(array(), $returningAdvice->getResults());
+      $this->assertEquals(array("willThrowException"), $beforeAdvice->getCalledMethods());
+    }
   }
   
   public function testAdvices()

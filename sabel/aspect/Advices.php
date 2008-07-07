@@ -19,6 +19,8 @@ class Sabel_Aspect_Advices
       $this->advices[] = new Sabel_Aspect_MethodBeforeAdviceInterceptor($advice);
     } elseif ($advice instanceof Sabel_Aspect_MethodAfterReturningAdvice) {
       $this->advices[] = new Sabel_Aspect_MethodAfterReturningAdviceInterceptor($advice);
+    } elseif ($advice instanceof Sabel_Aspect_MethodAfterAdvice) {
+      $this->advices[] = new Sabel_Aspect_MethodAfterAdviceInterceptor($advice);
     } elseif ($advice instanceof Sabel_Aspect_MethodThrowsAdvice) {
       $this->advices[] = new Sabel_Aspect_MethodThrowsAdviceInterceptor($advice);
     } elseif ($advice instanceof Sabel_Aspect_MethodInterceptor) {

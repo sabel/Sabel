@@ -24,8 +24,13 @@ class Sabel_Aspect_MethodBeforeAdviceInterceptor implements Sabel_Aspect_MethodI
    */
   public function invoke(Sabel_Aspect_MethodInvocation $i)
   {
-    $this->interceptor->before($i->getMethod(), $i->getArguments(), $i->getThis());
-    return $i->proceed();
+    $result = $this->interceptor->before($i->getMethod(), $i->getArguments(), $i->getThis());
+    
+    if ($result !== null) {
+      return $result;
+    } else {
+      return $i->proceed();
+    }
   }
 }
 
@@ -110,6 +115,43 @@ class Sabel_Aspect_PlainObjectAdviceInterceptor implements Sabel_Aspect_MethodIn
   }
 }
 
+class Sabel_Aspect_MethodAfterAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
+{
+  private $interceptor = null;
+  
+  public function __construct(Sabel_Aspect_MethodAfterReturningAdvice $interceptor)
+  {
+    $this->interceptor = $interceptor;
+  }
+  
+  /**
+   * implements Sabel_Aspect_MethodInterceptor
+   */
+  public function invoke(Sabel_Aspect_MethodInvocation $i)
+  {
+    $exception = null;
+    
+    try {
+      $return = $i->proceed();
+      $result = $this->interceptor->after($i->getMethod(), $i->getArguments(), $i->getThis(), $return, $exception);
+      
+      if ($result !== null) {
+        return $result;
+      } else {
+        return $return;
+      }
+    } catch (Exception $exception) {
+      $result = $this->interceptor->after($i->getMethod(), $i->getArguments(), $i->getThis(), $return, $exception);
+      
+      if ($result !== null) {
+        return $result;
+      } else {
+        throw $exception;
+      }
+    }
+  }
+}
+
 class Sabel_Aspect_MethodAfterReturningAdviceInterceptor implements Sabel_Aspect_MethodInterceptor
 {
   private $interceptor = null;
@@ -126,9 +168,13 @@ class Sabel_Aspect_MethodAfterReturningAdviceInterceptor implements Sabel_Aspect
   {
     $return = $i->proceed();
     
-    $this->interceptor->after($i->getMethod(), $i->getArguments(), $i->getThis(), $return);
+    $result = $this->interceptor->after($i->getMethod(), $i->getArguments(), $i->getThis(), $return);
     
-    return $return;
+    if ($result !== null) {
+      return $result;
+    } else {
+      return $return;  
+    }
   }
 }
 
@@ -149,7 +195,13 @@ class Sabel_Aspect_MethodThrowsAdviceInterceptor implements Sabel_Aspect_MethodI
     try {
       return $i->proceed();
     } catch (Exception $e) {
-      $this->interceptor->throws($i->getMethod(), $i->getArguments(), $i->getThis(), $e);
+      $result = $this->interceptor->throws($i->getMethod(), $i->getArguments(), $i->getThis(), $e);
+      
+      if ($result !== null) {
+        return $result;
+      } else {
+        throw $e;
+      }
     }
   }
 }
