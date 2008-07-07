@@ -313,7 +313,7 @@ class Sabel_Container
     $className = get_class($instance);
     $adviceClasses = array();
     
-    $aspects = $this->config->getAspects();    
+    $aspects = $this->config->getAspects();
     
     $interfaces = $this->getReflection($instance)->getInterfaces();
     
