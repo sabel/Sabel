@@ -344,7 +344,7 @@ class Sabel_Container
     }
     
     $weaverClass = $this->config->getWeaver();
-    $factory = new Sabel_Aspect_Factory();
+    $factory = new Sabel_Aspect_RegexFactory();
     return $factory->build($weaverClass, $instance, $adviceClasses)->getProxy();
   }
   
