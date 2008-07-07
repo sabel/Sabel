@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Settings for Acl.
+ * Settings of ACL.
  *
  * @category   Addon
  * @package    addon.acl

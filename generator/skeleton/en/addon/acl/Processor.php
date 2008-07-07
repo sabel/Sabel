@@ -14,13 +14,14 @@ class Acl_Processor extends Sabel_Bus_Processor
   /**
    * @var Acl_User
    */
-  private $user = null;
+  protected $user = null;
   
   public function execute($bus)
   {
     $config     = new Acl_Config();
     $configs    = $config->configure();
-    $this->user = new Acl_User($bus->get("session"));
+    $session    = $bus->get("session");
+    $this->user = new Acl_User($session);
     $this->user->restore();
     
     $bus->get("controller")->setAttribute("aclUser", $this->user);
@@ -50,6 +51,7 @@ class Acl_Processor extends Sabel_Bus_Processor
       if ($authUri === null) {
         $bus->get("response")->forbidden();
       } else {
+        $session->write("acl_after_auth_uri", $bus->get("request")->getUri(), 180);
         $bus->get("controller")->getRedirector()->to($authUri);
       }
     } else {
