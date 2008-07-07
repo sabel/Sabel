@@ -87,7 +87,12 @@ interface Sabel_Aspect_MethodBeforeAdvice extends Sabel_Aspect_BeforeAdvice
   public function before($method, $arguments, $target);
 }
 
-interface Sabel_Aspect_MethodAfterReturningAdvice extends Sabel_Aspect_BeforeAdvice
+interface Sabel_Aspect_MethodAfterAdvice extends Sabel_Aspect_AfterAdvice
+{
+  public function after($method, $arguments, $target, $returnValue);
+}
+
+interface Sabel_Aspect_MethodAfterReturningAdvice extends Sabel_Aspect_AfterAdvice
 {
   public function after($method, $arguments, $target, $returnValue);
 }
