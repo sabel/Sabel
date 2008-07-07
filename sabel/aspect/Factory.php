@@ -68,13 +68,12 @@ class Sabel_Aspect_Factory
     $pat = $annotation[$type];
     $methodPattern = "/{$pat[0][0]}/";
     
-    $advisorClass     = $this->advisorClass;
-    $interceptorClass = $this->interceptorClass;
-    $annotatedClass   = $this->annotatedClass;
-    
     if (isset($this->methodPatterns[$methodPattern])) {
       $advisor = $this->methodPatterns[$methodPattern];
     } else {
+      $advisorClass   = $this->advisorClass;
+      $annotatedClass = $this->annotatedClass;
+      
       $advisor = new $advisorClass();
       $advisor->setClassMatchPattern("/{$annotatedClass}/");
       $advisor->setMethodMatchPattern($methodPattern);
@@ -82,6 +81,7 @@ class Sabel_Aspect_Factory
       $this->weaver->addAdvisor($advisor);
     }
     
+    $interceptorClass = $this->interceptorClass;
     $poInterceptor = new $interceptorClass($this->advice);
     
     $setMethod = "set" . ucfirst($type) . "AdviceMethod";
