@@ -23,7 +23,7 @@ class Sabel_Http_Request extends Sabel_Object
   
   protected $config = array(
     "maxRedirects" => 5,
-    "timeout"      => 100,
+    "timeout"      => 10,
     "useCookie"    => true,
     "useProxy"     => false,
     "keepAlive"    => false,
