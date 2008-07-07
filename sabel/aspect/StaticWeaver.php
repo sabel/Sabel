@@ -9,33 +9,8 @@
  * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_StaticWeaver implements Sabel_Aspect_Weaver
+class Sabel_Aspect_StaticWeaver extends Sabel_Aspect_AbstractWeaver
 {
-  private $target = null;
-  
-  private $advisor = array();
-  
-  public function __construct($target = null)
-  {
-    if ($target !== null) {
-      $this->target = $target;  
-    }
-  }
-  
-  public function setTarget($target)
-  {
-    $this->target = $target;
-  }
-  
-  public function addAdvisor($advisor, $position = null)
-  {
-    if ($position === null) {
-      $position = count($this->advisor);
-    }
-    
-    $this->advisor[$position] = $advisor;
-  }
-  
   public function getProxy()
   {
     if ($this->target === null) {

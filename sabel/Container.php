@@ -310,16 +310,14 @@ class Sabel_Container
       throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
     }
     
-    $weaverClass = $this->config->getWeaver();
-    
     $className = get_class($instance);
+    $adviceClasses = array();
+    
+    $aspects = $this->config->getAspects();    
     
     $interfaces = $this->getReflection($instance)->getInterfaces();
     
     if (count($interfaces) >= 1) {
-      $adviceClasses = array();
-      
-      $aspects = $this->config->getAspects();
       foreach ($aspects as $aspect) {
         foreach ($interfaces as $implementInterface) {
           $implementName = $implementInterface->name;
@@ -330,30 +328,24 @@ class Sabel_Container
           }
         }
       }
-      
-      $factory = new Sabel_Aspect_Factory();
-      $weaver = $factory->build($weaverClass, $instance, $adviceClasses);
-
-      return $weaver->getProxy();
     } else {
-      foreach ($this->config->getAspects() as $aspect) {
+      foreach ($aspects as $aspect) {
         $parent = $aspect->getName();
+        
         if ($instance instanceof $parent) {
           $className = $aspect->getName();
+          break;
         }
       }
       
       if (!$this->config->hasAspect($className)) return $instance;
       
-      $aspectSetting = $this->config->getAspect($className);
-
-      $adviceClass = $aspectSetting->getAdvice();
-
-      $factory = new Sabel_Aspect_Factory();
-      $weaver = $factory->build($weaverClass, $instance, $adviceClass);
-
-      return $weaver->getProxy();
+      $adviceClasses[] = $this->config->getAspect($className)->getAdvice();
     }
+    
+    $weaverClass = $this->config->getWeaver();
+    $factory = new Sabel_Aspect_Factory();
+    return $factory->build($weaverClass, $instance, $adviceClasses)->getProxy();
   }
   
   protected function newInstanceWithConstruct($reflection, $className)

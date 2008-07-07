@@ -5,9 +5,17 @@ class Sabel_Aspect_Factory
   private $weaver = null;
   private $advice = null;
   
+  private $advisorClass = "Sabel_Aspect_RegexMatcherPointcutAdvisor";
+  private $annotatedClass = ".+";
+  private $interceptorClass = "Sabel_Aspect_PlainObjectAdviceInterceptor";
+  
+  private $methodPatterns = array();
+  
+  private $types = array("before", "after", "around", "throws");
+  
   public function build($weaverClass, $targetClass, $adviceClasses)
   {
-    $weaver = new $weaverClass($targetClass);
+    $this->weaver = new $weaverClass($targetClass);
     
     if (!is_array($adviceClasses)) {
       $adviceClasses = array($adviceClasses);
@@ -17,80 +25,69 @@ class Sabel_Aspect_Factory
     
     foreach ($adviceClasses as $adviceClass) {
       $advice = new $adviceClass();
-
-      $this->weaver = $weaver;
+      
       $this->advice = $advice;
-
+      
       $reflection = new Sabel_Reflection_Class($advice);
-
+      
       $annotatedAdvisor = $reflection->getAnnotation("advisor");
-
-      if ($annotatedAdvisor === null) {
-        $advisorClass = "Sabel_Aspect_RegexMatcherPointcutAdvisor";
-      } else {
-        $advisorClass = $annotatedAdvisor[0][0];
+      if ($annotatedAdvisor !== null) {
+        $this->advisorClass = $annotatedAdvisor[0][0];
       }
-
+      
       $annotatedInterceptor = $reflection->getAnnotation("interceptor");
-
-      if ($annotatedInterceptor === null) {
-        $interceptorClass = "Sabel_Aspect_PlainObjectAdviceInterceptor";
-      } else {
-        $interceptorClass = $annotatedInterceptor[0][0];
+      if ($annotatedInterceptor !== null) {
+        $this->interceptorClass = $annotatedInterceptor[0][0];
       }
-
+      
       $annotatedClass = $reflection->getAnnotation("classMatch");
-
-      if ($annotatedClass === null) {
-        $annotatedClass = ".+";
-      } else {
-        $annotatedClass = $annotatedClass[0][0];
+      if ($annotatedClass !== null) {
+        $this->annotatedClass = $annotatedClass[0][0];
       }
-
+      
       foreach ($reflection->getMethods() as $method) {
-        $annotation = $method->getAnnotations();
-
-        $advisor = new $advisorClass();
-        $advisor->setClassMatchPattern("/{$annotatedClass}/");
-
-        if (isset($annotation["before"])) {
-          $before = $annotation["before"];
-
-          $methodPattern = "/{$before[0][0]}/";
-          $advisor->setMethodMatchPattern($methodPattern);
-
-          $poInterceptor = new $interceptorClass($advice);
-          $poInterceptor->setBeforeAdviceMethod($method->getName());
-
-          $advisor->addAdvice($poInterceptor);
-          $weaver->addAdvisor($advisor);
-        } elseif (isset($annotation["after"])) {
-          $after = $annotation["after"];
-
-          $methodPattern = "/{$after[0][0]}/";
-          $advisor->setMethodMatchPattern($methodPattern);
-
-          $poInterceptor = new $interceptorClass($advice);
-          $poInterceptor->setAfterAdviceMethod($method->getName());
-
-          $advisor->addAdvice($poInterceptor);
-          $weaver->addAdvisor($advisor);
-        } elseif (isset($annotation["throws"])) {
-          $throws = $annotation["throws"];
-
-          $methodPattern = "/{$throws[0][0]}/";
-          $advisor->setMethodMatchPattern($methodPattern);
-
-          $poInterceptor = new $interceptorClass($advice);
-          $poInterceptor->setThrowsAdviceMethod($method->getName());
-
-          $advisor->addAdvice($poInterceptor);
-          $weaver->addAdvisor($advisor);
-        }
+        $this->addToAdvisor($method);
       }
     }
     
-    return $weaver;
+    return $this->weaver;
+  }
+  
+  private function addToAdvisor($method)
+  {
+    $annotation = $method->getAnnotations();
+    
+    $type = null;
+    foreach ($this->types as $cType) {
+      if (isset($annotation[$cType])) {
+        $type = $cType;
+      }
+    }
+    if ($type === null) return;
+    
+    $pat = $annotation[$type];
+    $methodPattern = "/{$pat[0][0]}/";
+    
+    $advisorClass     = $this->advisorClass;
+    $interceptorClass = $this->interceptorClass;
+    $annotatedClass   = $this->annotatedClass;
+    
+    if (isset($this->methodPatterns[$methodPattern])) {
+      $advisor = $this->methodPatterns[$methodPattern];
+    } else {
+      $advisor = new $advisorClass();
+      $advisor->setClassMatchPattern("/{$annotatedClass}/");
+      $advisor->setMethodMatchPattern($methodPattern);
+      $this->methodPatterns[$methodPattern] = $advisor;
+      $this->weaver->addAdvisor($advisor);
+    }
+    
+    $poInterceptor = new $interceptorClass($this->advice);
+    
+    $setMethod = "set" . ucfirst($type) . "AdviceMethod";
+    $poInterceptor->$setMethod($method->getName());
+    
+    $advisor->addAdvice($poInterceptor);
   }
   
   public function getAdvice()
@@ -98,4 +95,3 @@ class Sabel_Aspect_Factory
     return $this->advice;
   }
 }
-

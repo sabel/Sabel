@@ -212,3 +212,37 @@ interface Sabel_Aspect_Weaver
 {
   public function getProxy();
 }
+
+abstract class Sabel_Aspect_AbstractWeaver implements Sabel_Aspect_Weaver
+{
+  protected $target  = null;
+  protected $advisor = array();
+  
+  public function __construct($target = null)
+  {
+    if ($target !== null) {
+      $this->target = $target;  
+    }
+  }
+  
+  public function addAdvisor($advisor, $position = null)
+  {
+    if ($position === null) {
+      $position = count($this->advisor);
+    }
+    
+    $this->advisor[$position] = $advisor;
+  }
+  
+  /**
+   * @param object $target
+   */
+  public function setTarget($target)
+  {
+    if (class_exists($target)) {
+      $this->target = $target;  
+    } else {
+      throw new Sabel_Exception_Runtime("target must be exist class. {$target} not found");
+    }
+  }
+}

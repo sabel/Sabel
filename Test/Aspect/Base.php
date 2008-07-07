@@ -26,6 +26,18 @@ class Test_Aspect_Base extends SabelTestCase
     $this->assertFalse($matcher->matches("Test_Test", ""));
   }
   
+  public function testNonExistTargetClass()
+  {
+    try {
+      $this->weaver->setTarget("Non_Exist_Target_Class");
+    } catch (Sabel_Exception_Runtime $e) {
+      $this->assertTrue(true);
+      return;
+    }
+    
+    $this->fail();
+  }
+  
   public function testWeaverWithInterceptor()
   {
     $weaver = $this->weaver;

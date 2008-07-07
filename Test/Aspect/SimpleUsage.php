@@ -56,4 +56,12 @@ class Sabel_Test_Aspect_UpdatableAdvice
   {
     // before
   }
+  
+  /**
+   * @around update.+
+   */
+  public function around($invocation)
+  {
+    // around
+  }
 }

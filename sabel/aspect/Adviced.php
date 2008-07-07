@@ -54,4 +54,9 @@ class Sabel_Aspect_Adviced
   {
     return (count($this->adviced) >= 1);
   }
+  
+  public function getAdvices()
+  {
+    return $this->adviced;
+  }
 }
