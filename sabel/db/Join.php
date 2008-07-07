@@ -195,13 +195,7 @@ class Sabel_DB_Join extends Sabel_Object
     } else {
       $projection = array();
       foreach ($this->projection as $name => $proj) {
-        $tblName = convert_to_tablename($name);
-        
-        if (is_string($proj)) {
-          $proj = array_map("trim", explode(",", $proj));
-        }
-        
-        if ($tblName === $this->tblName) {
+        if (($tblName = convert_to_tablename($name)) === $this->tblName) {
           foreach ($proj as $column) {
             $projection[] = $stmt->quoteIdentifier($tblName) . "." . $stmt->quoteIdentifier($column);
           }
