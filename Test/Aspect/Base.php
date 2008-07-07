@@ -284,7 +284,7 @@ class Test_Aspect_Base extends SabelTestCase
   
   public function testAnnotationPlainObjectAdvice()
   {
-    $factory = new Sabel_Aspect_Factory();
+    $factory = new Sabel_Aspect_RegexFactory();
     $weaver = $factory->build(get_class($this->weaver),
                               "Sabel_Tests_Aspect_TargetClass",
                               "Sabel_Tests_Aspect_PlainObject_Advice");
