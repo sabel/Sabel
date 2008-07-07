@@ -50,7 +50,9 @@ function remove_nullbyte($arg)
     return str_replace("\000", "", $arg);
   } elseif (is_array($arg)) {
     foreach ($arg as &$v) {
-      $v = str_replace("\000", "", $v);
+      if (is_string($v)) {
+        $v = str_replace("\000", "", $v);
+      }
     }
     
     return $arg;
