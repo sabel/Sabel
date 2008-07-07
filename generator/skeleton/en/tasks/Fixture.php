@@ -25,41 +25,38 @@ class Fixture extends Sabel_Sakle_Task
       exit;
     }
     
-    $isExport = false;
-    if (Sabel_Console::hasOption("export", $this->arguments)) {
-      $index = array_search("--export", $this->arguments, true);
-      unset($this->arguments[$index]);
-      $this->arguments = array_values($this->arguments);
-      $isExport = true;
-    }
-    
     $method = $this->getFixtureMethod();
     $this->defineEnvironment($this->arguments[0]);
     Sabel_DB_Config::initialize(new Config_Database());
     
-    if ($isExport) {
-      $this->export();
+    if (Sabel_Console::hasOption("export", $this->arguments)) {
+      unset($this->arguments[array_search("--export", $this->arguments, true)]);
+      return $this->export("fixture");
+    } elseif (Sabel_Console::hasOption("export-csv", $this->arguments)) {
+      $dir = Sabel_Console::getOption("export-csv", $this->arguments);
+      if ($dir === null) $dir = RUN_BASE . DS . "data";
+      return $this->export("csv", $dir);
+    }
+    
+    $fixtureName = $this->arguments[1];
+    
+    if ($fixtureName === "all") {
+      foreach (scandir($this->fixturesDir) as $item) {
+        if ($item === "." || $item === "..") continue;
+        Sabel::fileUsing($this->fixturesDir . DS . $item, true);
+        $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
+        $instance  = new $className();
+        $instance->$method();
+      }
     } else {
-      $fixtureName = $this->arguments[1];
-      
-      if ($fixtureName === "all") {
-        foreach (scandir($this->fixturesDir) as $item) {
-          if ($item === "." || $item === "..") continue;
-          Sabel::fileUsing($this->fixturesDir . DS . $item, true);
-          $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
-          $instance  = new $className();
-          $instance->$method();
-        }
+      $filePath = $this->fixturesDir . DS . $fixtureName . ".php";
+      if (Sabel::fileUsing($filePath, true)) {
+        $className = "Fixture_" . $fixtureName;
+        $instance  = new $className();
+        $instance->$method();
+        $this->success(ucfirst($method) . " " . $fixtureName);
       } else {
-        $filePath = $this->fixturesDir . DS . $fixtureName . ".php";
-        if (Sabel::fileUsing($filePath, true)) {
-          $className = "Fixture_" . $fixtureName;
-          $instance  = new $className();
-          $instance->$method();
-          $this->success(ucfirst($method) . " " . $fixtureName);
-        } else {
-          $this->error("no such fixture file. '{$filePath}'");
-        }
+        $this->error("no such fixture file. '{$filePath}'");
       }
     }
   }
@@ -101,21 +98,45 @@ class Fixture extends Sabel_Sakle_Task
     echo PHP_EOL;
   }
   
-  protected function export()
+  protected function export($type, $dir = null)
   {
-    dump($this->arguments);
-    exit;
     unset($this->arguments[0]);
     
-    $fp = fopen(RUN_BASE . "/test.csv", "w+");
-    $models = MODEL("Foo")->select();
-    foreach ($models as $model) {
-      fputcsv($fp, $model->toArray());
+    if ($type === "csv") {
+      if (DS === "\\") {  // win
+        if (preg_match('/^[a-z]:\\/', $dir) === 0) {  // relative path
+          $dir = RUN_BASE . DS . $dir;
+        }
+      } else {
+        if ($dir{0} !== "/") {  // relative path
+          $dir = RUN_BASE . DS . $dir;
+        }
+      }
+      
+      if (!is_dir($dir)) {
+        $this->error("'{$dir}' is not directory.");
+        exit;
+      }
+      
+      $this->export_cvs($dir);
+    } else {
+      $this->export_fixture();
     }
-    
-    fclose($fp);
-    exit;
-    
+  }
+  
+  protected function export_cvs($dir)
+  {
+    foreach ($this->arguments as $mdlName) {
+      $fp = fopen($dir . DS . "{$mdlName}.csv", "w");
+      foreach (MODEL($mdlName)->select() as $model) {
+        fputcsv($fp, $model->toArray());
+      }
+      fclose($fp);
+    }
+  }
+  
+  protected function export_fixture()
+  {
     foreach ($this->arguments as $mdlName) {
       $lines  = array();
       

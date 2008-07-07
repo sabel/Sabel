@@ -80,7 +80,14 @@ class Sabel_Console
       }
     } else {
       foreach ($arguments as $idx => $argument) {
-        if (preg_match("/^--{$opt}=(.+)$/", $argument, $matches)) {
+        if ($argument === "--{$opt}") {
+          if ($unset) {
+            unset($arguments[$idx]);
+            $arguments = array_values($arguments);
+          }
+          
+          break;
+        } if (preg_match("/^--{$opt}=(.+)$/", $argument, $matches)) {
           $value = $matches[1];
           if ($unset) {
             unset($arguments[$idx]);
