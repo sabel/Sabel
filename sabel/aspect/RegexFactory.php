@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_Factory
+class Sabel_Aspect_RegexFactory
 {
   private $weaver = null;
   private $advice = null;
