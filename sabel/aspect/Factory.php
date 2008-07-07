@@ -65,8 +65,8 @@ class Sabel_Aspect_Factory
     }
     if ($type === null) return;
     
-    $pat = $annotation[$type];
-    $methodPattern = "/{$pat[0][0]}/";
+    $pattern = $annotation[$type][0][0];
+    $methodPattern = "/{$pattern}/";
     
     if (isset($this->methodPatterns[$methodPattern])) {
       $advisor = $this->methodPatterns[$methodPattern];
