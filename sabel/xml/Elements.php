@@ -1,0 +1,119 @@
+<?php
+
+/**
+ * Sabel_Xml_Elements
+ *
+ * @category   XML
+ * @package    org.sabel.sakle
+ * @author     Ebine Yutaka <ebine.yutaka@sabel.jp>
+ * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
+{
+  /**
+   * @var int
+   */
+  public $length = 0;
+  
+  /**
+   * @var Sabel_Xml_Element[]
+   */
+  protected $elements = array();
+  
+  /**
+   * @var int
+   */
+  protected $pointer = 0;
+  
+  public function __construct(array $elements)
+  {
+    $this->elements = $elements;
+    $this->length = count($elements);
+  }
+  
+  public function getElementAt($index)
+  {
+    if (isset($this->elements[$index])) {
+      return $this->elements[$index];
+    } else {
+      return null;
+    }
+  }
+  
+  public function item($index)
+  {
+    return $this->getElementAt($index);
+  }
+  
+  public function getDocument()
+  {
+    if ($this->length > 0) {
+      return $this->elements[0]->getDocument();
+    } else {
+      return null;
+    }
+  }
+  
+  public function getParent()
+  {
+    if ($this->length > 0) {
+      return $this->elements[0]->getParent();
+    } else {
+      return null;
+    }
+  }
+  
+  public function offsetGet($index)
+  {
+    return $this->getElementAt($index);
+  }
+  
+  public function offsetSet($offset, $value)
+  {
+    // @todo warning
+  }
+  
+  public function offsetExists($index)
+  {
+    return isset($this->elements[$index]);
+  }
+  
+  public function offsetUnset($index)
+  {
+    if (isset($this->elements[$index])) {
+      unset($this->elements[$index]);
+      $this->length--;
+    }
+  }
+  
+  public function current()
+  {
+    if (isset($this->elements[$this->pointer])) {
+      return $this->elements[$this->pointer];
+    } else {
+      return null;
+    }
+  }
+  
+  public function key()
+  {
+    return $this->pointer;
+  }
+  
+  public function next()
+  {
+    $this->pointer++;
+  }
+  
+  public function rewind()
+  {
+    $this->pointer = 0;
+  }
+  
+  public function valid()
+  {
+    return ($this->pointer < $this->length);
+  }
+
+}
