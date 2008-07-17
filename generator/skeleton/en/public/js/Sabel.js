@@ -417,7 +417,8 @@ Sabel.String = new Sabel.Class(String, {
 	},
 
 	_set: function(string) {
-		return this._string = string;
+		this._string = string;
+		return this;
 	},
 
 	chr: function() {
@@ -549,8 +550,8 @@ Sabel.String = new Sabel.Class(String, {
 
 
 	capitalize: function() {
-		var str = this._string;
-		return this.ucfirst(str.toLowerCase());
+		this._set(this._string.toLowerCase());
+		return this.ucfirst();
 	},
 
 	camelize: function() {

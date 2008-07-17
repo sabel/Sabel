@@ -300,6 +300,7 @@ class Sabel_Http_Request extends Sabel_Object
         $texts[] = $content;
       }
       
+      $this->getValues = $this->postValues = array();
       $responseText = implode("", $texts);
     }
     

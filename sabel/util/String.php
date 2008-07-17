@@ -348,18 +348,20 @@ class Sabel_Util_String extends Sabel_Object
     }
     
     if ($ienc === "utf-8") {
-      $clist = ($charlist === null) ? '[\s　]*' : "[" . str_replace("~", "\\~", $charlist) . "]*";
+      $del   = "~";
+      $clist = ($charlist === null) ? '[\s　]*' : "[" . str_replace($del, "\\{$del}", $charlist) . "]*";
+      
       switch (strtolower($type)) {
         case "both":
-          $regex = "~^{$clist}(.*?){$clist}$~u";
+          $regex = "^{$clist}(.*?){$clist}";
           break;
         
         case "right":
-          $regex = "~(.*?){$clist}$~u";
+          $regex = "(.*?){$clist}";
           break;
         
         case "left":
-          $regex = "~^{$clist}(.*)$~u";
+          $regex = "^{$clist}(.*)";
           break;
         
         default:
@@ -367,7 +369,7 @@ class Sabel_Util_String extends Sabel_Object
           throw new Sabel_Exception_InvalidArgument($message);
       }
       
-      $this->string = preg_replace($regex, '$1', $this->string);
+      $this->string = preg_replace($del . $regex . "\${$del}us", '$1', $this->string);
     } else {
       $clist = ($charlist === null) ? '[\s　]*' : "[{$charlist}]*";
       switch (strtolower($type)) {

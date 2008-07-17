@@ -104,7 +104,7 @@ class Fixture extends Sabel_Sakle_Task
     
     if ($type === "csv") {
       if (DS === "\\") {  // win
-        if (preg_match('/^[a-z]:\\/', $dir) === 0) {  // relative path
+        if (preg_match('/^[a-z]:\\\\/i', $dir) === 0) {  // relative path
           $dir = RUN_BASE . DS . $dir;
         }
       } else {

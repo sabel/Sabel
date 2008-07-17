@@ -187,7 +187,7 @@ div#contents {
  * error
  */
 div.sbl_error {
-  margin: 5px 40px;
+  margin: 10px 0;
   padding: 10px;
   border: 2px solid #cc6655;
   background-color: #feeae6;
