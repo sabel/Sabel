@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<test>
+  <foo attr="foo">
+    footext
+  </foo>
+  <bar attr="bar">
+    bartext
+  </bar>
+  <baz attr="baz">
+    baztext
+  </baz>
+</test>

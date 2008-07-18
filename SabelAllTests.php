@@ -78,6 +78,7 @@ require_once ("Test/DB/TestConfig.php");
 require_once ("Test/DB/Statement/Tests.php");
 require_once ("Test/DB/Storage/Tests.php");
 require_once ("Test/DB/Tests.php");
+require_once ("Test/XML/Tests.php");
 require_once ("Test/I18n/Gettext.php");
 require_once ("Test/Cookie/Tests.php");
 
@@ -122,6 +123,7 @@ class SabelAllTests
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
     $suite->addTest(Test_Mail_Tests::suite());
+    $suite->addTest(Test_XML_Tests::suite());
     
     $suite->addTest(Test_Application::suite());
     

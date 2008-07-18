@@ -64,6 +64,41 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
     }
   }
   
+  public function append($element)
+  {
+    if (!$element instanceof Sabel_Xml_Element) {
+      $element = new Sabel_Xml_Element($element);
+    }
+    
+    $this->getParent()->appendChild($element);
+    
+    $this->elements[] = $element;
+    $this->length++;
+  }
+  
+  public function appendChild($element)
+  {
+    $this->append($element);
+  }
+  
+  public function appendLast($element)
+  {
+    $this->append($element);
+  }
+  
+  public function appendFirst($element)
+  {
+    if (!$element instanceof Sabel_Xml_Element) {
+      $element = new Sabel_Xml_Element($element);
+    }
+    
+    $first = $this->getParent()->getFirstChild();
+    $first->insertBefore($element);
+    
+    array_unshift($this->elements, $element);
+    $this->length++;
+  }
+  
   public function offsetGet($index)
   {
     return $this->getElementAt($index);

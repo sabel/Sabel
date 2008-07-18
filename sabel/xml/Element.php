@@ -51,9 +51,19 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element->nodeType;
   }
   
-  public function getContent()
+  public function setNodeValue($content)
   {
-    return $this->element->textContent;
+    $this->element->nodeValue = $content;
+  }
+  
+  public function getNodeValue()
+  {
+    return $this->element->nodeValue;
+  }
+  
+  public function setAttribute($name, $value)
+  {
+    $this->element->setAttribute($name, $value);
   }
   
   public function getAttribute($name)
@@ -64,6 +74,30 @@ class Sabel_Xml_Element extends Sabel_Object
   public function hasAttribute($name)
   {
     return $this->element->hasAttribute($name);
+  }
+  
+  public function appendChild($element)
+  {
+    if ($element instanceof self) {
+      $element = $element->getElement();
+    }
+    
+    $this->element->appendChild($element);
+  }
+  
+  public function insertBefore($element)
+  {
+    if ($element instanceof self) {
+      $element = $element->getElement();
+    }
+    
+    $parent = $this->getParent()->getElement();
+    $parent->insertBefore($element, $this->element);
+  }
+  
+  public function insertAfter($element)
+  {
+    $this->getNextSibling()->insertBefore($element);
   }
   
   public function __get($tagName)
@@ -107,6 +141,17 @@ class Sabel_Xml_Element extends Sabel_Object
     return new Sabel_Xml_Elements($elements);
   }
   
+  public function select($query)
+  {
+    $_exp = explode(" ", $query);
+    $target = str_replace(".", "/", $_exp[1]);
+    
+    unset($_exp[0]);
+    unset($_exp[1]);
+    
+    return $this->find($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
+  }
+  
   public function getChild($tagName)
   {
     return $this->find($tagName)->getElementAt(0);
@@ -132,14 +177,25 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
-  public function getParent()
+  public function getParent($target = null)
   {
-    $parent = $this->element->parentNode;
-    
-    if ($parent->nodeType === XML_DOCUMENT_NODE) {
-      return null;
+    if ($target === null) {
+      $parent = $this->element->parentNode;
+      if ($parent->nodeType === XML_DOCUMENT_NODE) {
+        return null;
+      } else {
+        return new self($parent);
+      }
     } else {
-      return new self($parent);
+      $element = $this;
+      while (true) {
+        $element = $element->getParent();
+        if ($element === null) {
+          return null;
+        } elseif ($element->tagName === $target) {
+          return $element;
+        }
+      }
     }
   }
   

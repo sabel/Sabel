@@ -26,6 +26,28 @@ class Sabel_Xml_Document extends Sabel_Object
     return $this->document;
   }
   
+  public function setEncoding($encoding)
+  {
+    $this->document->encoding = $encoding;
+    
+    return $this;
+  }
+  
+  public function getEncoding()
+  {
+    return $this->document->encoding;
+  }
+  
+  public function setVersion($version)
+  {
+    $this->document->xmlVersion = $version;
+  }
+  
+  public function getVersion()
+  {
+    return $this->document->xmlVersion;
+  }
+  
   public function loadXML($xml, $ignoreErrors = false)
   {
     if ($ignoreErrors) {
@@ -34,20 +56,7 @@ class Sabel_Xml_Document extends Sabel_Object
       $this->document->loadXML($xml);
     }
     
-    $element = new Sabel_Xml_Element($this->document->firstChild);
-    
-    if ($element->getNodeType() === XML_ELEMENT_NODE) {
-      return $element;
-    } else {
-      while (true) {
-        $element = $element->getNextSibling();
-        if ($element === null) {
-          return null;
-        } elseif ($element->getNodeType() === XML_ELEMENT_NODE) {
-          return $element;
-        }
-      }
-    }
+    return new Sabel_Xml_Element($this->document->documentElement);
   }
   
   public function loadHTML($html, $ignoreErrors = false)
@@ -60,5 +69,40 @@ class Sabel_Xml_Document extends Sabel_Object
     
     $doc = new Sabel_Xml_Element($this->document);
     return $doc->getChild("html");
+  }
+  
+  public function saveXML($node = null)
+  {
+    $this->document->formatOutput = true;
+    
+    if ($node === null) {
+      return $this->document->saveXML();
+    } else {
+      return $this->document->saveXML($node);
+    }
+  }
+  
+  public function createElement($tagName, $nodeValue = null, $attrs = array())
+  {
+    if ($nodeValue === null) {
+      $element = $this->document->createElement($tagName);
+    } else {
+      $element = $this->document->createElement($tagName, $nodeValue);
+    }
+    
+    foreach ($attrs as $name => $value) {
+      $element->setAttribute($name, $value);
+    }
+    
+    return new Sabel_Xml_Element($element);
+  }
+  
+  public function setDocumentElement($element)
+  {
+    if ($element instanceof Sabel_Xml_Element) {
+      $element = $element->getElement();
+    }
+    
+    $this->document->appendChild($element);
   }
 }
