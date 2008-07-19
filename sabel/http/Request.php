@@ -251,30 +251,37 @@ class Sabel_Http_Request extends Sabel_Object
       return $body;
     }
     
-    if (!empty($this->files) && !empty($this->postValues)) {
+    $hasValues = !empty($this->postValues);
+    $hasFiles  = !empty($this->files);
+    
+    if ($hasValues || $hasFiles) {
       $body = array();
       $boundary = md5hash();
       
-      foreach ($this->postValues as $name => $value) {
-        $body[] = "--" . $boundary;
-        $body[] = "Content-Disposition: form-data; name=\"{$name}\"\r\n";
-        $body[] = $value;
+      if ($hasValues) {
+        foreach ($this->postValues as $name => $value) {
+          $body[] = "--" . $boundary;
+          $body[] = "Content-Disposition: form-data; name=\"{$name}\"\r\n";
+          $body[] = $value;
+        }
       }
       
-      foreach ($this->files as $name => $file) {
-        $name   = $file["name"];
-        $input  = $file["formName"];
-        $body[] = "--" . $boundary;
-        $body[] = "Content-Disposition: form-data; name=\"{$input}\"; filename=\"{$name}\"";
-        $body[] = "Content-Type: " . $file["contentType"] . "\r\n";
-        $body[] = $file["data"];
+      if ($hasFiles) {
+        foreach ($this->files as $name => $file) {
+          $name   = $file["name"];
+          $input  = $file["formName"];
+          $body[] = "--" . $boundary;
+          $body[] = "Content-Disposition: form-data; name=\"{$input}\"; filename=\"{$name}\"";
+          $body[] = "Content-Type: " . $file["contentType"] . "\r\n";
+          $body[] = $file["data"];
+        }
       }
       
       $body[] = "--{$boundary}--";
       $body = implode("\r\n", $body);
       $this->headers["Content-Type"] = "multipart/form-data; boundary=\"{$boundary}\"";
       $this->headers["Content-Length"] = strlen($body);
-    } elseif (!empty($this->postValues)) {
+    } elseif ($hasValues) {
       $body = http_build_query($this->postValues, "", "&");
       $this->headers["Content-Type"] = "application/x-www-form-urlencoded";
       $this->headers["Content-Length"] = strlen($body);

@@ -2,7 +2,7 @@
 
                Sabel - Rapid Web Application Development Framework
 
-                                The New BSD License
+                               The New BSD License
    Copyright (c) 2004-2008 Mori Reo <mori.reo@sabel.jp> All rights reserved.
 
 -------------------------------------------------------------------------------
