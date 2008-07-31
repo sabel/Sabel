@@ -71,6 +71,15 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element->getAttribute($name);
   }
   
+  public function at($arg1, $arg2 = null)
+  {
+    if ($arg2 === null) {
+      return $this->getAttribute($arg1);
+    } else {
+      $this->setAttribute($arg1, $arg2);
+    }
+  }
+  
   public function hasAttribute($name)
   {
     return $this->element->hasAttribute($name);
@@ -97,23 +106,17 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function insertAfter($element)
   {
-    $this->getNextSibling()->insertBefore($element);
+    if ($next = $this->getNextSibling()) {
+      $next->insertBefore($element);
+    } else {
+      $parent = $this->getParent();
+      $parent->appendChild($element);
+    }
   }
   
   public function __get($tagName)
   {
-    $elements = $this->getChildren($tagName);
-    
-    switch ($elements->length) {
-      case 0:
-        return null;
-      
-      case 1:
-        return $elements->getElementAt(0);
-
-      default:
-        return $elements;
-    }
+    return $this->getChildren($tagName);
   }
   
   public function find($query)
@@ -144,7 +147,12 @@ class Sabel_Xml_Element extends Sabel_Object
   public function select($query)
   {
     $_exp = explode(" ", $query);
-    $target = str_replace(".", "/", $_exp[1]);
+    
+    if ($_exp[1] === ".") {
+      $target = "../" . $this->tagName;
+    } else {
+      $target = str_replace(".", "/", $_exp[1]);
+    }
     
     unset($_exp[0]);
     unset($_exp[1]);
@@ -213,6 +221,20 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
+  public function getLastChild()
+  {
+    $lastChild = $this->element->lastChild;
+    
+    if ($lastChild === null) {
+      return null;
+    } elseif ($lastChild->nodeType === XML_ELEMENT_NODE) {
+      return new self($lastChild);
+    } else {
+      $_lastChild = new self($lastChild);
+      return $_lastChild->getPreviousSibling();
+    }
+  }
+  
   public function getPreviousSibling()
   {
     $element = $this->element;
@@ -227,6 +249,23 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
+  public function getPreviousSiblings()
+  {
+    $elements = array();
+    $element  = $this;
+    
+    while (true) {
+      $element = $element->getPreviousSibling();
+      if ($element === null) {
+        break;
+      } else {
+        $elements[] = $element;
+      }
+    }
+    
+    return new Sabel_Xml_Elements($elements);
+  }
+  
   public function getNextSibling()
   {
     $element = $this->element;
@@ -239,5 +278,30 @@ class Sabel_Xml_Element extends Sabel_Object
         return new self($element);
       }
     }
+  }
+  
+  public function getNextSiblings()
+  {
+    $elements = array();
+    $element  = $this;
+    
+    while (true) {
+      $element = $element->getNextSibling();
+      if ($element === null) {
+        break;
+      } else {
+        $elements[] = $element;
+      }
+    }
+    
+    return new Sabel_Xml_Elements($elements);
+  }
+  
+  public function getSiblings()
+  {
+    return new Sabel_Xml_Elements(array_merge(
+      $this->getPreviousSiblings()->reverse()->getElements(),
+      $this->getNextSiblings()->getElements()
+    ));
   }
 }

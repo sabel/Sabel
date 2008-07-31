@@ -32,6 +32,11 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
     $this->length = count($elements);
   }
   
+  public function getElements()
+  {
+    return $this->elements;
+  }
+  
   public function getElementAt($index)
   {
     if (isset($this->elements[$index])) {
@@ -53,6 +58,13 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
     } else {
       return null;
     }
+  }
+  
+  public function reverse()
+  {
+    $this->elements = array_reverse($this->elements);
+    
+    return $this;
   }
   
   public function getParent()

@@ -8,8 +8,16 @@
     <name>suzuki</name>
     <age>25</age>
   </user>
+  <user>
+    <name>yamada</name>
+    <age>60</age>
+  </user>
   <user id="3">
     <name>satou</name>
     <age>40</age>
+  </user>
+  <user>
+    <name>koike</name>
+    <age>80</age>
   </user>
 </users>

@@ -16,9 +16,20 @@ class Sabel_Xml_Document extends Sabel_Object
    */
   protected $document = null;
   
-  public function __construct()
+  protected $config = array(
+    "preserveWhiteSpace" => false,
+    "formatOutput"       => true,
+  );
+  
+  public function __construct(array $config = array())
   {
     $this->document = new DOMDocument();
+    
+    $cnf = array_merge($this->config, $config);
+    $this->document->preserveWhiteSpace = $cnf["preserveWhiteSpace"];
+    $this->document->formatOutput = $cnf["formatOutput"];
+    
+    $this->config = $cnf;
   }
   
   public function getDocument()
@@ -71,15 +82,20 @@ class Sabel_Xml_Document extends Sabel_Object
     return $doc->getChild("html");
   }
   
-  public function saveXML($node = null)
+  public function saveXML($path = null, $node = null)
   {
-    $this->document->formatOutput = true;
-    
+    $savedXml = "";
     if ($node === null) {
-      return $this->document->saveXML();
+      $savedXml = $this->document->saveXML();
     } else {
-      return $this->document->saveXML($node);
+      $savedXml = $this->document->saveXML($node);
     }
+    
+    if ($path !== null) {
+      file_put_contents($path, $savedXml);
+    }
+    
+    return $savedXml;
   }
   
   public function createElement($tagName, $nodeValue = null, $attrs = array())

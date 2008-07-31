@@ -29,10 +29,19 @@ class Sabel_Xml_Query
         $xpath .= " {$lowered} ";
         $i++;
       } elseif ($lowered === "not") {
-        $i = $i + 4;
+        $i += 4;
       } else {
-        $xpath .= self::createPartOfXpath($parts[$i], $parts[$i + 1], $parts[$i + 2], $hash);
-        $i = $i + 3;
+        $path  = $parts[$i];
+        $exp   = $parts[$i + 1];
+        $value = $parts[$i + 2];
+        
+        if ($exp === "IS" && $value === "NOT") {
+          $xpath .= self::createPartOfXpath($path, "IS", "NOT NULL", $hash);
+          $i += 4;
+        } else {
+          $xpath .= self::createPartOfXpath($path, $exp, $value, $hash);
+          $i += 3;
+        }
       }
     }
     
@@ -43,14 +52,34 @@ class Sabel_Xml_Query
   {
     $value = str_replace(array("__{$hash}__", self::WHITE_SPACE), array("", " "), $value);
     $path  = str_replace(".", "/", $path);
+    $hasAt = false;
     
-    if (strpos($path, "@") === false) {
-      $path .= "/text()";
-    } else {
-      $path = str_replace("@", "/@", $path);
+    if ($path{0} === "@") {
+      $path = "." . $path;
     }
     
-    if ($exp === "=" || $exp === "!=") {
+    if (strpos($path, "@") !== false) {
+      $path  = str_replace("@", "/@", $path);
+      $hasAt = true;
+    }
+    
+    if ($exp === "IS") {
+      if (!$hasAt) {
+        $path = ".//" . $path;
+      }
+      
+      if ($value === "NULL") {
+        return "not($path)";
+      } elseif ($value === "NOT NULL") {
+        return $path;
+      }
+    } elseif (!$hasAt) {
+      $path .= "/text()";
+    }
+    
+    $simpleExps = array("=", "!=", ">=", "<=");
+    
+    if (in_array($exp, $simpleExps, true)) {
       return "{$path}{$exp}{$value}";
     } elseif (strtolower($exp) === "like") {
       $_value = substr($value, 1, -1);
