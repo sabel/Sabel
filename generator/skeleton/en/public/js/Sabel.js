@@ -189,7 +189,6 @@ Sabel.Window = {
 			return document.documentElement.scrollLeft;
 		} else {
 			return document.body.scrollLeft;
-
 		}
 	},
 
@@ -606,6 +605,7 @@ for (var i = 0, len = methods.length; i < len; i++) {
 		}
 	})(String.prototype[method]);
 };
+
 Sabel.Number = function(number) {
 	return Sabel.Object.create(number, Sabel.Number)
 };
@@ -623,9 +623,12 @@ Sabel.Number.toHumanReadable = function(number, unit, ext) {
 	return number.toFixed(1) + Sabel.Number._units[i];
 };
 
+//Sabel.Number.numberFormat
+
 Sabel.Number.between = function(number, min, max) {
 	return number >= min && number <= max;
 };
+
 Sabel.Array = function(iterable) {
 	if (typeof iterable === "undefined") {
 		iterable = new Array();
@@ -817,9 +820,6 @@ Sabel.Dom = {
 
 Sabel.get   = Sabel.Dom.getElementById;
 Sabel.find  = Sabel.Dom.getElementsBySelector;
-
-
-
 
 Sabel.Dom.Selector = {
 	patterns: {
@@ -1178,6 +1178,7 @@ Sabel.Element = function(element) {
 	if (typeof element === "string") {
 		element = document.createElement(element);
 	} else if (typeof element !== "object") {
+		// @todo 通る?
 		element = Sabel.get(element, false);
 	} else if (element._extended === true) {
 		return element;
@@ -1192,6 +1193,7 @@ Sabel.Element.get = function(element, id) {
 
 	do {
 		if (parent == element) return elm;
+		// @todo 必要? getCumulative関数から持ってきただけのような気がする
 		if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) break;
 	} while (parent = parent.parentNode);
 
@@ -1312,6 +1314,13 @@ Sabel.Element.setHeight = function(element, value) {
 	element = Sabel.get(element, false);
 	if (value !== "" && typeof value === "number") value = value + "px";
 	element.style.height = value;
+	return element;
+};
+
+Sabel.Element.setWidth = function(element, value) {
+	element = Sabel.get(element, false);
+	if (value !== "" && typeof value === "number") value = value + "px";
+	element.style.width = value;
 	return element;
 };
 
@@ -1938,6 +1947,7 @@ Sabel.Ajax.prototype = {
 		return text;
 	}
 };
+
 Sabel.History = function() {
 	this.init.apply(this, arguments);
 };
@@ -2072,7 +2082,7 @@ Sabel.Form.prototype = {
 Sabel.Object.extend(Sabel.Form, Sabel.Object.Methods);
 
 Sabel.Validator = function(formElm, errField) {
-	this.errField = Sabel.get(errField||"sbl_errmsg", false);
+	this.errField   = Sabel.get(errField || "sbl_errmsg", false);
 	this.validators = new Object();
 
 	Sabel.Element.observe(formElm, "submit", Sabel.Function.bindWithEvent(this.validate, this));
@@ -2273,91 +2283,79 @@ Sabel.KeyEvent = new Sabel.Class({
 	init: function(element) {
 		element = this.element = Sabel.get(element) || document;
 
-		new Sabel.Event(element, "keydown", this.keyDownHandler, false, this);
+		var cancel = false;
+
+		var keyDownListener = function(e) {
+			var key = this.getKeyCode(e);
+
+			Sabel.dump(key);
+			if (this._lists[key]) {
+				cancel = (this._lists[key](e) == false);
+			} else {
+				cancel = false;
+			}
+		};
+
+		var keyPressListener = function(e) {
+			Sabel.dump(cancel);
+			if (cancel === true) {
+				Sabel.Event.preventDefault(e);
+				cancel = false;
+				return;
+			}
+
+			var key = this.getKeyCode(e);
+			if (this._lists[key]) this._lists[key](e);
+		};
+
+		new Sabel.Event(element, "keydown", keyDownListener, false, this);
+		new Sabel.Event(element, "keypress", keyPressListener, false, this);
 	},
 
 	add: function(key, func, scope) {
-		key = this.createCharCode(key);		
-		this._lists[key] = Sabel.Function.bind(func, scope || this.element);
+		var buf = key.toLowerCase().split("-"), tmp = buf.pop();
+		buf.sort();
+		buf.push(tmp);
+		this._lists[buf.join("-")] = Sabel.Function.bind(func, scope || this.element);
 
 		return this;
 	},
 
 	remove: function(key) {
-		key = this.createCharCode(key);
-		delete this._lists[key];
+		var buf = key.toLowerCase().split("-"), tmp = buf.pop();
+		buf.sort();
+		buf.push(tmp);
+		delete this._lists[buf.join("-")];
 
 		return this;
 	},
 
-	keyDownHandler: function(e) {
-		var key  = this.getCharCode(e);
-		var func = this._lists[key];
-		if (func) {
-			func(e);
-			Sabel.Event.preventDefault(e);
-		}
-	},
+	getKeyCode: function(e) {
+		var buf = new Array();
+		if (e.altKey === true) buf.push("a");
+		if (e.ctrlKey === true) buf.push("c");
+		if (e.type === "keydown" && e.shiftKey === true) buf.push("s");
 
-	createCharCode: function(key) {
-		if (typeof key === 'string') {
-			switch (key.length) {
-			case 1:
-				key = key.charCodeAt(0);
-				break;
-			case 3:
-				key = key.charCodeAt(2) + Sabel.KeyEvent._CTRL_CODE;
-				break;
-			default:
-				// @todo throw exception?
-			}
-		}
-		return key;
-	},
-
-	getCharCode: function(e) {
-		if (e.type === "keydown") {
-			var kc = e.keyCode;
-			if (Sabel.Number.between(kc, 65, 90)) {
-				if (e.shiftKey === false)
-					kc += 32;
-			}
-			if (kc !== 17 && e.ctrlKey === true) kc += Sabel.KeyEvent._CTRL_CODE;
-			return kc;
+		var kc = e.keyCode || e.charCode || e.which;
+		if (e.type === "keydown" && Sabel.KeyEvent.special_keys[kc]) {
+			buf.push(Sabel.KeyEvent.special_keys[kc]);
+		} else {
+			buf.push(String.fromCharCode(kc).toLowerCase());
 		}
 
-		return null;
+		return buf.join("-");
 	}
 });
 
-Sabel.KeyEvent._CTRL_CODE    = 1000;
-Sabel.KeyEvent.KEY_BACKSPACE = 8;
-Sabel.KeyEvent.KEY_TAB       = 9;
-Sabel.KeyEvent.KEY_ENTER     = 13;
-Sabel.KeyEvent.KEY_ESC       = 27;
-Sabel.KeyEvent.KEY_SPACE     = 32;
-Sabel.KeyEvent.KEY_PAGEUP    = 33;
-Sabel.KeyEvent.KEY_PAGEDOWN  = 34;
-Sabel.KeyEvent.KEY_END       = 35;
-Sabel.KeyEvent.KEY_HOME      = 36;
-Sabel.KeyEvent.KEY_LEFT      = 37;
-Sabel.KeyEvent.KEY_UP        = 38;
-Sabel.KeyEvent.KEY_RIGHT     = 39;
-Sabel.KeyEvent.KEY_DOWN      = 40;
-Sabel.KeyEvent.KEY_INSERT    = 45;
-Sabel.KeyEvent.KEY_DELETE    = 46;
-Sabel.KeyEvent.KEY_F1        = 112;
-Sabel.KeyEvent.KEY_F2        = 113;
-Sabel.KeyEvent.KEY_F3        = 114;
-Sabel.KeyEvent.KEY_F4        = 115;
-Sabel.KeyEvent.KEY_F5        = 116;
-Sabel.KeyEvent.KEY_F6        = 117;
-Sabel.KeyEvent.KEY_F7        = 118;
-Sabel.KeyEvent.KEY_F8        = 119;
-Sabel.KeyEvent.KEY_F9        = 120;
-Sabel.KeyEvent.KEY_F10       = 121;
-Sabel.KeyEvent.KEY_F11       = 122;
-Sabel.KeyEvent.KEY_F12       = 123;
+Sabel.KeyEvent.special_keys = {
+	8: "backspace", 9: "tab", 13: "enter", 19: "pause", 27: "esc",
+	32: "space", 33: "pageup", 34: "pagedown", 35: "end", 36: "home",
+	37: "left", 38: "up", 39: "right", 40: "down", 45: "insert", 46: "del",
+	112: "f1", 113: "f2", 114: "f3", 115: "f4", 116: "f5", 117: "f6",
+	118: "f7", 119: "f8", 120: "f9", 121: "f10", 122: "f11", 123: "f12",
+	144: "numlock", 240: "capslock"
+};
+
 
 Sabel.Effect = function() {
 	this.init.apply(this, arguments);
