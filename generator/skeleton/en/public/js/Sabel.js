@@ -682,8 +682,10 @@ Sabel.Array.inject = function(array, method) {
 
 
 Sabel.Array.callmap = function(array, method) {
+	var args   = Sabel.Array(arguments);
+	var array  = args.shift(), method = args.shift();
 	for (var i = 0, len = array. length; i < len; i++) {
-		array[i][method]();
+		array[i][method].apply(array[i], args);
 	}
 	return array;
 };
