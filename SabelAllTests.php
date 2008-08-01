@@ -100,7 +100,6 @@ class SabelAllTests
       return $suite;
     }
     
-    /*
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Console::suite());
     $suite->addTest(Test_Bus_Tests::suite());
@@ -124,10 +123,9 @@ class SabelAllTests
     $suite->addTest(Test_I18n_Gettext::suite());
     $suite->addTest(Test_Cookie_Tests::suite());
     $suite->addTest(Test_Mail_Tests::suite());
-    */
     $suite->addTest(Test_XML_Tests::suite());
     
-    //$suite->addTest(Test_Application::suite());
+    $suite->addTest(Test_Application::suite());
     
     return $suite;
   }
