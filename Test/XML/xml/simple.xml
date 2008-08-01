@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <test>
-  <foo attr="foo">
+  <foo attr="foo" a="10" b="20" c="30">
     footext
   </foo>
   <bar attr="bar">

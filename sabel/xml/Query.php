@@ -73,6 +73,8 @@ class Sabel_Xml_Query
       } elseif ($value === "NOT NULL") {
         return $path;
       }
+    } elseif ($path === "value()") {
+      $path = "./text()";
     } elseif (!$hasAt) {
       $path .= "/text()";
     }

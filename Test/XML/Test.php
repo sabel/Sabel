@@ -34,25 +34,49 @@ class Test_XML_Test extends SabelTestCase
   {
     $xml = new Sabel_Xml_Document();
     $test = $this->loadXML($xml, "simple");
-    $this->assertEquals("foo", $test->getChild("foo")->getAttribute("attr"));
-    $this->assertEquals("bar", $test->getChild("bar")->getAttribute("attr"));
-    $this->assertEquals("baz", $test->getChild("baz")->getAttribute("attr"));
+    $this->assertEquals("foo", $test->getChild("foo")->at("attr"));
+    $this->assertEquals("bar", $test->getChild("bar")->at("attr"));
+    $this->assertEquals("baz", $test->getChild("baz")->at("attr"));
+  }
+  
+  public function testAttributes()
+  {
+    $xml = new Sabel_Xml_Document();
+    $test = $this->loadXML($xml, "simple");
+    $attrs = $test->getChild("foo")->getAttributes();
+    
+    $this->assertEquals(true,  $attrs->has("a"));
+    $this->assertEquals(true,  $attrs->has("b"));
+    $this->assertEquals(true,  $attrs->has("c"));
+    $this->assertEquals(false, $attrs->has("d"));
+    
+    $this->assertEquals("10", $attrs->get("a"));
+    $this->assertEquals("20", $attrs->get("b"));
+    $this->assertEquals("30", $attrs->get("c"));
+    $this->assertEquals(null, $attrs->get("d"));
+    
+    // getter
+    
+    $this->assertEquals("10", $attrs->a);
+    $this->assertEquals("20", $attrs->b);
+    $this->assertEquals("30", $attrs->c);
+    $this->assertEquals(null, $attrs->d);
   }
   
   public function testNodeValue()
   {
     $xml = new Sabel_Xml_Document();
     $test = $this->loadXML($xml, "simple");
-    $this->assertEquals("footext", trim($test->getChild("foo")->getNodeValue()));
-    $this->assertEquals("bartext", trim($test->getChild("bar")->getNodeValue()));
-    $this->assertEquals("baztext", trim($test->getChild("baz")->getNodeValue()));
+    $this->assertEquals("footext", trim($test->getChild("foo")->getValue()));
+    $this->assertEquals("bartext", trim($test->getChild("bar")->getValue()));
+    $this->assertEquals("baztext", trim($test->getChild("baz")->getValue()));
   }
   
   public function testElementsCount()
   {
     $xml = new Sabel_Xml_Document();
     $test = $this->loadXML($xml, "test");
-    $this->assertEquals(2, $test->getElement()->getElementsByTagName("foo")->length);
+    $this->assertEquals(2, $test->getRawElement()->getElementsByTagName("foo")->length);
     $this->assertEquals(1, $test->getChildren("foo")->length);
   }
   
@@ -92,12 +116,12 @@ class Test_XML_Test extends SabelTestCase
     foreach ($users as $i => $user) {}
     $this->assertEquals(2, $i);
     
-    $this->assertEquals("tanaka", $users[0]->getChild("name")->getNodeValue());
-    $this->assertEquals("18",     $users[0]->getChild("age")->getNodeValue());
-    $this->assertEquals("suzuki", $users[1]->getChild("name")->getNodeValue());
-    $this->assertEquals("25",     $users[1]->getChild("age")->getNodeValue());
-    $this->assertEquals("satou",  $users[2]->getChild("name")->getNodeValue());
-    $this->assertEquals("40",     $users[2]->getChild("age")->getNodeValue());
+    $this->assertEquals("tanaka", $users[0]->getChild("name")->getValue());
+    $this->assertEquals("18",     $users[0]->getChild("age")->getValue());
+    $this->assertEquals("suzuki", $users[1]->getChild("name")->getValue());
+    $this->assertEquals("25",     $users[1]->getChild("age")->getValue());
+    $this->assertEquals("satou",  $users[2]->getChild("name")->getValue());
+    $this->assertEquals("40",     $users[2]->getChild("age")->getValue());
   }
   
   public function testSimpleAccess()
@@ -105,12 +129,12 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "users");
     
-    $this->assertEquals("tanaka", $users->user[0]->name[0]->getNodeValue());
-    $this->assertEquals("18",     $users->user[0]->age[0]->getNodeValue());
-    $this->assertEquals("suzuki", $users->user[1]->name[0]->getNodeValue());
-    $this->assertEquals("25",     $users->user[1]->age[0]->getNodeValue());
-    $this->assertEquals("satou",  $users->user[2]->name[0]->getNodeValue());
-    $this->assertEquals("40",     $users->user[2]->age[0]->getNodeValue());
+    $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
+    $this->assertEquals("18",     $users->user[0]->age[0]->getValue());
+    $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
+    $this->assertEquals("25",     $users->user[1]->age[0]->getValue());
+    $this->assertEquals("satou",  $users->user[2]->name[0]->getValue());
+    $this->assertEquals("40",     $users->user[2]->age[0]->getValue());
   }
   
   public function setSetNodeValue()
@@ -122,7 +146,7 @@ class Test_XML_Test extends SabelTestCase
     
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "users");
-    $this->assertEquals("20", $users->user[0]->age[0]->getNodeValue());
+    $this->assertEquals("20", $users->user[0]->age[0]->getValue());
   }
   
   public function testSetAttribute()
@@ -150,9 +174,9 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "users");
     
-    $this->assertEquals("tanaka", $users->user[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $users->user[1]->name[0]->getNodeValue());
-    $this->assertEquals("satou",  $users->user[2]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
+    $this->assertEquals("satou",  $users->user[2]->name[0]->getValue());
     
     $aUser = $xml->createElement("user");
     $aUser->appendChild($xml->createElement("name", "yamada"));
@@ -165,10 +189,10 @@ class Test_XML_Test extends SabelTestCase
     
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "users");
-    $this->assertEquals("tanaka", $users->user[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $users->user[1]->name[0]->getNodeValue());
-    $this->assertEquals("yamada", $users->user[2]->name[0]->getNodeValue());
-    $this->assertEquals("satou",  $users->user[3]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
+    $this->assertEquals("yamada", $users->user[2]->name[0]->getValue());
+    $this->assertEquals("satou",  $users->user[3]->name[0]->getValue());
   }
   
   public function testInsertAfter()
@@ -187,11 +211,11 @@ class Test_XML_Test extends SabelTestCase
     
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "users");
-    $this->assertEquals("tanaka", $users->user[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $users->user[1]->name[0]->getNodeValue());
-    $this->assertEquals("yamada", $users->user[2]->name[0]->getNodeValue());
-    $this->assertEquals("satou",  $users->user[3]->name[0]->getNodeValue());
-    $this->assertEquals("koike",  $users->user[4]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $users->user[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $users->user[1]->name[0]->getValue());
+    $this->assertEquals("yamada", $users->user[2]->name[0]->getValue());
+    $this->assertEquals("satou",  $users->user[3]->name[0]->getValue());
+    $this->assertEquals("koike",  $users->user[4]->name[0]->getValue());
   }
   
   public function testGetParent()
@@ -222,7 +246,7 @@ class Test_XML_Test extends SabelTestCase
     $aUser = $users->getLastChild();
     $this->assertEquals("user", $aUser->tagName);
     $this->assertEquals("age", $aUser->getLastChild()->tagName);
-    $this->assertEquals("80", $aUser->getLastChild()->getNodeValue());
+    $this->assertEquals("80", $aUser->getLastChild()->getValue());
   }
   
   public function testGetNextSibling()
@@ -231,15 +255,15 @@ class Test_XML_Test extends SabelTestCase
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->getFirstChild();
-    $this->assertEquals("tanaka", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $aUser->name[0]->getValue());
     $aUser = $aUser->getNextSibling();
-    $this->assertEquals("suzuki", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $aUser->name[0]->getValue());
     $aUser = $aUser->getNextSibling();
-    $this->assertEquals("yamada", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("yamada", $aUser->name[0]->getValue());
     $aUser = $aUser->getNextSibling();
-    $this->assertEquals("satou", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("satou", $aUser->name[0]->getValue());
     $aUser = $aUser->getNextSibling();
-    $this->assertEquals("koike", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("koike", $aUser->name[0]->getValue());
     $aUser = $aUser->getNextSibling();
     $this->assertEquals(null, $aUser);
   }
@@ -251,8 +275,8 @@ class Test_XML_Test extends SabelTestCase
     
     $elems = $users->user[2]->getNextSiblings();
     $this->assertEquals(2, $elems->length);
-    $this->assertEquals("satou", $elems[0]->name[0]->getNodeValue());
-    $this->assertEquals("koike", $elems[1]->name[0]->getNodeValue());
+    $this->assertEquals("satou", $elems[0]->name[0]->getValue());
+    $this->assertEquals("koike", $elems[1]->name[0]->getValue());
   }
   
   public function testGetPreviousSibling()
@@ -261,16 +285,16 @@ class Test_XML_Test extends SabelTestCase
     $users = $this->loadXML($xml, "users");
     
     $aUser = $users->getLastChild();
-    $this->assertEquals("koike", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("koike", $aUser->name[0]->getValue());
     $aUser = $aUser->getPreviousSibling();
-    $this->assertEquals("satou", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("satou", $aUser->name[0]->getValue());
     $aUser = $aUser->getPreviousSibling();
-    $this->assertEquals("yamada", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("yamada", $aUser->name[0]->getValue());
     $aUser = $aUser->getPreviousSibling();
-    $this->assertEquals("suzuki", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $aUser->name[0]->getValue());
     $aUser = $aUser->getPreviousSibling();
     
-    $this->assertEquals("tanaka", $aUser->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $aUser->name[0]->getValue());
     $aUser = $aUser->getPreviousSibling();
     $this->assertEquals(null, $aUser);
   }
@@ -282,13 +306,13 @@ class Test_XML_Test extends SabelTestCase
     
     $elems = $users->user[2]->getPreviousSiblings();
     $this->assertEquals(2, $elems->length);
-    $this->assertEquals("suzuki", $elems[0]->name[0]->getNodeValue());
-    $this->assertEquals("tanaka", $elems[1]->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $elems[0]->name[0]->getValue());
+    $this->assertEquals("tanaka", $elems[1]->name[0]->getValue());
     
     $elems->reverse();
     
-    $this->assertEquals("tanaka", $elems[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $elems[1]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $elems[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $elems[1]->name[0]->getValue());
   }
   
   public function testGetSiblings()
@@ -298,10 +322,10 @@ class Test_XML_Test extends SabelTestCase
     
     $elems = $users->user[2]->getSiblings();
     $this->assertEquals(4, $elems->length);
-    $this->assertEquals("tanaka", $elems[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $elems[1]->name[0]->getNodeValue());
-    $this->assertEquals("satou",  $elems[2]->name[0]->getNodeValue());
-    $this->assertEquals("koike",  $elems[3]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $elems[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $elems[1]->name[0]->getValue());
+    $this->assertEquals("satou",  $elems[2]->name[0]->getValue());
+    $this->assertEquals("koike",  $elems[3]->name[0]->getValue());
   }
   
   public function testFindFromAttribute()
@@ -309,19 +333,19 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user @id = 1");
+    $elems = $users->select("from user where @id = 1");
     $this->assertEquals(1, $elems->length);
     
     $elem = $elems[0];
     $this->assertEquals("1", $elem->at("id"));
-    $this->assertEquals("tanaka", $elem->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $elem->profile[0]->name[0]->getValue());
     
-    $elems = $users->select("from user.foo.bar @type = 'b'");
+    $elems = $users->select("from user.foo.bar where @type = 'b'");
     $this->assertEquals(1, $elems->length);
     
     $elem = $elems[0]->getParent("user");
     $this->assertEquals("2", $elem->at("id"));
-    $this->assertEquals("suzuki", $elem->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $elem->profile[0]->name[0]->getValue());
   }
   
   public function testSelectByIsNull()
@@ -329,20 +353,20 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user.foo.bar @type IS NULL");
+    $elems = $users->select("from user.foo.bar where @type IS NULL");
     $this->assertEquals(1, $elems->length);
     
     $elem = $elems[0]->getParent("user");
     $this->assertEquals("5", $elem->at("id"));
-    $this->assertEquals("koike", $elem->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("koike", $elem->profile[0]->name[0]->getValue());
     
-    $elems = $users->select("from user.foo.bar @type IS NOT NULL");
+    $elems = $users->select("from user.foo.bar where @type IS NOT NULL");
     $this->assertEquals(4, $elems->length);
     
-    $elems = $users->select("from user test IS NULL");
+    $elems = $users->select("from user where test IS NULL");
     $this->assertEquals(3, $elems->length);
     
-    $elems = $users->select("from user test IS NOT NULL");
+    $elems = $users->select("from user where test IS NOT NULL");
     $this->assertEquals(2, $elems->length);
   }
   
@@ -351,32 +375,39 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user.foo.bar @type = 'b'");
+    $elems = $users->select("from user.foo.bar where @type = 'b'");
     $this->assertEquals("bar", $elems[0]->tagName);
     
-    $elems = $users->select("from user.foo.bar @type IS NULL");
+    $elems = $users->select("from user.foo.bar where @type IS NULL");
     $this->assertEquals("bar", $elems[0]->tagName);
     
-    $elems = $users->select("from user.foo.bar @type IS NOT NULL");
+    $elems = $users->select("from user.foo.bar where @type IS NOT NULL");
     $this->assertEquals("bar", $elems[0]->tagName);
     
     //-------------------------------------------
     
-    $elems = $users->select("from user foo.bar@type = 'b'");
+    $elems = $users->select("from user where foo.bar@type = 'b'");
     $this->assertEquals("user", $elems[0]->tagName);
     
-    $elems = $users->select("from user foo.bar@type IS NULL");
+    $elems = $users->select("from user where foo.bar@type IS NULL");
     $this->assertEquals("user", $elems[0]->tagName);
     
-    $elems = $users->select("from user foo.bar@type IS NOT NULL");
+    $elems = $users->select("from user where foo.bar@type IS NOT NULL");
     $this->assertEquals("user", $elems[0]->tagName);
     
     //-------------------------------------------
     
     $aUser = $users->user[0];
-    $elems = $aUser->select("from . @id = 2");
+    $elems = $aUser->select("from . where @id = 2");
     $this->assertEquals("2", $elems[0]->at("id"));
-    $this->assertEquals("suzuki", $elems[0]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $elems[0]->profile[0]->name[0]->getValue());
+    
+    //-------------------------------------------
+    
+    $elems = $users->select("from user.foo.bar.baz where value() = 'test456'");
+    $this->assertEquals("baz", $elems[0]->tagName);
+    $this->assertEquals("test456", $elems[0]->getValue());
+    $this->assertEquals("2", $elems[0]->getParent("user")->at("id"));
   }
   
   public function testLike()
@@ -384,16 +415,16 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user foo.bar.baz LIKE 'test%'");
+    $elems = $users->select("from user where foo.bar.baz LIKE 'test%'");
     $this->assertEquals(2, $elems->length);
-    $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getNodeValue());
-    $this->assertEquals("suzuki", $elems[1]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getValue());
+    $this->assertEquals("suzuki", $elems[1]->profile[0]->name[0]->getValue());
     
-    $elems = $users->select("from user foo.bar.baz LIKE '%456%'");
+    $elems = $users->select("from user where foo.bar.baz LIKE '%456%'");
     $this->assertEquals(3, $elems->length);
-    $this->assertEquals("suzuki", $elems[0]->profile[0]->name[0]->getNodeValue());
-    $this->assertEquals("satou",  $elems[1]->profile[0]->name[0]->getNodeValue());
-    $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("suzuki", $elems[0]->profile[0]->name[0]->getValue());
+    $this->assertEquals("satou",  $elems[1]->profile[0]->name[0]->getValue());
+    $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getValue());
   }
   
   public function testAnd()
@@ -401,9 +432,9 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user foo.bar.baz LIKE '%456%' AND test IS NOT NULL");
+    $elems = $users->select("from user where foo.bar.baz LIKE '%456%' AND test IS NOT NULL");
     $this->assertEquals(1, $elems->length);
-    $this->assertEquals("koike", $elems[0]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("koike", $elems[0]->profile[0]->name[0]->getValue());
   }
   
   public function testOr()
@@ -411,14 +442,117 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user profile.age >= 60 OR profile.age <= 20");
+    $elems = $users->select("from user where profile.age >= 60 OR profile.age <= 20");
     $this->assertEquals(3, $elems->length);
-    $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getValue());
     $this->assertEquals("1",      $elems[0]->at("id"));
-    $this->assertEquals("yamada", $elems[1]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("yamada", $elems[1]->profile[0]->name[0]->getValue());
     $this->assertEquals("3",      $elems[1]->at("id"));
-    $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getNodeValue());
+    $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getValue());
     $this->assertEquals("5",      $elems[2]->at("id"));
+  }
+  
+  public function testSwap()
+  {
+    $xml = new Sabel_Xml_Document();
+    $users = $this->loadXML($xml, "users");
+    
+    $tanaka = $users->user[0];
+    $satou  = $users->user[3];
+    $this->assertEquals("tanaka", $tanaka->name[0]->getValue());
+    $this->assertEquals("satou",  $satou->name[0]->getValue());
+    
+    $tanaka->swap($satou);
+    
+    $tanaka = $users->user[3];
+    $satou  = $users->user[0];
+    $this->assertEquals("tanaka", $tanaka->name[0]->getValue());
+    $this->assertEquals("satou",  $satou->name[0]->getValue());
+    
+    $suzuki = $users->user[1];
+    $koike  = $users->user[4];
+    $this->assertEquals("suzuki", $suzuki->name[0]->getValue());
+    $this->assertEquals("koike",  $koike->name[0]->getValue());
+    
+    $koike->swap($suzuki);
+    
+    $suzuki = $users->user[4];
+    $koike  = $users->user[1];
+    $this->assertEquals("suzuki", $suzuki->name[0]->getValue());
+    $this->assertEquals("koike",  $koike->name[0]->getValue());
+    
+    $koike  = $users->user[1];
+    $yamada = $users->user[2];
+    $this->assertEquals("koike",  $koike->name[0]->getValue());
+    $this->assertEquals("yamada", $yamada->name[0]->getValue());
+    
+    $koike->swap($yamada);
+    
+    $koike  = $users->user[2];
+    $yamada = $users->user[1];
+    $this->assertEquals("koike",  $koike->name[0]->getValue());
+    $this->assertEquals("yamada", $yamada->name[0]->getValue());
+  }
+  
+  public function testRemoveElement()
+  {
+    $xml = new Sabel_Xml_Document();
+    $users = $this->loadXML($xml, "users");
+    
+    $this->assertEquals(5, $users->user->length);
+    
+    $deleted = $users->user[2]->remove();
+    $this->assertEquals("yamada", $deleted->name[0]->getValue());
+    $this->assertEquals(4, $users->user->length);
+    
+    $deleted = $users->user[2]->remove();
+    $this->assertEquals("satou", $deleted->name[0]->getValue());
+    $this->assertEquals(3, $users->user->length);
+    
+    $this->saveXML($xml, "users");
+  }
+  
+  public function testDelete()
+  {
+    $xml = new Sabel_Xml_Document();
+    $users = $this->loadXML($xml, "users");
+    
+    $aUser = $users->user[1];
+    $this->assertEquals(1, $aUser->age->length);
+    $this->assertEquals("25", $aUser->age[0]->getValue());
+    
+    $users->delete("from user.age where value() = 25");
+    
+    $this->assertEquals(0, $aUser->age->length);
+    
+    //-------------------------------------------------
+   
+    $this->assertEquals(3, $users->user->length);
+    
+    $users->delete("from user where age = 18");
+    
+    $this->assertEquals(2, $users->user->length);
+    
+    $this->saveXML($xml, "users");
+  }
+  
+  public function testCDATA()
+  {
+    $xml = new Sabel_Xml_Document();
+    $users = $this->loadXML($xml, "users");
+    $aUser = $users->getFirstChild();
+    $aUser->name[0]->setValue(null);
+    
+    $cdata = $xml->createCDATA("<test><![CDATA['test']]></test>");
+    $aUser->name[0]->appendChild($cdata);
+    $this->saveXML($xml, "users");
+    
+    //--------------------------------------------
+    
+    $xml = new Sabel_Xml_Document();
+    $users = $this->loadXML($xml, "users");
+    $aUser = $users->getFirstChild();
+    $this->assertEquals("<test><![CDATA['test']]></test>", $aUser->name[0]->getValue());
   }
   
   protected function getXmlAsString($name)

@@ -1,20 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <users>
-  <user id="1">
-    <name>tanaka</name>
-    <age>18</age>
-  </user>
   <user id="2">
-    <name>suzuki</name>
-    <age>25</age>
-  </user>
-  <user>
-    <name>yamada</name>
-    <age>60</age>
-  </user>
-  <user id="3">
-    <name>satou</name>
-    <age>40</age>
+    <name><![CDATA[<test><![CDATA['test']]]]><![CDATA[></test>]]></name>
   </user>
   <user>
     <name>koike</name>

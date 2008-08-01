@@ -32,7 +32,7 @@ class Sabel_Xml_Document extends Sabel_Object
     $this->config = $cnf;
   }
   
-  public function getDocument()
+  public function getRawDocument()
   {
     return $this->document;
   }
@@ -84,18 +84,19 @@ class Sabel_Xml_Document extends Sabel_Object
   
   public function saveXML($path = null, $node = null)
   {
-    $savedXml = "";
-    if ($node === null) {
-      $savedXml = $this->document->saveXML();
-    } else {
-      $savedXml = $this->document->saveXML($node);
-    }
-    
-    if ($path !== null) {
-      file_put_contents($path, $savedXml);
-    }
+    $savedXml = $this->toXML($node);
+    if ($path !== null) file_put_contents($path, $savedXml);
     
     return $savedXml;
+  }
+  
+  public function toXML($node = null)
+  {
+    if ($node === null) {
+      return $this->document->saveXML();
+    } else {
+      return $this->document->saveXML($node);
+    }
   }
   
   public function createElement($tagName, $nodeValue = null, $attrs = array())
@@ -113,10 +114,15 @@ class Sabel_Xml_Document extends Sabel_Object
     return new Sabel_Xml_Element($element);
   }
   
+  public function createCDATA($text)
+  {
+    return new Sabel_Xml_Element($this->document->createCDATASection($text));
+  }
+  
   public function setDocumentElement($element)
   {
     if ($element instanceof Sabel_Xml_Element) {
-      $element = $element->getElement();
+      $element = $element->getRawElement();
     }
     
     $this->document->appendChild($element);

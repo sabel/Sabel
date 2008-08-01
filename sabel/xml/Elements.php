@@ -32,7 +32,7 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
     $this->length = count($elements);
   }
   
-  public function getElements()
+  public function getRawElements()
   {
     return $this->elements;
   }

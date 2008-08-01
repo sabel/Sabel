@@ -33,6 +33,10 @@ class Sabel_Xml_Element extends Sabel_Object
       case XML_ELEMENT_NODE:
         $this->tagName = "#text";
         break;
+        
+      case XML_CDATA_SECTION_NODE:
+        $this->tagName = "#cdata";
+        break;
     }
   }
   
@@ -41,9 +45,14 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element->ownerDocument;
   }
   
-  public function getElement()
+  public function getRawElement()
   {
     return $this->element;
+  }
+  
+  public function reproduce()
+  {
+    return new self($this->element->cloneNode(true));
   }
   
   public function getNodeType()
@@ -51,14 +60,24 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element->nodeType;
   }
   
-  public function setNodeValue($content)
+  public function setNodeValue($value)
   {
-    $this->element->nodeValue = $content;
+    $this->element->nodeValue = $value;
   }
   
   public function getNodeValue()
   {
     return $this->element->nodeValue;
+  }
+  
+  public function setValue($value)
+  {
+    $this->setNodeValue($value);
+  }
+  
+  public function getValue()
+  {
+    return $this->getNodeValue();
   }
   
   public function setAttribute($name, $value)
@@ -71,12 +90,17 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element->getAttribute($name);
   }
   
-  public function at($arg1, $arg2 = null)
+  public function getAttributes()
   {
-    if ($arg2 === null) {
-      return $this->getAttribute($arg1);
+    return new Sabel_Xml_Attributes($this->element->attributes);
+  }
+  
+  public function at($name, $value = null)
+  {
+    if ($value === null) {
+      return $this->getAttribute($name);
     } else {
-      $this->setAttribute($arg1, $arg2);
+      $this->setAttribute($name, $value);
     }
   }
   
@@ -88,7 +112,7 @@ class Sabel_Xml_Element extends Sabel_Object
   public function appendChild($element)
   {
     if ($element instanceof self) {
-      $element = $element->getElement();
+      $element = $element->getRawElement();
     }
     
     $this->element->appendChild($element);
@@ -97,10 +121,10 @@ class Sabel_Xml_Element extends Sabel_Object
   public function insertBefore($element)
   {
     if ($element instanceof self) {
-      $element = $element->getElement();
+      $element = $element->getRawElement();
     }
     
-    $parent = $this->getParent()->getElement();
+    $parent = $this->getParent()->getRawElement();
     $parent->insertBefore($element, $this->element);
   }
   
@@ -156,8 +180,20 @@ class Sabel_Xml_Element extends Sabel_Object
     
     unset($_exp[0]);
     unset($_exp[1]);
+    unset($_exp[2]);
     
     return $this->find($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
+  }
+  
+  public function delete($query)
+  {
+    $elements = $this->select($query);
+    
+    if ($elements->length > 0) {
+      foreach ($elements as $element) {
+        $element->remove();
+      }
+    }
   }
   
   public function getChild($tagName)
@@ -197,8 +233,7 @@ class Sabel_Xml_Element extends Sabel_Object
     } else {
       $element = $this;
       while (true) {
-        $element = $element->getParent();
-        if ($element === null) {
+        if (($element = $element->getParent()) === null) {
           return null;
         } elseif ($element->tagName === $target) {
           return $element;
@@ -209,9 +244,7 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function getFirstChild()
   {
-    $firstChild = $this->element->firstChild;
-    
-    if ($firstChild === null) {
+    if (($firstChild = $this->element->firstChild) === null) {
       return null;
     } elseif ($firstChild->nodeType === XML_ELEMENT_NODE) {
       return new self($firstChild);
@@ -223,9 +256,7 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function getLastChild()
   {
-    $lastChild = $this->element->lastChild;
-    
-    if ($lastChild === null) {
+    if (($lastChild = $this->element->lastChild) === null) {
       return null;
     } elseif ($lastChild->nodeType === XML_ELEMENT_NODE) {
       return new self($lastChild);
@@ -240,8 +271,7 @@ class Sabel_Xml_Element extends Sabel_Object
     $element = $this->element;
     
     while (true) {
-      $element = $element->previousSibling;
-      if ($element === null) {
+      if (($element = $element->previousSibling) === null) {
         return null;
       } elseif ($element->nodeType === XML_ELEMENT_NODE) {
         return new self($element);
@@ -255,8 +285,7 @@ class Sabel_Xml_Element extends Sabel_Object
     $element  = $this;
     
     while (true) {
-      $element = $element->getPreviousSibling();
-      if ($element === null) {
+      if (($element = $element->getPreviousSibling()) === null) {
         break;
       } else {
         $elements[] = $element;
@@ -271,8 +300,7 @@ class Sabel_Xml_Element extends Sabel_Object
     $element = $this->element;
     
     while (true) {
-      $element = $element->nextSibling;
-      if ($element === null) {
+      if (($element = $element->nextSibling) === null) {
         return null;
       } elseif ($element->nodeType === XML_ELEMENT_NODE) {
         return new self($element);
@@ -286,8 +314,7 @@ class Sabel_Xml_Element extends Sabel_Object
     $element  = $this;
     
     while (true) {
-      $element = $element->getNextSibling();
-      if ($element === null) {
+      if (($element = $element->getNextSibling()) === null) {
         break;
       } else {
         $elements[] = $element;
@@ -300,8 +327,35 @@ class Sabel_Xml_Element extends Sabel_Object
   public function getSiblings()
   {
     return new Sabel_Xml_Elements(array_merge(
-      $this->getPreviousSiblings()->reverse()->getElements(),
-      $this->getNextSiblings()->getElements()
+      $this->getPreviousSiblings()->reverse()->getRawElements(),
+      $this->getNextSiblings()->getRawElements()
     ));
+  }
+  
+  public function remove()
+  {
+    $parent = $this->getParent();
+    
+    if ($element = $parent->getRawElement()->removeChild($this->element)) {
+      return new self($element);
+    } else {
+      return null;
+    }
+  }
+  
+  public function swap($element)
+  {
+    if (!$element instanceof self) {
+      $element = new self($element);
+    }
+    
+    $_self = $this->reproduce();
+    $_elem = $element->reproduce();
+    $this->insertAfter($_self);
+    $element->insertAfter($_elem);
+    
+    $parent = $this->getParent()->getRawElement();
+    $parent->replaceChild($element->getRawElement(), $this->getRawElement());
+    $parent->replaceChild($_self->getRawElement(), $_elem->getRawElement());
   }
 }
