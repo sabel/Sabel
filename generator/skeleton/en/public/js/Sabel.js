@@ -1573,12 +1573,14 @@ Sabel.Element.stopObserve = function(element, eventName, handler) {
 };
 
 Sabel.Element.analyze = function(element) {
-	var as = Sabel.get(element, false).attributes;
+	element = Sabel.get(element, false)
+	var as = element.attributes, buf = new Array(), attr, i = 0;
 
+	buf.push("<" + element.tagName.toLowerCase());
 	if (Sabel.UserAgent.isIE) {
 		var def = document.createElement(element.nodeName);
 
-		var buf = new Array(), attr, defAttr, i = 0;
+		var defAttr;
 		while (attr = as[i++]) {
 			if (typeof attr.nodeValue !== "string") continue;
 
@@ -1588,13 +1590,12 @@ Sabel.Element.analyze = function(element) {
 			buf[buf.length] = attr.nodeName + '="' + attr.nodeValue + '"';
 		}
 	} else {
-		var buf = new Array(), attr, i = 0;
 		while (attr = as[i++]) {
 			buf[buf.length] = attr.nodeName + '="' + attr.nodeValue + '"';
 		}
 	}
 
-	return buf.join(" ");
+	return buf.join(" ") + ">";
 };
 
 Sabel.Element.getChildElements = function(element, tagName) {
