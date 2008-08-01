@@ -681,7 +681,7 @@ Sabel.Array.inject = function(array, method) {
 };
 
 
-Sabel.Array.callmap = function(array, method) {
+Sabel.Array.callmap = function(/*array, method, args */) {
 	var args   = Sabel.Array(arguments);
 	var array  = args.shift(), method = args.shift();
 	for (var i = 0, len = array. length; i < len; i++) {
@@ -1195,15 +1195,13 @@ Sabel.Element.get = function(element, id) {
 
 	do {
 		if (parent == element) return elm;
-		// @todo 必要? getCumulative関数から持ってきただけのような気がする
-		if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) break;
 	} while (parent = parent.parentNode);
 
 	return null;
 };
 
-Sabel.Element.show = function(element) {
-	Sabel.get(element, false).style.display = "";
+Sabel.Element.show = function(element, value) {
+	Sabel.get(element, false).style.display = value || "inline";
 };
 
 Sabel.Element.hide = function(element) {
@@ -1261,7 +1259,8 @@ if (Sabel.UserAgent.isIE) {
 	Sabel.Element.getStyle = function(element, property) {
 		element = Sabel.get(element, false);
 		// Operaでelementがwindowだった時の対策
-		if (element.nodeType === undefined) return null;
+		// CSSでdisplay: noneが指定されている時の対策
+		if (element === null || element.nodeType === undefined) return null;
 		property = (property === "float") ? "cssFloat" : new Sabel.String(property).camelize();
 
 		var css = document.defaultView.getComputedStyle(element, "")
@@ -1339,32 +1338,24 @@ Sabel.Element.setOpacity = function(element, value) {
 Sabel.Element.getCumulativeTop = function(element) {
 	element = Sabel.get(element, false);
 
-	var position = 0;
-	var parent   = null;
-
-	do {
+	var position = element.offsetTop;
+	while (element = element.offsetParent) {
 		position += element.offsetTop;
-		parent = element.offsetParent;
 
-		if (Sabel.UserAgent.isIE || Sabel.UserAgent.isMozilla) {
-			var border = parseInt(Sabel.Element.getStyle(parent, "borderTopWidth"));
-			position += border || 0;
+		if (Sabel.UserAgent.isOpera === false) {
+			var border = parseInt(Sabel.Element.getStyle(element, "borderTopWidth")) || 0;
+			position += border;
 
 			if (Sabel.UserAgent.isMozilla) {
-				var of = Sabel.Element.getStyle(parent, "overflow");
+				var of = Sabel.Element.getStyle(element, "overflow");
 				if (!Sabel.Array.include(["visible", "inherit"], of)) {
 					position += border;
 				}
 			}
-		}
 
-		element = parent;
-		if (element) {
 			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (Sabel.UserAgent.isOpera) break;
-
 				if (document.compatMode === "CSS1Compat") {
-					var html = Sabel.find('html')[0];
+					var html = document.getElementsByTagName('html')[0];
 					position += parseInt(Sabel.Element.getStyle(html, "marginTop")) || 0;
 
 					if (Sabel.UserAgent.isIE) {
@@ -1375,40 +1366,31 @@ Sabel.Element.getCumulativeTop = function(element) {
 				break;
 			}
 		}
-	} while (element);
-
+	}
 	return position;
 };
 
 Sabel.Element.getCumulativeLeft = function(element) {
 	element = Sabel.get(element, false);
 
-	var position = 0;
-	var parent   = null;
-
-	do {
+	var position = element.offsetLeft;
+	while (element = element.offsetParent) {
 		position += element.offsetLeft;
-		parent = element.offsetParent;
 
 		if (Sabel.UserAgent.isOpera === false) {
-			var border = parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
-			position += border || 0;
+			var border = parseInt(Sabel.Element.getStyle(element, "borderLeftWidth")) || 0;
+			position += border;
 
 			if (Sabel.UserAgent.isMozilla) {
-				var of = Sabel.Element.getStyle(parent, "overflow");
+				var of = Sabel.Element.getStyle(element, "overflow");
 				if (!Sabel.Array.include(["visible", "inherit"], of)) {
 					position += border;
 				}
 			}
-		}
 
-		element = parent;
-		if (element) {
 			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (Sabel.UserAgent.isOpera) break;
-
 				if (document.compatMode === "CSS1Compat") {
-					var html = Sabel.find('html')[0];
+					var html = document.getElementsByTagName('html')[0];
 					position += parseInt(Sabel.Element.getStyle(html, "marginLeft")) || 0;
 
 					if (Sabel.UserAgent.isIE) {
@@ -1419,9 +1401,15 @@ Sabel.Element.getCumulativeLeft = function(element) {
 				break;
 			}
 		}
-	} while (element);
-
+	}
 	return position;
+};
+
+Sabel.Element.getCumulativePositions = function(element) {
+	return {
+		left: this.getCumulativeLeft(element),
+		top:  this.getCumulativeTop(element)
+	};
 };
 
 Sabel.Element.getOffsetTop = function(element) {
@@ -1432,7 +1420,7 @@ Sabel.Element.getOffsetTop = function(element) {
 	if (Sabel.UserAgent.isOpera) {
 		var parent = element.offsetParent;
 		if (parent.nodeName !== "BODY") {
-			position  -= parseInt(Sabel.Element.getStyle(parent, "borderTopWidth"));
+			position -= parseInt(Sabel.Element.getStyle(parent, "borderTopWidth"));
 		}
 	}
 
@@ -1447,7 +1435,7 @@ Sabel.Element.getOffsetLeft = function(element) {
 	if (Sabel.UserAgent.isOpera) {
 		var parent = element.offsetParent;
 		if (parent.nodeName !== "BODY") {
-			position  -= parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
+			position -= parseInt(Sabel.Element.getStyle(parent, "borderLeftWidth"));
 		}
 	}
 
