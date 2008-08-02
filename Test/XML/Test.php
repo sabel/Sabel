@@ -87,20 +87,17 @@ class Test_XML_Test extends SabelTestCase
     
     $users = $xml->createElement("users");
     
-    $aUser = $xml->createElement("user");
-    $aUser->appendChild($xml->createElement("name", "tanaka"));
-    $aUser->appendChild($xml->createElement("age", "18"));
-    $users->appendChild($aUser);
+    $aUser = $users->addChild("user");
+    $aUser->addChild("name", "tanaka");
+    $aUser->addChild("age", "18");
     
-    $aUser = $xml->createElement("user");
-    $aUser->appendChild($xml->createElement("name", "suzuki"));
-    $aUser->appendChild($xml->createElement("age", "25"));
-    $users->appendChild($aUser);
+    $aUser = $users->addChild("user");
+    $aUser->addChild("name", "suzuki");
+    $aUser->addChild("age", "25");
     
-    $aUser = $xml->createElement("user");
-    $aUser->appendChild($xml->createElement("name", "satou"));
-    $aUser->appendChild($xml->createElement("age", "40"));
-    $users->appendChild($aUser);
+    $aUser = $users->addChild("user");
+    $aUser->addChild("name", "satou");
+    $aUser->addChild("age", "40");
     
     $xml->setDocumentElement($users);
     $this->saveXML($xml, "users");
@@ -179,8 +176,8 @@ class Test_XML_Test extends SabelTestCase
     $this->assertEquals("satou",  $users->user[2]->name[0]->getValue());
     
     $aUser = $xml->createElement("user");
-    $aUser->appendChild($xml->createElement("name", "yamada"));
-    $aUser->appendChild($xml->createElement("age", "60"));
+    $aUser->addChild("name", "yamada");
+    $aUser->addChild("age", "60");
     
     $users->user[2]->insertBefore($aUser);
     $this->saveXML($xml, "users");
@@ -201,8 +198,8 @@ class Test_XML_Test extends SabelTestCase
     $users = $this->loadXML($xml, "users");
     
     $aUser = $xml->createElement("user");
-    $aUser->appendChild($xml->createElement("name", "koike"));
-    $aUser->appendChild($xml->createElement("age", "80"));
+    $aUser->addChild("name", "koike");
+    $aUser->addChild("age", "80");
     
     $users->user[3]->insertAfter($aUser);
     $this->saveXML($xml, "users");
@@ -346,6 +343,10 @@ class Test_XML_Test extends SabelTestCase
     $elem = $elems[0]->getParent("user");
     $this->assertEquals("2", $elem->at("id"));
     $this->assertEquals("suzuki", $elem->profile[0]->name[0]->getValue());
+    
+    // not equals
+    $elems = $users->select("from user where not @id = 1");
+    $this->assertEquals(4, $elems->length);
   }
   
   public function testSelectByIsNull()
@@ -415,16 +416,29 @@ class Test_XML_Test extends SabelTestCase
     $xml = new Sabel_Xml_Document();
     $users = $this->loadXML($xml, "find");
     
-    $elems = $users->select("from user where foo.bar.baz LIKE 'test%'");
+    $elems = $users->select("from user where foo.bar.baz like 'test%'");
     $this->assertEquals(2, $elems->length);
     $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getValue());
     $this->assertEquals("suzuki", $elems[1]->profile[0]->name[0]->getValue());
     
-    $elems = $users->select("from user where foo.bar.baz LIKE '%456%'");
+    $elems = $users->select("from user where foo.bar.baz like '%456%'");
     $this->assertEquals(3, $elems->length);
     $this->assertEquals("suzuki", $elems[0]->profile[0]->name[0]->getValue());
     $this->assertEquals("satou",  $elems[1]->profile[0]->name[0]->getValue());
     $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getValue());
+    
+    //-------------------------------------------------------
+    
+    $elems = $users->select("from user where not foo.bar.baz like 'test%'");
+    $this->assertEquals(3, $elems->length);
+    $this->assertEquals("yamada", $elems[0]->profile[0]->name[0]->getValue());
+    $this->assertEquals("satou",  $elems[1]->profile[0]->name[0]->getValue());
+    $this->assertEquals("koike",  $elems[2]->profile[0]->name[0]->getValue());
+    
+    $elems = $users->select("from user where not foo.bar.baz like '%456%'");
+    $this->assertEquals(2, $elems->length);
+    $this->assertEquals("tanaka", $elems[0]->profile[0]->name[0]->getValue());
+    $this->assertEquals("yamada", $elems[1]->profile[0]->name[0]->getValue());
   }
   
   public function testAnd()

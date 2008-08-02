@@ -40,7 +40,7 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
-  public function getDocument()
+  public function getRawDocument()
   {
     return $this->element->ownerDocument;
   }
@@ -143,17 +143,10 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->getChildren($tagName);
   }
   
-  public function find($query)
+  public function xpath($query)
   {
     $element = $this->element;
-    if ($element->nodeType === XML_DOCUMENT_NODE ||
-        $element->nodeType === XML_HTML_DOCUMENT_NODE) {
-      $xpath = new DOMXPath($element);
-    } else {
-      $xpath = new DOMXPath($element->ownerDocument);
-    }
-    
-    $nodes = $xpath->evaluate($query, $element);
+    $nodes = Sabel_Xml_Xpath::create($element->ownerDocument)->evaluate($query, $element);
     
     $elements = array();
     if ($nodes->length > 0) {
@@ -182,7 +175,7 @@ class Sabel_Xml_Element extends Sabel_Object
     unset($_exp[1]);
     unset($_exp[2]);
     
-    return $this->find($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
+    return $this->xpath($target . "[" . Sabel_Xml_Query::toXpath(implode(" ", $_exp)) . "]");
   }
   
   public function delete($query)
@@ -196,9 +189,31 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
+  public function addChild($tagName, $value = null, $cdata = false)
+  {
+    if ($cdata) {
+      if ($value === null) {
+        $_element = $this->getRawDocument()->createCDATASection($tagName);
+      } else {
+        $_element = $this->getRawDocument()->createCDATASection($tagName, $value);
+      }
+    } else {
+      if ($value === null) {
+        $_element = $this->getRawDocument()->createElement($tagName);
+      } else {
+        $_element = $this->getRawDocument()->createElement($tagName, $value);
+      }
+    }
+    
+    $this->appendChild($_element);
+    $element = new self($_element);
+    
+    return $element;
+  }
+  
   public function getChild($tagName)
   {
-    return $this->find($tagName)->getElementAt(0);
+    return $this->xpath($tagName)->getElementAt(0);
   }
   
   public function getChildren($tagName = null)
@@ -217,7 +232,7 @@ class Sabel_Xml_Element extends Sabel_Object
       
       return new Sabel_Xml_Elements($elements);
     } else {
-      return $this->find($tagName);
+      return $this->xpath($tagName);
     }
   }
   
@@ -351,8 +366,8 @@ class Sabel_Xml_Element extends Sabel_Object
     
     $_self = $this->reproduce();
     $_elem = $element->reproduce();
-    $this->insertAfter($_self);
-    $element->insertAfter($_elem);
+    $this->insertBefore($_self);
+    $element->insertBefore($_elem);
     
     $parent = $this->getParent()->getRawElement();
     $parent->replaceChild($element->getRawElement(), $this->getRawElement());

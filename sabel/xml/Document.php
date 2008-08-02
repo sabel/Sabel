@@ -67,7 +67,11 @@ class Sabel_Xml_Document extends Sabel_Object
       $this->document->loadXML($xml);
     }
     
-    return new Sabel_Xml_Element($this->document->documentElement);
+    if ($this->document->documentElement) {
+      return new Sabel_Xml_Element($this->document->documentElement);
+    } else {
+      return null;
+    }
   }
   
   public function loadHTML($html, $ignoreErrors = false)
@@ -99,19 +103,13 @@ class Sabel_Xml_Document extends Sabel_Object
     }
   }
   
-  public function createElement($tagName, $nodeValue = null, $attrs = array())
+  public function createElement($tagName, $value = null)
   {
-    if ($nodeValue === null) {
-      $element = $this->document->createElement($tagName);
+    if ($value === null) {
+      return new Sabel_Xml_Element($this->document->createElement($tagName));
     } else {
-      $element = $this->document->createElement($tagName, $nodeValue);
+      return new Sabel_Xml_Element($this->document->createElement($tagName, $value));
     }
-    
-    foreach ($attrs as $name => $value) {
-      $element->setAttribute($name, $value);
-    }
-    
-    return new Sabel_Xml_Element($element);
   }
   
   public function createCDATA($text)

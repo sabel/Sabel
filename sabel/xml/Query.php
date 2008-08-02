@@ -11,13 +11,9 @@
  */
 class Sabel_Xml_Query
 {
-  const WHITE_SPACE = "__@@SBLWS@@__";
-  
   public static function toXpath($query)
   {
-    list ($query, $hash) = self::convertWhiteSpaceInValue($query);
-    
-    $parts = explode(" ", $query);
+    $parts = self::splitByWhiteSpace($query);
     $xpath = "";
     
     $i = 0;
@@ -25,21 +21,22 @@ class Sabel_Xml_Query
       if (!isset($parts[$i])) break;
       
       $lowered = strtolower($parts[$i]);
-      if ($lowered === "or" || $lowered === "and") {
+      if (in_array($lowered, array("and", "or"), true)) {
         $xpath .= " {$lowered} ";
         $i++;
       } elseif ($lowered === "not") {
+        $xpath .= self::createPartOfXpath($parts[$i + 1], $parts[$i + 2], $parts[$i + 3], true);
         $i += 4;
       } else {
         $path  = $parts[$i];
-        $exp   = $parts[$i + 1];
+        $exp   = strtoupper($parts[$i + 1]);
         $value = $parts[$i + 2];
         
         if ($exp === "IS" && $value === "NOT") {
-          $xpath .= self::createPartOfXpath($path, "IS", "NOT NULL", $hash);
+          $xpath .= self::createPartOfXpath($path, "IS", "NOT NULL");
           $i += 4;
         } else {
-          $xpath .= self::createPartOfXpath($path, $exp, $value, $hash);
+          $xpath .= self::createPartOfXpath($path, $exp, $value);
           $i += 3;
         }
       }
@@ -48,10 +45,10 @@ class Sabel_Xml_Query
     return $xpath;
   }
   
-  protected static function createPartOfXpath($path, $exp, $value, $hash)
+  protected static function createPartOfXpath($path, $exp, $value, $not = false)
   {
-    $value = str_replace(array("__{$hash}__", self::WHITE_SPACE), array("", " "), $value);
     $path  = str_replace(".", "/", $path);
+    $exp   = strtoupper($exp);
     $hasAt = false;
     
     if ($path{0} === "@") {
@@ -79,61 +76,50 @@ class Sabel_Xml_Query
       $path .= "/text()";
     }
     
-    $simpleExps = array("=", "!=", ">=", "<=");
-    
-    if (in_array($exp, $simpleExps, true)) {
-      return "{$path}{$exp}{$value}";
-    } elseif (strtolower($exp) === "like") {
+    $xpath = "";
+    if (in_array($exp, array("=", "!=", ">=", "<="), true)) {
+      $xpath = "{$path}{$exp}{$value}";
+    } elseif ($exp === "LIKE") {
       $_value = substr($value, 1, -1);
       $first  = $_value{0};
       $last   = $_value{strlen($_value) - 1};
       
       if ($first === "%" && $last === "%") {
-        return "contains({$path}, '" . substr($_value, 1, -1) . "')";
+        $xpath = "contains({$path}, '" . substr($_value, 1, -1) . "')";
       } elseif ($first === "%" && $last !== "%") {
-        return "ends-with({$path}, '" . substr($_value, 1) . "')";
+        $xpath = "ends-with({$path}, '" . substr($_value, 1) . "')";
       } elseif ($first !== "%" && $last === "%") {
-        return "starts-with({$path}, '" . substr($_value, 0, -1) . "')";
+        $xpath = "starts-with({$path}, '" . substr($_value, 0, -1) . "')";
       } else {
-        return "contains({$path}, '{$_value}')";
+        $xpath = "contains({$path}, '{$_value}')";
       }
     }
+    
+    return ($not) ? "not({$xpath})" : $xpath;
   }
   
-  protected static function convertWhiteSpaceInValue($query)
+  protected static function splitByWhiteSpace($query)
   {
-    $random = md5hash();
-    $length = strlen($query);
-    $ret    = "";
-    $prev   = null;
-    $inVal  = false;
-    
-    for ($i = 0; $i < $length; $i++) {
-      $char = $query{$i};
-      
-      if ($char === "'" && $prev !== "\\") {
-        if (!$inVal) {
-          $inVal = true;
-          $ret  .= "__{$random}__@'";
-          $prev  = "'";
-        } else {
-          $inVal = false;
-          $ret  .= "'@__";
-          $prev  = "'";
-        }
-      } else {
-        $ret .= $char;
-        $prev = $char;
+    $replace = array();
+    if (preg_match_all("/'.+'/U", $query, $matches)) {
+      $hash = md5hash();
+      foreach ($matches[0] as $i => $match) {
+        $replace[$hash . $i] = $match;
+        $query = str_replace($match, $hash . $i, $query);
       }
     }
     
-    preg_match_all("~__{$random}__@'(.+)'@__~U", $ret, $matches);
-    foreach ($matches[1] as $i => $value) {
-      $replace = str_replace(" ", self::WHITE_SPACE, $value);
-      $ret = str_replace("__{$random}__@'{$value}'@__", "__{$random}__'{$replace}'__{$random}__", $ret);
+    $query = preg_replace("/ {2,}/", " ", $query);
+    $parts = explode(" ", $query);
+    
+    if ($replace) {
+      foreach ($parts as &$part) {
+        if (isset($replace[$part])) {
+          $part = $replace[$part];
+        }
+      }
     }
     
-    $ret = preg_replace("/ {2,}/", " ", $ret);
-    return array($ret, $random);
+    return $parts;
   }
 }
