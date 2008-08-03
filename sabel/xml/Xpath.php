@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Xml_Xpath extends Sabel_Object
+class Sabel_Xml_Xpath
 {
   protected static $xpaths = array();
   
