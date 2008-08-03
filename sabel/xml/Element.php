@@ -50,6 +50,11 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element;
   }
   
+  public function __toString()
+  {
+    return $this->getNodeValue();
+  }
+  
   public function reproduce()
   {
     return new self($this->element->cloneNode(true));
@@ -145,8 +150,7 @@ class Sabel_Xml_Element extends Sabel_Object
   
   public function xpath($query)
   {
-    $element = $this->element;
-    $nodes = Sabel_Xml_Xpath::create($element->ownerDocument)->evaluate($query, $element);
+    $nodes = $this->getRawDocument()->xpath->evaluate($query, $this->element);
     
     $elements = array();
     if ($nodes->length > 0) {
@@ -211,12 +215,12 @@ class Sabel_Xml_Element extends Sabel_Object
     return $element;
   }
   
-  public function getChild($tagName)
+  public function getChild($tagName, $namespaceUri = null)
   {
-    return $this->xpath($tagName)->getElementAt(0);
+    return $this->getChildren($tagName, $namespaceUri)->getElementAt(0);
   }
   
-  public function getChildren($tagName = null)
+  public function getChildren($tagName = null, $namespaceUri = null)
   {
     if ($tagName === null) {
       $elements = array();
@@ -232,6 +236,41 @@ class Sabel_Xml_Element extends Sabel_Object
       
       return new Sabel_Xml_Elements($elements);
     } else {
+      $element = $this->element;
+      $namespaces = $this->getRawDocument()->defaultNamespaces;
+      
+      if ($namespaceUri !== null) {
+        $namespaces = $this->getRawDocument()->defaultNamespaces;
+        if (isset($namespaces[$namespaceUri])) {
+          $tagName = $namespaces[$namespaceUri] . ":" . $tagName;
+        }
+      } elseif ($tagName{0} === ":") {
+        $xmlns = null;
+        $elem  = $this;
+        while (true) {
+          if (($xmlns = $elem->getAttribute("xmlns")) !== "") {
+            break;
+          } else {
+            if (($elem = $elem->getParent()) === null) {
+              $message = __METHOD__ . "() default namespace not found.";
+              throw new Sabel_Exception_Runtime($message);
+            }
+          }
+        }
+        
+        if (isset($namespaces[$xmlns])) {
+          $tagName = $namespaces[$xmlns] . $tagName;
+        }
+      } elseif (strpos($tagName, ":") === false && $element->namespaceURI !== null) {
+        if ($element->prefix === "") {  // default namespace
+          if (isset($namespaces[$element->namespaceURI])) {
+            $tagName = $namespaces[$element->namespaceURI] . ":" . $tagName;
+          }
+        } else {
+          $tagName = $element->prefix . ":" . $tagName;
+        }
+      }
+      
       return $this->xpath($tagName);
     }
   }

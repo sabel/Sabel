@@ -569,6 +569,22 @@ class Test_XML_Test extends SabelTestCase
     $this->assertEquals("<test><![CDATA['test']]></test>", $aUser->name[0]->getValue());
   }
   
+  public function testNamespace()
+  {
+    $xml = new Sabel_Xml_Document();
+    $nodes = $this->loadXML($xml, "ns");
+    
+    $this->assertEquals("defitem4 value", $nodes->defitem3[0]->defitem4[0]->getValue());
+    
+    $foo = $nodes->getChild("foo:foo");
+    $this->assertEquals("fooitem2 value", $foo->fooitem1[0]->fooitem2[0]->getValue());
+    
+    $this->assertEquals("defitem2 value", $foo->getChild(":defitem")->defitem2[0]->getValue());
+    
+    $baz = $foo->getChild("baz", "http://www.example.com/baz");
+    $this->assertEquals("bazitem3 value", $baz->bazitem1[0]->bazitem2[0]->bazitem3[0]->getValue());
+  }
+  
   protected function getXmlAsString($name)
   {
     return file_get_contents(XML_TEST_DIR . DS . "xml" . DS . $name . ".xml");

@@ -28,6 +28,8 @@ class Sabel_Xml_Document extends Sabel_Object
     $cnf = array_merge($this->config, $config);
     $this->document->preserveWhiteSpace = $cnf["preserveWhiteSpace"];
     $this->document->formatOutput = $cnf["formatOutput"];
+    $this->document->defaultNamespaces = array();
+    $this->document->xpath = null;
     
     $this->config = $cnf;
   }
@@ -61,14 +63,25 @@ class Sabel_Xml_Document extends Sabel_Object
   
   public function loadXML($xml, $ignoreErrors = false)
   {
-    if ($ignoreErrors) {
-      @$this->document->loadXML($xml);
-    } else {
-      $this->document->loadXML($xml);
+    $document = $this->document;
+    ($ignoreErrors) ? @$document->loadXML($xml) : $document->loadXML($xml);
+    
+    $xpath = new DOMXpath($document);
+    preg_match_all('/xmlns=("[^"]+"|\'[^\']+\')/U', $xml, $matches);
+    
+    if (isset($matches[1])) {
+      foreach ($matches[1] as $i => $namespace) {
+        $_ns = substr($namespace, 1, -1);
+        $_pf = "default" . $i;
+        $document->defaultNamespaces[$_ns] = $_pf;
+        $xpath->registerNamespace($_pf, $_ns);
+      }
     }
     
-    if ($this->document->documentElement) {
-      return new Sabel_Xml_Element($this->document->documentElement);
+    $document->xpath = $xpath;
+    
+    if ($document->documentElement) {
+      return new Sabel_Xml_Element($document->documentElement);
     } else {
       return null;
     }
