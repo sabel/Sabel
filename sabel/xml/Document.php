@@ -16,6 +16,19 @@ class Sabel_Xml_Document extends Sabel_Object
    */
   protected $document = null;
   
+  /**
+   * @var string
+   */
+  protected $docPath = "";
+  
+  /**
+   * @var string
+   */
+  protected $docType = "XML";
+  
+  /**
+   * @var array
+   */
   protected $config = array(
     "preserveWhiteSpace" => false,
     "formatOutput"       => true,
@@ -61,6 +74,44 @@ class Sabel_Xml_Document extends Sabel_Object
     return $this->document->xmlVersion;
   }
   
+  public function load($type, $path, $ignoreErrors = false)
+  {
+    $docTypes = array("XML", "HTML");
+    
+    if (!in_array($type, $docTypes, true)) {
+      $message = __METHOD__ . "() invalid document type.";
+      throw new Sabel_Exception_Runtime($message);
+    } elseif (!is_file($path)) {
+      $message = __METHOD__ . "() '{$path}' is not a file.";
+      throw new Sabel_Exception_Runtime($message);
+    } elseif (!is_readable($path)) {
+      $message = __METHOD__ . "() '{$path}' is not readable.";
+      throw new Sabel_Exception_Runtime($message);
+    }
+    
+    $this->docPath = $path;
+    $this->docType = $type;
+    
+    if ($type === "XML") {
+      return $this->loadXML(file_get_contents($path), $ignoreErrors);
+    } elseif ($type === "HTML") {
+      return $this->loadHTML(file_get_contents($path), $ignoreErrors);
+    }
+  }
+  
+  public function save($path = null)
+  {
+    if ($path === null) {
+      $path = $this->docPath;
+    }
+    
+    if ($this->docType === "XML") {
+      return $this->saveXML($path);
+    } else {
+      return $this->saveHTML($path);
+    }
+  }
+  
   public function loadXML($xml, $ignoreErrors = false)
   {
     $document = $this->document;
@@ -99,12 +150,12 @@ class Sabel_Xml_Document extends Sabel_Object
     return $doc->getChild("html");
   }
   
-  public function saveXML($path = null, $node = null)
+  public function saveXML($path, $node = null)
   {
-    $savedXml = $this->toXML($node);
-    if ($path !== null) file_put_contents($path, $savedXml);
+    $xml = $this->toXML($node);
+    file_put_contents($path, $xml);
     
-    return $savedXml;
+    return $xml;
   }
   
   public function toXML($node = null)
@@ -114,6 +165,19 @@ class Sabel_Xml_Document extends Sabel_Object
     } else {
       return $this->document->saveXML($node);
     }
+  }
+  
+  public function saveHTML($path)
+  {
+    $html = $this->toHTML();
+    file_put_contents($path, $html);
+    
+    return $html;
+  }
+  
+  public function toHTML()
+  {
+    return $this->document->saveHTML();
   }
   
   public function createElement($tagName, $value = null)
