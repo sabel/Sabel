@@ -71,7 +71,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       
       $vars = $this->getContinuationVariables();
       foreach ($vars as $var) {
-        $controller->$var = $state->$var;
+        $controller->setAttribute($var, $state->read($var));
       }
     }
   }
@@ -84,7 +84,7 @@ class Flow_Processor extends Sabel_Bus_Processor
       $vars = $this->getContinuationVariables();
       
       foreach ($vars as $var) {
-        $state->$var = $controller->$var;
+        $state->write($var, $controller->getAttribute($var));
       }
       
       $state->save($this->storage, $this->lifetime);

@@ -47,23 +47,25 @@ class Processor_Action extends Sabel_Bus_Processor
       $controller->setAction($action);
       $controller->initialize();
       
-      if ($status->isFailure() || $controller->isRedirected() || !$hasAction) return;
+      if ($status->isFailure() || $controller->isRedirected()) return;
       
-      if (isset($annotations["check"])) {
-        if (!$result = $this->validateRequests($controller, $request, $annotations["check"])) {
-          return $status->setCode(Sabel_Response::BAD_REQUEST);
+      if ($hasAction) {
+        if (isset($annotations["check"])) {          
+          if (!$result = $this->validateRequests($controller, $request, $annotations["check"])) {
+            return $status->setCode(Sabel_Response::BAD_REQUEST);
+          }
         }
-      }
-      
-      l("execute action '{$action}'");
-      $controller->execute();
-      
-      if ($controller->layout === false) {
-        $bus->set("noLayout", true);
+        
+        l("execute action '{$action}'");
+        $controller->execute();
       }
     } catch (Exception $e) {
       $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
       Sabel_Context::getContext()->setException($e);
+    }
+    
+    if ($controller->layout === false) {
+      $bus->set("noLayout", true);
     }
   }
   

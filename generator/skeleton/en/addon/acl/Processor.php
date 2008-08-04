@@ -21,18 +21,20 @@ class Acl_Processor extends Sabel_Bus_Processor
     $config     = new Acl_Config();
     $configs    = $config->configure();
     $session    = $bus->get("session");
+    $controller = $bus->get("controller");
+    $redirector = $controller->getRedirector();
     $this->user = new Acl_User($session);
+    $this->user->setRedirector($redirector);
     $this->user->restore();
     
-    $bus->get("controller")->setAttribute("aclUser", $this->user);
+    $controller->setAttribute("aclUser", $this->user);
     
     $destination = $bus->get("destination");
-    $module      = $destination->getModule();
-    $controller  = $destination->getController();
+    $module = $destination->getModule();
     
     if (isset($configs[$module])) {
       $modConfig  = $configs[$module];
-      $ctrlConfig = $modConfig->getController($controller);
+      $ctrlConfig = $modConfig->getController($destination->getController());
       
       if ($ctrlConfig === null) {
         if ($this->isAllow($modConfig)) return;
@@ -49,14 +51,14 @@ class Acl_Processor extends Sabel_Bus_Processor
       l("[acl] access denied.", SBL_LOG_DEBUG);
       
       if ($authUri === null) {
-        $bus->get("response")->forbidden();
+        $bus->get("response")->getStatus()->setCode(Sabel_Response::FORBIDDEN);
       } else {
         $session->write("acl_after_auth_uri", $bus->get("request")->getUri(), 180);
-        $bus->get("controller")->getRedirector()->to($authUri);
+        $redirector->to($authUri);
       }
     } else {
       l("[acl] access denied. (no module settings for '{$module}')", SBL_LOG_DEBUG);
-      $bus->get("response")->forbidden();
+      $bus->get("response")->getStatus()->setCode(Sabel_Response::FORBIDDEN);
     }
   }
   
