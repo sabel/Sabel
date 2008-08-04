@@ -2279,7 +2279,6 @@ Sabel.KeyEvent = new Sabel.Class({
 		var keyDownListener = function(e) {
 			var key = this.getKeyCode(e);
 
-			Sabel.dump(key);
 			if (this._lists[key]) {
 				cancel = (this._lists[key](e) == false);
 			} else {
@@ -2288,7 +2287,6 @@ Sabel.KeyEvent = new Sabel.Class({
 		};
 
 		var keyPressListener = function(e) {
-			Sabel.dump(cancel);
 			if (cancel === true) {
 				Sabel.Event.preventDefault(e);
 				cancel = false;
