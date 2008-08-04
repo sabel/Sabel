@@ -40,6 +40,11 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
+  public function __toString()
+  {
+    return $this->getValue();
+  }
+  
   public function getRawDocument()
   {
     return $this->element->ownerDocument;
@@ -50,19 +55,14 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->element;
   }
   
-  public function __toString()
+  public function getType()
   {
-    return $this->getNodeValue();
+    return $this->element->nodeType;
   }
   
   public function reproduce()
   {
     return new self($this->element->cloneNode(true));
-  }
-  
-  public function getNodeType()
-  {
-    return $this->element->nodeType;
   }
   
   public function setNodeValue($value)
@@ -193,20 +193,26 @@ class Sabel_Xml_Element extends Sabel_Object
     }
   }
   
-  public function addChild($tagName, $value = null, $cdata = false)
+  public function addText($text, $cdata = false)
   {
     if ($cdata) {
-      if ($value === null) {
-        $_element = $this->getRawDocument()->createCDATASection($tagName);
-      } else {
-        $_element = $this->getRawDocument()->createCDATASection($tagName, $value);
-      }
+      $_element = $this->getRawDocument()->createCDATASection($text);
     } else {
-      if ($value === null) {
-        $_element = $this->getRawDocument()->createElement($tagName);
-      } else {
-        $_element = $this->getRawDocument()->createElement($tagName, $value);
-      }
+      $_element = $this->getRawDocument()->createTextNode($text);
+    }
+    
+    $this->appendChild($_element);
+    $element = new self($_element);
+    
+    return $element;
+  }
+  
+  public function addChild($tagName, $value = null)
+  {
+    if ($value === null) {
+      $_element = $this->getRawDocument()->createElement($tagName);
+    } else {
+      $_element = $this->getRawDocument()->createElement($tagName, $value);
     }
     
     $this->appendChild($_element);
@@ -243,23 +249,6 @@ class Sabel_Xml_Element extends Sabel_Object
         $namespaces = $this->getRawDocument()->defaultNamespaces;
         if (isset($namespaces[$namespaceUri])) {
           $tagName = $namespaces[$namespaceUri] . ":" . $tagName;
-        }
-      } elseif ($tagName{0} === ":") {
-        $xmlns = null;
-        $elem  = $this;
-        while (true) {
-          if (($xmlns = $elem->getAttribute("xmlns")) !== "") {
-            break;
-          } else {
-            if (($elem = $elem->getParent()) === null) {
-              $message = __METHOD__ . "() default namespace not found.";
-              throw new Sabel_Exception_Runtime($message);
-            }
-          }
-        }
-        
-        if (isset($namespaces[$xmlns])) {
-          $tagName = $namespaces[$xmlns] . $tagName;
         }
       } elseif (strpos($tagName, ":") === false && $element->namespaceURI !== null) {
         if ($element->prefix === "") {  // default namespace

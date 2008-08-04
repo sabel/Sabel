@@ -36,15 +36,16 @@ class Sabel_Xml_Document extends Sabel_Object
   
   public function __construct(array $config = array())
   {
-    $this->document = new DOMDocument();
+    $config = array_merge($this->config, $config);
     
-    $cnf = array_merge($this->config, $config);
-    $this->document->preserveWhiteSpace = $cnf["preserveWhiteSpace"];
-    $this->document->formatOutput = $cnf["formatOutput"];
-    $this->document->defaultNamespaces = array();
-    $this->document->xpath = null;
+    $document = new DOMDocument();
+    $document->preserveWhiteSpace = $config["preserveWhiteSpace"];
+    $document->formatOutput = $config["formatOutput"];
+    $document->defaultNamespaces = array();
+    $document->xpath = new DOMXpath($document);
     
-    $this->config = $cnf;
+    $this->config   = $config;
+    $this->document = $document;
   }
   
   public function getRawDocument()

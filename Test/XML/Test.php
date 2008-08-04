@@ -579,10 +579,25 @@ class Test_XML_Test extends SabelTestCase
     $foo = $nodes->getChild("foo:foo");
     $this->assertEquals("fooitem2 value", $foo->fooitem1[0]->fooitem2[0]->getValue());
     
-    $this->assertEquals("defitem2 value", $foo->getChild(":defitem")->defitem2[0]->getValue());
+    $defitem = $foo->getChild("defitem", "http://www.example.com/default");
+    $this->assertEquals("defitem2 value", $defitem->defitem2[0]->getValue());
     
     $baz = $foo->getChild("baz", "http://www.example.com/baz");
     $this->assertEquals("bazitem3 value", $baz->bazitem1[0]->bazitem2[0]->bazitem3[0]->getValue());
+  }
+  
+  public function testGetAllChildren()
+  {
+    $xml = new Sabel_Xml_Document();
+    $nodes = $this->loadXML($xml, "ns");
+    $foo = $nodes->getChild("foo:foo");
+    
+    $children = $foo->getChildren();
+    $this->assertEquals(4, $children->length);
+    $this->assertEquals("foo:fooitem1", $children->item(0)->tagName);
+    $this->assertEquals("defitem",      $children->item(1)->tagName);
+    $this->assertEquals("bar:baritem1", $children->item(2)->tagName);
+    $this->assertEquals("baz",          $children->item(3)->tagName);
   }
   
   protected function getXmlAsString($name)
