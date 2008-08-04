@@ -2321,9 +2321,9 @@ Sabel.KeyEvent = new Sabel.Class({
 
 	getKeyCode: function(e) {
 		var buf = new Array();
-		if (e.altKey === true) buf.push("a");
-		if (e.ctrlKey === true) buf.push("c");
-		if (e.type === "keydown" && e.shiftKey === true) buf.push("s");
+		if (e.altKey === true) buf.push("alt");
+		if (e.ctrlKey === true) buf.push("ctrl");
+		if (e.type === "keydown" && e.shiftKey === true) buf.push("shift");
 
 		var kc = e.keyCode || e.charCode || e.which;
 		if (e.type === "keydown" && Sabel.KeyEvent.special_keys[kc]) {
@@ -2337,7 +2337,8 @@ Sabel.KeyEvent = new Sabel.Class({
 });
 
 Sabel.KeyEvent.special_keys = {
-	8: "backspace", 9: "tab", 13: "enter", 19: "pause", 27: "esc",
+	8: "backspace", 9: "tab", 13: "enter", 16: "shift",
+	17: "ctrl", 18: "alt", 19: "pause", 27: "esc",
 	32: "space", 33: "pageup", 34: "pagedown", 35: "end", 36: "home",
 	37: "left", 38: "up", 39: "right", 40: "down", 45: "insert", 46: "del",
 	106: "*", 107: "+", 109: "-", 110: ".", 111: "/",
