@@ -2270,9 +2270,12 @@ Sabel.Events = {
 
 Sabel.KeyEvent = new Sabel.Class({
 	_lists: {},
+	element: null,
 
 	init: function(element) {
+		this._lists = {};
 		element = this.element = Sabel.get(element) || document;
+
 
 		var cancel = false;
 
@@ -2280,7 +2283,7 @@ Sabel.KeyEvent = new Sabel.Class({
 			var key = this.getKeyCode(e);
 
 			if (this._lists[key]) {
-				cancel = (this._lists[key](e) == false);
+				cancel = (this._lists[key](e) !== false);
 			} else {
 				cancel = false;
 			}
@@ -2321,11 +2324,14 @@ Sabel.KeyEvent = new Sabel.Class({
 
 	getKeyCode: function(e) {
 		var buf = new Array();
-		if (e.altKey === true) buf.push("alt");
-		if (e.ctrlKey === true) buf.push("ctrl");
-		if (e.type === "keydown" && e.shiftKey === true) buf.push("shift");
-
 		var kc = e.keyCode || e.charCode || e.which;
+
+		if (Sabel.Number.between(kc, 16, 18) !== true) {
+			if (e.altKey === true) buf.push("alt");
+			if (e.ctrlKey === true) buf.push("ctrl");
+			if (e.type === "keydown" && e.shiftKey === true) buf.push("shift");
+		}
+
 		if (e.type === "keydown" && Sabel.KeyEvent.special_keys[kc]) {
 			buf.push(Sabel.KeyEvent.special_keys[kc]);
 		} else {
