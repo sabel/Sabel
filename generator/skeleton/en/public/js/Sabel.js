@@ -799,11 +799,13 @@ Sabel.Dom = {
 		}
 	},
 
-	getElementsBySelector: function(selector) {
-		if (document.querySelectorAll) {
+	getElementsBySelector: function(selector, root) {
+		root = root || document;
+
+		if (root.querySelectorAll) {
 			try {
 				var elms = [];
-				Sabel.Array.each(document.querySelectorAll(selector), function(el) {
+				Sabel.Array.each(root.querySelectorAll(selector), function(el) {
 					elms.push(el);
 				});
 				return Sabel.Elements(elms);
@@ -814,7 +816,7 @@ Sabel.Dom = {
 		var elms = [];
 		Sabel.Array.each(selectors, function(query) {
 			var method = s._cache[query] || (s._cache[query] = s.convertToJSCode(query));
-			elms = elms.concat(method([document]));
+			elms = elms.concat(method([root]));
 		});
 		return Sabel.Elements(Sabel.Elements.unique(elms));
 	}
@@ -1154,7 +1156,6 @@ Sabel.Dom.Selector.convertToJSCode = function(selector, force) {
 	var patterns = Sabel.Dom.Selector.patterns;
 	var cs = Sabel.Dom.Selector.cs.base;
 	var prev, pattern, m;
-  // @todo bug fix;
 	var buf = ['sbl_func = function(nodes) { var h = Sabel.Dom.Selector.handlers, f = '+(force||'false')+';'];
 
 	while (selector && selector !== prev) {
@@ -1179,11 +1180,11 @@ Sabel.Dom.Selector._cache = {};
 Sabel.Element = function(element) {
 	if (typeof element === "string") {
 		element = document.createElement(element);
-	} else if (typeof element !== "object") {
-		// @todo 通る?
-		element = Sabel.get(element, false);
 	} else if (element._extended === true) {
 		return element;
+	} else if (typeof element !== "object") {
+		// @todo throw exception ??
+		return null;
 	}
 	return Sabel.Object.extend(element, Sabel.Element, true);
 };
@@ -1198,6 +1199,10 @@ Sabel.Element.get = function(element, id) {
 	} while (parent = parent.parentNode);
 
 	return null;
+};
+
+Sabel.Element.find = function(element, selector) {
+	return Sabel.Dom.getElementsBySelector(selector, Sabel.get(element, false));
 };
 
 Sabel.Element.show = function(element, value) {
@@ -1545,7 +1550,6 @@ Sabel.Element.observe = function(element, eventName, handler, useCapture, scope)
 	element._events[eventName].push(evt);
 
 	return evt;
-	//return element;
 };
 
 Sabel.Element.stopObserve = function(element, eventName, handler) {
@@ -1697,6 +1701,7 @@ Sabel.Element._getOfTypeNodeIndex = function(element, reverse) {
 
 Sabel.Element.contains = function(element, other) {
 	if (element === document) element = document.body;
+
 	if (element.contains) {
 		// IE, Opera, Safari
 		return element.contains(other);
@@ -1711,6 +1716,7 @@ Sabel.Object.extend(Sabel.Element, Sabel.Object.Methods);
 Sabel.Elements = function(elements) {
 	if (typeof elements === "undefined") {
 		elements = new Sabel.Array();
+	// @todo 普通のSabel.Elementが引っかかる
 	} else if (elements._extended === true) {
 		return elements;
 	} else if (elements.constructor !== Array) {
@@ -2272,10 +2278,12 @@ Sabel.KeyEvent = new Sabel.Class({
 	_lists: {},
 	element: null,
 
+	_keyDownEvent: null,
+	_keyPressEvent: null,
+
 	init: function(element) {
 		this._lists = {};
 		element = this.element = Sabel.get(element) || document;
-
 
 		var cancel = false;
 
@@ -2300,8 +2308,22 @@ Sabel.KeyEvent = new Sabel.Class({
 			if (this._lists[key]) this._lists[key](e);
 		};
 
-		new Sabel.Event(element, "keydown", keyDownListener, false, this);
-		new Sabel.Event(element, "keypress", keyPressListener, false, this);
+		this._keyDownEvent  = new Sabel.Event(element, "keydown", keyDownListener, false, this);
+		this._keyPressEvent = new Sabel.Event(element, "keypress", keyPressListener, false, this);
+	},
+
+	start: function() {
+		this._keyDownEvent.start();
+		this._keyPressEvent.start();
+
+		return this;
+	},
+
+	stop: function() {
+		this._keyDownEvent.stop();
+		this._keyPressEvent.stop();
+
+		return this;
 	},
 
 	add: function(key, func, scope) {
