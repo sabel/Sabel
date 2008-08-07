@@ -1603,24 +1603,24 @@ Sabel.Element.getChildElements = function(element, tagName) {
 };
 
 Sabel.Element.getFirstChild = function(element) {
-	return Sabel.Element.getChildElements(element)[0];
+	return new Sabel.Element(Sabel.Element.getChildElements(element)[0]);
 };
 
 Sabel.Element.getLastChild = function(element) {
 	var elms = Sabel.Element.getChildElements(element);
-	return elms[elms.length - 1];
+	return new Sabel.Element(elms[elms.length - 1]);
 };
 
 Sabel.Element.getNextSibling = function(element) {
 	while (element = element.nextSibling) {
-		if (element.nodeType === 1) return element;
+		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
 };
 
 Sabel.Element.getPreviousSibling = function(element) {
 	while (element = element.previousSibling) {
-		if (element.nodeType === 1) return element;
+		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
 };
