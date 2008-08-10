@@ -30,6 +30,8 @@ class Sabel_Xml_Document extends Sabel_Object
    * @var array
    */
   protected $config = array(
+    "version"            => "1.0",
+    "encoding"           => "utf-8",
     "preserveWhiteSpace" => false,
     "formatOutput"       => true,
   );
@@ -39,6 +41,8 @@ class Sabel_Xml_Document extends Sabel_Object
     $config = array_merge($this->config, $config);
     
     $document = new DOMDocument();
+    $document->xmlVersion = $config["version"];
+    $document->encoding = $config["encoding"];
     $document->preserveWhiteSpace = $config["preserveWhiteSpace"];
     $document->formatOutput = $config["formatOutput"];
     $document->defaultNamespaces = array();
@@ -77,6 +81,9 @@ class Sabel_Xml_Document extends Sabel_Object
   
   public function load($type, $path, $ignoreErrors = false)
   {
+    $type = strtoupper($type);
+    if ($type === "XHTML") $type = "HTML";
+    
     $docTypes = array("XML", "HTML");
     
     if (!in_array($type, $docTypes, true)) {
@@ -119,7 +126,7 @@ class Sabel_Xml_Document extends Sabel_Object
     ($ignoreErrors) ? @$document->loadXML($xml) : $document->loadXML($xml);
     
     $xpath = new DOMXpath($document);
-    preg_match_all('/xmlns=("[^"]+"|\'[^\']+\')/U', $xml, $matches);
+    preg_match_all('/xmlns=(".+"|\'.+\')/U', $xml, $matches);
     
     if (isset($matches[1])) {
       foreach ($matches[1] as $i => $namespace) {
@@ -179,6 +186,39 @@ class Sabel_Xml_Document extends Sabel_Object
   public function toHTML()
   {
     return $this->document->saveHTML();
+  }
+  
+  public function validate()
+  {
+    $source = $this->toXML();
+    preg_match_all('/schemaLocation=(".+"|\'.+\')/U', $source, $matches);
+    
+    $locations = array();
+    if (isset($matches[1])) {
+      foreach ($matches[1] as $match) {
+        $location = substr($match, 1, -1);
+        if (strpos($location, " ") === false) {
+          $locations[] = $location;
+        } else {
+          $location = preg_replace("/ {2,}/", " ", $location);
+          $_tmp = explode(" ", $location);
+          for ($i = 1, $c = count($_tmp); $i < $c; $i += 2) {
+            $locations[] = $_tmp[$i];
+          }
+        }
+      }
+    }
+    
+    $handler = new Sabel_Xml_Validate_ErrorHandler();
+    set_error_handler(array($handler, "setError"));
+    
+    foreach ($locations as $location) {
+      $this->document->schemaValidate($location);
+    }
+    
+    restore_error_handler();
+    
+    return $handler;
   }
   
   public function createElement($tagName, $value = null)

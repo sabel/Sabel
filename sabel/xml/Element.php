@@ -148,6 +148,11 @@ class Sabel_Xml_Element extends Sabel_Object
     return $this->getChildren($tagName);
   }
   
+  public function __isset($tagName)
+  {
+    return ($this->getChildren($tagName)->length > 0);
+  }
+  
   public function xpath($query)
   {
     $nodes = $this->getRawDocument()->xpath->evaluate($query, $this->element);
