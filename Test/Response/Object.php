@@ -62,46 +62,39 @@ class Test_Response_Object extends SabelTestCase
   public function testStatus()
   {
     $response = new Sabel_Response_Object();
+    $status = $response->getStatus();
     
-    $this->assertTrue($response->isSuccess());
+    $this->assertTrue($status->isSuccess());
     
-    $response->notFound();
-    $this->assertTrue($response->isNotFound());
+    $status->setCode(Sabel_Response::NOT_FOUND);
+    $this->assertTrue($status->isClientError());
     
-    $response->serverError();
-    $this->assertTrue($response->isServerError());
-    
-    $response->forbidden();
-    $this->assertTrue($response->isForbidden());
-    
-    $response->notModified();
-    $this->assertTrue($response->isNotModified());
+    $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
+    $this->assertTrue($status->isServerError());
   }
   
   public function testIsFailure()
   {
     $response = new Sabel_Response_Object();
+    $status = $response->getStatus();
     
-    $this->assertFalse($response->isFailure());
+    $this->assertFalse($status->isFailure());
     
-    $response->notFound();
-    $this->assertTrue($response->isFailure());
+    $status->setCode(Sabel_Response::NOT_FOUND);
+    $this->assertTrue($status->isFailure());
     
-    $response->serverError();
-    $this->assertTrue($response->isFailure());
+    $status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
+    $this->assertTrue($status->isFailure());
     
-    $response->forbidden();
-    $this->assertTrue($response->isFailure());
-    
-    $response->notModified();
-    $this->assertFalse($response->isFailure());
+    $status->setCode(Sabel_Response::FORBIDDEN);
+    $this->assertTrue($status->isFailure());
   }
   
   public function testHeaderLocation()
   {
     $response = new Sabel_Response_Object();
     $response->setLocation("index/index", "localhost");
-    $this->assertTrue($response->isRedirected());
+    $this->assertTrue($response->getStatus()->isRedirect());
     $this->assertEquals("http://localhost/index/index", $response->getLocation());
   }
 }

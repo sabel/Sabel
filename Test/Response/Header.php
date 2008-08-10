@@ -20,24 +20,21 @@ class Test_Response_Header extends SabelTestCase
     $response->setHeader("Content-Type",   "text/html; charset=UTF-8");
     $response->setHeader("Content-Length", "4096");
     
-    $header = new Sabel_Response_Header_Cli();
-    $headers = $header->output($response);
+    $headers = $response->outputHeader();
     $this->assertEquals("Content-Type: text/html; charset=UTF-8", $headers[1]);
     $this->assertEquals("Content-Length: 4096", $headers[2]);
   }
   
   public function testOutputStatus()
   {
-    $header = new Sabel_Response_Header_Cli();
-    
     $response = new Sabel_Response_Object();
-    $response->forbidden();
-    $headers = $header->output($response);
+    $response->getStatus()->setCode(Sabel_Response::FORBIDDEN);
+    $headers = $response->outputHeader();
     $this->assertEquals("HTTP/1.0 403 Forbidden", $headers[0]);
     
     $response = new Sabel_Response_Object();
-    $response->notModified();
-    $headers = $header->output($response);
+    $response->getStatus()->setCode(Sabel_Response::NOT_MODIFIED);
+    $headers = $response->outputHeader();
     $this->assertEquals("HTTP/1.0 304 Not Modified", $headers[0]);
   }
 }

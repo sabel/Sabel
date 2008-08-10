@@ -135,6 +135,7 @@ final class Sabel
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
     $MAP     = $SABEL . "map"        . DIRECTORY_SEPARATOR;
     $CTRL    = $SABEL . "controller" . DIRECTORY_SEPARATOR;
+    $RESP    = $SABEL . "response"   . DIRECTORY_SEPARATOR;
     $SESSION = $SABEL . "session"    . DIRECTORY_SEPARATOR;
     $VIEW    = $SABEL . "view"       . DIRECTORY_SEPARATOR;
     $UTIL    = $SABEL . "util"       . DIRECTORY_SEPARATOR;
@@ -150,6 +151,10 @@ final class Sabel
     require ($CTRL . "Page.php");
     require ($CTRL . "Redirector.php");
     
+    require ($RESP . "Object.php");
+    require ($RESP . "Status.php");
+    require ($RESP . "Header.php");
+    
     require ($SESSION . "Abstract.php");
     require ($SESSION . "PHP.php");
     
@@ -162,7 +167,6 @@ final class Sabel
     require ($UTIL . "VariableCache.php");
     
     require ($SABEL . "request"   . DIRECTORY_SEPARATOR . "Object.php");
-    require ($SABEL . "response"  . DIRECTORY_SEPARATOR . "Object.php");
     require ($SABEL . "exception" . DIRECTORY_SEPARATOR . "Runtime.php");
     require ($SABEL . "logger"    . DIRECTORY_SEPARATOR . "Interface.php");
   }

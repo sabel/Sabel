@@ -11,20 +11,40 @@
  */
 class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
+  protected $httpVersion = "1.0";
   protected $status      = null;
   protected $location    = "";
-  protected $contentType = "";
-  protected $headers   = array();
-  protected $responses = array();
+  protected $headers     = array();
+  protected $responses   = array();
   
-  public function __construct()
+  public function __construct($statusClassName = "Sabel_Response_Status")
   {
-    $this->status = new Sabel_Response_Status();
+    $this->status = new $statusClassName();
+    
+    if (!$this->status instanceof Sabel_Response_Status) {
+      $message = __METHOD__ . "() Status object must be an instance of Sabel_Response_Status.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
   }
   
   public function getStatus()
   {
     return $this->status;
+  }
+  
+  public function setHttpVersion($version)
+  {
+    if (is_string($version)) {
+      $this->httpVersion = $version;
+    } else {
+      $message = __METHOD__ . "() argument must be a string.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
+  public function getHttpVersion()
+  {
+    return $this->httpVersion;
   }
   
   public function setResponse($key, $value)
@@ -77,13 +97,7 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   
   public function outputHeader()
   {
-    if (PHP_SAPI === "cli") {
-      $header = new Sabel_Response_Header_Cli();
-    } else {
-      $header = new Sabel_Response_Header_Http();
-    }
-    
-    return $header->output($this);
+    return Sabel_Response_Header::output($this);
   }
   
   public function expiredCache($expire = 31536000)
@@ -92,81 +106,6 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
     $this->setHeader("Last-Modified", date(DATE_RFC822, time() - $expire) . " GMT" );
     $this->setHeader("Cache-Control", "max-age={$expire}");
     $this->setHeader("Pragma", "");
-  }
-  
-  public function success()
-  {
-    $this->status->setCode(Sabel_Response::OK);
-    
-    return $this;
-  }
-  
-  public function isSuccess()
-  {
-    return ($this->status->getCode() === Sabel_Response::OK);
-  }
-  
-  public function isFailure()
-  {
-    return $this->status->isFailure();
-  }
-  
-  public function notFound()
-  {
-    $this->status->setCode(Sabel_Response::NOT_FOUND);
-    
-    return $this;
-  }
-  
-  public function isNotFound()
-  {
-    return ($this->status->getCode() === Sabel_Response::NOT_FOUND);
-  }
-  
-  public function serverError()
-  {
-    $this->status->setCode(Sabel_Response::INTERNAL_SERVER_ERROR);
-    
-    return $this;
-  }
-  
-  public function isServerError()
-  {
-    return ($this->status->getCode() === Sabel_Response::INTERNAL_SERVER_ERROR);
-  }
-  
-  public function forbidden()
-  {
-    $this->status->setCode(Sabel_Response::FORBIDDEN);
-    
-    return $this;
-  }
-  
-  public function isForbidden()
-  {
-    return ($this->status->getCode() === Sabel_Response::FORBIDDEN);
-  }
-  
-  public function badRequest()
-  {
-    $this->status->setCode(Sabel_Response::BAD_REQUEST);
-    
-    return $this;
-  }
-  
-  public function isBadRequest()
-  {
-    return ($this->status->getCode() === Sabel_Response::BAD_REQUEST);
-  }
-  
-  public function notModified()
-  {
-    $this->status->setCode(Sabel_Response::NOT_MODIFIED);
-  }
-  
-  public function isNotModified()
-  {
-    return ($this->status->getCode() === Sabel_Response::NOT_MODIFIED);
   }
   
   public function setLocation($to, $host = null)
@@ -185,10 +124,5 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   public function getLocation()
   {
     return $this->location;
-  }
-  
-  public function isRedirected()
-  {
-    return ($this->status->getCode() === Sabel_Response::FOUND);
   }
 }

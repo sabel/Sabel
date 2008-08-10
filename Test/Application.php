@@ -123,7 +123,7 @@ class Test_Application extends SabelTestCase
     $bus->run(new AppBusConfig());
     
     $response = $bus->get("response");
-    $this->assertTrue($response->isNotFound());
+    $this->assertEquals(Sabel_Response::NOT_FOUND, $response->getStatus()->getCode());
     $headers = $response->outputHeader();
     $this->assertEquals("HTTP/1.0 404 Not Found", $headers[0]);
   }
@@ -134,7 +134,7 @@ class Test_Application extends SabelTestCase
     $bus->run(new AppBusConfig());
     
     $response = $bus->get("response");
-    $this->assertTrue($response->isServerError());
+    $this->assertEquals(Sabel_Response::INTERNAL_SERVER_ERROR, $response->getStatus()->getCode());
     $headers = $response->outputHeader();
     $this->assertEquals("HTTP/1.0 500 Internal Server Error", $headers[0]);
   }

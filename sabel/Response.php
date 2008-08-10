@@ -68,20 +68,6 @@ interface Sabel_Response
   
   public function getStatus();
   
-  public function success();
-  public function isSuccess();
-  public function badRequest();
-  public function isBadRequest();
-  public function forbidden();
-  public function isForbidden();
-  public function notFound();
-  public function isNotFound();
-  public function serverError();
-  public function isServerError();
-  
-  public function isFailure();
-  public function isRedirected();
-  
   public function getLocation();
   public function setLocation($to, $host = null);
   

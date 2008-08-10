@@ -53,7 +53,7 @@ class Test_Controller_Page extends SabelTestCase
     $c->execute();
     
     $this->assertFalse($c->isExecuted());
-    $this->assertTrue($c->getResponse()->isNotFound());
+    $this->assertEquals(Sabel_Response::NOT_FOUND, $c->getResponse()->getStatus()->getCode());
   }
   
   public function testHiddenAction()
@@ -63,7 +63,7 @@ class Test_Controller_Page extends SabelTestCase
     $c->execute();
     
     $this->assertFalse($c->isExecuted());
-    $this->assertTrue($c->getResponse()->isNotFound());
+    $this->assertEquals(Sabel_Response::NOT_FOUND, $c->getResponse()->getStatus()->getCode());
   }
   
   public function testProtectedAction()

@@ -2,13 +2,20 @@
 
 class TestProcessor_Response extends Sabel_Bus_Processor
 {
+  protected $beforeEvents = array("controller" => "initResponseObject");
+  
+  public function initResponseObject($bus)
+  {
+    $bus->set("response", new Sabel_Response_Object());
+  }
+  
   public function execute($bus)
   {
-    $response  = $bus->get("response");
-    $responses = array_merge($response->getResponses(),
-                             $bus->get("controller")->getAttributes());
-    
-    $response->setResponses($responses);
+    $response = $bus->get("response");
+    $response->setResponses(array_merge(
+                              $response->getResponses(),
+                              $bus->get("controller")->getAttributes())
+                           );
     
     if ($response->getStatus()->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();

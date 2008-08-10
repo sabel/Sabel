@@ -9,14 +9,12 @@ class TestProcessor_Router extends Sabel_Bus_Processor
     $config->configure();
     
     if ($candidate = $config->getValidCandidate($request->getUri())) {
-      Sabel_Context::getContext()->setCandidate($candidate);
+      $request->setParameterValues($candidate->getUriParameters());
       $bus->set("destination", $candidate->getDestination());
-      
-      foreach ($candidate->getUriParameters() as $name => $value) {
-        $request->setParameterValue($name, $value);
-      }
+      Sabel_Context::getContext()->setCandidate($candidate);
     } else {
-      throw new Sabel_Exception_Runtime("map not match.");
+      $message = __METHOD__ . "() didn't match to any routing configuration.";
+      throw new Sabel_Exception_Runtime($message);
     }
   }
 }
