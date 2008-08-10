@@ -33,6 +33,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $redirect = null;
   
   /**
+   * @var object[]
+   */
+  protected $mixins = array();
+  
+  /**
    * @var string
    */
   protected $action = "";
@@ -73,6 +78,40 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function initialize()
   {
     
+  }
+  
+  /**
+   * @param object $object
+   */
+  public function mixin($object)
+  {
+    if (is_object($object)) {
+      $className  = get_class($object);
+      $reflection = new ReflectionClass($object);
+      $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+      foreach ($methods as $method) {
+        if ($method->getDeclaringClass()->name === $className) {
+          $this->mixins[$method->name] = $object;
+        }
+      }
+    } else {
+      $message = __METHOD__ . "() argument must be an object.";
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
+  /**
+   * @param string $method
+   * @param array  $arguments
+   */
+  public function __call($method, $arguments)
+  {
+    if (isset($this->mixins[$method])) {
+      return call_user_func_array(array($this->mixins[$method], $method), $arguments);
+    } else {
+      $message = "Call to undefined method " . __CLASS__ . "::{$method}()";
+      throw new Sabel_Exception_Runtime($message);
+    }
   }
   
   /**

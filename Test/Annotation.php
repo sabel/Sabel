@@ -17,7 +17,7 @@ class Test_Annotation extends SabelTestCase
   
   public function setUp()
   {
-    $this->reader = new Sabel_Annotation_Reader();
+    $this->reader = Sabel_Annotation_Reader::create();
   }
   
   public function testClassAnnotation()

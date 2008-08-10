@@ -140,7 +140,7 @@ if (!defined("TEST_CASE")) {
   $sabel = realpath(dirname(__FILE__) . DS . ".." . DS . "sabel");
   require_once ($sabel . DS . "Object.php");
   require_once ($sabel . DS . "Console.php");
-  require_once ($sabel . DS . "util" . DS . "filesystem" . DS . "Base.php");
+  require_once ($sabel . DS . "util" . DS . "fileSystem" . DS . "Base.php");
   require_once ($sabel . DS . "util" . DS . "FileSystem.php");
   
   $scaffold = new SabelScaffold($_SERVER["argv"], dirname(__FILE__) . DS . "skeleton");

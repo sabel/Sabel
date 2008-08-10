@@ -14,6 +14,11 @@ class Sabel_Annotation_Reader extends Sabel_Object
 {
   protected static $instance = null;
   
+  private function __construct()
+  {
+    
+  }
+  
   public static function create()
   {
     if (self::$instance === null) {

@@ -27,16 +27,16 @@ class Processor_Action extends Sabel_Bus_Processor
     try {
       if ($hasAction) {
         $reader = Sabel_Annotation_Reader::create();
-        $annotations = $reader->readMethodAnnotation($controller, $action);
+        $annots = $reader->readMethodAnnotation($controller, $action);
         
-        if (isset($annotations["checkClientId"])) {
+        if (isset($annots["checkClientId"])) {
           if ($request->fetchPostValue("SBL_CLIENT_ID") !== $controller->getSession()->getClientId()) {
             return $status->setCode(Sabel_Response::BAD_REQUEST);
           }
         }
         
-        if (isset($annotations["httpMethod"])) {
-          $allows = $annotations["httpMethod"][0];
+        if (isset($annots["httpMethod"])) {
+          $allows = $annots["httpMethod"][0];
           if (!$this->isMethodAllowed($request, $allows)) {
             $response->setHeader("Allow", implode(",", array_map("strtoupper", $allows)));
             return $status->setCode(Sabel_Response::METHOD_NOT_ALLOWED);
@@ -50,12 +50,6 @@ class Processor_Action extends Sabel_Bus_Processor
       if ($status->isFailure() || $controller->isRedirected()) return;
       
       if ($hasAction) {
-        if (isset($annotations["check"])) {
-          if (!$result = $this->validateRequests($controller, $request, $annotations["check"])) {
-            return $status->setCode(Sabel_Response::BAD_REQUEST);
-          }
-        }
-        
         l("execute action '{$action}'");
         $controller->execute();
       }
@@ -64,7 +58,7 @@ class Processor_Action extends Sabel_Bus_Processor
       Sabel_Context::getContext()->setException($e);
     }
     
-    if ($controller->layout === false) {
+    if ($controller->getAttribute("layout") === false) {
       $bus->set("noLayout", true);
     }
   }
@@ -74,47 +68,6 @@ class Processor_Action extends Sabel_Bus_Processor
     $result = true;
     foreach ($allows as $method) {
       if (!($result = $request->{"is" . $method}())) break;
-    }
-    
-    return $result;
-  }
-  
-  protected function validateRequests($controller, $request, $checks)
-  {
-    $values = array();
-    $method = strtoupper($request->getMethod());
-    
-    if ($request->isGet()) {
-      $gets   = $request->fetchGetValues();
-      $params = $request->fetchParameterValues();
-      $values = array_merge($gets, $params);
-      if (count($values) !== (count($gets) + count($params))) {
-        $message = __METHOD__ . "() duplicate request key.";
-        throw new Sabel_Exception_Runtime($message);
-      }
-    } elseif ($request->isPost()) {
-      $values = $request->fetchPostValues();
-    } else {
-      return true;
-    }
-    
-    $validator = new Validator();
-    
-    foreach ($checks as $check) {
-      $name = array_shift($check);
-      $validator->set($name, $check);
-    }
-    
-    $validator->validate($values);
-    $controller->setAttribute("validator", $validator);
-    
-    $result = true;
-    if (!$validator->validate($values)) {
-      if ($request->isPost()) {
-        $controller->setAttribute("errors", $validator->getErrors());
-      } else {
-        $result = false;
-      }
     }
     
     return $result;
