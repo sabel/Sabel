@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Reader
+ * Sabel_Db_Migration_Reader
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Reader extends Sabel_Object
+class Sabel_Db_Migration_Reader extends Sabel_Object
 {
   private $filePath = "";
   
@@ -20,35 +20,35 @@ class Sabel_DB_Migration_Reader extends Sabel_Object
   
   public function readCreate()
   {
-    $create = new Sabel_DB_Migration_Create();
+    $create = new Sabel_Db_Migration_Create();
     include ($this->filePath);
     return $create->build();
   }
   
   public function readAddColumn()
   {
-    $add = new Sabel_DB_Migration_AddColumn();
+    $add = new Sabel_Db_Migration_AddColumn();
     include ($this->filePath);
     return $add->build();
   }
   
   public function readDropColumn()
   {
-    $drop = new Sabel_DB_Migration_DropColumn();
+    $drop = new Sabel_Db_Migration_DropColumn();
     include ($this->filePath);
     return $drop;
   }
   
   public function readChangeColumn()
   {
-    $change = new Sabel_DB_Migration_ChangeColumn();
+    $change = new Sabel_Db_Migration_ChangeColumn();
     include ($this->filePath);
     return $change;
   }
   
   public function readQuery()
   {
-    $query = new Sabel_DB_Migration_Query();
+    $query = new Sabel_Db_Migration_Query();
     include ($this->filePath);
     return $query;
   }

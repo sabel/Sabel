@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Statement
+ * Sabel_Db_Statement
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Statement extends Sabel_Object
+abstract class Sabel_Db_Statement extends Sabel_Object
 {
   const SELECT = 0x01;
   const INSERT = 0x02;
@@ -26,9 +26,9 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   protected static $queries = array();
   
   /**
-   * @var const Sabel_DB_Statement
+   * @var const Sabel_Db_Statement
    */
-  protected $type = Sabel_DB_Statement::QUERY;
+  protected $type = Sabel_Db_Statement::QUERY;
   
   /**
    * @var string
@@ -36,12 +36,12 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   protected $query = "";
   
   /**
-   * @var Sabel_DB_Driver
+   * @var Sabel_Db_Driver
    */
   protected $driver = null;
   
   /**
-   * @var Sabel_DB_Metadata_Table
+   * @var Sabel_Db_Metadata_Table
    */
   protected $metadata = null;
   
@@ -98,7 +98,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   /**
    * @param string $binaryData
    *
-   * @return Sabel_DB_Abstract_Blob
+   * @return Sabel_Db_Abstract_Blob
    */
   abstract public function createBlob($binaryData);
   
@@ -111,7 +111,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Driver
+   * @return Sabel_Db_Driver
    */
   public function getDriver()
   {
@@ -119,11 +119,11 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Metadata_Table $metadata
+   * @param Sabel_Db_Metadata_Table $metadata
    *
    * @return self
    */
-  public function setMetadata(Sabel_DB_Metadata_Table $metadata)
+  public function setMetadata(Sabel_Db_Metadata_Table $metadata)
   {
     $this->table    = $metadata->getTableName();
     $this->metadata = $metadata;
@@ -228,7 +228,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $this->binaries[] = $this->createBlob($v);
-        $v = new Sabel_DB_Statement_Expression($this, self::BINARY_IDENTIFIER . count($this->binaries));
+        $v = new Sabel_Db_Statement_Expression($this, self::BINARY_IDENTIFIER . count($this->binaries));
       }
     }
     
@@ -325,22 +325,22 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   
   public function isSelect()
   {
-    return ($this->type === Sabel_DB_Statement::SELECT);
+    return ($this->type === Sabel_Db_Statement::SELECT);
   }
   
   public function isInsert()
   {
-    return ($this->type === Sabel_DB_Statement::INSERT);
+    return ($this->type === Sabel_Db_Statement::INSERT);
   }
   
   public function isUpdate()
   {
-    return ($this->type === Sabel_DB_Statement::UPDATE);
+    return ($this->type === Sabel_Db_Statement::UPDATE);
   }
   
   public function isDelete()
   {
-    return ($this->type === Sabel_DB_Statement::DELETE);
+    return ($this->type === Sabel_Db_Statement::DELETE);
   }
   
   public function build()
@@ -394,7 +394,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
     foreach ($this->values as $column => $value) {
       $cols[] = $this->quoteIdentifier($column);
       
-      if ($value instanceof Sabel_DB_Statement_Expression) {
+      if ($value instanceof Sabel_Db_Statement_Expression) {
         unset($this->bindValues[$column]);
         $hlds[] = $value->getExpression();
       } else {
@@ -410,7 +410,7 @@ abstract class Sabel_DB_Statement extends Sabel_Object
   {
     $updates = array();
     foreach ($this->values as $column => $value) {
-      if ($value instanceof Sabel_DB_Statement_Expression) {
+      if ($value instanceof Sabel_Db_Statement_Expression) {
         unset($this->bindValues[$column]);
         $updates[] = $this->quoteIdentifier($column) . " = " . $value->getExpression();
       } else {

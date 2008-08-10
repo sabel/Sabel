@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Type
+ * Sabel_Db_Type
  *
  * @interface
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-interface Sabel_DB_Type
+interface Sabel_Db_Type
 {
   const INT       = "_INT";
   const BIGINT    = "_BIGINT";

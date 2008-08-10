@@ -89,7 +89,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
       $newId = $this->createSessionId();
       $stmt  = $this->createStatement();
       
-      $stmt->type(Sabel_DB_Statement::UPDATE)
+      $stmt->type(Sabel_Db_Statement::UPDATE)
            ->values(array("id" => $newId))
            ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @currentId@")
            ->setBindValue("currentId", $this->sessionId)
@@ -107,7 +107,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   {
     if ($this->started) {
       $stmt = $this->createStatement();
-      $stmt->type(Sabel_DB_Statement::DELETE)
+      $stmt->type(Sabel_Db_Statement::DELETE)
            ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
            ->setBindValue("id", $this->sessionId)
            ->execute();
@@ -124,7 +124,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   protected function getSessionData($sessionId)
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::SELECT)
+    $stmt->type(Sabel_Db_Statement::SELECT)
          ->projection(array("data", "timeout"))
          ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
          ->setBindValue("id", $sessionId);
@@ -142,7 +142,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   protected function sessionIdExists($sessionId)
   {
     $stmt   = $this->createStatement();
-    $result = $stmt->type(Sabel_DB_Statement::SELECT)
+    $result = $stmt->type(Sabel_Db_Statement::SELECT)
                    ->projection("COUNT(*) AS cnt")
                    ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
                    ->setBindValue("id", $sessionId)
@@ -161,7 +161,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
     
     if (rand(1, $divisor) <= $probability) {
       $stmt = $this->createStatement();
-      $stmt->type(Sabel_DB_Statement::DELETE)
+      $stmt->type(Sabel_Db_Statement::DELETE)
            ->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@")
            ->setBindValue("timeout", time())
            ->execute();
@@ -170,8 +170,8 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   
   private function createStatement()
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));
+    $stmt = Sabel_Db::createStatement($this->connectionName);
+    $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo($this->tableName, $this->connectionName));
     return $stmt;
   }
   
@@ -179,7 +179,7 @@ class Sabel_Session_Database extends Sabel_Session_Ext
   {
     if ($this->newSession && empty($this->attributes)) return;
     
-    $stmt    = Sabel_DB::createStatement($this->connectionName);
+    $stmt    = Sabel_Db::createStatement($this->connectionName);
     $value   = str_replace("\000", "\\000", serialize($this->attributes));
     $timeout = time() + $this->maxLifetime;
     $table   = $stmt->quoteIdentifier($this->tableName);

@@ -106,7 +106,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
     } else {
       $this->deleteIds = $ids;
       $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
+      $inCondition = Sabel_Db_Condition::create(Sabel_Db_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
       $this->deleteItems = $<?php echo lcfirst($mdlName) ?>->select($inCondition);
     }
   }
@@ -119,7 +119,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
   public function doDelete()
   {
     $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-    $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $this->deleteIds);
+    $inCondition = Sabel_Db_Condition::create(Sabel_Db_Condition::IN, "<?php echo $primaryColumn ?>", $this->deleteIds);
     $<?php echo lcfirst($mdlName) ?>->delete($inCondition);
     
     $this->request->setPostValue("token", null);

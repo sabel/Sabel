@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Validate_Config_Model
+ * Sabel_Db_Validate_Config_Model
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,29 +9,29 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Validate_Config_Model
+class Sabel_Db_Validate_Config_Model
 {
   /**
-   * @var Sabel_DB_Validate_Config_Column[]
+   * @var Sabel_Db_Validate_Config_Column[]
    */
   private $columns = array();
   
   /**
    * @param string $colName
    *
-   * @return Sabel_DB_Validate_Config_Column
+   * @return Sabel_Db_Validate_Config_Column
    */
   public function column($colName)
   {
     if (!isset($this->columns[$colName])) {
-      $this->columns[$colName] = new Sabel_DB_Validate_Config_Column();
+      $this->columns[$colName] = new Sabel_Db_Validate_Config_Column();
     }
     
     return $this->columns[$colName];
   }
   
   /**
-   * @return Sabel_DB_Validate_Config_Column[]
+   * @return Sabel_Db_Validate_Config_Column[]
    */
   public function getColumns()
   {

@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
+class Sabel_Db_Ibase_Driver extends Sabel_Db_Driver
 {
   private $lastInsertId   = null;
   private $isolationLevel = 0;
@@ -41,7 +41,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
     if (ibase_commit($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver(ibase_errmsg());
+      throw new Sabel_Db_Exception_Driver(ibase_errmsg());
     }
   }
   
@@ -50,7 +50,7 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
     if (ibase_rollback($this->connection)) {
       $this->autoCommit = true;
     } else {
-      throw new Sabel_DB_Exception_Driver(ibase_errmsg());
+      throw new Sabel_Db_Exception_Driver(ibase_errmsg());
     }
   }
   
@@ -126,6 +126,6 @@ class Sabel_DB_Ibase_Driver extends Sabel_DB_Driver
   
   private function executeError($sql)
   {
-    throw new Sabel_DB_Exception_Driver(ibase_errmsg() . ", SQL: " . $sql);
+    throw new Sabel_Db_Exception_Driver(ibase_errmsg() . ", SQL: " . $sql);
   }
 }

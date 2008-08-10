@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Ibase_Migration
+ * Sabel_Db_Ibase_Migration
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,19 +9,19 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
+class Sabel_Db_Ibase_Migration extends Sabel_Db_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "INTEGER",
-                           Sabel_DB_Type::BIGINT   => "BIGINT",
-                           Sabel_DB_Type::SMALLINT => "SMALLINT",
-                           Sabel_DB_Type::FLOAT    => "FLOAT",
-                           Sabel_DB_Type::DOUBLE   => "DOUBLE PRECISION",
-                           Sabel_DB_Type::BOOL     => "CHAR(1)",
-                           Sabel_DB_Type::STRING   => "VARCHAR",
-                           Sabel_DB_Type::TEXT     => "BLOB SUB_TYPE TEXT",
-                           Sabel_DB_Type::DATETIME => "TIMESTAMP",
-                           Sabel_DB_Type::DATE     => "DATE",
-                           Sabel_DB_Type::BINARY   => "BLOB SUB_TYPE 2");
+  protected $types = array(Sabel_Db_Type::INT      => "INTEGER",
+                           Sabel_Db_Type::BIGINT   => "BIGINT",
+                           Sabel_Db_Type::SMALLINT => "SMALLINT",
+                           Sabel_Db_Type::FLOAT    => "FLOAT",
+                           Sabel_Db_Type::DOUBLE   => "DOUBLE PRECISION",
+                           Sabel_Db_Type::BOOL     => "CHAR(1)",
+                           Sabel_Db_Type::STRING   => "VARCHAR",
+                           Sabel_Db_Type::TEXT     => "BLOB SUB_TYPE TEXT",
+                           Sabel_Db_Type::DATETIME => "TIMESTAMP",
+                           Sabel_Db_Type::DATE     => "DATE",
+                           Sabel_Db_Type::BINARY   => "BLOB SUB_TYPE 2");
   
   protected function create()
   {
@@ -29,7 +29,7 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
     $schema  = $this->getSchema();
     $tables  = $schema->getTableList();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (in_array($tblName, $tables)) {
         Sabel_Console::warning("table '{$tblName}' already exists. (SKIP)");
       } else {
@@ -63,11 +63,11 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
   {
     $restore = $this->getRestoreFileName();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $schema = $this->getSchema()->getTable(convert_to_tablename($this->mdlName));
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeTable($schema);
       $tblName = $this->quoteIdentifier($schema->getTableName());
       $this->executeQuery("DROP TABLE $tblName");
@@ -130,7 +130,7 @@ class Sabel_DB_Ibase_Migration extends Sabel_DB_Abstract_Migration
     
     if (($column->isBool() && !is_bool($default)) ||
         ($column->isNumeric() && !is_numeric($default))) {
-      throw new Sabel_DB_Exception("invalid default value.");
+      throw new Sabel_Db_Exception("invalid default value.");
     } else {
       return true;
     }

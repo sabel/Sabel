@@ -13,7 +13,7 @@ class Test_DB_Storage_Ibase extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
     MODEL("SblStorage")->delete();
   }
 }

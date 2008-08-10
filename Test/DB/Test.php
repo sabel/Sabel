@@ -17,7 +17,7 @@ class Test_DB_Test extends SabelTestCase
   public function testClean()
   {
     $tables = self::$tables;
-    $driver = Sabel_DB::createDriver("default");
+    $driver = Sabel_Db::createDriver("default");
     
     foreach ($tables as $table) {
       $driver->execute("DELETE FROM $table");
@@ -119,7 +119,7 @@ class Test_DB_Test extends SabelTestCase
   public function testJoin1()
   {
     $this->insertJoinTableData();
-    $join = new Sabel_DB_Join("Grandchildren");
+    $join = new Sabel_Db_Join("Grandchildren");
     $join->setOrderBy("Grandchildren.id ASC");
     $results = $join->add("Children")->select();
     
@@ -132,9 +132,9 @@ class Test_DB_Test extends SabelTestCase
   
   public function testJoin2()
   {
-    $join = new Sabel_DB_Join("Grandchildren");
+    $join = new Sabel_Db_Join("Grandchildren");
     $join->setOrderBy("Grandchildren.id ASC");
-    $chilren = new Sabel_DB_Join_Relation("Children");
+    $chilren = new Sabel_Db_Join_Relation("Children");
     $results = $join->add($chilren->add("Parents"))->select();
     
     $this->assertEquals(2, count($results));
@@ -146,10 +146,10 @@ class Test_DB_Test extends SabelTestCase
   
   public function testJoin3()
   {
-    $join = new Sabel_DB_Join("Grandchildren");
+    $join = new Sabel_Db_Join("Grandchildren");
     $join->setOrderBy("Grandchildren.id ASC");
-    $children = new Sabel_DB_Join_Relation("Children");
-    $parents = new Sabel_DB_Join_Relation("Parents");
+    $children = new Sabel_Db_Join_Relation("Children");
+    $parents = new Sabel_Db_Join_Relation("Parents");
     $results = $join->add($children->add($parents->add("Grandparents")))->select();
     
     $this->assertEquals(2, count($results));
@@ -163,10 +163,10 @@ class Test_DB_Test extends SabelTestCase
   
   public function testJoinCondition()
   {
-    $join = new Sabel_DB_Join("Grandchildren");
+    $join = new Sabel_Db_Join("Grandchildren");
     $join->setCondition("Grandparents.value", "grandparents2");
-    $children = new Sabel_DB_Join_Relation("Children");
-    $parents = new Sabel_DB_Join_Relation("Parents");
+    $children = new Sabel_Db_Join_Relation("Children");
+    $parents = new Sabel_Db_Join_Relation("Parents");
     
     $results = $join->add($children->add($parents->add("Grandparents")))->select();
     $this->assertEquals(1, count($results));
@@ -287,7 +287,7 @@ class Test_DB_Test extends SabelTestCase
   public function testOrCondition()
   {
     $st = MODEL("SchemaTest");
-    $or = new Sabel_DB_Condition_Or();
+    $or = new Sabel_Db_Condition_Or();
     $or->add(Condition::create(EQUAL, "sint",  200));
     $or->add(Condition::create(EQUAL, "email", "test9@example.com"));
     $st->setOrderBy("id ASC");
@@ -302,7 +302,7 @@ class Test_DB_Test extends SabelTestCase
   public function testOrCondition2()
   {
     $st = MODEL("SchemaTest");
-    $or = new Sabel_DB_Condition_Or();
+    $or = new Sabel_Db_Condition_Or();
     $or->add(Condition::create(EQUAL, "sint",  100));
     $or->add(Condition::create(BETWEEN, "dt", array("2008-01-07", "2008-01-09")));
     $st->setOrderBy("id ASC");
@@ -319,10 +319,10 @@ class Test_DB_Test extends SabelTestCase
   public function testOrAndOrCondition()
   {
     $st = MODEL("SchemaTest");
-    $or1 = new Sabel_DB_Condition_Or();
+    $or1 = new Sabel_Db_Condition_Or();
     $or1->add(Condition::create(EQUAL, "sint", 100));
     $or1->add(Condition::create(EQUAL, "sint", 300));
-    $or2 = new Sabel_DB_Condition_Or();
+    $or2 = new Sabel_Db_Condition_Or();
     $or2->add(Condition::create(EQUAL, "sint", 300));
     $or2->add(Condition::create(EQUAL, "sint", 500));
     $st->setOrderBy("id ASC");
@@ -391,31 +391,31 @@ class Test_DB_Test extends SabelTestCase
   
   public function testRollback()
   {
-    Sabel_DB_Transaction::activate();
+    Sabel_Db_Transaction::activate();
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));
     $gp->insert(array("id" => 4, "value" => "grandparents4"));
     
-    Sabel_DB_Transaction::rollback();
+    Sabel_Db_Transaction::rollback();
     $this->assertEquals(2, $gp->getCount());
   }
   
   public function testCommit()
   {
-    Sabel_DB_Transaction::activate(Sabel_DB_Transaction::SERIALIZABLE);
+    Sabel_Db_Transaction::activate(Sabel_Db_Transaction::SERIALIZABLE);
     
     $gp = MODEL("Grandparents");
     $gp->insert(array("id" => 3, "value" => "grandparents3"));
     $gp->insert(array("id" => 4, "value" => "grandparents4"));
     
-    Sabel_DB_Transaction::commit();
+    Sabel_Db_Transaction::commit();
     $this->assertEquals(4, $gp->getCount());
   }
   
   public function testBridge()
   {
-    $join = new Sabel_DB_Join("StudentCourse");
+    $join = new Sabel_Db_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
     $r = $join->setParents(array("Student", "Course"))->select();
     
@@ -438,7 +438,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testBridgeWithCondition()
   {
-    $join = new Sabel_DB_Join("StudentCourse");
+    $join = new Sabel_Db_Join("StudentCourse");
     $join->setOrderBy("StudentCourse.student_id ASC, StudentCourse.course_id ASC");
     $join->setCondition("Student.id", 1);
     $r = $join->setParents(array("Student", "Course"))->select();
@@ -452,7 +452,7 @@ class Test_DB_Test extends SabelTestCase
   
   public function testBridgeCount()
   {
-    $join = new Sabel_DB_Join("StudentCourse");
+    $join = new Sabel_Db_Join("StudentCourse");
     $join->setCondition("Student.id", 3);
     $this->assertEquals(3, $join->setParents(array("Student", "Course"))->getCount());
   }
@@ -535,8 +535,8 @@ class Test_DB_Test extends SabelTestCase
   
   public function testClear()
   {
-    Sabel_DB_Metadata::clear();
-    Sabel_DB_Connection::closeAll();
+    Sabel_Db_Metadata::clear();
+    Sabel_Db_Connection::closeAll();
   }
   
   protected function insertTestData()

@@ -13,7 +13,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    Sabel_DB_Config::initialize($bus->getConfig("database"));
+    Sabel_Db_Config::initialize($bus->getConfig("database"));
     //Sabel::fileUsing(RUN_BASE . DS . LIB_DIR_NAME . DS . "db" . DS . "utility.php", true);
     
     if (!defined("SBL_BATCH")) {

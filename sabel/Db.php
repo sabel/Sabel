@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB
+ * Sabel_Db
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,13 +9,13 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB
+class Sabel_Db
 {
   /**
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Driver
+   * @return Sabel_Db_Driver
    */
   public static function createDriver($connectionName = "default")
   {
@@ -30,7 +30,7 @@ class Sabel_DB
       throw new Sabel_Exception_ClassNotFound($message);
     }
     
-    Sabel_DB_Connection::connect($driver);
+    Sabel_Db_Connection::connect($driver);
     
     return $driver;
   }
@@ -39,7 +39,7 @@ class Sabel_DB
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
   public static function createStatement($connectionName = "default")
   {
@@ -62,12 +62,12 @@ class Sabel_DB
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Abstract_Metadata
+   * @return Sabel_Db_Abstract_Metadata
    */
   public static function createMetadata($connectionName = "default")
   {
     $className  = self::classPrefix($connectionName) . "Metadata";
-    $schemaName = Sabel_DB_Config::getSchemaName($connectionName);
+    $schemaName = Sabel_Db_Config::getSchemaName($connectionName);
     
     if (Sabel::using($className)) {
       return new $className(self::createDriver($connectionName), $schemaName);
@@ -83,7 +83,7 @@ class Sabel_DB
    * @param string $connectionName
    *
    * @throws Sabel_Exception_ClassNotFound
-   * @return Sabel_DB_Abstract_Migration
+   * @return Sabel_Db_Abstract_Migration
    */
   public static function createMigration($connectionName = "default")
   {
@@ -106,7 +106,7 @@ class Sabel_DB
    */
   private static function classPrefix($connectionName)
   {
-    $dirs = explode(".", Sabel_DB_Config::getPackage($connectionName));
+    $dirs = explode(".", Sabel_Db_Config::getPackage($connectionName));
     return implode("_", array_map("ucfirst", $dirs)) . "_";
   }
   
@@ -118,12 +118,12 @@ class Sabel_DB
    */
   protected static function getBaseClassName($connectionName, $className)
   {
-    $packageName = Sabel_DB_Config::getPackage($connectionName);
+    $packageName = Sabel_Db_Config::getPackage($connectionName);
     $reserved = array("mysql", "pgsql", "oci", "ibase");
     
     foreach ($reserved as $part) {
       if (strpos($packageName, $part) !== false) {
-        return "Sabel_DB_" . ucfirst($part) . "_" . $className;
+        return "Sabel_Db_" . ucfirst($part) . "_" . $className;
       }
     }
     

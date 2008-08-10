@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Metadata_Column
+ * Sabel_Db_Metadata_Column
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Metadata_Column extends Sabel_Object
+class Sabel_Db_Metadata_Column extends Sabel_Object
 {
   public $name      = null;
   public $type      = null;
@@ -24,67 +24,67 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
   public function isInt($strict = false)
   {
     if ($strict) {
-      return ($this->type === Sabel_DB_Type::INT);
+      return ($this->type === Sabel_Db_Type::INT);
     } else {
-      return ($this->type === Sabel_DB_Type::INT    ||
-              $this->type === Sabel_DB_Type::BIGINT ||
-              $this->type === Sabel_DB_Type::SMALLINT);
+      return ($this->type === Sabel_Db_Type::INT    ||
+              $this->type === Sabel_Db_Type::BIGINT ||
+              $this->type === Sabel_Db_Type::SMALLINT);
     }
   }
   
   public function isBigint()
   {
-    return ($this->type === Sabel_DB_Type::BIGINT);
+    return ($this->type === Sabel_Db_Type::BIGINT);
   }
   
   public function isSmallint()
   {
-    return ($this->type === Sabel_DB_Type::SMALLINT);
+    return ($this->type === Sabel_Db_Type::SMALLINT);
   }
   
   public function isFloat($strict = false)
   {
     if ($strict) {
-      return ($this->type === Sabel_DB_Type::FLOAT);
+      return ($this->type === Sabel_Db_Type::FLOAT);
     } else {
-      return ($this->type === Sabel_DB_Type::FLOAT ||
-              $this->type === Sabel_DB_Type::DOUBLE);
+      return ($this->type === Sabel_Db_Type::FLOAT ||
+              $this->type === Sabel_Db_Type::DOUBLE);
     }
   }
   
   public function isDouble()
   {
-    return ($this->type === Sabel_DB_Type::DOUBLE);
+    return ($this->type === Sabel_Db_Type::DOUBLE);
   }
   
   public function isString()
   {
-    return ($this->type === Sabel_DB_Type::STRING);
+    return ($this->type === Sabel_Db_Type::STRING);
   }
   
   public function isText()
   {
-    return ($this->type === Sabel_DB_Type::TEXT);
+    return ($this->type === Sabel_Db_Type::TEXT);
   }
   
   public function isDatetime()
   {
-    return ($this->type === Sabel_DB_Type::DATETIME);
+    return ($this->type === Sabel_Db_Type::DATETIME);
   }
   
   public function isDate()
   {
-    return ($this->type === Sabel_DB_Type::DATE);
+    return ($this->type === Sabel_Db_Type::DATE);
   }
   
   public function isBool()
   {
-    return ($this->type === Sabel_DB_Type::BOOL);
+    return ($this->type === Sabel_Db_Type::BOOL);
   }
   
   public function isBinary()
   {
-    return ($this->type === Sabel_DB_Type::BINARY);
+    return ($this->type === Sabel_Db_Type::BINARY);
   }
   
   public function isNumeric()
@@ -95,9 +95,9 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
   public function isUnknown($strict = false)
   {
     if ($strict) {
-      return ($this->type === Sabel_DB_Type::UNKNOWN);
+      return ($this->type === Sabel_Db_Type::UNKNOWN);
     } else {
-      return ($this->type === Sabel_DB_Type::UNKNOWN || $this->type === null);
+      return ($this->type === Sabel_Db_Type::UNKNOWN || $this->type === null);
     }
   }
   
@@ -106,18 +106,18 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
     if ($value === null) return null;
     
     switch ($this->type) {
-      case Sabel_DB_Type::INT:
+      case Sabel_Db_Type::INT:
         return (is_int($value)) ? $value : $this->toInteger($value, PHP_INT_MAX, -PHP_INT_MAX - 1);
       
-      case Sabel_DB_Type::SMALLINT:
+      case Sabel_Db_Type::SMALLINT:
         return $this->toInteger($value, 32767, -32768);
       
-      case Sabel_DB_Type::STRING:
-      case Sabel_DB_Type::TEXT:
-      case Sabel_DB_Type::BIGINT:
+      case Sabel_Db_Type::STRING:
+      case Sabel_Db_Type::TEXT:
+      case Sabel_Db_Type::BIGINT:
         return (string)$value;
       
-      case Sabel_DB_Type::BOOL:
+      case Sabel_Db_Type::BOOL:
         if (is_string($value)) {
           if ($value === "1" || $value === "t" || $value === "true") {
             return true;
@@ -134,16 +134,16 @@ class Sabel_DB_Metadata_Column extends Sabel_Object
           return $value;
         }
       
-      case Sabel_DB_Type::DATETIME:
+      case Sabel_Db_Type::DATETIME:
         $result = strtotime($value);
         return ($result === false) ? $value : date("Y-m-d H:i:s", $result);
       
-      case Sabel_DB_Type::DATE:
+      case Sabel_Db_Type::DATE:
         $result = strtotime($value);
         return ($result === false) ? $value : date("Y-m-d", $result);
       
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
+      case Sabel_Db_Type::FLOAT:
+      case Sabel_Db_Type::DOUBLE:
         if ((is_string($value) && $value === (string)(float)$value) || is_int($value)) {
           return (float)$value;
         } else {

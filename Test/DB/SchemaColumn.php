@@ -142,7 +142,7 @@ class Schema_TestSchema
   {
     $cols = array();
     
-    $cols['intcol'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['intcol'] = array('type'      => Sabel_Db_Type::INT,
                             'max'       => PHP_INT_MAX,
                             'min'       => -PHP_INT_MAX - 1,
                             'increment' => false,
@@ -150,7 +150,7 @@ class Schema_TestSchema
                             'primary'   => false,
                             'default'   => null);
                              
-    $cols['sintcol'] = array('type'      => Sabel_DB_Type::SMALLINT,
+    $cols['sintcol'] = array('type'      => Sabel_Db_Type::SMALLINT,
                              'max'       => 32767,
                              'min'       => -32768,
                              'increment' => false,
@@ -158,13 +158,13 @@ class Schema_TestSchema
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['boolcol'] = array('type'      => Sabel_DB_Type::BOOL,
+    $cols['boolcol'] = array('type'      => Sabel_Db_Type::BOOL,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['floatcol'] = array('type'      => Sabel_DB_Type::FLOAT,
+    $cols['floatcol'] = array('type'      => Sabel_Db_Type::FLOAT,
                               'min'       => -3.4028235E+38,
                               'max'       => 3.4028235E+38,
                               'increment' => false,

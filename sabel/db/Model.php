@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Model
+ * Sabel_Db_Model
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Model extends Sabel_Object
+abstract class Sabel_Db_Model extends Sabel_Object
 {
   /**
    * @var string
@@ -28,17 +28,17 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $modelName = "";
   
   /**
-   * @var Sabel_DB_Statement
+   * @var Sabel_Db_Statement
    */
   protected $statement = null;
   
   /**
-   * @var Sabel_DB_Metadata_Table
+   * @var Sabel_Db_Metadata_Table
    */
   protected $metadata = null;
   
   /**
-   * @var Sabel_DB_Metadata_Column[]
+   * @var Sabel_Db_Metadata_Column[]
    */
   protected $metaCols = array();
   
@@ -58,7 +58,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   protected $constraints = array();
   
   /**
-   * @var Sabel_DB_Condition_Manager
+   * @var Sabel_Db_Condition_Manager
    */
   protected $condition = null;
   
@@ -114,7 +114,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $this->tableName = convert_to_tablename($mdlName);
     }
     
-    $this->metadata = Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName);
+    $this->metadata = Sabel_Db_Metadata::getTableInfo($this->tableName, $this->connectionName);
     $this->metaCols = $this->metadata->getColumns();
   }
   
@@ -239,7 +239,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Metadata_Table
+   * @return Sabel_Db_Metadata_Table
    */
   public function getMetadata()
   {
@@ -247,7 +247,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Metadata_Column[]
+   * @return Sabel_Db_Metadata_Column[]
    */
   public function getColumns()
   {
@@ -371,12 +371,12 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Condition_Manager
+   * @return Sabel_Db_Condition_Manager
    */
   public function getCondition()
   {
     if ($this->condition === null) {
-      $this->condition = new Sabel_DB_Condition_Manager();
+      $this->condition = new Sabel_Db_Condition_Manager();
     }
     
     return $this->condition;
@@ -510,7 +510,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
       $projection = $this->projection;
       $this->projection = "COUNT(*) AS cnt";
       
-      $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
+      $stmt = $this->prepareStatement(Sabel_Db_Statement::SELECT);
       $rows = $this->prepareSelect($stmt)->execute();
       
       $this->projection = $projection;
@@ -531,7 +531,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
-   * @return Sabel_DB_Model
+   * @return Sabel_Db_Model
    */
   public function selectOne($arg1 = null, $arg2 = null)
   {
@@ -543,7 +543,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     if ($result === null) {
       if ($arg1 === null && $this->condition === null) {
         $message = __METHOD__ . "() must set the condition.";
-        throw new Sabel_DB_Exception($message);
+        throw new Sabel_Db_Exception($message);
       }
       
       $this->setCondition($arg1, $arg2);
@@ -566,7 +566,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
    * @param mixed $arg1
    * @param mixed $arg2
    *
-   * @return Sabel_DB_Model[]
+   * @return Sabel_Db_Model[]
    */
   public function select($arg1 = null, $arg2 = null)
   {
@@ -577,7 +577,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     
     if ($result === null) {
       $this->setCondition($arg1, $arg2);
-      $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
+      $stmt = $this->prepareStatement(Sabel_Db_Statement::SELECT);
       $rows = $this->prepareSelect($stmt)->execute();
       $result = (empty($rows)) ? array() : $this->toModels($rows);
     }
@@ -630,7 +630,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
         $saveValues[$k] = (isset($columns[$k])) ? $columns[$k]->cast($v) : $v;
       }
       
-      $stmt  = $this->prepareStatement(Sabel_DB_Statement::INSERT);
+      $stmt  = $this->prepareStatement(Sabel_Db_Statement::INSERT);
       $newId = $this->prepareInsert($stmt, $saveValues)->execute();
       
       foreach ($columns as $name => $column) {
@@ -655,7 +655,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @throws Sabel_DB_Exception
+   * @throws Sabel_Db_Exception
    * @return array
    */
   protected function saveUpdate()
@@ -668,7 +668,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     if ($result === null) {
       if (($pkey = $this->metadata->getPrimaryKey()) === null) {
         $message = __METHOD__ . "() can't update a model(there is not primary key).";
-        throw new Sabel_DB_Exception($message);
+        throw new Sabel_Db_Exception($message);
       }
       
       foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
@@ -676,7 +676,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
           $this->setCondition("{$this->modelName}.{$key}", $this->__get($key));
         } else {
           $message = __METHOD__ . "() can't update the primary key value.";
-          throw new Sabel_DB_Exception($message);
+          throw new Sabel_Db_Exception($message);
         }
       }
       
@@ -698,17 +698,17 @@ abstract class Sabel_DB_Model extends Sabel_Object
           $saveValues[$vColumn] = now();
         } else {
           $message = __METHOD__ . "() version column must be DATETIME or INT.";
-          throw new Sabel_DB_Exception($message);
+          throw new Sabel_Db_Exception($message);
         }
       }
       
       $this->updateValues = array();
-      $stmt = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
+      $stmt = $this->prepareStatement(Sabel_Db_Statement::UPDATE);
       $result = $this->prepareUpdate($stmt, $saveValues)->execute();
       
       if (isset($this->metaCols[$vColumn]) && $result < 1) {
         $message = __METHOD__ . "() this model has already been changed by other transactions.";
-        throw new Sabel_DB_Exception_StaleModel($message);
+        throw new Sabel_Db_Exception_StaleModel($message);
       }
     }
     
@@ -733,7 +733,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($result === null) {
-      $stmt   = $this->prepareStatement(Sabel_DB_Statement::INSERT);
+      $stmt   = $this->prepareStatement(Sabel_Db_Statement::INSERT);
       $result = $this->prepareInsert($stmt, $values)->execute();
     }
     
@@ -760,7 +760,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     }
     
     if ($result === null) {
-      $stmt   = $this->prepareStatement(Sabel_DB_Statement::UPDATE);
+      $stmt   = $this->prepareStatement(Sabel_Db_Statement::UPDATE);
       $result = $this->prepareUpdate($stmt, $values)->execute();
     }
     
@@ -790,7 +790,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
     if ($result === null) {
       $condition = $this->getCondition();
       if (!$this->isSelected() && $arg1 === null && $condition->isEmpty()) {
-        $stmt   = $this->prepareStatement(Sabel_DB_Statement::DELETE);
+        $stmt   = $this->prepareStatement(Sabel_Db_Statement::DELETE);
         $result = $this->prepareDelete($stmt)->execute();
       } else {
         if ($arg1 !== null) {
@@ -798,7 +798,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
         } elseif ($this->isSelected()) {
           if (($pkey = $this->metadata->getPrimaryKey()) === null) {
             $message = __METHOD__ . "() cannot delete model(there is not primary key).";
-            throw new Sabel_DB_Exception($message);
+            throw new Sabel_Db_Exception($message);
           } else {
             foreach ((is_string($pkey)) ? array($pkey) : $pkey as $key) {
               $this->setCondition($this->modelName . "." . $key, $this->__get($key));
@@ -806,7 +806,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
           }
         }
         
-        $stmt   = $this->prepareStatement(Sabel_DB_Statement::DELETE);
+        $stmt   = $this->prepareStatement(Sabel_Db_Statement::DELETE);
         $result = $this->prepareDelete($stmt)->execute();
       }
     }
@@ -822,22 +822,22 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param const $type Sabel_DB_Statement
+   * @param const $type Sabel_Db_Statement
    *
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
-  public function prepareStatement($type = Sabel_DB_Statement::QUERY)
+  public function prepareStatement($type = Sabel_Db_Statement::QUERY)
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
+    $stmt = Sabel_Db::createStatement($this->connectionName);
     return $stmt->setMetadata($this->metadata)->type($type);
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    *
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
-  protected function prepareSelect(Sabel_DB_Statement $stmt)
+  protected function prepareSelect(Sabel_Db_Statement $stmt)
   {
     return $stmt->projection($this->projection)
                 ->where($this->getCondition()->build($stmt))
@@ -845,47 +845,47 @@ abstract class Sabel_DB_Model extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    * @param array $values
    *
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
-  protected function prepareUpdate(Sabel_DB_Statement $stmt, array $values = array())
+  protected function prepareUpdate(Sabel_Db_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->where($this->getCondition()->build($stmt));
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    * @param array $values
    *
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
-  protected function prepareInsert(Sabel_DB_Statement $stmt, array $values = array())
+  protected function prepareInsert(Sabel_Db_Statement $stmt, array $values = array())
   {
     if (empty($values)) $values = $this->values;
     return $stmt->values($values)->sequenceColumn($this->metadata->getSequenceColumn());
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    *
-   * @return Sabel_DB_Statement
+   * @return Sabel_Db_Statement
    */
-  protected function prepareDelete(Sabel_DB_Statement $stmt)
+  protected function prepareDelete(Sabel_Db_Statement $stmt)
   {
     return $stmt->where($this->getCondition()->build($stmt));
   }
   
   /**
-   * @param Sabel_DB_Model $model
+   * @param Sabel_Db_Model $model
    *
    * @return void
    */
-  protected function _doSelectOne(Sabel_DB_Model $model)
+  protected function _doSelectOne(Sabel_Db_Model $model)
   {
-    $stmt = $this->prepareStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->prepareStatement(Sabel_Db_Statement::SELECT);
     $rows = $this->prepareSelect($stmt)->execute();
     if (isset($rows[0])) $model->setProperties($rows[0]);
   }
@@ -893,7 +893,7 @@ abstract class Sabel_DB_Model extends Sabel_Object
   /**
    * @param array $rows
    *
-   * @return Sabel_DB_Model[]
+   * @return Sabel_Db_Model[]
    */
   protected function toModels(array $rows)
   {

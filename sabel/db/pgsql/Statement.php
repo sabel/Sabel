@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pgsql_Statement
+ * Sabel_Db_Pgsql_Statement
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,9 +9,9 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
+class Sabel_Db_Pgsql_Statement extends Sabel_Db_Statement
 {
-  public function __construct(Sabel_DB_Pgsql_Driver $driver)
+  public function __construct(Sabel_Db_Pgsql_Driver $driver)
   {
     $this->driver = $driver;
   }
@@ -57,6 +57,6 @@ class Sabel_DB_Pgsql_Statement extends Sabel_DB_Statement
   public function createBlob($binary)
   {
     $conn = $this->driver->getConnection();
-    return new Sabel_DB_Pgsql_Blob($conn, $binary);
+    return new Sabel_Db_Pgsql_Blob($conn, $binary);
   }
 }

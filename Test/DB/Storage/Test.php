@@ -36,8 +36,8 @@ class Test_DB_Storage_Test extends SabelTestCase
   
   public function testClose()
   {
-    Sabel_DB_Metadata::clear();
-    Sabel_DB_Connection::closeAll();
+    Sabel_Db_Metadata::clear();
+    Sabel_Db_Connection::closeAll();
   }
 }
 

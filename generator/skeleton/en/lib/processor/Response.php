@@ -22,9 +22,9 @@ class Processor_Response extends Sabel_Bus_Processor
   {
     $response = $bus->get("response");
     $response->setResponses(array_merge(
-                              $response->getResponses(),
-                              $bus->get("controller")->getAttributes())
-                           );
+      $response->getResponses(),
+      $bus->get("controller")->getAttributes()
+    ));
     
     if ($response->getStatus()->isServerError()) {
       $exception = Sabel_Context::getContext()->getException();

@@ -87,7 +87,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   public function fetch($key)
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::SELECT)
+    $stmt->type(Sabel_Db_Statement::SELECT)
          ->projection(array("data", "timeout"))
          ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
          ->setBindValue("id", $this->getKey($key));
@@ -112,7 +112,7 @@ class Sabel_Storage_Database implements Sabel_Storage
       $timeout += time();
     }
     
-    $stmt  = Sabel_DB::createStatement($this->connectionName);
+    $stmt  = Sabel_Db::createStatement($this->connectionName);
     $value = str_replace("\000", "\\000", serialize($value));
     
     $table   = $stmt->quoteIdentifier($this->tableName);
@@ -136,7 +136,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   public function has($key)
   {
     $stmt   = $this->createStatement();
-    $result = $stmt->type(Sabel_DB_Statement::SELECT)
+    $result = $stmt->type(Sabel_Db_Statement::SELECT)
                    ->projection("COUNT(*) AS cnt")
                    ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
                    ->setBindValue("id", $this->getKey($key))
@@ -148,7 +148,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   public function clear($key)
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::DELETE)
+    $stmt->type(Sabel_Db_Statement::DELETE)
          ->where("WHERE " . $stmt->quoteIdentifier("id") . " = @id@")
          ->setBindValue("id", $this->getKey($key))
          ->execute();
@@ -157,7 +157,7 @@ class Sabel_Storage_Database implements Sabel_Storage
   protected function gc()
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::DELETE)
+    $stmt->type(Sabel_Db_Statement::DELETE)
          ->where("WHERE " . $stmt->quoteIdentifier("timeout") . " <= @timeout@")
          ->setBindValue("timeout", time())
          ->execute();
@@ -165,8 +165,8 @@ class Sabel_Storage_Database implements Sabel_Storage
   
   protected function createStatement()
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));
+    $stmt = Sabel_Db::createStatement($this->connectionName);
+    $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo($this->tableName, $this->connectionName));
     return $stmt;
   }
   

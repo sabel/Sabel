@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Validate_Config
+ * Sabel_Db_Validate_Config
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,10 +9,10 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Validate_Config implements Sabel_Config
+abstract class Sabel_Db_Validate_Config implements Sabel_Config
 {
   /**
-   * @var Sabel_DB_Validate_Config_Model[]
+   * @var Sabel_Db_Validate_Config_Model[]
    */
   private $models = array();
   
@@ -49,12 +49,12 @@ abstract class Sabel_DB_Validate_Config implements Sabel_Config
   /**
    * @param string $mdlName
    *
-   * @return Sabel_DB_Validate_Config_Model
+   * @return Sabel_Db_Validate_Config_Model
    */
   public function model($mdlName)
   {
     if (!isset($this->models[$mdlName])) {
-      $this->models[$mdlName] = new Sabel_DB_Validate_Config_Model();
+      $this->models[$mdlName] = new Sabel_Db_Validate_Config_Model();
     }
     
     return $this->models[$mdlName];
@@ -73,7 +73,7 @@ abstract class Sabel_DB_Validate_Config implements Sabel_Config
   /**
    * @param string $mdlName
    *
-   * @return Sabel_DB_Validate_Config_Model
+   * @return Sabel_Db_Validate_Config_Model
    */
   public function get($mdlName)
   {

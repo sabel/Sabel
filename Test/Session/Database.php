@@ -104,8 +104,8 @@ class Test_Session_Database extends SabelTestCase
       return false;
     }
     
-    Sabel_DB_Config::add("default", $params);
-    Sabel_DB::createDriver("default")->execute("DELETE FROM session");
+    Sabel_Db_Config::add("default", $params);
+    Sabel_Db::createDriver("default")->execute("DELETE FROM session");
     return true;
   }
 }

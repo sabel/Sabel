@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysql_Driver extends Sabel_DB_Driver
+class Sabel_Db_Mysql_Driver extends Sabel_Db_Driver
 {
   public function connect(array $params)
   {
@@ -92,6 +92,6 @@ class Sabel_DB_Mysql_Driver extends Sabel_DB_Driver
   private function executeError($sql)
   {
     $error = mysql_error($this->connection);
-    throw new Sabel_DB_Exception_Driver("{$error}, SQL: $sql");
+    throw new Sabel_Db_Exception_Driver("{$error}, SQL: $sql");
   }
 }

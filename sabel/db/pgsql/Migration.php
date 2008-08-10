@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pgsql_Migration
+ * Sabel_Db_Pgsql_Migration
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,19 +9,19 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
+class Sabel_Db_Pgsql_Migration extends Sabel_Db_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "INTEGER",
-                           Sabel_DB_Type::BIGINT   => "BIGINT",
-                           Sabel_DB_Type::SMALLINT => "SMALLINT",
-                           Sabel_DB_Type::FLOAT    => "REAL",
-                           Sabel_DB_Type::DOUBLE   => "DOUBLE PRECISION",
-                           Sabel_DB_Type::BOOL     => "BOOLEAN",
-                           Sabel_DB_Type::STRING   => "VARCHAR",
-                           Sabel_DB_Type::TEXT     => "TEXT",
-                           Sabel_DB_Type::DATETIME => "TIMESTAMP",
-                           Sabel_DB_Type::DATE     => "DATE",
-                           Sabel_DB_Type::BINARY   => "BYTEA");
+  protected $types = array(Sabel_Db_Type::INT      => "INTEGER",
+                           Sabel_Db_Type::BIGINT   => "BIGINT",
+                           Sabel_Db_Type::SMALLINT => "SMALLINT",
+                           Sabel_Db_Type::FLOAT    => "REAL",
+                           Sabel_Db_Type::DOUBLE   => "DOUBLE PRECISION",
+                           Sabel_Db_Type::BOOL     => "BOOLEAN",
+                           Sabel_Db_Type::STRING   => "VARCHAR",
+                           Sabel_Db_Type::TEXT     => "TEXT",
+                           Sabel_Db_Type::DATETIME => "TIMESTAMP",
+                           Sabel_Db_Type::DATE     => "DATE",
+                           Sabel_Db_Type::BINARY   => "BYTEA");
   
   protected function createTable($filePath)
   {
@@ -129,7 +129,7 @@ class Sabel_DB_Pgsql_Migration extends Sabel_DB_Abstract_Migration
       } elseif ($col->isBigint()) {
         return "bigserial";
       } else {
-        throw new Sabel_DB_Exception("invalid data type for sequence.");
+        throw new Sabel_Db_Exception("invalid data type for sequence.");
       }
     } elseif ($col->isString()) {
       return $this->types[$col->type] . "({$col->max})";

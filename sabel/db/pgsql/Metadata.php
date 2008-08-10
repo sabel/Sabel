@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pgsql_Metadata
+ * Sabel_Db_Pgsql_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pgsql_Metadata extends Sabel_DB_Abstract_Metadata
+class Sabel_Db_Pgsql_Metadata extends Sabel_Db_Abstract_Metadata
 {
   /**
    * @var array
@@ -65,10 +65,10 @@ SQL;
   
   protected function createColumn($row)
   {
-    $column = new Sabel_DB_Metadata_Column();
+    $column = new Sabel_Db_Metadata_Column();
     $column->name = $row["column_name"];
     $column->nullable = ($row["is_nullable"] !== "NO");
-    Sabel_DB_Type_Manager::create()->applyType($column, $row["data_type"]);
+    Sabel_Db_Type_Manager::create()->applyType($column, $row["data_type"]);
     $this->setDefault($column, $row["column_default"]);
     
     $column->primary = (in_array($column->name, $this->primaryKeys));

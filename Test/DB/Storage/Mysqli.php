@@ -13,7 +13,7 @@ class Test_DB_Storage_Mysqli extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getMysqliConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getMysqliConfig());
     MODEL("SblStorage")->delete();
   }
 }

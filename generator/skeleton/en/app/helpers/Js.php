@@ -62,8 +62,8 @@ INC;
     
     $model   = $formObj->getModel();
     $columns = $model->getColumns();
-    $errMsgs = Sabel_DB_Validate_Config::getMessages();
-    $lNames  = Sabel_DB_Model_Localize::getColumnNames($model->getName());
+    $errMsgs = Sabel_Db_Validate_Config::getMessages();
+    $lNames  = Sabel_Db_Model_Localize::getColumnNames($model->getName());
     
     $data = array("data" => array(), "errors" => $errMsgs);
     foreach ($columns as $c) {

@@ -89,7 +89,7 @@ class Sabel_View_Location_Database extends Sabel_View_Location
   public function create($contents = "")
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::INSERT)
+    $stmt->type(Sabel_Db_Statement::INSERT)
          ->values(array("name"      => $this->_getPath(),
                         "namespace" => $this->namespace,
                         "contents"  => $contents));
@@ -101,7 +101,7 @@ class Sabel_View_Location_Database extends Sabel_View_Location
   public function delete()
   {
     $stmt = $this->createStatement();
-    $stmt->type(Sabel_DB_Statement::DELETE)
+    $stmt->type(Sabel_Db_Statement::DELETE)
          ->where("WHERE " . $stmt->quoteIdentifier("name") . " = @name@")
          ->setBindValue("name", $this->_getPath())
          ->execute();
@@ -126,7 +126,7 @@ class Sabel_View_Location_Database extends Sabel_View_Location
     $nCol  = $stmt->quoteIdentifier("name");
     $nsCol = $stmt->quoteIdentifier("namespace");
     
-    $stmt->type(Sabel_DB_Statement::SELECT)
+    $stmt->type(Sabel_Db_Statement::SELECT)
          ->projection(array("contents"))
          ->where("WHERE $nCol = @name@ AND $nsCol = @namespace@")
          ->setBindValue("name", $this->_getPath())
@@ -143,8 +143,8 @@ class Sabel_View_Location_Database extends Sabel_View_Location
   
   private function createStatement()
   {
-    $stmt = Sabel_DB::createStatement($this->connectionName);
-    $stmt->setMetadata(Sabel_DB_Metadata::getTableInfo($this->tableName, $this->connectionName));
+    $stmt = Sabel_Db::createStatement($this->connectionName);
+    $stmt->setMetadata(Sabel_Db_Metadata::getTableInfo($this->tableName, $this->connectionName));
     return $stmt;
   }
 }

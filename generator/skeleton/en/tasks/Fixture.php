@@ -27,7 +27,7 @@ class Fixture extends Sabel_Sakle_Task
     
     $method = $this->getFixtureMethod();
     $this->defineEnvironment($this->arguments[0]);
-    Sabel_DB_Config::initialize(new Config_Database());
+    Sabel_Db_Config::initialize(new Config_Database());
     
     if (Sabel_Console::hasOption("export", $this->arguments)) {
       unset($this->arguments[array_search("--export", $this->arguments, true)]);

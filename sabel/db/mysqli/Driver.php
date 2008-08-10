@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysqli_Driver extends Sabel_DB_Driver
+class Sabel_Db_Mysqli_Driver extends Sabel_Db_Driver
 {
   public function connect(array $params)
   {
@@ -44,7 +44,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Driver
     if (mysqli_autocommit($this->connection, $this->autoCommit = false)) {
       return $this->connection;
     } else {
-      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
+      throw new Sabel_Db_Exception_Driver(mysql_error($this->connection));
     }
   }
   
@@ -53,7 +53,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Driver
     if (mysqli_commit($this->connection)) {
       mysqli_autocommit($this->connection, $this->autoCommit = true);
     } else {
-      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
+      throw new Sabel_Db_Exception_Driver(mysql_error($this->connection));
     }
   }
   
@@ -62,7 +62,7 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Driver
     if (mysqli_rollback($this->connection)) {
       mysqli_autocommit($this->connection, $this->autoCommit = true);
     } else {
-      throw new Sabel_DB_Exception_Driver(mysql_error($this->connection));
+      throw new Sabel_Db_Exception_Driver(mysql_error($this->connection));
     }
   }
   
@@ -98,6 +98,6 @@ class Sabel_DB_Mysqli_Driver extends Sabel_DB_Driver
   private function executeError($sql)
   {
     $error = mysqli_error($this->connection);
-    throw new Sabel_DB_Exception_Driver("{$error}, SQL: $sql");
+    throw new Sabel_Db_Exception_Driver("{$error}, SQL: $sql");
   }
 }

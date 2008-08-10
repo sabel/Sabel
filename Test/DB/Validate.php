@@ -16,7 +16,7 @@ class Test_DB_Validate extends SabelTestCase
   public function testRequired()
   {
     $ex = MODEL("Example");
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals(2, count($errors));
@@ -30,7 +30,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column1 = 3000000000;
     $ex->column2 = "a";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column1 must be " . PHP_INT_MAX . " or less.", $errors[0]);
@@ -43,7 +43,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column4 = 15;
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column4 must be 18 or more.", $errors[0]);
@@ -56,7 +56,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column3 = "123456789";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column3 must be 8 characters or less.", $errors[0]);
@@ -69,7 +69,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column3 = "123";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column3 must be 4 characters or more.", $errors[0]);
@@ -82,7 +82,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column4 = "hoge";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column4 must be a numeric.", $errors[0]);
@@ -95,7 +95,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column5 = 3.4028235E+39;
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column5 must be 3.4028235E+38 or less.", $errors[0]);
@@ -108,7 +108,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column5 = -3.4028235E+39;
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("column5 must be -3.4028235E+38 or more.", $errors[0]);
@@ -121,14 +121,14 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column6 = "hogehoge";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("wrong column6 format.", $errors[0]);
     
     $ex->column6 = "2008-01-01";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
   }
@@ -140,14 +140,14 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column7 = "hogehoge";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("wrong column7 format.", $errors[0]);
     
     $ex->column7 = "2008-01-01 10:10:10";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
   }
@@ -159,20 +159,20 @@ class Test_DB_Validate extends SabelTestCase
     $ex->column2 = "a";
     $ex->column8 = "hogehoge";
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     
     $this->assertEquals("wrong column8 format.", $errors[0]);
     
     $ex->column8 = true;
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
     
     $ex->column8 = false;
     
-    $validator = new Sabel_DB_Validator($ex);
+    $validator = new Sabel_Db_Validator($ex);
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
   }
@@ -198,8 +198,8 @@ class Test_DB_Validate extends SabelTestCase
       return false;
     }
     
-    Sabel_DB_Config::add("default", $params);
-    $driver = Sabel_DB::createDriver("default");
+    Sabel_Db_Config::add("default", $params);
+    $driver = Sabel_Db::createDriver("default");
     $driver->execute("DELETE FROM schema_test");
     $driver->execute("INSERT INTO schema_test(name, email) VALUES('hoge', 'validate.test@example.com')");
     
@@ -207,7 +207,7 @@ class Test_DB_Validate extends SabelTestCase
     $st->name  = "fuga";
     $st->email = "validate.test@example.com";
     
-    $validator = new Sabel_DB_Validator($st);
+    $validator = new Sabel_Db_Validator($st);
     $errors = $validator->validate();
     
     $this->assertEquals("'validate.test@example.com'(email) is unavailable.", $errors[0]);
@@ -219,7 +219,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex2->column1 = 1;
     $ex2->column2 = "hoge";
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $validator->setValidateConfig(new Test_Validate_Config());
     $errors = $validator->validate();
     
@@ -227,7 +227,7 @@ class Test_DB_Validate extends SabelTestCase
     
     $ex2->column2 = "a@a.a";
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
   }
@@ -238,7 +238,7 @@ class Test_DB_Validate extends SabelTestCase
     $ex2->column1 = 1;
     $ex2->column2 = "hoge";
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $validator->setValidateConfig(new Test_Validate_Config2());
     $errors = $validator->validate();
     
@@ -246,7 +246,7 @@ class Test_DB_Validate extends SabelTestCase
     
     $ex2->column2 = "a@a.a";
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $validator->setValidateConfig(new Test_Validate_Config2());
     $errors = $validator->validate();
     
@@ -259,14 +259,14 @@ class Test_DB_Validate extends SabelTestCase
     $ex2->column1 = 1;
     $ex2->column2 = "hoge@example.com";
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $validator->setValidateConfig(new Test_Validate_Config3());
     $errors = $validator->validate();
     $this->assertEquals("column1 must be 10 or more.", $errors[0]);
     
     $ex2->column1 = 120;
     
-    $validator = new Sabel_DB_Validator($ex2);
+    $validator = new Sabel_Db_Validator($ex2);
     $validator->setValidateConfig(new Test_Validate_Config3());
     $errors = $validator->validate();
     $this->assertEquals("column1 must be 100 or less.", $errors[0]);
@@ -278,14 +278,14 @@ class Test_DB_Validate extends SabelTestCase
     $ex3->column1 = 10;
     $ex3->column2 = "hoge@example.com";
     
-    $validator = new Sabel_DB_Validator($ex3);
+    $validator = new Sabel_Db_Validator($ex3);
     $validator->setValidateConfig(new Test_Validate_Config3());
     $errors = $validator->validate();
     $this->assertEquals("column1 must be 20 or more.", $errors[0]);
     
     $ex3->column1 = 90;
     
-    $validator = new Sabel_DB_Validator($ex3);
+    $validator = new Sabel_Db_Validator($ex3);
     $validator->setValidateConfig(new Test_Validate_Config3());
     $errors = $validator->validate();
     $this->assertEquals("column1 must be 80 or less.", $errors[0]);
@@ -299,14 +299,14 @@ class Test_DB_Validate extends SabelTestCase
     $ex3->column3 = "1p2a3s4s5w6o7r8d";
     $ex3->retype  = "abcde";
     
-    $validator = new Sabel_DB_Validator($ex3);
+    $validator = new Sabel_Db_Validator($ex3);
     $validator->setValidateConfig(new Test_Validate_Config4());
     $errors = $validator->validate();
     $this->assertEquals("input values didn't match.", $errors[0]);
     
     $ex3->retype = "1p2a3s4s5w6o7r8d";
     
-    $validator = new Sabel_DB_Validator($ex3);
+    $validator = new Sabel_Db_Validator($ex3);
     $validator->setValidateConfig(new Test_Validate_Config4());
     $errors = $validator->validate();
     $this->assertTrue(empty($errors));
@@ -315,7 +315,7 @@ class Test_DB_Validate extends SabelTestCase
   public function testBeginsWith()
   {
     $ex4 = MODEL("Example4");
-    $validator = new Sabel_DB_Validator($ex4);
+    $validator = new Sabel_Db_Validator($ex4);
     $validator->setValidateConfig(new Test_Validate_Config5());
     $errors = $validator->validate();
     $this->assertEquals(2, count($errors));
@@ -328,7 +328,7 @@ class Test_DB_Validate extends SabelTestCase
   public function testEndsWith()
   {
     $ex4 = MODEL("Example4");
-    $validator = new Sabel_DB_Validator($ex4);
+    $validator = new Sabel_Db_Validator($ex4);
     $validator->setValidateConfig(new Test_Validate_Config6());
     $errors = $validator->validate();
     $this->assertEquals(2, count($errors));
@@ -341,7 +341,7 @@ class Test_DB_Validate extends SabelTestCase
   public function testCustomValidationByParentClassName()
   {
     $ex4 = MODEL("Example4");
-    $validator = new Sabel_DB_Validator($ex4);
+    $validator = new Sabel_Db_Validator($ex4);
     $validator->setValidateConfig(new Test_Validate_Config7());
     $errors = $validator->validate();
     $this->assertEquals(2, count($errors));
@@ -352,7 +352,7 @@ class Test_DB_Validate extends SabelTestCase
   }
 }
 
-class Test_Validate_Config extends Sabel_DB_Validate_Config
+class Test_Validate_Config extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -370,7 +370,7 @@ class Test_Validate_Config extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config2 extends Sabel_DB_Validate_Config
+class Test_Validate_Config2 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -398,7 +398,7 @@ class Test_Validate_Config2 extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config3 extends Sabel_DB_Validate_Config
+class Test_Validate_Config3 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -419,7 +419,7 @@ class Test_Validate_Config3 extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config4 extends Sabel_DB_Validate_Config
+class Test_Validate_Config4 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -436,7 +436,7 @@ class Test_Validate_Config4 extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config5 extends Sabel_DB_Validate_Config
+class Test_Validate_Config5 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -449,7 +449,7 @@ class Test_Validate_Config5 extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config6 extends Sabel_DB_Validate_Config
+class Test_Validate_Config6 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -462,7 +462,7 @@ class Test_Validate_Config6 extends Sabel_DB_Validate_Config
   }
 }
 
-class Test_Validate_Config7 extends Sabel_DB_Validate_Config
+class Test_Validate_Config7 extends Sabel_Db_Validate_Config
 {
   public function configure()
   {
@@ -475,7 +475,7 @@ class Test_Validate_Config7 extends Sabel_DB_Validate_Config
   }
 }
 
-class ParentExample extends Sabel_DB_Model {}
+class ParentExample extends Sabel_Db_Model {}
 class Example4 extends ParentExample {}
 
 class Schema_Example
@@ -484,7 +484,7 @@ class Schema_Example
   {
     $cols = array();
     
-    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['column1'] = array('type'      => Sabel_Db_Type::INT,
                              'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
@@ -492,14 +492,14 @@ class Schema_Example
                              'primary'   => true,
                              'default'   => null);
                              
-    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column2'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => false,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column3'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column3'] = array('type'      => Sabel_Db_Type::STRING,
                              'min'       => 4,
                              'max'       => 8,
                              'increment' => false,
@@ -507,7 +507,7 @@ class Schema_Example
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column4'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['column4'] = array('type'      => Sabel_Db_Type::INT,
                              'min'       => 18,
                              'max'       => 120,
                              'increment' => false,
@@ -515,7 +515,7 @@ class Schema_Example
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column5'] = array('type'      => Sabel_DB_Type::FLOAT,
+    $cols['column5'] = array('type'      => Sabel_Db_Type::FLOAT,
                              'min'       => -3.4028235E+38,
                              'max'       => 3.4028235E+38,
                              'increment' => false,
@@ -523,19 +523,19 @@ class Schema_Example
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column6'] = array('type'      => Sabel_DB_Type::DATE,
+    $cols['column6'] = array('type'      => Sabel_Db_Type::DATE,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column7'] = array('type'      => Sabel_DB_Type::DATETIME,
+    $cols['column7'] = array('type'      => Sabel_Db_Type::DATETIME,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['column8'] = array('type'      => Sabel_DB_Type::BOOL,
+    $cols['column8'] = array('type'      => Sabel_Db_Type::BOOL,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
@@ -562,7 +562,7 @@ class Schema_Example2
   {
     $cols = array();
 
-    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['column1'] = array('type'      => Sabel_Db_Type::INT,
                              'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
@@ -570,7 +570,7 @@ class Schema_Example2
                              'primary'   => true,
                              'default'   => null);
 
-    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column2'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => false,
@@ -598,7 +598,7 @@ class Schema_Example3
   {
     $cols = array();
 
-    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['column1'] = array('type'      => Sabel_Db_Type::INT,
                              'min'       => -PHP_INT_MAX - 1,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
@@ -606,14 +606,14 @@ class Schema_Example3
                              'primary'   => true,
                              'default'   => null);
 
-    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column2'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => false,
                              'primary'   => false,
                              'default'   => null);
 
-    $cols['column3'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column3'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,
@@ -641,28 +641,28 @@ class Schema_Example4
   {
     $cols = array();
     
-    $cols['col_abc'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['col_abc'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['col_xyz'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['col_xyz'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['abc_col'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['abc_col'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,
                              'primary'   => false,
                              'default'   => null);
                              
-    $cols['xyz_col'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['xyz_col'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => true,

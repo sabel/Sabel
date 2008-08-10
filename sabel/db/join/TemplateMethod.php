@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Join_TemplateMethod
+ * Sabel_Db_Join_TemplateMethod
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Join_TemplateMethod extends Sabel_Object
+class Sabel_Db_Join_TemplateMethod extends Sabel_Object
 {
   protected
     $model     = null,
@@ -76,7 +76,7 @@ class Sabel_DB_Join_TemplateMethod extends Sabel_Object
     
     $props = array();
     foreach ($this->columns as $column) {
-      $hash = Sabel_DB_Join_ColumnHash::getHash("{$name}.{$column}");
+      $hash = Sabel_Db_Join_ColumnHash::getHash("{$name}.{$column}");
       if (isset($row[$hash])) {
         $props[$column] = $row[$hash];
         unset($row[$hash]);

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Sqlite_Migration
+ * Sabel_Db_Pdo_Sqlite_Migration
  *
  * @category   DB
  * @package    org.sabel.db.pdo
@@ -9,19 +9,19 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
+class Sabel_Db_Pdo_Sqlite_Migration extends Sabel_Db_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "int",
-                           Sabel_DB_Type::BIGINT   => "bigint",
-                           Sabel_DB_Type::SMALLINT => "smallint",
-                           Sabel_DB_Type::FLOAT    => "float",
-                           Sabel_DB_Type::DOUBLE   => "double",
-                           Sabel_DB_Type::BOOL     => "boolean",
-                           Sabel_DB_Type::STRING   => "varchar",
-                           Sabel_DB_Type::TEXT     => "text",
-                           Sabel_DB_Type::DATETIME => "datetime",
-                           Sabel_DB_Type::DATE     => "date",
-                           Sabel_DB_Type::BINARY   => "binary");
+  protected $types = array(Sabel_Db_Type::INT      => "int",
+                           Sabel_Db_Type::BIGINT   => "bigint",
+                           Sabel_Db_Type::SMALLINT => "smallint",
+                           Sabel_Db_Type::FLOAT    => "float",
+                           Sabel_Db_Type::DOUBLE   => "double",
+                           Sabel_Db_Type::BOOL     => "boolean",
+                           Sabel_Db_Type::STRING   => "varchar",
+                           Sabel_Db_Type::TEXT     => "text",
+                           Sabel_Db_Type::DATETIME => "datetime",
+                           Sabel_Db_Type::DATE     => "date",
+                           Sabel_Db_Type::BINARY   => "binary");
   
   protected function createTable($filePath)
   {
@@ -38,7 +38,7 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
   {
     $columns = $this->getReader()->readAddColumn()->getColumns();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       $this->execAddColumn($columns);
     } else {
       $schema = $this->getSchema()->getTable($this->tblName);
@@ -57,14 +57,14 @@ class Sabel_DB_Pdo_Sqlite_Migration extends Sabel_DB_Abstract_Migration
   {
     $restore = $this->getRestoreFileName();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $columns  = $this->getReader()->readDropColumn()->getColumns();
       $schema   = $this->getSchema()->getTable($this->tblName);
       $sColumns = $schema->getColumns();
       
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeColumns($schema, $columns);
       $writer->close();
       

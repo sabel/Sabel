@@ -18,7 +18,7 @@ class Schema extends Sabel_Sakle_Task
     
     $outputDir = RUN_BASE . DS . LIB_DIR_NAME . DS . "schema";
     $this->defineEnvironment($this->arguments[0]);
-    Sabel_DB_Config::initialize(new Config_Database());
+    Sabel_Db_Config::initialize(new Config_Database());
     
     $isAll = false;
     $tables = $this->getOutputTables();
@@ -27,13 +27,13 @@ class Schema extends Sabel_Sakle_Task
     }
     
     $tList = new TableListWriter($outputDir);
-    foreach (Sabel_DB_Config::get() as $connectionName => $params) {
-      Sabel_DB_Config::add($connectionName, $params);
-      $db = Sabel_DB::createMetadata($connectionName);
+    foreach (Sabel_Db_Config::get() as $connectionName => $params) {
+      Sabel_Db_Config::add($connectionName, $params);
+      $db = Sabel_Db::createMetadata($connectionName);
       
       foreach ($db->getTableList() as $tblName) {
         if ($isAll || in_array($tblName, $tables, true)) {
-          $writer = new Sabel_DB_Metadata_FileWriter($outputDir);
+          $writer = new Sabel_Db_Metadata_FileWriter($outputDir);
           $writer->write($db->getTable($tblName));
           $this->success("generate Schema 'Schema_" . convert_to_modelname($tblName) . "'");
         }

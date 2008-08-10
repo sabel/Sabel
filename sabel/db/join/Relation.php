@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Join_Relation
+ * Sabel_Db_Join_Relation
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,19 +9,19 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
+class Sabel_Db_Join_Relation extends Sabel_Db_Join_TemplateMethod
 {
   protected $objects = array();
   
   public function add($object, $alias = "", $joinKey = array())
   {
     if (is_string($object)) {
-      $object = new Sabel_DB_Join_Object(MODEL($object), $alias, $joinKey);
+      $object = new Sabel_Db_Join_Object(MODEL($object), $alias, $joinKey);
     } elseif (is_model($object)) {
-      $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
+      $object = new Sabel_Db_Join_Object($object, $alias, $joinKey);
     }
     
-    $structure = Sabel_DB_Join_Structure::getInstance();
+    $structure = Sabel_Db_Join_Structure::getInstance();
     $structure->addJoinObject($this->getName(), $object);
     $object->setChildName($this->getName());
     $this->objects[] = $object;
@@ -34,14 +34,14 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $this;
   }
   
-  public function getProjection(Sabel_DB_Statement $stmt)
+  public function getProjection(Sabel_Db_Statement $stmt)
   {
     $projection = array();
     $name = ($this->hasAlias()) ? strtolower($this->aliasName) : $this->getName(false);
     
     foreach ($this->columns as $column) {
       $as = "{$name}.{$column}";
-      if (strlen($as) > 30) $as = Sabel_DB_Join_ColumnHash::toHash($as);
+      if (strlen($as) > 30) $as = Sabel_Db_Join_ColumnHash::toHash($as);
       $p = $stmt->quoteIdentifier($name) . "." . $stmt->quoteIdentifier($column);
       $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
     }
@@ -53,7 +53,7 @@ class Sabel_DB_Join_Relation extends Sabel_DB_Join_TemplateMethod
     return $projection;
   }
   
-  public function getJoinQuery(Sabel_DB_Statement $stmt, $joinType)
+  public function getJoinQuery(Sabel_Db_Statement $stmt, $joinType)
   {
     $name  = $stmt->quoteIdentifier($this->tblName);
     $keys  = $this->joinKey;

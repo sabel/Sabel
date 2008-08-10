@@ -17,7 +17,7 @@ require_once ("Test/DB/SchemaColumn.php");
 require_once ("Test/DB/Validate.php");
 require_once ("Test/DB/Config.php");
 
-class Condition extends Sabel_DB_Condition{}
+class Condition extends Sabel_Db_Condition{}
 
 define("EQUAL",         Condition::EQUAL);
 define("ISNULL",        Condition::ISNULL);
@@ -31,9 +31,9 @@ define("LESS_EQUAL",    Condition::LESS_EQUAL);
 define("LESS_THAN",     Condition::LESS_THAN);
 define("DIRECT",        Condition::DIRECT);
 
-define("LIKE_BEGINS_WITH", Sabel_DB_Condition_Like::BEGINS_WITH);
-define("LIKE_ENDS_WITH",   Sabel_DB_Condition_Like::ENDS_WITH);
-define("LIKE_CONTAINS",    Sabel_DB_Condition_Like::CONTAINS);
+define("LIKE_BEGINS_WITH", Sabel_Db_Condition_Like::BEGINS_WITH);
+define("LIKE_ENDS_WITH",   Sabel_Db_Condition_Like::ENDS_WITH);
+define("LIKE_CONTAINS",    Sabel_Db_Condition_Like::CONTAINS);
 
 /**
  * load tests of sabel.db.*

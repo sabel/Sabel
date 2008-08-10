@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
+abstract class Sabel_Db_Pdo_Driver extends Sabel_Db_Driver
 {
   public function begin($isolationLevel = null)
   {
@@ -23,7 +23,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
       $this->autoCommit = false;
       return $this->connection;
     } catch (PDOException $e) {
-      throw new Sabel_DB_Exception_Driver($e->getMessage());
+      throw new Sabel_Db_Exception_Driver($e->getMessage());
     }
   }
   
@@ -33,7 +33,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
       $this->connection->commit();
       $this->autoCommit = true;
     } catch (PDOException $e) {
-      throw new Sabel_DB_Exception_Driver($e->getMessage());
+      throw new Sabel_Db_Exception_Driver($e->getMessage());
     }
   }
   
@@ -43,7 +43,7 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
       $this->connection->rollback();
       $this->autoCommit = true;
     } catch (PDOException $e) {
-      throw new Sabel_DB_Exception_Driver($e->getMessage());
+      throw new Sabel_Db_Exception_Driver($e->getMessage());
     }
   }
   
@@ -58,12 +58,12 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
     $connection = $this->connection;
     if (!($pdoStmt = $connection->prepare($sql))) {
       $error = $connection->errorInfo();
-      throw new Sabel_DB_Exception_Driver("PdoStatement is invalid. {$error[2]}");
+      throw new Sabel_Db_Exception_Driver("PdoStatement is invalid. {$error[2]}");
     }
     
     $hasBlob = false;
     foreach ($bindParams as $name => $value) {
-      if ($value instanceof Sabel_DB_Pdo_Blob) {
+      if ($value instanceof Sabel_Db_Pdo_Blob) {
         $hasBlob = true;
         $pdoStmt->bindValue($name, $value->getData(), PDO::PARAM_LOB);
       } else {
@@ -107,6 +107,6 @@ abstract class Sabel_DB_Pdo_Driver extends Sabel_DB_Driver
       $error .= PHP_EOL . "BIND_PARAMS: " . print_r($bindParams, true);
     }
     
-    throw new Sabel_DB_Exception_Driver($error);
+    throw new Sabel_Db_Exception_Driver($error);
   }
 }

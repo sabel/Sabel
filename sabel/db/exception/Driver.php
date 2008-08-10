@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Exception_Driver extends Sabel_DB_Exception
+class Sabel_Db_Exception_Driver extends Sabel_Db_Exception
 {
   
 }

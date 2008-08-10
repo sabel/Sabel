@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Sqlite_Metadata
+ * Sabel_Db_Pdo_Sqlite_Metadata
  *
  * @category   DB
  * @package    org.sabel.db.pdo
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
+class Sabel_Db_Pdo_Sqlite_Metadata extends Sabel_Db_Abstract_Metadata
 {
   public function getTableList()
   {
@@ -50,7 +50,7 @@ class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
     
     $columns = array();
     foreach ($rows as $row) {
-      $co = new Sabel_DB_Metadata_Column();
+      $co = new Sabel_Db_Metadata_Column();
       $co->name = $row["name"];
       
       if ($row["pk"] === "1") {
@@ -64,9 +64,9 @@ class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
       }
       
       if ($this->isBoolean($row["type"])) {
-        $co->type = Sabel_DB_Type::BOOL;
+        $co->type = Sabel_Db_Type::BOOL;
       } elseif (!$this->isString($co, $row["type"])) {
-        Sabel_DB_Type_Manager::create()->applyType($co, $row["type"]);
+        Sabel_Db_Type_Manager::create()->applyType($co, $row["type"]);
       }
       
       $this->setDefaultValue($co, $row["dflt_value"]);
@@ -94,7 +94,7 @@ class Sabel_DB_Pdo_Sqlite_Metadata extends Sabel_DB_Abstract_Metadata
     foreach ($types as $sType) {
       if (strpos($type, $sType) !== false) {
         $length   = strpbrk($type, "(");
-        $co->type = Sabel_DB_Type::STRING;
+        $co->type = Sabel_Db_Type::STRING;
         $co->max  = ($length === false) ? 255 : (int)substr($length, 1, -1);
         return true;
       }

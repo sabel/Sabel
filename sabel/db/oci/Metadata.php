@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Oci_Metadata
+ * Sabel_Db_Oci_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Metadata extends Sabel_DB_Abstract_Metadata
+class Sabel_Db_Oci_Metadata extends Sabel_Db_Abstract_Metadata
 {
   /**
    * @var array
@@ -70,7 +70,7 @@ SQL;
   
   protected function createColumn($row)
   {
-    $column = new Sabel_DB_Metadata_Column();
+    $column = new Sabel_Db_Metadata_Column();
     $column->name = strtolower($row["column_name"]);
     $column->nullable = ($row["nullable"] !== "N");
     
@@ -80,7 +80,7 @@ SQL;
     
     if ($type === "number") {
       if ($precision === 1 && ($default === "1" || $default === "0")) {
-        $column->type = Sabel_DB_Type::BOOL;
+        $column->type = Sabel_Db_Type::BOOL;
       } else {
         if ($precision === 5) {
           $type = "smallint";
@@ -99,7 +99,7 @@ SQL;
         $type = "datetime";
       }
       
-      Sabel_DB_Type_Manager::create()->applyType($column, $type);
+      Sabel_Db_Type_Manager::create()->applyType($column, $type);
     }
     
     $this->setDefault($column, $default);

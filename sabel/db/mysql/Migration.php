@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Mysql_Migration
+ * Sabel_Db_Mysql_Migration
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,19 +9,19 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
+class Sabel_Db_Mysql_Migration extends Sabel_Db_Abstract_Migration
 {
-  protected $types = array(Sabel_DB_Type::INT      => "INTEGER",
-                           Sabel_DB_Type::BIGINT   => "BIGINT",
-                           Sabel_DB_Type::SMALLINT => "SMALLINT",
-                           Sabel_DB_Type::FLOAT    => "FLOAT",
-                           Sabel_DB_Type::DOUBLE   => "DOUBLE",
-                           Sabel_DB_Type::BOOL     => "TINYINT(1)",
-                           Sabel_DB_Type::STRING   => "VARCHAR",
-                           Sabel_DB_Type::TEXT     => "TEXT",
-                           Sabel_DB_Type::DATETIME => "DATETIME",
-                           Sabel_DB_Type::DATE     => "DATE",
-                           Sabel_DB_Type::BINARY   => "LONGBLOB");
+  protected $types = array(Sabel_Db_Type::INT      => "INTEGER",
+                           Sabel_Db_Type::BIGINT   => "BIGINT",
+                           Sabel_Db_Type::SMALLINT => "SMALLINT",
+                           Sabel_Db_Type::FLOAT    => "FLOAT",
+                           Sabel_Db_Type::DOUBLE   => "DOUBLE",
+                           Sabel_Db_Type::BOOL     => "TINYINT(1)",
+                           Sabel_Db_Type::STRING   => "VARCHAR",
+                           Sabel_Db_Type::TEXT     => "TEXT",
+                           Sabel_Db_Type::DATETIME => "DATETIME",
+                           Sabel_Db_Type::DATE     => "DATE",
+                           Sabel_Db_Type::BINARY   => "LONGBLOB");
   
   protected function createTable($filePath)
   {
@@ -42,7 +42,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
   
   public function drop()
   {
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       $restore = $this->getRestoreFileName();
       if (is_file($restore)) unlink($restore);
       
@@ -50,7 +50,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
       $tblSchema = $schema->getTable($this->tblName);
       $engine    = $schema->getTableEngine($this->tblName);
       
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeTable($tblSchema);
       $writer->write('$create->options("engine", "' . $engine . '");');
       $writer->write(PHP_EOL)->close();
@@ -173,7 +173,7 @@ class Sabel_DB_Mysql_Migration extends Sabel_DB_Abstract_Migration
     if (($column->isBool() && !is_bool($default)) ||
         ($column->isNumeric() && !is_numeric($default))) {
       $message = __METHOD__ . "() invalid default value for '{$column->name}'.";
-      throw new Sabel_DB_Exception($message);
+      throw new Sabel_Db_Exception($message);
     } else {
       return true;
     }

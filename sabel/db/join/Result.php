@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Join_Result
+ * Sabel_Db_Join_Result
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,9 +9,9 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Join_Result
+class Sabel_Db_Join_Result
 {
-  public static function build(Sabel_DB_Model $source, Sabel_DB_Join_Structure $structure, $rows)
+  public static function build(Sabel_Db_Model $source, Sabel_Db_Join_Structure $structure, $rows)
   {
     $objects = $structure->getJoinObjects();
     $structure = $structure->getStructure();

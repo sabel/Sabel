@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Join
+ * Sabel_Db_Join
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Join extends Sabel_Object
+class Sabel_Db_Join extends Sabel_Object
 {
   /**
    * @var string
@@ -17,7 +17,7 @@ class Sabel_DB_Join extends Sabel_Object
   protected $joinType = "INNER";
   
   /**
-   * @var Sabel_DB_Model
+   * @var Sabel_Db_Model
    */
   protected $model = null;
   
@@ -47,7 +47,7 @@ class Sabel_DB_Join extends Sabel_Object
     
     $this->model     = $model;
     $this->tblName   = $model->getTableName();
-    $this->structure = Sabel_DB_Join_Structure::getInstance();
+    $this->structure = Sabel_Db_Join_Structure::getInstance();
   }
   
   public function getModel()
@@ -66,7 +66,7 @@ class Sabel_DB_Join extends Sabel_Object
       $this->structure->clear();
     }
     
-    Sabel_DB_Join_ColumnHash::clear();
+    Sabel_Db_Join_ColumnHash::clear();
   }
   
   public function setProjection(array $projections)
@@ -97,9 +97,9 @@ class Sabel_DB_Join extends Sabel_Object
   public function add($object, $alias = "", $joinKey = array())
   {
     if (is_string($object)) {
-      $object = new Sabel_DB_Join_Object(MODEL($object), $alias, $joinKey);
+      $object = new Sabel_Db_Join_Object(MODEL($object), $alias, $joinKey);
     } elseif (is_model($object)) {
-      $object = new Sabel_DB_Join_Object($object, $alias, $joinKey);
+      $object = new Sabel_Db_Join_Object($object, $alias, $joinKey);
     }
     
     $object->setChildName($this->tblName);
@@ -129,7 +129,7 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->model->prepareStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->model->prepareStatement(Sabel_Db_Statement::SELECT);
     
     $query = array();
     foreach ($this->objects as $object) {
@@ -153,7 +153,7 @@ class Sabel_DB_Join extends Sabel_Object
       $joinType = $this->joinType;
     }
     
-    $stmt = $this->model->prepareStatement(Sabel_DB_Statement::SELECT);
+    $stmt = $this->model->prepareStatement(Sabel_Db_Statement::SELECT);
     $projection = $this->createProjection($stmt);
     
     $query = array();
@@ -163,7 +163,7 @@ class Sabel_DB_Join extends Sabel_Object
     
     $results = array();
     if ($rows = $this->execute($stmt, $projection, implode("", $query))) {
-      $results = Sabel_DB_Join_Result::build($this->model, $this->structure, $rows);
+      $results = Sabel_Db_Join_Result::build($this->model, $this->structure, $rows);
     }
     
     $this->clear();
@@ -180,7 +180,7 @@ class Sabel_DB_Join extends Sabel_Object
     return $stmt->constraints($constraints)->execute();
   }
   
-  protected function createProjection(Sabel_DB_Statement $stmt)
+  protected function createProjection(Sabel_Db_Statement $stmt)
   {
     if (empty($this->projection)) {
       $projection = array();
@@ -202,7 +202,7 @@ class Sabel_DB_Join extends Sabel_Object
         } else {
           foreach ($proj as $column) {
             $as = "{$tblName}.{$column}";
-            if (strlen($as) > 30) $as = Sabel_DB_Join_ColumnHash::toHash($as);
+            if (strlen($as) > 30) $as = Sabel_Db_Join_ColumnHash::toHash($as);
             $p = $stmt->quoteIdentifier($tblName) . "." . $stmt->quoteIdentifier($column);
             $projection[] = $p . " AS " . $stmt->quoteIdentifier($as);
           }

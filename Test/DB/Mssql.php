@@ -15,7 +15,7 @@ class Test_DB_Mssql extends Test_DB_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getMssqlConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getMssqlConfig());
     Test_DB_Test::$db = "MSSQL";
   }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Column
+ * Sabel_Db_Migration_Column
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,10 +9,10 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Column
+class Sabel_Db_Migration_Column
 {
   /**
-   * @var Sabel_DB_Metadata_Column
+   * @var Sabel_Db_Metadata_Column
    */
   private $column = null;
   
@@ -23,7 +23,7 @@ class Sabel_DB_Migration_Column
   
   public function __construct($name, $isChange = false)
   {
-    $this->column = new Sabel_DB_Metadata_Column();
+    $this->column = new Sabel_Db_Metadata_Column();
     $this->column->name = $name;
     $this->isChange = $isChange;
   }
@@ -115,15 +115,15 @@ class Sabel_DB_Migration_Column
       $column->increment = false;
     }
     
-    if ($column->type === Sabel_DB_Type::STRING &&
+    if ($column->type === Sabel_Db_Type::STRING &&
         $column->max === null) $column->max = 255;
         
-    if ($column->type === Sabel_DB_Type::INT) {
+    if ($column->type === Sabel_Db_Type::INT) {
       if ($column->max === null) $column->max = PHP_INT_MAX;
       if ($column->min === null) $column->min = -PHP_INT_MAX - 1;
     }
     
-    if ($column->type === Sabel_DB_Type::SMALLINT) {
+    if ($column->type === Sabel_Db_Type::SMALLINT) {
       if ($column->max === null) $column->max = 32767;
       if ($column->min === null) $column->min = -32768;
     }

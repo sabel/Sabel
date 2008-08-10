@@ -22,14 +22,14 @@ class Test_DB_Pgsql extends Test_DB_Test
                     "password" => "fugafuga",
                     "database" => "sdb_test");
     
-    Sabel_DB_Config::add("conrefused", $params);
-    $driver = new Sabel_DB_Pgsql_Driver("conrefused");
+    Sabel_Db_Config::add("conrefused", $params);
+    $driver = new Sabel_Db_Pgsql_Driver("conrefused");
     
     try {
       $c = error_reporting(0);
-      $resource = Sabel_DB_Connection::connect($driver);
+      $resource = Sabel_Db_Connection::connect($driver);
       error_reporting($c);
-    } catch (Sabel_DB_Exception_Connection $e) {
+    } catch (Sabel_Db_Exception_Connection $e) {
       return;
     }
     
@@ -38,7 +38,7 @@ class Test_DB_Pgsql extends Test_DB_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
     Test_DB_Test::$db = "PGSQL";
   }
 }

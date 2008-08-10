@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_Condition
+ * Sabel_Db_Abstract_Condition
  *
  * @abstract
  * @category   DB
@@ -10,12 +10,12 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
+abstract class Sabel_Db_Abstract_Condition extends Sabel_Object
 {
   protected static $counter = 0;
   
   /**
-   * @var const Sabel_DB_Condition
+   * @var const Sabel_Db_Condition
    */
   protected $type;
   
@@ -35,12 +35,12 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
   protected $isNot = false;
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    * @param int $counter
    *
    * @return string
    */
-  abstract public function build(Sabel_DB_Statement $stmt);
+  abstract public function build(Sabel_Db_Statement $stmt);
   
   /**
    * @return void
@@ -111,12 +111,12 @@ abstract class Sabel_DB_Abstract_Condition extends Sabel_Object
     } elseif (is_bool($bool)) {
       $this->isNot = $bool;
     } else {
-      throw new Sabel_DB_Exception("argument must be a string.");
+      throw new Sabel_Db_Exception("argument must be a string.");
     }
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    *
    * @return string
    */

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Transaction
+ * Sabel_Db_Transaction
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Transaction
+class Sabel_Db_Transaction
 {
   const READ_UNCOMMITTED = 1;
   const READ_COMMITTED   = 2;
@@ -79,25 +79,25 @@ class Sabel_DB_Transaction
   }
   
   /**
-   * @param Sabel_DB_Driver $driver
+   * @param Sabel_Db_Driver $driver
    *
-   * @throws Sabel_DB_Exception_Transaction
+   * @throws Sabel_Db_Exception_Transaction
    * @return void
    */
-  public static function begin(Sabel_DB_Driver $driver)
+  public static function begin(Sabel_Db_Driver $driver)
   {
     switch (self::$isolationLevel) {
       case self::READ_UNCOMMITTED:
-        $iLevel = Sabel_DB_Driver::TRANS_READ_UNCOMMITTED;
+        $iLevel = Sabel_Db_Driver::TRANS_READ_UNCOMMITTED;
         break;
       case self::READ_COMMITTED:
-        $iLevel = Sabel_DB_Driver::TRANS_READ_COMMITTED;
+        $iLevel = Sabel_Db_Driver::TRANS_READ_COMMITTED;
         break;
       case self::REPEATABLE_READ:
-        $iLevel = Sabel_DB_Driver::TRANS_REPEATABLE_READ;
+        $iLevel = Sabel_Db_Driver::TRANS_REPEATABLE_READ;
         break;
       case self::SERIALIZABLE:
-        $iLevel = Sabel_DB_Driver::TRANS_SERIALIZABLE;
+        $iLevel = Sabel_Db_Driver::TRANS_SERIALIZABLE;
         break;
       default:
         $iLevel = null;
@@ -110,12 +110,12 @@ class Sabel_DB_Transaction
       self::$transactions[$connectionName]["driver"] = $driver;
       self::$active = true;
     } catch (Exception $e) {
-      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+      throw new Sabel_Db_Exception_Transaction($e->getMessage());
     }
   }
   
   /**
-   * @throws Sabel_DB_Exception_Transaction
+   * @throws Sabel_Db_Exception_Transaction
    * @return void
    */
   public static function commit()
@@ -123,12 +123,12 @@ class Sabel_DB_Transaction
     try {
       self::release("commit");
     } catch (Exception $e) {
-      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+      throw new Sabel_Db_Exception_Transaction($e->getMessage());
     }
   }
   
   /**
-   * @throws Sabel_DB_Exception_Transaction
+   * @throws Sabel_Db_Exception_Transaction
    * @return void
    */
   public static function rollback()
@@ -136,7 +136,7 @@ class Sabel_DB_Transaction
     try {
       self::release("rollback");
     } catch (Exception $e) {
-      throw new Sabel_DB_Exception_Transaction($e->getMessage());
+      throw new Sabel_Db_Exception_Transaction($e->getMessage());
     }
   }
   

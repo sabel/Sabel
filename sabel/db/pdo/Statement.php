@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Statement
+ * Sabel_Db_Pdo_Statement
  *
  * @abstract
  * @category   DB
@@ -10,11 +10,11 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Statement
+abstract class Sabel_Db_Pdo_Statement extends Sabel_Db_Statement
 {
   abstract public function escape(array $values);
   
-  public function __construct(Sabel_DB_Pdo_Driver $driver)
+  public function __construct(Sabel_Db_Pdo_Driver $driver)
   {
     $this->driver = $driver;
   }
@@ -55,6 +55,6 @@ abstract class Sabel_DB_Pdo_Statement extends Sabel_DB_Statement
   
   public function createBlob($binary)
   {
-    return new Sabel_DB_Pdo_Blob($binary);
+    return new Sabel_Db_Pdo_Blob($binary);
   }
 }

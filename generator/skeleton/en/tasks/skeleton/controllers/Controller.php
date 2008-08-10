@@ -62,7 +62,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
       $this->redirect->to("a: lists");
     } else {
       $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
+      $inCondition = Sabel_Db_Condition::create(Sabel_Db_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
       $this->deleteItems = $<?php echo lcfirst($mdlName) ?>->select($inCondition);
     }
   }
@@ -73,7 +73,7 @@ class <?php echo $controllerName ?> extends Sabel_Controller_Page
     
     if (is_array($ids) && !empty($ids)) {
       $<?php echo lcfirst($mdlName) ?> = MODEL("<?php echo $mdlName ?>");
-      $inCondition = Sabel_DB_Condition::create(Sabel_DB_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
+      $inCondition = Sabel_Db_Condition::create(Sabel_Db_Condition::IN, "<?php echo $primaryColumn ?>", $ids);
       $<?php echo lcfirst($mdlName) ?>->delete($inCondition);
     }
     

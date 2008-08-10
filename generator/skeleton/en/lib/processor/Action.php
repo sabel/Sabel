@@ -50,7 +50,7 @@ class Processor_Action extends Sabel_Bus_Processor
       if ($status->isFailure() || $controller->isRedirected()) return;
       
       if ($hasAction) {
-        if (isset($annotations["check"])) {          
+        if (isset($annotations["check"])) {
           if (!$result = $this->validateRequests($controller, $request, $annotations["check"])) {
             return $status->setCode(Sabel_Response::BAD_REQUEST);
           }

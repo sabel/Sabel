@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Model_CascadeDelete
+ * Sabel_Db_Model_CascadeDelete
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Model_CascadeDelete
+class Sabel_Db_Model_CascadeDelete
 {
   protected $model = null;
   protected $keys  = array();
@@ -24,7 +24,7 @@ class Sabel_DB_Model_CascadeDelete
   public function execute($config)
   {
     if (!is_object($config)) {
-      throw new Sabel_DB_Exception("argument should be an object of cascade delete config.");
+      throw new Sabel_Db_Exception("argument should be an object of cascade delete config.");
     }
 
     $model      = $this->model;
@@ -32,7 +32,7 @@ class Sabel_DB_Model_CascadeDelete
     $this->keys = $config->getKeys();
     $mdlName    = $model->getName();
 
-    Sabel_DB_Transaction::begin($model->getConnectionName());
+    Sabel_Db_Transaction::begin($model->getConnectionName());
 
     $models  = array();
     $pKey    = $model->getPrimaryKey();
@@ -53,7 +53,7 @@ class Sabel_DB_Model_CascadeDelete
     $this->clearCascadeStack();
 
     $model->delete();
-    Sabel_DB_Transaction::commit();
+    Sabel_Db_Transaction::commit();
   }
 
   private function makeChainModels($children, &$cascade)

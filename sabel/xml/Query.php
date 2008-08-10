@@ -66,7 +66,7 @@ class Sabel_Xml_Query
       }
       
       if ($value === "NULL") {
-        return "not($path)";
+        return "not({$path})";
       } elseif ($value === "NOT NULL") {
         return $path;
       }

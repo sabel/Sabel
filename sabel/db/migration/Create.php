@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Create
+ * Sabel_Db_Migration_Create
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Create
+class Sabel_Db_Migration_Create
 {
   private
     $mcolumns = array(),
@@ -22,7 +22,7 @@ class Sabel_DB_Migration_Create
     
   public function column($name)
   {
-    $mcolumn = new Sabel_DB_Migration_Column($name);
+    $mcolumn = new Sabel_Db_Migration_Column($name);
     return $this->mcolumns[$name] = $mcolumn;
   }
   
@@ -100,7 +100,7 @@ class Sabel_DB_Migration_Create
   
   public function fkey($colName)
   {
-    $fKey = new Sabel_DB_Migration_ForeignKey($colName);
+    $fKey = new Sabel_Db_Migration_ForeignKey($colName);
     return $this->fkeys[$colName] = $fKey;
   }
   

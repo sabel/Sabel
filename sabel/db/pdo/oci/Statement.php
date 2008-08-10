@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Oci_Statement
+ * Sabel_Db_Pdo_Oci_Statement
  *
  * @category   DB
  * @package    org.sabel.db.pdo
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
+class Sabel_Db_Pdo_Oci_Statement extends Sabel_Db_Pdo_Statement
 {
   protected $blobs = array();
   
@@ -19,7 +19,7 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $this->blobs[$k] = $this->createBlob($v);
-        $v = new Sabel_DB_Statement_Expression($this, "EMPTY_BLOB()");
+        $v = new Sabel_Db_Statement_Expression($this, "EMPTY_BLOB()");
       }
     }
     
@@ -96,7 +96,7 @@ class Sabel_DB_Pdo_Oci_Statement extends Sabel_DB_Pdo_Statement
   
   public function createBlob($binary)
   {
-    return new Sabel_DB_Pdo_Oci_Blob($binary);
+    return new Sabel_Db_Pdo_Oci_Blob($binary);
   }
   
   public function quoteIdentifier($arg)

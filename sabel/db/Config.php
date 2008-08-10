@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Config
+ * Sabel_Db_Config
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Config
+class Sabel_Db_Config
 {
   private static $initialized = false;
   private static $configs = array();
@@ -47,7 +47,7 @@ class Sabel_DB_Config
       return $config["package"];
     } else {
       $message = "'package' not found in config.";
-      throw new Sabel_DB_Exception($message);
+      throw new Sabel_Db_Exception($message);
     }
   }
   
@@ -73,7 +73,7 @@ class Sabel_DB_Config
       return "dbo";
     } else {
       $message = __METHOD__ . "() 'schema' not found in config.";
-      throw new Sabel_DB_Exception($message);
+      throw new Sabel_Db_Exception($message);
     }
   }
   
@@ -94,7 +94,7 @@ class Sabel_DB_Config
       return self::$configs[$connectionName];
     } else {
       $message = "getConfig() config for '{$connectionName}' not found.";
-      throw new Sabel_DB_Exception($message);
+      throw new Sabel_Db_Exception($message);
     }
   }
 }

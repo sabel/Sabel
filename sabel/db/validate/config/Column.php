@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Validate_Config_Column
+ * Sabel_Db_Validate_Config_Column
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Validate_Config_Column
+class Sabel_Db_Validate_Config_Column
 {
   /**
    * @var object[]

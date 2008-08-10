@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_Blob
+ * Sabel_Db_Abstract_Blob
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Blob extends Sabel_Object
+abstract class Sabel_Db_Abstract_Blob extends Sabel_Object
 {
   protected $binary = "";
   

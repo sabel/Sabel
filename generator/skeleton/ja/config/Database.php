@@ -40,7 +40,7 @@ class Config_Database implements Sabel_Config
   }
 }
 
-Sabel_DB_Validate_Config::setMessages(
+Sabel_Db_Validate_Config::setMessages(
   array("maxlength" => "%NAME%は%MAX%文字以下で入力してください",
         "minlength" => "%NAME%は%MIN%文字以上で入力してください",
         "maximum"   => "%NAME%は%MAX%以上を入力してください",

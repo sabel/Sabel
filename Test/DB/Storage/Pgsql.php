@@ -13,7 +13,7 @@ class Test_DB_Storage_Pgsql extends Test_DB_Storage_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getPgsqlConfig());
     MODEL("SblStorage")->delete();
   }
 }

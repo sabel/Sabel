@@ -33,12 +33,12 @@ class Migration extends Sabel_Sakle_Task
     
     $this->defineEnvironment($this->arguments[0]);
     
-    Sabel_DB_Config::initialize(new Config_Database());
+    Sabel_Db_Config::initialize(new Config_Database());
     $directory = $this->defineMigrationDirectory();
     
     $connectionName = $this->connectionName = $this->getConnectionName();
-    $this->stmt     = Sabel_DB::createStatement($connectionName);
-    $this->metadata = Sabel_DB::createMetadata($connectionName);
+    $this->stmt     = Sabel_Db::createStatement($connectionName);
+    $this->metadata = Sabel_Db::createMetadata($connectionName);
     
     // @todo
     //if ($this->arguments[1] === "export") {
@@ -62,7 +62,7 @@ class Migration extends Sabel_Sakle_Task
       self::$startVersion = $this->currentVersion;
     }
    
-    $this->files = Sabel_DB_Migration_Manager::getFiles();
+    $this->files = Sabel_Db_Migration_Manager::getFiles();
     
     if (empty($this->files)) {
       $this->error("No migration files is found.");
@@ -88,8 +88,8 @@ class Migration extends Sabel_Sakle_Task
   
   protected function getCurrentVersion()
   {
-    Sabel_DB_Migration_Manager::setStatement($this->stmt);
-    Sabel_DB_Migration_Manager::setMetadata($this->metadata);
+    Sabel_Db_Migration_Manager::setStatement($this->stmt);
+    Sabel_Db_Migration_Manager::setMetadata($this->metadata);
     
     try {
       if (!in_array("sbl_version", $this->metadata->getTableList())) {
@@ -117,7 +117,7 @@ class Migration extends Sabel_Sakle_Task
       exit;
     }
     
-    Sabel_DB_Migration_Manager::setDirectory($dir);
+    Sabel_Db_Migration_Manager::setDirectory($dir);
     
     return $dir;
   }
@@ -145,10 +145,10 @@ class Migration extends Sabel_Sakle_Task
       $doNext = ($next > $to);
     }
     
-    Sabel_DB_Migration_Manager::setApplyMode($mode);
+    Sabel_Db_Migration_Manager::setApplyMode($mode);
     
-    $instance  = Sabel_DB::createMigration($this->connectionName);
-    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    $instance  = Sabel_Db::createMigration($this->connectionName);
+    $directory = Sabel_Db_Migration_Manager::getDirectory();
     $instance->execute($directory . DS . $this->files[$num]);
     $this->updateVersionNumber($next);
     
@@ -305,7 +305,7 @@ class MigrationExport
     
     Sabel_Console::success("$fileName");
     
-    $writer = new Sabel_DB_Migration_Writer($filePath);
+    $writer = new Sabel_Db_Migration_Writer($filePath);
     $writer->writeTable($tblSchema);
     
     // @todo

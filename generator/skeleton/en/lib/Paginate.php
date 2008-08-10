@@ -12,7 +12,7 @@
 class Paginate extends Sabel_Object
 {
   /**
-   * @var object Sabel_DB_Model or Sabel_DB_Join
+   * @var object Sabel_Db_Model or Sabel_Db_Join
    */
   protected $model = null;
   
@@ -49,7 +49,7 @@ class Paginate extends Sabel_Object
     
     if (is_model($model)) {
       $model->autoReinit(false);
-    } elseif ($model instanceof Sabel_DB_Join) {
+    } elseif ($model instanceof Sabel_Db_Join) {
       $model->getModel()->autoReinit(false);
       $this->isJoin = true;
     } else {

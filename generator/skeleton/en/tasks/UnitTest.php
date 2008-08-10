@@ -16,7 +16,7 @@ class UnitTest extends Tests
 {
   public function run()
   {
-    Sabel_DB_Config::initialize(new Config_Database());
+    Sabel_Db_Config::initialize(new Config_Database());
     
     $runner = Sabel_Test_Runner::create();
     $runner->setClassPrefix("Unit_");

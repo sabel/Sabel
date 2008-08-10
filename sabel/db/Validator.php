@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Validator
+ * Sabel_Db_Validator
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Validator extends Sabel_Object
+class Sabel_Db_Validator extends Sabel_Object
 {
   /**
    * @var string
@@ -36,15 +36,15 @@ class Sabel_DB_Validator extends Sabel_Object
     $errors  = array(),
     $ignores = array();
   
-  public function __construct(Sabel_DB_Model $model)
+  public function __construct(Sabel_Db_Model $model)
   {
     $this->model    = $model;
     $this->mdlName  = $model->getName();
-    $this->messages = Sabel_DB_Validate_Config::getMessages();
-    $this->localizedNames = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+    $this->messages = Sabel_Db_Validate_Config::getMessages();
+    $this->localizedNames = Sabel_Db_Model_Localize::getColumnNames($this->mdlName);
   }
   
-  public function setValidateConfig(Sabel_DB_Validate_Config $config)
+  public function setValidateConfig(Sabel_Db_Validate_Config $config)
   {
     $this->validateConfig = $config;
   }
@@ -74,7 +74,7 @@ class Sabel_DB_Validator extends Sabel_Object
       if ($column->increment) {
         if ($column->value === null || $this->model->isSelected()) continue;
         $message = "don't set a value in '{$column->name}'(sequence column).";
-        throw new Sabel_DB_Exception($message);
+        throw new Sabel_Db_Exception($message);
       }
       
       $value = $column->value;
@@ -239,7 +239,7 @@ class Sabel_DB_Validator extends Sabel_Object
     return ($column->value >= $column->min);
   }
   
-  protected function doCustomValidate(Sabel_DB_Validate_Config $config, $columns, $mdlName = null)
+  protected function doCustomValidate(Sabel_Db_Validate_Config $config, $columns, $mdlName = null)
   {
     if ($mdlName === null) $mdlName = $this->mdlName;
     
@@ -265,7 +265,7 @@ class Sabel_DB_Validator extends Sabel_Object
     }
     
     $parent = get_parent_class($mdlName);
-    if ($parent !== false && $parent !== "Sabel_DB_Model") {
+    if ($parent !== false && $parent !== "Sabel_Db_Model") {
       $this->doCustomValidate($config, $columns, $parent);
     }
   }

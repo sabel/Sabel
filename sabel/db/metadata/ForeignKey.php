@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Metadata_ForeignKey
+ * Sabel_Db_Metadata_ForeignKey
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Metadata_ForeignKey extends Sabel_Object
+class Sabel_Db_Metadata_ForeignKey extends Sabel_Object
 {
   /**
    * @var array

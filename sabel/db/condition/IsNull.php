@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Condition_IsNull
+ * Sabel_Db_Condition_IsNull
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,11 +9,11 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_IsNull extends Sabel_DB_Abstract_Condition
+class Sabel_Db_Condition_IsNull extends Sabel_Db_Abstract_Condition
 {
-  protected $type = Sabel_DB_Condition::ISNULL;
+  protected $type = Sabel_Db_Condition::ISNULL;
   
-  public function build(Sabel_DB_Statement $stmt)
+  public function build(Sabel_Db_Statement $stmt)
   {
     return $this->getQuotedColumn($stmt) . " IS NULL";
   }

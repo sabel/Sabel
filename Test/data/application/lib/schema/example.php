@@ -6,7 +6,7 @@ class Schema_Example
   {
     $cols = array();
 
-    $cols['column1'] = array('type'      => Sabel_DB_Type::INT,
+    $cols['column1'] = array('type'      => Sabel_Db_Type::INT,
                              'min'       => 0,
                              'max'       => PHP_INT_MAX,
                              'increment' => false,
@@ -14,7 +14,7 @@ class Schema_Example
                              'primary'   => true,
                              'default'   => null);
 
-    $cols['column2'] = array('type'      => Sabel_DB_Type::STRING,
+    $cols['column2'] = array('type'      => Sabel_Db_Type::STRING,
                              'max'       => 255,
                              'increment' => false,
                              'nullable'  => false,

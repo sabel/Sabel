@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Pdo_Mysql_Statement
+ * Sabel_Db_Pdo_Mysql_Statement
  *
  * @category   DB
  * @package    org.sabel.db.pdo
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Pdo_Mysql_Statement extends Sabel_DB_Pdo_Statement
+class Sabel_Db_Pdo_Mysql_Statement extends Sabel_Db_Pdo_Statement
 {
   public function values(array $values)
   {

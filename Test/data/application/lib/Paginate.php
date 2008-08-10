@@ -27,7 +27,7 @@ class Paginate extends Sabel_Object
     if (is_model($model)) {
       $model->autoReinit(false);
       $this->method = "select";
-    } elseif ($model instanceof Sabel_DB_Join) {
+    } elseif ($model instanceof Sabel_Db_Join) {
       $model->getModel()->autoReinit(false);
       $this->method = "join";
       $this->isJoin = true;

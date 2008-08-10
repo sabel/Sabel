@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_Migration
+ * Sabel_Db_Abstract_Migration
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
+abstract class Sabel_Db_Abstract_Migration extends Sabel_Object
 {
   /**
    * @var string
@@ -61,7 +61,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
       $this->$command();
     } else {
       $message = __METHOD__ . "() command '{$command}' not found.";
-      throw new Sabel_DB_Exception($message);
+      throw new Sabel_Db_Exception($message);
     }
   }
   
@@ -69,7 +69,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   {
     $tables = $this->getSchema()->getTableList();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (in_array($this->tblName, $tables)) {
         Sabel_Console::warning("table '{$this->tblName}' already exists. (SKIP)");
       } else {
@@ -86,10 +86,10 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   {
     $restore = $this->getRestoreFileName();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       $schema = $this->getSchema()->getTable($this->tblName);
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeTable($schema);
       $this->executeQuery("DROP TABLE " . $this->quoteIdentifier($this->tblName));
     } else {
@@ -101,7 +101,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   {
     $columns = $this->getReader()->readAddColumn()->getColumns();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       $this->execAddColumn($columns);
     } else {
       $quotedTblName = $this->quoteIdentifier($this->tblName);
@@ -131,14 +131,14 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   {
     $restore = $this->getRestoreFileName();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $columns  = $this->getReader()->readDropColumn()->getColumns();
       $schema   = $this->getSchema()->getTable($this->tblName);
       $colNames = $schema->getColumnNames();
       
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeColumns($schema, $columns)->close();
       $quotedTblName = $this->quoteIdentifier($this->tblName);
       
@@ -161,14 +161,14 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
     $schema  = $this->getSchema()->getTable($this->tblName);
     $restore = $this->getRestoreFileName();
     
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       if (is_file($restore)) unlink($restore);
       
       $names = array();
       $columns = $this->getReader()->readChangeColumn()->getColumns();
       foreach ($columns as $column) $names[] = $column->name;
       
-      $writer = new Sabel_DB_Migration_Writer($restore);
+      $writer = new Sabel_Db_Migration_Writer($restore);
       $writer->writeColumns($schema, $names, '$change')->close();
       $this->changeColumnUpgrade($columns, $schema);
     } else {
@@ -225,7 +225,7 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   
   protected function getRestoreFileName()
   {
-    $directory = Sabel_DB_Migration_Manager::getDirectory();
+    $directory = Sabel_Db_Migration_Manager::getDirectory();
     $dir = $directory . DIRECTORY_SEPARATOR . "restores";
     if (!is_dir($dir)) mkdir($dir);
     
@@ -240,17 +240,17 @@ abstract class Sabel_DB_Abstract_Migration extends Sabel_Object
   protected function getReader($filePath = null)
   {
     if ($filePath === null) $filePath = $this->filePath;
-    return new Sabel_DB_Migration_Reader($filePath);
+    return new Sabel_Db_Migration_Reader($filePath);
   }
   
   protected function getSchema()
   {
-    return Sabel_DB_Migration_Manager::getMetadata();
+    return Sabel_Db_Migration_Manager::getMetadata();
   }
   
   protected function getStatement()
   {
-    return Sabel_DB_Migration_Manager::getStatement();
+    return Sabel_Db_Migration_Manager::getStatement();
   }
   
   protected function executeQuery($query)

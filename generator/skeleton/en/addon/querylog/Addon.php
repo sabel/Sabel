@@ -18,7 +18,7 @@ class QueryLog_Addon extends Sabel_Object
   
   public function output($bus)
   {
-    $queries = Sabel_DB_Statement::getExecutedQueries();
+    $queries = Sabel_Db_Statement::getExecutedQueries();
     if (empty($queries)) return;
     
     $rows = array();

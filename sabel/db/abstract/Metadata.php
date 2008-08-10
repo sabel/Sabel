@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Abstract_Metadata
+ * Sabel_Db_Abstract_Metadata
  *
  * @abstract
  * @category   DB
@@ -10,7 +10,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
+abstract class Sabel_Db_Abstract_Metadata extends Sabel_Object
 {
   protected $driver = null;
   protected $schemaName = "";
@@ -19,7 +19,7 @@ abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
   abstract public function getForeignKeys($tblName);
   abstract public function getUniques($tblName);
   
-  public function __construct(Sabel_DB_Driver $driver, $schemaName)
+  public function __construct(Sabel_Db_Driver $driver, $schemaName)
   {
     $this->driver = $driver;
     $this->schemaName = $schemaName;
@@ -38,7 +38,7 @@ abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
   public function getTable($tblName)
   {
     $columns = $this->createColumns($tblName);
-    $schema  = new Sabel_DB_Metadata_Table($tblName, $columns);
+    $schema  = new Sabel_Db_Metadata_Table($tblName, $columns);
     $schema->setForeignKeys($this->getForeignKeys($tblName));
     $schema->setUniques($this->getUniques($tblName));
     
@@ -56,17 +56,17 @@ abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
     }
     
     switch ($column->type) {
-      case Sabel_DB_Type::INT:
-      case Sabel_DB_Type::SMALLINT:
+      case Sabel_Db_Type::INT:
+      case Sabel_Db_Type::SMALLINT:
         $column->default = (int)$default;
         break;
         
-      case Sabel_DB_Type::FLOAT:
-      case Sabel_DB_Type::DOUBLE:
+      case Sabel_Db_Type::FLOAT:
+      case Sabel_Db_Type::DOUBLE:
         $column->default = (float)$default;
         break;
         
-      case Sabel_DB_Type::BOOL:
+      case Sabel_Db_Type::BOOL:
         if (is_bool($default)) {
           $column->default = $default;
         } else {
@@ -74,7 +74,7 @@ abstract class Sabel_DB_Abstract_Metadata extends Sabel_Object
         }
         break;
         
-      case Sabel_DB_Type::BIGINT:
+      case Sabel_Db_Type::BIGINT:
         $column->default = (string)$default;
         break;
         

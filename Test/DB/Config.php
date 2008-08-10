@@ -15,8 +15,8 @@ class Test_DB_Config extends SabelTestCase
   
   public function testInitialize()
   {
-    Sabel_DB_Config::initialize(new TestDatabaseConfig());
-    $config = Sabel_DB_Config::get("configtest");
+    Sabel_Db_Config::initialize(new TestDatabaseConfig());
+    $config = Sabel_Db_Config::get("configtest");
     $this->assertEquals("localhost", $config["host"]);
     $this->assertEquals("mydb", $config["database"]);
   }
@@ -26,32 +26,32 @@ class Test_DB_Config extends SabelTestCase
     $params = array("package"  => "sabel.db.mysql",
                     "database" => "mydb");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("mydb", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("mydb", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.pgsql",
                     "database" => "mydb");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("public", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("public", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.pdo.pgsql",
                     "database" => "mydb");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("public", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("public", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.oci",
                     "database" => "mydb", "user" => "webuser");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("WEBUSER", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("WEBUSER", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.pdo.oci",
                     "database" => "mydb", "user" => "webuser");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("WEBUSER", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("WEBUSER", Sabel_Db_Config::getSchemaName("configtest"));
   }
   
   public function testSchemaNameSet()
@@ -59,20 +59,20 @@ class Test_DB_Config extends SabelTestCase
     $params = array("package"  => "sabel.db.mysql",
                     "database" => "mydb", "schema" => "hoge");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("hoge", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("hoge", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.pgsql",
                     "database" => "mydb", "schema" => "hoge");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("hoge", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("hoge", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "sabel.db.oci",
                     "database" => "mydb", "schema" => "HOGE");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("HOGE", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("HOGE", Sabel_Db_Config::getSchemaName("configtest"));
   }
   
   public function testSchemaNameOfCustomPackage()
@@ -80,17 +80,17 @@ class Test_DB_Config extends SabelTestCase
     $params = array("package"  => "my.db.org",
                     "database" => "mydb", "schema" => "hoge");
     
-    Sabel_DB_Config::add("configtest", $params);
-    $this->assertEquals("hoge", Sabel_DB_Config::getSchemaName("configtest"));
+    Sabel_Db_Config::add("configtest", $params);
+    $this->assertEquals("hoge", Sabel_Db_Config::getSchemaName("configtest"));
     
     $params = array("package"  => "my.db.org",
                     "database" => "mydb");
     
-    Sabel_DB_Config::add("configtest", $params);
+    Sabel_Db_Config::add("configtest", $params);
     
     try {
-      Sabel_DB_Config::getSchemaName("configtest");
-    } catch (Sabel_DB_Exception $e) {
+      Sabel_Db_Config::getSchemaName("configtest");
+    } catch (Sabel_Db_Exception $e) {
       return;
     }
     

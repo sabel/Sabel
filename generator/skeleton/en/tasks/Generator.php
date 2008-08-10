@@ -24,7 +24,7 @@ class Generator extends Sabel_Sakle_Task
   public function run()
   {
     $this->defineEnvironmentByOption();
-    Sabel_DB_Config::initialize(new Config_Database());
+    Sabel_Db_Config::initialize(new Config_Database());
     
     $method = "generate" . $this->checkArguments();
     $this->$method();
@@ -44,7 +44,7 @@ class Generator extends Sabel_Sakle_Task
         $columns = MODEL($mdlName)->getColumnNames();
         $lines   = array();
         $lines[] = "<?php" . PHP_EOL;
-        $lines[] = "Sabel_DB_Model_Localize::setColumnNames(";
+        $lines[] = "Sabel_Db_Model_Localize::setColumnNames(";
         $lines[] = "  \"{$mdlName}\",";
         $lines[] = "  array(";
         
@@ -54,7 +54,7 @@ class Generator extends Sabel_Sakle_Task
         
         $lines[] = "  )";
         $lines[] = ");" . PHP_EOL;
-        $lines[] = "class {$mdlName} extends Sabel_DB_Model";
+        $lines[] = "class {$mdlName} extends Sabel_Db_Model";
         $lines[] = "{";
         $lines[] = "  ";
         $lines[] = "}";

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Oci_Statement
+ * Sabel_Db_Oci_Statement
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,11 +9,11 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
+class Sabel_Db_Oci_Statement extends Sabel_Db_Statement
 {
   protected $blobs = array();
   
-  public function __construct(Sabel_DB_Oci_Driver $driver)
+  public function __construct(Sabel_Db_Oci_Driver $driver)
   {
     $this->driver = $driver;
   }
@@ -24,7 +24,7 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
     foreach ($values as $k => &$v) {
       if (isset($columns[$k]) && $columns[$k]->isBinary()) {
         $this->blobs[$k] = $this->createBlob($v);
-        $v = new Sabel_DB_Statement_Expression($this, "EMPTY_BLOB()");
+        $v = new Sabel_Db_Statement_Expression($this, "EMPTY_BLOB()");
       }
     }
     
@@ -92,7 +92,7 @@ class Sabel_DB_Oci_Statement extends Sabel_DB_Statement
   public function createBlob($binary)
   {
     $conn = $this->driver->getConnection();
-    return new Sabel_DB_Oci_Blob($conn, $binary);
+    return new Sabel_Db_Oci_Blob($conn, $binary);
   }
   
   public function createInsertSql()

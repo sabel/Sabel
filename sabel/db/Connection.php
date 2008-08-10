@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Connection
+ * Sabel_Db_Connection
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Connection
+class Sabel_Db_Connection
 {
   /**
    * @var resource[]
@@ -17,19 +17,19 @@ class Sabel_DB_Connection
   private static $connections = array();
   
   /**
-   * @param Sabel_DB_Driver $driver
+   * @param Sabel_Db_Driver $driver
    *
-   * @throws Sabel_DB_Exception_Connection
+   * @throws Sabel_Db_Exception_Connection
    * @return void
    */
-  public static function connect(Sabel_DB_Driver $driver)
+  public static function connect(Sabel_Db_Driver $driver)
   {
-    if (Sabel_DB_Transaction::isActive()) {
+    if (Sabel_Db_Transaction::isActive()) {
       $connectionName = $driver->getConnectionName();
-      if ($connection = Sabel_DB_Transaction::getConnection($connectionName)) {
+      if ($connection = Sabel_Db_Transaction::getConnection($connectionName)) {
         $driver->setConnection($connection);
       } else {
-        Sabel_DB_Transaction::begin(self::_connect($driver));
+        Sabel_Db_Transaction::begin(self::_connect($driver));
       }
       
       $driver->autoCommit(false);
@@ -48,7 +48,7 @@ class Sabel_DB_Connection
     if (!isset(self::$connections[$connectionName])) return;
     
     $conn = self::$connections[$connectionName];
-    Sabel_DB::createDriver($connectionName)->close($conn);
+    Sabel_Db::createDriver($connectionName)->close($conn);
     
     unset(self::$connections[$connectionName]);
   }
@@ -58,7 +58,7 @@ class Sabel_DB_Connection
    */
   public static function closeAll()
   {
-    foreach (Sabel_DB_Config::get() as $connectionName => $config) {
+    foreach (Sabel_Db_Config::get() as $connectionName => $config) {
       self::close($connectionName);
     }
     
@@ -66,15 +66,15 @@ class Sabel_DB_Connection
   }
   
   /**
-   * @param Sabel_DB_Driver $driver
+   * @param Sabel_Db_Driver $driver
    *
-   * @throws Sabel_DB_Exception_Connection
-   * @return Sabel_DB_Driver
+   * @throws Sabel_Db_Exception_Connection
+   * @return Sabel_Db_Driver
    */
-  protected static function _connect(Sabel_DB_Driver $driver)
+  protected static function _connect(Sabel_Db_Driver $driver)
   {
     $connectionName = $driver->getConnectionName();
-    $names = Sabel_DB_Config::getConnectionNamesOfSameSetting($connectionName);
+    $names = Sabel_Db_Config::getConnectionNamesOfSameSetting($connectionName);
     
     foreach ($names as $name) {
       if (isset(self::$connections[$name])) {
@@ -84,10 +84,10 @@ class Sabel_DB_Connection
     }
     
     if (!isset(self::$connections[$connectionName])) {
-      $result = $driver->connect(Sabel_DB_Config::get($connectionName));
+      $result = $driver->connect(Sabel_Db_Config::get($connectionName));
       
       if (is_string($result)) {
-        throw new Sabel_DB_Exception_Connection($result);
+        throw new Sabel_Db_Exception_Connection($result);
       } else {
         self::$connections[$connectionName] = $result;
       }

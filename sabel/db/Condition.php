@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Condition
+ * Sabel_Db_Condition
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition
+class Sabel_Db_Condition
 {
   const EQUAL         = 1;
   const ISNULL        = 2;
@@ -24,58 +24,58 @@ class Sabel_DB_Condition
   const DIRECT        = 11;
   
   /**
-   * @param const   $type   Sabel_DB_Condition
+   * @param const   $type   Sabel_Db_Condition
    * @param string  $column
    * @param mixed   $value
    * @param boolean $not
    *
-   * @return Sabel_DB_Abstract_Condition
+   * @return Sabel_Db_Abstract_Condition
    */
   public static function create($type, $column, $value = null, $not = false)
   {
     switch ($type) {
       case self::EQUAL:
-        $condition = new Sabel_DB_Condition_Equal($column);
+        $condition = new Sabel_Db_Condition_Equal($column);
         break;
         
       case self::BETWEEN:
-        $condition = new Sabel_DB_Condition_Between($column);
+        $condition = new Sabel_Db_Condition_Between($column);
         break;
         
       case self::IN:
-        $condition = new Sabel_DB_Condition_In($column);
+        $condition = new Sabel_Db_Condition_In($column);
         break;
         
       case self::LIKE:
-        $condition = new Sabel_DB_Condition_Like($column);
+        $condition = new Sabel_Db_Condition_Like($column);
         break;
         
       case self::ISNULL:
-        $condition = new Sabel_DB_Condition_IsNull($column);
+        $condition = new Sabel_Db_Condition_IsNull($column);
         break;
         
       case self::ISNOTNULL:
-        $condition = new Sabel_DB_Condition_IsNotNull($column);
+        $condition = new Sabel_Db_Condition_IsNotNull($column);
         break;
         
       case self::GREATER_EQUAL:
-        $condition = new Sabel_DB_Condition_GreaterEqual($column);
+        $condition = new Sabel_Db_Condition_GreaterEqual($column);
         break;
         
       case self::LESS_EQUAL:
-        $condition = new Sabel_DB_Condition_LessEqual($column);
+        $condition = new Sabel_Db_Condition_LessEqual($column);
         break;
         
       case self::GREATER_THAN:
-        $condition = new Sabel_DB_Condition_GreaterThan($column);
+        $condition = new Sabel_Db_Condition_GreaterThan($column);
         break;
         
       case self::LESS_THAN:
-        $condition = new Sabel_DB_Condition_LessThan($column);
+        $condition = new Sabel_Db_Condition_LessThan($column);
         break;
         
       case self::DIRECT:
-        $condition = new Sabel_DB_Condition_Direct($column);
+        $condition = new Sabel_Db_Condition_Direct($column);
         break;
         
       default:

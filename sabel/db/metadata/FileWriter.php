@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Metadata_FileWriter
+ * Sabel_Db_Metadata_FileWriter
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Metadata_FileWriter extends Sabel_Object
+class Sabel_Db_Metadata_FileWriter extends Sabel_Object
 {
   private $schemaDir = "";
   
@@ -18,11 +18,11 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
     if (is_dir($schemaDir)) {
       $this->schemaDir = $schemaDir;
     } else {
-      throw new Sabel_DB_Exception("no such directory: '{$schemaDir}'");
+      throw new Sabel_Db_Exception("no such directory: '{$schemaDir}'");
     }
   }
   
-  public function write(Sabel_DB_Metadata_Table $metadata)
+  public function write(Sabel_Db_Metadata_Table $metadata)
   {
     $mdlName   = convert_to_modelname($metadata->getTableName());
     $className = "Schema_" . $mdlName;
@@ -77,7 +77,7 @@ class Sabel_DB_Metadata_FileWriter extends Sabel_Object
       $line[] = '$cols[' . "'{$col->name}'] = array(";
       
       $type   = str_replace("_", "", $col->type);
-      $line[] = "'type' => Sabel_DB_Type::{$type}, ";
+      $line[] = "'type' => Sabel_Db_Type::{$type}, ";
       
       if ($col->isInt() || $col->isFloat() || $col->isDouble()) {
         $line[] = "'max' => {$col->max}, ";

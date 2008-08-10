@@ -11,8 +11,8 @@ $passwdValidator = array("function"  => "validatePasswords",
                          "arguments" => "REINPUT");
 */
 
-// Sabel_DB_Validate_Config::addValidator($emailValidator);
-// Sabel_DB_Validate_Config::addValidator($passwdValidator);
+// Sabel_Db_Validate_Config::addValidator($emailValidator);
+// Sabel_Db_Validate_Config::addValidator($passwdValidator);
 
 function checkEmailAddress($email)
 {

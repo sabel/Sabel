@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Statement_Expression
+ * Sabel_Db_Statement_Expression
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,12 +9,12 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Statement_Expression extends Sabel_Object
+class Sabel_Db_Statement_Expression extends Sabel_Object
 {
   protected $stmt = null;
   protected $expression = "";
   
-  public function __construct(Sabel_DB_Statement $stmt, $expression)
+  public function __construct(Sabel_Db_Statement $stmt, $expression)
   {
     $this->stmt = $stmt;
     $this->expression = $expression;

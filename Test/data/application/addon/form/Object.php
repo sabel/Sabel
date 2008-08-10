@@ -14,7 +14,7 @@ class Form_Object extends Sabel_Object
   const NAME_SEPARATOR = ":";
   
   /**
-   * @var Sabel_DB_Model
+   * @var Sabel_Db_Model
    */
   protected $model = null;
   
@@ -29,7 +29,7 @@ class Form_Object extends Sabel_Object
   protected $mdlName = "";
   
   /**
-   * @var Sabel_DB_Metadata_Column[]
+   * @var Sabel_Db_Metadata_Column[]
    */
   protected $columns = array();
   
@@ -56,7 +56,7 @@ class Form_Object extends Sabel_Object
   }
   
   /**
-   * @return Sabel_DB_Model
+   * @return Sabel_Db_Model
    */
   public function getModel()
   {
@@ -153,7 +153,7 @@ class Form_Object extends Sabel_Object
       $ignores = array($ignores);
     }
     
-    $validator = new Sabel_DB_Validator($this->model);
+    $validator = new Sabel_Db_Validator($this->model);
     $this->errors = $validator->validate($ignores);
     return empty($this->errors);
   }
@@ -168,7 +168,7 @@ class Form_Object extends Sabel_Object
     static $names = null;
     
     if ($names === null) {
-      $names = Sabel_DB_Model_Localize::getColumnNames($this->mdlName);
+      $names = Sabel_Db_Model_Localize::getColumnNames($this->mdlName);
     }
     
     return (isset($names[$colName])) ? $names[$colName] : $colName;

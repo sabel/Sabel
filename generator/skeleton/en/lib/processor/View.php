@@ -52,9 +52,11 @@ class Processor_View extends Sabel_Bus_Processor
     $responses = $response->getResponses();
     $contents  = (isset($responses["contents"])) ? $responses["contents"] : "";
     
-    $view = $this->getView($response->getStatus(),
-                           $bus->get("destination")->getAction(),
-                           $bus->get("isAjaxRequest") === true);
+    $view = $this->getView(
+      $response->getStatus(),
+      $bus->get("destination")->getAction(),
+      $bus->get("isAjaxRequest") === true
+    );
     
     if (isset($responses["renderText"]) && $responses["renderText"]) {
       $renderer = $view->getRenderer();

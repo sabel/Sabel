@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Db_Validate_Config extends Sabel_DB_Validate_Config
+class Db_Validate_Config extends Sabel_Db_Validate_Config
 {
   public function configure()
   {

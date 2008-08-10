@@ -31,7 +31,7 @@ $configs = array("sqlite" => array(
                  );
 
 foreach ($configs as $key => $param) {
-  Sabel_DB_Config::add($key, $param);
+  Sabel_Db_Config::add($key, $param);
 }
 
 $args    = $_SERVER["argv"];
@@ -39,15 +39,15 @@ $path    = $args[1];
 $conName = $args[2];
 $type    = $args[3];
 
-$schema = Sabel_DB::createMetadata($conName);
-$stmt = Sabel_DB::createStatement($conName);
+$schema = Sabel_Db::createMetadata($conName);
+$stmt = Sabel_Db::createStatement($conName);
 
-Sabel_DB_Migration_Manager::setSchema($schema);
-Sabel_DB_Migration_Manager::setStatement($stmt);
-Sabel_DB_Migration_Manager::setDirectory(RUN_BASE . "/migration/tmp");
-Sabel_DB_Migration_Manager::setApplyMode($type);
+Sabel_Db_Migration_Manager::setSchema($schema);
+Sabel_Db_Migration_Manager::setStatement($stmt);
+Sabel_Db_Migration_Manager::setDirectory(RUN_BASE . "/migration/tmp");
+Sabel_Db_Migration_Manager::setApplyMode($type);
 
-$dirs = explode(".", Sabel_DB_Config::getPackage($conName));
+$dirs = explode(".", Sabel_Db_Config::getPackage($conName));
 $className = implode("_", array_map("ucfirst", $dirs)) . "_Migration";
 $mig = new $className();
 $mig->execute($path);

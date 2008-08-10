@@ -86,7 +86,7 @@ $configs = array("sqlite" => array(
                  );
 
 foreach ($configs as $key => $param) {
-  Sabel_DB_Config::add($key, $param);
+  Sabel_Db_Config::add($key, $param);
 }
 
 echo "[ " . CONNAME . " ]\n";
@@ -94,7 +94,7 @@ echo "[ " . CONNAME . " ]\n";
 $path = RUN_BASE . "/migration/tmp/1_Hoge_create.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -135,12 +135,12 @@ isFalse($bool->increment);
 isFalse($bool->default);
 isTrue($bool->nullable);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/2_Hoge_addColumn.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -209,12 +209,12 @@ isFalse($bool->increment);
 isFalse($bool->default);
 isTrue($bool->nullable);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/3_Hoge_dropColumn.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -271,12 +271,12 @@ isTrue($bool->nullable);
 isNull($hoge->dbl);
 isNull($hoge->sint);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/4_Hoge_changeColumn.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -334,12 +334,12 @@ isTrue($bool->nullable);
 isNull($hoge->dbl);
 isNull($hoge->sint);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/5_Huga_create.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $huga  = $accessor->getTable("huga");
 $id    = $huga->id;
 $email = $huga->email;
@@ -359,12 +359,12 @@ isFalse($email->nullable);
 equals($email->max, 255);
 isTrue($huga->isUnique("email"));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/6_Foo_create.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $foo = $accessor->getTable("foo");
 $id  = $foo->id;
 
@@ -375,21 +375,21 @@ isNull($id->default);
 isFalse($id->nullable);
 equals($id->max, PHP_INT_MAX);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/7_Hoge_drop.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $tables = $accessor->getTableList();
 isFalse(in_array("hoge", $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/8_Bar_create.php";
 system("php exec.php $path " . CONNAME . " upgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $bar = $accessor->getTable("bar");
 $id  = $bar->id;
 $huga_id = $bar->huga_id;
@@ -432,21 +432,21 @@ if (CONNAME !== "sqlite") {
   equals($fooId->onUpdate,  "NO ACTION");
 }
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/8_Bar_create.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $tables = $accessor->getTableList();
 isFalse(in_array("bar", $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/7_Hoge_drop.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -504,30 +504,30 @@ isTrue($bool->nullable);
 isNull($hoge->dbl);
 isNull($hoge->sint);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/6_Foo_create.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $tables = $accessor->getTableList();
 isFalse(in_array("foo", $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/5_Huga_create.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $tables = $accessor->getTableList();
 isFalse(in_array("huga", $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/4_Hoge_changeColumn.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -589,12 +589,12 @@ $tables = $accessor->getTableList();
 isFalse(in_array("huga", $tables));
 isFalse(in_array("foo",  $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/3_Hoge_dropColumn.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -663,12 +663,12 @@ isFalse($bool->increment);
 isFalse($bool->default);
 isTrue($bool->nullable);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/2_Hoge_addColumn.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $hoge = $accessor->getTable("hoge");
 $id   = $hoge->id;
 $name = $hoge->name;
@@ -714,15 +714,15 @@ isNull($hoge->dbl);
 isNull($hoge->sint);
 isNull($hoge->bint);
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 $path = RUN_BASE . "/migration/tmp/1_Hoge_create.php";
 system("php exec.php $path " . CONNAME . " downgrade");
 
-$accessor = Sabel_DB::createMetadata(CONNAME);
+$accessor = Sabel_Db::createMetadata(CONNAME);
 $tables = $accessor->getTableList();
 isFalse(in_array("hoge", $tables));
 
-Sabel_DB_Connection::closeAll();
+Sabel_Db_Connection::closeAll();
 
 echo "\n";

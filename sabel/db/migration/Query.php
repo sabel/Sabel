@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Migration_Query
+ * Sabel_Db_Migration_Query
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Migration_Query
+class Sabel_Db_Migration_Query
 {
   private
     $upgradeQueries   = array(),
@@ -37,13 +37,13 @@ class Sabel_DB_Migration_Query
   
   public function execute()
   {
-    if (Sabel_DB_Migration_Manager::isUpgrade()) {
+    if (Sabel_Db_Migration_Manager::isUpgrade()) {
       $queries = $this->upgradeQueries;
     } else {
       $queries = $this->downgradeQueries;
     }
     
-    $stmt = Sabel_DB_Migration_Manager::getStatement();
+    $stmt = Sabel_Db_Migration_Manager::getStatement();
     foreach ($queries as $query) $stmt->setQuery($query)->execute();
   }
 }

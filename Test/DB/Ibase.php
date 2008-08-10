@@ -21,14 +21,14 @@ class Test_DB_Ibase extends Test_DB_Test
                     "password" => "fugafuga",
                     "database" => "/home/firebird/sdb_test.fdb");
     
-    Sabel_DB_Config::add("conrefused", $params);
-    $driver = new Sabel_DB_Ibase_Driver("conrefused");
+    Sabel_Db_Config::add("conrefused", $params);
+    $driver = new Sabel_Db_Ibase_Driver("conrefused");
     
     try {
       $c = error_reporting(0);
-      $resource = Sabel_DB_Connection::connect($driver);
+      $resource = Sabel_Db_Connection::connect($driver);
       error_reporting($c);
-    } catch (Sabel_DB_Exception_Connection $e) {
+    } catch (Sabel_Db_Exception_Connection $e) {
       return;
     }
     
@@ -37,7 +37,7 @@ class Test_DB_Ibase extends Test_DB_Test
   
   public function testInit()
   {
-    Sabel_DB_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
+    Sabel_Db_Config::add("default", Test_DB_TestConfig::getIbaseConfig());
     Test_DB_Test::$db = "IBASE";
   }
   

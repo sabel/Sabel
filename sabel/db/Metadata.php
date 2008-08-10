@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Metadata
+ * Sabel_Db_Metadata
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Metadata
+class Sabel_Db_Metadata
 {
   private static $metadata = array();
   
@@ -25,19 +25,19 @@ class Sabel_DB_Metadata
       $cols = array();
       $schemaClass = new $className();
       foreach ($schemaClass->get() as $colName => $info) {
-        $co = new Sabel_DB_Metadata_Column();
+        $co = new Sabel_Db_Metadata_Column();
         $co->name = $colName;
         foreach ($info as $key => $val) $co->$key = $val;
         $cols[$colName] = $co;
       }
       
-      $tblSchema  = new Sabel_DB_Metadata_Table($tblName, $cols);
+      $tblSchema  = new Sabel_Db_Metadata_Table($tblName, $cols);
       $properties = $schemaClass->getProperty();
       $tblSchema->setTableEngine($properties["tableEngine"]);
       $tblSchema->setUniques($properties["uniques"]);
       $tblSchema->setForeignKeys($properties["fkeys"]);
     } else {
-      $schemaObj = Sabel_DB::createMetadata($connectionName);
+      $schemaObj = Sabel_Db::createMetadata($connectionName);
       $tblSchema = $schemaObj->getTable($tblName);
     }
     
@@ -52,7 +52,7 @@ class Sabel_DB_Metadata
       $sc = new $className();
       return $sc->get();
     } else {
-      return Sabel_DB::createMetadata($connectionName)->getTableList();
+      return Sabel_Db::createMetadata($connectionName)->getTableList();
     }
   }
   

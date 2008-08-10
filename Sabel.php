@@ -17,6 +17,9 @@ final class Sabel
    */
   private static $readableFiles = array();
   
+  /**
+   * @var int
+   */
   private static $readableFileCount = 0;
   
   /**
@@ -94,7 +97,7 @@ final class Sabel
       $path = $exp[0] . ".php";
     } else {
       $class = array_pop($exp);
-      $prePath = implode("/", array_map("strtolower", $exp));
+      $prePath = implode("/", array_map("lcfirst", $exp));
       $path = $prePath . DIRECTORY_SEPARATOR . $class . ".php";
     }
     

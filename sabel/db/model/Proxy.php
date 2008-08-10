@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Model_Proxy
+ * Sabel_Db_Model_Proxy
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@gmail.com>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Model_Proxy extends Sabel_DB_Model
+class Sabel_Db_Model_Proxy extends Sabel_Db_Model
 {
   public function __construct($mdlName, $id)
   {

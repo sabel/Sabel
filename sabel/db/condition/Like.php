@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Condition_Like
+ * Sabel_Db_Condition_Like
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
+class Sabel_Db_Condition_Like extends Sabel_Db_Abstract_Condition
 {
   const BEGINS_WITH = 1;
   const CONTAINS    = 2;
@@ -18,7 +18,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
   /**
    * @var int
    */
-  protected $type = Sabel_DB_Condition::LIKE;
+  protected $type = Sabel_Db_Condition::LIKE;
   
   /**
    * @var int
@@ -54,7 +54,7 @@ class Sabel_DB_Condition_Like extends Sabel_DB_Abstract_Condition
     return $this;
   }
   
-  public function build(Sabel_DB_Statement $stmt)
+  public function build(Sabel_Db_Statement $stmt)
   {
     $value = $this->value;
     

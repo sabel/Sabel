@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Sabel_DB_Condition_Manager
+ * Sabel_Db_Condition_Manager
  *
  * @category   DB
  * @package    org.sabel.db
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Condition_Manager extends Sabel_Object
+class Sabel_Db_Condition_Manager extends Sabel_Object
 {
   /**
    * @var array
@@ -24,10 +24,10 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
    */
   public function add($condition)
   {
-    if ($condition instanceof Sabel_DB_Abstract_Condition) {
+    if ($condition instanceof Sabel_Db_Abstract_Condition) {
       $this->conditions[$condition->getColumn()] = $condition;
-    } elseif ($condition instanceof Sabel_DB_Condition_Or ||
-              $condition instanceof Sabel_DB_Condition_And) {
+    } elseif ($condition instanceof Sabel_Db_Condition_Or ||
+              $condition instanceof Sabel_Db_Condition_And) {
       $this->conditions[] = $condition;
     } else {
       $message = "invalid condition object.";
@@ -69,7 +69,7 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
    */
   public function create($key, $val)
   {
-    $c = Sabel_DB_Condition::create(Sabel_DB_Condition::EQUAL, $key, $val);
+    $c = Sabel_Db_Condition::create(Sabel_Db_Condition::EQUAL, $key, $val);
     $this->conditions[$c->getColumn()] = $c;
   }
   
@@ -85,15 +85,15 @@ class Sabel_DB_Condition_Manager extends Sabel_Object
   }
   
   /**
-   * @param Sabel_DB_Statement $stmt
+   * @param Sabel_Db_Statement $stmt
    *
    * @return string
    */
-  public function build(Sabel_DB_Statement $stmt)
+  public function build(Sabel_Db_Statement $stmt)
   {
     if (empty($this->conditions)) return "";
     
-    Sabel_DB_Abstract_Condition::rewind();
+    Sabel_Db_Abstract_Condition::rewind();
     
     $query = array();
     foreach ($this->conditions as $condition) {

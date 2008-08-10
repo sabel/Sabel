@@ -197,7 +197,7 @@ function environment($str)
 
 function is_model($model)
 {
-  return ($model instanceof Sabel_DB_Model);
+  return ($model instanceof Sabel_Db_Model);
 }
 
 function convert_to_tablename($mdlName)
@@ -237,7 +237,7 @@ function MODEL($mdlName, $id = null)
     if ($cache[$mdlName]) {
       return new $mdlName($id);
     } else {
-      return new Sabel_DB_Model_Proxy($mdlName, $id);
+      return new Sabel_Db_Model_Proxy($mdlName, $id);
     }
   }
   
@@ -251,11 +251,11 @@ function MODEL($mdlName, $id = null)
   if ($exists) {
     return new $mdlName($id);
   } else {
-    return new Sabel_DB_Model_Proxy($mdlName, $id);
+    return new Sabel_Db_Model_Proxy($mdlName, $id);
   }
 }
 
-function create_join_key(Sabel_DB_Model $childModel, $parentName)
+function create_join_key(Sabel_Db_Model $childModel, $parentName)
 {
   if ($fkey = $childModel->getMetadata()->getForeignKey()) {
     foreach ($fkey->toArray() as $colName => $fkey) {

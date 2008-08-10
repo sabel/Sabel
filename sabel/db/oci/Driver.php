@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
+class Sabel_Db_Oci_Driver extends Sabel_Db_Driver
 {
   /**
    * @var int
@@ -60,7 +60,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
       $this->autoCommit = true;
     } else {
       $e = oci_error($this->connection);
-      throw new Sabel_DB_Exception_Driver($e["message"]);
+      throw new Sabel_Db_Exception_Driver($e["message"]);
     }
   }
   
@@ -70,7 +70,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
       $this->autoCommit = true;
     } else {
       $e = oci_error($this->connection);
-      throw new Sabel_DB_Exception_Driver($e["message"]);
+      throw new Sabel_Db_Exception_Driver($e["message"]);
     }
   }
   
@@ -100,7 +100,7 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
     $connection = $this->connection;
     $sql = $this->bind($sql, $bindParams);
     
-    // array $blobs Sabel_DB_Oci_Blob[]
+    // array $blobs Sabel_Db_Oci_Blob[]
     $blobs = (isset($additionalParameters["blob"])) ? $additionalParameters["blob"] : array();
     
     if (empty($blobs)) {
@@ -162,6 +162,6 @@ class Sabel_DB_Oci_Driver extends Sabel_DB_Driver
   private function executeError($ociStmt)
   {
     $e = oci_error($ociStmt);
-    throw new Sabel_DB_Exception_Driver($e["message"] . ", SQL:" . $e["sqltext"]);
+    throw new Sabel_Db_Exception_Driver($e["message"] . ", SQL:" . $e["sqltext"]);
   }
 }
