@@ -18,14 +18,7 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
     if (empty($allMessages)) return;
     
     foreach ($allMessages as $identifier => $messages) {
-      $filePath = $this->getFilePath($identifier);
-      
-      if (!is_file($filePath)) {
-        touch($filePath);
-        chmod($filePath, 0777);
-      }
-      
-      $fp  = fopen($filePath, "a");
+      $fp  = $this->open($identifier);
       $sep = "============================================================" . PHP_EOL;
       fwrite($fp, PHP_EOL . $sep . PHP_EOL);
       
@@ -39,6 +32,17 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
       fwrite($fp, implode(PHP_EOL, $msgs) . PHP_EOL);
       fclose($fp);
     }
+  }
+  
+  public function write($identifier, $message)
+  {
+    $msg = $message["time"]
+         . " [" . $this->defineToString($message["level"])
+         . "] " . $message["message"];
+    
+    $fp = $this->open($identifier);
+    fwrite($fp, $msg . PHP_EOL);
+    fclose($fp);
   }
   
   protected function defineToString($level)
@@ -55,8 +59,10 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
     }
   }
   
-  protected function getFilePath($identifier)
+  protected function open($identifier)
   {
+    $filePath = "";
+    
     if ($identifier === "default") {
       if (!defined("ENVIRONMENT")) {
         $name = "test";
@@ -73,9 +79,16 @@ class Sabel_Logger_File extends Sabel_Object implements Sabel_Logger_Interface
         }
       }
       
-      return LOG_DIR_PATH . DS . $name . "." . self::DEFAULT_LOG_FILE;
+      $filePath = LOG_DIR_PATH . DS . $name . "." . self::DEFAULT_LOG_FILE;
     } else {
-      return LOG_DIR_PATH . DS . $identifier . ".log";
+      $filePath = LOG_DIR_PATH . DS . $identifier . ".log";
     }
+    
+    if (!is_file($filePath)) {
+      touch($filePath);
+      chmod($filePath, 0777);
+    }
+    
+    return fopen($filePath, "a");
   }
 }

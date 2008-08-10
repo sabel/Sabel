@@ -18,4 +18,12 @@ interface Sabel_Logger_Interface
    * @return void
    */
   public function output($messages);
+  
+  /**
+   * @param string $identifier
+   * @param array  $message
+   *
+   * @return void
+   */
+  public function write($identifier, $message);
 }

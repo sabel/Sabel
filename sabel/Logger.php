@@ -26,6 +26,11 @@ class Sabel_Logger extends Sabel_Object
    */
   protected $messages = array();
   
+  /**
+   * @var boolean
+   */
+  protected $realtime = false;
+  
   public static function create()
   {
     if (self::$instance === null) {
@@ -42,16 +47,30 @@ class Sabel_Logger extends Sabel_Object
     $this->loggers[] = $logger;
   }
   
+  public function realtime($bool)
+  {
+    $this->realtime = $bool;
+    
+    if ($bool) {
+      $this->output(true);
+      $this->messages = array();
+    }
+  }
+  
   public function write($text, $level = SBL_LOG_INFO, $identifier = "default")
   {
     if ((SBL_LOG_LEVEL & $level) === 0) return;
     
     $message = array("time" => now(), "level" => $level, "message" => $text);
     
-    if (array_key_exists($identifier, $this->messages)) {
-      $this->messages[$identifier][] = $message;
+    if ($this->realtime) {
+      $this->_write($identifier, $message);
     } else {
-      $this->messages[$identifier] = array($message);
+      if (array_key_exists($identifier, $this->messages)) {
+        $this->messages[$identifier][] = $message;
+      } else {
+        $this->messages[$identifier] = array($message);
+      }
     }
   }
   
@@ -60,10 +79,19 @@ class Sabel_Logger extends Sabel_Object
     return $this->messages;
   }
   
-  public function output()
+  public function output($force = false)
+  {
+    if ($force || !$this->realtime) {
+      foreach ($this->loggers as $logger) {
+        $logger->output($this->messages);
+      }
+    }
+  }
+  
+  protected function _write($identifier, array $message)
   {
     foreach ($this->loggers as $logger) {
-      $logger->output($this->messages);
+      $logger->write($identifier, $message);
     }
   }
 }

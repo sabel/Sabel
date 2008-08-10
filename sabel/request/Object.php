@@ -281,7 +281,7 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     foreach ($values as $value) {
       if (isset($value[$key])) {
         if ($result !== null) {
-          $message = __METHOD__ . "() duplicate request key.";
+          $message = __METHOD__ . "() request key overlaps.";
           throw new Sabel_Exception_Runtime($message);
         } else {
           $result = $value[$key];

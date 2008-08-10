@@ -48,7 +48,7 @@ class Acl_Processor extends Sabel_Bus_Processor
         }
       }
       
-      l("[acl] access denied.", SBL_LOG_DEBUG);
+      l("[ACL] access denied.", SBL_LOG_DEBUG);
       
       if ($authUri === null) {
         $bus->get("response")->getStatus()->setCode(Sabel_Response::FORBIDDEN);
@@ -57,7 +57,7 @@ class Acl_Processor extends Sabel_Bus_Processor
         $redirector->to($authUri);
       }
     } else {
-      l("[acl] access denied. (no module settings for '{$module}')", SBL_LOG_DEBUG);
+      l("[ACL] access denied. (no module settings for '{$module}')", SBL_LOG_DEBUG);
       $bus->get("response")->getStatus()->setCode(Sabel_Response::FORBIDDEN);
     }
   }

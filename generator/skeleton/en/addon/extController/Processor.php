@@ -27,13 +27,16 @@ class ExtController_Processor extends Sabel_Bus_Processor
     $values  = array_merge($gets, $posts, $params);
     
     if (count($values) !== $vCount) {
+      l("[ExtController] request key overlaps", SBL_LOG_DEBUG);
       return $status->setCode(Sabel_Response::BAD_REQUEST);
     } else {
-      $controller->setAttribute("REQUEST_VARS", $values);
-      
       foreach ($values as $name => $value) {
         $controller->setAttribute($name, $value);
       }
+      
+      $controller->setAttribute("REQUEST_VARS", $values);
+      $controller->setAttribute("GET_VARS",     $gets);
+      $controller->setAttribute("POST_VARS",    $posts);
     }
     
     $action = $bus->get("destination")->getAction();
