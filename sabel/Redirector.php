@@ -49,11 +49,10 @@ class Sabel_Redirector
    */
   public function to($uriParameter, $parameters = array())
   {
-    $this->redirected = true;
     $this->parameters = $parameters;
     
     $candidate = Sabel_Context::getContext()->getCandidate();
-    $this->uri($candidate->uri($uriParameter));
+    return $this->uri($candidate->uri($uriParameter));
   }
   
   /**
@@ -82,13 +81,15 @@ class Sabel_Redirector
    */
   public function uri($uri)
   {
+    $this->redirected = true;
+    
     if ($this->hasParameters()) {
       $this->uri = $uri . "?" . http_build_query($this->parameters, "", "&");
     } else {
       $this->uri = $uri;
     }
     
-    $this->redirected = true;
+    return $this->uri;
   }
   
   public function getUri()

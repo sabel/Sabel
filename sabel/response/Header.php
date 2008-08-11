@@ -22,7 +22,7 @@ class Sabel_Response_Header
       array_map("header", $headers);
       
       if (in_array($response->getStatus()->getCode(), self::$redirectCode, true)) {
-        l("redirect: $location");
+        l("redirect: " . $response->getLocation());
       }
     }
     

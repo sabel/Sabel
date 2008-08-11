@@ -16,7 +16,7 @@ class Acl_Config implements Sabel_Config
   public function configure()
   {
     $index = $this->module("index");
-    $index->allow();
+    $index->allow();  // public module
     
     return $this->configs;
   }

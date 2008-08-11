@@ -15,18 +15,43 @@ class Acl_User
   const AUTHED_KEY  = "authenticated";
   const SESSION_KEY = "sbl_acl_user";
   
+  const URI_HISTORY_COUNT = 5;
+  const URI_HISTORY_KEY   = "sbl_acl_uri_history";
+  
   /**
    * @var Sabel_Session_Abstract
    */
   private $session = null;
   
   /**
+   * @var Sabel_Redirector
+   */
+  private $redirector = null;
+  
+  /**
    * @var array
    */
   private $attributes = array();
   
-  public function __construct(Sabel_Session_Abstract $session)
+  public function __construct()
   {
+    $bus = Sabel_Context::getContext()->getBus();
+    $this->redirector = $bus->get("redirector");
+    
+    $session = $bus->get("session");
+    $request = $bus->get("request");
+    
+    if (($history = $session->read(self::URI_HISTORY_KEY)) === null) {
+      $history = array();
+    }
+    
+    if ($request->isGet()) {
+      if (array_unshift($history, $request->getUri()) > self::URI_HISTORY_COUNT) {
+        array_pop($history);
+      }
+    }
+    
+    $session->write(self::URI_HISTORY_KEY, $history);
     $this->session = $session;
   }
   
@@ -90,11 +115,24 @@ class Acl_User
     $roles = func_get_args();
     array_shift($roles);
     
-    $redirector = Sabel_Context::getContext()->getBus()->get("redirector");
-    if (($uri = $this->session->read("acl_after_auth_uri")) !== null) {
-      $redirector->uri($uri);
+    $history  = $this->session->read(self::URI_HISTORY_KEY);
+    $authUri  = $this->__get("__auth_uri");
+    $loginUri = $history[0];
+    $prevUri  = null;
+    
+    for ($i = 1; $i < self::URI_HISTORY_COUNT; $i++) {
+      if ($history[$i] !== $loginUri && $history[$i] !== $authUri) {
+        $prevUri = $history[$i];
+        break;
+      }
+    }
+    
+    if ($authUri === null || $prevUri === null) {
+      
+      $this->redirector->to($redirectTo);
     } else {
-      $redirector->to($redirectTo);
+      l("[ACL] back to the page before authentication.", SBL_LOG_DEBUG);
+      $this->redirector->uri($prevUri);
     }
     
     $this->authenticate($roles[0]);
