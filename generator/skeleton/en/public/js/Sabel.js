@@ -229,7 +229,11 @@ Sabel.UserAgent = new function() {
 		this.version = parseFloat(RegExp.$1);
 	} else if (this.isSafari = /Safari\/([\d.]+)/.test(ua)) {
 		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
-		if (build >= 523) {
+		if (build >= 526) {
+			this.version = 4;
+		} else if (build >= 525) {
+			this.version = 3.1;
+		} else if (build >= 523) {
 			this.version = 3;
 		} else if (build >= 412) {
 			this.version = 2;
@@ -249,11 +253,12 @@ Sabel.UserAgent = new function() {
 		this.version = "unknown";
 	}
 	/*@end @*/
-
+		
 	this.isWindows = /Win/.test(ua);
 	this.isMac     = /Mac/.test(ua);
 	this.isLinux   = /Linux/.test(ua);
 	this.isBSD     = /BSD/.test(ua);
+	this.isIPhone  = /iPhone/.test(ua);
 };
 
 Sabel.Window.lineFeedCode = (Sabel.UserAgent.isIE) ? "\r" : "\n";
@@ -1603,24 +1608,24 @@ Sabel.Element.getChildElements = function(element, tagName) {
 };
 
 Sabel.Element.getFirstChild = function(element) {
-	return new Sabel.Element(Sabel.Element.getChildElements(element)[0]);
+	return Sabel.Element.getChildElements(element)[0];
 };
 
 Sabel.Element.getLastChild = function(element) {
 	var elms = Sabel.Element.getChildElements(element);
-	return new Sabel.Element(elms[elms.length - 1]);
+	return elms[elms.length - 1];
 };
 
 Sabel.Element.getNextSibling = function(element) {
 	while (element = element.nextSibling) {
-		if (element.nodeType === 1) return new Sabel.Element(element);
+		if (element.nodeType === 1) return element;
 	}
 	return null;
 };
 
 Sabel.Element.getPreviousSibling = function(element) {
 	while (element = element.previousSibling) {
-		if (element.nodeType === 1) return new Sabel.Element(element);
+		if (element.nodeType === 1) return element;
 	}
 	return null;
 };
@@ -2354,8 +2359,20 @@ Sabel.KeyEvent = new Sabel.Class({
 			if (e.type === "keydown" && e.shiftKey === true) buf.push("shift");
 		}
 
-		if (e.type === "keydown" && Sabel.KeyEvent.special_keys[kc]) {
-			buf.push(Sabel.KeyEvent.special_keys[kc]);
+		if (e.type === "keydown") {
+			if (Sabel.UserAgent.isIPhone === true) {
+				if (Sabel.KeyEvent.special_keys_for_iphone[kc]) {
+					buf.push(Sabel.KeyEvent.special_keys_for_iphone[kc]);
+				} else {
+					buf.push(String.fromCharCode(kc).toLowerCase());
+				}
+			} else {
+				if (Sabel.KeyEvent.special_keys[kc]) {
+					buf.push(Sabel.KeyEvent.special_keys[kc]);
+				} else {
+					buf.push(String.fromCharCode(kc).toLowerCase());
+				}
+			}
 		} else {
 			buf.push(String.fromCharCode(kc).toLowerCase());
 		}
@@ -2374,7 +2391,10 @@ Sabel.KeyEvent.special_keys = {
 	118: "f7", 119: "f8", 120: "f9", 121: "f10", 122: "f11", 123: "f12",
 	144: "numlock", 145: "scrolllock", 240: "capslock"
 };
-
+Sabel.KeyEvent.special_keys_for_iphone = {
+	10: "enter", 32: "space", 127: "del",
+	163: "pound", 165: "yen", 8226: "bullet", 8364: "euro"
+};
 
 Sabel.Effect = function() {
 	this.init.apply(this, arguments);
