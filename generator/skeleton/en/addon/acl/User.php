@@ -10,13 +10,13 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Acl_User
+class Acl_User extends Sabel_ValueObject
 {
-  const AUTHED_KEY  = "authenticated";
-  const SESSION_KEY = "sbl_acl_user";
-  
   const URI_HISTORY_COUNT = 5;
-  const URI_HISTORY_KEY   = "sbl_acl_uri_history";
+  
+  const AUTHED_KEY      = "authenticated";
+  const SESSION_KEY     = "sbl_acl_user";
+  const URI_HISTORY_KEY = "sbl_acl_uri_history";
   
   /**
    * @var Sabel_Session_Abstract
@@ -28,11 +28,6 @@ class Acl_User
    */
   private $redirector = null;
   
-  /**
-   * @var array
-   */
-  private $attributes = array();
-  
   public function __construct()
   {
     $bus = Sabel_Context::getContext()->getBus();
@@ -41,8 +36,12 @@ class Acl_User
     $session = $bus->get("session");
     $request = $bus->get("request");
     
-    if (($history = $session->read(self::URI_HISTORY_KEY)) === null) {
-      $history = array();
+    $values = $session->read(self::SESSION_KEY);
+    if ($values === null) $values= array();
+    
+    $history = array();
+    if (isset($values[self::URI_HISTORY_KEY])) {
+      $history = $values[self::URI_HISTORY_KEY];
     }
     
     if ($request->isGet()) {
@@ -51,55 +50,30 @@ class Acl_User
       }
     }
     
-    $session->write(self::URI_HISTORY_KEY, $history);
+    $values[self::URI_HISTORY_KEY] = $history;
+    $this->values  = $values;
     $this->session = $session;
   }
   
-  public function __set($key, $value)
+  public function getUriHistory()
   {
-    $this->attributes[$key] = $value;
-  }
-  
-  public function __get($key)
-  {
-    if (array_key_exists($key, $this->attributes)) {
-      return $this->attributes[$key];
-    } else {
-      return null;
-    }
-  }
-  
-  public function getSessionId()
-  {
-    return $this->session->getId();
-  }
-  
-  public function toArray()
-  {
-    return $this->attributes;
-  }
-  
-  public function restore()
-  {
-    if ($attributes = $this->session->read(self::SESSION_KEY)) {
-      $this->attributes = $attributes;
-    }
+    return $this->__get(self::URI_HISTORY_KEY);
   }
   
   public function save()
   {
-    $this->session->write(self::SESSION_KEY, $this->attributes);
+    $this->session->write(self::SESSION_KEY, $this->values);
   }
   
   public function isAuthenticated()
   {
-    $attr = $this->attributes;
-    return (isset($attr[self::AUTHED_KEY]) && $attr[self::AUTHED_KEY]);
+    $v = $this->values;
+    return (isset($v[self::AUTHED_KEY]) && $v[self::AUTHED_KEY]);
   }
   
   public function authenticate($role, $regenerateId = true)
   {
-    $this->attributes[self::AUTHED_KEY] = true;
+    $this->values[self::AUTHED_KEY] = true;
     $this->addRole($role);
     
     if ($regenerateId) $this->session->regenerateId();
@@ -107,7 +81,7 @@ class Acl_User
   
   public function deAuthenticate()
   {
-    $this->attributes = array(self::AUTHED_KEY => false);
+    $this->values = array(self::AUTHED_KEY => false);
   }
   
   public function login($redirectTo)
@@ -128,7 +102,6 @@ class Acl_User
     }
     
     if ($authUri === null || $prevUri === null) {
-      
       $this->redirector->to($redirectTo);
     } else {
       l("[ACL] back to the page before authentication.", SBL_LOG_DEBUG);
@@ -149,10 +122,10 @@ class Acl_User
     $role = $this->__get("role");
     
     if ($role === null) {
-      $this->attributes["role"] = array($add);
+      $this->values["role"] = array($add);
     } elseif (!in_array($add, $role, true)) {
       $role[] = $add;
-      $this->attributes["role"] = $role;
+      $this->values["role"] = $role;
     }
   }
   
@@ -173,7 +146,7 @@ class Acl_User
     
     if (is_array($role)) {
       unset($role[$remove]);
-      $this->attributes["role"] = $role;
+      $this->values["role"] = $role;
     }
   }
 }

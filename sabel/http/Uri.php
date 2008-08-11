@@ -9,10 +9,8 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Http_Uri extends Sabel_Object
+class Sabel_Http_Uri extends Sabel_ValueObject
 {
-  protected $attributes = array();
-  
   public function __construct($uri)
   {
     $parsed     = parse_url($uri);
@@ -39,20 +37,6 @@ class Sabel_Http_Uri extends Sabel_Object
     } else {
       // @todo
     }
-  }
-  
-  public function __get($key)
-  {
-    if (isset($this->attributes[$key])) {
-      return $this->attributes[$key];
-    } else {
-      return null;
-    }
-  }
-  
-  public function __set($key, $value)
-  {
-    $this->attributes[$key] = $value;
   }
   
   public function setPath($path)

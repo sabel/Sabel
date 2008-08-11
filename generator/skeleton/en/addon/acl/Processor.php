@@ -22,8 +22,6 @@ class Acl_Processor extends Sabel_Bus_Processor
     $configs = $config->configure();
     
     $this->user = new Acl_User();
-    $this->user->restore();
-    
     $controller = $bus->get("controller");
     $controller->setAttribute("aclUser", $this->user);
     
