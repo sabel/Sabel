@@ -28,7 +28,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $session = null;
   
   /**
-   * @var Sabel_Controller_Redirector
+   * @var Sabel_Redirector
    */
   protected $redirect = null;
   
@@ -68,7 +68,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public final function __construct()
   {
     $this->reserved = get_class_methods(__CLASS__);
-    $this->redirect = new Sabel_Controller_Redirector();
   }
   
   /**
@@ -169,17 +168,17 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   }
   
   /**
-   * @param Sabel_Controller_Redirector $redirector
+   * @param Sabel_Redirector $redirector
    *
    * @return void
    */
-  public function setRedirector(Sabel_Controller_Redirector $redirector)
+  public function setRedirector(Sabel_Redirector $redirector)
   {
     $this->redirect = $redirector;
   }
   
   /**
-   * @return Sabel_Controller_Redirector
+   * @return Sabel_Redirector
    */
   public function getRedirector()
   {

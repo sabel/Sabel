@@ -21,11 +21,6 @@ class Acl_User
   private $session = null;
   
   /**
-   * @var Sabel_Controller_Redirector
-   */
-  private $redirector = null;
-  
-  /**
    * @var array
    */
   private $attributes = array();
@@ -33,11 +28,6 @@ class Acl_User
   public function __construct(Sabel_Session_Abstract $session)
   {
     $this->session = $session;
-  }
-  
-  public function setRedirector(Sabel_Controller_Redirector $redirector)
-  {
-    $this->redirector = $redirector;
   }
   
   public function __set($key, $value)
@@ -100,10 +90,11 @@ class Acl_User
     $roles = func_get_args();
     array_shift($roles);
     
+    $redirector = Sabel_Context::getContext()->getBus()->get("redirector");
     if (($uri = $this->session->read("acl_after_auth_uri")) !== null) {
-      $this->redirector->uri($uri);
+      $redirector->uri($uri);
     } else {
-      $this->redirector->to($redirectTo);
+      $redirector->to($redirectTo);
     }
     
     $this->authenticate($roles[0]);

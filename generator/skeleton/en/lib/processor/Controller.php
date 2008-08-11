@@ -35,6 +35,10 @@ class Processor_Controller extends Sabel_Bus_Processor
       $controller->setSession($session);
     }
     
+    if (($redirector = $bus->get("redirector")) !== null) {
+      $controller->setRedirector($redirector);
+    }
+    
     $bus->set("controller", $controller);
   }
   
@@ -66,10 +70,10 @@ class Processor_Controller extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
-    $controller = $bus->get("controller");
-    if (!$controller->isRedirected()) return;
+    $redirector = $bus->get("redirector");
+    if (!$redirector->isRedirected()) return;
     
-    $redirector = $controller->getRedirector();
+    $controller = $bus->get("controller");
     $request = $controller->getRequest();
     
     if (($url = $redirector->getUrl()) !== "") {

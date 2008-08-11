@@ -64,6 +64,7 @@ require_once ("Test/Bus/Tests.php");
 require_once ("Test/Request/Tests.php");
 require_once ("Test/Response/Tests.php");
 require_once ("Test/Controller/Tests.php");
+require_once ("Test/Redirector.php");
 require_once ("Test/Util/Tests.php");
 require_once ("Test/View/Tests.php");
 require_once ("Test/Map/Tests.php");
@@ -102,6 +103,7 @@ class SabelAllTests
     
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Console::suite());
+    $suite->addTest(Test_Redirector::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Request_Tests::suite());

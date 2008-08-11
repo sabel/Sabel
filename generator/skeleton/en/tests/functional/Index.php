@@ -7,6 +7,6 @@ class Functional_Index extends Sabel_Test_Functional
     $request = new Sabel_Request_Object();
     $request->get("index/index");
     $response = $this->request($request);
-    $this->assertFalse($response->isRedirected());
+    $this->assertFalse($this->isRedirected($response));
   }
 }

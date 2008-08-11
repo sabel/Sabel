@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Sabel_Controller_Redirector
+ * Sabel_Redirector
  *
- * @category   Controller
- * @package    org.sabel.controller
+ * @category   Core
+ * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Controller_Redirector
+class Sabel_Redirector
 {
   /**
    * @var string

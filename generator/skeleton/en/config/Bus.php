@@ -18,6 +18,7 @@ class Config_Bus extends Sabel_Bus_Config
   protected $interfaces = array("request"     => "Sabel_Request",
                                 "session"     => "Sabel_Session",
                                 "response"    => "Sabel_Response",
+                                "redirector"  => "Sabel_Redirector",
                                 "view"        => "Sabel_View",
                                 "controller"  => "Sabel_Controller_Page");
   

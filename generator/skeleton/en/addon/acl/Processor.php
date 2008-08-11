@@ -18,15 +18,14 @@ class Acl_Processor extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $config     = new Acl_Config();
-    $configs    = $config->configure();
-    $session    = $bus->get("session");
-    $controller = $bus->get("controller");
-    $redirector = $controller->getRedirector();
+    $config  = new Acl_Config();
+    $configs = $config->configure();
+    $session = $bus->get("session");
+    
     $this->user = new Acl_User($session);
-    $this->user->setRedirector($redirector);
     $this->user->restore();
     
+    $controller = $bus->get("controller");
     $controller->setAttribute("aclUser", $this->user);
     
     $destination = $bus->get("destination");
@@ -54,7 +53,7 @@ class Acl_Processor extends Sabel_Bus_Processor
         $bus->get("response")->getStatus()->setCode(Sabel_Response::FORBIDDEN);
       } else {
         $session->write("acl_after_auth_uri", $bus->get("request")->getUri(), 180);
-        $redirector->to($authUri);
+        $bus->get("redirector")->to($authUri);
       }
     } else {
       l("[ACL] access denied. (no module settings for '{$module}')", SBL_LOG_DEBUG);

@@ -71,11 +71,16 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
     return $responses;
   }
   
+  protected function isRedirected($response)
+  {
+    return $response->getStatus()->isRedirect();
+  }
+  
   protected function assertRedirect($uri, $toUri, $session = null)
   {
     $response = $this->request($uri, $session);
     
-    if ($response->isRedirected()) {
+    if ($this->isRedirected($response)) {
       $this->assertEquals($toUri, $response->getLocationUri());
     } else {
       $this->fail("not redirected");
@@ -86,7 +91,7 @@ class Sabel_Test_Functional extends Sabel_Test_TestCase
   
   protected function assertHtmlElementEquals($expect, $id, $html)
   {
-    $doc = new DomDocument();
+    $doc = new DOMDocument();
     @$doc->loadHTML($html);
     $element = $doc->getElementById($id);
     

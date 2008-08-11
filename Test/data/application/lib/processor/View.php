@@ -36,16 +36,19 @@ class TestProcessor_View extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
+    $redirector = $bus->get("redirector");
+    if ($redirector->isRedirected()) return;
+    
     $controller = $bus->get("controller");
-    if ($controller->isRedirected()) return;
+    $response   = $bus->get("response");
+    $responses  = $response->getResponses();
+    $contents   = (isset($responses["contents"])) ? $responses["contents"] : "";
     
-    $response  = $bus->get("response");
-    $responses = $response->getResponses();
-    $contents  = (isset($responses["contents"])) ? $responses["contents"] : "";
-    
-    $view = $this->getView($response->getStatus(),
-                           $bus->get("destination")->getAction(),
-                           $bus->get("isAjaxRequest") === true);
+    $view = $this->getView(
+      $response->getStatus(),
+      $bus->get("destination")->getAction(),
+      $bus->get("isAjaxRequest") === true
+    );
     
     if (isset($responses["renderText"]) && $responses["renderText"]) {
       $renderer = $view->getRenderer();

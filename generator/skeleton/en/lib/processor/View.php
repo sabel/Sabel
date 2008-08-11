@@ -45,12 +45,13 @@ class Processor_View extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $controller = $bus->get("controller");
-    if ($controller->isRedirected()) return;
+    $redirector = $bus->get("redirector");
+    if ($redirector->isRedirected()) return;
     
-    $response  = $bus->get("response");
-    $responses = $response->getResponses();
-    $contents  = (isset($responses["contents"])) ? $responses["contents"] : "";
+    $controller = $bus->get("controller");
+    $response   = $bus->get("response");
+    $responses  = $response->getResponses();
+    $contents   = (isset($responses["contents"])) ? $responses["contents"] : "";
     
     $view = $this->getView(
       $response->getStatus(),
