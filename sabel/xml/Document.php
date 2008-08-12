@@ -129,9 +129,10 @@ class Sabel_Xml_Document extends Sabel_Object
     preg_match_all('/xmlns=(".+"|\'.+\')/U', $xml, $matches);
     
     if (isset($matches[1])) {
+      $matches[1] = array_values(array_unique($matches[1]));
       foreach ($matches[1] as $i => $namespace) {
         $_ns = substr($namespace, 1, -1);
-        $_pf = "default" . $i;
+        $_pf = "dns" . $i;
         $document->defaultNamespaces[$_ns] = $_pf;
         $xpath->registerNamespace($_pf, $_ns);
       }
@@ -139,11 +140,7 @@ class Sabel_Xml_Document extends Sabel_Object
     
     $document->xpath = $xpath;
     
-    if ($document->documentElement) {
-      return new Sabel_Xml_Element($document->documentElement);
-    } else {
-      return null;
-    }
+    return $this->getDocumentElement();
   }
   
   public function loadHTML($html, $ignoreErrors = false)
@@ -237,10 +234,21 @@ class Sabel_Xml_Document extends Sabel_Object
   
   public function setDocumentElement($element)
   {
+    // @todo
+    
     if ($element instanceof Sabel_Xml_Element) {
       $element = $element->getRawElement();
     }
     
     $this->document->appendChild($element);
+  }
+  
+  public function getDocumentElement()
+  {
+    if ($this->document->documentElement) {
+      return new Sabel_Xml_Element($this->document->documentElement);
+    } else {
+      return null;
+    }
   }
 }

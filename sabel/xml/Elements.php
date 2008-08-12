@@ -162,5 +162,4 @@ class Sabel_Xml_Elements extends Sabel_Object implements Iterator, ArrayAccess
   {
     return ($this->pointer < $this->length);
   }
-
 }

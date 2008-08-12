@@ -251,7 +251,6 @@ class Sabel_Xml_Element extends Sabel_Object
       $namespaces = $this->getRawDocument()->defaultNamespaces;
       
       if ($namespaceUri !== null) {
-        $namespaces = $this->getRawDocument()->defaultNamespaces;
         if (isset($namespaces[$namespaceUri])) {
           $tagName = $namespaces[$namespaceUri] . ":" . $tagName;
         }
