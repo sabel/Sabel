@@ -65,6 +65,11 @@ class Sabel_Response_Status extends Sabel_Object
   
   protected $statusCode = Sabel_Response::OK;
   
+  public function __construct($statusCode = Sabel_Response::OK)
+  {
+    $this->statusCode = $statusCode;
+  }
+  
   public function __toString()
   {
     return $this->statusCode . " " . $this->getReason();

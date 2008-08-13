@@ -12,7 +12,7 @@
  */
 class Acl_User extends Sabel_ValueObject
 {
-  const URI_HISTORY_COUNT = 5;
+  const URI_HISTORY_COUNT = 10;
   
   const AUTHED_KEY      = "authenticated";
   const SESSION_KEY     = "sbl_acl_user";
