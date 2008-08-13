@@ -6,13 +6,9 @@ class Config_Addon implements Sabel_Config
   {
     $addons = array();
     
-    //$addons[] = "acl";
-    //$addons[] = "flow";
-    //$addons[] = "form";
-    //$addons[] = "i18n";
-    //$addons[] = "renderer";
-    //$addons[] = "extController";
-    //$addons[] = "querylog";
+    // $addons[] = "addonname1";
+    // $addons[] = "addonname2";
+    // ...
     
     return $addons;
   }
