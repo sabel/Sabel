@@ -14,7 +14,6 @@ class Sabel_Rss_Writer_Atom03 extends Sabel_Rss_Writer_Abstract
   public function build(array $items)
   {
     $feed = $this->createFeed();
-    //$xml .= $this->createImage();
     $this->createItems($feed, $items);
     
     return $this->document->saveXML();
@@ -30,19 +29,15 @@ class Sabel_Rss_Writer_Atom03 extends Sabel_Rss_Writer_Abstract
     $feed->setAttribute("xmlns:dc", "http://purl.org/dc/elements/1.1/");
     $feed->setAttribute("xml:lang", $this->info["language"]);
     
-    if (isset($info["title"])) {
-      $title = $dom->createElement("title");
-      $title->nodeValue = htmlescape($info["title"]);
-      $feed->appendChild($title);
-    }
-    
-    if (isset($info["home"])) {
-      $link = $dom->createElement("link");
-      $link->setAttribute("rel",  "alternate");
-      $link->setAttribute("type", "text/html");
-      $link->setAttribute("href", $info["home"]);
-      $feed->appendChild($link);
-    }
+    $title = $dom->createElement("title");
+    $title->nodeValue = htmlescape($info["title"]);
+    $feed->appendChild($title);
+  
+    $link = $dom->createElement("link");
+    $link->setAttribute("rel",  "alternate");
+    $link->setAttribute("type", "text/html");
+    $link->setAttribute("href", $info["home"]);
+    $feed->appendChild($link);
     
     if (isset($info["description"])) {
       $tagline = $dom->createElement("tagline");

@@ -29,7 +29,7 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getUri()
   {
     if (($link = $this->channel->getChild("link")) === null) {
-      return "";
+      return null;
     } else {
       return $link->getNodeValue();
     }
@@ -41,7 +41,7 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getTitle()
   {
     if (($title = $this->channel->getChild("title")) === null) {
-      return "";
+      return null;
     } else {
       return $title->getNodeValue();
     }
@@ -53,7 +53,7 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   public function getDescription()
   {
     if (($desc = $this->channel->getChild("description")) === null) {
-      return "";
+      return null;
     } else {
       return $desc->getNodeValue();
     }
@@ -76,53 +76,30 @@ class Sabel_Rss_Reader_Rdf extends Sabel_Rss_Reader_Abstract
   }
   
   /**
-   * @return stdClass[]
+   * @return Sabel_ValueObject
    */
-  public function getItems()
+  protected function toObject(Sabel_Xml_Element $element)
   {
-    $items = array();
-    foreach ($this->items as $i => $item) {
-      $items[] = $this->toObject($item);
-    }
-    
-    return $items;
-  }
-  
-  /**
-   * @return stdClass
-   */
-  public function toObject(Sabel_Xml_Element $element)
-  {
-    $object = new stdClass();
+    $object = new Sabel_ValueObject();
     
     if ($title = $element->getChild("title")) {
       $object->title = $title->getNodeValue();
-    } else {
-      $object->title = "";
     }
     
     if ($link = $element->getChild("link")) {
       $object->uri = $link->getNodeValue();
-    } else {
-      $object->uri = "";
     }
     
     if ($desc = $element->getChild("description")) {
       $object->description = $desc->getNodeValue();
-    } else {
-      $object->description = "";
     }
     
     if ($date = $element->getChild("dc:date")) {
       $object->date = date("Y-m-d H:i:s", strtotime($date->getNodeValue()));
-    } else {
-      $object->date = "";
     }
     
     if ($content = $element->getChild("content:encoded")) {
       $object->content = $content->getNodeValue();
-    } else {
-      $object->content = "";
     }
     
     return $object;

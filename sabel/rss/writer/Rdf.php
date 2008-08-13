@@ -15,7 +15,7 @@ class Sabel_Rss_Writer_Rdf extends Sabel_Rss_Writer_Abstract
   {
     $rdf = $this->createRdf();
     $this->createChannel($rdf, $items);
-    //$xml .= $this->createImage();
+    $this->createImage($rdf);
     $this->createItems($rdf, $items);
     
     return $this->document->saveXML();
@@ -45,22 +45,24 @@ class Sabel_Rss_Writer_Rdf extends Sabel_Rss_Writer_Abstract
       $channel->setAttribute("rdf:about", $info["rss"]);
     }
     
-    if (isset($info["title"])) {
-      $title = $dom->createElement("title");
-      $title->nodeValue = htmlescape($info["title"]);
-      $channel->appendChild($title);
-    }
-    
-    if (isset($info["home"])) {
-      $link = $dom->createElement("link");
-      $link->nodeValue = $info["home"];
-      $channel->appendChild($link);
-    }
+    $title = $dom->createElement("title");
+    $title->nodeValue = htmlescape($info["title"]);
+    $channel->appendChild($title);
+  
+    $link = $dom->createElement("link");
+    $link->nodeValue = $info["home"];
+    $channel->appendChild($link);
     
     if (isset($info["description"])) {
       $desc = $dom->createElement("description");
       $desc->nodeValue = htmlescape($info["description"]);
       $channel->appendChild($desc);
+    }
+    
+    if (isset($info["image"])) {
+      $image = $dom->createElement("image");
+      $image->setAttribute("rdf:resource", $info["image"]["uri"]);
+      $channel->appendChild($image);
     }
     
     if (isset($info["updated"])) {
@@ -81,6 +83,39 @@ class Sabel_Rss_Writer_Rdf extends Sabel_Rss_Writer_Abstract
     $channel->appendChild($items);
     
     $rdf->appendChild($channel);
+  }
+  
+  protected function createImage($rdf)
+  {
+    $info = $this->info;
+    $dom  = $this->document;
+    
+    if (isset($info["image"])) {
+      $_image = $info["image"];
+      $url = $dom->createElement("url");
+      $url->nodeValue = $_image["uri"];
+      
+      $title = $dom->createElement("title");
+      if (isset($_image["title"])) {
+        $title->nodeValue = htmlescape($_image["title"]);
+      } else {
+        $title->nodeValue = $info["title"];
+      }
+      
+      $link = $dom->createElement("link");
+      if (isset($_image["link"])) {
+        $link->nodeValue = $_image["link"];
+      } else {
+        $link->nodeValue = $info["home"];
+      }
+      
+      $image = $dom->createElement("image");
+      $image->appendChild($title);
+      $image->appendChild($url);
+      $image->appendChild($link);
+      
+      $rdf->appendChild($image);
+    }
   }
   
   protected function createItems($rdf, $items)

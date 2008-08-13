@@ -53,12 +53,7 @@ abstract class Sabel_Rss_Reader_Abstract extends Sabel_Object implements Iterato
   abstract public function getLastUpdated();
   
   /**
-   * @return stdClass[]
-   */
-  abstract public function getItems();
-  
-  /**
-   * @return stdClass
+   * @return Sabel_ValueObject
    */
   abstract protected function toObject(Sabel_Xml_Element $element);
   
@@ -68,6 +63,19 @@ abstract class Sabel_Rss_Reader_Abstract extends Sabel_Object implements Iterato
   public function getItemElements()
   {
     return $this->items;
+  }
+  
+  /**
+   * @return Sabel_ValueObject[]
+   */
+  public function getItems()
+  {
+    $items = array();
+    foreach ($this->items as $i => $item) {
+      $items[] = $this->toObject($item);
+    }
+    
+    return $items;
   }
   
   public function current()

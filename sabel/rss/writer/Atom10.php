@@ -27,19 +27,15 @@ class Sabel_Rss_Writer_Atom10 extends Sabel_Rss_Writer_Abstract
     $feed = $dom->createElement("feed");
     $feed->setAttribute("xmlns", "http://www.w3.org/2005/Atom");
     
-    if (isset($info["title"])) {
-      $title = $dom->createElement("title");
-      $title->nodeValue = htmlescape($info["title"]);
-      $feed->appendChild($title);
-    }
+    $title = $dom->createElement("title");
+    $title->nodeValue = htmlescape($info["title"]);
+    $feed->appendChild($title);
     
-    if (isset($info["home"])) {
-      $link = $dom->createElement("link");
-      $link->setAttribute("rel",  "alternate");
-      $link->setAttribute("type", "text/html");
-      $link->setAttribute("href", $info["home"]);
-      $feed->appendChild($link);
-    }
+    $link = $dom->createElement("link");
+    $link->setAttribute("rel",  "alternate");
+    $link->setAttribute("type", "text/html");
+    $link->setAttribute("href", $info["home"]);
+    $feed->appendChild($link);
     
     if (isset($info["rss"])) {
       $link = $dom->createElement("link");

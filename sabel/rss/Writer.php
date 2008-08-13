@@ -52,21 +52,52 @@ class Sabel_Rss_Writer extends Sabel_Object
     } elseif (in_array($type, array("Rss", "Rdf", "Atom10", "Atom03"), true)) {
       $this->type = $type;
     } else {
-      $message = __METHOD__ . "() ";
+      $message = __METHOD__ . "() '{$type}' is not supported now.";
       throw new Sabel_Exception_Runtime($message);
     }
   }
   
+  /**
+   * @param array $info
+   *
+   * @return self
+   */
   public function setInfo(array $info)
   {
     $this->info = array_merge($this->info, $info);
+    
+    return $this;
   }
   
+  /**
+   * @param array $info
+   *
+   * @return self
+   */
+  public function setImage(array $info)
+  {
+    $this->info["image"] = $info;
+    
+    return $this;
+  }
+  
+  /**
+   * @param array $data
+   *
+   * @return self
+   */
   public function addItem(array $data)
   {
     $this->items[] = $data;
+    
+    return $this;
   }
   
+  /**
+   * @param int $length
+   *
+   * @return self
+   */
   public function setSummaryLength($length)
   {
     if (preg_match('/^[1-9][0-9]*$/', $length) === 1) {
@@ -75,8 +106,15 @@ class Sabel_Rss_Writer extends Sabel_Object
       $message = __METHOD__ . "() argument must be an integer.";
       throw new Sabel_Exception_Runtime($message);
     }
+    
+    return $this;
   }
   
+  /**
+   * @param string $path
+   *
+   * @return string
+   */
   public function output($path = null)
   {
     $items = $this->items;

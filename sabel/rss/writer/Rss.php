@@ -15,7 +15,6 @@ class Sabel_Rss_Writer_Rss extends Sabel_Rss_Writer_Abstract
   {
     $rss = $this->createRss();
     $this->createChannel($rss);
-    //$xml .= $this->createImage();
     $this->createItems($rss, $items);
     
     return $this->document->saveXML();
@@ -40,17 +39,13 @@ class Sabel_Rss_Writer_Rss extends Sabel_Rss_Writer_Abstract
     $dom     = $this->document;
     $channel = $dom->createElement("channel");
     
-    if (isset($info["title"])) {
-      $title = $dom->createElement("title");
-      $title->nodeValue = htmlescape($info["title"]);
-      $channel->appendChild($title);
-    }
-    
-    if (isset($info["home"])) {
-      $link = $dom->createElement("link");
-      $link->nodeValue = $info["home"];
-      $channel->appendChild($link);
-    }
+    $title = $dom->createElement("title");
+    $title->nodeValue = htmlescape($info["title"]);
+    $channel->appendChild($title);
+  
+    $link = $dom->createElement("link");
+    $link->nodeValue = $info["home"];
+    $channel->appendChild($link);
     
     if (isset($info["description"])) {
       $desc = $dom->createElement("description");
@@ -62,6 +57,32 @@ class Sabel_Rss_Writer_Rss extends Sabel_Rss_Writer_Abstract
       $date = $dom->createElement("lastBuildDate");
       $date->nodeValue = date("r", strtotime($info["updated"]));
       $channel->appendChild($date);
+    }
+    
+    if (isset($info["image"])) {
+      $_image = $info["image"];
+      $url = $dom->createElement("url");
+      $url->nodeValue = $_image["uri"];
+      
+      $title = $dom->createElement("title");
+      if (isset($_image["title"])) {
+        $title->nodeValue = htmlescape($_image["title"]);
+      } else {
+        $title->nodeValue = $info["title"];
+      }
+      
+      $link = $dom->createElement("link");
+      if (isset($_image["link"])) {
+        $link->nodeValue = $_image["link"];
+      } else {
+        $link->nodeValue = $info["home"];
+      }
+      
+      $image = $dom->createElement("image");
+      $image->appendChild($title);
+      $image->appendChild($url);
+      $image->appendChild($link);
+      $channel->appendChild($image);
     }
     
     $rss->appendChild($channel);
