@@ -11,10 +11,24 @@
  */
 class Install extends Sabel_Sakle_Task
 {
+  /**
+   * @var Sabel_Http_Request
+   */
   protected $client = null;
   
+  /**
+   * @var Sabel_Util_FileSystem
+   */
   protected $fs = null;
   
+  /**
+   * @var float
+   */
+  protected $version = null;
+  
+  /**
+   * @var array
+   */
   protected $addonRepositories = array(
     "http://www.sabel.jp/archives/addon",
   );
@@ -29,6 +43,10 @@ class Install extends Sabel_Sakle_Task
   {
     $args = $this->arguments;
     
+    if (Sabel_Console::hasOption("v", $args)) {
+      $this->version = Sabel_Console::getOption("v", $args);
+    }
+    
     if (Sabel_Console::hasOption("a", $args)) {
       $this->installAddon(Sabel_Console::getOption("a", $args));
     } elseif (Sabel_Console::hasOption("l", $args)) {  // library
@@ -42,34 +60,51 @@ class Install extends Sabel_Sakle_Task
   
   protected function installAddon($addon, $repository = "")
   {
+    $addon = lcfirst($addon);
     foreach ($this->addonRepositories as $repo) {
-      $url = $repo . "/{$addon}?type=xml&version=";
+      $url = $repo . "?name={$addon}&type=xml&version={$this->version}";
       
       try {
         $this->client->setUri($url);
         $response = @$this->client->request();
-        
-        if (($status = $response->getStatusCode()) === Sabel_Response::OK) {
-          $stobj = new Sabel_Response_Status($status);
-          $this->success($repo . ' : "' . $stobj . '"');
-          $this->_install($response->getContent());
-        } else {
-          $stobj = new Sabel_Response_Status($status);
-          $this->warning($repo . ' : "' . $stobj . '"');
-        }
+        $this->_installAddon($addon, $response->getContent());
       } catch (Exception $e) {
         $this->warning($e->getMessage() . " '{$repo}'");
       }
     }
   }
   
-  protected function _install($xml)
+  protected function _installAddon($name, $xml)
   {
-    $doc   = new Sabel_Xml_Document();
-    $root  = $doc->loadXML($xml);
-    $files = $root->getChildren("file");
+    $doc  = new Sabel_Xml_Document();
+    $root = $doc->loadXML($xml);
     
-    foreach ($files as $file) {
+    if ($error = $root->getChild("error")) {
+      $this->error($error->getNodeValue());
+      $this->error("install failed.");
+      return;
+    }
+    
+    $version   = $root->getChild("version")->getNodeValue();
+    $addonName = ucfirst($name);
+    $className = $addonName . "_Addon";
+    
+    if (class_exists($className, true)) {
+      eval ('$v = ' . $className . '::VERSION;');
+      if ($v === (float)$version) {
+        $this->message("{$addonName}_{$version} already installed.");
+        return;
+      } elseif ((float)$version > $v) {
+        $_v = (strpos($v, ".") === false) ? "{$v}.0" : $v;
+        $this->message("upgrade " . $addonName . " from {$_v} to {$version}.");
+      } else {
+        $this->message("nothing to install.");
+        return;
+      }
+    }
+    
+    $files = $root->getChildren("file");
+    foreach ($files as $i => $file) {
       $path = $file->getChild("path")->getNodeValue();
       $path = str_replace(":", DS, $path);
       $source = $file->getChild("source")->getNodeValue();
@@ -80,7 +115,9 @@ class Install extends Sabel_Sakle_Task
         $this->fs->getFile($path)->write($source)->save();
       }
       
-      $this->success("Install '{$path}'");
+      $this->success($path);
     }
+    
+    $this->success("install ok: {$addonName}_{$version}");
   }
 }

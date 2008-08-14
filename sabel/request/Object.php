@@ -53,9 +53,15 @@ class Sabel_Request_Object extends Sabel_Object implements Sabel_Request
     return $this;
   }
   
-  public function getUri()
+  public function getUri($withQuery = false)
   {
-    return $this->uri;
+    $uri = $this->uri;
+    
+    if ($withQuery && ($values = $this->fetchGetValues())) {
+      $uri .= "?" . http_build_query($values);
+    }
+    
+    return $uri;
   }
   
   /**
