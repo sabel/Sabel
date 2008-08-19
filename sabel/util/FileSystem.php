@@ -140,7 +140,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     }
     
     if ($this->isDir($file) || $this->isFile($file)) {
-      $message = "cannot create directory '{$file}': "
+      $message = "cannot create file '{$file}': "
                . "file or directory exists.";
       
       throw new Sabel_Exception_Runtime($message);
