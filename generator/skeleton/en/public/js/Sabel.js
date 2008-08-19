@@ -541,10 +541,10 @@ Sabel.String = new Sabel.Class(String, {
 	},
 
 	format: function(obj) {
-		var pat = /(?:#\{(\w+)\}|%(\w+)%)/g;
-		return this._string.replace(pat, function(target, key) {
+		var replaceFunc = function(target, key) {
 			return (obj[key] !== undefined) ? obj[key] : "";
-		});
+		};
+		return this._string.replace(/%(\w+)%/g, replaceFunc).replace(/#{(\w+)}/g, replaceFunc);
 	},
 
 	ucfirst: function() {
@@ -1281,20 +1281,26 @@ if (Sabel.UserAgent.isIE) {
 Sabel.Element.setStyle = function(element, styles) {
 	element = Sabel.get(element, false);
 
-	if (typeof styles === "string") {
+	if (arguments.length === 3) {
+		Sabel.Element._setStyle(element, styles, arguments[2]);
+	} else if (typeof styles === "string") {
 		element.style.cssText += ";" + styles;
 	} else {
 		for (var prop in styles) {
-			var method = "set" + new Sabel.String(prop).ucfirst();
-			if (typeof Sabel.Element[method] !== "undefined") {
-				Sabel.Element[method](element, styles[prop]);
-			} else {
-				element.style[prop] = styles[prop];
-			}
+			Sabel.Element._setStyle(element, prop, styles[prop]);
 		}
 	}
 
 	return element;
+};
+
+Sabel.Element._setStyle = function(element, property, value) {
+	var method = "set" + new Sabel.String(property).ucfirst();
+	if (typeof Sabel.Element[method] !== "undefined") {
+		Sabel.Element[method](element, value);
+	} else {
+		element.style[property] = value;
+	}
 };
 
 Sabel.Element.deleteStyle = function(element, styles) {
