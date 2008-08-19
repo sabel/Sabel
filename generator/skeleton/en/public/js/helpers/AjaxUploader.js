@@ -15,8 +15,11 @@ Sabel.PHP.AjaxUploader.prototype = {
 	message: "preparing transfer...",
 	errorMessage: "upload error.",
 	updateInterval: 200,  // msec
-	
+
 	uploadFrame: null,
+
+	successCallback: null,
+	errorCallback:   null,
 
 	incrementValue: 0,
 	totalSize:      0,
@@ -35,11 +38,14 @@ Sabel.PHP.AjaxUploader.prototype = {
 	_bindedGetProgress: null,
 	_bindedShowProgress: null,
 
-	init: function(form, uri, progress) {
+	init: function(form, uri, progress, successCallback, errorCallback) {
 		var self = this;
 
 		this.uri  = uri;
 		this.ajax = new Sabel.Ajax();
+
+		this.successCallback = successCallback || Sabel.emptyFunc;
+		this.errorCallback   = errorCallback || Sabel.emptyFunc;
 
 		this._bindedGetProgress  = Sabel.Function.bind(this.getProgress, this);
 		this._bindedShowProgress = Sabel.Function.bind(this.showProgress, this);
@@ -102,6 +108,8 @@ Sabel.PHP.AjaxUploader.prototype = {
 			Sabel.Element.remove(self.formElm);
 			Sabel.Element.remove(self.uploadFrame);
 		}, 0);
+
+		this.successCallback();
 	},
 
 	getProgress: function() {
@@ -127,6 +135,7 @@ Sabel.PHP.AjaxUploader.prototype = {
 				Sabel.Array.each(this.progressTexts, function(el) {
 					el.innerHTML = self.errorMessage;
 				});
+				this.errorCallback();
 				return Sabel.Element.remove(this.uploadFrame);
 			}
 
