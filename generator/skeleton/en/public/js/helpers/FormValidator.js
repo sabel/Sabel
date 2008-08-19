@@ -35,14 +35,14 @@ Sabel.PHP.FormValidator.prototype = {
   addValidator: function(el, column, errors) {
     var type = column.TYPE, v = this.validator;
 
-    if (column.NULLABLE == false) v.add(el, Sabel.Validator.Must(), Sabel.String.format(errors.nullable, column));
+    if (column.NULLABLE == false) v.add(el, Sabel.Validator.Must(), new Sabel.String(errors.nullable).format(column));
     if (type === "_INT") {
-      v.add(el, Sabel.Validator.Int(), Sabel.String.format(errors.numeric, column));
-      if (column.MIN) v.add(el, Sabel.Validator.Int({min: column.MIN}), Sabel.String.format(errors.minimum, column));
-      if (column.MAX) v.add(el, Sabel.Validator.Int({max: column.MAX}), Sabel.String.format(errors.maximum, column));
+      v.add(el, Sabel.Validator.Int(), new Sabel.String(errors.numeric).format(column));
+      if (column.MIN) v.add(el, Sabel.Validator.Int({min: column.MIN}), new Sabel.String(errors.minimum).format(column));
+      if (column.MAX) v.add(el, Sabel.Validator.Int({max: column.MAX}), new Sabel.String(errors.maximum).format(column));
     } else if (type === "_STRING") {
-      if (column.MIN) v.add(el, Sabel.Validator.String({min: column.MIN}), Sabel.String.format(errors.minlength, column));
-      if (column.MAX) v.add(el, Sabel.Validator.String({max: column.MAX}), Sabel.String.format(errors.maxlength, column));
+      if (column.MIN) v.add(el, Sabel.Validator.String({min: column.MIN}), new Sabel.String(errors.minlength).format(column));
+      if (column.MAX) v.add(el, Sabel.Validator.String({max: column.MAX}), new Sabel.String(errors.maxlength).format(column));
     }
   }
 };
