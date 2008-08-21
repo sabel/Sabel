@@ -194,22 +194,22 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   public function execute($action = null, $params = array())
   {
-    if ($action === null) $action = $this->action;
+    if ($action === null) {
+      $action = $this->action;
+    }
     
     if ($this->isReserved($action)) {
       $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
     } elseif ($this->isHiddenAction($action)) {
       $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
-    } else {
-      if ($this->isValidAction($action)) {
-        if (count($params) >= 1) {
-          call_user_func_array(array($this, $action), $params);
-        } else {
-          $this->$action();
-        }
-        
-        $this->executed = true;
+    } elseif ($this->isValidAction($action)) {
+      if (count($params) >= 1) {
+        call_user_func_array(array($this, $action), $params);
+      } else {
+        $this->$action();
       }
+      
+      $this->executed = true;
     }
     
     return $this;

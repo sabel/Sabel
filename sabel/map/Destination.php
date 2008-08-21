@@ -39,6 +39,18 @@ class Sabel_Map_Destination extends Sabel_Object
   }
   
   /**
+   * @return string
+   */
+  public function __toString()
+  {
+    return implode(", ", array(
+      "module: "     . $this->module,
+      "controller: " . $this->controller,
+      "action: "     . $this->action,
+    ));
+  }
+  
+  /**
    * @return boolean
    */
   public function hasModule()

@@ -16,7 +16,12 @@ class Processor_Request extends Sabel_Bus_Processor
     if ($bus->has("request")) {
       $request = $bus->get("request");
     } else {
-      $uri = (isset($_SERVER["REQUEST_URI"])) ? normalize_uri($_SERVER["REQUEST_URI"]) : "";
+      $uri = "";
+      if (isset($_SERVER["REQUEST_URI"])) {
+        l("REQUEST URI: " . $_SERVER["REQUEST_URI"]);
+        $uri = normalize_uri($_SERVER["REQUEST_URI"]);
+      }
+      
       $request = new Sabel_Request_Object($uri);
       
       if (SBL_SECURE_MODE) {

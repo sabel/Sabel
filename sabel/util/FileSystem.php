@@ -207,7 +207,10 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   
   public function copyTo($dest)
   {
-    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    if (!$this->isAbsolutePath($dest)) {
+      $dest = $this->path . DS . $dest;
+    }
+    
     $this->copy($this->path, $dest);
   }
   
@@ -222,7 +225,10 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
   
   public function moveTo($dest)
   {
-    if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
+    if (!$this->isAbsolutePath($dest)) {
+      $dest = $this->path . DS . $dest;
+    }
+    
     $this->move($this->path, $dest);
   }
   

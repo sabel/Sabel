@@ -18,7 +18,9 @@ class Processor_Initializer extends Sabel_Bus_Processor
     
     if (!defined("SBL_BATCH")) {
       // start session.
-      $bus->get("session")->start();
+      $session = $bus->get("session");
+      $session->start();
+      l("START SESSION: " . $session->getName() . "=" . $session->getId());
     }
     
     // default page title.

@@ -51,7 +51,7 @@ class Processor_Controller extends Sabel_Bus_Processor
       l("create controller '{$class}'");
       return new $class();
     } else {
-      l("controller '{$class}' not found");
+      l("controller '{$class}' not found", SBL_LOG_WARN);
       return null;
     }
   }
