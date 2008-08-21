@@ -4,6 +4,7 @@ class Config_Container extends Sabel_Container_Injection
 {
   public function configure()
   {
+    
   }
 }
 

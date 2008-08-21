@@ -8,13 +8,6 @@ if (!defined("TEST_CASE")) {
   error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
   
-  $pathToSabel = Sabel::getPath();
-  $includePath = get_include_path();
-  
-  if (!in_array($pathToSabel, explode(PATH_SEPARATOR, $includePath))) {
-    set_include_path($includePath . PATH_SEPARATOR . $pathToSabel);
-  }
-  
   if (isset($_SERVER["argv"][1])) {
     Sakle::run($_SERVER["argv"][1]);
   } else {
@@ -37,13 +30,11 @@ class Sakle
   {
     $args = $_SERVER["argv"];
     array_shift($args);
+    
     $class = array_shift($args);
+    unshift_include_path(RUN_BASE . DS . "tasks");
     
-    $pathToClass = RUN_BASE . DS . "tasks" . DS . $class . ".php";
-    
-    if (is_readable($pathToClass)) {
-      Sabel::fileUsing($pathToClass, true);
-      
+    if (class_exists($class, true)) {
       $ins = new $class();
       $ins->setArguments($args);
       

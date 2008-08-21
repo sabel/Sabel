@@ -49,8 +49,8 @@ unshift_include_path(Sabel::getPath());
 
 ############### INCLUDE CONFIGURATION FILES ################
 
-Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Bus.php",      true);
-Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Map.php",      true);
-Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Addon.php",    true);
-Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Database.php", true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Bus.php",       true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Map.php",       true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Addon.php",     true);
+Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Database.php",  true);
 Sabel::fileUsing(CONFIG_DIR_PATH . DS . "Container.php", true);
