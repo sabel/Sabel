@@ -47,6 +47,28 @@ class Sabel_ValueObject extends Sabel_Object
     return array_key_exists($key, $this->values);
   }
   
+  public function remove($key)
+  {
+    $ret = $this->get($key);
+    unset($this->values[$key]);
+    
+    return $ret;
+  }
+  
+  public function merge($values)
+  {
+    if (is_array($values)) {
+      $this->values = array_merge($this->values, $values);
+    } elseif ($values instanceof self) {
+      $this->values = array_merge($this->values, $values->toArray());
+    } else {
+      $message = __METHOD__ . "() argument must be an array or "
+               . "an instanceof Sabel_ValueObject";
+      
+      throw new Sabel_Exception_InvalidArgument($message);
+    }
+  }
+  
   public function toArray()
   {
     return $this->values;

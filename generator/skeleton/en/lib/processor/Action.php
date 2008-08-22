@@ -20,11 +20,10 @@ class Processor_Action extends Sabel_Bus_Processor
     
     if ($status->isFailure() || $redirector->isRedirected()) return;
     
-    $action  = $bus->get("destination")->getAction();
-    $request = $bus->get("request");
+    $action = $bus->get("destination")->getAction();
+    $controller->setAction($action);
     
     try {
-      $controller->setAction($action);
       $controller->initialize();
       
       if ($status->isFailure() || $redirector->isRedirected()) return;

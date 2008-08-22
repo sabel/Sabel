@@ -68,7 +68,6 @@ class Sabel_Storage_Memcache implements Sabel_Storage
       throw new Sabel_Exception_InvalidArgument($message);
     }
     
-    l("Memcache::store() " . $this->getKey($key) . " {$timeout}");
     $this->memcache->set($this->getKey($key), $value, false, $timeout);
   }
   

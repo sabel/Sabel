@@ -148,14 +148,14 @@ function uri($uriParameter, $secure = false, $absolute = false)
 
 function normalize_uri($uri)
 {
-  $uri = trim(preg_replace("/\/{2,}/", "/", $uri), "/");
+  $uri = trim(preg_replace("@/{2,}@", "/", $uri), "/");
   $parsedUrl = parse_url("http://localhost/{$uri}");
   return ltrim($parsedUrl["path"], "/");
 }
 
 function realempty($value)
 {
-  return ($value === null || $value === array() || $value === "");
+  return ($value === null || $value === array() || $value === "" || $value === false);
 }
 
 function dump()
@@ -190,6 +190,21 @@ function environment($str)
       return DEVELOPMENT;
     default:
       return null;
+  }
+}
+
+function is_natural_number($num)
+{
+  if (is_int($num)) {
+    return true;
+  } elseif (is_string($num)) {
+    if ($num === "0") {
+      return true;
+    } else {
+      return (preg_match('/^[1-9][0-9]*$/', $num) === 1);
+    }
+  } else {
+    return false;
   }
 }
 

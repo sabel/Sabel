@@ -37,7 +37,8 @@ abstract class Sabel_Bus_Processor extends Sabel_Object
   public function __construct($name)
   {
     if ($name === null || $name === "") {
-      throw new Sabel_Exception_InvalidArgument("name must be set.");
+      $message = __METHOD__ . "() name must be set.";
+      throw new Sabel_Exception_InvalidArgument($message);
     }
     
     $this->name = $name;

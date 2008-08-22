@@ -28,7 +28,7 @@ class Validator extends Sabel_Request_Validator
   
   public function integer($name, $value)
   {
-    if ($value !== null && preg_match('/^[1-9][0-9]*$/', $value) === 0) {
+    if ($value !== null && !ctype_digit($value)) {
       return $this->getDisplayName($name) . "は整数で入力してください";
     }
   }
@@ -38,6 +38,19 @@ class Validator extends Sabel_Request_Validator
     if ($value !== null && !is_numeric($value)) {
       return $this->getDisplayName($name) . "は数値で入力してください";
     }
+  }
+  
+  public function naturalNumber($name, $value)
+  {
+    if ($value !== null && !is_natural_number($value)) {
+      //return $this->getDisplayName($name) . "は自然数で入力してください";
+      return $this->getDisplayName($name) . "は整数で入力してください";
+    }
+  }
+  
+  public function nnumber($name, $value)
+  {
+    return $this->naturalNumber($name, $value);
   }
   
   protected function getDisplayName($name)

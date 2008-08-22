@@ -229,7 +229,7 @@ class Sabel_Bus extends Sabel_Object
       
       return true;
     } else {
-      return array_key_exists($key, $this->holder);
+      return isset($this->holder[$key]);
     }
   }
 }
