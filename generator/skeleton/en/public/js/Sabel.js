@@ -253,7 +253,7 @@ Sabel.UserAgent = new function() {
 		this.version = "unknown";
 	}
 	/*@end @*/
-		
+
 	this.isWindows = /Win/.test(ua);
 	this.isMac     = /Mac/.test(ua);
 	this.isLinux   = /Linux/.test(ua);
@@ -544,7 +544,7 @@ Sabel.String = new Sabel.Class(String, {
 		var replaceFunc = function(target, key) {
 			return (obj[key] !== undefined) ? obj[key] : "";
 		};
-		return this._string.replace(/%(\w+)%/g, replaceFunc).replace(/#{(\w+)}/g, replaceFunc);
+		return this._string.replace(/%(\w+)%/g, replaceFunc).replace(/#\{(\w+)\}/g, replaceFunc);
 	},
 
 	ucfirst: function() {
@@ -3089,7 +3089,13 @@ Sabel.Widget.Calendar.prototype = {
 			var cDate = tmpDate.getDate();
 
 			if (tmpDate.getMonth() === month) {
-				html.push("<div class='day" + cDate + " selectable'>" + cDate + "</div>");
+				if (tmpDate.getDay() === 0) {
+					html.push("<div class='day" + cDate + " selectable sunday'>" + cDate + "</div>");
+				} else if (tmpDate.getDay() === 6) {
+					html.push("<div class='day" + cDate + " selectable saturday'>" + cDate + "</div>");
+				} else {
+					html.push("<div class='day" + cDate + " selectable'>" + cDate + "</div>");
+				}
 			} else {
 				html.push("<div class='nonselectable'>" + cDate + "</div>");
 			}
