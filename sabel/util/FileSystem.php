@@ -184,6 +184,21 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     }
   }
   
+  public function remove($path = null)
+  {
+    if ($path === null) {
+      $path = $this->path;
+    } elseif (!$this->isAbsolutePath($path)) {
+      $path = $this->path . DS . $path;
+    }
+    
+    if ($this->isDir($path)) {
+      $this->rmdir($path);
+    } else {
+      unlink($path);
+    }
+  }
+  
   public function copy($src, $dest)
   {
     if (!$this->isAbsolutePath($dest)) $dest = $this->path . DS . $dest;
