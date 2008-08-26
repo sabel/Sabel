@@ -1351,6 +1351,16 @@ Sabel.Element.setOpacity = function(element, value) {
 	}
 };
 
+Sabel.Element.getBackGroundColor = function(el) {
+	var color;
+	do {
+		color = Sabel.Element.getStyle(el, "backgroundColor");
+		if (color !== "" && color !== "transparent" &&
+		   (color.indexOf("rgba") === -1 || color.slice(-2) !== "0)")) break;
+	} while (el = el.parentNode);
+	return (color !== "transparent") ? color : "#ffffff";
+};
+
 Sabel.Element.getCumulativeTop = function(element) {
 	element = Sabel.get(element, false);
 
@@ -1720,6 +1730,58 @@ Sabel.Element.contains = function(element, other) {
 		// Firefox
 		return !!(element.compareDocumentPosition(other) & element.DOCUMENT_POSITION_CONTAINED_BY);
 	}
+};
+
+Sabel.CSS = {};
+
+Sabel.CSS.rgbToHex = function(rgb) {
+	var hex = "#";
+	Sabel.Array.each(rgb, function(num) {
+		hex += new Sabel.String("%02x").sprintf(num.toString(16));
+	});
+	return hex;
+};
+
+Sabel.CSS.getRGB = function(color) {
+	if (color.indexOf("#") === 0) {
+		if (color.length === 4) {
+			return [
+				parseInt(color.charAt(1) + color.charAt(1), 16),
+				parseInt(color.charAt(2) + color.charAt(2), 16),
+				parseInt(color.charAt(3) + color.charAt(3), 16)
+			]
+		} else if (color.length === 7) {
+			return [
+				parseInt(color.subcolor(1,2), 16),
+				parseInt(color.subcolor(3,2), 16),
+				parseInt(color.subcolor(5,2), 16)
+			];
+		}
+	} else if (color.search("\(([0-9, ]+)\)") !== -1) {
+		return RegExp.$1.replace(/ /g, "").split(",");
+	} else if (typeof color === "Array" && color.length === 3) {
+		return color;
+	} else {
+		if (color in Sabel.CSS.colorNames) return Sabel.CSS.colorNames[color];
+	}
+	return null;
+}
+
+Sabel.CSS.colorNames = {
+	black:   [  0,   0,   0],
+	blue:    [  0,   0, 255],
+	green:   [  0, 128,   0],
+	lime:    [  0, 255,   0],
+	cyan:    [  0, 255, 255],
+	purple:  [128,   0, 128],
+	gray:    [128, 128, 128],
+	silver:  [192, 192, 192],
+	red:     [255,   0,   0],
+	magenta: [255,   0, 255],
+	orange:  [255, 165,   0],
+	pink:    [255, 192, 203],
+	yellow:  [255, 255,   0],
+	white:   [255, 255, 255]
 };
 
 Sabel.Object.extend(Sabel.Element, Sabel.Object.Methods);
@@ -2814,6 +2876,30 @@ Sabel.Effect.Slide.prototype = {
 		Sabel.Element.setStyle(element, {height: height});
 	}
 };
+
+Sabel.Effect.Highlight = new Sabel.Class({
+	init: function(element, to) {
+		var element = this.element = Sabel.get(element);
+		var from    = this.from    = Sabel.CSS.getRGB(element.getBackGroundColor());
+		var to      = this.to      = Sabel.CSS.getRGB(to || "yellow");
+		this.step   = [from[0] - to[0], from[1] - to[1], from[2] - to[2]];
+	},
+
+	start: function(state) {
+		this.exec(state);
+	},
+
+	end: function(state) {},
+
+	exec: function(state) {
+		var r = this.to[0] + parseInt(this.step[0] * state);
+		var g = this.to[1] + parseInt(this.step[1] * state);
+		var b = this.to[2] + parseInt(this.step[2] * state);
+		this.element.style.backgroundColor = Sabel.CSS.rgbToHex([r,g,b]);
+	}
+});
+
+
 Sabel.DragAndDrop = function() { this.initialize.apply(this, arguments); };
 
 Sabel.DragAndDrop.prototype = {
