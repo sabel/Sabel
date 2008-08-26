@@ -29,12 +29,12 @@ define("HELPERS_DIR_NAME", "helpers");
 define("LIB_DIR_NAME",     "lib");
 define("ADDON_DIR_NAME",   "addon");
 
-define("CONFIG_DIR_PATH",  RUN_BASE . DS . "config");
-define("MODULES_DIR_PATH", RUN_BASE . DS . MODULES_DIR_NAME);
-define("MODELS_DIR_PATH",  MODULES_DIR_PATH . DS . "models");
-define("LOG_DIR_PATH",     RUN_BASE . DS . "logs");
-define("CACHE_DIR_PATH",   RUN_BASE . DS . "cache");
-define("COMPILE_DIR_PATH", RUN_BASE . DS . "data" . DS . "compiled");
+define("CONFIG_DIR_PATH",   RUN_BASE . DS  . "config");
+define("MODULES_DIR_PATH",  RUN_BASE . DS  . MODULES_DIR_NAME);
+define("MODELS_DIR_PATH",   MODULES_DIR_PATH . DS . "models");
+define("LOG_DIR_PATH",      RUN_BASE . DS  . "logs");
+define("CACHE_DIR_PATH",    RUN_BASE . DS  . "cache");
+define("COMPILED_DIR_PATH", CACHE_DIR_PATH . DS . "templates");
 
 define("DEFAULT_LAYOUT_NAME", "layout");
 
