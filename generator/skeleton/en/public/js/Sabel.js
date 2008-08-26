@@ -1749,12 +1749,12 @@ Sabel.CSS.getRGB = function(color) {
 				parseInt(color.charAt(1) + color.charAt(1), 16),
 				parseInt(color.charAt(2) + color.charAt(2), 16),
 				parseInt(color.charAt(3) + color.charAt(3), 16)
-			]
+			];
 		} else if (color.length === 7) {
 			return [
-				parseInt(color.subcolor(1,2), 16),
-				parseInt(color.subcolor(3,2), 16),
-				parseInt(color.subcolor(5,2), 16)
+				parseInt(color.substr(1,2), 16),
+				parseInt(color.substr(3,2), 16),
+				parseInt(color.substr(5,2), 16)
 			];
 		}
 	} else if (color.search("\(([0-9, ]+)\)") !== -1) {
