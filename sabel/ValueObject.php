@@ -13,6 +13,19 @@ class Sabel_ValueObject extends Sabel_Object
 {
   protected $values = array();
   
+  public static function fromArray(array $values)
+  {
+    $self = new self();
+    $self->values = $values;
+    
+    return $self;
+  }
+  
+  public function toArray()
+  {
+    return $this->values;
+  }
+  
   public function set($key, $value)
   {
     $this->values[$key] = $value;
@@ -67,10 +80,5 @@ class Sabel_ValueObject extends Sabel_Object
       
       throw new Sabel_Exception_InvalidArgument($message);
     }
-  }
-  
-  public function toArray()
-  {
-    return $this->values;
   }
 }

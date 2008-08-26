@@ -13,7 +13,10 @@ class Sabel_Cookie_Http extends Sabel_Cookie_Abstract
 {
   private static $instance = null;
   
-  private function __construct() {}
+  private function __construct()
+  {
+    
+  }
   
   public static function create()
   {

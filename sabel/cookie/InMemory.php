@@ -15,7 +15,10 @@ class Sabel_Cookie_InMemory extends Sabel_Cookie_Abstract
   
   protected $cookies = array();
   
-  private function __construct() {}
+  private function __construct()
+  {
+    
+  }
   
   public static function create()
   {
