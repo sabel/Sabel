@@ -315,6 +315,10 @@ class Sabel_Container
     
     $aspects = $this->config->getAspects();
     
+    if (count($aspects) === 0) {
+      return $instance;
+    }
+    
     $interfaces = $this->getReflection($instance)->getInterfaces();
     
     if (count($interfaces) >= 1) {
