@@ -1505,22 +1505,22 @@ Sabel.Element.getDimensions = function(element, ignoreBorder) {
 		style.display    = oldD;
 	}
 
-	if (ignoreBorder == true) {
-		dimensions.width -= parseInt(Sabel.Element.getStyle(element, "borderLeftWidth"))
-		                  + parseInt(Sabel.Element.getStyle(element, "borderRightWidth"));
-		dimensions.height -= parseInt(Sabel.Element.getStyle(element, "borderTopWidth"))
-		                   + parseInt(Sabel.Element.getStyle(element, "borderBottomWidth"));
+	if (ignoreBorder === true) {
+		dimensions.width -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderLeftWidth")))
+		                  + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderRightWidth")));
+		dimensions.height -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderTopWidth")))
+		                   + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderBottomWidth")));
 	}
 
 	return dimensions;
 };
 
-Sabel.Element.getWidth = function(element) {
-	return Sabel.Element.getDimensions(element).width;
+Sabel.Element.getWidth = function(element, ignoreBorder) {
+	return Sabel.Element.getDimensions(element, ignoreBorder).width;
 };
 
-Sabel.Element.getHeight = function(element) {
-	return Sabel.Element.getDimensions(element).height;
+Sabel.Element.getHeight = function(element, ignoreBorder) {
+	return Sabel.Element.getDimensions(element, ignoreBorder).height;
 };
 
 Sabel.Element.getRegion = function(element) {
@@ -1624,24 +1624,24 @@ Sabel.Element.getChildElements = function(element, tagName) {
 };
 
 Sabel.Element.getFirstChild = function(element) {
-	return Sabel.Element.getChildElements(element)[0];
+	return new Sabel.Element(Sabel.Element.getChildElements(element)[0]);
 };
 
 Sabel.Element.getLastChild = function(element) {
 	var elms = Sabel.Element.getChildElements(element);
-	return elms[elms.length - 1];
+	return new Sabel.Element(elms[elms.length - 1]);
 };
 
 Sabel.Element.getNextSibling = function(element) {
 	while (element = element.nextSibling) {
-		if (element.nodeType === 1) return element;
+		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
 };
 
 Sabel.Element.getPreviousSibling = function(element) {
 	while (element = element.previousSibling) {
-		if (element.nodeType === 1) return element;
+		if (element.nodeType === 1) return new Sabel.Element(element);
 	}
 	return null;
 };
