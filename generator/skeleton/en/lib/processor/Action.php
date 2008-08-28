@@ -15,8 +15,8 @@ class Processor_Action extends Sabel_Bus_Processor
   public function execute($bus)
   {
     $status     = $bus->get("response")->getStatus();
-    $redirector = $bus->get("redirector");
     $controller = $bus->get("controller");
+    $redirector = Sabel_Redirector::create();
     
     if ($status->isFailure() || $redirector->isRedirected()) return;
     

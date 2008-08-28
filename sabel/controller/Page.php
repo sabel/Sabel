@@ -198,9 +198,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
       $action = $this->action;
     }
     
-    if ($this->isReserved($action)) {
-      $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
-    } elseif ($this->isHiddenAction($action)) {
+    if ($this->isReserved($action) || $this->isHiddenAction($action)) {
       $this->response->getStatus()->setCode(Sabel_Response::NOT_FOUND);
     } elseif ($this->isValidAction($action)) {
       if (count($params) >= 1) {

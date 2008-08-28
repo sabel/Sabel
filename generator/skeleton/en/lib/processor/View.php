@@ -45,8 +45,7 @@ class Processor_View extends Sabel_Bus_Processor
   
   public function execute($bus)
   {
-    $redirector = $bus->get("redirector");
-    if ($redirector->isRedirected()) return;
+    if (Sabel_Redirector::create()->isRedirected()) return;
     
     $controller = $bus->get("controller");
     $response   = $bus->get("response");

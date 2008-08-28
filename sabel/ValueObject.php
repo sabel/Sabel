@@ -50,6 +50,11 @@ class Sabel_ValueObject extends Sabel_Object
     return $this->get($key);
   }
   
+  public function __isset($key)
+  {
+    return ($this->get($key) !== null);
+  }
+  
   public function has($key)
   {
     return isset($this->values[$key]);

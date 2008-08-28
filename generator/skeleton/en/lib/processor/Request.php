@@ -51,10 +51,5 @@ class Processor_Request extends Sabel_Bus_Processor
       $bus->set("noLayout",      true);
       $bus->set("isAjaxRequest", true);
     }
-    
-    if (!$bus->has("redirector")) {
-      // create redirector
-      $bus->set("redirector", new Sabel_Redirector());
-    }
   }
 }
