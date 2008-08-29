@@ -17,7 +17,7 @@ class Sabel_Container
    * @var Sabel_Container_Injection
    */
   protected $config = null;
-  
+
   /**
    * @var array reflection cache
    */
@@ -53,7 +53,7 @@ class Sabel_Container
           $config = new $config();
         }
         
-        return new self($config);  
+        return new self($config);
       } elseif (isset(self::$configs["default"])) {
         return new self(self::$configs["default"]);
       } else {
@@ -263,9 +263,29 @@ class Sabel_Container
    */
   protected function injectToSetter($reflection, $sourceInstance)
   {
-    if (!$this->config->hasBinds()) return $sourceInstance;
+    if (self::hasConfig("default")) {
+      $defaultConfig = self::getConfig("default");
+      $defaultConfig->configure();
+    }
     
-    foreach ($this->config->getBinds() as $name => $binds) {
+    if (!$this->config->hasBinds() && !$defaultConfig->hasBinds()) {
+      return $sourceInstance;
+    }
+
+    if (self::hasConfig("default") && $defaultConfig->hasBinds()) {
+      $this->processSetter($reflection, $sourceInstance, $defaultConfig);
+    }
+
+    if ($this->config->hasBinds()) {
+      $this->processSetter($reflection, $sourceInstance, $this->config);
+    }
+
+    return $sourceInstance;
+  }
+
+  private function processSetter($reflection, $sourceInstance, $config)
+  {
+    foreach ($config->getBinds() as $name => $binds) {
       foreach ($binds as $bind) {
         if ($bind->hasSetter()) {
           $injectionMethod = $bind->getSetter();
@@ -281,8 +301,6 @@ class Sabel_Container
         }
       }
     }
-    
-    return $sourceInstance;
   }
   
   protected function recover($reflection, $instance)
