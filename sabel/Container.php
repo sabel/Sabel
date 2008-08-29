@@ -11,6 +11,11 @@
  */
 class Sabel_Container
 {
+  const DEFAULT_CONFIG = "default";
+  const SETTER_PREFIX  = "set";
+  
+  const INJECTION_ANNOTATION = "injection";
+  
   private static $configs = array();
   
   /**
@@ -263,8 +268,8 @@ class Sabel_Container
    */
   protected function injectToSetter($reflection, $sourceInstance)
   {
-    if (self::hasConfig("default")) {
-      $defaultConfig = self::getConfig("default");
+    if (self::hasConfig(self::DEFAULT_CONFIG)) {
+      $defaultConfig = self::getConfig(self::DEFAULT_CONFIG);
       $defaultConfig->configure();
 
       if ($defaultConfig->hasBinds()) {
@@ -281,19 +286,31 @@ class Sabel_Container
 
   private function processSetter($reflection, $sourceInstance, $config)
   {
-    foreach ($config->getBinds() as $name => $binds) {
+    foreach ($config->getBinds() as $ifName => $binds) {
       foreach ($binds as $bind) {
         if ($bind->hasSetter()) {
           $injectionMethod = $bind->getSetter();
         } else {
-          $injectionMethod = "set" . ucfirst($name);
+          $injectionMethod = self::SETTER_PREFIX . ucfirst($ifName);
         }
         
         $implClassName = $bind->getImplementation();
         
-        if (in_array($injectionMethod, get_class_methods($sourceInstance))) {
+        if (in_array($injectionMethod, get_class_methods($sourceInstance), true)) {
           $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
-          $sourceInstance->$injectionMethod($argumentInstance);
+
+          if ($reflection->hasMethod($injectionMethod)) {
+            $sourceInstance->$injectionMethod($argumentInstance);
+          }
+        } else {
+          foreach ($reflection->getMethods() as $method) {
+            $injection = $method->getAnnotation(self::INJECTION_ANNOTATION);
+            if (isset($injection[0][0]) && $injection[0][0] === $ifName) {
+              $injectionMethod = $method->getName();
+              $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
+              $sourceInstance->$injectionMethod($argumentInstance);
+            }
+          }
         }
       }
     }
