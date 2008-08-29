@@ -266,10 +266,10 @@ class Sabel_Container
     if (self::hasConfig("default")) {
       $defaultConfig = self::getConfig("default");
       $defaultConfig->configure();
-    }
-    
-    if (self::hasConfig("default") && $defaultConfig->hasBinds()) {
-      $this->processSetter($reflection, $sourceInstance, $defaultConfig);
+
+      if ($defaultConfig->hasBinds()) {
+        $this->processSetter($reflection, $sourceInstance, $defaultConfig);
+      }
     }
 
     if ($this->config->hasBinds()) {
