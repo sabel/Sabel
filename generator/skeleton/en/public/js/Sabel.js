@@ -291,9 +291,9 @@ Sabel.Object = {
 		return obj;
 	},
 
-	extend: function(child, parent, curry) {
+	extend: function(child, parent, curry, override) {
 		for (var prop in parent) {
-			if (typeof child[prop] !== "undefined") continue;
+			if (typeof child[prop] !== "undefined" && override !== true) continue;
 			if (typeof parent[prop] !== "function") {
 				child[prop] = parent[prop];
 			} else {
@@ -827,8 +827,8 @@ Sabel.Dom = {
 	}
 };
 
-Sabel.get   = Sabel.Dom.getElementById;
-Sabel.find  = Sabel.Dom.getElementsBySelector;
+Sabel.get  = Sabel.Dom.getElementById;
+Sabel.find = Sabel.Dom.getElementsBySelector;
 
 Sabel.Dom.Selector = {
 	patterns: {
@@ -911,7 +911,7 @@ Sabel.Dom.Selector = {
 			} else {
 				var el = document.getElementById(id);
 				for (var i = 0; i < nodes.length; i++) {
-					if (Sabel.Element.contains(nodes[i], el)) return [el];
+					if (Sabel.Element.isContain(nodes[i], el)) return [el];
 				}
 				return [];
 			}
@@ -1185,12 +1185,13 @@ Sabel.Dom.Selector._cache = {};
 Sabel.Element = function(element) {
 	if (typeof element === "string") {
 		element = document.createElement(element);
-	} else if (element._extended === true) {
-		return element;
 	} else if (typeof element !== "object") {
 		// @todo throw exception ??
 		return null;
+	} else if (element._extended === true) {
+		return element;
 	}
+
 	return Sabel.Object.extend(element, Sabel.Element, true);
 };
 
@@ -1211,7 +1212,7 @@ Sabel.Element.find = function(element, selector) {
 };
 
 Sabel.Element.show = function(element, value) {
-	Sabel.get(element, false).style.display = value || "inline";
+	Sabel.get(element, false).style.display = value || "";
 };
 
 Sabel.Element.hide = function(element) {
@@ -1506,10 +1507,12 @@ Sabel.Element.getDimensions = function(element, ignoreBorder) {
 	}
 
 	if (ignoreBorder === true) {
-		dimensions.width -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderLeftWidth")))
-		                  + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderRightWidth")));
-		dimensions.height -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderTopWidth")))
-		                   + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderBottomWidth")));
+		// parseFloat Fx3 fix
+		// || 0 IE7 fix
+		dimensions.width -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderLeftWidth")))||0
+		                  + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderRightWidth")))||0;
+		dimensions.height -= Math.round(parseFloat(Sabel.Element.getStyle(element, "borderTopWidth")))||0
+		                   + Math.round(parseFloat(Sabel.Element.getStyle(element, "borderBottomWidth")))||0;
 	}
 
 	return dimensions;
@@ -1613,22 +1616,34 @@ Sabel.Element.analyze = function(element) {
 	return buf.join(" ") + ">";
 };
 
+Sabel.Element.getParentNode = function(element, tagName) {
+	tagName = (tagName || "").toUpperCase();
+	element = Sabel.get(element, false);
+	while (element = element.parentNode) {
+		if (tagName === "" || tagName === elm.tagName)
+			return new Sabel.Element(element);
+	}
+	return null;
+};
+
 Sabel.Element.getChildElements = function(element, tagName) {
+	tagName = (tagName || "").toUpperCase();
 	var buf = new Array(), element = Sabel.get(element, false);
 	Sabel.Array.each(element.childNodes, function(elm) {
 		if (elm.nodeType === 1) {
-			if (tagName === undefined || tagName === elm.tagName) buf[buf.length] = elm;
+			if (tagName === "" || tagName === elm.tagName) buf[buf.length] = elm;
 		}
 	});
 	return buf;
 };
 
-Sabel.Element.getFirstChild = function(element) {
-	return new Sabel.Element(Sabel.Element.getChildElements(element)[0]);
+Sabel.Element.getFirstChild = function(element, tagName) {
+	element = Sabel.Element.getChildElements(element, tagName)[0];
+	return (element) ? new Sabel.Element(element) : null;
 };
 
-Sabel.Element.getLastChild = function(element) {
-	var elms = Sabel.Element.getChildElements(element);
+Sabel.Element.getLastChild = function(element, tagName) {
+	var elms = Sabel.Element.getChildElements(element, tagName);
 	return new Sabel.Element(elms[elms.length - 1]);
 };
 
@@ -1720,7 +1735,7 @@ Sabel.Element._getOfTypeNodeIndex = function(element, reverse) {
 	return element[propName];
 };
 
-Sabel.Element.contains = function(element, other) {
+Sabel.Element.isContain = function(element, other) {
 	if (element === document) element = document.body;
 
 	if (element.contains) {
@@ -1798,7 +1813,7 @@ Sabel.Elements = function(elements) {
 		elements = new Sabel.Array(elements);
 	}
 
-	return Sabel.Object.extend(elements, Sabel.Elements, true);
+	return Sabel.Object.extend(elements, Sabel.Elements, true, true);
 };
 
 Sabel.Elements._extended = true;
@@ -1823,6 +1838,12 @@ Sabel.Elements.stopObserve = function(elements, eventName, handler) {
 	Sabel.Array.each(elements, function(elm) {
 		Sabel.Element.stopObserve(elm, eventName, handler);
 	});
+};
+
+Sabel.Elements.each = function(elements, callback) {
+	var i = 0, el;
+	while(el = elements.item(i)) callback(el, i++);
+	return elements;
 };
 
 Sabel.Elements.unique = function(elements) {
@@ -2179,27 +2200,24 @@ Sabel.Validator.prototype = {
 			if (v.validate() === false) errors.push(v.errMsg);
 		}
 
-		var status = !(errors.length);
-		if (status === false) {
+		this.clearMessageField();
+
+		if (errors.length !== 0) {
 			this.insertMessage(errors);
 			Sabel.Event.preventDefault(e);
-		} else {
-			this.clearMessageField();
 		}
 	},
 
 	insertMessage: function(errors) {
-		this.clearMessageField();
-
 		this.errField.appendChild(this.getErrorMessage(errors));
-		Sabel.Element.setStyle(this.errField, {display: "inline"});
+		Sabel.Element.show(this.errField);
 
 		var yPos = Sabel.Element.getCumulativeTop(this.errField) - 20;
 		window.scroll(0, yPos);
 	},
 
 	clearMessageField: function() {
-		Sabel.Element.setStyle(this.errField, {display: "none"});
+		Sabel.Element.hide(this.errField);
 		this.errField.innerHTML = "";
 	},
 
@@ -3227,3 +3245,107 @@ Sabel.Widget.Calendar.prototype = {
 		this.rootElement.hide();
 	}
 }
+
+
+Sabel.Widget.Dropdown = new Sabel.Class({
+	hoverElements: null,
+	lastElement: null,
+	event: null,
+	moveTimer: null,
+	leaveTimer: null,
+
+	init: function() {
+		var root = Sabel.find("ul.sbl_dropdown").item(0);
+		var elms = root.find("> li");
+
+		this.setup();
+
+		elms.each(function(el) {
+			el.addClass("root");
+		});
+
+		root.find("li li").each(function(el) {
+			if (el.getFirstChild("UL")) el.addClass("icon");
+		});
+
+		var self = this;
+		root.observe("mouseenter", function() {
+			if (self.leaveTimer) clearTimeout(self.leaveTimer);
+			self.event = new Sabel.Event(document, "mousemove", function(e) {
+				if (self.moveTimer) clearTimeout(self.moveTimer);
+				self.moveTimer = setTimeout(function() {
+					self.moveHandler(e);
+				}, 10);
+			}, false, self);
+		});
+		root.observe("mouseleave", this.leaveHandler, false, this);
+		root.observe("mousedown", this.clickHandler, false, this);
+	},
+
+	moveHandler: function(e) {
+		var el = Sabel.Event.getTarget(e), child;
+		if (el.tagName == "SPAN") el = el.parentNode;
+		if (el.tagName !== "LI" || this.lastElement === el) return;
+		this.lastElement = el = new Sabel.Element(el);
+
+		this.hoverElements = Sabel.Array.inject(this.hoverElements, function(elm) {
+			if (Sabel.Element.isContain(elm, el) === false) {
+				elm.style.display = "none";
+				return false;
+			}
+			return true;
+		});
+
+		Sabel.find(".hover").each(function(elm) {
+			if (elm.isContain(el) === false)
+				elm.removeClass("hover");
+		});
+		el.addClass("hover");
+
+		if ((child = el.getFirstChild("UL")) === null) return;
+
+		if (el.hasClass("root")) {
+			child.setStyle({
+				display: "block",
+				top: el.getHeight(true) + "px",
+				left: el.getOffsetLeft() + "px"
+			});
+		} else {
+			var borderWidth = parseInt(el.getParentNode().getStyle("borderTopWidth"));
+			child.setStyle({
+				display: "block",
+				top: el.getOffsetTop() - borderWidth + "px",
+				left: el.getWidth() + "px"
+			});
+		}
+
+		this.hoverElements.unshift(child);
+	},
+
+	leaveHandler: function(e) {
+		var self = this;
+		this.leaveTimer = setTimeout(function() {
+			Sabel.Array.each(self.hoverElements, function(el) {
+				el.hide();
+			});
+			Sabel.find(".hover").each(function(el) {
+				el.removeClass("hover");
+			});
+			self.setup();
+		}, 250);
+	},
+
+	clickHandler: function(e) {
+		var el = new Sabel.Element(Sabel.Event.getTarget(e));
+		var href = (el.getFirstChild("span") || el).getAttribute("href");;
+		if (href !== null) location.href = href;
+	},
+
+	setup: function() {
+		this.hoverElements = new Sabel.Array();
+		this.lastElement   = null;
+		this.moveTimer     = null;
+		this.leaveTimer    = null;
+		if (this.event) this.event.stop();
+	}
+});
