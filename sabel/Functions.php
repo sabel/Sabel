@@ -141,6 +141,8 @@ function uri($uriParameter, $secure = false, $absolute = false)
   
   if (defined("URI_IGNORE")) {
     $uriPrefix .= $_SERVER["SCRIPT_NAME"];
+  } elseif (defined("NO_REWRITE")) {
+    $uriPrefix .= "?" . NO_REWRITE_PREFIX . "=";
   }
   
   return $uriPrefix . "/" . $context->getCandidate()->uri($uriParameter);
