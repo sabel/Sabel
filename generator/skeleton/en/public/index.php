@@ -16,7 +16,9 @@ if (!defined("ENVIRONMENT")) {
 if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
   $ignore = str_replace($_SERVER["SCRIPT_NAME"], "", $_SERVER["REQUEST_URI"]);
   define("URI_IGNORE", $ignore);
-  $_SERVER["REQUEST_URI"] = ltrim($ignore, "/");
+  $_SERVER["REQUEST_URI"] = ltrim($ignore, DS);
+} elseif (isset($_GET["_uri"])) {
+  $_SERVER["REQUEST_URI"] = $_GET["_uri"];
 }
 
 if (ENVIRONMENT === PRODUCTION) Sabel::init();
