@@ -268,10 +268,6 @@ class Sabel_Container
       $defaultConfig->configure();
     }
     
-    if (!$this->config->hasBinds() && !$defaultConfig->hasBinds()) {
-      return $sourceInstance;
-    }
-
     if (self::hasConfig("default") && $defaultConfig->hasBinds()) {
       $this->processSetter($reflection, $sourceInstance, $defaultConfig);
     }
