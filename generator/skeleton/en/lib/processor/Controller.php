@@ -98,6 +98,8 @@ class Processor_Controller extends Sabel_Bus_Processor
     $ignored = "";
     if (defined("URI_IGNORE")) {
       $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+    } elseif (defined("NO_REWRITE")) {
+      $ignored = "?" . NO_REWRITE_PREFIX . "=/";
     }
     
     $bus->get("response")->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
