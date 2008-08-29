@@ -22,6 +22,7 @@ define("SBL_LOG_ALL",   0xFF);
 
 define("TPL_SUFFIX", ".tpl");
 define("DS", DIRECTORY_SEPARATOR);
+define("NO_REWRITE_PREFIX", "_uri");
 
 define("MODULES_DIR_NAME", "app");
 define("VIEW_DIR_NAME",    "views");
