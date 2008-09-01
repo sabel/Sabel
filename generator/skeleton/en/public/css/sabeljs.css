@@ -175,7 +175,7 @@ ul.sbl_dropdown li ul li {
 }
 
 ul.sbl_dropdown li ul li.icon {
-  background-image: url("icon.gif");
+  background-image: url("../images/js/dropdownRightArrow.gif");
   background-repeat: no-repeat;
   background-position: 100% 50%;
 }
