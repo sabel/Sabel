@@ -1462,13 +1462,13 @@ Sabel.Element.getHeight = function(element, ignoreBorder) {
 	return Sabel.Element.getDimensions(element, ignoreBorder).height;
 };
 
-Sabel.Element.getRegion = function(element, t) {
+Sabel.Element.getRegion = function(element) {
 	element = Sabel.get(element);
 	if (element.parentNode === null || element.offsetParent === null) {
 		return false;
 	}
 
-	if (element.getBoundingClientRect && t != true) {
+	if (element.getBoundingClientRect) {
 		var rect = element.getBoundingClientRect();
 
 		var st = Sabel.Window.getScrollTop()  - document.documentElement.clientTop;
