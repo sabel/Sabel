@@ -1363,80 +1363,16 @@ Sabel.Element.getBackGroundColor = function(el) {
 };
 
 Sabel.Element.getCumulativeTop = function(element) {
-	element = Sabel.get(element, false);
-
-	var position = element.offsetTop;
-	while (element = element.offsetParent) {
-		position += element.offsetTop;
-
-		if (Sabel.UserAgent.isOpera === false) {
-			var border = parseInt(Sabel.Element.getStyle(element, "borderTopWidth")) || 0;
-			position += border;
-
-			if (Sabel.UserAgent.isMozilla) {
-				var of = Sabel.Element.getStyle(element, "overflow");
-				if (!Sabel.Array.include(["visible", "inherit"], of)) {
-					position += border;
-				}
-			}
-
-			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (document.compatMode === "CSS1Compat") {
-					var html = document.getElementsByTagName('html')[0];
-					position += parseInt(Sabel.Element.getStyle(html, "marginTop")) || 0;
-
-					if (Sabel.UserAgent.isIE) {
-						position += parseInt(Sabel.Element.getStyle(element, "marginTop")) || 0;
-						position += parseInt(Sabel.Element.getStyle(html, "borderTopWidth")) || 0;
-					}
-				}
-				break;
-			}
-		}
-	}
-	return position;
+	return Sabel.Element.getRegion(element).top;
 };
 
 Sabel.Element.getCumulativeLeft = function(element) {
-	element = Sabel.get(element, false);
-
-	var position = element.offsetLeft;
-	while (element = element.offsetParent) {
-		position += element.offsetLeft;
-
-		if (Sabel.UserAgent.isOpera === false) {
-			var border = parseInt(Sabel.Element.getStyle(element, "borderLeftWidth")) || 0;
-			position += border;
-
-			if (Sabel.UserAgent.isMozilla) {
-				var of = Sabel.Element.getStyle(element, "overflow");
-				if (!Sabel.Array.include(["visible", "inherit"], of)) {
-					position += border;
-				}
-			}
-
-			if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
-				if (document.compatMode === "CSS1Compat") {
-					var html = document.getElementsByTagName('html')[0];
-					position += parseInt(Sabel.Element.getStyle(html, "marginLeft")) || 0;
-
-					if (Sabel.UserAgent.isIE) {
-						position += parseInt(Sabel.Element.getStyle(element, "marginLeft")) || 0;
-						position += parseInt(Sabel.Element.getStyle(html, "borderLeftWidth")) || 0;
-					}
-				}
-				break;
-			}
-		}
-	}
-	return position;
+	return Sabel.Element.getRegion(element).left;
 };
 
 Sabel.Element.getCumulativePositions = function(element) {
-	return {
-		left: this.getCumulativeLeft(element),
-		top:  this.getCumulativeTop(element)
-	};
+	var rect = Sabel.Element.getRegion(element);
+	return {top: rect.top, left: rect.left};
 };
 
 Sabel.Element.getOffsetTop = function(element) {
@@ -1526,25 +1462,81 @@ Sabel.Element.getHeight = function(element, ignoreBorder) {
 	return Sabel.Element.getDimensions(element, ignoreBorder).height;
 };
 
-Sabel.Element.getRegion = function(element) {
-	element = Sabel.get(element, false);
+Sabel.Element.getRegion = function(element, t) {
+	element = Sabel.get(element);
 	if (element.parentNode === null || element.offsetParent === null) {
 		return false;
 	}
 
-	var wh = Sabel.Element.getDimensions(element);
+	if (element.getBoundingClientRect && t != true) {
+		var rect = element.getBoundingClientRect();
 
-	var top    = Sabel.Element.getCumulativeTop(element);
-	var left   = Sabel.Element.getCumulativeLeft(element);
-	var bottom = top + wh.height;
-	var right  = left + wh.width;
+		var st = Sabel.Window.getScrollTop()  - document.documentElement.clientTop;
+		var sl = Sabel.Window.getScrollLeft() - document.documentElement.clientLeft;
 
-	return {
-		top: top, right: right, bottom: bottom, left: left,
-		toString: function() {
-			return new Sabel.String("{top: #{top}, right: #{right}, bottom: #{bottom}, left: #{left}}").format(this);
+		return {
+			top: Math.round(rect.top + st), right: Math.round(rect.right + sl),
+			bottom: Math.round(rect.bottom + st), left: Math.round(rect.left + sl),
+			toString: function() {
+				return new Sabel.String("{top: #{top}, right: #{right}, bottom: #{bottom}, left: #{left}}").format(this);
+			}
+		};
+	} else {
+		var wh = Sabel.Element.getDimensions(element);
+		var rect = {top: element.offsetTop, left: element.offsetLeft};
+
+		var add = function(t, l) {
+			rect.top  += parseInt(t) || 0;
+			rect.left += parseInt(l) || 0;
+		};
+
+		while (element = element.offsetParent) {
+			add(element.offsetTop, element.offsetLeft);
+
+			if (Sabel.UserAgent.isOpera === false) {
+				var borderTop  = Sabel.Element.getStyle(element, "borderTopWidth");
+				var borderLeft = Sabel.Element.getStyle(element, "borderLeftWidth");
+				add(borderTop, borderLeft);
+
+				if (Sabel.UserAgent.isMozilla) {
+					var of = Sabel.Element.getStyle(element, "overflow");
+					if (!Sabel.Array.include(["visible", "inherit"], of)) {
+						add(borderTop, borderLeft);
+					}
+				}
+
+				if (Sabel.Array.include(["BODY", "HTML"], element.tagName)) {
+					if (document.compatMode === "CSS1Compat") {
+						var html = document.getElementsByTagName('html')[0];
+						add(
+							Sabel.Element.getStyle(html, "marginTop"),
+							Sabel.Element.getStyle(html, "marginLeft")
+						);
+
+						if (Sabel.UserAgent.isIE) {
+							add(
+								Sabel.Element.getStyle(element, "marginTop"),
+								Sabel.Element.getStyle(element, "marginLeft")
+							);
+							add(
+								Sabel.Element.getStyle(html, "borderTopWidth"),
+								Sabel.Element.getStyle(html, "borderLeftWidth")
+							);
+						}
+					}
+					break;
+				}
+			}
 		}
-	};
+
+		return {
+			top: rect.top, right: rect.left + wh.width,
+			bottom: rect.top + wh.height, left: rect.left,
+			toString: function() {
+				return new Sabel.String("{top: #{top}, right: #{right}, bottom: #{bottom}, left: #{left}}").format(this);
+			}
+		};
+	}
 };
 
 Sabel.Element.remove = function(element) {
@@ -3271,10 +3263,10 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		var self = this;
 		root.observe("mouseenter", function() {
 			if (self.leaveTimer) clearTimeout(self.leaveTimer);
-			self.event = new Sabel.Event(document, "mousemove", function(e) {
+			self.event = new Sabel.Event(document, "mousemove", function(event) {
 				if (self.moveTimer) clearTimeout(self.moveTimer);
 				self.moveTimer = setTimeout(function() {
-					self.moveHandler(e);
+					self.moveHandler(event);
 				}, 10);
 			}, false, self);
 		});
@@ -3282,8 +3274,8 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		root.observe("mousedown", this.clickHandler, false, this);
 	},
 
-	moveHandler: function(e) {
-		var el = Sabel.Event.getTarget(e), child;
+	moveHandler: function(event) {
+		var el = Sabel.Event.getTarget(event), child;
 		if (el.tagName == "SPAN") el = el.parentNode;
 		if (el.tagName !== "LI" || this.lastElement === el) return;
 		this.lastElement = el = new Sabel.Element(el);
