@@ -2,7 +2,7 @@
 
 if (!defined("TEST_CASE")) {
   define("RUN_BASE", getcwd());
-  require_once ("Sabel"  . DIRECTORY_SEPARATOR . "Sabel.php");
+  require_once (dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." .  DIRECTORY_SEPARATOR . "Sabel.php");
   require_once (RUN_BASE . DIRECTORY_SEPARATOR . "config" . DIRECTORY_SEPARATOR . "INIT.php");
   
   error_reporting(E_ALL|E_STRICT);
