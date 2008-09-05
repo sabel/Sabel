@@ -16,7 +16,7 @@ abstract class Tests extends Sabel_Sakle_Task
   {
     $this->defineEnvironmentByOption("e", TEST);
     
-    if (ENVIRONMENT === PRODUCTION) {
+    if ((ENVIRONMENT & PRODUCTION) > 0) {
       error_reporting(0);
     } else {
       error_reporting(E_ALL|E_STRICT);
