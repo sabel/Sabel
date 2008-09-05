@@ -241,7 +241,9 @@ class Sabel_Mail extends Sabel_Object
   
   public function generateContentId()
   {
-    list (, $host) = explode("@", $this->headers["From"]["address"]);
+    $fromAddress = $this->headers["From"]["address"];
+    $this->checkAddressFormat($fromAddress);
+    list (, $host) = explode("@", $fromAddress);
     return md5hash() . "@" . $host;
   }
   
@@ -393,7 +395,11 @@ class Sabel_Mail extends Sabel_Object
     }
     
     if (!$hasMessageId) {
-      list (, $host) = explode("@", $headers["From"]["address"]);
+      $fromAddress = $headers["From"]["address"];
+      
+      $this->checkAddressFormat($fromAddress);
+      
+      list (, $host) = explode("@", $fromAddress);
       $headers["Message-ID"] = "<" . md5hash() . "@{$host}>";
     }
     
@@ -436,5 +442,12 @@ class Sabel_Mail extends Sabel_Object
     }
     
     return implode(self::$EOL, $texts);
+  }
+  
+  protected function checkAddressFormat($address)
+  {
+    if (strpos($address, "@") === false) {
+      throw new Sabel_Mail_Exception("atmark not found in address: " . $address);
+    }
   }
 }
