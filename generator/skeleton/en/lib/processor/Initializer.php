@@ -24,7 +24,7 @@ class Processor_Initializer extends Sabel_Bus_Processor
     }
     
     // default page title.
-    $bus->get("response")->setResponse("pageTitle", "Phwittr");
+    $bus->get("response")->setResponse("pageTitle", "Sabel");
     
     // $request = $bus->get("request");
     // if ($request->isPost()) $this->trim($request);
