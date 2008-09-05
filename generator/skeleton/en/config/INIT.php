@@ -3,8 +3,8 @@
 ##################### ENVIRONMENTS ########################
 
 define("PRODUCTION",  0x01);
-define("TEST",        0x05);
-define("DEVELOPMENT", 0x0A);
+define("TEST",        0x02);
+define("DEVELOPMENT", 0x04);
 
 ###################### SECURE MODE ########################
 
@@ -14,8 +14,8 @@ define("SBL_SECURE_MODE", true);
 
 define("SBL_LOG_INFO",  0x01);
 define("SBL_LOG_DEBUG", 0x02);
-define("SBL_LOG_WARN",  0x03);
-define("SBL_LOG_ERR",   0x04);
+define("SBL_LOG_WARN",  0x04);
+define("SBL_LOG_ERR",   0x08);
 define("SBL_LOG_ALL",   0xFF);
 
 ############################################################

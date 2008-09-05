@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Map_Candidate
+class Sabel_Map_Candidate extends Sabel_Object
 {
   const MODULE     = "module";
   const CONTROLLER = "controller";

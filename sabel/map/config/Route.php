@@ -106,6 +106,8 @@ class Sabel_Map_Config_Route
   
   public function createUrl($params, $currentUris = array())
   {
+    unset($params["name"]);
+    
     $parts = explode("/", $this->uri);
     $firstIndex = null;
     

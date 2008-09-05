@@ -36,8 +36,10 @@ if (isset($_SERVER["argv"][1])) {
   $_SERVER["REQUEST_URI"] = "/";
 }
 
-if (ENVIRONMENT === PRODUCTION) Sabel::init();
-
-Sabel_Bus::create()->run(new Config_Bus());
-
-if (ENVIRONMENT === PRODUCTION) Sabel::shutdown();
+if ((ENVIRONMENT & PRODUCTION) > 0) {
+  Sabel::init();
+  Sabel_Bus::create()->run(new Config_Bus());
+  Sabel::shutdown();
+} else {
+  Sabel_Bus::create()->run(new Config_Bus());
+}

@@ -114,7 +114,7 @@ class Test_Application extends SabelTestCase
     
     $controller = $bus->get("controller");
     $this->assertTrue($controller->isRedirected());
-    $this->assertEquals("manage/login/prepare", $controller->getRedirector()->getUri());
+    $this->assertEquals("manage/login/prepare", $controller->getResponse()->getRedirector()->getUri());
   }
   
   public function testNotFound()
@@ -164,6 +164,7 @@ class Test_Application extends SabelTestCase
 class AppBusConfig extends Sabel_Bus_Config
 {
   protected $processors = array("request"     => "TestProcessor_Request",
+                                "response"    => "TestProcessor_Response",
                                 "session"     => "TestProcessor_Session",
                                 "router"      => "TestProcessor_Router",
                                 "addon"       => "TestProcessor_Addon",
@@ -171,7 +172,6 @@ class AppBusConfig extends Sabel_Bus_Config
                                 "helper"      => "TestProcessor_Helper",
                                 "initializer" => "TestProcessor_Initializer",
                                 "executer"    => "TestProcessor_Executer",
-                                "response"    => "TestProcessor_Response",
                                 "view"        => "TestProcessor_View");
   
   protected $configs = array("map"      => "AppTestMapConfig",

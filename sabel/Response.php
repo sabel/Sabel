@@ -67,6 +67,11 @@ interface Sabel_Response
   const NOT_EXTENDED                    = 510;
   
   public function getStatus();
+  public function getRedirector();
+  
+  public function isSuccess();     // 2xx
+  public function isRedirected();  // 3xx
+  public function isFailure();     // 4xx or 5xx
   
   public function getLocation();
   public function setLocation($to, $host = null);

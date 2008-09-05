@@ -148,7 +148,7 @@ class Sabel_I18n_Gettext
   
   private function getLocaleDirs()
   {
-    if (ENVIRONMENT === PRODUCTION) {
+    if ((ENVIRONMENT & PRODUCTION) > 0) {
       $cache = CACHE_DIR_PATH . DS . "sabel" . DS . "locale_dirs.php";
       
       if (is_file($cache)) {

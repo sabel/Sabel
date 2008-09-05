@@ -9,11 +9,13 @@ class TestProcessor_Initializer extends Sabel_Bus_Processor
     
     if (!defined("SBL_BATCH")) {
       // start session.
-      $bus->get("session")->start();
+      $session = $bus->get("session");
+      $session->start();
+      l("START SESSION: " . $session->getName() . "=" . $session->getId());
     }
     
     // default page title.
-    $bus->get("response")->setResponse("pageTitle", "Sabel");
+    $bus->get("response")->setResponse("pageTitle", "Phwittr");
     
     // $request = $bus->get("request");
     // if ($request->isPost()) $this->trim($request);

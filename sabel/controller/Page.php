@@ -23,14 +23,14 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   protected $response = null;
   
   /**
+   * @var Sabel_Response_Redirector
+   */
+  protected $redirect = null;
+  
+  /**
    * @var Sabel_Session
    */
   protected $session = null;
-  
-  /**
-   * @var Sabel_Redirector
-   */
-  protected $redirect = null;
   
   /**
    * @var object[]
@@ -139,6 +139,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function setResponse(Sabel_Response $response)
   {
     $this->response = $response;
+    $this->redirect = $response->getRedirector();
   }
   
   /**
@@ -165,24 +166,6 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   public function getSession()
   {
     return $this->session;
-  }
-  
-  /**
-   * @param Sabel_Redirector $redirector
-   *
-   * @return void
-   */
-  public function setRedirector(Sabel_Redirector $redirector)
-  {
-    $this->redirect = $redirector;
-  }
-  
-  /**
-   * @return Sabel_Redirector
-   */
-  public function getRedirector()
-  {
-    return $this->redirect;
   }
   
   /**

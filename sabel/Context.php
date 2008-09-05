@@ -11,11 +11,12 @@
  */
 class Sabel_Context extends Sabel_Object
 {
-  private static $context = null;
+  protected static $context = null;
   
-  private $bus       = null;
-  private $candidate = null;
-  private $exception = null;
+  protected $bus        = null;
+  protected $candidate  = null;
+  protected $redirector = null;
+  protected $exception  = null;
   
   public static function setContext($context)
   {
@@ -31,6 +32,16 @@ class Sabel_Context extends Sabel_Object
     return self::$context;
   }
   
+  public function setBus($bus)
+  {
+    $this->bus = $bus;
+  }
+  
+  public function getBus()
+  {
+    return $this->bus;
+  }
+  
   public function setCandidate($candidate)
   {
     $this->candidate = $candidate;
@@ -41,14 +52,14 @@ class Sabel_Context extends Sabel_Object
     return $this->candidate;
   }
   
-  public function setBus($bus)
+  public function setRedirector($redirector)
   {
-    $this->bus = $bus;
+    $this->redirector = $redirector;
   }
   
-  public function getBus()
+  public function getRedirector()
   {
-    return $this->bus;
+    return $this->redirector;
   }
   
   public function setException($exception)

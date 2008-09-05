@@ -29,10 +29,12 @@ if (strpos($_SERVER["SCRIPT_NAME"], "/index.php") >= 1) {
   define("NO_REWRITE", true);
 }
 
-if (ENVIRONMENT === PRODUCTION) Sabel::init();
-
-echo Sabel_Bus::create()->run(new Config_Bus());
-
-if (ENVIRONMENT === PRODUCTION) Sabel::shutdown();
+if ((ENVIRONMENT & PRODUCTION) > 0) {
+  Sabel::init();
+  echo Sabel_Bus::create()->run(new Config_Bus());
+  Sabel::shutdown();
+} else {
+  echo Sabel_Bus::create()->run(new Config_Bus());
+}
 
 ob_flush();

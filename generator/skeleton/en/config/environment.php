@@ -10,7 +10,7 @@ if (!defined("ENVIRONMENT")) define("ENVIRONMENT", DEVELOPMENT);
 /**
  * error_reporting settings.
  */
-if (ENVIRONMENT === DEVELOPMENT) {
+if ((ENVIRONMENT & DEVELOPMENT) > 0) {
   error_reporting(E_ALL|E_STRICT);
   define("SBL_LOG_LEVEL", SBL_LOG_ALL);
 } else {

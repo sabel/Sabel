@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Paginate
+ * Paginator
  *
  * @category   DB
  * @package    lib
@@ -9,7 +9,7 @@
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Paginate extends Sabel_Object
+class Paginator extends Sabel_Object
 {
   /**
    * @var object Sabel_Db_Model or Sabel_Db_Join

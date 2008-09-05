@@ -14,11 +14,11 @@ class Processor_Action extends Sabel_Bus_Processor
 {
   public function execute($bus)
   {
-    $status     = $bus->get("response")->getStatus();
+    $response   = $bus->get("response");
+    $status     = $response->getStatus();
     $controller = $bus->get("controller");
-    $redirector = Sabel_Redirector::create();
     
-    if ($status->isFailure() || $redirector->isRedirected()) return;
+    if ($response->isFailure() || $response->isRedirected()) return;
     
     $action = $bus->get("destination")->getAction();
     $controller->setAction($action);
@@ -26,7 +26,7 @@ class Processor_Action extends Sabel_Bus_Processor
     try {
       $controller->initialize();
       
-      if ($status->isFailure() || $redirector->isRedirected()) return;
+      if ($response->isFailure() || $response->isRedirected()) return;
       
       $controller->execute();
     } catch (Exception $e) {

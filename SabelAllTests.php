@@ -6,8 +6,8 @@ define("DS", DIRECTORY_SEPARATOR);
 
 define("SBL_LOG_INFO",  0x01);
 define("SBL_LOG_DEBUG", 0x02);
-define("SBL_LOG_WARN",  0x03);
-define("SBL_LOG_ERR",   0x04);
+define("SBL_LOG_WARN",  0x04);
+define("SBL_LOG_ERR",   0x08);
 define("SBL_LOG_ALL",   0xFF);
 define("SBL_LOG_LEVEL", SBL_LOG_ALL);
 
@@ -32,8 +32,8 @@ define("MODULES_DIR_PATH", TEST_APP_DIR . DS . "app");
 define("COMPILE_DIR_PATH", TEST_APP_DIR . DS . "data" . DS . "compiled");
 
 define("PRODUCTION",  0x01);
-define("TEST",        0x05);
-define("DEVELOPMENT", 0x0A);
+define("TEST",        0x02);
+define("DEVELOPMENT", 0x04);
 define("ENVIRONMENT", TEST);
 define("TPL_SUFFIX",  ".tpl");
 define("SBL_SECURE_MODE", true);
@@ -64,7 +64,6 @@ require_once ("Test/Bus/Tests.php");
 require_once ("Test/Request/Tests.php");
 require_once ("Test/Response/Tests.php");
 require_once ("Test/Controller/Tests.php");
-require_once ("Test/Redirector.php");
 require_once ("Test/Util/Tests.php");
 require_once ("Test/View/Tests.php");
 require_once ("Test/Map/Tests.php");
@@ -103,7 +102,6 @@ class SabelAllTests
     
     $suite->addTest(Test_Object::suite());
     $suite->addTest(Test_Console::suite());
-    $suite->addTest(Test_Redirector::suite());
     $suite->addTest(Test_Bus_Tests::suite());
     $suite->addTest(Test_Map_Tests::suite());
     $suite->addTest(Test_Request_Tests::suite());

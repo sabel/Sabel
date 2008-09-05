@@ -157,7 +157,7 @@ class Sabel_Bus extends Sabel_Object
       
       l(PHP_EOL . $msg, SBL_LOG_ERR);
       
-      if (ENVIRONMENT === DEVELOPMENT) {
+      if ((ENVIRONMENT & DEVELOPMENT) > 0) {
         echo nl2br($msg);
       }
     }

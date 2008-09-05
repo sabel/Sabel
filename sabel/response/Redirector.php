@@ -1,21 +1,16 @@
 <?php
 
 /**
- * Sabel_Redirector
+ * Sabel_Response_Redirector
  *
- * @category   Core
+ * @category   Response
  * @package    org.sabel.core
  * @author     Mori Reo <mori.reo@sabel.jp>
  * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Redirector extends Sabel_Object
+class Sabel_Response_Redirector extends Sabel_Object
 {
-  /**
-   * @var self
-   */
-  protected static $instance = null;
-  
   /**
    * @var string
    */
@@ -35,20 +30,6 @@ class Sabel_Redirector extends Sabel_Object
    * @var array
    */
   protected $parameters = array();
-  
-  private function __construct()
-  {
-    
-  }
-  
-  public static function create()
-  {
-    if (self::$instance === null) {
-      self::$instance = new self();
-    }
-    
-    return self::$instance;
-  }
   
   /**
    * @return boolean

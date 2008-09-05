@@ -396,9 +396,7 @@ class Sabel_Mail extends Sabel_Object
     
     if (!$hasMessageId) {
       $fromAddress = $headers["From"]["address"];
-      
       $this->checkAddressFormat($fromAddress);
-      
       list (, $host) = explode("@", $fromAddress);
       $headers["Message-ID"] = "<" . md5hash() . "@{$host}>";
     }

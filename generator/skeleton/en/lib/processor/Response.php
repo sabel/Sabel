@@ -11,14 +11,14 @@
  */
 class Processor_Response extends Sabel_Bus_Processor
 {
-  protected $beforeEvents = array("controller" => "initResponseObject");
+  protected $afterEvents = array("action" => "afterAction");
   
-  public function initResponseObject($bus)
+  public function execute($bus)
   {
     $bus->set("response", new Sabel_Response_Object());
   }
   
-  public function execute($bus)
+  public function afterAction($bus)
   {
     $response = $bus->get("response");
     $response->setResponses(array_merge(
@@ -30,13 +30,13 @@ class Processor_Response extends Sabel_Bus_Processor
       $exception = Sabel_Context::getContext()->getException();
       if (!is_object($exception)) return;
       
-      $eol = (ENVIRONMENT === DEVELOPMENT) ? "<br />" : PHP_EOL;
+      $eol = ((ENVIRONMENT & DEVELOPMENT) > 0) ? "<br />" : PHP_EOL;
       $msg = get_class($exception) . ": "
            . $exception->getMessage()  . $eol
            . "At: " . date("r") . $eol . $eol
            . Sabel_Exception_Printer::printTrace($exception, $eol, true);
       
-      if (ENVIRONMENT === PRODUCTION) {
+      if ((ENVIRONMENT & PRODUCTION) > 0) {
         
       } else {
         $response->setResponse("exception_message", $msg);
@@ -48,6 +48,39 @@ class Processor_Response extends Sabel_Bus_Processor
   
   public function shutdown($bus)
   {
-    $bus->get("response")->outputHeader();
+    $response = $bus->get("response");
+    $redirector = $response->getRedirector();
+    if (!$redirector->isRedirected()) return;
+    
+    if (($url = $redirector->getUrl()) !== "") {
+      $response->setLocation($url);
+    } else {
+      $session   = $bus->get("session");
+      $token     = $bus->get("request")->getValueWithMethod("token");
+      $hasToken  = !empty($token);
+      $hasParams = $redirector->hasParameters();
+      
+      if (!$hasToken) {
+        $to = $redirector->getUri();
+      } elseif ($hasParams) {
+        $to = $redirector->getUri() . "&token={$token}";
+      } else {
+        $to = $redirector->getUri() . "?token={$token}";
+      }
+      
+      if ($session->isStarted() && !$session->isCookieEnabled()) {
+        $glue = ($hasToken || $hasParams) ? "&" : "?";
+        $to  .= $glue . $session->getName() . "=" . $session->getId();
+      }
+      
+      $ignored = "";
+      if (defined("URI_IGNORE")) {
+        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+      }
+      
+      $response->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
+    }
+    
+    $response->outputHeader();
   }
 }

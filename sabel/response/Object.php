@@ -13,23 +13,43 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
 {
   protected $httpVersion = "1.0";
   protected $status      = null;
+  protected $redirector  = null;
   protected $location    = "";
   protected $headers     = array();
   protected $responses   = array();
   
-  public function __construct($statusClassName = "Sabel_Response_Status")
+  protected $statusClass     = "Sabel_Response_Status";
+  protected $redirectorClass = "Sabel_Response_Redirector";
+  
+  public function __construct()
   {
-    $this->status = new $statusClassName();
-    
-    if (!$this->status instanceof Sabel_Response_Status) {
-      $message = __METHOD__ . "() Status object must be an instance of Sabel_Response_Status.";
-      throw new Sabel_Exception_InvalidArgument($message);
-    }
+    $this->setUpStatus();
+    $this->setUpRedirector();
   }
   
   public function getStatus()
   {
     return $this->status;
+  }
+  
+  public function getRedirector()
+  {
+    return $this->redirector;
+  }
+  
+  public function isSuccess()
+  {
+    return $this->status->isSuccess();
+  }
+  
+  public function isRedirected()
+  {
+    return ($this->redirector->isRedirected() || $this->status->isRedirect());
+  }
+  
+  public function isFailure()
+  {
+    return $this->status->isFailure();
   }
   
   public function setHttpVersion($version)
@@ -124,5 +144,31 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   public function getLocation()
   {
     return $this->location;
+  }
+  
+  protected function setUpStatus()
+  {
+    $class = $this->statusClass;
+    $this->status = new $class();
+    
+    if (!$this->status instanceof Sabel_Response_Status) {
+      $message = __METHOD__ . "() Status object must be an "
+               . "instance of Sabel_Response_Status.";
+      
+      throw new Sabel_Exception_Runtime($message);
+    }
+  }
+  
+  protected function setUpRedirector()
+  {
+    $class = $this->redirectorClass;
+    $this->redirector = new $class();
+    
+    if (!$this->redirector instanceof Sabel_Response_Redirector) {
+      $message = __METHOD__ . "() Redirector object must be an "
+               . "instance of Sabel_Response_Redirector.";
+      
+      throw new Sabel_Exception_Runtime($message);
+    }
   }
 }

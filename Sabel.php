@@ -133,7 +133,6 @@ final class Sabel
     require ($SABEL . "Request.php");
     require ($SABEL . "Session.php");
     require ($SABEL . "Response.php");
-    require ($SABEL . "Redirector.php");
     require ($SABEL . "View.php");
     
     $BUS     = $SABEL . "bus"        . DIRECTORY_SEPARATOR;
@@ -154,6 +153,7 @@ final class Sabel
     
     require ($RESP . "Object.php");
     require ($RESP . "Status.php");
+    require ($RESP . "Redirector.php");
     require ($RESP . "Header.php");
     
     require ($SESSION . "Abstract.php");
