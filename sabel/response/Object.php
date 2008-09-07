@@ -21,7 +21,7 @@ class Sabel_Response_Object extends Sabel_Object implements Sabel_Response
   protected $statusClass     = "Sabel_Response_Status";
   protected $redirectorClass = "Sabel_Response_Redirector";
   
-  public function __construct()
+  public final function __construct()
   {
     $this->setUpStatus();
     $this->setUpRedirector();

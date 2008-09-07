@@ -78,7 +78,7 @@ class Sabel_Map_Candidate extends Sabel_Object
       }
     }
     
-    $name = (isset($parameters["name"])) ? $parameters["name"] : $this->name;
+    $name  = (isset($parameters["name"])) ? $parameters["name"] : $this->name;
     $route = Sabel_Map_Configurator::getRoute($name);
     return $route->createUrl($parameters, array_merge($this->destination, $this->uriParameters));
   }
