@@ -228,7 +228,7 @@ Sabel.UserAgent = new function() {
 	if (this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua)) {
 		this.isMozilla = true;
 		this.version = parseFloat(RegExp.$1);
-	} else if (this.isChrome = /Chrome\/([\d.\+)/.test(ua)) {
+	} else if (this.isChrome = /Chrome\/([\d.]+)/.test(ua)) {
 		this.version = RegExp.$1;
 	} else if (this.isSafari = /Safari\/([\d.]+)/.test(ua)) {
 		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
@@ -834,11 +834,11 @@ Sabel.Dom = {
 
 		if (result.snapshotLength) {
 			var buf = new Array(result.snapshotLength), i = 0, tmp;
-			while(buf[i] = result.snapshotItem(i++));
-			result = Sabel.Elements(buf);
+			while(tmp = result.snapshotItem(i)) buf[i++] = tmp;
+			return new Sabel.Elements(buf);
+		} else {
+			return new Sabel.Elements();
 		}
-
-		return result;
 	}
 };
 
