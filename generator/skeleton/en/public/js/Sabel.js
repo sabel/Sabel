@@ -210,6 +210,7 @@ Sabel.UserAgent = new function() {
 	this.isMozilla = false;
 	this.isSafari  = false;
 	this.isOpera   = false;
+	this.isChrome  = false;
 
 	/*@cc_on
 	@if (@_jscript)
@@ -227,6 +228,8 @@ Sabel.UserAgent = new function() {
 	if (this.isFirefox = /(?:Firefox|Minefield)\/([\d.]+)/.test(ua)) {
 		this.isMozilla = true;
 		this.version = parseFloat(RegExp.$1);
+	} else if (this.isChrome = /Chrome\/([\d.\+)/.test(ua)) {
+		this.version = RegExp.$1;
 	} else if (this.isSafari = /Safari\/([\d.]+)/.test(ua)) {
 		var build = parseInt(ua.substring(ua.lastIndexOf("/") + 1));
 		if (build >= 526) {
@@ -824,11 +827,24 @@ Sabel.Dom = {
 			elms = elms.concat(method([root]));
 		});
 		return Sabel.Elements(Sabel.Elements.unique(elms));
+	},
+
+	getElementsByXPath: function(xpath, root) {
+		var result = document.evaluate(xpath, root || document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+
+		if (result.snapshotLength) {
+			var buf = new Array(result.snapshotLength), i = 0, tmp;
+			while(buf[i] = result.snapshotItem(i++));
+			result = Sabel.Elements(buf);
+		}
+
+		return result;
 	}
 };
 
-Sabel.get  = Sabel.Dom.getElementById;
-Sabel.find = Sabel.Dom.getElementsBySelector;
+Sabel.get   = Sabel.Dom.getElementById;
+Sabel.find  = Sabel.Dom.getElementsBySelector;
+Sabel.xpath = Sabel.Dom.getElementsByXPath;
 
 Sabel.Dom.Selector = {
 	patterns: {
@@ -1209,6 +1225,22 @@ Sabel.Element.get = function(element, id) {
 
 Sabel.Element.find = function(element, selector) {
 	return Sabel.Dom.getElementsBySelector(selector, Sabel.get(element, false));
+};
+
+Sabel.Element.append = function(element, child, text, attributes) {
+	element = Sabel.get(element);
+
+	if (typeof child === "string") {
+		child = document.createElement(child);
+		if (text) child.appendChild(document.createTextNode(text));
+		if (attributes) {
+			for (var name in attributes)
+				child.setAttribute(name, attributes[name]);
+		}
+	}
+
+	element.appendChild(new Sabel.Element(child));
+	return child;
 };
 
 Sabel.Element.show = function(element, value) {
