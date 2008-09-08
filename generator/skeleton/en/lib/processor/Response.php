@@ -50,35 +50,36 @@ class Processor_Response extends Sabel_Bus_Processor
   {
     $response = $bus->get("response");
     $redirector = $response->getRedirector();
-    if (!$redirector->isRedirected()) return;
     
-    if (($url = $redirector->getUrl()) !== "") {
-      $response->setLocation($url);
-    } else {
-      $session   = $bus->get("session");
-      $token     = $bus->get("request")->getValueWithMethod("token");
-      $hasToken  = !empty($token);
-      $hasParams = $redirector->hasParameters();
-      
-      if (!$hasToken) {
-        $to = $redirector->getUri();
-      } elseif ($hasParams) {
-        $to = $redirector->getUri() . "&token={$token}";
+    if ($redirector->isRedirected()) {
+      if (($url = $redirector->getUrl()) !== "") {
+        $response->setLocation($url);
       } else {
-        $to = $redirector->getUri() . "?token={$token}";
+        $session   = $bus->get("session");
+        $token     = $bus->get("request")->getValueWithMethod("token");
+        $hasToken  = !empty($token);
+        $hasParams = $redirector->hasParameters();
+        
+        if (!$hasToken) {
+          $to = $redirector->getUri();
+        } elseif ($hasParams) {
+          $to = $redirector->getUri() . "&token={$token}";
+        } else {
+          $to = $redirector->getUri() . "?token={$token}";
+        }
+        
+        if ($session->isStarted() && !$session->isCookieEnabled()) {
+          $glue = ($hasToken || $hasParams) ? "&" : "?";
+          $to  .= $glue . $session->getName() . "=" . $session->getId();
+        }
+        
+        $ignored = "";
+        if (defined("URI_IGNORE")) {
+          $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
+        }
+        
+        $response->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
       }
-      
-      if ($session->isStarted() && !$session->isCookieEnabled()) {
-        $glue = ($hasToken || $hasParams) ? "&" : "?";
-        $to  .= $glue . $session->getName() . "=" . $session->getId();
-      }
-      
-      $ignored = "";
-      if (defined("URI_IGNORE")) {
-        $ignored = ltrim($_SERVER["SCRIPT_NAME"], "/") . "/";
-      }
-      
-      $response->setLocation($ignored . $to, $_SERVER["SERVER_NAME"]);
     }
     
     $response->outputHeader();
