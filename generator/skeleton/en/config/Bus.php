@@ -5,6 +5,7 @@ class Config_Bus extends Sabel_Bus_Config
   protected $logging    = false;
   
   protected $processors = array("request"     => "Processor_Request",
+                                "response"    => "Processor_Response",
                                 "router"      => "Processor_Router",
                                 "session"     => "Processor_Session",
                                 "addon"       => "Processor_Addon",
@@ -12,13 +13,11 @@ class Config_Bus extends Sabel_Bus_Config
                                 "helper"      => "Processor_Helper",
                                 "initializer" => "Processor_Initializer",
                                 "action"      => "Processor_Action",
-                                "response"    => "Processor_Response",
                                 "view"        => "Processor_View");
   
   protected $interfaces = array("request"     => "Sabel_Request",
-                                "session"     => "Sabel_Session",
                                 "response"    => "Sabel_Response",
-                                "redirector"  => "Sabel_Redirector",
+                                "session"     => "Sabel_Session",
                                 "view"        => "Sabel_View",
                                 "controller"  => "Sabel_Controller_Page");
   
