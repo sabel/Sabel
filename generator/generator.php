@@ -79,9 +79,7 @@ class SabelScaffold
   
   public function chmod()
   {
-    $dirs = array("cache", "cache" . DS . "sabel",
-                  "data" , "data"  . DS . "compiled",
-                  "logs");
+    $dirs = array("cache", "cache" . DS . "sabel", "data" , "logs");
     
     foreach ($dirs as $dir) {
       chmod($this->targetDir . DS . $dir, 0777);
