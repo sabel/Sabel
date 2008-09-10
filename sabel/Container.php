@@ -40,12 +40,20 @@ class Sabel_Container
   
   protected $instance = array();
   
+  protected static $aspectConfig = null;
+  
   /**
    *
    * @param mixed $config object | string
    */
   public static function create($config = null)
   {
+    if (self::$aspectConfig === null) {
+      if (class_exists("Config_Aspect", true)) {
+        self::$aspectConfig = new Config_Aspect();
+      }
+    }
+    
     if ($config === null) return new self();
     
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
@@ -341,6 +349,25 @@ class Sabel_Container
       throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
     }
     
+    if (!interface_exists("Sabel_Aspect_Joinpoint", true)) {
+      $SABEL_ASPECT = "sabel" . DIRECTORY_SEPARATOR . "aspect" . DIRECTORY_SEPARATOR;
+      
+      require ($SABEL_ASPECT . "Interfaces.php");
+      require ($SABEL_ASPECT . "Matchers.php");
+      require ($SABEL_ASPECT . "Pointcuts.php");
+      require ($SABEL_ASPECT . "Advisors.php");
+      require ($SABEL_ASPECT . "Introduction.php");
+      require ($SABEL_ASPECT . "Interceptors.php");
+    }
+    
+    $reflection = $this->getReflection($instance);
+    
+    $resultInstance = $this->processAnnotatedAspect($instance, $reflection);
+    
+    if ($resultInstance !== null) {
+      return $resultInstance;
+    }
+    
     $className = get_class($instance);
     $adviceClasses = array();
     
@@ -350,7 +377,7 @@ class Sabel_Container
       return $instance;
     }
     
-    $interfaces = $this->getReflection($instance)->getInterfaces();
+    $interfaces = $reflection->getInterfaces();
     
     if (count($interfaces) >= 1) {
       foreach ($aspects as $aspect) {
@@ -381,6 +408,52 @@ class Sabel_Container
     $weaverClass = $this->config->getWeaver();
     $factory = new Sabel_Aspect_RegexFactory();
     return $factory->build($weaverClass, $instance, $adviceClasses)->getProxy();
+  }
+  
+  protected function processAnnotatedAspect($instance, $reflection)
+  {
+    if (!$reflection->hasAnnotation("use")) {
+      return null;
+    }
+    
+    $classAnnot = $reflection->getAnnotation("use");
+    
+    if (!isset($classAnnot[0][0]) && $classAnnot[0][0] !== "aspect") {
+      return null;
+    }
+    
+    if (self::$aspectConfig === null) {
+      throw new Sabel_Exception_Runtime("Config_Aspect not found. can't proceed aspect process");
+    }
+    
+    $configs = self::$aspectConfig->configure();
+    
+    if (!is_array($configs)) {
+      throw new Sabel_Exception_Runtime("Config_Aspect::configure() must be return array");
+    }
+    
+    $weaver = new Sabel_Aspect_StaticWeaver($instance);
+    
+    foreach ($reflection->getMethods() as $method) {
+      $methodAnnots = $method->getAnnotations();
+        
+      foreach ($methodAnnots as $methodAnnotName => $v) {
+        if (array_key_exists($methodAnnotName, $configs)) {
+          
+          $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+          $advisor->setClassMatchPattern("/" . $reflection->getName() . "/");
+          $methodName = $method->getName();
+          
+          $interceptor = $configs[$methodAnnotName][0];
+          $advisor->setMethodMatchPattern("/" . $methodName . "/");
+          
+          $advisor->addAdvice(new $interceptor());
+          $weaver->addAdvisor($advisor);
+        }
+      }
+    }
+    
+    return $weaver->getProxy();
   }
   
   protected function newInstanceWithConstruct($reflection, $className)

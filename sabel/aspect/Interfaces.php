@@ -11,13 +11,6 @@
  */
 
 /**
- * @see org.aopalliance.aop.Advice
- */
-interface Sabel_Aspect_Advice
-{
-}
-
-/**
  * @see org.aopalliance.aop.Joinpoint
  */
 interface Sabel_Aspect_Joinpoint
@@ -49,13 +42,6 @@ interface Sabel_Aspect_MethodInvocation extends Sabel_Aspect_Invocation
   public function getMethod();
 }
 
-/**
- * @see org.aopalliance.aop.Interceptor
- */
-interface Sabel_Aspect_Interceptor extends Sabel_Aspect_Advice
-{
-}
-
 interface Sabel_Aspect_BeforeAdvice extends Sabel_Aspect_Advice
 {
 }
@@ -66,14 +52,6 @@ interface Sabel_Aspect_AfterAdvice extends Sabel_Aspect_Advice
 
 interface Sabel_Aspect_ThrowsAdvice extends Sabel_Aspect_Advice
 {
-}
-
-/**
- * @see org.aopalliance.aop.MethodInterceptor
- */
-interface Sabel_Aspect_MethodInterceptor extends Sabel_Aspect_Interceptor
-{
-  public function invoke(Sabel_Aspect_MethodInvocation $invocation);
 }
 
 interface Sabel_Aspect_Advisor

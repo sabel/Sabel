@@ -55,18 +55,7 @@ abstract class Sabel_Container_Injection implements Sabel_Config
    * @return Sabel_Container_Bind
    */
   public function aspect($className)
-  {
-    if (!interface_exists("Sabel_Aspect_Advice")) {
-      $SABEL_ASPECT = "sabel" . DIRECTORY_SEPARATOR . "aspect" . DIRECTORY_SEPARATOR;
-      
-      require ($SABEL_ASPECT . "Interfaces.php");
-      require ($SABEL_ASPECT . "Matchers.php");
-      require ($SABEL_ASPECT . "Pointcuts.php");
-      require ($SABEL_ASPECT . "Advisors.php");
-      require ($SABEL_ASPECT . "Introduction.php");
-      require ($SABEL_ASPECT . "Interceptors.php");
-    }
-    
+  {    
     $aspect = new Sabel_Container_Aspect($className);
     $this->aspects[$className] = $aspect;
     

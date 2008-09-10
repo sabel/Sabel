@@ -5,8 +5,8 @@ class Sabel_Aspect_RegexFactory
   private $weaver = null;
   private $advice = null;
   
-  private $advisorClass = "Sabel_Aspect_RegexMatcherPointcutAdvisor";
-  private $annotatedClass = ".+";
+  private $advisorClass     = "Sabel_Aspect_RegexMatcherPointcutAdvisor";
+  private $annotatedClass   = ".+";
   private $interceptorClass = "Sabel_Aspect_PlainObjectAdviceInterceptor";
   
   private $methodPatterns = array();
