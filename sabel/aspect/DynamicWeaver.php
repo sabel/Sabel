@@ -9,7 +9,7 @@ class Sabel_Aspect_DynamicWeaver extends Sabel_Aspect_AbstractWeaver
     }
     
     if (!is_object($this->target)) {
-      if (class_exists($this->target)) {
+      if (class_exists($this->target, true)) {
         $this->target = new $this->target();
       }
     }

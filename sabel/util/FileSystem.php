@@ -17,6 +17,10 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
       $this->path = (DS === '\\') ? "C:\\" : "/";
     } else {
       $this->path = realpath($base);
+      
+      if ($this->path === false) {
+        trigger_error("no such file or directory.", E_USER_WARNING);
+      }
     }
   }
   
