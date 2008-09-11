@@ -139,7 +139,7 @@ class Sabel_Rss_Writer extends Sabel_Object
       $info["home"] = "http://" . $_SERVER["SERVER_NAME"] . "/";
     }
     
-    if ($info["updated"] === "") {
+    if ($info["updated"] === "" && isset($items[0])) {
       $info["updated"] = $items[0]["date"];
     }
     
