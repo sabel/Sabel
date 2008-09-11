@@ -12,6 +12,11 @@
 class Sabel_Xml_Document extends Sabel_Object
 {
   /**
+   * @var self[]
+   */
+  protected static $instances = array();
+  
+  /**
    * @var DOMDocument
    */
   protected $document = null;
@@ -50,6 +55,11 @@ class Sabel_Xml_Document extends Sabel_Object
     
     $this->config   = $config;
     $this->document = $document;
+  }
+  
+  public static function create(array $config = array())
+  {
+    return self::$instances[] = new self($config);
   }
   
   public function getRawDocument()
