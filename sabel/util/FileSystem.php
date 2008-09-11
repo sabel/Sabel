@@ -42,7 +42,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     return $this;
   }
   
-  public function ls($path = null)
+  public function ls($path = null, $ignoreDotFiles = false)
   {
     if ($path === null) {
       $path = $this->path;
@@ -53,7 +53,32 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     $items = array();
     foreach (scandir($path) as $item) {
       if ($item === "." || $item === "..") continue;
+      if ($ignoreDotFiles && $item{0} === ".") continue;
       $items[] = $item;
+    }
+    
+    return $items;
+  }
+  
+  public function getList($path = null, $ignoreDotFiles = false)
+  {
+    if ($path === null) {
+      $path = $this->path;
+    } elseif (!$this->isAbsolutePath($path)) {
+      $path = $this->path . DS . $path;
+    }
+    
+    $items = array();
+    foreach (scandir($path) as $item) {
+      if ($item === "." || $item === "..") continue;
+      if ($ignoreDotFiles && $item{0} === ".") continue;
+      
+      $path = $this->path . DS . $item;
+      if (is_file($path)) {
+        $items[] = new Sabel_Util_FileSystem_File($path);
+      } else {
+        $items[] = new self($path);
+      }
     }
     
     return $items;
@@ -87,7 +112,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     }
   }
   
-  public function getDirectoryNames()
+  public function getDirectoryNames($ignoreDotFiles = false)
   {
     clearstatcache();
     
@@ -96,6 +121,7 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
     
     foreach (scandir($path) as $item) {
       if ($item === "." || $item === "..") continue;
+      if ($ignoreDotFiles && $item{0} === ".") continue;
       if (is_dir($path . DS . $item)) $dirs[] = $item;
     }
     
@@ -148,22 +174,6 @@ class Sabel_Util_FileSystem extends Sabel_Util_FileSystem_Base
       $this->_mkfile($file, $permission);
       return new Sabel_Util_FileSystem_File($file);
     }
-  }
-  
-  public function getList()
-  {
-    $items = array();
-    foreach (scandir($this->path) as $item) {
-      if ($item === "." || $item === "..") continue;
-      $path = $this->path . DS . $item;
-      if (is_file($path)) {
-        $items[] = new Sabel_Util_FileSystem_File($path);
-      } else {
-        $items[] = new self($path);
-      }
-    }
-    
-    return $items;
   }
   
   public function rmdir($directory = null)
