@@ -25,7 +25,7 @@ class Sabel_Test_Fixture extends Sabel_Object
   
   protected function insert($data)
   {
-    $this->model->insert($data);
+    return $this->model->insert($data);
   }
   
   protected function deleteAll()
