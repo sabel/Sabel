@@ -138,7 +138,7 @@ SQL;
   private function getForeignKeys50($tblName)
   {
     $schemaName = $this->schemaName;
-    $result     = $this->driver->execute("SHOW CREATE TABLE $tblName");
+    $result     = $this->driver->execute("SHOW CREATE TABLE `{$tblName}`");
     $createSql  = $result[0]["Create Table"];
     
     preg_match_all("/CONSTRAINT .+ FOREIGN KEY (.+)/", $createSql, $matches);
