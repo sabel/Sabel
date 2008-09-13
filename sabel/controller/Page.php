@@ -55,20 +55,7 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * @var array
    */
-  protected $reserved = array();
-  
-  /**
-   * @var array
-   */
   protected $attributes = array();
-  
-  /**
-   * default constructer of page controller
-   */
-  public final function __construct()
-  {
-    $this->reserved = get_class_methods(__CLASS__);
-  }
   
   /**
    * initialize a controller.
@@ -82,20 +69,30 @@ abstract class Sabel_Controller_Page extends Sabel_Object
   /**
    * @param object $object
    */
-  public function mixin($object)
+  public function mixin($className)
   {
-    if (is_object($object)) {
-      $className  = get_class($object);
-      $reflection = new ReflectionClass($object);
-      $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
-      foreach ($methods as $method) {
-        if ($method->getDeclaringClass()->name === $className) {
-          $this->mixins[$method->name] = $object;
-        }
+    if (is_string($className)) {
+      $instance = new $className();
+    } elseif (is_object($className)) {
+      $instance  = $className;
+      $className = get_class($instance);
+    }
+    
+    if ($instance instanceof self) {
+      $properties = array("request", "response", "redirect", "session");
+      foreach ($properties as $property) {
+        $instance->$property = $this->$property;
       }
-    } else {
-      $message = __METHOD__ . "() argument must be an object.";
-      throw new Sabel_Exception_InvalidArgument($message);
+    } elseif (method_exists($instance, "setController")) {
+      $instance->setController($this);
+    }
+    
+    $reflection = new ReflectionClass($instance);
+    $methods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
+    foreach ($methods as $method) {
+      if ($method->getDeclaringClass()->name === $className) {
+        $this->mixins[$method->name] = $instance;
+      }
     }
   }
   
@@ -213,7 +210,13 @@ abstract class Sabel_Controller_Page extends Sabel_Object
    */
   private function isReserved($action)
   {
-    return in_array($action, $this->reserved, true);
+    static $reserved = array();
+    
+    if (empty($reserved)) {
+      $reserved = get_class_methods(__CLASS__);
+    }
+    
+    return in_array($action, $reserved, true);
   }
   
   /**
