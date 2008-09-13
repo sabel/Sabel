@@ -1,5 +1,7 @@
 <?php
 
+define("FIXTURE_DIR", RUN_BASE . DS . "tests" . DS . "fixture");
+
 /**
  * Fixture
  *
@@ -11,13 +13,6 @@
  */
 class Fixture extends Sabel_Sakle_Task
 {
-  protected $fixturesDir = "";
-  
-  public function initialize()
-  {
-    $this->fixturesDir = RUN_BASE . DS . "tests" . DS . "fixture";
-  }
-  
   public function run()
   {
     if (count($this->arguments) < 2) {
@@ -41,15 +36,15 @@ class Fixture extends Sabel_Sakle_Task
     $fixtureName = $this->arguments[1];
     
     if ($fixtureName === "all") {
-      foreach (scandir($this->fixturesDir) as $item) {
+      foreach (scandir(FIXTURE_DIR) as $item) {
         if ($item === "." || $item === "..") continue;
-        Sabel::fileUsing($this->fixturesDir . DS . $item, true);
+        Sabel::fileUsing(FIXTURE_DIR . DS . $item, true);
         $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
         $instance  = new $className();
         $instance->$method();
       }
     } else {
-      $filePath = $this->fixturesDir . DS . $fixtureName . ".php";
+      $filePath = FIXTURE_DIR . DS . $fixtureName . ".php";
       if (Sabel::fileUsing($filePath, true)) {
         $className = "Fixture_" . $fixtureName;
         $instance  = new $className();
@@ -158,7 +153,7 @@ class Fixture extends Sabel_Sakle_Task
       $code[] = "  }";
       $code[] = "}";
       
-      $path = $this->fixturesDir . DS . $mdlName . ".php";
+      $path = FIXTURE_DIR . DS . $mdlName . ".php";
       file_put_contents($path, implode(PHP_EOL, $code));
       
       $this->success("export $mdlName Records to '" . substr($path, strlen(RUN_BASE) + 1) . "'");
