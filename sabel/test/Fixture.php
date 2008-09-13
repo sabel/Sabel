@@ -23,6 +23,11 @@ class Sabel_Test_Fixture extends Sabel_Object
     $this->model = MODEL($this->modelName);
   }
   
+  public function initialize()
+  {
+    
+  }
+  
   protected function insert($data)
   {
     return $this->model->insert($data);

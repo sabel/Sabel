@@ -41,6 +41,7 @@ class Fixture extends Sabel_Sakle_Task
         Sabel::fileUsing(FIXTURE_DIR . DS . $item, true);
         $className = "Fixture_" . substr($item, 0, strlen($item) - 4);
         $instance  = new $className();
+        $instance->initialize();
         $instance->$method();
       }
     } else {
@@ -48,6 +49,7 @@ class Fixture extends Sabel_Sakle_Task
       if (Sabel::fileUsing($filePath, true)) {
         $className = "Fixture_" . $fixtureName;
         $instance  = new $className();
+        $instance->initialize();
         $instance->$method();
         $this->success(ucfirst($method) . " " . $fixtureName);
       } else {
@@ -75,6 +77,7 @@ class Fixture extends Sabel_Sakle_Task
     }
     
     $this->arguments = $arguments;
+    
     return $method;
   }
   
