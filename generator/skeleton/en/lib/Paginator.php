@@ -166,29 +166,30 @@ class Paginator extends Sabel_Object
   
   protected function _setOrderBy($getValues)
   {
+    $orderValues  = array();
     $orderColumns = $this->orderColumns;
-    if ($orderColumns === false) return;
     
-    $orderValues = array();
-    $oColNum = count($orderColumns);
-    $pageKey = $this->attributes["pageKey"];
-    
-    if ($this->isJoin) {
-      $columns = $this->model->getModel()->getColumnNames();
-    } else {
-      $columns = $this->model->getColumnNames();
-    }
-    
-    foreach ($getValues as $key => $val) {
-      if (preg_match('/^[A-Z]/', $key{0}) === 1 && strpos($key, "_") !== false) {
-        list ($mname, $cname) = explode("_", $key, 2);
-        $key = $mname . "." . $cname;
+    if ($orderColumns !== false) {
+      $oColNum = count($orderColumns);
+      $pageKey = $this->attributes["pageKey"];
+      
+      if ($this->isJoin) {
+        $columns = $this->model->getModel()->getColumnNames();
       } else {
-        if (!in_array($key, $columns, true)) continue;
+        $columns = $this->model->getColumnNames();
       }
       
-      if ($oColNum === 0 || in_array($key, $orderColumns, true)) {
-        $orderValues[$key] = $val;
+      foreach ($getValues as $key => $val) {
+        if (preg_match('/^[A-Z]/', $key{0}) === 1 && strpos($key, "_") !== false) {
+          list ($mname, $cname) = explode("_", $key, 2);
+          $key = $mname . "." . $cname;
+        } else {
+          if (!in_array($key, $columns, true)) continue;
+        }
+        
+        if ($oColNum === 0 || in_array($key, $orderColumns, true)) {
+          $orderValues[$key] = $val;
+        }
       }
     }
     

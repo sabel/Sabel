@@ -11,6 +11,8 @@
  */
 class Sabel_Db_Validator extends Sabel_Object
 {
+  const OMITTED = "__OMITTED__";
+  
   /**
    * @var string
    */
@@ -21,25 +23,20 @@ class Sabel_Db_Validator extends Sabel_Object
    */
   protected $dateRegex = '/^[12]\d{3}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/';
   
-  protected
-    $model   = null,
-    $mdlName = null;
-  
-  protected
-    $validateConfig = null;
-  
-  protected
-    $messages      = array(),
-    $displayNames  = array();
-  
-  protected
-    $errors  = array(),
-    $ignores = array();
+  protected $model = null;
+  protected $mdlName = null;
+  protected $isUpdate = false;
+  protected $validateConfig = null;
+  protected $messages = array();
+  protected $displayNames = array();
+  protected $errors = array();
+  protected $ignores = array();
   
   public function __construct(Sabel_Db_Model $model)
   {
     $this->model    = $model;
     $this->mdlName  = $model->getName();
+    $this->isUpdate = $model->isSelected();
     $this->messages = Sabel_Db_Validate_Config::getMessages();
     $this->localizedNames = Sabel_Db_Model_Localize::getColumnNames($this->mdlName);
   }
@@ -56,7 +53,7 @@ class Sabel_Db_Validator extends Sabel_Object
   
   public function hasError()
   {
-    return !(empty($this->errors));
+    return !empty($this->errors);
   }
   
   public function validate($ignores = array())
@@ -71,15 +68,18 @@ class Sabel_Db_Validator extends Sabel_Object
     foreach ($columns as $name => $column) {
       if (in_array($name, $ignores)) continue;
       
+      $value = $column->value;
       if ($column->increment) {
-        if ($column->value === null || $this->model->isSelected()) continue;
-        $message = "don't set a value in '{$column->name}'(sequence column).";
+        if ($value === self::OMITTED || $value === null || $this->isUpdate) continue;
+        $message = __METHOD__ . "() don't set a value in '{$column->name}'(sequence column).";
         throw new Sabel_Db_Exception($message);
       }
       
-      $value = $column->value;
-      
-      if (!$this->nullable($column)) {
+      if ($this->nullable($column)) {
+        if ($value === self::OMITTED) {
+          $column->value = $value = null;
+        }
+      } else {
         $this->errors[] = $this->errorMessage($name, $value, "nullable");
         continue;
       }
@@ -105,7 +105,7 @@ class Sabel_Db_Validator extends Sabel_Object
         }
       }
       
-      if ($column->isNumeric() && $column->value !== null) {
+      if ($column->isNumeric() && $value !== null) {
         if (!$this->maximum($column)) {
           $message = $this->errorMessage($name, $value, "maximum");
           $this->errors[] = str_replace("%MAX%", $column->max, $message);
@@ -143,7 +143,7 @@ class Sabel_Db_Validator extends Sabel_Object
     $model   = $this->model;
     $schemas = $model->getColumns();
     
-    if ($model->isSelected()) {
+    if ($this->isUpdate) {
       $values = $model->getUpdateValues();
       foreach ($values as $name => $val) {
         if (isset($schemas[$name])) {
@@ -156,7 +156,12 @@ class Sabel_Db_Validator extends Sabel_Object
       $values = $model->toArray();
       foreach ($schemas as $name => $schema) {
         $column = clone $schema;
-        if (isset($values[$name])) $column->setValue($values[$name]);
+        if (isset($values[$name])) {
+          $column->setValue($values[$name]);
+        } else {
+          $column->value = self::OMITTED;
+        }
+        
         $columns[$name] = $column;
       }
     }
@@ -179,17 +184,22 @@ class Sabel_Db_Validator extends Sabel_Object
   
   protected function nullable($column)
   {
-    if ($column->nullable) {
-      return true;
+    if ($column->nullable) return true;
+    
+    if ($this->isUpdate) {
+      return ($column->value !== null);
+    } elseif ($column->value === self::OMITTED) {
+      return ($column->default !== null);
     } else {
-      return isset($column->value);
+      return ($column->value !== null);
     }
   }
   
   protected function type($column)
   {
-    $value = $column->value;
-    if ($value === null) return true;
+    if (($value = $column->value) === null) {
+      return true;
+    }
     
     /**
      *  don't care if value of integer column is too large.
