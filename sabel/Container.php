@@ -304,7 +304,7 @@ class Sabel_Container
         
         $implClassName = $bind->getImplementation();
         
-        if (in_array($injectionMethod, get_class_methods($sourceInstance), true)) {
+        if (in_array($injectionMethod, get_class_methods($reflection->getName()), true)) {
           $argumentInstance = $this->newInstanceWithConstruct($reflection, $implClassName);
 
           if ($reflection->hasMethod($injectionMethod)) {
