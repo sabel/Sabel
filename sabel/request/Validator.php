@@ -80,6 +80,13 @@ class Sabel_Request_Validator extends Sabel_Object
             $message = $this->$check($name, $value);
             if ($message !== null) $errors[] = $message;
           }
+        } elseif (strpos($method, "(") !== false) {
+          preg_match('/\((.+)\)/', $method, $matches);
+          $args = explode(",", $matches[1]);
+          array_unshift($args, $name, $value);
+          $method = substr($method, 0, strlen($matches[0]));
+          $message = call_user_func_array(array($this, $method), $args);
+          if ($message !== null) $errors[] = $message;
         } else {
           $message = $this->$method($name, $value);
           if ($message !== null) $errors[] = $message;
