@@ -110,6 +110,11 @@ function md5hash()
   return md5(uniqid(mt_rand(), true));
 }
 
+function sha1hash()
+{
+  return sha1(uniqid(mt_rand(), true));
+}
+
 function load($class, $config = null)
 {
   static $container = null;

@@ -82,16 +82,22 @@ class Sabel_Db_Join extends Sabel_Object
   public function setOrderBy($orderBy)
   {
     $this->model->setOrderBy($orderBy);
+    
+    return $this;
   }
   
   public function setLimit($limit)
   {
     $this->model->setLimit($limit);
+    
+    return $this;
   }
   
   public function setOffset($offset)
   {
     $this->model->setOffset($offset);
+    
+    return $this;
   }
   
   public function add($object, $alias = "", $joinKey = array())
