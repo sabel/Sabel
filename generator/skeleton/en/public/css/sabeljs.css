@@ -121,8 +121,19 @@
   background-color: #fbe3e0;
 }
 
-div.sbl_dropdown{
+div.sbl_dropdown {
   position: relative;
+  zoom: 1;
+}
+
+div.sbl_dropdown:after {
+  content: ".";
+  display: block;
+  visibility: hidden;
+  height: 0px;
+  font-size: 0;
+  line-height: 0;
+  clear: both;
 }
 
 ul.sbl_dropdown_list,
