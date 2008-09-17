@@ -3279,7 +3279,7 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 	leaveTimer: null,
 
 	init: function() {
-		var root = Sabel.find("ul.sbl_dropdown").item(0);
+		var root = Sabel.find(".sbl_dropdown > ul").item(0);
 		var elms = root.find("> li");
 
 		this.setup();
@@ -3295,10 +3295,11 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		var self = this;
 		root.observe("mouseenter", function() {
 			if (self.leaveTimer) clearTimeout(self.leaveTimer);
-			self.event = new Sabel.Event(document, "mousemove", function(event) {
+			self.event = new Sabel.Event(document, "mousemove", function(e) {
+				self.targetElm = Sabel.Event.getTarget(e);
 				if (self.moveTimer) clearTimeout(self.moveTimer);
 				self.moveTimer = setTimeout(function() {
-					self.moveHandler(event);
+					self.moveHandler();
 				}, 10);
 			}, false, self);
 		});
@@ -3306,8 +3307,8 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		root.observe("mousedown", this.clickHandler, false, this);
 	},
 
-	moveHandler: function(event) {
-		var el = Sabel.Event.getTarget(event), child;
+	moveHandler: function() {
+		var el = this.targetElm, child;
 		if (el.tagName == "SPAN") el = el.parentNode;
 		if (el.tagName !== "LI" || this.lastElement === el) return;
 		this.lastElement = el = new Sabel.Element(el);
@@ -3359,8 +3360,8 @@ Sabel.Widget.Dropdown = new Sabel.Class({
 		}, 250);
 	},
 
-	clickHandler: function(e) {
-		var el = new Sabel.Element(Sabel.Event.getTarget(e));
+	clickHandler: function(/*e*/) {
+		var el = new Sabel.Element(this.targetElm);
 		var href = (el.getFirstChild("span") || el).getAttribute("href");;
 		if (href !== null) location.href = href;
 	},
