@@ -1,66 +1,17 @@
 <?php
 
-abstract class Sabel_Aspect_StaticMethodMatcherPointcut
-             extends Sabel_Aspect_StaticMethodMatcher
-               implements Sabel_Aspect_Pointcut
+abstract class Sabel_Aspect_Pointcuts
 {
-  private $classMatcher = null;
-  
-  public function setClassMatcher(Sabel_Aspect_ClassMatcher $matcher)
+  public function matches(Sabel_Aspect_Pointcut $pointcut, $method, $class)
   {
-    $this->classMatcher = $matcher;
+    $class = new Sabel_Reflection_Class($class);
+    
+    if ($pointcut === null) throw new Sabel_Exception_Runtime("pointcut can't be null");
+    
+    if ($pointcut->getClassMatcher()->matches($class)) {
+      return $pointcut->getMethodMatcher()->matches($method, $class);
+    }
+    
+    return false;
   }
-  
-  /**
-   * implements from Pointcut interface
-   */
-  public function getClassMatcher()
-  {
-    return $this->classMatcher;
-  }
-  
-  /**
-   * implements from Pointcut interface
-   */
-  public function getMethodMatcher()
-  {
-    return $this;
-  }
-}
-
-class Sabel_Aspect_DefaultRegexPointcut implements Sabel_Aspect_RegexPointcut
-{
-  private $classMatcher = null;
-  private $methodMatcher = null;
-  
-  public function __construct()
-  {
-    $this->classMatcher  = new Sabel_Aspect_RegexClassMatcher();
-    $this->methodMatcher = new Sabel_Aspect_RegexMethodMatcher();
-  }
-  
-  public function setClassMatchPattern($pattern)
-  {
-    $this->classMatcher->setPattern($pattern);
-  }
-  
-  public function setMethodMatchPattern($pattern)
-  {
-    $this->methodMatcher->setPattern($pattern);
-  }
-  
-  public function getClassMatcher()
-  {
-    return $this->classMatcher;
-  }
-  
-  public function getMethodMatcher()
-  {
-    return $this->methodMatcher;
-  }
-}
-
-class Sabel_Aspect_DefaultPointcuts extends Sabel_Aspect_Pointcuts
-{
-  
 }

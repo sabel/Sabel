@@ -69,7 +69,7 @@ class MyMethodMatcher extends Sabel_Aspect_StaticMethodMatcher
   }
 }
 
-class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
+class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_Pointcut_StaticMethodMatcherAdvisor
 {
   public function __construct()
   {
@@ -92,7 +92,7 @@ class MyStaticMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatc
   }
 }
 
-class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_StaticMethodMatcherPointcutAdvisor
+class MyRegexMethodMatcherPointcutAdvisor extends Sabel_Aspect_Pointcut_StaticMethodMatcherAdvisor
 {
   private $pattern;
   

@@ -1,6 +1,15 @@
 <?php
 
-class Sabel_Aspect_DefaultProxy extends Sabel_Aspect_AbstractProxy
+/**
+ * Dynamic Proxy
+ *
+ * @category   aspect
+ * @package    org.sabel.aspect
+ * @author     Mori Reo <mori.reo@sabel.jp>
+ * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
+ * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
+ */
+class Sabel_Aspect_Proxy_Default extends Sabel_Aspect_Proxy_Abstract
 {
   protected function __setupInvocation()
   {

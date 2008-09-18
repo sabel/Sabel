@@ -15,14 +15,14 @@ class Sabel_Aspect_Advices
   
   public function addAdvice(Sabel_Aspect_Advice $advice)
   {
-    if ($advice instanceof Sabel_Aspect_MethodBeforeAdvice) {
-      $this->advices[] = new Sabel_Aspect_MethodBeforeAdviceInterceptor($advice);
-    } elseif ($advice instanceof Sabel_Aspect_MethodAfterReturningAdvice) {
-      $this->advices[] = new Sabel_Aspect_MethodAfterReturningAdviceInterceptor($advice);
-    } elseif ($advice instanceof Sabel_Aspect_MethodAfterAdvice) {
-      $this->advices[] = new Sabel_Aspect_MethodAfterAdviceInterceptor($advice);
-    } elseif ($advice instanceof Sabel_Aspect_MethodThrowsAdvice) {
-      $this->advices[] = new Sabel_Aspect_MethodThrowsAdviceInterceptor($advice);
+    if ($advice instanceof Sabel_Aspect_Advice_MethodBefore) {
+      $this->advices[] = new Sabel_Aspect_Advice_MethodBeforeInterceptor($advice);
+    } elseif ($advice instanceof Sabel_Aspect_Advice_MethodAfterReturning) {
+      $this->advices[] = new Sabel_Aspect_Advice_MethodAfterReturningInterceptor($advice);
+    } elseif ($advice instanceof Sabel_Aspect_Advice_MethodAfter) {
+      $this->advices[] = new Sabel_Aspect_Advice_MethodAfterInterceptor($advice);
+    } elseif ($advice instanceof Sabel_Aspect_Advice_MethodThrows) {
+      $this->advices[] = new Sabel_Aspect_Advice_MethodThrowsInterceptor($advice);
     } elseif ($advice instanceof Sabel_Aspect_MethodInterceptor) {
       $this->advices[] = $advice;
     }

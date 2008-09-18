@@ -9,7 +9,7 @@
  * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_StaticProxy extends Sabel_Aspect_AbstractProxy
+class Sabel_Aspect_Proxy_Static extends Sabel_Aspect_Proxy_Abstract
 {
   private $adviced = null;
   

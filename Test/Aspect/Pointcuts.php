@@ -34,7 +34,7 @@ class Test_Aspect_Pointcuts extends SabelTestCase
     $target = $this->target;
     
     
-    $pointcut = new Sabel_Aspect_DefaultRegexPointcut();
+    $pointcut = new Sabel_Aspect_Pointcut_DefaultRegex();
     $pointcut->setClassMatchPattern("/Sabel+/");
     $pointcut->setMethodMatchPattern("/set+/");
     

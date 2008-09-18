@@ -9,7 +9,7 @@
  * @copyright  2008-2011 Mori Reo <mori.reo@sabel.jp>
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
-class Sabel_Aspect_StaticWeaver extends Sabel_Aspect_AbstractWeaver
+class Sabel_Aspect_Weaver_Static extends Sabel_Aspect_Weaver_Abstract
 {
   public function getProxy()
   {
@@ -27,13 +27,15 @@ class Sabel_Aspect_StaticWeaver extends Sabel_Aspect_AbstractWeaver
     $reflection = new Sabel_Reflection_Class($this->target);
     
     foreach ($this->advisor as $advisor) {
-      if (!$advisor instanceof Sabel_Aspect_Advisor)
+      if (!$advisor instanceof Sabel_Aspect_Advisor) {
         throw new Sabel_Exception_Runtime("advisor must be implements Sabel_Aspect_Advisor");
+      }
         
       $pointcut = $advisor->getPointcut();
       
-      if (!$pointcut instanceof Sabel_Aspect_Pointcut)
+      if (!$pointcut instanceof Sabel_Aspect_Pointcut) {
         throw new Sabel_Exception_Runtime("pointcut must be Sabel_Aspect_Pointcut");
+      }
       
       $pointcuts = new Sabel_Aspect_DefaultPointcuts();
       
@@ -45,7 +47,7 @@ class Sabel_Aspect_StaticWeaver extends Sabel_Aspect_AbstractWeaver
     }
     
     if ($adviced->hasAdvices()) {
-      $proxy = new Sabel_Aspect_StaticProxy($this->target);
+      $proxy = new Sabel_Aspect_Proxy_Static($this->target);
       $proxy->setAdviced($adviced);
       
       return $proxy;

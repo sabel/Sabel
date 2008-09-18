@@ -40,20 +40,12 @@ class Sabel_Container
   
   protected $instance = array();
   
-  protected static $aspectConfig = null;
-  
   /**
    *
    * @param mixed $config object | string
    */
   public static function create($config = null)
   {
-    if (self::$aspectConfig === null) {
-      if (class_exists("Config_Aspect", true)) {
-        self::$aspectConfig = new Config_Aspect();
-      }
-    }
-    
     if ($config === null) return new self();
     
     if (is_object($config) && $config instanceof Sabel_Container_Injection) {
@@ -349,17 +341,6 @@ class Sabel_Container
       throw new Sabel_Exception_Runtime("invalid instance " . var_export($instance, 1));
     }
     
-    if (!interface_exists("Sabel_Aspect_Joinpoint", true)) {
-      $SABEL_ASPECT = "sabel" . DIRECTORY_SEPARATOR . "aspect" . DIRECTORY_SEPARATOR;
-      
-      require ($SABEL_ASPECT . "Interfaces.php");
-      require ($SABEL_ASPECT . "Matchers.php");
-      require ($SABEL_ASPECT . "Pointcuts.php");
-      require ($SABEL_ASPECT . "Advisors.php");
-      require ($SABEL_ASPECT . "Introduction.php");
-      require ($SABEL_ASPECT . "Interceptors.php");
-    }
-    
     $reflection = $this->getReflection($instance);
     
     $resultInstance = $this->processAnnotatedAspect($instance, $reflection);
@@ -412,39 +393,35 @@ class Sabel_Container
   
   protected function processAnnotatedAspect($instance, $reflection)
   {
-    if (!$reflection->hasAnnotation("use")) {
-      return null;
+    $foundAnnotated = false;
+    $aspects = $this->config->getAspects();
+    
+    foreach ($aspects as $aspect) {
+      $interfaceName = $aspect->getName();
+      if ($instance instanceof $interfaceName) {
+        $annotated = $aspect->getAnnotated();
+        $foundAnnotated = true;
+        break;
+      }
     }
     
-    $classAnnot = $reflection->getAnnotation("use");
-    
-    if (!isset($classAnnot[0][0]) && $classAnnot[0][0] !== "aspect") {
-      return null;
+    if (!$foundAnnotated) {
+      return $instance;
     }
     
-    if (self::$aspectConfig === null) {
-      throw new Sabel_Exception_Runtime("Config_Aspect not found. can't proceed aspect process");
-    }
-    
-    $configs = self::$aspectConfig->configure();
-    
-    if (!is_array($configs)) {
-      throw new Sabel_Exception_Runtime("Config_Aspect::configure() must be return array");
-    }
-    
-    $weaver = new Sabel_Aspect_StaticWeaver($instance);
+    $weaver = new Sabel_Aspect_Weaver_Static($instance);
     
     foreach ($reflection->getMethods() as $method) {
       $methodAnnots = $method->getAnnotations();
         
       foreach ($methodAnnots as $methodAnnotName => $v) {
-        if (array_key_exists($methodAnnotName, $configs)) {
+        if (array_key_exists($methodAnnotName, $annotated)) {
           
-          $advisor = new Sabel_Aspect_RegexMatcherPointcutAdvisor();
+          $advisor = new Sabel_Aspect_Advisor_RegexMatcherPointcut();
           $advisor->setClassMatchPattern("/" . $reflection->getName() . "/");
           $methodName = $method->getName();
           
-          $interceptor = $configs[$methodAnnotName][0];
+          $interceptor = $annotated[$methodAnnotName][0];
           $advisor->setMethodMatchPattern("/" . $methodName . "/");
           
           $advisor->addAdvice(new $interceptor());
@@ -809,41 +786,5 @@ class Sabel_Container_Construct
   public function getConstructs()
   {
     return $this->constructs;
-  }
-}
-
-/**
- * Sabel Container Aspect
- *
- * @category   Container
- * @package    org.sabel.container
- * @author     Mori Reo <mori.reo@sabel.jp>
- * @copyright  2004-2008 Mori Reo <mori.reo@sabel.jp>
- * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
- */
-final class Sabel_Container_Aspect
-{
-  private $className = "";
-  private $adviceClass = "";
-  
-  public function __construct($className)
-  {
-    $this->className = $className;
-  }
-  
-  public function getName()
-  {
-    return $this->className;
-  }
-  
-  public function advice($adviceClass)
-  {
-    $this->adviceClass = $adviceClass;
-    return $this;
-  }
-  
-  public function getAdvice()
-  {
-    return $this->adviceClass;
   }
 }

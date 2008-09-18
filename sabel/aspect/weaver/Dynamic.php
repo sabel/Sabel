@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Aspect_DynamicWeaver extends Sabel_Aspect_AbstractWeaver
+class Sabel_Aspect_Weaver_Dynamic extends Sabel_Aspect_Weaver_Abstract
 {
   public function getProxy()
   {
@@ -14,7 +14,7 @@ class Sabel_Aspect_DynamicWeaver extends Sabel_Aspect_AbstractWeaver
       }
     }
     
-    $proxy = new Sabel_Aspect_DefaultProxy($this->target);
+    $proxy = new Sabel_Aspect_Proxy_Default$this->target);
     $proxy->__setAdvisor($this->advisor);
     
     return $proxy;

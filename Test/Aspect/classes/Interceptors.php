@@ -1,6 +1,6 @@
 <?php
 
-class Sabel_Tests_Aspect_SimpleBeforeAdvice implements Sabel_Aspect_MethodBeforeAdvice
+class Sabel_Tests_Aspect_SimpleBeforeAdvice implements Sabel_Aspect_Advice_MethodBefore
 {
   private $calledMethods = array();
   
@@ -15,7 +15,7 @@ class Sabel_Tests_Aspect_SimpleBeforeAdvice implements Sabel_Aspect_MethodBefore
   }
 }
 
-class Sabel_Tests_Aspect_SimpleAfterReturningAdvice implements Sabel_Aspect_MethodAfterReturningAdvice
+class Sabel_Tests_Aspect_SimpleAfterReturningAdvice implements Sabel_Aspect_Advice_MethodAfterReturning
 {
   private $results = array();
   
@@ -30,7 +30,7 @@ class Sabel_Tests_Aspect_SimpleAfterReturningAdvice implements Sabel_Aspect_Meth
   }
 }
 
-class Sabel_Tests_Aspect_SimpleThrowsAdvice implements Sabel_Aspect_MethodThrowsAdvice
+class Sabel_Tests_Aspect_SimpleThrowsAdvice implements Sabel_Aspect_Advice_MethodThrows
 {
   private $throwsMessage = "";
   
