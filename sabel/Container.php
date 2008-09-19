@@ -384,7 +384,7 @@ class Sabel_Container
     }
     
     if (!$foundAnnotated) {
-      return $instance;
+      return null;
     }
     
     $weaver = new Sabel_Aspect_Weaver_Static($instance);
