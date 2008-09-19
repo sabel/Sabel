@@ -13,9 +13,11 @@ class Sabel_Db_Condition_Or extends Sabel_Object
 {
   protected $conditions = array();
   
-  public function add(Sabel_Db_Abstract_Condition $condition)
+  public function add($condition)
   {
     $this->conditions[] = $condition;
+    
+    return $this;
   }
   
   public function build(Sabel_Db_Statement $sql)
