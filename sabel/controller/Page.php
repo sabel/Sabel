@@ -66,6 +66,11 @@ abstract class Sabel_Controller_Page extends Sabel_Object
     
   }
   
+  public function finalize()
+  {
+    
+  }
+  
   /**
    * @param object $object
    */
